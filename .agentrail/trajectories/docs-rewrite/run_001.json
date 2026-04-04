@@ -1,0 +1,11 @@
+{
+  "task_type": "docs-rewrite",
+  "state": {
+    "number": 1,
+    "step": "rewrite-process-md"
+  },
+  "action": "Read existing files, Write new process.md, Edit research.txt, sed for non-ASCII fixes, cargo fmt/clippy/test, markdown-checker, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-04T15:57:18"
+}
