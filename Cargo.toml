@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/mlpl-core",
+  "crates/mlpl-array",
+  "crates/mlpl-parser",
+  "crates/mlpl-cli",
+  "apps/mlpl-repl",
+]
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.1.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"

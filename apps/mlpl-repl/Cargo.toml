@@ -1,0 +1,8 @@
+[package]
+name = "mlpl-repl"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-cli = { path = "../../crates/mlpl-cli" }
