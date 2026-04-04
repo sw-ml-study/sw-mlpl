@@ -207,7 +207,7 @@ After setup, verify the connection:
 claude
 > /mcp
 
-# Should show: playwright: npx -y @playwright/mcp - ✓ Connected
+# Should show: playwright: npx -y @playwright/mcp - [ok] Connected
 ```
 
 ---

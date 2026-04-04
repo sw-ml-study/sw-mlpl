@@ -4,7 +4,7 @@
 Write the initial array contract README and contract test plan.
 
 ## Milestone
-Saga 0 — Foundation and contracts
+Saga 0 -- Foundation and contracts
 
 ## Goal
 Define the first version of the array contract for MLPL, covering shapes, ranks, indexing, reshape, and transpose at a concise contract level.

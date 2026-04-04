@@ -4,7 +4,7 @@
 Implement Shape type and shape invariants in `mlpl-array`.
 
 ## Milestone
-Saga 1 — Dense tensor substrate v1
+Saga 1 -- Dense tensor substrate v1
 
 ## Goal
 Add a first `Shape` representation to `mlpl-array` with rank calculation, dimension access, element count calculation, and basic validation.

@@ -4,7 +4,7 @@
 Implement the first lexer for MLPL numeric literals and core punctuation.
 
 ## Milestone
-Saga 1 / early Saga 2 bridge — Parser foundation
+Saga 1 / early Saga 2 bridge -- Parser foundation
 
 ## Goal
 Create the first lexer in `mlpl-parser` that can tokenize numeric literals, identifiers if needed, and the core punctuation required for simple expressions and array literals.

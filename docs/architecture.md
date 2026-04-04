@@ -4,7 +4,7 @@ MLPL is organized as a cellular monorepo with narrow crates and matching contrac
 
 ## Dependency flow
 
-`core → array/parser → runtime → eval → trace → viz/wasm/apps → ml`
+`core -> array/parser -> runtime -> eval -> trace -> viz/wasm/apps -> ml`
 
 ## Design rules
 - narrow public APIs

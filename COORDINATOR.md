@@ -160,24 +160,24 @@ unless the task explicitly allows it or escalation approves it.
 
 ## Escalation Ladder
 
-### Level 0 — local only
+### Level 0 -- local only
 Allowed:
 - assigned crate
 - assigned contract
 - local tests
 
-### Level 1 — upstream public API
+### Level 1 -- upstream public API
 Allowed only if needed:
 - direct upstream crate public API
 - direct upstream contract
 
-### Level 2 — coordinator summary
+### Level 2 -- coordinator summary
 Coordinator provides a short summary of an external requirement.
 
-### Level 3 — selective file reveal
+### Level 3 -- selective file reveal
 One or two specific external files are approved.
 
-### Level 4 — design decision
+### Level 4 -- design decision
 Human/coordinator resolves ambiguity or architecture conflict.
 
 ---

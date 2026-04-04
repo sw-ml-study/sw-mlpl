@@ -4,7 +4,7 @@
 Create initial contract directory skeletons and placeholders.
 
 ## Milestone
-Saga -1 — Repo compartmentalization scaffolding
+Saga -1 -- Repo compartmentalization scaffolding
 
 ## Goal
 Create the initial contract directories and placeholder files for core, array, parser, runtime, eval, trace, viz, and ml contracts.

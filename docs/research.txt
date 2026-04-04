@@ -1,0 +1,7452 @@
+ARCHIVAL: This is a raw conversation transcript preserved for reference.
+Normative decisions have been extracted into docs/*.md and docs/clarifications.txt.
+
+
+
+What are the main changes/improvements over APL introduced by APL2
+
+APL2 (developed by IBM in the 1980s) is best understood as a major evolution of classic APL, aimed at making the language more practical for large-scale programming, data processing, and system integration.
+
+Below is a structured breakdown of the main improvements over earlier APL implementations (APL\360, APL\SV, etc.), with rationale and tradeoffs.
+
+1) Requirement Restatement
+You’re asking for:
+
+The key language and system-level changes
+
+Compared to classic APL
+
+With emphasis on what actually improved usability, expressiveness, and scalability
+
+2) High-Level Design Shift
+Classic APL:
+
+Pure array language
+
+Flat namespace
+
+Minimal structure
+
+Highly expressive but hard to scale
+
+APL2:
+
+Still array-first, but introduces:
+
+Structured data
+
+Modularity
+
+Interoperability
+
+Better control flow and state
+
+👉 Think of APL2 as moving from:
+
+“mathematical notation interpreter”
+to
+“full programming environment with array semantics”
+
+3) Major Language Improvements
+3.1 Nested Arrays (Huge Change)
+Classic APL
+Arrays are homogeneous and flat
+
+No arrays of arrays
+
+APL2
+Supports nested arrays (arrays can contain arrays)
+
+Example Concept
+('abc' 123 (1 2 3))
+Why this matters
+Enables:
+
+Lists
+
+Trees
+
+Records
+
+Mixed data types
+
+Impact
+Transforms APL into a general-purpose data structure language
+
+Tradeoffs
+Increased complexity
+
+Some primitives behave differently with nesting
+
+3.2 Generalized Data Structures
+Built on nested arrays, APL2 enables:
+
+Heterogeneous collections
+
+Recursive structures
+
+👉 This is effectively APL’s version of:
+
+Lisp lists
+
+JSON-like structures
+
+3.3 Improved Function Definition (Structured Programming)
+Classic APL
+Functions defined with line numbers
+
+GOTO-style control flow
+
+APL2
+Introduces:
+
+Structured control flow constructs
+
+Better function definition syntax
+
+Benefits
+Easier to read
+
+Easier to maintain
+
+Less reliance on jumps
+
+3.4 Namespaces (Major for Scale)
+Classic APL
+Single global workspace
+
+APL2
+Introduces namespaces
+
+Benefits
+Modular code organization
+
+Avoid name collisions
+
+Enables large applications
+
+Analogy
+Like modules/packages in modern languages
+
+3.5 Shared Variables (Concurrency / Integration)
+APL2 adds shared variables:
+
+Mechanism for:
+
+Inter-process communication
+
+Communication with external systems
+
+Use cases
+Database interaction
+
+Real-time systems
+
+Multi-user environments
+
+3.6 Better File I/O and System Integration
+APL2 improves:
+
+File handling
+
+External data access
+
+Compared to classic APL
+Much more practical for:
+
+Business applications
+
+Data processing pipelines
+
+3.7 Enhanced Character Data Handling
+APL2 improves:
+
+Character arrays
+
+Text processing
+
+Why it matters
+Classic APL was numeric-first; APL2 becomes:
+
+Much more suitable for string-heavy workloads
+
+3.8 Error Handling Improvements
+APL2 introduces:
+
+Better error reporting
+
+More structured handling
+
+Impact
+More robust applications
+
+Easier debugging
+
+3.9 Workspace and Memory Enhancements
+APL2 improves:
+
+Memory management
+
+Workspace handling
+
+Benefits
+Larger datasets
+
+More stable long-running programs
+
+3.10 Auxiliary Processors (APs)
+APL2 expands the idea of:
+
+External system interfaces (Auxiliary Processors)
+
+Examples
+Databases
+
+File systems
+
+Other languages
+
+4) Conceptual Leap
+Classic APL
+Best for:
+
+Mathematical exploration
+
+Interactive problem solving
+
+APL2
+Designed for:
+
+Production systems
+
+Enterprise data processing
+
+Integration with other software
+
+5) Summary Table
+Feature	Classic APL	APL2
+Arrays	Flat only	Nested arrays
+Data types	Mostly homogeneous	Heterogeneous
+Functions	Line-numbered	Structured
+Namespaces	None	Yes
+Modularity	Weak	Strong
+I/O	Limited	Improved
+Integration	Minimal	Strong
+Concurrency	None	Shared variables
+Text handling	Basic	Improved
+6) Benefits vs Risks
+Benefits
+Much more expressive (nested arrays)
+
+Scales to large systems
+
+Better modularity
+
+Real-world usability (I/O, integration)
+
+Risks / Tradeoffs
+More complex semantics
+
+Some loss of APL’s minimal purity
+
+Performance nuances with nested arrays
+
+7) Alternatives / Evolution
+APL2 influenced:
+
+Dyalog APL → modern, extends nested arrays + objects
+
+J programming language → avoids nesting, uses rank-based approach
+
+K programming language → compact, vector-first, financial focus
+
+8) Bottom Line
+The single most important improvement:
+
+Nested arrays, which unlock everything else
+
+Everything else (namespaces, structured programming, shared variables) is about:
+
+making APL viable as a real-world, large-scale programming system
+
+If you want, I can:
+
+Show before/after APL vs APL2 code examples
+
+Compare APL2 vs J vs Dyalog in terms of design philosophy
+
+Or map APL2 features to modern languages (Rust/JS analogies)
+
+
+There are other APL/APL2 inspired modern languages, q.v., online to identify them, and summarize their features, approach, status, significance.  Are any open source?  which license(s)?
+
+You’re essentially asking for a survey of the “array language ecosystem” after APL/APL2—with emphasis on:
+
+descendants / inspired languages
+
+their design direction vs APL2
+
+current status + significance
+
+open-source availability + licenses
+
+I’ll structure this as:
+
+Taxonomy (design directions)
+
+Key languages (deep summaries)
+
+Open-source + license table
+
+Strategic takeaways (what actually matters today)
+
+1) Architectural Taxonomy of APL Descendants
+APL → APL2 introduced nested arrays + structure + system integration
+
+Post-APL2 languages diverged into 3 major design paths:
+
+A. “Pure array / mathematical successors”
+Preserve APL ideas, improve usability
+
+Examples: J, BQN, Dyalog APL, GNU APL
+
+B. “Minimalist / high-performance finance-oriented”
+Strip syntax, optimize execution
+
+Examples: K, q
+
+C. “Experimental / modern reinterpretations”
+Simplify semantics or modernize ergonomics
+
+Examples: BQN, Uiua, Nial
+
+2) Key Languages (Features, Approach, Status)
+2.1 J programming language
+Approach
+Designed by Iverson (APL creator)
+
+Removes APL symbols → ASCII-only
+
+Emphasizes:
+
+tacit programming (point-free)
+
+functional composition
+
+rank polymorphism
+
+Key Innovations
+No special character set (major usability improvement)
+
+Powerful function composition system
+
+Namespace (“locale”) system for modularity
+
+Status / Significance
+Mature, stable, still actively maintained (2025 releases) 
+
+Influenced NumPy and array thinking in Python
+
+Open Source
+Yes
+
+License: GPLv3 
+
+2.2 K programming language
+Approach
+Ultra-terse, performance-focused APL derivative
+
+Designed for financial time-series + trading systems
+
+Key Innovations
+Minimal syntax (even more compact than APL)
+
+Very fast vector execution
+
+Database integration (kdb+ ecosystem)
+
+Status / Significance
+Widely used in finance (Goldman Sachs, JPMorgan, etc.) 
+
+Foundation for q / kdb+
+
+Open Source
+No (core language proprietary) 
+
+2.3 q (KDB+ language)
+(not separately indexed but tightly tied to K)
+
+Approach
+SQL-like + array language hybrid
+
+Built on K
+
+Focus: columnar database + analytics
+
+Key Innovations
+Combines:
+
+array programming
+
+relational queries
+
+time-series DB
+
+Status
+Industry standard in high-frequency trading
+
+Open Source
+No (proprietary)
+
+2.4 Dyalog APL
+Approach
+Modern APL2 successor
+
+Adds:
+
+object orientation
+
+namespaces
+
+GUI/web integration
+
+Key Innovations
+Production-grade APL
+
+Large ecosystem (finance, analytics)
+
+Status
+One of the most widely used APL systems today
+
+Open Source
+No (core interpreter proprietary)
+
+Free for non-commercial use 
+
+Many tools/libraries are open source 
+
+2.5 GNU APL
+Approach
+Faithful APL (ISO standard)
+
+CLI-oriented
+
+Features
+Classic APL + some modern extensions
+
+Strong emphasis on standards compliance
+
+Status
+Niche but important for open-source APL
+
+Open Source
+Yes
+
+License: GPL (GNU project)
+
+2.6 NARS2000
+Approach
+Experimental APL dialect
+
+Focus on:
+
+precision
+
+extended numeric types
+
+research features
+
+Status
+Active niche community
+
+Open Source
+Yes (source available) 
+
+License: custom / permissive-like (not widely standardized)
+
+2.7 BQN (Big Questions Notation)
+(modern APL-like, not in Wikipedia but widely recognized)
+
+Approach
+Clean redesign of APL ideas
+
+Fixes:
+
+inconsistencies in APL/J
+
+irregular primitives
+
+Key Innovations
+Consistent semantics
+
+Modern tooling
+
+Unicode but cleaner than APL
+
+Status
+Growing modern community (especially among PL enthusiasts)
+
+Open Source
+Yes
+
+Typically MIT / permissive (implementation dependent)
+
+2.8 Uiua
+(very modern experimental language)
+
+Approach
+Stack-based + array hybrid
+
+Strong emphasis on:
+
+learnability
+
+visual / audio interactivity
+
+Key Innovations
+Immediate feedback model
+
+Simpler mental model than APL
+
+Status
+Experimental but gaining attention
+
+Open Source
+Yes
+
+MIT license (typical)
+
+2.9 Nial
+Approach
+“Nested Interactive Array Language”
+
+Closer to APL2 philosophy
+
+Key Innovations
+Built-in support for nested arrays
+
+Functional style
+
+Status
+Academic / niche
+
+Open Source
+Yes (various implementations, often permissive)
+
+2.10 A+, Ivy, others
+A+: extended APL with GUI (Morgan Stanley origins)
+
+Ivy (by Rob Pike):
+
+APL-like but ASCII-based
+
+Mostly niche / experimental today
+
+3) Open Source & License Summary
+Language	Open Source	License	Notes
+J	Yes	GPLv3	Mature, widely used
+GNU APL	Yes	GPL	Closest to classic APL
+NARS2000	Yes	Custom/permissive	Research-oriented
+BQN	Yes	MIT (typical)	Modern APL redesign
+Uiua	Yes	MIT	Experimental
+Nial	Yes	Various permissive	Academic
+Dyalog APL	No (core)	Proprietary (free non-commercial)	Industry APL
+K	No	Proprietary	Finance
+q	No	Proprietary	Finance DB
+4) Design Tradeoffs Across the Ecosystem
+4.1 Symbolic vs ASCII
+APL: symbolic (hard to type)
+
+J: ASCII → more portable
+
+BQN: hybrid (modern Unicode, cleaner)
+
+4.2 Nested arrays vs rank calculus
+APL2: nested arrays
+
+J: emphasizes rank (less nesting)
+
+BQN: tries to unify both cleanly
+
+4.3 Performance vs elegance
+K/q: performance-first
+
+APL/J: expressive-first
+
+BQN/Uiua: clarity-first
+
+5) What Actually Matters Today
+Most influential (practically)
+K / q → finance industry dominance
+
+J → conceptual influence (NumPy, array programming)
+
+Dyalog APL → production APL systems
+
+Most interesting (research / modern PL design)
+BQN → cleanest “modern APL”
+
+Uiua → rethinking usability
+
+Best open-source entry points
+J (mature)
+
+GNU APL (classic)
+
+BQN (modern)
+
+6) Big Picture Insight
+APL2 solved:
+
+“How do we scale APL to real systems?”
+
+Modern descendants split that into:
+
+J / BQN: “How do we make it cleaner and more consistent?”
+
+K / q: “How do we make it faster and commercially viable?”
+
+Uiua / Nial: “How do we make it understandable?”
+
+7) If You Want a Practical Starting Point
+Given your background (Rust, systems, PL design):
+
+BQN → best modern design study
+
+J → best “complete system”
+
+K/q → best for performance + real-world impact
+
+If you want, I can:
+
+Map these languages to Rust abstractions (traits, iterators, SIMD)
+
+Show side-by-side code (APL vs J vs BQN vs K)
+
+Or outline how to embed an APL-like DSL into your COR24 toolchain
+
+
+Here are my current goals: (1) I want semi-complex (non-trivial) projects to implment using an AI coordinator and a team of AI coding agents of different abilities so that I can dogfood my Rust-based AI agent calling tools and tools provided to AI agents. (2) I want to learn by teaching, so I want to learn some of the improvements to APL, but demonstrating my own implementation of them -- not just what the language(s) can do but also how to implement it in Rust; (3) I want the demonstrations to visual, with animations, graphs, visualizations to show what is happening, perhaps even provide a visual IDE debugger, that works at a visual, not text-based, level.  So, special characters are ok, ascii-based is okay too, but a visual representation of operations is important.  Give the above, which language or languages should I focus on.  Note that my approach has these phases:  A Rust-based CLI version, an added-on Rust/Yew/WASM UI with additional UI features, a blog post about these two repos, a video explainer demostrating both the CLI demos and the Web UI demos.  
+
+
+Thought for 27s
+Given your goals, I would not optimize for “most historically important” or “most commercially successful.” I would optimize for this stack of requirements:
+
+Implementable in Rust by a small AI-agent team
+
+Teachable as a language-design-and-runtime project
+
+Visually demonstrable in a browser
+
+Rich enough to show real APL/APL2 ideas
+
+Open enough that you can study and borrow ideas freely
+
+That leads to a clear recommendation:
+
+Recommendation
+Primary focus: BQN-inspired subset
+Secondary reference: APL2 / Dyalog-style nested arrays and namespaces
+Tertiary inspiration for UI/teaching: Uiua
+Optional comparative reference only: J
+That is the combination I would choose for your plan.
+
+Why this combination fits your phases
+Your phase structure
+You want:
+
+Phase 1: Rust CLI
+
+Phase 2: Rust/Yew/WASM visual UI
+
+Phase 3: blog post
+
+Phase 4: video explainer with CLI + web demos
+
+That strongly favors a language whose core semantics are:
+
+compact enough to implement in Rust
+
+modern enough to explain cleanly
+
+array-centric enough for great visuals
+
+not locked behind a proprietary implementation
+
+BQN is especially attractive here because its documentation is unusually explicit about design choices, and it provides a modern array model with first-class nested structure discussion and clear semantics around arrays, types, shape, rank, and depth. The project explicitly presents itself as an APL-like language for learning, scripting, prototyping, and number crunching, and its docs explain both features and why they were chosen. 
+
+High-level decision
+1) Why not make classic APL or GNU APL your main target
+GNU APL is valuable as a reference point because it implements ISO APL Extended and gives you a concrete open implementation to compare against. 
+
+But as the center of your teaching/demo project, classic APL has drawbacks:
+
+the historical semantics are not always the cleanest teaching story
+
+the notation is iconic but harder to make approachable
+
+the implementation story is less obviously “modern Rust architecture for a new runtime”
+
+So I would use GNU APL as a compatibility oracle / comparison baseline, not as the core design target. GNU APL is free software from GNU, and GNU APL ecosystem materials emphasize GPL/LGPL compatibility for associated libraries. 
+
+2) Why not make Dyalog your main target
+Dyalog is extremely important conceptually because it carries forward many of the APL2-style practical features you care about, including namespaces and broader production-oriented tooling. Dyalog’s docs explicitly describe namespaces as analogous to nested workspaces. 
+
+But Dyalog itself is not open source; it is free for non-commercial use under a Basic Licence, but it is not free software. 
+
+So Dyalog is best used as:
+
+a feature reference
+
+a semantics benchmark
+
+an example of what “APL2 evolved toward”
+
+not as the implementation you center your Rust-teaching repos around.
+
+3) Why not make J your main target
+J is mature, portable, actively maintained, and its source is available under GPLv3, with J Software also offering commercial licensing. The project site says the source is provided under both commercial and GPL 3 licenses, and the current release line includes J9.6. 
+
+Technically, J is excellent. It also gives you:
+
+ASCII syntax
+
+strong array semantics
+
+rank/cell thinking
+
+tacit programming
+
+modularity through locales/namespaces-like mechanisms
+
+Its docs emphasize rank, cells, forks, and composition, and J’s own papers position it as essentially a superset of APL in spirit. 
+
+But for your specific teaching/demo goals, J has two problems:
+
+the tacit / fork-heavy style can become visually and cognitively dense very quickly
+
+it is less naturally aligned with your desire to demonstrate APL2-style improvements like nested structure in an intuitive, visual way
+
+So I would absolutely study J, but mostly to learn:
+
+rank-oriented execution
+
+composition patterns
+
+interpreter/runtime organization ideas
+
+not as the main language you build demos around.
+
+4) Why BQN is the best primary target
+BQN is the best fit because it gives you a modern, teachable reinterpretation of APL-family ideas while still being close enough to the tradition to let you explain what changed and why.
+
+The BQN docs are especially useful for your project because they explicitly discuss:
+
+array model
+
+types
+
+shape / rank / depth
+
+the relationship between BQN’s model and the nested array model of APL2, Dyalog, GNU APL, and NARS. 
+
+That last part matters a lot: BQN’s own design commentary gives you a built-in narrative for blog posts and videos:
+
+“Here is the APL2-style nested array tradition, and here is a modern alternative model.”
+
+That is gold for teaching.
+
+BQN is also open source. The main BQN repo is public, and at least one prominent implementation, dzaima/BQN, is MIT licensed. 
+
+Why BQN maps well to your architecture
+For your Rust CLI and later Yew/WASM UI, BQN gives you a clean set of visually demonstrable primitives:
+
+arrays with shape and rank
+
+per-glyph operators
+
+structural transforms
+
+nested data / depth
+
+predictable opportunities for animation:
+
+reshape
+
+take/drop
+
+reverse/transpose
+
+map/fold/scan
+
+rank-based traversal
+
+boxing / nesting / unboxing analogs
+
+These are exactly the kinds of operations that become compelling in a visual IDE or debugger.
+
+5) Why Uiua should influence your UI, even if it is not your main semantic target
+Uiua is open source and MIT licensed, with an active official site and public repo. 
+
+I would not center your implementation on Uiua’s semantics, because it is farther from your “learn APL improvements by implementing them” goal. But Uiua is very relevant for your presentation layer:
+
+modern visual personality
+
+strong demo-friendliness
+
+immediacy
+
+good inspiration for interactive pads and visual feedback
+
+So I would treat Uiua as a UX reference:
+not “copy the language,” but “borrow the sense that array code should feel alive on screen.”
+
+Concrete recommendation: focus on one main language family plus two reference tracks
+Main implementation track
+A BQN-inspired educational array language in Rust
+Use this as the actual thing you implement.
+
+Feature-reference track
+APL2/Dyalog features
+Use these as the “improvements over classic APL” that you selectively demonstrate:
+
+nested arrays / boxed values
+
+namespaces / nested workspaces
+
+maybe structured definitions
+
+maybe better system objects / visual environment concepts
+
+Dyalog’s namespace documentation is especially useful for this conceptual track. 
+
+UI-reference track
+Uiua-like interactivity
+Use it for inspiration in:
+
+pad-like visual execution
+
+animation timing
+
+interactive stepping
+
+immediate display of transformations
+
+What I would build, specifically
+Repo 1: Rust CLI
+A small educational array language, probably with:
+
+Core v1
+scalars
+
+vectors
+
+matrices
+
+shape
+
+rank
+
+indexing
+
+a few structural primitives
+
+parser for either:
+
+Unicode glyphs, or
+
+ASCII aliases plus Unicode pretty-print
+
+Core v2
+boxed / nested arrays
+
+depth visualization
+
+rank-based traversal
+
+scans / folds
+
+error model with visual trace metadata
+
+Core v3
+namespaces / modules
+
+user-defined functions
+
+execution trace format designed for the web UI
+
+This gives your AI coordinator and coding agents plenty of non-trivial tasks:
+
+lexer/parser
+
+AST / bytecode / direct evaluator
+
+array storage model
+
+boxed-value model
+
+rank engine
+
+pretty printer
+
+test oracle generator
+
+trace serializer
+
+benchmark harness
+
+That is a very good dogfooding project.
+
+Repo 2: Rust/Yew/WASM visual frontend
+This is where your project becomes much more distinctive.
+
+Main visualizations
+Shape view: show rank and dimensions
+
+Cell traversal animation: show how an operator walks major cells
+
+Box / nested array explorer: expandable tree + array panes
+
+Execution timeline: each primitive as a frame
+
+Memory / value graph: boxed arrays and sharing
+
+Visual debugger:
+
+step primitive by primitive
+
+inspect current stack / environment / namespace
+
+inspect selected array at multiple views:
+
+literal
+
+grid
+
+tree
+
+graph
+
+heatmap / bar plot when numeric
+
+Why this is especially strong
+APL-family languages are often taught as text and tables.
+Your differentiator would be:
+
+“Here is what the runtime is doing, visually.”
+
+That fits your blog and video plan perfectly.
+
+Which APL/APL2 improvements you should choose to implement first
+Because you want to learn by teaching, I would not try to reproduce an entire historical language. I would pick a curated subset of improvements that are:
+
+historically meaningful
+
+implementable in Rust
+
+visually demonstrable
+
+Best subset
+1. Nested arrays / boxing
+This is the highest-value feature.
+It is historically important in the APL2 lineage, visually rich, and implementation-interesting. BQN’s docs directly discuss how its model relates to the nested-array model used in APL2, Dyalog, GNU APL, and NARS. 
+
+2. Rank / cell-oriented execution
+Even if you do not adopt J fully, rank-based execution is one of the best concepts to animate and teach. J’s documentation around cells, rank, forks, and composition makes it a useful comparison point. 
+
+3. Namespaces / nested workspaces
+This is one of the most important “APL became a serious programming environment” ideas. Dyalog’s docs explicitly frame namespaces as analogous to nested workspaces. 
+
+4. Visual function composition
+Whether via glyph chains or named pipeline blocks, this is ideal for your web UI.
+
+5. Structured errors with visual source locations
+Not historically the flashiest feature, but great for teaching and demos.
+
+Suggested language choice by priority
+Best overall fit: BQN-inspired
+Why: best balance of modern semantics, teachability, openness, and visualizability. BQN is publicly documented, explicitly educational in tone, and supported by open implementations including MIT-licensed ones. 
+
+Best historical reference: APL2/Dyalog
+Why: best source of the “improvements over classic APL” story, especially nested arrays and namespaces. Dyalog remains a live source for those ideas even though it is proprietary for commercial use. 
+
+Best comparative reference: J
+Why: great for rank/cell execution and runtime design, but less ideal as the centerpiece of your teaching demos. J is active and source-available under GPL/commercial licensing. 
+
+Best UI inspiration: Uiua
+Why: modern, open, MIT-licensed, highly demo-friendly. 
+
+Open-source and license angle
+For your own project, if you want maximum adoption and minimal friction for AI-agent experiments, I would license your Rust implementation under either:
+
+MIT
+
+Apache-2.0
+
+or dual MIT/Apache-2.0
+
+That aligns better with your tooling and demo goals than GPL.
+
+Among the languages discussed here:
+
+BQN implementations: at least one major implementation is MIT licensed. 
+
+Uiua: MIT licensed. 
+
+J: source available under GPLv3 with commercial licensing also offered by J Software. 
+
+GNU APL: GNU free software ecosystem; GNU APL references and associated library guidance are GPL/LGPL-oriented. 
+
+Dyalog: not open source, free for non-commercial use. 
+
+QNial/Nial: open-source history exists, with repositories describing the interpreter as released as open source and older code published under the Artistic License; newer Nial website repos are MIT licensed, though the exact licensing story is more fragmented than BQN or Uiua. 
+
+Practical project strategy
+What I would do in your shoes
+Focus on one language target:
+“BQN-inspired educational array language with APL2-style nested-array extensions.”
+
+That phrasing gives you permission to:
+
+avoid full compatibility burden
+
+teach the ideas you care about
+
+build a runtime that is designed for visualization from day one
+
+Use three comparison chapters in the blog/video:
+Classic APL: what the original idea was
+
+APL2/Dyalog: what got improved for structure and scale
+
+BQN/J/Uiua: how modern designs rethink semantics and usability
+
+That is a much stronger teaching narrative than “I reimplemented old APL syntax.”
+
+Final answer
+Focus primarily on:
+BQN-inspired semantics
+because it is the best match for:
+
+a Rust-first implementation
+
+a visual debugger / IDE story
+
+clear teaching material
+
+open implementations and permissive licensing options
+
+modern, clean array semantics with explicit discussion of how they relate to APL2-style nested arrays 
+
+Use as supporting references:
+APL2/Dyalog
+for the historical “improvements over APL” story, especially:
+
+nested arrays
+
+namespaces / nested workspaces 
+
+Uiua
+for UX and visual demo inspiration, because it is active and MIT-licensed. 
+
+J
+for comparative ideas about rank/cell semantics and composition, not as the primary target. 
+
+Short version of the recommendation stack
+Best single choice
+BQN
+
+Best pair
+BQN + APL2/Dyalog concepts
+
+Best trio
+BQN + APL2/Dyalog + Uiua-inspired UI
+
+If you want, I’ll turn this into a concrete repo roadmap with:
+
+crate layout
+
+feature phases
+
+AI-agent work breakdown
+
+demo ideas for the CLI, Yew app, blog, and video.
+
+
+Additional considerations:  I would like to explore using my clean-room Rust-based implementation for Machine Learning experiments, like fine tuning, neural nets, trying new ML papers (prototyping engram, mHC, RLM, etc.).    I prefer Rust ML libraries over using Python.  I'd like to use my APL-ish language too.  I'd like to be able to more easily visualize weights, layers, etc.  matrix operations, etc.  Does this change your recommendation?
+
+
+Thought for 35s
+Yes — it changes the recommendation a bit.
+
+Not in the sense of “pick a totally different historical language,” but in the sense of what to center your implementation around.
+
+Revised recommendation
+Focus on a hybrid design:
+
+Primary semantic core: J-style rank/cell tensor semantics
+Primary presentation / teachability layer: BQN-style modern array language design
+Selective feature imports: APL2-style boxing/nested arrays and namespaces
+UI inspiration: Uiua-style immediacy and visual feedback
+That is the version I’d recommend now.
+
+Why the recommendation changes
+Your new requirement is not just:
+
+“teach APL improvements”
+
+“build a visual debugger”
+
+“dogfood AI coding agents”
+
+It is now also:
+
+use the implementation as an ML experimentation platform
+
+prototype tensor-heavy ideas in Rust
+
+visualize weights, layers, matrices, activations
+
+possibly fine-tune / explore papers
+
+use the APL-ish language as part of that workflow
+
+That pushes the center of gravity toward a language model where dense n-dimensional arrays and rank semantics are first-class, because ML is mostly about:
+
+tensors
+
+broadcasting / pervasion
+
+slicing
+
+reduction
+
+transposition / reshape
+
+batch dimensions
+
+per-layer transformations
+
+Jacobian/gradient-style flows
+
+That is where J-style rank/cell thinking becomes especially valuable. J remains actively maintained, and its source is available under GPLv3 as well as commercial licensing. 
+
+At the same time, BQN’s documentation makes it especially good for teaching modern array-language ideas, including cells and rank, array depth, reshape, and related concepts in a cleaner modern presentation. 
+
+So the new answer is:
+
+Do not build “an APL2 clone.” Build a Rust-native tensor/array language whose semantics are mostly J/BQN-like, then add selected APL2-style features where they help.
+
+The core architectural shift
+Before the ML requirement, a BQN-inspired educational language was the best center.
+
+After the ML requirement, I’d change that to:
+
+Build a tensor-first array runtime
+with:
+
+dense tensor core first
+
+rank/cell semantics early
+
+boxing / nested arrays later
+
+namespaces/modules after that
+
+This matters because for ML, you want your first-class runtime values to map naturally to:
+
+vectors
+
+matrices
+
+n-D tensors
+
+parameter tables
+
+gradients
+
+optimizer states
+
+layer outputs
+
+attention maps
+
+embedding tables
+
+APL2-style nested arrays are historically important, but they are not the best primary substrate for the first version of an ML-oriented engine. They are better as a secondary structure system for irregular data, model metadata, trees, token traces, debug frames, or experiment records.
+
+So I would reorder priorities like this:
+
+New priority order
+Dense arrays / tensors
+
+Rank/cell semantics
+
+Broadcast / pervasion / reduction
+
+Visual tracing and introspection
+
+Boxed / nested arrays
+
+Namespaces / modularity
+
+Tacit / advanced combinators
+
+What this means in language terms
+Best historical influences now
+1. J for semantic direction
+J is the strongest influence for ML-shaped execution because its model leans heavily into array/rank thinking rather than “everything is a nested object first.” It is also ASCII-based, which helps if you want a pragmatic CLI and parser story in early Rust prototypes. J is open-source under GPLv3/commercial dual licensing. 
+
+2. BQN for language cleanliness and teaching
+BQN’s docs explicitly surface cells/rank, array depth, reshape, and other concepts in a very teachable way. That makes it ideal for your blog/video/visual-debugger side. 
+
+3. APL2 / Dyalog for selected improvements
+Dyalog’s namespaces are explicitly described as analogous to nested workspaces, which makes them useful as a later-stage feature when you want your language to scale beyond tiny demos. Dyalog is free for non-commercial use under its Basic Licence, but it is not open source. 
+
+4. Uiua for UX ideas
+Uiua is a stack-based array language, open source under MIT, and it is very useful as inspiration for interactive, visually responsive tooling. 
+
+So what should you focus on now?
+Recommended language target
+A BQN/J-inspired Rust tensor language
+with:
+
+J-inspired execution model
+
+rank
+
+cells
+
+dense tensor transforms
+
+concise array calculus
+
+BQN-inspired surface design
+
+cleaner modern semantics
+
+better teachability
+
+visualizability
+
+optional Unicode pretty form
+
+APL2-inspired extensions
+
+boxing/nested arrays for irregular structures
+
+namespaces/modules
+
+debugger-friendly structured environments
+
+That is the strongest fit for all your goals together.
+
+Why this is better for ML than “APL2-first”
+APL2-first strengths
+great historical story
+
+nested arrays are very interesting
+
+good for teaching structural evolution of APL
+
+visually rich for debugger work
+
+APL2-first weaknesses for ML
+boxed/nested structures are not the best initial substrate for dense tensor math
+
+ML wants efficient dense layout and predictable bulk ops
+
+a first implementation centered on nested arrays risks making the tensor engine feel bolted on
+
+J/BQN-first strengths for ML
+tensors and rank are the center of the language
+
+broadcasting/reduction semantics line up with ML mental models
+
+easier path to matrix kernels, batch axes, and layer visualization
+
+cleaner “array transformations as animations” story
+
+Rust ecosystem impact
+This is where the change is most important.
+
+If you want to prototype ML in Rust and maybe connect your language runtime to real backends, the most useful current Rust-side anchors are:
+
+Burn: a tensor library and deep learning framework for numerical computing, inference, and training. 
+
+Candle: a minimalist Rust ML framework focused on performance, ease of use, and GPU support. 
+
+dfdx: a GPU-accelerated Rust tensor/deep-learning library with compile-time and runtime shapes plus shape/type-checked tensor ops. 
+
+That suggests an implementation strategy:
+
+Language/runtime core
+Your own clean-room Rust value model and evaluator
+
+Backend bridge
+An internal tensor abstraction that can target:
+
+a simple native dense-array engine first
+
+then optionally Burn
+
+then optionally Candle
+
+optionally dfdx for shape-checked experiments
+
+That way your language remains yours, while still gaining access to practical ML machinery.
+
+Best architecture for your project now
+High-level design
+Layer 1: Core IR / runtime
+A small Rust crate family for:
+
+scalar types
+
+shape
+
+strides / layout
+
+tensor views
+
+reductions / maps / scans
+
+rank/cell execution
+
+trace events for visualization
+
+Layer 2: Language
+Parser + evaluator for your APL-ish syntax:
+
+ASCII first, Unicode optionally
+
+explicit array/tensor literals
+
+later function composition features
+
+Layer 3: ML adapter
+Bindings from your runtime values to:
+
+Burn tensors
+
+Candle tensors
+
+dfdx tensors
+
+Layer 4: Visual debugger / IDE
+Yew/WASM UI:
+
+shape viewer
+
+tensor heatmaps
+
+per-op execution animation
+
+graph of value flow
+
+layer explorer
+
+weight matrix visualizer
+
+gradient visualizer
+
+optimizer state inspector
+
+This is a much better architecture than tying parsing/evaluation directly to one ML framework.
+
+What to implement first
+Phase 1: dense tensor language, not boxing-first
+I would start with:
+
+Core numeric/tensor primitives
+scalar
+
+vector
+
+matrix
+
+n-D tensor
+
+shape
+
+reshape
+
+transpose
+
+slice
+
+map
+
+zip
+
+reduce
+
+scan
+
+broadcast/pervasion
+
+matrix multiply
+
+axis-wise operations
+
+Visual hooks from day one
+Every primitive should emit structured trace data:
+
+input shapes
+
+output shape
+
+axis mapping
+
+selected cells
+
+execution snapshots
+
+This makes the later Yew app much easier.
+
+Phase 2: rank/cell semantics
+This is the big differentiator.
+
+Implement:
+
+major cells
+
+rank-polymorphic application
+
+axis selection
+
+batching semantics
+
+This will pay off enormously for both teaching and ML.
+
+Phase 3: boxing / nested arrays
+Now bring in the APL2 story:
+
+irregular data
+
+trees / records
+
+model metadata
+
+experiment bundles
+
+debugger snapshots
+
+symbolic expressions
+
+token streams
+
+This is where the APL2 angle becomes really interesting again.
+
+Phase 4: namespaces and environments
+Add:
+
+modules/namespaces
+
+experiment contexts
+
+model definitions
+
+reusable layer libraries
+
+Dyalog’s namespace model is a useful conceptual reference here. 
+
+Recommendation by use case
+If your main goal is:
+“Teach APL evolution visually”
+Use BQN + APL2 emphasis.
+
+If your main goal is:
+“Build a usable Rust-native ML experimentation language”
+Use J + BQN emphasis.
+
+If your main goal is:
+“Do both at once”
+Use this exact mix:
+
+J-style tensor semantics
+BQN-style language design
+APL2-style boxed/nested structures and namespaces
+Uiua-style visual UX
+That is my strongest recommendation now.
+
+Licensing and openness
+For studying and inspiration:
+
+J: source under GPLv3 and commercial licensing. 
+
+BQN ecosystem: open implementations exist; CBQN is dual-licensed LGPLv3/MPL 2.0. 
+
+Uiua: MIT. 
+
+GNU APL: GPLv3-or-later free software implementing ISO APL Extended. 
+
+Dyalog: free for non-commercial use, not open source. 
+
+For your own implementation, I would still recommend:
+
+MIT
+
+Apache-2.0
+
+or dual MIT/Apache-2.0
+
+That will be friendlier for agent experiments, blog/video adoption, and ML integrations than copyleft.
+
+Bottom line
+Does this change my recommendation?
+Yes, slightly but importantly.
+
+Old answer
+Build a BQN-inspired educational array language with APL2 features.
+
+New answer
+Build a tensor-first Rust array language that is:
+
+semantically closer to J
+
+ergonomically/pedagogically closer to BQN
+
+extended with APL2-style boxing and namespaces
+
+presented with Uiua-like visual immediacy
+
+Practical shorthand
+If you want one sentence to guide the project:
+
+Make the runtime think like J, make the language feel like BQN, and make the debugger teach APL2.
+
+If you want, I’ll turn this into a concrete repo plan with crates, milestones, and a staged demo sequence for CLI, Yew/WASM, blog post, and video.
+
+
+what would be possible git repo names, descriptions
+
+Given your goals, let’s treat naming as an architecture decision, not just aesthetics.
+
+You’re building:
+
+a Rust-first tensor/array language runtime
+
+a teachable APL/BQN/J hybrid
+
+a visual debugger + ML experimentation platform
+
+a multi-repo system with CLI + WASM UI + blog/video narrative
+
+So the naming should support:
+
+cohesive ecosystem branding
+
+clear separation of components
+
+extensibility for future ML / RLM / Engram work
+
+memorability for blog/video audience
+
+1) Naming Strategy (High-Level Design)
+Core idea
+Use a unified prefix + layered repo names
+
+Example pattern:
+
+<family>-<component>
+Where:
+
+<family> = your language/platform name
+
+<component> = cli, core, wasm, viz, ml, etc.
+
+Good naming properties
+Your name should:
+
+hint at arrays / tensors / structure
+
+hint at visualization / insight
+
+be short (3–8 chars ideally)
+
+not collide with existing APL-family names
+
+be easy to type in CLI
+
+2) Strong Name Candidates (with rationale)
+Category A — Best overall (recommended)
+tenso
+Why:
+
+evokes tensor + sense
+
+short, modern, neutral
+
+ML-friendly
+
+Repos:
+
+tenso-core
+tenso-cli
+tenso-wasm
+tenso-viz
+tenso-ml
+arrio
+Why:
+
+array + io
+
+approachable, modern
+
+works well for visualization + ML
+
+ranko
+Why:
+
+directly references rank semantics (J-style core)
+
+strong conceptual alignment
+
+axion
+Why:
+
+“axis” + motion
+
+great for visualization + animation story
+
+Category B — APL lineage inspired
+glyph
+Why:
+
+references APL symbols
+
+good for visual narrative
+
+Risk: somewhat generic
+
+aplix
+Why:
+
+APL-inspired without being APL
+
+modernized feel
+
+boxel
+Why:
+
+box (APL2 nested arrays) + pixel
+
+excellent for your visual debugger angle
+
+👉 This is very strong for your specific project
+
+Category C — ML + visualization focused
+tensorium
+more “big project” sounding
+
+visarray
+explicit but less brandable
+
+neuroglyph
+ML + APL vibe, but more niche
+
+3) My Top 3 Picks (for your exact goals)
+🥇 boxel
+Best alignment with:
+
+APL2 nested arrays (boxing)
+
+visualization (pixel/voxel vibe)
+
+teaching story
+
+🥈 ranko
+Best alignment with:
+
+J-style rank semantics (your ML core)
+
+short, clean, technical
+
+🥉 tenso
+Best alignment with:
+
+ML + tensors
+
+broader appeal
+
+4) Suggested Repo Layout (Concrete)
+Assume base name = boxel
+
+Core repos
+1. Runtime / language core
+boxel-core
+Description:
+
+Rust implementation of a tensor-first array language inspired by APL, J, and BQN, with support for rank semantics and nested arrays.
+
+2. CLI
+boxel-cli
+Description:
+
+Command-line interface for the Boxel array language, supporting interactive evaluation, scripting, and debugging.
+
+3. WASM + UI
+boxel-wasm
+or
+
+boxel-ui
+Description:
+
+WebAssembly + Yew-based visual environment for exploring array programs with animated execution and debugging.
+
+4. Visualization engine
+boxel-viz
+Description:
+
+Visualization engine for tensor operations, execution traces, and array transformations in Boxel.
+
+5. ML integration
+boxel-ml
+Description:
+
+Machine learning integrations for Boxel, including tensor backends (Burn, Candle) and experimental model prototyping.
+
+6. Examples / demos
+boxel-demos
+Description:
+
+Interactive demos showcasing array operations, visual debugging, and ML experiments in Boxel.
+
+7. Agent orchestration (your dogfooding layer)
+boxel-agents
+Description:
+
+AI-agent orchestration and task coordination for developing and testing the Boxel ecosystem.
+
+5) Alternative: Monorepo option
+If you prefer a workspace:
+
+boxel/
+  crates/
+    core/
+    cli/
+    wasm/
+    viz/
+    ml/
+  examples/
+  docs/
+6) Taglines / Project Descriptions
+Here are polished descriptions you can reuse:
+
+Short (GitHub header)
+A Rust-based tensor-first array language inspired by APL, J, and BQN, with a visual debugger and ML experimentation support.
+
+Medium
+Boxel is a Rust-first array programming environment combining J-style rank semantics, BQN-inspired language design, and APL2-style nested arrays. It includes a CLI, a WebAssembly visual debugger, and tools for machine learning experimentation and visualization.
+
+Long (README intro)
+Boxel is an experimental array programming language and runtime written in Rust.
+
+It is designed to explore and teach the evolution of APL-family languages while providing a modern platform for tensor computation, visualization, and machine learning experimentation.
+
+Boxel combines:
+
+J-style rank and cell semantics for efficient tensor operations
+
+BQN-inspired language design for clarity and composability
+
+APL2-style nested arrays for structured data
+
+The project includes a CLI interpreter, a Yew/WASM-based visual debugger, and integrations with Rust ML frameworks.
+
+7) Naming for blog/video series
+Match your repo name with your content:
+
+Series name ideas
+“Building Boxel”
+
+“Reinventing APL for ML in Rust”
+
+“Visual Array Programming from Scratch”
+
+“From APL to AI: Building a Tensor Language”
+
+8) Final Recommendation
+If you want one clean, future-proof choice:
+
+Use:
+boxel
+Because it uniquely captures:
+
+APL2’s boxing
+
+your visualization goals
+
+your ML ambitions
+
+your teaching narrative
+
+If you want, next I can:
+
+generate a full Cargo workspace skeleton
+
+define crate boundaries aligned with your constraints
+
+or create a phase-by-phase AI-agent task breakdown for building this system
+
+
+I was thinking of something like "AMLL" - A Machine Learning Language -- in the style of original APL naming.  What do you think?
+
+You’re thinking in exactly the right direction—but “AMLL” is close, not quite there yet.
+
+Let’s evaluate it like a system design decision.
+
+1) Restating Your Intent
+You want a name that:
+
+Echoes APL-style naming
+
+Signals Machine Learning + array language
+
+Feels like a language, not just a library
+
+Works for:
+
+CLI tool
+
+WASM UI
+
+blog/video branding
+
+multi-repo ecosystem
+
+2) Evaluation of “AMLL”
+👍 Strengths
+1. APL lineage signal
+Very strong resemblance to APL
+
+Feels historically grounded
+
+2. Meaningful expansion
+“A Machine Learning Language” is clean and accurate
+
+3. Short and CLI-friendly
+Easy to type
+
+Works well in code, commands, repo names
+
+⚠️ Weaknesses
+1. Pronunciation problem
+“A-M-L-L” is awkward to say
+
+People will hesitate: “am-ell?” “amel?” “A-M-L-L?”
+
+👉 This matters for:
+
+videos
+
+teaching
+
+word-of-mouth
+
+2. Slight ambiguity
+Could be read as:
+
+AML + L
+
+Anti-Money Laundering (AML is common)
+
+Not strongly distinctive in search results
+
+3. Doesn’t capture your visual + array angle
+It emphasizes ML
+
+But your project is equally about:
+
+array semantics
+
+visualization
+
+language design
+
+3) Architectural Insight
+APL worked because:
+
+short
+
+pronounceable
+
+distinctive
+
+conceptually aligned
+
+“AMLL” gets 3/4, but misses pronounceability + uniqueness.
+
+4) Recommended Direction
+Option A — Keep AMLL, but treat it as a formal name
+Use AMLL like:
+
+“AMLL (A Machine Learning Language)”
+
+But introduce a spoken name / codename
+
+Example
+AMLL (codename: Boxel)
+
+AMLL (codename: Ranko)
+
+👉 This is actually very strong:
+
+AMLL = formal / academic identity
+
+codename = brand / UX / demos
+
+Option B — Slightly evolve AMLL
+Make it pronounceable.
+
+Good variants
+Amel
+Derived from AMLL
+
+Pronounceable: “ah-mel”
+
+Clean, modern
+
+Aml
+Minimalist (like APL)
+
+Could work if you lean into it stylistically
+
+Amlang
+More explicit, slightly longer
+
+Option C — APL-style but ML-aware names (best balance)
+These preserve the APL spirit but improve usability.
+
+🔥 Strong candidates
+APLX
+“APL Extended / Experimental”
+
+Very natural evolution feel
+
+APL-ML
+Explicit but slightly clunky
+
+MLPL
+“Machine Learning Programming Language”
+
+Nice symmetry with APL
+
+RPL
+“Rank Programming Language”
+
+Strong alignment with your core semantics
+
+TML
+“Tensor Machine Language”
+
+Very ML-aligned
+
+5) My Recommendation (Clear)
+Best overall strategy
+Use a dual naming model
+Formal name:
+AMLL
+Project / repo name:
+boxel (or ranko / tenso)
+Why this is ideal
+AMLL gives you:
+APL-style credibility
+
+Academic framing
+
+Clean blog/video narrative:
+
+“I built AMLL: A Machine Learning Language inspired by APL”
+
+Boxel (or similar) gives you:
+memorable branding
+
+visual identity
+
+easier onboarding
+
+6) Example of how this looks in practice
+Repo
+boxel-core
+boxel-cli
+boxel-wasm
+README
+Boxel is the reference implementation of AMLL (A Machine Learning Language), a Rust-based array programming language inspired by APL, J, and BQN.
+
+Video intro
+“Today we’re building AMLL—A Machine Learning Language—and its implementation, Boxel.”
+
+7) If you insist on a single name
+If you want only one name, I would NOT choose AMLL.
+
+Instead choose:
+
+🥇 RPL
+Best alignment with your architecture:
+
+rank semantics
+
+tensor focus
+
+APL lineage
+
+🥈 APLX
+Best lineage signal
+
+🥉 boxel
+Best product/visual identity
+
+8) Bottom Line
+AMLL is:
+conceptually strong ✅
+
+historically aligned ✅
+
+but weak as a standalone brand ⚠️
+
+Best move:
+👉 Use AMLL as the “language name” and pair it with a stronger project name
+
+If you want, next I can:
+
+design a logo/visual identity direction
+
+define crate/module names aligned with AMLL semantics
+
+or create a CLI UX spec (commands, REPL, debugging commands)
+
+
+I like MLPL, so come up with your recommended approach using that for a mono-repo MLPL top, your other suggestions below.
+
+MLPL is a good choice.
+
+It preserves the APL-style compactness, but it is clearer than AMLL and easier to explain:
+
+MLPL = Machine Learning Programming Language
+
+It also fits your actual architecture better, because this is not just “a language for ML models.” It is a programming language for:
+
+tensors and array programming
+
+ML experimentation
+
+visual execution/debugging
+
+teaching APL-family ideas through implementation
+
+So I would recommend:
+
+Recommended naming approach
+Top-level monorepo name
+mlpl
+That should be the GitHub repo root and the umbrella identity.
+
+Positioning line
+MLPL: a Rust-first array and tensor programming language for machine learning, visualization, and experimentation
+That is broad enough for your future work and narrow enough to be understandable.
+
+1) Naming architecture
+You asked for a mono-repo MLPL top, using the earlier layered naming ideas below it.
+
+The cleanest approach is:
+
+MLPL = umbrella project / language / monorepo
+
+subcomponents use short, descriptive names
+
+the internal crates and apps keep the ecosystem coherent without needing separate brand names
+
+That gives you:
+
+one clear public identity
+
+one Cargo workspace
+
+separate crates/apps for agent-friendly work decomposition
+
+room for later extraction into separate repos if needed
+
+2) Recommended monorepo structure
+Repo
+mlpl
+GitHub description
+Rust-first tensor and array programming language inspired by APL, J, BQN, and APL2, with visual debugging and ML experimentation tools.
+
+3) Recommended workspace layout
+Given your preferences around modularity, I would structure it around a few top-level components.
+
+mlpl/
+  README.md
+  LICENSE-MIT
+  LICENSE-APACHE
+  Cargo.toml
+  justfile
+  docs/
+  examples/
+  demos/
+  crates/
+    mlpl-core/
+    mlpl-array/
+    mlpl-runtime/
+    mlpl-parser/
+    mlpl-eval/
+    mlpl-cli/
+    mlpl-trace/
+    mlpl-viz/
+    mlpl-wasm/
+    mlpl-ml/
+    mlpl-lsp/
+  apps/
+    mlpl-repl/
+    mlpl-web/
+    mlpl-lab/
+  assets/
+  blog/
+  scripts/
+This is the high-level recommendation. Below is how I would define each part.
+
+4) Core naming scheme
+Use mlpl-* consistently.
+
+That gives you:
+
+clear crates.io naming
+
+obvious relationships
+
+no ambiguity in imports
+
+easy blog/video narration
+
+5) Recommended crates and descriptions
+Core semantic and runtime crates
+mlpl-core
+Description:
+Core language data types, symbols, errors, spans, and shared semantic definitions.
+
+Purpose:
+This is the stable center. No evaluator logic, no parsing, no UI logic. Just the shared model.
+
+mlpl-array
+Description:
+Dense array and tensor types, shapes, indexing, views, layout, and structural operations.
+
+Purpose:
+This is your tensor substrate. It should be usable independently of the language parser.
+
+Why important:
+You want ML experiments and visualizations. This crate becomes the engine for:
+
+shape/rank demos
+
+matrix ops
+
+layer visualization
+
+possible direct Rust usage outside the language
+
+mlpl-runtime
+Description:
+Runtime values, environments, namespaces, boxing, and execution support.
+
+Purpose:
+Holds the dynamic value model:
+
+scalars
+
+arrays
+
+boxed/nested arrays
+
+functions
+
+namespaces/modules
+
+maybe future model/layer objects
+
+mlpl-parser
+Description:
+Lexer, parser, syntax tree, and source handling for MLPL.
+
+Purpose:
+Keep syntax concerns isolated from semantics.
+
+Recommendation:
+Start with ASCII-first input, with optional Unicode aliases later.
+
+mlpl-eval
+Description:
+Interpreter and execution engine for MLPL expressions, functions, and programs.
+
+Purpose:
+Implements:
+
+primitive dispatch
+
+rank/cell semantics
+
+broadcasting/pervasion
+
+reductions/scans
+
+function application
+
+namespace resolution
+
+Introspection and visualization crates
+mlpl-trace
+Description:
+Structured execution traces for debugging, animation, and visual explanation.
+
+Purpose:
+This is one of the most important design decisions for your project.
+
+Every meaningful operation should be able to emit:
+
+input values or summaries
+
+output values or summaries
+
+shape/rank info
+
+axis mappings
+
+evaluation steps
+
+timing/metadata
+
+This makes the later Yew app much easier.
+
+mlpl-viz
+Description:
+Shared visualization models and render helpers for arrays, tensors, traces, and graphs.
+
+Purpose:
+A Rust crate that defines visual projections such as:
+
+grid view
+
+tree view
+
+axis view
+
+heatmap metadata
+
+histogram/bar metadata
+
+trace timeline model
+
+This allows the CLI and WASM UI to share concepts.
+
+mlpl-wasm
+Description:
+WebAssembly-facing bindings and adapters for MLPL execution and visualization.
+
+Purpose:
+Bridge layer between core crates and Yew frontend.
+
+ML integration crate
+mlpl-ml
+Description:
+Machine learning integrations, tensor backends, layers, optimizers, and experiments.
+
+Purpose:
+This is where you can explore:
+
+Burn adapters
+
+Candle adapters
+
+simple neural net demos
+
+training loops
+
+visualization of parameters/gradients
+
+experimentation with papers like Engram, mHC, RLM-inspired structures
+
+Important design note:
+Do not let this crate own the language semantics. It should extend the platform, not define it.
+
+Tooling crates/apps
+mlpl-cli
+Description:
+Command-line tooling for running files, evaluating expressions, inspecting arrays, and exporting traces.
+
+Purpose:
+This is the user-facing command surface.
+
+mlpl-lsp
+Description:
+Language tooling support for MLPL editors and IDE integrations.
+
+Purpose:
+Optional later. Good if you want AI agents and editors to interact more richly.
+
+6) Recommended apps
+Apps are different from crates: they are user-facing entry points.
+
+apps/mlpl-repl
+Description:
+Interactive REPL for MLPL with trace inspection and visualization-friendly output.
+
+apps/mlpl-web
+Description:
+Yew/WASM visual environment for stepping through MLPL programs and exploring tensors.
+
+apps/mlpl-lab
+Description:
+Interactive experiment workbench for MLPL demos, ML prototypes, and educational notebooks.
+
+This gives you three clean user experiences:
+
+terminal
+
+browser visualizer
+
+experiment-focused app
+
+7) Recommended docs and content directories
+docs/
+Use this for architecture and engineering docs.
+
+Suggested files:
+
+docs/
+  prd.md
+  architecture.md
+  design.md
+  roadmap.md
+  language-overview.md
+  semantics-rank.md
+  semantics-boxing.md
+  semantics-namespaces.md
+  trace-format.md
+  ml-integration.md
+  visual-debugger.md
+blog/
+Use for polished article drafts and media assets:
+
+blog/
+  0001-why-mlpl.md
+  0002-rank-and-cells.md
+  0003-boxing-and-nested-arrays.md
+  0004-visual-debugging.md
+  0005-mlpl-for-ml.md
+demos/
+Curated showcase programs:
+
+demos/
+  arrays/
+  rank/
+  boxing/
+  namespaces/
+  tracing/
+  ml/
+  papers/
+examples/
+More code-oriented examples:
+
+examples/
+  cli/
+  wasm/
+  rust-api/
+8) Recommended naming for internal concepts
+Since MLPL is short and formal, you can give the UI and tooling slightly more expressive internal names if you want.
+
+Suggested internal names
+Visual debugger name
+MLPL Studio
+or
+MLPL Lab
+
+Trace viewer
+MLPL Trace
+
+Array explorer
+MLPL View
+
+Experiment environment
+MLPL Lab
+
+This keeps the public brand simple while making sub-tools easy to talk about.
+
+Example:
+
+“The language is MLPL”
+
+“The browser app is MLPL Studio”
+
+“The experiment shell is MLPL Lab”
+
+9) Suggested README positioning
+Short version
+MLPL is a Rust-first array and tensor programming language for machine learning, visualization, and experimentation.
+
+Medium version
+MLPL is an experimental programming language and runtime written in Rust. It combines ideas from APL, APL2, J, and BQN to explore tensor programming, nested array structures, visual debugging, and machine learning experimentation.
+
+Long version
+MLPL is a Rust-first programming language for array and tensor computation, inspired by APL-family languages and designed for machine learning, visualization, and experimentation.
+
+The project combines:
+
+J-style rank and cell semantics for tensor-oriented execution
+
+BQN-inspired modern array language design
+
+APL2-style boxed and nested structures for irregular data
+
+visual tracing and debugging tools built for Yew/WASM
+
+MLPL is intended both as a practical experimentation platform and as a teaching vehicle for understanding how array languages work internally.
+
+10) Suggested repo descriptions for the monorepo and major subprojects
+Monorepo description
+Rust-first array and tensor programming language with visual debugging and ML experimentation.
+
+mlpl-array
+Dense arrays, tensors, shapes, views, and structural operations for MLPL.
+
+mlpl-eval
+Interpreter and execution engine for MLPL rank, cell, and array semantics.
+
+mlpl-trace
+Structured execution traces for MLPL debugging, animation, and visualization.
+
+mlpl-web
+Yew/WASM visual environment for stepping through MLPL programs and exploring tensors.
+
+mlpl-ml
+ML integrations and experiments for MLPL using Rust-native tensor and model backends.
+
+11) Recommended phased implementation naming
+You also want this to work well with AI coordinators and coding agents. Clear milestone names help.
+
+Phase 0
+mlpl-foundation
+Core docs, workspace, crate skeletons, coding conventions
+
+Phase 1
+mlpl-array-v1
+Dense arrays, shapes, reshape, transpose, indexing
+
+Phase 2
+mlpl-eval-v1
+Parser + evaluator + primitive operations
+
+Phase 3
+mlpl-trace-v1
+Operation tracing and serialized trace output
+
+Phase 4
+mlpl-web-v1
+Basic Yew/WASM execution viewer
+
+Phase 5
+mlpl-box-v1
+Boxed/nested arrays and visual tree explorer
+
+Phase 6
+mlpl-ml-v1
+ML backend experiments and tensor/layer visualizations
+
+These names are useful for issues, project boards, and agent prompts.
+
+12) Recommended license approach
+For this project, I would use:
+
+Dual license
+MIT
+
+Apache-2.0
+
+Why:
+
+friendly for Rust ecosystem
+
+good for experimentation
+
+low friction for future reuse
+
+compatible with your likely goals for demos, blog, and tooling adoption
+
+If later you want some docs/examples/content under CC-BY, do that separately.
+
+13) My recommended final structure
+Monorepo name
+mlpl
+Workspace crates
+mlpl-core
+mlpl-array
+mlpl-runtime
+mlpl-parser
+mlpl-eval
+mlpl-trace
+mlpl-viz
+mlpl-wasm
+mlpl-ml
+mlpl-cli
+mlpl-lsp
+User-facing apps
+mlpl-repl
+mlpl-web
+mlpl-lab
+Docs/content areas
+docs
+examples
+demos
+blog
+14) Final recommendation
+Use MLPL as both the language name and the monorepo name.
+
+Then use a disciplined, explicit internal naming scheme:
+
+mlpl-array for the tensor engine
+
+mlpl-eval for semantics
+
+mlpl-trace for visual execution
+
+mlpl-web for the Yew/WASM UI
+
+mlpl-ml for ML experiments
+
+That gives you:
+
+strong APL-style identity
+
+good technical clarity
+
+room to grow
+
+excellent compatibility with AI-agent task decomposition
+
+a clean story for blog posts and videos
+
+If you want, next I can turn this into a full monorepo PRD + architecture + crate boundary plan.
+
+
+yes proceed, and then come up with a Saga of implementation steps in a suggested order of implementation, assume TDD, and structure it to have demonstratable milestones and an eventual MVP, and follow-on increasingly featured demonstratable post-MVP milestones.
+
+You want two things:
+
+a full monorepo PRD + architecture + crate boundary plan for MLPL
+
+a Saga: an ordered implementation plan using TDD, with demonstrable milestones, a clear MVP, and a sequence of increasingly richer post-MVP milestones
+
+I’ll treat this as a product-and-systems design for a Rust-first language platform that supports:
+
+an array/tensor language
+
+ML experimentation
+
+visual explanations and debugging
+
+AI-coordinator / multi-agent implementation workflows
+
+MLPL Monorepo PRD
+1) Product definition
+Product name
+MLPL — Machine Learning Programming Language
+
+Product thesis
+MLPL is a Rust-first array and tensor programming language platform inspired by APL, APL2, J, and BQN, designed for:
+
+learning by implementing language ideas
+
+visualizing execution, tensors, and transformations
+
+experimenting with machine learning systems in Rust
+
+serving as a realistic multi-agent software project for AI coordination
+
+Primary product outputs
+MLPL is not one binary. It is a platform with several outputs:
+
+a Rust CLI / REPL
+
+a Rust/Yew/WASM visual app
+
+a Rust library ecosystem
+
+a demo and tutorial corpus
+
+a blog/video teaching pipeline
+
+Primary user personas
+Persona A: the builder-teacher
+Wants to learn array-language concepts by implementing them and explaining them visually.
+
+Persona B: the Rust ML experimenter
+Wants a tensor-friendly language and runtime for prototyping ideas without defaulting to Python.
+
+Persona C: the AI-orchestrator
+Wants a realistic codebase for coordinating multiple coding agents with bounded tasks and measurable outputs.
+
+2) Goals
+Primary goals
+Build a clean-room Rust implementation of a compact tensor/array language.
+
+Make the implementation visually explainable.
+
+Design the runtime to support ML-oriented experiments.
+
+Enable strong decomposition into independently implementable crates and milestones.
+
+Secondary goals
+Support eventual IDE/editor tooling.
+
+Support optional Unicode syntax without requiring it.
+
+Allow visual, not just textual, inspection of program behavior.
+
+Non-goals for early phases
+Full compatibility with APL, J, BQN, or Dyalog
+
+Full optimizer/autograd stack from day one
+
+Distributed runtime
+
+GPU support in the first milestone
+
+JIT compiler in the first milestone
+
+3) Product scope
+In scope
+parser
+
+interpreter
+
+dense arrays / tensors
+
+rank/cell-oriented operations
+
+structured tracing
+
+visual debugger foundation
+
+later: boxed/nested arrays
+
+later: namespaces/modules
+
+later: ML adapters and experiments
+
+Out of scope initially
+full compiler to native code
+
+sophisticated optimizer passes
+
+full symbolic algebra
+
+production-grade distributed ML training
+
+4) Success criteria
+Technical success
+Can execute non-trivial tensor/array programs correctly.
+
+Can emit structured traces suitable for visualization.
+
+Can demonstrate rank/cell semantics visually.
+
+Can run at least one simple ML demo end-to-end.
+
+Educational success
+Can explain key APL-family ideas through the implementation.
+
+Can show side-by-side “before/after” evolution from simple arrays to richer semantics.
+
+Can support a blog/video series with compelling demos.
+
+Process success
+Can be decomposed into small TDD-friendly work items.
+
+Can be implemented by a coordinator plus several coding agents.
+
+Each milestone results in a visible, demonstrable artifact.
+
+Architecture
+1) High-level architecture
+MLPL should be split into five conceptual layers.
+
+Layer A — Language definition
+syntax
+
+AST
+
+source spans
+
+primitive catalog
+
+function definitions
+
+module/namespace structure
+
+Layer B — Runtime semantics
+values
+
+arrays/tensors
+
+boxed/nested values
+
+function application
+
+environments
+
+rank/cell semantics
+
+primitive evaluation
+
+Layer C — Execution instrumentation
+trace events
+
+snapshots / summaries
+
+timing / operation metadata
+
+visual projection metadata
+
+Layer D — User interfaces
+CLI / REPL
+
+file runner
+
+web UI
+
+visual debugger
+
+future IDE/LSP
+
+Layer E — ML experimentation
+tensor backend abstraction
+
+optional adapters to Burn/Candle/dfdx
+
+visualizations of layers, weights, activations, gradients
+
+experiment harnesses
+
+2) Architectural style
+Recommended style
+Use a library-first monorepo with thin apps.
+
+That means:
+
+most logic lives in reusable crates
+
+apps/ are integration shells
+
+core types are shared and stable
+
+visual and ML features build on traceable runtime semantics
+
+Why this is best
+It matches your constraints:
+
+TDD-friendly
+
+easy agent decomposition
+
+supports CLI and WASM without duplicated logic
+
+makes it easier to later spin pieces into separate repos if needed
+
+3) Nonfunctional requirements
+Maintainability
+small crates
+
+small modules
+
+simple interfaces
+
+stable data contracts between layers
+
+Testability
+pure functions wherever possible
+
+deterministic traces
+
+golden test support
+
+property tests for array identities and shape invariants
+
+Explainability
+every meaningful operation should be traceable
+
+visual UI should not reverse-engineer behavior; it should consume explicit runtime metadata
+
+Performance
+enough for demos and modest ML experiments
+
+avoid premature optimization in early phases
+
+design APIs so internals can later optimize storage/layout
+
+Portability
+Rust-native
+
+CLI on Linux/macOS first
+
+WASM frontend later
+
+no Python dependency in core workflows
+
+Crate boundary plan
+Below is the recommended monorepo structure.
+
+mlpl/
+  Cargo.toml
+  README.md
+  LICENSE-MIT
+  LICENSE-APACHE
+  docs/
+  examples/
+  demos/
+  blog/
+  apps/
+  crates/
+Core crates
+mlpl-core
+Purpose: foundational shared definitions
+
+Contains:
+
+spans
+
+identifiers
+
+symbol names
+
+primitive IDs
+
+language-level error enums
+
+shared metadata types
+
+Should not contain:
+
+parser logic
+
+evaluator logic
+
+UI logic
+
+mlpl-array
+Purpose: dense arrays/tensors and shape/layout logic
+
+Contains:
+
+scalar element enum or typed storage abstractions
+
+shape
+
+rank
+
+strides/layout metadata
+
+views/slices
+
+reshape/transpose/index helpers
+
+broadcast compatibility checks
+
+Key design decision:
+Keep this crate useful independently of the language.
+It should feel like a reusable Rust tensor substrate.
+
+mlpl-runtime
+Purpose: runtime values and environments
+
+Contains:
+
+Value
+
+boxed/nested values later
+
+function values
+
+namespace/module values later
+
+environment/frame structure
+
+runtime errors
+
+display/summary helpers for values
+
+Separation principle:
+mlpl-array knows arrays.
+mlpl-runtime knows language values.
+
+mlpl-parser
+Purpose: syntax handling
+
+Contains:
+
+lexer
+
+parser
+
+AST
+
+source-file representation
+
+parse diagnostics
+
+Early recommendation:
+Use ASCII syntax first.
+Add Unicode aliases later.
+
+mlpl-eval
+Purpose: interpreter
+
+Contains:
+
+AST evaluation
+
+primitive dispatch
+
+rank/cell application rules
+
+reductions/scans
+
+function call semantics
+
+environment lookup
+
+module/namespace resolution later
+
+Separation principle:
+Interpreter logic here; representation logic elsewhere.
+
+Introspection and visualization crates
+mlpl-trace
+Purpose: structured execution trace model
+
+Contains:
+
+operation events
+
+input/output summaries
+
+span references
+
+value IDs
+
+shape/rank metadata
+
+timeline/event grouping
+
+serialization format
+
+This crate is strategically critical.
+It is what turns MLPL from a language project into a visual teaching platform.
+
+mlpl-viz
+Purpose: visual projection helpers
+
+Contains:
+
+grid projection models
+
+tree projection models
+
+tensor heatmap metadata
+
+axis labeling metadata
+
+trace timeline projection helpers
+
+Important:
+This is not the UI itself.
+This crate defines the reusable visual model.
+
+mlpl-wasm
+Purpose: WASM bridge adapters
+
+Contains:
+
+wrappers around evaluator + trace
+
+serialization/adapters for web UI
+
+JS/WASM boundary-safe types if needed
+
+ML crate
+mlpl-ml
+Purpose: machine learning features and experiments
+
+Contains:
+
+initial pure-Rust demo layers
+
+simple training loops
+
+visualizable model state
+
+optional adapters to Burn/Candle/dfdx later
+
+paper experiments
+
+Key rule:
+This crate must depend on the language/runtime, not own it.
+
+Tooling crates
+mlpl-cli
+Purpose: command-line interface and runner
+
+Contains:
+
+CLI arg parsing
+
+file execution
+
+expression evaluation
+
+trace export
+
+simple REPL shell support, or delegate to app
+
+mlpl-lsp
+Purpose: future editor tooling
+
+Contains later:
+
+diagnostics
+
+hover/help
+
+primitive docs
+
+trace-aware inspection hooks
+
+This can wait until well after MVP.
+
+Apps
+apps/mlpl-repl
+Interactive shell for:
+
+evaluating expressions
+
+loading files
+
+toggling trace output
+
+inspecting values
+
+apps/mlpl-web
+Yew/WASM UI for:
+
+stepping through traces
+
+visualizing arrays/tensors
+
+inspecting function applications
+
+later viewing model/layer state
+
+apps/mlpl-lab
+Post-MVP experiment workbench for:
+
+demos
+
+notebooks/lab-style workflows
+
+ML experiment panels
+
+paper prototype dashboards
+
+Language design recommendation
+Core semantic strategy
+Make the runtime:
+
+tensor-first
+
+rank-aware
+
+traceable
+
+extensible toward boxed/nested arrays
+
+Surface syntax strategy
+Start with:
+
+ASCII-first
+
+compact but readable
+
+Unicode pretty-print later
+
+avoid over-optimizing for historical fidelity early
+
+Semantic priorities in order
+dense arrays/tensors
+
+elementwise operations
+
+shape/rank
+
+broadcasting/pervasion
+
+reductions/scans
+
+rank/cell semantics
+
+boxed/nested arrays
+
+namespaces/modules
+
+optional tacit/combinator features
+
+Testing methodology
+Testing pyramid
+Level 1: unit tests
+For:
+
+shapes
+
+indexing
+
+parser tokens
+
+AST formation
+
+primitive semantics
+
+environment lookup
+
+Level 2: property tests
+For:
+
+reshape invariants
+
+transpose properties
+
+rank preservation rules
+
+serialization round-trips
+
+parser/pretty-printer round-trips where applicable
+
+Level 3: golden tests
+For:
+
+CLI output
+
+trace output
+
+visual projection JSON
+
+demo programs
+
+Level 4: scenario tests
+For:
+
+full demo scripts
+
+REPL interactions
+
+web trace fixture rendering
+
+simple ML experiment runs
+
+Saga of implementation
+Below is the recommended implementation saga in order.
+It is designed for:
+
+TDD
+
+visible progress
+
+agent decomposition
+
+demos at every stage
+
+Saga 0 — Foundation and contracts
+Goal
+Create the monorepo, contracts, and quality bar before writing meaningful semantics.
+
+Deliverables
+Cargo workspace
+
+crate skeletons
+
+lint/test config
+
+docs: PRD, architecture, roadmap
+
+coding standards
+
+first CI run
+
+first “hello workspace” binaries
+
+TDD focus
+test crate wiring
+
+test serialization fixtures
+
+test basic CLI smoke behavior
+
+Demo milestone
+Demo 0: “MLPL workspace boots”
+
+mlpl-cli --version
+
+test suite passes
+
+architecture docs present
+
+initial repo walkthrough video/blog seed possible
+
+Why this matters
+This is the first agent-coordination dogfood milestone.
+
+Saga 1 — Dense tensor substrate v1
+Goal
+Build a solid mlpl-array foundation.
+
+Features
+scalar numeric values
+
+vector and matrix support
+
+n-D shape metadata
+
+contiguous storage
+
+indexing
+
+reshape
+
+transpose
+
+pretty-print summaries
+
+TDD focus
+shape construction tests
+
+bounds/index tests
+
+reshape tests
+
+transpose tests
+
+property tests on shape consistency
+
+Demo milestone
+Demo 1: tensor playground in Rust
+
+create arrays in Rust
+
+reshape matrices
+
+transpose tensors
+
+print shapes and values
+
+User-visible artifact
+CLI can expose a small debug subcommand:
+
+mlpl-cli array-demo
+Significance
+First real technical substrate.
+This milestone is visualizable and bloggable.
+
+Saga 2 — Parser + expression evaluator v1
+Goal
+Run simple MLPL expressions in the CLI.
+
+Features
+lexer
+
+parser
+
+AST
+
+numeric literals
+
+array literals
+
+a small primitive set:
+
+add
+
+subtract
+
+multiply
+
+divide
+
+reshape
+
+transpose
+
+shape
+
+expression evaluation
+
+TDD focus
+lexer tests
+
+parse tests
+
+AST golden tests
+
+evaluator semantic tests
+
+invalid syntax diagnostics
+
+Demo milestone
+Demo 2: first MLPL expressions
+
+1 + 2
+
+vector + vector
+
+matrix reshape
+
+transpose demo
+
+User-visible artifact
+mlpl-cli eval "reshape([1,2,3,4], [2,2])"
+Significance
+This is the first real “language exists” milestone.
+
+Saga 3 — CLI + REPL v1
+Goal
+Make MLPL usable interactively.
+
+Features
+CLI expression eval
+
+file execution
+
+REPL shell
+
+basic help/diagnostics
+
+value printing modes
+
+TDD focus
+golden tests for CLI output
+
+scripted REPL tests
+
+file execution tests
+
+error reporting tests
+
+Demo milestone
+Demo 3: interactive MLPL
+
+live REPL session
+
+load demo file
+
+inspect arrays interactively
+
+Significance
+This is the first public-friendly milestone.
+
+Saga 4 — Structured trace v1
+Goal
+Make evaluation observable.
+
+Features
+value IDs
+
+operation events
+
+input/output summaries
+
+source span links
+
+trace export as JSON
+
+optional trace-on mode in CLI
+
+TDD focus
+trace event generation tests
+
+stable serialization tests
+
+span linkage tests
+
+trace completeness tests
+
+Demo milestone
+Demo 4: explain every step
+
+run an expression
+
+export trace
+
+inspect timeline in JSON / pretty CLI mode
+
+Significance
+This is where the project becomes visually powerful.
+
+Saga 5 — Visual web viewer v1
+Goal
+Display traces and arrays in a browser.
+
+Features
+Yew app bootstrapped
+
+load trace JSON
+
+render event list
+
+render array/table view
+
+show shape/rank
+
+step through events
+
+TDD focus
+projection tests in mlpl-viz
+
+component rendering tests where practical
+
+fixture-based snapshot tests
+
+Demo milestone
+Demo 5: first visual debugger
+
+evaluate CLI expression
+
+open web app
+
+scrub through operation timeline
+
+see arrays change
+
+MVP relevance
+This is the first strongly differentiated milestone.
+
+Saga 6 — Broadcasting/pervasion and reduction v1
+Goal
+Make the language useful for real tensor work.
+
+Features
+scalar/vector/matrix broadcasting
+
+axis-wise reductions
+
+scan/fold basics
+
+shape compatibility diagnostics
+
+TDD focus
+per-operation semantic tests
+
+property tests for reduction identities
+
+mismatch/error cases
+
+Demo milestone
+Demo 6: real array programming
+
+matrix ops
+
+row/column reductions
+
+broadcasting visual demos
+
+Significance
+Now the language is meaningfully expressive.
+
+Saga 7 — Rank/cell semantics v1
+Goal
+Implement the central semantic feature for tensor-oriented expressiveness.
+
+Features
+cell decomposition
+
+rank-sensitive application
+
+major-cell traversal
+
+visual metadata for axis/cell traversal
+
+TDD focus
+rank application tests
+
+cell selection tests
+
+consistency tests between rank rules and shapes
+
+trace metadata tests for cell traversal
+
+Demo milestone
+Demo 7: visual rank explainer
+
+show how an operation walks cells
+
+animate dimension grouping
+
+compare elementwise vs cellwise application
+
+Significance
+This is one of the most important teaching milestones.
+
+MVP definition
+MVP = Sagas 0 through 7
+At MVP, MLPL should provide:
+
+a working CLI/REPL
+
+dense array/tensor support
+
+a small but real language
+
+broadcasting/reduction support
+
+rank/cell semantics
+
+trace export
+
+a browser-based visual trace viewer
+
+MVP demo package
+A public MVP should be able to show:
+
+basic arithmetic and arrays
+
+reshape/transpose
+
+broadcasting
+
+reductions
+
+rank/cell visual explanation
+
+stepping through execution in the web UI
+
+That is already a strong product and an excellent blog/video milestone.
+
+Post-MVP Saga
+Now we shift from “working and explainable” to “richer and more distinctive.”
+
+Saga 8 — Boxed / nested arrays
+Goal
+Introduce the APL2-family structural leap.
+
+Features
+boxed values
+
+nested arrays/trees
+
+mixed structures
+
+tree visualizer
+
+trace support for nested values
+
+TDD focus
+nesting semantics
+
+box/unbox tests
+
+mixed-value display tests
+
+tree projection tests
+
+Demo milestone
+Post-MVP Demo 1: from tensors to structured data
+
+nested arrays
+
+tree explorer
+
+mixed symbolic/numeric structures
+
+Significance
+This is where the “APL2 improvements” story becomes vivid.
+
+Saga 9 — Namespaces/modules
+Goal
+Scale beyond tiny expressions.
+
+Features
+named bindings
+
+modules/namespaces
+
+loading files/modules
+
+scoped lookup
+
+visual environment inspector
+
+TDD focus
+resolution tests
+
+shadowing/scoping tests
+
+module loading tests
+
+environment trace tests
+
+Demo milestone
+Post-MVP Demo 2: real program structure
+
+multi-function script
+
+namespace browser in web UI
+
+step across calls and scopes
+
+Significance
+This transitions MLPL from toy interpreter to language platform.
+
+Saga 10 — Function system expansion
+Goal
+Improve expressiveness.
+
+Features
+user-defined functions
+
+lambdas or concise function forms
+
+optional composition features
+
+better call trace visualization
+
+TDD focus
+function definition/call tests
+
+higher-order cases if included
+
+closure/scope tests if included
+
+Demo milestone
+Post-MVP Demo 3: reusable abstractions
+
+define helper functions
+
+apply across tensors
+
+visualize call stack and value flow
+
+Saga 11 — ML primitives v1
+Goal
+Make MLPL genuinely useful for simple ML demos.
+
+Features
+matrix multiply
+
+bias add
+
+activation functions
+
+simple loss functions
+
+parameter blocks
+
+model state visual summaries
+
+TDD focus
+numeric correctness tests
+
+shape compatibility tests
+
+layer composition tests
+
+demo scenario tests
+
+Demo milestone
+Post-MVP Demo 4: tiny neural net forward pass
+
+define a small model
+
+run inputs through it
+
+visualize weights, activations, outputs
+
+Significance
+This is the first “MLPL really means MLPL” milestone.
+
+Saga 12 — Training loop and gradients strategy
+Goal
+Support learning experiments.
+
+Options
+There are two reasonable approaches:
+
+Option A: manual/explicit gradients first
+Pros:
+
+simpler
+
+more teachable
+
+easier to visualize
+
+Option B: limited autodiff later
+Pros:
+
+more powerful
+
+closer to real ML usage
+
+Recommendation
+Do manual gradients or limited differentiable kernels first.
+This keeps the teaching story much cleaner.
+
+Features
+tiny training loop
+
+parameter update step
+
+gradient/state visualization
+
+traceable optimizer steps
+
+Demo milestone
+Post-MVP Demo 5: train a tiny model
+
+linear regression or tiny MLP
+
+watch loss curve
+
+inspect weight updates visually
+
+Saga 13 — ML backend adapters
+Goal
+Connect MLPL to Rust ML frameworks without making them mandatory.
+
+Features
+adapter interface
+
+optional Burn backend
+
+optional Candle backend
+
+maybe dfdx experiments
+
+backend capability reporting
+
+TDD focus
+adapter contract tests
+
+consistency tests between native and backend results
+
+fixture comparisons
+
+Demo milestone
+Post-MVP Demo 6: native vs backend execution
+
+run same model two ways
+
+compare results and visualizations
+
+Saga 14 — Experiment lab
+Goal
+Create a real exploratory environment.
+
+Features
+browser “lab” UI
+
+side-by-side source / trace / tensor views
+
+demo gallery
+
+simple plotting
+
+model/layer explorer
+
+experiment saved sessions
+
+Demo milestone
+Post-MVP Demo 7: MLPL Lab
+
+run curated demos
+
+inspect layers and tensors
+
+compare traces across experiments
+
+Saga 15 — Research prototypes
+Goal
+Use MLPL as an experimentation platform for your research interests.
+
+Candidate topics
+Engram-inspired memory experiments
+
+mHC-inspired constraint experiments
+
+RLM-inspired recursive/runtime orchestration experiments
+
+explicit external-memory visualizations
+
+layer/state evolution tooling
+
+Demo milestone
+Post-MVP Demo 8: paper-inspired prototype
+
+implement one small research-flavored idea
+
+visualize core mechanism
+
+blog/video around it
+
+Demonstrable milestone ladder
+Here is the milestone ladder in compressed form.
+
+Milestone 0
+Workspace + docs + CI
+
+Milestone 1
+Dense tensor substrate
+
+Milestone 2
+First parser/evaluator
+
+Milestone 3
+CLI + REPL
+
+Milestone 4
+Structured trace
+
+Milestone 5
+Web trace viewer
+
+Milestone 6
+Broadcasting + reductions
+
+Milestone 7
+Rank/cell semantics
+
+This is the MVP
+Milestone 8
+Boxed/nested arrays
+
+Milestone 9
+Namespaces/modules
+
+Milestone 10
+Function system expansion
+
+Milestone 11
+ML forward-pass primitives
+
+Milestone 12
+Tiny training loops
+
+Milestone 13
+Rust ML backend adapters
+
+Milestone 14
+Experiment lab UI
+
+Milestone 15
+Research/paper prototypes
+
+Suggested implementation order by crate
+This is the practical order I recommend.
+
+Wave 1
+mlpl-core
+
+mlpl-array
+
+mlpl-parser
+
+mlpl-runtime
+
+mlpl-eval
+
+mlpl-cli
+
+Wave 2
+mlpl-trace
+
+mlpl-viz
+
+apps/mlpl-repl
+
+mlpl-wasm
+
+apps/mlpl-web
+
+Wave 3
+richer mlpl-eval semantics
+
+boxed/nested support in mlpl-runtime
+
+namespaces
+
+functions
+
+module loading
+
+Wave 4
+mlpl-ml
+
+experiment demos
+
+apps/mlpl-lab
+
+Wave 5
+mlpl-lsp
+
+advanced editor/debug tooling
+
+research prototype infrastructure
+
+Suggested AI-agent decomposition
+You mentioned using an AI coordinator and multiple coding agents. This project fits that very well.
+
+Good agent lanes
+Lane A — language front end
+lexer
+
+parser
+
+AST
+
+parse diagnostics
+
+Lane B — tensor substrate
+shapes
+
+indexing
+
+storage/layout
+
+broadcasting checks
+
+Lane C — evaluator
+primitive semantics
+
+rank/cell execution
+
+function call behavior
+
+Lane D — trace/visual contracts
+trace schema
+
+projection schema
+
+timeline semantics
+
+Lane E — CLI/apps
+command parsing
+
+REPL shell
+
+file execution
+
+UX polish
+
+Lane F — web UI
+Yew components
+
+trace viewer
+
+array grid/tree views
+
+interaction model
+
+Lane G — ML experiments
+primitive ML ops
+
+training demos
+
+backend adapters later
+
+Each lane can work largely independently if the contracts are written first.
+
+Suggested TDD rhythm for each milestone
+For each saga step, use this loop:
+
+Step 1
+Write acceptance demo scenarios first.
+
+Step 2
+Write unit tests for smallest core behavior.
+
+Step 3
+Write golden outputs for CLI or trace formats.
+
+Step 4
+Implement minimal passing code.
+
+Step 5
+Refactor toward clearer module boundaries.
+
+Step 6
+Record a tiny demo and update milestone docs.
+
+That last step matters.
+A milestone is stronger when it leaves behind:
+
+code
+
+tests
+
+docs
+
+demo artifact
+
+Suggested initial docs set
+Inside docs/, I recommend starting with:
+
+docs/
+  prd.md
+  architecture.md
+  design-array.md
+  design-runtime.md
+  design-parser.md
+  design-trace.md
+  design-web-ui.md
+  design-ml.md
+  roadmap.md
+  milestone-mvp.md
+  saga.md
+  testing-strategy.md
+  coding-standards.md
+And inside demos/:
+
+demos/
+  000-array-basics
+  010-reshape-transpose
+  020-broadcasting
+  030-reductions
+  040-rank-cells
+  100-boxed-values
+  110-namespaces
+  200-ml-forward
+  210-ml-train
+Recommended MVP statement
+Here is the crisp MVP definition I would use in the repo.
+
+MLPL MVP is a Rust-first tensor/array language with a CLI and a browser-based visual trace viewer. It supports dense arrays, basic tensor operations, broadcasting, reductions, and rank/cell semantics, and can explain execution step-by-step visually.
+
+That is specific, demonstrable, and strong.
+
+Final recommendation
+The best path is:
+
+build tensor-first
+
+make traceability a first-class feature
+
+reach rank/cell semantics by MVP
+
+add APL2-style boxed/nested arrays after MVP
+
+then build upward into ML experiments and research prototypes
+
+This sequencing gives you:
+
+a clean teaching narrative
+
+a realistic agent-orchestration project
+
+meaningful demos at every stage
+
+a strong eventual platform for ML research experiments in Rust
+
+If you want, next I can turn this directly into:
+1. a concrete docs/prd.md, docs/architecture.md, docs/saga.md set, or
+2. a proposed Cargo workspace tree with per-crate responsibilities and first issue backlog.
+
+
+proceed, but also consider: each agent can get overloaded with info/context while it is trying to implement a small incremental part.  How can we compartmentalize such that each agent only sees the contract it is expected to test/implement.  Is there a way to structure the mono-repo so that each agent starts in a subdirectory with very limited context (additional info from other dirs only provided if and when needed.
+
+Yes. The right way to handle this is to design the monorepo not just for code reuse, but for context isolation.
+
+Your added requirement changes the implementation plan in an important way:
+
+the repo should support small, contract-first work packets
+
+most agents should begin inside a single subdirectory
+
+they should see only:
+
+their local crate
+
+a tiny contract crate or spec file
+
+a few acceptance tests
+
+cross-crate details should be pulled in only on demand
+
+That argues for a cellular monorepo rather than a “big shared workspace with everybody reading everything” design.
+
+Revised design goals
+We now want the monorepo to optimize for all of these:
+
+Product goals
+MLPL language/runtime/UI/ML platform
+
+Engineering goals
+TDD
+
+demonstrable milestones
+
+clean crate boundaries
+
+Agent-orchestration goals
+strict compartmentalization
+
+local contracts
+
+minimal starting context
+
+explicit dependency promotion when needed
+
+limited file footprint per task
+
+Core idea: a cellular monorepo
+Instead of treating the monorepo as one giant codebase, treat it as a collection of cells.
+
+Each cell should have:
+
+its own README.md
+
+its own AGENTS.md or WORK_CONTRACT.md
+
+its own tests
+
+its own public contract
+
+as few dependencies as possible
+
+no need to inspect unrelated directories
+
+The coordinator sees the big picture.
+Most coding agents see only one cell.
+
+Recommended monorepo structure
+Here is the revised top-level structure I recommend.
+
+mlpl/
+  README.md
+  AGENTS.md
+  Cargo.toml
+  Cargo.lock
+  justfile
+  docs/
+    prd.md
+    architecture.md
+    saga.md
+    repo-structure.md
+    agent-coordination.md
+    milestone-mvp.md
+  contracts/
+    array-contract/
+    parser-contract/
+    runtime-contract/
+    eval-contract/
+    trace-contract/
+    viz-contract/
+    ml-contract/
+  crates/
+    mlpl-core/
+    mlpl-array/
+    mlpl-parser/
+    mlpl-runtime/
+    mlpl-eval/
+    mlpl-trace/
+    mlpl-viz/
+    mlpl-wasm/
+    mlpl-ml/
+    mlpl-cli/
+  apps/
+    mlpl-repl/
+    mlpl-web/
+    mlpl-lab/
+  demos/
+  examples/
+  scripts/
+  tools/
+The new element here is the contracts/ directory.
+
+That is the main mechanism for keeping agent context small.
+
+How the compartmentalization works
+Principle 1: agents implement against contracts, not the whole repo
+For example:
+
+mlpl-array agents should mostly read:
+
+contracts/array-contract/
+
+crates/mlpl-array/
+
+mlpl-parser agents should mostly read:
+
+contracts/parser-contract/
+
+crates/mlpl-parser/
+
+mlpl-trace agents should mostly read:
+
+contracts/trace-contract/
+
+crates/mlpl-trace/
+
+This reduces context dramatically.
+
+Principle 2: contracts are tiny and human-written
+Each contract package should contain only:
+
+a short purpose statement
+
+public types/interfaces
+
+invariants
+
+examples
+
+acceptance tests or fixtures
+
+dependency assumptions
+
+It should not contain long architectural essays.
+
+Think of each contract as a mini RFC plus executable tests.
+
+Principle 3: one-way dependency flow
+To keep context minimal, dependencies should mostly flow one direction:
+
+core
+  ↓
+array
+  ↓
+runtime
+  ↓
+eval
+  ↓
+trace
+  ↓
+viz / wasm / apps
+And:
+
+array + runtime + eval
+  ↓
+ml
+Avoid cycles.
+Avoid “everyone imports everyone.”
+
+That way each agent can understand its local upstream contracts without having to understand downstream consumers.
+
+Recommended crate dependency graph
+This is the dependency graph I recommend.
+
+Lowest-level crates
+mlpl-core
+No dependencies on MLPL crates.
+
+mlpl-array
+Depends on:
+
+mlpl-core
+
+mlpl-parser
+Depends on:
+
+mlpl-core
+
+These three are foundational and should stay small.
+
+Mid-level crates
+mlpl-runtime
+Depends on:
+
+mlpl-core
+
+mlpl-array
+
+mlpl-eval
+Depends on:
+
+mlpl-core
+
+mlpl-array
+
+mlpl-parser
+
+mlpl-runtime
+
+mlpl-trace
+Depends on:
+
+mlpl-core
+
+maybe mlpl-array summaries only
+
+maybe mlpl-runtime summary adapters only
+
+Important: mlpl-trace should not own the evaluator. It should define trace models and event contracts.
+
+Upper-level crates
+mlpl-viz
+Depends on:
+
+mlpl-core
+
+mlpl-trace
+
+possibly summary-level adapters from runtime, not full evaluator
+
+mlpl-wasm
+Depends on:
+
+mlpl-eval
+
+mlpl-trace
+
+mlpl-viz
+
+mlpl-cli
+Depends on:
+
+mlpl-parser
+
+mlpl-eval
+
+mlpl-trace
+
+mlpl-ml
+Depends on:
+
+mlpl-array
+
+mlpl-runtime
+
+optionally mlpl-eval
+
+later optional external backends
+
+Recommended directory-local control files
+To support agents with minimal context, each major directory should have a local control file.
+
+At repo root
+AGENTS.md
+This is for the coordinator and human owner.
+It defines:
+
+overall mission
+
+dependency graph
+
+coding rules
+
+escalation rules
+
+how an agent asks for more context
+
+when an agent must stop and hand off
+
+Most implementation agents should not need to read much beyond the first page.
+
+In each crate
+crates/mlpl-array/AGENTS.md
+Example contents:
+
+crate purpose
+
+what this crate is allowed to know
+
+what it must not import
+
+public API summary
+
+local testing commands
+
+local invariants
+
+current milestone scope
+
+This is the primary context for the agent assigned there.
+
+In each contract package
+contracts/array-contract/README.md
+Contains:
+
+public contract
+
+examples
+
+boundary cases
+
+expected error behavior
+
+This is even smaller than a crate-level AGENTS.md.
+
+Recommended contract package design
+Each contract directory should look like this:
+
+contracts/array-contract/
+  README.md
+  API.md
+  INVARIANTS.md
+  EXAMPLES.md
+  fixtures/
+  tests/
+For some contracts, API.md and INVARIANTS.md can be merged.
+
+Example: contracts/array-contract/README.md
+It should contain only things like:
+
+shape model
+
+indexing semantics
+
+reshape rules
+
+transpose rules
+
+errors
+
+no language syntax
+
+no web UI details
+
+no ML backend discussion
+
+That keeps the array agent focused.
+
+Example: contracts/trace-contract/README.md
+It should contain only:
+
+what an event is
+
+required fields
+
+ordering guarantees
+
+value-summary contract
+
+stable serialization requirements
+
+fixture examples
+
+The trace agent should not need parser internals or web rendering internals.
+
+Strong recommendation: use public test crates for contracts
+This is one of the best techniques for context isolation.
+
+Instead of relying only on prose docs, create contract test crates that depend on the implementation crate.
+
+Example:
+
+contracts/array-contract/tests/
+  shape_contract.rs
+  reshape_contract.rs
+  transpose_contract.rs
+These tests encode the contract.
+The implementation agent works until those tests pass.
+
+This gives you:
+
+unambiguous scope
+
+TDD support
+
+reduced need for narrative context
+
+reusable acceptance criteria
+
+How to keep agents from wandering the repo
+There are several practical tactics.
+
+1. Start each agent in a subdirectory
+When possible, initialize an agent in:
+
+crates/mlpl-array/
+
+or contracts/array-contract/
+
+not at repo root.
+
+That alone reduces accidental context acquisition.
+
+2. Give each agent a local task packet
+Each packet should include only:
+
+task statement
+
+allowed directories
+
+required tests
+
+prohibited dependencies
+
+escalation triggers
+
+Example:
+
+Task: Implement reshape validation for mlpl-array.
+Allowed dirs:
+  - crates/mlpl-array
+  - contracts/array-contract
+Do not inspect:
+  - crates/mlpl-eval
+  - apps/*
+Success:
+  - reshape_contract.rs passes
+  - no API changes outside mlpl-array
+Escalate if:
+  - contract seems inconsistent
+  - new error type required in mlpl-core
+This is much better than dumping architecture docs into every task.
+
+3. Make “upstream only” the default read rule
+An agent may read:
+
+its own crate
+
+contract crate
+
+direct upstream crates only if necessary
+
+An agent may not read:
+
+downstream UI
+
+unrelated demos
+
+future milestones
+
+blog/docs unless specifically needed
+
+That keeps mental load low.
+
+4. Prefer narrow facade crates and summary types
+For example, mlpl-trace should receive value summaries, not whole runtime internals.
+
+Bad:
+
+trace agent must understand full Value internals
+
+Better:
+
+runtime exposes ValueSummary
+
+trace consumes ValueSummary
+
+This reduces coupling and context size.
+
+Recommended crate API style for low-context agents
+To make this work, APIs need to be intentionally narrow.
+
+Prefer:
+small structs
+
+small enums
+
+pure functions
+
+no deep hidden side effects
+
+explicit error types
+
+explicit conversion/adaptation layers
+
+Avoid:
+giant “god” modules
+
+big prelude exports
+
+deep macro magic early
+
+broad trait hierarchies too soon
+
+runtime globals
+
+Those increase the amount of context an agent must hold.
+
+Recommended “capsule” design per crate
+Each crate should behave like a capsule.
+
+Each capsule should have:
+1. README.md
+One-screen overview.
+
+2. AGENTS.md
+Tasking and local rules.
+
+3. src/lib.rs
+Exports only the public API, with minimal surface.
+
+4. src/
+Small modules only.
+
+5. tests/
+Local tests.
+
+6. examples/
+Tiny examples.
+
+7. CHANGELOG.md or MILESTONE.md
+Local progress.
+
+That way an agent can operate inside a capsule without browsing the world.
+
+Suggested capsule layout example
+crates/mlpl-array/
+crates/mlpl-array/
+  README.md
+  AGENTS.md
+  MILESTONE.md
+  Cargo.toml
+  src/
+    lib.rs
+    shape.rs
+    index.rs
+    layout.rs
+    reshape.rs
+    transpose.rs
+    error.rs
+  tests/
+    shape_tests.rs
+    reshape_tests.rs
+    transpose_tests.rs
+  examples/
+    basics.rs
+An agent here should not need to read parser or eval code.
+
+Repo layout revised for agent isolation
+Here is the fuller version I recommend.
+
+mlpl/
+  README.md
+  AGENTS.md
+  Cargo.toml
+  justfile
+
+  docs/
+    prd.md
+    architecture.md
+    saga.md
+    agent-coordination.md
+    repo-structure.md
+
+  contracts/
+    core-contract/
+      README.md
+      tests/
+    array-contract/
+      README.md
+      tests/
+    parser-contract/
+      README.md
+      tests/
+    runtime-contract/
+      README.md
+      tests/
+    eval-contract/
+      README.md
+      tests/
+    trace-contract/
+      README.md
+      tests/
+    viz-contract/
+      README.md
+      tests/
+    ml-contract/
+      README.md
+      tests/
+
+  crates/
+    mlpl-core/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-array/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-parser/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-runtime/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-eval/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-trace/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-viz/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-wasm/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-ml/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+    mlpl-cli/
+      README.md
+      AGENTS.md
+      MILESTONE.md
+
+  apps/
+    mlpl-repl/
+      README.md
+      AGENTS.md
+    mlpl-web/
+      README.md
+      AGENTS.md
+    mlpl-lab/
+      README.md
+      AGENTS.md
+
+  demos/
+  examples/
+  scripts/
+  tools/
+Revised PRD addition: agent compartmentalization requirement
+Add this as an explicit requirement.
+
+New nonfunctional requirement
+Agent context containment
+The repository must support development by multiple AI coding agents, where each agent can operate with minimal context and limited visibility into the rest of the codebase.
+
+Success criteria
+Most tasks can be completed using one crate directory plus one contract directory.
+
+Most implementation prompts can fit on one screen.
+
+Most agents should not need repo-root architecture docs.
+
+Cross-crate dependencies should be explicit and narrow.
+
+Escalation to broader context should be rare and intentional.
+
+That should be in the PRD.
+
+Revised saga: add a pre-foundation step for contracts and isolation
+Before the earlier Saga 0, I would add a new step.
+
+Saga -1 — Repo compartmentalization scaffolding
+Goal
+Create the repository structure for low-context agent work before meaningful implementation begins.
+
+Deliverables
+top-level AGENTS.md
+
+per-crate AGENTS.md templates
+
+contracts/ directory with initial contract stubs
+
+dependency policy document
+
+local task packet templates
+
+“allowed dirs / prohibited dirs” conventions
+
+workspace linting that discourages forbidden dependencies
+
+Demo milestone
+Demo -1: agent-ready monorepo scaffold
+
+show one agent task packet
+
+show one crate capsule
+
+show one contract test crate
+
+show local-only test command
+
+This is worth doing first.
+
+Recommended policy for information escalation
+You asked whether additional info can be provided only if and when needed.
+
+Yes. You should make that explicit.
+
+Standard escalation ladder
+Level 0 — local only
+Agent gets:
+
+current crate
+
+local contract
+
+local tests
+
+local milestone note
+
+Level 1 — direct upstream contract
+If blocked, agent may read:
+
+contract of direct upstream crate
+
+public API of upstream crate
+
+Level 2 — coordinator summary
+If still blocked, coordinator provides:
+
+small textual summary of needed external constraint
+
+not whole files
+
+Level 3 — selective file reveal
+Only if necessary:
+
+one or two exact files outside local scope
+
+Level 4 — design review / human decision
+If contract mismatch or architecture conflict exists
+
+This keeps context creep under control.
+
+Strong recommendation: define “what not to know”
+This is underused, but very effective.
+
+Each crate AGENTS.md should explicitly say:
+
+Example for mlpl-array
+This crate does not need to know:
+
+parser syntax
+
+evaluator rules
+
+trace serialization
+
+Yew UI structure
+
+ML backend adapters
+
+That keeps agents from inventing unnecessary coupling.
+
+Suggested top-level AGENTS.md structure
+Here is the content outline I recommend.
+
+AGENTS.md
+1. Mission
+What MLPL is.
+
+2. Dependency graph
+Short, visual.
+
+3. Context rules
+start local
+
+read only allowed dirs
+
+escalate intentionally
+
+4. Task packet format
+Template for work requests.
+
+5. Contract-first rule
+Implement to contract tests before broadening scope.
+
+6. Forbidden behavior
+do not refactor unrelated crates
+
+do not widen APIs without approval
+
+do not import downstream crates
+
+do not browse the repo unless needed
+
+7. Escalation procedure
+How to request more context.
+
+Suggested task packet template
+Use something like this for every agent.
+
+Task packet
+Task ID: ARRAY-RESHAPE-001
+Milestone: Saga 1 / Dense tensor substrate
+Goal: Implement reshape validation and reshape operation.
+
+Allowed directories
+
+crates/mlpl-array/
+
+contracts/array-contract/
+
+Primary files
+
+contracts/array-contract/README.md
+
+contracts/array-contract/tests/reshape_contract.rs
+
+crates/mlpl-array/src/reshape.rs
+
+Do not read unless escalated
+
+crates/mlpl-eval/
+
+apps/
+
+docs/architecture.md
+
+Definition of done
+
+contract tests pass
+
+no changes outside allowed dirs
+
+public API documented in local README
+
+Escalate if
+
+new core error type needed
+
+contract ambiguity discovered
+
+shape model insufficient
+
+This is exactly the kind of compact prompt that keeps agents effective.
+
+Suggested milestone structure with context containment
+Each milestone should be decomposed into capsule-sized tasks.
+
+For example, Saga 1 can become:
+
+Saga 1 tasks
+ARRAY-SHAPE-001
+
+ARRAY-INDEX-001
+
+ARRAY-RESHAPE-001
+
+ARRAY-TRANSPOSE-001
+
+ARRAY-DISPLAY-001
+
+Each one only touches:
+
+mlpl-array
+
+array-contract
+
+Likewise Saga 2 becomes:
+
+PARSER-LEX-001
+
+PARSER-AST-001
+
+PARSER-LITERAL-001
+
+EVAL-ARITH-001
+
+EVAL-ARRAY-LIT-001
+
+Again, small capsules.
+
+Recommended tooling to reinforce compartmentalization
+1. Cargo workspace with local test commands
+Support commands like:
+
+cargo test -p mlpl-array
+cargo test -p array-contract
+or a helper:
+
+just test-array
+just test-parser
+This encourages local-only work.
+
+2. Dependency linting
+Use tools or CI rules to catch forbidden cross-crate imports.
+
+Examples:
+
+deny certain dependency edges
+
+forbid app crates from being imported into library crates
+
+keep mlpl-array independent from parser/eval
+
+3. Local fixture ownership
+Each contract owns its own fixtures.
+Avoid giant shared fixture directories unless necessary.
+
+4. Stable summary adapters
+Use summary types to decouple crates:
+
+ValueSummary
+
+ArraySummary
+
+TraceEventSummary
+
+This reduces the need to inspect internal representations.
+
+My final recommendation
+Yes, you should absolutely structure the monorepo so that each agent starts in a subdirectory with very limited context.
+
+The best way to do that is:
+1. Use a cellular monorepo
+Small crate capsules with local docs and tests.
+
+2. Add a contracts/ layer
+Each implementation crate works against a tiny local contract package.
+
+3. Enforce a one-way dependency graph
+Upstream-only visibility by default.
+
+4. Give agents task packets
+Allowed dirs, prohibited dirs, done criteria, escalation rules.
+
+5. Require context escalation in stages
+Local first, then upstream contract, then coordinator summary, then selective reveal.
+
+6. Make trace, viz, and ML consume summaries
+Not full internals, unless absolutely needed.
+
+Best practical shape for MLPL
+If I compress everything into one sentence:
+
+Build MLPL as a contract-first cellular monorepo where each crate is a small capsule, each capsule has its own local agent instructions, and most work is done against tiny contract test suites without browsing the full repository.
+
+That will help both your human workflow and your AI-agent dogfooding goals.
+
+Next, I can draft the actual initial contents for:
+
+docs/prd.md
+
+docs/architecture.md
+
+docs/saga.md
+
+root AGENTS.md
+
+one sample crate AGENTS.md
+
+one sample contract README and test plan
+
+
+should each agent work in a branch named after it and the feature, use pull requests, and/or use git-worktrees?  what is a simple reliable way to reduce friction and interference between agents.  Another agent can deal with merge conflicts, which should be rare.
+
+Yes. For your use case, I would use all three, but with very different roles:
+
+git worktrees for isolation and low friction
+
+branches for ownership and review boundaries
+
+pull requests as the integration contract
+
+The simple reliable default is:
+
+Recommended baseline
+One agent = one worktree + one branch + one small PR
+That gives you the best balance of:
+
+isolation
+
+reproducibility
+
+low interference
+
+easy cleanup
+
+clear ownership
+
+Short answer up front
+For a coordinator with multiple coding agents working on a monorepo, the cleanest low-friction setup is:
+
+Use this workflow
+Create a dedicated branch per agent task
+
+Check that branch out into a dedicated git worktree
+
+Let the agent work only inside its assigned subdirectory/capsule
+
+Require the agent to produce a small PR
+
+Have a separate integration/merge agent or coordinator handle rebases, conflict resolution, and final merge
+
+That is the simplest reliable model I’d recommend.
+
+Why this is better than the alternatives
+Option A: branches only, one shared working tree
+This is too fragile.
+
+Problems
+agents can stomp on each other’s working directory state
+
+switching branches is annoying and error-prone
+
+easy to lose track of uncommitted changes
+
+high friction for parallel work
+
+Verdict
+Not recommended for multi-agent parallel work.
+
+Option B: worktrees without disciplined branch naming
+Better, but still messy.
+
+Problems
+isolation is good, but ownership becomes unclear
+
+hard to know which worktree corresponds to which task
+
+difficult to audit later
+
+Verdict
+Useful, but incomplete.
+
+Option C: long-lived agent branches with direct merges to main
+This increases drift and integration pain.
+
+Problems
+long-lived branches accumulate conflicts
+
+agents may unknowingly diverge from current contracts
+
+integration becomes harder, not easier
+
+Verdict
+Avoid long-lived feature branches unless they are intentionally reserved for major epics.
+
+Option D: short-lived task branches in dedicated worktrees, merged via PR
+This is the sweet spot.
+
+Benefits
+each agent has filesystem isolation
+
+branch ownership is explicit
+
+PR is the review/integration boundary
+
+conflicts are localized
+
+cleanup is easy
+
+Verdict
+Recommended.
+
+Recommended repo workflow architecture
+Given your “cellular monorepo” idea, I’d structure the git workflow around task-sized slices, not around people or large epics.
+
+Branch naming
+Use branch names based on:
+
+milestone/saga
+
+capsule/crate
+
+task ID
+
+optional agent label
+
+Suggested format
+feat/<area>/<task-id>-<short-name>
+fix/<area>/<task-id>-<short-name>
+spike/<area>/<task-id>-<short-name>
+Examples:
+
+feat/array/array-reshape-001
+feat/parser/parser-lex-001
+feat/trace/trace-event-001
+fix/eval/eval-broadcast-002
+spike/ml/ml-backend-burn-001
+If you want agent identity in the branch name, append it at the end, not the beginning:
+
+feat/array/array-reshape-001-agent-a
+That keeps branches grouped by feature area rather than by agent.
+
+Should the branch be named after the agent?
+My recommendation
+No, not primarily.
+Name it after the task, with optional agent suffix.
+
+Why
+Agents are transient. Tasks are durable.
+
+You will care later about:
+
+what feature the branch implemented
+
+what contract it touched
+
+what milestone it belonged to
+
+You will care less about:
+
+whether “agent-3” or “agent-blue” wrote it
+
+So prefer:
+
+feat/array/array-reshape-001-agent-blue
+over:
+
+agent-blue/reshape
+Should each agent get a worktree?
+Yes
+For your scenario, worktrees are the cleanest operational isolation mechanism.
+
+Why worktrees help
+Each agent gets:
+
+its own directory
+
+its own checked-out branch
+
+its own build artifacts if you configure target dirs locally
+
+no branch-switching friction
+
+no accidental overwrites of another agent’s working directory
+
+Example layout
+~/dev/mlpl-main
+~/dev/mlpl-wt-array-reshape-001
+~/dev/mlpl-wt-parser-lex-001
+~/dev/mlpl-wt-trace-event-001
+That is much better than trying to multiplex agents in one checkout.
+
+Should you use pull requests?
+Yes, absolutely
+PRs should be the integration boundary, even if the reviewer is another agent.
+
+Why PRs matter
+They provide:
+
+a natural review point
+
+a visible diff
+
+a place to attach task/contract metadata
+
+CI gatekeeping
+
+a clean handoff to a merge/conflict-resolution agent
+
+For your use case, a PR is less about human social workflow and more about state transition control.
+
+Think of it as:
+
+implementation done → validated artifact ready for integration
+
+Best simple reliable setup
+If you want the minimum-friction reliable process, use this:
+
+Core rule
+Task branch + dedicated worktree + small PR
+That’s it.
+
+Then add these constraints:
+
+Constraints
+one task per branch
+
+one branch per worktree
+
+one PR per task
+
+keep PRs small
+
+merge quickly
+
+delete branch and remove worktree after merge
+
+That will keep conflicts rare.
+
+Recommended operational model
+1. Coordinator owns main
+Only the coordinator or merge agent integrates into main.
+
+2. Each coding agent gets a task packet
+The packet includes:
+
+task ID
+
+allowed directories
+
+contract files
+
+target branch name
+
+target worktree path
+
+3. Agent works in isolated worktree
+No branch switching. No cross-task editing.
+
+4. Agent opens PR when local tests pass
+PR should reference:
+
+task ID
+
+contract
+
+milestone
+
+allowed dirs
+
+5. Integration agent handles:
+rebasing
+
+conflict resolution
+
+merge
+
+branch/worktree cleanup
+
+This is very close to the simplest stable system.
+
+Recommended branch / PR / worktree conventions
+Branch naming
+Use:
+
+feat/<area>/<task-id>-<slug>
+fix/<area>/<task-id>-<slug>
+docs/<area>/<task-id>-<slug>
+Examples:
+
+feat/array/array-shape-001-shape-type
+feat/array/array-reshape-002-reshape-op
+feat/parser/parser-lex-001-basic-lexer
+feat/eval/eval-arith-001-scalar-arith
+feat/trace/trace-event-001-core-events
+Worktree naming
+Mirror the branch, but filesystem-friendly:
+
+wt-array-shape-001
+wt-array-reshape-002
+wt-parser-lex-001
+wt-trace-event-001
+Or place them under a dedicated folder:
+
+../mlpl-worktrees/array-shape-001
+../mlpl-worktrees/parser-lex-001
+PR title format
+[array] ARRAY-SHAPE-001: add Shape type and invariants
+[parser] PARSER-LEX-001: implement numeric/token lexer
+[trace] TRACE-EVENT-001: add core trace event model
+This makes browsing and automation easier.
+
+How to reduce friction and interference
+You asked for a simple reliable way to reduce friction and interference.
+
+Here is the lowest-friction recipe I recommend.
+
+Friction-reduction recipe
+Rule 1: Keep tasks narrow
+Each branch should touch:
+
+one crate
+
+one contract
+
+maybe one shared core file only if explicitly allowed
+
+Avoid multi-crate tasks early.
+
+Rule 2: Prefer upstream-first sequencing
+Have agents work in this order:
+
+core
+
+array/parser
+
+runtime
+
+eval
+
+trace
+
+viz/web
+
+ml
+
+That reduces “everybody blocked on everything.”
+
+Rule 3: Use tiny PRs
+Small PRs merge faster and conflict less.
+
+Ideal size:
+
+1 focused change
+
+1 contract
+
+1 acceptance test set
+
+Avoid “week-long mega branches.”
+
+Rule 4: Merge early, rebase rarely
+Do not let branches age.
+
+Preferred flow:
+
+open task
+
+implement
+
+run tests
+
+PR
+
+integrate quickly
+
+Short branch lifetime is one of the strongest conflict reducers.
+
+Rule 5: One merge agent handles conflicts
+You already suggested this. I agree.
+
+That agent should:
+
+rebase or merge from main
+
+resolve conflicts
+
+run integration tests
+
+push updated branch
+
+merge PR
+
+remove worktree and branch
+
+This keeps coding agents focused on implementation.
+
+Rule 6: Separate build output per worktree when practical
+This avoids odd interference and makes cleanup easier.
+
+For example, use a local target dir:
+
+CARGO_TARGET_DIR=target-local
+or per-worktree target dirs if needed.
+
+This is especially helpful if many agents build in parallel.
+
+Rule 7: Forbid unrelated edits
+Each task packet should explicitly say:
+
+allowed dirs
+
+forbidden dirs
+
+whether shared files may be touched
+
+This matters more than git itself for reducing interference.
+
+Suggested integration model
+Here’s a practical model that matches your needs.
+
+Roles
+1. Coordinator
+chooses task order
+
+creates task packets
+
+creates worktrees/branches
+
+assigns agents
+
+2. Coding agent
+works only in assigned worktree
+
+implements contract
+
+opens PR
+
+3. Merge/integration agent
+rebases/merges branch
+
+resolves conflicts
+
+runs cross-crate tests
+
+merges PR
+
+deletes branch
+
+removes worktree
+
+This is clean and scalable.
+
+Suggested commands / workflow example
+Create a task branch and worktree
+From repo root:
+
+git fetch origin
+git checkout main
+git pull --ff-only
+
+git worktree add ../mlpl-worktrees/array-reshape-001 -b feat/array/array-reshape-001 origin/main
+Then the agent works inside:
+
+../mlpl-worktrees/array-reshape-001
+When done:
+
+git status
+cargo test -p mlpl-array
+git add ...
+git commit -m "ARRAY-RESHAPE-001: implement reshape validation and op"
+git push -u origin feat/array/array-reshape-001
+Open PR.
+
+After merge:
+
+git worktree remove ../mlpl-worktrees/array-reshape-001
+git branch -d feat/array/array-reshape-001
+git push origin --delete feat/array/array-reshape-001
+That is low-friction and repeatable.
+
+Should you use merge commits, squash, or rebase?
+For your workflow, I recommend:
+
+PR merge style
+Squash merge for most task branches
+Why squash helps
+keeps history cleaner
+
+one task = one logical commit on main
+
+reduces noise from agent intermediate commits
+
+easier to bisect milestone-level changes later
+
+Use commit message format tied to task ID:
+
+ARRAY-RESHAPE-001: implement reshape validation and op
+Exception
+Use normal merge only if preserving branch commit history is important for a larger epic.
+
+But for most agent tasks:
+squash merge is best.
+
+Should you allow stacked branches?
+Early on: no
+Stacked branches create extra dependency complexity and more context burden.
+
+Prefer:
+
+merge prerequisite task
+
+then spawn downstream task from updated main
+
+Later, if the system is mature, you can allow stack-based development for larger epics, but not at the beginning.
+
+Recommended simplest reliable policy
+If I had to boil it down to one operational policy for MLPL, it would be this:
+
+Policy
+Every task:
+starts from current main
+
+gets a dedicated short-lived branch
+
+gets a dedicated worktree
+
+stays inside allowed directories
+
+ends in a small PR
+
+is squash-merged by an integration agent
+
+That is the simplest reliable system I know for reducing friction and interference.
+
+What should be rare
+You said merge conflicts should be rare. I agree. To make that true:
+
+Make these rare
+multi-crate edits
+
+long-lived branches
+
+shared-file edits
+
+simultaneous editing of the same contract
+
+ad hoc refactors
+
+touching root workspace files unless necessary
+
+The main remaining conflict hotspots will be:
+
+workspace Cargo.toml
+
+lockfiles
+
+shared docs
+
+shared contract files
+
+root README
+
+Those should usually be handled by the coordinator or merge agent, not by every coding agent.
+
+Recommended ownership of shared files
+To reduce conflicts further, assign ownership:
+
+Coordinator / merge agent owns:
+root Cargo.toml
+
+Cargo.lock
+
+root README.md
+
+top-level docs
+
+workspace-wide CI config
+
+Crate agents own:
+their crate files
+
+their crate tests
+
+their local README/AGENTS/MILESTONE files
+
+their contract tests if assigned
+
+This is a big conflict reducer.
+
+Final recommendation
+Yes:
+
+Use
+one short-lived branch per task
+
+one dedicated git worktree per branch
+
+one small PR per task
+
+Prefer
+branch names based on feature/task, optionally with agent suffix
+
+squash merges
+
+a separate merge/integration agent
+
+strict allowed directory boundaries
+
+quick merges and cleanup
+
+Avoid
+shared working trees
+
+long-lived branches
+
+direct commits to main
+
+broad multi-crate tasks
+
+every agent touching root files
+
+That is the simplest reliable low-friction setup for your multi-agent monorepo.
+
+The next useful step is to define a concrete naming convention plus a coordinator checklist and task packet template for branch/worktree/PR creation.
+
+
+proceed
+
+You want the operational layer now: a concrete naming convention, coordinator checklist, task packet template, and a repeatable branch/worktree/PR process that keeps agents isolated and low-friction.
+
+The design target is:
+
+small, contract-first tasks
+
+isolated execution per agent
+
+rare merge conflicts
+
+fast integration
+
+clean milestone history
+
+minimal context per agent
+
+Below is the approach I recommend for MLPL.
+
+1) Recommended operational model
+Core rule
+One task = one branch = one worktree = one PR
+That is the atomic unit.
+
+Each task should ideally touch:
+
+one crate
+
+one contract directory
+
+maybe one tightly-scoped shared file only if explicitly allowed
+
+Everything else follows from that.
+
+2) Naming conventions
+The naming convention should help you answer these questions at a glance:
+
+what milestone is this for?
+
+what area/crate is touched?
+
+what exact task is this?
+
+who owns it right now?
+
+where is the worktree on disk?
+
+what PR belongs to it?
+
+2.1 Task IDs
+Use stable task IDs that are human-readable and sortable.
+
+Recommended format
+<AREA>-<TOPIC>-<NNN>
+Examples:
+
+ARRAY-SHAPE-001
+ARRAY-RESHAPE-002
+PARSER-LEX-001
+EVAL-ARITH-001
+TRACE-EVENT-001
+VIZ-TIMELINE-001
+ML-LINEAR-001
+This is better than opaque ticket numbers for a small-to-medium project.
+
+2.2 Branch names
+Recommended format
+feat/<area>/<task-id>-<slug>
+fix/<area>/<task-id>-<slug>
+docs/<area>/<task-id>-<slug>
+spike/<area>/<task-id>-<slug>
+Examples:
+
+feat/array/array-shape-001-shape-type
+feat/array/array-reshape-002-reshape-op
+feat/parser/parser-lex-001-basic-lexer
+feat/eval/eval-arith-001-scalar-arith
+feat/trace/trace-event-001-core-events
+docs/array/array-shape-003-readme-contract-sync
+Optional agent suffix
+Only add an agent suffix if you really need it:
+
+feat/array/array-reshape-002-reshape-op-agent-blue
+I would make that optional, not required.
+
+2.3 Worktree names
+Worktree names should be shorter and filesystem-friendly.
+
+Recommended format
+wt-<task-id-lower>
+Examples:
+
+wt-array-shape-001
+wt-array-reshape-002
+wt-parser-lex-001
+wt-eval-arith-001
+wt-trace-event-001
+Place them in one dedicated directory outside the main checkout:
+
+~/dev/mlpl/
+~/dev/mlpl-worktrees/wt-array-shape-001
+~/dev/mlpl-worktrees/wt-parser-lex-001
+That keeps the repo clean.
+
+2.4 PR titles
+Recommended format
+[<area>] <TASK-ID>: <short summary>
+Examples:
+
+[array] ARRAY-SHAPE-001: add Shape type and invariants
+[array] ARRAY-RESHAPE-002: implement reshape validation and operation
+[parser] PARSER-LEX-001: implement numeric and punctuation lexer
+[eval] EVAL-ARITH-001: add scalar arithmetic evaluation
+[trace] TRACE-EVENT-001: add core trace event model
+This works well in GitHub lists and commit history after squash merge.
+
+2.5 Squash merge commit messages
+Use the same pattern:
+
+ARRAY-RESHAPE-002: implement reshape validation and operation
+That gives main a clean task-oriented history.
+
+3) Suggested top-level coordinator files
+At repo root, add these:
+
+AGENTS.md
+COORDINATOR.md
+TASKS/
+  active/
+  ready/
+  done/
+WORKTREES.md
+3.1 COORDINATOR.md
+This is the runbook for spawning and integrating agent work.
+
+Suggested sections:
+
+branch naming rules
+
+worktree rules
+
+PR rules
+
+allowed directory policy
+
+escalation policy
+
+merge policy
+
+cleanup steps
+
+3.2 WORKTREES.md
+Keep a simple table like:
+
+Task ID	Branch	Worktree Path	Status	Owner	PR
+ARRAY-SHAPE-001	feat/array/array-shape-001-shape-type	../mlpl-worktrees/wt-array-shape-001	merged	agent-blue	#12
+PARSER-LEX-001	feat/parser/parser-lex-001-basic-lexer	../mlpl-worktrees/wt-parser-lex-001	active	agent-red	#14
+This can be plain markdown.
+
+3.3 TASKS/
+Use lightweight task files.
+
+Suggested layout
+TASKS/
+  ready/
+    ARRAY-SHAPE-001.md
+    PARSER-LEX-001.md
+  active/
+    ARRAY-RESHAPE-002.md
+  done/
+    ARRAY-SHAPE-001.md
+Each task file is the packet given to the agent.
+
+That makes the repo itself the source of truth.
+
+4) Coordinator checklist
+Here is the checklist I would actually use.
+
+Coordinator checklist
+A. Before creating a task
+Confirm the task is small and capsule-local
+
+Confirm a contract exists or write one
+
+Confirm success criteria are testable
+
+Confirm allowed directories are narrow
+
+Confirm task does not unnecessarily overlap another active task
+
+B. Before spawning the agent
+Pull latest main
+
+Ensure CI on main is green
+
+Create task packet in TASKS/ready/
+
+Create branch name
+
+Create worktree path
+
+Record it in WORKTREES.md
+
+C. Spawn the branch/worktree
+Create branch from current main
+
+Create dedicated worktree
+
+Place agent in that worktree
+
+Give agent only:
+
+task packet
+
+local crate AGENTS.md
+
+contract dir
+
+allowed directory list
+
+D. During implementation
+Do not broaden scope casually
+
+If blocked, escalate in levels:
+
+local
+
+upstream contract
+
+coordinator summary
+
+selective file reveal
+
+E. Before opening PR
+Run local crate tests
+
+Run local contract tests
+
+Run formatting/linting for allowed scope
+
+Confirm no forbidden directories changed
+
+Confirm task packet done criteria are met
+
+F. PR review/integration
+Check PR scope is narrow
+
+Check allowed dirs policy was followed
+
+Check tests pass in CI
+
+Rebase or merge main into branch only if needed
+
+Resolve conflicts centrally
+
+Prefer squash merge
+
+G. After merge
+Move task file to TASKS/done/
+
+Update WORKTREES.md
+
+Remove worktree
+
+Delete branch locally and remotely
+
+Record milestone status if applicable
+
+5) Task packet template
+This is the key artifact for low-context work.
+
+Recommended task packet format
+# TASK: ARRAY-RESHAPE-002
+
+## Title
+Implement reshape validation and reshape operation in `mlpl-array`.
+
+## Milestone
+Saga 1 — Dense tensor substrate v1
+
+## Goal
+Add shape-product validation and reshape support for dense arrays.
+
+## Scope
+This task is limited to reshape semantics for already-supported dense arrays.
+
+## Allowed directories
+- `contracts/array-contract/`
+- `crates/mlpl-array/`
+
+## Primary files
+- `contracts/array-contract/README.md`
+- `contracts/array-contract/tests/reshape_contract.rs`
+- `crates/mlpl-array/src/reshape.rs`
+- `crates/mlpl-array/src/error.rs`
+- `crates/mlpl-array/tests/`
+
+## Do not modify
+- `crates/mlpl-parser/`
+- `crates/mlpl-eval/`
+- `apps/`
+- root `Cargo.toml`
+- `Cargo.lock`
+
+## Required reading
+- `crates/mlpl-array/AGENTS.md`
+- `contracts/array-contract/README.md`
+
+## Contract summary
+- Reshape preserves element order
+- Reshape succeeds only when total element count matches
+- Reshape returns explicit error on incompatible target shape
+
+## Acceptance tests
+- `contracts/array-contract/tests/reshape_contract.rs`
+- local `mlpl-array` tests
+
+## Definition of done
+- contract tests pass
+- local crate tests pass
+- API documented in crate README or module docs
+- no changes outside allowed directories
+
+## Escalate if
+- new shared error type is required in `mlpl-core`
+- current shape representation is insufficient
+- contract text and tests disagree
+
+## Suggested branch
+`feat/array/array-reshape-002-reshape-op`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-array-reshape-002`
+That is enough for most agent tasks.
+
+6) Sample root AGENTS.md
+Here is the structure I recommend.
+
+AGENTS.md
+# MLPL Agent Rules
+
+## Mission
+MLPL is a Rust-first tensor and array programming language with visual debugging and ML experimentation support.
+
+## Development model
+Work is task-based and contract-first.
+
+Default rule:
+- one task
+- one branch
+- one worktree
+- one PR
+
+## Context containment
+Agents should begin with only:
+- their task packet
+- their local crate directory
+- their contract directory
+- their local crate `AGENTS.md`
+
+Do not browse the wider repo unless required by escalation.
+
+## Allowed read scope
+1. local crate
+2. local contract
+3. direct upstream public API, only if needed
+4. coordinator-provided summary
+5. selectively revealed external files
+
+## Forbidden behavior
+- do not refactor unrelated crates
+- do not edit root workspace files unless task explicitly allows it
+- do not widen public APIs casually
+- do not browse apps/UI/docs for implementation inspiration unless task requires it
+- do not solve adjacent problems “while here”
+
+## Dependency rule
+Prefer one-way dependencies:
+core → array/parser → runtime → eval → trace → viz/wasm/apps → ml
+
+## PR rule
+Open a small PR when local acceptance tests pass.
+Use task ID in branch, PR title, and final squash commit.
+
+## Escalation
+Escalate when:
+- contract is ambiguous
+- new upstream API is needed
+- forbidden file would need modification
+- local implementation reveals architecture conflict
+7) Sample crate-local AGENTS.md
+Example for crates/mlpl-array/AGENTS.md.
+
+# mlpl-array agent notes
+
+## Purpose
+`mlpl-array` defines dense array/tensor structures, shapes, indexing, layout, reshape, transpose, and related structural operations.
+
+## This crate should know
+- shapes
+- ranks
+- dimensions
+- storage layout
+- indexing
+- structural transforms
+
+## This crate should not know
+- parser syntax
+- evaluator semantics
+- trace serialization
+- Yew UI
+- ML backend adapters
+
+## Allowed dependencies
+- `mlpl-core`
+
+## Module style
+- keep modules small
+- prefer pure functions
+- keep error cases explicit
+- do not introduce broad trait abstractions unless required
+
+## Testing
+Run:
+- `cargo test -p mlpl-array`
+- contract tests for array behavior
+
+## Escalate if
+- shape or error contracts require changes in `mlpl-core`
+- an API change would affect `mlpl-runtime`
+This sharply limits context.
+
+8) Suggested Git workflow commands
+Use the same sequence every time.
+
+8.1 Create worktree for a task
+From your main checkout:
+
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+
+git worktree add ../mlpl-worktrees/wt-array-reshape-002 \
+  -b feat/array/array-reshape-002-reshape-op \
+  origin/main
+Then hand the agent the worktree path.
+
+8.2 Agent local workflow
+Inside the worktree:
+
+cargo test -p mlpl-array
+cargo test -p array-contract
+cargo fmt
+cargo clippy -p mlpl-array --all-targets -- -D warnings
+git status
+git add .
+git commit -m "ARRAY-RESHAPE-002: implement reshape validation and operation"
+git push -u origin feat/array/array-reshape-002-reshape-op
+Then open PR.
+
+8.3 Integration workflow
+Integration agent does:
+
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+
+# optional: inspect PR branch in temporary worktree
+git worktree add ../mlpl-worktrees/wt-review-array-reshape-002 origin/feat/array/array-reshape-002-reshape-op
+Run broader checks if needed, then squash merge PR.
+
+8.4 Cleanup
+After merge:
+
+git worktree remove ../mlpl-worktrees/wt-array-reshape-002
+git branch -d feat/array/array-reshape-002-reshape-op
+git push origin --delete feat/array/array-reshape-002-reshape-op
+9) Recommended merge policy
+Use squash merge by default
+Why:
+
+one task becomes one clean commit on main
+
+intermediate agent commits do not clutter history
+
+task history remains easy to browse
+
+easier to revert whole tasks if needed
+
+Exception
+Use normal merge only when you intentionally want to preserve internal branch history for a large multi-step epic.
+
+For MLPL, I would keep the default as squash.
+
+10) How to reduce conflicts even more
+Git mechanics matter, but task design matters more.
+
+Best conflict reducers
+Keep shared root files coordinator-owned
+These should usually be touched only by coordinator or merge agent:
+
+root Cargo.toml
+
+Cargo.lock
+
+top-level docs
+
+CI config
+
+workspace metadata
+
+Prefer crate-local manifests when possible
+If adding a dependency only changes a crate-local Cargo.toml, conflict risk is much lower.
+
+Avoid simultaneous contract edits
+Try not to have two agents editing the same contract directory at once.
+
+Sequence upstream before downstream
+Merge mlpl-array tasks before spawning dependent mlpl-runtime tasks if possible.
+
+Keep tasks short-lived
+The fastest conflict reducer is fast merge turnaround.
+
+11) Simple reliable policy set
+If you want a compact policy you can actually enforce, I’d use this.
+
+MLPL parallel-work policy
+Every task must:
+start from current main
+
+have a task ID
+
+have a dedicated branch
+
+have a dedicated worktree
+
+have a narrow allowed-directory list
+
+end in a small PR
+
+be squash-merged
+
+Coding agents may not:
+edit root workspace files unless explicitly allowed
+
+edit unrelated crates
+
+perform drive-by refactors
+
+browse the repo broadly without escalation
+
+Integration agent is responsible for:
+rebasing if needed
+
+conflict resolution
+
+running broader tests
+
+merging PRs
+
+cleanup
+
+That is enough to keep the system stable.
+
+12) Suggested milestone board format
+Use milestone-oriented task buckets, for example:
+
+Saga 1 / Dense Tensor Substrate
+  ARRAY-SHAPE-001
+  ARRAY-INDEX-001
+  ARRAY-RESHAPE-002
+  ARRAY-TRANSPOSE-003
+
+Saga 2 / Parser + Evaluator
+  PARSER-LEX-001
+  PARSER-AST-002
+  EVAL-ARITH-001
+  EVAL-ARRAY-LIT-002
+
+Saga 3 / Trace
+  TRACE-EVENT-001
+  TRACE-SERIALIZE-002
+  TRACE-SPAN-003
+This helps the coordinator spawn tasks in safe order.
+
+13) Suggested first real task sequence
+To minimize interference, the first wave should look like this:
+
+Wave 0
+repo scaffold
+
+task/contract/worktree conventions
+
+root docs
+
+Wave 1: mostly parallel
+ARRAY-SHAPE-001
+
+ARRAY-INDEX-001
+
+PARSER-LEX-001
+
+Wave 2
+ARRAY-RESHAPE-002
+
+ARRAY-TRANSPOSE-003
+
+PARSER-AST-002
+
+Wave 3
+RUNTIME-VALUE-001
+
+EVAL-ARITH-001
+
+This gives you real concurrency with limited conflict risk.
+
+14) My final recommended approach
+Use:
+task-based branch names
+
+one dedicated worktree per task
+
+one small PR per task
+
+squash merges
+
+an integration/merge agent
+
+contract-first task packets
+
+strict allowed-directory boundaries
+
+Do not rely on:
+a shared working tree
+
+long-lived branches
+
+broad “one agent owns a whole subsystem for weeks” flows
+
+ad hoc direct merges into main
+
+The simplest reliable setup is still:
+
+One task = one branch = one worktree = one PR
+with the repo structured so the task can be done locally and merged quickly.
+
+If you want, the next step is for me to draft actual starter contents for COORDINATOR.md, WORKTREES.md, TASKS/ready/TEMPLATE.md, and the first few concrete task files for Saga 0 and Saga 1.
+
+
+proceed (note I may name the repo sw-mlpl (under sw-ml-study org) this should not change anything, still can call it MLPL in README and docs)
+
+Using sw-mlpl as the repo name under sw-ml-study is a good fit.
+
+That changes only the git/repo identity, not the product identity:
+
+repo: sw-mlpl
+
+language/platform name in docs: MLPL
+
+That is a clean separation and works well.
+
+Below is a concrete starter set for:
+
+COORDINATOR.md
+
+WORKTREES.md
+
+TASKS/ready/TEMPLATE.md
+
+first concrete task files for Saga -1, Saga 0, and Saga 1
+
+I’ll also include a recommended top-level tree and a suggested first rollout order.
+
+1) Recommended top-level tree for sw-mlpl
+sw-mlpl/
+  README.md
+  AGENTS.md
+  COORDINATOR.md
+  WORKTREES.md
+  Cargo.toml
+  Cargo.lock
+  justfile
+
+  TASKS/
+    ready/
+      TEMPLATE.md
+    active/
+    blocked/
+    done/
+
+  docs/
+    prd.md
+    architecture.md
+    saga.md
+    repo-structure.md
+    agent-coordination.md
+    milestone-mvp.md
+
+  contracts/
+    core-contract/
+    array-contract/
+    parser-contract/
+    runtime-contract/
+    eval-contract/
+    trace-contract/
+    viz-contract/
+    ml-contract/
+
+  crates/
+    mlpl-core/
+    mlpl-array/
+    mlpl-parser/
+    mlpl-runtime/
+    mlpl-eval/
+    mlpl-trace/
+    mlpl-viz/
+    mlpl-wasm/
+    mlpl-ml/
+    mlpl-cli/
+
+  apps/
+    mlpl-repl/
+    mlpl-web/
+    mlpl-lab/
+
+  demos/
+  examples/
+  scripts/
+  tools/
+2) Starter COORDINATOR.md
+# MLPL Coordinator Runbook
+
+This repository is `sw-mlpl`.
+The product, language, and platform described in docs and README are called **MLPL**.
+
+## Purpose
+
+This file defines the operating procedure for coordinating multiple AI coding agents working in parallel on MLPL.
+
+The goals are:
+
+- low friction
+- low interference
+- narrow task scope
+- contract-first development
+- short-lived branches
+- reproducible integration
+- minimal agent context
+
+---
+
+## Core Rule
+
+Every implementation task should follow this pattern:
+
+- one task
+- one branch
+- one worktree
+- one PR
+
+Default merge style: **squash merge**.
+
+---
+
+## Repository Model
+
+The repository is a **cellular monorepo**.
+
+Each crate is a capsule with:
+- its own `README.md`
+- its own `AGENTS.md`
+- its own tests
+- narrow dependencies
+- a matching contract area in `contracts/`
+
+Agents should work locally in one capsule plus one contract directory.
+
+---
+
+## Naming Rules
+
+### Repo
+- Git repo name: `sw-mlpl`
+- Language/platform name in docs: `MLPL`
+
+### Task IDs
+Format:
+`<AREA>-<TOPIC>-<NNN>`
+
+Examples:
+- `ARRAY-SHAPE-001`
+- `PARSER-LEX-001`
+- `TRACE-EVENT-001`
+
+### Branch names
+Format:
+`feat/<area>/<task-id-lower>-<slug>`
+`fix/<area>/<task-id-lower>-<slug>`
+`docs/<area>/<task-id-lower>-<slug>`
+`spike/<area>/<task-id-lower>-<slug>`
+
+Examples:
+- `feat/array/array-shape-001-shape-type`
+- `feat/parser/parser-lex-001-basic-lexer`
+
+### Worktree names
+Format:
+`wt-<task-id-lower>`
+
+Examples:
+- `wt-array-shape-001`
+- `wt-parser-lex-001`
+
+### PR titles
+Format:
+`[<area>] <TASK-ID>: <summary>`
+
+Examples:
+- `[array] ARRAY-SHAPE-001: add Shape type and invariants`
+- `[parser] PARSER-LEX-001: implement numeric and punctuation lexer`
+
+---
+
+## Branch and Worktree Procedure
+
+### Create a task branch and worktree
+
+From the main checkout:
+
+```bash
+git fetch origin
+git checkout main
+git pull --ff-only origin main
+
+git worktree add ../mlpl-worktrees/wt-array-shape-001 \
+  -b feat/array/array-shape-001-shape-type \
+  origin/main
+Agent works only in that worktree
+The agent should begin in:
+
+the assigned worktree
+
+the assigned crate directory
+
+the assigned contract directory
+
+The agent should not browse the wider repo unless escalation permits it.
+
+Task Lifecycle
+1. Ready
+Task file exists in TASKS/ready/.
+
+2. Active
+Task file is moved to TASKS/active/.
+Branch and worktree are created.
+Agent begins implementation.
+
+3. Blocked
+If blocked, move task file to TASKS/blocked/ or keep in active/ with a blocked note.
+
+4. PR Open
+PR references the task ID and contract.
+
+5. Done
+After merge:
+
+move task file to TASKS/done/
+
+update WORKTREES.md
+
+remove worktree
+
+delete branch
+
+Context Containment Rules
+Agents start with only:
+
+the task packet
+
+the local crate AGENTS.md
+
+the local contract README/tests
+
+the allowed directories listed in the task
+
+Agents should not read:
+
+unrelated crates
+
+apps
+
+top-level docs
+
+downstream consumers
+unless the task explicitly allows it or escalation approves it.
+
+Escalation Ladder
+Level 0 — local only
+Allowed:
+
+assigned crate
+
+assigned contract
+
+local tests
+
+Level 1 — upstream public API
+Allowed only if needed:
+
+direct upstream crate public API
+
+direct upstream contract
+
+Level 2 — coordinator summary
+Coordinator provides a short summary of an external requirement.
+
+Level 3 — selective file reveal
+One or two specific external files are approved.
+
+Level 4 — design decision
+Human/coordinator resolves ambiguity or architecture conflict.
+
+Allowed Scope Rule
+Each task packet must include:
+
+allowed directories
+
+prohibited directories
+
+acceptance tests
+
+definition of done
+
+escalation triggers
+
+If a task would require touching files outside allowed directories, the agent must escalate before making the change.
+
+Ownership Rules
+Coordinator / integration agent owns
+root Cargo.toml
+
+Cargo.lock
+
+root README.md
+
+top-level docs
+
+CI config
+
+milestone summaries
+
+cross-cutting refactors
+
+Crate agent owns
+assigned crate files
+
+assigned contract files
+
+local tests
+
+local README/AGENTS/MILESTONE updates if task allows
+
+Merge Policy
+Default:
+
+small PR
+
+green tests
+
+squash merge
+
+The integration agent handles:
+
+rebase if needed
+
+conflict resolution
+
+broader test execution
+
+merge
+
+cleanup
+
+Cleanup Procedure
+After merge:
+
+git worktree remove ../mlpl-worktrees/wt-array-shape-001
+git branch -d feat/array/array-shape-001-shape-type
+git push origin --delete feat/array/array-shape-001-shape-type
+Update:
+
+WORKTREES.md
+
+task location in TASKS/
+
+milestone docs if needed
+
+What to Optimize For
+Prefer:
+
+narrow tasks
+
+local contracts
+
+short branch lifetime
+
+early integration
+
+explicit boundaries
+
+Avoid:
+
+broad multi-crate tasks
+
+drive-by refactors
+
+long-lived branches
+
+direct commits to main
+
+widening public APIs casually
+
+
+---
+
+# 3) Starter `WORKTREES.md`
+
+```md
+# MLPL Worktree Registry
+
+This file tracks active and recent task worktrees for the `sw-mlpl` repository.
+
+## Status Legend
+
+- `ready` — task prepared, no worktree yet
+- `active` — worktree exists, task in progress
+- `pr-open` — PR opened, awaiting review/integration
+- `merged` — merged to `main`
+- `blocked` — task blocked
+- `abandoned` — task intentionally stopped
+
+---
+
+## Active and Recent Worktrees
+
+| Task ID | Area | Branch | Worktree Path | Status | Owner | PR | Notes |
+|---|---|---|---|---|---|---|---|
+| REPO-SCAFFOLD-001 | repo | feat/repo/repo-scaffold-001-cellular-layout | `../mlpl-worktrees/wt-repo-scaffold-001` | ready | unassigned |  | initial repo layout |
+| AGENT-CONTRACTS-001 | repo | feat/repo/agent-contracts-001-contract-dirs | `../mlpl-worktrees/wt-agent-contracts-001` | ready | unassigned |  | create contracts skeleton |
+| ARRAY-SHAPE-001 | array | feat/array/array-shape-001-shape-type | `../mlpl-worktrees/wt-array-shape-001` | ready | unassigned |  | first array substrate task |
+| PARSER-LEX-001 | parser | feat/parser/parser-lex-001-basic-lexer | `../mlpl-worktrees/wt-parser-lex-001` | ready | unassigned |  | first parser task |
+
+---
+
+## Usage Notes
+
+- Every task should have at most one active worktree.
+- Use one worktree per task branch.
+- Delete worktrees after merge.
+- Keep this file updated as part of coordinator/integration workflow.
+4) Starter TASKS/ready/TEMPLATE.md
+# TASK: <TASK-ID>
+
+## Title
+<short imperative title>
+
+## Milestone
+<Saga / milestone name>
+
+## Goal
+<one paragraph describing the intended result>
+
+## Why
+<why this task matters to the current milestone>
+
+## Scope
+<what is included>
+<what is intentionally excluded>
+
+## Allowed directories
+- `contracts/<contract-name>/`
+- `crates/<crate-name>/`
+
+## Primary files
+- `<path>`
+- `<path>`
+- `<path>`
+
+## Do not modify
+- `<path>`
+- `<path>`
+- `<path>`
+
+## Required reading
+- `crates/<crate-name>/AGENTS.md`
+- `contracts/<contract-name>/README.md`
+
+## Contract summary
+- <rule 1>
+- <rule 2>
+- <rule 3>
+
+## Acceptance tests
+- `<path to contract test>`
+- `<path to local crate tests>`
+
+## Suggested implementation notes
+- <optional hint>
+- <optional hint>
+
+## Definition of done
+- contract tests pass
+- local crate tests pass
+- no changes outside allowed directories
+- local docs updated if required by task
+
+## Escalate if
+- <case 1>
+- <case 2>
+- <case 3>
+
+## Suggested branch
+`feat/<area>/<task-id-lower>-<slug>`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-<task-id-lower>`
+5) Concrete starter tasks
+I recommend beginning with Saga -1 and Saga 0 before real semantics work.
+
+5.1 TASKS/ready/REPO-SCAFFOLD-001.md
+# TASK: REPO-SCAFFOLD-001
+
+## Title
+Create the initial cellular monorepo directory structure.
+
+## Milestone
+Saga -1 — Repo compartmentalization scaffolding
+
+## Goal
+Create the top-level repository structure for MLPL as a cellular monorepo, including the main directory layout for docs, tasks, contracts, crates, apps, demos, examples, scripts, and tools.
+
+## Why
+This task creates the physical structure that allows later work to be compartmentalized by crate and contract. It is the first step toward low-context agent development.
+
+## Scope
+Included:
+- create top-level directories
+- create empty placeholder directories for contracts, crates, and apps
+- create placeholder markdown files where required
+
+Excluded:
+- writing all docs in detail
+- implementing Rust code
+- populating all crate internals
+
+## Allowed directories
+- `./`
+
+## Primary files
+- `README.md`
+- `AGENTS.md`
+- `COORDINATOR.md`
+- `WORKTREES.md`
+- `TASKS/`
+- `docs/`
+- `contracts/`
+- `crates/`
+- `apps/`
+
+## Do not modify
+- files outside the repository
+- CI/provider configuration unless explicitly needed
+
+## Required reading
+- `COORDINATOR.md`
+- `AGENTS.md`
+
+## Contract summary
+- repository must support task-based compartmentalized work
+- repository must expose contracts as first-class directories
+- repository must support future crate-local agent instructions
+
+## Acceptance tests
+- visual/manual verification of directory tree
+- optional script or checklist output proving required paths exist
+
+## Suggested implementation notes
+- use `.gitkeep` where needed for empty directories
+- keep placeholder files short and neutral
+
+## Definition of done
+- required directory tree exists
+- placeholder files exist
+- no Rust implementation added yet
+- repository layout matches docs
+
+## Escalate if
+- there is disagreement about top-level directory naming
+- a root file needs content that belongs to another task
+
+## Suggested branch
+`feat/repo/repo-scaffold-001-cellular-layout`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-repo-scaffold-001`
+5.2 TASKS/ready/AGENT-CONTRACTS-001.md
+# TASK: AGENT-CONTRACTS-001
+
+## Title
+Create initial contract directory skeletons and placeholders.
+
+## Milestone
+Saga -1 — Repo compartmentalization scaffolding
+
+## Goal
+Create the initial contract directories and placeholder files for core, array, parser, runtime, eval, trace, viz, and ml contracts.
+
+## Why
+Contracts are the primary mechanism for low-context agent work. This task creates the scaffolding for contract-first development.
+
+## Scope
+Included:
+- create `contracts/*` directories
+- add initial `README.md` placeholders
+- add `tests/` directories for each contract area
+
+Excluded:
+- detailed contract prose
+- real executable contract tests
+
+## Allowed directories
+- `contracts/`
+
+## Primary files
+- `contracts/core-contract/README.md`
+- `contracts/array-contract/README.md`
+- `contracts/parser-contract/README.md`
+- `contracts/runtime-contract/README.md`
+- `contracts/eval-contract/README.md`
+- `contracts/trace-contract/README.md`
+- `contracts/viz-contract/README.md`
+- `contracts/ml-contract/README.md`
+
+## Do not modify
+- `crates/`
+- `apps/`
+- root `Cargo.toml`
+
+## Required reading
+- `COORDINATOR.md`
+- `AGENTS.md`
+
+## Contract summary
+- each implementation area should have a matching contract area
+- each contract area should be independently readable
+- contract directories should support future executable tests
+
+## Acceptance tests
+- manual verification of directory structure
+- placeholder file existence
+
+## Suggested implementation notes
+- keep placeholders short
+- include a one-sentence purpose and a TODO list per contract
+
+## Definition of done
+- all contract directories exist
+- each has a placeholder README
+- each has a `tests/` subdirectory
+
+## Escalate if
+- additional contract areas seem necessary
+- naming needs adjustment to match future crate layout
+
+## Suggested branch
+`feat/repo/agent-contracts-001-contract-dirs`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-agent-contracts-001`
+5.3 TASKS/ready/CRATE-SKELETONS-001.md
+# TASK: CRATE-SKELETONS-001
+
+## Title
+Create crate and app directory skeletons with local README and AGENTS files.
+
+## Milestone
+Saga 0 — Foundation and contracts
+
+## Goal
+Create the top-level crate and app directories for MLPL, each with placeholder `README.md`, `AGENTS.md`, and `MILESTONE.md` files where appropriate.
+
+## Why
+Each crate is intended to be a local capsule for implementation agents. This task creates the scaffold for those capsules.
+
+## Scope
+Included:
+- create crate directories
+- create app directories
+- add local placeholder docs
+
+Excluded:
+- creating valid Cargo manifests for every crate
+- implementing code
+- detailed local instructions
+
+## Allowed directories
+- `crates/`
+- `apps/`
+
+## Primary files
+- `crates/mlpl-core/README.md`
+- `crates/mlpl-core/AGENTS.md`
+- `crates/mlpl-core/MILESTONE.md`
+- similar files for all planned crates
+- `apps/mlpl-repl/README.md`
+- `apps/mlpl-repl/AGENTS.md`
+- similar files for all planned apps
+
+## Do not modify
+- `contracts/`
+- root `Cargo.toml` unless explicitly approved
+
+## Required reading
+- `COORDINATOR.md`
+- `AGENTS.md`
+
+## Contract summary
+- every crate should be an isolated work capsule
+- every crate should have local agent instructions
+- every crate should have local progress tracking
+
+## Acceptance tests
+- manual verification of expected files
+- optional script/checklist output
+
+## Definition of done
+- all planned crate directories exist
+- all planned app directories exist
+- placeholder local docs exist
+
+## Escalate if
+- crate naming changes are needed
+- app naming changes are needed
+
+## Suggested branch
+`feat/repo/crate-skeletons-001-local-capsules`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-crate-skeletons-001`
+5.4 TASKS/ready/WORKSPACE-BOOT-001.md
+# TASK: WORKSPACE-BOOT-001
+
+## Title
+Create initial Cargo workspace and minimal compile/test smoke path.
+
+## Milestone
+Saga 0 — Foundation and contracts
+
+## Goal
+Create the root Cargo workspace for `sw-mlpl` with a minimal set of placeholder crates sufficient to run `cargo check` and basic smoke tests.
+
+## Why
+This creates the first executable foundation for the repository and allows later crate work to happen inside a real Rust workspace.
+
+## Scope
+Included:
+- create root `Cargo.toml`
+- create minimal `Cargo.toml` and `src/lib.rs` or `src/main.rs` for initial crates/apps
+- ensure `cargo check` succeeds
+
+Excluded:
+- meaningful semantics
+- detailed tests for language behavior
+- broad dependency setup
+
+## Allowed directories
+- `Cargo.toml`
+- `crates/`
+- `apps/`
+
+## Primary files
+- `Cargo.toml`
+- `crates/mlpl-core/Cargo.toml`
+- `crates/mlpl-core/src/lib.rs`
+- `crates/mlpl-array/Cargo.toml`
+- `crates/mlpl-array/src/lib.rs`
+- `crates/mlpl-cli/Cargo.toml`
+- `crates/mlpl-cli/src/lib.rs`
+- `apps/mlpl-repl/Cargo.toml`
+- `apps/mlpl-repl/src/main.rs`
+
+## Do not modify
+- detailed contracts
+- milestone docs outside local updates
+
+## Required reading
+- `COORDINATOR.md`
+- root `AGENTS.md`
+
+## Contract summary
+- workspace should build successfully in minimal form
+- initial crates should exist as independent units
+- no broad implementation should be added in this task
+
+## Acceptance tests
+- `cargo check`
+- `cargo test` for smoke-only cases if included
+
+## Suggested implementation notes
+- start with a very small set of workspace members
+- add more members later if that reduces friction
+
+## Definition of done
+- root workspace exists
+- minimal workspace builds
+- placeholder Rust source compiles
+
+## Escalate if
+- workspace dependency structure becomes unclear
+- additional root tooling files are needed
+
+## Suggested branch
+`feat/repo/workspace-boot-001-minimal-workspace`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-workspace-boot-001`
+5.5 TASKS/ready/ARRAY-CONTRACT-001.md
+# TASK: ARRAY-CONTRACT-001
+
+## Title
+Write the initial array contract README and contract test plan.
+
+## Milestone
+Saga 0 — Foundation and contracts
+
+## Goal
+Define the first version of the array contract for MLPL, covering shapes, ranks, indexing, reshape, and transpose at a concise contract level.
+
+## Why
+The array contract is the foundation for the tensor substrate and should be written before implementation tasks such as shape and reshape are assigned.
+
+## Scope
+Included:
+- write `contracts/array-contract/README.md`
+- add a small test plan file or placeholder test module list
+- describe invariants and failure modes at a high level
+
+Excluded:
+- implementing the array crate
+- writing full executable tests for every case
+- evaluator or parser semantics
+
+## Allowed directories
+- `contracts/array-contract/`
+
+## Primary files
+- `contracts/array-contract/README.md`
+- `contracts/array-contract/tests/`
+
+## Do not modify
+- `crates/mlpl-array/`
+- parser/eval/runtime contracts
+
+## Required reading
+- `COORDINATOR.md`
+- `AGENTS.md`
+
+## Contract summary
+- shape is first-class
+- rank is derived from shape length
+- indexing must be bounds-checked
+- reshape preserves element order and element count
+- transpose must define axis behavior clearly
+
+## Acceptance tests
+- contract review by coordinator
+- contract text must be sufficient to drive subsequent array tasks
+
+## Suggested implementation notes
+- keep README concise
+- use headings: Purpose, Concepts, Invariants, Operations, Errors, Open Questions
+
+## Definition of done
+- initial array contract README exists
+- contract scope is clear enough for `ARRAY-SHAPE-001` and `ARRAY-RESHAPE-002`
+- open questions are explicitly listed
+
+## Escalate if
+- element type model needs early commitment
+- views/strides decisions block the contract
+
+## Suggested branch
+`docs/array/array-contract-001-initial-contract`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-array-contract-001`
+5.6 TASKS/ready/ARRAY-SHAPE-001.md
+# TASK: ARRAY-SHAPE-001
+
+## Title
+Implement Shape type and shape invariants in `mlpl-array`.
+
+## Milestone
+Saga 1 — Dense tensor substrate v1
+
+## Goal
+Add a first `Shape` representation to `mlpl-array` with rank calculation, dimension access, element count calculation, and basic validation.
+
+## Why
+Shape is the most foundational concept in the dense array substrate and should be implemented before indexing, reshape, and transpose.
+
+## Scope
+Included:
+- shape type
+- rank computation
+- dimension accessors
+- total element count
+- basic validation rules
+- unit tests
+
+Excluded:
+- full array storage
+- indexing
+- reshape
+- transpose
+- parser/evaluator integration
+
+## Allowed directories
+- `contracts/array-contract/`
+- `crates/mlpl-array/`
+
+## Primary files
+- `contracts/array-contract/README.md`
+- `crates/mlpl-array/AGENTS.md`
+- `crates/mlpl-array/src/lib.rs`
+- `crates/mlpl-array/src/shape.rs`
+- `crates/mlpl-array/src/error.rs`
+- `crates/mlpl-array/tests/`
+
+## Do not modify
+- `crates/mlpl-parser/`
+- `crates/mlpl-eval/`
+- `apps/`
+- root `Cargo.toml`
+
+## Required reading
+- `crates/mlpl-array/AGENTS.md`
+- `contracts/array-contract/README.md`
+
+## Contract summary
+- shape is an ordered list of dimensions
+- rank equals number of dimensions
+- total element count is the product of dimensions
+- invalid shape conditions must be reported explicitly
+
+## Acceptance tests
+- local `mlpl-array` unit tests
+- contract-aligned shape tests
+
+## Suggested implementation notes
+- keep the type simple
+- prefer explicit methods over abstractions
+- use clear error types
+
+## Definition of done
+- shape type exists
+- rank and element count work
+- tests pass
+- no out-of-scope files modified
+
+## Escalate if
+- shape validation requires a new shared error in `mlpl-core`
+- contract ambiguities are discovered
+
+## Suggested branch
+`feat/array/array-shape-001-shape-type`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-array-shape-001`
+5.7 TASKS/ready/PARSER-LEX-001.md
+# TASK: PARSER-LEX-001
+
+## Title
+Implement the first lexer for MLPL numeric literals and core punctuation.
+
+## Milestone
+Saga 1 / early Saga 2 bridge — Parser foundation
+
+## Goal
+Create the first lexer in `mlpl-parser` that can tokenize numeric literals, identifiers if needed, and the core punctuation required for simple expressions and array literals.
+
+## Why
+A small lexer can be developed in parallel with early array work and will unblock the first parser/evaluator milestones.
+
+## Scope
+Included:
+- token definitions
+- numeric literal lexing
+- punctuation lexing for simple expressions
+- source span tracking
+- lexer tests
+
+Excluded:
+- full parser
+- evaluator
+- array semantics
+- Unicode syntax
+
+## Allowed directories
+- `contracts/parser-contract/`
+- `crates/mlpl-parser/`
+- optionally `crates/mlpl-core/` only if spans are defined there and task allows read-only use
+
+## Primary files
+- `contracts/parser-contract/README.md`
+- `crates/mlpl-parser/AGENTS.md`
+- `crates/mlpl-parser/src/lib.rs`
+- `crates/mlpl-parser/src/token.rs`
+- `crates/mlpl-parser/src/lexer.rs`
+- `crates/mlpl-parser/tests/`
+
+## Do not modify
+- `crates/mlpl-eval/`
+- `crates/mlpl-array/`
+- `apps/`
+- root `Cargo.toml`
+
+## Required reading
+- `crates/mlpl-parser/AGENTS.md`
+- `contracts/parser-contract/README.md`
+
+## Contract summary
+- lexer must produce stable token kinds
+- tokens must include source spans
+- invalid input must produce explicit lexer errors
+- implementation is ASCII-first
+
+## Acceptance tests
+- local `mlpl-parser` unit tests
+- contract-aligned lexer tests
+
+## Suggested implementation notes
+- keep token set minimal
+- avoid parser assumptions leaking into lexer design
+- make spans explicit from day one
+
+## Definition of done
+- lexer tokenizes numeric literals and core punctuation
+- tests pass
+- output is stable enough for the next parser task
+
+## Escalate if
+- span type in `mlpl-core` does not yet exist and is needed
+- parser contract is not yet sufficient
+
+## Suggested branch
+`feat/parser/parser-lex-001-basic-lexer`
+
+## Suggested worktree
+`../mlpl-worktrees/wt-parser-lex-001`
+6) Suggested immediate rollout order
+To minimize friction, I would start in this order:
+
+Step A
+Spawn one repo-structure task at a time:
+
+REPO-SCAFFOLD-001
+
+AGENT-CONTRACTS-001
+
+CRATE-SKELETONS-001
+
+Step B
+Then bootstrap workspace:
+4. WORKSPACE-BOOT-001
+
+Step C
+Then write first contracts:
+5. ARRAY-CONTRACT-001
+6. PARSER-CONTRACT-001 later in the same style
+
+Step D
+Then first parallel implementation wave:
+7. ARRAY-SHAPE-001
+8. PARSER-LEX-001
+
+That gives you early parallelism without much conflict risk.
+
+7) Recommended README positioning for sw-mlpl
+At repo root, I’d suggest something like this:
+
+# MLPL
+
+MLPL is a Rust-first array and tensor programming language for machine learning, visualization, and experimentation.
+
+This repository is named `sw-mlpl`, while the language and platform described in the documentation are called **MLPL**.
+
+MLPL is inspired by APL, APL2, J, and BQN, and is designed to support:
+
+- dense tensor and array programming
+- visual debugging and execution tracing
+- ML experiments in Rust
+- contract-first, compartmentalized implementation by multiple coding agents
+That makes the naming split explicit and harmless.
+
+8) Final recommendation
+The right next move is:
+
+create the repo as sw-mlpl
+
+keep all docs and README speaking in terms of MLPL
+
+add the coordinator and task machinery first
+
+treat repo structure and contracts as the first milestone, not as side work
+
+only then start spawning shape/parser tasks in parallel
+
+That will give you a low-friction system that supports your agent-coordination goals from the start.
+
+The next useful step is for me to draft the first actual contents for:
+
+root README.md
+
+root AGENTS.md
+
+docs/repo-structure.md
+
+contracts/array-contract/README.md
+
+crates/mlpl-array/AGENTS.md
+
+
+proceed, and please create a downloadable zip file
+
+
+Thought for 2m 5s
+I created the starter repo scaffold and zipped it here:
+
+Download the sw-mlpl starter zip
+
+It includes:
+
+root coordination files:
+
+README.md
+
+AGENTS.md
+
+COORDINATOR.md
+
+WORKTREES.md
+
+docs:
+
+docs/prd.md
+
+docs/architecture.md
+
+docs/saga.md
+
+docs/repo-structure.md
+
+docs/agent-coordination.md
+
+docs/milestone-mvp.md
+
+task system:
+
+TASKS/ready/TEMPLATE.md
+
+starter task packets for repo scaffolding, contracts, workspace boot, array contract, array shape, and parser lexer
+
+contract scaffolding:
+
+contracts/*-contract/README.md
+
+matching tests/ directories
+
+crate/app scaffolding:
+
+crates/mlpl-*
+
+apps/mlpl-*
+
+local README.md, AGENTS.md, and MILESTONE.md placeholders
+
+a minimal Cargo workspace bootstrapped for:
+
+mlpl-core
+
+mlpl-array
+
+mlpl-parser
+
+mlpl-cli
+
+mlpl-repl
+
+One note: I included a .gitignore that ignores Cargo.lock, which is common for libraries, but if you want the repo to commit the workspace lockfile from the start, that should be changed.
+
+
+
+

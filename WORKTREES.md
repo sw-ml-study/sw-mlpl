@@ -4,12 +4,12 @@ This file tracks active and recent task worktrees for the `sw-mlpl` repository.
 
 ## Status Legend
 
-- `ready` — task prepared, no worktree yet
-- `active` — worktree exists, task in progress
-- `pr-open` — PR opened, awaiting review/integration
-- `merged` — merged to `main`
-- `blocked` — task blocked
-- `abandoned` — task intentionally stopped
+- `ready` -- task prepared, no worktree yet
+- `active` -- worktree exists, task in progress
+- `pr-open` -- PR opened, awaiting review/integration
+- `merged` -- merged to `main`
+- `blocked` -- task blocked
+- `abandoned` -- task intentionally stopped
 
 ---
 

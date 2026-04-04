@@ -4,7 +4,7 @@
 Create the initial cellular monorepo directory structure.
 
 ## Milestone
-Saga -1 — Repo compartmentalization scaffolding
+Saga -1 -- Repo compartmentalization scaffolding
 
 ## Goal
 Create the top-level repository structure for MLPL as a cellular monorepo, including the main directory layout for docs, tasks, contracts, crates, apps, demos, examples, scripts, and tools.

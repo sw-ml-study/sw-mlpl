@@ -4,7 +4,7 @@
 Create crate and app directory skeletons with local README and AGENTS files.
 
 ## Milestone
-Saga 0 — Foundation and contracts
+Saga 0 -- Foundation and contracts
 
 ## Goal
 Create the top-level crate and app directories for MLPL, each with placeholder `README.md`, `AGENTS.md`, and `MILESTONE.md` files where appropriate.

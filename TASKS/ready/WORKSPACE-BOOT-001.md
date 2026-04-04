@@ -4,7 +4,7 @@
 Create initial Cargo workspace and minimal compile/test smoke path.
 
 ## Milestone
-Saga 0 — Foundation and contracts
+Saga 0 -- Foundation and contracts
 
 ## Goal
 Create the root Cargo workspace for `sw-mlpl` with a minimal set of placeholder crates sufficient to run `cargo check` and basic smoke tests.

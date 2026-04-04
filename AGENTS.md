@@ -40,13 +40,13 @@ Do not browse the wider repo unless required by escalation.
 - do not edit root workspace files unless task explicitly allows it
 - do not widen public APIs casually
 - do not browse apps, UI, or docs for implementation inspiration unless the task requires it
-- do not solve adjacent problems “while here”
+- do not solve adjacent problems "while here"
 
 ## Dependency rule
 
 Prefer one-way dependencies:
 
-`core → array/parser → runtime → eval → trace → viz/wasm/apps → ml`
+`core -> array/parser -> runtime -> eval -> trace -> viz/wasm/apps -> ml`
 
 ## PR rule
 

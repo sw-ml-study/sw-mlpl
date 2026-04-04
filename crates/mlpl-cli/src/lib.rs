@@ -1,3 +1,5 @@
 //! CLI support library for MLPL.
 
-pub fn crate_name() -> &'static str' { "mlpl-cli" }
+pub fn crate_name() -> &'static str {
+    "mlpl-cli"
+}
