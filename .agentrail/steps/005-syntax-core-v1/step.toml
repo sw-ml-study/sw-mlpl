@@ -1,0 +1,11 @@
+number = 5
+slug = "syntax-core-v1"
+status = "pending"
+description = """
+Create docs/syntax-core-v1.md -- a small syntax design spike for MLPL v1.
+
+Th..."""
+role = "production"
+context_files = []
+created_at = "2026-04-04T14:57:12"
+task_type = "design-spike"
