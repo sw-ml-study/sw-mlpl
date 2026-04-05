@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-impl",
+  "state": {
+    "number": 7,
+    "step": "007-runtime-builtins"
+  },
+  "action": "Write tests first (TDD), implement runtime error/builtins modules, wire FnCall in eval.rs, macro for arity check, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T13:27:38"
+}

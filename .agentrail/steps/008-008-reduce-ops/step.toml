@@ -1,6 +1,6 @@
 number = 8
 slug = "008-reduce-ops"
-status = "pending"
+status = "in-progress"
 description = """
 Add reduce_add and reduce_mul built-in functions to mlpl-runtime.
 

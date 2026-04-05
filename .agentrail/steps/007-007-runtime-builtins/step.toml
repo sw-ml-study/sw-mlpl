@@ -1,8 +1,9 @@
 number = 7
 slug = "007-runtime-builtins"
-status = "in-progress"
+status = "completed"
 description = "Implement the built-in function registry in mlpl-runtime and wire it into the..."
 role = "production"
 context_files = []
 created_at = "2026-04-05T09:03:56"
+completed_at = "2026-04-05T13:27:38"
 task_type = "rust-impl"
