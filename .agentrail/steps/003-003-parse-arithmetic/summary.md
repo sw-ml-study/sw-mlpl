@@ -1,0 +1,1 @@
+Added precedence-climbing arithmetic parsing. parse_expr takes min_prec, loops over binop operators (+ - at prec 1, * / at prec 2), left-associative. Parens handled in parse_atom. 9 new tests for precedence, associativity, parens, arrays as operands. All existing tests pass.
