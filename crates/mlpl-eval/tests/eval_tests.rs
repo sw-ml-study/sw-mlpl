@@ -98,9 +98,9 @@ fn eval_binop_works() {
 }
 
 #[test]
-fn eval_fncall_unsupported() {
-    let result = eval("iota(5)");
-    assert!(matches!(result, Err(EvalError::Unsupported(_))));
+fn eval_fncall_works() {
+    let arr = eval("iota(5)").unwrap();
+    assert_eq!(arr.data(), &[0.0, 1.0, 2.0, 3.0, 4.0]);
 }
 
 // -- Assignment returns value --

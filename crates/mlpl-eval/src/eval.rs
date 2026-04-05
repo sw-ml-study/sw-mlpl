@@ -44,7 +44,13 @@ pub(crate) fn eval_expr(expr: &Expr, env: &mut Environment) -> Result<DenseArray
             };
             Ok(l.apply_binop(&r, f)?)
         }
-        Expr::FnCall { .. } => Err(EvalError::Unsupported("function calls".into())),
+        Expr::FnCall { name, args, .. } => {
+            let evaluated_args: Vec<mlpl_array::DenseArray> = args
+                .iter()
+                .map(|a| eval_expr(a, env))
+                .collect::<Result<Vec<_>, _>>()?;
+            Ok(mlpl_runtime::call_builtin(name, evaluated_args)?)
+        }
     }
 }
 

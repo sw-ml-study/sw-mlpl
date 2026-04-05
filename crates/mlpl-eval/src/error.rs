@@ -11,6 +11,8 @@ pub enum EvalError {
     Unsupported(String),
     /// Error from array operations.
     ArrayError(mlpl_array::ArrayError),
+    /// Error from built-in function dispatch.
+    RuntimeError(mlpl_runtime::RuntimeError),
 }
 
 impl std::fmt::Display for EvalError {
@@ -20,6 +22,7 @@ impl std::fmt::Display for EvalError {
             Self::UndefinedVariable(name) => write!(f, "undefined variable: {name}"),
             Self::Unsupported(msg) => write!(f, "unsupported: {msg}"),
             Self::ArrayError(e) => write!(f, "array error: {e}"),
+            Self::RuntimeError(e) => write!(f, "{e}"),
         }
     }
 }
@@ -29,5 +32,11 @@ impl std::error::Error for EvalError {}
 impl From<mlpl_array::ArrayError> for EvalError {
     fn from(e: mlpl_array::ArrayError) -> Self {
         Self::ArrayError(e)
+    }
+}
+
+impl From<mlpl_runtime::RuntimeError> for EvalError {
+    fn from(e: mlpl_runtime::RuntimeError) -> Self {
+        Self::RuntimeError(e)
     }
 }
