@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-impl",
+  "state": {
+    "number": 4,
+    "step": "004-parse-calls-assign"
+  },
+  "action": "Write tests first (TDD), extend parse_atom for fn calls, extend parse() for assignment, inline binop_prec, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T11:16:42"
+}

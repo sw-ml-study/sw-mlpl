@@ -1,6 +1,6 @@
 number = 5
 slug = "005-eval-ast-walker"
-status = "pending"
+status = "in-progress"
 description = """
 Implement the real AST-walking evaluator in mlpl-eval, replacing the PoC.
 
