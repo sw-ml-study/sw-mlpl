@@ -1,6 +1,6 @@
 number = 8
 slug = "array-dense-storage"
-status = "pending"
+status = "in-progress"
 description = "Implement dense array storage in mlpl-array. This builds on the Shape type fr..."
 role = "production"
 context_files = []
