@@ -1,7 +1,7 @@
 //! AST-walking evaluator.
 
 use mlpl_array::{DenseArray, Shape};
-use mlpl_parser::Expr;
+use mlpl_parser::{BinOpKind, Expr};
 
 use crate::env::Environment;
 use crate::error::EvalError;
@@ -33,7 +33,17 @@ pub(crate) fn eval_expr(expr: &Expr, env: &mut Environment) -> Result<DenseArray
             env.set(name.clone(), val.clone());
             Ok(val)
         }
-        Expr::BinOp { .. } => Err(EvalError::Unsupported("binary operators".into())),
+        Expr::BinOp { op, lhs, rhs, .. } => {
+            let l = eval_expr(lhs, env)?;
+            let r = eval_expr(rhs, env)?;
+            let f: fn(f64, f64) -> f64 = match op {
+                BinOpKind::Add => |a, b| a + b,
+                BinOpKind::Sub => |a, b| a - b,
+                BinOpKind::Mul => |a, b| a * b,
+                BinOpKind::Div => |a, b| a / b,
+            };
+            Ok(l.apply_binop(&r, f)?)
+        }
         Expr::FnCall { .. } => Err(EvalError::Unsupported("function calls".into())),
     }
 }

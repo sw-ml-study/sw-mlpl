@@ -1,4 +1,4 @@
-//! Reshape and transpose operations for DenseArray.
+//! Array operations: reshape, transpose, element-wise arithmetic.
 
 use crate::dense::DenseArray;
 use crate::error::ArrayError;
@@ -55,6 +55,53 @@ impl DenseArray {
             shape: new_shape,
             data: new_data,
         }
+    }
+}
+
+impl DenseArray {
+    /// Apply a binary operation element-wise with scalar broadcasting.
+    ///
+    /// - Same shape: element-wise.
+    /// - One scalar: broadcast to the other's shape.
+    /// - Otherwise: ShapeMismatch error.
+    pub fn apply_binop(
+        &self,
+        other: &DenseArray,
+        op: fn(f64, f64) -> f64,
+    ) -> Result<DenseArray, ArrayError> {
+        if self.shape() == other.shape() {
+            let data: Vec<f64> = self
+                .data()
+                .iter()
+                .zip(other.data().iter())
+                .map(|(a, b)| op(*a, *b))
+                .collect();
+            return Ok(DenseArray {
+                shape: self.shape.clone(),
+                data,
+            });
+        }
+        // Scalar broadcast
+        if self.rank() == 0 {
+            let s = self.data()[0];
+            let data: Vec<f64> = other.data().iter().map(|b| op(s, *b)).collect();
+            return Ok(DenseArray {
+                shape: other.shape.clone(),
+                data,
+            });
+        }
+        if other.rank() == 0 {
+            let s = other.data()[0];
+            let data: Vec<f64> = self.data().iter().map(|a| op(*a, s)).collect();
+            return Ok(DenseArray {
+                shape: self.shape.clone(),
+                data,
+            });
+        }
+        Err(ArrayError::ShapeMismatch {
+            source: self.elem_count(),
+            target: other.elem_count(),
+        })
     }
 }
 

@@ -1,0 +1,1 @@
+Replaced PoC evaluator with AST-walking evaluator. Environment (HashMap) for persistent variable bindings. eval_program walks statement list. eval_expr handles IntLit, FloatLit, Ident (env lookup), ArrayLit (flat->vector, nested->matrix), Assign (store+return). BinOp/FnCall return Unsupported. Updated REPL to use parse()+eval_program(). 13 integration tests.
