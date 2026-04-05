@@ -92,9 +92,9 @@ fn eval_empty() {
 // -- Unsupported (BinOp and FnCall deferred) --
 
 #[test]
-fn eval_binop_unsupported() {
-    let result = eval("1 + 2");
-    assert!(matches!(result, Err(EvalError::Unsupported(_))));
+fn eval_binop_works() {
+    let arr = eval("1 + 2").unwrap();
+    assert_eq!(arr.data(), &[3.0]);
 }
 
 #[test]

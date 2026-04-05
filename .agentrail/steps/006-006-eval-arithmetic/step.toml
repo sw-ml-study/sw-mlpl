@@ -1,6 +1,6 @@
 number = 6
 slug = "006-eval-arithmetic"
-status = "pending"
+status = "in-progress"
 description = """
 Implement element-wise arithmetic and scalar broadcasting in the evaluator.
 
