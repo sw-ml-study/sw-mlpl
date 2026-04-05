@@ -1,0 +1,12 @@
+number = 3
+slug = "workspace-boot"
+status = "completed"
+description = """
+Bootstrap the Cargo workspace so that all crates compile.
+
+1. Create root Car..."""
+role = "production"
+context_files = []
+created_at = "2026-04-04T14:56:47"
+completed_at = "2026-04-04T18:46:14"
+task_type = "rust-project-init"

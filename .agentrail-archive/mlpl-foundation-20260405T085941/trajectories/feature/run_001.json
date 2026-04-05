@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 11,
+    "step": "011-repl-poc"
+  },
+  "action": "Write eval tests first (TDD), implement evaluate() in mlpl-eval, wire REPL main loop in mlpl-repl, verify with piped input, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T08:38:33"
+}

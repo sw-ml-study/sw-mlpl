@@ -1,0 +1,1 @@
+Implemented DenseArray with row-major Vec<f64> storage. Split across dense.rs (struct/constructors/accessors), indexing.rs (rank/elem_count/get/set with stride-based offset), display.rs (scalar/vector/matrix/empty formatting). 20 integration tests covering construction, validation, row-major indexing, bounds checking, and display. All quality gates pass.

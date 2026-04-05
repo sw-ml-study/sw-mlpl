@@ -1,0 +1,9 @@
+number = 6
+slug = "mlpl-core-basics"
+status = "completed"
+description = "Implement the first real types in mlpl-core. This crate is the stable shared ..."
+role = "production"
+context_files = []
+created_at = "2026-04-04T14:57:24"
+completed_at = "2026-04-04T20:12:55"
+task_type = "rust-impl"
