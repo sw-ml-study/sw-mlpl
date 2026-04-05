@@ -1,6 +1,6 @@
 number = 9
 slug = "array-reshape-transpose"
-status = "pending"
+status = "in-progress"
 description = """
 Implement reshape and transpose operations in mlpl-array.
 
