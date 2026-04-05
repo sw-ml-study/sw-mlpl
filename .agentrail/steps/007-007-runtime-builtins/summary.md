@@ -1,0 +1,1 @@
+Implemented built-in function registry: iota, shape, rank, reshape, transpose. RuntimeError with 4 variants. Wired FnCall in evaluator. Arity checking via macro for sw-checklist compliance. 11 new integration tests including composed operations (iota+reshape, reshape+arithmetic). All tests pass.

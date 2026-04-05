@@ -24,13 +24,20 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
         "rank" => builtin_rank(name, args),
         "reshape" => builtin_reshape(name, args),
         "transpose" => builtin_transpose(name, args),
+        "reduce_add" | "reduce_mul" => builtin_reduce(name, args),
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
 }
 
 fn builtin_iota(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     check_arity!(name, 1, args);
-    let n = scalar_to_usize(name, &args[0])?;
+    if args[0].rank() != 0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("expected scalar, got rank {}", args[0].rank()),
+        });
+    }
+    let n = args[0].data()[0] as usize;
     let data: Vec<f64> = (0..n).map(|i| i as f64).collect();
     Ok(DenseArray::from_vec(data))
 }
@@ -58,12 +65,13 @@ fn builtin_transpose(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Ru
     Ok(args[0].transpose())
 }
 
-fn scalar_to_usize(func: &str, arr: &DenseArray) -> Result<usize, RuntimeError> {
-    if arr.rank() != 0 {
-        return Err(RuntimeError::InvalidArgument {
-            func: func.into(),
-            reason: format!("expected scalar, got rank {}", arr.rank()),
-        });
-    }
-    Ok(arr.data()[0] as usize)
+fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    check_arity!(name, 1, args);
+    let data = args[0].data();
+    let result = match name {
+        "reduce_add" => data.iter().sum(),
+        "reduce_mul" => data.iter().product(),
+        _ => unreachable!(),
+    };
+    Ok(DenseArray::from_scalar(result))
 }
