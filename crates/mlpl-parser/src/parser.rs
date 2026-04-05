@@ -12,7 +12,30 @@ pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {
     let mut stmts = Vec::new();
     p.skip_sep();
     while p.pos < p.tokens.len() && p.tokens[p.pos].kind != TokenKind::Eof {
-        stmts.push(p.parse_expr(0)?);
+        // Check for assignment: ident '=' expr
+        let stmt = if matches!(p.tokens[p.pos].kind, TokenKind::Ident(_))
+            && p.tokens
+                .get(p.pos + 1)
+                .is_some_and(|t| t.kind == TokenKind::Equals)
+        {
+            let name_tok = &p.tokens[p.pos];
+            let name = match &name_tok.kind {
+                TokenKind::Ident(n) => n.clone(),
+                _ => unreachable!(),
+            };
+            let start = name_tok.span;
+            p.pos += 2; // skip ident and '='
+            let value = p.parse_expr(0)?;
+            let span = Span::new(start.start, value.span().end);
+            Expr::Assign {
+                name,
+                value: Box::new(value),
+                span,
+            }
+        } else {
+            p.parse_expr(0)?
+        };
+        stmts.push(stmt);
         p.skip_sep();
     }
     Ok(stmts)
@@ -31,7 +54,16 @@ impl<'a> Parser<'a> {
     /// Parse an expression with precedence climbing (min_prec=0 for full expr).
     pub(crate) fn parse_expr(&mut self, min_prec: u8) -> Result<Expr, ParseError> {
         let mut lhs = self.parse_atom()?;
-        while let Some((op, prec)) = self.binop_prec() {
+        loop {
+            let Some((op, prec)) = self.tokens.get(self.pos).and_then(|t| match t.kind {
+                TokenKind::Plus => Some((BinOpKind::Add, 1u8)),
+                TokenKind::Minus => Some((BinOpKind::Sub, 1)),
+                TokenKind::Star => Some((BinOpKind::Mul, 2)),
+                TokenKind::Slash => Some((BinOpKind::Div, 2)),
+                _ => None,
+            }) else {
+                break;
+            };
             if prec < min_prec {
                 break;
             }
@@ -48,16 +80,6 @@ impl<'a> Parser<'a> {
         Ok(lhs)
     }
 
-    fn binop_prec(&self) -> Option<(BinOpKind, u8)> {
-        match self.tokens.get(self.pos).map(|t| &t.kind)? {
-            TokenKind::Plus => Some((BinOpKind::Add, 1)),
-            TokenKind::Minus => Some((BinOpKind::Sub, 1)),
-            TokenKind::Star => Some((BinOpKind::Mul, 2)),
-            TokenKind::Slash => Some((BinOpKind::Div, 2)),
-            _ => None,
-        }
-    }
-
     pub(crate) fn parse_atom(&mut self) -> Result<Expr, ParseError> {
         let tok = &self.tokens[self.pos];
         match &tok.kind {
@@ -72,9 +94,36 @@ impl<'a> Parser<'a> {
                 Ok(e)
             }
             TokenKind::Ident(name) => {
-                let e = Expr::Ident(name.clone(), tok.span);
+                let name = name.clone();
+                let start = tok.span;
                 self.pos += 1;
-                Ok(e)
+                // Function call: ident '('
+                if self.is(TokenKind::LParen) {
+                    self.pos += 1; // skip '('
+                    let mut args = Vec::new();
+                    if !self.is(TokenKind::RParen) {
+                        args.push(self.parse_expr(0)?);
+                        while self.is(TokenKind::Comma) {
+                            self.pos += 1;
+                            args.push(self.parse_expr(0)?);
+                        }
+                    }
+                    if !self.is(TokenKind::RParen) {
+                        return Err(ParseError::UnclosedDelimiter {
+                            open: "(".into(),
+                            span: start,
+                        });
+                    }
+                    let end = self.tokens[self.pos].span;
+                    self.pos += 1;
+                    Ok(Expr::FnCall {
+                        name,
+                        args,
+                        span: Span::new(start.start, end.end),
+                    })
+                } else {
+                    Ok(Expr::Ident(name, start))
+                }
             }
             TokenKind::LBracket => self.parse_array_lit(),
             TokenKind::LParen => {

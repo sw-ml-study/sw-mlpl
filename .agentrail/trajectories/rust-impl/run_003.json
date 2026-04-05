@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-impl",
+  "state": {
+    "number": 3,
+    "step": "003-parse-arithmetic"
+  },
+  "action": "Write tests first (TDD), extend parser.rs with precedence climbing in parse_expr, binop_prec helper, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T10:57:23"
+}
