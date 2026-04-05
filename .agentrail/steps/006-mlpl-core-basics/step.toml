@@ -1,6 +1,6 @@
 number = 6
 slug = "mlpl-core-basics"
-status = "pending"
+status = "in-progress"
 description = "Implement the first real types in mlpl-core. This crate is the stable shared ..."
 role = "production"
 context_files = []
