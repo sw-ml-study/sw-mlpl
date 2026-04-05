@@ -1,6 +1,6 @@
 number = 10
 slug = "parser-lexer"
-status = "pending"
+status = "in-progress"
 description = """
 Implement the MLPL lexer in mlpl-parser. This is task PARSER-LEX-001.
 
