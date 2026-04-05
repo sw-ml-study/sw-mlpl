@@ -55,7 +55,8 @@ dependencies = [
 name = "mlpl-repl"
 version = "0.1.0"
 dependencies = [
- "mlpl-cli",
+ "mlpl-eval",
+ "mlpl-parser",
 ]
 
 [[package]]
