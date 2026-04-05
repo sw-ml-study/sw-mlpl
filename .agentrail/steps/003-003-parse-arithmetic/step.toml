@@ -1,6 +1,6 @@
 number = 3
 slug = "003-parse-arithmetic"
-status = "pending"
+status = "in-progress"
 description = """
 Add arithmetic expression parsing with operator precedence to the parser.
 

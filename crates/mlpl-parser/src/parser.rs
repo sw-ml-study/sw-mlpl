@@ -2,7 +2,7 @@
 
 use mlpl_core::Span;
 
-use crate::ast::Expr;
+use crate::ast::{BinOpKind, Expr};
 use crate::error::ParseError;
 use crate::token::{Token, TokenKind};
 
@@ -12,7 +12,7 @@ pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {
     let mut stmts = Vec::new();
     p.skip_sep();
     while p.pos < p.tokens.len() && p.tokens[p.pos].kind != TokenKind::Eof {
-        stmts.push(p.parse_expr()?);
+        stmts.push(p.parse_expr(0)?);
         p.skip_sep();
     }
     Ok(stmts)
@@ -28,28 +28,68 @@ impl<'a> Parser<'a> {
         Self { tokens, pos: 0 }
     }
 
-    /// Parse a single expression.
-    /// Steps 003-004 will extend this with binop, assignment, and fn calls.
-    pub(crate) fn parse_expr(&mut self) -> Result<Expr, ParseError> {
+    /// Parse an expression with precedence climbing (min_prec=0 for full expr).
+    pub(crate) fn parse_expr(&mut self, min_prec: u8) -> Result<Expr, ParseError> {
+        let mut lhs = self.parse_atom()?;
+        while let Some((op, prec)) = self.binop_prec() {
+            if prec < min_prec {
+                break;
+            }
+            self.pos += 1;
+            let rhs = self.parse_expr(prec + 1)?;
+            let span = Span::new(lhs.span().start, rhs.span().end);
+            lhs = Expr::BinOp {
+                op,
+                lhs: Box::new(lhs),
+                rhs: Box::new(rhs),
+                span,
+            };
+        }
+        Ok(lhs)
+    }
+
+    fn binop_prec(&self) -> Option<(BinOpKind, u8)> {
+        match self.tokens.get(self.pos).map(|t| &t.kind)? {
+            TokenKind::Plus => Some((BinOpKind::Add, 1)),
+            TokenKind::Minus => Some((BinOpKind::Sub, 1)),
+            TokenKind::Star => Some((BinOpKind::Mul, 2)),
+            TokenKind::Slash => Some((BinOpKind::Div, 2)),
+            _ => None,
+        }
+    }
+
+    pub(crate) fn parse_atom(&mut self) -> Result<Expr, ParseError> {
         let tok = &self.tokens[self.pos];
         match &tok.kind {
             TokenKind::IntLit(n) => {
-                let expr = Expr::IntLit(*n, tok.span);
+                let e = Expr::IntLit(*n, tok.span);
                 self.pos += 1;
-                Ok(expr)
+                Ok(e)
             }
             TokenKind::FloatLit(f) => {
-                let expr = Expr::FloatLit(*f, tok.span);
+                let e = Expr::FloatLit(*f, tok.span);
                 self.pos += 1;
-                Ok(expr)
+                Ok(e)
             }
             TokenKind::Ident(name) => {
-                let expr = Expr::Ident(name.clone(), tok.span);
+                let e = Expr::Ident(name.clone(), tok.span);
+                self.pos += 1;
+                Ok(e)
+            }
+            TokenKind::LBracket => self.parse_array_lit(),
+            TokenKind::LParen => {
+                let open = tok.span;
+                self.pos += 1;
+                let expr = self.parse_expr(0)?;
+                if !self.is(TokenKind::RParen) {
+                    return Err(ParseError::UnclosedDelimiter {
+                        open: "(".into(),
+                        span: open,
+                    });
+                }
                 self.pos += 1;
                 Ok(expr)
             }
-            TokenKind::LBracket => self.parse_array_lit(),
-            TokenKind::LParen => self.parse_paren(),
             _ => Err(ParseError::UnexpectedToken {
                 found: format!("{:?}", tok.kind),
                 span: tok.span,
@@ -62,10 +102,10 @@ impl<'a> Parser<'a> {
         self.pos += 1;
         let mut elems = Vec::new();
         if !self.is(TokenKind::RBracket) {
-            elems.push(self.parse_expr()?);
+            elems.push(self.parse_expr(0)?);
             while self.is(TokenKind::Comma) {
                 self.pos += 1;
-                elems.push(self.parse_expr()?);
+                elems.push(self.parse_expr(0)?);
             }
         }
         if !self.is(TokenKind::RBracket) {
@@ -80,20 +120,6 @@ impl<'a> Parser<'a> {
             elems,
             Span::new(open_span.start, close_span.end),
         ))
-    }
-
-    fn parse_paren(&mut self) -> Result<Expr, ParseError> {
-        let open_span = self.tokens[self.pos].span;
-        self.pos += 1;
-        let expr = self.parse_expr()?;
-        if !self.is(TokenKind::RParen) {
-            return Err(ParseError::UnclosedDelimiter {
-                open: "(".into(),
-                span: open_span,
-            });
-        }
-        self.pos += 1;
-        Ok(expr)
     }
 
     pub(crate) fn is(&self, kind: TokenKind) -> bool {
