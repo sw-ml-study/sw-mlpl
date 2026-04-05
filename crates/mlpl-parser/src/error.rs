@@ -2,7 +2,7 @@
 
 use mlpl_core::Span;
 
-/// Errors produced during parsing.
+/// Errors produced during lexing and parsing.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ParseError {
     /// An unexpected character was encountered during lexing.
@@ -17,6 +17,20 @@ pub enum ParseError {
         /// Where the number was.
         span: Span,
     },
+    /// An unexpected token was encountered during parsing.
+    UnexpectedToken {
+        /// Description of what was found.
+        found: String,
+        /// Where it was found.
+        span: Span,
+    },
+    /// Expected a closing delimiter that was not found.
+    UnclosedDelimiter {
+        /// The opening delimiter.
+        open: String,
+        /// Where the opening delimiter was.
+        span: Span,
+    },
 }
 
 impl std::fmt::Display for ParseError {
@@ -25,8 +39,12 @@ impl std::fmt::Display for ParseError {
             Self::UnexpectedCharacter { ch, span } => {
                 write!(f, "unexpected character '{ch}' at {span}")
             }
-            Self::InvalidNumber { span } => {
-                write!(f, "invalid number at {span}")
+            Self::InvalidNumber { span } => write!(f, "invalid number at {span}"),
+            Self::UnexpectedToken { found, span } => {
+                write!(f, "unexpected token '{found}' at {span}")
+            }
+            Self::UnclosedDelimiter { open, span } => {
+                write!(f, "unclosed '{open}' at {span}")
             }
         }
     }
