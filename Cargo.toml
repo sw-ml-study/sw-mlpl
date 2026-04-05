@@ -4,8 +4,16 @@ members = [
   "crates/mlpl-core",
   "crates/mlpl-array",
   "crates/mlpl-parser",
+  "crates/mlpl-runtime",
+  "crates/mlpl-eval",
+  "crates/mlpl-trace",
+  "crates/mlpl-viz",
+  "crates/mlpl-wasm",
+  "crates/mlpl-ml",
   "crates/mlpl-cli",
   "apps/mlpl-repl",
+  "apps/mlpl-web",
+  "apps/mlpl-lab",
 ]
 
 [workspace.package]
