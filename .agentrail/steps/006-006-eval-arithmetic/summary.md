@@ -1,0 +1,1 @@
+Added apply_binop to DenseArray for element-wise ops with scalar broadcasting. Wired BinOp in evaluator dispatching Add/Sub/Mul/Div to closures. IEEE division semantics. 14 new tests for scalar ops, precedence, vectors, broadcast, shape mismatch, variables, div-by-zero.

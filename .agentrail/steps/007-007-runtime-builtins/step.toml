@@ -1,6 +1,6 @@
 number = 7
 slug = "007-runtime-builtins"
-status = "pending"
+status = "in-progress"
 description = "Implement the built-in function registry in mlpl-runtime and wire it into the..."
 role = "production"
 context_files = []
