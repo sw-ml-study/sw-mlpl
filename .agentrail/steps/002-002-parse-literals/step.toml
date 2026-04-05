@@ -1,6 +1,6 @@
 number = 2
 slug = "002-parse-literals"
-status = "pending"
+status = "in-progress"
 description = """
 Implement parser for literals and array literals.
 

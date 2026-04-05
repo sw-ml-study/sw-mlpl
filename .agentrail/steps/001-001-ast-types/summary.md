@@ -1,0 +1,1 @@
+Defined AST types: Expr enum (IntLit, FloatLit, Ident, ArrayLit, BinOp, FnCall, Assign) with Span on every variant. BinOpKind enum (Add, Sub, Mul, Div). Expr::span() method. 9 integration tests. Parser-owned nodes, no mlpl-array dependency.

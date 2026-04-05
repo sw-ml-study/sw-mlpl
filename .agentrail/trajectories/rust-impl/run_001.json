@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-impl",
+  "state": {
+    "number": 1,
+    "step": "001-ast-types"
+  },
+  "action": "Write tests first (TDD), implement ast.rs with Expr/BinOpKind, export from lib.rs, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T09:53:30"
+}

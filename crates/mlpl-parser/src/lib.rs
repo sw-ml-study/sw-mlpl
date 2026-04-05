@@ -4,9 +4,11 @@ mod ast;
 mod error;
 mod lex_util;
 mod lexer;
+mod parser;
 mod token;
 
 pub use ast::{BinOpKind, Expr};
 pub use error::ParseError;
 pub use lexer::lex;
+pub use parser::parse;
 pub use token::{Token, TokenKind};
