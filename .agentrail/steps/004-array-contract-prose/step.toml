@@ -1,6 +1,6 @@
 number = 4
 slug = "array-contract-prose"
-status = "pending"
+status = "in-progress"
 description = "Write the detailed array-contract prose spec in contracts/array-contract/READ..."
 role = "production"
 context_files = []
