@@ -1,0 +1,1 @@
+Implemented reshape (element-count validation, data reuse, ShapeMismatch error) and transpose (axis reversal with stride-based physical reordering, scalar/vector identity). Merged into ops.rs to stay within 7-module limit. 13 integration tests covering reshape variants, transpose for all ranks, round-trip, and double-transpose identity. All 62 tests pass.
