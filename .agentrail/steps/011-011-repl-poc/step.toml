@@ -1,6 +1,6 @@
 number = 11
 slug = "011-repl-poc"
-status = "pending"
+status = "in-progress"
 description = "Build a REPL proof-of-concept that demonstrates end-to-end evaluation of simp..."
 role = "production"
 context_files = []

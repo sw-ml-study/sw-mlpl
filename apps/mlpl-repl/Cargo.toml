@@ -5,4 +5,5 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-mlpl-cli = { path = "../../crates/mlpl-cli" }
+mlpl-parser = { path = "../../crates/mlpl-parser" }
+mlpl-eval = { path = "../../crates/mlpl-eval" }
