@@ -1,4 +1,4 @@
-# MLPL Foundation Saga
+# MLPL Language Core Saga
 
 ## Quality Requirements (apply to EVERY step)
 
@@ -16,34 +16,39 @@ Every step MUST:
 
 ## Goal
 
-Bootstrap the MLPL monorepo from skeleton to a working Cargo workspace
-with crate skeletons, contract prose, and agent coordination infrastructure.
-This is Saga -1 and Saga 0 from the planning docs.
+Build the MLPL language pipeline from lexer to working REPL. At the
+end of this saga, the REPL should evaluate the full syntax-core-v1.md
+example set: array literals, arithmetic, variables, function calls
+(reshape, transpose, shape, iota, reduce_add).
+
+## What already exists (from mlpl-foundation saga)
+
+- mlpl-core: Span, Identifier
+- mlpl-array: Shape, DenseArray, reshape, transpose, indexing, Display
+- mlpl-parser: lexer with all v1 tokens
+- mlpl-eval: PoC evaluator (number sequences only)
+- mlpl-repl: PoC REPL (lex -> eval -> print)
 
 ## Phases
 
-### Phase 0: Repo scaffolding and agent infrastructure
-- Rewrite process.md for MLPL
-- Populate contract READMEs with prose specs
-- Bootstrap Cargo workspace with crate skeletons
+### Phase 1: Parser AST and expression parsing
+- Define AST node types
+- Parse literals and array literals
+- Parse arithmetic with precedence
+- Parse function calls and assignment
 
-### Phase 1: Core contracts and design
-- Write detailed array-contract spec
-- Syntax design spike (docs/syntax-core-v1.md)
-- Implement mlpl-core basics (spans, identifiers)
+### Phase 2: Evaluator and runtime
+- Real evaluator that walks the AST
+- Environment for variable bindings
+- Element-wise arithmetic with scalar broadcasting
+- Built-in function registry (reshape, transpose, shape, iota, reduce_add, reduce_mul, rank)
 
-### Phase 2: First array types
-- Shape type in mlpl-array
-- DenseArray with storage and indexing
-- Reshape and transpose operations
-
-### Phase 3: Parser foundation
-- Lexer for MLPL v1 syntax
+### Phase 3: REPL integration
+- Wire parser + evaluator into REPL
+- Multi-statement support
+- Error display with source spans
 
 ## Success criteria
-- cargo check succeeds for all workspace members
-- cargo test passes with real tests for core, array, parser
-- Contract READMEs exist with meaningful prose
-- Syntax v1 spec exists
-- process.md is MLPL-specific
-- All code formatted, linted, pushed
+- All syntax-core-v1.md examples work in the REPL
+- cargo test passes with real tests for parser, eval, runtime
+- cargo run -p mlpl-repl is a usable interactive calculator

@@ -1,0 +1,11 @@
+number = 4
+slug = "004-parse-calls-assign"
+status = "pending"
+description = """
+Add function call and assignment parsing to the parser.
+
+Extend crates/mlpl-p..."""
+role = "production"
+context_files = []
+created_at = "2026-04-05T09:02:27"
+task_type = "rust-impl"
