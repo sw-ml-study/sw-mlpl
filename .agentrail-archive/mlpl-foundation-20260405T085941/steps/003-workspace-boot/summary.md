@@ -1,0 +1,1 @@
+Bootstrapped full Cargo workspace with all 13 members (10 crates + 3 apps). Added runtime, eval, trace, viz, wasm, ml, web, lab with correct internal dependencies per architecture doc. Added .gitignore and Cargo.lock. All members pass cargo check, clippy, and test.

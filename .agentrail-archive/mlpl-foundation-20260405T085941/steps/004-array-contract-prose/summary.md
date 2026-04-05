@@ -1,0 +1,1 @@
+Expanded array-contract README from brief outline to full 9-section behavioral spec covering shape model (rank-0 scalar, zero dims allowed, usize), dense storage (row-major, f64 MVP), indexing (0-origin, bounds-checked), reshape, transpose, broadcasting principles, error cases with variant/field table, exclusions, and implementation order.
