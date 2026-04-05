@@ -1,0 +1,383 @@
+Claude Code: I've read all the docs. Here are my questions:
+
+  Architecture / Design
+
+  1. Dependency flow ambiguity: The architecture doc says core → array/parser → runtime → eval → trace → viz/wasm/apps → ml. But in
+  research.txt, mlpl-parser depends on mlpl-core only, while mlpl-eval depends on core + array + parser + runtime. Is parser truly at
+  the same level as array, or should parser depend on array (e.g., for array literal AST nodes referencing shape types)?
+  2. Contract crates vs contract directories: The research envisions contracts/array-contract/tests/reshape_contract.rs as executable
+  Rust tests. But the current contracts/ directories only have README.md stubs — no Cargo.toml, no tests/. Are contracts meant to become
+   actual Rust test crates in the workspace, or stay as prose-only specs that crate-local tests implement?
+  3. mlpl-core scope: The research says core holds spans, identifiers, symbols, primitive IDs, error enums, metadata. But the PRD and
+  architecture docs are silent on what goes in core vs. what each crate defines locally. Have you decided whether errors are centralized
+   in core or local per-crate?
+
+  Process / Workflow
+
+  4. process.md provenance: This file references "needs-attention project", database operations, Playwright UI testing, docs/design.md,
+  docs/learnings.md, and docs/status.md — none of which exist in this repo. It reads like it was copied from a different project. Should
+   it be rewritten for MLPL specifically, or is it intentionally generic?
+  5. TDD with no code yet: The saga plan calls for TDD, but there's no src/ code or Cargo.toml with dependencies in any crate. Saga -1
+  (scaffold) and Saga 0 (foundation) are listed as separate steps. Are you expecting the first real task to also bootstrap the Cargo
+  workspace wiring, or should that be done as a prerequisite before any task packets are assigned?
+  6. research.txt status: This is ~6300 lines of raw conversation transcript. Is this intended to stay as-is for reference, or should
+  key decisions be extracted into proper docs? Right now there's significant duplication between research.txt and the already-created
+  docs.
+
+  Scope / Priorities
+
+  7. MVP visual viewer: Saga 5 calls for a Yew/WASM trace viewer as part of MVP, but the WASM/Yew stack adds significant complexity
+  (trunk, wasm-pack, wasm-bindgen). Given that the core language doesn't exist yet, would you prefer to defer the web viewer to post-MVP
+   and keep MVP as CLI-only with JSON trace export?
+  8. Syntax decisions: The research recommends "ASCII-first, Unicode later" but doesn't specify what the actual syntax looks like.
+  Before parser work begins (Saga 2), do you have a target syntax in mind, or should the first parser task include a syntax design
+  spike?
+
+ChatGPT: Good questions. Here are the decisions I’d make so the agent can proceed without over-reading the repo.
+
+Decisions
+1) Dependency flow ambiguity
+
+Treat mlpl-parser and mlpl-array as peers.
+
+Final rule
+mlpl-core → shared low-level types only
+mlpl-parser depends on mlpl-core
+mlpl-array depends on mlpl-core
+mlpl-runtime depends on mlpl-core + mlpl-array
+mlpl-eval depends on mlpl-core + mlpl-parser + mlpl-runtime + mlpl-array
+Why
+
+Parser should produce syntax/AST, not semantic tensor objects.
+So array literals in the AST should be represented as syntax nodes like:
+
+scalar literal
+array literal
+list of expressions
+maybe shape annotations later
+
+They should not use mlpl-array::Shape directly.
+
+That keeps parser context small and avoids premature semantic coupling.
+
+Practical guidance
+
+If a parser task needs to represent an array literal, use parser-owned AST nodes, not runtime/array types.
+
+2) Contract crates vs contract directories
+
+Use contract directories first, not workspace crates.
+
+Final rule
+
+For now, contracts/ are:
+
+prose specs
+examples
+planned acceptance-test locations
+
+They are not yet separate Cargo crates.
+
+Recommended progression
+Phase A
+
+contracts/<name>-contract/README.md
+
+purpose
+invariants
+examples
+error cases
+open questions
+Phase B
+
+Add executable tests in one of two ways:
+
+crate-local tests that explicitly say “contract-aligned”
+or a dedicated contract test crate later if needed
+My recommendation
+
+Start with crate-local tests, not contract crates.
+
+Why:
+
+less workspace complexity
+less Cargo friction
+fewer moving parts for early agents
+
+So contracts/array-contract/tests/... should be treated as future shape, not immediate required structure.
+
+3) mlpl-core scope
+
+Keep mlpl-core small.
+
+Put in mlpl-core
+source spans
+identifiers
+maybe simple symbol/name wrappers
+maybe shared primitive IDs later
+very small shared utility types only when more than one crate truly needs them
+Do not centralize all errors in mlpl-core
+
+Each crate should own its own error types initially.
+
+Examples
+mlpl-parser::ParseError
+mlpl-array::ArrayError
+mlpl-runtime::RuntimeError
+mlpl-eval::EvalError
+Why
+
+Centralized errors too early create coupling and context bleed.
+
+Exception
+
+If later you want a top-level user-facing diagnostic wrapper, create it later, probably in mlpl-cli or a thin shared diagnostics crate.
+
+Process / Workflow
+4) process.md provenance
+
+It sounds like that file was copied from a different project template and should be treated as wrong for MLPL unless rewritten.
+
+Decision
+
+Yes, it should be rewritten for MLPL specifically.
+
+What to do
+
+Either:
+
+delete it, or
+replace it with an MLPL-specific version
+
+I would replace it with a short MLPL-specific process doc covering:
+
+contract-first work
+one task / one branch / one worktree / one PR
+crate-local context only
+TDD expectations
+escalation rules
+
+Anything about:
+
+database ops
+Playwright
+unrelated project files
+should be removed.
+5) TDD with no code yet
+
+Yes, the workspace bootstrap should be treated as a prerequisite before real implementation tasks.
+
+Decision
+
+Do not ask a shape agent or parser agent to also invent the workspace.
+
+Order
+repo scaffold
+crate/app directory skeletons
+minimal Cargo workspace boot
+initial contract prose
+first code tasks
+
+So:
+
+WORKSPACE-BOOT-001 is a real prerequisite
+ARRAY-SHAPE-001 and PARSER-LEX-001 should come after that merges
+TDD interpretation here
+
+Early TDD means:
+
+for scaffold tasks: checklist / existence / smoke tests
+for workspace boot: cargo check / smoke tests
+for code tasks: real unit tests first
+6) research.txt status
+
+It should not remain the authoritative source long-term.
+
+Decision
+
+Treat research.txt as:
+
+archival background
+raw conversation dump
+not normative
+Normative sources should be
+docs/prd.md
+docs/architecture.md
+docs/saga.md
+contract READMEs
+task packets
+Recommended action
+
+Do not delete research.txt yet, but stop expanding it.
+Extract decisions into proper docs as they stabilize.
+
+A good rule:
+
+if a decision affects implementation, it belongs in docs/contracts/tasks, not only in research.txt.
+
+Scope / Priorities
+7) MVP visual viewer
+
+I would adjust the MVP.
+
+Revised recommendation
+
+Make MVP:
+
+CLI / REPL
+JSON trace export
+maybe a very small offline trace renderer later
+
+And move full Yew/WASM viewer to post-MVP milestone 1.
+
+Why
+
+Right now the highest-risk path is:
+
+language core
+array semantics
+trace model
+
+The web viewer is valuable, but it multiplies toolchain complexity before the core semantics exist.
+
+Revised milestone split
+MVP
+dense arrays
+parser/evaluator basics
+broadcasting/reductions
+rank/cell semantics
+trace export in stable JSON
+good CLI demos
+Post-MVP 1
+Yew/WASM trace viewer
+timeline stepping
+array/table/heatmap views
+
+This is a better sequencing choice.
+
+8) Syntax decisions
+
+Do not let parser implementation run ahead of a syntax mini-spec.
+
+Decision
+
+Add a small syntax design spike before the first parser implementation task.
+
+Not a giant language design effort. Just enough to lock the first slice.
+
+Recommended new task
+
+SYNTAX-CORE-001
+
+Output
+
+A short doc, maybe docs/syntax-core-v1.md, covering:
+
+numeric literals
+identifiers
+delimiters
+array literals
+function call form
+operator spelling for v1
+comments
+whitespace rules
+examples
+My recommendation for v1 syntax
+
+Keep it boring and easy.
+
+Example direction:
+
+1
+1.5
+x
+[1, 2, 3]
+[[1, 2], [3, 4]]
+add(1, 2)
+reshape([1,2,3,4], [2,2])
+transpose([[1,2],[3,4]])
+shape([[1,2],[3,4]])
+
+That is enough to get:
+
+lexer
+parser
+evaluator
+moving, without prematurely locking in APL-like notation.
+
+Later you can add:
+
+ASCII symbolic operators
+pipeline forms
+Unicode aliases
+more compact array syntax
+
+So yes: parser work should begin only after a small syntax spike.
+
+Recommended corrections to the plan
+Immediate doc/process corrections
+Rewrite or remove process.md
+Mark research.txt as archival/non-normative
+Update architecture docs to state clearly:
+parser and array are peers
+parser does not depend on array
+errors are local per crate
+Change contract guidance to:
+prose-first
+crate-local executable tests first
+Move full Yew/WASM viewer out of MVP
+Insert SYNTAX-CORE-001 before parser implementation
+Concrete decisions the agent can rely on
+Final answers in compact form
+1. Parser vs array dependency
+
+Parser and array are peers. Parser should not depend on array.
+
+2. Contract crates
+
+Not yet. Start with prose contracts + crate-local tests.
+
+3. Core scope
+
+Keep core small. Errors stay local per crate initially.
+
+4. process.md
+
+Rewrite or remove it; it is not MLPL-specific enough.
+
+5. TDD bootstrap
+
+Workspace boot is a prerequisite before real implementation tasks.
+
+6. research.txt
+
+Keep as archival reference only; extract decisions into real docs.
+
+7. MVP viewer
+
+Defer full Yew/WASM viewer to post-MVP. MVP should be CLI + JSON trace.
+
+8. Syntax
+
+Do a small syntax-design spike before parser implementation.
+
+Recommended new near-term task order
+REPO-SCAFFOLD-001
+AGENT-CONTRACTS-001
+CRATE-SKELETONS-001
+WORKSPACE-BOOT-001
+ARRAY-CONTRACT-001
+SYNTAX-CORE-001
+ARRAY-SHAPE-001
+PARSER-LEX-001
+PARSER-AST-001
+EVAL-ARITH-001
+
+That is the cleanest next sequence.
+
+If you want, I’ll draft the exact contents for:
+
+docs/syntax-core-v1.md
+an updated MVP statement
+a rewritten MLPL-specific process.md
+a short “normative vs archival docs” note for the repo.
