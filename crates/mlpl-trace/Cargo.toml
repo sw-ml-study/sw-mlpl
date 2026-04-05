@@ -1,0 +1,8 @@
+[package]
+name = "mlpl-trace"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-core = { path = "../mlpl-core" }

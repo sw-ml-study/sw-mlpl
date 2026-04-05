@@ -1,0 +1,9 @@
+[package]
+name = "mlpl-ml"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-runtime = { path = "../mlpl-runtime" }

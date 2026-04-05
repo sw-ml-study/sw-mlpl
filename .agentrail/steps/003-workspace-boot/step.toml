@@ -1,6 +1,6 @@
 number = 3
 slug = "workspace-boot"
-status = "pending"
+status = "in-progress"
 description = """
 Bootstrap the Cargo workspace so that all crates compile.
 

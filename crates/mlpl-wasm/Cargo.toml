@@ -1,13 +1,10 @@
 [package]
-name = "mlpl-cli"
+name = "mlpl-wasm"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
 
-[lib]
-path = "src/lib.rs"
-
 [dependencies]
-mlpl-parser = { path = "../mlpl-parser" }
 mlpl-eval = { path = "../mlpl-eval" }
 mlpl-trace = { path = "../mlpl-trace" }
+mlpl-viz = { path = "../mlpl-viz" }

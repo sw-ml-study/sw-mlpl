@@ -1,0 +1,5 @@
+[package]
+name = "mlpl-lab"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
