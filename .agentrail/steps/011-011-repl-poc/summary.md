@@ -1,1 +1,0 @@
-Built REPL PoC with end-to-end lex-eval-print pipeline. Minimal evaluator in mlpl-eval recognizes numeric literal sequences (single->scalar, multiple->vector). REPL in mlpl-repl reads stdin, lexes, evaluates, prints. 7 integration tests for evaluate(). Demo: type '1 2 3' to see vector output.

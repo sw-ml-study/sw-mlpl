@@ -1,1 +1,0 @@
-Rewrote docs/process.md to be MLPL-specific (contract-first workflow, agent containment, TDD, quality gates, commit format). Added archival notice to docs/research.txt. Also fixed pre-existing issues: str' typo in 4 crate lib.rs files, non-ASCII characters in 15 markdown files. All quality gates pass.

@@ -1,1 +1,0 @@
-Populated all 8 contract READMEs with meaningful prose specs. Array and parser contracts are detailed (types, invariants, errors, exclusions, open questions). Core, eval, runtime, trace, viz, and ml contracts have purpose, scope, invariants, and exclusions. All quality gates pass.

@@ -1,1 +1,0 @@
-Implemented Shape type (new/scalar/vector, rank/dims/elem_count, Display, Eq/Hash/Clone) and ArrayError enum (5 variants: DataLengthMismatch, ShapeMismatch, IndexOutOfBounds, RankMismatch, EmptyArray with Display/Error). 13 integration tests. Removed matrix() convenience constructor to stay within sw-checklist 7-function limit.

@@ -1,9 +1,0 @@
-number = 4
-slug = "array-contract-prose"
-status = "completed"
-description = "Write the detailed array-contract prose spec in contracts/array-contract/READ..."
-role = "production"
-context_files = []
-created_at = "2026-04-04T14:56:59"
-completed_at = "2026-04-04T19:28:02"
-task_type = "docs-contracts"
