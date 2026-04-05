@@ -1,6 +1,6 @@
 number = 5
 slug = "syntax-core-v1"
-status = "pending"
+status = "in-progress"
 description = """
 Create docs/syntax-core-v1.md -- a small syntax design spike for MLPL v1.
 
