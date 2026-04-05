@@ -1,0 +1,1 @@
+Added function call parsing (ident+LParen triggers arg list, supports 0-N args, nested calls) and assignment parsing (ident+Equals at statement level, lowest precedence). Inlined binop_prec to stay at 7 functions. 12 new tests for fn calls, assignment, and disambiguation. All 67 parser tests pass.
