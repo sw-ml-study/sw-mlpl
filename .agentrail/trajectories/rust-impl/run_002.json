@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-impl",
+  "state": {
+    "number": 2,
+    "step": "002-parse-literals"
+  },
+  "action": "Write tests first (TDD), implement parser.rs, add ParseError variants, iterative refactoring for sw-checklist compliance, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T10:25:28"
+}
