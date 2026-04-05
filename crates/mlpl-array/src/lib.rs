@@ -1,5 +1,7 @@
-//! mlpl-array
+//! Dense array and tensor types for MLPL.
 
-pub fn crate_name() -> &'static str {
-    "mlpl-array"
-}
+mod error;
+mod shape;
+
+pub use error::ArrayError;
+pub use shape::Shape;

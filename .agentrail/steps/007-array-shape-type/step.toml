@@ -1,6 +1,6 @@
 number = 7
 slug = "array-shape-type"
-status = "pending"
+status = "in-progress"
 description = "Implement the Shape type in mlpl-array. This is task ARRAY-SHAPE-001 from the..."
 role = "production"
 context_files = []

@@ -1,0 +1,1 @@
+Implemented Span (byte-offset range with len/is_empty/Display) and Identifier (validated name wrapper with Option-returning new/as_str/Display/Eq/Hash) in mlpl-core. 16 integration tests in tests/ dir. Tests moved from inline cfg(test) to integration files to satisfy sw-checklist function count limit.
