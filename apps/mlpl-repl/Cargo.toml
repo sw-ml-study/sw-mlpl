@@ -7,3 +7,4 @@ version.workspace = true
 [dependencies]
 mlpl-parser = { path = "../../crates/mlpl-parser" }
 mlpl-eval = { path = "../../crates/mlpl-eval" }
+mlpl-trace = { path = "../../crates/mlpl-trace" }
