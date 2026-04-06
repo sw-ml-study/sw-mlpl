@@ -1,0 +1,1 @@
+Created 4 demo scripts (basics, matrix_ops, computation, trace_demo). Added -f/--file flag and --trace to mlpl-repl for script execution. Updated README.md with quick start, examples, feature list. Updated milestone-mvp.md with completion checklist. Updated saga.md marking sagas 0-4 complete.
