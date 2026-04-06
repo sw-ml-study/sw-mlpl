@@ -1,6 +1,6 @@
 number = 1
 slug = "001-unary-neg"
-status = "pending"
+status = "in-progress"
 description = """
 Add unary negation support to the parser and evaluator.
 

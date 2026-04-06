@@ -83,6 +83,16 @@ impl<'a> Parser<'a> {
     pub(crate) fn parse_atom(&mut self) -> Result<Expr, ParseError> {
         let tok = &self.tokens[self.pos];
         match &tok.kind {
+            TokenKind::Minus => {
+                let start = tok.span;
+                self.pos += 1;
+                let operand = self.parse_atom()?;
+                let span = Span::new(start.start, operand.span().end);
+                Ok(Expr::UnaryNeg {
+                    operand: Box::new(operand),
+                    span,
+                })
+            }
             TokenKind::IntLit(n) => {
                 let e = Expr::IntLit(*n, tok.span);
                 self.pos += 1;
