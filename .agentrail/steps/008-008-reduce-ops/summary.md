@@ -1,0 +1,1 @@
+Added reduce_add and reduce_mul builtins. Single builtin_reduce function dispatches on name. Handles any rank. Inlined scalar_to_usize to stay at 7 functions. 6 new tests for sum/product of vectors/matrices/scalars/with-zero.

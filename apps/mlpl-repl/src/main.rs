@@ -3,8 +3,9 @@ use std::io::{self, BufRead, Write};
 use mlpl_eval::Environment;
 
 fn main() {
-    println!("MLPL v0.1");
-    println!("Type expressions. Type \"exit\" or Ctrl-D to quit.");
+    println!("MLPL v0.1 -- Array Programming Language");
+    println!("Built-ins: iota, shape, rank, reshape, transpose, reduce_add, reduce_mul");
+    println!("Type \"exit\" or Ctrl-D to quit.");
     println!();
 
     let stdin = io::stdin();
@@ -33,11 +34,11 @@ fn main() {
             Ok(tokens) => match mlpl_parser::parse(&tokens) {
                 Ok(stmts) => match mlpl_eval::eval_program(&stmts, &mut env) {
                     Ok(arr) => println!("{arr}"),
-                    Err(e) => eprintln!("eval error: {e}"),
+                    Err(e) => eprintln!("error: {e}"),
                 },
-                Err(e) => eprintln!("parse error: {e}"),
+                Err(e) => eprintln!("error: {e}"),
             },
-            Err(e) => eprintln!("lex error: {e}"),
+            Err(e) => eprintln!("error: {e}"),
         }
     }
 }
