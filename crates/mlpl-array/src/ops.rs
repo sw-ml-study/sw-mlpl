@@ -105,6 +105,53 @@ impl DenseArray {
     }
 }
 
+impl DenseArray {
+    /// Reduce along an axis using the given binary operation.
+    ///
+    /// Removes the specified axis from the shape. For example,
+    /// a [2,3] array reduced along axis 0 produces a [3] result.
+    pub fn reduce_axis(
+        &self,
+        axis: usize,
+        identity: f64,
+        op: fn(f64, f64) -> f64,
+    ) -> Result<DenseArray, ArrayError> {
+        let dims = self.shape().dims();
+        if axis >= dims.len() {
+            return Err(ArrayError::IndexOutOfBounds {
+                axis,
+                index: axis,
+                size: dims.len(),
+            });
+        }
+        let mut result_dims: Vec<usize> = dims.to_vec();
+        result_dims.remove(axis);
+        let result_shape = Shape::new(result_dims);
+        let result_count = result_shape.elem_count();
+        let mut result_data = vec![identity; result_count];
+
+        let strides = compute_strides(dims);
+        let axis_size = dims[axis];
+        let axis_stride = strides[axis];
+
+        for flat in 0..self.elem_count() {
+            let result_flat = if axis_stride > 1 {
+                let outer = flat / (axis_size * axis_stride);
+                let inner = flat % axis_stride;
+                outer * axis_stride + inner
+            } else {
+                flat / axis_size
+            };
+            result_data[result_flat] = op(result_data[result_flat], self.data[flat]);
+        }
+
+        Ok(DenseArray {
+            shape: result_shape,
+            data: result_data,
+        })
+    }
+}
+
 /// Compute strides for row-major layout.
 fn compute_strides(dims: &[usize]) -> Vec<usize> {
     let mut strides = vec![1; dims.len()];
