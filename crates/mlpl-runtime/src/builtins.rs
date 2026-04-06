@@ -33,6 +33,22 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
             check_arity!(name, 2, args);
             Ok(args[0].matmul(&args[1])?)
         }
+        "exp" => {
+            check_arity!(name, 1, args);
+            Ok(args[0].map(f64::exp))
+        }
+        "log" => {
+            check_arity!(name, 1, args);
+            Ok(args[0].map(f64::ln))
+        }
+        "sqrt" => {
+            check_arity!(name, 1, args);
+            Ok(args[0].map(f64::sqrt))
+        }
+        "abs" => {
+            check_arity!(name, 1, args);
+            Ok(args[0].map(f64::abs))
+        }
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
 }

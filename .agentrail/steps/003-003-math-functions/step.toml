@@ -1,6 +1,6 @@
 number = 3
 slug = "003-math-functions"
-status = "pending"
+status = "in-progress"
 description = """
 Add element-wise math functions: exp, log, sqrt, abs.
 

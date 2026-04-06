@@ -1,0 +1,1 @@
+Implemented DenseArray::matmul() for matrix-matrix [m,k]*[k,n]->[m,n] and matrix-vector [m,k]*[k]->[m]. Chunk-based iteration for clippy compliance. Wired as 'matmul' built-in. 6 integration tests including identity, mat-vec, dimension mismatch, non-square.
