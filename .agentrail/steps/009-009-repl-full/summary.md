@@ -1,0 +1,1 @@
+Polished REPL with built-in function list in welcome message. Added 8 E2E integration tests covering every syntax-core-v1.md example: scalar/vector arithmetic, broadcast, iota+reshape, transpose, shape query, reduce, multi-step computation (=42). REPL was already fully functional from step 005; this step added polish and validation.

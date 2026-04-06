@@ -32,6 +32,7 @@ fn main() {
 
         match mlpl_parser::lex(trimmed) {
             Ok(tokens) => match mlpl_parser::parse(&tokens) {
+                Ok(stmts) if stmts.is_empty() => {}
                 Ok(stmts) => match mlpl_eval::eval_program(&stmts, &mut env) {
                     Ok(arr) => println!("{arr}"),
                     Err(e) => eprintln!("error: {e}"),
