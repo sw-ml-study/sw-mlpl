@@ -1,0 +1,1 @@
+Instrumented evaluator with trace capture. eval_program_traced() records TraceEvent for every eval_expr call with op name, span, inputs, output, seq number. eval_program() backward compatible (no trace). Split eval_expr into helpers (eval_binop, eval_fncall) for function LOC compliance. 7 new tests for trace events, ordering, spans, JSON, backward compat.
