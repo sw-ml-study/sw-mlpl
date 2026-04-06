@@ -1,4 +1,4 @@
-# MLPL Language Core Saga
+# MLPL MVP Completion Saga
 
 ## Quality Requirements (apply to EVERY step)
 
@@ -16,39 +16,46 @@ Every step MUST:
 
 ## Goal
 
-Build the MLPL language pipeline from lexer to working REPL. At the
-end of this saga, the REPL should evaluate the full syntax-core-v1.md
-example set: array literals, arithmetic, variables, function calls
-(reshape, transpose, shape, iota, reduce_add).
+Complete the MLPL MVP: add the remaining language features
+(rank/cell semantics, axis reductions, unary negation), build the
+trace system with JSON export, and create compelling CLI demos.
 
-## What already exists (from mlpl-foundation saga)
+At the end of this saga, MLPL should be demonstrable as a working
+array language with execution tracing.
+
+## What already exists (from previous sagas)
 
 - mlpl-core: Span, Identifier
-- mlpl-array: Shape, DenseArray, reshape, transpose, indexing, Display
-- mlpl-parser: lexer with all v1 tokens
-- mlpl-eval: PoC evaluator (number sequences only)
-- mlpl-repl: PoC REPL (lex -> eval -> print)
+- mlpl-array: Shape, DenseArray, reshape, transpose, indexing,
+  element-wise ops with scalar broadcasting, Display
+- mlpl-parser: lexer (all v1 tokens), parser (AST with literals,
+  arrays, arithmetic with precedence, function calls, assignment)
+- mlpl-eval: AST-walking evaluator with environment
+- mlpl-runtime: builtins (iota, shape, rank, reshape, transpose,
+  reduce_add, reduce_mul)
+- mlpl-repl: working REPL with full syntax-core-v1 support
 
 ## Phases
 
-### Phase 1: Parser AST and expression parsing
-- Define AST node types
-- Parse literals and array literals
-- Parse arithmetic with precedence
-- Parse function calls and assignment
+### Phase 1: Language enrichment
+- Unary negation in expressions
+- Axis-specific reductions (reduce along an axis)
+- Element-wise comparison operators (future consideration)
 
-### Phase 2: Evaluator and runtime
-- Real evaluator that walks the AST
-- Environment for variable bindings
-- Element-wise arithmetic with scalar broadcasting
-- Built-in function registry (reshape, transpose, shape, iota, reduce_add, reduce_mul, rank)
+### Phase 2: Trace system
+- TraceEvent and Trace types in mlpl-trace
+- Instrument evaluator to emit trace events
+- JSON serialization of traces (serde)
+- Trace export command in REPL
 
-### Phase 3: REPL integration
-- Wire parser + evaluator into REPL
-- Multi-statement support
-- Error display with source spans
+### Phase 3: CLI demos and polish
+- Demo scripts exercising all features
+- REPL help command
+- Error messages with source context
+- Update documentation
 
 ## Success criteria
-- All syntax-core-v1.md examples work in the REPL
-- cargo test passes with real tests for parser, eval, runtime
-- cargo run -p mlpl-repl is a usable interactive calculator
+- All v1 syntax examples work
+- Trace JSON output for any evaluation
+- cargo test passes for all crates including trace
+- Demo scripts run and produce correct output
