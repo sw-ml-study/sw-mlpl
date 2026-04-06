@@ -1,0 +1,1 @@
+Added DenseArray::map() for element-wise function application. Wired exp, log, sqrt, abs as built-ins using f64 std methods. 8 integration tests including round-trip verification.

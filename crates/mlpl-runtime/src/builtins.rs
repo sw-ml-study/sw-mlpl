@@ -49,6 +49,18 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
             check_arity!(name, 1, args);
             Ok(args[0].map(f64::abs))
         }
+        "sigmoid" => {
+            check_arity!(name, 1, args);
+            Ok(args[0].map(|x| 1.0 / (1.0 + (-x).exp())))
+        }
+        "tanh_fn" => {
+            check_arity!(name, 1, args);
+            Ok(args[0].map(f64::tanh))
+        }
+        "pow" => {
+            check_arity!(name, 2, args);
+            Ok(args[0].apply_binop(&args[1], f64::powf)?)
+        }
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
 }
