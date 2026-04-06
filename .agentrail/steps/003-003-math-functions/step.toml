@@ -1,0 +1,11 @@
+number = 3
+slug = "003-math-functions"
+status = "pending"
+description = """
+Add element-wise math functions: exp, log, sqrt, abs.
+
+1. In mlpl-array, add ..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T12:41:34"
+task_type = "rust-impl"

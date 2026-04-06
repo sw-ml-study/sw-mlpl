@@ -1,0 +1,11 @@
+number = 5
+slug = "005-array-constructors"
+status = "pending"
+description = """
+Add fill, ones, and random array constructors.
+
+1. In mlpl-runtime, add built..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T12:41:57"
+task_type = "rust-impl"

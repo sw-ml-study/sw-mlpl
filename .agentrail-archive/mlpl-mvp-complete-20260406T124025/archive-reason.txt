@@ -1,0 +1,1 @@
+Saga complete: all 8 steps finished. MVP tagged v0.1.0-mvp. 191 tests, 4 demos, trace system, full REPL.
