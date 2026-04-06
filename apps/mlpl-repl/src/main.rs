@@ -4,13 +4,32 @@ use mlpl_eval::Environment;
 use mlpl_trace::Trace;
 
 fn main() {
+    let args: Vec<String> = std::env::args().collect();
+    let mut env = Environment::new();
+    let trace_flag = args.iter().any(|a| a == "--trace");
+
+    if let Some(pos) = args.iter().position(|a| a == "-f" || a == "--file") {
+        let path = args.get(pos + 1).unwrap_or_else(|| {
+            eprintln!("error: -f requires a file path");
+            std::process::exit(1);
+        });
+        let content = std::fs::read_to_string(path).unwrap_or_else(|e| {
+            eprintln!("error reading {path}: {e}");
+            std::process::exit(1);
+        });
+        run_script(&content, &mut env, trace_flag);
+    } else {
+        run_interactive(&mut env);
+    }
+}
+
+fn run_interactive(env: &mut Environment) {
     println!("MLPL v0.1 -- Array Programming Language");
     println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();
 
     let stdin = io::stdin();
     let mut stdout = io::stdout();
-    let mut env = Environment::new();
     let mut tracing = false;
     let mut last_trace: Option<Trace> = None;
 
@@ -32,11 +51,27 @@ fn main() {
             break;
         }
 
-        if handle_command(trimmed, &mut tracing, &last_trace, &mut env) {
+        if handle_command(trimmed, &mut tracing, &last_trace, env) {
             continue;
         }
 
-        eval_line(trimmed, &mut env, tracing, &mut last_trace);
+        eval_line(trimmed, env, tracing, &mut last_trace);
+    }
+}
+
+fn run_script(content: &str, env: &mut Environment, tracing: bool) {
+    let mut last_trace: Option<Trace> = None;
+    for line in content.lines() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        println!("> {trimmed}");
+        eval_line(trimmed, env, tracing, &mut last_trace);
+    }
+    if let Some(trace) = &last_trace {
+        println!();
+        print_trace_summary(trace);
     }
 }
 
@@ -46,7 +81,7 @@ fn handle_command(
     last_trace: &Option<Trace>,
     env: &mut Environment,
 ) -> bool {
-    if !input.starts_with(':') && input != "exit" {
+    if !input.starts_with(':') {
         return false;
     }
     match input {
@@ -63,32 +98,35 @@ fn handle_command(
             *tracing = false;
             println!("Tracing disabled.");
         }
-        ":trace json" => with_trace(last_trace, |t| println!("{}", t.to_json())),
-        ":trace" => with_trace(last_trace, print_trace_summary),
+        ":trace json" => match last_trace {
+            Some(t) => println!("{}", t.to_json()),
+            None => eprintln!("No trace available. Use :trace on first."),
+        },
+        ":trace" => match last_trace {
+            Some(t) => print_trace_summary(t),
+            None => eprintln!("No trace available. Use :trace on first."),
+        },
         _ if input.starts_with(":trace json ") => {
             let path = input.strip_prefix(":trace json ").unwrap().trim();
-            with_trace(last_trace, |t| match std::fs::write(path, t.to_json()) {
-                Ok(()) => println!("Trace written to {path}"),
-                Err(e) => eprintln!("error writing file: {e}"),
-            });
+            match last_trace {
+                Some(t) => match std::fs::write(path, t.to_json()) {
+                    Ok(()) => println!("Trace written to {path}"),
+                    Err(e) => eprintln!("error writing file: {e}"),
+                },
+                None => eprintln!("No trace available. Use :trace on first."),
+            }
         }
         _ => eprintln!("Unknown command: {input}. Type :help for available commands."),
     }
     true
 }
 
-fn with_trace(trace: &Option<Trace>, f: impl FnOnce(&Trace)) {
-    match trace {
-        Some(t) => f(t),
-        None => eprintln!("No trace available. Use :trace on first."),
-    }
-}
-
 fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut Option<Trace>) {
     let tokens = match mlpl_parser::lex(input) {
         Ok(t) => t,
         Err(e) => {
-            print_error(input, &format!("{e}"));
+            eprintln!("  {input}");
+            eprintln!("  error: {e}");
             return;
         }
     };
@@ -96,7 +134,8 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
         Ok(s) if s.is_empty() => return,
         Ok(s) => s,
         Err(e) => {
-            print_error(input, &format!("{e}"));
+            eprintln!("  {input}");
+            eprintln!("  error: {e}");
             return;
         }
     };
@@ -107,19 +146,20 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
                 println!("{arr}");
                 *last_trace = Some(trace);
             }
-            Err(e) => print_error(input, &format!("{e}")),
+            Err(e) => {
+                eprintln!("  {input}");
+                eprintln!("  error: {e}");
+            }
         }
     } else {
         match mlpl_eval::eval_program(&stmts, env) {
             Ok(arr) => println!("{arr}"),
-            Err(e) => print_error(input, &format!("{e}")),
+            Err(e) => {
+                eprintln!("  {input}");
+                eprintln!("  error: {e}");
+            }
         }
     }
-}
-
-fn print_error(source: &str, msg: &str) {
-    eprintln!("  {source}");
-    eprintln!("  error: {msg}");
 }
 
 fn print_help() {
@@ -151,6 +191,8 @@ fn print_help() {
     println!("  :trace json          print last trace as JSON");
     println!("  :trace json <file>   write trace JSON to file");
     println!("  exit                 quit");
+    println!();
+    println!("File mode: cargo run -p mlpl-repl -- -f <script.mlpl>");
 }
 
 fn print_trace_summary(trace: &Trace) {

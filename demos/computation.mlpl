@@ -1,0 +1,9 @@
+# MLPL Multi-Step Computation Demo
+# The answer to life, the universe, and everything
+data = [1, 2, 3, 4, 5, 6]
+grid = reshape(data, [2, 3])
+grid
+scaled = grid * 2
+scaled
+result = reduce_add(scaled)
+result
