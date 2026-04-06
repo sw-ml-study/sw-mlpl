@@ -1,6 +1,6 @@
 number = 8
 slug = "008-mvp-validation"
-status = "pending"
+status = "in-progress"
 description = """
 Final MVP validation: run all demos, verify traces, confirm docs.
 
