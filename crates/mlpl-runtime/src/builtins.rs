@@ -3,6 +3,7 @@
 use mlpl_array::{DenseArray, Shape};
 
 use crate::error::RuntimeError;
+use crate::math_builtins;
 
 macro_rules! check_arity {
     ($name:expr, $expected:expr, $args:expr) => {
@@ -18,6 +19,10 @@ macro_rules! check_arity {
 
 /// Dispatch a built-in function call by name.
 pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    // Try math/constructor builtins first
+    if let Some(result) = math_builtins::try_call(name, args.clone()) {
+        return result;
+    }
     match name {
         "iota" => builtin_iota(name, args),
         "shape" => builtin_shape(name, args),
@@ -32,34 +37,6 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
         "matmul" => {
             check_arity!(name, 2, args);
             Ok(args[0].matmul(&args[1])?)
-        }
-        "exp" => {
-            check_arity!(name, 1, args);
-            Ok(args[0].map(f64::exp))
-        }
-        "log" => {
-            check_arity!(name, 1, args);
-            Ok(args[0].map(f64::ln))
-        }
-        "sqrt" => {
-            check_arity!(name, 1, args);
-            Ok(args[0].map(f64::sqrt))
-        }
-        "abs" => {
-            check_arity!(name, 1, args);
-            Ok(args[0].map(f64::abs))
-        }
-        "sigmoid" => {
-            check_arity!(name, 1, args);
-            Ok(args[0].map(|x| 1.0 / (1.0 + (-x).exp())))
-        }
-        "tanh_fn" => {
-            check_arity!(name, 1, args);
-            Ok(args[0].map(f64::tanh))
-        }
-        "pow" => {
-            check_arity!(name, 2, args);
-            Ok(args[0].apply_binop(&args[1], f64::powf)?)
         }
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
@@ -115,7 +92,6 @@ fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runti
         _ => unreachable!(),
     };
     if args.len() == 2 {
-        // Axis reduction
         if args[1].rank() != 0 {
             return Err(RuntimeError::InvalidArgument {
                 func: name.into(),
@@ -125,7 +101,6 @@ fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runti
         let axis = args[1].data()[0] as usize;
         Ok(args[0].reduce_axis(axis, identity, op)?)
     } else {
-        // Reduce all elements
         let result = args[0].data().iter().copied().fold(identity, op);
         Ok(DenseArray::from_scalar(result))
     }
