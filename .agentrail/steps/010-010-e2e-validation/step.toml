@@ -1,6 +1,6 @@
 number = 10
 slug = "010-e2e-validation"
-status = "pending"
+status = "in-progress"
 description = "End-to-end validation: run all syntax-core-v1.md examples through the REPL an..."
 role = "production"
 context_files = []
