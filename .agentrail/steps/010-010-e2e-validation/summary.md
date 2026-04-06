@@ -1,0 +1,1 @@
+Final acceptance tests: 12 tests verifying exact Display output for every syntax-core-v1.md example. All pass. Fixed REPL to silently skip comment-only lines. Full pipeline validated: lex -> parse -> eval -> Display. Saga success criteria met.
