@@ -28,6 +28,11 @@ pub(crate) fn eval_expr(expr: &Expr, env: &mut Environment) -> Result<DenseArray
             .cloned()
             .ok_or_else(|| EvalError::UndefinedVariable(name.clone())),
         Expr::ArrayLit(elems, _) => eval_array_lit(elems, env),
+        Expr::UnaryNeg { operand, .. } => {
+            let val = eval_expr(operand, env)?;
+            let neg = DenseArray::from_scalar(-1.0);
+            Ok(neg.apply_binop(&val, |a, b| a * b)?)
+        }
         Expr::Assign { name, value, .. } => {
             let val = eval_expr(value, env)?;
             env.set(name.clone(), val.clone());

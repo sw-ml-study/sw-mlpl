@@ -48,6 +48,13 @@ pub enum Expr {
         /// Span covering name through closing paren.
         span: Span,
     },
+    /// Unary negation: `-expr`
+    UnaryNeg {
+        /// The operand.
+        operand: Box<Expr>,
+        /// Span covering the minus through the operand.
+        span: Span,
+    },
     /// Assignment: `name = value`
     Assign {
         /// Variable name.
@@ -69,6 +76,7 @@ impl Expr {
             | Self::Ident(_, s)
             | Self::ArrayLit(_, s)
             | Self::BinOp { span: s, .. }
+            | Self::UnaryNeg { span: s, .. }
             | Self::FnCall { span: s, .. }
             | Self::Assign { span: s, .. } => *s,
         }
