@@ -29,6 +29,10 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
             check_arity!(name, 2, args);
             Ok(args[0].dot(&args[1])?)
         }
+        "matmul" => {
+            check_arity!(name, 2, args);
+            Ok(args[0].matmul(&args[1])?)
+        }
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
 }

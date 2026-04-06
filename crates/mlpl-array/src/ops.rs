@@ -137,6 +137,60 @@ impl DenseArray {
 }
 
 impl DenseArray {
+    /// Matrix multiplication.
+    ///
+    /// - [m, k] * [k, n] -> [m, n]
+    /// - [m, k] * [k] -> [m] (matrix-vector product)
+    pub fn matmul(&self, other: &DenseArray) -> Result<DenseArray, ArrayError> {
+        let (m, k) = match self.shape().dims() {
+            [m, k] => (*m, *k),
+            _ => {
+                return Err(ArrayError::RankMismatch {
+                    expected: 2,
+                    got: self.rank(),
+                });
+            }
+        };
+        match other.shape().dims() {
+            [k2, n] if *k2 == k => {
+                let n = *n;
+                let data: Vec<f64> = self
+                    .data
+                    .chunks(k)
+                    .flat_map(|row| {
+                        (0..n).map(move |j| {
+                            row.iter()
+                                .zip(other.data.chunks(n).map(|col| col[j]))
+                                .map(|(a, b)| a * b)
+                                .sum::<f64>()
+                        })
+                    })
+                    .collect();
+                Ok(DenseArray {
+                    shape: Shape::new(vec![m, n]),
+                    data,
+                })
+            }
+            [k2] if *k2 == k => {
+                let data: Vec<f64> = self
+                    .data
+                    .chunks(k)
+                    .map(|row| row.iter().zip(other.data.iter()).map(|(a, b)| a * b).sum())
+                    .collect();
+                Ok(DenseArray {
+                    shape: Shape::vector(m),
+                    data,
+                })
+            }
+            _ => Err(ArrayError::ShapeMismatch {
+                source: k,
+                target: other.shape().dims().first().copied().unwrap_or(0),
+            }),
+        }
+    }
+}
+
+impl DenseArray {
     /// Reduce along an axis using the given binary operation.
     ///
     /// Removes the specified axis from the shape. For example,

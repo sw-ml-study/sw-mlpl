@@ -1,0 +1,1 @@
+Implemented DenseArray::dot() for rank-1 vector dot product. Returns scalar sum of element-wise products. Errors on rank/length mismatch. Wired as 'dot' built-in. 5 integration tests.
