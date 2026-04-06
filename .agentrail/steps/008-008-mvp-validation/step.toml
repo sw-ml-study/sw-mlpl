@@ -1,0 +1,11 @@
+number = 8
+slug = "008-mvp-validation"
+status = "pending"
+description = """
+Final MVP validation: run all demos, verify traces, confirm docs.
+
+1. Run eac..."""
+role = "production"
+context_files = []
+created_at = "2026-04-05T19:02:44"
+task_type = "validation"
