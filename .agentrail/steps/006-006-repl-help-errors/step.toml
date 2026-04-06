@@ -1,6 +1,6 @@
 number = 6
 slug = "006-repl-help-errors"
-status = "pending"
+status = "in-progress"
 description = """
 Add a :help command and improve REPL error messages.
 

@@ -1,0 +1,1 @@
+Added :trace on/off, :trace (summary), :trace json (stdout), :trace json <file> (file export) commands to REPL. When tracing is on, uses eval_program_traced to capture Trace. When off, uses eval_program with no overhead. Refactored REPL into handle_command/eval_line/print_trace_summary. Verified via piped input testing.
