@@ -1,6 +1,6 @@
 number = 2
 slug = "002-matmul"
-status = "pending"
+status = "in-progress"
 description = """
 Implement matrix multiplication in mlpl-array and wire as a built-in.
 
