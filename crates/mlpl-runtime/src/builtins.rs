@@ -25,6 +25,10 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
         "reshape" => builtin_reshape(name, args),
         "transpose" => builtin_transpose(name, args),
         "reduce_add" | "reduce_mul" => builtin_reduce(name, args),
+        "dot" => {
+            check_arity!(name, 2, args);
+            Ok(args[0].dot(&args[1])?)
+        }
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
 }

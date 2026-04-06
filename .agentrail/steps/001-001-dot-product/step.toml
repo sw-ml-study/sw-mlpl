@@ -1,6 +1,6 @@
 number = 1
 slug = "001-dot-product"
-status = "pending"
+status = "in-progress"
 description = """
 Implement dot product for vectors in mlpl-array and wire as a built-in.
 
