@@ -5,8 +5,7 @@ use mlpl_trace::Trace;
 
 fn main() {
     println!("MLPL v0.1 -- Array Programming Language");
-    println!("Built-ins: iota, shape, rank, reshape, transpose, reduce_add, reduce_mul");
-    println!("Commands: :trace on/off, :trace, :trace json, exit");
+    println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();
 
     let stdin = io::stdin();
@@ -33,7 +32,7 @@ fn main() {
             break;
         }
 
-        if handle_command(trimmed, &mut tracing, &last_trace) {
+        if handle_command(trimmed, &mut tracing, &last_trace, &mut env) {
             continue;
         }
 
@@ -41,48 +40,47 @@ fn main() {
     }
 }
 
-fn handle_command(input: &str, tracing: &mut bool, last_trace: &Option<Trace>) -> bool {
+fn handle_command(
+    input: &str,
+    tracing: &mut bool,
+    last_trace: &Option<Trace>,
+    env: &mut Environment,
+) -> bool {
+    if !input.starts_with(':') && input != "exit" {
+        return false;
+    }
     match input {
+        ":help" => print_help(),
+        ":clear" => {
+            *env = Environment::new();
+            println!("Environment cleared.");
+        }
         ":trace on" => {
             *tracing = true;
             println!("Tracing enabled.");
-            true
         }
         ":trace off" => {
             *tracing = false;
             println!("Tracing disabled.");
-            true
         }
-        ":trace json" => {
-            match last_trace {
-                Some(t) => println!("{}", t.to_json()),
-                None => eprintln!("No trace available. Use :trace on first."),
-            }
-            true
-        }
-        ":trace" => {
-            match last_trace {
-                Some(t) => print_trace_summary(t),
-                None => eprintln!("No trace available. Use :trace on first."),
-            }
-            true
-        }
+        ":trace json" => with_trace(last_trace, |t| println!("{}", t.to_json())),
+        ":trace" => with_trace(last_trace, print_trace_summary),
         _ if input.starts_with(":trace json ") => {
             let path = input.strip_prefix(":trace json ").unwrap().trim();
-            match last_trace {
-                Some(t) => match std::fs::write(path, t.to_json()) {
-                    Ok(()) => println!("Trace written to {path}"),
-                    Err(e) => eprintln!("error writing file: {e}"),
-                },
-                None => eprintln!("No trace available. Use :trace on first."),
-            }
-            true
+            with_trace(last_trace, |t| match std::fs::write(path, t.to_json()) {
+                Ok(()) => println!("Trace written to {path}"),
+                Err(e) => eprintln!("error writing file: {e}"),
+            });
         }
-        _ if input.starts_with(':') => {
-            eprintln!("Unknown command: {input}");
-            true
-        }
-        _ => false,
+        _ => eprintln!("Unknown command: {input}. Type :help for available commands."),
+    }
+    true
+}
+
+fn with_trace(trace: &Option<Trace>, f: impl FnOnce(&Trace)) {
+    match trace {
+        Some(t) => f(t),
+        None => eprintln!("No trace available. Use :trace on first."),
     }
 }
 
@@ -90,7 +88,7 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
     let tokens = match mlpl_parser::lex(input) {
         Ok(t) => t,
         Err(e) => {
-            eprintln!("error: {e}");
+            print_error(input, &format!("{e}"));
             return;
         }
     };
@@ -98,7 +96,7 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
         Ok(s) if s.is_empty() => return,
         Ok(s) => s,
         Err(e) => {
-            eprintln!("error: {e}");
+            print_error(input, &format!("{e}"));
             return;
         }
     };
@@ -109,14 +107,50 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
                 println!("{arr}");
                 *last_trace = Some(trace);
             }
-            Err(e) => eprintln!("error: {e}"),
+            Err(e) => print_error(input, &format!("{e}")),
         }
     } else {
         match mlpl_eval::eval_program(&stmts, env) {
             Ok(arr) => println!("{arr}"),
-            Err(e) => eprintln!("error: {e}"),
+            Err(e) => print_error(input, &format!("{e}")),
         }
     }
+}
+
+fn print_error(source: &str, msg: &str) {
+    eprintln!("  {source}");
+    eprintln!("  error: {msg}");
+}
+
+fn print_help() {
+    println!("MLPL v0.1 -- Array Programming Language");
+    println!();
+    println!("Syntax:");
+    println!("  42              scalar literal");
+    println!("  [1, 2, 3]       array literal");
+    println!("  x = expr        assignment");
+    println!("  a + b           arithmetic (+, -, *, /)");
+    println!("  func(args)      function call");
+    println!();
+    println!("Built-in functions:");
+    println!("  iota(n)              integers 0..n");
+    println!("  shape(a)             dimension vector");
+    println!("  rank(a)              number of dimensions");
+    println!("  reshape(a, dims)     reshape array");
+    println!("  transpose(a)         reverse axis order");
+    println!("  reduce_add(a)        sum all elements");
+    println!("  reduce_add(a, axis)  sum along axis");
+    println!("  reduce_mul(a)        product of all elements");
+    println!("  reduce_mul(a, axis)  product along axis");
+    println!();
+    println!("Commands:");
+    println!("  :help                show this help");
+    println!("  :clear               reset all variables");
+    println!("  :trace on/off        toggle execution tracing");
+    println!("  :trace               show last trace summary");
+    println!("  :trace json          print last trace as JSON");
+    println!("  :trace json <file>   write trace JSON to file");
+    println!("  exit                 quit");
 }
 
 fn print_trace_summary(trace: &Trace) {
