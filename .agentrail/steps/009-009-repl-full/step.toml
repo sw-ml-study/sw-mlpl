@@ -1,6 +1,6 @@
 number = 9
 slug = "009-repl-full"
-status = "pending"
+status = "in-progress"
 description = """
 Wire the full parser + evaluator pipeline into the REPL, replacing the PoC.
 

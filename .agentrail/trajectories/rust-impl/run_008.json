@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-impl",
+  "state": {
+    "number": 8,
+    "step": "008-reduce-ops"
+  },
+  "action": "Write tests first (TDD), add builtin_reduce to builtins.rs, inline scalar_to_usize for function count, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T15:14:05"
+}
