@@ -2,81 +2,133 @@
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_parser::{BinOpKind, Expr};
+use mlpl_trace::{Trace, TraceEvent, TraceValue};
 
 use crate::env::Environment;
 use crate::error::EvalError;
 
 /// Evaluate a program (list of statements). Returns the last result.
 pub fn eval_program(stmts: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
+    eval_program_inner(stmts, env, None)
+}
+
+/// Evaluate a program with tracing enabled.
+pub fn eval_program_traced(
+    stmts: &[Expr],
+    env: &mut Environment,
+    trace: &mut Trace,
+) -> Result<DenseArray, EvalError> {
+    eval_program_inner(stmts, env, Some(trace))
+}
+
+fn eval_program_inner(
+    stmts: &[Expr],
+    env: &mut Environment,
+    mut trace: Option<&mut Trace>,
+) -> Result<DenseArray, EvalError> {
     if stmts.is_empty() {
         return Err(EvalError::EmptyInput);
     }
     let mut result = None;
     for stmt in stmts {
-        result = Some(eval_expr(stmt, env)?);
+        result = Some(eval_expr(stmt, env, &mut trace)?);
     }
     result.ok_or(EvalError::EmptyInput)
 }
 
-/// Evaluate a single expression.
-pub(crate) fn eval_expr(expr: &Expr, env: &mut Environment) -> Result<DenseArray, EvalError> {
-    match expr {
-        Expr::IntLit(n, _) => Ok(DenseArray::from_scalar(*n as f64)),
-        Expr::FloatLit(f, _) => Ok(DenseArray::from_scalar(*f)),
-        Expr::Ident(name, _) => env
-            .get(name)
-            .cloned()
-            .ok_or_else(|| EvalError::UndefinedVariable(name.clone())),
-        Expr::ArrayLit(elems, _) => eval_array_lit(elems, env),
+fn eval_expr(
+    expr: &Expr,
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<DenseArray, EvalError> {
+    let (op_name, inputs, result) = match expr {
+        Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),
+        Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
+        Expr::Ident(name, _) => {
+            let r = env
+                .get(name)
+                .cloned()
+                .ok_or_else(|| EvalError::UndefinedVariable(name.clone()))?;
+            ("ident", vec![], r)
+        }
+        Expr::ArrayLit(elems, _) => ("array_lit", vec![], eval_array_lit(elems, env, trace)?),
         Expr::UnaryNeg { operand, .. } => {
-            let val = eval_expr(operand, env)?;
-            let neg = DenseArray::from_scalar(-1.0);
-            Ok(neg.apply_binop(&val, |a, b| a * b)?)
+            let val = eval_expr(operand, env, trace)?;
+            let r = DenseArray::from_scalar(-1.0).apply_binop(&val, |a, b| a * b)?;
+            ("negate", vec![TraceValue::from_array(&val)], r)
         }
         Expr::Assign { name, value, .. } => {
-            let val = eval_expr(value, env)?;
+            let val = eval_expr(value, env, trace)?;
             env.set(name.clone(), val.clone());
-            Ok(val)
+            ("assign", vec![TraceValue::from_array(&val)], val)
         }
-        Expr::BinOp { op, lhs, rhs, .. } => {
-            let l = eval_expr(lhs, env)?;
-            let r = eval_expr(rhs, env)?;
-            let f: fn(f64, f64) -> f64 = match op {
-                BinOpKind::Add => |a, b| a + b,
-                BinOpKind::Sub => |a, b| a - b,
-                BinOpKind::Mul => |a, b| a * b,
-                BinOpKind::Div => |a, b| a / b,
-            };
-            Ok(l.apply_binop(&r, f)?)
-        }
-        Expr::FnCall { name, args, .. } => {
-            let evaluated_args: Vec<mlpl_array::DenseArray> = args
-                .iter()
-                .map(|a| eval_expr(a, env))
-                .collect::<Result<Vec<_>, _>>()?;
-            Ok(mlpl_runtime::call_builtin(name, evaluated_args)?)
-        }
+        Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
+        Expr::FnCall { name, args, .. } => eval_fncall(name, args, env, trace)?,
+    };
+    if let Some(t) = trace.as_mut() {
+        let seq = t.events().len() as u64;
+        t.push(TraceEvent {
+            seq,
+            op: op_name.into(),
+            span: expr.span(),
+            inputs,
+            output: TraceValue::from_array(&result),
+        });
     }
+    Ok(result)
 }
 
-/// Evaluate an array literal.
-fn eval_array_lit(elems: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
+fn eval_binop(
+    op: &BinOpKind,
+    lhs: &Expr,
+    rhs: &Expr,
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
+    let l = eval_expr(lhs, env, trace)?;
+    let r = eval_expr(rhs, env, trace)?;
+    let (name, f): (&str, fn(f64, f64) -> f64) = match op {
+        BinOpKind::Add => ("add", |a, b| a + b),
+        BinOpKind::Sub => ("sub", |a, b| a - b),
+        BinOpKind::Mul => ("mul", |a, b| a * b),
+        BinOpKind::Div => ("div", |a, b| a / b),
+    };
+    let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
+    let result = l.apply_binop(&r, f)?;
+    Ok((name, inputs, result))
+}
+
+fn eval_fncall(
+    name: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
+    let evaluated: Vec<DenseArray> = args
+        .iter()
+        .map(|a| eval_expr(a, env, trace))
+        .collect::<Result<Vec<_>, _>>()?;
+    let inputs: Vec<TraceValue> = evaluated.iter().map(TraceValue::from_array).collect();
+    let result = mlpl_runtime::call_builtin(name, evaluated)?;
+    Ok(("fncall", inputs, result))
+}
+
+fn eval_array_lit(
+    elems: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<DenseArray, EvalError> {
     if elems.is_empty() {
         return Ok(DenseArray::from_vec(vec![]));
     }
-
     let evaluated: Vec<DenseArray> = elems
         .iter()
-        .map(|e| eval_expr(e, env))
+        .map(|e| eval_expr(e, env, trace))
         .collect::<Result<Vec<_>, _>>()?;
-
-    // Check if all elements are scalars (flat array)
     if evaluated.iter().all(|a| a.rank() == 0) {
         let data: Vec<f64> = evaluated.iter().map(|a| a.data()[0]).collect();
         return Ok(DenseArray::from_vec(data));
     }
-
-    // Nested: all elements must have the same shape
     let inner_shape = evaluated[0].shape().clone();
     let rows = evaluated.len();
     let mut data = Vec::with_capacity(rows * inner_shape.elem_count());

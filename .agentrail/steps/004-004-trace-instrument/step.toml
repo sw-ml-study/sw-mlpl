@@ -1,6 +1,6 @@
 number = 4
 slug = "004-trace-instrument"
-status = "pending"
+status = "in-progress"
 description = """
 Instrument the evaluator to emit trace events.
 
