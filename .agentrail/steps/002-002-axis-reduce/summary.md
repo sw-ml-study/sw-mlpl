@@ -1,0 +1,1 @@
+Added DenseArray::reduce_axis with stride-based index mapping. Updated reduce_add/reduce_mul builtins to accept optional axis argument (1 arg: reduce all, 2 args: reduce along axis). 7 new tests for column/row sums, reduce_mul axis, backward compat, invalid axis, reshape+reduce pipeline.

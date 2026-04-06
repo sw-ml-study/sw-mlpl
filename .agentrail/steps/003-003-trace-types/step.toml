@@ -1,6 +1,6 @@
 number = 3
 slug = "003-trace-types"
-status = "pending"
+status = "in-progress"
 description = """
 Implement TraceEvent and Trace types in mlpl-trace with JSON serialization.
 
