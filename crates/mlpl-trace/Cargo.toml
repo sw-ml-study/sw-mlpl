@@ -6,3 +6,6 @@ version.workspace = true
 
 [dependencies]
 mlpl-core = { path = "../mlpl-core" }
+mlpl-array = { path = "../mlpl-array" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

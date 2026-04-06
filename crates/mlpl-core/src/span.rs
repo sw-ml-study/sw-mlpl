@@ -3,7 +3,7 @@
 /// A byte-offset range into source text.
 ///
 /// `start` is inclusive, `end` is exclusive.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, serde::Serialize, serde::Deserialize)]
 pub struct Span {
     /// Inclusive start byte offset.
     pub start: usize,
