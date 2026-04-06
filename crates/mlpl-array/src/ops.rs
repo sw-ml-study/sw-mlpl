@@ -106,6 +106,37 @@ impl DenseArray {
 }
 
 impl DenseArray {
+    /// Dot product of two rank-1 vectors.
+    ///
+    /// Both must be vectors of the same length. Returns a scalar.
+    pub fn dot(&self, other: &DenseArray) -> Result<DenseArray, ArrayError> {
+        if self.rank() != 1 || other.rank() != 1 {
+            return Err(ArrayError::RankMismatch {
+                expected: 1,
+                got: if self.rank() != 1 {
+                    self.rank()
+                } else {
+                    other.rank()
+                },
+            });
+        }
+        if self.elem_count() != other.elem_count() {
+            return Err(ArrayError::ShapeMismatch {
+                source: self.elem_count(),
+                target: other.elem_count(),
+            });
+        }
+        let sum: f64 = self
+            .data()
+            .iter()
+            .zip(other.data().iter())
+            .map(|(a, b)| a * b)
+            .sum();
+        Ok(DenseArray::from_scalar(sum))
+    }
+}
+
+impl DenseArray {
     /// Reduce along an axis using the given binary operation.
     ///
     /// Removes the specified axis from the shape. For example,
