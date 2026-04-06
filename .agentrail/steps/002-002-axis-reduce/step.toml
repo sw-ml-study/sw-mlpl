@@ -1,6 +1,6 @@
 number = 2
 slug = "002-axis-reduce"
-status = "pending"
+status = "in-progress"
 description = """
 Implement axis-specific reduction in mlpl-runtime.
 

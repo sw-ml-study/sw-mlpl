@@ -66,12 +66,31 @@ fn builtin_transpose(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Ru
 }
 
 fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
-    check_arity!(name, 1, args);
-    let data = args[0].data();
-    let result = match name {
-        "reduce_add" => data.iter().sum(),
-        "reduce_mul" => data.iter().product(),
+    if args.len() != 1 && args.len() != 2 {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 1,
+            got: args.len(),
+        });
+    }
+    let (identity, op): (f64, fn(f64, f64) -> f64) = match name {
+        "reduce_add" => (0.0, |a, b| a + b),
+        "reduce_mul" => (1.0, |a, b| a * b),
         _ => unreachable!(),
     };
-    Ok(DenseArray::from_scalar(result))
+    if args.len() == 2 {
+        // Axis reduction
+        if args[1].rank() != 0 {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("axis must be scalar, got rank {}", args[1].rank()),
+            });
+        }
+        let axis = args[1].data()[0] as usize;
+        Ok(args[0].reduce_axis(axis, identity, op)?)
+    } else {
+        // Reduce all elements
+        let result = args[0].data().iter().copied().fold(identity, op);
+        Ok(DenseArray::from_scalar(result))
+    }
 }

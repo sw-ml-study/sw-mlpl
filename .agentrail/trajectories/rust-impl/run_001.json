@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-impl",
+  "state": {
+    "number": 1,
+    "step": "001-unary-neg"
+  },
+  "action": "Write tests first (TDD), add UnaryNeg to ast.rs, handle in parse_atom and eval_expr, cargo fmt/clippy/test, sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-05T20:30:19"
+}

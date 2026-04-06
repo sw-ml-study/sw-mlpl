@@ -1,0 +1,1 @@
+Added Expr::UnaryNeg to AST. Parser handles leading minus in parse_atom wrapping next atom in UnaryNeg. Evaluator negates via scalar broadcast (*-1). Works for -x, -(expr), -[array], 1+-2. Negative literals still work via lexer path. 8 new tests.
