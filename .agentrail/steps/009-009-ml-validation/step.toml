@@ -1,0 +1,11 @@
+number = 9
+slug = "009-ml-validation"
+status = "pending"
+description = """
+Update documentation and :help for new capabilities. Final validation.
+
+1. Up..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T12:42:51"
+task_type = "validation"

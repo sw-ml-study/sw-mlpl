@@ -1,4 +1,4 @@
-# MLPL MVP Completion Saga
+# MLPL MatMul and ML Foundations Saga
 
 ## Quality Requirements (apply to EVERY step)
 
@@ -16,46 +16,45 @@ Every step MUST:
 
 ## Goal
 
-Complete the MLPL MVP: add the remaining language features
-(rank/cell semantics, axis reductions, unary negation), build the
-trace system with JSON export, and create compelling CLI demos.
+Add matrix multiplication and math functions to MLPL, then
+demonstrate training a logistic regression model on a toy dataset.
+This is the first step toward ML in the language.
 
-At the end of this saga, MLPL should be demonstrable as a working
-array language with execution tracing.
+At the end of this saga, the REPL should be able to:
+- Multiply matrices: matmul(A, B)
+- Apply math functions: exp, log, sigmoid, sqrt, abs
+- Run a manual gradient descent training loop
+- Train a logistic regression model and show accuracy
 
-## What already exists (from previous sagas)
+## What already exists
 
-- mlpl-core: Span, Identifier
-- mlpl-array: Shape, DenseArray, reshape, transpose, indexing,
-  element-wise ops with scalar broadcasting, Display
-- mlpl-parser: lexer (all v1 tokens), parser (AST with literals,
-  arrays, arithmetic with precedence, function calls, assignment)
+- mlpl-array: DenseArray with reshape, transpose, element-wise ops,
+  scalar broadcasting, axis reductions
+- mlpl-runtime: 9 built-in functions
 - mlpl-eval: AST-walking evaluator with environment
-- mlpl-runtime: builtins (iota, shape, rank, reshape, transpose,
-  reduce_add, reduce_mul)
-- mlpl-repl: working REPL with full syntax-core-v1 support
+- mlpl-parser: full v1 syntax (literals, arrays, arithmetic,
+  function calls, assignment, unary negation)
+- mlpl-repl: REPL with :help, :trace, :clear, -f flag
 
 ## Phases
 
-### Phase 1: Language enrichment
-- Unary negation in expressions
-- Axis-specific reductions (reduce along an axis)
-- Element-wise comparison operators (future consideration)
+### Phase 1: Linear algebra
+- Dot product for vectors
+- Matrix multiplication
+- Element-wise math functions
 
-### Phase 2: Trace system
-- TraceEvent and Trace types in mlpl-trace
-- Instrument evaluator to emit trace events
-- JSON serialization of traces (serde)
-- Trace export command in REPL
+### Phase 2: ML primitives
+- Sigmoid activation
+- Binary cross-entropy loss
+- Manual gradient computation
 
-### Phase 3: CLI demos and polish
-- Demo scripts exercising all features
-- REPL help command
-- Error messages with source context
-- Update documentation
+### Phase 3: Training demo
+- Logistic regression training loop
+- Toy dataset (AND/OR gate or simple 2D classification)
+- Accuracy measurement
 
 ## Success criteria
-- All v1 syntax examples work
-- Trace JSON output for any evaluation
-- cargo test passes for all crates including trace
-- Demo scripts run and produce correct output
+- matmul(A, B) works for compatible matrices
+- Math functions (exp, log, sqrt, abs, sigmoid) work element-wise
+- A training script in demos/ converges on a toy problem
+- All tests pass
