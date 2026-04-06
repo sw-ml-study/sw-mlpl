@@ -1,0 +1,1 @@
+Added sigmoid (1/(1+exp(-x)), numerically stable), tanh_fn (f64::tanh), and pow (element-wise a^b with broadcasting). All inline in call_builtin match. 9 integration tests including extreme sigmoid values.
