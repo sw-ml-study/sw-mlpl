@@ -62,4 +62,13 @@ impl DenseArray {
     pub fn data(&self) -> &[f64] {
         &self.data
     }
+
+    /// Apply a function to every element, returning a new array.
+    #[must_use]
+    pub fn map(&self, f: fn(f64) -> f64) -> Self {
+        Self {
+            shape: self.shape.clone(),
+            data: self.data.iter().map(|&x| f(x)).collect(),
+        }
+    }
 }
