@@ -1,0 +1,1 @@
+MVP validation complete. All 4 demos run correctly. Trace JSON export verified. 191 tests pass (0 failures). All quality gates clean (fmt, clippy, markdown-checker, sw-checklist). README verified. Tagged repo as v0.1.0-mvp.
