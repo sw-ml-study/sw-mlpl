@@ -1,0 +1,7 @@
+# MLPL Trace Demo
+# Run with: cargo run -p mlpl-repl -- -f demos/trace_demo.mlpl --trace
+a = [1, 2, 3]
+b = [4, 5, 6]
+c = a + b
+result = reduce_add(c)
+result

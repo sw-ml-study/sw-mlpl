@@ -1,0 +1,18 @@
+# MLPL Matrix Operations Demo
+# Create a sequence and reshape into a matrix
+x = iota(12)
+m = reshape(x, [3, 4])
+m
+
+# Transpose
+t = transpose(m)
+t
+
+# Query shape and rank
+shape(m)
+rank(m)
+shape(t)
+
+# Axis reductions
+reduce_add(m, 0)
+reduce_add(m, 1)

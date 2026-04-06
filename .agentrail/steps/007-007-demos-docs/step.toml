@@ -1,6 +1,6 @@
 number = 7
 slug = "007-demos-docs"
-status = "pending"
+status = "in-progress"
 description = """
 Create demo scripts and update documentation for MVP.
 

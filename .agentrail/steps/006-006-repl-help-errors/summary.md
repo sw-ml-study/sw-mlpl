@@ -1,0 +1,1 @@
+Added :help (full syntax/builtin/command reference), :clear (reset environment), and improved error display (source line + error message). Refactored handle_command with with_trace helper for LOC compliance.
