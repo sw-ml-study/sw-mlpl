@@ -1,6 +1,6 @@
 number = 3
 slug = "003-trace-types"
-status = "in-progress"
+status = "completed"
 description = """
 Implement TraceEvent and Trace types in mlpl-trace with JSON serialization.
 
@@ -8,4 +8,5 @@ Implement TraceEvent and Trace types in mlpl-trace with JSON serialization.
 role = "production"
 context_files = []
 created_at = "2026-04-05T19:01:41"
+completed_at = "2026-04-06T10:30:42"
 task_type = "rust-impl"

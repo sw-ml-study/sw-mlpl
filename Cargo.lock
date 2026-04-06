@@ -45,6 +45,7 @@ dependencies = [
  "mlpl-core",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-trace",
 ]
 
 [[package]]

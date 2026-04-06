@@ -1,0 +1,1 @@
+Implemented TraceEvent, TraceValue, and Trace types with serde JSON serialization. TraceValue has Scalar{value} and Array{shape,data} variants with from_array() conversion. Trace holds source+events with to_json() export. Added serde to mlpl-core for Span serialization. JSON round-trip verified. 6 integration tests.
