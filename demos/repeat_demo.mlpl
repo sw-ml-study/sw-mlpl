@@ -1,0 +1,4 @@
+# Repeat loop demo
+x = 0
+repeat 5 { x = x + 1 }
+x

@@ -64,6 +64,15 @@ pub enum Expr {
         /// Span covering name through value.
         span: Span,
     },
+    /// Repeat loop: `repeat <count> { body }`
+    Repeat {
+        /// Number of iterations.
+        count: Box<Expr>,
+        /// Body statements.
+        body: Vec<Expr>,
+        /// Span covering keyword through closing brace.
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -78,7 +87,8 @@ impl Expr {
             | Self::BinOp { span: s, .. }
             | Self::UnaryNeg { span: s, .. }
             | Self::FnCall { span: s, .. }
-            | Self::Assign { span: s, .. } => *s,
+            | Self::Assign { span: s, .. }
+            | Self::Repeat { span: s, .. } => *s,
         }
     }
 }

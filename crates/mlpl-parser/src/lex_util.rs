@@ -50,6 +50,8 @@ pub(crate) fn single_char_token(b: u8) -> Option<TokenKind> {
         b'+' => Some(TokenKind::Plus),
         b'*' => Some(TokenKind::Star),
         b'/' => Some(TokenKind::Slash),
+        b'{' => Some(TokenKind::LBrace),
+        b'}' => Some(TokenKind::RBrace),
         _ => None,
     }
 }

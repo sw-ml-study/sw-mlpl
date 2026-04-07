@@ -12,30 +12,7 @@ pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {
     let mut stmts = Vec::new();
     p.skip_sep();
     while p.pos < p.tokens.len() && p.tokens[p.pos].kind != TokenKind::Eof {
-        // Check for assignment: ident '=' expr
-        let stmt = if matches!(p.tokens[p.pos].kind, TokenKind::Ident(_))
-            && p.tokens
-                .get(p.pos + 1)
-                .is_some_and(|t| t.kind == TokenKind::Equals)
-        {
-            let name_tok = &p.tokens[p.pos];
-            let name = match &name_tok.kind {
-                TokenKind::Ident(n) => n.clone(),
-                _ => unreachable!(),
-            };
-            let start = name_tok.span;
-            p.pos += 2; // skip ident and '='
-            let value = p.parse_expr(0)?;
-            let span = Span::new(start.start, value.span().end);
-            Expr::Assign {
-                name,
-                value: Box::new(value),
-                span,
-            }
-        } else {
-            p.parse_expr(0)?
-        };
-        stmts.push(stmt);
+        stmts.push(p.parse_statement()?);
         p.skip_sep();
     }
     Ok(stmts)
@@ -49,6 +26,35 @@ pub(crate) struct Parser<'a> {
 impl<'a> Parser<'a> {
     pub(crate) fn new(tokens: &'a [Token]) -> Self {
         Self { tokens, pos: 0 }
+    }
+
+    /// Parse a single statement (assignment, repeat, or expression).
+    fn parse_statement(&mut self) -> Result<Expr, ParseError> {
+        if self.tokens[self.pos].kind == TokenKind::Repeat {
+            return self.parse_repeat();
+        }
+        if matches!(self.tokens[self.pos].kind, TokenKind::Ident(_))
+            && self
+                .tokens
+                .get(self.pos + 1)
+                .is_some_and(|t| t.kind == TokenKind::Equals)
+        {
+            let name_tok = &self.tokens[self.pos];
+            let name = match &name_tok.kind {
+                TokenKind::Ident(n) => n.clone(),
+                _ => unreachable!(),
+            };
+            let start = name_tok.span;
+            self.pos += 2;
+            let value = self.parse_expr(0)?;
+            let span = Span::new(start.start, value.span().end);
+            return Ok(Expr::Assign {
+                name,
+                value: Box::new(value),
+                span,
+            });
+        }
+        self.parse_expr(0)
     }
 
     /// Parse an expression with precedence climbing (min_prec=0 for full expr).
@@ -179,6 +185,47 @@ impl<'a> Parser<'a> {
             elems,
             Span::new(open_span.start, close_span.end),
         ))
+    }
+
+    fn parse_repeat(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1; // skip 'repeat'
+        let count = self.parse_expr(0)?;
+        if !self.is(TokenKind::LBrace) {
+            return Err(ParseError::UnexpectedToken {
+                found: format!("{:?}", self.tokens[self.pos].kind),
+                span: self.tokens[self.pos].span,
+            });
+        }
+        let body = self.parse_brace_body()?;
+        let end = self.tokens[self.pos - 1].span;
+        Ok(Expr::Repeat {
+            count: Box::new(count),
+            body,
+            span: Span::new(start.start, end.end),
+        })
+    }
+
+    fn parse_brace_body(&mut self) -> Result<Vec<Expr>, ParseError> {
+        let open = self.tokens[self.pos].span;
+        self.pos += 1; // skip '{'
+        self.skip_sep();
+        let mut body = Vec::new();
+        while self.pos < self.tokens.len()
+            && !self.is(TokenKind::RBrace)
+            && self.tokens[self.pos].kind != TokenKind::Eof
+        {
+            body.push(self.parse_statement()?);
+            self.skip_sep();
+        }
+        if !self.is(TokenKind::RBrace) {
+            return Err(ParseError::UnclosedDelimiter {
+                open: "{".into(),
+                span: open,
+            });
+        }
+        self.pos += 1; // skip '}'
+        Ok(body)
     }
 
     pub(crate) fn is(&self, kind: TokenKind) -> bool {
