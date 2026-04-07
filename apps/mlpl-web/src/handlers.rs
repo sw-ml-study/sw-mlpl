@@ -5,6 +5,7 @@ use mlpl_wasm::WasmSession;
 use web_sys::{HtmlInputElement, KeyboardEvent};
 use yew::prelude::*;
 
+use crate::demos::DEMOS;
 use crate::help::help_text;
 use crate::state::HistoryEntry;
 
@@ -58,6 +59,39 @@ pub fn make_submit(deps: EvalDeps) -> Callback<String> {
         deps.cmd_history.set(new_cmds);
         deps.cmd_index.set(None);
         deps.input_value.set(String::new());
+    })
+}
+
+pub fn make_clear(
+    session: Rc<RefCell<WasmSession>>,
+    history: UseStateHandle<Vec<HistoryEntry>>,
+) -> Callback<web_sys::MouseEvent> {
+    Callback::from(move |_| {
+        session.borrow().clear();
+        history.set(Vec::new());
+    })
+}
+
+pub fn make_run_demo(
+    session: Rc<RefCell<WasmSession>>,
+    history: UseStateHandle<Vec<HistoryEntry>>,
+) -> Callback<usize> {
+    Callback::from(move |idx: usize| {
+        let Some(demo) = DEMOS.get(idx) else {
+            return;
+        };
+        session.borrow().clear();
+        let mut entries = Vec::with_capacity(demo.lines.len());
+        for line in demo.lines {
+            let result = session.borrow().eval(line);
+            let is_error = result.starts_with("error:");
+            entries.push(HistoryEntry {
+                input: (*line).to_string(),
+                output: result,
+                is_error,
+            });
+        }
+        history.set(entries);
     })
 }
 
