@@ -1,6 +1,7 @@
-use web_sys::KeyboardEvent;
+use web_sys::{HtmlSelectElement, KeyboardEvent};
 use yew::prelude::*;
 
+use crate::demos::DEMOS;
 use crate::state::DocTab;
 
 const LANG_REFERENCE: &str = include_str!("../../../docs/lang-reference.md");
@@ -27,15 +28,35 @@ pub fn github_corner(props: &UrlProps) -> Html {
 #[derive(Properties, PartialEq)]
 pub struct HeaderProps {
     pub on_help: Callback<MouseEvent>,
+    pub on_clear: Callback<MouseEvent>,
+    pub on_demo: Callback<usize>,
 }
 
 #[function_component(Header)]
 pub fn header(props: &HeaderProps) -> Html {
+    let on_demo = props.on_demo.clone();
+    let on_change = Callback::from(move |e: Event| {
+        let target: HtmlSelectElement = e.target_unchecked_into();
+        let idx = target.value();
+        if let Ok(i) = idx.parse::<usize>() {
+            on_demo.emit(i);
+            target.set_value("");
+        }
+    });
     html! {
         <header>
             <h1>{"MLPL"}</h1>
             <span>{"v0.2 — Array Programming Language for ML"}</span>
-            <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation">{"?"}</button>
+            <div class="controls">
+                <select class="demo-select" onchange={on_change} aria-label="Load demo">
+                    <option value="" selected=true>{"Load Demo..."}</option>
+                    { for DEMOS.iter().enumerate().map(|(i, d)| html!{
+                        <option value={i.to_string()}>{ d.name }</option>
+                    }) }
+                </select>
+                <button class="ctrl-btn" onclick={props.on_clear.clone()}>{"Clear"}</button>
+                <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation">{"?"}</button>
+            </div>
         </header>
     }
 }
