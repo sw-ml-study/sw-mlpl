@@ -9,7 +9,15 @@ use crate::error::EvalError;
 
 /// Evaluate a program (list of statements). Returns the last result.
 pub fn eval_program(stmts: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
-    eval_program_inner(stmts, env, None)
+    if stmts.is_empty() {
+        return Err(EvalError::EmptyInput);
+    }
+    let mut trace: Option<&mut Trace> = None;
+    let mut result = None;
+    for stmt in stmts {
+        result = Some(eval_expr(stmt, env, &mut trace)?);
+    }
+    result.ok_or(EvalError::EmptyInput)
 }
 
 /// Evaluate a program with tracing enabled.
@@ -18,17 +26,10 @@ pub fn eval_program_traced(
     env: &mut Environment,
     trace: &mut Trace,
 ) -> Result<DenseArray, EvalError> {
-    eval_program_inner(stmts, env, Some(trace))
-}
-
-fn eval_program_inner(
-    stmts: &[Expr],
-    env: &mut Environment,
-    mut trace: Option<&mut Trace>,
-) -> Result<DenseArray, EvalError> {
     if stmts.is_empty() {
         return Err(EvalError::EmptyInput);
     }
+    let mut trace: Option<&mut Trace> = Some(trace);
     let mut result = None;
     for stmt in stmts {
         result = Some(eval_expr(stmt, env, &mut trace)?);
@@ -64,18 +65,42 @@ fn eval_expr(
         }
         Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
         Expr::FnCall { name, args, .. } => eval_fncall(name, args, env, trace)?,
+        Expr::Repeat { count, body, .. } => {
+            let n_arr = eval_expr(count, env, trace)?;
+            if n_arr.rank() != 0 {
+                return Err(EvalError::InvalidRepeatCount);
+            }
+            let n = n_arr.data()[0] as usize;
+            let mut r = DenseArray::from_scalar(0.0);
+            for _ in 0..n {
+                for stmt in body {
+                    r = eval_expr(stmt, env, trace)?;
+                }
+            }
+            ("repeat", vec![], r)
+        }
     };
+    record_trace(trace, op_name, expr.span(), inputs, &result);
+    Ok(result)
+}
+
+fn record_trace(
+    trace: &mut Option<&mut Trace>,
+    op: &str,
+    span: mlpl_core::Span,
+    inputs: Vec<TraceValue>,
+    result: &DenseArray,
+) {
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;
         t.push(TraceEvent {
             seq,
-            op: op_name.into(),
-            span: expr.span(),
+            op: op.into(),
+            span,
             inputs,
-            output: TraceValue::from_array(&result),
+            output: TraceValue::from_array(result),
         });
     }
-    Ok(result)
 }
 
 fn eval_binop(

@@ -60,15 +60,27 @@ fn run_interactive(env: &mut Environment) {
 }
 
 fn run_script(content: &str, env: &mut Environment, tracing: bool) {
-    let mut last_trace: Option<Trace> = None;
-    for line in content.lines() {
-        let trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with('#') {
-            continue;
-        }
-        println!("> {trimmed}");
-        eval_line(trimmed, env, tracing, &mut last_trace);
+    // Strip comment-only lines but preserve structure for multi-line constructs
+    let cleaned: Vec<&str> = content
+        .lines()
+        .map(|line| {
+            let trimmed = line.trim();
+            if trimmed.starts_with('#') { "" } else { line }
+        })
+        .collect();
+    let source = cleaned.join("\n");
+    let trimmed = source.trim();
+    if trimmed.is_empty() {
+        return;
     }
+    for line in content.lines() {
+        let t = line.trim();
+        if !t.is_empty() && !t.starts_with('#') {
+            println!("> {t}");
+        }
+    }
+    let mut last_trace: Option<Trace> = None;
+    eval_line(trimmed, env, tracing, &mut last_trace);
     if let Some(trace) = &last_trace {
         println!();
         print_trace_summary(trace);
@@ -171,6 +183,7 @@ fn print_help() {
     println!("  x = expr        assignment");
     println!("  a + b           arithmetic (+, -, *, /)");
     println!("  func(args)      function call");
+    println!("  repeat N {{ }}    loop N times");
     println!();
     println!("Built-in functions:");
     println!("  iota(n)              integers 0..n");
@@ -182,6 +195,14 @@ fn print_help() {
     println!("  reduce_add(a, axis)  sum along axis");
     println!("  reduce_mul(a)        product of all elements");
     println!("  reduce_mul(a, axis)  product along axis");
+    println!("  dot(a, b)            vector dot product");
+    println!("  matmul(a, b)         matrix multiplication");
+    println!("  exp(a) log(a)        element-wise exp / log");
+    println!("  sqrt(a) abs(a)       element-wise sqrt / abs");
+    println!("  sigmoid(a) tanh_fn(a) activations");
+    println!("  pow(a, b)            element-wise power");
+    println!("  zeros(s) ones(s)     array constructors");
+    println!("  fill(s, v)           fill array with value");
     println!();
     println!("Commands:");
     println!("  :help                show this help");

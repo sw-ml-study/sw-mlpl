@@ -11,6 +11,8 @@ pub enum EvalError {
     Unsupported(String),
     /// Error from array operations.
     ArrayError(mlpl_array::ArrayError),
+    /// Repeat count must be a scalar.
+    InvalidRepeatCount,
     /// Error from built-in function dispatch.
     RuntimeError(mlpl_runtime::RuntimeError),
 }
@@ -20,6 +22,7 @@ impl std::fmt::Display for EvalError {
         match self {
             Self::EmptyInput => write!(f, "empty input"),
             Self::UndefinedVariable(name) => write!(f, "undefined variable: {name}"),
+            Self::InvalidRepeatCount => write!(f, "repeat count must be a scalar integer"),
             Self::Unsupported(msg) => write!(f, "unsupported: {msg}"),
             Self::ArrayError(e) => write!(f, "array error: {e}"),
             Self::RuntimeError(e) => write!(f, "{e}"),

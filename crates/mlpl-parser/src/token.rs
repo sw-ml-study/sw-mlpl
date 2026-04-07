@@ -33,6 +33,12 @@ pub enum TokenKind {
     Star,
     /// `/`
     Slash,
+    /// `{`
+    LBrace,
+    /// `}`
+    RBrace,
+    /// `repeat` keyword.
+    Repeat,
     /// Newline (statement separator).
     Newline,
     /// End of input.

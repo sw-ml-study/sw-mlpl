@@ -136,9 +136,18 @@ impl<'a> Lexer<'a> {
         let name = std::str::from_utf8(&self.bytes[start..self.pos])
             .unwrap()
             .to_owned();
-        self.prev_was_value = true;
+        let kind = match name.as_str() {
+            "repeat" => {
+                self.prev_was_value = false;
+                TokenKind::Repeat
+            }
+            _ => {
+                self.prev_was_value = true;
+                TokenKind::Ident(name)
+            }
+        };
         Token {
-            kind: TokenKind::Ident(name),
+            kind,
             span: Span::new(start, self.pos),
         }
     }
