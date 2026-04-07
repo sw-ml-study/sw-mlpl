@@ -33,6 +33,7 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
         "reshape" => builtin_reshape(name, args),
         "transpose" => builtin_transpose(name, args),
         "reduce_add" | "reduce_mul" => builtin_reduce(name, args),
+        "argmax" => builtin_argmax(name, args),
         "dot" => {
             check_arity!(name, 2, args);
             Ok(args[0].dot(&args[1])?)
@@ -80,6 +81,43 @@ fn builtin_reshape(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runt
 fn builtin_transpose(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     check_arity!(name, 1, args);
     Ok(args[0].transpose())
+}
+
+fn builtin_argmax(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() == 1 {
+        // Flat argmax over all elements, returned as a scalar index.
+        let data = args[0].data();
+        if data.is_empty() {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: "argmax of empty array".into(),
+            });
+        }
+        let mut best_idx = 0usize;
+        let mut best_val = data[0];
+        for (i, &v) in data.iter().enumerate().skip(1) {
+            if v > best_val {
+                best_val = v;
+                best_idx = i;
+            }
+        }
+        return Ok(DenseArray::from_scalar(best_idx as f64));
+    }
+    if args.len() != 2 {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    if args[1].rank() != 0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("axis must be scalar, got rank {}", args[1].rank()),
+        });
+    }
+    let axis = args[1].data()[0] as usize;
+    Ok(args[0].argmax_axis(axis)?)
 }
 
 fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
