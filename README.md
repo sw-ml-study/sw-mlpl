@@ -100,6 +100,17 @@ mlpl> matmul([[1,2],[3,4]], [[5],[6]])
 | `ones(shape)` | Array of ones |
 | `fill(shape, value)` | Array filled with value |
 | `grid(bounds, n)` | n*n by 2 matrix of (x,y) points |
+| `random(seed, shape)` | Seeded uniform [0, 1) array |
+| `randn(seed, shape)` | Seeded standard-normal array |
+| `blobs(seed, n, centers)` | Seeded 2D gaussian-blob dataset (Nx3 [x, y, label]) |
+
+### ML Primitives
+
+| Function | Description |
+|----------|-------------|
+| `argmax(a)` / `argmax(a, axis)` | Flat or per-axis argmax |
+| `softmax(a, axis)` | Numerically stable softmax along an axis |
+| `one_hot(labels, k)` | NxK one-hot encoding of a label vector |
 
 ### Visualization
 
@@ -154,4 +165,9 @@ cargo run -p mlpl-repl -- -f demos/logistic_regression.mlpl  # ML training demo
 cargo run -p mlpl-repl -- -f demos/loss_curve.mlpl           # SVG loss curve
 cargo run -p mlpl-repl -- -f demos/decision_boundary.mlpl    # 2D classifier viz
 cargo run -p mlpl-repl -- -f demos/trace_demo.mlpl --trace   # with tracing
+cargo run -p mlpl-repl -- -f demos/kmeans.mlpl               # K-means clustering
+cargo run -p mlpl-repl -- -f demos/pca.mlpl                  # PCA via power iteration
+cargo run -p mlpl-repl -- -f demos/softmax_classifier.mlpl   # 3-class softmax
+cargo run -p mlpl-repl -- -f demos/tiny_mlp.mlpl             # 2-8-2 MLP on XOR
+cargo run -p mlpl-repl -- -f demos/attention.mlpl            # attention pattern
 ```

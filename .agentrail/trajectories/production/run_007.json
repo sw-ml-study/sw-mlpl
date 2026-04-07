@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 7,
+    "step": "attention-pattern"
+  },
+  "action": "TDD: attention_demo_tests.rs first (row sums == 1, diagonal dominates when K=Q); built demo with three heatmaps (raw scores, attention, self-attention)",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-07T15:45:18"
+}
