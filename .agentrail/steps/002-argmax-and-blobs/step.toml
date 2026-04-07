@@ -1,8 +1,9 @@
 number = 2
 slug = "argmax-and-blobs"
-status = "in-progress"
+status = "completed"
 description = "Add the dataset and reduction primitives needed by k-means and the classifier..."
 role = "production"
 context_files = []
 created_at = "2026-04-07T14:34:07"
+completed_at = "2026-04-07T14:56:05"
 task_type = "production"
