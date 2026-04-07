@@ -1,0 +1,11 @@
+number = 5
+slug = "softmax-classifier"
+status = "pending"
+description = """
+Add a 3-class softmax classifier and confusion-matrix demo.
+
+1. New built-ins..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T14:34:32"
+task_type = "production"

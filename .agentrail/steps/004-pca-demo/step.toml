@@ -1,0 +1,10 @@
+number = 4
+slug = "pca-demo"
+status = "pending"
+description = """
+Add a PCA demo that visualizes the principal axis on a 2D synthetic dataset.
+..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T14:34:23"
+task_type = "production"

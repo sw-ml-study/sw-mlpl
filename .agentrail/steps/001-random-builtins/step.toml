@@ -1,0 +1,11 @@
+number = 1
+slug = "random-builtins"
+status = "pending"
+description = """
+Add seeded random number generation built-ins.
+
+1. random(seed, shape) -> arr..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T14:33:58"
+task_type = "production"
