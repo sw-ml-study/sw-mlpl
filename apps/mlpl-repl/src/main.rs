@@ -1,12 +1,22 @@
+mod svg_out;
+
 use std::io::{self, BufRead, Write};
+use std::path::PathBuf;
 
 use mlpl_eval::Environment;
 use mlpl_trace::Trace;
+use svg_out::SvgOut;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mut env = Environment::new();
     let trace_flag = args.iter().any(|a| a == "--trace");
+    let svg_dir = args
+        .iter()
+        .position(|a| a == "--svg-out")
+        .and_then(|p| args.get(p + 1))
+        .map(PathBuf::from);
+    let mut svg_out = SvgOut::new(svg_dir);
 
     if let Some(pos) = args.iter().position(|a| a == "-f" || a == "--file") {
         let path = args.get(pos + 1).unwrap_or_else(|| {
@@ -17,13 +27,13 @@ fn main() {
             eprintln!("error reading {path}: {e}");
             std::process::exit(1);
         });
-        run_script(&content, &mut env, trace_flag);
+        run_script(&content, &mut env, trace_flag, &mut svg_out);
     } else {
-        run_interactive(&mut env);
+        run_interactive(&mut env, &mut svg_out);
     }
 }
 
-fn run_interactive(env: &mut Environment) {
+fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
     println!("MLPL v0.2 -- Array Programming Language for ML");
     println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();
@@ -55,11 +65,11 @@ fn run_interactive(env: &mut Environment) {
             continue;
         }
 
-        eval_line(trimmed, env, tracing, &mut last_trace);
+        eval_line(trimmed, env, tracing, &mut last_trace, svg_out);
     }
 }
 
-fn run_script(content: &str, env: &mut Environment, tracing: bool) {
+fn run_script(content: &str, env: &mut Environment, tracing: bool, svg_out: &mut SvgOut) {
     // Strip comment-only lines but preserve structure for multi-line constructs
     let cleaned: Vec<&str> = content
         .lines()
@@ -80,7 +90,7 @@ fn run_script(content: &str, env: &mut Environment, tracing: bool) {
         }
     }
     let mut last_trace: Option<Trace> = None;
-    eval_line(trimmed, env, tracing, &mut last_trace);
+    eval_line(trimmed, env, tracing, &mut last_trace, svg_out);
     if let Some(trace) = &last_trace {
         println!();
         print_trace_summary(trace);
@@ -133,23 +143,25 @@ fn handle_command(
     true
 }
 
-fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut Option<Trace>) {
+fn eval_line(
+    input: &str,
+    env: &mut Environment,
+    tracing: bool,
+    last_trace: &mut Option<Trace>,
+    svg_out: &mut SvgOut,
+) {
+    let report_err = |e: &dyn std::fmt::Display| {
+        eprintln!("  {input}");
+        eprintln!("  error: {e}");
+    };
     let tokens = match mlpl_parser::lex(input) {
         Ok(t) => t,
-        Err(e) => {
-            eprintln!("  {input}");
-            eprintln!("  error: {e}");
-            return;
-        }
+        Err(e) => return report_err(&e),
     };
     let stmts = match mlpl_parser::parse(&tokens) {
         Ok(s) if s.is_empty() => return,
         Ok(s) => s,
-        Err(e) => {
-            eprintln!("  {input}");
-            eprintln!("  error: {e}");
-            return;
-        }
+        Err(e) => return report_err(&e),
     };
     if tracing {
         let mut trace = Trace::new(input.into());
@@ -158,18 +170,19 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
                 println!("{arr}");
                 *last_trace = Some(trace);
             }
-            Err(e) => {
-                eprintln!("  {input}");
-                eprintln!("  error: {e}");
-            }
+            Err(e) => report_err(&e),
         }
     } else {
         match mlpl_eval::eval_program_value(&stmts, env) {
-            Ok(value) => println!("{value}"),
-            Err(e) => {
-                eprintln!("  {input}");
-                eprintln!("  error: {e}");
+            Ok(value) => {
+                let formatted = format!("{value}");
+                if formatted.trim_start().starts_with("<svg") {
+                    svg_out.handle(&formatted);
+                } else {
+                    println!("{formatted}");
+                }
             }
+            Err(e) => report_err(&e),
         }
     }
 }

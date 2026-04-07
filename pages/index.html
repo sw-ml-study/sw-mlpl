@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-c398cbabca18d16b.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-c398cbabca18d16b_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-3d7dc75ecea103c.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-3d7dc75ecea103c_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -227,6 +227,19 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         .output-line.error {
             color: var(--red);
         }
+        .svg-output {
+            display: inline-block;
+            background: var(--mantle);
+            border: 1px solid var(--surface1);
+            border-radius: 6px;
+            padding: 10px;
+            margin: 6px 0;
+        }
+        .svg-output svg {
+            display: block;
+            max-width: 100%;
+            height: auto;
+        }
 
         /* Input row */
         .input-row {
@@ -402,7 +415,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             cursor: not-allowed;
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-c398cbabca18d16b.js" crossorigin="anonymous" integrity="sha384-dU0VQ7VwlyRPIfPA+bW3ElvEQs1FWCi6jr/a/bmimK/cUginhxg+gPvtdJHETKc8"><link rel="preload" href="/sw-mlpl/mlpl-web-c398cbabca18d16b_bg.wasm" crossorigin="anonymous" integrity="sha384-kh/Q1E3ZknP4l6hpCkEGw3aOpjCvrwpmSvt18wEQLdppmjXNvzJN+zIcTixPMtDn" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-3d7dc75ecea103c.js" crossorigin="anonymous" integrity="sha384-9xWE4KBtn0xL54XKGB7CuNGIFuvqiiRr+bLCm+0DzrZffATe8PORfG75bkPjByEe"><link rel="preload" href="/sw-mlpl/mlpl-web-3d7dc75ecea103c_bg.wasm" crossorigin="anonymous" integrity="sha384-1T/fk4trIDNGeh776U3iRDOowT3xV1Vyon3mPVxHLU0iG2mo3cceTprQ2DY/HZP2" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
