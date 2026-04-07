@@ -1,0 +1,1 @@
+PCA demo: demos/pca.mlpl with power iteration on covariance matrix, web entry, tutorial lesson, integration test, pages rebuilt

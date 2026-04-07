@@ -1,6 +1,6 @@
 number = 5
 slug = "softmax-classifier"
-status = "pending"
+status = "in-progress"
 description = """
 Add a 3-class softmax classifier and confusion-matrix demo.
 
