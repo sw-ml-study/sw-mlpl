@@ -1,0 +1,1 @@
+Added demo selector dropdown and Clear button to browser REPL header. Created demos.rs with 4 preloaded examples (Basics, Matrix Ops, Math Functions, Logistic Regression). Selecting a demo clears the session and runs each line, populating output history. Wired make_clear and make_run_demo handlers, bundled render args into RenderArgs struct to satisfy LOC limit.
