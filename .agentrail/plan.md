@@ -1,4 +1,4 @@
-# MLPL MatMul and ML Foundations Saga
+# MLPL Web UI Saga
 
 ## Quality Requirements (apply to EVERY step)
 
@@ -16,45 +16,59 @@ Every step MUST:
 
 ## Goal
 
-Add matrix multiplication and math functions to MLPL, then
-demonstrate training a logistic regression model on a toy dataset.
-This is the first step toward ML in the language.
+Build a browser-based MLPL REPL deployed to GitHub Pages.
+Users visit the page, type MLPL expressions, and see results
+instantly -- no install required. Includes a step-by-step
+tutorial that teaches the language from basics to ML training.
 
-At the end of this saga, the REPL should be able to:
-- Multiply matrices: matmul(A, B)
-- Apply math functions: exp, log, sigmoid, sqrt, abs
-- Run a manual gradient descent training loop
-- Train a logistic regression model and show accuracy
+Deployed at: https://sw-ml-study.github.io/sw-mlpl/
 
 ## What already exists
 
 - mlpl-array: DenseArray with reshape, transpose, element-wise ops,
-  scalar broadcasting, axis reductions
-- mlpl-runtime: 9 built-in functions
-- mlpl-eval: AST-walking evaluator with environment
+  scalar broadcasting, axis reductions, dot, matmul
+- mlpl-runtime: 23 built-in functions including ML primitives
+- mlpl-eval: AST-walking evaluator with environment and tracing
 - mlpl-parser: full v1 syntax (literals, arrays, arithmetic,
-  function calls, assignment, unary negation)
-- mlpl-repl: REPL with :help, :trace, :clear, -f flag
+  function calls, assignment, unary negation, repeat loops)
+- mlpl-repl: CLI REPL with :help, :trace, :clear, -f flag
+- mlpl-wasm: placeholder (empty lib.rs, deps on eval/trace/viz)
+- mlpl-web: placeholder (stub main.rs, no deps)
+- No Yew, Trunk, or GitHub Actions infrastructure exists
+
+## Reference implementation
+
+../../sw-embed/web-sw-cor24-apl uses:
+- Yew 0.21 CSR + Trunk for WASM build
+- Catppuccin Mocha theme
+- pages/ directory with committed build artifacts
+- .github/workflows/pages.yml deploying pages/ to GitHub Pages
+- scripts/build-pages.sh running trunk build --release
+
+Follow this pattern closely.
 
 ## Phases
 
-### Phase 1: Linear algebra
-- Dot product for vectors
-- Matrix multiplication
-- Element-wise math functions
+### Phase 1: WASM bindings and build infrastructure
+- Wire mlpl-wasm with wasm-bindgen exports
+- Set up Trunk, index.html, build scripts
 
-### Phase 2: ML primitives
-- Sigmoid activation
-- Binary cross-entropy loss
-- Manual gradient computation
+### Phase 2: Browser REPL
+- Yew app with input/output panels
+- REPL state management (environment persistence)
+- Demo selector with preloaded examples
 
-### Phase 3: Training demo
-- Logistic regression training loop
-- Toy dataset (AND/OR gate or simple 2D classification)
-- Accuracy measurement
+### Phase 3: Deployment
+- GitHub Actions workflow
+- Build, commit pages/, verify deployment
+
+### Phase 4: Tutorial
+- Interactive step-by-step tutorial built into the web UI
+- Progression from scalars to ML training
 
 ## Success criteria
-- matmul(A, B) works for compatible matrices
-- Math functions (exp, log, sqrt, abs, sigmoid) work element-wise
-- A training script in demos/ converges on a toy problem
-- All tests pass
+- Live demo at GitHub Pages URL
+- Browser REPL evaluates all 23 built-in functions
+- Demo selector loads example scripts
+- Tutorial walks users from "1 + 2" to logistic regression
+- All tests pass, all quality gates green

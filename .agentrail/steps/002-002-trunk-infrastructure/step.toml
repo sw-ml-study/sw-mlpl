@@ -1,0 +1,11 @@
+number = 2
+slug = "002-trunk-infrastructure"
+status = "pending"
+description = """
+Set up Trunk build infrastructure for the web app.
+
+1. Add dependencies to ap..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T18:48:28"
+task_type = "production"

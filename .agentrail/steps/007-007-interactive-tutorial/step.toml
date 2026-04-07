@@ -1,0 +1,11 @@
+number = 7
+slug = "007-interactive-tutorial"
+status = "pending"
+description = """
+Build an interactive tutorial that teaches MLPL step by step.
+
+The tutorial i..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T18:49:21"
+task_type = "production"
