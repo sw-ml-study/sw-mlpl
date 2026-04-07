@@ -201,6 +201,9 @@ fn print_help() {
     println!("  sqrt(a) abs(a)       element-wise sqrt / abs");
     println!("  sigmoid(a) tanh_fn(a) activations");
     println!("  pow(a, b)            element-wise power");
+    println!("  gt(a, b) lt(a, b)    element-wise comparison");
+    println!("  eq(a, b)             element-wise equality");
+    println!("  mean(a)              mean of all elements");
     println!("  zeros(s) ones(s)     array constructors");
     println!("  fill(s, v)           fill array with value");
     println!();

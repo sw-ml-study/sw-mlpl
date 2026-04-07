@@ -1,6 +1,6 @@
 number = 7
 slug = "007-compare-mean"
-status = "pending"
+status = "in-progress"
 description = """
 Add comparison and logical operations for ML use cases.
 
