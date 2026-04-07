@@ -1,0 +1,1 @@
+Added gt, lt, eq comparison operators (element-wise 0.0/1.0 with broadcast) and mean built-in. 15 new tests. Updated REPL :help.
