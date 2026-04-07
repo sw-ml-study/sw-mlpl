@@ -1,0 +1,1 @@
+Updated README with full 23-function reference table across 4 categories, added docs/milestone-ml.md documenting all ML foundations work, bumped REPL version to v0.2, verified all demos pass including logistic regression (100% accuracy), all quality gates green, tagged v0.2.0-ml
