@@ -1,0 +1,11 @@
+number = 7
+slug = "attention-pattern"
+status = "pending"
+description = """
+Add a toy attention-pattern demo.
+
+1. demos/attention.mlpl: build a small que..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T14:34:45"
+task_type = "production"

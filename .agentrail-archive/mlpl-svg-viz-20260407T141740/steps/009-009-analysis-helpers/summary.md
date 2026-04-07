@@ -1,0 +1,1 @@
+Added 5 analysis helpers (hist, scatter_labeled, loss_curve, confusion_matrix, boundary_2d) in new mlpl-viz analysis module, dispatched from eval_expr alongside svg(); 11 new tests; merged bar/line into charts.rs to free a module slot; new analysis_demo.mlpl, web demo entry, tutorial Lesson 12, lang-reference + usage docs updated; all gates green; pages rebuilt and pushed

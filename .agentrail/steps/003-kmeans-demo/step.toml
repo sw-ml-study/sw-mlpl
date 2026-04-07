@@ -1,0 +1,11 @@
+number = 3
+slug = "kmeans-demo"
+status = "pending"
+description = """
+Implement k-means clustering as an MLPL demo and wire it into the web REPL.
+
+..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T14:34:16"
+task_type = "production"
