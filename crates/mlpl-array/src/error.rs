@@ -47,10 +47,7 @@ impl std::fmt::Display for ArrayError {
                 )
             }
             Self::ShapeMismatch { source, target } => {
-                write!(
-                    f,
-                    "cannot reshape: source has {source} elements, target has {target}"
-                )
+                write!(f, "shape mismatch: {source} vs {target} elements")
             }
             Self::IndexOutOfBounds { axis, index, size } => {
                 write!(
