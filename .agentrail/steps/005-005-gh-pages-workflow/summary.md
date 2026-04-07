@@ -1,0 +1,1 @@
+GitHub Pages workflow already created and verified working. .github/workflows/pages.yml deploys pages/ on push to main using actions/checkout@v4, upload-pages-artifact@v3, deploy-pages@v4. Latest run (24061613671) completed in 18s. Site is live at https://sw-ml-study.github.io/sw-mlpl/ returning HTTP 200.
