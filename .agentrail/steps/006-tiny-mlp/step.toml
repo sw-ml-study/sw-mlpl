@@ -1,6 +1,6 @@
 number = 6
 slug = "tiny-mlp"
-status = "pending"
+status = "in-progress"
 description = """
 Add a tiny one-hidden-layer MLP demo on a non-linearly separable dataset.
 

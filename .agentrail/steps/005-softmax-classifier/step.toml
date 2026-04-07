@@ -1,6 +1,6 @@
 number = 5
 slug = "softmax-classifier"
-status = "in-progress"
+status = "completed"
 description = """
 Add a 3-class softmax classifier and confusion-matrix demo.
 
@@ -8,4 +8,5 @@ Add a 3-class softmax classifier and confusion-matrix demo.
 role = "production"
 context_files = []
 created_at = "2026-04-07T14:34:32"
+completed_at = "2026-04-07T15:29:34"
 task_type = "production"
