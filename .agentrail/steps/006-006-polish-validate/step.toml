@@ -1,6 +1,6 @@
 number = 6
 slug = "006-polish-validate"
-status = "pending"
+status = "in-progress"
 description = """
 Polish and validate the web REPL deployment.
 

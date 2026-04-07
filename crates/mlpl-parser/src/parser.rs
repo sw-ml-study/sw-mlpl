@@ -156,7 +156,7 @@ impl<'a> Parser<'a> {
                 Ok(expr)
             }
             _ => Err(ParseError::UnexpectedToken {
-                found: format!("{:?}", tok.kind),
+                found: describe_kind(&tok.kind),
                 span: tok.span,
             }),
         }
@@ -193,7 +193,7 @@ impl<'a> Parser<'a> {
         let count = self.parse_expr(0)?;
         if !self.is(TokenKind::LBrace) {
             return Err(ParseError::UnexpectedToken {
-                found: format!("{:?}", self.tokens[self.pos].kind),
+                found: describe_kind(&self.tokens[self.pos].kind),
                 span: self.tokens[self.pos].span,
             });
         }
@@ -242,5 +242,29 @@ impl<'a> Parser<'a> {
         {
             self.pos += 1;
         }
+    }
+}
+
+fn describe_kind(kind: &TokenKind) -> String {
+    match kind {
+        TokenKind::Eof => "end of input".into(),
+        TokenKind::Newline => "newline".into(),
+        TokenKind::IntLit(n) => format!("integer {n}"),
+        TokenKind::FloatLit(n) => format!("float {n}"),
+        TokenKind::Ident(s) => format!("identifier '{s}'"),
+        TokenKind::LParen => "'('".into(),
+        TokenKind::RParen => "')'".into(),
+        TokenKind::LBracket => "'['".into(),
+        TokenKind::RBracket => "']'".into(),
+        TokenKind::LBrace => "'{'".into(),
+        TokenKind::RBrace => "'}'".into(),
+        TokenKind::Comma => "','".into(),
+        TokenKind::Equals => "'='".into(),
+        TokenKind::Semicolon => "';'".into(),
+        TokenKind::Plus => "'+'".into(),
+        TokenKind::Minus => "'-'".into(),
+        TokenKind::Star => "'*'".into(),
+        TokenKind::Slash => "'/'".into(),
+        TokenKind::Repeat => "'repeat'".into(),
     }
 }
