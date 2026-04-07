@@ -1,0 +1,1 @@
+Created logistic regression demo (demos/logistic_regression.mlpl) that trains on AND gate with sigmoid activation and manual gradient descent, converging to 100% accuracy in 300 steps. Added 4 integration tests covering AND gate convergence, loss decrease, OR gate generalization, and accuracy computation.
