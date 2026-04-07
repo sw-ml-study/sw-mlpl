@@ -1,0 +1,1 @@
+Set up Trunk build infrastructure: Yew 0.21 CSR app with Catppuccin Mocha theme, index.html entry point, Trunk.toml config, build-pages.sh and serve.sh scripts, pages/.nojekyll, favicon.ico. Verified trunk build succeeds producing WASM+JS+HTML output.

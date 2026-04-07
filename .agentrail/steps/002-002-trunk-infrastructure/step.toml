@@ -1,6 +1,6 @@
 number = 2
 slug = "002-trunk-infrastructure"
-status = "in-progress"
+status = "completed"
 description = """
 Set up Trunk build infrastructure for the web app.
 
@@ -8,4 +8,5 @@ Set up Trunk build infrastructure for the web app.
 role = "production"
 context_files = []
 created_at = "2026-04-06T18:48:28"
+completed_at = "2026-04-06T19:22:06"
 task_type = "production"
