@@ -222,4 +222,19 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Generate a histogram of iota(20) with 5 bins.",
     },
+    Lesson {
+        title: "Unsupervised: K-Means",
+        intro: "K-Means clustering finds K groups in unlabeled data by repeating two steps: (1) assign each point to its nearest cluster center, and (2) move each center to the mean of its assigned points. We use blobs() to make a synthetic dataset, then express the whole Lloyd iteration with matmul, reduce_add, and argmax -- no per-point loops. The assignment mask is built from eq(iota(K), labels) broadcast via matmul.",
+        examples: &[
+            "D = blobs(7, 20, [[0, 0], [4, 4], [-4, 4]])",
+            "X = matmul(D, [[1,0],[0,1],[0,0]])",
+            "C = [[1, 1], [3, 3], [-3, 3]]",
+            "sqX = reshape(reduce_add(X*X, 1), [60, 1])",
+            "sqC = reshape(reduce_add(C*C, 1), [1, 3])",
+            "dists = matmul(sqX, ones([1, 3])) + matmul(ones([60, 1]), sqC) - 2 * matmul(X, transpose(C))",
+            "clus = argmax(-1 * dists, 1)",
+            "scatter_labeled(X, clus)",
+        ],
+        try_it: "Run a full K-Means from the K-Means demo and compare the learned centers to the true centers [[0,0],[4,4],[-4,4]].",
+    },
 ];

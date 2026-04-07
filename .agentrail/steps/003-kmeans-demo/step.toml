@@ -1,6 +1,6 @@
 number = 3
 slug = "kmeans-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Implement k-means clustering as an MLPL demo and wire it into the web REPL.
 
