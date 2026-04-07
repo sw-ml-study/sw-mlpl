@@ -1,6 +1,6 @@
 number = 1
 slug = "001-wasm-bindings"
-status = "pending"
+status = "in-progress"
 description = """
 Implement WASM bindings in mlpl-wasm crate.
 

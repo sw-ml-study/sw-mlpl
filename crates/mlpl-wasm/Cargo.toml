@@ -4,7 +4,11 @@ edition.workspace = true
 license.workspace = true
 version.workspace = true
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
 [dependencies]
 mlpl-eval = { path = "../mlpl-eval" }
+mlpl-parser = { path = "../mlpl-parser" }
 mlpl-trace = { path = "../mlpl-trace" }
-mlpl-viz = { path = "../mlpl-viz" }
+wasm-bindgen = "0.2"
