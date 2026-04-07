@@ -1,6 +1,6 @@
 number = 3
 slug = "003-browser-repl"
-status = "pending"
+status = "in-progress"
 description = """
 Build the browser REPL UI in apps/mlpl-web using Yew.
 
