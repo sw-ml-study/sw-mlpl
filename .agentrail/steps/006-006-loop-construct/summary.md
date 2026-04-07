@@ -1,0 +1,1 @@
+Added repeat N { body } loop construct: lexer tokens ({, }, repeat keyword), Expr::Repeat AST node, parser with parse_statement/parse_brace_body helpers, evaluator running body N times with variable persistence. Updated REPL script runner to parse whole file for multi-line blocks. Expanded :help. 16 new tests (8 parser, 8 eval).
