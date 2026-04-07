@@ -1,6 +1,6 @@
 number = 6
 slug = "006-loss-curve-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Update the logistic regression demo and tutorial to show a
 loss curve via svg..."""

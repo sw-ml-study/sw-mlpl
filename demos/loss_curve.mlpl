@@ -1,0 +1,27 @@
+# Loss Curve -- 1D linear regression loss surface
+#
+# Fit y = w*x to data and visualize the loss as a function of w.
+# Because MLPL has no vector-append, we sweep w over a range and
+# compute the MSE at every w in a single vectorized expression --
+# this gives a true "loss curve" you can render with svg().
+
+x = [0, 1, 2, 3, 4]
+y = [0, 2, 4, 6, 8]      # true slope = 2
+
+# Sweep w from -1 to 5 in steps of 0.25 (25 values)
+ws = iota(25) / 4 - 1
+
+# For each w, compute MSE = mean((w*x - y)^2).
+# Build an outer product: ws (25,1) * x (1,5) = preds (25,5)
+WS = reshape(ws, [25, 1])
+XS = reshape(x, [1, 5])
+preds = matmul(WS, XS)
+# Tile y to 25x5 by an outer product with a column of ones
+YS    = matmul(ones([25, 1]), reshape(y, [1, 5]))
+errs  = preds - YS
+sq    = errs * errs
+# mean across columns by reducing axis 1 then dividing by 5
+losses = reduce_add(sq, 1) / 5
+
+# Render the loss curve
+svg(losses, "line")

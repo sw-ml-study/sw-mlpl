@@ -193,7 +193,22 @@ pub const LESSONS: &[Lesson] = &[
             "rounded = gt(pred, 0.5)",
             "accuracy = mean(eq(reshape(rounded, [4]), y))",
             "accuracy",
+            "svg(reshape(pred, [4]), \"bar\")",
         ],
         try_it: "Change y to [0, 1, 1, 1] and retrain. You just learned the OR gate!",
+    },
+    Lesson {
+        title: "Visualizing Data",
+        intro: "svg(data, type) renders an array as an inline SVG diagram. Four diagram types are built in: \"scatter\" for an Nx2 matrix of (x,y) points, \"line\" for a vector or Nx2 matrix, \"bar\" for a vector, and \"heatmap\" for an MxN matrix. The browser REPL displays the SVG inline.",
+        examples: &[
+            "svg([[0,0],[1,1],[2,4],[3,9],[4,16]], \"scatter\")",
+            "svg([1, 3, 2, 5, 4, 6], \"line\")",
+            "svg([3, 1, 4, 1, 5, 9, 2, 6], \"bar\")",
+            "svg(reshape(iota(25), [5, 5]), \"heatmap\")",
+            "ws = iota(20) / 4 - 2",
+            "losses = ws * ws + 1",
+            "svg(losses, \"line\")",
+        ],
+        try_it: "Build a vector of squares with iota and pow, then render it as a bar chart.",
     },
 ];
