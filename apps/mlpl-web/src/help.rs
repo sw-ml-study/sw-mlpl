@@ -1,6 +1,6 @@
 pub fn help_text() -> String {
     [
-        "MLPL v0.2 -- Array Programming Language for ML",
+        "MLPL v0.3 -- Array Programming Language for ML",
         "",
         "Syntax:",
         "  42              scalar literal",

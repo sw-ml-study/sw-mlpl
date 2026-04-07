@@ -229,6 +229,69 @@ repeat 5 {
 total    # 15
 ```
 
+## Visualizing Data
+
+The `svg(data, type)` built-in renders an array as an inline SVG
+diagram. In the browser REPL the SVG is displayed directly below
+the input; in the CLI REPL it prints a one-line summary and can
+optionally be written to a file with `--svg-out <dir>`.
+
+### Diagram types
+
+```
+# Scatter: Nx2 matrix of (x, y) points
+svg([[0,0],[1,1],[2,4],[3,9],[4,16]], "scatter")
+
+# Line: a vector becomes a polyline; Nx2 becomes connected (x,y) points
+svg([1, 3, 2, 5, 4, 6], "line")
+
+# Bar: one bar per element of a vector
+svg([3, 1, 4, 1, 5, 9, 2, 6], "bar")
+
+# Heatmap: MxN matrix as a colored grid (viridis ramp)
+svg(reshape(iota(25), [5, 5]), "heatmap")
+```
+
+### Loss curve walkthrough
+
+The `loss_curve.mlpl` demo fits `y = w*x` to a small dataset by
+sweeping `w` over a range and computing the mean squared error at
+every value:
+
+```
+x = [0, 1, 2, 3, 4]
+y = [0, 2, 4, 6, 8]              # true slope = 2
+
+ws = iota(25) / 4 - 1            # 25 candidate slopes
+WS = reshape(ws, [25, 1])
+preds = matmul(WS, reshape(x, [1, 5]))
+YS    = matmul(ones([25, 1]), reshape(y, [1, 5]))
+errs  = preds - YS
+losses = reduce_add(errs * errs, 1) / 5
+
+svg(losses, "line")              # render the loss curve
+```
+
+The result is a U-shaped curve with its minimum at `w = 2`.
+
+### Decision boundary
+
+`svg(grid_outputs, "decision_boundary", training)` renders a
+classifier's probability surface over a 2D region with the
+training points overlaid:
+
+```
+gx = grid([0, 1, 0, 1], 20)      # 400 (x, y) points in the unit square
+# ... train logistic regression to get w and b ...
+gz = matmul(gx, reshape(w, [2, 1])) + b
+gp = sigmoid(reshape(gz, [400]))
+surface = reshape(gp, [20, 20])
+train = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]
+svg(surface, "decision_boundary", train)
+```
+
+See `demos/decision_boundary.mlpl` for the full demo.
+
 ## Execution Tracing
 
 Enable tracing to inspect what MLPL does internally:
@@ -306,5 +369,7 @@ cargo run -p mlpl-repl -- -f demos/matrix_ops.mlpl           # reshape, transpos
 cargo run -p mlpl-repl -- -f demos/computation.mlpl          # multi-step computation
 cargo run -p mlpl-repl -- -f demos/repeat_demo.mlpl          # loop construct
 cargo run -p mlpl-repl -- -f demos/logistic_regression.mlpl  # ML training
+cargo run -p mlpl-repl -- -f demos/loss_curve.mlpl           # SVG loss curve
+cargo run -p mlpl-repl -- -f demos/decision_boundary.mlpl    # 2D classifier
 cargo run -p mlpl-repl -- -f demos/trace_demo.mlpl --trace   # execution tracing
 ```

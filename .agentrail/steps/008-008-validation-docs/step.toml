@@ -1,6 +1,6 @@
 number = 8
 slug = "008-validation-docs"
-status = "pending"
+status = "in-progress"
 description = """
 Final validation and documentation pass for the SVG viz saga.
 

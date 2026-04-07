@@ -1,0 +1,1 @@
+Added decision_boundary svg type with diverging ramp + training-point overlay, render_with_aux dispatch, grid() runtime builtin, eval_svg 3-arg support, AND-gate decision boundary demo, alphabetized web demo dropdown and added Decision Boundary entry. 6 new viz tests. Folded helpers.rs into svg/mod.rs and split grid into its own module to satisfy sw-checklist.
