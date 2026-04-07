@@ -211,4 +211,15 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Build a vector of squares with iota and pow, then render it as a bar chart.",
     },
+    Lesson {
+        title: "Visualizing Analyses",
+        intro: "High-level helpers compute the right view of your data and render a complete diagram in one call. hist makes a histogram, scatter_labeled colors points by cluster id, loss_curve plots a training loss vector, confusion_matrix renders a KxK heatmap of class predictions vs actuals, and boundary_2d renders a 2D classifier decision surface with training points overlaid.",
+        examples: &[
+            "hist([1, 2, 2, 3, 3, 3, 4, 4, 5], 5)",
+            "scatter_labeled([[0,0],[1,1],[0,1],[1,0]], [0, 0, 1, 1])",
+            "loss_curve([5, 3, 2, 1.5, 1.0, 0.7, 0.5, 0.4, 0.3, 0.25])",
+            "confusion_matrix([0, 1, 2, 1, 0], [0, 1, 1, 1, 0])",
+        ],
+        try_it: "Generate a histogram of iota(20) with 5 bins.",
+    },
 ];

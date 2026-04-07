@@ -69,6 +69,74 @@ pub(crate) fn eval_svg(
     Ok(mlpl_viz::render_with_aux(&data, &type_name, aux.as_ref())?)
 }
 
+/// Dispatch high-level analysis helpers from `mlpl_viz`. Returns
+/// `None` if `name` is not a known helper.
+pub(crate) fn eval_analysis_helper(
+    name: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Option<Result<String, EvalError>> {
+    if !matches!(
+        name,
+        "hist" | "scatter_labeled" | "loss_curve" | "confusion_matrix" | "boundary_2d"
+    ) {
+        return None;
+    }
+    let evaluated: Result<Vec<DenseArray>, EvalError> = args
+        .iter()
+        .map(|a| eval_expr(a, env, trace).and_then(Value::into_array))
+        .collect();
+    Some(match evaluated {
+        Ok(arrs) => call_analysis(name, &arrs),
+        Err(e) => Err(e),
+    })
+}
+
+fn call_analysis(name: &str, a: &[DenseArray]) -> Result<String, EvalError> {
+    let bad_arity = |expected: usize| EvalError::BadArity {
+        func: name.into(),
+        expected,
+        got: a.len(),
+    };
+    Ok(match name {
+        "hist" => {
+            if a.len() != 2 {
+                return Err(bad_arity(2));
+            }
+            if a[1].rank() != 0 {
+                return Err(EvalError::ExpectedString);
+            }
+            mlpl_viz::analysis_hist(&a[0], a[1].data()[0] as usize)?
+        }
+        "scatter_labeled" => {
+            if a.len() != 2 {
+                return Err(bad_arity(2));
+            }
+            mlpl_viz::analysis_scatter_labeled(&a[0], &a[1])?
+        }
+        "loss_curve" => {
+            if a.len() != 1 {
+                return Err(bad_arity(1));
+            }
+            mlpl_viz::analysis_loss_curve(&a[0])?
+        }
+        "confusion_matrix" => {
+            if a.len() != 2 {
+                return Err(bad_arity(2));
+            }
+            mlpl_viz::analysis_confusion_matrix(&a[0], &a[1])?
+        }
+        "boundary_2d" => {
+            if a.len() != 4 {
+                return Err(bad_arity(4));
+            }
+            mlpl_viz::analysis_boundary_2d(&a[0], &a[1], &a[2], &a[3])?
+        }
+        _ => unreachable!(),
+    })
+}
+
 pub(crate) fn eval_array_lit(
     elems: &[Expr],
     env: &mut Environment,
