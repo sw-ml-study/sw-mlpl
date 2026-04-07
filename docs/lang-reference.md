@@ -192,6 +192,8 @@ Newlines and semicolons are both statement separators.
 | `ones(shape)` | 1 | Array of ones with given shape |
 | `fill(shape, v)` | 2 | Array filled with value v |
 | `grid(bounds, n)` | 2 | n*n by 2 matrix of (x, y) points over [xmin,xmax] x [ymin,ymax]; bounds is [xmin, xmax, ymin, ymax] |
+| `random(seed, shape)` | 2 | Seeded uniform [0, 1) array with the given shape. `seed` is a scalar integer; `shape` is a vector of dimensions. Deterministic for a given seed. |
+| `randn(seed, shape)` | 2 | Seeded standard-normal array (mean 0, variance 1), same shape semantics as `random`. Implemented via Box-Muller on the same xorshift64 stream. |
 
 ### Visualization
 
