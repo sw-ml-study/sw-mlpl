@@ -29,3 +29,22 @@ pred = sigmoid(matmul(X, reshape(w, [2, 1])) + b)
 rounded = gt(pred, 0.5)
 accuracy = mean(eq(reshape(rounded, [4]), y))
 accuracy
+
+# Visualize the final predictions as a bar chart (compare to y = [0,0,0,1])
+svg(reshape(pred, [4]), "bar")
+
+# Loss curve along the learned weight direction:
+# sweep a scale s from 0 to 1.5 and recompute the binary cross-entropy
+# proxy (mean squared error of pred vs y) at s*w, s*b.
+ss   = iota(16) / 10
+WS2  = matmul(reshape(ss, [16, 1]), reshape(w, [1, 2]))
+bs   = ss * b
+# preds_s[i,j] = sigmoid( sum_k X[j,k] * (s_i * w[k]) + s_i*b )
+zs   = matmul(WS2, transpose(X))
+ones16 = ones([16, 1])
+zs   = zs + matmul(reshape(bs, [16, 1]), ones([1, 4]))
+ps   = sigmoid(zs)
+ys4  = matmul(ones16, reshape(y, [1, 4]))
+diff = ps - ys4
+losses = reduce_add(diff * diff, 1) / 4
+svg(losses, "line")
