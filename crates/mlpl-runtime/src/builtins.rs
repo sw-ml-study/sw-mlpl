@@ -23,6 +23,9 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
     if let Some(result) = math_builtins::try_call(name, args.clone()) {
         return result;
     }
+    if let Some(result) = crate::random_builtins::try_call(name, args.clone()) {
+        return result;
+    }
     match name {
         "iota" => builtin_iota(name, args),
         "shape" => builtin_shape(name, args),

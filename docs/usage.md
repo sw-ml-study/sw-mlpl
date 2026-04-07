@@ -71,6 +71,10 @@ iota(10)          # 0 1 2 3 4 5 6 7 8 9
 zeros([3, 4])     # 3x4 matrix of zeros
 ones([2, 2])      # 2x2 matrix of ones
 fill([5], 3.14)   # vector of five 3.14s
+
+# Seeded random arrays (deterministic for a given seed)
+random(42, [3, 4])  # 3x4 uniform [0, 1) values
+randn(42, [1000])   # 1000 standard-normal values
 ```
 
 ### Reshaping and Transposing
