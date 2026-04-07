@@ -1,0 +1,11 @@
+number = 2
+slug = "002-svg-builtin-scatter"
+status = "pending"
+description = """
+Implement the svg() built-in with the "scatter" diagram type.
+
+1. Create crat..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T08:57:17"
+task_type = "production"

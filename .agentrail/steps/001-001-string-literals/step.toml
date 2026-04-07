@@ -1,0 +1,11 @@
+number = 1
+slug = "001-string-literals"
+status = "pending"
+description = """
+Add string literals to the parser and a Value type to the evaluator.
+
+This is..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T08:56:23"
+task_type = "production"

@@ -1,0 +1,11 @@
+number = 8
+slug = "008-validation-docs"
+status = "pending"
+description = """
+Final validation and documentation pass for the SVG viz saga.
+
+1. Update docs..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T08:58:21"
+task_type = "validation"

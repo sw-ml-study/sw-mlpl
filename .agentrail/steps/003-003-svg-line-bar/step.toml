@@ -1,0 +1,11 @@
+number = 3
+slug = "003-svg-line-bar"
+status = "pending"
+description = """
+Add "line" and "bar" diagram types to svg().
+
+1. render_line(data, opts) -> S..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T08:57:24"
+task_type = "production"
