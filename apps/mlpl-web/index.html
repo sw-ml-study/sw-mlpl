@@ -218,11 +218,33 @@
         }
         .svg-output {
             display: inline-block;
+            position: relative;
             background: var(--mantle);
             border: 1px solid var(--surface1);
             border-radius: 6px;
             padding: 10px;
             margin: 6px 0;
+        }
+        .svg-download {
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface0);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            color: var(--text);
+            text-decoration: none;
+            font-size: 14px;
+            opacity: 0.6;
+            transition: opacity 0.15s;
+        }
+        .svg-download:hover {
+            opacity: 1;
         }
         .svg-output svg {
             display: block;
