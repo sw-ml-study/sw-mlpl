@@ -1,6 +1,6 @@
 number = 9
 slug = "009-analysis-helpers"
-status = "pending"
+status = "in-progress"
 description = """
 Add high-level analysis/visualization helper functions that
 generate large/co..."""

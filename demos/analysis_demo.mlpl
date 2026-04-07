@@ -1,0 +1,42 @@
+# Analysis demo: train a logistic-regression classifier on the AND
+# gate, then render its loss curve, confusion matrix, and decision
+# boundary using the high-level analysis helpers.
+
+X = [[0,0],[0,1],[1,0],[1,1]]
+y = [0, 0, 0, 1]
+w = zeros([2])
+b = 0
+lr = 1.0
+n = 4
+
+repeat 400 {
+  z = matmul(X, reshape(w, [2, 1])) + b;
+  pred = sigmoid(z);
+  dz = pred - reshape(y, [4, 1]);
+  dw = reshape(matmul(transpose(X), dz), [2]) / n;
+  db = mean(dz);
+  w = w - lr * dw;
+  b = b - lr * db
+}
+
+# A loss-style curve: sweep a scale factor along the learned weights
+# and compute the mean squared error at each point.
+ss = iota(20) / 10
+WS = matmul(reshape(ss, [20, 1]), reshape(w, [1, 2]))
+zs = matmul(WS, transpose(X)) + matmul(reshape(ss * b, [20, 1]), ones([1, 4]))
+ps = sigmoid(zs)
+ys4 = matmul(ones([20, 1]), reshape(y, [1, 4]))
+losses = reduce_add((ps - ys4) * (ps - ys4), 1) / 4
+
+loss_curve(losses)
+
+# Confusion matrix: round the model's predictions and compare to y.
+pred_final = sigmoid(matmul(X, reshape(w, [2, 1])) + b)
+predicted = reshape(gt(pred_final, 0.5), [4])
+confusion_matrix(predicted, y)
+
+# Decision boundary on a 20x20 grid
+gx = grid([0, 1, 0, 1], 20)
+gz = matmul(gx, reshape(w, [2, 1])) + b
+gp = sigmoid(reshape(gz, [400]))
+boundary_2d(gp, [20, 20], X, y)

@@ -6,7 +6,7 @@ use mlpl_trace::{Trace, TraceEvent, TraceValue};
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::eval_ops::{eval_array_lit, eval_binop, eval_fncall, eval_svg};
+use crate::eval_ops::{eval_analysis_helper, eval_array_lit, eval_binop, eval_fncall, eval_svg};
 use crate::value::Value;
 
 /// Evaluate a program (list of statements). Returns the last result as an array.
@@ -58,6 +58,11 @@ pub(crate) fn eval_expr(
         && name == "svg"
     {
         return eval_svg(args, env, trace).map(Value::Str);
+    }
+    if let Expr::FnCall { name, args, .. } = expr
+        && let Some(result) = eval_analysis_helper(name, args, env, trace)
+    {
+        return result.map(Value::Str);
     }
     let (op_name, inputs, result) = match expr {
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),

@@ -1,24 +1,37 @@
 //! SVG diagram rendering for MLPL arrays.
 
-mod bar;
+mod charts;
 mod decision_boundary;
 mod heatmap;
-mod line;
 mod scatter;
 
 use std::fmt;
 
 use mlpl_array::DenseArray;
 
-pub use bar::render_bar;
+pub use charts::{render_bar, render_line};
 pub use decision_boundary::render_decision_boundary;
 pub use heatmap::render_heatmap;
-pub use line::render_line;
 pub use scatter::render_scatter;
 
 pub(crate) const W: f64 = 400.0;
 pub(crate) const H: f64 = 300.0;
 pub(crate) const PAD: f64 = 30.0;
+
+/// Plain min/max of a slice (no expansion when all equal).
+pub(crate) fn data_range(values: &[f64]) -> (f64, f64) {
+    let mut lo = f64::INFINITY;
+    let mut hi = f64::NEG_INFINITY;
+    for &v in values {
+        if v < lo {
+            lo = v;
+        }
+        if v > hi {
+            hi = v;
+        }
+    }
+    (lo, hi)
+}
 
 /// Min/max of a slice, returning (lo-1, hi+1) when all values are equal
 /// so the resulting range is non-zero.

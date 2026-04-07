@@ -292,6 +292,24 @@ svg(surface, "decision_boundary", train)
 
 See `demos/decision_boundary.mlpl` for the full demo.
 
+### Analysis helpers
+
+`svg()` is a low-level primitive. For common diagrams there are
+higher-level helpers that compute the right view of the data and
+render a complete picture in one call:
+
+```
+hist([1, 2, 2, 3, 3, 3, 4, 4, 5], 5)
+scatter_labeled([[0,0],[1,1],[0,1],[1,0]], [0, 0, 1, 1])
+loss_curve([5.0, 3.0, 2.0, 1.0, 0.5, 0.25])
+confusion_matrix([0,1,2,1,0], [0,1,1,1,0])
+boundary_2d(grid_probs, [20, 20], training_points, training_labels)
+```
+
+`demos/analysis_demo.mlpl` walks through training a classifier and
+rendering its loss curve, confusion matrix, and decision boundary
+in a single script.
+
 ## Execution Tracing
 
 Enable tracing to inspect what MLPL does internally:
@@ -371,5 +389,6 @@ cargo run -p mlpl-repl -- -f demos/repeat_demo.mlpl          # loop construct
 cargo run -p mlpl-repl -- -f demos/logistic_regression.mlpl  # ML training
 cargo run -p mlpl-repl -- -f demos/loss_curve.mlpl           # SVG loss curve
 cargo run -p mlpl-repl -- -f demos/decision_boundary.mlpl    # 2D classifier
+cargo run -p mlpl-repl -- -f demos/analysis_demo.mlpl        # analysis helpers
 cargo run -p mlpl-repl -- -f demos/trace_demo.mlpl --trace   # execution tracing
 ```

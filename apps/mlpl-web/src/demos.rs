@@ -6,6 +6,17 @@ pub struct Demo {
 // Demos are listed alphabetically by `name`.
 pub const DEMOS: &[Demo] = &[
     Demo {
+        name: "Analysis Helpers",
+        lines: &[
+            "hist([1, 2, 2, 3, 3, 3, 4, 4, 5], 5)",
+            "scatter_labeled([[0,0],[1,1],[0,1],[1,0]], [0, 0, 1, 1])",
+            "loss_curve([5, 3, 2, 1.5, 1.0, 0.7, 0.5, 0.4, 0.3, 0.25])",
+            "confusion_matrix([0, 1, 2, 1, 0], [0, 1, 1, 1, 0])",
+            "gx = grid([0, 1, 0, 1], 20)",
+            "boundary_2d(reshape(iota(400), [400]) / 400, [20, 20], [[0,0],[1,1]], [0, 1])",
+        ],
+    },
+    Demo {
         name: "Basics",
         lines: &[
             "1 + 2",
