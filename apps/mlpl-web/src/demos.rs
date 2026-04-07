@@ -130,6 +130,24 @@ pub const DEMOS: &[Demo] = &[
         ],
     },
     Demo {
+        name: "PCA",
+        lines: &[
+            "Xraw = randn(1, [60, 2])",
+            "X = matmul(Xraw, [[1, 2], [0, 0.3]])",
+            "cm = reduce_add(X, 0) / 60",
+            "Xc = X - matmul(ones([60, 1]), reshape(cm, [1, 2]))",
+            "Cov = matmul(transpose(Xc), Xc) / 60",
+            "v = [1, 0]",
+            "repeat 10 { v = matmul(Cov, v); v = v / sqrt(dot(v, v)) }",
+            "coords = reshape(matmul(Xc, reshape(v, [2, 1])), [60])",
+            "labels = gt(coords, 0)",
+            "ends = matmul(reshape([-3, 3], [2, 1]), reshape(v, [1, 2]))",
+            "line = ends + matmul(ones([2, 1]), reshape(cm, [1, 2]))",
+            "scatter_labeled(X, labels)",
+            "svg(line, \"line\")",
+        ],
+    },
+    Demo {
         name: "Visualizations",
         lines: &[
             "svg([[0,0],[1,1],[2,4],[3,9],[4,16]], \"scatter\")",

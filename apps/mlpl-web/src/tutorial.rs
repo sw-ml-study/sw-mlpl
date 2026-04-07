@@ -237,4 +237,19 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Run a full K-Means from the K-Means demo and compare the learned centers to the true centers [[0,0],[4,4],[-4,4]].",
     },
+    Lesson {
+        title: "Dimensionality Reduction: PCA",
+        intro: "Principal Component Analysis finds the direction along which a dataset varies the most. First center the data by subtracting the column means. The covariance matrix is Xc^T Xc / n. Its dominant eigenvector is the first principal component. Power iteration -- repeatedly multiplying a unit vector by the covariance and renormalizing -- converges to that eigenvector without needing an eigensolver. Projecting the centered data onto the principal axis gives a 1D coordinate you can color points by.",
+        examples: &[
+            "Xraw = randn(1, [60, 2])",
+            "X = matmul(Xraw, [[1, 2], [0, 0.3]])",
+            "cm = reduce_add(X, 0) / 60",
+            "Xc = X - matmul(ones([60, 1]), reshape(cm, [1, 2]))",
+            "Cov = matmul(transpose(Xc), Xc) / 60",
+            "v = [1, 0]",
+            "repeat 10 { v = matmul(Cov, v); v = v / sqrt(dot(v, v)) }",
+            "v",
+        ],
+        try_it: "Change the mixing matrix to [[1, 0], [0, 3]] and verify that the principal axis comes out parallel to (0, 1).",
+    },
 ];
