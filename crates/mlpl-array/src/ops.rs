@@ -237,6 +237,51 @@ impl DenseArray {
     }
 }
 
+impl DenseArray {
+    /// Argmax along an axis. Returns an array with the given axis
+    /// removed whose values are the indices (as f64) of the maxima.
+    /// Ties go to the first occurrence.
+    pub fn argmax_axis(&self, axis: usize) -> Result<DenseArray, ArrayError> {
+        let dims = self.shape().dims();
+        if axis >= dims.len() {
+            return Err(ArrayError::IndexOutOfBounds {
+                axis,
+                index: axis,
+                size: dims.len(),
+            });
+        }
+        let mut result_dims: Vec<usize> = dims.to_vec();
+        result_dims.remove(axis);
+        let result_shape = Shape::new(result_dims);
+        let result_count = result_shape.elem_count();
+        let mut best_val = vec![f64::NEG_INFINITY; result_count];
+        let mut best_idx = vec![0.0f64; result_count];
+
+        let strides = compute_strides(dims);
+        let axis_size = dims[axis];
+        let axis_stride = strides[axis];
+
+        for flat in 0..self.elem_count() {
+            let result_flat = if axis_stride > 1 {
+                let outer = flat / (axis_size * axis_stride);
+                let inner = flat % axis_stride;
+                outer * axis_stride + inner
+            } else {
+                flat / axis_size
+            };
+            // Recover axis index: (flat / axis_stride) % axis_size.
+            let axis_idx = (flat / axis_stride) % axis_size;
+            let v = self.data()[flat];
+            if v > best_val[result_flat] {
+                best_val[result_flat] = v;
+                best_idx[result_flat] = axis_idx as f64;
+            }
+        }
+
+        DenseArray::new(result_shape, best_idx)
+    }
+}
+
 /// Compute strides for row-major layout.
 fn compute_strides(dims: &[usize]) -> Vec<usize> {
     let mut strides = vec![1; dims.len()];

@@ -75,6 +75,14 @@ fill([5], 3.14)   # vector of five 3.14s
 # Seeded random arrays (deterministic for a given seed)
 random(42, [3, 4])  # 3x4 uniform [0, 1) values
 randn(42, [1000])   # 1000 standard-normal values
+
+# Argmax (flat scalar, or along an axis)
+argmax([1, 5, 2, 4])                    # scalar: 1
+argmax(reshape(iota(6), [2, 3]), 1)     # per-row argmax
+
+# Synthetic gaussian blobs dataset
+# 3 centers, 20 points each -> 60x3 matrix of [x, y, label]
+blobs(42, 20, [[0, 0], [3, 3], [-3, 3]])
 ```
 
 ### Reshaping and Transposing
