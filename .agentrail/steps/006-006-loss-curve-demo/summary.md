@@ -1,0 +1,1 @@
+Added loss_curve demo, svg lines in logistic_regression demo, Loss Curve and Visualizations entries in web demo selector, tutorial Lesson 11 Visualizing Data, rebuilt pages

@@ -3,6 +3,7 @@ pub struct Demo {
     pub lines: &'static [&'static str],
 }
 
+// Demos are listed alphabetically by `name`.
 pub const DEMOS: &[Demo] = &[
     Demo {
         name: "Basics",
@@ -19,30 +20,21 @@ pub const DEMOS: &[Demo] = &[
         ],
     },
     Demo {
-        name: "Matrix Ops",
+        name: "Decision Boundary",
         lines: &[
-            "x = iota(12)",
-            "m = reshape(x, [3, 4])",
-            "m",
-            "transpose(m)",
-            "shape(m)",
-            "rank(m)",
-            "reduce_add(m, 0)",
-            "reduce_add(m, 1)",
-        ],
-    },
-    Demo {
-        name: "Math Functions",
-        lines: &[
-            "exp(0)",
-            "exp([0, 1, 2])",
-            "log(exp(1))",
-            "sqrt([4, 9, 16, 25])",
-            "abs([-3, 0, 5])",
-            "pow([2, 3, 4], 2)",
-            "sigmoid(0)",
-            "sigmoid([-2, -1, 0, 1, 2])",
-            "tanh_fn([-1, 0, 1])",
+            "X = [[0,0],[0,1],[1,0],[1,1]]",
+            "y = [0, 0, 0, 1]",
+            "w = zeros([2])",
+            "b = 0",
+            "lr = 1.0",
+            "n = 4",
+            "repeat 400 { z = matmul(X, reshape(w, [2, 1])) + b; pred = sigmoid(z); dz = pred - reshape(y, [4, 1]); dw = reshape(matmul(transpose(X), dz), [2]) / n; db = mean(dz); w = w - lr * dw; b = b - lr * db }",
+            "gx = grid([0, 1, 0, 1], 20)",
+            "gz = matmul(gx, reshape(w, [2, 1])) + b",
+            "gp = sigmoid(reshape(gz, [400]))",
+            "surface = reshape(gp, [20, 20])",
+            "train = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]",
+            "svg(surface, \"decision_boundary\", train)",
         ],
     },
     Demo {
@@ -81,6 +73,33 @@ pub const DEMOS: &[Demo] = &[
             "errs = preds - YS",
             "losses = reduce_add(errs * errs, 1) / 5",
             "svg(losses, \"line\")",
+        ],
+    },
+    Demo {
+        name: "Math Functions",
+        lines: &[
+            "exp(0)",
+            "exp([0, 1, 2])",
+            "log(exp(1))",
+            "sqrt([4, 9, 16, 25])",
+            "abs([-3, 0, 5])",
+            "pow([2, 3, 4], 2)",
+            "sigmoid(0)",
+            "sigmoid([-2, -1, 0, 1, 2])",
+            "tanh_fn([-1, 0, 1])",
+        ],
+    },
+    Demo {
+        name: "Matrix Ops",
+        lines: &[
+            "x = iota(12)",
+            "m = reshape(x, [3, 4])",
+            "m",
+            "transpose(m)",
+            "shape(m)",
+            "rank(m)",
+            "reduce_add(m, 0)",
+            "reduce_add(m, 1)",
         ],
     },
     Demo {

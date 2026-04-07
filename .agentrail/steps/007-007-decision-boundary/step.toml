@@ -1,6 +1,6 @@
 number = 7
 slug = "007-decision-boundary"
-status = "pending"
+status = "in-progress"
 description = """
 Add the "decision_boundary" diagram type and a classifier demo.
 
