@@ -1,6 +1,7 @@
 //! SVG diagram rendering for MLPL arrays.
 
 mod bar;
+mod heatmap;
 mod helpers;
 mod line;
 mod scatter;
@@ -10,6 +11,7 @@ use std::fmt;
 use mlpl_array::DenseArray;
 
 pub use bar::render_bar;
+pub use heatmap::render_heatmap;
 pub use line::render_line;
 pub use scatter::render_scatter;
 
@@ -41,6 +43,7 @@ pub fn render(data: &DenseArray, type_name: &str) -> Result<String, VizError> {
         "scatter" => render_scatter(data),
         "line" => render_line(data),
         "bar" => render_bar(data),
+        "heatmap" => render_heatmap(data),
         other => Err(VizError::UnknownType(other.to_string())),
     }
 }
