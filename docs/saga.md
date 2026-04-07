@@ -18,8 +18,28 @@ Working REPL with all v1 syntax, built-in functions, tracing.
 ## Saga 4: Structured trace v1 (COMPLETE)
 TraceEvent/Trace types, evaluator instrumentation, JSON export.
 
-## Saga 5: Visual web viewer v1
+## Saga 5: Visual web viewer v1 (DEFERRED)
 Deferred to post-MVP. MVP uses CLI + JSON trace export.
 
 ## MVP
 Sagas 0 through 4 complete. MVP ships with REPL + trace export.
+
+## Saga 6: ML foundations (COMPLETE)
+Sigmoid, tanh_fn, pow, comparison operators, axis reductions, mean,
+array constructors (zeros, ones, fill), and the first end-to-end
+logistic regression demo. Delivered v0.2.
+
+## Saga 7: SVG visualization v1 (COMPLETE)
+`mlpl-viz` crate, `svg(data, type[, aux])` built-in, diagram types
+(scatter, line, bar, heatmap, decision_boundary), `grid()` helper,
+high-level analysis helpers (hist, scatter_labeled, loss_curve,
+confusion_matrix, boundary_2d), browser REPL inline SVG rendering,
+and download button. Delivered v0.3.
+
+## Saga 8: ML demos (COMPLETE)
+Synthetic data primitives (random, randn, argmax, blobs) and
+higher-level ML built-ins (softmax, one_hot), plus six demos wired
+into the browser REPL: k-means clustering, PCA via power iteration,
+a linear softmax classifier, a tiny MLP on XOR-style data, and a
+scaled dot-product attention pattern. Tutorial lessons added for
+each. Delivered v0.4.

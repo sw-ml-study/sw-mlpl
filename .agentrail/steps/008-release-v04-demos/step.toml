@@ -1,6 +1,6 @@
 number = 8
 slug = "release-v04-demos"
-status = "pending"
+status = "in-progress"
 description = """
 Final validation, documentation, and release of the ML demos saga.
 
