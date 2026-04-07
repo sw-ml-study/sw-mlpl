@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-d67abd03445d52f.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-d67abd03445d52f_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-95bd2aaa5d4d8f4f.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-95bd2aaa5d4d8f4f_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -131,10 +131,42 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             40%, 80% { transform: rotate(10deg); }
         }
 
-        /* Help button */
-        .help-btn {
+        /* Header controls */
+        .controls {
             margin-left: auto;
             margin-right: 60px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .demo-select {
+            background: var(--surface0);
+            color: var(--text);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .demo-select:hover {
+            border-color: var(--blue);
+        }
+        .ctrl-btn {
+            background: var(--surface0);
+            color: var(--text);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 6px 12px;
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .ctrl-btn:hover {
+            background: var(--surface1);
+            border-color: var(--blue);
+        }
+        .help-btn {
             background: var(--surface0);
             color: var(--blue);
             border: 1px solid var(--surface1);
@@ -290,7 +322,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             word-break: break-word;
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-d67abd03445d52f.js" crossorigin="anonymous" integrity="sha384-cpZAW38CxXbU5SrZKDwu+s7eYKJ0WS+LOnP6a00vt+GIw/sUj2DlmN2SvTKCcxag"><link rel="preload" href="/sw-mlpl/mlpl-web-d67abd03445d52f_bg.wasm" crossorigin="anonymous" integrity="sha384-5Hm8BAxfbT/jkMe2W1cEfatXNc/aUkx3rAaVIjsNNNUfY7Ig2Xcu0gBS5gKv6WCn" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-95bd2aaa5d4d8f4f.js" crossorigin="anonymous" integrity="sha384-PkqGKyKeMu34qKFmEWuj1r4e7XdkGbxk3fs1LG0H2C9gfLt8kQMFcKPY5LCPmEGM"><link rel="preload" href="/sw-mlpl/mlpl-web-95bd2aaa5d4d8f4f_bg.wasm" crossorigin="anonymous" integrity="sha384-+m9nAJYEmWd66XjFPtIKDBXoI47bMTcuJZRzPW4SPeyhPE7I7+nB0N2Uh/TGDKdG" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
