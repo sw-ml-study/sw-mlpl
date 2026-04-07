@@ -310,6 +310,86 @@
             white-space: pre-wrap;
             word-break: break-word;
         }
+
+        /* Tutorial panel */
+        .tutorial-panel {
+            background: var(--mantle);
+            border-bottom: 1px solid var(--surface1);
+            padding: 16px 20px;
+            flex-shrink: 0;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .tutorial-header {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+        .tutorial-progress {
+            color: var(--peach);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .tutorial-header h2 {
+            color: var(--blue);
+            font-size: 18px;
+            font-weight: 700;
+            flex: 1;
+        }
+        .tutorial-intro {
+            color: var(--subtext1);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .lesson-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .lesson-example {
+            background: var(--base);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 6px 10px;
+            text-align: left;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .lesson-example:hover {
+            background: var(--surface0);
+            border-color: var(--blue);
+        }
+        .example-prompt {
+            color: var(--green);
+            font-weight: 700;
+            margin-right: 4px;
+        }
+        .tutorial-tryit {
+            color: var(--yellow);
+            background: var(--base);
+            border-left: 3px solid var(--yellow);
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+        .tutorial-tryit strong {
+            color: var(--peach);
+        }
+        .tutorial-nav {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .tutorial-nav .ctrl-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 <body>

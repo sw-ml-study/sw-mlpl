@@ -3,6 +3,7 @@ use yew::prelude::*;
 
 use crate::demos::DEMOS;
 use crate::state::DocTab;
+use crate::tutorial::LESSONS;
 
 const LANG_REFERENCE: &str = include_str!("../../../docs/lang-reference.md");
 const USAGE_GUIDE: &str = include_str!("../../../docs/usage.md");
@@ -30,6 +31,8 @@ pub struct HeaderProps {
     pub on_help: Callback<MouseEvent>,
     pub on_clear: Callback<MouseEvent>,
     pub on_demo: Callback<usize>,
+    pub on_tutorial: Callback<MouseEvent>,
+    pub tutorial_active: bool,
 }
 
 #[function_component(Header)]
@@ -43,6 +46,11 @@ pub fn header(props: &HeaderProps) -> Html {
             target.set_value("");
         }
     });
+    let tutorial_label = if props.tutorial_active {
+        "Exit Tutorial"
+    } else {
+        "Tutorial"
+    };
     html! {
         <header>
             <h1>{"MLPL"}</h1>
@@ -54,10 +62,62 @@ pub fn header(props: &HeaderProps) -> Html {
                         <option value={i.to_string()}>{ d.name }</option>
                     }) }
                 </select>
+                <button class="ctrl-btn" onclick={props.on_tutorial.clone()}>{ tutorial_label }</button>
                 <button class="ctrl-btn" onclick={props.on_clear.clone()}>{"Clear"}</button>
                 <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation">{"?"}</button>
             </div>
         </header>
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct TutorialPanelProps {
+    pub lesson_idx: usize,
+    pub on_prev: Callback<MouseEvent>,
+    pub on_next: Callback<MouseEvent>,
+    pub on_run_example: Callback<String>,
+    pub on_close: Callback<MouseEvent>,
+}
+
+#[function_component(TutorialPanel)]
+pub fn tutorial_panel(props: &TutorialPanelProps) -> Html {
+    let lesson = match LESSONS.get(props.lesson_idx) {
+        Some(l) => l,
+        None => return html! {},
+    };
+    let total = LESSONS.len();
+    let is_first = props.lesson_idx == 0;
+    let is_last = props.lesson_idx + 1 == total;
+
+    let examples_html = lesson.examples.iter().map(|line| {
+        let line_str = (*line).to_string();
+        let on_click = {
+            let on_run = props.on_run_example.clone();
+            let line_str = line_str.clone();
+            Callback::from(move |_| on_run.emit(line_str.clone()))
+        };
+        html! {
+            <button class="lesson-example" onclick={on_click} title="Click to run">
+                <span class="example-prompt">{"mlpl> "}</span>{ line }
+            </button>
+        }
+    });
+
+    html! {
+        <div class="tutorial-panel">
+            <div class="tutorial-header">
+                <span class="tutorial-progress">{ format!("Lesson {} of {}", props.lesson_idx + 1, total) }</span>
+                <h2>{ lesson.title }</h2>
+                <button class="close-btn" onclick={props.on_close.clone()} aria-label="Exit tutorial">{"×"}</button>
+            </div>
+            <p class="tutorial-intro">{ lesson.intro }</p>
+            <div class="lesson-examples">{ for examples_html }</div>
+            <p class="tutorial-tryit"><strong>{"Try it: "}</strong>{ lesson.try_it }</p>
+            <div class="tutorial-nav">
+                <button class="ctrl-btn" disabled={is_first} onclick={props.on_prev.clone()}>{"← Previous"}</button>
+                <button class="ctrl-btn" disabled={is_last} onclick={props.on_next.clone()}>{"Next →"}</button>
+            </div>
+        </div>
     }
 }
 

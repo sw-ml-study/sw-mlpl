@@ -3,11 +3,17 @@ mod demos;
 mod handlers;
 mod help;
 mod state;
+mod tutorial;
 
-use components::{DocDialog, Footer, GithubCorner, Header, InputRow, Welcome};
-use handlers::{EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit};
+use components::{
+    DocDialog, Footer, GithubCorner, Header, InputRow, TutorialPanel, TutorialPanelProps, Welcome,
+};
+use handlers::{
+    EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit, toggle_bool,
+};
 use mlpl_wasm::WasmSession;
 use state::HistoryEntry;
+use tutorial::{run_example, step_lesson, toggle_tutorial};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -22,6 +28,7 @@ fn app() -> Html {
     let cmd_history = use_state(Vec::<String>::new);
     let cmd_index = use_state(|| None::<usize>);
     let dialog_open = use_state(|| false);
+    let lesson_idx = use_state(|| None::<usize>);
 
     let on_submit = make_submit(EvalDeps {
         session: session.clone(),
@@ -47,6 +54,7 @@ fn app() -> Html {
         cmd_index,
         history,
         dialog_open,
+        lesson_idx,
     })
 }
 
@@ -59,26 +67,32 @@ struct RenderArgs {
     cmd_index: UseStateHandle<Option<usize>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
     dialog_open: UseStateHandle<bool>,
+    lesson_idx: UseStateHandle<Option<usize>>,
 }
 
 fn render(a: RenderArgs) -> Html {
     let on_input = make_oninput(a.input_value.clone());
     let on_keydown = make_keydown(
-        a.on_submit,
+        a.on_submit.clone(),
         a.input_value.clone(),
         a.cmd_history,
         a.cmd_index,
     );
-    let open_dialog = toggle(a.dialog_open.clone(), true);
-    let close_dialog = toggle(a.dialog_open.clone(), false);
+    let open_dialog = toggle_bool(a.dialog_open.clone(), true);
+    let close_dialog = toggle_bool(a.dialog_open.clone(), false);
+    let cur_lesson = *a.lesson_idx;
+    let tutorial_active = cur_lesson.is_some();
+    let on_tutorial = toggle_tutorial(a.lesson_idx.clone());
+    let on_run_example = run_example(a.on_submit.clone(), a.input_value.clone());
 
     html! {
         <>
             <GithubCorner url={REPO_URL} />
-            <Header on_help={open_dialog} on_clear={a.on_clear} on_demo={a.on_demo} />
+            <Header on_help={open_dialog} on_clear={a.on_clear} on_demo={a.on_demo} on_tutorial={on_tutorial} {tutorial_active} />
             <main>
+                { render_tutorial(cur_lesson, a.lesson_idx.clone(), on_run_example) }
                 <div id="output" class="output">
-                    <Welcome />
+                    { if tutorial_active { html!{} } else { html!{ <Welcome /> } } }
                     { for a.history.iter().map(render_entry) }
                 </div>
                 <InputRow value={(*a.input_value).clone()} on_input={on_input} on_keydown={on_keydown} />
@@ -89,8 +103,25 @@ fn render(a: RenderArgs) -> Html {
     }
 }
 
-fn toggle(handle: UseStateHandle<bool>, value: bool) -> Callback<MouseEvent> {
-    Callback::from(move |_| handle.set(value))
+fn render_tutorial(
+    cur: Option<usize>,
+    lesson: UseStateHandle<Option<usize>>,
+    on_run_example: Callback<String>,
+) -> Html {
+    let Some(idx) = cur else {
+        return html! {};
+    };
+    let on_prev = step_lesson(lesson.clone(), -1);
+    let on_next = step_lesson(lesson.clone(), 1);
+    let on_close = Callback::from(move |_| lesson.set(None));
+    let props = TutorialPanelProps {
+        lesson_idx: idx,
+        on_prev,
+        on_next,
+        on_run_example,
+        on_close,
+    };
+    html! { <TutorialPanel ..props /> }
 }
 
 fn render_entry(entry: &HistoryEntry) -> Html {
