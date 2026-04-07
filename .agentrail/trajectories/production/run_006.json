@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 6,
+    "step": "006-loss-curve-demo"
+  },
+  "action": "Wrote demos using outer-product tiling to work around scalar-only broadcasting; verified via mlpl-repl -f; updated tutorial.rs and demos.rs; ran build-pages.sh",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-07T10:06:21"
+}

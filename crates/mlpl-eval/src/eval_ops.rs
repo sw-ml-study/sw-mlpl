@@ -49,7 +49,7 @@ pub(crate) fn eval_svg(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<String, EvalError> {
-    if args.len() != 2 {
+    if args.len() != 2 && args.len() != 3 {
         return Err(EvalError::BadArity {
             func: "svg".into(),
             expected: 2,
@@ -61,7 +61,12 @@ pub(crate) fn eval_svg(
         Value::Str(s) => s,
         Value::Array(_) => return Err(EvalError::ExpectedString),
     };
-    Ok(mlpl_viz::render(&data, &type_name)?)
+    let aux = if args.len() == 3 {
+        Some(eval_expr(&args[2], env, trace)?.into_array()?)
+    } else {
+        None
+    };
+    Ok(mlpl_viz::render_with_aux(&data, &type_name, aux.as_ref())?)
 }
 
 pub(crate) fn eval_array_lit(

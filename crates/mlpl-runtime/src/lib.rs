@@ -2,6 +2,7 @@
 
 mod builtins;
 mod error;
+mod grid_builtin;
 mod math_builtins;
 
 pub use builtins::call_builtin;

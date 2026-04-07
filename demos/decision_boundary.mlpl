@@ -1,0 +1,39 @@
+# Decision Boundary -- logistic regression on a 2D toy dataset
+#
+# Train a logistic regression classifier on four points (the AND gate
+# in the unit square), then evaluate the trained model on a dense
+# 20x20 grid of points and render the resulting probability surface
+# as a heatmap with the training points overlaid.
+
+# Training data: AND gate
+X = [[0,0],[0,1],[1,0],[1,1]]
+y = [0, 0, 0, 1]
+w = zeros([2])
+b = 0
+lr = 1.0
+n = 4
+
+repeat 400 {
+  z = matmul(X, reshape(w, [2, 1])) + b;
+  pred = sigmoid(z);
+  dz = pred - reshape(y, [4, 1]);
+  dw = reshape(matmul(transpose(X), dz), [2]) / n;
+  db = mean(dz);
+  w = w - lr * dw;
+  b = b - lr * db
+}
+
+# Build a 20x20 grid of (x, y) points covering [0, 1] x [0, 1]
+gx = grid([0, 1, 0, 1], 20)         # 400x2 matrix of points
+
+# Evaluate the classifier at every grid point
+gz = matmul(gx, reshape(w, [2, 1])) + b
+gp = sigmoid(reshape(gz, [400]))     # length-400 vector of probabilities
+
+# Reshape into a 20x20 matrix for the heatmap
+surface = reshape(gp, [20, 20])
+
+# Build the Nx3 training matrix [x, y, label]
+train = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]
+
+svg(surface, "decision_boundary", train)
