@@ -1,6 +1,6 @@
 number = 3
 slug = "003-svg-line-bar"
-status = "pending"
+status = "in-progress"
 description = """
 Add "line" and "bar" diagram types to svg().
 
