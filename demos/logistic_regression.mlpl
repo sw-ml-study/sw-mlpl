@@ -1,0 +1,31 @@
+# Logistic Regression -- AND gate
+# Train a model to learn: (1,1) -> 1, all others -> 0
+
+# Dataset: 4 samples, 2 features
+X = [[0,0],[0,1],[1,0],[1,1]]
+y = [0, 0, 0, 1]
+
+# Model parameters
+w = zeros([2])
+b = 0
+lr = 1.0
+n = 4
+
+# Training: 300 steps of gradient descent
+repeat 300 {
+  z = matmul(X, reshape(w, [2, 1])) + b;
+  pred = sigmoid(z);
+  dz = pred - reshape(y, [4, 1]);
+  dw = reshape(matmul(transpose(X), dz), [2]) / n;
+  db = mean(dz);
+  w = w - lr * dw;
+  b = b - lr * db
+}
+
+# Final predictions (should be close to [0, 0, 0, 1])
+pred = sigmoid(matmul(X, reshape(w, [2, 1])) + b)
+
+# Accuracy (round predictions, compare to labels)
+rounded = gt(pred, 0.5)
+accuracy = mean(eq(reshape(rounded, [4]), y))
+accuracy
