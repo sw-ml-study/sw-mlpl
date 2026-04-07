@@ -1,0 +1,5 @@
+[build]
+dist = "../../dist"
+
+[watch]
+watch = ["src", "index.html"]

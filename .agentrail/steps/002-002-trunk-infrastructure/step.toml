@@ -1,6 +1,6 @@
 number = 2
 slug = "002-trunk-infrastructure"
-status = "pending"
+status = "in-progress"
 description = """
 Set up Trunk build infrastructure for the web app.
 
