@@ -2,4 +2,4 @@
 
 pub mod svg;
 
-pub use svg::{VizError, render, render_scatter};
+pub use svg::{VizError, render, render_bar, render_line, render_scatter};
