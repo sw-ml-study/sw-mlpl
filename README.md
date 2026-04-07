@@ -4,6 +4,8 @@ MLPL is a Rust-first array and tensor programming language for machine learning,
 
 Inspired by APL, APL2, J, and BQN.
 
+**[Try MLPL in your browser](https://sw-ml-study.github.io/sw-mlpl/)** -- no install required.
+
 ## Quick Start
 
 ```bash
