@@ -1,6 +1,6 @@
 number = 8
 slug = "008-logistic-regression"
-status = "pending"
+status = "in-progress"
 description = """
 Create a logistic regression training demo.
 
