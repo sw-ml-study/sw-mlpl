@@ -11,6 +11,8 @@ pub enum TokenKind {
     FloatLit(f64),
     /// Identifier.
     Ident(String),
+    /// String literal (double-quoted, escapes processed).
+    StrLit(String),
     /// `(`
     LParen,
     /// `)`

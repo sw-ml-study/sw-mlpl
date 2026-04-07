@@ -15,6 +15,8 @@ pub enum EvalError {
     InvalidRepeatCount,
     /// Error from built-in function dispatch.
     RuntimeError(mlpl_runtime::RuntimeError),
+    /// Expected an array value but got a string.
+    ExpectedArray,
 }
 
 impl std::fmt::Display for EvalError {
@@ -26,6 +28,7 @@ impl std::fmt::Display for EvalError {
             Self::Unsupported(msg) => write!(f, "unsupported: {msg}"),
             Self::ArrayError(e) => write!(f, "array error: {e}"),
             Self::RuntimeError(e) => write!(f, "{e}"),
+            Self::ExpectedArray => write!(f, "expected an array value, got a string"),
         }
     }
 }

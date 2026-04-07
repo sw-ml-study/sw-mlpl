@@ -62,8 +62,8 @@ fn eval_input(input: &str, env: &mut Environment) -> String {
         Err(e) => return format!("error: {e}"),
     };
 
-    match mlpl_eval::eval_program(&stmts, env) {
-        Ok(arr) => format!("{arr}"),
+    match mlpl_eval::eval_program_value(&stmts, env) {
+        Ok(value) => format!("{value}"),
         Err(e) => format!("error: {e}"),
     }
 }
