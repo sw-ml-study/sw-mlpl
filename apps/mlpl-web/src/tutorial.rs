@@ -262,4 +262,18 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Run the Softmax Classifier demo and read off the diagonal of the confusion matrix -- those are the correctly classified points.",
     },
+    Lesson {
+        title: "Going Non-Linear: A Tiny MLP",
+        intro: "A single-layer softmax classifier can only draw straight lines. Adding a hidden layer with a non-linear activation lets the network bend the decision boundary around the data. A 2 -> 8 -> 2 MLP with tanh activations learns the XOR pattern that the linear model from the previous lesson cannot. The backward pass uses the chain rule: dZ2 = P - Y at the output, and the hidden-layer gradient is dZ1 = (dZ2 W2^T) * (1 - H*H), which is the tanh derivative applied element-wise.",
+        examples: &[
+            "D = blobs(3, 20, [[-2,-2],[2,2],[-2,2],[2,-2]])",
+            "X = matmul(D, [[1,0],[0,1],[0,0]])",
+            "raw = reshape(matmul(D, [[0],[0],[1]]), [80])",
+            "y = gt(raw, 1.5)",
+            "Y = one_hot(y, 2)",
+            "W1 = randn(5, [2, 8]) * 0.5",
+            "W2 = randn(6, [8, 2]) * 0.5",
+        ],
+        try_it: "Try running the Tiny MLP demo, then the Softmax Classifier demo on the same data -- compare the boundary shapes.",
+    },
 ];

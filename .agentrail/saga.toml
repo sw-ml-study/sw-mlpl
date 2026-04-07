@@ -1,5 +1,5 @@
 name = "mlpl-ml-demos"
 status = "active"
-current_step = 5
+current_step = 6
 created_at = "2026-04-07T14:33:46"
 plan_file = ".agentrail/plan.md"
