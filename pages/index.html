@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-6d2dfb8f55e268d0.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-6d2dfb8f55e268d0_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-c398cbabca18d16b.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-c398cbabca18d16b_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -321,8 +321,88 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             white-space: pre-wrap;
             word-break: break-word;
         }
+
+        /* Tutorial panel */
+        .tutorial-panel {
+            background: var(--mantle);
+            border-bottom: 1px solid var(--surface1);
+            padding: 16px 20px;
+            flex-shrink: 0;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+        .tutorial-header {
+            display: flex;
+            align-items: baseline;
+            gap: 14px;
+            margin-bottom: 8px;
+        }
+        .tutorial-progress {
+            color: var(--peach);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .tutorial-header h2 {
+            color: var(--blue);
+            font-size: 18px;
+            font-weight: 700;
+            flex: 1;
+        }
+        .tutorial-intro {
+            color: var(--subtext1);
+            margin-bottom: 12px;
+            line-height: 1.5;
+        }
+        .lesson-examples {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+        .lesson-example {
+            background: var(--base);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 6px 10px;
+            text-align: left;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .lesson-example:hover {
+            background: var(--surface0);
+            border-color: var(--blue);
+        }
+        .example-prompt {
+            color: var(--green);
+            font-weight: 700;
+            margin-right: 4px;
+        }
+        .tutorial-tryit {
+            color: var(--yellow);
+            background: var(--base);
+            border-left: 3px solid var(--yellow);
+            padding: 8px 12px;
+            margin-bottom: 12px;
+            border-radius: 0 4px 4px 0;
+        }
+        .tutorial-tryit strong {
+            color: var(--peach);
+        }
+        .tutorial-nav {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+        }
+        .tutorial-nav .ctrl-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-6d2dfb8f55e268d0.js" crossorigin="anonymous" integrity="sha384-kJzyYUPfwqsDsXRSrSBf7qBLQy8edwXUDyBFstLNFwumQZGcPucXWtsOZT0HTBkr"><link rel="preload" href="/sw-mlpl/mlpl-web-6d2dfb8f55e268d0_bg.wasm" crossorigin="anonymous" integrity="sha384-0Qf4Flqqfihx+Beqqi9/8bmFTh3XHNdVJpgDiiTjUsZ1FL4h9wziENlNA0uf41bt" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-c398cbabca18d16b.js" crossorigin="anonymous" integrity="sha384-dU0VQ7VwlyRPIfPA+bW3ElvEQs1FWCi6jr/a/bmimK/cUginhxg+gPvtdJHETKc8"><link rel="preload" href="/sw-mlpl/mlpl-web-c398cbabca18d16b_bg.wasm" crossorigin="anonymous" integrity="sha384-kh/Q1E3ZknP4l6hpCkEGw3aOpjCvrwpmSvt18wEQLdppmjXNvzJN+zIcTixPMtDn" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>

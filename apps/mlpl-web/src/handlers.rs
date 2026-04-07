@@ -9,6 +9,10 @@ use crate::demos::DEMOS;
 use crate::help::help_text;
 use crate::state::HistoryEntry;
 
+pub fn toggle_bool(handle: UseStateHandle<bool>, value: bool) -> Callback<web_sys::MouseEvent> {
+    Callback::from(move |_| handle.set(value))
+}
+
 pub struct EvalDeps {
     pub session: Rc<RefCell<WasmSession>>,
     pub history: UseStateHandle<Vec<HistoryEntry>>,

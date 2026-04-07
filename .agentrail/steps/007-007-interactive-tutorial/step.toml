@@ -1,6 +1,6 @@
 number = 7
 slug = "007-interactive-tutorial"
-status = "pending"
+status = "in-progress"
 description = """
 Build an interactive tutorial that teaches MLPL step by step.
 
