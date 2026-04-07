@@ -1,6 +1,6 @@
 number = 4
 slug = "004-svg-heatmap"
-status = "in-progress"
+status = "completed"
 description = """
 Add "heatmap" diagram type for visualizing matrices.
 
@@ -8,4 +8,5 @@ Add "heatmap" diagram type for visualizing matrices.
 role = "production"
 context_files = []
 created_at = "2026-04-07T08:57:33"
+completed_at = "2026-04-07T09:50:10"
 task_type = "production"
