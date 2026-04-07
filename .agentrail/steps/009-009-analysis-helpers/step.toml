@@ -1,0 +1,10 @@
+number = 9
+slug = "009-analysis-helpers"
+status = "pending"
+description = """
+Add high-level analysis/visualization helper functions that
+generate large/co..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T09:49:04"
+task_type = "production"
