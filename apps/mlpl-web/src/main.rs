@@ -124,10 +124,32 @@ fn render_tutorial(
     html! { <TutorialPanel ..props /> }
 }
 
+fn percent_encode(s: &str) -> String {
+    let mut out = String::with_capacity(s.len());
+    for b in s.bytes() {
+        let safe = b.is_ascii_alphanumeric() || matches!(b, b'-' | b'_' | b'.' | b'~');
+        if safe {
+            out.push(b as char);
+        } else {
+            out.push_str(&format!("%{b:02X}"));
+        }
+    }
+    out
+}
+
 fn render_entry(entry: &HistoryEntry) -> Html {
     let body = if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
         let svg_html = Html::from_html_unchecked(AttrValue::from(entry.output.clone()));
-        html! { <div class="svg-output">{ svg_html }</div> }
+        let href = format!(
+            "data:image/svg+xml;charset=utf-8,{}",
+            percent_encode(&entry.output)
+        );
+        html! {
+            <div class="svg-output">
+                { svg_html }
+                <a class="svg-download" href={href} download="mlpl.svg" title="Download SVG" aria-label="Download SVG">{"⬇"}</a>
+            </div>
+        }
     } else {
         let class = if entry.is_error {
             "output-line error"

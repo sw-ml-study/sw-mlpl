@@ -1,0 +1,1 @@
+Saga validation/docs pass: lang-reference adds string literals + svg/grid tables, usage adds Visualizing Data section + loss-curve and decision-boundary walkthroughs, README adds viz feature list and function tables, new docs/milestone-viz.md, REPL banners bumped to v0.3 in CLI, web, help; ran all quality gates and all demos; rebuilt pages; tagged v0.3.0-viz
