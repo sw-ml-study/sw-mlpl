@@ -17,6 +17,19 @@ pub enum EvalError {
     RuntimeError(mlpl_runtime::RuntimeError),
     /// Expected an array value but got a string.
     ExpectedArray,
+    /// Expected a string value but got something else.
+    ExpectedString,
+    /// Wrong number of arguments to a built-in.
+    BadArity {
+        /// Function name.
+        func: String,
+        /// Expected count.
+        expected: usize,
+        /// Got count.
+        got: usize,
+    },
+    /// Error from the visualization layer.
+    VizError(mlpl_viz::VizError),
 }
 
 impl std::fmt::Display for EvalError {
@@ -29,6 +42,15 @@ impl std::fmt::Display for EvalError {
             Self::ArrayError(e) => write!(f, "array error: {e}"),
             Self::RuntimeError(e) => write!(f, "{e}"),
             Self::ExpectedArray => write!(f, "expected an array value, got a string"),
+            Self::ExpectedString => write!(f, "expected a string value"),
+            Self::BadArity {
+                func,
+                expected,
+                got,
+            } => {
+                write!(f, "{func} expects {expected} arguments, got {got}")
+            }
+            Self::VizError(e) => write!(f, "{e}"),
         }
     }
 }
@@ -44,5 +66,11 @@ impl From<mlpl_array::ArrayError> for EvalError {
 impl From<mlpl_runtime::RuntimeError> for EvalError {
     fn from(e: mlpl_runtime::RuntimeError) -> Self {
         Self::RuntimeError(e)
+    }
+}
+
+impl From<mlpl_viz::VizError> for EvalError {
+    fn from(e: mlpl_viz::VizError) -> Self {
+        Self::VizError(e)
     }
 }

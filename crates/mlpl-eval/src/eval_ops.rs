@@ -44,6 +44,26 @@ pub(crate) fn eval_fncall(
     Ok(("fncall", inputs, result))
 }
 
+pub(crate) fn eval_svg(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<String, EvalError> {
+    if args.len() != 2 {
+        return Err(EvalError::BadArity {
+            func: "svg".into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    let data = eval_expr(&args[0], env, trace)?.into_array()?;
+    let type_name = match eval_expr(&args[1], env, trace)? {
+        Value::Str(s) => s,
+        Value::Array(_) => return Err(EvalError::ExpectedString),
+    };
+    Ok(mlpl_viz::render(&data, &type_name)?)
+}
+
 pub(crate) fn eval_array_lit(
     elems: &[Expr],
     env: &mut Environment,

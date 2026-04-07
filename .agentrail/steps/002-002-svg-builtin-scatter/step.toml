@@ -1,6 +1,6 @@
 number = 2
 slug = "002-svg-builtin-scatter"
-status = "pending"
+status = "in-progress"
 description = """
 Implement the svg() built-in with the "scatter" diagram type.
 

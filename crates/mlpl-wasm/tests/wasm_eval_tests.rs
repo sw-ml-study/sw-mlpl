@@ -102,3 +102,22 @@ fn eval_string_in_arithmetic_is_error() {
     let result = session.eval(r#""x" + 1"#);
     assert!(result.starts_with("error: "));
 }
+
+#[test]
+fn eval_svg_scatter_returns_svg_string() {
+    let session = WasmSession::new();
+    session.eval("pts = reshape([0,0,1,1,2,4], [3, 2])");
+    let result = session.eval(r#"svg(pts, "scatter")"#);
+    assert!(
+        result.starts_with("<svg"),
+        "expected svg output, got: {result}"
+    );
+    assert!(result.contains("<circle"), "expected circles in svg");
+}
+
+#[test]
+fn eval_svg_unknown_type_is_error() {
+    let session = WasmSession::new();
+    let result = session.eval(r#"svg([[0,0],[1,1]], "rainbow")"#);
+    assert!(result.starts_with("error: "), "got: {result}");
+}
