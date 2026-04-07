@@ -99,6 +99,14 @@ mlpl> matmul([[1,2],[3,4]], [[5],[6]])
 | `zeros(shape)` | Array of zeros |
 | `ones(shape)` | Array of ones |
 | `fill(shape, value)` | Array filled with value |
+| `grid(bounds, n)` | n*n by 2 matrix of (x,y) points |
+
+### Visualization
+
+| Function | Description |
+|----------|-------------|
+| `svg(data, type)` | Render an array as an SVG diagram (scatter, line, bar, heatmap) |
+| `svg(data, type, aux)` | 3-arg form for `decision_boundary` (aux is the Nx3 training matrix) |
 
 ## Features
 
@@ -116,6 +124,8 @@ mlpl> matmul([[1,2],[3,4]], [[5],[6]])
 - Execution tracing with JSON export
 - REPL with :help, :trace, :clear commands
 - Script file execution (-f flag)
+- Inline SVG visualization in the browser REPL (scatter, line, bar, heatmap, decision_boundary)
+- String literals for type-name arguments (e.g. `svg(data, "scatter")`)
 
 ## Architecture
 
@@ -141,5 +151,7 @@ cargo run -p mlpl-repl -- -f demos/matrix_ops.mlpl           # reshape, transpos
 cargo run -p mlpl-repl -- -f demos/computation.mlpl          # the "42" computation
 cargo run -p mlpl-repl -- -f demos/repeat_demo.mlpl          # loop construct
 cargo run -p mlpl-repl -- -f demos/logistic_regression.mlpl  # ML training demo
+cargo run -p mlpl-repl -- -f demos/loss_curve.mlpl           # SVG loss curve
+cargo run -p mlpl-repl -- -f demos/decision_boundary.mlpl    # 2D classifier viz
 cargo run -p mlpl-repl -- -f demos/trace_demo.mlpl --trace   # with tracing
 ```

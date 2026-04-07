@@ -1,6 +1,6 @@
 number = 7
 slug = "007-decision-boundary"
-status = "in-progress"
+status = "completed"
 description = """
 Add the "decision_boundary" diagram type and a classifier demo.
 
@@ -8,4 +8,5 @@ Add the "decision_boundary" diagram type and a classifier demo.
 role = "production"
 context_files = []
 created_at = "2026-04-07T08:58:03"
+completed_at = "2026-04-07T12:52:13"
 task_type = "production"

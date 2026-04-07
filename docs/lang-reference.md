@@ -12,6 +12,18 @@
 Integers are sequences of digits. Floats contain a decimal point with
 digits on both sides. No scientific notation.
 
+## String Literals
+
+```
+"scatter"
+"line"
+"hello"
+```
+
+Double-quoted ASCII strings. Strings are a separate value kind from
+arrays and are used as type-name arguments to built-ins like `svg()`.
+Strings cannot be combined with numeric operators.
+
 ## Identifiers
 
 ```
@@ -179,6 +191,26 @@ Newlines and semicolons are both statement separators.
 | `zeros(shape)` | 1 | Array of zeros with given shape |
 | `ones(shape)` | 1 | Array of ones with given shape |
 | `fill(shape, v)` | 2 | Array filled with value v |
+| `grid(bounds, n)` | 2 | n*n by 2 matrix of (x, y) points over [xmin,xmax] x [ymin,ymax]; bounds is [xmin, xmax, ymin, ymax] |
+
+### Visualization
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `svg(data, type)` | 2 | Render `data` as an SVG diagram of the given type and return the SVG string |
+| `svg(data, type, aux)` | 3 | Same, with an auxiliary array (used by `decision_boundary`) |
+
+Supported `type` values:
+
+- `"scatter"` -- expects an Nx2 matrix; one circle per row.
+- `"line"` -- a vector becomes a polyline; an Nx2 matrix becomes (x,y) points connected by lines.
+- `"bar"` -- a vector becomes a bar chart with one bar per element.
+- `"heatmap"` -- an MxN matrix rendered as a viridis-colored grid.
+- `"decision_boundary"` -- a 2D classifier-output grid rendered as a diverging-color surface, with the third argument as an Nx3 `[x, y, label]` training matrix overlaid as colored points.
+
+The browser REPL detects SVG return values and renders them inline.
+The CLI REPL prints a `[svg: N bytes]` summary; pass `--svg-out <dir>`
+to write each SVG to a file.
 
 ## Array Display
 
