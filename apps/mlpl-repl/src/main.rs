@@ -24,7 +24,7 @@ fn main() {
 }
 
 fn run_interactive(env: &mut Environment) {
-    println!("MLPL v0.1 -- Array Programming Language");
+    println!("MLPL v0.2 -- Array Programming Language for ML");
     println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();
 
@@ -175,7 +175,7 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
 }
 
 fn print_help() {
-    println!("MLPL v0.1 -- Array Programming Language");
+    println!("MLPL v0.2 -- Array Programming Language for ML");
     println!();
     println!("Syntax:");
     println!("  42              scalar literal");
