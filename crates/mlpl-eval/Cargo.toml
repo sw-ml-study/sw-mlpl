@@ -10,3 +10,4 @@ mlpl-parser = { path = "../mlpl-parser" }
 mlpl-array = { path = "../mlpl-array" }
 mlpl-runtime = { path = "../mlpl-runtime" }
 mlpl-trace = { path = "../mlpl-trace" }
+mlpl-viz = { path = "../mlpl-viz" }
