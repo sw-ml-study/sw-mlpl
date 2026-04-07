@@ -1,0 +1,1 @@
+Implemented WASM bindings in mlpl-wasm: eval_line() for stateless eval, WasmSession with persistent environment (new/eval/clear). Added wasm-bindgen + mlpl-parser deps, set cdylib crate type. 11 tests covering arithmetic, arrays, variables, builtins, errors, session isolation. All quality gates pass.
