@@ -1,0 +1,38 @@
+# Principal Component Analysis on a linearly-mixed 2D gaussian dataset.
+#
+# Build a correlated dataset by mixing standard-normal samples with
+# a known 2x2 matrix, then recover the principal axis via power
+# iteration on the covariance matrix.
+
+# ----- data -----
+# 60 samples of N(0, I_2), then mixed to correlate along ~(1, 2).
+Xraw = randn(1, [60, 2])
+X    = matmul(Xraw, [[1, 2], [0, 0.3]])
+
+# Center the data (subtract column means).
+cm = reduce_add(X, 0) / 60
+Xc = X - matmul(ones([60, 1]), reshape(cm, [1, 2]))
+
+# 2x2 covariance matrix.
+Cov = matmul(transpose(Xc), Xc) / 60
+
+# Power iteration: 10 steps with renormalization recovers the
+# dominant eigenvector of Cov (the principal axis).
+v = [1, 0]
+repeat 10 {
+  v = matmul(Cov, v);
+  v = v / sqrt(dot(v, v))
+}
+
+# Project each centered point onto the principal axis to get a 1D
+# coordinate, then split by sign for a simple two-color scatter.
+coords = reshape(matmul(Xc, reshape(v, [2, 1])), [60])
+labels = gt(coords, 0)
+
+# Principal-axis line through the centroid: two endpoints at
+# centroid +/- 3 * v, packed as a 2x2 matrix for svg("line").
+ends = matmul(reshape([-3, 3], [2, 1]), reshape(v, [1, 2]))
+line = ends + matmul(ones([2, 1]), reshape(cm, [1, 2]))
+
+scatter_labeled(X, labels)
+svg(line, "line")
