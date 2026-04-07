@@ -1,6 +1,6 @@
 number = 7
 slug = "attention-pattern"
-status = "pending"
+status = "in-progress"
 description = """
 Add a toy attention-pattern demo.
 

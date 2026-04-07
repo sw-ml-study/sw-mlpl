@@ -276,4 +276,16 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Try running the Tiny MLP demo, then the Softmax Classifier demo on the same data -- compare the boundary shapes.",
     },
+    Lesson {
+        title: "Attention Patterns",
+        intro: "Scaled dot-product attention is a single matrix expression: A = softmax(Q K^T / sqrt(d), 1). Each row of A is a probability distribution over the keys -- a weight map for one query. The scaling by sqrt(d) keeps the scores from growing with the key dimension so softmax doesn't saturate. When K = Q (self-attention), each token's highest score is on itself, so the diagonal of A dominates. Rendering A as a heatmap shows the full attention pattern at a glance.",
+        examples: &[
+            "Q = randn(17, [6, 4])",
+            "K = randn(23, [6, 4])",
+            "scores = matmul(Q, transpose(K)) / sqrt(4)",
+            "A = softmax(scores, 1)",
+            "svg(A, \"heatmap\")",
+        ],
+        try_it: "Set K = Q and re-render the heatmap -- notice how the diagonal becomes the brightest cell in each row.",
+    },
 ];

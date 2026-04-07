@@ -17,6 +17,21 @@ pub const DEMOS: &[Demo] = &[
         ],
     },
     Demo {
+        name: "Attention Pattern",
+        lines: &[
+            "Q = randn(17, [6, 4])",
+            "K = randn(23, [6, 4])",
+            "scores = matmul(Q, transpose(K)) / sqrt(4)",
+            "A = softmax(scores, 1)",
+            "svg(scores, \"heatmap\")",
+            "svg(A, \"heatmap\")",
+            "Qs = randn(17, [6, 4])",
+            "Sself = matmul(Qs, transpose(Qs)) / sqrt(4)",
+            "Aself = softmax(Sself, 1)",
+            "svg(Aself, \"heatmap\")",
+        ],
+    },
+    Demo {
         name: "Basics",
         lines: &[
             "1 + 2",

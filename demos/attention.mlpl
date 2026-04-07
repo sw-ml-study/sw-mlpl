@@ -1,0 +1,27 @@
+# Scaled dot-product attention pattern on random Q/K matrices.
+#
+# No trained model -- just the mechanical core of attention:
+#   scores = Q K^T / sqrt(d)
+#   A      = softmax(scores, axis=1)
+# Renders both the raw scores and the final attention as heatmaps.
+
+# 6 tokens, 4-dim key/query space.
+Q = randn(17, [6, 4])
+K = randn(23, [6, 4])
+
+# Scaled dot-product scores.
+scores = matmul(Q, transpose(K)) / sqrt(4)
+
+# Row-wise softmax -> attention pattern (each row sums to 1).
+A = softmax(scores, 1)
+
+# Raw scores first, then the normalized attention pattern.
+svg(scores, "heatmap")
+svg(A, "heatmap")
+
+# Self-attention variant: with K = Q, each token attends most to
+# itself so the diagonal of A dominates.
+Qs = randn(17, [6, 4])
+Sself = matmul(Qs, transpose(Qs)) / sqrt(4)
+Aself = softmax(Sself, 1)
+svg(Aself, "heatmap")
