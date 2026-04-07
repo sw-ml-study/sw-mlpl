@@ -1,0 +1,11 @@
+number = 5
+slug = "005-repl-inline-svg"
+status = "pending"
+description = """
+Make both REPLs render SVG output specially.
+
+1. Browser REPL (apps/mlpl-web)..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T08:57:43"
+task_type = "production"

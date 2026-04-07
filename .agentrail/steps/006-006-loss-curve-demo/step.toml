@@ -1,0 +1,10 @@
+number = 6
+slug = "006-loss-curve-demo"
+status = "pending"
+description = """
+Update the logistic regression demo and tutorial to show a
+loss curve via svg..."""
+role = "production"
+context_files = []
+created_at = "2026-04-07T08:57:53"
+task_type = "production"
