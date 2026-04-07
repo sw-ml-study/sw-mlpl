@@ -1,0 +1,11 @@
+number = 5
+slug = "005-gh-pages-workflow"
+status = "pending"
+description = """
+Set up GitHub Actions workflow for GitHub Pages deployment.
+
+1. Create .githu..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T18:48:56"
+task_type = "production"

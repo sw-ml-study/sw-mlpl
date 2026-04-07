@@ -1,0 +1,11 @@
+number = 3
+slug = "003-browser-repl"
+status = "pending"
+description = """
+Build the browser REPL UI in apps/mlpl-web using Yew.
+
+1. Implement the main ..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T18:48:40"
+task_type = "production"

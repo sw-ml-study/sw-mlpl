@@ -1,0 +1,11 @@
+number = 1
+slug = "001-wasm-bindings"
+status = "pending"
+description = """
+Implement WASM bindings in mlpl-wasm crate.
+
+1. Add wasm-bindgen dependency t..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T18:48:15"
+task_type = "production"

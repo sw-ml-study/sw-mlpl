@@ -1,0 +1,12 @@
+number = 6
+slug = "006-polish-validate"
+status = "pending"
+description = """
+Polish and validate the web REPL deployment.
+
+1. Cross-browser testing:
+   - ..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T18:49:03"
+task_type = "validation"

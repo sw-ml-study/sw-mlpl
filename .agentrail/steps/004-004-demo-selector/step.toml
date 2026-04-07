@@ -1,0 +1,11 @@
+number = 4
+slug = "004-demo-selector"
+status = "pending"
+description = """
+Add a demo selector to the web REPL.
+
+1. Create a demos module in apps/mlpl-w..."""
+role = "production"
+context_files = []
+created_at = "2026-04-06T18:48:48"
+task_type = "production"
