@@ -1,6 +1,6 @@
 number = 5
 slug = "005-repl-inline-svg"
-status = "in-progress"
+status = "completed"
 description = """
 Make both REPLs render SVG output specially.
 
@@ -8,4 +8,5 @@ Make both REPLs render SVG output specially.
 role = "production"
 context_files = []
 created_at = "2026-04-07T08:57:43"
+completed_at = "2026-04-07T10:00:24"
 task_type = "production"

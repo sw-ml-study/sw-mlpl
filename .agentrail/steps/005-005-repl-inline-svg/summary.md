@@ -1,0 +1,1 @@
+Browser REPL detects '<svg' prefix in output and renders inline via Html::from_html_unchecked inside a styled .svg-output card. CLI REPL gains --svg-out <dir> flag and SvgOut::handle in new svg_out module: with the flag, each SVG is written to svg-NNN.svg; without, a placeholder line shows the byte count. Smoke-tested both modes via stdin pipe. Pages rebuilt and pushed.
