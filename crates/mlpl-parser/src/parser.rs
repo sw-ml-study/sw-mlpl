@@ -109,6 +109,11 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 Ok(e)
             }
+            TokenKind::StrLit(s) => {
+                let e = Expr::StrLit(s.clone(), tok.span);
+                self.pos += 1;
+                Ok(e)
+            }
             TokenKind::Ident(name) => {
                 let name = name.clone();
                 let start = tok.span;
@@ -251,6 +256,7 @@ fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::Newline => "newline".into(),
         TokenKind::IntLit(n) => format!("integer {n}"),
         TokenKind::FloatLit(n) => format!("float {n}"),
+        TokenKind::StrLit(s) => format!("string \"{s}\""),
         TokenKind::Ident(s) => format!("identifier '{s}'"),
         TokenKind::LParen => "'('".into(),
         TokenKind::RParen => "')'".into(),

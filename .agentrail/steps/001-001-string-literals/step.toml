@@ -1,6 +1,6 @@
 number = 1
 slug = "001-string-literals"
-status = "pending"
+status = "in-progress"
 description = """
 Add string literals to the parser and a Value type to the evaluator.
 

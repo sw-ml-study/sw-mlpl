@@ -3,7 +3,7 @@
 use mlpl_core::Span;
 
 use crate::error::ParseError;
-use crate::lex_util::{lex_number, single_char_token};
+use crate::lex_util::{lex_number, lex_string, single_char_token};
 use crate::token::{Token, TokenKind};
 
 /// Tokenize MLPL source code.
@@ -65,6 +65,13 @@ impl<'a> Lexer<'a> {
             self.pos += 1;
             self.prev_was_value = is_val;
             return Ok(tok);
+        }
+        if b == b'"' {
+            let (kind, end) = lex_string(self.bytes, self.pos)?;
+            let span = Span::new(self.pos, end);
+            self.pos = end;
+            self.prev_was_value = true;
+            return Ok(Token { kind, span });
         }
         if b == b'-' {
             return self.lex_minus();

@@ -88,3 +88,17 @@ fn eval_line_stateless() {
     assert_eq!(mlpl_wasm::eval_line("2 + 3"), "5");
     assert_eq!(mlpl_wasm::eval_line("[1,2] * 3"), "3 6");
 }
+
+#[test]
+fn eval_string_literal_returns_string() {
+    let session = WasmSession::new();
+    assert_eq!(session.eval(r#""hello""#), "hello");
+    assert_eq!(session.eval(r#""scatter""#), "scatter");
+}
+
+#[test]
+fn eval_string_in_arithmetic_is_error() {
+    let session = WasmSession::new();
+    let result = session.eval(r#""x" + 1"#);
+    assert!(result.starts_with("error: "));
+}

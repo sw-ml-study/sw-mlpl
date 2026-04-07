@@ -164,8 +164,8 @@ fn eval_line(input: &str, env: &mut Environment, tracing: bool, last_trace: &mut
             }
         }
     } else {
-        match mlpl_eval::eval_program(&stmts, env) {
-            Ok(arr) => println!("{arr}"),
+        match mlpl_eval::eval_program_value(&stmts, env) {
+            Ok(value) => println!("{value}"),
             Err(e) => {
                 eprintln!("  {input}");
                 eprintln!("  error: {e}");

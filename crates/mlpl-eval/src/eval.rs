@@ -1,35 +1,44 @@
 //! AST-walking evaluator.
 
-use mlpl_array::{DenseArray, Shape};
-use mlpl_parser::{BinOpKind, Expr};
+use mlpl_array::DenseArray;
+use mlpl_parser::Expr;
 use mlpl_trace::{Trace, TraceEvent, TraceValue};
 
 use crate::env::Environment;
 use crate::error::EvalError;
+use crate::eval_ops::{eval_array_lit, eval_binop, eval_fncall};
+use crate::value::Value;
 
-/// Evaluate a program (list of statements). Returns the last result.
+/// Evaluate a program (list of statements). Returns the last result as an array.
+///
+/// If the final value is a string, returns `EvalError::ExpectedArray`.
+/// Use `eval_program_value` to handle both arrays and strings.
 pub fn eval_program(stmts: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
-    if stmts.is_empty() {
-        return Err(EvalError::EmptyInput);
-    }
-    let mut trace: Option<&mut Trace> = None;
-    let mut result = None;
-    for stmt in stmts {
-        result = Some(eval_expr(stmt, env, &mut trace)?);
-    }
-    result.ok_or(EvalError::EmptyInput)
+    eval_program_value(stmts, env)?.into_array()
 }
 
-/// Evaluate a program with tracing enabled.
+/// Evaluate a program and return the final value (array or string).
+pub fn eval_program_value(stmts: &[Expr], env: &mut Environment) -> Result<Value, EvalError> {
+    run_program(stmts, env, None)
+}
+
+/// Evaluate a program with tracing enabled. Returns the final array.
 pub fn eval_program_traced(
     stmts: &[Expr],
     env: &mut Environment,
     trace: &mut Trace,
 ) -> Result<DenseArray, EvalError> {
+    run_program(stmts, env, Some(trace))?.into_array()
+}
+
+fn run_program(
+    stmts: &[Expr],
+    env: &mut Environment,
+    mut trace: Option<&mut Trace>,
+) -> Result<Value, EvalError> {
     if stmts.is_empty() {
         return Err(EvalError::EmptyInput);
     }
-    let mut trace: Option<&mut Trace> = Some(trace);
     let mut result = None;
     for stmt in stmts {
         result = Some(eval_expr(stmt, env, &mut trace)?);
@@ -37,14 +46,18 @@ pub fn eval_program_traced(
     result.ok_or(EvalError::EmptyInput)
 }
 
-fn eval_expr(
+pub(crate) fn eval_expr(
     expr: &Expr,
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
-) -> Result<DenseArray, EvalError> {
+) -> Result<Value, EvalError> {
+    if let Expr::StrLit(s, _) = expr {
+        return Ok(Value::Str(s.clone()));
+    }
     let (op_name, inputs, result) = match expr {
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),
         Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
+        Expr::StrLit(_, _) => unreachable!(),
         Expr::Ident(name, _) => {
             let r = env
                 .get(name)
@@ -54,113 +67,48 @@ fn eval_expr(
         }
         Expr::ArrayLit(elems, _) => ("array_lit", vec![], eval_array_lit(elems, env, trace)?),
         Expr::UnaryNeg { operand, .. } => {
-            let val = eval_expr(operand, env, trace)?;
+            let val = eval_expr(operand, env, trace)?.into_array()?;
             let r = DenseArray::from_scalar(-1.0).apply_binop(&val, |a, b| a * b)?;
             ("negate", vec![TraceValue::from_array(&val)], r)
         }
         Expr::Assign { name, value, .. } => {
-            let val = eval_expr(value, env, trace)?;
+            let val = eval_expr(value, env, trace)?.into_array()?;
             env.set(name.clone(), val.clone());
             ("assign", vec![TraceValue::from_array(&val)], val)
         }
         Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
         Expr::FnCall { name, args, .. } => eval_fncall(name, args, env, trace)?,
-        Expr::Repeat { count, body, .. } => {
-            let n_arr = eval_expr(count, env, trace)?;
-            if n_arr.rank() != 0 {
-                return Err(EvalError::InvalidRepeatCount);
-            }
-            let n = n_arr.data()[0] as usize;
-            let mut r = DenseArray::from_scalar(0.0);
-            for _ in 0..n {
-                for stmt in body {
-                    r = eval_expr(stmt, env, trace)?;
-                }
-            }
-            ("repeat", vec![], r)
-        }
+        Expr::Repeat { count, body, .. } => eval_repeat(count, body, env, trace)?,
     };
-    record_trace(trace, op_name, expr.span(), inputs, &result);
-    Ok(result)
-}
-
-fn record_trace(
-    trace: &mut Option<&mut Trace>,
-    op: &str,
-    span: mlpl_core::Span,
-    inputs: Vec<TraceValue>,
-    result: &DenseArray,
-) {
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;
         t.push(TraceEvent {
             seq,
-            op: op.into(),
-            span,
+            op: op_name.into(),
+            span: expr.span(),
             inputs,
-            output: TraceValue::from_array(result),
+            output: TraceValue::from_array(&result),
         });
     }
+    Ok(Value::Array(result))
 }
 
-fn eval_binop(
-    op: &BinOpKind,
-    lhs: &Expr,
-    rhs: &Expr,
+fn eval_repeat(
+    count: &Expr,
+    body: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
-    let l = eval_expr(lhs, env, trace)?;
-    let r = eval_expr(rhs, env, trace)?;
-    let (name, f): (&str, fn(f64, f64) -> f64) = match op {
-        BinOpKind::Add => ("add", |a, b| a + b),
-        BinOpKind::Sub => ("sub", |a, b| a - b),
-        BinOpKind::Mul => ("mul", |a, b| a * b),
-        BinOpKind::Div => ("div", |a, b| a / b),
-    };
-    let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
-    let result = l.apply_binop(&r, f)?;
-    Ok((name, inputs, result))
-}
-
-fn eval_fncall(
-    name: &str,
-    args: &[Expr],
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
-    let evaluated: Vec<DenseArray> = args
-        .iter()
-        .map(|a| eval_expr(a, env, trace))
-        .collect::<Result<Vec<_>, _>>()?;
-    let inputs: Vec<TraceValue> = evaluated.iter().map(TraceValue::from_array).collect();
-    let result = mlpl_runtime::call_builtin(name, evaluated)?;
-    Ok(("fncall", inputs, result))
-}
-
-fn eval_array_lit(
-    elems: &[Expr],
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<DenseArray, EvalError> {
-    if elems.is_empty() {
-        return Ok(DenseArray::from_vec(vec![]));
+    let n_arr = eval_expr(count, env, trace)?.into_array()?;
+    if n_arr.rank() != 0 {
+        return Err(EvalError::InvalidRepeatCount);
     }
-    let evaluated: Vec<DenseArray> = elems
-        .iter()
-        .map(|e| eval_expr(e, env, trace))
-        .collect::<Result<Vec<_>, _>>()?;
-    if evaluated.iter().all(|a| a.rank() == 0) {
-        let data: Vec<f64> = evaluated.iter().map(|a| a.data()[0]).collect();
-        return Ok(DenseArray::from_vec(data));
+    let n = n_arr.data()[0] as usize;
+    let mut r = DenseArray::from_scalar(0.0);
+    for _ in 0..n {
+        for stmt in body {
+            r = eval_expr(stmt, env, trace)?.into_array()?;
+        }
     }
-    let inner_shape = evaluated[0].shape().clone();
-    let rows = evaluated.len();
-    let mut data = Vec::with_capacity(rows * inner_shape.elem_count());
-    for arr in &evaluated {
-        data.extend_from_slice(arr.data());
-    }
-    let mut dims = vec![rows];
-    dims.extend_from_slice(inner_shape.dims());
-    Ok(DenseArray::new(Shape::new(dims), data)?)
+    Ok(("repeat", vec![], r))
 }

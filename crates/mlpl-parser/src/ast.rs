@@ -24,6 +24,8 @@ pub enum Expr {
     IntLit(i64, Span),
     /// Float literal.
     FloatLit(f64, Span),
+    /// String literal.
+    StrLit(String, Span),
     /// Identifier reference.
     Ident(String, Span),
     /// Array literal: `[expr, expr, ...]`
@@ -82,6 +84,7 @@ impl Expr {
         match self {
             Self::IntLit(_, s)
             | Self::FloatLit(_, s)
+            | Self::StrLit(_, s)
             | Self::Ident(_, s)
             | Self::ArrayLit(_, s)
             | Self::BinOp { span: s, .. }
