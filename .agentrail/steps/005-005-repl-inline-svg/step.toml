@@ -1,6 +1,6 @@
 number = 5
 slug = "005-repl-inline-svg"
-status = "pending"
+status = "in-progress"
 description = """
 Make both REPLs render SVG output specially.
 

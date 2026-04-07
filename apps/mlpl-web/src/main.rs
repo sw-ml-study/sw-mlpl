@@ -125,15 +125,21 @@ fn render_tutorial(
 }
 
 fn render_entry(entry: &HistoryEntry) -> Html {
-    let output_class = if entry.is_error {
-        "output-line error"
+    let body = if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
+        let svg_html = Html::from_html_unchecked(AttrValue::from(entry.output.clone()));
+        html! { <div class="svg-output">{ svg_html }</div> }
     } else {
-        "output-line"
+        let class = if entry.is_error {
+            "output-line error"
+        } else {
+            "output-line"
+        };
+        html! { <pre class={class}>{ &entry.output }</pre> }
     };
     html! {
         <div class="entry">
             <div class="input-line"><span class="prompt">{"mlpl> "}</span>{ &entry.input }</div>
-            <pre class={output_class}>{ &entry.output }</pre>
+            { body }
         </div>
     }
 }
