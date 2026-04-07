@@ -1,6 +1,6 @@
 number = 3
 slug = "003-svg-line-bar"
-status = "in-progress"
+status = "completed"
 description = """
 Add "line" and "bar" diagram types to svg().
 
@@ -8,4 +8,5 @@ Add "line" and "bar" diagram types to svg().
 role = "production"
 context_files = []
 created_at = "2026-04-07T08:57:24"
+completed_at = "2026-04-07T09:42:39"
 task_type = "production"
