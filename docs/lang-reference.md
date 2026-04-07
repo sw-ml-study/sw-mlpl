@@ -197,6 +197,8 @@ Newlines and semicolons are both statement separators.
 | `argmax(a)` | 1 | Scalar index of the maximum element over all elements of `a` (flat). |
 | `argmax(a, axis)` | 2 | Index (as f64) of the max along `axis`; output rank is one less than input. Ties go to the first occurrence. |
 | `blobs(seed, n_per_class, centers)` | 3 | Seeded 2D gaussian-blob dataset. `centers` is a Kx2 matrix (or length-2K vector) of cluster centers; returns an Nx3 matrix where each row is `[x, y, label]`, with `N = K * n_per_class` and noise sigma 0.15. |
+| `softmax(a, axis)` | 2 | Softmax along `axis`, stabilized by subtracting the per-group max before exponentiation. |
+| `one_hot(labels, k)` | 2 | Convert a length-N label vector to an `NxK` one-hot matrix. |
 
 ### Visualization
 

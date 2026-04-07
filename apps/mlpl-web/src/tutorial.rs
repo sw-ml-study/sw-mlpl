@@ -252,4 +252,14 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Change the mixing matrix to [[1, 0], [0, 3]] and verify that the principal axis comes out parallel to (0, 1).",
     },
+    Lesson {
+        title: "Multi-class Classification",
+        intro: "Softmax regression generalizes logistic regression to K classes. Logits Z = X W + b are turned into row-normalized probabilities P by softmax(Z, 1), which subtracts the row max for stability and exponentiates. With one-hot labels Y, the cross-entropy gradient is elegant: dZ = P - Y, so dW = X^T (P - Y) / N and db = mean(P - Y, 0). At prediction time, argmax(P, 1) picks the most probable class.",
+        examples: &[
+            "Z = [[1, 2, 3], [2, 0, -1]]",
+            "softmax(Z, 1)",
+            "one_hot([0, 2, 1, 0], 3)",
+        ],
+        try_it: "Run the Softmax Classifier demo and read off the diagonal of the confusion matrix -- those are the correctly classified points.",
+    },
 ];

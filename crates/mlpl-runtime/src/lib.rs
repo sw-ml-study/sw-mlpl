@@ -4,6 +4,7 @@ mod builtins;
 mod error;
 mod grid_builtin;
 mod math_builtins;
+mod ml_builtins;
 mod prng;
 mod random_builtins;
 

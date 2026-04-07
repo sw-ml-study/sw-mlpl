@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "pca-demo"
+  },
+  "action": "TDD: pca_demo_tests.rs first (asserts |cos|>0.95 with known mixing direction); built demo with matmul-based centering and 2x2 polyline for principal axis",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-07T15:26:18"
+}
