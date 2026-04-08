@@ -17,6 +17,15 @@ pub enum BinOpKind {
     Div,
 }
 
+/// Kind of tensor constructor: trainable parameter or non-trainable tensor.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum TensorCtorKind {
+    /// `param[shape]` -- trainable leaf (`requires_grad` = true).
+    Param,
+    /// `tensor[shape]` -- non-trainable leaf.
+    Tensor,
+}
+
 /// An expression in the MLPL AST.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Expr {
@@ -66,6 +75,15 @@ pub enum Expr {
         /// Span covering name through value.
         span: Span,
     },
+    /// Tensor constructor: `param[shape...]` or `tensor[shape...]`.
+    TensorCtor {
+        /// Which kind of leaf to construct.
+        kind: TensorCtorKind,
+        /// Shape dimension expressions.
+        shape: Vec<Expr>,
+        /// Span covering keyword through closing bracket.
+        span: Span,
+    },
     /// Repeat loop: `repeat <count> { body }`
     Repeat {
         /// Number of iterations.
@@ -91,6 +109,7 @@ impl Expr {
             | Self::UnaryNeg { span: s, .. }
             | Self::FnCall { span: s, .. }
             | Self::Assign { span: s, .. }
+            | Self::TensorCtor { span: s, .. }
             | Self::Repeat { span: s, .. } => *s,
         }
     }
