@@ -1,0 +1,1 @@
+Implemented momentum_sgd(loss, params, lr, beta) built-in with per-param velocity buffers in OptimizerState. Surface accepts single ident or array-literal list of params. Update rule v<-beta*v+grad; w<-w-lr*v. 4 new tests: quadratic convergence, velocity persistence (v1=4.0, v2=6.8 hand-checked), multi-param list form, plus updated adam stub test for new 6-arg signature.
