@@ -1,0 +1,1 @@
+v0.4 release: milestone-demos.md, saga.md updated with sagas 6-8, README ML primitives + new demos, v0.4 banner bumps in CLI + web, all demos verified, pages rebuilt, tag v0.4.0-demos pushed

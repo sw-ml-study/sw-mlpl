@@ -1,6 +1,6 @@
 number = 3
 slug = "autograd-reductions-matmul"
-status = "pending"
+status = "in-progress"
 description = "Add autograd for sum, mean, softmax, transpose, reshape, and matmul. TDD + gr..."
 role = "production"
 context_files = []

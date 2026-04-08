@@ -3,7 +3,7 @@
 use std::cell::{Ref, RefCell, RefMut};
 use std::rc::Rc;
 
-use mlpl_array::DenseArray;
+use mlpl_array::{DenseArray, Shape};
 
 use crate::ops::{BinaryOp, UnaryOp};
 
@@ -27,6 +27,42 @@ pub enum NodeKind {
     Binary {
         /// Operation.
         op: BinaryOp,
+        /// Left parent id.
+        left: NodeId,
+        /// Right parent id.
+        right: NodeId,
+    },
+    /// Sum all elements of `parent` into a scalar.
+    SumAll {
+        /// Parent node id.
+        parent: NodeId,
+    },
+    /// Mean over all elements of `parent` into a scalar.
+    MeanAll {
+        /// Parent node id.
+        parent: NodeId,
+    },
+    /// Row-wise softmax along `axis` (last axis for rank-1 / rank-2).
+    Softmax {
+        /// Parent node id.
+        parent: NodeId,
+        /// Axis along which softmax is computed.
+        axis: usize,
+    },
+    /// Transpose (reverse axes).
+    Transpose {
+        /// Parent node id.
+        parent: NodeId,
+    },
+    /// Reshape to a new shape; `orig_shape` is the parent's original shape.
+    Reshape {
+        /// Parent node id.
+        parent: NodeId,
+        /// Parent's original shape, needed to un-reshape the gradient.
+        orig_shape: Shape,
+    },
+    /// Matrix multiplication `left @ right`.
+    MatMul {
         /// Left parent id.
         left: NodeId,
         /// Right parent id.

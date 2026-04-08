@@ -1,0 +1,11 @@
+{
+  "task_type": "validation",
+  "state": {
+    "number": 8,
+    "step": "release-v04-demos"
+  },
+  "action": "wrote milestone-demos.md, rewrote saga.md with Sagas 6/7/8, expanded README built-ins and demos, sed-bumped v0.3->v0.4 in REPL banners, ran each demo, rebuilt pages, committed, tagged",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-07T16:43:03"
+}

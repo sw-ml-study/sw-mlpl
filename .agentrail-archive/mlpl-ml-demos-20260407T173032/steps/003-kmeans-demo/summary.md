@@ -1,0 +1,1 @@
+K-means demo: demos/kmeans.mlpl with vectorized Lloyd iteration, web dropdown entry, tutorial lesson, integration tests, pages rebuilt

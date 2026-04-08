@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 5,
+    "step": "softmax-classifier"
+  },
+  "action": "TDD: softmax_onehot_tests.rs and softmax_classifier_tests.rs first; implemented softmax (stable, any axis) and one_hot in new ml_builtins module; built demo with matmul-based broadcasting",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-07T15:29:34"
+}
