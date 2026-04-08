@@ -1,8 +1,9 @@
 number = 4
 slug = "004-lr-schedules"
-status = "in-progress"
+status = "completed"
 description = "Add cosine_schedule(step, total, lr_min, lr_max) and linear_warmup(step, warm..."
 role = "production"
 context_files = []
 created_at = "2026-04-08T13:32:23"
+completed_at = "2026-04-08T14:24:24"
 task_type = "production"
