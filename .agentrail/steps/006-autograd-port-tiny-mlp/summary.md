@@ -1,0 +1,1 @@
+Rewrote demos/tiny_mlp.mlpl to use param[...] + grad() for both linear baseline and 2->8->2 tanh MLP; biases reshaped to [1,C] for broadcast via matmul(O80,b) since grad lifter lacks reshape/ones; MSE-on-one-hot loss uses only supported tape ops; verified runs end-to-end via REPL stdin; inline tiny_mlp integration test untouched.
