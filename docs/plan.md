@@ -37,24 +37,14 @@ depends on removing that limitation.
 - **Saga 8** ML demos (v0.4): random/randn/argmax/blobs/softmax/one_hot;
   k-means, PCA, softmax classifier, tiny MLP, attention pattern demos;
   tutorial lessons for each
+- **Saga 9** Autograd v1 (v0.5): `mlpl-autograd` reverse-mode tape;
+  `param[...]` / `tensor[...]` constructors; `grad(expr, wrt)` built-in;
+  tiny MLP and softmax classifier demos ported off hand-written backprop;
+  "Automatic differentiation" tutorial lesson
 
 ## Future saga sequence
 
-### Saga 9 -- Autograd v1 (NEXT)
-Reverse-mode automatic differentiation on the existing
-`DenseArray` substrate. Introduces a `mlpl-autograd` crate with a
-tape-based graph, `param[...]` / `tensor[...]` constructors, and a
-`grad` built-in. Port the tiny MLP and softmax classifier demos
-off hand-written gradients as the acceptance test. No new
-backends, no optimizers beyond SGD.
-
-Why first: every later saga (optimizers, model DSL, LoRA,
-training loop, distillation) assumes differentiation is a
-language primitive. Doing it now is cheap because the surface
-area is still small; doing it later means rewriting the demos
-twice.
-
-### Saga 10 -- Optimizers and training loop
+### Saga 10 -- Optimizers and training loop (NEXT)
 Adam, momentum-SGD, learning-rate schedules, and a composable
 `train ... |> ...` pipeline operator. Richer synthetic datasets
 (moons, circles, spirals) from the v0.4 "what's next" list.
@@ -126,17 +116,10 @@ codegen helpers. Intentionally last: secondary to the
 Sagas 14-19 can reorder based on hardware access and interest;
 9-13 must run in order.
 
-## Start next: Saga 9 -- Autograd v1
+## Start next: Saga 10 -- Optimizers and training loop
 
-Concrete entry criteria, high-level steps, and success criteria
-for Saga 9 will live in its own `agentrail init` plan when this
-document is accepted. The short version:
-
-1. New `mlpl-autograd` crate with a reverse-mode tape.
-2. `tensor[...]` / `param[...]` constructors in the parser.
-3. `grad(expr, wrt)` built-in returning a parameter-shaped array.
-4. Port `demos/tiny_mlp.mlpl` and `demos/softmax_classifier.mlpl`
-   to use `grad` instead of hand-written backprop. Both demos
-   must still pass their existing accuracy tests.
-5. Tutorial lesson "Automatic differentiation" added.
-6. v0.5.0-autograd tag.
+With autograd shipped in v0.5, the next saga adds Adam and
+learning-rate schedules on top of `grad`, plus a structured
+training loop and richer synthetic datasets (moons, circles,
+spirals). See `docs/milestone-autograd.md` for the v0.5
+retrospective.

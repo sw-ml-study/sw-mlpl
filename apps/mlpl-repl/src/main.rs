@@ -34,7 +34,7 @@ fn main() {
 }
 
 fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
-    println!("MLPL v0.4 -- Array Programming Language for ML");
+    println!("MLPL v0.5 -- Array Programming Language for ML");
     println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();
 
@@ -188,7 +188,7 @@ fn eval_line(
 }
 
 fn print_help() {
-    println!("MLPL v0.4 -- Array Programming Language for ML");
+    println!("MLPL v0.5 -- Array Programming Language for ML");
     println!();
     println!("Syntax:");
     println!("  42              scalar literal");

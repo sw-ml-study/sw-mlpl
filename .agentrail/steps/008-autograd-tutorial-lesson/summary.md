@@ -1,0 +1,1 @@
+Added 'Automatic Differentiation' tutorial lesson to apps/mlpl-web/src/tutorial.rs walking from scalar (x-3)^2 minimization through 4-point linear regression trained with grad + SGD; rebuilt pages/ via scripts/build-pages.sh; verified examples via mlpl-repl -f (linear reg converges to slope 2).
