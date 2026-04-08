@@ -41,16 +41,17 @@ depends on removing that limitation.
   `param[...]` / `tensor[...]` constructors; `grad(expr, wrt)` built-in;
   tiny MLP and softmax classifier demos ported off hand-written backprop;
   "Automatic differentiation" tutorial lesson
+- **Saga 10** Optimizers + training loop (v0.6): `momentum_sgd` and
+  `adam` built-ins with per-param state on the environment;
+  `cosine_schedule` / `linear_warmup` scalar helpers; `moons` and
+  `circles` synthetic datasets; new `train N { body }` construct
+  with implicit `step` binding and `last_losses` capture;
+  `moons_mlp` and `circles_mlp` demos; "Optimizers and Schedules"
+  tutorial lesson
 
 ## Future saga sequence
 
-### Saga 10 -- Optimizers and training loop (NEXT)
-Adam, momentum-SGD, learning-rate schedules, and a composable
-`train ... |> ...` pipeline operator. Richer synthetic datasets
-(moons, circles, spirals) from the v0.4 "what's next" list.
-Live loss-curve animation via the existing trace pipeline.
-
-### Saga 11 -- Model DSL
+### Saga 11 -- Model DSL (NEXT)
 `chain[...]`, `residual[...]`, `norm[...]`, `attention[...]`
 combinators. Parameter trees with named addressing. Rebuild the
 tiny MLP and attention demos using the DSL; add a 2-layer
@@ -116,10 +117,10 @@ codegen helpers. Intentionally last: secondary to the
 Sagas 14-19 can reorder based on hardware access and interest;
 9-13 must run in order.
 
-## Start next: Saga 10 -- Optimizers and training loop
+## Start next: Saga 11 -- Model DSL
 
-With autograd shipped in v0.5, the next saga adds Adam and
-learning-rate schedules on top of `grad`, plus a structured
-training loop and richer synthetic datasets (moons, circles,
-spirals). See `docs/milestone-autograd.md` for the v0.5
-retrospective.
+With Saga 10 (Adam, schedules, `train { }`, moons/circles)
+shipped in v0.6, the next saga introduces composition primitives
+(`chain`, `residual`, `attention`, `norm`) so models can be
+expressed as data instead of long matmul expressions. See
+`docs/milestone-optim.md` for the v0.6 retrospective.

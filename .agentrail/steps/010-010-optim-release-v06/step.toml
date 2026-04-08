@@ -1,6 +1,6 @@
 number = 10
 slug = "010-optim-release-v06"
-status = "pending"
+status = "in-progress"
 description = "Release v0.6.0-optim. Update docs/saga.md (Saga 10 COMPLETE), docs/status.md,..."
 role = "production"
 context_files = []

@@ -1,0 +1,1 @@
+Added 'Optimizers and Schedules' lesson to apps/mlpl-web/src/tutorial.rs covering adam inside train { } with last_losses capture and cosine_schedule/linear_warmup boundary samples. Rebuilt pages/ via scripts/build-pages.sh.
