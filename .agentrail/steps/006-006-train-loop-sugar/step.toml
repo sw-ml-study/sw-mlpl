@@ -1,8 +1,9 @@
 number = 6
 slug = "006-train-loop-sugar"
-status = "in-progress"
+status = "completed"
 description = "Add a structured training loop construct. Pick a surface ('train { body } for..."
 role = "production"
 context_files = []
 created_at = "2026-04-08T13:32:23"
+completed_at = "2026-04-08T15:15:47"
 task_type = "production"

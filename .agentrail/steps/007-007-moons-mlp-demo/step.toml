@@ -1,6 +1,6 @@
 number = 7
 slug = "007-moons-mlp-demo"
-status = "pending"
+status = "in-progress"
 description = "New demos/moons_mlp.mlpl: 2-layer tanh MLP trained with adam() on moons(). Re..."
 role = "production"
 context_files = []

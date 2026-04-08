@@ -1,0 +1,1 @@
+Added 'train N { body }' construct. New Train token/AST/parser (parse_repeat reused with is_train flag), eval_train in eval.rs that binds 'step' inside body and captures the body's last value per iter into 'last_losses' (1-D array). Non-scalar last values are mean-reduced. 3 tests: step indexing, Adam loss-decrease integration, zero-step empty history.
