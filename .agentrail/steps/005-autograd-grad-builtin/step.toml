@@ -1,8 +1,9 @@
 number = 5
 slug = "autograd-grad-builtin"
-status = "in-progress"
+status = "completed"
 description = "Add the grad(expr, wrt) built-in. wrt may be a single param or a list of para..."
 role = "production"
 context_files = []
 created_at = "2026-04-07T17:36:07"
+completed_at = "2026-04-07T18:18:40"
 task_type = "production"

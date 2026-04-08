@@ -1,0 +1,1 @@
+Added grad(expr, wrt) built-in: tape-lifted mini-evaluator over AST, Environment param tracking (set_param/mark_param + auto-mark from param[] ctor), fresh tape per call for zero-grad reset. TDD: 4 tests covering scalar/vector/matrix params and reset. /mw-cp + push.
