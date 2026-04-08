@@ -1,0 +1,1 @@
+Scaffolded mlpl-autograd crate: Tensor { value, grad, node, requires_grad, tape }, Tape with unique NodeIds, leaf/param constructors, no-op backward on leaves. Added to workspace. 5 integration tests passing, clippy clean.

@@ -1,37 +1,30 @@
-//! Differentiable tensor wrapper.
+//! Differentiable tensor handle.
 
-use std::cell::{Ref, RefCell};
 use std::rc::Rc;
 
 use mlpl_array::DenseArray;
 
-use crate::tape::{Node, NodeId, Tape};
+use crate::backward;
+use crate::tape::{NodeData, NodeId, NodeKind, Tape};
 
-/// A differentiable tensor.
-///
-/// Holds a value, an optional accumulated gradient, a handle to the
-/// tape node that produced it, and a `requires_grad` flag.
-#[derive(Debug)]
+/// A differentiable tensor: a handle into a [`Tape`] node.
+#[derive(Debug, Clone)]
 pub struct Tensor {
-    value: DenseArray,
-    grad: RefCell<Option<DenseArray>>,
-    node: NodeId,
-    requires_grad: bool,
-    tape: Rc<Tape>,
+    pub(crate) node: NodeId,
+    pub(crate) tape: Rc<Tape>,
 }
 
 impl Tensor {
-    /// Construct a leaf tensor on the given tape.
+    /// Construct a leaf tensor on `tape`.
     #[must_use]
     pub fn leaf(tape: Rc<Tape>, value: DenseArray, requires_grad: bool) -> Self {
-        let node = tape.push(Node::Leaf { requires_grad });
-        Self {
+        let node = tape.push(NodeData {
             value,
-            grad: RefCell::new(None),
-            node,
+            grad: None,
+            kind: NodeKind::Leaf,
             requires_grad,
-            tape,
-        }
+        });
+        Self { node, tape }
     }
 
     /// Construct a trainable parameter leaf (`requires_grad` = true).
@@ -40,38 +33,32 @@ impl Tensor {
         Self::leaf(tape, value, true)
     }
 
-    /// Borrow the underlying value.
-    #[must_use]
-    pub fn value(&self) -> &DenseArray {
-        &self.value
-    }
-
-    /// Borrow the accumulated gradient, if any.
-    #[must_use]
-    pub fn grad(&self) -> Ref<'_, Option<DenseArray>> {
-        self.grad.borrow()
-    }
-
-    /// Whether this tensor participates in gradient tracking.
-    #[must_use]
-    pub fn requires_grad(&self) -> bool {
-        self.requires_grad
-    }
-
-    /// The tape node id that produced this tensor.
+    /// Node id on the tape.
     #[must_use]
     pub fn node(&self) -> NodeId {
         self.node
     }
 
-    /// Reverse-mode backward pass from this tensor.
-    ///
-    /// For the scaffold this is a no-op on leaves. Non-leaf behavior is
-    /// introduced in later steps as operations are added to the tape.
+    /// Clone of the forward value.
+    #[must_use]
+    pub fn value(&self) -> DenseArray {
+        self.tape.nodes()[self.node.0].value.clone()
+    }
+
+    /// Clone of the accumulated gradient, if any.
+    #[must_use]
+    pub fn grad(&self) -> Option<DenseArray> {
+        self.tape.nodes()[self.node.0].grad.clone()
+    }
+
+    /// Whether this node is a trainable leaf.
+    #[must_use]
+    pub fn requires_grad(&self) -> bool {
+        self.tape.nodes()[self.node.0].requires_grad
+    }
+
+    /// Run reverse-mode backward from this tensor.
     pub fn backward(&self) {
-        let nodes = self.tape.nodes.borrow();
-        if let Some(Node::Leaf { .. }) = nodes.get(self.node.0) {
-            // Leaves have no parents; nothing to propagate.
-        }
+        backward::backward(&self.tape, self.node);
     }
 }
