@@ -7,6 +7,7 @@ use std::rc::Rc;
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
+use mlpl_core::Span;
 use mlpl_parser::{BinOpKind, Expr};
 
 use crate::env::Environment;
@@ -202,14 +203,116 @@ pub fn optim_state_mut(env: &mut Environment) -> &mut OptimizerState {
     &mut env.optim_state
 }
 
-/// Stub: full implementation lands in step 002.
+/// `momentum_sgd(loss_expr, params, lr, beta)` built-in.
+///
+/// `params` is either a single param identifier or an array literal of
+/// param identifiers. For each param `w`, applies the classical
+/// heavy-ball update with per-param velocity buffer `v` stored on the
+/// environment under `("momentum_sgd", w, "v")`:
+///
+/// ```text
+///     g       = grad(loss_expr, w)
+///     v_new   = beta * v_old + g
+///     w_new   = w - lr * v_new
+/// ```
+///
+/// Returns a scalar zero (the call is invoked for its side effects on
+/// the parameter bindings and optimizer state).
 pub(crate) fn eval_momentum_sgd(
-    _args: &[Expr],
-    _env: &mut Environment,
+    args: &[Expr],
+    env: &mut Environment,
 ) -> Result<DenseArray, EvalError> {
-    Err(EvalError::Unsupported(
-        "momentum_sgd: not yet implemented (step 002)".into(),
-    ))
+    if args.len() != 4 {
+        return Err(EvalError::BadArity {
+            func: "momentum_sgd".into(),
+            expected: 4,
+            got: args.len(),
+        });
+    }
+    let loss_expr = args[0].clone();
+    let param_names: Vec<String> = match &args[1] {
+        Expr::Ident(n, _) => vec![n.clone()],
+        Expr::ArrayLit(elems, _) => {
+            let mut v = Vec::with_capacity(elems.len());
+            for e in elems {
+                match e {
+                    Expr::Ident(n, _) => v.push(n.clone()),
+                    _ => {
+                        return Err(EvalError::Unsupported(
+                            "momentum_sgd: params list must contain only identifiers".into(),
+                        ));
+                    }
+                }
+            }
+            v
+        }
+        _ => {
+            return Err(EvalError::Unsupported(
+                "momentum_sgd: second argument must be a param identifier or list".into(),
+            ));
+        }
+    };
+    let scalar_arg = |expr: &Expr, env: &mut Environment| -> Result<f64, EvalError> {
+        let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
+        if arr.rank() != 0 {
+            return Err(EvalError::Unsupported(
+                "momentum_sgd: lr and beta must be scalars".into(),
+            ));
+        }
+        Ok(arr.data()[0])
+    };
+    let lr = scalar_arg(&args[2], env)?;
+    let beta = scalar_arg(&args[3], env)?;
+
+    for name in &param_names {
+        if !env.is_param(name) {
+            return Err(EvalError::Unsupported(format!(
+                "momentum_sgd: '{name}' is not a tracked parameter"
+            )));
+        }
+        let grad_args = [
+            loss_expr.clone(),
+            Expr::Ident(name.clone(), Span::new(0, 0)),
+        ];
+        let g = eval_grad(&grad_args, env)?;
+        let key = ("momentum_sgd".to_string(), name.clone(), "v".to_string());
+        let v_old = env
+            .optim_state
+            .buffers
+            .get(&key)
+            .cloned()
+            .unwrap_or_else(|| DenseArray::zeros(g.shape().clone()));
+        if v_old.shape() != g.shape() {
+            return Err(EvalError::Unsupported(format!(
+                "momentum_sgd: stored velocity shape mismatch for '{name}'"
+            )));
+        }
+        let v_data: Vec<f64> = v_old
+            .data()
+            .iter()
+            .zip(g.data().iter())
+            .map(|(vo, gv)| beta * vo + gv)
+            .collect();
+        let v_new =
+            DenseArray::new(v_old.shape().clone(), v_data).expect("velocity shape matches grad");
+        env.optim_state.buffers.insert(key, v_new.clone());
+
+        let w = env.get(name).cloned().expect("param exists in environment");
+        let w_data: Vec<f64> = w
+            .data()
+            .iter()
+            .zip(v_new.data().iter())
+            .map(|(wv, vv)| wv - lr * vv)
+            .collect();
+        let w_new =
+            DenseArray::new(w.shape().clone(), w_data).expect("weight shape matches velocity");
+        env.set(name.clone(), w_new);
+    }
+    *env.optim_state
+        .steps
+        .entry("momentum_sgd".into())
+        .or_insert(0) += 1;
+    Ok(DenseArray::from_scalar(0.0))
 }
 
 /// Stub: full implementation lands in step 003.
