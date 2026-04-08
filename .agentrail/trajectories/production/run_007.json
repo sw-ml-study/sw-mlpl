@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 7,
+    "step": "007-moons-mlp-demo"
+  },
+  "action": "Wrote demo and iterated: hit parser newline-in-parens issue (collapsed to single lines), then grad's lack of reduce_add (switched to MSE)",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-08T15:18:50"
+}

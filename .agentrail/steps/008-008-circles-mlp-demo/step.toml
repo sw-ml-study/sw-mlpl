@@ -1,6 +1,6 @@
 number = 8
 slug = "008-circles-mlp-demo"
-status = "pending"
+status = "in-progress"
 description = "New demos/circles_mlp.mlpl: 2-layer tanh MLP trained with adam() on circles()..."
 role = "production"
 context_files = []

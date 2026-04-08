@@ -1,0 +1,1 @@
+New demos/moons_mlp.mlpl: 2->8->2 tanh MLP trained with adam() inside train { body } on moons() with boundary_2d render. Uses MSE loss (reduce_add unsupported in grad). Verified runs cleanly via mlpl-repl -f.
