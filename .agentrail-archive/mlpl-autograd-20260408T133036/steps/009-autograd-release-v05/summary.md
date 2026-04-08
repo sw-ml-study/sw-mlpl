@@ -1,0 +1,1 @@
+Released v0.5.0-autograd: created docs/milestone-autograd.md, marked Saga 9 COMPLETE in saga.md/status.md/plan.md (promoted Saga 10 as next), bumped REPL+web banners v0.4->v0.5, rebuilt+deployed pages/, ran full quality gates (cargo test/clippy/fmt + markdown-checker), committed and tagged v0.5.0-autograd, pushed both main and tag.

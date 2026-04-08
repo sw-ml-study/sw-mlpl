@@ -1,0 +1,1 @@
+Add cosine_schedule(step, total, lr_min, lr_max) and linear_warmup(step, warmup, lr) built-ins as pure functions returning a scalar. RED: boundary tests (step=0, step=warmup, step=total). GREEN: minimal impl. Commit via /mw-cp.

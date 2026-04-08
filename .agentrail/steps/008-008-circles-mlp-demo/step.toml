@@ -1,0 +1,8 @@
+number = 8
+slug = "008-circles-mlp-demo"
+status = "pending"
+description = "New demos/circles_mlp.mlpl: 2-layer tanh MLP trained with adam() on circles()..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T13:32:23"
+task_type = "production"

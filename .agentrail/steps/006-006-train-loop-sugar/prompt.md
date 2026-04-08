@@ -1,0 +1,1 @@
+Add a structured training loop construct. Pick a surface ('train { body } for N steps' OR a train_loop(N, fn) builtin -- whichever is cheaper given the current parser). It should thread step counter and capture per-step loss into a 'last_losses' env var. RED: parser/eval tests that running the construct mutates params and exposes last_losses. Commit via /mw-cp.

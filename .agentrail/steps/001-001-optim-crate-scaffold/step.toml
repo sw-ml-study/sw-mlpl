@@ -1,0 +1,8 @@
+number = 1
+slug = "001-optim-crate-scaffold"
+status = "pending"
+description = "Create the mlpl-optim crate scaffold (or mlpl-runtime::optim module -- pick o..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T13:32:06"
+task_type = "production"
