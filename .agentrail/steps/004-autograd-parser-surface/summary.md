@@ -1,0 +1,1 @@
+Added param[shape] and tensor[shape] constructor syntax. New TensorCtorKind + Expr::TensorCtor AST variant parsed as contextual keywords. Eval evaluates shape dims, builds zero DenseArray, and constructs autograd Tensor::param/leaf on a fresh Tape. TDD with parser and eval tests.
