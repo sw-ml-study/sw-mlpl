@@ -76,6 +76,18 @@ pub(crate) fn eval_expr(
         }
         return Ok(Value::Array(result));
     }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "linear"
+    {
+        let model = crate::model_dispatch::eval_linear(args, env)?;
+        return Ok(Value::Model(model));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "apply"
+    {
+        let result = crate::model_dispatch::eval_apply(args, env, trace)?;
+        return Ok(Value::Array(result));
+    }
     if let Expr::FnCall { name, args, span } = expr
         && (name == "momentum_sgd" || name == "adam")
     {
@@ -126,12 +138,26 @@ pub(crate) fn eval_expr(
                     ..
                 }
             );
-            let val = eval_expr(value, env, trace)?.into_array()?;
-            env.set(name.clone(), val.clone());
-            if is_param_ctor {
-                env.mark_param(name);
+            let v = eval_expr(value, env, trace)?;
+            match v {
+                Value::Model(m) => {
+                    env.models.insert(name.clone(), m);
+                    let placeholder = DenseArray::from_scalar(0.0);
+                    ("assign_model", vec![], placeholder)
+                }
+                Value::Str(_) => {
+                    return Err(EvalError::Unsupported(
+                        "assigning string values is not supported".into(),
+                    ));
+                }
+                Value::Array(val) => {
+                    env.set(name.clone(), val.clone());
+                    if is_param_ctor {
+                        env.mark_param(name);
+                    }
+                    ("assign", vec![TraceValue::from_array(&val)], val)
+                }
             }
-            ("assign", vec![TraceValue::from_array(&val)], val)
         }
         Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
         Expr::FnCall { name, args, .. } => eval_fncall(name, args, env, trace)?,
