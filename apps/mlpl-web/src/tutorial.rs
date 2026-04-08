@@ -308,4 +308,23 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Set K = Q and re-render the heatmap -- notice how the diagonal becomes the brightest cell in each row.",
     },
+    Lesson {
+        title: "Optimizers and Schedules",
+        intro: "Hand-rolled SGD is fine for one parameter, but real training needs momentum, Adam, and a structured loop. MLPL provides momentum_sgd(loss, params, lr, beta) and adam(loss, params, lr, b1, b2, eps) as built-ins -- both maintain per-parameter state across calls so you can just call them in a loop. The train N { body } construct does the loop for you: it binds the iteration index to `step`, runs the body, and captures the value of the body's final expression into a vector named `last_losses`. cosine_schedule(step, total, lr_min, lr_max) and linear_warmup(step, warmup, lr) are pure scalar helpers you can drop into any optimizer call.",
+        examples: &[
+            "W = param[1]",
+            "W = randn(1, [1]) * 2",
+            "train 50 { adam(sum(W*W), W, 0.1, 0.9, 0.999, 0.00000001); reduce_add(W*W) }",
+            "W",
+            "shape(last_losses)",
+            "loss_curve(last_losses)",
+            "cosine_schedule(0, 100, 0.001, 0.1)",
+            "cosine_schedule(50, 100, 0.001, 0.1)",
+            "cosine_schedule(100, 100, 0.001, 0.1)",
+            "linear_warmup(0, 10, 0.1)",
+            "linear_warmup(5, 10, 0.1)",
+            "linear_warmup(20, 10, 0.1)",
+        ],
+        try_it: "Swap adam for momentum_sgd(sum(W*W), W, 0.1, 0.9) inside the train block and re-run. Then plot the new last_losses with loss_curve and compare how quickly each optimizer drives W to zero.",
+    },
 ];
