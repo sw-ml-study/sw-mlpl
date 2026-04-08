@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "004-lr-schedules"
+  },
+  "action": "TDD red/green; placed in math_builtins to avoid bloating builtins.rs which already exceeds fn budget; merged both into one helper",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-08T14:24:24"
+}

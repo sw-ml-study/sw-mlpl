@@ -14,8 +14,70 @@ pub(crate) fn try_call(
         "random" => Some(build(name, args, |rng| rng.next_f64())),
         "randn" => Some(build(name, args, |rng| rng.next_normal())),
         "blobs" => Some(builtin_blobs(name, args)),
+        "moons" | "circles" => Some(synthetic_2d(name, args)),
         _ => None,
     }
+}
+
+/// Shared implementation for the `moons(seed, n, noise)` and
+/// `circles(seed, n, noise)` synthetic 2D classification datasets.
+/// Returns an `[n, 3]` matrix of `[x, y, label]` rows. Labels are
+/// 0 / 1 in two roughly balanced groups; layout is deterministic
+/// given `seed`.
+///
+/// - `moons`: two interleaving half-circles, the classic
+///   `make_moons` shape.
+/// - `circles`: a small inner ring (radius 0.5, label 0) inside a
+///   larger outer ring (radius 1.0, label 1).
+fn synthetic_2d(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 3 {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 3,
+            got: args.len(),
+        });
+    }
+    for (i, a) in args.iter().enumerate() {
+        if a.rank() != 0 {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("argument {i} must be scalar, got rank {}", a.rank()),
+            });
+        }
+    }
+    let seed = args[0].data()[0] as i64 as u64;
+    let n = args[1].data()[0] as usize;
+    let noise = args[2].data()[0];
+    let n0 = n / 2;
+    let n1 = n - n0;
+    let mut rng = Xorshift64::new(seed);
+    let mut data = Vec::with_capacity(n * 3);
+    let pi = std::f64::consts::PI;
+    for k in 0..n {
+        let label = if k < n0 { 0.0 } else { 1.0 };
+        let local_n = if k < n0 { n0 } else { n1 };
+        let local_i = if k < n0 { k } else { k - n0 };
+        let denom = local_n.max(1) as f64;
+        let (mut x, mut y) = if name == "moons" {
+            let theta = pi * (local_i as f64) / denom;
+            if label == 0.0 {
+                (theta.cos(), theta.sin())
+            } else {
+                (1.0 - theta.cos(), 0.5 - theta.sin())
+            }
+        } else {
+            // circles
+            let theta = 2.0 * pi * (local_i as f64) / denom;
+            let r = if label == 0.0 { 0.5 } else { 1.0 };
+            (r * theta.cos(), r * theta.sin())
+        };
+        x += noise * rng.next_normal();
+        y += noise * rng.next_normal();
+        data.push(x);
+        data.push(y);
+        data.push(label);
+    }
+    Ok(DenseArray::new(Shape::new(vec![n, 3]), data)?)
 }
 
 fn builtin_blobs(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {

@@ -1,0 +1,1 @@
+Added cosine_schedule(step,total,lr_min,lr_max) and linear_warmup(step,warmup,lr) as pure scalar built-ins in math_builtins.rs via a single shared schedule helper (keeps module at 7 fns). Boundary + midpoint + out-of-range clamping tests for both.
