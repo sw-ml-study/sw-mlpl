@@ -1,6 +1,6 @@
 number = 8
 slug = "autograd-tutorial-lesson"
-status = "pending"
+status = "in-progress"
 description = "Add a tutorial lesson 'Automatic differentiation' to the web REPL tutorial sy..."
 role = "production"
 context_files = []
