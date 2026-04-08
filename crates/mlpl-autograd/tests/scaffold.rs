@@ -1,4 +1,4 @@
-//! Scaffold tests for the mlpl-autograd crate.
+//! Scaffold tests: leaf construction and node ids.
 
 use mlpl_array::DenseArray;
 use mlpl_autograd::{Tape, Tensor};
@@ -22,11 +22,12 @@ fn leaf_non_trainable() {
 }
 
 #[test]
-fn backward_on_leaf_is_noop() {
+fn backward_on_leaf_seeds_identity() {
     let tape = Tape::new();
     let t = Tensor::param(tape, DenseArray::from_scalar(1.0));
     t.backward();
-    assert!(t.grad().is_none());
+    // Backward seeds d x / d x = 1 even on a bare leaf.
+    assert_eq!(t.grad().unwrap().data(), &[1.0]);
 }
 
 #[test]

@@ -1,15 +1,14 @@
 //! Reverse-mode autograd engine for MLPL.
 //!
-//! This crate provides a [`Tensor`] wrapper around
-//! [`mlpl_array::DenseArray`] and a [`Tape`] that records operations
-//! for reverse-mode differentiation.
-//!
-//! This is the v0.5 scaffold: leaf construction, unique node ids, and a
-//! no-op `backward` on a leaf. Operations and gradient propagation land
-//! in subsequent steps.
+//! Provides [`Tensor`], a handle into a [`Tape`] that records
+//! elementwise operations and propagates gradients backward.
 
+pub mod backward;
+pub mod ops;
 mod tape;
 mod tensor;
+mod tensor_ops;
 
-pub use tape::{Node, NodeId, Tape};
+pub use ops::{BinaryOp, UnaryOp};
+pub use tape::{NodeData, NodeId, NodeKind, Tape};
 pub use tensor::Tensor;

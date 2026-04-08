@@ -1,6 +1,6 @@
 number = 2
 slug = "autograd-elementwise-ops"
-status = "pending"
+status = "in-progress"
 description = "Add reverse-mode autograd for elementwise ops: add, sub, mul, div, neg, exp, ..."
 role = "production"
 context_files = []
