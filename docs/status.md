@@ -20,13 +20,13 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 6 | ML foundations (matmul, activations, logistic regression) | v0.2 | [x] |
 | 7 | SVG visualization v1 (`mlpl-viz`, inline SVG in REPL) | v0.3 | [x] |
 | 8 | ML demos (k-means, PCA, softmax, tiny MLP, attention) | v0.4 | [x] |
+| 9 | Autograd v1 (reverse-mode tape, `grad` built-in) | v0.5 | [x] |
 
 ## Planned
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 9 | Autograd v1 (reverse-mode tape, `grad` built-in) | v0.5 | [ ] NEXT | 8 |
-| 10 | Optimizers + training loop (Adam, schedules, moons/circles) | v0.6 | [ ] | 9 |
+| 10 | Optimizers + training loop (Adam, schedules, moons/circles) | v0.6 | [ ] NEXT | 9 |
 | 11 | Model DSL (`chain`, `residual`, `attention`, `norm`) | v0.7 | [ ] | 10 |
 | 12 | Tokenizers, datasets, experiment tracking | v0.8 | [ ] | 11 |
 | 13 | Tiny language model end-to-end (CPU) | v0.9 | [ ] | 12 |
@@ -39,7 +39,7 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 ## Next saga to start
 
-**Saga 9 -- Autograd v1.** Rationale, scope, and entry criteria
-are documented in `docs/plan.md`. Every saga from 10 onward
-assumes differentiation is a language primitive, so landing
-autograd now avoids rewriting the v0.4 demos twice.
+**Saga 10 -- Optimizers + training loop.** With autograd shipped
+in v0.5, the next saga adds Adam and learning-rate schedules on
+top of `grad`, plus a structured training loop that drives the
+moons/circles datasets called out in the v0.4 "what's next" list.
