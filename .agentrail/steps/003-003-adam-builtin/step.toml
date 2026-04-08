@@ -1,8 +1,9 @@
 number = 3
 slug = "003-adam-builtin"
-status = "in-progress"
+status = "completed"
 description = "Add the adam(params, lr, b1, b2, eps) built-in. Per-param first and second mo..."
 role = "production"
 context_files = []
 created_at = "2026-04-08T13:32:06"
+completed_at = "2026-04-08T14:21:02"
 task_type = "production"

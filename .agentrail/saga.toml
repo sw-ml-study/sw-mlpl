@@ -1,5 +1,5 @@
 name = "mlpl-optim"
 status = "active"
-current_step = 3
+current_step = 4
 created_at = "2026-04-08T13:31:54"
 plan_file = ".agentrail/plan.md"
