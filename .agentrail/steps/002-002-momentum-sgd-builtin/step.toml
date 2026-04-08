@@ -1,6 +1,6 @@
 number = 2
 slug = "002-momentum-sgd-builtin"
-status = "pending"
+status = "in-progress"
 description = "Add the momentum_sgd(params, lr, beta) built-in. params is a list of param id..."
 role = "production"
 context_files = []
