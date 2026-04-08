@@ -5,6 +5,7 @@ use std::collections::{HashMap, HashSet};
 use mlpl_array::DenseArray;
 
 use crate::grad::OptimizerState;
+use crate::model::ModelSpec;
 
 /// Variable bindings for evaluation.
 #[derive(Clone, Debug, Default)]
@@ -12,6 +13,8 @@ pub struct Environment {
     vars: HashMap<String, DenseArray>,
     params: HashSet<String>,
     pub(crate) optim_state: OptimizerState,
+    pub(crate) models: HashMap<String, ModelSpec>,
+    pub(crate) next_model_id: u64,
 }
 
 impl Environment {
@@ -54,4 +57,18 @@ impl Environment {
             .iter()
             .filter_map(move |n| self.vars.get(n).map(|v| (n, v)))
     }
+
+    /// Look up a model by name (Saga 11). Returns `None` if `name`
+    /// is not bound to a model value.
+    #[must_use]
+    pub fn get_model(&self, name: &str) -> Option<&ModelSpec> {
+        self.models.get(name)
+    }
+}
+
+/// Public test helper: walk the parameter tree of the model bound to
+/// `name` and return the flat list of param identifiers it owns.
+#[must_use]
+pub fn model_params(env: &Environment, name: &str) -> Option<Vec<String>> {
+    env.get_model(name).map(ModelSpec::params)
 }

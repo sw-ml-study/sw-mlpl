@@ -1,6 +1,6 @@
 number = 1
 slug = "model-value-and-linear"
-status = "pending"
+status = "in-progress"
 description = "Phase 1: Add a Value::Model variant (or equivalent representation) holding a ..."
 role = "production"
 context_files = []
