@@ -28,6 +28,7 @@ pub(crate) fn try_call(
         })),
         "mean" => Some(builtin_mean(name, args)),
         "zeros" | "ones" | "fill" => Some(constructor(name, args)),
+        "cosine_schedule" | "linear_warmup" => Some(schedule(name, args)),
         _ => None,
     }
 }
@@ -81,6 +82,54 @@ fn builtin_mean(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runtime
     let sum: f64 = data.iter().sum();
     let count = data.len().max(1) as f64;
     Ok(DenseArray::from_scalar(sum / count))
+}
+
+/// Pure scalar learning-rate schedule built-ins.
+///
+/// - `cosine_schedule(step, total, lr_min, lr_max)`:
+///   `lr_min + 0.5*(lr_max - lr_min)*(1 + cos(pi * step/total))`,
+///   clamped to `[lr_min, lr_max]` for `step` outside `[0, total]`.
+/// - `linear_warmup(step, warmup, lr)`:
+///   `lr * min(1, step/warmup)`, clamped to `[0, lr]`.
+fn schedule(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    let expected = if name == "cosine_schedule" { 4 } else { 3 };
+    if args.len() != expected {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected,
+            got: args.len(),
+        });
+    }
+    for (i, a) in args.iter().enumerate() {
+        if a.rank() != 0 {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("argument {i} must be a scalar, got rank {}", a.rank()),
+            });
+        }
+    }
+    let v = if name == "cosine_schedule" {
+        let step = args[0].data()[0];
+        let total = args[1].data()[0];
+        let lr_min = args[2].data()[0];
+        let lr_max = args[3].data()[0];
+        if total <= 0.0 {
+            lr_max
+        } else {
+            let t = step.clamp(0.0, total) / total;
+            lr_min + 0.5 * (lr_max - lr_min) * (1.0 + (std::f64::consts::PI * t).cos())
+        }
+    } else {
+        let step = args[0].data()[0];
+        let warmup = args[1].data()[0];
+        let lr = args[2].data()[0];
+        if warmup <= 0.0 {
+            lr
+        } else {
+            lr * (step / warmup).clamp(0.0, 1.0)
+        }
+    };
+    Ok(DenseArray::from_scalar(v))
 }
 
 fn constructor(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {

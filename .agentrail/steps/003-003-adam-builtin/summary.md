@@ -1,0 +1,1 @@
+Implemented adam(loss, params, lr, b1, b2, eps) built-in with per-param m/v buffers and bias-corrected updates. Step counter t in OptimizerState.steps['adam'] is post-incremented per call. 2 new tests: closed-form step-1 reference (W=2.0 -> ~1.9, m=0.4, v=0.016) and Adam beats SGD on 100*X^2+Y^2 after 200 steps.
