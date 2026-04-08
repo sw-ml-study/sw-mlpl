@@ -1,0 +1,1 @@
+Phase 5 cont.: New demos/transformer_block.mlpl. Build a tiny 2-layer transformer block using residual, norm, attention, and chain on a small toy sequence task (e.g. predict next token in a 16-symbol vocab over short sequences). Train inside train { } with adam and verify the captured last_losses decreases monotonically over the run. Verify via mlpl-repl -f. Commit via /mw-cp.

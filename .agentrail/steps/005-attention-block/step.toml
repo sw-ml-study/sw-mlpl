@@ -1,0 +1,8 @@
+number = 5
+slug = "attention-block"
+status = "pending"
+description = "Phase 4: Add an attention[d_model, heads] multi-head self-attention layer com..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T15:51:22"
+task_type = "production"

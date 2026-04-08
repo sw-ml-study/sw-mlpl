@@ -1,0 +1,8 @@
+number = 2
+slug = "chain-and-activations"
+status = "pending"
+description = "Phase 2: Add chain[layer1, layer2, ...] sequential composition and atomic act..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T15:51:22"
+task_type = "production"

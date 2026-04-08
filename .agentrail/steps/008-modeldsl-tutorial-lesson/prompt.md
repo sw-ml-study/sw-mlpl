@@ -1,0 +1,1 @@
+Phase 6: Add a 'Model Composition' tutorial lesson to apps/mlpl-web/src/tutorial.rs walking from a single linear() through a chain MLP to params(model) feeding adam inside train { }. Keep snippets short and runnable in the web REPL. Rebuild pages/ via scripts/build-pages.sh. Commit via /mw-cp.
