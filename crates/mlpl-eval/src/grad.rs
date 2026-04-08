@@ -315,9 +315,137 @@ pub(crate) fn eval_momentum_sgd(
     Ok(DenseArray::from_scalar(0.0))
 }
 
-/// Stub: full implementation lands in step 003.
-pub(crate) fn eval_adam(_args: &[Expr], _env: &mut Environment) -> Result<DenseArray, EvalError> {
-    Err(EvalError::Unsupported(
-        "adam: not yet implemented (step 003)".into(),
-    ))
+/// `adam(loss_expr, params, lr, b1, b2, eps)` built-in.
+///
+/// Standard Adam with bias correction. Per-param first/second moment
+/// buffers `m`, `v` and a per-optimizer step counter `t` live in
+/// `OptimizerState`. At each call (with `t` post-incremented to start
+/// at 1):
+///
+/// ```text
+///     g     = grad(loss_expr, w)
+///     m     = b1*m + (1 - b1)*g
+///     v     = b2*v + (1 - b2)*g*g
+///     mhat  = m / (1 - b1^t)
+///     vhat  = v / (1 - b2^t)
+///     w     = w - lr * mhat / (sqrt(vhat) + eps)
+/// ```
+pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
+    if args.len() != 6 {
+        return Err(EvalError::BadArity {
+            func: "adam".into(),
+            expected: 6,
+            got: args.len(),
+        });
+    }
+    let loss_expr = args[0].clone();
+    let param_names: Vec<String> = match &args[1] {
+        Expr::Ident(n, _) => vec![n.clone()],
+        Expr::ArrayLit(elems, _) => {
+            let mut v = Vec::with_capacity(elems.len());
+            for e in elems {
+                match e {
+                    Expr::Ident(n, _) => v.push(n.clone()),
+                    _ => {
+                        return Err(EvalError::Unsupported(
+                            "adam: params list must contain only identifiers".into(),
+                        ));
+                    }
+                }
+            }
+            v
+        }
+        _ => {
+            return Err(EvalError::Unsupported(
+                "adam: second argument must be a param identifier or list".into(),
+            ));
+        }
+    };
+    let scalar_arg = |expr: &Expr, env: &mut Environment| -> Result<f64, EvalError> {
+        let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
+        if arr.rank() != 0 {
+            return Err(EvalError::Unsupported(
+                "adam: lr/b1/b2/eps must be scalars".into(),
+            ));
+        }
+        Ok(arr.data()[0])
+    };
+    let lr = scalar_arg(&args[2], env)?;
+    let b1 = scalar_arg(&args[3], env)?;
+    let b2 = scalar_arg(&args[4], env)?;
+    let eps = scalar_arg(&args[5], env)?;
+
+    // Step counter is 1-based: bump first, then read.
+    let t = {
+        let entry = env.optim_state.steps.entry("adam".into()).or_insert(0);
+        *entry += 1;
+        *entry
+    };
+    let bc1 = 1.0 - b1.powi(t as i32);
+    let bc2 = 1.0 - b2.powi(t as i32);
+
+    for name in &param_names {
+        if !env.is_param(name) {
+            return Err(EvalError::Unsupported(format!(
+                "adam: '{name}' is not a tracked parameter"
+            )));
+        }
+        let grad_args = [
+            loss_expr.clone(),
+            Expr::Ident(name.clone(), Span::new(0, 0)),
+        ];
+        let g = eval_grad(&grad_args, env)?;
+        let m_key = ("adam".to_string(), name.clone(), "m".to_string());
+        let v_key = ("adam".to_string(), name.clone(), "v".to_string());
+        let m_old = env
+            .optim_state
+            .buffers
+            .get(&m_key)
+            .cloned()
+            .unwrap_or_else(|| DenseArray::zeros(g.shape().clone()));
+        let v_old = env
+            .optim_state
+            .buffers
+            .get(&v_key)
+            .cloned()
+            .unwrap_or_else(|| DenseArray::zeros(g.shape().clone()));
+        if m_old.shape() != g.shape() || v_old.shape() != g.shape() {
+            return Err(EvalError::Unsupported(format!(
+                "adam: stored moment shape mismatch for '{name}'"
+            )));
+        }
+        let m_data: Vec<f64> = m_old
+            .data()
+            .iter()
+            .zip(g.data().iter())
+            .map(|(mo, gv)| b1 * mo + (1.0 - b1) * gv)
+            .collect();
+        let v_data: Vec<f64> = v_old
+            .data()
+            .iter()
+            .zip(g.data().iter())
+            .map(|(vo, gv)| b2 * vo + (1.0 - b2) * gv * gv)
+            .collect();
+        let m_new = DenseArray::new(g.shape().clone(), m_data).expect("m shape matches grad");
+        let v_new = DenseArray::new(g.shape().clone(), v_data).expect("v shape matches grad");
+
+        let w = env.get(name).cloned().expect("param exists in environment");
+        let w_data: Vec<f64> = w
+            .data()
+            .iter()
+            .zip(m_new.data().iter())
+            .zip(v_new.data().iter())
+            .map(|((wv, mv), vv)| {
+                let mhat = mv / bc1;
+                let vhat = vv / bc2;
+                wv - lr * mhat / (vhat.sqrt() + eps)
+            })
+            .collect();
+        let w_new = DenseArray::new(w.shape().clone(), w_data).expect("weight shape matches grad");
+
+        env.optim_state.buffers.insert(m_key, m_new);
+        env.optim_state.buffers.insert(v_key, v_new);
+        env.set(name.clone(), w_new);
+    }
+    Ok(DenseArray::from_scalar(0.0))
 }

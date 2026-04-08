@@ -52,15 +52,77 @@ fn step_counters_are_independent_per_optimizer() {
 }
 
 #[test]
-fn adam_is_recognized_but_stubbed() {
+fn adam_step_one_matches_reference_with_bias_correction() {
+    // W=[2.0], loss=sum(W*W). At step t=1:
+    //   g    = 4.0
+    //   m    = 0.1*4.0     = 0.4
+    //   v    = 0.001*16.0  = 0.016
+    //   mhat = 0.4/(1-0.9) = 4.0
+    //   vhat = 0.016/0.001 = 16.0
+    //   step = 0.1 * 4.0 / (sqrt(16) + 1e-8) ~= 0.1
+    //   W'   ~= 1.9
     let mut env = Environment::new();
-    eval_program(&parse(&lex("W = param[2]").unwrap()).unwrap(), &mut env).unwrap();
-    let stmts = parse(&lex("adam(sum(W*W), W, 0.001, 0.9, 0.999, 0.00000001)").unwrap()).unwrap();
-    let err = eval_program(&stmts, &mut env).unwrap_err();
-    let msg = format!("{err}");
+    env.set_param("W".into(), arr(vec![1], vec![2.0]));
+    let stmts = parse(&lex("adam(sum(W*W), W, 0.1, 0.9, 0.999, 0.00000001)").unwrap()).unwrap();
+    eval_program(&stmts, &mut env).unwrap();
+
+    let m = optim_state(&env)
+        .buffers
+        .get(&key("adam", "W", "m"))
+        .expect("adam m buffer present");
+    let v = optim_state(&env)
+        .buffers
+        .get(&key("adam", "W", "v"))
+        .expect("adam v buffer present");
+    assert!((m.data()[0] - 0.4).abs() < 1e-9);
+    assert!((v.data()[0] - 0.016).abs() < 1e-9);
+    assert_eq!(optim_state(&env).steps.get("adam").copied(), Some(1));
+
+    let w = env.get("W").unwrap().data()[0];
+    assert!((w - 1.9).abs() < 1e-6, "expected W ~= 1.9, got {w}");
+}
+
+#[test]
+fn adam_beats_sgd_on_poorly_conditioned_quadratic() {
+    // loss = 100*X*X + Y*Y. Hessian condition number 100; vanilla SGD
+    // with a single learning rate either diverges on X or crawls on Y,
+    // while Adam's per-coordinate scaling handles both.
+    let src = "100*sum(X*X) + sum(Y*Y)";
+    let n = 200;
+
+    // Adam run
+    let mut env_a = Environment::new();
+    env_a.set_param("X".into(), arr(vec![1], vec![1.0]));
+    env_a.set_param("Y".into(), arr(vec![1], vec![1.0]));
+    let stmts_a =
+        parse(&lex(&format!("adam({src}, [X, Y], 0.1, 0.9, 0.999, 0.00000001)")).unwrap()).unwrap();
+    for _ in 0..n {
+        eval_program(&stmts_a, &mut env_a).unwrap();
+    }
+    let xa = env_a.get("X").unwrap().data()[0];
+    let ya = env_a.get("Y").unwrap().data()[0];
+    let adam_norm = (xa * xa + ya * ya).sqrt();
+
+    // Plain SGD run via momentum_sgd with beta=0
+    let mut env_s = Environment::new();
+    env_s.set_param("X".into(), arr(vec![1], vec![1.0]));
+    env_s.set_param("Y".into(), arr(vec![1], vec![1.0]));
+    let stmts_s =
+        parse(&lex(&format!("momentum_sgd({src}, [X, Y], 0.005, 0.0)")).unwrap()).unwrap();
+    for _ in 0..n {
+        eval_program(&stmts_s, &mut env_s).unwrap();
+    }
+    let xs = env_s.get("X").unwrap().data()[0];
+    let ys = env_s.get("Y").unwrap().data()[0];
+    let sgd_norm = (xs * xs + ys * ys).sqrt();
+
     assert!(
-        msg.contains("not yet implemented"),
-        "expected stub error, got {msg}"
+        adam_norm < sgd_norm,
+        "expected Adam to outperform SGD: adam_norm={adam_norm}, sgd_norm={sgd_norm}"
+    );
+    assert!(
+        adam_norm < 0.1,
+        "expected Adam to be near optimum, got norm={adam_norm}"
     );
 }
 
