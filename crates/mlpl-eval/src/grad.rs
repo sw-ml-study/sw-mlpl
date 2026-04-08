@@ -56,9 +56,10 @@ fn eval_tensor_expr(
     tape: &Rc<Tape>,
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, EvalError> {
+    let leaf = |v: DenseArray| Tensor::leaf(Rc::clone(tape), v, false);
     match expr {
-        Expr::IntLit(n, _) => Ok(const_leaf(tape, DenseArray::from_scalar(*n as f64))),
-        Expr::FloatLit(f, _) => Ok(const_leaf(tape, DenseArray::from_scalar(*f))),
+        Expr::IntLit(n, _) => Ok(leaf(DenseArray::from_scalar(*n as f64))),
+        Expr::FloatLit(f, _) => Ok(leaf(DenseArray::from_scalar(*f))),
         Expr::Ident(name, _) => {
             if let Some(t) = params.get(name) {
                 return Ok(t.clone());
@@ -67,11 +68,11 @@ fn eval_tensor_expr(
                 .get(name)
                 .cloned()
                 .ok_or_else(|| EvalError::UndefinedVariable(name.clone()))?;
-            Ok(const_leaf(tape, arr))
+            Ok(leaf(arr))
         }
-        Expr::ArrayLit(_, _) => {
-            let arr = crate::eval_ops::eval_array_lit(array_lit_elems(expr), env, &mut None)?;
-            Ok(const_leaf(tape, arr))
+        Expr::ArrayLit(elems, _) => {
+            let arr = crate::eval_ops::eval_array_lit(elems, env, &mut None)?;
+            Ok(leaf(arr))
         }
         Expr::UnaryNeg { operand, .. } => Ok(eval_tensor_expr(operand, env, tape, params)?.neg()),
         Expr::BinOp { op, lhs, rhs, .. } => {
@@ -87,7 +88,7 @@ fn eval_tensor_expr(
         Expr::FnCall { name, args, .. } => eval_tensor_fncall(name, args, env, tape, params),
         Expr::TensorCtor { shape, .. } => {
             let dims = eval_shape_dims(shape, env)?;
-            Ok(const_leaf(tape, DenseArray::zeros(Shape::new(dims))))
+            Ok(leaf(DenseArray::zeros(Shape::new(dims))))
         }
         Expr::Assign { .. } | Expr::Repeat { .. } | Expr::StrLit(_, _) => Err(
             EvalError::Unsupported("grad: expression form not supported inside grad()".into()),
@@ -102,13 +103,24 @@ fn eval_tensor_fncall(
     tape: &Rc<Tape>,
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, EvalError> {
+    let arity = |expected: usize| -> Result<(), EvalError> {
+        if args.len() == expected {
+            Ok(())
+        } else {
+            Err(EvalError::BadArity {
+                func: name.into(),
+                expected,
+                got: args.len(),
+            })
+        }
+    };
     if let Some(op) = unary_tensor_op(name) {
-        check_arity(name, args, 1)?;
+        arity(1)?;
         let a = eval_tensor_expr(&args[0], env, tape, params)?;
         return Ok(op(&a));
     }
     if name == "matmul" {
-        check_arity(name, args, 2)?;
+        arity(2)?;
         let a = eval_tensor_expr(&args[0], env, tape, params)?;
         let b = eval_tensor_expr(&args[1], env, tape, params)?;
         return Ok(a.matmul(&b));
@@ -133,29 +145,6 @@ fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
     })
 }
 
-fn check_arity(name: &str, args: &[Expr], expected: usize) -> Result<(), EvalError> {
-    if args.len() == expected {
-        Ok(())
-    } else {
-        Err(EvalError::BadArity {
-            func: name.into(),
-            expected,
-            got: args.len(),
-        })
-    }
-}
-
-fn const_leaf(tape: &Rc<Tape>, value: DenseArray) -> Tensor {
-    Tensor::leaf(Rc::clone(tape), value, false)
-}
-
-fn array_lit_elems(expr: &Expr) -> &[Expr] {
-    match expr {
-        Expr::ArrayLit(e, _) => e,
-        _ => unreachable!(),
-    }
-}
-
 fn eval_shape_dims(shape: &[Expr], env: &mut Environment) -> Result<Vec<usize>, EvalError> {
     let mut dims = Vec::with_capacity(shape.len());
     for dim_expr in shape {
@@ -170,4 +159,62 @@ fn eval_shape_dims(shape: &[Expr], env: &mut Environment) -> Result<Vec<usize>, 
         dims.push(v as usize);
     }
     Ok(dims)
+}
+// ----- optimizer state and built-in dispatch (Saga 10) -----
+//
+// Saga 10 design choice: optimizer state lives on `Environment` as a
+// map keyed by `(optimizer_name, param_name, slot_name)` instead of
+// in a new crate. The `mlpl-autograd` substrate already lives in its
+// own crate, and Adam / momentum-SGD are thin wrappers around `grad`
+// plus per-param buffers, so a fresh crate would just trampoline
+// through `mlpl-eval` to reach `Environment`. Folding the state and
+// dispatch hooks into `grad.rs` keeps the wiring local and respects
+// the project's per-module function-count budget.
+//
+// Step 001 adds only the storage type and stub built-in dispatch.
+// Steps 002 and 003 fill in `momentum_sgd` and `adam`.
+
+/// Per-optimizer, per-parameter state buffers (e.g. momentum velocity,
+/// Adam first/second moments).
+///
+/// Step 001 exposes the storage as plain public fields keyed by
+/// `(optimizer_name, param_name, slot_name)` so steps 002 and 003 can
+/// fill in `momentum_sgd` and `adam` without dragging extra accessor
+/// helpers across the per-module function-count budget.
+#[derive(Clone, Debug, Default)]
+pub struct OptimizerState {
+    /// Buffers keyed by `(optimizer_name, param_name, slot_name)`.
+    /// `slot_name` lets a single optimizer store multiple buffers per
+    /// param (e.g. Adam needs both `m` and `v`).
+    pub buffers: HashMap<(String, String, String), DenseArray>,
+    /// Per-optimizer step counter (for Adam bias correction).
+    pub steps: HashMap<String, u64>,
+}
+
+/// Read-only accessor used by tests and downstream optimizer code.
+#[must_use]
+pub fn optim_state(env: &Environment) -> &OptimizerState {
+    &env.optim_state
+}
+
+/// Mutable accessor used by tests and downstream optimizer code.
+pub fn optim_state_mut(env: &mut Environment) -> &mut OptimizerState {
+    &mut env.optim_state
+}
+
+/// Stub: full implementation lands in step 002.
+pub(crate) fn eval_momentum_sgd(
+    _args: &[Expr],
+    _env: &mut Environment,
+) -> Result<DenseArray, EvalError> {
+    Err(EvalError::Unsupported(
+        "momentum_sgd: not yet implemented (step 002)".into(),
+    ))
+}
+
+/// Stub: full implementation lands in step 003.
+pub(crate) fn eval_adam(_args: &[Expr], _env: &mut Environment) -> Result<DenseArray, EvalError> {
+    Err(EvalError::Unsupported(
+        "adam: not yet implemented (step 003)".into(),
+    ))
 }
