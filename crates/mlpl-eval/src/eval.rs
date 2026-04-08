@@ -60,6 +60,22 @@ pub(crate) fn eval_expr(
     {
         return eval_svg(args, env, trace).map(Value::Str);
     }
+    if let Expr::FnCall { name, args, span } = expr
+        && name == "grad"
+    {
+        let result = crate::grad::eval_grad(args, env)?;
+        if let Some(t) = trace.as_mut() {
+            let seq = t.events().len() as u64;
+            t.push(TraceEvent {
+                seq,
+                op: "grad".into(),
+                span: *span,
+                inputs: vec![],
+                output: TraceValue::from_array(&result),
+            });
+        }
+        return Ok(Value::Array(result));
+    }
     if let Expr::FnCall { name, args, .. } = expr
         && let Some(result) = eval_analysis_helper(name, args, env, trace)
     {
@@ -83,8 +99,18 @@ pub(crate) fn eval_expr(
             ("negate", vec![TraceValue::from_array(&val)], r)
         }
         Expr::Assign { name, value, .. } => {
+            let is_param_ctor = matches!(
+                value.as_ref(),
+                Expr::TensorCtor {
+                    kind: TensorCtorKind::Param,
+                    ..
+                }
+            );
             let val = eval_expr(value, env, trace)?.into_array()?;
             env.set(name.clone(), val.clone());
+            if is_param_ctor {
+                env.mark_param(name);
+            }
             ("assign", vec![TraceValue::from_array(&val)], val)
         }
         Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
