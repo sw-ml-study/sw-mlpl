@@ -1,0 +1,1 @@
+Rewrite demos/tiny_mlp.mlpl to use param + grad instead of hand-written backprop. Keep manual SGD updates (W <- W - lr * grad). The existing tiny_mlp integration test (MLP beats linear on XOR-style data) must still pass unchanged. Do not change the test. Commit via /mw-cp.

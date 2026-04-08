@@ -1,0 +1,8 @@
+number = 4
+slug = "autograd-parser-surface"
+status = "pending"
+description = "Add parser support for param[shape] and tensor[shape] constructors. RED: pars..."
+role = "production"
+context_files = []
+created_at = "2026-04-07T17:36:07"
+task_type = "production"

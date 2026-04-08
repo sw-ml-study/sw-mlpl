@@ -1,0 +1,1 @@
+Rewrite demos/softmax_classifier.mlpl to use param + grad. Must still reach >95% accuracy on the separable 3-class blobs dataset (existing integration test must pass unchanged). Commit via /mw-cp.

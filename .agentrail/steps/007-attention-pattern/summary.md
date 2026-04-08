@@ -1,1 +1,0 @@
-Attention pattern demo: Q K^T / sqrt(d) + row softmax rendered as heatmaps, with self-attention variant; web entry, tutorial lesson, test, pages rebuilt

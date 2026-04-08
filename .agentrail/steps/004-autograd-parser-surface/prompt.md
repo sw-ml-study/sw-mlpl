@@ -1,0 +1,1 @@
+Add parser support for param[shape] and tensor[shape] constructors. RED: parser tests for both forms including nested shapes. GREEN: implement. Extend AST and mlpl-eval to construct autograd Tensors when these constructors are used. Non-tracked arrays continue to evaluate as before. Commit via /mw-cp.

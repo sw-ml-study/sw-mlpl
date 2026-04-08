@@ -1,0 +1,8 @@
+number = 8
+slug = "autograd-tutorial-lesson"
+status = "pending"
+description = "Add a tutorial lesson 'Automatic differentiation' to the web REPL tutorial sy..."
+role = "production"
+context_files = []
+created_at = "2026-04-07T17:36:07"
+task_type = "production"

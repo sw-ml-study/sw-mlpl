@@ -1,0 +1,8 @@
+number = 6
+slug = "autograd-port-tiny-mlp"
+status = "pending"
+description = "Rewrite demos/tiny_mlp.mlpl to use param + grad instead of hand-written backp..."
+role = "production"
+context_files = []
+created_at = "2026-04-07T17:36:07"
+task_type = "production"

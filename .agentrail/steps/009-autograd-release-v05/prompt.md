@@ -1,0 +1,1 @@
+Release v0.5.0-autograd. Update docs/saga.md (Saga 9 COMPLETE), docs/status.md, docs/plan.md, create or update docs/milestone-autograd.md. Bump REPL banners from v0.4 to v0.5. Rebuild and deploy pages/. Run full quality gates. Tag v0.5.0-autograd and push the tag. Commit via /mw-cp.

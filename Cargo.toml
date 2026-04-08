@@ -9,6 +9,7 @@ members = [
   "crates/mlpl-trace",
   "crates/mlpl-viz",
   "crates/mlpl-wasm",
+  "crates/mlpl-autograd",
   "crates/mlpl-ml",
   "crates/mlpl-cli",
   "apps/mlpl-repl",

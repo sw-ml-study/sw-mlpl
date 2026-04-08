@@ -1,1 +1,0 @@
-Softmax classifier demo: new softmax/one_hot built-ins with TDD, trained classifier reaches >95% on blobs, wired into web + tutorial, pages rebuilt

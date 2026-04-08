@@ -1,0 +1,8 @@
+number = 2
+slug = "autograd-elementwise-ops"
+status = "pending"
+description = "Add reverse-mode autograd for elementwise ops: add, sub, mul, div, neg, exp, ..."
+role = "production"
+context_files = []
+created_at = "2026-04-07T17:36:07"
+task_type = "production"
