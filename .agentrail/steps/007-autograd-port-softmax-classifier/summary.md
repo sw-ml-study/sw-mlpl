@@ -1,0 +1,1 @@
+Rewrote demos/softmax_classifier.mlpl to use param + grad with CE loss (-(1/N)*sum(Y*log(softmax(logits)))); bias shape [1,3] for matmul broadcast; verified 100% accuracy via mlpl-repl -f (lr=0.2, 300 iters); inline integration test untouched.

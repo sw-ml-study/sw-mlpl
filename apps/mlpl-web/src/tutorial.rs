@@ -277,6 +277,26 @@ pub const LESSONS: &[Lesson] = &[
         try_it: "Try running the Tiny MLP demo, then the Softmax Classifier demo on the same data -- compare the boundary shapes.",
     },
     Lesson {
+        title: "Automatic Differentiation",
+        intro: "MLPL has built-in autograd. Declare a trainable leaf with param[shape] and compute gradients with grad(loss_expr, wrt). Inside grad(), array ops are recorded on a tape and a reverse pass returns the gradient with the same shape as wrt. The classic recipe is: build a scalar loss from your params, call grad, and step the param against its gradient (W <- W - lr * grad). That gives you SGD without writing a single chain-rule formula by hand.",
+        examples: &[
+            "x = param[1]",
+            "grad((x - 3) * (x - 3), x)",
+            "x = x - 0.5 * grad((x - 3) * (x - 3), x)",
+            "x",
+            "repeat 20 { x = x - 0.3 * grad((x - 3) * (x - 3), x) }",
+            "x",
+            "X = [[1],[2],[3],[4]]",
+            "Yc = [[2],[4],[6],[8]]",
+            "w = param[1, 1]",
+            "lr = 0.05",
+            "repeat 100 { w = w - lr * grad(mean((matmul(X, w) - Yc) * (matmul(X, w) - Yc)), w) }",
+            "w",
+            "matmul(X, w)",
+        ],
+        try_it: "Change Yc to [[3],[5],[7],[9]] (slope 2, intercept 1) and retrain. The fit will be slightly off because this model has no bias term -- try adding b = param[1, 1] and a matmul(ones([4,1]), b) bias inside the loss expression.",
+    },
+    Lesson {
         title: "Attention Patterns",
         intro: "Scaled dot-product attention is a single matrix expression: A = softmax(Q K^T / sqrt(d), 1). Each row of A is a probability distribution over the keys -- a weight map for one query. The scaling by sqrt(d) keeps the scores from growing with the key dimension so softmax doesn't saturate. When K = Q (self-attention), each token's highest score is on itself, so the diagonal of A dominates. Rendering A as a heatmap shows the full attention pattern at a glance.",
         examples: &[
