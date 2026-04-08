@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 6,
+    "step": "autograd-port-tiny-mlp"
+  },
+  "action": "edit demo file, run via cargo run -p mlpl-repl stdin, /mw-cp",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-07T19:05:45"
+}

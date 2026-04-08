@@ -1,7 +1,10 @@
 # Linear softmax classifier on a 3-class gaussian-blobs dataset.
 #
-# Trains W (2x3) and b (length 3) by gradient descent on softmax
-# cross-entropy, then renders:
+# This version uses MLPL's autograd: parameters are declared with
+# `param[...]` and gradients are computed via the `grad` built-in.
+# SGD updates stay manual (W <- W - lr * grad).
+#
+# Renders:
 #   - confusion matrix of predicted vs true labels
 #   - the class-0 decision boundary on a 2D grid
 
@@ -11,24 +14,29 @@ X  = matmul(D, [[1,0],[0,1],[0,0]])
 tl = reshape(matmul(D, [[0],[0],[1]]), [90])
 Y  = one_hot(tl, 3)
 
+# Precomputed broadcast helper (grad's mini-evaluator can't call
+# `ones` directly, so we lift it into an env variable used as a
+# const leaf inside the loss expression).
+O90 = ones([90, 1])
+
 # ----- parameters -----
-W  = zeros([2, 3])
-b  = zeros([3])
+# Bias has shape [1, 3] so it broadcasts via matmul(O90, b).
+W  = param[2, 3]
+b  = param[1, 3]
 lr = 0.2
 
-# ----- training (softmax cross-entropy gradient: (P - Y)) -----
+# ----- training (cross-entropy loss via grad) -----
+# Loss = -(1/N) * sum(Y * log(softmax(logits))). The grad tape
+# lifter supports matmul, softmax (unary, last axis), log, sum,
+# and elementwise arith, so this composes cleanly. Loss is
+# recomputed fresh for each parameter's grad call.
 repeat 300 {
-  logits = matmul(X, W) + matmul(ones([90, 1]), reshape(b, [1, 3]));
-  P = softmax(logits, 1);
-  dZ = P - Y;
-  gW = matmul(transpose(X), dZ) / 90;
-  gb = reduce_add(dZ, 0) / 90;
-  W  = W - lr * gW;
-  b  = b - lr * gb
+  W = W - lr * grad(0 - sum(Y * log(softmax(matmul(X, W) + matmul(O90, b)))) / 90, W);
+  b = b - lr * grad(0 - sum(Y * log(softmax(matmul(X, W) + matmul(O90, b)))) / 90, b)
 }
 
 # ----- evaluation -----
-logits = matmul(X, W) + matmul(ones([90, 1]), reshape(b, [1, 3]))
+logits = matmul(X, W) + matmul(O90, b)
 P      = softmax(logits, 1)
 pred   = argmax(P, 1)
 accuracy = mean(eq(pred, tl))
@@ -41,9 +49,10 @@ confusion_matrix(pred, tl)
 # Evaluate the classifier on a 30x30 grid spanning the data range, then
 # render the class-0 probability as the surface with the original
 # points overlaid (as [x, y, label] via the stored blobs matrix).
-G   = grid([-6, 6, -3, 6], 30)
-gl  = matmul(G, W) + matmul(ones([900, 1]), reshape(b, [1, 3]))
-gP  = softmax(gl, 1)
+G    = grid([-6, 6, -3, 6], 30)
+O900 = ones([900, 1])
+gl   = matmul(G, W) + matmul(O900, b)
+gP   = softmax(gl, 1)
 # Extract class-0 probability via matmul projection.
-p0  = reshape(matmul(gP, [[1],[0],[0]]), [900])
+p0   = reshape(matmul(gP, [[1],[0],[0]]), [900])
 boundary_2d(p0, [30, 30], X, tl)

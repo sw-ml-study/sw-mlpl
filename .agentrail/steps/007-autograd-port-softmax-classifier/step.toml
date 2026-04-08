@@ -1,6 +1,6 @@
 number = 7
 slug = "autograd-port-softmax-classifier"
-status = "pending"
+status = "in-progress"
 description = "Rewrite demos/softmax_classifier.mlpl to use param + grad. Must still reach >..."
 role = "production"
 context_files = []
