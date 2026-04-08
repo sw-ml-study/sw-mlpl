@@ -1,6 +1,6 @@
 number = 1
 slug = "001-optim-crate-scaffold"
-status = "pending"
+status = "in-progress"
 description = "Create the mlpl-optim crate scaffold (or mlpl-runtime::optim module -- pick o..."
 role = "production"
 context_files = []

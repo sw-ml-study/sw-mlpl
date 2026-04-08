@@ -4,11 +4,14 @@ use std::collections::{HashMap, HashSet};
 
 use mlpl_array::DenseArray;
 
+use crate::grad::OptimizerState;
+
 /// Variable bindings for evaluation.
 #[derive(Clone, Debug, Default)]
 pub struct Environment {
     vars: HashMap<String, DenseArray>,
     params: HashSet<String>,
+    pub(crate) optim_state: OptimizerState,
 }
 
 impl Environment {

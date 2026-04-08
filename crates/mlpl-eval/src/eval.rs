@@ -76,6 +76,26 @@ pub(crate) fn eval_expr(
         }
         return Ok(Value::Array(result));
     }
+    if let Expr::FnCall { name, args, span } = expr
+        && (name == "momentum_sgd" || name == "adam")
+    {
+        let result = if name == "momentum_sgd" {
+            crate::grad::eval_momentum_sgd(args, env)?
+        } else {
+            crate::grad::eval_adam(args, env)?
+        };
+        if let Some(t) = trace.as_mut() {
+            let seq = t.events().len() as u64;
+            t.push(TraceEvent {
+                seq,
+                op: name.clone(),
+                span: *span,
+                inputs: vec![],
+                output: TraceValue::from_array(&result),
+            });
+        }
+        return Ok(Value::Array(result));
+    }
     if let Expr::FnCall { name, args, .. } = expr
         && let Some(result) = eval_analysis_helper(name, args, env, trace)
     {
