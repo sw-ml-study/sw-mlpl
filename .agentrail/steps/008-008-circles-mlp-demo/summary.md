@@ -1,0 +1,1 @@
+New demos/circles_mlp.mlpl: 2->16->2 tanh MLP trained with adam() inside train { } on circles() dataset, boundary_2d on [-1.5,1.5]^2 grid. Verified runs cleanly via mlpl-repl -f.
