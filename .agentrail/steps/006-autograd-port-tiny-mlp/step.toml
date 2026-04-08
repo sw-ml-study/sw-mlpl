@@ -1,6 +1,6 @@
 number = 6
 slug = "autograd-port-tiny-mlp"
-status = "pending"
+status = "in-progress"
 description = "Rewrite demos/tiny_mlp.mlpl to use param + grad instead of hand-written backp..."
 role = "production"
 context_files = []
