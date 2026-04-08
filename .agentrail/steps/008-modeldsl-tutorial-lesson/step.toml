@@ -1,0 +1,8 @@
+number = 8
+slug = "modeldsl-tutorial-lesson"
+status = "pending"
+description = "Phase 6: Add a 'Model Composition' tutorial lesson to apps/mlpl-web/src/tutor..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T15:51:22"
+task_type = "production"

@@ -1,0 +1,1 @@
+Released v0.6.0-optim. Marked Saga 10 COMPLETE in docs/saga.md, updated docs/status.md and docs/plan.md to point next at Saga 11 Model DSL, wrote docs/milestone-optim.md retrospective, bumped REPL banners (mlpl-repl, mlpl-web components/help) from v0.5 to v0.6, rebuilt pages/, tagged v0.6.0-optim and pushed.
