@@ -1,7 +1,8 @@
 //! AST-walking evaluator.
 
-use mlpl_array::DenseArray;
-use mlpl_parser::Expr;
+use mlpl_array::{DenseArray, Shape};
+use mlpl_autograd::{Tape, Tensor};
+use mlpl_parser::{Expr, TensorCtorKind};
 use mlpl_trace::{Trace, TraceEvent, TraceValue};
 
 use crate::env::Environment;
@@ -88,6 +89,7 @@ pub(crate) fn eval_expr(
         }
         Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
         Expr::FnCall { name, args, .. } => eval_fncall(name, args, env, trace)?,
+        Expr::TensorCtor { kind, shape, .. } => eval_tensor_ctor(*kind, shape, env, trace)?,
         Expr::Repeat { count, body, .. } => eval_repeat(count, body, env, trace)?,
     };
     if let Some(t) = trace.as_mut() {
@@ -101,6 +103,41 @@ pub(crate) fn eval_expr(
         });
     }
     Ok(Value::Array(result))
+}
+
+fn eval_tensor_ctor(
+    kind: TensorCtorKind,
+    shape: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
+    let mut dims = Vec::with_capacity(shape.len());
+    for dim_expr in shape {
+        let arr = eval_expr(dim_expr, env, trace)?.into_array()?;
+        if arr.rank() != 0 {
+            return Err(EvalError::InvalidShapeDim);
+        }
+        let v = arr.data()[0];
+        if v < 0.0 || v.fract() != 0.0 {
+            return Err(EvalError::InvalidShapeDim);
+        }
+        dims.push(v as usize);
+    }
+    let zeros = DenseArray::zeros(Shape::new(dims));
+    // Construct an autograd Tensor on a fresh tape. Step 005 will
+    // route this through a tape stored in the environment so that
+    // operations on the resulting array are recorded; for now we
+    // simply return the underlying zero-initialized array.
+    let tape = Tape::new();
+    let _tensor = match kind {
+        TensorCtorKind::Param => Tensor::param(tape, zeros.clone()),
+        TensorCtorKind::Tensor => Tensor::leaf(tape, zeros.clone(), false),
+    };
+    let op_name = match kind {
+        TensorCtorKind::Param => "param_ctor",
+        TensorCtorKind::Tensor => "tensor_ctor",
+    };
+    Ok((op_name, vec![], zeros))
 }
 
 fn eval_repeat(

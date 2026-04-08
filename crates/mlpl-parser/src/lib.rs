@@ -7,7 +7,7 @@ mod lexer;
 mod parser;
 mod token;
 
-pub use ast::{BinOpKind, Expr};
+pub use ast::{BinOpKind, Expr, TensorCtorKind};
 pub use error::ParseError;
 pub use lexer::lex;
 pub use parser::parse;

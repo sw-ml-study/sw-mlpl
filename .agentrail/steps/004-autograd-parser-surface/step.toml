@@ -1,6 +1,6 @@
 number = 4
 slug = "autograd-parser-surface"
-status = "pending"
+status = "in-progress"
 description = "Add parser support for param[shape] and tensor[shape] constructors. RED: pars..."
 role = "production"
 context_files = []

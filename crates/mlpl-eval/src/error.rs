@@ -13,6 +13,8 @@ pub enum EvalError {
     ArrayError(mlpl_array::ArrayError),
     /// Repeat count must be a scalar.
     InvalidRepeatCount,
+    /// Tensor constructor shape dimension must be a non-negative scalar integer.
+    InvalidShapeDim,
     /// Error from built-in function dispatch.
     RuntimeError(mlpl_runtime::RuntimeError),
     /// Expected an array value but got a string.
@@ -38,6 +40,9 @@ impl std::fmt::Display for EvalError {
             Self::EmptyInput => write!(f, "empty input"),
             Self::UndefinedVariable(name) => write!(f, "undefined variable: {name}"),
             Self::InvalidRepeatCount => write!(f, "repeat count must be a scalar integer"),
+            Self::InvalidShapeDim => {
+                write!(f, "shape dimension must be a non-negative scalar integer")
+            }
             Self::Unsupported(msg) => write!(f, "unsupported: {msg}"),
             Self::ArrayError(e) => write!(f, "array error: {e}"),
             Self::RuntimeError(e) => write!(f, "{e}"),

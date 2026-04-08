@@ -686,6 +686,7 @@ name = "mlpl-eval"
 version = "0.1.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-autograd",
  "mlpl-core",
  "mlpl-parser",
  "mlpl-runtime",

@@ -2,7 +2,7 @@
 
 use mlpl_core::Span;
 
-use crate::ast::{BinOpKind, Expr};
+use crate::ast::{BinOpKind, Expr, TensorCtorKind};
 use crate::error::ParseError;
 use crate::token::{Token, TokenKind};
 
@@ -118,6 +118,17 @@ impl<'a> Parser<'a> {
                 let name = name.clone();
                 let start = tok.span;
                 self.pos += 1;
+                // Tensor constructor: `param[...]` or `tensor[...]`
+                if self.is(TokenKind::LBracket) {
+                    let ctor_kind = match name.as_str() {
+                        "param" => Some(TensorCtorKind::Param),
+                        "tensor" => Some(TensorCtorKind::Tensor),
+                        _ => None,
+                    };
+                    if let Some(kind) = ctor_kind {
+                        return self.parse_tensor_ctor(kind, start);
+                    }
+                }
                 // Function call: ident '('
                 if self.is(TokenKind::LParen) {
                     self.pos += 1; // skip '('
@@ -165,6 +176,32 @@ impl<'a> Parser<'a> {
                 span: tok.span,
             }),
         }
+    }
+
+    fn parse_tensor_ctor(&mut self, kind: TensorCtorKind, start: Span) -> Result<Expr, ParseError> {
+        let open_span = self.tokens[self.pos].span;
+        self.pos += 1; // skip '['
+        let mut shape = Vec::new();
+        if !self.is(TokenKind::RBracket) {
+            shape.push(self.parse_expr(0)?);
+            while self.is(TokenKind::Comma) {
+                self.pos += 1;
+                shape.push(self.parse_expr(0)?);
+            }
+        }
+        if !self.is(TokenKind::RBracket) {
+            return Err(ParseError::UnclosedDelimiter {
+                open: "[".into(),
+                span: open_span,
+            });
+        }
+        let close_span = self.tokens[self.pos].span;
+        self.pos += 1;
+        Ok(Expr::TensorCtor {
+            kind,
+            shape,
+            span: Span::new(start.start, close_span.end),
+        })
     }
 
     fn parse_array_lit(&mut self) -> Result<Expr, ParseError> {
