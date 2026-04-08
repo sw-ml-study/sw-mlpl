@@ -1,0 +1,8 @@
+number = 5
+slug = "autograd-grad-builtin"
+status = "pending"
+description = "Add the grad(expr, wrt) built-in. wrt may be a single param or a list of para..."
+role = "production"
+context_files = []
+created_at = "2026-04-07T17:36:07"
+task_type = "production"

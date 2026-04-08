@@ -1,0 +1,1 @@
+Add autograd for sum, mean, softmax, transpose, reshape, and matmul. TDD + gradcheck against finite differences. Verify chain-rule composition through a small two-layer linear -> relu -> sum pipeline. Commit via /mw-cp.

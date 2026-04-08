@@ -1,0 +1,1 @@
+Add a tutorial lesson 'Automatic differentiation' to the web REPL tutorial system. Walk from a scalar grad example through a one-layer linear regression trained with grad + SGD. Update the tutorial index. Rebuild pages/ via scripts/build-pages.sh. Commit via /mw-cp.

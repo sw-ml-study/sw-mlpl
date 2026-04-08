@@ -658,6 +658,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-autograd"
+version = "0.1.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+]
+
+[[package]]
 name = "mlpl-cli"
 version = "0.1.0"
 dependencies = [

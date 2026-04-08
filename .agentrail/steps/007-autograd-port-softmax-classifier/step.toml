@@ -1,0 +1,8 @@
+number = 7
+slug = "autograd-port-softmax-classifier"
+status = "pending"
+description = "Rewrite demos/softmax_classifier.mlpl to use param + grad. Must still reach >..."
+role = "production"
+context_files = []
+created_at = "2026-04-07T17:36:07"
+task_type = "production"

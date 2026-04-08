@@ -1,0 +1,8 @@
+number = 1
+slug = "autograd-crate-scaffold"
+status = "in-progress"
+description = "Create the mlpl-autograd crate skeleton. TDD. Add crate to workspace. Define ..."
+role = "production"
+context_files = []
+created_at = "2026-04-07T17:36:07"
+task_type = "production"

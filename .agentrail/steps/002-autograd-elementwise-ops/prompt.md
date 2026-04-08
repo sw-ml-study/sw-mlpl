@@ -1,0 +1,1 @@
+Add reverse-mode autograd for elementwise ops: add, sub, mul, div, neg, exp, log, relu, tanh, sigmoid. TDD with finite-difference gradcheck for each op (tolerance 1e-4). Broadcasting: scalar op tensor must flow gradients correctly. Commit via /mw-cp.
