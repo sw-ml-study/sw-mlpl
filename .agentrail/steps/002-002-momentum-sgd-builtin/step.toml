@@ -1,0 +1,8 @@
+number = 2
+slug = "002-momentum-sgd-builtin"
+status = "pending"
+description = "Add the momentum_sgd(params, lr, beta) built-in. params is a list of param id..."
+role = "production"
+context_files = []
+created_at = "2026-04-08T13:32:06"
+task_type = "production"

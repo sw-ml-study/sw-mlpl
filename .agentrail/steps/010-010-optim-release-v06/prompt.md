@@ -1,0 +1,1 @@
+Release v0.6.0-optim. Update docs/saga.md (Saga 10 COMPLETE), docs/status.md, docs/plan.md, create docs/milestone-optim.md. Bump REPL banners from v0.5 to v0.6. Rebuild and deploy pages/. Run full quality gates. Tag v0.6.0-optim and push the tag. Commit via /mw-cp.

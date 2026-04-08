@@ -1,0 +1,1 @@
+New demos/moons_mlp.mlpl: 2-layer tanh MLP trained with adam() on moons(). Render the decision boundary via boundary_2d. Add an integration test asserting >95% accuracy in <500 steps. Commit via /mw-cp.

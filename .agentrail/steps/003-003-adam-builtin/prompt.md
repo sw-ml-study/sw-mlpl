@@ -1,0 +1,1 @@
+Add the adam(params, lr, b1, b2, eps) built-in. Per-param first and second moment buffers in OptimizerState. Standard Adam update with bias correction. RED: tests that Adam converges faster than plain SGD on a poorly-conditioned quadratic, and that bias-corrected updates match a reference computation at step 1. Commit via /mw-cp.

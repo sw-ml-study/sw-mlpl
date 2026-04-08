@@ -1,19 +1,18 @@
-# MLPL Autograd v1 Saga (v0.5)
+# MLPL Optimizers + Training Loop Saga (v0.6)
 
 ## Goal
 
-Make differentiation a language primitive. Land a reverse-mode
-autograd engine on the existing `DenseArray` substrate, expose
-`tensor[...]`, `param[...]`, and `grad` at the language level,
-and port the v0.4 demos that currently hand-write their
-gradients onto the new engine. No new backends, no optimizers
-beyond SGD, no model DSL -- those are later sagas.
+Build proper training infrastructure on top of v0.5 autograd:
+real optimizers (momentum-SGD, Adam) with state, learning-rate
+schedules, a structured `train` loop construct, and richer
+non-linear synthetic datasets (moons, circles). No model DSL,
+no backend changes -- those are later sagas.
 
 ## Quality requirements (every step)
 
 1. TDD: failing tests first, then implementation, then refactor.
 2. Quality gates must all pass before commit:
-   - `cargo test` (all tests)
+   - `cargo test`
    - `cargo clippy --all-targets --all-features -- -D warnings`
    - `cargo fmt --all` + `cargo fmt --all -- --check`
    - `markdown-checker -f "**/*.md"` if docs touched
@@ -24,56 +23,54 @@ beyond SGD, no model DSL -- those are later sagas.
 
 ## What already exists
 
-- `mlpl-array` DenseArray, shape, reductions, matmul
-- `mlpl-runtime` built-ins (softmax, argmax, blobs, random, ...)
-- `mlpl-eval` tree-walking evaluator
-- `mlpl-parser` with current surface syntax
-- v0.4 demos: `tiny_mlp.mlpl`, `softmax_classifier.mlpl`, ...
-  (both hand-rolling gradient formulas)
+- `mlpl-autograd` reverse-mode tape with gradcheck-verified ops
+- `param[shape]` / `tensor[shape]` constructors
+- `grad(expr, wrt)` built-in
+- v0.5 demos: tiny_mlp.mlpl, softmax_classifier.mlpl using grad
+- `blobs`, `randn`, `one_hot`, manual SGD recipe `W <- W - lr * grad`
 
 ## Phases
 
-### Phase 1: Autograd core (Rust)
-- New crate `mlpl-autograd` with a reverse-mode tape.
-- `Tensor` wrapper holding `{ value: DenseArray, grad: RefCell<Option<DenseArray>>, node: NodeId }`.
-- Graph nodes for: add, sub, mul, div, neg, matmul, sum,
-  mean, exp, log, relu, tanh, sigmoid, softmax, transpose,
-  broadcast, reshape.
-- `backward(root)` walks the tape in reverse topo order and
-  accumulates gradients into leaf tensors marked `requires_grad`.
-- Tests: gradcheck against finite differences for every op.
+### Phase 1: Optimizer state machinery
+- New `mlpl-optim` crate (or module under `mlpl-runtime`).
+- Optimizer state stored in the `Environment`, keyed by param name.
+- `momentum_sgd(params, lr, beta)` and `adam(params, lr, b1, b2, eps)`
+  built-ins that maintain per-param state across calls.
+- Tests: state persists, momentum/Adam updates match reference math.
 
-### Phase 2: Language surface
-- Parser support for `param[shape]` and `tensor[shape]`
-  constructors (trainable vs. non-trainable leaves).
-- New built-in `grad(expr, wrt)` where `wrt` is a parameter or
-  list of parameters; returns array(s) matching their shape.
-- Evaluator wires array-valued operations through the autograd
-  tape when any input is a tracked tensor.
-- Tests: end-to-end `grad` calls on scalar and vector losses.
+### Phase 2: Schedules
+- `cosine_schedule(step, total, lr_min, lr_max)` built-in.
+- `linear_warmup(step, warmup, lr)` built-in.
+- Tests: schedule values at boundary points.
 
-### Phase 3: Demo ports
-- Rewrite `demos/tiny_mlp.mlpl` to use `param` + `grad` instead
-  of hand-written backprop. Must still pass the existing
-  "MLP beats linear on XOR" integration test.
-- Rewrite `demos/softmax_classifier.mlpl` the same way. Must
-  still reach > 95% accuracy on separable blobs.
-- Keep SGD manual for now (`W <- W - lr * grad`).
+### Phase 3: Synthetic datasets
+- `moons(seed, n, noise)` and `circles(seed, n, noise)` built-ins
+  returning `[N, 3]` matrices `[x, y, label]` like `blobs`.
+- Tests: shape, label balance, deterministic given seed.
 
-### Phase 4: Tutorial, docs, release
-- Add tutorial lesson "Automatic differentiation" walking from
-  a scalar example to the MLP port.
-- Update `docs/milestone-ml.md` (or new `milestone-autograd.md`),
-  `docs/saga.md`, `docs/status.md`, `docs/plan.md`.
-- Bump REPL banner to v0.5.
+### Phase 4: Training-loop sugar
+- A `train { ... } for N steps` (or similar) statement that
+  implicitly threads optimizer state and step counter.
+- Captured loss vector available afterward via `last_losses`.
+- Tests: end-to-end Adam-trained MLP on moons reaches >95% acc.
+
+### Phase 5: Demos, tutorial, release
+- New `demos/moons_mlp.mlpl`: 2-layer MLP trained with Adam on
+  moons dataset, decision boundary rendered.
+- New `demos/circles_mlp.mlpl`: same with circles.
+- Tutorial lesson "Optimizers and schedules".
+- Update `docs/saga.md`, `docs/status.md`, `docs/plan.md`,
+  create `docs/milestone-optim.md`.
+- Bump REPL banners to v0.6.
 - Rebuild and deploy `pages/`.
-- Tag `v0.5.0-autograd`.
+- Tag `v0.6.0-optim`.
 
 ## Success criteria
 
-- `mlpl-autograd` crate exists with gradcheck-verified ops.
-- `grad` built-in works in the REPL for scalar and vector losses.
-- Tiny MLP and softmax classifier demos pass their existing
-  accuracy tests with zero hand-written gradient math.
-- Tutorial lesson on autograd renders in the web REPL.
+- `momentum_sgd` and `adam` built-ins work on any `param[...]`.
+- Adam-trained MLP on moons reaches >95% accuracy in <500 steps.
+- `moons` and `circles` datasets ship with deterministic seeds.
+- Training-loop sugar replaces the manual `repeat { grad; step }`
+  pattern in at least one demo.
+- Tutorial lesson on optimizers renders in the web REPL.
 - All quality gates green, pages deployed, release tagged.

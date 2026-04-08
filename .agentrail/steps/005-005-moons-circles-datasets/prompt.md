@@ -1,0 +1,1 @@
+Add moons(seed, n, noise) and circles(seed, n, noise) built-ins returning [N, 3] matrices [x, y, label] consistent with how blobs() is used in existing demos. RED: shape, label balance, determinism-given-seed tests. GREEN: minimal impl. Commit via /mw-cp.

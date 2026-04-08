@@ -1,0 +1,1 @@
+Add a tutorial lesson 'Optimizers and schedules' to the web REPL tutorial system. Walk from manual SGD through momentum_sgd to adam, plus a cosine_schedule example. Rebuild pages via scripts/build-pages.sh. Commit via /mw-cp.

@@ -1,0 +1,1 @@
+New demos/circles_mlp.mlpl: 2-layer tanh MLP trained with adam() on circles(). Render the decision boundary. Add an integration test asserting >95% accuracy in <500 steps. Commit via /mw-cp.
