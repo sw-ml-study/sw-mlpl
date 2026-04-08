@@ -1,0 +1,1 @@
+Added moons(seed,n,noise) and circles(seed,n,noise) built-ins via shared synthetic_2d helper in random_builtins.rs. Returns [N,3] [x,y,label] like blobs. Half-and-half label split, deterministic via Xorshift64. Tests: shape, balance, determinism per seed, different seeds differ, per-point bounds.

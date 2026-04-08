@@ -93,6 +93,19 @@ pub enum Expr {
         /// Span covering keyword through closing brace.
         span: Span,
     },
+    /// Training loop: `train <count> { body }`. On each iteration the
+    /// loop binds the iteration index to `step`, runs the body, and
+    /// captures the value of the body's final statement as the
+    /// per-step loss. After the loop, all captured losses are stored
+    /// in the environment as a 1-D array under the name `last_losses`.
+    Train {
+        /// Number of training steps.
+        count: Box<Expr>,
+        /// Body statements; the value of the last one is the loss.
+        body: Vec<Expr>,
+        /// Span covering keyword through closing brace.
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -110,7 +123,8 @@ impl Expr {
             | Self::FnCall { span: s, .. }
             | Self::Assign { span: s, .. }
             | Self::TensorCtor { span: s, .. }
-            | Self::Repeat { span: s, .. } => *s,
+            | Self::Repeat { span: s, .. }
+            | Self::Train { span: s, .. } => *s,
         }
     }
 }

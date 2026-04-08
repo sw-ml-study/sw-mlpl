@@ -41,6 +41,8 @@ pub enum TokenKind {
     RBrace,
     /// `repeat` keyword.
     Repeat,
+    /// `train` keyword.
+    Train,
     /// Newline (statement separator).
     Newline,
     /// End of input.

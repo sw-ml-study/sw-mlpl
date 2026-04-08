@@ -148,6 +148,10 @@ impl<'a> Lexer<'a> {
                 self.prev_was_value = false;
                 TokenKind::Repeat
             }
+            "train" => {
+                self.prev_was_value = false;
+                TokenKind::Train
+            }
             _ => {
                 self.prev_was_value = true;
                 TokenKind::Ident(name)
