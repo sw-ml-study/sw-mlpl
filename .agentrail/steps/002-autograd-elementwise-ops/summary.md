@@ -1,0 +1,1 @@
+Added reverse-mode backward for elementwise ops (add/sub/mul/div/neg/exp/log/relu/tanh/sigmoid). Tape stores value+grad per node; ops push unary/binary nodes; backward walks descending NodeId. Scalar-broadcast grads un-broadcast to scalars via sum. 13 gradcheck tests + composition + broadcast cases all pass.

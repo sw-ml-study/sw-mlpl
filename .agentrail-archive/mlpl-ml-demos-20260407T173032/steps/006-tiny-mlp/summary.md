@@ -1,0 +1,1 @@
+Tiny MLP demo (2-8-2 with tanh+softmax) on XOR-style blobs beats linear baseline; loss curve via iota/eq mask; web entry, tutorial lesson, test, pages rebuilt

@@ -5,10 +5,11 @@
 
 pub mod backward;
 pub mod ops;
+mod reduction_ops;
 mod tape;
 mod tensor;
 mod tensor_ops;
 
-pub use ops::{BinaryOp, UnaryOp};
+pub use ops::{BinaryOp, UnaryOp, softmax_backward, softmax_forward};
 pub use tape::{NodeData, NodeId, NodeKind, Tape};
 pub use tensor::Tensor;

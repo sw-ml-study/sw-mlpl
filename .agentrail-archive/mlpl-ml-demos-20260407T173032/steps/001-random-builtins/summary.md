@@ -1,0 +1,1 @@
+Added seeded random/randn built-ins with xorshift64 PRNG and Box-Muller, full tests, docs updated
