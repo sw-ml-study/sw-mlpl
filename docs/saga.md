@@ -36,6 +36,25 @@ high-level analysis helpers (hist, scatter_labeled, loss_curve,
 confusion_matrix, boundary_2d), browser REPL inline SVG rendering,
 and download button. Delivered v0.3.
 
+## Saga 10: Optimizers + training loop (COMPLETE)
+Built proper training infrastructure on top of Saga 9 autograd.
+New built-ins: `momentum_sgd(loss, params, lr, beta)` and
+`adam(loss, params, lr, b1, b2, eps)` with per-parameter state
+held in an `OptimizerState` map on the evaluation environment;
+`cosine_schedule(step, total, lr_min, lr_max)` and
+`linear_warmup(step, warmup, lr)` pure scalar schedules; and
+two non-linear synthetic datasets `moons(seed, n, noise)` and
+`circles(seed, n, noise)` returning `[N, 3]` `[x, y, label]`
+matrices in the same layout as `blobs`. New `train N { body }`
+language construct binds the iteration index to `step` inside
+the body and captures each iteration's final value into a
+`last_losses` 1-D array, replacing the manual
+`repeat { grad; manual update; record loss }` recipe. Two new
+demos -- `demos/moons_mlp.mlpl` and `demos/circles_mlp.mlpl` --
+train a tanh MLP with `adam` inside `train { }` and render the
+decision boundary with `boundary_2d`. New "Optimizers and
+Schedules" tutorial lesson added to the web REPL. Delivered v0.6.
+
 ## Saga 9: Autograd v1 (COMPLETE)
 Reverse-mode autograd as a language primitive. New `mlpl-autograd`
 crate provides a tape-based `Tensor` with backward over add, sub,

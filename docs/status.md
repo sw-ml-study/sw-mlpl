@@ -21,13 +21,13 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 7 | SVG visualization v1 (`mlpl-viz`, inline SVG in REPL) | v0.3 | [x] |
 | 8 | ML demos (k-means, PCA, softmax, tiny MLP, attention) | v0.4 | [x] |
 | 9 | Autograd v1 (reverse-mode tape, `grad` built-in) | v0.5 | [x] |
+| 10 | Optimizers + training loop (Adam, schedules, moons/circles, `train { }`) | v0.6 | [x] |
 
 ## Planned
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 10 | Optimizers + training loop (Adam, schedules, moons/circles) | v0.6 | [ ] NEXT | 9 |
-| 11 | Model DSL (`chain`, `residual`, `attention`, `norm`) | v0.7 | [ ] | 10 |
+| 11 | Model DSL (`chain`, `residual`, `attention`, `norm`) | v0.7 | [ ] NEXT | 10 |
 | 12 | Tokenizers, datasets, experiment tracking | v0.8 | [ ] | 11 |
 | 13 | Tiny language model end-to-end (CPU) | v0.9 | [ ] | 12 |
 | 14 | MLX backend (Apple Silicon, lazy graph, fusion) | v0.10 | [ ] | 13 |
@@ -39,7 +39,8 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 ## Next saga to start
 
-**Saga 10 -- Optimizers + training loop.** With autograd shipped
-in v0.5, the next saga adds Adam and learning-rate schedules on
-top of `grad`, plus a structured training loop that drives the
-moons/circles datasets called out in the v0.4 "what's next" list.
+**Saga 11 -- Model DSL.** With Saga 10 (Adam, schedules,
+`train { }`, moons/circles) shipped in v0.6, the next saga adds
+composition primitives (`chain`, `residual`, `attention`, `norm`)
+so models can be expressed as data instead of long matmul
+expressions.
