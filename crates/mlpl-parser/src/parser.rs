@@ -31,7 +31,10 @@ impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
     fn parse_statement(&mut self) -> Result<Expr, ParseError> {
         if self.tokens[self.pos].kind == TokenKind::Repeat {
-            return self.parse_repeat();
+            return self.parse_repeat(false);
+        }
+        if self.tokens[self.pos].kind == TokenKind::Train {
+            return self.parse_repeat(true);
         }
         if matches!(self.tokens[self.pos].kind, TokenKind::Ident(_))
             && self
@@ -229,9 +232,9 @@ impl<'a> Parser<'a> {
         ))
     }
 
-    fn parse_repeat(&mut self) -> Result<Expr, ParseError> {
+    fn parse_repeat(&mut self, is_train: bool) -> Result<Expr, ParseError> {
         let start = self.tokens[self.pos].span;
-        self.pos += 1; // skip 'repeat'
+        self.pos += 1; // skip 'repeat' or 'train'
         let count = self.parse_expr(0)?;
         if !self.is(TokenKind::LBrace) {
             return Err(ParseError::UnexpectedToken {
@@ -241,10 +244,12 @@ impl<'a> Parser<'a> {
         }
         let body = self.parse_brace_body()?;
         let end = self.tokens[self.pos - 1].span;
-        Ok(Expr::Repeat {
-            count: Box::new(count),
-            body,
-            span: Span::new(start.start, end.end),
+        let span = Span::new(start.start, end.end);
+        let count = Box::new(count);
+        Ok(if is_train {
+            Expr::Train { count, body, span }
+        } else {
+            Expr::Repeat { count, body, span }
         })
     }
 
@@ -309,5 +314,6 @@ fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::Star => "'*'".into(),
         TokenKind::Slash => "'/'".into(),
         TokenKind::Repeat => "'repeat'".into(),
+        TokenKind::Train => "'train'".into(),
     }
 }

@@ -137,6 +137,7 @@ pub(crate) fn eval_expr(
         Expr::FnCall { name, args, .. } => eval_fncall(name, args, env, trace)?,
         Expr::TensorCtor { kind, shape, .. } => eval_tensor_ctor(*kind, shape, env, trace)?,
         Expr::Repeat { count, body, .. } => eval_repeat(count, body, env, trace)?,
+        Expr::Train { count, body, .. } => eval_train(count, body, env, trace)?,
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;
@@ -204,4 +205,41 @@ fn eval_repeat(
         }
     }
     Ok(("repeat", vec![], r))
+}
+
+fn eval_train(
+    count: &Expr,
+    body: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
+    let n_arr = eval_expr(count, env, trace)?.into_array()?;
+    if n_arr.rank() != 0 {
+        return Err(EvalError::InvalidRepeatCount);
+    }
+    let n = n_arr.data()[0] as usize;
+    let mut losses: Vec<f64> = Vec::with_capacity(n);
+    let mut last = DenseArray::from_scalar(0.0);
+    for i in 0..n {
+        env.set("step".into(), DenseArray::from_scalar(i as f64));
+        let mut step_val = DenseArray::from_scalar(0.0);
+        for stmt in body {
+            step_val = eval_expr(stmt, env, trace)?.into_array()?;
+        }
+        // Capture the body's final value as the per-step loss; if it
+        // is non-scalar (e.g. a vector), reduce by mean for the loss
+        // curve so callers can still rely on a scalar history.
+        let scalar_loss = if step_val.rank() == 0 {
+            step_val.data()[0]
+        } else {
+            let s: f64 = step_val.data().iter().sum();
+            s / (step_val.data().len().max(1) as f64)
+        };
+        losses.push(scalar_loss);
+        last = step_val;
+    }
+    let losses_arr = DenseArray::new(mlpl_array::Shape::new(vec![losses.len()]), losses)
+        .expect("losses shape matches data");
+    env.set("last_losses".into(), losses_arr);
+    Ok(("train", vec![], last))
 }
