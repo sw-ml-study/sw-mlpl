@@ -1,0 +1,1 @@
+Added reverse-mode autograd for sum/mean/softmax/transpose/reshape/matmul with finite-difference gradcheck and a two-layer linear->relu->matmul->sum chain-rule test. Restructured crate modules to satisfy sw-checklist budgets.
