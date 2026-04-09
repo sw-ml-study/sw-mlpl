@@ -92,14 +92,11 @@
 (defun mlpl-menu--find-badge-file ()
   "Find the MLPL badge image file."
   (or mlpl-badge-file
-      (let ((repo-root
-             (locate-dominating-file
-              (or load-file-name
-                  (buffer-file-name (get-buffer " *load*"))
-                  default-directory)
-              "Cargo.toml")))
-        (when repo-root
-          (let ((badge (expand-file-name "docs/mlpl-badge.png" repo-root)))
+      (let ((exe (executable-find "mlpl-repl")))
+        (when exe
+          (let* ((bin-dir (file-name-directory exe))
+                 (share-dir (expand-file-name "../share/mlpl" bin-dir))
+                 (badge (expand-file-name "mlpl-badge.png" share-dir)))
             (and (file-exists-p badge) badge))))))
 
 (defun mlpl-menu--insert-logo ()
@@ -225,12 +222,13 @@
   (mlpl-menu--redraw))
 
 (defun mlpl-menu--find-demos-dir ()
-  "Find the demos directory relative to this file."
-  (let ((repo-root (locate-dominating-file
-                    (or load-file-name buffer-file-name)
-                    "Cargo.toml")))
-    (when repo-root
-      (expand-file-name "demos" repo-root))))
+  "Find the demos directory."
+  (or mlpl-demos-dir
+      (let ((exe (executable-find "mlpl-repl")))
+        (when exe
+          (let* ((bin-dir (file-name-directory exe))
+                 (share-dir (expand-file-name "../share/mlpl/demos" bin-dir)))
+            (and (file-directory-p share-dir) share-dir))))))
 
 (defun mlpl-menu--demo-items ()
   "Build the list of demo items."

@@ -52,20 +52,25 @@
   :type 'integer
   :group 'mlpl)
 
-(defcustom mlpl-repl-command "env RUSTFLAGS=\"-A warnings\" cargo run -p mlpl-repl --quiet --"
-  "Command to start the MLPL REPL."
+(defcustom mlpl-repl-command "mlpl-repl"
+  "Command to start the MLPL REPL.  Must be on $PATH."
+  :type 'string
+  :group 'mlpl)
+
+(defcustom mlpl-lab-command "mlpl-lab"
+  "Command to start the MLPL lab app.  Must be on $PATH."
+  :type 'string
+  :group 'mlpl)
+
+(defcustom mlpl-web-command "mlpl-web"
+  "Command to start the MLPL web app.  Must be on $PATH."
   :type 'string
   :group 'mlpl)
 
 (defcustom mlpl-repl-args '()
   "Extra arguments passed to the MLPL REPL command."
   :type '(repeat string)
-  :group 'mlpl)
-
-(defcustom mlpl-demos-dir nil
-  "Path to the MLPL demos directory.  Auto-detected from file location if nil."
-  :type '(choice (const :tag "Auto-detect" nil) directory)
-  :group 'mlpl)
+   :group 'mlpl)
 
 (defvar mlpl--keywords
   '("repeat" "train")
@@ -645,9 +650,16 @@ With prefix ARG, kill existing REPL first."
   :group 'mlpl)
 
 (defcustom mlpl-badge-file nil
-  "Path to the MLPL badge image file.  Auto-detected from repo if nil."
+  "Path to the MLPL badge image file (e.g. mlpl-badge.png).
+Auto-detected from installed location if nil."
   :type '(choice (const :tag "Auto-detect" nil) file)
   :group 'mlpl-menu)
+
+(defcustom mlpl-demos-dir nil
+  "Path to the MLPL demos directory.
+Auto-detected from installed location if nil."
+  :type '(choice (const :tag "Auto-detect" nil) directory)
+  :group 'mlpl)
 
 (defvar mlpl-menu--color-bg "#1e1e2e")
 (defvar mlpl-menu--color-surface "#313244")
@@ -803,14 +815,11 @@ With prefix ARG, kill existing REPL first."
 (defun mlpl-menu--find-badge-file ()
   "Find the MLPL badge image file."
   (or mlpl-badge-file
-      (let ((repo-root
-             (locate-dominating-file
-              (or load-file-name
-                  (buffer-file-name (get-buffer " *load*"))
-                  default-directory)
-              "Cargo.toml")))
-        (when repo-root
-          (let ((badge (expand-file-name "docs/mlpl-badge.png" repo-root)))
+      (let ((exe (executable-find "mlpl-repl")))
+        (when exe
+          (let* ((bin-dir (file-name-directory exe))
+                 (share-dir (expand-file-name "../share/mlpl" bin-dir))
+                 (badge (expand-file-name "mlpl-badge.png" share-dir)))
             (and (file-exists-p badge) badge))))))
 
 (defun mlpl-menu--insert-logo ()
@@ -839,14 +848,11 @@ With prefix ARG, kill existing REPL first."
 (defun mlpl-menu--find-demos-dir ()
   "Find the demos directory."
   (or mlpl-demos-dir
-      (let ((repo-root
-             (locate-dominating-file
-              (or load-file-name
-                  (buffer-file-name (get-buffer " *load*"))
-                  default-directory)
-              "Cargo.toml")))
-        (when repo-root
-          (expand-file-name "demos" repo-root)))))
+      (let ((exe (executable-find "mlpl-repl")))
+        (when exe
+          (let* ((bin-dir (file-name-directory exe))
+                 (share-dir (expand-file-name "../share/mlpl/demos" bin-dir)))
+            (and (file-directory-p share-dir) share-dir))))))
 
 (defun mlpl-menu--demo-items ()
   "Build the list of demo items."
@@ -978,6 +984,266 @@ With prefix ARG, kill existing REPL first."
       (add-text-properties start (point) '(face (font-lock-constant-face))))))
 
 ;;; ============================================================
+;;; mlpl-fold -- Fold/expand large outputs
+;;; ============================================================
+
+(require 'cl-lib)
+
+(defgroup mlpl-fold nil
+  "Fold/expand large MLPL array outputs."
+  :group 'mlpl)
+
+(defcustom mlpl-fold-line-threshold 8
+  "Number of output lines before folding is considered."
+  :type 'integer
+  :group 'mlpl-fold)
+
+(defcustom mlpl-fold-char-threshold 200
+  "Number of output chars before folding is considered."
+  :type 'integer
+  :group 'mlpl-fold)
+
+(defcustom mlpl-fold-preview-lines 3
+  "Number of lines to show in a folded block."
+  :type 'integer
+  :group 'mlpl-fold)
+
+(defface mlpl-fold-summary-face
+  '((t :foreground "#268bd2" :weight bold
+       :box (:line-width 1 :color "#586e75")))
+  "Face for the fold summary indicator."
+  :group 'mlpl-fold)
+
+(defun mlpl-fold--parse-numeric-grid (text)
+  "Parse TEXT as a grid of numbers.  Return list of rows or nil."
+  (let* ((lines (split-string text "\n" t))
+         (rows nil)
+         (ok t))
+    (dolist (line lines)
+      (let* ((trimmed (string-trim line))
+             (tokens (split-string trimmed)))
+        (when (string= trimmed "") (setq trimmed nil))
+        (when trimmed
+          (let ((nums nil))
+            (dolist (tok tokens)
+              (let ((n (string-to-number tok)))
+                (if (and (zerop n) (not (string-match-p "^[+-]?0" tok)))
+                    (setq ok nil)
+                  (push n nums))))
+            (when ok (push (nreverse nums) rows))))))
+    (when ok (nreverse rows))))
+
+(defun mlpl-fold--numeric-summary (text)
+  "Return a summary string for numeric TEXT, or nil."
+  (let ((grid (mlpl-fold--parse-numeric-grid text)))
+    (when (and grid (>= (length grid) 2))
+      (let* ((flat (apply #'append grid))
+             (total (length flat))
+             (row-count (length grid))
+             (col-count (length (car grid)))
+             (min-val (apply #'min flat))
+             (max-val (apply #'max flat))
+             (mean (/ (float (apply #'+ flat)) (float total)))
+             (sorted (cl-sort (copy-sequence flat) #'<))
+             (median (if (cl-oddp total)
+                         (nth (/ total 2) sorted)
+                       (/ (+ (nth (1- (/ total 2)) sorted)
+                             (nth (/ total 2) sorted)) 2.0)))
+             (variance (/ (float (apply #'+ (mapcar
+                                            (lambda (x) (expt (- x mean) 2))
+                                            flat)))
+                         (float total)))
+             (std (sqrt variance)))
+        (format "%dx%d (%d values)  min=%.2f  max=%.2f  mean=%.2f  median=%.2f  std=%.2f"
+                row-count col-count total min-val max-val mean median std)))))
+
+(defun mlpl-fold--should-fold-p (output)
+  "Return non-nil if OUTPUT should be folded."
+  (let ((lines (split-string output "\n" t)))
+    (and (> (length lines) mlpl-fold-line-threshold)
+         (> (length output) mlpl-fold-char-threshold))))
+
+(defun mlpl-fold-toggle ()
+  "Toggle fold/expand at point."
+  (interactive)
+  (let ((ov (cl-loop for o in (overlays-at (point))
+                     when (overlay-get o 'mlpl-fold)
+                     return o)))
+    (if ov
+        (let ((hidden (overlay-get ov 'mlpl-fold-hidden))
+              (start (overlay-start ov))
+              (end (overlay-end ov)))
+          (delete-overlay ov)
+          (when hidden
+            (let ((inhibit-read-only t))
+              (goto-char end)
+              (insert hidden)
+              (delete-region start end))))
+      (let ((next (cl-loop for o in (overlays-in (point) (point-max))
+                           when (overlay-get o 'mlpl-fold)
+                           return o)))
+        (when next
+          (let ((hidden (overlay-get next 'mlpl-fold-hidden))
+                (start (overlay-start next))
+                (end (overlay-end next)))
+            (delete-overlay next)
+            (when hidden
+              (let ((inhibit-read-only t))
+                (goto-char end)
+                (insert hidden)
+                (delete-region start end)))))))))
+
+(defun mlpl-fold--insert (output &optional buffer)
+  "Insert OUTPUT into BUFFER, folding large numeric outputs."
+  (let ((buf (or buffer (current-buffer))))
+    (with-current-buffer buf
+      (if (mlpl-fold--should-fold-p output)
+          (let* ((lines (split-string output "\n" t))
+                 (preview (string-join (cl-subseq lines 0 mlpl-fold-preview-lines) "\n"))
+                 (rest (string-join (nthcdr mlpl-fold-preview-lines lines) "\n"))
+                 (stats (mlpl-fold--numeric-summary output))
+                 (tail-count (length (nthcdr mlpl-fold-preview-lines lines)))
+                 (summary-text (format "\n... %d more line(s)%s\n"
+                                       tail-count
+                                       (if stats (concat "  [" stats "]") "")))
+                 (start (point)))
+            (insert preview)
+            (insert summary-text)
+            (let ((summary-end (point)))
+              (let ((ov (make-overlay start summary-end)))
+                (overlay-put ov 'mlpl-fold t)
+                (overlay-put ov 'mlpl-fold-hidden (concat rest "\n"))
+                (overlay-put ov 'mouse-face 'highlight)
+                (overlay-put ov 'help-echo "RET or click to expand")
+                (let ((map (make-sparse-keymap)))
+                  (define-key map [mouse-1] (lambda (&rest _)
+                                              (interactive)
+                                              (mlpl-fold-toggle)))
+                  (define-key map (kbd "RET") (lambda (&rest _)
+                                               (interactive)
+                                               (mlpl-fold-toggle)))
+                  (overlay-put ov 'keymap map))
+                (add-text-properties start summary-end
+                                     '(face mlpl-fold-summary-face
+                                       rear-nonsticky t))))
+            preview)
+        (insert output)
+        output))))
+
+(defun mlpl-fold-region (start end)
+  "Fold the region between START and END if it is large output."
+  (interactive "r")
+  (let* ((text (buffer-substring-no-properties start end)))
+    (when (mlpl-fold--should-fold-p text)
+      (let ((inhibit-read-only t))
+        (delete-region start end)
+        (mlpl-fold--insert text)))))
+
+;;; ============================================================
+;;; ob-mlpl -- Org-babel support
+;;; ============================================================
+
+(require 'ob)
+
+(defcustom org-babel-mlpl-command "mlpl-repl"
+  "Command used to evaluate MLPL code blocks."
+  :type 'string
+  :group 'mlpl)
+
+(defvar org-babel-default-header-args:mlpl
+  '((:results . "output replace"))
+  "Default header arguments for MLPL source blocks.")
+
+(defun org-babel-expand-body:mlpl (body params)
+  "Expand BODY according to MLPL source block PARAMS."
+  body)
+
+(defun org-babel-execute:mlpl (body params)
+  "Execute a block of MLPL code."
+  (let* ((full-body (org-babel-expand-body:mlpl body params))
+         (result-params (cdr (assq :result-params params)))
+         (tmp-file (make-temp-file "mlpl-ob-" nil ".mlpl"))
+         (out-file (make-temp-file "mlpl-ob-out-" nil ".txt"))
+         (svg-dir (make-temp-file "mlpl-ob-svg-" nil ".dir"))
+         exit-code output)
+    (make-directory svg-dir t)
+    (write-region full-body nil tmp-file nil 'silent)
+    (setq exit-code
+          (call-process org-babel-mlpl-command nil (list :file out-file) nil
+                        "-f" tmp-file "--svg-out" svg-dir))
+    (setq output (with-temp-buffer
+                   (insert-file-contents out-file)
+                   (buffer-string)))
+    (delete-file tmp-file)
+    (delete-file out-file)
+    (delete-directory svg-dir t)
+    (cond
+     ((not (zerop exit-code))
+      (org-babel-error-exit exit-code output))
+     ((string-match-p "<svg" output)
+      output)
+     (t
+      (org-babel-result-cond result-params
+        output
+        (let ((clean (string-trim output)))
+          (org-babel-reassemble-table
+           (org-babel-mlpl--maybe-fold clean params)
+           (org-babel-mlpl--table-or-string clean)
+           (org-babel-mlpl--table-or-string clean))))))))
+
+(defun org-babel-mlpl--table-or-string (results)
+  "Convert RESULTS to an org table if multi-line numeric data."
+  (if (string-match-p "\n" results)
+      (let* ((lines (split-string results "\n" t))
+             (all-numeric
+              (cl-every
+               (lambda (line)
+                 (cl-every
+                  (lambda (tok)
+                    (or (string-match-p "^[+-]?[0-9]" tok)
+                        (string= tok "")))
+                  (split-string line)))
+               lines)))
+        (if all-numeric
+            (mapconcat (lambda (line)
+                        (concat "| " (replace-regexp-in-string
+                                    " +" " | " (string-trim line)) " |"))
+                      lines "\n")
+          results))
+    results))
+
+(defun org-babel-mlpl--maybe-fold (output params)
+  "Fold OUTPUT if it exceeds thresholds."
+  (if (mlpl-fold--should-fold-p output)
+      (let* ((lines (split-string output "\n" t))
+             (preview-lines (min mlpl-fold-preview-lines mlpl-fold-line-threshold))
+             (preview (string-join (cl-subseq lines 0 preview-lines) "\n"))
+             (tail-count (- (length lines) preview-lines))
+             (stats (mlpl-fold--numeric-summary output)))
+        (concat preview
+                "\n"
+                (format "  ... %d more line%s%s\n"
+                        tail-count
+                        (if (= tail-count 1) "" "s")
+                        (if stats (concat "  [" stats "]") ""))))
+    output))
+
+(defun org-babel-mlpl-var-to-mlpl (var)
+  "Convert an elisp VAR to an MLPL value string."
+  (cond
+   ((numberp var) (format "%s" var))
+   ((stringp var) (format "\"%s\"" (replace-regexp-in-string "\"" "\\\\\"" var)))
+   ((null var) "0")
+   (t (format "\"%s\"" var))))
+
+(defun org-babel-variable-assignments:mlpl (params)
+  "Return list of MLPL variable assignments from PARAMS."
+  (mapcar
+   (lambda (pair)
+     (format "%s = %s" (car pair) (org-babel-mlpl-var-to-mlpl (cdr pair))))
+   (org-babel--get-vars params)))
+
+;;; ============================================================
 ;;; Bootstrap complete
 ;;; ============================================================
 
@@ -991,4 +1257,6 @@ With prefix ARG, kill existing REPL first."
 (provide 'mlpl-repl)
 (provide 'mlpl-svg)
 (provide 'mlpl-menu)
+(provide 'mlpl-fold)
+(provide 'ob-mlpl)
 ;;; mlpl-bootstrap.el ends here
