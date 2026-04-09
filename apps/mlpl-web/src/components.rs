@@ -106,6 +106,10 @@ pub fn tutorial_panel(props: &TutorialPanelProps) -> Html {
     html! {
         <div class="tutorial-panel">
             <div class="tutorial-header">
+                <div class="tutorial-nav">
+                    <button class="ctrl-btn" disabled={is_first} onclick={props.on_prev.clone()} aria-label="Previous lesson" title="Previous lesson">{"←"}</button>
+                    <button class="ctrl-btn" disabled={is_last} onclick={props.on_next.clone()} aria-label="Next lesson" title="Next lesson">{"→"}</button>
+                </div>
                 <span class="tutorial-progress">{ format!("Lesson {} of {}", props.lesson_idx + 1, total) }</span>
                 <h2>{ lesson.title }</h2>
                 <button class="close-btn" onclick={props.on_close.clone()} aria-label="Exit tutorial">{"×"}</button>
@@ -113,10 +117,6 @@ pub fn tutorial_panel(props: &TutorialPanelProps) -> Html {
             <p class="tutorial-intro">{ lesson.intro }</p>
             <div class="lesson-examples">{ for examples_html }</div>
             <p class="tutorial-tryit"><strong>{"Try it: "}</strong>{ lesson.try_it }</p>
-            <div class="tutorial-nav">
-                <button class="ctrl-btn" disabled={is_first} onclick={props.on_prev.clone()}>{"← Previous"}</button>
-                <button class="ctrl-btn" disabled={is_last} onclick={props.on_next.clone()}>{"Next →"}</button>
-            </div>
         </div>
     }
 }
