@@ -102,6 +102,26 @@ git push
 Then the push-triggered Pages workflow deploys the new `pages/`.
 Verify with `gh run list --workflow=pages.yml --limit 1`.
 
+## NEVER run sw-install without an explicit request
+
+The user keeps a stable installed `mlpl-repl` (and other mlpl
+binaries) under `~/.local/softwarewrighter/bin/` for use OUTSIDE
+this dev session. Reinstalling between feature commits would
+overwrite that stable binary with an in-progress build and break
+the user's other work.
+
+- Do NOT run `sw-install` after a feature commit, a release
+  commit, or a quality-gate green-light.
+- Do NOT run `sw-install` as part of `/mw-cp` or any "ship it"
+  flow.
+- Only run `sw-install` when the user explicitly asks for it
+  ("install the binaries", "sw-install", "update my installed
+  mlpl", etc.).
+- `cargo build --release` is fine on its own -- it stays inside
+  `target/release/` and does not touch the installed binaries.
+
+If you are unsure whether the user wants an install, ASK first.
+
 ## Key Rules
 
 - **Do NOT skip steps** -- the next session depends on accurate tracking
