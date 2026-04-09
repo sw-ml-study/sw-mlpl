@@ -3,6 +3,7 @@ mod demos;
 mod handlers;
 mod help;
 mod state;
+mod summary;
 mod tutorial;
 
 use components::{
@@ -150,13 +151,26 @@ fn render_entry(entry: &HistoryEntry) -> Html {
                 <a class="svg-download" href={href} download="mlpl.svg" title="Download SVG" aria-label="Download SVG">{"⬇"}</a>
             </div>
         }
+    } else if entry.is_error {
+        html! { <pre class={"output-line error"}>{ &entry.output }</pre> }
+    } else if let Some(s) = summary::summarize(&entry.output) {
+        let summary_text = format!(
+            "{}  min={}  max={}  mean={}  median={}  std={}",
+            s.shape,
+            summary::fmt_stat(s.min),
+            summary::fmt_stat(s.max),
+            summary::fmt_stat(s.mean),
+            summary::fmt_stat(s.median),
+            summary::fmt_stat(s.std),
+        );
+        html! {
+            <details class="output-summary">
+                <summary>{ summary_text }</summary>
+                <pre class={"output-line"}>{ &entry.output }</pre>
+            </details>
+        }
     } else {
-        let class = if entry.is_error {
-            "output-line error"
-        } else {
-            "output-line"
-        };
-        html! { <pre class={class}>{ &entry.output }</pre> }
+        html! { <pre class={"output-line"}>{ &entry.output }</pre> }
     };
     html! {
         <div class="entry">
