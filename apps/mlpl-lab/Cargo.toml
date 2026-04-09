@@ -3,3 +3,7 @@ name = "mlpl-lab"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
+
+[build-dependencies]
+hostname = "0.4"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }

@@ -8,3 +8,7 @@ version.workspace = true
 mlpl-parser = { path = "../../crates/mlpl-parser" }
 mlpl-eval = { path = "../../crates/mlpl-eval" }
 mlpl-trace = { path = "../../crates/mlpl-trace" }
+
+[build-dependencies]
+hostname = "0.4"
+chrono = { version = "0.4", default-features = false, features = ["clock"] }
