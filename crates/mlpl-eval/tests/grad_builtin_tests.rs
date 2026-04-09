@@ -109,6 +109,88 @@ fn grad_through_apply_chain_linear_tanh_linear() {
 }
 
 #[test]
+fn grad_through_apply_residual_wraps_linear() {
+    // residual(linear(...)) forward pass is x + (XW + 1@b). The
+    // gradient wrt the wrapped W equals the gradient of (XW + 1@b - Y)^2
+    // alone in the non-residual case when Y is shifted by x, so the
+    // cleanest equivalence is: grad(residual-loss, W) == grad of the
+    // same loss with x added into the target. Easier: compare the
+    // residual-wrapped grad against the hand-rolled add form.
+    let mut env = Environment::new();
+    let setup = "\
+        outer = residual(linear(2, 2, 19))\n\
+        X = [[0.7, -0.1], [0.2, 0.6]]\n\
+        Y = [[1.0, 0.0], [0.0, 1.0]]\n\
+        O = ones([2, 1])\n";
+    eval_program(&parse(&lex(setup).unwrap()).unwrap(), &mut env).unwrap();
+
+    let names = model_params(&env, "outer").expect("outer is a model");
+    let w = names[0].clone();
+    let b = names[1].clone();
+
+    let apply_src = format!("grad(mean((apply(outer, X) - Y) * (apply(outer, X) - Y)), {w})");
+    let hand_src = format!(
+        "grad(mean((X + matmul(X, {w}) + matmul(O, {b}) - Y) * \
+         (X + matmul(X, {w}) + matmul(O, {b}) - Y)), {w})"
+    );
+    let g_apply = run(&apply_src, &mut env);
+    let g_hand = run(&hand_src, &mut env);
+    assert_eq!(g_apply.shape(), g_hand.shape());
+    for (a, b) in g_apply.data().iter().zip(g_hand.data().iter()) {
+        assert!((a - b).abs() < 1e-10, "grad mismatch: {a} vs {b}");
+    }
+    assert!(g_apply.data().iter().any(|v| v.abs() > 1e-6));
+}
+
+#[test]
+fn grad_through_apply_rms_norm_produces_nonzero_grad() {
+    // chain(linear, rms_norm, linear) must emit rms_norm on the tape
+    // so that gradients flow back through the normalization to the
+    // upstream linear's parameters. Numerical equivalence to a
+    // hand-rolled form is out of scope here; this test just checks
+    // that the gradient has the right shape and is non-trivial.
+    let mut env = Environment::new();
+    let setup = "\
+        mdl = chain(linear(3, 4, 31), rms_norm(4), linear(4, 2, 32))\n\
+        X = [[1.0, -0.5, 0.25], [0.2, 0.3, -0.7], [0.4, 0.9, 0.1]]\n\
+        Y = [[1.0, 0.0], [0.0, 1.0], [1.0, 0.0]]\n";
+    eval_program(&parse(&lex(setup).unwrap()).unwrap(), &mut env).unwrap();
+
+    let names = model_params(&env, "mdl").expect("mdl is a model");
+    // rms_norm has no params, so the chain's params are W1,b1,W2,b2
+    assert_eq!(names.len(), 4);
+    let w1 = names[0].clone();
+    let src = format!("grad(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)), {w1})");
+    let g = run(&src, &mut env);
+    assert_eq!(g.shape().dims(), &[3, 4]);
+    assert!(g.data().iter().any(|v| v.abs() > 1e-6));
+}
+
+#[test]
+fn grad_through_apply_single_head_attention_produces_nonzero_grad() {
+    // Single-head attention lowers to matmul/transpose/softmax/mul on
+    // the tape. Gradient wrt Wq must propagate through the softmax
+    // and non-trivially change. Multi-head (heads > 1) tape lowering
+    // is deferred: it requires slicing that the autograd tape does
+    // not yet support.
+    let mut env = Environment::new();
+    let setup = "\
+        attn = attention(4, 1, 41)\n\
+        X = [[1.0, 0.0, 0.5, -0.2], [0.2, 0.8, -0.1, 0.3], [-0.3, 0.4, 0.9, 0.1]]\n\
+        Y = [[0.0, 0.1, 0.2, 0.3], [0.1, 0.2, 0.3, 0.0], [0.2, 0.3, 0.0, 0.1]]\n";
+    eval_program(&parse(&lex(setup).unwrap()).unwrap(), &mut env).unwrap();
+
+    let names = model_params(&env, "attn").expect("attn is a model");
+    // attention has Wq, Wk, Wv, Wo
+    assert_eq!(names.len(), 4);
+    let wq = names[0].clone();
+    let src = format!("grad(mean((apply(attn, X) - Y) * (apply(attn, X) - Y)), {wq})");
+    let g = run(&src, &mut env);
+    assert_eq!(g.shape().dims(), &[4, 4]);
+    assert!(g.data().iter().any(|v| v.abs() > 1e-6));
+}
+
+#[test]
 fn grad_param_from_ctor_is_tracked() {
     // Params introduced via `w = param[3]` should be tracked even
     // without calling set_param explicitly.

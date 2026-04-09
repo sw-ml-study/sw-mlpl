@@ -7,6 +7,7 @@ mod eval_ops;
 mod grad;
 mod model;
 mod model_dispatch;
+mod model_tape;
 mod value;
 
 pub use env::{Environment, model_params};
