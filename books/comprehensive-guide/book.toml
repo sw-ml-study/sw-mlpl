@@ -1,0 +1,14 @@
+[book]
+authors = ["Michael A. Wright"]
+language = "en"
+src = "src"
+title = "MLPL - The Comprehensive Guide"
+
+[output.html]
+git-repository-url = "https://github.com/sw-ml-study/sw-mlpl"
+
+[output.epub]
+enabled = true
+
+[output.pdf]
+enabled = true
