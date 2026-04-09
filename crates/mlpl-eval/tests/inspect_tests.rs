@@ -61,11 +61,31 @@ fn describe_builtin_prints_signature() {
 }
 
 #[test]
-fn fns_lists_model_dsl_entries() {
+fn builtins_lists_model_dsl_entries() {
     let env = Environment::new();
-    let out = inspect(&env, ":fns").unwrap();
+    let out = inspect(&env, ":builtins").unwrap();
     assert!(out.contains("Model DSL"), "out was: {out}");
     assert!(out.contains("chain(a, b, ...)"), "out was: {out}");
+}
+
+#[test]
+fn fns_reports_no_user_functions_yet() {
+    let env = Environment::new();
+    let out = inspect(&env, ":fns").unwrap();
+    assert!(out.contains("no user-defined functions"), "out was: {out}");
+    assert!(out.contains(":builtins"), "out was: {out}");
+}
+
+#[test]
+fn help_topic_aliases_dispatch_to_inspectors() {
+    let mut env = Environment::new();
+    eval("x = [1, 2, 3]", &mut env);
+    let vars = inspect(&env, ":help vars").unwrap();
+    assert!(vars.contains("x: [3]"), "out was: {vars}");
+    let builtins = inspect(&env, ":help builtins").unwrap();
+    assert!(builtins.contains("Model DSL"), "out was: {builtins}");
+    let fns = inspect(&env, ":help fns").unwrap();
+    assert!(fns.contains("no user-defined functions"), "out was: {fns}");
 }
 
 #[test]

@@ -24,9 +24,15 @@ pub fn inspect(env: &Environment, input: &str) -> Option<String> {
     let head = parts.next()?;
     let arg = parts.next();
     match head {
-        ":vars" => Some(format_vars(env)),
+        ":vars" | ":variables" => Some(format_vars(env)),
         ":models" => Some(format_models(env)),
-        ":fns" => Some(format_fns()),
+        ":fns" | ":functions" => Some(
+            "(no user-defined functions)\n\
+             user functions are not yet a language feature; for the \
+             built-in surface, use :builtins"
+                .into(),
+        ),
+        ":builtins" | ":built-ins" => Some(format_builtins()),
         ":wsid" => Some(format!(
             "workspace:\n  variables:       {}\n  parameters:      {}\n  \
              models:          {}\n  optimizer slots: {}",
@@ -39,6 +45,39 @@ pub fn inspect(env: &Environment, input: &str) -> Option<String> {
             Some(name) => format_describe(env, name),
             None => "usage: :describe <name>".into(),
         }),
+        ":help" => arg.and_then(|topic| help_topic(topic, env)),
+        _ => None,
+    }
+}
+
+/// Resolve `:help <topic>` to a corresponding inspector output.
+/// `:help` with no topic is handled by the REPL itself (it prints
+/// the long-form cheatsheet); only `:help <topic>` lands here.
+fn help_topic(topic: &str, env: &Environment) -> Option<String> {
+    match topic {
+        "vars" | "variables" => Some(format_vars(env)),
+        "models" => Some(format_models(env)),
+        "fns" | "functions" => Some(
+            "(no user-defined functions)\n\
+             user functions are not yet a language feature; for the \
+             built-in surface, use :builtins"
+                .into(),
+        ),
+        "builtins" | "built-ins" => Some(format_builtins()),
+        "wsid" | "workspace" => Some(format!(
+            "workspace:\n  variables:       {}\n  parameters:      {}\n  \
+             models:          {}\n  optimizer slots: {}",
+            env.vars.len(),
+            env.params.len(),
+            env.models.len(),
+            env.optim_state.buffers.len()
+        )),
+        "describe" => Some(
+            ":describe <name>\n  print the shape and a values preview \
+             for a variable, the layer tree for a model, or the signature \
+             and one-line doc for a built-in"
+                .into(),
+        ),
         _ => None,
     }
 }
@@ -283,7 +322,7 @@ const BUILTIN_GROUPS: &[FnGroup] = &[
     ),
 ];
 
-fn format_fns() -> String {
+fn format_builtins() -> String {
     let mut out = String::new();
     for (group, fns) in BUILTIN_GROUPS {
         out.push_str(group);
