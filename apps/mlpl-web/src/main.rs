@@ -1,3 +1,12 @@
+// On a native (non-wasm) target the entire Yew/wasm-bindgen frontend
+// is dead code -- only the stub `main` below runs. Suppress the
+// resulting dead_code / unused-import warnings so `cargo build` and
+// `cargo clippy -D warnings` stay clean for both targets.
+#![cfg_attr(
+    not(target_arch = "wasm32"),
+    allow(dead_code, unused_imports, unused_variables)
+)]
+
 mod components;
 mod demos;
 mod handlers;
@@ -195,6 +204,32 @@ fn scroll_and_focus() {
     }
 }
 
+// mlpl-web is a Yew/WASM bundle served via `trunk serve` (or built
+// into ./pages/ via scripts/build-pages.sh). It is *not* a native
+// CLI -- linking succeeds for the host target but the resulting
+// binary panics on first call into js-sys because the imported
+// statics only resolve inside a wasm runtime. Provide a friendly
+// stub when invoked as a native binary so users get a clear error
+// instead of a stack trace, and skip mlpl-web from sw-install via
+// `sw-install -p . --bin mlpl-repl --bin mlpl-lab`.
+
+#[cfg(target_arch = "wasm32")]
 fn main() {
     yew::Renderer::<App>::new().render();
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+fn main() {
+    eprintln!(
+        "mlpl-web is a WASM/Yew bundle, not a native CLI.\n\
+         \n\
+         To run it locally:\n\
+           cd apps/mlpl-web && trunk serve\n\
+         \n\
+         To rebuild the deployed pages/ bundle:\n\
+           ./scripts/build-pages.sh\n\
+         \n\
+         Or visit the live demo: https://sw-ml-study.github.io/sw-mlpl/"
+    );
+    std::process::exit(1);
 }
