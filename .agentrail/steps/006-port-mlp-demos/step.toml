@@ -1,6 +1,6 @@
 number = 6
 slug = "port-mlp-demos"
-status = "pending"
+status = "in-progress"
 description = "Phase 5: Port demos/moons_mlp.mlpl and demos/tiny_mlp.mlpl to the new DSL. Ea..."
 role = "production"
 context_files = []

@@ -5,6 +5,16 @@
 coverage of language features, and an end-to-end smoke test of the
 Saga 11 model DSL.
 
+**Update 2026-04-09 (same day):** the "Blocker found during tutorial
+drafting" section below has been *partially* resolved as part of
+Saga 11 step `006-port-mlp-demos`. The grad tape now lowers
+`apply(model_ident, X)` for `linear`, `chain`, and activation layers,
+so `adam(loss_with_apply, mdl, ...)` trains end-to-end for MLP-shaped
+models; `demos/moons_mlp.mlpl` and `demos/tiny_mlp.mlpl` have been
+ported to the DSL and verified. Tape lowering for `residual`,
+`rms_norm`, and `attention` is still TODO and remains a prerequisite
+for step `007-transformer-block-demo`.
+
 This document is not normative. It captures what is missing from
 the user-facing surfaces after Sagas 8-11 landed so the next few
 steps can be planned with eyes open.
