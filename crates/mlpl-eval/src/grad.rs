@@ -126,6 +126,23 @@ fn eval_tensor_fncall(
         let b = eval_tensor_expr(&args[1], env, tape, params)?;
         return Ok(a.matmul(&b));
     }
+    if name == "apply" {
+        arity(2)?;
+        let model_name = match &args[0] {
+            Expr::Ident(n, _) => n.clone(),
+            _ => {
+                return Err(EvalError::Unsupported(
+                    "grad: apply's first argument must be a model identifier".into(),
+                ));
+            }
+        };
+        let model = env
+            .get_model(&model_name)
+            .cloned()
+            .ok_or(EvalError::UndefinedVariable(model_name))?;
+        let x = eval_tensor_expr(&args[1], env, tape, params)?;
+        return crate::model_dispatch::apply_model_tape(&model, x, tape, params);
+    }
     Err(EvalError::Unsupported(format!(
         "grad: function '{name}' not supported inside grad()"
     )))

@@ -1,12 +1,7 @@
-# Tiny 1-hidden-layer MLP on an XOR-style non-linearly separable dataset.
-#
-# This version uses MLPL's autograd: parameters are declared with
-# `param[...]` and gradients are computed with the `grad` built-in.
-# SGD updates stay manual (W <- W - lr * grad).
-#
-# A linear softmax classifier (also autograd-powered) is trained on
-# the same data for comparison: the MLP learns a curved boundary,
-# the linear model cannot.
+# Tiny 2 -> 8 -> 2 MLP on an XOR-style 4-blob dataset, plus a linear
+# softmax baseline for comparison. Both models are built with the
+# Saga 11 model DSL (`linear` + `chain` + `tanh_layer`) and trained
+# with `adam` inside `train { }`.
 
 # ----- data: 4 blobs arranged as XOR, labeled by diagonal -----
 D   = blobs(3, 20, [[-2,-2],[2,2],[-2,2],[2,-2]])
@@ -15,80 +10,32 @@ raw = reshape(matmul(D, [[0],[0],[1]]), [80])
 y   = gt(raw, 1.5)
 Y   = one_hot(y, 2)
 
-# Precomputed broadcast helper: grad() can't call `ones` directly,
-# so we lift it into an environment variable used as a const leaf
-# inside the loss expression.
-O80 = ones([80, 1])
-
-# ----- linear softmax baseline (autograd + MSE-on-one-hot loss) -----
-# Biases have shape [1, C] so they can be broadcast via matmul(O80, b).
-Wl = param[2, 2]
-bl = param[1, 2]
-lr = 0.3
-repeat 300 {
-  Wl = Wl - lr * grad(mean((softmax(matmul(X, Wl) + matmul(O80, bl)) - Y) * (softmax(matmul(X, Wl) + matmul(O80, bl)) - Y)), Wl);
-  bl = bl - lr * grad(mean((softmax(matmul(X, Wl) + matmul(O80, bl)) - Y) * (softmax(matmul(X, Wl) + matmul(O80, bl)) - Y)), bl)
+# ----- linear softmax baseline -----
+lin = linear(2, 2, 21)
+train 300 {
+  adam(mean((apply(lin, X) - Y) * (apply(lin, X) - Y)), lin, 0.05, 0.9, 0.999, 0.00000001);
+  mean((apply(lin, X) - Y) * (apply(lin, X) - Y))
 }
-logits      = matmul(X, Wl) + matmul(O80, bl)
-Pl          = softmax(logits, 1)
-linear_pred = argmax(Pl, 1)
+linear_pred     = argmax(softmax(apply(lin, X), 1), 1)
 linear_accuracy = mean(eq(linear_pred, y))
 linear_accuracy
 confusion_matrix(linear_pred, y)
 
-# ----- tiny MLP: 2 -> 8 -> 2 with tanh + softmax -----
-# Declare trainable parameters, then reseed with random values. The
-# reassignment keeps the `param` mark so `grad` still tracks them.
-W1 = param[2, 8]
-b1 = param[1, 8]
-W2 = param[8, 2]
-b2 = param[1, 2]
-W1 = randn(5, [2, 8]) * 0.5
-W2 = randn(6, [8, 2]) * 0.5
-lr = 0.2
-
-# Training loop with loss-curve capture: 20 outer steps of 30 updates
-# each. `counter` indexes into a length-20 losses vector via an
-# iota/eq mask (MLPL has no array indexing, so we broadcast instead).
-# Each grad() call re-evaluates the MSE loss on the current parameters.
-counter = 0
-losses  = zeros([20])
-repeat 20 {
-  repeat 30 {
-    W1 = W1 - lr * grad(mean((softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y) * (softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y)), W1);
-    b1 = b1 - lr * grad(mean((softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y) * (softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y)), b1);
-    W2 = W2 - lr * grad(mean((softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y) * (softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y)), W2);
-    b2 = b2 - lr * grad(mean((softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y) * (softmax(matmul(tanh(matmul(X, W1) + matmul(O80, b1)), W2) + matmul(O80, b2)) - Y)), b2)
-  };
-  Z1 = matmul(X, W1) + matmul(O80, b1);
-  H  = tanh_fn(Z1);
-  Z2 = matmul(H, W2) + matmul(O80, b2);
-  P  = softmax(Z2, 1);
-  loss = 0 - mean(reduce_add(Y * log(P + 0.0001), 1));
-  mask = eq(iota(20), counter);
-  losses = losses + loss * mask;
-  counter = counter + 1
+# ----- tiny MLP: one-line chain definition -----
+mdl = chain(linear(2, 8, 22), tanh_layer(), linear(8, 2, 23))
+train 400 {
+  adam(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)), mdl, 0.05, 0.9, 0.999, 0.00000001);
+  mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y))
 }
-
-# ----- evaluation -----
-Z1 = matmul(X, W1) + matmul(O80, b1)
-H  = tanh_fn(Z1)
-Z2 = matmul(H, W2) + matmul(O80, b2)
-P  = softmax(Z2, 1)
-mlp_pred = argmax(P, 1)
+mlp_pred     = argmax(softmax(apply(mdl, X), 1), 1)
 mlp_accuracy = mean(eq(mlp_pred, y))
 mlp_accuracy
 
-loss_curve(losses)
+loss_curve(last_losses)
 confusion_matrix(mlp_pred, y)
 
 # ----- MLP decision surface on a 30x30 grid -----
-G   = grid([-4, 4, -4, 4], 30)
-O900 = ones([900, 1])
-GZ1 = matmul(G, W1) + matmul(O900, b1)
-GH  = tanh_fn(GZ1)
-GZ2 = matmul(GH, W2) + matmul(O900, b2)
-GP  = softmax(GZ2, 1)
-# Class-1 probability as the surface.
-p1  = reshape(matmul(GP, [[0],[1]]), [900])
+G  = grid([-4, 4, -4, 4], 30)
+GP = softmax(apply(mdl, G), 1)
+p1 = reshape(matmul(GP, [[0],[1]]), [900])
 boundary_2d(p1, [30, 30], X, y)
