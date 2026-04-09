@@ -199,6 +199,51 @@ fn rms_norm_produces_unit_rms_per_row() {
 }
 
 #[test]
+fn attention_registers_four_params_and_preserves_shape() {
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("A = attention(4, 1, 5)").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let names = model_params(&env, "A").unwrap();
+    assert_eq!(names.len(), 4, "Wq Wk Wv Wo");
+    for n in &names {
+        assert_eq!(env.get(n).unwrap().shape().dims(), &[4, 4]);
+        assert!(env.is_param(n));
+    }
+
+    env.set(
+        "X".into(),
+        arr(
+            vec![3, 4],
+            vec![1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0],
+        ),
+    );
+    let out = eval_program(&parse(&lex("apply(A, X)").unwrap()).unwrap(), &mut env).unwrap();
+    assert_eq!(out.shape().dims(), &[3, 4]);
+}
+
+#[test]
+fn attention_multi_head_runs_and_preserves_shape() {
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("A = attention(4, 2, 6)").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    env.set(
+        "X".into(),
+        arr(vec![2, 4], vec![1.0, 0.5, -0.5, 0.0, -1.0, 0.25, 0.75, 1.0]),
+    );
+    let out = eval_program(&parse(&lex("apply(A, X)").unwrap()).unwrap(), &mut env).unwrap();
+    assert_eq!(out.shape().dims(), &[2, 4]);
+    // Output should not be all zeros for a randomly-initialized layer.
+    let nonzero = out.data().iter().any(|v| v.abs() > 1e-9);
+    assert!(nonzero, "expected attention output to be non-trivial");
+}
+
+#[test]
 fn linear_with_same_seed_produces_same_initial_weights() {
     let mut env_a = Environment::new();
     let mut env_b = Environment::new();

@@ -88,6 +88,56 @@ pub(crate) fn eval_residual(args: &[Expr], env: &mut Environment) -> Result<Mode
     }
 }
 
+/// `attention(d_model, heads, seed)` -- multi-head self-attention.
+/// Allocates four `[d_model, d_model]` weight params and registers
+/// them as trainable in the env. Names are namespaced by the env's
+/// `next_model_id` so multiple attention layers do not collide.
+pub(crate) fn eval_attention(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+    if args.len() != 3 {
+        return Err(EvalError::BadArity {
+            func: "attention".into(),
+            expected: 3,
+            got: args.len(),
+        });
+    }
+    let d_model = scalar_usize(&args[0], env, "attention")?;
+    let heads = scalar_usize(&args[1], env, "attention")?;
+    let seed = scalar_f64(&args[2], env, "attention")?;
+    if heads == 0 || d_model % heads != 0 {
+        return Err(EvalError::Unsupported(format!(
+            "attention: d_model ({d_model}) must be divisible by heads ({heads})"
+        )));
+    }
+    let id = env.next_model_id;
+    env.next_model_id += 1;
+    let wq = format!("__attn_Wq_{id}");
+    let wk = format!("__attn_Wk_{id}");
+    let wv = format!("__attn_Wv_{id}");
+    let wo = format!("__attn_Wo_{id}");
+    // Use a small offset on the seed so the four projections do not
+    // start out identical.
+    for (i, name) in [&wq, &wk, &wv, &wo].iter().enumerate() {
+        let init = mlpl_runtime::call_builtin(
+            "randn",
+            vec![
+                DenseArray::from_scalar(seed + i as f64),
+                DenseArray::new(Shape::new(vec![2]), vec![d_model as f64, d_model as f64])?,
+            ],
+        )?;
+        let scaled: Vec<f64> = init.data().iter().map(|v| v * 0.5).collect();
+        let arr = DenseArray::new(Shape::new(vec![d_model, d_model]), scaled)?;
+        env.set_param((*name).clone(), arr);
+    }
+    Ok(ModelSpec::Attention {
+        wq,
+        wk,
+        wv,
+        wo,
+        d_model,
+        heads,
+    })
+}
+
 /// `rms_norm(dim)` -- parameter-free per-row RMS normalization.
 pub(crate) fn eval_rms_norm(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
     if args.len() != 1 {
@@ -187,7 +237,94 @@ fn apply_model(
             Ok(x.apply_binop(&inner_out, |a, b| a + b)?)
         }
         ModelSpec::RmsNorm { .. } => apply_rms_norm(x),
+        ModelSpec::Attention {
+            wq,
+            wk,
+            wv,
+            wo,
+            d_model,
+            heads,
+        } => apply_attention(x, wq, wk, wv, wo, *d_model, *heads, env),
     }
+}
+
+#[allow(clippy::too_many_arguments)]
+fn apply_attention(
+    x: &DenseArray,
+    wq: &str,
+    wk: &str,
+    wv: &str,
+    wo: &str,
+    d_model: usize,
+    heads: usize,
+    env: &Environment,
+) -> Result<DenseArray, EvalError> {
+    let dims = x.shape().dims();
+    if dims.len() != 2 || dims[1] != d_model {
+        return Err(EvalError::Unsupported(format!(
+            "attention: input must be [seq, {d_model}], got {:?}",
+            dims
+        )));
+    }
+    let seq = dims[0];
+    let d_k = d_model / heads;
+
+    let wq_a = env
+        .get(wq)
+        .ok_or_else(|| EvalError::UndefinedVariable(wq.into()))?;
+    let wk_a = env
+        .get(wk)
+        .ok_or_else(|| EvalError::UndefinedVariable(wk.into()))?;
+    let wv_a = env
+        .get(wv)
+        .ok_or_else(|| EvalError::UndefinedVariable(wv.into()))?;
+    let wo_a = env
+        .get(wo)
+        .ok_or_else(|| EvalError::UndefinedVariable(wo.into()))?;
+
+    let q = x.matmul(wq_a)?;
+    let k = x.matmul(wk_a)?;
+    let v = x.matmul(wv_a)?;
+
+    let scale = 1.0 / (d_k as f64).sqrt();
+    // Per-head attention. Concatenate per-head outputs back into a
+    // [seq, d_model] matrix in the same column layout as the input.
+    let mut concat = vec![0.0_f64; seq * d_model];
+    for h in 0..heads {
+        let q_h = slice_cols(&q, h * d_k, d_k)?;
+        let k_h = slice_cols(&k, h * d_k, d_k)?;
+        let v_h = slice_cols(&v, h * d_k, d_k)?;
+        let scores = q_h.matmul(&k_h.transpose())?;
+        let scaled: Vec<f64> = scores.data().iter().map(|s| s * scale).collect();
+        let scores_scaled = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
+        let attn = mlpl_runtime::call_builtin(
+            "softmax",
+            vec![scores_scaled, DenseArray::from_scalar(1.0)],
+        )?;
+        let head_out = attn.matmul(&v_h)?; // [seq, d_k]
+        for r in 0..seq {
+            for c in 0..d_k {
+                concat[r * d_model + h * d_k + c] = head_out.data()[r * d_k + c];
+            }
+        }
+    }
+    let concat = DenseArray::new(Shape::new(vec![seq, d_model]), concat)?;
+    Ok(concat.matmul(wo_a)?)
+}
+
+/// Extract `width` consecutive columns starting at `start` from a
+/// rank-2 matrix.
+fn slice_cols(x: &DenseArray, start: usize, width: usize) -> Result<DenseArray, EvalError> {
+    let dims = x.shape().dims();
+    let rows = dims[0];
+    let cols = dims[1];
+    let mut out = Vec::with_capacity(rows * width);
+    for r in 0..rows {
+        for c in 0..width {
+            out.push(x.data()[r * cols + start + c]);
+        }
+    }
+    Ok(DenseArray::new(Shape::new(vec![rows, width]), out)?)
 }
 
 /// Per-row RMS normalization: `y[i, :] = x[i, :] / sqrt(mean(x[i, :]^2) + eps)`.

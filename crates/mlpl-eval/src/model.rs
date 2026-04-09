@@ -50,6 +50,25 @@ pub enum ModelSpec {
         /// Expected last-dim size (informational).
         dim: usize,
     },
+    /// `attention(d_model, heads, seed)` -- multi-head self-attention.
+    /// Four `[d_model, d_model]` projection weights (`Wq`, `Wk`,
+    /// `Wv`, `Wo`) and no biases. Apply runs the standard
+    /// scaled-dot-product attention split into `heads` per-head
+    /// chunks of size `d_model / heads`.
+    Attention {
+        /// Query projection parameter name.
+        wq: String,
+        /// Key projection parameter name.
+        wk: String,
+        /// Value projection parameter name.
+        wv: String,
+        /// Output projection parameter name.
+        wo: String,
+        /// Model dimension (must be divisible by `heads`).
+        d_model: usize,
+        /// Number of attention heads.
+        heads: usize,
+    },
 }
 
 impl ModelSpec {
@@ -70,6 +89,9 @@ impl ModelSpec {
             Self::Activation(_) => Vec::new(),
             Self::Residual(inner) => inner.params(),
             Self::RmsNorm { .. } => Vec::new(),
+            Self::Attention { wq, wk, wv, wo, .. } => {
+                vec![wq.clone(), wk.clone(), wv.clone(), wo.clone()]
+            }
         }
     }
 }

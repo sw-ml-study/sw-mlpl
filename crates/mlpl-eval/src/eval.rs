@@ -101,6 +101,12 @@ pub(crate) fn eval_expr(
         return Ok(Value::Model(model));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "attention"
+    {
+        let model = crate::model_dispatch::eval_attention(args, env)?;
+        return Ok(Value::Model(model));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && let Some(kind) = crate::model_dispatch::activation_kind(name)
     {
         if !args.is_empty() {

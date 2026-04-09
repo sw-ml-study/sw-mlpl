@@ -1,0 +1,1 @@
+Added ModelSpec::Residual(Box<ModelSpec>) and ModelSpec::RmsNorm{dim}. Recursive params() walks residual's inner block. New built-ins residual(inner) and rms_norm(dim). 2 tests: residual identity at zero-init returns input unchanged; rms_norm produces unit RMS per row.
