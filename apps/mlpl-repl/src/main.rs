@@ -225,9 +225,12 @@ fn print_help() {
     println!();
     println!("Commands:");
     println!("  :help                show this help");
+    println!("  :help <topic>        focused help: vars, models, fns, builtins,");
+    println!("                       describe, wsid");
     println!("  :vars                list bound variables with shape");
     println!("  :models              list bound models with layer structure");
-    println!("  :fns                 list built-in functions by category");
+    println!("  :fns                 list user-defined functions (none yet)");
+    println!("  :builtins            list built-in functions by category");
     println!("  :describe <name>     describe a variable, model, or built-in");
     println!("  :wsid                workspace summary (var/param/model counts)");
     println!("  :clear               reset all variables");
