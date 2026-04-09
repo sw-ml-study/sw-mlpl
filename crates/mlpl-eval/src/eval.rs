@@ -89,6 +89,18 @@ pub(crate) fn eval_expr(
         return Ok(Value::Model(model));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "residual"
+    {
+        let model = crate::model_dispatch::eval_residual(args, env)?;
+        return Ok(Value::Model(model));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "rms_norm"
+    {
+        let model = crate::model_dispatch::eval_rms_norm(args, env)?;
+        return Ok(Value::Model(model));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && let Some(kind) = crate::model_dispatch::activation_kind(name)
     {
         if !args.is_empty() {

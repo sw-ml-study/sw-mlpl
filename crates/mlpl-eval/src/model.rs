@@ -39,6 +39,17 @@ pub enum ModelSpec {
     /// Parameter-free activation layer (`tanh_layer`, `relu_layer`,
     /// `softmax_layer`).
     Activation(ActKind),
+    /// `residual(inner)` -- y = x + inner(x). The inner model's
+    /// output shape must match its input shape.
+    Residual(Box<ModelSpec>),
+    /// `rms_norm(dim)` -- per-row root-mean-square normalization
+    /// (no learnable scale or shift). `dim` records the expected
+    /// last-dim size for documentation only; the implementation
+    /// normalizes whatever rank-2 input it receives.
+    RmsNorm {
+        /// Expected last-dim size (informational).
+        dim: usize,
+    },
 }
 
 impl ModelSpec {
@@ -57,6 +68,8 @@ impl ModelSpec {
                 out
             }
             Self::Activation(_) => Vec::new(),
+            Self::Residual(inner) => inner.params(),
+            Self::RmsNorm { .. } => Vec::new(),
         }
     }
 }

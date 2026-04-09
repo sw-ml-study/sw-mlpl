@@ -1,0 +1,1 @@
+Made momentum_sgd and adam accept a model identifier as their params arg via a shared collect_params helper that walks ModelSpec::params() when env.get_model(name) is Some, otherwise falls back to single-ident or array-literal forms. No new Value variant. 2 tests verify both optimizers drive a model's W and b to ~0 from non-zero starts inside train { }.
