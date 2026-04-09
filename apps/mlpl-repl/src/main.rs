@@ -1,4 +1,5 @@
 mod svg_out;
+mod version;
 
 use std::io::{self, BufRead, Write};
 use std::path::PathBuf;
@@ -9,6 +10,10 @@ use svg_out::SvgOut;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    if args.iter().any(|a| a == "-V" || a == "--version") {
+        version::print();
+        return;
+    }
     let mut env = Environment::new();
     let trace_flag = args.iter().any(|a| a == "--trace");
     let svg_dir = args
@@ -34,7 +39,7 @@ fn main() {
 }
 
 fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
-    println!("MLPL v0.7.0 -- Array Programming Language for ML");
+    println!("{}", version::banner());
     println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();
 
@@ -108,6 +113,7 @@ fn handle_command(
     }
     match input {
         ":help" => print_help(),
+        ":version" => println!("{}", version::banner()),
         ":clear" => {
             *env = Environment::new();
             println!("Environment cleared.");
@@ -191,7 +197,7 @@ fn eval_line(
 }
 
 fn print_help() {
-    println!("MLPL v0.7.0 -- Array Programming Language for ML");
+    println!("{}", version::banner());
     println!();
     println!("Syntax:");
     println!("  42              scalar literal");
@@ -227,6 +233,7 @@ fn print_help() {
     println!("  :help                show this help");
     println!("  :help <topic>        focused help: vars, models, fns, builtins,");
     println!("                       describe, wsid");
+    println!("  :version             show the build banner (version + host + commit + timestamp)");
     println!("  :vars                list bound variables with shape");
     println!("  :models              list bound models with layer structure");
     println!("  :fns                 list user-defined functions (none yet)");
@@ -241,6 +248,7 @@ fn print_help() {
     println!("  exit                 quit");
     println!();
     println!("File mode: cargo run -p mlpl-repl -- -f <script.mlpl>");
+    println!("Version:   mlpl-repl -V    or    mlpl-repl --version");
 }
 
 fn print_trace_summary(trace: &Trace) {
