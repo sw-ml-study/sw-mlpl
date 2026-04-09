@@ -43,8 +43,8 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Small core language (few, composable primitives) | A | HAVE | Intentional design constraint |
 | Canonical formatting of MLPL source | A | CONS | No MLPL-level formatter exists; Rust side uses rustfmt. Needed for LLM roundtripping |
 | REPL with incremental execution | A | HAVE | `mlpl-repl` + web REPL |
-| Named axes on tensors (`x[batch, time, dim]`) | A | CONS | Highest-leverage "agent readability" win per source doc; no plan |
-| Shape-checked / dependent-shape types (`Tensor[B, T, D]`) | A | CONS | Needed to reason about matmul validity without running |
+| Named axes on tensors (`x[batch, time, dim]`) | A | PLAN | Saga 11.5 (`docs/milestone-named-axes.md`) |
+| Shape-checked / dependent-shape types (`Tensor[B, T, D]`) | A | PART | Saga 11.5 tracks labels as metadata with runtime validation, stopping short of full dependent types |
 | Dual syntax: terse APL mode vs explicit agent-friendly mode | A | CONS | Open design question |
 | Code-as-data: `parse`, `transform`, `eval` primitives | A | CONS | Needed for meta-programming, self-modification |
 | Deterministic execution mode (`with deterministic { }`) | A | CONS | Seed control needs a scoped construct |
@@ -120,10 +120,11 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Capability | Source | Status | Notes |
 |------------|--------|--------|-------|
 | Introspectable execution graph (`trace f`) | A | HAVE | `mlpl-trace` JSON export |
-| Structured errors (kind + expected/actual fields) | A | PART | `EvalError` enum is typed in Rust but the REPL renders strings; no JSON error channel |
+| Structured errors (kind + expected/actual fields) | A | PLAN | Saga 11.5 phase 4 introduces a structured `ShapeMismatch` error variant and a JSON error channel |
 | Built-in testing primitives (`assert`, `approx_equal`, `fuzz`) | A | CONS | Rust tests exist, MLPL-level asserts do not |
 | Sandbox execution with time/memory/GPU limits (`run_safe`) | A | CONS | Needed for agent self-correction loops; no plan |
 | Cost / performance introspection (`profile f x`) | A | CONS | Paper #12 also benefits; no plan |
+| `:describe <name>` / `:vars` / `:fns` REPL introspection | A | PLAN | Saga 11.5 phase 5 ports APL-style `)FNS`/`)VARS` conventions to the REPL |
 | `explain f` structured-explanation primitive | A | CONS | Speculative but high-leverage for agent tooling |
 | `repair f given error` primitive | A | CONS | Speculative; depends on structured errors + code-as-data |
 | `optimize f for gpu` primitive | A | CONS | Speculative; depends on device placement + profile |
@@ -173,28 +174,17 @@ row is "what MLPL would need to make this paper a one-screen demo."
 
 ## What this tells us about priorities
 
-Three clusters deserve attention before the "CONS" tail gets any
-bigger:
+Historical note (2026-04-09): the three clusters originally listed
+here were (1) named axes + shape types, (2) structured errors +
+trace-driven self-correction, and (3) differentiable `apply`
+through residual/rms_norm/attention. Cluster 3 was shipped the
+same day as Saga 11 steps 006 and 007. Clusters 1 and 2 were
+folded into a new **Saga 11.5 -- Named axes and shape
+introspection** (`docs/milestone-named-axes.md`), inserted between
+Saga 11 and Saga 12.
 
-1. **Named axes + shape types (Agent-driven, CONS)**. The single
-   biggest lever for agent usability in the source doc. Every paper
-   demo that an LLM tries to write will fail on shape arithmetic
-   without this. Candidate for a *Saga 11.5* between the model DSL
-   and Saga 12, since it is a core-language change and the agent
-   demos in Saga 18/19 depend on it.
-
-2. **Structured errors + trace-driven self-correction (Agent-driven,
-   PART + CONS)**. The `EvalError` enum is already typed in Rust; a
-   JSON error channel and `explain`/`repair` primitives are a small
-   step on top. Would unlock early agent-as-user experiments long
-   before Saga 18 lands the full ICL/ICRL substrate.
-
-3. **Differentiable `apply` through residual / rms_norm / attention
-   (Paper-driven, PART)**. Already called out as a prerequisite for
-   Saga 11 step 007. Not new work to identify, but worth flagging
-   here so the audit matches the saga tracker.
-
-The largest uncovered region is the **agent-as-user** half: device
+With the top three addressed, the remaining uncovered region is
+the rest of the **agent-as-user** half: device
 placement, profiling, sandboxing, deterministic mode, code-as-data,
 testing, notebook mode, canonical formatting. None of these fit
 naturally into Sagas 12-19 as currently scoped. A dedicated
