@@ -57,6 +57,17 @@ combinators. Parameter trees with named addressing. Rebuild the
 tiny MLP and attention demos using the DSL; add a 2-layer
 transformer block demo (still CPU, still tiny).
 
+### Saga 11.5 -- Named axes and shape introspection
+Labeled shape metadata on `Value::Array`, annotation syntax on
+assignment (`x : [batch, time, dim] = ...`), label propagation
+through matmul/elementwise/reductions, structured `ShapeMismatch`
+errors, and agent-facing introspection commands (`:describe`,
+`:vars`, `:models`, `:fns`). Inserted between Saga 11 and Saga 12
+because every later saga (Tiny LM, LoRA, attention variants,
+embedding viz) benefits from labeled axes. Surface-only milestone:
+no new kernels, no new backends, CPU only. See
+`docs/milestone-named-axes.md` for the 10-step plan.
+
 ### Saga 12 -- Tokenizers, datasets, and experiment tracking
 Streaming/lazy dataset ops (`load`, `tokenize`, `shuffle`,
 `batch`), a byte-level BPE tokenizer, and `experiment "name"`
@@ -104,23 +115,30 @@ codegen helpers. Intentionally last: secondary to the
 
 ```
 9 autograd
-  |-- 10 optimizers -- 11 model DSL -- 12 data+tracking -- 13 tiny LM
-  |                                                            |
-  |                                                            +-- 14 MLX
-  |                                                            +-- 15 LoRA
-  |                                                            +-- 16 viz/RAG
-  |                                                            +-- 17 CUDA/dist
-  |                                                            +-- 18 distill/ICRL
-  |                                                            +-- 19 LLM REST
+  |-- 10 optimizers -- 11 model DSL -- 11.5 named axes -- 12 data+tracking -- 13 tiny LM
+  |                                                                                |
+  |                                                                                +-- 14 MLX
+  |                                                                                +-- 15 LoRA
+  |                                                                                +-- 16 viz/RAG
+  |                                                                                +-- 17 CUDA/dist
+  |                                                                                +-- 18 distill/ICRL
+  |                                                                                +-- 19 LLM REST
 ```
 
 Sagas 14-19 can reorder based on hardware access and interest;
-9-13 must run in order.
+9-13 (plus the inserted 11.5) must run in order.
 
-## Start next: Saga 11 -- Model DSL
+## Start next: finish Saga 11, then Saga 11.5 -- Named axes
 
-With Saga 10 (Adam, schedules, `train { }`, moons/circles)
-shipped in v0.6, the next saga introduces composition primitives
-(`chain`, `residual`, `attention`, `norm`) so models can be
-expressed as data instead of long matmul expressions. See
-`docs/milestone-optim.md` for the v0.6 retrospective.
+Saga 11 (Model DSL) is mostly shipped: model values, atomic and
+composed layers, params walker, residual + rms_norm + attention,
+differentiable `apply()` through the tape (Linear/Chain/Activation,
+then also Residual/RmsNorm/single-head Attention as of step 007),
+and ported MLP + transformer-block demos. Remaining Saga 11 work
+is the tutorial lesson (done ahead of schedule on 2026-04-09) and
+the v0.7.0 release.
+
+After Saga 11 ships as v0.7.0, Saga 11.5 adds labeled shapes and
+introspection -- the surface-only milestone surfaced by
+`docs/are-we-driven-yet.md` as the single biggest agent-usability
+gap. See `docs/milestone-named-axes.md` for the 10-step plan.
