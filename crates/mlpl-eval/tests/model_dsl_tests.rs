@@ -90,6 +90,62 @@ fn relu_layer_clamps_negatives() {
 }
 
 #[test]
+fn adam_walks_model_params_and_drives_loss_to_zero() {
+    // chain[linear(2, 2, 1)] -> two params (__linear_W_0, __linear_b_0).
+    // Loss = sum(W*W) + sum(b*b). adam(loss, M, ...) should walk M's
+    // param tree and drive both params toward zero.
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("M = chain(linear(2, 2, 1))").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let names = model_params(&env, "M").unwrap();
+    assert_eq!(names.len(), 2);
+    // Force W to a known non-zero starting point so the test isn't
+    // sensitive to the random init.
+    env.set(names[0].clone(), arr(vec![2, 2], vec![1.0, 1.0, 1.0, 1.0]));
+    env.set(names[1].clone(), arr(vec![1, 2], vec![0.5, -0.5]));
+
+    let src = format!(
+        "train 100 {{ adam(sum({w}*{w}) + sum({b}*{b}), M, 0.05, 0.9, 0.999, 0.00000001) }}",
+        w = names[0],
+        b = names[1],
+    );
+    eval_program(&parse(&lex(&src).unwrap()).unwrap(), &mut env).unwrap();
+    let w = env.get(&names[0]).unwrap();
+    let b = env.get(&names[1]).unwrap();
+    let w_norm: f64 = w.data().iter().map(|v| v * v).sum::<f64>().sqrt();
+    let b_norm: f64 = b.data().iter().map(|v| v * v).sum::<f64>().sqrt();
+    assert!(w_norm < 0.1, "expected W ~= 0, got norm {w_norm}");
+    assert!(b_norm < 0.1, "expected b ~= 0, got norm {b_norm}");
+}
+
+#[test]
+fn momentum_sgd_also_walks_model_params() {
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("M = chain(linear(1, 1, 3))").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let names = model_params(&env, "M").unwrap();
+    env.set(names[0].clone(), arr(vec![1, 1], vec![2.0]));
+    env.set(names[1].clone(), arr(vec![1, 1], vec![1.0]));
+
+    let src = format!(
+        "train 100 {{ momentum_sgd(sum({w}*{w}) + sum({b}*{b}), M, 0.05, 0.9) }}",
+        w = names[0],
+        b = names[1],
+    );
+    eval_program(&parse(&lex(&src).unwrap()).unwrap(), &mut env).unwrap();
+    let w = env.get(&names[0]).unwrap().data()[0];
+    let b = env.get(&names[1]).unwrap().data()[0];
+    assert!(w.abs() < 0.1, "expected W ~= 0, got {w}");
+    assert!(b.abs() < 0.1, "expected b ~= 0, got {b}");
+}
+
+#[test]
 fn linear_with_same_seed_produces_same_initial_weights() {
     let mut env_a = Environment::new();
     let mut env_b = Environment::new();

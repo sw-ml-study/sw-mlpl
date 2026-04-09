@@ -218,6 +218,43 @@ pub fn optim_state_mut(env: &mut Environment) -> &mut OptimizerState {
 ///
 /// Returns a scalar zero (the call is invoked for its side effects on
 /// the parameter bindings and optimizer state).
+/// Resolve the optimizer's `params` argument into a flat list of
+/// parameter identifiers. Accepts:
+///
+/// - a single param identifier: `adam(loss, W, ...)`
+/// - an array literal of param identifiers: `adam(loss, [W, b], ...)`
+/// - a model identifier registered via the Saga 11 model DSL:
+///   `adam(loss, M, ...)` walks `ModelSpec::params()` and returns its
+///   flat, order-stable parameter list.
+fn collect_params(arg: &Expr, env: &Environment, func: &str) -> Result<Vec<String>, EvalError> {
+    match arg {
+        Expr::Ident(n, _) => {
+            if let Some(model) = env.get_model(n) {
+                Ok(model.params())
+            } else {
+                Ok(vec![n.clone()])
+            }
+        }
+        Expr::ArrayLit(elems, _) => {
+            let mut v = Vec::with_capacity(elems.len());
+            for e in elems {
+                match e {
+                    Expr::Ident(n, _) => v.push(n.clone()),
+                    _ => {
+                        return Err(EvalError::Unsupported(format!(
+                            "{func}: params list must contain only identifiers"
+                        )));
+                    }
+                }
+            }
+            Ok(v)
+        }
+        _ => Err(EvalError::Unsupported(format!(
+            "{func}: second argument must be a param identifier, model identifier, or list"
+        ))),
+    }
+}
+
 pub(crate) fn eval_momentum_sgd(
     args: &[Expr],
     env: &mut Environment,
@@ -230,28 +267,7 @@ pub(crate) fn eval_momentum_sgd(
         });
     }
     let loss_expr = args[0].clone();
-    let param_names: Vec<String> = match &args[1] {
-        Expr::Ident(n, _) => vec![n.clone()],
-        Expr::ArrayLit(elems, _) => {
-            let mut v = Vec::with_capacity(elems.len());
-            for e in elems {
-                match e {
-                    Expr::Ident(n, _) => v.push(n.clone()),
-                    _ => {
-                        return Err(EvalError::Unsupported(
-                            "momentum_sgd: params list must contain only identifiers".into(),
-                        ));
-                    }
-                }
-            }
-            v
-        }
-        _ => {
-            return Err(EvalError::Unsupported(
-                "momentum_sgd: second argument must be a param identifier or list".into(),
-            ));
-        }
-    };
+    let param_names = collect_params(&args[1], env, "momentum_sgd")?;
     let scalar_arg = |expr: &Expr, env: &mut Environment| -> Result<f64, EvalError> {
         let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
         if arr.rank() != 0 {
@@ -339,28 +355,7 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         });
     }
     let loss_expr = args[0].clone();
-    let param_names: Vec<String> = match &args[1] {
-        Expr::Ident(n, _) => vec![n.clone()],
-        Expr::ArrayLit(elems, _) => {
-            let mut v = Vec::with_capacity(elems.len());
-            for e in elems {
-                match e {
-                    Expr::Ident(n, _) => v.push(n.clone()),
-                    _ => {
-                        return Err(EvalError::Unsupported(
-                            "adam: params list must contain only identifiers".into(),
-                        ));
-                    }
-                }
-            }
-            v
-        }
-        _ => {
-            return Err(EvalError::Unsupported(
-                "adam: second argument must be a param identifier or list".into(),
-            ));
-        }
-    };
+    let param_names = collect_params(&args[1], env, "adam")?;
     let scalar_arg = |expr: &Expr, env: &mut Environment| -> Result<f64, EvalError> {
         let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
         if arr.rank() != 0 {
