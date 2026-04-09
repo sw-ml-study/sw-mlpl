@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-286e92baf77742df.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-286e92baf77742df_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-d29cb6abadf11c57.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-d29cb6abadf11c57_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -469,15 +469,19 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
         .tutorial-nav {
             display: flex;
-            gap: 8px;
-            justify-content: flex-end;
+            gap: 6px;
+        }
+        .tutorial-nav .ctrl-btn {
+            padding: 2px 10px;
+            font-size: 14px;
+            line-height: 1.4;
         }
         .tutorial-nav .ctrl-btn:disabled {
             opacity: 0.4;
             cursor: not-allowed;
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-286e92baf77742df.js" crossorigin="anonymous" integrity="sha384-BxEJmFheJ0gaQ2ra2yWkQvEDHdDvNGkjshSHEuWiYqGWWs2TK6MgUNDd7QVjRcVm"><link rel="preload" href="/sw-mlpl/mlpl-web-286e92baf77742df_bg.wasm" crossorigin="anonymous" integrity="sha384-YaZN4iEqU9UAj3I0rJgKq+ACVL0I4YWe+nA8rrrRtVMSvz65r6OMNpGghyGtFpYH" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-d29cb6abadf11c57.js" crossorigin="anonymous" integrity="sha384-BxEJmFheJ0gaQ2ra2yWkQvEDHdDvNGkjshSHEuWiYqGWWs2TK6MgUNDd7QVjRcVm"><link rel="preload" href="/sw-mlpl/mlpl-web-d29cb6abadf11c57_bg.wasm" crossorigin="anonymous" integrity="sha384-rkDWwT8tJG8dCFv4R+jgKlzhrR0YwA5G2NNiUBKVpOyrDZztDrs+X9uFmlgHFGzb" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
