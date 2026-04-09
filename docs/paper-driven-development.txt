@@ -1,0 +1,392 @@
+
+
+
+
+So I have a machine learning programming language under development.  I need use-cases to drive development.  There is a video channel Discover AI, that covers very new ML papers.  I like to implement such papers in Rust (using MLX or Cuda) and Yew/WASM to produce visual demos (with charts, plots).  My MLPL language supports visualization, linear algebra (APL2, BQN, J/K concepts).  I would like some way (feature request) to describe what is needed in a language like this to implement different (recent) papers, e.g., mulitiple hypercontrained manifolds, engram, ICL, ICRL, and many more.  For each topic, I'd need a document that discusses the primitives and tools needed to demonstrate the concept (implement the changes described in a related paper).  For example, MPLP will have helpers for using MLX or CUDA, helpers for calling Ollama or llama.cpp.    Think of it as a kind of RLM, with APL2++ tools, providing (A) ML facilities for fine-tuning or running models with changes, and (B) using LLMs to help write code in this new language (and help explain code, document code, generate tests, generate demos, generate presentations (PaperBanana style), generate docs.  Can you find recent arXiv ML papers, especially ones discussed by Discover AI YouTube channel in the past 4 months (Dec 2025 through Apr 2026).  q.v. online
+
+
+Thought for 6s
+
+Thought
+
+Thought
+
+Thought
+
+Thought
+You want recent arXiv ML papers that can serve as use-cases and feature drivers for MLPL, with extra weight on papers that appear to have been covered by Discover AI during December 2025 through April 2026. You also want them filtered for papers that naturally map to your language goals: model architecture experimentation, fine-tuning/runtime changes, agentic tooling, visualization, and demo generation.
+
+What I found
+I found a strong set of papers from that window, including several that line up closely with the topics you named. In particular, I found Discover AI video hits for mHC, RelayLLM, Learning Rate Matters, CUDA Agent, EVA, and Astrolabe, and matched them to corresponding arXiv papers. 
+
+Best candidate papers for MLPL-driven development
+Topic	Paper	Date	Why it is a good MLPL use-case
+Manifold / architecture constraints	mHC: Manifold-Constrained Hyper-Connections	Dec 31, 2025	Great for language support around custom tensor transforms, constrained parameterizations, architecture experiments, and visualization of residual/hyper-connection topology. 
+Memory architecture / scalable lookup	Conditional Memory via Scalable Lookup: A New Axis of Scaling	Jan 12, 2026	Strong driver for MLPL primitives around external/static memory, lookup tables, cache-like memory modules, long-context diagnostics, and memory-vs-attention comparisons. This appears to be the “Engram” line of work you had in mind. 
+Tool-use / in-context RL	In-Context Reinforcement Learning for Tool Use in Large Language Models	Mar 9, 2026	Direct fit for MLPL as an RLM-like orchestration language: tool definitions, reward traces, trajectory storage, action/result logs, and evaluation dashboards. 
+ICRL prompting / reward-in-context	Reward Is Enough: LLMs Are In-Context Reinforcement Learners	May 21, 2025	Slightly older than your requested window, but still highly relevant as the conceptual base for ICRL-style workflows, scalar reward signals, and multi-round prompting loops. 
+Small+large model collaboration	RelayLLM: Efficient Reasoning via Collaborative Decoding	Jan 8, 2026	Excellent for MLPL features around cooperative decoding, controller/submodel roles, token-level delegation, and cost/latency charts. Discover AI appears to have covered it. 
+Fine-tuning methodology	Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning	Feb 4, 2026	Good driver for hyperparameter sweep DSLs, experiment grids, Hessian/eigenvalue diagnostics, rank-vs-LR visualization, and reproducible benchmark runners. Discover AI appears to have covered it. 
+Agentic CUDA generation	CUDA Agent: Large-Scale Agentic RL for High-Performance CUDA Kernel Generation	Feb 27, 2026	Excellent for MLPL’s CUDA/MLX integration story: kernel synthesis, profiler feedback, reward functions, correctness/performance loops, and codegen-verification pipelines. Discover AI appears to have covered it. 
+Video agent / planning before perception	EVA: Efficient Reinforcement Learning for End-to-End Video Agent	Mar 2026	Nice fit if MLPL grows multimodal/agentic demos: selective perception, summary-plan-action loops, staged training pipelines, and benchmark dashboards. Discover AI appears to have covered it. 
+RL for generative video alignment	Astrolabe: Steering Forward-Process Reinforcement Learning for Video Generation	Mar 2026	Useful for pipeline abstractions around reward composition, long-sequence generation, rolling KV-cache workflows, and visual evaluation metrics. Discover AI appears to have covered it. 
+My recommendation: organize MLPL feature requests into paper-driven capability buckets
+Instead of treating each paper as a one-off, I would group them into a handful of reusable capability families.
+
+1. Architecture research primitives
+Use-cases: mHC, Engram
+
+Needed MLPL capabilities:
+
+tensor and block-structured linear algebra
+
+constrained parameterization primitives
+
+graph-like model topology description
+
+pluggable residual / routing / memory modules
+
+per-layer instrumentation hooks
+
+attention-vs-memory ablation support
+
+visualization for topology, activations, retrieval hit-rates, long-context behavior
+
+Why this matters:
+These papers are really about changing the computation graph itself, so MLPL needs to make architecture variation first-class rather than burying it in handwritten Rust/CUDA glue. 
+
+2. Inference-time adaptation and reward-loop primitives
+Use-cases: ICRL, Tool-use ICRL, RelayLLM
+
+Needed MLPL capabilities:
+
+trajectory records
+
+reward annotation streams
+
+prompt/context accumulation operators
+
+tool schemas and tool-call execution
+
+controller/worker model orchestration
+
+token-level or step-level routing
+
+eval harnesses for cost, latency, success rate, and reward over time
+
+Why this matters:
+These papers emphasize test-time learning or coordination, not just offline training. Your language will benefit from native constructs for episodes, actions, rewards, tool calls, and replay. 
+
+3. Fine-tuning and optimizer experiment primitives
+Use-cases: Learning Rate Matters, plus LoRA/QLoRA/shared-subspace work
+
+Needed MLPL capabilities:
+
+parameter-efficient adapter declarations
+
+hyperparameter sweep syntax
+
+optimizer/learning-rate schedule abstractions
+
+rank, init, precision, quantization controls
+
+experiment registry and comparison plots
+
+Hessian/eigenvalue or curvature probe hooks
+
+Why this matters:
+A lot of papers are not about inventing a new layer; they are about showing that results depend on training protocol details. MLPL should make these protocols easy to vary and inspect. 
+
+4. Agentic code-generation / systems optimization primitives
+Use-cases: CUDA Agent, EVA, Astrolabe
+
+Needed MLPL capabilities:
+
+task → code → verify → profile → revise loops
+
+external tool invocation
+
+benchmark and reward extraction
+
+sandboxed execution
+
+multi-stage training pipelines
+
+rubric/reward composition
+
+artifact generation: charts, docs, demos, slides
+
+Why this matters:
+This is where MLPL becomes both an ML language and an ML systems laboratory. The same substrate can drive model training experiments and code-generating agents that build kernels, demos, and benchmarks. 
+
+A concrete paper-to-feature-request format
+For each paper, I would create one design document with this structure:
+
+Paper capability spec
+Paper summary
+
+what changed
+
+what baseline it replaces
+
+what metrics improved
+
+Core abstractions needed in MLPL
+
+tensors / graph nodes / memory blocks / reward traces / tools / adapters / profilers
+
+New syntax or standard library features
+
+model blocks
+
+experiment blocks
+
+eval blocks
+
+visualization blocks
+
+external runtime bindings
+
+Runtime integrations
+
+MLX
+
+CUDA
+
+Ollama / llama.cpp
+
+plotting / SVG / WASM demo generation
+
+Minimal reproducible demo
+
+smallest toy problem that exhibits the paper’s idea
+
+Scaling path
+
+toy → benchmark → real model
+
+Artifacts to auto-generate
+
+docs
+
+tests
+
+benchmark tables
+
+plots
+
+PaperBanana-style slides
+
+Yew/WASM interactive demo
+
+That format will keep your language development grounded in actual research workloads instead of drifting into generic feature accumulation.
+
+Suggested first 6 MLPL “driver documents”
+If I were prioritizing, I would start with these:
+
+mHC capability document
+Drives constrained topology, graph transforms, tensor projections, architecture visualization. 
+
+Engram capability document
+Drives memory module APIs, scalable lookup, long-context evals, memory/attention split visualization. 
+
+ICRL/tool-use capability document
+Drives reward traces, episodes, tool orchestration, replay, eval harnesses. 
+
+RelayLLM capability document
+Drives cooperative inference, controller/submodel orchestration, token-level delegation and cost accounting. 
+
+LoRA tuning capability document
+Drives sweep DSLs, adapter abstractions, experiment comparison, reproducibility. 
+
+CUDA Agent capability document
+Drives codegen/eval/profiling loops and tight integration with CUDA backends. 
+
+Notes on “Discover AI” coverage
+I could verify Discover AI video results for these topics:
+
+mHC 
+
+RelayLLM 
+
+Learning Rate Matters 
+
+CUDA Agent 
+
+EVA 
+
+Astrolabe 
+
+I could not reliably enumerate the entire channel’s full Dec 2025–Apr 2026 catalog from YouTube directly in browse mode, so this is a curated, evidence-backed subset, not a guaranteed complete index of every Discover AI paper in that period. 
+
+Bottom line
+The strongest recent paper cluster for your MLPL roadmap is:
+
+mHC
+
+Engram / scalable lookup memory
+
+In-context reinforcement learning for tool use
+
+RelayLLM
+
+Learning Rate Matters
+
+CUDA Agent
+
+EVA
+
+Astrolabe
+
+These cover the exact spread you described: architecture changes, memory changes, inference-time learning, fine-tuning methodology, agentic tooling, CUDA/MLX integration, and demo/visualization opportunities. 
+
+I can turn this into a ranked backlog of 20 paper-driven MLPL feature requests, with one row per paper and columns for syntax, runtime, visualization, demo scope, and implementation difficulty.
+
+
+turn this into a ranked backlog of 20 paper-driven MLPL feature requests, with one row per paper and columns for syntax, runtime, visualization, demo scope, and implementation difficulty.
+
+
+Thought for 8s
+
+Thought
+
+Thought
+
+Thought
+
+Thought
+
+Thought
+
+Thought
+
+Thought
+
+Thought
+You want a ranked backlog of 20 paper-driven MLPL feature requests, with each row tied to a recent paper and scored for what it would force MLPL to support. I ranked these by a mix of architectural leverage, fit with your Rust/MLX/CUDA + Yew/WASM demo workflow, reusability across many future papers, and how well each one can drive concrete language/runtime features. The paper set is concentrated in December 2025 through April 2026, and a subset has visible Discover AI coverage in search results. 
+
+Ranked backlog
+Rank	Paper	Discover AI?	MLPL feature request / syntax	Runtime / tooling needed	Visualization / demo	Demo scope	Difficulty
+1	Recursive Language Models (Dec 31, 2025) 
+—	Add recursive task / decompose / reduce constructs for hierarchical prompt splitting, recursive calls, and result aggregation.	Runtime scheduler for recursive subcalls, budget tracking, memoization, tool invocation, and trace persistence across nested calls.	Recursive call tree, chunk lineage, cost/latency heatmaps, answer provenance DAG.	End-to-end long-context “RLM in MLPL” toy plus benchmark harness.	High
+2	mHC: Manifold-Constrained Hyper-Connections (Dec 31, 2025) 
+Likely yes for the paper topic. 
+Add first-class model-graph syntax for residual-stream variants, manifold projections, and constrained connection operators.	Tensor graph compiler hooks, custom differentiable projection ops, mixed backends for MLX/CUDA.	Block diagrams, stream topology graphs, training stability plots, activation/residual norms over depth.	Small transformer block variants with side-by-side ablation dashboard.	High
+3	Conditional Memory via Scalable Lookup (Jan 2026) 
+—	Add memory table, lookup, writeback, and sparse-addressing primitives so memory modules are first-class, not hidden in host code.	Fast external memory store, batched lookup kernels, CPU/GPU hybrid data path, long-context eval harness.	Retrieval hit-rate plots, lookup sparsity maps, memory slot utilization, context-length scaling charts.	Toy memory-augmented LM and long-document QA demo.	High
+4	In-Context Reinforcement Learning for Tool Use in Large Language Models (Mar 9, 2026) 
+—	Add episode, rollout, reward, tool, and fewshot curriculum syntax for RL-only tool learning.	Tool schema registry, rollout engine, reward logging, replay buffers, prompt curriculum control.	Episode timelines, reward-per-step charts, tool-call traces, success/failure Sankeys.	Local tool-use agent benchmark with Ollama/llama.cpp backends.	High
+5	Learning Rate Matters: Vanilla LoRA May Suffice for LLM Fine-tuning (Feb 4, 2026) 
+Likely yes. 
+Add sweep DSL: adapter, rank, lr grid, scheduler, seed, judge. Make ablation studies concise.	Fine-tuning runner, experiment matrix engine, checkpoint management, Hessian/eigenvalue probe hooks.	Hyperparameter heatmaps, LR-vs-rank response curves, loss/accuracy overlays.	LoRA tuning workbench for a small code/math model.	Medium
+6	RelayLLM: Efficient Reasoning via Collaborative Decoding (Jan 8, 2026) 
+Yes. 
+Add syntax for controller/worker decoding, token-level help requests, and multi-model cooperative generation.	Cross-model token relay runtime, mixed local/remote inference, token routing policies, traceable decoding stream.	Token ownership ribbon, cost-vs-accuracy frontier, invocation percentage charts.	Small+large model collaborative reasoning demo.	High
+7	CM2: Reinforcement Learning with Checklist Rewards for Multi-Turn and Multi-Step Agentic Tool Use (Feb 2026) 
+—	Add checklist reward specs: declarative reward clauses with evidence anchors and sparse/dense evaluation modes.	Judge/extractor pipeline, evidence store, criterion scoring, multi-turn transcript state.	Checklist scorecards, evidence alignment UI, reward composition breakdowns.	Multi-step agent benchmark with inspectable rewards.	Medium
+8	PEARL: Plan Exploration and Adaptive Reinforcement Learning for Multihop Tool Use (Jan 2026) 
+—	Add planner/executor split syntax: plan {} and execute {} stages with separate rewards and offline/online phases.	Distinct planner/executor agents, offline exploration cache, online execution engine, tool hallucination checks.	Plan tree vs execution tree comparison, deviation heatmaps, tool-parameter validity charts.	Multihop research/demo agent.	Medium
+9	Tool-R0: Self-Evolving LLM Agents for Tool-Learning from Zero Data (Feb 24, 2026) 
+—	Add self-play / co-evolution syntax for generator and solver roles with curriculum loops.	Dual-agent training runtime, frontier task generation, self-play orchestration, difficulty estimation.	Curriculum progression plots, task frontier histograms, solver-vs-generator co-evolution charts.	Zero-data tool-learning sandbox.	High
+10	SkillRL: Evolving Agents via Recursive Skill-… (Feb 2026) 
+—	Add skill as a reusable packaged abstraction containing code, prompt, resources, tests, and permissions.	Skill registry, retrieval/loading, recursive skill composition, execution sandbox.	Skill graph, reuse frequency, skill success-by-context charts.	Agent-skills ecosystem prototype for MLPL.	Medium
+11	Agent World Model: Infinity Synthetic Environments for Agentic Reinforcement Learning (Feb 10, 2026) 
+—	Add environment DSL for executable synthetic worlds, tools, schemas, and task generators.	Environment compiler, database-backed state, MCP-style tool exposure, benchmark driver.	World topology view, state timelines, agent trajectories, OOD generalization dashboards.	Local synthetic environment lab for agent research.	High
+12	CUDA Agent: Large-Scale Agentic RL for High-Performance CUDA Kernel Generation (Feb 27, 2026) 
+Yes. 
+Add kernel blocks, verification hooks, profiler-aware reward terms, and codegen pipelines for backend specialization.	CUDA compile/benchmark harness, correctness checker, profiler ingestion, RL reward loop.	Kernel performance leaderboards, occupancy/bandwidth charts, diff views between generated kernels.	“Generate and improve a CUDA op” benchmark demo.	High
+13	MSA: Memory Sparse Attention for Efficient End-to-End Memory Model Scaling to 100M Tokens (Mar 2026) 
+—	Add long-context memory/attention operators and memory-interleaving constructs to MLPL.	Sparse attention kernels, memory-parallel runtime, large-sequence dataset loader, scaling evals.	Context-length scaling plots, latency/memory charts, sparse-attention maps.	Long-context memory model explorer.	High
+14	Self-Indexing KVCache: Predicting Sparse Attention from Compressed Keys (Mar 15, 2026) 
+—	Add cache-policy and compressed-key syntax, letting inference-time memory layout be programmable.	KV compression kernels, 1-bit/compact key formats, FlashAttention integration hooks.	KV-cache size vs quality curves, retrieval precision plots, token hotness maps.	Inference-optimization lab for local models.	High
+15	S³-Attention: Attention-Aligned Endogenous Retrieval for Memory-Bounded Long-Context Inference (Jan 25, 2026) 
+—	Add retrieve from attention primitives to blur the line between retrieval and inference.	Sparse feature extraction, inverted indexes, hybrid lexical+attention retrieval path.	Retrieved span overlays, sparse feature activations, GPU memory boundedness charts.	“Retrieval inside the model loop” demo.	Medium
+16	iGRPO: Self-Feedback-Driven LLM Reasoning (Feb 9, 2026) 
+Yes. 
+Add draft, select_best, and refine syntax for two-stage self-feedback reasoning loops.	Draft sampler, judge/scalar reward interface, refinement-phase trainer, entropy tracking.	Draft comparison UI, reward distributions, refinement gain charts.	Reasoning self-improvement workbench.	Medium
+17	Self-Distilled RLVR (Apr 3, 2026) 
+Likely yes in Discover AI snippets. 
+Add post-training syntax for self-distilled RL with token-level credit and stability controls.	RLVR runner, token-credit assignment, distilled-target generation, multimodal option support.	Token-credit heatmaps, stability curves, before/after reasoning traces.	Post-training research harness.	Medium
+18	Embarrassingly Simple Self-Distillation Improves Code Generation (Apr 1, 2026) 
+Likely yes in Discover AI snippets. 
+Add sample -> filter -> finetune pipeline primitives for verifier-free self-distillation.	Batch sampler, temperature/truncation sweeps, corpus builder, finetune runner.	Pass@k trends, token-distribution shift plots, sample diversity scatterplots.	Code-model self-bootstrapping demo.	Low-Medium
+19	Reasoning Models Generate Societies of Thought (Jan 15, 2026) 
+Yes. 
+Add multi-perspective reasoning syntax: voices, debate, reconcile, critic, judge.	Multi-agent trace runtime, role prompts, diversity metrics, conflict-resolution policies.	Debate transcript viewer, perspective-diversity charts, role activation summaries.	“Society of thought” reasoning playground.	Medium
+20	Attention Residuals (Mar 2026) 
+—	Add residual-policy syntax so skip/accumulation behavior can be changed as a first-class model choice.	Layerwise residual attention kernels, ablation runner, stability/performance benchmarks.	Per-layer contribution charts, hidden-state norm trajectories, depth utilization plots.	Fast architectural ablation demo.	Medium
+How to read this backlog
+Tier 1: build these first
+The top six are the best “language shapers” because they force MLPL to cover the biggest reusable surfaces: recursive orchestration, architecture graph mutation, memory as a first-class object, tool-use RL, fine-tuning sweeps, and multi-model collaborative inference. Those are the features most likely to unlock a long tail of later papers. 
+
+Tier 2: build once the substrate exists
+Rows 7–15 mostly depend on the same substrate, but specialize it: richer reward declarations, planner/executor separation, skill packages, synthetic environments, CUDA backend optimization, and long-context memory/runtime policies. These feel like standard library + runtime + tooling work layered on top of Tier 1. 
+
+Tier 3: excellent experiments, but less foundational
+Rows 16–20 are still useful, but they look more like research recipes than core language-shaping needs. They are valuable to validate MLPL’s abstractions once the language/runtime already exists. 
+
+Suggested backlog implementation order
+Core syntax/runtime
+
+recursive tasks
+
+model graph blocks
+
+memory objects
+
+episode / rollout / reward
+
+multi-model orchestration
+
+experiment sweep DSL
+
+Core tooling
+
+trace store
+
+benchmark runner
+
+plotting/visualization layer
+
+Yew/WASM artifact generator
+
+backend adapters for MLX, CUDA, Ollama, llama.cpp
+
+Advanced research substrate
+
+skill packaging
+
+environment DSL
+
+CUDA verification/profiling loop
+
+long-context cache/memory policies
+
+self-distillation / RLVR pipelines
+
+My strongest recommendation
+If the goal is to use papers to drive the language, I would convert the top 10 rows into a standard template:
+
+paper summary
+
+MLPL syntax additions
+
+runtime additions
+
+visualization needs
+
+smallest reproducible demo
+
+Rust/MLX/CUDA/Yew implementation notes
+
+acceptance tests
+
+stretch goals
+
+That will turn this from a reading list into an actual language roadmap.
+
+I can turn this next into a CSV or Markdown backlog file with sortable fields like rank, paper, paper_date, discover_ai, syntax_request, runtime_request, viz_request, demo_scope, difficulty, priority_bucket, and dependencies.
+
+
+
+
