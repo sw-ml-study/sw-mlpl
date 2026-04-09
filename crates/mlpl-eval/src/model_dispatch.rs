@@ -70,6 +70,37 @@ pub(crate) fn eval_chain(args: &[Expr], env: &mut Environment) -> Result<ModelSp
     Ok(ModelSpec::Chain(children))
 }
 
+/// `residual(inner_model)`. Wraps a single model argument in a
+/// skip-connection node.
+pub(crate) fn eval_residual(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+    if args.len() != 1 {
+        return Err(EvalError::BadArity {
+            func: "residual".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    }
+    match crate::eval::eval_expr(&args[0], env, &mut None)? {
+        Value::Model(m) => Ok(ModelSpec::Residual(Box::new(m))),
+        _ => Err(EvalError::Unsupported(
+            "residual: argument must evaluate to a model".into(),
+        )),
+    }
+}
+
+/// `rms_norm(dim)` -- parameter-free per-row RMS normalization.
+pub(crate) fn eval_rms_norm(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+    if args.len() != 1 {
+        return Err(EvalError::BadArity {
+            func: "rms_norm".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    }
+    let dim = scalar_usize(&args[0], env, "rms_norm")?;
+    Ok(ModelSpec::RmsNorm { dim })
+}
+
 /// Parameter-free activation layer constructors. Returns the
 /// matching `ActKind` if `name` is recognized.
 #[must_use]
@@ -146,7 +177,41 @@ fn apply_model(
                 vec![x.clone(), DenseArray::from_scalar(1.0)],
             )?),
         },
+        ModelSpec::Residual(inner) => {
+            let inner_out = apply_model(inner, x, env)?;
+            if inner_out.shape() != x.shape() {
+                return Err(EvalError::Unsupported(
+                    "residual: inner block must preserve input shape".into(),
+                ));
+            }
+            Ok(x.apply_binop(&inner_out, |a, b| a + b)?)
+        }
+        ModelSpec::RmsNorm { .. } => apply_rms_norm(x),
     }
+}
+
+/// Per-row RMS normalization: `y[i, :] = x[i, :] / sqrt(mean(x[i, :]^2) + eps)`.
+fn apply_rms_norm(x: &DenseArray) -> Result<DenseArray, EvalError> {
+    let dims = x.shape().dims();
+    if dims.len() != 2 {
+        return Err(EvalError::Unsupported(
+            "rms_norm: input must be a rank-2 [rows, cols] matrix".into(),
+        ));
+    }
+    let rows = dims[0];
+    let cols = dims[1];
+    let eps = 1e-8;
+    let src = x.data();
+    let mut out = Vec::with_capacity(src.len());
+    for r in 0..rows {
+        let row = &src[r * cols..(r + 1) * cols];
+        let mean_sq: f64 = row.iter().map(|v| v * v).sum::<f64>() / cols.max(1) as f64;
+        let scale = 1.0 / (mean_sq + eps).sqrt();
+        for v in row {
+            out.push(v * scale);
+        }
+    }
+    Ok(DenseArray::new(Shape::new(vec![rows, cols]), out)?)
 }
 
 fn scalar_f64(expr: &Expr, env: &mut Environment, func: &str) -> Result<f64, EvalError> {

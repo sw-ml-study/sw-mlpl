@@ -146,6 +146,59 @@ fn momentum_sgd_also_walks_model_params() {
 }
 
 #[test]
+fn residual_with_zero_inner_block_returns_input_unchanged() {
+    // Build R = residual(chain(linear(2, 2, 9))) and force the inner
+    // linear's W and b to zero so the inner output is the zero matrix.
+    // Then R(X) = X + 0 = X.
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("R = residual(chain(linear(2, 2, 9)))").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let names = model_params(&env, "R").unwrap();
+    assert_eq!(
+        names.len(),
+        2,
+        "residual recurses into the linear's W and b"
+    );
+    env.set(names[0].clone(), arr(vec![2, 2], vec![0.0; 4]));
+    env.set(names[1].clone(), arr(vec![1, 2], vec![0.0; 2]));
+
+    let xv = vec![0.5, -0.5, 1.0, 0.0, -1.0, 1.0];
+    env.set("X".into(), arr(vec![3, 2], xv.clone()));
+    let out = eval_program(&parse(&lex("apply(R, X)").unwrap()).unwrap(), &mut env).unwrap();
+    assert_eq!(out.shape().dims(), &[3, 2]);
+    assert_eq!(out.data(), xv.as_slice());
+}
+
+#[test]
+fn rms_norm_produces_unit_rms_per_row() {
+    let mut env = Environment::new();
+    eval_program(&parse(&lex("N = rms_norm(4)").unwrap()).unwrap(), &mut env).unwrap();
+    assert!(
+        model_params(&env, "N").unwrap().is_empty(),
+        "rms_norm has no params"
+    );
+
+    env.set(
+        "X".into(),
+        arr(vec![2, 4], vec![1.0, 2.0, 3.0, 4.0, -2.0, -1.0, 0.5, 1.5]),
+    );
+    let out = eval_program(&parse(&lex("apply(N, X)").unwrap()).unwrap(), &mut env).unwrap();
+    assert_eq!(out.shape().dims(), &[2, 4]);
+    for r in 0..2 {
+        let row = &out.data()[r * 4..(r + 1) * 4];
+        let mean_sq: f64 = row.iter().map(|v| v * v).sum::<f64>() / 4.0;
+        let rms = mean_sq.sqrt();
+        assert!(
+            (rms - 1.0).abs() < 1e-6,
+            "row {r} expected unit RMS, got {rms}"
+        );
+    }
+}
+
+#[test]
 fn linear_with_same_seed_produces_same_initial_weights() {
     let mut env_a = Environment::new();
     let mut env_b = Environment::new();
