@@ -1,6 +1,6 @@
 number = 3
 slug = "params-walker"
-status = "pending"
+status = "in-progress"
 description = "Phase 2 cont.: Implement params(model) that walks a model value's parameter t..."
 role = "production"
 context_files = []

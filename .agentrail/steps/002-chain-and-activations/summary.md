@@ -1,0 +1,1 @@
+Added ModelSpec::Chain(Vec<ModelSpec>) and ModelSpec::Activation(ActKind) variants with recursive params() flattening and recursive apply_model. New built-ins: chain(layer_a, layer_b, ...), tanh_layer(), relu_layer(), softmax_layer(). Tests verify a 2->8->2 chain produces row-stochastic output and relu clamps negatives.
