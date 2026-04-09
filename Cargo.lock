@@ -652,14 +652,14 @@ checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
 name = "mlpl-array"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-autograd"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -667,7 +667,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-cli"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-eval",
  "mlpl-parser",
@@ -676,14 +676,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-core"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-eval"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-array",
  "mlpl-autograd",
@@ -696,11 +696,11 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lab"
-version = "0.1.0"
+version = "0.7.0"
 
 [[package]]
 name = "mlpl-ml"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime",
@@ -708,14 +708,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-parser"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-repl"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-eval",
  "mlpl-parser",
@@ -724,7 +724,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -732,7 +732,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-trace"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -742,7 +742,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-viz"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -751,7 +751,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-wasm"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "mlpl-eval",
  "mlpl-parser",
@@ -761,7 +761,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web"
-version = "0.1.0"
+version = "0.7.0"
 dependencies = [
  "gloo 0.11.0",
  "mlpl-wasm",
