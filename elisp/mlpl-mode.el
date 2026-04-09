@@ -33,8 +33,8 @@
   :type 'integer
   :group 'mlpl)
 
-(defcustom mlpl-repl-command "env RUSTFLAGS=\"-A warnings\" cargo run -p mlpl-repl --quiet --"
-  "Command to start the MLPL REPL."
+(defcustom mlpl-repl-command "mlpl-repl"
+  "Command to start the MLPL REPL.  Must be on $PATH."
   :type 'string
   :group 'mlpl)
 
