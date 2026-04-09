@@ -1,0 +1,15 @@
+[book]
+authors = ["MLPL Team"]
+language = "en"
+src = "src"
+title = "MLPL Language Reference"
+
+[output.html]
+git-repository-url = "https://github.com/sw-ml-study/sw-mlpl"
+edit-url-template = "https://github.com/sw-ml-study/sw-mlpl/edit/main/docs/lang-reference.md"
+
+[output.epub]
+enabled = true
+
+[output.pdf]
+enabled = true
