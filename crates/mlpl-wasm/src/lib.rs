@@ -51,6 +51,13 @@ fn eval_input(input: &str, env: &mut Environment) -> String {
         return String::new();
     }
 
+    // Introspection commands (`:vars`, `:models`, `:fns`, `:wsid`,
+    // `:describe <name>`) short-circuit evaluation so they work
+    // identically in the terminal and web REPLs.
+    if let Some(out) = mlpl_eval::inspect(env, trimmed) {
+        return out;
+    }
+
     let tokens = match mlpl_parser::lex(trimmed) {
         Ok(t) => t,
         Err(e) => return format!("error: {e}"),

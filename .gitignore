@@ -1,2 +1,11 @@
 /target/
 /dist/
+
+# Build artifacts -- never tracked
+*.pdf
+*.epub
+*.elc
+
+# mdbook build outputs (sources live in books/*/src/, builds are local)
+books/dist/
+books/*/book/
