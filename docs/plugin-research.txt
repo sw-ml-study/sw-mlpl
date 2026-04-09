@@ -1,0 +1,1261 @@
+
+
+
+
+I have an APL-inspired language and I'm about to add user defined functions that could be used to compose built-in functions or other user defined functions.  I also want a way to extend the language using Rust (since APL is weakly typed and Rust is a much safer statically typed language).  How would you define the interface to Rust?  What would the API or SPI (contract) be?    How would you expose dynamic loading of extensions within mlpl itself (or within an extension function)?
+
+You’re defining two things at once:
+
+a user-function model inside the APL-like language, and
+
+a foreign-extension model to Rust that is safe, stable, and composable.
+
+Those should be designed together, because the Rust boundary will either feel like a natural extension of the language, or like an awkward escape hatch.
+
+Requirements to satisfy
+You want:
+
+user-defined functions that compose built-ins and other user functions
+
+a Rust extension mechanism
+
+a clear API/SPI contract
+
+a way to dynamically load extensions
+
+the possibility that mlpl itself can load them, and perhaps that an extension can load more things too
+
+The main architectural tension is this:
+
+APL-like languages prefer terse, dynamic, array-oriented semantics
+
+Rust prefers explicit ownership, stable types, and compile-time guarantees
+
+So the boundary must not try to make Rust “be APL” directly. It should instead define a small, explicit runtime contract that Rust plugins can implement safely.
+
+Recommended architecture
+I would separate the system into four layers.
+
+1. Core language function model
+All callable things in MLPL should look conceptually alike:
+
+built-in primitive
+
+built-in operator/adverb/conjunction if you have them
+
+user-defined function
+
+foreign/Rust function
+
+At runtime, every callable should satisfy a common invocation protocol.
+
+For example, conceptually:
+
+Callable
+  - metadata
+  - valence support (monadic/dyadic, maybe variadic later)
+  - invoke(context, args) -> result
+That means the evaluator does not care whether a function is:
+
++
+
+{⍵+1}-style user function
+
+rust:fft
+
+plugin:image.blur
+
+It only cares that the callable can be applied.
+
+This is the single most important design choice.
+
+2. Stable runtime value model
+Do not expose internal evaluator structs directly to plugins.
+
+Instead define a stable ABI-facing value representation.
+
+The boundary should revolve around a limited set of runtime concepts:
+
+scalars
+
+arrays
+
+ranks/shapes
+
+numeric types
+
+strings/symbols
+
+booleans
+
+maybe dictionaries/tables later
+
+opaque handles for advanced runtime-managed objects
+
+A good mental model is:
+
+inside MLPL runtime: rich Rust enums and structs
+
+across plugin boundary: stable handles + descriptors
+
+This avoids freezing your internal implementation too early.
+
+3. Host API for plugins
+Rust plugins should not be given raw access to interpreter internals.
+
+Instead they should receive a Host API table with function pointers or trait-backed wrappers for:
+
+allocate arrays
+
+inspect arguments
+
+create errors
+
+log/debug
+
+register functions
+
+maybe call back into MLPL evaluator
+
+maybe load another extension, if allowed
+
+This makes the runtime the authority.
+
+4. Dynamic plugin loader
+The loader should:
+
+load a shared library (.so, .dylib, .dll)
+
+look for a single exported entry point
+
+negotiate ABI version
+
+pass in the host API
+
+receive a manifest / registration list
+
+register functions into a namespace
+
+This is much safer than discovering symbols ad hoc.
+
+High-level design choice: ABI-first, not Rust-trait-first
+There are two broad designs.
+
+Option A: Native Rust trait plugins
+Example idea:
+
+pub trait MlplPlugin {
+    fn register(&self, registry: &mut dyn Registry);
+}
+Benefits
+ergonomic for Rust developers
+
+type-safe inside one build
+
+pleasant if everything is compiled together
+
+Risks
+not ABI stable
+
+painful across compiler versions
+
+difficult for true dynamic loading unless host and plugin are built in lockstep
+
+weak long-term compatibility story
+
+This is fine for statically linked extensions.
+
+Option B: C-ABI plugin boundary with Rust wrappers
+Example idea:
+
+shared library exports:
+
+mlpl_plugin_entry_v1
+
+host passes:
+
+MlplHostApiV1
+
+plugin returns:
+
+MlplPluginDescriptorV1
+
+Benefits
+realistic dynamic loading
+
+stable across builds
+
+explicit versioning
+
+can support plugins written in Rust, C, Zig, etc.
+
+Risks
+more boilerplate
+
+string/value marshaling must be designed carefully
+
+plugin authors need helper crates
+
+This is the better long-term answer.
+
+Recommendation
+Use both:
+
+internal SPI: ergonomic Rust traits for statically linked extensions
+
+external ABI: C-ABI stable plugin interface for dynamic extensions
+
+Then provide an official crate that wraps the ABI in safe Rust.
+
+That gives you:
+
+easy development now
+
+dynamic loading later
+
+a real compatibility story
+
+Suggested callable model inside MLPL
+Before talking Rust, define MLPL callables clearly.
+
+Suggested function classes
+I would model at least these:
+
+Primitive function
+
+Derived function from operators/adverbs/conjunctions
+
+User function
+
+Foreign function
+
+Suggested function signature model
+APL-family languages often care about valence:
+
+monadic
+
+dyadic
+
+So a good core shape is:
+
+CallSig
+  - monadic: optional
+  - dyadic: optional
+A callable may implement one or both.
+
+That lets you define:
+
+user function with only monadic meaning
+
+plugin function with both meanings
+
+later support operators that derive callables
+
+Runtime invoke contract
+Conceptually:
+
+invoke(callable, call_mode, left_arg?, right_arg, context) -> value or error
+Where:
+
+call_mode is monadic or dyadic
+
+left_arg absent for monadic
+
+right_arg always present
+
+context includes environment, namespaces, options, evaluator hooks
+
+This model maps very cleanly to both user-defined and Rust-defined functions.
+
+Suggested Rust plugin contract
+Now the actual extension boundary.
+
+Core principle
+A plugin should register named callables, not expose arbitrary executable code.
+
+So the plugin contract is not “here is a Rust function pointer, do anything.”
+
+It is:
+
+identify plugin
+
+declare capabilities
+
+register one or more MLPL functions/operators/namespaces
+
+optionally expose initialization/finalization hooks
+
+ABI entry point
+I would use exactly one well-known export:
+
+#[no_mangle]
+pub extern "C" fn mlpl_plugin_entry_v1(
+    host: *const MlplHostApiV1
+) -> MlplPluginDescriptorV1
+This function should:
+
+verify host ABI compatibility
+
+store or use the host API
+
+return plugin metadata and registration callbacks
+
+Alternatively, if you want less returned data and more push-style registration:
+
+#[no_mangle]
+pub extern "C" fn mlpl_plugin_init_v1(
+    host: *const MlplHostApiV1,
+    registrar: *mut MlplRegistrarV1,
+) -> MlplStatus
+I slightly prefer the registrar callback form because it avoids returning complex structures by value across ABI boundaries.
+
+Suggested ABI data structures
+Conceptually, something like this.
+
+Status / error
+#[repr(C)]
+pub struct MlplStatus {
+    pub code: i32,
+    pub message: MlplStringRef,
+}
+Or better, use integer status codes and keep strings host-allocated.
+
+String reference
+#[repr(C)]
+pub struct MlplStringRef {
+    pub ptr: *const u8,
+    pub len: usize,
+}
+This is simple and language-neutral.
+
+Value handle
+Do not pass rich enums directly unless you fully own both sides.
+
+Better:
+
+#[repr(C)]
+pub struct MlplValueHandle {
+    pub raw: u64,
+}
+The host owns actual values. Plugins use host API calls to inspect or create them.
+
+This keeps memory ownership sane.
+
+Host API
+#[repr(C)]
+pub struct MlplHostApiV1 {
+    pub abi_version: u32,
+
+    pub retain_value: extern "C" fn(MlplValueHandle),
+    pub release_value: extern "C" fn(MlplValueHandle),
+
+    pub value_kind: extern "C" fn(MlplValueHandle) -> MlplValueKind,
+    pub scalar_to_f64: extern "C" fn(MlplValueHandle, *mut f64) -> MlplStatus,
+    pub scalar_to_i64: extern "C" fn(MlplValueHandle, *mut i64) -> MlplStatus,
+    pub get_shape: extern "C" fn(MlplValueHandle, *mut MlplShapeView) -> MlplStatus,
+    pub get_array_data_f64: extern "C" fn(MlplValueHandle, *mut MlplSliceViewF64) -> MlplStatus,
+
+    pub make_scalar_f64: extern "C" fn(f64, *mut MlplValueHandle) -> MlplStatus,
+    pub make_scalar_i64: extern "C" fn(i64, *mut MlplValueHandle) -> MlplStatus,
+    pub make_array_f64: extern "C" fn(*const usize, usize, *const f64, usize, *mut MlplValueHandle) -> MlplStatus,
+
+    pub make_error: extern "C" fn(MlplErrorCode, MlplStringRef, *mut MlplValueHandle) -> MlplStatus,
+
+    pub eval_source: extern "C" fn(MlplStringRef, *mut MlplValueHandle) -> MlplStatus,
+    pub resolve_name: extern "C" fn(MlplStringRef, *mut MlplValueHandle) -> MlplStatus,
+
+    pub register_function: extern "C" fn(*const MlplFunctionDescriptorV1) -> MlplStatus,
+    pub register_namespace: extern "C" fn(MlplStringRef) -> MlplStatus,
+
+    pub log: extern "C" fn(MlplLogLevel, MlplStringRef),
+}
+That is more capability than you need at first, but the pattern is right.
+
+Function descriptor
+#[repr(C)]
+pub struct MlplFunctionDescriptorV1 {
+    pub namespace: MlplStringRef,
+    pub name: MlplStringRef,
+    pub doc: MlplStringRef,
+    pub flags: u64,
+    pub monadic: Option<extern "C" fn(*const MlplCallContextV1, MlplValueHandle, *mut MlplValueHandle) -> MlplStatus>,
+    pub dyadic: Option<extern "C" fn(*const MlplCallContextV1, MlplValueHandle, MlplValueHandle, *mut MlplValueHandle) -> MlplStatus>,
+}
+This gives direct support for APL-ish valence.
+
+Call context
+#[repr(C)]
+pub struct MlplCallContextV1 {
+    pub host: *const MlplHostApiV1,
+    pub eval_id: u64,
+    pub flags: u64,
+}
+Later you can add:
+
+current namespace
+
+current rank mode
+
+tracing hooks
+
+cancellation handle
+
+allocator arena
+
+randomness source
+
+Safe Rust wrapper API
+Plugin authors should not work directly with raw pointers if you can help it.
+
+Provide an official crate, something like:
+
+use mlpl_plugin_api::{Plugin, Host, Value, Error, Result, FunctionBuilder};
+Then Rust authors implement something like:
+
+pub fn register(reg: &mut dyn Registry) -> Result<()> {
+    reg.function(
+        FunctionBuilder::new("stats", "mean")
+            .monadic(mean_monad)
+            .doc("Mean of a numeric array")
+    )?;
+    Ok(())
+}
+Where mean_monad takes a safe wrapper:
+
+fn mean_monad(ctx: &CallContext, y: Value) -> Result<Value> {
+    let arr = y.as_f64_array()?;
+    let sum: f64 = arr.data().iter().sum();
+    Ok(Value::scalar(sum / arr.len() as f64))
+}
+Under the hood that compiles to the C ABI contract.
+
+This is the right split:
+
+ABI layer for compatibility
+
+safe wrapper layer for ergonomics
+
+Memory ownership rules
+This is where plugin systems usually go wrong.
+
+Recommended rule
+The host owns all MLPL values.
+
+Plugins only hold handles.
+
+If a plugin wants to keep a value beyond the current call:
+
+it must call retain_value
+
+later call release_value
+
+If a plugin creates a result:
+
+it asks the host to allocate/create it
+
+returns a handle to the host
+
+Why this is good
+prevents allocator mismatches
+
+allows host GC/arena/refcount later
+
+protects runtime invariants
+
+makes it easier to evolve value representation
+
+What plugins should never do
+Avoid allowing plugins to:
+
+directly free host-owned memory
+
+construct internal runtime objects with Box::from_raw
+
+mutate evaluator state directly
+
+keep borrowed pointers into array memory after the call unless explicitly pinned
+
+That last point is important. Zero-copy is nice, but borrow lifetime bugs across dynamic libraries are miserable.
+
+Type system / data model at the boundary
+Since MLPL is weakly typed and Rust is strongly typed, the interface should not pretend otherwise.
+
+The plugin sees dynamic values
+At the boundary, a function receives Value.
+
+It can inspect:
+
+scalar type
+
+shape/rank
+
+element type
+
+maybe sparsity / layout later
+
+Then it either:
+
+accepts and computes
+
+converts/coerces
+
+returns a domain/rank/type error
+
+Recommended coercion policy
+Make coercions explicit in plugin registration metadata.
+
+For example, a plugin function descriptor may declare:
+
+exact only
+
+numeric coercion allowed
+
+scalar extension allowed
+
+rank polymorphic
+
+shape constrained
+
+This lets the evaluator optionally pre-check or adapt.
+
+Example metadata:
+
+expects:
+  right: numeric array
+returns:
+  scalar f64
+properties:
+  monadic
+  rank-polymorphic
+  pure
+This is useful not only for runtime correctness, but also for docs/help/introspection.
+
+Suggested SPI capabilities
+Your SPI should include more than just “call function.”
+
+I would define the contract around these categories.
+
+1. Registration SPI
+Used at load time.
+
+Functions like:
+
+register namespace
+
+register callable
+
+register constant
+
+register operator/adverb later
+
+register docs/examples/tests metadata
+
+2. Invocation SPI
+Used when MLPL calls plugin-defined functions.
+
+monadic invoke
+
+dyadic invoke
+
+maybe n-ary later, but do not start there
+
+3. Host services SPI
+Used by plugin while running.
+
+inspect arguments
+
+create results
+
+emit errors
+
+logging/tracing
+
+evaluator callbacks
+
+random source / cancellation / progress later
+
+4. Lifecycle SPI
+Used when plugin is loaded/unloaded.
+
+initialize
+
+finalize
+
+maybe reload
+
+Keep unload optional. Many dynamic unload stories are fragile.
+
+Purity, side effects, and capabilities
+Not all Rust extensions are equal.
+
+Some will be pure numeric transforms. Others may:
+
+open files
+
+use CUDA
+
+call Ollama
+
+load models
+
+make HTTP calls
+
+Do not treat these the same.
+
+Recommended capability metadata
+Each registered function should declare capabilities like:
+
+PURE
+
+DETERMINISTIC
+
+IO
+
+NETWORK
+
+GPU
+
+LOADS_CODE
+
+MUTATES_SESSION
+
+NON_REENTRANT
+
+This matters for:
+
+sandboxing
+
+caching
+
+testing
+
+reproducibility
+
+safe evaluation in demos/notebooks
+
+possible future parallel execution
+
+Example:
+
+stats.mean → PURE | DETERMINISTIC
+
+cuda.matmul → PURE | GPU
+
+http.get_json → IO | NETWORK
+
+plugin.load → LOADS_CODE | MUTATES_SESSION
+
+This is very valuable.
+
+Dynamic loading model in MLPL
+Now the user-facing part.
+
+You asked how to expose dynamic loading within mlpl itself.
+
+Recommended approach
+Add a small built-in namespace for module/plugin management.
+
+For example:
+
+⎕load_plugin 'path/to/libmlpl_stats.dylib'
+Or if you want something less APL-system-variable-like:
+
+plugin.load 'path/to/libmlpl_stats.dylib'
+I would strongly prefer a namespace-based style over magical syntax.
+
+For example:
+
+plugin.load "/usr/local/lib/mlpl/stats"
+plugin.list
+plugin.info "stats"
+After load, the plugin may register names like:
+
+stats.mean
+stats.stddev
+stats.zscore
+This avoids polluting the global namespace.
+
+Suggested dynamic loading flow
+When MLPL evaluates:
+
+plugin.load "/path/to/libmlpl_stats.dylib"
+the runtime should:
+
+canonicalize and validate path
+
+load shared library with libloading
+
+find mlpl_plugin_init_v1
+
+pass host API + registrar
+
+plugin registers functions under a namespace
+
+runtime stores module handle in plugin registry
+
+runtime marks namespace as available
+
+Suggested plugin registry data
+The runtime should keep:
+
+plugin id
+
+version
+
+ABI version
+
+filesystem path
+
+loaded library handle
+
+registered namespaces
+
+registered callables
+
+capability flags
+
+loaded dependencies
+
+load time / checksum maybe
+
+This helps for introspection and debugging.
+
+Should extensions be able to load extensions?
+My advice:
+
+Initial answer: No, not directly
+At least not at first.
+
+Letting plugins dynamically load more code introduces:
+
+dependency resolution complexity
+
+security risks
+
+unload/reload headaches
+
+duplicate ABI/version conflicts
+
+recursion and reentrancy problems
+
+A cleaner first model is:
+
+only the host runtime may load plugins
+
+plugins may request a load through host API
+
+host decides whether to allow it
+
+So instead of giving plugins direct libloading authority, give them:
+
+host.request_plugin_load(path_or_id)
+or maybe:
+
+plugin.require "fft"
+inside MLPL, which forwards to host policy.
+
+Better long-term design
+Use declarative plugin dependencies.
+
+Each plugin manifest can declare:
+
+plugin id
+
+version
+
+required ABI
+
+dependencies on other plugins
+
+Then the runtime resolves and loads in dependency order.
+
+This is much cleaner than arbitrary recursive loading from inside plugin code.
+
+Suggested manifest model
+A plugin should expose metadata like:
+
+id: "mlpl.stats"
+name: "Statistics"
+version: "0.1.0"
+abi: 1
+depends:
+  - "mlpl.core>=1"
+namespaces:
+  - "stats"
+functions:
+  - stats.mean
+  - stats.stddev
+capabilities:
+  - pure
+  - deterministic
+This can be returned from the entry point or supplied via registration calls.
+
+Error model
+Your boundary needs a crisp error model.
+
+Recommended categories
+At least:
+
+arity error
+
+rank error
+
+length/shape error
+
+domain/type error
+
+value error
+
+IO error
+
+plugin load error
+
+ABI mismatch
+
+internal error
+
+interrupt/cancelled
+
+Plugins should return structured errors, not panic across the boundary.
+
+Important rule
+No panic may cross the ABI boundary.
+
+Wrap all plugin entrypoints in catch_unwind on the plugin side or host wrapper side and convert panic to internal error.
+
+That alone will save you pain.
+
+Concurrency and reentrancy
+You may not need this immediately, but decide early.
+
+Questions:
+
+Can MLPL call plugin functions from multiple threads?
+
+Can plugin functions call back into MLPL evaluator?
+
+Can plugin functions keep global mutable state?
+
+Recommendation for v1
+Keep it simple:
+
+plugin calls are single-threaded by default
+
+plugin functions must declare if they are REENTRANT or NON_REENTRANT
+
+host may serialize calls to non-reentrant plugins
+
+callback into evaluator is allowed only through explicit host API functions
+
+This avoids a lot of subtle bugs.
+
+Statically linked vs dynamically loaded extensions
+You asked about API/SPI and dynamic loading. I would support both models.
+
+Static extensions
+These are compiled into the interpreter binary.
+
+Benefits
+simplest for development
+
+no ABI worries
+
+good for “standard library with Rust backing”
+
+best performance and debuggability
+
+Good use cases
+core math
+
+shape transforms
+
+visualization
+
+standard ML kernels
+
+file formats
+
+Dynamic extensions
+These are separate shared libraries.
+
+Benefits
+user-installable
+
+optional heavy dependencies
+
+faster iteration
+
+can keep CUDA/MLX/ONNX/llama.cpp integrations outside core
+
+Good use cases
+GPU backends
+
+vendor-specific ML accelerators
+
+experimental research ops
+
+database/network/model-serving integrations
+
+Recommendation
+Make the public interface identical from MLPL’s point of view.
+
+Whether a function came from a static or dynamic extension should not matter to user code.
+
+Proposed MLPL surface syntax
+Here’s a practical direction.
+
+Loading
+plugin.load "/opt/mlpl/plugins/libmlpl_stats.dylib"
+plugin.load "mlpl_cuda"
+The second form could resolve via plugin search paths.
+
+Listing
+plugin.list
+plugin.info "mlpl_cuda"
+names "stats"
+Calling registered functions
+stats.mean 1 2 3 4
+x stats.corr y
+cuda.matmul A B
+Importing aliases
+use stats
+mean 1 2 3 4
+or
+
+use stats.{mean stddev}
+If you want a cleaner namespace story.
+
+Proposed Rust-side development model
+For plugin authors, I’d provide:
+
+Crates
+mlpl-plugin-abi
+raw #[repr(C)] structs
+
+exported constants
+
+ABI versioning
+
+mlpl-plugin-sdk
+safe wrappers
+
+registration helpers
+
+procedural macros optional
+
+mlpl-runtime
+host implementation
+
+loader
+
+registry
+
+Plugin author experience
+Ideally plugin authors write something like:
+
+use mlpl_plugin_sdk::prelude::*;
+
+fn mean(ctx: &CallContext, y: Value) -> Result<Value> {
+    let arr = y.as_numeric_array_f64()?;
+    Ok(Value::scalar(arr.iter().sum::<f64>() / arr.len() as f64))
+}
+
+mlpl_plugin! {
+    id: "mlpl.stats",
+    version: "0.1.0",
+    namespace: "stats",
+    functions: [
+        function("mean").monadic(mean).doc("Mean of numeric array")
+    ]
+}
+The macro emits the ABI entry point.
+
+That gives you a strong developer story without making ABI stability depend on Rust traits.
+
+How user-defined MLPL functions and Rust functions should align
+Since you’re about to add user-defined functions, I would make sure both support the same semantic categories.
+
+User-defined function examples
+Depending on your syntax, something like:
+
+square ← {⍵ × ⍵}
+sumsq  ← {(+/ ⍵ × ⍵)}
+hypot  ← {(square ⍺) + (square ⍵) * 0.5}
+Conceptually these compile into the same callable registry form.
+
+Foreign function alignment
+Rust-registered functions should be first-class values too.
+
+That means they can be:
+
+assigned to names
+
+passed to higher-order operators later
+
+composed with user functions
+
+introspected
+
+For example:
+
+f ← stats.mean
+g ← {f ⍵}
+If you treat Rust functions as second-class “special commands,” composition becomes awkward.
+
+Make them first-class callables.
+
+Suggested MVP scope
+To keep this tractable, I would start with a constrained v1.
+
+v1 of user functions
+Support:
+
+monadic and dyadic functions
+
+lexical scope
+
+calling built-ins and other user-defined functions
+
+no user-defined operators/adverbs yet
+
+v1 of Rust extensions
+Support:
+
+dynamic load of shared library
+
+register named monadic/dyadic functions
+
+numeric scalars and dense numeric arrays
+
+strings
+
+structured errors
+
+namespace registration
+
+introspection metadata
+
+host-owned values
+
+no plugin-defined syntax
+
+no direct plugin-to-plugin loading
+
+no unload, or unload only at process exit
+
+That is enough to be useful and avoids the hardest traps.
+
+What not to do in v1
+I would avoid these initially:
+
+1. Exposing evaluator internals
+Don’t pass ASTs, environments, or symbol tables directly to plugins.
+
+2. Letting plugins mutate arbitrary runtime state
+Keep interaction through host APIs.
+
+3. Full zero-copy mutable array access
+Read-only views are much safer at first.
+
+4. Plugin-defined parser extensions
+That is much harder than function extensions.
+
+5. True hot-unload/reload
+Library unloading is often fragile due to lingering function pointers and state.
+
+6. Arbitrary plugin-side dlopen
+Keep load policy centralized.
+
+A concrete SPI sketch
+Here is a compact version of what I would actually define.
+
+Host-side concepts
+MlplValueHandle
+MlplCallContextV1
+MlplHostApiV1
+MlplFunctionDescriptorV1
+MlplRegistrarV1
+MlplStatus
+Plugin entry point
+mlpl_plugin_init_v1(host, registrar) -> status
+Plugin registers
+metadata
+
+namespace
+
+callables
+
+Callable descriptor includes
+name
+
+namespace
+
+docs
+
+valence support
+
+capability flags
+
+type/shape expectations
+
+function pointers
+
+Host API includes
+inspect value
+
+construct value
+
+retain/release
+
+error creation
+
+optional eval callback
+
+logging
+
+plugin metadata registration
+
+Example lifecycle
+1. User loads plugin
+plugin.load "mlpl_stats"
+2. Runtime loads shared library
+Finds mlpl_plugin_init_v1
+
+3. Runtime passes host API and registrar
+Plugin registers:
+
+namespace stats
+
+function mean
+
+function variance
+
+4. User invokes
+stats.mean data
+5. Evaluator resolves callable
+Calls plugin monadic entrypoint with data
+
+6. Plugin inspects array, computes result, returns value handle
+Security / trust model
+If extensions can do arbitrary Rust, they are native code. That means they are effectively fully trusted unless sandboxed externally.
+
+So the language should be honest about that.
+
+Recommended policy modes
+You might support runtime modes like:
+
+--allow-plugins=none
+
+--allow-plugins=signed
+
+--allow-plugins=local
+
+--allow-plugins=all
+
+And maybe per-plugin capability approval:
+
+allow network?
+
+allow filesystem?
+
+allow loading models?
+
+allow GPU?
+
+Even if you don’t enforce much in v1, model the metadata now.
+
+Best overall design choice
+If I were designing MLPL, I would choose this:
+
+Core rule
+Everything callable in MLPL is a first-class callable with monadic/dyadic invocation semantics.
+
+Rust extension rule
+Rust integration uses a stable C ABI plugin boundary plus a safe Rust SDK.
+
+Value boundary rule
+Plugins never own interpreter internals; they use host-managed value handles and host services.
+
+Dynamic loading rule
+Only the host runtime loads plugins. Plugins declare dependencies; they do not recursively dlopen things on their own in v1.
+
+User-facing rule
+Plugins load into namespaces and are called exactly like ordinary MLPL functions.
+
+That gives you:
+
+good language coherence
+
+safe evolution of runtime internals
+
+real dynamic loading
+
+a reasonable Rust experience
+
+future room for GPU/MLX/CUDA/llama.cpp integrations
+
+A practical starter contract
+If you want the shortest concrete version, start with this contract:
+
+Plugin export
+extern "C" fn mlpl_plugin_init_v1(
+    host: *const MlplHostApiV1,
+    registrar: *mut MlplRegistrarV1
+) -> MlplStatus
+Registered function signature
+extern "C" fn monad(
+    ctx: *const MlplCallContextV1,
+    y: MlplValueHandle,
+    out: *mut MlplValueHandle
+) -> MlplStatus
+
+extern "C" fn dyad(
+    ctx: *const MlplCallContextV1,
+    x: MlplValueHandle,
+    y: MlplValueHandle,
+    out: *mut MlplValueHandle
+) -> MlplStatus
+Host services
+inspect scalar/array/string
+
+create scalar/array/string/error
+
+retain/release value
+
+log
+
+register function
+
+MLPL surface
+plugin.load "mlpl_stats"
+stats.mean data
+That is enough to launch.
+
+Suggested next step
+The next artifact worth producing is a versioned plugin ABI spec with:
+
+abi.md
+
+spi.md
+
+runtime-loading.md
+
+examples/stats-plugin/
+
+examples/cuda-plugin/
+
+examples/user-functions.mlpl
+
+I can draft that spec and a Rust skeleton for:
+
+mlpl-plugin-abi
+
+mlpl-plugin-sdk
+
+a sample stats dynamic plugin
+
+and the MLPL-side plugin.load design.
+
+
+
+
