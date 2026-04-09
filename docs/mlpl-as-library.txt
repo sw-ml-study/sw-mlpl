@@ -1,0 +1,1395 @@
+
+
+
+
+I have an APL inspired ML. oriented programming language.  I want to be able to call it from Rust (e.g. a CLI or a Web App CRUD/REST server).  Rust should be able to introspect my language's builtin-function, and invoke them (like a FFI, like calling a Python library in C from Rust).  What would it take to do this?
+
+You want an embedding API in both directions:
+
+Rust host → your language runtime
+
+load or initialize the runtime
+
+discover builtins, signatures, metadata, docs, shapes, types, capabilities
+
+call builtins and user-defined functions
+
+exchange arrays, scalars, strings, records, and errors
+
+control evaluation, memory, timeouts, and isolation
+
+Your language → Rust extensions
+
+register Rust functions as foreign builtins
+
+let the language call them safely
+
+expose metadata so they look like native primitives
+
+That is very doable. The cleanest approach is to treat your language runtime as an embeddable VM / engine with a stable C-style ABI surface, while keeping your internal implementation in Rust. Then provide a more ergonomic Rust crate on top.
+
+1. High-level architecture
+The most robust design is a 3-layer interface:
+
+Layer A: core runtime
+Your language implementation itself:
+
+parser
+
+compiler / bytecode generator / evaluator
+
+array engine
+
+builtin registry
+
+environment / namespace
+
+error handling
+
+memory manager / GC / refcount / arena
+
+Layer B: stable embedding ABI
+A narrow API surface that Rust hosts can call:
+
+create engine
+
+create context/session
+
+evaluate code
+
+look up builtin metadata
+
+invoke builtin by id/name
+
+marshal values in/out
+
+register foreign functions
+
+This should be small, explicit, versioned.
+
+Layer C: ergonomic Rust SDK
+A Rust crate wrapping the ABI:
+
+typed Rust enums/structs
+
+safe handles
+
+builder-pattern host setup
+
+serde integration
+
+async helpers for web servers
+
+ndarray / arrow / candle / tract / mlx bridge adapters if desired
+
+This separation matters because:
+
+the ABI gives you long-term stability
+
+the Rust SDK gives ergonomics
+
+the runtime internals can keep evolving
+
+2. Decide what “call it from Rust” means
+There are three increasingly powerful use cases.
+
+A. Evaluate source strings
+Rust does:
+
+initialize runtime
+
+load script/module text
+
+evaluate expression/function
+
+get result back
+
+Example:
+
+let result = engine.eval("+/ 1 2 3 4")?;
+Good for:
+
+CLI scripting
+
+configuration
+
+ad hoc analysis
+
+admin tools
+
+B. Discover and call builtins directly
+Rust does:
+
+enumerate builtins
+
+inspect metadata
+
+invoke builtin by stable id or symbol without parsing source text
+
+Example:
+
+let plus_reduce = engine.lookup_builtin("+/")?;
+let result = engine.call_builtin(plus_reduce, &[array])?;
+Good for:
+
+REST backends
+
+web app endpoints
+
+IDE integration
+
+testing harnesses
+
+performance-sensitive embedding
+
+C. Register Rust functions as foreign builtins
+Rust does:
+
+define a function
+
+describe its metadata
+
+register it with engine
+
+language code calls it like a builtin
+
+Example:
+
+result ← rust_http_get url
+Good for:
+
+ML backends
+
+storage access
+
+web APIs
+
+database bridges
+
+GPU / tensor extensions
+
+For your use case, you want all three.
+
+3. The most important design decision: execution model
+You need to choose whether your language runtime is:
+
+Option 1: library-style evaluator
+Rust links directly to your runtime crate.
+
+Pros
+
+simplest
+
+fastest
+
+easiest debugging
+
+easiest zero-copy internal representations
+
+Cons
+
+host and runtime are tightly coupled
+
+plugin ABI is harder if you want dynamic loading later
+
+Best if:
+
+same repo / workspace
+
+same Rust toolchain
+
+same release cadence
+
+Option 2: stable ABI runtime
+Runtime exposes a C ABI or equivalent stable boundary.
+
+Pros
+
+can be used from Rust, C, other languages
+
+easier dynamic loading
+
+easier plugin system
+
+cleaner long-term compatibility story
+
+Cons
+
+more design work
+
+marshaling overhead
+
+fewer zero-cost abstractions
+
+Best if:
+
+you want extensions
+
+you want external host apps
+
+you want versioned embedding
+
+Option 3: out-of-process engine
+Rust talks to your language over IPC/REST/stdin/stdout.
+
+Pros
+
+strongest isolation
+
+best for untrusted code
+
+easy crash containment
+
+Cons
+
+higher latency
+
+worse data movement
+
+not FFI-like
+
+Best if:
+
+multi-tenant service
+
+sandboxing is critical
+
+For your case, I would recommend:
+
+Recommended path
+start with library-style embedding
+
+define the APIs as if they were a stable ABI
+
+later add a thin C ABI wrapper if needed
+
+That gives you fast iteration without painting yourself into a corner.
+
+4. The core host-side API you need
+Your Rust host should see something like this conceptually:
+
+pub trait MlLangEngine {
+    type Error;
+    type Value;
+    type BuiltinId;
+    type FuncId;
+    type Context;
+
+    fn version(&self) -> VersionInfo;
+
+    fn create_context(&self) -> Result<Self::Context, Self::Error>;
+
+    fn eval(&self, ctx: &mut Self::Context, src: &str) -> Result<Self::Value, Self::Error>;
+
+    fn list_builtins(&self) -> Result<Vec<BuiltinInfo>, Self::Error>;
+
+    fn get_builtin(&self, name: &str) -> Result<Option<BuiltinInfo>, Self::Error>;
+
+    fn call_builtin(
+        &self,
+        ctx: &mut Self::Context,
+        builtin: Self::BuiltinId,
+        args: &[Self::Value],
+    ) -> Result<Self::Value, Self::Error>;
+
+    fn call_function(
+        &self,
+        ctx: &mut Self::Context,
+        func: Self::FuncId,
+        args: &[Self::Value],
+    ) -> Result<Self::Value, Self::Error>;
+
+    fn register_foreign(&self, spec: ForeignFuncSpec) -> Result<(), Self::Error>;
+}
+This is the heart of it.
+
+5. What builtin introspection should expose
+If Rust is going to “introspect builtins,” then every builtin needs machine-readable metadata.
+
+At minimum:
+
+pub struct BuiltinInfo {
+    pub id: u32,
+    pub name: String,
+    pub glyph: Option<String>,
+    pub aliases: Vec<String>,
+    pub category: BuiltinCategory,
+    pub doc_summary: String,
+    pub doc_detail: Option<String>,
+    pub arities: Vec<ArityInfo>,
+    pub purity: Purity,
+    pub volatility: Volatility,
+    pub shape_rules: Option<String>,
+    pub type_rules: Option<String>,
+    pub thread_safety: ThreadSafety,
+    pub features: Vec<String>,
+}
+And arity metadata:
+
+pub struct ArityInfo {
+    pub kind: CallKind,          // monadic, dyadic, variadic, operator, adverb, conjunction
+    pub min_args: usize,
+    pub max_args: Option<usize>,
+    pub left_arg: Option<ParamInfo>,
+    pub right_args: Vec<ParamInfo>,
+    pub result: ResultInfo,
+}
+And parameter metadata:
+
+pub struct ParamInfo {
+    pub name: String,
+    pub kinds: Vec<ValueKind>,   // scalar, vector, matrix, tensor, function, namespace, etc.
+    pub optional: bool,
+    pub repeated: bool,
+}
+This gives you:
+
+CLI help generation
+
+IDE completion
+
+REST schema generation
+
+automatic docs
+
+runtime validation
+
+web UI forms for builtin invocation
+
+For an APL-inspired language, include:
+
+rank support
+
+shape compatibility info
+
+broadcast/scalar extension behavior
+
+axis parameter rules
+
+whether function accepts function operands
+
+whether it is a modifier/operator rather than a callable value
+
+That last point is important because APL-family languages often distinguish:
+
+functions
+
+operators/adverbs/conjunctions/modifiers
+
+arrays
+
+namespaces
+
+tacit compositions
+
+Your metadata model should reflect that rather than pretending everything is just fn(Vec<Value>) -> Value.
+
+6. Define a universal value model
+The runtime boundary lives or dies by the value model.
+
+A good starter model:
+
+pub enum Value {
+    Unit,
+    Bool(bool),
+    Int(i64),
+    Float(f64),
+    Complex { re: f64, im: f64 },
+    Char(char),
+    String(String),
+
+    Array(ArrayValue),
+    Func(FuncRef),
+    Namespace(NamespaceRef),
+    Record(RecordValue),
+    Foreign(ForeignHandle),
+}
+And arrays:
+
+pub struct ArrayValue {
+    pub elem_type: ElemType,
+    pub shape: Vec<usize>,
+    pub data: ArrayData,
+}
+Where ArrayData can be:
+
+owned bytes/buffer
+
+shared refcounted buffer
+
+borrowed slice
+
+strided view
+
+sparse representation later
+
+For ML orientation, you will likely also want:
+
+F16, BF16
+
+I8, U8, I16, U16, I32, U32, I64, U64
+
+F32, F64
+
+maybe quantized tensor blocks later
+
+device placement metadata: CPU / CUDA / MLX / Metal / WASM / remote
+
+Example:
+
+pub struct TensorHandle {
+    pub elem_type: ElemType,
+    pub shape: Vec<usize>,
+    pub device: DeviceKind,
+    pub layout: LayoutKind,
+    pub storage: StorageKind,
+}
+Important design question:
+
+Do you copy arrays across the boundary or share them?
+Copying
+Pros
+
+easy
+
+safe
+
+simple ownership
+
+Cons
+
+expensive for ML/tensor workloads
+
+Shared buffers / views
+Pros
+
+efficient
+
+zero-copy possible
+
+Cons
+
+much harder lifetime management
+
+Recommendation
+Support both:
+
+simple copy-based API first
+
+advanced borrowed/shared buffer API second
+
+7. Handles, not raw pointers
+Do not expose your internals directly.
+
+Use opaque handles:
+
+pub struct EngineHandle(u64);
+pub struct ContextHandle(u64);
+pub struct FuncHandle(u64);
+pub struct NamespaceHandle(u64);
+pub struct ValueHandle(u64);
+Internally, map handles to runtime objects. This gives you:
+
+ownership control
+
+easier validation
+
+safer error reporting
+
+future ABI compatibility
+
+For a C ABI, make them opaque pointers or integer ids. For pure Rust, wrap them in typed structs.
+
+8. Separate engine, context, and session
+This matters a lot in CLI and server use.
+
+Engine
+Global immutable-ish runtime:
+
+builtin table
+
+parser tables
+
+module cache
+
+configuration defaults
+
+foreign function registry
+
+Context
+Execution environment:
+
+variables
+
+namespaces
+
+loaded modules
+
+random state
+
+runtime options
+
+per-request scratch memory
+
+Session / evaluation frame
+Transient call state:
+
+stack
+
+cancellation token
+
+tracing
+
+diagnostics
+
+source spans
+
+For a REST server, typically:
+
+one shared Engine
+
+one Context per user/session/request class
+
+one evaluation frame per API call
+
+This helps with concurrency and isolation.
+
+9. How Rust should invoke builtins
+You need two styles.
+
+Style A: by name
+Easy, slower, flexible:
+
+engine.call_named(ctx, "reshape", &[shape, data])?;
+Style B: by stable id
+Fast, better for generated code:
+
+let reshape_id = engine.lookup_builtin_id("reshape")?;
+engine.call_builtin(ctx, reshape_id, &[shape, data])?;
+I would make builtin ids:
+
+stable within a runtime major version
+
+documented as not stable across incompatible major versions unless explicitly promised
+
+Best practice:
+
+names are stable public interface
+
+ids are optimized internal/public-with-caveat interface
+
+10. Treat builtins and user functions uniformly where possible
+A useful abstraction is:
+
+pub enum CallableRef {
+    Builtin(BuiltinId),
+    User(FuncId),
+    Foreign(ForeignFuncId),
+    Derived(FuncId),   // composition, operators, partials, tacit forms
+}
+Then:
+
+fn call(ctx: &mut Context, callee: CallableRef, args: &[Value]) -> Result<Value, Error>;
+This is valuable because in an APL-like language:
+
+builtin functions
+
+derived functions
+
+compositions
+
+operator applications
+
+all behave like callables even though they are not implemented identically.
+
+11. Foreign Rust function registration
+This is where extension design starts.
+
+A solid registration model looks like:
+
+pub struct ForeignFuncSpec {
+    pub name: String,
+    pub aliases: Vec<String>,
+    pub arities: Vec<ArityInfo>,
+    pub doc_summary: String,
+    pub purity: Purity,
+    pub thread_safety: ThreadSafety,
+    pub capabilities: Vec<Capability>,
+    pub callback: ForeignCallback,
+}
+And the callback:
+
+pub type ForeignCallback =
+    Arc<dyn Fn(&mut ForeignCallContext, &[Value]) -> Result<Value, ForeignError> + Send + Sync>;
+ForeignCallContext can expose:
+
+logging
+
+allocation helpers
+
+cancellation checks
+
+module loading
+
+access to current namespace
+
+host services
+
+capability checks
+
+This lets Rust extensions feel like first-class builtins.
+
+12. Safety model for foreign functions
+This is where many runtimes become messy.
+
+You should classify foreign functions by capability:
+
+pub enum Capability {
+    FileRead,
+    FileWrite,
+    NetworkClient,
+    NetworkServer,
+    DbAccess,
+    ProcessSpawn,
+    GpuAccess,
+    UnsafeMemory,
+    HostCallback,
+}
+Then contexts or sandboxes can allow/deny them.
+
+For example:
+
+CLI mode: allow file/network
+
+browser/WASM mode: deny process/file unless proxied
+
+multi-tenant REST mode: deny most host powers by default
+
+This prevents your language from becoming an accidental remote code execution surface.
+
+13. Error model
+Do not just return strings.
+
+Use structured errors:
+
+pub struct RuntimeError {
+    pub kind: ErrorKind,
+    pub code: String,
+    pub message: String,
+    pub span: Option<SourceSpan>,
+    pub traceback: Vec<FrameInfo>,
+    pub notes: Vec<String>,
+}
+Kinds:
+
+parse
+
+type
+
+rank
+
+shape
+
+domain
+
+name resolution
+
+arity
+
+capability denied
+
+foreign function failure
+
+timeout
+
+cancellation
+
+internal runtime error
+
+For REST/CLI/UI embedding, structured errors are extremely valuable.
+
+14. Memory ownership rules
+This is one of the hardest parts. You need a clear contract.
+
+Safe default contract
+values returned to host are owned host-visible values
+
+host can clone/drop them independently
+
+runtime does not invalidate them unexpectedly
+
+Advanced contract
+host may receive borrowed/shared array views
+
+these are valid only for some lifetime tied to context/frame
+
+mutation rules must be explicit
+
+For early versions, prefer:
+
+immutable values crossing the boundary
+
+copy-on-write or shared immutable buffers
+
+no host mutation of runtime-owned arrays unless explicitly supported
+
+That will save you a lot of pain.
+
+15. Async, concurrency, and servers
+Since you mentioned CLI and CRUD/REST server:
+
+CLI
+Simple:
+
+one engine
+
+one context
+
+sync calls are fine
+
+REST server
+You need to decide:
+
+can the runtime be called concurrently?
+
+is a context Send / Sync?
+
+are evaluations re-entrant?
+
+can foreign functions block?
+
+My recommendation:
+
+Recommended server design
+Engine: Send + Sync
+
+Context: not shared across concurrent requests unless explicitly synchronized
+
+each request uses its own context or a pooled context
+
+long-running evals get cancellation tokens and timeouts
+
+foreign functions should ideally support async bridging, but keep runtime core sync first
+
+A reasonable pattern:
+
+synchronous runtime core
+
+async Rust server wrapper
+
+spawn_blocking for heavy compute if necessary
+
+explicit cancellation polling in evaluator
+
+16. Module / namespace API
+Rust hosts often need more than “eval this string.”
+
+Useful APIs:
+
+load_module(path/text)
+
+list_exports(module)
+
+get_export(module, name)
+
+set_global(name, value)
+
+get_global(name)
+
+call_export(module, name, args)
+
+Example:
+
+let module = engine.load_module_text("mymod", src)?;
+let exports = engine.list_exports(module)?;
+let out = engine.call_export(ctx, module, "train_step", &[batch])?;
+That is especially useful for:
+
+web apps
+
+plugin packs
+
+ML notebooks
+
+precompiled module caches
+
+17. Two metadata layers: public docs and execution contract
+Each builtin should expose:
+
+Human metadata
+name
+
+aliases
+
+docs
+
+examples
+
+category
+
+Machine metadata
+arity
+
+accepted kinds
+
+rank/shape rules
+
+purity
+
+deterministic or not
+
+allocates or not
+
+device requirements
+
+side effects
+
+thread safety
+
+Do not conflate these. You will want both.
+
+18. If you want Python-like embedding, mimic the good parts, not the bad parts
+Python embedding works because it provides:
+
+interpreter lifecycle
+
+object model
+
+reflection
+
+callable invocation
+
+module imports
+
+exceptions
+
+reference counting rules
+
+You need the same equivalents:
+
+Python embedding idea	Your language equivalent
+Py_Initialize()	Engine::new()
+PyObject*	Value / ValueHandle
+module import	module/namespace load
+callable object	CallableRef
+PyObject_Call*	call_builtin, call_function, call_export
+PyErr_*	structured runtime error
+reflection	builtin/function/module metadata
+But avoid:
+
+ad hoc global interpreter state
+
+implicit ownership traps
+
+stringly-typed reflection everywhere
+
+19. What it would take in implementation terms
+Here is the concrete work breakdown.
+
+Phase 1: stabilize the runtime core
+You need:
+
+a canonical Value representation
+
+a canonical callable abstraction
+
+a builtin registry
+
+a context/environment object
+
+structured errors
+
+Without this, embedding will stay ad hoc.
+
+Phase 2: build builtin registry + metadata
+Every builtin should register itself through a single mechanism:
+
+BuiltinSpec {
+    id,
+    name,
+    aliases,
+    arities,
+    docs,
+    implementation,
+}
+This registry becomes the source of truth for:
+
+evaluator dispatch
+
+docs
+
+introspection
+
+host invocation
+
+Phase 3: define the host embedding API
+Create a crate, for example:
+
+mlpl-runtime
+
+mlpl-host
+
+mlpl-ffi
+
+With APIs for:
+
+engine lifecycle
+
+context lifecycle
+
+eval
+
+lookup
+
+call
+
+module load
+
+global variable access
+
+Phase 4: define value marshaling
+Implement conversions:
+
+Rust scalar ↔ language scalar
+
+Vec<T> ↔ vector
+
+ndarray or your own tensor buffer ↔ array
+
+JSON ↔ record/namespace/value
+
+strings/errors/docs
+
+Phase 5: add foreign function registration
+Allow Rust code to register functions as:
+
+builtin-like callables
+
+namespace members
+
+modules
+
+Phase 6: add sandboxing and capabilities
+Before exposing this in a web server, add:
+
+timeouts
+
+cancellation
+
+memory limits
+
+capability restrictions
+
+max recursion / max result size
+
+Phase 7: add optional stable ABI / dynamic loading
+Only after the in-process Rust API feels right.
+
+20. Recommended crate split
+Given your preferences, I would keep it small:
+
+mlpl-core
+Pure data types only:
+
+Value
+
+Error
+
+metadata structs
+
+ids/handles
+
+traits for callables
+
+mlpl-runtime
+Interpreter/evaluator/array engine:
+
+builtin registry
+
+parser/eval integration
+
+context
+
+module system
+
+mlpl-host
+Ergonomic Rust embedding:
+
+builders
+
+typed conversions
+
+server helpers
+
+serde/JSON integration
+
+mlpl-ffi later
+Only if you want stable dynamic/plugin ABI.
+
+That keeps concerns clean.
+
+21. Minimal builtin registration design
+Something along these lines is a good center of gravity:
+
+pub struct BuiltinSpec {
+    pub id: BuiltinId,
+    pub name: &'static str,
+    pub aliases: &'static [&'static str],
+    pub category: BuiltinCategory,
+    pub arities: &'static [AritySpec],
+    pub doc_summary: &'static str,
+    pub implementation: BuiltinImpl,
+}
+
+pub type BuiltinImpl =
+    fn(ctx: &mut EvalContext, args: &[Value]) -> Result<Value, RuntimeError>;
+And registry:
+
+pub struct BuiltinRegistry {
+    by_id: HashMap<BuiltinId, BuiltinSpec>,
+    by_name: HashMap<String, BuiltinId>,
+}
+Then host introspection becomes trivial.
+
+22. Minimal host API example
+pub struct Engine {
+    registry: BuiltinRegistry,
+    // parser/compiler/runtime state
+}
+
+impl Engine {
+    pub fn new() -> Result<Self, RuntimeError> { /* ... */ }
+
+    pub fn list_builtins(&self) -> Vec<BuiltinInfo> { /* ... */ }
+
+    pub fn get_builtin(&self, name: &str) -> Option<BuiltinInfo> { /* ... */ }
+
+    pub fn call_builtin(
+        &self,
+        ctx: &mut Context,
+        name: &str,
+        args: &[Value],
+    ) -> Result<Value, RuntimeError> {
+        /* lookup -> dispatch */
+    }
+
+    pub fn eval(
+        &self,
+        ctx: &mut Context,
+        src: &str,
+    ) -> Result<Value, RuntimeError> {
+        /* parse -> compile -> eval */
+    }
+
+    pub fn register_foreign(
+        &mut self,
+        spec: ForeignFuncSpec,
+    ) -> Result<(), RuntimeError> {
+        /* ... */
+    }
+}
+23. Web app / REST implications
+If a web service is going to call your language, design for these nonfunctional requirements now:
+
+Determinism
+Can a request produce stable results given same inputs?
+
+Isolation
+Can one request contaminate another request’s namespace or random state?
+
+Resource limits
+Can a user send an expression that explodes memory or CPU?
+
+Serialization
+Can values cleanly round-trip through JSON?
+
+Observability
+Can you trace builtin calls and failures?
+
+Versioning
+Can one service version pin a known builtin set?
+
+This argues strongly for:
+
+per-request context
+
+capability controls
+
+structured traces
+
+explicit value-to-JSON conversion policy
+
+24. JSON bridge is worth building early
+For CRUD/REST, a JSON bridge is almost mandatory.
+
+You want:
+
+fn value_to_json(v: &Value) -> serde_json::Value;
+fn json_to_value(v: &serde_json::Value) -> Result<Value, ConversionError>;
+You will need policy decisions for:
+
+arrays of mixed type
+
+namespaces/records
+
+functions
+
+NaN / Infinity
+
+big integers
+
+tensor binary blobs
+
+For ML arrays, often the best REST representation is:
+
+{
+  "dtype": "f32",
+  "shape": [2, 3],
+  "data": [1.0, 2.0, 3.0, 4.0, 5.0, 6.0]
+}
+or for large data:
+
+{
+  "dtype": "f32",
+  "shape": [1024, 1024],
+  "buffer_id": "..."
+}
+25. Dynamic loading: do it later unless you already need it
+You mentioned “like FFI.” If by that you also mean dynamic extension modules, be careful.
+
+Dynamic loading is useful, but it adds:
+
+ABI compatibility problems
+
+symbol/version mismatch
+
+allocator mismatch
+
+panic/unwind boundary problems
+
+platform-specific headaches
+
+Better progression
+static registration inside Rust
+
+load Rust extension crates in same build
+
+then maybe dynamic plugins
+
+or use WASM plugins for safer isolation
+
+If you want third-party extensibility without native ABI pain, WASM plugins are very attractive:
+
+stable boundary
+
+sandboxable
+
+portable
+
+hostcall model maps nicely to your runtime
+
+Native dynamic libraries are faster, but operationally harder.
+
+26. The core contracts you should write down
+Before coding too much, write these contracts.
+
+Value contract
+what values exist
+
+mutability rules
+
+ownership rules
+
+serialization rules
+
+Callable contract
+how monadic/dyadic/operator forms are represented
+
+how function operands are handled
+
+how derived callables are represented
+
+Builtin metadata contract
+required fields
+
+optional fields
+
+stable ids or not
+
+docs/examples format
+
+Foreign function contract
+callback signature
+
+allowed side effects
+
+error return semantics
+
+panic handling
+
+thread safety
+
+Embedding lifecycle contract
+engine/context/session lifecycle
+
+concurrency rules
+
+cancellation/timeouts
+
+cleanup/drop semantics
+
+These contracts matter more than the first code.
+
+27. Biggest risks
+Risk 1: pretending everything is “just a function”
+In APL-like languages, operators/modifiers/derived functions matter. Model them explicitly.
+
+Risk 2: weak value model
+If arrays/tensors/functions/namespaces are not first-class in the embedding API, you will regret it.
+
+Risk 3: unclear ownership
+This becomes a source of crashes or artificial copying.
+
+Risk 4: no metadata registry
+Then introspection becomes scattered and fragile.
+
+Risk 5: exposing too much of runtime internals
+That blocks refactoring later.
+
+Risk 6: unsafe server exposure
+Without limits/capabilities, embedding inside REST can become a security and stability problem.
+
+28. Best first implementation path
+I would build this in this order:
+
+Step 1
+Define:
+
+Value
+
+RuntimeError
+
+BuiltinInfo
+
+ForeignFuncSpec
+
+Step 2
+Make every builtin register via one central registry.
+
+Step 3
+Implement:
+
+list_builtins
+
+get_builtin
+
+call_builtin(name, args)
+
+without even worrying about source parsing yet.
+
+Step 4
+Add:
+
+eval(src)
+
+load_module
+
+call_export
+
+Step 5
+Add:
+
+Rust-to-value conversions
+
+value-to-JSON conversions
+
+Step 6
+Add foreign Rust function registration.
+
+Step 7
+Add resource control and tracing.
+
+That sequence gives you value quickly and keeps architecture clean.
+
+29. A small concrete example
+Here is the shape of a pleasant host-side API.
+
+let mut engine = Engine::new()?;
+let mut ctx = engine.create_context();
+
+for b in engine.list_builtins() {
+    println!("{} {:?}", b.name, b.arities);
+}
+
+let x = Value::from_vec_f64(vec![1.0, 2.0, 3.0, 4.0], vec![4]);
+let result = engine.call_builtin(&mut ctx, "sum", &[x])?;
+
+engine.register_foreign(ForeignFuncSpec::simple(
+    "double",
+    |_, args| {
+        let n = args[0].as_i64()?;
+        Ok(Value::Int(n * 2))
+    }
+))?;
+
+let y = engine.eval(&mut ctx, "double 21")?;
+assert_eq!(y.as_i64()?, 42);
+That is the developer experience you want.
+
+30. Bottom line
+What it would take is:
+
+Required foundations
+a stable runtime Value model
+
+a builtin registry with rich metadata
+
+a uniform callable abstraction
+
+a host Engine/Context API
+
+structured errors
+
+explicit ownership rules
+
+Then for Rust embedding
+safe Rust wrapper crate
+
+builtin introspection methods
+
+direct builtin invocation methods
+
+eval/module APIs
+
+Rust foreign-function registration
+
+JSON/array marshaling
+
+Then for production use
+timeouts
+
+cancellation
+
+capability sandboxing
+
+tracing
+
+per-request isolation
+
+If you want, I can turn this into a concrete Rust API design with:
+
+trait definitions
+
+struct layouts
+
+crate layout
+
+sample builtin registry code
+
+sample register_foreign implementation
+
+sample Axum REST integration for calling your language from a web server.
+
+
+
+
