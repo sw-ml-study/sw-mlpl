@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-964dab5fee145de0.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-964dab5fee145de0_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-4df8fb78af4f3b41.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-4df8fb78af4f3b41_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -17,6 +17,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
     <link rel="icon" href="/sw-mlpl/favicon-31c28a69865ebe2b.ico" integrity="sha384-dYOp5HPtgcVJNpgY9aJzLcaf8cB2SOg7pMoVVpJ6pdpZI8ww94WDtK16GRLmglhk"/>
+    
     <style>
         /* Catppuccin Mocha */
         :root {
@@ -72,6 +73,14 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             font-size: 22px;
             font-weight: 700;
             color: var(--blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .title-badge {
+            height: 28px;
+            width: auto;
+            display: block;
         }
         header span {
             font-size: 15px;
@@ -437,7 +446,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             cursor: not-allowed;
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-964dab5fee145de0.js" crossorigin="anonymous" integrity="sha384-90IsY7GODfs38t0ciCQcdL7pyBugcXWIXW1ZaIOf7PO7HoP0lXwxQGqb0nFQfSpo"><link rel="preload" href="/sw-mlpl/mlpl-web-964dab5fee145de0_bg.wasm" crossorigin="anonymous" integrity="sha384-4qELU6nvO9dpufbrFv9rBGMduX+632pG0u7KCKY7ejzcfCRt8HlR3SyPV8L+bJjZ" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-4df8fb78af4f3b41.js" crossorigin="anonymous" integrity="sha384-a5oAWjwpldh2A3/OvdrE5b/k1oD2RKkRRDHTljdaLOr04XprTrr2MDjNuxNvpl7Q"><link rel="preload" href="/sw-mlpl/mlpl-web-4df8fb78af4f3b41_bg.wasm" crossorigin="anonymous" integrity="sha384-gbCov+XssnZMSZWpfh48qRjeaxqee2oxxb/wzw80fu8y2XEIOyeH7iDSk54p0OdA" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
