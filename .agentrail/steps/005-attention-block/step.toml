@@ -1,6 +1,6 @@
 number = 5
 slug = "attention-block"
-status = "pending"
+status = "in-progress"
 description = "Phase 4: Add an attention[d_model, heads] multi-head self-attention layer com..."
 role = "production"
 context_files = []

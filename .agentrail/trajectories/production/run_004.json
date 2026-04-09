@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "residual-and-norm"
+  },
+  "action": "Extended model.rs/model_dispatch.rs and 2 more dispatch arms in eval.rs; rms_norm has no learnable params for simplicity (layer_norm with affine can come later)",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-08T17:54:50"
+}

@@ -1,8 +1,9 @@
 number = 4
 slug = "residual-and-norm"
-status = "in-progress"
+status = "completed"
 description = "Phase 3: Add residual[block] (y = x + block(x)) and a normalization layer (pi..."
 role = "production"
 context_files = []
 created_at = "2026-04-08T15:51:22"
+completed_at = "2026-04-08T17:54:50"
 task_type = "production"
