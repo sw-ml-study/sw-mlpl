@@ -1,0 +1,1 @@
+Added Value::Model + ModelSpec::Linear, Environment models registry + next_model_id, linear(in,out,seed) and apply(model_ident,X) built-ins dispatched in eval.rs FnCall path. Surface decision: apply(model,X) (parser has no symbol table for model(X)). Assign now branches on Value::Model. 3 tests: shape, apply correctness, deterministic seeding.

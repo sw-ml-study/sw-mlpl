@@ -50,6 +50,46 @@ fn apply_linear_runs_matmul_plus_bias() {
 }
 
 #[test]
+fn chain_mlp_applies_through_layers_and_normalizes() {
+    // 2 -> 8 -> 2 chain ending in softmax: rows must sum to 1.
+    let mut env = Environment::new();
+    let src = "M = chain(linear(2, 8, 1), tanh_layer(), linear(8, 2, 2), softmax_layer())";
+    eval_program(&parse(&lex(src).unwrap()).unwrap(), &mut env).unwrap();
+    let names = model_params(&env, "M").unwrap();
+    assert_eq!(names.len(), 4, "two linear layers contribute W and b each");
+
+    env.set(
+        "X".into(),
+        arr(vec![3, 2], vec![0.5, -0.5, 1.0, 0.0, -1.0, 1.0]),
+    );
+    let stmts = parse(&lex("apply(M, X)").unwrap()).unwrap();
+    let out = eval_program(&stmts, &mut env).unwrap();
+    assert_eq!(out.shape().dims(), &[3, 2]);
+    for row in 0..3 {
+        let s = out.data()[row * 2] + out.data()[row * 2 + 1];
+        assert!(
+            (s - 1.0).abs() < 1e-9,
+            "row {row} of softmax should sum to 1, got {s}"
+        );
+        assert!(out.data()[row * 2] > 0.0);
+        assert!(out.data()[row * 2 + 1] > 0.0);
+    }
+}
+
+#[test]
+fn relu_layer_clamps_negatives() {
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("R = chain(relu_layer())").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    env.set("X".into(), arr(vec![1, 4], vec![-2.0, -0.5, 0.0, 3.0]));
+    let out = eval_program(&parse(&lex("apply(R, X)").unwrap()).unwrap(), &mut env).unwrap();
+    assert_eq!(out.data(), &[0.0, 0.0, 0.0, 3.0]);
+}
+
+#[test]
 fn linear_with_same_seed_produces_same_initial_weights() {
     let mut env_a = Environment::new();
     let mut env_b = Environment::new();
