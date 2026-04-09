@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 6,
+    "step": "port-mlp-demos"
+  },
+  "action": "TDD red/green with two grad-through-apply tests in grad_builtin_tests.rs; added apply arm in eval_tensor_fncall that delegates to a new apply_model_tape helper in model_dispatch.rs (kept next to apply_model to respect grad.rs LOC/fn budgets); ported both demos and verified via mlpl-repl -f; quality gates all green.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-09T10:13:31"
+}
