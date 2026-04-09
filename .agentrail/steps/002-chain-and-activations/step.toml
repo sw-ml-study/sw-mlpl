@@ -1,6 +1,6 @@
 number = 2
 slug = "chain-and-activations"
-status = "pending"
+status = "in-progress"
 description = "Phase 2: Add chain[layer1, layer2, ...] sequential composition and atomic act..."
 role = "production"
 context_files = []

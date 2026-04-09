@@ -11,7 +11,8 @@ use mlpl_trace::Trace;
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::model::ModelSpec;
+use crate::model::{ActKind, ModelSpec};
+use crate::value::Value;
 
 /// `linear(in_dim, out_dim, seed)`.
 pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
@@ -49,6 +50,35 @@ pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelS
     Ok(ModelSpec::Linear {
         w: w_name,
         b: b_name,
+    })
+}
+
+/// `chain(layer_a, layer_b, ...)`. Each argument must evaluate to a
+/// `Value::Model`.
+pub(crate) fn eval_chain(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+    let mut children = Vec::with_capacity(args.len());
+    for (i, arg) in args.iter().enumerate() {
+        match crate::eval::eval_expr(arg, env, &mut None)? {
+            Value::Model(m) => children.push(m),
+            _ => {
+                return Err(EvalError::Unsupported(format!(
+                    "chain: argument {i} did not evaluate to a model"
+                )));
+            }
+        }
+    }
+    Ok(ModelSpec::Chain(children))
+}
+
+/// Parameter-free activation layer constructors. Returns the
+/// matching `ActKind` if `name` is recognized.
+#[must_use]
+pub(crate) fn activation_kind(name: &str) -> Option<ActKind> {
+    Some(match name {
+        "tanh_layer" => ActKind::Tanh,
+        "relu_layer" => ActKind::Relu,
+        "softmax_layer" => ActKind::Softmax,
+        _ => return None,
     })
 }
 
@@ -101,6 +131,21 @@ fn apply_model(
             let b_broadcast = ones.matmul(b_arr)?;
             Ok(xw.apply_binop(&b_broadcast, |a, c| a + c)?)
         }
+        ModelSpec::Chain(children) => {
+            let mut cur = x.clone();
+            for child in children {
+                cur = apply_model(child, &cur, env)?;
+            }
+            Ok(cur)
+        }
+        ModelSpec::Activation(kind) => match kind {
+            ActKind::Tanh => Ok(x.map(f64::tanh)),
+            ActKind::Relu => Ok(x.map(|v| if v > 0.0 { v } else { 0.0 })),
+            ActKind::Softmax => Ok(mlpl_runtime::call_builtin(
+                "softmax",
+                vec![x.clone(), DenseArray::from_scalar(1.0)],
+            )?),
+        },
     }
 }
 

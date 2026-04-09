@@ -11,21 +11,34 @@
 //! which the parser does not know -- a free-standing `apply` built-in
 //! sidesteps the symbol-table problem and keeps the surface uniform.
 
-/// A model node. For step 001 only the atomic `Linear` layer exists;
-/// later steps will add `Chain`, `Activation`, `Residual`, `Norm`,
-/// and `Attention` variants.
+/// Activation kind for the parameter-free activation layers.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ActKind {
+    /// Element-wise hyperbolic tangent.
+    Tanh,
+    /// Element-wise rectified linear unit (`max(x, 0)`).
+    Relu,
+    /// Row-wise softmax (axis 1).
+    Softmax,
+}
+
+/// A model node. Built up step by step over Saga 11; later steps add
+/// `Residual`, `Norm`, and `Attention` variants.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ModelSpec {
-    /// `linear(in_dim, out_dim, seed)` -- y = X @ W + b, where
-    /// `W` has shape `[in_dim, out_dim]` and `b` has shape
-    /// `[1, out_dim]`. The two `String` fields are the parameter
-    /// names under which `W` and `b` are stored in the environment.
+    /// `linear(in_dim, out_dim, seed)` -- y = X @ W + b.
     Linear {
         /// Name of the weight parameter (`[in_dim, out_dim]`).
         w: String,
         /// Name of the bias parameter (`[1, out_dim]`).
         b: String,
     },
+    /// `chain(layer_a, layer_b, ...)` -- sequential composition.
+    /// Apply threads the input through each child in order.
+    Chain(Vec<ModelSpec>),
+    /// Parameter-free activation layer (`tanh_layer`, `relu_layer`,
+    /// `softmax_layer`).
+    Activation(ActKind),
 }
 
 impl ModelSpec {
@@ -36,6 +49,14 @@ impl ModelSpec {
     pub fn params(&self) -> Vec<String> {
         match self {
             Self::Linear { w, b } => vec![w.clone(), b.clone()],
+            Self::Chain(children) => {
+                let mut out = Vec::new();
+                for child in children {
+                    out.extend(child.params());
+                }
+                out
+            }
+            Self::Activation(_) => Vec::new(),
         }
     }
 }

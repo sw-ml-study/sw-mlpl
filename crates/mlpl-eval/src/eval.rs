@@ -83,6 +83,24 @@ pub(crate) fn eval_expr(
         return Ok(Value::Model(model));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "chain"
+    {
+        let model = crate::model_dispatch::eval_chain(args, env)?;
+        return Ok(Value::Model(model));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
+        && let Some(kind) = crate::model_dispatch::activation_kind(name)
+    {
+        if !args.is_empty() {
+            return Err(EvalError::BadArity {
+                func: name.into(),
+                expected: 0,
+                got: args.len(),
+            });
+        }
+        return Ok(Value::Model(crate::model::ModelSpec::Activation(kind)));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "apply"
     {
         let result = crate::model_dispatch::eval_apply(args, env, trace)?;
