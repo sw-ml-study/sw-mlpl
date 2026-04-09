@@ -1,0 +1,45 @@
+# Tiny 2-layer transformer block trained end-to-end with the Saga 11
+# model DSL. Each block is `rms_norm -> attention -> residual` then
+# `rms_norm -> MLP -> residual`, stacked twice, with a final `linear`
+# projection onto the target dimension. adam walks the whole stacked
+# model's param tree, and grad() sees through the entire forward pass
+# via apply(mdl, X) because the tape now lowers residual, rms_norm,
+# and single-head attention into primitive ops.
+#
+# Toy task: given a random rank-2 input of shape [seq, d_model], learn
+# to reconstruct a fixed target matrix Y. Loss should decrease
+# monotonically across the 100 adam steps.
+
+# ----- dimensions -----
+# seq = 6 tokens, d_model = 4, heads = 1 (multi-head tape lowering
+# is not yet supported; see docs/missing-demos.md).
+
+# ----- data -----
+X = randn(101, [6, 4])
+Y = randn(202, [6, 4])
+
+# ----- a single transformer-style block as a one-line chain -----
+# Two sub-blocks, each: rms_norm -> inner -> add residual.
+# The first inner is attention(4, 1, seed). The second is a tiny
+# 2-layer MLP linear(4, 8) -> relu -> linear(8, 4). The final
+# linear(4, 4) projects the stacked output onto the target space.
+mdl = chain(residual(chain(rms_norm(4), attention(4, 1, 301))), residual(chain(rms_norm(4), linear(4, 8, 311), relu_layer(), linear(8, 4, 312))), residual(chain(rms_norm(4), attention(4, 1, 321))), residual(chain(rms_norm(4), linear(4, 8, 331), relu_layer(), linear(8, 4, 332))), linear(4, 4, 341))
+
+# ----- training: 100 adam steps -----
+# The inner loss is mean squared error on the full [seq, d_model] output.
+train 100 {
+  adam(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)), mdl, 0.02, 0.9, 0.999, 0.00000001);
+  mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y))
+}
+
+# ----- evaluation -----
+# last_losses is a length-100 vector of per-step losses. Pick out the
+# first and last entries via iota/eq masks (MLPL has no array indexing)
+# and stack them so the final REPL line prints [first_loss, last_loss]
+# as a 2-vector, making the decrease visible at a glance. The
+# loss_curve chart gives the full trajectory.
+shape(last_losses)
+loss_curve(last_losses)
+first_loss = reduce_add(last_losses * eq(iota(100), 0))
+last_loss  = reduce_add(last_losses * eq(iota(100), 99))
+[first_loss, last_loss]

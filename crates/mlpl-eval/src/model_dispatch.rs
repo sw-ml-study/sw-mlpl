@@ -5,11 +5,7 @@
 //! generated names. `apply(model_ident, X)` looks up the model and
 //! evaluates it on the given input.
 
-use std::collections::HashMap;
-use std::rc::Rc;
-
 use mlpl_array::{DenseArray, Shape};
-use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
@@ -331,60 +327,8 @@ fn slice_cols(x: &DenseArray, start: usize, width: usize) -> Result<DenseArray, 
     Ok(DenseArray::new(Shape::new(vec![rows, width]), out)?)
 }
 
-/// Tape-side analogue of `apply_model` used by `grad(loss_with_apply, ...)`
-/// and therefore by `adam(loss_with_apply, mdl, ...)`. Walks the model
-/// and emits the same primitive ops onto the autograd tape so that
-/// gradients flow back into each layer's trainable leaves. Layers
-/// without primitive tape equivalents (residual/rms_norm/attention)
-/// are reported as unsupported for now; lowering them is a follow-up
-/// needed before the transformer-block demo can train end-to-end.
-pub(crate) fn apply_model_tape(
-    model: &ModelSpec,
-    x: Tensor,
-    tape: &Rc<Tape>,
-    params: &HashMap<String, Tensor>,
-) -> Result<Tensor, EvalError> {
-    match model {
-        ModelSpec::Linear { w, b } => {
-            let w_t = params
-                .get(w)
-                .cloned()
-                .ok_or_else(|| EvalError::UndefinedVariable(w.clone()))?;
-            let b_t = params
-                .get(b)
-                .cloned()
-                .ok_or_else(|| EvalError::UndefinedVariable(b.clone()))?;
-            let xw = x.matmul(&w_t);
-            // Match apply_model's eager broadcast recipe: b is [1, out],
-            // lift it to [n, out] via ones([n, 1]) @ b so the tape graph
-            // is identical to the hand-rolled form.
-            let n = xw.value().shape().dims()[0];
-            let ones_arr = DenseArray::new(Shape::new(vec![n, 1]), vec![1.0; n])?;
-            let ones_t = Tensor::leaf(Rc::clone(tape), ones_arr, false);
-            let b_broadcast = ones_t.matmul(&b_t);
-            Ok(xw.add(&b_broadcast))
-        }
-        ModelSpec::Chain(children) => {
-            let mut cur = x;
-            for child in children {
-                cur = apply_model_tape(child, cur, tape, params)?;
-            }
-            Ok(cur)
-        }
-        ModelSpec::Activation(kind) => Ok(match kind {
-            ActKind::Tanh => x.tanh(),
-            ActKind::Relu => x.relu(),
-            ActKind::Softmax => x.softmax(),
-        }),
-        ModelSpec::Residual(_) | ModelSpec::RmsNorm { .. } | ModelSpec::Attention { .. } => {
-            Err(EvalError::Unsupported(
-                "grad: apply() through residual/rms_norm/attention is not yet supported; \
-                 inline those layers in the loss expression for now"
-                    .into(),
-            ))
-        }
-    }
-}
+// Tape lowering of the model DSL lives in `crate::model_tape`; the
+// eager forward pass below stays here.
 
 /// Per-row RMS normalization: `y[i, :] = x[i, :] / sqrt(mean(x[i, :]^2) + eps)`.
 fn apply_rms_norm(x: &DenseArray) -> Result<DenseArray, EvalError> {

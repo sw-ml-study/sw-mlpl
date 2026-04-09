@@ -141,7 +141,7 @@ fn eval_tensor_fncall(
             .cloned()
             .ok_or(EvalError::UndefinedVariable(model_name))?;
         let x = eval_tensor_expr(&args[1], env, tape, params)?;
-        return crate::model_dispatch::apply_model_tape(&model, x, tape, params);
+        return crate::model_tape::apply_model_tape(&model, x, tape, params);
     }
     Err(EvalError::Unsupported(format!(
         "grad: function '{name}' not supported inside grad()"
