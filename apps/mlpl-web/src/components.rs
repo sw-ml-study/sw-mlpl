@@ -53,7 +53,7 @@ pub fn header(props: &HeaderProps) -> Html {
     };
     html! {
         <header>
-            <h1>{"MLPL"}</h1>
+            <h1><img src="mlpl-badge.png" alt="" class="title-badge" />{"MLPL"}</h1>
             <span>{"v0.6 — Array Programming Language for ML"}</span>
             <div class="controls">
                 <select class="demo-select" onchange={on_change} aria-label="Load demo">

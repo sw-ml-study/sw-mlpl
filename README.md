@@ -1,4 +1,4 @@
-# MLPL
+# ![MLPL](docs/mlpl-badge.png) MLPL
 
 MLPL is a Rust-first array and tensor programming language for machine learning, visualization, and experimentation.
 
