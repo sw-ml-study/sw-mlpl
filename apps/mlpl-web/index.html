@@ -225,6 +225,37 @@
         .output-line.error {
             color: var(--red);
         }
+        .output-summary {
+            margin: 2px 0 8px 0;
+        }
+        .output-summary > summary {
+            color: var(--sapphire);
+            cursor: pointer;
+            font-family: var(--mono);
+            font-size: 15px;
+            list-style: none;
+            padding: 2px 0;
+        }
+        .output-summary > summary::-webkit-details-marker {
+            display: none;
+        }
+        .output-summary > summary::before {
+            content: "\25b8  ";
+            color: var(--overlay2);
+            display: inline-block;
+            width: 1em;
+        }
+        .output-summary[open] > summary::before {
+            content: "\25be  ";
+        }
+        .output-summary > summary:hover {
+            color: var(--blue);
+        }
+        .output-summary > pre {
+            margin-top: 4px;
+            padding-left: 1.25em;
+            border-left: 2px solid var(--surface1);
+        }
         .svg-output {
             display: inline-block;
             position: relative;
