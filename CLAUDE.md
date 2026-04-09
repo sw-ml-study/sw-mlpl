@@ -82,6 +82,26 @@ Do NOT make any further code changes after running agentrail complete.
 Any changes after complete are untracked and invisible to the next session.
 If you see more work to do, it belongs in the NEXT step, not this session.
 
+## Live Demo (GitHub Pages) Deploy
+
+The `.github/workflows/pages.yml` workflow ONLY uploads the committed
+`./pages/` directory -- it does NOT build from source. Source-only
+commits to `apps/mlpl-web/` will never reach the live demo at
+<https://sw-ml-study.github.io/sw-mlpl/>.
+
+Whenever you change `apps/mlpl-web/` (Rust, `index.html`, CSS, assets,
+or the `demos.rs` list), you MUST rebuild and commit `pages/`:
+
+```bash
+./scripts/build-pages.sh    # trunk build --release into pages/
+git add pages/
+git commit -m "chore(pages): rebuild for <what changed>"
+git push
+```
+
+Then the push-triggered Pages workflow deploys the new `pages/`.
+Verify with `gh run list --workflow=pages.yml --limit 1`.
+
 ## Key Rules
 
 - **Do NOT skip steps** -- the next session depends on accurate tracking
