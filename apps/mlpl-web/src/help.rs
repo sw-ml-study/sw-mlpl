@@ -20,8 +20,13 @@ pub fn help_text() -> String {
         "  zeros, ones, fill",
         "",
         "Commands:",
-        "  :help   show this help",
-        "  :clear  reset all variables",
+        "  :help              show this help",
+        "  :vars              list bound variables with shape",
+        "  :models            list bound models with layer structure",
+        "  :fns               list built-in functions by category",
+        "  :describe <name>   describe a variable, model, or built-in",
+        "  :wsid              workspace summary",
+        "  :clear             reset all variables",
     ]
     .join("\n")
 }

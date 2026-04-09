@@ -108,7 +108,7 @@ fn builtin_blobs(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runtim
             }
             (k, v)
         }
-        1 if cdims[0] % 2 == 0 => {
+        1 if cdims[0].is_multiple_of(2) => {
             let k = cdims[0] / 2;
             let mut v = Vec::with_capacity(k);
             for i in 0..k {

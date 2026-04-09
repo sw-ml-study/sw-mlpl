@@ -10,8 +10,8 @@ use crate::model::ModelSpec;
 /// Variable bindings for evaluation.
 #[derive(Clone, Debug, Default)]
 pub struct Environment {
-    vars: HashMap<String, DenseArray>,
-    params: HashSet<String>,
+    pub(crate) vars: HashMap<String, DenseArray>,
+    pub(crate) params: HashSet<String>,
     pub(crate) optim_state: OptimizerState,
     pub(crate) models: HashMap<String, ModelSpec>,
     pub(crate) next_model_id: u64,
