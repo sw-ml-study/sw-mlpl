@@ -17,6 +17,7 @@ impl DenseArray {
         Ok(DenseArray {
             shape: new_shape,
             data: self.data.clone(),
+            labels: None,
         })
     }
 
@@ -54,6 +55,7 @@ impl DenseArray {
         DenseArray {
             shape: new_shape,
             data: new_data,
+            labels: None,
         }
     }
 }
@@ -79,6 +81,7 @@ impl DenseArray {
             return Ok(DenseArray {
                 shape: self.shape.clone(),
                 data,
+                labels: None,
             });
         }
         // Scalar broadcast
@@ -88,6 +91,7 @@ impl DenseArray {
             return Ok(DenseArray {
                 shape: other.shape.clone(),
                 data,
+                labels: None,
             });
         }
         if other.rank() == 0 {
@@ -96,6 +100,7 @@ impl DenseArray {
             return Ok(DenseArray {
                 shape: self.shape.clone(),
                 data,
+                labels: None,
             });
         }
         Err(ArrayError::ShapeMismatch {
@@ -169,6 +174,7 @@ impl DenseArray {
                 Ok(DenseArray {
                     shape: Shape::new(vec![m, n]),
                     data,
+                    labels: None,
                 })
             }
             [k2] if *k2 == k => {
@@ -180,6 +186,7 @@ impl DenseArray {
                 Ok(DenseArray {
                     shape: Shape::vector(m),
                     data,
+                    labels: None,
                 })
             }
             _ => Err(ArrayError::ShapeMismatch {
@@ -233,6 +240,7 @@ impl DenseArray {
         Ok(DenseArray {
             shape: result_shape,
             data: result_data,
+            labels: None,
         })
     }
 }
