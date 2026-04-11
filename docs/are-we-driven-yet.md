@@ -61,7 +61,7 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | `cosine_schedule`, `linear_warmup` helpers | P | HAVE | Saga 10 |
 | Model DSL (`linear`/`chain`/activations) | P+A | HAVE | Saga 11, training through `apply()` wired 2026-04-09 |
 | Model DSL: `residual` / `rms_norm` / `attention` forward | P | HAVE | Saga 11 steps 004-005 |
-| Model DSL: differentiable `apply()` through residual/norm/attention | P | PART | Forward-only today; tape lowering TODO before Saga 11 step 007 |
+| Model DSL: differentiable `apply()` through residual/norm/attention | P | HAVE | Tape-lowered for linear/chain/activations/residual/rms_norm/single-head attention in Saga 11 step 007 (fb90fb4). Multi-head (`heads>1`) still forward-only pending per-head slicing |
 | `jacobian f`, `vmap f` | A | CONS | Not on the Saga 11 roadmap; Jax-style transforms would be a Saga 11.5 item |
 | Named-parameter trees and parameter addressing | P | PART | `ModelSpec::params()` returns a flat list; no path-addressed subtree ops |
 | Hyperparameter sweep DSL (adapter/rank/lr grid) | P | PLAN | Saga 12 ("experiment tracking") |
@@ -91,7 +91,7 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Analysis helpers (`hist`, `scatter_labeled`, `loss_curve`, `confusion_matrix`, `boundary_2d`) | P+A | HAVE | Saga 8 |
 | Execution trace with JSON export | A | HAVE | `mlpl-trace` |
 | Yew/WASM web REPL | P+A | HAVE | Saga 5 |
-| Tutorial mode in web REPL | A | HAVE | 19 lessons, missing a Model DSL one |
+| Tutorial mode in web REPL | A | HAVE | 20 lessons including "Model Composition (the Model DSL)" added in Saga 11 |
 | Numeric output summarization (collapsible stats) | A | HAVE | Added 2026-04-09 |
 | Embedding viz: PCA / t-SNE / UMAP projections | P+A | PLAN | Saga 16 |
 | 3D scatter via SVG projection, nearest-neighbor links | P | PLAN | Saga 16 |
@@ -124,7 +124,7 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Built-in testing primitives (`assert`, `approx_equal`, `fuzz`) | A | CONS | Rust tests exist, MLPL-level asserts do not |
 | Sandbox execution with time/memory/GPU limits (`run_safe`) | A | CONS | Needed for agent self-correction loops; no plan |
 | Cost / performance introspection (`profile f x`) | A | CONS | Paper #12 also benefits; no plan |
-| `:describe <name>` / `:vars` / `:fns` REPL introspection | A | PLAN | Saga 11.5 phase 5 ports APL-style `)FNS`/`)VARS` conventions to the REPL |
+| `:describe <name>` / `:vars` / `:fns` REPL introspection | A | HAVE | Shipped in Saga 11 (99f7c8a, 623652d): `:vars`, `:models`, `:fns` user / `:builtins`, `:wsid`, `:describe`, `:help <topic>` in both `mlpl-repl` and `mlpl-web` |
 | `explain f` structured-explanation primitive | A | CONS | Speculative but high-leverage for agent tooling |
 | `repair f given error` primitive | A | CONS | Speculative; depends on structured errors + code-as-data |
 | `optimize f for gpu` primitive | A | CONS | Speculative; depends on device placement + profile |
@@ -167,9 +167,9 @@ row is "what MLPL would need to make this paper a one-screen demo."
 
 | Bucket | Count | What it means |
 |--------|-------|---------------|
-| HAVE   | ~25   | Shipped, exercised by demos/tests |
-| PART   | ~6    | Partially there; needs deepening (notably differentiable `apply` through residual/norm/attention, named-parameter trees, structured errors, mHC architecture graph) |
-| PLAN   | ~18   | On the Sagas 12-19 roadmap |
+| HAVE   | ~28   | Shipped, exercised by demos/tests |
+| PART   | ~5    | Partially there; needs deepening (notably multi-head attention tape lowering, named-parameter tree addressing, mHC architecture graph) |
+| PLAN   | ~17   | On the Sagas 11.5 / 12-19 roadmap |
 | CONS   | ~30   | Not on the roadmap; each is a candidate for a new saga or an inserted step |
 
 ## What this tells us about priorities
@@ -177,14 +177,16 @@ row is "what MLPL would need to make this paper a one-screen demo."
 Historical note (2026-04-09): the three clusters originally listed
 here were (1) named axes + shape types, (2) structured errors +
 trace-driven self-correction, and (3) differentiable `apply`
-through residual/rms_norm/attention. Cluster 3 was shipped the
-same day as Saga 11 steps 006 and 007. Clusters 1 and 2 were
-folded into a new **Saga 11.5 -- Named axes and shape
-introspection** (`docs/milestone-named-axes.md`), inserted between
-Saga 11 and Saga 12.
+through residual/rms_norm/attention. Cluster 3 shipped in Saga 11
+steps 006 and 007. The REPL-introspection subset of cluster 2
+(`:vars`, `:models`, `:fns`, `:wsid`, `:describe`) also shipped in
+Saga 11 ahead of schedule. Clusters 1 and the remaining structured
+errors half of cluster 2 landed as **Saga 11.5 -- Named axes and
+shape introspection** (`docs/milestone-named-axes.md`), inserted
+between Saga 11 and Saga 12 and now NEXT.
 
-With the top three addressed, the remaining uncovered region is
-the rest of the **agent-as-user** half: device
+With Saga 11 shipped as v0.7.0-modeldsl, the remaining uncovered
+region is the rest of the **agent-as-user** half: device
 placement, profiling, sandboxing, deterministic mode, code-as-data,
 testing, notebook mode, canonical formatting. None of these fit
 naturally into Sagas 12-19 as currently scoped. A dedicated
