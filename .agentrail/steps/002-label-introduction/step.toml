@@ -1,0 +1,8 @@
+number = 2
+slug = "label-introduction"
+status = "pending"
+description = 'Phase 2: Give users a way to attach labels. Add label(x, ["batch", "time", "d...'
+role = "production"
+context_files = []
+created_at = "2026-04-11T12:48:35"
+commits = []

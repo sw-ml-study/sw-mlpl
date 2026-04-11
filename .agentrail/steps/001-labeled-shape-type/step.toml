@@ -1,0 +1,8 @@
+number = 1
+slug = "labeled-shape-type"
+status = "pending"
+description = "Phase 1: Introduce an axis-labeled shape type and thread it through Value::Ar..."
+role = "production"
+context_files = []
+created_at = "2026-04-11T12:48:14"
+commits = []
