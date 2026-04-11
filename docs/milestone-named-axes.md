@@ -69,8 +69,10 @@ Identical to Saga 11:
   `mlpl-eval`. Labels would ride on `Value::Array`.
 - Structured `EvalError` enum per crate, used everywhere errors
   surface (good substrate for shape-mismatch improvements).
-- `:help` REPL command and web help dialog (good surface to
-  extend with `:describe <name>`).
+- `:help`, `:vars`, `:models`, `:fns`, `:wsid`, and `:describe`
+  REPL commands in both `mlpl-repl` and `mlpl-web` (shipped in
+  Saga 11 ahead of schedule). This saga teaches them about
+  labels rather than introducing them.
 
 ## Phases
 
@@ -131,17 +133,18 @@ dedicated variant:
 - The existing error site in `mlpl-eval::eval_ops` for broadcasting
   failures migrates to the new variant.
 
-### Phase 5: Agent-facing introspection
+### Phase 5: Label-aware introspection and trace
 
-Wire the label metadata into the existing `:help` surface:
+The REPL introspection commands `:vars`, `:models`, `:fns`,
+`:wsid`, and `:describe` already shipped as part of Saga 11. This
+phase teaches them about labels and threads labels through the
+trace surface:
 
-- New `:describe <name>` REPL command: prints the variable's
-  labeled shape, dtype, and the first couple of slices. For models
-  it prints the `ModelSpec` tree with per-layer labeled shapes on
-  the input/output.
-- New `:vars` / `:models` / `:fns` REPL commands (scope-local
-  versions of APL's `)VARS` and `)FNS`), documented in the web
-  help dialog.
+- `:describe <name>` learns to print a variable's labeled shape
+  alongside its raw dims. For models it prints the `ModelSpec`
+  tree with per-layer labeled shapes on the input/output, pinned
+  from the first `apply` call.
+- `:vars` output includes labeled shape for every labeled array.
 - `trace` JSON export includes axis labels so downstream tooling
   can reason about shape flow through a run.
 
@@ -171,14 +174,17 @@ Wire the label metadata into the existing `:help` surface:
 | 004 | label-propagation-elementwise | 3 | +, -, *, / propagate and validate labels |
 | 005 | label-propagation-matmul-reduce | 3 | matmul, reduce_add, softmax by axis name |
 | 006 | shape-mismatch-error | 4 | Structured `ShapeMismatch` error variant + rendering |
-| 007 | describe-vars-fns-commands | 5 | `:describe`, `:vars`, `:models`, `:fns` REPL commands |
-| 008 | trace-json-labels | 5 | Label metadata in trace JSON export |
-| 009 | named-axes-tutorial-lesson | 6 | New lesson + Model DSL lesson refresh |
-| 010 | named-axes-release-v075 | 6 | docs, banners, release tag |
+| 007 | describe-labels-trace | 5 | `:describe` / `:vars` learn labels; trace JSON includes axis labels |
+| 008 | named-axes-tutorial-lesson | 6 | New lesson + Model DSL lesson refresh |
+| 009 | named-axes-release-v075 | 6 | docs, banners, release tag |
 
-Ten steps. Expect some merging once implementation starts --
-steps 004 and 005 in particular may collapse if the elementwise
-path generalizes cleanly.
+Nine steps. The original plan had ten; step 007's REPL
+introspection commands (`:describe`, `:vars`, `:models`, `:fns`)
+already shipped in Saga 11, so phase 5 is now scoped to teach
+those commands about labels and add labels to the trace export.
+Expect some merging once implementation starts -- steps 004 and
+005 in particular may collapse if the elementwise path
+generalizes cleanly.
 
 ## Success criteria
 
