@@ -1,8 +1,9 @@
 number = 1
 slug = "labeled-shape-type"
-status = "in-progress"
+status = "completed"
 description = "Phase 1: Introduce an axis-labeled shape type and thread it through Value::Ar..."
 role = "production"
 context_files = []
 created_at = "2026-04-11T12:48:14"
-commits = []
+completed_at = "2026-04-11T14:12:15"
+commits = ["f88e1ac81a73fbb11d84c38634a773084b2330f9"]

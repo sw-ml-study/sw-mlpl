@@ -33,7 +33,9 @@ gp = sigmoid(reshape(gz, [400]))     # length-400 vector of probabilities
 # Reshape into a 20x20 matrix for the heatmap
 surface = reshape(gp, [20, 20])
 
-# Build the Nx3 training matrix [x, y, label]
-train = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]
+# Build the Nx3 training matrix [x, y, label]. Name it `tp` not
+# `train`, which has been a reserved keyword for the `train N { body }`
+# construct since Saga 10 (v0.6).
+tp = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]
 
-svg(surface, "decision_boundary", train)
+svg(surface, "decision_boundary", tp)

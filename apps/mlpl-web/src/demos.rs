@@ -59,8 +59,8 @@ pub const DEMOS: &[Demo] = &[
             "gz = matmul(gx, reshape(w, [2, 1])) + b",
             "gp = sigmoid(reshape(gz, [400]))",
             "surface = reshape(gp, [20, 20])",
-            "train = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]",
-            "svg(surface, \"decision_boundary\", train)",
+            "tp = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]",
+            "svg(surface, \"decision_boundary\", tp)",
         ],
     },
     Demo {
