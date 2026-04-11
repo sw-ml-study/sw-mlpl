@@ -9,4 +9,5 @@ mod shape;
 
 pub use dense::DenseArray;
 pub use error::ArrayError;
+pub use mlpl_core::LabeledShape;
 pub use shape::Shape;

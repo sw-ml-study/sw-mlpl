@@ -1,6 +1,6 @@
 number = 1
 slug = "labeled-shape-type"
-status = "pending"
+status = "in-progress"
 description = "Phase 1: Introduce an axis-labeled shape type and thread it through Value::Ar..."
 role = "production"
 context_files = []

@@ -181,6 +181,11 @@ const BUILTIN_GROUPS: &[FnGroup] = &[
         &[
             ("iota", "iota(n)", "integers 0..n as a vector"),
             ("shape", "shape(a)", "dimension vector of a"),
+            (
+                "labels",
+                "labels(a)",
+                "comma-joined axis labels of a (empty for positional)",
+            ),
             ("rank", "rank(a)", "number of dimensions of a"),
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),

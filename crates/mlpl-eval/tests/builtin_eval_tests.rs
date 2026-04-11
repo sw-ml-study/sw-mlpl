@@ -1,5 +1,5 @@
 use mlpl_array::Shape;
-use mlpl_eval::{Environment, EvalError, eval_program};
+use mlpl_eval::{Environment, EvalError, Value, eval_program, eval_program_value};
 use mlpl_parser::{lex, parse};
 
 fn eval(src: &str) -> Result<mlpl_array::DenseArray, EvalError> {
@@ -7,6 +7,13 @@ fn eval(src: &str) -> Result<mlpl_array::DenseArray, EvalError> {
     let stmts = parse(&tokens).unwrap();
     let mut env = Environment::new();
     eval_program(&stmts, &mut env)
+}
+
+fn eval_value(src: &str) -> Result<Value, EvalError> {
+    let tokens = lex(src).unwrap();
+    let stmts = parse(&tokens).unwrap();
+    let mut env = Environment::new();
+    eval_program_value(&stmts, &mut env)
 }
 
 #[test]
@@ -87,4 +94,34 @@ fn compose_reshape_arithmetic() {
     let arr = eval_program(&stmts, &mut env).unwrap();
     assert_eq!(arr.shape(), &Shape::new(vec![2, 3]));
     assert_eq!(arr.data(), &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+}
+
+#[test]
+fn labels_of_scalar_is_empty() {
+    let v = eval_value("labels(42)").unwrap();
+    assert_eq!(v, Value::Str(String::new()));
+}
+
+#[test]
+fn labels_of_unlabeled_vector_is_empty() {
+    let v = eval_value("labels(iota(3))").unwrap();
+    assert_eq!(v, Value::Str(String::new()));
+}
+
+#[test]
+fn labels_of_unlabeled_matrix_is_one_comma() {
+    let v = eval_value("labels(reshape(iota(6), [2, 3]))").unwrap();
+    assert_eq!(v, Value::Str(",".into()));
+}
+
+#[test]
+fn labels_of_unlabeled_rank3_is_two_commas() {
+    let v = eval_value("labels(reshape(iota(12), [2, 2, 3]))").unwrap();
+    assert_eq!(v, Value::Str(",,".into()));
+}
+
+#[test]
+fn shape_still_works_on_matrix_after_labels_exist() {
+    let arr = eval("shape(reshape(iota(6), [2, 3]))").unwrap();
+    assert_eq!(arr.data(), &[2.0, 3.0]);
 }

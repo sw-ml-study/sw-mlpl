@@ -16,6 +16,19 @@ impl DenseArray {
         self.shape().elem_count()
     }
 
+    /// Borrow the optional per-axis label slice.
+    ///
+    /// `None` means every axis is positional (the common case).
+    /// `Some(slice)` has one entry per axis, with inner `None` for
+    /// positional axes in a partially-labeled shape. Lives here
+    /// rather than in `dense.rs` to group the short shape-metadata
+    /// accessors (`rank`, `elem_count`, `labels`) together and keep
+    /// `dense.rs` at its 7-function sw-checklist budget.
+    #[must_use]
+    pub fn labels(&self) -> Option<&[Option<String>]> {
+        self.labels.as_deref()
+    }
+
     /// Get a reference to the element at multi-dimensional index.
     pub fn get(&self, index: &[usize]) -> Result<&f64, ArrayError> {
         let offset = self.validate_index(index)?;

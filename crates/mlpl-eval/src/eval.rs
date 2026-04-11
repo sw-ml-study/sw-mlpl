@@ -124,6 +124,33 @@ pub(crate) fn eval_expr(
         let result = crate::model_dispatch::eval_apply(args, env, trace)?;
         return Ok(Value::Array(result));
     }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "labels"
+    {
+        if args.len() != 1 {
+            return Err(EvalError::BadArity {
+                func: "labels".into(),
+                expected: 1,
+                got: args.len(),
+            });
+        }
+        let arr = eval_expr(&args[0], env, trace)?.into_array()?;
+        // Comma-join the per-axis labels, using an empty string for
+        // positional axes. Saga 11.5 Phase 1 intentionally stops at
+        // this stringly-typed encoding because MLPL has no
+        // string-vector literal yet; Phase 2 introduces one alongside
+        // the `label(x, [...])` builtin and can upgrade this return
+        // type in lock-step. The current encoding is testable and
+        // unambiguous for every rank >= 1: a rank-3 positional array
+        // becomes `",,"`, a labeled rank-2 becomes `"seq,d_k"`, etc.
+        // Rank-0 and rank-1-positional both render as `""`; the user
+        // can call `rank(x)` to disambiguate.
+        let parts: Vec<String> = match arr.labels() {
+            Some(lbls) => lbls.iter().map(|l| l.clone().unwrap_or_default()).collect(),
+            None => (0..arr.rank()).map(|_| String::new()).collect(),
+        };
+        return Ok(Value::Str(parts.join(",")));
+    }
     if let Expr::FnCall { name, args, span } = expr
         && (name == "momentum_sgd" || name == "adam")
     {
