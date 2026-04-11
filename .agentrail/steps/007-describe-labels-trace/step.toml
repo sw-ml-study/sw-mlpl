@@ -1,0 +1,8 @@
+number = 7
+slug = "describe-labels-trace"
+status = "pending"
+description = "Phase 5: Teach the existing Saga 11 REPL introspection commands about labels,..."
+role = "production"
+context_files = []
+created_at = "2026-04-11T12:48:52"
+commits = []
