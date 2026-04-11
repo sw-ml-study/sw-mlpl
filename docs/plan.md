@@ -48,24 +48,33 @@ depends on removing that limitation.
   with implicit `step` binding and `last_losses` capture;
   `moons_mlp` and `circles_mlp` demos; "Optimizers and Schedules"
   tutorial lesson
+- **Saga 11** Model DSL (v0.7): `Value::Model` runtime value;
+  `linear(in, out, seed)` atomic layer; parameter-free
+  `tanh_layer` / `relu_layer` / `softmax_layer` activations;
+  `chain(...)` sequential composition; `residual(block)` skip
+  connections; `rms_norm(dim)` normalization; `attention(
+  d_model, heads, seed)` multi-head self-attention (tape-lowered
+  for `heads=1`); `params(model)` walker and optimizer
+  integration so `adam(loss, mdl, ...)` walks the parameter
+  tree; differentiable `apply(mdl, X)`; `moons_mlp` and
+  `tiny_mlp` demos ported to one-line `chain(...)` form; new
+  `transformer_block.mlpl` demo (loss 143.87 -> 1.02 over 100
+  Adam steps); `:vars` / `:models` / `:fns` / `:wsid` /
+  `:describe` REPL introspection commands; "Model Composition"
+  tutorial lesson. See `docs/milestone-modeldsl.md`.
 
 ## Future saga sequence
 
-### Saga 11 -- Model DSL (NEXT)
-`chain[...]`, `residual[...]`, `norm[...]`, `attention[...]`
-combinators. Parameter trees with named addressing. Rebuild the
-tiny MLP and attention demos using the DSL; add a 2-layer
-transformer block demo (still CPU, still tiny).
-
-### Saga 11.5 -- Named axes and shape introspection
+### Saga 11.5 -- Named axes and shape introspection (NEXT)
 Labeled shape metadata on `Value::Array`, annotation syntax on
 assignment (`x : [batch, time, dim] = ...`), label propagation
-through matmul/elementwise/reductions, structured `ShapeMismatch`
-errors, and agent-facing introspection commands (`:describe`,
-`:vars`, `:models`, `:fns`). Inserted between Saga 11 and Saga 12
+through matmul/elementwise/reductions, and structured
+`ShapeMismatch` errors. Inserted between Saga 11 and Saga 12
 because every later saga (Tiny LM, LoRA, attention variants,
 embedding viz) benefits from labeled axes. Surface-only milestone:
-no new kernels, no new backends, CPU only. See
+no new kernels, no new backends, CPU only. The agent-facing
+introspection commands (`:describe`, `:vars`, `:models`, `:fns`)
+already shipped as part of Saga 11. See
 `docs/milestone-named-axes.md` for the 10-step plan.
 
 ### Saga 12 -- Tokenizers, datasets, and experiment tracking
@@ -128,17 +137,19 @@ codegen helpers. Intentionally last: secondary to the
 Sagas 14-19 can reorder based on hardware access and interest;
 9-13 (plus the inserted 11.5) must run in order.
 
-## Start next: finish Saga 11, then Saga 11.5 -- Named axes
+## Start next: Saga 11.5 -- Named axes
 
-Saga 11 (Model DSL) is mostly shipped: model values, atomic and
-composed layers, params walker, residual + rms_norm + attention,
-differentiable `apply()` through the tape (Linear/Chain/Activation,
-then also Residual/RmsNorm/single-head Attention as of step 007),
-and ported MLP + transformer-block demos. Remaining Saga 11 work
-is the tutorial lesson (done ahead of schedule on 2026-04-09) and
-the v0.7.0 release.
+Saga 11 (Model DSL) shipped as v0.7.0 (tag `v0.7.0-modeldsl`):
+model values, atomic and composed layers, params walker,
+residual + rms_norm + attention, differentiable `apply()`
+through the tape (Linear / Chain / Activation / Residual /
+RmsNorm / single-head Attention), ported MLP + transformer-block
+demos, "Model Composition" tutorial lesson, and the new
+`:vars` / `:models` / `:fns` / `:wsid` / `:describe` REPL
+introspection commands. See `docs/milestone-modeldsl.md` for
+the retrospective.
 
-After Saga 11 ships as v0.7.0, Saga 11.5 adds labeled shapes and
-introspection -- the surface-only milestone surfaced by
-`docs/are-we-driven-yet.md` as the single biggest agent-usability
-gap. See `docs/milestone-named-axes.md` for the 10-step plan.
+Saga 11.5 adds labeled shapes -- the surface-only milestone
+surfaced by `docs/are-we-driven-yet.md` as the single biggest
+remaining agent-usability gap. See `docs/milestone-named-axes.md`
+for the 10-step plan.
