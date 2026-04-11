@@ -1,6 +1,6 @@
 name = "mlpl-modeldsl"
 status = "active"
-current_step = 8
+current_step = 9
 created_at = "2026-04-08T15:50:51"
 plan_file = ".agentrail/plan.md"
 retroactive = false

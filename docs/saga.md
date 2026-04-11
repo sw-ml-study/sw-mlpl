@@ -36,6 +36,30 @@ high-level analysis helpers (hist, scatter_labeled, loss_curve,
 confusion_matrix, boundary_2d), browser REPL inline SVG rendering,
 and download button. Delivered v0.3.
 
+## Saga 11: Model DSL (COMPLETE)
+Composition primitives for neural-net models: a new `Value::Model`
+runtime value, atomic `linear(in, out, seed)` layers,
+parameter-free activation layers (`tanh_layer`, `relu_layer`,
+`softmax_layer`), sequential `chain(...)` composition,
+`residual(block)` skip connections, `rms_norm(dim)` normalization,
+and `attention(d_model, heads, seed)` multi-head self-attention
+(tape-lowered for `heads=1`, forward-only for `heads>1`). A
+`params(model)` walker returns the flat parameter list, and
+optimizers now accept a model identifier directly so
+`adam(loss, mdl, lr, b1, b2, eps)` trains every weight the model
+owns through differentiable `apply(mdl, X)`. The v0.6 `moons_mlp`
+and `tiny_mlp` demos were rewritten as one-line `chain(...)`
+expressions, and a new `transformer_block.mlpl` demo stacks
+`residual(chain(rms_norm, attention))` and `residual(chain(
+rms_norm, linear, relu_layer, linear))` twice to train a tiny
+2-layer transformer block end-to-end (loss 143.87 -> 1.02 over
+100 Adam steps, strictly monotonic). New REPL introspection
+commands -- `:vars`, `:models`, `:fns`, `:wsid`, `:describe` --
+ship in both `mlpl-repl` and `mlpl-web`, and a new "Model
+Composition" tutorial lesson walks from a single `linear` through
+a chain MLP to Adam inside `train { }` on the moons dataset.
+Delivered v0.7. See `docs/milestone-modeldsl.md`.
+
 ## Saga 10: Optimizers + training loop (COMPLETE)
 Built proper training infrastructure on top of Saga 9 autograd.
 New built-ins: `momentum_sgd(loss, params, lr, beta)` and
