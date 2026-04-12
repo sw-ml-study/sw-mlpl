@@ -1,0 +1,33 @@
+> C    = circles(11, 120, 0.06)
+> X    = matmul(C, [[1,0],[0,1],[0,0]])
+> y    = reshape(matmul(C, [[0],[0],[1]]), [120])
+> Y    = one_hot(y, 2)
+> O120 = ones([120, 1])
+> W1 = param[2, 16]
+> b1 = param[1, 16]
+> W2 = param[16, 2]
+> b2 = param[1, 2]
+> W1 = randn(21, [2, 16]) * 0.5
+> W2 = randn(22, [16, 2]) * 0.5
+> train 200 {
+> adam(mean((softmax(matmul(tanh(matmul(X, W1) + matmul(O120, b1)), W2) + matmul(O120, b2)) - Y) * (softmax(matmul(tanh(matmul(X, W1) + matmul(O120, b1)), W2) + matmul(O120, b2)) - Y)), [W1, b1, W2, b2], 0.05, 0.9, 0.999, 0.00000001);
+> mean((softmax(matmul(tanh_fn(matmul(X, W1) + matmul(O120, b1)), W2) + matmul(O120, b2), 1) - Y) * (softmax(matmul(tanh_fn(matmul(X, W1) + matmul(O120, b1)), W2) + matmul(O120, b2), 1) - Y))
+> }
+> Z1   = matmul(X, W1) + matmul(O120, b1)
+> H    = tanh_fn(Z1)
+> Z2   = matmul(H, W2) + matmul(O120, b2)
+> P    = softmax(Z2, 1)
+> pred = argmax(P, 1)
+> accuracy = mean(eq(pred, y))
+> accuracy
+> loss_curve(last_losses)
+> confusion_matrix(pred, y)
+> G    = grid([-1.5, 1.5, -1.5, 1.5], 30)
+> O900 = ones([900, 1])
+> GZ1  = matmul(G, W1) + matmul(O900, b1)
+> GH   = tanh_fn(GZ1)
+> GZ2  = matmul(GH, W2) + matmul(O900, b2)
+> GP   = softmax(GZ2, 1)
+> p1   = reshape(matmul(GP, [[0],[1]]), [900])
+> boundary_2d(p1, [30, 30], X, y)
+[svg: 79622 bytes -- pass --svg-out <dir> to save]

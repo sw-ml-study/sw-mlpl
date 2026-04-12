@@ -1,0 +1,12 @@
+> x = [0, 1, 2, 3, 4]
+> y = [0, 2, 4, 6, 8]      # true slope = 2
+> ws = iota(25) / 4 - 1
+> WS = reshape(ws, [25, 1])
+> XS = reshape(x, [1, 5])
+> preds = matmul(WS, XS)
+> YS    = matmul(ones([25, 1]), reshape(y, [1, 5]))
+> errs  = preds - YS
+> sq    = errs * errs
+> losses = reduce_add(sq, 1) / 5
+> svg(losses, "line")
+[svg: 649 bytes -- pass --svg-out <dir> to save]

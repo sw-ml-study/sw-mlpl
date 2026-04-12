@@ -1,0 +1,8 @@
+x = iota(12)
+m = reshape(x, [3, 4])
+m
+transpose(m)
+shape(m)
+rank(m)
+reduce_add(m, 0)
+reduce_add(m, 1)

@@ -1,0 +1,14 @@
+> X = [[0,0],[0,1],[1,0],[1,1]]
+> y = [0, 0, 0, 1]
+> w = zeros([2])
+> b = 0
+> lr = 1.0
+> n = 4
+> repeat 400 { z = matmul(X, reshape(w, [2, 1])) + b; pred = sigmoid(z); dz = pred - reshape(y, [4, 1]); dw = reshape(matmul(transpose(X), dz), [2]) / n; db = mean(dz); w = w - lr * dw; b = b - lr * db }
+> gx = grid([0, 1, 0, 1], 20)
+> gz = matmul(gx, reshape(w, [2, 1])) + b
+> gp = sigmoid(reshape(gz, [400]))
+> surface = reshape(gp, [20, 20])
+> tp = [[0,0,0],[0,1,0],[1,0,0],[1,1,1]]
+> svg(surface, "decision_boundary", tp)
+[svg: 39620 bytes -- pass --svg-out <dir> to save]

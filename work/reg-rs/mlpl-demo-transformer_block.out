@@ -1,0 +1,13 @@
+> X = randn(101, [6, 4])
+> Y = randn(202, [6, 4])
+> mdl = chain(residual(chain(rms_norm(4), attention(4, 1, 301))), residual(chain(rms_norm(4), linear(4, 8, 311), relu_layer(), linear(8, 4, 312))), residual(chain(rms_norm(4), attention(4, 1, 321))), residual(chain(rms_norm(4), linear(4, 8, 331), relu_layer(), linear(8, 4, 332))), linear(4, 4, 341))
+> train 100 {
+> adam(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)), mdl, 0.02, 0.9, 0.999, 0.00000001);
+> mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y))
+> }
+> shape(last_losses)
+> loss_curve(last_losses)
+> first_loss = reduce_add(last_losses * eq(iota(100), 0))
+> last_loss  = reduce_add(last_losses * eq(iota(100), 99))
+> [first_loss, last_loss]
+143.87040581201546 1.019801019451439

@@ -1,0 +1,5 @@
+command = "cargo run --release --quiet -p mlpl-repl -- -f work/reg-rs/web-demos/loss-curve.mlpl"
+timeout = 120
+preprocess = "bash scripts/normalize-mlpl-output.sh"
+exit_code = 0
+desc = "Web demo extracted from demos.rs: loss-curve"
