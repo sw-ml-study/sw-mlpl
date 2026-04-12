@@ -1,0 +1,29 @@
+> D   = blobs(3, 20, [[-2,-2],[2,2],[-2,2],[2,-2]])
+> X   = matmul(D, [[1,0],[0,1],[0,0]])
+> raw = reshape(matmul(D, [[0],[0],[1]]), [80])
+> y   = gt(raw, 1.5)
+> Y   = one_hot(y, 2)
+> lin = linear(2, 2, 21)
+> train 300 {
+> adam(mean((apply(lin, X) - Y) * (apply(lin, X) - Y)), lin, 0.05, 0.9, 0.999, 0.00000001);
+> mean((apply(lin, X) - Y) * (apply(lin, X) - Y))
+> }
+> linear_pred     = argmax(softmax(apply(lin, X), 1), 1)
+> linear_accuracy = mean(eq(linear_pred, y))
+> linear_accuracy
+> confusion_matrix(linear_pred, y)
+> mdl = chain(linear(2, 8, 22), tanh_layer(), linear(8, 2, 23))
+> train 400 {
+> adam(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)), mdl, 0.05, 0.9, 0.999, 0.00000001);
+> mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y))
+> }
+> mlp_pred     = argmax(softmax(apply(mdl, X), 1), 1)
+> mlp_accuracy = mean(eq(mlp_pred, y))
+> mlp_accuracy
+> loss_curve(last_losses)
+> confusion_matrix(mlp_pred, y)
+> G  = grid([-4, 4, -4, 4], 30)
+> GP = softmax(apply(mdl, G), 1)
+> p1 = reshape(matmul(GP, [[0],[1]]), [900])
+> boundary_2d(p1, [30, 30], X, y)
+[svg: 76072 bytes -- pass --svg-out <dir> to save]

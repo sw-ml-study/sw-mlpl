@@ -1,0 +1,5 @@
+command = "cargo run --release --quiet -p mlpl-repl -- -f demos/analysis_demo.mlpl"
+timeout = 120
+preprocess = "bash scripts/normalize-mlpl-output.sh"
+exit_code = 0
+desc = "On-disk demo: demos/analysis_demo.mlpl"

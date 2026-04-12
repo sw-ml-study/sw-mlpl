@@ -1,0 +1,19 @@
+X = [[0,0],[0,1],[1,0],[1,1]]
+y = [0, 0, 0, 1]
+w = zeros([2])
+b = 0
+lr = 1.0
+n = 4
+repeat 300 { z = matmul(X, reshape(w, [2, 1])) + b; pred = sigmoid(z); dz = pred - reshape(y, [4, 1]); dw = reshape(matmul(transpose(X), dz), [2]) / n; db = mean(dz); w = w - lr * dw; b = b - lr * db }
+pred = sigmoid(matmul(X, reshape(w, [2, 1])) + b)
+rounded = gt(pred, 0.5)
+accuracy = mean(eq(reshape(rounded, [4]), y))
+accuracy
+svg(reshape(pred, [4]), "bar")
+ss = iota(16) / 10
+WS2 = matmul(reshape(ss, [16, 1]), reshape(w, [1, 2]))
+zs = matmul(WS2, transpose(X)) + matmul(reshape(ss * b, [16, 1]), ones([1, 4]))
+ps = sigmoid(zs)
+ys4 = matmul(ones([16, 1]), reshape(y, [1, 4]))
+losses = reduce_add((ps - ys4) * (ps - ys4), 1) / 4
+svg(losses, "line")

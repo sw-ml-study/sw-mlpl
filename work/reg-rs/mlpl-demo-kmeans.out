@@ -1,0 +1,28 @@
+> D = blobs(7, 30, [[0, 0], [4, 4], [-4, 4]])
+> X  = matmul(D, [[1,0],[0,1],[0,0]])
+> tl = reshape(matmul(D, [[0],[0],[1]]), [90])
+> C = [[1, 1], [3, 3], [-3, 3]]
+> N = 90
+> K = 3
+> repeat 10 {
+> sqX = reshape(reduce_add(X*X, 1), [90, 1]);
+> sqC = reshape(reduce_add(C*C, 1), [1, 3]);
+> XC  = matmul(X, transpose(C));
+> dists = matmul(sqX, ones([1, 3])) + matmul(ones([90, 1]), sqC) - 2*XC;
+> clus = argmax(-1 * dists, 1);
+> jj = reshape(iota(3), [3, 1]);
+> ll = reshape(clus, [1, 90]);
+> diff = matmul(jj, ones([1, 90])) - matmul(ones([3, 1]), ll);
+> A = eq(diff, 0);
+> counts = reshape(reduce_add(A, 1), [3, 1]);
+> sums   = matmul(A, X);
+> C = sums / matmul(counts, ones([1, 2]))
+> }
+> sqX = reshape(reduce_add(X*X, 1), [90, 1])
+> sqC = reshape(reduce_add(C*C, 1), [1, 3])
+> XC  = matmul(X, transpose(C))
+> dists = matmul(sqX, ones([1, 3])) + matmul(ones([90, 1]), sqC) - 2*XC
+> clus = argmax(-1 * dists, 1)
+> scatter_labeled(X, clus)
+> svg(C, "scatter")
+[svg: 445 bytes -- pass --svg-out <dir> to save]

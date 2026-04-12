@@ -1,0 +1,9 @@
+x = [0, 1, 2, 3, 4]
+y = [0, 2, 4, 6, 8]
+ws = iota(25) / 4 - 1
+WS = reshape(ws, [25, 1])
+preds = matmul(WS, reshape(x, [1, 5]))
+YS = matmul(ones([25, 1]), reshape(y, [1, 5]))
+errs = preds - YS
+losses = reduce_add(errs * errs, 1) / 5
+svg(losses, "line")
