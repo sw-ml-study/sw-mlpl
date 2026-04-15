@@ -1,0 +1,1 @@
+sinusoidal_encoding(seq_len, d_model) builtin: deterministic [T,D] table labeled [time,dim], standard sin/cos(pos / 10000^(2i/d)) formula. Lives in mlpl-runtime ml_builtins. 8 TDD tests cover shape, position-0/1 reference values, determinism, label propagation through embed + add, arity and input validation. Refactored arg-parsing into a helper to fit per-fn LOC budget.

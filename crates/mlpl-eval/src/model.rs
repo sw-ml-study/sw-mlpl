@@ -70,6 +70,11 @@ pub enum ModelSpec {
     /// `Wv`, `Wo`) and no biases. Apply runs the standard
     /// scaled-dot-product attention split into `heads` per-head
     /// chunks of size `d_model / heads`.
+    ///
+    /// `causal_attention(...)` is the same spec with `causal = true`,
+    /// which adds a lower-triangular mask to the pre-softmax scores
+    /// so position `t` cannot attend to positions `> t`. Language
+    /// models require this to preserve the autoregressive property.
     Attention {
         /// Query projection parameter name.
         wq: String,
@@ -83,6 +88,8 @@ pub enum ModelSpec {
         d_model: usize,
         /// Number of attention heads.
         heads: usize,
+        /// Whether to apply a lower-triangular causal mask.
+        causal: bool,
     },
 }
 

@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "positional-encoding"
+  },
+  "action": "TDD: wrote 8 failing tests in positional_encoding_tests.rs (RED), then implemented builtin_sinusoidal_encoding + parse_sinusoidal_args helper in ml_builtins.rs (GREEN). Used the existing call_builtin dispatch and DenseArray::with_labels for [time, dim] propagation. Documented the [B,T,D] add pattern via test (B=1 degenerate case) since broader prefix-axis broadcasting would require autograd unbroadcast changes -- deferred.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T15:52:10"
+}
