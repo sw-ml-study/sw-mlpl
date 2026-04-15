@@ -1,40 +1,61 @@
-# Tokenizers, Datasets, and Experiment Tracking Milestone (Saga 12, v0.9.0)
+# Tiny Language Model End-to-End Milestone (Saga 13, v0.10.0)
 
 ## Why this exists
 
-`docs/plan.md` puts Saga 12 squarely between the compile-to-Rust
-saga (v0.8.0, just shipped) and Saga 13's Tiny LM end-to-end.
-The Tiny LM needs three things the current repo doesn't have:
+Saga 13 is the first saga that proves the MLPL platform thesis
+end-to-end: a user writes a handful of lines of MLPL, and a
+small transformer-based language model trains, generates
+text, and visualizes its own attention -- all on CPU, with
+reproducible experiment tracking.
 
-1. **A way to get text off disk.** Every demo today hand-builds
-   its dataset with `blobs()` / `moons()` / `iota()`. A language
-   model needs a corpus.
-2. **A way to turn text into integer tokens.** Byte-level gets
-   you a 256-vocab baseline; byte-level BPE gets you the real
-   tokenizer any modern LM uses.
-3. **A way to record what a training run did.** Seed, config,
-   metrics -- so a re-run is reproducible and runs are
-   comparable.
+Every prior saga has been building toward this. Saga 9 gave
+us reverse-mode autograd; Saga 10 gave us optimizers and the
+`train { }` loop; Saga 11 gave us `chain` / `residual` /
+`attention` / `rms_norm` for composing models; Saga 11.5
+added shape checking via labeled axes; Saga 12 added file IO,
+batched dataset iteration, a byte-level BPE tokenizer, and
+`experiment "name" { }` for tracking runs. What is still
+missing for a real LM:
 
-Saga 12 is the last surface-only saga before the Tiny LM
-itself. No new kernels, no new backends, no new optimizer. Just
-file IO, tokenization, and a small experiment-capture
-primitive.
+1. **Token embeddings.** `Value::Model` has `linear(in,out)`
+   but no `embed(vocab, d_model)`. Language models start with
+   a learned lookup from integer token ids to vectors.
+2. **Positional information.** `attention` today is
+   permutation-invariant over the sequence axis. An LM needs
+   positional encoding (sinusoidal or learned) added to
+   embeddings.
+3. **Causal masking.** Existing `attention` attends to all
+   positions. An LM needs a lower-triangular causal mask so
+   position `t` cannot peek at `t+1`.
+4. **Cross-entropy loss.** Autograd knows `sum`, `log`,
+   `softmax`, `exp`, but there is no fused `cross_entropy`
+   over integer targets. We need a numerically-stable
+   log-softmax + NLL primitive that works on `[B*T, V]` logits
+   and `[B*T]` integer targets.
+5. **Sampling.** `argmax` exists; multinomial sampling over a
+   temperature-scaled softmax with optional top-k does not.
+6. **Generation loop.** A small helper or tutorial pattern
+   that, given a trained model and a prompt, iteratively
+   samples the next token and appends it.
+
+Saga 13 fills those gaps, then demos the whole stack with a
+tiny character- or BPE-level LM trained on a small corpus,
+with attention-map and loss-curve visualization.
 
 ## Non-goals
 
-- Full Hugging Face compatibility. MLPL ships its own BPE
-  trainer with a deterministic tie-breaking rule; loading a
-  pre-trained HF tokenizer is a later saga if ever.
-- Generic dataset formats (parquet, arrow, jsonl). CSV and raw
-  text corpora only for now; the Tiny LM doesn't need more.
-- Cloud / remote data sources. Local filesystem only.
-- Checkpoint / weight serialization. That's orthogonal; Saga 13
-  will motivate it.
+- **No new backends.** CPU only. MLX / CUDA are Sagas 14, 17.
+- **No pretraining claims.** Target is ~1-5M params on a
+  ~100KB corpus -- enough to see loss drop and coherent-ish
+  snippets, not benchmarkable.
+- **No KV cache.** Generation recomputes the full prefix each
+  step. KV caching is an optimization; correctness first.
+- **No LoRA / quantization.** Those are Saga 15.
+- **No embedding visualization / RAG.** Saga 16.
 
 ## Quality requirements (every step)
 
-Identical to Sagas 11 / 11.5 / compile-to-rust:
+Identical to Sagas 11 / 11.5 / compile-to-rust / 12:
 
 1. TDD: failing test first, then implementation, then refactor.
 2. Quality gates must all pass before commit:
@@ -46,181 +67,168 @@ Identical to Sagas 11 / 11.5 / compile-to-rust:
 3. Use `/mw-cp` checkpoint process.
 4. Push immediately after commit.
 5. Web UI changes rebuild `pages/` via `scripts/build-pages.sh`.
+6. `.agentrail/` changes are committed whenever they change.
 
 ## What already exists
 
-- `mlpl-array::DenseArray` with row-major storage, labeled
-  shapes, and the full op surface from Saga 11.5.
-- `mlpl-eval::Environment` with vars / params / models / optim
-  state / optimizer buffers.
-- Parser that accepts string literals (`"foo"`) and multi-line
-  programs with both `\n` and `;` statement separators.
-- `Value::Str` variant for strings (used today by the SVG
-  builtins -- carries diagram type names).
-- `mlpl-trace` JSON export for per-step reproducibility of
-  individual REPL runs.
+- `param[shape]` / `tensor[shape]` constructors, `grad(expr, wrt)`.
+- `adam` / `momentum_sgd` optimizers with per-parameter state;
+  `train N { body }` with implicit `step` and `last_losses`.
+- Model DSL: `linear(in, out, seed)`, `chain(...)`,
+  `residual(block)`, `rms_norm(dim)`, `attention(d, heads, seed)`
+  (heads=1 tape-lowered), `apply(mdl, X)`, `params(model)`.
+- Labeled axes: `[batch, time, dim]` annotations propagate
+  through elementwise / matmul / reduce; `axis="time"` in
+  reductions.
+- Saga 12 data surface: `load("...")`, `load_preloaded(...)`,
+  `shuffle` / `batch` / `batch_mask` / `split` / `val_split`,
+  `for row in ds { ... }` / `last_rows`.
+- Byte-level + BPE tokenizer: `tokenize_bytes` / `decode_bytes`,
+  `train_bpe(corpus, vocab, seed)`, `apply_tokenizer(tok, text)`,
+  `decode(tok, tokens)`; `Value::Tokenizer` runtime variant.
+- Experiment tracking: `experiment "name" { body }` captures
+  `_metric`-suffixed scalars; `:experiments` REPL command;
+  `compare(a, b)` returns per-metric deltas; on-disk run.json
+  via `--exp-dir`.
+- Softmax, log, exp, sum, mean, matmul, reshape all
+  differentiable through the tape.
 
-None of these touch `std::fs`. This saga adds file IO for the
-first time; that is the key new surface.
+## Phase 1 -- LM primitives (3 steps)
 
-## Phases
+### Step 001 -- embedding layer
+New `Value::Model` variant for token embeddings. Builtin
+`embed(vocab_size, d_model, seed)` returns a model with a
+`[vocab, d_model]` parameter table. `apply(emb, tokens)` where
+`tokens` is a `[B, T]` integer array (or `[B*T]`) returns a
+`[B, T, d_model]` float array, with gradient flowing back into
+the embedding table through `grad(...)`. Gradcheck against
+finite differences on a small `(vocab=5, d=3)` table.
 
-### Phase 1: Datasets (3 steps)
+### Step 002 -- positional encoding
+Additive positional information. Pick one of:
+(a) `positional(max_len, d_model, seed)` learned layer, or
+(b) `sinusoidal_encoding(seq_len, d_model)` deterministic
+    table (no params).
+Both return a `[T, d_model]` (or `[1, T, d_model]`
+broadcastable) array that gets added to embeddings. Tests:
+deterministic output for (b); gradcheck + `params()` walk for
+(a). Decision between (a) and (b) during TDD -- start with
+(b) for simplicity, add (a) only if the demo benefits.
 
-File IO enters MLPL. Every demo today invents its dataset
-procedurally; the Tiny LM will need to read a corpus off disk.
+### Step 003 -- causal mask for attention
+Existing `attention` attends to all positions. Add causal
+masking. Either:
+(a) new `causal_attention(d_model, heads, seed)` builtin, or
+(b) optional third arg / flag to `attention` that toggles
+    causal masking.
+Implementation: lower-triangular mask applied to pre-softmax
+scores (set upper triangle to a large negative number).
+Tests: a [B=1, T=3, d=2] forward pass with causal attention
+must give position-0 output that depends only on position 0's
+input (verified by perturbing position 1 and checking
+position-0 output is unchanged). Gradcheck preserved.
 
-- **`load("path.csv")`** returns a `DenseArray` with the CSV's
-  numeric columns. First row is treated as header iff it
-  contains any non-numeric token; header names become axis-1
-  labels so `labels(X) == "col1,col2,..."`. Non-numeric data
-  cells error clearly. Raw text files (`.txt`) return a
-  `Value::Str` whole-file blob for the tokenizer phase to chew
-  on. Absolute paths disallowed at the `mlpl-web` surface;
-  allowed under the terminal REPL behind a
-  `--data-dir <path>` flag that scopes relative reads to a
-  sandbox directory.
-- **`shuffle(x, seed)`** returns a row-permutation of a rank>=1
-  array. Labels preserved. **`batch(x, size)`** returns a
-  rank-(r+1) array of contiguous batches, padding the last if
-  needed. **`split(x, train_frac, seed)`** returns a 2-tuple
-  (a labeled-2-element array `[[train_rows], [val_rows]]` is
-  out; we'll return `split` as two side-effect-free bindings
-  via a new `let (a, b) = split(...)` form only if really
-  necessary, otherwise one call returns the train chunk and a
-  `val_split` twin returns the val chunk; decide in the step).
-- **Streaming iteration.** `for row in dataset { body }` binds
-  `row` to each rank-(r-1) slice of a rank-r array, runs body,
-  and captures per-iteration values into a
-  `last_rows` vector in the environment (mirrors `train`'s
-  `last_losses`). This is the escape hatch when a dataset is
-  too big for a single-array representation; Phase 2's BPE
-  trainer uses it.
+## Phase 2 -- loss + sampling (2 steps)
 
-### Phase 2: Byte-level BPE tokenizer (3 steps)
+### Step 004 -- cross-entropy loss
+`cross_entropy(logits, targets)` builtin. `logits` is
+`[N, V]` float, `targets` is `[N]` integer. Returns a scalar
+`-mean(log_softmax(logits)[i, targets[i]])`. Numerically
+stable via max-subtraction inside log-softmax. Fully
+differentiable through the tape wrt `logits`. Tests:
+(i) matches a hand-written `mean(-log(softmax(x)[target]))`
+pipeline on a `[4, 3]` example; (ii) gradcheck against finite
+differences; (iii) targets of the wrong shape produce a clear
+`EvalError::ShapeMismatch`.
 
-Two-stage design: bytes first, BPE on top.
+### Step 005 -- sampling
+`sample(logits, temperature, seed)` builtin for multinomial
+sampling. `logits` is a 1-D `[V]` float array; returns a
+scalar integer token id. Temperature = 0 collapses to
+`argmax`. Add `top_k(logits, k)` that zeroes out all but the
+top-k logits (pre-softmax). Compose for top-k sampling as
+`sample(top_k(logits, k), t, seed)`. Tests: determinism on
+fixed seed; temperature=0 matches `argmax`; top-k=1 matches
+argmax regardless of temperature; distribution approximates
+softmax at high temperature over many draws.
 
-- **`tokenize_bytes(str)`** returns a rank-1 array of byte
-  indices (0-255). `decode_bytes(tokens)` inverses.
-  Deterministic. No training. Gives the Tiny LM a baseline
-  tokenizer to sanity-check end-to-end before BPE.
-- **`bpe = train_bpe(text_or_tokens, vocab_size, seed)`**
-  trains a BPE tokenizer from a `Value::Str` (the Phase 1
-  `load` output for raw text) or an already-byte-tokenized
-  rank-1 array. Returns a new `Value::Tokenizer` runtime
-  value (a sibling to `Value::Model`) holding the merge table
-  + vocab. Deterministic tie-breaking: on ties in merge count,
-  pick the lexicographically smallest pair by byte order. Seed
-  is threaded through for any randomized sub-sampling of the
-  training corpus at larger scales; the core algorithm is
-  deterministic given the same input.
-- **`tokens = apply_tokenizer(bpe, text)`** and
-  **`text = decode(bpe, tokens)`** round-trip: any input
-  string `s` satisfies `decode(bpe, apply_tokenizer(bpe, s)) == s`
-  for every byte sequence the training corpus could have
-  produced. A new `:describe` branch prints `bpe -- tokenizer`
-  with vocab size and training-corpus byte count.
+## Phase 3 -- end-to-end (2 steps)
 
-### Phase 3: Experiment tracking (2 steps)
+### Step 006 -- tiny LM demo (training)
+`demos/tiny_lm.mlpl`. End-to-end:
+1. `corpus = load_preloaded("tiny_shakespeare_snippet")` (or
+   similarly small, ~50-100KB preloaded text).
+2. `tok = train_bpe(corpus, vocab_size=256, seed=0)`.
+3. `ids = apply_tokenizer(tok, corpus)`.
+4. `(X, Y) = shift_pairs(ids, block_size=32)` -- helper to
+   build next-token prediction pairs; added if not already
+   present as part of step 006.
+5. `model = chain(embed(V, d_model), add_positional(T),
+   residual(chain(rms_norm(d), causal_attention(d, h))),
+   residual(chain(rms_norm(d), linear(d, 4d), relu_layer,
+   linear(4d, d))), rms_norm(d), linear(d, V))`.
+6. `experiment "tiny_lm" { train N { loss = cross_entropy(
+   apply(model, X_batch), Y_batch); adam(loss, model,
+   lr, ...); loss_metric = loss } }`.
+7. `loss_curve(last_losses)` inline SVG.
+Measurable outcome: loss drops monotonically (or near) by
+>=40% over N steps. Wire into the web REPL demo list.
 
-Reproducibility as a language construct.
+### Step 007 -- generation + attention viz
+`demos/tiny_lm_generate.mlpl`. Given a trained `model` from
+step 006 (either loaded from checkpoint if we've added that,
+or trained inline with a tiny budget), implement a sampling
+loop: given a prompt string, tokenize, then iteratively
+`apply` the model, take the last position's logits, `sample`,
+append, decode. Render generated text via the REPL's string
+output path. Add an attention-map heatmap: extract one
+forward pass's per-head attention weights and visualize as a
+`heatmap` SVG. Decision during TDD: either reuse a hook on
+`attention` to capture weights, or add `attention_weights(
+model, X)` as a separate read-only builtin.
 
-- **`experiment "name" { body }`** is a new scoped form that
-  (a) captures the seed / RNG state / current config on entry,
-  (b) runs `body`, (c) on exit writes a JSON record to
-  `.mlpl-exp/<name>/<unix-timestamp>/run.json` containing the
-  entry snapshot, the body's source text, and any scalar
-  values assigned to names ending in `_metric` during the run
-  (so `loss_metric = ...`, `accuracy_metric = ...` land as
-  recorded metrics). In the web REPL with no fs, the record is
-  held in an environment-scoped list and surfaced via a new
-  `:experiments` REPL command; the terminal REPL actually
-  writes to disk.
-- **`:experiments` / `compare(name_a, name_b)`** REPL
-  introspection. `:experiments` lists every recorded run with
-  its name, timestamp, and top-line metric. `compare("a", "b")`
-  prints a side-by-side of the two runs' metric dicts.
+## Phase 4 -- docs (1 step)
 
-### Phase 4: Docs, tutorial, release (1 step)
+### Step 008 -- tutorial lessons + pages rebuild
+Add two new web REPL tutorial lessons:
+- **"Language Model Basics"** -- walks from `embed` +
+  positional + causal attention to a forward pass and
+  `cross_entropy`.
+- **"Training and Generating"** -- runs the tiny LM training
+  loop (smaller budget) and the generation loop, showing the
+  attention heatmap.
+Update `docs/status.md` one-liner, add
+`docs/milestone-tiny-lm.md` retrospective, rebuild
+`pages/` via `scripts/build-pages.sh`, commit both the source
+and the built artifact in the same commit.
 
-- New "Loading Data" and "Tokenizing Text" tutorial lessons in
-  the web REPL, immediately after the "Named Axes" lesson.
-- New "Experiments" lesson showing a tiny training loop wrapped
-  in `experiment "name" { ... }`.
-- Update `docs/are-we-driven-yet.md`: move "load.csv", "custom
-  tokenizers", "experiment registry" from CONS/PLAN to HAVE.
-- Update `docs/saga.md`, `docs/status.md`, `docs/plan.md`.
-- Bump workspace version 0.8.0 -> 0.9.0, banners, pages/.
-- Tag `v0.9.0-tokenizers`.
+## Phase 5 -- release (1 step)
 
-## Planned steps
+### Step 009 -- release v0.10.0
+Bump workspace version to `0.10.0`. Write release commit
+message summarizing primitives (`embed`,
+`sinusoidal_encoding`/`positional`, causal attention,
+`cross_entropy`, `sample`/`top_k`), demos (`tiny_lm.mlpl`,
+`tiny_lm_generate.mlpl`), and tutorials. Tag `v0.10.0`. Push
+commit and tag. Verify pages workflow deploys the updated
+demo list.
 
-| # | Slug | Phase | What it delivers |
-|---|------|-------|------------------|
-| 001 | load-csv-txt | 1 | `load("file.csv")` / `load("file.txt")` with header detection + sandbox |
-| 002 | dataset-ops | 1 | `shuffle(x, seed)`, `batch(x, size)`, `split(x, frac, seed)` |
-| 003 | streaming-iter | 1 | `for row in x { body }` form + `last_rows` capture |
-| 004 | bytes-tokenizer | 2 | `tokenize_bytes`, `decode_bytes`; Value::Tokenizer scaffolding |
-| 005 | bpe-train | 2 | `train_bpe(text, vocab_size, seed)` with deterministic tie-breaking |
-| 006 | bpe-apply-decode | 2 | `apply_tokenizer` + `decode`; round-trip tests |
-| 007 | experiment-block | 3 | `experiment "name" { body }` scoped form + metric capture |
-| 008 | experiment-registry | 3 | `:experiments` / `compare(a, b)` REPL commands |
-| 009 | tokenizers-release-v090 | 4 | docs, banners, tag |
+## Dependencies and risk
 
-Nine steps. The original prose sketch had a tenth for
-per-variable metric capture inside `experiment`; folded into
-step 007 since they share all the same plumbing.
-
-## Success criteria
-
-- A tiny corpus can be loaded end-to-end:
-  `text = load("data/tiny.txt")` -> `tokens = apply_tokenizer(bpe, text)`
-  -> fits the labeled-array pipeline for Saga 13's Tiny LM.
-- Round-trip: for every byte string `s`,
-  `decode(bpe, apply_tokenizer(bpe, s)) == s`.
-- A simple `experiment "baseline" { ... }` block produces a
-  `.mlpl-exp/baseline/<ts>/run.json` that lists seeds, source
-  text, and any `_metric`-suffixed scalars.
-- `:experiments` in the terminal REPL lists at least one run
-  after an `experiment` block completes.
-- No compile-path regression: Saga 12 additions are interpreter-
-  only for now (mlpl-lower-rs doesn't know about `load`,
-  `experiment`, or `Value::Tokenizer`). They return
-  `LowerError::Unsupported` in the compile path until a future
-  saga extends the lowering.
-- Every Saga 11.5 demo still runs unchanged.
-- All quality gates green; pages deployed; release tagged.
-
-## Risks and open questions
-
-- **File IO in the web REPL.** `std::fs` doesn't exist in
-  WASM; a direct `load("foo.csv")` would hang the parser or
-  panic. Proposal: web REPL ships a small preloaded-corpus
-  registry (e.g. `load_preloaded("tiny_shakespeare")`), and
-  the web UI synthesizes a `Value::Str` from an embedded
-  dataset. Terminal REPL reads real files. Decide final API
-  in step 001.
-- **Sandbox story.** The terminal REPL must not let a random
-  `load("/etc/passwd")` succeed. Proposal: `--data-dir <path>`
-  flag (default `./data`) scopes all `load` calls. Any
-  absolute or traversing path errors out. Step 001 owns this.
-- **BPE performance.** A naive BPE trainer is O(corpus *
-  vocab_size * merges). For a ~5 MB corpus at vocab 2048 this
-  is still seconds, not minutes, on a laptop. If a demo corpus
-  takes longer than ~10s to train we add progress reporting
-  and/or early-exit criteria; otherwise leave it simple.
-- **`Value::Tokenizer` vs a generic `Value::Handle<T>`.** The
-  latter would let Saga 13 reuse the same pattern for trained
-  models more easily. Decide in step 004: either `Tokenizer`
-  is a dedicated variant, or we introduce a general-purpose
-  opaque-value variant now.
-- **Experiment writes and the sandbox.** Writing to
-  `.mlpl-exp/` from interpreter code is a new side-effect.
-  Scope to a `--exp-dir <path>` terminal-REPL flag (defaults to
-  `./.mlpl-exp`). Web REPL keeps records in-memory only.
-- **Backward compat on `for`.** There is no existing `for`
-  construct in MLPL (only `repeat` and `train`). Adding `for`
-  is a parser change -- small, but genuinely new syntax. Keep
-  it narrow: only `for ident in expr { body }`, no C-style
-  variants.
+- Step 001 (embedding) is a new `Value::Model` variant -- the
+  main risk is integrating with `params(model)` and the Adam
+  state map cleanly. Mitigation: mirror `linear`'s existing
+  model-param plumbing.
+- Step 003 (causal mask) touches the existing `attention`
+  builtin which is tape-lowered for heads=1. Risk: the mask
+  must be applied in the lowered tape path, not post-hoc.
+- Step 004 (cross-entropy) risk: numerical stability on
+  logits drawn from an untrained `[B*T, 256]` output. Always
+  subtract max inside log-softmax.
+- Step 006 (demo) risk: a 256-vocab BPE on a 100KB corpus may
+  train very slowly on pure-interpreter CPU. Accept it. If
+  unworkable, fall back to a smaller vocab + shorter block
+  size; MLX (Saga 14) is the proper speedup lever, not this
+  saga.
+- Step 007 generation risk: no KV cache means O(T^2) per
+  generated token. Keep T small in the demo (~64).
