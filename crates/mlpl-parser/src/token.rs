@@ -49,6 +49,8 @@ pub enum TokenKind {
     For,
     /// `in` keyword (only meaningful inside `for ... in ...`).
     In,
+    /// `experiment` keyword (Saga 12 step 007).
+    Experiment,
     /// Newline (statement separator).
     Newline,
     /// End of input.

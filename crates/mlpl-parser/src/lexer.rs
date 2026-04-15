@@ -160,6 +160,10 @@ impl<'a> Lexer<'a> {
                 self.prev_was_value = false;
                 TokenKind::In
             }
+            "experiment" => {
+                self.prev_was_value = false;
+                TokenKind::Experiment
+            }
             _ => {
                 self.prev_was_value = true;
                 TokenKind::Ident(name)

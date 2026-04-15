@@ -61,6 +61,29 @@ impl Parser<'_> {
         })
     }
 
+    /// Parse `experiment "name" { body }`. Saga 12 step 007.
+    /// Name must be a string literal; anything else is a parse
+    /// error to keep the grammar unambiguous.
+    pub(crate) fn parse_experiment(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1; // skip 'experiment'
+        let tok = &self.tokens[self.pos];
+        let TokenKind::StrLit(name) = &tok.kind else {
+            return Err(ParseError::UnexpectedToken {
+                found: describe_kind(&tok.kind),
+                span: tok.span,
+            });
+        };
+        let name = name.clone();
+        self.pos += 1;
+        let (body, end) = self.parse_braced_body()?;
+        Ok(Expr::Experiment {
+            name,
+            body,
+            span: Span::new(start.start, end.end),
+        })
+    }
+
     /// Parse `for <ident> in <expr> { body }`. Saga 12 step 003.
     pub(crate) fn parse_for(&mut self) -> Result<Expr, ParseError> {
         let start = self.tokens[self.pos].span;

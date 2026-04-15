@@ -220,6 +220,7 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::TensorCtor { .. }
         | Expr::Repeat { .. }
         | Expr::Train { .. }
-        | Expr::For { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
+        | Expr::For { .. }
+        | Expr::Experiment { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
     }
 }
