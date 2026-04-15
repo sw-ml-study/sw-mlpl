@@ -1,6 +1,6 @@
 number = 3
 slug = "streaming-iter"
-status = "pending"
+status = "in-progress"
 description = "Phase 1 step 003: Streaming iteration over rows. Add a new language construct..."
 role = "production"
 context_files = []

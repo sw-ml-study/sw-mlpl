@@ -3,6 +3,7 @@
 mod env;
 mod error;
 mod eval;
+mod eval_for;
 mod eval_ops;
 mod grad;
 mod inspect;

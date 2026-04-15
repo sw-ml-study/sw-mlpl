@@ -152,6 +152,14 @@ impl<'a> Lexer<'a> {
                 self.prev_was_value = false;
                 TokenKind::Train
             }
+            "for" => {
+                self.prev_was_value = false;
+                TokenKind::For
+            }
+            "in" => {
+                self.prev_was_value = false;
+                TokenKind::In
+            }
             _ => {
                 self.prev_was_value = true;
                 TokenKind::Ident(name)

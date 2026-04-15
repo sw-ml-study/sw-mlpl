@@ -216,8 +216,10 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         Expr::Assign { .. } => Err(LowerError::Unsupported(
             "nested assignment (assignment as subexpression)".into(),
         )),
-        Expr::StrLit(_, _) | Expr::TensorCtor { .. } | Expr::Repeat { .. } | Expr::Train { .. } => {
-            Err(LowerError::Unsupported(format!("{expr:?}")))
-        }
+        Expr::StrLit(_, _)
+        | Expr::TensorCtor { .. }
+        | Expr::Repeat { .. }
+        | Expr::Train { .. }
+        | Expr::For { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
     }
 }

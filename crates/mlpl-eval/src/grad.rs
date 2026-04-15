@@ -91,9 +91,13 @@ fn eval_tensor_expr(
             let dims = eval_shape_dims(shape, env)?;
             Ok(leaf(DenseArray::zeros(Shape::new(dims))))
         }
-        Expr::Assign { .. } | Expr::Repeat { .. } | Expr::Train { .. } | Expr::StrLit(_, _) => Err(
-            EvalError::Unsupported("grad: expression form not supported inside grad()".into()),
-        ),
+        Expr::Assign { .. }
+        | Expr::Repeat { .. }
+        | Expr::Train { .. }
+        | Expr::For { .. }
+        | Expr::StrLit(_, _) => Err(EvalError::Unsupported(
+            "grad: expression form not supported inside grad()".into(),
+        )),
     }
 }
 
