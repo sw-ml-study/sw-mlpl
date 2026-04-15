@@ -1,9 +1,10 @@
 number = 1
 slug = "load-csv-txt"
-status = "in-progress"
+status = "completed"
 description = 'Phase 1 step 001: Add file IO to MLPL. Implement load("path.csv") and load("p...'
 role = "production"
 context_files = []
 created_at = "2026-04-15T11:15:59"
+completed_at = "2026-04-15T12:19:56"
 task_type = "production"
-commits = []
+commits = ["4c4e18d8bf751278b2094c966d015b48d38c8849"]

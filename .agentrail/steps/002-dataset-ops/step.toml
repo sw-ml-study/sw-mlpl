@@ -1,6 +1,6 @@
 number = 2
 slug = "dataset-ops"
-status = "pending"
+status = "in-progress"
 description = "Phase 1 step 002: Dataset operations. Add three builtins for preparing data f..."
 role = "production"
 context_files = []
