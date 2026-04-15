@@ -1,9 +1,0 @@
-number = 8
-slug = "mlpl-build-subcommand"
-status = "in-progress"
-description = "Phase 5: mlpl build foo.mlpl subcommand (native binary). Extend the existing ..."
-role = "production"
-context_files = []
-created_at = "2026-04-14T20:47:11"
-task_type = "production"
-commits = []
