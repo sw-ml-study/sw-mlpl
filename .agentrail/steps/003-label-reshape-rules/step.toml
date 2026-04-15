@@ -1,6 +1,6 @@
 number = 3
 slug = "label-reshape-rules"
-status = "pending"
+status = "in-progress"
 description = "Phase 2 cont.: Label propagation through shape-changing ops. transpose(x) / x..."
 role = "production"
 context_files = []

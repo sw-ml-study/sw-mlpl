@@ -52,10 +52,15 @@ impl DenseArray {
             new_data[new_flat] = self.data[flat];
         }
 
+        let labels = self
+            .labels
+            .as_ref()
+            .map(|lbls| lbls.iter().rev().cloned().collect());
+
         DenseArray {
             shape: new_shape,
             data: new_data,
-            labels: None,
+            labels,
         }
     }
 }

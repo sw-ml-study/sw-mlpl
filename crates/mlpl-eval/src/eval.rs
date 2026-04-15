@@ -125,6 +125,38 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "reshape_labeled"
+    {
+        if args.len() != 3 {
+            return Err(EvalError::BadArity {
+                func: "reshape_labeled".into(),
+                expected: 3,
+                got: args.len(),
+            });
+        }
+        let Expr::ArrayLit(label_elems, _) = &args[2] else {
+            return Err(EvalError::Unsupported(
+                "reshape_labeled: third argument must be a bracketed list of string literals"
+                    .into(),
+            ));
+        };
+        let mut labels: Vec<Option<String>> = Vec::with_capacity(label_elems.len());
+        for e in label_elems {
+            let Expr::StrLit(s, _) = e else {
+                return Err(EvalError::Unsupported(
+                    "reshape_labeled: axis names must be string literals".into(),
+                ));
+            };
+            labels.push(Some(s.clone()));
+        }
+        let source = eval_expr(&args[0], env, trace)?.into_array()?;
+        let shape_arr = eval_expr(&args[1], env, trace)?.into_array()?;
+        let dims: Vec<usize> = shape_arr.data().iter().map(|&d| d as usize).collect();
+        let reshaped = source.reshape(Shape::new(dims))?;
+        let labeled = reshaped.with_labels(labels)?;
+        return Ok(Value::Array(labeled));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "label"
     {
         if args.len() != 2 {
