@@ -763,6 +763,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-build"
+version = "0.7.5"
+dependencies = [
+ "mlpl-lower-rs",
+ "mlpl-parser",
+]
+
+[[package]]
 name = "mlpl-cli"
 version = "0.7.5"
 dependencies = [
