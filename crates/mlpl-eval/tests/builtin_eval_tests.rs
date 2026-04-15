@@ -208,3 +208,73 @@ fn unlabeled_assign_still_works() {
     let v = eval_value(src).unwrap();
     assert_eq!(v, Value::Str(",".into()));
 }
+
+// -- Label propagation through shape ops (Saga 11.5 Phase 2 cont.) --
+
+#[test]
+fn transpose_swaps_labels_in_repl() {
+    let src = "x : [rows, cols] = reshape(iota(6), [2, 3])\nlabels(transpose(x))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("cols,rows".into()));
+}
+
+#[test]
+fn transpose_unlabeled_stays_unlabeled() {
+    let src = "labels(transpose(reshape(iota(6), [2, 3])))";
+    let v = eval_value(src).unwrap();
+    // Unlabeled rank-2 shows as "," (two positional axes).
+    assert_eq!(v, Value::Str(",".into()));
+}
+
+#[test]
+fn reshape_drops_labels_in_repl() {
+    let src = "x : [rows, cols] = reshape(iota(6), [2, 3])\nlabels(reshape(x, [6]))";
+    let v = eval_value(src).unwrap();
+    // After reshape, labels cleared; rank-1 unlabeled renders as "".
+    assert_eq!(v, Value::Str(String::new()));
+}
+
+#[test]
+fn reshape_labeled_attaches_new_labels() {
+    let src = "labels(reshape_labeled(iota(6), [2, 3], [\"r\", \"c\"]))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("r,c".into()));
+}
+
+#[test]
+fn reshape_labeled_preserves_shape_and_data() {
+    let src = "reshape_labeled(iota(6), [2, 3], [\"r\", \"c\"])";
+    let arr = eval(src).unwrap();
+    assert_eq!(arr.shape(), &Shape::new(vec![2, 3]));
+    assert_eq!(arr.data(), &[0.0, 1.0, 2.0, 3.0, 4.0, 5.0]);
+}
+
+#[test]
+fn reshape_labeled_rank_mismatch_errors() {
+    // 2-d shape but only 1 label.
+    let result = eval("reshape_labeled(iota(6), [2, 3], [\"only_one\"])");
+    assert!(result.is_err(), "expected label-rank mismatch error");
+}
+
+#[test]
+fn reshape_labeled_shape_mismatch_errors() {
+    // Element count does not match.
+    let result = eval("reshape_labeled(iota(6), [2, 2], [\"r\", \"c\"])");
+    assert!(result.is_err(), "expected shape mismatch error");
+}
+
+#[test]
+fn reshape_labeled_from_labeled_source() {
+    // Labels on the source do not leak through; only the supplied
+    // labels matter. This matches the `reshape clears labels` rule.
+    let src = "x : [rows, cols] = reshape(iota(6), [2, 3])\n\
+               labels(reshape_labeled(x, [3, 2], [\"a\", \"b\"]))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("a,b".into()));
+}
+
+#[test]
+fn reshape_labeled_rejects_non_string_labels() {
+    let result = eval("reshape_labeled(iota(6), [2, 3], [1, 2])");
+    assert!(result.is_err(), "expected non-string label error");
+}

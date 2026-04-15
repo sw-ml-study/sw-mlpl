@@ -133,3 +133,78 @@ fn double_transpose_identity() {
     assert_eq!(t2.shape(), arr.shape());
     assert_eq!(t2.data(), arr.data());
 }
+
+// -- Label propagation through shape ops (Saga 11.5 Phase 2 cont.) --
+
+#[test]
+fn transpose_swaps_labels_on_labeled_matrix() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        .unwrap()
+        .with_labels(vec![Some("rows".into()), Some("cols".into())])
+        .unwrap();
+    let t = arr.transpose();
+    assert_eq!(
+        t.labels(),
+        Some(&[Some("cols".into()), Some("rows".into())][..])
+    );
+    assert_eq!(t.shape(), &Shape::new(vec![3, 2]));
+}
+
+#[test]
+fn transpose_swaps_partial_labels() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![0.0; 6])
+        .unwrap()
+        .with_labels(vec![None, Some("cols".into())])
+        .unwrap();
+    let t = arr.transpose();
+    assert_eq!(t.labels(), Some(&[Some("cols".into()), None][..]));
+}
+
+#[test]
+fn transpose_preserves_none_labels() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![0.0; 6]).unwrap();
+    let t = arr.transpose();
+    assert_eq!(t.labels(), None);
+}
+
+#[test]
+fn transpose_rank1_preserves_single_label() {
+    let arr = DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let t = arr.transpose();
+    assert_eq!(t.labels(), Some(&[Some("seq".into())][..]));
+}
+
+#[test]
+fn transpose_rank3_reverses_labels() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3, 1]), vec![0.0; 6])
+        .unwrap()
+        .with_labels(vec![
+            Some("batch".into()),
+            Some("time".into()),
+            Some("dim".into()),
+        ])
+        .unwrap();
+    let t = arr.transpose();
+    assert_eq!(
+        t.labels(),
+        Some(
+            &[
+                Some("dim".into()),
+                Some("time".into()),
+                Some("batch".into()),
+            ][..]
+        )
+    );
+}
+
+#[test]
+fn reshape_clears_labels() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![0.0; 6])
+        .unwrap()
+        .with_labels(vec![Some("rows".into()), Some("cols".into())])
+        .unwrap();
+    let reshaped = arr.reshape(Shape::vector(6)).unwrap();
+    assert_eq!(reshaped.labels(), None);
+}
