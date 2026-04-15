@@ -1,6 +1,6 @@
 number = 7
 slug = "compile-to-rust-release"
-status = "pending"
+status = "in-progress"
 description = "Phase 8: release v0.8.0-compile-rs. (1) Update docs/milestone-compile-to-rust..."
 role = "production"
 context_files = []

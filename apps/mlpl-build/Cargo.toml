@@ -1,0 +1,13 @@
+[package]
+name = "mlpl-build"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[[bin]]
+name = "mlpl-build"
+path = "src/main.rs"
+
+[dependencies]
+mlpl-lower-rs = { path = "../../crates/mlpl-lower-rs" }
+mlpl-parser = { path = "../../crates/mlpl-parser" }

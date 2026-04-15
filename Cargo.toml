@@ -20,6 +20,7 @@ members = [
   "apps/mlpl-repl",
   "apps/mlpl-web",
   "apps/mlpl-lab",
+  "apps/mlpl-build",
 ]
 
 [workspace.package]
