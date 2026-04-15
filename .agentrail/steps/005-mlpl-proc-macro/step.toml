@@ -1,0 +1,9 @@
+number = 5
+slug = "mlpl-proc-macro"
+status = "pending"
+description = "Phase 3: mlpl! proc macro. Create crates/mlpl-macro/ (proc-macro = true) that..."
+role = "production"
+context_files = []
+created_at = "2026-04-14T20:45:28"
+task_type = "production"
+commits = []

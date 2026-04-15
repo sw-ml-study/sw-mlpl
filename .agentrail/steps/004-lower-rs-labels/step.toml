@@ -1,0 +1,9 @@
+number = 4
+slug = "lower-rs-labels"
+status = "pending"
+description = "Phase 2 finish: label-aware lowering. Extend mlpl-lower-rs to handle annotati..."
+role = "production"
+context_files = []
+created_at = "2026-04-14T20:44:59"
+task_type = "production"
+commits = []
