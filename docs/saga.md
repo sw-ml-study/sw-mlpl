@@ -100,3 +100,22 @@ into the browser REPL: k-means clustering, PCA via power iteration,
 a linear softmax classifier, a tiny MLP on XOR-style data, and a
 scaled dot-product attention pattern. Tutorial lessons added for
 each. Delivered v0.4.
+
+## Saga 11.5: Named Axes and shape introspection (IN PROGRESS)
+Axis-labeled shapes threaded through `Value::Array`, a `label(x, [...])`
+primitive and `x : [...]` annotation syntax, label propagation through
+elementwise / matmul / reduce / softmax, a structured
+`EvalError::ShapeMismatch` variant, label-aware `:describe`/`:vars`
+output, and labels in the trace JSON export. Surface-only saga:
+no new kernels, no new backends, no new ML primitives. See
+`docs/milestone-named-axes.md`. Target: v0.7.5.
+
+## Future: Compile-to-Rust (PLANNED, not scheduled)
+Exploratory direction for lowering MLPL to Rust source. Three
+targets from one codegen backend: an `mlpl!` proc macro for
+embedding MLPL in Rust apps, a `mlpl build foo.mlpl` subcommand
+that emits native Mac/Linux binaries via cargo+rustc, and a
+leaner WASM path that reuses the same pipeline. Depends on
+Saga 11.5 (LabeledShape is the compile-time key for static
+einsum-class dispatch) and on MLPL keeping no `exec(string)` /
+no runtime-code primitive. See `docs/milestone-compile-to-rust.md`.
