@@ -125,6 +125,34 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "label"
+    {
+        if args.len() != 2 {
+            return Err(EvalError::BadArity {
+                func: "label".into(),
+                expected: 2,
+                got: args.len(),
+            });
+        }
+        let Expr::ArrayLit(label_elems, _) = &args[1] else {
+            return Err(EvalError::Unsupported(
+                "label: second argument must be a bracketed list of string literals".into(),
+            ));
+        };
+        let mut labels: Vec<Option<String>> = Vec::with_capacity(label_elems.len());
+        for e in label_elems {
+            let Expr::StrLit(s, _) = e else {
+                return Err(EvalError::Unsupported(
+                    "label: axis names must be string literals".into(),
+                ));
+            };
+            labels.push(Some(s.clone()));
+        }
+        let arr = eval_expr(&args[0], env, trace)?.into_array()?;
+        let labeled = arr.with_labels(labels)?;
+        return Ok(Value::Array(labeled));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "labels"
     {
         if args.len() != 1 {

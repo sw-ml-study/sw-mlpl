@@ -3,12 +3,12 @@
 use mlpl_core::Span;
 
 use crate::ast::{BinOpKind, Expr, TensorCtorKind};
-use crate::error::ParseError;
+use crate::error::{ParseError, describe_kind};
 use crate::token::{Token, TokenKind};
 
 /// Parse a token stream into a list of expression statements.
 pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {
-    let mut p = Parser::new(tokens);
+    let mut p = Parser { tokens, pos: 0 };
     let mut stmts = Vec::new();
     p.skip_sep();
     while p.pos < p.tokens.len() && p.tokens[p.pos].kind != TokenKind::Eof {
@@ -24,10 +24,6 @@ pub(crate) struct Parser<'a> {
 }
 
 impl<'a> Parser<'a> {
-    pub(crate) fn new(tokens: &'a [Token]) -> Self {
-        Self { tokens, pos: 0 }
-    }
-
     /// Parse a single statement (assignment, repeat, or expression).
     fn parse_statement(&mut self) -> Result<Expr, ParseError> {
         if self.tokens[self.pos].kind == TokenKind::Repeat {
@@ -57,7 +53,79 @@ impl<'a> Parser<'a> {
                 span,
             });
         }
+        if matches!(self.tokens[self.pos].kind, TokenKind::Ident(_))
+            && self
+                .tokens
+                .get(self.pos + 1)
+                .is_some_and(|t| t.kind == TokenKind::Colon)
+        {
+            return self.parse_annotated_assign();
+        }
         self.parse_expr(0)
+    }
+
+    /// Parse `name : [axis1, axis2, ...] = value` and desugar to
+    /// `Assign { name, value: FnCall("label", [value, ArrayLit([StrLit(a1), ...])]) }`.
+    /// Saga 11.5 Phase 2. The bracket list holds bare identifiers; each
+    /// is captured as a string label. An empty list `[]` is legal and
+    /// means "scalar with no axes".
+    fn parse_annotated_assign(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        let TokenKind::Ident(n) = &self.tokens[self.pos].kind else {
+            unreachable!()
+        };
+        let name = n.clone();
+        self.pos += 2; // skip name and ':'
+        let br_start = self.expect(&TokenKind::LBracket)?;
+        let mut labels: Vec<Expr> = Vec::new();
+        while !self.is(TokenKind::RBracket) {
+            let tok = &self.tokens[self.pos];
+            let TokenKind::Ident(a) = &tok.kind else {
+                return Err(ParseError::UnexpectedToken {
+                    found: describe_kind(&tok.kind),
+                    span: tok.span,
+                });
+            };
+            labels.push(Expr::StrLit(a.clone(), tok.span));
+            self.pos += 1;
+            if self.is(TokenKind::Comma) {
+                self.pos += 1;
+            } else {
+                break;
+            }
+        }
+        let br_end = self.expect(&TokenKind::RBracket)?;
+        self.expect(&TokenKind::Equals)?;
+        let value = self.parse_expr(0)?;
+        let value_span = value.span();
+        let call = Expr::FnCall {
+            name: "label".into(),
+            args: vec![
+                value,
+                Expr::ArrayLit(labels, Span::new(br_start.start, br_end.end)),
+            ],
+            span: Span::new(br_start.start, value_span.end),
+        };
+        Ok(Expr::Assign {
+            name,
+            value: Box::new(call),
+            span: Span::new(start.start, value_span.end),
+        })
+    }
+
+    /// Consume a token of the given kind or return `UnexpectedToken`.
+    /// Returns the consumed token's span on success.
+    fn expect(&mut self, kind: &TokenKind) -> Result<Span, ParseError> {
+        if std::mem::discriminant(&self.tokens[self.pos].kind) == std::mem::discriminant(kind) {
+            let span = self.tokens[self.pos].span;
+            self.pos += 1;
+            Ok(span)
+        } else {
+            Err(ParseError::UnexpectedToken {
+                found: describe_kind(&self.tokens[self.pos].kind),
+                span: self.tokens[self.pos].span,
+            })
+        }
     }
 
     /// Parse an expression with precedence climbing (min_prec=0 for full expr).
@@ -236,26 +304,7 @@ impl<'a> Parser<'a> {
         let start = self.tokens[self.pos].span;
         self.pos += 1; // skip 'repeat' or 'train'
         let count = self.parse_expr(0)?;
-        if !self.is(TokenKind::LBrace) {
-            return Err(ParseError::UnexpectedToken {
-                found: describe_kind(&self.tokens[self.pos].kind),
-                span: self.tokens[self.pos].span,
-            });
-        }
-        let body = self.parse_brace_body()?;
-        let end = self.tokens[self.pos - 1].span;
-        let span = Span::new(start.start, end.end);
-        let count = Box::new(count);
-        Ok(if is_train {
-            Expr::Train { count, body, span }
-        } else {
-            Expr::Repeat { count, body, span }
-        })
-    }
-
-    fn parse_brace_body(&mut self) -> Result<Vec<Expr>, ParseError> {
-        let open = self.tokens[self.pos].span;
-        self.pos += 1; // skip '{'
+        let open = self.expect(&TokenKind::LBrace)?;
         self.skip_sep();
         let mut body = Vec::new();
         while self.pos < self.tokens.len()
@@ -271,8 +320,15 @@ impl<'a> Parser<'a> {
                 span: open,
             });
         }
+        let end = self.tokens[self.pos].span;
         self.pos += 1; // skip '}'
-        Ok(body)
+        let span = Span::new(start.start, end.end);
+        let count = Box::new(count);
+        Ok(if is_train {
+            Expr::Train { count, body, span }
+        } else {
+            Expr::Repeat { count, body, span }
+        })
     }
 
     pub(crate) fn is(&self, kind: TokenKind) -> bool {
@@ -289,31 +345,5 @@ impl<'a> Parser<'a> {
         {
             self.pos += 1;
         }
-    }
-}
-
-fn describe_kind(kind: &TokenKind) -> String {
-    match kind {
-        TokenKind::Eof => "end of input".into(),
-        TokenKind::Newline => "newline".into(),
-        TokenKind::IntLit(n) => format!("integer {n}"),
-        TokenKind::FloatLit(n) => format!("float {n}"),
-        TokenKind::StrLit(s) => format!("string \"{s}\""),
-        TokenKind::Ident(s) => format!("identifier '{s}'"),
-        TokenKind::LParen => "'('".into(),
-        TokenKind::RParen => "')'".into(),
-        TokenKind::LBracket => "'['".into(),
-        TokenKind::RBracket => "']'".into(),
-        TokenKind::LBrace => "'{'".into(),
-        TokenKind::RBrace => "'}'".into(),
-        TokenKind::Comma => "','".into(),
-        TokenKind::Equals => "'='".into(),
-        TokenKind::Semicolon => "';'".into(),
-        TokenKind::Plus => "'+'".into(),
-        TokenKind::Minus => "'-'".into(),
-        TokenKind::Star => "'*'".into(),
-        TokenKind::Slash => "'/'".into(),
-        TokenKind::Repeat => "'repeat'".into(),
-        TokenKind::Train => "'train'".into(),
     }
 }

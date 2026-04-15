@@ -25,6 +25,8 @@ pub enum TokenKind {
     Comma,
     /// `=`
     Equals,
+    /// `:` (axis-label annotation, Saga 11.5 Phase 2).
+    Colon,
     /// `;`
     Semicolon,
     /// `+`

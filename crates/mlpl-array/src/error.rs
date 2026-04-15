@@ -35,6 +35,13 @@ pub enum ArrayError {
     },
     /// Attempted to index an empty array.
     EmptyArray,
+    /// Label list does not match array rank (Saga 11.5 Phase 2).
+    LabelsRankMismatch {
+        /// Array rank (number of axes).
+        rank: usize,
+        /// Number of labels the caller provided.
+        labels: usize,
+    },
 }
 
 impl std::fmt::Display for ArrayError {
@@ -62,6 +69,12 @@ impl std::fmt::Display for ArrayError {
                 )
             }
             Self::EmptyArray => write!(f, "cannot index an empty array"),
+            Self::LabelsRankMismatch { rank, labels } => {
+                write!(
+                    f,
+                    "label list has {labels} entries but array has rank {rank}"
+                )
+            }
         }
     }
 }

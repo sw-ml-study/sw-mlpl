@@ -167,3 +167,44 @@ fn display_empty_vector() {
     let arr = DenseArray::zeros(Shape::vector(0));
     assert_eq!(arr.to_string(), "[]");
 }
+
+// -- Labels (Saga 11.5 Phase 2) --
+
+#[test]
+fn with_labels_matrix() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]).unwrap();
+    let labeled = arr
+        .with_labels(vec![Some("seq".into()), Some("d_k".into())])
+        .unwrap();
+    assert_eq!(
+        labeled.labels(),
+        Some(&[Some("seq".into()), Some("d_k".into())][..])
+    );
+    // Data and shape unchanged.
+    assert_eq!(labeled.shape(), &Shape::new(vec![2, 3]));
+    assert_eq!(labeled.data(), &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+}
+
+#[test]
+fn with_labels_scalar_empty_ok() {
+    let arr = DenseArray::from_scalar(7.5);
+    let labeled = arr.with_labels(vec![]).unwrap();
+    assert_eq!(labeled.labels(), Some(&[][..]));
+}
+
+#[test]
+fn with_labels_rank_mismatch() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![0.0; 6]).unwrap();
+    let result = arr.with_labels(vec![Some("rows".into())]);
+    assert_eq!(
+        result,
+        Err(ArrayError::LabelsRankMismatch { rank: 2, labels: 1 })
+    );
+}
+
+#[test]
+fn with_labels_unlabeled_is_none() {
+    // Starting state: fresh arrays have no labels.
+    let arr = DenseArray::from_vec(vec![1.0, 2.0, 3.0]);
+    assert_eq!(arr.labels(), None);
+}
