@@ -20,6 +20,23 @@ pub enum TokenizerSpec {
     /// Identity byte-level tokenizer: each byte 0..256 is its own
     /// token. Vocab size is implicitly 256.
     ByteLevel,
+    /// Trained byte-level BPE tokenizer (Saga 12 step 005). Vocab
+    /// starts at 256 bytes; each merge adds one entry with the
+    /// next free id. `merges[i]` = `(left_id, right_id)` pair that
+    /// produced the new token at id `256 + i`.
+    BpeMerges {
+        /// Ordered list of `(left_id, right_id)` merges. Apply in
+        /// training order (step 006 spec).
+        merges: Vec<(u32, u32)>,
+        /// Total vocab size = 256 + merges.len().
+        vocab_size: u32,
+        /// Number of bytes in the training corpus.
+        corpus_byte_count: usize,
+        /// Seed threaded through to training (currently unused by
+        /// the deterministic algorithm; reserved for future
+        /// randomized sub-sampling at larger scales).
+        seed: u64,
+    },
 }
 
 impl TokenizerSpec {
@@ -28,6 +45,15 @@ impl TokenizerSpec {
     pub fn describe(&self) -> String {
         match self {
             Self::ByteLevel => "byte-level tokenizer (vocab=256)".into(),
+            Self::BpeMerges {
+                merges,
+                vocab_size,
+                corpus_byte_count,
+                seed,
+            } => format!(
+                "BPE tokenizer (vocab={vocab_size}, merges={}, trained from {corpus_byte_count} bytes, seed={seed})",
+                merges.len()
+            ),
         }
     }
 }
@@ -46,6 +72,7 @@ pub(crate) fn dispatch(
         "tokenizer" => Some(dispatch_tokenizer_ctor(args)),
         "tokenize_bytes" => Some(dispatch_tokenize_bytes(args, env, trace)),
         "decode_bytes" => Some(dispatch_decode_bytes(args, env, trace)),
+        "train_bpe" => Some(dispatch_train_bpe(args, env, trace)),
         _ => None,
     }
 }
@@ -94,6 +121,38 @@ fn dispatch_decode_bytes(
     }
     let arr = crate::eval::eval_expr(&args[0], env, trace)?.into_array()?;
     eval_decode_bytes(&arr)
+}
+
+fn dispatch_train_bpe(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    if args.len() != 3 {
+        return Err(EvalError::BadArity {
+            func: "train_bpe".into(),
+            expected: 3,
+            got: args.len(),
+        });
+    }
+    let corpus_val = crate::eval::eval_expr(&args[0], env, trace)?;
+    let corpus_bytes = crate::bpe::corpus_to_bytes(corpus_val)?;
+    let vocab_arr = crate::eval::eval_expr(&args[1], env, trace)?.into_array()?;
+    let seed_arr = crate::eval::eval_expr(&args[2], env, trace)?.into_array()?;
+    if vocab_arr.rank() != 0 || seed_arr.rank() != 0 {
+        return Err(EvalError::Unsupported(
+            "train_bpe: vocab_size and seed must be scalars".into(),
+        ));
+    }
+    let vocab_size = vocab_arr.data()[0] as u32;
+    let seed = seed_arr.data()[0] as i64 as u64;
+    let merges = crate::bpe::train(&corpus_bytes, vocab_size);
+    Ok(Value::Tokenizer(TokenizerSpec::BpeMerges {
+        vocab_size: 256 + u32::try_from(merges.len()).unwrap_or(u32::MAX - 256),
+        merges,
+        corpus_byte_count: corpus_bytes.len(),
+        seed,
+    }))
 }
 
 /// `tokenize_bytes(str)` -- returns a rank-1 `DenseArray` of byte
