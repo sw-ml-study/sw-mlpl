@@ -1,5 +1,6 @@
 //! Expression evaluator for MLPL.
 
+mod bpe;
 mod env;
 mod error;
 mod eval;
