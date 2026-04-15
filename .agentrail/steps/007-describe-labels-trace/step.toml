@@ -1,8 +1,9 @@
 number = 7
 slug = "describe-labels-trace"
-status = "in-progress"
+status = "completed"
 description = "Phase 5: Teach the existing Saga 11 REPL introspection commands about labels,..."
 role = "production"
 context_files = []
 created_at = "2026-04-11T12:48:52"
-commits = []
+completed_at = "2026-04-14T19:08:15"
+commits = ["b308f01265d569748fca6b67600280b86479c408"]

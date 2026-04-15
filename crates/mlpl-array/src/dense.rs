@@ -82,12 +82,15 @@ impl DenseArray {
     }
 
     /// Apply a function to every element, returning a new array.
+    ///
+    /// Labels propagate unchanged (Saga 11.5): `map` is 1:1 with
+    /// identical shape, so per-axis identity is preserved.
     #[must_use]
     pub fn map(&self, f: fn(f64) -> f64) -> Self {
         Self {
             shape: self.shape.clone(),
             data: self.data.iter().map(|&x| f(x)).collect(),
-            labels: None,
+            labels: self.labels.clone(),
         }
     }
 }

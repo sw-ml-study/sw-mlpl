@@ -1,6 +1,6 @@
 number = 8
 slug = "named-axes-tutorial-lesson"
-status = "pending"
+status = "in-progress"
 description = 'Phase 6: Add a "Named Axes" tutorial lesson to apps/mlpl-web/src/tutorial.rs ...'
 role = "production"
 context_files = []
