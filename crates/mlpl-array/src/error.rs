@@ -42,6 +42,17 @@ pub enum ArrayError {
         /// Number of labels the caller provided.
         labels: usize,
     },
+    /// Two labeled operands disagree on axis labels (Saga 11.5 Phase 3).
+    ///
+    /// Raised by `apply_binop` when both sides carry labels but the
+    /// label vectors differ. Step 006 will lift this into a
+    /// richer `EvalError::ShapeMismatch` at the evaluator boundary.
+    LabelMismatch {
+        /// Labels on the first (left-hand) operand.
+        expected: Vec<Option<String>>,
+        /// Labels on the second (right-hand) operand.
+        actual: Vec<Option<String>>,
+    },
 }
 
 impl std::fmt::Display for ArrayError {
@@ -73,6 +84,12 @@ impl std::fmt::Display for ArrayError {
                 write!(
                     f,
                     "label list has {labels} entries but array has rank {rank}"
+                )
+            }
+            Self::LabelMismatch { expected, actual } => {
+                write!(
+                    f,
+                    "axis label mismatch: expected {expected:?}, got {actual:?}"
                 )
             }
         }

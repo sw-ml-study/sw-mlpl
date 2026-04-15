@@ -278,3 +278,63 @@ fn reshape_labeled_rejects_non_string_labels() {
     let result = eval("reshape_labeled(iota(6), [2, 3], [1, 2])");
     assert!(result.is_err(), "expected non-string label error");
 }
+
+// -- Elementwise label propagation in REPL (Saga 11.5 Phase 3) --
+
+#[test]
+fn binop_matching_labels_propagate_in_repl() {
+    let src = "x : [seq] = iota(3)\n\
+               y : [seq] = iota(3)\n\
+               labels(x + y)";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("seq".into()));
+}
+
+#[test]
+fn binop_mismatched_labels_error_in_repl() {
+    let src = "x : [seq] = iota(3)\n\
+               y : [batch] = iota(3)\n\
+               x + y";
+    let result = eval(src);
+    assert!(result.is_err(), "expected label mismatch error");
+}
+
+#[test]
+fn binop_labeled_plus_unlabeled_in_repl() {
+    let src = "x : [seq] = iota(3)\n\
+               y = iota(3)\n\
+               labels(x + y)";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("seq".into()));
+}
+
+#[test]
+fn binop_scalar_times_labeled_in_repl() {
+    let src = "x : [seq] = iota(3)\nlabels(2 * x)";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("seq".into()));
+}
+
+#[test]
+fn binop_both_unlabeled_in_repl_unchanged() {
+    let src = "a = iota(3)\nb = iota(3)\nlabels(a + b)";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str(String::new()));
+}
+
+#[test]
+fn relabel_overrides_labels() {
+    let src = "x : [seq] = iota(3)\nlabels(relabel(x, [\"time\"]))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("time".into()));
+}
+
+#[test]
+fn relabel_escape_hatch_resolves_mismatch() {
+    // Labels would clash on `x + y`, but relabel resolves it.
+    let src = "x : [seq] = iota(3)\n\
+               y : [batch] = iota(3)\n\
+               labels(x + relabel(y, [\"seq\"]))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("seq".into()));
+}
