@@ -73,6 +73,8 @@ pub(crate) fn dispatch(
         "tokenize_bytes" => Some(dispatch_tokenize_bytes(args, env, trace)),
         "decode_bytes" => Some(dispatch_decode_bytes(args, env, trace)),
         "train_bpe" => Some(dispatch_train_bpe(args, env, trace)),
+        "apply_tokenizer" => Some(crate::bpe::dispatch_apply(args, env, trace)),
+        "decode" => Some(crate::bpe::dispatch_decode(args, env, trace)),
         _ => None,
     }
 }
