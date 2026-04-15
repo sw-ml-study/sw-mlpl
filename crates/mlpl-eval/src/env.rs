@@ -1,6 +1,7 @@
 //! Evaluation environment (variable bindings).
 
 use std::collections::{HashMap, HashSet};
+use std::path::PathBuf;
 
 use mlpl_array::DenseArray;
 
@@ -15,6 +16,11 @@ pub struct Environment {
     pub(crate) optim_state: OptimizerState,
     pub(crate) models: HashMap<String, ModelSpec>,
     pub(crate) next_model_id: u64,
+    /// Sandbox root for filesystem `load("relative-path")` calls.
+    /// `None` means filesystem access is disabled (the web REPL
+    /// surface, where `std::fs` doesn't exist under WASM). Saga 12
+    /// step 001.
+    pub(crate) data_dir: Option<PathBuf>,
 }
 
 impl Environment {
@@ -63,6 +69,20 @@ impl Environment {
     #[must_use]
     pub fn get_model(&self, name: &str) -> Option<&ModelSpec> {
         self.models.get(name)
+    }
+
+    /// Set the sandbox root for `load("relative-path")` (Saga 12
+    /// step 001). The terminal REPL calls this from a `--data-dir`
+    /// CLI flag; the web REPL never calls this, leaving fs access
+    /// disabled.
+    pub fn set_data_dir(&mut self, dir: PathBuf) {
+        self.data_dir = Some(dir);
+    }
+
+    /// Borrow the current sandbox root, if any.
+    #[must_use]
+    pub fn data_dir(&self) -> Option<&PathBuf> {
+        self.data_dir.as_ref()
     }
 }
 

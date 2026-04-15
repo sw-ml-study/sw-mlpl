@@ -23,6 +23,16 @@ fn main() {
         .map(PathBuf::from);
     let mut svg_out = SvgOut::new(svg_dir);
 
+    // Sandbox root for `load("relative.csv")` etc. Saga 12 step 001.
+    // Unset by default -- `load` without a sandbox errors cleanly.
+    if let Some(dir) = args
+        .iter()
+        .position(|a| a == "--data-dir")
+        .and_then(|p| args.get(p + 1))
+    {
+        env.set_data_dir(PathBuf::from(dir));
+    }
+
     if let Some(pos) = args.iter().position(|a| a == "-f" || a == "--file") {
         let path = args.get(pos + 1).unwrap_or_else(|| {
             eprintln!("error: -f requires a file path");
