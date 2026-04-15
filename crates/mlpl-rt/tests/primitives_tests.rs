@@ -8,7 +8,8 @@
 //! decoupled from the interpreter stack.
 
 use mlpl_rt::{
-    DenseArray, Shape, iota, rank, reduce_add, reduce_add_axis, reshape, shape, transpose,
+    DenseArray, Shape, array_lit, iota, rank, reduce_add, reduce_add_axis, reshape, shape,
+    transpose,
 };
 
 #[test]
@@ -86,6 +87,34 @@ fn reduce_add_axis_drops_label() {
         .unwrap();
     let s = reduce_add_axis(&m, 0).unwrap();
     assert_eq!(s.labels(), Some(&[Some("feat".into())][..]));
+}
+
+#[test]
+fn array_lit_scalars_pack_to_vector() {
+    let v = array_lit(vec![
+        DenseArray::from_scalar(1.0),
+        DenseArray::from_scalar(2.0),
+        DenseArray::from_scalar(3.0),
+    ])
+    .unwrap();
+    assert_eq!(v.shape(), &Shape::vector(3));
+    assert_eq!(v.data(), &[1.0, 2.0, 3.0]);
+}
+
+#[test]
+fn array_lit_empty_is_empty_vector() {
+    let v = array_lit(vec![]).unwrap();
+    assert_eq!(v.shape(), &Shape::vector(0));
+}
+
+#[test]
+fn array_lit_rows_stack_into_matrix() {
+    // [[1, 2, 3], [4, 5, 6]] -> shape [2, 3].
+    let row_a = DenseArray::from_vec(vec![1.0, 2.0, 3.0]);
+    let row_b = DenseArray::from_vec(vec![4.0, 5.0, 6.0]);
+    let m = array_lit(vec![row_a, row_b]).unwrap();
+    assert_eq!(m.shape(), &Shape::new(vec![2, 3]));
+    assert_eq!(m.data(), &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
 }
 
 #[test]

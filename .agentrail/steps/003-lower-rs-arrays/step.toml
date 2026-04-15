@@ -1,6 +1,6 @@
 number = 3
 slug = "lower-rs-arrays"
-status = "pending"
+status = "in-progress"
 description = "Phase 2 cont.: extend mlpl-lower-rs to cover the array surface. Lower ArrayLi..."
 role = "production"
 context_files = []

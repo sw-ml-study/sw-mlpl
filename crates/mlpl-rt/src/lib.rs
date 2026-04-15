@@ -12,6 +12,10 @@
 //! compiled binaries link only against `mlpl-rt` so they never
 //! carry a parser or an interpreter at runtime.
 
+mod array_lit;
+mod error;
+
+pub use array_lit::array_lit;
 pub use mlpl_array::{ArrayError, DenseArray, Shape};
 pub use mlpl_core::LabeledShape;
 
