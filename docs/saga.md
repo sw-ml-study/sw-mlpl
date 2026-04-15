@@ -123,12 +123,28 @@ the web REPL; "Model Composition" lesson now annotates X as
 `[batch, feat]` so labels flow through `apply(mdl, X)`. Delivered
 v0.7.5. See `docs/milestone-named-axes.md`.
 
-## Future: Compile-to-Rust (PLANNED, not scheduled)
-Exploratory direction for lowering MLPL to Rust source. Three
-targets from one codegen backend: an `mlpl!` proc macro for
-embedding MLPL in Rust apps, a `mlpl build foo.mlpl` subcommand
-that emits native Mac/Linux binaries via cargo+rustc, and a
-leaner WASM path that reuses the same pipeline. Depends on
-Saga 11.5 (LabeledShape is the compile-time key for static
-einsum-class dispatch) and on MLPL keeping no `exec(string)` /
-no runtime-code primitive. See `docs/milestone-compile-to-rust.md`.
+## Saga: Compile-to-Rust (COMPLETE)
+Lowers MLPL source to Rust `TokenStream` shared by three targets:
+the `mlpl!` proc macro (compile-time embed inside Rust apps), the
+`mlpl build foo.mlpl -o bin` subcommand (native-binary and
+cross-compile via cargo+rustc, verified for native and
+wasm32-unknown-unknown), and a leaner future WASM path that
+reuses the same pipeline. New crates: `mlpl-rt` (runtime target;
+typed primitive wrappers around `DenseArray`/`LabeledShape`),
+`mlpl-lower-rs` (AST -> `TokenStream` with path-configurable
+runtime prefix and static matmul contraction checks when both
+operands' labels are known at lower time), `mlpl-macro`
+(proc-macro wrapper), `mlpl` (user-facing facade with hidden
+`__rt` re-export), `mlpl-parity-tests` (parity harness -- nine
+curated programs run through both paths and agreement is
+asserted bit-for-bit). Static label mismatches surface as
+`LowerError::StaticShapeMismatch` which the proc macro converts
+to `compile_error!`; the `mlpl-build` CLI surfaces them as
+`mlpl-build: ...` prefixed stderr before cargo is even invoked.
+Measured 9.05x speedup on a 100x100 reshape+reduce workload
+(interpreter 479us -> compiled 53us, median of 5). Deferred:
+`TensorCtor` (`param`/`tensor`), `Repeat`, `Train`, autograd
+(`grad`), optimizers (`adam`/`momentum_sgd`), and Model DSL
+(`chain`/`linear`/activations) are all out of compile scope for
+this saga; they require tape-state or loop lowering. Delivered
+v0.8. See `docs/milestone-compile-to-rust.md`.

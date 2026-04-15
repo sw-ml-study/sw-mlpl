@@ -1,7 +1,11 @@
-# Compile-to-Rust Milestone (FUTURE SAGA, exploratory)
+# Compile-to-Rust Milestone (COMPLETE, v0.8.0)
 
-Status: **design direction, not yet scheduled**. This document
-captures the direction so a future saga can be planned from it.
+Status: **shipped** as `v0.8.0-compile-rs` on 2026-04-15. This
+document was originally written as a design-direction scout and
+has since been executed. The design outlined below held up in
+practice; the retrospective at the end records what actually
+shipped vs. what was deferred, and the measured 9x speedup from
+the parity harness.
 
 ## Why this exists
 
@@ -209,3 +213,118 @@ a compiled web build would be smaller and faster for fixed demos
   think of that format as a preview of what `mlpl-lower-rs` will
   consume -- the shapes with labels are exactly the metadata the
   codegen will need.
+
+## Retrospective (v0.8.0-compile-rs)
+
+### What shipped
+
+Eight steps in the agentrail saga, each under its own commit.
+The design held up: one codegen crate, three targets, no JIT,
+no LLVM, emit Rust and let rustc do lowering.
+
+| Step | Slug | What landed |
+|---|---|---|
+| 001 | `mlpl-rt-scaffolding` | Runtime target crate, typed wrappers around `DenseArray`/`LabeledShape`, 7 primitive fns |
+| 002 | `lower-rs-scalar` | Scalar-arithmetic codegen, end-to-end rustc-compile-and-run test |
+| 003 | `lower-rs-arrays` | Array literals, variable bindings, 6 phase-1 fncalls, `array_lit` runtime primitive |
+| 004 | `lower-rs-labels` | `label` / `relabel` / `reshape_labeled` / annotation syntax; `matmul` with static contraction check; `StaticShapeMismatch` error |
+| 005 | `mlpl-proc-macro` | `mlpl-macro` (proc-macro) + `mlpl` facade crate with hidden `__rt` re-export; static label mismatches become `compile_error!` |
+| 006 | `interpreter-compiler-parity` | `mlpl-parity-tests` harness: 9 programs agree bit-for-bit; speedup measurement |
+| 008 | `mlpl-build-subcommand` | `mlpl-build foo.mlpl -o bin [--target <triple>]` binary: eager fail on parse/lower error, cargo shell-out, wasm cross-compile verified |
+| 007 | `compile-to-rust-release` | This step: version bump 0.7.5 -> 0.8.0, banners, saga/status/plan docs, tag `v0.8.0-compile-rs` |
+
+Step numbering note: during saga init a shell-quoting mishap
+placed step 008 (build subcommand) after step 007 (release) in
+the agentrail numeric slots. The documented execution order
+swapped the two at runtime, and commit messages record which
+slot ran which step's content.
+
+### Measured speedup
+
+The parity harness's `compiled_speedup_measurement` test times a
+100x100 reshape + row-reduce + column-reduce + sum workload in
+both modes, median of 5:
+
+    interpreter = 479,500 ns
+    compiled    =  53,000 ns
+    ratio       = 9.05x
+
+Expected ballpark was 2-10x per the milestone doc's phase-7
+sketch; 9x is at the high end for an array-heavy workload.
+Scalar-heavy code would show a larger ratio; fat-vector code a
+smaller one.
+
+### What was deferred
+
+`TensorCtor` (`param[...]`, `tensor[...]`), `Repeat`, `Train`,
+autograd (`grad`), optimizers (`adam`, `momentum_sgd`), and the
+Model DSL (`chain`, `linear`, activations, `residual`, `apply`)
+are all out of compile scope. They need either (a) tape-state
+lowering (autograd + optimizers), (b) control-flow lowering
+(Repeat / Train), or (c) apply-time dispatch lowering (Model
+DSL). Each is a real piece of design work and would expand the
+saga meaningfully. Leaving them for a follow-up keeps the v0.8
+release small enough to ship cleanly.
+
+Consequence: `mlpl-build` and `mlpl!` today work for the
+numerical-expression subset of MLPL. Training loops stay in the
+interpreter; once the user has a trained model, serializing its
+parameters and calling a compiled forward pass via `mlpl-build`
+is feasible but not yet wired up.
+
+### Design decisions that held up
+
+- **Emit Rust, not LLVM.** Every SIMD/BLAS/Rayon/cross-compile
+  win comes free. The `mlpl-lower-rs` crate is ~300 LOC of
+  `quote!` and a match arm per primitive.
+- **`DenseArray`-everywhere return type.** Every lowered
+  expression is a `DenseArray`. `from_scalar` wraps literals;
+  `apply_binop` threads through BinOps; `map` handles unary neg.
+  That uniform shape meant phase 2 added array literals and
+  fncalls without rewriting phases 1's scalar path.
+- **No `exec(string)`.** MLPL still has no runtime code-loading
+  primitive, which is why compiled binaries don't need to ship
+  a parser. This constraint must be preserved going forward.
+- **Path-configurable runtime.** `LowerConfig { rt_path }`
+  lets the proc macro emit `::mlpl::__rt::...` (via the facade)
+  while direct lower users emit `::mlpl_rt::...`. Same
+  TokenStream producer; two target paths.
+
+### Design surprises
+
+- **Proc-macro newline handling.** `TokenStream::to_string()`
+  inserts `\n` in some group formattings, which collided with
+  the MLPL parser's use of `\n` as a statement separator. Fix:
+  macro expand() rewrites every `\n` to a space before lexing;
+  users inside `mlpl! { ... }` must separate statements with `;`.
+  Documented; not a big deal once known.
+- **Static label tracking only needed a small env.** The
+  `Ctx::known_labels` HashMap plus the four cases in `labels_of`
+  (Ident / label+relabel / reshape_labeled / transpose) is
+  enough to catch the realistic `matmul(a, transpose(b))` kind
+  of mismatch. A bigger static analyzer would be overkill.
+
+### Follow-up candidates
+
+Ordered roughly by payoff:
+
+1. Lower Model DSL (`chain`/`linear`/activations/`residual`).
+   Probably the single biggest user-facing win -- it would let
+   `mlpl-build` ship a trained model's forward pass as a native
+   binary. Requires apply-time dispatch lowering but no
+   autograd.
+2. Lower `Repeat` / `Train`. Straight-line rust `for` loops
+   with `step` binding. Opens up compile for any loop-bodied
+   MLPL program, not just expressions.
+3. Span-preserved `compile_error!`. Today errors point at the
+   macro call site via `Span::call_site()`; mapping back to
+   individual MLPL tokens inside the macro input would give
+   rustc-style carats at the offending op.
+4. Lower autograd + optimizers. Requires representing the tape
+   at compile time or emitting runtime tape calls. Worth it
+   only after the Model DSL path exists so there's something to
+   differentiate.
+
+None of these are on the Saga 12 roadmap; they live in a
+future "compile-to-rust v2" saga that would extend the existing
+`mlpl-lower-rs` crate rather than rewrite it.

@@ -24,29 +24,32 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 10 | Optimizers + training loop (Adam, schedules, moons/circles, `train { }`) | v0.6 | [x] |
 | 11 | Model DSL (`chain`, `residual`, `attention`, `norm`, differentiable `apply`) | v0.7 | [x] |
 | 11.5 | Named axes and shape introspection (`label`, annotation syntax, ShapeMismatch, trace labels) | v0.7.5 | [x] |
+| -- | Compile-to-Rust (`mlpl!` macro, `mlpl build`, parity harness, 9x speedup) | v0.8.0 | [x] |
 
 ## Planned
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 12 | Tokenizers, datasets, experiment tracking | v0.8 | [ ] NEXT | 11.5 |
-| 13 | Tiny language model end-to-end (CPU) | v0.9 | [ ] | 12 |
-| 14 | MLX backend (Apple Silicon, lazy graph, fusion) | v0.10 | [ ] | 13 |
-| 15 | LoRA / QLoRA / quantization | v0.11 | [ ] | 13 |
-| 16 | Embedding visualization and RAG | v0.12 | [ ] | 13 |
-| 17 | CUDA backend and distributed execution | v0.13 | [ ] | 14 |
-| 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.14 | [ ] | 15 |
-| 19 | LLM-as-tool REST integration | v0.15 | [ ] | 12 |
+| 12 | Tokenizers, datasets, experiment tracking | v0.9 | [ ] NEXT | 11.5 |
+| 13 | Tiny language model end-to-end (CPU) | v0.10 | [ ] | 12 |
+| 14 | MLX backend (Apple Silicon, lazy graph, fusion) | v0.11 | [ ] | 13 |
+| 15 | LoRA / QLoRA / quantization | v0.12 | [ ] | 13 |
+| 16 | Embedding visualization and RAG | v0.13 | [ ] | 13 |
+| 17 | CUDA backend and distributed execution | v0.14 | [ ] | 14 |
+| 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.15 | [ ] | 15 |
+| 19 | LLM-as-tool REST integration | v0.16 | [ ] | 12 |
 
 ## Next saga to start
 
-**Saga 12 -- Tokenizers, datasets, and experiment tracking.** With
-Saga 11.5 shipped in v0.7.5 (labeled shape metadata,
-`x : [batch, time, dim]` annotation syntax, label propagation
-through elementwise/matmul/reduce/softmax, `reshape_labeled` and
-`relabel` helpers, structured `EvalError::ShapeMismatch`,
-label-aware `:vars`/`:describe`/trace JSON, and the "Named Axes"
-tutorial lesson), every downstream saga (Tiny LM, LoRA, attention
-variants, embedding viz) inherits shape-checked tensors. Saga 12
-adds streaming dataset ops, a byte-level BPE tokenizer, and
-`experiment "name"` objects with seed control and logged metrics.
+**Saga 12 -- Tokenizers, datasets, and experiment tracking.** Two
+sagas shipped in rapid succession on top of Saga 11 (Model DSL):
+11.5 added labeled shapes and structured shape errors (v0.7.5),
+and the Compile-to-Rust saga added the `mlpl!` proc macro +
+`mlpl build` native-binary CLI (v0.8.0, 9x measured speedup on a
+100x100 reshape+reduce workload). Every downstream saga (Tiny
+LM, LoRA, attention variants, embedding viz) now inherits both
+shape-checked tensors and a path from MLPL source to a native
+executable. Saga 12 adds streaming dataset ops, a byte-level BPE
+tokenizer, and `experiment "name"` objects with seed control and
+logged metrics -- the last surface-only saga before the Tiny LM
+end-to-end.
