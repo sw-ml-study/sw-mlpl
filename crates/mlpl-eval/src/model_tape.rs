@@ -52,6 +52,21 @@ pub(crate) fn apply_model_tape(
             Ok(x.add(&inner_out))
         }
         ModelSpec::RmsNorm { .. } => rms_norm_tape(&x, tape),
+        ModelSpec::Embedding { table, vocab, .. } => {
+            let table_t = params
+                .get(table)
+                .cloned()
+                .ok_or_else(|| EvalError::UndefinedVariable(table.clone()))?;
+            // The token id array enters the tape as a non-trainable
+            // input leaf; we use its eager value to build a one-hot
+            // matrix and matmul against the trainable table tensor.
+            // Backprop then routes through matmul straight into the
+            // table's gradient buffer.
+            let tokens_arr = x.value().clone();
+            let onehot_arr = onehot_from_tokens(&tokens_arr, *vocab)?;
+            let onehot_t = Tensor::leaf(Rc::clone(tape), onehot_arr, false);
+            Ok(onehot_t.matmul(&table_t))
+        }
         ModelSpec::Attention {
             wq,
             wk,
@@ -127,6 +142,38 @@ fn rms_norm_tape(x: &Tensor, tape: &Rc<Tape>) -> Result<Tensor, EvalError> {
     let row_mean_eps = x.mul(x).matmul(&ones_col).mul(&inv_cols).add(&eps_t);
     let rsqrt = row_mean_eps.log().mul(&half_neg).exp();
     Ok(x.mul(&rsqrt.matmul(&ones_row)))
+}
+
+/// One-hot encode a 1-D token id array `[N]` into `[N, vocab]`. Mirrors
+/// the eager helper in `model_dispatch` so the tape sees an identical
+/// matrix; consolidating the two would couple the modules more tightly
+/// than this small allocation is worth.
+fn onehot_from_tokens(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, EvalError> {
+    let dims = tokens.shape().dims();
+    if dims.len() != 1 {
+        return Err(EvalError::Unsupported(format!(
+            "embed (tape): tokens must be a 1-D [N] array, got shape {dims:?}"
+        )));
+    }
+    let n = dims[0];
+    let mut data = vec![0.0_f64; n * vocab];
+    for (row, &id_f) in tokens.data().iter().enumerate() {
+        if !id_f.is_finite() || id_f < 0.0 || id_f.fract() != 0.0 {
+            return Err(EvalError::Unsupported(format!(
+                "embed (tape): token at position {row} = {id_f} is not a non-negative integer"
+            )));
+        }
+        let id = id_f as usize;
+        if id >= vocab {
+            return Err(EvalError::Unsupported(format!(
+                "embed (tape): token at position {row} = {id} out of vocab range [0, {vocab})"
+            )));
+        }
+        data[row * vocab + id] = 1.0;
+    }
+    DenseArray::new(Shape::new(vec![n, vocab]), data).map_err(|e| {
+        EvalError::Unsupported(format!("embed (tape): one-hot construction failed: {e}"))
+    })
 }
 
 /// Bundle of attention parameter names + model dimension so the

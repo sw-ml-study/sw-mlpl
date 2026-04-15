@@ -53,6 +53,44 @@ pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelS
     })
 }
 
+/// `embed(vocab_size, d_model, seed)` -- token embedding layer.
+/// Allocates a single `[vocab, d_model]` lookup table parameter,
+/// initialised with `randn(seed, [vocab, d_model]) * 0.1` (small to
+/// avoid blowing up early softmax logits in language-model demos).
+pub(crate) fn eval_embedding(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+    if args.len() != 3 {
+        return Err(EvalError::BadArity {
+            func: "embed".into(),
+            expected: 3,
+            got: args.len(),
+        });
+    }
+    let vocab = scalar_usize(&args[0], env, "embed")?;
+    let d_model = scalar_usize(&args[1], env, "embed")?;
+    let seed = scalar_f64(&args[2], env, "embed")?;
+
+    let id = env.next_model_id;
+    env.next_model_id += 1;
+    let table_name = format!("__embed_E_{id}");
+
+    let table_init = mlpl_runtime::call_builtin(
+        "randn",
+        vec![
+            DenseArray::from_scalar(seed),
+            DenseArray::new(Shape::new(vec![2]), vec![vocab as f64, d_model as f64])?,
+        ],
+    )?;
+    let table_data: Vec<f64> = table_init.data().iter().map(|v| v * 0.1).collect();
+    let table = DenseArray::new(Shape::new(vec![vocab, d_model]), table_data)?;
+    env.set_param(table_name.clone(), table);
+
+    Ok(ModelSpec::Embedding {
+        table: table_name,
+        vocab,
+        d_model,
+    })
+}
+
 /// `chain(layer_a, layer_b, ...)`. Each argument must evaluate to a
 /// `Value::Model`.
 pub(crate) fn eval_chain(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
@@ -245,7 +283,45 @@ fn apply_model(
             d_model,
             heads,
         } => apply_attention(x, wq, wk, wv, wo, *d_model, *heads, env),
+        ModelSpec::Embedding { table, vocab, .. } => {
+            let t = env
+                .get(table)
+                .ok_or_else(|| EvalError::UndefinedVariable(table.clone()))?;
+            Ok(tokens_to_onehot(x, *vocab)?.matmul(t)?)
+        }
     }
+}
+
+/// Convert an integer-valued token id array (1-D `[N]`) into a
+/// `[N, vocab]` one-hot matrix. Token ids must be non-negative
+/// integers in `[0, vocab)`. The one-hot trick lets the embedding
+/// gather lower to a plain matmul, so the existing autograd tape
+/// can backprop into the table without a new gather primitive.
+fn tokens_to_onehot(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, EvalError> {
+    let dims = tokens.shape().dims();
+    if dims.len() != 1 {
+        return Err(EvalError::Unsupported(format!(
+            "embed: tokens must be a 1-D [N] array, got shape {dims:?}"
+        )));
+    }
+    let n = dims[0];
+    let mut data = vec![0.0_f64; n * vocab];
+    for (row, &id_f) in tokens.data().iter().enumerate() {
+        if !id_f.is_finite() || id_f < 0.0 || id_f.fract() != 0.0 {
+            return Err(EvalError::Unsupported(format!(
+                "embed: token at position {row} = {id_f} is not a non-negative integer"
+            )));
+        }
+        let id = id_f as usize;
+        if id >= vocab {
+            return Err(EvalError::Unsupported(format!(
+                "embed: token at position {row} = {id} out of vocab range [0, {vocab})"
+            )));
+        }
+        data[row * vocab + id] = 1.0;
+    }
+    DenseArray::new(Shape::new(vec![n, vocab]), data)
+        .map_err(|e| EvalError::Unsupported(format!("embed: one-hot construction failed: {e}")))
 }
 
 #[allow(clippy::too_many_arguments)]

@@ -83,35 +83,22 @@ pub(crate) fn eval_expr(
         }
         return Ok(Value::Array(result));
     }
-    if let Expr::FnCall { name, args, .. } = expr
-        && name == "linear"
-    {
-        let model = crate::model_dispatch::eval_linear(args, env)?;
-        return Ok(Value::Model(model));
-    }
-    if let Expr::FnCall { name, args, .. } = expr
-        && name == "chain"
-    {
-        let model = crate::model_dispatch::eval_chain(args, env)?;
-        return Ok(Value::Model(model));
-    }
-    if let Expr::FnCall { name, args, .. } = expr
-        && name == "residual"
-    {
-        let model = crate::model_dispatch::eval_residual(args, env)?;
-        return Ok(Value::Model(model));
-    }
-    if let Expr::FnCall { name, args, .. } = expr
-        && name == "rms_norm"
-    {
-        let model = crate::model_dispatch::eval_rms_norm(args, env)?;
-        return Ok(Value::Model(model));
-    }
-    if let Expr::FnCall { name, args, .. } = expr
-        && name == "attention"
-    {
-        let model = crate::model_dispatch::eval_attention(args, env)?;
-        return Ok(Value::Model(model));
+    if let Expr::FnCall { name, args, .. } = expr {
+        // Model-constructor dispatch -- each builds a ModelSpec from
+        // its args and returns Value::Model. Kept as a single match so
+        // the eval entrypoint stays under its file LOC budget.
+        let model = match name.as_str() {
+            "linear" => Some(crate::model_dispatch::eval_linear(args, env)),
+            "embed" => Some(crate::model_dispatch::eval_embedding(args, env)),
+            "chain" => Some(crate::model_dispatch::eval_chain(args, env)),
+            "residual" => Some(crate::model_dispatch::eval_residual(args, env)),
+            "rms_norm" => Some(crate::model_dispatch::eval_rms_norm(args, env)),
+            "attention" => Some(crate::model_dispatch::eval_attention(args, env)),
+            _ => None,
+        };
+        if let Some(m) = model {
+            return Ok(Value::Model(m?));
+        }
     }
     if let Expr::FnCall { name, args, .. } = expr
         && let Some(kind) = crate::model_dispatch::activation_kind(name)
