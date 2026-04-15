@@ -1,0 +1,9 @@
+number = 6
+slug = "interpreter-compiler-parity"
+status = "pending"
+description = "Phase 6: parity test harness + one demo port. (a) New parity-tests integratio..."
+role = "production"
+context_files = []
+created_at = "2026-04-14T20:45:40"
+task_type = "production"
+commits = []

@@ -1,8 +1,9 @@
 number = 9
 slug = "named-axes-release-v075"
-status = "in-progress"
+status = "completed"
 description = "Phase 6 wrap-up: Release v0.7.5-named-axes. Mark Saga 11.5 COMPLETE in docs/s..."
 role = "production"
 context_files = []
 created_at = "2026-04-11T12:48:52"
-commits = []
+completed_at = "2026-04-14T20:00:10"
+commits = ["c09e7dcaf78e608d6d6378c9eed188742b1005e3"]
