@@ -69,3 +69,22 @@ impl LabeledShape {
         self.labels.iter().any(Option::is_some)
     }
 }
+
+impl std::fmt::Display for LabeledShape {
+    /// `[batch=2, feat=3]` for fully labeled, `[2, feat=3]` for
+    /// partially labeled, `[2, 3]` for fully positional. Saga 11.5
+    /// Phase 4: used in `EvalError::ShapeMismatch` rendering.
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str("[")?;
+        for (i, (dim, label)) in self.dims.iter().zip(self.labels.iter()).enumerate() {
+            if i > 0 {
+                f.write_str(", ")?;
+            }
+            match label {
+                Some(name) => write!(f, "{name}={dim}")?,
+                None => write!(f, "{dim}")?,
+            }
+        }
+        f.write_str("]")
+    }
+}

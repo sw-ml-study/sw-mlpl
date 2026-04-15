@@ -1,8 +1,9 @@
 number = 5
 slug = "label-propagation-matmul-reduce"
-status = "in-progress"
+status = "completed"
 description = "Phase 3 cont.: matmul, reduce_add, softmax propagate and validate labels. mat..."
 role = "production"
 context_files = []
 created_at = "2026-04-11T12:48:35"
-commits = []
+completed_at = "2026-04-14T18:55:06"
+commits = ["c87242c2853ffa7623ca9877641e348276c5dd4f"]

@@ -1,5 +1,7 @@
 //! Evaluation error types.
 
+use mlpl_core::LabeledShape;
+
 /// Errors produced during evaluation.
 #[derive(Clone, Debug, PartialEq)]
 pub enum EvalError {
@@ -32,6 +34,19 @@ pub enum EvalError {
     },
     /// Error from the visualization layer.
     VizError(mlpl_viz::VizError),
+    /// Two operand shapes (or labels) disagree in a way the named op
+    /// cannot resolve. Saga 11.5 Phase 4: replaces string
+    /// `Unsupported` messages for broadcasting and contraction
+    /// failures. `expected` and `actual` are the left- and right-hand
+    /// operand labeled shapes respectively.
+    ShapeMismatch {
+        /// Operator or builtin name (`"add"`, `"matmul"`, ...).
+        op: String,
+        /// Left-hand operand's labeled shape.
+        expected: LabeledShape,
+        /// Right-hand operand's labeled shape.
+        actual: LabeledShape,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -56,6 +71,11 @@ impl std::fmt::Display for EvalError {
                 write!(f, "{func} expects {expected} arguments, got {got}")
             }
             Self::VizError(e) => write!(f, "{e}"),
+            Self::ShapeMismatch {
+                op,
+                expected,
+                actual,
+            } => write!(f, "{op}: expected {expected}, got {actual}"),
         }
     }
 }

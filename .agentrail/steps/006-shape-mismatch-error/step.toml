@@ -1,6 +1,6 @@
 number = 6
 slug = "shape-mismatch-error"
-status = "pending"
+status = "in-progress"
 description = "Phase 4: Replace string EvalError::Unsupported shape errors with a dedicated ..."
 role = "production"
 context_files = []
