@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 7,
+    "step": "experiment-block"
+  },
+  "action": "Token + AST + stmts.rs parser, experiment module with ExperimentRecord/ParamShape serde types + eval_experiment, Environment exp_dir/experiment_log storage + accessors, mlpl-repl --exp-dir flag, lower-rs + grad rejection, 14 TDD tests",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T13:33:26"
+}

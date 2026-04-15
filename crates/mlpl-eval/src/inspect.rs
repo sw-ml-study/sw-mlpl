@@ -36,6 +36,7 @@ pub fn inspect(env: &Environment, input: &str) -> Option<String> {
                 .into(),
         ),
         ":builtins" | ":built-ins" => Some(format_builtins()),
+        ":experiments" => Some(crate::experiment::format_registry(env)),
         ":wsid" => Some(format!(
             "workspace:\n  variables:       {}\n  parameters:      {}\n  \
              models:          {}\n  optimizer slots: {}",

@@ -1,6 +1,6 @@
 number = 8
 slug = "experiment-registry"
-status = "pending"
+status = "in-progress"
 description = "Phase 3 step 008: REPL introspection for experiments. Add :experiments and co..."
 role = "production"
 context_files = []
