@@ -1,4 +1,4 @@
-//! Higher-level ML built-ins: `softmax` and `one_hot`.
+//! Higher-level ML built-ins: `softmax`, `one_hot`, `sinusoidal_encoding`.
 
 use mlpl_array::{DenseArray, Shape};
 
@@ -12,8 +12,74 @@ pub(crate) fn try_call(
     match name {
         "softmax" => Some(builtin_softmax(name, args)),
         "one_hot" => Some(builtin_one_hot(name, args)),
+        "sinusoidal_encoding" => Some(builtin_sinusoidal_encoding(name, args)),
         _ => None,
     }
+}
+
+/// Standard transformer sinusoidal positional encoding table.
+///
+/// `sinusoidal_encoding(seq_len, d_model)` returns a deterministic
+/// `[seq_len, d_model]` table labeled `[time, dim]`:
+///
+/// - even cols `2i`:   `sin(pos / 10000^(2i / d_model))`
+/// - odd cols `2i+1`:  `cos(pos / 10000^(2i / d_model))`
+///
+/// Pure -- no params, no seed. The `[time, dim]` labels propagate
+/// through element-wise add when paired with a token embedding
+/// output of matching shape.
+fn builtin_sinusoidal_encoding(
+    name: &str,
+    args: Vec<DenseArray>,
+) -> Result<DenseArray, RuntimeError> {
+    let (t, d) = parse_sinusoidal_args(name, &args)?;
+    let mut data = vec![0.0_f64; t * d];
+    for pos in 0..t {
+        for col in 0..d {
+            let exponent = (2 * (col / 2)) as f64 / d as f64;
+            let theta = pos as f64 / 10000.0_f64.powf(exponent);
+            data[pos * d + col] = if col % 2 == 0 {
+                theta.sin()
+            } else {
+                theta.cos()
+            };
+        }
+    }
+    let arr = DenseArray::new(Shape::new(vec![t, d]), data)?;
+    Ok(arr.with_labels(vec![Some("time".into()), Some("dim".into())])?)
+}
+
+fn parse_sinusoidal_args(name: &str, args: &[DenseArray]) -> Result<(usize, usize), RuntimeError> {
+    if args.len() != 2 {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    for (i, a) in args.iter().enumerate() {
+        if a.rank() != 0 {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("argument {i} must be a scalar, got rank {}", a.rank()),
+            });
+        }
+    }
+    let seq_len = args[0].data()[0];
+    let d_model = args[1].data()[0];
+    if seq_len < 0.0 || seq_len.fract() != 0.0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("seq_len must be a non-negative integer, got {seq_len}"),
+        });
+    }
+    if d_model <= 0.0 || d_model.fract() != 0.0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("d_model must be a positive integer, got {d_model}"),
+        });
+    }
+    Ok((seq_len as usize, d_model as usize))
 }
 
 fn builtin_softmax(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
