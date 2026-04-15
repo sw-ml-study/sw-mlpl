@@ -1,6 +1,6 @@
 number = 2
 slug = "lower-rs-scalar"
-status = "pending"
+status = "in-progress"
 description = "Phase 2 start: mlpl-lower-rs crate skeleton. Create crates/mlpl-lower-rs/ tha..."
 role = "production"
 context_files = []
