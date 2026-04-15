@@ -1,6 +1,6 @@
 number = 4
 slug = "bytes-tokenizer"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 004: Byte-level tokenizer + Value::Tokenizer scaffolding.
 

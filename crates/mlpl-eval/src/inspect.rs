@@ -126,6 +126,9 @@ fn format_models(env: &Environment) -> String {
 }
 
 fn format_describe(env: &Environment, name: &str) -> String {
+    if let Some(tok) = env.tokenizers.get(name) {
+        return format!("{name} -- tokenizer\n  {}", tok.describe());
+    }
     if let Some(spec) = env.models.get(name) {
         let mut out = format!("{name} -- model\n  shape: {}\n", render_spec(spec));
         let ps = spec.params();

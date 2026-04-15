@@ -159,6 +159,11 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(labeled));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && let Some(r) = crate::tokenizer::dispatch(name, args, env, trace)
+    {
+        return r;
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && (name == "load" || name == "load_preloaded")
     {
         if args.len() != 1 {
@@ -345,6 +350,11 @@ pub(crate) fn eval_expr(
                     env.models.insert(name.clone(), m);
                     let placeholder = DenseArray::from_scalar(0.0);
                     ("assign_model", vec![], placeholder)
+                }
+                Value::Tokenizer(t) => {
+                    env.set_tokenizer(name.clone(), t);
+                    let placeholder = DenseArray::from_scalar(0.0);
+                    ("assign_tokenizer", vec![], placeholder)
                 }
                 Value::Str(_) => {
                     return Err(EvalError::Unsupported(

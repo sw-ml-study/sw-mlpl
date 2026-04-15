@@ -7,6 +7,7 @@ use mlpl_array::DenseArray;
 
 use crate::grad::OptimizerState;
 use crate::model::ModelSpec;
+use crate::tokenizer::TokenizerSpec;
 
 /// Variable bindings for evaluation.
 #[derive(Clone, Debug, Default)]
@@ -16,6 +17,8 @@ pub struct Environment {
     pub(crate) optim_state: OptimizerState,
     pub(crate) models: HashMap<String, ModelSpec>,
     pub(crate) next_model_id: u64,
+    /// Tokenizer bindings (Saga 12 step 004). Sibling to `models`.
+    pub(crate) tokenizers: HashMap<String, TokenizerSpec>,
     /// Sandbox root for filesystem `load("relative-path")` calls.
     /// `None` means filesystem access is disabled (the web REPL
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12
@@ -77,6 +80,18 @@ impl Environment {
     /// disabled.
     pub fn set_data_dir(&mut self, dir: PathBuf) {
         self.data_dir = Some(dir);
+    }
+
+    /// Bind `name` to a tokenizer value. Saga 12 step 004.
+    pub fn set_tokenizer(&mut self, name: String, tok: TokenizerSpec) {
+        self.tokenizers.insert(name, tok);
+    }
+
+    /// Look up a tokenizer by name. Returns `None` if `name` is
+    /// not bound to a tokenizer.
+    #[must_use]
+    pub fn get_tokenizer(&self, name: &str) -> Option<&TokenizerSpec> {
+        self.tokenizers.get(name)
     }
 
     /// Borrow the current sandbox root, if any.
