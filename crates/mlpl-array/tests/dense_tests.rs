@@ -291,6 +291,120 @@ fn binop_scalar_rhs_preserves_labeled_lhs() {
     assert_eq!(r.labels(), Some(&[Some("seq".into())][..]));
 }
 
+// -- matmul label propagation (Saga 11.5 Phase 3 cont.) --
+
+#[test]
+fn matmul_matching_contraction_axis() {
+    // [seq, d] @ [d, heads] -> [seq, heads]
+    let a = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6])
+        .unwrap()
+        .with_labels(vec![Some("seq".into()), Some("d".into())])
+        .unwrap();
+    let b = DenseArray::new(Shape::new(vec![3, 4]), vec![1.0; 12])
+        .unwrap()
+        .with_labels(vec![Some("d".into()), Some("heads".into())])
+        .unwrap();
+    let r = a.matmul(&b).unwrap();
+    assert_eq!(r.shape(), &Shape::new(vec![2, 4]));
+    assert_eq!(
+        r.labels(),
+        Some(&[Some("seq".into()), Some("heads".into())][..])
+    );
+}
+
+#[test]
+fn matmul_contraction_axis_mismatch_errors() {
+    let a = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6])
+        .unwrap()
+        .with_labels(vec![Some("seq".into()), Some("d".into())])
+        .unwrap();
+    let b = DenseArray::new(Shape::new(vec![3, 4]), vec![1.0; 12])
+        .unwrap()
+        .with_labels(vec![Some("time".into()), Some("heads".into())])
+        .unwrap();
+    let r = a.matmul(&b);
+    assert!(
+        matches!(r, Err(ArrayError::LabelMismatch { .. })),
+        "expected LabelMismatch, got {r:?}"
+    );
+}
+
+#[test]
+fn matmul_labeled_matrix_unlabeled_matrix() {
+    let a = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6])
+        .unwrap()
+        .with_labels(vec![Some("seq".into()), Some("d".into())])
+        .unwrap();
+    let b = DenseArray::new(Shape::new(vec![3, 4]), vec![1.0; 12]).unwrap();
+    // Mixed: left is labeled, right is not. Inner dim silently lines up;
+    // result carries left's outer label, right's axis is None.
+    let r = a.matmul(&b).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("seq".into()), None][..]));
+}
+
+#[test]
+fn matmul_matrix_vector_propagates_outer_label() {
+    // [m, k] @ [k] -> [m]
+    let a = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6])
+        .unwrap()
+        .with_labels(vec![Some("seq".into()), Some("d".into())])
+        .unwrap();
+    let b = DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+        .with_labels(vec![Some("d".into())])
+        .unwrap();
+    let r = a.matmul(&b).unwrap();
+    assert_eq!(r.shape(), &Shape::vector(2));
+    assert_eq!(r.labels(), Some(&[Some("seq".into())][..]));
+}
+
+#[test]
+fn matmul_both_unlabeled_stays_unlabeled() {
+    let a = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6]).unwrap();
+    let b = DenseArray::new(Shape::new(vec![3, 4]), vec![1.0; 12]).unwrap();
+    let r = a.matmul(&b).unwrap();
+    assert_eq!(r.labels(), None);
+}
+
+// -- reduce_axis / argmax_axis label propagation --
+
+#[test]
+fn reduce_axis_drops_reduced_label() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        .unwrap()
+        .with_labels(vec![Some("batch".into()), Some("feat".into())])
+        .unwrap();
+    let r = arr.reduce_axis(0, 0.0, |a, b| a + b).unwrap();
+    // Axis 0 removed; only "feat" remains.
+    assert_eq!(r.labels(), Some(&[Some("feat".into())][..]));
+}
+
+#[test]
+fn reduce_axis_drops_reduced_label_axis1() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        .unwrap()
+        .with_labels(vec![Some("batch".into()), Some("feat".into())])
+        .unwrap();
+    let r = arr.reduce_axis(1, 0.0, |a, b| a + b).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("batch".into())][..]));
+}
+
+#[test]
+fn reduce_axis_unlabeled_stays_none() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6]).unwrap();
+    let r = arr.reduce_axis(0, 0.0, |a, b| a + b).unwrap();
+    assert_eq!(r.labels(), None);
+}
+
+#[test]
+fn argmax_axis_drops_reduced_label() {
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0, 5.0, 2.0, 4.0, 0.0, 3.0])
+        .unwrap()
+        .with_labels(vec![Some("batch".into()), Some("class".into())])
+        .unwrap();
+    let r = arr.argmax_axis(1).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("batch".into())][..]));
+}
+
 #[test]
 fn binop_partial_labels_match() {
     // Both sides have `[None, Some("cols")]` -- matches.

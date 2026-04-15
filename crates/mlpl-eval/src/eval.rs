@@ -157,6 +157,32 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(labeled));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && matches!(
+            name.as_str(),
+            "reduce_add" | "reduce_mul" | "argmax" | "softmax"
+        )
+        && args.len() == 2
+        && let Expr::StrLit(axis_name, _) = &args[1]
+    {
+        let arr = eval_expr(&args[0], env, trace)?.into_array()?;
+        let labels = arr.labels().ok_or_else(|| {
+            EvalError::Unsupported(format!(
+                "{name}: axis name \"{axis_name}\" requires a labeled array"
+            ))
+        })?;
+        let axis = labels
+            .iter()
+            .position(|l| l.as_deref() == Some(axis_name.as_str()))
+            .ok_or_else(|| {
+                EvalError::Unsupported(format!(
+                    "{name}: axis name \"{axis_name}\" not found in labels"
+                ))
+            })?;
+        let axis_arr = DenseArray::from_scalar(axis as f64);
+        let result = mlpl_runtime::call_builtin(name, vec![arr, axis_arr])?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && (name == "label" || name == "relabel")
     {
         if args.len() != 2 {

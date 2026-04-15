@@ -1,6 +1,6 @@
 number = 5
 slug = "label-propagation-matmul-reduce"
-status = "pending"
+status = "in-progress"
 description = "Phase 3 cont.: matmul, reduce_add, softmax propagate and validate labels. mat..."
 role = "production"
 context_files = []
