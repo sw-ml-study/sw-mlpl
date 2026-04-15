@@ -8,6 +8,11 @@ use crate::token::TokenKind;
 /// Lex a double-quoted string literal starting at `start` (which points
 /// at the opening `"`). Returns the token and the byte offset just after
 /// the closing quote.
+///
+/// UTF-8 aware: non-ASCII characters inside the literal are decoded
+/// via their full UTF-8 byte sequence and stored as proper Rust
+/// `char`s. Malformed UTF-8 surfaces as `ParseError::InvalidUtf8`
+/// with a byte-span pointing at the offending sequence.
 pub(crate) fn lex_string(bytes: &[u8], start: usize) -> Result<(TokenKind, usize), ParseError> {
     let mut pos = start + 1; // skip opening quote
     let mut value = String::new();
@@ -46,9 +51,44 @@ pub(crate) fn lex_string(bytes: &[u8], start: usize) -> Result<(TokenKind, usize
             value.push(ch);
             pos += 1;
         } else {
-            value.push(b as char);
-            pos += 1;
+            // Decode one UTF-8 code point from `bytes` starting at
+            // `pos`. ASCII is a single byte; multi-byte leaders
+            // advance by 2/3/4. `b as char` would be Latin-1 and
+            // mojibake any non-ASCII input; Rust source is UTF-8 by
+            // convention so we decode honestly.
+            let n = utf8_char_len(b).ok_or(ParseError::InvalidUtf8 {
+                span: Span::new(pos, pos + 1),
+            })?;
+            let end = pos + n;
+            if end > bytes.len() {
+                return Err(ParseError::InvalidUtf8 {
+                    span: Span::new(pos, bytes.len()),
+                });
+            }
+            let ch = std::str::from_utf8(&bytes[pos..end])
+                .map_err(|_| ParseError::InvalidUtf8 {
+                    span: Span::new(pos, end),
+                })?
+                .chars()
+                .next()
+                .expect("non-empty UTF-8 slice");
+            value.push(ch);
+            pos = end;
         }
+    }
+}
+
+/// UTF-8 leading-byte length: 1 for ASCII, 2 for `110xxxxx`, 3 for
+/// `1110xxxx`, 4 for `11110xxx`. Returns `None` for continuation
+/// bytes (`10xxxxxx`) or invalid leaders -- treated as a UTF-8
+/// decode failure.
+fn utf8_char_len(b: u8) -> Option<usize> {
+    match b {
+        0x00..=0x7F => Some(1),
+        0xC2..=0xDF => Some(2),
+        0xE0..=0xEF => Some(3),
+        0xF0..=0xF4 => Some(4),
+        _ => None,
     }
 }
 

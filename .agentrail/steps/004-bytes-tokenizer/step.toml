@@ -1,6 +1,6 @@
 number = 4
 slug = "bytes-tokenizer"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 004: Byte-level tokenizer + Value::Tokenizer scaffolding.
 
@@ -8,5 +8,6 @@ Add t..."""
 role = "production"
 context_files = []
 created_at = "2026-04-15T11:18:31"
+completed_at = "2026-04-15T12:52:09"
 task_type = "production"
-commits = []
+commits = ["34af73f786ca29fb39ea54b25c078817f8787430"]

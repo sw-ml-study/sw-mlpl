@@ -49,14 +49,23 @@ fn decode_tokenize_round_trip_ascii() {
 
 #[test]
 fn decode_bytes_of_utf8_bytes_reconstructs_utf8_string() {
-    // The MLPL lexer does not process `\u{...}` escapes; string
-    // literals are byte-wise Latin-1 when built from source. So
-    // exercise the UTF-8 round-trip by feeding `decode_bytes` an
-    // explicit list of UTF-8 bytes and checking the string.
-    //
     // "hé" = h (0x68) + é (0xc3 0xa9 in UTF-8).
     let v = eval_val("decode_bytes([104, 195, 169])");
     assert_eq!(v, Value::Str("h\u{00e9}".into()));
+}
+
+#[test]
+fn decode_tokenize_round_trip_utf8() {
+    // Now that the lexer handles UTF-8 properly (Saga 12 fix),
+    // the round-trip through source literal works natively.
+    let v = eval_val("decode_bytes(tokenize_bytes(\"h\u{00e9}llo\"))");
+    assert_eq!(v, Value::Str("h\u{00e9}llo".into()));
+}
+
+#[test]
+fn decode_tokenize_round_trip_cjk() {
+    let v = eval_val("decode_bytes(tokenize_bytes(\"\u{65e5}\u{672c}\u{8a9e}\"))");
+    assert_eq!(v, Value::Str("\u{65e5}\u{672c}\u{8a9e}".into()));
 }
 
 #[test]
