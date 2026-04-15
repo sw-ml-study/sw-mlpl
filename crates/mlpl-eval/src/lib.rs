@@ -11,6 +11,7 @@ mod loader;
 mod model;
 mod model_dispatch;
 mod model_tape;
+mod tokenizer;
 mod value;
 
 pub use env::{Environment, model_params};
@@ -19,4 +20,5 @@ pub use eval::{eval_program, eval_program_traced, eval_program_value};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
 pub use inspect::inspect;
 pub use model::ModelSpec;
+pub use tokenizer::TokenizerSpec;
 pub use value::Value;
