@@ -101,14 +101,27 @@ a linear softmax classifier, a tiny MLP on XOR-style data, and a
 scaled dot-product attention pattern. Tutorial lessons added for
 each. Delivered v0.4.
 
-## Saga 11.5: Named Axes and shape introspection (IN PROGRESS)
-Axis-labeled shapes threaded through `Value::Array`, a `label(x, [...])`
-primitive and `x : [...]` annotation syntax, label propagation through
-elementwise / matmul / reduce / softmax, a structured
-`EvalError::ShapeMismatch` variant, label-aware `:describe`/`:vars`
-output, and labels in the trace JSON export. Surface-only saga:
-no new kernels, no new backends, no new ML primitives. See
-`docs/milestone-named-axes.md`. Target: v0.7.5.
+## Saga 11.5: Named Axes and shape introspection (COMPLETE)
+Axis-labeled shapes threaded through `Value::Array` via a new
+`LabeledShape` type on `mlpl-core`. `label(x, [...])` and `relabel(x,
+[...])` primitives, annotation syntax on assignment (`x : [batch,
+time, dim] = ...`), and `reshape_labeled(x, dims, labels)` as the
+opt-in re-labeling path. Label propagation through elementwise
+ops (with one-None-one-Some accepted and mismatches rejected),
+matmul (contraction axis validated, outer dims passed through),
+reduce/argmax (reduced axis's label dropped), and `map()`
+(preserves labels through every math builtin). `reduce_add`,
+`reduce_mul`, `argmax`, and `softmax` accept an axis name string
+in place of an integer. Structured `EvalError::ShapeMismatch
+{ op, expected: LabeledShape, actual: LabeledShape }` at the
+evaluator boundary, with Display rendering as `op: expected
+[seq=N, d=M], got [time=N, d=M]`. Label-aware `:vars` and
+`:describe` (using `LabeledShape` Display), and trace JSON that
+round-trips axis labels for labeled arrays and omits the key
+entirely for unlabeled ones. New "Named Axes" tutorial lesson in
+the web REPL; "Model Composition" lesson now annotates X as
+`[batch, feat]` so labels flow through `apply(mdl, X)`. Delivered
+v0.7.5. See `docs/milestone-named-axes.md`.
 
 ## Future: Compile-to-Rust (PLANNED, not scheduled)
 Exploratory direction for lowering MLPL to Rust source. Three

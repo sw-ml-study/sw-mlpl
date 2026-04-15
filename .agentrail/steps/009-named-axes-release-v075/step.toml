@@ -1,6 +1,6 @@
 number = 9
 slug = "named-axes-release-v075"
-status = "pending"
+status = "in-progress"
 description = "Phase 6 wrap-up: Release v0.7.5-named-axes. Mark Saga 11.5 COMPLETE in docs/s..."
 role = "production"
 context_files = []

@@ -23,13 +23,13 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 9 | Autograd v1 (reverse-mode tape, `grad` built-in) | v0.5 | [x] |
 | 10 | Optimizers + training loop (Adam, schedules, moons/circles, `train { }`) | v0.6 | [x] |
 | 11 | Model DSL (`chain`, `residual`, `attention`, `norm`, differentiable `apply`) | v0.7 | [x] |
+| 11.5 | Named axes and shape introspection (`label`, annotation syntax, ShapeMismatch, trace labels) | v0.7.5 | [x] |
 
 ## Planned
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 11.5 | Named axes and shape introspection | v0.7.5 | [ ] NEXT | 11 |
-| 12 | Tokenizers, datasets, experiment tracking | v0.8 | [ ] | 11.5 |
+| 12 | Tokenizers, datasets, experiment tracking | v0.8 | [ ] NEXT | 11.5 |
 | 13 | Tiny language model end-to-end (CPU) | v0.9 | [ ] | 12 |
 | 14 | MLX backend (Apple Silicon, lazy graph, fusion) | v0.10 | [ ] | 13 |
 | 15 | LoRA / QLoRA / quantization | v0.11 | [ ] | 13 |
@@ -40,12 +40,13 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 ## Next saga to start
 
-**Saga 11.5 -- Named axes and shape introspection.** With
-Saga 11 (Model DSL) shipped in v0.7, the next surface-only
-milestone adds labeled shape metadata on `Value::Array`,
-annotation syntax on assignment (`x : [batch, time, dim] = ...`),
-label propagation through matmul/elementwise/reductions, and
-structured `ShapeMismatch` errors. It is inserted between Saga 11
-and Saga 12 because every later saga (Tiny LM, LoRA, attention
-variants, embedding viz) benefits from labeled axes. See
-`docs/milestone-named-axes.md` for the 10-step plan.
+**Saga 12 -- Tokenizers, datasets, and experiment tracking.** With
+Saga 11.5 shipped in v0.7.5 (labeled shape metadata,
+`x : [batch, time, dim]` annotation syntax, label propagation
+through elementwise/matmul/reduce/softmax, `reshape_labeled` and
+`relabel` helpers, structured `EvalError::ShapeMismatch`,
+label-aware `:vars`/`:describe`/trace JSON, and the "Named Axes"
+tutorial lesson), every downstream saga (Tiny LM, LoRA, attention
+variants, embedding viz) inherits shape-checked tensors. Saga 12
+adds streaming dataset ops, a byte-level BPE tokenizer, and
+`experiment "name"` objects with seed control and logged metrics.
