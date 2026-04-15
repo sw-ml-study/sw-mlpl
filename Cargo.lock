@@ -827,6 +827,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-parity-tests"
+version = "0.7.5"
+dependencies = [
+ "mlpl-array",
+ "mlpl-eval",
+ "mlpl-lower-rs",
+ "mlpl-parser",
+]
+
+[[package]]
 name = "mlpl-parser"
 version = "0.7.5"
 dependencies = [

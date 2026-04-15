@@ -1,9 +1,10 @@
 number = 5
 slug = "mlpl-proc-macro"
-status = "in-progress"
+status = "completed"
 description = "Phase 3: mlpl! proc macro. Create crates/mlpl-macro/ (proc-macro = true) that..."
 role = "production"
 context_files = []
 created_at = "2026-04-14T20:45:28"
+completed_at = "2026-04-15T10:43:49"
 task_type = "production"
-commits = []
+commits = ["60caea66cae59edf73f601f04b29d52ad8ae4445"]
