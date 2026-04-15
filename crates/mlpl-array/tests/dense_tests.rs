@@ -209,6 +209,22 @@ fn with_labels_unlabeled_is_none() {
     assert_eq!(arr.labels(), None);
 }
 
+#[test]
+fn map_preserves_labels() {
+    // Elementwise map is 1:1 with identical shape, so axis identity
+    // survives. Saga 11.5: unblocks label flow through math builtins
+    // (exp, log, sigmoid, tanh_fn, ...) and model DSL activations.
+    let arr = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6])
+        .unwrap()
+        .with_labels(vec![Some("batch".into()), Some("feat".into())])
+        .unwrap();
+    let mapped = arr.map(|x| x * 2.0);
+    assert_eq!(
+        mapped.labels(),
+        Some(&[Some("batch".into()), Some("feat".into())][..])
+    );
+}
+
 // -- Elementwise label propagation (Saga 11.5 Phase 3) --
 
 #[test]

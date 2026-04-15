@@ -116,6 +116,26 @@ pub const LESSONS: &[Lesson] = &[
         try_it: "Build a 2x5 matrix from iota(10) and sum each column.",
     },
     Lesson {
+        title: "Named Axes",
+        intro: "Axes can carry names as well as sizes. Attach them with label(x, [\"a\", \"b\"]) or the annotation syntax x : [a, b] = ... . labels(x) reads them back as a comma-joined string. transpose swaps labels alongside dims. reshape clears labels (the new axes are genuinely new); reshape_labeled attaches fresh labels in one step. Reductions and softmax accept an axis name -- reduce_add(x, \"feat\") -- instead of a positional integer. matmul requires the contraction axis labels to match; a disagreement surfaces as a ShapeMismatch error that names both labeled shapes. relabel(x, [...]) is the explicit escape hatch when you want to override labels mid-expression.",
+        examples: &[
+            "v : [seq] = iota(5)",
+            "labels(v)",
+            "M : [batch, feat] = reshape(iota(6), [2, 3])",
+            "labels(M)",
+            "labels(transpose(M))",
+            "labels(reshape(M, [6]))",
+            "labels(reshape_labeled(iota(6), [2, 3], [\"rows\", \"cols\"]))",
+            "reduce_add(M, \"feat\")",
+            "labels(reduce_add(M, \"feat\"))",
+            "A : [seq, d] = reshape(iota(6), [2, 3])",
+            "B : [d, heads] = reshape(iota(12), [3, 4])",
+            "labels(matmul(A, B))",
+            "labels(relabel(v, [\"time\"]))",
+        ],
+        try_it: "Create Q : [seq, d_k] and K : [seq, d_k], then read the labels of matmul(Q, transpose(K)). What axis names come out?",
+    },
+    Lesson {
         title: "Linear Algebra",
         intro: "dot(a, b) computes the dot product of two vectors. matmul(A, B) is matrix multiplication: an [m, k] matrix times a [k, n] matrix yields an [m, n] result. These are the building blocks of ML.",
         examples: &[
@@ -329,11 +349,12 @@ pub const LESSONS: &[Lesson] = &[
     },
     Lesson {
         title: "Model Composition (the Model DSL)",
-        intro: "Once you have more than one layer, inlining the full forward pass inside every loss expression gets noisy fast. The Saga 11 model DSL lets you describe the network as data: linear(in, out, seed) is an atomic layer, chain(a, b, ...) composes layers in sequence, and tanh_layer() / relu_layer() / softmax_layer() are parameter-free activation layers. apply(model, X) runs the forward pass. Optimizers accept a model identifier directly and walk its parameter tree, so adam(loss, mdl, lr, b1, b2, eps) trains every W and b the model owns in one call. A 2 -> 8 -> 2 tanh MLP becomes a one-liner, and the full training loop fits in a single train block.",
+        intro: "Once you have more than one layer, inlining the full forward pass inside every loss expression gets noisy fast. The Saga 11 model DSL lets you describe the network as data: linear(in, out, seed) is an atomic layer, chain(a, b, ...) composes layers in sequence, and tanh_layer() / relu_layer() / softmax_layer() are parameter-free activation layers. apply(model, X) runs the forward pass. Optimizers accept a model identifier directly and walk its parameter tree, so adam(loss, mdl, lr, b1, b2, eps) trains every W and b the model owns in one call. A 2 -> 8 -> 2 tanh MLP becomes a one-liner, and the full training loop fits in a single train block. Labeling the input as X : [batch, feat] (Saga 11.5) lets the batch axis label flow through the whole forward pass -- labels(apply(mdl, X)) reports batch, ... so you can read what each axis is at every stage.",
         examples: &[
             "mdl = chain(linear(2, 8, 11), tanh_layer(), linear(8, 2, 12))",
             "M = moons(7, 60, 0.08)",
-            "X = matmul(M, [[1,0],[0,1],[0,0]])",
+            "X : [batch, feat] = matmul(M, [[1,0],[0,1],[0,0]])",
+            "labels(apply(mdl, X))",
             "y = reshape(matmul(M, [[0],[0],[1]]), [60])",
             "Y = one_hot(y, 2)",
             "train 100 { adam(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)), mdl, 0.05, 0.9, 0.999, 0.00000001); mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)) }",
