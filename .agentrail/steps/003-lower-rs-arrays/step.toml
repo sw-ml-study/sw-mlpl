@@ -1,9 +1,10 @@
 number = 3
 slug = "lower-rs-arrays"
-status = "in-progress"
+status = "completed"
 description = "Phase 2 cont.: extend mlpl-lower-rs to cover the array surface. Lower ArrayLi..."
 role = "production"
 context_files = []
 created_at = "2026-04-14T20:44:50"
+completed_at = "2026-04-14T21:21:23"
 task_type = "production"
-commits = []
+commits = ["4e43c4538463a488ab5dc6780a320218ad9c512f"]

@@ -5,29 +5,39 @@
 //! AST and emits Rust code that, when compiled, produces the same
 //! numeric result as the interpreter.
 //!
-//! Phase-2 coverage (this step):
+//! Phase-2 coverage (through step 004):
 //! - Every MLPL expression lowers to a Rust expression of type
 //!   `::mlpl_rt::DenseArray`. Scalar literals wrap via
 //!   `DenseArray::from_scalar`; binary ops thread through
 //!   `DenseArray::apply_binop`; unary negation goes through
-//!   `DenseArray::map`. This uniform representation means later
-//!   phases can swap primitives without touching the core shape.
-//! - Array literals (`[1, 2, 3]`, `[[1,2],[3,4]]`) lower to
-//!   `mlpl_rt::array_lit(vec![...]).unwrap()`.
-//! - Variable bindings: `Assign` becomes a `let` in an outer block;
-//!   `Ident` becomes `name.clone()` so the same binding can be
-//!   referenced multiple times without moves.
-//! - Function calls for the phase-1 `mlpl-rt` primitives: `iota`,
-//!   `shape`, `rank`, `reshape`, `transpose`, `reduce_add` (flat
-//!   and per-axis).
+//!   `DenseArray::map`.
+//! - Array literals lower to `mlpl_rt::array_lit(...)`.
+//! - Variable bindings: `Assign` becomes a `let`; `Ident` becomes
+//!   `name.clone()`.
+//! - FnCalls: `iota`, `shape`, `rank`, `reshape`, `transpose`,
+//!   `reduce_add` (flat + axis), plus the label builtins `label`,
+//!   `relabel`, `reshape_labeled`, and `matmul`.
+//! - Annotation syntax `x : [batch, dim] = ...` is automatic
+//!   because the parser desugars it to `label(<value>, [...])`.
+//! - **Static label check for matmul**: when both operands' labels
+//!   are known at lower time, the contraction axis is checked and
+//!   a mismatch surfaces as `LowerError::StaticShapeMismatch`. The
+//!   proc macro (step 005) will convert this to `compile_error!`
+//!   with span-preserved carats.
 //!
-//! Unsupported constructs (TensorCtor, Repeat, Train, FnCall for
-//! primitives not in the phase-1 list, annotation syntax and
-//! labels) return `LowerError::Unsupported` for later steps.
+//! Known deferred constructs (`labels()` as a REPL-only string
+//! builtin, `TensorCtor`, `Repeat`, `Train`) still return
+//! `LowerError::Unsupported`.
+
+use std::collections::HashMap;
 
 use mlpl_parser::{BinOpKind, Expr};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
+
+mod fncall;
+
+use fncall::{labels_of, lower_fncall};
 
 /// Error produced while lowering MLPL AST to Rust.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -36,6 +46,22 @@ pub enum LowerError {
     Unsupported(String),
     /// The program is empty; nothing to lower.
     EmptyProgram,
+    /// Two operands' labels statically disagree on an operator
+    /// that requires them to match (currently: `matmul` contraction
+    /// axis). Surfaces at lower time; step 005 maps this to
+    /// `compile_error!` in a proc-macro context.
+    StaticShapeMismatch {
+        /// Operator or builtin name.
+        op: String,
+        /// Labels on the first operand at lower time.
+        expected: Vec<Option<String>>,
+        /// Labels on the second operand at lower time.
+        actual: Vec<Option<String>>,
+    },
+    /// A label-attaching builtin (`label`, `relabel`,
+    /// `reshape_labeled`) was called with a label list that is not
+    /// a bracketed list of string literals.
+    LabelsMustBeStringLiterals(String),
 }
 
 impl std::fmt::Display for LowerError {
@@ -43,45 +69,57 @@ impl std::fmt::Display for LowerError {
         match self {
             Self::Unsupported(what) => write!(f, "lower: unsupported construct: {what}"),
             Self::EmptyProgram => write!(f, "lower: empty program"),
+            Self::StaticShapeMismatch {
+                op,
+                expected,
+                actual,
+            } => write!(
+                f,
+                "lower: {op} static label mismatch: expected {expected:?}, got {actual:?}"
+            ),
+            Self::LabelsMustBeStringLiterals(fn_name) => write!(
+                f,
+                "lower: {fn_name}: label list must be [\"name1\", \"name2\", ...]"
+            ),
         }
     }
 }
 
 impl std::error::Error for LowerError {}
 
+/// Compile-time knowledge of a binding's axis labels, built up as
+/// we walk top-level statements. When a name is missing the
+/// static check is skipped; the runtime still validates. Saga:
+/// compile-to-rust step 004.
+#[derive(Default)]
+pub(crate) struct Ctx {
+    pub(crate) known_labels: HashMap<String, Vec<Option<String>>>,
+}
+
 /// Lower an MLPL AST (list of top-level statements) into a Rust
 /// `TokenStream` that evaluates to a `mlpl_rt::DenseArray`.
-///
-/// The output is a block expression:
-/// ```text
-/// {
-///     let x = ::mlpl_rt::iota((5.0) as usize);
-///     let y = (x.clone()).apply_binop(...).unwrap();
-///     y.clone()
-/// }
-/// ```
-/// When the final statement is an `Assign`, the block yields that
-/// binding's value; otherwise it yields the expression's value
-/// directly, matching the interpreter's "last expression wins"
-/// semantics.
 pub fn lower(stmts: &[Expr]) -> Result<TokenStream, LowerError> {
     if stmts.is_empty() {
         return Err(LowerError::EmptyProgram);
     }
+    let mut ctx = Ctx::default();
     let mut bindings: Vec<TokenStream> = Vec::new();
     let last_idx = stmts.len() - 1;
     let mut final_expr: Option<TokenStream> = None;
     for (i, stmt) in stmts.iter().enumerate() {
         let is_last = i == last_idx;
         if let Expr::Assign { name, value, .. } = stmt {
-            let val = lower_expr(value)?;
+            let val = lower_expr(&ctx, value)?;
+            if let Some(lbls) = labels_of(&ctx, value) {
+                ctx.known_labels.insert(name.clone(), lbls);
+            }
             let id = format_ident!("{name}");
             bindings.push(quote! { let #id = #val; });
             if is_last {
                 final_expr = Some(quote! { #id.clone() });
             }
         } else {
-            let val = lower_expr(stmt)?;
+            let val = lower_expr(&ctx, stmt)?;
             if is_last {
                 final_expr = Some(val);
             } else {
@@ -98,9 +136,10 @@ pub fn lower(stmts: &[Expr]) -> Result<TokenStream, LowerError> {
     })
 }
 
-/// Lower a single expression to a Rust expression of type
-/// `::mlpl_rt::DenseArray`.
-fn lower_expr(expr: &Expr) -> Result<TokenStream, LowerError> {
+/// Lower a single expression. Returns a `DenseArray`-valued Rust
+/// expression. Fails on unsupported constructs or static label
+/// mismatches.
+pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerError> {
     match expr {
         Expr::IntLit(n, _) => {
             let v = *n as f64;
@@ -111,12 +150,12 @@ fn lower_expr(expr: &Expr) -> Result<TokenStream, LowerError> {
             Ok(quote! { ::mlpl_rt::DenseArray::from_scalar(#v) })
         }
         Expr::UnaryNeg { operand, .. } => {
-            let inner = lower_expr(operand)?;
+            let inner = lower_expr(ctx, operand)?;
             Ok(quote! { (#inner).map(|__v| -__v) })
         }
         Expr::BinOp { op, lhs, rhs, .. } => {
-            let l = lower_expr(lhs)?;
-            let r = lower_expr(rhs)?;
+            let l = lower_expr(ctx, lhs)?;
+            let r = lower_expr(ctx, rhs)?;
             let closure = match op {
                 BinOpKind::Add => quote! { |__a, __b| __a + __b },
                 BinOpKind::Sub => quote! { |__a, __b| __a - __b },
@@ -130,60 +169,18 @@ fn lower_expr(expr: &Expr) -> Result<TokenStream, LowerError> {
             Ok(quote! { #id.clone() })
         }
         Expr::ArrayLit(elems, _) => {
-            let lowered: Vec<TokenStream> =
-                elems.iter().map(lower_expr).collect::<Result<_, _>>()?;
+            let lowered: Vec<TokenStream> = elems
+                .iter()
+                .map(|e| lower_expr(ctx, e))
+                .collect::<Result<_, _>>()?;
             Ok(quote! { ::mlpl_rt::array_lit(vec![#(#lowered),*]).unwrap() })
         }
-        Expr::FnCall { name, args, .. } => lower_fncall(name, args),
+        Expr::FnCall { name, args, .. } => lower_fncall(ctx, name, args),
         Expr::Assign { .. } => Err(LowerError::Unsupported(
             "nested assignment (assignment as subexpression)".into(),
         )),
         Expr::StrLit(_, _) | Expr::TensorCtor { .. } | Expr::Repeat { .. } | Expr::Train { .. } => {
             Err(LowerError::Unsupported(format!("{expr:?}")))
         }
-    }
-}
-
-/// Lower a call to one of the phase-1 `mlpl-rt` primitives.
-fn lower_fncall(name: &str, args: &[Expr]) -> Result<TokenStream, LowerError> {
-    match (name, args.len()) {
-        ("iota", 1) => {
-            let arg = lower_expr(&args[0])?;
-            Ok(quote! { ::mlpl_rt::iota((#arg).data()[0] as usize) })
-        }
-        ("shape", 1) => {
-            let a = lower_expr(&args[0])?;
-            Ok(quote! { ::mlpl_rt::shape(&(#a)) })
-        }
-        ("rank", 1) => {
-            let a = lower_expr(&args[0])?;
-            Ok(quote! { ::mlpl_rt::rank(&(#a)) })
-        }
-        ("transpose", 1) => {
-            let a = lower_expr(&args[0])?;
-            Ok(quote! { ::mlpl_rt::transpose(&(#a)) })
-        }
-        ("reshape", 2) => {
-            let a = lower_expr(&args[0])?;
-            let shape = lower_expr(&args[1])?;
-            Ok(quote! {{
-                let __shape = #shape;
-                let __dims: Vec<usize> = __shape.data().iter().map(|&d| d as usize).collect();
-                ::mlpl_rt::reshape(&(#a), &__dims).unwrap()
-            }})
-        }
-        ("reduce_add", 1) => {
-            let a = lower_expr(&args[0])?;
-            Ok(quote! { ::mlpl_rt::reduce_add(&(#a)) })
-        }
-        ("reduce_add", 2) => {
-            let a = lower_expr(&args[0])?;
-            let axis = lower_expr(&args[1])?;
-            Ok(quote! { ::mlpl_rt::reduce_add_axis(&(#a), (#axis).data()[0] as usize).unwrap() })
-        }
-        _ => Err(LowerError::Unsupported(format!(
-            "fncall {name}/{}",
-            args.len()
-        ))),
     }
 }
