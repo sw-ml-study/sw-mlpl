@@ -1,6 +1,6 @@
 number = 3
 slug = "causal-mask"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 003: Causal masking for attention.
 

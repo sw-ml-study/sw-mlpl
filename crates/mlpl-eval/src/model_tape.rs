@@ -74,6 +74,7 @@ pub(crate) fn apply_model_tape(
             wo,
             d_model,
             heads,
+            causal,
         } => {
             if *heads != 1 {
                 return Err(EvalError::Unsupported(format!(
@@ -88,6 +89,7 @@ pub(crate) fn apply_model_tape(
                 wv,
                 wo,
                 d_model: *d_model,
+                causal: *causal,
             };
             attention_single_head_tape(&x, &inputs, tape, params)
         }
@@ -185,6 +187,7 @@ struct AttentionInputs<'a> {
     wv: &'a str,
     wo: &'a str,
     d_model: usize,
+    causal: bool,
 }
 
 /// Single-head scaled-dot-product attention on the tape. Multi-head
@@ -220,6 +223,28 @@ fn attention_single_head_tape(
         DenseArray::from_scalar(1.0 / (inputs.d_model as f64).sqrt()),
         false,
     );
-    let attn = q.matmul(&k.transpose()).mul(&scale).softmax();
-    Ok(attn.matmul(&v).matmul(&wo_t))
+    let scores = q.matmul(&k.transpose()).mul(&scale);
+    let masked = if inputs.causal {
+        let seq = scores.value().shape().dims()[0];
+        let mask = Tensor::leaf(Rc::clone(tape), causal_mask_array(seq)?, false);
+        scores.add(&mask)
+    } else {
+        scores
+    };
+    Ok(masked.softmax().matmul(&v).matmul(&wo_t))
+}
+
+/// Build a `[seq, seq]` additive causal mask: zero on and below the
+/// diagonal, a large negative value strictly above. Adding it to the
+/// pre-softmax scores pushes non-causal positions to ~0 probability
+/// after softmax, without introducing a new tape primitive.
+fn causal_mask_array(seq: usize) -> Result<DenseArray, EvalError> {
+    let neg = -1.0e9_f64;
+    let mut data = vec![0.0_f64; seq * seq];
+    for r in 0..seq {
+        for c in (r + 1)..seq {
+            data[r * seq + c] = neg;
+        }
+    }
+    Ok(DenseArray::new(Shape::new(vec![seq, seq]), data)?)
 }

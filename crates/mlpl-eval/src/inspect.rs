@@ -306,6 +306,11 @@ const BUILTIN_GROUPS: &[FnGroup] = &[
                 "attention(d_model, heads, seed)",
                 "multi-head self-attention",
             ),
+            (
+                "causal_attention",
+                "causal_attention(d_model, heads, seed)",
+                "self-attention with a lower-triangular causal mask",
+            ),
             ("apply", "apply(model, X)", "forward pass on a stored model"),
         ],
     ),
@@ -378,8 +383,18 @@ fn render_spec(spec: &ModelSpec) -> String {
         },
         ModelSpec::Residual(inner) => format!("residual({})", render_spec(inner)),
         ModelSpec::RmsNorm { dim } => format!("rms_norm({dim})"),
-        ModelSpec::Attention { d_model, heads, .. } => {
-            format!("attention(d={d_model}, heads={heads})")
+        ModelSpec::Attention {
+            d_model,
+            heads,
+            causal,
+            ..
+        } => {
+            let name = if *causal {
+                "causal_attention"
+            } else {
+                "attention"
+            };
+            format!("{name}(d={d_model}, heads={heads})")
         }
         ModelSpec::Embedding { vocab, d_model, .. } => {
             format!("embed[vocab={vocab}, d={d_model}]")

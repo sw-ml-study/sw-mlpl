@@ -93,7 +93,8 @@ pub(crate) fn eval_expr(
             "chain" => Some(crate::model_dispatch::eval_chain(args, env)),
             "residual" => Some(crate::model_dispatch::eval_residual(args, env)),
             "rms_norm" => Some(crate::model_dispatch::eval_rms_norm(args, env)),
-            "attention" => Some(crate::model_dispatch::eval_attention(args, env)),
+            "attention" => Some(crate::model_dispatch::eval_attention(args, env, false)),
+            "causal_attention" => Some(crate::model_dispatch::eval_attention(args, env, true)),
             _ => None,
         };
         if let Some(m) = model {

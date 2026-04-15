@@ -127,23 +127,33 @@ pub(crate) fn eval_residual(args: &[Expr], env: &mut Environment) -> Result<Mode
 }
 
 /// `attention(d_model, heads, seed)` -- multi-head self-attention.
-/// Allocates four `[d_model, d_model]` weight params and registers
-/// them as trainable in the env. Names are namespaced by the env's
-/// `next_model_id` so multiple attention layers do not collide.
-pub(crate) fn eval_attention(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+/// `causal_attention(...)` dispatches through the same builder with
+/// `causal = true`; the parameter set, names, and initial values are
+/// identical for the same seed, and only the forward pass differs
+/// (causal_attention applies a lower-triangular mask before softmax).
+pub(crate) fn eval_attention(
+    args: &[Expr],
+    env: &mut Environment,
+    causal: bool,
+) -> Result<ModelSpec, EvalError> {
+    let func = if causal {
+        "causal_attention"
+    } else {
+        "attention"
+    };
     if args.len() != 3 {
         return Err(EvalError::BadArity {
-            func: "attention".into(),
+            func: func.into(),
             expected: 3,
             got: args.len(),
         });
     }
-    let d_model = scalar_usize(&args[0], env, "attention")?;
-    let heads = scalar_usize(&args[1], env, "attention")?;
-    let seed = scalar_f64(&args[2], env, "attention")?;
+    let d_model = scalar_usize(&args[0], env, func)?;
+    let heads = scalar_usize(&args[1], env, func)?;
+    let seed = scalar_f64(&args[2], env, func)?;
     if heads == 0 || d_model % heads != 0 {
         return Err(EvalError::Unsupported(format!(
-            "attention: d_model ({d_model}) must be divisible by heads ({heads})"
+            "{func}: d_model ({d_model}) must be divisible by heads ({heads})"
         )));
     }
     let id = env.next_model_id;
@@ -173,6 +183,7 @@ pub(crate) fn eval_attention(args: &[Expr], env: &mut Environment) -> Result<Mod
         wo,
         d_model,
         heads,
+        causal,
     })
 }
 
@@ -282,7 +293,8 @@ fn apply_model(
             wo,
             d_model,
             heads,
-        } => apply_attention(x, wq, wk, wv, wo, *d_model, *heads, env),
+            causal,
+        } => apply_attention(x, wq, wk, wv, wo, *d_model, *heads, *causal, env),
         ModelSpec::Embedding { table, vocab, .. } => {
             let t = env
                 .get(table)
@@ -333,6 +345,7 @@ fn apply_attention(
     wo: &str,
     d_model: usize,
     heads: usize,
+    causal: bool,
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
@@ -371,7 +384,18 @@ fn apply_attention(
         let k_h = slice_cols(&k, h * d_k, d_k)?;
         let v_h = slice_cols(&v, h * d_k, d_k)?;
         let scores = q_h.matmul(&k_h.transpose())?;
-        let scaled: Vec<f64> = scores.data().iter().map(|s| s * scale).collect();
+        let scaled: Vec<f64> = scores
+            .data()
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                if causal && i % seq > i / seq {
+                    -1.0e9
+                } else {
+                    s * scale
+                }
+            })
+            .collect();
         let scores_scaled = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
         let attn = mlpl_runtime::call_builtin(
             "softmax",
