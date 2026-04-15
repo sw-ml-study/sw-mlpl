@@ -1,6 +1,6 @@
 number = 6
 slug = "interpreter-compiler-parity"
-status = "pending"
+status = "in-progress"
 description = "Phase 6: parity test harness + one demo port. (a) New parity-tests integratio..."
 role = "production"
 context_files = []

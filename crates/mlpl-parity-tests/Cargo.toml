@@ -1,0 +1,17 @@
+[package]
+name = "mlpl-parity-tests"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+publish = false
+
+# Empty `src/lib.rs` just to make this a valid crate; all the
+# interesting code lives in `tests/`.
+[lib]
+path = "src/lib.rs"
+
+[dev-dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-eval = { path = "../mlpl-eval" }
+mlpl-lower-rs = { path = "../mlpl-lower-rs" }
+mlpl-parser = { path = "../mlpl-parser" }
