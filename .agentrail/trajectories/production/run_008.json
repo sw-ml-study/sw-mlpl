@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 8,
+    "step": "experiment-registry"
+  },
+  "action": "Extended experiment module with registry readers + formatting + compare dispatch, Deserialize on record types, :experiments match arm in inspect, compare FnCall branch in eval, 12 TDD tests covering memory + on-disk + error + ordering paths",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T13:38:25"
+}

@@ -1,6 +1,6 @@
 number = 9
 slug = "tokenizers-release-v090"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 4 step 009: Release v0.9.0-tokenizers.
 

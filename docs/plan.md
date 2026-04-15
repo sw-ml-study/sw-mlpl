@@ -67,6 +67,18 @@ depends on removing that limitation.
   bit-for-bit agreement on 9 programs. Measured 9.05x speedup
   on a 100x100 reshape+reduce workload. See
   `docs/milestone-compile-to-rust.md`.
+- **Saga 12** Tokenizers, datasets, experiment tracking
+  (v0.9.0): `load`/`load_preloaded` with `--data-dir` sandbox;
+  `shuffle`/`batch`/`batch_mask`/`split`/`val_split` dataset
+  prep; `for row in ds { body }` streaming iteration;
+  byte-level tokenizer (`tokenize_bytes`/`decode_bytes`);
+  `Value::Tokenizer` + `TokenizerSpec::{ByteLevel,BpeMerges}`
+  with `train_bpe`/`apply_tokenizer`/`decode`; `experiment
+  "name" { body }` with `_metric` capture and `ExperimentRecord`
+  logged to memory + `--exp-dir/<name>/<ts>/run.json`;
+  `:experiments` + `compare(a, b)` registry; UTF-8 string-
+  literal fix in the lexer; string-valued variable bindings.
+  Three new tutorial lessons. See `docs/milestone-tokenizers.md`.
 - **Saga 11** Model DSL (v0.7): `Value::Model` runtime value;
   `linear(in, out, seed)` atomic layer; parameter-free
   `tanh_layer` / `relu_layer` / `softmax_layer` activations;
@@ -114,13 +126,27 @@ reshape+reduce workload. Deferred: `TensorCtor`, `Repeat`,
 `Train`, autograd, optimizers, Model DSL -- they need tape-
 state or loop lowering and sit in a follow-up.
 
-### Saga 12 -- Tokenizers, datasets, and experiment tracking (NEXT)
-Streaming/lazy dataset ops (`load`, `tokenize`, `shuffle`,
-`batch`), a byte-level BPE tokenizer, and `experiment "name"`
-objects with seed control, config snapshots, and logged metrics.
-Reproducibility story lands here.
+### Saga 12 -- Tokenizers, datasets, and experiment tracking (COMPLETE, v0.9.0)
+Shipped: `load`/`load_preloaded` with terminal-REPL
+`--data-dir` sandbox and compiled-in web corpus registry;
+dataset prep (`shuffle`, `batch`, `batch_mask`, `split`,
+`val_split`); `for row in ds { body }` streaming iteration
+with `last_rows` capture; byte-level BPE
+(`tokenize_bytes`/`decode_bytes` primitives;
+`Value::Tokenizer` + `TokenizerSpec::{ByteLevel,BpeMerges}`;
+`train_bpe`/`apply_tokenizer`/`decode` with byte-lossless
+round-trip); experiment tracking
+(`experiment "name" { body }`, `_metric`-capture,
+`ExperimentRecord` to `env.experiment_log` + optional
+on-disk `<exp_dir>/<name>/<ts>/run.json`, `:experiments`
+merge + `compare(a, b)` with per-metric deltas);
+byproduct UTF-8 string-literal lexer fix; string-valued
+variable bindings; three new tutorial lessons. Deferred:
+`experiment` source-text capture (needs source threading
+through eval), `load` sandbox disallowing absolute-path
+canonicalized symlinks (currently path-component-based).
 
-### Saga 13 -- Tiny LM end-to-end
+### Saga 13 -- Tiny LM end-to-end (NEXT)
 Train a character-level or tiny-BPE language model (~1-5M params)
 on a small corpus entirely in MLPL on CPU. Visualize loss,
 sample generations, and attention maps. This is the first saga
@@ -174,19 +200,19 @@ codegen helpers. Intentionally last: secondary to the
 Sagas 14-19 can reorder based on hardware access and interest;
 9-13 (plus the inserted 11.5) must run in order.
 
-## Start next: Saga 12 -- Tokenizers, datasets, experiment tracking
+## Start next: Saga 13 -- Tiny LM end-to-end (CPU)
 
-Saga 11.5 (Named axes and shape introspection) shipped as v0.7.5
-(tag `v0.7.5-named-axes`). Compile-to-Rust shipped as v0.8.0
-(tag `v0.8.0-compile-rs`): `mlpl!` proc macro, `mlpl-build` CLI
-with cross-compile, parity harness with 9x measured speedup,
-four new crates (`mlpl-rt`, `mlpl-lower-rs`, `mlpl-macro`,
-`mlpl`) plus a dev-only parity-tests crate. See
-`docs/milestone-compile-to-rust.md` for the retrospective.
-
-Saga 12 closes the last surface-only gap before the Tiny LM:
-streaming/lazy dataset ops, a byte-level BPE tokenizer, and
-`experiment "name"` objects for reproducible runs. Labeled
-shapes from Saga 11.5 carry through into the dataset pipeline
-so `batch : [B, T]` annotations stay meaningful all the way to
-the training loop.
+Three surface-only sagas shipped in rapid succession:
+Saga 11.5 (v0.7.5, named axes + structured shape errors),
+Compile-to-Rust (v0.8.0, `mlpl!` macro + `mlpl-build` CLI +
+9x measured speedup), and Saga 12 (v0.9.0, file IO + dataset
+prep + byte-level BPE + experiment tracking). With both
+shape-checked tensors and a full text-to-tokens pipeline in
+place, Saga 13 trains a tiny transformer-block LM end-to-end
+on a small corpus: load text, train a BPE tokenizer, batch
+token streams, compose a model with `attention` +
+`residual` + `rms_norm`, optimize with `adam` inside a
+`train { }` loop wrapped in `experiment`, then sample. This
+is the first saga that proves the platform thesis end-to-end.
+See `docs/milestone-tokenizers.md` for the Saga 12
+retrospective.

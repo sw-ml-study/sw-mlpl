@@ -148,3 +148,35 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 (`chain`/`linear`/activations) are all out of compile scope for
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
+
+## Saga 12: Tokenizers, datasets, and experiment tracking (COMPLETE)
+Closes the last surface-only gap before the Tiny LM. File IO:
+`load("rel.csv")` / `load("rel.txt")` reads through an
+`Environment::data_dir` sandbox (terminal REPL `--data-dir`
+flag); `load_preloaded("name")` serves compiled-in corpora for
+the web REPL. Dataset prep: `shuffle(x, seed)` Fisher-Yates row
+permutation, `batch(x, size)` with zero-padded short batches +
+matching `batch_mask`, `split(x, frac, seed)` and
+`val_split(x, frac, seed)` returning disjoint chunks; `for row
+in ds { body }` streaming iteration with `last_rows` capture
+(new `Token::For`/`Token::In` keywords, `Expr::For` AST
+variant). Byte-level BPE: `tokenize_bytes` / `decode_bytes`
+primitives; `Value::Tokenizer` runtime variant with
+`TokenizerSpec::ByteLevel` and `TokenizerSpec::BpeMerges`;
+`train_bpe(corpus, vocab_size, seed)` with deterministic
+lex-smallest tie-breaking; `apply_tokenizer(tok, text)` +
+`decode(tok, tokens)` byte-lossless round-trip for any UTF-8
+input. Experiment tracking: `experiment "name" { body }` scoped
+form captures `_metric`-suffixed scalars and bound params'
+shapes into `ExperimentRecord`s, logged to
+`env.experiment_log` and (terminal REPL `--exp-dir`)
+`<dir>/<name>/<ts>/run.json` via serde_json; `:experiments`
+REPL command merges memory + disk; `compare(a, b)` builtin
+returns side-by-side per-metric deltas. Byproduct: lexer UTF-8
+fix so string literals now carry arbitrary Unicode code points
+(previously was `b as char` Latin-1 mojibake). Three new
+tutorial lessons in the web REPL ("Loading Data", "Tokenizing
+Text", "Experiments"). String-valued variable bindings
+(`corpus = load_preloaded("...")`) via new
+`Environment::strings` map. Delivered v0.9.0. See
+`docs/milestone-tokenizers.md`.

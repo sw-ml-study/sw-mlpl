@@ -1,9 +1,10 @@
 number = 8
 slug = "experiment-registry"
-status = "in-progress"
+status = "completed"
 description = "Phase 3 step 008: REPL introspection for experiments. Add :experiments and co..."
 role = "production"
 context_files = []
 created_at = "2026-04-15T12:11:02"
+completed_at = "2026-04-15T13:38:25"
 task_type = "production"
-commits = []
+commits = ["603457066bf55515b398efa02010979f0de809fa"]
