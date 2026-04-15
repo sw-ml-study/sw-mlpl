@@ -1,8 +1,9 @@
 number = 3
 slug = "label-reshape-rules"
-status = "in-progress"
+status = "completed"
 description = "Phase 2 cont.: Label propagation through shape-changing ops. transpose(x) / x..."
 role = "production"
 context_files = []
 created_at = "2026-04-11T12:48:35"
-commits = []
+completed_at = "2026-04-14T18:42:01"
+commits = ["aa84e45b25335b1eab287426209023e5288758da"]

@@ -1,6 +1,6 @@
 number = 4
 slug = "label-propagation-elementwise"
-status = "pending"
+status = "in-progress"
 description = "Phase 3: Elementwise ops propagate and validate labels. +, -, *, / require ma..."
 role = "production"
 context_files = []

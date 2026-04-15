@@ -71,11 +71,18 @@ impl DenseArray {
     /// - Same shape: element-wise.
     /// - One scalar: broadcast to the other's shape.
     /// - Otherwise: ShapeMismatch error.
+    ///
+    /// Label propagation (Saga 11.5 Phase 3): scalar operands contribute
+    /// no labels, so the non-scalar side's labels win unconditionally.
+    /// For same-shape operands: if either side is unlabeled, the
+    /// labeled side's labels carry through; if both are labeled, the
+    /// label vectors must match or `LabelMismatch` is raised.
     pub fn apply_binop(
         &self,
         other: &DenseArray,
         op: fn(f64, f64) -> f64,
     ) -> Result<DenseArray, ArrayError> {
+        let result_labels = merge_labels(self, other)?;
         if self.shape() == other.shape() {
             let data: Vec<f64> = self
                 .data()
@@ -86,7 +93,7 @@ impl DenseArray {
             return Ok(DenseArray {
                 shape: self.shape.clone(),
                 data,
-                labels: None,
+                labels: result_labels,
             });
         }
         // Scalar broadcast
@@ -96,7 +103,7 @@ impl DenseArray {
             return Ok(DenseArray {
                 shape: other.shape.clone(),
                 data,
-                labels: None,
+                labels: result_labels,
             });
         }
         if other.rank() == 0 {
@@ -105,7 +112,7 @@ impl DenseArray {
             return Ok(DenseArray {
                 shape: self.shape.clone(),
                 data,
-                labels: None,
+                labels: result_labels,
             });
         }
         Err(ArrayError::ShapeMismatch {
@@ -292,6 +299,30 @@ impl DenseArray {
         }
 
         DenseArray::new(result_shape, best_idx)
+    }
+}
+
+/// Compute the label list for the result of an elementwise op on two
+/// arrays. Scalars contribute no labels, so the non-scalar side wins
+/// unconditionally when one operand is rank 0. For non-scalar pairs,
+/// two unlabeled sides stay unlabeled, a single labeled side carries
+/// its labels through, and two labeled sides must agree or
+/// `LabelMismatch` is returned. Saga 11.5 Phase 3.
+fn merge_labels(a: &DenseArray, b: &DenseArray) -> Result<Option<Vec<Option<String>>>, ArrayError> {
+    if a.rank() == 0 {
+        return Ok(b.labels.clone());
+    }
+    if b.rank() == 0 {
+        return Ok(a.labels.clone());
+    }
+    match (&a.labels, &b.labels) {
+        (None, None) => Ok(None),
+        (Some(l), None) | (None, Some(l)) => Ok(Some(l.clone())),
+        (Some(la), Some(lb)) if la == lb => Ok(Some(la.clone())),
+        (Some(la), Some(lb)) => Err(ArrayError::LabelMismatch {
+            expected: la.clone(),
+            actual: lb.clone(),
+        }),
     }
 }
 

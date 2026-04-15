@@ -157,26 +157,26 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(labeled));
     }
     if let Expr::FnCall { name, args, .. } = expr
-        && name == "label"
+        && (name == "label" || name == "relabel")
     {
         if args.len() != 2 {
             return Err(EvalError::BadArity {
-                func: "label".into(),
+                func: name.clone(),
                 expected: 2,
                 got: args.len(),
             });
         }
         let Expr::ArrayLit(label_elems, _) = &args[1] else {
-            return Err(EvalError::Unsupported(
-                "label: second argument must be a bracketed list of string literals".into(),
-            ));
+            return Err(EvalError::Unsupported(format!(
+                "{name}: second argument must be a bracketed list of string literals"
+            )));
         };
         let mut labels: Vec<Option<String>> = Vec::with_capacity(label_elems.len());
         for e in label_elems {
             let Expr::StrLit(s, _) = e else {
-                return Err(EvalError::Unsupported(
-                    "label: axis names must be string literals".into(),
-                ));
+                return Err(EvalError::Unsupported(format!(
+                    "{name}: axis names must be string literals"
+                )));
             };
             labels.push(Some(s.clone()));
         }

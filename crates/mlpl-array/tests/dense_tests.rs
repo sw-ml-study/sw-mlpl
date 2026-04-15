@@ -208,3 +208,100 @@ fn with_labels_unlabeled_is_none() {
     let arr = DenseArray::from_vec(vec![1.0, 2.0, 3.0]);
     assert_eq!(arr.labels(), None);
 }
+
+// -- Elementwise label propagation (Saga 11.5 Phase 3) --
+
+#[test]
+fn binop_same_labels_propagate() {
+    let a = DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let b = DenseArray::from_vec(vec![10.0, 20.0, 30.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let r = a.apply_binop(&b, |x, y| x + y).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("seq".into())][..]));
+    assert_eq!(r.data(), &[11.0, 22.0, 33.0]);
+}
+
+#[test]
+fn binop_label_mismatch_errors() {
+    let a = DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let b = DenseArray::from_vec(vec![10.0, 20.0, 30.0])
+        .with_labels(vec![Some("batch".into())])
+        .unwrap();
+    let r = a.apply_binop(&b, |x, y| x + y);
+    assert_eq!(
+        r,
+        Err(ArrayError::LabelMismatch {
+            expected: vec![Some("seq".into())],
+            actual: vec![Some("batch".into())],
+        })
+    );
+}
+
+#[test]
+fn binop_labeled_plus_unlabeled_adopts_labels() {
+    let a = DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let b = DenseArray::from_vec(vec![10.0, 20.0, 30.0]);
+    let r = a.apply_binop(&b, |x, y| x + y).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("seq".into())][..]));
+}
+
+#[test]
+fn binop_unlabeled_plus_labeled_adopts_labels() {
+    let a = DenseArray::from_vec(vec![1.0, 2.0, 3.0]);
+    let b = DenseArray::from_vec(vec![10.0, 20.0, 30.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let r = a.apply_binop(&b, |x, y| x + y).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("seq".into())][..]));
+}
+
+#[test]
+fn binop_both_unlabeled_stays_unlabeled() {
+    let a = DenseArray::from_vec(vec![1.0, 2.0, 3.0]);
+    let b = DenseArray::from_vec(vec![10.0, 20.0, 30.0]);
+    let r = a.apply_binop(&b, |x, y| x + y).unwrap();
+    assert_eq!(r.labels(), None);
+}
+
+#[test]
+fn binop_scalar_lhs_preserves_labeled_rhs() {
+    let s = DenseArray::from_scalar(2.0);
+    let v = DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let r = s.apply_binop(&v, |x, y| x * y).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("seq".into())][..]));
+    assert_eq!(r.data(), &[2.0, 4.0, 6.0]);
+}
+
+#[test]
+fn binop_scalar_rhs_preserves_labeled_lhs() {
+    let v = DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+        .with_labels(vec![Some("seq".into())])
+        .unwrap();
+    let s = DenseArray::from_scalar(2.0);
+    let r = v.apply_binop(&s, |x, y| x * y).unwrap();
+    assert_eq!(r.labels(), Some(&[Some("seq".into())][..]));
+}
+
+#[test]
+fn binop_partial_labels_match() {
+    // Both sides have `[None, Some("cols")]` -- matches.
+    let a = DenseArray::new(Shape::new(vec![2, 3]), vec![0.0; 6])
+        .unwrap()
+        .with_labels(vec![None, Some("cols".into())])
+        .unwrap();
+    let b = DenseArray::new(Shape::new(vec![2, 3]), vec![1.0; 6])
+        .unwrap()
+        .with_labels(vec![None, Some("cols".into())])
+        .unwrap();
+    let r = a.apply_binop(&b, |x, y| x + y).unwrap();
+    assert_eq!(r.labels(), Some(&[None, Some("cols".into())][..]));
+}
