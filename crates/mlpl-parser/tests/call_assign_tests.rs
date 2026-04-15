@@ -154,3 +154,75 @@ fn multi_assign() {
     assert!(matches!(stmts[0], Expr::Assign { .. }));
     assert!(matches!(stmts[1], Expr::Assign { .. }));
 }
+
+// -- Axis-label annotation on assignment (Saga 11.5 Phase 2) --
+
+#[test]
+fn assign_with_axis_annotation_desugars_to_label_call() {
+    match parse_one("x : [batch, dim] = reshape(iota(6), [2, 3])") {
+        Expr::Assign { name, value, .. } => {
+            assert_eq!(name, "x");
+            match *value {
+                Expr::FnCall {
+                    name: fname, args, ..
+                } => {
+                    assert_eq!(fname, "label");
+                    assert_eq!(args.len(), 2);
+                    assert!(matches!(args[0], Expr::FnCall { .. }));
+                    match &args[1] {
+                        Expr::ArrayLit(elems, _) => {
+                            assert_eq!(elems.len(), 2);
+                            assert!(matches!(&elems[0], Expr::StrLit(s, _) if s == "batch"));
+                            assert!(matches!(&elems[1], Expr::StrLit(s, _) if s == "dim"));
+                        }
+                        other => panic!("expected ArrayLit of StrLit, got {other:?}"),
+                    }
+                }
+                other => panic!("expected FnCall(label, ...), got {other:?}"),
+            }
+        }
+        other => panic!("expected Assign, got {other:?}"),
+    }
+}
+
+#[test]
+fn assign_with_single_axis_annotation() {
+    match parse_one("v : [seq] = iota(5)") {
+        Expr::Assign { name, value, .. } => {
+            assert_eq!(name, "v");
+            match *value {
+                Expr::FnCall {
+                    name: fname, args, ..
+                } => {
+                    assert_eq!(fname, "label");
+                    match &args[1] {
+                        Expr::ArrayLit(elems, _) => {
+                            assert_eq!(elems.len(), 1);
+                            assert!(matches!(&elems[0], Expr::StrLit(s, _) if s == "seq"));
+                        }
+                        other => panic!("expected ArrayLit, got {other:?}"),
+                    }
+                }
+                other => panic!("expected FnCall, got {other:?}"),
+            }
+        }
+        other => panic!("expected Assign, got {other:?}"),
+    }
+}
+
+#[test]
+fn assign_with_empty_axis_annotation_scalar() {
+    match parse_one("s : [] = 42") {
+        Expr::Assign { value, .. } => match *value {
+            Expr::FnCall { name, args, .. } => {
+                assert_eq!(name, "label");
+                match &args[1] {
+                    Expr::ArrayLit(elems, _) => assert!(elems.is_empty()),
+                    other => panic!("expected empty ArrayLit, got {other:?}"),
+                }
+            }
+            other => panic!("expected FnCall, got {other:?}"),
+        },
+        other => panic!("expected Assign, got {other:?}"),
+    }
+}

@@ -1,6 +1,6 @@
 number = 2
 slug = "label-introduction"
-status = "pending"
+status = "in-progress"
 description = 'Phase 2: Give users a way to attach labels. Add label(x, ["batch", "time", "d...'
 role = "production"
 context_files = []

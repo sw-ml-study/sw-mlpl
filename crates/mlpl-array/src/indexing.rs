@@ -29,6 +29,25 @@ impl DenseArray {
         self.labels.as_deref()
     }
 
+    /// Attach axis labels to this array, returning a new array that
+    /// shares the original's shape and data but carries the given
+    /// labels. Saga 11.5 Phase 2 entry point for the `label(x, [...])`
+    /// built-in and the `x : [a, b]` annotation syntax.
+    ///
+    /// Returns `LabelsRankMismatch` if `labels.len()` differs from
+    /// `self.rank()`. A rank-0 scalar accepts only the empty label
+    /// list.
+    pub fn with_labels(mut self, labels: Vec<Option<String>>) -> Result<Self, ArrayError> {
+        if labels.len() != self.rank() {
+            return Err(ArrayError::LabelsRankMismatch {
+                rank: self.rank(),
+                labels: labels.len(),
+            });
+        }
+        self.labels = Some(labels);
+        Ok(self)
+    }
+
     /// Get a reference to the element at multi-dimensional index.
     pub fn get(&self, index: &[usize]) -> Result<&f64, ArrayError> {
         let offset = self.validate_index(index)?;

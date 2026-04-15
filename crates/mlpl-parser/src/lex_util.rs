@@ -96,6 +96,7 @@ pub(crate) fn single_char_token(b: u8) -> Option<TokenKind> {
         b']' => Some(TokenKind::RBracket),
         b',' => Some(TokenKind::Comma),
         b'=' => Some(TokenKind::Equals),
+        b':' => Some(TokenKind::Colon),
         b';' => Some(TokenKind::Semicolon),
         b'+' => Some(TokenKind::Plus),
         b'*' => Some(TokenKind::Star),
