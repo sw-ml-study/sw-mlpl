@@ -5,6 +5,8 @@ members = [
   "crates/mlpl-array",
   "crates/mlpl-rt",
   "crates/mlpl-lower-rs",
+  "crates/mlpl-macro",
+  "crates/mlpl",
   "crates/mlpl-parser",
   "crates/mlpl-runtime",
   "crates/mlpl-eval",

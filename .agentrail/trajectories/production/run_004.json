@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "lower-rs-labels"
+  },
+  "action": "Extended Ctx with known_labels env, added LowerError::StaticShapeMismatch + LabelsMustBeStringLiterals variants, labels_of recursive label inference, lower_label_attach + lower_matmul helpers, split lib into lib + fncall modules, 13 label tests + 1 e2e compile test",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-14T21:29:41"
+}

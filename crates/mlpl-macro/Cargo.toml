@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-macro"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+mlpl-lower-rs = { path = "../mlpl-lower-rs" }
+mlpl-parser = { path = "../mlpl-parser" }
+proc-macro2 = "1"
+quote = "1"

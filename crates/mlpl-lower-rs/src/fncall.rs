@@ -16,22 +16,23 @@ pub(crate) fn lower_fncall(
     name: &str,
     args: &[Expr],
 ) -> Result<TokenStream, LowerError> {
+    let rt = &ctx.rt;
     match (name, args.len()) {
         ("iota", 1) => {
             let arg = lower_expr(ctx, &args[0])?;
-            Ok(quote! { ::mlpl_rt::iota((#arg).data()[0] as usize) })
+            Ok(quote! { #rt::iota((#arg).data()[0] as usize) })
         }
         ("shape", 1) => {
             let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { ::mlpl_rt::shape(&(#a)) })
+            Ok(quote! { #rt::shape(&(#a)) })
         }
         ("rank", 1) => {
             let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { ::mlpl_rt::rank(&(#a)) })
+            Ok(quote! { #rt::rank(&(#a)) })
         }
         ("transpose", 1) => {
             let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { ::mlpl_rt::transpose(&(#a)) })
+            Ok(quote! { #rt::transpose(&(#a)) })
         }
         ("reshape", 2) => {
             let a = lower_expr(ctx, &args[0])?;
@@ -39,17 +40,17 @@ pub(crate) fn lower_fncall(
             Ok(quote! {{
                 let __shape = #shape;
                 let __dims: Vec<usize> = __shape.data().iter().map(|&d| d as usize).collect();
-                ::mlpl_rt::reshape(&(#a), &__dims).unwrap()
+                #rt::reshape(&(#a), &__dims).unwrap()
             }})
         }
         ("reduce_add", 1) => {
             let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { ::mlpl_rt::reduce_add(&(#a)) })
+            Ok(quote! { #rt::reduce_add(&(#a)) })
         }
         ("reduce_add", 2) => {
             let a = lower_expr(ctx, &args[0])?;
             let axis = lower_expr(ctx, &args[1])?;
-            Ok(quote! { ::mlpl_rt::reduce_add_axis(&(#a), (#axis).data()[0] as usize).unwrap() })
+            Ok(quote! { #rt::reduce_add_axis(&(#a), (#axis).data()[0] as usize).unwrap() })
         }
         ("label" | "relabel", 2) | ("reshape_labeled", 3) => lower_label_attach(ctx, name, args),
         ("matmul", 2) => lower_matmul(ctx, args),
@@ -103,6 +104,7 @@ pub(crate) fn labels_of(ctx: &Ctx, expr: &Expr) -> Option<Vec<Option<String>>> {
 /// Lower `label`, `relabel`, and `reshape_labeled` -- the three
 /// builtins that attach axis labels to an array at runtime.
 fn lower_label_attach(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStream, LowerError> {
+    let rt = &ctx.rt;
     let labels_arg_idx = if name == "reshape_labeled" { 2 } else { 1 };
     let labels = extract_label_list(&args[labels_arg_idx])
         .ok_or_else(|| LowerError::LabelsMustBeStringLiterals(name.into()))?;
@@ -116,7 +118,7 @@ fn lower_label_attach(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStrea
         Ok(quote! {{
             let __shape = #shape;
             let __dims: Vec<usize> = __shape.data().iter().map(|&d| d as usize).collect();
-            ::mlpl_rt::reshape(&(#a), &__dims).unwrap().with_labels(vec![#(#lits),*]).unwrap()
+            #rt::reshape(&(#a), &__dims).unwrap().with_labels(vec![#(#lits),*]).unwrap()
         }})
     } else {
         Ok(quote! { (#a).with_labels(vec![#(#lits),*]).unwrap() })

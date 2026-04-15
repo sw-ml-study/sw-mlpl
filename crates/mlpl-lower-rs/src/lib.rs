@@ -91,18 +91,52 @@ impl std::error::Error for LowerError {}
 /// we walk top-level statements. When a name is missing the
 /// static check is skipped; the runtime still validates. Saga:
 /// compile-to-rust step 004.
-#[derive(Default)]
-pub(crate) struct Ctx {
-    pub(crate) known_labels: HashMap<String, Vec<Option<String>>>,
+/// Configuration for lowering. Default emits `::mlpl_rt::...` paths
+/// (direct runtime dep); proc-macro users override `rt_path` to a
+/// re-exported path through their facade crate.
+pub struct LowerConfig {
+    /// Path token sequence to the runtime, e.g. `::mlpl_rt` or
+    /// `::mlpl::__rt`. Prefixed before every primitive call.
+    pub rt_path: TokenStream,
 }
 
-/// Lower an MLPL AST (list of top-level statements) into a Rust
-/// `TokenStream` that evaluates to a `mlpl_rt::DenseArray`.
+impl Default for LowerConfig {
+    fn default() -> Self {
+        Self {
+            rt_path: quote! { ::mlpl_rt },
+        }
+    }
+}
+
+pub(crate) struct Ctx {
+    pub(crate) known_labels: HashMap<String, Vec<Option<String>>>,
+    pub(crate) rt: TokenStream,
+}
+
+impl Ctx {
+    fn new(cfg: &LowerConfig) -> Self {
+        Self {
+            known_labels: HashMap::new(),
+            rt: cfg.rt_path.clone(),
+        }
+    }
+}
+
+/// Lower an MLPL AST using the default configuration
+/// (`::mlpl_rt::...` paths). Shorthand for
+/// `lower_with_config(stmts, &LowerConfig::default())`.
 pub fn lower(stmts: &[Expr]) -> Result<TokenStream, LowerError> {
+    lower_with_config(stmts, &LowerConfig::default())
+}
+
+/// Lower an MLPL AST with a configurable runtime path. Used by the
+/// `mlpl!` proc macro (step 005) to emit paths through a facade
+/// crate instead of the raw `mlpl-rt` crate.
+pub fn lower_with_config(stmts: &[Expr], cfg: &LowerConfig) -> Result<TokenStream, LowerError> {
     if stmts.is_empty() {
         return Err(LowerError::EmptyProgram);
     }
-    let mut ctx = Ctx::default();
+    let mut ctx = Ctx::new(cfg);
     let mut bindings: Vec<TokenStream> = Vec::new();
     let last_idx = stmts.len() - 1;
     let mut final_expr: Option<TokenStream> = None;
@@ -142,12 +176,14 @@ pub fn lower(stmts: &[Expr]) -> Result<TokenStream, LowerError> {
 pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerError> {
     match expr {
         Expr::IntLit(n, _) => {
+            let rt = &ctx.rt;
             let v = *n as f64;
-            Ok(quote! { ::mlpl_rt::DenseArray::from_scalar(#v) })
+            Ok(quote! { #rt::DenseArray::from_scalar(#v) })
         }
         Expr::FloatLit(f, _) => {
+            let rt = &ctx.rt;
             let v = *f;
-            Ok(quote! { ::mlpl_rt::DenseArray::from_scalar(#v) })
+            Ok(quote! { #rt::DenseArray::from_scalar(#v) })
         }
         Expr::UnaryNeg { operand, .. } => {
             let inner = lower_expr(ctx, operand)?;
@@ -169,11 +205,12 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
             Ok(quote! { #id.clone() })
         }
         Expr::ArrayLit(elems, _) => {
+            let rt = &ctx.rt;
             let lowered: Vec<TokenStream> = elems
                 .iter()
                 .map(|e| lower_expr(ctx, e))
                 .collect::<Result<_, _>>()?;
-            Ok(quote! { ::mlpl_rt::array_lit(vec![#(#lowered),*]).unwrap() })
+            Ok(quote! { #rt::array_lit(vec![#(#lowered),*]).unwrap() })
         }
         Expr::FnCall { name, args, .. } => lower_fncall(ctx, name, args),
         Expr::Assign { .. } => Err(LowerError::Unsupported(
