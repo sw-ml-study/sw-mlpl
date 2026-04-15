@@ -119,3 +119,21 @@ fn variable_bindings_and_arithmetic_compile_and_evaluate() {
     let got = compile_and_run("x = 3\ny = x * 4\ny + 1");
     assert!((got - 13.0).abs() < 1e-9, "expected 13.0, got {got}");
 }
+
+#[test]
+fn labeled_matmul_compiles_and_evaluates() {
+    if !should_run() {
+        eprintln!("skipping end-to-end compile test; set MLPL_LOWER_RS_COMPILE_TESTS=1 to run");
+        return;
+    }
+    // a : [seq, d] = [[1,2,3],[4,5,6]]     (shape [2,3])
+    // b : [d, h] = [[1,0],[0,1],[1,1]]     (shape [3,2])
+    // matmul(a, b) = [[1+0+3, 0+2+3], [4+0+6, 0+5+6]] = [[4, 5], [10, 11]]
+    // reduce_add = 30
+    let src = "\
+a : [seq, d] = reshape(iota(6) + 1, [2, 3])
+b : [d, h] = reshape([1, 0, 0, 1, 1, 1], [3, 2])
+reduce_add(matmul(a, b))";
+    let got = compile_and_run(src);
+    assert!((got - 30.0).abs() < 1e-9, "expected 30.0, got {got}");
+}

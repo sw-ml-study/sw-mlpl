@@ -1,6 +1,6 @@
 number = 4
 slug = "lower-rs-labels"
-status = "pending"
+status = "in-progress"
 description = "Phase 2 finish: label-aware lowering. Extend mlpl-lower-rs to handle annotati..."
 role = "production"
 context_files = []
