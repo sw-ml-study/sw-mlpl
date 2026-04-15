@@ -1,8 +1,9 @@
 number = 8
 slug = "named-axes-tutorial-lesson"
-status = "in-progress"
+status = "completed"
 description = 'Phase 6: Add a "Named Axes" tutorial lesson to apps/mlpl-web/src/tutorial.rs ...'
 role = "production"
 context_files = []
 created_at = "2026-04-11T12:48:52"
-commits = []
+completed_at = "2026-04-14T19:47:35"
+commits = ["dd9c1717b12c1153080548377fbefaef203a139f"]

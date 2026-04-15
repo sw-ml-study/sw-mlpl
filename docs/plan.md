@@ -48,6 +48,15 @@ depends on removing that limitation.
   with implicit `step` binding and `last_losses` capture;
   `moons_mlp` and `circles_mlp` demos; "Optimizers and Schedules"
   tutorial lesson
+- **Saga 11.5** Named axes and shape introspection (v0.7.5):
+  `LabeledShape` on `mlpl-core`; `label` / `relabel` /
+  `reshape_labeled` builtins; `x : [batch, dim] = ...` annotation
+  syntax; label propagation through elementwise, matmul,
+  reduce/argmax, and `map()`; axis-name arg for
+  `reduce_add`/`reduce_mul`/`argmax`/`softmax`; structured
+  `EvalError::ShapeMismatch` with op-aware Display; label-aware
+  `:vars`/`:describe` and trace JSON; "Named Axes" tutorial
+  lesson and labeled Model Composition example
 - **Saga 11** Model DSL (v0.7): `Value::Model` runtime value;
   `linear(in, out, seed)` atomic layer; parameter-free
   `tanh_layer` / `relu_layer` / `softmax_layer` activations;
@@ -65,17 +74,22 @@ depends on removing that limitation.
 
 ## Future saga sequence
 
-### Saga 11.5 -- Named axes and shape introspection (NEXT)
-Labeled shape metadata on `Value::Array`, annotation syntax on
-assignment (`x : [batch, time, dim] = ...`), label propagation
-through matmul/elementwise/reductions, and structured
-`ShapeMismatch` errors. Inserted between Saga 11 and Saga 12
-because every later saga (Tiny LM, LoRA, attention variants,
-embedding viz) benefits from labeled axes. Surface-only milestone:
-no new kernels, no new backends, CPU only. The agent-facing
-introspection commands (`:describe`, `:vars`, `:models`, `:fns`)
-already shipped as part of Saga 11. See
-`docs/milestone-named-axes.md` for the 10-step plan.
+### Saga 11.5 -- Named axes and shape introspection (COMPLETE, v0.7.5)
+Shipped: `LabeledShape` type on `mlpl-core`; `label(x, [...])` /
+`relabel(x, [...])` / `reshape_labeled(x, dims, labels)` builtins;
+`x : [batch, time, dim] = ...` annotation syntax; label propagation
+through elementwise (with `merge_labels`), matmul (contraction
+axis validated, outer dims threaded), reduce/argmax (reduced
+axis's label dropped), and `map()` (preserves through math
+builtins); axis-name arg for `reduce_add` / `reduce_mul` /
+`argmax` / `softmax`; structured `EvalError::ShapeMismatch { op,
+expected, actual }` with op-aware Display; labels in `:vars` /
+`:describe` (via `LabeledShape` Display) and in the trace JSON
+export (serde-skip-when-None); "Named Axes" tutorial lesson and
+labeled `apply(mdl, X)` in the Model Composition lesson.
+Deferred: per-layer input/output label pinning on `:describe
+<model>` (needs `Environment` signature tracking on first
+`apply` -- a natural follow-up).
 
 ### Saga 12 -- Tokenizers, datasets, and experiment tracking
 Streaming/lazy dataset ops (`load`, `tokenize`, `shuffle`,
@@ -137,19 +151,18 @@ codegen helpers. Intentionally last: secondary to the
 Sagas 14-19 can reorder based on hardware access and interest;
 9-13 (plus the inserted 11.5) must run in order.
 
-## Start next: Saga 11.5 -- Named axes
+## Start next: Saga 12 -- Tokenizers, datasets, experiment tracking
 
-Saga 11 (Model DSL) shipped as v0.7.0 (tag `v0.7.0-modeldsl`):
-model values, atomic and composed layers, params walker,
-residual + rms_norm + attention, differentiable `apply()`
-through the tape (Linear / Chain / Activation / Residual /
-RmsNorm / single-head Attention), ported MLP + transformer-block
-demos, "Model Composition" tutorial lesson, and the new
-`:vars` / `:models` / `:fns` / `:wsid` / `:describe` REPL
-introspection commands. See `docs/milestone-modeldsl.md` for
-the retrospective.
+Saga 11.5 (Named axes and shape introspection) shipped as v0.7.5
+(tag `v0.7.5-named-axes`): `LabeledShape` metadata, annotation
+syntax, full propagation through the op surface, structured
+`ShapeMismatch` errors, label-aware introspection and trace,
+Named Axes tutorial lesson. See `docs/milestone-named-axes.md`
+for the retrospective.
 
-Saga 11.5 adds labeled shapes -- the surface-only milestone
-surfaced by `docs/are-we-driven-yet.md` as the single biggest
-remaining agent-usability gap. See `docs/milestone-named-axes.md`
-for the 10-step plan.
+Saga 12 closes the last surface-only gap before the Tiny LM:
+streaming/lazy dataset ops, a byte-level BPE tokenizer, and
+`experiment "name"` objects for reproducible runs. Labeled
+shapes from Saga 11.5 carry through into the dataset pipeline
+so `batch : [B, T]` annotations stay meaningful all the way to
+the training loop.

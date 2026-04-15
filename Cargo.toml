@@ -20,7 +20,7 @@ members = [
 [workspace.package]
 edition = "2024"
 license = "MIT OR Apache-2.0"
-version = "0.7.0"
+version = "0.7.5"
 
 [workspace.lints.clippy]
 pedantic = "warn"

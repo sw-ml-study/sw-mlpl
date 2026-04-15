@@ -43,8 +43,8 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Small core language (few, composable primitives) | A | HAVE | Intentional design constraint |
 | Canonical formatting of MLPL source | A | CONS | No MLPL-level formatter exists; Rust side uses rustfmt. Needed for LLM roundtripping |
 | REPL with incremental execution | A | HAVE | `mlpl-repl` + web REPL |
-| Named axes on tensors (`x[batch, time, dim]`) | A | PLAN | Saga 11.5 (`docs/milestone-named-axes.md`) |
-| Shape-checked / dependent-shape types (`Tensor[B, T, D]`) | A | PART | Saga 11.5 tracks labels as metadata with runtime validation, stopping short of full dependent types |
+| Named axes on tensors (`x[batch, time, dim]`) | A | HAVE | Saga 11.5 shipped `label(x, [...])`, `x : [batch, dim] = ...` annotation syntax, `labels(x)` readback, and propagation through elementwise / matmul / reduce / softmax |
+| Shape-checked / dependent-shape types (`Tensor[B, T, D]`) | A | PART | Saga 11.5 tracks labels as metadata with runtime validation (`EvalError::ShapeMismatch { op, expected, actual }`), stopping short of full dependent types -- label mismatches still surface at evaluation, not at parse time |
 | Dual syntax: terse APL mode vs explicit agent-friendly mode | A | CONS | Open design question |
 | Code-as-data: `parse`, `transform`, `eval` primitives | A | CONS | Needed for meta-programming, self-modification |
 | Deterministic execution mode (`with deterministic { }`) | A | CONS | Seed control needs a scoped construct |
@@ -120,11 +120,11 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Capability | Source | Status | Notes |
 |------------|--------|--------|-------|
 | Introspectable execution graph (`trace f`) | A | HAVE | `mlpl-trace` JSON export |
-| Structured errors (kind + expected/actual fields) | A | PLAN | Saga 11.5 phase 4 introduces a structured `ShapeMismatch` error variant and a JSON error channel |
+| Structured errors (kind + expected/actual fields) | A | HAVE | `EvalError::ShapeMismatch { op, expected: LabeledShape, actual: LabeledShape }` shipped in Saga 11.5 step 006. Display renders as `op: expected [seq=N, d=M], got [time=N, d=M]`. `ArrayError::LabelMismatch` and `ArrayError::LabelsRankMismatch` are the typed lower-layer sources |
 | Built-in testing primitives (`assert`, `approx_equal`, `fuzz`) | A | CONS | Rust tests exist, MLPL-level asserts do not |
 | Sandbox execution with time/memory/GPU limits (`run_safe`) | A | CONS | Needed for agent self-correction loops; no plan |
 | Cost / performance introspection (`profile f x`) | A | CONS | Paper #12 also benefits; no plan |
-| `:describe <name>` / `:vars` / `:fns` REPL introspection | A | HAVE | Shipped in Saga 11 (99f7c8a, 623652d): `:vars`, `:models`, `:fns` user / `:builtins`, `:wsid`, `:describe`, `:help <topic>` in both `mlpl-repl` and `mlpl-web` |
+| `:describe <name>` / `:vars` / `:fns` REPL introspection | A | HAVE | Shipped in Saga 11; Saga 11.5 step 007 extended `:vars` and `:describe` to render labeled shapes through `LabeledShape` Display (e.g. `X: [seq=6, d_model=4]`, or `[6, d_model=4]` for partial labels) |
 | `explain f` structured-explanation primitive | A | CONS | Speculative but high-leverage for agent tooling |
 | `repair f given error` primitive | A | CONS | Speculative; depends on structured errors + code-as-data |
 | `optimize f for gpu` primitive | A | CONS | Speculative; depends on device placement + profile |
