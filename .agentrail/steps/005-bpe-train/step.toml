@@ -1,6 +1,6 @@
 number = 5
 slug = "bpe-train"
-status = "pending"
+status = "in-progress"
 description = "Phase 2 step 005: BPE trainer. Add train_bpe(corpus, vocab_size, seed) return..."
 role = "production"
 context_files = []

@@ -65,6 +65,11 @@ pub enum ParseError {
         /// Where the opening delimiter was.
         span: Span,
     },
+    /// Bytes inside a string literal were not valid UTF-8. Saga 12.
+    InvalidUtf8 {
+        /// Byte span of the offending sequence.
+        span: Span,
+    },
 }
 
 impl std::fmt::Display for ParseError {
@@ -79,6 +84,9 @@ impl std::fmt::Display for ParseError {
             }
             Self::UnclosedDelimiter { open, span } => {
                 write!(f, "unclosed '{open}' at {span}")
+            }
+            Self::InvalidUtf8 { span } => {
+                write!(f, "invalid UTF-8 in string literal at {span}")
             }
         }
     }
