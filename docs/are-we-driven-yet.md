@@ -65,7 +65,7 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | `jacobian f`, `vmap f` | A | CONS | Not on the Saga 11 roadmap; Jax-style transforms would be a Saga 11.5 item |
 | Named-parameter trees and parameter addressing | P | PART | `ModelSpec::params()` returns a flat list; no path-addressed subtree ops |
 | Hyperparameter sweep DSL (adapter/rank/lr grid) | P | PLAN | Saga 12 ("experiment tracking") |
-| Experiment registry + comparison plots | P | PLAN | Saga 12 |
+| Experiment registry + comparison plots | P | PART | Saga 12 shipped `experiment "name" { body }` with `_metric` capture, memory + on-disk log, and `:experiments` + `compare(a, b)` REPL commands; comparison *plots* still pending (compare today prints text deltas) |
 | Hessian / eigenvalue / curvature probes | P | CONS | Paper #5 (Learning Rate Matters) asks for this; no plan |
 | LoRA / QLoRA adapter declarations | P | PLAN | Saga 15 |
 | 4-bit / low-precision quantization | P | PLAN | Saga 15 |
@@ -77,9 +77,9 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Capability | Source | Status | Notes |
 |------------|--------|--------|-------|
 | Synthetic datasets (`moons`, `blobs`, `circles`, `randn`) | P+A | HAVE | Saga 8/10 |
-| `load.csv`, generic file loaders | A | PLAN | Saga 12 |
-| Streaming / lazy dataset ops (`shuffle`, `batch`, `map`) | A | PLAN | Saga 12 |
-| Byte-level BPE tokenizer | P | PLAN | Saga 12 |
+| `load.csv`, generic file loaders | A | HAVE | Saga 12: `load("rel.csv")` with header auto-detection, `load("rel.txt")` whole-file string read, `load_preloaded("name")` for the web REPL, `--data-dir` sandbox |
+| Streaming / lazy dataset ops (`shuffle`, `batch`, `map`) | A | HAVE | Saga 12: `shuffle`, `batch`, `batch_mask`, `split`/`val_split`, and `for row in ds { body }` with `last_rows` capture. `map`-style transforms fold into the existing `for` loop |
+| Byte-level BPE tokenizer | P | HAVE | Saga 12: `tokenize_bytes`/`decode_bytes` primitives, `Value::Tokenizer` with `TokenizerSpec::{ByteLevel,BpeMerges}`, `train_bpe(corpus, vocab, seed)` with deterministic lex tie-breaking, `apply_tokenizer(tok, text)` + `decode(tok, tokens)` byte-lossless round-trip |
 | Long-context / 100M-token loader | P | CONS | Paper #13 (MSA); needs backend work |
 | External memory store (key-value table, writeback, sparse addressing) | P | PLAN | Saga 18 ("engram memory") covers the idea; no concrete API |
 

@@ -25,13 +25,13 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 11 | Model DSL (`chain`, `residual`, `attention`, `norm`, differentiable `apply`) | v0.7 | [x] |
 | 11.5 | Named axes and shape introspection (`label`, annotation syntax, ShapeMismatch, trace labels) | v0.7.5 | [x] |
 | -- | Compile-to-Rust (`mlpl!` macro, `mlpl build`, parity harness, 9x speedup) | v0.8.0 | [x] |
+| 12 | Tokenizers, datasets, experiment tracking (`load`, `shuffle`/`batch`/`split`, `for`, byte-level BPE, `experiment`/`:experiments`/`compare`) | v0.9.0 | [x] |
 
 ## Planned
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 12 | Tokenizers, datasets, experiment tracking | v0.9 | [ ] NEXT | 11.5 |
-| 13 | Tiny language model end-to-end (CPU) | v0.10 | [ ] | 12 |
+| 13 | Tiny language model end-to-end (CPU) | v0.10 | [ ] NEXT | 12 |
 | 14 | MLX backend (Apple Silicon, lazy graph, fusion) | v0.11 | [ ] | 13 |
 | 15 | LoRA / QLoRA / quantization | v0.12 | [ ] | 13 |
 | 16 | Embedding visualization and RAG | v0.13 | [ ] | 13 |
@@ -41,15 +41,19 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 ## Next saga to start
 
-**Saga 12 -- Tokenizers, datasets, and experiment tracking.** Two
-sagas shipped in rapid succession on top of Saga 11 (Model DSL):
-11.5 added labeled shapes and structured shape errors (v0.7.5),
-and the Compile-to-Rust saga added the `mlpl!` proc macro +
-`mlpl build` native-binary CLI (v0.8.0, 9x measured speedup on a
-100x100 reshape+reduce workload). Every downstream saga (Tiny
-LM, LoRA, attention variants, embedding viz) now inherits both
-shape-checked tensors and a path from MLPL source to a native
-executable. Saga 12 adds streaming dataset ops, a byte-level BPE
-tokenizer, and `experiment "name"` objects with seed control and
-logged metrics -- the last surface-only saga before the Tiny LM
-end-to-end.
+**Saga 13 -- Tiny language model end-to-end (CPU).** Three
+surface-only sagas shipped in rapid succession on top of Saga 11
+(Model DSL): Saga 11.5 added labeled shapes and structured
+errors (v0.7.5); the Compile-to-Rust saga added the `mlpl!` proc
+macro + `mlpl build` native-binary CLI (v0.8.0, 9x measured
+speedup); Saga 12 added filesystem IO (`load`, `--data-dir`
+sandbox), dataset prep (`shuffle`/`batch`/`split`/`for`), a
+byte-level BPE tokenizer (`tokenize_bytes`, `train_bpe`,
+`apply_tokenizer`, `decode`), and experiment tracking
+(`experiment "name" { ... }`, `:experiments`, `compare(a, b)`)
+in v0.9.0 (plus a byproduct UTF-8 lexer fix that lets string
+literals carry arbitrary Unicode). With both shape-checked
+tensors and a full text-to-tokens pipeline in place, Saga 13
+trains a tiny transformer-block LM end-to-end on a small
+corpus: tokenize -> batch -> Model DSL with `attention` and
+`residual` -> `adam` in a `train { }` loop -> sampling loop.

@@ -57,6 +57,11 @@ pub(crate) fn eval_expr(
     if let Expr::StrLit(s, _) = expr {
         return Ok(Value::Str(s.clone()));
     }
+    if let Expr::Ident(name, _) = expr
+        && let Some(s) = env.get_string(name)
+    {
+        return Ok(Value::Str(s.clone()));
+    }
     if let Expr::FnCall { name, args, .. } = expr
         && name == "svg"
     {
@@ -361,10 +366,9 @@ pub(crate) fn eval_expr(
                     let placeholder = DenseArray::from_scalar(0.0);
                     ("assign_tokenizer", vec![], placeholder)
                 }
-                Value::Str(_) => {
-                    return Err(EvalError::Unsupported(
-                        "assigning string values is not supported".into(),
-                    ));
+                Value::Str(s) => {
+                    env.set_string(name.clone(), s);
+                    ("assign_string", vec![], DenseArray::from_scalar(0.0))
                 }
                 Value::Array(val) => {
                     env.set(name.clone(), val.clone());

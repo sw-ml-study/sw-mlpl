@@ -25,6 +25,11 @@ pub struct Environment {
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12
     /// step 001.
     pub(crate) data_dir: Option<PathBuf>,
+    /// String-valued variable bindings (Saga 12 step 009). Sibling
+    /// to `vars`; populated when assignment value is a `Value::Str`
+    /// (e.g. `corpus = load_preloaded("...")`). Ident lookup checks
+    /// here before falling through to array vars.
+    pub(crate) strings: HashMap<String, String>,
     /// Output directory for `experiment` records. `None` disables
     /// disk writes (web REPL); `Some(path)` is set by the terminal
     /// REPL's `--exp-dir` flag. Saga 12 step 007.
@@ -136,6 +141,17 @@ impl Environment {
     /// `experiment` to scan for `_metric`-suffixed scalars.
     pub fn vars_iter(&self) -> impl Iterator<Item = (&String, &DenseArray)> {
         self.vars.iter()
+    }
+
+    /// Bind a string value to `name`. Saga 12 step 009.
+    pub fn set_string(&mut self, name: String, value: String) {
+        self.strings.insert(name, value);
+    }
+
+    /// Look up a string binding by name.
+    #[must_use]
+    pub fn get_string(&self, name: &str) -> Option<&String> {
+        self.strings.get(name)
     }
 }
 
