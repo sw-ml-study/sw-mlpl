@@ -5,6 +5,7 @@ use std::path::PathBuf;
 
 use mlpl_array::DenseArray;
 
+use crate::experiment::ExperimentRecord;
 use crate::grad::OptimizerState;
 use crate::model::ModelSpec;
 use crate::tokenizer::TokenizerSpec;
@@ -24,6 +25,12 @@ pub struct Environment {
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12
     /// step 001.
     pub(crate) data_dir: Option<PathBuf>,
+    /// Output directory for `experiment` records. `None` disables
+    /// disk writes (web REPL); `Some(path)` is set by the terminal
+    /// REPL's `--exp-dir` flag. Saga 12 step 007.
+    pub(crate) exp_dir: Option<PathBuf>,
+    /// Append-only log of completed experiments in this env.
+    pub(crate) experiment_log: Vec<ExperimentRecord>,
 }
 
 impl Environment {
@@ -98,6 +105,37 @@ impl Environment {
     #[must_use]
     pub fn data_dir(&self) -> Option<&PathBuf> {
         self.data_dir.as_ref()
+    }
+
+    /// Set the output directory for `experiment` records. Saga 12
+    /// step 007. The terminal REPL calls this from a `--exp-dir`
+    /// CLI flag; the web REPL leaves it unset so nothing is
+    /// written to disk.
+    pub fn set_exp_dir(&mut self, dir: PathBuf) {
+        self.exp_dir = Some(dir);
+    }
+
+    /// Borrow the configured experiment output dir, if any.
+    #[must_use]
+    pub fn exp_dir(&self) -> Option<&PathBuf> {
+        self.exp_dir.as_ref()
+    }
+
+    /// Append a completed experiment record to the log.
+    pub fn push_experiment_log(&mut self, rec: ExperimentRecord) {
+        self.experiment_log.push(rec);
+    }
+
+    /// Borrow every recorded experiment in order.
+    #[must_use]
+    pub fn experiment_log(&self) -> &[ExperimentRecord] {
+        &self.experiment_log
+    }
+
+    /// Iterate over every bound `(name, DenseArray)`. Used by
+    /// `experiment` to scan for `_metric`-suffixed scalars.
+    pub fn vars_iter(&self) -> impl Iterator<Item = (&String, &DenseArray)> {
+        self.vars.iter()
     }
 }
 

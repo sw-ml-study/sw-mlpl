@@ -12,6 +12,8 @@ mlpl-autograd = { path = "../mlpl-autograd" }
 mlpl-runtime = { path = "../mlpl-runtime" }
 mlpl-trace = { path = "../mlpl-trace" }
 mlpl-viz = { path = "../mlpl-viz" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 [dev-dependencies]
 mlpl-lower-rs = { path = "../mlpl-lower-rs" }

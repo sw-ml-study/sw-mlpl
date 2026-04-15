@@ -1,6 +1,6 @@
 number = 7
 slug = "experiment-block"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 007: experiment "name" { body } scoped form + metric capture.
 

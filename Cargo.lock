@@ -793,10 +793,13 @@ dependencies = [
  "mlpl-array",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-lower-rs",
  "mlpl-parser",
  "mlpl-runtime",
  "mlpl-trace",
  "mlpl-viz",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

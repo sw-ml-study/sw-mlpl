@@ -95,6 +95,7 @@ fn eval_tensor_expr(
         | Expr::Repeat { .. }
         | Expr::Train { .. }
         | Expr::For { .. }
+        | Expr::Experiment { .. }
         | Expr::StrLit(_, _) => Err(EvalError::Unsupported(
             "grad: expression form not supported inside grad()".into(),
         )),

@@ -33,6 +33,7 @@ pub(crate) fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::Train => "'train'".into(),
         TokenKind::For => "'for'".into(),
         TokenKind::In => "'in'".into(),
+        TokenKind::Experiment => "'experiment'".into(),
     }
 }
 

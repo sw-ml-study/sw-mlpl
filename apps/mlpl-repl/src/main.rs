@@ -32,6 +32,17 @@ fn main() {
     {
         env.set_data_dir(PathBuf::from(dir));
     }
+    // Output directory for `experiment` records. Saga 12 step 007.
+    // Unset by default -- experiments still record to
+    // `env.experiment_log` in memory; setting the dir enables the
+    // on-disk `<dir>/<name>/<ts>/run.json` write.
+    if let Some(dir) = args
+        .iter()
+        .position(|a| a == "--exp-dir")
+        .and_then(|p| args.get(p + 1))
+    {
+        env.set_exp_dir(PathBuf::from(dir));
+    }
 
     if let Some(pos) = args.iter().position(|a| a == "-f" || a == "--file") {
         let path = args.get(pos + 1).unwrap_or_else(|| {

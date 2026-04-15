@@ -106,6 +106,20 @@ pub enum Expr {
         /// Span covering keyword through closing brace.
         span: Span,
     },
+    /// Scoped experiment block: `experiment "name" { body }`
+    /// (Saga 12 step 007). Runs body in the current environment;
+    /// on exit, scans `_metric`-suffixed scalar vars and appends a
+    /// record to `env.experiment_log`. When the environment has an
+    /// `exp_dir` set (terminal REPL only), also writes a
+    /// `run.json` record to disk.
+    Experiment {
+        /// Human-chosen name for the run; used in file paths.
+        name: String,
+        /// Body statements.
+        body: Vec<Expr>,
+        /// Span covering the keyword through the closing brace.
+        span: Span,
+    },
     /// Streaming iteration: `for <binding> in <source> { body }`
     /// (Saga 12 step 003). On each iteration binds `binding` to a
     /// rank-(r-1) slice of `source`'s axis 0. After the loop, each
@@ -140,7 +154,8 @@ impl Expr {
             | Self::TensorCtor { span: s, .. }
             | Self::Repeat { span: s, .. }
             | Self::Train { span: s, .. }
-            | Self::For { span: s, .. } => *s,
+            | Self::For { span: s, .. }
+            | Self::Experiment { span: s, .. } => *s,
         }
     }
 }
