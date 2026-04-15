@@ -1,0 +1,12 @@
+number = 7
+slug = "experiment-block"
+status = "pending"
+description = """
+Phase 3 step 007: experiment "name" { body } scoped form + metric capture.
+
+P..."""
+role = "production"
+context_files = []
+created_at = "2026-04-15T12:11:00"
+task_type = "production"
+commits = []
