@@ -1,6 +1,6 @@
 number = 1
 slug = "embedding-layer"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: Token embedding layer.
 

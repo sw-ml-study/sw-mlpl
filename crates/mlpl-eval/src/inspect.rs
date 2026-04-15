@@ -381,5 +381,8 @@ fn render_spec(spec: &ModelSpec) -> String {
         ModelSpec::Attention { d_model, heads, .. } => {
             format!("attention(d={d_model}, heads={heads})")
         }
+        ModelSpec::Embedding { vocab, d_model, .. } => {
+            format!("embed[vocab={vocab}, d={d_model}]")
+        }
     }
 }

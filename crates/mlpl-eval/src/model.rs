@@ -50,6 +50,21 @@ pub enum ModelSpec {
         /// Expected last-dim size (informational).
         dim: usize,
     },
+    /// `embed(vocab_size, d_model, seed)` -- token embedding layer.
+    /// Owns a single `[vocab, d_model]` lookup table parameter. Apply
+    /// gathers rows from the table by integer token ids: input `[N]`
+    /// (one-D float-typed array of integers) -> output `[N, d_model]`.
+    /// The gather is lowered on the autograd tape as `O @ table`,
+    /// where `O` is the `[N, vocab]` one-hot matrix of the token ids,
+    /// so gradients flow back into the table via plain matmul.
+    Embedding {
+        /// Name of the lookup-table parameter (`[vocab, d_model]`).
+        table: String,
+        /// Vocabulary size (number of rows in the table).
+        vocab: usize,
+        /// Embedding dimension (number of columns in the table).
+        d_model: usize,
+    },
     /// `attention(d_model, heads, seed)` -- multi-head self-attention.
     /// Four `[d_model, d_model]` projection weights (`Wq`, `Wk`,
     /// `Wv`, `Wo`) and no biases. Apply runs the standard
@@ -92,6 +107,7 @@ impl ModelSpec {
             Self::Attention { wq, wk, wv, wo, .. } => {
                 vec![wq.clone(), wk.clone(), wv.clone(), wo.clone()]
             }
+            Self::Embedding { table, .. } => vec![table.clone()],
         }
     }
 }
