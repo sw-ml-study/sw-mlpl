@@ -1,6 +1,7 @@
 //! Evaluation helpers for binops, function calls, and array literals.
 
-use mlpl_array::{DenseArray, Shape};
+use mlpl_array::{ArrayError, DenseArray, Shape};
+use mlpl_core::LabeledShape;
 use mlpl_parser::{BinOpKind, Expr};
 use mlpl_trace::{Trace, TraceValue};
 
@@ -25,8 +26,29 @@ pub(crate) fn eval_binop(
         BinOpKind::Div => ("div", |a, b| a / b),
     };
     let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
-    let result = l.apply_binop(&r, f)?;
+    let result = match l.apply_binop(&r, f) {
+        Ok(a) => a,
+        Err(ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. }) => {
+            return Err(EvalError::ShapeMismatch {
+                op: name.into(),
+                expected: labeled_shape_of(&l),
+                actual: labeled_shape_of(&r),
+            });
+        }
+        Err(e) => return Err(e.into()),
+    };
     Ok((name, inputs, result))
+}
+
+/// Snapshot an array's dims + label list as a `LabeledShape`. Unlabeled
+/// arrays get `None` at every axis. Saga 11.5 Phase 4: used when
+/// lifting `ArrayError::ShapeMismatch` / `LabelMismatch` into
+/// `EvalError::ShapeMismatch` at op call sites.
+pub(crate) fn labeled_shape_of(a: &DenseArray) -> LabeledShape {
+    let labels = a
+        .labels()
+        .map_or_else(|| vec![None; a.rank()], <[_]>::to_vec);
+    LabeledShape::new(a.shape().dims().to_vec(), labels)
 }
 
 pub(crate) fn eval_fncall(

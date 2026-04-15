@@ -431,3 +431,93 @@ fn reduce_add_unknown_axis_name_errors() {
     let result = eval(src);
     assert!(result.is_err(), "expected unknown axis name error");
 }
+
+// -- Structured ShapeMismatch error (Saga 11.5 Phase 4) --
+
+#[test]
+fn binop_label_mismatch_yields_structured_error() {
+    let src = "x : [seq] = iota(3)\n\
+               y : [batch] = iota(3)\n\
+               x + y";
+    let err = eval(src).unwrap_err();
+    match err {
+        EvalError::ShapeMismatch {
+            op,
+            expected,
+            actual,
+        } => {
+            assert_eq!(op, "add");
+            assert_eq!(expected.dims(), &[3]);
+            assert_eq!(expected.labels(), &[Some("seq".into())]);
+            assert_eq!(actual.labels(), &[Some("batch".into())]);
+        }
+        other => panic!("expected ShapeMismatch, got {other:?}"),
+    }
+}
+
+#[test]
+fn binop_broadcast_shape_mismatch_yields_structured_error() {
+    // Same-rank but incompatible shapes: [3] vs [4].
+    let src = "a = iota(3)\nb = iota(4)\na + b";
+    let err = eval(src).unwrap_err();
+    match err {
+        EvalError::ShapeMismatch {
+            op,
+            expected,
+            actual,
+        } => {
+            assert_eq!(op, "add");
+            assert_eq!(expected.dims(), &[3]);
+            assert_eq!(actual.dims(), &[4]);
+        }
+        other => panic!("expected ShapeMismatch, got {other:?}"),
+    }
+}
+
+#[test]
+fn matmul_label_mismatch_yields_structured_error() {
+    let src = "a = label(reshape(iota(6), [2, 3]), [\"seq\", \"d\"])\n\
+               b = label(reshape(iota(12), [3, 4]), [\"time\", \"heads\"])\n\
+               matmul(a, b)";
+    let err = eval(src).unwrap_err();
+    match err {
+        EvalError::ShapeMismatch {
+            op,
+            expected,
+            actual,
+        } => {
+            assert_eq!(op, "matmul");
+            assert_eq!(expected.labels(), &[Some("seq".into()), Some("d".into())]);
+            assert_eq!(
+                actual.labels(),
+                &[Some("time".into()), Some("heads".into())]
+            );
+        }
+        other => panic!("expected ShapeMismatch, got {other:?}"),
+    }
+}
+
+#[test]
+fn matmul_shape_mismatch_yields_structured_error() {
+    // [2,3] @ [4,5] -> contraction axis size mismatch
+    let src = "a = reshape(iota(6), [2, 3])\n\
+               b = reshape(iota(20), [4, 5])\n\
+               matmul(a, b)";
+    let err = eval(src).unwrap_err();
+    assert!(
+        matches!(err, EvalError::ShapeMismatch { ref op, .. } if op == "matmul"),
+        "expected ShapeMismatch for matmul, got {err:?}"
+    );
+}
+
+#[test]
+fn shape_mismatch_display_names_op_and_shapes() {
+    let src = "x : [seq] = iota(3)\n\
+               y : [batch] = iota(3)\n\
+               x + y";
+    let err = eval(src).unwrap_err();
+    let msg = format!("{err}");
+    assert!(msg.contains("add"), "{msg}");
+    assert!(msg.contains("seq"), "{msg}");
+    assert!(msg.contains("batch"), "{msg}");
+}

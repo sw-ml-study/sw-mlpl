@@ -90,7 +90,10 @@ fn broadcast_scalar_add_vector() {
 #[test]
 fn shape_mismatch() {
     let result = eval("[1, 2] + [1, 2, 3]");
-    assert!(matches!(result, Err(EvalError::ArrayError(_))));
+    assert!(
+        matches!(result, Err(EvalError::ShapeMismatch { ref op, .. }) if op == "add"),
+        "got {result:?}"
+    );
 }
 
 // -- With variables --

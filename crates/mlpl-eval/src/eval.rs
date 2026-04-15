@@ -1,13 +1,15 @@
 //! AST-walking evaluator.
 
-use mlpl_array::{DenseArray, Shape};
+use mlpl_array::{ArrayError, DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::{Expr, TensorCtorKind};
 use mlpl_trace::{Trace, TraceEvent, TraceValue};
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::eval_ops::{eval_analysis_helper, eval_array_lit, eval_binop, eval_fncall, eval_svg};
+use crate::eval_ops::{
+    eval_analysis_helper, eval_array_lit, eval_binop, eval_fncall, eval_svg, labeled_shape_of,
+};
 use crate::value::Value;
 
 /// Evaluate a program (list of statements). Returns the last result as an array.
@@ -155,6 +157,35 @@ pub(crate) fn eval_expr(
         let reshaped = source.reshape(Shape::new(dims))?;
         let labeled = reshaped.with_labels(labels)?;
         return Ok(Value::Array(labeled));
+    }
+    if let Expr::FnCall { name, args, span } = expr
+        && name == "matmul"
+        && args.len() == 2
+    {
+        let l = eval_expr(&args[0], env, trace)?.into_array()?;
+        let r = eval_expr(&args[1], env, trace)?.into_array()?;
+        let result = match l.matmul(&r) {
+            Ok(a) => a,
+            Err(ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. }) => {
+                return Err(EvalError::ShapeMismatch {
+                    op: "matmul".into(),
+                    expected: labeled_shape_of(&l),
+                    actual: labeled_shape_of(&r),
+                });
+            }
+            Err(e) => return Err(e.into()),
+        };
+        if let Some(t) = trace.as_mut() {
+            let seq = t.events().len() as u64;
+            t.push(TraceEvent {
+                seq,
+                op: "matmul".into(),
+                span: *span,
+                inputs: vec![TraceValue::from_array(&l), TraceValue::from_array(&r)],
+                output: TraceValue::from_array(&result),
+            });
+        }
+        return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
         && matches!(
