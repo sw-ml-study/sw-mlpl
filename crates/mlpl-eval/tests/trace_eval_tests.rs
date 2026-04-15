@@ -74,3 +74,31 @@ fn eval_without_trace_still_works() {
     let arr = eval_program(&stmts, &mut env).unwrap();
     assert_eq!(arr.data(), &[3.0]);
 }
+
+// -- Label propagation through trace export (Saga 11.5 Phase 5) --
+
+#[test]
+fn trace_includes_axis_labels_on_labeled_array() {
+    // An annotated assignment pushes a labeled array through the
+    // trace. The JSON surface must carry those labels so downstream
+    // tooling can reason about shape flow.
+    let trace = traced("x : [seq, d] = reshape(iota(6), [2, 3])");
+    let json = trace.to_json();
+    assert!(
+        json.contains("\"seq\""),
+        "missing \"seq\" in trace:\n{json}"
+    );
+    assert!(json.contains("\"d\""), "missing \"d\" in trace:\n{json}");
+}
+
+#[test]
+fn trace_unlabeled_array_has_no_labels_field() {
+    // Labels are optional; unlabeled arrays must not emit stray label
+    // metadata (keeps the trace JSON terse for the common case).
+    let trace = traced("x = reshape(iota(6), [2, 3])");
+    let json = trace.to_json();
+    assert!(
+        !json.contains("\"labels\""),
+        "trace should omit labels on unlabeled arrays:\n{json}"
+    );
+}

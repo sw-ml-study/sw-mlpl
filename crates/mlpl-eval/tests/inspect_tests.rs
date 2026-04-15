@@ -37,6 +37,65 @@ fn vars_lists_arrays_with_shape_and_param_tag() {
 }
 
 #[test]
+fn vars_shows_labeled_shape_for_labeled_arrays() {
+    let mut env = Environment::new();
+    env.set(
+        "x".into(),
+        DenseArray::new(Shape::new(vec![6, 4]), vec![0.0; 24])
+            .unwrap()
+            .with_labels(vec![Some("seq".into()), Some("d_model".into())])
+            .unwrap(),
+    );
+    let out = inspect(&env, ":vars").unwrap();
+    assert!(
+        out.contains("x: [seq=6, d_model=4]"),
+        "expected labeled shape, out was: {out}"
+    );
+}
+
+#[test]
+fn describe_array_shows_labeled_shape() {
+    let mut env = Environment::new();
+    env.set(
+        "x".into(),
+        DenseArray::from_vec(vec![1.0, 2.0, 3.0])
+            .with_labels(vec![Some("seq".into())])
+            .unwrap(),
+    );
+    let out = inspect(&env, ":describe x").unwrap();
+    assert!(
+        out.contains("shape: [seq=3]"),
+        "expected labeled shape, out was: {out}"
+    );
+}
+
+#[test]
+fn describe_array_unlabeled_unchanged() {
+    let mut env = Environment::new();
+    env.set("x".into(), DenseArray::from_vec(vec![1.0, 2.0, 3.0]));
+    let out = inspect(&env, ":describe x").unwrap();
+    // Positional shape preserved -- no regression.
+    assert!(out.contains("shape: [3]"), "out was: {out}");
+}
+
+#[test]
+fn vars_partial_labels_render_mixed() {
+    let mut env = Environment::new();
+    env.set(
+        "X".into(),
+        DenseArray::new(Shape::new(vec![6, 4]), vec![0.0; 24])
+            .unwrap()
+            .with_labels(vec![None, Some("d_model".into())])
+            .unwrap(),
+    );
+    let out = inspect(&env, ":vars").unwrap();
+    assert!(
+        out.contains("X: [6, d_model=4]"),
+        "expected partial labeling, out was: {out}"
+    );
+}
+
+#[test]
 fn wsid_counts_match_env_state() {
     let mut env = Environment::new();
     env.set("a".into(), DenseArray::from_scalar(1.0));

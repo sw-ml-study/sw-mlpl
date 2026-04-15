@@ -61,6 +61,7 @@ fn trace_value_array() {
     let val = TraceValue::Array {
         shape: vec![2, 3],
         data: vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0],
+        labels: None,
     };
     let json = serde_json::to_string(&val).unwrap();
     assert!(json.contains("\"shape\":[2,3]"));
@@ -74,7 +75,7 @@ fn trace_value_from_dense_array() {
     let arr = DenseArray::new(Shape::new(vec![2, 2]), vec![1.0, 2.0, 3.0, 4.0]).unwrap();
     let val = TraceValue::from_array(&arr);
     match val {
-        TraceValue::Array { shape, data } => {
+        TraceValue::Array { shape, data, .. } => {
             assert_eq!(shape, vec![2, 2]);
             assert_eq!(data, vec![1.0, 2.0, 3.0, 4.0]);
         }
