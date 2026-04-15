@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 1,
+    "step": "embedding-layer"
+  },
+  "action": "TDD: wrote 7 failing tests in model_dsl_embedding_tests.rs (RED), then implemented ModelSpec::Embedding + eval_embedding builder + Embedding arm in apply_model + tape-side onehot+matmul lowering + :describe render. Used the one-hot-and-matmul trick so backprop into the embedding table reuses the existing matmul tape primitive -- no new gather/scatter op required. Compacted the model-constructor dispatch to keep eval.rs under its file-LOC budget.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T15:05:48"
+}

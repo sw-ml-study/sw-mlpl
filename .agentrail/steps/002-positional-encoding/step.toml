@@ -1,6 +1,6 @@
 number = 2
 slug = "positional-encoding"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 002: Positional encoding.
 

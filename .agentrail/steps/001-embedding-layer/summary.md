@@ -1,0 +1,1 @@
+embed(vocab, d_model, seed) layer: ModelSpec::Embedding variant + eager apply (one-hot @ table) + tape lowering + :describe + 7 green tests including gradcheck against one-hot form. Refactored eval.rs model-ctor dispatch from 6 if-lets to a single match to fit under the 500-line file budget.

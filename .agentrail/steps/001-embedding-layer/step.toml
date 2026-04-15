@@ -1,6 +1,6 @@
 number = 1
 slug = "embedding-layer"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 001: Token embedding layer.
 
@@ -8,5 +8,6 @@ Add a token embedding to the Model ..."""
 role = "production"
 context_files = []
 created_at = "2026-04-15T14:53:14"
+completed_at = "2026-04-15T15:05:48"
 task_type = "primitive"
-commits = []
+commits = ["4b6986493a1ca4e8c4c7c86de6d29f0632e25930"]
