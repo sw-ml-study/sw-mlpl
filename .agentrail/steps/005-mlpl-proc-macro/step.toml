@@ -1,6 +1,6 @@
 number = 5
 slug = "mlpl-proc-macro"
-status = "pending"
+status = "in-progress"
 description = "Phase 3: mlpl! proc macro. Create crates/mlpl-macro/ (proc-macro = true) that..."
 role = "production"
 context_files = []

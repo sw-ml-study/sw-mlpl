@@ -188,10 +188,19 @@ Labels, shapes, error semantics all carry through:
 
 - **Shipped (v0.7.5):** Interpreter + REPL + WASM web REPL,
   labeled shapes, structured errors.
-- **In progress (v0.8.0 target):** `mlpl-rt` scaffold done
-  (step 001), scalar-arithmetic lowering done (step 002), array
-  + variable lowering + labels + proc macro + `mlpl build` +
-  parity harness + release still ahead.
+- **In progress (v0.8.0 target):** `mlpl-rt` runtime target
+  (step 001), `mlpl-lower-rs` scalar + array + label lowering
+  with static matmul contraction checks (steps 002-004), and
+  the `mlpl!` proc macro through a facade `mlpl` crate
+  (step 005) are all shipped. `mlpl build` CLI subcommand,
+  parity harness, and release step still ahead.
+- **Usage note for the macro.** Inside `mlpl! { ... }`,
+  statements must be separated by `;` because `proc_macro`
+  tokenization strips REPL-style newlines. Label annotations,
+  multi-statement programs, and static label checks all work
+  through the macro path -- a matmul with mismatched
+  contraction labels becomes a `compile_error!` at build time
+  rather than a runtime error.
 - **Not planned:** JIT, LLVM direct backend, an
   `exec(string)` primitive. See
   `docs/milestone-compile-to-rust.md` "Non-goals".

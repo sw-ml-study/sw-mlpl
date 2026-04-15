@@ -1,0 +1,9 @@
+[package]
+name = "mlpl"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-macro = { path = "../mlpl-macro" }
+mlpl-rt = { path = "../mlpl-rt" }

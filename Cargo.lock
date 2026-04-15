@@ -740,6 +740,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f8ca58f447f06ed17d5fc4043ce1b10dd205e060fb3ce5b979b8ed8e59ff3f79"
 
 [[package]]
+name = "mlpl"
+version = "0.7.5"
+dependencies = [
+ "mlpl-macro",
+ "mlpl-rt",
+]
+
+[[package]]
 name = "mlpl-array"
 version = "0.7.5"
 dependencies = [
@@ -795,6 +803,16 @@ dependencies = [
 name = "mlpl-lower-rs"
 version = "0.7.5"
 dependencies = [
+ "mlpl-parser",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
+name = "mlpl-macro"
+version = "0.7.5"
+dependencies = [
+ "mlpl-lower-rs",
  "mlpl-parser",
  "proc-macro2",
  "quote",
