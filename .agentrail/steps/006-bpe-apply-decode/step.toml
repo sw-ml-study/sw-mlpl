@@ -1,6 +1,6 @@
 number = 6
 slug = "bpe-apply-decode"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 006: Apply and decode for a trained BPE tokenizer.
 

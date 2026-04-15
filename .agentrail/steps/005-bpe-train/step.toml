@@ -1,9 +1,10 @@
 number = 5
 slug = "bpe-train"
-status = "in-progress"
+status = "completed"
 description = "Phase 2 step 005: BPE trainer. Add train_bpe(corpus, vocab_size, seed) return..."
 role = "production"
 context_files = []
 created_at = "2026-04-15T12:08:57"
+completed_at = "2026-04-15T13:15:34"
 task_type = "production"
-commits = []
+commits = ["d59ed5f0ecf4fca6bb838376e135142aa49d0a90"]
