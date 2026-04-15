@@ -158,6 +158,27 @@ pub(crate) fn eval_expr(
         let labeled = reshaped.with_labels(labels)?;
         return Ok(Value::Array(labeled));
     }
+    if let Expr::FnCall { name, args, .. } = expr
+        && (name == "load" || name == "load_preloaded")
+    {
+        if args.len() != 1 {
+            return Err(EvalError::BadArity {
+                func: name.clone(),
+                expected: 1,
+                got: args.len(),
+            });
+        }
+        let Expr::StrLit(path, _) = &args[0] else {
+            return Err(EvalError::Unsupported(format!(
+                "{name}: argument must be a string literal"
+            )));
+        };
+        return if name == "load" {
+            crate::loader::eval_load(env, path)
+        } else {
+            crate::loader::eval_load_preloaded(path)
+        };
+    }
     if let Expr::FnCall { name, args, span } = expr
         && name == "matmul"
         && args.len() == 2

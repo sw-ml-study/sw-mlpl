@@ -1,6 +1,6 @@
 number = 1
 slug = "load-csv-txt"
-status = "pending"
+status = "in-progress"
 description = 'Phase 1 step 001: Add file IO to MLPL. Implement load("path.csv") and load("p...'
 role = "production"
 context_files = []

@@ -6,6 +6,7 @@ mod eval;
 mod eval_ops;
 mod grad;
 mod inspect;
+mod loader;
 mod model;
 mod model_dispatch;
 mod model_tape;
