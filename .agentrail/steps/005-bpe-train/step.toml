@@ -1,0 +1,9 @@
+number = 5
+slug = "bpe-train"
+status = "pending"
+description = "Phase 2 step 005: BPE trainer. Add train_bpe(corpus, vocab_size, seed) return..."
+role = "production"
+context_files = []
+created_at = "2026-04-15T12:08:57"
+task_type = "production"
+commits = []

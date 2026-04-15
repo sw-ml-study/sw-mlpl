@@ -1,0 +1,9 @@
+number = 3
+slug = "streaming-iter"
+status = "pending"
+description = "Phase 1 step 003: Streaming iteration over rows. Add a new language construct..."
+role = "production"
+context_files = []
+created_at = "2026-04-15T11:18:11"
+task_type = "production"
+commits = []
