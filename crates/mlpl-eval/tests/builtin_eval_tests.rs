@@ -338,3 +338,96 @@ fn relabel_escape_hatch_resolves_mismatch() {
     let v = eval_value(src).unwrap();
     assert_eq!(v, Value::Str("seq".into()));
 }
+
+// -- matmul / reduce / softmax by axis name (Saga 11.5 Phase 3 cont.) --
+
+#[test]
+fn matmul_propagates_labels_in_repl() {
+    let src = "a = label(reshape(iota(6), [2, 3]), [\"seq\", \"d\"])\n\
+               b = label(reshape(iota(12), [3, 4]), [\"d\", \"heads\"])\n\
+               labels(matmul(a, b))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("seq,heads".into()));
+}
+
+#[test]
+fn matmul_mismatched_contraction_errors_in_repl() {
+    let src = "a = label(reshape(iota(6), [2, 3]), [\"seq\", \"d\"])\n\
+               b = label(reshape(iota(12), [3, 4]), [\"time\", \"heads\"])\n\
+               matmul(a, b)";
+    let result = eval(src);
+    assert!(result.is_err(), "expected contraction label mismatch");
+}
+
+#[test]
+fn reduce_add_by_axis_name_matches_int() {
+    let mut env_int = Environment::new();
+    let mut env_name = Environment::new();
+    let tokens =
+        lex("m = label(reshape(iota(6), [2, 3]), [\"batch\", \"feat\"])\nreduce_add(m, 1)")
+            .unwrap();
+    let stmts = parse(&tokens).unwrap();
+    let by_int = eval_program(&stmts, &mut env_int).unwrap();
+
+    let tokens =
+        lex("m = label(reshape(iota(6), [2, 3]), [\"batch\", \"feat\"])\nreduce_add(m, \"feat\")")
+            .unwrap();
+    let stmts = parse(&tokens).unwrap();
+    let by_name = eval_program(&stmts, &mut env_name).unwrap();
+
+    assert_eq!(by_int.data(), by_name.data());
+    assert_eq!(by_int.shape(), by_name.shape());
+}
+
+#[test]
+fn reduce_add_by_axis_name_drops_label() {
+    let src = "m = label(reshape(iota(6), [2, 3]), [\"batch\", \"feat\"])\n\
+               labels(reduce_add(m, \"feat\"))";
+    let v = eval_value(src).unwrap();
+    // Only "batch" remains after reducing "feat".
+    assert_eq!(v, Value::Str("batch".into()));
+}
+
+#[test]
+fn reduce_mul_by_axis_name() {
+    let src = "m = label(reshape(iota(6), [2, 3]) + 1, [\"batch\", \"feat\"])\n\
+               labels(reduce_mul(m, \"batch\"))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("feat".into()));
+}
+
+#[test]
+fn argmax_by_axis_name_matches_int() {
+    let src_int = "m = label(reshape(iota(6), [2, 3]), [\"batch\", \"class\"])\nargmax(m, 1)";
+    let src_name =
+        "m = label(reshape(iota(6), [2, 3]), [\"batch\", \"class\"])\nargmax(m, \"class\")";
+    let by_int = eval(src_int).unwrap();
+    let by_name = eval(src_name).unwrap();
+    assert_eq!(by_int.data(), by_name.data());
+}
+
+#[test]
+fn softmax_by_axis_name_matches_int() {
+    let src_int = "m = label(reshape(iota(6), [2, 3]) + 0.0, [\"batch\", \"cls\"])\nsoftmax(m, 1)";
+    let src_name =
+        "m = label(reshape(iota(6), [2, 3]) + 0.0, [\"batch\", \"cls\"])\nsoftmax(m, \"cls\")";
+    let by_int = eval(src_int).unwrap();
+    let by_name = eval(src_name).unwrap();
+    assert_eq!(by_int.data(), by_name.data());
+}
+
+#[test]
+fn reduce_add_by_axis_int_still_works_on_labeled() {
+    let src = "m = label(reshape(iota(6), [2, 3]), [\"batch\", \"feat\"])\n\
+               labels(reduce_add(m, 0))";
+    let v = eval_value(src).unwrap();
+    assert_eq!(v, Value::Str("feat".into()));
+}
+
+#[test]
+fn reduce_add_unknown_axis_name_errors() {
+    let src = "m = label(reshape(iota(6), [2, 3]), [\"batch\", \"feat\"])\n\
+               reduce_add(m, \"unknown\")";
+    let result = eval(src);
+    assert!(result.is_err(), "expected unknown axis name error");
+}

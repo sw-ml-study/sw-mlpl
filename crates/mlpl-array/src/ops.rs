@@ -158,6 +158,13 @@ impl DenseArray {
     ///
     /// - [m, k] * [k, n] -> [m, n]
     /// - [m, k] * [k] -> [m] (matrix-vector product)
+    ///
+    /// Label propagation (Saga 11.5 Phase 3): the contraction axis
+    /// (`self`'s last dim against `other`'s first dim) must agree when
+    /// both sides carry explicit labels. Result labels are the
+    /// non-contracted dims: `[self.labels[0], other.labels[1]]` for
+    /// matrix-matrix, `[self.labels[0]]` for matrix-vector. Unlabeled
+    /// sides contribute `None` positions.
     pub fn matmul(&self, other: &DenseArray) -> Result<DenseArray, ArrayError> {
         let (m, k) = match self.shape().dims() {
             [m, k] => (*m, *k),
@@ -168,6 +175,7 @@ impl DenseArray {
                 });
             }
         };
+        let result_labels = matmul_labels(self, other)?;
         match other.shape().dims() {
             [k2, n] if *k2 == k => {
                 let n = *n;
@@ -186,7 +194,7 @@ impl DenseArray {
                 Ok(DenseArray {
                     shape: Shape::new(vec![m, n]),
                     data,
-                    labels: None,
+                    labels: result_labels,
                 })
             }
             [k2] if *k2 == k => {
@@ -198,7 +206,7 @@ impl DenseArray {
                 Ok(DenseArray {
                     shape: Shape::vector(m),
                     data,
-                    labels: None,
+                    labels: result_labels,
                 })
             }
             _ => Err(ArrayError::ShapeMismatch {
@@ -249,10 +257,15 @@ impl DenseArray {
             result_data[result_flat] = op(result_data[result_flat], self.data[flat]);
         }
 
+        let labels = self.labels.as_ref().map(|lbls| {
+            let mut out = lbls.clone();
+            out.remove(axis);
+            out
+        });
         Ok(DenseArray {
             shape: result_shape,
             data: result_data,
-            labels: None,
+            labels,
         })
     }
 }
@@ -298,8 +311,48 @@ impl DenseArray {
             }
         }
 
-        DenseArray::new(result_shape, best_idx)
+        let mut out = DenseArray::new(result_shape, best_idx)?;
+        if let Some(lbls) = self.labels.as_ref() {
+            let mut new_lbls = lbls.clone();
+            new_lbls.remove(axis);
+            out.labels = Some(new_lbls);
+        }
+        Ok(out)
     }
+}
+
+/// Compute the result labels for a `matmul(a, b)`. The contraction
+/// axis is `a`'s last dim vs `b`'s first dim; if both sides name it
+/// and the names differ, raise `LabelMismatch`. Output labels are the
+/// non-contracted dims. An unlabeled side contributes `None` at its
+/// position, preserving partial labeling. If neither side is labeled,
+/// the result is fully unlabeled. Saga 11.5 Phase 3.
+fn matmul_labels(
+    a: &DenseArray,
+    b: &DenseArray,
+) -> Result<Option<Vec<Option<String>>>, ArrayError> {
+    if a.labels.is_none() && b.labels.is_none() {
+        return Ok(None);
+    }
+    let default_b = vec![None; b.rank()];
+    let al = a.labels.as_ref().map_or(&[None, None][..], Vec::as_slice);
+    let bl = b
+        .labels
+        .as_ref()
+        .map_or(default_b.as_slice(), Vec::as_slice);
+    if let (Some(sa), Some(sb)) = (&al[1], &bl[0])
+        && sa != sb
+    {
+        return Err(ArrayError::LabelMismatch {
+            expected: al.to_vec(),
+            actual: bl.to_vec(),
+        });
+    }
+    let mut result = vec![al[0].clone()];
+    if b.rank() == 2 {
+        result.push(bl[1].clone());
+    }
+    Ok(Some(result))
 }
 
 /// Compute the label list for the result of an elementwise op on two
