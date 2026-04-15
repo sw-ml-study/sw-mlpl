@@ -31,6 +31,8 @@ pub(crate) fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::Slash => "'/'".into(),
         TokenKind::Repeat => "'repeat'".into(),
         TokenKind::Train => "'train'".into(),
+        TokenKind::For => "'for'".into(),
+        TokenKind::In => "'in'".into(),
     }
 }
 

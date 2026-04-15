@@ -12,3 +12,6 @@ mlpl-autograd = { path = "../mlpl-autograd" }
 mlpl-runtime = { path = "../mlpl-runtime" }
 mlpl-trace = { path = "../mlpl-trace" }
 mlpl-viz = { path = "../mlpl-viz" }
+
+[dev-dependencies]
+mlpl-lower-rs = { path = "../mlpl-lower-rs" }

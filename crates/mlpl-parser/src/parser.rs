@@ -25,12 +25,15 @@ pub(crate) struct Parser<'a> {
 
 impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
-    fn parse_statement(&mut self) -> Result<Expr, ParseError> {
+    pub(crate) fn parse_statement(&mut self) -> Result<Expr, ParseError> {
         if self.tokens[self.pos].kind == TokenKind::Repeat {
             return self.parse_repeat(false);
         }
         if self.tokens[self.pos].kind == TokenKind::Train {
             return self.parse_repeat(true);
+        }
+        if self.tokens[self.pos].kind == TokenKind::For {
+            return self.parse_for();
         }
         if matches!(self.tokens[self.pos].kind, TokenKind::Ident(_))
             && self
@@ -64,58 +67,9 @@ impl<'a> Parser<'a> {
         self.parse_expr(0)
     }
 
-    /// Parse `name : [axis1, axis2, ...] = value` and desugar to
-    /// `Assign { name, value: FnCall("label", [value, ArrayLit([StrLit(a1), ...])]) }`.
-    /// Saga 11.5 Phase 2. The bracket list holds bare identifiers; each
-    /// is captured as a string label. An empty list `[]` is legal and
-    /// means "scalar with no axes".
-    fn parse_annotated_assign(&mut self) -> Result<Expr, ParseError> {
-        let start = self.tokens[self.pos].span;
-        let TokenKind::Ident(n) = &self.tokens[self.pos].kind else {
-            unreachable!()
-        };
-        let name = n.clone();
-        self.pos += 2; // skip name and ':'
-        let br_start = self.expect(&TokenKind::LBracket)?;
-        let mut labels: Vec<Expr> = Vec::new();
-        while !self.is(TokenKind::RBracket) {
-            let tok = &self.tokens[self.pos];
-            let TokenKind::Ident(a) = &tok.kind else {
-                return Err(ParseError::UnexpectedToken {
-                    found: describe_kind(&tok.kind),
-                    span: tok.span,
-                });
-            };
-            labels.push(Expr::StrLit(a.clone(), tok.span));
-            self.pos += 1;
-            if self.is(TokenKind::Comma) {
-                self.pos += 1;
-            } else {
-                break;
-            }
-        }
-        let br_end = self.expect(&TokenKind::RBracket)?;
-        self.expect(&TokenKind::Equals)?;
-        let value = self.parse_expr(0)?;
-        let value_span = value.span();
-        let call = Expr::FnCall {
-            name: "label".into(),
-            args: vec![
-                value,
-                Expr::ArrayLit(labels, Span::new(br_start.start, br_end.end)),
-            ],
-            span: Span::new(br_start.start, value_span.end),
-        };
-        Ok(Expr::Assign {
-            name,
-            value: Box::new(call),
-            span: Span::new(start.start, value_span.end),
-        })
-    }
-
     /// Consume a token of the given kind or return `UnexpectedToken`.
     /// Returns the consumed token's span on success.
-    fn expect(&mut self, kind: &TokenKind) -> Result<Span, ParseError> {
+    pub(crate) fn expect(&mut self, kind: &TokenKind) -> Result<Span, ParseError> {
         if std::mem::discriminant(&self.tokens[self.pos].kind) == std::mem::discriminant(kind) {
             let span = self.tokens[self.pos].span;
             self.pos += 1;
@@ -304,24 +258,7 @@ impl<'a> Parser<'a> {
         let start = self.tokens[self.pos].span;
         self.pos += 1; // skip 'repeat' or 'train'
         let count = self.parse_expr(0)?;
-        let open = self.expect(&TokenKind::LBrace)?;
-        self.skip_sep();
-        let mut body = Vec::new();
-        while self.pos < self.tokens.len()
-            && !self.is(TokenKind::RBrace)
-            && self.tokens[self.pos].kind != TokenKind::Eof
-        {
-            body.push(self.parse_statement()?);
-            self.skip_sep();
-        }
-        if !self.is(TokenKind::RBrace) {
-            return Err(ParseError::UnclosedDelimiter {
-                open: "{".into(),
-                span: open,
-            });
-        }
-        let end = self.tokens[self.pos].span;
-        self.pos += 1; // skip '}'
+        let (body, end) = self.parse_braced_body()?;
         let span = Span::new(start.start, end.end);
         let count = Box::new(count);
         Ok(if is_train {

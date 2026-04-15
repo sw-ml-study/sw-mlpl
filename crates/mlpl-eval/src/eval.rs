@@ -365,6 +365,12 @@ pub(crate) fn eval_expr(
         Expr::TensorCtor { kind, shape, .. } => eval_tensor_ctor(*kind, shape, env, trace)?,
         Expr::Repeat { count, body, .. } => eval_repeat(count, body, env, trace)?,
         Expr::Train { count, body, .. } => eval_train(count, body, env, trace)?,
+        Expr::For {
+            binding,
+            source,
+            body,
+            ..
+        } => crate::eval_for::eval_for(binding, source, body, env, trace)?,
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;

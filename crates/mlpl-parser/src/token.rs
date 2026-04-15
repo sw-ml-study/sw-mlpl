@@ -45,6 +45,10 @@ pub enum TokenKind {
     Repeat,
     /// `train` keyword.
     Train,
+    /// `for` keyword (streaming-iter, Saga 12 step 003).
+    For,
+    /// `in` keyword (only meaningful inside `for ... in ...`).
+    In,
     /// Newline (statement separator).
     Newline,
     /// End of input.

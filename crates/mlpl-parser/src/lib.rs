@@ -5,6 +5,7 @@ mod error;
 mod lex_util;
 mod lexer;
 mod parser;
+mod stmts;
 mod token;
 
 pub use ast::{BinOpKind, Expr, TensorCtorKind};

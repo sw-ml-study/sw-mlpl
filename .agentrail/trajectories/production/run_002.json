@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 2,
+    "step": "dataset-ops"
+  },
+  "action": "New dataset_builtins module with 7 fns (under the checklist cap after inlining a small label-carry helper), parameterized builtins via as_mask/take_train bools to share code between batch/batch_mask and split/val_split, dispatch wired into builtins::call_builtin, 14 TDD tests",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T12:27:04"
+}
