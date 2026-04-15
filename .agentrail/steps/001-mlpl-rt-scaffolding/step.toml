@@ -1,9 +1,10 @@
 number = 1
 slug = "mlpl-rt-scaffolding"
-status = "in-progress"
+status = "completed"
 description = "Phase 1: mlpl-rt scaffolding. Create a new crate crates/mlpl-rt/ that compile..."
 role = "production"
 context_files = []
 created_at = "2026-04-14T20:44:39"
+completed_at = "2026-04-14T20:51:16"
 task_type = "production"
-commits = []
+commits = ["6e2fb89488091cccf1e74d12f6a212c83adb7f0d"]

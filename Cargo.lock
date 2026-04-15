@@ -792,6 +792,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-lower-rs"
+version = "0.7.5"
+dependencies = [
+ "mlpl-parser",
+ "proc-macro2",
+ "quote",
+]
+
+[[package]]
 name = "mlpl-ml"
 version = "0.7.5"
 dependencies = [
