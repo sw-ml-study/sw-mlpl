@@ -54,7 +54,7 @@ pub fn header(props: &HeaderProps) -> Html {
     html! {
         <header>
             <h1><img src="mlpl-badge.png" alt="" class="title-badge" />{"MLPL"}</h1>
-            <span>{"v0.7.5 — Array Programming Language for ML"}</span>
+            <span>{"v0.8.0 — Array Programming Language for ML"}</span>
             <div class="controls">
                 <select class="demo-select" onchange={on_change} aria-label="Load demo">
                     <option value="" selected=true>{"Load Demo..."}</option>
@@ -161,7 +161,7 @@ pub fn welcome() -> Html {
 pub fn footer(props: &UrlProps) -> Html {
     html! {
         <footer>
-            <span>{"MLPL v0.7.5"}</span>
+            <span>{"MLPL v0.8.0"}</span>
             <span class="footer-sep">{"·"}</span>
             <a href={props.url} target="_blank" rel="noopener">{"GitHub"}</a>
             <span class="footer-sep">{"·"}</span>

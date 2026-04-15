@@ -57,6 +57,16 @@ depends on removing that limitation.
   `EvalError::ShapeMismatch` with op-aware Display; label-aware
   `:vars`/`:describe` and trace JSON; "Named Axes" tutorial
   lesson and labeled Model Composition example
+- **Compile-to-Rust saga** (v0.8.0): `mlpl-rt` runtime target,
+  `mlpl-lower-rs` AST -> `TokenStream` codegen (scalar, array,
+  fncall, variable, labels, matmul with static contraction
+  check), `mlpl-macro` proc-macro, `mlpl` facade crate with
+  hidden `__rt` re-export, `mlpl-build` CLI that compiles a
+  `.mlpl` file to a native binary (and cross-compiles to
+  wasm32-unknown-unknown), `mlpl-parity-tests` harness proving
+  bit-for-bit agreement on 9 programs. Measured 9.05x speedup
+  on a 100x100 reshape+reduce workload. See
+  `docs/milestone-compile-to-rust.md`.
 - **Saga 11** Model DSL (v0.7): `Value::Model` runtime value;
   `linear(in, out, seed)` atomic layer; parameter-free
   `tanh_layer` / `relu_layer` / `softmax_layer` activations;
@@ -91,7 +101,20 @@ Deferred: per-layer input/output label pinning on `:describe
 <model>` (needs `Environment` signature tracking on first
 `apply` -- a natural follow-up).
 
-### Saga 12 -- Tokenizers, datasets, and experiment tracking
+### Compile-to-Rust saga (COMPLETE, v0.8.0)
+Shipped: `mlpl-rt` runtime target, `mlpl-lower-rs` (path-
+configurable AST -> Rust TokenStream codegen), `mlpl-macro`
+proc-macro (`mlpl! { ... }` emits `compile_error!` on lower
+failure), `mlpl` facade crate, `mlpl-build` CLI
+(`mlpl-build foo.mlpl -o foo [--target <triple>]`),
+`mlpl-parity-tests` harness. Static matmul contraction check
+at lower time; runtime label checks still catch anything the
+static pass cannot resolve. 9.05x measured speedup on a 100x100
+reshape+reduce workload. Deferred: `TensorCtor`, `Repeat`,
+`Train`, autograd, optimizers, Model DSL -- they need tape-
+state or loop lowering and sit in a follow-up.
+
+### Saga 12 -- Tokenizers, datasets, and experiment tracking (NEXT)
 Streaming/lazy dataset ops (`load`, `tokenize`, `shuffle`,
 `batch`), a byte-level BPE tokenizer, and `experiment "name"`
 objects with seed control, config snapshots, and logged metrics.
@@ -154,11 +177,12 @@ Sagas 14-19 can reorder based on hardware access and interest;
 ## Start next: Saga 12 -- Tokenizers, datasets, experiment tracking
 
 Saga 11.5 (Named axes and shape introspection) shipped as v0.7.5
-(tag `v0.7.5-named-axes`): `LabeledShape` metadata, annotation
-syntax, full propagation through the op surface, structured
-`ShapeMismatch` errors, label-aware introspection and trace,
-Named Axes tutorial lesson. See `docs/milestone-named-axes.md`
-for the retrospective.
+(tag `v0.7.5-named-axes`). Compile-to-Rust shipped as v0.8.0
+(tag `v0.8.0-compile-rs`): `mlpl!` proc macro, `mlpl-build` CLI
+with cross-compile, parity harness with 9x measured speedup,
+four new crates (`mlpl-rt`, `mlpl-lower-rs`, `mlpl-macro`,
+`mlpl`) plus a dev-only parity-tests crate. See
+`docs/milestone-compile-to-rust.md` for the retrospective.
 
 Saga 12 closes the last surface-only gap before the Tiny LM:
 streaming/lazy dataset ops, a byte-level BPE tokenizer, and

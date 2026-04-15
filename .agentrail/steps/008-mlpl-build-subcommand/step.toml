@@ -1,6 +1,6 @@
 number = 8
 slug = "mlpl-build-subcommand"
-status = "pending"
+status = "in-progress"
 description = "Phase 5: mlpl build foo.mlpl subcommand (native binary). Extend the existing ..."
 role = "production"
 context_files = []
