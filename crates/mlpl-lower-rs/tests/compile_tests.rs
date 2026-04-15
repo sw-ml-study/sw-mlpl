@@ -97,3 +97,25 @@ fn scalar_arithmetic_compiles_and_evaluates() {
     let got = compile_and_run("1 + 2 * 3");
     assert!((got - 7.0).abs() < 1e-9, "expected 7.0, got {got}");
 }
+
+#[test]
+fn fncall_reduce_of_iota_compiles_and_evaluates() {
+    if !should_run() {
+        eprintln!("skipping end-to-end compile test; set MLPL_LOWER_RS_COMPILE_TESTS=1 to run");
+        return;
+    }
+    // sum 0..9 = 45
+    let got = compile_and_run("reduce_add(iota(10))");
+    assert!((got - 45.0).abs() < 1e-9, "expected 45.0, got {got}");
+}
+
+#[test]
+fn variable_bindings_and_arithmetic_compile_and_evaluate() {
+    if !should_run() {
+        eprintln!("skipping end-to-end compile test; set MLPL_LOWER_RS_COMPILE_TESTS=1 to run");
+        return;
+    }
+    // x = 3; y = x * 4; y + 1  ->  13
+    let got = compile_and_run("x = 3\ny = x * 4\ny + 1");
+    assert!((got - 13.0).abs() < 1e-9, "expected 13.0, got {got}");
+}
