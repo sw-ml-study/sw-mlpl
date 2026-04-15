@@ -1,0 +1,12 @@
+number = 6
+slug = "tiny-lm-train"
+status = "pending"
+description = """
+Phase 3 step 006: Tiny LM training demo (end-to-end).
+
+First end-to-end LM tr..."""
+role = "production"
+context_files = []
+created_at = "2026-04-15T14:53:14"
+task_type = "demo"
+commits = []
