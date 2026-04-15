@@ -3,6 +3,7 @@ resolver = "2"
 members = [
   "crates/mlpl-core",
   "crates/mlpl-array",
+  "crates/mlpl-rt",
   "crates/mlpl-parser",
   "crates/mlpl-runtime",
   "crates/mlpl-eval",

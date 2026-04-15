@@ -1,0 +1,9 @@
+[package]
+name = "mlpl-rt"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-core = { path = "../mlpl-core" }

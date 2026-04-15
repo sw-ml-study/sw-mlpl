@@ -818,6 +818,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-rt"
+version = "0.7.5"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+]
+
+[[package]]
 name = "mlpl-runtime"
 version = "0.7.5"
 dependencies = [

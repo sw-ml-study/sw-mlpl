@@ -1,6 +1,6 @@
 number = 1
 slug = "mlpl-rt-scaffolding"
-status = "pending"
+status = "in-progress"
 description = "Phase 1: mlpl-rt scaffolding. Create a new crate crates/mlpl-rt/ that compile..."
 role = "production"
 context_files = []
