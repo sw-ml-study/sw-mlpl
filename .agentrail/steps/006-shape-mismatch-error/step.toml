@@ -1,8 +1,9 @@
 number = 6
 slug = "shape-mismatch-error"
-status = "in-progress"
+status = "completed"
 description = "Phase 4: Replace string EvalError::Unsupported shape errors with a dedicated ..."
 role = "production"
 context_files = []
 created_at = "2026-04-11T12:48:35"
-commits = []
+completed_at = "2026-04-14T19:00:49"
+commits = ["6240c15890b113d1dca4a7c000a8afa9d685204e"]

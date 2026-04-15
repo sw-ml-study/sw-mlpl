@@ -1,6 +1,6 @@
 number = 7
 slug = "describe-labels-trace"
-status = "pending"
+status = "in-progress"
 description = "Phase 5: Teach the existing Saga 11 REPL introspection commands about labels,..."
 role = "production"
 context_files = []

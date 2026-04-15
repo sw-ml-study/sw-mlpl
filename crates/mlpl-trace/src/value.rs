@@ -13,6 +13,10 @@ pub enum TraceValue {
         shape: Vec<usize>,
         /// Flat row-major data.
         data: Vec<f64>,
+        /// Per-axis labels (Saga 11.5 Phase 5). Omitted from JSON when
+        /// the array is unlabeled, keeping the common-case trace terse.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        labels: Option<Vec<Option<String>>>,
     },
 }
 
@@ -28,6 +32,7 @@ impl TraceValue {
             Self::Array {
                 shape: arr.shape().dims().to_vec(),
                 data: arr.data().to_vec(),
+                labels: arr.labels().map(<[_]>::to_vec),
             }
         }
     }

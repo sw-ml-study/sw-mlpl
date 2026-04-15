@@ -8,6 +8,9 @@
 //! language-level built-ins, so they stay out of the expression
 //! grammar and never need to return a value.
 
+use mlpl_array::DenseArray;
+use mlpl_core::LabeledShape;
+
 use crate::env::Environment;
 use crate::model::{ActKind, ModelSpec};
 
@@ -91,7 +94,7 @@ fn format_vars(env: &Environment) -> String {
     let mut out = String::new();
     for name in names {
         let arr = &env.vars[name];
-        let shape = format_shape(arr.shape().dims());
+        let shape = format_shape(arr);
         let tag = if env.params.contains(name) {
             " [param]"
         } else {
@@ -132,7 +135,7 @@ fn format_describe(env: &Environment, name: &str) -> String {
             out.push_str("  params:\n");
             for p in ps {
                 if let Some(arr) = env.vars.get(&p) {
-                    out.push_str(&format!("    {p}: {}\n", format_shape(arr.shape().dims())));
+                    out.push_str(&format!("    {p}: {}\n", format_shape(arr)));
                 }
             }
             out.truncate(out.trim_end().len());
@@ -140,7 +143,7 @@ fn format_describe(env: &Environment, name: &str) -> String {
         return out;
     }
     if let Some(arr) = env.vars.get(name) {
-        let shape = format_shape(arr.shape().dims());
+        let shape = format_shape(arr);
         let tag = if env.params.contains(name) {
             " (trainable param)"
         } else {
@@ -341,9 +344,17 @@ fn format_builtins() -> String {
     out
 }
 
-fn format_shape(dims: &[usize]) -> String {
+fn format_shape(arr: &DenseArray) -> String {
+    let dims = arr.shape().dims();
     if dims.is_empty() {
         return "scalar".into();
+    }
+    // Labeled (fully or partially) arrays render through `LabeledShape`
+    // Display: `[seq=6, d_model=4]`, `[6, d_model=4]`. Unlabeled
+    // arrays keep the positional `[6, 4]` rendering so existing
+    // :vars/:describe output is unchanged for pre-labels demos.
+    if let Some(labels) = arr.labels() {
+        return LabeledShape::new(dims.to_vec(), labels.to_vec()).to_string();
     }
     let inner: Vec<String> = dims.iter().map(usize::to_string).collect();
     format!("[{}]", inner.join(", "))
