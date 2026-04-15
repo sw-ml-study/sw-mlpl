@@ -26,6 +26,9 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
     if let Some(result) = crate::random_builtins::try_call(name, args.clone()) {
         return result;
     }
+    if let Some(result) = crate::dataset_builtins::try_call(name, args.clone()) {
+        return result;
+    }
     if let Some(result) = crate::ml_builtins::try_call(name, args.clone()) {
         return result;
     }

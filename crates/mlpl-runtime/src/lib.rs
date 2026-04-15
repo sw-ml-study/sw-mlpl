@@ -1,6 +1,7 @@
 //! Built-in function registry and dispatch for MLPL.
 
 mod builtins;
+mod dataset_builtins;
 mod error;
 mod grid_builtin;
 mod math_builtins;
