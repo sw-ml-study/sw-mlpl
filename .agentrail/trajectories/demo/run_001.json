@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 6,
+    "step": "tiny-lm-train"
+  },
+  "action": "TDD with unit tests for shift_pairs shape/content/error handling, preloaded corpus test, and e2e convergence test. Used existing builtins (embed, sinusoidal_encoding, causal_attention, cross_entropy, chain, residual, rms_norm, linear, adam, experiment).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T18:57:28"
+}
