@@ -1,0 +1,14 @@
+number = 10
+slug = "mlx-release-v0110"
+status = "pending"
+description = """
+Phase 5 step 010: release v0.11.0.
+
+Cut the MLX release.
+
+1. Bump workspace v..."""
+role = "production"
+context_files = []
+created_at = "2026-04-16T13:36:53"
+task_type = "release"
+commits = []

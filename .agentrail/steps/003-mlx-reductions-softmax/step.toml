@@ -1,0 +1,12 @@
+number = 3
+slug = "mlx-reductions-softmax"
+status = "pending"
+description = """
+Phase 1 step 003: reductions + softmax + log-softmax on MLX.
+
+Close the forwa..."""
+role = "production"
+context_files = []
+created_at = "2026-04-16T13:36:53"
+task_type = "primitive"
+commits = []
