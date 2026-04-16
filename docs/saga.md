@@ -149,6 +149,33 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 13: Tiny language model end-to-end (IN PROGRESS)
+First saga that proves the platform thesis: a few lines of MLPL
+train a small transformer LM, generate text from a prompt, and
+render the attention pattern -- all on CPU, all reproducible via
+experiment tracking. Six new primitives filled the gap between
+Saga 12's tokenizer surface and a working LM: `embed(vocab,
+d_model, seed)` as a `Value::Model` with a learned `[vocab,
+d_model]` table and gradient flow; deterministic
+`sinusoidal_encoding(T, d_model)` additive positional tables;
+`causal_attention(d_model, heads, seed)` with a lower-triangular
+pre-softmax mask so position `t` cannot peek at `t+1`;
+numerically-stable `cross_entropy(logits, targets)` over integer
+targets with max-subtraction log-softmax; `sample(logits, t,
+seed)` multinomial draws plus `top_k(logits, k)` pre-softmax
+restriction; and a `last_row` / `concat` / `attention_weights`
+triple that makes a generation loop and a `[T, T]` attention
+heatmap one-liner. New demos `demos/tiny_lm.mlpl` (end-to-end
+training) and `demos/tiny_lm_generate.mlpl` (generation +
+heatmap) wire every Saga 13 primitive together with Saga 12's
+BPE tokenizer, `shift_pairs_x`/`shift_pairs_y` next-token pair
+windows, and `experiment "name" { }`-tracked `train N { adam(... )
+}`. Two new web REPL tutorial lessons -- "Language Model Basics"
+(forward-only, runs in <2s) and "Training and Generating"
+(stripped-down training loop + 20-token generation + attention
+heatmap) -- ship alongside. Target v0.10.0; step 009 cuts the
+release tag. See `docs/milestone-tiny-lm.md`.
+
 ## Saga 12: Tokenizers, datasets, and experiment tracking (COMPLETE)
 Closes the last surface-only gap before the Tiny LM. File IO:
 `load("rel.csv")` / `load("rel.txt")` reads through an
