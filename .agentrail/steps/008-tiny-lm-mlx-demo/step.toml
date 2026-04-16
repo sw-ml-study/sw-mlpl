@@ -1,0 +1,12 @@
+number = 8
+slug = "tiny-lm-mlx-demo"
+status = "pending"
+description = """
+Phase 4 step 008: tiny LM MLX variant + bench harness.
+
+Prove the speedup end..."""
+role = "production"
+context_files = []
+created_at = "2026-04-16T13:36:53"
+task_type = "demo"
+commits = []

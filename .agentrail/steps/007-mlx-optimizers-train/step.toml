@@ -1,0 +1,12 @@
+number = 7
+slug = "mlx-optimizers-train"
+status = "pending"
+description = """
+Phase 3 step 007: optimizers + train { } on MLX.
+
+Close the training loop on ..."""
+role = "production"
+context_files = []
+created_at = "2026-04-16T13:36:53"
+task_type = "runtime"
+commits = []

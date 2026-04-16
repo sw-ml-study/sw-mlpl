@@ -1,0 +1,12 @@
+number = 4
+slug = "device-scoped-form"
+status = "pending"
+description = """
+Phase 2 step 004: device("...") scoped form + parser surface.
+
+Expose device ..."""
+role = "production"
+context_files = []
+created_at = "2026-04-16T13:36:53"
+task_type = "language"
+commits = []
