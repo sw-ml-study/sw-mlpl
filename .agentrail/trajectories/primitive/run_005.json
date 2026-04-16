@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 5,
+    "step": "sampling"
+  },
+  "action": "TDD with 12 failing tests first; placed sample/top_k in random_builtins.rs (already had PRNG, only 4 fns); added categorical_sample helper to keep builtin_sample <50 lines; SplitMix64 mix on raw seed to decorrelate adjacent small seeds for single-shot draws",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T18:18:48"
+}

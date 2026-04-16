@@ -1,0 +1,29 @@
+# Tiny Language Model -- end-to-end training on a Shakespeare snippet.
+#
+# Saga 13 step 006 demo: wires every Saga 13 primitive together with
+# the existing BPE tokenizer, dataset surface, and experiment tracking.
+# All on CPU, reproducible via fixed seeds.
+
+# ---- corpus + tokenization ----
+corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+
+# ---- shift-pair windows: input tokens and next-token labels ----
+X_all = shift_pairs_x(ids, 32)
+Y_all = shift_pairs_y(ids, 32)
+X     = reshape(X_all, [reduce_mul(shape(X_all))])
+Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+# ---- model: embed -> positional -> 1-block transformer -> project ----
+V = 280 ; d = 32 ; h = 1
+model = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))
+
+# ---- training ----
+experiment "tiny_lm" {
+  train 200 {
+    adam(cross_entropy(apply(model, X), Y), model, 0.001, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(model, X), Y)
+  }
+}
+loss_curve(last_losses)

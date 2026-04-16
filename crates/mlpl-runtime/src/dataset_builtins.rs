@@ -23,6 +23,8 @@ pub(crate) fn try_call(
         "batch_mask" => Some(builtin_batch(name, args, true)),
         "split" => Some(builtin_split(name, args, true)),
         "val_split" => Some(builtin_split(name, args, false)),
+        "shift_pairs_x" => Some(builtin_shift_pairs(name, args, false)),
+        "shift_pairs_y" => Some(builtin_shift_pairs(name, args, true)),
         _ => None,
     }
 }
@@ -169,6 +171,70 @@ fn permutation(n: usize, seed: u64) -> Vec<usize> {
         perm.swap(i, j);
     }
     perm
+}
+
+/// `shift_pairs_x(ids, block_size)` / `shift_pairs_y(ids, block_size)`.
+///
+/// Slices a 1-D `[N]` token-id array into non-overlapping windows of
+/// length `block_size + 1`. Returns `[B, block_size]` where
+/// `B = N / (block_size + 1)` (integer division; trailing tokens that
+/// do not fill a full window are dropped). When `take_y` is false,
+/// returns the first `block_size` elements of each window (X); when
+/// true, returns elements `1..=block_size` of each window (Y).
+fn builtin_shift_pairs(
+    name: &str,
+    args: Vec<DenseArray>,
+    take_y: bool,
+) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 2 {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    if args[0].rank() != 1 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("ids must be rank-1, got rank {}", args[0].rank()),
+        });
+    }
+    if args[1].rank() != 0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: "block_size must be a scalar".into(),
+        });
+    }
+    let bs = args[1].data()[0] as usize;
+    if bs == 0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: "block_size must be > 0".into(),
+        });
+    }
+    let n = args[0].shape().dims()[0];
+    let window = bs + 1;
+    let b = n / window;
+    if b == 0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!(
+                "ids length {n} is too short for block_size {bs} \
+                 (need at least {} tokens)",
+                window
+            ),
+        });
+    }
+    let ids = args[0].data();
+    let offset = usize::from(take_y);
+    let mut data = Vec::with_capacity(b * bs);
+    for batch in 0..b {
+        let start = batch * window + offset;
+        for t in 0..bs {
+            data.push(ids[start + t]);
+        }
+    }
+    Ok(DenseArray::new(Shape::new(vec![b, bs]), data)?)
 }
 
 /// Build a new array whose rows are `x`'s rows at positions given by
