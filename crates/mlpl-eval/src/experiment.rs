@@ -48,10 +48,7 @@ pub(crate) fn eval_experiment(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
-    let timestamp_ns = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_nanos())
-        .unwrap_or(0);
+    let timestamp_ns = experiment_timestamp_ns();
     let mut last = DenseArray::from_scalar(0.0);
     for stmt in body {
         last = crate::eval::eval_expr(stmt, env, trace)?.into_array()?;
@@ -70,6 +67,27 @@ pub(crate) fn eval_experiment(
     }
     env.push_experiment_log(record);
     Ok(("experiment", vec![], last))
+}
+
+/// Per-run timestamp used to make on-disk run dirs unique and to
+/// sort the registry. `wasm32-unknown-unknown` has no real clock
+/// (SystemTime::now() panics), so on that target we fall back to a
+/// monotonic in-process counter, which is sufficient for ordering
+/// runs captured in `env.experiment_log` even though the resulting
+/// value is not wall-clock time.
+#[cfg(not(target_arch = "wasm32"))]
+fn experiment_timestamp_ns() -> u128 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_nanos())
+        .unwrap_or(0)
+}
+
+#[cfg(target_arch = "wasm32")]
+fn experiment_timestamp_ns() -> u128 {
+    use std::sync::atomic::{AtomicU64, Ordering};
+    static COUNTER: AtomicU64 = AtomicU64::new(1);
+    COUNTER.fetch_add(1, Ordering::Relaxed) as u128
 }
 
 fn collect_metrics(env: &Environment) -> BTreeMap<String, f64> {
