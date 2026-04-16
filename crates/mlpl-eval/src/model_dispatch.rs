@@ -427,6 +427,132 @@ fn slice_cols(x: &DenseArray, start: usize, width: usize) -> Result<DenseArray, 
     Ok(DenseArray::new(Shape::new(vec![rows, width]), out)?)
 }
 
+/// `attention_weights(model_ident, X)` -- read-only forward pass that
+/// returns the `[T, T]` (single-head) or `[heads, T, T]` attention
+/// weight matrix from the first `Attention` layer encountered in the
+/// model. Used for visualization.
+pub(crate) fn eval_attention_weights(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<DenseArray, EvalError> {
+    if args.len() != 2 {
+        return Err(EvalError::BadArity {
+            func: "attention_weights".into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    let model_name = match &args[0] {
+        Expr::Ident(n, _) => n.clone(),
+        _ => {
+            return Err(EvalError::Unsupported(
+                "attention_weights: first argument must be a model identifier".into(),
+            ));
+        }
+    };
+    let model = env
+        .get_model(&model_name)
+        .cloned()
+        .ok_or_else(|| EvalError::UndefinedVariable(model_name.clone()))?;
+    let x = crate::eval::eval_expr(&args[1], env, trace)?.into_array()?;
+    extract_attn_weights(&model, &x, env)
+}
+
+/// Walk the model tree, threading `x` through each layer until we hit
+/// the first `Attention` node; then return its softmax weights.
+fn extract_attn_weights(
+    m: &ModelSpec,
+    x: &DenseArray,
+    env: &Environment,
+) -> Result<DenseArray, EvalError> {
+    let not_found =
+        || EvalError::Unsupported("attention_weights: no Attention layer found in model".into());
+    match m {
+        ModelSpec::Attention {
+            wq,
+            wk,
+            d_model,
+            heads,
+            causal,
+            ..
+        } => compute_attn_weights(x, wq, wk, *d_model, *heads, *causal, env),
+        ModelSpec::Chain(children) => {
+            let mut cur = x.clone();
+            for child in children {
+                if matches!(child, ModelSpec::Attention { .. }) {
+                    return extract_attn_weights(child, &cur, env);
+                }
+                cur = apply_model(child, &cur, env)?;
+            }
+            Err(not_found())
+        }
+        ModelSpec::Residual(inner) => extract_attn_weights(inner, x, env),
+        _ => Err(not_found()),
+    }
+}
+
+/// Compute just the softmax attention weights (no value multiply).
+/// Returns `[T, T]` for single-head or `[heads, T, T]` for multi-head.
+#[allow(clippy::too_many_arguments)]
+fn compute_attn_weights(
+    x: &DenseArray,
+    wq: &str,
+    wk: &str,
+    d_model: usize,
+    heads: usize,
+    causal: bool,
+    env: &Environment,
+) -> Result<DenseArray, EvalError> {
+    let dims = x.shape().dims();
+    if dims.len() != 2 || dims[1] != d_model {
+        return Err(EvalError::Unsupported(format!(
+            "attention_weights: input must be [seq, {d_model}], got {:?}",
+            dims
+        )));
+    }
+    let seq = dims[0];
+    let d_k = d_model / heads;
+    let wq_a = env
+        .get(wq)
+        .ok_or_else(|| EvalError::UndefinedVariable(wq.into()))?;
+    let wk_a = env
+        .get(wk)
+        .ok_or_else(|| EvalError::UndefinedVariable(wk.into()))?;
+    let q = x.matmul(wq_a)?;
+    let k = x.matmul(wk_a)?;
+    let scale = 1.0 / (d_k as f64).sqrt();
+    let mut all = Vec::with_capacity(heads * seq * seq);
+    for h in 0..heads {
+        let q_h = slice_cols(&q, h * d_k, d_k)?;
+        let k_h = slice_cols(&k, h * d_k, d_k)?;
+        let scaled: Vec<f64> = q_h
+            .matmul(&k_h.transpose())?
+            .data()
+            .iter()
+            .enumerate()
+            .map(|(i, s)| {
+                if causal && i % seq > i / seq {
+                    -1e9
+                } else {
+                    s * scale
+                }
+            })
+            .collect();
+        let scores = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
+        let attn =
+            mlpl_runtime::call_builtin("softmax", vec![scores, DenseArray::from_scalar(1.0)])
+                .map_err(|e| EvalError::Unsupported(format!("attention_weights: {e}")))?;
+        all.extend_from_slice(attn.data());
+    }
+    let shape = if heads == 1 {
+        vec![seq, seq]
+    } else {
+        vec![heads, seq, seq]
+    };
+    Ok(DenseArray::new(Shape::new(shape), all)?)
+}
+
 // Tape lowering of the model DSL lives in `crate::model_tape`; the
 // eager forward pass below stays here.
 

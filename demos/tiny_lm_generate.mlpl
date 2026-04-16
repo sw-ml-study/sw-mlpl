@@ -1,0 +1,49 @@
+# Tiny Language Model -- generation + attention visualization.
+#
+# Saga 13 step 007 demo: trains a small LM (same architecture as
+# step 006), then generates text from a prompt and visualizes the
+# attention pattern as a heatmap.
+
+# ---- corpus + tokenization ----
+corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+
+# ---- shift-pair windows ----
+X_all = shift_pairs_x(ids, 32)
+Y_all = shift_pairs_y(ids, 32)
+X     = reshape(X_all, [reduce_mul(shape(X_all))])
+Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+# ---- model ----
+V = 280 ; d = 32 ; h = 1
+model = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))
+
+# ---- training ----
+experiment "tiny_lm_gen" {
+  train 200 {
+    adam(cross_entropy(apply(model, X), Y), model, 0.001, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(model, X), Y)
+  }
+}
+loss_curve(last_losses)
+
+# ---- generation ----
+prompt = apply_tokenizer(tok, "to be ")
+seq    = prompt
+repeat 40 {
+  logits = apply(model, seq);
+  last   = last_row(logits);
+  nxt    = sample(top_k(last, 40), 0.8, step);
+  seq    = concat(seq, nxt)
+}
+text_out = decode(tok, seq)
+
+# ---- attention-map visualization ----
+# Extract the causal attention weights from the trained model on
+# a short prefix. attention_weights() walks the chain, transforms
+# the input through preceding layers, then returns the [T, T]
+# weight matrix from the first attention layer.
+viz_ids = apply_tokenizer(tok, "to be or")
+attn_w  = attention_weights(model, viz_ids)
+svg(attn_w, "heatmap")
