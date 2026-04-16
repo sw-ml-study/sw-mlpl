@@ -116,6 +116,95 @@ repeat 10 { x = x + 1 }
 # x is now 10
 ```
 
+## Training Loop
+
+```
+train N { body }
+```
+
+Like `repeat`, but additionally binds the iteration index to `step`
+inside the body and captures each iteration's final expression value
+into a `last_losses` 1-D array in the environment. Use with
+`momentum_sgd` / `adam` for training loops:
+
+```
+train 100 {
+  adam(loss_expr, model, 0.01, 0.9, 0.999, 0.00000001);
+  loss_expr
+}
+loss_curve(last_losses)
+```
+
+## For-Row Iteration
+
+```
+for ident in expr { body }
+```
+
+Iterates `ident` over each rank-(r-1) slice of a rank-r array along
+axis 0. The body runs once per slice; each iteration's final value
+is collected into a `last_rows` vector in the environment (mirrors
+`train`'s `last_losses`). Use for streaming over a dataset when a
+full batched representation doesn't fit:
+
+```
+for row in reshape(iota(6), [3, 2]) { reduce_add(row) }
+last_rows   # [1, 5, 9]
+```
+
+## Experiment Block
+
+```
+experiment "name" { body }
+```
+
+A scoped form that records every scalar assigned to a name ending
+in `_metric` during the body, along with the shapes of any `param`
+bindings. The record lands in the REPL's in-memory experiment log
+(web REPL) and also on disk under `--exp-dir/<name>/<timestamp>/run.json`
+when the terminal REPL is invoked with `--exp-dir`.
+
+```
+experiment "baseline" {
+  train 50 { adam(loss, model, 0.01, 0.9, 0.999, 0.00000001); loss };
+  loss_metric = loss
+}
+compare("baseline", "variant")
+:experiments
+```
+
+## Labeled Axes
+
+An assignment may carry axis labels as metadata so label mismatches
+in downstream ops surface with a `ShapeMismatch` error that names
+both labeled shapes. Labels propagate through elementwise ops,
+matmul (contraction axis validated), reductions (the reduced axis's
+label drops), and `map()`.
+
+```
+M : [batch, feat] = reshape(iota(6), [2, 3])
+labels(M)                         # "batch,feat"
+reduce_add(M, "feat")             # reduce by axis name
+labels(transpose(M))              # swaps labels alongside dims
+```
+
+See `label(x, [...])`, `relabel(x, [...])`, and
+`reshape_labeled(x, dims, labels)` in the built-ins table.
+
+## Parameters and Autograd
+
+```
+W = param[2, 3]        # trainable leaf; tape-tracked
+T = tensor[2, 3]       # non-trainable tape tensor
+grad(loss_expr, W)     # gradient of a scalar wrt a param
+```
+
+`param[shape]` declares a zero-initialized trainable leaf
+(typically immediately overwritten with `randn(seed, shape) * scale`).
+`tensor[shape]` declares an ordinary tape-tracked tensor. `grad`
+lifts an array expression onto the reverse-mode tape and returns
+the gradient with the same shape as the `wrt` operand.
+
 ## Comments
 
 ```
@@ -202,6 +291,108 @@ Newlines and semicolons are both statement separators.
 | `cross_entropy(logits, targets)` | 2 | Scalar mean negative log-likelihood. `logits` is `[N, V]` or `[B, T, V]`; `targets` is `[N]` or `[B, T]` integer-valued. Fused, numerically-stable log-softmax + NLL; fully differentiable wrt `logits` via `grad(...)`. |
 | `sample(logits, temperature, seed)` | 3 | Categorical sample from a 1-D `[V]` logit vector. Returns a scalar integer token id. `temperature == 0.0` collapses to `argmax(logits)`; otherwise draws from `softmax(logits / temperature)` via inverse-CDF on a single seeded uniform. Same `(logits, temperature, seed)` always yields the same id. |
 | `top_k(logits, k)` | 2 | Return a `[V]` logit vector with all but the top-`k` entries replaced by `-inf`. Pure (no randomness). Compose with `sample` for top-k sampling: `sample(top_k(logits, k), temperature, seed)`. |
+| `moons(seed, n_per_class, noise)` | 3 | Seeded two-moons dataset; returns an `Nx3` matrix of `[x, y, label]` for `N = 2 * n_per_class`. |
+| `circles(seed, n_per_class, noise)` | 3 | Seeded two-concentric-circles dataset, same `Nx3` layout as `moons`. |
+
+### Labeled Axes
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `label(x, names)` | 2 | Attach axis labels to an array. `names` is a rank-1 string array; length must equal the rank of `x`. Use `""` for "no label" on a single axis. |
+| `relabel(x, names)` | 2 | Like `label`, but explicitly overrides any existing labels on `x`. |
+| `reshape_labeled(x, dims, names)` | 3 | Combine `reshape` and `label` in one call. New axes get the given names; plain `reshape` clears labels. |
+| `labels(x)` | 1 | Return the axis labels of `x` as a comma-joined string ("" for unlabeled axes). |
+| `map(x, "fn")` | 2 | Apply a math built-in (by string name, e.g. `"sigmoid"`, `"exp"`) element-wise while preserving labels. |
+
+Annotation syntax on assignment attaches labels in one step:
+
+```
+X : [batch, feat] = randn(7, [60, 2])
+Q : [seq, d_k] = randn(17, [6, 4])
+```
+
+Labels propagate through elementwise ops (one-None / one-Some
+accepted), matmul (contraction axis validated, outer dims passed
+through), reductions (the reduced axis's label drops), and `map()`.
+A mismatch surfaces as a structured
+`EvalError::ShapeMismatch { op, expected, actual }` whose Display
+renders both labeled shapes side by side.
+
+### Autograd
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `grad(expr, wrt)` | 2 | Lift `expr` onto the reverse-mode tape and return the gradient wrt the named parameter or tensor. Shape equals the shape of `wrt`. Supported ops: `+`, `-`, `*`, `/`, unary `-`, `exp`, `log`, `sigmoid`, `tanh_fn`, `relu` (via `relu_layer`), `softmax`, `sum` / `reduce_add`, `mean`, `transpose`, `reshape`, `matmul`, `cross_entropy`. Use with `param[shape]` / `tensor[shape]` leaves. |
+
+### Optimizers and Schedules
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `momentum_sgd(loss, params, lr, beta)` | 4 | One in-place momentum-SGD step on `params`. `params` is a single param name, a `[p1, p2, ...]` list, or a model identifier (walked via `params(model)`). Per-parameter state is maintained on the environment so the next call continues the trajectory. |
+| `adam(loss, params, lr, b1, b2, eps)` | 6 | One Adam step on `params`. Same `params` shape as `momentum_sgd`; per-parameter `m`/`v` state is maintained across calls. |
+| `cosine_schedule(step, total, lr_min, lr_max)` | 4 | Cosine annealing from `lr_max` at `step=0` to `lr_min` at `step=total`. Pure scalar helper usable inside `adam(..., cosine_schedule(step, 100, 1e-4, 1e-2), ...)`. |
+| `linear_warmup(step, warmup, lr)` | 3 | Ramp from 0 to `lr` over the first `warmup` steps and return `lr` after. |
+| `params(model)` | 1 | Return the flat list of parameter names owned by a model; used internally by the optimizers when given a model identifier. |
+
+### Model DSL
+
+Models are a `Value::Model` runtime value built by composition. A
+"parameterless" layer still carries state (the owned parameters it
+initialized at construction). Apply a model to an array with
+`apply(model, X)`; gradients flow back through every owned parameter.
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `linear(in, out, seed)` | 3 | Seeded `W : [in, out]` + `b : [out]`, `apply(m, X)` computes `X W + b`. |
+| `tanh_layer()` | 0 | Parameter-free `tanh_fn`. |
+| `relu_layer()` | 0 | Parameter-free `relu` activation (zeros negatives). |
+| `softmax_layer()` | 0 | Parameter-free `softmax(x, last_axis)`. |
+| `rms_norm(dim)` | 1 | Per-row RMS normalization: `y[i] = x[i] / sqrt(mean(x[i]^2) + 1e-8)`. |
+| `chain(a, b, ...)` | Nx | Sequential composition: `apply(chain(a, b, c), X) = apply(c, apply(b, apply(a, X)))`. |
+| `residual(block)` | 1 | Skip connection: `apply(residual(b), X) = apply(b, X) + X`. The inner block must preserve input shape. |
+| `attention(d_model, heads, seed)` | 3 | Multi-head self-attention. Input `[T, d_model]` (or `[B, T, d_model]`), output same shape. Tape-lowered for `heads=1`, forward-only for `heads>1`. |
+| `causal_attention(d_model, heads, seed)` | 3 | Same as `attention` but applies a lower-triangular mask (upper-triangle scores become `-1e9` before softmax) so position `t` cannot attend to `t+k` for `k > 0`. Tape-lowered for `heads=1`. |
+| `embed(vocab_size, d_model, seed)` | 3 | Learned `[vocab, d_model]` lookup table. `apply(embed, tokens)` where `tokens` is a rank-1 `[T]` (or rank-2 `[B, T]`) integer array returns `[T, d_model]` (or `[B, T, d_model]`). Gradients accumulate on the embedding rows touched by `tokens`. |
+| `sinusoidal_encoding(seq_len, d_model)` | 2 | Deterministic `[time=seq_len, dim=d_model]` sinusoidal positional table. No parameters. Additive pattern: `apply(embed, toks) + sinusoidal_encoding(T, d)`. |
+| `apply(model, X)` | 2 | Forward pass. For `embed`, `X` is integer tokens; for everything else it is an `[..., d_in]` float array. Fully differentiable through the tape. |
+
+### Data Loading and Dataset Prep
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `load(path)` | 1 | Terminal REPL only (`--data-dir <path>` required). `"foo.csv"` returns a labeled `DenseArray` of the CSV's numeric columns; `"foo.txt"` (or any non-CSV extension) returns a whole-file `Value::Str`. Absolute and traversing paths are rejected. |
+| `load_preloaded(name)` | 1 | Returns a compiled-in corpus as a `Value::Str`. Current registry: `"tiny_corpus"` (short pangram-style text) and `"tiny_shakespeare_snippet"` (~KB of Shakespeare). Works in both REPLs. |
+| `shuffle(x, seed)` | 2 | Fisher-Yates row permutation on a rank>=1 array. Labels preserved. Deterministic for a given seed. |
+| `batch(x, size)` | 2 | Return a rank-(r+1) array of contiguous row batches; the last batch is zero-padded if `n_rows` is not divisible by `size`. |
+| `batch_mask(x, size)` | 2 | Return the 0/1 mask matching `batch(x, size)` (1 for real rows, 0 for padded). |
+| `split(x, train_frac, seed)` | 3 | Return the first `round(train_frac * n_rows)` rows after a deterministic shuffle. |
+| `val_split(x, train_frac, seed)` | 3 | Companion to `split`; returns the complementary rows with the same seed. |
+
+### Tokenizers
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `tokenize_bytes(s)` | 1 | Return a rank-1 array of byte indices (0-255) for the UTF-8 encoding of `s`. Pure, deterministic, no training. |
+| `decode_bytes(tokens)` | 1 | Inverse of `tokenize_bytes`; returns a `Value::Str`. |
+| `train_bpe(corpus, vocab_size, seed)` | 3 | Train a byte-level BPE tokenizer on a `Value::Str` (or already-byte-tokenized rank-1 array). Returns a `Value::Tokenizer`. Deterministic tie-breaking: on ties in merge count, the lexicographically smallest byte pair wins. |
+| `apply_tokenizer(tok, text)` | 2 | Encode `text` (a `Value::Str`) through a trained tokenizer; returns a rank-1 integer array. |
+| `decode(tok, tokens)` | 2 | Inverse of `apply_tokenizer`. For every byte string `s`, `decode(tok, apply_tokenizer(tok, s)) == s`. |
+
+### Language Model Helpers
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `shift_pairs_x(ids, block_size)` | 2 | Build next-token-prediction input windows from a 1-D token array. Returns an `[N, block_size]` integer matrix where each row is a contiguous window of `ids`. |
+| `shift_pairs_y(ids, block_size)` | 2 | Matching target windows for `shift_pairs_x`: each row is the input window shifted right by one position. |
+| `last_row(M)` | 1 | Return the last row of a rank-2 matrix as a rank-1 vector. Used in generation loops to extract the final position's logits from an `[T, V]` model output. |
+| `concat(a, b)` | 2 | Concatenate two rank-0 or rank-1 arrays into a 1-D vector. Used in generation loops to append a sampled token id to the growing sequence. |
+| `attention_weights(model, X)` | 2 | Read-only forward pass that walks `model` to its first `attention` / `causal_attention` layer, transforms `X` through any preceding layers in the outer chain, and returns the softmax attention weight matrix (`[T, T]` single-head or `[heads, T, T]` multi-head). Renders well as a heatmap. |
+
+### Experiments
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `compare(name_a, name_b)` | 2 | Return a `Value::Str` with a side-by-side view of the most-recent runs with those names, including per-metric deltas. Merges memory-only (web REPL) and on-disk (terminal REPL, under `--exp-dir`) records. |
 
 ### Visualization
 
