@@ -1,6 +1,6 @@
 number = 5
 slug = "sampling"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 005: Sampling -- multinomial + top-k.
 

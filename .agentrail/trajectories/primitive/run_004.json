@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 4,
+    "step": "cross-entropy-loss"
+  },
+  "action": "TDD: 8 failing tests first (RED), then fused tape primitive in autograd with forward/backward helpers; merged helpers into tensor_ops.rs to keep autograd at 7 modules after sw-checklist caught the new FAIL; runtime builtin with split validate/compute to respect 50-line fn budget; shared validator in model_tape.rs (rather than grad.rs which was at fn-count cap) so both paths produce identical errors; shrank eval_tensor_fncall closure/branches with let-else + then_some to stay under 50 lines. One net sw-checklist improvement vs baseline (16 vs 17 FAIL).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T17:02:00"
+}
