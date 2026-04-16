@@ -24,11 +24,17 @@ use crate::value::Value;
 /// Compiled-in preloaded corpora. Keeping the registry tiny and
 /// explicit; the web REPL's WASM binary carries these as string
 /// literals.
-const PRELOADED: &[(&str, &str)] = &[(
-    "tiny_corpus",
-    "the quick brown fox jumps over the lazy dog.\n\
-     pack my box with five dozen liquor jugs.\n",
-)];
+const PRELOADED: &[(&str, &str)] = &[
+    (
+        "tiny_corpus",
+        "the quick brown fox jumps over the lazy dog.\n\
+         pack my box with five dozen liquor jugs.\n",
+    ),
+    (
+        "tiny_shakespeare_snippet",
+        include_str!("../data/tiny_shakespeare_snippet.txt"),
+    ),
+];
 
 /// Dispatch `load(path)`. Called from `eval::eval_expr` when the
 /// evaluator sees a `FnCall { name == "load", args.len() == 1 }`

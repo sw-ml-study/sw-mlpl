@@ -1,6 +1,6 @@
 number = 5
 slug = "sampling"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 005: Sampling -- multinomial + top-k.
 
@@ -8,5 +8,6 @@ Generation needs sampling..."""
 role = "production"
 context_files = []
 created_at = "2026-04-15T14:53:14"
+completed_at = "2026-04-15T18:18:48"
 task_type = "primitive"
-commits = []
+commits = ["e9910b422ceed6e1f3c8f7a2d7e1f827ea11f10b"]

@@ -1,6 +1,6 @@
 number = 6
 slug = "tiny-lm-train"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 006: Tiny LM training demo (end-to-end).
 
