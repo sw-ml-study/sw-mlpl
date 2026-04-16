@@ -1,0 +1,13 @@
+# Simplest possible compile-to-binary example.
+#
+# `mlpl build hello.mlpl -o hello` produces a native binary that
+# evaluates the MLPL program and prints its final scalar result.
+#
+# The lowering path covers scalar + array ops, labels, matmul,
+# reshape, and positional-axis reductions. It does not yet cover
+# repeat / train / for / grad / the Model DSL, nor string-named
+# axis reductions like reduce_add(x, "feat"); those stay
+# interpreter-only today (see docs/compiling-mlpl.md).
+
+v = iota(7)
+reduce_add(v)

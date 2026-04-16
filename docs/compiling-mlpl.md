@@ -1,11 +1,12 @@
 # Compiling MLPL
 
-**Status:** in progress (compile-to-rust saga, targeting
-v0.8.0-compile-rs). This doc is user-facing: it describes what
-each mode *is for*, shows examples, and lays out the trade-offs
-so you can pick the right tool for your situation. The design
-rationale -- why this path rather than a JIT or LLVM backend --
-lives in `docs/milestone-compile-to-rust.md`.
+**Status:** shipped in v0.8.0. This doc is user-facing: it
+describes what each mode *is for*, shows examples, and lays out
+the trade-offs so you can pick the right tool for your situation.
+The design rationale -- why this path rather than a JIT or LLVM
+backend -- and the retrospective on the saga live in
+`docs/milestone-compile-to-rust.md`. See
+`examples/compile-cli/` for a runnable `mlpl build` walkthrough.
 
 ## Three ways to run MLPL
 
@@ -184,18 +185,29 @@ Labels, shapes, error semantics all carry through:
   build it with `mlpl build`. The REPL is the authoring surface;
   the compile modes are ways to ship.
 
-## Status and what's next
+## Status and what shipped (v0.8.0)
 
-- **Shipped (v0.7.5):** Interpreter + REPL + WASM web REPL,
-  labeled shapes, structured errors.
-- **In progress (v0.8.0 target):** `mlpl-rt` runtime target
-  (step 001), `mlpl-lower-rs` scalar + array + label lowering
-  with static matmul contraction checks (steps 002-004), the
-  `mlpl!` proc macro through a facade `mlpl` crate (step 005),
-  the interpreter-vs-compiled parity harness (step 006,
-  9x speedup on a 100x100 reshape/reduce workload), and the
-  `mlpl-build` binary that compiles a `.mlpl` file to a native
-  binary via cargo+rustc (this step). Release step still ahead.
+- **`mlpl-rt`** runtime target -- typed primitive wrappers
+  around `DenseArray` / `LabeledShape`. This is what compiled
+  MLPL programs link against at runtime; no parser, no
+  evaluator.
+- **`mlpl-lower-rs`** lowers the AST to a Rust `TokenStream`.
+  Scalar + array + label lowering, plus static matmul
+  contraction checks: when both operands' labels are known at
+  lower time, a mismatch is caught before rustc runs.
+- **`mlpl!` proc macro** (through the `mlpl` facade crate) --
+  embed MLPL inside a Rust program. Span-preserved errors land
+  in rustc as `compile_error!` with MLPL-source carats.
+- **`mlpl build foo.mlpl -o bin`** -- compile a `.mlpl` file to
+  a native binary via cargo + rustc. Cross-compilation comes
+  free via `--target <triple>`; native and
+  `wasm32-unknown-unknown` are the tested paths.
+- **Parity harness** -- nine curated programs run through both
+  the interpreter and the compile path with bit-equal output
+  assertions on deterministic ops. Measured 9x speedup on a
+  100x100 reshape+reduce workload (interpreter 479us ->
+  compiled 53us, median of 5).
+
 - **Usage note for the macro.** Inside `mlpl! { ... }`,
   statements must be separated by `;` because `proc_macro`
   tokenization strips REPL-style newlines. Label annotations,
@@ -203,10 +215,20 @@ Labels, shapes, error semantics all carry through:
   through the macro path -- a matmul with mismatched
   contraction labels becomes a `compile_error!` at build time
   rather than a runtime error.
+
+- **Out of scope (deferred).** `TensorCtor` (`param` /
+  `tensor`), `repeat` / `train` / `for` loop bodies, autograd
+  (`grad`), optimizers (`adam` / `momentum_sgd`), and the Model
+  DSL (`chain` / `linear` / activations / `embed` /
+  `causal_attention`) are not lowered yet -- they require tape
+  state or loop lowering. Programs that use them return
+  `LowerError::Unsupported` from the compile path; the
+  interpreter is the only way to run them today. A future saga
+  will extend the lowering.
+
 - **Not planned:** JIT, LLVM direct backend, an
   `exec(string)` primitive. See
   `docs/milestone-compile-to-rust.md` "Non-goals".
 
-Follow the release progression in `docs/saga.md`; when the
-compile-to-rust saga closes, this doc gets a retrospective
-section with the measured interpreter-vs-compiled speedup.
+For a concrete `mlpl build` walkthrough see
+`examples/compile-cli/README.md`.

@@ -389,18 +389,221 @@ accuracy = mean(eq(reshape(rounded, [4]), y))
 accuracy    # 1 (100%)
 ```
 
+## Labeled Axes
+
+Annotation syntax on assignment attaches axis names as metadata.
+Labels propagate through elementwise ops, matmul, reductions, and
+activations; a mismatch surfaces as a structured error that names
+both shapes:
+
+```
+X : [batch, feat] = randn(7, [60, 2])
+labels(X)                         # "batch,feat"
+reduce_add(X, "feat")             # reduce by axis name
+```
+
+See `docs/lang-reference.md` under "Labeled Axes" for `label`,
+`relabel`, `reshape_labeled`, and `labels`.
+
+## Autograd, Optimizers, and the Training Loop
+
+Declare a trainable leaf with `param[shape]`. `grad(loss_expr, W)`
+lifts the expression onto a reverse-mode tape and returns the
+gradient with the same shape as `W`. `adam` / `momentum_sgd` take
+either a single param, a list, or a model identifier:
+
+```
+W = param[1]
+W = randn(1, [1]) * 2             # initialize
+
+train 50 {
+  adam(sum(W*W), W, 0.1, 0.9, 0.999, 0.00000001);
+  reduce_add(W*W)
+}
+loss_curve(last_losses)
+```
+
+`train N { body }` mirrors `repeat` but also binds the iteration
+index to `step` and captures each iteration's final value into a
+`last_losses` vector.
+
+## Model DSL
+
+Stack layers as data. `chain(a, b, ...)` composes sequentially;
+`residual(block)` adds a skip connection; `apply(m, X)` runs the
+forward pass and is differentiable through every owned parameter:
+
+```
+mdl = chain(linear(2, 8, 11), tanh_layer(), linear(8, 2, 12))
+X : [batch, feat] = matmul(moons(7, 60, 0.08), [[1,0],[0,1],[0,0]])
+Y = one_hot(reshape(matmul(moons(7, 60, 0.08), [[0],[0],[1]]), [120]), 2)
+
+train 100 {
+  adam(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)),
+       mdl, 0.05, 0.9, 0.999, 0.00000001);
+  mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y))
+}
+```
+
+Available layers: `linear`, `tanh_layer`, `relu_layer`,
+`softmax_layer`, `rms_norm`, `attention`, `causal_attention`,
+`embed`, plus `sinusoidal_encoding` for additive positional tables.
+
+## Loading Data
+
+The terminal REPL reads files under a sandbox (`--data-dir <path>`);
+the web REPL uses a compiled-in corpus registry instead:
+
+```
+# Terminal REPL: cargo run -p mlpl-repl -- --data-dir ./data
+text = load("corpus.txt")         # whole-file Value::Str
+points = load("points.csv")       # numeric array, header -> labels
+
+# Either REPL:
+text = load_preloaded("tiny_corpus")
+text = load_preloaded("tiny_shakespeare_snippet")
+```
+
+Dataset ops prepare training data without leaving MLPL:
+
+```
+data = reshape(iota(12), [6, 2])
+s = shuffle(data, 7)
+batched = batch(iota(5), 2)        # zero-pads the short tail
+mask = batch_mask(iota(5), 2)       # 1 for real rows, 0 for padding
+trset = split(iota(10), 0.8, 42)
+vaset = val_split(iota(10), 0.8, 42)
+
+for row in reshape(iota(6), [3, 2]) { reduce_add(row) }
+last_rows                          # [1, 5, 9]
+```
+
+## Tokenizers
+
+Byte-level tokenization is the deterministic baseline; byte-pair
+encoding adds a trained merge table on top. Round-trip is lossless
+for any UTF-8 input:
+
+```
+tokenize_bytes("hello")            # [104, 101, 108, 108, 111]
+decode_bytes(tokenize_bytes("round trip"))
+
+bpe = train_bpe("abababab", 260, 7)
+apply_tokenizer(bpe, "abababab")
+decode(bpe, apply_tokenizer(bpe, "unseen text"))
+```
+
+## Experiment Tracking
+
+Wrap a block in `experiment "name" { ... }` to capture every scalar
+assigned to a name ending in `_metric` along with the shapes of any
+`param` bindings. The terminal REPL additionally writes the record
+to `<--exp-dir>/<name>/<timestamp>/run.json`:
+
+```
+experiment "baseline" { loss_metric = 0.5; accuracy_metric = 0.82 }
+experiment "tweak"    { loss_metric = 0.3; accuracy_metric = 0.91 }
+:experiments
+compare("baseline", "tweak")
+```
+
+## Training a Tiny Language Model
+
+Saga 13 ties everything above together. `embed(V, d, seed)` is a
+learned lookup table; `sinusoidal_encoding(T, d)` is deterministic
+positional info; `causal_attention` masks the pre-softmax scores so
+position `t` cannot peek at `t+1`; `cross_entropy(logits, targets)`
+is a numerically-stable fused loss; `sample` + `top_k` plus the
+`last_row` / `concat` helpers give you a generation loop:
+
+```
+corpus = load_preloaded("tiny_corpus")
+tok    = train_bpe(corpus, 260, 0)
+ids    = apply_tokenizer(tok, corpus)
+X_all  = shift_pairs_x(ids, 8)
+Y_all  = shift_pairs_y(ids, 8)
+X      = reshape(X_all, [reduce_mul(shape(X_all))])
+Y      = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+V = 260 ; d = 16 ; h = 1
+model = chain(embed(V, d, 0),
+              causal_attention(d, h, 1),
+              rms_norm(d),
+              linear(d, V, 2))
+
+experiment "tutorial_tiny_lm" {
+  train 30 {
+    adam(cross_entropy(apply(model, X), Y),
+         model, 0.01, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(model, X), Y)
+  }
+}
+loss_curve(last_losses)
+
+# Generation
+prompt = apply_tokenizer(tok, "the ")
+seq    = prompt
+repeat 20 {
+  logits = apply(model, seq);
+  last   = last_row(logits);
+  nxt    = sample(top_k(last, 20), 0.8, step);
+  seq    = concat(seq, nxt)
+}
+decode(tok, seq)
+
+# Attention heatmap
+viz_ids = apply_tokenizer(tok, "the quick")
+svg(attention_weights(model, viz_ids), "heatmap")
+```
+
+The web REPL's "Training and Generating" tutorial lesson walks
+through the same flow interactively. `demos/tiny_lm.mlpl` and
+`demos/tiny_lm_generate.mlpl` are the full-size versions (280-vocab
+BPE, Shakespeare corpus, residual transformer block).
+
+## Compiling MLPL to a Native Binary
+
+`mlpl-build` takes a `.mlpl` script and produces a self-contained
+native binary that only links against `mlpl-rt`. The compiled
+program has no interpreter, no parser, and no runtime dispatch --
+startup is just the OS loading an executable.
+
+```bash
+cargo run -p mlpl-build -- examples/compile-cli/hello.mlpl -o hello
+./hello
+# -> 42
+
+# Cross-compile the same source to WASM
+cargo run -p mlpl-build -- examples/compile-cli/hello.mlpl \
+    --target wasm32-unknown-unknown -o hello.wasm
+```
+
+See `examples/compile-cli/README.md` for a complete walkthrough,
+and `docs/compiling-mlpl.md` for the three-way comparison of the
+interpreter, the `mlpl!` proc macro, and the `mlpl build` path.
+
 ## Demo Scripts
 
 The `demos/` directory contains ready-to-run examples:
 
 ```bash
-cargo run -p mlpl-repl -- -f demos/basics.mlpl              # arithmetic, arrays, variables
-cargo run -p mlpl-repl -- -f demos/matrix_ops.mlpl           # reshape, transpose, reductions
-cargo run -p mlpl-repl -- -f demos/computation.mlpl          # multi-step computation
-cargo run -p mlpl-repl -- -f demos/repeat_demo.mlpl          # loop construct
-cargo run -p mlpl-repl -- -f demos/logistic_regression.mlpl  # ML training
-cargo run -p mlpl-repl -- -f demos/loss_curve.mlpl           # SVG loss curve
-cargo run -p mlpl-repl -- -f demos/decision_boundary.mlpl    # 2D classifier
-cargo run -p mlpl-repl -- -f demos/analysis_demo.mlpl        # analysis helpers
-cargo run -p mlpl-repl -- -f demos/trace_demo.mlpl --trace   # execution tracing
+cargo run -p mlpl-repl -- -f demos/basics.mlpl               # arithmetic, arrays, variables
+cargo run -p mlpl-repl -- -f demos/matrix_ops.mlpl            # reshape, transpose, reductions
+cargo run -p mlpl-repl -- -f demos/computation.mlpl           # multi-step computation
+cargo run -p mlpl-repl -- -f demos/repeat_demo.mlpl           # loop construct
+cargo run -p mlpl-repl -- -f demos/logistic_regression.mlpl   # ML training
+cargo run -p mlpl-repl -- -f demos/loss_curve.mlpl            # SVG loss curve
+cargo run -p mlpl-repl -- -f demos/decision_boundary.mlpl     # 2D classifier
+cargo run -p mlpl-repl -- -f demos/analysis_demo.mlpl         # analysis helpers
+cargo run -p mlpl-repl -- -f demos/kmeans.mlpl                # K-Means clustering
+cargo run -p mlpl-repl -- -f demos/pca.mlpl                   # PCA via power iteration
+cargo run -p mlpl-repl -- -f demos/softmax_classifier.mlpl    # 3-class softmax
+cargo run -p mlpl-repl -- -f demos/tiny_mlp.mlpl              # 2-8-2 MLP on XOR-like data
+cargo run -p mlpl-repl -- -f demos/moons_mlp.mlpl             # chain + train + adam on moons
+cargo run -p mlpl-repl -- -f demos/circles_mlp.mlpl           # same, on circles
+cargo run -p mlpl-repl -- -f demos/attention.mlpl             # Q K^T / sqrt(d) pattern
+cargo run -p mlpl-repl -- -f demos/transformer_block.mlpl     # residual attention + MLP
+cargo run -p mlpl-repl -- -f demos/tiny_lm.mlpl               # tiny LM training (Saga 13)
+cargo run -p mlpl-repl -- -f demos/tiny_lm_generate.mlpl      # training + generation + attention heatmap
+cargo run -p mlpl-repl -- -f demos/trace_demo.mlpl --trace    # execution tracing
 ```
