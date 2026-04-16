@@ -78,4 +78,100 @@ impl Tensor {
     unary_method!(relu, Relu, "Elementwise ReLU.");
     unary_method!(tanh, Tanh, "Elementwise tanh.");
     unary_method!(sigmoid, Sigmoid, "Elementwise sigmoid.");
+
+    /// Fused cross-entropy loss (Saga 13 step 004).
+    ///
+    /// `targets` is consumed and stored verbatim on the tape node: it
+    /// carries class indices (no gradient flows through it). Caller
+    /// guarantees `0 <= targets[i] < V` for every row, where `V` is
+    /// the trailing axis of `self`'s logits.
+    #[must_use]
+    pub fn cross_entropy(&self, targets: Vec<usize>) -> Self {
+        let logits = self.value();
+        let value =
+            cross_entropy_forward(&logits, &targets).expect("caller validated shapes and indices");
+        let node = self.tape.push(NodeData {
+            value,
+            grad: None,
+            kind: NodeKind::CrossEntropy {
+                logits: self.node,
+                targets,
+            },
+            requires_grad: false,
+        });
+        Tensor {
+            node,
+            tape: Rc::clone(&self.tape),
+        }
+    }
+}
+
+/// Fused log-softmax + NLL forward pass. Scalar output.
+///
+/// `logits` is `[N, V]` (caller must pre-flatten `[B, T, V]` to
+/// `[B*T, V]`); `targets` has length `N`. Stable via max-subtraction
+/// inside the log-sum-exp.
+pub(crate) fn cross_entropy_forward(
+    logits: &mlpl_array::DenseArray,
+    targets: &[usize],
+) -> Result<mlpl_array::DenseArray, String> {
+    let (n, v) = ce_split_rows_cols(logits)?;
+    if targets.len() != n {
+        return Err(format!(
+            "cross_entropy: target length {} does not match logits rows {}",
+            targets.len(),
+            n
+        ));
+    }
+    let data = logits.data();
+    let mut total = 0.0;
+    for (i, &t) in targets.iter().enumerate() {
+        if t >= v {
+            return Err(format!(
+                "cross_entropy: target index {t} out of range for V={v}"
+            ));
+        }
+        let row = &data[i * v..(i + 1) * v];
+        let m = row.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let lse: f64 = m + row.iter().map(|x| (x - m).exp()).sum::<f64>().ln();
+        total += lse - row[t];
+    }
+    Ok(mlpl_array::DenseArray::from_scalar(total / n as f64))
+}
+
+/// Cross-entropy backward pass: returns `d loss / d logits` shaped like
+/// `logits`, computed as `(softmax(logits) - one_hot(targets)) / N *
+/// upstream_scalar`.
+pub(crate) fn cross_entropy_backward(
+    logits: &mlpl_array::DenseArray,
+    targets: &[usize],
+    upstream_scalar: f64,
+) -> mlpl_array::DenseArray {
+    let (n, v) = ce_split_rows_cols(logits).expect("forward validated shape");
+    let data = logits.data();
+    let mut out = vec![0.0; data.len()];
+    let inv_n = 1.0 / n as f64;
+    for (i, &t) in targets.iter().enumerate() {
+        let row = &data[i * v..(i + 1) * v];
+        let m = row.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let exps: Vec<f64> = row.iter().map(|x| (x - m).exp()).collect();
+        let s: f64 = exps.iter().sum();
+        for (j, e) in exps.iter().enumerate() {
+            let p = e / s;
+            let indicator = if j == t { 1.0 } else { 0.0 };
+            out[i * v + j] = upstream_scalar * (p - indicator) * inv_n;
+        }
+    }
+    mlpl_array::DenseArray::new(logits.shape().clone(), out).expect("shape preserved")
+}
+
+fn ce_split_rows_cols(logits: &mlpl_array::DenseArray) -> Result<(usize, usize), String> {
+    let dims = logits.shape().dims();
+    match dims.len() {
+        2 => Ok((dims[0], dims[1])),
+        3 => Ok((dims[0] * dims[1], dims[2])),
+        r => Err(format!(
+            "cross_entropy: logits must be rank 2 or 3, got rank {r}"
+        )),
+    }
 }

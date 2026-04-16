@@ -1,6 +1,6 @@
 number = 3
 slug = "causal-mask"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 003: Causal masking for attention.
 
@@ -8,5 +8,6 @@ Existing `attention(d_model,..."""
 role = "production"
 context_files = []
 created_at = "2026-04-15T14:53:14"
+completed_at = "2026-04-15T16:10:21"
 task_type = "primitive"
-commits = []
+commits = ["805eba04eac5c5c9df0a5ad6c676935a20ad2c02"]

@@ -65,6 +65,12 @@ fn propagate(tape: &Tape, id: NodeId) {
             accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
         }
         NodeKind::MatMul { left, right } => prop_matmul(tape, left, right, &upstream),
+        NodeKind::CrossEntropy { logits, targets } => {
+            let logits_val = tape.nodes()[logits.0].value.clone();
+            let g = upstream.data()[0];
+            let grad = crate::tensor_ops::cross_entropy_backward(&logits_val, &targets, g);
+            accumulate(&mut tape.nodes_mut()[logits.0].grad, grad);
+        }
     }
 }
 

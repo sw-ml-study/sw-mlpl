@@ -109,21 +109,16 @@ fn eval_tensor_fncall(
     tape: &Rc<Tape>,
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, EvalError> {
-    let arity = |expected: usize| -> Result<(), EvalError> {
-        if args.len() == expected {
-            Ok(())
-        } else {
-            Err(EvalError::BadArity {
-                func: name.into(),
-                expected,
-                got: args.len(),
-            })
-        }
+    let arity = |e: usize| -> Result<(), EvalError> {
+        (args.len() == e).then_some(()).ok_or(EvalError::BadArity {
+            func: name.into(),
+            expected: e,
+            got: args.len(),
+        })
     };
     if let Some(op) = unary_tensor_op(name) {
         arity(1)?;
-        let a = eval_tensor_expr(&args[0], env, tape, params)?;
-        return Ok(op(&a));
+        return Ok(op(&eval_tensor_expr(&args[0], env, tape, params)?));
     }
     if name == "matmul" {
         arity(2)?;
@@ -133,20 +128,24 @@ fn eval_tensor_fncall(
     }
     if name == "apply" {
         arity(2)?;
-        let model_name = match &args[0] {
-            Expr::Ident(n, _) => n.clone(),
-            _ => {
-                return Err(EvalError::Unsupported(
-                    "grad: apply's first argument must be a model identifier".into(),
-                ));
-            }
+        let Expr::Ident(m, _) = &args[0] else {
+            return Err(EvalError::Unsupported(
+                "grad: apply's first argument must be a model identifier".into(),
+            ));
         };
         let model = env
-            .get_model(&model_name)
+            .get_model(m)
             .cloned()
-            .ok_or(EvalError::UndefinedVariable(model_name))?;
+            .ok_or_else(|| EvalError::UndefinedVariable(m.clone()))?;
         let x = eval_tensor_expr(&args[1], env, tape, params)?;
         return crate::model_tape::apply_model_tape(&model, x, tape, params);
+    }
+    if name == "cross_entropy" {
+        arity(2)?;
+        let l = eval_tensor_expr(&args[0], env, tape, params)?;
+        let t = crate::eval::eval_expr(&args[1], env, &mut None)?.into_array()?;
+        let idx = crate::model_tape::validate_cross_entropy_targets(&l.value(), &t)?;
+        return Ok(l.cross_entropy(idx));
     }
     Err(EvalError::Unsupported(format!(
         "grad: function '{name}' not supported inside grad()"

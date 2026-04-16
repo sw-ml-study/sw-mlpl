@@ -1,6 +1,6 @@
 number = 4
 slug = "cross-entropy-loss"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 004: Cross-entropy loss over integer targets.
 

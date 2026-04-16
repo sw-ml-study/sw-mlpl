@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 3,
+    "step": "causal-mask"
+  },
+  "action": "TDD with enumerate-based inline mask to keep fn count neutral; extracted no new helpers to preserve model_dispatch.rs 7-fn budget; reused existing tape primitives (add + softmax) instead of introducing a masked_softmax op",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-15T16:10:21"
+}

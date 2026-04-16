@@ -182,6 +182,16 @@ pub(crate) fn eval_expr(
             crate::loader::eval_load_preloaded(path)
         };
     }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "cross_entropy"
+        && args.len() == 2
+    {
+        let logits = eval_expr(&args[0], env, trace)?.into_array()?;
+        let targets = eval_expr(&args[1], env, trace)?.into_array()?;
+        crate::model_tape::validate_cross_entropy_targets(&logits, &targets)?;
+        let result = mlpl_runtime::call_builtin("cross_entropy", vec![logits, targets])?;
+        return Ok(Value::Array(result));
+    }
     if let Expr::FnCall { name, args, span } = expr
         && name == "matmul"
         && args.len() == 2
