@@ -108,3 +108,135 @@ fn matmul_rejects_contraction_dim_mismatch() {
 
     assert!(mlpl_mlx::matmul(&a, &b).is_err());
 }
+
+// Saga 14 step 002: forward-pass primitives.
+//
+// Each test below compares `mlpl_mlx::<op>` against `mlpl_rt::<op>`
+// on the same fixture. Because the MLX path computes in fp32 and
+// casts back to f64 at the boundary, the parity bound is `FP32_TOL`
+// (see module-level docstring), not bit-for-bit. Labels are compared
+// exactly -- they live in `mlpl-core`, not MLX, so no precision
+// round-trip applies.
+
+fn mat23(data: [f64; 6]) -> DenseArray {
+    DenseArray::new(Shape::new(vec![2, 3]), data.to_vec()).unwrap()
+}
+
+fn mat23_labeled(data: [f64; 6]) -> DenseArray {
+    mat23(data)
+        .with_labels(vec![Some("batch".into()), Some("feat".into())])
+        .unwrap()
+}
+
+#[test]
+fn add_matches_cpu_on_labeled_matrix() {
+    let a = mat23_labeled([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    let b = mat23_labeled([0.5, 0.5, 0.5, 0.5, 0.5, 0.5]);
+    let cpu = mlpl_rt::add(&a, &b).unwrap();
+    let mlx = mlpl_mlx::add(&a, &b).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn sub_matches_cpu() {
+    let a = mat23([5.0, 4.0, 3.0, 2.0, 1.0, 0.0]);
+    let b = mat23([1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+    let cpu = mlpl_rt::sub(&a, &b).unwrap();
+    let mlx = mlpl_mlx::sub(&a, &b).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn mul_matches_cpu() {
+    let a = mat23([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    let b = mat23([2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
+    let cpu = mlpl_rt::mul(&a, &b).unwrap();
+    let mlx = mlpl_mlx::mul(&a, &b).unwrap();
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn div_matches_cpu() {
+    let a = mat23([2.0, 4.0, 6.0, 8.0, 10.0, 12.0]);
+    let b = mat23([2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
+    let cpu = mlpl_rt::div(&a, &b).unwrap();
+    let mlx = mlpl_mlx::div(&a, &b).unwrap();
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn neg_preserves_labels_and_matches_cpu() {
+    let a = mat23_labeled([1.0, -2.0, 3.0, -4.0, 5.0, -6.0]);
+    let cpu = mlpl_rt::neg(&a);
+    let mlx = mlpl_mlx::neg(&a);
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn exp_matches_cpu_within_fp32_tolerance() {
+    let a = DenseArray::new(
+        Shape::new(vec![2, 3]),
+        vec![0.0, 0.25, 0.5, -0.5, -0.25, 1.0],
+    )
+    .unwrap();
+    let cpu = mlpl_rt::exp(&a);
+    let mlx = mlpl_mlx::exp(&a);
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn log_matches_cpu_within_fp32_tolerance() {
+    let a = DenseArray::new(Shape::vector(5), vec![0.25, 0.5, 1.0, 2.0, 4.0]).unwrap();
+    let cpu = mlpl_rt::log(&a);
+    let mlx = mlpl_mlx::log(&a);
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn tanh_matches_cpu_within_fp32_tolerance() {
+    let a = DenseArray::new(Shape::vector(5), vec![-2.0, -0.5, 0.0, 0.5, 2.0]).unwrap();
+    let cpu = mlpl_rt::tanh(&a);
+    let mlx = mlpl_mlx::tanh(&a);
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn sigmoid_matches_cpu_within_fp32_tolerance() {
+    let a = DenseArray::new(Shape::vector(5), vec![-2.0, -1.0, 0.0, 1.0, 2.0]).unwrap();
+    let cpu = mlpl_rt::sigmoid(&a);
+    let mlx = mlpl_mlx::sigmoid(&a);
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn relu_matches_cpu_on_mixed_signs() {
+    let a = DenseArray::new(Shape::vector(5), vec![-2.0, -0.5, 0.0, 0.5, 2.0]).unwrap();
+    let cpu = mlpl_rt::relu(&a);
+    let mlx = mlpl_mlx::relu(&a);
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn reshape_matches_cpu_on_6_to_2x3() {
+    let a = DenseArray::from_vec((0..6).map(|i| i as f64).collect());
+    let cpu = mlpl_rt::reshape(&a, &[2, 3]).unwrap();
+    let mlx = mlpl_mlx::reshape(&a, &[2, 3]).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn transpose_matches_cpu_and_reverses_labels() {
+    let a = mat23_labeled([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    let cpu = mlpl_rt::transpose(&a);
+    let mlx = mlpl_mlx::transpose(&a);
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}

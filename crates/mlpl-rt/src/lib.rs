@@ -11,13 +11,25 @@
 //! `mlpl-runtime`, or `mlpl-parser`. Those crates are tooling;
 //! compiled binaries link only against `mlpl-rt` so they never
 //! carry a parser or an interpreter at runtime.
+//!
+//! Forward-pass primitives are split across sibling modules
+//! (`elementwise`, `activations`, `transforms`) to stay under the
+//! sw-checklist function-count budget as Saga 14 grows the surface.
+//! `mlpl-mlx` mirrors this layout and signature, so the
+//! compile-to-rust codegen can target either runtime interchangeably.
 
+mod activations;
 mod array_lit;
+mod elementwise;
 mod error;
+mod transforms;
 
+pub use activations::{exp, log, relu, sigmoid, tanh};
 pub use array_lit::array_lit;
+pub use elementwise::{add, div, mul, neg, sub};
 pub use mlpl_array::{ArrayError, DenseArray, Shape};
 pub use mlpl_core::LabeledShape;
+pub use transforms::{reduce_add, reduce_add_axis, reshape, transpose};
 
 /// `iota(n)` -- the vector `[0, 1, ..., n-1]` as f64 values.
 #[must_use]
@@ -37,29 +49,4 @@ pub fn shape(a: &DenseArray) -> DenseArray {
 #[must_use]
 pub fn rank(a: &DenseArray) -> DenseArray {
     DenseArray::from_scalar(a.rank() as f64)
-}
-
-/// `reshape(a, dims)` -- reinterpret `a` with new dims; element count
-/// must match or `ArrayError::ShapeMismatch` is returned.
-pub fn reshape(a: &DenseArray, dims: &[usize]) -> Result<DenseArray, ArrayError> {
-    a.reshape(Shape::new(dims.to_vec()))
-}
-
-/// `transpose(a)` -- reverse axis order. Preserves Saga 11.5 labels.
-#[must_use]
-pub fn transpose(a: &DenseArray) -> DenseArray {
-    a.transpose()
-}
-
-/// `reduce_add(a)` -- flat sum of all elements as a scalar.
-#[must_use]
-pub fn reduce_add(a: &DenseArray) -> DenseArray {
-    let sum: f64 = a.data().iter().copied().sum();
-    DenseArray::from_scalar(sum)
-}
-
-/// `reduce_add_axis(a, axis)` -- sum along `axis`, dropping that
-/// dim (and its label, if any) from the result shape.
-pub fn reduce_add_axis(a: &DenseArray, axis: usize) -> Result<DenseArray, ArrayError> {
-    a.reduce_axis(axis, 0.0, |x, y| x + y)
 }

@@ -1,0 +1,1 @@
+mlpl-mlx crate shipped with matmul primitive, 5 gated parity tests green (fp32 tol 1e-5). Vendored mlx-rs 0.25.3 under vendor/ with one-line Cargo.toml fix to drop the forced metal feature (avoids needing full Xcode).

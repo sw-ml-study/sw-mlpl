@@ -1,6 +1,6 @@
 number = 1
 slug = "mlx-crate-skeleton"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 001: mlpl-mlx crate skeleton + first primitive.
 
@@ -8,5 +8,6 @@ Stand up the ML..."""
 role = "production"
 context_files = []
 created_at = "2026-04-16T13:36:53"
+completed_at = "2026-04-16T15:59:34"
 task_type = "primitive"
-commits = []
+commits = ["bfac5e91860c1991b1a49e01d904c1f7cc6a4bed"]
