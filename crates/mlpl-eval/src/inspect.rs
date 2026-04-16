@@ -37,6 +37,12 @@ pub fn inspect(env: &Environment, input: &str) -> Option<String> {
         ),
         ":builtins" | ":built-ins" => Some(format_builtins()),
         ":experiments" => Some(crate::experiment::format_registry(env)),
+        ":version" => Some(format!(
+            "MLPL v{} -- Array Programming Language for ML\n  \
+             target: {}",
+            env!("CARGO_PKG_VERSION"),
+            std::env::consts::ARCH,
+        )),
         ":wsid" => Some(format!(
             "workspace:\n  variables:       {}\n  parameters:      {}\n  \
              models:          {}\n  optimizer slots: {}",
