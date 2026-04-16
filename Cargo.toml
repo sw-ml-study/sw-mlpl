@@ -4,6 +4,7 @@ members = [
   "crates/mlpl-core",
   "crates/mlpl-array",
   "crates/mlpl-rt",
+  "crates/mlpl-mlx",
   "crates/mlpl-lower-rs",
   "crates/mlpl-macro",
   "crates/mlpl",
@@ -31,3 +32,12 @@ version = "0.10.0"
 
 [workspace.lints.clippy]
 pedantic = "warn"
+
+# Saga 14 step 001: the crates.io copy of `mlx-rs` 0.25.3 has an
+# upstream packaging bug -- its own `mlx-sys` dependency omits
+# `default-features = false`, which forces `metal` on and demands a
+# full `Xcode.app` (Command Line Tools is not enough). The vendored
+# copy at `vendor/mlx-rs/` ships the one-line fix so the Accelerate
+# backend builds without Xcode. See `vendor/mlx-rs/VENDORING.md`.
+[patch.crates-io]
+mlx-rs = { path = "vendor/mlx-rs" }

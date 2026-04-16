@@ -1,6 +1,6 @@
 number = 1
 slug = "mlx-crate-skeleton"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: mlpl-mlx crate skeleton + first primitive.
 

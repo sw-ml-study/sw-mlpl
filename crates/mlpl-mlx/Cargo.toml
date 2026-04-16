@@ -1,0 +1,32 @@
+[package]
+name = "mlpl-mlx"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+# Apple Silicon only. The `cfg(all(target_os = "macos", target_arch =
+# "aarch64"))` guard inside the crate keeps the feature compilable on
+# non-Apple hosts (where `mlx-rs`' C++/Metal toolchain would fail to
+# build), making `cargo test -p mlpl-mlx --features mlx` safe to run
+# from a Linux CI host: it stubs out to a no-op surface.
+mlx = ["dep:mlx-rs"]
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-core = { path = "../mlpl-core" }
+
+# Pinned by Saga 14 plan (risk/mitigation item): upstream ABI can
+# shift between minor versions. Bump deliberately, not transitively.
+#
+# `default-features = false` drops the `metal` feature so mlx-sys
+# does not require the `metal` shader compiler (ships only with a
+# full Xcode.app, not the Command Line Tools). We keep
+# `accelerate` on -- that's Apple's CPU/SIMD BLAS, which is all
+# Saga 14 step 001 needs to prove the crate integrates. A later
+# step re-enables `metal` behind its own cfg gate once the Xcode
+# dependency is documented in the project bootstrap.
+mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
+  "accelerate",
+] }
