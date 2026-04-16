@@ -30,3 +30,9 @@ mlpl-core = { path = "../mlpl-core" }
 mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
   "accelerate",
 ] }
+
+[dev-dependencies]
+# Saga 14 step 002: parity tests compare MLX outputs against the
+# CPU path in `mlpl-rt`. Dev-only so `mlpl-mlx` itself stays
+# decoupled from the CPU runtime crate at link time.
+mlpl-rt = { path = "../mlpl-rt" }

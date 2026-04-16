@@ -1174,6 +1174,7 @@ version = "0.10.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-rt",
  "mlx-rs",
 ]
 

@@ -8,8 +8,8 @@
 //! decoupled from the interpreter stack.
 
 use mlpl_rt::{
-    DenseArray, Shape, array_lit, iota, rank, reduce_add, reduce_add_axis, reshape, shape,
-    transpose,
+    DenseArray, Shape, add, array_lit, div, exp, iota, log, mul, neg, rank, reduce_add,
+    reduce_add_axis, relu, reshape, shape, sigmoid, sub, tanh, transpose,
 };
 
 #[test]
@@ -129,4 +129,99 @@ fn transpose_swaps_labels() {
         t.labels(),
         Some(&[Some("cols".into()), Some("rows".into())][..])
     );
+}
+
+// Saga 14 step 002: forward-pass primitives that the MLX backend mirrors.
+// Every test here exercises shape, values, and label propagation on a
+// small fixture so the mlpl-mlx parity tests have a trusted gold
+// standard to compare against.
+
+fn mat23(data: [f64; 6]) -> DenseArray {
+    DenseArray::new(Shape::new(vec![2, 3]), data.to_vec()).unwrap()
+}
+
+#[test]
+fn add_elementwise_matches_broadcast_and_labels() {
+    let a = mat23([1.0, 2.0, 3.0, 4.0, 5.0, 6.0])
+        .with_labels(vec![Some("batch".into()), Some("feat".into())])
+        .unwrap();
+    let b = mat23([0.5, 0.5, 0.5, 0.5, 0.5, 0.5]);
+    let c = add(&a, &b).unwrap();
+    assert_eq!(c.shape(), a.shape());
+    assert_eq!(c.data(), &[1.5, 2.5, 3.5, 4.5, 5.5, 6.5]);
+    assert_eq!(c.labels(), a.labels());
+}
+
+#[test]
+fn sub_elementwise_produces_expected_values() {
+    let a = mat23([5.0, 4.0, 3.0, 2.0, 1.0, 0.0]);
+    let b = mat23([1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+    let c = sub(&a, &b).unwrap();
+    assert_eq!(c.data(), &[4.0, 3.0, 2.0, 1.0, 0.0, -1.0]);
+}
+
+#[test]
+fn mul_elementwise_produces_expected_values() {
+    let a = mat23([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    let b = mat23([2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
+    let c = mul(&a, &b).unwrap();
+    assert_eq!(c.data(), &[2.0, 4.0, 6.0, 8.0, 10.0, 12.0]);
+}
+
+#[test]
+fn div_elementwise_produces_expected_values() {
+    let a = mat23([2.0, 4.0, 6.0, 8.0, 10.0, 12.0]);
+    let b = mat23([2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
+    let c = div(&a, &b).unwrap();
+    assert_eq!(c.data(), &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+}
+
+#[test]
+fn neg_preserves_labels_and_flips_signs() {
+    let a = mat23([1.0, -2.0, 3.0, -4.0, 5.0, -6.0])
+        .with_labels(vec![Some("r".into()), Some("c".into())])
+        .unwrap();
+    let c = neg(&a);
+    assert_eq!(c.data(), &[-1.0, 2.0, -3.0, 4.0, -5.0, 6.0]);
+    assert_eq!(c.labels(), a.labels());
+}
+
+#[test]
+fn exp_of_zero_vector_is_ones() {
+    let a = DenseArray::from_vec(vec![0.0, 0.0, 0.0]);
+    let c = exp(&a);
+    assert_eq!(c.data(), &[1.0, 1.0, 1.0]);
+}
+
+#[test]
+fn log_of_e_vector_is_ones() {
+    let e = std::f64::consts::E;
+    let a = DenseArray::from_vec(vec![e, e, e]);
+    let c = log(&a);
+    for &v in c.data() {
+        assert!((v - 1.0_f64).abs() < 1e-12);
+    }
+}
+
+#[test]
+fn tanh_of_zero_is_zero() {
+    let a = DenseArray::from_vec(vec![0.0, 0.0]);
+    let c = tanh(&a);
+    assert_eq!(c.data(), &[0.0, 0.0]);
+}
+
+#[test]
+fn sigmoid_of_zero_is_half() {
+    let a = DenseArray::from_vec(vec![0.0, 0.0, 0.0]);
+    let c = sigmoid(&a);
+    for &v in c.data() {
+        assert!((v - 0.5_f64).abs() < 1e-12);
+    }
+}
+
+#[test]
+fn relu_zeros_negatives_and_keeps_positives() {
+    let a = DenseArray::from_vec(vec![-2.0, -0.5, 0.0, 0.5, 2.0]);
+    let c = relu(&a);
+    assert_eq!(c.data(), &[0.0, 0.0, 0.0, 0.5, 2.0]);
 }

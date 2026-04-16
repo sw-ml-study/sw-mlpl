@@ -1,6 +1,6 @@
 number = 2
 slug = "mlx-elementwise-shape"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 002: core elementwise + shape ops on MLX.
 
