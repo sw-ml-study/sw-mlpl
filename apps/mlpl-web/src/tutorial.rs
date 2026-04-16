@@ -420,6 +420,26 @@ pub const LESSONS: &[Lesson] = &[
         try_it: "Run two experiment blocks with different metric values, then call compare to see the delta. Which metric improved? Which regressed?",
     },
     Lesson {
+        title: "Workspace Introspection",
+        intro: "APL shaped its workspace around a handful of system commands -- )WSID for the current workspace id, )VARS for the variable table, )FNS for the function table, )CLEAR to wipe, and similar. MLPL keeps the same habit but spells them with a leading colon. :version prints the build info. :wsid shows counts of variables, trainable parameters, models, and optimizer state slots. :vars and :models list bindings with their shapes. :describe <name> prints richer detail -- an array's values preview, a model's layer tree, a tokenizer's vocab and merge count, or a built-in's one-line doc. :builtins prints every built-in grouped by category. :experiments lists every recorded run. :fns is the APL analogue for user-defined functions (a placeholder today; user functions aren't a language feature yet). :clear (APL's )CLEAR) resets the whole workspace. MLPL doesn't expose APL's []IO toggle -- array indexing is 0-origin throughout.",
+        examples: &[
+            ":version",
+            ":wsid",
+            "x = 42",
+            "v = iota(5)",
+            "M : [batch, feat] = reshape(iota(6), [2, 3])",
+            ":vars",
+            ":describe v",
+            "mdl = chain(linear(2, 4, 11), relu_layer(), linear(4, 2, 12))",
+            ":models",
+            ":describe mdl",
+            "W = param[3, 2]",
+            ":wsid",
+            ":describe matmul",
+        ],
+        try_it: "Bind a few of your own variables, then use :describe on each. Try :describe on a built-in you haven't used yet -- every name in :builtins is a valid :describe argument.",
+    },
+    Lesson {
         title: "Language Model Basics",
         intro: "Saga 13 adds the four primitives every transformer LM needs on top of the Model DSL. embed(vocab, d_model, seed) is a learned [vocab, d_model] lookup table: apply(emb, toks) gathers one row per integer token id and returns [T, d_model]. sinusoidal_encoding(T, d_model) is a deterministic [time=T, dim=d_model] positional table you add to the embeddings so the network can tell positions apart. causal_attention(d_model, heads, seed) is the same self-attention as attention(...) but with a lower-triangular mask on the pre-softmax scores, so position t never peeks at t+1. cross_entropy(logits, targets) returns a numerically-stable scalar mean negative log-likelihood over [N, V] logits and [N] integer targets, fully differentiable through the tape. Chain them together and you have the forward pass of a language model -- no training needed to see the pieces fit.",
         examples: &[
