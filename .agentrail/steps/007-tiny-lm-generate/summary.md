@@ -1,0 +1,1 @@
+Added concat(a,b), last_row(matrix), and attention_weights(model,X) builtins. Created demos/tiny_lm_generate.mlpl with generation loop (repeat+sample+top_k+concat) and attention heatmap viz. 11 TDD tests covering all new builtins plus generation determinism and causal weight properties. Wired into web REPL demo list.
