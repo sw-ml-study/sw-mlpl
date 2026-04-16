@@ -1,6 +1,6 @@
 number = 7
 slug = "tiny-lm-generate"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 007: Generation loop + attention-map visualization.
 

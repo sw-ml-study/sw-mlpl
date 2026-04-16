@@ -29,6 +29,7 @@ pub(crate) fn try_call(
         "mean" => Some(builtin_mean(name, args)),
         "zeros" | "ones" | "fill" => Some(constructor(name, args)),
         "cosine_schedule" | "linear_warmup" => Some(schedule(name, args)),
+        "concat" | "last_row" => Some(array_util(name, args)),
         _ => None,
     }
 }
@@ -130,6 +131,51 @@ fn schedule(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeErro
         }
     };
     Ok(DenseArray::from_scalar(v))
+}
+
+/// `concat(a, b)` and `last_row(matrix)` -- array utilities for
+/// generation loops. `concat` joins two rank-0/1 arrays into a 1-D
+/// vector; `last_row` extracts the final row of a rank-2 matrix.
+fn array_util(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if name == "concat" {
+        if args.len() != 2 {
+            return Err(RuntimeError::ArityMismatch {
+                func: name.into(),
+                expected: 2,
+                got: args.len(),
+            });
+        }
+        for (i, a) in args.iter().enumerate() {
+            if a.rank() > 1 {
+                return Err(RuntimeError::InvalidArgument {
+                    func: name.into(),
+                    reason: format!("argument {i} must be rank 0 or 1, got rank {}", a.rank()),
+                });
+            }
+        }
+        let mut data = Vec::with_capacity(args[0].data().len() + args[1].data().len());
+        data.extend_from_slice(args[0].data());
+        data.extend_from_slice(args[1].data());
+        Ok(DenseArray::from_vec(data))
+    } else {
+        // last_row
+        if args.len() != 1 {
+            return Err(RuntimeError::ArityMismatch {
+                func: name.into(),
+                expected: 1,
+                got: args.len(),
+            });
+        }
+        if args[0].rank() != 2 {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("expected rank-2 matrix, got rank {}", args[0].rank()),
+            });
+        }
+        let cols = args[0].shape().dims()[1];
+        let data = args[0].data();
+        Ok(DenseArray::from_vec(data[data.len() - cols..].to_vec()))
+    }
 }
 
 fn constructor(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {

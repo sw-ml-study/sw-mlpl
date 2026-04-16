@@ -31,7 +31,7 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 13 | Tiny language model end-to-end (CPU) | v0.10 | [~] IN PROGRESS (step 006/009) | 12 |
+| 13 | Tiny language model end-to-end (CPU) | v0.10 | [~] IN PROGRESS (step 007/009) | 12 |
 | 14 | MLX backend (Apple Silicon, lazy graph, fusion) | v0.11 | [ ] | 13 |
 | 15 | LoRA / QLoRA / quantization | v0.12 | [ ] | 13 |
 | 16 | Embedding visualization and RAG | v0.13 | [ ] | 13 |
