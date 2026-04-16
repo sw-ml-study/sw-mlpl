@@ -248,3 +248,44 @@ fn causal_mask_array(seq: usize) -> Result<DenseArray, EvalError> {
     }
     Ok(DenseArray::new(Shape::new(vec![seq, seq]), data)?)
 }
+
+/// Shape + index validation for `cross_entropy(logits, targets)`.
+/// Shared between the forward-only runtime builtin path (via `eval.rs`)
+/// and the tape-side path in `grad.rs`, so errors look identical either
+/// way. Returns a flat `Vec<usize>` of class indices ready to hand to
+/// `Tensor::cross_entropy`.
+pub(crate) fn validate_cross_entropy_targets(
+    logits: &DenseArray,
+    targets: &DenseArray,
+) -> Result<Vec<usize>, EvalError> {
+    let dims = logits.shape().dims();
+    let (n, v) = match dims.len() {
+        2 => (dims[0], dims[1]),
+        3 => (dims[0] * dims[1], dims[2]),
+        r => {
+            return Err(EvalError::Unsupported(format!(
+                "cross_entropy: logits must be rank 2 or 3, got rank {r}"
+            )));
+        }
+    };
+    if targets.elem_count() != n {
+        return Err(EvalError::ShapeMismatch {
+            op: "cross_entropy".into(),
+            expected: mlpl_core::LabeledShape::new(vec![n], vec![None]),
+            actual: mlpl_core::LabeledShape::new(
+                targets.shape().dims().to_vec(),
+                vec![None; targets.rank()],
+            ),
+        });
+    }
+    let mut idx = Vec::with_capacity(n);
+    for (i, &t) in targets.data().iter().enumerate() {
+        if t < 0.0 || t.fract() != 0.0 || (t as usize) >= v {
+            return Err(EvalError::Unsupported(format!(
+                "cross_entropy: target[{i}] = {t} is not a valid class index in 0..{v}"
+            )));
+        }
+        idx.push(t as usize);
+    }
+    Ok(idx)
+}

@@ -68,6 +68,19 @@ pub enum NodeKind {
         /// Right parent id.
         right: NodeId,
     },
+    /// Fused log-softmax + NLL over integer targets.
+    ///
+    /// Forward: scalar `-mean(log_softmax(logits)[i, targets[i]])`.
+    /// Targets are owned by the node because they are integer-valued
+    /// and do not flow gradient; storing them here keeps the tape
+    /// self-contained for the backward pass.
+    CrossEntropy {
+        /// Logits parent (rank-2 `[N, V]` or rank-3 `[B, T, V]`).
+        logits: NodeId,
+        /// Flattened target indices, one per row in `[N, V]`
+        /// (or one per `(b, t)` pair in `[B, T, V]`).
+        targets: Vec<usize>,
+    },
 }
 
 /// Per-node storage: the forward value, an accumulated gradient, the

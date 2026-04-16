@@ -13,8 +13,84 @@ pub(crate) fn try_call(
         "softmax" => Some(builtin_softmax(name, args)),
         "one_hot" => Some(builtin_one_hot(name, args)),
         "sinusoidal_encoding" => Some(builtin_sinusoidal_encoding(name, args)),
+        "cross_entropy" => Some(builtin_cross_entropy(name, args)),
         _ => None,
     }
+}
+
+/// `cross_entropy(logits, targets)` fused log-softmax + NLL, scalar mean.
+///
+/// Logits are `[N, V]` or `[B, T, V]` float; targets are `[N]` or
+/// `[B, T]` integer-valued (represented as f64 with whole-number
+/// values, the convention MLPL uses for all integer-typed builtins).
+/// Errors surface as `InvalidArgument` with the reason string; the
+/// `mlpl-eval` layer maps them to `EvalError::ShapeMismatch` where
+/// appropriate.
+fn builtin_cross_entropy(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 2 {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    let (n, v, idx) = cross_entropy_indices(name, &args[0], &args[1])?;
+    let data = args[0].data();
+    let mut total = 0.0;
+    for (i, &t) in idx.iter().enumerate() {
+        let row = &data[i * v..(i + 1) * v];
+        let m = row.iter().copied().fold(f64::NEG_INFINITY, f64::max);
+        let lse: f64 = m + row.iter().map(|x| (x - m).exp()).sum::<f64>().ln();
+        total += lse - row[t];
+    }
+    Ok(DenseArray::from_scalar(total / n as f64))
+}
+
+/// Validate logits / targets shapes and convert targets into a flat
+/// `Vec<usize>`. Returns `(N, V, indices)` on success.
+fn cross_entropy_indices(
+    name: &str,
+    logits: &DenseArray,
+    targets: &DenseArray,
+) -> Result<(usize, usize, Vec<usize>), RuntimeError> {
+    let dims = logits.shape().dims();
+    let (n, v) = match dims.len() {
+        2 => (dims[0], dims[1]),
+        3 => (dims[0] * dims[1], dims[2]),
+        r => {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("logits must be rank 2 or 3, got rank {r}"),
+            });
+        }
+    };
+    if targets.elem_count() != n {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!(
+                "targets must have {n} elements to match logits rows, got {}",
+                targets.elem_count()
+            ),
+        });
+    }
+    let mut idx = Vec::with_capacity(n);
+    for (i, &t) in targets.data().iter().enumerate() {
+        if t < 0.0 || t.fract() != 0.0 {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("target[{i}] must be a non-negative integer, got {t}"),
+            });
+        }
+        let ti = t as usize;
+        if ti >= v {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: format!("target[{i}] = {ti} out of range for V = {v}"),
+            });
+        }
+        idx.push(ti);
+    }
+    Ok((n, v, idx))
 }
 
 /// Standard transformer sinusoidal positional encoding table.
