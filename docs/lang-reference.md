@@ -200,6 +200,8 @@ Newlines and semicolons are both statement separators.
 | `softmax(a, axis)` | 2 | Softmax along `axis`, stabilized by subtracting the per-group max before exponentiation. |
 | `one_hot(labels, k)` | 2 | Convert a length-N label vector to an `NxK` one-hot matrix. |
 | `cross_entropy(logits, targets)` | 2 | Scalar mean negative log-likelihood. `logits` is `[N, V]` or `[B, T, V]`; `targets` is `[N]` or `[B, T]` integer-valued. Fused, numerically-stable log-softmax + NLL; fully differentiable wrt `logits` via `grad(...)`. |
+| `sample(logits, temperature, seed)` | 3 | Categorical sample from a 1-D `[V]` logit vector. Returns a scalar integer token id. `temperature == 0.0` collapses to `argmax(logits)`; otherwise draws from `softmax(logits / temperature)` via inverse-CDF on a single seeded uniform. Same `(logits, temperature, seed)` always yields the same id. |
+| `top_k(logits, k)` | 2 | Return a `[V]` logit vector with all but the top-`k` entries replaced by `-inf`. Pure (no randomness). Compose with `sample` for top-k sampling: `sample(top_k(logits, k), temperature, seed)`. |
 
 ### Visualization
 
