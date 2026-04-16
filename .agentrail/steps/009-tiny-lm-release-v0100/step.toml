@@ -1,6 +1,6 @@
 number = 9
 slug = "tiny-lm-release-v0100"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 5 step 009: Release v0.10.0.
 
