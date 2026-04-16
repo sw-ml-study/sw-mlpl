@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 8,
+    "step": "tutorials-pages"
+  },
+  "action": "Inspected saga 12 tutorial lesson shape and existing tiny_lm demos, validated lesson scripts end-to-end via mlpl-repl -f before committing, used Edit to append lessons, Write for milestone doc, quality gates (cargo test, clippy -D warnings, fmt --check, markdown-checker, sw-checklist), /mw-cp commit + git push.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-16T08:53:57"
+}

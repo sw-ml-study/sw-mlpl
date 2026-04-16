@@ -149,7 +149,7 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
-## Saga 13: Tiny language model end-to-end (IN PROGRESS)
+## Saga 13: Tiny language model end-to-end (COMPLETE)
 First saga that proves the platform thesis: a few lines of MLPL
 train a small transformer LM, generate text from a prompt, and
 render the attention pattern -- all on CPU, all reproducible via
@@ -173,8 +173,8 @@ windows, and `experiment "name" { }`-tracked `train N { adam(... )
 }`. Two new web REPL tutorial lessons -- "Language Model Basics"
 (forward-only, runs in <2s) and "Training and Generating"
 (stripped-down training loop + 20-token generation + attention
-heatmap) -- ship alongside. Target v0.10.0; step 009 cuts the
-release tag. See `docs/milestone-tiny-lm.md`.
+heatmap) -- ship alongside. Delivered v0.10.0. See
+`docs/milestone-tiny-lm.md`.
 
 ## Saga 12: Tokenizers, datasets, and experiment tracking (COMPLETE)
 Closes the last surface-only gap before the Tiny LM. File IO:

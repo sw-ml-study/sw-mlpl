@@ -26,12 +26,12 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 11.5 | Named axes and shape introspection (`label`, annotation syntax, ShapeMismatch, trace labels) | v0.7.5 | [x] |
 | -- | Compile-to-Rust (`mlpl!` macro, `mlpl build`, parity harness, 9x speedup) | v0.8.0 | [x] |
 | 12 | Tokenizers, datasets, experiment tracking (`load`, `shuffle`/`batch`/`split`, `for`, byte-level BPE, `experiment`/`:experiments`/`compare`) | v0.9.0 | [x] |
+| 13 | Tiny language model end-to-end (`embed`, `sinusoidal_encoding`, `causal_attention`, `cross_entropy`, `sample`/`top_k`, `attention_weights`, `tiny_lm`/`tiny_lm_generate`) | v0.10.0 | [x] |
 
 ## Planned
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 13 | Tiny language model end-to-end (CPU) | v0.10 | [~] IN PROGRESS (step 008/009) | 12 |
 | 14 | MLX backend (Apple Silicon, lazy graph, fusion) | v0.11 | [ ] | 13 |
 | 15 | LoRA / QLoRA / quantization | v0.12 | [ ] | 13 |
 | 16 | Embedding visualization and RAG | v0.13 | [ ] | 13 |
