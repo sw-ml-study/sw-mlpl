@@ -34,6 +34,7 @@ pub(crate) fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::For => "'for'".into(),
         TokenKind::In => "'in'".into(),
         TokenKind::Experiment => "'experiment'".into(),
+        TokenKind::Device => "'device'".into(),
     }
 }
 

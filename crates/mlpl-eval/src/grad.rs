@@ -91,12 +91,10 @@ fn eval_tensor_expr(
             let dims = eval_shape_dims(shape, env)?;
             Ok(leaf(DenseArray::zeros(Shape::new(dims))))
         }
-        Expr::Assign { .. }
-        | Expr::Repeat { .. }
-        | Expr::Train { .. }
-        | Expr::For { .. }
-        | Expr::Experiment { .. }
-        | Expr::StrLit(_, _) => Err(EvalError::Unsupported(
+        // Scoped forms and string literals never have a tensor
+        // analogue inside `grad(expr, wrt)` -- the differentiable
+        // surface is array-valued ops only.
+        _ => Err(EvalError::Unsupported(
             "grad: expression form not supported inside grad()".into(),
         )),
     }

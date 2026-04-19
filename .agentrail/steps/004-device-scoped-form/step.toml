@@ -1,6 +1,6 @@
 number = 4
 slug = "device-scoped-form"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 004: device("...") scoped form + parser surface.
 

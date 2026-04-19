@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 3,
+    "step": "mlx-reductions-softmax"
+  },
+  "action": "RED-first TDD: wrote MLX-gated parity tests in parity_tests.rs against fixed [4,3] / [2,3,5] / [B*T=8,V=5] fixtures + Tiny LM end-to-end forward parity test before any implementation, plus CPU gold-standard tests in mlpl-rt to anchor the parity bar. Designed reductions.rs around Option<usize> axis (None = flat) so reduce_mul/mean/argmax stay one fn each, keeping the new module at 6/7 fns and freeing room for softmax/log_softmax/cross_entropy in the same module -- avoided splitting into two new modules which would have busted the 7-modules-per-crate sw-checklist budget. mlpl-mlx routes reductions through mlx-rs's native prod/mean/argmax (with a u32->f32 cast so f64 round-trip works), softmax via softmax_axis, log_softmax via nn::log_softmax (which lowers to x - logsumexp_axis(x, axis, true) -- same max-subtraction LSE form as the CPU path), and cross_entropy by taking the per-row LSE through MLX once and doing the gather+mean on the Rust side (one fewer kernel, less compounding). Tiny LM forward test factored as a Backend function-pointer table so the same forward function runs on both runtimes verbatim, with a cpu_matmul wrapper because mlpl-rt does not export matmul as a free fn (the codegen path lowers it to DenseArray::matmul directly). Tolerance budget: same FP32_TOL (1e-5) as step 002 for single-kernel ops, 2 * FP32_TOL for cross_entropy (two fp32 round-trips), 5e-4 for the chained Tiny LM forward (per-element error compounds across ~10 kernels). Quality gates: cargo test --workspace + cargo test -p mlpl-mlx --features mlx + clippy --all-targets --all-features + fmt + sw-checklist (no new FAILs in mlpl-rt or mlpl-mlx) -- all clean before commit f5ba9b8 push.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-18T21:29:11"
+}

@@ -26,16 +26,36 @@ pub(crate) fn eval_binop(
         BinOpKind::Div => ("div", |a, b| a / b),
     };
     let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
-    let result = match l.apply_binop(&r, f) {
-        Ok(a) => a,
-        Err(ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. }) => {
-            return Err(EvalError::ShapeMismatch {
-                op: name.into(),
-                expected: labeled_shape_of(&l),
-                actual: labeled_shape_of(&r),
-            });
+    // Saga 14 step 004: when inside a `device("mlx") { }` block,
+    // route the binop through `mlpl-mlx`. The CPU path is the
+    // fallback for every other case (`device("cpu")`, no device
+    // block at all, or MLX feature unavailable).
+    let result = if env.device() == "mlx"
+        && let Some(out) = crate::device::try_mlx_dispatch(name, &[l.clone(), r.clone()])
+    {
+        match out {
+            Ok(a) => a,
+            Err(ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. }) => {
+                return Err(EvalError::ShapeMismatch {
+                    op: name.into(),
+                    expected: labeled_shape_of(&l),
+                    actual: labeled_shape_of(&r),
+                });
+            }
+            Err(e) => return Err(crate::device::lift_array_error(e)),
         }
-        Err(e) => return Err(e.into()),
+    } else {
+        match l.apply_binop(&r, f) {
+            Ok(a) => a,
+            Err(ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. }) => {
+                return Err(EvalError::ShapeMismatch {
+                    op: name.into(),
+                    expected: labeled_shape_of(&l),
+                    actual: labeled_shape_of(&r),
+                });
+            }
+            Err(e) => return Err(e.into()),
+        }
     };
     Ok((name, inputs, result))
 }
@@ -62,7 +82,20 @@ pub(crate) fn eval_fncall(
         .map(|a| eval_expr(a, env, trace).and_then(Value::into_array))
         .collect::<Result<Vec<_>, _>>()?;
     let inputs: Vec<TraceValue> = evaluated.iter().map(TraceValue::from_array).collect();
-    let result = mlpl_runtime::call_builtin(name, evaluated)?;
+    // Saga 14 step 004: try the MLX surface first when the caller
+    // is inside a `device("mlx") { }` block. If `mlpl-mlx` does
+    // not implement this primitive, fall through to the CPU
+    // `mlpl_runtime::call_builtin` path -- a transparent fallback
+    // covers builtins like `iota`/`shape`/`zeros` that have no MLX
+    // counterpart and metadata-only ops that do not need GPU
+    // dispatch.
+    let result = if env.device() == "mlx"
+        && let Some(out) = crate::device::try_mlx_dispatch(name, &evaluated)
+    {
+        out.map_err(crate::device::lift_array_error)?
+    } else {
+        mlpl_runtime::call_builtin(name, evaluated)?
+    };
     Ok(("fncall", inputs, result))
 }
 

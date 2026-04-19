@@ -1125,6 +1125,7 @@ dependencies = [
  "mlpl-autograd",
  "mlpl-core",
  "mlpl-lower-rs",
+ "mlpl-mlx",
  "mlpl-parser",
  "mlpl-runtime",
  "mlpl-trace",

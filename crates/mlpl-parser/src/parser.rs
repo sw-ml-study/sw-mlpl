@@ -38,6 +38,9 @@ impl<'a> Parser<'a> {
         if self.tokens[self.pos].kind == TokenKind::Experiment {
             return self.parse_experiment();
         }
+        if self.tokens[self.pos].kind == TokenKind::Device {
+            return self.parse_device();
+        }
         if matches!(self.tokens[self.pos].kind, TokenKind::Ident(_))
             && self
                 .tokens
