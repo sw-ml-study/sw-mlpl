@@ -22,11 +22,12 @@
 //! it.
 //!
 //! Phase 1 grows the primitive surface across three steps:
-//! step 001 introduced `matmul`; step 002 adds the elementwise,
-//! unary-activation, and shape ops listed above; step 003 will
-//! add reductions and softmax. Each primitive is in its own
-//! module so the crate stays under the sw-checklist
-//! function-count budget as the surface expands.
+//! step 001 introduced `matmul`; step 002 added the elementwise,
+//! unary-activation, and shape ops listed above; step 003 closes
+//! the forward-pass gap with reductions, softmax/log_softmax, and
+//! cross_entropy. Each primitive lives in its own module so the
+//! crate stays under the sw-checklist function-count budget as
+//! the surface expands.
 
 pub use mlpl_array::{ArrayError, DenseArray, Shape};
 pub use mlpl_core::LabeledShape;
@@ -40,6 +41,8 @@ mod elementwise;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod matmul;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod reductions;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod shapes;
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
@@ -48,5 +51,7 @@ pub use activations::{exp, log, relu, sigmoid, tanh};
 pub use elementwise::{add, div, mul, neg, sub};
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use matmul::matmul;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+pub use reductions::{argmax, cross_entropy, log_softmax, mean, reduce_mul, softmax};
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use shapes::{reshape, transpose};

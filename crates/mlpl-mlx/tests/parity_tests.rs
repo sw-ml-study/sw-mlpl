@@ -240,3 +240,142 @@ fn transpose_matches_cpu_and_reverses_labels() {
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
 }
+
+// Saga 14 step 003: reductions, normalisation, and loss primitives.
+//
+// These fixtures match the prompt: `[4, 3]` and `[2, 3, 5]` for
+// reductions and softmax, and `[B*T = 8, V = 5]` for cross_entropy.
+// MLX runs in fp32 -- the same `FP32_TOL` budget applies, except
+// the cross_entropy path round-trips through fp32 twice (once for
+// the per-row LSE, once when reading it back), so we double the
+// tolerance there.
+
+const CE_TOL: f64 = 2.0 * FP32_TOL;
+
+fn mat43() -> DenseArray {
+    let data: Vec<f64> = (0..12).map(|i| (i as f64) * 0.5 - 1.0).collect();
+    DenseArray::new(Shape::new(vec![4, 3]), data)
+        .unwrap()
+        .with_labels(vec![Some("batch".into()), Some("feat".into())])
+        .unwrap()
+}
+
+fn cube235() -> DenseArray {
+    let data: Vec<f64> = (0..30).map(|i| ((i as f64) - 15.0) * 0.2).collect();
+    DenseArray::new(Shape::new(vec![2, 3, 5]), data)
+        .unwrap()
+        .with_labels(vec![
+            Some("batch".into()),
+            Some("time".into()),
+            Some("feat".into()),
+        ])
+        .unwrap()
+}
+
+#[test]
+fn reduce_mul_flat_matches_cpu_within_fp32_tolerance() {
+    let a = mat43();
+    let cpu = mlpl_rt::reduce_mul(&a, None).unwrap();
+    let mlx = mlpl_mlx::reduce_mul(&a, None).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn reduce_mul_axis_drops_label_and_matches_cpu() {
+    let a = mat43();
+    let cpu = mlpl_rt::reduce_mul(&a, Some(0)).unwrap();
+    let mlx = mlpl_mlx::reduce_mul(&a, Some(0)).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn mean_axis_on_3d_matches_cpu_and_drops_axis_label() {
+    let a = cube235();
+    let cpu = mlpl_rt::mean(&a, Some(1)).unwrap();
+    let mlx = mlpl_mlx::mean(&a, Some(1)).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn mean_flat_returns_scalar_matching_cpu() {
+    let a = cube235();
+    let cpu = mlpl_rt::mean(&a, None).unwrap();
+    let mlx = mlpl_mlx::mean(&a, None).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn argmax_axis_matches_cpu_index_layout() {
+    let a = mat43();
+    let cpu = mlpl_rt::argmax(&a, Some(1)).unwrap();
+    let mlx = mlpl_mlx::argmax(&a, Some(1)).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    // Indices are exact integers, so no fp tolerance is needed.
+    assert_eq!(mlx.data(), cpu.data());
+}
+
+#[test]
+fn argmax_flat_returns_scalar_matching_cpu() {
+    let a = mat43();
+    let cpu = mlpl_rt::argmax(&a, None).unwrap();
+    let mlx = mlpl_mlx::argmax(&a, None).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.data(), cpu.data());
+}
+
+#[test]
+fn softmax_on_4x3_preserves_labels_and_matches_cpu() {
+    let a = mat43();
+    let cpu = mlpl_rt::softmax(&a, 1).unwrap();
+    let mlx = mlpl_mlx::softmax(&a, 1).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn softmax_on_3d_along_feature_axis_matches_cpu() {
+    let a = cube235();
+    let cpu = mlpl_rt::softmax(&a, 2).unwrap();
+    let mlx = mlpl_mlx::softmax(&a, 2).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn log_softmax_on_4x3_matches_cpu() {
+    let a = mat43();
+    let cpu = mlpl_rt::log_softmax(&a, 1).unwrap();
+    let mlx = mlpl_mlx::log_softmax(&a, 1).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert_eq!(mlx.labels(), cpu.labels());
+    assert_within_fp32(mlx.data(), cpu.data());
+}
+
+#[test]
+fn cross_entropy_on_8x5_matches_cpu_within_fp32_tolerance() {
+    // [B*T = 8, V = 5] logits with mixed signs; targets cover every class.
+    let logits_data: Vec<f64> = (0..40).map(|i| ((i as f64) - 20.0) * 0.15).collect();
+    let logits = DenseArray::new(Shape::new(vec![8, 5]), logits_data).unwrap();
+    let targets = DenseArray::from_vec(vec![0.0, 1.0, 2.0, 3.0, 4.0, 0.0, 2.0, 4.0]);
+    let cpu = mlpl_rt::cross_entropy(&logits, &targets).unwrap();
+    let mlx = mlpl_mlx::cross_entropy(&logits, &targets).unwrap();
+    assert_eq!(mlx.shape(), cpu.shape());
+    assert!(mlx.labels().is_none());
+    assert_eq!(mlx.data().len(), 1);
+    assert!(
+        (mlx.data()[0] - cpu.data()[0]).abs() <= CE_TOL,
+        "cross_entropy mlx={} cpu={} diff={} tol={CE_TOL}",
+        mlx.data()[0],
+        cpu.data()[0],
+        (mlx.data()[0] - cpu.data()[0]).abs()
+    );
+}

@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "mlx-elementwise-shape"
+  },
+  "action": "RED-first TDD: added failing primitive tests to mlpl-rt and MLX-gated parity tests in mlpl-mlx before implementation. Split mlpl-rt and mlpl-mlx into submodules (elementwise/activations/shapes/transforms + common) to stay under sw-checklist function-count budgets. Built shared common.rs in mlpl-mlx with dense_to_mlx/mlx_to_dense_data/merge_labels/matmul_labels/finalize helpers to deduplicate the fp32 round-trip boilerplate across every op. Discovered MLX transpose-view semantics via a failing parity test (mlx=2 cpu=4), tried a multiply-by-one materialization trick that also failed, then fell back to DenseArray::transpose with a docstring explaining the mlx-rs 0.25.3 limitation and the Phase 2 fix path. Added mlpl-rt as dev-dep on mlpl-mlx so parity tests can import both sides. Full /mw-cp checkpoint: cargo test / clippy --all-features / fmt / sw-checklist clean; commit 9b3dd74 pushed to main.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-16T16:44:10"
+}

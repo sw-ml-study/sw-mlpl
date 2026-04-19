@@ -1,6 +1,6 @@
 number = 3
 slug = "mlx-reductions-softmax"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 003: reductions + softmax + log-softmax on MLX.
 

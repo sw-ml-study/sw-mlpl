@@ -1,6 +1,6 @@
 number = 2
 slug = "mlx-elementwise-shape"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 002: core elementwise + shape ops on MLX.
 
@@ -8,5 +8,6 @@ Fill out the forward-..."""
 role = "production"
 context_files = []
 created_at = "2026-04-16T13:36:53"
+completed_at = "2026-04-16T16:44:10"
 task_type = "primitive"
-commits = []
+commits = ["9b3dd7445c5fe315c5fb5a7d403bdc2b88d16bfb"]
