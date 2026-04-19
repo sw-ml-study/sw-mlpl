@@ -128,3 +128,100 @@ pub(crate) fn try_mlx_dispatch(
 pub(crate) fn lift_array_error(err: ArrayError) -> EvalError {
     EvalError::from(err)
 }
+
+/// Run a named builtin with `env`'s active device in mind
+/// (Saga 14 step 005). When `env.device() == "mlx"` and the op is
+/// in the `mlpl-mlx` surface, route through `try_mlx_dispatch`.
+/// Otherwise fall back to the CPU path: elementwise arithmetic
+/// lowers to `DenseArray::apply_binop`/`map`, everything else
+/// goes through `mlpl_runtime::call_builtin`. Used by
+/// `eval_binop`, `eval_fncall`, and every Model DSL forward
+/// helper so the device decision lives in exactly one place.
+pub(crate) fn dispatched_call(
+    env: &Environment,
+    name: &str,
+    args: Vec<DenseArray>,
+) -> Result<DenseArray, EvalError> {
+    if env.device() == "mlx"
+        && let Some(result) = try_mlx_dispatch(name, &args)
+    {
+        return result.map_err(lift_array_error);
+    }
+    match (name, args.len()) {
+        ("add", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a + b)?),
+        ("sub", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a - b)?),
+        ("mul", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a * b)?),
+        ("div", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a / b)?),
+        ("neg", 1) => Ok(args[0].map(|v| -v)),
+        // Model DSL activation names; `mlpl_runtime::call_builtin`
+        // does not own `tanh`/`relu` directly, so the CPU fallback
+        // lowers them to `DenseArray::map`.
+        ("tanh", 1) => Ok(args[0].map(f64::tanh)),
+        ("relu", 1) => Ok(args[0].map(|v| if v > 0.0 { v } else { 0.0 })),
+        _ => Ok(mlpl_runtime::call_builtin(name, args)?),
+    }
+}
+
+/// `to_device(x, target)` builtin (Saga 14 step 005). Records the
+/// target on the environment's per-tensor device map when `x` is a
+/// variable reference, so subsequent `apply(model, ...)` calls can
+/// see the placement. When `x` evaluates to a bare array literal,
+/// the move is purely metadata and there is no named binding to
+/// stamp; the tensor still round-trips cleanly because values
+/// stay CPU-resident until gradient/optimizer steps ship in
+/// later phases. Unknown targets are an error.
+pub(crate) fn eval_to_device(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<DenseArray, EvalError> {
+    if args.len() != 2 {
+        return Err(EvalError::BadArity {
+            func: "to_device".into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    let target = match &args[1] {
+        Expr::StrLit(s, _) => s.clone(),
+        _ => {
+            return Err(EvalError::Unsupported(
+                "to_device: target must be a string literal".into(),
+            ));
+        }
+    };
+    if target != "cpu" && target != "mlx" {
+        return Err(EvalError::Unsupported(format!(
+            "to_device: unknown target '{target}' (expected 'cpu' or 'mlx')"
+        )));
+    }
+    if target == "mlx" && !mlx_available() && env.take_mlx_fallback_warning() {
+        eprintln!(
+            "warning: to_device(..., \"mlx\") requested but the mlx \
+             feature is not compiled in; placement recorded but \
+             values stay CPU-resident."
+        );
+    }
+    // If the argument is an identifier, stamp the device on the
+    // binding so models that reference it downstream see the new
+    // placement. Also propagate to model params when the name
+    // resolves to a model.
+    if let Expr::Ident(name, _) = &args[0] {
+        let is_model = env.get_model(name).is_some();
+        if is_model {
+            let params: Vec<String> = env
+                .get_model(name)
+                .map(crate::model::ModelSpec::params)
+                .unwrap_or_default();
+            for p in params {
+                env.set_tensor_device(p, target.clone());
+            }
+            // Models don't correspond to a single DenseArray value; return
+            // a scalar zero so `to_device(model, "mlx")` can appear in
+            // statement position the same way model assignments do.
+            return Ok(DenseArray::from_scalar(0.0));
+        }
+        env.set_tensor_device(name.clone(), target.clone());
+    }
+    crate::eval::eval_expr(&args[0], env, trace)?.into_array()
+}

@@ -42,10 +42,13 @@ pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelS
     )?;
     let w_data: Vec<f64> = w_init.data().iter().map(|v| v * 0.5).collect();
     let w = DenseArray::new(Shape::new(vec![in_dim, out_dim]), w_data)?;
+    let device = env.device().to_string();
     env.set_param(w_name.clone(), w);
+    env.set_tensor_device(w_name.clone(), device.clone());
 
     let b = DenseArray::zeros(Shape::new(vec![1, out_dim]));
     env.set_param(b_name.clone(), b);
+    env.set_tensor_device(b_name.clone(), device);
 
     Ok(ModelSpec::Linear {
         w: w_name,
@@ -82,7 +85,9 @@ pub(crate) fn eval_embedding(args: &[Expr], env: &mut Environment) -> Result<Mod
     )?;
     let table_data: Vec<f64> = table_init.data().iter().map(|v| v * 0.1).collect();
     let table = DenseArray::new(Shape::new(vec![vocab, d_model]), table_data)?;
+    let device = env.device().to_string();
     env.set_param(table_name.clone(), table);
+    env.set_tensor_device(table_name.clone(), device);
 
     Ok(ModelSpec::Embedding {
         table: table_name,
@@ -164,6 +169,7 @@ pub(crate) fn eval_attention(
     let wo = format!("__attn_Wo_{id}");
     // Use a small offset on the seed so the four projections do not
     // start out identical.
+    let device = env.device().to_string();
     for (i, name) in [&wq, &wk, &wv, &wo].iter().enumerate() {
         let init = mlpl_runtime::call_builtin(
             "randn",
@@ -175,6 +181,7 @@ pub(crate) fn eval_attention(
         let scaled: Vec<f64> = init.data().iter().map(|v| v * 0.5).collect();
         let arr = DenseArray::new(Shape::new(vec![d_model, d_model]), scaled)?;
         env.set_param((*name).clone(), arr);
+        env.set_tensor_device((*name).clone(), device.clone());
     }
     Ok(ModelSpec::Attention {
         wq,
@@ -238,7 +245,37 @@ pub(crate) fn eval_apply(
         .cloned()
         .ok_or_else(|| EvalError::UndefinedVariable(model_name.clone()))?;
     let x = crate::eval::eval_expr(&args[1], env, trace)?.into_array()?;
+    check_device_agreement(&model, &args[1], env)?;
     apply_model(&model, &x, env)
+}
+
+/// Saga 14 step 005: cross-check that the model's params and the
+/// input tensor are on the same device. Raises
+/// `EvalError::DeviceMismatch` with a clear message when the user
+/// forgot a `to_device` call. Only fires when the input is a bare
+/// variable reference; bare array literals carry no device tag
+/// yet and are assumed to live on whatever device the active
+/// `device("...")` scope names.
+fn check_device_agreement(
+    model: &ModelSpec,
+    x_expr: &Expr,
+    env: &Environment,
+) -> Result<(), EvalError> {
+    let x_device = match x_expr {
+        Expr::Ident(name, _) => env.tensor_device(name).to_string(),
+        _ => env.device().to_string(),
+    };
+    for p in model.params() {
+        let p_device = env.tensor_device(&p).to_string();
+        if p_device != x_device {
+            return Err(EvalError::DeviceMismatch {
+                op: "apply".into(),
+                expected: p_device,
+                actual: x_device,
+            });
+        }
+    }
+    Ok(())
 }
 
 fn apply_model(
@@ -254,12 +291,12 @@ fn apply_model(
             let b_arr = env
                 .get(b)
                 .ok_or_else(|| EvalError::UndefinedVariable(b.clone()))?;
-            let xw = x.matmul(w_arr)?;
-            // Broadcast b ([1, out]) up to [n, out] via ones([n, 1]) @ b.
+            let xw = crate::device::dispatched_call(env, "matmul", vec![x.clone(), w_arr.clone()])?;
             let n = xw.shape().dims()[0];
             let ones = DenseArray::new(Shape::new(vec![n, 1]), vec![1.0; n])?;
-            let b_broadcast = ones.matmul(b_arr)?;
-            Ok(xw.apply_binop(&b_broadcast, |a, c| a + c)?)
+            let b_broadcast =
+                crate::device::dispatched_call(env, "matmul", vec![ones, b_arr.clone()])?;
+            crate::device::dispatched_call(env, "add", vec![xw, b_broadcast])
         }
         ModelSpec::Chain(children) => {
             let mut cur = x.clone();
@@ -268,14 +305,19 @@ fn apply_model(
             }
             Ok(cur)
         }
-        ModelSpec::Activation(kind) => match kind {
-            ActKind::Tanh => Ok(x.map(f64::tanh)),
-            ActKind::Relu => Ok(x.map(|v| if v > 0.0 { v } else { 0.0 })),
-            ActKind::Softmax => Ok(mlpl_runtime::call_builtin(
-                "softmax",
-                vec![x.clone(), DenseArray::from_scalar(1.0)],
-            )?),
-        },
+        ModelSpec::Activation(kind) => {
+            let name = match kind {
+                ActKind::Tanh => "tanh",
+                ActKind::Relu => "relu",
+                ActKind::Softmax => "softmax",
+            };
+            let args = if matches!(kind, ActKind::Softmax) {
+                vec![x.clone(), DenseArray::from_scalar(1.0)]
+            } else {
+                vec![x.clone()]
+            };
+            crate::device::dispatched_call(env, name, args)
+        }
         ModelSpec::Residual(inner) => {
             let inner_out = apply_model(inner, x, env)?;
             if inner_out.shape() != x.shape() {
@@ -283,7 +325,7 @@ fn apply_model(
                     "residual: inner block must preserve input shape".into(),
                 ));
             }
-            Ok(x.apply_binop(&inner_out, |a, b| a + b)?)
+            crate::device::dispatched_call(env, "add", vec![x.clone(), inner_out])
         }
         ModelSpec::RmsNorm { .. } => apply_rms_norm(x),
         ModelSpec::Attention {
@@ -299,7 +341,8 @@ fn apply_model(
             let t = env
                 .get(table)
                 .ok_or_else(|| EvalError::UndefinedVariable(table.clone()))?;
-            Ok(tokens_to_onehot(x, *vocab)?.matmul(t)?)
+            let onehot = tokens_to_onehot(x, *vocab)?;
+            crate::device::dispatched_call(env, "matmul", vec![onehot, t.clone()])
         }
     }
 }
@@ -371,19 +414,18 @@ fn apply_attention(
         .get(wo)
         .ok_or_else(|| EvalError::UndefinedVariable(wo.into()))?;
 
-    let q = x.matmul(wq_a)?;
-    let k = x.matmul(wk_a)?;
-    let v = x.matmul(wv_a)?;
+    let q = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wq_a.clone()])?;
+    let k = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wk_a.clone()])?;
+    let v = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wv_a.clone()])?;
 
     let scale = 1.0 / (d_k as f64).sqrt();
-    // Per-head attention. Concatenate per-head outputs back into a
-    // [seq, d_model] matrix in the same column layout as the input.
     let mut concat = vec![0.0_f64; seq * d_model];
     for h in 0..heads {
         let q_h = slice_cols(&q, h * d_k, d_k)?;
         let k_h = slice_cols(&k, h * d_k, d_k)?;
         let v_h = slice_cols(&v, h * d_k, d_k)?;
-        let scores = q_h.matmul(&k_h.transpose())?;
+        let kt = crate::device::dispatched_call(env, "transpose", vec![k_h])?;
+        let scores = crate::device::dispatched_call(env, "matmul", vec![q_h, kt])?;
         let scaled: Vec<f64> = scores
             .data()
             .iter()
@@ -397,11 +439,12 @@ fn apply_attention(
             })
             .collect();
         let scores_scaled = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
-        let attn = mlpl_runtime::call_builtin(
+        let attn = crate::device::dispatched_call(
+            env,
             "softmax",
             vec![scores_scaled, DenseArray::from_scalar(1.0)],
         )?;
-        let head_out = attn.matmul(&v_h)?; // [seq, d_k]
+        let head_out = crate::device::dispatched_call(env, "matmul", vec![attn, v_h])?;
         for r in 0..seq {
             for c in 0..d_k {
                 concat[r * d_model + h * d_k + c] = head_out.data()[r * d_k + c];
@@ -409,7 +452,7 @@ fn apply_attention(
         }
     }
     let concat = DenseArray::new(Shape::new(vec![seq, d_model]), concat)?;
-    Ok(concat.matmul(wo_a)?)
+    crate::device::dispatched_call(env, "matmul", vec![concat, wo_a.clone()])
 }
 
 /// Extract `width` consecutive columns starting at `start` from a
@@ -519,15 +562,16 @@ fn compute_attn_weights(
     let wk_a = env
         .get(wk)
         .ok_or_else(|| EvalError::UndefinedVariable(wk.into()))?;
-    let q = x.matmul(wq_a)?;
-    let k = x.matmul(wk_a)?;
+    let q = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wq_a.clone()])?;
+    let k = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wk_a.clone()])?;
     let scale = 1.0 / (d_k as f64).sqrt();
     let mut all = Vec::with_capacity(heads * seq * seq);
     for h in 0..heads {
         let q_h = slice_cols(&q, h * d_k, d_k)?;
         let k_h = slice_cols(&k, h * d_k, d_k)?;
-        let scaled: Vec<f64> = q_h
-            .matmul(&k_h.transpose())?
+        let kt = crate::device::dispatched_call(env, "transpose", vec![k_h])?;
+        let qk = crate::device::dispatched_call(env, "matmul", vec![q_h, kt])?;
+        let scaled: Vec<f64> = qk
             .data()
             .iter()
             .enumerate()
@@ -540,9 +584,11 @@ fn compute_attn_weights(
             })
             .collect();
         let scores = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
-        let attn =
-            mlpl_runtime::call_builtin("softmax", vec![scores, DenseArray::from_scalar(1.0)])
-                .map_err(|e| EvalError::Unsupported(format!("attention_weights: {e}")))?;
+        let attn = crate::device::dispatched_call(
+            env,
+            "softmax",
+            vec![scores, DenseArray::from_scalar(1.0)],
+        )?;
         all.extend_from_slice(attn.data());
     }
     let shape = if heads == 1 {

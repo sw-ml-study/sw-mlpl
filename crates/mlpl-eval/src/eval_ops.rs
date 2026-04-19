@@ -19,43 +19,30 @@ pub(crate) fn eval_binop(
 ) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
     let l = eval_expr(lhs, env, trace)?.into_array()?;
     let r = eval_expr(rhs, env, trace)?.into_array()?;
-    let (name, f): (&str, fn(f64, f64) -> f64) = match op {
-        BinOpKind::Add => ("add", |a, b| a + b),
-        BinOpKind::Sub => ("sub", |a, b| a - b),
-        BinOpKind::Mul => ("mul", |a, b| a * b),
-        BinOpKind::Div => ("div", |a, b| a / b),
+    let name: &str = match op {
+        BinOpKind::Add => "add",
+        BinOpKind::Sub => "sub",
+        BinOpKind::Mul => "mul",
+        BinOpKind::Div => "div",
     };
     let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
-    // Saga 14 step 004: when inside a `device("mlx") { }` block,
-    // route the binop through `mlpl-mlx`. The CPU path is the
-    // fallback for every other case (`device("cpu")`, no device
-    // block at all, or MLX feature unavailable).
-    let result = if env.device() == "mlx"
-        && let Some(out) = crate::device::try_mlx_dispatch(name, &[l.clone(), r.clone()])
-    {
-        match out {
-            Ok(a) => a,
-            Err(ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. }) => {
-                return Err(EvalError::ShapeMismatch {
-                    op: name.into(),
-                    expected: labeled_shape_of(&l),
-                    actual: labeled_shape_of(&r),
-                });
-            }
-            Err(e) => return Err(crate::device::lift_array_error(e)),
+    // Saga 14 step 004/005: route the binop through the active
+    // device. `dispatched_call` falls back to the CPU path for
+    // everything outside a `device("mlx")` block and for ops that
+    // `mlpl-mlx` does not implement. Shape/label mismatches get
+    // lifted into the Saga 11.5 `EvalError::ShapeMismatch` shape.
+    let result = match crate::device::dispatched_call(env, name, vec![l.clone(), r.clone()]) {
+        Ok(a) => a,
+        Err(EvalError::ArrayError(
+            ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. },
+        )) => {
+            return Err(EvalError::ShapeMismatch {
+                op: name.into(),
+                expected: labeled_shape_of(&l),
+                actual: labeled_shape_of(&r),
+            });
         }
-    } else {
-        match l.apply_binop(&r, f) {
-            Ok(a) => a,
-            Err(ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. }) => {
-                return Err(EvalError::ShapeMismatch {
-                    op: name.into(),
-                    expected: labeled_shape_of(&l),
-                    actual: labeled_shape_of(&r),
-                });
-            }
-            Err(e) => return Err(e.into()),
-        }
+        Err(e) => return Err(e),
     };
     Ok((name, inputs, result))
 }
@@ -82,20 +69,10 @@ pub(crate) fn eval_fncall(
         .map(|a| eval_expr(a, env, trace).and_then(Value::into_array))
         .collect::<Result<Vec<_>, _>>()?;
     let inputs: Vec<TraceValue> = evaluated.iter().map(TraceValue::from_array).collect();
-    // Saga 14 step 004: try the MLX surface first when the caller
-    // is inside a `device("mlx") { }` block. If `mlpl-mlx` does
-    // not implement this primitive, fall through to the CPU
-    // `mlpl_runtime::call_builtin` path -- a transparent fallback
-    // covers builtins like `iota`/`shape`/`zeros` that have no MLX
-    // counterpart and metadata-only ops that do not need GPU
-    // dispatch.
-    let result = if env.device() == "mlx"
-        && let Some(out) = crate::device::try_mlx_dispatch(name, &evaluated)
-    {
-        out.map_err(crate::device::lift_array_error)?
-    } else {
-        mlpl_runtime::call_builtin(name, evaluated)?
-    };
+    // Saga 14 steps 004/005: one routing helper decides CPU vs
+    // MLX, so a Model DSL `apply(...)` forward and a raw user
+    // `foo(x)` call see the same dispatch rules.
+    let result = crate::device::dispatched_call(env, name, evaluated)?;
     Ok(("fncall", inputs, result))
 }
 

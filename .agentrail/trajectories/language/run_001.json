@@ -1,0 +1,11 @@
+{
+  "task_type": "language",
+  "state": {
+    "number": 4,
+    "step": "device-scoped-form"
+  },
+  "action": "Mirrored experiment{}'s grammar shape: device keyword + paren-wrapped string-literal target + brace body. Added TokenKind::Device + Expr::Device { target, body, span } across mlpl-parser (token, error, lexer, ast, parser dispatch, stmts::parse_device). New mlpl-eval/src/device.rs holds eval_device (push target onto env.device_stack, run body, pop, return last value) and the single try_mlx_dispatch helper that maps a name+args tuple to mlpl-mlx::* calls when feature/target gates are satisfied; otherwise returns None for the caller to fall through to mlpl_runtime::call_builtin. eval_binop and eval_fncall both consult env.device() and try the dispatch helper before the CPU path. Added optional mlpl-mlx dep + mlx feature on mlpl-eval. To stay under the 50-line per-fn ceiling on grad.rs::eval_tensor_expr after adding the Device variant, swapped its scoped-form arm list for a wildcard with a clarifying comment. Tests cover: parser AST emission for mlx/cpu/unknown targets, parse rejection for missing parens / non-string target / missing body, device(cpu) no-op + label preservation + assignment visibility outside the block, empty body returns scalar zero, mlx-block shape+label preservation, experiment around device + device around experiment metric capture (one record each), nested device(mlx)+device(cpu) inner override, mlx-feature-gated matmul-in-block parity vs CPU within fp32 tolerance. Dispatch surface chosen to cover every op in mlpl-mlx exactly so the routing is uniform; iota/zeros/ones/randn/load/etc transparently fall through to CPU since they have no MLX counterpart and don't need GPU dispatch. /mw-cp green: workspace tests, mlx-feature tests on mlpl-eval and mlpl-mlx, clippy on both feature combos, fmt, sw-checklist no new FAILs. Commit 318d90f pushed.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-19T00:27:52"
+}
