@@ -51,6 +51,11 @@ pub enum TokenKind {
     In,
     /// `experiment` keyword (Saga 12 step 007).
     Experiment,
+    /// `device` keyword (Saga 14 step 004). Introduces a scoped
+    /// `device("mlx") { body }` or `device("cpu") { body }` block
+    /// that dispatches ops inside the body through the named
+    /// runtime target.
+    Device,
     /// Newline (statement separator).
     Newline,
     /// End of input.

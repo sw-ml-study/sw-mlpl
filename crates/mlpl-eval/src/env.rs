@@ -36,6 +36,17 @@ pub struct Environment {
     pub(crate) exp_dir: Option<PathBuf>,
     /// Append-only log of completed experiments in this env.
     pub(crate) experiment_log: Vec<ExperimentRecord>,
+    /// Stack of active `device("...")` targets. Empty stack means
+    /// the implicit CPU device. The innermost (last) entry wins,
+    /// so nested `device("mlx") { device("cpu") { ... } }` runs
+    /// the inner body on CPU even when the outer is MLX. Saga 14
+    /// step 004.
+    pub(crate) device_stack: Vec<String>,
+    /// One-time-warning flag for the "user asked for MLX but the
+    /// mlx feature is not compiled in" fallback path. Set on the
+    /// first `device("mlx") { }` entry under that condition; the
+    /// warning is emitted at most once per `Environment`.
+    pub(crate) mlx_fallback_warned: bool,
 }
 
 impl Environment {
@@ -152,6 +163,37 @@ impl Environment {
     #[must_use]
     pub fn get_string(&self, name: &str) -> Option<&String> {
         self.strings.get(name)
+    }
+
+    /// Current active device target (Saga 14 step 004). Returns
+    /// `"cpu"` when no `device("...")` block is in scope.
+    #[must_use]
+    pub fn device(&self) -> &str {
+        self.device_stack.last().map_or("cpu", String::as_str)
+    }
+
+    /// Push a new device target onto the stack. Called on
+    /// `device("...") { ... }` entry.
+    pub fn push_device(&mut self, target: String) {
+        self.device_stack.push(target);
+    }
+
+    /// Pop the innermost device target. Called on `device(...)`
+    /// block exit. No-op when the stack is empty (defensive).
+    pub fn pop_device(&mut self) {
+        self.device_stack.pop();
+    }
+
+    /// Take ownership of the "have we already warned about an MLX
+    /// fallback?" flag. Returns `true` the first time it is
+    /// called per `Environment`, `false` thereafter, so callers
+    /// can emit a warning at most once.
+    pub fn take_mlx_fallback_warning(&mut self) -> bool {
+        if self.mlx_fallback_warned {
+            return false;
+        }
+        self.mlx_fallback_warned = true;
+        true
     }
 }
 

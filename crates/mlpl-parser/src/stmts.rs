@@ -84,6 +84,31 @@ impl Parser<'_> {
         })
     }
 
+    /// Parse `device("target") { body }`. Saga 14 step 004. The
+    /// target is a string literal (the grammar is unambiguous when
+    /// `device` is reserved); anything else is a parse error.
+    pub(crate) fn parse_device(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1; // skip 'device'
+        self.expect(&TokenKind::LParen)?;
+        let tok = &self.tokens[self.pos];
+        let TokenKind::StrLit(target) = &tok.kind else {
+            return Err(ParseError::UnexpectedToken {
+                found: describe_kind(&tok.kind),
+                span: tok.span,
+            });
+        };
+        let target = target.clone();
+        self.pos += 1;
+        self.expect(&TokenKind::RParen)?;
+        let (body, end) = self.parse_braced_body()?;
+        Ok(Expr::Device {
+            target,
+            body,
+            span: Span::new(start.start, end.end),
+        })
+    }
+
     /// Parse `for <ident> in <expr> { body }`. Saga 12 step 003.
     pub(crate) fn parse_for(&mut self) -> Result<Expr, ParseError> {
         let start = self.tokens[self.pos].span;

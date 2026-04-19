@@ -397,6 +397,7 @@ pub(crate) fn eval_expr(
         Expr::Experiment { name, body, .. } => {
             crate::experiment::eval_experiment(name, body, env, trace)?
         }
+        Expr::Device { target, body, .. } => crate::device::eval_device(target, body, env, trace)?,
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;
