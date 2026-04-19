@@ -13,15 +13,17 @@
 //! carry a parser or an interpreter at runtime.
 //!
 //! Forward-pass primitives are split across sibling modules
-//! (`elementwise`, `activations`, `transforms`) to stay under the
-//! sw-checklist function-count budget as Saga 14 grows the surface.
-//! `mlpl-mlx` mirrors this layout and signature, so the
-//! compile-to-rust codegen can target either runtime interchangeably.
+//! (`elementwise`, `activations`, `transforms`, `reductions`) to
+//! stay under the sw-checklist function-count budget as Saga 14
+//! grows the surface. `mlpl-mlx` mirrors this layout and signature,
+//! so the compile-to-rust codegen can target either runtime
+//! interchangeably.
 
 mod activations;
 mod array_lit;
 mod elementwise;
 mod error;
+mod reductions;
 mod transforms;
 
 pub use activations::{exp, log, relu, sigmoid, tanh};
@@ -29,6 +31,7 @@ pub use array_lit::array_lit;
 pub use elementwise::{add, div, mul, neg, sub};
 pub use mlpl_array::{ArrayError, DenseArray, Shape};
 pub use mlpl_core::LabeledShape;
+pub use reductions::{argmax, cross_entropy, log_softmax, mean, reduce_mul, softmax};
 pub use transforms::{reduce_add, reduce_add_axis, reshape, transpose};
 
 /// `iota(n)` -- the vector `[0, 1, ..., n-1]` as f64 values.
