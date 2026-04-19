@@ -126,6 +126,12 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "to_device"
+    {
+        let result = crate::device::eval_to_device(args, env, trace)?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "reshape_labeled"
     {
         if args.len() != 3 {

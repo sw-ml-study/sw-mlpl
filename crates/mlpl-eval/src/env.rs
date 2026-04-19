@@ -42,6 +42,14 @@ pub struct Environment {
     /// the inner body on CPU even when the outer is MLX. Saga 14
     /// step 004.
     pub(crate) device_stack: Vec<String>,
+    /// Per-tensor device placement. Saga 14 step 005: `to_device`
+    /// records the target here keyed by the tensor's variable
+    /// name. Missing keys default to `"cpu"`. Params allocated
+    /// inside a `device("mlx") { }` block are pre-stamped with
+    /// `"mlx"` by the model constructors so `apply(model, X)` can
+    /// cross-check placement without the caller needing to remember
+    /// to call `to_device` on every param.
+    pub(crate) tensor_device: HashMap<String, String>,
     /// One-time-warning flag for the "user asked for MLX but the
     /// mlx feature is not compiled in" fallback path. Set on the
     /// first `device("mlx") { }` entry under that condition; the
@@ -194,6 +202,23 @@ impl Environment {
         }
         self.mlx_fallback_warned = true;
         true
+    }
+
+    /// Device placement recorded for the tensor bound to `name`.
+    /// Saga 14 step 005. Returns `"cpu"` for names that were never
+    /// passed through `to_device` and for names that don't exist
+    /// (the evaluator looks up the value separately via `get`).
+    #[must_use]
+    pub fn tensor_device(&self, name: &str) -> &str {
+        self.tensor_device.get(name).map_or("cpu", String::as_str)
+    }
+
+    /// Stamp `name` with device placement `target`. Saga 14 step
+    /// 005; used by `to_device(x, target)` and by model
+    /// constructors when they allocate params inside a
+    /// `device("mlx") { }` block.
+    pub fn set_tensor_device(&mut self, name: String, target: String) {
+        self.tensor_device.insert(name, target);
     }
 }
 

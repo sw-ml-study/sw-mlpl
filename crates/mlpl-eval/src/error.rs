@@ -47,6 +47,22 @@ pub enum EvalError {
         /// Right-hand operand's labeled shape.
         actual: LabeledShape,
     },
+    /// Two tensors (or a tensor and the active `device("...") { }`
+    /// scope) disagree on device placement. Saga 14 step 005: raised
+    /// by `apply(model, X)` when the input lives on a different
+    /// device than the model's parameters, and by any op that
+    /// receives mixed-device operands. `op` names the site
+    /// (`"matmul"`, `"apply"`, `"add"`, ...); `expected` is the
+    /// device the left-hand side carries and `actual` is the
+    /// right-hand side's.
+    DeviceMismatch {
+        /// Operator or builtin name.
+        op: String,
+        /// Device the left-hand (or first) operand is on.
+        expected: String,
+        /// Device the right-hand (or second) operand is on.
+        actual: String,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -76,6 +92,11 @@ impl std::fmt::Display for EvalError {
                 expected,
                 actual,
             } => write!(f, "{op}: expected {expected}, got {actual}"),
+            Self::DeviceMismatch {
+                op,
+                expected,
+                actual,
+            } => write!(f, "device mismatch: {op} on {expected} vs {actual}"),
         }
     }
 }
