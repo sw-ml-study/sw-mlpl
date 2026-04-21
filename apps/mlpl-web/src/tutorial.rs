@@ -485,4 +485,16 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Re-run the repeat 20 { ... } block with a higher temperature (1.5) and a wider top-k (40). Does the generated decode become less repetitive? Then run :experiments to see the recorded tutorial_tiny_lm run.",
     },
+    Lesson {
+        title: "Running on MLX",
+        intro: "Saga 14 adds device(\"target\") { body } so the same source runs on CPU or Apple MLX without edits. Browser WASM is CPU-only, so device(\"mlx\") { ... } is a no-op here (values/shapes still match). On Apple Silicon with `cargo run -p mlpl-repl --features mlx`, matmul/softmax/autograd dispatch through mlpl-mlx. docs/using-mlx.md + docs/benchmarks.md have measured throughput -- step 008 was 0.26x on tiny_lm_train_step, under the 5x gate. Lesson here is source-level parity, not speed.",
+        examples: &[
+            "device(\"cpu\") { randn(7, [4, 8]) }",
+            "device(\"mlx\") { randn(7, [4, 8]) }",
+            "device(\"mlx\") { m = linear(4, 3, 0) }",
+            "x = reshape(iota(8), [2, 4]) ; to_device(x, \"mlx\")",
+            "device(\"mlx\") { apply(m, x) }",
+        ],
+        try_it: "Build a model outside any device block, then apply(m, X) inside device(\"mlx\") { ... } with to_device(X, \"mlx\"). MLPL raises EvalError::DeviceMismatch naming the op and both sides' devices.",
+    },
 ];
