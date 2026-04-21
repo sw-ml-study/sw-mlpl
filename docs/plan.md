@@ -180,8 +180,30 @@ frontier items from section 6 of `research2.txt`.
 
 ### Saga 19 -- LLM-as-tool integration
 REST client built-ins, teacher-model distillation workflows,
-codegen helpers. Intentionally last: secondary to the
-"build your own model" story.
+codegen helpers. Intentionally last in the "core platform"
+sequence: secondary to the "build your own model" story.
+
+### Saga 20 -- Perturbation research demos
+Express the [Neural Thickets / nt-rs](https://github.com/swcraig/nt-rs)
+algorithm (RandOpt-style weight perturbation specialists +
+top-K ensembling) as a single MLPL program with a
+specialization heatmap output. Adds four small builtins to the
+language surface: `clone_model(m)` (deep copy with fresh param
+names), `perturb_params(m, family, sigma, seed)` (family-targeted
+randn add, where `family` matches the layer-name patterns the
+Saga 11/13 model constructors already use internally),
+`argtop_k(values, k)` (index-returning companion to the existing
+`top_k`), and `scatter(buffer, index, value)` (scalar write into
+a rank-1 array, sized to drive `repeat N` accumulation loops).
+Headline demo `demos/neural_thicket.mlpl` trains a Saga 13 Tiny
+LM as the base, sweeps four perturbation families on MLX, scores
+on held-out tokens, runs a top-K ensemble, and renders a
+`[family x seed]` heatmap. Stays single-process (no distributed
+coordination -- that is Saga 17) and stays on the Tiny LM (no
+real pretrained model -- that needs Saga 15+'s checkpoint format
+or Saga 19's REST sidecar). Depends on Saga 14 for the variant-
+loop speed budget. See `docs/mlpl-for-neural-thickets.md` for
+the design sketch and full strawman source.
 
 ## Dependency graph (abbreviated)
 
@@ -190,6 +212,7 @@ codegen helpers. Intentionally last: secondary to the
   |-- 10 optimizers -- 11 model DSL -- 11.5 named axes -- 12 data+tracking -- 13 tiny LM
   |                                                                                |
   |                                                                                +-- 14 MLX
+  |                                                                                |    \-- 20 perturbation demos
   |                                                                                +-- 15 LoRA
   |                                                                                +-- 16 viz/RAG
   |                                                                                +-- 17 CUDA/dist
@@ -198,7 +221,9 @@ codegen helpers. Intentionally last: secondary to the
 ```
 
 Sagas 14-19 can reorder based on hardware access and interest;
-9-13 (plus the inserted 11.5) must run in order.
+9-13 (plus the inserted 11.5) must run in order. Saga 20 needs
+14 finished (variant-loop throughput) but is otherwise free to
+slot wherever a research-demo cycle makes sense.
 
 ## Start next: Saga 13 -- Tiny LM end-to-end (CPU)
 

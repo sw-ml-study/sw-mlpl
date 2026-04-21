@@ -1,0 +1,11 @@
+{
+  "task_type": "runtime",
+  "state": {
+    "number": 5,
+    "step": "backend-dispatch-model"
+  },
+  "action": "Refactored eval_binop and eval_fncall to collapse onto a single dispatched_call helper in device.rs, which is now the only place the CPU-vs-MLX decision lives. Extended dispatched_call's CPU fallback to handle add/sub/mul/div/neg via DenseArray::apply_binop (mlpl_runtime::call_builtin does not own those names), plus tanh/relu via DenseArray::map (call_builtin has tanh_fn but the Model DSL uses tanh/relu). Found and fixed this when tanh_layer/relu_layer model tests started failing after the eval_binop refactor. model_dispatch::apply_model + apply_attention + compute_attn_weights all thread matmul/transpose/softmax/add through dispatched_call so the Saga 11 models participate in MLX dispatch. rms_norm stays pure Rust (no MLX primitive + small scaling work) and its output feeds back into MLX ops downstream. Model constructors (linear, embed, attention/causal_attention) call env.device() once then set_tensor_device for every param they allocate -- clean device tagging at birth. eval_apply gained a check_device_agreement helper that walks model.params() and compares each to the input's tag (only when input is a bare Ident, so ephemeral intermediates in device(\"mlx\") blocks don't false-positive). EvalError::DeviceMismatch variant added with structured {op, expected, actual} and Display. to_device(x, target) dispatched from eval.rs alongside other special builtins; the logic for target validation, optional warning, tensor vs model stamping all lives in device::eval_to_device. Tests cover both the unit-level contract (to_device round-trip, unknown target error, device mismatch error) and the integration end-to-end (linear/chain/causal_attention/Tiny LM parity vs CPU within fp32 tolerance). 1e-3 tolerance chosen for the multi-layer path because per-op fp32 errors compound through ~10 MLX kernels in the Tiny LM; tighter 1e-5 held for single-kernel parity in earlier steps but is too strict end-to-end. /mw-cp green: cargo test --workspace, cargo test -p mlpl-eval --features mlx, cargo test -p mlpl-mlx --features mlx, clippy both feature modes with -D warnings, fmt, sw-checklist no new FAILs. Commit 8dbf2c8 pushed.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-19T08:40:04"
+}
