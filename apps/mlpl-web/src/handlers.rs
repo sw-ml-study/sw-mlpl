@@ -99,17 +99,31 @@ pub fn make_run_demo(
             is_error: false,
             kind: EntryKind::Narration,
         };
-        history.set(vec![intro_entry]);
-        // Evaluate demo lines asynchronously: each line runs in its
-        // own `Timeout::new(0, ...)` tick so the browser can paint
-        // the preceding line's output and process input between
-        // lines. A long-running single line (e.g. `train 30 { ...
-        // }`) still blocks the event loop *during* its own eval --
-        // fixing that needs Web Workers (see docs/worker-threads.md)
-        // -- but the cross-line yield keeps the tab from triggering
-        // the "unresponsive" dialog on multi-line demos where the
-        // total wall clock is the problem.
-        schedule_demo_line(session.clone(), history.clone(), demo, 0);
+        let entries = vec![intro_entry];
+        history.set(entries.clone());
+        // Evaluate demo lines asynchronously: each line runs in
+        // its own `Timeout::new(0, ...)` tick so the browser can
+        // paint the preceding line's output and process input
+        // between lines. A long-running single line (e.g. `train
+        // 30 { ... }`) still blocks the event loop *during* its
+        // own eval -- fixing that needs Web Workers (see
+        // docs/worker-threads.md) -- but the cross-line yield
+        // keeps the tab from triggering the "unresponsive"
+        // dialog on multi-line demos where the total wall clock
+        // is the problem.
+        //
+        // We thread the accumulated `entries` vec through
+        // recursion explicitly rather than reading from the
+        // `UseStateHandle` inside each tick: a state handle is
+        // snapshotted at the callback's closure-creation time
+        // and does not refresh between `set()` calls, so reading
+        // via `(*history).clone()` inside a deferred Timeout
+        // reliably sees the stale initial value and each tick
+        // overwrites the previous one's write. Passing `entries`
+        // by move keeps a single authoritative Rust-side source
+        // of truth; `history.set(entries.clone())` is purely for
+        // the UI paint.
+        schedule_demo_line(session.clone(), history.clone(), entries, demo, 0);
     })
 }
 
@@ -130,13 +144,14 @@ fn bind_demo_metadata(session: &WasmSession, demo: &crate::demos::Demo) {
 fn schedule_demo_line(
     session: Rc<RefCell<WasmSession>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
+    mut entries: Vec<HistoryEntry>,
     demo: &'static crate::demos::Demo,
     idx: usize,
 ) {
     let lines = demo.lines;
     if idx >= lines.len() {
-        // Last line ran -- append the takeaway narration panel.
-        let mut entries = (*history).clone();
+        // Last line ran -- append the takeaway narration panel
+        // and paint the final history state.
         entries.push(HistoryEntry {
             input: "What just happened".to_string(),
             output: demo.takeaway.to_string(),
@@ -152,15 +167,14 @@ fn schedule_demo_line(
         let line = lines[idx];
         let result = session.borrow().eval(line);
         let is_error = result.starts_with("error:");
-        let mut entries = (*history).clone();
         entries.push(HistoryEntry {
             input: line.to_string(),
             output: result,
             is_error,
             kind: EntryKind::Command,
         });
-        history.set(entries);
-        schedule_demo_line(session_next, history_next, demo, idx + 1);
+        history.set(entries.clone());
+        schedule_demo_line(session_next, history_next, entries, demo, idx + 1);
     })
     .forget();
 }
