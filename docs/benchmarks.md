@@ -135,6 +135,114 @@ a previous run.
   entry. Once a later saga extends lowering, those workloads can
   land here.
 
+## Saga 14: MLX vs interpreter CPU
+
+A second Criterion harness lives at
+`crates/mlpl-bench/benches/mlx_vs_cpu.rs` and runs the same
+interpreter code path twice per workload: once on the CPU
+runtime and once wrapped in `device("mlx") { ... }` so ops
+dispatch through `mlpl-mlx`. Triple-gated on macOS + aarch64 +
+the `mlx` Cargo feature; `cargo bench -p mlpl-bench` on any
+non-MLX host skips this binary entirely.
+
+```bash
+# Full MLX harness (roughly 40s with Criterion's default budget)
+cargo bench -p mlpl-bench --features mlx --bench mlx_vs_cpu
+```
+
+### Measured numbers (Apple Silicon, 2026-04-21)
+
+Cold timings are one-shot wall-clock prints from the harness and
+include MLX's first-call compile overhead. Warm timings are
+Criterion's steady-state medians after a 3s warm-up.
+
+| Workload | CPU cold | MLX cold | CPU warm | MLX warm | Warm ratio |
+|---|---:|---:|---:|---:|---:|
+| `reshape_reduce_100x100` | 206 us | 347 us | 68.5 us | 81.1 us | **0.84x** (MLX slower) |
+| `tiny_lm_train_step` | 769 us | 2.60 ms | 619 us | 2.36 ms | **0.26x** (MLX slower) |
+
+`tiny_lm_train_step` is one Adam step (forward + cross_entropy +
+backward + Adam update) on a Saga 13 Tiny LM-shaped slice scaled
+to V=60, d=16, T=8, single-head causal attention. The full
+`demos/tiny_lm_mlx.mlpl` is V=280, d=32, T=32, 200 steps --
+roughly 20x more work per iteration, so its warm-path
+performance trends in the same direction but amortizes more of
+the per-op overhead.
+
+### Go/no-go gate result: MISS
+
+The Saga 14 plan set **5x warm-path speedup** as the go/no-go
+gate for step 008, with a 10-50x target per `docs/using-mlx.md`.
+Measured MLX performance is **below parity** on both workloads
+at Tiny LM scale: about 0.84x on the reshape+reduce and 0.26x on
+the training step. The step-008 prompt allows this outcome --
+the plan explicitly says "do not block the saga on hitting 10x;
+ship the MLX demo anyway with the honest number documented, and
+open a follow-up step for optimization."
+
+### Why MLX is currently slower at this scale
+
+Four compounding costs, all diagnosable from the current
+`mlpl-mlx` dispatch path:
+
+1. **f32 <-> f64 round-trip on every op.** `common::dense_to_mlx`
+   casts input data f64 -> f32 and allocates a fresh MLX array;
+   `mlx_to_dense_data` does the reverse on the way out. At
+   100x100 (10 k elements) or Tiny LM-slice sizes (~1 k
+   elements per op), the copy is a noticeable fraction of total
+   work; for workloads that would dominate the matmul FLOPs on
+   a GPU (think 1024x1024), the copy becomes negligible.
+
+2. **No graph fusion.** Each primitive -- `matmul`, `softmax`,
+   `add`, etc. -- wraps the MLX call in an `eval()` that
+   materializes immediately. MLX's lazy graph (its main
+   performance advantage over eager frameworks) is never given
+   more than one node at a time. A proper backend would submit
+   a sequence of ops and evaluate once per training step;
+   designing that interface is a follow-up.
+
+3. **Saga 14 step 006 tape re-materialization.** Inside
+   `grad(expr, wrt)` we compute the forward on CPU to build the
+   autograd tape, *then* walk the tape and recompute every node
+   on MLX to give backward MLX-rounded values. That's 2x the
+   forward work. Option (a) -- leaning on
+   `mlx_rs::transforms::grad` -- would cut that in half but
+   requires rewriting the tape structure, which the step-006
+   commit explicitly deferred as a future optimization.
+
+4. **Small inner dimensions on Tiny LM.** d=16 (or d=32 in the
+   full demo) gives a [4, 16] @ [16, 16] matmul where the MLX
+   kernel launch overhead is comparable to the arithmetic. The
+   same architecture at d=256 or d=512 (a real small LLM) would
+   flip the ratio decisively; we just are not running anything
+   that big in this saga.
+
+### What ships anyway
+
+- `demos/tiny_lm_mlx.mlpl` -- the Saga 13 Tiny LM body wrapped
+  in `device("mlx") { ... }`. Loss curve matches the CPU path
+  within fp32 tolerance (validated by a micro-variant parity
+  test in `crates/mlpl-eval/tests/tiny_lm_mlx_demo_tests.rs`).
+  Correctness is proved; speed is not.
+- `mlpl-bench` MLX row -- reproducible numbers for future
+  optimization work to target.
+- Every MLX-gated parity test across the saga (matmul,
+  reductions, softmax, cross_entropy, Tiny LM forward, autograd
+  gradcheck, optimizer step) continues to pass, so the
+  correctness story is complete.
+
+### What's deferred to a future step
+
+A dedicated "MLX throughput" step (slotting naturally before
+the Saga 14 release) would target the four bottlenecks above.
+Most likely first lever: skip the tape re-materialization when
+the forward is already MLX-native (cuts one of the two MLX
+forward passes per gradient). After that, lifting the f32 round
+trips by keeping MLX arrays alive across multiple ops (instead
+of materializing on every `eval()`) is the biggest remaining
+win. Both are perf optimizations; neither changes numerical
+behaviour, so the parity tests will carry forward unchanged.
+
 ## Related
 
 - `crates/mlpl-parity-tests/tests/parity_tests.rs` --

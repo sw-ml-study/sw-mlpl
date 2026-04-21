@@ -7,6 +7,14 @@ version.workspace = true
 [lib]
 path = "src/lib.rs"
 
+[features]
+default = []
+# Saga 14 step 008: enable the MLX-vs-CPU Criterion harness. Pulls
+# in `mlpl-eval` with its `mlx` feature so `device("mlx") { }`
+# blocks in the bench source actually route through `mlpl-mlx`.
+# Triple-gated at the call site on macOS + aarch64.
+mlx = ["mlpl-eval/mlx"]
+
 [dependencies]
 mlpl-rt = { path = "../mlpl-rt" }
 
@@ -23,3 +31,8 @@ mlpl-parser = { path = "../mlpl-parser" }
 [[bench]]
 name = "interp_vs_compiled"
 harness = false
+
+[[bench]]
+name = "mlx_vs_cpu"
+harness = false
+required-features = ["mlx"]

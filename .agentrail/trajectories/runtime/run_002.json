@@ -1,0 +1,11 @@
+{
+  "task_type": "runtime",
+  "state": {
+    "number": 7,
+    "step": "mlx-optimizers-train"
+  },
+  "action": "Read adam and momentum_sgd implementations in grad.rs and confirmed both call eval_grad internally for each param. Since step 006 wired eval_grad to re-materialize the tape through mlpl-mlx, gradients were already MLX-quality inside device(mlx); only the post-grad Adam/SGD arithmetic was open, and it's pure elementwise math that produces CPU-comparable numbers from the same gradients. Wrote 5 parity tests that validate this was the case without source changes. TDD approach intentionally skipped a RED phase since I predicted (correctly) that step 006's groundwork already closed the loop -- wrote the tests first, they all passed on first run. Documented design choice (OptimizerState buffers stay CPU-resident) in both the test file docstring and commit message so step 008's Tiny LM benchmark knows what to expect. Ran /mw-cp green: workspace tests, mlx-feature tests on both mlpl-eval and mlpl-mlx, clippy both feature modes with -D warnings, fmt, sw-checklist no new FAILs. Commit 498fcaa pushed.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-21T09:57:36"
+}
