@@ -1,6 +1,6 @@
 number = 9
 slug = "tutorials-pages-mlx"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 5 step 009: tutorial lesson + using-mlx.md retrospective.
 
@@ -8,5 +8,6 @@ Make Saga 14..."""
 role = "production"
 context_files = []
 created_at = "2026-04-16T13:36:53"
+completed_at = "2026-04-21T12:03:13"
 task_type = "docs"
-commits = []
+commits = ["e4f96c993ad29fbd3f8f9fad73e7caa18bfc9392"]
