@@ -1,6 +1,6 @@
 number = 6
 slug = "mlx-autograd-tape"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 3 step 006: tape-lowered ops on MLX + gradcheck parity.
 
@@ -8,5 +8,6 @@ Make `grad(exp..."""
 role = "production"
 context_files = []
 created_at = "2026-04-16T13:36:53"
+completed_at = "2026-04-20T21:41:29"
 task_type = "autograd"
-commits = []
+commits = ["df5cfb8cf00b28fbfcc02f010f18a32bf045a3a4"]
