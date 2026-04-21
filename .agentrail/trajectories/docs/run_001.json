@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 9,
+    "step": "tutorials-pages-mlx"
+  },
+  "action": "Added Lesson entry in apps/mlpl-web/src/tutorial.rs with title 'Running on MLX' and body that highlights source-level parity over speed (WASM browser can't actually dispatch MLX). Rewrote docs/using-mlx.md end-to-end: removed planned disclaimer, replaced design sketch with shipped-API reference, added Performance section with step-008 measured table, added Retrospective section honest about what sketch got right and wrong. Updated docs/status.md (Saga 14 moves from Planned to Delivered, added Saga 20 row), docs/saga.md (new Saga 14 retrospective entry), docs/plan.md (Saga 14 marked COMPLETE, v0.11.0). Ran scripts/build-pages.sh twice (second time after trimming the new lesson to fit the 500-LOC module ceiling; had to consolidate two example lines with a semicolon separator). markdown-checker clean on all four touched docs. Committed source + pages together per rebuild-pages invariant. /mw-cp green. Commit e4f96c9 pushed.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-21T12:03:13"
+}
