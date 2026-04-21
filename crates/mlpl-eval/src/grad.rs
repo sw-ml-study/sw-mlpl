@@ -42,6 +42,16 @@ pub(crate) fn eval_grad(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         params.insert(name.clone(), Tensor::param(Rc::clone(&tape), value.clone()));
     }
     let root = eval_tensor_expr(&args[0], env, &tape, &params)?;
+    // Saga 14 step 006: when the grad call is inside a
+    // `device("mlx") { }` block, re-run the forward pass through
+    // `mlpl-mlx` so the tape's per-node values are MLX-rounded.
+    // The CPU backward formulas in `mlpl-autograd::ops` then
+    // operate on those values, producing gradients that match the
+    // all-CPU path within fp32 tolerance. See
+    // `device::materialize_tape_on_mlx` for the design rationale.
+    if env.device() == "mlx" {
+        crate::device::materialize_tape_on_mlx(&tape);
+    }
     root.backward();
     let wrt_tensor = params
         .get(&wrt_name)

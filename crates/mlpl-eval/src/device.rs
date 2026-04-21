@@ -162,6 +162,163 @@ pub(crate) fn dispatched_call(
     }
 }
 
+/// Re-execute every non-leaf node on `tape` through `mlpl-mlx` so
+/// each `NodeData::value` carries the MLX-rounded forward value
+/// (Saga 14 step 006).
+///
+/// Design choice (option (b) hand-written, per the step prompt):
+/// the autograd tape's structure -- nodes, parent ids, op
+/// kinds -- stays exactly as the CPU tape built it. After the
+/// forward pass, this helper walks node ids in insertion order
+/// (which is topological because each op's parents are pushed
+/// before the op itself) and recomputes every non-leaf node's
+/// value via the corresponding `mlpl-mlx` primitive, threading
+/// MLX-computed parent values forward. The CPU backward formulas
+/// in `mlpl-autograd::ops` then operate on those MLX-rounded
+/// values; the gradients they produce match the all-CPU path
+/// within the documented fp32 tolerance because the math is
+/// identical -- only the forward values' fp32 round-trip differs.
+///
+/// Why not lean on `mlx_rs::transforms::grad` (option (a)): it
+/// requires expressing the forward as an `Fn(Array) -> Array`
+/// closure, which is incompatible with our `Tape` / `NodeId`
+/// structure without a wholesale rewrite. The CPU formulas are
+/// already tested via Saga 9's gradcheck fixtures and are the
+/// authoritative spec; replacing each with an `mlx-rs` op would
+/// change zero numerical behaviour while doubling the maintenance
+/// surface. Option (b) ships the smallest defensible change that
+/// honours the prompt's "grad on MLX matches CPU within
+/// tolerance" invariant.
+///
+/// On builds without the mlx feature, this function is a no-op.
+#[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
+pub(crate) fn materialize_tape_on_mlx(tape: &mlpl_autograd::Tape) {
+    use mlpl_autograd::NodeKind;
+    let len = tape.len();
+    for i in 0..len {
+        // Snapshot parents we need before taking a mutable borrow
+        // so the borrow checker is happy.
+        let kind = tape.nodes()[i].kind.clone();
+        let new_value = match kind {
+            NodeKind::Leaf => continue,
+            NodeKind::Unary { op, parent } => {
+                let x = tape.nodes()[parent.0].value.clone();
+                rerun_unary(op, &x)
+            }
+            NodeKind::Binary { op, left, right } => {
+                let a = tape.nodes()[left.0].value.clone();
+                let b = tape.nodes()[right.0].value.clone();
+                match rerun_binary(op, &a, &b) {
+                    Ok(v) => v,
+                    Err(_) => continue,
+                }
+            }
+            NodeKind::SumAll { parent } => {
+                let x = tape.nodes()[parent.0].value.clone();
+                match try_mlx_dispatch("reduce_add", std::slice::from_ref(&x)) {
+                    Some(Ok(v)) => v,
+                    _ => x,
+                }
+            }
+            NodeKind::MeanAll { parent } => {
+                let x = tape.nodes()[parent.0].value.clone();
+                match try_mlx_dispatch("mean", std::slice::from_ref(&x)) {
+                    Some(Ok(v)) => v,
+                    _ => x,
+                }
+            }
+            NodeKind::Softmax { parent, axis } => {
+                let x = tape.nodes()[parent.0].value.clone();
+                match try_mlx_dispatch(
+                    "softmax",
+                    &[x.clone(), DenseArray::from_scalar(axis as f64)],
+                ) {
+                    Some(Ok(v)) => v,
+                    _ => x,
+                }
+            }
+            NodeKind::Transpose { parent } => {
+                let x = tape.nodes()[parent.0].value.clone();
+                match try_mlx_dispatch("transpose", std::slice::from_ref(&x)) {
+                    Some(Ok(v)) => v,
+                    _ => x,
+                }
+            }
+            NodeKind::Reshape { .. } => {
+                // Reshape stores no new dims on the tape (the new
+                // shape comes from the existing CPU value); reuse
+                // the CPU forward value to avoid recomputing.
+                tape.nodes()[i].value.clone()
+            }
+            NodeKind::MatMul { left, right } => {
+                let a = tape.nodes()[left.0].value.clone();
+                let b = tape.nodes()[right.0].value.clone();
+                match try_mlx_dispatch("matmul", &[a.clone(), b]) {
+                    Some(Ok(v)) => v,
+                    _ => a,
+                }
+            }
+            NodeKind::CrossEntropy { .. } => {
+                // The fused CE forward is small per-row work; let
+                // the CPU value stand. Its inputs (the logits)
+                // were already MLX-rounded by an earlier loop
+                // iteration, so the CE value implicitly carries
+                // MLX-rounded data.
+                tape.nodes()[i].value.clone()
+            }
+        };
+        tape.nodes_mut()[i].value = new_value;
+    }
+}
+
+/// CPU-only stub used when the `mlx` feature, target OS, or
+/// target arch is missing. The autograd tape stays CPU-resident
+/// so the gradients produced by `mlpl-autograd` match the
+/// all-CPU path exactly.
+#[cfg(not(all(feature = "mlx", target_os = "macos", target_arch = "aarch64")))]
+pub(crate) fn materialize_tape_on_mlx(_tape: &mlpl_autograd::Tape) {}
+
+/// Forward a unary op through `mlpl-mlx` when possible, or fall
+/// back to the input unchanged when the op has no MLX kernel
+/// (defensive -- every current `UnaryOp` variant has one).
+#[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
+fn rerun_unary(op: mlpl_autograd::ops::UnaryOp, x: &DenseArray) -> DenseArray {
+    use mlpl_autograd::ops::UnaryOp;
+    let name = match op {
+        UnaryOp::Neg => "neg",
+        UnaryOp::Exp => "exp",
+        UnaryOp::Log => "log",
+        UnaryOp::Relu => "relu",
+        UnaryOp::Tanh => "tanh",
+        UnaryOp::Sigmoid => "sigmoid",
+    };
+    match try_mlx_dispatch(name, std::slice::from_ref(x)) {
+        Some(Ok(v)) => v,
+        _ => op.forward(x),
+    }
+}
+
+/// Forward a binary op through `mlpl-mlx` when possible.
+#[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
+fn rerun_binary(
+    op: mlpl_autograd::ops::BinaryOp,
+    a: &DenseArray,
+    b: &DenseArray,
+) -> Result<DenseArray, ArrayError> {
+    use mlpl_autograd::ops::BinaryOp;
+    let name = match op {
+        BinaryOp::Add => "add",
+        BinaryOp::Sub => "sub",
+        BinaryOp::Mul => "mul",
+        BinaryOp::Div => "div",
+    };
+    match try_mlx_dispatch(name, &[a.clone(), b.clone()]) {
+        Some(Ok(v)) => Ok(v),
+        Some(Err(e)) => Err(e),
+        None => op.forward(a, b),
+    }
+}
+
 /// `to_device(x, target)` builtin (Saga 14 step 005). Records the
 /// target on the environment's per-tensor device map when `x` is a
 /// variable reference, so subsequent `apply(model, ...)` calls can

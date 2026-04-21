@@ -1,6 +1,6 @@
 number = 6
 slug = "mlx-autograd-tape"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 006: tape-lowered ops on MLX + gradcheck parity.
 
