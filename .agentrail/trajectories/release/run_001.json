@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 10,
+    "step": "mlx-release-v0110"
+  },
+  "action": "Bumped workspace version from 0.10.0 to 0.11.0 in the root Cargo.toml [workspace.package] block (single source of truth since every crate uses version.workspace = true). Verified all crates picked up the new version via cargo build --workspace. Checked for lingering 0.10.0 refs -- all remaining mentions are historical (Saga 13 archives, milestone-tiny-lm.md, saga.md Saga 13 entry) and should stay as-is to reflect which version shipped those features. docs/status.md + docs/saga.md + docs/plan.md Saga 14 v0.11.0 refs already in place from step 009, confirmed. Ran all quality gates green (workspace tests, mlx-feature tests on mlpl-eval and mlpl-mlx, clippy both modes, fmt, sw-checklist). Ran scripts/build-pages.sh to rebuild pages/ with the bumped wasm hash. Committed everything (Cargo.toml + Cargo.lock + pages/ + agentrail bookkeeping) in one release commit e814bf5 with a comprehensive Saga-14 summary message. Tagged v0.11.0 with annotation 'Saga 14 MLX backend release' and pushed commit + tag via git push origin main --tags. Monitored the Pages workflow via gh run list --workflow=pages.yml until it completed successfully (22s, run 24741500350). Saga 14 is done. /mw-cp green. Commit e814bf5 + tag v0.11.0 pushed, live demo deployed.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-21T12:15:09"
+}
