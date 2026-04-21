@@ -149,6 +149,55 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 14: MLX backend (COMPLETE)
+First accelerator backend for MLPL: a program that trains on CPU
+now runs on Apple Silicon via MLX without source changes. Ten
+steps across five phases. Phase 1 built a `crates/mlpl-mlx`
+sibling to `mlpl-rt` with MLX-backed equivalents of every
+forward primitive the Tiny LM touches (matmul, add/sub/mul/div/
+neg, exp/log/tanh/sigmoid/relu, reshape/transpose, reduce_mul/
+mean/argmax axis-aware, softmax/log_softmax, fused
+cross_entropy), each parity-tested vs CPU within documented
+fp32 tolerance. Phase 2 added the `device("mlx") { body }`
+scoped form in the parser/AST (mirroring `experiment`'s shape),
+the `to_device(x, target)` movement helper (also walks the
+param tree for models), cross-device-safety as a typed
+`EvalError::DeviceMismatch { op, expected, actual }` variant,
+and routed every Saga 11 model's forward (`linear`, `chain`,
+`residual`, `rms_norm`, `attention`, `causal_attention`,
+`embed`, activations) through a single `dispatched_call`
+helper. Phase 3 wired autograd on MLX: `grad(expr, wrt)` inside
+a `device("mlx") { }` block re-materializes the CPU-built tape's
+forward values through `mlpl-mlx` before CPU backward formulas
+compute gradients, producing gradients that match the all-CPU
+path within fp32 tolerance across every tape primitive (sum,
+mean, exp, log, relu, tanh, sigmoid, neg, add, mul, div,
+softmax, transpose, matmul) plus the full `grad(cross_entropy(
+apply(model, X), Y), W)` integration path. Adam, momentum_sgd,
+`train N { body }`, `last_losses`, `cosine_schedule`,
+`linear_warmup`, and `experiment "name" { body }` all inherit
+from the grad wiring and produce parameter updates and loss
+curves that match CPU on a Tiny LM-shaped slice within 1e-4.
+Phase 4 shipped `demos/tiny_lm_mlx.mlpl` (the Saga 13 body
+wrapped in `device("mlx") { }`, identical seeds, hyperparams,
+dataset, 200 steps, loss curve matches CPU) and extended
+`mlpl-bench` with a Criterion harness comparing CPU vs MLX on
+`reshape_reduce_100x100` and a `tiny_lm_train_step` workload,
+reporting both cold and warm wall-clock timings. Phase 5 added
+a "Running on MLX" web REPL tutorial lesson, turned
+`docs/using-mlx.md` from design sketch into shipped-API
+reference with a retrospective, and rebuilt the live demo page.
+Measured performance at Tiny LM scale: MLX is 0.84x on
+reshape+reduce and 0.26x on the training step -- below the saga
+plan's 5x warm-path gate. Four bottlenecks diagnosed in
+`docs/benchmarks.md` (f32/f64 round-trip per op, no graph
+fusion, tape re-materialization doubles forward work, d=16/32
+inner dims dominated by kernel-launch overhead); a dedicated
+"MLX throughput" follow-up step is the natural next work item.
+Correctness is intact -- every MLX-gated parity test across
+the saga passes. Delivered v0.11.0. See
+`docs/milestone-mlx-backend.md` and `docs/using-mlx.md`.
+
 ## Saga 13: Tiny language model end-to-end (COMPLETE)
 First saga that proves the platform thesis: a few lines of MLPL
 train a small transformer LM, generate text from a prompt, and

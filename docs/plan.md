@@ -152,10 +152,25 @@ on a small corpus entirely in MLPL on CPU. Visualize loss,
 sample generations, and attention maps. This is the first saga
 that proves the platform thesis end-to-end.
 
-### Saga 14 -- MLX backend
-Backend abstraction layer (`backend <- mlx | cpu`), lazy
-execution graph, kernel fusion for the hot ops. Re-run the tiny
-LM on Apple Silicon and show a concrete speedup. CUDA deferred.
+### Saga 14 -- MLX backend (COMPLETE, v0.11.0)
+Ten steps across five phases. Shipped: `crates/mlpl-mlx` runtime
+target with matmul/elementwise/activations/reshape/transpose/
+reductions/softmax/log_softmax/cross_entropy each parity-tested
+vs CPU within fp32 tolerance; `device("mlx") { body }` scoped
+form + `to_device(x, target)` movement helper + typed
+`EvalError::DeviceMismatch`; Model DSL dispatch so `apply(model,
+X)` inside an MLX block routes every matmul/softmax/add through
+`mlpl-mlx`; autograd via tape re-materialization (grad matches
+CPU within 1e-4 across every tape primitive); Adam/momentum_sgd/
+`train N { }`/`experiment` all inherit; `demos/tiny_lm_mlx.mlpl`
+training end-to-end with loss curve matching CPU; Criterion
+bench harness (`mlpl-bench --features mlx`). Performance: 0.84x
+reshape+reduce, 0.26x tiny_lm_train_step -- below the 5x gate;
+bottlenecks diagnosed in `docs/benchmarks.md` (f32/f64
+round-trip per op, no graph fusion, tape re-materialization,
+small inner dims). Correctness intact. CUDA still Saga 17. See
+`docs/milestone-mlx-backend.md`, `docs/using-mlx.md`
+retrospective, and `docs/saga.md` Saga 14 entry.
 
 ### Saga 15 -- LoRA / QLoRA and quantization
 `lora[rank=8] model`, layer-scoped adapters, shared subspaces,

@@ -1,6 +1,6 @@
 number = 8
 slug = "tiny-lm-mlx-demo"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 4 step 008: tiny LM MLX variant + bench harness.
 
@@ -8,5 +8,6 @@ Prove the speedup end..."""
 role = "production"
 context_files = []
 created_at = "2026-04-16T13:36:53"
+completed_at = "2026-04-21T11:05:04"
 task_type = "demo"
-commits = []
+commits = ["520a48537ed0388c5dca1cac3a3dbecb168bfb09"]
