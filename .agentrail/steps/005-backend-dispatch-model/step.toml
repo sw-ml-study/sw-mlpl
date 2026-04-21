@@ -1,6 +1,6 @@
 number = 5
 slug = "backend-dispatch-model"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 005: backend dispatch in the Model DSL.
 
@@ -8,5 +8,6 @@ Make `apply`/`params` r..."""
 role = "production"
 context_files = []
 created_at = "2026-04-16T13:36:53"
+completed_at = "2026-04-19T08:40:04"
 task_type = "runtime"
-commits = []
+commits = ["8dbf2c804f16bb18ace61c94bbe9857ddcee3976"]
