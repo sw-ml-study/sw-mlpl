@@ -220,25 +220,36 @@ pub const DEMOS: &[Demo] = &[
             "boundary_2d(p0, [30, 30], X, tl)",
         ],
     },
+    // The interactive `Tiny LM` and `Tiny LM Generate` demos use a
+    // smaller configuration than `demos/tiny_lm.mlpl` (V=280, d=32,
+    // 200 steps) -- the CLI source is tuned for a serious run under
+    // a native build where each training step is milliseconds. The
+    // interpreter + WASM stack on the browser main thread is ~100x
+    // slower per op; running the CLI configuration here hangs the
+    // event loop past the browser's "unresponsive tab" timeout.
+    // These entries mirror the "Training and Generating" tutorial
+    // lesson's budget (V=260, d=16, block=8, 30 steps) which
+    // completes in a few seconds interactively. For the serious
+    // run, use the CLI: `mlpl-repl -f demos/tiny_lm.mlpl`.
     Demo {
         name: "Tiny LM Generate",
         lines: &[
-            "corpus = load_preloaded(\"tiny_shakespeare_snippet\")",
-            "tok    = train_bpe(corpus, 280, 0)",
+            "corpus = load_preloaded(\"tiny_corpus\")",
+            "tok    = train_bpe(corpus, 260, 0)",
             "ids    = apply_tokenizer(tok, corpus)",
-            "X_all = shift_pairs_x(ids, 32)",
-            "Y_all = shift_pairs_y(ids, 32)",
+            "X_all = shift_pairs_x(ids, 8)",
+            "Y_all = shift_pairs_y(ids, 8)",
             "X     = reshape(X_all, [reduce_mul(shape(X_all))])",
             "Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])",
-            "V = 280 ; d = 32 ; h = 1",
-            "model = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))",
-            "experiment \"tiny_lm_gen\" { train 200 { adam(cross_entropy(apply(model, X), Y), model, 0.001, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(model, X), Y) } }",
+            "V = 260 ; d = 16 ; h = 1",
+            "model = chain(embed(V, d, 0), causal_attention(d, h, 1), rms_norm(d), linear(d, V, 2))",
+            "experiment \"tiny_lm_gen\" { train 30 { adam(cross_entropy(apply(model, X), Y), model, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(model, X), Y) } }",
             "loss_curve(last_losses)",
-            "prompt = apply_tokenizer(tok, \"to be \")",
+            "prompt = apply_tokenizer(tok, \"the \")",
             "seq    = prompt",
-            "repeat 40 { logits = apply(model, seq); last = last_row(logits); nxt = sample(top_k(last, 40), 0.8, step); seq = concat(seq, nxt) }",
+            "repeat 20 { logits = apply(model, seq); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); seq = concat(seq, nxt) }",
             "decode(tok, seq)",
-            "viz_ids = apply_tokenizer(tok, \"to be or\")",
+            "viz_ids = apply_tokenizer(tok, \"the quick\")",
             "attn_w  = attention_weights(model, viz_ids)",
             "svg(attn_w, \"heatmap\")",
         ],
@@ -246,16 +257,16 @@ pub const DEMOS: &[Demo] = &[
     Demo {
         name: "Tiny LM",
         lines: &[
-            "corpus = load_preloaded(\"tiny_shakespeare_snippet\")",
-            "tok    = train_bpe(corpus, 280, 0)",
+            "corpus = load_preloaded(\"tiny_corpus\")",
+            "tok    = train_bpe(corpus, 260, 0)",
             "ids    = apply_tokenizer(tok, corpus)",
-            "X_all = shift_pairs_x(ids, 32)",
-            "Y_all = shift_pairs_y(ids, 32)",
+            "X_all = shift_pairs_x(ids, 8)",
+            "Y_all = shift_pairs_y(ids, 8)",
             "X     = reshape(X_all, [reduce_mul(shape(X_all))])",
             "Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])",
-            "V = 280 ; d = 32 ; h = 1",
-            "model = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))",
-            "experiment \"tiny_lm\" { train 200 { adam(cross_entropy(apply(model, X), Y), model, 0.001, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(model, X), Y) } }",
+            "V = 260 ; d = 16 ; h = 1",
+            "model = chain(embed(V, d, 0), causal_attention(d, h, 1), rms_norm(d), linear(d, V, 2))",
+            "experiment \"tiny_lm\" { train 30 { adam(cross_entropy(apply(model, X), Y), model, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(model, X), Y) } }",
             "loss_curve(last_losses)",
         ],
     },
