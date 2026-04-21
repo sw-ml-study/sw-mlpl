@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-f576645ee584cc76.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-f576645ee584cc76_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-3ff383416525963e.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-3ff383416525963e_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -218,6 +218,26 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
         .entry {
             margin-bottom: 8px;
+        }
+        .narration {
+            background: var(--surface0);
+            border-left: 3px solid var(--sapphire);
+            padding: 10px 14px;
+            margin: 12px 0;
+            border-radius: 0 4px 4px 0;
+        }
+        .narration-heading {
+            color: var(--sapphire);
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .narration-body {
+            color: var(--text);
+            line-height: 1.5;
+            font-size: 14px;
         }
         .input-line {
             color: var(--text);
@@ -481,7 +501,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             cursor: not-allowed;
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-f576645ee584cc76.js" crossorigin="anonymous" integrity="sha384-fMGThD1rS5mtOH8w9cK3mXFmSQRvxu1FZ8k55ZdajNihwA2Y3LMvw7DoNgV44ukh"><link rel="preload" href="/sw-mlpl/mlpl-web-f576645ee584cc76_bg.wasm" crossorigin="anonymous" integrity="sha384-AD0/mDx8KpJL8Bp+H9A2Agn6Ear84MxOMN9zR1u2ZGpPoOhk+9tHxq97/cB2vzcy" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-3ff383416525963e.js" crossorigin="anonymous" integrity="sha384-ueQp1Uxu7O1GrE/bE+U3EP+Wpq5pHDPgp0lTNjf4kSuhdy7yez9CJfk46aOD/geF"><link rel="preload" href="/sw-mlpl/mlpl-web-3ff383416525963e_bg.wasm" crossorigin="anonymous" integrity="sha384-LtrO5VOSTYElh+fh33a4ktarMfE4+k6lFh1foo/6RL7DlH+0m03BqlcAoAdbjQLY" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>

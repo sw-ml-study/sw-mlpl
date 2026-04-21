@@ -7,7 +7,7 @@ use yew::prelude::*;
 
 use crate::demos::DEMOS;
 use crate::help::help_text;
-use crate::state::HistoryEntry;
+use crate::state::{EntryKind, HistoryEntry};
 
 pub fn toggle_bool(handle: UseStateHandle<bool>, value: bool) -> Callback<web_sys::MouseEvent> {
     Callback::from(move |_| handle.set(value))
@@ -47,6 +47,7 @@ pub fn make_submit(deps: EvalDeps) -> Callback<String> {
                 input: trimmed.to_string(),
                 output: help_text(),
                 is_error: false,
+                kind: EntryKind::Command,
             }
         } else {
             let result = deps.session.borrow().eval(trimmed);
@@ -55,6 +56,7 @@ pub fn make_submit(deps: EvalDeps) -> Callback<String> {
                 input: trimmed.to_string(),
                 output: result,
                 is_error,
+                kind: EntryKind::Command,
             }
         };
 
@@ -85,7 +87,19 @@ pub fn make_run_demo(
             return;
         };
         session.borrow().clear();
-        history.set(Vec::new());
+        // Lead with a narration panel framing what the demo does
+        // and why. Demo lines follow; the takeaway narration lands
+        // after the final line in `schedule_demo_line`. Also bind
+        // a `_demo` string in the session so `:describe _demo`
+        // prints the intro + takeaway from the REPL.
+        bind_demo_metadata(&session.borrow(), demo);
+        let intro_entry = HistoryEntry {
+            input: format!("About this demo -- {}", demo.name),
+            output: demo.intro.to_string(),
+            is_error: false,
+            kind: EntryKind::Narration,
+        };
+        history.set(vec![intro_entry]);
         // Evaluate demo lines asynchronously: each line runs in its
         // own `Timeout::new(0, ...)` tick so the browser can paint
         // the preceding line's output and process input between
@@ -95,17 +109,41 @@ pub fn make_run_demo(
         // -- but the cross-line yield keeps the tab from triggering
         // the "unresponsive" dialog on multi-line demos where the
         // total wall clock is the problem.
-        schedule_demo_line(session.clone(), history.clone(), demo.lines, 0);
+        schedule_demo_line(session.clone(), history.clone(), demo, 0);
     })
+}
+
+/// Bind `_demo` as a string variable in the session so typing
+/// `:describe _demo` after a demo run reprints the intro +
+/// takeaway. Uses MLPL's string-assignment syntax through `eval`
+/// so the binding goes through the existing string-variable
+/// surface (Saga 12 step 009) -- no new plumbing.
+fn bind_demo_metadata(session: &WasmSession, demo: &crate::demos::Demo) {
+    let body = format!(
+        "{}\n\nAbout this demo:\n  {}\n\nTakeaway:\n  {}",
+        demo.name, demo.intro, demo.takeaway,
+    );
+    let escaped = body.replace('\\', "\\\\").replace('"', "\\\"");
+    let _ = session.eval(&format!("_demo = \"{escaped}\""));
 }
 
 fn schedule_demo_line(
     session: Rc<RefCell<WasmSession>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
-    lines: &'static [&'static str],
+    demo: &'static crate::demos::Demo,
     idx: usize,
 ) {
+    let lines = demo.lines;
     if idx >= lines.len() {
+        // Last line ran -- append the takeaway narration panel.
+        let mut entries = (*history).clone();
+        entries.push(HistoryEntry {
+            input: "What just happened".to_string(),
+            output: demo.takeaway.to_string(),
+            is_error: false,
+            kind: EntryKind::Narration,
+        });
+        history.set(entries);
         return;
     }
     let session_next = Rc::clone(&session);
@@ -119,9 +157,10 @@ fn schedule_demo_line(
             input: line.to_string(),
             output: result,
             is_error,
+            kind: EntryKind::Command,
         });
         history.set(entries);
-        schedule_demo_line(session_next, history_next, lines, idx + 1);
+        schedule_demo_line(session_next, history_next, demo, idx + 1);
     })
     .forget();
 }

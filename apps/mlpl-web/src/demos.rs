@@ -1,5 +1,13 @@
 pub struct Demo {
     pub name: &'static str,
+    /// One-to-three-sentence framing shown before the demo runs:
+    /// what the demo does and why. Intentionally short -- the
+    /// code is the real lesson.
+    pub intro: &'static str,
+    /// One-to-three-sentence takeaway shown after the demo's last
+    /// line completes: what the output proves and where to go
+    /// next. Paired with `intro` to bookend the run.
+    pub takeaway: &'static str,
     pub lines: &'static [&'static str],
 }
 
@@ -7,6 +15,8 @@ pub struct Demo {
 pub const DEMOS: &[Demo] = &[
     Demo {
         name: "Analysis Helpers",
+        intro: "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model.",
+        takeaway: "Six one-liners, six labeled plots. Every helper under 'analysis' in the docs takes arrays you already have and returns an SVG -- no separate plotting library, no config blocks.",
         lines: &[
             "hist([1, 2, 2, 3, 3, 3, 4, 4, 5], 5)",
             "scatter_labeled([[0,0],[1,1],[0,1],[1,0]], [0, 0, 1, 1])",
@@ -18,6 +28,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Attention Pattern",
+        intro: "The scaled-dot-product attention formula from 'Attention is All You Need', spelled out. Two Q and K matrices, scored and softmax'd, rendered as heatmaps. A second self-attention pass (Q attending to itself) shows the diagonal pattern that makes self-attention recognizable on sight.",
+        takeaway: "You just built transformer attention in four lines: matmul + transpose + softmax. The heatmaps show where each query row puts probability mass -- self-attention concentrates on the diagonal; cross-attention doesn't.",
         lines: &[
             "Q = randn(17, [6, 4])",
             "K = randn(23, [6, 4])",
@@ -33,6 +45,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Basics",
+        intro: "The smallest possible MLPL tour: scalar arithmetic, elementwise array arithmetic with broadcasting, variable binding, and unary negation. If this makes sense, you can read the rest of the demos.",
+        takeaway: "Operators apply elementwise; scalars broadcast; variables persist across REPL lines. That's the substrate every other demo builds on.",
         lines: &[
             "1 + 2",
             "3 * 4",
@@ -47,6 +61,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Decision Boundary",
+        intro: "Train a two-weight logistic regression on the AND function (only [1,1] is class 1), then visualize the learned probability surface over a 20x20 grid. The sigmoid's S-curve lives in 2D here, tilted by the weight vector.",
+        takeaway: "300 gradient steps on four points produced a linear decision boundary that cleanly separates AND's one positive from its three negatives. The surface SVG shows where the model transitions from 'no' to 'yes' in input space.",
         lines: &[
             "X = [[0,0],[0,1],[1,0],[1,1]]",
             "y = [0, 0, 0, 1]",
@@ -65,6 +81,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "K-Means",
+        intro: "K-means clustering without loops over points: all distances computed in one matmul, cluster assignments via argmax, and centroid updates via a one-hot-matrix-times-data trick. Three blobs in 2D, three centroids, ten iterations.",
+        takeaway: "The final scatter shows points colored by their assigned cluster and the three centroids as a separate plot. Unsupervised -- no labels were passed in; the algorithm discovered the three groups from geometry alone.",
         lines: &[
             "D = blobs(7, 30, [[0, 0], [4, 4], [-4, 4]])",
             "X = matmul(D, [[1,0],[0,1],[0,0]])",
@@ -81,6 +99,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Logistic Regression",
+        intro: "The hello-world of supervised learning: 2D AND with hand-rolled gradient descent, final-accuracy check, a bar chart of per-point predictions, and a 1D loss sweep along the weight direction showing the minimum the optimizer found.",
+        takeaway: "Accuracy prints as 1.0; the bar chart shows confident [0, 0, 0, 1] predictions; the loss curve has a clean bowl shape. This is the sanity-check pattern every classifier should pass.",
         lines: &[
             "X = [[0,0],[0,1],[1,0],[1,1]]",
             "y = [0, 0, 0, 1]",
@@ -105,6 +125,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Loss Curve",
+        intro: "Sweep a single weight across 25 values, compute the MSE loss against a linear target at each one, and plot the result. No training -- just the shape of the loss landscape.",
+        takeaway: "A smooth parabolic curve with a clear minimum near the true weight. This is what gradient descent is walking down when you train; seeing the bowl makes the 'minimize the loss' story tangible.",
         lines: &[
             "x = [0, 1, 2, 3, 4]",
             "y = [0, 2, 4, 6, 8]",
@@ -119,6 +141,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Math Functions",
+        intro: "The scalar and elementwise math primitives MLPL inherits from NumPy/APL conventions: exp, log, sqrt, abs, pow, sigmoid, tanh. Works on scalars and arrays uniformly.",
+        takeaway: "Every primitive broadcasts over array inputs without a loop. If you know these names from NumPy you already know MLPL's math surface.",
         lines: &[
             "exp(0)",
             "exp([0, 1, 2])",
@@ -133,6 +157,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Matrix Ops",
+        intro: "Build a 3x4 matrix from iota, transpose it, read its shape and rank, and sum along both axes. The axis argument to reduce_add is how you go from a 2D tensor to a row-sum or column-sum vector.",
+        takeaway: "reshape moves between flat and multi-dimensional views without copying; transpose swaps axes; reduce_add with an axis drops that axis. This is the APL half of MLPL -- shape is first-class and cheap to manipulate.",
         lines: &[
             "x = iota(12)",
             "m = reshape(x, [3, 4])",
@@ -146,6 +172,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Moons MLP",
+        intro: "A two-layer tanh MLP trained with Adam on the 'two moons' synthetic dataset -- two interleaved half-circles that a single linear classifier can't separate. 200 training steps, then accuracy, a loss curve, a confusion matrix, and the learned decision boundary over a 30x30 grid.",
+        takeaway: "A non-linear classifier with ~50 parameters separates the moons. The boundary SVG curves around each moon -- a visual proof that a hidden layer plus a non-linearity learned a non-linear decision surface.",
         lines: &[
             "M = moons(7, 120, 0.08)",
             "X = matmul(M, [[1,0],[0,1],[0,0]])",
@@ -180,6 +208,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "PCA",
+        intro: "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run power iteration to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance.",
+        takeaway: "The scatter is colored by which side of zero each point's projection lands on; the line shows the found principal axis. Power iteration converges in ~10 steps to a direction that's clearly the long axis of the data cloud.",
         lines: &[
             "Xraw = randn(1, [60, 2])",
             "X = matmul(Xraw, [[1, 2], [0, 0.3]])",
@@ -198,6 +228,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Softmax Classifier",
+        intro: "Three-class classification on 90 blob points. softmax + cross-entropy gradient descent (done in closed form here -- P - Y IS the gradient through the softmax+CE pair), then the usual accuracy / confusion-matrix / decision-boundary close.",
+        takeaway: "A single linear layer with three output heads separates three well-spaced clusters. The decision boundary shows three roughly-wedge-shaped regions, one per class.",
         lines: &[
             "D = blobs(11, 30, [[0, 0], [4, 4], [-4, 4]])",
             "X = matmul(D, [[1,0],[0,1],[0,0]])",
@@ -233,6 +265,8 @@ pub const DEMOS: &[Demo] = &[
     // run, use the CLI: `mlpl-repl -f demos/tiny_lm.mlpl`.
     Demo {
         name: "Tiny LM Generate",
+        intro: "End-to-end tiny transformer language model: tokenize a small corpus with BPE, wrap inputs as next-token pairs, build a 1-layer model (embed + causal_attention + rms_norm + linear head), train 30 Adam steps, then sample 20 tokens from a prompt and render the attention heatmap. The smallest program that trains and generates text.",
+        takeaway: "A language model with a few thousand parameters produced a decoded string from a learned distribution and a [T,T] heatmap of what each position attended to. The loss curve should trend downward; the generated text is noisy because the model and budget are both tiny -- scale V, d, block, and step count for a serious run via the CLI.",
         lines: &[
             "corpus = load_preloaded(\"tiny_corpus\")",
             "tok    = train_bpe(corpus, 260, 0)",
@@ -256,6 +290,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Tiny LM",
+        intro: "Training-only variant of the Tiny LM: same model shape (embed + causal_attention + rms_norm + linear head, V=260, d=16, block=8), wrapped in experiment so the final metric is logged, then plot the loss curve across 30 Adam steps. No generation -- just a clean 'does the loss go down' demo.",
+        takeaway: "Loss curve trends downward over 30 steps; the :experiments registry records the run's final loss metric. For generation + attention visualization, see 'Tiny LM Generate'. For a serious run with V=280 and 200 steps, use the CLI: mlpl-repl -f demos/tiny_lm.mlpl.",
         lines: &[
             "corpus = load_preloaded(\"tiny_corpus\")",
             "tok    = train_bpe(corpus, 260, 0)",
@@ -272,6 +308,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Tiny MLP",
+        intro: "A hand-rolled 2-layer MLP on four blobs (two per class, XOR-ish layout). Forward + backward pass written out explicitly so every gradient is visible -- no autograd, no Model DSL. Ends with the decision-boundary render over a 30x30 grid.",
+        takeaway: "You can see every matmul and every elementwise op in the training loop. For the same model with autograd hiding the backward pass, see 'Moons MLP'; for the same model as a Model DSL composition, see the tutorial's 'Model Composition' lesson.",
         lines: &[
             "D = blobs(3, 20, [[-2,-2],[2,2],[-2,2],[2,-2]])",
             "X = matmul(D, [[1,0],[0,1],[0,0]])",
@@ -302,6 +340,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Workspace Introspection",
+        intro: "Tour of the REPL's introspection commands: :version, :wsid (workspace ID summary), :vars, :describe, :models, :experiments, :fns. Also shows how the axis-label annotation syntax (M : [batch, feat] = ...) shows up in :vars and :describe output.",
+        takeaway: "You can always ask the REPL what's in your session. :describe on a variable prints shape + labels + a preview; on a model, the layer tree; on a builtin, the signature and one-line doc. :experiments shows every tracked run.",
         lines: &[
             ":version",
             ":wsid",
@@ -326,6 +366,8 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Visualizations",
+        intro: "The four primitive svg() types -- scatter, line, bar, heatmap -- each in one line. Rendered inline; a download button next to each SVG saves it as a file.",
+        takeaway: "Every plot is one call with a data array and a type string. There is no plotting API to learn beyond 'pass the right shape.'",
         lines: &[
             "svg([[0,0],[1,1],[2,4],[3,9],[4,16]], \"scatter\")",
             "svg([1, 3, 2, 5, 4, 6], \"line\")",

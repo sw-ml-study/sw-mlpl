@@ -15,6 +15,14 @@ mlx = ["mlpl-eval/mlx"]
 mlpl-parser = { path = "../../crates/mlpl-parser" }
 mlpl-eval = { path = "../../crates/mlpl-eval" }
 mlpl-trace = { path = "../../crates/mlpl-trace" }
+# Saga 19 preview (`:ask <question>`): minimal HTTP client used by
+# the CLI REPL to call a local Ollama server at
+# `$OLLAMA_HOST` (default http://localhost:11434). Pinned to 2.x
+# to stay on a stable API surface; TLS disabled because Ollama
+# binds to plain HTTP on localhost by default. `serde_json` picks
+# up the DOM for request/response JSON.
+ureq = { version = "2", default-features = false, features = ["json"] }
+serde_json = "1"
 
 [build-dependencies]
 hostname = "0.4"
