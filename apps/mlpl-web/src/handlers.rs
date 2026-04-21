@@ -85,18 +85,45 @@ pub fn make_run_demo(
             return;
         };
         session.borrow().clear();
-        let mut entries = Vec::with_capacity(demo.lines.len());
-        for line in demo.lines {
-            let result = session.borrow().eval(line);
-            let is_error = result.starts_with("error:");
-            entries.push(HistoryEntry {
-                input: (*line).to_string(),
-                output: result,
-                is_error,
-            });
-        }
-        history.set(entries);
+        history.set(Vec::new());
+        // Evaluate demo lines asynchronously: each line runs in its
+        // own `Timeout::new(0, ...)` tick so the browser can paint
+        // the preceding line's output and process input between
+        // lines. A long-running single line (e.g. `train 30 { ...
+        // }`) still blocks the event loop *during* its own eval --
+        // fixing that needs Web Workers (see docs/worker-threads.md)
+        // -- but the cross-line yield keeps the tab from triggering
+        // the "unresponsive" dialog on multi-line demos where the
+        // total wall clock is the problem.
+        schedule_demo_line(session.clone(), history.clone(), demo.lines, 0);
     })
+}
+
+fn schedule_demo_line(
+    session: Rc<RefCell<WasmSession>>,
+    history: UseStateHandle<Vec<HistoryEntry>>,
+    lines: &'static [&'static str],
+    idx: usize,
+) {
+    if idx >= lines.len() {
+        return;
+    }
+    let session_next = Rc::clone(&session);
+    let history_next = history.clone();
+    gloo::timers::callback::Timeout::new(0, move || {
+        let line = lines[idx];
+        let result = session.borrow().eval(line);
+        let is_error = result.starts_with("error:");
+        let mut entries = (*history).clone();
+        entries.push(HistoryEntry {
+            input: line.to_string(),
+            output: result,
+            is_error,
+        });
+        history.set(entries);
+        schedule_demo_line(session_next, history_next, lines, idx + 1);
+    })
+    .forget();
 }
 
 pub fn make_oninput(input_value: UseStateHandle<String>) -> Callback<InputEvent> {
