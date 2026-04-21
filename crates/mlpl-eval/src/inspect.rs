@@ -173,6 +173,15 @@ fn format_describe(env: &Environment, name: &str) -> String {
         };
         return format!("{name} -- array\n  shape: {shape}{tag}\n  values: {preview}");
     }
+    if let Some(s) = env.get_string(name) {
+        // Web-UI demos bind `_demo` here; multi-line indented.
+        let body = s
+            .lines()
+            .map(|l| format!("  {l}"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        return format!("{name} -- string ({} chars)\n{body}", s.len());
+    }
     // Last fallback: flatten the grouped built-in list and look up by name.
     for (_, entries) in BUILTIN_GROUPS {
         if let Some(doc) = entries.iter().find(|(n, _, _)| *n == name) {

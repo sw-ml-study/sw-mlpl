@@ -1,3 +1,4 @@
+mod ask;
 mod svg_out;
 mod version;
 
@@ -165,6 +166,9 @@ fn handle_command(
                 None => eprintln!("No trace available. Use :trace on first."),
             }
         }
+        _ if input == ":ask" || input.starts_with(":ask ") => {
+            ask::dispatch(input.strip_prefix(":ask").unwrap_or("").trim(), env);
+        }
         _ => match mlpl_eval::inspect(env, input) {
             Some(out) => println!("{out}"),
             None => eprintln!("Unknown command: {input}. Type :help for available commands."),
@@ -259,7 +263,10 @@ fn print_help() {
     println!("  :models              list bound models with layer structure");
     println!("  :fns                 list user-defined functions (none yet)");
     println!("  :builtins            list built-in functions by category");
-    println!("  :describe <name>     describe a variable, model, or built-in");
+    println!("  :describe <name>     describe a variable, model, string, or built-in");
+    println!(
+        "  :ask <question>      ask a local Ollama server about the session -- set OLLAMA_HOST / OLLAMA_MODEL to override; Saga 19 preview, see docs/using-ollama.md"
+    );
     println!("  :wsid                workspace summary (var/param/model counts)");
     println!("  :clear               reset all variables");
     println!("  :trace on/off        toggle execution tracing");

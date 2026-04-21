@@ -22,7 +22,7 @@ use handlers::{
     EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit, toggle_bool,
 };
 use mlpl_wasm::WasmSession;
-use state::HistoryEntry;
+use state::{EntryKind, HistoryEntry};
 use tutorial::{run_example, step_lesson, toggle_tutorial};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
@@ -148,6 +148,18 @@ fn percent_encode(s: &str) -> String {
 }
 
 fn render_entry(entry: &HistoryEntry) -> Html {
+    if entry.kind == EntryKind::Narration {
+        // Demo narration: prose framing around the code output.
+        // No `mlpl>` prompt, no output pre-formatting; `input` is
+        // the heading (e.g. "About this demo" / "What just
+        // happened"), `output` is the narration body.
+        return html! {
+            <div class="narration">
+                <div class="narration-heading">{ &entry.input }</div>
+                <div class="narration-body">{ &entry.output }</div>
+            </div>
+        };
+    }
     let body = if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
         let svg_html = Html::from_html_unchecked(AttrValue::from(entry.output.clone()));
         let href = format!(

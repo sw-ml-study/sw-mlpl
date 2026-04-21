@@ -1,10 +1,85 @@
 # Using MLPL with Ollama (and other LLM servers)
 
 > **Status:** planned -- Saga 19 (`v0.16` target). Not yet
-> shipped. This doc sketches the intended API so the surface
-> area is visible and contributors can plan around it; actual
-> code lands with the saga. Treat everything below as design,
-> not reference.
+> shipped in full. One preview command (`:ask <question>` in
+> the CLI REPL) ships today -- see "Shipped today: `:ask`
+> preview" below. Treat the rest of this doc as design, not
+> reference.
+
+## Shipped today: `:ask` preview (v0.11.x)
+
+The CLI REPL has a `:ask <question>` command that POSTs to a
+local Ollama server with the current workspace summary as
+grounding context. It is a preview of Saga 19's REST
+integration scoped to exactly one use case: "explain this to
+me" in the middle of a session.
+
+### Setup
+
+```bash
+# One-time: start Ollama and pull a model that fits on your
+# machine. llama3.2 (2B) is the MLPL default because it loads
+# fast and is small enough for laptops without a discrete GPU.
+ollama serve &
+ollama pull llama3.2
+
+# In the MLPL CLI REPL
+mlpl-repl
+mlpl> v = iota(5) + [10, 20, 30, 40, 50]
+mlpl> m = reshape(iota(12), [3, 4])
+mlpl> :ask what's in my session?
+```
+
+The `:ask` command sends:
+
+1. A short system prompt telling the model it is inside MLPL
+   and should explain concisely (under ~200 words, plain
+   prose, no made-up builtins).
+2. The current `_demo` string if one is bound (web-REPL demos
+   bind this automatically; CLI users can set it themselves
+   with `_demo = "..."` to get the same grounding).
+3. A compact workspace summary (variable names + shapes +
+   `[param]` tags for trainables), capped at 40 entries so
+   large sessions do not overflow the model's context.
+4. The user's question.
+
+### Configuration
+
+- `OLLAMA_HOST` -- default `http://localhost:11434`. Change to
+  point at a remote or containerized Ollama.
+- `OLLAMA_MODEL` -- default `llama3.2`. Any model you have
+  pulled locally works; `qwen2.5-coder` is a strong alternative
+  when the question is code-shaped.
+- Timeout is 120 seconds. Streaming is a Saga 19 follow-up; for
+  now the REPL blocks until Ollama returns the full response.
+
+### Why CLI-only, why not in the web REPL
+
+Two reasons:
+
+1. **CORS.** The browser's `fetch` to `http://localhost:11434`
+   is blocked by Ollama's default CORS policy. Enabling it
+   (`OLLAMA_ORIGINS="*" ollama serve`) works but is a sharp
+   edge to put on the landing-page-accessible web demo.
+2. **Scope.** `:ask` is most useful when you are mid-session
+   and want a second opinion. The CLI is where that happens;
+   the web REPL is the on-ramp for new users and stays
+   dependency-free by design.
+
+Web-REPL integration lands with Saga 19 proper, behind a
+dedicated opt-in panel and a clearer "this talks to an
+external service" warning.
+
+### What the command is and is not
+
+Is: a preview of a single Saga 19 surface, useful for
+"describe this demo" / "what does :vars look like to an
+outsider" / "what am I about to run" questions.
+
+Is not: a REPL shell built on the LLM (you type MLPL, not
+natural language), a codegen helper (you get prose answers,
+not executable MLPL), or a proper REST client surface for use
+inside MLPL programs. All three are Saga 19.
 
 ## Why this exists
 
