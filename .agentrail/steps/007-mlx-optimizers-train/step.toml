@@ -1,6 +1,6 @@
 number = 7
 slug = "mlx-optimizers-train"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 007: optimizers + train { } on MLX.
 
