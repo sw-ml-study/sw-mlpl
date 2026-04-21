@@ -1,6 +1,6 @@
 number = 10
 slug = "mlx-release-v0110"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 5 step 010: release v0.11.0.
 
