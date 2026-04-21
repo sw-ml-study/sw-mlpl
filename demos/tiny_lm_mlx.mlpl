@@ -1,0 +1,38 @@
+# Tiny Language Model -- MLX variant (Saga 14 step 008).
+#
+# Same source as `demos/tiny_lm.mlpl`, body wrapped in
+# `device("mlx") { ... }`. Identical seeds, hyperparams, and
+# dataset; identical-shape loss curve within fp32 tolerance.
+# On Apple Silicon with the `mlx` feature compiled in, the forward
+# (including every matmul, softmax, and elementwise op) runs
+# through `mlpl-mlx`; the autograd tape's forward values are
+# re-materialized on MLX before the CPU backward formulas compute
+# gradients; Adam's parameter-update arithmetic stays on CPU as
+# pure elementwise math over MLX-rounded gradients (Saga 14
+# step 007 design choice).
+
+# ---- corpus + tokenization (device-agnostic) ----
+corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+
+# ---- shift-pair windows: input tokens and next-token labels ----
+X_all = shift_pairs_x(ids, 32)
+Y_all = shift_pairs_y(ids, 32)
+X     = reshape(X_all, [reduce_mul(shape(X_all))])
+Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+# ---- MLX scope: model + training ----
+device("mlx") {
+  V = 280 ; d = 32 ; h = 1
+  model = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))
+
+  to_device(X, "mlx")
+  experiment "tiny_lm_mlx" {
+    train 200 {
+      adam(cross_entropy(apply(model, X), Y), model, 0.001, 0.9, 0.999, 0.00000001);
+      loss_metric = cross_entropy(apply(model, X), Y)
+    }
+  }
+}
+loss_curve(last_losses)

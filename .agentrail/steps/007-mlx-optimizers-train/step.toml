@@ -1,6 +1,6 @@
 number = 7
 slug = "mlx-optimizers-train"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 3 step 007: optimizers + train { } on MLX.
 
@@ -8,5 +8,6 @@ Close the training loop on ..."""
 role = "production"
 context_files = []
 created_at = "2026-04-16T13:36:53"
+completed_at = "2026-04-21T09:57:36"
 task_type = "runtime"
-commits = []
+commits = ["498fcaa70f85dcf0bfe204fbb9b6abc12c786b59"]

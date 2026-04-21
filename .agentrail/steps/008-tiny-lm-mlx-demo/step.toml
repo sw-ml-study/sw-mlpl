@@ -1,6 +1,6 @@
 number = 8
 slug = "tiny-lm-mlx-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 4 step 008: tiny LM MLX variant + bench harness.
 
