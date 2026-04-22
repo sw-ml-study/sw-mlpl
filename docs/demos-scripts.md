@@ -251,33 +251,53 @@ to 6.6x (small sweep `iota_reduce_100`).
   -- --target wasm32-unknown-unknown my_program.mlpl -o
   my_program.wasm`.
 
-## Demo 7 -- "Neural Thickets preview" (2 min, any host)
+## Demo 7 -- "Neural Thickets" (3 min, CPU)
 
-**What it shows.** The design sketch for a future MLPL-as-
-research-platform demo: take a trained base model, perturb
-its weights into N variants (gaussian noise, layer-targeted),
-score each on held-out tokens, top-K select, ensemble, render
-a specialization heatmap. All in ~60 lines of MLPL.
+**What it shows.** Take a trained base Tiny LM, perturb its
+weights into 16 variants across 4 families (`all_layers`,
+`attention_only`, `mlp_only`, `embed_and_head`), score each
+on a held-out string, render a `[family x seed]`
+specialization heatmap, pick the top-K best with
+`argtop_k`, and average logits across all variants for an
+ensemble cross-entropy. The MLPL-as-research-platform demo
+in ~100 lines of source.
 
-**Why.** Shows where the platform is going. Useful for
-audiences who care about "can I use this for my own research
-question?"
+**Why.** Saga 20 surface in action. Shows that
+`clone_model` + `perturb_params` + `argtop_k` + `scatter`
+compose into a non-trivial weight-space-search algorithm
+without leaving the language. Useful for audiences who care
+about "can I use this for my own research question?"
 
-**How.** Not runnable yet -- the sketch is a planning artifact.
-Open the doc side-by-side with the current Tiny LM:
+**How.**
 ```bash
-less docs/mlpl-for-neural-thickets.md
+$REPL_CPU -f demos/neural_thicket.mlpl
 ```
-Walk through the strawman source (lines marked `# NEW` are
-the four builtins Saga 20 would add: `clone_model`,
-`perturb_params`, `argtop_k`, `scatter`).
+Runs ~10-20 seconds on an M-class laptop. Watch for:
+- Base training loss decreasing across 100 `train` steps
+  inside the `experiment "thicket_base"` block.
+- The final value (`ens_metric`) printed: cross-entropy of
+  the 16-variant ensemble on the held-out string.
+- `heat_svg` produced via `svg(heat, "heatmap")`: rows are
+  perturbation families (top -> bottom: all_layers,
+  attention_only, mlp_only, embed_and_head), columns are
+  seeds.
 
 **Follow-up questions to expect.**
-- "When?" Saga 20, planned after Saga 14's MLX throughput
-  follow-up. See `docs/plan.md` for the dependency graph.
-- "Does it need CUDA?" No. Tiny LM scale is fine on Apple
-  Silicon once MLX throughput improves. CUDA is Saga 17 and
-  targets larger-model workloads.
+- "Why not strict top-K ensembling?" The flat `best_idx` from
+  `argtop_k` does not include family info; selecting the
+  matching family string per index needs string-array
+  indexing, which the Saga 20 surface does not yet have.
+  CPU demo averages all 16 variants instead. Same forward
+  composition; the strict top-K case is a follow-up once
+  string-indexing or per-index dispatch lands.
+- "Does it need CUDA?" No. CPU runs end-to-end. Step 005 of
+  Saga 20 wraps the variant loop in `device("mlx")` for the
+  Apple Silicon variant.
+- "Where is the design sketch?"
+  `docs/mlpl-for-neural-thickets.md` walks through the
+  thicket idea, the four new builtins, and what is and is
+  not in scope for Saga 20. `docs/using-perturbation.md`
+  (step 006) is the user-facing retrospective.
 
 ## Quick-reference: what each demo proves
 
@@ -289,7 +309,7 @@ the four builtins Saga 20 would add: `clone_model`,
 | 4. Parity test wall | Correctness credibility | 2 min | any |
 | 5. MLX benchmark | Honest performance status | 3 min | Apple Silicon |
 | 6. Compile-to-Rust | Native / WASM deployment | 2 min | any |
-| 7. Neural Thickets | Where the platform is going | 2 min | any |
+| 7. Neural Thickets | Weight-perturbation specialization | 3 min | CPU |
 
 ## Suggested demo orders
 

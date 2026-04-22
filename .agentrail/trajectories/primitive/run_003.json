@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 3,
+    "step": "argtop-k-scatter"
+  },
+  "action": "TDD first: wrote 19 failing tests across argtop_k_tests.rs and scatter_tests.rs. Implemented try_call + builtin_argtop_k + builtin_scatter in new ensemble_builtins.rs. Wired into call_builtin dispatch in builtins.rs. Wrote two contracts. One of the scatter tests originally used  but step is only bound inside train, not repeat -- replaced with a chained-scatter composition test and noted the ambiguity for step 004 to resolve.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T12:23:15"
+}
