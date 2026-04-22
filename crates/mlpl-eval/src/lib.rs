@@ -14,6 +14,7 @@ mod loader;
 mod model;
 mod model_clone;
 mod model_dispatch;
+mod model_perturb;
 mod model_tape;
 mod tokenizer;
 mod value;
