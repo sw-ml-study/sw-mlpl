@@ -1,6 +1,6 @@
 number = 5
 slug = "neural-thicket-mlx-bench"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 005: MLX variant loop + `mlpl-bench` entry.
 

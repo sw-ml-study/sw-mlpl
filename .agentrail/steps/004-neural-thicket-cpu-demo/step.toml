@@ -1,6 +1,6 @@
 number = 4
 slug = "neural-thicket-cpu-demo"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 004: `demos/neural_thicket.mlpl` end-to-end on CPU.
 
@@ -8,5 +8,6 @@ First runna..."""
 role = "production"
 context_files = []
 created_at = "2026-04-22T10:39:38"
+completed_at = "2026-04-22T13:06:06"
 task_type = "demo"
-commits = []
+commits = ["77b23897fc9f3c09e122a79a9775f1a78280dedd"]

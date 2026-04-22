@@ -64,6 +64,50 @@ device(\"mlx\") { \
   adam(cross_entropy(apply(m, X), Y), m, 0.001, 0.9, 0.999, 0.00000001) \
 }";
 
+// Saga 20 step 005: Neural Thickets variant loop. Each bench
+// iteration builds a fresh base model (no training), sweeps
+// 4 families x 4 seeds = 16 variants (clone_model ->
+// perturb_params -> apply -> cross_entropy -> scatter), and
+// averages all 16 variants' logits for an ensemble. Same
+// shape as `demos/neural_thicket_mlx.mlpl`'s variant loop,
+// scaled down so a single warm iteration is interactive.
+const NEURAL_THICKET_BASE: &str = "\
+V = 32 ; d = 8 ; h = 1 ; \
+base = chain(embed(V, d, 0), \
+             residual(chain(rms_norm(d), causal_attention(d, h, 1))), \
+             residual(chain(rms_norm(d), \
+                            linear(d, 16, 2), \
+                            relu_layer(), \
+                            linear(16, d, 3))), \
+             rms_norm(d), \
+             linear(d, V, 4)) ; \
+val_X = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0] ; \
+val_Y = [3, 5, 7, 2, 4, 6, 0, 1, 11, 13, 15, 2, 4, 6, 0, 1] ; \
+sigma = 0.1 ; \
+losses = zeros([16])";
+
+const NEURAL_THICKET_SWEEP: &str = "\
+for i in [0, 1, 2, 3] { \
+  v = clone_model(base); \
+  perturb_params(v, \"all_layers\", sigma, i + 100); \
+  losses = scatter(losses, i, cross_entropy(apply(v, val_X), val_Y)) \
+} ; \
+for i in [0, 1, 2, 3] { \
+  v = clone_model(base); \
+  perturb_params(v, \"attention_only\", sigma, i + 200); \
+  losses = scatter(losses, 4 + i, cross_entropy(apply(v, val_X), val_Y)) \
+} ; \
+for i in [0, 1, 2, 3] { \
+  v = clone_model(base); \
+  perturb_params(v, \"mlp_only\", sigma, i + 300); \
+  losses = scatter(losses, 8 + i, cross_entropy(apply(v, val_X), val_Y)) \
+} ; \
+for i in [0, 1, 2, 3] { \
+  v = clone_model(base); \
+  perturb_params(v, \"embed_and_head\", sigma, i + 400); \
+  losses = scatter(losses, 12 + i, cross_entropy(apply(v, val_X), val_Y)) \
+}";
+
 fn parse_or_die(src: &str, label: &str) -> Vec<Expr> {
     let tokens = lex(src).unwrap_or_else(|e| panic!("bench lex {label}: {e}"));
     parse(&tokens).unwrap_or_else(|e| panic!("bench parse {label}: {e}"))
@@ -139,5 +183,53 @@ fn bench_tiny_lm_train_step(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(benches, bench_reshape_reduce, bench_tiny_lm_train_step);
+fn bench_neural_thicket_variant_loop(c: &mut Criterion) {
+    // CPU path: `NEURAL_THICKET_BASE` + sweep, all on CPU.
+    // MLX path: base stays on CPU, variant sweep runs inside a
+    // single `device("mlx") { ... }` block with a prologue that
+    // stamps `base` + `val_X` as MLX so clone_model + apply
+    // cross-checks pass.
+    let cpu_src = format!("{NEURAL_THICKET_BASE} ; {NEURAL_THICKET_SWEEP}");
+    let mlx_src = format!(
+        "{NEURAL_THICKET_BASE} ; \
+         device(\"mlx\") {{ \
+           to_device(base, \"mlx\") ; \
+           to_device(val_X, \"mlx\") ; \
+           {NEURAL_THICKET_SWEEP} \
+         }}"
+    );
+    let cpu_stmts = parse_or_die(&cpu_src, "neural_thicket cpu");
+    let mlx_stmts = parse_or_die(&mlx_src, "neural_thicket mlx");
+
+    println!("neural_thicket_variant_loop cold timings:");
+    cold_time_once(&cpu_stmts, "cpu");
+    cold_time_once(&mlx_stmts, "mlx");
+
+    let mut group = c.benchmark_group("neural_thicket_variant_loop");
+    // 16 variants x (clone + perturb + apply + cross_entropy +
+    // scatter) does meaningfully more work than a single Adam
+    // step; keep sample_size modest so the bench finishes in
+    // under a minute per path.
+    group.sample_size(20);
+    group.bench_function("interp_cpu", |b| {
+        b.iter(|| {
+            let mut env = Environment::new();
+            black_box(eval_program(&cpu_stmts, &mut env).expect("cpu eval"));
+        });
+    });
+    group.bench_function("interp_mlx", |b| {
+        b.iter(|| {
+            let mut env = Environment::new();
+            black_box(eval_program(&mlx_stmts, &mut env).expect("mlx eval"));
+        });
+    });
+    group.finish();
+}
+
+criterion_group!(
+    benches,
+    bench_reshape_reduce,
+    bench_tiny_lm_train_step,
+    bench_neural_thicket_variant_loop,
+);
 criterion_main!(benches);
