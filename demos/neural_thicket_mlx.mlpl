@@ -1,0 +1,104 @@
+# Neural Thicket -- MLX variant (Saga 20 step 005).
+#
+# Same source as `demos/neural_thicket.mlpl`, with the
+# variant-loop portion wrapped in `device("mlx") { ... }` so
+# the 16-variant sweep (clone -> perturb -> apply -> score) and
+# the ensemble logits accumulation run through MLX.
+#
+# Base training stays on CPU. Training is cheap at this scale
+# and deterministic (the tape + adam path has the most Saga 14
+# coverage on CPU); the thesis of Saga 20's MLX story is the
+# 16-variant inference sweep, not the training step itself.
+#
+# Run with:
+#   cargo run -p mlpl-repl --features mlx --release -- \
+#     -f demos/neural_thicket_mlx.mlpl
+# DO NOT pipe on stdin (see CLAUDE.md).
+
+# ---- 1. Base model + tokenizer (CPU) ----
+corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+X_all  = shift_pairs_x(ids, 32)
+Y_all  = shift_pairs_y(ids, 32)
+X      = reshape(X_all, [reduce_mul(shape(X_all))])
+Y      = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+V = 280 ; d = 32 ; h = 1
+base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))
+
+experiment "thicket_mlx_base" {
+  train 100 {
+    adam(cross_entropy(apply(base, X), Y), base, 0.001, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(base, X), Y)
+  }
+}
+
+# ---- 2. Held-out validation tokens (CPU) ----
+val_ids   = apply_tokenizer(tok, "to be or not to be that is the question")
+val_X_all = shift_pairs_x(val_ids, 8)
+val_Y_all = shift_pairs_y(val_ids, 8)
+val_X     = reshape(val_X_all, [reduce_mul(shape(val_X_all))])
+val_Y     = reshape(val_Y_all, [reduce_mul(shape(val_Y_all))])
+
+# ---- 3. Variant loop + ensemble on MLX ----
+# to_device(base, "mlx") stamps every base param with "mlx" so
+# clone_model(base) inherits the tag and apply(variant, val_X)
+# cross-checks pass.
+device("mlx") {
+  to_device(base, "mlx")
+  to_device(val_X, "mlx")
+
+  sigma  = 0.02
+  losses = zeros([16])
+
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "all_layers", sigma, i + 100)
+    losses = scatter(losses, i, cross_entropy(apply(v, val_X), val_Y))
+  }
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "attention_only", sigma, i + 200)
+    losses = scatter(losses, 4 + i, cross_entropy(apply(v, val_X), val_Y))
+  }
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "mlp_only", sigma, i + 300)
+    losses = scatter(losses, 8 + i, cross_entropy(apply(v, val_X), val_Y))
+  }
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "embed_and_head", sigma, i + 400)
+    losses = scatter(losses, 12 + i, cross_entropy(apply(v, val_X), val_Y))
+  }
+
+  ens_logits = zeros(shape(apply(base, val_X)))
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "all_layers", sigma, i + 100)
+    ens_logits = ens_logits + apply(v, val_X)
+  }
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "attention_only", sigma, i + 200)
+    ens_logits = ens_logits + apply(v, val_X)
+  }
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "mlp_only", sigma, i + 300)
+    ens_logits = ens_logits + apply(v, val_X)
+  }
+  for i in [0, 1, 2, 3] {
+    v = clone_model(base)
+    perturb_params(v, "embed_and_head", sigma, i + 400)
+    ens_logits = ens_logits + apply(v, val_X)
+  }
+  ens_logits = ens_logits * (1.0 / 16.0)
+  ens_metric = cross_entropy(ens_logits, val_Y)
+}
+
+# ---- 4. Heatmap + top-K report (CPU; viz + argtop_k are CPU builtins) ----
+heat     = reshape(losses, [4, 4])
+heat_svg = svg(heat, "heatmap")
+best_idx = argtop_k(-1.0 * losses, 4)

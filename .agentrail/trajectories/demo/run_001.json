@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 4,
+    "step": "neural-thicket-cpu-demo"
+  },
+  "action": "Researched language surface (for-loop binding, scalar arithmetic, no string-array indexing) before authoring the demo, since several patterns from the design sketch (repeat with step counter, families[step/4], strict top-K ensemble) needed reshaping. Ran into \"val string too short for ctx=32\" on first manual run and fixed by reducing val context to 8 (Tiny LM has no positional encoding). Documented two language-level limitations (no per-iteration counter in repeat, no string-array indexing) in demo comments and docs/demos-scripts.md so step 005 / using-perturbation.md know the followup surface.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T13:06:06"
+}

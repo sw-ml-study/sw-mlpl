@@ -160,6 +160,7 @@ Criterion's steady-state medians after a 3s warm-up.
 |---|---:|---:|---:|---:|---:|
 | `reshape_reduce_100x100` | 206 us | 347 us | 68.5 us | 81.1 us | **0.84x** (MLX slower) |
 | `tiny_lm_train_step` | 769 us | 2.60 ms | 619 us | 2.36 ms | **0.26x** (MLX slower) |
+| `neural_thicket_variant_loop` | 838 us | 3.12 ms | 767 us | 3.01 ms | **0.25x** (MLX slower) |
 
 `tiny_lm_train_step` is one Adam step (forward + cross_entropy +
 backward + Adam update) on a Saga 13 Tiny LM-shaped slice scaled
@@ -168,6 +169,21 @@ to V=60, d=16, T=8, single-head causal attention. The full
 roughly 20x more work per iteration, so its warm-path
 performance trends in the same direction but amortizes more of
 the per-op overhead.
+
+`neural_thicket_variant_loop` (added Saga 20 step 005) is 16
+perturbation variants scored through a Tiny LM-shaped base
+(V=32, d=8, T=16, single-head causal attention) inside one
+`device("mlx") { ... }` block: for each variant, a
+`clone_model` + `perturb_params` + `apply` + `cross_entropy` +
+`scatter` cycle. Each iteration does 16 forwards (and no
+training), so the ratio is driven by inference throughput
+rather than by the tape-rematerialization cost that dominated
+`tiny_lm_train_step`. Yet the MLX-vs-CPU ratio is essentially
+unchanged (0.25x vs 0.26x), which is consistent with the
+bottleneck analysis below: at this inner dimension, per-op
+kernel launch + f32 round-trip overhead swamps the forward
+arithmetic regardless of whether a backward/Adam pass also
+runs.
 
 ### Go/no-go gate result: MISS
 
