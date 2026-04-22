@@ -12,6 +12,7 @@ mod grad;
 mod inspect;
 mod loader;
 mod model;
+mod model_clone;
 mod model_dispatch;
 mod model_tape;
 mod tokenizer;
