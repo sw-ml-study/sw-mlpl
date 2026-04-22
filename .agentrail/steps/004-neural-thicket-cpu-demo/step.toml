@@ -1,6 +1,6 @@
 number = 4
 slug = "neural-thicket-cpu-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 004: `demos/neural_thicket.mlpl` end-to-end on CPU.
 
