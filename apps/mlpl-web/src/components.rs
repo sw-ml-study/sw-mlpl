@@ -159,13 +159,31 @@ pub fn welcome() -> Html {
 
 #[function_component(Footer)]
 pub fn footer(props: &UrlProps) -> Html {
+    // Same shape as the Software Wrighter web-sw-cor24-* live demos:
+    // legal blurb, repo, project links, and build provenance --
+    // separated by middots. Build env vars come from `build.rs`
+    // and refresh whenever .git/HEAD changes.
+    let build_info = format!(
+        "{} \u{00b7} {} \u{00b7} {}",
+        env!("BUILD_HOST"),
+        env!("BUILD_SHA"),
+        env!("BUILD_TIMESTAMP"),
+    );
     html! {
         <footer>
-            <span>{"MLPL v0.9.0"}</span>
-            <span class="footer-sep">{"·"}</span>
+            <span>{"MIT License"}</span>
+            <span class="footer-sep">{"\u{00b7}"}</span>
+            <span>{"\u{00a9} 2026 Michael A Wright"}</span>
+            <span class="footer-sep">{"\u{00b7}"}</span>
             <a href={props.url} target="_blank" rel="noopener">{"GitHub"}</a>
-            <span class="footer-sep">{"·"}</span>
-            <span>{"Built with Rust + Yew + WASM"}</span>
+            <span class="footer-sep">{"\u{00b7}"}</span>
+            <a href="https://software-wrighter-lab.github.io/" target="_blank" rel="noopener">{"Blog"}</a>
+            <span class="footer-sep">{"\u{00b7}"}</span>
+            <a href="https://discord.com/invite/Ctzk5uHggZ" target="_blank" rel="noopener">{"Discord"}</a>
+            <span class="footer-sep">{"\u{00b7}"}</span>
+            <a href="https://www.youtube.com/@SoftwareWrighter" target="_blank" rel="noopener">{"YouTube"}</a>
+            <span class="footer-sep">{"\u{00b7}"}</span>
+            <span>{ build_info }</span>
         </footer>
     }
 }
