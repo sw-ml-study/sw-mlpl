@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 5,
+    "step": "neural-thicket-mlx-bench"
+  },
+  "action": "Mirrored the Saga 14 tiny_lm_mlx demo + test + bench pattern for the CPU/MLX pair. clone_model and perturb_params carry the device tag through the variant loop correctly (verified by the new parity test). Bench group lowered sample_size to 20 because the 16-variant sweep is chunky; cold vs warm timings are close (no meaningful first-call compile overhead on top of the per-op overhead at this scale).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T13:21:02"
+}

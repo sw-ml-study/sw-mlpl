@@ -1,6 +1,6 @@
 number = 5
 slug = "neural-thicket-mlx-bench"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 005: MLX variant loop + `mlpl-bench` entry.
 
@@ -8,5 +8,6 @@ Prove the speedup e..."""
 role = "production"
 context_files = []
 created_at = "2026-04-22T10:39:38"
+completed_at = "2026-04-22T13:21:02"
 task_type = "demo"
-commits = []
+commits = ["d13ac9805e74aa87da5f8867c6827b9100fbd0e8"]

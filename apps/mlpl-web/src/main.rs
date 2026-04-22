@@ -11,6 +11,7 @@ mod components;
 mod demos;
 mod handlers;
 mod help;
+mod lessons;
 mod state;
 mod summary;
 mod tutorial;
