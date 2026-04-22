@@ -133,6 +133,12 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "perturb_params"
+    {
+        let result = crate::model_perturb::eval_perturb_params(args, env)?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "reshape_labeled"
     {
         if args.len() != 3 {

@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 1,
+    "step": "clone-model-builtin"
+  },
+  "action": "Read existing model_dispatch.rs constructor patterns. TDD: wrote 10 failing tests in tests/clone_model_tests.rs first. Implemented eval_clone_model + clone_spec recursion + 3 per-variant helpers + copy_param in new crates/mlpl-eval/src/model_clone.rs module. Wired into eval.rs constructor-dispatch match. Wrote contracts/eval-contract/clone-model.md. Refactor pass extracted per-variant helpers to keep clone_spec under 50 LOC.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T10:53:56"
+}

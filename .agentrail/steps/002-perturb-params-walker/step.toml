@@ -1,6 +1,6 @@
 number = 2
 slug = "perturb-params-walker"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 002: `perturb_params` builtin + family pattern walker.
 
