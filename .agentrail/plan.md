@@ -1,43 +1,55 @@
-# MLX Backend Milestone (Saga 14, v0.11.0)
+# Perturbation Research Demos Milestone (Saga 20, v0.12.0)
 
 ## Why this exists
 
-Saga 13 proved the platform thesis on CPU: a few lines of MLPL
-train a tiny transformer LM, generate text, and render its own
-attention. The next bottleneck is speed. The Saga 13 Tiny LM
-trains at interpreter pace on an M-class laptop; an accelerator
-backend is the proper lever.
+Saga 13 trained a Tiny LM on CPU; Saga 14 put the same forward
+pass on MLX with interactive latency for many independent
+variants. That unlocks a class of research workflow the platform
+has not yet expressed as MLPL source: weight-perturbation
+specialization, a.k.a. [Neural Thickets / nt-rs](https://github.com/swcraig/nt-rs)
+(the Rust research harness for the [RandOpt](https://www.alphaxiv.org/overview/2603.12228.pdfv1)
+approach).
 
-Apple Silicon is this project's baseline dev hardware, and MLX
-is its native array framework: lazy graph execution, automatic
-operator fusion, unified CPU+GPU memory, and no kernel-per-device
-dance. Its array semantics already agree with MLPL's
-`DenseArray` (row-major, shape-labeled, consistent broadcast
-rules). Saga 14 introduces MLX as MLPL's first accelerator
-backend behind the same source surface: a program that trains on
-CPU should train on MLX without source changes.
+The thesis: in a pretrained model the weight-space neighborhood
+is dense with task-specialized solutions; sample N perturbations,
+score, take top-K, ensemble. MLPL already owns forward/autograd,
+named params, `randn`, `top_k`, `device("mlx") { }`, and
+`svg(..., "heatmap")`. Four small builtins close the gap:
+`clone_model`, `perturb_params`, `argtop_k`, `scatter`.
 
-CUDA (Saga 17) is the second accelerator backend. The MLPL
-source surface shipped in Saga 14 is the same surface CUDA will
-land behind. See `docs/using-mlx.md` for the user-facing design
-sketch; this doc is the implementation plan.
+Saga 20 ships those builtins, a `demos/neural_thicket.mlpl`
+headline demo that trains a Tiny LM, sweeps four perturbation
+families on MLX, top-K ensembles, and renders a
+`[family x seed]` specialization heatmap, plus a tutorial lesson
+and `docs/using-perturbation.md` retrospective. Release is
+v0.12.0.
+
+See `docs/mlpl-for-neural-thickets.md` for the design sketch and
+strawman source.
 
 ## Non-goals
 
-- **No CUDA.** Saga 17.
-- **No distributed execution.** Saga 17.
-- **No LoRA / quantization.** Saga 15.
-- **No new Model DSL layers.** The existing `linear`, `chain`,
-  `residual`, `rms_norm`, `attention`, `causal_attention`,
-  `embed`, `sinusoidal_encoding`, activations, and
-  `cross_entropy` ship on MLX as-is.
-- **No checkpoint format.** Still deferred to Saga 15+.
-- **No pretraining claims.** Target is the Saga 13 Tiny LM demo
-  running faster, not a bigger model.
+- **No real pretrained LLM.** Demo runs on the Saga 13 Tiny LM.
+  A Llama-class host would need checkpoint loading (Saga 15+) or
+  an Ollama sidecar (Saga 19).
+- **No distributed coordination.** nt-rs's coordinator + worker
+  shard pattern is Saga 17 (CUDA + LAN).
+- **No new optimizer.** Variants are scored on a frozen forward;
+  `adam` trains the base only.
+- **No new viz primitive.** Existing `svg(..., "heatmap")` and
+  `svg(..., "bar")` cover the visualization story.
+- **No `early_N_layers` / `late_N_layers` families.** They need
+  explicit layer depth in the param name, which we do not encode.
+  Ship the four families the nt-rs surface calls out
+  (`all_layers`, `attention_only`, `mlp_only`, `embed_and_head`);
+  defer depth-aware families to a follow-up.
+- **No low-rank perturbation.** `perturb_low_rank` is a sibling
+  to `perturb_params`; defer until the family walker exists and
+  proves out on the Gaussian case.
 
 ## Quality requirements (every step)
 
-Identical to Saga 13:
+Identical to Saga 14:
 
 1. TDD: failing test first, then implementation, then refactor.
 2. Quality gates must all pass before commit:
@@ -50,159 +62,165 @@ Identical to Saga 13:
 4. Push immediately after commit.
 5. Web UI changes rebuild `pages/` via `scripts/build-pages.sh`.
 6. `.agentrail/` changes are committed whenever they change.
-7. MLX-feature tests are gated so CI on non-Apple-Silicon hosts
-   still passes (`#[cfg(all(target_os = "macos",
-   target_arch = "aarch64", feature = "mlx"))]` or the closest
-   equivalent supported by `mlx-rs`). Where MLX is unavailable,
-   the CPU path remains authoritative.
+7. MLX-feature tests stay gated behind
+   `#[cfg(all(target_os = "macos", target_arch = "aarch64",
+   feature = "mlx"))]` (or the equivalent `mlpl-mlx` gate).
+   The CPU path is authoritative; MLX paths mirror its
+   numerics within documented fp32 tolerance.
 
 ## What already exists
 
-- `mlpl-rt` runtime target (scalar, array, fncall, variable,
-  labels, matmul with static contraction check) used by both
-  `mlpl!` proc macro and `mlpl-build` CLI.
-- `mlpl-parity-tests` harness proving bit-for-bit agreement
-  between interpreter and compile-to-Rust paths on 9 programs.
-- `mlpl-bench` Criterion harness comparing interpreter vs
-  compiled MLPL (9.05x measured speedup on 100x100 reshape+
-  reduce).
-- `mlpl-lower-rs` path-configurable AST -> `TokenStream` codegen
-  (the `runtime_prefix` knob makes swapping runtimes cheap).
-- Full Saga 11/13 Model DSL, autograd, optimizers, and the
-  Tiny LM end-to-end demo (`demos/tiny_lm.mlpl`).
-- Labeled axes and structured `EvalError::ShapeMismatch`
-  propagate through every existing op.
+- Saga 13 Tiny LM end-to-end (`demos/tiny_lm.mlpl`), including
+  `embed`, `chain`, `residual`, `rms_norm`, `causal_attention`,
+  `linear`, `relu_layer`, `cross_entropy`, `adam`, `train N { }`.
+- Saga 14 MLX backend: `to_device(model, "mlx")`, the
+  `device("mlx") { ... }` scoped form, MLX autograd via tape,
+  `mlpl-bench` Criterion harness with `tiny_lm_mlx_demo`.
+- `randn(seed, shape)` and per-seed reproducibility (Saga 8).
+- `top_k(logits, k)` -- masked logits for sampling (Saga 13).
+- Model DSL param name conventions: `__attn_Wq_*`,
+  `__attn_Wk_*`, `__attn_Wv_*`, `__attn_Wo_*`, `__linear_W_*`,
+  `__linear_b_*`, `__embed_E_*`, `__rmsnorm_*` (Sagas 11/13).
+- `svg(matrix, "heatmap")` and `svg(vec, "bar")` (Saga 7).
+- `reshape`, `shape`, `reduce_mul`, `mean`, `neg`, `zeros`,
+  integer indexing on vectors.
 
-## Phase 1 -- mlpl-mlx runtime target (3 steps)
+## Phase 1 -- Model mutation builtins (3 steps)
 
-### Step 001 -- mlpl-mlx crate skeleton + first primitive
-New `crates/mlpl-mlx` sibling to `mlpl-rt`. `mlx-rs` dependency
-behind a `mlx` Cargo feature. Ports exactly one primitive --
-`matmul(a, b)` -- backed by MLX's `matmul` and returning an
-MLX array wrapped in the same `DenseArray` / `LabeledShape`
-shape as `mlpl-rt`. Parity test vs `mlpl-rt::matmul` on a
-`[8, 4] @ [4, 8]` fixture (bit-for-bit or within a documented
-fp32 tolerance; decide during TDD). `cargo test -p mlpl-mlx
---features mlx` gates the test; default build stays green on
-non-Apple hosts.
+### Step 001 -- `clone_model` builtin
+Deep-copy a `ModelSpec` tree: walk every layer, allocate fresh
+param names (stable rename scheme, e.g. suffix with a fresh
+clone id so repeated clones stay distinct), copy the stored
+values, return a new `ModelSpec` independent of the original.
+Mutating the clone's params through `perturb_params` or `adam`
+must not affect the source. Contract lives in
+`contracts/eval/clone-model.md` as prose; test lives in
+`crates/mlpl-eval/tests/clone_model_tests.rs`.
 
-### Step 002 -- core elementwise + shape ops on MLX
-Port the shape- and element-level primitives the existing
-interpreter uses most: `add`/`sub`/`mul`/`div`/`neg`, `exp`/
-`log`/`tanh`/`sigmoid`/`relu`, `reshape`, `transpose`. Each
-primitive lands with a unit test + parity test vs `mlpl-rt`.
-Labels propagate identically -- the MLX runtime does not own
-`LabeledShape`, it borrows `mlpl-core`'s. Gradcheck is not in
-scope yet (step 006).
+TDD shape: construct a small `chain(linear(4, 4, 0),
+linear(4, 4, 1))` base, clone it, mutate the clone's params (or
+train it one step), assert the base's params are unchanged; and
+assert `clone_model(m)` has the same forward output as `m` on
+a fixed input (identity before perturbation).
 
-### Step 003 -- reductions + softmax + log-softmax on MLX
-`reduce_add`/`reduce_mul`/`mean`/`argmax` (axis-aware, label-
-aware), `softmax`, `log_softmax`, and `cross_entropy`.
-Numerical-stability invariants from the CPU path (max-
-subtraction log-softmax) carry over. Parity tests on `[4, 3]`
-and `[2, 3, 5]` fixtures. At the end of this phase the MLX
-runtime can compute forward passes of every primitive the Tiny
-LM uses.
+### Step 002 -- `perturb_params` + family pattern walker
+Walk a `ModelSpec`'s params, filter by family name, and add
+`sigma * randn(seed, shape)` to each matching param in place.
+Families:
 
-## Phase 2 -- Device placement + backend dispatch (2 steps)
+- `all_layers` -- every param.
+- `attention_only` -- `__attn_Wq_*`, `__attn_Wk_*`,
+  `__attn_Wv_*`, `__attn_Wo_*`.
+- `mlp_only` -- `__linear_W_*` / `__linear_b_*` outside the final
+  projection head.
+- `embed_and_head` -- `__embed_E_*` plus the final `linear`'s
+  `W` / `b`.
 
-### Step 004 -- device("...") scoped form + parser surface
-New `device("mlx") { body }` scoped form in the parser/AST
-(`Expr::Device`), mirroring `experiment`'s shape. Inside the
-block, evaluator dispatches array allocations and ops through
-the MLX runtime when the `mlx` feature is enabled; falls back
-to CPU (with a one-time warning) otherwise. Labels and shapes
-propagate identically across the boundary. Tests: parser
-round-trip, evaluator returns the same shape+labels as the CPU
-path, `device("cpu") { }` is a no-op and works on every host.
+The "final linear projection head" discrimination is the one
+subtle bit -- the walker needs to know which `__linear_*` belongs
+to the head vs. the MLP. Use the structural position in the
+`ModelSpec` tree (last top-level `linear` child of the outermost
+`chain`), not a name pattern; this keeps the test
+deterministic.
 
-### Step 005 -- backend dispatch in the Model DSL
-`apply(model, X)` and `params(model)` route through the active
-backend when `X` was allocated inside a `device("mlx")` block.
-A model owns its parameters on one device -- moving between
-devices requires an explicit `to_device("cpu")` / `to_device
-("mlx")` builtin (single-direction helpers that copy tensors;
-tests cover round-trip equality). The Saga 11 models
-(`linear`, `chain`, `residual`, `rms_norm`, `attention`,
-`causal_attention`) produce bit-for-bit (or tolerance-bounded)
-equivalent outputs on both devices for fixed seeds.
+Unknown family strings raise `EvalError::InvalidArgument` with
+the list of accepted families in the message.
 
-## Phase 3 -- Autograd on MLX (2 steps)
+TDD shape: clone a base, call `perturb_params(clone,
+"attention_only", 0.02, 42)`, assert attention params differ
+from base's within `abs(delta) in [0, 6*sigma]`, and MLP /
+embed / head params are bit-identical to base's.
 
-### Step 006 -- tape-lowered ops on MLX + gradcheck parity
-`grad(expr, wrt)` works inside a `device("mlx")` block. The
-autograd tape's primitives (`add`, `mul`, `matmul`, `exp`,
-`log`, `relu`, `tanh`, `sigmoid`, `softmax`, `sum`, `mean`,
-`transpose`, `reshape`) all ship MLX-backed backward paths,
-each gradcheck-verified against finite differences on fixtures
-matching Saga 9's. Where MLX's own `vjp` / `grad` helps,
-`mlpl-mlx` is free to use it; where it doesn't, we hand-write
-the backward. Either way, the invariant is that
-`grad(expr, wrt)` on MLX matches the CPU path to within a
-documented tolerance.
+### Step 003 -- `argtop_k` + `scatter` builtins
+Two small utility builtins that close the ensemble loop:
 
-### Step 007 -- optimizers + train { } on MLX
-`adam`, `momentum_sgd`, `train N { body }`, `last_losses`,
-`experiment "name" { }`, and the `_metric` capture all work
-unchanged inside `device("mlx") { }`. The `OptimizerState` map
-holds MLX-typed tensors when the surrounding scope is MLX.
-Parity test: one Adam step on the Saga 11 `tiny_mlp` demo
-produces the same parameter update (within tolerance) on CPU
-and MLX.
+- `argtop_k(values, k)` -- returns the `k` indices (as a rank-1
+  integer array) of the largest entries in `values`. Companion
+  to the existing `top_k(logits, k)` (which masks logits);
+  different name because the return type differs.
+- `scatter(buffer, index, value)` -- returns `buffer` with
+  `buffer[index] = value`. Rank-1 buffer, scalar `index`, scalar
+  `value`. Pairs with `repeat N { ... }` loops that produce one
+  number per iteration.
 
-## Phase 4 -- Tiny LM on MLX + benchmarks (1 step)
+Both land in the interpreter and -- if they fit the existing
+pattern trivially -- in `mlpl-rt` too. If the `mlpl-rt` side is
+non-trivial, document the gap and leave a follow-up issue;
+Saga 20's demo runs through the interpreter either way.
 
-### Step 008 -- tiny LM MLX variant + bench harness
-`demos/tiny_lm_mlx.mlpl` wraps the Saga 13 `demos/tiny_lm.mlpl`
-body in `device("mlx") { ... }` and otherwise changes nothing.
-Measurable outcome: identical-shape loss curve, >=5x wall-clock
-speedup over the interpreter CPU path on an M-class laptop
-(target 10-50x per `docs/using-mlx.md`, but 5x is the go / no-go
-gate). Extend `mlpl-bench` with an MLX row on the existing
-reshape+reduce workload and the Tiny LM training-step workload.
-Document the numbers in `docs/benchmarks.md`.
+TDD shape: `argtop_k([0.1, 0.5, 0.2, 0.9], 2)` equals
+`[3, 1]`; `scatter(zeros([4]), 2, 7.5)` equals `[0, 0, 7.5,
+0]`; `argtop_k` of a tie breaks by lowest index first;
+out-of-range index raises `EvalError::IndexOutOfBounds`.
 
-## Phase 5 -- Docs + release (2 steps)
+## Phase 2 -- Headline demo (2 steps)
 
-### Step 009 -- tutorial lesson + using-mlx.md retrospective
-New web REPL tutorial lesson **"Running on MLX"** that walks
-from a `device("cpu") { randn(7, [1024, 64]) }` baseline to the
-same expression wrapped in `device("mlx") { ... }`, then shows
-a tiny training loop swap. Update `docs/using-mlx.md` from
-"design sketch" to "reference" and strip the `> Status: planned`
-disclaimer; add a retrospective section summarizing what
-actually shipped vs the sketch. Update `docs/status.md`
-one-liner and `docs/saga.md` Saga 14 entry. Rebuild `pages/`
-via `scripts/build-pages.sh` and commit both source and built
-artifact in the same commit.
+### Step 004 -- `demos/neural_thicket.mlpl` on CPU
+First end-to-end runnable version of the demo, on CPU (no
+`device("mlx")` block yet). Trains a base Tiny LM (shorter run
+than Saga 13 -- the demo is about perturbation, not base
+quality), sweeps four families x four seeds = 16 variants,
+scores each on held-out validation tokens, builds a
+`losses : [16]` vector via `scatter`, picks top-K via
+`argtop_k`, reshapes to `[family, seed]` heatmap matrix.
 
-### Step 010 -- release v0.11.0
-Bump workspace version to `0.11.0`. Release commit summarizes
-`mlpl-mlx` runtime, `device("...") { }` scoped form,
-`to_device(...)` movement helpers, autograd + optimizers on
-MLX, and the Tiny LM MLX variant with its measured speedup.
-Tag `v0.11.0`. Push commit and tag. Verify the pages workflow
-deploys the updated tutorial list.
+Demo runs clean under `mlpl-repl -f demos/neural_thicket.mlpl`
+(remember: stdin piping splits `repeat { }` -- always `-f`).
+Commit the demo; `docs/demos-scripts.md` gets a one-line entry.
 
-## Dependencies and risk
+Integration test in `crates/mlpl-eval/tests/neural_thicket_tests.rs`
+runs a tiny cut-down version (smaller V, smaller N, 10 training
+steps) and asserts the heatmap shape is `[4, 4]`, losses are
+finite, and `argtop_k` picks indices in-range.
 
-- Step 001 depends on `mlx-rs` building cleanly on the dev
-  laptop; pin a known-good version in `Cargo.toml`. Risk: MLX
-  crate ABI changes between versions. Mitigation: pin minor.
-- Step 004 introduces `Expr::Device`. Risk: the scoped form
-  interacts with `experiment { }` and `train { }` nesting.
-  Mitigation: explicit tests for `experiment { device { train
-  { } } }` and the swapped nesting.
-- Step 006 is the highest-risk step. MLX's lazy graph and
-  MLPL's tape are two autograd systems; we only get to pick
-  one per expression. Decide during TDD whether to lean on
-  `mlx-rs`'s `vjp` / `grad` wholesale or hand-write backward
-  per primitive. Either path must produce the same gradients
-  (within tolerance) as the CPU tape.
-- Step 008 risk: MLX compile overhead on the first call may
-  dominate the Tiny LM's wall clock at this size. Mitigation:
-  bench harness reports both cold and warm timings; go/no-go
-  is warm-path speedup.
-- Cross-platform CI risk: every MLX test must be feature- and
-  target-gated so `cargo test` on Linux CI stays green. This
-  is an invariant across every step, not a single-step task.
+### Step 005 -- MLX variant loop + bench parity
+Wrap the perturb / score loop in `device("mlx") { ... }` with
+a `to_device(base, "mlx")` prologue, mirroring the Saga 14
+pattern. Extend `mlpl-bench` with a `neural_thicket_mlx`
+Criterion entry so the speedup is recorded next to the Tiny LM
+bench. Document the measured numbers (whatever they are,
+honestly -- Saga 14 already set the precedent that MLX can be
+slower than CPU on small workloads; report what we see).
+
+TDD shape: `crates/mlpl-eval/tests/neural_thicket_mlx_demo_tests.rs`
+that runs the MLX variant-loop cut-down under the existing
+MLX cfg gate and asserts heatmap shape + finite losses match
+the CPU path's shape within fp32 tolerance.
+
+## Phase 3 -- Tutorials, docs, release (2 steps)
+
+### Step 006 -- Heatmap tutorial lesson + docs
+Add a "Neural Thickets" tutorial lesson to the web REPL
+following the Saga 14 "Running on MLX" pattern: a short
+narrative, the demo source, and a rendered heatmap. Rebuild
+`pages/` via `scripts/build-pages.sh` and commit both the
+source changes and the rebuilt `pages/` dir (per CLAUDE.md).
+
+Write `docs/using-perturbation.md` -- user-facing retrospective
+covering: what the four builtins do, which families matter and
+why, how the demo composes, the measured heatmap, honest numbers
+on MLX vs CPU for the variant loop, and what the follow-up work
+looks like (depth-aware families, low-rank, real checkpoints).
+
+### Step 007 -- Release v0.12.0
+Bump workspace version to 0.12.0, update `CHANGELOG.md` with a
+Saga 20 entry (new builtins, new demo, new docs, measured
+speedups), update `docs/saga.md` to mark Saga 20 complete, tag
+the release commit. Final `/mw-cp` run and push. `agentrail
+complete --done` closes the saga.
+
+## Dependency graph
+
+```
+001 clone_model
+  \-- 002 perturb_params
+        \-- 003 argtop_k + scatter
+              \-- 004 neural_thicket CPU
+                    \-- 005 neural_thicket MLX + bench
+                          \-- 006 tutorial + using-perturbation.md
+                                \-- 007 release v0.12.0
+```
+
+Steps 001-003 can in principle interleave (001 is the only hard
+prerequisite of 002), but the sequential order keeps the commit
+story clean and each step's contract testable in isolation.

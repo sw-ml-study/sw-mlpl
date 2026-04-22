@@ -1,0 +1,12 @@
+number = 5
+slug = "neural-thicket-mlx-bench"
+status = "pending"
+description = """
+Phase 2 step 005: MLX variant loop + `mlpl-bench` entry.
+
+Prove the speedup e..."""
+role = "production"
+context_files = []
+created_at = "2026-04-22T10:39:38"
+task_type = "demo"
+commits = []

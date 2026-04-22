@@ -1,0 +1,12 @@
+number = 1
+slug = "clone-model-builtin"
+status = "pending"
+description = """
+Phase 1 step 001: `clone_model` builtin.
+
+Deep-copy a `ModelSpec` tree so per..."""
+role = "production"
+context_files = []
+created_at = "2026-04-22T10:39:38"
+task_type = "primitive"
+commits = []

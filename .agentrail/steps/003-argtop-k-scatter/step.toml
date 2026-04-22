@@ -1,0 +1,12 @@
+number = 3
+slug = "argtop-k-scatter"
+status = "pending"
+description = """
+Phase 1 step 003: `argtop_k` + `scatter` builtins.
+
+Close the ensemble loop w..."""
+role = "production"
+context_files = []
+created_at = "2026-04-22T10:39:38"
+task_type = "primitive"
+commits = []
