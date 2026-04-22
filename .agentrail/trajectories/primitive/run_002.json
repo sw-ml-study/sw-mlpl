@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "perturb-params-walker"
+  },
+  "action": "TDD first: 12 failing tests in crates/mlpl-eval/tests/perturb_params_tests.rs. Implemented eval_perturb_params + head_param_names + filter_family + perturb_one + scalar_f64 in new crates/mlpl-eval/src/model_perturb.rs. Wired into eval.rs as a model-mutator branch next to to_device. One test threshold required loosening from 6*sigma to 10*sigma because randn uses Box-Muller on a 53-bit uniform (theoretical max magnitude ~8.6); documented in the test comment and in the contract.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T12:09:58"
+}
