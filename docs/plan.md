@@ -220,6 +220,28 @@ or Saga 19's REST sidecar). Depends on Saga 14 for the variant-
 loop speed budget. See `docs/mlpl-for-neural-thickets.md` for
 the design sketch and full strawman source.
 
+### Saga 21 -- CLI server + multi-client UI
+New `crates/mlpl-serve` binary that exposes a REST + WebSocket
+surface over a long-running MLPL interpreter. One server, many
+clients: today's web UI wired to call origin (unblocks `:ask`
+via a server-side Ollama reverse proxy -- no CORS gymnastics
+on the client), `mlpl-repl --connect <host>`, an eventual
+ratatui TUI, and an Emacs client that renders SVG in-buffer
+without a browser. Session isolation per bearer token;
+`--bind 0.0.0.0` requires `--auth required`; proxy allow-list
+gates which LLM providers are reachable and server-side env
+vars hold their keys. Ships with the CLI visualization
+strategy (auto-write SVG to cache dir + print path) so the
+terminal REPL stops dumping raw `<svg>` XML. MVP scope: new
+crate skeleton, `POST /v1/sessions` + `POST /v1/.../eval`,
+`mlpl-repl --connect`. After MVP: visualization storage +
+URLs, proxy endpoints, streaming eval via SSE, cancellation.
+Desktop GUI wrapper (tauri/wry) and Emacs client land in
+follow-up sagas once the server surface is stable. See
+`docs/configurations.md` for the configuration matrix, the
+CLI-server architecture diagram, the REST API sketch, and the
+security posture.
+
 ## Dependency graph (abbreviated)
 
 ```
@@ -232,6 +254,7 @@ the design sketch and full strawman source.
   |                                                                                +-- 16 viz/RAG
   |                                                                                +-- 17 CUDA/dist
   |                                                                                +-- 18 distill/ICRL
+  |                                                                                +-- 21 CLI server
   |                                                                                +-- 19 LLM REST
 ```
 

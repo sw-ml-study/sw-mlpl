@@ -39,6 +39,7 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.15 | [ ] | 15 |
 | 19 | LLM-as-tool REST integration | v0.16 | [ ] | 12 |
 | 20 | Perturbation research demos (Neural Thickets) | v0.17 | [ ] | 14 |
+| 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.18 | [ ] | 13 |
 
 ## Next saga to start
 
