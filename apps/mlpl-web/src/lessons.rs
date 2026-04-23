@@ -483,4 +483,18 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Rerun the sweep at sigma = 0.2 and at sigma = 0.01. How does the heatmap change? At large sigma, every family's loss blows up; at small sigma the heatmap stays close to base. Then try swapping apply(v, val_X) for apply(base, val_X) in one family to see the base's loss show up as a row.",
     },
+    Lesson {
+        title: "LoRA Fine-Tuning",
+        intro: "Saga 15 ships three builtins for parameter-efficient fine-tuning: freeze(m) marks every param of m frozen (adam / momentum_sgd skip frozen names), unfreeze(m) is the inverse, and lora(m, rank, alpha, seed) wraps every Linear in m with two low-rank adapter matrices A [in, rank] and B [rank, out] and auto-freezes every non-adapter param in the returned student. Forward is y = X @ W + (alpha / rank) * X @ A @ B + b. B zero-inits so apply(lora_m, X) matches the base exactly before any gradient step; A inits as scaled randn so learning has somewhere to go. Only the adapters train. This lesson runs a tiny interactive version (V=8, d=4, rank=2) so the forward and the learned adapter render quickly in the browser; demos/lora_finetune.mlpl has the full Shakespeare version and docs/using-lora.md has the retrospective.",
+        examples: &[
+            "base = chain(embed(8, 4, 0), residual(chain(rms_norm(4), causal_attention(4, 1, 1))), linear(4, 8, 1))",
+            "student = lora(base, 2, 4.0, 7)",
+            "X = [1, 3, 5, 7, 2, 4, 6, 0] ; Y = [3, 5, 7, 2, 4, 6, 0, 1]",
+            "train 10 { adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(student, X), Y) }",
+            "loss_curve(last_losses)",
+            "cross_entropy(apply(student, X), Y)",
+            "cross_entropy(apply(base, X), Y)",
+        ],
+        try_it: "The two cross_entropy lines after training should report different numbers: student's loss went down during fine-tune, but base's loss is unchanged because lora() auto-froze the base -- adam only moved the adapters. Try unfreeze(student) before the train block and re-run: now both losses move.",
+    },
 ];
