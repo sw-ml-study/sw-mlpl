@@ -93,10 +93,77 @@ pub(crate) fn apply_model_tape(
             };
             attention_single_head_tape(&x, &inputs, tape, params)
         }
-        ModelSpec::LinearLora { .. } => Err(EvalError::Unsupported(
-            "grad: apply() through LinearLora is not yet implemented (Saga 15 step 003)".into(),
-        )),
+        ModelSpec::LinearLora {
+            w,
+            b,
+            a,
+            b_adapter,
+            rank,
+            alpha,
+            ..
+        } => linear_lora_tape(
+            &x,
+            &LinearLoraTapeInputs {
+                w,
+                b,
+                a,
+                b_adapter,
+                rank: *rank,
+                alpha: *alpha,
+            },
+            tape,
+            params,
+        ),
     }
+}
+
+/// Named-field inputs for one `linear_lora_tape` call so
+/// the helper stays at 4 args and does not trip
+/// `clippy::too_many_arguments`.
+struct LinearLoraTapeInputs<'a> {
+    w: &'a str,
+    b: &'a str,
+    a: &'a str,
+    b_adapter: &'a str,
+    rank: usize,
+    alpha: f64,
+}
+
+fn linear_lora_tape(
+    x: &Tensor,
+    inputs: &LinearLoraTapeInputs<'_>,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
+    let w_t = params
+        .get(inputs.w)
+        .cloned()
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.w.into()))?;
+    let b_t = params
+        .get(inputs.b)
+        .cloned()
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.b.into()))?;
+    let a_t = params
+        .get(inputs.a)
+        .cloned()
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.a.into()))?;
+    let b_adapt_t = params
+        .get(inputs.b_adapter)
+        .cloned()
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.b_adapter.into()))?;
+    // Base: X @ W
+    let xw = x.matmul(&w_t);
+    // Adapter: (alpha / rank) * X @ A @ B
+    let xa = x.matmul(&a_t);
+    let xab = xa.matmul(&b_adapt_t);
+    let scale = inputs.alpha / inputs.rank as f64;
+    let scale_t = Tensor::leaf(Rc::clone(tape), DenseArray::from_scalar(scale), false);
+    let xab_scaled = xab.mul(&scale_t);
+    // Bias: broadcast [1, out] -> [n, out] via ones([n, 1]) @ b.
+    let n = xw.value().shape().dims()[0];
+    let ones_arr = DenseArray::new(Shape::new(vec![n, 1]), vec![1.0; n])?;
+    let ones_t = Tensor::leaf(Rc::clone(tape), ones_arr, false);
+    Ok(xw.add(&xab_scaled).add(&ones_t.matmul(&b_t)))
 }
 
 fn linear_tape(

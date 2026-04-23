@@ -1,11 +1,12 @@
 number = 2
 slug = "lora-builtin"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 002: `lora(m, rank, alpha, seed)` builtin +
 `ModelSpec::LinearLo..."""
 role = "production"
 context_files = []
 created_at = "2026-04-22T19:21:34"
+completed_at = "2026-04-22T20:32:46"
 task_type = "primitive"
-commits = []
+commits = ["c69fb8a8a1161bac0e45e016e28833634194ae06"]

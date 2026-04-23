@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "lora-builtin"
+  },
+  "action": "First cut introduced two new sw-checklist FAILs (wrap_linear at 67 lines, clone_linear_lora with 9 args triggering clippy::too_many_arguments). User feedback: \"use structs to pass many args\". Refactored: LoraCtx threads rank/alpha/seed/counter through the tree walker so rewrite_linears_to_lora takes 3 positional args instead of 6; AdapterInit passes adapter-allocation params as one borrow; rank validation moved into allocate_adapters so wrap_linear stays under 50 LOC; clone_linear_lora now takes &ModelSpec and destructures internally. Final state: 7 fns in model_lora.rs (at budget), zero new FAILs, 139/102 matching Saga 20 baseline.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T20:32:46"
+}

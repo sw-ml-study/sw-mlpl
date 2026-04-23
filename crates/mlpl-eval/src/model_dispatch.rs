@@ -344,10 +344,69 @@ fn apply_model(
             let onehot = tokens_to_onehot(x, *vocab)?;
             crate::device::dispatched_call(env, "matmul", vec![onehot, t.clone()])
         }
-        ModelSpec::LinearLora { .. } => Err(EvalError::Unsupported(
-            "apply: LinearLora forward is not yet implemented (Saga 15 step 003)".into(),
-        )),
+        ModelSpec::LinearLora {
+            w,
+            b,
+            a,
+            b_adapter,
+            rank,
+            alpha,
+            ..
+        } => apply_linear_lora(
+            x,
+            &LinearLoraInputs {
+                w,
+                b,
+                a,
+                b_adapter,
+                rank: *rank,
+                alpha: *alpha,
+            },
+            env,
+        ),
     }
+}
+
+/// Named-field inputs for one `apply_linear_lora` call so
+/// the helper stays at 3 args (x, inputs, env) and does not
+/// trip `clippy::too_many_arguments`.
+struct LinearLoraInputs<'a> {
+    w: &'a str,
+    b: &'a str,
+    a: &'a str,
+    b_adapter: &'a str,
+    rank: usize,
+    alpha: f64,
+}
+
+fn apply_linear_lora(
+    x: &DenseArray,
+    inputs: &LinearLoraInputs<'_>,
+    env: &Environment,
+) -> Result<DenseArray, EvalError> {
+    let w_arr = env
+        .get(inputs.w)
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.w.into()))?;
+    let b_arr = env
+        .get(inputs.b)
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.b.into()))?;
+    let a_arr = env
+        .get(inputs.a)
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.a.into()))?;
+    let b_adapt_arr = env
+        .get(inputs.b_adapter)
+        .ok_or_else(|| EvalError::UndefinedVariable(inputs.b_adapter.into()))?;
+    let xw = crate::device::dispatched_call(env, "matmul", vec![x.clone(), w_arr.clone()])?;
+    let xa = crate::device::dispatched_call(env, "matmul", vec![x.clone(), a_arr.clone()])?;
+    let xab = crate::device::dispatched_call(env, "matmul", vec![xa, b_adapt_arr.clone()])?;
+    let scale = inputs.alpha / inputs.rank as f64;
+    let xab_scaled =
+        crate::device::dispatched_call(env, "mul", vec![xab, DenseArray::from_scalar(scale)])?;
+    let n = xw.shape().dims()[0];
+    let ones = DenseArray::new(Shape::new(vec![n, 1]), vec![1.0; n])?;
+    let b_broadcast = crate::device::dispatched_call(env, "matmul", vec![ones, b_arr.clone()])?;
+    let sum_wx_and_adapter = crate::device::dispatched_call(env, "add", vec![xw, xab_scaled])?;
+    crate::device::dispatched_call(env, "add", vec![sum_wx_and_adapter, b_broadcast])
 }
 
 /// Convert an integer-valued token id array (1-D `[N]`) into a
