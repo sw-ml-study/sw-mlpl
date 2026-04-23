@@ -1,0 +1,13 @@
+number = 3
+slug = "scatter3d-viz"
+status = "pending"
+description = """
+Phase 2 step 003: 3D scatter viz type
+`svg(pts, "scatter3d")`.
+
+New viz type ..."""
+role = "production"
+context_files = []
+created_at = "2026-04-23T14:00:32"
+task_type = "primitive"
+commits = []

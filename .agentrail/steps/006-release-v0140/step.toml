@@ -1,0 +1,13 @@
+number = 6
+slug = "release-v0140"
+status = "pending"
+description = """
+Phase 3 step 006: release v0.14.0.
+
+Cut the Embedding Visualization release.
+..."""
+role = "production"
+context_files = []
+created_at = "2026-04-23T14:00:32"
+task_type = "release"
+commits = []
