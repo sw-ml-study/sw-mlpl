@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 6,
+    "step": "perturbation-tutorial-docs"
+  },
+  "action": "Initial tutorial.rs addition pushed the file to 522 LOC (over 500 budget) causing one new sw-checklist FAIL. Fixed by extracting Lesson + LESSONS into a new lessons.rs module -- tutorial.rs is now 40 lines (callbacks only), lessons.rs is 486 lines (data). pub use re-export kept the single external import site in components.rs untouched. Rebuilt pages/ twice (once before the refactor, once after, since the WASM hash changes).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T13:57:53"
+}
