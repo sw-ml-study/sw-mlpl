@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 1,
+    "step": "freeze-builtin"
+  },
+  "action": "New crates/mlpl-eval/src/model_freeze.rs module (3 fns, under the 7-fn budget). Filter branch inserted in both eval_adam and eval_momentum_sgd right after the existing is_param check: \"if env.is_frozen(name) { continue; }\". That skips grad computation AND optimizer update in one go, since grad is only requested inside the optimizer loop. Module count +1 (already over the 7 crate budget; one new row on the existing FAIL, no new FAIL category). Test approach: freeze a model, run 3 adam steps, assert params bit-identical; then unfreeze, assert adam moves them again.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T19:27:12"
+}

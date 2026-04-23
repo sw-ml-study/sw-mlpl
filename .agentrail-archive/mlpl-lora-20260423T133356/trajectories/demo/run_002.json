@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 5,
+    "step": "lora-mlx-bench"
+  },
+  "action": "Followed the Saga 14 tiny_lm_mlx + Saga 20 neural_thicket_mlx pattern: mirror demo file, triple-gated integration test with CPU/MLX parity assertions, new Criterion group with sample_size=20. Frozen-base bit-identical test had to run both paths through a shared fixture loop (for mlx in [false, true] { ... }) rather than two separate tests to avoid code duplication.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-23T11:00:28"
+}
