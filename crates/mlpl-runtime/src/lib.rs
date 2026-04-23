@@ -2,6 +2,7 @@
 
 mod builtins;
 mod dataset_builtins;
+mod embedding_builtins;
 mod ensemble_builtins;
 mod error;
 mod grid_builtin;
