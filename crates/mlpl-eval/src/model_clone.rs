@@ -72,7 +72,7 @@ pub(crate) fn eval_clone_model(
 /// residual) recurse structurally; parameterised nodes delegate
 /// to small helpers that allocate fresh names and copy the
 /// underlying tensors.
-fn clone_spec(spec: &ModelSpec, env: &mut Environment) -> Result<ModelSpec, EvalError> {
+pub(crate) fn clone_spec(spec: &ModelSpec, env: &mut Environment) -> Result<ModelSpec, EvalError> {
     match spec {
         ModelSpec::Linear { w, b } => clone_linear(env, w, b),
         ModelSpec::Chain(children) => {
@@ -99,6 +99,7 @@ fn clone_spec(spec: &ModelSpec, env: &mut Environment) -> Result<ModelSpec, Eval
             heads,
             causal,
         } => clone_attention(env, [wq, wk, wv, wo], *d_model, *heads, *causal),
+        ModelSpec::LinearLora { .. } => clone_linear_lora(env, spec),
     }
 }
 
@@ -154,6 +155,46 @@ fn clone_attention(
         d_model,
         heads,
         causal,
+    })
+}
+
+fn clone_linear_lora(env: &mut Environment, spec: &ModelSpec) -> Result<ModelSpec, EvalError> {
+    let ModelSpec::LinearLora {
+        w,
+        b,
+        a,
+        b_adapter,
+        in_dim,
+        out_dim,
+        rank,
+        alpha,
+    } = spec
+    else {
+        unreachable!("clone_linear_lora called with non-LinearLora spec");
+    };
+    // Base W, b reuse the Linear naming scheme; adapters get
+    // their own fresh id from the same counter.
+    let base_id = env.next_model_id;
+    env.next_model_id += 1;
+    let new_w = format!("__linear_W_{base_id}");
+    let new_b = format!("__linear_b_{base_id}");
+    copy_param(env, w, &new_w)?;
+    copy_param(env, b, &new_b)?;
+    let lora_id = env.next_model_id;
+    env.next_model_id += 1;
+    let new_a = format!("__lora_A_{lora_id}");
+    let new_b_adapter = format!("__lora_B_{lora_id}");
+    copy_param(env, a, &new_a)?;
+    copy_param(env, b_adapter, &new_b_adapter)?;
+    Ok(ModelSpec::LinearLora {
+        w: new_w,
+        b: new_b,
+        a: new_a,
+        b_adapter: new_b_adapter,
+        in_dim: *in_dim,
+        out_dim: *out_dim,
+        rank: *rank,
+        alpha: *alpha,
     })
 }
 

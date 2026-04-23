@@ -344,6 +344,9 @@ fn apply_model(
             let onehot = tokens_to_onehot(x, *vocab)?;
             crate::device::dispatched_call(env, "matmul", vec![onehot, t.clone()])
         }
+        ModelSpec::LinearLora { .. } => Err(EvalError::Unsupported(
+            "apply: LinearLora forward is not yet implemented (Saga 15 step 003)".into(),
+        )),
     }
 }
 

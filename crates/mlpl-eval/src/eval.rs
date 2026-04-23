@@ -96,6 +96,7 @@ pub(crate) fn eval_expr(
             "attention" => Some(crate::model_dispatch::eval_attention(args, env, false)),
             "causal_attention" => Some(crate::model_dispatch::eval_attention(args, env, true)),
             "clone_model" => Some(crate::model_clone::eval_clone_model(args, env)),
+            "lora" => Some(crate::model_lora::eval_lora(args, env)),
             _ => None,
         };
         if let Some(m) = model {

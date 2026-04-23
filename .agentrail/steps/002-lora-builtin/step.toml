@@ -1,6 +1,6 @@
 number = 2
 slug = "lora-builtin"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 002: `lora(m, rank, alpha, seed)` builtin +
 `ModelSpec::LinearLo..."""
