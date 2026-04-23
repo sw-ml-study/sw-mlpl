@@ -15,6 +15,13 @@ use crate::tokenizer::TokenizerSpec;
 pub struct Environment {
     pub(crate) vars: HashMap<String, DenseArray>,
     pub(crate) params: HashSet<String>,
+    /// Saga 15 step 001: parameters that are still trainable
+    /// (in `params`) and still carry values but that
+    /// `adam` / `momentum_sgd` must skip at the
+    /// optimizer-update stage. Gradient computation is
+    /// unaffected -- the chain rule still flows through
+    /// frozen parameters; only the *update* is suppressed.
+    pub(crate) frozen_params: HashSet<String>,
     pub(crate) optim_state: OptimizerState,
     pub(crate) models: HashMap<String, ModelSpec>,
     pub(crate) next_model_id: u64,
@@ -89,6 +96,25 @@ impl Environment {
     #[must_use]
     pub fn is_param(&self, name: &str) -> bool {
         self.params.contains(name)
+    }
+
+    /// Saga 15 step 001: mark `name` as frozen. `adam` and
+    /// `momentum_sgd` skip any frozen name when applying
+    /// parameter updates.
+    pub fn mark_frozen(&mut self, name: &str) {
+        self.frozen_params.insert(name.to_string());
+    }
+
+    /// Saga 15 step 001: remove `name` from the frozen set.
+    /// No-op if `name` is not currently frozen.
+    pub fn unmark_frozen(&mut self, name: &str) {
+        self.frozen_params.remove(name);
+    }
+
+    /// Saga 15 step 001: whether `name` is currently frozen.
+    #[must_use]
+    pub fn is_frozen(&self, name: &str) -> bool {
+        self.frozen_params.contains(name)
     }
 
     /// Iterate over all (name, value) parameter bindings.

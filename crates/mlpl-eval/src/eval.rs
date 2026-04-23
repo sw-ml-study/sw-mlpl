@@ -139,6 +139,16 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && (name == "freeze" || name == "unfreeze")
+    {
+        let result = if name == "freeze" {
+            crate::model_freeze::eval_freeze(args, env)?
+        } else {
+            crate::model_freeze::eval_unfreeze(args, env)?
+        };
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "reshape_labeled"
     {
         if args.len() != 3 {
