@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 7,
+    "step": "release-v0120"
+  },
+  "action": "Single-source-of-truth Cargo.toml workspace.package.version means the 0.11 -> 0.12 bump was a one-line edit; verified via build output (\"Checking mlpl-wasm v0.12.0\", etc.). Wrote CHANGELOG.md from scratch (no prior file). saga.md ordering convention is newest-first (Saga 14 at top of recent block); inserted Saga 20 above it. status.md needed both a row insert in Completed and rolling Planned target versions forward to keep the v0.12 slot consistent. Did NOT run sw-install per project memory (feedback_no_sw_install.md). Did NOT push the v0.12.0 tag per the step prompt and CLAUDE.md tag-push policy.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T18:40:43"
+}
