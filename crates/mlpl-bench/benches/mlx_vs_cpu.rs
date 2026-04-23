@@ -108,6 +108,27 @@ for i in [0, 1, 2, 3] { \
   losses = scatter(losses, 12 + i, cross_entropy(apply(v, val_X), val_Y)) \
 }";
 
+// Saga 15 step 005: one LoRA fine-tune training step. Each
+// bench iteration builds a Tiny LM base, wraps it with
+// rank-2 LoRA adapters (which auto-freezes every non-adapter
+// param), and runs one Adam step that only moves the
+// adapters. Shape: V=16, d=8, ctx=4 -- small enough that a
+// single iteration stays sub-second on CPU.
+const LORA_TRAIN_SETUP: &str = "\
+ids = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0] ; \
+X_all = shift_pairs_x(ids, 4) ; \
+Y_all = shift_pairs_y(ids, 4) ; \
+X = reshape(X_all, [reduce_mul(shape(X_all))]) ; \
+Y = reshape(Y_all, [reduce_mul(shape(Y_all))]) ; \
+base = chain(embed(16, 8, 0), \
+             residual(chain(rms_norm(8), causal_attention(8, 1, 1))), \
+             rms_norm(8), \
+             linear(8, 16, 2)) ; \
+student = lora(base, 2, 4.0, 7)";
+
+const LORA_TRAIN_STEP: &str =
+    "adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001)";
+
 fn parse_or_die(src: &str, label: &str) -> Vec<Expr> {
     let tokens = lex(src).unwrap_or_else(|e| panic!("bench lex {label}: {e}"));
     parse(&tokens).unwrap_or_else(|e| panic!("bench parse {label}: {e}"))
@@ -226,10 +247,56 @@ fn bench_neural_thicket_variant_loop(c: &mut Criterion) {
     group.finish();
 }
 
+fn bench_lora_finetune_step(c: &mut Criterion) {
+    // CPU path: build base + lora-wrap + one adam step, all
+    // on CPU. The auto-freeze inside lora() already set up
+    // env.frozen_params so adam skips the base.
+    // MLX path: build + wrap on CPU, then move student + X
+    // onto MLX and run the adam step inside a device("mlx")
+    // block so every matmul/softmax/cross_entropy/add
+    // dispatches through mlpl-mlx. Base stays frozen on
+    // both paths.
+    let cpu_src = format!("{LORA_TRAIN_SETUP} ; {LORA_TRAIN_STEP}");
+    let mlx_src = format!(
+        "{LORA_TRAIN_SETUP} ; \
+         device(\"mlx\") {{ \
+           to_device(student, \"mlx\") ; \
+           to_device(X, \"mlx\") ; \
+           {LORA_TRAIN_STEP} \
+         }}"
+    );
+    let cpu_stmts = parse_or_die(&cpu_src, "lora_finetune cpu");
+    let mlx_stmts = parse_or_die(&mlx_src, "lora_finetune mlx");
+
+    println!("lora_finetune_step cold timings:");
+    cold_time_once(&cpu_stmts, "cpu");
+    cold_time_once(&mlx_stmts, "mlx");
+
+    let mut group = c.benchmark_group("lora_finetune_step");
+    // One step over the base forward + adapter delta +
+    // adam update is chunky; a sample_size of 20 keeps the
+    // bench under a minute per path.
+    group.sample_size(20);
+    group.bench_function("interp_cpu", |b| {
+        b.iter(|| {
+            let mut env = Environment::new();
+            black_box(eval_program(&cpu_stmts, &mut env).expect("cpu eval"));
+        });
+    });
+    group.bench_function("interp_mlx", |b| {
+        b.iter(|| {
+            let mut env = Environment::new();
+            black_box(eval_program(&mlx_stmts, &mut env).expect("mlx eval"));
+        });
+    });
+    group.finish();
+}
+
 criterion_group!(
     benches,
     bench_reshape_reduce,
     bench_tiny_lm_train_step,
     bench_neural_thicket_variant_loop,
+    bench_lora_finetune_step,
 );
 criterion_main!(benches);

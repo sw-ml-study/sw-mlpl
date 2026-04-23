@@ -161,6 +161,7 @@ Criterion's steady-state medians after a 3s warm-up.
 | `reshape_reduce_100x100` | 206 us | 347 us | 68.5 us | 81.1 us | **0.84x** (MLX slower) |
 | `tiny_lm_train_step` | 769 us | 2.60 ms | 619 us | 2.36 ms | **0.26x** (MLX slower) |
 | `neural_thicket_variant_loop` | 838 us | 3.12 ms | 767 us | 3.01 ms | **0.25x** (MLX slower) |
+| `lora_finetune_step` | 208 us | 1.45 ms | 164 us | 1.11 ms | **0.15x** (MLX slower) |
 
 `tiny_lm_train_step` is one Adam step (forward + cross_entropy +
 backward + Adam update) on a Saga 13 Tiny LM-shaped slice scaled
@@ -184,6 +185,26 @@ bottleneck analysis below: at this inner dimension, per-op
 kernel launch + f32 round-trip overhead swamps the forward
 arithmetic regardless of whether a backward/Adam pass also
 runs.
+
+`lora_finetune_step` (added Saga 15 step 005) is one Adam
+step through a LoRA-wrapped Tiny LM (V=16, d=8, T=4,
+rank=2) with the base auto-frozen inside `lora()`. The MLX
+ratio (0.15x) is noticeably worse than the non-LoRA
+`tiny_lm_train_step` (0.26x) or the non-training
+`neural_thicket_variant_loop` (0.25x). The direct cause:
+each `LinearLora` forward is `X @ W + (alpha/rank) * X @ A
+@ B + b`, which launches three matmuls + one scalar
+elementwise multiply per wrapped linear instead of one
+matmul per linear. At d=8 the extra kernel launches and
+f32 round-trips swamp the arithmetic savings from the
+low-rank factorization -- the adapter matmuls are tiny
+(shape `[T, rank]` and `[rank, out]`, rank=2) and give MLX
+no room to amortize. The same forward on a d=512 model
+would flip the ratio: both `X @ W` and `X @ A @ B` would
+be matmul-FLOP-bound and MLX's Metal kernels would
+dominate. Bottleneck categories unchanged from the Saga 14
+breakdown below; LoRA just compounds them because it adds
+ops per layer.
 
 ### Go/no-go gate result: MISS
 
