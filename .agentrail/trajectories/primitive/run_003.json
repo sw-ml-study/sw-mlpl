@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 3,
+    "step": "lora-forward-tape"
+  },
+  "action": "Named-field structs (LinearLoraInputs, LinearLoraTapeInputs) per the Saga 15 step 002 design pattern kept helper arg counts at 3-4 so no too_many_arguments allow needed. Bias broadcast reused the existing ones([n,1]) @ b[1,out] pattern from the Linear tape arm so no new tape ops were necessary. Step-002 stub-error test renamed/inverted to a positive \"apply works in step 003\" assertion. One fmt pass removed experimental `#[rustfmt::skip]` attribs that Rust rejects on expressions.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-22T20:45:30"
+}

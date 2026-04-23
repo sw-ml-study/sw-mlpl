@@ -77,19 +77,32 @@ magnitude; the 10x is the same rationale as the
 
 ## Automatic freeze of the base
 
-At rewrite time, `lora` calls `env.mark_frozen(&w)` and
-`env.mark_frozen(&b)` for every replaced `Linear`'s cloned
-base names. This matches the standard LoRA use pattern:
+After the rewrite, `lora` walks the student's full param
+list and marks every name that is NOT a new adapter
+(`__lora_A_*` or `__lora_B_*`) as frozen in
+`env.frozen_params`. That includes:
+
+- Cloned base `W`, `b` of every wrapped `Linear`.
+- Embedding table (`__embed_E_*`) if the source has an
+  `embed` node.
+- Attention projections (`__attn_Wq_*`, `__attn_Wk_*`,
+  `__attn_Wv_*`, `__attn_Wo_*`) if the source has an
+  `attention` / `causal_attention` node.
+- `rms_norm` nodes carry no parameters; no-op.
+
+This matches the standard LoRA library convention --
+"frozen base, trainable adapters" -- without the caller
+having to enumerate which base params to freeze:
 
 ```mlpl
 student = lora(base, 8, 16.0, 0)
 train N { adam(loss, student, ...) ; ... }
-# -> student's W, b untouched; adapters A, B train.
+# -> every base param untouched; only A, B train.
 ```
 
-Callers who want full fine-tuning (train W, b AND A, B)
-call `unfreeze(student)` after `lora()`. The adapter A, B
-are NOT auto-frozen -- they are the whole point.
+Callers who want full fine-tuning (train everything,
+adapters AND base) call `unfreeze(student)` after `lora()`
+to clear the frozen set for every student param.
 
 ## Device propagation
 
