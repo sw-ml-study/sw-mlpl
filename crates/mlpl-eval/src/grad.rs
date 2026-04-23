@@ -315,6 +315,12 @@ pub(crate) fn eval_momentum_sgd(
                 "momentum_sgd: '{name}' is not a tracked parameter"
             )));
         }
+        // Saga 15 step 001: frozen params keep their gradients
+        // flowing through the tape but the optimizer update is
+        // suppressed -- the weight stays put.
+        if env.is_frozen(name) {
+            continue;
+        }
         let grad_args = [
             loss_expr.clone(),
             Expr::Ident(name.clone(), Span::new(0, 0)),
@@ -413,6 +419,12 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
             return Err(EvalError::Unsupported(format!(
                 "adam: '{name}' is not a tracked parameter"
             )));
+        }
+        // Saga 15 step 001: frozen params keep their gradients
+        // flowing through the tape but the optimizer update is
+        // suppressed -- the weight stays put.
+        if env.is_frozen(name) {
+            continue;
         }
         let grad_args = [
             loss_expr.clone(),
