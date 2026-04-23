@@ -149,6 +149,57 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 20: Perturbation research demos / Neural Thickets (COMPLETE)
+Four new builtins plus a headline demo that compose MLPL into
+a RandOpt-style weight-perturbation workflow. Seven steps in
+three phases. Phase 1 shipped the language surface: `clone_model(m)`
+deep-copies a `ModelSpec` tree and allocates a disjoint set of
+fresh param names while preserving device tags (step 001);
+`perturb_params(m, family, sigma, seed)` walks a model's
+params, filters by one of four families (`all_layers`,
+`attention_only`, `mlp_only`, `embed_and_head`), and adds
+`sigma * randn(seed + i, shape)` to each matching param in
+place, with the "final projection head" detected structurally
+(the last top-level `Linear` child of the outermost `Chain`,
+not a name-pattern heuristic) so `mlp_only` / `embed_and_head`
+can tell MLP linears apart from the vocab projection (step
+002); `argtop_k(values, k)` returns the k indices of the
+largest entries in a rank-1 vector (descending by value, ties
+to lower index; stable sort) and `scatter(buffer, index,
+value)` returns a copy of a rank-1 buffer with the single
+entry at `index` replaced by `value` (step 003, both in a
+new `crates/mlpl-runtime/src/ensemble_builtins.rs`). Phase 2
+shipped `demos/neural_thicket.mlpl` -- train a Saga 13 Tiny
+LM base, sweep 4 families x 4 seeds = 16 variants, score
+each on a held-out string, render a `[family x seed]`
+specialization heatmap, pick top-K via `argtop_k`, and
+average logits across all 16 variants for an ensemble
+cross-entropy (step 004, CPU-only; uses `for i in [0,1,2,3]`
+loops per family because `repeat` does not expose a counter
+and MLPL lacks string-array indexing for `families[i/4]`).
+`demos/neural_thicket_mlx.mlpl` wraps the variant loop +
+ensemble in a single `device("mlx") { ... }` block (base
+training stays on CPU); losses and ensemble logits agree
+with the CPU path elementwise within fp32 tolerance, pinned
+by a triple-gated integration test (step 005). A new
+`mlpl-bench` Criterion group `neural_thicket_variant_loop`
+measures warm CPU 767us vs warm MLX 3.01ms (MLX 0.25x), a
+ratio essentially identical to Saga 14's 0.26x on
+`tiny_lm_train_step` -- evidence that the bottleneck at
+Tiny LM inner dimensions is per-op kernel launch + f32
+round-trip, not autograd-specific cost. Phase 3 shipped a
+"Neural Thickets" web REPL tutorial lesson (tiny 4x4 sweep
+at V=8/d=4 so the full heatmap renders in the browser),
+`docs/using-perturbation.md` (retrospective covering the
+four builtins, the four families, the heatmap narrative,
+measured MLX numbers, and the deferred follow-up surface:
+depth-aware families / low-rank perturbation / real
+checkpoints / strict top-K ensembling / `repeat`
+step-counter), and rebuilt `pages/` for the live demo
+(step 006). Delivered v0.12.0. See
+`docs/mlpl-for-neural-thickets.md` for the design sketch and
+`docs/using-perturbation.md` for the shipped-surface doc.
+
 ## Saga 14: MLX backend (COMPLETE)
 First accelerator backend for MLPL: a program that trains on CPU
 now runs on Apple Silicon via MLX without source changes. Ten
