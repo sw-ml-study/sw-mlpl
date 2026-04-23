@@ -414,5 +414,12 @@ fn render_spec(spec: &ModelSpec) -> String {
         ModelSpec::Embedding { vocab, d_model, .. } => {
             format!("embed[vocab={vocab}, d={d_model}]")
         }
+        ModelSpec::LinearLora {
+            in_dim,
+            out_dim,
+            rank,
+            alpha,
+            ..
+        } => format!("lora[linear({in_dim} -> {out_dim}), rank={rank}, alpha={alpha}]"),
     }
 }

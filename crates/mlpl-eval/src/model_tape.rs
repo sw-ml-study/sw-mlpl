@@ -93,6 +93,9 @@ pub(crate) fn apply_model_tape(
             };
             attention_single_head_tape(&x, &inputs, tape, params)
         }
+        ModelSpec::LinearLora { .. } => Err(EvalError::Unsupported(
+            "grad: apply() through LinearLora is not yet implemented (Saga 15 step 003)".into(),
+        )),
     }
 }
 

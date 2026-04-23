@@ -91,6 +91,38 @@ pub enum ModelSpec {
         /// Whether to apply a lower-triangular causal mask.
         causal: bool,
     },
+    /// Saga 15 step 002: LoRA-wrapped linear layer. The base
+    /// weight `W` [in, out] and bias `b` [1, out] are the
+    /// same as `ModelSpec::Linear`; the adapter matrices
+    /// `A` [in, rank] and `B` [rank, out] hold the
+    /// trainable low-rank delta. Forward (step 003):
+    /// `y = X @ W + (alpha / rank) * X @ A @ B + b`.
+    /// At rewrite time `A` is randn-initialized and `B` is
+    /// zero-initialized, so the adapter contributes zero
+    /// before any training step. `lora(m, ...)` also marks
+    /// the cloned base `W` and `b` as frozen so
+    /// `adam(loss, lora_m, ...)` only moves the adapters;
+    /// callers who want full fine-tuning can
+    /// `unfreeze(lora_m)` after `lora()`.
+    LinearLora {
+        /// Base weight parameter name (`[in_dim, out_dim]`).
+        w: String,
+        /// Base bias parameter name (`[1, out_dim]`).
+        b: String,
+        /// Adapter `A` parameter name (`[in_dim, rank]`).
+        a: String,
+        /// Adapter `B` parameter name (`[rank, out_dim]`).
+        b_adapter: String,
+        /// Input dimension (cached for shape checks).
+        in_dim: usize,
+        /// Output dimension (cached for shape checks).
+        out_dim: usize,
+        /// Adapter rank.
+        rank: usize,
+        /// LoRA alpha; the forward uses `alpha / rank` as
+        /// the scalar multiplier on the adapter delta.
+        alpha: f64,
+    },
 }
 
 impl ModelSpec {
@@ -115,6 +147,9 @@ impl ModelSpec {
                 vec![wq.clone(), wk.clone(), wv.clone(), wo.clone()]
             }
             Self::Embedding { table, .. } => vec![table.clone()],
+            Self::LinearLora {
+                w, b, a, b_adapter, ..
+            } => vec![w.clone(), b.clone(), a.clone(), b_adapter.clone()],
         }
     }
 }
