@@ -1,11 +1,13 @@
 # MLPL deployment configurations
 
 > Status: design doc. The browser-only and CLI-REPL-only
-> configurations are what ship today (v0.11.0). The CLI-server
-> configuration is planned; design below is the reference for
-> the implementation saga. The desktop GUI wrapper and Emacs
-> client are sketched so the earlier configurations leave the
-> right hooks in place.
+> configurations are what ship today (v0.12.0 shipped in Saga
+> 20; Saga 15 LoRA in progress targets v0.13.0 without
+> changing the configuration matrix). The CLI-server
+> configuration is planned (Saga 21 slot open); design below
+> is the reference for the implementation saga. The desktop
+> GUI wrapper and Emacs client are sketched so the earlier
+> configurations leave the right hooks in place.
 
 MLPL is one language with multiple deployment surfaces. This
 doc is the map: which configuration supports what, where the
@@ -19,6 +21,8 @@ what they want to do.
 | Interpreter (`iota`, matmul, etc.)   | yes          | yes      | yes        | yes         |
 | Model DSL + autograd + training      | yes          | yes      | yes        | yes         |
 | MLX backend (Apple Silicon)          | no           | yes      | yes        | yes         |
+| LoRA fine-tune, CPU [4]              | slow [5]     | yes      | yes        | yes         |
+| LoRA fine-tune, MLX-accelerated [4]  | no [5]       | yes      | yes        | yes         |
 | Inline SVG visualization             | yes          | file [1] | yes        | yes         |
 | Trace export                         | no           | yes      | yes        | yes         |
 | Filesystem `load("rel.csv")`         | no [2]       | yes      | yes        | yes         |
@@ -48,6 +52,29 @@ server is out of scope for the browser-only config.
 blocked by Ollama's default CORS policy. The CLI server unlocks
 this by serving the web UI from an origin that reverse-proxies
 Ollama (and cloud LLMs) -- see "CLI server" below.
+
+[4] Saga 15 (v0.13.0, in progress). The LoRA language surface
+(`freeze`, `lora`, `LinearLora`) is pure Rust and lands in
+every environment the evaluator runs in. The CPU path works
+in both the CLI REPL and the browser WASM. The MLX path is
+native-only -- `mlpl-mlx` links against Accelerate / Metal,
+which WASM cannot reach. The tutorial lesson in the web REPL
+runs a deliberately tiny variant (V=8, d=4, rank=2) so the
+full walkthrough stays interactive; `demos/lora_finetune.mlpl`
+(CPU, any host) and `demos/lora_finetune_mlx.mlpl` (Apple
+Silicon CLI only) are the full-scale artifacts. The
+CLI-server configuration (Saga 21, unshipped) is the eventual
+path for "browser UI + MLX-accelerated training": the web
+client POSTs programs to `mlpl-serve` running natively with
+the `mlx` feature compiled in, which closes the gap without
+changing the language surface.
+
+[5] WASM has no Metal / Accelerate path and cannot compile
+`mlx-rs`, so `device("mlx") { ... }` in the browser is a
+silent no-op (the one-time warning prints once per session).
+At V=280 / d=32 the full-scale CPU LoRA training loop runs in
+the browser but is too slow to be interactive; use the CLI
+for full-scale fine-tunes or wait for Saga 21.
 
 ## Configuration 1: Browser-only
 
