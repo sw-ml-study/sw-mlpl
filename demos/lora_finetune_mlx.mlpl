@@ -1,0 +1,66 @@
+# LoRA fine-tune on MLX (Saga 15 step 005).
+#
+# Same source as `demos/lora_finetune.mlpl` with the
+# fine-tune training block wrapped in `device("mlx") { ... }`.
+# Base pre-training stays on CPU: the Saga 14 MLX ratio at
+# Tiny LM scale is slightly slower than CPU per op, and the
+# base pre-train is cheap + deterministic on CPU. The
+# fine-tune loop is where the MLX story matters -- it is what
+# runs in production for a real LoRA workflow.
+#
+# CLI-only (MLX feature). Run with:
+#   cargo run -p mlpl-repl --features mlx --release -- \
+#     -f demos/lora_finetune_mlx.mlpl
+# Apple Silicon + the `mlx` Cargo feature are required.
+
+# ---- 1. Base model + Shakespeare tokenizer (CPU) ----
+corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+X_all  = shift_pairs_x(ids, 32)
+Y_all  = shift_pairs_y(ids, 32)
+X      = reshape(X_all, [reduce_mul(shape(X_all))])
+Y      = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+V = 280 ; d = 32 ; h = 1
+base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))
+
+experiment "lora_mlx_base_pretrain" {
+  train 100 {
+    adam(cross_entropy(apply(base, X), Y), base, 0.001, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(base, X), Y)
+  }
+}
+
+# ---- 2. Synthetic instruction corpus (CPU-side tokenization) ----
+instr = "Q: hi A: hello Q: name A: alice Q: bye A: farewell Q: how A: well Q: who A: friend Q: what A: answer Q: where A: here Q: when A: now"
+instr_ids = apply_tokenizer(tok, instr)
+instr_X_all = shift_pairs_x(instr_ids, 16)
+instr_Y_all = shift_pairs_y(instr_ids, 16)
+instr_X = reshape(instr_X_all, [reduce_mul(shape(instr_X_all))])
+instr_Y = reshape(instr_Y_all, [reduce_mul(shape(instr_Y_all))])
+
+# ---- 3. LoRA-wrap the base (CPU) ----
+# lora() allocates adapters and auto-freezes every non-adapter
+# param in the student. The resulting student still carries
+# CPU device tags.
+student = lora(base, 8, 16.0, 0)
+
+# ---- 4. MLX fine-tune loop ----
+# to_device(student, "mlx") + to_device(instr_X, "mlx")
+# stamp device placement on every student param and on the
+# input tokens so apply + matmul + cross_entropy dispatch
+# through mlpl-mlx. instr_Y stays on CPU; cross_entropy's
+# per-row reduction handles the mixed placement.
+device("mlx") {
+  to_device(student, "mlx")
+  to_device(instr_X, "mlx")
+
+  experiment "lora_mlx_finetune" {
+    train 50 {
+      adam(cross_entropy(apply(student, instr_X), instr_Y), student, 0.01, 0.9, 0.999, 0.00000001);
+      loss_metric = cross_entropy(apply(student, instr_X), instr_Y)
+    }
+  }
+}
+loss_curve(last_losses)

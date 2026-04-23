@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 4,
+    "step": "lora-finetune-demo"
+  },
+  "action": "First cut of the integration test used tokenize_bytes (byte ids 0-255) with V=32, which errored out on embed lookup. Switched to explicit small-integer sequences with V=16 for the test. Discovered that step 002s auto-freeze was incomplete for LoRA: it only froze the MLP Linear W/b, leaving embed tables and attention projections trainable, which would cause the demo to mis-train the Tiny LM base. Amended eval_lora to do one post-rewrite pass freezing every non-adapter param in the student; removed the redundant wrap_linear mark_frozen; extended the contract and added a test covering chain(embed, attn, linear).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-23T10:18:35"
+}

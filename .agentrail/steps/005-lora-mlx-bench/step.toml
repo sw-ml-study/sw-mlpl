@@ -1,6 +1,6 @@
 number = 5
 slug = "lora-mlx-bench"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 005: LoRA fine-tune on MLX + Criterion bench.
 
