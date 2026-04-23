@@ -1,0 +1,13 @@
+number = 4
+slug = "embedding-viz-demo"
+status = "pending"
+description = """
+Phase 3 step 004: `demos/embedding_viz.mlpl`
+end-to-end.
+
+First runnable embe..."""
+role = "production"
+context_files = []
+created_at = "2026-04-23T14:00:32"
+task_type = "demo"
+commits = []
