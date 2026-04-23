@@ -1,6 +1,6 @@
 number = 1
 slug = "pairwise-sqdist-knn"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: `pairwise_sqdist(X)` + `knn(X, k)`
 builtins.
