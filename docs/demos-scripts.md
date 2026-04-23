@@ -299,6 +299,59 @@ Runs ~10-20 seconds on an M-class laptop. Watch for:
   not in scope for Saga 20. `docs/using-perturbation.md`
   (step 006) is the user-facing retrospective.
 
+## Demo 8 -- "LoRA fine-tune" (3 min, CPU)
+
+**What it shows.** Pre-train a Saga 13 Tiny LM on the
+Shakespeare snippet, wrap it with rank-8 LoRA adapters
+(`lora(base, 8, 16.0, 0)`), and fine-tune the adapters on
+a tiny synthetic instruction corpus. The base stays
+bit-identical across the fine-tune; only the low-rank
+adapter matrices `A [in, r]` and `B [r, out]` train. The
+whole pipeline (base train + adapter wrap + fine-tune)
+fits in ~40 lines of MLPL.
+
+**Why.** Saga 15 surface in action. Shows that `freeze`,
+`lora`, and the auto-freeze semantics ("everything in the
+student tree except the new adapters is frozen at rewrite
+time") compose with the existing Model DSL + adam + train
+without any new training concept. Useful for audiences
+who ask "can I fine-tune a base model in this language
+the way I would in PyTorch + peft?"
+
+**How.**
+```bash
+$REPL_CPU -f demos/lora_finetune.mlpl
+```
+Runs ~10-15 seconds on an M-class laptop. Watch for:
+- Two `experiment "..." { train N { ... } }` blocks: first
+  `lora_base_pretrain` moves the base, then
+  `lora_finetune` moves only the adapters.
+- Final `loss_metric` printed for each block: base pretrain
+  settles around the Shakespeare corpus's entropy floor;
+  the fine-tune final loss is around 2.18 on the
+  instruction corpus (loose reproducibility bound -- the
+  exact value shifts with seeds and tokenizer training
+  order).
+- `loss_curve(last_losses)` at the end writes an SVG of
+  the fine-tune loss descent.
+
+**Follow-up questions to expect.**
+- "Does the base move?" No. `lora()` auto-freezes every
+  non-adapter param in the student (cloned base W/b,
+  embedding table, attention projections). The integration
+  test `crates/mlpl-eval/tests/lora_finetune_tests.rs`
+  asserts this bit-identically.
+- "MLX variant?" `demos/lora_finetune_mlx.mlpl` (Saga 15
+  step 005) wraps the fine-tune loop in `device("mlx") { }`.
+  Apple Silicon CLI only; see `docs/configurations.md` for
+  the CLI-vs-web matrix.
+- "Can I train everything, base and adapters together?"
+  `unfreeze(student)` after `lora()` reopens every frozen
+  param. Unusual for LoRA but legal.
+- "What about QLoRA / 4-bit quantization?" Deferred to a
+  future saga. See `docs/using-lora.md` (Saga 15 step 006)
+  for the full deferred-follow-up list.
+
 ## Quick-reference: what each demo proves
 
 | Demo | Proves | Time | Host |
@@ -310,6 +363,7 @@ Runs ~10-20 seconds on an M-class laptop. Watch for:
 | 5. MLX benchmark | Honest performance status | 3 min | Apple Silicon |
 | 6. Compile-to-Rust | Native / WASM deployment | 2 min | any |
 | 7. Neural Thickets | Weight-perturbation specialization | 3 min | CPU |
+| 8. LoRA fine-tune | Frozen base + trainable adapters | 3 min | CPU |
 
 ## Suggested demo orders
 

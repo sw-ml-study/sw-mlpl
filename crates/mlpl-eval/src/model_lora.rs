@@ -81,7 +81,21 @@ pub(crate) fn eval_lora(args: &[Expr], env: &mut Environment) -> Result<ModelSpe
         seed,
         counter: 0,
     };
-    rewrite_linears_to_lora(cloned, env, &mut ctx)
+    let student = rewrite_linears_to_lora(cloned, env, &mut ctx)?;
+    // Auto-freeze every non-adapter param in the student
+    // tree: embed tables, attention projections, rms_norm
+    // (parameter-free; no-op), and the cloned base W, b of
+    // each LinearLora. Only the newly allocated `__lora_A_*`
+    // and `__lora_B_*` names stay trainable. This matches
+    // the LoRA-library convention -- "frozen base +
+    // trainable adapters" -- without the user having to
+    // remember which params belong to the base.
+    for name in student.params() {
+        if !name.starts_with("__lora_A_") && !name.starts_with("__lora_B_") {
+            env.mark_frozen(&name);
+        }
+    }
+    Ok(student)
 }
 
 fn resolve_model(arg: &Expr, env: &mut Environment) -> Result<ModelSpec, EvalError> {
@@ -176,11 +190,11 @@ fn wrap_linear(
             a_seed,
         },
     )?;
-    // Auto-freeze the cloned base W, b so `adam(loss,
-    // student, ...)` only moves the adapters. Users who
-    // want full fine-tuning can call `unfreeze(student)`.
-    env.mark_frozen(&w);
-    env.mark_frozen(&b);
+    // Auto-freeze of the cloned base W, b happens in
+    // `eval_lora` after the whole tree is rewritten -- one
+    // pass that freezes every non-adapter param so
+    // embeddings, attention, and bare linears all end up
+    // frozen consistently.
     Ok(ModelSpec::LinearLora {
         w,
         b,

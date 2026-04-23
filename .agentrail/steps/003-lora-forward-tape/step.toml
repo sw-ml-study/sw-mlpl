@@ -1,6 +1,6 @@
 number = 3
 slug = "lora-forward-tape"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 003: forward + autograd for `LinearLora`.
 
@@ -8,5 +8,6 @@ Make `apply(lora_m, X..."""
 role = "production"
 context_files = []
 created_at = "2026-04-22T19:21:34"
+completed_at = "2026-04-22T20:45:30"
 task_type = "primitive"
-commits = []
+commits = ["ebab661e6c1de655a71764cb40f271a64a94e54d"]

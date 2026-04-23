@@ -178,6 +178,37 @@ fn lora_walks_chain_and_wraps_every_linear() {
 }
 
 #[test]
+fn lora_auto_freezes_every_non_adapter_param() {
+    // Saga 15 step 004 amendment: auto-freeze is not just
+    // the Linear W, b -- every cloned base param in the
+    // student tree (embedding table, attention projections,
+    // base linears) is frozen at rewrite time. Only the
+    // adapter A, B stay trainable. Matches the LoRA
+    // convention of "frozen base + trainable adapters"
+    // without the caller having to enumerate base params.
+    let mut env = Environment::new();
+    run(
+        &mut env,
+        "m = chain(embed(16, 8, 0), \
+                   residual(chain(rms_norm(8), causal_attention(8, 1, 1))), \
+                   linear(8, 16, 2))",
+    );
+    run(&mut env, "student = lora(m, 2, 4.0, 7)");
+
+    for n in model_params(&env, "student").unwrap() {
+        let is_adapter = n.starts_with("__lora_A_") || n.starts_with("__lora_B_");
+        if is_adapter {
+            assert!(!env.is_frozen(&n), "adapter '{n}' must stay trainable");
+        } else {
+            assert!(
+                env.is_frozen(&n),
+                "non-adapter param '{n}' (embed / attn / linear base) must auto-freeze"
+            );
+        }
+    }
+}
+
+#[test]
 fn lora_leaves_non_linear_nodes_unchanged() {
     let mut env = Environment::new();
     // embed + causal_attention + rms_norm should NOT be

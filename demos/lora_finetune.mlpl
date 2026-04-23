@@ -1,0 +1,67 @@
+# LoRA fine-tune on a tiny instruction corpus (Saga 15 step 004).
+#
+# Pre-trains a Saga 13 Tiny LM on the Shakespeare snippet, then
+# wraps it with rank-8 LoRA adapters and fine-tunes ONLY the
+# adapters on a handful of Q/A pairs. Demonstrates the Saga 15
+# surface end-to-end:
+#
+# 1. Train a base model on corpus A (Shakespeare).
+# 2. student = lora(base, rank, alpha, seed) -- one call that
+#    clones the base, allocates adapter matrices A and B
+#    (A = randn * 1/sqrt(in), B = 0), and AUTO-FREEZES every
+#    non-adapter param in the student so adam only moves the
+#    adapters.
+# 3. Train student on corpus B (instruction Q/A) -- base W/b,
+#    embedding, and attention projections stay bit-identical.
+#    Only the low-rank adapters train.
+#
+# All on CPU. MLX variant is demos/lora_finetune_mlx.mlpl
+# (Saga 15 step 005, Apple Silicon only). Run with:
+#   mlpl-repl -f demos/lora_finetune.mlpl
+# DO NOT pipe on stdin (per CLAUDE.md).
+
+# ---- 1. Base model + Shakespeare tokenizer ----
+corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+X_all  = shift_pairs_x(ids, 32)
+Y_all  = shift_pairs_y(ids, 32)
+X      = reshape(X_all, [reduce_mul(shape(X_all))])
+Y      = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+V = 280 ; d = 32 ; h = 1
+base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), residual(chain(rms_norm(d), linear(d, 128, 2), relu_layer(), linear(128, d, 3))), rms_norm(d), linear(d, V, 4))
+
+experiment "lora_base_pretrain" {
+  train 100 {
+    adam(cross_entropy(apply(base, X), Y), base, 0.001, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(base, X), Y)
+  }
+}
+
+# ---- 2. Synthetic instruction corpus (Q/A pairs) ----
+# Short; shares the Shakespeare-trained BPE so tokens are a
+# mix of learned merges and byte-level. The point is to
+# specialize the student on a NEW distribution while keeping
+# the base's general-language prior fixed.
+instr = "Q: hi A: hello Q: name A: alice Q: bye A: farewell Q: how A: well Q: who A: friend Q: what A: answer Q: where A: here Q: when A: now"
+instr_ids = apply_tokenizer(tok, instr)
+instr_X_all = shift_pairs_x(instr_ids, 16)
+instr_Y_all = shift_pairs_y(instr_ids, 16)
+instr_X = reshape(instr_X_all, [reduce_mul(shape(instr_X_all))])
+instr_Y = reshape(instr_Y_all, [reduce_mul(shape(instr_Y_all))])
+
+# ---- 3. LoRA-wrap the base and fine-tune the adapters ----
+# lora() clones the base (so training the student doesn't
+# touch the original base binding) and auto-freezes every
+# non-adapter param in the student tree. adam only moves
+# __lora_A_* and __lora_B_* across the next train block.
+student = lora(base, 8, 16.0, 0)
+
+experiment "lora_finetune" {
+  train 50 {
+    adam(cross_entropy(apply(student, instr_X), instr_Y), student, 0.01, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(student, instr_X), instr_Y)
+  }
+}
+loss_curve(last_losses)
