@@ -5,6 +5,134 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
+## v0.13.0 -- Saga 15: LoRA Fine-Tuning (2026-04-23)
+
+Parameter-efficient fine-tuning lands in MLPL source. Three
+new builtins plus a new `ModelSpec` variant compose into a
+PyTorch-`peft`-style "frozen base, trainable low-rank
+adapters" workflow: take a trained base, wrap it with
+`lora(base, rank, alpha, seed)`, train only the adapters.
+
+### Added
+
+- **`freeze(m) -> scalar 0`** (step 001). Marks every name
+  in `m.params()` as frozen in `env.frozen_params`. `adam`
+  and `momentum_sgd` skip frozen names at the optimizer-
+  update stage; gradient computation is unchanged, so the
+  chain rule still flows through for downstream ops.
+  Contract: `contracts/eval-contract/freeze.md`.
+- **`unfreeze(m) -> scalar 0`** (step 001). Inverse of
+  `freeze`. Removes every `m.params()` name from
+  `env.frozen_params`. Idempotent.
+- **`lora(m, rank, alpha, seed) -> Model`** (step 002).
+  Clones `m`'s spec tree, replaces every `Linear` node
+  with a `LinearLora` that owns the cloned base `W`, `b`
+  plus two fresh low-rank adapter matrices `A [in, rank]`
+  (init `randn * 1/sqrt(in)`) and `B [rank, out]` (init
+  zeros), and auto-freezes every non-adapter param in the
+  returned student. The zero-init on B gives the LoRA
+  "forward identity before training" property
+  (`apply(lora_m, X) == apply(m, X)` elementwise). Contract:
+  `contracts/eval-contract/lora.md`.
+- **`ModelSpec::LinearLora`** (step 002). New variant on
+  the `ModelSpec` enum; `in_dim, out_dim, rank, alpha`
+  cached for the forward formula. `params()` returns
+  `[w, b, a, b_adapter]`.
+- **Forward + autograd for `LinearLora`** (step 003).
+  `apply_model` and `apply_model_tape` compute
+  `y = X @ W + (alpha / rank) * X @ A @ B + b`. Threaded
+  through the existing matmul / scalar-mul / add dispatch,
+  so MLX (Saga 14) picks it up for free; no new tape ops
+  were needed.
+- **`demos/lora_finetune.mlpl`** (step 004, CPU, any host).
+  Pre-train a Saga 13 Tiny LM on the Shakespeare snippet
+  (100 Adam steps), wrap with rank-8 LoRA, fine-tune the
+  adapters on a synthetic Q/A instruction corpus (50
+  steps). Final fine-tune cross-entropy ~2.18; base
+  bit-identical throughout.
+- **`demos/lora_finetune_mlx.mlpl`** (step 005, Apple
+  Silicon CLI). Mirror with the fine-tune loop wrapped in
+  `device("mlx") { ... }`. Base pre-train stays on CPU.
+- **Criterion bench group `lora_finetune_step`** (step 005)
+  in `crates/mlpl-bench/benches/mlx_vs_cpu.rs`.
+- **Web REPL tutorial lesson "LoRA Fine-Tuning"** (step 006,
+  `apps/mlpl-web/src/lessons.rs`). Tiny interactive variant
+  (V=8, d=4, rank=2) so a 10-step fine-tune renders in
+  WASM.
+- **`docs/using-lora.md`** (step 006). User-facing
+  retrospective covering the three-builtin surface,
+  initialization conventions, auto-freeze semantics
+  (including the step 004 amendment covering embed +
+  attention, not just Linear), device propagation, demo
+  walkthroughs, measured MLX numbers, parity testing, and
+  the deferred follow-up list.
+
+### Measured
+
+On an M-class laptop (`cargo bench -p mlpl-bench --features
+mlx --bench mlx_vs_cpu -- lora_finetune_step`):
+
+| Path | Cold | Warm |
+|---|---:|---:|
+| CPU | 208 us | 164 us |
+| MLX | 1.45 ms | 1.11 ms |
+
+MLX is **0.15x** of CPU on this workload -- a step down
+from Saga 14's `tiny_lm_train_step` (0.26x) and Saga 20's
+`neural_thicket_variant_loop` (0.25x) at the same Tiny LM
+scale. Cause: LoRA doubles the matmul count per linear
+(`X @ W` AND `X @ A @ B`) and the rank-2 adapter matmuls
+are too small to amortize MLX's per-op kernel-launch
+overhead. At d=512 the ratio would flip. See
+`docs/benchmarks.md` for the full analysis (bottleneck
+categories unchanged from Saga 14).
+
+Correctness: CPU-vs-MLX fine-tune losses AND every student
+param agree elementwise within fp32 tolerance (1e-3);
+frozen base bit-identical on both paths (confirming the
+optimizer's frozen filter is backend-independent). See
+`crates/mlpl-eval/tests/lora_mlx_demo_tests.rs`.
+
+### Refactored
+
+- Step 002's auto-freeze originally only covered the MLP
+  `Linear`'s cloned W, b. Step 004 amended `eval_lora` to
+  freeze every non-adapter param in the student tree --
+  embed tables, attention projections, and MLP base
+  linears all auto-freeze now, matching the LoRA library
+  convention. One post-rewrite pass, one source of truth;
+  the per-Linear `mark_frozen` in `wrap_linear` was
+  removed.
+
+### Scope notes
+
+- LoRA language surface is pure Rust and lands identically
+  in the CLI REPL and the browser WASM. The MLX
+  acceleration path is Apple Silicon + `--features mlx`
+  (CLI only); `docs/configurations.md` has the CLI-vs-web
+  matrix with Saga 21 as the eventual path to
+  MLX-accelerated LoRA from the browser via
+  `mlpl-serve`.
+
+### Not shipped (deferred follow-ups)
+
+- QLoRA / 4-bit quantization. Needs per-tensor
+  scale/zero-point handling and its own parity harness;
+  deferred to a future saga.
+- Selective layer attachment (e.g. LoRA only on attention
+  projections). Saga 15 ships the uniform "every Linear
+  gets an adapter" variant; a `lora(m, ..., layers:
+  "attention_only")` variant composes naturally with
+  Saga 20's family walker.
+- Adapter merging (`merge_lora(m)`).
+- Multi-adapter composition / adapter routing.
+- Real pretrained LLM checkpoints (needs Saga 15+
+  checkpoint format or Saga 19's LLM sidecar).
+- Nested `lora()` (currently an explicit error).
+
+See `docs/using-lora.md` "Not shipped" section and
+`docs/saga.md` Saga 15 entry.
+
 ## v0.12.0 -- Saga 20: Neural Thickets (2026-04-22)
 
 Weight-perturbation research workflow lands in MLPL source.

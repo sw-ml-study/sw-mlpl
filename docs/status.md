@@ -29,17 +29,18 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 13 | Tiny language model end-to-end (`embed`, `sinusoidal_encoding`, `causal_attention`, `cross_entropy`, `sample`/`top_k`, `attention_weights`, `tiny_lm`/`tiny_lm_generate`) | v0.10.0 | [x] |
 | 14 | MLX backend (`mlpl-mlx` runtime, `device("...") { }` scoped form, `to_device`, autograd + optimizers + `train { }` on MLX, `tiny_lm_mlx` demo) | v0.11.0 | [x] |
 | 20 | Perturbation research demos / Neural Thickets (`clone_model`, `perturb_params`, `argtop_k`, `scatter`, `neural_thicket` CPU + MLX demos, specialization heatmap) | v0.12.0 | [x] |
+| 15 | LoRA fine-tuning (`freeze`, `unfreeze`, `lora`, `LinearLora` variant, `lora_finetune` CPU + MLX demos, CPU-MLX parity within fp32; QLoRA / quantization deferred) | v0.13.0 | [x] |
 
 ## Planned
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 15 | LoRA / QLoRA / quantization | v0.13 | [ ] | 13 |
 | 16 | Embedding visualization and RAG | v0.14 | [ ] | 13 |
 | 17 | CUDA backend and distributed execution | v0.15 | [ ] | 14 |
 | 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.16 | [ ] | 15 |
 | 19 | LLM-as-tool REST integration | v0.17 | [ ] | 12 |
 | 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.18 | [ ] | 13 |
+| -- | QLoRA / 4-bit quantization (deferred follow-up from Saga 15) | tbd | [ ] | 15 |
 
 ## Next saga to start
 

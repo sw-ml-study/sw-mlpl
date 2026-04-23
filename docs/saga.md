@@ -149,6 +149,46 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 15: LoRA Fine-Tuning (COMPLETE)
+Parameter-efficient fine-tuning for the Model DSL. Three new
+builtins compose into a PyTorch-`peft`-style "frozen base,
+trainable low-rank adapters" workflow: `freeze(m)` /
+`unfreeze(m)` mark every `m.params()` name in a new
+`env.frozen_params` set that `adam` and `momentum_sgd` skip
+at the optimizer-update stage (gradient computation is
+unchanged, so the chain rule still flows through frozen
+params); `lora(m, rank, alpha, seed)` clones `m`'s spec tree,
+replaces every `Linear` node with a new `ModelSpec::LinearLora`
+that owns the cloned base `W`, `b` plus two fresh adapter
+matrices `A [in, rank]` (init `randn * 1/sqrt(in)`) and
+`B [rank, out]` (init zeros), and -- after step 004's scope
+amendment -- auto-freezes EVERY non-adapter param in the
+student (embed tables, attention projections, and MLP base
+linears all freeze consistently). The zero-init on B is the
+standard LoRA "forward identity before training" property:
+`apply(lora_m, X) == apply(m, X)` elementwise before any
+gradient step. Forward formula `y = X @ W + (alpha / rank) *
+X @ A @ B + b` composes through existing matmul / scalar-mul
+/ add dispatch, so MLX (Saga 14) picks it up for free -- no
+new tape ops were needed. `demos/lora_finetune.mlpl` trains a
+Saga 13 Tiny LM on Shakespeare for 100 steps, wraps with
+rank-8 LoRA, fine-tunes adapters on a synthetic Q/A
+instruction corpus for 50 steps; base bit-identical
+throughout, final fine-tune cross-entropy ~2.18.
+`demos/lora_finetune_mlx.mlpl` is the Apple-Silicon variant
+with the fine-tune loop under `device("mlx") { }`. A new
+Criterion bench group `lora_finetune_step` measured warm
+CPU 164us vs warm MLX 1.11ms = 0.15x (MLX slower at this
+scale -- LoRA doubles the matmul count per linear and the
+rank-2 adapter matmuls are too small to amortize MLX's
+kernel-launch overhead; at d=512 the ratio would flip).
+CPU-vs-MLX parity across fine-tune losses + every student
+param (both adapters and frozen base) within 1e-3, pinned
+by `crates/mlpl-eval/tests/lora_mlx_demo_tests.rs`. A
+"LoRA Fine-Tuning" web REPL tutorial lesson (tiny V=8, d=4,
+rank=2 variant) runs interactively in WASM. Delivered
+v0.13.0. See `docs/using-lora.md` and `docs/benchmarks.md`.
+
 ## Saga 20: Perturbation research demos / Neural Thickets (COMPLETE)
 Four new builtins plus a headline demo that compose MLPL into
 a RandOpt-style weight-perturbation workflow. Seven steps in
