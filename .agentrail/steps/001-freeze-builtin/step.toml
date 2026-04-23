@@ -1,0 +1,12 @@
+number = 1
+slug = "freeze-builtin"
+status = "pending"
+description = """
+Phase 1 step 001: `freeze(m)` + `env.frozen_params`.
+
+Groundwork for LoRA. Ad..."""
+role = "production"
+context_files = []
+created_at = "2026-04-22T19:21:34"
+task_type = "primitive"
+commits = []
