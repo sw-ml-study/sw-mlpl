@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 7,
+    "step": "release-v0130"
+  },
+  "action": "Followed the v0.12.0 release cadence exactly: workspace.package.version bump, CHANGELOG entry above the previous saga, saga.md retrospective entry above the previous saga, status.md row move, cargo build --release sanity check, /mw-cp gates, local tag. Added a new row in status.md Planned section for QLoRA rather than deleting the Saga 15 LoRA / QLoRA / quantization entry -- lets the deferred follow-up stay visible without implying it is no longer planned.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-23T12:54:10"
+}
