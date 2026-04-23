@@ -1,6 +1,6 @@
 number = 3
 slug = "lora-forward-tape"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 003: forward + autograd for `LinearLora`.
 

@@ -285,12 +285,15 @@ fn lora_rejects_nested_lora() {
 }
 
 #[test]
-fn apply_on_lora_model_errors_with_clear_message_in_step_002() {
-    // Step 002 ships the rewrite only; step 003 wires the
-    // forward pass. Until then, apply() on a lora-wrapped
-    // model returns a clear error that names Saga 15 step
-    // 003 so the next step's task is discoverable from the
-    // error text alone.
+fn apply_on_lora_model_runs_forward_in_step_003() {
+    // Originally a step-002 test that pinned the "forward
+    // not yet implemented" stub. Step 003 replaced that
+    // stub with the real forward; the test now asserts the
+    // positive: apply(lora_m, X) runs and produces the
+    // expected shape. Full forward semantics (identity
+    // before training, formula correctness, MLX parity,
+    // frozen-base training isolation) live in
+    // `lora_forward_tape_tests.rs`.
     let mut env = Environment::new();
     run(&mut env, "m = linear(4, 8, 0)");
     run(&mut env, "student = lora(m, 2, 4.0, 7)");
@@ -299,10 +302,6 @@ fn apply_on_lora_model_errors_with_clear_message_in_step_002() {
         DenseArray::new(Shape::new(vec![2, 4]), vec![1.0; 8]).unwrap(),
     );
     let stmts = parse(&lex("apply(student, X)").unwrap()).unwrap();
-    let err = eval_program(&stmts, &mut env).expect_err("apply on LinearLora not yet supported");
-    let msg = format!("{err:?}").to_ascii_lowercase();
-    assert!(
-        msg.contains("lora") || msg.contains("step 003") || msg.contains("not yet"),
-        "error should name LoRA / step 003 / not-yet, got: {msg}"
-    );
+    let out = eval_program(&stmts, &mut env).expect("apply on LinearLora should work in step 003");
+    assert_eq!(out.shape().dims(), &[2, 8]);
 }
