@@ -1,6 +1,6 @@
 number = 2
 slug = "tsne-builtin"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 002: `tsne(X, perplexity, iters, seed)`
 builtin.

@@ -10,6 +10,10 @@ mod math_builtins;
 mod ml_builtins;
 mod prng;
 mod random_builtins;
+mod tsne_affinities;
+mod tsne_builtin;
+mod tsne_gradient;
+mod tsne_validate;
 
 pub use builtins::call_builtin;
 pub use error::RuntimeError;
