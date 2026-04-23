@@ -1,6 +1,6 @@
 number = 6
 slug = "lora-tutorial-docs"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 006: web tutorial lesson + `docs/using-lora.md`.
 
