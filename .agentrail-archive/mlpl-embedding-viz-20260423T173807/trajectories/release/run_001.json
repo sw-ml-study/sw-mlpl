@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 6,
+    "step": "release-v0140"
+  },
+  "action": "Followed the v0.12.0 / v0.13.0 release cadence exactly. Added three granular Planned rows in docs/status.md rather than bundling all Saga 16 deferred work into one row -- matches the QLoRA-only-row precedent from Saga 15 for keeping deferred surface visible. Biggest meta-achievement of this saga: the tsne monolith -> 4-module split after a user-directed pause to write the decomposition patterns doc. That doc + its companion feedback memory are durable assets that should keep future sagas cleaner by default.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-23T17:36:11"
+}
