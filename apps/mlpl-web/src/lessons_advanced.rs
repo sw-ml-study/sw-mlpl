@@ -46,10 +46,10 @@ pub const LORA_FINE_TUNING: Lesson = Lesson {
     try_it: "The two cross_entropy lines after training should report different numbers: student's loss went down during fine-tune, but base's loss is unchanged because lora() auto-froze the base -- adam only moved the adapters. Try unfreeze(student) before the train block and re-run: now both losses move.",
 };
 
-/// Saga 16 tutorial lesson.
+/// Saga 16 / 16.5 tutorial lesson.
 pub const EMBEDDING_EXPLORATION: Lesson = Lesson {
     title: "Embedding exploration",
-    intro: "Saga 16 ships three builtins for inspecting any rank-2 [N, D] array you want to treat as a set of points: pairwise_sqdist(X) returns the [N, N] squared-Euclidean distance matrix; knn(X, k) returns each row's k nearest non-self neighbors sorted by ascending distance with lower-index tie-break; tsne(X, perplexity, iters, seed) runs classic van der Maaten t-SNE to reduce to [N, 2]. Plus a new viz type: svg(pts, \"scatter3d\") renders [N, 3] or [N, 4] as an orthographic 3-D scatter with axis gizmos. This lesson runs a 6-point fixture in 3-D so every render is instant in the browser; demos/embedding_viz.mlpl has the training story with a learned [12, 8] embedding table and docs/using-embeddings.md has the retrospective.",
+    intro: "Saga 16 + 16.5 ship five builtins for inspecting any rank-2 [N, D] array you want to treat as a set of points. pairwise_sqdist(X) returns the [N, N] squared-Euclidean distance matrix; knn(X, k) returns each row's k nearest non-self neighbors sorted by ascending distance; tsne(X, perplexity, iters, seed) runs classic van der Maaten t-SNE to reduce to [N, 2]; pca(X, k) returns the top-k PCA projection [N, k] via power iteration + Gram-Schmidt deflation (v0.14.1); embed_table(model) walks a ModelSpec tree and returns the first Embedding layer's [vocab, d_model] table (v0.14.1). Plus svg(pts, \"scatter3d\") renders [N, 3] as an orthographic 3-D scatter with axis gizmos. This lesson runs a 6-point fixture in 3-D so every render is instant in the browser; demos/embedding_viz.mlpl has the training story with a learned [12, 8] embedding table and docs/using-embeddings.md has the retrospective.",
     examples: &[
         "X = reshape([0.0, 0.0, 2.0, 0.1, 0.1, 2.0, -0.1, 0.0, 2.1, 2.0, 0.0, 0.0, 2.1, 0.1, 0.0, 1.9, -0.1, 0.0], [6, 3])",
         "pairwise_sqdist(X)",
@@ -57,6 +57,10 @@ pub const EMBEDDING_EXPLORATION: Lesson = Lesson {
         "svg(X, \"scatter3d\")",
         "emb_2d = tsne(X, 2.0, 100, 7)",
         "svg(emb_2d, \"scatter\")",
+        "pca_2d = pca(X, 2)",
+        "svg(pca_2d, \"scatter\")",
+        "emb = embed(6, 3, 0)",
+        "svg(embed_table(emb), \"scatter3d\")",
     ],
-    try_it: "Every row of knn(X, 2) should list indices from X's own cluster -- rows 0/1/2 are near [0,0,2] and rows 3/4/5 are near [2,0,0]. Re-run with a different seed: the 2-D layout rotates and flips (t-SNE has no absolute orientation) but the two groups stay separated. Try perplexity = 5 and watch the clusters merge toward one big blob.",
+    try_it: "knn(X, 2) should list indices from X's own cluster -- rows 0/1/2 are near [0,0,2] and rows 3/4/5 are near [2,0,0]. pca_2d vs emb_2d: t-SNE rotates and flips between seeds and emphasizes local structure; PCA is deterministic and linear, so pca_2d keeps the two clusters on a single axis. embed_table(emb) returns the raw [6, 3] lookup table of a freshly-initialized embedding layer -- untrained, so the scatter is a tiny gaussian cloud. Run train ...adam over emb and re-call embed_table to see the learned rows.",
 };

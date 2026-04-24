@@ -60,16 +60,13 @@ table = apply(emb, iota(V))
 emb_2d = tsne(table, 3.0, 300, 7)
 svg(emb_2d, "scatter")
 
-# 3-D via a column selector. A proper top-3-PCA
-# projection (power iteration + deflation, per the
-# Saga 8 tutorial lesson) is the principled choice but
-# gets wordy in MLPL source; since the target
-# concentrates signal on dims 0-2, picking the first
-# three dims reads the same structure with less source.
-# `docs/using-embeddings.md` walks through the PCA
-# upgrade as a composition pattern.
-selector : [dim, axis] = reshape([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [8, 3])
-emb_3d = matmul(table, selector)
+# 3-D via top-3 PCA. v0.14.1 ships `pca(X, k)` as a
+# builtin, so the principled projection is a one-liner.
+# The column-selector matmul in the Saga 16 ancestor of
+# this demo was a scope shortcut; PCA reads the same
+# cluster structure and does not assume the target
+# concentrates signal on specific input dims.
+emb_3d = pca(table, 3)
 svg(emb_3d, "scatter3d")
 
 # Nearest neighbors: for each token, the 3 closest
