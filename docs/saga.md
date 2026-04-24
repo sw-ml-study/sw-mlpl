@@ -149,6 +149,59 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 16: Embedding Visualization (COMPLETE)
+Embedding-inspection surface for any model with an
+`embed` layer or any rank-2 `[N, D]` intermediate
+representation. Three new builtins plus one new viz
+type close the "train a model, inspect what it
+learned" loop: `pairwise_sqdist(X)` returns the
+`[N, N]` squared-Euclidean distance matrix with
+symmetry + zero-diagonal + empty-input safety;
+`knn(X, k)` returns each row's k nearest non-self
+neighbors sorted by ascending distance with lower-
+index tie-break (self never appears in its own row);
+`tsne(X, perplexity, iters, seed)` runs classic van
+der Maaten t-SNE to produce `[N, 2]` with per-row
+perplexity-calibrated binary search, symmetrized
+joint probabilities, Student-t low-dim affinities,
+momentum-based KL-gradient descent with early
+exaggeration, deterministic under identical seeds.
+`svg(pts, "scatter3d")` renders `[N, 3]` (point
+cloud) or `[N, 4]` (points + integer cluster id) as
+a static orthographic-projection SVG with labeled
+axis gizmos + one `<circle>` per point + optional
+sorted legend. `demos/embedding_viz.mlpl` composes
+the pipeline end-to-end: train a standalone
+`embed(12, 8, 0)` toward a structured 3-cluster
+target via MSE for 50 adam steps; extract the
+learned table via `apply(emb, iota(V))`; render
+through t-SNE + column-selector + `knn` to show that
+learned embeddings recover the target structure
+(every token's nearest neighbors stay in its own
+cluster). 35 tests across five files pin every
+invariant. The t-SNE builtin was first written as a
+300-line monolith (three new sw-checklist FAILs);
+user feedback paused the work to document the
+decomposition rules, producing
+`docs/sw-checklist-patterns.md` (catalog of struct-
+return, struct-args, validate-then-work, orchestrator
++ helpers, phase helpers, extract-to-module, chain-
+of-responsibility, bridge, split-tests-from-work
+patterns with worked examples from this codebase).
+The monolith was then split into four sibling modules
+(`tsne_builtin` / `tsne_validate` / `tsne_affinities`
+/ `tsne_gradient`), each a single-responsibility
+facade under every budget; baseline 139/102 sw-
+checklist held. PCA stays a composition pattern (the
+Saga 8 power-iteration + deflation lesson) rather
+than shipping a new builtin. t-SNE itself is CPU-only
+(inner loop does not vectorize cleanly through MLX).
+UMAP, `pca` builtin, RAG pipeline (pending Saga 19),
+interactive 3-D, MLX for tsne, `embed_table` builtin,
+Barnes-Hut approximate t-SNE all deferred; see
+`docs/using-embeddings.md` "Not shipped". Delivered
+v0.14.0.
+
 ## Saga 15: LoRA Fine-Tuning (COMPLETE)
 Parameter-efficient fine-tuning for the Model DSL. Three new
 builtins compose into a PyTorch-`peft`-style "frozen base,

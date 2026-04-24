@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 5,
+    "step": "embedding-tutorial-docs"
+  },
+  "action": "Applied the patterns doc correctly this time: identified up-front that adding the new Embedding lesson would push lessons.rs over 500 LOC (from 500 to 513), and planned the extract-to-new-module refactor as part of the step rather than reactively. Chose to extract the three Saga-15/16/20 advanced lessons rather than just the Embedding one, giving lessons.rs more headroom for future lessons. One module-count delta on the already-failing mlpl-web crate category, no new FAIL category introduced. sw-checklist 102/139 baseline held.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-23T17:28:47"
+}
