@@ -242,6 +242,47 @@ follow-up sagas once the server surface is stable. See
 CLI-server architecture diagram, the REST API sketch, and the
 security posture.
 
+### Saga 22 -- Feasibility checking + resource estimation
+Users on limited hardware (laptops, older GPUs) need a way
+to sanity-check a planned operation BEFORE running it so
+they don't hit OOM, fill disk, or discover a run will take
+days. Saga 22 ships four builtins on top of the Model DSL
+that answer "will this fit / how long will it take?"
+without the user needing to commit to the run.
+`estimate_train(model, steps, batch_size, seq_len [,
+dtype_bytes]) -> [params, vram_bytes, disk_bytes, flops,
+wall_seconds]` is pure-math over the ModelSpec tree:
+walks `ModelSpec::params()`, sums parameter counts,
+computes VRAM (fwd + grad + Adam moments + activation
+heuristic), derives FLOPS per step by node type (Linear,
+LinearLora, Embedding, Attention), and divides by a
+device-throughput number to get wall-clock.
+`calibrate_device() -> gflops` runs a canned 1024x1024
+matmul benchmark on the active device, caches the observed
+GFLOPS in `env` (CPU vs MLX cached separately), and makes
+subsequent `estimate_train` calls honest instead of the
+default conservative 50-GFLOPS lower bound.
+`hypothetical_model(name) -> ModelSpec` returns a
+structural ModelSpec for SmolLM-135M / 360M / 1.7B,
+Llama-3.2-1B, Qwen2.5-0.5B so users can ask "how big would
+a SmolLM-135M + LoRA(rank=8) fine-tune be on my laptop?"
+WITHOUT needing to download the weights first. `apply` on
+a hypothetical errors helpfully -- it is an estimation-only
+spec. `feasible(estimate_result, [vram_budget, disk_budget,
+wall_budget]) -> 0/1` is the guard pattern:
+`if feasible(est, [4e9, 10e9, 600]) { train ... }`.
+Zeros in the budget mean skip that dimension. Non-goals
+(deferred): actual HuggingFace download + safetensors
+parsing (separate future saga); f16/bf16 tensor
+dtype machinery (what-if only today via `dtype_bytes`
+argument); dynamic profiling (the estimator is honest-
+approximate at ~2x accuracy); distributed / multi-GPU
+estimation (Saga 17); automatic shrinking / recovery
+(estimator reports, does not rewrite). CLI-first;
+estimator itself works in web but `calibrate_device`
+needs CLI. Depends on Saga 11 (Model DSL) + Saga 15
+(LoRA freeze set).
+
 ## Dependency graph (abbreviated)
 
 ```
@@ -256,12 +297,17 @@ security posture.
   |                                                                                +-- 18 distill/ICRL
   |                                                                                +-- 21 CLI server
   |                                                                                +-- 19 LLM REST
+  |                                                                                +-- 22 feasibility/estimation (also uses 15)
 ```
 
-Sagas 14-19 can reorder based on hardware access and interest;
-9-13 (plus the inserted 11.5) must run in order. Saga 20 needs
-14 finished (variant-loop throughput) but is otherwise free to
-slot wherever a research-demo cycle makes sense.
+Sagas 14-19 + 22 can reorder based on hardware access and
+interest; 9-13 (plus the inserted 11.5) must run in order.
+Saga 20 needs 14 finished (variant-loop throughput) but is
+otherwise free to slot wherever a research-demo cycle makes
+sense. Saga 22 is queued ahead of Saga 19 because the
+feasibility checker is useful for every existing user
+immediately, whereas Saga 19's `llm_call` only lands value
+for users with a local Ollama.
 
 ## Start next: Saga 13 -- Tiny LM end-to-end (CPU)
 

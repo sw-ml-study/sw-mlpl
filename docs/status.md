@@ -35,17 +35,21 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 ## Planned
 
-Intended sequence: **19 -> 21 -> (dev host move to Linux) -> 17 -> 18**.
-Saga 21 (CLI server) is prioritized **before** the Linux move because once
-dev is off Apple Silicon the browser live demo loses local MLX; the server-
-side `mlpl-serve` route keeps it usable.
+Intended sequence: **22 -> 19 -> 21 -> (dev host move to Linux) -> 17 -> 18**.
+Saga 22 (feasibility / resource estimation) is queued ahead of Saga 19 so users
+on limited PCs can sanity-check a planned operation (VRAM, disk, wall-clock)
+BEFORE running code that might OOM, fill disk, or take days. Saga 21
+(CLI server) is prioritized **before** the Linux move because once dev is off
+Apple Silicon the browser live demo loses local MLX; the server-side
+`mlpl-serve` route keeps it usable.
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 19 | LLM-as-tool REST integration | v0.15.0 | [ ] | 12 |
-| 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.16.0 | [ ] | 13 |
-| 17 | CUDA backend and distributed execution (requires Linux + NVIDIA host) | v0.17.0 | [ ] | 14, dev host move |
-| 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.18.0 | [ ] | 15 |
+| 22 | Feasibility checking + resource estimation (`estimate_train`, `calibrate_device`, `hypothetical_model`, `feasible`; SmolLM / Llama / Qwen what-if table) | v0.15.0 | [ ] | 11, 15 |
+| 19 | LLM-as-tool REST integration (`llm_call` builtin; plan preserved in `.agentrail-archive/mlpl-llm-rest-20260424T095011/`) | v0.16.0 | [ ] | 12 |
+| 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.17.0 | [ ] | 13 |
+| 17 | CUDA backend and distributed execution (requires Linux + NVIDIA host) | v0.18.0 | [ ] | 14, dev host move |
+| 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.19.0 | [ ] | 15 |
 | -- | QLoRA / 4-bit quantization (deferred follow-up from Saga 15) | tbd | [ ] | 15 |
 | -- | UMAP reducer (deferred follow-up from Saga 16; overlaps with t-SNE) | tbd | [ ] | 16 |
 | -- | RAG pipeline over a local LLM inference path (deferred follow-up from Saga 16) | tbd | [ ] | 16, 19 |
