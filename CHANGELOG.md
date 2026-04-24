@@ -5,6 +5,147 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
+## v0.15.0 -- Saga 22: Feasibility Checking + Resource Estimation (2026-04-24)
+
+Four new builtins that let the user sanity-check a
+planned training run BEFORE committing disk, RAM, and
+hours of wall-clock to it. Pure math over a
+`ModelSpec` (or a hardcoded HF-scale dimension table)
+plus train-loop parameters; no weights required for
+what-if queries. Targets ~2x accuracy as an honest
+lower bound -- activation memory is a safety-factor
+heuristic, the FLOPS model ignores softmax / layer
+norm / elementwise costs, and wall-clock reads
+throughput from a one-shot calibration benchmark.
+
+### Added
+
+- **`estimate_train(model, steps, batch_size, seq_len
+  [, dtype_bytes]) -> [5]`**. Rank-1 f64 array
+  `[params, vram_bytes, disk_bytes, flops,
+  wall_seconds]` -- labels pinned in the contract. VRAM
+  sums forward weights (all params) + gradient +
+  Adam m/v moments (trainable only; frozen LoRA base
+  is zero on the grad/adam legs) + an activation
+  estimate `batch * seq * hidden * depth *
+  dtype_bytes * 4`. Disk is one full checkpoint.
+  FLOPS model covers Linear / LinearLora / Attention
+  / Embedding. Wall-clock = flops /
+  `mlpl_device_throughput_gflops` (defaults 50
+  GFLOPS as a CPU laptop lower bound). Default
+  `dtype_bytes = 8` (f64); pass 4 for f32 what-ifs,
+  2 for f16/bf16. Contract:
+  `contracts/eval-contract/estimate.md`. Module:
+  `crates/mlpl-runtime/src/estimate_builtins.rs` (6
+  fns, within the 7-fn budget).
+- **`calibrate_device() -> gflops`**. Zero-arg
+  benchmark: 10 iterations of a 1024x1024 matmul
+  through `device::dispatched_call`, wall-clock
+  measured (first iter discarded as warmup).
+  Observed GFLOPS is written into
+  `env.set_string("mlpl_device_throughput_gflops",
+  ...)` so subsequent `estimate_train` calls read
+  honest numbers. Device-aware -- under
+  `device("mlx") { ... }` writes
+  `mlpl_device_throughput_gflops_mlx` instead; the
+  estimator's lookup is device-aware in the same
+  way. Contract:
+  `contracts/eval-contract/calibrate-device.md`.
+- **`estimate_hypothetical(name, steps, batch_size,
+  seq_len [, dtype_bytes]) -> [5]`** (design
+  deviation from the original plan, which proposed
+  `hypothetical_model(name) -> ModelSpec`).
+  `estimate_train` reads parameter shapes from
+  `env`, and materializing zero arrays for a
+  SmolLM-1.7B spec would cost ~14 GB just to ask
+  the question -- hostile for a what-if query.
+  Shipped as a direct `[5]`-return builtin that
+  consults the same hardcoded SmolLM / Llama /
+  Qwen dimension table without populating any
+  env entries; output shape is identical to
+  `estimate_train` so `feasible(...)` composes
+  unchanged. Supported names: `smollm-135m`,
+  `smollm-360m`, `smollm-1.7b`, `llama-3.2-1b`,
+  `qwen-2.5-0.5b`. Contract:
+  `contracts/eval-contract/estimate-hypothetical.md`.
+- **`feasible(estimate_result, budget) -> 0/1`**.
+  Guard-pattern builtin. `budget` is a rank-1 `[3]`
+  `[vram_bytes, disk_bytes, wall_seconds]`; zeros
+  skip that dimension. Returns scalar 1.0 if every
+  non-zero budget is satisfied, 0.0 otherwise.
+  Pairs with `if feasible(est, [4e9, 1e10, 600])
+  { train ... }` to abort doomed runs before
+  allocating. Contract:
+  `contracts/eval-contract/feasible.md`. Module
+  (with `calibrate_device` and
+  `estimate_hypothetical`):
+  `crates/mlpl-eval/src/model_feasibility.rs` (7
+  fns at the budget limit).
+
+### Changed
+
+- `demos/feasibility.mlpl` (new, CLI-only):
+  estimates a tiny mlpl-toy model, calibrates the
+  device, re-estimates (wall drops), compares a
+  SmolLM-135M full fine-tune against a LoRA
+  fine-tune, gates a mock train call on
+  `feasible(...)`.
+- `docs/using-feasibility.md` (new): what the
+  estimator computes and what it does NOT (the ~2x
+  accuracy target, the activation_factor = 4
+  heuristic), signature reference for all four
+  builtins, the hardcoded HF-scale dimension
+  table, the LoRA-on-SmolLM worked example, the
+  guard pattern, deferred non-goals.
+- `docs/configurations.md`: new rows for
+  `estimate_train`, `estimate_hypothetical`, and
+  `feasible` (work in web; pure math, no device
+  calls) and `calibrate_device` (CLI-only --
+  browser timers are too noisy and the WASM
+  device has no GPU path to measure).
+
+### Tests
+
+- `crates/mlpl-eval/tests/estimate_tests.rs` (step
+  001): 11 tests -- tiny linear exact math (params,
+  VRAM legs, FLOPS), two-linear chain additivity,
+  LoRA (base frozen, adapters trainable; grad/adam
+  count only adapters; disk counts all),
+  Embedding params + FLOPS, Attention bumps
+  activation bytes vs no-attention chain, 5-arg
+  `dtype_bytes = 4` halves VRAM, 4 error paths
+  (non-model, negative scalars, non-scalar args,
+  no-params model).
+- `crates/mlpl-eval/tests/feasibility_tests.rs`
+  (step 002): 12 tests (11 fast + 1
+  `#[ignore]`-ed slow benchmark for the 1024x1024
+  default-size `calibrate_device` run which takes
+  minutes on CPU). Covers `calibrate_device`
+  (positive GFLOPS, env key cached),
+  `estimate_hypothetical` (SmolLM-135M param
+  count in the 100-200M range, scales across
+  sizes, LoRA drops VRAM while disk is unchanged,
+  unknown name / wrong arity errors), and
+  `feasible` (passes / fails per-dimension, zero
+  skips, wrong shapes error, composes with
+  `estimate_train` via the `[5]` / `[3]` flow).
+
+### Scope notes
+
+- HuggingFace Hub download + safetensors loading
+  are deferred; `estimate_hypothetical` talks
+  about these models structurally WITHOUT
+  requiring any weights on disk.
+- f16 / bf16 tensor support is deferred -- MLPL
+  runs f64 today. The `dtype_bytes` argument is a
+  what-if knob for the estimator only.
+- Activation memory is a 4x safety multiplier;
+  exact numbers need a real profiler.
+- Distributed / multi-GPU estimation is Saga 17
+  territory (CUDA backend + distributed).
+- Auto-recovery / batch-shrinking is a non-goal;
+  the estimator reports, the user decides.
+
 ## v0.14.1 -- Saga 16.5: Embedding-viz Polish (2026-04-24)
 
 Two convenience builtins that close the loose ends Saga

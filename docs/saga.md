@@ -149,6 +149,67 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 22: Feasibility Checking + Resource Estimation (COMPLETE)
+Four new language-level builtins that let the user
+sanity-check a planned training run BEFORE committing
+disk, RAM, and hours of wall-clock to it. Pure math
+over a `ModelSpec` (or a hardcoded HF-scale dimension
+table) plus train-loop parameters; no weights required
+for what-if queries. `estimate_train(model, steps,
+batch_size, seq_len [, dtype_bytes])` returns a
+rank-1 `[5]` f64 array `[params, vram_bytes,
+disk_bytes, flops, wall_seconds]` with labels pinned
+in the contract -- VRAM sums forward weights +
+gradient + Adam m/v moments (trainable only; LoRA
+frozen base is zero on the grad/adam legs) + a `4x`
+activation safety factor; FLOPS covers Linear /
+LinearLora / Attention / Embedding; wall-clock reads
+throughput from a cached env key defaulting to 50
+GFLOPS (CPU laptop lower bound). `calibrate_device()`
+runs a 10-iteration 1024x1024 matmul benchmark
+through `device::dispatched_call` (first iter is
+warmup), measures wall-clock, writes observed GFLOPS
+into `mlpl_device_throughput_gflops`; device-aware
+under `device("mlx") { }` so subsequent estimates on
+that device read honest numbers.
+`estimate_hypothetical(name, ...)` talks about
+SmolLM-135M / 360M / 1.7B / Llama-3.2-1B /
+Qwen-2.5-0.5B via a hardcoded dimension table --
+**design deviation from the original plan**, which
+proposed `hypothetical_model(name) -> ModelSpec` that
+`estimate_train` would walk. That path required
+materializing zero arrays in `env` for every
+parameter in the spec, and a SmolLM-1.7B query would
+have cost ~14 GB of RAM just to ask the question.
+Shipped as a direct `[5]`-return builtin instead; the
+output shape is identical to `estimate_train` so
+`feasible(...)` composes unchanged.
+`feasible(estimate_result, budget)` takes the `[5]`
+estimate plus a `[3]` `[vram, disk, wall]` budget
+(zeros skip that dimension) and returns scalar 1/0
+for `if feasible(est, [4e9, 1e10, 600]) { train ... }`
+guards. 23 new tests (11 estimate + 12 feasibility;
+one ignored for the slow default-size calibrate
+bench). Two contracts for step 001
+(`contracts/eval-contract/estimate.md`) plus three
+for step 002 (`calibrate-device.md`,
+`estimate-hypothetical.md`, `feasible.md`). Module
+layout: `crates/mlpl-runtime/src/estimate_builtins.rs`
+(6 fns) + `crates/mlpl-eval/src/model_feasibility.rs`
+(7 fns at limit); sw-checklist baseline 102/139 held
+across both steps. `demos/feasibility.mlpl` tours
+all four builtins end-to-end (CLI-only because
+browser timers are too noisy for calibration).
+`docs/using-feasibility.md` retrospective + user
+guide documents the estimator math, the ~2x
+accuracy target, the hardcoded HF-scale table, the
+LoRA-on-SmolLM worked example, the guard pattern,
+and the deferred non-goals (HF download +
+safetensors loading, f16/bf16 tensor support,
+dynamic profiling, distributed / multi-GPU, auto-
+recovery). Delivered v0.15.0. Saga 19 (LLM-as-tool
+REST `llm_call`) is next.
+
 ## Saga 16: Embedding Visualization (COMPLETE)
 Embedding-inspection surface for any model with an
 `embed` layer or any rank-2 `[N, D]` intermediate

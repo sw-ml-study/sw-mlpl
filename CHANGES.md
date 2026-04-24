@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-04-24
 
+- feat(mlpl-eval,docs): Saga 22 step 002 -- calibrate + hypothetical + feasible
+- feat(mlpl-eval): Saga 22 step 001 -- estimate_train(...) builtin
+- chore(agentrail,plan): queue Saga 22 (feasibility) ahead of Saga 19
+- chore(web,docs): add CHANGES.md + footer "Changes" link
 - release(v0.14.1): Saga 16.5 Embedding-viz Polish COMPLETE
 - feat(mlpl-eval): Saga 16.5 step 002 -- embed_table(model) builtin
 
