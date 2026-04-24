@@ -1,0 +1,14 @@
+number = 5
+slug = "embedding-tutorial-docs"
+status = "completed"
+description = """
+Phase 3 step 005: web tutorial lesson +
+`docs/using-embeddings.md`.
+
+1. Add a..."""
+role = "production"
+context_files = []
+created_at = "2026-04-23T14:00:32"
+completed_at = "2026-04-23T17:28:47"
+task_type = "docs"
+commits = ["8a1f632f13f94ee0e44ef8f6c758523b32f42d3b"]
