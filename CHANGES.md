@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-04-24
 
+- feat(mlpl-repl,demos,docs): Saga 19 step 002 -- demo + :ask migration + docs
+- feat(mlpl-runtime,mlpl-eval): Saga 19 step 001 -- llm_call(url, prompt, model) builtin
+- chore(agentrail,plan): archive Saga 22 + open Saga 19 (LLM REST, v0.16.0)
+- release(v0.15.0): Saga 22 COMPLETE -- Feasibility Checking + Resource Estimation
 - feat(mlpl-eval,docs): Saga 22 step 002 -- calibrate + hypothetical + feasible
 - feat(mlpl-eval): Saga 22 step 001 -- estimate_train(...) builtin
 - chore(agentrail,plan): queue Saga 22 (feasibility) ahead of Saga 19

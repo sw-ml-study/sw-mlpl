@@ -149,6 +149,68 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 19: LLM-as-Tool REST Integration (COMPLETE)
+A language-level builtin that POSTs to an Ollama-
+compatible `/api/generate` endpoint and returns the
+model's completion text as a `Value::Str` scalar.
+The REPL's preview `:ask` command (shipped in
+v0.11.x as the Saga 19 preview) predated this; it
+now delegates to the same `mlpl_runtime::call_ollama`
+path so the HTTP machinery lives in one place. The
+headline use case is "LLM as a tool" -- pipe a value
+through a hosted LLM, store the reply as an MLPL
+string, feed it to `tokenize_bytes` /
+`experiment {}` / the rest of the pipeline. The
+language surface is exactly `llm_call(url, prompt,
+model) -> string`: URL is normalized (trailing
+slashes stripped, `/api/generate` appended unless
+already present, no double-append), 120-second
+timeout matches the `:ask` preview, returns the
+top-level `response` field as a string. Non-2xx
+status, invalid JSON, or missing `response` field
+all surface as actionable errors carrying
+`"llm_call"`, the URL, and a 200-character body
+preview. CLI-only -- the browser cannot reach
+localhost Ollama without CORS allow-listing + a
+server-side proxy; that path lands in Saga 21
+(`mlpl-serve`). Module layout splits the pure HTTP
+path (`crates/mlpl-runtime/src/llm_builtins.rs`, 3
+fns) from the `Expr`-aware dispatch shim
+(`crates/mlpl-eval/src/llm_dispatch.rs`, 1 fn) --
+mirrors Saga 22's revised layout. **Design
+deviation** from the original step 001 plan, which
+proposed 5 functions in the runtime crate
+(try_call / builtin_llm_call / validate_args /
+resolve_url / parse_response): try_call and
+validate_args need `Expr` access that the runtime
+crate intentionally avoids, so they moved to the
+eval-side dispatcher. The :ask migration is a
+**behavior change**: the pre-v0.16 :ask used
+Ollama's `/api/chat` with explicit
+`{role: system}` + `{role: user}` messages; the
+new :ask concatenates the same content into a
+single prompt and POSTs to `/api/generate`. Model
+loses the role distinction but keeps the context;
+TODO note in `apps/mlpl-repl/src/ask.rs` flags a
+future `llm_chat(history, prompt)` variant (listed
+in step 001's deferred non-goals) as the path to
+restore `/api/chat` semantics. 8 mockito-based
+integration tests pin the URL-resolution +
+arity + error catalog. New `demos/llm_tool.mlpl`
+exercises `llm_call` -> `tokenize_bytes`
+end-to-end (verified live during step 002 against
+a running local Ollama). `docs/using-llm-tool.md`
+is the user guide; `docs/using-ollama.md` was
+updated to redirect to it; `docs/configurations.md`
+gained an `llm_call` row + footnote [7]. Streaming
+SSE, OpenAI-style tool calling, multi-turn chat,
+request batching, in-source auth secrets,
+teacher-model distillation pipelines, and
+web / WASM support all stay deferred -- see the
+contract for the full list. sw-checklist baseline
+102/139 held across both feature steps. Delivered
+v0.16.0. Saga 21 (CLI server) is next.
+
 ## Saga 22: Feasibility Checking + Resource Estimation (COMPLETE)
 Four new language-level builtins that let the user
 sanity-check a planned training run BEFORE committing
