@@ -15,6 +15,7 @@ mod model;
 mod model_clone;
 mod model_dispatch;
 mod model_embed_table;
+mod model_estimate;
 mod model_freeze;
 mod model_lora;
 mod model_perturb;
