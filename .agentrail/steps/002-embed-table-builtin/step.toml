@@ -1,6 +1,6 @@
 number = 2
 slug = "embed-table-builtin"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 002: `embed_table(model) -> [vocab, d_model]`
 builtin.

@@ -1,0 +1,1 @@
+Shipped pca(X, k) builtin: top-k PCA via power iteration + Gram-Schmidt + deflation. Returns projected [N, k] data. 9 tests green (anisotropic capture, shape, k=D variance preservation, determinism, 5 error paths). Module stays within 7-fn budget. Contract documented.
