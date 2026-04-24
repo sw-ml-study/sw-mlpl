@@ -25,6 +25,7 @@ what they want to do.
 | LoRA fine-tune, MLX-accelerated [4]  | no [5]       | yes      | yes        | yes         |
 | `estimate_train` / `estimate_hypothetical` / `feasible` [6] | yes | yes | yes | yes |
 | `calibrate_device` [6]               | unreliable   | yes      | yes        | yes         |
+| `llm_call(url, prompt, model)` [7]   | no [3]       | yes      | yes (proxy)| yes (proxy) |
 | Inline SVG visualization             | yes          | file [1] | yes        | yes         |
 | Trace export                         | no           | yes      | yes        | yes         |
 | Filesystem `load("rel.csv")`         | no [2]       | yes      | yes        | yes         |
@@ -89,6 +90,21 @@ measurement unreliable, so the cached default (50
 GFLOPS) is preferable there. CLI users should run
 `calibrate_device()` once per session (or per device
 switch) to get honest wall-clock estimates.
+
+[7] Saga 19 (v0.16.0). `llm_call(url, prompt, model)`
+is the language-level builtin form of the REPL's
+`:ask` command -- one POST to an Ollama-compatible
+`/api/generate` endpoint, returns the completion as
+a string. The browser sandbox cannot reach a
+localhost Ollama server (same CORS story as note
+[3]); the CLI-server configuration unblocks the web
+case via the proxy allow-list. Streaming SSE,
+OpenAI-style tool calling, multi-turn chat
+threading, request batching, and in-source auth
+secrets are all explicit non-goals -- see
+`contracts/eval-contract/llm-call.md` and
+`docs/using-llm-tool.md` for the full deferred
+list.
 
 ## Configuration 1: Browser-only
 

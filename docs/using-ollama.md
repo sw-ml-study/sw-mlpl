@@ -1,10 +1,15 @@
 # Using MLPL with Ollama (and other LLM servers)
 
-> **Status:** planned -- Saga 19 (`v0.16` target). Not yet
-> shipped in full. One preview command (`:ask <question>` in
-> the CLI REPL) ships today -- see "Shipped today: `:ask`
-> preview" below. Treat the rest of this doc as design, not
-> reference.
+> **Status:** Saga 19 (v0.16.0) is now the reference --
+> see [`docs/using-llm-tool.md`](using-llm-tool.md)
+> for the shipped `llm_call(url, prompt, model)`
+> language-level builtin. This doc kept its
+> forward-looking design notes (env var conventions,
+> CLI-server proxy posture, non-goals around
+> streaming / tools / chat threading / auth) for
+> historical context; treat the shipped builtin's
+> contract at `contracts/eval-contract/llm-call.md`
+> as canonical for current behavior.
 
 ## Shipped today: `:ask` preview (v0.11.x)
 

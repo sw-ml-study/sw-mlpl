@@ -15,14 +15,13 @@ mlx = ["mlpl-eval/mlx"]
 mlpl-parser = { path = "../../crates/mlpl-parser" }
 mlpl-eval = { path = "../../crates/mlpl-eval" }
 mlpl-trace = { path = "../../crates/mlpl-trace" }
-# Saga 19 preview (`:ask <question>`): minimal HTTP client used by
-# the CLI REPL to call a local Ollama server at
-# `$OLLAMA_HOST` (default http://localhost:11434). Pinned to 2.x
-# to stay on a stable API surface; TLS disabled because Ollama
-# binds to plain HTTP on localhost by default. `serde_json` picks
-# up the DOM for request/response JSON.
-ureq = { version = "2", default-features = false, features = ["json"] }
-serde_json = "1"
+# Saga 19 step 002: `:ask` now delegates the HTTP path
+# to `mlpl_runtime::call_ollama` (the same path the
+# `llm_call` builtin uses), so the REPL no longer
+# pulls in ureq / serde_json directly. The local
+# system-prompt + workspace framing stays here in
+# `ask.rs`; only the POST is shared.
+mlpl-runtime = { path = "../../crates/mlpl-runtime" }
 
 [build-dependencies]
 hostname = "0.4"
