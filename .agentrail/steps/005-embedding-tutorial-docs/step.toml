@@ -1,6 +1,6 @@
 number = 5
 slug = "embedding-tutorial-docs"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 005: web tutorial lesson +
 `docs/using-embeddings.md`.

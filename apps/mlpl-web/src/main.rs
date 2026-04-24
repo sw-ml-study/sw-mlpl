@@ -12,6 +12,7 @@ mod demos;
 mod handlers;
 mod help;
 mod lessons;
+mod lessons_advanced;
 mod state;
 mod summary;
 mod tutorial;
