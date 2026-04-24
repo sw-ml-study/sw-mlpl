@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 3,
+    "step": "release-v0141"
+  },
+  "action": "Orchestration: updated demo, 3 doc files, 1 lesson file, Cargo.toml, CHANGELOG.md; verified demo end-to-end with mlpl-repl -f; rebuilt pages/ per sticky feedback_pages_rebuild; ran full quality gates (cargo test, clippy, fmt, markdown-checker, sw-checklist); tagged v0.14.1 locally without pushing.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T09:12:18"
+}
