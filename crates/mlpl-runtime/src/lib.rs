@@ -8,6 +8,7 @@ mod error;
 mod grid_builtin;
 mod math_builtins;
 mod ml_builtins;
+mod pca_builtin;
 mod prng;
 mod random_builtins;
 mod tsne_affinities;
