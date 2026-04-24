@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "calibrate-hypothetical-feasible"
+  },
+  "action": "Extended estimate_builtins pattern with model_feasibility.rs at 7-fn budget limit (eval_calibrate_device, run_matmul_benchmark, eval_estimate_hypothetical, lookup_hypothetical, compute_hyp_estimate, eval_feasible, pos_scalar). HypSpec struct keeps dimension table typed. TDD-first with 12 failing tests covering all three builtins and their error cases; ignored the 1024x1024 default-size calibrate bench because it takes minutes on CPU. End-to-end demo verified with mlpl-repl -f.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T13:26:15"
+}

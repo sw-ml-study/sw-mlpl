@@ -1,11 +1,12 @@
 number = 2
 slug = "calibrate-hypothetical-feasible"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 002: `calibrate_device()` +
 `hypothetical_model(name)` + `feasib..."""
 role = "production"
 context_files = []
 created_at = "2026-04-24T09:53:39"
+completed_at = "2026-04-24T13:26:15"
 task_type = "primitive"
-commits = []
+commits = ["1dc7c617ab5dc55256feed9838fbe0a7c787b97a"]

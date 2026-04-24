@@ -1,6 +1,6 @@
 number = 3
 slug = "release-v0150"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 003: release v0.15.0.
 
