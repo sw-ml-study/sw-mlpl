@@ -5,6 +5,119 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
+## v0.14.0 -- Saga 16: Embedding Visualization (2026-04-23)
+
+Embedding-inspection surface for the Model DSL. Three new
+builtins + one new SVG type close the "train a model,
+inspect what it learned" loop, and a new decomposition-
+patterns doc formalizes the design rules that kept Sagas
+15 and 16 under the sw-checklist budgets.
+
+### Added
+
+- **`pairwise_sqdist(X) -> D`** (step 001). Rank-2
+  `[N, D]` -> rank-2 `[N, N]` squared Euclidean
+  distances, `D[i, j] = sum_k (X[i, k] - X[j, k])^2`.
+  Symmetric, zero diagonal, empty-input safe. Contract:
+  `contracts/eval-contract/pairwise-sqdist.md`.
+- **`knn(X, k) -> idx`** (step 001). Each row's `k`
+  nearest non-self neighbors sorted by ascending
+  distance, ties broken by lower original index. Row
+  `i` never appears in `idx[i]`. Contract:
+  `contracts/eval-contract/knn.md`.
+- **`tsne(X, perplexity, iters, seed) -> Y`** (step
+  002). Classic van der Maaten t-SNE: per-row
+  perplexity-calibrated binary search for beta,
+  symmetrized joint probabilities, Student-t low-dim
+  affinities, KL-loss gradient descent with
+  early exaggeration. Deterministic under identical
+  seeds; rotational / reflection symmetry in absolute
+  coordinates. Four sibling modules
+  (`tsne_builtin` / `tsne_validate` / `tsne_affinities`
+  / `tsne_gradient`) following the decomposition
+  patterns. Contract:
+  `contracts/eval-contract/tsne.md`.
+- **`svg(pts, "scatter3d")`** (step 003). Static 3-D
+  scatter via orthographic projection at fixed
+  azimuth=30 / elevation=20. Accepts `[N, 3]` or
+  `[N, 4]` (points + integer cluster id); renders
+  labeled axis gizmos + one `<circle>` per point +
+  optional sorted legend. Snapshot-deterministic.
+  Contract: `contracts/viz-contract/scatter3d.md`.
+- **`demos/embedding_viz.mlpl`** (step 004, CPU, any
+  host). Trains a standalone `embed(12, 8, 0)` toward
+  a structured 3-cluster target via MSE for 50 adam
+  steps; extracts the learned table via
+  `apply(emb, iota(V))`; runs it through t-SNE (2-D),
+  a column-selector matmul (3-D), and `knn` (neighbor
+  reporting). Final neighbor output confirms learned
+  embeddings recover the target structure (every
+  token's nearest neighbors are in its own cluster).
+- **"Embedding exploration" web REPL tutorial lesson**
+  (step 005). Tiny 6-point 3-D fixture renders
+  instantly in WASM; walks all three builtins + 3-D
+  scatter.
+- **`docs/using-embeddings.md`** (step 005). User-
+  facing retrospective: the three builtins, the
+  scatter3d viz type, the PCA composition pattern,
+  demo walkthrough, parity testing inventory (5 test
+  files, 35 tests), and the deferred follow-ups.
+- **`docs/sw-checklist-patterns.md`** (step 002, shipped
+  mid-saga). Decomposition patterns catalog: why the
+  budgets exist, pre-implementation checklist,
+  worked examples (struct returns, struct args,
+  validate-then-work, orchestrator + helpers, per-
+  variant helpers, phase helpers, extract-to-module,
+  chain-of-responsibility, bridge, split-tests-from-
+  work), anti-patterns, and the "new commits don't
+  add new FAILs, edits to over-budget fns trigger
+  extractions" rules. Companion
+  `feedback_sw_checklist_patterns.md` memory for
+  cross-session persistence.
+
+### Refactored
+
+- Extracted the three "advanced" web REPL lessons
+  (Neural Thickets from Saga 20, LoRA Fine-Tuning
+  from Saga 15, new Embedding exploration from Saga
+  16) into a sibling `apps/mlpl-web/src/lessons_advanced.rs`
+  module. `lessons.rs` shrinks from 500 (at budget)
+  to 467; `lessons_advanced.rs` sits at 62. Both
+  under the 500-LOC budget; new lessons added in
+  either module cleanly.
+
+### Scope notes
+
+- **PCA stays a composition pattern, not a builtin.**
+  The power-iteration + deflation recipe is already a
+  Saga 8 tutorial lesson; a `pca(X, k)` wrapper would
+  hide mechanics that deserve being visible. Becomes
+  trivial to add if an ergonomic use case emerges.
+- **t-SNE is CPU-only.** Its inner loop does not
+  vectorize cleanly through MLX's kernel model at
+  embedding-table scale. `pairwise_sqdist` and `knn`
+  are also CPU-only primitives. Deferred.
+- **`embed_table(model)` is not shipped.** The demo
+  uses a standalone `embed` layer + MSE-to-target to
+  sidestep the chain-child-can't-be-a-bound-ident
+  language quirk; `embed_table` would be the clean
+  fix (one-fn addition, not done this saga).
+
+### Not shipped (deferred follow-ups)
+
+- UMAP (sibling nonlinear reducer; overlaps with
+  t-SNE for marginal user value).
+- `pca(X, k)` builtin.
+- RAG pipeline (pending Saga 19 LLM-as-tool REST
+  integration).
+- Interactive 3-D scatter with rotation/zoom.
+- MLX dispatch for `tsne`.
+- `embed_table(model)` builtin.
+- Barnes-Hut approximate t-SNE (exact O(N^2) is fine
+  at embedding-table scale).
+
+See `docs/using-embeddings.md` "Not shipped" section.
+
 ## v0.13.0 -- Saga 15: LoRA Fine-Tuning (2026-04-23)
 
 Parameter-efficient fine-tuning lands in MLPL source. Three
