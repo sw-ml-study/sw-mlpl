@@ -177,6 +177,8 @@ pub fn footer(props: &UrlProps) -> Html {
             <span class="footer-sep">{"\u{00b7}"}</span>
             <a href={props.url} target="_blank" rel="noopener">{"GitHub"}</a>
             <span class="footer-sep">{"\u{00b7}"}</span>
+            <a href="https://github.com/sw-ml-study/sw-mlpl/blob/main/CHANGES.md" target="_blank" rel="noopener">{"Changes"}</a>
+            <span class="footer-sep">{"\u{00b7}"}</span>
             <a href="https://software-wrighter-lab.github.io/" target="_blank" rel="noopener">{"Blog"}</a>
             <span class="footer-sep">{"\u{00b7}"}</span>
             <a href="https://discord.com/invite/Ctzk5uHggZ" target="_blank" rel="noopener">{"Discord"}</a>
