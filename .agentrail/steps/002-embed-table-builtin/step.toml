@@ -1,0 +1,13 @@
+number = 2
+slug = "embed-table-builtin"
+status = "pending"
+description = """
+Phase 1 step 002: `embed_table(model) -> [vocab, d_model]`
+builtin.
+
+Extract ..."""
+role = "production"
+context_files = []
+created_at = "2026-04-23T17:47:31"
+task_type = "primitive"
+commits = []
