@@ -1,0 +1,84 @@
+# Feasibility checking + resource estimation (Saga 22).
+#
+# Before committing a laptop to a long training run,
+# ask whether it will even fit. `estimate_train`,
+# `calibrate_device`, `estimate_hypothetical`, and
+# `feasible` answer the four questions a limited-
+# hardware user actually cares about: param count,
+# VRAM, disk per checkpoint, and wall-clock time.
+#
+# Run with:
+#   mlpl-repl -f demos/feasibility.mlpl
+
+# ---- Tour 1: estimate a tiny model ----
+
+m = chain(embed(32, 8, 0), causal_attention(8, 2, 1), linear(8, 32, 2))
+est_default = estimate_train(m, 100, 4, 8)
+est_default
+
+# Output layout: [params, vram_bytes, disk_bytes, flops, wall_seconds].
+# With the default 50 GFLOPS throughput assumption, the
+# wall-clock estimate is conservative (the tiny model
+# will actually run much faster on any real hardware).
+
+# ---- Tour 2: calibrate the device, re-estimate ----
+
+gflops = calibrate_device(256)
+gflops
+
+# calibrate_device writes mlpl_device_throughput_gflops
+# into env; estimate_train reads it on the next call.
+# For a serious calibration use the default size (1024)
+# instead of 256; this demo keeps it small so the demo
+# itself finishes quickly.
+
+est_calibrated = estimate_train(m, 100, 4, 8)
+est_calibrated
+
+# The wall-clock number should drop significantly
+# relative to est_default -- on a modern laptop matmul
+# is nowhere near the conservative 50 GFLOPS floor.
+
+# ---- Tour 3: what-if on HF-scale models ----
+
+# Full fine-tune of SmolLM-135M (100 steps, batch=4, seq=512).
+smollm_full = estimate_hypothetical("smollm-135m", 100, 4, 512)
+smollm_full
+
+# LoRA at rank=8 drops VRAM (grad + Adam cover only
+# the adapters), keeps disk unchanged (still saves
+# the full base checkpoint), and keeps FLOPS
+# approximately the same (forward pass is
+# unchanged).
+smollm_lora = estimate_hypothetical("smollm-135m", 100, 4, 512, 8, 8)
+smollm_lora
+
+# Bigger model, bigger numbers.
+smollm_17b = estimate_hypothetical("smollm-1.7b", 100, 4, 512)
+smollm_17b
+
+# ---- Tour 4: gate a real train call on feasibility ----
+
+# A 4 GB VRAM, 10 GB disk, 60 second wall budget.
+# Zeros in the budget array would skip the
+# corresponding dimension; here we check all three.
+budget = [4000000000.0, 10000000000.0, 60.0]
+ok_tiny = feasible(est_calibrated, budget)
+ok_tiny
+
+# The tiny model easily fits: ok_tiny = 1.0.
+
+ok_smollm_full = feasible(smollm_full, budget)
+ok_smollm_full
+
+# SmolLM-135M full fine-tune is over the 4 GB VRAM
+# budget -- feasible returns 0.0. A LoRA-only run
+# would gate differently:
+ok_smollm_lora = feasible(smollm_lora, budget)
+ok_smollm_lora
+
+# The natural guard pattern (for a real .mlpl script):
+#   if feasible(est, budget) {
+#     train N { adam(cross_entropy(apply(m, X), Y), m, ...) }
+#   }
+# So the user never commits the laptop to a doomed run.

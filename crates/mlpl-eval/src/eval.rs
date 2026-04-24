@@ -162,6 +162,24 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "calibrate_device"
+    {
+        let result = crate::model_feasibility::eval_calibrate_device(args, env)?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "estimate_hypothetical"
+    {
+        let result = crate::model_feasibility::eval_estimate_hypothetical(args, env)?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "feasible"
+    {
+        let result = crate::model_feasibility::eval_feasible(args, env)?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "reshape_labeled"
     {
         if args.len() != 3 {

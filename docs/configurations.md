@@ -23,6 +23,8 @@ what they want to do.
 | MLX backend (Apple Silicon)          | no           | yes      | yes        | yes         |
 | LoRA fine-tune, CPU [4]              | slow [5]     | yes      | yes        | yes         |
 | LoRA fine-tune, MLX-accelerated [4]  | no [5]       | yes      | yes        | yes         |
+| `estimate_train` / `estimate_hypothetical` / `feasible` [6] | yes | yes | yes | yes |
+| `calibrate_device` [6]               | unreliable   | yes      | yes        | yes         |
 | Inline SVG visualization             | yes          | file [1] | yes        | yes         |
 | Trace export                         | no           | yes      | yes        | yes         |
 | Filesystem `load("rel.csv")`         | no [2]       | yes      | yes        | yes         |
@@ -75,6 +77,18 @@ silent no-op (the one-time warning prints once per session).
 At V=280 / d=32 the full-scale CPU LoRA training loop runs in
 the browser but is too slow to be interactive; use the CLI
 for full-scale fine-tunes or wait for Saga 21.
+
+[6] Saga 22 (v0.15.0). `estimate_train`,
+`estimate_hypothetical`, and `feasible` are pure math
+over the `ModelSpec` tree + lookup tables, so they
+run identically in every environment -- browser
+included. `calibrate_device` runs a square-matmul
+benchmark on the active device; in WASM the browser
+timer resolution + tab-event-loop jitter make the
+measurement unreliable, so the cached default (50
+GFLOPS) is preferable there. CLI users should run
+`calibrate_device()` once per session (or per device
+switch) to get honest wall-clock estimates.
 
 ## Configuration 1: Browser-only
 

@@ -1,6 +1,6 @@
 number = 2
 slug = "calibrate-hypothetical-feasible"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 002: `calibrate_device()` +
 `hypothetical_model(name)` + `feasib..."""

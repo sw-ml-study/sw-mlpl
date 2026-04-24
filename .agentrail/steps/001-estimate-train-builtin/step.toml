@@ -1,11 +1,12 @@
 number = 1
 slug = "estimate-train-builtin"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 001: `estimate_train(...) -> [5]`
 feasibility / resource-estimat..."""
 role = "production"
 context_files = []
 created_at = "2026-04-24T09:53:39"
+completed_at = "2026-04-24T10:42:06"
 task_type = "primitive"
-commits = []
+commits = ["c031368be88981dbd87871ac337d3acecc50b504"]
