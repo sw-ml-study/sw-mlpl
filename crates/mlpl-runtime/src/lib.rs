@@ -6,6 +6,7 @@ mod embedding_builtins;
 mod ensemble_builtins;
 mod error;
 mod grid_builtin;
+mod llm_builtins;
 mod math_builtins;
 mod ml_builtins;
 mod pca_builtin;
@@ -18,3 +19,4 @@ mod tsne_validate;
 
 pub use builtins::call_builtin;
 pub use error::RuntimeError;
+pub use llm_builtins::call_ollama;

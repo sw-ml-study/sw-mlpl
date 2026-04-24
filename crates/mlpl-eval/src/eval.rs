@@ -217,6 +217,11 @@ pub(crate) fn eval_expr(
         return r;
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "llm_call"
+    {
+        return crate::llm_dispatch::dispatch(args, env, trace);
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "compare"
     {
         return crate::experiment::dispatch_compare(args, env);

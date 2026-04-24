@@ -1,6 +1,6 @@
 number = 1
 slug = "llm-call-builtin"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: `llm_call(url, prompt, model) -> string`
 language-level bui..."""
