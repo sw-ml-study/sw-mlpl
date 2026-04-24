@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "tsne-builtin"
+  },
+  "action": "First cut was a 300-line monolith in one module with 3 new FAILs (55-59 LOC on validate_tsne_args, compute_p_matrix, tsne_step). User paused me to document the decomposition patterns rather than reactively patching. Wrote docs/sw-checklist-patterns.md + feedback memory capturing the \"design for budgets up front\" rule and the pattern menu (struct-return, struct-args, validate-then-work, orchestrator+helpers, phase helpers, extract-to-module, chain-of-responsibility, bridge). Then applied the patterns: split into 4 sibling modules, each 4-5 fns under the 7-fn budget, each fn under 50 LOC. sw-checklist restored to 139/102 baseline.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-23T16:55:21"
+}
