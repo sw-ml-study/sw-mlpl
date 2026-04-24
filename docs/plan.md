@@ -304,24 +304,24 @@ Sagas 14-19 + 22 can reorder based on hardware access and
 interest; 9-13 (plus the inserted 11.5) must run in order.
 Saga 20 needs 14 finished (variant-loop throughput) but is
 otherwise free to slot wherever a research-demo cycle makes
-sense. Saga 22 is queued ahead of Saga 19 because the
-feasibility checker is useful for every existing user
-immediately, whereas Saga 19's `llm_call` only lands value
-for users with a local Ollama.
+sense. Saga 22 was queued ahead of Saga 19 because the
+feasibility checker landed value for every existing user
+immediately; it shipped as v0.15.0 on 2026-04-24. Saga 19
+follows next.
 
-## Start next: Saga 13 -- Tiny LM end-to-end (CPU)
+## Start next: Saga 19 -- LLM-as-tool REST integration (v0.16.0)
 
-Three surface-only sagas shipped in rapid succession:
-Saga 11.5 (v0.7.5, named axes + structured shape errors),
-Compile-to-Rust (v0.8.0, `mlpl!` macro + `mlpl-build` CLI +
-9x measured speedup), and Saga 12 (v0.9.0, file IO + dataset
-prep + byte-level BPE + experiment tracking). With both
-shape-checked tensors and a full text-to-tokens pipeline in
-place, Saga 13 trains a tiny transformer-block LM end-to-end
-on a small corpus: load text, train a BPE tokenizer, batch
-token streams, compose a model with `attention` +
-`residual` + `rms_norm`, optimize with `adam` inside a
-`train { }` loop wrapped in `experiment`, then sample. This
-is the first saga that proves the platform thesis end-to-end.
-See `docs/milestone-tokenizers.md` for the Saga 12
-retrospective.
+Saga 22 (v0.15.0) just shipped the feasibility / resource
+estimator (`estimate_train`, `calibrate_device`,
+`estimate_hypothetical`, `feasible`), so users on limited
+hardware can now gate a planned train call behind a what-if
+check. Saga 19 ships `llm_call(url, prompt, model) -> string`
+as a language-level builtin so `.mlpl` scripts can compose
+a hosted LLM as a tool alongside `tokenize_bytes`, `adam`,
+`experiment`, etc. -- not just the REPL's `:ask` slash
+command. CLI-only (browser CORS + proxy is Saga 21's job);
+streaming SSE, OpenAI-style tools, multi-turn chat, request
+batching, and teacher-distillation pipelines all stay
+deferred. Demo `demos/llm_tool.mlpl`, retrospective at
+`docs/using-llm-tool.md`, three steps total
+(builtin -> demo + `:ask` migration + docs -> release).

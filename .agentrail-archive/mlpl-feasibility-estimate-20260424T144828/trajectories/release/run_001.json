@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 3,
+    "step": "release-v0150"
+  },
+  "action": "Release-step recipe: workspace version bump, CHANGELOG section above previous release, saga.md retrospective, status.md row-move-and-next-pointer-update (including the stale 'next saga' narrative being refreshed to point at Saga 19), release build, pages rebuild, CHANGES.md regen, /mw-cp gates, detailed commit, push commit only (not the tag), agentrail complete --done. Pre-existing unused-import warning in mlpl-web/src/tutorial.rs (last touched in Saga 20) noted but left alone -- out of scope for this release.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T14:03:17"
+}

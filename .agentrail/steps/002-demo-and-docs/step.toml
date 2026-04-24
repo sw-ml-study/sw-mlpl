@@ -1,0 +1,12 @@
+number = 2
+slug = "demo-and-docs"
+status = "pending"
+description = """
+Phase 2 step 002: demo + `:ask` migration + docs.
+
+With `llm_call` shipped (s..."""
+role = "production"
+context_files = []
+created_at = "2026-04-24T09:44:38"
+task_type = "primitive"
+commits = []
