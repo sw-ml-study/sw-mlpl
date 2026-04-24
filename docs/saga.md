@@ -196,11 +196,44 @@ checklist held. PCA stays a composition pattern (the
 Saga 8 power-iteration + deflation lesson) rather
 than shipping a new builtin. t-SNE itself is CPU-only
 (inner loop does not vectorize cleanly through MLX).
-UMAP, `pca` builtin, RAG pipeline (pending Saga 19),
-interactive 3-D, MLX for tsne, `embed_table` builtin,
-Barnes-Hut approximate t-SNE all deferred; see
-`docs/using-embeddings.md` "Not shipped". Delivered
-v0.14.0.
+UMAP, RAG pipeline (pending Saga 19), interactive
+3-D, MLX for tsne, Barnes-Hut approximate t-SNE all
+deferred; see `docs/using-embeddings.md` "Not
+shipped". Delivered v0.14.0.
+
+### Addendum: Saga 16.5 -- Embedding-viz Polish (COMPLETE)
+
+Two convenience builtins that closed the Saga 16 loose
+ends flagged in the shipped `docs/using-embeddings.md`
+"Not shipped" list: `pca(X, k) -> Y [N, k]` wraps
+power iteration + Gram-Schmidt + deflation into a
+one-liner (the Gram-Schmidt-inside-power-iteration
+step is load-bearing for `k = D` on rank-deficient
+inputs where plain deflation lets `v` drift back
+toward earlier components), and `embed_table(model) ->
+[vocab, d_model]` walks a `ModelSpec` tree depth-
+first left-to-right and returns the first Embedding
+layer's lookup table cloned from `env` (first-match
+semantics; Chain / Residual / nested chain all
+traverse; no-Embedding errors cleanly). 17 new tests
+(9 pca + 8 embed_table), both modules under the 7-fn
+budget by design (6 and 2 respectively), sw-checklist
+baseline 139/102 held. `demos/embedding_viz.mlpl`
+now uses `pca(table, 3)` for the 3-D projection
+(principled instead of the first-three-dims selector
+shortcut). `docs/using-embeddings.md` rewrites the
+PCA section from "composition-only" to "shipped as a
+builtin in v0.14.1" (keeps the power-iteration recipe
+as pedagogy), adds an "Extracting embed-layer
+weights" section, and updates the "Training inside a
+chain" flow to use `embed_table(m)` instead of the
+`apply(standalone_embed, iota(V))` workaround. Web
+REPL "Embedding exploration" lesson adds `pca(X, 2)`
+and `embed_table(emb)` examples. Path-selector
+variants of `embed_table` (e.g., `embed_table(m,
+"encoder.embed")`), multi-embedding stacks, and
+streaming / randomized / kernel PCA all deferred.
+Delivered v0.14.1. In-family polish, not a full saga.
 
 ## Saga 15: LoRA Fine-Tuning (COMPLETE)
 Parameter-efficient fine-tuning for the Model DSL. Three new

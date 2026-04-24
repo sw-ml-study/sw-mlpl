@@ -5,6 +5,79 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
+## v0.14.1 -- Saga 16.5: Embedding-viz Polish (2026-04-24)
+
+Two convenience builtins that close the loose ends Saga
+16 explicitly flagged: a one-line `pca(X, k)` and a
+source-level way to pull an embed layer's weights back
+out of a trained chain. Demo, docs, and tutorial
+updated to use both; no breaking changes.
+
+### Added
+
+- **`pca(X, k) -> Y`**. Top-k principal component
+  analysis via power iteration + Gram-Schmidt + deflation
+  (50 iterations per component; GS inside the loop
+  guarantees orthogonality even when later eigenvalues
+  are numerical noise, which matters for `k = D` on rank-
+  deficient inputs). Returns the centered-and-projected
+  `[N, k]` data; the components themselves are not
+  returned (run the Saga 8 composition pattern directly
+  if you need them). Contract:
+  `contracts/eval-contract/pca.md`. Module:
+  `crates/mlpl-runtime/src/pca_builtin.rs` (6 fns,
+  within the 7-fn budget).
+- **`embed_table(model) -> table`**. Depth-first left-
+  to-right walk of a `ModelSpec` tree; returns the first
+  Embedding layer's `[vocab, d_model]` lookup table
+  cloned from `env`. First-match semantics (documented;
+  multi-embedding selectors are deferred). Works inside
+  `Chain`, `Residual`, or nested `Chain(Chain(...))`;
+  errors cleanly if no Embedding is present. Contract:
+  `contracts/eval-contract/embed-table.md`. Module:
+  `crates/mlpl-eval/src/model_embed_table.rs` (2 fns).
+
+### Changed
+
+- `demos/embedding_viz.mlpl` now uses `pca(table, 3)`
+  for the 3-D projection instead of the column-selector
+  matmul. Same cluster structure, principled projection.
+- `docs/using-embeddings.md`: PCA section rewritten from
+  "composition-only" to "shipped as a builtin in
+  v0.14.1" (keeps the power-iteration recipe as
+  pedagogical reference); new "Extracting embed-layer
+  weights" section; "Training inside a chain" workaround
+  story updated to the shipped `embed_table` flow.
+- `apps/mlpl-web/src/lessons_advanced.rs` "Embedding
+  exploration" lesson adds `pca(X, 2)` and
+  `embed_table(emb)` examples alongside the existing
+  `pairwise_sqdist` / `knn` / `tsne` / `svg(...,
+  scatter3d)` walkthrough. Intro and try_it updated.
+
+### Tests
+
+- `crates/mlpl-eval/tests/pca_tests.rs`: 9 tests --
+  anisotropic 2-D capture (>80% variance retained with
+  k=1), shape preservation for `1 <= k <= D`, k=D
+  variance preservation within 1e-4, determinism, 5
+  error paths (rank != 2, k=0, k>D, non-finite, wrong
+  arity).
+- `crates/mlpl-eval/tests/embed_table_tests.rs`: 8 tests
+  -- standalone, chain-at-position-0, residual, nested
+  chain, reflects trained weights (diff > 1e-6 after 5
+  adam steps), no-embedding error, wrong arity, non-
+  model argument.
+
+### Scope notes
+
+- UMAP, interactive 3-D scatter, MLX dispatch for
+  `tsne`, and approximate / Barnes-Hut `tsne` remain
+  deferred (same reasoning as v0.14.0).
+- Multi-embedding path-selector variant of
+  `embed_table` (e.g., `embed_table(m,
+  "encoder.embed")`) is deferred -- not a shipped
+  pattern today.
+
 ## v0.14.0 -- Saga 16: Embedding Visualization (2026-04-23)
 
 Embedding-inspection surface for the Model DSL. Three new

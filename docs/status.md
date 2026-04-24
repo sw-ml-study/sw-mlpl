@@ -30,18 +30,18 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 14 | MLX backend (`mlpl-mlx` runtime, `device("...") { }` scoped form, `to_device`, autograd + optimizers + `train { }` on MLX, `tiny_lm_mlx` demo) | v0.11.0 | [x] |
 | 20 | Perturbation research demos / Neural Thickets (`clone_model`, `perturb_params`, `argtop_k`, `scatter`, `neural_thicket` CPU + MLX demos, specialization heatmap) | v0.12.0 | [x] |
 | 15 | LoRA fine-tuning (`freeze`, `unfreeze`, `lora`, `LinearLora` variant, `lora_finetune` CPU + MLX demos, CPU-MLX parity within fp32; QLoRA / quantization deferred) | v0.13.0 | [x] |
-| 16 | Embedding visualization (`pairwise_sqdist`, `knn`, `tsne`, `svg(..., "scatter3d")`, `embedding_viz` demo; UMAP / pca builtin / RAG / MLX-for-tsne deferred) | v0.14.0 | [x] |
+| 16 | Embedding visualization (`pairwise_sqdist`, `knn`, `tsne`, `svg(..., "scatter3d")`, `embedding_viz` demo; UMAP / RAG / MLX-for-tsne deferred) | v0.14.0 | [x] |
+| 16.5 | Embedding-viz polish (`pca(X, k)` + `embed_table(model)`; demo / docs / tutorial updates; UMAP / interactive 3-D / MLX-for-tsne stay deferred) | v0.14.1 | [x] |
 
 ## Planned
 
-Intended sequence: **16.5 -> 19 -> 21 -> (dev host move to Linux) -> 17 -> 18**.
+Intended sequence: **19 -> 21 -> (dev host move to Linux) -> 17 -> 18**.
 Saga 21 (CLI server) is prioritized **before** the Linux move because once
 dev is off Apple Silicon the browser live demo loses local MLX; the server-
 side `mlpl-serve` route keeps it usable.
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 16.5 | Embedding-viz polish (`pca(X, k)` + `embed_table(model)`; UMAP / interactive 3-D / MLX-for-tsne stay deferred) | v0.14.1 | [ ] | 16 |
 | 19 | LLM-as-tool REST integration | v0.15.0 | [ ] | 12 |
 | 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.16.0 | [ ] | 13 |
 | 17 | CUDA backend and distributed execution (requires Linux + NVIDIA host) | v0.17.0 | [ ] | 14, dev host move |

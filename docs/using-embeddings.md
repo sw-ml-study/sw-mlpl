@@ -1,9 +1,11 @@
 # Using MLPL for Embedding Visualization
 
-> **Status:** reference. Shipped in Saga 16 (v0.14.0).
-> `docs/plan.md` Saga 16 is the original design sketch;
-> this doc is the shipped-surface reference + honest
-> retrospective.
+> **Status:** reference. Shipped in Saga 16 (v0.14.0);
+> Saga 16.5 (v0.14.1) added `pca(X, k)` and
+> `embed_table(model)` as convenience builtins on top
+> of the same surface. `docs/plan.md` Saga 16 is the
+> original design sketch; this doc is the shipped-
+> surface reference + honest retrospective.
 
 ## What this is about
 
@@ -110,29 +112,80 @@ docs and "is my cluster structure real?" checks.
 
 Contract: `contracts/viz-contract/scatter3d.md`.
 
-## PCA is a composition pattern, not a builtin
+## PCA is shipped as a builtin (v0.14.1)
 
-MLPL already lets you compute top-k principal
-components of a matrix via power iteration and
-deflation; see the "Dimensionality Reduction: PCA"
-tutorial lesson (shipped in Saga 8). For a rank-2
-matrix `Xc` (centered), the loop is roughly:
+```
+pca(X, k) -> Y
+```
+
+- `X` rank-2 `[N, D]`, all finite.
+- `k` positive integer, `1 <= k <= D`.
+- `Y` rank-2 `[N, k]` -- centered-and-projected data.
+
+Returns the projected data only, not the eigenvectors.
+Callers who need the components themselves can still
+run the power-iteration + deflation composition
+directly (the "Dimensionality Reduction: PCA" tutorial
+lesson, Saga 8), which is a useful pedagogical
+reference for understanding what the builtin does:
 
 ```mlpl
 Cov = matmul(transpose(Xc), Xc) / N
 v1 = [1, 0, ..., 0]
-repeat 10 { v1 = matmul(Cov, v1) ; v1 = v1 / sqrt(dot(v1, v1)) }
+repeat 50 { v1 = matmul(Cov, v1) ; v1 = v1 / sqrt(dot(v1, v1)) }
 # Deflate: Cov_2 = Cov - lambda1 * (v1 @ transpose(v1))
 # Repeat for v2, v3...
 ```
 
-Saga 16 deliberately did NOT ship a `pca(X, k)`
-builtin. The composition pattern is well-understood,
-already demonstrated in a lesson, and any additional
-wrapping would hide the mechanics that make PCA a
-good thing to teach. If a concrete use case emerges
-that demands a one-liner, the builtin becomes
-trivial.
+The builtin does the same thing, plus Gram-Schmidt
+inside the power-iteration loop so that `V` stays
+orthonormal to machine precision even when later
+eigenvalues are numerical noise. That detail matters
+when `k = D` on rank-deficient or near-rank-deficient
+inputs.
+
+Contract: `contracts/eval-contract/pca.md`.
+
+## Extracting embed-layer weights (v0.14.1)
+
+```
+embed_table(model) -> table
+```
+
+Walks a `ModelSpec` tree depth-first left-to-right and
+returns the first Embedding layer's `[vocab, d_model]`
+lookup table, cloned from `env`. Closes the Saga 16
+gap where a trained
+`chain(embed, transformer_block, head)` had no
+source-level way to pull the learned embedding
+weights back out -- `apply(standalone_embed, iota(V))`
+only worked when the embed was a top-level standalone
+model.
+
+The natural flow becomes a one-liner:
+
+```mlpl
+m = chain(embed(V, d, 0), transformer_block, head)
+train N { adam(cross_entropy(apply(m, X), Y), m, ...) }
+table = embed_table(m)
+emb_2d = tsne(table, 5.0, 300, 0)
+svg(emb_2d, "scatter")
+```
+
+First-match semantics: if a model somehow contains two
+Embedding layers (not a shipped pattern; encoder/
+decoder stacks with separate embeddings are out of
+scope), `embed_table` returns the first one
+encountered. A path-selector variant
+(`embed_table(model, "encoder.embed")`) is a
+deferred follow-up.
+
+`Residual(Embedding)` is recognized structurally; at
+apply time the residual's shape math is ill-typed
+(embed changes input shape), but the `embed_table`
+walk is purely structural and does not call apply.
+
+Contract: `contracts/eval-contract/embed-table.md`.
 
 ## The shipped demo
 
@@ -156,8 +209,8 @@ end (CPU, any host):
    `onehot @ table = table`.
 4. t-SNE to 2-D: `tsne(table, 3.0, 300, 7)`; render
    via `svg(..., "scatter")`.
-5. 3-D via column-selector matmul on the first three
-   dims; render via `svg(..., "scatter3d")`.
+5. 3-D via `pca(table, 3)` (v0.14.1); render via
+   `svg(..., "scatter3d")`.
 6. `knn(table, 3)` reports each token's 3 nearest
    non-self neighbors. After training, every token
    in cluster 0 (ids 0-3) has neighbors from cluster
@@ -186,7 +239,7 @@ in WASM. Covers the same four operations
 "scatter3d")`) at a size where you can eyeball every
 output.
 
-## Why training-inside-a-chain is not shown
+## Training inside a chain (v0.14.1)
 
 The natural demo shape for "learn embeddings, then
 visualize" is:
@@ -194,31 +247,25 @@ visualize" is:
 ```mlpl
 model = chain(embed(V, d, 0), transformer_block, head)
 train N { adam(cross_entropy(apply(model, X), Y), model, ...) }
-table = apply(model.embed_layer, iota(V))  # <-- this
+table = embed_table(model)
 ```
 
-The last line is not possible today. `chain`'s child
-evaluation goes through the generic `eval_expr` path,
-which resolves bare identifiers only via `env.vars` and
-not `env.models`. A pre-bound `emb_layer = embed(V, d,
-0)` binding therefore can't be referenced inside a
-`chain(...)` call. And there's no source-level way to
-reach "the embed sublayer of this chain".
+v0.14.1 ships the last line. Before v0.14.1,
+`chain(...)` evaluation resolved bare identifiers only
+via `env.vars` (not `env.models`), so a pre-bound
+`emb_layer = embed(V, d, 0)` binding could not be
+referenced inside a `chain(...)` call -- and there was
+no source-level way to reach "the embed sublayer of
+this chain". The shipped `embed_table(model)` builtin
+walks the `ModelSpec` depth-first, first match wins,
+and returns the Embedding layer's `[vocab, d_model]`
+table cloned from `env`.
 
-Workarounds:
-
-- Use a standalone `embed` (no chain), train it
-  directly. That is the demo's approach.
-- Ship a language-level `embed_table(model) -> [V, d]`
-  builtin that walks the ModelSpec and returns the
-  table by internal name. Trivial to implement; not
-  done in Saga 16 to keep scope tight.
-- Extend `chain`'s child evaluation to fall through to
-  `env.models` for bare idents. Also trivial; not done
-  in Saga 16.
-
-Either follow-up lands cleanly. The demo story works
-as-is with the standalone variant.
+The standalone-embed + MSE-to-target approach used in
+`demos/embedding_viz.mlpl` still works and is a
+smaller pedagogical starting point. The training-
+inside-a-chain flow is the path once you're running a
+real model end-to-end.
 
 ## Parity testing
 
@@ -249,10 +296,6 @@ Five test files pin the surface:
   doubling the testing surface was out of Saga 16's
   scope. Ships once a concrete use case justifies the
   second algorithm.
-- **`pca(X, k)` builtin.** PCA is composition-only
-  today (power iteration + deflation, see Saga 8
-  tutorial). Becomes trivial to add if the mechanics
-  exposure ever stops being pedagogically useful.
 - **RAG pipeline.** Real RAG wants a local LLM
   inference path for the "retrieve + augment + LLM
   generation" story; without that the demo is
@@ -269,10 +312,6 @@ Five test files pin the surface:
   only today. `pairwise_sqdist` and `knn` are CPU-
   only primitives too; both are small and dominated
   by launch overhead at our scales.
-- **`embed_table(model)` builtin.** Extract an embed
-  layer's weights from a trained chain without using
-  the `apply(standalone_embed, iota(V))` workaround.
-  One-fn addition; not done in Saga 16.
 - **Approximate / Barnes-Hut t-SNE.** Exact
   `O(N^2)` is fine at embedding-table scale;
   approximate methods land once anyone runs t-SNE on
@@ -285,6 +324,10 @@ Five test files pin the surface:
 - `contracts/eval-contract/knn.md` -- k-NN contract.
 - `contracts/eval-contract/tsne.md` -- t-SNE
   hyperparameters + algorithm.
+- `contracts/eval-contract/pca.md` -- top-k PCA
+  builtin (v0.14.1).
+- `contracts/eval-contract/embed-table.md` --
+  embed-table extraction builtin (v0.14.1).
 - `contracts/viz-contract/scatter3d.md` -- 3-D
   scatter camera + rendering.
 - `demos/embedding_viz.mlpl` -- CPU demo.
