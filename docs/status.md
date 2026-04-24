@@ -34,14 +34,20 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 ## Planned
 
+Intended sequence: **16.5 -> 19 -> 21 -> (dev host move to Linux) -> 17 -> 18**.
+Saga 21 (CLI server) is prioritized **before** the Linux move because once
+dev is off Apple Silicon the browser live demo loses local MLX; the server-
+side `mlpl-serve` route keeps it usable.
+
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 17 | CUDA backend and distributed execution | v0.15 | [ ] | 14 |
-| 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.16 | [ ] | 15 |
-| 19 | LLM-as-tool REST integration | v0.17 | [ ] | 12 |
-| 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.18 | [ ] | 13 |
+| 16.5 | Embedding-viz polish (`pca(X, k)` + `embed_table(model)`; UMAP / interactive 3-D / MLX-for-tsne stay deferred) | v0.14.1 | [ ] | 16 |
+| 19 | LLM-as-tool REST integration | v0.15.0 | [ ] | 12 |
+| 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.16.0 | [ ] | 13 |
+| 17 | CUDA backend and distributed execution (requires Linux + NVIDIA host) | v0.17.0 | [ ] | 14, dev host move |
+| 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.18.0 | [ ] | 15 |
 | -- | QLoRA / 4-bit quantization (deferred follow-up from Saga 15) | tbd | [ ] | 15 |
-| -- | UMAP + `pca(X, k)` builtin + `embed_table(model)` (deferred follow-ups from Saga 16) | tbd | [ ] | 16 |
+| -- | UMAP reducer (deferred follow-up from Saga 16; overlaps with t-SNE) | tbd | [ ] | 16 |
 | -- | RAG pipeline over a local LLM inference path (deferred follow-up from Saga 16) | tbd | [ ] | 16, 19 |
 | -- | Interactive 3-D scatter (rotation/zoom) + MLX dispatch for t-SNE (deferred follow-ups from Saga 16) | tbd | [ ] | 16 |
 
