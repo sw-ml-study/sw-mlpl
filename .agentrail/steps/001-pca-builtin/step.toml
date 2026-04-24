@@ -1,6 +1,6 @@
 number = 1
 slug = "pca-builtin"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: `pca(X, k) -> Y [N, k]` builtin.
 
