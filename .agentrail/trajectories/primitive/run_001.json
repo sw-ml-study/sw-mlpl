@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 1,
+    "step": "estimate-train-builtin"
+  },
+  "action": "TDD: wrote 11 failing tests with exact-math assertions; scoped module to 6 fns (6/7 budget); caught a 59-LOC FAIL on accumulate_stats and refactored to delegate param sums to ModelSpec::params() while the tree walk only tracks hidden/depth; sw-checklist went 139->140->139 from refactor.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T10:42:06"
+}
