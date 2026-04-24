@@ -1,6 +1,6 @@
 number = 3
 slug = "scatter3d-viz"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 003: 3D scatter viz type
 `svg(pts, "scatter3d")`.

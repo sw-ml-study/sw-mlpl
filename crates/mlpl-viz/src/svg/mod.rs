@@ -12,7 +12,7 @@ use mlpl_array::DenseArray;
 pub use charts::{render_bar, render_line};
 pub use decision_boundary::render_decision_boundary;
 pub use heatmap::render_heatmap;
-pub use scatter::render_scatter;
+pub use scatter::{render_scatter, render_scatter3d};
 
 pub(crate) const W: f64 = 400.0;
 pub(crate) const H: f64 = 300.0;
@@ -116,6 +116,7 @@ pub fn render_with_aux(
 ) -> Result<String, VizError> {
     match type_name {
         "scatter" => render_scatter(data),
+        "scatter3d" => render_scatter3d(data),
         "line" => render_line(data),
         "bar" => render_bar(data),
         "heatmap" => render_heatmap(data),
