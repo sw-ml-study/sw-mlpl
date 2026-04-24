@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "demo-and-docs"
+  },
+  "action": "Bypassed the eval_program-with-escaped-source approach for :ask migration in favor of direct mlpl_runtime::call_ollama call -- escaping arbitrary user prompt text into MLPL source would have been gnarly. Verified end-to-end live against the user's running local Ollama via mlpl-repl -f demos/llm_tool.mlpl. Quality gates: cargo test 975/0/3, clippy clean, fmt clean, markdown-checker clean on 3 docs, sw-checklist baseline 102/139 held (warnings dropped from 351 -> 350).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T16:33:20"
+}
