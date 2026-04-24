@@ -1,0 +1,82 @@
+# Embedding visualization (Saga 16 step 004).
+#
+# Trains a small embedding layer toward a structured 3-
+# cluster target, extracts the learned table, and runs
+# it through the Saga 16 visualization pipeline:
+#
+#   - `tsne` for a 2-D reduction; `svg(..., "scatter")`
+#     renders the result.
+#   - A selector matmul for a 3-D projection; `svg(...,
+#     "scatter3d")` renders it with axis gizmos.
+#   - `knn` for nearest-neighbor lookup per token.
+#
+# All on CPU. t-SNE is CPU-only today -- its inner loop
+# (per-point perplexity binary search + SGD over
+# pairwise affinities) does not vectorize cleanly
+# through MLX's kernel model at embedding-table scale.
+# `pairwise_sqdist` and `knn` route through the normal
+# CPU path but are primitive-scale and irrelevant to the
+# MLX speedup story.
+#
+# Run with:
+#   mlpl-repl -f demos/embedding_viz.mlpl
+# DO NOT pipe on stdin -- `train {}` body splits (see
+# CLAUDE.md / project memory).
+
+V = 12 ; d = 8
+
+# Structured target: three clusters of 4 tokens each,
+# centered at [2, 0, 0, ...], [0, 2, 0, ...], [0, 0, 2,
+# ...] in 8-D. Built as (one-hot cluster assignment
+# [12, 3]) @ (cluster centers [3, 8]) plus a tiny randn
+# jitter so no two target rows are identical (t-SNE's
+# perplexity binary search cannot fit on duplicate
+# points).
+cluster_assign : [token, cluster] = reshape([1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0, 0.0, 0.0, 1.0], [12, 3])
+centers : [cluster, dim] = reshape([2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2.0, 0.0, 0.0, 0.0, 0.0, 0.0], [3, 8])
+target = matmul(cluster_assign, centers) + randn(1, [12, 8]) * 0.1
+
+# Train a randomly-initialized embedding layer toward the
+# target via mean-squared error. 50 adam steps drives the
+# layer's table close enough to the target for t-SNE to
+# recover the 3-cluster structure. `apply(emb, ids)` both
+# evaluates the layer inside the loss AND, after
+# training, extracts the final table.
+emb = embed(V, d, 0)
+ids = iota(V)
+experiment "embedding_viz" {
+  train 50 {
+    adam(mean((apply(emb, ids) - target) * (apply(emb, ids) - target)), emb, 0.1, 0.9, 0.999, 0.00000001);
+    loss_metric = mean((apply(emb, ids) - target) * (apply(emb, ids) - target))
+  }
+}
+
+table = apply(emb, iota(V))
+
+# --- Visualization ---
+
+# 2-D via t-SNE. Perplexity 3 fits well below N=12 (van
+# der Maaten recommends perplexity < (N-1)/3).
+emb_2d = tsne(table, 3.0, 300, 7)
+svg(emb_2d, "scatter")
+
+# 3-D via a column selector. A proper top-3-PCA
+# projection (power iteration + deflation, per the
+# Saga 8 tutorial lesson) is the principled choice but
+# gets wordy in MLPL source; since the target
+# concentrates signal on dims 0-2, picking the first
+# three dims reads the same structure with less source.
+# `docs/using-embeddings.md` walks through the PCA
+# upgrade as a composition pattern.
+selector : [dim, axis] = reshape([1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], [8, 3])
+emb_3d = matmul(table, selector)
+svg(emb_3d, "scatter3d")
+
+# Nearest neighbors: for each token, the 3 closest
+# others by squared Euclidean distance (self excluded).
+# Expect tokens in cluster 0 (ids 0-3) to list
+# neighbors from 0-3, and similarly for clusters 1 and
+# 2 -- if training worked, the learned embedding
+# recovers that structure.
+neighbors = knn(table, 3)
+neighbors
