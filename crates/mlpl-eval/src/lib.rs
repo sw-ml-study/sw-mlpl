@@ -10,6 +10,7 @@ mod eval_ops;
 mod experiment;
 mod grad;
 mod inspect;
+mod llm_dispatch;
 mod loader;
 mod model;
 mod model_clone;

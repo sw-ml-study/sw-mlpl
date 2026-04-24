@@ -27,3 +27,6 @@ serde_json = "1"
 
 [dev-dependencies]
 mlpl-lower-rs = { path = "../mlpl-lower-rs" }
+# Saga 19 step 001: stub Ollama HTTP responses for
+# `llm_call` tests without requiring a live server.
+mockito = "1"

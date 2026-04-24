@@ -7,3 +7,12 @@ version.workspace = true
 [dependencies]
 mlpl-core = { path = "../mlpl-core" }
 mlpl-array = { path = "../mlpl-array" }
+# Saga 19 step 001: `llm_call` POSTs to an Ollama-
+# compatible /api/generate endpoint. ureq is pinned
+# to 2.x with `default-features = false` because
+# Ollama serves plain HTTP on localhost; no TLS
+# needed and skipping it avoids the rustls/openssl
+# dependency choice. Same pin as `apps/mlpl-repl`'s
+# `:ask` command uses today.
+ureq = { version = "2", default-features = false, features = ["json"] }
+serde_json = "1"
