@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 3,
+    "step": "scatter3d-viz"
+  },
+  "action": "Applied the patterns doc DURING authoring: designed with orchestrator + 4 phase helpers (parse_input, project_orthographic, render_axes/points/legend) + two named structs (Scatter3dInput, ProjectedBounds) for clean arg/return types. Clippy still caught two lints in the first cut (type_complexity on a tuple return; iter_cloned_collect on the legend dedup); both fixed per the patterns doc (named struct return; to_vec() not iter.copied.collect). Module placement: initial separate scatter3d.rs tipped mlpl-viz over the 7-module crate budget (one new FAIL); merged into scatter.rs since 2-D and 3-D scatter are natural siblings. Final inlining of ProjectedBounds::from_points brought the file fn count back to 7 (at budget). sw-checklist restored to 139/102 baseline.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-23T17:07:08"
+}

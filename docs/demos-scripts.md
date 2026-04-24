@@ -352,6 +352,58 @@ Runs ~10-15 seconds on an M-class laptop. Watch for:
   future saga. See `docs/using-lora.md` (Saga 15 step 006)
   for the full deferred-follow-up list.
 
+## Demo 9 -- "Embedding visualization" (2 min, CPU)
+
+**What it shows.** Train a small embedding layer toward a
+structured 3-cluster target in 8-D, extract the learned
+table, and render it through the Saga 16 visualization
+pipeline: `tsne(table, 3, 300, 7)` reduces to 2-D for a
+`svg(..., "scatter")`, a column-selector matmul extracts
+three dims for `svg(..., "scatter3d")`, and `knn(table,
+3)` reports each token's nearest non-self neighbors. If
+training worked, every token's neighbor list stays
+within its cluster -- a quick sanity check on whether
+the embedding recovered the target structure.
+
+**Why.** Saga 16 surface end-to-end. Shows that
+`tsne`, `knn`, and the new 3-D scatter type compose with
+the existing Model DSL (`embed`, `apply`, `adam`) and
+viz stack without any new language concepts. Useful for
+audiences who ask "can I inspect what my model
+actually learned?"
+
+**How.**
+```bash
+$REPL_CPU -f demos/embedding_viz.mlpl
+```
+Runs ~2 seconds. Watch for:
+- 50 train steps driving the MSE loss down to ~0.01.
+- 2-D t-SNE scatter: three visibly-separated blobs.
+- 3-D scatter with axis gizmos: the three clusters
+  line up along the first three coordinate axes
+  (because the target concentrates signal there).
+- `neighbors` output: for every token id in cluster 0
+  (ids 0-3), the 3 nearest neighbors are other tokens
+  in cluster 0. Similarly for clusters 1 (4-7) and 2
+  (8-11).
+
+**Follow-up questions to expect.**
+- "Why not PCA for the 3-D projection?" A proper
+  top-3-PCA via power iteration + deflation (extending
+  the Saga 8 tutorial) is the principled choice; the
+  column-selector shortcut works here because the
+  target already concentrates signal on dims 0-2. See
+  `docs/using-embeddings.md` for the PCA composition
+  pattern.
+- "Why not run t-SNE on MLX?" Its inner loop does not
+  vectorize cleanly through MLX's kernel model at
+  embedding-table scale. CPU-only today. `pairwise_sqdist`
+  and `knn` are primitive-scale and CPU-only likewise.
+- "UMAP?" Deferred follow-up; overlaps with t-SNE in
+  user experience. See `docs/using-embeddings.md`.
+- "RAG pipeline?" Deferred; real RAG wants a local LLM
+  inference path (Saga 19's LLM-as-tool sidecar).
+
 ## Quick-reference: what each demo proves
 
 | Demo | Proves | Time | Host |
@@ -364,6 +416,7 @@ Runs ~10-15 seconds on an M-class laptop. Watch for:
 | 6. Compile-to-Rust | Native / WASM deployment | 2 min | any |
 | 7. Neural Thickets | Weight-perturbation specialization | 3 min | CPU |
 | 8. LoRA fine-tune | Frozen base + trainable adapters | 3 min | CPU |
+| 9. Embedding viz | t-SNE + knn + 3-D scatter on a trained embed | 2 min | CPU |
 
 ## Suggested demo orders
 

@@ -1,6 +1,6 @@
 number = 4
 slug = "embedding-viz-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 004: `demos/embedding_viz.mlpl`
 end-to-end.
