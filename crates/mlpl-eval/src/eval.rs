@@ -156,6 +156,12 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "estimate_train"
+    {
+        let result = crate::model_estimate::eval_estimate_train(args, env)?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "reshape_labeled"
     {
         if args.len() != 3 {

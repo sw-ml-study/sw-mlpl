@@ -1,6 +1,6 @@
 number = 1
 slug = "estimate-train-builtin"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: `estimate_train(...) -> [5]`
 feasibility / resource-estimat..."""
