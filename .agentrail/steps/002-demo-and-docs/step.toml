@@ -1,6 +1,6 @@
 number = 2
 slug = "demo-and-docs"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 002: demo + `:ask` migration + docs.
 

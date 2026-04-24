@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 1,
+    "step": "llm-call-builtin"
+  },
+  "action": "TDD: contract first (signature + HTTP surface + error cases + non-goals), then 8 failing tests with mockito, then runtime module + eval dispatcher. Quality gate flagged eval.rs at 9 fns (cap 7) -- moved dispatcher to a new sibling module llm_dispatch.rs and inlined eval_string_arg into the dispatch fn. Also dropped 5 unit tests in llm_builtins.rs that duplicated integration-test coverage; kept the file at 3 prod fns. sw-checklist baseline 102/139 held.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T16:24:13"
+}

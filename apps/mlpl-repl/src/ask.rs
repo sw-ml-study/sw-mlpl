@@ -1,26 +1,37 @@
 //! `:ask <question>` REPL command.
 //!
-//! Saga 19 preview: calls a local Ollama server at
-//! `OLLAMA_HOST` (default `http://localhost:11434`) with a prompt
-//! template that includes (a) a system framing so the model knows
-//! it is explaining MLPL, (b) the current workspace summary (so
-//! "what's in my session?" questions work), and (c) the user's
-//! question. The caller is the CLI REPL; the web REPL stays out
-//! of this path because (i) CORS requires the user to set
-//! `OLLAMA_ORIGINS` before the browser's fetch is allowed, and
-//! (ii) this feature is primarily useful in the interactive CLI
-//! where the user is mid-session anyway. Saga 19 ships the real
-//! REST integration story across web + CLI + codegen.
+//! Saga 19 step 002: the HTTP path now lives in
+//! `mlpl_runtime::call_ollama` (the same path the
+//! language-level `llm_call` builtin uses). `:ask`
+//! still owns the workspace-aware framing: a system
+//! prompt that tells the model what MLPL is, plus a
+//! user-context message built from `:vars` /
+//! `:models` / the optional `_demo` narration. That
+//! framing gets concatenated into a single prompt
+//! and sent through the `/api/generate` endpoint --
+//! the model loses the role distinction it would
+//! get from `/api/chat`, but the context is
+//! preserved.
 //!
-//! Model selection is via `OLLAMA_MODEL` (default `llama3.2`).
-//! The command blocks the REPL until Ollama responds; streaming
-//! is a Saga 19 follow-up.
+//! TODO(saga-19-followup): a future `llm_chat(history,
+//! prompt)` variant -- listed in step 001's deferred
+//! non-goals -- would let `:ask` keep the
+//! system+user role pair via `/api/chat` while still
+//! sharing the underlying HTTP machinery. Not
+//! shipping today.
+//!
+//! `OLLAMA_HOST` (default `http://localhost:11434`)
+//! and `OLLAMA_MODEL` (default `llama3.2`) override
+//! the endpoint. CLI-only -- the web REPL stays out
+//! of this path because (i) CORS requires
+//! `OLLAMA_ORIGINS` be set before the browser's fetch
+//! is allowed, and (ii) Saga 21 ships the proper
+//! server-side proxy.
 
 use mlpl_eval::Environment;
 
 const DEFAULT_HOST: &str = "http://localhost:11434";
 const DEFAULT_MODEL: &str = "llama3.2";
-const TIMEOUT_SECS: u64 = 120;
 
 /// Dispatch `:ask <question>` -- called from the main REPL
 /// command table. Prints the answer to stdout or an
@@ -34,7 +45,8 @@ pub fn dispatch(question: &str, env: &Environment) {
     }
     let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| DEFAULT_HOST.into());
     let model = std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| DEFAULT_MODEL.into());
-    match call_ollama(&host, &model, question, env) {
+    let prompt = build_prompt(env, question);
+    match mlpl_runtime::call_ollama(&host, &prompt, &model) {
         Ok(answer) => println!("{}", answer.trim_end()),
         Err(e) => {
             eprintln!("error: {e}");
@@ -45,41 +57,15 @@ pub fn dispatch(question: &str, env: &Environment) {
     }
 }
 
-/// Build the request payload and POST to Ollama's `/api/chat`.
-/// Returns the model's reply text on success; the error string
-/// surfaces the connection failure or non-200 body so the REPL
-/// can print an actionable fix hint.
-fn call_ollama(
-    host: &str,
-    model: &str,
-    question: &str,
-    env: &Environment,
-) -> Result<String, String> {
+/// Concatenate the system framing and the user
+/// context into a single `/api/generate` prompt
+/// string. Order: system block first so the model
+/// sees the role definition before the workspace
+/// dump and the question.
+fn build_prompt(env: &Environment, question: &str) -> String {
     let system = build_system_prompt();
-    let user_context = build_user_context(env, question);
-    let body = serde_json::json!({
-        "model": model,
-        "stream": false,
-        "messages": [
-            {"role": "system", "content": system},
-            {"role": "user", "content": user_context},
-        ],
-    });
-    let url = format!("{}/api/chat", host.trim_end_matches('/'));
-    let resp = ureq::AgentBuilder::new()
-        .timeout(std::time::Duration::from_secs(TIMEOUT_SECS))
-        .build()
-        .post(&url)
-        .set("Content-Type", "application/json")
-        .send_json(body)
-        .map_err(|e| format!("POST {url} failed: {e}"))?;
-    let json: serde_json::Value = resp
-        .into_json()
-        .map_err(|e| format!("bad JSON from {url}: {e}"))?;
-    json.pointer("/message/content")
-        .and_then(|v| v.as_str())
-        .map(str::to_string)
-        .ok_or_else(|| format!("no /message/content in Ollama response: {json}"))
+    let user = build_user_context(env, question);
+    format!("{system}\n\n{user}")
 }
 
 /// System prompt framing the model's task. Short on purpose --

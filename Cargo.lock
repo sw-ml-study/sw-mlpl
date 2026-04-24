@@ -1478,9 +1478,8 @@ dependencies = [
  "hostname",
  "mlpl-eval",
  "mlpl-parser",
+ "mlpl-runtime",
  "mlpl-trace",
- "serde_json",
- "ureq",
 ]
 
 [[package]]

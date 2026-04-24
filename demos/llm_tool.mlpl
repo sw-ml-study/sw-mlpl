@@ -1,0 +1,57 @@
+# LLM-as-tool REST integration (Saga 19).
+#
+# Calls a hosted LLM (via a local Ollama server) as a
+# composable language-level builtin -- no longer just
+# the REPL's :ask slash command. The reply is an MLPL
+# string and feeds straight into the rest of the
+# language: tokenize_bytes, experiment {}, etc.
+#
+# Requires a running Ollama server at
+# http://localhost:11434 with `llama3.2` pulled.
+# Skip this demo on CI / no-network envs -- it makes
+# a real network call and depends on a local model.
+#
+# CLI-only. The browser cannot reach localhost Ollama
+# without CORS allow-listing + a server-side proxy;
+# Saga 21 ships `mlpl-serve` for that path. See
+# docs/using-llm-tool.md.
+#
+# Run with:
+#   mlpl-repl -f demos/llm_tool.mlpl
+
+# ---- Tour 1: a single LLM call ----
+
+reply = llm_call("http://localhost:11434", "Summarize MLPL in one sentence.", "llama3.2")
+reply
+
+# Whatever the local model returns. Typical shape:
+#   "MLPL is a Rust-first array programming language
+#    inspired by APL and J, designed for machine
+#    learning experiments."
+
+# ---- Tour 2: compose the reply into the rest of MLPL ----
+
+# `tokenize_bytes` converts the reply string into a
+# rank-1 array of byte tokens (vocab=256). Useful for
+# quick token-count sanity checks or piping into a BPE
+# tokenizer / embed lookup downstream.
+
+reply_tokens = tokenize_bytes(reply)
+reply_tokens
+
+# Output is a [N] f64 array where N is the byte count
+# of the reply; values are the byte values 0..256.
+
+# ---- Expected output format ----
+
+# `reply` prints as a string scalar (no shape header).
+# `reply_tokens` prints as a rank-1 array; on a typical
+# llama3.2 reply this will be ~100-300 bytes long.
+
+# ---- Non-goals (deferred) ----
+
+# Streaming SSE, OpenAI-style tool calling, multi-turn
+# chat threading, request batching, in-source auth
+# secrets, and web/WASM support all stay deferred.
+# See contracts/eval-contract/llm-call.md and
+# docs/using-llm-tool.md for the full list.
