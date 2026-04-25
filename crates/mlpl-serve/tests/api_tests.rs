@@ -218,6 +218,102 @@ async fn run_rejects_non_loopback_with_auth_disabled() {
 }
 
 #[tokio::test]
+async fn inspect_returns_var_snapshot() {
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+    let url_eval = format!("http://{addr}/v1/sessions/{id}/eval");
+    let client = reqwest::Client::new();
+
+    // Bind two vars; one a model.
+    for prog in [
+        "x = iota(5)",
+        "y = reshape(iota(12), [3, 4])",
+        "m = linear(3, 4, 0)",
+    ] {
+        let resp = client
+            .post(&url_eval)
+            .bearer_auth(&token)
+            .json(&serde_json::json!({"program": prog}))
+            .send()
+            .await
+            .unwrap();
+        assert_eq!(resp.status(), 200, "setup eval `{prog}` should succeed");
+    }
+
+    let resp = client
+        .get(format!("http://{addr}/v1/sessions/{id}/inspect"))
+        .bearer_auth(&token)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200);
+    let body: JsonValue = resp.json().await.unwrap();
+
+    let var_names: Vec<&str> = body["vars"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v["name"].as_str().unwrap())
+        .collect();
+    assert!(
+        var_names.contains(&"x"),
+        "x should be in vars: {var_names:?}"
+    );
+    assert!(
+        var_names.contains(&"y"),
+        "y should be in vars: {var_names:?}"
+    );
+
+    // y has shape [3, 4]
+    let y = body["vars"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|v| v["name"] == "y")
+        .unwrap();
+    assert_eq!(y["shape"], serde_json::json!([3, 4]));
+
+    // Models list contains m
+    let models: Vec<&str> = body["models"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|v| v.as_str().unwrap())
+        .collect();
+    assert!(models.contains(&"m"), "m should be in models: {models:?}");
+
+    // No truncation expected for a tiny snapshot
+    assert_eq!(body["more"], 0);
+}
+
+#[tokio::test]
+async fn inspect_without_bearer_returns_401() {
+    let addr = start_server(AuthMode::Required).await;
+    let (id, _token) = create_session(addr).await;
+
+    let resp = reqwest::Client::new()
+        .get(format!("http://{addr}/v1/sessions/{id}/inspect"))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 401);
+}
+
+#[tokio::test]
+async fn inspect_unknown_session_returns_404() {
+    let addr = start_server(AuthMode::Required).await;
+    let bogus = "00000000-0000-0000-0000-000000000000";
+
+    let resp = reqwest::Client::new()
+        .get(format!("http://{addr}/v1/sessions/{bogus}/inspect"))
+        .bearer_auth("anything")
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 404);
+}
+
+#[tokio::test]
 async fn auth_disabled_skips_bearer_check() {
     let addr = start_server(AuthMode::Disabled).await;
     let (id, _token) = create_session(addr).await;

@@ -1,6 +1,6 @@
 number = 2
 slug = "repl-connect-client"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 002: `mlpl-repl --connect <url>`
 client + `GET /v1/sessions/{id}..."""

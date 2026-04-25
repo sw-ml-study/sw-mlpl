@@ -6,7 +6,7 @@ use axum::Router;
 use axum::routing::{get, post};
 
 use crate::auth::AuthMode;
-use crate::handlers::{create_session_handler, eval_handler, health_handler};
+use crate::handlers::{create_session_handler, eval_handler, health_handler, inspect_handler};
 use crate::sessions::{SessionMap, new_map};
 
 /// Errors the server can fail with at startup or
@@ -60,6 +60,7 @@ pub fn build_app(auth_mode: AuthMode) -> Router {
         .route("/v1/health", get(health_handler))
         .route("/v1/sessions", post(create_session_handler))
         .route("/v1/sessions/:id/eval", post(eval_handler))
+        .route("/v1/sessions/:id/inspect", get(inspect_handler))
         .with_state(state)
 }
 

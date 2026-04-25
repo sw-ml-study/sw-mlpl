@@ -1,6 +1,6 @@
 number = 1
 slug = "mlpl-serve-skeleton"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1 step 001: `crates/mlpl-serve` skeleton +
 sessions + eval endpoint.
@@ -9,5 +9,6 @@ B..."""
 role = "production"
 context_files = []
 created_at = "2026-04-24T17:45:57"
+completed_at = "2026-04-24T18:00:42"
 task_type = "primitive"
-commits = []
+commits = ["75dfa71c2daa4693551183bb71a6343cba09a7a2"]
