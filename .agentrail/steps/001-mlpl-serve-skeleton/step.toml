@@ -1,6 +1,6 @@
 number = 1
 slug = "mlpl-serve-skeleton"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: `crates/mlpl-serve` skeleton +
 sessions + eval endpoint.

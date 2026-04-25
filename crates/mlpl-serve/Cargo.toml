@@ -1,0 +1,36 @@
+[package]
+name = "mlpl-serve"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Saga 21 step 001: ship as both a binary (so users
+# run `mlpl-serve --bind ... --auth ...`) and a
+# library (so integration tests + future clients can
+# spin up the server in-process via
+# `mlpl_serve::server::build_app(...)` /
+# `run(...)`).
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "mlpl-serve"
+path = "src/main.rs"
+
+[dependencies]
+mlpl-parser = { path = "../mlpl-parser" }
+mlpl-eval = { path = "../mlpl-eval" }
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+tower = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+rand = "0.8"
+# Constant-time bearer-token compare; defends against
+# timing oracles that could otherwise leak the token
+# character-by-character.
+subtle = "2"
+
+[dev-dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
