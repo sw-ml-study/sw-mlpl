@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 1,
+    "step": "mlpl-serve-skeleton"
+  },
+  "action": "Contract first (signature + endpoint shapes + error catalog + security posture + non-goals), then 10 failing tokio tests using axum::serve on a TcpListener::bind('127.0.0.1:0').await random port, then the 5 modules. axum 0.7 + tokio + reqwest dev-dep with default-features=false + rustls-tls. AppState carries Arc<RwLock<HashMap<Uuid, Session>>> + AuthMode; eval_handler holds a write lock for the call duration because Environment mutates via side-effecting builtins. Two clippy nits to round-trip: redundant #[must_use] on build_app (axum::Router is already must_use) and a docstring '+' that clippy parsed as a markdown list item. sw-checklist actually improved 102->105 passed -- new crate's modules each pass per-module checks.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T18:00:42"
+}

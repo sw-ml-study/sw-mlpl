@@ -22,6 +22,20 @@ mlpl-trace = { path = "../../crates/mlpl-trace" }
 # system-prompt + workspace framing stays here in
 # `ask.rs`; only the POST is shared.
 mlpl-runtime = { path = "../../crates/mlpl-runtime" }
+# Saga 21 step 002: `--connect <url>` mode delegates
+# evaluation to a remote `mlpl-serve`. Blocking
+# reqwest avoids pulling tokio into the REPL crate
+# (the server side already owns the async runtime).
+reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[dev-dependencies]
+# Spin up `mlpl-serve` in-process for `--connect`
+# integration tests on a random localhost port.
+mlpl-serve = { path = "../../crates/mlpl-serve" }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+axum = "0.7"
 
 [build-dependencies]
 hostname = "0.4"

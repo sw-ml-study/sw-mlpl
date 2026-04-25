@@ -84,6 +84,47 @@ Error responses:
   The error message is the same one
   `mlpl-repl` would print locally.
 
+### `GET /v1/sessions/{session_id}/inspect`
+
+Workspace snapshot for client-side slash-command
+rendering (added in Saga 21 step 002 for the
+`mlpl-repl --connect` client). **Authenticated**
+(bearer token).
+
+Response (`200 OK`):
+
+```json
+{
+  "vars": [
+    {"name": "x", "shape": [3, 4], "is_param": false},
+    {"name": "y", "shape": [], "is_param": true}
+  ],
+  "models": ["mdl"],
+  "tokenizers": ["tok"],
+  "experiments": ["sweep-v1"],
+  "more": 0
+}
+```
+
+- `vars` is sorted alphabetically by name and capped
+  at 200 entries; the `more` field reports how many
+  variables were truncated (0 when the snapshot was
+  complete).
+- `models`, `tokenizers`, `experiments` are sorted
+  alphabetically. `experiments` is deduplicated --
+  multiple runs of the same experiment name appear
+  once (the per-run history lives in the
+  experiment-record store, not the snapshot).
+- Shapes are arrays of `usize` from
+  `DenseArray::shape().dims()`. Scalars come back
+  as `[]`.
+- `is_param` mirrors `Environment::is_param(name)`.
+
+Error responses match the eval endpoint:
+
+- `401 Unauthorized` -- missing or wrong bearer.
+- `404 Not Found` -- unknown session id.
+
 ### `GET /v1/health`
 
 Liveness check. **No authentication required.**
@@ -192,7 +233,6 @@ These items appear in the design brief
 step 001. They land in step 002, step 003, or
 follow-up sagas:
 
-- **`GET /v1/sessions/{id}/inspect`.** Step 002.
 - **Server-side LLM proxy with allow-list.**
   Follow-up saga after the MVP server proves
   stable. Needs careful security review (allow-

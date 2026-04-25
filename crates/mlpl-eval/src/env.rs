@@ -188,6 +188,19 @@ impl Environment {
         self.vars.iter()
     }
 
+    /// Iterate over every bound `(name, ModelSpec)`. Saga 21 step
+    /// 002: needed by `mlpl-serve`'s `/inspect` endpoint to list
+    /// model names without exposing the internal HashMap.
+    pub fn models_iter(&self) -> impl Iterator<Item = (&String, &ModelSpec)> {
+        self.models.iter()
+    }
+
+    /// Iterate over every bound `(name, TokenizerSpec)`. Saga 21
+    /// step 002: same use case as `models_iter`.
+    pub fn tokenizers_iter(&self) -> impl Iterator<Item = (&String, &TokenizerSpec)> {
+        self.tokenizers.iter()
+    }
+
     /// Bind a string value to `name`. Saga 12 step 009.
     pub fn set_string(&mut self, name: String, value: String) {
         self.strings.insert(name, value);

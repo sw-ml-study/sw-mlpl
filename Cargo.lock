@@ -1666,12 +1666,18 @@ dependencies = [
 name = "mlpl-repl"
 version = "0.16.0"
 dependencies = [
+ "axum",
  "chrono",
  "hostname",
  "mlpl-eval",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-serve",
  "mlpl-trace",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
 ]
 
 [[package]]
@@ -2245,7 +2251,9 @@ checksum = "eddd3ca559203180a307f12d114c268abf583f59b03cb906fd0b3ff8646c1147"
 dependencies = [
  "base64",
  "bytes",
+ "futures-channel",
  "futures-core",
+ "futures-util",
  "http 1.4.0",
  "http-body",
  "http-body-util",
