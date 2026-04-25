@@ -4,7 +4,7 @@
 //! `matmul`, `add`/`sub`/`mul`/`div`/`neg`, `exp`/`log`/`tanh`/
 //! `sigmoid`/`relu`, `reshape`/`transpose` -- but dispatches
 //! through Apple's MLX library via `mlx-rs`. A program compiled
-//! against `mlpl-rt::<op>` must be swappable for `mlpl_mlx::<op>`
+//! against `mlpl-rt::<op>` must be swappable for `mlpl_mlx_rt::<op>`
 //! without source changes; outputs agree bit-for-bit where the
 //! two runtimes share a dtype, and within a documented fp32
 //! tolerance where MLX downcasts to f32 for GPU dispatch.

@@ -11,15 +11,15 @@
 //!    `device("cpu")` overrides an outer `device("mlx")`.
 //!
 //! 2. `try_mlx_dispatch` is the single place where `mlpl-eval`
-//!    decides whether an op should route through the `mlpl-mlx`
+//!    decides whether an op should route through the `mlpl-mlx-rt`
 //!    runtime. It is called from `eval_binop` and `eval_fncall`
 //!    only when `Environment::device()` returns `"mlx"`. The
 //!    helper returns `Some(result)` if the named op exists in
-//!    `mlpl-mlx`, otherwise `None` so the caller can fall back to
+//!    `mlpl-mlx-rt`, otherwise `None` so the caller can fall back to
 //!    the CPU path.
 //!
 //! Triple-gate: the `mlx` Cargo feature on `mlpl-eval` pulls in
-//! `mlpl-mlx` (which itself triple-gates on
+//! `mlpl-mlx-rt` (which itself triple-gates on
 //! `target_os = "macos"`, `target_arch = "aarch64"`, and its own
 //! `mlx` feature). When any of those is missing the dispatch
 //! helper is a stub returning `None`, the `device("mlx") { }`
@@ -70,7 +70,7 @@ const fn mlx_available() -> bool {
     ))
 }
 
-/// Dispatch a named op through `mlpl-mlx` when the running build
+/// Dispatch a named op through `mlpl-mlx-rt` when the running build
 /// supports it. Returns `None` to mean "this op is not in the
 /// MLX surface, run it on CPU"; `Some(Ok(arr))` for a successful
 /// MLX result; `Some(Err(e))` for an MLX-side validation error
@@ -80,7 +80,7 @@ pub(crate) fn try_mlx_dispatch(
     name: &str,
     args: &[DenseArray],
 ) -> Option<Result<DenseArray, ArrayError>> {
-    use mlpl_mlx as mx;
+    use mlpl_mlx_rt as mx;
     Some(match (name, args.len()) {
         ("matmul", 2) => mx::matmul(&args[0], &args[1]),
         ("add", 2) => mx::add(&args[0], &args[1]),
@@ -121,7 +121,7 @@ pub(crate) fn try_mlx_dispatch(
     None
 }
 
-/// Map an `mlpl-mlx` `ArrayError` to the eval-layer error type so
+/// Map an `mlpl-mlx-rt` `ArrayError` to the eval-layer error type so
 /// the caller can route through the same `?` chain that the CPU
 /// path uses. Pulled out so `eval_binop` and `eval_fncall` can
 /// share it without each duplicating the conversion.
@@ -131,7 +131,7 @@ pub(crate) fn lift_array_error(err: ArrayError) -> EvalError {
 
 /// Run a named builtin with `env`'s active device in mind
 /// (Saga 14 step 005). When `env.device() == "mlx"` and the op is
-/// in the `mlpl-mlx` surface, route through `try_mlx_dispatch`.
+/// in the `mlpl-mlx-rt` surface, route through `try_mlx_dispatch`.
 /// Otherwise fall back to the CPU path: elementwise arithmetic
 /// lowers to `DenseArray::apply_binop`/`map`, everything else
 /// goes through `mlpl_runtime::call_builtin`. Used by
@@ -162,7 +162,7 @@ pub(crate) fn dispatched_call(
     }
 }
 
-/// Re-execute every non-leaf node on `tape` through `mlpl-mlx` so
+/// Re-execute every non-leaf node on `tape` through `mlpl-mlx-rt` so
 /// each `NodeData::value` carries the MLX-rounded forward value
 /// (Saga 14 step 006).
 ///
@@ -172,7 +172,7 @@ pub(crate) fn dispatched_call(
 /// forward pass, this helper walks node ids in insertion order
 /// (which is topological because each op's parents are pushed
 /// before the op itself) and recomputes every non-leaf node's
-/// value via the corresponding `mlpl-mlx` primitive, threading
+/// value via the corresponding `mlpl-mlx-rt` primitive, threading
 /// MLX-computed parent values forward. The CPU backward formulas
 /// in `mlpl-autograd::ops` then operate on those MLX-rounded
 /// values; the gradients they produce match the all-CPU path
@@ -278,7 +278,7 @@ pub(crate) fn materialize_tape_on_mlx(tape: &mlpl_autograd::Tape) {
 #[cfg(not(all(feature = "mlx", target_os = "macos", target_arch = "aarch64")))]
 pub(crate) fn materialize_tape_on_mlx(_tape: &mlpl_autograd::Tape) {}
 
-/// Forward a unary op through `mlpl-mlx` when possible, or fall
+/// Forward a unary op through `mlpl-mlx-rt` when possible, or fall
 /// back to the input unchanged when the op has no MLX kernel
 /// (defensive -- every current `UnaryOp` variant has one).
 #[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
@@ -298,7 +298,7 @@ fn rerun_unary(op: mlpl_autograd::ops::UnaryOp, x: &DenseArray) -> DenseArray {
     }
 }
 
-/// Forward a binary op through `mlpl-mlx` when possible.
+/// Forward a binary op through `mlpl-mlx-rt` when possible.
 #[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
 fn rerun_binary(
     op: mlpl_autograd::ops::BinaryOp,

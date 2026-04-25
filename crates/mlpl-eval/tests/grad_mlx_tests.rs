@@ -8,14 +8,14 @@
 //! matches within fp32 tolerance.
 //!
 //! The MLX path differs from CPU only in that each tape node's
-//! forward value is re-materialized through `mlpl-mlx` after the
+//! forward value is re-materialized through `mlpl-mlx-rt` after the
 //! CPU forward built the tape (see
 //! `crate::device::materialize_tape_on_mlx` for the rationale).
 //! Backward formulas operate on those MLX-rounded values, which
 //! is the only source of divergence the tolerance budget needs to
 //! absorb.
 //!
-//! Triple-gated like the rest of `mlpl-mlx`.
+//! Triple-gated like the rest of `mlpl-mlx-rt`.
 
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 

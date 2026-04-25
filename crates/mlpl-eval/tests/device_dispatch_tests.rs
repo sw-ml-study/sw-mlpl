@@ -7,12 +7,12 @@
 //!   target on the environment's per-tensor map. Value is
 //!   unchanged. Round-trip cpu -> mlx -> cpu returns bit-for-bit
 //!   the original array; mlx -> cpu -> mlx is bounded by the
-//!   `mlpl-mlx` fp32 tolerance (the value path is CPU-resident
+//!   `mlpl-mlx-rt` fp32 tolerance (the value path is CPU-resident
 //!   until later phases add real device-backed storage).
 //! - `apply(model, X)` raises `EvalError::DeviceMismatch` when
 //!   the model's params and `X` disagree on device placement.
 //! - Inside `device("mlx") { }`, `apply(model, X)` routes
-//!   matmul/softmax/add through `mlpl-mlx`. Output shape and
+//!   matmul/softmax/add through `mlpl-mlx-rt`. Output shape and
 //!   labels must match the CPU path exactly; numeric values
 //!   match within the documented fp32 tolerance.
 //! - The Tiny LM forward assembled from the Saga 11 layers

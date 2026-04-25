@@ -1,4 +1,4 @@
-//! Parity tests: `mlpl_mlx::matmul` agrees with the CPU path in
+//! Parity tests: `mlpl_mlx_rt::matmul` agrees with the CPU path in
 //! `mlpl_array::DenseArray::matmul` on shape, labels, and
 //! numerical values.
 //!
@@ -15,13 +15,13 @@
 //!   * `target_arch = "aarch64"`,
 //!   * `feature = "mlx"`.
 //!
-//! On any other configuration `cargo test -p mlpl-mlx` still
+//! On any other configuration `cargo test -p mlpl-mlx-rt` still
 //! compiles (the tests simply aren't generated). That matches the
 //! Saga 14 invariant that CI on non-Apple hosts stays green.
 
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 
-use mlpl_mlx::{DenseArray, Shape};
+use mlpl_mlx_rt::{DenseArray, Shape};
 
 /// Tolerance budget for MLX (fp32) vs CPU (f64) parity. See the
 /// module-level docstring for the derivation.
@@ -46,7 +46,7 @@ fn matmul_8x4_mul_4x8_matches_cpu_within_fp32_tolerance() {
     let b = DenseArray::new(Shape::new(vec![4, 8]), b_data).unwrap();
 
     let cpu = a.matmul(&b).unwrap();
-    let mlx = mlpl_mlx::matmul(&a, &b).unwrap();
+    let mlx = mlpl_mlx_rt::matmul(&a, &b).unwrap();
 
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
@@ -59,7 +59,7 @@ fn matmul_matrix_vector_matches_cpu() {
     let b = DenseArray::new(Shape::vector(4), vec![0.5, -0.25, 2.0, 1.0]).unwrap();
 
     let cpu = a.matmul(&b).unwrap();
-    let mlx = mlpl_mlx::matmul(&a, &b).unwrap();
+    let mlx = mlpl_mlx_rt::matmul(&a, &b).unwrap();
 
     assert_eq!(mlx.shape(), cpu.shape());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -78,7 +78,7 @@ fn matmul_propagates_labels_on_both_sides() {
         .with_labels(vec![Some("feat".into()), Some("out".into())])
         .unwrap();
 
-    let mlx = mlpl_mlx::matmul(&a, &b).unwrap();
+    let mlx = mlpl_mlx_rt::matmul(&a, &b).unwrap();
 
     assert_eq!(mlx.shape(), &Shape::new(vec![2, 4]));
     assert_eq!(
@@ -98,7 +98,7 @@ fn matmul_rejects_label_mismatch_on_contraction_axis() {
         .with_labels(vec![Some("time".into()), Some("out".into())])
         .unwrap();
 
-    assert!(mlpl_mlx::matmul(&a, &b).is_err());
+    assert!(mlpl_mlx_rt::matmul(&a, &b).is_err());
 }
 
 #[test]
@@ -106,12 +106,12 @@ fn matmul_rejects_contraction_dim_mismatch() {
     let a = DenseArray::new(Shape::new(vec![2, 3]), vec![0.0; 6]).unwrap();
     let b = DenseArray::new(Shape::new(vec![5, 4]), vec![0.0; 20]).unwrap();
 
-    assert!(mlpl_mlx::matmul(&a, &b).is_err());
+    assert!(mlpl_mlx_rt::matmul(&a, &b).is_err());
 }
 
 // Saga 14 step 002: forward-pass primitives.
 //
-// Each test below compares `mlpl_mlx::<op>` against `mlpl_rt::<op>`
+// Each test below compares `mlpl_mlx_rt::<op>` against `mlpl_rt::<op>`
 // on the same fixture. Because the MLX path computes in fp32 and
 // casts back to f64 at the boundary, the parity bound is `FP32_TOL`
 // (see module-level docstring), not bit-for-bit. Labels are compared
@@ -133,7 +133,7 @@ fn add_matches_cpu_on_labeled_matrix() {
     let a = mat23_labeled([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
     let b = mat23_labeled([0.5, 0.5, 0.5, 0.5, 0.5, 0.5]);
     let cpu = mlpl_rt::add(&a, &b).unwrap();
-    let mlx = mlpl_mlx::add(&a, &b).unwrap();
+    let mlx = mlpl_mlx_rt::add(&a, &b).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -144,7 +144,7 @@ fn sub_matches_cpu() {
     let a = mat23([5.0, 4.0, 3.0, 2.0, 1.0, 0.0]);
     let b = mat23([1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
     let cpu = mlpl_rt::sub(&a, &b).unwrap();
-    let mlx = mlpl_mlx::sub(&a, &b).unwrap();
+    let mlx = mlpl_mlx_rt::sub(&a, &b).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_within_fp32(mlx.data(), cpu.data());
 }
@@ -154,7 +154,7 @@ fn mul_matches_cpu() {
     let a = mat23([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
     let b = mat23([2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
     let cpu = mlpl_rt::mul(&a, &b).unwrap();
-    let mlx = mlpl_mlx::mul(&a, &b).unwrap();
+    let mlx = mlpl_mlx_rt::mul(&a, &b).unwrap();
     assert_within_fp32(mlx.data(), cpu.data());
 }
 
@@ -163,7 +163,7 @@ fn div_matches_cpu() {
     let a = mat23([2.0, 4.0, 6.0, 8.0, 10.0, 12.0]);
     let b = mat23([2.0, 2.0, 2.0, 2.0, 2.0, 2.0]);
     let cpu = mlpl_rt::div(&a, &b).unwrap();
-    let mlx = mlpl_mlx::div(&a, &b).unwrap();
+    let mlx = mlpl_mlx_rt::div(&a, &b).unwrap();
     assert_within_fp32(mlx.data(), cpu.data());
 }
 
@@ -171,7 +171,7 @@ fn div_matches_cpu() {
 fn neg_preserves_labels_and_matches_cpu() {
     let a = mat23_labeled([1.0, -2.0, 3.0, -4.0, 5.0, -6.0]);
     let cpu = mlpl_rt::neg(&a);
-    let mlx = mlpl_mlx::neg(&a);
+    let mlx = mlpl_mlx_rt::neg(&a);
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -185,7 +185,7 @@ fn exp_matches_cpu_within_fp32_tolerance() {
     )
     .unwrap();
     let cpu = mlpl_rt::exp(&a);
-    let mlx = mlpl_mlx::exp(&a);
+    let mlx = mlpl_mlx_rt::exp(&a);
     assert_within_fp32(mlx.data(), cpu.data());
 }
 
@@ -193,7 +193,7 @@ fn exp_matches_cpu_within_fp32_tolerance() {
 fn log_matches_cpu_within_fp32_tolerance() {
     let a = DenseArray::new(Shape::vector(5), vec![0.25, 0.5, 1.0, 2.0, 4.0]).unwrap();
     let cpu = mlpl_rt::log(&a);
-    let mlx = mlpl_mlx::log(&a);
+    let mlx = mlpl_mlx_rt::log(&a);
     assert_within_fp32(mlx.data(), cpu.data());
 }
 
@@ -201,7 +201,7 @@ fn log_matches_cpu_within_fp32_tolerance() {
 fn tanh_matches_cpu_within_fp32_tolerance() {
     let a = DenseArray::new(Shape::vector(5), vec![-2.0, -0.5, 0.0, 0.5, 2.0]).unwrap();
     let cpu = mlpl_rt::tanh(&a);
-    let mlx = mlpl_mlx::tanh(&a);
+    let mlx = mlpl_mlx_rt::tanh(&a);
     assert_within_fp32(mlx.data(), cpu.data());
 }
 
@@ -209,7 +209,7 @@ fn tanh_matches_cpu_within_fp32_tolerance() {
 fn sigmoid_matches_cpu_within_fp32_tolerance() {
     let a = DenseArray::new(Shape::vector(5), vec![-2.0, -1.0, 0.0, 1.0, 2.0]).unwrap();
     let cpu = mlpl_rt::sigmoid(&a);
-    let mlx = mlpl_mlx::sigmoid(&a);
+    let mlx = mlpl_mlx_rt::sigmoid(&a);
     assert_within_fp32(mlx.data(), cpu.data());
 }
 
@@ -217,7 +217,7 @@ fn sigmoid_matches_cpu_within_fp32_tolerance() {
 fn relu_matches_cpu_on_mixed_signs() {
     let a = DenseArray::new(Shape::vector(5), vec![-2.0, -0.5, 0.0, 0.5, 2.0]).unwrap();
     let cpu = mlpl_rt::relu(&a);
-    let mlx = mlpl_mlx::relu(&a);
+    let mlx = mlpl_mlx_rt::relu(&a);
     assert_within_fp32(mlx.data(), cpu.data());
 }
 
@@ -225,7 +225,7 @@ fn relu_matches_cpu_on_mixed_signs() {
 fn reshape_matches_cpu_on_6_to_2x3() {
     let a = DenseArray::from_vec((0..6).map(|i| i as f64).collect());
     let cpu = mlpl_rt::reshape(&a, &[2, 3]).unwrap();
-    let mlx = mlpl_mlx::reshape(&a, &[2, 3]).unwrap();
+    let mlx = mlpl_mlx_rt::reshape(&a, &[2, 3]).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -235,7 +235,7 @@ fn reshape_matches_cpu_on_6_to_2x3() {
 fn transpose_matches_cpu_and_reverses_labels() {
     let a = mat23_labeled([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
     let cpu = mlpl_rt::transpose(&a);
-    let mlx = mlpl_mlx::transpose(&a);
+    let mlx = mlpl_mlx_rt::transpose(&a);
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -276,7 +276,7 @@ fn cube235() -> DenseArray {
 fn reduce_mul_flat_matches_cpu_within_fp32_tolerance() {
     let a = mat43();
     let cpu = mlpl_rt::reduce_mul(&a, None).unwrap();
-    let mlx = mlpl_mlx::reduce_mul(&a, None).unwrap();
+    let mlx = mlpl_mlx_rt::reduce_mul(&a, None).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_within_fp32(mlx.data(), cpu.data());
 }
@@ -285,7 +285,7 @@ fn reduce_mul_flat_matches_cpu_within_fp32_tolerance() {
 fn reduce_mul_axis_drops_label_and_matches_cpu() {
     let a = mat43();
     let cpu = mlpl_rt::reduce_mul(&a, Some(0)).unwrap();
-    let mlx = mlpl_mlx::reduce_mul(&a, Some(0)).unwrap();
+    let mlx = mlpl_mlx_rt::reduce_mul(&a, Some(0)).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -295,7 +295,7 @@ fn reduce_mul_axis_drops_label_and_matches_cpu() {
 fn mean_axis_on_3d_matches_cpu_and_drops_axis_label() {
     let a = cube235();
     let cpu = mlpl_rt::mean(&a, Some(1)).unwrap();
-    let mlx = mlpl_mlx::mean(&a, Some(1)).unwrap();
+    let mlx = mlpl_mlx_rt::mean(&a, Some(1)).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -305,7 +305,7 @@ fn mean_axis_on_3d_matches_cpu_and_drops_axis_label() {
 fn mean_flat_returns_scalar_matching_cpu() {
     let a = cube235();
     let cpu = mlpl_rt::mean(&a, None).unwrap();
-    let mlx = mlpl_mlx::mean(&a, None).unwrap();
+    let mlx = mlpl_mlx_rt::mean(&a, None).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_within_fp32(mlx.data(), cpu.data());
 }
@@ -314,7 +314,7 @@ fn mean_flat_returns_scalar_matching_cpu() {
 fn argmax_axis_matches_cpu_index_layout() {
     let a = mat43();
     let cpu = mlpl_rt::argmax(&a, Some(1)).unwrap();
-    let mlx = mlpl_mlx::argmax(&a, Some(1)).unwrap();
+    let mlx = mlpl_mlx_rt::argmax(&a, Some(1)).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     // Indices are exact integers, so no fp tolerance is needed.
@@ -325,7 +325,7 @@ fn argmax_axis_matches_cpu_index_layout() {
 fn argmax_flat_returns_scalar_matching_cpu() {
     let a = mat43();
     let cpu = mlpl_rt::argmax(&a, None).unwrap();
-    let mlx = mlpl_mlx::argmax(&a, None).unwrap();
+    let mlx = mlpl_mlx_rt::argmax(&a, None).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.data(), cpu.data());
 }
@@ -334,7 +334,7 @@ fn argmax_flat_returns_scalar_matching_cpu() {
 fn softmax_on_4x3_preserves_labels_and_matches_cpu() {
     let a = mat43();
     let cpu = mlpl_rt::softmax(&a, 1).unwrap();
-    let mlx = mlpl_mlx::softmax(&a, 1).unwrap();
+    let mlx = mlpl_mlx_rt::softmax(&a, 1).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -344,7 +344,7 @@ fn softmax_on_4x3_preserves_labels_and_matches_cpu() {
 fn softmax_on_3d_along_feature_axis_matches_cpu() {
     let a = cube235();
     let cpu = mlpl_rt::softmax(&a, 2).unwrap();
-    let mlx = mlpl_mlx::softmax(&a, 2).unwrap();
+    let mlx = mlpl_mlx_rt::softmax(&a, 2).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -354,7 +354,7 @@ fn softmax_on_3d_along_feature_axis_matches_cpu() {
 fn log_softmax_on_4x3_matches_cpu() {
     let a = mat43();
     let cpu = mlpl_rt::log_softmax(&a, 1).unwrap();
-    let mlx = mlpl_mlx::log_softmax(&a, 1).unwrap();
+    let mlx = mlpl_mlx_rt::log_softmax(&a, 1).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert_eq!(mlx.labels(), cpu.labels());
     assert_within_fp32(mlx.data(), cpu.data());
@@ -367,7 +367,7 @@ fn cross_entropy_on_8x5_matches_cpu_within_fp32_tolerance() {
     let logits = DenseArray::new(Shape::new(vec![8, 5]), logits_data).unwrap();
     let targets = DenseArray::from_vec(vec![0.0, 1.0, 2.0, 3.0, 4.0, 0.0, 2.0, 4.0]);
     let cpu = mlpl_rt::cross_entropy(&logits, &targets).unwrap();
-    let mlx = mlpl_mlx::cross_entropy(&logits, &targets).unwrap();
+    let mlx = mlpl_mlx_rt::cross_entropy(&logits, &targets).unwrap();
     assert_eq!(mlx.shape(), cpu.shape());
     assert!(mlx.labels().is_none());
     assert_eq!(mlx.data().len(), 1);

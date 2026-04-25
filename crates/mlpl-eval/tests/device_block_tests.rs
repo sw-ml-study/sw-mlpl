@@ -13,9 +13,9 @@
 //! - `device("mlx") { body }` is the same on hosts where the
 //!   `mlx` feature is unavailable: the evaluator emits a one-time
 //!   warning and runs the body on CPU. On Apple Silicon with the
-//!   `mlx` feature compiled in, eval routes ops through `mlpl-mlx`
+//!   `mlx` feature compiled in, eval routes ops through `mlpl-mlx-rt`
 //!   but still produces the same shapes and labels (numeric values
-//!   match within fp32 tolerance, asserted by the mlpl-mlx parity
+//!   match within fp32 tolerance, asserted by the mlpl-mlx-rt parity
 //!   tests, not here).
 //! - Nesting works in either direction: `experiment { device { ...
 //!   } }` and `device { experiment { ... } }` both compose
@@ -139,7 +139,7 @@ fn empty_device_block_returns_scalar_zero() {
 fn mlx_block_preserves_shape_and_labels() {
     // Whether mlx feature is on or off, the shape and labels of
     // the body's last value must match what the CPU path would
-    // produce. The mlpl-mlx parity tests cover the numeric
+    // produce. The mlpl-mlx-rt parity tests cover the numeric
     // tolerance separately; here we only assert the metadata
     // contract.
     let mut env_cpu = Environment::new();
@@ -184,10 +184,10 @@ fn device_around_experiment_records_one_run() {
 
 // Saga 14 step 004: when the mlx feature is compiled in (and we
 // are on Apple Silicon), ops inside `device("mlx") { }` actually
-// route through `mlpl-mlx`. We can observe this only indirectly
+// route through `mlpl-mlx-rt`. We can observe this only indirectly
 // at the eval layer -- the numeric output must agree with the
 // CPU path within the documented fp32 tolerance. Same gate as
-// `mlpl-mlx`'s own parity tests so non-Apple CI stays green.
+// `mlpl-mlx-rt`'s own parity tests so non-Apple CI stays green.
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 #[test]
 fn mlx_block_matmul_matches_cpu_within_fp32_tolerance() {
@@ -220,7 +220,7 @@ fn nested_device_inner_target_overrides_outer() {
     // active device as cpu. After the inner block exits, the
     // active device pops back to mlx. We can only observe the
     // final body value here -- the dispatch fingerprint is left
-    // to the parity tests in mlpl-mlx -- but the result shape
+    // to the parity tests in mlpl-mlx-rt -- but the result shape
     // must agree with the CPU path.
     let mut env = Environment::new();
     let r = run("device(\"mlx\") { device(\"cpu\") { iota(4) } }", &mut env);

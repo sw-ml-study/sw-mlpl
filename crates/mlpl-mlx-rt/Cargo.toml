@@ -1,5 +1,8 @@
 [package]
-name = "mlpl-mlx"
+# Saga R1 step 001: renamed from `mlpl-mlx`. The
+# crate is now the FFI shim only; the long-running
+# MLX service binary lives in `mlpl-mlx-serve`.
+name = "mlpl-mlx-rt"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
@@ -9,7 +12,7 @@ default = []
 # Apple Silicon only. The `cfg(all(target_os = "macos", target_arch =
 # "aarch64"))` guard inside the crate keeps the feature compilable on
 # non-Apple hosts (where `mlx-rs`' C++/Metal toolchain would fail to
-# build), making `cargo test -p mlpl-mlx --features mlx` safe to run
+# build), making `cargo test -p mlpl-mlx-rt --features mlx` safe to run
 # from a Linux CI host: it stubs out to a no-op surface.
 mlx = ["dep:mlx-rs"]
 
@@ -33,6 +36,6 @@ mlx-rs = { version = "=0.25.3", optional = true, default-features = false, featu
 
 [dev-dependencies]
 # Saga 14 step 002: parity tests compare MLX outputs against the
-# CPU path in `mlpl-rt`. Dev-only so `mlpl-mlx` itself stays
+# CPU path in `mlpl-rt`. Dev-only so `mlpl-mlx-rt` itself stays
 # decoupled from the CPU runtime crate at link time.
 mlpl-rt = { path = "../mlpl-rt" }

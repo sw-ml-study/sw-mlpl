@@ -16,12 +16,12 @@
 //! the MLX path produces the same loss as the CPU path on the
 //! same fixed-seed parameters.
 //!
-//! Same triple-gate as the rest of `mlpl-mlx`: macOS + aarch64 +
+//! Same triple-gate as the rest of `mlpl-mlx-rt`: macOS + aarch64 +
 //! `mlx` feature.
 
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 
-use mlpl_mlx::{ArrayError, DenseArray, Shape};
+use mlpl_mlx_rt::{ArrayError, DenseArray, Shape};
 
 /// Tolerance for the end-to-end forward parity. The Tiny LM
 /// forward chains ~10 fp32-round-tripped MLX kernels; the
@@ -46,7 +46,7 @@ struct Backend {
 /// CPU matmul wrapper -- `mlpl-rt` does not surface a free
 /// `matmul` symbol because the compile-to-rust codegen lowers it
 /// to a direct `DenseArray::matmul` method call. The MLX side does
-/// have a free `mlpl_mlx::matmul`, so we wrap the CPU side here to
+/// have a free `mlpl_mlx_rt::matmul`, so we wrap the CPU side here to
 /// give the `Backend` table a uniform signature.
 fn cpu_matmul(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
     a.matmul(b)
@@ -62,12 +62,12 @@ const MLPL_RT: Backend = Backend {
 };
 
 const MLPL_MLX: Backend = Backend {
-    matmul: mlpl_mlx::matmul,
-    add: mlpl_mlx::add,
-    softmax: mlpl_mlx::softmax,
-    transpose: mlpl_mlx::transpose,
-    relu: mlpl_mlx::relu,
-    cross_entropy: mlpl_mlx::cross_entropy,
+    matmul: mlpl_mlx_rt::matmul,
+    add: mlpl_mlx_rt::add,
+    softmax: mlpl_mlx_rt::softmax,
+    transpose: mlpl_mlx_rt::transpose,
+    relu: mlpl_mlx_rt::relu,
+    cross_entropy: mlpl_mlx_rt::cross_entropy,
 };
 
 #[test]
