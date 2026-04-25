@@ -38,17 +38,24 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
 ## Planned
 
-Intended sequence: **(dev host move to Linux) -> 17 -> 18**.
-Post-MVP follow-ups to Saga 21 (LLM proxy, SSE, cancellation,
-persistence, web UI re-routing, ratatui / Emacs / desktop GUI
-clients) fold into a follow-up CLI-server saga after the MVP
-server contract proves stable in real use; not gated on the
-Linux move.
+Intended sequence: **R1 -> (dev host move to Linux)
+-> R2 -> R3 -> 18**. Saga 17 was superseded by the
+services refactor proposed in
+`docs/refactor-services.md`; R1 / R2 / R3 replace
+it. Post-MVP follow-ups to Saga 21 (LLM proxy, SSE,
+cancellation, persistence, web UI re-routing,
+ratatui / Emacs / desktop GUI clients) fold into a
+follow-up CLI-server saga after the MVP server
+contract proves stable in real use; not gated on
+the Linux move.
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 17 | CUDA backend and distributed execution (requires Linux + NVIDIA host) | v0.18.0 | [ ] | 14, dev host move |
-| 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.19.0 | [ ] | 15 |
+| R1 | mlpl-mlx as a service (`mlpl-mlx-serve` binary; orchestrator routes `device("mlx") { ... }` blocks to peers; in-process MLX feature stays as fallback; separate `target/` per service workspace -- disk pressure relief) | tbd | [ ] | 21 |
+| R2 | CUDA-as-a-service (`mlpl-cuda-serve`; same shape as R1; replaces the originally-planned in-process Saga 17) | tbd | [ ] | R1, dev host move |
+| R3 | Distributed primitives + LAN auto-discovery (`run model on nodes[...]`, mDNS peer discovery, peer-to-peer tensor migration) | tbd | [ ] | R1, R2 |
+| 17 | CUDA backend and distributed execution -- **SUPERSEDED** by R1 / R2 / R3; see `docs/refactor-services.md` | -- | [-] superseded | -- |
+| 18 | Distillation, ICL/ICRL, engram memory, orchestration | tbd | [ ] | 15 |
 | -- | QLoRA / 4-bit quantization (deferred follow-up from Saga 15) | tbd | [ ] | 15 |
 | -- | UMAP reducer (deferred follow-up from Saga 16; overlaps with t-SNE) | tbd | [ ] | 16 |
 | -- | RAG pipeline over a local LLM inference path (deferred follow-up from Saga 16) | tbd | [ ] | 16, 19 |
@@ -56,25 +63,34 @@ Linux move.
 
 ## Next saga to start
 
-**Dev host move to Linux + NVIDIA, then Saga 17 (CUDA +
-distributed execution).** Saga 21 MVP (v0.17.0) just
-shipped: `crates/mlpl-serve` skeleton, the
-`mlpl-repl --connect <url>` thin client, and the CLI
+**Saga R1 -- `mlpl-mlx` as a service (services
+refactor).** Saga 21 MVP (v0.17.0) just shipped:
+`crates/mlpl-serve` skeleton, the `mlpl-repl
+--connect <url>` thin client, and the CLI
 visualization cache (`MLPL_CACHE_DIR`,
-content-addressed SHA-prefix paths). The
-`mlpl-serve` running natively on the Apple-Silicon
-host with `--features mlx` is the bridge that keeps
-MLX-accelerated training reachable from any client
-once dev moves off Apple Silicon. Saga 17 then
-adds CUDA kernels (paralleling Saga 14's MLX
-fused ops) plus distributed primitives
-(`run model on nodes[...]`, device placement,
-basic data-parallel training). Homelab LAN
-training demo as the headline. Post-MVP follow-ups
-to Saga 21 (server-side LLM proxy with allow-list,
-visualization storage URLs, Server-Sent-Events
-streaming, cancellation, persistence, web UI
-re-routing, ratatui / Emacs / desktop GUI clients)
-slot in as a follow-up CLI-server saga whenever
-the MVP server contract proves stable in real use
--- not gated on the Linux move.
+content-addressed SHA-prefix paths). The next
+high-leverage move is the services refactor
+proposed in `docs/refactor-services.md`: promote
+`mlpl-mlx` from an in-process Cargo feature to a
+standalone service binary (`mlpl-mlx-serve`) that
+the orchestrator dispatches `device("mlx") { ... }`
+blocks to. Three wins at once: (1) cross-host MLX
+from a Linux dev host (orchestrator on Linux, MLX
+peer on the Mac); (2) hardware-coupling escape so
+R2 (CUDA-as-a-service, replacing the deferred
+in-process Saga 17) can land cleanly; (3) disk-
+pressure relief because each service workspace
+has its own `target/`. R1 keeps the in-process
+MLX feature as a fallback so single-host MLX
+users don't regress; R2 follows once R1's protocol
+is settled; R3 layers distributed primitives +
+mDNS auto-discovery on top.
+
+Post-MVP follow-ups to Saga 21 (server-side LLM
+proxy with allow-list, visualization storage
+URLs, Server-Sent-Events streaming, cancellation,
+persistence, web UI re-routing, ratatui / Emacs /
+desktop GUI clients) slot in as a follow-up
+CLI-server saga whenever the MVP server contract
+proves stable in real use -- not gated on R1 / R2
+/ R3 or the Linux move.

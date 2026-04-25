@@ -182,10 +182,37 @@ model on a small instruction set.
 nearest-neighbor links. RAG pipeline demo over a small corpus.
 Builds directly on the existing viz stack.
 
-### Saga 17 -- CUDA backend and distributed execution
-CUDA kernels for the fused ops from Saga 14; `run model on
-nodes[...]` primitives; device placement syntax. Homelab LAN
-training demo.
+### Saga 17 -- CUDA backend and distributed execution (SUPERSEDED)
+**Superseded** by the services refactor proposed in
+`docs/refactor-services.md`. The original Saga 17 plan
+was an in-process CUDA crate paralleling Saga 14's
+in-process MLX crate; that approach has hardware
+coupling problems (one binary can't link both MLX
+and CUDA) and disk pressure problems (target/ tree
+balloons further). The replacement plan:
+
+- **Saga R1** -- refactor `mlpl-mlx` into
+  `mlpl-mlx-serve` (a separate service binary
+  reusing Saga 21's REST + auth machinery).
+  Orchestrator gains peer routing for `device("mlx")
+  { ... }` blocks. In-process MLX feature stays as
+  a fallback. Disk benefit: separate target tree.
+- **Saga R2** -- CUDA-as-a-service. Replaces
+  Saga 17's in-process CUDA crate with
+  `mlpl-cuda-serve` of the same shape as
+  `mlpl-mlx-serve`. The Linux + NVIDIA dev host
+  builds + tests it; the orchestrator + MLX peer
+  can stay on the Mac.
+- **Saga R3** -- distributed primitives (`run
+  model on nodes[...]`, data-parallel training)
+  layered on R1 + R2. Auto-discovery (mDNS) of
+  peers on a LAN. The original "Saga 17
+  distributed" content, just renumbered + layered
+  on the service architecture.
+
+See `docs/refactor-services.md` for the full
+design + worked example + tensor lifecycle +
+non-goals + open questions.
 
 ### Saga 18 -- Distillation, ICL/ICRL, engram memory
 Distillation pipelines, trajectory-based updates, engram-style
@@ -293,7 +320,7 @@ needs CLI. Depends on Saga 11 (Model DSL) + Saga 15
   |                                                                                |    \-- 20 perturbation demos
   |                                                                                +-- 15 LoRA
   |                                                                                +-- 16 viz/RAG
-  |                                                                                +-- 17 CUDA/dist
+  |                                                                                +-- 17 SUPERSEDED -> R1/R2/R3 (services refactor; see docs/refactor-services.md)
   |                                                                                +-- 18 distill/ICRL
   |                                                                                +-- 21 CLI server
   |                                                                                +-- 19 LLM REST
@@ -312,31 +339,42 @@ followed and shipped as v0.16.0 on 2026-04-24. Saga 21
 host move so the live browser demo keeps working without
 local MLX once dev moves off Apple Silicon.
 
-## Start next: Saga 21 -- CLI server + multi-client UI (v0.17.0)
+## Start next: Saga R1 -- mlpl-mlx as a service (services refactor)
 
-Saga 19 (v0.16.0) just shipped `llm_call(url, prompt,
-model) -> string` as a CLI-only language-level builtin;
-the browser path was deferred because a same-origin
-server-side proxy is needed. Saga 21 builds the missing
-piece: `crates/mlpl-serve`, a long-running MLPL
-interpreter exposed as a REST + WebSocket server, with
-multiple thin clients connecting to it. MVP ships the
-server skeleton (`POST /v1/sessions`, `POST /v1/sessions/
-{id}/eval`, `GET /v1/sessions/{id}/inspect`, `GET /v1/
-health`; constant-time bearer-token compare; `--bind
-0.0.0.0` requires `--auth required`), the
-`mlpl-repl --connect <url>` CLI client, and the CLI
-visualization cache strategy (write returned SVGs to
-`$MLPL_CACHE_DIR`, print the path instead of raw XML).
-Four steps total: skeleton + sessions + eval -> connect
-client + inspect endpoint -> viz cache + docs ->
-release v0.17.0.
+Saga 21 (v0.17.0) just shipped the MVP CLI server +
+`mlpl-repl --connect` client + CLI viz cache. The
+next high-leverage move is **the services refactor**
+proposed in `docs/refactor-services.md`: promote
+`mlpl-mlx` from an in-process Cargo feature to a
+standalone service binary (`mlpl-mlx-serve`) that
+the orchestrator dispatches `device("mlx") { ... }`
+blocks to. This unlocks three things at once:
 
-Explicitly deferred to follow-up sagas after the MVP
-proves stable: the server-side LLM proxy with allow-list
-(unblocks browser `llm_call` -- a careful security
-review is wanted before that ships), visualization
-storage URLs, Server-Sent-Events streaming eval,
-cancellation, persistence across restarts, web UI
-re-routing to call origin, ratatui TUI client, Emacs
-client, desktop GUI wrapper (tauri / wry).
+1. **Cross-host MLX from a Linux dev host.** Run
+   the orchestrator on Linux; MLX peer on the Mac;
+   `device("mlx") { train ... }` blocks ship as
+   program source, run on the Mac, return handles.
+2. **Hardware coupling escape** for Saga R2
+   (CUDA-as-a-service, replacing the deferred
+   in-process Saga 17). One binary still can't
+   link both MLX and CUDA, but one orchestrator
+   can route to peers that each link one.
+3. **Disk pressure relief.** `mlpl-mlx-serve` lives
+   in its own service workspace with its own
+   `target/`. The main workspace's `target/` no
+   longer compiles the MLX bindings.
+
+R1 keeps the in-process MLX feature as a fallback
+so existing single-host MLX users don't regress;
+the new "remote MLX peer" path is additive. R2
+follows once R1's protocol is settled. R3 layers
+distributed primitives + auto-discovery on top.
+
+The planned saga decomposition lives in
+`docs/refactor-services.md`. Open questions to
+resolve before R1 begins: peer-to-peer auth
+beyond loopback, tensor wire-format choice,
+strict-fault vs auto-fetch on cross-device ops,
+streaming for long-running blocks. None of these
+gate the design itself, but they shape R1's first
+contract.
