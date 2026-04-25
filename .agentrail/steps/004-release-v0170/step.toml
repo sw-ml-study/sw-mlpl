@@ -1,13 +1,13 @@
-number = 3
-slug = "release-v0160"
-status = "in-progress"
+number = 4
+slug = "release-v0170"
+status = "pending"
 description = """
-Phase 3 step 003: release v0.16.0.
+Phase 4 step 004: release v0.17.0.
 
 1. **Version bump**. `Cargo.toml`
    work..."""
 role = "production"
 context_files = []
-created_at = "2026-04-24T09:44:38"
+created_at = "2026-04-24T17:45:57"
 task_type = "release"
 commits = []

@@ -307,21 +307,36 @@ otherwise free to slot wherever a research-demo cycle makes
 sense. Saga 22 was queued ahead of Saga 19 because the
 feasibility checker landed value for every existing user
 immediately; it shipped as v0.15.0 on 2026-04-24. Saga 19
-follows next.
+followed and shipped as v0.16.0 on 2026-04-24. Saga 21
+(CLI server) is next, prioritized ahead of the Linux
+host move so the live browser demo keeps working without
+local MLX once dev moves off Apple Silicon.
 
-## Start next: Saga 19 -- LLM-as-tool REST integration (v0.16.0)
+## Start next: Saga 21 -- CLI server + multi-client UI (v0.17.0)
 
-Saga 22 (v0.15.0) just shipped the feasibility / resource
-estimator (`estimate_train`, `calibrate_device`,
-`estimate_hypothetical`, `feasible`), so users on limited
-hardware can now gate a planned train call behind a what-if
-check. Saga 19 ships `llm_call(url, prompt, model) -> string`
-as a language-level builtin so `.mlpl` scripts can compose
-a hosted LLM as a tool alongside `tokenize_bytes`, `adam`,
-`experiment`, etc. -- not just the REPL's `:ask` slash
-command. CLI-only (browser CORS + proxy is Saga 21's job);
-streaming SSE, OpenAI-style tools, multi-turn chat, request
-batching, and teacher-distillation pipelines all stay
-deferred. Demo `demos/llm_tool.mlpl`, retrospective at
-`docs/using-llm-tool.md`, three steps total
-(builtin -> demo + `:ask` migration + docs -> release).
+Saga 19 (v0.16.0) just shipped `llm_call(url, prompt,
+model) -> string` as a CLI-only language-level builtin;
+the browser path was deferred because a same-origin
+server-side proxy is needed. Saga 21 builds the missing
+piece: `crates/mlpl-serve`, a long-running MLPL
+interpreter exposed as a REST + WebSocket server, with
+multiple thin clients connecting to it. MVP ships the
+server skeleton (`POST /v1/sessions`, `POST /v1/sessions/
+{id}/eval`, `GET /v1/sessions/{id}/inspect`, `GET /v1/
+health`; constant-time bearer-token compare; `--bind
+0.0.0.0` requires `--auth required`), the
+`mlpl-repl --connect <url>` CLI client, and the CLI
+visualization cache strategy (write returned SVGs to
+`$MLPL_CACHE_DIR`, print the path instead of raw XML).
+Four steps total: skeleton + sessions + eval -> connect
+client + inspect endpoint -> viz cache + docs ->
+release v0.17.0.
+
+Explicitly deferred to follow-up sagas after the MVP
+proves stable: the server-side LLM proxy with allow-list
+(unblocks browser `llm_call` -- a careful security
+review is wanted before that ships), visualization
+storage URLs, Server-Sent-Events streaming eval,
+cancellation, persistence across restarts, web UI
+re-routing to call origin, ratatui TUI client, Emacs
+client, desktop GUI wrapper (tauri / wry).

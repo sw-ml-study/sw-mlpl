@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 3,
+    "step": "release-v0160"
+  },
+  "action": "Standard release recipe (workspace version bump, CHANGELOG above prior release, saga.md retrospective insertion, status.md row-move + sequence + next-pointer refresh, release build, pages rebuild, CHANGES.md regen, /mw-cp gates, detailed commit, push commit not tag). Inherited the Saga 22 release-step pattern; minor variation was the 'Behavior change' note in the CHANGELOG / saga.md / commit because :ask switched endpoints. v0.15.0 tag from the prior release also remains local-only.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T16:41:08"
+}

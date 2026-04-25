@@ -1,0 +1,1 @@
+Saga 19 (LLM-as-tool REST) shipped v0.16.0; ready to start Saga 21 (CLI server)
