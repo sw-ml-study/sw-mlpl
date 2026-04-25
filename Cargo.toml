@@ -19,6 +19,7 @@ members = [
   "crates/mlpl-autograd",
   "crates/mlpl-ml",
   "crates/mlpl-cli",
+  "crates/mlpl-serve",
   "apps/mlpl-repl",
   "apps/mlpl-web",
   "apps/mlpl-lab",
