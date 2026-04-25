@@ -1,0 +1,13 @@
+number = 3
+slug = "peer-routing-and-workspace-split"
+status = "pending"
+description = """
+Phase 2 step 003: orchestrator peer routing +
+workspace split.
+
+Wire `mlpl-se..."""
+role = "production"
+context_files = []
+created_at = "2026-04-24T20:19:11"
+task_type = "primitive"
+commits = []

@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 4,
+    "step": "release-v0170"
+  },
+  "action": "Hit a hard disk-full block mid-step: target/ at 35 GB on a 460 GB Mac with 80%+ already consumed. cargo clean recovered 37.4 GiB; reproved the saga's tests work at 0.17.0 with the leaner /mw-cp-from-clean recipe (build --release: 459 MB target/, +clippy: 2.2 GB, +test: 4.0 GB -- well under the new 10 GB clean threshold). Captured the disk-pressure-aware workflow rules the user requested into CLAUDE.md as a permanent section so future sessions don't repeat the failure.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T19:58:16"
+}

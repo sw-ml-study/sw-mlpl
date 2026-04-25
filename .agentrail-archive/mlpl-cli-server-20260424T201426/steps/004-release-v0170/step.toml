@@ -1,6 +1,6 @@
 number = 4
 slug = "release-v0170"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 4 step 004: release v0.17.0.
 
@@ -9,5 +9,6 @@ Phase 4 step 004: release v0.17.0.
 role = "production"
 context_files = []
 created_at = "2026-04-24T17:45:57"
+completed_at = "2026-04-24T19:58:16"
 task_type = "release"
-commits = []
+commits = ["cd21cd1ee8202b66733f73bda0d7ff92e5866568"]
