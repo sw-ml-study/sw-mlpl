@@ -34,17 +34,19 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 16.5 | Embedding-viz polish (`pca(X, k)` + `embed_table(model)`; demo / docs / tutorial updates; UMAP / interactive 3-D / MLX-for-tsne stay deferred) | v0.14.1 | [x] |
 | 22 | Feasibility checking + resource estimation (`estimate_train`, `calibrate_device`, `estimate_hypothetical`, `feasible`; SmolLM / Llama / Qwen what-if table; design deviation: direct `estimate_hypothetical` instead of `hypothetical_model` -> ModelSpec) | v0.15.0 | [x] |
 | 19 | LLM-as-tool REST integration (`llm_call(url, prompt, model) -> string`; `:ask` migrated onto shared HTTP path; CLI-only pending Saga 21 proxy; streaming/tools/chat-threading/batching/auth/web all deferred) | v0.16.0 | [x] |
+| 21 | CLI server + multi-client UI MVP (`crates/mlpl-serve` REST skeleton: sessions / eval / inspect / health; `mlpl-repl --connect <url>` thin client; CLI viz cache `MLPL_CACHE_DIR`; constant-time auth; LLM proxy / SSE / cancellation / persistence / web-rerouting / Emacs / TUI / desktop-GUI all deferred to follow-up sagas) | v0.17.0 | [x] |
 
 ## Planned
 
-Intended sequence: **21 -> (dev host move to Linux) -> 17 -> 18**.
-Saga 21 (CLI server) is prioritized **before** the Linux move because once
-dev is off Apple Silicon the browser live demo loses local MLX; the
-server-side `mlpl-serve` route keeps it usable.
+Intended sequence: **(dev host move to Linux) -> 17 -> 18**.
+Post-MVP follow-ups to Saga 21 (LLM proxy, SSE, cancellation,
+persistence, web UI re-routing, ratatui / Emacs / desktop GUI
+clients) fold into a follow-up CLI-server saga after the MVP
+server contract proves stable in real use; not gated on the
+Linux move.
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 21 | CLI server + multi-client UI (REST, proxy, CLI/web/Emacs clients) | v0.17.0 | [ ] | 13 |
 | 17 | CUDA backend and distributed execution (requires Linux + NVIDIA host) | v0.18.0 | [ ] | 14, dev host move |
 | 18 | Distillation, ICL/ICRL, engram memory, orchestration | v0.19.0 | [ ] | 15 |
 | -- | QLoRA / 4-bit quantization (deferred follow-up from Saga 15) | tbd | [ ] | 15 |
@@ -54,25 +56,25 @@ server-side `mlpl-serve` route keeps it usable.
 
 ## Next saga to start
 
-**Saga 21 -- CLI server + multi-client UI.** Saga 19 (v0.16.0)
-just shipped `llm_call(url, prompt, model)` as a CLI-only
-language-level builtin; the browser path was deferred to
-Saga 21 because localhost Ollama is unreachable from the
-browser without CORS allow-listing + a server-side proxy.
-Saga 21 builds that proxy. New `crates/mlpl-serve` binary
-exposing a REST + WebSocket surface over a long-running
-MLPL interpreter; one server, many clients (web UI wired
-to call origin -- unblocks `:ask` / `llm_call` from the
-browser via a server-side allow-listed Ollama proxy --
-plus `mlpl-repl --connect <host>`, eventual ratatui TUI,
-Emacs client). Session isolation per bearer token;
-`--bind 0.0.0.0` requires `--auth required`; proxy
-allow-list gates which LLM providers are reachable and
-server-side env vars hold their keys. Ships with the CLI
-visualization strategy (auto-write SVG to cache dir + print
-path) so the terminal REPL stops dumping raw `<svg>` XML.
-Prioritized before the Linux move because once dev goes off
-Apple Silicon the browser live demo loses local MLX; the
-server-side `mlpl-serve` keeps it usable. See
-`docs/configurations.md` for the architecture diagram + REST
-API sketch + security posture.
+**Dev host move to Linux + NVIDIA, then Saga 17 (CUDA +
+distributed execution).** Saga 21 MVP (v0.17.0) just
+shipped: `crates/mlpl-serve` skeleton, the
+`mlpl-repl --connect <url>` thin client, and the CLI
+visualization cache (`MLPL_CACHE_DIR`,
+content-addressed SHA-prefix paths). The
+`mlpl-serve` running natively on the Apple-Silicon
+host with `--features mlx` is the bridge that keeps
+MLX-accelerated training reachable from any client
+once dev moves off Apple Silicon. Saga 17 then
+adds CUDA kernels (paralleling Saga 14's MLX
+fused ops) plus distributed primitives
+(`run model on nodes[...]`, device placement,
+basic data-parallel training). Homelab LAN
+training demo as the headline. Post-MVP follow-ups
+to Saga 21 (server-side LLM proxy with allow-list,
+visualization storage URLs, Server-Sent-Events
+streaming, cancellation, persistence, web UI
+re-routing, ratatui / Emacs / desktop GUI clients)
+slot in as a follow-up CLI-server saga whenever
+the MVP server contract proves stable in real use
+-- not gated on the Linux move.

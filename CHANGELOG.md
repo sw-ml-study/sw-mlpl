@@ -5,6 +5,229 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
+## v0.17.0 -- Saga 21: CLI Server + Multi-Client UI (MVP) (2026-04-24)
+
+The first piece of the multi-client story: a long-
+running MLPL interpreter exposed as a REST server
+(`crates/mlpl-serve`) plus a thin CLI client
+(`mlpl-repl --connect <url>`) plus a content-
+addressed CLI visualization cache that finally
+stops the terminal from dumping raw `<svg>` XML.
+Three new packages added to the workspace, four
+new contracts, one new retrospective doc. MVP
+scope only -- the server-side LLM proxy that
+would unblock browser `llm_call`-against-localhost-
+Ollama is explicitly deferred to a follow-up saga
+(needs a careful security review first), as are
+SSE streaming, cancellation, persistence, web UI
+re-routing, and the rest of the multi-client roster
+(ratatui, Emacs, desktop GUI).
+
+### Added
+
+- **`crates/mlpl-serve`** -- new binary +
+  library crate exposing a REST surface over a
+  long-running MLPL interpreter. MVP endpoints:
+  - `POST /v1/sessions` (no auth) creates a
+    fresh session backed by a
+    `mlpl_eval::Environment` and returns
+    `{session_id: <uuid>, token: <32-char>}`.
+  - `POST /v1/sessions/{id}/eval`
+    (auth required) lex+parse+eval against the
+    session's env; returns
+    `{value: <stringified>, kind: "array" |
+    "string" | "model" | "tokenizer"}`. On
+    `EvalError` returns 400 with the upstream
+    message.
+  - `GET /v1/sessions/{id}/inspect` (auth
+    required) returns a structured workspace
+    snapshot
+    `{vars: [{name, shape, is_param}], models,
+    tokenizers, experiments, more}` for client
+    slash-command rendering. Vars sorted +
+    capped at 200 entries with the truncated
+    count in `more`; models / tokenizers /
+    experiments sorted + deduplicated.
+  - `GET /v1/health` (no auth) returns
+    `{status: "ok", version: <crate version>}`.
+  Constant-time token compare via
+  `subtle::ConstantTimeEq`; `--bind 0.0.0.0` (or
+  any non-loopback) refuses to start with
+  `--auth disabled`. 32-char alphanumeric tokens
+  from the thread-local CSPRNG. axum 0.7 + tokio
+  + tower stack. Module layout: 5 modules
+  (auth.rs, sessions.rs, handlers.rs, server.rs,
+  main.rs) each under the 7-fn cap. Contract:
+  `contracts/serve-contract/sessions-and-eval.md`.
+- **`mlpl-repl --connect <url>`** -- thin CLI
+  client that delegates every eval to a remote
+  `mlpl-serve`. Local `mlpl_eval::Environment`
+  is unused; slash commands `:vars`, `:models`,
+  `:tokenizers`, `:experiments`, `:wsid` call
+  the new `/inspect` endpoint and render the
+  JSON snapshot locally; `:ask` keeps using
+  `mlpl_runtime::call_ollama` directly (the
+  server-side framing path is a follow-up).
+  Cannot combine with `-f` / `--file` /
+  `--data-dir` / `--exp-dir` -- those all
+  assume a local env (parser errors with exit
+  code 2). Module layout: split between
+  `apps/mlpl-repl/src/connect.rs` (HTTP
+  transport: `create_session`, `eval_remote`,
+  `inspect_remote`, `build_client`,
+  `ClientError`) and
+  `apps/mlpl-repl/src/connect_repl.rs` (REPL
+  loop, slash dispatch, `--connect` argv
+  parser). Contract:
+  `contracts/repl-contract/connect.md`.
+- **CLI visualization cache strategy**.
+  `mlpl-repl` (both local + connect modes) now
+  writes returned SVG strings to
+  `$MLPL_CACHE_DIR/<sha256-prefix-12chars>.svg`
+  and prints `viz: <path>` instead of dumping
+  raw `<svg>` XML. Default cache dir is
+  `dirs::cache_dir().join("mlpl")` --
+  `~/Library/Caches/mlpl/` on macOS,
+  `~/.cache/mlpl/` on Linux. Content-addressed
+  filenames mean repeated identical viz outputs
+  do not accumulate junk. Non-SVG return values
+  pass through unchanged. The legacy
+  `--svg-out <dir>` flag still works as a
+  per-process cache-dir override (back-compat;
+  filenames change from sequential `svg-NNN.svg`
+  to content-addressed). Server-side does NOT
+  transform -- raw SVG comes back; clients
+  decide where to put it. Module:
+  `crates/mlpl-cli/src/viz_cache.rs` (5 fns:
+  `is_svg_string`, `cache_path_for_content`,
+  `write_to_cache`, `transform_value`,
+  `resolve_cache_dir`).
+- **`docs/using-cli-server.md`** -- retrospective
+  + user guide. Quickstart, `mlpl-repl --connect`
+  walkthrough, the slash-command routing table,
+  the cache-dir + `MLPL_CACHE_DIR` story, the
+  security posture, the multi-client picture
+  today, and the full deferred-non-goals list.
+
+### Changed
+
+- **`apps/mlpl-repl`** added a `mlpl-cli` path
+  dep (the viz cache lives in `mlpl-cli`) and a
+  `reqwest = { version = "0.12", default-
+  features = false, features = ["json",
+  "blocking", "rustls-tls"] }` dep for the
+  `--connect` client (blocking API avoids
+  pulling tokio into the REPL crate). Plus
+  `serde` / `serde_json` for the request /
+  response shapes and `mlpl-serve` + `tokio` +
+  `axum` as dev-deps for the in-process
+  integration test harness.
+- **`apps/mlpl-repl/src/svg_out.rs`** simplified
+  to a thin holder for the `--svg-out <dir>`
+  override flag; the SVG-handling machinery
+  moved to `mlpl_cli::viz_cache::transform_value`.
+- **`crates/mlpl-eval/src/env.rs`** added
+  `models_iter()` and `tokenizers_iter()`
+  public methods (mirrors `vars_iter()`) so
+  `mlpl-serve`'s `inspect` handler can list
+  names without importing the internal HashMap
+  fields, which stay `pub(crate)`.
+- **`docs/configurations.md`** refreshed to
+  reflect what Saga 21 MVP actually ships. New
+  rows for `mlpl-repl --connect` and the CLI viz
+  cache; cells previously marked "yes (proxy)"
+  now carry "(proxy [8])" with footnote [8]
+  explicitly distinguishing "MVP shipped" vs
+  "the LLM-proxy follow-up is still deferred."
+  Footnotes [3] and [7] updated to make the
+  same distinction so readers do not think the
+  CORS / browser-`llm_call` story is fixed yet.
+
+### Tests
+
+- `crates/mlpl-serve/tests/api_tests.rs` -- 13
+  tokio integration tests covering session
+  creation (id + 32-char token, uniqueness),
+  eval happy path with `iota(5)`, state
+  persistence across calls, the three auth-
+  failure cases (no bearer, wrong bearer,
+  unknown session), the eval-error -> 400 path,
+  the `/health` endpoint, the `InsecureBind`
+  safety check via `run("0.0.0.0:0",
+  Disabled)`, `AuthMode::Disabled` actually
+  skipping the bearer check on a loopback
+  bind, and three new inspect tests (happy
+  path with vars + models + shape, auth-
+  required 401, unknown session 404).
+- `apps/mlpl-repl/tests/connect_tests.rs` -- 4
+  tokio integration tests that spin
+  `mlpl_serve::server::build_app(...)` up on a
+  random localhost port and drive the connect
+  module's HTTP helpers end-to-end (create +
+  eval, eval-error path, inspect snapshot,
+  network error when the server isn't there).
+  The test file `#[path]`-includes `connect.rs`
+  with `#[allow(dead_code)]` to silence false
+  positives for items only the binary uses.
+- `crates/mlpl-cli/tests/viz_cache_tests.rs` --
+  18 unit tests covering SVG detection (8
+  positive + negative cases including XML
+  prolog and whitespace variants), cache path
+  determinism + content-addressing + `.svg`
+  extension + 12-char hex stem, write
+  roundtrip via `tempfile::TempDir`, same-
+  content-rewrite hits same path, transform
+  passthrough for non-SVG, transform writes
+  for SVG, override dir is honored, XML prolog
+  SVG goes through the cache path.
+
+### Scope notes
+
+These items appeared in the saga design brief and
+were carved out as post-MVP. Each lands in a
+follow-up saga after the MVP server contract
+proves stable in real use:
+
+- **Server-side LLM proxy with allow-list.**
+  The endpoint that lets browser / connect-mode
+  clients call `llm_call` against a server-side
+  allow-listed Ollama. Needs a security review
+  for allow-list config + env-var secret
+  handling before it ships.
+- **Visualization storage URLs.** A server-side
+  endpoint that mints URLs the client can fetch
+  the SVG / PNG back from, replacing the
+  client-local cache dir for connect-mode.
+- **Server-Sent-Events streaming eval.**
+  Single-request / single-response today;
+  streaming is the natural shape for partial
+  output (loss curves during a long
+  `train { }` loop, streaming `llm_call`).
+- **Cancellation / interrupt.** The MVP eval
+  endpoint blocks until the program finishes;
+  cooperative interrupt point in
+  `eval_program` is the path.
+- **Persistence across restarts.** Sessions
+  live in process memory only.
+- **Web UI re-routing to call origin.** Today's
+  `apps/mlpl-web` runs entirely in WASM.
+  Pointing it at `mlpl-serve` is a non-trivial
+  frontend refactor.
+- **Reattach across REPL restarts.** Sessions
+  persist on the server but the client
+  generates a fresh one on every connect; a
+  `--session <id>` flag could re-attach.
+- **WebSocket surface.** Despite the saga title
+  ("REST + WebSocket"), MVP is REST-only.
+- **Desktop GUI wrapper (tauri / wry), Emacs
+  client, ratatui TUI client.** Three follow-up
+  client surfaces; all share the same REST
+  contract that just shipped.
+- **Other viz formats (PNG, HTML, JSON).**
+  Today `is_svg_string` is the only detector;
+  the format table is mechanical to grow as
+  new viz return types ship.
+
 ## v0.16.0 -- Saga 19: LLM-as-Tool REST Integration (2026-04-24)
 
 A language-level builtin that POSTs to an Ollama-

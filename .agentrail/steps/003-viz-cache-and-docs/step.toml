@@ -1,11 +1,12 @@
 number = 3
 slug = "viz-cache-and-docs"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 3 step 003: CLI viz cache strategy +
 `docs/using-cli-server.md` retrosp..."""
 role = "production"
 context_files = []
 created_at = "2026-04-24T17:45:57"
+completed_at = "2026-04-24T19:00:47"
 task_type = "primitive"
-commits = []
+commits = ["dbdde27b1bea161252af6b955a73221df5fa77f7"]

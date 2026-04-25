@@ -102,6 +102,83 @@ git push
 Then the push-triggered Pages workflow deploys the new `pages/`.
 Verify with `gh run list --workflow=pages.yml --limit 1`.
 
+## Disk-aware build hygiene (Saga 21+)
+
+The Mac dev host is disk-constrained; full unscoped
+`cargo` runs across this workspace can push `target/`
+to 30+ GB and fill the disk mid-session. Saga 21 added
+a heavy HTTP stack (axum + hyper + tokio + reqwest +
+rustls) that compounds the problem -- and the dev host
+move to Linux is the longer-term fix, but until then
+follow these rules:
+
+### Build only what you need
+
+- **Default to scoped commands.** `cargo build -p <crate>`
+  / `cargo test -p <crate>` / `cargo test -p <crate>
+  --test <file>` instead of workspace-wide runs when
+  you are working on a single crate.
+- **Skip `cargo bench` and `./scripts/build-pages.sh`
+  unless explicitly required.** `bench` pulls Criterion
+  + plotters; `build-pages.sh` builds the WASM target
+  tree (separate `target/wasm32-unknown-unknown/`,
+  several GB on its own). Only run pages/ rebuild when
+  `apps/mlpl-web/` actually changed (the live demo gate
+  in CLAUDE.md still applies, but only when the web
+  source changed).
+- **Selective clean** is OK: `cargo clean -p <crate>`
+  removes only that crate's artifacts.
+
+### Clean policy
+
+- **Run `cargo clean` if `target/` exceeds ~10 GB.**
+  Check with `du -sh target/`. The full
+  release-build-only baseline for this workspace is
+  ~500 MB; a complete /mw-cp pass adds ~3-4 GB more
+  (clippy + test profile). Anything past 10 GB is
+  almost always accumulated incremental cruft from
+  prior sessions, not load-bearing state.
+- **Always `cargo clean --release` after a release
+  step** -- release artifacts aren't needed once
+  shipped. Saves ~12-15 GB on a fully-built tree.
+- **Measure free space + target/ before and after**
+  any clean so the user can see what was recovered.
+
+### /mw-cp on a constrained disk
+
+The full /mw-cp gate is still required for code-
+affecting commits, but if the commit is docs-only or a
+version-bump-only release step (e.g., the final step
+of a saga), prefer scoped tests for the changed crates
+plus full clippy / fmt / markdown / sw-checklist.
+Document the scoping rationale in the commit message.
+
+### Pre-save binaries before destructive cleans
+
+When the user explicitly authorizes a `cargo clean` to
+free space mid-session, copy any in-flight binaries
+the session needs into a safe scratch dir BEFORE the
+clean -- e.g., `cp target/release/mlpl-serve
+/tmp/mlpl-binaries/` -- so the binary survives the
+clean and can still be exercised by manual smoke
+tests. Do NOT copy into
+`~/.local/softwarewrighter/bin/` -- that is the user's
+stable-install path (see "NEVER run sw-install"
+below).
+
+### Future partition saga
+
+The workspace currently bundles five compilation
+contexts in one `target/`: native interpreter, async
+server, WASM target, proc macros, benchmarks.
+Splitting into separate Cargo workspaces (e.g., a
+`mlpl-web/` workspace, a `mlpl-serve/` workspace, an
+`mlpl-mlx/` workspace, a future `mlpl-cuda/`
+workspace) would each get its own `target/` --
+trading workspace-wide ergonomics for disk
+discipline. Treat that as a planned follow-up saga,
+not a within-current-saga refactor.
+
 ## NEVER run sw-install without an explicit request
 
 The user keeps a stable installed `mlpl-repl` (and other mlpl
