@@ -1,0 +1,11 @@
+number = 1
+slug = "mlx-rt-serve-skeleton"
+status = "pending"
+description = """
+Phase 1 step 001: split mlpl-mlx into mlpl-mlx-rt
+(FFI library) + mlpl-mlx-se..."""
+role = "production"
+context_files = []
+created_at = "2026-04-24T20:19:11"
+task_type = "primitive"
+commits = []
