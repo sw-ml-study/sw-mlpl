@@ -11,3 +11,12 @@ path = "src/lib.rs"
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-eval = { path = "../mlpl-eval" }
 mlpl-trace = { path = "../mlpl-trace" }
+# Saga 21 step 003: CLI viz cache strategy. Content-
+# addressed SVG paths under $MLPL_CACHE_DIR (default
+# dirs::cache_dir().join("mlpl")) replace the old
+# raw <svg>...</svg> XML dumping in mlpl-repl.
+dirs = "5"
+sha2 = "0.10"
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,11 +1,12 @@
 number = 2
 slug = "repl-connect-client"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 002: `mlpl-repl --connect <url>`
 client + `GET /v1/sessions/{id}..."""
 role = "production"
 context_files = []
 created_at = "2026-04-24T17:45:57"
+completed_at = "2026-04-24T18:51:25"
 task_type = "primitive"
-commits = []
+commits = ["3fc935b6ddf7a4b6086c1fe5f94d296363f51e92"]

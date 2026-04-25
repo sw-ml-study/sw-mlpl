@@ -15,6 +15,10 @@ mlx = ["mlpl-eval/mlx"]
 mlpl-parser = { path = "../../crates/mlpl-parser" }
 mlpl-eval = { path = "../../crates/mlpl-eval" }
 mlpl-trace = { path = "../../crates/mlpl-trace" }
+# Saga 21 step 003: viz_cache transforms SVG return
+# values into `viz: <path>` for both local and
+# --connect modes.
+mlpl-cli = { path = "../../crates/mlpl-cli" }
 # Saga 19 step 002: `:ask` now delegates the HTTP path
 # to `mlpl_runtime::call_ollama` (the same path the
 # `llm_call` builtin uses), so the REPL no longer

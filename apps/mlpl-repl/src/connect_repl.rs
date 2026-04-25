@@ -87,7 +87,7 @@ pub fn read_loop(base_url: &str) {
             continue;
         }
         match eval_remote(&client, base_url, &session_id, &token, trimmed) {
-            Ok(r) => println!("{}", r.value),
+            Ok(r) => println!("{}", mlpl_cli::viz_cache::transform_value(&r.value, None)),
             Err(e) => eprintln!("  {trimmed}\n  error: {e}"),
         }
     }

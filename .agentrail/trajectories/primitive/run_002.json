@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "repl-connect-client"
+  },
+  "action": "Hit two sw-checklist budget walls during impl: connect.rs ended up at 8 fns -> split into connect.rs (HTTP transport) + connect_repl.rs (REPL loop). main fn ballooned to 58 LOC after --connect dispatch -> couldn't add a top-level helper because main.rs was at 7-fn cap, so used a local closure for the flag-lookup pattern.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T18:51:25"
+}

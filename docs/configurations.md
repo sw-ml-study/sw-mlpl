@@ -33,12 +33,14 @@ what they want to do.
 | BPE tokenizer                        | yes          | yes      | yes        | yes         |
 | `experiment "name" { }` -> run.json  | mem only     | disk     | disk       | disk        |
 | Host process spawning                | no           | direct   | direct     | via server  |
-| Call local Ollama via `:ask`         | no [3]       | yes      | yes (proxy)| yes (proxy) |
-| Call LAN Ollama                      | no [3]       | yes      | yes (proxy)| yes (proxy) |
-| Call cloud LLM (OpenAI, etc.)        | no [3]       | yes      | yes (proxy)| yes (proxy) |
-| Multi-client concurrency             | n/a          | n/a      | yes        | yes         |
-| Session persistence across clients   | no           | no       | yes        | yes         |
-| Attach from Emacs                    | no           | partial  | yes        | yes         |
+| Call local Ollama via `:ask`         | no [3]       | yes      | yes (proxy [8])| yes (proxy [8]) |
+| Call LAN Ollama                      | no [3]       | yes      | yes (proxy [8])| yes (proxy [8]) |
+| Call cloud LLM (OpenAI, etc.)        | no [3]       | yes      | yes (proxy [8])| yes (proxy [8]) |
+| Multi-client concurrency             | n/a          | n/a      | yes [8]    | yes [8]     |
+| Session persistence across clients   | no           | no       | yes [8]    | yes [8]     |
+| `mlpl-repl --connect <url>` [8]      | no           | yes      | yes        | yes         |
+| CLI viz cache (`MLPL_CACHE_DIR`) [8] | n/a          | yes      | yes        | yes         |
+| Attach from Emacs                    | no           | partial  | yes [8]    | yes [8]     |
 
 [1] In CLI the visualization primitives (`svg(...)`,
 `heatmap(...)`, `loss_curve(...)`, ...) write the result to a
@@ -52,9 +54,13 @@ compiled-in corpora. A future "proxied file read" via the CLI
 server is out of scope for the browser-only config.
 
 [3] CORS: a browser's `fetch("http://localhost:11434")` is
-blocked by Ollama's default CORS policy. The CLI server unlocks
-this by serving the web UI from an origin that reverse-proxies
-Ollama (and cloud LLMs) -- see "CLI server" below.
+blocked by Ollama's default CORS policy. The CLI server
+*skeleton* shipped in Saga 21 (v0.17.0) -- see note [8] -- but
+the specific server-side LLM reverse proxy that would unblock
+the browser is a deferred follow-up saga (the proxy needs a
+careful security review around allow-list config + env-var
+secret handling before it ships). Until then, browser
+`llm_call` / `:ask` remain unreachable.
 
 [4] Saga 15 (v0.13.0, in progress). The LoRA language surface
 (`freeze`, `lora`, `LinearLora`) is pure Rust and lands in
@@ -97,14 +103,40 @@ is the language-level builtin form of the REPL's
 `/api/generate` endpoint, returns the completion as
 a string. The browser sandbox cannot reach a
 localhost Ollama server (same CORS story as note
-[3]); the CLI-server configuration unblocks the web
-case via the proxy allow-list. Streaming SSE,
+[3]); the CLI server skeleton shipped in Saga 21
+(see note [8]) but the specific reverse-proxy
+endpoint that would unblock the browser remains
+deferred to a follow-up. Streaming SSE,
 OpenAI-style tool calling, multi-turn chat
 threading, request batching, and in-source auth
 secrets are all explicit non-goals -- see
 `contracts/eval-contract/llm-call.md` and
 `docs/using-llm-tool.md` for the full deferred
 list.
+
+[8] Saga 21 (v0.17.0). The CLI server
+(`crates/mlpl-serve`) MVP skeleton ships with
+`POST /v1/sessions`, `POST /v1/sessions/{id}/eval`,
+`GET /v1/sessions/{id}/inspect`, and
+`GET /v1/health`, plus the
+`mlpl-repl --connect <url>` client and the CLI
+viz cache strategy (`MLPL_CACHE_DIR` /
+`dirs::cache_dir()/mlpl/`, content-addressed SHA-
+prefix paths replacing raw `<svg>` XML in the
+terminal). The browser-unblocking LLM proxy,
+visualization storage URLs, Server-Sent-Events
+streaming, cancellation, persistence across
+restarts, web UI re-routing to call origin, the
+ratatui TUI client, the Emacs client, and the
+desktop GUI wrapper are all explicit follow-up
+sagas after the MVP server contract proves
+stable. Cells flagged "(proxy [8])" depend on
+the LLM-proxy follow-up specifically, not on
+the MVP that just shipped. See
+`docs/using-cli-server.md` for the full picture
+plus the security posture (constant-time token
+compare; non-loopback bind requires
+`--auth required`).
 
 ## Configuration 1: Browser-only
 
