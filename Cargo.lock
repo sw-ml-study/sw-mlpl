@@ -1677,7 +1677,7 @@ dependencies = [
  "mlpl-autograd",
  "mlpl-core",
  "mlpl-lower-rs",
- "mlpl-mlx",
+ "mlpl-mlx-rt",
  "mlpl-parser",
  "mlpl-runtime",
  "mlpl-trace",
@@ -1723,13 +1723,30 @@ dependencies = [
 ]
 
 [[package]]
-name = "mlpl-mlx"
+name = "mlpl-mlx-rt"
 version = "0.17.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
  "mlpl-rt",
  "mlx-rs",
+]
+
+[[package]]
+name = "mlpl-mlx-serve"
+version = "0.17.0"
+dependencies = [
+ "axum",
+ "mlpl-eval",
+ "mlpl-mlx-rt",
+ "mlpl-parser",
+ "mlpl-serve",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tower 0.4.13",
+ "uuid",
 ]
 
 [[package]]

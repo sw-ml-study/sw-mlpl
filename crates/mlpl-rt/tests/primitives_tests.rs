@@ -134,7 +134,7 @@ fn transpose_swaps_labels() {
 
 // Saga 14 step 002: forward-pass primitives that the MLX backend mirrors.
 // Every test here exercises shape, values, and label propagation on a
-// small fixture so the mlpl-mlx parity tests have a trusted gold
+// small fixture so the mlpl-mlx-rt parity tests have a trusted gold
 // standard to compare against.
 
 fn mat23(data: [f64; 6]) -> DenseArray {
@@ -230,7 +230,7 @@ fn relu_zeros_negatives_and_keeps_positives() {
 // Saga 14 step 003: reductions, normalisation, and loss primitives.
 //
 // These tests pin the CPU-side semantics that the MLX parity tests
-// in `mlpl-mlx/tests/parity_tests.rs` compare against, including
+// in `mlpl-mlx-rt/tests/parity_tests.rs` compare against, including
 // the Saga 11.5 label-propagation rules (reductions drop the
 // reduced axis label; softmax/log_softmax preserve labels;
 // cross_entropy returns an unlabeled scalar).

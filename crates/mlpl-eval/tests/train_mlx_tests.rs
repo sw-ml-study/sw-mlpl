@@ -2,7 +2,7 @@
 //! `device("mlx") { }`.
 //!
 //! Step 006 wired `grad(expr, wrt)` to re-materialize tape forward
-//! values through `mlpl-mlx` before CPU backward formulas compute
+//! values through `mlpl-mlx-rt` before CPU backward formulas compute
 //! the gradient. Adam and momentum_sgd both call `eval_grad`
 //! internally, so their parameter updates ride on those
 //! MLX-rounded gradients. The step-007 invariant: an Adam or

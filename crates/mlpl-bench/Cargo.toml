@@ -11,7 +11,7 @@ path = "src/lib.rs"
 default = []
 # Saga 14 step 008: enable the MLX-vs-CPU Criterion harness. Pulls
 # in `mlpl-eval` with its `mlx` feature so `device("mlx") { }`
-# blocks in the bench source actually route through `mlpl-mlx`.
+# blocks in the bench source actually route through `mlpl-mlx-rt`.
 # Triple-gated at the call site on macOS + aarch64.
 mlx = ["mlpl-eval/mlx"]
 

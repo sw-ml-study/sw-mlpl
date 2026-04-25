@@ -15,7 +15,7 @@
 //! Forward-pass primitives are split across sibling modules
 //! (`elementwise`, `activations`, `transforms`, `reductions`) to
 //! stay under the sw-checklist function-count budget as Saga 14
-//! grows the surface. `mlpl-mlx` mirrors this layout and signature,
+//! grows the surface. `mlpl-mlx-rt` mirrors this layout and signature,
 //! so the compile-to-rust codegen can target either runtime
 //! interchangeably.
 

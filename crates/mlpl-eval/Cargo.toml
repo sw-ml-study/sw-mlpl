@@ -7,11 +7,11 @@ version.workspace = true
 [features]
 default = []
 # Saga 14 step 004: dispatch ops inside `device("mlx") { }` blocks
-# through the `mlpl-mlx` runtime. Off by default; the `mlpl-mlx`
+# through the `mlpl-mlx-rt` runtime. Off by default; the `mlpl-mlx-rt`
 # crate itself triple-gates on macOS + aarch64, so building with
 # this feature on a non-Apple host still compiles and falls back
 # to CPU at runtime with a one-time warning.
-mlx = ["dep:mlpl-mlx", "mlpl-mlx/mlx"]
+mlx = ["dep:mlpl-mlx-rt", "mlpl-mlx-rt/mlx"]
 
 [dependencies]
 mlpl-core = { path = "../mlpl-core" }
@@ -21,7 +21,7 @@ mlpl-autograd = { path = "../mlpl-autograd" }
 mlpl-runtime = { path = "../mlpl-runtime" }
 mlpl-trace = { path = "../mlpl-trace" }
 mlpl-viz = { path = "../mlpl-viz" }
-mlpl-mlx = { path = "../mlpl-mlx", optional = true }
+mlpl-mlx-rt = { path = "../mlpl-mlx-rt", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

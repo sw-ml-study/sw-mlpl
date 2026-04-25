@@ -1,6 +1,6 @@
 number = 1
 slug = "mlx-rt-serve-skeleton"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 1 step 001: split mlpl-mlx into mlpl-mlx-rt
 (FFI library) + mlpl-mlx-se..."""

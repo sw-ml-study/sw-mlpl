@@ -138,7 +138,7 @@ pub enum Expr {
     /// Scoped device block: `device("mlx") { body }` or
     /// `device("cpu") { body }` (Saga 14 step 004). Inside the
     /// body, the evaluator dispatches array ops through the named
-    /// runtime target -- `mlpl-mlx` when the `mlx` feature is
+    /// runtime target -- `mlpl-mlx-rt` when the `mlx` feature is
     /// compiled in and the block's target is `"mlx"`, else the
     /// CPU path (with a one-time warning if the user asked for MLX
     /// but the feature is unavailable). `device("cpu") { ... }` is

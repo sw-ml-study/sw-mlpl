@@ -29,7 +29,7 @@ pub(crate) fn eval_binop(
     // Saga 14 step 004/005: route the binop through the active
     // device. `dispatched_call` falls back to the CPU path for
     // everything outside a `device("mlx")` block and for ops that
-    // `mlpl-mlx` does not implement. Shape/label mismatches get
+    // `mlpl-mlx-rt` does not implement. Shape/label mismatches get
     // lifted into the Saga 11.5 `EvalError::ShapeMismatch` shape.
     let result = match crate::device::dispatched_call(env, name, vec![l.clone(), r.clone()]) {
         Ok(a) => a,

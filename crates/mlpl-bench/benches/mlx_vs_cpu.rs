@@ -254,7 +254,7 @@ fn bench_lora_finetune_step(c: &mut Criterion) {
     // MLX path: build + wrap on CPU, then move student + X
     // onto MLX and run the adam step inside a device("mlx")
     // block so every matmul/softmax/cross_entropy/add
-    // dispatches through mlpl-mlx. Base stays frozen on
+    // dispatches through mlpl-mlx-rt. Base stays frozen on
     // both paths.
     let cpu_src = format!("{LORA_TRAIN_SETUP} ; {LORA_TRAIN_STEP}");
     let mlx_src = format!(

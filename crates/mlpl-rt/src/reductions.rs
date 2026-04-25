@@ -1,7 +1,7 @@
 //! Reductions, normalisation, and loss primitives (Saga 14 step 003).
 //!
 //! Each function mirrors the runtime-target signature that the
-//! `mlpl-mlx` sibling exposes, so compiled MLPL code can swap
+//! `mlpl-mlx-rt` sibling exposes, so compiled MLPL code can swap
 //! runtimes without source changes. Semantics match the
 //! interpreter's `mlpl-runtime` builtins by construction:
 //! `softmax` and `log_softmax` use the same max-subtraction trick

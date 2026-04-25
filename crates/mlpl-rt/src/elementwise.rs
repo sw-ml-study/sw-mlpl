@@ -2,7 +2,7 @@
 //!
 //! Thin wrappers over `DenseArray::apply_binop` that let compiled
 //! MLPL code call `mlpl_rt::add(&a, &b)` instead of a trait method.
-//! The `mlpl-mlx` sibling crate exposes the same signatures so the
+//! The `mlpl-mlx-rt` sibling crate exposes the same signatures so the
 //! compile-to-rust codegen can target either runtime without source
 //! changes.
 //!

@@ -8,7 +8,7 @@ version.workspace = true
 default = []
 # Saga 14 step 008: pass through `mlpl-eval`'s mlx feature so
 # `device("mlx") { }` blocks in scripts run via `mlpl-repl -f`
-# dispatch through `mlpl-mlx`. Triple-gated inside `mlpl-mlx`.
+# dispatch through `mlpl-mlx-rt`. Triple-gated inside `mlpl-mlx-rt`.
 mlx = ["mlpl-eval/mlx"]
 
 [dependencies]
