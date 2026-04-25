@@ -1,6 +1,6 @@
 number = 3
 slug = "viz-cache-and-docs"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 3 step 003: CLI viz cache strategy +
 `docs/using-cli-server.md` retrosp..."""

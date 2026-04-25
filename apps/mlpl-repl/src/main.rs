@@ -196,11 +196,9 @@ fn eval_line(
         match mlpl_eval::eval_program_value(&stmts, env) {
             Ok(value) => {
                 let formatted = format!("{value}");
-                if formatted.trim_start().starts_with("<svg") {
-                    svg_out.handle(&formatted);
-                } else {
-                    println!("{formatted}");
-                }
+                let display =
+                    mlpl_cli::viz_cache::transform_value(&formatted, svg_out.dir.as_deref());
+                println!("{display}");
             }
             Err(e) => report_err(&e),
         }
