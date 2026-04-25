@@ -149,6 +149,81 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga 21: CLI Server + Multi-Client UI (MVP) (COMPLETE)
+First piece of the multi-client story: a long-
+running MLPL interpreter exposed as a REST server
+(`crates/mlpl-serve`), a thin CLI client
+(`mlpl-repl --connect <url>`), and a content-
+addressed CLI visualization cache
+(`MLPL_CACHE_DIR`) that finally stops the terminal
+from dumping raw `<svg>` XML. Three new packages,
+four new contracts, one new retrospective doc. The
+server skeleton (auth.rs / sessions.rs /
+handlers.rs / server.rs / main.rs, each under the
+7-fn cap) ships `POST /v1/sessions` (no auth, hands
+out a 32-char alphanumeric bearer token),
+`POST /v1/sessions/{id}/eval` (auth required;
+lex+parse+`eval_program_value` against the
+session's `Environment`; returns
+`{value, kind}`), `GET /v1/sessions/{id}/inspect`
+(auth required; structured workspace snapshot --
+vars sorted+capped at 200 with `more` count, models
+/ tokenizers / experiments sorted+deduped), and
+`GET /v1/health`. Constant-time token compare via
+`subtle::ConstantTimeEq`; `--bind 0.0.0.0` (or any
+non-loopback) refuses to start under
+`--auth disabled`. axum 0.7 + tokio + tower stack.
+The `mlpl-repl --connect <url>` client splits
+between `connect.rs` (HTTP transport: 4 fns) and
+`connect_repl.rs` (REPL loop + slash dispatch +
+`--connect` argv parser: 4 fns) -- two modules
+because connect.rs would have hit the 7-fn cap
+otherwise. Local `Environment` is unused in connect
+mode; slash commands `:vars` / `:models` /
+`:tokenizers` / `:experiments` / `:wsid` go through
+`/inspect`, while `:ask` keeps using
+`mlpl_runtime::call_ollama` directly (server-side
+framing follows in a future saga). `--connect` is
+incompatible with `-f` / `--data-dir` / `--exp-dir`
+(parser errors with exit code 2). The CLI viz
+cache lives at `crates/mlpl-cli/src/viz_cache.rs`:
+SHA-256-prefix-12 chars under
+`$MLPL_CACHE_DIR` / `dirs::cache_dir().join("mlpl")`,
+with content-addressed naming so identical viz
+outputs don't duplicate; non-SVG values pass
+through. Wired into both local `eval_line` and
+connect-mode `read_loop`. `svg_out.rs` simplified
+from the previous SVG handler to a thin holder for
+the `--svg-out <dir>` back-compat override flag.
+35 new tests across the saga (13 server +
+4 connect + 18 viz_cache); sw-checklist baseline
+139 fails held throughout. Hit two budget walls
+during impl -- connect.rs at 8 fns split into
+connect.rs + connect_repl.rs; main.rs's `main` fn
+at 58 LOC compressed via a local closure for the
+flag-lookup pattern (couldn't extract a top-level
+helper because main.rs was already at the 7-fn
+cap). `docs/using-cli-server.md` is the user-
+facing retrospective; `docs/configurations.md`
+refreshed with new rows + footnote [8] explicitly
+distinguishing "MVP shipped" from "LLM-proxy
+follow-up still deferred." Carved out as
+post-MVP and listed in the deferred non-goals:
+the server-side LLM proxy with allow-list
+(unblocks browser `llm_call`; needs a security
+review for allow-list + secret handling first),
+visualization storage URLs, Server-Sent-Events
+streaming, cancellation, persistence across
+restarts, web UI re-routing to call origin,
+reattach across REPL restarts, the WebSocket
+surface, the desktop GUI wrapper (tauri / wry),
+the Emacs client, the ratatui TUI client, and
+other viz formats (PNG / HTML / JSON). Each lands
+in a follow-up saga after the MVP server contract
+proves stable. Delivered v0.17.0. Next: the dev
+host move to Linux + NVIDIA, then Saga 17 (CUDA +
+distributed execution).
+
 ## Saga 19: LLM-as-Tool REST Integration (COMPLETE)
 A language-level builtin that POSTs to an Ollama-
 compatible `/api/generate` endpoint and returns the

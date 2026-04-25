@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-04-24
 
+- feat(mlpl-cli,mlpl-repl,docs): Saga 21 step 003 -- CLI viz cache + using-cli-server.md
+- feat(mlpl-repl,mlpl-serve): Saga 21 step 002 -- --connect client + /inspect endpoint
+- feat(mlpl-serve): Saga 21 step 001 -- skeleton + sessions + eval + health
+- chore(agentrail,plan): archive Saga 19 + open Saga 21 (CLI server, v0.17.0)
+- release(v0.16.0): Saga 19 COMPLETE -- LLM-as-Tool REST Integration
 - feat(mlpl-repl,demos,docs): Saga 19 step 002 -- demo + :ask migration + docs
 - feat(mlpl-runtime,mlpl-eval): Saga 19 step 001 -- llm_call(url, prompt, model) builtin
 - chore(agentrail,plan): archive Saga 22 + open Saga 19 (LLM REST, v0.16.0)
