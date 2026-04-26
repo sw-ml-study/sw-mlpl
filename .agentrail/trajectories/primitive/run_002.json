@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 2,
+    "step": "wire-format-and-device-tensor"
+  },
+  "action": "Hit two sw-checklist budget walls during impl: eval_on_device_handler at 71 LOC (over 50) -- refactored to use the existing auth_for_session helper instead of inline auth, dropped to 44 lines. handlers.rs hit 8 fns when I'd added a parse_handle helper -- inlined Uuid::parse_str at the 2 callsites instead. Caught the same 3.14-as-PI clippy::approx_constant trap from prior sagas; replaced with 42.5. Mid-step disk filled (the harness scratch dir on /tmp); cargo clean --release recovered ~450 MB and unblocked. Net target/ ended at 6.7 GB.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-26T14:42:10"
+}

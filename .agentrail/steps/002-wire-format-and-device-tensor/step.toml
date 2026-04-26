@@ -1,6 +1,6 @@
 number = 2
 slug = "wire-format-and-device-tensor"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2 step 002: tensor wire format +
 Value::DeviceTensor variant + real
@@ -8,5 +8,6 @@ Value::DeviceTensor variant + real
 role = "production"
 context_files = []
 created_at = "2026-04-24T20:19:11"
+completed_at = "2026-04-26T14:42:10"
 task_type = "primitive"
-commits = []
+commits = ["8d8009a031366dbc92b8a7cbb04715c172a603b9"]

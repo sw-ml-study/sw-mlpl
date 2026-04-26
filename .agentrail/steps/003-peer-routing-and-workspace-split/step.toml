@@ -1,6 +1,6 @@
 number = 3
 slug = "peer-routing-and-workspace-split"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 003: orchestrator peer routing +
 workspace split.

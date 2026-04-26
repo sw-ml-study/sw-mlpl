@@ -5,7 +5,11 @@ members = [
   "crates/mlpl-array",
   "crates/mlpl-rt",
   "crates/mlpl-mlx-rt",
-  "crates/mlpl-mlx-serve",
+  # Saga R1 step 003: mlpl-mlx-serve moved to
+  # services/mlpl-mlx-serve/ with its own
+  # [workspace] declaration so its target/ tree is
+  # separate from the main workspace's. Build via
+  # `cd services/mlpl-mlx-serve && cargo build`.
   "crates/mlpl-lower-rs",
   "crates/mlpl-macro",
   "crates/mlpl",
