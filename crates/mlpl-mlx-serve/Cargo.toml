@@ -25,12 +25,18 @@ mlpl-serve = { path = "../mlpl-serve" }
 mlpl-eval = { path = "../mlpl-eval" }
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-mlx-rt = { path = "../mlpl-mlx-rt" }
+mlpl-array = { path = "../mlpl-array" }
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
 tower = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4", "serde"] }
+# Saga R1 step 002: tensor wire format. bincode 1.x
+# is the in-memory serialization; base64 wraps it for
+# JSON transport in the eval-on-device endpoint.
+bincode = "1"
+base64 = "0.22"
 
 [dev-dependencies]
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

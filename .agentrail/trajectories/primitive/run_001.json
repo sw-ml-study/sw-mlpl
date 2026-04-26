@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 1,
+    "step": "mlx-rt-serve-skeleton"
+  },
+  "action": "Bulk perl word-boundary rename across 20+ files (mlpl_mlx -> mlpl_mlx_rt with negative lookahead for _, mlpl-mlx -> mlpl-mlx-rt with negative lookahead for - so new mlpl-mlx-rt + mlpl-mlx-serve weren't double-renamed). Same 'doc list item without indentation' clippy trap hit twice in Saga 21 surfaced again -- same -as-list-bullet pattern; reworded each. mlpl-mlx-serve port shifted from default 6464 to 6465 so orchestrator + MLX peer can run on the same host. Workspace split deferred to step 003 once protocol is settled (per saga plan). Quality gates: cargo test 1014/0/3, clippy + fmt + markdown clean, sw-checklist 108/139 (failed baseline held; passed +3 from new modules), target/ at 5.9 GB.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-24T20:51:39"
+}

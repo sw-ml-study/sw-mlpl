@@ -23,6 +23,16 @@ pub enum EvalError {
     ExpectedArray,
     /// Expected a string value but got something else.
     ExpectedString,
+    /// Saga R1 step 002: a CPU op tried to consume a
+    /// `Value::DeviceTensor` whose bytes live on a
+    /// peer server. Strict-fault: the user must
+    /// explicitly `to_device('cpu', x)` to fetch.
+    DeviceTensorFault {
+        /// Peer URL the tensor lives on.
+        peer: String,
+        /// Device name on that peer (e.g., `"mlx"`).
+        device: String,
+    },
     /// Wrong number of arguments to a built-in.
     BadArity {
         /// Function name.
@@ -79,6 +89,11 @@ impl std::fmt::Display for EvalError {
             Self::RuntimeError(e) => write!(f, "{e}"),
             Self::ExpectedArray => write!(f, "expected an array value, got a string"),
             Self::ExpectedString => write!(f, "expected a string value"),
+            Self::DeviceTensorFault { peer, device } => write!(
+                f,
+                "tensor lives on {peer}:{device}; \
+                 use to_device('cpu', x) to fetch"
+            ),
             Self::BadArity {
                 func,
                 expected,

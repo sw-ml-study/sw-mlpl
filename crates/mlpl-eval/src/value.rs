@@ -8,7 +8,8 @@ use crate::error::EvalError;
 use crate::model::ModelSpec;
 use crate::tokenizer::TokenizerSpec;
 
-/// A runtime value: an array, a string, a model, or a tokenizer.
+/// A runtime value: an array, a string, a model, a tokenizer,
+/// or a peer-resident device tensor reference.
 #[derive(Clone, Debug, PartialEq)]
 pub enum Value {
     /// A dense array (scalar, vector, matrix, ...).
@@ -21,23 +22,46 @@ pub enum Value {
     /// A tokenizer (Saga 12 step 004). Sibling to `Model` -- holds
     /// the tokenization strategy as data.
     Tokenizer(TokenizerSpec),
+    /// Saga R1 step 002: peer-resident tensor reference. The bytes
+    /// live on the peer named by `peer`; the orchestrator only holds
+    /// the handle + shape + device metadata. Touching it from a CPU
+    /// op errors strict-fault; explicit `to_device('cpu', x)` is the
+    /// only way to materialize the bytes back as a `Value::Array`.
+    DeviceTensor {
+        /// Peer URL the bytes live on.
+        peer: String,
+        /// Opaque handle issued by the peer.
+        handle: String,
+        /// Tensor shape (orchestrator-side cached so callers can
+        /// `shape(x)` without a network round-trip).
+        shape: Vec<usize>,
+        /// Device name (e.g., `"mlx"`, future `"cuda"`).
+        device: String,
+    },
 }
 
 impl Value {
     /// Extract the inner array, returning an error if this is a
-    /// string, model, or tokenizer.
+    /// string, model, tokenizer, or device tensor.
     pub fn into_array(self) -> Result<DenseArray, EvalError> {
         match self {
             Self::Array(a) => Ok(a),
+            Self::DeviceTensor { peer, device, .. } => {
+                Err(EvalError::DeviceTensorFault { peer, device })
+            }
             _ => Err(EvalError::ExpectedArray),
         }
     }
 
     /// Borrow the inner array, returning an error if this is a
-    /// string, model, or tokenizer.
+    /// string, model, tokenizer, or device tensor.
     pub fn as_array(&self) -> Result<&DenseArray, EvalError> {
         match self {
             Self::Array(a) => Ok(a),
+            Self::DeviceTensor { peer, device, .. } => Err(EvalError::DeviceTensorFault {
+                peer: peer.clone(),
+                device: device.clone(),
+            }),
             _ => Err(EvalError::ExpectedArray),
         }
     }
@@ -62,6 +86,12 @@ impl fmt::Display for Value {
             Self::Str(s) => write!(f, "{s}"),
             Self::Model(_) => write!(f, "<model>"),
             Self::Tokenizer(t) => write!(f, "<tokenizer: {}>", t.describe()),
+            Self::DeviceTensor {
+                peer,
+                device,
+                shape,
+                ..
+            } => write!(f, "<tensor on {peer}:{device}; shape={shape:?}>"),
         }
     }
 }

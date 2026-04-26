@@ -2,17 +2,19 @@
 
 ## Status
 
-- **Step 001 (this saga):** STUB. The endpoint exists
-  on `mlpl-mlx-serve` and returns `501 Not
-  Implemented` with body `{"error": "wire format
-  ships in Saga R1 step 002; ..."}`. Forward-points
-  the implementation to step 002.
-- **Step 002:** real implementation with the bincode
-  + versioned-envelope tensor wire format described
-  below.
-- **Step 003:** orchestrator (`mlpl-serve`) `--peer
-  mlx=<url>` flag wires `device("mlx") { ... }`
-  blocks to call this endpoint.
+- **Step 001:** stub returning 501.
+- **Step 002 (shipped):** real implementation
+  documented below. The wire format module +
+  per-peer handle store + `Value::DeviceTensor`
+  variant land together. See
+  `contracts/eval-contract/device-tensor.md` for
+  the orchestrator-side variant.
+- **Step 003:** orchestrator (`mlpl-serve`)
+  `--peer mlx=<url>` flag will wire
+  `device("mlx") { ... }` blocks to call this
+  endpoint and bind the resulting handles as
+  `Value::DeviceTensor` in the orchestrator's
+  session Environment.
 
 ## Purpose
 
@@ -30,7 +32,9 @@ CLI-only LAN deployment in R1. The browser path
 through this endpoint waits on R3's auto-discovery
 + per-peer auth work.
 
-## Signature (step 002 target)
+## Endpoints (step 002, shipped)
+
+### `POST /v1/sessions/{id}/eval-on-device`
 
 Authenticated. Request:
 
@@ -47,38 +51,61 @@ Content-Type: application/json
 }
 ```
 
+Behavior:
+1. Auth + session lookup (404 / 401 on miss).
+2. Decode each binding via the wire format module
+   (`decode_from_json` -> `DenseArray`); bind
+   into a fresh sub-Environment.
+3. Lex + parse + `eval_program_value` against the
+   sub-Environment.
+4. Inspect the result:
+   - `Value::Array(a)` -> stash on the peer's
+     handle store under a fresh uuid; return
+     `{result: {kind: "tensor", handle, shape,
+     device: "mlx"}}`.
+   - `Value::Str(s)` -> return
+     `{result: {kind: "string", value: s}}`.
+   - `Value::Model(_)` / `Value::Tokenizer(_)` /
+     `Value::DeviceTensor { .. }` -> 400 with the
+     "must return a tensor or string" message.
+
+### `POST /v1/sessions/{id}/transfer`
+
+Authenticated. Pull the bytes back to the
+orchestrator. Request:
+
+```json
+{"handle": "<uuid>"}
+```
+
 Response on success:
 
 ```json
-{
-  "result": {
-    "kind": "tensor",
-    "handle": "<uuid>",
-    "shape": [3, 4],
-    "device": "mlx"
-  }
-}
+{"tensor": "<base64-bincode>"}
 ```
 
-Or, when the block evaluates to a string:
+The orchestrator decodes via `decode_from_json`
+and rebinds as a local `Value::Array`.
 
-```json
-{
-  "result": {
-    "kind": "string",
-    "value": "<the string>"
-  }
-}
-```
+### `POST /v1/sessions/{id}/release-handle/{handle}`
 
-Error responses:
+Authenticated. Idempotent-style cleanup of a
+single handle. Returns `204 No Content` on
+release; `404 Not Found` if the handle is unknown
+(already released or never existed). Session-drop
+also implicitly releases all handles owned by
+that session (step 003 will wire the actual
+session-drop hook from the orchestrator side).
+
+### Error responses (all endpoints)
+
 - `400 Bad Request` -- malformed body, lex/parse
-  error, eval error, or block evaluated to a
-  non-tensor / non-string Value (Model / Tokenizer
-  not supported in R1).
+  error, eval error, malformed binding (bad
+  base64 / bincode / shape mismatch), or block
+  evaluated to a non-tensor / non-string Value.
 - `401 Unauthorized` -- missing or wrong bearer.
-- `404 Not Found` -- unknown session id.
-- `501 Not Implemented` -- step 001 stub only.
+- `404 Not Found` -- unknown session id, or
+  unknown handle on transfer / release-handle.
 
 ## Tensor wire format (step 002)
 

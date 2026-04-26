@@ -1737,6 +1737,9 @@ name = "mlpl-mlx-serve"
 version = "0.17.0"
 dependencies = [
  "axum",
+ "base64",
+ "bincode",
+ "mlpl-array",
  "mlpl-eval",
  "mlpl-mlx-rt",
  "mlpl-parser",

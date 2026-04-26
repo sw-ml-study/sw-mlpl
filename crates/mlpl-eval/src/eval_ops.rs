@@ -91,7 +91,7 @@ pub(crate) fn eval_svg(
     let data = eval_expr(&args[0], env, trace)?.into_array()?;
     let type_name = match eval_expr(&args[1], env, trace)? {
         Value::Str(s) => s,
-        Value::Array(_) | Value::Model(_) | Value::Tokenizer(_) => {
+        Value::Array(_) | Value::Model(_) | Value::Tokenizer(_) | Value::DeviceTensor { .. } => {
             return Err(EvalError::ExpectedString);
         }
     };
