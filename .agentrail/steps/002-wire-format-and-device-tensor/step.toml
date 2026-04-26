@@ -1,6 +1,6 @@
 number = 2
 slug = "wire-format-and-device-tensor"
-status = "pending"
+status = "in-progress"
 description = """
 Phase 2 step 002: tensor wire format +
 Value::DeviceTensor variant + real

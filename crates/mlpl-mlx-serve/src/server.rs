@@ -1,11 +1,12 @@
-//! Router wiring + server entry. Saga R1 step 001.
+//! Router wiring + server entry. Saga R1 step 002:
+//! eval-on-device + transfer + release-handle now
+//! ship real implementations on top of the wire
+//! format module + per-peer handle store.
 //!
 //! Reuses `mlpl_serve::auth::AuthMode` and the
 //! session storage primitives so this server speaks
 //! the same auth protocol an orchestrator's
-//! `mlpl-serve` does. The route set differs --
-//! mlpl-mlx-serve has /health, /sessions, and the
-//! step-002-stub /eval-on-device endpoint.
+//! `mlpl-serve` does.
 
 use std::net::SocketAddr;
 
@@ -14,7 +15,11 @@ use axum::routing::{get, post};
 use mlpl_serve::auth::AuthMode;
 use mlpl_serve::sessions::{SessionMap, new_map};
 
-use crate::handlers::{create_session_handler, eval_on_device_stub, health_handler};
+use crate::handlers::{
+    create_session_handler, eval_on_device_handler, health_handler, release_handle_handler,
+    transfer_handler,
+};
+use crate::handles::{HandleStore, new_store};
 
 /// Errors the server can fail with at startup or
 /// while serving. Same shape as
@@ -49,28 +54,40 @@ impl std::fmt::Display for ServerError {
 
 impl std::error::Error for ServerError {}
 
-/// Shared state on the application: the session map
-/// and the configured auth mode. Mirrors
-/// `mlpl_serve::server::AppState` shape.
+/// Shared state on the application: the session map,
+/// the per-peer tensor handle store (Saga R1 step
+/// 002), and the configured auth mode. Mirrors
+/// `mlpl_serve::server::AppState` shape with the
+/// extra handles field.
 #[derive(Clone)]
 pub struct AppState {
     pub sessions: SessionMap,
+    pub handles: HandleStore,
     pub auth_mode: AuthMode,
 }
 
-/// Build the axum router with the session map state +
-/// auth mode wired in. Used by `run` and by the
-/// integration tests (which build their own listener
-/// on a random port).
+/// Build the axum router with the session map state,
+/// handle store, and auth mode wired in. Used by
+/// `run` and by the integration tests (which build
+/// their own listener on a random port).
 pub fn build_app(auth_mode: AuthMode) -> Router {
     let state = AppState {
         sessions: new_map(),
+        handles: new_store(),
         auth_mode,
     };
     Router::new()
         .route("/v1/health", get(health_handler))
         .route("/v1/sessions", post(create_session_handler))
-        .route("/v1/eval-on-device", post(eval_on_device_stub))
+        .route(
+            "/v1/sessions/:id/eval-on-device",
+            post(eval_on_device_handler),
+        )
+        .route("/v1/sessions/:id/transfer", post(transfer_handler))
+        .route(
+            "/v1/sessions/:id/release-handle/:handle",
+            post(release_handle_handler),
+        )
         .with_state(state)
 }
 

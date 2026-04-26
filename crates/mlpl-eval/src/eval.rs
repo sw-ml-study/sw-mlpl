@@ -440,6 +440,16 @@ pub(crate) fn eval_expr(
                     }
                     ("assign", vec![TraceValue::from_array(&val)], val)
                 }
+                Value::DeviceTensor { peer, device, .. } => {
+                    // Saga R1 step 002: DeviceTensor binding in
+                    // Environment lands when step 003 wires the
+                    // orchestrator's `device("mlx") { ... }` block
+                    // routing. Today the variant exists for the
+                    // peer-side eval-on-device handler to construct
+                    // and return; the orchestrator-side bind path
+                    // doesn't reach this branch yet.
+                    return Err(EvalError::DeviceTensorFault { peer, device });
+                }
             }
         }
         Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
