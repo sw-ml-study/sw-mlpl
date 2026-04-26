@@ -1733,26 +1733,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "mlpl-mlx-serve"
-version = "0.17.0"
-dependencies = [
- "axum",
- "base64",
- "bincode",
- "mlpl-array",
- "mlpl-eval",
- "mlpl-mlx-rt",
- "mlpl-parser",
- "mlpl-serve",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tower 0.4.13",
- "uuid",
-]
-
-[[package]]
 name = "mlpl-parity-tests"
 version = "0.17.0"
 dependencies = [

@@ -1,0 +1,49 @@
+# Saga R1 step 003: mlpl-mlx-serve moved out of the
+# main `crates/` workspace into its own `services/`
+# workspace so its target/ tree is separate. The
+# main workspace no longer compiles axum + tokio +
+# reqwest + bincode + base64 for mlpl-mlx-serve's
+# sake -- a measurable disk-pressure win on the
+# constrained Mac dev host. Path deps reach back
+# into the main workspace via `../../crates/...`;
+# cross-workspace path deps work and build into the
+# consumer's target.
+[workspace]
+members = ["."]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.17.0"
+
+[package]
+name = "mlpl-mlx-serve"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "mlpl-mlx-serve"
+path = "src/main.rs"
+
+[dependencies]
+mlpl-serve = { path = "../../crates/mlpl-serve" }
+mlpl-eval = { path = "../../crates/mlpl-eval" }
+mlpl-parser = { path = "../../crates/mlpl-parser" }
+mlpl-mlx-rt = { path = "../../crates/mlpl-mlx-rt" }
+mlpl-array = { path = "../../crates/mlpl-array" }
+axum = "0.7"
+tokio = { version = "1", features = ["full"] }
+tower = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+bincode = "1"
+base64 = "0.22"
+
+[dev-dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

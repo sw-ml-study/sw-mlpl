@@ -12,5 +12,6 @@
 
 pub mod auth;
 pub mod handlers;
+pub mod peers;
 pub mod server;
 pub mod sessions;

@@ -32,5 +32,16 @@ rand = "0.8"
 # character-by-character.
 subtle = "2"
 
+# Saga R1 step 003: orchestrator forwards
+# device("mlx") { ... } blocks to a registered peer
+# via blocking reqwest. Async would force tokio into
+# the eval crate's call site; blocking keeps the
+# evaluator synchronous. The blocking feature
+# coexists with the async client used by the
+# tokio-based integration tests below.
+reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+
 [dev-dependencies]
-reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+# Saga 21: tokio-based api_tests use the async
+# reqwest client (still available alongside the
+# blocking client enabled in [dependencies] above).

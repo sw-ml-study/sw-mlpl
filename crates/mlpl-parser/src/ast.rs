@@ -2,6 +2,8 @@
 //!
 //! These are parser-owned syntax nodes. They do NOT depend on mlpl-array.
 
+use std::fmt;
+
 use mlpl_core::Span;
 
 /// Binary operator kind.
@@ -173,6 +175,108 @@ impl Expr {
             | Self::For { span: s, .. }
             | Self::Experiment { span: s, .. }
             | Self::Device { span: s, .. } => *s,
+        }
+    }
+}
+
+impl fmt::Display for BinOpKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Add => "+",
+            Self::Sub => "-",
+            Self::Mul => "*",
+            Self::Div => "/",
+        };
+        write!(f, "{s}")
+    }
+}
+
+impl fmt::Display for TensorCtorKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let s = match self {
+            Self::Param => "param",
+            Self::Tensor => "tensor",
+        };
+        write!(f, "{s}")
+    }
+}
+
+/// Saga R1 step 003: render a body of statements back
+/// to MLPL source for cross-process transmission. Used
+/// when forwarding `device("mlx") { ... }` blocks to a
+/// peer's eval-on-device endpoint.
+fn fmt_body(f: &mut fmt::Formatter<'_>, body: &[Expr]) -> fmt::Result {
+    for (i, e) in body.iter().enumerate() {
+        if i > 0 {
+            write!(f, "; ")?;
+        }
+        write!(f, "{e}")?;
+    }
+    Ok(())
+}
+
+fn fmt_comma_seq(f: &mut fmt::Formatter<'_>, exprs: &[Expr]) -> fmt::Result {
+    for (i, e) in exprs.iter().enumerate() {
+        if i > 0 {
+            write!(f, ", ")?;
+        }
+        write!(f, "{e}")?;
+    }
+    Ok(())
+}
+
+fn fmt_scope(
+    f: &mut fmt::Formatter<'_>,
+    head: &dyn fmt::Display,
+    body: &[Expr],
+) -> fmt::Result {
+    write!(f, "{head} {{ ")?;
+    fmt_body(f, body)?;
+    write!(f, " }}")
+}
+
+impl fmt::Display for Expr {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::IntLit(n, _) => write!(f, "{n}"),
+            // Round-trip floats by always including a decimal
+            // point so re-parsing picks FloatLit, not IntLit.
+            Self::FloatLit(x, _) if x.fract() == 0.0 && x.is_finite() => write!(f, "{x:.1}"),
+            Self::FloatLit(x, _) => write!(f, "{x}"),
+            Self::StrLit(s, _) => write!(f, "\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\"")),
+            Self::Ident(name, _) => write!(f, "{name}"),
+            Self::ArrayLit(elems, _) => {
+                write!(f, "[")?;
+                fmt_comma_seq(f, elems)?;
+                write!(f, "]")
+            }
+            Self::BinOp { op, lhs, rhs, .. } => write!(f, "({lhs} {op} {rhs})"),
+            Self::UnaryNeg { operand, .. } => write!(f, "(-{operand})"),
+            Self::FnCall { name, args, .. } => {
+                write!(f, "{name}(")?;
+                fmt_comma_seq(f, args)?;
+                write!(f, ")")
+            }
+            Self::Assign { name, value, .. } => write!(f, "{name} = {value}"),
+            Self::TensorCtor { kind, shape, .. } => {
+                write!(f, "{kind}[")?;
+                fmt_comma_seq(f, shape)?;
+                write!(f, "]")
+            }
+            Self::Repeat { count, body, .. } => fmt_scope(f, &format_args!("repeat {count}"), body),
+            Self::Train { count, body, .. } => fmt_scope(f, &format_args!("train {count}"), body),
+            Self::For {
+                binding,
+                source,
+                body,
+                ..
+            } => fmt_scope(f, &format_args!("for {binding} in {source}"), body),
+            Self::Experiment { name, body, .. } => {
+                fmt_scope(f, &format_args!("experiment \"{name}\""), body)
+            }
+            Self::Device { target, body, .. } => {
+                fmt_scope(f, &format_args!("device(\"{target}\")"), body)
+            }
         }
     }
 }

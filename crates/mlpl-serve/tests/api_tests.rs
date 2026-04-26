@@ -205,7 +205,13 @@ async fn run_rejects_non_loopback_with_auth_disabled() {
     // don't actually expect to bind it. The safety
     // check should fail before bind.
     let addr: SocketAddr = "0.0.0.0:0".parse().unwrap();
-    let err = run(addr, AuthMode::Disabled).await.unwrap_err();
+    let err = run(
+        addr,
+        AuthMode::Disabled,
+        mlpl_serve::peers::empty_registry(),
+    )
+    .await
+    .unwrap_err();
     let msg = format!("{err}");
     assert!(
         matches!(err, ServerError::InsecureBind { .. }),

@@ -39,21 +39,31 @@ impl std::fmt::Display for ServerError {
 
 impl std::error::Error for ServerError {}
 
-/// Shared state on the application: the session map
-/// + the configured auth mode.
+/// Shared state on the application: the session map,
+/// the peer registry (Saga R1 step 003), and the
+/// configured auth mode.
 #[derive(Clone)]
 pub struct AppState {
     pub sessions: SessionMap,
+    pub peers: crate::peers::PeerRegistry,
     pub auth_mode: AuthMode,
 }
 
 /// Build the axum router with the session-map state
-/// and auth mode wired in. Used by `run` and by the
-/// integration tests (which build their own listener
-/// on a random port).
+/// and auth mode wired in. Empty peer registry; use
+/// `build_app_with_peers` for tests that need to
+/// register peers up-front.
 pub fn build_app(auth_mode: AuthMode) -> Router {
+    build_app_with_peers(auth_mode, crate::peers::empty_registry())
+}
+
+/// Saga R1 step 003: build the router with an
+/// explicit peer registry. Used by `run` and by the
+/// peer-routing integration test harness.
+pub fn build_app_with_peers(auth_mode: AuthMode, peers: crate::peers::PeerRegistry) -> Router {
     let state = AppState {
         sessions: new_map(),
+        peers,
         auth_mode,
     };
     Router::new()
@@ -68,14 +78,24 @@ pub fn build_app(auth_mode: AuthMode) -> Router {
 /// non-loopback binds, then `axum::serve` the
 /// router. Used by `main`; tests call `build_app`
 /// directly + run on their own listener.
-pub async fn run(addr: SocketAddr, auth_mode: AuthMode) -> Result<(), ServerError> {
+///
+/// Saga R1 step 003: `peers` carries the
+/// `--peer mlx=<url>`-derived registry built up by
+/// `peers::build_registry` in `main`. An empty
+/// registry means "no peer routing; device-scoped
+/// blocks fall back to in-process dispatch."
+pub async fn run(
+    addr: SocketAddr,
+    auth_mode: AuthMode,
+    peers: crate::peers::PeerRegistry,
+) -> Result<(), ServerError> {
     if !addr.ip().is_loopback() && auth_mode == AuthMode::Disabled {
         return Err(ServerError::InsecureBind { addr });
     }
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .map_err(ServerError::Bind)?;
-    axum::serve(listener, build_app(auth_mode))
+    axum::serve(listener, build_app_with_peers(auth_mode, peers))
         .await
         .map_err(ServerError::Serve)
 }
