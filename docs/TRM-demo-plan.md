@@ -21,9 +21,10 @@ loop maps cleanly onto MLPL source.
 
 ## Repository strategy
 
-Use the existing TRM repo as the home for demo-specific code, saved
-puzzle sets, comparison charts, and artifacts. This plan is for adding
-an sw-MLPL track to that repo, not for creating a new repo.
+Use the existing `softwarewrighter/train-trm` repo as the home for
+demo-specific code, saved puzzle sets, comparison charts, and
+artifacts. This plan is for adding an sw-MLPL track to that repo, not
+for creating a new repo.
 
 Suggested layout inside the existing repo:
 
@@ -86,8 +87,8 @@ target/trm-grid-demo --task copy_fill --recursions 8
 3. Add MLX remote training.
 4. Add recursion-step visualization.
 5. Add compiled wrapper.
-6. Update the existing repo README so the sw-MLPL path is useful
-   without this monorepo context.
+6. Update `softwarewrighter/train-trm` README so the sw-MLPL path is
+   useful without this monorepo context.
 
 ## Acceptance tests
 
@@ -100,3 +101,4 @@ target/trm-grid-demo --task copy_fill --recursions 8
 
 - TRM paper page: <https://huggingface.co/papers/2510.04871>
 - arXiv record: <https://arxiv.org/abs/2510.04871>
+- Existing sw project repo: <https://github.com/softwarewrighter/train-trm>
