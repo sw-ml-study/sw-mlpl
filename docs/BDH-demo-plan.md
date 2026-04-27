@@ -2,18 +2,24 @@
 
 ## Goal
 
-Use "Baby Dragon Hatchlings" as an MLPL-branded teaching demo, not as
-an existing public model architecture. The demo should be playful but
-technically real: tiny agents hatch, learn simple behaviors, and gain
-small task adapters through LoRA.
+Use the Baby Dragon Hatchlings repo to build an sw-MLPL track for
+Dragon Hatchling (BDH), the architecture described in "The Dragon
+Hatchling: The Missing Link between the Transformer and Models of the
+Brain." BDH is presented as an attention-based state-space sequence
+learning architecture with a scale-free, biologically inspired graph
+structure, sparse positive activations, and an interpretability story
+around state and synaptic plasticity.
 
-The strongest version is a compact multitask model:
+The demo should start with a tiny BDH-inspired sequence model rather
+than a full reproduction. The strongest version is a compact language
+or grid-sequence model:
 
-- base "hatchling brain" trained from scratch on simple grid-world
-  behaviors;
-- LoRA adapters for personalities or skills;
+- base "hatchling" sequence model trained from scratch on tiny text or
+  symbolic grid data;
+- LoRA adapters for domain or behavior specialization;
 - MLX acceleration for adapter training;
-- REPL visualizations for behavior changes.
+- REPL visualizations for graph activity, sparse state, and adapter
+  effects.
 
 ## Why this is better than a notebook
 
@@ -24,20 +30,24 @@ The strongest version is a compact multitask model:
 - LoRA adapters are small enough to save, compare, and swap.
 - The compiled app can become a tiny interactive toy: load a base
   model, choose an adapter, and watch the agent act.
+- The interpretability angle is first-class: sparse activations,
+  graph neighborhoods, and concept-specific state changes can be
+  rendered as normal MLPL outputs instead of ad-hoc notebook plots.
 
 ## Repository strategy
 
-Use the existing Baby Dragon Hatchlings repo as the home for art
-assets, saved adapters, interactive app code, and artifacts. This plan
-is for adding an sw-MLPL track to that repo, not for creating a new
-repo.
+Use the existing `softwarewrighter/bdh` repo as the home for paper
+notes, architecture experiments, saved adapters, interactive app code,
+and artifacts. This plan is for adding an sw-MLPL track to that repo,
+not for creating a new repo. Treat `pathwaycom/bdh` as the upstream
+reference implementation and paper companion.
 
 Suggested layout inside the existing repo:
 
-- `mlpl/hatchling_base.mlpl`
-- `mlpl/hatchling_lora_fire.mlpl`
-- `mlpl/hatchling_lora_guard.mlpl`
-- `assets/` for SVG sprites or generated bitmaps
+- `mlpl/bdh_tiny_base.mlpl`
+- `mlpl/bdh_lora_domain.mlpl`
+- `mlpl/bdh_state_probe.mlpl`
+- `assets/` for graph/state visualizations
 - `src/` for compiled app wrapper
 - `adapters/` ignored or Git LFS-managed if published
 
@@ -47,73 +57,88 @@ Suggested layout inside the existing repo:
    - `save_lora(model, "path")`
    - `load_lora(model, "path")`
 2. Tiny RL or imitation helpers.
-   - `gridworld(seed, n, h, w)`
-   - `policy_loss(logits, actions, rewards)`
-   - Optional: `self_play` later.
+   - `sequence_dataset(name, n, context)`
+   - `causal_lm_loss(model, X, Y)`
+   - Optional: grid-sequence tasks later.
 3. Better demo asset handling.
-   - SVG sprite composition or simple raster export.
+   - SVG graph visualization and simple raster export.
 4. Model comparison helpers.
-   - `compare_policy(base, adapted, world)`
-   - behavior heatmaps.
+   - `compare_generation(base, adapted, prompts)`
+   - sparse activation heatmaps.
+   - graph neighborhood overlays.
 5. Compiled app wrapper.
    - Interactive mode can embed the interpreter first.
+6. BDH-inspired primitives.
+   - Sparse positive activation helpers.
+   - Graph-neighborhood mixing or attention/state-space hybrid layer.
+   - State probe output for interpretability demos.
 
 ## Demo shape
 
 ### REPL/interpreter flow
 
 ```mlpl
-world = hatchling_world(0, 256, 8, 8)
-brain = hatchling_policy(obs_dim(world), 32, 4, 0)
+tok = tokenizer("byte")
+data = sequence_dataset("tiny_stories_slice", 256, 64)
+brain = bdh_tiny(vocab_size(tok), hidden=64, graph_k=8, seed=0)
 
 device("mlx") {
   train 100 {
-    logits = apply(brain, world.obs)
-    loss = policy_loss(logits, world.actions, world.rewards)
+    batch = sample_lm_batch(tok, data, 64, step)
+    logits = apply(brain, batch.input)
+    loss = causal_lm_loss(logits, batch.target)
     adam(loss, brain, 0.003, 0.9, 0.999, 0.00000001)
-    reward_metric = mean(world.rewards)
     loss
   }
 }
 
-guard = lora(brain, 4, 8.0, 1)
+domain = lora(brain, 4, 8.0, 1)
 device("mlx") {
   train 40 {
-    logits = apply(guard, world.obs)
-    loss = policy_loss(logits, world.guard_actions, world.guard_rewards)
-    adam(loss, guard, 0.01, 0.9, 0.999, 0.00000001)
+    batch = sample_lm_batch(tok, data, 64, step)
+    logits = apply(domain, batch.input)
+    loss = causal_lm_loss(logits, batch.target)
+    adam(loss, domain, 0.01, 0.9, 0.999, 0.00000001)
     loss
   }
 }
 
-svg(policy_rollout(guard, world), "gridworld")
+svg(bdh_graph(brain), "graph")
+svg(bdh_state_probe(domain, "dragon"), "heatmap")
 ```
 
 ### Compiled-app flow
 
 ```sh
-mlpl build mlpl/hatchling_demo.mlpl -o target/hatchling-demo
-target/hatchling-demo --adapter guard --seed 7
+mlpl build mlpl/bdh_demo.mlpl -o target/bdh-demo
+target/bdh-demo --adapter adapters/domain.safetensors --prompt "Once"
 ```
 
 ## Phases
 
-1. CPU imitation-learning policy on a generated grid world.
-2. MLX training for the base policy.
-3. LoRA adapters for distinct behaviors.
-4. Adapter save/load.
-5. Visual rollout viewer.
-6. Compiled interactive app.
+1. Paper-to-MLPL notes: identify the minimum BDH-inspired layer that
+   can be expressed with current MLPL plus small new primitives.
+2. CPU tiny sequence model on byte-level or synthetic text.
+3. MLX training for the base model.
+4. LoRA adapters for domain specialization.
+5. Adapter save/load.
+6. Graph and state-probe visualizations.
+7. Compiled interactive app.
 
 ## Acceptance tests
 
-- A tiny policy improves reward over a random baseline.
-- A LoRA adapter changes behavior without mutating the base model.
-- The rollout visualization is deterministic for a fixed seed.
+- A tiny BDH-inspired model improves next-token loss over a small MLP
+  or vanilla recurrent baseline.
+- A LoRA adapter changes generation or task behavior without mutating
+  the base model.
+- Sparse state and graph visualizations are deterministic for a fixed
+  seed.
 - The same demo has REPL and compiled-app commands.
 
 ## References
 
-No public ML architecture named "Baby Dragon Hatchlings" was found in
-the initial scan. Treat this as an original demo concept hosted in the
-existing BDH repo.
+- The Dragon Hatchling: The Missing Link between the Transformer and
+  Models of the Brain: <https://arxiv.org/abs/2509.26507>
+- Upstream BDH implementation: <https://github.com/pathwaycom/bdh>
+- Existing sw project repo:
+  <https://github.com/softwarewrighter/bdh/commits/main/>
