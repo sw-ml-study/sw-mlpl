@@ -5,6 +5,61 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
+## v0.18.0 -- Saga R1: MLX Service Peer (2026-04-27)
+
+MLX can now run as a peer service instead of only
+as an in-process feature. The orchestrator keeps
+CPU work local, forwards whole `device("mlx") {
+... }` blocks to a registered `mlpl-mlx-serve`
+peer, stores results as opaque `DeviceTensor`
+handles, and fetches bytes back only when the
+program asks for `to_device("cpu", x)`. The
+in-process MLX path remains as a fallback for
+single-host builds.
+
+### Added
+
+- **`services/mlpl-mlx-serve` release path** --
+  separate MLX service workspace with its own
+  lockfile and target tree. It exposes session,
+  eval, health, and transfer endpoints for the
+  peer protocol while reusing the existing
+  server/session machinery.
+- **Orchestrator peer routing** --
+  `mlpl-serve --peer mlx=<url>` registers a peer
+  and forwards `device("mlx") { ... }` blocks at
+  block granularity. Non-loopback peer URLs require
+  the explicit `--insecure-peers` opt-in.
+- **Peer tensor materialization** --
+  `Value::DeviceTensor` represents peer-resident
+  results. CPU operations strict-fault on those
+  values until the program calls
+  `to_device("cpu", x)`, which transfers the peer
+  tensor into a local CPU array.
+- **Remote MLX demo and guide** --
+  `demos/mlx_remote.mlpl` and
+  `docs/using-mlx-service.md` document the R1
+  topology and the explicit fetch workflow.
+
+### Changed
+
+- `mlpl-mlx` runtime code now lives behind the
+  `mlpl-mlx-rt` split, with the peer service kept
+  outside the main workspace package graph.
+- `docs/configurations.md`, `docs/status.md`,
+  `docs/refactor-services.md`, and `docs/saga.md`
+  now describe R1 as shipped and point the next
+  service work at CUDA-as-a-service (R2).
+
+### Tests
+
+- Added peer dispatcher and peer routing tests for
+  forwarded blocks, strict CPU faults, and
+  `to_device("cpu", x)` fetch behavior.
+- Existing `mlpl-mlx-serve` API and wire-format
+  tests cover peer sessions, transfer envelopes,
+  and service error handling.
+
 ## v0.17.0 -- Saga 21: CLI Server + Multi-Client UI (MVP) (2026-04-24)
 
 The first piece of the multi-client story: a long-

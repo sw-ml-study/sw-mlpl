@@ -120,8 +120,8 @@ pub async fn eval_on_device_handler(
     }
     let tokens = lex(&body.program)
         .map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("lex: {e:?}"))))?;
-    let stmts = parse(&tokens)
-        .map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("parse: {e:?}"))))?;
+    let stmts =
+        parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("parse: {e:?}"))))?;
     let value = eval_program_value(&stmts, &mut sub)
         .map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
     let payload = match value {

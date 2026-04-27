@@ -623,14 +623,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-autograd"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -638,14 +638,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-core"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-eval"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-array",
  "mlpl-autograd",
@@ -660,7 +660,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-mlx-rt"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -668,7 +668,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-mlx-serve"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "axum",
  "base64",
@@ -688,14 +688,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-parser"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-runtime"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -705,7 +705,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-serve"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "axum",
  "base64",
@@ -725,7 +725,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-trace"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -735,7 +735,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-viz"
-version = "0.17.0"
+version = "0.18.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",

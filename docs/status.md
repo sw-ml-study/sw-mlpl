@@ -35,14 +35,16 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 22 | Feasibility checking + resource estimation (`estimate_train`, `calibrate_device`, `estimate_hypothetical`, `feasible`; SmolLM / Llama / Qwen what-if table; design deviation: direct `estimate_hypothetical` instead of `hypothetical_model` -> ModelSpec) | v0.15.0 | [x] |
 | 19 | LLM-as-tool REST integration (`llm_call(url, prompt, model) -> string`; `:ask` migrated onto shared HTTP path; CLI-only pending Saga 21 proxy; streaming/tools/chat-threading/batching/auth/web all deferred) | v0.16.0 | [x] |
 | 21 | CLI server + multi-client UI MVP (`crates/mlpl-serve` REST skeleton: sessions / eval / inspect / health; `mlpl-repl --connect <url>` thin client; CLI viz cache `MLPL_CACHE_DIR`; constant-time auth; LLM proxy / SSE / cancellation / persistence / web-rerouting / Emacs / TUI / desktop-GUI all deferred to follow-up sagas) | v0.17.0 | [x] |
+| R1 | MLX as a service (`services/mlpl-mlx-serve`; orchestrator `--peer mlx=<url>` routing for `device("mlx") { ... }`; opaque `DeviceTensor` handles; strict CPU faults until `to_device("cpu", x)` materialization; in-process MLX fallback retained) | v0.18.0 | [x] |
 
 ## Planned
 
-Intended sequence: **R1 -> (dev host move to Linux)
+Intended sequence: **(dev host move to Linux)
 -> R2 -> R3 -> 18**. Saga 17 was superseded by the
 services refactor proposed in
-`docs/refactor-services.md`; R1 / R2 / R3 replace
-it. Post-MVP follow-ups to Saga 21 (LLM proxy, SSE,
+`docs/refactor-services.md`; R1 shipped in v0.18.0
+and R2 / R3 replace the remaining in-process CUDA /
+distributed portions. Post-MVP follow-ups to Saga 21 (LLM proxy, SSE,
 cancellation, persistence, web UI re-routing,
 ratatui / Emacs / desktop GUI clients) fold into a
 follow-up CLI-server saga after the MVP server
@@ -51,7 +53,6 @@ the Linux move.
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| R1 | mlpl-mlx as a service (`mlpl-mlx-serve` binary; orchestrator routes `device("mlx") { ... }` blocks to peers; in-process MLX feature stays as fallback; separate `target/` per service workspace -- disk pressure relief) | tbd | [ ] | 21 |
 | R2 | CUDA-as-a-service (`mlpl-cuda-serve`; same shape as R1; replaces the originally-planned in-process Saga 17) | tbd | [ ] | R1, dev host move |
 | R3 | Distributed primitives + LAN auto-discovery (`run model on nodes[...]`, mDNS peer discovery, peer-to-peer tensor migration) | tbd | [ ] | R1, R2 |
 | 17 | CUDA backend and distributed execution -- **SUPERSEDED** by R1 / R2 / R3; see `docs/refactor-services.md` | -- | [-] superseded | -- |
@@ -63,28 +64,20 @@ the Linux move.
 
 ## Next saga to start
 
-**Saga R1 -- `mlpl-mlx` as a service (services
-refactor).** Saga 21 MVP (v0.17.0) just shipped:
-`crates/mlpl-serve` skeleton, the `mlpl-repl
---connect <url>` thin client, and the CLI
-visualization cache (`MLPL_CACHE_DIR`,
-content-addressed SHA-prefix paths). The next
-high-leverage move is the services refactor
-proposed in `docs/refactor-services.md`: promote
-`mlpl-mlx` from an in-process Cargo feature to a
-standalone service binary (`mlpl-mlx-serve`) that
-the orchestrator dispatches `device("mlx") { ... }`
-blocks to. Three wins at once: (1) cross-host MLX
-from a Linux dev host (orchestrator on Linux, MLX
-peer on the Mac); (2) hardware-coupling escape so
-R2 (CUDA-as-a-service, replacing the deferred
-in-process Saga 17) can land cleanly; (3) disk-
-pressure relief because each service workspace
-has its own `target/`. R1 keeps the in-process
-MLX feature as a fallback so single-host MLX
-users don't regress; R2 follows once R1's protocol
-is settled; R3 layers distributed primitives +
-mDNS auto-discovery on top.
+**Saga R2 -- CUDA as a service.** Saga R1 shipped
+in v0.18.0 with `services/mlpl-mlx-serve`, peer
+registration on the orchestrator
+(`--peer mlx=<url>`), block-granularity forwarding
+for `device("mlx") { ... }`, opaque peer tensor
+handles, and explicit `to_device("cpu", x)`
+materialization. The next high-leverage move is to
+reuse that service/peer shape for CUDA after the
+dev host move to Linux: build `mlpl-cuda-rt` /
+`mlpl-cuda-serve`, keep CPU work in the
+orchestrator, and preserve the R1 strict-fault
+rule for cross-device values. R3 then layers
+distributed primitives and mDNS auto-discovery on
+top of the two concrete service backends.
 
 Post-MVP follow-ups to Saga 21 (server-side LLM
 proxy with allow-list, visualization storage
