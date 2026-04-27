@@ -9,12 +9,15 @@
   variant land together. See
   `contracts/eval-contract/device-tensor.md` for
   the orchestrator-side variant.
-- **Step 003:** orchestrator (`mlpl-serve`)
-  `--peer mlx=<url>` flag will wire
-  `device("mlx") { ... }` blocks to call this
-  endpoint and bind the resulting handles as
-  `Value::DeviceTensor` in the orchestrator's
-  session Environment.
+- **Step 003 (shipped):** orchestrator
+  (`mlpl-serve`) `--peer mlx=<url>` flag +
+  immutable peer registry.
+- **Step 004 (shipped):** orchestrator
+  `PeerDispatcher` hook forwards
+  `device("mlx") { ... }` blocks to registered
+  peers, stores returned tensor handles as
+  `Value::DeviceTensor`, and materializes them
+  with `to_device("cpu", x)`.
 
 ## Purpose
 
@@ -31,6 +34,42 @@ binary (`mlpl-mlx-serve`, future
 CLI-only LAN deployment in R1. The browser path
 through this endpoint waits on R3's auto-discovery
 + per-peer auth work.
+
+## Orchestrator flow (step 004, shipped)
+
+1. `mlpl-serve --peer mlx=<url>` builds a peer
+   registry keyed by device name. Non-loopback
+   peer URLs require `--insecure-peers` in R1.
+2. Before each `/v1/sessions/{id}/eval`, the
+   handler installs a `PeerDispatcher` on that
+   session's `Environment`; it is cleared after
+   the eval call.
+3. When eval sees `device("<name>") { body }`, it
+   renders `body` back to MLPL source via
+   `Display for Expr`, collects any array
+   bindings whose names appear in that source,
+   and calls the dispatcher before falling back
+   to in-process device dispatch.
+4. The dispatcher lazily creates a peer session by
+   POSTing `/v1/sessions` on the peer, caches the
+   peer session id + bearer token by peer URL, and
+   then POSTs `/v1/sessions/{peer_id}/eval-on-
+   device`.
+5. A tensor response becomes
+   `Value::DeviceTensor { peer, handle, shape,
+   device }` in the orchestrator. Assignment binds
+   that opaque value in the session environment.
+6. CPU use of the opaque value strict-faults until
+   the user calls `to_device("cpu", x)` (the older
+   `to_device(x, "cpu")` form is still accepted).
+   Fetch calls `/v1/sessions/{peer_id}/transfer`,
+   decodes the tensor envelope, rebinds `x` as a
+   local `Value::Array`, and stamps its placement
+   as CPU.
+
+The free-name binding collection is intentionally
+substring-based for R1; AST-level scope analysis is
+a follow-up once the protocol shape is stable.
 
 ## Endpoints (step 002, shipped)
 
@@ -156,8 +195,10 @@ tensor lives on http://mac.local:6465:mlx; \
   use to_device('cpu', x) to fetch
 ```
 
-`to_device('cpu', x)` is the only way to
-materialize the bytes back -- it calls the peer's
+`to_device("cpu", x)` is the canonical way to
+materialize the bytes back (`to_device(x, "cpu")`
+remains accepted for the pre-R1 call order) -- it
+calls the peer's
 `POST /v1/sessions/{id}/transfer` (also lands in
 step 002) which returns the raw envelope so the
 orchestrator can decode + rebind locally as a

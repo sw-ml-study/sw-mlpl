@@ -28,10 +28,11 @@
 
 use mlpl_array::{ArrayError, DenseArray};
 use mlpl_parser::Expr;
-use mlpl_trace::{Trace, TraceValue};
+use mlpl_trace::Trace;
 
 use crate::env::Environment;
 use crate::error::EvalError;
+use crate::value::Value;
 
 /// Evaluate a `device("target") { body }` block. Returns the
 /// value of the body's last statement -- mirrors `experiment`'s
@@ -42,7 +43,14 @@ pub(crate) fn eval_device(
     body: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
-) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
+) -> Result<Value, EvalError> {
+    if let Some(dispatcher) = env.peer_dispatcher() {
+        let source = block_source(body);
+        let bindings = collect_array_bindings(env, &source);
+        if let Some(result) = dispatcher.dispatch_block(target, &source, bindings) {
+            return result;
+        }
+    }
     if target == "mlx" && !mlx_available() && env.take_mlx_fallback_warning() {
         eprintln!(
             "warning: device(\"mlx\") block requested but the mlx \
@@ -50,12 +58,29 @@ pub(crate) fn eval_device(
         );
     }
     env.push_device(target.to_string());
-    let mut last = DenseArray::from_scalar(0.0);
+    let mut last = Value::Array(DenseArray::from_scalar(0.0));
     for stmt in body {
-        last = crate::eval::eval_expr(stmt, env, trace)?.into_array()?;
+        last = crate::eval::eval_expr(stmt, env, trace)?;
     }
     env.pop_device();
-    Ok(("device", vec![], last))
+    Ok(last)
+}
+
+fn block_source(body: &[Expr]) -> String {
+    body.iter()
+        .map(std::string::ToString::to_string)
+        .collect::<Vec<_>>()
+        .join("\n")
+}
+
+fn collect_array_bindings(
+    env: &Environment,
+    source: &str,
+) -> std::collections::HashMap<String, DenseArray> {
+    env.vars_iter()
+        .filter(|(name, _)| source.contains(name.as_str()))
+        .map(|(name, arr)| (name.clone(), arr.clone()))
+        .collect()
 }
 
 /// Whether the running build can actually dispatch through MLX.
@@ -331,7 +356,7 @@ pub(crate) fn eval_to_device(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
-) -> Result<DenseArray, EvalError> {
+) -> Result<Value, EvalError> {
     if args.len() != 2 {
         return Err(EvalError::BadArity {
             func: "to_device".into(),
@@ -339,11 +364,12 @@ pub(crate) fn eval_to_device(
             got: args.len(),
         });
     }
-    let target = match &args[1] {
-        Expr::StrLit(s, _) => s.clone(),
+    let (target, value_expr) = match (&args[0], &args[1]) {
+        (Expr::StrLit(s, _), value) => (s.clone(), value),
+        (value, Expr::StrLit(s, _)) => (s.clone(), value),
         _ => {
             return Err(EvalError::Unsupported(
-                "to_device: target must be a string literal".into(),
+                "to_device: one argument must be a string literal target".into(),
             ));
         }
     };
@@ -363,7 +389,26 @@ pub(crate) fn eval_to_device(
     // binding so models that reference it downstream see the new
     // placement. Also propagate to model params when the name
     // resolves to a model.
-    if let Expr::Ident(name, _) = &args[0] {
+    if target == "cpu" {
+        let value = crate::eval::eval_expr(value_expr, env, trace)?;
+        if let Value::DeviceTensor { peer, handle, .. } = value {
+            let arr = env
+                .peer_dispatcher()
+                .ok_or_else(|| EvalError::Unsupported("to_device: no peer dispatcher".into()))?
+                .fetch_tensor(&peer, &handle)?;
+            if let Expr::Ident(name, _) = value_expr {
+                env.set(name.clone(), arr.clone());
+                env.remove_device_tensor(name);
+                env.set_tensor_device(name.clone(), "cpu".into());
+            }
+            return Ok(Value::Array(arr));
+        }
+        if let Expr::Ident(name, _) = value_expr {
+            env.set_tensor_device(name.clone(), "cpu".into());
+        }
+        return value.into_array().map(Value::Array);
+    }
+    if let Expr::Ident(name, _) = value_expr {
         let is_model = env.get_model(name).is_some();
         if is_model {
             let params: Vec<String> = env
@@ -376,9 +421,11 @@ pub(crate) fn eval_to_device(
             // Models don't correspond to a single DenseArray value; return
             // a scalar zero so `to_device(model, "mlx")` can appear in
             // statement position the same way model assignments do.
-            return Ok(DenseArray::from_scalar(0.0));
+            return Ok(Value::Array(DenseArray::from_scalar(0.0)));
         }
         env.set_tensor_device(name.clone(), target.clone());
     }
-    crate::eval::eval_expr(&args[0], env, trace)?.into_array()
+    crate::eval::eval_expr(value_expr, env, trace)
+        .and_then(Value::into_array)
+        .map(Value::Array)
 }

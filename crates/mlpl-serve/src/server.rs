@@ -4,9 +4,13 @@ use std::net::SocketAddr;
 
 use axum::Router;
 use axum::routing::{get, post};
+use mlpl_array::DenseArray;
+use mlpl_eval::{EvalError, PeerDispatcher, Value};
+use serde::{Deserialize, Serialize};
 
 use crate::auth::AuthMode;
 use crate::handlers::{create_session_handler, eval_handler, health_handler, inspect_handler};
+use crate::peers::{PeerRegistry, PeerSessionMap};
 use crate::sessions::{SessionMap, new_map};
 
 /// Errors the server can fail with at startup or
@@ -45,8 +49,132 @@ impl std::error::Error for ServerError {}
 #[derive(Clone)]
 pub struct AppState {
     pub sessions: SessionMap,
-    pub peers: crate::peers::PeerRegistry,
+    pub peers: PeerRegistry,
+    pub peer_sessions: PeerSessionMap,
     pub auth_mode: AuthMode,
+}
+
+#[derive(Debug)]
+pub struct RemoteMlxDispatcher {
+    peers: PeerRegistry,
+    sessions: PeerSessionMap,
+}
+
+#[derive(Serialize)]
+pub struct EvalOnDeviceBinding {
+    pub name: String,
+    pub tensor: String,
+}
+
+#[derive(Serialize)]
+struct EvalOnDeviceRequest {
+    program: String,
+    bindings: Vec<EvalOnDeviceBinding>,
+}
+
+#[derive(Deserialize)]
+struct EvalOnDeviceResponse {
+    result: EvalResultPayload,
+}
+
+#[derive(Deserialize)]
+#[serde(tag = "kind", rename_all = "lowercase")]
+enum EvalResultPayload {
+    Tensor {
+        handle: String,
+        shape: Vec<usize>,
+        device: String,
+    },
+    String {
+        value: String,
+    },
+}
+
+#[derive(Deserialize)]
+struct TransferResponse {
+    tensor: String,
+}
+
+impl RemoteMlxDispatcher {
+    #[must_use]
+    pub fn new(peers: PeerRegistry, sessions: PeerSessionMap) -> Self {
+        Self { peers, sessions }
+    }
+}
+
+impl PeerDispatcher for RemoteMlxDispatcher {
+    #[rustfmt::skip]
+    fn dispatch_block(
+        &self,
+        device: &str,
+        source: &str,
+        bindings: std::collections::HashMap<String, DenseArray>,
+    ) -> Option<Result<Value, EvalError>> {
+        let peer = self.peers.get(device)?.clone();
+        let session = self.sessions.get_or_create(&peer);
+        let bindings = crate::peers::encode_bindings(bindings);
+        let (session, bindings) = match (session, bindings) {
+            (Ok(session), Ok(bindings)) => (session, bindings),
+            (Err(e), _) | (_, Err(e)) => return Some(Err(e)),
+        };
+        let body = EvalOnDeviceRequest { program: source.to_string(), bindings };
+        let url = format!(
+            "{}/v1/sessions/{}/eval-on-device",
+            peer.url.trim_end_matches('/'),
+            session.id
+        );
+        let client = peer.client;
+        let token = session.token;
+        let result = std::thread::spawn(move || {
+            client
+                .post(url)
+                .bearer_auth(&token)
+                .json(&body)
+                .send()
+                .and_then(reqwest::blocking::Response::error_for_status)?
+                .json::<EvalOnDeviceResponse>()
+        })
+        .join()
+        .map_err(|_| EvalError::Unsupported("remote peer thread panicked".into()));
+        Some(result.and_then(|r| {
+            r.map_err(|e| EvalError::Unsupported(format!("remote peer request: {e}")))
+        }).map(|r| match r.result {
+            EvalResultPayload::Tensor { handle, shape, device } => {
+                Value::DeviceTensor { peer: peer.url, handle, shape, device }
+            }
+            EvalResultPayload::String { value } => Value::Str(value),
+        }))
+    }
+
+    fn fetch_tensor(&self, peer_url: &str, handle: &str) -> Result<DenseArray, EvalError> {
+        let peer = self
+            .peers
+            .values()
+            .find(|p| p.url == peer_url)
+            .ok_or_else(|| EvalError::Unsupported(format!("unknown peer {peer_url}")))?;
+        let session = self.sessions.get_or_create(peer)?;
+        let url = format!(
+            "{}/v1/sessions/{}/transfer",
+            peer.url.trim_end_matches('/'),
+            session.id
+        );
+        let client = peer.client;
+        let token = session.token;
+        let handle = handle.to_string();
+        let resp = std::thread::spawn(move || {
+            client
+                .post(url)
+                .bearer_auth(&token)
+                .json(&serde_json::json!({ "handle": handle }))
+                .send()
+                .and_then(reqwest::blocking::Response::error_for_status)?
+                .json::<TransferResponse>()
+        })
+        .join()
+        .map_err(|_| EvalError::Unsupported("remote peer thread panicked".into()))?
+        .map_err(|e| EvalError::Unsupported(format!("remote peer request: {e}")))?;
+        crate::peers::decode_from_json(&resp.tensor)
+    }
 }
 
 /// Build the axum router with the session-map state
@@ -64,6 +192,7 @@ pub fn build_app_with_peers(auth_mode: AuthMode, peers: crate::peers::PeerRegist
     let state = AppState {
         sessions: new_map(),
         peers,
+        peer_sessions: PeerSessionMap::default(),
         auth_mode,
     };
     Router::new()

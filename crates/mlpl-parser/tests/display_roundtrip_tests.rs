@@ -94,6 +94,11 @@ fn device_block() {
 }
 
 #[test]
+fn assign_device_block() {
+    roundtrip("x = device(\"mlx\") { iota(3) }");
+}
+
+#[test]
 fn device_block_multi_stmt() {
     roundtrip("device(\"mlx\") { a = iota(3); b = a * 2 }");
 }

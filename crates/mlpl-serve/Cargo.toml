@@ -20,6 +20,7 @@ path = "src/main.rs"
 [dependencies]
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-eval = { path = "../mlpl-eval" }
+mlpl-array = { path = "../mlpl-array" }
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
 tower = "0.4"
@@ -40,6 +41,8 @@ subtle = "2"
 # coexists with the async client used by the
 # tokio-based integration tests below.
 reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+base64 = "0.22"
+bincode = "1"
 
 [dev-dependencies]
 # Saga 21: tokio-based api_tests use the async

@@ -62,6 +62,11 @@ pub(crate) fn eval_expr(
     {
         return Ok(Value::Str(s.clone()));
     }
+    if let Expr::Ident(name, _) = expr
+        && let Some(v) = env.get_device_tensor(name)
+    {
+        return Ok(v.clone());
+    }
     if let Expr::FnCall { name, args, .. } = expr
         && name == "svg"
     {
@@ -131,7 +136,7 @@ pub(crate) fn eval_expr(
         && name == "to_device"
     {
         let result = crate::device::eval_to_device(args, env, trace)?;
-        return Ok(Value::Array(result));
+        return Ok(result);
     }
     if let Expr::FnCall { name, args, .. } = expr
         && name == "perturb_params"
@@ -392,6 +397,9 @@ pub(crate) fn eval_expr(
     {
         return result.map(Value::Str);
     }
+    if let Expr::Device { target, body, .. } = expr {
+        return crate::device::eval_device(target, body, env, trace);
+    }
     let (op_name, inputs, result) = match expr {
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),
         Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
@@ -440,15 +448,9 @@ pub(crate) fn eval_expr(
                     }
                     ("assign", vec![TraceValue::from_array(&val)], val)
                 }
-                Value::DeviceTensor { peer, device, .. } => {
-                    // Saga R1 step 002: DeviceTensor binding in
-                    // Environment lands when step 003 wires the
-                    // orchestrator's `device("mlx") { ... }` block
-                    // routing. Today the variant exists for the
-                    // peer-side eval-on-device handler to construct
-                    // and return; the orchestrator-side bind path
-                    // doesn't reach this branch yet.
-                    return Err(EvalError::DeviceTensorFault { peer, device });
+                Value::DeviceTensor { .. } => {
+                    env.set_device_tensor(name.clone(), v.clone());
+                    return Ok(v);
                 }
             }
         }
@@ -466,7 +468,7 @@ pub(crate) fn eval_expr(
         Expr::Experiment { name, body, .. } => {
             crate::experiment::eval_experiment(name, body, env, trace)?
         }
-        Expr::Device { target, body, .. } => crate::device::eval_device(target, body, env, trace)?,
+        Expr::Device { .. } => unreachable!(),
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;

@@ -2,13 +2,36 @@
 
 use std::collections::{HashMap, HashSet};
 use std::path::PathBuf;
+use std::sync::Arc;
 
 use mlpl_array::DenseArray;
 
+use crate::error::EvalError;
 use crate::experiment::ExperimentRecord;
 use crate::grad::OptimizerState;
 use crate::model::ModelSpec;
 use crate::tokenizer::TokenizerSpec;
+use crate::value::Value;
+
+/// Orchestrator hook for remote device peers. Implemented by
+/// `mlpl-serve`; absent in local REPL / web eval, where device blocks
+/// fall back to the in-process path.
+pub trait PeerDispatcher: Send + Sync + std::fmt::Debug {
+    fn dispatch_block(
+        &self,
+        _device: &str,
+        _source: &str,
+        _bindings: HashMap<String, DenseArray>,
+    ) -> Option<Result<Value, EvalError>> {
+        None
+    }
+
+    fn fetch_tensor(&self, peer: &str, _handle: &str) -> Result<DenseArray, EvalError> {
+        Err(EvalError::Unsupported(format!(
+            "no peer dispatcher can fetch tensor from {peer}"
+        )))
+    }
+}
 
 /// Variable bindings for evaluation.
 #[derive(Clone, Debug, Default)]
@@ -62,6 +85,11 @@ pub struct Environment {
     /// first `device("mlx") { }` entry under that condition; the
     /// warning is emitted at most once per `Environment`.
     pub(crate) mlx_fallback_warned: bool,
+    /// Optional remote peer dispatcher installed by the orchestrator
+    /// around one eval call. Local eval leaves this unset.
+    pub(crate) peer_dispatcher: Option<Arc<dyn PeerDispatcher>>,
+    /// Peer-resident tensor handles bound by assignment.
+    pub(crate) device_tensors: HashMap<String, Value>,
 }
 
 impl Environment {
@@ -258,6 +286,32 @@ impl Environment {
     /// `device("mlx") { }` block.
     pub fn set_tensor_device(&mut self, name: String, target: String) {
         self.tensor_device.insert(name, target);
+    }
+
+    pub fn set_peer_dispatcher(&mut self, dispatcher: Arc<dyn PeerDispatcher>) {
+        self.peer_dispatcher = Some(dispatcher);
+    }
+
+    pub fn clear_peer_dispatcher(&mut self) {
+        self.peer_dispatcher = None;
+    }
+
+    #[must_use]
+    pub fn peer_dispatcher(&self) -> Option<Arc<dyn PeerDispatcher>> {
+        self.peer_dispatcher.clone()
+    }
+
+    pub fn set_device_tensor(&mut self, name: String, value: Value) {
+        self.device_tensors.insert(name, value);
+    }
+
+    #[must_use]
+    pub fn get_device_tensor(&self, name: &str) -> Option<&Value> {
+        self.device_tensors.get(name)
+    }
+
+    pub fn remove_device_tensor(&mut self, name: &str) {
+        self.device_tensors.remove(name);
     }
 }
 

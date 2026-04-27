@@ -1,0 +1,11 @@
+{
+  "task_type": "primitive",
+  "state": {
+    "number": 3,
+    "step": "peer-routing-and-workspace-split"
+  },
+  "action": "Hit a budget wall on Display for Expr at 79 LOC (max 50) -- factored fmt_body / fmt_comma_seq / fmt_scope helpers; inlined fmt_float_lit back as match guards to keep ast.rs at 7 fns. peers.rs hit 13 fns when I'd inlined unit tests; moved to sibling tests/peers_tests.rs file. Mid-step disk pressure: target/ at 6.7 GB during clippy; cargo clean --release recovered 450 MB. Workspace split's gross disk math is mixed -- main target/ stayed at 6.9G (reqwest blocking now in mlpl-serve), services target/ adds 643M, but each tree is independently buildable + cleanable which is the point.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-26T15:00:20"
+}
