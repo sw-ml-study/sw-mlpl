@@ -1,0 +1,9 @@
+number = 1
+slug = "demo-plan-docs"
+status = "in-progress"
+description = "Create demo-support planning docs for HRM, TRM, Baby Dragon Hatchlings, SmolL..."
+role = "production"
+context_files = []
+created_at = "2026-04-27T09:22:24"
+task_type = "planning"
+commits = []
