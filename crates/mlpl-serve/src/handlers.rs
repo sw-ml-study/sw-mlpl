@@ -14,6 +14,7 @@ use axum::response::IntoResponse;
 use mlpl_eval::{Environment, Value, eval_program_value};
 use mlpl_parser::{lex, parse};
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use uuid::Uuid;
 
 use crate::auth::{AuthMode, check_token, extract_bearer};
@@ -108,8 +109,15 @@ pub async fn eval_handler(
         lex(&body.program).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
     let stmts =
         parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
-    let value = eval_program_value(&stmts, &mut session.env)
-        .map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
+    session
+        .env
+        .set_peer_dispatcher(Arc::new(crate::server::RemoteMlxDispatcher::new(
+            state.peers.clone(),
+            state.peer_sessions.clone(),
+        )));
+    let value = eval_program_value(&stmts, &mut session.env);
+    session.env.clear_peer_dispatcher();
+    let value = value.map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
     let kind = value_kind(&value);
     Ok(Json(EvalResponse {
         value: format!("{value}"),

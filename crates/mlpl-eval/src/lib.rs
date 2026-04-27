@@ -25,7 +25,7 @@ mod model_tape;
 mod tokenizer;
 mod value;
 
-pub use env::{Environment, model_params};
+pub use env::{Environment, PeerDispatcher, model_params};
 pub use error::EvalError;
 pub use eval::{eval_program, eval_program_traced, eval_program_value};
 pub use experiment::{ExperimentRecord, ParamShape};

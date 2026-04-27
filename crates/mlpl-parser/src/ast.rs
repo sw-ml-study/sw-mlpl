@@ -225,11 +225,7 @@ fn fmt_comma_seq(f: &mut fmt::Formatter<'_>, exprs: &[Expr]) -> fmt::Result {
     Ok(())
 }
 
-fn fmt_scope(
-    f: &mut fmt::Formatter<'_>,
-    head: &dyn fmt::Display,
-    body: &[Expr],
-) -> fmt::Result {
+fn fmt_scope(f: &mut fmt::Formatter<'_>, head: &dyn fmt::Display, body: &[Expr]) -> fmt::Result {
     write!(f, "{head} {{ ")?;
     fmt_body(f, body)?;
     write!(f, " }}")

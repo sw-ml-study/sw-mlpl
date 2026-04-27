@@ -7,8 +7,15 @@
 //! registration + mDNS auto-discovery).
 
 use std::collections::HashMap;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
+
+use base64::Engine;
+use base64::engine::general_purpose::STANDARD as BASE64;
+use mlpl_array::{DenseArray, Shape};
+use mlpl_eval::EvalError;
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 const PEER_TIMEOUT_SECS: u64 = 600;
 
@@ -18,7 +25,7 @@ const PEER_TIMEOUT_SECS: u64 = 600;
 #[derive(Clone, Debug)]
 pub struct Peer {
     pub url: String,
-    pub client: reqwest::blocking::Client,
+    pub client: &'static reqwest::blocking::Client,
 }
 
 /// Shared peer registry, keyed by device name. R1
@@ -26,6 +33,32 @@ pub struct Peer {
 /// build-once-at-startup-immutable; R3 will swap to
 /// `Arc<RwLock<...>>` for dynamic registration.
 pub type PeerRegistry = Arc<HashMap<String, Peer>>;
+
+#[derive(Clone, Debug, Default)]
+pub struct PeerSessionMap {
+    inner: Arc<Mutex<HashMap<String, PeerSession>>>,
+}
+
+#[derive(Clone, Debug)]
+pub struct PeerSession {
+    pub id: Uuid,
+    pub token: String,
+}
+
+#[derive(Deserialize)]
+struct CreateSessionResponse {
+    session_id: Uuid,
+    token: String,
+}
+
+#[derive(Serialize, Deserialize)]
+struct WireEnvelope {
+    version: u32,
+    dtype: u8,
+    ndim: u8,
+    shape: Vec<u64>,
+    data: Vec<u8>,
+}
 
 /// Construct an empty registry.
 #[must_use]
@@ -78,10 +111,15 @@ pub fn build_registry(
                  (each device may have at most one peer in R1)"
             ));
         }
-        let client = reqwest::blocking::Client::builder()
-            .timeout(Duration::from_secs(PEER_TIMEOUT_SECS))
-            .build()
-            .map_err(|e| format!("reqwest client for {device}: {e}"))?;
+        let client = std::thread::spawn(|| {
+            reqwest::blocking::Client::builder()
+                .timeout(Duration::from_secs(PEER_TIMEOUT_SECS))
+                .build()
+        })
+        .join()
+        .map_err(|_| format!("reqwest client for {device}: builder thread panicked"))?
+        .map_err(|e| format!("reqwest client for {device}: {e}"))?;
+        let client = Box::leak(Box::new(client));
         map.insert(device, Peer { url, client });
     }
     Ok(Arc::new(map))
@@ -102,3 +140,78 @@ fn is_loopback_url(url: &str) -> bool {
     matches!(host, "localhost" | "127.0.0.1" | "::1" | "0:0:0:0:0:0:0:1")
 }
 
+impl PeerSessionMap {
+    pub fn get_or_create(&self, peer: &Peer) -> Result<PeerSession, EvalError> {
+        if let Some(session) = self.inner.lock().unwrap().get(&peer.url).cloned() {
+            return Ok(session);
+        }
+        let url = format!("{}/v1/sessions", peer.url.trim_end_matches('/'));
+        let client = peer.client;
+        let resp = std::thread::spawn(move || {
+            client
+                .post(url)
+                .send()
+                .map_err(|e| EvalError::Unsupported(format!("remote peer request: {e}")))?
+                .error_for_status()
+                .map_err(|e| EvalError::Unsupported(format!("remote peer request: {e}")))?
+                .json::<CreateSessionResponse>()
+                .map_err(|e| EvalError::Unsupported(format!("remote peer request: {e}")))
+        })
+        .join()
+        .map_err(|_| EvalError::Unsupported("remote peer thread panicked".into()))??;
+        let session = PeerSession {
+            id: resp.session_id,
+            token: resp.token,
+        };
+        self.inner
+            .lock()
+            .unwrap()
+            .insert(peer.url.clone(), session.clone());
+        Ok(session)
+    }
+}
+
+pub fn encode_bindings(
+    bindings: HashMap<String, DenseArray>,
+) -> Result<Vec<crate::server::EvalOnDeviceBinding>, EvalError> {
+    bindings
+        .into_iter()
+        .map(|(name, arr)| {
+            let shape = arr.shape().dims().iter().map(|d| *d as u64).collect();
+            let data = arr.data().iter().flat_map(|v| v.to_le_bytes()).collect();
+            let bytes = bincode::serialize(&WireEnvelope {
+                version: 1,
+                dtype: 0,
+                ndim: arr.rank() as u8,
+                shape,
+                data,
+            })
+            .map_err(|e| EvalError::Unsupported(format!("wire encode: {e}")))?;
+            Ok(crate::server::EvalOnDeviceBinding {
+                name,
+                tensor: BASE64.encode(bytes),
+            })
+        })
+        .collect()
+}
+
+pub fn decode_from_json(s: &str) -> Result<DenseArray, EvalError> {
+    let bytes = BASE64
+        .decode(s)
+        .map_err(|e| EvalError::Unsupported(format!("wire base64: {e}")))?;
+    let env: WireEnvelope = bincode::deserialize(&bytes)
+        .map_err(|e| EvalError::Unsupported(format!("wire decode: {e}")))?;
+    if env.version != 1 || env.dtype != 0 || env.shape.len() != env.ndim as usize {
+        return Err(EvalError::Unsupported("wire envelope mismatch".into()));
+    }
+    let dims: Vec<usize> = env.shape.iter().map(|d| *d as usize).collect();
+    if env.data.len() != dims.iter().product::<usize>() * 8 {
+        return Err(EvalError::Unsupported("wire data length mismatch".into()));
+    }
+    let data = env
+        .data
+        .chunks_exact(8)
+        .map(|chunk| f64::from_le_bytes(chunk.try_into().unwrap()))
+        .collect();
+    DenseArray::new(Shape::new(dims), data).map_err(EvalError::from)
+}

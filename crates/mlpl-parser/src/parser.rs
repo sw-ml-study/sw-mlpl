@@ -202,6 +202,7 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 Ok(expr)
             }
+            TokenKind::Device => self.parse_device(),
             _ => Err(ParseError::UnexpectedToken {
                 found: describe_kind(&tok.kind),
                 span: tok.span,
