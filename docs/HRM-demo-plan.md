@@ -27,8 +27,9 @@ metrics, trace, and visualization in one small program.
 
 ## Repository strategy
 
-Use the existing HRM repo as the home for demo-specific code, data,
-run scripts, and artifacts. This plan is for adding an sw-MLPL track
+Use the existing `softwarewrighter/viz-hrm-ft` repo as the home for
+demo-specific code, data, run scripts, visualizations, fine-tuning
+experiments, and artifacts. This plan is for adding an sw-MLPL track
 to that repo, not for creating a new repo.
 
 Suggested layout inside the existing repo:
@@ -104,7 +105,8 @@ interpreter and expose a stable CLI around the `.mlpl` program.
 3. MLX training with remote peer support.
 4. Recurrent trace visualization.
 5. Compiled app wrapper.
-6. Separate repo with reproducible run scripts.
+6. Update `softwarewrighter/viz-hrm-ft` with reproducible sw-MLPL run
+   scripts.
 
 ## Acceptance tests
 
@@ -118,3 +120,4 @@ interpreter and expose a stable CLI around the `.mlpl` program.
 
 - HRM paper page: <https://huggingface.co/papers/2506.21734>
 - arXiv record: <https://arxiv.org/abs/2506.21734>
+- Existing sw project repo: <https://github.com/softwarewrighter/viz-hrm-ft>
