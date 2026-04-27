@@ -1,0 +1,1 @@
+Archived the completed MLX service saga and created demo-support planning docs for HRM, TRM, Baby Dragon Hatchlings, SmolLM2, and Tic-Tac-Toe/tiny neural networks. The plans defer CUDA, assume the existing external repos host demo-specific work, and define the sw-MLPL language/runtime support needed for REPL, MLX, and compiled-app paths.
