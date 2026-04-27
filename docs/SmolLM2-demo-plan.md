@@ -27,12 +27,12 @@ local MLX demo.
 
 ## Repository strategy
 
-Use the existing SmolLM2 repo as the home for demo-specific code,
-tokenizer/weight download instructions, adapter artifacts, and example
-datasets. This plan is for adding an sw-MLPL track to that repo, not
-for creating a new repo. Base weights, tokenizer files, adapter
-artifacts, and example datasets should not live in the MLPL language
-repo.
+Use the existing `softwarewrighter/efficient-llm` repo as the home
+for demo-specific code, tokenizer/weight download instructions,
+adapter artifacts, and example datasets. This plan is for adding an
+sw-MLPL track to that repo, not for creating a new repo. Base weights,
+tokenizer files, adapter artifacts, and example datasets should not
+live in the MLPL language repo.
 
 Suggested layout inside the existing repo:
 
@@ -106,8 +106,8 @@ target/smollm2-demo \
 4. Train a tiny adapter on MLX using remote peer.
 5. Add eval prompts and before/after comparison.
 6. Build compiled inference wrapper.
-7. Keep demo-specific artifacts in the existing SmolLM2 repo and keep
-   only reusable language/runtime support in `sw-mlpl`.
+7. Keep demo-specific artifacts in `softwarewrighter/efficient-llm`
+   and keep only reusable language/runtime support in `sw-mlpl`.
 
 ## Acceptance tests
 
@@ -127,3 +127,5 @@ target/smollm2-demo \
 - SmolLM2 1.7B model card:
   <https://huggingface.co/HuggingFaceTB/SmolLM2-1.7B>
 - SmolLM2 paper: <https://arxiv.org/abs/2502.02737>
+- Existing sw project repo:
+  <https://github.com/softwarewrighter/efficient-llm>
