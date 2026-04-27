@@ -1,0 +1,36 @@
+# Remote MLX peer demo.
+#
+# Start the peer on the Apple Silicon host:
+#   cd services/mlpl-mlx-serve
+#   cargo run --release -- --bind 127.0.0.1:6465
+#
+# Start the orchestrator on the client host:
+#   cargo run --release -p mlpl-serve -- --peer mlx=http://127.0.0.1:6465
+#
+# Then connect a REPL to the orchestrator and paste this file, or run the
+# expressions one block at a time.
+
+remote_vec = device("mlx") {
+  iota(5)
+}
+
+# Device tensors are opaque in the orchestrator. Fetch bytes explicitly when
+# a CPU value is needed.
+remote_vec_cpu = to_device("cpu", remote_vec)
+
+losses = device("mlx") {
+  X = reshape(iota(16), [2, 8])
+  Y = X
+  model = chain(linear(8, 16, 0), tanh_layer(), linear(16, 8, 1))
+  to_device("mlx", X)
+  to_device("mlx", Y)
+  train 8 {
+    pred = apply(model, X)
+    diff = pred - Y
+    loss = mean(diff * diff)
+    adam(loss, model, 0.01, 0.9, 0.999, 0.00000001)
+    loss
+  }
+}
+
+losses_cpu = to_device("cpu", losses)

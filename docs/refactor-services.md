@@ -1,9 +1,9 @@
 # Refactor: Device Backends as Services
 
-> **Status:** design / proposal. Not yet a saga. Treat
-> as direction-setting until the first refactor saga
-> opens. See `docs/plan.md` for the proposed saga
-> decomposition.
+> **Status:** Saga R1 shipped in v0.18.0. This document now
+> tracks the service direction, the R1 result, and the remaining
+> R2 / R3 work. See `docs/status.md` for the current saga
+> scoreboard.
 
 ## Why this exists
 
@@ -67,13 +67,14 @@ feature is enabled, falling back to CPU otherwise.
 Saga 17's plan was to add `device("cuda") { ... }`
 the same way.
 
-## Proposed architecture (device backends as services)
+## Current architecture after R1
 
-Promote each device backend to its own long-running
-service process. The interpreter forwards
-device-scoped blocks over the wire to the
-appropriate peer, which holds device-resident
-tensors and returns results.
+R1 promoted MLX to a long-running service process
+without removing the in-process MLX fallback. The
+interpreter forwards device-scoped blocks over the
+wire to a registered peer when one exists. The peer
+holds device-resident tensors and returns opaque
+handles; CPU materialization is explicit.
 
 ```
    [ mlpl-web (WASM) ]    [ mlpl-repl (CLI) ]
@@ -92,9 +93,9 @@ tensors and returns results.
         ("mlx") |            |  ("cuda")
           v     |            |     v
 +----------------+      +-------------------+
-| mlpl-serve     |      | mlpl-serve        |
-| --device mlx   |      | --device cuda     |
-| (Apple Silicon)|      | (Linux + NVIDIA)  |
+| mlpl-mlx-serve |      | mlpl-cuda-serve   |
+| (Apple Silicon)|      | (Linux + NVIDIA,  |
+| shipped R1)    |      | planned R2)       |
 +----------------+      +-------------------+
 ```
 
@@ -108,12 +109,14 @@ serve them.
 
 ### Key invariants
 
-- **One server binary, multiple roles.** Same
-  `mlpl-serve` binary; `--device <name>` flag (or
-  feature-flag-gated set of devices it advertises)
-  selects what hardware it manages locally.
-  `--peer <name>=<url>` registers a peer that owns
-  hardware this host doesn't.
+- **Orchestrator plus device-service peers.** R1
+  intentionally shipped a separate
+  `mlpl-mlx-serve` workspace instead of a single
+  `mlpl-serve --device mlx` binary. This avoids a
+  dependency cycle and keeps the heavy MLX service
+  build in its own target tree. `--peer
+  <name>=<url>` on the orchestrator registers a
+  peer that owns hardware this host doesn't.
 - **Tensors live on-device.** A tensor created
   inside a `device("mlx") { ... }` block stays on
   the MLX peer's heap. The orchestrator gets back
@@ -137,28 +140,26 @@ serve them.
 
 ### Protocol additions to `mlpl-serve`
 
-Layer over Saga 21's REST surface:
+Layer over Saga 21's REST surface. R1 shipped the
+minimal subset needed for MLX:
 
-- `POST /v1/sessions/{id}/eval-on-device` --
-  request body: `{device: "mlx" | "cuda", program:
-  "<MLPL source>"}`. Server-side: forwards to the
-  registered peer that owns `device`, awaits the
-  result, returns `{value, kind, tensor_handles:
-  [...]}`. If no peer owns the device, falls back
-  to in-process (so a single-host MLX server still
-  works without peer registration).
-- `GET /v1/peers` -- lists registered peers + the
-  devices each one advertises. No auth (LAN-only
-  deployment assumption; LLM-proxy-style allow-
-  lists are a separate concern).
-- `POST /v1/peers/register` -- register a peer
-  (or auto-discovery via mDNS for LAN; out of
-  scope for the first refactor saga).
+- `--peer mlx=<url>` on the orchestrator registers
+  a static peer at process start. Non-loopback peer
+  URLs require `--insecure-peers`.
+- `POST /v1/sessions` on the peer creates a lazy
+  peer session the first time an orchestrator
+  forwards work.
+- `POST /v1/sessions/{id}/eval` is reused for the
+  forwarded block source.
 - `POST /v1/sessions/{id}/transfer` --
   `to_device(...)` materialization. Pull a peer-
   resident tensor handle back to the
   orchestrator's heap (or push a local tensor to
   a peer for subsequent device-scoped work).
+
+`GET /v1/peers`, dynamic peer registration, peer
+discovery, CUDA routing, streaming, and cancellation
+remain R2 / R3 or follow-up work.
 
 The existing `POST /v1/sessions/{id}/eval`
 remains unchanged for CPU work. Block-routing is
@@ -237,16 +238,17 @@ three sequential sagas, in this order:
 
 ### Saga R1 -- Refactor mlpl-mlx into mlpl-mlx-serve
 
+Status: shipped in v0.18.0.
+
 Take the existing `crates/mlpl-mlx` and split it:
 
 - `crates/mlpl-mlx-rt` -- the pure FFI surface
   (Accelerate / Metal bindings + ops). Library-
   only.
-- `crates/mlpl-mlx-serve` -- a new binary that
-  reuses `mlpl-serve`'s session + bearer-auth
-  machinery and exposes a `--device mlx` mode.
-  Implements the `eval-on-device` endpoint
-  pattern by lex+parse+running the block source
+- `services/mlpl-mlx-serve` -- a new binary
+  workspace with its own lockfile and `target/`.
+  It reuses `mlpl-serve`'s session + bearer-auth
+  machinery and evaluates forwarded block source
   against an MLX-bound `Environment`.
 - `mlpl-eval`'s `device::dispatched_call` keeps
   its in-process feature-gated path AS A
@@ -261,6 +263,28 @@ heavy MLX bindings; `mlpl-mlx-serve` is its own
 workspace target tree, separately buildable. A
 Linux dev host that doesn't need MLX never
 compiles either.
+
+### R1 lessons
+
+- A separate service workspace was the right
+  first cut. The main workspace can build and test
+  orchestration without pulling the service binary
+  into its package graph, while the MLX peer has a
+  clean target tree of its own.
+- The service still depends on `mlpl-serve` for
+  session and HTTP machinery, so the orchestrator
+  cannot depend back on the service crate. R1
+  duplicated the small tensor wire encode/decode
+  helpers in the orchestrator peer path. If this
+  grows, split a tiny shared wire crate.
+- Strict CPU faults are better than implicit
+  transfer. Users see the real cost boundary and
+  write `to_device("cpu", x)` when they actually
+  need bytes back.
+- Static `--peer mlx=<url>` registration is enough
+  for a release. Dynamic discovery and peer-trust
+  design should wait until CUDA gives the protocol
+  a second backend.
 
 ### Saga R2 -- CUDA backend AS A SERVICE (replaces Saga 17)
 

@@ -12,8 +12,19 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-04-26
+
+- Saga R1 step 004 block forwarding and fetch
+- feat(mlpl-parser,mlpl-serve,services): Saga R1 step 003 -- Display impl + peers infrastructure + workspace split
+- feat(mlpl-mlx-serve,mlpl-eval): Saga R1 step 002 -- wire format + Value::DeviceTensor + real eval-on-device
+
 ## 2026-04-24
 
+- feat(mlpl-mlx-rt,mlpl-mlx-serve): Saga R1 step 001 -- crate split + service skeleton
+- chore(agentrail,plan): archive Saga 21 + open Saga R1 (mlpl-mlx as a service, v0.18.0)
+- docs(refactor-services): plan device backends as separate processes
+- chore(web,pages): replace 2.9MB mlpl-badge.png with 3.3KB WebP
+- release(v0.17.0): Saga 21 MVP COMPLETE -- CLI Server + Multi-Client UI
 - feat(mlpl-cli,mlpl-repl,docs): Saga 21 step 003 -- CLI viz cache + using-cli-server.md
 - feat(mlpl-repl,mlpl-serve): Saga 21 step 002 -- --connect client + /inspect endpoint
 - feat(mlpl-serve): Saga 21 step 001 -- skeleton + sessions + eval + health

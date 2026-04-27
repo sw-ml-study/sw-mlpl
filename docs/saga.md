@@ -149,6 +149,64 @@ Measured 9.05x speedup on a 100x100 reshape+reduce workload
 this saga; they require tape-state or loop lowering. Delivered
 v0.8. See `docs/milestone-compile-to-rust.md`.
 
+## Saga R1: MLX as a Service (COMPLETE)
+R1 shipped the first concrete backend-service
+split. `services/mlpl-mlx-serve` is now a separate
+workspace and service binary for Apple Silicon MLX
+work, while the main `mlpl-serve` process acts as
+an orchestrator. The orchestrator accepts
+`--peer mlx=<url>`, keeps CPU evaluation local,
+and forwards whole `device("mlx") { ... }` blocks
+to the peer when one is registered. Peer sessions
+are created lazily and cached per orchestrator
+session. The result of a remote device block is an
+opaque `Value::DeviceTensor { peer, handle, shape,
+device }`, not copied bytes.
+
+The most important user-facing rule is strict
+materialization: a CPU operation on a peer tensor
+faults with guidance to call `to_device("cpu", x)`.
+That explicit fetch path calls the peer transfer
+endpoint, decodes the f64 tensor envelope, and
+rebinds the value as a normal local array. The old
+`to_device(x, "cpu")` spelling remains accepted
+for compatibility, but the canonical form is
+`to_device("cpu", x)`.
+
+Design deviations from the original services
+proposal were deliberate. R1 shipped
+`mlpl-mlx-serve` as its own workspace rather than
+folding every role into one `mlpl-serve --device`
+binary; the service already depends on
+`mlpl-serve` for session and HTTP machinery, so
+the orchestrator peer helpers duplicate a small
+wire encode/decode surface for now instead of
+creating a dependency cycle. If the protocol grows,
+a tiny shared wire crate is the obvious cleanup.
+Static `--peer` registration also won over dynamic
+registration for the first release. Loopback is the
+safe default, and non-loopback peer URLs require
+`--insecure-peers` until peer trust and discovery
+get their own design.
+
+The split is a disk-pressure improvement, not a
+magic shrink. The main `target/` and the service
+`target/` are independently cleanable and buildable;
+during release validation the service target sat at
+about 1 GB while the already-warm main target stayed
+around 10 GB. That separation matters for the Linux
+dev-host move and for R2, where CUDA should follow
+the same service shape instead of entering the main
+workspace as another in-process optional backend.
+
+Shipped artifacts: `demos/mlx_remote.mlpl`,
+`docs/using-mlx-service.md`, refreshed
+configuration/status/refactor docs, peer dispatcher
+tests in `mlpl-eval`, peer routing tests in
+`mlpl-serve`, and the existing service API / wire
+tests. Delivered v0.18.0. Next: Saga R2, CUDA as a
+service, after the Linux + NVIDIA dev host move.
+
 ## Saga 21: CLI Server + Multi-Client UI (MVP) (COMPLETE)
 First piece of the multi-client story: a long-
 running MLPL interpreter exposed as a REST server
@@ -220,9 +278,10 @@ surface, the desktop GUI wrapper (tauri / wry),
 the Emacs client, the ratatui TUI client, and
 other viz formats (PNG / HTML / JSON). Each lands
 in a follow-up saga after the MVP server contract
-proves stable. Delivered v0.17.0. Next: the dev
-host move to Linux + NVIDIA, then Saga 17 (CUDA +
-distributed execution).
+proves stable. Delivered v0.17.0. R1 followed by
+turning MLX into a peer service; next service work
+is the dev host move to Linux + NVIDIA, then R2
+(CUDA as a service).
 
 ## Saga 19: LLM-as-Tool REST Integration (COMPLETE)
 A language-level builtin that POSTs to an Ollama-
