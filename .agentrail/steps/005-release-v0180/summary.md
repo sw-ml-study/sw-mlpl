@@ -1,0 +1,1 @@
+Released v0.18.0 for Saga R1: added remote MLX demo and service guide, refreshed configuration/status/refactor/saga docs, bumped main and service workspaces to 0.18.0, regenerated CHANGES.md, validated release builds and gates, committed and pushed dbcdc6f, and created local tag v0.18.0 without pushing it.

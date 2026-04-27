@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 5,
+    "step": "release-v0180"
+  },
+  "action": "Used CLAUDE/AGENTS AgentRail flow; edited release docs/demo/version files; ran cargo build --release in main and services/mlpl-mlx-serve; ran cargo test and clippy in both workspaces; ran cargo fmt checks, markdown checks for touched docs, sw-checklist baseline, demo smoke run, gen-changes, git commit/push, local git tag; cleaned target directories for disk policy.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-04-26T19:03:15"
+}
