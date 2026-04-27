@@ -1,6 +1,6 @@
 number = 5
 slug = "release-v0180"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 3 step 004: demo + docs + release v0.18.0.
 
@@ -8,5 +8,6 @@ Phase 3 step 004: demo + docs + release v0.18.0.
 role = "production"
 context_files = []
 created_at = "2026-04-24T20:19:11"
+completed_at = "2026-04-26T19:03:15"
 task_type = "release"
-commits = []
+commits = ["dbcdc6fe4631adb0d45a1db45c2bac04eb760b5b"]
