@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use mlpl_array::DenseArray;
+use mlpl_core::ValueTag;
 
 use crate::error::EvalError;
 use crate::experiment::ExperimentRecord;
@@ -90,6 +91,14 @@ pub struct Environment {
     pub(crate) peer_dispatcher: Option<Arc<dyn PeerDispatcher>>,
     /// Peer-resident tensor handles bound by assignment.
     pub(crate) device_tensors: HashMap<String, Value>,
+    /// Saga 23 step 001: optional ValueTag attached per binding
+    /// name. Auto-tagged by producer ops in steps 002+; consumed
+    /// by predicate-checked consumers, `:describe` / `:vars` /
+    /// `:tags`, and trace JSON. Re-binding a name with a new tag
+    /// overwrites; clearing is explicit via `clear_tag`. Untyped
+    /// bindings keep working unchanged (gradual-typing
+    /// additivity rule).
+    pub(crate) tags: HashMap<String, ValueTag>,
 }
 
 impl Environment {
@@ -312,6 +321,30 @@ impl Environment {
 
     pub fn remove_device_tensor(&mut self, name: &str) {
         self.device_tensors.remove(name);
+    }
+
+    /// Saga 23 step 001: attach a `ValueTag` to a binding name.
+    /// Overwrites any prior tag for the same name.
+    pub fn set_tag(&mut self, name: String, tag: ValueTag) {
+        self.tags.insert(name, tag);
+    }
+
+    /// Saga 23 step 001: look up a binding's tag, if any.
+    #[must_use]
+    pub fn get_tag(&self, name: &str) -> Option<&ValueTag> {
+        self.tags.get(name)
+    }
+
+    /// Saga 23 step 001: clear any tag attached to `name`. No-op
+    /// when `name` is not currently tagged.
+    pub fn clear_tag(&mut self, name: &str) {
+        self.tags.remove(name);
+    }
+
+    /// Saga 23 step 001: iterate every (name, tag) pair. Used by
+    /// `:tags` listing in step 005.
+    pub fn tags_iter(&self) -> impl Iterator<Item = (&String, &ValueTag)> {
+        self.tags.iter()
     }
 }
 

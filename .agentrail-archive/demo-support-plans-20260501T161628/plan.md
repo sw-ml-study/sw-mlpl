@@ -1,0 +1,1 @@
+Plan demo-support features and repo/demo strategy for HRM, TRM, Baby Dragon Hatchlings, SmolLM2, and Tic-Tac-Toe/tiny neural networks. Deliver planning docs under docs/*-demo-plan.md, then validate docs and commit.

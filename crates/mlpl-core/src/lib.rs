@@ -7,7 +7,9 @@
 mod ident;
 mod labels;
 mod span;
+mod value_tag;
 
 pub use ident::Identifier;
 pub use labels::LabeledShape;
 pub use span::Span;
+pub use value_tag::{ActivationKind, LossKind, ValueTag};

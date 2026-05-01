@@ -1,0 +1,12 @@
+number = 1
+slug = "tag-enum-side-table"
+status = "in-progress"
+description = """
+Saga 23 step 001: tag-enum-side-table.
+
+Goal: ship the ValueTag enum and Envi..."""
+role = "production"
+context_files = []
+created_at = "2026-05-01T16:17:14"
+task_type = "production"
+commits = []
