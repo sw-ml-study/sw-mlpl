@@ -1,6 +1,6 @@
 number = 2
 slug = "auto-tag-producers"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 23 step 002: auto-tag-producers.
 
@@ -8,5 +8,6 @@ Wire the ops that *produce* typed valu..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-01T16:25:11"
+completed_at = "2026-05-01T16:37:24"
 task_type = "production"
-commits = []
+commits = ["2bba7d89219a97fc6173871dbbc90f2d1aaf7d7c"]

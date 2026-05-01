@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 2,
+    "step": "auto-tag-producers"
+  },
+  "action": "TDD red-green: wrote tests/auto_tag_tests.rs first, hit two failure modes -- mlpl_parser::ast was private (use mlpl_parser::Expr instead), then several builtins didn't match my prompt's signature (softmax needs axis arg, log_softmax/mse/kl_divergence aren't language-level builtins). Adjusted: pulled forward-looking rules out of from_fncall, fixed test args. Decision: split step 002 into FnCall-only (this step) + model-aware (new step 003), documented the split in the commit body. Tools: Read for understanding ast/builtin signatures, Write for new module + tests, Edit for surgical hooks into eval.rs and lib.rs, Bash for cargo test/clippy/fmt and sw-checklist.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-01T16:37:24"
+}
