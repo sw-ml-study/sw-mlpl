@@ -1,0 +1,138 @@
+
+
+
+
+I want to focus my ML PL on more ML data types as first class language features and separate out tools into optional libraries.  I'm thinking of concepts like logit, layer, attention head, and operations like back-propogate, softmax, sinkhorn normalization, etc.  what would be a good candidate list for such building blocks in a programming language designed to manipulate and visualize them, show shape, graphs, animate transforms, etc.
+
+I’ll treat this as a language-design inventory problem: separate core semantic data types from optional algorithm/tool libraries, while keeping visualization, shape tracking, and transform animation in mind.
+
+Thought for a few seconds
+You want the ML PL core to make ML-native values visible, inspectable, composable, and type/shape-aware, while moving larger workflows and integrations into libraries. A good split is:
+
+1. Core first-class data types
+Category	Candidate first-class types	Why they belong in the language core
+Numeric/scalar	Scalar, Probability, LogProbability, Logit, Loss, Gradient	These carry meaning beyond “float.” A Logit should not be silently treated as a probability.
+Shape-aware arrays	Tensor, Vector, Matrix, Axis, Shape, Batch, Sequence, Channel	Shape and axis meaning are central to ML debugging and visualization.
+Distributions	Distribution, Categorical, Gaussian, Mixture, EmbeddingDistribution	Useful for sampling, uncertainty, generative models, and visual explanations.
+Neural structure	Layer, Module, Parameter, ParameterSet, Activation, Residual, Normalization	Lets models be inspected as structured objects, not opaque functions.
+Attention	Token, Embedding, Query, Key, Value, AttentionHead, AttentionMap, AttentionBlock	Excellent candidates because they have visualizable intermediate states.
+Graph/autodiff	ComputationGraph, Node, Edge, Tape, ForwardPass, BackwardPass, Jacobian, Hessian	Enables animation of forward/backward flow and dependency tracing.
+Training state	OptimizerState, LearningRate, Momentum, BatchStats, Checkpoint, Epoch, Step	Useful, but maybe “core-adjacent” rather than minimal core.
+Data/model IO	Dataset, Sample, Label, Feature, BatchStream, Transform	First-class if your language is also for teaching/dataflow visualization.
+2. Core operations worth making language-visible
+Operation family	Candidate operations
+Tensor ops	reshape, permute, slice, broadcast, contract, matmul, einsum, concat, split
+Probability/logit ops	softmax, log_softmax, sigmoid, temperature_scale, argmax, top_k, sample
+Normalization	normalize, layer_norm, batch_norm, rms_norm, sinkhorn_normalize
+Attention	project_qkv, score_attention, mask_attention, apply_attention, multi_head_attention
+Autodiff	forward, backward, backpropagate, gradient, stop_gradient, detach, checkpoint_gradient
+Losses	cross_entropy, mse, kl_divergence, contrastive_loss, triplet_loss
+Optimizers	step, zero_grad, clip_grad, sgd, adam, adamw
+Visualization hooks	trace, inspect_shape, show_graph, animate, compare, explain_transform
+3. Strong candidates for language primitives
+These feel like the best “first-class” building blocks:
+
+Tensor
+Shape
+Axis
+Logit
+Probability
+Distribution
+Parameter
+Gradient
+Layer
+Activation
+AttentionHead
+AttentionMap
+ComputationGraph
+ForwardPass
+BackwardPass
+Loss
+OptimizerState
+Dataset
+Transform
+The reason: each has semantic meaning, visual structure, and common misuse cases that a language can prevent.
+
+4. Things better as optional libraries
+These are important, but probably not core syntax/types at first:
+
+CNN layers
+Transformer variants
+Diffusion schedulers
+RL environments
+Fine-tuning frameworks
+Model loaders
+ONNX / GGUF / safetensors support
+CUDA / MLX / WebGPU backends
+Dataset downloaders
+Tokenizer implementations
+Experiment tracking
+The language core should know what an AttentionHead is; a library can provide LlamaAttention, ViTBlock, or StableDiffusionUNet.
+
+5. A useful organizing principle
+Design the language around observable transforms:
+
+value_before
+  -> operation
+  -> value_after
+  -> shape change
+  -> graph change
+  -> visual animation
+  -> gradient consequence
+So a statement like:
+
+p : Probability[Batch, Token] =
+    softmax(logits : Logit[Batch, Token], axis: Token)
+could automatically expose:
+
+input shape:  [Batch, Token]
+output shape: [Batch, Token]
+axis meaning: Token
+domain:       Logit -> Probability
+visual:       bars/surface/heatmap
+gradient:     differentiable
+6. My recommended MVP core
+For a first useful prototype:
+
+Tensor
+Shape
+Axis
+Logit
+Probability
+Layer
+Parameter
+Gradient
+ComputationGraph
+AttentionHead
+AttentionMap
+Loss
+Dataset
+Transform
+And implement these operations first:
+
+reshape
+matmul
+softmax
+log_softmax
+cross_entropy
+forward
+backward
+gradient
+layer_norm
+attention
+sinkhorn_normalize
+trace
+animate
+show_shape
+show_graph
+That gives you enough to demonstrate:
+
+logits -> softmax -> loss -> backprop -> gradient update
+and:
+
+tokens -> embeddings -> Q/K/V -> attention map -> attended values
+Those two pipelines would make the language feel genuinely ML-native rather than just “Python with tensor syntax.”
+
+
+
+

@@ -659,6 +659,82 @@ windows, and `experiment "name" { }`-tracked `train N { adam(... )
 heatmap) -- ship alongside. Delivered v0.10.0. See
 `docs/milestone-tiny-lm.md`.
 
+## Optional-typing arc (Sagas 23-28, PLANNED)
+
+The Saga 22 / R1 release closed the "estimate before training"
+loop and the "MLX as a service" service split. The next planned
+arc is optional typing: a gradual-typing layer that turns
+MLPL's runtime metadata (shape, labels, device, frozen status,
+model spec) into a *named*, *visible*, *teaching* surface. The
+umbrella design is `docs/optional-typing-design.md`; each saga
+has its own milestone-* doc.
+
+Goal ranking applied: educational > correctness > utility >
+practicality > maintainability > extensibility > performance.
+Every design decision in the optional-typing arc should be
+re-derivable from this ranking. Performance is explicitly last,
+which is what makes the runtime tag-checking + typed-trace
+strategy affordable.
+
+### Saga 23: Typed ML values + typed traces (PLANNED)
+Side-table tag mechanism on `Environment`; Tier A vocabulary
+(Logit / Probability / LogProbability / Loss / Gradient /
+Weight / Bias / Activation / LearningRate / Labels /
+AttentionMap); auto-tagging from softmax / cross_entropy /
+linear / grad / etc.; predicate-checked consumers;
+`EvalError::TypeMismatch` with tutoring hints; typed
+`:describe` / `:vars` / `:tags` / `:untag`; typed trace JSON
+events. The keystone of the optional-typing rollout. See
+`docs/milestone-typed-values.md`.
+
+### Saga 24: First-class Distributions (PLANNED)
+`Value::Distribution` with `Categorical` / `Gaussian` /
+`Mixture` variants; `sample` / `log_prob` / `entropy` /
+`kl_divergence` builtins; reparameterization gradient for
+`Gaussian.sample`; per-variant SVG rendering; VAE,
+policy-gradient, mixture-density-network demos. Educational
+unlock for variational and probabilistic ML. See
+`docs/milestone-distributions.md`.
+
+### Saga 25: Inspectable ComputationGraph (PLANNED)
+`Value::Graph` snapshot with nodes / edges / forward /
+backward; `compute_graph(loss)` builtin; static
+`svg(g, "compute_graph")` typed-graph rendering;
+`animate(g)` forward + backward carousel; `jacobian` /
+`hessian`. Implements `docs/research3.txt` "value_before
+-> operation -> value_after -> shape change -> graph change
+-> visual animation -> gradient consequence" loop as
+language-level surface. See `docs/milestone-compute-graph.md`.
+
+### Saga 26: Annotation syntax + tutoring errors (PLANNED)
+Extend Saga 11.5's `x : [batch, time, dim]` annotation to
+accept type names: `logits : Logit[batch, vocab]`.
+Assignment-time tag predicate; assignment-site tutoring
+catalog (Logit-vs-Probability, Probability-vs-Loss, etc.);
+typed signatures shown for builtins in `:describe` and error
+hints; annotated `param` / `tensor` constructors. The
+load-bearing *educational* saga of the arc -- writing types
+is the lesson. See `docs/milestone-typed-annotations.md`.
+
+### Saga 27: Typed Layer roles + walked `:describe mdl` (PLANNED)
+Tier B from `docs/typed-ml-concepts.md`: `LayerRole` enum
+(`Layer` / `ActivationLayer` / `Embedding` / `AttentionLayer`
+/ `Composite`); first-apply shape pinning that Saga 11.5
+deferred; walked-tree `:describe mdl` with typed input /
+output columns; `:hidden mdl k` extraction; typed Optimizer /
+Schedule / Dataset roles for `:describe`. See
+`docs/milestone-typed-layers.md`.
+
+### Saga 28: User-defined tags (PLANNED)
+Open the typing surface to research-grade concepts.
+`define_tag("MemoryRow", { requires_shape: [...],
+requires_invariants: [...] })` registry; `tag(x, "...")`
+attachment with assignment-time predicate verification;
+curated declarative invariant vocabulary; promotion path
+from user tag to curated tag. Unblocks Tier C concepts
+(MemoryRow, Skill, Tool, Episode) without per-feature parser
+work. See `docs/milestone-user-tags.md`.
+
 ## Saga 12: Tokenizers, datasets, and experiment tracking (COMPLETE)
 Closes the last surface-only gap before the Tiny LM. File IO:
 `load("rel.csv")` / `load("rel.txt")` reads through an
