@@ -1,5 +1,6 @@
 //! Expression evaluator for MLPL.
 
+mod auto_tag;
 mod bpe;
 mod device;
 mod env;
