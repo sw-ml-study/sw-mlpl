@@ -57,10 +57,17 @@ the Linux move.
 | R3 | Distributed primitives + LAN auto-discovery (`run model on nodes[...]`, mDNS peer discovery, peer-to-peer tensor migration) | tbd | [ ] | R1, R2 |
 | 17 | CUDA backend and distributed execution -- **SUPERSEDED** by R1 / R2 / R3; see `docs/refactor-services.md` | -- | [-] superseded | -- |
 | 18 | Distillation, ICL/ICRL, engram memory, orchestration | tbd | [ ] | 15 |
+| 23 | Typed ML values + typed traces (Tier A tags: Logit / Probability / Loss / Gradient / Weight / Bias / Activation / LearningRate / Labels / AttentionMap; auto-tagging from producers; predicate-checked consumers; tutoring error catalog; typed `:describe` and trace JSON) -- see `docs/milestone-typed-values.md` | tbd | [ ] | 11.5 |
+| 24 | First-class Distributions (`Categorical`, `Gaussian`, `Mixture`; `sample` / `log_prob` / `entropy` / `kl_divergence`; reparam gradients for Gaussian; VAE / policy-gradient / mixture-density demos) -- see `docs/milestone-distributions.md` | tbd | [ ] | 23 |
+| 25 | Inspectable ComputationGraph (`Value::Graph`, `compute_graph(loss)`, static `svg(g, "compute_graph")`, `animate(g)` carousel, `jacobian` / `hessian`) -- see `docs/milestone-compute-graph.md` | tbd | [ ] | 23 |
+| 26 | Annotation syntax + tutoring errors (extend Saga 11.5 colon-annotation to type names; assignment-time tag predicate; assignment-site tutoring catalog; typed builtin signatures in `:describe`) -- see `docs/milestone-typed-annotations.md` | tbd | [ ] | 23, 11.5 |
+| 27 | Typed Layer roles + walked `:describe mdl` (Tier B: `LayerRole`, first-apply shape pinning, walked typed-tree `:describe`, `:hidden mdl k`, typed Optimizer / Schedule / Dataset roles) -- see `docs/milestone-typed-layers.md` | tbd | [ ] | 23, 11 |
+| 28 | User-defined tags (`define_tag` registry, `tag(x, "...")` attachment, curated invariant vocabulary, trace + describe integration, promotion-to-curated path) -- see `docs/milestone-user-tags.md` | tbd | [ ] | 23, 26 |
 | -- | QLoRA / 4-bit quantization (deferred follow-up from Saga 15) | tbd | [ ] | 15 |
 | -- | UMAP reducer (deferred follow-up from Saga 16; overlaps with t-SNE) | tbd | [ ] | 16 |
 | -- | RAG pipeline over a local LLM inference path (deferred follow-up from Saga 16) | tbd | [ ] | 16, 19 |
 | -- | Interactive 3-D scatter (rotation/zoom) + MLX dispatch for t-SNE (deferred follow-ups from Saga 16) | tbd | [ ] | 16 |
+| -- | Static type checks on the `mlpl!` / `mlpl build` lower path (deferred follow-up to Sagas 23-26; lifts annotation predicates to lower time) | tbd | [ ] | 23, 26 |
 
 ## Next saga to start
 
