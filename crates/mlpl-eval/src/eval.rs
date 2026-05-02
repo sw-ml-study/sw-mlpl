@@ -84,6 +84,8 @@ pub(crate) fn eval_expr(
                 span: *span,
                 inputs: vec![],
                 output: TraceValue::from_array(&result),
+                input_types: vec![],
+                output_type: None,
             });
         }
         return Ok(Value::Array(result));
@@ -288,6 +290,8 @@ pub(crate) fn eval_expr(
                 span: *span,
                 inputs: vec![TraceValue::from_array(&l), TraceValue::from_array(&r)],
                 output: TraceValue::from_array(&result),
+                input_types: vec![],
+                output_type: None,
             });
         }
         return Ok(Value::Array(result));
@@ -392,6 +396,8 @@ pub(crate) fn eval_expr(
                 span: *span,
                 inputs: vec![],
                 output: TraceValue::from_array(&result),
+                input_types: vec![],
+                output_type: None,
             });
         }
         return Ok(Value::Array(result));
@@ -481,12 +487,15 @@ pub(crate) fn eval_expr(
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;
+        let (input_types, output_type) = crate::auto_tag::for_trace_event(expr, env);
         t.push(TraceEvent {
             seq,
             op: op_name.into(),
             span: expr.span(),
             inputs,
             output: TraceValue::from_array(&result),
+            input_types,
+            output_type,
         });
     }
     Ok(Value::Array(result))

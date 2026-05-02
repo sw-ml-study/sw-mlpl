@@ -1,6 +1,6 @@
 number = 7
 slug = "typed-trace-events"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 23 step 007: typed-trace-events.
 
