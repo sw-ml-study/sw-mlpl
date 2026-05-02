@@ -64,6 +64,11 @@ pub(crate) fn eval_fncall(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
+    if matches!(name, "sample" | "top_k")
+        && let Some(first) = args.first()
+    {
+        crate::type_errors::check_logit_consumer(name, first, env)?;
+    }
     let evaluated: Vec<DenseArray> = args
         .iter()
         .map(|a| eval_expr(a, env, trace).and_then(Value::into_array))

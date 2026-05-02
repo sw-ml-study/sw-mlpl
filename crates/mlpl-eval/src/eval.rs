@@ -256,6 +256,7 @@ pub(crate) fn eval_expr(
         && name == "cross_entropy"
         && args.len() == 2
     {
+        crate::type_errors::check_logit_consumer("cross_entropy", &args[0], env)?;
         let logits = eval_expr(&args[0], env, trace)?.into_array()?;
         let targets = eval_expr(&args[1], env, trace)?.into_array()?;
         crate::model_tape::validate_cross_entropy_targets(&logits, &targets)?;
@@ -375,6 +376,9 @@ pub(crate) fn eval_expr(
     if let Expr::FnCall { name, args, span } = expr
         && (name == "momentum_sgd" || name == "adam")
     {
+        if let Some(loss_arg) = args.first() {
+            crate::type_errors::check_loss_consumer(name, loss_arg, env)?;
+        }
         let result = if name == "momentum_sgd" {
             crate::grad::eval_momentum_sgd(args, env)?
         } else {
