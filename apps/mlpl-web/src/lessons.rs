@@ -464,4 +464,5 @@ pub const LESSONS: &[Lesson] = &[
     crate::lessons_advanced::NEURAL_THICKETS,
     crate::lessons_advanced::LORA_FINE_TUNING,
     crate::lessons_advanced::EMBEDDING_EXPLORATION,
+    crate::lessons_advanced::TYPED_ML_VALUES,
 ];

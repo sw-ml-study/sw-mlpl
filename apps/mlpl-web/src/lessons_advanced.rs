@@ -46,6 +46,50 @@ pub const LORA_FINE_TUNING: Lesson = Lesson {
     try_it: "The two cross_entropy lines after training should report different numbers: student's loss went down during fine-tune, but base's loss is unchanged because lora() auto-froze the base -- adam only moved the adapters. Try unfreeze(student) before the train block and re-run: now both losses move.",
 };
 
+/// Saga 23 tutorial lesson: typed ML values (Tier A vocabulary).
+pub const TYPED_ML_VALUES: Lesson = Lesson {
+    title: "Typed ML Values",
+    intro: "Saga 23 ships a curated Tier A typed-value vocabulary -- Logit, Probability, LogProbability, Loss, Gradient, Weight, Bias, Activation, LearningRate, Labels, AttentionMap -- attached to bindings via a side table on Environment. The runtime auto-tags producers (softmax -> Probability, cross_entropy -> Loss, grad -> Gradient, linear -> Weight + Bias, apply on a Linear-tailed model -> Logit). Predicate consumers reject mismatched tags with EvalError::TypeMismatch carrying a 3-5 line tutoring hint. Tags propagate through arithmetic / transpose / reshape / reductions: Logit + Logit stays Logit, Loss survives mean/reduce_add, reshape clears, and domain-mixing combos like Logit + Probability raise a tutoring TypeMismatch. New REPL commands :tags lists every tagged binding and :untag clears one. Untyped programs keep working unchanged (gradual-typing additivity). This lesson walks the canonical pipeline -- logits to probs to loss to gradient to weight update -- and demos the canonical double-softmax bug now caught at the call site.",
+    examples: &[
+        "L = randn(0, [2, 3])",
+        ":describe L",
+        "probs = softmax(L, 1)",
+        ":describe probs",
+        "T = [0.0, 1.0]",
+        "loss = cross_entropy(L, T)",
+        ":describe loss",
+        ":tags",
+        "loss = cross_entropy(probs, T)",
+        "lr = cosine_schedule(0, 100, 0.001, 0.01)",
+        ":describe lr",
+        "W = param[3, 4]",
+        "X = randn(0, [2, 3])",
+        "Y = matmul(X, W)",
+        "g = grad(mean(Y), W)",
+        ":describe g",
+        "A = randn(1, [2, 3])",
+        "B = randn(2, [2, 3])",
+        ":untag A",
+        ":untag B",
+        "B_lp = log_softmax(B, 1)",
+        "L1 = randn(3, [2, 3])",
+        "L2 = randn(4, [2, 3])",
+        "sum_logits = L1 + L2",
+        ":describe sum_logits",
+        "mean_loss = mean(L1 + L2)",
+        "L_tag = randn(5, [2, 3])",
+        "P_tag = softmax(L_tag, 1)",
+        "mix = L_tag + P_tag",
+        ":untag P_tag",
+        "mix = L_tag + P_tag",
+        ":describe mix",
+        "mdl = chain(linear(3, 4, 0), softmax_layer())",
+        "out = apply(mdl, randn(0, [2, 3]))",
+        ":describe out",
+    ],
+    try_it: "After the cross_entropy(probs, T) line failed with the double-softmax tutoring hint, try cross_entropy(softmax(L, 1), T) -- same bug, inline form. Then call :describe on every Weight in the workspace: walk through :vars first to find the auto-generated names like __linear_W_0. Finally, build a chain with a relu_layer tail and inspect apply(mdl, X) -- the result is tagged Activation(layer, kind=Relu), not Logit, because the structural-tail walk reaches relu_layer before any Linear.",
+};
+
 /// Saga 16 / 16.5 tutorial lesson.
 pub const EMBEDDING_EXPLORATION: Lesson = Lesson {
     title: "Embedding exploration",
