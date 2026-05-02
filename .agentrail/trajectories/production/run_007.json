@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 7,
+    "step": "typed-trace-events"
+  },
+  "action": "TDD red-green: wrote 5 failing tests, hit two issues -- input_types Vec<Option<None>> wasn't being skipped by Vec::is_empty (only empty vec is skipped, so I added a 'skip-when-all-none' fold), and a function-count regression from putting trace_types_for in eval.rs (moved to auto_tag.rs as for_trace_event). Tools: Read for trace event/value structs and call sites, Write for new tests + contract doc, Edit for surgical schema changes + 4 trace event construction site updates + helper function, Bash for cargo test/clippy/fmt + sw-checklist + markdown-checker. Decision: skip Vec entirely when no input is tagged (rather than serialize a vec of nulls). Cleaner JSON for the common case (output-only tagged events). The full ValueTag serde JSON is verbose (struct variants render as nested objects) but unambiguous; trace consumers can render however they want. Human-readable formatter deferred -- no dedicated trace formatter exists today; web REPL trace panel + future viewers consume the JSON.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-01T19:36:13"
+}

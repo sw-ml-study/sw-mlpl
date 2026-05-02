@@ -1,6 +1,6 @@
 number = 7
 slug = "typed-trace-events"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 23 step 007: typed-trace-events.
 
@@ -8,5 +8,6 @@ Extend the trace JSON schema to carry ..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-01T19:01:27"
+completed_at = "2026-05-01T19:36:13"
 task_type = "production"
-commits = []
+commits = ["b88409023f70cd80c5000349ec51b726ad375874"]
