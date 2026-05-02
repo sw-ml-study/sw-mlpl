@@ -23,6 +23,7 @@ mod model_freeze;
 mod model_lora;
 mod model_perturb;
 mod model_tape;
+mod tag_propagate;
 mod tokenizer;
 mod type_errors;
 mod value;

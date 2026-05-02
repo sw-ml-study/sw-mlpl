@@ -452,6 +452,8 @@ pub(crate) fn eval_expr(
                     }
                     if let Some(tag) = crate::auto_tag::for_assign(value, env) {
                         env.set_tag(name.clone(), tag);
+                    } else if let Some(tag) = crate::tag_propagate::propagate(value, env)? {
+                        env.set_tag(name.clone(), tag);
                     }
                     ("assign", vec![TraceValue::from_array(&val)], val)
                 }
