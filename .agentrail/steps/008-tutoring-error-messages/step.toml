@@ -1,0 +1,12 @@
+number = 8
+slug = "tutoring-error-messages"
+status = "pending"
+description = """
+Saga 23 step 008: tutoring-error-messages.
+
+Polish the tutoring hint catalog...."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-01T19:36:13"
+task_type = "production"
+commits = []
