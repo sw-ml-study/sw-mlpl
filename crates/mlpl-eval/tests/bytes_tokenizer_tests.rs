@@ -132,7 +132,7 @@ fn describe_byte_level_tokenizer_reports_kind() {
     // extend when BpeMerges lands.
     let mut env = Environment::new();
     env.set_tokenizer("tok".into(), mlpl_eval::TokenizerSpec::ByteLevel);
-    let out = inspect(&env, ":describe tok").unwrap();
+    let out = inspect(&mut env, ":describe tok").unwrap();
     assert!(out.contains("tokenizer"), "out was: {out}");
     assert!(out.contains("byte-level"), "out was: {out}");
     assert!(out.contains("256"), "out was: {out}");

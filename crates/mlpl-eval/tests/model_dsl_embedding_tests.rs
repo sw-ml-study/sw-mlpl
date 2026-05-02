@@ -202,7 +202,7 @@ fn describe_embed_renders_vocab_and_d() {
         &mut env,
     )
     .unwrap();
-    let desc = mlpl_eval::inspect(&env, ":describe E").expect("inspect returns a String");
+    let desc = mlpl_eval::inspect(&mut env, ":describe E").expect("inspect returns a String");
     assert!(
         desc.contains("embed[vocab=7, d=4]"),
         ":describe E should include 'embed[vocab=7, d=4]', got:\n{desc}"
