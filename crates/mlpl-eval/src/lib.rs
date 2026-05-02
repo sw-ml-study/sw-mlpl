@@ -24,6 +24,7 @@ mod model_lora;
 mod model_perturb;
 mod model_tape;
 mod tag_propagate;
+mod tag_render;
 mod tokenizer;
 mod type_errors;
 mod value;

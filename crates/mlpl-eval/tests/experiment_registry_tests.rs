@@ -27,8 +27,8 @@ fn tempdir(tag: &str) -> std::path::PathBuf {
 
 #[test]
 fn experiments_with_no_runs_reports_empty() {
-    let env = Environment::new();
-    let out = inspect(&env, ":experiments").unwrap();
+    let mut env = Environment::new();
+    let out = inspect(&mut env, ":experiments").unwrap();
     assert!(out.contains("no experiments recorded"), "out: {out}");
 }
 
@@ -37,7 +37,7 @@ fn experiments_lists_memory_log_entries_in_order() {
     let mut env = Environment::new();
     run("experiment \"a\" { loss_metric = 0.5 }", &mut env);
     run("experiment \"b\" { loss_metric = 0.3 }", &mut env);
-    let out = inspect(&env, ":experiments").unwrap();
+    let out = inspect(&mut env, ":experiments").unwrap();
     assert!(out.contains("a"), "missing 'a':\n{out}");
     assert!(out.contains("b"), "missing 'b':\n{out}");
     let pos_a = out.find("a").unwrap();
@@ -52,7 +52,7 @@ fn experiments_shows_top_line_metric() {
         "experiment \"run1\" { loss_metric = 0.25; accuracy_metric = 0.9 }",
         &mut env,
     );
-    let out = inspect(&env, ":experiments").unwrap();
+    let out = inspect(&mut env, ":experiments").unwrap();
     // Top-line metric = first alphabetically among _metric names.
     // "accuracy_metric" < "loss_metric" lex -> shown first.
     assert!(
@@ -65,7 +65,7 @@ fn experiments_shows_top_line_metric() {
 fn experiments_no_metrics_falls_back_to_no_metrics_string() {
     let mut env = Environment::new();
     run("experiment \"bare\" { x = 1 }", &mut env);
-    let out = inspect(&env, ":experiments").unwrap();
+    let out = inspect(&mut env, ":experiments").unwrap();
     assert!(out.contains("bare"), "out: {out}");
     assert!(out.contains("(no metrics)"), "out: {out}");
 }
@@ -85,7 +85,7 @@ fn experiments_merges_on_disk_records_in_terminal() {
 
     let mut env = Environment::new();
     env.set_exp_dir(dir);
-    let out = inspect(&env, ":experiments").unwrap();
+    let out = inspect(&mut env, ":experiments").unwrap();
     assert!(out.contains("fromdisk"), "out: {out}");
     assert!(out.contains("loss_metric"), "out: {out}");
     assert!(out.contains("0.1"), "out: {out}");

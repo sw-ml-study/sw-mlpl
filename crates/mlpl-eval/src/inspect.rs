@@ -18,7 +18,7 @@ use crate::model::{ActKind, ModelSpec};
 /// rendered output. Returns `None` when the command is not one of
 /// ours -- the caller should pass it through its normal handling
 /// path (error for unknown commands, etc.).
-pub fn inspect(env: &Environment, input: &str) -> Option<String> {
+pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
     let trimmed = input.trim();
     if !trimmed.starts_with(':') {
         return None;
@@ -55,8 +55,22 @@ pub fn inspect(env: &Environment, input: &str) -> Option<String> {
             Some(name) => format_describe(env, name),
             None => "usage: :describe <name>".into(),
         }),
+        ":tags" => Some(crate::tag_render::format_tags(env)),
+        ":untag" => Some(handle_untag(env, arg)),
         ":help" => arg.and_then(|topic| help_topic(topic, env)),
         _ => None,
+    }
+}
+
+fn handle_untag(env: &mut Environment, arg: Option<&str>) -> String {
+    let Some(name) = arg else {
+        return "usage: :untag <name>".into();
+    };
+    if env.get_tag(name).is_some() {
+        env.clear_tag(name);
+        format!("untagged {name}")
+    } else {
+        format!("{name} had no tag")
     }
 }
 
@@ -102,12 +116,16 @@ fn format_vars(env: &Environment) -> String {
     for name in names {
         let arr = &env.vars[name];
         let shape = format_shape(arr);
-        let tag = if env.params.contains(name) {
+        let param_marker = if env.params.contains(name) {
             " [param]"
         } else {
             ""
         };
-        out.push_str(&format!("  {name}: {shape}{tag}\n"));
+        let tag_marker = match env.get_tag(name) {
+            Some(t) => format!("  {}", crate::tag_render::header_line(t)),
+            None => String::new(),
+        };
+        out.push_str(&format!("  {name}: {shape}{param_marker}{tag_marker}\n"));
     }
     out.truncate(out.trim_end().len());
     out
@@ -154,7 +172,7 @@ fn format_describe(env: &Environment, name: &str) -> String {
     }
     if let Some(arr) = env.vars.get(name) {
         let shape = format_shape(arr);
-        let tag = if env.params.contains(name) {
+        let param_marker = if env.params.contains(name) {
             " (trainable param)"
         } else {
             ""
@@ -171,7 +189,17 @@ fn format_describe(env: &Environment, name: &str) -> String {
                 head.join(" ")
             }
         };
-        return format!("{name} -- array\n  shape: {shape}{tag}\n  values: {preview}");
+        let header = match env.get_tag(name) {
+            Some(t) => format!("{name} -- {}", crate::tag_render::header_line(t)),
+            None => format!("{name} -- array"),
+        };
+        let mut out = format!("{header}\n  shape: {shape}{param_marker}\n  values: {preview}");
+        if let Some(t) = env.get_tag(name) {
+            for line in crate::tag_render::body_lines(t, Some(arr)) {
+                out.push_str(&format!("\n  {line}"));
+            }
+        }
+        return out;
     }
     if let Some(s) = env.get_string(name) {
         // Web-UI demos bind `_demo` here; multi-line indented.

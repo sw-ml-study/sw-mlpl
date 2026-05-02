@@ -273,7 +273,7 @@ fn describe_causal_attention_renders_flag() {
         &mut env,
     )
     .unwrap();
-    let out = inspect(&env, ":describe A").unwrap();
+    let out = inspect(&mut env, ":describe A").unwrap();
     assert!(
         out.contains("causal_attention(d=4, heads=1)"),
         "expected causal_attention render, got: {out}"

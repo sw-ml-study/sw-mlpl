@@ -95,7 +95,7 @@ fn train_bpe_describe_reports_metadata() {
     let tokens = lex("bpe = train_bpe(\"abababab\", 260, 7)").unwrap();
     let stmts = parse(&tokens).unwrap();
     eval_program_value(&stmts, &mut env).unwrap();
-    let out = inspect(&env, ":describe bpe").unwrap();
+    let out = inspect(&mut env, ":describe bpe").unwrap();
     assert!(out.contains("BPE tokenizer"), "out was: {out}");
     assert!(out.contains("vocab="), "out was: {out}");
     assert!(out.contains("trained from 8 bytes"), "out was: {out}");
