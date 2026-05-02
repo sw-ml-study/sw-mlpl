@@ -1,0 +1,12 @@
+number = 6
+slug = "typed-describe"
+status = "pending"
+description = """
+Saga 23 step 006: typed-describe.
+
+Surface ValueTags in :describe / :vars / :..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-01T17:17:03"
+task_type = "production"
+commits = []
