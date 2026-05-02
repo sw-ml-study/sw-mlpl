@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 9,
+    "step": "typed-values-tutorial"
+  },
+  "action": "Read existing lesson infrastructure (apps/mlpl-web/src/lessons.rs + lessons_advanced.rs) to find the Lesson struct + LESSONS const + advanced-lesson extraction pattern. Wrote the new lesson as a sibling const in lessons_advanced.rs alongside NEURAL_THICKETS / LORA_FINE_TUNING / EMBEDDING_EXPLORATION. Wrote 9 smoke tests in mlpl-eval (not mlpl-web; mlpl-web is wasm-targeted and adding native dev-deps complicates the build). Tools: Read for lesson structure + tutorial.rs entry points + REPL :command surface, Edit for the LESSONS reference, Write for the new const + test, Bash for cargo test/clippy/fmt + scripts/build-pages.sh + sw-checklist. Decision: skip typed traces section in the lesson since :trace is terminal-only; documented the deferral in the commit body.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-02T13:36:07"
+}
