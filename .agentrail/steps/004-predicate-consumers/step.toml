@@ -1,6 +1,6 @@
 number = 4
 slug = "predicate-consumers"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 23 step 004: predicate-consumers.
 

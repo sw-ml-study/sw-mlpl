@@ -24,6 +24,7 @@ mod model_lora;
 mod model_perturb;
 mod model_tape;
 mod tokenizer;
+mod type_errors;
 mod value;
 
 pub use env::{Environment, PeerDispatcher, model_params};

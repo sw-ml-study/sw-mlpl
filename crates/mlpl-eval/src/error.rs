@@ -73,6 +73,25 @@ pub enum EvalError {
         /// Device the right-hand (or second) operand is on.
         actual: String,
     },
+    /// Saga 23 step 004: a typed-value consumer received an
+    /// argument whose `ValueTag` does not satisfy the
+    /// predicate. `expected` is the tag-display-name the
+    /// consumer wants ("Logit", "Loss", ...), `actual` is the
+    /// tag-display-name the argument carries, and `hint` is a
+    /// 3-5 line tutoring message naming the most likely cause
+    /// and one or two concrete fixes. Untagged arguments
+    /// always pass and never raise this error (gradual-typing
+    /// additivity).
+    TypeMismatch {
+        /// Consumer op name.
+        op: String,
+        /// Tag the consumer wants.
+        expected: String,
+        /// Tag the argument actually carries.
+        actual: String,
+        /// Tutoring hint (multi-line ASCII text).
+        hint: String,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -112,6 +131,15 @@ impl std::fmt::Display for EvalError {
                 expected,
                 actual,
             } => write!(f, "device mismatch: {op} on {expected} vs {actual}"),
+            Self::TypeMismatch {
+                op,
+                expected,
+                actual,
+                hint,
+            } => write!(
+                f,
+                "type mismatch in {op}: expected {expected}, got {actual}\n  hint: {hint}"
+            ),
         }
     }
 }
