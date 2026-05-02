@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 3,
+    "step": "auto-tag-model-params"
+  },
+  "action": "TDD red-green: wrote 11 tests in tests/auto_tag_models_tests.rs covering each constructor and apply-tail case, hit a single clippy non_snake_case warning (test name had capital W), renamed. Tools: Read for model_dispatch.rs and model.rs to understand param naming and ActKind variants, Edit for surgical changes to model_dispatch.rs (3 constructors) and auto_tag.rs (signature + 3 new fns), Bash for cargo test/clippy/fmt and sw-checklist. Decision: tags follow param names just like is_param/is_frozen rather than introducing a separate id-based scheme; layer string format is '<kind>_<id>' (e.g. 'linear_3') chosen for :describe readability.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-01T17:00:44"
+}

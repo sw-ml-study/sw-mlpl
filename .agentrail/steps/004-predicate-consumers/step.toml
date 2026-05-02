@@ -1,0 +1,12 @@
+number = 4
+slug = "predicate-consumers"
+status = "pending"
+description = """
+Saga 23 step 004: predicate-consumers.
+
+Wire the ops that *consume* typed val..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-01T17:00:44"
+task_type = "production"
+commits = []
