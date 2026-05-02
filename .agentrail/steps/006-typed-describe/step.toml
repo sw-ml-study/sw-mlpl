@@ -1,6 +1,6 @@
 number = 6
 slug = "typed-describe"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 23 step 006: typed-describe.
 
@@ -8,5 +8,6 @@ Surface ValueTags in :describe / :vars / :..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-01T17:17:03"
+completed_at = "2026-05-01T19:01:27"
 task_type = "production"
-commits = []
+commits = ["60e9a70212f4dba401eeec29e455591695d94e6e"]
