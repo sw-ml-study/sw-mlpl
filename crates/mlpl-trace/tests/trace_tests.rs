@@ -19,6 +19,8 @@ fn trace_push_and_serialize() {
         span: Span::new(0, 1),
         inputs: vec![],
         output: TraceValue::scalar(1.0),
+        input_types: vec![],
+        output_type: None,
     });
     trace.push(TraceEvent {
         seq: 1,
@@ -26,6 +28,8 @@ fn trace_push_and_serialize() {
         span: Span::new(4, 5),
         inputs: vec![],
         output: TraceValue::scalar(2.0),
+        input_types: vec![],
+        output_type: None,
     });
     trace.push(TraceEvent {
         seq: 2,
@@ -33,6 +37,8 @@ fn trace_push_and_serialize() {
         span: Span::new(0, 5),
         inputs: vec![TraceValue::scalar(1.0), TraceValue::scalar(2.0)],
         output: TraceValue::scalar(3.0),
+        input_types: vec![],
+        output_type: None,
     });
     let json = trace.to_json();
     assert!(json.contains("\"add\""));
@@ -48,6 +54,8 @@ fn trace_roundtrip_json() {
         span: Span::new(4, 6),
         inputs: vec![],
         output: TraceValue::scalar(42.0),
+        input_types: vec![],
+        output_type: None,
     });
     let json = trace.to_json();
     let parsed: Trace = serde_json::from_str(&json).unwrap();

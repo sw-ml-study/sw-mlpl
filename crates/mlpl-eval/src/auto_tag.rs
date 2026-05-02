@@ -93,6 +93,40 @@ fn tail_tag(spec: &ModelSpec, layer: &str) -> Option<ValueTag> {
     }
 }
 
+/// Saga 23 step 007: derive (input_types, output_type) for a
+/// trace event from the expression that produced it. For
+/// Assign expressions, the output type is the just-set tag on
+/// the binding; input types come from FnCall args that are
+/// bare identifiers (tags looked up by name). Other expression
+/// kinds yield empty / None. The input_types vec is also
+/// emptied when no input carries a tag, so untagged programs
+/// serialize identically to their pre-step-007 trace JSON.
+pub(crate) fn for_trace_event(
+    expr: &Expr,
+    env: &Environment,
+) -> (Vec<Option<ValueTag>>, Option<ValueTag>) {
+    let Expr::Assign { name, value, .. } = expr else {
+        return (Vec::new(), None);
+    };
+    let output_type = env.get_tag(name).cloned();
+    let input_types: Vec<Option<ValueTag>> = match value.as_ref() {
+        Expr::FnCall { args, .. } => args
+            .iter()
+            .map(|a| match a {
+                Expr::Ident(n, _) => env.get_tag(n).cloned(),
+                _ => None,
+            })
+            .collect(),
+        _ => Vec::new(),
+    };
+    let input_types = if input_types.iter().any(Option::is_some) {
+        input_types
+    } else {
+        Vec::new()
+    };
+    (input_types, output_type)
+}
+
 fn activation_tail_tag(kind: ActKind, layer: &str) -> Option<ValueTag> {
     match kind {
         ActKind::Softmax => Some(ValueTag::Probability),
