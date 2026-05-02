@@ -1,0 +1,12 @@
+number = 5
+slug = "tag-propagation"
+status = "pending"
+description = """
+Saga 23 step 005: tag-propagation.
+
+Define and implement a propagation table ..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-01T17:07:54"
+task_type = "production"
+commits = []

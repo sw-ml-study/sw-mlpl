@@ -1,6 +1,6 @@
 number = 4
 slug = "predicate-consumers"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 23 step 004: predicate-consumers.
 
@@ -8,5 +8,6 @@ Wire the ops that *consume* typed val..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-01T17:00:44"
+completed_at = "2026-05-01T17:07:54"
 task_type = "production"
-commits = []
+commits = ["cdad531bd724ebaf13fb44feddde58d1c80a25b1"]
