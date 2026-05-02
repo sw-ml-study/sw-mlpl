@@ -1,6 +1,6 @@
 number = 3
 slug = "auto-tag-model-params"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 23 step 003: auto-tag-model-params.
 

@@ -446,7 +446,7 @@ pub(crate) fn eval_expr(
                     if is_param_ctor {
                         env.mark_param(name);
                     }
-                    if let Some(tag) = crate::auto_tag::for_assign(value) {
+                    if let Some(tag) = crate::auto_tag::for_assign(value, env) {
                         env.set_tag(name.clone(), tag);
                     }
                     ("assign", vec![TraceValue::from_array(&val)], val)

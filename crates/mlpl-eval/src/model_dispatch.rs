@@ -6,6 +6,7 @@
 //! evaluates it on the given input.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_core::ValueTag;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
@@ -31,6 +32,7 @@ pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelS
     env.next_model_id += 1;
     let w_name = format!("__linear_W_{id}");
     let b_name = format!("__linear_b_{id}");
+    let layer = format!("linear_{id}");
 
     // W <- randn(seed, [in_dim, out_dim]) * 0.5 (Xavier-ish small).
     let w_init = mlpl_runtime::call_builtin(
@@ -45,10 +47,23 @@ pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelS
     let device = env.device().to_string();
     env.set_param(w_name.clone(), w);
     env.set_tensor_device(w_name.clone(), device.clone());
+    env.set_tag(
+        w_name.clone(),
+        ValueTag::Weight {
+            layer: layer.clone(),
+            name: "W".into(),
+        },
+    );
 
     let b = DenseArray::zeros(Shape::new(vec![1, out_dim]));
     env.set_param(b_name.clone(), b);
     env.set_tensor_device(b_name.clone(), device);
+    env.set_tag(
+        b_name.clone(),
+        ValueTag::Bias {
+            layer: layer.clone(),
+        },
+    );
 
     Ok(ModelSpec::Linear {
         w: w_name,
@@ -75,6 +90,7 @@ pub(crate) fn eval_embedding(args: &[Expr], env: &mut Environment) -> Result<Mod
     let id = env.next_model_id;
     env.next_model_id += 1;
     let table_name = format!("__embed_E_{id}");
+    let layer = format!("embed_{id}");
 
     let table_init = mlpl_runtime::call_builtin(
         "randn",
@@ -88,6 +104,13 @@ pub(crate) fn eval_embedding(args: &[Expr], env: &mut Environment) -> Result<Mod
     let device = env.device().to_string();
     env.set_param(table_name.clone(), table);
     env.set_tensor_device(table_name.clone(), device);
+    env.set_tag(
+        table_name.clone(),
+        ValueTag::Weight {
+            layer,
+            name: "table".into(),
+        },
+    );
 
     Ok(ModelSpec::Embedding {
         table: table_name,
@@ -167,9 +190,11 @@ pub(crate) fn eval_attention(
     let wk = format!("__attn_Wk_{id}");
     let wv = format!("__attn_Wv_{id}");
     let wo = format!("__attn_Wo_{id}");
+    let layer = format!("attention_{id}");
     // Use a small offset on the seed so the four projections do not
     // start out identical.
     let device = env.device().to_string();
+    let proj_names = ["W_q", "W_k", "W_v", "W_o"];
     for (i, name) in [&wq, &wk, &wv, &wo].iter().enumerate() {
         let init = mlpl_runtime::call_builtin(
             "randn",
@@ -182,6 +207,13 @@ pub(crate) fn eval_attention(
         let arr = DenseArray::new(Shape::new(vec![d_model, d_model]), scaled)?;
         env.set_param((*name).clone(), arr);
         env.set_tensor_device((*name).clone(), device.clone());
+        env.set_tag(
+            (*name).clone(),
+            ValueTag::Weight {
+                layer: layer.clone(),
+                name: proj_names[i].into(),
+            },
+        );
     }
     Ok(ModelSpec::Attention {
         wq,
