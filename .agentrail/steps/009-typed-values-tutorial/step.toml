@@ -1,0 +1,12 @@
+number = 9
+slug = "typed-values-tutorial"
+status = "pending"
+description = """
+Saga 23 step 009: typed-values-tutorial.
+
+Ship the web REPL tutorial lesson '..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-02T12:07:53"
+task_type = "production"
+commits = []
