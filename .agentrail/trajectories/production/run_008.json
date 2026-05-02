@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 8,
+    "step": "tutoring-error-messages"
+  },
+  "action": "TDD red-green: wrote 9 failing tests with substring assertions for canonical phrasings. Two failed initially: cross_entropy_probability needed copy-pasteable syntax in the existing hint, and cross_entropy_labels needed a brand-new HINT_LOGIT_GOT_LABELS branch. Refined the existing hints, added the new branch, all 9 pass. Tools: Read for type_errors.rs to audit existing hints, Edit for hint refinements + new branch wiring, Write for the new contract doc, Bash for cargo test/clippy/fmt + markdown-checker + sw-checklist. Decision: Labels predicate is cross_entropy-only since other Logit consumers (sample/top_k) would not see Labels in normal workflows; matched with an op-specific guard.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-02T12:07:53"
+}
