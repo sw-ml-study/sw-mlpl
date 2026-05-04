@@ -228,6 +228,25 @@ fn synthetic_2d(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runtime
     Ok(DenseArray::new(Shape::new(vec![n, 3]), data)?)
 }
 
+/// Parse the `centers` argument of `blobs(seed, n, centers)`,
+/// accepted as either a Kx2 matrix or a length-2K flat vector.
+/// Returns `(K, pairs)` where pairs is the (cx, cy) per cluster.
+fn parse_blob_centers(name: &str, centers: &DenseArray) -> Result<Vec<(f64, f64)>, RuntimeError> {
+    let cdims = centers.shape().dims();
+    let k = match cdims.len() {
+        2 if cdims[1] == 2 => cdims[0],
+        1 if cdims[0].is_multiple_of(2) => cdims[0] / 2,
+        _ => {
+            return Err(RuntimeError::InvalidArgument {
+                func: name.into(),
+                reason: "centers must be Kx2 matrix or length-2K vector".into(),
+            });
+        }
+    };
+    let data = centers.data();
+    Ok((0..k).map(|i| (data[i * 2], data[i * 2 + 1])).collect())
+}
+
 fn builtin_blobs(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     if args.len() != 3 {
         return Err(RuntimeError::ArityMismatch {
@@ -244,39 +263,12 @@ fn builtin_blobs(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runtim
     }
     let seed = args[0].data()[0] as i64 as u64;
     let n_per_class = args[1].data()[0] as usize;
-    // centers: Kx2 matrix OR length-2K vector.
-    let centers = &args[2];
-    let cdims = centers.shape().dims();
-    let (k, pairs): (usize, Vec<(f64, f64)>) = match cdims.len() {
-        2 if cdims[1] == 2 => {
-            let k = cdims[0];
-            let mut v = Vec::with_capacity(k);
-            for i in 0..k {
-                v.push((centers.data()[i * 2], centers.data()[i * 2 + 1]));
-            }
-            (k, v)
-        }
-        1 if cdims[0].is_multiple_of(2) => {
-            let k = cdims[0] / 2;
-            let mut v = Vec::with_capacity(k);
-            for i in 0..k {
-                v.push((centers.data()[i * 2], centers.data()[i * 2 + 1]));
-            }
-            (k, v)
-        }
-        _ => {
-            return Err(RuntimeError::InvalidArgument {
-                func: name.into(),
-                reason: "centers must be Kx2 matrix or length-2K vector".into(),
-            });
-        }
-    };
-
+    let pairs = parse_blob_centers(name, &args[2])?;
     let sigma = 0.15;
-    let total = k * n_per_class;
+    let total = pairs.len() * n_per_class;
     let mut data = Vec::with_capacity(total * 3);
     let mut rng = Xorshift64::new(seed);
-    for (label, &(cx, cy)) in pairs.iter().enumerate().take(k) {
+    for (label, &(cx, cy)) in pairs.iter().enumerate() {
         for _ in 0..n_per_class {
             let x = cx + sigma * rng.next_normal();
             let y = cy + sigma * rng.next_normal();
