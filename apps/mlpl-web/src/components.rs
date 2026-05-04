@@ -46,8 +46,11 @@ pub fn header(props: &HeaderProps) -> Html {
     };
     html! {
         <header>
-            <h1><img src="mlpl-badge.webp" alt="" class="title-badge" />{"MLPL"}</h1>
-            <span>{"v0.19.0 -- Array Programming Language for ML"}</span>
+            <h1><img src="mlpl-badge.webp" alt="" class="title-badge" />{"sw-MLPL"}</h1>
+            <div class="title-text">
+                <span class="title-line">{"Software Wrighter's Machine Learning Programming Language Playground"}</span>
+                <span class="title-subtitle">{"Array Programming for Machine Learning"}</span>
+            </div>
             <div class="header-tabs">
                 <button class={cls(false)} onclick={props.on_select_repl.clone()}>{"REPL"}</button>
                 <button class={cls(true)} onclick={props.on_select_tutorial.clone()}>{"Tutorial"}</button>
