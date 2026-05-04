@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-d176177986cdd8a9.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-d176177986cdd8a9_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-2d1380257dd8cabc.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-2d1380257dd8cabc_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -140,13 +140,49 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             40%, 80% { transform: rotate(10deg); }
         }
 
-        /* Header controls */
-        .controls {
+        /* Header tabs */
+        .header-tabs {
             margin-left: auto;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .header-tabs .tab {
+            background: var(--surface0);
+            color: var(--text);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .header-tabs .tab:hover {
+            border-color: var(--blue);
+        }
+        .header-tabs .tab.active {
+            background: var(--surface1);
+            color: var(--blue);
+            border-color: var(--blue);
+        }
+        header > .help-btn {
             margin-right: 60px;
+        }
+        /* Mode bar (per-tab controls under the header) */
+        .modebar {
+            padding: 8px 20px;
+            border-bottom: 1px solid var(--surface1);
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-shrink: 0;
+        }
+        .modebar.repl {
+            background: var(--mantle);
+        }
+        .modebar.tutorial {
+            background: var(--mantle);
         }
         .demo-select {
             background: var(--surface0);
@@ -635,7 +671,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-d176177986cdd8a9.js" crossorigin="anonymous" integrity="sha384-JAdGkgTzuYJ/EPxbb/p13AH2/SwkCi/kMnty1cMOZFiIZv/Q3qsIZjumz4SmFPLa"><link rel="preload" href="/sw-mlpl/mlpl-web-d176177986cdd8a9_bg.wasm" crossorigin="anonymous" integrity="sha384-xiCgPVRuJ94J5KSw2xteBWaw3gLCi2YooPLHPmGzee4iQFwVU6NP3uR2CpQnFjGQ" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-2d1380257dd8cabc.js" crossorigin="anonymous" integrity="sha384-pUMfhB0P//mGgbhcpopJRSzBSkjCHn4bxSi3/i2Y6uvlXG2LCvjsCHaIDbXO5DtD"><link rel="preload" href="/sw-mlpl/mlpl-web-2d1380257dd8cabc_bg.wasm" crossorigin="anonymous" integrity="sha384-eQNSakdvMegUscVvp0JAmjTVqF6+8M0bzDUlgm4rbe7zUjcuWeERVcc7CNYBOZez" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
