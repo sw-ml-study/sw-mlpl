@@ -119,6 +119,7 @@ fn handle_command(
     if !input.starts_with(':') {
         return false;
     }
+    let no_trace = || eprintln!("No trace available. Use :trace on first.");
     match input {
         ":help" => print_help(),
         ":version" => println!("{}", version::banner()),
@@ -126,21 +127,17 @@ fn handle_command(
             *env = Environment::new();
             println!("Environment cleared.");
         }
-        ":trace on" => {
-            *tracing = true;
-            println!("Tracing enabled.");
-        }
-        ":trace off" => {
-            *tracing = false;
-            println!("Tracing disabled.");
+        ":trace on" | ":trace off" => {
+            *tracing = input == ":trace on";
+            println!("Tracing {}.", if *tracing { "enabled" } else { "disabled" });
         }
         ":trace json" => match last_trace {
             Some(t) => println!("{}", t.to_json()),
-            None => eprintln!("No trace available. Use :trace on first."),
+            None => no_trace(),
         },
         ":trace" => match last_trace {
             Some(t) => print_trace_summary(t),
-            None => eprintln!("No trace available. Use :trace on first."),
+            None => no_trace(),
         },
         _ if input.starts_with(":trace json ") => {
             let path = input.strip_prefix(":trace json ").unwrap().trim();
@@ -149,7 +146,7 @@ fn handle_command(
                     Ok(()) => println!("Trace written to {path}"),
                     Err(e) => eprintln!("error writing file: {e}"),
                 },
-                None => eprintln!("No trace available. Use :trace on first."),
+                None => no_trace(),
             }
         }
         _ if input == ":ask" || input.starts_with(":ask ") => {
