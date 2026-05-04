@@ -1,11 +1,20 @@
-# <img src="docs/mlpl-badge.png" alt="sw-MLPL" width="64" align="left" style="margin-right:12px"> sw-MLPL
+# <img src="docs/mlpl-badge.png" alt="sw-MLPL" width="128" align="left" style="margin-right:12px"> sw-MLPL
 
-Software Wrighter's Machine Learning Programming Language
-Playground -- a Rust-first array and tensor programming
-language for machine learning, visualization, and
-experimentation. Inspired by APL, APL2, J, and BQN.
+Software Wrighter's Machine Learning Programming Language --
+a Rust-first array and tensor language for machine learning,
+visualization, and experimentation. Inspired by APL, APL2, J,
+and BQN.
 
-**[Try sw-MLPL in your browser](https://sw-ml-study.github.io/sw-mlpl/?ts=1777922058129)**
+This repository ships three things together:
+
+- the **language** itself (interpreter, parser, autograd,
+  Model DSL, MLX backend, compile-to-Rust path),
+- a curated set of **demos** that walk through every
+  language feature end-to-end, and
+- a browser **playground** that runs both via WASM with no
+  install.
+
+**[Try the playground in your browser](https://sw-ml-study.github.io/sw-mlpl/?ts=1777922058129)**
 -- no install required.
 
 ## Tour
