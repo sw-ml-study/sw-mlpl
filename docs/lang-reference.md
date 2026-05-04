@@ -36,6 +36,34 @@ _temp
 Start with an ASCII letter or underscore. Contain ASCII letters,
 digits, and underscores. Case-sensitive.
 
+## Builtin / Operator References (`:foo`)
+
+```
+:add
+:max
+:+
+:*
+:sigmoid
+```
+
+A first-class-ish reference to a builtin or operator. Lexed as
+`:` immediately followed (no intervening space) by an
+identifier-start character or one of `+ * / -`. Evaluates to a
+`Value::BuiltinRef { name }`. Used as the first argument to
+higher-order builtins like `reduce(:op, x[, axis])`. Lives in a
+separate namespace from regular variables, so `add = 42` cannot
+shadow `:add`. Variables can hold a BuiltinRef:
+
+```
+f = :max
+reduce(f, [3, 1, 4, 1, 5, 9, 2, 6])    # 9
+```
+
+The annotation form (`x : [batch] = ...`) requires a space after
+`:` and is unaffected. Forward-compatible with first-class
+functions: when `Value::Function` lands in a future saga, `:foo`
+will lift to a function value cleanly.
+
 ## Array Literals
 
 ```
@@ -235,10 +263,10 @@ Newlines and semicolons are both statement separators.
 | `rank(a)` | 1 | Number of dimensions (scalar) |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `transpose(a)` | 1 | Reverse axis order |
-| `reduce_add(a)` | 1 | Sum all elements |
-| `reduce_add(a, axis)` | 2 | Sum along a specific axis |
-| `reduce_mul(a)` | 1 | Product of all elements |
-| `reduce_mul(a, axis)` | 2 | Product along a specific axis |
+| `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |
+| `reduce(:op, a, axis)` | 3 | Same, restricted to a single axis. |
+| `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |
+| `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
 
 ### Linear Algebra
 
