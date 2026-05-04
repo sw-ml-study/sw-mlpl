@@ -141,6 +141,27 @@ Run a snapshot before risky agent operations or after creating files
 you haven't yet staged. It does NOT replace normal git tracking — it is
 a safety net for what is not yet committed.
 
+## sw-checklist paydown (every commit)
+
+Every commit must HOLD or LOWER the `sw-checklist` failed
+count from its parent. The policy is documented in
+`docs/sw-checklist-paydown.md`; the short version:
+
+- Run `sw-checklist` before commit. Note the failed count.
+- If your commit introduced any new FAIL, retire it before
+  shipping (refactor, extract, bundle args, etc.).
+- If your commit can also retire a pre-existing FAIL,
+  pair the retirement with the main work and include a
+  `sw-checklist:` trailer in the commit message naming the
+  new count and the retired check.
+- Exceptions (commits that grow the count by at most 1) MUST
+  include `sw-checklist: exception` on its own line with a
+  justification. Use sparingly.
+
+The trajectory at one retirement per commit is roughly 140
+commits to green; a single refactor saga can clear 3-5 at
+once and shorten the schedule.
+
 ## Git hygiene
 
 - Never amend a commit that has already been pushed to a shared branch.

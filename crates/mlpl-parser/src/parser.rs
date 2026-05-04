@@ -145,6 +145,11 @@ impl<'a> Parser<'a> {
                 self.pos += 1;
                 Ok(e)
             }
+            TokenKind::BuiltinRef(name) => {
+                let e = Expr::BuiltinRef(name.clone(), tok.span);
+                self.pos += 1;
+                Ok(e)
+            }
             TokenKind::Ident(name) => {
                 let name = name.clone();
                 let start = tok.span;

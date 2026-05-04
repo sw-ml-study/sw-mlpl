@@ -368,7 +368,19 @@ fn apply_model(
             d_model,
             heads,
             causal,
-        } => apply_attention(x, wq, wk, wv, wo, *d_model, *heads, *causal, env),
+        } => apply_attention(
+            x,
+            &AttentionArgs {
+                wq,
+                wk,
+                wv,
+                wo,
+                d_model: *d_model,
+                heads: *heads,
+                causal: *causal,
+            },
+            env,
+        ),
         ModelSpec::Embedding { table, vocab, .. } => {
             let t = env
                 .get(table)
@@ -473,18 +485,34 @@ fn tokens_to_onehot(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, Eva
         .map_err(|e| EvalError::Unsupported(format!("embed: one-hot construction failed: {e}")))
 }
 
-#[allow(clippy::too_many_arguments)]
-fn apply_attention(
-    x: &DenseArray,
-    wq: &str,
-    wk: &str,
-    wv: &str,
-    wo: &str,
+/// Bundle of `Attention` layer parameters threaded through
+/// `apply_attention` and its forward-pass helpers. Replaces a
+/// 9-argument signature that previously needed
+/// `#[allow(clippy::too_many_arguments)]`.
+struct AttentionArgs<'a> {
+    wq: &'a str,
+    wk: &'a str,
+    wv: &'a str,
+    wo: &'a str,
     d_model: usize,
     heads: usize,
     causal: bool,
+}
+
+fn apply_attention(
+    x: &DenseArray,
+    args: &AttentionArgs<'_>,
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
+    let AttentionArgs {
+        wq,
+        wk,
+        wv,
+        wo,
+        d_model,
+        heads,
+        causal,
+    } = *args;
     let dims = x.shape().dims();
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(

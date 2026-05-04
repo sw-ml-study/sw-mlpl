@@ -39,6 +39,13 @@ pub enum Expr {
     StrLit(String, Span),
     /// Identifier reference.
     Ident(String, Span),
+    /// Builtin / operator reference: `:foo`, `:+`, `:max`.
+    /// Evaluates to a `Value::BuiltinRef { name }` -- the
+    /// canonical first-class-ish reference to a builtin or
+    /// operator. Higher-order builtins like `reduce` and
+    /// `map` accept this in place of (the future) function
+    /// values.
+    BuiltinRef(String, Span),
     /// Array literal: `[expr, expr, ...]`
     ArrayLit(Vec<Expr>, Span),
     /// Binary operation: `lhs op rhs`
@@ -164,6 +171,7 @@ impl Expr {
             | Self::FloatLit(_, s)
             | Self::StrLit(_, s)
             | Self::Ident(_, s)
+            | Self::BuiltinRef(_, s)
             | Self::ArrayLit(_, s)
             | Self::BinOp { span: s, .. }
             | Self::UnaryNeg { span: s, .. }
@@ -241,6 +249,7 @@ impl fmt::Display for Expr {
             Self::FloatLit(x, _) => write!(f, "{x}"),
             Self::StrLit(s, _) => write!(f, "\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\"")),
             Self::Ident(name, _) => write!(f, "{name}"),
+            Self::BuiltinRef(name, _) => write!(f, ":{name}"),
             Self::ArrayLit(elems, _) => {
                 write!(f, "[")?;
                 fmt_comma_seq(f, elems)?;

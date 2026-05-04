@@ -22,6 +22,16 @@ pub enum Value {
     /// A tokenizer (Saga 12 step 004). Sibling to `Model` -- holds
     /// the tokenization strategy as data.
     Tokenizer(TokenizerSpec),
+    /// A reference to a builtin or operator. Produced by the
+    /// `:foo` / `:+` / `:max` syntax. Higher-order builtins
+    /// like `reduce` and `map` accept this in place of a
+    /// (future) function value -- it is the canonical first-
+    /// class-ish op handle in v0.19.
+    BuiltinRef {
+        /// The builtin name without the leading `:`. Examples:
+        /// `"add"`, `"+"`, `"max"`, `"sigmoid"`.
+        name: String,
+    },
     /// Saga R1 step 002: peer-resident tensor reference. The bytes
     /// live on the peer named by `peer`; the orchestrator only holds
     /// the handle + shape + device metadata. Touching it from a CPU
@@ -86,6 +96,7 @@ impl fmt::Display for Value {
             Self::Str(s) => write!(f, "{s}"),
             Self::Model(_) => write!(f, "<model>"),
             Self::Tokenizer(t) => write!(f, "<tokenizer: {}>", t.describe()),
+            Self::BuiltinRef { name } => write!(f, ":{name}"),
             Self::DeviceTensor {
                 peer,
                 device,

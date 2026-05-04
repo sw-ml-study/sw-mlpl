@@ -127,6 +127,52 @@ pub(crate) fn lex_number(bytes: &[u8], start: usize) -> Option<(TokenKind, usize
     }
 }
 
+/// Skip ASCII spaces, tabs, and `#` line comments starting at
+/// `pos`. Returns the new position. Newlines stop the skip --
+/// they are statement separators in MLPL and produce `Newline`
+/// tokens upstream.
+pub(crate) fn skip_whitespace(bytes: &[u8], pos: usize) -> usize {
+    let mut p = pos;
+    while p < bytes.len() {
+        let b = bytes[p];
+        if b == b' ' || b == b'\t' {
+            p += 1;
+        } else if b == b'#' {
+            while p < bytes.len() && bytes[p] != b'\n' {
+                p += 1;
+            }
+        } else {
+            break;
+        }
+    }
+    p
+}
+
+/// Try to lex a `:foo` / `:+` / `:max` BuiltinRef starting at
+/// `pos`. Returns `(TokenKind::BuiltinRef(name), new_pos)` on
+/// match, or `None` if `:` is followed by something other than
+/// an ident-start char or one of `+ * / -` (so the caller can
+/// fall through to the annotation `Colon` token).
+pub(crate) fn lex_builtin_ref(bytes: &[u8], pos: usize) -> Option<(TokenKind, usize)> {
+    if bytes.get(pos)? != &b':' {
+        return None;
+    }
+    let next = *bytes.get(pos + 1)?;
+    if next.is_ascii_alphabetic() || next == b'_' {
+        let s = pos + 1;
+        let mut e = s;
+        while e < bytes.len() && (bytes[e].is_ascii_alphanumeric() || bytes[e] == b'_') {
+            e += 1;
+        }
+        let name = std::str::from_utf8(&bytes[s..e]).unwrap().to_owned();
+        Some((TokenKind::BuiltinRef(name), e))
+    } else if matches!(next, b'+' | b'*' | b'/' | b'-') {
+        Some((TokenKind::BuiltinRef((next as char).to_string()), pos + 2))
+    } else {
+        None
+    }
+}
+
 /// Match a single-char punctuation/operator token (except minus).
 pub(crate) fn single_char_token(b: u8) -> Option<TokenKind> {
     match b {

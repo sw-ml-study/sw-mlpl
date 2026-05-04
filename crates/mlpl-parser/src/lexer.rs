@@ -3,7 +3,9 @@
 use mlpl_core::Span;
 
 use crate::error::ParseError;
-use crate::lex_util::{lex_number, lex_string, single_char_token};
+use crate::lex_util::{
+    lex_builtin_ref, lex_number, lex_string, single_char_token, skip_whitespace,
+};
 use crate::token::{Token, TokenKind};
 
 /// Tokenize MLPL source code.
@@ -38,40 +40,32 @@ impl<'a> Lexer<'a> {
         }
     }
 
+    fn make_tok(&mut self, kind: TokenKind, end: usize, prev_was_value: bool) -> Token {
+        let span = Span::new(self.pos, end);
+        self.pos = end;
+        self.prev_was_value = prev_was_value;
+        Token { kind, span }
+    }
+
     fn next_token(&mut self) -> Result<Token, ParseError> {
-        self.skip_whitespace_and_comments();
+        self.pos = skip_whitespace(self.bytes, self.pos);
         if self.pos >= self.bytes.len() {
-            return Ok(Token {
-                kind: TokenKind::Eof,
-                span: Span::new(self.pos, self.pos),
-            });
+            return Ok(self.make_tok(TokenKind::Eof, self.pos, false));
         }
         let b = self.bytes[self.pos];
         if b == b'\n' {
-            let tok = Token {
-                kind: TokenKind::Newline,
-                span: Span::new(self.pos, self.pos + 1),
-            };
-            self.pos += 1;
-            self.prev_was_value = false;
-            return Ok(tok);
+            return Ok(self.make_tok(TokenKind::Newline, self.pos + 1, false));
+        }
+        if let Some((kind, end)) = lex_builtin_ref(self.bytes, self.pos) {
+            return Ok(self.make_tok(kind, end, true));
         }
         if let Some(kind) = single_char_token(b) {
             let is_val = matches!(kind, TokenKind::RParen | TokenKind::RBracket);
-            let tok = Token {
-                kind,
-                span: Span::new(self.pos, self.pos + 1),
-            };
-            self.pos += 1;
-            self.prev_was_value = is_val;
-            return Ok(tok);
+            return Ok(self.make_tok(kind, self.pos + 1, is_val));
         }
         if b == b'"' {
             let (kind, end) = lex_string(self.bytes, self.pos)?;
-            let span = Span::new(self.pos, end);
-            self.pos = end;
-            self.prev_was_value = true;
-            return Ok(Token { kind, span });
+            return Ok(self.make_tok(kind, end, true));
         }
         if b == b'-' {
             return self.lex_minus();
@@ -87,21 +81,6 @@ impl<'a> Lexer<'a> {
             ch,
             span: Span::new(self.pos, self.pos + ch.len_utf8()),
         })
-    }
-
-    fn skip_whitespace_and_comments(&mut self) {
-        while self.pos < self.bytes.len() {
-            let b = self.bytes[self.pos];
-            if b == b' ' || b == b'\t' {
-                self.pos += 1;
-            } else if b == b'#' {
-                while self.pos < self.bytes.len() && self.bytes[self.pos] != b'\n' {
-                    self.pos += 1;
-                }
-            } else {
-                break;
-            }
-        }
     }
 
     fn lex_minus(&mut self) -> Result<Token, ParseError> {
