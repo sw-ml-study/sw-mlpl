@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-04
 
+- docs(readme): shrink the title badge to 64px wide
+- docs(readme,images): six-screenshot tour of the web playground
+- chore(readme,images): sw-MLPL rebrand + screenshot + cache-buster
+- chore(web,docs): glossary +50, scroll fix, sw-MLPL rebrand
+- docs(changes,changelog,pages): refresh post-v0.19.0 polish bundle
 - feat(parser, eval): higher-order reduce(:op, x[, axis]) via :foo BuiltinRef
 - chore(web): fix glossary auto-scroll obscuring matched term
 - chore(web): rename Clear to Reset (the action wipes the session, not the screen)
