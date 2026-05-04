@@ -1,6 +1,6 @@
 number = 10
 slug = "typed-values-release"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 23 step 010: typed-values-release.
 
@@ -8,5 +8,6 @@ Wrap Saga 23 with the user-facing re..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-02T13:36:07"
+completed_at = "2026-05-04T09:21:41"
 task_type = "production"
-commits = []
+commits = ["839ebefee67c75287848f2fcc7497c087568c14a"]
