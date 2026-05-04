@@ -21,4 +21,5 @@ pub enum EntryKind {
 pub enum DocTab {
     LangReference,
     Usage,
+    Glossary,
 }

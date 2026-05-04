@@ -141,6 +141,20 @@ fn bind_demo_metadata(session: &WasmSession, demo: &crate::demos::Demo) {
     let _ = session.eval(&format!("_demo = \"{escaped}\""));
 }
 
+fn push_progress_notes(entries: &mut Vec<HistoryEntry>, demo_name: &str, idx: usize) -> bool {
+    let mut had = false;
+    for note in crate::demos::progress_notes_for(demo_name, idx) {
+        entries.push(HistoryEntry {
+            input: note.heading.to_string(),
+            output: note.body.to_string(),
+            is_error: false,
+            kind: EntryKind::Narration,
+        });
+        had = true;
+    }
+    had
+}
+
 fn schedule_demo_line(
     session: Rc<RefCell<WasmSession>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
@@ -160,6 +174,14 @@ fn schedule_demo_line(
         });
         history.set(entries);
         return;
+    }
+    // Pre-line heads-up: any progress notes attached to this
+    // (demo, idx) pair render as Narration entries BEFORE the
+    // line evaluates. The existing Timeout::new(0) below then
+    // yields a macrotask so the browser paints the heads-up
+    // before the WASM eval blocks the main thread.
+    if push_progress_notes(&mut entries, demo.name, idx) {
+        history.set(entries.clone());
     }
     let session_next = Rc::clone(&session);
     let history_next = history.clone();

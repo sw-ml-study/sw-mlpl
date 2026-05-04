@@ -9,6 +9,7 @@
 
 mod components;
 mod demos;
+mod glossary_view;
 mod handlers;
 mod help;
 mod lessons;
@@ -25,7 +26,7 @@ use handlers::{
 };
 use mlpl_wasm::WasmSession;
 use state::{EntryKind, HistoryEntry};
-use tutorial::{run_example, step_lesson, toggle_tutorial};
+use tutorial::{jump_lesson, run_example, step_lesson, toggle_tutorial};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -34,25 +35,37 @@ const REPO_URL: &str = "https://github.com/sw-ml-study/sw-mlpl";
 
 #[function_component(App)]
 fn app() -> Html {
+    // Two fully-isolated scratchpads: main (session+history,
+    // long-running) and tutorial (shown only while a lesson
+    // is open). Closing the tutorial restores main untouched.
     let session = use_mut_ref(WasmSession::new);
+    let tutorial_session = use_mut_ref(WasmSession::new);
     let history = use_state(Vec::<HistoryEntry>::new);
+    let tutorial_history = use_state(Vec::<HistoryEntry>::new);
     let input_value = use_state(String::new);
     let cmd_history = use_state(Vec::<String>::new);
     let cmd_index = use_state(|| None::<usize>);
     let dialog_open = use_state(|| false);
     let lesson_idx = use_state(|| None::<usize>);
+    let in_tutorial = lesson_idx.is_some();
+    let active_session = if in_tutorial { tutorial_session } else { session.clone() };
+    let active_history: UseStateHandle<Vec<HistoryEntry>> = if in_tutorial {
+        tutorial_history.clone()
+    } else {
+        history.clone()
+    };
 
     let on_submit = make_submit(EvalDeps {
-        session: session.clone(),
-        history: history.clone(),
+        session: active_session.clone(),
+        history: active_history.clone(),
         input_value: input_value.clone(),
         cmd_history: cmd_history.clone(),
         cmd_index: cmd_index.clone(),
     });
-    let on_clear = make_clear(session.clone(), history.clone());
-    let on_demo = make_run_demo(session, history.clone());
+    let on_clear = make_clear(active_session.clone(), active_history.clone());
+    let on_demo = make_run_demo(active_session, active_history.clone());
 
-    use_effect_with(history.clone(), |_| {
+    use_effect_with(active_history.clone(), |_| {
         scroll_and_focus();
         || ()
     });
@@ -64,7 +77,7 @@ fn app() -> Html {
         input_value,
         cmd_history,
         cmd_index,
-        history,
+        history: active_history,
         dialog_open,
         lesson_idx,
     })
@@ -125,11 +138,13 @@ fn render_tutorial(
     };
     let on_prev = step_lesson(lesson.clone(), -1);
     let on_next = step_lesson(lesson.clone(), 1);
+    let on_jump = jump_lesson(lesson.clone());
     let on_close = Callback::from(move |_| lesson.set(None));
     let props = TutorialPanelProps {
         lesson_idx: idx,
         on_prev,
         on_next,
+        on_jump,
         on_run_example,
         on_close,
     };

@@ -11,6 +11,104 @@ pub struct Demo {
     pub lines: &'static [&'static str],
 }
 
+/// A heads-up rendered before a single long-running demo line.
+/// Browser WASM evaluates each line on the main thread, so a
+/// 30-step train block (Tiny LM) blocks the event loop for
+/// seconds. Without a note the user sees a previous line's
+/// output, then a stalled tab, then the result. The note paints
+/// before the line starts so the wait is intentional and
+/// estimated, not mysterious.
+#[derive(Clone, Copy)]
+pub struct ProgressNote {
+    /// Demo's `name` field.
+    pub demo: &'static str,
+    /// Index into `Demo::lines` that the note precedes.
+    pub line_idx: usize,
+    /// Short heading -- e.g. "Training the language model".
+    pub heading: &'static str,
+    /// One-to-three-sentence body explaining what the runtime
+    /// is about to do and a rough ETA on a recent laptop.
+    pub body: &'static str,
+}
+
+/// Heads-up notes for demos whose individual lines block the
+/// event loop long enough that the user wonders if the page is
+/// frozen. Each entry attaches to a specific demo + line index.
+/// Demos not listed here render with no pre-line narration --
+/// the existing intro / takeaway pair is enough.
+///
+/// ETA wording is approximate (modern laptop, no MLX). The
+/// numbers err on the high side so a faster machine never
+/// sees the heads-up linger longer than the actual op.
+pub const PROGRESS_NOTES: &[ProgressNote] = &[
+    ProgressNote {
+        demo: "Tiny LM Generate",
+        line_idx: 1,
+        heading: "Training the BPE tokenizer",
+        body: "train_bpe walks the corpus and learns 260 byte-pair merges. A few seconds; the corpus is small but the merge loop is O(merges * pairs).",
+    },
+    ProgressNote {
+        demo: "Tiny LM Generate",
+        line_idx: 9,
+        heading: "Training the language model (~10-30s)",
+        body: "30 Adam steps over a 1-layer transformer (V=260, d=16, block=8). Each step runs a forward pass, a backward pass through the autograd tape, and an Adam update over every model parameter. The browser tab is single-threaded WASM so the page is unresponsive for the duration; this is normal.",
+    },
+    ProgressNote {
+        demo: "Tiny LM Generate",
+        line_idx: 13,
+        heading: "Generating 20 tokens (~3-8s)",
+        body: "Each token is a forward pass on the growing sequence, top_k restriction, and a multinomial sample. The output is decoded BPE bytes back to text once the loop finishes.",
+    },
+    ProgressNote {
+        demo: "Tiny LM",
+        line_idx: 1,
+        heading: "Training the BPE tokenizer",
+        body: "train_bpe walks the corpus and learns 260 byte-pair merges. A few seconds.",
+    },
+    ProgressNote {
+        demo: "Tiny LM",
+        line_idx: 9,
+        heading: "Training the language model (~10-30s)",
+        body: "30 Adam steps over a 1-layer transformer (V=260, d=16, block=8). The page is unresponsive while WASM runs on the main thread; the loss curve renders once the train block returns.",
+    },
+    ProgressNote {
+        demo: "Tiny MLP",
+        line_idx: 10,
+        heading: "Training the hand-rolled MLP (~5-10s)",
+        body: "600 iterations of an explicit forward + backward pass on 80 points. No autograd -- every gradient is written out so you can see the chain rule run.",
+    },
+    ProgressNote {
+        demo: "Moons MLP",
+        line_idx: 7,
+        heading: "Training with Adam (~10-20s)",
+        body: "200 train steps on 120 points through the autograd tape. The decision-boundary surface that follows is the visible payoff.",
+    },
+    ProgressNote {
+        demo: "AND Logistic Regression",
+        line_idx: 7,
+        heading: "Gradient descent (~2-5s)",
+        body: "300 iterations of explicit logistic-regression gradient descent on four points. Short but visibly blocks the tab.",
+    },
+    ProgressNote {
+        demo: "Linear Softmax Classifier",
+        line_idx: 9,
+        heading: "Training the softmax classifier (~3-8s)",
+        body: "300 explicit-gradient steps over 90 points and 3 classes. The decision-boundary plot at the end shows the three wedges this minimization carved out.",
+    },
+];
+
+/// Look up progress notes for `(demo_name, line_idx)`. Returns
+/// the matching slice (usually 0 or 1 entries) without
+/// allocating; callers iterate.
+pub fn progress_notes_for(
+    demo_name: &str,
+    line_idx: usize,
+) -> impl Iterator<Item = &'static ProgressNote> {
+    PROGRESS_NOTES
+        .iter()
+        .filter(move |n| n.demo == demo_name && n.line_idx == line_idx)
+}
+
 // Demos are listed alphabetically by `name`.
 pub const DEMOS: &[Demo] = &[
     Demo {
