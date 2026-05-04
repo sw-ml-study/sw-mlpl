@@ -35,7 +35,7 @@ pub use error::EvalError;
 pub use eval::{eval_program, eval_program_traced, eval_program_value};
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
-pub use inspect::inspect;
+pub use inspect::{documented_builtin_names, inspect};
 pub use model::ModelSpec;
 pub use tokenizer::TokenizerSpec;
 pub use value::Value;
