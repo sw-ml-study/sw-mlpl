@@ -5,10 +5,75 @@ Playground -- a Rust-first array and tensor programming
 language for machine learning, visualization, and
 experimentation. Inspired by APL, APL2, J, and BQN.
 
-**[Try sw-MLPL in your browser](https://sw-ml-study.github.io/sw-mlpl/?ts=1777921909540)**
+**[Try sw-MLPL in your browser](https://sw-ml-study.github.io/sw-mlpl/?ts=1777922058129)**
 -- no install required.
 
-![Screenshot](images/screenshot.png?ts=1777921909540)
+## Tour
+
+The web playground gives you a full REPL plus 17 worked
+demos, 19 tutorial lessons, and a 220-entry glossary --
+all running entirely in your browser via WASM.
+
+### REPL
+
+![REPL](images/01-repl.png?ts=1777922058129)
+
+The default view. Type MLPL expressions at the
+`mlpl>` prompt; type `:help` for the full slash-command
+list, click `?` for the documentation modal, or pick a
+demo from the **Load Demo...** dropdown to walk through
+worked examples.
+
+### Visualizations demo
+
+![Visualizations demo](images/02-visualizations.png?ts=1777922058129)
+
+Every demo opens with an "About this demo" panel and
+closes with a "What just happened" takeaway. Long-running
+demos add intermediate progress callouts so the page
+never appears to hang. The **Visualizations** demo is
+the four primitive `svg()` types -- scatter, line, bar,
+heatmap -- in one line each.
+
+### Tutorial
+
+![Tutorial Index](images/03-tutorial.png?ts=1777922058129)
+
+The Tutorial tab opens to an Index of all 19 lessons
+(default), with the current lesson highlighted in
+peach. Click any tile to jump directly; the Lesson tab
+holds prev / next pagination if you prefer step-by-step.
+The Tutorial uses an isolated session + transcript --
+your main REPL state is preserved when you switch tabs.
+
+### Documentation: Language Reference
+
+![? dialog -- Language Reference](images/04-langref.png?ts=1777922058129)
+
+The first tab of the `?` documentation modal.
+Grammar, syntax, and the full builtin surface grouped
+by category (Array, Linear algebra, Math, Comparisons,
+ML primitives, Autograd, Model DSL, Visualization).
+
+### Documentation: Usage Guide
+
+![? dialog -- Usage Guide](images/05-usage.png?ts=1777922058129)
+
+The second tab. Worked examples for every major
+language feature: arrays, named axes, autograd, the
+Model DSL, tokenizers, experiment tracking, training
+a tiny LM end-to-end.
+
+### Documentation: Glossary
+
+![? dialog -- Glossary](images/06-glossary.png?ts=1777922058129)
+
+The third tab. 220 alphabetical entries covering every
+language keyword, builtin, and ML concept the demos
+touch. Type-to-jump search at the top: typing `M`,
+`L`, `P` scrolls to MLP. Each entry names the closest
+MLPL construct or marks the concept as deferred / out
+of scope.
 
 ## Documentation
 
