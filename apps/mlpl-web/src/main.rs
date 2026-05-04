@@ -179,6 +179,17 @@ fn percent_encode(s: &str) -> String {
     out
 }
 
+fn render_svg_body(svg: &str) -> Html {
+    let svg_html = Html::from_html_unchecked(AttrValue::from(svg.to_string()));
+    let href = format!("data:image/svg+xml;charset=utf-8,{}", percent_encode(svg));
+    html! {
+        <div class="svg-output">
+            { svg_html }
+            <a class="svg-download" href={href} download="mlpl.svg" title="Download SVG" aria-label="Download SVG">{"⬇"}</a>
+        </div>
+    }
+}
+
 fn render_entry(entry: &HistoryEntry) -> Html {
     if entry.kind == EntryKind::Narration {
         // Demo narration: prose framing around the code output.
@@ -193,17 +204,7 @@ fn render_entry(entry: &HistoryEntry) -> Html {
         };
     }
     let body = if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
-        let svg_html = Html::from_html_unchecked(AttrValue::from(entry.output.clone()));
-        let href = format!(
-            "data:image/svg+xml;charset=utf-8,{}",
-            percent_encode(&entry.output)
-        );
-        html! {
-            <div class="svg-output">
-                { svg_html }
-                <a class="svg-download" href={href} download="mlpl.svg" title="Download SVG" aria-label="Download SVG">{"⬇"}</a>
-            </div>
-        }
+        render_svg_body(&entry.output)
     } else if entry.is_error {
         html! { <pre class={"output-line error"}>{ &entry.output }</pre> }
     } else if let Some(s) = summary::summarize(&entry.output) {
