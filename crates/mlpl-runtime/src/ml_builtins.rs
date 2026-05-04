@@ -4,6 +4,8 @@ use mlpl_array::{DenseArray, Shape};
 
 use crate::error::RuntimeError;
 
+pub(crate) const NAMES: &[&str] = &["softmax", "one_hot", "sinusoidal_encoding", "cross_entropy"];
+
 /// Dispatch ML built-ins. Returns None if not matched.
 pub(crate) fn try_call(
     name: &str,

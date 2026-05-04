@@ -26,6 +26,8 @@ use crate::error::RuntimeError;
 /// deterministic and cheap.
 const POWER_ITERS: usize = 50;
 
+pub(crate) const NAMES: &[&str] = &["pca"];
+
 pub(crate) fn try_call(
     name: &str,
     args: Vec<DenseArray>,

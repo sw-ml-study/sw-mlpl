@@ -6,6 +6,10 @@ use mlpl_array::{DenseArray, Shape};
 use crate::error::RuntimeError;
 use crate::prng::Xorshift64;
 
+pub(crate) const NAMES: &[&str] = &[
+    "random", "randn", "blobs", "moons", "circles", "sample", "top_k",
+];
+
 /// Dispatch random built-ins. Returns None if not matched.
 pub(crate) fn try_call(
     name: &str,

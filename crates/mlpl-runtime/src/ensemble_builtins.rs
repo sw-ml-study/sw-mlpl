@@ -14,6 +14,8 @@ use mlpl_array::{DenseArray, Shape};
 
 use crate::error::RuntimeError;
 
+pub(crate) const NAMES: &[&str] = &["argtop_k", "scatter"];
+
 /// Dispatch `argtop_k` and `scatter`. Returns `None` when `name` is
 /// not one of them, so the outer `call_builtin` dispatch chain can
 /// continue to the next module.
