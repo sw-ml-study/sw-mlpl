@@ -15,6 +15,7 @@ pub(crate) fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::FloatLit(n) => format!("float {n}"),
         TokenKind::StrLit(s) => format!("string \"{s}\""),
         TokenKind::Ident(s) => format!("identifier '{s}'"),
+        TokenKind::BuiltinRef(s) => format!("builtin ref ':{s}'"),
         TokenKind::LParen => "'('".into(),
         TokenKind::RParen => "')'".into(),
         TokenKind::LBracket => "'['".into(),

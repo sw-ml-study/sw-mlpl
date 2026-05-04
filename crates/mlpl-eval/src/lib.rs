@@ -8,6 +8,7 @@ mod error;
 mod eval;
 mod eval_for;
 mod eval_ops;
+mod eval_reduce;
 mod experiment;
 mod grad;
 mod inspect;

@@ -36,9 +36,7 @@ const REPO_URL: &str = "https://github.com/sw-ml-study/sw-mlpl";
 
 #[function_component(App)]
 fn app() -> Html {
-    // Two fully-isolated scratchpads: main (session+history,
-    // long-running) and tutorial (shown only while a lesson
-    // is open). Closing the tutorial restores main untouched.
+    // Isolated scratchpads: main (session+history) vs tutorial.
     let session = use_mut_ref(WasmSession::new);
     let tutorial_session = use_mut_ref(WasmSession::new);
     let history = use_state(Vec::<HistoryEntry>::new);
@@ -49,7 +47,11 @@ fn app() -> Html {
     let dialog_open = use_state(|| false);
     let lesson_idx = use_state(|| None::<usize>);
     let in_tutorial = lesson_idx.is_some();
-    let active_session = if in_tutorial { tutorial_session } else { session.clone() };
+    let active_session = if in_tutorial {
+        tutorial_session
+    } else {
+        session.clone()
+    };
     let active_history: UseStateHandle<Vec<HistoryEntry>> = if in_tutorial {
         tutorial_history.clone()
     } else {

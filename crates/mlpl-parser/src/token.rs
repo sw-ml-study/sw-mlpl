@@ -11,6 +11,16 @@ pub enum TokenKind {
     FloatLit(f64),
     /// Identifier.
     Ident(String),
+    /// Builtin / operator reference: `:foo`, `:+`, `:max`, `:*`.
+    /// The lexer produces this whenever a `:` is immediately
+    /// followed (no intervening space) by an identifier-start
+    /// character or one of `+ * / -`. The annotation colon
+    /// (`x : [batch] = ...`) keeps producing `Colon` because
+    /// it requires a space after the `:`, then a `[`. This
+    /// is the canonical way to pass a function / operator
+    /// reference to a higher-order builtin like `reduce` or
+    /// `map`. See `docs/glossary.md` "Reduce".
+    BuiltinRef(String),
     /// String literal (double-quoted, escapes processed).
     StrLit(String),
     /// `(`

@@ -57,10 +57,20 @@ pub(crate) fn eval_expr(
     if let Expr::StrLit(s, _) = expr {
         return Ok(Value::Str(s.clone()));
     }
+    if let Expr::BuiltinRef(name, _) = expr {
+        return Ok(Value::BuiltinRef { name: name.clone() });
+    }
     if let Expr::Ident(name, _) = expr
         && let Some(s) = env.get_string(name)
     {
         return Ok(Value::Str(s.clone()));
+    }
+    if let Expr::Ident(name, _) = expr
+        && let Some(target) = env.get_builtin_ref(name)
+    {
+        return Ok(Value::BuiltinRef {
+            name: target.clone(),
+        });
     }
     if let Expr::Ident(name, _) = expr
         && let Some(v) = env.get_device_tensor(name)
@@ -255,6 +265,11 @@ pub(crate) fn eval_expr(
         };
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "reduce"
+    {
+        return crate::eval_reduce::eval_reduce(args, env, trace);
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "cross_entropy"
         && args.len() == 2
     {
@@ -414,6 +429,7 @@ pub(crate) fn eval_expr(
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),
         Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
         Expr::StrLit(_, _) => unreachable!(),
+        Expr::BuiltinRef(_, _) => unreachable!(),
         Expr::Ident(name, _) => {
             let r = env
                 .get(name)
@@ -450,6 +466,10 @@ pub(crate) fn eval_expr(
                 Value::Str(s) => {
                     env.set_string(name.clone(), s);
                     ("assign_string", vec![], DenseArray::from_scalar(0.0))
+                }
+                Value::BuiltinRef { name: target } => {
+                    env.set_builtin_ref(name.clone(), target);
+                    ("assign_builtin_ref", vec![], DenseArray::from_scalar(0.0))
                 }
                 Value::Array(val) => {
                     env.set(name.clone(), val.clone());

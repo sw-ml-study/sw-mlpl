@@ -209,5 +209,6 @@ fn value_kind(value: &Value) -> &'static str {
         Value::Model(_) => "model",
         Value::Tokenizer(_) => "tokenizer",
         Value::DeviceTensor { .. } => "device-tensor",
+        Value::BuiltinRef { .. } => "builtin-ref",
     }
 }

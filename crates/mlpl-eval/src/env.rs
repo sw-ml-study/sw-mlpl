@@ -99,6 +99,15 @@ pub struct Environment {
     /// bindings keep working unchanged (gradual-typing
     /// additivity rule).
     pub(crate) tags: HashMap<String, ValueTag>,
+    /// Bindings that hold a BuiltinRef value (`:add`, `:max`,
+    /// `:+`, etc.). Sibling to `vars` / `strings` -- a separate
+    /// namespace so user variables can't shadow builtin
+    /// references and vice versa. `f = :add` lands here;
+    /// `eval_expr(Expr::Ident(f))` looks up here after `vars`
+    /// and `strings`. Forward-compatible with first-class
+    /// functions: when `Value::Function` lands, this map either
+    /// gets absorbed or stays as the "named-builtin" subset.
+    pub(crate) builtin_refs: HashMap<String, String>,
 }
 
 impl Environment {
@@ -345,6 +354,20 @@ impl Environment {
     /// `:tags` listing in step 005.
     pub fn tags_iter(&self) -> impl Iterator<Item = (&String, &ValueTag)> {
         self.tags.iter()
+    }
+
+    /// Bind `name` to a builtin / operator reference (e.g.
+    /// `f = :add` records `name="f", target="add"`).
+    pub fn set_builtin_ref(&mut self, name: String, target: String) {
+        self.builtin_refs.insert(name, target);
+    }
+
+    /// Look up a builtin / operator reference by binding name.
+    /// Returns the target builtin name, or `None` if `name` is
+    /// not bound to a BuiltinRef.
+    #[must_use]
+    pub fn get_builtin_ref(&self, name: &str) -> Option<&String> {
+        self.builtin_refs.get(name)
     }
 }
 
