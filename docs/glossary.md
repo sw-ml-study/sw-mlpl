@@ -8,6 +8,11 @@ at the saga that may add them; concepts outside MLPL's
 teaching-language scope (MLOps, deployment, monitoring) carry
 an `out of scope` note.
 
+## abs (builtin)
+
+Elementwise absolute value: `abs(x)` returns `|x|` for each
+element. Pure scalar map; preserves shape.
+
 ## Activation function
 
 A non-linear elementwise function applied to a layer's output
@@ -89,6 +94,14 @@ shift. Stabilizes training of deep networks; sensitive to
 small batch sizes. MLPL ships `rms_norm` (a simpler scheme);
 batch norm is deferred.
 
+## batch / batch_mask (builtins)
+
+`batch(x, size)` slices a `[N, ...]` array into a `[B, size,
+...]` array of batches; the trailing batch is zero-padded if
+`size` does not divide `N`. `batch_mask(x, size)` returns the
+matching `[B, size]` `0 / 1` mask so downstream ops can ignore
+the padded positions.
+
 ## Beam search
 
 A decoding strategy that keeps the top-`k` partial sequences
@@ -124,6 +137,32 @@ A subword tokenizer that starts from raw bytes and greedily
 merges the most-frequent adjacent pair until a target vocab
 size is reached. MLPL ships `train_bpe(corpus, vocab_size,
 seed)` plus `apply_tokenizer` and `decode`.
+
+## blobs / circles / moons (builtins)
+
+Synthetic 2-D classification datasets. `blobs(seed, n,
+centers)` returns `[N, 3]` rows of `[x, y, label]` for `n`
+points around each given center. `circles(seed, n, noise)`
+makes concentric noisy rings; `moons(seed, n, noise)` makes
+the classic two-half-moon pattern. All three appear in the
+"Decision Boundary" / "K-Means" / "Moons MLP" demos.
+
+## boundary_2d (builtin)
+
+Renders a 2-D classifier's decision surface as an SVG
+heatmap with the training points overlaid. Signature:
+`boundary_2d(predictions, grid_shape, points, labels)`.
+
+## BuiltinRef (`:foo` syntax)
+
+A first-class-ish reference to a builtin or operator. Written
+as `:` immediately followed by an identifier or one of
+`+ * / -`. Examples: `:add`, `:max`, `:+`, `:sigmoid`. Used
+as the first arg to higher-order builtins like `reduce(:op,
+x[, axis])`. Lives in a separate namespace from regular
+variables, so `add = 42` does not shadow `:add`. Forward-
+compatible with first-class functions: when `Value::Function`
+lands, `:foo` lifts to a function value.
 
 ## Calibration
 
@@ -182,6 +221,13 @@ Grouping points without labels. K-means is the classic
 algorithm; the demo runs ten Lloyd-iteration steps over 90
 points and three centroids.
 
+## clone_model (builtin)
+
+`clone_model(m)` deep-copies a `ModelSpec` tree, allocating a
+fresh disjoint set of param names. Saga 20's "Neural Thicket"
+ensembling clones a base model into 16 disjoint variants
+before perturbing each.
+
 ## CNN (Convolutional Neural Network)
 
 A network built around convolution and pooling layers,
@@ -215,6 +261,19 @@ or state-space alternatives.
 
 The window-and-sum operation at the core of CNNs. Not a
 v0.19 builtin in MLPL; deferred along with CNN-family demos.
+
+## Comparison ops: `gt`, `lt`, `eq` (builtins)
+
+Elementwise predicates returning `0.0` / `1.0`. `gt(a, b)`,
+`lt(a, b)`, `eq(a, b)`. MLPL has no boolean type -- the
+`0 / 1` floats double as masks (multiply to filter) and
+counts (`reduce_add` to sum a "how many true" tally).
+
+## concat (builtin)
+
+`concat(a, b)` stitches two rank-1 vectors end to end. Used
+in the Tiny LM generation loop to grow the prompt
+sequence by appending each newly-sampled token.
 
 ## Cross-attention
 
@@ -253,6 +312,25 @@ concentrates near the surface of any hypercube, and density
 estimation becomes intractable. Drives the value of structured
 priors, dimensionality reduction (PCA, t-SNE), and learned
 representations.
+
+## :describe (REPL command)
+
+`:describe <name>` prints a typed summary of a binding -- shape
++ tag + values preview for an array, layer tree for a model,
+vocab + merge count for a tokenizer, signature for a builtin.
+Saga 23 v0.19 added per-tag bodies (Probability rows show
+the verified-or-violated row-sum invariant; Gradient shows
+`wrt`, etc.).
+
+## device block (language keyword)
+
+`device("target") { body }` pushes a device target onto a
+stack so ops inside the body dispatch through that backend.
+MLPL: `device("cpu") { ... }` (default), `device("mlx") {
+... }` (Apple MLX, Saga 14), and -- with `--peer` registered
+-- a remote service peer (Saga R1). Bindings created inside
+the block carry the device tag forward; cross-device ops
+strict-fault.
 
 ## Data Augmentation
 
@@ -354,6 +432,14 @@ than after a fixed step count) to avoid overfitting. MLPL
 doesn't ship a built-in early-stop hook; the user can
 condition the `train` body on `last_losses` patterns.
 
+## embed_table (builtin)
+
+`embed_table(model)` walks a `ModelSpec` tree depth-first
+left-to-right and returns the first `Embedding` layer's
+`[vocab, d_model]` matrix as a plain array. Saga 16.5
+shipped this so demos can inspect / project / cluster a
+learned embedding after training.
+
 ## Embedding
 
 A learned `[vocab, d_model]` lookup table that maps token ids
@@ -384,6 +470,36 @@ One full pass through the training dataset. Distinct from
 "step" -- a step is one optimizer update. Epochs are dataset-
 relative; steps are gradient-relative.
 
+## estimate_train / estimate_hypothetical / feasible / calibrate_device (builtins)
+
+Saga 22's "feasibility" surface. `estimate_train(model, steps,
+batch_size, seq_len[, dtype_bytes])` returns a `[5]` array
+`[params, vram_bytes, disk_bytes, flops, wall_seconds]` from
+a `ModelSpec`. `estimate_hypothetical(name, ...)` answers the
+same question for SmolLM / Llama / Qwen scale points without
+materializing weights. `feasible(estimate, [vram, disk,
+wall])` returns a `0 / 1` guard for `if feasible(est,
+budget) { train ... }`. `calibrate_device()` runs a 1024x1024
+matmul benchmark and caches device GFLOPS for honest
+estimates.
+
+## :experiments (REPL command)
+
+`:experiments` lists every recorded experiment block in the
+session merged with on-disk records (terminal REPL only).
+Each row shows the experiment name + captured `_metric`-
+suffixed scalars; pairs with `compare(a, b)` for delta
+inspection.
+
+## experiment block (language keyword)
+
+`experiment "name" { body }` runs the body and captures any
+scalar variable whose name ends in `_metric` as a metric on
+an `ExperimentRecord`. The record lands in
+`env.experiment_log` (always) and on disk under
+`<exp_dir>/<name>/<ts>/run.json` (terminal REPL only).
+Use to pin a reproducible notebook entry per run.
+
 ## Few-shot Learning
 
 Doing a task by showing the model a handful of input/output
@@ -405,6 +521,22 @@ the matmuls and tiles to keep working memory in fast SRAM,
 reducing both wall-clock and memory cost without changing
 the math. MLPL's MLX backend uses naive attention today;
 fused / flash variants are deferred.
+
+## fill / zeros / ones (builtins)
+
+Constant-array constructors. `zeros([d0, d1, ...])` makes a
+zero-filled tensor of the given shape; `ones(...)` is one-
+filled; `fill(shape, value)` is the general form. Used to
+allocate accumulators (`losses = zeros([16])`), bias inits,
+mask scaffolding.
+
+## for / in (language keyword)
+
+`for row in dataset { body }` streams over rows (or batches)
+of a dataset, binding the row to `row` per iteration. The
+last value of `body` is captured into `last_rows` for
+plotting / inspection. Saga 12 added this construct; the
+"Loading Data" tutorial walks it end-to-end.
 
 ## Forward pass
 
@@ -475,11 +607,24 @@ mitigated by RAG (ground in retrieved facts) or explicit
 "I don't know" training. Out of MLPL's current scope;
 relevant when using `llm_call`.
 
+## grid (builtin)
+
+`grid([x_lo, x_hi, y_lo, y_hi], n)` returns an `[n*n, 2]`
+array of `(x, y)` points evenly spaced over the rectangle.
+Used by `boundary_2d` to query a classifier's surface for
+decision-boundary plots.
+
 ## Heatmap
 
 `svg(matrix, "heatmap")` renders a `[N, M]` array as a 2-D
 intensity grid. Standard for attention maps and confusion
 matrices.
+
+## hist (builtin)
+
+`hist(values, bins)` renders a histogram of a flat values
+vector with the requested number of bins as an SVG. One-line
+distribution inspection.
 
 ## Hyperparameter
 
@@ -529,11 +674,24 @@ Prompt patterns that trick an LLM out of its safety training
 safety territory; MLPL exposes `llm_call` but doesn't ship
 a jailbreak / safety-eval surface.
 
+## iota (builtin)
+
+`iota(n)` returns the integer sequence `[0, 1, ..., n-1]` as
+a rank-1 vector. The most basic array constructor; building
+block for indexing / shape arithmetic / one-hot scaffolding.
+
 ## K-Means
 
 Unsupervised clustering by alternating "assign each point to
 its nearest centroid" and "move each centroid to the mean of
 its assigned points". The K-Means demo runs ten iterations.
+
+## knn (builtin)
+
+`knn(X, k)` returns each row's `k` nearest non-self neighbors
+sorted by ascending distance with lower-index tie-break.
+`[N, k]` integer-index output. Saga 16 ships this for
+embedding inspection.
 
 ## KV Cache
 
@@ -556,6 +714,13 @@ Ground-truth integer class indices for a classification task.
 A `Labels { num_classes }` tag in v0.19 carries the class
 count so `confusion_matrix` and `cross_entropy` can validate
 shape compatibility.
+
+## last_row (builtin)
+
+`last_row(m)` returns the last row of a rank-2 matrix as a
+rank-1 vector. The Tiny LM generation loop uses it to pick
+the next-token logits from `apply(model, seq)`'s `[T, V]`
+output.
 
 ## Latent Space
 
@@ -608,6 +773,28 @@ A model that predicts the next token given a sequence of
 prior tokens. The "Tiny LM" and "Tiny LM Generate" demos
 train a 1-layer transformer end-to-end on a small corpus.
 
+## llm_call (builtin)
+
+`llm_call(url, prompt, model)` POSTs to an Ollama-compatible
+`/api/generate` endpoint and returns the model's completion
+text as a `Value::Str` string. Saga 19 added this; CLI-only
+in v0.19 (browser CORS / proxy story is a deferred saga).
+
+## load / load_preloaded (builtins)
+
+`load("rel.csv")` / `load("rel.txt")` reads through an
+`Environment::data_dir` sandbox set by the terminal REPL's
+`--data-dir` flag. `load_preloaded("name")` serves
+compiled-in corpora for the web REPL where filesystem access
+is unavailable. Both produce a string for `.txt` and a
+DenseArray (with header autoparse) for `.csv`.
+
+## log (builtin)
+
+Elementwise natural log: `log(x)` returns `ln(x)` for each
+element. Used to bridge `Probability -> LogProbability` and
+in numerical stability tricks for cross-entropy.
+
 ## Logits
 
 The unnormalized scores a classifier produces just before
@@ -659,6 +846,14 @@ space. Justifies dimensionality reduction (PCA, t-SNE, UMAP)
 and explains why deep learning works at all -- the network
 need only be expressive on the manifold, not the cube.
 
+## map (deferred higher-order)
+
+`map(:op, x)` -- elementwise apply of a unary BuiltinRef
+across every element. Not shipped in v0.19; the natural
+companion to `reduce(:op, x[, axis])` and an obvious follow-
+up. For now compose with `reduce(:add, x * x)` or named
+math primitives (`exp(x)`, `sigmoid(x)`).
+
 ## Mask
 
 A `0 / 1` (or `0.0 / -inf`) array that nullifies positions in
@@ -680,6 +875,12 @@ Storing weights in f32 for stability while running matmuls in
 f16 / bf16 for speed and memory. Standard on modern GPUs.
 MLPL stores everything in f64 today; mixed precision is
 deferred until a dtype layer ships.
+
+## mean (builtin)
+
+`mean(x)` returns the arithmetic mean of all elements as a
+scalar. Distinct from `reduce_add(x) / shape(x)` only in
+that it ignores axis arguments today (always full reduction).
 
 ## MLP (Multi-Layer Perceptron)
 
@@ -731,6 +932,13 @@ projection, capturing different relationships in the input.
 MLPL: `attention(d_model, heads, seed)` -- `heads` controls
 this split.
 
+## :models / :tokenizers (REPL commands)
+
+`:models` lists every bound `Value::Model` with its layer
+tree summary; `:tokenizers` does the same for tokenizer
+bindings. Sibling commands to `:vars` for the non-array
+namespaces.
+
 ## One-hot encoding
 
 Converting an integer class index to a vector with 1.0 at
@@ -767,6 +975,21 @@ variance). Classic diagnosis: train loss low + val loss high
 = overfitting; both high = underfitting; both low =
 well-tuned.
 
+## pairwise_sqdist (builtin)
+
+`pairwise_sqdist(X)` returns the `[N, N]` symmetric matrix
+of pairwise squared Euclidean distances between every pair
+of rows in `X`. Building block for `knn`, k-means, and
+embedding-cluster inspection.
+
+## param / tensor (constructors)
+
+`param[d0, d1, ...]` allocates a trainable leaf tensor that
+the autograd tape tracks; `tensor[d0, d1, ...]` allocates a
+fixed (non-trainable) leaf. Both auto-bind to the assignment
+target's name. Auto-tagged `Weight` / `Bias` per the
+shape-and-position heuristics in Saga 23.
+
 ## Padding
 
 Filling a short input out to a fixed length so a batch can be
@@ -786,6 +1009,14 @@ A linear projection that finds the directions of greatest
 variance in a dataset. MLPL: `pca(X, k)` returns the
 top-k projection `[N, k]`. The "PCA via Power Iteration"
 demo writes it out by hand.
+
+## perturb_params (builtin)
+
+`perturb_params(m, family, sigma, seed)` walks `m`'s param
+tree, filters by `family` (`"all_layers"`, `"attention_only"`,
+`"mlp_only"`, `"embed_and_head"`), and adds `sigma * randn(seed
++ i, shape)` to each matching param in place. Saga 20's
+weight-perturbation ensembling pattern.
 
 ## Perceptron
 
@@ -833,6 +1064,20 @@ dataset, often with a smaller subset of parameters trainable
 (see LoRA). MLPL's "Tiny LM" demos pretrain; the "LoRA
 Fine-Tuning" lesson fine-tunes.
 
+## pow (builtin)
+
+Elementwise power: `pow(a, b)` raises each element of `a` to
+each element of `b`, broadcasting in the usual way. `pow(x,
+2.0)` is the canonical squared-error component.
+
+## power iteration
+
+Numerical method for the dominant eigenvector: repeatedly
+multiply `Cov * v` and renormalize until `v` stops changing.
+The "PCA via Power Iteration" demo writes it out by hand;
+the `pca(X, k)` builtin uses the same idea internally with
+Gram-Schmidt deflation for the top-k.
+
 ## Probability
 
 A non-negative scalar that, with siblings, sums to 1.
@@ -868,6 +1113,13 @@ context. Reduces hallucination and lets you cite. MLPL ships
 `pairwise_sqdist` / `knn` for similarity search; full RAG
 pipelines are a deferred saga.
 
+## randn / random (builtins)
+
+`randn(seed, [shape...])` returns a standard-normal
+sample (mean 0, variance 1) with the given shape. `random(
+seed, [shape...])` returns uniform `[0, 1)` samples. Both
+deterministic given the same seed.
+
 ## Rank (of a tensor)
 
 The number of dimensions of a tensor. A scalar has rank 0; a
@@ -877,6 +1129,23 @@ tensor rank 3. MLPL: `rank(x)` returns the count;
 linear algebra (the dimension of a matrix's column span)
 and from "low-rank" in LoRA (the small inner dimension of
 the adapter matrices A and B).
+
+## reduce (builtin)
+
+Higher-order reduction: `reduce(:op, x[, axis])` applies the
+binop named by a `BuiltinRef` to every element of `x` (or
+along `axis`), starting from the op's identity. Curated set:
+`:add` (== `:+`), `:mul` (== `:*`), `:min`, `:max`, `:and`,
+`:or`. Examples: `reduce(:max, v)`, `reduce(:add, M, 1)`,
+`f = :max; reduce(f, v)`. Subsumes the older fixed-name
+`reduce_add` / `reduce_mul`. See also: `dot product`, `mean`,
+`argmax`.
+
+## reduce_add / reduce_mul (builtins)
+
+`reduce_add(x[, axis])` is sum reduction; `reduce_mul` is
+product reduction. Equivalent to `reduce(:add, x[, axis])`
+and `reduce(:mul, x[, axis])`; kept as direct shorthands.
 
 ## Regularization
 
@@ -906,6 +1175,25 @@ pretraining, autoencoders, contrastive learning all fall
 under it. Saga 16's embedding-visualization tools poke at
 representations; full self-supervised pretraining is a
 deferred saga.
+
+## repeat block (language keyword)
+
+`repeat N { body }` runs the body `N` times with no per-
+iteration index binding. Ancestor of `train { ... }` (which
+DOES bind `step` and capture loss). Use `repeat` for
+iterative algorithms (k-means, power iteration, MLP forward
++ backward demo) where you want a counted loop without the
+training-specific bookkeeping.
+
+## reshape (builtin)
+
+`reshape(x, [d0, d1, ...])` returns a view of `x` with the
+given dim sizes. Total element count must match; otherwise
+`ShapeMismatch`. Clears axis labels (semantic identity is
+lost on shape reflow); `reshape_labeled(x, dims, labels)`
+preserves them by re-stating labels explicitly. Note: also
+clears Saga 23 ValueTags, since the result no longer
+represents the same domain.
 
 ## Residual
 
@@ -982,6 +1270,28 @@ default; `causal_attention(...)` adds the lower-triangular
 mask used in language models. The "Attention Pattern" demo's
 second pass renders the diagonal pattern from `Q @ Q^T`.
 
+## scan (deferred higher-order)
+
+`scan(:op, x)` -- the cumulative version of `reduce`. Returns
+a same-shape array where each entry is the reduction over the
+prefix up to that point. Standard for cumulative sum / running
+max / prefix product. Not in v0.19; obvious follow-up to
+`reduce`.
+
+## scatter (builtin)
+
+`scatter(buf, idx, value)` returns a copy of a rank-1 buffer
+with the entry at `idx` replaced by `value`. Saga 20's neural-
+thicket loop uses it to write each variant's loss into a
+flat `[16]` accumulator before reshaping into the heatmap.
+
+## scatter_labeled (builtin)
+
+`scatter_labeled(points, labels)` renders `[N, 2]` points
+colored by integer class labels as an SVG scatter plot.
+Stable color palette across calls so multiple runs are
+visually comparable.
+
 ## Sequence
 
 An ordered list of tokens. Inputs to language models are
@@ -995,6 +1305,30 @@ the label in training but not in deployment -- the famous
 "husky vs wolf" paper where the model learned snow, not
 wolves. Mitigations: data augmentation, careful curation,
 causal-feature-aware training.
+
+## shape / rank (builtins)
+
+`shape(x)` returns the dim-size vector of an array (e.g.
+`[2, 3]` for a 2x3 matrix). `rank(x)` returns the number of
+dims (a single scalar). Together they describe an array's
+structural type. Shape-mismatch errors at runtime cite the
+`shape(x)` of the offending operand; named-axis arrays
+render as `[batch=4, vocab=8]` instead of `[4, 8]`.
+
+## shift_pairs_x / shift_pairs_y (builtins)
+
+`shift_pairs_x(ids, block)` and `shift_pairs_y(ids, block)`
+take a flat token-id array and produce next-token training
+pairs of length `block`. `_x` rows are the input
+sub-sequences; `_y` rows are the corresponding target
+sub-sequences (input shifted by one). The Tiny LM demo uses
+this to build training data without a custom loop.
+
+## shuffle (builtin)
+
+`shuffle(x, seed)` returns a Fisher-Yates row permutation of
+a rank-2 array, deterministic given `seed`. Standard for
+randomizing dataset order before batching.
 
 ## Sigmoid
 
@@ -1046,6 +1380,13 @@ selective gating. Trades all-to-all attention for linear
 scaling. MLPL ships transformer + MLP families only; SSMs
 are deferred.
 
+## sqrt (builtin)
+
+Elementwise square root: `sqrt(x)`. Used in attention
+scoring (`/ sqrt(d_k)`), RMS norm, and PCA's Gram-Schmidt
+normalization. Negative inputs produce NaN; the runtime does
+not raise.
+
 ## Step
 
 One optimizer update. The training loop runs `train N { body
@@ -1070,6 +1411,24 @@ than there are neurons, by representing them as overlapping
 directions in feature space. Explains why a single neuron
 rarely encodes one clean concept and motivates dictionary-
 learning-style decomposition.
+
+## :tags / :untag (REPL commands)
+
+Saga 23 v0.19 typed-value introspection. `:tags` lists every
+binding with an attached `ValueTag` sorted alphabetically,
+showing the tag's display form (e.g. `Probability`,
+`Loss(CrossEntropy)`, `Weight(layer=linear_0, name=W)`).
+`:untag <name>` clears the auto-tag from a binding when the
+auto-tagger guessed wrong.
+
+## tanh_layer / relu_layer / softmax_layer (builtins)
+
+Parameter-free activation layers wrappable in a `chain(...)`.
+`tanh_layer()` / `relu_layer()` / `softmax_layer()` apply
+their respective elementwise functions. Distinct from the
+math primitives (`tanh_fn`, `sigmoid`) in that layers can
+participate in `apply(model, X)` and Saga 23's structural-
+tail tagging.
 
 ## Tanh
 
@@ -1122,6 +1481,13 @@ Restrict a logit vector to its k largest entries (zero out
 the rest) before sampling. Reduces tail noise in
 text generation. MLPL: `top_k(logits, k)`.
 
+## tokenize_bytes / decode_bytes (builtins)
+
+`tokenize_bytes(text)` returns a flat array of byte values
+(`0..256`); `decode_bytes(ids)` reverses it. The simplest
+tokenizer: byte-level, no merges, no vocabulary file. Useful
+for tiny pedagogical demos before BPE complexity.
+
 ## Train (loop)
 
 `train N { body }` runs the body N times, binding the loop
@@ -1171,6 +1537,13 @@ ensembles, Bayesian neural nets, Monte-Carlo dropout, deep
 evidential learning. MLPL's "Neural Thicket" ensemble demo
 is a tiny taste; full uncertainty surface is deferred.
 
+## unfreeze (builtin)
+
+`unfreeze(m)` is the inverse of `freeze(m)` -- removes every
+param of `m` from the env's frozen set so subsequent
+`adam` / `momentum_sgd` updates can move them again. Saga 15
+ships both as the LoRA freeze / unfreeze pair.
+
 ## Universal Approximation
 
 Theorem: a feed-forward network with a single hidden layer
@@ -1189,6 +1562,13 @@ outputs `(mean, std)`; the decoder samples from
 divergence terms. Saga 24 plans first-class
 `Distribution` support; VAE demos follow once
 distributions ship.
+
+## :vars (REPL command)
+
+`:vars` lists every bound array variable with its shape
+(labeled if any axes are named) and Saga 23 ValueTag if any.
+Trainable params are flagged `[param]`; frozen params show
+in `:wsid`'s frozen-count.
 
 ## Validation set
 
@@ -1224,6 +1604,14 @@ MLPL: `linear_warmup(step, warmup_steps, target_lr)`.
 The trainable matrix in a `Linear` layer (or a tile of one
 in `Attention`). Auto-tagged `Weight(layer, name)` in
 v0.19.
+
+## :wsid (REPL command)
+
+`:wsid` (workspace ID) prints summary counts: variables,
+trainable parameters, frozen parameters, models, tokenizers,
+optimizer slots, experiment records. Inspired by APL's
+`)WSID`. The first command to run when you reopen a
+session and want a quick sense of state.
 
 ## Weight Decay
 

@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-35e6c293accef320.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-35e6c293accef320_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-74902b5d72f7ebd3.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-74902b5d72f7ebd3_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -82,9 +82,20 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             width: auto;
             display: block;
         }
-        header span {
-            font-size: 15px;
+        .title-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .title-line {
+            font-size: 13px;
             color: var(--overlay2);
+            font-weight: 600;
+        }
+        .title-subtitle {
+            font-size: 11px;
+            color: var(--overlay0);
+            font-style: italic;
         }
         #app {
             flex: 1;
@@ -515,10 +526,11 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             padding-left: 10px;
             border-left: 3px solid transparent;
             transition: border-color 0.15s, background 0.15s;
-            /* leave a margin above when scroll_into_view lands on
-               this entry, so the heading isn't flush against the
-               container edge or hidden behind padding */
-            scroll-margin-top: 12px;
+            /* leave a full line of breathing room above when
+               scroll_into_view lands on this entry, so the
+               blank space before the heading is visible (not
+               just the heading flush against the top edge) */
+            scroll-margin-top: 28px;
         }
         .glossary-entry h3 {
             margin-top: 0;
@@ -678,7 +690,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-35e6c293accef320.js" crossorigin="anonymous" integrity="sha384-n/U5nhdX16vPdrgjvx2G3z5rxTriww+v825FvXXYxNMqzvm64MnHVjddUR8wV5gP"><link rel="preload" href="/sw-mlpl/mlpl-web-35e6c293accef320_bg.wasm" crossorigin="anonymous" integrity="sha384-GNkWJea6COKm5aufbCZTeUUyW/SYTyduxjLf7ahgUnEZAftxkxNaQ2a+JoWNzz2i" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-74902b5d72f7ebd3.js" crossorigin="anonymous" integrity="sha384-n/U5nhdX16vPdrgjvx2G3z5rxTriww+v825FvXXYxNMqzvm64MnHVjddUR8wV5gP"><link rel="preload" href="/sw-mlpl/mlpl-web-74902b5d72f7ebd3_bg.wasm" crossorigin="anonymous" integrity="sha384-O678HwqJD7M/+w/gie2unoh0Ku3UWoWLeKBZ1UkQnEJ5wzeeOQIqqRN8LxfvDXjj" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>

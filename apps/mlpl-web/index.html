@@ -71,9 +71,20 @@
             width: auto;
             display: block;
         }
-        header span {
-            font-size: 15px;
+        .title-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.2;
+        }
+        .title-line {
+            font-size: 13px;
             color: var(--overlay2);
+            font-weight: 600;
+        }
+        .title-subtitle {
+            font-size: 11px;
+            color: var(--overlay0);
+            font-style: italic;
         }
         #app {
             flex: 1;
@@ -504,10 +515,11 @@
             padding-left: 10px;
             border-left: 3px solid transparent;
             transition: border-color 0.15s, background 0.15s;
-            /* leave a margin above when scroll_into_view lands on
-               this entry, so the heading isn't flush against the
-               container edge or hidden behind padding */
-            scroll-margin-top: 12px;
+            /* leave a full line of breathing room above when
+               scroll_into_view lands on this entry, so the
+               blank space before the heading is visible (not
+               just the heading flush against the top edge) */
+            scroll-margin-top: 28px;
         }
         .glossary-entry h3 {
             margin-top: 0;
