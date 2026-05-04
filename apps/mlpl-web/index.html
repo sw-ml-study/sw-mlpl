@@ -504,6 +504,13 @@
             padding-left: 10px;
             border-left: 3px solid transparent;
             transition: border-color 0.15s, background 0.15s;
+            /* leave a margin above when scroll_into_view lands on
+               this entry, so the heading isn't flush against the
+               container edge or hidden behind padding */
+            scroll-margin-top: 12px;
+        }
+        .glossary-entry h3 {
+            margin-top: 0;
         }
         .glossary-entry.matched {
             border-left-color: var(--peach);
