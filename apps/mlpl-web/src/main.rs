@@ -14,6 +14,8 @@ mod handlers;
 mod help;
 mod lessons;
 mod lessons_advanced;
+#[cfg(test)]
+mod readme_counts;
 mod state;
 mod summary;
 mod tutorial;
