@@ -1,11 +1,14 @@
-# ![MLPL](docs/mlpl-badge.png) MLPL
+# ![sw-MLPL](docs/mlpl-badge.png) sw-MLPL
 
-MLPL is a Rust-first array and tensor programming language for
-machine learning, visualization, and experimentation. Inspired by
-APL, APL2, J, and BQN.
+Software Wrighter's Machine Learning Programming Language
+Playground -- a Rust-first array and tensor programming
+language for machine learning, visualization, and
+experimentation. Inspired by APL, APL2, J, and BQN.
 
-**[Try MLPL in your browser](https://sw-ml-study.github.io/sw-mlpl/)**
+**[Try sw-MLPL in your browser](https://sw-ml-study.github.io/sw-mlpl/?ts=1777921909540)**
 -- no install required.
+
+![Screenshot](images/screenshot.png?ts=1777921909540)
 
 ## Documentation
 
