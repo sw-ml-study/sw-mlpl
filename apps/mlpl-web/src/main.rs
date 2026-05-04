@@ -120,7 +120,7 @@ fn render(a: RenderArgs) -> Html {
                     { if tutorial_active { html!{} } else { html!{ <Welcome /> } } }
                     { for a.history.iter().map(render_entry) }
                 </div>
-                <InputRow value={(*a.input_value).clone()} on_input={on_input} on_keydown={on_keydown} />
+                <InputRow value={(*a.input_value).clone()} on_input={on_input} on_keydown={on_keydown} in_tutorial={tutorial_active} />
             </main>
             <Footer url={REPO_URL} />
             <DocDialog open={*a.dialog_open} on_close={close_dialog} />
