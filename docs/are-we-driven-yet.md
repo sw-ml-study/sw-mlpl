@@ -45,6 +45,8 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | REPL with incremental execution | A | HAVE | `mlpl-repl` + web REPL |
 | Named axes on tensors (`x[batch, time, dim]`) | A | HAVE | Saga 11.5 shipped `label(x, [...])`, `x : [batch, dim] = ...` annotation syntax, `labels(x)` readback, and propagation through elementwise / matmul / reduce / softmax |
 | Shape-checked / dependent-shape types (`Tensor[B, T, D]`) | A | PART | Saga 11.5 tracks labels as metadata with runtime validation (`EvalError::ShapeMismatch { op, expected, actual }`), stopping short of full dependent types -- label mismatches still surface at evaluation, not at parse time |
+| Typed ML concepts (Logit, Probability, Loss, Gradient, Weight, Bias, Activation, LearningRate, Labels, AttentionMap) | A | HAVE | Saga 23 (v0.19.0) shipped the Tier A `ValueTag` side table on `Environment` with auto-tagging from softmax/sigmoid/cross_entropy/grad/linear/embed/attention/apply, predicate-checked consumers (cross_entropy/sample/top_k/adam/momentum_sgd) raising `EvalError::TypeMismatch{op, expected, actual, hint}` with four-part tutoring hints, and propagation through arith/transpose/reshape/reductions. Catches the canonical double-softmax bug at the call site instead of as a NaN factory at training time |
+| Tutoring error messages with copy-pasteable fixes | A | HAVE | Saga 23 step 008 catalog -- every type error includes a 3-5 line tutor naming the most likely cause and a concrete MLPL fix (`loss = cross_entropy(logits, y)` etc.). See `contracts/eval-contract/tutoring-hints.md` |
 | Dual syntax: terse APL mode vs explicit agent-friendly mode | A | CONS | Open design question |
 | Code-as-data: `parse`, `transform`, `eval` primitives | A | CONS | Needed for meta-programming, self-modification |
 | Deterministic execution mode (`with deterministic { }`) | A | CONS | Seed control needs a scoped construct |
@@ -120,11 +122,11 @@ from `ai-agent-driven-development.txt`, `P+A` = both.
 | Capability | Source | Status | Notes |
 |------------|--------|--------|-------|
 | Introspectable execution graph (`trace f`) | A | HAVE | `mlpl-trace` JSON export |
-| Structured errors (kind + expected/actual fields) | A | HAVE | `EvalError::ShapeMismatch { op, expected: LabeledShape, actual: LabeledShape }` shipped in Saga 11.5 step 006. Display renders as `op: expected [seq=N, d=M], got [time=N, d=M]`. `ArrayError::LabelMismatch` and `ArrayError::LabelsRankMismatch` are the typed lower-layer sources |
+| Structured errors (kind + expected/actual fields) | A | HAVE | `EvalError::ShapeMismatch { op, expected: LabeledShape, actual: LabeledShape }` shipped in Saga 11.5 step 006. Display renders as `op: expected [seq=N, d=M], got [time=N, d=M]`. Saga 23 step 004 added `EvalError::TypeMismatch { op, expected, actual, hint }` for typed-value predicate failures with multi-line tutoring hints. `ArrayError::LabelMismatch` and `ArrayError::LabelsRankMismatch` are the typed lower-layer sources |
 | Built-in testing primitives (`assert`, `approx_equal`, `fuzz`) | A | CONS | Rust tests exist, MLPL-level asserts do not |
 | Sandbox execution with time/memory/GPU limits (`run_safe`) | A | CONS | Needed for agent self-correction loops; no plan |
 | Cost / performance introspection (`profile f x`) | A | CONS | Paper #12 also benefits; no plan |
-| `:describe <name>` / `:vars` / `:fns` REPL introspection | A | HAVE | Shipped in Saga 11; Saga 11.5 step 007 extended `:vars` and `:describe` to render labeled shapes through `LabeledShape` Display (e.g. `X: [seq=6, d_model=4]`, or `[6, d_model=4]` for partial labels) |
+| `:describe <name>` / `:vars` / `:fns` REPL introspection | A | HAVE | Shipped in Saga 11; Saga 11.5 step 007 extended `:vars` and `:describe` to render labeled shapes through `LabeledShape` Display; Saga 23 step 006 extended both to render typed `ValueTag` headers + per-tag body lines (Probability shows verified-or-violated row-sum invariant), added `:tags` listing and `:untag <name>` clearing |
 | `explain f` structured-explanation primitive | A | CONS | Speculative but high-leverage for agent tooling |
 | `repair f given error` primitive | A | CONS | Speculative; depends on structured errors + code-as-data |
 | `optimize f for gpu` primitive | A | CONS | Speculative; depends on device placement + profile |

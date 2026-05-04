@@ -1,6 +1,6 @@
 number = 10
 slug = "typed-values-release"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 23 step 010: typed-values-release.
 
