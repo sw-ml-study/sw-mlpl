@@ -5,6 +5,231 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
+## Unreleased -- post-v0.19.0 polish
+
+Working on the live web demo + lesson surface,
+plus a higher-order `reduce` that points the way
+toward first-class functions. No saga has shipped
+since v0.19.0; these accumulate toward whichever
+release tag follows.
+
+### Added
+
+- **Higher-order `reduce(:op, x[, axis])`** -- one
+  named-binop reduction subsumes `reduce_add` /
+  `reduce_mul` and adds `:min`, `:max`, `:and`,
+  `:or`, plus operator aliases `:+` / `:*`. The
+  string form (`reduce("add", x)`) is gone --
+  callers use `:add`, `:max`, etc. exclusively.
+- **`:foo` BuiltinRef syntax** -- new lexer rule
+  produces `Token::BuiltinRef` for `:` immediately
+  followed by an ident-start char or one of
+  `+ * / -`. New `Value::BuiltinRef { name }` and
+  AST node ride alongside. A separate
+  `Environment::builtin_refs` namespace prevents
+  shadowing (`add = 42` cannot break `:add`).
+  Forward-compatible with first-class functions
+  (when `Value::Function` lands, `:foo` lifts to
+  `Function::Builtin(name)` with no syntax break).
+  Documented in `docs/glossary.md` (Reduce entry).
+- **Demo progress callouts** -- the web REPL now
+  paints a heads-up Narration panel BEFORE each
+  long-running line in Tiny LM Generate, Tiny LM,
+  Tiny MLP, Moons MLP, AND Logistic Regression,
+  Linear Softmax Classifier. Each note carries a
+  short heading + 1-3-sentence body with a rough
+  ETA so the wait is intentional rather than
+  mysterious.
+- **Glossary tab in the `?` documentation dialog**
+  -- new third tab alongside Language Reference
+  and Usage Guide. Backed by `docs/glossary.md`
+  (170 alphabetical entries; cross-referenced
+  against the 145-term ML reference list). Sticky
+  search input at the top with type-to-jump:
+  typing `M`, `L`, `P` scrolls to MLP.
+- **Tutorial Index tab + lesson TOC** -- the
+  Tutorial panel opens to an "Index" tab (default)
+  showing a clickable grid of all 19 lessons with
+  the current lesson highlighted in peach.
+  Clicking jumps directly; the existing prev /
+  next pagination stays available under the
+  "Current Lesson" tab.
+- **Header tabs (REPL / Tutorial)** -- replaces
+  the old Tutorial / Exit Tutorial toggle button.
+  A ModeBar below the header shows tab-specific
+  controls: REPL gets the Demo dropdown +
+  "Reset REPL"; Tutorial gets just "Reset
+  Tutorial". The old single Clear button became
+  Reset REPL / Reset Tutorial because the action
+  wipes the session, not just the screen.
+- **Active-session label above the prompt** --
+  a small uppercase badge: green `(REPL)` when
+  the main session is active, peach
+  `(TUTORIAL)` when a lesson is open.
+- **Isolated tutorial scratchpad** -- the
+  Tutorial tab uses a separate `tutorial_session`
+  + `tutorial_history` from the main session.
+  Submit / demo / reset callbacks transparently
+  swap to the active pair. Closing the tutorial
+  restores the main pair untouched (vars, models,
+  optimizer state, frozen set, tag side-table,
+  experiment log all preserved).
+- **`docs/gaps-to-be-addressed.md`** -- planning
+  doc cross-referencing the glossary against
+  MLPL's actual feature list. Sorts gaps by
+  category (Architecture, Loss/Training, Eval,
+  Distribution Shift, Theory, LLM, Safety,
+  Sequence/Generation) with markers
+  `SCOPE` / `CORE` / `LLM` / `RESEARCH` / `META`.
+  Suggests grouped follow-up sagas: "Norm + Init",
+  "Eval Suite", "Sequence Decoding", "Robustness",
+  "Conv Family", "RAG", "Train Loop Polish".
+- **`docs/sw-checklist-paydown.md`** -- new
+  policy: every commit must HOLD or LOWER the
+  sw-checklist failed count. Trajectory at one
+  retirement per commit is roughly 138 commits to
+  green; CLAUDE.md adopts the rule project-wide.
+
+### Changed
+
+- `apply_attention` in `mlpl-eval/src/model_dispatch.rs`
+  takes an `AttentionArgs<'a>` struct instead of 9
+  bare arguments. Retires
+  `#[allow(clippy::too_many_arguments)]`. First
+  paydown under the new policy: sw-checklist
+  139 -> 138.
+
+### Glossary additions
+
+170 entries total (was 90 immediately after Saga 23).
+New rows include CNN, RNN/LSTM/GRU, Rank,
+Sinkhorn normalization, Self-attention (expanded),
+Softmax (expanded), Adversarial Examples,
+Autoencoder, Batch Normalization, BERT,
+Bias-Variance Tradeoff, Calibration,
+Catastrophic Forgetting, Chain of Thought,
+Checkpointing, Context Window, Cross-Validation,
+Curriculum Learning, Curse of Dimensionality,
+Data Augmentation, Data Leakage, Diffusion Models,
+Distillation, Distribution Shift, Double Descent,
+DPO, Early Stopping, Emergent Behavior,
+Ensembling, Few-shot Learning, Flash Attention,
+Goodhart's Law, GPT, GQA, Gradient Clipping,
+Grokking, Hallucination, Inductive Bias,
+In-Context Learning, Mechanistic Interpretability,
+Jailbreaks, KV Cache, Label Smoothing,
+Latent Space, Learning Rate Schedules,
+Loss Landscape, Lottery Ticket Hypothesis,
+Manifold Hypothesis, Mixed Precision,
+Mode Collapse, MoE, OOD Inputs,
+Optimization vs Generalization,
+Overfitting / Underfitting, Perceptron,
+Perplexity, Precision vs Recall,
+Preference Learning, Prompt Injection, Prompting,
+Quantization, RAG, Replay Buffer,
+Representation Learning, Reward Hacking, RLHF,
+ROC / AUC, RoPE, Scaling Laws,
+Shortcut Learning / Spurious Correlations,
+Sparse Activation, Speculative Decoding,
+State Space Models / Mamba, Superposition,
+Test set, Tool Use, Transfer Learning,
+Uncertainty Estimation, Universal Approximation,
+VAE, VLM, Weight Decay, Weight Initialization.
+
+## v0.19.0 -- Saga 23: Typed ML Values + Typed Traces (2026-05-02)
+
+The optional-typing keystone. Ten steps shipped a
+curated Tier A typed-value vocabulary (Logit,
+Probability, LogProbability, Loss, Gradient,
+Weight, Bias, Activation, LearningRate, Labels,
+AttentionMap), auto-tagged by producer ops,
+predicate-checked at consumer ops with four-part
+tutoring error hints, propagated through arithmetic
+and shape ops, surfaced in `:describe` / `:vars`
+/ `:tags` / `:untag` and the trace JSON.
+
+The canonical double-softmax bug -- writing
+`cross_entropy(softmax(logits, 1), Y)` -- now
+raises a `TypeMismatch` at the call site with a
+copy-pasteable fix instead of silently producing a
+NaN factory at training time.
+
+### Added
+
+- **`mlpl_core::ValueTag`** with 11 Tier A
+  variants and `serde` derives. Helper enums
+  `LossKind` and `ActivationKind` ride alongside.
+- **`Environment::tags` side table** plus
+  `set_tag` / `get_tag` / `clear_tag` /
+  `tags_iter` helpers. Tags follow binding names
+  (same scheme as `is_param` / `is_frozen`).
+- **Auto-tagging at producer ops** --
+  `softmax` / `sigmoid` -> `Probability`,
+  `cross_entropy` -> `Loss(CrossEntropy)`,
+  `grad(loss, w)` -> `Gradient { wrt }`,
+  `cosine_schedule` / `linear_warmup` ->
+  `LearningRate`, `attention_weights` ->
+  `AttentionMap`. Plus model-aware rules:
+  `linear` / `embed` / `attention` constructors
+  tag the params they create, and `apply(model, X)`
+  walks the structural tail to pick `Logit` /
+  `Probability` / `Activation`.
+- **Predicate-checked consumers** --
+  `cross_entropy` / `sample` / `top_k` reject
+  non-Logit args; `adam` / `momentum_sgd` reject
+  non-Loss first args. Each failure raises
+  `EvalError::TypeMismatch { op, expected, actual,
+  hint }` with a four-part tutoring hint
+  (expected+why / got / likely cause /
+  copy-pasteable MLPL fix).
+- **Tag propagation table** --
+  `Logit + Logit -> Logit`, `Loss + Loss ->
+  Loss`, tagged + untagged keeps tagged,
+  domain-mismatch arithmetic raises a tutoring
+  hint pointing at softmax / log /
+  cross_entropy / mse as the bridge ops.
+  `transpose` / `reshape_labeled` preserve;
+  `reshape` clears; reductions keep `Loss` and
+  clear everything else.
+- **Typed `:describe` / `:vars` / `:tags` /
+  `:untag`** -- typed header + per-tag body
+  including a row-sum invariant check on
+  `Probability` bindings (verified vs violated).
+  New `:tags` lists every tagged binding sorted
+  by name; `:untag <name>` clears a tag.
+- **Typed trace events** -- `mlpl_trace::TraceEvent`
+  gains optional `input_types` and `output_type`
+  fields with `skip_serializing_if` defaults so
+  untagged programs serialize byte-identically.
+- **Tutoring-hint catalog** --
+  `crates/mlpl-eval/src/type_errors.rs` consolidates
+  the hint constants. Each hint follows the
+  consistent four-part shape and references real
+  MLPL syntax in the suggested fix.
+- **Web REPL "Typed ML Values" lesson** -- 35
+  example lines walking the canonical pipeline,
+  the double-softmax bug fix, propagation, and
+  `:tags` / `:untag`. Backed by 9 lesson smoke
+  tests.
+- **Three contract docs** --
+  `contracts/eval-contract/tag-propagation.md`,
+  `contracts/eval-contract/typed-trace.md`,
+  `contracts/eval-contract/tutoring-hints.md`.
+- **`docs/using-typed-values.md`** retrospective +
+  user guide.
+
+### Out of scope (deferred)
+
+Annotation syntax (`logits : Logit[batch, vocab] =
+...`) lands in Saga 26. Inline-binop predicate
+checking (catching `cross_entropy(L + P, Y)`)
+deferred. Distribution / ComputationGraph /
+LayerRole / user-defined tags ship in Sagas 24-28.
+Static checks on the `mlpl!` / `mlpl build` lower
+seam are deferred indefinitely (correctness +
+performance gain; educational ranking puts them
+last).
+
 ## v0.18.0 -- Saga R1: MLX Service Peer (2026-04-27)
 
 MLX can now run as a peer service instead of only

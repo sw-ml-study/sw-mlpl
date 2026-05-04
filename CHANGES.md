@@ -12,8 +12,62 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-04
+
+- feat(parser, eval): higher-order reduce(:op, x[, axis]) via :foo BuiltinRef
+- chore(web): fix glossary auto-scroll obscuring matched term
+- chore(web): rename Clear to Reset (the action wipes the session, not the screen)
+- chore(web): split header into REPL/Tutorial tabs + per-tab modebar
+- chore(web): label active session above the mlpl> prompt
+- chore(web): demo polish -- progress notes, glossary tab + search, tutorial TOC, isolated tutorial session
+- chore(agentrail): record saga typed-ml-values complete (10/10 steps)
+
+## 2026-05-03
+
+- saga 23 step 010: release v0.19.0 -- typed ML values
+
+## 2026-05-02
+
+- chore(agentrail): record step 009 completion + kickoff step 010
+- saga 23 step 009: typed-values tutorial lesson + pages rebuild
+- chore(agentrail): record step 008 completion + kickoff step 009
+- saga 23 step 008: tutoring-error-message catalog polish
+
+## 2026-05-01
+
+- chore(agentrail): record step 007 completion + kickoff step 008
+- saga 23 step 007: typed trace events
+- chore(agentrail): record step 006 completion + kickoff step 007
+- saga 23 step 006: typed :describe / :vars / :tags / :untag
+- chore(agentrail): record step 005 completion + kickoff step 006
+- saga 23 step 005: tag propagation through arith / shape / reduce
+- chore(agentrail): record step 004 completion + kickoff step 005
+- saga 23 step 004: predicate-checked consumers + tutoring hints
+- chore(agentrail): record step 003 completion + kickoff step 004
+- saga 23 step 003: auto-tag model params and apply results
+- chore(agentrail): record step 002 completion + kickoff step 003
+- saga 23 step 002: auto-tag FnCall producers at assign site
+- chore(agentrail): record step 001 completion + kickoff step 002
+- saga 23 step 001: ValueTag + Environment::tags side table
+- docs: seed optional-typing arc (Sagas 23-28)
+
+## 2026-04-29
+
+- chore: install agentrail briefing block
+
+## 2026-04-27
+
+- Update SmolLM2 demo repo reference
+- Update TRM demo repo reference
+- Update HRM demo repo reference
+- Update BDH demo plan references
+- Record demo planning completion
+- Plan MLPL demo support tracks
+- Record Saga R1 completion
+
 ## 2026-04-26
 
+- Release v0.18.0
 - Saga R1 step 004 block forwarding and fetch
 - feat(mlpl-parser,mlpl-serve,services): Saga R1 step 003 -- Display impl + peers infrastructure + workspace split
 - feat(mlpl-mlx-serve,mlpl-eval): Saga R1 step 002 -- wire format + Value::DeviceTensor + real eval-on-device
