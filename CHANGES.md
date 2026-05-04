@@ -14,6 +14,19 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-04
 
+- refactor(mlpl-eval): extract describe_array helper
+- test(mlpl-web): smoke that README counts match source
+- docs(readme): fix tutorial lesson count to 32 (was 28)
+- docs(readme): correct tutorial lesson count to 28 (was 19)
+- refactor(mlpl-repl): collapse :trace on/off arms in handle_command
+- refactor(mlpl-web): extract render_svg_body helper
+- test(runtime, eval): runtime-completeness check + 19 builtins documented
+- test(mlpl-web): demos + progress-notes smoke; fix drifted note refs
+- test(parser, eval): keyword + help-completeness smoke
+- docs(help,reference,usage): backfill reduce / :foo / :tags / :untag
+- test(mlpl-eval): all_demos_smoke -- catch demo regressions before they ship
+- docs(readme): clarify repo scope (language + demos + playground)
+- docs(changes): refresh CHANGES.md to head
 - docs(readme): shrink the title badge to 64px wide
 - docs(readme,images): six-screenshot tour of the web playground
 - chore(readme,images): sw-MLPL rebrand + screenshot + cache-buster
