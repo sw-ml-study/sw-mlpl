@@ -76,22 +76,31 @@ pub struct InputRowProps {
     pub value: String,
     pub on_input: Callback<InputEvent>,
     pub on_keydown: Callback<KeyboardEvent>,
+    pub in_tutorial: bool,
 }
 
 #[function_component(InputRow)]
 pub fn input_row(props: &InputRowProps) -> Html {
+    let (label_text, label_class) = if props.in_tutorial {
+        ("(Tutorial)", "session-label tutorial")
+    } else {
+        ("(REPL)", "session-label repl")
+    };
     html! {
-        <div class="input-row">
-            <span class="prompt">{"mlpl> "}</span>
-            <input
-                id="repl-input"
-                type="text"
-                autocomplete="off"
-                spellcheck="false"
-                value={props.value.clone()}
-                oninput={props.on_input.clone()}
-                onkeydown={props.on_keydown.clone()}
-            />
+        <div class="input-wrap">
+            <div class={label_class}>{ label_text }</div>
+            <div class="input-row">
+                <span class="prompt">{"mlpl> "}</span>
+                <input
+                    id="repl-input"
+                    type="text"
+                    autocomplete="off"
+                    spellcheck="false"
+                    value={props.value.clone()}
+                    oninput={props.on_input.clone()}
+                    onkeydown={props.on_keydown.clone()}
+                />
+            </div>
         </div>
     }
 }

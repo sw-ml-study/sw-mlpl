@@ -313,12 +313,29 @@
         }
 
         /* Input row */
+        .input-wrap {
+            border-top: 1px solid var(--surface1);
+            background: var(--mantle);
+            flex-shrink: 0;
+        }
+        .session-label {
+            padding: 4px 20px 0;
+            font-family: var(--mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+        .session-label.repl {
+            color: var(--green);
+        }
+        .session-label.tutorial {
+            color: var(--peach);
+        }
         .input-row {
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            border-top: 1px solid var(--surface1);
-            background: var(--mantle);
+            padding: 4px 20px 12px;
             flex-shrink: 0;
         }
         .input-row input {
