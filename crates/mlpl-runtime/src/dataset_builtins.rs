@@ -12,6 +12,16 @@ use mlpl_array::{DenseArray, Shape};
 use crate::error::RuntimeError;
 use crate::prng::Xorshift64;
 
+pub(crate) const NAMES: &[&str] = &[
+    "shuffle",
+    "batch",
+    "batch_mask",
+    "split",
+    "val_split",
+    "shift_pairs_x",
+    "shift_pairs_y",
+];
+
 /// Dispatch dataset builtins. Returns None if not matched.
 pub(crate) fn try_call(
     name: &str,

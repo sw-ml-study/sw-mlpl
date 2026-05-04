@@ -26,6 +26,8 @@ const MOMENTUM_SWITCH: usize = 250;
 const MOMENTUM_EARLY: f64 = 0.5;
 const MOMENTUM_LATE: f64 = 0.8;
 
+pub(crate) const NAMES: &[&str] = &["tsne"];
+
 pub(crate) fn try_call(
     name: &str,
     args: Vec<DenseArray>,

@@ -12,6 +12,7 @@ use mlpl_array::DenseArray;
 use mlpl_core::LabeledShape;
 
 use crate::env::Environment;
+use crate::inspect_groups::BUILTIN_GROUPS;
 use crate::model::{ActKind, ModelSpec};
 
 /// If `input` is a recognized introspection command, returns the
@@ -219,183 +220,11 @@ fn format_describe(env: &Environment, name: &str) -> String {
     format!("'{name}' is not a bound variable, model, or built-in.")
 }
 
-/// `(name, signature, one-line doc)` row used by both the grouped
-/// `:fns` listing and the flat `:describe <builtin>` lookup.
-type FnEntry = (&'static str, &'static str, &'static str);
-/// `(group_label, entries)` used by `:fns`.
-type FnGroup = (&'static str, &'static [FnEntry]);
-
-const BUILTIN_GROUPS: &[FnGroup] = &[
-    (
-        "Array",
-        &[
-            ("iota", "iota(n)", "integers 0..n as a vector"),
-            ("shape", "shape(a)", "dimension vector of a"),
-            (
-                "labels",
-                "labels(a)",
-                "comma-joined axis labels of a (empty for positional)",
-            ),
-            ("rank", "rank(a)", "number of dimensions of a"),
-            ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
-            ("transpose", "transpose(a)", "reverse axis order"),
-            (
-                "reduce",
-                "reduce(:op, a[, axis])",
-                "higher-order reduction: :op is :add/:+, :mul/:*, :min, :max, :and, :or",
-            ),
-            (
-                "reduce_add",
-                "reduce_add(a[, axis])",
-                "sum all or along axis (== reduce(:add, ...))",
-            ),
-            (
-                "reduce_mul",
-                "reduce_mul(a[, axis])",
-                "product all or along axis (== reduce(:mul, ...))",
-            ),
-            ("zeros", "zeros(shape)", "array of zeros"),
-            ("ones", "ones(shape)", "array of ones"),
-            ("fill", "fill(shape, value)", "array filled with value"),
-            ("grid", "grid(bounds, n)", "n*n by 2 (x,y) grid"),
-        ],
-    ),
-    (
-        "Linear algebra",
-        &[
-            ("dot", "dot(a, b)", "vector dot product"),
-            ("matmul", "matmul(a, b)", "matrix multiplication"),
-        ],
-    ),
-    (
-        "Math",
-        &[
-            ("exp", "exp(a)", "elementwise exponential"),
-            ("log", "log(a)", "elementwise natural log"),
-            ("sqrt", "sqrt(a)", "elementwise square root"),
-            ("abs", "abs(a)", "elementwise absolute value"),
-            ("pow", "pow(a, b)", "elementwise power"),
-            ("sigmoid", "sigmoid(a)", "logistic sigmoid activation"),
-            ("tanh_fn", "tanh_fn(a)", "hyperbolic tangent activation"),
-        ],
-    ),
-    (
-        "Comparisons + statistics",
-        &[
-            ("gt", "gt(a, b)", "elementwise greater-than (0/1)"),
-            ("lt", "lt(a, b)", "elementwise less-than (0/1)"),
-            ("eq", "eq(a, b)", "elementwise equality (0/1)"),
-            ("mean", "mean(a)", "mean of all elements"),
-        ],
-    ),
-    (
-        "ML primitives",
-        &[
-            ("argmax", "argmax(a[, axis])", "flat or per-axis argmax"),
-            ("softmax", "softmax(a, axis)", "numerically stable softmax"),
-            ("one_hot", "one_hot(labels, k)", "NxK one-hot encoding"),
-            ("random", "random(seed, shape)", "seeded uniform [0, 1)"),
-            ("randn", "randn(seed, shape)", "seeded standard normal"),
-            (
-                "blobs",
-                "blobs(seed, n, centers)",
-                "Nx3 gaussian-blob dataset",
-            ),
-            (
-                "moons",
-                "moons(seed, n, noise)",
-                "two-moons synthetic dataset",
-            ),
-            (
-                "circles",
-                "circles(seed, n, noise)",
-                "concentric-circles dataset",
-            ),
-        ],
-    ),
-    (
-        "Autograd + optimizers",
-        &[
-            ("grad", "grad(expr, wrt)", "reverse-mode gradient"),
-            (
-                "momentum_sgd",
-                "momentum_sgd(loss, params, lr, beta)",
-                "momentum-SGD update",
-            ),
-            ("adam", "adam(loss, params, lr, b1, b2, eps)", "Adam update"),
-            (
-                "cosine_schedule",
-                "cosine_schedule(step, total, lr_min, lr_max)",
-                "cosine LR schedule",
-            ),
-            (
-                "linear_warmup",
-                "linear_warmup(step, warmup, lr)",
-                "linear warmup helper",
-            ),
-        ],
-    ),
-    (
-        "Model DSL",
-        &[
-            ("linear", "linear(in, out, seed)", "dense layer y = xW + b"),
-            ("chain", "chain(a, b, ...)", "sequential composition"),
-            ("tanh_layer", "tanh_layer()", "tanh activation layer"),
-            ("relu_layer", "relu_layer()", "relu activation layer"),
-            (
-                "softmax_layer",
-                "softmax_layer()",
-                "softmax activation layer",
-            ),
-            ("residual", "residual(inner)", "y = x + inner(x)"),
-            ("rms_norm", "rms_norm(dim)", "per-row RMS normalization"),
-            (
-                "attention",
-                "attention(d_model, heads, seed)",
-                "multi-head self-attention",
-            ),
-            (
-                "causal_attention",
-                "causal_attention(d_model, heads, seed)",
-                "self-attention with a lower-triangular causal mask",
-            ),
-            ("apply", "apply(model, X)", "forward pass on a stored model"),
-        ],
-    ),
-    (
-        "Visualization",
-        &[
-            ("svg", "svg(data, type[, aux])", "render an SVG diagram"),
-            ("hist", "hist(values, bins)", "histogram"),
-            (
-                "scatter_labeled",
-                "scatter_labeled(points, labels)",
-                "colored scatter",
-            ),
-            ("loss_curve", "loss_curve(losses)", "training loss curve"),
-            (
-                "confusion_matrix",
-                "confusion_matrix(pred, truth)",
-                "KxK heatmap",
-            ),
-            (
-                "boundary_2d",
-                "boundary_2d(surface, grid, X, y)",
-                "classifier boundary",
-            ),
-        ],
-    ),
-];
-
-/// Iterate every builtin name listed in `BUILTIN_GROUPS`. Used
-/// by `tests/help_completeness_tests.rs` to assert every entry
-/// is also documented in `docs/lang-reference.md`. Order
-/// matches the curated category layout shown by `:builtins`.
-pub fn documented_builtin_names() -> impl Iterator<Item = &'static str> {
-    BUILTIN_GROUPS
-        .iter()
-        .flat_map(|(_, fns)| fns.iter().map(|(name, _, _)| *name))
-}
+// The `BUILTIN_GROUPS` data table moved to `inspect_groups.rs`
+// to keep this file under the file-LOC budget. The remaining code
+// below stays here because it consumes the table for output
+// formatting (private helper) -- the data and the formatting are
+// orthogonal axes of change.
 
 fn format_builtins() -> String {
     let mut out = String::new();

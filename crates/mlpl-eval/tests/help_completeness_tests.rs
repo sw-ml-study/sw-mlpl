@@ -1,7 +1,7 @@
 //! Help / reference completeness checks.
 //!
 //! Catches doc drift the moment a builtin lands undocumented.
-//! Two checks:
+//! Four checks:
 //!
 //! 1. Every name in `BUILTIN_GROUPS` (the table backing
 //!    `:builtins` in the REPL) appears at least once in
@@ -9,16 +9,24 @@
 //! 2. `BUILTIN_GROUPS` itself contains no duplicate names
 //!    (would shadow earlier entries in `:describe <name>`
 //!    builtin lookup).
+//! 3. Every runtime dispatch arm (aggregated by
+//!    `mlpl_runtime::runtime_builtin_names`) appears in
+//!    `BUILTIN_GROUPS`. Without this, a new pure-array
+//!    builtin can land in `mlpl-runtime` without showing up
+//!    in `:builtins` or `:describe <name>`.
+//! 4. `runtime_builtin_names` itself contains no duplicates
+//!    across modules (e.g. `dot` accidentally listed in two
+//!    `NAMES` constants would silently mean the second
+//!    module's dispatch is dead code).
+//!
+//! Eval-side builtins (`grad`, `freeze`, `params`, `model`
+//! ctors, etc.) are dispatched in `mlpl-eval` before falling
+//! through to `mlpl-runtime`, so they are *not* part of the
+//! runtime names list. Their coverage is enforced by check #1
+//! against `BUILTIN_GROUPS`.
 //!
 //! Failures collect every miss into a single panic so a single
 //! refactor surfaces the full set instead of failing fast.
-//!
-//! Out of scope (deferred): reverse direction --
-//! "every runtime dispatch arm appears in `BUILTIN_GROUPS`".
-//! That requires aggregating the per-source-file `match name {
-//! ... }` arms in `mlpl-runtime`. Once that crate exposes a
-//! `runtime_builtin_names()` accessor, a sibling test fills
-//! the gap.
 
 use std::collections::HashSet;
 
@@ -40,6 +48,41 @@ fn every_builtin_groups_name_is_in_lang_reference() {
             missing.join("\n  - ")
         );
     }
+}
+
+#[test]
+fn every_runtime_builtin_is_in_builtin_groups() {
+    let documented: HashSet<&'static str> = mlpl_eval::documented_builtin_names().collect();
+    let mut missing: Vec<&'static str> = Vec::new();
+    for name in mlpl_runtime::runtime_builtin_names() {
+        if !documented.contains(name) {
+            missing.push(name);
+        }
+    }
+    if !missing.is_empty() {
+        panic!(
+            "{} runtime builtin(s) not in BUILTIN_GROUPS \
+             (would not show up in :builtins / :describe):\n  - {}",
+            missing.len(),
+            missing.join("\n  - ")
+        );
+    }
+}
+
+#[test]
+fn runtime_builtin_names_has_no_duplicates() {
+    let mut seen: HashSet<&'static str> = HashSet::new();
+    let mut dups: Vec<&'static str> = Vec::new();
+    for name in mlpl_runtime::runtime_builtin_names() {
+        if !seen.insert(name) {
+            dups.push(name);
+        }
+    }
+    assert!(
+        dups.is_empty(),
+        "runtime_builtin_names has duplicates across modules \
+         (would silently shadow second dispatch arm): {dups:?}"
+    );
 }
 
 #[test]

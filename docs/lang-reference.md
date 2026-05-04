@@ -267,6 +267,8 @@ Newlines and semicolons are both statement separators.
 | `reduce(:op, a, axis)` | 3 | Same, restricted to a single axis. |
 | `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |
 | `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
+| `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
+| `scatter(buffer, indices, values)` | 3 | Accumulate `values` into `buffer` at positions given by `indices`. Returns a new buffer; the input is not mutated. Used inside `repeat N { ... }` loops to track per-index scores without explicit indexing. |
 
 ### Linear Algebra
 
@@ -415,6 +417,15 @@ initialized at construction). Apply a model to an array with
 | `last_row(M)` | 1 | Return the last row of a rank-2 matrix as a rank-1 vector. Used in generation loops to extract the final position's logits from an `[T, V]` model output. |
 | `concat(a, b)` | 2 | Concatenate two rank-0 or rank-1 arrays into a 1-D vector. Used in generation loops to append a sampled token id to the growing sequence. |
 | `attention_weights(model, X)` | 2 | Read-only forward pass that walks `model` to its first `attention` / `causal_attention` layer, transforms `X` through any preceding layers in the outer chain, and returns the softmax attention weight matrix (`[T, T]` single-head or `[heads, T, T]` multi-head). Renders well as a heatmap. |
+
+### Embeddings and Manifold
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `pairwise_sqdist(X)` | 1 | Return the `[N, N]` squared Euclidean distance matrix for an `[N, D]` input. Symmetric, zero diagonal. |
+| `knn(X, k)` | 2 | Return an `[N, k]` integer matrix of the `k` nearest non-self neighbors per row of `X`, sorted by ascending distance. Ties broken by lower original index. |
+| `pca(X, k)` | 2 | Top-`k` principal-component projection of an `[N, D]` matrix via power iteration with deflation. Returns the centered, projected data `[N, k]` (not the components themselves). |
+| `tsne(X, perplexity, iters, seed)` | 4 | t-SNE 2D embedding of an `[N, D]` matrix. Returns `[N, 2]`. Deterministic for a given seed. Output has rotation / reflection ambiguity; cluster shape is what is meaningful, not absolute coordinates. |
 
 ### Experiments
 

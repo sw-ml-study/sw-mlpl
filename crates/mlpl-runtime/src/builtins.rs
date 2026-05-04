@@ -5,6 +5,24 @@ use mlpl_array::{DenseArray, Shape};
 use crate::error::RuntimeError;
 use crate::math_builtins;
 
+/// Names dispatched by the `match` block at the bottom of
+/// `call_builtin`. Excludes names handled by the per-module
+/// `try_call` chain above (those are listed in each module's
+/// own `NAMES` constant).
+pub(crate) const LOCAL_NAMES: &[&str] = &[
+    "iota",
+    "shape",
+    "rank",
+    "reshape",
+    "transpose",
+    "reduce_add",
+    "reduce_mul",
+    "argmax",
+    "dot",
+    "matmul",
+    "grid",
+];
+
 macro_rules! check_arity {
     ($name:expr, $expected:expr, $args:expr) => {
         if $args.len() != $expected {

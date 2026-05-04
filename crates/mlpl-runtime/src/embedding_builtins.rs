@@ -19,6 +19,8 @@ use mlpl_array::{DenseArray, Shape};
 
 use crate::error::RuntimeError;
 
+pub(crate) const NAMES: &[&str] = &["pairwise_sqdist", "knn"];
+
 pub(crate) fn try_call(
     name: &str,
     args: Vec<DenseArray>,

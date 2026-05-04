@@ -4,6 +4,31 @@ use mlpl_array::{DenseArray, Shape};
 
 use crate::error::RuntimeError;
 
+/// Every name dispatched by [`try_call`]. Kept in sync with the
+/// `match name { ... }` block by hand -- a coverage test in
+/// `mlpl-eval/tests/help_completeness_tests.rs` asserts each
+/// entry is documented in `docs/lang-reference.md`.
+pub(crate) const NAMES: &[&str] = &[
+    "exp",
+    "log",
+    "sqrt",
+    "abs",
+    "sigmoid",
+    "tanh_fn",
+    "pow",
+    "gt",
+    "lt",
+    "eq",
+    "mean",
+    "zeros",
+    "ones",
+    "fill",
+    "cosine_schedule",
+    "linear_warmup",
+    "concat",
+    "last_row",
+];
+
 /// Dispatch math and constructor built-ins. Returns None if not matched.
 pub(crate) fn try_call(
     name: &str,
