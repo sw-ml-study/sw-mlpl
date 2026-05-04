@@ -676,16 +676,50 @@ re-derivable from this ranking. Performance is explicitly last,
 which is what makes the runtime tag-checking + typed-trace
 strategy affordable.
 
-### Saga 23: Typed ML values + typed traces (PLANNED)
-Side-table tag mechanism on `Environment`; Tier A vocabulary
-(Logit / Probability / LogProbability / Loss / Gradient /
-Weight / Bias / Activation / LearningRate / Labels /
-AttentionMap); auto-tagging from softmax / cross_entropy /
-linear / grad / etc.; predicate-checked consumers;
-`EvalError::TypeMismatch` with tutoring hints; typed
-`:describe` / `:vars` / `:tags` / `:untag`; typed trace JSON
-events. The keystone of the optional-typing rollout. See
-`docs/milestone-typed-values.md`.
+### Saga 23: Typed ML values + typed traces (COMPLETE, v0.19.0)
+Optional-typing keystone shipped 2026-05-02. Ten steps. Curated
+Tier A vocabulary (Logit / Probability / LogProbability /
+Loss{kind} / Gradient{wrt} / Weight{layer,name} / Bias{layer} /
+Activation{layer,kind} / LearningRate / Labels{num_classes} /
+AttentionMap) as a `ValueTag` enum in `mlpl-core` with serde
+derives; `Environment::tags` HashMap side table on `mlpl-eval`
+with `set_tag` / `get_tag` / `clear_tag` / `tags_iter` helpers.
+Auto-tagging fires at the assignment site for FnCall producers
+(softmax/sigmoid/cross_entropy/grad/cosine_schedule/
+linear_warmup/attention_weights) and at param-creation time in
+model_dispatch (linear / embed / attention) plus a structural-
+tail walker for `apply(model, X)`. Predicate consumers
+(cross_entropy / sample / top_k / adam / momentum_sgd) reject
+mismatched tags with `EvalError::TypeMismatch{op, expected,
+actual, hint}` carrying a four-part tutoring hint (expected+why
+/ got / likely cause / copy-pasteable MLPL fix). Tag propagation
+through arithmetic / transpose / reshape / reductions /
+negation: same-family combines, tagged+untagged keeps tagged,
+domain mismatches raise the bridge-ops hint. New `:tags` and
+`:untag` REPL commands; `:describe` / `:vars` extended to
+render tag headers + per-tag bodies (Probability includes a
+verified-or-violated row-sum invariant note). `mlpl-trace
+TraceEvent` gains `input_types` + `output_type` fields with
+skip_serializing_if defaults so untagged programs serialize
+byte-identically. Three contract docs:
+`contracts/eval-contract/tag-propagation.md`,
+`contracts/eval-contract/typed-trace.md`,
+`contracts/eval-contract/tutoring-hints.md`.
+`apps/mlpl-web/src/lessons_advanced.rs::TYPED_ML_VALUES` walks
+students through the canonical pipeline, the canonical
+double-softmax bug now caught at the call site, propagation, and
+`:tags` / `:untag`. Nine lesson smoke tests in
+`crates/mlpl-eval/tests/typed_values_lesson_smoke.rs` keep the
+lesson invariants from drifting. Performance is explicitly last
+in the goal ranking; runtime tag-checking on every op entry and
+re-walking metadata in `:describe` is fine. Untagged programs
+keep working unchanged (gradual-typing additivity rule). Static
+checks on the `mlpl!`/`mlpl build` lower seam are deferred.
+Distributions, ComputationGraph, annotation syntax,
+LayerRole, and user-defined tags ship in Sagas 24-28 of the
+optional-typing arc. See `docs/milestone-typed-values.md`,
+`docs/using-typed-values.md` retrospective, and
+`docs/optional-typing-design.md` for the umbrella design.
 
 ### Saga 24: First-class Distributions (PLANNED)
 `Value::Distribution` with `Categorical` / `Gaussian` /
