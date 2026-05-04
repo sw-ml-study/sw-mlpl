@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-04
 
+- refactor(mlpl-runtime): extract parse_blob_centers helper
+- docs(claude, changes): add CHANGES discipline note + refresh log
 - refactor(mlpl-eval): extract describe_array helper
 - test(mlpl-web): smoke that README counts match source
 - docs(readme): fix tutorial lesson count to 32 (was 28)
