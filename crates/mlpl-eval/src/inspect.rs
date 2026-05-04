@@ -387,6 +387,16 @@ const BUILTIN_GROUPS: &[FnGroup] = &[
     ),
 ];
 
+/// Iterate every builtin name listed in `BUILTIN_GROUPS`. Used
+/// by `tests/help_completeness_tests.rs` to assert every entry
+/// is also documented in `docs/lang-reference.md`. Order
+/// matches the curated category layout shown by `:builtins`.
+pub fn documented_builtin_names() -> impl Iterator<Item = &'static str> {
+    BUILTIN_GROUPS
+        .iter()
+        .flat_map(|(_, fns)| fns.iter().map(|(name, _, _)| *name))
+}
+
 fn format_builtins() -> String {
     let mut out = String::new();
     for (group, fns) in BUILTIN_GROUPS {
