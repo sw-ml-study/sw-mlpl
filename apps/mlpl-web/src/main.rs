@@ -19,14 +19,15 @@ mod summary;
 mod tutorial;
 
 use components::{
-    DocDialog, Footer, GithubCorner, Header, InputRow, TutorialPanel, TutorialPanelProps, Welcome,
+    DocDialog, Footer, GithubCorner, Header, InputRow, ModeBar, TutorialPanel, TutorialPanelProps,
+    Welcome,
 };
 use handlers::{
     EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit, toggle_bool,
 };
 use mlpl_wasm::WasmSession;
 use state::{EntryKind, HistoryEntry};
-use tutorial::{jump_lesson, run_example, step_lesson, toggle_tutorial};
+use tutorial::{jump_lesson, run_example, step_lesson};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -107,13 +108,25 @@ fn render(a: RenderArgs) -> Html {
     let close_dialog = toggle_bool(a.dialog_open.clone(), false);
     let cur_lesson = *a.lesson_idx;
     let tutorial_active = cur_lesson.is_some();
-    let on_tutorial = toggle_tutorial(a.lesson_idx.clone());
+    let on_select_repl = {
+        let lesson_idx = a.lesson_idx.clone();
+        Callback::from(move |_| lesson_idx.set(None))
+    };
+    let on_select_tutorial = {
+        let lesson_idx = a.lesson_idx.clone();
+        Callback::from(move |_| {
+            if lesson_idx.is_none() {
+                lesson_idx.set(Some(0));
+            }
+        })
+    };
     let on_run_example = run_example(a.on_submit.clone(), a.input_value.clone());
 
     html! {
         <>
             <GithubCorner url={REPO_URL} />
-            <Header on_help={open_dialog} on_clear={a.on_clear} on_demo={a.on_demo} on_tutorial={on_tutorial} {tutorial_active} />
+            <Header on_help={open_dialog} on_select_repl={on_select_repl} on_select_tutorial={on_select_tutorial} {tutorial_active} />
+            <ModeBar on_clear={a.on_clear} on_demo={a.on_demo} {tutorial_active} />
             <main>
                 { render_tutorial(cur_lesson, a.lesson_idx.clone(), on_run_example) }
                 <div id="output" class="output">

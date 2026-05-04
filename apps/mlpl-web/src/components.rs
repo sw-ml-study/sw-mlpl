@@ -30,14 +30,42 @@ pub fn github_corner(props: &UrlProps) -> Html {
 #[derive(Properties, PartialEq)]
 pub struct HeaderProps {
     pub on_help: Callback<MouseEvent>,
-    pub on_clear: Callback<MouseEvent>,
-    pub on_demo: Callback<usize>,
-    pub on_tutorial: Callback<MouseEvent>,
+    pub on_select_repl: Callback<MouseEvent>,
+    pub on_select_tutorial: Callback<MouseEvent>,
     pub tutorial_active: bool,
 }
 
 #[function_component(Header)]
 pub fn header(props: &HeaderProps) -> Html {
+    let cls = |is_tut: bool| {
+        if props.tutorial_active == is_tut {
+            "tab active"
+        } else {
+            "tab"
+        }
+    };
+    html! {
+        <header>
+            <h1><img src="mlpl-badge.webp" alt="" class="title-badge" />{"MLPL"}</h1>
+            <span>{"v0.19.0 -- Array Programming Language for ML"}</span>
+            <div class="header-tabs">
+                <button class={cls(false)} onclick={props.on_select_repl.clone()}>{"REPL"}</button>
+                <button class={cls(true)} onclick={props.on_select_tutorial.clone()}>{"Tutorial"}</button>
+            </div>
+            <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation">{"?"}</button>
+        </header>
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct ModeBarProps {
+    pub on_clear: Callback<MouseEvent>,
+    pub on_demo: Callback<usize>,
+    pub tutorial_active: bool,
+}
+
+#[function_component(ModeBar)]
+pub fn mode_bar(props: &ModeBarProps) -> Html {
     let on_demo = props.on_demo.clone();
     let on_change = Callback::from(move |e: Event| {
         let target: HtmlSelectElement = e.target_unchecked_into();
@@ -47,27 +75,33 @@ pub fn header(props: &HeaderProps) -> Html {
             target.set_value("");
         }
     });
-    let tutorial_label = if props.tutorial_active {
-        "Exit Tutorial"
+    let cls = if props.tutorial_active {
+        "modebar tutorial"
     } else {
-        "Tutorial"
+        "modebar repl"
+    };
+    let demo_dropdown = if props.tutorial_active {
+        html! {}
+    } else {
+        html! {
+            <select class="demo-select" onchange={on_change} aria-label="Load demo">
+                <option value="" selected=true>{"Load Demo..."}</option>
+                { for DEMOS.iter().enumerate().map(|(i, d)| html!{
+                    <option value={i.to_string()}>{ d.name }</option>
+                }) }
+            </select>
+        }
+    };
+    let clear_label = if props.tutorial_active {
+        "Clear Tutorial"
+    } else {
+        "Clear REPL"
     };
     html! {
-        <header>
-            <h1><img src="mlpl-badge.webp" alt="" class="title-badge" />{"MLPL"}</h1>
-            <span>{"v0.9.0 — Array Programming Language for ML"}</span>
-            <div class="controls">
-                <select class="demo-select" onchange={on_change} aria-label="Load demo">
-                    <option value="" selected=true>{"Load Demo..."}</option>
-                    { for DEMOS.iter().enumerate().map(|(i, d)| html!{
-                        <option value={i.to_string()}>{ d.name }</option>
-                    }) }
-                </select>
-                <button class="ctrl-btn" onclick={props.on_tutorial.clone()}>{ tutorial_label }</button>
-                <button class="ctrl-btn" onclick={props.on_clear.clone()}>{"Clear"}</button>
-                <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation">{"?"}</button>
-            </div>
-        </header>
+        <div class={cls}>
+            { demo_dropdown }
+            <button class="ctrl-btn" onclick={props.on_clear.clone()}>{ clear_label }</button>
+        </div>
     }
 }
 

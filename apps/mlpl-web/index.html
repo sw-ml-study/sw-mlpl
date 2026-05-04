@@ -129,13 +129,49 @@
             40%, 80% { transform: rotate(10deg); }
         }
 
-        /* Header controls */
-        .controls {
+        /* Header tabs */
+        .header-tabs {
             margin-left: auto;
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+        .header-tabs .tab {
+            background: var(--surface0);
+            color: var(--text);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            padding: 6px 14px;
+            font-family: var(--mono);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .header-tabs .tab:hover {
+            border-color: var(--blue);
+        }
+        .header-tabs .tab.active {
+            background: var(--surface1);
+            color: var(--blue);
+            border-color: var(--blue);
+        }
+        header > .help-btn {
             margin-right: 60px;
+        }
+        /* Mode bar (per-tab controls under the header) */
+        .modebar {
+            padding: 8px 20px;
+            border-bottom: 1px solid var(--surface1);
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-shrink: 0;
+        }
+        .modebar.repl {
+            background: var(--mantle);
+        }
+        .modebar.tutorial {
+            background: var(--mantle);
         }
         .demo-select {
             background: var(--surface0);
