@@ -1,4 +1,4 @@
-# ![sw-MLPL](docs/mlpl-badge.png) sw-MLPL
+# <img src="docs/mlpl-badge.png" alt="sw-MLPL" width="64" align="left" style="margin-right:12px"> sw-MLPL
 
 Software Wrighter's Machine Learning Programming Language
 Playground -- a Rust-first array and tensor programming
