@@ -202,62 +202,66 @@ fn eval_line(
     }
 }
 
+/// Static body of `:help`. The version banner is printed
+/// separately so it stays current at runtime; everything
+/// else is a fixed string that prints in one go.
+const HELP_BODY: &str = "
+Syntax:
+  42              scalar literal
+  [1, 2, 3]       array literal
+  x = expr        assignment
+  a + b           arithmetic (+, -, *, /)
+  func(args)      function call
+  repeat N { }    loop N times
+
+Built-in functions:
+  iota(n)              integers 0..n
+  shape(a)             dimension vector
+  rank(a)              number of dimensions
+  reshape(a, dims)     reshape array
+  transpose(a)         reverse axis order
+  reduce_add(a)        sum all elements
+  reduce_add(a, axis)  sum along axis
+  reduce_mul(a)        product of all elements
+  reduce_mul(a, axis)  product along axis
+  dot(a, b)            vector dot product
+  matmul(a, b)         matrix multiplication
+  exp(a) log(a)        element-wise exp / log
+  sqrt(a) abs(a)       element-wise sqrt / abs
+  sigmoid(a) tanh_fn(a) activations
+  pow(a, b)            element-wise power
+  gt(a, b) lt(a, b)    element-wise comparison
+  eq(a, b)             element-wise equality
+  mean(a)              mean of all elements
+  zeros(s) ones(s)     array constructors
+  fill(s, v)           fill array with value
+
+Commands:
+  :help                show this help
+  :help <topic>        focused help: vars, models, fns, builtins,
+                       describe, wsid
+  :version             show the build banner (version + host + commit + timestamp)
+  :vars                list bound variables with shape
+  :models              list bound models with layer structure
+  :fns                 list user-defined functions (none yet)
+  :builtins            list built-in functions by category
+  :describe <name>     describe a variable, model, string, or built-in
+  :ask <question>      ask a local Ollama server about the session -- set OLLAMA_HOST / OLLAMA_MODEL to override; Saga 19 preview, see docs/using-ollama.md
+  :wsid                workspace summary (var/param/model counts)
+  :clear               reset all variables
+  :trace on/off        toggle execution tracing
+  :trace               show last trace summary
+  :trace json          print last trace as JSON
+  :trace json <file>   write trace JSON to file
+  exit                 quit
+
+File mode: cargo run -p mlpl-repl -- -f <script.mlpl>
+Version:   mlpl-repl -V    or    mlpl-repl --version
+";
+
 fn print_help() {
     println!("{}", version::banner());
-    println!();
-    println!("Syntax:");
-    println!("  42              scalar literal");
-    println!("  [1, 2, 3]       array literal");
-    println!("  x = expr        assignment");
-    println!("  a + b           arithmetic (+, -, *, /)");
-    println!("  func(args)      function call");
-    println!("  repeat N {{ }}    loop N times");
-    println!();
-    println!("Built-in functions:");
-    println!("  iota(n)              integers 0..n");
-    println!("  shape(a)             dimension vector");
-    println!("  rank(a)              number of dimensions");
-    println!("  reshape(a, dims)     reshape array");
-    println!("  transpose(a)         reverse axis order");
-    println!("  reduce_add(a)        sum all elements");
-    println!("  reduce_add(a, axis)  sum along axis");
-    println!("  reduce_mul(a)        product of all elements");
-    println!("  reduce_mul(a, axis)  product along axis");
-    println!("  dot(a, b)            vector dot product");
-    println!("  matmul(a, b)         matrix multiplication");
-    println!("  exp(a) log(a)        element-wise exp / log");
-    println!("  sqrt(a) abs(a)       element-wise sqrt / abs");
-    println!("  sigmoid(a) tanh_fn(a) activations");
-    println!("  pow(a, b)            element-wise power");
-    println!("  gt(a, b) lt(a, b)    element-wise comparison");
-    println!("  eq(a, b)             element-wise equality");
-    println!("  mean(a)              mean of all elements");
-    println!("  zeros(s) ones(s)     array constructors");
-    println!("  fill(s, v)           fill array with value");
-    println!();
-    println!("Commands:");
-    println!("  :help                show this help");
-    println!("  :help <topic>        focused help: vars, models, fns, builtins,");
-    println!("                       describe, wsid");
-    println!("  :version             show the build banner (version + host + commit + timestamp)");
-    println!("  :vars                list bound variables with shape");
-    println!("  :models              list bound models with layer structure");
-    println!("  :fns                 list user-defined functions (none yet)");
-    println!("  :builtins            list built-in functions by category");
-    println!("  :describe <name>     describe a variable, model, string, or built-in");
-    println!(
-        "  :ask <question>      ask a local Ollama server about the session -- set OLLAMA_HOST / OLLAMA_MODEL to override; Saga 19 preview, see docs/using-ollama.md"
-    );
-    println!("  :wsid                workspace summary (var/param/model counts)");
-    println!("  :clear               reset all variables");
-    println!("  :trace on/off        toggle execution tracing");
-    println!("  :trace               show last trace summary");
-    println!("  :trace json          print last trace as JSON");
-    println!("  :trace json <file>   write trace JSON to file");
-    println!("  exit                 quit");
-    println!();
-    println!("File mode: cargo run -p mlpl-repl -- -f <script.mlpl>");
-    println!("Version:   mlpl-repl -V    or    mlpl-repl --version");
+    print!("{HELP_BODY}");
 }
 
 fn print_trace_summary(trace: &Trace) {
