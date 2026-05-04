@@ -151,6 +151,38 @@ fn format_models(env: &Environment) -> String {
     out
 }
 
+fn describe_array(env: &Environment, name: &str, arr: &DenseArray) -> String {
+    let shape = format_shape(arr);
+    let param_marker = if env.params.contains(name) {
+        " (trainable param)"
+    } else {
+        ""
+    };
+    let data = arr.data();
+    let preview = if data.is_empty() {
+        "(empty)".to_string()
+    } else {
+        let take = 8.min(data.len());
+        let head: Vec<String> = data[..take].iter().map(|v| format!("{v:.4}")).collect();
+        if data.len() > take {
+            format!("{} ... ({} total)", head.join(" "), data.len())
+        } else {
+            head.join(" ")
+        }
+    };
+    let header = match env.get_tag(name) {
+        Some(t) => format!("{name} -- {}", crate::tag_render::header_line(t)),
+        None => format!("{name} -- array"),
+    };
+    let mut out = format!("{header}\n  shape: {shape}{param_marker}\n  values: {preview}");
+    if let Some(t) = env.get_tag(name) {
+        for line in crate::tag_render::body_lines(t, Some(arr)) {
+            out.push_str(&format!("\n  {line}"));
+        }
+    }
+    out
+}
+
 fn format_describe(env: &Environment, name: &str) -> String {
     if let Some(tok) = env.tokenizers.get(name) {
         return format!("{name} -- tokenizer\n  {}", tok.describe());
@@ -172,35 +204,7 @@ fn format_describe(env: &Environment, name: &str) -> String {
         return out;
     }
     if let Some(arr) = env.vars.get(name) {
-        let shape = format_shape(arr);
-        let param_marker = if env.params.contains(name) {
-            " (trainable param)"
-        } else {
-            ""
-        };
-        let data = arr.data();
-        let preview = if data.is_empty() {
-            "(empty)".to_string()
-        } else {
-            let take = 8.min(data.len());
-            let head: Vec<String> = data[..take].iter().map(|v| format!("{v:.4}")).collect();
-            if data.len() > take {
-                format!("{} ... ({} total)", head.join(" "), data.len())
-            } else {
-                head.join(" ")
-            }
-        };
-        let header = match env.get_tag(name) {
-            Some(t) => format!("{name} -- {}", crate::tag_render::header_line(t)),
-            None => format!("{name} -- array"),
-        };
-        let mut out = format!("{header}\n  shape: {shape}{param_marker}\n  values: {preview}");
-        if let Some(t) = env.get_tag(name) {
-            for line in crate::tag_render::body_lines(t, Some(arr)) {
-                out.push_str(&format!("\n  {line}"));
-            }
-        }
-        return out;
+        return describe_array(env, name, arr);
     }
     if let Some(s) = env.get_string(name) {
         // Web-UI demos bind `_demo` here; multi-line indented.
