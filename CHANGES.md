@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-04
 
+- refactor(mlpl-eval): extract attn_head_weights helper
+- refactor(mlpl-repl): collapse print_help to static HELP_BODY
+- docs(changes): refresh CHANGES.md to head
 - refactor(mlpl-runtime): extract parse_blob_centers helper
 - docs(claude, changes): add CHANGES discipline note + refresh log
 - refactor(mlpl-eval): extract describe_array helper
