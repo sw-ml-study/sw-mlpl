@@ -2,6 +2,7 @@
 
 mod builtins;
 mod dataset_builtins;
+mod dataset_validate;
 mod embedding_builtins;
 mod ensemble_builtins;
 mod error;

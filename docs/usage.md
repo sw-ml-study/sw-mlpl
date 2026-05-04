@@ -106,6 +106,8 @@ rank(m)        # 2
 
 ### Reductions
 
+The fixed-name forms cover the two most common cases:
+
 ```
 reduce_add([1, 2, 3, 4, 5])          # 15 (sum all)
 reduce_mul([1, 2, 3, 4, 5])          # 120 (product all)
@@ -114,6 +116,29 @@ m = reshape(iota(6), [2, 3])
 reduce_add(m, 0)                      # sum along rows: 3 5 7
 reduce_add(m, 1)                      # sum along columns: 3 12
 ```
+
+For other binops -- `:max`, `:min`, `:and`, `:or` -- use the
+higher-order form `reduce(:op, x[, axis])`:
+
+```
+reduce(:max, [3, 1, 4, 1, 5, 9, 2, 6])   # 9
+reduce(:min, [3, 1, 4, 1, 5, 9, 2, 6])   # 1
+reduce(:add, m, 1)                        # same as reduce_add(m, 1)
+
+# A BuiltinRef can be bound to a variable like any other value;
+# user-namespace bindings do not shadow `:foo` so this is safe:
+f = :max
+reduce(f, [-2, 7, -3, 4])                 # 7
+
+add = 42                                   # user var, not the builtin
+reduce(:add, [1, 2, 3])                    # still 6 -- :add lives in
+                                            # its own namespace
+```
+
+The first arg is a `BuiltinRef` (`:foo` syntax) -- one of the
+curated names: `:add` (== `:+`), `:mul` (== `:*`), `:min`,
+`:max`, `:and`, `:or`. Anything else raises a tutoring
+`TypeMismatch` listing the accepted set.
 
 ## Variables
 

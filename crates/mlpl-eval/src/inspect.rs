@@ -240,14 +240,19 @@ const BUILTIN_GROUPS: &[FnGroup] = &[
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),
             (
+                "reduce",
+                "reduce(:op, a[, axis])",
+                "higher-order reduction: :op is :add/:+, :mul/:*, :min, :max, :and, :or",
+            ),
+            (
                 "reduce_add",
                 "reduce_add(a[, axis])",
-                "sum all or along axis",
+                "sum all or along axis (== reduce(:add, ...))",
             ),
             (
                 "reduce_mul",
                 "reduce_mul(a[, axis])",
-                "product all or along axis",
+                "product all or along axis (== reduce(:mul, ...))",
             ),
             ("zeros", "zeros(shape)", "array of zeros"),
             ("ones", "ones(shape)", "array of ones"),

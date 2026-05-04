@@ -186,47 +186,10 @@ fn builtin_shift_pairs(
     args: Vec<DenseArray>,
     take_y: bool,
 ) -> Result<DenseArray, RuntimeError> {
-    if args.len() != 2 {
-        return Err(RuntimeError::ArityMismatch {
-            func: name.into(),
-            expected: 2,
-            got: args.len(),
-        });
-    }
-    if args[0].rank() != 1 {
-        return Err(RuntimeError::InvalidArgument {
-            func: name.into(),
-            reason: format!("ids must be rank-1, got rank {}", args[0].rank()),
-        });
-    }
-    if args[1].rank() != 0 {
-        return Err(RuntimeError::InvalidArgument {
-            func: name.into(),
-            reason: "block_size must be a scalar".into(),
-        });
-    }
-    let bs = args[1].data()[0] as usize;
-    if bs == 0 {
-        return Err(RuntimeError::InvalidArgument {
-            func: name.into(),
-            reason: "block_size must be > 0".into(),
-        });
-    }
-    let n = args[0].shape().dims()[0];
-    let window = bs + 1;
-    let b = n / window;
-    if b == 0 {
-        return Err(RuntimeError::InvalidArgument {
-            func: name.into(),
-            reason: format!(
-                "ids length {n} is too short for block_size {bs} \
-                 (need at least {} tokens)",
-                window
-            ),
-        });
-    }
+    let (bs, b) = crate::dataset_validate::validate_shift_pairs(name, &args)?;
     let ids = args[0].data();
     let offset = usize::from(take_y);
+    let window = bs + 1;
     let mut data = Vec::with_capacity(b * bs);
     for batch in 0..b {
         let start = batch * window + offset;
