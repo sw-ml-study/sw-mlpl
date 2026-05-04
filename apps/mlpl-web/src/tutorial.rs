@@ -1,16 +1,6 @@
 use yew::prelude::*;
 
-pub use crate::lessons::{LESSONS, Lesson};
-
-pub fn toggle_tutorial(lesson: UseStateHandle<Option<usize>>) -> Callback<web_sys::MouseEvent> {
-    Callback::from(move |_| {
-        if lesson.is_some() {
-            lesson.set(None);
-        } else {
-            lesson.set(Some(0));
-        }
-    })
-}
+pub use crate::lessons::LESSONS;
 
 pub fn step_lesson(
     lesson: UseStateHandle<Option<usize>>,

@@ -93,9 +93,9 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
         }
     };
     let clear_label = if props.tutorial_active {
-        "Clear Tutorial"
+        "Reset Tutorial"
     } else {
-        "Clear REPL"
+        "Reset REPL"
     };
     html! {
         <div class={cls}>
