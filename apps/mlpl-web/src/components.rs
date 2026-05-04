@@ -2,8 +2,9 @@ use web_sys::{HtmlSelectElement, KeyboardEvent};
 use yew::prelude::*;
 
 use crate::demos::DEMOS;
+use crate::glossary_view::GlossaryView;
 use crate::state::DocTab;
-use crate::tutorial::LESSONS;
+pub use crate::tutorial::{TutorialPanel, TutorialPanelProps};
 
 const LANG_REFERENCE: &str = include_str!("../../../docs/lang-reference.md");
 const USAGE_GUIDE: &str = include_str!("../../../docs/usage.md");
@@ -67,57 +68,6 @@ pub fn header(props: &HeaderProps) -> Html {
                 <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation">{"?"}</button>
             </div>
         </header>
-    }
-}
-
-#[derive(Properties, PartialEq)]
-pub struct TutorialPanelProps {
-    pub lesson_idx: usize,
-    pub on_prev: Callback<MouseEvent>,
-    pub on_next: Callback<MouseEvent>,
-    pub on_run_example: Callback<String>,
-    pub on_close: Callback<MouseEvent>,
-}
-
-#[function_component(TutorialPanel)]
-pub fn tutorial_panel(props: &TutorialPanelProps) -> Html {
-    let lesson = match LESSONS.get(props.lesson_idx) {
-        Some(l) => l,
-        None => return html! {},
-    };
-    let total = LESSONS.len();
-    let is_first = props.lesson_idx == 0;
-    let is_last = props.lesson_idx + 1 == total;
-
-    let examples_html = lesson.examples.iter().map(|line| {
-        let line_str = (*line).to_string();
-        let on_click = {
-            let on_run = props.on_run_example.clone();
-            let line_str = line_str.clone();
-            Callback::from(move |_| on_run.emit(line_str.clone()))
-        };
-        html! {
-            <button class="lesson-example" onclick={on_click} title="Click to run">
-                <span class="example-prompt">{"mlpl> "}</span>{ line }
-            </button>
-        }
-    });
-
-    html! {
-        <div class="tutorial-panel">
-            <div class="tutorial-header">
-                <div class="tutorial-nav">
-                    <button class="ctrl-btn" disabled={is_first} onclick={props.on_prev.clone()} aria-label="Previous lesson" title="Previous lesson">{"←"}</button>
-                    <button class="ctrl-btn" disabled={is_last} onclick={props.on_next.clone()} aria-label="Next lesson" title="Next lesson">{"→"}</button>
-                </div>
-                <span class="tutorial-progress">{ format!("Lesson {} of {}", props.lesson_idx + 1, total) }</span>
-                <h2>{ lesson.title }</h2>
-                <button class="close-btn" onclick={props.on_close.clone()} aria-label="Exit tutorial">{"×"}</button>
-            </div>
-            <p class="tutorial-intro">{ lesson.intro }</p>
-            <div class="lesson-examples">{ for examples_html }</div>
-            <p class="tutorial-tryit"><strong>{"Try it: "}</strong>{ lesson.try_it }</p>
-        </div>
     }
 }
 
@@ -204,44 +154,35 @@ pub fn doc_dialog(props: &DocDialogProps) -> Html {
         return html! {};
     }
 
-    let content = match *active_tab {
-        DocTab::LangReference => LANG_REFERENCE,
-        DocTab::Usage => USAGE_GUIDE,
+    let body = match *active_tab {
+        DocTab::LangReference => html! { <pre class="doc-content">{ LANG_REFERENCE }</pre> },
+        DocTab::Usage => html! { <pre class="doc-content">{ USAGE_GUIDE }</pre> },
+        DocTab::Glossary => html! { <GlossaryView /> },
     };
-    let lang_class = if *active_tab == DocTab::LangReference {
-        "tab active"
-    } else {
-        "tab"
+    let cls = |t: DocTab| {
+        if *active_tab == t {
+            "tab active"
+        } else {
+            "tab"
+        }
     };
-    let usage_class = if *active_tab == DocTab::Usage {
-        "tab active"
-    } else {
-        "tab"
+    let setter = |t: DocTab| {
+        let h = active_tab.clone();
+        Callback::from(move |_| h.set(t))
     };
-
-    let select_lang = {
-        let active_tab = active_tab.clone();
-        Callback::from(move |_| active_tab.set(DocTab::LangReference))
-    };
-    let select_usage = {
-        let active_tab = active_tab.clone();
-        Callback::from(move |_| active_tab.set(DocTab::Usage))
-    };
-    let stop_propagation = Callback::from(|e: MouseEvent| e.stop_propagation());
-
+    let stop = Callback::from(|e: MouseEvent| e.stop_propagation());
     html! {
         <div class="modal-backdrop" onclick={props.on_close.clone()}>
-            <div class="modal" onclick={stop_propagation}>
+            <div class="modal" onclick={stop}>
                 <div class="modal-header">
                     <div class="tabs">
-                        <button class={lang_class} onclick={select_lang}>{"Language Reference"}</button>
-                        <button class={usage_class} onclick={select_usage}>{"Usage Guide"}</button>
+                        <button class={cls(DocTab::LangReference)} onclick={setter(DocTab::LangReference)}>{"Language Reference"}</button>
+                        <button class={cls(DocTab::Usage)} onclick={setter(DocTab::Usage)}>{"Usage Guide"}</button>
+                        <button class={cls(DocTab::Glossary)} onclick={setter(DocTab::Glossary)}>{"Glossary"}</button>
                     </div>
                     <button class="close-btn" onclick={props.on_close.clone()} aria-label="Close">{"×"}</button>
                 </div>
-                <div class="modal-body">
-                    <pre class="doc-content">{ content }</pre>
-                </div>
+                <div class="modal-body">{ body }</div>
             </div>
         </div>
     }
