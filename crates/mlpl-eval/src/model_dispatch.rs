@@ -499,21 +499,74 @@ struct AttentionArgs<'a> {
     causal: bool,
 }
 
+/// Pre-computed per-attention-call context shared across every
+/// head: the three projected matrices Q / K / V, the geometry
+/// (`d_k`, `d_model`, `seq`), the score scale factor, and the
+/// causal-mask flag. Built once in `apply_attention` and
+/// borrowed by every `apply_attn_head` call.
+struct AttnHeadCtx<'a> {
+    q: &'a DenseArray,
+    k: &'a DenseArray,
+    v: &'a DenseArray,
+    d_k: usize,
+    d_model: usize,
+    seq: usize,
+    scale: f64,
+    causal: bool,
+}
+
+/// One head of forward attention: compute `softmax(scale * Q_h
+/// @ K_h^T)` (with optional causal mask) then `attn @ V_h`, and
+/// scatter the resulting `[seq, d_k]` slice into the shared
+/// `concat[seq, d_model]` buffer at column offset `h * d_k`.
+fn apply_attn_head(
+    ctx: &AttnHeadCtx<'_>,
+    h: usize,
+    env: &Environment,
+    concat: &mut [f64],
+) -> Result<(), EvalError> {
+    let q_h = slice_cols(ctx.q, h * ctx.d_k, ctx.d_k)?;
+    let k_h = slice_cols(ctx.k, h * ctx.d_k, ctx.d_k)?;
+    let v_h = slice_cols(ctx.v, h * ctx.d_k, ctx.d_k)?;
+    let kt = crate::device::dispatched_call(env, "transpose", vec![k_h])?;
+    let scores = crate::device::dispatched_call(env, "matmul", vec![q_h, kt])?;
+    let seq = ctx.seq;
+    let causal = ctx.causal;
+    let scale = ctx.scale;
+    let scaled: Vec<f64> = scores
+        .data()
+        .iter()
+        .enumerate()
+        .map(|(i, s)| {
+            if causal && i % seq > i / seq {
+                -1.0e9
+            } else {
+                s * scale
+            }
+        })
+        .collect();
+    let scores_scaled = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
+    let attn = crate::device::dispatched_call(
+        env,
+        "softmax",
+        vec![scores_scaled, DenseArray::from_scalar(1.0)],
+    )?;
+    let head_out = crate::device::dispatched_call(env, "matmul", vec![attn, v_h])?;
+    for r in 0..seq {
+        for c in 0..ctx.d_k {
+            concat[r * ctx.d_model + h * ctx.d_k + c] = head_out.data()[r * ctx.d_k + c];
+        }
+    }
+    Ok(())
+}
+
 fn apply_attention(
     x: &DenseArray,
     args: &AttentionArgs<'_>,
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
-    let AttentionArgs {
-        wq,
-        wk,
-        wv,
-        wo,
-        d_model,
-        heads,
-        causal,
-    } = *args;
     let dims = x.shape().dims();
+    let d_model = args.d_model;
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(
             "attention: input must be [seq, {d_model}], got {:?}",
@@ -521,60 +574,34 @@ fn apply_attention(
         )));
     }
     let seq = dims[0];
-    let d_k = d_model / heads;
-
-    let wq_a = env
-        .get(wq)
-        .ok_or_else(|| EvalError::UndefinedVariable(wq.into()))?;
-    let wk_a = env
-        .get(wk)
-        .ok_or_else(|| EvalError::UndefinedVariable(wk.into()))?;
-    let wv_a = env
-        .get(wv)
-        .ok_or_else(|| EvalError::UndefinedVariable(wv.into()))?;
-    let wo_a = env
-        .get(wo)
-        .ok_or_else(|| EvalError::UndefinedVariable(wo.into()))?;
-
-    let q = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wq_a.clone()])?;
-    let k = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wk_a.clone()])?;
-    let v = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wv_a.clone()])?;
-
+    let d_k = d_model / args.heads;
+    let lookup = |n: &str| -> Result<DenseArray, EvalError> {
+        env.get(n)
+            .cloned()
+            .ok_or_else(|| EvalError::UndefinedVariable(n.into()))
+    };
+    let project = |w: DenseArray| crate::device::dispatched_call(env, "matmul", vec![x.clone(), w]);
+    let q = project(lookup(args.wq)?)?;
+    let k = project(lookup(args.wk)?)?;
+    let v = project(lookup(args.wv)?)?;
+    let wo_a = lookup(args.wo)?;
     let scale = 1.0 / (d_k as f64).sqrt();
+    let ctx = AttnHeadCtx {
+        q: &q,
+        k: &k,
+        v: &v,
+        d_k,
+        d_model,
+        seq,
+        scale,
+        causal: args.causal,
+    };
     let mut concat = vec![0.0_f64; seq * d_model];
-    for h in 0..heads {
-        let q_h = slice_cols(&q, h * d_k, d_k)?;
-        let k_h = slice_cols(&k, h * d_k, d_k)?;
-        let v_h = slice_cols(&v, h * d_k, d_k)?;
-        let kt = crate::device::dispatched_call(env, "transpose", vec![k_h])?;
-        let scores = crate::device::dispatched_call(env, "matmul", vec![q_h, kt])?;
-        let scaled: Vec<f64> = scores
-            .data()
-            .iter()
-            .enumerate()
-            .map(|(i, s)| {
-                if causal && i % seq > i / seq {
-                    -1.0e9
-                } else {
-                    s * scale
-                }
-            })
-            .collect();
-        let scores_scaled = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
-        let attn = crate::device::dispatched_call(
-            env,
-            "softmax",
-            vec![scores_scaled, DenseArray::from_scalar(1.0)],
-        )?;
-        let head_out = crate::device::dispatched_call(env, "matmul", vec![attn, v_h])?;
-        for r in 0..seq {
-            for c in 0..d_k {
-                concat[r * d_model + h * d_k + c] = head_out.data()[r * d_k + c];
-            }
-        }
+    for h in 0..args.heads {
+        apply_attn_head(&ctx, h, env, &mut concat)?;
     }
     let concat = DenseArray::new(Shape::new(vec![seq, d_model]), concat)?;
-    crate::device::dispatched_call(env, "matmul", vec![concat, wo_a.clone()])
+    crate::device::dispatched_call(env, "matmul", vec![concat, wo_a])
 }
 
 /// Extract `width` consecutive columns starting at `start` from a
