@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-05
 
+- feat(web, glossary): cross-attention + encoder-block demos and lessons
+- docs(changes): refresh CHANGES.md to head
 - refactor(mlpl-runtime): extract softmax_group_index helper + simplify
 - docs(changes): refresh CHANGES.md to head
 - feat(web, glossary): multi-head attention demo + 6 vocab entries
