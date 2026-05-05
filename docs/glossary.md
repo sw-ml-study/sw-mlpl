@@ -72,6 +72,21 @@ axis 0 (batch) and axis 1 (vocab). Many ops take an `axis`
 argument: `softmax(x, 1)` normalizes along axis 1; named
 axes (`x : [batch, vocab] = ...`) make this self-documenting.
 
+## Backpropagation
+
+The algorithm for computing gradients of a scalar loss with
+respect to every parameter, by walking the computation graph
+backwards from the loss and applying the chain rule at each
+node. Foundation of every gradient-based ML technique. In
+MLPL the algorithm is hidden behind `grad(loss, wrt)`: the
+forward pass records a tape, `grad` walks it backward and
+returns the gradient with the same shape as `wrt`. The
+"Automatic Differentiation" tutorial lesson covers the
+mechanics; the "Logistic Regression" and "Tiny MLP" lessons
+show the manual chain-rule version (`dZ = pred - y`,
+`dW = X^T dZ / N`) that `grad` automates. See also Backward
+pass, Autograd, Chain rule.
+
 ## Backward pass
 
 The traversal of the autograd tape that computes gradients.
@@ -191,6 +206,19 @@ seed)`.
 
 Sequential composition of layers. `chain(linear(2, 8, 0),
 tanh_layer(), linear(8, 2, 1))` is a 2-layer MLP.
+
+## Chain rule
+
+The calculus identity `d(f(g(x)))/dx = f'(g(x)) * g'(x)`,
+applied recursively to compose gradients across the layers
+of a neural network. Backpropagation IS the chain rule
+applied to the computation graph: at each node, multiply the
+incoming gradient by the local Jacobian, then propagate
+upstream. MLPL's `grad(loss, wrt)` does this automatically;
+the "Tiny MLP" lesson shows the manual two-layer version
+where the hidden-layer gradient is `dZ1 = (dZ2 W2^T) * (1 -
+H * H)` -- the tanh derivative being the local Jacobian
+factor. See also Backpropagation, Autograd.
 
 ## Chain of Thought
 
