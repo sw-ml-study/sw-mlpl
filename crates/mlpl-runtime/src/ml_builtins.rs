@@ -160,6 +160,19 @@ fn parse_sinusoidal_args(name: &str, args: &[DenseArray]) -> Result<(usize, usiz
     Ok((seq_len as usize, d_model as usize))
 }
 
+/// Map a flat element index to its softmax group index --
+/// the same flat index with the `axis` coordinate stripped
+/// out, so every position along `axis` shares one group.
+fn softmax_group_index(flat: usize, axis_size: usize, axis_stride: usize) -> usize {
+    if axis_stride > 1 {
+        let outer = flat / (axis_size * axis_stride);
+        let inner = flat % axis_stride;
+        outer * axis_stride + inner
+    } else {
+        flat / axis_size
+    }
+}
+
 fn builtin_softmax(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     if args.len() != 2 {
         return Err(RuntimeError::ArityMismatch {
@@ -183,64 +196,30 @@ fn builtin_softmax(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runt
             reason: format!("axis {axis} out of range for rank {}", dims.len()),
         });
     }
-
-    // Strides for the input shape.
-    let mut strides = vec![1usize; dims.len()];
-    for i in (0..dims.len().saturating_sub(1)).rev() {
-        strides[i] = strides[i + 1] * dims[i + 1];
-    }
     let axis_size = dims[axis];
-    let axis_stride = strides[axis];
-
-    // Group index: flat index with the `axis` coordinate removed.
-    let mut group_dims = dims.clone();
-    group_dims.remove(axis);
-    let group_count: usize = group_dims.iter().product::<usize>().max(1);
-
-    // First pass: per-group max for numerical stability.
+    // Stride along `axis` = product of trailing dims (1 if axis is last).
+    let axis_stride: usize = dims[axis + 1..].iter().product();
+    let group_count = (a.elem_count() / axis_size).max(1);
     let mut maxv = vec![f64::NEG_INFINITY; group_count];
     for flat in 0..a.elem_count() {
-        let g = if axis_stride > 1 {
-            let outer = flat / (axis_size * axis_stride);
-            let inner = flat % axis_stride;
-            outer * axis_stride + inner
-        } else {
-            flat / axis_size
-        };
+        let g = softmax_group_index(flat, axis_size, axis_stride);
         let v = a.data()[flat];
         if v > maxv[g] {
             maxv[g] = v;
         }
     }
-
-    // Second pass: exponentiate shifted logits and accumulate per-group sums.
     let mut out = vec![0.0f64; a.elem_count()];
     let mut sums = vec![0.0f64; group_count];
     for (flat, slot) in out.iter_mut().enumerate() {
-        let g = if axis_stride > 1 {
-            let outer = flat / (axis_size * axis_stride);
-            let inner = flat % axis_stride;
-            outer * axis_stride + inner
-        } else {
-            flat / axis_size
-        };
+        let g = softmax_group_index(flat, axis_size, axis_stride);
         let e = (a.data()[flat] - maxv[g]).exp();
         *slot = e;
         sums[g] += e;
     }
-
-    // Third pass: normalize.
     for (flat, slot) in out.iter_mut().enumerate() {
-        let g = if axis_stride > 1 {
-            let outer = flat / (axis_size * axis_stride);
-            let inner = flat % axis_stride;
-            outer * axis_stride + inner
-        } else {
-            flat / axis_size
-        };
+        let g = softmax_group_index(flat, axis_size, axis_stride);
         *slot /= sums[g];
     }
-
     Ok(DenseArray::new(Shape::new(dims), out)?)
 }
 
