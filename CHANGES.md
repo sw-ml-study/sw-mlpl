@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-05
 
+- feat(web): self-attention from scratch demo + lesson
+- docs(changes): refresh CHANGES.md to head
 - refactor(mlpl-eval): trim apply_attention via AttnHeadCtx + closures
 - refactor(mlpl-web): collapse help_text body to static HELP_TEXT
 
