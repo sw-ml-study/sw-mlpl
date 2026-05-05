@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-05
+
+- refactor(mlpl-eval): trim apply_attention via AttnHeadCtx + closures
+- refactor(mlpl-web): collapse help_text body to static HELP_TEXT
+
 ## 2026-05-04
 
+- docs(changes): refresh CHANGES.md to head
 - refactor(mlpl-eval): extract attn_head_weights helper
 - refactor(mlpl-repl): collapse print_help to static HELP_BODY
 - docs(changes): refresh CHANGES.md to head
