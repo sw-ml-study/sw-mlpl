@@ -108,3 +108,36 @@ pub const EMBEDDING_EXPLORATION: Lesson = Lesson {
     ],
     try_it: "knn(X, 2) should list indices from X's own cluster -- rows 0/1/2 are near [0,0,2] and rows 3/4/5 are near [2,0,0]. pca_2d vs emb_2d: t-SNE rotates and flips between seeds and emphasizes local structure; PCA is deterministic and linear, so pca_2d keeps the two clusters on a single axis. embed_table(emb) returns the raw [6, 3] lookup table of a freshly-initialized embedding layer -- untrained, so the scatter is a tiny gaussian cloud. Run train ...adam over emb and re-call embed_table to see the learned rows.",
 };
+
+/// Multi-head attention built from primitives. Lives here
+/// rather than inline in `lessons.rs` to keep that file
+/// under its file-LOC budget.
+pub const MULTI_HEAD_ATTENTION: Lesson = Lesson {
+    title: "Multi-Head Attention from Scratch",
+    intro: "Multi-head attention runs `h` copies of single-head attention in parallel on `d_k = d_model / h`-wide slabs, then concatenates the per-head outputs and projects through one final Wo. MLPL has no surface column-slicing op, so each head's slab is built explicitly via a selector matrix S_h: [d_model, d_k] (1s where this head's columns belong, 0s elsewhere). Multiplying full-width Q / K / V by S_h projects them down to the per-head width; multiplying the per-head output by S_h^T scatters it back into the full d_model width with zeros in the other heads' columns. Summing across heads recovers the concatenation. Each head's [T, T] weight heatmap shows a distinct attention pattern -- the model can dedicate one head per type of relationship in the input.",
+    examples: &[
+        "T = 4",
+        "d_model = 4",
+        "heads = 2",
+        "d_k = d_model / heads",
+        "X : [seq, d] = randn(0, [T, d_model])",
+        "Wq = randn(1, [d_model, d_model])",
+        "Wk = randn(2, [d_model, d_model])",
+        "Wv = randn(3, [d_model, d_model])",
+        "S0 = [[1,0],[0,1],[0,0],[0,0]]",
+        "S1 = [[0,0],[0,0],[1,0],[0,1]]",
+        "Q = matmul(X, Wq)",
+        "K = matmul(X, Wk)",
+        "V = matmul(X, Wv)",
+        "W0 = softmax(matmul(matmul(Q, S0), transpose(matmul(K, S0))) / sqrt(d_k), 1)",
+        "W1 = softmax(matmul(matmul(Q, S1), transpose(matmul(K, S1))) / sqrt(d_k), 1)",
+        "svg(W0, \"heatmap\")",
+        "svg(W1, \"heatmap\")",
+        "out0 = matmul(W0, matmul(V, S0))",
+        "out1 = matmul(W1, matmul(V, S1))",
+        "out = matmul(out0, transpose(S0)) + matmul(out1, transpose(S1))",
+        "Wo = randn(7, [d_model, d_model])",
+        "shape(matmul(out, Wo))",
+    ],
+    try_it: "Replace the from-scratch pipeline with the model layer: `m = attention(4, 2, 0); apply(m, X)` and `attention_weights(m, X)` (which returns `[heads, T, T]` for multi-head). The math is the same; the layer just hides the slicing behind a single name.",
+};
