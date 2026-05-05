@@ -351,6 +351,8 @@ pub const LESSONS: &[Lesson] = &[
         try_it: "Add a causal mask: replace the upper triangle of `scores` with -1e9 before the softmax (use `gt` and an indices grid) and re-render the weight heatmap. The lower-triangular pattern is what `causal_attention()` builds in.",
     },
     crate::lessons_advanced::MULTI_HEAD_ATTENTION,
+    crate::lessons_advanced::CROSS_ATTENTION,
+    crate::lessons_advanced::ENCODER_BLOCK,
     Lesson {
         title: "Optimizers and Schedules",
         intro: "Hand-rolled SGD is fine for one parameter, but real training needs momentum, Adam, and a structured loop. MLPL provides momentum_sgd(loss, params, lr, beta) and adam(loss, params, lr, b1, b2, eps) as built-ins -- both maintain per-parameter state across calls so you can just call them in a loop. The train N { body } construct does the loop for you: it binds the iteration index to `step`, runs the body, and captures the value of the body's final expression into a vector named `last_losses`. cosine_schedule(step, total, lr_min, lr_max) and linear_warmup(step, warmup, lr) are pure scalar helpers you can drop into any optimizer call.",

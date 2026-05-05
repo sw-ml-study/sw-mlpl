@@ -19,8 +19,8 @@ This repository ships three things together:
 
 ## Tour
 
-The web playground gives you a full REPL plus 19 worked
-demos, 34 tutorial lessons, and a 226-entry glossary --
+The web playground gives you a full REPL plus 21 worked
+demos, 36 tutorial lessons, and a 229-entry glossary --
 all running entirely in your browser via WASM.
 
 ### REPL
@@ -48,7 +48,7 @@ heatmap -- in one line each.
 
 ![Tutorial Index](images/03-tutorial.png?ts=1777922058129)
 
-The Tutorial tab opens to an Index of all 34 lessons
+The Tutorial tab opens to an Index of all 36 lessons
 (default), with the current lesson highlighted in
 peach. Click any tile to jump directly; the Lesson tab
 holds prev / next pagination if you prefer step-by-step.
