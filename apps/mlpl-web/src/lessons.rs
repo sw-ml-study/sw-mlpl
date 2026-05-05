@@ -330,6 +330,27 @@ pub const LESSONS: &[Lesson] = &[
         try_it: "Set K = Q and re-render the heatmap -- notice how the diagonal becomes the brightest cell in each row.",
     },
     Lesson {
+        title: "Self-Attention from Scratch",
+        intro: "Self-attention is four matmuls, one transpose, one scalar division, one softmax. Each of the T input tokens emits three projections: Q (the query, what am I looking for?), K (the key, what do I advertise?), and V (the value, what do I share if attended-to?). The scaled-dot-product expression `softmax(Q K^T / sqrt(d_k), 1) V` produces the per-token output by mixing all V rows according to how strongly each query matched each key. Building one head from primitives -- without the `attention()` layer -- makes the formula visible: three projection matmuls, the score matmul, the softmax, the final value matmul. With random Wq/Wk/Wv the weight heatmap is noise; training those projections is what turns attention into something useful.",
+        examples: &[
+            "T = 6",
+            "d_model = 4",
+            "X : [seq, d] = randn(0, [T, d_model])",
+            "Wq = randn(1, [d_model, d_model])",
+            "Wk = randn(2, [d_model, d_model])",
+            "Wv = randn(3, [d_model, d_model])",
+            "Q = matmul(X, Wq)",
+            "K = matmul(X, Wk)",
+            "V = matmul(X, Wv)",
+            "scores = matmul(Q, transpose(K)) / sqrt(d_model)",
+            "weights = softmax(scores, 1)",
+            "svg(weights, \"heatmap\")",
+            "out = matmul(weights, V)",
+            "shape(out)",
+        ],
+        try_it: "Add a causal mask: replace the upper triangle of `scores` with -1e9 before the softmax (use `gt` and an indices grid) and re-render the weight heatmap. The lower-triangular pattern is what `causal_attention()` builds in.",
+    },
+    Lesson {
         title: "Optimizers and Schedules",
         intro: "Hand-rolled SGD is fine for one parameter, but real training needs momentum, Adam, and a structured loop. MLPL provides momentum_sgd(loss, params, lr, beta) and adam(loss, params, lr, b1, b2, eps) as built-ins -- both maintain per-parameter state across calls so you can just call them in a loop. The train N { body } construct does the loop for you: it binds the iteration index to `step`, runs the body, and captures the value of the body's final expression into a vector named `last_losses`. cosine_schedule(step, total, lr_min, lr_max) and linear_warmup(step, warmup, lr) are pure scalar helpers you can drop into any optimizer call.",
         examples: &[
