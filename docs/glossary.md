@@ -614,6 +614,17 @@ array of `(x, y)` points evenly spaced over the rectangle.
 Used by `boundary_2d` to query a classifier's surface for
 decision-boundary plots.
 
+## Head (attention)
+
+One of the parallel attention components in multi-head
+attention. Each head has its own Q/K/V projections of width
+`d_k = d_model / heads` and operates independently; the
+per-head outputs are concatenated to recover the full
+`d_model` width. Different heads can specialize on different
+relationships in the input. MLPL: `attention(d_model, heads,
+seed)` with `heads >= 1`. See "Multi-Head Attention from
+Scratch" for a per-head walkthrough.
+
 ## Heatmap
 
 `svg(matrix, "heatmap")` renders a `[N, M]` array as a 2-D
@@ -679,6 +690,16 @@ a jailbreak / safety-eval surface.
 `iota(n)` returns the integer sequence `[0, 1, ..., n-1]` as
 a rank-1 vector. The most basic array constructor; building
 block for indexing / shape arithmetic / one-hot scaffolding.
+
+## Key (K)
+
+One of the three projections in attention. Each token emits
+a key advertising "what I have to offer"; the dot product `Q
+@ K^T` measures how strongly each query matches each key,
+producing the unnormalized score matrix. In MLPL:
+`K = matmul(X, Wk)` where `Wk` is `[d_model, d_model]` for
+single-head or `[d_model, d_k]` per head. Paired with Query
+(Q) and Value (V).
 
 ## K-Means
 
@@ -1084,6 +1105,16 @@ A non-negative scalar that, with siblings, sums to 1.
 Auto-tagged `Probability` in v0.19; produced by `softmax`
 and `sigmoid`.
 
+## Projection (matrix)
+
+A learned linear map applied as `Y = matmul(X, W)` where `W
+: [d_in, d_out]`. In attention, three projections (Wq, Wk,
+Wv) turn each token into Query, Key, Value vectors of width
+`d_model`; a fourth (Wo) recombines per-head outputs after
+concatenation. In MLPL these are `param[d_in, d_out]`
+tensors trained by gradient descent through `apply` /
+`attention`.
+
 ## Prompt Injection
 
 Adversarial inputs that overwrite the system prompt or steer
@@ -1104,6 +1135,15 @@ Storing weights in low-precision integer formats (int8, int4)
 for memory and speed at modest accuracy cost. Often combined
 with LoRA in QLoRA workflows. MLPL stores everything in f64;
 quantization is a deferred follow-up to Saga 15.
+
+## Query (Q)
+
+One of the three projections in attention. Each token emits
+a query asking "what am I looking for?"; the dot product `Q
+@ K^T` measures how strongly each query matches each key. In
+MLPL: `Q = matmul(X, Wq)` where `Wq` is `[d_model, d_model]`
+for single-head or `[d_model, d_k]` per head. Paired with
+Key (K) and Value (V).
 
 ## RAG (Retrieval-Augmented Generation)
 
@@ -1248,6 +1288,17 @@ positional encoding today; RoPE is deferred.
 Drawing a random outcome from a probability distribution.
 Multinomial sampling from logits: `sample(logits,
 temperature, seed)`.
+
+## Scaled dot-product attention
+
+The canonical attention formula: `softmax(Q @ K^T / sqrt(d_k),
+1) @ V`. The `sqrt(d_k)` divisor keeps the score variance
+bounded as the key dimension grows so softmax doesn't
+saturate into one-hot. Demos: "Attention Pattern" (heatmap
+of weights only) and "Self-Attention from Scratch" (full
+pipeline including `weights @ V`). Multi-head attention runs
+this formula in parallel on `d_k = d_model / heads`-wide
+slabs, then concatenates the per-head outputs.
 
 ## Scaling Laws
 
@@ -1577,6 +1628,16 @@ during training without leaking into the gradient. MLPL:
 `split(x, frac, seed)` and `val_split(x, frac, seed)` slice
 disjoint chunks; the `experiment "name" { body }` block
 captures `_metric`-suffixed scalars per run.
+
+## Value (V)
+
+One of the three projections in attention. Each token emits
+a value that gets mixed into other tokens' outputs in
+proportion to the softmax weights: `out = weights @ V` where
+each output row is a weighted average of the V rows. In
+MLPL: `V = matmul(X, Wv)` where `Wv` is `[d_model, d_model]`
+for single-head or `[d_model, d_k]` per head. Paired with
+Query (Q) and Key (K).
 
 ## VLM (Vision-Language Models)
 
