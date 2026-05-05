@@ -141,3 +141,45 @@ pub const MULTI_HEAD_ATTENTION: Lesson = Lesson {
     ],
     try_it: "Replace the from-scratch pipeline with the model layer: `m = attention(4, 2, 0); apply(m, X)` and `attention_weights(m, X)` (which returns `[heads, T, T]` for multi-head). The math is the same; the layer just hides the slicing behind a single name.",
 };
+
+/// Cross-attention from primitives. Same `softmax(Q K^T /
+/// sqrt(d_k)) V` formula as self-attention, but Q comes from
+/// a target sequence and K / V come from a separate source.
+pub const CROSS_ATTENTION: Lesson = Lesson {
+    title: "Cross-Attention from Scratch",
+    intro: "Cross-attention is what couples a transformer's decoder to its encoder: each target-side query attends to every source-side key, then mixes the source's V vectors into the target output. Mathematically it's identical to self-attention -- `softmax(Q K^T / sqrt(d_k)) V` -- but the inputs are split: Q is built from the target sequence (here T_tgt=4 random rows), while K and V are built from the source (T_src=6). The weight heatmap is `[T_tgt, T_src]` -- non-square -- which is the visual giveaway. Each row is one target query's distribution over source positions; each output row is the corresponding weighted average of V. Stack one cross-attention block after a causal-self-attention block and you have a transformer decoder layer; MLPL has no built-in cross-attention layer because the from-scratch pipeline is the same primitives you already know.",
+    examples: &[
+        "T_tgt = 4",
+        "T_src = 6",
+        "d_model = 4",
+        "X_tgt : [seq, d] = randn(0, [T_tgt, d_model])",
+        "X_src : [seq, d] = randn(1, [T_src, d_model])",
+        "Wq = randn(2, [d_model, d_model])",
+        "Wk = randn(3, [d_model, d_model])",
+        "Wv = randn(4, [d_model, d_model])",
+        "Q = matmul(X_tgt, Wq)",
+        "K = matmul(X_src, Wk)",
+        "V = matmul(X_src, Wv)",
+        "weights = softmax(matmul(Q, transpose(K)) / sqrt(d_model), 1)",
+        "shape(weights)",
+        "svg(weights, \"heatmap\")",
+        "out = matmul(weights, V)",
+        "shape(out)",
+    ],
+    try_it: "Set X_src = X_tgt and re-run -- the weight heatmap collapses to T x T (square) and you have self-attention. Cross-attention's distinguishing feature is just the non-square shape that comes from Q and K/V having different row counts.",
+};
+
+/// Single transformer encoder block via the model DSL.
+pub const ENCODER_BLOCK: Lesson = Lesson {
+    title: "Encoder Block",
+    intro: "One layer of a transformer encoder is just `chain(residual(pre_norm + self_attn), residual(pre_norm + ffn))`: two sub-blocks, each with a pre-normalization and a skip connection. The first sub-block lets every position mix information with every other (no causal mask in an encoder); the second sub-block applies a position-wise nonlinear transformation via two linear layers with a relu in between. Stacking N of these is what BERT does; replacing self-attention with causal self-attention and adding a third (cross-attention) sub-block is what a decoder layer does. The model DSL builds the whole block in five lines, and `attention_weights(encoder, X)` walks the chain to render the [T, T] attention pattern of just the self-attn sub-block.",
+    examples: &[
+        "X = randn(0, [4, 8])",
+        "encoder = chain(residual(chain(rms_norm(8), attention(8, 1, 1))), residual(chain(rms_norm(8), linear(8, 16, 2), relu_layer(), linear(16, 8, 3))))",
+        "out = apply(encoder, X)",
+        "shape(out)",
+        "bare_attn = attention(8, 1, 1)",
+        "svg(attention_weights(bare_attn, X), \"heatmap\")",
+    ],
+    try_it: "Build a second encoder block inline (same chain expression with fresh seeds 4/5/6) and chain them: deeper = chain(encoder, encoder2). Shape is unchanged; the attention pattern at each layer differs because layer 2 sees layer 1's output. Real transformers stack 12-100+ blocks.",
+};

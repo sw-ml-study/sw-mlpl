@@ -278,9 +278,12 @@ sequence by appending each newly-sampled token.
 ## Cross-attention
 
 Attention where the queries come from one sequence and the
-keys / values come from a different sequence. The
-"Attention Pattern" demo's first pass shows this with two
-distinct `Q`, `K` matrices.
+keys / values come from a different sequence. Same math as
+self-attention, just with Q from a different source than K
+and V. The weight matrix is `[T_query, T_source]` -- non-
+square, distinguishing it from self-attention's `[T, T]`.
+Demos: "Cross-Attention from Scratch" (full pipeline) and
+"Attention Pattern" (the two-Q/K-matrix variant).
 
 ## Cross entropy
 
@@ -456,6 +459,17 @@ Heavily debated whether truly emergent or an artifact of
 metric thresholding. MLPL's tiny scales don't produce
 emergent capabilities; the lessons are pedagogical.
 
+## Encoder-decoder
+
+A two-stack transformer where the encoder turns an input
+sequence into contextualized representations and the decoder
+generates an output sequence by attending both to its own
+prior tokens (causal self-attention) and to the encoder's
+output (cross-attention). Used for sequence-to-sequence
+tasks like translation. Decoder-only models (GPT-style) skip
+the encoder; encoder-only models (BERT-style) skip the
+decoder. See "Decoder / encoder" for the role of each side.
+
 ## Ensembling
 
 Running multiple trained models on the same input and
@@ -499,6 +513,15 @@ an `ExperimentRecord`. The record lands in
 `env.experiment_log` (always) and on disk under
 `<exp_dir>/<name>/<ts>/run.json` (terminal REPL only).
 Use to pin a reproducible notebook entry per run.
+
+## Feedforward (FFN)
+
+The two-linear-layer subblock inside a transformer block:
+`linear(d_model, d_ff) -> relu_layer() -> linear(d_ff,
+d_model)`. Hidden width `d_ff` is typically `4 * d_model`.
+Provides the position-wise nonlinear transformation between
+attention layers. In MLPL: `chain(linear(d, d_ff, s1),
+relu_layer(), linear(d_ff, d, s2))`.
 
 ## Few-shot Learning
 
@@ -1567,6 +1590,16 @@ learning.
 A sequence model built from stacked attention + feed-forward
 blocks with residual connections and normalization. The
 "Tiny LM" demos build a 1-layer transformer.
+
+## Transformer block
+
+One layer of a transformer: pre-norm -> self-attention ->
+residual; pre-norm -> feedforward -> residual. The unit you
+stack to make deep models (12-100+ blocks for production-
+scale transformers; MLPL demos use 1). MLPL builds one with
+`chain(residual(chain(rms_norm(d), attention(d, h, s))),
+residual(chain(rms_norm(d), linear(d, d_ff, s2),
+relu_layer(), linear(d_ff, d, s3))))`.
 
 ## Transpose
 
