@@ -183,3 +183,34 @@ pub const ENCODER_BLOCK: Lesson = Lesson {
     ],
     try_it: "Build a second encoder block inline (same chain expression with fresh seeds 4/5/6) and chain them: deeper = chain(encoder, encoder2). Shape is unchanged; the attention pattern at each layer differs because layer 2 sees layer 1's output. Real transformers stack 12-100+ blocks.",
 };
+
+/// Single transformer decoder block. Three sub-blocks:
+/// causal self-attention, cross-attention (built from
+/// scratch since MLPL has no cross-attn layer primitive),
+/// and feedforward.
+pub const DECODER_BLOCK: Lesson = Lesson {
+    title: "Decoder Block",
+    intro: "A transformer decoder block is the encoder block plus a cross-attention sub-block in the middle. Three sub-blocks total: (1) causal self-attention -- the target position can only attend to itself and earlier positions, enforced by `causal_attention(d, h, s)`'s lower-triangular mask; (2) cross-attention -- target queries (Q from `H`) attend to encoder output (K, V from `X_src`), built from scratch with matmul + softmax because MLPL has no cross-attention layer primitive; (3) feedforward -- the same `linear -> relu -> linear` MLP as the encoder. Each sub-block has its own pre-norm + residual. Stack a dozen of these and you have GPT (decoder-only, drop the cross-attn step) or T5 (encoder-decoder, keep all three). The cross-attention heatmap is `[T_tgt, T_src]` -- non-square -- which visually distinguishes it from self-attention.",
+    examples: &[
+        "T_tgt = 4",
+        "T_src = 6",
+        "d_model = 8",
+        "d_ff = 16",
+        "X_tgt = randn(0, [T_tgt, d_model])",
+        "X_src = randn(1, [T_src, d_model])",
+        "self_attn = residual(chain(rms_norm(d_model), causal_attention(d_model, 1, 2)))",
+        "H = apply(self_attn, X_tgt)",
+        "pre_xattn = rms_norm(d_model)",
+        "H_norm = apply(pre_xattn, H)",
+        "Wq = randn(3, [d_model, d_model])",
+        "Wk = randn(4, [d_model, d_model])",
+        "Wv = randn(5, [d_model, d_model])",
+        "weights = softmax(matmul(matmul(H_norm, Wq), transpose(matmul(X_src, Wk))) / sqrt(d_model), 1)",
+        "svg(weights, \"heatmap\")",
+        "H2 = H + matmul(weights, matmul(X_src, Wv))",
+        "ffn = residual(chain(rms_norm(d_model), linear(d_model, d_ff, 6), relu_layer(), linear(d_ff, d_model, 7)))",
+        "out = apply(ffn, H2)",
+        "shape(out)",
+    ],
+    try_it: "Drop the cross-attention sub-block (just leave self-attn + ffn) and you have a decoder-only block in the GPT style. Or stack the encoder demo's encoder before this decoder, feeding `apply(encoder, X_src)` as the new X_src -- that's the encoder-decoder pipeline, which Saga 24 (deferred) will package as a built-in.",
+};
