@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-05
 
+- refactor(mlpl-runtime): extract softmax_group_index helper + simplify
+- docs(changes): refresh CHANGES.md to head
 - feat(web, glossary): multi-head attention demo + 6 vocab entries
 - docs(changes): refresh CHANGES.md to head
 - feat(web): self-attention from scratch demo + lesson
