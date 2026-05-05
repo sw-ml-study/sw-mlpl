@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-05
 
+- feat(web): decoder-block demo + lesson
+- docs(changes): refresh CHANGES.md to head
 - docs(glossary): add Backpropagation + Chain rule entries
 - docs(changes): refresh CHANGES.md to head
 - feat(web, glossary): cross-attention + encoder-block demos and lessons
