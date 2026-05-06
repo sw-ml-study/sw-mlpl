@@ -22,4 +22,5 @@ pub enum DocTab {
     LangReference,
     Usage,
     Glossary,
+    Diagrams,
 }

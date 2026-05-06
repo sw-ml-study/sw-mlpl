@@ -204,6 +204,7 @@ pub fn doc_dialog(props: &DocDialogProps) -> Html {
         DocTab::LangReference => html! { <pre class="doc-content">{ LANG_REFERENCE }</pre> },
         DocTab::Usage => html! { <pre class="doc-content">{ USAGE_GUIDE }</pre> },
         DocTab::Glossary => html! { <GlossaryView /> },
+        DocTab::Diagrams => html! { <crate::diagrams_view::DiagramsView /> },
     };
     let cls = |t: DocTab| {
         if *active_tab == t {
@@ -225,6 +226,7 @@ pub fn doc_dialog(props: &DocDialogProps) -> Html {
                         <button class={cls(DocTab::LangReference)} onclick={setter(DocTab::LangReference)}>{"Language Reference"}</button>
                         <button class={cls(DocTab::Usage)} onclick={setter(DocTab::Usage)}>{"Usage Guide"}</button>
                         <button class={cls(DocTab::Glossary)} onclick={setter(DocTab::Glossary)}>{"Glossary"}</button>
+                        <button class={cls(DocTab::Diagrams)} onclick={setter(DocTab::Diagrams)}>{"Diagrams"}</button>
                     </div>
                     <button class="close-btn" onclick={props.on_close.clone()} aria-label="Close">{"×"}</button>
                 </div>
