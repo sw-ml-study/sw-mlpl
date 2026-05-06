@@ -7,7 +7,7 @@
 use std::net::SocketAddr;
 
 use mlpl_serve::auth::AuthMode;
-use mlpl_serve::server::{ServerError, build_app, run};
+use mlpl_serve::server::{ServerError, build_app, build_app_with_peers, run};
 use serde_json::Value as JsonValue;
 
 /// Spin up a server in the background on a random
@@ -209,6 +209,7 @@ async fn run_rejects_non_loopback_with_auth_disabled() {
         addr,
         AuthMode::Disabled,
         mlpl_serve::peers::empty_registry(),
+        None,
     )
     .await
     .unwrap_err();
@@ -317,6 +318,54 @@ async fn inspect_unknown_session_returns_404() {
         .await
         .unwrap();
     assert_eq!(resp.status(), 404);
+}
+
+/// Saga 25 step A: with `--static-dir <path>` set,
+/// the server mounts a `ServeDir` at `/sw-mlpl/`. Smoke
+/// test it with a tempdir + a tiny `index.html`. The
+/// /v1 routes must keep working alongside.
+#[tokio::test]
+async fn static_dir_serves_index_at_sw_mlpl_prefix() {
+    use std::io::Write;
+    let tmp = std::env::temp_dir().join(format!(
+        "mlpl-serve-static-{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_nanos()
+    ));
+    std::fs::create_dir_all(&tmp).unwrap();
+    let index_path = tmp.join("index.html");
+    let mut f = std::fs::File::create(&index_path).unwrap();
+    writeln!(f, "<!DOCTYPE html><title>mlpl-test</title>").unwrap();
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let app = build_app_with_peers(
+        AuthMode::Required,
+        mlpl_serve::peers::empty_registry(),
+        Some(&tmp),
+    );
+    tokio::spawn(async move {
+        axum::serve(listener, app).await.unwrap();
+    });
+
+    // Static side: GET /sw-mlpl/ should return the index.
+    let html = reqwest::get(format!("http://{addr}/sw-mlpl/index.html"))
+        .await
+        .unwrap()
+        .text()
+        .await
+        .unwrap();
+    assert!(html.contains("mlpl-test"), "served body was {html:?}");
+
+    // API side: /v1/health must still work alongside.
+    let health = reqwest::get(format!("http://{addr}/v1/health"))
+        .await
+        .unwrap();
+    assert_eq!(health.status(), 200);
+
+    let _ = std::fs::remove_dir_all(&tmp);
 }
 
 #[tokio::test]
