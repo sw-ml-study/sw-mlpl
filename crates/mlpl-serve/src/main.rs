@@ -22,6 +22,9 @@ struct Args {
     peer_pairs: Vec<(String, String)>,
     insecure_peers: bool,
     static_dir: Option<PathBuf>,
+    tls_cert: Option<PathBuf>,
+    tls_key: Option<PathBuf>,
+    self_signed: bool,
 }
 
 fn main() -> ExitCode {
@@ -30,13 +33,6 @@ fn main() -> ExitCode {
         Err(msg) => {
             eprintln!("{msg}");
             print_usage();
-            return ExitCode::from(2);
-        }
-    };
-    let peers = match build_registry(args.peer_pairs, args.insecure_peers) {
-        Ok(r) => r,
-        Err(msg) => {
-            eprintln!("{msg}");
             return ExitCode::from(2);
         }
     };
@@ -50,21 +46,26 @@ fn main() -> ExitCode {
             return ExitCode::FAILURE;
         }
     };
-    let peer_summary: Vec<String> = peers
-        .iter()
-        .map(|(d, p)| format!("{d}={}", p.url))
-        .collect();
-    let static_summary = match &args.static_dir {
-        Some(p) => format!(", web=http://{}/sw-mlpl/ ({})", args.bind, p.display()),
-        None => String::new(),
+    let tls = match runtime.block_on(build_tls(
+        args.tls_cert.as_deref(),
+        args.tls_key.as_deref(),
+        args.self_signed,
+    )) {
+        Ok(t) => t,
+        Err(e) => {
+            eprintln!("{e}");
+            return ExitCode::from(2);
+        }
     };
-    eprintln!(
-        "mlpl-serve listening on http://{} (auth={:?}, peers=[{}]){static_summary}",
-        args.bind,
-        args.auth,
-        peer_summary.join(", ")
-    );
-    match runtime.block_on(run(args.bind, args.auth, peers, args.static_dir)) {
+    let peers = match build_registry(args.peer_pairs.clone(), args.insecure_peers) {
+        Ok(r) => r,
+        Err(msg) => {
+            eprintln!("{msg}");
+            return ExitCode::from(2);
+        }
+    };
+    print_banner(&args, &peers, tls.is_some());
+    match runtime.block_on(run(args.bind, args.auth, peers, args.static_dir, tls)) {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
             eprintln!("{e}");
@@ -79,6 +80,9 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
     let mut peer_pairs: Vec<(String, String)> = Vec::new();
     let mut insecure_peers = false;
     let mut static_dir: Option<PathBuf> = None;
+    let mut tls_cert: Option<PathBuf> = None;
+    let mut tls_key: Option<PathBuf> = None;
+    let mut self_signed = false;
     let mut it = iter.into_iter();
     while let Some(arg) = it.next() {
         match arg.as_str() {
@@ -89,18 +93,26 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
                     .map_err(|e| format!("--bind: invalid SocketAddr {v:?}: {e}"))?;
             }
             "--auth" => auth = parse_auth(&it.next().ok_or("--auth requires a value")?)?,
-            "--peer" => {
-                let v = it.next().ok_or("--peer requires a value")?;
-                peer_pairs.push(parse_peer_arg(&v)?);
-            }
-            "--insecure-peers" => {
-                insecure_peers = true;
-            }
+            "--peer" => peer_pairs.push(parse_peer_arg(
+                &it.next().ok_or("--peer requires a value")?,
+            )?),
+            "--insecure-peers" => insecure_peers = true,
             "--static-dir" => {
                 static_dir = Some(parse_static_dir(
                     it.next().ok_or("--static-dir requires a value")?,
                 )?);
             }
+            "--tls-cert" => {
+                tls_cert = Some(PathBuf::from(
+                    it.next().ok_or("--tls-cert requires a value")?,
+                ));
+            }
+            "--tls-key" => {
+                tls_key = Some(PathBuf::from(
+                    it.next().ok_or("--tls-key requires a value")?,
+                ));
+            }
+            "--self-signed" => self_signed = true,
             "-h" | "--help" => {
                 print_usage();
                 std::process::exit(0);
@@ -114,7 +126,38 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
         peer_pairs,
         insecure_peers,
         static_dir,
+        tls_cert,
+        tls_key,
+        self_signed,
     })
+}
+
+/// Resolve the three TLS-related flags into an
+/// `Option<RustlsConfig>`. Mutually exclusive: pass either
+/// `--tls-cert` + `--tls-key` together, or `--self-signed`,
+/// or neither (HTTP). Logs the SHA-256 fingerprint when
+/// generating a self-signed cert so the user can verify
+/// what their browser is asked to trust.
+async fn build_tls(
+    cert: Option<&std::path::Path>,
+    key: Option<&std::path::Path>,
+    self_signed: bool,
+) -> Result<mlpl_serve::server::TlsConfig, String> {
+    match (cert, key, self_signed) {
+        (None, None, false) => Ok(None),
+        (Some(c), Some(k), false) => Ok(Some(mlpl_serve::tls::from_pem_files(c, k).await?)),
+        (None, None, true) => {
+            let (config, fingerprint) = mlpl_serve::tls::self_signed_loopback().await?;
+            eprintln!("mlpl-serve self-signed cert SHA-256 fingerprint:\n  {fingerprint}");
+            Ok(Some(config))
+        }
+        (Some(_), None, _) | (None, Some(_), _) => {
+            Err("--tls-cert and --tls-key must be set together".into())
+        }
+        (Some(_), Some(_), true) => {
+            Err("--self-signed is exclusive with --tls-cert/--tls-key; pick one path".into())
+        }
+    }
 }
 
 fn parse_auth(value: &str) -> Result<AuthMode, String> {
@@ -133,11 +176,29 @@ fn parse_static_dir(value: String) -> Result<PathBuf, String> {
     Ok(path)
 }
 
+fn print_banner(args: &Args, peers: &mlpl_serve::peers::PeerRegistry, tls_set: bool) {
+    let scheme = if tls_set { "https" } else { "http" };
+    let peers_str = peers
+        .iter()
+        .map(|(d, p)| format!("{d}={}", p.url))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let web = match &args.static_dir {
+        Some(p) => format!(", web={scheme}://{}/sw-mlpl/ ({})", args.bind, p.display()),
+        None => String::new(),
+    };
+    eprintln!(
+        "mlpl-serve listening on {scheme}://{} (auth={:?}, peers=[{peers_str}]){web}",
+        args.bind, args.auth
+    );
+}
+
 fn print_usage() {
     eprintln!(
         "usage: mlpl-serve [--bind <host:port>] [--auth <required|disabled>]\n\
          \x20            [--peer <device>=<url>]... [--insecure-peers]\n\
          \x20            [--static-dir <path>]\n\
+         \x20            [--tls-cert <cert.pem> --tls-key <key.pem> | --self-signed]\n\
          \n\
          Defaults: --bind 127.0.0.1:6464  --auth required\n\
          Non-loopback binds (e.g. 0.0.0.0:...) require --auth required.\n\
@@ -146,16 +207,27 @@ fn print_usage() {
          \n\
          --static-dir <path> mounts a static-file tree at /sw-mlpl/ on\n\
          the same listener. The directory is expected to contain the\n\
-         output of `./scripts/build-pages.sh` (i.e. the `pages/`\n\
-         build with `--public-url /sw-mlpl/`). With this flag set,\n\
-         http://<bind>/sw-mlpl/ serves the web REPL on the same\n\
+         output of `./scripts/build-pages.sh`. With this flag set,\n\
+         <scheme>://<bind>/sw-mlpl/ serves the web REPL on the same\n\
          origin as the /v1 API -- no CORS plumbing required for the\n\
          WASM client to call back.\n\
+         \n\
+         TLS modes (mutually exclusive):\n\
+         \x20 --tls-cert <cert.pem> --tls-key <key.pem>\n\
+         \x20     Production-style PEM cert + key. The pair must\n\
+         \x20     be set together.\n\
+         \x20 --self-signed\n\
+         \x20     Generate an in-memory self-signed cert covering\n\
+         \x20     `localhost`, `127.0.0.1`, `::1`. Browser shows a\n\
+         \x20     warning the first time; click Advanced -> Proceed.\n\
+         \x20     The SHA-256 fingerprint is printed at startup so\n\
+         \x20     you can verify what you accepted.\n\
          \n\
          Examples:\n\
          \x20 --peer mlx=http://localhost:6465\n\
          \x20     routes device(\"mlx\") {{ ... }} blocks to a peer.\n\
-         \x20 --static-dir ./pages\n\
-         \x20     also serves the web UI at http://127.0.0.1:6464/sw-mlpl/."
+         \x20 --static-dir ./pages --self-signed\n\
+         \x20     serves the web UI at https://127.0.0.1:6464/sw-mlpl/\n\
+         \x20     -- compatible with browsers that enforce HTTPS-First."
     );
 }

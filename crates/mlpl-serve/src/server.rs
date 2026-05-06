@@ -230,22 +230,33 @@ pub fn build_app_with_peers(
 /// `peers::build_registry` in `main`. An empty
 /// registry means "no peer routing; device-scoped
 /// blocks fall back to in-process dispatch."
+/// Optional TLS configuration. `None` keeps the legacy
+/// HTTP path; `Some(config)` switches to
+/// `axum_server::bind_rustls` so the same listener
+/// terminates TLS for the /v1 API and the static UI.
+pub type TlsConfig = Option<axum_server::tls_rustls::RustlsConfig>;
+
 pub async fn run(
     addr: SocketAddr,
     auth_mode: AuthMode,
     peers: crate::peers::PeerRegistry,
     static_dir: Option<std::path::PathBuf>,
+    tls: TlsConfig,
 ) -> Result<(), ServerError> {
     if !addr.ip().is_loopback() && auth_mode == AuthMode::Disabled {
         return Err(ServerError::InsecureBind { addr });
     }
-    let listener = tokio::net::TcpListener::bind(addr)
-        .await
-        .map_err(ServerError::Bind)?;
-    axum::serve(
-        listener,
-        build_app_with_peers(auth_mode, peers, static_dir.as_deref()),
-    )
-    .await
-    .map_err(ServerError::Serve)
+    let app = build_app_with_peers(auth_mode, peers, static_dir.as_deref());
+    match tls {
+        Some(config) => axum_server::bind_rustls(addr, config)
+            .serve(app.into_make_service())
+            .await
+            .map_err(ServerError::Bind),
+        None => {
+            let listener = tokio::net::TcpListener::bind(addr)
+                .await
+                .map_err(ServerError::Bind)?;
+            axum::serve(listener, app).await.map_err(ServerError::Serve)
+        }
+    }
 }

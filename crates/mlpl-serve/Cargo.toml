@@ -28,6 +28,18 @@ tower = "0.4"
 # build alongside the /v1 API so the WASM client and
 # the API live on one origin (no CORS plumbing).
 tower-http = { version = "0.5", features = ["fs", "trace"] }
+# Saga 25 step B: HTTPS support so browsers with
+# HTTPS-First Mode (Chrome 147+, Edge, etc.) can reach
+# the local UI without disabling browser settings.
+# `axum-server` wraps `tokio-rustls`; `rcgen` builds an
+# in-memory self-signed cert for `--self-signed`.
+axum-server = { version = "0.7", features = ["tls-rustls"] }
+rcgen = "0.13"
+sha2 = "0.10"
+# rustls 0.23 requires an explicit crypto provider; pick
+# `ring` (the historical default; aws-lc-rs is the
+# alternative and has different licensing).
+rustls = { version = "0.23", default-features = false, features = ["ring", "std"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 uuid = { version = "1", features = ["v4", "serde"] }
