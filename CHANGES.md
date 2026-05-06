@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-06
 
+- feat(mlpl-serve): --static-dir mounts the web UI on the API origin
+- docs(changes): refresh CHANGES.md to head
 - chore(git): add .gitattributes pinning all text files to LF
 
 ## 2026-05-05
