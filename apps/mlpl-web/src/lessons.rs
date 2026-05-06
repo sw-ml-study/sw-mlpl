@@ -9,6 +9,9 @@ pub struct Lesson {
 }
 
 pub const LESSONS: &[Lesson] = &[
+    crate::lessons_advanced::WHAT_IS_ML,
+    crate::lessons_advanced::HISTORY_OF_ML,
+    crate::lessons_advanced::WHY_BACKPROP,
     Lesson {
         title: "Hello Numbers",
         intro: "MLPL starts with simple arithmetic. Numbers are scalars. The four basic operators (+, -, *, /) work as you expect, and parentheses control order of operations.",

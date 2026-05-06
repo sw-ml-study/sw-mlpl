@@ -214,3 +214,65 @@ pub const DECODER_BLOCK: Lesson = Lesson {
     ],
     try_it: "Drop the cross-attention sub-block (just leave self-attn + ffn) and you have a decoder-only block in the GPT style. Or stack the encoder demo's encoder before this decoder, feeding `apply(encoder, X_src)` as the new X_src -- that's the encoder-decoder pipeline, which Saga 24 (deferred) will package as a built-in.",
 };
+
+// --- Orientation triplet (course-outline Phase 1 gap fill).
+// These are pure-prose lessons that frame the rest of the
+// tutorial; they live in lessons_advanced.rs to keep
+// lessons.rs under its file-LOC budget but are referenced
+// at the TOP of `LESSONS` so they appear first in the UI.
+
+/// "What is ML?" -- the destination-setting intro the
+/// course outline calls out as missing.
+pub const WHAT_IS_ML: Lesson = Lesson {
+    title: "What is ML, and why are we here?",
+    intro: "Machine learning is what you do when you cannot write the rules but you can show examples. Instead of `if x > 0.5 then ...`, you collect labeled data, define a parameterized function (a model), pick a loss that scores its predictions against the labels, and use gradient descent to nudge the parameters toward lower loss. Every classifier, regressor, MLP, attention block, and language model in this tutorial is a variation on that recipe -- linear regression is the smallest example, GPT is the largest. MLPL exists to make the variation visible: the inner loop of any model is a few lines of array code, not a wall of framework tensors. Read each lesson's `examples` block as a small worked example of the recipe; the `try_it` line at the end is a knob to twist.",
+    examples: &[
+        "X = [[0,0],[0,1],[1,0],[1,1]]",
+        "y = [0, 0, 0, 1]",
+        "w = zeros([2])",
+        "b = 0",
+        "z = matmul(X, reshape(w, [2, 1])) + b",
+        "pred = sigmoid(z)",
+        "loss = mean((pred - reshape(y, [4, 1])) * (pred - reshape(y, [4, 1])))",
+        "loss",
+    ],
+    try_it: "The next lessons walk the recipe end-to-end on increasingly capable models. \"Hello Numbers\" starts with the smallest possible MLPL expressions; \"Logistic Regression\" trains the toy classifier this lesson sketched; \"Tiny LM\" trains a 1-layer transformer.",
+};
+
+/// "A short history of ML" -- Perceptron through
+/// Transformers, with MLPL one-liners for the eras that
+/// MLPL ships primitives for.
+pub const HISTORY_OF_ML: Lesson = Lesson {
+    title: "A short history of ML",
+    intro: "Each ML era introduced one architectural idea that solved a problem the prior generation could not. The **Perceptron** (Rosenblatt 1958) -- a single linear layer plus a threshold -- proved that a machine could learn from labeled examples; AI winter set in when Minsky and Papert showed it could not solve XOR. The **MLP** (multi-layer perceptron) crossed that gap by adding a hidden layer + a non-linear activation, but training was unwieldy until **backpropagation** was popularized (Rumelhart, Hinton, Williams 1986). **CNNs** (LeCun 1989) used weight-sharing and convolutions to handle images; **RNNs** and **LSTMs** (1997) handled sequences. The **Transformer** (Vaswani et al. 2017) replaced recurrence with attention, unlocking the LM era we are in now. MLPL ships the Perceptron, MLP, and Transformer pieces directly; CNN and RNN are deferred so the historical arc is teachable but not yet runnable in MLPL.",
+    examples: &[
+        "perceptron = chain(linear(2, 1, 0), tanh_layer())",
+        "shape(apply(perceptron, [[0,0],[0,1],[1,0],[1,1]]))",
+        "mlp = chain(linear(2, 4, 1), tanh_layer(), linear(4, 1, 2))",
+        "shape(apply(mlp, [[0,0],[0,1],[1,0],[1,1]]))",
+        "attn_layer = attention(8, 1, 3)",
+        "shape(apply(attn_layer, randn(0, [4, 8])))",
+    ],
+    try_it: "The progression from perceptron to MLP to transformer is two architectural leaps: adding a hidden layer (Perceptron -> MLP solves XOR) and replacing matrix mixing across positions with attention (MLP -> Transformer solves long-range dependencies). Try classifying the XOR data with `perceptron` (it cannot) and then with `mlp` (it can) by training each through `train` blocks.",
+};
+
+/// "Why backprop?" -- the historical complement to
+/// "Automatic Differentiation". Frames `grad` as the
+/// generalization of hand-derived chain-rule formulas.
+pub const WHY_BACKPROP: Lesson = Lesson {
+    title: "Why backprop?",
+    intro: "Backpropagation is just the chain rule applied to a computation graph. Before it was popularized in 1986, the gradient of a model's loss was a per-architecture derivation: hand-derive `dW = X^T (pred - y) / N` for linear regression, a different formula for logistic regression, and a third for a two-layer MLP. Backprop generalizes that work: build the forward graph; the backward walk produces every gradient automatically. The \"Logistic Regression\" and \"Tiny MLP\" lessons in this tutorial show the manual chain-rule version (`dZ2 = pred - y`, `dZ1 = (dZ2 W2^T) * (1 - H * H)`); the \"Automatic Differentiation\" lesson shows the `grad(loss, wrt)` version that automates it. Both compute the same gradient. The win is not faster math -- it is faster *iteration*: changing your loss or your model no longer means redoing pages of derivative calculus.",
+    examples: &[
+        "X = [[1.0], [2.0], [3.0]]",
+        "y = [2.0, 4.0, 6.0]",
+        "W = param[1, 1]",
+        "W = randn(0, [1, 1])",
+        "pred = matmul(X, W)",
+        "manual_dW = matmul(transpose(X), reshape(pred - reshape(y, [3, 1]), [3, 1])) / 3.0",
+        "loss = mean((pred - reshape(y, [3, 1])) * (pred - reshape(y, [3, 1])))",
+        "auto_dW = grad(loss, \"W\")",
+        "manual_dW",
+        "auto_dW",
+    ],
+    try_it: "Confirm `manual_dW` and `auto_dW` are the same up to floating-point noise. Then change the loss expression (e.g. add a regularizer `+ 0.01 * reduce_add(W * W)`) and watch how `grad` keeps working without any hand-derivation -- which is the entire point of backprop.",
+};
