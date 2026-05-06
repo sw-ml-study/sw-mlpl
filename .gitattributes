@@ -1,0 +1,46 @@
+# Line-ending discipline.
+#
+# Windows clones (where `core.autocrlf` may default to `true`)
+# would otherwise convert text files to CRLF, which the MLPL
+# parser and the Rust toolchain both reject as unexpected
+# `\r` characters mid-source. The rules below pin every text
+# format we ship to LF regardless of the contributor's OS,
+# and explicitly mark known binary formats so Git never tries
+# to convert them either.
+
+* text=auto eol=lf
+
+# Source code.
+*.rs text eol=lf
+*.toml text eol=lf
+*.mlpl text eol=lf
+
+# Web frontend.
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.svg text eol=lf
+
+# Docs / config / scripts.
+*.md text eol=lf
+*.txt text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.sh text eol=lf
+*.in text eol=lf
+*.lock text eol=lf
+
+# Hidden config files (no extension).
+.gitattributes text eol=lf
+.gitignore text eol=lf
+.editorconfig text eol=lf
+
+# Binary formats -- never touch.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.wasm binary
+*.pdf binary
