@@ -303,6 +303,18 @@ ends in a `[batch, num_classes]` logit matrix; training uses
 `cross_entropy(logits, y)`. See "Linear Softmax Classifier"
 demo.
 
+## CLIP (Contrastive Language-Image Pre-training)
+
+A dual-encoder model trained on (image, caption) pairs. One
+encoder embeds images, another embeds text; both project
+into a shared vector space where matched pairs have high
+cosine similarity. The contrastive loss pushes matched
+pairs together and unmatched pairs apart. Enables
+zero-shot image classification: compare a query image to a
+list of text prompts. Foundation for many vision-language
+systems. **Deferred** in MLPL: needs image inputs + the
+dual-encoder training pattern.
+
 ## Clustering
 
 Grouping points without labels. K-means is the classic
@@ -449,11 +461,36 @@ The most common silent killer of "great" benchmark numbers.
 Defense: cross-check the split; never look at test until
 the final report.
 
+## Data Parallel Training
+
+The simplest distributed-training scheme. Replicate the
+model on N devices; each device processes one Nth of the
+batch in parallel; gradients are all-reduced across
+devices before applying the optimizer step. Scales batch
+size linearly with device count. Distinct from tensor
+parallel (split a single layer's weights across devices)
+and pipeline parallel (split layers across devices).
+**Deferred** in MLPL: the `device("mlx") { ... }` peer
+dispatch is the building block, but no automatic
+gradient all-reduce.
+
 ## Decision boundary
 
 The surface in input space that separates one predicted class
 from another. `boundary_2d(predictions, grid_shape, points,
 labels)` renders it for a 2-D classifier.
+
+## Decision Tree
+
+A tree of yes/no splits on input features that classifies
+or regresses by traversing from root to leaf. Each
+internal node tests one feature against a threshold; the
+leaf carries the prediction. Trained greedily by picking
+the split that maximizes information gain (or minimizes
+Gini impurity). Easy to interpret, prone to overfitting --
+the standard fix is ensembling, e.g. Random Forest.
+**Deferred** in MLPL: needs a tree data structure and a
+greedy split fitter.
 
 ## Decoder / encoder
 
@@ -1281,6 +1318,17 @@ Training with pairwise rankings ("output A is preferred to
 output B") instead of absolute labels. The DPO and RLHF
 families. Out of MLPL's current scope.
 
+## Pipeline Parallel Training
+
+Split the layers of a deep model across devices: device 0
+holds layers 1-3, device 1 holds 4-6, etc. Inputs flow
+through the device chain (forward), then gradients flow
+back (backward). To keep all devices busy, micro-batches
+are pipelined so each device works on a different
+micro-batch at any moment. Distinct from data parallel
+(replicate, split batch) and tensor parallel (split a
+layer's weights). **Deferred** in MLPL.
+
 ## Pretraining / fine-tuning
 
 Pretraining: train a base model on a large generic corpus.
@@ -1344,6 +1392,17 @@ The lever everything else (few-shot, chain of thought,
 RAG context) attaches to. No dedicated MLPL builtins; just
 strings passed to `llm_call(url, prompt, model)`.
 
+## QLoRA
+
+Quantization-aware LoRA fine-tuning: load the base model
+in int4 (or other low-precision format) with weights
+frozen, and train only the LoRA adapter weights in higher
+precision (typically bfloat16). Lets fine-tuning fit on
+far smaller GPUs than the base model would otherwise
+allow. Pairs naturally with the chat-template / SFT
+workflow. **Deferred** in MLPL: the LoRA path exists
+today (Saga 17) but `quantize` does not.
+
 ## Quantization
 
 Storing weights in low-precision integer formats (int8, int4)
@@ -1401,6 +1460,16 @@ along `axis`), starting from the op's identity. Curated set:
 `reduce_add(x[, axis])` is sum reduction; `reduce_mul` is
 product reduction. Equivalent to `reduce(:add, x[, axis])`
 and `reduce(:mul, x[, axis])`; kept as direct shorthands.
+
+## Random Forest
+
+An ensemble of Decision Trees, each trained on a bootstrap
+sample of the data with a random feature subset considered
+at every split. Predictions are averaged (regression) or
+voted (classification). Reduces variance vs a single deep
+tree, harder to overfit, still interpretable feature-by-
+feature. Distinct from Boosting (sequential trees on
+residuals, e.g. XGBoost). **Deferred** in MLPL.
 
 ## Regularization
 
@@ -1461,6 +1530,16 @@ When an RL agent finds a strategy that maximizes the reward
 signal without solving the intended task -- exploiting bugs
 in the reward function or environment. Goodhart's Law applied
 to RL. Out of MLPL's current scope.
+
+## ResNet (Residual Network)
+
+A deep CNN (or transformer) where every block computes
+`y = x + f(x)` instead of `y = f(x)`, so the gradient has
+a clean path through the identity bypass. Solved the
+"deeper means harder to train" problem and unlocked
+50-layer-plus networks. The `residual(...)` builder in
+MLPL's model DSL is exactly this pattern; the Encoder
+Block / Decoder Block lessons use it on every sub-block.
 
 ## RLHF (Reinforcement Learning from Human Feedback)
 
@@ -1743,6 +1822,17 @@ MLP, Moons MLP, Softmax Classifier) is supervised. Cheap
 and well-understood, but bounded by the supply of
 labeled data.
 
+## SVM (Support Vector Machine)
+
+A binary classifier that finds the maximum-margin
+hyperplane separating two classes. The kernel trick lets
+it implicitly use higher-dimensional spaces (RBF,
+polynomial) so non-linearly-separable data becomes
+separable in a transformed space. The dominant pre-deep-
+learning classifier on small / tabular tasks; mostly
+historical now. **Deferred** in MLPL: needs a quadratic-
+program solver (or SMO algorithm).
+
 ## System prompt
 
 The leading text in a chat-formatted prompt that sets the
@@ -1771,6 +1861,17 @@ high temperature (~2.0) flattens the distribution.
 
 An N-dimensional array. MLPL's `DenseArray` is the storage;
 `Shape` and `LabeledShape` carry the structural type.
+
+## Tensor Parallel Training
+
+Split a single layer's weights across multiple devices --
+e.g. each device holds a column slab of a large linear
+layer's weight matrix; activations are sharded along the
+appropriate axis. Every forward step requires all-reduce
+or all-gather across devices. Used for layers too big to
+fit on one GPU. Distinct from data parallel (replicate
+the whole model) and pipeline parallel (split layers
+across devices). **Deferred** in MLPL.
 
 ## Test set
 
@@ -1864,6 +1965,18 @@ when reducing high-dimensional points to 2-D. MLPL:
 `tsne(X, perplexity, iters, seed)`. See "Embedding
 exploration" lesson.
 
+## U-Net
+
+A convolutional encoder-decoder with skip connections at
+every resolution: the contracting path downsamples, the
+expanding path upsamples, and same-resolution feature maps
+from the encoder are concatenated into the decoder. The
+"U" comes from drawing the architecture diagram in the
+shape of the letter. Originally for biomedical image
+segmentation; now the standard backbone for diffusion
+models. **Deferred** in MLPL: needs `conv2d` plus
+upsampling primitives.
+
 ## Uncertainty Estimation
 
 Asking "how confident is the model in this prediction" --
@@ -1933,6 +2046,18 @@ each output row is a weighted average of the V rows. In
 MLPL: `V = matmul(X, Wv)` where `Wv` is `[d_model, d_model]`
 for single-head or `[d_model, d_k]` per head. Paired with
 Query (Q) and Key (K).
+
+## ViT (Vision Transformer)
+
+Apply a transformer directly to images by splitting the
+image into fixed-size patches (e.g. 16x16 pixels),
+flattening each patch into a vector, and treating the
+sequence of patch vectors as tokens (with positional
+embeddings). Showed that the inductive biases of CNNs are
+not strictly required at scale -- pure attention works
+on images too. Foundation for modern vision-language
+models. **Deferred** in MLPL: needs image inputs + patch-
+embed plumbing.
 
 ## VLM (Vision-Language Models)
 
