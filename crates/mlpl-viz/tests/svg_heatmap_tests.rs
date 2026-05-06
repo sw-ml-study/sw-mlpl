@@ -13,19 +13,23 @@ fn heatmap_returns_svg() {
     assert!(svg.ends_with("</svg>"));
 }
 
+/// 32 stacked rects approximate the gradient on the legend
+/// colorbar; tests count `<rect` elements as `1 background +
+/// rows*cols cells + LEGEND_STEPS legend strips`.
+const LEGEND_STEPS: usize = 32;
+
 #[test]
 fn heatmap_emits_one_rect_per_cell_plus_background() {
     let m = matrix(3, 4, (0..12).map(|i| i as f64).collect());
     let svg = render_heatmap(&m).unwrap();
-    // 1 background rect + 12 cells
-    assert_eq!(svg.matches("<rect").count(), 13);
+    assert_eq!(svg.matches("<rect").count(), 1 + 12 + LEGEND_STEPS);
 }
 
 #[test]
 fn heatmap_constant_values_does_not_panic() {
     let m = matrix(2, 2, vec![5.0, 5.0, 5.0, 5.0]);
     let svg = render_heatmap(&m).unwrap();
-    assert_eq!(svg.matches("<rect").count(), 5);
+    assert_eq!(svg.matches("<rect").count(), 1 + 4 + LEGEND_STEPS);
     // No NaN in fill values
     assert!(!svg.contains("NaN"));
 }
@@ -34,7 +38,17 @@ fn heatmap_constant_values_does_not_panic() {
 fn heatmap_single_cell() {
     let m = matrix(1, 1, vec![42.0]);
     let svg = render_heatmap(&m).unwrap();
-    assert_eq!(svg.matches("<rect").count(), 2);
+    assert_eq!(svg.matches("<rect").count(), 1 + 1 + LEGEND_STEPS);
+}
+
+#[test]
+fn heatmap_legend_renders_value_labels() {
+    let m = matrix(2, 2, vec![0.0, 1.0, 2.0, 3.0]);
+    let svg = render_heatmap(&m).unwrap();
+    // Three labels: hi (3.00), mid (1.50), lo (0.00).
+    assert!(svg.contains(">3.00<"), "missing hi label in {svg}");
+    assert!(svg.contains(">1.50<"), "missing mid label in {svg}");
+    assert!(svg.contains(">0.00<"), "missing lo label in {svg}");
 }
 
 #[test]
