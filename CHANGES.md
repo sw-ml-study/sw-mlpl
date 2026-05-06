@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-06
 
+- docs(glossary): +11 entries from the diagram set's coverage gap
+- docs(changes): refresh CHANGES.md to head
 - feat(web): paragraph hover tooltips on the from-scratch attention lessons
 - docs(changes): refresh CHANGES.md to head
 - feat(web): hover-tooltip "what / why" on tutorial example lines
