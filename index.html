@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-8d901575b39aab8d.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-8d901575b39aab8d_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-a0a5f7ad6751bd6d.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-a0a5f7ad6751bd6d_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -292,6 +292,11 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         .prompt {
             color: var(--green);
             font-weight: 700;
+        }
+        .line-comment {
+            color: var(--subtext0);
+            font-style: italic;
+            opacity: 0.85;
         }
         .output-line {
             color: var(--subtext1);
@@ -690,7 +695,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-8d901575b39aab8d.js" crossorigin="anonymous" integrity="sha384-n/U5nhdX16vPdrgjvx2G3z5rxTriww+v825FvXXYxNMqzvm64MnHVjddUR8wV5gP"><link rel="preload" href="/sw-mlpl/mlpl-web-8d901575b39aab8d_bg.wasm" crossorigin="anonymous" integrity="sha384-N6t59jAGMZr765rH7KhOtEfP4kPDGLL3h8LfOvJS9EYwxpSUUQWYLB7b2qCEnKOX" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-a0a5f7ad6751bd6d.js" crossorigin="anonymous" integrity="sha384-n/U5nhdX16vPdrgjvx2G3z5rxTriww+v825FvXXYxNMqzvm64MnHVjddUR8wV5gP"><link rel="preload" href="/sw-mlpl/mlpl-web-a0a5f7ad6751bd6d_bg.wasm" crossorigin="anonymous" integrity="sha384-s/548+EgFpJLw89PBpolcUxdAHwkilFFrq0pht/HrI02KC0zEEK3MhMB+lme3aN2" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
