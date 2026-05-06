@@ -9,6 +9,7 @@
 
 mod components;
 mod demos;
+mod diagrams_view;
 mod glossary_view;
 mod handlers;
 mod help;
