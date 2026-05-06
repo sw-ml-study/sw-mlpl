@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-06
+
+- chore(git): add .gitattributes pinning all text files to LF
+
 ## 2026-05-05
 
+- docs(changes): refresh CHANGES.md to head
 - fix(eval, web): unbreak Moons MLP -- grad-friendly loss + tanh_fn alias
 - docs(changes): refresh CHANGES.md to head
 - feat(viz): heatmap legend (vertical colorbar + min/mid/max labels)
