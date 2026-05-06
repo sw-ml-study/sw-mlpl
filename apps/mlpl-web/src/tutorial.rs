@@ -148,7 +148,7 @@ fn render_lesson(props: &TutorialPanelProps) -> Html {
                 <span class="tutorial-progress">{ format!("Lesson {} of {}", props.lesson_idx + 1, total) }</span>
                 <h2>{ lesson.title }</h2>
             </div>
-            <p class="tutorial-intro">{ lesson.intro }</p>
+            <div class="tutorial-intro">{ crate::intro_md::render(lesson.intro) }</div>
             <div class="lesson-examples">{ for examples_html }</div>
             <p class="tutorial-tryit"><strong>{"Try it: "}</strong>{ lesson.try_it }</p>
         </>
