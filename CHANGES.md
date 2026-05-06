@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-06
 
+- feat(web): hover-tooltip "what / why" on tutorial example lines
+- docs(changes): refresh CHANGES.md to head
 - feat(web): markdown subset for lesson intros (## / - / --- / ** / `)
 - docs(changes): refresh CHANGES.md to head
 - fix(web): strip ** markdown markers from training-paradigms lesson
