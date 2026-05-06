@@ -188,7 +188,7 @@ fn percent_encode(s: &str) -> String {
 /// leading `#`, trimmed). MLPL's parser already drops `#`
 /// comments; this is purely for the UI to render the
 /// commentary as an annotation alongside the code.
-fn split_inline_comment(line: &str) -> (&str, Option<&str>) {
+pub(crate) fn split_inline_comment(line: &str) -> (&str, Option<&str>) {
     let mut in_str = false;
     let bytes = line.as_bytes();
     for (i, &b) in bytes.iter().enumerate() {

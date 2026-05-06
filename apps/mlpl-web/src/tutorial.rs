@@ -132,9 +132,17 @@ fn render_lesson(props: &TutorialPanelProps) -> Html {
             let line_str = line_str.clone();
             Callback::from(move |_| on_run.emit(line_str.clone()))
         };
+        // Optional ` # explanation` suffix becomes a hover
+        // tooltip; the visible code is the prefix only. The
+        // full line still goes to eval (the lexer drops `#`
+        // to end of line, so the comment is harmless).
+        let (code, tip) = crate::split_inline_comment(line);
+        let title = tip
+            .map(|t| format!("{t}\n\nClick to run."))
+            .unwrap_or_else(|| "Click to run".to_string());
         html! {
-            <button class="lesson-example" onclick={on_click} title="Click to run">
-                <span class="example-prompt">{"mlpl> "}</span>{ line }
+            <button class="lesson-example" onclick={on_click} title={title}>
+                <span class="example-prompt">{"mlpl> "}</span>{ code }
             </button>
         }
     });
