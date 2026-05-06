@@ -32,6 +32,17 @@ fn doc() -> &'static GlossaryDoc {
     DOC.get_or_init(parse_glossary)
 }
 
+/// Look up a glossary entry by exact term match (case-
+/// insensitive). Used by the Paths walker to render an
+/// inline glossary excerpt for `Stop::Glossary` stops.
+pub fn find_by_term(term: &str) -> Option<&'static GlossaryEntry> {
+    let q = term.trim().to_ascii_lowercase();
+    doc()
+        .entries
+        .iter()
+        .find(|e| e.term.to_ascii_lowercase() == q)
+}
+
 fn parse_glossary() -> GlossaryDoc {
     let mut intro = String::new();
     let mut entries = Vec::new();

@@ -16,6 +16,8 @@ mod help;
 mod intro_md;
 mod lessons;
 mod lessons_advanced;
+mod paths;
+mod paths_view;
 #[cfg(test)]
 mod readme_counts;
 mod state;
@@ -23,8 +25,8 @@ mod summary;
 mod tutorial;
 
 use components::{
-    DocDialog, Footer, GithubCorner, Header, InputRow, ModeBar, TutorialPanel, TutorialPanelProps,
-    Welcome,
+    DocDialog, Footer, GithubCorner, Header, HeaderMode, InputRow, ModeBar, TutorialPanel,
+    TutorialPanelProps, Welcome,
 };
 use handlers::{
     EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit, toggle_bool,
@@ -50,6 +52,10 @@ fn app() -> Html {
     let cmd_index = use_state(|| None::<usize>);
     let dialog_open = use_state(|| false);
     let lesson_idx = use_state(|| None::<usize>);
+    // Paths-mode state: outer None = not in paths mode; inner
+    // (None, _) = picker; inner (Some(p), s) = walking path p
+    // at stop s. See paths_view::PathsView.
+    let path_state = use_state(|| None::<(Option<usize>, usize)>);
     let in_tutorial = lesson_idx.is_some();
     let active_session = if in_tutorial {
         tutorial_session
@@ -87,6 +93,7 @@ fn app() -> Html {
         history: active_history,
         dialog_open,
         lesson_idx,
+        path_state,
     })
 }
 
@@ -100,6 +107,7 @@ struct RenderArgs {
     history: UseStateHandle<Vec<HistoryEntry>>,
     dialog_open: UseStateHandle<bool>,
     lesson_idx: UseStateHandle<Option<usize>>,
+    path_state: UseStateHandle<Option<(Option<usize>, usize)>>,
 }
 
 fn render(a: RenderArgs) -> Html {
@@ -113,30 +121,44 @@ fn render(a: RenderArgs) -> Html {
     let open_dialog = toggle_bool(a.dialog_open.clone(), true);
     let close_dialog = toggle_bool(a.dialog_open.clone(), false);
     let cur_lesson = *a.lesson_idx;
+    let cur_path = *a.path_state;
     let tutorial_active = cur_lesson.is_some();
-    let on_select_repl = {
-        let lesson_idx = a.lesson_idx.clone();
-        Callback::from(move |_| lesson_idx.set(None))
+    let paths_active = cur_path.is_some();
+    let header_mode = if paths_active {
+        HeaderMode::Paths
+    } else if tutorial_active {
+        HeaderMode::Tutorial
+    } else {
+        HeaderMode::Repl
     };
-    let on_select_tutorial = {
-        let lesson_idx = a.lesson_idx.clone();
-        Callback::from(move |_| {
-            if lesson_idx.is_none() {
-                lesson_idx.set(Some(0));
-            }
-        })
-    };
+    let cb = mode_callbacks(
+        a.lesson_idx.clone(),
+        a.path_state.clone(),
+        a.on_demo.clone(),
+    );
     let on_run_example = run_example(a.on_submit.clone(), a.input_value.clone());
 
     html! {
         <>
             <GithubCorner url={REPO_URL} />
-            <Header on_help={open_dialog} on_select_repl={on_select_repl} on_select_tutorial={on_select_tutorial} {tutorial_active} />
+            <Header
+                on_help={open_dialog}
+                on_select_repl={cb.repl}
+                on_select_tutorial={cb.tutorial}
+                on_select_paths={cb.paths}
+                mode={header_mode}
+            />
             <ModeBar on_clear={a.on_clear} on_demo={a.on_demo} {tutorial_active} />
             <main>
                 { render_tutorial(cur_lesson, a.lesson_idx.clone(), on_run_example) }
+                <paths_view::PathsView
+                    state={cur_path}
+                    on_change={cb.path_change}
+                    on_open_lesson={cb.path_open_lesson}
+                    on_run_demo={cb.path_run_demo}
+                />
                 <div id="output" class="output">
-                    { if tutorial_active { html!{} } else { html!{ <Welcome /> } } }
+                    { if tutorial_active || paths_active { html!{} } else { html!{ <Welcome /> } } }
                     { for a.history.iter().map(render_entry) }
                 </div>
                 <InputRow value={(*a.input_value).clone()} on_input={on_input} on_keydown={on_keydown} in_tutorial={tutorial_active} />
@@ -144,6 +166,83 @@ fn render(a: RenderArgs) -> Html {
             <Footer url={REPO_URL} />
             <DocDialog open={*a.dialog_open} on_close={close_dialog} />
         </>
+    }
+}
+
+/// Bundle of mode-switch + paths-callback handlers built
+/// from the shared lesson/path state. Extracted so the
+/// `render` body stays under the function-LOC budget; the
+/// callback closures are otherwise just plumbing.
+struct ModeCallbacks {
+    repl: Callback<MouseEvent>,
+    tutorial: Callback<MouseEvent>,
+    paths: Callback<MouseEvent>,
+    path_change: Callback<Option<(Option<usize>, usize)>>,
+    path_open_lesson: Callback<usize>,
+    path_run_demo: Callback<String>,
+}
+
+fn mode_callbacks(
+    lesson_idx: UseStateHandle<Option<usize>>,
+    path_state: UseStateHandle<Option<(Option<usize>, usize)>>,
+    on_demo: Callback<usize>,
+) -> ModeCallbacks {
+    let repl = {
+        let l = lesson_idx.clone();
+        let p = path_state.clone();
+        Callback::from(move |_| {
+            l.set(None);
+            p.set(None);
+        })
+    };
+    let tutorial = {
+        let l = lesson_idx.clone();
+        let p = path_state.clone();
+        Callback::from(move |_| {
+            p.set(None);
+            if l.is_none() {
+                l.set(Some(0));
+            }
+        })
+    };
+    let paths = {
+        let l = lesson_idx.clone();
+        let p = path_state.clone();
+        Callback::from(move |_| {
+            l.set(None);
+            if p.is_none() {
+                p.set(Some((None, 0)));
+            }
+        })
+    };
+    let path_change = {
+        let p = path_state.clone();
+        Callback::from(move |next| p.set(next))
+    };
+    let path_open_lesson = {
+        let l = lesson_idx.clone();
+        let p = path_state.clone();
+        Callback::from(move |i: usize| {
+            p.set(None);
+            l.set(Some(i));
+        })
+    };
+    let path_run_demo = {
+        let p = path_state;
+        Callback::from(move |name: String| {
+            if let Some(idx) = demos::DEMOS.iter().position(|d| d.name == name) {
+                p.set(None);
+                on_demo.emit(idx);
+            }
+        })
+    };
+    ModeCallbacks {
+        repl,
+        tutorial,
+        paths,
+        path_change,
+        path_open_lesson,
+        path_run_demo,
     }
 }
 
