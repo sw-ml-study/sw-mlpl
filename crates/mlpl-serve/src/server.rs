@@ -182,25 +182,42 @@ impl PeerDispatcher for RemoteMlxDispatcher {
 /// `build_app_with_peers` for tests that need to
 /// register peers up-front.
 pub fn build_app(auth_mode: AuthMode) -> Router {
-    build_app_with_peers(auth_mode, crate::peers::empty_registry())
+    build_app_with_peers(auth_mode, crate::peers::empty_registry(), None)
 }
 
-/// Saga R1 step 003: build the router with an
-/// explicit peer registry. Used by `run` and by the
-/// peer-routing integration test harness.
-pub fn build_app_with_peers(auth_mode: AuthMode, peers: crate::peers::PeerRegistry) -> Router {
+/// Saga R1 step 003 + Saga 25 step A: build the
+/// router with an explicit peer registry and an
+/// optional static-asset directory. Used by `run` and
+/// by integration tests; `static_dir = None` keeps
+/// the legacy API-only behavior.
+pub fn build_app_with_peers(
+    auth_mode: AuthMode,
+    peers: crate::peers::PeerRegistry,
+    static_dir: Option<&std::path::Path>,
+) -> Router {
     let state = AppState {
         sessions: new_map(),
         peers,
         peer_sessions: PeerSessionMap::default(),
         auth_mode,
     };
-    Router::new()
+    let mut router = Router::new()
         .route("/v1/health", get(health_handler))
         .route("/v1/sessions", post(create_session_handler))
         .route("/v1/sessions/:id/eval", post(eval_handler))
         .route("/v1/sessions/:id/inspect", get(inspect_handler))
-        .with_state(state)
+        .with_state(state);
+    if let Some(dir) = static_dir {
+        // The web build sets `--public-url /sw-mlpl/`, so
+        // every asset reference in `pages/index.html` is
+        // already prefixed with `/sw-mlpl/`. Mount the
+        // ServeDir on that exact prefix so the same
+        // committed `pages/` directory works locally and
+        // on GitHub Pages without rebuilding.
+        let serve = tower_http::services::ServeDir::new(dir);
+        router = router.nest_service("/sw-mlpl", serve);
+    }
+    router
 }
 
 /// Bind the listener at `addr`, refuse insecure
@@ -217,6 +234,7 @@ pub async fn run(
     addr: SocketAddr,
     auth_mode: AuthMode,
     peers: crate::peers::PeerRegistry,
+    static_dir: Option<std::path::PathBuf>,
 ) -> Result<(), ServerError> {
     if !addr.ip().is_loopback() && auth_mode == AuthMode::Disabled {
         return Err(ServerError::InsecureBind { addr });
@@ -224,7 +242,10 @@ pub async fn run(
     let listener = tokio::net::TcpListener::bind(addr)
         .await
         .map_err(ServerError::Bind)?;
-    axum::serve(listener, build_app_with_peers(auth_mode, peers))
-        .await
-        .map_err(ServerError::Serve)
+    axum::serve(
+        listener,
+        build_app_with_peers(auth_mode, peers, static_dir.as_deref()),
+    )
+    .await
+    .map_err(ServerError::Serve)
 }
