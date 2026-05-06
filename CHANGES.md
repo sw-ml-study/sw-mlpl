@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-06
 
+- fix(web): strip ** markdown markers from training-paradigms lesson
+- docs(changes): refresh CHANGES.md to head
 - feat(web, glossary): "How models learn" training-paradigms lesson
 - docs(changes): refresh CHANGES.md to head
 - feat(mlpl-serve): TLS support (--tls-cert/--tls-key, --self-signed)
