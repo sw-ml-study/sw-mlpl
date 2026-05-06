@@ -1536,6 +1536,29 @@ default; `causal_attention(...)` adds the lower-triangular
 mask used in language models. The "Attention Pattern" demo's
 second pass renders the diagonal pattern from `Q @ Q^T`.
 
+## Self-play
+
+A training regime where an agent plays against itself,
+generating its own training signal -- AlphaZero / chess
+engines / self-improving game players. Distinct from
+human-supervised learning because no fixed labels exist;
+the only ground truth is "did this strategy beat the other
+copy of yourself?". Modern LLM post-training also borrows
+the pattern (self-rewarding models, debate, constitutional
+AI). **Deferred** in MLPL: requires environment + reward
++ policy-update primitives that do not ship today.
+
+## Self-supervised learning
+
+Training on (input, derived-label) pairs where the label
+is computed from the input itself rather than supplied by
+a human. Next-token prediction is the canonical example:
+the label for token t is just token t+1. MLPL: the
+"Tiny LM" demo's `shift_pairs_x(ids, block)` /
+`shift_pairs_y(ids, block)` pairing is a self-supervised
+setup -- no human labels touched the model. Most of modern
+LLM pretraining is self-supervised.
+
 ## scan (deferred higher-order)
 
 `scan(:op, x)` -- the cumulative version of `reduce`. Returns
@@ -1709,6 +1732,17 @@ math primitives (`tanh_fn`, `sigmoid`) in that layers can
 participate in `apply(model, X)` and Saga 23's structural-
 tail tagging.
 
+## Supervised learning
+
+The classical paradigm: training on (input, label) pairs
+where a human (or curation pipeline) supplied the labels.
+The model minimizes a per-example loss against the label
+-- cross_entropy for classification, MSE for regression.
+MLPL: every classifier demo (Logistic Regression, Tiny
+MLP, Moons MLP, Softmax Classifier) is supervised. Cheap
+and well-understood, but bounded by the supply of
+labeled data.
+
 ## System prompt
 
 The leading text in a chat-formatted prompt that sets the
@@ -1853,6 +1887,17 @@ to arbitrary precision, given enough hidden units. Existence
 result, not a learnability claim. Justifies why neural nets
 are not architecturally limited; says nothing about whether
 gradient descent will find the right weights.
+
+## Unsupervised learning
+
+Training without labels: the model discovers structure in
+the data itself. Clustering, dimensionality reduction,
+density estimation. MLPL: the K-Means demo, the PCA demo,
+and t-SNE (`tsne(X, perp, iters, seed)`) are unsupervised
+-- they group / project points using only geometry.
+Self-supervised learning is a closely-related modern
+variant where labels are *derived* from the input rather
+than absent.
 
 ## VAE (Variational Autoencoder)
 

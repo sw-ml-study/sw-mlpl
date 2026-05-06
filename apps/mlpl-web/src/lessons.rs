@@ -11,6 +11,7 @@ pub struct Lesson {
 pub const LESSONS: &[Lesson] = &[
     crate::lessons_advanced::WHAT_IS_ML,
     crate::lessons_advanced::HISTORY_OF_ML,
+    crate::lessons_advanced::HOW_MODELS_LEARN,
     crate::lessons_advanced::WHY_BACKPROP,
     Lesson {
         title: "Hello Numbers",
