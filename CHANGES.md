@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-05
 
+- docs(glossary): +16 entries from course-outline gap list
+- Merge pull request #1 from sw-ml-study/claude/llm-course-outline-E3bGZ
+- docs(course): add LLM-track course outline
+- docs(changes): refresh CHANGES.md to head
 - feat(web): decoder-block demo + lesson
 - docs(changes): refresh CHANGES.md to head
 - docs(glossary): add Backpropagation + Chain rule entries
