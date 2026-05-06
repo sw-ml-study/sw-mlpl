@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-06
 
+- feat(web): learning paths -- curated walks across lessons / demos / diagrams / glossary
+- docs(changes): refresh CHANGES.md to head
 - feat(web): "Diagrams" tab in the Help dialog (38 ML reference diagrams)
 - docs(changes): refresh CHANGES.md to head
 - docs(glossary): +11 entries from the diagram set's coverage gap
