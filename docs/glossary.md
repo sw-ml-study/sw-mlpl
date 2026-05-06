@@ -27,6 +27,18 @@ parameter first and second moments (`m`, `v`) and rescales
 each update by their ratio. Spelled `adam(loss, params, lr,
 b1, b2, eps)` in MLPL.
 
+## AdamW
+
+Adam with decoupled weight decay. Plain `adam` mixes
+weight decay into the gradient before the moment update,
+which interacts oddly with the per-parameter learning-rate
+scaling; AdamW applies the decay directly to the parameter
+update step, keeping it independent from the moment
+scaling. Empirically robust default for transformer
+training. **Deferred** in MLPL: `adam(loss, params, lr,
+b1, b2, eps)` ships today; an `adamw` variant with explicit
+`weight_decay` is on the regularization-tour roadmap.
+
 ## Adversarial examples
 
 Inputs crafted with small, often imperceptible perturbations
@@ -35,6 +47,16 @@ example: change a few pixels and "panda" becomes "gibbon".
 MLPL ships `perturb_params(model, family, sigma, seed)` for
 weight-space perturbation (Saga 20); input-space adversarial
 attacks are deferred.
+
+## Agent loop
+
+A control loop where an LLM repeatedly emits a tool-use
+request, the runtime executes the tool, the result is fed
+back into the prompt, and the cycle continues until a stop
+condition. The "function calling" interface is what the
+model sees; the loop is what the application implements.
+MLPL: `llm_call(url, prompt, model)` is one step of such
+a loop; building the loop itself is application code.
 
 ## Attention
 
@@ -146,6 +168,18 @@ to the training set), and irreducible noise. Increasing model
 capacity drops bias but raises variance; regularization,
 ensembling, and more data shift the optimum.
 
+## Born-again networks (self-distillation)
+
+A simplified distillation setup where the student has the
+*same architecture* as the teacher. Train teacher to
+convergence; then train a fresh-init student against the
+teacher's softened logits with KL-divergence loss; often
+the student reaches slightly better accuracy than the
+teacher despite identical capacity. The simplest demo of
+distillation because there is no architecture mismatch to
+explain. **Deferred** in MLPL: blocked on `kl_div` /
+`soft_targets` builtins.
+
 ## BPE (Byte-Pair Encoding)
 
 A subword tokenizer that starts from raw bytes and greedily
@@ -167,6 +201,21 @@ the classic two-half-moon pattern. All three appear in the
 Renders a 2-D classifier's decision surface as an SVG
 heatmap with the training points overlaid. Signature:
 `boundary_2d(predictions, grid_shape, points, labels)`.
+
+## Broadcasting
+
+The rules for combining arrays of different shapes in
+elementwise operations: a singleton axis (size 1) stretches
+to match the other operand's size on that axis; missing
+trailing axes are treated as singletons. `[3, 4] + [4]`
+broadcasts the rank-1 vector across the rows of the rank-2
+matrix; `[3, 4] + [3, 1]` broadcasts the column-vector
+across the columns. MLPL applies broadcasting to all
+binary arithmetic ops (`+`, `-`, `*`, `/`) and the
+comparison builtins (`gt`, `lt`, `eq`). Mismatches surface
+as `EvalError::ShapeMismatch` whose Display shows both
+labeled shapes side by side. See `docs/lang-reference.md`
+"Broadcasting Rules" for the full table.
 
 ## BuiltinRef (`:foo` syntax)
 
@@ -227,6 +276,17 @@ reasoning steps before its final answer, often improving
 accuracy on multi-step problems. MLPL ships `llm_call(url,
 prompt, model)` for general LLM tool-use; CoT is a prompting
 pattern, not a builtin.
+
+## Chat template
+
+The string-formatting convention that wraps multi-turn
+chat messages with role markers (`<|user|>`, `<|assistant|>`,
+`<|system|>`, etc.) before tokenization, so the model can
+distinguish who said what. Different model families ship
+different templates (ChatML, Llama, Alpaca); using the
+wrong one degrades responses sharply. **Deferred** in
+MLPL: `apply_tokenizer(tok, text)` is byte-level only;
+template handling is application code.
 
 ## Checkpointing
 
@@ -289,6 +349,16 @@ or state-space alternatives.
 
 The window-and-sum operation at the core of CNNs. Not a
 v0.19 builtin in MLPL; deferred along with CNN-family demos.
+
+## Cosine similarity
+
+A similarity measure between two vectors that is invariant
+to magnitude: `cos(u, v) = dot(u, v) / (norm(u) * norm(v))`,
+range `[-1, 1]`. Distinct from `Dot product` (which is
+sensitive to magnitude). The standard scoring function for
+embedding-based retrieval (RAG) and nearest-neighbor lookup
+on learned representations. MLPL: build from `dot`,
+`sqrt`, `reduce_add` -- no dedicated builtin.
 
 ## Comparison ops: `gt`, `lt`, `eq` (builtins)
 
@@ -542,6 +612,17 @@ an `ExperimentRecord`. The record lands in
 `<exp_dir>/<name>/<ts>/run.json` (terminal REPL only).
 Use to pin a reproducible notebook entry per run.
 
+## F1 score / threshold tuning
+
+The harmonic mean of precision and recall: `F1 = 2 * P * R
+/ (P + R)`. Single number that penalizes either failure
+mode. For a probabilistic classifier, the threshold that
+maximizes F1 is rarely 0.5 -- you sweep thresholds against
+held-out predictions and pick the argmax. MLPL: build from
+`gt(probs, threshold)` masks plus `confusion_matrix` or
+`reduce_add` over true-positive / false-positive counts; no
+dedicated builtin.
+
 ## Feedforward (FFN)
 
 The two-linear-layer subblock inside a transformer block:
@@ -589,6 +670,17 @@ last value of `body` is captured into `last_rows` for
 plotting / inspection. Saga 12 added this construct; the
 "Loading Data" tutorial walks it end-to-end.
 
+## Function calling
+
+A model-output convention where, instead of a free-text
+answer, the LLM emits a structured tool-call (function name
++ JSON arguments). The application parses, executes, and
+feeds the result back. Strictly an output-formatting
+contract; the model is doing next-token prediction
+underneath. Paired with the agent loop. MLPL: not a
+builtin; achievable today by formatting prompts to request
+JSON and parsing the response from `llm_call`.
+
 ## Forward pass
 
 The traversal from inputs to outputs (no gradients computed).
@@ -628,6 +720,17 @@ The partial derivative of a loss with respect to a parameter.
 Computed by `grad(loss, wrt_param)`. Auto-tags as
 `Gradient(wrt=W1)` so `:describe g` shows which param it
 belongs to.
+
+## Gradient accumulation
+
+Sum gradients over several mini-batches before applying an
+optimizer step, simulating a larger effective batch size
+than fits in memory at once. `effective_bs = micro_bs *
+accumulation_steps`. Used routinely at LLM training scale
+where the desired batch size exceeds device memory.
+**Deferred** in MLPL: `train` block applies the optimizer
+every iteration; an explicit accumulator pattern is
+buildable but not first-class.
 
 ## Gradient Clipping
 
@@ -696,6 +799,17 @@ epochs, model dimensions (`d_model`, `heads`, `vocab_size`),
 optimizer betas, etc. MLPL doesn't have a hyperparameter
 sweep DSL today; `experiment "name" { body }` records what
 was tried.
+
+## Instruction tuning
+
+Supervised fine-tuning on (instruction, response) pairs --
+typically formatted with a chat template -- to teach a
+pretrained base model to follow user instructions instead
+of completing free text. The "SFT" step in the standard
+pretrain -> SFT -> RLHF pipeline. **Deferred** in MLPL:
+LoRA fine-tuning ships, but instruction-tuning datasets
+require chat-template handling and prompt masking that
+are not first-class.
 
 ## In-Context Learning (ICL)
 
@@ -772,6 +886,19 @@ during autoregressive decoding so each new token only needs
 to compute its own row, not the entire `[T, T]` attention
 matrix. MLPL's "Tiny LM Generate" demo recomputes from
 scratch each step; KV cache is a deferred efficiency win.
+
+## KL divergence
+
+A non-symmetric measure of how one probability distribution
+diverges from another: `KL(P || Q) = sum(P * (log(P) -
+log(Q)))`, zero iff `P == Q`, larger when Q gives low
+probability to events P deems likely. The natural
+distillation loss: a high-temperature student softmax
+trained to match a teacher's softened logits via KL.
+**Deferred** in MLPL: build by hand from `softmax`,
+`log`, `reduce_add`; a `kl_div(p_logits, q_logits,
+temperature)` builtin is on the Module 11 distillation
+roadmap.
 
 ## Label Smoothing
 
@@ -866,6 +993,19 @@ DenseArray (with header autoparse) for `.csv`.
 Elementwise natural log: `log(x)` returns `ln(x)` for each
 element. Used to bridge `Probability -> LogProbability` and
 in numerical stability tricks for cross-entropy.
+
+## LM benchmarks (BLEU, ROUGE, MMLU, HellaSwag)
+
+Standard evaluation suites for language models. **BLEU**
+and **ROUGE** are n-gram-overlap metrics for translation
+and summarization (closer to 1 is better; both have known
+limitations). **MMLU** (Massive Multitask Language
+Understanding) is a 57-subject multiple-choice exam --
+the standard "general knowledge" leaderboard.
+**HellaSwag** tests commonsense sentence completion. None
+ship as MLPL builtins; benchmark suites are downstream
+application work. Glossary anchor for the names that
+appear in LM evaluation papers.
 
 ## Logits
 
@@ -1024,6 +1164,19 @@ trained on. Models tend to be silently overconfident on OOD,
 not flagged "I don't know". Detection is an active research
 area; deferred in MLPL.
 
+## Online vs offline distillation
+
+**Offline distillation:** train the teacher to convergence
+first, then train the student against the frozen teacher's
+logits. The standard pipeline; reproducible and easy to
+debug.
+**Online distillation:** train teacher and student
+together, often with the teacher's logits computed in the
+same forward pass. Cheaper end-to-end but the moving
+target makes debugging harder. **Deferred** in MLPL: both
+require the `kl_div` / `soft_targets` builtins flagged as
+Module 11 blockers.
+
 ## Optimization vs Generalization
 
 Optimization concerns minimizing training loss; generalization
@@ -1172,6 +1325,17 @@ Adversarial inputs that overwrite the system prompt or steer
 the model to leak instructions / tools. The web equivalent
 of SQL injection. MLPL exposes `llm_call` but the security
 posture is the user's responsibility.
+
+## Prompt masking
+
+In supervised instruction tuning, zero out the loss on
+prompt tokens so the gradient only flows from the
+response. Without it the model would also learn to
+predict the user's instruction text, which is wasted
+capacity. Implemented as a per-position mask multiplied
+into the per-token cross-entropy before averaging.
+**Deferred** in MLPL: requires per-position loss masking,
+which `cross_entropy(logits, targets)` does not expose.
 
 ## Prompting
 
@@ -1459,6 +1623,19 @@ for numerical stability. Auto-tags its output as
 TypeMismatch at the call site (the canonical double-softmax
 bug).
 
+## Soft targets
+
+The output of a softmax over logits divided by a
+*temperature* > 1: `soft_targets = softmax(logits /
+temperature, axis)`. Temperature spreads probability mass
+across more classes, so the targets carry richer
+information than a one-hot label about which alternatives
+the teacher considered. Training a student against these
+softer targets via KL divergence is the core of knowledge
+distillation. **Deferred** in MLPL: build by hand from
+`softmax(logits / temperature, axis)`; a `soft_targets`
+helper is on the Module 11 roadmap.
+
 ## Sparse Activation
 
 Architectures where only a small fraction of parameters are
@@ -1531,6 +1708,18 @@ their respective elementwise functions. Distinct from the
 math primitives (`tanh_fn`, `sigmoid`) in that layers can
 participate in `apply(model, X)` and Saga 23's structural-
 tail tagging.
+
+## System prompt
+
+The leading text in a chat-formatted prompt that sets the
+model's persona, capabilities, and constraints, before the
+user turn begins. Different from instruction prompts: the
+system prompt is set by the application, not the user, and
+is typically wrapped in a distinct role marker by the chat
+template. Adversarial inputs that try to override it are
+called prompt injection. MLPL: not a first-class concept;
+build via `llm_call` with a manually-formatted prompt
+string.
 
 ## Tanh
 
