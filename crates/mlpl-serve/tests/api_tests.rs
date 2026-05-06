@@ -210,6 +210,7 @@ async fn run_rejects_non_loopback_with_auth_disabled() {
         AuthMode::Disabled,
         mlpl_serve::peers::empty_registry(),
         None,
+        None,
     )
     .await
     .unwrap_err();
@@ -366,6 +367,47 @@ async fn static_dir_serves_index_at_sw_mlpl_prefix() {
     assert_eq!(health.status(), 200);
 
     let _ = std::fs::remove_dir_all(&tmp);
+}
+
+/// Saga 25 step B: `--self-signed` mode terminates TLS
+/// in-process and serves the same routes over https. Smoke
+/// test it by wiring the server's `run()` into an
+/// `axum_server::bind_rustls` flow with a freshly-generated
+/// loopback cert, then call /v1/health with a TLS client
+/// configured to accept any cert (this is a self-signed
+/// loopback test, not a trust check).
+#[tokio::test]
+async fn self_signed_serves_health_over_tls() {
+    use std::net::TcpListener as StdListener;
+    let listener = StdListener::bind("127.0.0.1:0").unwrap();
+    let addr = listener.local_addr().unwrap();
+    drop(listener);
+    let (tls_config, fingerprint) = mlpl_serve::tls::self_signed_loopback().await.unwrap();
+    assert!(fingerprint.contains(':'), "fingerprint format wrong");
+    tokio::spawn(async move {
+        let _ = run(
+            addr,
+            AuthMode::Required,
+            mlpl_serve::peers::empty_registry(),
+            None,
+            Some(tls_config),
+        )
+        .await;
+    });
+    // Brief settle for the listener.
+    tokio::time::sleep(std::time::Duration::from_millis(100)).await;
+    let client = reqwest::Client::builder()
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap();
+    let resp = client
+        .get(format!("https://{addr}/v1/health"))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200, "TLS /v1/health must return 200");
+    let body: JsonValue = resp.json().await.unwrap();
+    assert_eq!(body["status"], "ok");
 }
 
 #[tokio::test]
