@@ -167,7 +167,10 @@ fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
         "exp" => Tensor::exp,
         "log" => Tensor::log,
         "relu" => Tensor::relu,
-        "tanh" => Tensor::tanh,
+        // `tanh_fn` is the surface-MLPL spelling (`tanh` itself
+        // is reserved by the `tanh_layer()` model layer); both
+        // names map to the same tape op.
+        "tanh" | "tanh_fn" => Tensor::tanh,
         "sigmoid" => Tensor::sigmoid,
         "softmax" => Tensor::softmax,
         "transpose" => Tensor::transpose,

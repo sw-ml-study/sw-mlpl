@@ -201,3 +201,18 @@ fn grad_param_from_ctor_is_tracked() {
     assert_eq!(g.shape(), &Shape::vector(3));
     assert_eq!(g.data(), &[1.0, 1.0, 1.0]);
 }
+
+#[test]
+fn grad_accepts_tanh_fn_alias_inside_grad() {
+    // Surface MLPL spells the elementwise tanh as `tanh_fn`
+    // (`tanh` itself is reserved for the `tanh_layer()` model
+    // layer). The grad lifter must accept both names so that
+    // demos / lessons that train an MLP with `tanh_fn` activation
+    // can reach a gradient. Regression for the Moons MLP demo.
+    let mut env = Environment::new();
+    env.set_param("w".into(), DenseArray::from_vec(vec![0.5, 0.5]));
+    let via_tanh = run("grad(sum(tanh(w)), w)", &mut env);
+    let via_tanh_fn = run("grad(sum(tanh_fn(w)), w)", &mut env);
+    assert_eq!(via_tanh.shape(), &Shape::vector(2));
+    assert_eq!(via_tanh.data(), via_tanh_fn.data());
+}
