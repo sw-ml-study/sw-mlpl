@@ -256,6 +256,30 @@ pub const HISTORY_OF_ML: Lesson = Lesson {
     try_it: "The progression from perceptron to MLP to transformer is two architectural leaps: adding a hidden layer (Perceptron -> MLP solves XOR) and replacing matrix mixing across positions with attention (MLP -> Transformer solves long-range dependencies). Try classifying the XOR data with `perceptron` (it cannot) and then with `mlp` (it can) by training each through `train` blocks.",
 };
 
+/// "How models learn" -- companion to HISTORY_OF_ML, but
+/// walking training paradigms (supervised / unsupervised
+/// / self-supervised / RLHF / distillation / self-play)
+/// instead of architectures.
+pub const HOW_MODELS_LEARN: Lesson = Lesson {
+    title: "How models learn: a short history of training paradigms",
+    intro: "Architecture (Perceptron / MLP / Transformer) is half the story of ML history; the other half is how models get their training signal. **Supervised learning** -- the classical paradigm -- minimizes a per-example loss against human-supplied labels. The Logistic Regression / Tiny MLP / Softmax Classifier demos are all supervised. **Unsupervised learning** drops the labels entirely and discovers structure from geometry alone -- K-Means clusters, PCA finds the principal axis, t-SNE preserves local distances. **Self-supervised learning** keeps the supervised loss but derives the labels from the input itself; next-token prediction is the canonical example, and MLPL's `shift_pairs_x` / `shift_pairs_y` pairing in the Tiny LM demo is exactly this -- the label for token t is just token t+1, no humans involved. The LLM era is mostly self-supervised pretraining followed by smaller human-touched stages: **RLHF** (preference learning over (chosen, rejected) pairs, deferred in MLPL), **distillation** (train a student against a teacher's softened logits via KL-divergence; deferred -- needs `kl_div` / `soft_targets` builtins), and **self-play** (an agent generates its own training signal by playing itself, the AlphaGo / AlphaZero pattern; deferred -- needs environment + reward primitives). The arc isn't strictly chronological -- supervised learning never went away, it just stopped being enough on its own at scale.",
+    examples: &[
+        "y_true = [0, 1, 0, 1]                                      # supervised: classical paradigm",
+        "logits = [[2.0, -1.0], [-0.5, 1.5], [1.0, 0.0], [-1.0, 1.0]]",
+        "supervised_loss = cross_entropy(logits, y_true)            # human-supplied labels minimize CE",
+        "supervised_loss",
+        "X = randn(0, [60, 2])                                      # unsupervised: structure from geometry",
+        "X_pca = pca(matmul(X, [[1, 2], [0, 0.3]]), 2)              # PCA finds the long axis -- no labels",
+        "shape(X_pca)",
+        "ids = [3, 7, 2, 9, 4, 1, 8, 5, 6, 0]                       # self-supervised: derive labels from data",
+        "self_X = shift_pairs_x(ids, 4)                             # input windows of length 4",
+        "self_Y = shift_pairs_y(ids, 4)                             # label = input shifted right by one",
+        "shape(self_X)",
+        "shape(self_Y)",
+    ],
+    try_it: "The three working examples cover supervised / unsupervised / self-supervised. RLHF, distillation, and self-play are deferred until MLPL ships preference loss + `kl_div` + environment primitives. Try sketching distillation by hand: pick a teacher logit vector `t = [2.0, -1.0, 0.5]`, soften with temperature 2 via `softmax(t / 2.0, 0)`, and a student via `softmax(s / 2.0, 0)`; the KL loss is `reduce_add(p * (log(p) - log(q)))` -- that's the formula a future `kl_div` builtin would wrap. The Module 11 distillation gap in `docs/course-outline.md` traces exactly this missing piece.",
+};
+
 /// "Why backprop?" -- the historical complement to
 /// "Automatic Differentiation". Frames `grad` as the
 /// generalization of hand-derived chain-rule formulas.
