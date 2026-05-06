@@ -181,6 +181,51 @@ fn percent_encode(s: &str) -> String {
     out
 }
 
+/// Split an MLPL line at the first inline `#` comment that
+/// is not inside a string literal. Returns `(code, comment)`
+/// with comment as `Some(text)` when present (without the
+/// leading `#`, trimmed). MLPL's parser already drops `#`
+/// comments; this is purely for the UI to render the
+/// commentary as an annotation alongside the code.
+fn split_inline_comment(line: &str) -> (&str, Option<&str>) {
+    let mut in_str = false;
+    let bytes = line.as_bytes();
+    for (i, &b) in bytes.iter().enumerate() {
+        match b {
+            b'"' => in_str = !in_str,
+            b'#' if !in_str => {
+                let code = line[..i].trim_end();
+                let comment = line[i + 1..].trim();
+                let comment_opt = if comment.is_empty() {
+                    None
+                } else {
+                    Some(comment)
+                };
+                return (code, comment_opt);
+            }
+            _ => {}
+        }
+    }
+    (line, None)
+}
+
+fn render_input_line(input: &str) -> Html {
+    let (code, comment) = split_inline_comment(input);
+    let comment_html = match comment {
+        Some(c) => {
+            html! { <span class="line-comment">{ format!(" # {c}") }</span> }
+        }
+        None => html! {},
+    };
+    html! {
+        <div class="input-line">
+            <span class="prompt">{"mlpl> "}</span>
+            { code }
+            { comment_html }
+        </div>
+    }
+}
+
 fn render_svg_body(svg: &str) -> Html {
     let svg_html = Html::from_html_unchecked(AttrValue::from(svg.to_string()));
     let href = format!("data:image/svg+xml;charset=utf-8,{}", percent_encode(svg));
@@ -230,7 +275,7 @@ fn render_entry(entry: &HistoryEntry) -> Html {
     };
     html! {
         <div class="entry">
-            <div class="input-line"><span class="prompt">{"mlpl> "}</span>{ &entry.input }</div>
+            { render_input_line(&entry.input) }
             { body }
         </div>
     }
