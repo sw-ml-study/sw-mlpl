@@ -27,22 +27,26 @@ pub fn github_corner(props: &UrlProps) -> Html {
     }
 }
 
+#[derive(Clone, Copy, PartialEq)]
+pub enum HeaderMode {
+    Repl,
+    Tutorial,
+    Paths,
+}
+
 #[derive(Properties, PartialEq)]
 pub struct HeaderProps {
     pub on_help: Callback<MouseEvent>,
     pub on_select_repl: Callback<MouseEvent>,
     pub on_select_tutorial: Callback<MouseEvent>,
-    pub tutorial_active: bool,
+    pub on_select_paths: Callback<MouseEvent>,
+    pub mode: HeaderMode,
 }
 
 #[function_component(Header)]
 pub fn header(props: &HeaderProps) -> Html {
-    let cls = |is_tut: bool| {
-        if props.tutorial_active == is_tut {
-            "tab active"
-        } else {
-            "tab"
-        }
+    let cls = |m: HeaderMode| {
+        if props.mode == m { "tab active" } else { "tab" }
     };
     html! {
         <header>
@@ -52,8 +56,9 @@ pub fn header(props: &HeaderProps) -> Html {
                 <span class="title-subtitle">{"Array Programming for Machine Learning"}</span>
             </div>
             <div class="header-tabs">
-                <button class={cls(false)} onclick={props.on_select_repl.clone()}>{"REPL"}</button>
-                <button class={cls(true)} onclick={props.on_select_tutorial.clone()}>{"Tutorial"}</button>
+                <button class={cls(HeaderMode::Repl)} onclick={props.on_select_repl.clone()}>{"REPL"}</button>
+                <button class={cls(HeaderMode::Tutorial)} onclick={props.on_select_tutorial.clone()}>{"Tutorial"}</button>
+                <button class={cls(HeaderMode::Paths)} onclick={props.on_select_paths.clone()}>{"Paths"}</button>
             </div>
             <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation">{"?"}</button>
         </header>
