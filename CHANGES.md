@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-05
 
+- feat(viz): heatmap legend (vertical colorbar + min/mid/max labels)
+- docs(changes): refresh CHANGES.md to head
 - feat(web): annotate the remaining 19 demos with line comments
 - docs(changes): refresh CHANGES.md to head
 - feat(web): inline-comment annotations on demo lines
