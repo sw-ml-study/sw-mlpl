@@ -12,6 +12,7 @@ mod demos;
 mod glossary_view;
 mod handlers;
 mod help;
+mod intro_md;
 mod lessons;
 mod lessons_advanced;
 #[cfg(test)]

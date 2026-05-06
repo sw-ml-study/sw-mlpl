@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-4734bc62003f599f.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-4734bc62003f599f_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-54c2cb0ed63e27a7.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-54c2cb0ed63e27a7_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -591,6 +591,42 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             margin-bottom: 12px;
             line-height: 1.5;
         }
+        .tutorial-intro .lesson-paragraph {
+            margin: 0 0 10px 0;
+        }
+        .tutorial-intro .lesson-paragraph:last-child {
+            margin-bottom: 0;
+        }
+        .tutorial-intro .lesson-section {
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 700;
+            margin: 14px 0 6px 0;
+            padding-bottom: 2px;
+            border-bottom: 1px solid var(--surface1);
+        }
+        .tutorial-intro .lesson-list {
+            margin: 4px 0 10px 0;
+            padding-left: 20px;
+        }
+        .tutorial-intro .lesson-list li {
+            margin-bottom: 4px;
+        }
+        .tutorial-intro .lesson-separator {
+            border: 0;
+            border-top: 1px dashed var(--surface1);
+            margin: 14px 0;
+        }
+        .tutorial-intro code {
+            background: var(--surface0);
+            padding: 1px 4px;
+            border-radius: 3px;
+            color: var(--text);
+        }
+        .tutorial-intro strong {
+            color: var(--text);
+            font-weight: 700;
+        }
         .lesson-examples {
             display: flex;
             flex-direction: column;
@@ -695,7 +731,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-4734bc62003f599f.js" crossorigin="anonymous" integrity="sha384-n/U5nhdX16vPdrgjvx2G3z5rxTriww+v825FvXXYxNMqzvm64MnHVjddUR8wV5gP"><link rel="preload" href="/sw-mlpl/mlpl-web-4734bc62003f599f_bg.wasm" crossorigin="anonymous" integrity="sha384-OpFMlzrtwXnoaU9LLfrpD76TH9YWaW3XzPS8dkO6d5AbgZPrPIxAuPTghK1oPsJA" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-54c2cb0ed63e27a7.js" crossorigin="anonymous" integrity="sha384-n/U5nhdX16vPdrgjvx2G3z5rxTriww+v825FvXXYxNMqzvm64MnHVjddUR8wV5gP"><link rel="preload" href="/sw-mlpl/mlpl-web-54c2cb0ed63e27a7_bg.wasm" crossorigin="anonymous" integrity="sha384-f+Tg/Mzb/OOlCOdBaCCC8dGDSFrxb5gWEU8CgngYIr3Ygu4m9P+OVgb2P8Q8MCw1" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
