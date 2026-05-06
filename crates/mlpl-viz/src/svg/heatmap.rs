@@ -4,7 +4,16 @@ use mlpl_array::DenseArray;
 
 use super::{H, PAD, VizError, W, write_svg_close, write_svg_open};
 
-/// Render an MxN matrix as a colored grid.
+/// Width pulled from the cell area to make room for the legend
+/// strip + value labels (`hi` / `mid` / `lo`).
+const LEGEND_RESERVE: f64 = 60.0;
+/// Width of the vertical colorbar itself.
+const LEGEND_W: f64 = 14.0;
+/// Number of stacked rectangles used to approximate the gradient.
+const LEGEND_STEPS: usize = 32;
+
+/// Render an MxN matrix as a colored grid with a viridis
+/// colorbar legend on the right (top = max, bottom = min).
 pub fn render_heatmap(data: &DenseArray) -> Result<String, VizError> {
     let dims = data.shape().dims();
     if dims.len() != 2 {
@@ -27,7 +36,7 @@ pub fn render_heatmap(data: &DenseArray) -> Result<String, VizError> {
     } else {
         hi - lo
     };
-    let plot_w = W - 2.0 * PAD;
+    let plot_w = W - 2.0 * PAD - LEGEND_RESERVE;
     let plot_h = H - 2.0 * PAD;
     let cell_w = plot_w / cols as f64;
     let cell_h = plot_h / rows as f64;
@@ -43,8 +52,37 @@ pub fn render_heatmap(data: &DenseArray) -> Result<String, VizError> {
             ));
         }
     }
+    render_legend(&mut out, plot_w, plot_h, lo, hi);
     write_svg_close(&mut out);
     Ok(out)
+}
+
+/// Vertical colorbar + min/mid/max value labels in the right
+/// margin reserved by `LEGEND_RESERVE`. Top of the bar is the
+/// data max (yellow); bottom is the data min (dark purple).
+fn render_legend(out: &mut String, plot_w: f64, plot_h: f64, lo: f64, hi: f64) {
+    let legend_x = PAD + plot_w + 8.0;
+    let label_x = legend_x + LEGEND_W + 5.0;
+    let step_h = plot_h / LEGEND_STEPS as f64;
+    for i in 0..LEGEND_STEPS {
+        // i=0 is top of the bar; t=1 is yellow (max).
+        let t = 1.0 - (i as f64 + 0.5) / LEGEND_STEPS as f64;
+        let (red, green, blue) = viridis(t);
+        let y = PAD + step_h * i as f64;
+        out.push_str(&format!(
+            "<rect x=\"{legend_x:.1}\" y=\"{y:.1}\" width=\"{LEGEND_W:.1}\" height=\"{:.2}\" fill=\"rgb({red},{green},{blue})\"/>",
+            step_h + 0.5
+        ));
+    }
+    let mid = (lo + hi) * 0.5;
+    let label = |out: &mut String, y: f64, v: f64| {
+        out.push_str(&format!(
+            "<text x=\"{label_x:.1}\" y=\"{y:.1}\" fill=\"#cdd6f4\" font-size=\"11\" font-family=\"monospace\" dominant-baseline=\"middle\">{v:.2}</text>"
+        ));
+    };
+    label(out, PAD + 4.0, hi);
+    label(out, PAD + plot_h * 0.5, mid);
+    label(out, PAD + plot_h - 4.0, lo);
 }
 
 fn data_range(values: &[f64]) -> (f64, f64) {
