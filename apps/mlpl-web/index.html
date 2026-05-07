@@ -483,9 +483,14 @@
             margin: -20px;
         }
         .paths-panel {
+            /* Explicit width (capped at viewport - 32px) so the
+               panel and its sticky header are exactly the same
+               size on every stop, regardless of diagram height
+               or stop body content. */
+            width: min(880px, 100% - 32px);
+            box-sizing: border-box;
             padding: 16px 24px;
             color: var(--text);
-            max-width: 880px;
             margin: 0 auto;
         }
         .paths-heading {
@@ -543,6 +548,11 @@
             padding: 8px 0;
             border-bottom: 1px solid var(--surface1);
             z-index: 2;
+            /* Explicit width matches the panel's computed width
+               so the header X coordinates do not move when the
+               body shrinks (a tall narrow diagram had let the
+               panel collapse to the SVG's content width before). */
+            width: 100%;
         }
         .paths-walker-title {
             font-weight: 700;
@@ -566,8 +576,9 @@
             color: var(--subtext0);
             font-family: var(--mono);
             font-size: 13px;
-            min-width: 90px;
+            min-width: 120px;
             text-align: center;
+            white-space: nowrap;
         }
         .paths-walker-body {
             margin-bottom: 16px;
