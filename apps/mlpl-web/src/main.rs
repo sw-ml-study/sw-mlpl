@@ -10,6 +10,7 @@
 mod components;
 mod demos;
 mod diagrams_view;
+mod entry_render;
 mod glossary_view;
 mod handlers;
 mod help;
@@ -28,11 +29,13 @@ use components::{
     DocDialog, Footer, GithubCorner, Header, HeaderMode, InputRow, ModeBar, TutorialPanel,
     TutorialPanelProps, TutorialView, Welcome,
 };
+use entry_render::render_entry;
 use handlers::{
-    EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit, toggle_bool,
+    EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit,
+    make_submit_batch, toggle_bool,
 };
 use mlpl_wasm::WasmSession;
-use state::{EntryKind, HistoryEntry};
+use state::HistoryEntry;
 use tutorial::{jump_lesson, run_example, step_lesson};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
@@ -74,13 +77,15 @@ fn app() -> Html {
         history.clone()
     };
 
-    let on_submit = make_submit(EvalDeps {
+    let deps = EvalDeps {
         session: active_session.clone(),
         history: active_history.clone(),
         input_value: input_value.clone(),
         cmd_history: cmd_history.clone(),
         cmd_index: cmd_index.clone(),
-    });
+    };
+    let on_submit = make_submit(deps.clone());
+    let on_run_batch = make_submit_batch(deps);
     let on_clear = make_clear(active_session.clone(), active_history.clone());
     let on_demo = make_run_demo(active_session, active_history.clone());
 
@@ -91,6 +96,7 @@ fn app() -> Html {
 
     render(RenderArgs {
         on_submit,
+        on_run_batch,
         on_clear,
         on_demo,
         input_value,
@@ -106,6 +112,7 @@ fn app() -> Html {
 
 struct RenderArgs {
     on_submit: Callback<String>,
+    on_run_batch: Callback<Vec<String>>,
     on_clear: Callback<MouseEvent>,
     on_demo: Callback<usize>,
     input_value: UseStateHandle<String>,
@@ -171,6 +178,7 @@ fn render(a: RenderArgs) -> Html {
                 on_input,
                 on_keydown,
                 on_run_example,
+                on_run_batch: a.on_run_batch,
             }) }
             <Footer url={REPO_URL} />
             <DocDialog open={*a.dialog_open} on_close={close_dialog} />
@@ -273,11 +281,17 @@ struct MainArgs<'a> {
     on_input: Callback<InputEvent>,
     on_keydown: Callback<web_sys::KeyboardEvent>,
     on_run_example: Callback<String>,
+    on_run_batch: Callback<Vec<String>>,
 }
 
 fn render_main(a: MainArgs) -> Html {
-    let tutorial_pane =
-        render_tutorial(a.cur_lesson, a.lesson_idx, a.initial_view, a.on_run_example);
+    let tutorial_pane = render_tutorial(
+        a.cur_lesson,
+        a.lesson_idx,
+        a.initial_view,
+        a.on_run_example,
+        a.on_run_batch,
+    );
     let paths_pane = html! {
         <paths_view::PathsView
             state={a.cur_path}
@@ -318,6 +332,7 @@ fn render_tutorial(
     lesson: UseStateHandle<Option<usize>>,
     initial_view: TutorialView,
     on_run_example: Callback<String>,
+    on_run_batch: Callback<Vec<String>>,
 ) -> Html {
     let Some(idx) = cur else {
         return html! {};
@@ -332,123 +347,11 @@ fn render_tutorial(
         on_next,
         on_jump,
         on_run_example,
+        on_run_batch,
         on_close,
         initial_view,
     };
     html! { <TutorialPanel ..props /> }
-}
-
-fn percent_encode(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    for b in s.bytes() {
-        let safe = b.is_ascii_alphanumeric() || matches!(b, b'-' | b'_' | b'.' | b'~');
-        if safe {
-            out.push(b as char);
-        } else {
-            out.push_str(&format!("%{b:02X}"));
-        }
-    }
-    out
-}
-
-/// Split an MLPL line at the first inline `#` comment that
-/// is not inside a string literal. Returns `(code, comment)`
-/// with comment as `Some(text)` when present (without the
-/// leading `#`, trimmed). MLPL's parser already drops `#`
-/// comments; this is purely for the UI to render the
-/// commentary as an annotation alongside the code.
-pub(crate) fn split_inline_comment(line: &str) -> (&str, Option<&str>) {
-    let mut in_str = false;
-    let bytes = line.as_bytes();
-    for (i, &b) in bytes.iter().enumerate() {
-        match b {
-            b'"' => in_str = !in_str,
-            b'#' if !in_str => {
-                let code = line[..i].trim_end();
-                let comment = line[i + 1..].trim();
-                let comment_opt = if comment.is_empty() {
-                    None
-                } else {
-                    Some(comment)
-                };
-                return (code, comment_opt);
-            }
-            _ => {}
-        }
-    }
-    (line, None)
-}
-
-fn render_input_line(input: &str) -> Html {
-    let (code, comment) = split_inline_comment(input);
-    let comment_html = match comment {
-        Some(c) => {
-            html! { <span class="line-comment">{ format!(" # {c}") }</span> }
-        }
-        None => html! {},
-    };
-    html! {
-        <div class="input-line">
-            <span class="prompt">{"mlpl> "}</span>
-            { code }
-            { comment_html }
-        </div>
-    }
-}
-
-fn render_svg_body(svg: &str) -> Html {
-    let svg_html = Html::from_html_unchecked(AttrValue::from(svg.to_string()));
-    let href = format!("data:image/svg+xml;charset=utf-8,{}", percent_encode(svg));
-    html! {
-        <div class="svg-output">
-            { svg_html }
-            <a class="svg-download" href={href} download="mlpl.svg" title="Download SVG" aria-label="Download SVG">{"⬇"}</a>
-        </div>
-    }
-}
-
-fn render_entry(entry: &HistoryEntry) -> Html {
-    if entry.kind == EntryKind::Narration {
-        // Demo narration: prose framing around the code output.
-        // No `mlpl>` prompt, no output pre-formatting; `input` is
-        // the heading (e.g. "About this demo" / "What just
-        // happened"), `output` is the narration body.
-        return html! {
-            <div class="narration">
-                <div class="narration-heading">{ &entry.input }</div>
-                <div class="narration-body">{ &entry.output }</div>
-            </div>
-        };
-    }
-    let body = if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
-        render_svg_body(&entry.output)
-    } else if entry.is_error {
-        html! { <pre class={"output-line error"}>{ &entry.output }</pre> }
-    } else if let Some(s) = summary::summarize(&entry.output) {
-        let summary_text = format!(
-            "{}  min={}  max={}  mean={}  median={}  std={}",
-            s.shape,
-            summary::fmt_stat(s.min),
-            summary::fmt_stat(s.max),
-            summary::fmt_stat(s.mean),
-            summary::fmt_stat(s.median),
-            summary::fmt_stat(s.std),
-        );
-        html! {
-            <details class="output-summary">
-                <summary>{ summary_text }</summary>
-                <pre class={"output-line"}>{ &entry.output }</pre>
-            </details>
-        }
-    } else {
-        html! { <pre class={"output-line"}>{ &entry.output }</pre> }
-    };
-    html! {
-        <div class="entry">
-            { render_input_line(&entry.input) }
-            { body }
-        </div>
-    }
 }
 
 fn scroll_and_focus() {

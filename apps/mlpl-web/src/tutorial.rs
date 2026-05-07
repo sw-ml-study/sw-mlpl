@@ -50,6 +50,11 @@ pub struct TutorialPanelProps {
     pub on_next: Callback<MouseEvent>,
     pub on_jump: Callback<usize>,
     pub on_run_example: Callback<String>,
+    /// Run-all path: emits the whole lesson example list in one
+    /// shot. Distinct from `on_run_example` because per-line
+    /// emission would race the Yew state batcher and lose all
+    /// but the last entry (see `handlers::make_submit_batch`).
+    pub on_run_batch: Callback<Vec<String>>,
     pub on_close: Callback<MouseEvent>,
     /// Which sub-tab to land on when this panel mounts.
     /// Header "Tutorial" click -> `Toc` (browsable index).
@@ -131,12 +136,10 @@ fn render_lesson(props: &TutorialPanelProps) -> Html {
     let is_first = props.lesson_idx == 0;
     let is_last = props.lesson_idx + 1 == total;
     let on_run_all = {
-        let on_run = props.on_run_example.clone();
+        let on_run_batch = props.on_run_batch.clone();
         let lines = lesson.examples;
         Callback::from(move |_: MouseEvent| {
-            for line in lines {
-                on_run.emit((*line).to_string());
-            }
+            on_run_batch.emit(lines.iter().map(|s| (*s).to_string()).collect());
         })
     };
     html! {
@@ -165,7 +168,7 @@ fn render_example(line: &'static str, on_run: &Callback<String>) -> Html {
         let line_str = line.to_string();
         Callback::from(move |_| on_run.emit(line_str.clone()))
     };
-    let (code, tip) = crate::split_inline_comment(line);
+    let (code, tip) = crate::entry_render::split_inline_comment(line);
     let title = tip
         .map(|t| format!("{t}\n\nClick to run."))
         .unwrap_or_else(|| "Click to run".to_string());
