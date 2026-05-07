@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-f40acfa3c27b3c44.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-f40acfa3c27b3c44_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-72153811a0c7b7e2.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-72153811a0c7b7e2_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -245,6 +245,59 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             display: flex;
             flex-direction: column;
             min-height: 0;
+        }
+        /* Tutorial mode: side-by-side panes so the lesson and
+           the live transcript both have meaningful vertical
+           space. Each pane scrolls independently. Stacks
+           vertically on narrow viewports. */
+        main.tutorial-split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: 1fr;
+            gap: 0;
+            overflow: hidden;
+            padding: 0;
+        }
+        main.tutorial-split .tutorial-pane {
+            overflow: auto;
+            padding: 16px 20px;
+            border-right: 1px solid var(--surface1);
+            min-height: 0;
+        }
+        main.tutorial-split .repl-pane {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        main.tutorial-split .repl-pane .output {
+            flex: 1;
+            overflow: auto;
+            padding: 16px 20px;
+        }
+        @media (max-width: 900px) {
+            main.tutorial-split {
+                grid-template-columns: 1fr;
+                grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+            }
+            main.tutorial-split .tutorial-pane {
+                border-right: 0;
+                border-bottom: 1px solid var(--surface1);
+            }
+        }
+        /* "Run all" button in the lesson subnav. */
+        .run-all-btn {
+            background: var(--green);
+            color: var(--base);
+            border: 0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .run-all-btn:hover {
+            background: var(--teal);
         }
         .output {
             flex: 1;
@@ -949,7 +1002,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-f40acfa3c27b3c44.js" crossorigin="anonymous" integrity="sha384-U4nDS/31TyRVzLc8QgsgggPACj5olV1pWkDAso+ALPS2U4NY/hss0jOvp5PE8tlK"><link rel="preload" href="/sw-mlpl/mlpl-web-f40acfa3c27b3c44_bg.wasm" crossorigin="anonymous" integrity="sha384-trluGOpwRJFDAGyFqpUM7Wgc49kgFU/tK44kd7n2062KpfszwnHgcGYL4yJydVGf" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-72153811a0c7b7e2.js" crossorigin="anonymous" integrity="sha384-EG8Js4jfrrHsUhA7/IVH84COMLWtU4hgs4IlZwNhDDdnrsOOm+1vPm/pI/OWR4Hj"><link rel="preload" href="/sw-mlpl/mlpl-web-72153811a0c7b7e2_bg.wasm" crossorigin="anonymous" integrity="sha384-nA732i+JlIYob5f/lg/c/+cU+GgvmgolCu7LPho9eZBXFtRlVZ1P4uIUcgQ1Gnln" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
