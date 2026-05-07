@@ -538,8 +538,8 @@
         .paths-panel {
             /* Explicit width (capped at viewport - 32px) so the
                panel and its sticky header are exactly the same
-               size on every stop, regardless of diagram height
-               or stop body content. */
+               size on every step, regardless of diagram height
+               or step body content. */
             width: min(880px, 100% - 32px);
             box-sizing: border-box;
             padding: 16px 24px;
@@ -636,13 +636,13 @@
         .paths-walker-body {
             margin-bottom: 16px;
         }
-        .path-stop {
+        .path-step {
             background: var(--mantle);
             border: 1px solid var(--surface1);
             border-radius: 6px;
             padding: 14px 18px;
         }
-        .path-stop-kind {
+        .path-step-kind {
             display: inline-block;
             background: var(--blue);
             color: var(--base);
@@ -653,22 +653,22 @@
             border-radius: 3px;
             text-transform: uppercase;
         }
-        .path-stop-title {
+        .path-step-title {
             color: var(--text);
             margin: 8px 0 6px 0;
         }
-        .path-stop-why {
+        .path-step-why {
             color: var(--subtext1);
             line-height: 1.5;
             font-style: italic;
             margin: 0 0 10px 0;
         }
-        .path-stop-preview {
+        .path-step-preview {
             color: var(--subtext1);
             line-height: 1.5;
             margin: 0 0 10px 0;
         }
-        .path-stop-error {
+        .path-step-error {
             color: var(--red);
             font-style: italic;
         }

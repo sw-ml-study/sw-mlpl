@@ -34,7 +34,7 @@ fn doc() -> &'static GlossaryDoc {
 
 /// Look up a glossary entry by exact term match (case-
 /// insensitive). Used by the Paths walker to render an
-/// inline glossary excerpt for `Stop::Glossary` stops.
+/// inline glossary excerpt for `Step::Glossary` steps.
 pub fn find_by_term(term: &str) -> Option<&'static GlossaryEntry> {
     let q = term.trim().to_ascii_lowercase();
     doc()
