@@ -13,6 +13,7 @@ pub fn toggle_bool(handle: UseStateHandle<bool>, value: bool) -> Callback<web_sy
     Callback::from(move |_| handle.set(value))
 }
 
+#[derive(Clone)]
 pub struct EvalDeps {
     pub session: Rc<RefCell<WasmSession>>,
     pub history: UseStateHandle<Vec<HistoryEntry>>,
@@ -21,46 +22,64 @@ pub struct EvalDeps {
     pub cmd_index: UseStateHandle<Option<usize>>,
 }
 
+/// Single-line submit: thin wrapper that pipes the line through
+/// the batch path so there is exactly one place that mutates
+/// state. Calling `make_submit` N times in a tight loop USED
+/// to drop N-1 history entries because each call did
+/// `(*deps.history).clone()` -> push one -> `set(new)` --
+/// inside one event tick every clone read the same snapshot
+/// and only the last `set` won (Tutorial Run-All bug, May 7
+/// 2026). Routing through `make_submit_batch` collapses any
+/// number of lines into a single read-modify-write.
 pub fn make_submit(deps: EvalDeps) -> Callback<String> {
-    Callback::from(move |line: String| {
-        let trimmed = line.trim();
-        if trimmed.is_empty() {
-            return;
-        }
+    let batch = make_submit_batch(deps);
+    Callback::from(move |line: String| batch.emit(vec![line]))
+}
 
+/// Evaluate every line in `lines` against the current session
+/// in one pass, then commit all four state handles exactly
+/// once. Empty/whitespace-only lines are skipped (matching
+/// single-line submit semantics); `:clear` and `:help` are
+/// honored mid-batch.
+pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
+    Callback::from(move |lines: Vec<String>| {
         let mut new_history = (*deps.history).clone();
         let mut new_cmds = (*deps.cmd_history).clone();
-        new_cmds.push(trimmed.to_string());
-
-        if trimmed == ":clear" {
-            deps.session.borrow().clear();
-            new_history.clear();
-            deps.cmd_history.set(new_cmds);
-            deps.cmd_index.set(None);
-            deps.input_value.set(String::new());
-            deps.history.set(new_history);
+        let mut any = false;
+        for line in lines {
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            any = true;
+            new_cmds.push(trimmed.to_string());
+            if trimmed == ":clear" {
+                deps.session.borrow().clear();
+                new_history.clear();
+                continue;
+            }
+            let entry = if trimmed == ":help" {
+                HistoryEntry {
+                    input: trimmed.to_string(),
+                    output: help_text(),
+                    is_error: false,
+                    kind: EntryKind::Command,
+                }
+            } else {
+                let result = deps.session.borrow().eval(trimmed);
+                let is_error = result.starts_with("error:");
+                HistoryEntry {
+                    input: trimmed.to_string(),
+                    output: result,
+                    is_error,
+                    kind: EntryKind::Command,
+                }
+            };
+            new_history.push(entry);
+        }
+        if !any {
             return;
         }
-
-        let entry = if trimmed == ":help" {
-            HistoryEntry {
-                input: trimmed.to_string(),
-                output: help_text(),
-                is_error: false,
-                kind: EntryKind::Command,
-            }
-        } else {
-            let result = deps.session.borrow().eval(trimmed);
-            let is_error = result.starts_with("error:");
-            HistoryEntry {
-                input: trimmed.to_string(),
-                output: result,
-                is_error,
-                kind: EntryKind::Command,
-            }
-        };
-
-        new_history.push(entry);
         deps.history.set(new_history);
         deps.cmd_history.set(new_cmds);
         deps.cmd_index.set(None);
