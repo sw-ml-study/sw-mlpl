@@ -38,7 +38,7 @@ pub fn run_example(
 }
 
 #[derive(Clone, Copy, PartialEq)]
-enum TutorialView {
+pub enum TutorialView {
     Toc,
     Lesson,
 }
@@ -51,11 +51,17 @@ pub struct TutorialPanelProps {
     pub on_jump: Callback<usize>,
     pub on_run_example: Callback<String>,
     pub on_close: Callback<MouseEvent>,
+    /// Which sub-tab to land on when this panel mounts.
+    /// Header "Tutorial" click -> `Toc` (browsable index).
+    /// Paths "Open lesson X" click -> `Lesson` (jumps
+    /// straight to the selected lesson's content, since
+    /// the user already chose a specific lesson upstream).
+    pub initial_view: TutorialView,
 }
 
 #[function_component(TutorialPanel)]
 pub fn tutorial_panel(props: &TutorialPanelProps) -> Html {
-    let view = use_state(|| TutorialView::Toc);
+    let view = use_state(|| props.initial_view);
     let on_select_toc = {
         let view = view.clone();
         Callback::from(move |_| view.set(TutorialView::Toc))
