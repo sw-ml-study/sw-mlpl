@@ -63,7 +63,7 @@ fn app() -> Html {
     let tutorial_initial_view = use_state(|| TutorialView::Toc);
     // Paths-mode state: outer None = not in paths mode; inner
     // (None, _) = picker; inner (Some(p), s) = walking path p
-    // at stop s. See paths_view::PathsView.
+    // at step s. See paths_view::PathsView.
     let path_state = use_state(|| None::<(Option<usize>, usize)>);
     let in_tutorial = lesson_idx.is_some();
     let active_session = if in_tutorial {

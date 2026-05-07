@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-27089b8d4aebaeab.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-27089b8d4aebaeab_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-ad21b657ddf48aa1.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-ad21b657ddf48aa1_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -549,8 +549,8 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         .paths-panel {
             /* Explicit width (capped at viewport - 32px) so the
                panel and its sticky header are exactly the same
-               size on every stop, regardless of diagram height
-               or stop body content. */
+               size on every step, regardless of diagram height
+               or step body content. */
             width: min(880px, 100% - 32px);
             box-sizing: border-box;
             padding: 16px 24px;
@@ -647,13 +647,13 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         .paths-walker-body {
             margin-bottom: 16px;
         }
-        .path-stop {
+        .path-step {
             background: var(--mantle);
             border: 1px solid var(--surface1);
             border-radius: 6px;
             padding: 14px 18px;
         }
-        .path-stop-kind {
+        .path-step-kind {
             display: inline-block;
             background: var(--blue);
             color: var(--base);
@@ -664,22 +664,22 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             border-radius: 3px;
             text-transform: uppercase;
         }
-        .path-stop-title {
+        .path-step-title {
             color: var(--text);
             margin: 8px 0 6px 0;
         }
-        .path-stop-why {
+        .path-step-why {
             color: var(--subtext1);
             line-height: 1.5;
             font-style: italic;
             margin: 0 0 10px 0;
         }
-        .path-stop-preview {
+        .path-step-preview {
             color: var(--subtext1);
             line-height: 1.5;
             margin: 0 0 10px 0;
         }
-        .path-stop-error {
+        .path-step-error {
             color: var(--red);
             font-style: italic;
         }
@@ -1002,7 +1002,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-27089b8d4aebaeab.js" crossorigin="anonymous" integrity="sha384-743ip05TSZ9hKvc27OxpQBGx1hzNEZf9kRFDrBdc+jouT4nv9uTLP6wbA8xz1NTX"><link rel="preload" href="/sw-mlpl/mlpl-web-27089b8d4aebaeab_bg.wasm" crossorigin="anonymous" integrity="sha384-1wzooJkfS2thuk085Y8KuC/1bQMfMYKMSU1Ned18d/RZEqMO1F77t2pHonb37O2J" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-ad21b657ddf48aa1.js" crossorigin="anonymous" integrity="sha384-743ip05TSZ9hKvc27OxpQBGx1hzNEZf9kRFDrBdc+jouT4nv9uTLP6wbA8xz1NTX"><link rel="preload" href="/sw-mlpl/mlpl-web-ad21b657ddf48aa1_bg.wasm" crossorigin="anonymous" integrity="sha384-K8BpLM3jMjinMX/hWlO8Rdsq0AS9TPJHppk5zayk8zKRpeo0dcy14vh5EilnVEf2" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
