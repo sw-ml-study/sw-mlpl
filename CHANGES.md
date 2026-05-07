@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-07
+
+- fix(mlpl-build): emit Cargo.toml path as a TOML literal string (issue #3)
+
 ## 2026-05-06
 
+- docs(changes): refresh CHANGES.md to head
 - feat(web): tutorial side-by-side layout + "Run all" button
 - docs(changes): refresh CHANGES.md to head
 - fix(web): "Open lesson" from Paths jumps to the Current Lesson sub-tab
