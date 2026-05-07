@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-06
 
+- fix(web): "Open lesson" from Paths jumps to the Current Lesson sub-tab
+- docs(changes): refresh CHANGES.md to head
 - fix(web): pin paths-panel + walker-header to a stable explicit width
 - docs(changes): refresh CHANGES.md to head
 - fix(web): pin paths-walker nav controls to a sticky header
