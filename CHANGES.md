@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-07
 
+- fix(web): tutorial Run All now records every example, not just the last
+- docs(changes): refresh CHANGES.md to head
 - fix(mlpl-build): honor platform exe suffix when locating the produced binary
 - docs(changes): refresh CHANGES.md to head
 - fix(mlpl-build): emit Cargo.toml path as a TOML literal string (issue #3)
