@@ -26,7 +26,7 @@ mod tutorial;
 
 use components::{
     DocDialog, Footer, GithubCorner, Header, HeaderMode, InputRow, ModeBar, TutorialPanel,
-    TutorialPanelProps, Welcome,
+    TutorialPanelProps, TutorialView, Welcome,
 };
 use handlers::{
     EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit, toggle_bool,
@@ -52,6 +52,12 @@ fn app() -> Html {
     let cmd_index = use_state(|| None::<usize>);
     let dialog_open = use_state(|| false);
     let lesson_idx = use_state(|| None::<usize>);
+    // Which sub-tab the TutorialPanel should land on the
+    // next time it mounts. Header "Tutorial" click sets
+    // this to Toc; Paths "Open lesson X" sets it to Lesson
+    // (because the user already chose a specific lesson
+    // and we want the content view, not the index list).
+    let tutorial_initial_view = use_state(|| TutorialView::Toc);
     // Paths-mode state: outer None = not in paths mode; inner
     // (None, _) = picker; inner (Some(p), s) = walking path p
     // at stop s. See paths_view::PathsView.
@@ -93,6 +99,7 @@ fn app() -> Html {
         history: active_history,
         dialog_open,
         lesson_idx,
+        tutorial_initial_view,
         path_state,
     })
 }
@@ -107,6 +114,7 @@ struct RenderArgs {
     history: UseStateHandle<Vec<HistoryEntry>>,
     dialog_open: UseStateHandle<bool>,
     lesson_idx: UseStateHandle<Option<usize>>,
+    tutorial_initial_view: UseStateHandle<TutorialView>,
     path_state: UseStateHandle<Option<(Option<usize>, usize)>>,
 }
 
@@ -134,6 +142,7 @@ fn render(a: RenderArgs) -> Html {
     let cb = mode_callbacks(
         a.lesson_idx.clone(),
         a.path_state.clone(),
+        a.tutorial_initial_view.clone(),
         a.on_demo.clone(),
     );
     let on_run_example = run_example(a.on_submit.clone(), a.input_value.clone());
@@ -150,7 +159,7 @@ fn render(a: RenderArgs) -> Html {
             />
             <ModeBar on_clear={a.on_clear} on_demo={a.on_demo} {tutorial_active} />
             <main>
-                { render_tutorial(cur_lesson, a.lesson_idx.clone(), on_run_example) }
+                { render_tutorial(cur_lesson, a.lesson_idx.clone(), *a.tutorial_initial_view, on_run_example) }
                 <paths_view::PathsView
                     state={cur_path}
                     on_change={cb.path_change}
@@ -185,6 +194,7 @@ struct ModeCallbacks {
 fn mode_callbacks(
     lesson_idx: UseStateHandle<Option<usize>>,
     path_state: UseStateHandle<Option<(Option<usize>, usize)>>,
+    tutorial_view: UseStateHandle<TutorialView>,
     on_demo: Callback<usize>,
 ) -> ModeCallbacks {
     let repl = {
@@ -198,9 +208,11 @@ fn mode_callbacks(
     let tutorial = {
         let l = lesson_idx.clone();
         let p = path_state.clone();
+        let v = tutorial_view.clone();
         Callback::from(move |_| {
             p.set(None);
             if l.is_none() {
+                v.set(TutorialView::Toc);
                 l.set(Some(0));
             }
         })
@@ -222,8 +234,10 @@ fn mode_callbacks(
     let path_open_lesson = {
         let l = lesson_idx.clone();
         let p = path_state.clone();
+        let v = tutorial_view;
         Callback::from(move |i: usize| {
             p.set(None);
+            v.set(TutorialView::Lesson);
             l.set(Some(i));
         })
     };
@@ -249,6 +263,7 @@ fn mode_callbacks(
 fn render_tutorial(
     cur: Option<usize>,
     lesson: UseStateHandle<Option<usize>>,
+    initial_view: TutorialView,
     on_run_example: Callback<String>,
 ) -> Html {
     let Some(idx) = cur else {
@@ -265,6 +280,7 @@ fn render_tutorial(
         on_jump,
         on_run_example,
         on_close,
+        initial_view,
     };
     html! { <TutorialPanel ..props /> }
 }
