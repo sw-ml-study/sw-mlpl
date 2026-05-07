@@ -86,14 +86,14 @@ fn render_walker(props: &PathsViewProps, path_idx: usize, stop_idx: usize) -> Ht
             <div class="paths-walker-header">
                 <button class="ctrl-btn" onclick={on_back} title="Back to picker">{"\u{2190} Paths"}</button>
                 <span class="paths-walker-title">{ path.title }</span>
-                <span class="paths-walker-progress">{ format!("Stop {} of {}", stop_idx + 1, total) }</span>
+                <div class="paths-walker-nav">
+                    <button class="ctrl-btn" disabled={is_first} onclick={on_prev} title="Previous stop">{"\u{2190}"}</button>
+                    <span class="paths-walker-progress">{ format!("Stop {} of {}", stop_idx + 1, total) }</span>
+                    <button class="ctrl-btn" disabled={is_last} onclick={on_next} title="Next stop">{"\u{2192}"}</button>
+                </div>
                 <button class="ctrl-btn" onclick={on_close} title="Exit paths mode">{"\u{2715}"}</button>
             </div>
             <div class="paths-walker-body">{ render_stop(props, stop) }</div>
-            <div class="paths-walker-footer">
-                <button class="ctrl-btn" disabled={is_first} onclick={on_prev}>{"\u{2190} Prev"}</button>
-                <button class="ctrl-btn" disabled={is_last} onclick={on_next}>{"Next \u{2192}"}</button>
-            </div>
         </div>
     }
 }
