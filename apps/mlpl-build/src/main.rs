@@ -63,20 +63,20 @@ fn run(args: &Args) -> Result<(), String> {
     }
 
     // Locate the produced binary. cargo places it at
-    // `<target-dir>/[<triple>/]release/<name>[.wasm]`, where `<name>`
-    // is either `mlpl-build-user` (native, dashes preserved) or
-    // `mlpl_build_user.wasm` (wasm, dashes -> underscores). Both
-    // variants have been observed across cargo versions; try each.
+    // `<target-dir>/[<triple>/]release/<name>[<suffix>]`, where
+    // `<name>` is either `mlpl-build-user` (dashes preserved) or
+    // `mlpl_build_user` (dashes -> underscores; both variants
+    // observed across cargo versions) and `<suffix>` is the
+    // platform's executable suffix:
+    //   - native build: `.exe` on Windows, empty elsewhere
+    //     (via `std::env::consts::EXE_SUFFIX`)
+    //   - wasm32 target: `.wasm`
     let mut release_dir = tmp.join("target");
     if let Some(d) = args.target.as_deref() {
         release_dir.push(d);
     }
     release_dir.push("release");
-    let candidates: &[&str] = if args.target.as_deref() == Some("wasm32-unknown-unknown") {
-        &["mlpl_build_user.wasm", "mlpl-build-user.wasm"]
-    } else {
-        &["mlpl-build-user", "mlpl_build_user"]
-    };
+    let candidates = candidate_names(args.target.as_deref(), std::env::consts::EXE_SUFFIX);
     let binary = candidates
         .iter()
         .map(|name| release_dir.join(name))
@@ -128,6 +128,30 @@ fn make_temp_project(workspace: &Path) -> Result<PathBuf, String> {
     std::fs::write(tmp.join("Cargo.toml"), cargo_toml)
         .map_err(|e| format!("writing Cargo.toml: {e}"))?;
     Ok(tmp)
+}
+
+/// Candidate filenames cargo might produce for the temp
+/// project's bin target. Two variations:
+/// 1. Cargo crates have historically used either dashed or
+///    underscored binary names (depends on cargo version);
+///    we try both.
+/// 2. The file extension depends on `target`: `.wasm` for
+///    `wasm32-unknown-unknown`, otherwise the platform's
+///    executable suffix (`.exe` on Windows, empty on
+///    Mac/Linux). Issue #3.5: Windows builds produced
+///    `mlpl-build-user.exe` but the lookup only checked
+///    unsuffixed names; cargo build "succeeded" but
+///    mlpl-build still bailed.
+fn candidate_names(target: Option<&str>, exe_suffix: &str) -> Vec<String> {
+    let suffix = if target == Some("wasm32-unknown-unknown") {
+        ".wasm"
+    } else {
+        exe_suffix
+    };
+    vec![
+        format!("mlpl-build-user{suffix}"),
+        format!("mlpl_build_user{suffix}"),
+    ]
 }
 
 /// Build the temp project's Cargo.toml string. Extracted from
@@ -255,5 +279,44 @@ mod tests {
         let weird = PathBuf::from("/tmp/mike's project");
         let err = render_cargo_toml(&weird).expect_err("should reject");
         assert!(err.contains("single quote"), "msg was: {err}");
+    }
+
+    /// Issue: Windows native builds produce `mlpl-build-user.exe`
+    /// but the candidate list previously hard-coded unsuffixed
+    /// names, so mlpl-build reported "no expected output found"
+    /// after a successful cargo build. This regression guard
+    /// asserts the suffix is honored.
+    #[test]
+    fn candidate_names_appends_exe_suffix_on_windows() {
+        let names = candidate_names(None, ".exe");
+        assert_eq!(
+            names,
+            vec![
+                "mlpl-build-user.exe".to_string(),
+                "mlpl_build_user.exe".to_string()
+            ]
+        );
+    }
+
+    #[test]
+    fn candidate_names_unsuffixed_on_unix() {
+        let names = candidate_names(None, "");
+        assert_eq!(
+            names,
+            vec!["mlpl-build-user".to_string(), "mlpl_build_user".to_string()]
+        );
+    }
+
+    #[test]
+    fn candidate_names_uses_wasm_extension_for_wasm32_target() {
+        // Wasm extension wins over the host's exe suffix.
+        let names = candidate_names(Some("wasm32-unknown-unknown"), ".exe");
+        assert_eq!(
+            names,
+            vec![
+                "mlpl-build-user.wasm".to_string(),
+                "mlpl_build_user.wasm".to_string()
+            ]
+        );
     }
 }
