@@ -124,34 +124,21 @@ fn render_toc(current: usize, on_jump_then_show: Callback<usize>) -> Html {
 }
 
 fn render_lesson(props: &TutorialPanelProps) -> Html {
-    let lesson = match LESSONS.get(props.lesson_idx) {
-        Some(l) => l,
-        None => return html! {},
+    let Some(lesson) = LESSONS.get(props.lesson_idx) else {
+        return html! {};
     };
     let total = LESSONS.len();
     let is_first = props.lesson_idx == 0;
     let is_last = props.lesson_idx + 1 == total;
-    let examples_html = lesson.examples.iter().map(|line| {
-        let line_str = (*line).to_string();
-        let on_click = {
-            let on_run = props.on_run_example.clone();
-            let line_str = line_str.clone();
-            Callback::from(move |_| on_run.emit(line_str.clone()))
-        };
-        // Optional ` # explanation` suffix becomes a hover
-        // tooltip; the visible code is the prefix only. The
-        // full line still goes to eval (the lexer drops `#`
-        // to end of line, so the comment is harmless).
-        let (code, tip) = crate::split_inline_comment(line);
-        let title = tip
-            .map(|t| format!("{t}\n\nClick to run."))
-            .unwrap_or_else(|| "Click to run".to_string());
-        html! {
-            <button class="lesson-example" onclick={on_click} title={title}>
-                <span class="example-prompt">{"mlpl> "}</span>{ code }
-            </button>
-        }
-    });
+    let on_run_all = {
+        let on_run = props.on_run_example.clone();
+        let lines = lesson.examples;
+        Callback::from(move |_: MouseEvent| {
+            for line in lines {
+                on_run.emit((*line).to_string());
+            }
+        })
+    };
     html! {
         <>
             <div class="tutorial-subnav">
@@ -161,10 +148,30 @@ fn render_lesson(props: &TutorialPanelProps) -> Html {
                 </div>
                 <span class="tutorial-progress">{ format!("Lesson {} of {}", props.lesson_idx + 1, total) }</span>
                 <h2>{ lesson.title }</h2>
+                <button class="run-all-btn" onclick={on_run_all} title="Run every example in this lesson, in order">{"Run all"}</button>
             </div>
             <div class="tutorial-intro">{ crate::intro_md::render(lesson.intro) }</div>
-            <div class="lesson-examples">{ for examples_html }</div>
+            <div class="lesson-examples">
+                { for lesson.examples.iter().map(|line| render_example(line, &props.on_run_example)) }
+            </div>
             <p class="tutorial-tryit"><strong>{"Try it: "}</strong>{ lesson.try_it }</p>
         </>
+    }
+}
+
+fn render_example(line: &'static str, on_run: &Callback<String>) -> Html {
+    let on_click = {
+        let on_run = on_run.clone();
+        let line_str = line.to_string();
+        Callback::from(move |_| on_run.emit(line_str.clone()))
+    };
+    let (code, tip) = crate::split_inline_comment(line);
+    let title = tip
+        .map(|t| format!("{t}\n\nClick to run."))
+        .unwrap_or_else(|| "Click to run".to_string());
+    html! {
+        <button class="lesson-example" onclick={on_click} title={title}>
+            <span class="example-prompt">{"mlpl> "}</span>{ code }
+        </button>
     }
 }
