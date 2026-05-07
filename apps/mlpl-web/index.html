@@ -235,6 +235,59 @@
             flex-direction: column;
             min-height: 0;
         }
+        /* Tutorial mode: side-by-side panes so the lesson and
+           the live transcript both have meaningful vertical
+           space. Each pane scrolls independently. Stacks
+           vertically on narrow viewports. */
+        main.tutorial-split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: 1fr;
+            gap: 0;
+            overflow: hidden;
+            padding: 0;
+        }
+        main.tutorial-split .tutorial-pane {
+            overflow: auto;
+            padding: 16px 20px;
+            border-right: 1px solid var(--surface1);
+            min-height: 0;
+        }
+        main.tutorial-split .repl-pane {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        main.tutorial-split .repl-pane .output {
+            flex: 1;
+            overflow: auto;
+            padding: 16px 20px;
+        }
+        @media (max-width: 900px) {
+            main.tutorial-split {
+                grid-template-columns: 1fr;
+                grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+            }
+            main.tutorial-split .tutorial-pane {
+                border-right: 0;
+                border-bottom: 1px solid var(--surface1);
+            }
+        }
+        /* "Run all" button in the lesson subnav. */
+        .run-all-btn {
+            background: var(--green);
+            color: var(--base);
+            border: 0;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-left: auto;
+        }
+        .run-all-btn:hover {
+            background: var(--teal);
+        }
         .output {
             flex: 1;
             overflow-y: auto;

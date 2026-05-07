@@ -152,26 +152,26 @@ fn render(a: RenderArgs) -> Html {
             <GithubCorner url={REPO_URL} />
             <Header
                 on_help={open_dialog}
-                on_select_repl={cb.repl}
-                on_select_tutorial={cb.tutorial}
-                on_select_paths={cb.paths}
+                on_select_repl={cb.repl.clone()}
+                on_select_tutorial={cb.tutorial.clone()}
+                on_select_paths={cb.paths.clone()}
                 mode={header_mode}
             />
             <ModeBar on_clear={a.on_clear} on_demo={a.on_demo} {tutorial_active} />
-            <main>
-                { render_tutorial(cur_lesson, a.lesson_idx.clone(), *a.tutorial_initial_view, on_run_example) }
-                <paths_view::PathsView
-                    state={cur_path}
-                    on_change={cb.path_change}
-                    on_open_lesson={cb.path_open_lesson}
-                    on_run_demo={cb.path_run_demo}
-                />
-                <div id="output" class="output">
-                    { if tutorial_active || paths_active { html!{} } else { html!{ <Welcome /> } } }
-                    { for a.history.iter().map(render_entry) }
-                </div>
-                <InputRow value={(*a.input_value).clone()} on_input={on_input} on_keydown={on_keydown} in_tutorial={tutorial_active} />
-            </main>
+            { render_main(MainArgs {
+                tutorial_active,
+                paths_active,
+                cur_lesson,
+                lesson_idx: a.lesson_idx.clone(),
+                initial_view: *a.tutorial_initial_view,
+                cur_path,
+                cb: &cb,
+                history: &a.history,
+                input_value: &a.input_value,
+                on_input,
+                on_keydown,
+                on_run_example,
+            }) }
             <Footer url={REPO_URL} />
             <DocDialog open={*a.dialog_open} on_close={close_dialog} />
         </>
@@ -257,6 +257,59 @@ fn mode_callbacks(
         path_change,
         path_open_lesson,
         path_run_demo,
+    }
+}
+
+struct MainArgs<'a> {
+    tutorial_active: bool,
+    paths_active: bool,
+    cur_lesson: Option<usize>,
+    lesson_idx: UseStateHandle<Option<usize>>,
+    initial_view: TutorialView,
+    cur_path: Option<(Option<usize>, usize)>,
+    cb: &'a ModeCallbacks,
+    history: &'a UseStateHandle<Vec<HistoryEntry>>,
+    input_value: &'a UseStateHandle<String>,
+    on_input: Callback<InputEvent>,
+    on_keydown: Callback<web_sys::KeyboardEvent>,
+    on_run_example: Callback<String>,
+}
+
+fn render_main(a: MainArgs) -> Html {
+    let tutorial_pane =
+        render_tutorial(a.cur_lesson, a.lesson_idx, a.initial_view, a.on_run_example);
+    let paths_pane = html! {
+        <paths_view::PathsView
+            state={a.cur_path}
+            on_change={a.cb.path_change.clone()}
+            on_open_lesson={a.cb.path_open_lesson.clone()}
+            on_run_demo={a.cb.path_run_demo.clone()}
+        />
+    };
+    let repl_pane = html! {
+        <>
+            <div id="output" class="output">
+                { if a.tutorial_active || a.paths_active { html!{} } else { html!{ <Welcome /> } } }
+                { for a.history.iter().map(render_entry) }
+            </div>
+            <InputRow value={(**a.input_value).clone()} on_input={a.on_input} on_keydown={a.on_keydown} in_tutorial={a.tutorial_active} />
+        </>
+    };
+    if a.tutorial_active {
+        html! {
+            <main class="tutorial-split">
+                <section class="tutorial-pane">{ tutorial_pane }</section>
+                <section class="repl-pane">{ repl_pane }</section>
+            </main>
+        }
+    } else {
+        html! {
+            <main>
+                { tutorial_pane }
+                { paths_pane }
+                { repl_pane }
+            </main>
+        }
     }
 }
 
