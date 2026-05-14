@@ -39,6 +39,10 @@ tower-http = { version = "0.5", features = ["fs", "trace"] }
 axum-server = { version = "0.7", features = ["tls-rustls"] }
 rcgen = "0.13"
 sha2 = "0.10"
+# Saga 21.5 step 004: reuse the CLI viz cache (is_svg_string
+# detector + write_to_cache helper) for the server-side eval
+# pipeline integration with `/v1/viz` storage.
+mlpl-cli = { path = "../mlpl-cli" }
 # rustls 0.23 requires an explicit crypto provider; pick
 # `ring` (the historical default; aws-lc-rs is the
 # alternative and has different licensing).

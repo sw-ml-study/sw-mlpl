@@ -15,6 +15,7 @@ pub mod handlers;
 pub mod peers;
 pub mod server;
 pub mod sessions;
+pub mod viz_storage;
 
 /// Saga 21.5 step 001: Server-Sent-Events streaming eval. Inline
 /// submodule of the crate root (rather than a top-level file) so
@@ -32,7 +33,7 @@ pub mod sse {
     use axum::extract::{Path, State};
     use axum::http::{HeaderMap, StatusCode};
     use axum::response::sse::{Event, KeepAlive, Sse};
-    use mlpl_eval::{EvalError, MetricSink, eval_program_value};
+    use mlpl_eval::{MetricSink, eval_program_value};
     use mlpl_parser::{lex, parse};
     use serde::Serialize;
     use tokio::sync::mpsc;
@@ -41,7 +42,7 @@ pub mod sse {
     use uuid::Uuid;
 
     use crate::auth::{AuthMode, check_token, extract_bearer};
-    use crate::handlers::{ErrorResponse, EvalRequest, json_err, value_kind};
+    use crate::handlers::{ErrorResponse, EvalRequest, json_err};
     use crate::server::AppState;
 
     /// One frame on the SSE stream. The first frame is always
@@ -61,6 +62,16 @@ pub mod sse {
         Done {
             value: String,
             kind: &'static str,
+            /// Saga 21.5 step 004: when the eval returned an
+            /// SVG-shaped string, this carries the URL the
+            /// `/v1/viz` storage minted for it. `None` (omitted
+            /// from JSON) for non-SVG results.
+            #[serde(skip_serializing_if = "Option::is_none")]
+            viz_url: Option<String>,
+            /// Saga 21.5 step 004: server-side `MLPL_CACHE_DIR`
+            /// path for the same SVG, when configured.
+            #[serde(skip_serializing_if = "Option::is_none")]
+            viz_local_path: Option<String>,
         },
         /// Saga 21.5 step 003: terminal frame for cooperative
         /// cancellation. Mirrors `EvalError::Cancelled`'s `step`
@@ -89,10 +100,21 @@ pub mod sse {
                     "metric".to_string(),
                     serde_json::json!({"name": name, "step": step, "value": value}),
                 ),
-                Self::Done { value, kind } => (
-                    "done".to_string(),
-                    serde_json::json!({"value": value, "kind": kind}),
-                ),
+                Self::Done {
+                    value,
+                    kind,
+                    viz_url,
+                    viz_local_path,
+                } => {
+                    let mut payload = serde_json::json!({"value": value, "kind": kind});
+                    if let Some(u) = viz_url {
+                        payload["viz_url"] = serde_json::Value::String(u.clone());
+                    }
+                    if let Some(p) = viz_local_path {
+                        payload["viz_local_path"] = serde_json::Value::String(p.clone());
+                    }
+                    ("done".to_string(), payload)
+                }
                 Self::Cancelled {
                     step,
                     partial_losses,
@@ -140,6 +162,7 @@ pub mod sse {
         mut session: crate::sessions::Session,
         stmts: Vec<mlpl_parser::Expr>,
         sessions_map: crate::sessions::SessionMap,
+        viz: crate::viz_storage::SharedVizStore,
         tx: mpsc::Sender<SseEvent>,
     ) {
         tokio::spawn(async move {
@@ -163,22 +186,7 @@ pub mod sse {
             session.env.clear_metric_sink();
             session.env.clear_peer_dispatcher();
             session.env.clear_interrupt();
-            let terminal = match value {
-                Ok(v) => SseEvent::Done {
-                    value: format!("{v}"),
-                    kind: value_kind(&v),
-                },
-                Err(EvalError::Cancelled {
-                    step,
-                    partial_losses,
-                }) => SseEvent::Cancelled {
-                    step,
-                    partial_losses,
-                },
-                Err(e) => SseEvent::Error {
-                    error: format!("{e}"),
-                },
-            };
+            let terminal = crate::viz_storage::result_to_sse(&viz, value).await;
             let _ = tx.send(terminal).await;
             sessions_map.write().await.insert(id, session);
         });
@@ -235,7 +243,9 @@ pub mod sse {
                 state.peers.clone(),
                 state.peer_sessions.clone(),
             )));
-        spawn_eval_task(id, session, stmts, state.sessions.clone(), tx);
+        let sessions = state.sessions.clone();
+        let viz = state.viz.clone();
+        spawn_eval_task(id, session, stmts, sessions, viz, tx);
         let stream = ReceiverStream::new(rx).map(|ev| Ok::<_, Infallible>(ev.to_axum_event()));
         Ok(Sse::new(stream).keep_alive(KeepAlive::default()))
     }

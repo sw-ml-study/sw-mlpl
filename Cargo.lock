@@ -1941,6 +1941,7 @@ dependencies = [
  "base64",
  "bincode",
  "mlpl-array",
+ "mlpl-cli",
  "mlpl-eval",
  "mlpl-parser",
  "rand 0.8.6",

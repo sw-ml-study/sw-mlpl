@@ -119,6 +119,10 @@ struct MetricData {
 struct DoneData {
     value: String,
     kind: String,
+    #[serde(default)]
+    viz_url: Option<String>,
+    #[serde(default)]
+    viz_local_path: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -276,6 +280,8 @@ fn handle_frame(
             Ok(Some(EvalResponse {
                 value: d.value,
                 kind: d.kind,
+                viz_url: d.viz_url,
+                viz_local_path: d.viz_local_path,
             }))
         }
         "error" => {
