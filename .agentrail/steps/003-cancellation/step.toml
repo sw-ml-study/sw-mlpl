@@ -1,0 +1,12 @@
+number = 3
+slug = "cancellation"
+status = "pending"
+description = """
+Saga 21.5 step 003: cancellation.
+
+Goal: ship POST /v1/sessions/<id>/cancel t..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-13T20:21:25"
+task_type = "production"
+commits = []

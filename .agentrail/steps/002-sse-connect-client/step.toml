@@ -1,6 +1,6 @@
 number = 2
 slug = "sse-connect-client"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 21.5 step 002: sse-connect-client.
 
@@ -8,5 +8,6 @@ Goal: `mlpl-repl --connect <url> --s..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-13T20:03:38"
+completed_at = "2026-05-13T20:21:25"
 task_type = "production"
-commits = []
+commits = ["69787eb03109c1e99074d060d1beec453899b01a"]
