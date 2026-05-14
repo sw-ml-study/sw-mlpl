@@ -455,10 +455,66 @@ The trait + both impls are exercised by
 which spins `mlpl-serve` up in-process on a
 random loopback port and asserts that both
 impls produce the same display string for
-`iota(5) + 1`. The wiring that swaps the
-in-flight evaluator inside the yew REPL flow
-lands in Saga 21.5 step 007 alongside the
-streaming SSE plumbing.
+`iota(5) + 1`.
+
+### Streaming + cancel in the web client (Saga 21.5 step 007)
+
+`RemoteEvaluator` exposes `eval_stream(program,
+on_metric, on_result)` for `train { }` programs
+that emit per-iteration `_metric` frames over
+SSE. The callbacks mirror the wire shapes:
+
+- `on_metric(&RemoteMetric { name, step, value })`
+  fires once per `event: metric` frame.
+- `on_result(StreamOutcome)` fires exactly
+  once with the terminal frame:
+  - `Done { value, kind }` -- matches
+    the non-streaming `/eval` response.
+  - `Cancelled { step, partial_losses }` --
+    when a concurrent `/v1/sessions/<id>/cancel`
+    landed mid-train.
+  - `Error { message }` -- HTTP failure or
+    runtime `event: error`.
+
+`RemoteEvaluator::cancel()` POSTs
+`/v1/sessions/<id>/cancel` against the cached
+server session. `cancel_handle()` returns a
+cheap-to-clone `Send`-able handle so the native
+test can fire cancel from a side thread
+without making the whole `RemoteEvaluator`
+`Send` (the browser is single-threaded so the
+in-tick `cancel()` is the normal path).
+
+The wire path is exercised by
+`apps/mlpl-web/tests/streaming_train_tests.rs`:
+
+- 5-iter train emits 5 metrics, terminal frame
+  is `Done` with `4.5`.
+- `iota(5)+1` produces the same final string
+  in streaming and non-streaming modes (no
+  metrics emitted).
+- Cancel mid-train returns `Cancelled` with
+  the partial loss curve.
+- Lex / parse errors surface as `Error`.
+
+WASM caveat: the browser path currently
+buffers the SSE body to completion before
+parsing (the response is read via
+`gloo::net::http::Response::text().await`
+rather than chunk-by-chunk). The native path
+uses `BufRead::lines` and DOES stream live.
+True live streaming on WASM (ReadableStream
+chunk reads via web-sys) is a follow-up; the
+contract above stays valid in both modes
+because the final delivered frames are
+identical.
+
+The yew REPL UI wiring (cancel button, in-place
+loss-curve update, tutorial lesson) is shipped
+incrementally in follow-up commits; step 007
+ships the wire-level Evaluator extensions +
+tests, the WASM compile path, and the
+pages/ rebuild.
 
 ## Programmatic entry (test harness)
 
