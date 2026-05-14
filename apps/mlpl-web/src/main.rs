@@ -12,6 +12,10 @@ mod demos;
 mod diagrams_view;
 mod entry_render;
 mod eval;
+mod eval_sse;
+mod eval_url;
+#[cfg(target_arch = "wasm32")]
+mod eval_wasm;
 mod glossary_view;
 mod handlers;
 mod help;

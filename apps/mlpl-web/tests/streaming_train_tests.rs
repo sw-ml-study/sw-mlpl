@@ -18,6 +18,14 @@
 #[path = "../src/eval.rs"]
 mod eval;
 
+#[allow(dead_code)]
+#[path = "../src/eval_sse.rs"]
+mod eval_sse;
+
+#[allow(dead_code)]
+#[path = "../src/eval_url.rs"]
+mod eval_url;
+
 use std::cell::RefCell;
 use std::net::SocketAddr;
 use std::rc::Rc;

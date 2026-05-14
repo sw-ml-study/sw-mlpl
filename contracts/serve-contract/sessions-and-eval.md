@@ -516,6 +516,40 @@ ships the wire-level Evaluator extensions +
 tests, the WASM compile path, and the
 pages/ rebuild.
 
+### Viz fetch in connect mode (Saga 21.5 step 008)
+
+`RemoteEvaluator::fetch_viz(viz_url, bearer) ->
+Result<(Vec<u8>, String), String>` retrieves the
+raw bytes + recorded `Content-Type` for a viz
+URL surfaced by the eval pipeline. The browser
+equivalent is `fetch_viz_async` (returns a
+Future for the same tuple). Both accept either
+the path form (`/v1/viz/<id>`, as the eval
+response emits) or an absolute URL
+(`http://host/v1/viz/<id>`, in case a future
+CDN deploy rewrites the URL).
+
+The native impl wraps `reqwest::blocking`; the
+WASM impl wraps `gloo::net::http::Request`. Auth
+uses any valid session bearer (the `/v1/viz`
+endpoint accepts any known token; see step
+004's contract above).
+
+Exercised by
+`apps/mlpl-web/tests/connect_viz_fetch_tests.rs`:
+SVG round-trip through eval + GET, 404 mapping
+for unknown ids, path / absolute URL parity.
+
+Module layout: `apps/mlpl-web/src/eval.rs` was
+split in step 008 to defend the 500-line file
+budget. `eval_sse.rs` owns the shared SSE
+frame parser; `eval_url.rs` owns the
+`?connect=` query-string helpers;
+`eval_wasm.rs` owns the browser-only `gloo::net`
+impls; `eval.rs` retains the trait + shared
+types + native impl + the public `fetch_viz`
+helper.
+
 ## Programmatic entry (test harness)
 
 `mlpl-serve` ships as a binary AND a library so
