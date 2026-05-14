@@ -125,6 +125,88 @@ Error responses match the eval endpoint:
 - `401 Unauthorized` -- missing or wrong bearer.
 - `404 Not Found` -- unknown session id.
 
+### `POST /v1/sessions/{session_id}/eval_stream`
+
+Server-Sent-Events streaming variant of `/eval`. Added in
+Saga 21.5 step 001. **Authenticated** (bearer token, same as
+`/eval`). Lex + parse synchronously so a malformed program
+surfaces as a plain JSON `400` before the SSE stream opens;
+runtime `EvalError`s land as a terminal `event: error` frame
+on the stream.
+
+Request:
+
+```http
+POST /v1/sessions/<id>/eval_stream
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{"program": "train 5 { loss_metric = step + 0.5 ; step + 0.5 }"}
+```
+
+Response on success: `200 OK` with
+`Content-Type: text/event-stream`. The response body is an
+SSE stream. Frame ordering:
+
+1. Exactly one `event: ready` frame as the first event.
+2. Zero-or-more `event: metric` frames -- one per binding
+   ending in `_metric` whose value is a rank-0 scalar, fired
+   after each `train { ... }` iteration. Untagged repeat /
+   for blocks do not produce metric frames; only `train`'s
+   per-iteration scan does.
+3. Exactly one terminal frame: `event: done` on success, or
+   `event: error` on any `EvalError` raised during eval.
+
+`data:` payload schema per event kind:
+
+```text
+event: ready
+data: {}
+
+event: metric
+data: {"name": "loss_metric", "step": 0, "value": 0.5}
+
+event: done
+data: {"value": "<stringified>", "kind": "array"}
+
+event: error
+data: {"error": "<EvalError display>"}
+```
+
+The `done` payload's `value` and `kind` fields match the
+non-streaming `/eval` response body byte-for-byte (same
+`Display` formatting, same `value_kind` mapping). Clients
+that already render `/eval` output can reuse that path on
+the `done` frame.
+
+Error responses (BEFORE the SSE stream opens) match `/eval`:
+
+- **`401 Unauthorized`** -- missing or wrong bearer. Body:
+  `{"error": "missing or invalid authorization"}`.
+- **`404 Not Found`** -- unknown `session_id`. Body:
+  `{"error": "unknown session"}`.
+- **`400 Bad Request`** -- the program failed to lex or
+  parse. Body: `{"error": "<parse error message>"}`.
+  Runtime errors do NOT use this code; they land as a
+  terminal `event: error` frame on a `200` response.
+
+Operational notes:
+
+- The handler removes the session from the session map for
+  the duration of the eval and re-inserts it on completion,
+  so concurrent `/eval` / `/eval_stream` calls on the same
+  session id receive a `404` while the prior eval is still
+  running. Parallel calls on *different* sessions are
+  unaffected.
+- The eval runs on a `tokio::task::spawn_blocking` task so
+  the async runtime stays healthy. Per-iteration metric
+  emission uses `mpsc::Sender::blocking_send`, applying
+  channel-bounded backpressure (capacity 64) if the client
+  reads slowly.
+- The MVP `/eval` endpoint is unchanged. The two endpoints
+  remain peers indefinitely; `/eval` covers callers that
+  don't want a streaming response.
+
 ### `GET /v1/health`
 
 Liveness check. **No authentication required.**
@@ -211,7 +293,13 @@ around it.
   + tokio runtime + `run` orchestration. 3-4 fns,
   under the 7-fn cap.
 - `crates/mlpl-serve/src/lib.rs` -- pub re-exports
-  for tests.
+  for tests, plus inline `pub mod sse` (Saga 21.5
+  step 001) with `SseEvent`, `ChannelMetricSink`,
+  and `eval_stream_handler`. Inline submodule
+  rather than a top-level file so the crate
+  module count stays at the sw-checklist budget;
+  the same precedent applies to the existing
+  inline `tls` mod.
 - `crates/mlpl-serve/src/server.rs` -- `AppState`,
   `build_app`, `run`, `ServerError`. 3-5 fns.
 - `crates/mlpl-serve/src/sessions.rs` --
@@ -238,10 +326,9 @@ follow-up sagas:
   stable. Needs careful security review (allow-
   list config, env-var secrets, rate limiting)
   before shipping.
-- **Server-Sent-Events streaming eval.**
-  Follow-up saga.
-- **Cancellation / interrupt.** The MVP `eval`
-  endpoint blocks until the program finishes.
+- **Cancellation / interrupt.** Both `eval` and
+  `eval_stream` block until the program finishes.
+  Saga 21.5 step 003 adds `/cancel`.
 - **Persistence across restarts.** Sessions are
   in-memory only.
 - **Visualization storage URLs.** SVGs returned

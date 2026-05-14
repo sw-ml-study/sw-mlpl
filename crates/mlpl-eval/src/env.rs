@@ -10,6 +10,7 @@ use mlpl_core::ValueTag;
 use crate::error::EvalError;
 use crate::experiment::ExperimentRecord;
 use crate::grad::OptimizerState;
+use crate::metric_sink::MetricSink;
 use crate::model::ModelSpec;
 use crate::tokenizer::TokenizerSpec;
 use crate::value::Value;
@@ -108,6 +109,12 @@ pub struct Environment {
     /// functions: when `Value::Function` lands, this map either
     /// gets absorbed or stays as the "named-builtin" subset.
     pub(crate) builtin_refs: HashMap<String, String>,
+    /// Saga 21.5 step 001: optional live-metric sink invoked by
+    /// `eval_train` after each iteration with every binding ending
+    /// in `_metric` whose value is a scalar. Local REPL evals leave
+    /// this `None`; the SSE `/eval_stream` handler installs a
+    /// channel-backed sink so the events stream to the client.
+    pub(crate) metric_sink: Option<Arc<dyn MetricSink>>,
 }
 
 impl Environment {
@@ -368,6 +375,27 @@ impl Environment {
     #[must_use]
     pub fn get_builtin_ref(&self, name: &str) -> Option<&String> {
         self.builtin_refs.get(name)
+    }
+
+    /// Saga 21.5 step 001: install a live `MetricSink`. Called by
+    /// the SSE `/eval_stream` handler around one eval call;
+    /// `clear_metric_sink` removes it on exit.
+    pub fn set_metric_sink(&mut self, sink: Arc<dyn MetricSink>) {
+        self.metric_sink = Some(sink);
+    }
+
+    /// Saga 21.5 step 001: remove any installed `MetricSink`.
+    pub fn clear_metric_sink(&mut self) {
+        self.metric_sink = None;
+    }
+
+    /// Saga 21.5 step 001: borrow the installed `MetricSink`, if
+    /// any. `eval_train` clones the `Arc` per iteration so the
+    /// emission loop can call out without holding an immutable
+    /// borrow of the environment alongside the var iterator.
+    #[must_use]
+    pub fn metric_sink(&self) -> Option<Arc<dyn MetricSink>> {
+        self.metric_sink.clone()
     }
 }
 

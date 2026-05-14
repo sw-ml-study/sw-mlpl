@@ -205,6 +205,10 @@ pub fn build_app_with_peers(
         .route("/v1/health", get(health_handler))
         .route("/v1/sessions", post(create_session_handler))
         .route("/v1/sessions/:id/eval", post(eval_handler))
+        .route(
+            "/v1/sessions/:id/eval_stream",
+            post(crate::sse::eval_stream_handler),
+        )
         .route("/v1/sessions/:id/inspect", get(inspect_handler))
         .with_state(state);
     if let Some(dir) = static_dir {
