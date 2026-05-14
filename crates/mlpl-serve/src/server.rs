@@ -14,6 +14,7 @@ use crate::handlers::{
 };
 use crate::peers::{PeerRegistry, PeerSessionMap};
 use crate::sessions::{InterruptMap, SessionMap, new_interrupt_map, new_map};
+use crate::viz_storage::{SharedVizStore, get_handler, new_store, upload_handler};
 
 /// Errors the server can fail with at startup or
 /// while serving. Translated to stderr + non-zero
@@ -57,6 +58,12 @@ pub struct AppState {
     /// does not have to take the sessions lock (which
     /// is held by an in-flight eval).
     pub interrupts: InterruptMap,
+    /// Saga 21.5 step 004: content-addressed store for
+    /// `POST /v1/viz` / `GET /v1/viz/:id`. The eval
+    /// pipeline detects SVG-returning programs and
+    /// stashes their bytes here so the eval response
+    /// can carry a `viz_url`.
+    pub viz: SharedVizStore,
     pub peers: PeerRegistry,
     pub peer_sessions: PeerSessionMap,
     pub auth_mode: AuthMode,
@@ -206,6 +213,7 @@ pub fn build_app_with_peers(
     let state = AppState {
         sessions: new_map(),
         interrupts: new_interrupt_map(),
+        viz: new_store(),
         peers,
         peer_sessions: PeerSessionMap::default(),
         auth_mode,
@@ -220,6 +228,8 @@ pub fn build_app_with_peers(
         )
         .route("/v1/sessions/:id/cancel", post(cancel_handler))
         .route("/v1/sessions/:id/inspect", get(inspect_handler))
+        .route("/v1/viz", post(upload_handler))
+        .route("/v1/viz/:id", get(get_handler))
         .with_state(state);
     if let Some(dir) = static_dir {
         // The web build sets `--public-url /sw-mlpl/`, so

@@ -37,6 +37,19 @@ pub struct EvalRequest {
 pub struct EvalResponse {
     pub value: String,
     pub kind: &'static str,
+    /// Saga 21.5 step 004: when the eval returned an SVG-shaped
+    /// string, the server stashes the bytes in the `viz_storage`
+    /// content-addressed store and surfaces the URL here.
+    /// `None` (skipped on serialization) for non-SVG results.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub viz_url: Option<String>,
+    /// Saga 21.5 step 004: server-side path inside
+    /// `MLPL_CACHE_DIR` (when set) where the same SVG was also
+    /// written. The dev-loopback case (`mlpl-serve` and
+    /// `mlpl-repl` on one host) lets the client open the file
+    /// directly; absent when no cache dir is configured.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub viz_local_path: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -129,9 +142,13 @@ pub async fn eval_handler(
     session.env.clear_interrupt();
     let value = value.map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
     let kind = value_kind(&value);
+    let formatted = format!("{value}");
+    let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
     Ok(Json(EvalResponse {
-        value: format!("{value}"),
+        value: formatted,
         kind,
+        viz_url: attached.url,
+        viz_local_path: attached.local_path,
     }))
 }
 

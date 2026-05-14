@@ -1,6 +1,6 @@
 number = 4
 slug = "viz-storage-endpoint"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 21.5 step 004: viz-storage-endpoint.
 

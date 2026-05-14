@@ -283,6 +283,77 @@ sites). The session's `last_losses` binding is also
 populated with the same vector, so post-cancel
 `:vars` still surfaces the partial curve.
 
+### `POST /v1/viz` and `GET /v1/viz/{id}`
+
+Content-addressed visualization storage. Added in
+Saga 21.5 step 004. **Authenticated** when
+`auth_mode == Required`: the bearer must match SOME
+existing session's token (auth is global, not
+session-scoped, so a browser viz fetch in connect
+mode does not need to know which session minted the
+URL).
+
+`POST /v1/viz`:
+
+```http
+POST /v1/viz
+Authorization: Bearer <any-valid-session-token>
+Content-Type: application/json
+
+{"bytes_base64": "PHN2Zy8+", "content_type": "image/svg+xml"}
+```
+
+Response (`200 OK`):
+
+```json
+{"id": "abcdef0123456789", "url": "/v1/viz/abcdef0123456789"}
+```
+
+The `id` is the first 16 hex chars of the SHA-256
+of the bytes; `url` is the path to fetch them back.
+Idempotent: identical bytes always yield the same
+id.
+
+`GET /v1/viz/{id}`:
+
+```http
+GET /v1/viz/abcdef0123456789
+Authorization: Bearer <any-valid-session-token>
+```
+
+Response: `200 OK` with the stored bytes as body
+and the `Content-Type` header set to the value
+recorded at upload time. `404 Not Found` for an
+unknown id; `401 Unauthorized` for a missing or
+invalid bearer.
+
+**Eval pipeline integration.** When `eval_handler`
+or the SSE `spawn_eval_task` produces a `Value::Str`
+that `mlpl_cli::viz_cache::is_svg_string` identifies
+as SVG, the bytes are stashed in the same store and
+the eval response surfaces a `viz_url` field
+pointing into it. If `MLPL_CACHE_DIR` is set in the
+server's environment, the bytes are ALSO written to
+`<dir>/<sha-prefix>.svg` and the response carries a
+`viz_local_path` field (useful for the dev-loopback
+case where `mlpl-serve` and `mlpl-repl` share a
+filesystem). Both fields are omitted from the JSON
+when absent.
+
+The non-streaming `EvalResponse` shape grows to:
+
+```json
+{
+  "value": "<svg>...</svg>",
+  "kind": "string",
+  "viz_url": "/v1/viz/abcdef0123456789",
+  "viz_local_path": "/var/tmp/mlpl/abcdef012345.svg"
+}
+```
+
+The SSE `done` payload mirrors the same fields when
+present (still omitted by `skip_serializing_if`).
+
 ### `GET /v1/health`
 
 Liveness check. **No authentication required.**
@@ -407,11 +478,9 @@ follow-up sagas:
   above.
 - **Persistence across restarts.** Sessions are
   in-memory only.
-- **Visualization storage URLs.** SVGs returned
-  by the eval endpoint are passed through as
-  strings; the CLI viz cache (step 003) puts
-  them on the local filesystem. Server-side
-  storage + URL minting is a follow-up.
+- ~~**Visualization storage URLs.**~~ Shipped in
+  Saga 21.5 step 004. See `POST /v1/viz` and
+  `GET /v1/viz/{id}` above.
 - **Web UI re-routing to call origin.** Today's
   `apps/mlpl-web` runs entirely in WASM. Pointing
   it at `mlpl-serve` instead is a non-trivial

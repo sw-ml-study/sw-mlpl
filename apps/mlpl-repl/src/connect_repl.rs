@@ -144,7 +144,20 @@ fn eval_and_print(
         eval_remote(client, base_url, session_id, token, program)
     };
     match result {
-        Ok(r) => println!("{}", mlpl_cli::viz_cache::transform_value(&r.value, None)),
+        Ok(r) => {
+            // Saga 21.5 step 004: surface the server-minted
+            // viz_url + viz_local_path (when set) before the
+            // formatted value; the value itself still passes
+            // through the local viz_cache so a co-located SVG
+            // also lands at `viz: <local-path>`.
+            if let Some(url) = &r.viz_url {
+                println!("viz: {url}");
+            }
+            if let Some(path) = &r.viz_local_path {
+                println!("viz: {path}");
+            }
+            println!("{}", mlpl_cli::viz_cache::transform_value(&r.value, None));
+        }
         Err(ClientError::Cancelled {
             step,
             partial_losses,

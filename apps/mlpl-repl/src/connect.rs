@@ -51,7 +51,7 @@ struct CreateSessionResponse {
     token: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Default)]
 pub struct EvalResponse {
     pub value: String,
     /// Tests inspect this; the REPL just prints
@@ -60,6 +60,16 @@ pub struct EvalResponse {
     /// deserialized shape.
     #[allow(dead_code)]
     pub kind: String,
+    /// Saga 21.5 step 004: when the server detected an SVG-shaped
+    /// return value, it stashes the bytes under `/v1/viz/<id>`
+    /// and surfaces the URL here. `None` for non-SVG.
+    #[serde(default)]
+    pub viz_url: Option<String>,
+    /// Saga 21.5 step 004: server-side `MLPL_CACHE_DIR` path
+    /// where the same SVG was written. The dev-loopback case
+    /// (same host) lets the REPL open the file directly.
+    #[serde(default)]
+    pub viz_local_path: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
