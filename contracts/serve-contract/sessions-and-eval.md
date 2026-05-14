@@ -406,6 +406,59 @@ ships before the version bump).
   loopback address; the server prints an error
   and exits non-zero if combined with a
   non-loopback bind.
+- `--cors-allow <origin>` (Saga 21.5 step 006,
+  optional). When set, wraps the router in a
+  `tower-http` `CorsLayer` that lets browsers
+  on `<origin>` reach `/v1/*` with the
+  `Authorization` bearer header. Required for
+  the connect-mode web REPL
+  (`apps/mlpl-web` running on
+  `https://sw-ml-study.github.io/sw-mlpl/` or
+  `http://localhost:8080`) to talk to a
+  `mlpl-serve` on a different origin. Omit
+  for the same-origin deploy (the
+  `--static-dir <pages/>` path).
+
+## Connect-mode web REPL (Saga 21.5 step 006)
+
+`apps/mlpl-web` ships an `Evaluator` trait
+(`src/eval.rs`) with two impls: `WasmEvaluator`
+(default, runs `mlpl_wasm::WasmSession` in the
+browser) and `RemoteEvaluator` (POSTs to a
+remote `mlpl-serve`). The yew app picks between
+them based on a new `?connect=<url>` query-string
+parameter: present + non-empty -> remote;
+absent or empty -> WASM.
+
+The `Evaluator` trait is callback-based
+(`fn eval(program, on_result: FnOnce(String))`)
+so the WASM impl (sync, in-process) and the
+REST impl (async, fetch-backed on the browser
+or blocking `reqwest` on the native test
+target) share one interface. Both impls return
+errors as `"error: <msg>"` strings, matching
+the existing `WasmSession::eval` contract so
+existing call sites' red-text UI test
+(`result.starts_with("error:")`) keeps working.
+
+Server-side requirement: when the web bundle
+runs on a different origin than the
+`mlpl-serve` instance it points at (e.g.
+GitHub Pages + a loopback dev server), the
+server must be launched with
+`--cors-allow <origin>` matching the bundle's
+deployed origin. Otherwise the browser refuses
+the fetch with a CORS error.
+
+The trait + both impls are exercised by
+`apps/mlpl-web/tests/connect_mode_tests.rs`,
+which spins `mlpl-serve` up in-process on a
+random loopback port and asserts that both
+impls produce the same display string for
+`iota(5) + 1`. The wiring that swaps the
+in-flight evaluator inside the yew REPL flow
+lands in Saga 21.5 step 007 alongside the
+streaming SSE plumbing.
 
 ## Programmatic entry (test harness)
 

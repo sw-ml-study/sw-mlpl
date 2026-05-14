@@ -11,6 +11,7 @@ mod components;
 mod demos;
 mod diagrams_view;
 mod entry_render;
+mod eval;
 mod glossary_view;
 mod handlers;
 mod help;
@@ -48,6 +49,21 @@ fn app() -> Html {
     // Isolated scratchpads: main (session+history) vs tutorial.
     let session = use_mut_ref(WasmSession::new);
     let tutorial_session = use_mut_ref(WasmSession::new);
+    // Saga 21.5 step 006: parse the connect-mode URL from
+    // `window.location.search` and log it for visibility. The
+    // actual evaluator swap into the REPL flow lands in step
+    // 007 alongside the streaming SSE plumbing. Until then,
+    // the eval path runs entirely in WASM regardless of the
+    // query parameter -- but the trait + native tests in
+    // `apps/mlpl-web/tests/connect_mode_tests.rs` already
+    // exercise the REST path end-to-end against an in-process
+    // `mlpl-serve`.
+    #[cfg(target_arch = "wasm32")]
+    if let Some(url) = eval::current_connect_url_from_window() {
+        web_sys::console::log_1(
+            &format!("[mlpl-web] ?connect={url} parsed (wiring in step 007)").into(),
+        );
+    }
     let history = use_state(Vec::<HistoryEntry>::new);
     let tutorial_history = use_state(Vec::<HistoryEntry>::new);
     let input_value = use_state(String::new);

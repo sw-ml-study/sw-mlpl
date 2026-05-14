@@ -25,6 +25,12 @@ struct Args {
     tls_cert: Option<PathBuf>,
     tls_key: Option<PathBuf>,
     self_signed: bool,
+    /// Saga 21.5 step 006: when set, the router is wrapped in
+    /// a `tower-http` CORS layer that allows browsers on this
+    /// origin to reach `/v1/*`. Required for the connect-mode
+    /// `apps/mlpl-web` running on a different origin (e.g.
+    /// `https://sw-ml-study.github.io/sw-mlpl/`).
+    cors_allow: Option<String>,
 }
 
 fn main() -> ExitCode {
@@ -36,42 +42,41 @@ fn main() -> ExitCode {
             return ExitCode::from(2);
         }
     };
-    let runtime = match tokio::runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-    {
-        Ok(r) => r,
-        Err(e) => {
-            eprintln!("failed to start tokio runtime: {e}");
-            return ExitCode::FAILURE;
-        }
-    };
-    let tls = match runtime.block_on(build_tls(
-        args.tls_cert.as_deref(),
-        args.tls_key.as_deref(),
-        args.self_signed,
-    )) {
-        Ok(t) => t,
-        Err(e) => {
-            eprintln!("{e}");
-            return ExitCode::from(2);
-        }
-    };
-    let peers = match build_registry(args.peer_pairs.clone(), args.insecure_peers) {
-        Ok(r) => r,
+    match run_main(args) {
+        Ok(()) => ExitCode::SUCCESS,
         Err(msg) => {
             eprintln!("{msg}");
-            return ExitCode::from(2);
-        }
-    };
-    print_banner(&args, &peers, tls.is_some());
-    match runtime.block_on(run(args.bind, args.auth, peers, args.static_dir, tls)) {
-        Ok(()) => ExitCode::SUCCESS,
-        Err(e) => {
-            eprintln!("{e}");
             ExitCode::FAILURE
         }
     }
+}
+
+/// Build the tokio runtime, resolve TLS + peers, and dispatch to
+/// `server::run`. Extracted from `main` so the body stays under
+/// the sw-checklist 50-line LOC budget while still surfacing
+/// every error to stderr.
+fn run_main(args: Args) -> Result<(), String> {
+    let runtime = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .map_err(|e| format!("failed to start tokio runtime: {e}"))?;
+    let tls = runtime.block_on(build_tls(
+        args.tls_cert.as_deref(),
+        args.tls_key.as_deref(),
+        args.self_signed,
+    ))?;
+    let peers = build_registry(args.peer_pairs.clone(), args.insecure_peers)?;
+    print_banner(&args, &peers, tls.is_some());
+    let Args {
+        bind,
+        auth,
+        static_dir,
+        cors_allow,
+        ..
+    } = args;
+    runtime
+        .block_on(run(bind, auth, peers, static_dir, tls, cors_allow))
+        .map_err(|e| format!("{e}"))
 }
 
 fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
@@ -83,6 +88,7 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
     let mut tls_cert: Option<PathBuf> = None;
     let mut tls_key: Option<PathBuf> = None;
     let mut self_signed = false;
+    let mut cors_allow: Option<String> = None;
     let mut it = iter.into_iter();
     while let Some(arg) = it.next() {
         match arg.as_str() {
@@ -92,7 +98,13 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
                     .parse()
                     .map_err(|e| format!("--bind: invalid SocketAddr {v:?}: {e}"))?;
             }
-            "--auth" => auth = parse_auth(&it.next().ok_or("--auth requires a value")?)?,
+            "--auth" => {
+                auth = match it.next().ok_or("--auth requires a value")?.as_str() {
+                    "required" => AuthMode::Required,
+                    "disabled" => AuthMode::Disabled,
+                    o => return Err(format!("--auth: expected required|disabled, got {o:?}")),
+                };
+            }
             "--peer" => peer_pairs.push(parse_peer_arg(
                 &it.next().ok_or("--peer requires a value")?,
             )?),
@@ -113,6 +125,9 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
                 ));
             }
             "--self-signed" => self_signed = true,
+            "--cors-allow" => {
+                cors_allow = Some(it.next().ok_or("--cors-allow requires a value")?);
+            }
             "-h" | "--help" => {
                 print_usage();
                 std::process::exit(0);
@@ -129,6 +144,7 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
         tls_cert,
         tls_key,
         self_signed,
+        cors_allow,
     })
 }
 
@@ -157,14 +173,6 @@ async fn build_tls(
         (Some(_), Some(_), true) => {
             Err("--self-signed is exclusive with --tls-cert/--tls-key; pick one path".into())
         }
-    }
-}
-
-fn parse_auth(value: &str) -> Result<AuthMode, String> {
-    match value {
-        "required" => Ok(AuthMode::Required),
-        "disabled" => Ok(AuthMode::Disabled),
-        other => Err(format!("--auth: expected required|disabled, got {other:?}")),
     }
 }
 
