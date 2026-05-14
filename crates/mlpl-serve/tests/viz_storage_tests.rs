@@ -232,6 +232,47 @@ async fn eval_returning_svg_populates_viz_url() {
     assert_eq!(bytes.as_ref(), svg_value.as_bytes());
 }
 
+/// Saga 21.5 step 005: PNG round-trip. The store accepts
+/// arbitrary `content_type`; `GET` returns the bytes verbatim
+/// with the original `Content-Type` header.
+#[tokio::test(flavor = "multi_thread")]
+async fn post_and_get_png_preserves_content_type_and_bytes() {
+    let addr = start_server(AuthMode::Required).await;
+    let (_id, token) = create_session(addr).await;
+    // Real PNG signature + a few bytes of payload.
+    let png: Vec<u8> = vec![0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3, 4];
+    let post: JsonValue = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/viz"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({
+            "bytes_base64": BASE64.encode(&png),
+            "content_type": "image/png",
+        }))
+        .send()
+        .await
+        .unwrap()
+        .json()
+        .await
+        .unwrap();
+    let url = post["url"].as_str().unwrap();
+
+    let get = reqwest::Client::new()
+        .get(format!("http://{addr}{url}"))
+        .bearer_auth(&token)
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(get.status(), 200);
+    let ct = get
+        .headers()
+        .get("content-type")
+        .and_then(|v| v.to_str().ok())
+        .unwrap_or("");
+    assert_eq!(ct, "image/png");
+    let bytes = get.bytes().await.unwrap();
+    assert_eq!(bytes.as_ref(), png.as_slice());
+}
+
 /// Non-SVG eval responses do NOT populate `viz_url` (the detector
 /// only fires when the string actually looks like SVG).
 #[tokio::test(flavor = "multi_thread")]

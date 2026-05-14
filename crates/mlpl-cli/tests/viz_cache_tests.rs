@@ -1,6 +1,9 @@
 //! Saga 21 step 003: viz cache strategy tests.
 
-use mlpl_cli::viz_cache::{cache_path_for_content, is_svg_string, transform_value, write_to_cache};
+use mlpl_cli::viz_cache::{
+    VizFormat, cache_path_for_content, is_svg_string, transform_value, write_bytes_to_cache,
+    write_to_cache,
+};
 use tempfile::TempDir;
 
 // ---- is_svg_string ----
@@ -153,4 +156,54 @@ fn transform_passes_xml_prolog_svg_through_to_cache() {
     let svg = "<?xml version='1.0'?><svg width='10'/>";
     let out = transform_value(svg, Some(tmp.path()));
     assert!(out.starts_with("viz: "), "should be cached: {out}");
+}
+
+// ---- Saga 21.5 step 005: format-aware cache writes ----
+
+#[test]
+fn write_bytes_to_cache_uses_png_extension_for_png_bytes() {
+    let tmp = TempDir::new().unwrap();
+    let png: &[u8] = &[0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 1, 2, 3];
+    let (path, fmt) = write_bytes_to_cache(png, tmp.path()).unwrap();
+    assert_eq!(fmt, VizFormat::Png);
+    assert_eq!(path.extension().and_then(|s| s.to_str()), Some("png"));
+    let read_back = std::fs::read(&path).unwrap();
+    assert_eq!(read_back, png);
+}
+
+#[test]
+fn write_bytes_to_cache_uses_html_extension_for_html() {
+    let tmp = TempDir::new().unwrap();
+    let html = b"<!DOCTYPE html><html><body>x</body></html>";
+    let (path, fmt) = write_bytes_to_cache(html, tmp.path()).unwrap();
+    assert_eq!(fmt, VizFormat::Html);
+    assert_eq!(path.extension().and_then(|s| s.to_str()), Some("html"));
+}
+
+#[test]
+fn write_bytes_to_cache_uses_svg_extension_for_svg() {
+    let tmp = TempDir::new().unwrap();
+    let svg = b"<svg width='10'/>";
+    let (path, fmt) = write_bytes_to_cache(svg, tmp.path()).unwrap();
+    assert_eq!(fmt, VizFormat::Svg);
+    assert_eq!(path.extension().and_then(|s| s.to_str()), Some("svg"));
+}
+
+#[test]
+fn write_bytes_to_cache_uses_jpg_extension_for_jpeg() {
+    let tmp = TempDir::new().unwrap();
+    let jpeg: &[u8] = &[0xFF, 0xD8, 0xFF, 0xE0, 1, 2, 3];
+    let (path, fmt) = write_bytes_to_cache(jpeg, tmp.path()).unwrap();
+    assert_eq!(fmt, VizFormat::Jpeg);
+    assert_eq!(path.extension().and_then(|s| s.to_str()), Some("jpg"));
+}
+
+#[test]
+fn write_bytes_to_cache_rejects_unrecognized_bytes() {
+    let tmp = TempDir::new().unwrap();
+    let err = write_bytes_to_cache(b"hello world", tmp.path()).unwrap_err();
+    // io::Error with InvalidData kind is the convention for "I
+    // do not know how to cache this payload"; caller falls back
+    // to printing the raw value.
+    assert_eq!(err.kind(), std::io::ErrorKind::InvalidData);
 }
