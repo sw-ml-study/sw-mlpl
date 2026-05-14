@@ -1,0 +1,12 @@
+number = 8
+slug = "web-repl-viz-storage"
+status = "pending"
+description = """
+Saga 21.5 step 008: web-repl-viz-storage.
+
+Goal: in connect mode the web REPL..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-14T15:45:33"
+task_type = "production"
+commits = []
