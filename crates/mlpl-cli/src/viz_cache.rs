@@ -16,32 +16,33 @@
 //! visualization-storage URL endpoint (out of
 //! scope here).
 //!
-//! Other formats (PNG, HTML, JSON) are deferred --
-//! `is_svg_string` is the only detector today.
+//! Saga 21.5 step 005: `VizFormat::detect` now
+//! recognizes SVG, HTML, PNG, JPEG (by magic bytes /
+//! text-prefix sniffing) plus an explicit
+//! `application/json` opt-in. Both the
+//! `MLPL_CACHE_DIR` write path and `mlpl-serve`'s
+//! `/v1/viz` endpoint use this table so non-SVG viz
+//! lands with the right `Content-Type` and the right
+//! filename extension.
 
 use std::fs;
 use std::path::{Path, PathBuf};
 
 use sha2::{Digest, Sha256};
 
+pub use crate::viz_format::VizFormat;
+
 const CACHE_DIR_ENV_VAR: &str = "MLPL_CACHE_DIR";
 const CACHE_DIR_NAME: &str = "mlpl";
 const HASH_PREFIX_LEN: usize = 12;
 
 /// True if `s` looks like an SVG document: optional
-/// XML prolog + leading `<svg`. Whitespace before
-/// either token is allowed; we strip it before the
-/// check.
+/// XML prolog + leading `<svg`. Wrapper over
+/// `VizFormat::detect` for back-compat with the
+/// Saga 21 step 003 callers.
 #[must_use]
 pub fn is_svg_string(s: &str) -> bool {
-    let trimmed = s.trim_start();
-    if trimmed.starts_with("<svg") {
-        return true;
-    }
-    if let Some(rest) = trimmed.strip_prefix("<?xml") {
-        return rest.trim_start().contains("<svg");
-    }
-    false
+    VizFormat::detect(s.as_bytes()) == Some(VizFormat::Svg)
 }
 
 /// Content-addressed cache path for `content` under
@@ -74,6 +75,38 @@ pub fn write_to_cache(content: &str, cache_dir: &Path) -> std::io::Result<PathBu
     let path = cache_path_for_content(content, cache_dir);
     fs::write(&path, content)?;
     Ok(path)
+}
+
+/// Saga 21.5 step 005: format-aware cache write. Sniffs the
+/// payload via `VizFormat::detect`, picks the right `.<ext>`
+/// suffix, and writes the bytes to
+/// `<cache_dir>/<sha256-prefix>.<ext>`. Returns the path AND
+/// the detected format so callers can also surface a
+/// `Content-Type` to their wire layer.
+///
+/// # Errors
+/// Returns `io::ErrorKind::InvalidData` when the bytes do not
+/// match any known format -- caller should fall back to "store
+/// opaquely" or "print raw". Otherwise bubbles up errors from
+/// `create_dir_all` or `write`.
+pub fn write_bytes_to_cache(
+    bytes: &[u8],
+    cache_dir: &Path,
+) -> std::io::Result<(PathBuf, VizFormat)> {
+    let fmt = VizFormat::detect(bytes).ok_or_else(|| {
+        std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            "viz payload did not match any known format",
+        )
+    })?;
+    fs::create_dir_all(cache_dir)?;
+    let mut hasher = Sha256::new();
+    hasher.update(bytes);
+    let hex = format!("{:x}", hasher.finalize());
+    let prefix: String = hex.chars().take(HASH_PREFIX_LEN).collect();
+    let path = cache_dir.join(format!("{prefix}.{}", fmt.extension()));
+    fs::write(&path, bytes)?;
+    Ok((path, fmt))
 }
 
 /// Run `s` through the cache transform: SVG strings
