@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 5,
+    "step": "viz-format-table"
+  },
+  "action": "TDD red-then-green; tried inline detector inside viz_cache.rs first then split to viz_format.rs after measuring the fn-count cost; opt-in #mlpl-viz: json prefix to avoid false-positives on plain '{...}' strings; magic-bytes-first then text-prefix sniffing in detect; pub use re-exports so existing mlpl_cli::viz_cache::VizFormat imports keep compiling; the server-side store already accepted arbitrary content_type so only a test addition was needed there.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-14T12:15:13"
+}
