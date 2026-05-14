@@ -1,0 +1,13 @@
+number = 1
+slug = "sse-endpoint-scaffold"
+status = "completed"
+description = """
+Saga 21.5 step 001: sse-endpoint-scaffold.
+
+Goal: ship a new `POST /v1/sessio..."""
+role = "production"
+context_files = []
+created_at = "2026-05-13T17:33:39"
+completed_at = "2026-05-13T20:03:38"
+task_type = "production"
+commits = ["71bf9b079a5612a2489ec6ede94199aa2620967f"]
