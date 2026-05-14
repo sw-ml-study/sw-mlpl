@@ -1,0 +1,12 @@
+number = 6
+slug = "web-repl-connect-mode"
+status = "pending"
+description = """
+Saga 21.5 step 006: web-repl-connect-mode.
+
+Goal: the apps/mlpl-web WASM REPL..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-14T12:15:13"
+task_type = "production"
+commits = []

@@ -1,6 +1,6 @@
 number = 5
 slug = "viz-format-table"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 21.5 step 005: viz-format-table.
 
@@ -8,5 +8,6 @@ Goal: grow mlpl_cli::viz_cache::is_svg..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-14T10:08:16"
+completed_at = "2026-05-14T12:15:13"
 task_type = "production"
-commits = []
+commits = ["88e932558b3d39c519ed662aeb362a0e1e978ec6"]
