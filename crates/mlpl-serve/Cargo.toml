@@ -30,7 +30,7 @@ tower = "0.4"
 # Saga 25 step A: serve the web UI's static `pages/`
 # build alongside the /v1 API so the WASM client and
 # the API live on one origin (no CORS plumbing).
-tower-http = { version = "0.5", features = ["fs", "trace"] }
+tower-http = { version = "0.5", features = ["fs", "trace", "cors"] }
 # Saga 25 step B: HTTPS support so browsers with
 # HTTPS-First Mode (Chrome 147+, Edge, etc.) can reach
 # the local UI without disabling browser settings.

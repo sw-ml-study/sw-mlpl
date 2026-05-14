@@ -7,7 +7,7 @@
 use std::net::SocketAddr;
 
 use mlpl_serve::auth::AuthMode;
-use mlpl_serve::server::{ServerError, build_app, build_app_with_peers, run};
+use mlpl_serve::server::{ServerError, build_app, build_app_with_peers_cors, run};
 use serde_json::Value as JsonValue;
 
 /// Spin up a server in the background on a random
@@ -211,6 +211,7 @@ async fn run_rejects_non_loopback_with_auth_disabled() {
         mlpl_serve::peers::empty_registry(),
         None,
         None,
+        None,
     )
     .await
     .unwrap_err();
@@ -342,10 +343,11 @@ async fn static_dir_serves_index_at_sw_mlpl_prefix() {
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
-    let app = build_app_with_peers(
+    let app = build_app_with_peers_cors(
         AuthMode::Required,
         mlpl_serve::peers::empty_registry(),
         Some(&tmp),
+        None,
     );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();
@@ -391,6 +393,7 @@ async fn self_signed_serves_health_over_tls() {
             mlpl_serve::peers::empty_registry(),
             None,
             Some(tls_config),
+            None,
         )
         .await;
     });

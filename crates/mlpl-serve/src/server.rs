@@ -194,21 +194,26 @@ impl PeerDispatcher for RemoteMlxDispatcher {
 
 /// Build the axum router with the session-map state
 /// and auth mode wired in. Empty peer registry; use
-/// `build_app_with_peers` for tests that need to
-/// register peers up-front.
+/// `build_app_with_peers_cors` for tests that need to
+/// register peers or a CORS origin up-front.
 pub fn build_app(auth_mode: AuthMode) -> Router {
-    build_app_with_peers(auth_mode, crate::peers::empty_registry(), None)
+    build_app_with_peers_cors(auth_mode, crate::peers::empty_registry(), None, None)
 }
 
-/// Saga R1 step 003 + Saga 25 step A: build the
-/// router with an explicit peer registry and an
-/// optional static-asset directory. Used by `run` and
-/// by integration tests; `static_dir = None` keeps
-/// the legacy API-only behavior.
-pub fn build_app_with_peers(
+/// Saga R1 step 003 + Saga 25 step A: build the router with an
+/// explicit peer registry and an optional static-asset
+/// directory. Saga 21.5 step 006 added `cors_origin`: when
+/// `Some(o)`, the router is wrapped in a `tower-http`
+/// `CorsLayer` that lets a browser on origin `o` reach
+/// `/v1/*` (the connect-mode REPL in `apps/mlpl-web`). All
+/// four args together replace the old 3-arg
+/// `build_app_with_peers`; callers passing `None` for the
+/// new arg get the legacy no-CORS behavior.
+pub fn build_app_with_peers_cors(
     auth_mode: AuthMode,
     peers: crate::peers::PeerRegistry,
     static_dir: Option<&std::path::Path>,
+    cors_origin: Option<String>,
 ) -> Router {
     let state = AppState {
         sessions: new_map(),
@@ -232,14 +237,19 @@ pub fn build_app_with_peers(
         .route("/v1/viz/:id", get(get_handler))
         .with_state(state);
     if let Some(dir) = static_dir {
-        // The web build sets `--public-url /sw-mlpl/`, so
-        // every asset reference in `pages/index.html` is
-        // already prefixed with `/sw-mlpl/`. Mount the
-        // ServeDir on that exact prefix so the same
-        // committed `pages/` directory works locally and
-        // on GitHub Pages without rebuilding.
         let serve = tower_http::services::ServeDir::new(dir);
         router = router.nest_service("/sw-mlpl", serve);
+    }
+    if let Some(origin) = cors_origin {
+        use axum::http::{Method, header};
+        let origin_header = origin
+            .parse::<axum::http::HeaderValue>()
+            .expect("--cors-allow value must be a valid origin header");
+        let layer = tower_http::cors::CorsLayer::new()
+            .allow_origin(origin_header)
+            .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
+            .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE]);
+        router = router.layer(layer);
     }
     router
 }
@@ -266,11 +276,12 @@ pub async fn run(
     peers: crate::peers::PeerRegistry,
     static_dir: Option<std::path::PathBuf>,
     tls: TlsConfig,
+    cors_origin: Option<String>,
 ) -> Result<(), ServerError> {
     if !addr.ip().is_loopback() && auth_mode == AuthMode::Disabled {
         return Err(ServerError::InsecureBind { addr });
     }
-    let app = build_app_with_peers(auth_mode, peers, static_dir.as_deref());
+    let app = build_app_with_peers_cors(auth_mode, peers, static_dir.as_deref(), cors_origin);
     match tls {
         Some(config) => axum_server::bind_rustls(addr, config)
             .serve(app.into_make_service())
