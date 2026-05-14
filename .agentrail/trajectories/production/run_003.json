@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 3,
+    "step": "cancellation"
+  },
+  "action": "TDD red-then-green across all 3 layers (eval interrupt, serve cancel, repl ctrl-c) before any GREEN; parallel InterruptMap pattern so cancel sidesteps the sessions write lock; pure-fn debounce + post_cancel helpers so tests don't need ctrlc; reused subprocess-free test strategy from step 002; aggressive helper extraction (enrich_train_cancel, emit_metrics, install_session_interrupt) to defend the sw-checklist 50-LOC budget after threading interrupt logic through five functions; long-train + reduce_add body in cancel tests so 50ms cancel window reliably lands mid-flight.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-14T07:53:59"
+}
