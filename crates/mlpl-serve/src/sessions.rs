@@ -29,9 +29,31 @@ const TOKEN_LEN: usize = 32;
 /// One client session. Holds the bearer token and a
 /// long-lived `Environment` that accumulates state
 /// across eval calls.
+///
+/// Saga 21.5 step 009: `created_at` (Unix seconds) is set on
+/// session creation; `last_eval_at` is `None` until the first
+/// `/eval` (or `/eval_stream`) handler success, then updated to
+/// the wall-clock time of the most recent eval. The session-
+/// reattach client (`mlpl-repl --connect --session <id>`) reads
+/// both via `GET /v1/sessions/<id>` to render a "you are
+/// rejoining a session last touched N seconds ago" banner.
 pub struct Session {
     pub token: String,
     pub env: Environment,
+    pub created_at: u64,
+    pub last_eval_at: Option<u64>,
+}
+
+/// Unix seconds since epoch -- saga 21.5 step 009 session
+/// timestamps. Falls back to 0 if the system clock is before
+/// 1970 (impossible on modern hardware but `SystemTime`'s
+/// `duration_since(UNIX_EPOCH)` can return an error in
+/// principle).
+#[must_use]
+pub fn now_unix_seconds() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map_or(0, |d| d.as_secs())
 }
 
 /// Shared state on the application: maps session ids
@@ -79,6 +101,8 @@ pub async fn create_session(sessions: &SessionMap, interrupts: &InterruptMap) ->
     let session = Session {
         token: token.clone(),
         env: Environment::new(),
+        created_at: now_unix_seconds(),
+        last_eval_at: None,
     };
     sessions.write().await.insert(id, session);
     interrupts.write().await.insert(

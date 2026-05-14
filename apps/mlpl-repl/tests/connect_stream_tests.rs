@@ -16,6 +16,10 @@
 mod connect;
 
 #[allow(dead_code)]
+#[path = "../src/connect_reattach.rs"]
+mod connect_reattach;
+
+#[allow(dead_code)]
 #[path = "../src/connect_stream.rs"]
 mod connect_stream;
 
@@ -184,10 +188,12 @@ fn parse_stream_env_var_equivalent_to_flag() {
             connect_stream::ConnectMode::Remote {
                 url: u1,
                 stream: s1,
+                ..
             },
             connect_stream::ConnectMode::Remote {
                 url: u2,
                 stream: s2,
+                ..
             },
         ) => {
             assert!(s1, "env-var path should enable streaming");

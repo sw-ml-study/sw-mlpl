@@ -33,11 +33,21 @@ pub const CANCEL_DOUBLE_WINDOW: Duration = Duration::from_secs(2);
 /// distinguishes after argv + env-var parsing. `Local`
 /// means "no `--connect` flag, fall through to local
 /// REPL"; `Remote` is connect mode with the streaming
-/// flag baked in.
+/// flag baked in (and, Saga 21.5 step 009, optional
+/// reattach credentials).
 #[derive(Debug)]
 pub enum ConnectMode {
     Local,
-    Remote { url: String, stream: bool },
+    Remote {
+        url: String,
+        stream: bool,
+        /// Saga 21.5 step 009: when `Some`, skip
+        /// `create_session` and rebind to an existing
+        /// server-side session. Populated by
+        /// `--session <id> --token <tok>` on the
+        /// command line (both flags required).
+        reattach: Option<crate::connect_reattach::Reattach>,
+    },
 }
 
 /// Parser errors that the binary maps to `exit(2)` with
@@ -48,6 +58,9 @@ pub enum ConnectMode {
 pub enum ConnectArgsError {
     StreamWithoutConnect,
     LocalFlagWithConnect(String),
+    /// Saga 21.5 step 009: `--session` and `--token` must be
+    /// passed together; either one alone is a usage error.
+    ReattachIncomplete,
 }
 
 /// One `event: metric` frame off the SSE stream. The
@@ -85,6 +98,15 @@ pub fn parse_connect_args(
         !lower.is_empty() && lower != "0" && lower != "false" && lower != "no" && lower != "off"
     });
     let stream = args.iter().any(|a| a == "--stream") || env_truthy;
+    let session = crate::connect_reattach::flag_value(args, "--session");
+    let token = crate::connect_reattach::flag_value(args, "--token");
+    let reattach = match (session, token) {
+        (Some(session_id), Some(token)) => {
+            Some(crate::connect_reattach::Reattach { session_id, token })
+        }
+        (None, None) => None,
+        _ => return Err(ConnectArgsError::ReattachIncomplete),
+    };
     match connect_url {
         None if stream => Err(ConnectArgsError::StreamWithoutConnect),
         None => Ok(ConnectMode::Local),
@@ -92,7 +114,11 @@ pub fn parse_connect_args(
             if let Some(bad) = args.iter().find(|a| LOCAL_ONLY_FLAGS.contains(&a.as_str())) {
                 return Err(ConnectArgsError::LocalFlagWithConnect(bad.clone()));
             }
-            Ok(ConnectMode::Remote { url, stream })
+            Ok(ConnectMode::Remote {
+                url,
+                stream,
+                reattach,
+            })
         }
     }
 }
