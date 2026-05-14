@@ -1,10 +1,15 @@
 //! Saga 21 step 002: connect-mode REPL loop +
 //! slash-command dispatch + `--connect` argv parser.
-//! Pure HTTP transport lives in `connect.rs`.
+//! Pure HTTP transport lives in `connect.rs`; the
+//! streaming wire path + connect-mode argv parsing live
+//! in `connect_stream.rs` (Saga 21.5 step 002).
 
 use std::io::{self, BufRead, Write};
 
 use crate::connect::{InspectResponse, build_client, create_session, eval_remote, inspect_remote};
+use crate::connect_stream::{
+    ConnectArgsError, ConnectMode, eval_remote_stream, parse_connect_args, render_metric,
+};
 
 const CONNECT_HELP: &str = "connect-mode commands:\n  \
      :vars         -- list workspace variables (remote)\n  \
@@ -16,40 +21,47 @@ const CONNECT_HELP: &str = "connect-mode commands:\n  \
      :help         -- this message\n  \
      exit, Ctrl-D  -- disconnect";
 
-/// Inspect argv for `--connect <url>`. If present,
-/// validate that no local-mode-only flags are also
-/// set (`-f`, `--file`, `--data-dir`, `--exp-dir`),
-/// run the connect-mode loop, and return `true` to
-/// signal the caller (`main`) to exit. Returns
-/// `false` if `--connect` was not present so the
-/// caller continues into local mode.
+/// Inspect argv for `--connect <url>` (+ optional
+/// `--stream` / `MLPL_REPL_STREAM=1`). Returns `true` if
+/// connect mode handled the session so the caller
+/// (`main`) can exit; returns `false` for local mode.
+/// Pure parsing lives in `connect_stream::parse_connect_args`
+/// so the integration tests can assert on
+/// `ConnectArgsError` without subprocess machinery.
 pub fn try_dispatch_args(args: &[String]) -> bool {
-    let url = match args
-        .iter()
-        .position(|a| a == "--connect")
-        .and_then(|p| args.get(p + 1))
-    {
-        Some(u) => u.clone(),
-        None => return false,
-    };
-    let conflicts = ["-f", "--file", "--data-dir", "--exp-dir"];
-    if let Some(bad) = args.iter().find(|a| conflicts.contains(&a.as_str())) {
-        eprintln!(
-            "error: --connect cannot be combined with {bad}\n  \
-             --connect delegates evaluation to a remote server; \
-             -f, --data-dir, and --exp-dir are local-mode only."
-        );
-        std::process::exit(2);
+    let stream_env = std::env::var("MLPL_REPL_STREAM").ok();
+    match parse_connect_args(args, stream_env.as_deref()) {
+        Ok(ConnectMode::Local) => false,
+        Ok(ConnectMode::Remote { url, stream }) => {
+            read_loop(&url, stream);
+            true
+        }
+        Err(ConnectArgsError::StreamWithoutConnect) => {
+            eprintln!(
+                "error: --stream requires --connect <url>\n  \
+                 --stream routes eval through `/v1/sessions/<id>/eval_stream`, \
+                 which only exists on a remote `mlpl-serve`."
+            );
+            std::process::exit(2);
+        }
+        Err(ConnectArgsError::LocalFlagWithConnect(bad)) => {
+            eprintln!(
+                "error: --connect cannot be combined with {bad}\n  \
+                 --connect delegates evaluation to a remote server; \
+                 -f, --data-dir, and --exp-dir are local-mode only."
+            );
+            std::process::exit(2);
+        }
     }
-    read_loop(&url);
-    true
 }
 
 /// Interactive read-eval-print loop in connect
 /// mode. Creates a session, then for each line
 /// either dispatches a slash command (locally OR
-/// against `/inspect`) or POSTs to `/eval`.
-pub fn read_loop(base_url: &str) {
+/// against `/inspect`) or POSTs to `/eval` (default)
+/// or `/eval_stream` (when `--stream` /
+/// `MLPL_REPL_STREAM` is set).
+pub fn read_loop(base_url: &str, stream: bool) {
     let client = build_client();
     let (session_id, token) = match create_session(&client, base_url) {
         Ok(s) => s,
@@ -59,7 +71,8 @@ pub fn read_loop(base_url: &str) {
             std::process::exit(1);
         }
     };
-    println!("Connected to {base_url} (session {session_id})");
+    let mode = if stream { " [streaming]" } else { "" };
+    println!("Connected to {base_url} (session {session_id}){mode}");
     println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();
 
@@ -86,10 +99,41 @@ pub fn read_loop(base_url: &str) {
             }
             continue;
         }
-        match eval_remote(&client, base_url, &session_id, &token, trimmed) {
-            Ok(r) => println!("{}", mlpl_cli::viz_cache::transform_value(&r.value, None)),
-            Err(e) => eprintln!("  {trimmed}\n  error: {e}"),
+        eval_and_print(&client, base_url, &session_id, &token, trimmed, stream);
+    }
+}
+
+/// Route one evaluation through `/eval` or
+/// `/eval_stream` depending on `stream`. Streaming-mode
+/// metric frames render via `render_metric` into stdout;
+/// a trailing newline flushes the in-place display
+/// before the result lands.
+fn eval_and_print(
+    client: &reqwest::blocking::Client,
+    base_url: &str,
+    session_id: &str,
+    token: &str,
+    program: &str,
+    stream: bool,
+) {
+    let result = if stream {
+        let mut stdout = io::stdout();
+        let mut any_metric = false;
+        let mut on_metric = |m: &crate::connect_stream::SseMetric| {
+            any_metric = true;
+            let _ = render_metric(&mut stdout, m);
+        };
+        let r = eval_remote_stream(client, base_url, session_id, token, program, &mut on_metric);
+        if any_metric {
+            println!();
         }
+        r
+    } else {
+        eval_remote(client, base_url, session_id, token, program)
+    };
+    match result {
+        Ok(r) => println!("{}", mlpl_cli::viz_cache::transform_value(&r.value, None)),
+        Err(e) => eprintln!("  {program}\n  error: {e}"),
     }
 }
 
