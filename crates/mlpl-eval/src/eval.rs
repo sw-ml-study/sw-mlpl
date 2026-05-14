@@ -568,7 +568,16 @@ fn eval_repeat(
     }
     let n = n_arr.data()[0] as usize;
     let mut r = DenseArray::from_scalar(0.0);
-    for _ in 0..n {
+    for i in 0..n {
+        // Saga 21.5 step 003: cancellation checkpoint at each
+        // iteration head. The bubbled error carries the iteration
+        // index so clients can show "cancelled after N reps".
+        if env.check_interrupt().is_err() {
+            return Err(EvalError::Cancelled {
+                step: i,
+                partial_losses: Vec::new(),
+            });
+        }
         for stmt in body {
             r = eval_expr(stmt, env, trace)?.into_array()?;
         }
@@ -590,14 +599,24 @@ fn eval_train(
     let mut losses: Vec<f64> = Vec::with_capacity(n);
     let mut last = DenseArray::from_scalar(0.0);
     for i in 0..n {
+        // Saga 21.5 step 003: cancellation checkpoint at iter head.
+        if env.check_interrupt().is_err() {
+            return crate::interrupt::enrich_train_cancel(env, i, losses);
+        }
         env.set("step".into(), DenseArray::from_scalar(i as f64));
         let mut step_val = DenseArray::from_scalar(0.0);
         for stmt in body {
-            step_val = eval_expr(stmt, env, trace)?.into_array()?;
+            step_val = match eval_expr(stmt, env, trace) {
+                Ok(v) => v.into_array()?,
+                Err(EvalError::Cancelled { .. }) => {
+                    return crate::interrupt::enrich_train_cancel(env, i, losses);
+                }
+                Err(e) => return Err(e),
+            };
         }
-        // Capture the body's final value as the per-step loss; if it
-        // is non-scalar (e.g. a vector), reduce by mean for the loss
-        // curve so callers can still rely on a scalar history.
+        // Body's final value is the per-step loss; non-scalar
+        // values reduce by mean so callers always get a scalar
+        // history.
         let scalar_loss = if step_val.rank() == 0 {
             step_val.data()[0]
         } else {
@@ -606,20 +625,7 @@ fn eval_train(
         };
         losses.push(scalar_loss);
         last = step_val;
-        // Saga 21.5 step 001: emit live `_metric`-suffixed scalars
-        // after each iteration so an SSE client can stream loss
-        // curves while training. Clone the Arc out first to release
-        // the env borrow before the metric collection loop reborrows.
-        if let Some(sink) = env.metric_sink() {
-            let metrics: Vec<(String, f64)> = env
-                .vars_iter()
-                .filter(|(name, arr)| name.ends_with("_metric") && arr.rank() == 0)
-                .map(|(name, arr)| (name.clone(), arr.data()[0]))
-                .collect();
-            for (name, value) in metrics {
-                sink.emit(&name, i, value);
-            }
-        }
+        env.emit_metrics(i);
     }
     let losses_arr = DenseArray::new(mlpl_array::Shape::new(vec![losses.len()]), losses)
         .expect("losses shape matches data");

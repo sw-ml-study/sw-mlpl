@@ -32,7 +32,7 @@ pub mod sse {
     use axum::extract::{Path, State};
     use axum::http::{HeaderMap, StatusCode};
     use axum::response::sse::{Event, KeepAlive, Sse};
-    use mlpl_eval::{MetricSink, eval_program_value};
+    use mlpl_eval::{EvalError, MetricSink, eval_program_value};
     use mlpl_parser::{lex, parse};
     use serde::Serialize;
     use tokio::sync::mpsc;
@@ -62,6 +62,15 @@ pub mod sse {
             value: String,
             kind: &'static str,
         },
+        /// Saga 21.5 step 003: terminal frame for cooperative
+        /// cancellation. Mirrors `EvalError::Cancelled`'s `step`
+        /// and `partial_losses` so clients can render the partial
+        /// loss curve without falling back to a second
+        /// `:vars`/inspect round-trip.
+        Cancelled {
+            step: usize,
+            partial_losses: Vec<f64>,
+        },
         Error {
             error: String,
         },
@@ -83,6 +92,13 @@ pub mod sse {
                 Self::Done { value, kind } => (
                     "done".to_string(),
                     serde_json::json!({"value": value, "kind": kind}),
+                ),
+                Self::Cancelled {
+                    step,
+                    partial_losses,
+                } => (
+                    "cancelled".to_string(),
+                    serde_json::json!({"step": step, "partial_losses": partial_losses}),
                 ),
                 Self::Error { error } => ("error".to_string(), serde_json::json!({"error": error})),
             };
@@ -146,10 +162,18 @@ pub mod sse {
             };
             session.env.clear_metric_sink();
             session.env.clear_peer_dispatcher();
+            session.env.clear_interrupt();
             let terminal = match value {
                 Ok(v) => SseEvent::Done {
                     value: format!("{v}"),
                     kind: value_kind(&v),
+                },
+                Err(EvalError::Cancelled {
+                    step,
+                    partial_losses,
+                }) => SseEvent::Cancelled {
+                    step,
+                    partial_losses,
                 },
                 Err(e) => SseEvent::Error {
                     error: format!("{e}"),
@@ -204,6 +228,7 @@ pub mod sse {
         let (tx, rx) = mpsc::channel::<SseEvent>(64);
         let sink: Arc<dyn MetricSink> = Arc::new(ChannelMetricSink { tx: tx.clone() });
         session.env.set_metric_sink(sink);
+        crate::handlers::install_session_interrupt(&state, &id, &mut session).await;
         session
             .env
             .set_peer_dispatcher(Arc::new(crate::server::RemoteMlxDispatcher::new(

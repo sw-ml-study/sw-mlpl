@@ -64,6 +64,11 @@ pub(crate) fn eval_fncall(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
+    // Saga 21.5 step 003: cooperative-cancellation checkpoint
+    // before every builtin dispatch. Builtins themselves do not
+    // yield mid-call, so the latency floor is "one op" -- a giant
+    // matmul finishes before this check observes the next cancel.
+    env.check_interrupt()?;
     if matches!(name, "sample" | "top_k")
         && let Some(first) = args.first()
     {

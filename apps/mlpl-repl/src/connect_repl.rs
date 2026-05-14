@@ -5,10 +5,15 @@
 //! in `connect_stream.rs` (Saga 21.5 step 002).
 
 use std::io::{self, BufRead, Write};
+use std::sync::{Arc, Mutex};
+use std::time::Instant;
 
-use crate::connect::{InspectResponse, build_client, create_session, eval_remote, inspect_remote};
+use crate::connect::{
+    ClientError, InspectResponse, build_client, create_session, eval_remote, inspect_remote,
+};
 use crate::connect_stream::{
-    ConnectArgsError, ConnectMode, eval_remote_stream, parse_connect_args, render_metric,
+    CANCEL_DOUBLE_WINDOW, ConnectArgsError, ConnectMode, eval_remote_stream, parse_connect_args,
+    post_cancel, render_metric, should_double_cancel,
 };
 
 const CONNECT_HELP: &str = "connect-mode commands:\n  \
@@ -74,7 +79,14 @@ pub fn read_loop(base_url: &str, stream: bool) {
     let mode = if stream { " [streaming]" } else { "" };
     println!("Connected to {base_url} (session {session_id}){mode}");
     println!("Type :help for commands, exit or Ctrl-D to quit.");
+    println!("Press Ctrl-C twice within 2s to cancel an in-flight eval.");
     println!();
+    install_sigint_cancel(
+        client.clone(),
+        base_url.to_string(),
+        session_id.clone(),
+        token.clone(),
+    );
 
     let stdin = io::stdin();
     let mut stdout = io::stdout();
@@ -133,7 +145,71 @@ fn eval_and_print(
     };
     match result {
         Ok(r) => println!("{}", mlpl_cli::viz_cache::transform_value(&r.value, None)),
+        Err(ClientError::Cancelled {
+            step,
+            partial_losses,
+        }) => render_cancellation(step, &partial_losses),
         Err(e) => eprintln!("  {program}\n  error: {e}"),
+    }
+}
+
+/// Saga 21.5 step 003: render a `Cancelled` terminal back to the
+/// user. Prints the step the cancel landed on plus a short
+/// preview of the partial loss curve so the user can see how far
+/// the train got before they tapped Ctrl-Ctrl-C. The full curve
+/// is still available via `:vars` (`last_losses`).
+fn render_cancellation(step: usize, partial_losses: &[f64]) {
+    eprintln!(
+        "  cancelled at step {step} ({} partial loss{} captured; see :vars last_losses)",
+        partial_losses.len(),
+        if partial_losses.len() == 1 { "" } else { "es" }
+    );
+    if !partial_losses.is_empty() {
+        let preview: Vec<String> = partial_losses
+            .iter()
+            .take(5)
+            .map(|v| format!("{v:.4}"))
+            .collect();
+        let ellipsis = if partial_losses.len() > 5 {
+            ", ..."
+        } else {
+            ""
+        };
+        eprintln!("  losses: [{}{ellipsis}]", preview.join(", "));
+    }
+}
+
+/// Saga 21.5 step 003: install the SIGINT handler that turns a
+/// double-Ctrl-C inside the cancel window into a `/cancel` POST.
+/// `ctrlc::set_handler` is process-global (and can only be
+/// installed once); a second install attempt is treated as a
+/// no-op so re-invoking the REPL inside the same process during
+/// tests doesn't panic.
+fn install_sigint_cancel(
+    client: reqwest::blocking::Client,
+    base_url: String,
+    session_id: String,
+    token: String,
+) {
+    let last: Arc<Mutex<Option<Instant>>> = Arc::new(Mutex::new(None));
+    let result = ctrlc::set_handler(move || {
+        let mut last_guard = last.lock().expect("sigint state lock");
+        let now = Instant::now();
+        if should_double_cancel(*last_guard, now, CANCEL_DOUBLE_WINDOW) {
+            match post_cancel(&client, &base_url, &session_id, &token) {
+                Ok(()) => eprintln!("\ncancel requested."),
+                Err(e) => eprintln!("\ncancel failed: {e}"),
+            }
+            *last_guard = None;
+        } else {
+            eprintln!("\n(press Ctrl-C again within 2s to cancel; or type 'exit' to quit)");
+            *last_guard = Some(now);
+        }
+    });
+    if result.is_err() {
+        // A handler is already installed (e.g. a prior connect
+        // session in the same process). Leave it in place; the
+        // double-press path still works.
     }
 }
 

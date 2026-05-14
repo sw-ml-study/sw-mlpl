@@ -36,6 +36,15 @@ pub(crate) fn eval_for(
     let mut captured: Vec<DenseArray> = Vec::with_capacity(n);
     let mut last = DenseArray::from_scalar(0.0);
     for i in 0..n {
+        // Saga 21.5 step 003: cancellation checkpoint at each
+        // iteration head. The bubbled error carries the loop
+        // index but no losses (only `train` accumulates a curve).
+        if env.check_interrupt().is_err() {
+            return Err(EvalError::Cancelled {
+                step: i,
+                partial_losses: Vec::new(),
+            });
+        }
         let slice_data = src_arr.data()[i * row_stride..(i + 1) * row_stride].to_vec();
         let mut row = DenseArray::new(Shape::new(slice_dims.clone()), slice_data)?;
         if let Some(src_lbls) = src_labels.as_ref() {
