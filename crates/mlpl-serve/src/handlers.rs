@@ -198,11 +198,11 @@ fn snapshot_env(env: &Environment) -> InspectResponse {
     }
 }
 
-fn json_err(msg: impl Into<String>) -> Json<ErrorResponse> {
+pub(crate) fn json_err(msg: impl Into<String>) -> Json<ErrorResponse> {
     Json(ErrorResponse { error: msg.into() })
 }
 
-fn value_kind(value: &Value) -> &'static str {
+pub(crate) fn value_kind(value: &Value) -> &'static str {
     match value {
         Value::Array(_) => "array",
         Value::Str(_) => "string",

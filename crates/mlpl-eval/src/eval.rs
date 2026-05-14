@@ -606,6 +606,20 @@ fn eval_train(
         };
         losses.push(scalar_loss);
         last = step_val;
+        // Saga 21.5 step 001: emit live `_metric`-suffixed scalars
+        // after each iteration so an SSE client can stream loss
+        // curves while training. Clone the Arc out first to release
+        // the env borrow before the metric collection loop reborrows.
+        if let Some(sink) = env.metric_sink() {
+            let metrics: Vec<(String, f64)> = env
+                .vars_iter()
+                .filter(|(name, arr)| name.ends_with("_metric") && arr.rank() == 0)
+                .map(|(name, arr)| (name.clone(), arr.data()[0]))
+                .collect();
+            for (name, value) in metrics {
+                sink.emit(&name, i, value);
+            }
+        }
     }
     let losses_arr = DenseArray::new(mlpl_array::Shape::new(vec![losses.len()]), losses)
         .expect("losses shape matches data");
