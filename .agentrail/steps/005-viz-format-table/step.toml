@@ -1,0 +1,12 @@
+number = 5
+slug = "viz-format-table"
+status = "pending"
+description = """
+Saga 21.5 step 005: viz-format-table.
+
+Goal: grow mlpl_cli::viz_cache::is_svg..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-14T10:08:16"
+task_type = "production"
+commits = []
