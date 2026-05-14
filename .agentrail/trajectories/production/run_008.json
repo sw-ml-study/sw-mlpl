@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 8,
+    "step": "web-repl-viz-storage"
+  },
+  "action": "TDD red-then-green; split eval.rs across 4 files with pub(crate) accessors (state_handle, clear_state, current_session_id, current_token) so eval_wasm.rs reaches the shared Rc<RefCell> without exposing it externally; resolve_viz_url helper shared between native/wasm fetch impls; allow(unused_imports) on the eval_url re-exports so tests that don't use them still compile clean; minimal serve change (none — /v1/viz already accepts any session bearer from step 004).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-14T16:13:36"
+}
