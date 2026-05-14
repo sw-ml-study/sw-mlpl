@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 7,
+    "step": "web-repl-streaming-train"
+  },
+  "action": "TDD red-then-green; CancelHandle pattern lets the test spawn a side thread for cancel without making RemoteEvaluator Send (browser stays single-threaded with in-tick cancel); shared parse_sse_stream avoids duplicating wire decode between native and wasm; inner Result-based wasm_eval_stream_inner uses ? to collapse the gloo fetch chain into one error path; aggressive compaction of dispatch_sse_frame (52->41 LOC) so the match arms stay under 50; documented WASM body-buffering caveat in contract rather than chasing chunk-stream complexity into one step.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-14T15:45:33"
+}

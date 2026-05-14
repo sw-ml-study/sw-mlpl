@@ -1,6 +1,6 @@
 number = 7
 slug = "web-repl-streaming-train"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 21.5 step 007: web-repl-streaming-train.
 
@@ -8,5 +8,6 @@ Goal: the web REPL consumes th..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-14T13:37:29"
+completed_at = "2026-05-14T15:45:33"
 task_type = "production"
-commits = []
+commits = ["70394e029689956899f388d988d3f68b1a3f265f"]
