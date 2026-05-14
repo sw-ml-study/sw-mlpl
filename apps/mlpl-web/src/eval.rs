@@ -5,23 +5,23 @@
 //! WASM impl invokes the callback synchronously; the REST impl
 //! returns immediately and the callback fires once the HTTP
 //! round-trip completes -- on WASM via `wasm_bindgen_futures::spawn_local`
-//! + `gloo::net`, on native via `reqwest::blocking`.
+//! + `gloo::net` (`eval_wasm.rs`), on native via `reqwest::blocking`.
 //!
-//! The full UI wiring (`?connect=<url>` swap of the REPL
-//! evaluator, full `handlers.rs` refactor onto the trait, the
-//! Playwright round-trip test) lands as step 006 ships and step
-//! 007 extends it with SSE streaming. Step 006 itself delivers:
-//!
-//!   1. The trait + both impls (this file).
-//!   2. Native unit tests against an in-process `mlpl-serve`
-//!      (`apps/mlpl-web/tests/connect_mode_tests.rs`).
-//!   3. CORS support on the server
-//!      (`mlpl-serve --cors-allow <origin>`).
-//!   4. URL parsing for `?connect=<url>` from
-//!      `window.location.search`.
+//! Saga 21.5 step 008 split out three sibling modules to defend
+//! the per-file LOC budget: `eval_sse.rs` (shared SSE parser),
+//! `eval_url.rs` (`?connect=` query helpers), and `eval_wasm.rs`
+//! (browser-only impls). This file keeps the trait + shared
+//! types + the native REST impl + the public `fetch_viz` helper
+//! used by both step 008's tests and step 007's UI work.
 
 use std::cell::RefCell;
 use std::rc::Rc;
+
+#[cfg(target_arch = "wasm32")]
+#[allow(unused_imports)]
+pub use crate::eval_url::current_connect_url_from_window;
+#[allow(unused_imports)]
+pub use crate::eval_url::parse_connect_url;
 
 /// Callback fired with the formatted result of one eval. Matches
 /// the existing `WasmSession::eval(&str) -> String` shape: errors
@@ -111,9 +111,8 @@ impl Evaluator for WasmEvaluator {
 
 /// REST evaluator backed by a remote `mlpl-serve`. Lazily creates
 /// a session on first `eval`. Native build uses
-/// `reqwest::blocking`; the WASM build uses `gloo::net` + a
-/// `wasm_bindgen_futures::spawn_local` to keep the main thread
-/// free.
+/// `reqwest::blocking`; the WASM build uses `gloo::net` (see
+/// `eval_wasm.rs`).
 pub struct RemoteEvaluator {
     base_url: String,
     state: Rc<RefCell<Option<RemoteSession>>>,
@@ -121,9 +120,9 @@ pub struct RemoteEvaluator {
 
 /// Server-side session id + bearer token, minted on first eval.
 #[derive(Clone)]
-pub(crate) struct RemoteSession {
-    pub(crate) session_id: String,
-    pub(crate) token: String,
+pub struct RemoteSession {
+    pub session_id: String,
+    pub token: String,
 }
 
 impl RemoteEvaluator {
@@ -143,12 +142,34 @@ impl RemoteEvaluator {
     /// Snapshot of the current server-side session id, if one
     /// has been minted. Used by `cancel` to address the in-flight
     /// stream.
-    fn current_session_id(&self) -> Option<String> {
+    pub(crate) fn current_session_id(&self) -> Option<String> {
         self.state.borrow().as_ref().map(|s| s.session_id.clone())
     }
 
-    fn current_token(&self) -> Option<String> {
+    pub(crate) fn current_token(&self) -> Option<String> {
         self.state.borrow().as_ref().map(|s| s.token.clone())
+    }
+
+    /// Internal hook for `eval_wasm.rs` to receive the shared
+    /// state cell without exposing it to external callers.
+    pub(crate) fn state_handle(&self) -> Rc<RefCell<Option<RemoteSession>>> {
+        self.state.clone()
+    }
+
+    pub(crate) fn clear_state(&self) {
+        *self.state.borrow_mut() = None;
+    }
+}
+
+/// Resolve a viz URL (`/v1/viz/<id>` path OR
+/// `http://host/v1/viz/<id>` absolute) into a fully-qualified URL
+/// against `base_url`. Used by both native `fetch_viz` and WASM
+/// `fetch_viz_async`.
+pub(crate) fn resolve_viz_url(base_url: &str, viz_url: &str) -> String {
+    if viz_url.starts_with("http://") || viz_url.starts_with("https://") {
+        viz_url.to_string()
+    } else {
+        format!("{}{}", base_url.trim_end_matches('/'), viz_url)
     }
 }
 
@@ -161,7 +182,7 @@ impl Evaluator for RemoteEvaluator {
         on_result(result);
     }
     fn clear(&self) {
-        *self.state.borrow_mut() = None;
+        self.clear_state();
     }
 }
 
@@ -206,10 +227,7 @@ fn native_eval(base_url: &str, state: &RefCell<Option<RemoteSession>>, program: 
 
 /// Saga 21.5 step 007: cheap-to-clone Send-able handle for
 /// firing a cancel POST from a different thread (native test)
-/// or event-loop tick (browser). The browser-side UI clicks
-/// `RemoteEvaluator::cancel` directly; the native test snapshots
-/// a `CancelHandle` before spawning the side thread so the
-/// `RemoteEvaluator` itself can stay `Rc`-based.
+/// or event-loop tick (browser).
 #[derive(Clone)]
 pub struct CancelHandle {
     base_url: String,
@@ -268,6 +286,32 @@ impl RemoteEvaluator {
             token,
         })
     }
+
+    /// Saga 21.5 step 008: native viz fetch. `GET /v1/viz/<id>`
+    /// with bearer auth, returns the raw bytes + content type so
+    /// callers can render an `<img>` (for `image/*`) or an
+    /// `<iframe srcdoc>` (for `text/html`). Accepts both bare
+    /// paths and absolute URLs. The WASM equivalent
+    /// (`fetch_viz_async`) lives in `eval_wasm.rs`.
+    pub fn fetch_viz(&self, viz_url: &str, bearer: &str) -> Result<(Vec<u8>, String), String> {
+        let url = resolve_viz_url(&self.base_url, viz_url);
+        let resp = reqwest::blocking::Client::new()
+            .get(&url)
+            .bearer_auth(bearer)
+            .send()
+            .map_err(|e| e.to_string())?;
+        if !resp.status().is_success() {
+            return Err(format!("fetch_viz: {}", resp.status()));
+        }
+        let content_type = resp
+            .headers()
+            .get("content-type")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("application/octet-stream")
+            .to_string();
+        let bytes = resp.bytes().map_err(|e| e.to_string())?.to_vec();
+        Ok((bytes, content_type))
+    }
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -311,77 +355,7 @@ fn native_eval_stream(
         return StreamOutcome::Error { message };
     }
     let reader = std::io::BufReader::new(resp);
-    parse_sse_stream(reader, &mut on_metric)
-}
-
-fn parse_sse_stream<R: std::io::BufRead>(reader: R, on_metric: &mut MetricCb) -> StreamOutcome {
-    let mut event: Option<String> = None;
-    let mut data: Option<String> = None;
-    for line in reader.lines() {
-        let line = match line {
-            Ok(l) => l,
-            Err(e) => {
-                return StreamOutcome::Error {
-                    message: format!("stream read: {e}"),
-                };
-            }
-        };
-        if line.is_empty() {
-            if let Some(outcome) = dispatch_sse_frame(event.take(), data.take(), on_metric) {
-                return outcome;
-            }
-        } else if let Some(rest) = line.strip_prefix("event:") {
-            event = Some(rest.trim().to_string());
-        } else if let Some(rest) = line.strip_prefix("data:") {
-            data = Some(rest.trim().to_string());
-        }
-    }
-    StreamOutcome::Error {
-        message: "stream ended without terminal frame".into(),
-    }
-}
-
-fn dispatch_sse_frame(
-    event: Option<String>,
-    data: Option<String>,
-    on_metric: &mut MetricCb,
-) -> Option<StreamOutcome> {
-    let (Some(event), Some(data)) = (event, data) else {
-        return None;
-    };
-    let v: serde_json::Value = serde_json::from_str(&data).ok()?;
-    match event.as_str() {
-        "ready" => None,
-        "metric" => {
-            on_metric(&RemoteMetric {
-                name: v.get("name").and_then(|x| x.as_str())?.to_string(),
-                step: v.get("step")?.as_u64()? as usize,
-                value: v.get("value")?.as_f64()?,
-            });
-            None
-        }
-        "done" => Some(StreamOutcome::Done {
-            value: v.get("value").and_then(|x| x.as_str())?.to_string(),
-            kind: v.get("kind").and_then(|x| x.as_str())?.to_string(),
-        }),
-        "cancelled" => Some(StreamOutcome::Cancelled {
-            step: v.get("step")?.as_u64()? as usize,
-            partial_losses: v
-                .get("partial_losses")?
-                .as_array()?
-                .iter()
-                .filter_map(serde_json::Value::as_f64)
-                .collect(),
-        }),
-        "error" => Some(StreamOutcome::Error {
-            message: v
-                .get("error")
-                .and_then(|x| x.as_str())
-                .unwrap_or("unknown error")
-                .to_string(),
-        }),
-        _ => None,
-    }
+    crate::eval_sse::parse_sse_stream(reader, &mut on_metric)
 }
 
 #[cfg(not(target_arch = "wasm32"))]
@@ -404,235 +378,4 @@ fn native_create_session(base_url: &str) -> Result<RemoteSession, String> {
         .ok_or("missing token")?
         .to_string();
     Ok(RemoteSession { session_id, token })
-}
-
-// ---- WASM impl (browser, gloo::net::http) ----
-
-#[cfg(target_arch = "wasm32")]
-impl Evaluator for RemoteEvaluator {
-    fn eval(&self, program: &str, on_result: ResultCb) {
-        let base = self.base_url.clone();
-        let state = self.state.clone();
-        let program = program.to_string();
-        wasm_bindgen_futures::spawn_local(async move {
-            let result = wasm_eval(&base, &state, &program).await;
-            on_result(result);
-        });
-    }
-    fn clear(&self) {
-        *self.state.borrow_mut() = None;
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-async fn wasm_eval(
-    base_url: &str,
-    state: &RefCell<Option<RemoteSession>>,
-    program: &str,
-) -> String {
-    if state.borrow().is_none() {
-        match wasm_create_session(base_url).await {
-            Ok(s) => *state.borrow_mut() = Some(s),
-            Err(e) => return format!("error: {e}"),
-        }
-    }
-    let s = state
-        .borrow()
-        .as_ref()
-        .expect("session created above")
-        .clone();
-    let url = format!(
-        "{}/v1/sessions/{}/eval",
-        base_url.trim_end_matches('/'),
-        s.session_id
-    );
-    let req = match gloo::net::http::Request::post(&url)
-        .header("Authorization", &format!("Bearer {}", s.token))
-        .header("Content-Type", "application/json")
-        .body(serde_json::json!({"program": program}).to_string())
-    {
-        Ok(r) => r,
-        Err(e) => return format!("error: {e}"),
-    };
-    let resp = match req.send().await {
-        Ok(r) => r,
-        Err(e) => return format!("error: {e}"),
-    };
-    let body: serde_json::Value = match resp.json().await {
-        Ok(j) => j,
-        Err(e) => return format!("error: decode: {e}"),
-    };
-    if let Some(err) = body.get("error").and_then(|v| v.as_str()) {
-        return format!("error: {err}");
-    }
-    body.get("value")
-        .and_then(|v| v.as_str())
-        .map_or_else(|| format!("error: missing value: {body}"), str::to_string)
-}
-
-#[cfg(target_arch = "wasm32")]
-async fn wasm_create_session(base_url: &str) -> Result<RemoteSession, String> {
-    let url = format!("{}/v1/sessions", base_url.trim_end_matches('/'));
-    let resp = gloo::net::http::Request::post(&url)
-        .send()
-        .await
-        .map_err(|e| e.to_string())?;
-    let body: serde_json::Value = resp.json().await.map_err(|e| e.to_string())?;
-    let session_id = body
-        .get("session_id")
-        .and_then(|v| v.as_str())
-        .ok_or("missing session_id")?
-        .to_string();
-    let token = body
-        .get("token")
-        .and_then(|v| v.as_str())
-        .ok_or("missing token")?
-        .to_string();
-    Ok(RemoteSession { session_id, token })
-}
-
-#[cfg(target_arch = "wasm32")]
-impl RemoteEvaluator {
-    /// Browser streaming-eval. Spawns a local future that POSTs
-    /// to `/eval_stream`, reads the response body as a UTF-8
-    /// stream, parses SSE frames, fires `on_metric` per metric,
-    /// and finally fires `on_result` with the terminal outcome.
-    pub fn eval_stream(&self, program: &str, on_metric: MetricCb, on_result: StreamCb) {
-        let base = self.base_url.clone();
-        let state = self.state.clone();
-        let program = program.to_string();
-        wasm_bindgen_futures::spawn_local(async move {
-            let outcome = wasm_eval_stream(&base, &state, &program, on_metric).await;
-            on_result(outcome);
-        });
-    }
-
-    /// Browser cancel: fire `/v1/sessions/<id>/cancel`. No-op
-    /// when no session has been minted yet.
-    pub fn cancel(&self) {
-        let Some(session_id) = self.current_session_id() else {
-            return;
-        };
-        let Some(token) = self.current_token() else {
-            return;
-        };
-        let url = format!(
-            "{}/v1/sessions/{}/cancel",
-            self.base_url.trim_end_matches('/'),
-            session_id
-        );
-        wasm_bindgen_futures::spawn_local(async move {
-            if let Ok(req) = gloo::net::http::Request::post(&url)
-                .header("Authorization", &format!("Bearer {token}"))
-                .body(String::new())
-            {
-                let _ = req.send().await;
-            }
-        });
-    }
-}
-
-#[cfg(target_arch = "wasm32")]
-async fn wasm_eval_stream(
-    base_url: &str,
-    state: &RefCell<Option<RemoteSession>>,
-    program: &str,
-    mut on_metric: MetricCb,
-) -> StreamOutcome {
-    match wasm_eval_stream_inner(base_url, state, program, &mut on_metric).await {
-        Ok(outcome) => outcome,
-        Err(message) => StreamOutcome::Error { message },
-    }
-}
-
-// Inner helper returning `Result<StreamOutcome, String>` so the
-// `?` operator can collapse the half-dozen fallible
-// `gloo::net::http` steps into one error path. Browser fetch
-// responses don't expose a Rust `BufRead`, so we pull the whole
-// body as a string and feed it through the shared SSE parser --
-// this forfeits true live streaming on WASM (frames batch at
-// body end). A follow-up step will switch to ReadableStream
-// chunk reads via web-sys.
-#[cfg(target_arch = "wasm32")]
-async fn wasm_eval_stream_inner(
-    base_url: &str,
-    state: &RefCell<Option<RemoteSession>>,
-    program: &str,
-    on_metric: &mut MetricCb,
-) -> Result<StreamOutcome, String> {
-    if state.borrow().is_none() {
-        let s = wasm_create_session(base_url).await?;
-        *state.borrow_mut() = Some(s);
-    }
-    let s = state.borrow().as_ref().expect("session").clone();
-    let url = format!(
-        "{}/v1/sessions/{}/eval_stream",
-        base_url.trim_end_matches('/'),
-        s.session_id
-    );
-    let req = gloo::net::http::Request::post(&url)
-        .header("Authorization", &format!("Bearer {}", s.token))
-        .header("Content-Type", "application/json")
-        .body(serde_json::json!({"program": program}).to_string())
-        .map_err(|e| e.to_string())?;
-    let resp = req.send().await.map_err(|e| e.to_string())?;
-    if !resp.ok() {
-        return Ok(StreamOutcome::Error {
-            message: resp.text().await.unwrap_or_default(),
-        });
-    }
-    let text = resp.text().await.unwrap_or_default();
-    Ok(parse_sse_stream(std::io::Cursor::new(text), on_metric))
-}
-
-/// Saga 21.5 step 006: parse a `?connect=<url>` parameter out of
-/// a `window.location.search` query string. Returns `None` when
-/// the parameter is missing, empty, or the search string itself
-/// is malformed. Pure function so unit tests can drive it
-/// without a browser.
-#[must_use]
-pub fn parse_connect_url(search: &str) -> Option<String> {
-    let trimmed = search.strip_prefix('?').unwrap_or(search);
-    for pair in trimmed.split('&') {
-        if let Some(v) = pair.strip_prefix("connect=") {
-            let decoded = url_decode(v);
-            if !decoded.is_empty() {
-                return Some(decoded);
-            }
-        }
-    }
-    None
-}
-
-/// Browser-only convenience: read `window.location.search` and
-/// run it through `parse_connect_url`. Returns `None` outside a
-/// browser context.
-#[cfg(target_arch = "wasm32")]
-#[must_use]
-pub fn current_connect_url_from_window() -> Option<String> {
-    let window = web_sys::window()?;
-    let search = window.location().search().ok()?;
-    parse_connect_url(&search)
-}
-
-/// Minimal `%`-decoder for the `connect=` value. Web URLs use a
-/// small subset (`%3A` -> `:`, `%2F` -> `/`); pulling in a full
-/// `urlencoding` crate for one query parameter is overkill.
-fn url_decode(s: &str) -> String {
-    let mut out = String::with_capacity(s.len());
-    let bytes = s.as_bytes();
-    let mut i = 0;
-    while i < bytes.len() {
-        if bytes[i] == b'%'
-            && i + 2 < bytes.len()
-            && let Ok(byte) = u8::from_str_radix(&s[i + 1..i + 3], 16)
-        {
-            out.push(byte as char);
-            i += 3;
-            continue;
-        }
-        out.push(bytes[i] as char);
-        i += 1;
-    }
-    out
 }
