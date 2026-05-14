@@ -18,10 +18,16 @@
 //! a subprocess.
 
 use std::io::{self, BufRead, BufReader, Write};
+use std::time::{Duration, Instant};
 
 use serde::Deserialize;
 
 use crate::connect::{ClientError, EvalResponse};
+
+/// Window for the double-Ctrl-C cancel debounce. The second press
+/// within this window triggers a `/cancel` POST; presses outside
+/// the window reset the counter to "first press".
+pub const CANCEL_DOUBLE_WINDOW: Duration = Duration::from_secs(2);
 
 /// Three connect-mode invocation shapes the binary
 /// distinguishes after argv + env-var parsing. `Local`
@@ -74,7 +80,11 @@ pub fn parse_connect_args(
         .position(|a| a == "--connect")
         .and_then(|p| args.get(p + 1))
         .cloned();
-    let stream = args.iter().any(|a| a == "--stream") || env_is_truthy(stream_env);
+    let env_truthy = stream_env.is_some_and(|s| {
+        let lower = s.trim().to_ascii_lowercase();
+        !lower.is_empty() && lower != "0" && lower != "false" && lower != "no" && lower != "off"
+    });
+    let stream = args.iter().any(|a| a == "--stream") || env_truthy;
     match connect_url {
         None if stream => Err(ConnectArgsError::StreamWithoutConnect),
         None => Ok(ConnectMode::Local),
@@ -83,16 +93,6 @@ pub fn parse_connect_args(
                 return Err(ConnectArgsError::LocalFlagWithConnect(bad.clone()));
             }
             Ok(ConnectMode::Remote { url, stream })
-        }
-    }
-}
-
-fn env_is_truthy(v: Option<&str>) -> bool {
-    match v {
-        None => false,
-        Some(s) => {
-            let lower = s.trim().to_ascii_lowercase();
-            !lower.is_empty() && lower != "0" && lower != "false" && lower != "no" && lower != "off"
         }
     }
 }
@@ -124,6 +124,61 @@ struct DoneData {
 #[derive(Deserialize)]
 struct ErrorData {
     error: String,
+}
+
+#[derive(Deserialize)]
+struct CancelledData {
+    step: usize,
+    partial_losses: Vec<f64>,
+}
+
+/// Saga 21.5 step 003: debounce predicate for the
+/// double-Ctrl-C cancel binding. Returns `true` when the current
+/// press should trigger a cancel POST -- i.e. there was a prior
+/// press within `window`. First press (or press after window
+/// expired) returns `false`; the caller updates the
+/// `Option<Instant>` it threads through the SIGINT handler so the
+/// NEXT press, if it lands in time, fires.
+#[must_use]
+pub fn should_double_cancel(
+    previous_press: Option<Instant>,
+    now: Instant,
+    window: Duration,
+) -> bool {
+    match previous_press {
+        Some(prev) => now.duration_since(prev) <= window,
+        None => false,
+    }
+}
+
+/// Saga 21.5 step 003: POST `/v1/sessions/<id>/cancel`. Used by
+/// the REPL's SIGINT debounce path when the user double-taps
+/// Ctrl-C. Returns `Ok(())` on `200`; idempotent at the server
+/// level so calling twice is safe.
+pub fn post_cancel(
+    client: &reqwest::blocking::Client,
+    base_url: &str,
+    session_id: &str,
+    token: &str,
+) -> Result<(), ClientError> {
+    let resp = client
+        .post(format!(
+            "{}/v1/sessions/{session_id}/cancel",
+            base_url.trim_end_matches('/')
+        ))
+        .bearer_auth(token)
+        .send()
+        .map_err(|e| ClientError::Network(e.to_string()))?;
+    if !resp.status().is_success() {
+        let status = resp.status().as_u16();
+        let body = resp.text().unwrap_or_default();
+        let message = serde_json::from_str::<serde_json::Value>(&body)
+            .ok()
+            .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(str::to_string))
+            .unwrap_or(body);
+        return Err(ClientError::Server { status, message });
+    }
+    Ok(())
 }
 
 /// POST `/v1/sessions/<id>/eval_stream` and consume the
@@ -229,6 +284,14 @@ fn handle_frame(
             Err(ClientError::Server {
                 status: 400,
                 message: e.error,
+            })
+        }
+        "cancelled" => {
+            let c: CancelledData = serde_json::from_str(&data)
+                .map_err(|e| ClientError::Network(format!("decode cancelled: {e}")))?;
+            Err(ClientError::Cancelled {
+                step: c.step,
+                partial_losses: c.partial_losses,
             })
         }
         _ => Ok(None),

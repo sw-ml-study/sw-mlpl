@@ -92,6 +92,21 @@ pub enum EvalError {
         /// Tutoring hint (multi-line ASCII text).
         hint: String,
     },
+    /// Saga 21.5 step 003: cooperative cancellation observed at a
+    /// loop head or pre-builtin checkpoint. `step` is the
+    /// inner-most loop iteration the eval was on when the trip was
+    /// caught (`0` for non-loop sites). `partial_losses` is the
+    /// per-iteration loss curve accumulated so far inside `train`
+    /// (empty for `for` / `repeat` / pre-builtin sites). The
+    /// session's `last_losses` binding is also populated with the
+    /// same vector so post-cancel `:vars` still sees the partial
+    /// curve.
+    Cancelled {
+        /// Iteration index at the trip site (0 for non-loop).
+        step: usize,
+        /// Per-iteration losses recorded so far inside `train`.
+        partial_losses: Vec<f64>,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -140,6 +155,7 @@ impl std::fmt::Display for EvalError {
                 f,
                 "type mismatch in {op}: expected {expected}, got {actual}\n  hint: {hint}"
             ),
+            Self::Cancelled { step, .. } => write!(f, "cancelled at step {step}"),
         }
     }
 }

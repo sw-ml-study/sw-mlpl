@@ -207,6 +207,82 @@ Operational notes:
   remain peers indefinitely; `/eval` covers callers that
   don't want a streaming response.
 
+### `POST /v1/sessions/{session_id}/cancel`
+
+Cooperatively cancel an in-flight eval on the session.
+Added in Saga 21.5 step 003. **Authenticated** (bearer
+token, same as `/eval`). Idempotent: a second `POST
+/cancel` after the bool is already set is a no-op.
+
+Request:
+
+```http
+POST /v1/sessions/<id>/cancel
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{}
+```
+
+Body is ignored (use `{}` or omit entirely).
+
+Response (`200 OK`) on success:
+
+```json
+{"cancelled": true}
+```
+
+Error responses match `/eval`:
+
+- **`401 Unauthorized`** -- missing or wrong bearer.
+- **`404 Not Found`** -- unknown `session_id`.
+
+Mechanism:
+
+- Every session has a `tokio` interrupt token kept in
+  a parallel `InterruptMap` alongside the session
+  record. `/cancel` reads that map (NOT the sessions
+  map) so it can fire while an in-flight `/eval` or
+  `/eval_stream` holds the sessions write lock or has
+  removed the session for the duration of the call.
+- The bearer-token check uses the copy of the token
+  stored in the `InterruptMap` entry, for the same
+  reason.
+- Flipping the bool trips the in-flight eval at its
+  next loop head (`for`, `train`, `repeat`) or
+  pre-builtin checkpoint. The evaluator raises
+  `EvalError::Cancelled { step, partial_losses }`;
+  the SSE handler emits a terminal `event: cancelled`
+  carrying both fields, and the non-streaming `/eval`
+  handler returns a `400` with the Display formatting.
+- Builtins do NOT yield mid-call. The cancellation
+  latency floor is therefore "one op": a long-running
+  `matmul` or `reduce_add` over a giant array finishes
+  before the next pre-builtin check observes the
+  cancel. A future saga can revisit if this bites in
+  practice.
+- After a cancel lands, the session is re-bindable
+  for further evals. The eval handlers `reset()` the
+  bool at the start of every call, so a prior cancel
+  does not contaminate the next program.
+
+SSE `event: cancelled` frame schema (Saga 21.5 step
+003, in addition to the `ready` / `metric` / `done` /
+`error` frames documented above):
+
+```text
+event: cancelled
+data: {"step": 17, "partial_losses": [0.5, 1.5, ...]}
+```
+
+`step` is the iteration index the cancel landed on
+(0 for non-loop sites); `partial_losses` is the
+per-iteration loss curve accumulated by `train { ... }`
+so far (empty for `for` / `repeat` / pre-builtin
+sites). The session's `last_losses` binding is also
+populated with the same vector, so post-cancel
+`:vars` still surfaces the partial curve.
+
 ### `GET /v1/health`
 
 Liveness check. **No authentication required.**
@@ -326,9 +402,9 @@ follow-up sagas:
   stable. Needs careful security review (allow-
   list config, env-var secrets, rate limiting)
   before shipping.
-- **Cancellation / interrupt.** Both `eval` and
-  `eval_stream` block until the program finishes.
-  Saga 21.5 step 003 adds `/cancel`.
+- ~~**Cancellation / interrupt.**~~ Shipped in Saga
+  21.5 step 003. See `POST /v1/sessions/{id}/cancel`
+  above.
 - **Persistence across restarts.** Sessions are
   in-memory only.
 - **Visualization storage URLs.** SVGs returned

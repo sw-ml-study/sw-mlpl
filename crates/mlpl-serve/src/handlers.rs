@@ -40,6 +40,11 @@ pub struct EvalResponse {
 }
 
 #[derive(Serialize)]
+pub struct CancelResponse {
+    pub cancelled: bool,
+}
+
+#[derive(Serialize)]
 pub struct ErrorResponse {
     pub error: String,
 }
@@ -67,9 +72,12 @@ pub struct InspectResponse {
 }
 
 /// `POST /v1/sessions` -- no auth. Creates a fresh
-/// session and returns its id + bearer token.
+/// session and returns its id + bearer token. Also
+/// registers the session in the parallel interrupt
+/// map (Saga 21.5 step 003) so `/cancel` is reachable
+/// for it from the very first call.
 pub async fn create_session_handler(State(state): State<AppState>) -> impl IntoResponse {
-    let (id, token) = crate::sessions::create_session(&state.sessions).await;
+    let (id, token) = crate::sessions::create_session(&state.sessions, &state.interrupts).await;
     (
         StatusCode::OK,
         Json(CreateSessionResponse {
@@ -109,6 +117,7 @@ pub async fn eval_handler(
         lex(&body.program).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
     let stmts =
         parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
+    install_session_interrupt(&state, &id, session).await;
     session
         .env
         .set_peer_dispatcher(Arc::new(crate::server::RemoteMlxDispatcher::new(
@@ -117,12 +126,51 @@ pub async fn eval_handler(
         )));
     let value = eval_program_value(&stmts, &mut session.env);
     session.env.clear_peer_dispatcher();
+    session.env.clear_interrupt();
     let value = value.map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
     let kind = value_kind(&value);
     Ok(Json(EvalResponse {
         value: format!("{value}"),
         kind,
     }))
+}
+
+/// `POST /v1/sessions/{id}/cancel` -- requires bearer
+/// when `auth_mode == Required`. Flips the session's
+/// shared `Interrupt` bool so any in-flight eval
+/// observes the trip at its next loop / pre-builtin
+/// checkpoint and raises `EvalError::Cancelled`. Idempotent:
+/// a second call after the bool is already set is a no-op
+/// at the eval level. Uses the parallel `InterruptMap`
+/// (Saga 21.5 step 003) so it can run while another
+/// request holds the sessions write lock. Saga 21.5
+/// step 003.
+pub async fn cancel_handler(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+    headers: HeaderMap,
+) -> Result<Json<CancelResponse>, (StatusCode, Json<ErrorResponse>)> {
+    let entry = {
+        let interrupts = state.interrupts.read().await;
+        interrupts
+            .get(&id)
+            .cloned()
+            .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?
+    };
+    if state.auth_mode == AuthMode::Required {
+        let provided = extract_bearer(&headers).ok_or((
+            StatusCode::UNAUTHORIZED,
+            json_err("missing or invalid authorization"),
+        ))?;
+        if !check_token(provided, &entry.token) {
+            return Err((
+                StatusCode::UNAUTHORIZED,
+                json_err("missing or invalid authorization"),
+            ));
+        }
+    }
+    entry.interrupt.set();
+    Ok(Json(CancelResponse { cancelled: true }))
 }
 
 /// `GET /v1/health` -- no auth. Liveness +
@@ -200,6 +248,23 @@ fn snapshot_env(env: &Environment) -> InspectResponse {
 
 pub(crate) fn json_err(msg: impl Into<String>) -> Json<ErrorResponse> {
     Json(ErrorResponse { error: msg.into() })
+}
+
+/// Saga 21.5 step 003: clone the session's shared `Interrupt`
+/// out of the parallel map, `reset()` it (so a prior cancel
+/// doesn't contaminate this call), and install it into the
+/// session's env. Shared by `eval_handler` (this module) and the
+/// SSE `eval_stream_handler` so cancellation behavior is
+/// identical across the two transports.
+pub(crate) async fn install_session_interrupt(
+    state: &AppState,
+    id: &Uuid,
+    session: &mut crate::sessions::Session,
+) {
+    if let Some(entry) = state.interrupts.read().await.get(id).cloned() {
+        entry.interrupt.reset();
+        session.env.set_interrupt(entry.interrupt);
+    }
 }
 
 pub(crate) fn value_kind(value: &Value) -> &'static str {

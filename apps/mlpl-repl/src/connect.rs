@@ -21,7 +21,18 @@ const TIMEOUT_SECS: u64 = 120;
 #[derive(Debug)]
 pub enum ClientError {
     Network(String),
-    Server { status: u16, message: String },
+    Server {
+        status: u16,
+        message: String,
+    },
+    /// Saga 21.5 step 003: the streaming endpoint returned a
+    /// terminal `event: cancelled` frame. Mirrors the server-side
+    /// `EvalError::Cancelled` shape so the REPL can render the
+    /// partial loss curve back to the user.
+    Cancelled {
+        step: usize,
+        partial_losses: Vec<f64>,
+    },
 }
 
 impl std::fmt::Display for ClientError {
@@ -29,6 +40,7 @@ impl std::fmt::Display for ClientError {
         match self {
             Self::Network(m) => write!(f, "network error: {m}"),
             Self::Server { status, message } => write!(f, "server {status}: {message}"),
+            Self::Cancelled { step, .. } => write!(f, "cancelled at step {step}"),
         }
     }
 }

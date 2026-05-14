@@ -9,9 +9,11 @@ use mlpl_eval::{EvalError, PeerDispatcher, Value};
 use serde::{Deserialize, Serialize};
 
 use crate::auth::AuthMode;
-use crate::handlers::{create_session_handler, eval_handler, health_handler, inspect_handler};
+use crate::handlers::{
+    cancel_handler, create_session_handler, eval_handler, health_handler, inspect_handler,
+};
 use crate::peers::{PeerRegistry, PeerSessionMap};
-use crate::sessions::{SessionMap, new_map};
+use crate::sessions::{InterruptMap, SessionMap, new_interrupt_map, new_map};
 
 /// Errors the server can fail with at startup or
 /// while serving. Translated to stderr + non-zero
@@ -49,6 +51,12 @@ impl std::error::Error for ServerError {}
 #[derive(Clone)]
 pub struct AppState {
     pub sessions: SessionMap,
+    /// Saga 21.5 step 003: parallel map keyed by
+    /// session id, holding `(token, Interrupt)` for
+    /// the `/cancel` handler so flipping the bool
+    /// does not have to take the sessions lock (which
+    /// is held by an in-flight eval).
+    pub interrupts: InterruptMap,
     pub peers: PeerRegistry,
     pub peer_sessions: PeerSessionMap,
     pub auth_mode: AuthMode,
@@ -197,6 +205,7 @@ pub fn build_app_with_peers(
 ) -> Router {
     let state = AppState {
         sessions: new_map(),
+        interrupts: new_interrupt_map(),
         peers,
         peer_sessions: PeerSessionMap::default(),
         auth_mode,
@@ -209,6 +218,7 @@ pub fn build_app_with_peers(
             "/v1/sessions/:id/eval_stream",
             post(crate::sse::eval_stream_handler),
         )
+        .route("/v1/sessions/:id/cancel", post(cancel_handler))
         .route("/v1/sessions/:id/inspect", get(inspect_handler))
         .with_state(state);
     if let Some(dir) = static_dir {

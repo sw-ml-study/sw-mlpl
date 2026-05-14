@@ -10,6 +10,7 @@ use mlpl_core::ValueTag;
 use crate::error::EvalError;
 use crate::experiment::ExperimentRecord;
 use crate::grad::OptimizerState;
+use crate::interrupt::Interrupt;
 use crate::metric_sink::MetricSink;
 use crate::model::ModelSpec;
 use crate::tokenizer::TokenizerSpec;
@@ -115,6 +116,13 @@ pub struct Environment {
     /// this `None`; the SSE `/eval_stream` handler installs a
     /// channel-backed sink so the events stream to the client.
     pub(crate) metric_sink: Option<Arc<dyn MetricSink>>,
+    /// Saga 21.5 step 003: optional cooperative-cancellation token
+    /// checked at loop heads (`for`, `train`, `repeat`) and before
+    /// every builtin dispatch. Local REPL evals leave this `None`;
+    /// the SSE `/eval_stream` and `/eval` handlers install one per
+    /// call so the shared `/cancel` endpoint can trip the bool
+    /// from a different thread.
+    pub(crate) interrupt: Option<Interrupt>,
 }
 
 impl Environment {
@@ -396,6 +404,58 @@ impl Environment {
     #[must_use]
     pub fn metric_sink(&self) -> Option<Arc<dyn MetricSink>> {
         self.metric_sink.clone()
+    }
+
+    /// Saga 21.5 step 003: install a cancellation token. The
+    /// server's `/cancel` handler flips the same `Arc<AtomicBool>`
+    /// from a different thread; `check_interrupt` reads it at
+    /// every loop / pre-builtin checkpoint and raises
+    /// `EvalError::Cancelled` on trip.
+    pub fn set_interrupt(&mut self, interrupt: Interrupt) {
+        self.interrupt = Some(interrupt);
+    }
+
+    /// Saga 21.5 step 003: drop the installed cancellation token.
+    /// Called by the server when an eval call returns so the next
+    /// call on the same session starts from a clean slate.
+    pub fn clear_interrupt(&mut self) {
+        self.interrupt = None;
+    }
+
+    /// Saga 21.5 step 003: check the installed cancellation token,
+    /// if any. Returns `Err(EvalError::Cancelled { step: 0,
+    /// partial_losses: vec![] })` on trip; the enclosing loop
+    /// (`eval_train`) re-wraps that error with its own iteration
+    /// index + accumulated loss curve before returning.
+    pub fn check_interrupt(&self) -> Result<(), EvalError> {
+        if self.interrupt.as_ref().is_some_and(Interrupt::is_set) {
+            Err(EvalError::Cancelled {
+                step: 0,
+                partial_losses: Vec::new(),
+            })
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Saga 21.5 step 001: emit every `_metric`-suffixed scalar
+    /// binding for iteration `step` through the installed
+    /// `MetricSink`. Called by `eval_train` at the end of each
+    /// iteration; no-op when no sink is installed. Extracted
+    /// from `eval_train` to keep that function under the
+    /// sw-checklist 50-line budget.
+    pub(crate) fn emit_metrics(&self, step: usize) {
+        let Some(sink) = self.metric_sink() else {
+            return;
+        };
+        let metrics: Vec<(String, f64)> = self
+            .vars_iter()
+            .filter(|(name, arr)| name.ends_with("_metric") && arr.rank() == 0)
+            .map(|(name, arr)| (name.clone(), arr.data()[0]))
+            .collect();
+        for (name, value) in metrics {
+            sink.emit(&name, step, value);
+        }
     }
 }
 

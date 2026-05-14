@@ -33,6 +33,10 @@ mlpl-runtime = { path = "../../crates/mlpl-runtime" }
 reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# Saga 21.5 step 003: SIGINT handler for the double-Ctrl-C cancel
+# binding in connect mode. Tiny crate; only used by the binary
+# entry point (not by the WASM web build).
+ctrlc = "3"
 
 [dev-dependencies]
 # Spin up `mlpl-serve` in-process for `--connect`
