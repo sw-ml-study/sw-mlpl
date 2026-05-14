@@ -1,6 +1,6 @@
 number = 8
 slug = "web-repl-viz-storage"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 21.5 step 008: web-repl-viz-storage.
 
@@ -8,5 +8,6 @@ Goal: in connect mode the web REPL..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-14T15:45:33"
+completed_at = "2026-05-14T16:13:35"
 task_type = "production"
-commits = []
+commits = ["41a210406012753bb977c1725c7d7e2d666c9a61"]
