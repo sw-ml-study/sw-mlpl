@@ -1,6 +1,6 @@
 number = 2
 slug = "sse-connect-client"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 21.5 step 002: sse-connect-client.
 
