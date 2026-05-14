@@ -44,6 +44,9 @@ ctrlc = "3"
 mlpl-serve = { path = "../../crates/mlpl-serve" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 axum = "0.7"
+# Saga 21.5 step 009: MLPL_REPL_SESSION_FILE persistence
+# tests roundtrip a JSON file through a temp directory.
+tempfile = "3"
 
 [build-dependencies]
 hostname = "0.4"

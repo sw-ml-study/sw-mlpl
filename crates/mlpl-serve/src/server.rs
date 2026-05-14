@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use crate::auth::AuthMode;
 use crate::handlers::{
     cancel_handler, create_session_handler, eval_handler, health_handler, inspect_handler,
+    session_meta_handler,
 };
 use crate::peers::{PeerRegistry, PeerSessionMap};
 use crate::sessions::{InterruptMap, SessionMap, new_interrupt_map, new_map};
@@ -226,6 +227,7 @@ pub fn build_app_with_peers_cors(
     let mut router = Router::new()
         .route("/v1/health", get(health_handler))
         .route("/v1/sessions", post(create_session_handler))
+        .route("/v1/sessions/:id", get(session_meta_handler))
         .route("/v1/sessions/:id/eval", post(eval_handler))
         .route(
             "/v1/sessions/:id/eval_stream",

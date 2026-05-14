@@ -1,5 +1,6 @@
 mod ask;
 mod connect;
+mod connect_reattach;
 mod connect_repl;
 mod connect_stream;
 mod svg_out;

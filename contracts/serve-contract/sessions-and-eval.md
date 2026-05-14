@@ -207,6 +207,53 @@ Operational notes:
   remain peers indefinitely; `/eval` covers callers that
   don't want a streaming response.
 
+### `GET /v1/sessions/{session_id}`
+
+Session metadata snapshot. Added in Saga 21.5
+step 009. **Authenticated** (bearer token, same
+as `/eval`). Used by `mlpl-repl --connect
+--session <id> --token <tok>` to validate
+cached credentials before printing the
+welcome banner.
+
+Request:
+
+```http
+GET /v1/sessions/<id>
+Authorization: Bearer <token>
+```
+
+Response (`200 OK`):
+
+```json
+{
+  "session_id": "<uuid>",
+  "created_at": 1714867200,
+  "last_eval_at": 1714867892,
+  "vars":        [{"name": "x", "shape": [3], "is_param": false}, ...],
+  "models":      ["mdl"],
+  "tokenizers":  ["bpe"],
+  "experiments": ["exp_1"],
+  "more":        0
+}
+```
+
+- `created_at` and `last_eval_at` are Unix
+  timestamps (seconds since epoch).
+  `last_eval_at` is `null` until the first
+  successful `/eval` call.
+- The workspace summary (`vars` / `models` /
+  `tokenizers` / `experiments` / `more`) is
+  identical to `/inspect`. Reattaching clients
+  use this to render "rejoining a session
+  with N variables and M models" before
+  accepting the first prompt.
+
+Error responses match `/inspect`:
+
+- `401 Unauthorized` -- missing or wrong bearer.
+- `404 Not Found` -- unknown session id.
+
 ### `POST /v1/sessions/{session_id}/cancel`
 
 Cooperatively cancel an in-flight eval on the session.
@@ -539,6 +586,33 @@ Exercised by
 `apps/mlpl-web/tests/connect_viz_fetch_tests.rs`:
 SVG round-trip through eval + GET, 404 mapping
 for unknown ids, path / absolute URL parity.
+
+### Session re-attach in the CLI client (Saga 21.5 step 009)
+
+`mlpl-repl --connect <url> --session <id>
+--token <tok>` skips `POST /v1/sessions` and
+rebinds to an existing server-side session.
+Both `--session` and `--token` must be passed
+together; either alone exits with code 2.
+
+Token persistence: when
+`MLPL_REPL_SESSION_FILE` is set to a writable
+JSON path, `mlpl-repl --connect` reads
+`{session_id, token}` from that file on
+startup (lower priority than the explicit
+flags but higher than `create_session`) and
+writes a fresh pair there after minting a new
+session. Keyring-backed storage is a follow-up
+(needs per-OS code + a security review).
+
+The reattach client validates the cached
+credentials via `GET /v1/sessions/<id>` before
+printing the welcome banner; a 401/404 drops
+the saved pair and falls through to
+`create_session`. The banner reads
+`Re-attached to <url> (session <id>)` instead
+of `Connected to <url> (session <id>)` when
+reattach succeeded.
 
 Module layout: `apps/mlpl-web/src/eval.rs` was
 split in step 008 to defend the 500-line file

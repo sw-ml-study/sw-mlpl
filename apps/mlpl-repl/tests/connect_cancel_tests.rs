@@ -19,6 +19,10 @@
 mod connect;
 
 #[allow(dead_code)]
+#[path = "../src/connect_reattach.rs"]
+mod connect_reattach;
+
+#[allow(dead_code)]
 #[path = "../src/connect_stream.rs"]
 mod connect_stream;
 

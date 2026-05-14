@@ -84,6 +84,23 @@ pub struct InspectResponse {
     pub more: usize,
 }
 
+/// Saga 21.5 step 009: `GET /v1/sessions/{id}` response.
+/// Superset of `InspectResponse` plus the session id and
+/// creation/last-eval timestamps the reattach client uses to
+/// render a "you are rejoining a session last touched N seconds
+/// ago" banner.
+#[derive(Serialize)]
+pub struct SessionMetaResponse {
+    pub session_id: Uuid,
+    pub created_at: u64,
+    pub last_eval_at: Option<u64>,
+    pub vars: Vec<VarSnapshot>,
+    pub models: Vec<String>,
+    pub tokenizers: Vec<String>,
+    pub experiments: Vec<String>,
+    pub more: usize,
+}
+
 /// `POST /v1/sessions` -- no auth. Creates a fresh
 /// session and returns its id + bearer token. Also
 /// registers the session in the parallel interrupt
@@ -143,6 +160,9 @@ pub async fn eval_handler(
     let value = value.map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
     let kind = value_kind(&value);
     let formatted = format!("{value}");
+    // Saga 21.5 step 009: stamp this eval's wall clock so
+    // `GET /v1/sessions/<id>` can surface a "last touched" hint.
+    session.last_eval_at = Some(crate::sessions::now_unix_seconds());
     let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
     Ok(Json(EvalResponse {
         value: formatted,
@@ -228,6 +248,45 @@ pub async fn inspect_handler(
         }
     }
     Ok(Json(snapshot_env(&session.env)))
+}
+
+/// `GET /v1/sessions/{id}` -- requires bearer when
+/// `auth_mode == Required`. Returns the session's bearer-token
+/// signed metadata: creation + last-eval timestamps plus the
+/// same workspace summary `/inspect` returns. Saga 21.5 step
+/// 009 -- backs `mlpl-repl --connect --session <id>`.
+pub async fn session_meta_handler(
+    State(state): State<AppState>,
+    Path(id): Path<Uuid>,
+    headers: HeaderMap,
+) -> Result<Json<SessionMetaResponse>, (StatusCode, Json<ErrorResponse>)> {
+    let sessions = state.sessions.read().await;
+    let session = sessions
+        .get(&id)
+        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
+    if state.auth_mode == AuthMode::Required {
+        let provided = extract_bearer(&headers).ok_or((
+            StatusCode::UNAUTHORIZED,
+            json_err("missing or invalid authorization"),
+        ))?;
+        if !check_token(provided, &session.token) {
+            return Err((
+                StatusCode::UNAUTHORIZED,
+                json_err("missing or invalid authorization"),
+            ));
+        }
+    }
+    let snap = snapshot_env(&session.env);
+    Ok(Json(SessionMetaResponse {
+        session_id: id,
+        created_at: session.created_at,
+        last_eval_at: session.last_eval_at,
+        vars: snap.vars,
+        models: snap.models,
+        tokenizers: snap.tokenizers,
+        experiments: snap.experiments,
+        more: snap.more,
+    }))
 }
 
 fn snapshot_env(env: &Environment) -> InspectResponse {

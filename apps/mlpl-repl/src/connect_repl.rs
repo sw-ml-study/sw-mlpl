@@ -8,9 +8,8 @@ use std::io::{self, BufRead, Write};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
-use crate::connect::{
-    ClientError, InspectResponse, build_client, create_session, eval_remote, inspect_remote,
-};
+use crate::connect::{ClientError, InspectResponse, build_client, eval_remote, inspect_remote};
+use crate::connect_reattach::{Reattach, print_welcome_banner, resolve_session};
 use crate::connect_stream::{
     CANCEL_DOUBLE_WINDOW, ConnectArgsError, ConnectMode, eval_remote_stream, parse_connect_args,
     post_cancel, render_metric, should_double_cancel,
@@ -37,8 +36,12 @@ pub fn try_dispatch_args(args: &[String]) -> bool {
     let stream_env = std::env::var("MLPL_REPL_STREAM").ok();
     match parse_connect_args(args, stream_env.as_deref()) {
         Ok(ConnectMode::Local) => false,
-        Ok(ConnectMode::Remote { url, stream }) => {
-            read_loop(&url, stream);
+        Ok(ConnectMode::Remote {
+            url,
+            stream,
+            reattach,
+        }) => {
+            read_loop(&url, stream, reattach);
             true
         }
         Err(ConnectArgsError::StreamWithoutConnect) => {
@@ -57,30 +60,32 @@ pub fn try_dispatch_args(args: &[String]) -> bool {
             );
             std::process::exit(2);
         }
+        Err(ConnectArgsError::ReattachIncomplete) => {
+            eprintln!(
+                "error: --session and --token must be passed together\n  \
+                 reattach to an existing session requires BOTH the session id \
+                 and its bearer token."
+            );
+            std::process::exit(2);
+        }
     }
 }
 
 /// Interactive read-eval-print loop in connect
-/// mode. Creates a session, then for each line
-/// either dispatches a slash command (locally OR
-/// against `/inspect`) or POSTs to `/eval` (default)
-/// or `/eval_stream` (when `--stream` /
-/// `MLPL_REPL_STREAM` is set).
-pub fn read_loop(base_url: &str, stream: bool) {
+/// mode. Creates a session (or rebinds to one via `reattach`
+/// / `MLPL_REPL_SESSION_FILE`), then for each line either
+/// dispatches a slash command (locally OR against `/inspect`)
+/// or POSTs to `/eval` / `/eval_stream`.
+pub fn read_loop(base_url: &str, stream: bool, reattach: Option<Reattach>) {
     let client = build_client();
-    let (session_id, token) = match create_session(&client, base_url) {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("error: failed to create session: {e}");
-            eprintln!("  is mlpl-serve running at {base_url}?");
+    let (session_id, token, reattached) = resolve_session(&client, base_url, reattach)
+        .unwrap_or_else(|e| {
+            eprintln!(
+                "error: failed to resolve session: {e}\n  is mlpl-serve running at {base_url}?"
+            );
             std::process::exit(1);
-        }
-    };
-    let mode = if stream { " [streaming]" } else { "" };
-    println!("Connected to {base_url} (session {session_id}){mode}");
-    println!("Type :help for commands, exit or Ctrl-D to quit.");
-    println!("Press Ctrl-C twice within 2s to cancel an in-flight eval.");
-    println!();
+        });
+    print_welcome_banner(base_url, &session_id, stream, reattached);
     install_sigint_cancel(
         client.clone(),
         base_url.to_string(),
