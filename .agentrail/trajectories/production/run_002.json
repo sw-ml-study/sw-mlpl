@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 2,
+    "step": "sse-connect-client"
+  },
+  "action": "TDD: failing tests first; pure-fn parser so tests can assert exit-2 reason without subprocess; SSE parsed via reqwest::blocking Response as Read + BufReader::lines; helper extraction (consume_sse_stream, handle_frame) to stay under 25-line LOC budget; collocated parse-args + wire logic in one module to keep crate at the 7-module ceiling.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-13T20:21:25"
+}
