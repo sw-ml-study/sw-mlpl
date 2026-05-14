@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "viz-storage-endpoint"
+  },
+  "action": "TDD red-then-green; tried inline-mod-in-lib.rs first then moved to top-level module file after measuring the lib.rs budget cost; shared attach_viz helper between eval_handler and spawn_eval_task to avoid duplicated SVG-detection logic; extracted result_to_sse to viz_storage.rs (rather than a helper inside the sse mod) to keep that mod under its 7-fn ceiling; added mlpl-cli dep to reuse existing is_svg_string + write_to_cache rather than duplicating; auth via require_known_bearer iterating InterruptMap (no sessions write lock contention).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-14T10:08:16"
+}

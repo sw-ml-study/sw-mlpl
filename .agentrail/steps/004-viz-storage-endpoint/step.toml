@@ -1,6 +1,6 @@
 number = 4
 slug = "viz-storage-endpoint"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 21.5 step 004: viz-storage-endpoint.
 
@@ -8,5 +8,6 @@ Goal: ship POST /v1/viz (stores SV..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-14T07:53:59"
+completed_at = "2026-05-14T10:08:16"
 task_type = "production"
-commits = []
+commits = ["ae3f6ed6933d1f4a1d341ec437381bf9b3676d5b"]
