@@ -1,6 +1,6 @@
 number = 9
 slug = "session-reattach-client"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 21.5 step 009: session-reattach-client.
 
@@ -8,5 +8,6 @@ Goal: mlpl-repl --connect --ses..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-14T16:13:36"
+completed_at = "2026-05-14T21:07:49"
 task_type = "production"
-commits = []
+commits = ["c2c76d2acc5512a73ce12135a50c22f32c5a6a09"]
