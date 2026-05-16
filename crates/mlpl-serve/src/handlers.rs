@@ -160,10 +160,10 @@ pub async fn eval_handler(
     let value = value.map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
     let kind = value_kind(&value);
     let formatted = format!("{value}");
-    // Saga 21.5 step 009: stamp this eval's wall clock so
-    // `GET /v1/sessions/<id>` can surface a "last touched" hint.
     session.last_eval_at = Some(crate::sessions::now_unix_seconds());
     let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
+    drop(sessions);
+    crate::persist::maybe_flush(&state).await;
     Ok(Json(EvalResponse {
         value: formatted,
         kind,

@@ -212,6 +212,7 @@ async fn run_rejects_non_loopback_with_auth_disabled() {
         None,
         None,
         None,
+        None,
     )
     .await
     .unwrap_err();
@@ -348,6 +349,7 @@ async fn static_dir_serves_index_at_sw_mlpl_prefix() {
         mlpl_serve::peers::empty_registry(),
         Some(&tmp),
         None,
+        None,
     );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();
@@ -393,6 +395,7 @@ async fn self_signed_serves_health_over_tls() {
             mlpl_serve::peers::empty_registry(),
             None,
             Some(tls_config),
+            None,
             None,
         )
         .await;

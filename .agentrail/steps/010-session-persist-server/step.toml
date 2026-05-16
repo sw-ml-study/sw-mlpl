@@ -1,6 +1,6 @@
 number = 10
 slug = "session-persist-server"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 21.5 step 010: session-persist-server.
 

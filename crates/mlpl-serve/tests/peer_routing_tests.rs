@@ -24,7 +24,7 @@ async fn start_orchestrator(peer_addr: SocketAddr) -> SocketAddr {
     let peers = build_registry(vec![("mlx".into(), format!("http://{peer_addr}"))], false).unwrap();
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
-    let app = build_app_with_peers_cors(AuthMode::Required, peers, None, None);
+    let app = build_app_with_peers_cors(AuthMode::Required, peers, None, None, None);
     listener.set_nonblocking(true).unwrap();
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
@@ -175,7 +175,13 @@ async fn device_block_routes_to_peer_and_fetches_back_to_cpu() {
 async fn device_block_without_peer_falls_back_to_existing_behavior() {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
     let addr = listener.local_addr().unwrap();
-    let app = build_app_with_peers_cors(AuthMode::Required, Arc::new(HashMap::new()), None, None);
+    let app = build_app_with_peers_cors(
+        AuthMode::Required,
+        Arc::new(HashMap::new()),
+        None,
+        None,
+        None,
+    );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();
     });
