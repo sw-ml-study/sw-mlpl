@@ -1,0 +1,12 @@
+number = 11
+slug = "wire-f32-u8"
+status = "pending"
+description = """
+Saga 21.5 step 011: wire-f32-u8.
+
+Goal: services/mlpl-mlx-serve/src/wire.rs g..."""
+role = "legacy"
+context_files = []
+created_at = "2026-05-15T18:53:24"
+task_type = "production"
+commits = []
