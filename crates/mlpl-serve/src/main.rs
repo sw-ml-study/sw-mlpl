@@ -31,6 +31,12 @@ struct Args {
     /// `apps/mlpl-web` running on a different origin (e.g.
     /// `https://sw-ml-study.github.io/sw-mlpl/`).
     cors_allow: Option<String>,
+    /// Saga 21.5 step 010: when set, every successful `/eval`
+    /// flushes the slim per-session state (token + timestamps +
+    /// variable bindings) to this JSON file. Startup reads the
+    /// same file so a restart picks up the prior session map.
+    /// Absent means in-memory-only (legacy behavior).
+    persist: Option<PathBuf>,
 }
 
 fn main() -> ExitCode {
@@ -72,10 +78,11 @@ fn run_main(args: Args) -> Result<(), String> {
         auth,
         static_dir,
         cors_allow,
+        persist,
         ..
     } = args;
     runtime
-        .block_on(run(bind, auth, peers, static_dir, tls, cors_allow))
+        .block_on(run(bind, auth, peers, static_dir, tls, cors_allow, persist))
         .map_err(|e| format!("{e}"))
 }
 
@@ -89,6 +96,7 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
     let mut tls_key: Option<PathBuf> = None;
     let mut self_signed = false;
     let mut cors_allow: Option<String> = None;
+    let mut persist: Option<PathBuf> = None;
     let mut it = iter.into_iter();
     while let Some(arg) = it.next() {
         match arg.as_str() {
@@ -128,6 +136,9 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
             "--cors-allow" => {
                 cors_allow = Some(it.next().ok_or("--cors-allow requires a value")?);
             }
+            "--persist" => {
+                persist = Some(PathBuf::from(it.next().ok_or("--persist requires a path")?));
+            }
             "-h" | "--help" => {
                 print_usage();
                 std::process::exit(0);
@@ -145,6 +156,7 @@ fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
         tls_key,
         self_signed,
         cors_allow,
+        persist,
     })
 }
 

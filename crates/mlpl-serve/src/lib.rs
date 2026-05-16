@@ -13,6 +13,7 @@
 pub mod auth;
 pub mod handlers;
 pub mod peers;
+pub mod persist;
 pub mod server;
 pub mod sessions;
 pub mod viz_storage;

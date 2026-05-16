@@ -68,6 +68,13 @@ pub struct AppState {
     pub peers: PeerRegistry,
     pub peer_sessions: PeerSessionMap,
     pub auth_mode: AuthMode,
+    /// Saga 21.5 step 010: when `Some`, every successful
+    /// `/eval` flushes the slim per-session state (token +
+    /// timestamps + variable bindings) to this JSON file so
+    /// a fresh `mlpl-serve` process can pick up where the
+    /// previous one left off. `None` keeps the legacy
+    /// in-memory-only behavior.
+    pub persist_path: Option<std::path::PathBuf>,
 }
 
 #[derive(Debug)]
@@ -196,9 +203,10 @@ impl PeerDispatcher for RemoteMlxDispatcher {
 /// Build the axum router with the session-map state
 /// and auth mode wired in. Empty peer registry; use
 /// `build_app_with_peers_cors` for tests that need to
-/// register peers or a CORS origin up-front.
+/// register peers, a CORS origin, or a persistence path
+/// up-front.
 pub fn build_app(auth_mode: AuthMode) -> Router {
-    build_app_with_peers_cors(auth_mode, crate::peers::empty_registry(), None, None)
+    build_app_with_peers_cors(auth_mode, crate::peers::empty_registry(), None, None, None)
 }
 
 /// Saga R1 step 003 + Saga 25 step A: build the router with an
@@ -215,14 +223,19 @@ pub fn build_app_with_peers_cors(
     peers: crate::peers::PeerRegistry,
     static_dir: Option<&std::path::Path>,
     cors_origin: Option<String>,
+    persist_path: Option<std::path::PathBuf>,
 ) -> Router {
+    let sessions = new_map();
+    let interrupts = new_interrupt_map();
+    crate::persist::maybe_load(persist_path.as_deref(), &sessions, &interrupts);
     let state = AppState {
-        sessions: new_map(),
-        interrupts: new_interrupt_map(),
+        sessions,
+        interrupts,
         viz: new_store(),
         peers,
         peer_sessions: PeerSessionMap::default(),
         auth_mode,
+        persist_path,
     };
     let mut router = Router::new()
         .route("/v1/health", get(health_handler))
@@ -279,11 +292,18 @@ pub async fn run(
     static_dir: Option<std::path::PathBuf>,
     tls: TlsConfig,
     cors_origin: Option<String>,
+    persist_path: Option<std::path::PathBuf>,
 ) -> Result<(), ServerError> {
     if !addr.ip().is_loopback() && auth_mode == AuthMode::Disabled {
         return Err(ServerError::InsecureBind { addr });
     }
-    let app = build_app_with_peers_cors(auth_mode, peers, static_dir.as_deref(), cors_origin);
+    let app = build_app_with_peers_cors(
+        auth_mode,
+        peers,
+        static_dir.as_deref(),
+        cors_origin,
+        persist_path,
+    );
     match tls {
         Some(config) => axum_server::bind_rustls(addr, config)
             .serve(app.into_make_service())

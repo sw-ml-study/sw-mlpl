@@ -453,6 +453,45 @@ ships before the version bump).
   loopback address; the server prints an error
   and exits non-zero if combined with a
   non-loopback bind.
+- `--persist <path>` (Saga 21.5 step 010,
+  optional). When set, every successful `/eval`
+  flushes a slim per-session snapshot
+  (`session_id`, `token`, `created_at`,
+  `last_eval_at`, variable bindings as
+  shape + flat-data arrays) to `<path>` as a
+  versioned JSON file. Server startup reads
+  the same file and re-populates the session
+  map so a restart picks up where the previous
+  process left off. Absent means in-memory
+  only (legacy behavior preserved).
+
+  Persistence semantics:
+
+  - **Slim subset only.** Models, tokenizers,
+    experiments, and the autograd tape do NOT
+    survive restart in step 010; full
+    `Environment` serialization is a follow-up.
+    The canonical reattach scenario binds
+    plain numeric arrays (`x = iota(3)`,
+    `last_losses = ...`) and resumes against
+    them.
+  - **Durability is eventual.** The flush runs
+    on the eval task BEFORE the `/eval`
+    response returns, so a successful HTTP
+    response means the data is on disk.
+    Failure modes (disk full, permission
+    denied) log to stderr but do NOT fail the
+    eval response -- the bearer token + var
+    bindings are still in memory.
+  - **Schema versioned.** The file has a
+    `persist_version` field; unknown versions
+    are skipped at startup (the session map
+    stays empty) rather than crashing the
+    process.
+  - **Single file.** All sessions share one
+    JSON file; concurrent writers are not
+    supported. Run one `mlpl-serve` per
+    persist path.
 - `--cors-allow <origin>` (Saga 21.5 step 006,
   optional). When set, wraps the router in a
   `tower-http` `CorsLayer` that lets browsers

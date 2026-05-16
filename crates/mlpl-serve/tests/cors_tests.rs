@@ -21,6 +21,7 @@ async fn start_server_with_cors(origin: Option<&str>) -> SocketAddr {
         empty_registry(),
         None,
         origin.map(str::to_string),
+        None,
     );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();
