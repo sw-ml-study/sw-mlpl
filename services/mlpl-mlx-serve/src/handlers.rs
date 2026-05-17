@@ -85,7 +85,13 @@ pub async fn health_handler() -> impl IntoResponse {
 /// eval-on-device handler is the simpler path for
 /// now.
 pub async fn create_session_handler(State(state): State<AppState>) -> impl IntoResponse {
-    let (id, token) = mlpl_serve::sessions::create_session(&state.sessions).await;
+    // Saga 21.5 step 003 added an InterruptMap to mlpl-serve's
+    // `create_session` signature for the orchestrator-side
+    // `/cancel` endpoint. mlpl-mlx-serve doesn't expose
+    // cancellation today, so we hand in a throwaway map; it
+    // gets dropped right after construction.
+    let throwaway = mlpl_serve::sessions::new_interrupt_map();
+    let (id, token) = mlpl_serve::sessions::create_session(&state.sessions, &throwaway).await;
     (
         StatusCode::OK,
         Json(CreateSessionResponse {
@@ -135,12 +141,15 @@ pub async fn eval_on_device_handler(
             }
         }
         Value::Str(s) => EvalResultPayload::String { value: s },
-        Value::Model(_) | Value::Tokenizer(_) | Value::DeviceTensor { .. } => {
+        Value::Model(_)
+        | Value::Tokenizer(_)
+        | Value::DeviceTensor { .. }
+        | Value::BuiltinRef { .. } => {
             return Err((
                 StatusCode::BAD_REQUEST,
                 json_err(
                     "eval-on-device blocks must return a tensor or string in R1 \
-                     (got model / tokenizer / device-tensor)",
+                     (got model / tokenizer / device-tensor / builtin-ref)",
                 ),
             ));
         }
