@@ -12,8 +12,52 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-17
+
+- release v0.20.0 -- Saga 21.5 Multi-client UI Follow-up
+- chore(agentrail): record step 012 completion + kickoff step 013
+
+## 2026-05-16
+
+- saga 21.5 step 012: retrospective docs sweep
+- chore(agentrail): record step 011 completion + kickoff step 012
+- saga 21.5 step 011: f32 + u8 wire dtypes on the MLX peer
+- docs(vit): add Phase 4.5 predictions UX (gallery, predict_batch, BYO image)
+
+## 2026-05-15
+
+- chore(agentrail): record step 010 completion + kickoff step 011
+- saga 21.5 step 010: --persist flag for session state across restart
+
+## 2026-05-14
+
+- chore(agentrail): record step 009 completion + kickoff step 010
+- saga 21.5 step 009: session re-attach (--session/--token + GET /v1/sessions/:id)
+- chore(agentrail): record step 008 completion + kickoff step 009
+- saga 21.5 step 008: fetch_viz + eval.rs split
+- chore(agentrail): record step 007 completion + kickoff step 008
+- saga 21.5 step 007: SSE streaming + cancel on RemoteEvaluator
+- chore(agentrail): record step 006 completion + kickoff step 007
+- saga 21.5 step 006: Evaluator trait + RemoteEvaluator + CORS
+- chore(agentrail): record step 005 completion + kickoff step 006
+- saga 21.5 step 005: VizFormat detection table (SVG/HTML/PNG/JPEG/JSON)
+- chore(agentrail): record step 004 completion + kickoff step 005
+- saga 21.5 step 004: /v1/viz storage endpoint + eval-pipeline integration
+- chore(agentrail): record step 003 completion + kickoff step 004
+
+## 2026-05-13
+
+- saga 21.5 step 003: cooperative cancellation (/cancel + Interrupt + Ctrl-Ctrl-C)
+- chore(agentrail): record step 002 completion + kickoff step 003
+- saga 21.5 step 002: --stream / MLPL_REPL_STREAM in connect mode
+- chore(agentrail): record step 001 completion + kickoff step 002
+- saga 21.5 step 001: SSE streaming eval (/eval_stream)
+- chore(agentrail): archive saga 23, init saga 21.5 multi-client-followup
+- docs: seed multi-client + ViT saga arc (Sagas 21.5, 29)
+
 ## 2026-05-07
 
+- docs(changes): refresh CHANGES.md to head
 - refactor(web): rename Path "Stop" to "Step" for clearer UX copy
 - docs(changes): refresh CHANGES.md to head
 - fix(web): tutorial Run All now records every example, not just the last
