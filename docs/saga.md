@@ -283,6 +283,123 @@ turning MLX into a peer service; next service work
 is the dev host move to Linux + NVIDIA, then R2
 (CUDA as a service).
 
+## Saga 21.5: Multi-Client UI Follow-up (COMPLETE)
+Picked up six of the eight items listed as deferred
+under Saga 21's "Non-goals" section after the MVP
+server contract held through one quarter of real
+use. Twelve steps across two months, delivered
+v0.20.0. The headline unlock was the browser REPL
+running against `mlpl-serve` rather than its own
+in-process WASM evaluator -- the prerequisite for
+the Saga 29 thorough ViT demo, where MLX-on-Apple-
+Silicon is the only compute substrate that can
+move tens of thousands of image patches per step.
+The shipped items:
+**SSE streaming eval.** `POST /v1/sessions/{id}/eval_stream`
+returns a `text/event-stream` whose frames are one
+JSON object per `data:` line. Four frame kinds:
+`metric` (one per `loss_metric` / `accuracy_metric`
+assignment), `final` (the request/response payload
+the non-streaming `/eval` would have returned),
+`error`, and `cancelled` (carries the partial loss
+curve up to the cancel point). The CLI and web
+REPLs both auto-route any program containing a
+`train { }` block through `eval_stream`.
+**Cancellation / interrupt.** A new
+`crates/mlpl-eval/src/interrupt.rs` ships a per-
+session interrupt token with `set` / `is_set` /
+`reset` semantics; the eval loop checks at each
+step boundary and short-circuits with the new
+`EvalError::Cancelled { step, partial_losses }`
+variant. `POST /v1/sessions/{id}/cancel` sets the
+token; SSE translates the cancellation into a
+`cancelled` frame. The CLI installs a SIGINT
+handler via the `ctrlc` crate that POSTs `/cancel`
+for the active session before tearing down the
+client.
+**Visualization storage endpoint.** `POST /v1/viz`
+accepts a typed body (SVG / HTML / PNG / JPEG /
+JSON), stores it content-addressed (sha256-prefix-
+12), and returns
+`{url, sha, format, bytes}`. `GET /v1/viz/{sha}.{ext}`
+serves the bytes back with the right Content-Type.
+The format detect grew beyond Saga 21's SVG-only
+`is_svg_string` into a five-format table at
+`crates/mlpl-cli/src/viz_format.rs` keyed off
+leading-bytes signals. CLI connect mode bypasses
+the local cache dir in favor of the server URL so
+two clients see the same viz.
+**Session persistence across restarts.**
+`mlpl-serve --persist <dir>` flushes a slim subset
+(variables only, no models / optimizer state) of
+each session's workspace to
+`<dir>/<session-id>.json` with debounce; loads
+every file in the directory on startup. The schema
+header is `persist_version: u32 = 1` so a future
+saga that grows the persisted set can bump the
+version cleanly.
+**Session reattach.** `mlpl-repl --connect <url>
+--session <id> --token <tok>` calls a new
+`GET /v1/sessions/{id}` endpoint to verify the
+session exists + the token authenticates, then
+prints a welcome banner ("reattached, N vars,
+created Y, last eval Z") and drops into the prompt.
+Combined with `--persist`, this is the
+"come-back-tomorrow" path.
+**Web UI in connect mode.** `apps/mlpl-web` grew
+an `Evaluator` trait that splits between
+`WasmEvaluator` (the original in-process path) and
+`RemoteEvaluator` (POSTs to a remote `mlpl-serve`,
+consumes SSE for streaming train, fetches
+`/v1/viz/...` URLs for inline viz). Switched by a
+`?server=<url>` query string in the URL bar. The
+server gets a `--cors-allow <origin>` flag to
+authorize the browser origin; the default stays
+deny-by-default.
+**f32 + u8 MLX-peer wire dtypes.** The wire format
+in `services/mlpl-mlx-serve/src/wire.rs` grew from
+f64-only to a 3-variant tagged union (`DTYPE_F64
+= 0`, `DTYPE_F32 = 1`, `DTYPE_U8 = 2`).
+`encode_tensor` (no `_as`) stays byte-for-byte
+identical to R1 so existing callers see no change;
+`encode_tensor_as(arr, dtype)` is the new path.
+The f32 lane halves training-param transport
+cost; the u8 lane is one eighth the size and is
+the Saga-29 prerequisite for moving image
+batches off the orchestrator without f64 padding.
+**Module-budget refactors.** Saga 21.5 added a
+lot of surface, which forced several module splits
+to stay under the sw-checklist 7-fn / 500-LOC caps:
+new modules `connect_reattach.rs`, `eval_sse.rs`,
+`eval_url.rs`, `eval_wasm.rs`, `viz_storage.rs`,
+`persist.rs`, `viz_format.rs`, `interrupt.rs`. The
+saga ended at the same failed-checks count as it
+started, with four steps spending the +1 exception
+lane and the rest holding flat.
+Tests grew by ~80 across the saga: streaming
+schemas, cancel timing, persistence round-trip
+under restart, the `Evaluator` trait's two impls,
+the f32/u8 wire round-trips, and the CORS header
+matrix. The MLX peer service in
+`services/mlpl-mlx-serve/` had two cross-workspace
+signature-drift fixes -- `Value::BuiltinRef` was
+added to `mlpl-eval` mid-saga and the orchestrator's
+`InterruptMap` argument changed; both were caught
+when the peer's tests finally ran in step 011 and
+surfaced into the contract docs. Carved out as
+post-21.5 follow-ups: server-side LLM proxy with
+allow-list (still gated on a security review),
+WebSocket surface (REST + SSE was enough for every
+use case here), persistence of models + optimizer
+state (the slim variables-only cut keeps the schema
+small until a concrete need surfaces). Next:
+Saga 29, the Vision Transformer track, which lands
+the image-tensor primitives and the four-demo
+ladder enabled by this saga's MLX-peer-from-the-
+browser path. The MVP server contract has now held
+through Saga 21, R1, and 21.5 -- no breaking change
+across three release cycles.
+
 ## Saga 19: LLM-as-Tool REST Integration (COMPLETE)
 A language-level builtin that POSTs to an Ollama-
 compatible `/api/generate` endpoint and returns the
