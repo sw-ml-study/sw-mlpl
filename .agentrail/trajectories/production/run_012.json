@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 12,
+    "step": "docs-and-tutorials"
+  },
+  "action": "Edit on docs/using-cli-server.md (Non-goals -> main-body migration), Edit on apps/mlpl-web/src/lessons.rs (two new Lesson const insertions), Edit on README.md (count drift), Edit on docs/saga.md + docs/status.md (saga 21.5 entry + Planned->Completed move), Bash scripts/build-pages.sh (rebuild WASM bundle), cargo test -p mlpl-web (verify readme_counts assertions hold), git commit + push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-17T07:54:55"
+}
