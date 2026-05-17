@@ -240,6 +240,59 @@ extract the CLS row of the attention map, reshape it back over the
 Gated on `save_model` / `load_model` shipping; until then this lives
 inside Demo 2 / 3 as a tail block instead of a standalone program.
 
+### Demo 5 -- labeled predictions gallery (Saga 29 phase 4.5)
+
+Take a trained ViT (Demo 2 or Demo 3 output) and render a
+gallery of N validation-set thumbnails, each annotated with
+the ground-truth label and the model's prediction:
+
+```mlpl
+data = load_preloaded("pets_tiny")
+sp   = split(data, 0.8, 0)
+
+# ... (training as in Demo 2) ...
+
+yhat = predict_batch(model, Xva)
+gallery(Xva[..16], labels=Yva[..16], predictions=yhat[..16])
+```
+
+Output is an SVG (or HTML, via the Saga 21.5 step 005 viz-format
+table) showing the 16 thumbnails in a 4x4 grid with overlay
+strings like `actual: cat / predicted: dog`. Misclassifications
+stand out at a glance. The same demo runs in the browser
+through the connect-mode REPL because the gallery viz routes
+through the existing `/v1/viz/<id>` storage endpoint.
+
+Gated on the new `predict_batch` builtin and the new
+`gallery` viz output -- Phase 4.5 of `docs/milestone-vit.md`
+ships both as their own steps.
+
+### Demo 6 -- bring-your-own-image (Saga 29 phase 4.5)
+
+Two entry points, one inference pipeline:
+
+```mlpl
+# CLI: load a local image
+img = load_image("~/Downloads/my_cat.jpg")  # [3, H, W] u8
+
+# Web: the connect-mode REPL surfaces a file picker that
+# POSTs to /v1/sessions/<id>/upload-image; the chosen
+# variable name is bound on the server side as a u8 tensor.
+# (No `load_image` call needed; the upload binds `img`
+# directly.)
+
+yhat = predict_batch(model, img)
+gallery([img], predictions=yhat)
+```
+
+The user's image lands alongside the held-out pets_tiny
+samples (or on its own) with the same labeled-prediction
+overlay. The u8 wire dtype from Saga 21.5 step 011 carries
+the image bytes to the MLX peer without an f32 round trip.
+
+Gated on Phase 4.5 of `docs/milestone-vit.md` (Step 010c
+ships the CLI builtin + the web upload endpoint).
+
 ### Compiled-app flow
 
 ```sh
