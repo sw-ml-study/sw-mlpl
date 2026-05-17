@@ -37,26 +37,25 @@ Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 | 21 | CLI server + multi-client UI MVP (`crates/mlpl-serve` REST skeleton: sessions / eval / inspect / health; `mlpl-repl --connect <url>` thin client; CLI viz cache `MLPL_CACHE_DIR`; constant-time auth; LLM proxy / SSE / cancellation / persistence / web-rerouting / Emacs / TUI / desktop-GUI all deferred to follow-up sagas) | v0.17.0 | [x] |
 | R1 | MLX as a service (`services/mlpl-mlx-serve`; orchestrator `--peer mlx=<url>` routing for `device("mlx") { ... }`; opaque `DeviceTensor` handles; strict CPU faults until `to_device("cpu", x)` materialization; in-process MLX fallback retained) | v0.18.0 | [x] |
 | 23 | Typed ML values + typed traces (Tier A vocabulary: Logit / Probability / LogProbability / Loss{kind} / Gradient{wrt} / Weight{layer,name} / Bias{layer} / Activation{layer,kind} / LearningRate / Labels{num_classes} / AttentionMap; auto-tagging from softmax/sigmoid/cross_entropy/grad/cosine_schedule/linear_warmup/attention_weights producers + linear/embed/attention param creation + apply structural-tail rule; predicate consumers with `EvalError::TypeMismatch` four-part tutoring hints; tag propagation through arith/transpose/reshape/reductions/negation; new `:tags` / `:untag` and typed `:describe` / `:vars`; typed trace JSON events; "Typed ML Values" web REPL lesson; gradual-typing additivity preserved; performance explicitly last in the goal ranking) | v0.19.0 | [x] |
+| 21.5 | Multi-client UI follow-up (SSE streaming eval at `POST /v1/sessions/{id}/eval_stream`, cancellation at `POST /v1/sessions/{id}/cancel` + `EvalError::Cancelled` + per-session interrupt token, viz storage at `POST /v1/viz` + `GET /v1/viz/{sha}.{ext}` with five-format detect, web REPL connect mode via `Evaluator` trait + `?server=<url>` query string + `--cors-allow`, session persistence via `--persist <dir>` + `persist_version: 1` JSON-on-disk, session reattach via `--session <id> --token <tok>` + `GET /v1/sessions/{id}`, f32 + u8 dtypes on the MLX peer wire as a tagged 3-variant union; LLM proxy / WebSocket / model+optimizer persistence deferred to follow-ups) -- see `docs/milestone-multi-client-followup.md` | v0.20.0 | [x] |
 
 ## Planned
 
-Intended sequence: **21.5 -> 29 -> (dev host
-move to Linux) -> R2 -> R3 -> 18**. Saga 21.5 picks
-up the deferred Saga-21 follow-ups so the browser
-REPL can drive the MLX peer; Saga 29 (Vision
-Transformer) is the headline demo that justifies
-21.5 and adds image-tensor primitives. R2 / R3
-follow the dev-host move to Linux. Saga 17 was
-superseded by the services refactor proposed in
-`docs/refactor-services.md`; R1 shipped in v0.18.0
-and R2 / R3 replace the remaining in-process CUDA /
-distributed portions. The typed-values follow-ups
-(24-28) can interleave once a track lead picks
-them up.
+Intended sequence: **29 -> (dev host move to
+Linux) -> R2 -> R3 -> 18**. Saga 21.5 shipped in
+v0.20.0 and unblocks the browser REPL driving the
+MLX peer, which is what Saga 29 (Vision
+Transformer) needs for the multi-head thorough
+demo. R2 / R3 follow the dev-host move to Linux.
+Saga 17 was superseded by the services refactor
+proposed in `docs/refactor-services.md`; R1
+shipped in v0.18.0 and R2 / R3 replace the
+remaining in-process CUDA / distributed portions.
+The typed-values follow-ups (24-28) can interleave
+once a track lead picks them up.
 
 | # | Saga | Target | Status | Depends on |
 |---|------|--------|--------|------------|
-| 21.5 | Multi-client UI follow-up (SSE streaming eval, cancellation, viz storage endpoint, web REPL connect mode, session persistence + re-attach, f32 / u8 wire dtype) -- see `docs/milestone-multi-client-followup.md` | v0.20.0 | [ ] | 21, R1 |
 | 29 | Vision Transformer track (`load_images`, `load_preloaded("pets_tiny")`, `fetch_dataset("oxford_iiit_pet")`, `patchify`, `concat`, `gelu`, `layer_norm`, multi-head attention on the tape; single-head quick demo + multi-head thorough demo on MLX) -- see `docs/milestone-vit.md` and `docs/ViT-demo-plan.md` | v0.21.0 | [ ] | 21.5 (for thorough demo), R1 |
 | R2 | CUDA-as-a-service (`mlpl-cuda-serve`; same shape as R1; replaces the originally-planned in-process Saga 17) | tbd | [ ] | R1, dev host move |
 | R3 | Distributed primitives + LAN auto-discovery (`run model on nodes[...]`, mDNS peer discovery, peer-to-peer tensor migration) | tbd | [ ] | R1, R2 |
@@ -76,36 +75,28 @@ them up.
 
 ## Next saga to start
 
-**Saga 21.5 -- Multi-client UI follow-up.** Saga 23
-shipped typed ML values in v0.19.0 with no
-remaining steps. The next saga picks up the
-deferred Saga-21 follow-ups (SSE streaming eval,
-cancellation, visualization storage endpoint, web
-REPL connect mode, session persistence and
-re-attach, and the f32 / u8 dtype expansion on the
-MLX peer wire) per `docs/milestone-multi-client-
-followup.md`. The MVP server contract has held
-through R1 and one quarter of real use, which was
-the stated gate.
-
-The headline unlock is the browser running against
-`mlpl-serve` rather than its own in-process WASM
-evaluator. That unblocks "train in the browser,
-MLX peer does the work" and is the prerequisite
-for the Saga 29 thorough ViT demo.
-
-After 21.5, **Saga 29 -- Vision Transformer
-track** ships the image-tensor primitives
-(`load_images`, `patchify`, `concat`,
-`layer_norm`, `gelu`, multi-head attention on the
-tape) and the four-demo ladder in
-`docs/ViT-demo-plan.md` / `docs/milestone-vit.md`.
-Steps 001-005 (Tier 1 builtins + single-head quick
-demo) can land in parallel with 21.5 if appetite
-allows; steps 008+ (multi-head, thorough, browser-
-against-MLX) want 21.5 in place first.
+**Saga 29 -- Vision Transformer track.** Saga 21.5
+shipped in v0.20.0 with no remaining steps: the
+browser REPL now drives the MLX peer over SSE +
+the viz storage endpoint, sessions persist across
+restarts, and the wire format takes f32 / u8 in
+addition to f64. The next saga lands the image-
+tensor primitives (`load_images`,
+`load_preloaded("pets_tiny")`,
+`fetch_dataset("oxford_iiit_pet")`, `patchify`,
+`concat`, `gelu`, `layer_norm`, multi-head
+attention on the tape) and the four-demo ladder
+in `docs/ViT-demo-plan.md` /
+`docs/milestone-vit.md`. Steps 001-005 (Tier 1
+builtins + single-head quick demo) can run on the
+Mac dev host today; step 008+ (multi-head,
+thorough, browser-against-MLX) was the path
+Saga 21.5 was opening up. The Phase 4.5 gallery /
+predict_batch / BYO image UX features in
+`docs/ViT-demo-plan.md` Demo 5 + Demo 6 are part
+of the same saga.
 
 Saga R2 -- CUDA-as-a-service -- still follows the
-dev-host move to Linux, after 21.5 and 29. R3
-distributed primitives + mDNS auto-discovery layer
-on top of the two concrete service backends.
+dev-host move to Linux, after 29. R3 distributed
+primitives + mDNS auto-discovery layer on top of
+the two concrete service backends.
