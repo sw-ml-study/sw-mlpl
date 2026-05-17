@@ -109,7 +109,10 @@ pub fn encode_tensor_as(arr: &DenseArray, dtype: u8) -> Result<Vec<u8>, WireErro
     let values = arr.data();
     let data: Vec<u8> = match dtype {
         DTYPE_F64 => values.iter().flat_map(|v| v.to_le_bytes()).collect(),
-        DTYPE_F32 => values.iter().flat_map(|v| (*v as f32).to_le_bytes()).collect(),
+        DTYPE_F32 => values
+            .iter()
+            .flat_map(|v| (*v as f32).to_le_bytes())
+            .collect(),
         DTYPE_U8 => values.iter().map(|v| *v as u8).collect(),
         other => return Err(WireError::UnsupportedDtype(other)),
     };
