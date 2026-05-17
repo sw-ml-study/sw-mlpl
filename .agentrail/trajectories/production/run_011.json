@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 11,
+    "step": "wire-f32-u8"
+  },
+  "action": "TDD red-then-green; encode_tensor_as helper picks dtype while keeping the byte-for-byte f64 default path; decode_data lifter table uses fn pointer dispatch; inlined encode helper into encode_tensor_as to defend the 7-fn module budget; documented the promotion ladder in the module docstring so future callers know what arithmetic does next; deferred orchestrator-side dtype picker to Saga 29 phase 4 where image-tensor sources actually originate.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-16T19:40:27"
+}
