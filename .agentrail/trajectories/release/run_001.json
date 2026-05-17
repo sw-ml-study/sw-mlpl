@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 13,
+    "step": "release-v020"
+  },
+  "action": "Edit Cargo.toml + services/mlpl-mlx-serve/Cargo.toml (version bumps), Edit CHANGELOG.md (v0.20.0 section + saga 21.5 + polish), cargo check --workspace + cd services/mlpl-mlx-serve && cargo check (refresh both Cargo.lock files), cargo fmt --all on services workspace (fixed leftover formatting), cargo test --workspace + services workspace test (1285 + 26 green), cargo clippy --workspace --all-targets --all-features -- -D warnings + services clippy, sw-checklist (139 held), markdown-checker -f '**/*.md' (touched files clean), git commit + git tag -a v0.20.0 + git push + git push --tags, ./scripts/gen-changes.sh + docs(changes) follow-up commit",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-17T11:14:11"
+}
