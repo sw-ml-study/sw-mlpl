@@ -1,0 +1,12 @@
+number = 1
+slug = "load-images-and-pets-tiny"
+status = "pending"
+description = """
+Saga 29 step 001: load-images-and-pets-tiny.
+
+Goal: ship a new `load_images(d..."""
+role = "production"
+context_files = []
+created_at = "2026-05-17T11:20:02"
+task_type = "production"
+commits = []

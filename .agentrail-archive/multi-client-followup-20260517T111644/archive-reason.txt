@@ -1,0 +1,1 @@
+Saga 21.5 (multi-client UI follow-up) shipped v0.20.0. Six of eight deferred Saga-21 follow-ups closed: SSE streaming, cancellation, viz storage, persistence, reattach, web connect mode. Plus MLX-peer wire f32/u8 dtype expansion. 13 steps over two months.
