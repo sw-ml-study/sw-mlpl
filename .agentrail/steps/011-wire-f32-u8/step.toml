@@ -1,6 +1,6 @@
 number = 11
 slug = "wire-f32-u8"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 21.5 step 011: wire-f32-u8.
 
