@@ -5,15 +5,204 @@ All notable changes to MLPL. Format loosely follows
 canonical per-saga retrospectives live in `docs/saga.md` and
 `docs/milestone-*.md`.
 
-## Unreleased -- post-v0.19.0 polish
+## Unreleased
 
-Working on the live web demo + lesson surface,
-plus a higher-order `reduce` that points the way
-toward first-class functions. No saga has shipped
-since v0.19.0; these accumulate toward whichever
-release tag follows.
+No content yet -- post-v0.20.0 work accumulates here.
 
-### Added
+## v0.20.0 -- Saga 21.5: Multi-Client UI Follow-up (2026-05-17)
+
+Closes six of the eight follow-ups Saga 21 had carved
+out as deferred Non-goals; the MVP server contract held
+through R1 and one quarter of real use, which was the
+stated gate. Headline unlock: the browser REPL now
+drives a remote `mlpl-serve` (via `?server=<url>`)
+instead of running entirely in WASM, which is the
+prerequisite for the Saga 29 thorough Vision Transformer
+demo. Twelve implementation steps + a 13th release step
+across two months.
+
+Pairs with a quarter's worth of post-v0.19.0 polish
+that also landed in this release (higher-order
+`reduce(:op, x)`, `:foo` BuiltinRef syntax, demo
+progress callouts, the Glossary tab, the Tutorial Index
+tab, the active-session badge, the isolated tutorial
+scratchpad, the gaps-to-be-addressed planning doc, the
+sw-checklist paydown policy, and ~70 new glossary
+entries -- detailed below).
+
+### Added -- Saga 21.5
+
+- **SSE streaming eval** at
+  `POST /v1/sessions/{id}/eval_stream`. Returns a
+  `text/event-stream` with four frame kinds: `metric`
+  (one per `loss_metric` / `accuracy_metric`
+  assignment), `final` (the request/response payload
+  the non-streaming `/eval` would have returned),
+  `error`, and `cancelled` (carries `step` +
+  `partial_losses`). CLI and web REPLs auto-route any
+  program containing a `train { }` block through
+  `eval_stream`; non-training calls stay on `/eval` to
+  avoid SSE overhead.
+- **Cancellation / interrupt.** New
+  `crates/mlpl-eval/src/interrupt.rs` ships a per-
+  session interrupt token with `set` / `is_set` /
+  `reset`; the eval loop checks at each step boundary
+  and short-circuits with the new
+  `EvalError::Cancelled { step, partial_losses }`.
+  `POST /v1/sessions/{id}/cancel` flips the token; SSE
+  translates the cancellation into a `cancelled`
+  frame. The CLI installs a SIGINT handler via the
+  `ctrlc` crate that POSTs `/cancel` for the active
+  session before tearing down the client.
+- **Visualization storage endpoint.** `POST /v1/viz`
+  accepts a typed body (SVG / HTML / PNG / JPEG /
+  JSON), stores it content-addressed (sha256-prefix-
+  12), and returns `{url, sha, format, bytes}`.
+  `GET /v1/viz/{sha}.{ext}` serves the bytes back
+  with the right Content-Type. The format detect grew
+  beyond Saga 21's SVG-only `is_svg_string` into a
+  five-format leading-bytes table at
+  `crates/mlpl-cli/src/viz_format.rs`. CLI connect
+  mode bypasses the local cache dir in favor of the
+  server URL so two clients see the same viz.
+- **Session persistence across restarts.**
+  `mlpl-serve --persist <dir>` flushes a slim subset
+  (variables only -- models and optimizer state stay
+  in-memory, deferred to a follow-up) of each
+  session's workspace to `<dir>/<session-id>.json`
+  with debounce; loads every file in the directory on
+  startup. The schema header is
+  `persist_version: u32 = 1` so a future saga that
+  grows the persisted set can bump cleanly.
+- **Session reattach across REPL restarts.**
+  `mlpl-repl --connect <url> --session <id> --token
+  <tok>` calls a new `GET /v1/sessions/{id}` endpoint
+  to verify the session exists + the token
+  authenticates, then prints a welcome banner
+  ("reattached, N vars, created Y, last eval Z") and
+  drops into the prompt. Combined with `--persist`,
+  this is the "come-back-tomorrow" path.
+- **Web UI in connect mode.** `apps/mlpl-web` grew an
+  `Evaluator` trait that splits between
+  `WasmEvaluator` (the original in-process path) and
+  `RemoteEvaluator` (POSTs to a remote `mlpl-serve`,
+  consumes SSE for streaming train, fetches
+  `/v1/viz/...` URLs for inline viz). Switched by a
+  `?server=<url>` query string in the URL bar. The
+  server gets a `--cors-allow <origin>` flag to
+  authorize the browser origin; the default stays
+  deny-by-default.
+- **f32 + u8 MLX-peer wire dtypes.** The wire format
+  in `services/mlpl-mlx-serve/src/wire.rs` grew from
+  f64-only to a 3-variant tagged union (`DTYPE_F64 =
+  0`, `DTYPE_F32 = 1`, `DTYPE_U8 = 2`).
+  `encode_tensor` (no `_as`) stays byte-for-byte
+  identical to R1 so existing callers see no change;
+  `encode_tensor_as(arr, dtype)` is the new path. The
+  f32 lane halves training-param transport cost; the
+  u8 lane is one eighth the size and is the Saga 29
+  prerequisite for moving image batches off the
+  orchestrator without f64 padding.
+- **Two new web REPL tutorial lessons.** "Connect to
+  a remote MLPL server" and "Long training, live
+  loss" land in `apps/mlpl-web/src/lessons.rs`;
+  `LESSONS.len()` 41 -> 43.
+- **`contracts/serve-contract/sessions-and-eval.md`
+  rewrites.** Streaming, cancellation, viz storage,
+  persistence, reattach, the `Evaluator` trait, and
+  the f32 / u8 wire all gain authoritative prose
+  specs in the same commits as their implementation.
+
+### Changed -- Saga 21.5
+
+- `docs/using-cli-server.md` -- moved every 21.5-
+  shipped item out of the "Non-goals (deferred)"
+  list into the main body, with new sections for
+  streaming + cancellation, viz storage endpoint,
+  session persistence, session reattach, web UI in
+  connect mode, and the MLX-peer wire dtype table.
+  The remaining Non-goals shrunk to three items
+  (LLM proxy, WebSocket surface, model + optimizer
+  persistence).
+- `docs/saga.md` -- Saga 21.5 narrative entry added
+  between Saga 21 and Saga 19; `docs/status.md` row
+  moved from Planned to Completed, "Next saga to
+  start" re-pointed at Saga 29.
+- Module-budget refactors across the saga: new
+  modules `connect_reattach.rs`, `eval_sse.rs`,
+  `eval_url.rs`, `eval_wasm.rs`, `viz_storage.rs`,
+  `persist.rs`, `viz_format.rs`, `interrupt.rs` --
+  each carved out so the touched crates stayed under
+  the sw-checklist 7-fn / 500-LOC caps. sw-checklist
+  baseline held at 139 failed across the saga; four
+  steps spent the +1 exception lane and the rest
+  held flat.
+
+### Added -- post-v0.19.0 polish (also in this release)
+
+- **Higher-order `reduce(:op, x[, axis])`** -- one
+  named-binop reduction subsumes `reduce_add` /
+  `reduce_mul` and adds `:min`, `:max`, `:and`,
+  `:or`, plus operator aliases `:+` / `:*`. The
+  string form (`reduce("add", x)`) is gone --
+  callers use `:add`, `:max`, etc. exclusively.
+- **`:foo` BuiltinRef syntax** -- new lexer rule
+  produces `Token::BuiltinRef` for `:` immediately
+  followed by an ident-start char or one of
+  `+ * / -`. New `Value::BuiltinRef { name }` and
+  AST node ride alongside. A separate
+  `Environment::builtin_refs` namespace prevents
+  shadowing (`add = 42` cannot break `:add`).
+  Forward-compatible with first-class functions
+  (when `Value::Function` lands, `:foo` lifts to
+  `Function::Builtin(name)` with no syntax break).
+  Documented in `docs/glossary.md` (Reduce entry).
+- **Demo progress callouts** -- the web REPL now
+  paints a heads-up Narration panel BEFORE each
+  long-running line in Tiny LM Generate, Tiny LM,
+  Tiny MLP, Moons MLP, AND Logistic Regression,
+  Linear Softmax Classifier. Each note carries a
+  short heading + 1-3-sentence body with a rough
+  ETA so the wait is intentional rather than
+  mysterious.
+- **Glossary tab in the `?` documentation dialog**
+  -- new third tab alongside Language Reference
+  and Usage Guide. Backed by `docs/glossary.md`
+  (170 alphabetical entries; cross-referenced
+  against the 145-term ML reference list). Sticky
+  search input at the top with type-to-jump:
+  typing `M`, `L`, `P` scrolls to MLP.
+- **Tutorial Index tab + lesson TOC** -- the
+  Tutorial panel opens to an "Index" tab (default)
+  showing a clickable grid of all 19 lessons with
+  the current lesson highlighted in peach.
+  Clicking jumps directly; the existing prev /
+  next pagination stays available under the
+  "Current Lesson" tab.
+- **Header tabs (REPL / Tutorial)** -- replaces
+  the old Tutorial / Exit Tutorial toggle button.
+  A ModeBar below the header shows tab-specific
+  controls: REPL gets the Demo dropdown +
+  "Reset REPL"; Tutorial gets just "Reset
+  Tutorial". The old single Clear button became
+  Reset REPL / Reset Tutorial because the action
+  wipes the session, not just the screen.
+- **Active-session label above the prompt** --
+  a small uppercase badge: green `(REPL)` when
+  the main session is active, peach
+  `(TUTORIAL)` when a lesson is open.
+- **Isolated tutorial scratchpad** -- the
+  Tutorial tab uses a separate `tutorial_session`
+  + `tutorial_history` from the main session.
+  Submit / demo / reset callbacks transparently
+  swap to the active pair. Closing the tutorial
+  restores the main pair untouched (vars, models,
+  optimizer state, frozen set, tag side-table,
+  experiment log all preserved).
+- **`docs/gaps-to-be-addressed.md`** -- planning
+  doc cross-referencing the glossary against
+  MLPL's actual feature list. Sorts gaps by
+  category (Architecture, Loss/Training, Eval,
 
 - **Higher-order `reduce(:op, x[, axis])`** -- one
   named-binop reduction subsumes `reduce_add` /
@@ -90,7 +279,7 @@ release tag follows.
   retirement per commit is roughly 138 commits to
   green; CLAUDE.md adopts the rule project-wide.
 
-### Changed
+### Changed -- post-v0.19.0 polish (also in this release)
 
 - `apply_attention` in `mlpl-eval/src/model_dispatch.rs`
   takes an `AttentionArgs<'a>` struct instead of 9
