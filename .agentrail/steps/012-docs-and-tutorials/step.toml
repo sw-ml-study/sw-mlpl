@@ -1,6 +1,6 @@
 number = 12
 slug = "docs-and-tutorials"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 21.5 step 012: docs-and-tutorials.
 
@@ -8,5 +8,6 @@ Goal: retrospective docs sweep for e..."""
 role = "legacy"
 context_files = []
 created_at = "2026-05-16T19:40:27"
+completed_at = "2026-05-17T07:54:55"
 task_type = "production"
-commits = []
+commits = ["7e3a46cd1a3dffccf5bcd96815898d5b5874a66f"]
