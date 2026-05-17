@@ -261,14 +261,61 @@ of a standalone program: extract the CLS row of the attention
 matrix on a held-out test image, reshape over the 8x8 patch
 grid, render as a heatmap overlay on the image.
 
+### Phase 4.5 -- Predictions UI (3 steps)
+
+These three lift the ViT track from "loss curve + final
+accuracy" into "look at the model's decisions on actual
+photos" -- the canonical user request. Each step is small and
+can land in any order after Phase 4's `demos/vit_multihead_thorough.mlpl`
+trains a usable checkpoint.
+
+#### Step 010a -- gallery viz output
+New `svg(images, "gallery")` viz output (or `gallery(images,
+labels=None, predictions=None) -> string`): take an
+`[N, 3, H, W]` image tensor, emit an SVG/HTML grid of N
+thumbnails laid out NxM with optional label / prediction
+overlay strings. Reuses the Saga 21.5 step 005 viz-format
+table for the right `Content-Type` so the result renders
+inline in the web REPL accordion. CPU-only, no training.
+Test fixture: render the 16-image `pets_tiny[..16]` slice
+with labels.
+
+#### Step 010b -- predict_batch builtin + labeled gallery demo
+`predict_batch(model, X) -> Y` (CPU + MLX) runs the trained
+classifier head over a batch of inputs, returns the argmax
+labels. New `demos/vit_predict_gallery.mlpl`: trains (or
+loads) a ViT, predicts the validation slice, renders the
+gallery annotated with `actual: cat / predicted: dog` (or
+similar) so misclassifications stand out at a glance. The
+demo runs against the same `pets_tiny` fixture so it works
+in the WASM REPL once Demo 2 ships.
+
+#### Step 010c -- bring-your-own-image
+Two paths share the same plumbing:
+- CLI: new `load_image(path)` builtin that decodes a single
+  JPG/PNG to a `[3, H, W]` u8 tensor (which the Saga 21.5
+  step 011 u8 wire dtype carries to the MLX peer
+  unchanged).
+- Web: a small file-picker UI in the connect-mode REPL
+  (`apps/mlpl-web/src/handlers.rs`) lifts a user-selected
+  image into bytes -> POSTs to a new
+  `/v1/sessions/<id>/upload-image` endpoint on `mlpl-serve`
+  -> server-side decodes + binds as a u8 array under a
+  caller-chosen variable name.
+
+Both paths feed the same `apply(model, X)` + gallery viz
+pipeline so the user's image lands beside the held-out
+pets_tiny samples with the same labeled-prediction overlay.
+
 ### Phase 5 -- Tutorial + bundle + release (2 steps)
 
 #### Step 011 -- web bundle + tutorial
 New "Vision Transformers" tutorial lesson with the Demo 1
-attention-pattern walkthrough, the Demo 2 training run, and a
-short forward-look at the thorough demo. Demo dropdown gains
-all four ViT entries (Demo 4 prints "needs save_model" if
-checkpointing isn't shipped yet). Rebuild `pages/` via
+attention-pattern walkthrough, the Demo 2 training run, the
+Phase 4.5 predictions-gallery demo, and a short forward-look
+at the thorough demo. Demo dropdown gains all the ViT
+entries (Demo 4 prints "needs save_model" if checkpointing
+isn't shipped yet). Rebuild `pages/` via
 `scripts/build-pages.sh` and commit both source and built
 artifact in the same commit.
 
@@ -292,10 +339,13 @@ tag.
 | 008 | multi-head-attention-tape    | 3 | `attention(d, h, seed)` differentiable for `h > 1` |
 | 009 | vit-multihead-thorough-demo  | 4 | `demos/vit_multihead_thorough.mlpl` on MLX |
 | 010 | vit-attention-viz-demo       | 4 | `demos/vit_attention_viz.mlpl` (or inline) |
+| 010a | gallery-viz                 | 4.5 | `svg(images, "gallery")` viz output |
+| 010b | predict-batch-and-gallery-demo | 4.5 | `predict_batch` + `demos/vit_predict_gallery.mlpl` |
+| 010c | load-image-and-upload-endpoint | 4.5 | CLI `load_image(path)` + web file-picker -> `/v1/sessions/<id>/upload-image` |
 | 011 | vit-tutorial-and-bundle      | 5 | tutorial lesson + demo dropdown + pages rebuild |
 | 012 | release-v021                 | 5 | version bump, retrospective doc, tag |
 
-Twelve steps. Steps 001-005 (Tier 1 + single-head demo) are the
+Fifteen steps. Steps 001-005 (Tier 1 + single-head demo) are the
 "can land before Saga 21.5" subset; everything from 008 onward
 benefits from the f32/u8 wire dtype landing first, and Demo 3 in
 the browser requires the web-rerouting from Saga 21.5.
