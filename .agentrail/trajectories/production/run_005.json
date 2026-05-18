@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 6,
+    "step": "vit-attention-pattern-demo"
+  },
+  "action": "Write on demos/vit_attention_pattern.mlpl (synthetic image -> patchify -> reshape -> linear-embed -> concat CLS -> +pos -> manual Q/K/softmax attention -> svg heatmap + row-sum sanity), Write on crates/mlpl-eval/tests/vit_attention_pattern_tests.rs (6 tests: parse/eval, shape [17,17], row sums within 1e-6 of 1.0, terminal row_sums all-ones, determinism across two runs, svg() returns non-empty <svg string), Edit on apps/mlpl-web/src/demos.rs (new ViT Attention Pattern entry in DEMOS array, lines mirror demo file with inline comments) + Edit on README.md (22 -> 23 demo count), cargo clean at session start (recovered 14.6GB), cargo test --workspace + cargo clippy --all-targets --all-features -- -D warnings + cargo fmt --check (all green), ./scripts/build-pages.sh (rebuilt pages/ with new WASM hash for live demo deploy), markdown-checker on README green, sw-checklist unchanged at 150, git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-18T16:44:20"
+}
