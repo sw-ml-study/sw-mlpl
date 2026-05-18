@@ -12,6 +12,16 @@ default = []
 # this feature on a non-Apple host still compiles and falls back
 # to CPU at runtime with a one-time warning.
 mlx = ["dep:mlpl-mlx-rt", "mlpl-mlx-rt/mlx"]
+# Saga 29 step 003: PNG / JPEG decode for the `load_images(dir,
+# [H, W])` builtin. Off by default so the WASM target stays
+# clean -- the browser REPL can still call
+# `load_preloaded("pets_tiny")` because that fixture is
+# pre-decoded bytes in the binary. Native binaries
+# (`mlpl-cli`, `mlpl-repl`, `mlpl-serve`) enable this feature
+# at build time. The decoder dispatch reads the file's magic
+# bytes and routes to `png` or `jpeg-decoder` separately
+# (smaller dep footprint than `image-rs`).
+image-io = ["dep:png", "dep:jpeg-decoder"]
 
 [dependencies]
 mlpl-core = { path = "../mlpl-core" }
@@ -22,6 +32,8 @@ mlpl-runtime = { path = "../mlpl-runtime" }
 mlpl-trace = { path = "../mlpl-trace" }
 mlpl-viz = { path = "../mlpl-viz" }
 mlpl-mlx-rt = { path = "../mlpl-mlx-rt", optional = true }
+png = { version = "0.17", optional = true }
+jpeg-decoder = { version = "0.3", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

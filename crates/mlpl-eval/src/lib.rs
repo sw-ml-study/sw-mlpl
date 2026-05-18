@@ -11,7 +11,12 @@ mod eval_ops;
 mod eval_reduce;
 mod experiment;
 mod grad;
+#[cfg(feature = "image-io")]
+mod image_io;
 mod inspect;
+
+#[cfg(feature = "image-io")]
+pub use image_io::decode_and_resize_u8;
 mod inspect_groups;
 mod interrupt;
 mod llm_dispatch;
@@ -27,6 +32,7 @@ mod model_freeze;
 mod model_lora;
 mod model_perturb;
 mod model_tape;
+mod pets_tiny;
 mod tag_propagate;
 mod tag_render;
 mod tokenizer;

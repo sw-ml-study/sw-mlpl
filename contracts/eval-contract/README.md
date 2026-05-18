@@ -46,6 +46,33 @@ existing numeric path) -> a stacked `DenseArray`; mixed kinds ->
 `MixedArrayLitElements { kinds }`. Empty `[]` continues to
 produce an empty `DenseArray` for back-compat.
 
+### Image-tensor builtins (Saga 29 step 003)
+
+`load_images(dir, [H, W])` (native-only, gated on the `image-io`
+Cargo feature) reads every PNG / JPEG file under `dir` (resolved
+inside the sandbox root set by `Environment::set_data_dir`),
+decodes via magic-byte dispatch to the `png` or `jpeg-decoder`
+crate, bilinear-resizes to `(H, W)`, normalizes u8 RGB to f64
+in `[-1, 1]` via `v / 127.5 - 1.0`, and stacks the results into
+a `Value::Array` of shape `[N, 3, H, W]` with axis labels
+`[batch, channel, y, x]`. The WASM build (no `image-io`
+feature) raises `EvalError::Unsupported` pointing at
+`load_preloaded("pets_tiny")` instead. The MLX peer wire does
+not encode images; live decode happens on the native side and
+the resulting tensor is what crosses the wire.
+
+`load_preloaded("pets_tiny")` returns a `Value::Record` with
+three fields: `X` (a `Value::Array` of shape `[200, 3, 64, 64]`
+with the same axis labels as live `load_images`), `Y` (a
+`Value::Array` of shape `[200]` with `batch` axis label;
+`0 = cat`, `1 = dog`), and `names` (a `Value::StrList` of the
+200 source filenames, e.g. `["Abyssinian_1.jpg", ...]`). The
+fixture is built offline from the Oxford-IIIT Pet dataset by
+`cargo run --example build_pets_tiny --features image-io
+-p mlpl-eval` and shipped as `crates/mlpl-eval/data/pets_tiny.bin`
+via `include_bytes!`, so the WASM REPL has the fixture
+available without any live decode.
+
 ### Environment
 
 A name-to-value mapping for variable bindings.

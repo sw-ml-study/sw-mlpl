@@ -1025,6 +1025,28 @@ compiled-in corpora for the web REPL where filesystem access
 is unavailable. Both produce a string for `.txt` and a
 DenseArray (with header autoparse) for `.csv`.
 
+`load_preloaded("pets_tiny")` (Saga 29 step 003) returns a
+`Value::Record` with three fields: `X` (a `DenseArray` of
+shape `[200, 3, 64, 64]` with `[batch, channel, y, x]` axis
+labels), `Y` (a `[200]` label vector; `0 = cat`, `1 = dog`),
+and `names` (a `Value::StrList` of source filenames). The
+fixture is shipped as pre-decoded u8 RGB bytes via
+`include_bytes!` so the WASM REPL has it without any live
+decoder.
+
+## load_images (builtin)
+
+`load_images(dir, [H, W])` (Saga 29 step 003, native-only via
+the `image-io` Cargo feature) reads every PNG / JPEG under
+`dir`, decodes via magic-byte dispatch to `png` /
+`jpeg-decoder` (smaller dep footprint than `image-rs`),
+bilinear-resizes to `(H, W)`, normalizes pixel bytes to f64
+in `[-1, 1]`, and returns a `[N, 3, H, W]` `DenseArray` with
+`[batch, channel, y, x]` axis labels. The WASM build raises a
+clean error pointing users at the `pets_tiny` fixture
+instead, since the WASM target deliberately excludes image
+decoder dependencies.
+
 ## log (builtin)
 
 Elementwise natural log: `log(x)` returns `ln(x)` for each
@@ -1193,6 +1215,21 @@ namespaces.
 Converting an integer class index to a vector with 1.0 at
 that index and 0.0 elsewhere. MLPL: `one_hot(labels,
 num_classes)`.
+
+## Oxford-IIIT Pet dataset
+
+7,393 photographs of cats and dogs (12 cat breeds + 25 dog
+breeds, ~200 images per breed), released by the Visual
+Geometry Group at Oxford. Standard cat-vs-dog classification
+benchmark with breed-level subclasses. MLPL uses it as the
+training set for the Saga 29 Vision Transformer demos. The
+filename convention encodes the class: capitalized prefix =
+cat breed (`Abyssinian_1.jpg`), lowercase prefix = dog breed
+(`beagle_3.jpg`). The full ~792 MB tarball lives in a
+gitignored `data/oxford-iiit-pet/` checkout; the
+`pets_tiny` preloaded fixture committed under
+`crates/mlpl-eval/data/pets_tiny.bin` is the 200-image
+(100 cat + 100 dog) subset used by the WASM REPL demos.
 
 ## OOD Inputs (Out-of-Distribution)
 
