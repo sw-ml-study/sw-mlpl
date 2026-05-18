@@ -1034,6 +1034,25 @@ fixture is shipped as pre-decoded u8 RGB bytes via
 `include_bytes!` so the WASM REPL has it without any live
 decoder.
 
+## fetch_dataset (builtin)
+
+`fetch_dataset(name)` (Saga 29 step 004, native-only via the
+`image-io` Cargo feature) is the live counterpart to
+`load_preloaded`. The v0.21 registry recognizes one name --
+`"oxford_iiit_pet"` -- which downloads the upstream
+~792 MB tarball to `$MLPL_DATA_DIR/oxford-iiit-pet/` on first
+use, sha256-verifies against a pinned hash, untars to
+`images/`, then runs the same decode + bilinear-resize +
+normalize pipeline as `load_images` at the demo's 128x128
+resolution. Returns the same record shape as
+`load_preloaded("pets_tiny")` but with the full ~7393-image
+count instead of 200. Pre-populated checkouts (the tarball
+and extracted `images/` already on disk) skip HTTP entirely,
+so a session that already ran the download from a prior
+step pays no network cost. The WASM REPL gets a clean error
+pointing at the preloaded fixture; image decoders are
+deliberately not in the WASM dependency tree.
+
 ## load_images (builtin)
 
 `load_images(dir, [H, W])` (Saga 29 step 003, native-only via

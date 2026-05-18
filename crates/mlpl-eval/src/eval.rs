@@ -390,6 +390,23 @@ pub(crate) fn eval_expr(
         };
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "fetch_dataset"
+    {
+        if args.len() != 1 {
+            return Err(EvalError::BadArity {
+                func: "fetch_dataset".into(),
+                expected: 1,
+                got: args.len(),
+            });
+        }
+        let Expr::StrLit(dataset, _) = &args[0] else {
+            return Err(EvalError::Unsupported(
+                "fetch_dataset: argument must be a string literal".into(),
+            ));
+        };
+        return crate::loader::eval_fetch_dataset(env, dataset);
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "load_images"
     {
         if args.len() != 2 {

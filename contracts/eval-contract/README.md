@@ -73,6 +73,30 @@ fixture is built offline from the Oxford-IIIT Pet dataset by
 via `include_bytes!`, so the WASM REPL has the fixture
 available without any live decode.
 
+`fetch_dataset(name)` (Saga 29 step 004, native-only via
+`image-io`) is the live counterpart to `load_preloaded`.
+For the v0.21 registry, only `name == "oxford_iiit_pet"` is
+recognized: it downloads the upstream ~792 MB tarball via
+`ureq` to `$MLPL_DATA_DIR/oxford-iiit-pet/images.tar.gz` on
+first use, sha256-verifies against a pinned hash, untars to
+`images/` if the dir isn't already populated, then runs the
+same decode + bilinear-resize + normalize pipeline as
+`load_images` at the demo's 128x128 resolution. Returns the
+same `Value::Record { X, Y, names }` shape as `load_preloaded`,
+but with `N = 7393` (the full Oxford-IIIT Pet count) instead
+of 200. Pre-populated checkouts (existing tarball + extracted
+`images/`) bypass HTTP entirely. Cat vs dog labels follow the
+Oxford filename convention: uppercase prefix = cat (`0`),
+lowercase prefix = dog (`1`).
+
+Data-dir resolution for `fetch_dataset`: prefer the
+`MLPL_DATA_DIR` environment variable; fall back to the
+`Environment::data_dir` set by the terminal REPL's
+`--data-dir` flag; without either, surface a tutoring error
+(implicit 792 MB downloads are never on by default). The WASM
+build raises `EvalError::Unsupported` pointing at
+`load_preloaded("pets_tiny")`.
+
 ### Environment
 
 A name-to-value mapping for variable bindings.

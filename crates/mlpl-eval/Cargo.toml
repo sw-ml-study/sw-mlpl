@@ -21,7 +21,20 @@ mlx = ["dep:mlpl-mlx-rt", "mlpl-mlx-rt/mlx"]
 # at build time. The decoder dispatch reads the file's magic
 # bytes and routes to `png` or `jpeg-decoder` separately
 # (smaller dep footprint than `image-rs`).
-image-io = ["dep:png", "dep:jpeg-decoder"]
+#
+# Step 004 extends the feature to cover the `fetch_dataset`
+# tarball-download path: `tar` + `flate2` for tarball extract,
+# `sha2` for fixture verification, `ureq` for the HTTP GET
+# itself (same pinned version + minimal-features as
+# `mlpl-runtime`'s `llm_call` shim).
+image-io = [
+    "dep:png",
+    "dep:jpeg-decoder",
+    "dep:tar",
+    "dep:flate2",
+    "dep:sha2",
+    "dep:ureq",
+]
 
 [dependencies]
 mlpl-core = { path = "../mlpl-core" }
@@ -34,6 +47,10 @@ mlpl-viz = { path = "../mlpl-viz" }
 mlpl-mlx-rt = { path = "../mlpl-mlx-rt", optional = true }
 png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }
+tar = { version = "0.4", optional = true }
+flate2 = { version = "1", optional = true }
+sha2 = { version = "0.10", optional = true }
+ureq = { version = "2", default-features = false, features = ["tls"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

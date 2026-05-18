@@ -10,6 +10,8 @@ mod eval_for;
 mod eval_ops;
 mod eval_reduce;
 mod experiment;
+#[cfg(feature = "image-io")]
+mod fetch_dataset;
 mod grad;
 #[cfg(feature = "image-io")]
 mod image_io;

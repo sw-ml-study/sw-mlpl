@@ -146,6 +146,25 @@ pub(crate) fn eval_load_images(
     )))
 }
 
+/// Dispatch `fetch_dataset(name)`. Native-only via
+/// `image-io`; WASM stub points users at the preloaded
+/// fixture.
+#[cfg(feature = "image-io")]
+pub(crate) fn eval_fetch_dataset(env: &Environment, name: &str) -> Result<Value, EvalError> {
+    crate::fetch_dataset::eval(env, name)
+}
+
+#[cfg(not(feature = "image-io"))]
+pub(crate) fn eval_fetch_dataset(_env: &Environment, name: &str) -> Result<Value, EvalError> {
+    Err(EvalError::Unsupported(format!(
+        "fetch_dataset(\"{name}\"): live dataset download is disabled \
+         in this build (the WASM REPL ships the pre-decoded \
+         `pets_tiny` fixture -- use `load_preloaded(\"pets_tiny\")` \
+         instead). Rebuild a native binary with \
+         `--features mlpl-eval/image-io` to enable fetching."
+    )))
+}
+
 /// Resolve a caller-supplied relative path under a sandbox root.
 /// Absolute paths and any component that escapes the root via `..`
 /// are rejected.
