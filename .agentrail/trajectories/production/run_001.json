@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 1,
+    "step": "value-record-and-field-access"
+  },
+  "action": "Edit on token.rs + lex_util.rs (TokenKind::Dot), Edit on ast.rs (Expr::RecordLit + Expr::FieldAccess + Display arms + fmt helpers), Write on record_parser.rs (parse_record_lit_after_brace + parse_postfix_chain), Edit on parser.rs (LBrace arm in parse_atom + postfix chain in parse_expr), Edit on value.rs (Value::Record + Display + value_kind helper), Edit on env.rs (records HashMap + set_record/get_record), Edit on eval.rs (RecordLit + FieldAccess early-return + Record assign arm + Ident records lookup), Edit on error.rs (FieldNotFound + FieldOnNonRecord), Edit on mlpl-lower-rs (Record arms in unsupported tail), Edit on mlpl-serve handlers (value_kind Record arm), Edit on services/mlpl-mlx-serve handlers (Record => clean error), Write on record_parse_tests.rs (17 tests), Write on record_tests.rs (14 tests), Edit on contracts/parser-contract README + contracts/eval-contract README, Edit on docs/glossary.md (Records entry), Edit on README.md (glossary count drift), cargo test --workspace (1316 green), cargo clippy --workspace --all-targets --all-features -- -D warnings (clean), cargo fmt --all --check, sw-checklist (140 with +1 exception), git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-18T03:18:02"
+}
