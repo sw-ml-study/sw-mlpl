@@ -12,8 +12,19 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-18
+
+- saga 29 step 002: Value::StrList + [...] literal dispatch
+- chore(agentrail): insert strlist prereq as saga 29 step 002
+- chore(agentrail): record saga 29 step 001 completion + kickoff step 002
+- saga 29 step 001: Value::Record + field access prerequisite
+
 ## 2026-05-17
 
+- chore(agentrail): insert records prereq as saga 29 step 001
+- chore(agentrail): archive saga 21.5, init saga 29 (vit)
+- chore(agentrail): record step 013 completion + close saga 21.5
+- docs(changes): refresh CHANGES.md to v0.20.0
 - release v0.20.0 -- Saga 21.5 Multi-client UI Follow-up
 - chore(agentrail): record step 012 completion + kickoff step 013
 
