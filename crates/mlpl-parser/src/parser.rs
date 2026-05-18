@@ -90,7 +90,8 @@ impl<'a> Parser<'a> {
 
     /// Parse an expression with precedence climbing (min_prec=0 for full expr).
     pub(crate) fn parse_expr(&mut self, min_prec: u8) -> Result<Expr, ParseError> {
-        let mut lhs = self.parse_atom()?;
+        let atom = self.parse_atom()?;
+        let mut lhs = self.parse_postfix_chain(atom)?;
         loop {
             let Some((op, prec)) = self.tokens.get(self.pos).and_then(|t| match t.kind {
                 TokenKind::Plus => Some((BinOpKind::Add, 1u8)),
@@ -194,6 +195,11 @@ impl<'a> Parser<'a> {
                 }
             }
             TokenKind::LBracket => self.parse_array_lit(),
+            TokenKind::LBrace => {
+                let open = tok.span;
+                self.pos += 1;
+                self.parse_record_lit_after_brace(open)
+            }
             TokenKind::LParen => {
                 let open = tok.span;
                 self.pos += 1;

@@ -39,6 +39,26 @@ Parser-owned syntax nodes. Array literals in the AST are represented
 as parser-owned nodes (e.g., list of expression nodes), NOT as
 `mlpl-array` types. This keeps parser context small.
 
+### Record literals and field access (Saga 29 step 001)
+
+- `Expr::RecordLit { fields: Vec<(String, Expr)>, span }` --
+  `{ name1: expr1, name2: expr2, ... }`. Empty record `{}` is legal.
+  Trailing comma is accepted. Field names must be idents. Duplicate
+  field names error at parse time
+  (`ParseError::DuplicateRecordField`).
+- `Expr::FieldAccess { receiver: Box<Expr>, field: String, span }` --
+  `expr.ident`. Binds tighter than every infix binop so `f(x).y + z`
+  parses as `(f(x).y) + z`. Chained access `a.b.c` is left-
+  associative.
+- `TokenKind::Dot` -- single-character `.`. Distinct from float-
+  literal decimal points: the float lexer only consumes
+  `digit.digit`; a bare `.` at lexer fall-through becomes this token.
+- Block-vs-record disambiguation is structural: `{ stmt; ... }`
+  blocks only appear after the `repeat` / `train` / `for` /
+  `experiment` / `device` keywords (their parsers consume the `{`
+  directly via `parse_braced_body`). In any other position, `{`
+  opens a record literal.
+
 ## Invariants
 
 - Token kinds are stable once defined (do not renumber or reorder)
@@ -57,6 +77,9 @@ Use explicit error variants local to `mlpl-parser`.
 - `UnterminatedString(Span)` -- if string literals are added later
 - `InvalidNumber(Span)` -- malformed numeric literal
 - `UnexpectedToken(TokenKind, Span)` -- parser-level, wrong token kind
+- `DuplicateRecordField { name, span }` -- Saga 29 step 001: a
+  record literal repeated a field name. Eval can assume names are
+  unique because the parser rejects duplicates.
 
 ## What This Contract Does NOT Cover
 

@@ -107,6 +107,24 @@ pub enum EvalError {
         /// Per-iteration losses recorded so far inside `train`.
         partial_losses: Vec<f64>,
     },
+    /// Saga 29 step 001: field access on a record that does not
+    /// have the requested field. Lists the available keys so the
+    /// user can fix the typo.
+    FieldNotFound {
+        /// Field name the user asked for.
+        requested: String,
+        /// Field names the record actually has, sorted.
+        available: Vec<String>,
+    },
+    /// Saga 29 step 001: field access on a value that is not a
+    /// record. The receiver_kind names the variant for the
+    /// tutoring message ("array", "string", "model", etc.).
+    FieldOnNonRecord {
+        /// What kind of value the receiver was.
+        receiver_kind: &'static str,
+        /// Field name the user asked for.
+        field: String,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -123,18 +141,17 @@ impl std::fmt::Display for EvalError {
             Self::RuntimeError(e) => write!(f, "{e}"),
             Self::ExpectedArray => write!(f, "expected an array value, got a string"),
             Self::ExpectedString => write!(f, "expected a string value"),
-            Self::DeviceTensorFault { peer, device } => write!(
-                f,
-                "tensor lives on {peer}:{device}; \
-                 use to_device('cpu', x) to fetch"
-            ),
+            Self::DeviceTensorFault { peer, device } => {
+                write!(
+                    f,
+                    "tensor lives on {peer}:{device}; use to_device('cpu', x) to fetch"
+                )
+            }
             Self::BadArity {
                 func,
                 expected,
                 got,
-            } => {
-                write!(f, "{func} expects {expected} arguments, got {got}")
-            }
+            } => write!(f, "{func} expects {expected} arguments, got {got}"),
             Self::VizError(e) => write!(f, "{e}"),
             Self::ShapeMismatch {
                 op,
@@ -156,6 +173,21 @@ impl std::fmt::Display for EvalError {
                 "type mismatch in {op}: expected {expected}, got {actual}\n  hint: {hint}"
             ),
             Self::Cancelled { step, .. } => write!(f, "cancelled at step {step}"),
+            Self::FieldNotFound {
+                requested,
+                available,
+            } => write!(
+                f,
+                "record has no field '{requested}'; available: [{}]",
+                available.join(", ")
+            ),
+            Self::FieldOnNonRecord {
+                receiver_kind,
+                field,
+            } => write!(
+                f,
+                "field access '.{field}' requires a record receiver, got {receiver_kind}"
+            ),
         }
     }
 }

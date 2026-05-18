@@ -10,7 +10,7 @@ use crate::error::EvalError;
 use crate::eval_ops::{
     eval_analysis_helper, eval_array_lit, eval_binop, eval_fncall, eval_svg, labeled_shape_of,
 };
-use crate::value::Value;
+use crate::value::{Value, value_kind};
 
 /// Evaluate a program (list of statements). Returns the last result as an array.
 ///
@@ -60,6 +60,35 @@ pub(crate) fn eval_expr(
     if let Expr::BuiltinRef(name, _) = expr {
         return Ok(Value::BuiltinRef { name: name.clone() });
     }
+    if let Expr::RecordLit { fields, .. } = expr {
+        let mut map = std::collections::BTreeMap::new();
+        for (name, value_expr) in fields {
+            let v = eval_expr(value_expr, env, trace)?;
+            map.insert(name.clone(), v);
+        }
+        return Ok(Value::Record { fields: map });
+    }
+    if let Expr::FieldAccess {
+        receiver, field, ..
+    } = expr
+    {
+        let recv = eval_expr(receiver, env, trace)?;
+        return match recv {
+            Value::Record { fields } => {
+                fields
+                    .get(field)
+                    .cloned()
+                    .ok_or_else(|| EvalError::FieldNotFound {
+                        requested: field.clone(),
+                        available: fields.keys().cloned().collect(),
+                    })
+            }
+            other => Err(EvalError::FieldOnNonRecord {
+                receiver_kind: value_kind(&other),
+                field: field.clone(),
+            }),
+        };
+    }
     if let Expr::Ident(name, _) = expr
         && let Some(s) = env.get_string(name)
     {
@@ -76,6 +105,13 @@ pub(crate) fn eval_expr(
         && let Some(v) = env.get_device_tensor(name)
     {
         return Ok(v.clone());
+    }
+    if let Expr::Ident(name, _) = expr
+        && let Some(fields) = env.get_record(name)
+    {
+        return Ok(Value::Record {
+            fields: fields.clone(),
+        });
     }
     if let Expr::FnCall { name, args, .. } = expr
         && name == "svg"
@@ -487,6 +523,10 @@ pub(crate) fn eval_expr(
                     env.set_device_tensor(name.clone(), v.clone());
                     return Ok(v);
                 }
+                Value::Record { fields } => {
+                    env.set_record(name.clone(), fields.clone());
+                    return Ok(Value::Record { fields });
+                }
             }
         }
         Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
@@ -504,6 +544,10 @@ pub(crate) fn eval_expr(
             crate::experiment::eval_experiment(name, body, env, trace)?
         }
         Expr::Device { .. } => unreachable!(),
+        // Saga 29 step 001: RecordLit and FieldAccess are dispatched
+        // by the early-return `if let` block at the head of
+        // `eval_expr`, so the big match never sees them.
+        Expr::RecordLit { .. } | Expr::FieldAccess { .. } => unreachable!(),
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;

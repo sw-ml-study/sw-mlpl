@@ -189,6 +189,7 @@ pub(crate) fn single_char_token(b: u8) -> Option<TokenKind> {
         b'/' => Some(TokenKind::Slash),
         b'{' => Some(TokenKind::LBrace),
         b'}' => Some(TokenKind::RBrace),
+        b'.' => Some(TokenKind::Dot),
         _ => None,
     }
 }

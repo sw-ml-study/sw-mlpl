@@ -223,6 +223,8 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::Train { .. }
         | Expr::For { .. }
         | Expr::Experiment { .. }
-        | Expr::Device { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
+        | Expr::Device { .. }
+        | Expr::RecordLit { .. }
+        | Expr::FieldAccess { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
     }
 }

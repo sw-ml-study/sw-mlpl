@@ -1471,6 +1471,30 @@ tree, harder to overfit, still interpretable feature-by-
 feature. Distinct from Boosting (sequential trees on
 residuals, e.g. XGBoost). **Deferred** in MLPL.
 
+## Record
+
+A structured value built from `{name1: expr1, name2: expr2}`
+record-literal syntax (Saga 29 step 001). Field access is
+`r.name`. Distinct from `{ stmt; }` blocks, which only appear
+after the `repeat` / `train` / `for` / `experiment` / `device`
+keywords -- at any other position `{` opens a record. Field
+keys are idents, must be unique within a literal (duplicates
+parse-error), and iterate alphabetically (BTreeMap) regardless
+of source order. Field values can be any value (nested records,
+arrays, strings, models, ...). Unknown-field access returns
+`FieldNotFound { requested, available }` listing the valid
+keys; field access on a non-record returns
+`FieldOnNonRecord { receiver_kind, field }`. Use case: the
+Saga 29 Vision Transformer track wants
+`load_preloaded("pets_tiny")` to return
+`{X: [200, 3, 64, 64], Y: [200], names: [str]}` -- one builtin,
+three logical outputs, no positional-tuple awkwardness.
+
+Out of scope for the initial step: record destructuring in
+let-bindings (`let {X, Y} = r`), record-update / spread syntax
+(`{..r, X: new_x}`), pattern matching on records. Each is a
+separate follow-up if a use case appears.
+
 ## Regularization
 
 Anything that constrains the model away from overfitting:

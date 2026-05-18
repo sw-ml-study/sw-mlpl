@@ -1,5 +1,6 @@
 //! Runtime value type for MLPL.
 
+use std::collections::BTreeMap;
 use std::fmt;
 
 use mlpl_array::DenseArray;
@@ -48,6 +49,14 @@ pub enum Value {
         /// Device name (e.g., `"mlx"`, future `"cuda"`).
         device: String,
     },
+    /// Saga 29 step 001: structured record value. Field names map
+    /// to arbitrary values (including nested records). BTreeMap so
+    /// the key ordering is deterministic for display, trace
+    /// serialization, and equality testing.
+    Record {
+        /// Field name -> value, sorted by name.
+        fields: BTreeMap<String, Value>,
+    },
 }
 
 impl Value {
@@ -83,6 +92,21 @@ impl From<DenseArray> for Value {
     }
 }
 
+/// Saga 29 step 001: human-readable variant name for tutoring
+/// error messages (e.g., `FieldOnNonRecord`). Stable strings;
+/// callers may match on them in tests.
+pub fn value_kind(v: &Value) -> &'static str {
+    match v {
+        Value::Array(_) => "array",
+        Value::Str(_) => "string",
+        Value::Model(_) => "model",
+        Value::Tokenizer(_) => "tokenizer",
+        Value::BuiltinRef { .. } => "builtin-ref",
+        Value::DeviceTensor { .. } => "device-tensor",
+        Value::Record { .. } => "record",
+    }
+}
+
 impl From<String> for Value {
     fn from(s: String) -> Self {
         Self::Str(s)
@@ -103,6 +127,16 @@ impl fmt::Display for Value {
                 shape,
                 ..
             } => write!(f, "<tensor on {peer}:{device}; shape={shape:?}>"),
+            Self::Record { fields } => {
+                write!(f, "{{")?;
+                for (i, (name, value)) in fields.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{name}: {value}")?;
+                }
+                write!(f, "}}")
+            }
         }
     }
 }
