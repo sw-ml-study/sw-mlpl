@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-18
 
+- saga 29 step 005: patchify + concat builtins with tape lowering
+- chore(agentrail): record saga 29 step 004 completion + kickoff step 005
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 004: fetch_dataset(name) live download pipeline
 - chore(agentrail): record saga 29 step 003 completion + kickoff step 004
 - docs(changes): refresh CHANGES.md to HEAD
