@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-18
 
+- saga 29 step 003: load_images + pets_tiny preloaded fixture
+- chore(agentrail): record saga 29 step 002 completion + kickoff step 003
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 002: Value::StrList + [...] literal dispatch
 - chore(agentrail): insert strlist prereq as saga 29 step 002
 - chore(agentrail): record saga 29 step 001 completion + kickoff step 002
