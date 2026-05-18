@@ -1,6 +1,6 @@
-number = 2
+number = 3
 slug = "load-images-and-pets-tiny"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 29 step 001: load-images-and-pets-tiny.
 
