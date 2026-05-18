@@ -1,9 +1,10 @@
 number = 6
 slug = "vit-attention-pattern-demo"
-status = "in-progress"
+status = "completed"
 description = "Saga 29 step 006 (per docs/milestone-vit.md Phase 2): demos/vit_attention_pat..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-18T16:24:31"
+completed_at = "2026-05-18T16:44:20"
 task_type = "production"
-commits = []
+commits = ["a2f56c075b4ca91d031d20b3026ecfa6e247060f"]
