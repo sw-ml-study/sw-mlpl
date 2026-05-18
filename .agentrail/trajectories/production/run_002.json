@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 3,
+    "step": "load-images-and-pets-tiny"
+  },
+  "action": "Edit on crates/mlpl-eval/Cargo.toml (image-io feature + png + jpeg-decoder optional deps), Write on src/image_io.rs (decode_bytes magic-byte dispatch + decode_png/decode_jpeg + expand_to_rgb + grayscale_to_rgb + bilinear_resize_rgb_hwc + decode_and_resize + decode_and_resize_u8 + 3 unit tests), Write on src/pets_tiny.rs (wire-format parser for MLPLPETS blob + Record assembly), Edit on src/loader.rs (eval_load_images native + WASM-stub variants, eval_load_preloaded special-case for pets_tiny), Edit on src/eval.rs (load_images dispatch), Edit on src/lib.rs (mod pets_tiny + cfg-gated mod image_io + pub use decode_and_resize_u8), Write on examples/build_pets_tiny.rs (round-robin breed sampling, builds 2.35MB pets_tiny.bin from 200 Oxford-IIIT Pet images), Write on examples/build_tiny_fixtures.rs (builds the committed tiny_4x4.png decode fixture), Write on tests/load_images_tests.rs (9 tests, image-io feature-gated) + tests/pets_tiny_tests.rs (10 tests), Edit on .gitignore (/data/), Bash curl ~792MB Oxford-IIIT Pet tarball to data/oxford-iiit-pet/ and tar -xzf, cargo run --example build_pets_tiny --features image-io --release (produced pets_tiny.bin), cargo run --example build_tiny_fixtures --features image-io --release (produced tiny_4x4.png), Edit on contracts/eval-contract/README.md (Image-tensor builtins section), Edit on docs/glossary.md (load_images + pets_tiny + Oxford-IIIT Pet entries, count 264->266), Edit on README.md (count drift), cargo test --workspace (green) + cargo test --features mlpl-eval/image-io -p mlpl-eval (green), cargo clippy --workspace --all-targets --all-features -- -D warnings (clean), cargo fmt --all --check, cargo tree -p mlpl-wasm verified empty for png/jpeg-decoder, markdown-checker on touched docs (green), cargo clean --release (recovered 253MB mid-session), sw-checklist (142 with +1 exception), git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-18T12:35:04"
+}
