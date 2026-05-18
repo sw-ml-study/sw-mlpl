@@ -81,6 +81,36 @@ pub enum NodeKind {
         /// (or one per `(b, t)` pair in `[B, T, V]`).
         targets: Vec<usize>,
     },
+    /// Saga 29 step 005: patchify `[B, C, H, W]` into
+    /// `[B, N, P*P*C]` where `N = (H/P) * (W/P)`. The
+    /// `orig_shape` of the parent is needed to scatter the
+    /// gradient back to image space on backward.
+    Patchify {
+        /// Parent node id (the `[B, C, H, W]` image batch).
+        parent: NodeId,
+        /// Original `[B, C, H, W]` shape -- needed because
+        /// the parent's forward value is consulted only via
+        /// node id, not shape, on the backward path.
+        orig_shape: Shape,
+        /// Square patch side length `P`.
+        patch_size: usize,
+    },
+    /// Saga 29 step 005: concat two parents along `axis`.
+    /// `left_size` is the size of `left` along `axis` so the
+    /// backward can split the gradient correctly without
+    /// re-reading the parent's value.
+    Concat {
+        /// Left parent id.
+        left: NodeId,
+        /// Right parent id.
+        right: NodeId,
+        /// Axis of concatenation (0 or 1 in this initial
+        /// release).
+        axis: usize,
+        /// Size of `left` along `axis`; the split point in
+        /// the gradient.
+        left_size: usize,
+    },
 }
 
 /// Per-node storage: the forward value, an accumulated gradient, the

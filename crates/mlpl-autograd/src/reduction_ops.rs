@@ -101,4 +101,43 @@ impl Tensor {
             },
         )
     }
+
+    /// Saga 29 step 005: ViT patch embedding.
+    /// `self` must be rank-4 `[B, C, H, W]` and `p` must
+    /// divide both `H` and `W`. Returns `[B, N, P*P*C]`.
+    #[must_use]
+    pub fn patchify(&self, p: usize) -> Self {
+        let v_orig = self.value();
+        let orig_shape = v_orig.shape().clone();
+        let v = v_orig.patchify(p).expect("patchify compatible shape");
+        new_tensor(
+            self,
+            v,
+            NodeKind::Patchify {
+                parent: self.node,
+                orig_shape,
+                patch_size: p,
+            },
+        )
+    }
+
+    /// Saga 29 step 005: concat `self` with `other` along
+    /// `axis` (0 or 1 supported in this initial release).
+    #[must_use]
+    pub fn concat(&self, other: &Self, axis: usize) -> Self {
+        let a = self.value();
+        let b = other.value();
+        let left_size = a.shape().dims()[axis];
+        let v = a.concat(&b, axis).expect("concat compatible shapes");
+        new_tensor(
+            self,
+            v,
+            NodeKind::Concat {
+                left: self.node,
+                right: other.node,
+                axis,
+                left_size,
+            },
+        )
+    }
 }

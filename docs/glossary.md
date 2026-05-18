@@ -1053,6 +1053,46 @@ step pays no network cost. The WASM REPL gets a clean error
 pointing at the preloaded fixture; image decoders are
 deliberately not in the WASM dependency tree.
 
+## patchify (builtin)
+
+`patchify(x, P)` rearranges a `[B, C, H, W]` image batch into
+`[B, N, P*P*C]` patch tokens (Saga 29 step 005). `P` is the
+square patch side length; it must divide both `H` and `W`,
+giving `N = (H/P) * (W/P)` patches per image. Each row of the
+trailing axis is one patch flattened in channel-outer order:
+the element at `(c, dy, dx)` lands at flat index
+`c * P*P + dy * P + dx`. Patch traversal across `N` is
+row-major: `n = i * (W/P) + j` for patch row `i` and column
+`j`. Differentiable on the autograd tape: forward is a pure
+re-arrangement, backward scatters the gradient back to image
+space with the inverse indexing (no per-position accumulation
+since every output element comes from exactly one input).
+
+The named builtin exists for two reasons. First, the demo
+reads cleanly (`tokens = patchify(images, 16)` instead of
+three reshape + transpose + reshape calls). Second, the
+autograd tape has one named op to lower, which simplifies the
+backward implementation compared to lowering through a
+general `permute` primitive that MLPL doesn't ship yet.
+
+## concat (builtin)
+
+`concat(a, b)` (Saga 13) joins two rank-0 or rank-1 arrays
+into a 1-D vector; used by generation loops to append a
+sampled token id to the growing sequence.
+
+`concat(a, b, axis)` (Saga 29 step 005) is the axis-aware
+extension. Both inputs must agree on every dim except `axis`,
+where the sizes add. Initial release supports `axis` in
+`{0, 1}` only; higher axes are a follow-up. Differentiable on
+the tape: forward stacks data per the axis layout; backward
+splits the upstream gradient at the seam (`left_size` along
+`axis`) and delivers each half to its parent. The driving use
+case is CLS-token prepending in ViT: `concat(cls, patches, 1)`
+adds a learnable `[B, 1, D]` token to the front of a
+`[B, N, D]` patch sequence so the classifier head can read off
+the CLS row after attention.
+
 ## load_images (builtin)
 
 `load_images(dir, [H, W])` (Saga 29 step 003, native-only via

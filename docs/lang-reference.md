@@ -416,6 +416,8 @@ initialized at construction). Apply a model to an array with
 | `shift_pairs_y(ids, block_size)` | 2 | Matching target windows for `shift_pairs_x`: each row is the input window shifted right by one position. |
 | `last_row(M)` | 1 | Return the last row of a rank-2 matrix as a rank-1 vector. Used in generation loops to extract the final position's logits from an `[T, V]` model output. |
 | `concat(a, b)` | 2 | Concatenate two rank-0 or rank-1 arrays into a 1-D vector. Used in generation loops to append a sampled token id to the growing sequence. |
+| `concat(a, b, axis)` | 3 | Saga 29 step 005: axis-aware concat for any rank. Both inputs must agree on every dim except `axis` (sizes add). Differentiable on the tape; the backward splits the upstream gradient at the seam. Initial release supports `axis` in `{0, 1}`. |
+| `patchify(x, P)` | 2 | Saga 29 step 005: ViT patch embedding rearrangement. Takes a `[B, C, H, W]` image batch and a square patch size `P` that divides both `H` and `W`. Returns `[B, N, P*P*C]` where `N = (H/P)*(W/P)` and each row of the trailing axis is one patch flattened in channel-outer order. Differentiable on the tape. |
 | `attention_weights(model, X)` | 2 | Read-only forward pass that walks `model` to its first `attention` / `causal_attention` layer, transforms `X` through any preceding layers in the outer chain, and returns the softmax attention weight matrix (`[T, T]` single-head or `[heads, T, T]` multi-head). Renders well as a heatmap. |
 
 ### Embeddings and Manifold

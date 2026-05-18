@@ -291,6 +291,14 @@ pub(crate) fn materialize_tape_on_mlx(tape: &mlpl_autograd::Tape) {
                 // MLX-rounded data.
                 tape.nodes()[i].value.clone()
             }
+            NodeKind::Patchify { .. } | NodeKind::Concat { .. } => {
+                // Saga 29 step 005: patchify and concat are pure
+                // re-arrangements -- no fp-rounding work happens
+                // inside them. The CPU forward value is bitwise-
+                // identical to what an MLX rerun would produce, so
+                // reuse it directly without a peer round-trip.
+                tape.nodes()[i].value.clone()
+            }
         };
         tape.nodes_mut()[i].value = new_value;
     }

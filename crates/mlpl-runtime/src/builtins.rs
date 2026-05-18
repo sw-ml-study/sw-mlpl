@@ -21,6 +21,14 @@ pub(crate) const LOCAL_NAMES: &[&str] = &[
     "dot",
     "matmul",
     "grid",
+    "patchify",
+    // Note: `concat` is not listed here. The 3-arg
+    // axis-aware form (Saga 29 step 005) is dispatched
+    // below alongside the 2-arg legacy form registered in
+    // `math_builtins::NAMES`. Both arities flow through this
+    // file's `call_builtin` -> 3-arg falls through
+    // `math_builtins::try_call` and hits the `"concat"` arm
+    // in the match below.
 ];
 
 macro_rules! check_arity {
@@ -79,6 +87,8 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
             Ok(args[0].matmul(&args[1])?)
         }
         "grid" => crate::grid_builtin::builtin_grid(name, args),
+        "patchify" => builtin_patchify(name, args),
+        "concat" => builtin_concat(name, args),
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
 }
@@ -182,4 +192,33 @@ fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runti
         let result = args[0].data().iter().copied().fold(identity, op);
         Ok(DenseArray::from_scalar(result))
     }
+}
+
+fn builtin_patchify(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    check_arity!(name, 2, args);
+    let p = scalar_usize(name, &args[1], "patch_size")?;
+    Ok(args[0].patchify(p)?)
+}
+
+fn builtin_concat(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    check_arity!(name, 3, args);
+    let axis = scalar_usize(name, &args[2], "axis")?;
+    Ok(args[0].concat(&args[1], axis)?)
+}
+
+fn scalar_usize(name: &str, arr: &DenseArray, what: &str) -> Result<usize, RuntimeError> {
+    if arr.rank() != 0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("{what} must be a scalar, got rank {}", arr.rank()),
+        });
+    }
+    let v = arr.data()[0];
+    if v < 0.0 || v.fract() != 0.0 {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("{what} must be a non-negative integer, got {v}"),
+        });
+    }
+    Ok(v as usize)
 }

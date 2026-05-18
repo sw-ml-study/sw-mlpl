@@ -155,9 +155,39 @@ fn eval_tensor_fncall(
         let idx = crate::model_tape::validate_cross_entropy_targets(&l.value(), &t)?;
         return Ok(l.cross_entropy(idx));
     }
+    if name == "patchify" {
+        arity(2)?;
+        let x = eval_tensor_expr(&args[0], env, tape, params)?;
+        let p = tape_scalar_usize(&args[1], env, "patchify: patch_size")?;
+        return Ok(x.patchify(p));
+    }
+    if name == "concat" {
+        arity(3)?;
+        let a = eval_tensor_expr(&args[0], env, tape, params)?;
+        let b = eval_tensor_expr(&args[1], env, tape, params)?;
+        let axis = tape_scalar_usize(&args[2], env, "concat: axis")?;
+        return Ok(a.concat(&b, axis));
+    }
     Err(EvalError::Unsupported(format!(
         "grad: function '{name}' not supported inside grad()"
     )))
+}
+
+fn tape_scalar_usize(arg: &Expr, env: &mut Environment, what: &str) -> Result<usize, EvalError> {
+    let arr = crate::eval::eval_expr(arg, env, &mut None)?.into_array()?;
+    if arr.rank() != 0 {
+        return Err(EvalError::Unsupported(format!(
+            "{what} must be a scalar, got rank {}",
+            arr.rank()
+        )));
+    }
+    let v = arr.data()[0];
+    if v < 0.0 || v.fract() != 0.0 {
+        return Err(EvalError::Unsupported(format!(
+            "{what} must be a non-negative integer, got {v}"
+        )));
+    }
+    Ok(v as usize)
 }
 
 fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {

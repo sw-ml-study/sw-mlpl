@@ -71,7 +71,88 @@ fn propagate(tape: &Tape, id: NodeId) {
             let grad = crate::tensor_ops::cross_entropy_backward(&logits_val, &targets, g);
             accumulate(&mut tape.nodes_mut()[logits.0].grad, grad);
         }
+        NodeKind::Patchify {
+            parent,
+            orig_shape,
+            patch_size,
+        } => {
+            let g = patchify_backward(&upstream, &orig_shape, patch_size);
+            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
+        }
+        NodeKind::Concat {
+            left,
+            right,
+            axis,
+            left_size,
+        } => {
+            let (ga, gb) = concat_backward(&upstream, axis, left_size);
+            let mut nodes = tape.nodes_mut();
+            accumulate(&mut nodes[left.0].grad, ga);
+            accumulate(&mut nodes[right.0].grad, gb);
+        }
     }
+}
+
+fn patchify_backward(upstream: &DenseArray, orig_shape: &Shape, p: usize) -> DenseArray {
+    let dims = orig_shape.dims();
+    let (b, c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
+    let (nh, nw) = (h / p, w / p);
+    let n_patches = nh * nw;
+    let patch_len = p * p * c;
+    let up = upstream.data();
+    let mut out = vec![0.0; b * c * h * w];
+    for b_i in 0..b {
+        for i in 0..nh {
+            for j in 0..nw {
+                let n = i * nw + j;
+                for c_i in 0..c {
+                    for dy in 0..p {
+                        for dx in 0..p {
+                            let dst = ((b_i * c + c_i) * h + i * p + dy) * w + j * p + dx;
+                            let src = (b_i * n_patches + n) * patch_len + c_i * p * p + dy * p + dx;
+                            out[dst] = up[src];
+                        }
+                    }
+                }
+            }
+        }
+    }
+    DenseArray::new(orig_shape.clone(), out).expect("shape")
+}
+
+fn concat_backward(
+    upstream: &DenseArray,
+    axis: usize,
+    left_size: usize,
+) -> (DenseArray, DenseArray) {
+    let dims = upstream.shape().dims();
+    let right_size = dims[axis] - left_size;
+    let mut ld = dims.to_vec();
+    ld[axis] = left_size;
+    let mut rd = dims.to_vec();
+    rd[axis] = right_size;
+    let up = upstream.data();
+    let (la, ra) = if axis == 0 {
+        let trailing: usize = dims[1..].iter().product::<usize>().max(1);
+        let split = left_size * trailing;
+        let total = split + right_size * trailing;
+        (up[..split].to_vec(), up[split..total].to_vec())
+    } else {
+        let trailing: usize = dims[2..].iter().product::<usize>().max(1);
+        let a_chunk = left_size * trailing;
+        let b_chunk = right_size * trailing;
+        let mut la = Vec::with_capacity(dims[0] * a_chunk);
+        let mut rb = Vec::with_capacity(dims[0] * b_chunk);
+        for i in 0..dims[0] {
+            let row = i * (a_chunk + b_chunk);
+            la.extend_from_slice(&up[row..row + a_chunk]);
+            rb.extend_from_slice(&up[row + a_chunk..row + a_chunk + b_chunk]);
+        }
+        (la, rb)
+    };
+    let left = DenseArray::new(Shape::new(ld), la).expect("shape");
+    let right = DenseArray::new(Shape::new(rd), ra).expect("shape");
+    (left, right)
 }
 
 fn prop_unary(

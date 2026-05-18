@@ -113,6 +113,31 @@ Walks the AST and produces values.
 - Calls into `mlpl-array` for array construction and operations
 - Calls into `mlpl-runtime` for built-in function dispatch
 
+### ViT shape ops (Saga 29 step 005)
+
+`patchify(x, P)` rearranges a `[B, C, H, W]` image batch into
+`[B, N, P*P*C]` where `N = (H/P) * (W/P)`. `P` must divide both
+`H` and `W`. Each row of the trailing axis is one patch
+flattened in channel-outer order
+(`out[b, n, c*P*P + dy*P + dx] = x[b, c, i*P+dy, j*P+dx]`
+where `n = i*(W/P) + j`).
+
+`concat(a, b[, axis])` has two arities. The 2-arg legacy form
+(Saga 13) concatenates two rank-0 or rank-1 arrays into a 1-D
+vector for generation loops. The 3-arg axis-aware form
+(Saga 29 step 005) accepts any rank; both inputs must agree on
+every dim except `axis` (sizes add). Initial release supports
+`axis` in `{0, 1}`; higher axes error cleanly.
+
+Both ops are differentiable on the autograd tape. `patchify`
+adds `NodeKind::Patchify { parent, orig_shape, patch_size }`;
+backward scatters the upstream `[B, N, P*P*C]` gradient back to
+`[B, C, H, W]` image space (each output element comes from
+exactly one input, so backward is the inverse indexing with no
+accumulation). `concat` adds `NodeKind::Concat { left, right,
+axis, left_size }`; backward splits the upstream gradient at
+the seam and delivers each half to its parent.
+
 ## Invariants
 
 - Evaluation is deterministic (same AST + env -> same result)

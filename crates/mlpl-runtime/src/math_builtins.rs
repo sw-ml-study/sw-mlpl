@@ -54,7 +54,13 @@ pub(crate) fn try_call(
         "mean" => Some(builtin_mean(name, args)),
         "zeros" | "ones" | "fill" => Some(constructor(name, args)),
         "cosine_schedule" | "linear_warmup" => Some(schedule(name, args)),
-        "concat" | "last_row" => Some(array_util(name, args)),
+        // Saga 29 step 005: the 2-arg `concat(a, b)` is the
+        // original Saga 13 generation-loop helper for rank-0/1
+        // arrays. The new 3-arg `concat(a, b, axis)` is the
+        // tape-differentiable axis-aware form, dispatched by
+        // `builtins.rs` -- let it fall through here.
+        "concat" if args.len() != 3 => Some(array_util(name, args)),
+        "last_row" => Some(array_util(name, args)),
         _ => None,
     }
 }
