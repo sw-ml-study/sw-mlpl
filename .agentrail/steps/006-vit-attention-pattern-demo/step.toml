@@ -1,0 +1,9 @@
+number = 6
+slug = "vit-attention-pattern-demo"
+status = "pending"
+description = "Saga 29 step 006 (per docs/milestone-vit.md Phase 2): demos/vit_attention_pat..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-18T16:24:31"
+task_type = "production"
+commits = []
