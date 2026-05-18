@@ -1,0 +1,12 @@
+number = 2
+slug = "value-strlist-and-list-literal"
+status = "pending"
+description = """
+Saga 29 step 002 (inserted): value-strlist-and-list-literal.
+
+Why: docs/miles..."""
+role = "production"
+context_files = []
+created_at = "2026-05-18T03:30:57"
+task_type = "prereq"
+commits = []
