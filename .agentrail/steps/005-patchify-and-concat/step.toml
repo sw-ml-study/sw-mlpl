@@ -1,6 +1,6 @@
 number = 5
 slug = "patchify-and-concat"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step 005 (per docs/milestone-vit.md Phase 1): patchify + concat built..."
 role = "legacy"
 context_files = []

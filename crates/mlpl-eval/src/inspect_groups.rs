@@ -54,13 +54,18 @@ pub(crate) const BUILTIN_GROUPS: &[FnGroup] = &[
             ("grid", "grid(bounds, n)", "n*n by 2 (x,y) grid"),
             (
                 "concat",
-                "concat(a, b)",
-                "concat two rank-0/1 arrays into a vector",
+                "concat(a, b[, axis])",
+                "concat rank-0/1 (2-arg) or axis-aware concat for tape (3-arg)",
             ),
             (
                 "last_row",
                 "last_row(M)",
                 "final row of a rank-2 matrix as a vector",
+            ),
+            (
+                "patchify",
+                "patchify(x, P)",
+                "[B,C,H,W] image batch into [B,N,P*P*C] patches",
             ),
             (
                 "argtop_k",

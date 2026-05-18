@@ -387,3 +387,133 @@ fn compute_strides(dims: &[usize]) -> Vec<usize> {
     }
     strides
 }
+
+impl DenseArray {
+    /// Saga 29 step 005: ViT patch embedding rearrangement.
+    /// Take a `[B, C, H, W]` image batch and a square patch
+    /// size `P` (which must divide both `H` and `W`). Return
+    /// `[B, N, P*P*C]` where `N = (H/P) * (W/P)` and each
+    /// row of the trailing axis is one patch flattened with
+    /// channel-outer order: index `c * P*P + dy * P + dx`.
+    ///
+    /// Patch traversal order across `N` is row-major:
+    /// `n = i * (W/P) + j` for patch row `i` (top-to-bottom)
+    /// and column `j` (left-to-right).
+    pub fn patchify(&self, patch_size: usize) -> Result<DenseArray, ArrayError> {
+        let dims = self.shape().dims();
+        if dims.len() != 4 {
+            return Err(ArrayError::ShapeMismatch {
+                source: dims.len(),
+                target: 4,
+            });
+        }
+        let (b, c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
+        if patch_size == 0 || h % patch_size != 0 || w % patch_size != 0 {
+            return Err(ArrayError::ShapeMismatch {
+                source: patch_size,
+                target: h.min(w),
+            });
+        }
+        let p = patch_size;
+        let nh = h / p;
+        let nw = w / p;
+        let n_patches = nh * nw;
+        let patch_len = p * p * c;
+        let mut out = vec![0.0; b * n_patches * patch_len];
+        let src = self.data();
+        for b_i in 0..b {
+            for i in 0..nh {
+                for j in 0..nw {
+                    let n = i * nw + j;
+                    for c_i in 0..c {
+                        for dy in 0..p {
+                            for dx in 0..p {
+                                let src_y = i * p + dy;
+                                let src_x = j * p + dx;
+                                let src_idx = ((b_i * c + c_i) * h + src_y) * w + src_x;
+                                let dst_idx =
+                                    (b_i * n_patches + n) * patch_len + c_i * p * p + dy * p + dx;
+                                out[dst_idx] = src[src_idx];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        DenseArray::new(Shape::new(vec![b, n_patches, patch_len]), out)
+    }
+
+    /// Saga 29 step 005: concat two arrays along `axis`.
+    /// Both inputs must agree on every dim except `axis`,
+    /// where the sizes add. Initial release supports axis
+    /// 0 or 1 only; later steps may extend to arbitrary
+    /// axes if a demo demands it. Labels are taken from
+    /// `self` -- the `other` operand's labels are ignored,
+    /// matching how concat composes inputs of the same
+    /// semantic shape.
+    pub fn concat(&self, other: &DenseArray, axis: usize) -> Result<DenseArray, ArrayError> {
+        let a_dims = self.shape().dims();
+        let b_dims = other.shape().dims();
+        if a_dims.len() != b_dims.len() {
+            return Err(ArrayError::ShapeMismatch {
+                source: a_dims.len(),
+                target: b_dims.len(),
+            });
+        }
+        if axis >= a_dims.len() {
+            return Err(ArrayError::ShapeMismatch {
+                source: axis,
+                target: a_dims.len(),
+            });
+        }
+        if axis > 1 {
+            return Err(ArrayError::ShapeMismatch {
+                source: axis,
+                target: 1,
+            });
+        }
+        for (k, (&a, &b)) in a_dims.iter().zip(b_dims.iter()).enumerate() {
+            if k != axis && a != b {
+                return Err(ArrayError::ShapeMismatch {
+                    source: a,
+                    target: b,
+                });
+            }
+        }
+        let mut out_dims = a_dims.to_vec();
+        out_dims[axis] = a_dims[axis] + b_dims[axis];
+        let mut data = Vec::with_capacity(out_dims.iter().product());
+        copy_concat_rows(&mut data, self, other, axis);
+        let arr = DenseArray::new(Shape::new(out_dims), data)?;
+        if let Some(lbls) = self.labels() {
+            arr.with_labels(lbls.to_vec())
+        } else {
+            Ok(arr)
+        }
+    }
+}
+
+/// Helper for `DenseArray::concat`: copy chunks from `a` then
+/// `b` along `axis`. For axis 0 we copy whole arrays in
+/// sequence; for axis 1 we interleave per row of axis 0.
+fn copy_concat_rows(out: &mut Vec<f64>, a: &DenseArray, b: &DenseArray, axis: usize) {
+    let a_dims = a.shape().dims();
+    let b_dims = b.shape().dims();
+    if axis == 0 {
+        out.extend_from_slice(a.data());
+        out.extend_from_slice(b.data());
+        return;
+    }
+    // axis == 1: for each i along axis 0, copy that slice
+    // of `a` then the matching slice of `b`.
+    let trailing_a: usize = a_dims[2..].iter().product::<usize>() * a_dims[1];
+    let trailing_b: usize = b_dims[2..].iter().product::<usize>() * b_dims[1];
+    let a_data = a.data();
+    let b_data = b.data();
+    for i in 0..a_dims[0] {
+        let a_start = i * trailing_a;
+        let b_start = i * trailing_b;
+        out.extend_from_slice(&a_data[a_start..a_start + trailing_a]);
+        out.extend_from_slice(&b_data[b_start..b_start + trailing_b]);
+    }
+}
