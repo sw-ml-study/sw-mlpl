@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "fetch-dataset"
+  },
+  "action": "Edit on crates/mlpl-eval/Cargo.toml (extend image-io feature with tar 0.4 + sha2 0.10 + flate2 1 + ureq 2, all optional), Write on src/fetch_dataset.rs (DatasetSpec registry + eval + resolve_data_root + ensure_tarball with hash-match short-circuit + sha256_of streaming hasher + extract_tarball + decode_directory_to_record + is_image_ext + build_record + label_for + io_err + 9 inline tests covering each helper), Edit on src/loader.rs (eval_fetch_dataset native + WASM stub), Edit on src/eval.rs (fetch_dataset dispatch with arity + string-literal arg checks), Edit on src/lib.rs (cfg-gated mod fetch_dataset), Write on tests/fetch_dataset_tests.rs (3 always-on dispatch tests + 1 #[ignore] live-tarball end-to-end), Edit on contracts/eval-contract/README.md (data-dir resolution + fetch_dataset semantics), Edit on docs/glossary.md (new fetch_dataset entry, count 266->267) + README count drift, refactored decode_directory_to_record from 53->31 LOC to retire one per-function LOC fail, cargo clean (recovered 13.3GB at session start), cargo test --workspace + --features image-io (green), cargo clippy --workspace --all-targets --all-features -- -D warnings (clean), cargo fmt --all --check, cargo tree -p mlpl-wasm verified no png/jpeg-decoder/tar/sha2/flate2 in WASM deps, markdown-checker on touched docs (green), sw-checklist (143 with +1 exception), git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-18T12:59:43"
+}
