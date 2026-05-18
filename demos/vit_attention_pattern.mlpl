@@ -1,0 +1,74 @@
+# Vision Transformer attention pattern: a no-training forward
+# pass that exercises every Phase-1 ViT builtin (patchify,
+# concat, randn, matmul, softmax) end-to-end and renders the
+# softmax attention matrix as a heatmap.
+# Saga 29 step 006.
+#
+# The demo's whole point is mechanical: it is the same kind of
+# pipeline the later trained demos use, but every weight is
+# `randn(seed, shape)` so there is no training step. Reading
+# the rendered heatmap shows what an UNTRAINED ViT head pays
+# attention to (essentially: nothing useful). Demo 2
+# (step 007) trains the same architecture on pets_tiny and
+# the heatmap takes on the cat-vs-dog structure.
+
+# ---- input image ----
+# A synthetic 64x64 RGB image, batch size 1. The real
+# pets_tiny.X tensor is [200, 3, 64, 64]; this demo extracts
+# the "first image" via a synthetic randn for now because MLPL
+# does not yet ship per-batch indexing. (Step 007 trains on
+# the full batch.)
+img = randn(101, [1, 3, 64, 64])
+
+# ---- patchify ----
+# Patch size P=16 over a 64x64 image gives N = (64/16)^2 = 16
+# patches. Each patch flattens P*P*C = 16*16*3 = 768 floats
+# channel-outer. Output shape: [1, 16, 768].
+tokens_4d = patchify(img, 16)
+
+# Drop the singleton batch dim so the rest of the pipeline is
+# rank-2 [seq, d]. This works because reshape preserves
+# element order and the batch dim has size 1.
+tokens = reshape(tokens_4d, [16, 768])
+
+# ---- linear patch embedding ----
+# Project each 768-vector patch down to d_model = 128. The
+# 1/sqrt(in_features) scaling is the same Xavier-style init
+# MLPL's `linear(...)` layer uses internally.
+Wp      = randn(201, [768, 128]) / sqrt(768)
+patches = matmul(tokens, Wp)
+
+# ---- CLS token + positional embedding ----
+# Prepend a randn-initialized CLS token via concat along axis
+# 0 (the sequence axis) -> [17, 128].
+cls = randn(301, [1, 128])
+seq_no_pos = concat(cls, patches, 0)
+
+# Add a randn positional embedding so every token has a
+# distinct position. Shape: [17, 128].
+pos = randn(401, [17, 128])
+seq = seq_no_pos + pos
+
+# ---- one attention head (no Model DSL) ----
+# We compute the attention pattern by hand so the demo stays
+# self-contained and pre-training. d_k = d_model / heads =
+# 128 / 1 = 128.
+Wq     = randn(501, [128, 128]) / sqrt(128)
+Wk     = randn(502, [128, 128]) / sqrt(128)
+q      = matmul(seq, Wq)
+k      = matmul(seq, Wk)
+scores = matmul(q, transpose(k)) / sqrt(128)
+
+# Row-wise softmax -> the attention pattern matrix.
+# Shape: [17, 17]. Row 0 is the CLS token's attention over
+# every other token, including itself.
+A = softmax(scores, 1)
+
+# ---- visualization ----
+svg(A, "heatmap")
+
+# Sanity check: every row of A should sum to exactly 1.0
+# (softmax is row-stochastic). Returning the row sums from
+# the REPL gives the user a quick numeric confirmation.
+row_sums = reduce_add(A, 1)
+row_sums
