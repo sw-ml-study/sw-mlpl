@@ -51,6 +51,11 @@ pub enum TokenKind {
     LBrace,
     /// `}`
     RBrace,
+    /// `.` (field access on records, Saga 29 step 001). Distinct
+    /// from float-literal decimal points -- floats lex via
+    /// `lex_number` which only consumes `digit.digit`; a bare `.`
+    /// at the lexer fall-through is this token.
+    Dot,
     /// `repeat` keyword.
     Repeat,
     /// `train` keyword.

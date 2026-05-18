@@ -160,6 +160,28 @@ pub enum Expr {
         /// Span covering keyword through closing brace.
         span: Span,
     },
+    /// Record literal: `{ field1: expr1, field2: expr2, ... }`.
+    /// Saga 29 step 001. Distinct from `{ stmt; ... }` blocks
+    /// (which only appear after the `repeat` / `train` / `for` /
+    /// `experiment` / `device` keywords); in expression position
+    /// `{` always opens a record. Field names are idents.
+    RecordLit {
+        /// Field name / value pairs, in source order. Duplicate
+        /// names error at parse time.
+        fields: Vec<(String, Expr)>,
+        /// Span covering opening through closing brace.
+        span: Span,
+    },
+    /// Field access: `receiver.field`. Saga 29 step 001. Lower
+    /// precedence than function call so `f(x).y` works.
+    FieldAccess {
+        /// Expression whose field is being read.
+        receiver: Box<Expr>,
+        /// Field name (always an ident).
+        field: String,
+        /// Span covering receiver-start through field-end.
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -182,7 +204,9 @@ impl Expr {
             | Self::Train { span: s, .. }
             | Self::For { span: s, .. }
             | Self::Experiment { span: s, .. }
-            | Self::Device { span: s, .. } => *s,
+            | Self::Device { span: s, .. }
+            | Self::RecordLit { span: s, .. }
+            | Self::FieldAccess { span: s, .. } => *s,
         }
     }
 }
@@ -213,16 +237,6 @@ impl fmt::Display for TensorCtorKind {
 /// to MLPL source for cross-process transmission. Used
 /// when forwarding `device("mlx") { ... }` blocks to a
 /// peer's eval-on-device endpoint.
-fn fmt_body(f: &mut fmt::Formatter<'_>, body: &[Expr]) -> fmt::Result {
-    for (i, e) in body.iter().enumerate() {
-        if i > 0 {
-            write!(f, "; ")?;
-        }
-        write!(f, "{e}")?;
-    }
-    Ok(())
-}
-
 fn fmt_comma_seq(f: &mut fmt::Formatter<'_>, exprs: &[Expr]) -> fmt::Result {
     for (i, e) in exprs.iter().enumerate() {
         if i > 0 {
@@ -235,8 +249,27 @@ fn fmt_comma_seq(f: &mut fmt::Formatter<'_>, exprs: &[Expr]) -> fmt::Result {
 
 fn fmt_scope(f: &mut fmt::Formatter<'_>, head: &dyn fmt::Display, body: &[Expr]) -> fmt::Result {
     write!(f, "{head} {{ ")?;
-    fmt_body(f, body)?;
+    for (i, e) in body.iter().enumerate() {
+        if i > 0 {
+            write!(f, "; ")?;
+        }
+        write!(f, "{e}")?;
+    }
     write!(f, " }}")
+}
+
+/// Render a record literal as `{name1: value1, name2: value2}`.
+/// Saga 29 step 001 -- extracted so the `impl Display for Expr`
+/// match stays under the sw-checklist 50-LOC function budget.
+fn fmt_record_lit(f: &mut fmt::Formatter<'_>, fields: &[(String, Expr)]) -> fmt::Result {
+    write!(f, "{{")?;
+    for (i, (name, value)) in fields.iter().enumerate() {
+        if i > 0 {
+            write!(f, ", ")?;
+        }
+        write!(f, "{name}: {value}")?;
+    }
+    write!(f, "}}")
 }
 
 impl fmt::Display for Expr {
@@ -282,6 +315,10 @@ impl fmt::Display for Expr {
             Self::Device { target, body, .. } => {
                 fmt_scope(f, &format_args!("device(\"{target}\")"), body)
             }
+            Self::RecordLit { fields, .. } => fmt_record_lit(f, fields),
+            Self::FieldAccess {
+                receiver, field, ..
+            } => write!(f, "{receiver}.{field}"),
         }
     }
 }

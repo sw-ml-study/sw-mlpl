@@ -10,10 +10,26 @@ by interpreting it. It depends on core, parser, array, and runtime.
 
 ### Value
 
-The result of evaluating an expression.
+The result of evaluating an expression. Tagged union of:
 
-- Wraps `DenseArray<f64>` from `mlpl-array` (scalars are rank-0 arrays)
-- May later include other types (strings, booleans, functions)
+- `Array(DenseArray)` -- the original numeric value (scalars are
+  rank-0 arrays).
+- `Str(String)` -- introduced for diagram type names, LLM prompts.
+- `Model(ModelSpec)` -- callable Model DSL value (Saga 11).
+- `Tokenizer(TokenizerSpec)` -- Saga 12 step 004.
+- `BuiltinRef { name }` -- canonical first-class-ish op reference
+  (Saga 21.5; `:foo` / `:max` / `:+` syntax).
+- `DeviceTensor { peer, handle, shape, device }` -- peer-resident
+  tensor (Saga R1 step 002). Strict-fault on cross-device CPU ops.
+- `Record { fields: BTreeMap<String, Value> }` -- Saga 29 step 001:
+  structured record literal value. BTreeMap-keyed for deterministic
+  display + serialization + equality.
+
+Field access on a record returns the inner value (which may itself
+be any variant including another `Record`). Field access on any
+other Value variant errors with `FieldOnNonRecord`. Unknown field
+errors with `FieldNotFound { requested, available }` so the user
+gets the list of valid keys.
 
 ### Environment
 
@@ -44,6 +60,14 @@ Walks the AST and produces values.
 - `TypeMismatch { expected, got }` -- wrong value kind for operation
 - `ArityMismatch { expected, got }` -- wrong argument count
 - `ArrayError(mlpl_array::ArrayError)` -- propagated from array ops
+- `FieldNotFound { requested, available }` -- Saga 29 step 001:
+  record field lookup on a key the record does not have. The
+  `available` list is sorted (BTreeMap key order) so the message
+  is deterministic.
+- `FieldOnNonRecord { receiver_kind, field }` -- Saga 29 step 001:
+  field access on a non-record receiver. `receiver_kind` is one of
+  "array", "string", "model", "tokenizer", "builtin-ref",
+  "device-tensor".
 
 ## What This Contract Does NOT Cover
 

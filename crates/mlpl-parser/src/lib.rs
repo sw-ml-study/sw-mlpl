@@ -5,6 +5,7 @@ mod error;
 mod lex_util;
 mod lexer;
 mod parser;
+mod record_parser;
 mod stmts;
 mod token;
 

@@ -22,6 +22,7 @@ pub(crate) fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::RBracket => "']'".into(),
         TokenKind::LBrace => "'{'".into(),
         TokenKind::RBrace => "'}'".into(),
+        TokenKind::Dot => "'.'".into(),
         TokenKind::Comma => "','".into(),
         TokenKind::Equals => "'='".into(),
         TokenKind::Colon => "':'".into(),
@@ -73,6 +74,15 @@ pub enum ParseError {
         /// Byte span of the offending sequence.
         span: Span,
     },
+    /// A record literal repeated a field name (Saga 29 step 001).
+    /// `{X: 1, X: 2}` errors here rather than silently picking one,
+    /// so the eval path can assume field names are unique.
+    DuplicateRecordField {
+        /// The repeated field name.
+        name: String,
+        /// Span of the second occurrence.
+        span: Span,
+    },
 }
 
 impl std::fmt::Display for ParseError {
@@ -90,6 +100,9 @@ impl std::fmt::Display for ParseError {
             }
             Self::InvalidUtf8 { span } => {
                 write!(f, "invalid UTF-8 in string literal at {span}")
+            }
+            Self::DuplicateRecordField { name, span } => {
+                write!(f, "duplicate record field '{name}' at {span}")
             }
         }
     }

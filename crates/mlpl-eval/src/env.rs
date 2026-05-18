@@ -1,6 +1,6 @@
 //! Evaluation environment (variable bindings).
 
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -123,6 +123,12 @@ pub struct Environment {
     /// call so the shared `/cancel` endpoint can trip the bool
     /// from a different thread.
     pub(crate) interrupt: Option<Interrupt>,
+    /// Saga 29 step 001: record-valued bindings. Sibling to `vars`
+    /// / `strings` / `models` -- a separate namespace so the
+    /// existing one-Value-variant-per-map pattern holds.
+    /// `r = {X: 1, Y: 2}` lands here; `eval_expr(Expr::Ident("r"))`
+    /// looks up here before falling through to other variant maps.
+    pub(crate) records: HashMap<String, BTreeMap<String, Value>>,
 }
 
 impl Environment {
@@ -373,6 +379,17 @@ impl Environment {
 
     /// Bind `name` to a builtin / operator reference (e.g.
     /// `f = :add` records `name="f", target="add"`).
+    /// Saga 29 step 001: bind a record value.
+    pub fn set_record(&mut self, name: String, fields: BTreeMap<String, Value>) {
+        self.records.insert(name, fields);
+    }
+
+    /// Saga 29 step 001: look up a record by name.
+    #[must_use]
+    pub fn get_record(&self, name: &str) -> Option<&BTreeMap<String, Value>> {
+        self.records.get(name)
+    }
+
     pub fn set_builtin_ref(&mut self, name: String, target: String) {
         self.builtin_refs.insert(name, target);
     }
