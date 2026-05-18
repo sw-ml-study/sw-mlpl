@@ -1,0 +1,9 @@
+number = 4
+slug = "fetch-dataset"
+status = "pending"
+description = 'Saga 29 step 004 (per docs/milestone-vit.md): fetch_dataset("oxford_iiit_pet"...'
+role = "legacy"
+context_files = []
+created_at = "2026-05-18T12:35:04"
+task_type = "production"
+commits = []
