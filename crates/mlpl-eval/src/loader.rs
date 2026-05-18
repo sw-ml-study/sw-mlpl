@@ -58,6 +58,9 @@ pub(crate) fn eval_load(env: &Environment, path: &str) -> Result<Value, EvalErro
 
 /// Dispatch `load_preloaded(name)`.
 pub(crate) fn eval_load_preloaded(name: &str) -> Result<Value, EvalError> {
+    if name == "pets_tiny" {
+        return crate::pets_tiny::load();
+    }
     PRELOADED
         .iter()
         .find(|(k, _)| *k == name)
@@ -67,6 +70,80 @@ pub(crate) fn eval_load_preloaded(name: &str) -> Result<Value, EvalError> {
                 "load_preloaded(\"{name}\"): unknown preloaded corpus"
             ))
         })
+}
+
+/// Dispatch `load_images(dir, [H, W])`. Native-only via the
+/// `image-io` feature; the WASM-side stub raises a clean
+/// error pointing users at `load_preloaded("pets_tiny")`.
+#[cfg(feature = "image-io")]
+pub(crate) fn eval_load_images(
+    env: &Environment,
+    dir: &str,
+    h: usize,
+    w: usize,
+) -> Result<Value, EvalError> {
+    let Some(root) = env.data_dir() else {
+        return Err(EvalError::Unsupported(format!(
+            "load_images(\"{dir}\"): filesystem access disabled (try \
+             load_preloaded(\"pets_tiny\") in the web REPL, or start the \
+             terminal REPL with --data-dir <path>)"
+        )));
+    };
+    let resolved = resolve_in_sandbox(root, dir)?;
+    let mut paths: Vec<PathBuf> = std::fs::read_dir(&resolved)
+        .map_err(|e| EvalError::Unsupported(format!("load_images(\"{dir}\"): {e}")))?
+        .filter_map(Result::ok)
+        .map(|e| e.path())
+        .filter(|p| {
+            p.extension()
+                .and_then(|e| e.to_str())
+                .map(|e| {
+                    let e = e.to_ascii_lowercase();
+                    e == "png" || e == "jpg" || e == "jpeg"
+                })
+                .unwrap_or(false)
+        })
+        .collect();
+    paths.sort();
+    if paths.is_empty() {
+        return Err(EvalError::Unsupported(format!(
+            "load_images(\"{dir}\"): no PNG or JPEG files in {}",
+            resolved.display()
+        )));
+    }
+    let per_image = 3 * h * w;
+    let mut data = Vec::with_capacity(paths.len() * per_image);
+    for path in &paths {
+        let pixels = crate::image_io::decode_and_resize(path, h, w)?;
+        data.extend_from_slice(&pixels);
+    }
+    let labels = vec![
+        Some("batch".to_string()),
+        Some("channel".to_string()),
+        Some("y".to_string()),
+        Some("x".to_string()),
+    ];
+    let arr = DenseArray::new(Shape::new(vec![paths.len(), 3, h, w]), data)?.with_labels(labels)?;
+    Ok(Value::Array(arr))
+}
+
+/// WASM stub: `load_images` is native-only because the
+/// decoders aren't available in the WASM target. Tell the
+/// user where to go instead.
+#[cfg(not(feature = "image-io"))]
+pub(crate) fn eval_load_images(
+    _env: &Environment,
+    dir: &str,
+    _h: usize,
+    _w: usize,
+) -> Result<Value, EvalError> {
+    Err(EvalError::Unsupported(format!(
+        "load_images(\"{dir}\"): PNG / JPEG decode is disabled in this \
+         build (the WASM REPL ships the pre-decoded `pets_tiny` fixture \
+         -- use `load_preloaded(\"pets_tiny\")` instead). Rebuild a \
+         native binary with `--features mlpl-eval/image-io` to enable \
+         live decode."
+    )))
 }
 
 /// Resolve a caller-supplied relative path under a sandbox root.

@@ -12,3 +12,8 @@
 # mdbook build outputs (sources live in books/*/src/, builds are local)
 books/dist/
 books/*/book/
+
+# Saga 29 step 003: Oxford-IIIT Pet tarball + extracted images
+# (used to build the committed pets_tiny.bin fixture, not
+# checked in themselves -- the tarball is ~792 MB).
+/data/

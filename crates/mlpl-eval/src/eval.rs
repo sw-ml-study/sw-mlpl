@@ -390,6 +390,44 @@ pub(crate) fn eval_expr(
         };
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "load_images"
+    {
+        if args.len() != 2 {
+            return Err(EvalError::BadArity {
+                func: "load_images".into(),
+                expected: 2,
+                got: args.len(),
+            });
+        }
+        let Expr::StrLit(dir, _) = &args[0] else {
+            return Err(EvalError::Unsupported(
+                "load_images: first argument must be a string literal directory".into(),
+            ));
+        };
+        let Expr::ArrayLit(dims, _) = &args[1] else {
+            return Err(EvalError::Unsupported(
+                "load_images: second argument must be a [H, W] array literal".into(),
+            ));
+        };
+        if dims.len() != 2 {
+            return Err(EvalError::Unsupported(format!(
+                "load_images: expected [H, W] (2 elements), got {} elements",
+                dims.len()
+            )));
+        }
+        let dim_to_usize = |e: &Expr| -> Result<usize, EvalError> {
+            match e {
+                Expr::IntLit(n, _) if *n >= 0 => Ok(*n as usize),
+                _ => Err(EvalError::Unsupported(
+                    "load_images: [H, W] entries must be non-negative integer literals".into(),
+                )),
+            }
+        };
+        let h = dim_to_usize(&dims[0])?;
+        let w = dim_to_usize(&dims[1])?;
+        return crate::loader::eval_load_images(env, dir, h, w);
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "reduce"
     {
         return crate::eval_reduce::eval_reduce(args, env, trace);
