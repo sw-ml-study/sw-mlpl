@@ -1,6 +1,6 @@
 number = 6
 slug = "vit-attention-pattern-demo"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step 006 (per docs/milestone-vit.md Phase 2): demos/vit_attention_pat..."
 role = "legacy"
 context_files = []

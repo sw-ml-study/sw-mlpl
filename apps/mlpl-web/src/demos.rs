@@ -597,6 +597,31 @@ pub const DEMOS: &[Demo] = &[
             "svg(reshape(iota(25), [5, 5]), \"heatmap\")            # MxN -> viridis grid",
         ],
     },
+    Demo {
+        name: "ViT Attention Pattern (no training)",
+        intro: "Vision Transformer pipeline end-to-end on a synthetic 64x64 RGB image, no training. patchify(x, 16) cuts the image into a 4x4 grid of 16 patches; each patch flattens P*P*C = 768 floats. A linear projection embeds them to d_model=128, a randn CLS token is prepended via concat(cls, patches, 0), a randn positional embedding is added, and one attention head computes its softmax weight matrix [17, 17] (16 patch tokens + 1 CLS). The heatmap is what an UNTRAINED ViT head pays attention to -- essentially nothing useful. Demo 2 (Saga 29 step 007, coming next) trains the same architecture on pets_tiny.",
+        takeaway: "The ViT recipe is shorter than it looks: patchify + linear-embed + CLS-prepend + pos-add + attention. Five new builtins (patchify, concat axis 0, randn, matmul, softmax) compose into the same forward-pass topology the original ViT paper drew. Without training, the attention weights are random; the row-sum sanity check at the end confirms softmax did its job regardless.",
+        lines: &[
+            "img = randn(101, [1, 3, 64, 64])                       # one synthetic 64x64 RGB image",
+            "tokens_4d = patchify(img, 16)                          # [1, 16, 768] -- 4x4 grid of P*P*C patches",
+            "tokens    = reshape(tokens_4d, [16, 768])              # drop the singleton batch dim",
+            "Wp        = randn(201, [768, 128]) / sqrt(768)         # linear patch embedding to d_model = 128",
+            "patches   = matmul(tokens, Wp)                         # [16, 128]",
+            "cls = randn(301, [1, 128])                             # learnable CLS token (randn for the no-training demo)",
+            "seq_no_pos = concat(cls, patches, 0)                   # prepend CLS along the sequence axis -> [17, 128]",
+            "pos = randn(401, [17, 128])                            # positional embedding",
+            "seq = seq_no_pos + pos                                 # add positions",
+            "Wq = randn(501, [128, 128]) / sqrt(128)                # one attention head, d_k = 128",
+            "Wk = randn(502, [128, 128]) / sqrt(128)",
+            "q  = matmul(seq, Wq)",
+            "k  = matmul(seq, Wk)",
+            "scores = matmul(q, transpose(k)) / sqrt(128)           # scaled dot-product",
+            "A = softmax(scores, 1)                                 # row-stochastic attention pattern [17, 17]",
+            "svg(A, \"heatmap\")                                    # render the heatmap",
+            "row_sums = reduce_add(A, 1)                            # sanity: every row sums to 1.0",
+            "row_sums",
+        ],
+    },
 ];
 
 #[cfg(test)]
