@@ -145,12 +145,13 @@ pub async fn eval_on_device_handler(
         | Value::Tokenizer(_)
         | Value::DeviceTensor { .. }
         | Value::BuiltinRef { .. }
-        | Value::Record { .. } => {
+        | Value::Record { .. }
+        | Value::StrList { .. } => {
             return Err((
                 StatusCode::BAD_REQUEST,
                 json_err(
                     "eval-on-device blocks must return a tensor or string in R1 \
-                     (got model / tokenizer / device-tensor / builtin-ref / record)",
+                     (got model / tokenizer / device-tensor / builtin-ref / record / string-list)",
                 ),
             ));
         }

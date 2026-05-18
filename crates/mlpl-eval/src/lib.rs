@@ -44,4 +44,4 @@ pub use interrupt::Interrupt;
 pub use metric_sink::MetricSink;
 pub use model::ModelSpec;
 pub use tokenizer::TokenizerSpec;
-pub use value::Value;
+pub use value::{Value, value_kind};

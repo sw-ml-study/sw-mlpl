@@ -59,6 +59,18 @@ as parser-owned nodes (e.g., list of expression nodes), NOT as
   directly via `parse_braced_body`). In any other position, `{`
   opens a record literal.
 
+### `[...]` array literal disambiguation (Saga 29 step 002)
+
+The parser produces a single `Expr::ArrayLit(Vec<Expr>, Span)`
+for `[...]` regardless of element kind: numeric, string, or
+mixed. Disambiguation between numeric `DenseArray` and
+string-list `Value::StrList` happens in `mlpl-eval` based on the
+kinds of the evaluated elements. Mixed-kind elements parse
+cleanly and the eval layer raises `MixedArrayLitElements` -- the
+parser does not need to know the kinds. This keeps the parser
+free of type analysis and pushes the tutoring error into the
+layer that already knows `value_kind`.
+
 ## Invariants
 
 - Token kinds are stable once defined (do not renumber or reorder)

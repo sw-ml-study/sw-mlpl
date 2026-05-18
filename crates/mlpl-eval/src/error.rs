@@ -125,6 +125,17 @@ pub enum EvalError {
         /// Field name the user asked for.
         field: String,
     },
+    /// Saga 29 step 002: a `[...]` array literal contained
+    /// elements of more than one kind (e.g. mixing strings and
+    /// numbers). The MLPL `[...]` literal is monomorphic: every
+    /// element must evaluate to the same `Value` kind. `kinds`
+    /// is the per-position list of `value_kind()` results, in
+    /// source order, so the tutoring message can show which
+    /// element broke the rule.
+    MixedArrayLitElements {
+        /// `value_kind()` of each element, in source order.
+        kinds: Vec<&'static str>,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -187,6 +198,11 @@ impl std::fmt::Display for EvalError {
             } => write!(
                 f,
                 "field access '.{field}' requires a record receiver, got {receiver_kind}"
+            ),
+            Self::MixedArrayLitElements { kinds } => write!(
+                f,
+                "[...] array literal must be all-strings or all-numbers; got mixed kinds: [{}]",
+                kinds.join(", ")
             ),
         }
     }

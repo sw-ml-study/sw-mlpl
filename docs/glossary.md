@@ -1799,6 +1799,29 @@ One optimizer update. The training loop runs `train N { body
 backward pass, and one parameter update. Distinct from
 "epoch" (a full dataset pass).
 
+## String list
+
+A `Value::StrList { items: Vec<String> }` value built from a
+`["a", "b", "c"]` literal whose every element evaluates to a
+string (Saga 29 step 002). The same `[...]` surface syntax
+dispatches on element kind: all strings -> `StrList`; all
+numbers -> the existing `DenseArray` numeric path; mixed
+kinds -> `EvalError::MixedArrayLitElements { kinds }` so the
+user sees which positions disagreed. Empty `[]` continues to
+produce an empty `DenseArray` for back-compat.
+
+Use case: the Saga 29 Vision Transformer track wants
+`load_preloaded("pets_tiny")` to return
+`{X: [200, 3, 64, 64], Y: [200], names: ["Abyssinian_1.jpg",
+"beagle_3.jpg", ...]}` -- one record value with three logical
+outputs, including a per-image basename list, without
+shoehorning the names into an index-keyed sub-record.
+
+Today's accessors are minimal: `list_len(xs)` returns the
+length as a scalar `DenseArray`. Indexing (`names[i]` or
+`index(names, i)`) and iteration are deferred to a follow-up
+step once a concrete demo needs them.
+
 ## Stop gradient / detach
 
 Severing the autograd tape so gradients do not flow through

@@ -1,6 +1,6 @@
 number = 2
 slug = "value-strlist-and-list-literal"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 29 step 002 (inserted): value-strlist-and-list-literal.
 

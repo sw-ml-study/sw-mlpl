@@ -8,7 +8,8 @@ use mlpl_trace::{Trace, TraceEvent, TraceValue};
 use crate::env::Environment;
 use crate::error::EvalError;
 use crate::eval_ops::{
-    eval_analysis_helper, eval_array_lit, eval_binop, eval_fncall, eval_svg, labeled_shape_of,
+    eval_analysis_helper, eval_binop, eval_fncall, eval_svg, flatten_evaluated_arrays,
+    labeled_shape_of,
 };
 use crate::value::{Value, value_kind};
 
@@ -68,6 +69,87 @@ pub(crate) fn eval_expr(
         }
         return Ok(Value::Record { fields: map });
     }
+    // Saga 29 step 002: `[...]` array-literal dispatch.
+    // Evaluate each element first, then decide based on the
+    // resulting kinds:
+    //   - all `Value::Str`  -> `Value::StrList`
+    //   - all `Value::Array` (numeric) -> existing numeric
+    //     flattening, with an `array_lit` trace event so the
+    //     prior trace-event shape is preserved
+    //   - empty `[]` keeps the back-compat numeric path
+    //     (empty `DenseArray`)
+    //   - mixed -> `MixedArrayLitElements`
+    if let Expr::ArrayLit(elems, _) = expr {
+        let arr_opt: Option<DenseArray> = if elems.is_empty() {
+            Some(DenseArray::from_vec(vec![]))
+        } else {
+            let mut evaluated: Vec<Value> = Vec::with_capacity(elems.len());
+            for e in elems {
+                evaluated.push(eval_expr(e, env, trace)?);
+            }
+            if evaluated.iter().all(|v| matches!(v, Value::Str(_))) {
+                let items: Vec<String> = evaluated
+                    .into_iter()
+                    .map(|v| match v {
+                        Value::Str(s) => s,
+                        _ => unreachable!(),
+                    })
+                    .collect();
+                return Ok(Value::StrList { items });
+            }
+            if evaluated.iter().all(|v| matches!(v, Value::Array(_))) {
+                let arrays: Vec<DenseArray> = evaluated
+                    .into_iter()
+                    .map(|v| match v {
+                        Value::Array(a) => a,
+                        _ => unreachable!(),
+                    })
+                    .collect();
+                Some(flatten_evaluated_arrays(arrays)?)
+            } else {
+                let kinds: Vec<&'static str> = evaluated.iter().map(value_kind).collect();
+                return Err(EvalError::MixedArrayLitElements { kinds });
+            }
+        };
+        let arr = arr_opt.unwrap();
+        if let Some(t) = trace.as_mut() {
+            let seq = t.events().len() as u64;
+            t.push(TraceEvent {
+                seq,
+                op: "array_lit".into(),
+                span: expr.span(),
+                inputs: vec![],
+                output: TraceValue::from_array(&arr),
+                input_types: vec![],
+                output_type: None,
+            });
+        }
+        return Ok(Value::Array(arr));
+    }
+    // Saga 29 step 002: `list_len(xs)` returns the length of a
+    // `Value::StrList` as a scalar `DenseArray`. Scoped to
+    // StrList only -- numeric arrays have other accessors.
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "list_len"
+    {
+        if args.len() != 1 {
+            return Err(EvalError::BadArity {
+                func: "list_len".into(),
+                expected: 1,
+                got: args.len(),
+            });
+        }
+        let v = eval_expr(&args[0], env, trace)?;
+        return match v {
+            Value::StrList { items } => {
+                Ok(Value::Array(DenseArray::from_scalar(items.len() as f64)))
+            }
+            other => Err(EvalError::Unsupported(format!(
+                "list_len: expected a string-list, got {}",
+                value_kind(&other)
+            ))),
+        };
+    }
     if let Expr::FieldAccess {
         receiver, field, ..
     } = expr
@@ -111,6 +193,13 @@ pub(crate) fn eval_expr(
     {
         return Ok(Value::Record {
             fields: fields.clone(),
+        });
+    }
+    if let Expr::Ident(name, _) = expr
+        && let Some(items) = env.get_string_list(name)
+    {
+        return Ok(Value::StrList {
+            items: items.clone(),
         });
     }
     if let Expr::FnCall { name, args, .. } = expr
@@ -473,7 +562,10 @@ pub(crate) fn eval_expr(
                 .ok_or_else(|| EvalError::UndefinedVariable(name.clone()))?;
             ("ident", vec![], r)
         }
-        Expr::ArrayLit(elems, _) => ("array_lit", vec![], eval_array_lit(elems, env, trace)?),
+        // Saga 29 step 002: every ArrayLit is dispatched by the
+        // early-return at the head of `eval_expr`, so this arm
+        // never fires.
+        Expr::ArrayLit(_, _) => unreachable!(),
         Expr::UnaryNeg { operand, .. } => {
             let val = eval_expr(operand, env, trace)?.into_array()?;
             let r = DenseArray::from_scalar(-1.0).apply_binop(&val, |a, b| a * b)?;
@@ -526,6 +618,10 @@ pub(crate) fn eval_expr(
                 Value::Record { fields } => {
                     env.set_record(name.clone(), fields.clone());
                     return Ok(Value::Record { fields });
+                }
+                Value::StrList { items } => {
+                    env.set_string_list(name.clone(), items.clone());
+                    return Ok(Value::StrList { items });
                 }
             }
         }

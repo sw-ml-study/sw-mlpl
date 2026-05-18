@@ -57,6 +57,16 @@ pub enum Value {
         /// Field name -> value, sorted by name.
         fields: BTreeMap<String, Value>,
     },
+    /// Saga 29 step 002: list of strings. Sibling to `Array`
+    /// (the numeric DenseArray path). Produced by `[...]` literals
+    /// whose elements all evaluate to `Value::Str`, and consumed
+    /// by `list_len(xs)` plus future string-indexing builtins.
+    /// Mixed-kind `[...]` literals raise
+    /// `EvalError::MixedArrayLitElements`.
+    StrList {
+        /// The items in source order.
+        items: Vec<String>,
+    },
 }
 
 impl Value {
@@ -104,6 +114,7 @@ pub fn value_kind(v: &Value) -> &'static str {
         Value::BuiltinRef { .. } => "builtin-ref",
         Value::DeviceTensor { .. } => "device-tensor",
         Value::Record { .. } => "record",
+        Value::StrList { .. } => "string-list",
     }
 }
 
@@ -136,6 +147,16 @@ impl fmt::Display for Value {
                     write!(f, "{name}: {value}")?;
                 }
                 write!(f, "}}")
+            }
+            Self::StrList { items } => {
+                write!(f, "[")?;
+                for (i, item) in items.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "\"{}\"", item.replace('\\', "\\\\").replace('"', "\\\""))?;
+                }
+                write!(f, "]")
             }
         }
     }
