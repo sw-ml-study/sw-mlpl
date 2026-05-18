@@ -129,6 +129,10 @@ pub struct Environment {
     /// `r = {X: 1, Y: 2}` lands here; `eval_expr(Expr::Ident("r"))`
     /// looks up here before falling through to other variant maps.
     pub(crate) records: HashMap<String, BTreeMap<String, Value>>,
+    /// Saga 29 step 002: string-list-valued bindings. Same
+    /// namespace pattern as `records`. `names = ["cat", "dog"]`
+    /// lands here.
+    pub(crate) string_lists: HashMap<String, Vec<String>>,
 }
 
 impl Environment {
@@ -388,6 +392,17 @@ impl Environment {
     #[must_use]
     pub fn get_record(&self, name: &str) -> Option<&BTreeMap<String, Value>> {
         self.records.get(name)
+    }
+
+    /// Saga 29 step 002: bind a string-list value.
+    pub fn set_string_list(&mut self, name: String, items: Vec<String>) {
+        self.string_lists.insert(name, items);
+    }
+
+    /// Saga 29 step 002: look up a string-list by name.
+    #[must_use]
+    pub fn get_string_list(&self, name: &str) -> Option<&Vec<String>> {
+        self.string_lists.get(name)
     }
 
     pub fn set_builtin_ref(&mut self, name: String, target: String) {

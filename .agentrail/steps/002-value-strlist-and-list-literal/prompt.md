@@ -2,7 +2,7 @@ Saga 29 step 002 (inserted): value-strlist-and-list-literal.
 
 Why: docs/milestone-vit.md step 001 specifies
 `load_preloaded("pets_tiny")` to return
-`{X: [200, 3, 64, 64], Y: [200], names: [str]}` — a record whose
+`{X: [200, 3, 64, 64], Y: [200], names: [str]}` -- a record whose
 `names` field is a list of file basenames. Step 001
 (`value-record-and-field-access`) added `Value::Record` so the
 record half of that spec is achievable, but MLPL has no
@@ -29,7 +29,7 @@ Scope (one PR / one step):
      evaluates to a scalar `Value::Array`, fall through to the
      existing `eval_array_lit` path. Mixed element kinds error
      cleanly with `EvalError::MixedArrayLitElements { kinds:
-     Vec<&'static str> }` — a new variant.
+     Vec<&'static str> }` -- a new variant.
    - The early-return must run BEFORE the existing `match expr`
      ArrayLit dispatch (which forces every element to a
      DenseArray and currently panics or surface-errors on
@@ -37,18 +37,18 @@ Scope (one PR / one step):
 
 3. Cross-crate match exhaustiveness (every `match value` site
    that pre-existed and gained a Record arm in step 001):
-   - crates/mlpl-eval/src/* — value.rs Display + value_kind,
+   - crates/mlpl-eval/src/* -- value.rs Display + value_kind,
      env.rs (if it has Value-discriminating helpers), eval.rs
      value-shaped early-returns.
-   - crates/mlpl-trace/src/* — JSON event serialization. StrList
+   - crates/mlpl-trace/src/* -- JSON event serialization. StrList
      serializes as `{"kind": "string-list", "items": [...]}` or
      similar; pick one and document.
-   - crates/mlpl-serve/src/handlers.rs — eval handler response
+   - crates/mlpl-serve/src/handlers.rs -- eval handler response
      shape + inspect handler. Whatever Record returns, StrList
      mirrors.
-   - services/mlpl-mlx-serve/src/handlers.rs — clean reject (the
+   - services/mlpl-mlx-serve/src/handlers.rs -- clean reject (the
      MLX peer wire does not encode string lists).
-   - crates/mlpl-lower-rs — Record arm in the unsupported tail;
+   - crates/mlpl-lower-rs -- Record arm in the unsupported tail;
      same treatment for StrList.
 
 4. Tests (crates/mlpl-eval/tests/strlist_tests.rs and
@@ -62,7 +62,7 @@ Scope (one PR / one step):
    - `["a", 1]` errors with `MixedArrayLitElements` and the
      error names both kinds.
    - `["a"]` evaluates to a `Value::StrList` with 1 item.
-   - Display round-trip: `["a", "b"]` → `["a", "b"]`.
+   - Display round-trip: `["a", "b"]` -> `["a", "b"]`.
    - Cross-crate: `trace.json` records a StrList event without
      panicking; `mlpl-serve` `value_kind` returns
      `"string-list"`.
@@ -75,7 +75,7 @@ Scope (one PR / one step):
    the others to follow-ups):
    - `len(xs)` where `xs` is a `Value::StrList` returns its
      length as a scalar `DenseArray`. The existing `len` builtin
-     already exists for arrays — extend it to StrList. (If `len`
+     already exists for arrays -- extend it to StrList. (If `len`
      does not yet exist, ship a new `list_len(xs)` builtin
      instead; do not block on adding a general `len`.)
    - Indexing into a StrList (`names[3]` or `index(names, 3)`)
@@ -105,13 +105,13 @@ Check `df -h /` before starting; if `target/` is over 10 GB,
 `cargo clean` first. No new dependencies expected.
 
 Out of scope (followups, not this step):
-- StrList indexing (`names[i]`, `index(names, i)`) — wait for
+- StrList indexing (`names[i]`, `index(names, i)`) -- wait for
   the consumer step or a dedicated indexing step.
 - StrList destructuring / pattern matching.
 - `concat_str_list(a, b)`, `push_str(xs, s)`, or any mutation.
 - Heterogeneous lists (`[1, "a", true]`); explicit step 003
   decision is that mixed element types are an error.
-- StrList in autograd / tape / MLX peer — those layers reject
+- StrList in autograd / tape / MLX peer -- those layers reject
   cleanly via the cross-crate match arms above.
 
 Why this is one step not three: every cross-crate match needs

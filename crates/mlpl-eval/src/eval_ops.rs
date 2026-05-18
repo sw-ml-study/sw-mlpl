@@ -191,6 +191,23 @@ pub(crate) fn eval_array_lit(
         .iter()
         .map(|e| eval_expr(e, env, trace).and_then(Value::into_array))
         .collect::<Result<Vec<_>, _>>()?;
+    flatten_evaluated_arrays(evaluated)
+}
+
+/// Saga 29 step 002: flatten an already-evaluated list of
+/// `DenseArray` elements into one `DenseArray`, matching the
+/// shape semantics `eval_array_lit` originally enforced (all
+/// rank-0 scalars stack into a `[n]` vector; otherwise the
+/// elements must share the same inner shape and stack into a
+/// `[n, ...inner]` array). Pulled out so the `eval_expr`
+/// ArrayLit early-return can dispatch string-vs-numeric on
+/// already-evaluated values without re-evaluating side effects.
+pub(crate) fn flatten_evaluated_arrays(
+    evaluated: Vec<DenseArray>,
+) -> Result<DenseArray, EvalError> {
+    if evaluated.is_empty() {
+        return Ok(DenseArray::from_vec(vec![]));
+    }
     if evaluated.iter().all(|a| a.rank() == 0) {
         let data: Vec<f64> = evaluated.iter().map(|a| a.data()[0]).collect();
         return Ok(DenseArray::from_vec(data));

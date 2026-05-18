@@ -24,12 +24,27 @@ The result of evaluating an expression. Tagged union of:
 - `Record { fields: BTreeMap<String, Value> }` -- Saga 29 step 001:
   structured record literal value. BTreeMap-keyed for deterministic
   display + serialization + equality.
+- `StrList { items: Vec<String> }` -- Saga 29 step 002: list of
+  strings. Produced by `[...]` literals whose elements all
+  evaluate to `Value::Str`. Sibling to `Array` (the numeric
+  `DenseArray` path) -- the same surface syntax dispatches by
+  element kind. Empty `[]` keeps the back-compat numeric
+  (`DenseArray`) shape; mixed-kind elements raise
+  `MixedArrayLitElements`. Accessed via `list_len(xs)` for
+  length; indexing / iteration are out of scope until a
+  follow-up.
 
 Field access on a record returns the inner value (which may itself
 be any variant including another `Record`). Field access on any
 other Value variant errors with `FieldOnNonRecord`. Unknown field
 errors with `FieldNotFound { requested, available }` so the user
 gets the list of valid keys.
+
+`[...]` array literals dispatch on the kinds of their evaluated
+elements: all `Value::Str` -> `StrList`; all `Value::Array` (the
+existing numeric path) -> a stacked `DenseArray`; mixed kinds ->
+`MixedArrayLitElements { kinds }`. Empty `[]` continues to
+produce an empty `DenseArray` for back-compat.
 
 ### Environment
 
@@ -67,7 +82,12 @@ Walks the AST and produces values.
 - `FieldOnNonRecord { receiver_kind, field }` -- Saga 29 step 001:
   field access on a non-record receiver. `receiver_kind` is one of
   "array", "string", "model", "tokenizer", "builtin-ref",
-  "device-tensor".
+  "device-tensor", "string-list".
+- `MixedArrayLitElements { kinds }` -- Saga 29 step 002: `[...]`
+  literal contained more than one kind of element (e.g. mixing
+  strings and numbers). `kinds` is the per-position list of
+  `value_kind()` results in source order so the tutoring
+  message can show which element broke the rule.
 
 ## What This Contract Does NOT Cover
 

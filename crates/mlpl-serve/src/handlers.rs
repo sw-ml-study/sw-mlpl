@@ -352,5 +352,6 @@ pub(crate) fn value_kind(value: &Value) -> &'static str {
         Value::DeviceTensor { .. } => "device-tensor",
         Value::BuiltinRef { .. } => "builtin-ref",
         Value::Record { .. } => "record",
+        Value::StrList { .. } => "string-list",
     }
 }
