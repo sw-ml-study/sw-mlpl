@@ -1,0 +1,11 @@
+{
+  "task_type": "prereq",
+  "state": {
+    "number": 11,
+    "step": "predict-batch-and-gallery-demo"
+  },
+  "action": "Edit on crates/mlpl-eval/src/model_dispatch.rs (eval_predict_batch), Edit on crates/mlpl-eval/src/eval.rs (predict_batch dispatch), Edit on crates/mlpl-eval/src/inspect_groups.rs (predict_batch help entry), Edit on crates/mlpl-viz/src/svg/gallery.rs (overlay support + render_overlay_label), Edit on crates/mlpl-viz/src/svg/mod.rs (pass aux to render_gallery), Write on demos/vit_predict_gallery.mlpl (16-image trained demo + labeled gallery), Write on crates/mlpl-eval/tests/vit_predict_gallery_tests.rs (4 tests including ignored end-to-end), 3 new gallery_render_tests, Edit on apps/mlpl-web/src/demos.rs (new 'Pets: predict + gallery' entry + SKIP_DEMOS + ProgressNote idx 56), Edit on apps/mlpl-web/src/paths.rs (Vision Transformers path gains new demo), Edit on contracts/viz-contract README + docs/glossary.md (Gallery + predict_batch entries) + docs/lang-reference.md (predict_batch row) + README count drift 271->272, ProgressNote for Pets: cat vs dog (quick) demo at idx 33 (Training the Vision Transformer ~30-60s), Edit on crates/mlpl-eval/tests/all_demos_smoke.rs (skip new demo), cargo test --workspace + clippy + fmt + markdown-checker (all green), ./scripts/build-pages.sh (rebuilt pages/), sw-checklist 152 unchanged, git commit + git push, fixed accidental commit of docs/self-play.md via follow-up removal",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T12:36:59"
+}
