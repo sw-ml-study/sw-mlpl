@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- docs: drop accidentally-committed docs/self-play.md scratch note
+- saga 29 step 011: predict_batch + gallery overlay + per-image demo
+- chore(agentrail): record saga 29 step 010 completion
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 010: gallery viz + UX curation
 - chore(agentrail): pull gallery-viz + predict-gallery forward as saga 29 steps 010/011
 - fix(display): truncate huge tensor + long-StrList Display
