@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-18
 
+- saga 29 step 008: batch-aware attention (rank-3 [B, T, d] input)
+- chore(agentrail): insert batch-aware-attention prereq as saga 29 step 008
+- chore(agentrail): record saga 29 step 007 completion
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 007: take(x, axis, idx) single-axis indexing
 - chore(agentrail): insert take-indexing prereq as saga 29 step 007
 - chore(agentrail): record saga 29 step 006 completion + kickoff step 007
