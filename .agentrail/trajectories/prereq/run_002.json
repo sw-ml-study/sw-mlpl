@@ -1,0 +1,11 @@
+{
+  "task_type": "prereq",
+  "state": {
+    "number": 7,
+    "step": "tensor-take-indexing"
+  },
+  "action": "Edit on mlpl-array ops.rs (DenseArray::take with label propagation), Edit on mlpl-autograd tape.rs (NodeKind::Take variant), Edit on mlpl-autograd backward.rs (Take arm + take_backward scatter helper), Edit on mlpl-autograd reduction_ops.rs (Tensor::take method), Edit on mlpl-runtime builtins.rs (take dispatch + builtin_take), Edit on mlpl-eval grad.rs (take arm in eval_tensor_fncall), Edit on mlpl-eval device.rs (Take arm in MLX re-run -- pure indexing, reuse CPU value), Edit on mlpl-eval inspect_groups.rs (take entry), Write on tests/take_tests.rs (10 tests including 2 gradcheck-parity), Edit on contracts/eval-contract README (Single-axis indexing subsection) + docs/glossary.md (take entry) + docs/lang-reference.md (take row) + README count drift 269->270, agentrail insert (this step) shifting vit-single-head-quick-demo to step 008, ASCII-normalized inserted prompt.md, cargo test --workspace + cargo clippy --workspace --all-targets --all-features -- -D warnings + cargo fmt --check (all green), markdown-checker on touched docs (green), sw-checklist (150 unchanged), git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-18T18:55:39"
+}

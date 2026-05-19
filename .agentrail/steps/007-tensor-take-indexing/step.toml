@@ -1,11 +1,12 @@
 number = 7
 slug = "tensor-take-indexing"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 29 step 007 (inserted prereq for the trained ViT demo):
 tensor-take-inde..."""
 role = "production"
 context_files = []
 created_at = "2026-05-18T18:13:19"
+completed_at = "2026-05-18T18:55:39"
 task_type = "prereq"
-commits = []
+commits = ["e27da503650b8a0bba4cedfbd857b87b9f71304c"]
