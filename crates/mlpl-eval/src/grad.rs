@@ -175,6 +175,22 @@ fn eval_tensor_fncall(
         let idx = tape_scalar_usize(&args[2], env, "take: idx")?;
         return Ok(x.take(axis, idx));
     }
+    if name == "reshape" {
+        arity(2)?;
+        let x = eval_tensor_expr(&args[0], env, tape, params)?;
+        let dims = eval_shape_dims(
+            match &args[1] {
+                Expr::ArrayLit(elems, _) => elems,
+                _ => {
+                    return Err(EvalError::Unsupported(
+                        "grad: reshape's second argument must be an [int, ...] literal".into(),
+                    ));
+                }
+            },
+            env,
+        )?;
+        return Ok(x.reshape(mlpl_array::Shape::new(dims)));
+    }
     Err(EvalError::Unsupported(format!(
         "grad: function '{name}' not supported inside grad()"
     )))
@@ -308,7 +324,19 @@ fn collect_params(arg: &Expr, env: &Environment, func: &str) -> Result<Vec<Strin
             let mut v = Vec::with_capacity(elems.len());
             for e in elems {
                 match e {
-                    Expr::Ident(n, _) => v.push(n.clone()),
+                    // Saga 29 step 009: walk model params when the
+                    // ArrayLit element resolves to a registered model,
+                    // matching the lone-Ident path's behavior. This
+                    // is what lets the trained ViT demo write
+                    // `adam(loss, [linear_p, attn, classifier], ...)`
+                    // and have every model's param list flattened in.
+                    Expr::Ident(n, _) => {
+                        if let Some(model) = env.get_model(n) {
+                            v.extend(model.params());
+                        } else {
+                            v.push(n.clone());
+                        }
+                    }
                     _ => {
                         return Err(EvalError::Unsupported(format!(
                             "{func}: params list must contain only identifiers"

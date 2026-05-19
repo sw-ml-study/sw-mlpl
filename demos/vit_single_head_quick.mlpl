@@ -1,0 +1,124 @@
+# Vision Transformer training demo: classify 64x64 pet
+# images as cat vs dog with one attention head + a small
+# MLP classifier head. Saga 29 step 009 (Phase 2 of the
+# milestone-vit.md ladder).
+#
+# Full-batch gradient descent on a balanced 20-image subset
+# (10 cats + 10 dogs from pets_tiny) for 100 adam steps;
+# CPU only. The training accuracy should beat 60% by the
+# end, which the integration test pins as a regression gate.
+#
+# The forward pass exercises every Phase-1 builtin shipped
+# in Sagas 29.001 .. 29.008:
+#   - load_preloaded("pets_tiny")  -- Saga 29 step 003
+#   - patchify(x, P)               -- Saga 29 step 005
+#   - rank-3 attention(d, 1, ...)  -- Saga 29 step 008
+#   - take(x, axis, idx)           -- Saga 29 step 007
+# plus the existing rank-2 Model DSL primitives: linear,
+# relu_layer, cross_entropy, adam, plus reshape and concat.
+#
+# The forward expression is duplicated between the adam
+# call and the loss snapshot because MLPL has no closures
+# and grad walks the *expression tree*, not a let-binding.
+# Reading the pipeline left-to-right:
+#
+#   patchify(X, 16)
+#     -> reshape to [20*16, 768] = [320, 768]
+#     -> linear (Wp: [768, 128])
+#     -> reshape to [20, 16, 128]
+#     -> attention (single head, rank-3)
+#     -> take axis=1 idx=0  (first-token pooling)
+#     -> classifier (MLP 128 -> 64 -> 2)
+#     -> cross_entropy with Y
+
+# ---- data ----
+# Build a balanced 20-image subset (10 cats + 10 dogs) from
+# pets_tiny via explicit take + concat. Pets_tiny stores cats
+# at indices 0..99 and dogs at 100..199. Concat chains build
+# the [10, 3, 64, 64] cat block and the [10, 3, 64, 64] dog
+# block, then concat the two halves.
+pets = load_preloaded("pets_tiny")
+c0 = reshape(take(pets.X, 0, 0), [1, 3, 64, 64])
+c1 = reshape(take(pets.X, 0, 1), [1, 3, 64, 64])
+c2 = reshape(take(pets.X, 0, 2), [1, 3, 64, 64])
+c3 = reshape(take(pets.X, 0, 3), [1, 3, 64, 64])
+c4 = reshape(take(pets.X, 0, 4), [1, 3, 64, 64])
+c5 = reshape(take(pets.X, 0, 5), [1, 3, 64, 64])
+c6 = reshape(take(pets.X, 0, 6), [1, 3, 64, 64])
+c7 = reshape(take(pets.X, 0, 7), [1, 3, 64, 64])
+c8 = reshape(take(pets.X, 0, 8), [1, 3, 64, 64])
+c9 = reshape(take(pets.X, 0, 9), [1, 3, 64, 64])
+d0 = reshape(take(pets.X, 0, 100), [1, 3, 64, 64])
+d1 = reshape(take(pets.X, 0, 101), [1, 3, 64, 64])
+d2 = reshape(take(pets.X, 0, 102), [1, 3, 64, 64])
+d3 = reshape(take(pets.X, 0, 103), [1, 3, 64, 64])
+d4 = reshape(take(pets.X, 0, 104), [1, 3, 64, 64])
+d5 = reshape(take(pets.X, 0, 105), [1, 3, 64, 64])
+d6 = reshape(take(pets.X, 0, 106), [1, 3, 64, 64])
+d7 = reshape(take(pets.X, 0, 107), [1, 3, 64, 64])
+d8 = reshape(take(pets.X, 0, 108), [1, 3, 64, 64])
+d9 = reshape(take(pets.X, 0, 109), [1, 3, 64, 64])
+cats_2 = concat(c0, c1, 0)
+cats_4 = concat(concat(cats_2, c2, 0), c3, 0)
+cats_6 = concat(concat(cats_4, c4, 0), c5, 0)
+cats_8 = concat(concat(cats_6, c6, 0), c7, 0)
+cats   = concat(concat(cats_8, c8, 0), c9, 0)
+dogs_2 = concat(d0, d1, 0)
+dogs_4 = concat(concat(dogs_2, d2, 0), d3, 0)
+dogs_6 = concat(concat(dogs_4, d4, 0), d5, 0)
+dogs_8 = concat(concat(dogs_6, d6, 0), d7, 0)
+dogs   = concat(concat(dogs_8, d8, 0), d9, 0)
+X = concat(cats, dogs, 0)
+
+# Same construction for the [20] label vector.
+ly0 = reshape(take(pets.Y, 0, 0),   [1])
+ly1 = reshape(take(pets.Y, 0, 1),   [1])
+ly2 = reshape(take(pets.Y, 0, 2),   [1])
+ly3 = reshape(take(pets.Y, 0, 3),   [1])
+ly4 = reshape(take(pets.Y, 0, 4),   [1])
+ly5 = reshape(take(pets.Y, 0, 5),   [1])
+ly6 = reshape(take(pets.Y, 0, 6),   [1])
+ly7 = reshape(take(pets.Y, 0, 7),   [1])
+ly8 = reshape(take(pets.Y, 0, 8),   [1])
+ly9 = reshape(take(pets.Y, 0, 9),   [1])
+ld0 = reshape(take(pets.Y, 0, 100), [1])
+ld1 = reshape(take(pets.Y, 0, 101), [1])
+ld2 = reshape(take(pets.Y, 0, 102), [1])
+ld3 = reshape(take(pets.Y, 0, 103), [1])
+ld4 = reshape(take(pets.Y, 0, 104), [1])
+ld5 = reshape(take(pets.Y, 0, 105), [1])
+ld6 = reshape(take(pets.Y, 0, 106), [1])
+ld7 = reshape(take(pets.Y, 0, 107), [1])
+ld8 = reshape(take(pets.Y, 0, 108), [1])
+ld9 = reshape(take(pets.Y, 0, 109), [1])
+ycats_2 = concat(ly0, ly1, 0)
+ycats_4 = concat(concat(ycats_2, ly2, 0), ly3, 0)
+ycats_6 = concat(concat(ycats_4, ly4, 0), ly5, 0)
+ycats_8 = concat(concat(ycats_6, ly6, 0), ly7, 0)
+ycats   = concat(concat(ycats_8, ly8, 0), ly9, 0)
+ydogs_2 = concat(ld0, ld1, 0)
+ydogs_4 = concat(concat(ydogs_2, ld2, 0), ld3, 0)
+ydogs_6 = concat(concat(ydogs_4, ld4, 0), ld5, 0)
+ydogs_8 = concat(concat(ydogs_6, ld6, 0), ld7, 0)
+ydogs   = concat(concat(ydogs_8, ld8, 0), ld9, 0)
+Y = concat(ycats, ydogs, 0)
+
+# ---- model ----
+linear_p   = linear(768, 128, 17)
+attn       = attention(128, 1, 23)
+classifier = chain(linear(128, 64, 31), relu_layer(), linear(64, 2, 37))
+
+# ---- training: 100 full-batch adam steps ----
+train 100 {
+  adam(cross_entropy(apply(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [320, 768])), [20, 16, 128])), 1, 0)), Y), [linear_p, attn, classifier], 0.001, 0.9, 0.999, 0.00000001);
+  cross_entropy(apply(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [320, 768])), [20, 16, 128])), 1, 0)), Y)
+}
+
+# ---- accuracy ----
+logits   = apply(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [320, 768])), [20, 16, 128])), 1, 0))
+preds    = argmax(logits, 1)
+correct  = eq(preds, Y)
+accuracy = reduce_add(correct) / 20
+
+loss_curve(last_losses)
+accuracy

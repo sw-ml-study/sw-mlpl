@@ -622,6 +622,31 @@ pub const DEMOS: &[Demo] = &[
             "row_sums",
         ],
     },
+    Demo {
+        name: "Pets: cat vs dog (quick)",
+        intro: "Trained Vision Transformer end-to-end on a balanced 20-image subset of pets_tiny. 100 full-batch adam steps with single-head attention(128, 1) and a tiny MLP classifier head. Heavy: this runs the real training loop -- the browser takes about a minute. The demo file at demos/vit_single_head_quick.mlpl has the full version; this entry is the compact narration. Saga 29 step 009.",
+        takeaway: "ViT in MLPL is the same five-step recipe as the no-training demo plus a train{} block and an adam call. The forward expression has to be inlined into adam because grad walks the expression tree (let-bindings would create non-differentiable leaves). First-token pooling stands in for a learned CLS token until per-batch broadcast lands. Final accuracy on the 20-image set should clear 60% by step ~30 and saturate near 100% by step 100.",
+        lines: &[
+            "# Balanced 20-image subset (10 cats + 10 dogs).",
+            "# The full demo file builds this via take + concat;",
+            "# this narration assumes pets.X and pets.Y are the",
+            "# load_preloaded outputs unchanged so the lines stay",
+            "# short. See demos/vit_single_head_quick.mlpl for",
+            "# the explicit take/concat data assembly.",
+            "pets = load_preloaded(\"pets_tiny\")",
+            "X = pets.X                                            # [200, 3, 64, 64]",
+            "Y = pets.Y                                            # [200]",
+            "# Model layers (Saga 11 + 29 builtins).",
+            "linear_p   = linear(768, 128, 17)                      # patch embedding",
+            "attn       = attention(128, 1, 23)                     # single-head, d_model=128",
+            "classifier = chain(linear(128, 64, 31), relu_layer(), linear(64, 2, 37))",
+            "# 100-step full-batch adam (see demo file).",
+            "# The forward pipeline:",
+            "#   patchify(X, 16) -> reshape -> linear -> reshape",
+            "#   -> attention(rank-3) -> take(_, 1, 0) (CLS-like)",
+            "#   -> classifier -> cross_entropy(_, Y)",
+        ],
+    },
 ];
 
 #[cfg(test)]
@@ -659,6 +684,7 @@ mod tests {
         "Moons MLP",
         "Circles MLP",
         "Transformer Block",
+        "Pets: cat vs dog (quick)",
     ];
 
     fn run_demo(demo_name: &str, lines: &[&str]) -> Result<(), String> {
