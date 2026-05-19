@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- saga 29 step 012: Value::Result<val, err> + ok/err/is_ok/is_err/unwrap/unwrap_or/err_message
+- chore(agentrail): insert value-result-type prereq as saga 29 step 012
+- feat(web): canvas-based photo upload + chunked training in gallery demo
+- chore(agentrail): record saga 29 step 011 completion
+- docs(changes): refresh CHANGES.md to HEAD
 - docs: drop accidentally-committed docs/self-play.md scratch note
 - saga 29 step 011: predict_batch + gallery overlay + per-image demo
 - chore(agentrail): record saga 29 step 010 completion
