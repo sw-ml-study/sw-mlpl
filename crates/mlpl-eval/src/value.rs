@@ -149,12 +149,22 @@ impl fmt::Display for Value {
                 write!(f, "}}")
             }
             Self::StrList { items } => {
+                // Saga 29 step 009 follow-up: truncate the
+                // display when there are too many items so
+                // long pets_tiny.names (200 strings) doesn't
+                // dump several KB of text into the REPL on
+                // every print.
+                const LIMIT: usize = 8;
                 write!(f, "[")?;
-                for (i, item) in items.iter().enumerate() {
+                let take = items.len().min(LIMIT);
+                for (i, item) in items.iter().take(take).enumerate() {
                     if i > 0 {
                         write!(f, ", ")?;
                     }
                     write!(f, "\"{}\"", item.replace('\\', "\\\\").replace('"', "\\\""))?;
+                }
+                if items.len() > LIMIT {
+                    write!(f, ", ... +{} more", items.len() - LIMIT)?;
                 }
                 write!(f, "]")
             }
