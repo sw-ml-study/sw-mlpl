@@ -133,6 +133,7 @@ pub struct Environment {
     /// namespace pattern as `records`. `names = ["cat", "dog"]`
     /// lands here.
     pub(crate) string_lists: HashMap<String, Vec<String>>,
+    pub(crate) results: HashMap<String, (bool, Value)>, // Saga 29 step 012
 }
 
 impl Environment {

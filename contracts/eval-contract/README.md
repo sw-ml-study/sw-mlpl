@@ -33,6 +33,22 @@ The result of evaluating an expression. Tagged union of:
   `MixedArrayLitElements`. Accessed via `list_len(xs)` for
   length; indexing / iteration are out of scope until a
   follow-up.
+- `Result { ok: bool, payload: Box<Value> }` -- Saga 29 step
+  012: success-or-failure wrapper for error-tolerant ops
+  (file I/O, parse, the upcoming `upload(...)` REPL command).
+  `ok = true` carries the success value, `ok = false` carries
+  an error payload (typically a `Value::Str` message but any
+  Value variant is allowed). Display is `Ok(<inner>)` or
+  `Err(<inner>)`. Constructors `ok(v)` and `err(v)` wrap any
+  evaluated value. Accessors: `is_ok(r) -> 1|0`, `is_err(r)
+  -> 1|0`, `unwrap(r)` (returns payload if Ok, else raises
+  `UnwrapOnErr` with the inner payload's display form),
+  `err_message(r)` (returns payload if Err, else raises
+  `Unsupported` since Ok carries no message), and
+  `unwrap_or(r, default)` (returns payload if Ok, else
+  evaluates and returns `default`). All accessors raise
+  `NotAResult { receiver_kind, accessor }` on a non-Result
+  receiver.
 
 Field access on a record returns the inner value (which may itself
 be any variant including another `Record`). Field access on any
@@ -204,6 +220,16 @@ Out of scope (followups): multi-index `gather`, slice ranges
   strings and numbers). `kinds` is the per-position list of
   `value_kind()` results in source order so the tutoring
   message can show which element broke the rule.
+- `UnwrapOnErr { message }` -- Saga 29 step 012: caller invoked
+  `unwrap(r)` on a `Value::Result` carrying `ok = false`. The
+  inner payload's display form is recorded in `message` so the
+  raised error names the actual failure, not a generic "unwrap
+  failed".
+- `NotAResult { receiver_kind, accessor }` -- Saga 29 step 012:
+  one of the Result accessors (`is_ok`, `is_err`, `unwrap`,
+  `err_message`, `unwrap_or`) received a non-Result first
+  argument. `receiver_kind` is the `value_kind()` of what was
+  passed in; `accessor` is the function name that was called.
 
 ## What This Contract Does NOT Cover
 

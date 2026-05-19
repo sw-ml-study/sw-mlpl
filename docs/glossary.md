@@ -1684,6 +1684,33 @@ represents the same domain.
 `y = x + f(x)`. A skip connection that lets gradients flow
 through deep stacks. MLPL: `residual(inner_model)`.
 
+## Result type
+
+A `Value::Result { ok: bool, payload: Box<Value> }` wrapper
+for ops that can fail without crashing the REPL (Saga 29
+step 012). `ok(v)` constructs `Ok(v)`; `err(v)` constructs
+`Err(v)` -- typically `err("message")` but any Value
+variant is allowed as the payload. The discriminator is a
+bool, not a tag string, so `is_ok`/`is_err` are O(1) reads.
+
+Accessors: `is_ok(r)` returns `1.0` / `0.0`, `is_err(r)` is
+the inverse, `unwrap(r)` returns the payload if Ok else
+raises `EvalError::UnwrapOnErr { message }` carrying the
+payload's display form, `err_message(r)` returns the
+payload if Err (else raises `Unsupported` -- Ok carries no
+message), and `unwrap_or(r, default)` returns the payload
+if Ok else evaluates and returns `default`. All accessors
+raise `EvalError::NotAResult { receiver_kind, accessor }`
+on a non-Result first argument.
+
+Motivating use: the upcoming `:upload x` REPL command
+(Saga 29 step 013) binds `x = Ok(image)` on a successful
+upload or `x = Err("cancelled")` when the user dismisses
+the file picker, so the program can branch on
+`is_ok(x)` rather than getting tripped by an undefined
+variable. The same shape generalizes to any future
+fallible builtin: parse, file open, fetch, etc.
+
 ## Reward Hacking
 
 When an RL agent finds a strategy that maximizes the reward
