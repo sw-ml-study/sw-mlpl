@@ -517,3 +517,54 @@ fn copy_concat_rows(out: &mut Vec<f64>, a: &DenseArray, b: &DenseArray, axis: us
         out.extend_from_slice(&b_data[b_start..b_start + trailing_b]);
     }
 }
+
+impl DenseArray {
+    /// Saga 29 step 007: drop one axis at a single integer
+    /// index. `axis` must be in `[0, rank)` and `idx` must be
+    /// in `[0, dims[axis])`. Per-axis labels propagate except
+    /// for the dropped axis. Used by ViT to pull one image out
+    /// of a `[B, C, H, W]` batch (`take(X, 0, i)`) and to read
+    /// the CLS row of a `[B, T, d]` post-attention activation
+    /// (`take(seq, 1, 0)`).
+    pub fn take(&self, axis: usize, idx: usize) -> Result<DenseArray, ArrayError> {
+        let dims = self.shape().dims();
+        if axis >= dims.len() {
+            return Err(ArrayError::ShapeMismatch {
+                source: axis,
+                target: dims.len(),
+            });
+        }
+        if idx >= dims[axis] {
+            return Err(ArrayError::ShapeMismatch {
+                source: idx,
+                target: dims[axis],
+            });
+        }
+        let outer: usize = dims[..axis].iter().product();
+        let axis_size = dims[axis];
+        let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
+        let mut out = Vec::with_capacity(outer * inner);
+        let data = self.data();
+        for o in 0..outer {
+            let start = (o * axis_size + idx) * inner;
+            out.extend_from_slice(&data[start..start + inner]);
+        }
+        let mut new_dims = Vec::with_capacity(dims.len().saturating_sub(1));
+        for (k, &d) in dims.iter().enumerate() {
+            if k != axis {
+                new_dims.push(d);
+            }
+        }
+        let arr = DenseArray::new(Shape::new(new_dims), out)?;
+        if let Some(lbls) = self.labels() {
+            let kept: Vec<Option<String>> = lbls
+                .iter()
+                .enumerate()
+                .filter_map(|(k, l)| if k == axis { None } else { Some(l.clone()) })
+                .collect();
+            arr.with_labels(kept)
+        } else {
+            Ok(arr)
+        }
+    }
+}

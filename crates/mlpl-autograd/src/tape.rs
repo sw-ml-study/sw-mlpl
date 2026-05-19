@@ -111,6 +111,22 @@ pub enum NodeKind {
         /// the gradient.
         left_size: usize,
     },
+    /// Saga 29 step 007: drop one axis at a single integer
+    /// index. The `orig_shape` is the parent's shape;
+    /// backward scatters the upstream gradient into a zero-
+    /// filled array of `orig_shape`, placing the gradient at
+    /// `axis = idx`.
+    Take {
+        /// Parent node id.
+        parent: NodeId,
+        /// Parent's original shape so the backward can
+        /// scatter into the right buffer.
+        orig_shape: Shape,
+        /// Axis to drop.
+        axis: usize,
+        /// Index along `axis` to extract.
+        idx: usize,
+    },
 }
 
 /// Per-node storage: the forward value, an accumulated gradient, the

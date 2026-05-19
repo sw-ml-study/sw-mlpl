@@ -90,7 +90,31 @@ fn propagate(tape: &Tape, id: NodeId) {
             accumulate(&mut nodes[left.0].grad, ga);
             accumulate(&mut nodes[right.0].grad, gb);
         }
+        NodeKind::Take {
+            parent,
+            orig_shape,
+            axis,
+            idx,
+        } => {
+            let g = take_backward(&upstream, &orig_shape, axis, idx);
+            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
+        }
     }
+}
+
+fn take_backward(upstream: &DenseArray, orig_shape: &Shape, axis: usize, idx: usize) -> DenseArray {
+    let dims = orig_shape.dims();
+    let outer: usize = dims[..axis].iter().product();
+    let axis_size = dims[axis];
+    let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
+    let mut out = vec![0.0; orig_shape.elem_count()];
+    let up = upstream.data();
+    for o in 0..outer {
+        let src = o * inner;
+        let dst = (o * axis_size + idx) * inner;
+        out[dst..dst + inner].copy_from_slice(&up[src..src + inner]);
+    }
+    DenseArray::new(orig_shape.clone(), out).expect("shape")
 }
 
 fn patchify_backward(upstream: &DenseArray, orig_shape: &Shape, p: usize) -> DenseArray {

@@ -168,6 +168,13 @@ fn eval_tensor_fncall(
         let axis = tape_scalar_usize(&args[2], env, "concat: axis")?;
         return Ok(a.concat(&b, axis));
     }
+    if name == "take" {
+        arity(3)?;
+        let x = eval_tensor_expr(&args[0], env, tape, params)?;
+        let axis = tape_scalar_usize(&args[1], env, "take: axis")?;
+        let idx = tape_scalar_usize(&args[2], env, "take: idx")?;
+        return Ok(x.take(axis, idx));
+    }
     Err(EvalError::Unsupported(format!(
         "grad: function '{name}' not supported inside grad()"
     )))

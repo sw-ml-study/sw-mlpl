@@ -22,6 +22,7 @@ pub(crate) const LOCAL_NAMES: &[&str] = &[
     "matmul",
     "grid",
     "patchify",
+    "take",
     // Note: `concat` is not listed here. The 3-arg
     // axis-aware form (Saga 29 step 005) is dispatched
     // below alongside the 2-arg legacy form registered in
@@ -89,6 +90,7 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
         "grid" => crate::grid_builtin::builtin_grid(name, args),
         "patchify" => builtin_patchify(name, args),
         "concat" => builtin_concat(name, args),
+        "take" => builtin_take(name, args),
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
 }
@@ -204,6 +206,13 @@ fn builtin_concat(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runti
     check_arity!(name, 3, args);
     let axis = scalar_usize(name, &args[2], "axis")?;
     Ok(args[0].concat(&args[1], axis)?)
+}
+
+fn builtin_take(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    check_arity!(name, 3, args);
+    let axis = scalar_usize(name, &args[1], "axis")?;
+    let idx = scalar_usize(name, &args[2], "idx")?;
+    Ok(args[0].take(axis, idx)?)
 }
 
 fn scalar_usize(name: &str, arr: &DenseArray, what: &str) -> Result<usize, RuntimeError> {
