@@ -136,6 +136,23 @@ pub enum EvalError {
         /// `value_kind()` of each element, in source order.
         kinds: Vec<&'static str>,
     },
+    /// Saga 29 step 012: caller invoked `unwrap(r)` on an
+    /// `Err(_)` value. The inner error payload's display
+    /// form is recorded here so the user sees what went
+    /// wrong rather than a generic "unwrap failed".
+    UnwrapOnErr {
+        /// Display-format of the Err payload.
+        message: String,
+    },
+    /// Saga 29 step 012: caller invoked an Ok-only accessor
+    /// (e.g. `unwrap`) on a non-Result value, or an Err-only
+    /// accessor (`err_message`) on a non-Result.
+    NotAResult {
+        /// `value_kind()` of the receiver.
+        receiver_kind: &'static str,
+        /// Name of the accessor that was called.
+        accessor: &'static str,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -203,6 +220,16 @@ impl std::fmt::Display for EvalError {
                 f,
                 "[...] array literal must be all-strings or all-numbers; got mixed kinds: [{}]",
                 kinds.join(", ")
+            ),
+            Self::UnwrapOnErr { message } => {
+                write!(f, "unwrap on an Err value: {message}")
+            }
+            Self::NotAResult {
+                receiver_kind,
+                accessor,
+            } => write!(
+                f,
+                "{accessor}: expected a Result value, got {receiver_kind}"
             ),
         }
     }

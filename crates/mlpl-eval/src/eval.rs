@@ -150,6 +150,33 @@ pub(crate) fn eval_expr(
             ))),
         };
     }
+    // Saga 29 step 012: Result<val, err> constructors +
+    // accessors. Eval-side dispatch because payloads are
+    // `Value`s (mlpl-runtime only handles `DenseArray`).
+    if let Expr::FnCall { name, args, .. } = expr
+        && matches!(name.as_str(), "ok" | "err")
+    {
+        if args.len() != 1 {
+            return Err(EvalError::BadArity {
+                func: name.clone(),
+                expected: 1,
+                got: args.len(),
+            });
+        }
+        let payload = eval_expr(&args[0], env, trace)?;
+        return Ok(Value::Result {
+            ok: name == "ok",
+            payload: Box::new(payload),
+        });
+    }
+    if let Expr::FnCall { name, args, .. } = expr
+        && matches!(
+            name.as_str(),
+            "is_ok" | "is_err" | "unwrap" | "err_message" | "unwrap_or"
+        )
+    {
+        return crate::result_ops::eval_result_accessor(name, args, env, trace);
+    }
     if let Expr::FieldAccess {
         receiver, field, ..
     } = expr
@@ -200,6 +227,14 @@ pub(crate) fn eval_expr(
     {
         return Ok(Value::StrList {
             items: items.clone(),
+        });
+    }
+    if let Expr::Ident(name, _) = expr
+        && let Some((ok, payload)) = env.get_result(name)
+    {
+        return Ok(Value::Result {
+            ok: *ok,
+            payload: Box::new(payload.clone()),
         });
     }
     if let Expr::FnCall { name, args, .. } = expr
@@ -683,6 +718,10 @@ pub(crate) fn eval_expr(
                 Value::StrList { items } => {
                     env.set_string_list(name.clone(), items.clone());
                     return Ok(Value::StrList { items });
+                }
+                Value::Result { ok, payload } => {
+                    env.set_result(name.clone(), ok, (*payload).clone());
+                    return Ok(Value::Result { ok, payload });
                 }
             }
         }

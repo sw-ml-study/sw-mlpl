@@ -67,6 +67,20 @@ pub enum Value {
         /// The items in source order.
         items: Vec<String>,
     },
+    /// Saga 29 step 012: first-class Result<val, err> value.
+    /// `ok` discriminates success vs error; `payload` is the
+    /// wrapped Value (typically `Array` for success, `Str`
+    /// for an error message). Constructed via the `ok(x)` /
+    /// `err(x)` builtins and inspected via `is_ok` / `is_err`
+    /// / `unwrap` / `unwrap_or` / `err_message`. Distinct from
+    /// `EvalError` -- a Result is a value that flows through
+    /// the program, while EvalError bubbles out of the REPL.
+    Result {
+        /// True for `Ok(_)`, false for `Err(_)`.
+        ok: bool,
+        /// Wrapped value.
+        payload: Box<Value>,
+    },
 }
 
 impl Value {
@@ -115,6 +129,7 @@ pub fn value_kind(v: &Value) -> &'static str {
         Value::DeviceTensor { .. } => "device-tensor",
         Value::Record { .. } => "record",
         Value::StrList { .. } => "string-list",
+        Value::Result { .. } => "result",
     }
 }
 
@@ -168,6 +183,8 @@ impl fmt::Display for Value {
                 }
                 write!(f, "]")
             }
+            Self::Result { ok: true, payload } => write!(f, "Ok({payload})"),
+            Self::Result { ok: false, payload } => write!(f, "Err({payload})"),
         }
     }
 }

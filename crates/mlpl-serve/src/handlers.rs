@@ -353,5 +353,6 @@ pub(crate) fn value_kind(value: &Value) -> &'static str {
         Value::BuiltinRef { .. } => "builtin-ref",
         Value::Record { .. } => "record",
         Value::StrList { .. } => "string-list",
+        Value::Result { .. } => "result",
     }
 }

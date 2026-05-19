@@ -35,6 +35,7 @@ mod model_lora;
 mod model_perturb;
 mod model_tape;
 mod pets_tiny;
+mod result_ops;
 mod tag_propagate;
 mod tag_render;
 mod tokenizer;

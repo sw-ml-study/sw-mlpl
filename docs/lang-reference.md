@@ -387,6 +387,29 @@ initialized at construction). Apply a model to an array with
 | `apply(model, X)` | 2 | Forward pass. For `embed`, `X` is integer tokens; for everything else it is an `[..., d_in]` float array. Fully differentiable through the tape. |
 | `predict_batch(model, X)` | 2 | Saga 29 step 011: forward pass + `argmax` over the trailing axis. Returns integer class indices. Not differentiable -- use `apply(model, X)` inside `grad()` or `adam()` instead. Convenient for evaluation: `preds = predict_batch(mdl, X); accuracy = reduce_add(eq(preds, Y)) / N`. |
 
+### Result type (Saga 29 step 012)
+
+A `Value::Result { ok, payload }` wraps success-or-failure for
+ops that can fail without crashing the REPL. The payload can be
+any Value (typically `Value::Array` for success and `Value::Str`
+for error messages). Display is `Ok(<inner>)` or `Err(<inner>)`.
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `ok(v)` | 1 | Wrap any value as `Ok(v)`. |
+| `err(v)` | 1 | Wrap any value as `Err(v)`. Typically `err("message string")`. |
+| `is_ok(r)` | 1 | Return scalar `1.0` if `r` is `Ok(_)`, else `0.0`. Raises `NotAResult` on a non-Result first argument. |
+| `is_err(r)` | 1 | Inverse of `is_ok`. |
+| `unwrap(r)` | 1 | Return the payload if `Ok(_)`. Raises `EvalError::UnwrapOnErr { message }` carrying the payload's display form if `Err(_)`. |
+| `err_message(r)` | 1 | Return the payload if `Err(_)`. Raises `Unsupported` on `Ok(_)` (no message to return). |
+| `unwrap_or(r, default)` | 2 | Return the payload if `Ok(_)`; otherwise evaluate `default` and return that. |
+
+Motivating use: the upcoming `:upload x` REPL command (Saga 29
+step 013) binds `x = Ok(image)` on a successful file pick and
+`x = Err("cancelled")` when the user dismisses the dialog, so
+the program can branch on `is_ok(x)` instead of getting tripped
+by an undefined name.
+
 ### Data Loading and Dataset Prep
 
 | Function | Args | Description |

@@ -1,6 +1,6 @@
 number = 12
 slug = "value-result-type"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 29 step 012 (inserted prereq): value-result-type.
 
