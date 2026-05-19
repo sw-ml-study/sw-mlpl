@@ -43,6 +43,41 @@ impl WasmSession {
     pub fn clear(&self) {
         *self.env.borrow_mut() = Environment::new();
     }
+
+    /// Saga 29 step 011 follow-up: bind a `[1, 3, h, w]` image
+    /// tensor under `name` in the session's environment. The
+    /// JS side decodes the user-selected file (any source size,
+    /// any PNG / JPEG / WebP format the browser supports) into
+    /// a Canvas at the target `h`x`w` size, then passes the
+    /// resulting RGB pixels in channel-first f64 layout
+    /// (`[3, h, w]` row-major, values in `[-1, 1]`) here. This
+    /// keeps image decoding + resizing in JS/Canvas where it
+    /// is fast and dependency-free, while letting the trained
+    /// MLPL model treat the result identically to a
+    /// `load_preloaded("pets_tiny")` slice.
+    pub fn bind_image(&self, name: &str, rgb_chw: &[f64], h: u32, w: u32) -> Result<(), JsValue> {
+        use mlpl_array::{DenseArray, Shape};
+        let h = h as usize;
+        let w = w as usize;
+        let expected = 3 * h * w;
+        if rgb_chw.len() != expected {
+            return Err(JsValue::from_str(&format!(
+                "bind_image: expected {expected} floats for [3, {h}, {w}], got {}",
+                rgb_chw.len()
+            )));
+        }
+        let arr = DenseArray::new(Shape::new(vec![1, 3, h, w]), rgb_chw.to_vec())
+            .map_err(|e| JsValue::from_str(&format!("{e}")))?
+            .with_labels(vec![
+                Some("batch".into()),
+                Some("channel".into()),
+                Some("y".into()),
+                Some("x".into()),
+            ])
+            .map_err(|e| JsValue::from_str(&format!("{e}")))?;
+        self.env.borrow_mut().set(name.into(), arr);
+        Ok(())
+    }
 }
 
 fn eval_input(input: &str, env: &mut Environment) -> String {

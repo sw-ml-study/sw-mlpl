@@ -29,6 +29,7 @@ mod readme_counts;
 mod state;
 mod summary;
 mod tutorial;
+mod upload;
 
 use components::{
     DocDialog, Footer, GithubCorner, Header, HeaderMode, InputRow, ModeBar, TutorialPanel,
@@ -107,6 +108,7 @@ fn app() -> Html {
     let on_submit = make_submit(deps.clone());
     let on_run_batch = make_submit_batch(deps);
     let on_clear = make_clear(active_session.clone(), active_history.clone());
+    let on_upload = upload::make_upload_image(active_session.clone(), active_history.clone());
     let on_demo = make_run_demo(active_session, active_history.clone());
 
     use_effect_with(active_history.clone(), |_| {
@@ -119,6 +121,7 @@ fn app() -> Html {
         on_run_batch,
         on_clear,
         on_demo,
+        on_upload,
         input_value,
         cmd_history,
         cmd_index,
@@ -135,6 +138,7 @@ struct RenderArgs {
     on_run_batch: Callback<Vec<String>>,
     on_clear: Callback<MouseEvent>,
     on_demo: Callback<usize>,
+    on_upload: Callback<web_sys::Event>,
     input_value: UseStateHandle<String>,
     cmd_history: UseStateHandle<Vec<String>>,
     cmd_index: UseStateHandle<Option<usize>>,
@@ -184,7 +188,7 @@ fn render(a: RenderArgs) -> Html {
                 on_select_paths={cb.paths.clone()}
                 mode={header_mode}
             />
-            <ModeBar on_clear={a.on_clear} on_demo={a.on_demo} {tutorial_active} />
+            <ModeBar on_clear={a.on_clear} on_demo={a.on_demo} on_upload={a.on_upload} {tutorial_active} />
             { render_main(MainArgs {
                 tutorial_active,
                 paths_active,
