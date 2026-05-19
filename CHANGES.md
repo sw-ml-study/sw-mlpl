@@ -12,8 +12,17 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-19
+
+- saga 29 step 010: gallery viz + UX curation
+- chore(agentrail): pull gallery-viz + predict-gallery forward as saga 29 steps 010/011
+- fix(display): truncate huge tensor + long-StrList Display
+
 ## 2026-05-18
 
+- fix(web-demo): make 'Pets: cat vs dog (quick)' actually train
+- chore(agentrail): record saga 29 step 009 completion + kickoff step 010
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 009: trained ViT demo (cat vs dog quick)
 - chore(agentrail): record saga 29 step 008 completion
 - docs(changes): refresh CHANGES.md to HEAD
