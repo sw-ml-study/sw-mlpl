@@ -8,6 +8,6 @@ pub use analysis::{
     analysis_scatter_labeled,
 };
 pub use svg::{
-    VizError, render, render_bar, render_decision_boundary, render_heatmap, render_line,
-    render_scatter, render_scatter3d, render_with_aux,
+    VizError, render, render_bar, render_decision_boundary, render_gallery, render_heatmap,
+    render_line, render_scatter, render_scatter3d, render_with_aux,
 };
