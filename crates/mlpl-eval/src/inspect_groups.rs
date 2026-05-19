@@ -253,6 +253,11 @@ pub(crate) const BUILTIN_GROUPS: &[FnGroup] = &[
                 "self-attention with a lower-triangular causal mask",
             ),
             ("apply", "apply(model, X)", "forward pass on a stored model"),
+            (
+                "predict_batch",
+                "predict_batch(model, X)",
+                "forward pass + argmax over the trailing axis (integer class labels)",
+            ),
         ],
     ),
     (

@@ -26,7 +26,15 @@ const MAX_THUMB: f64 = 60.0;
 
 /// Render an `[N, 3, H, W]` batch as a grid of RGB
 /// thumbnails. Returns a self-contained SVG string.
-pub fn render_gallery(data: &DenseArray) -> Result<String, VizError> {
+///
+/// `overlay` (Saga 29 step 011) is optional. Pass
+/// `Some([N])` to label each thumbnail with one integer
+/// value (e.g. predictions only), or `Some([N, K])` (K up
+/// to 4) for multiple values per thumbnail (e.g. actual /
+/// predicted as a 2-column matrix). Values render as
+/// integers separated by `/`; class-name mapping is the
+/// caller's job.
+pub fn render_gallery(data: &DenseArray, overlay: Option<&DenseArray>) -> Result<String, VizError> {
     let dims = data.shape().dims();
     if dims.len() != 4 || dims[1] != 3 {
         return Err(VizError::InvalidShape(format!(
@@ -36,6 +44,19 @@ pub fn render_gallery(data: &DenseArray) -> Result<String, VizError> {
     let n = dims[0];
     let src_h = dims[2];
     let src_w = dims[3];
+    if let Some(ov) = overlay {
+        let od = ov.shape().dims();
+        let ok = match od.len() {
+            1 => od[0] == n,
+            2 => od[0] == n && od[1] <= 4,
+            _ => false,
+        };
+        if !ok {
+            return Err(VizError::InvalidShape(format!(
+                "gallery overlay must be [N] or [N, K<=4] with N={n}, got {od:?}"
+            )));
+        }
+    }
     let mut out = String::new();
     write_svg_open(&mut out);
     if n == 0 || src_h == 0 || src_w == 0 {
@@ -46,25 +67,72 @@ pub fn render_gallery(data: &DenseArray) -> Result<String, VizError> {
     let rows = n.div_ceil(cols);
     let cell_w = (W - 2.0 * PAD) / cols as f64;
     let cell_h = (H - 2.0 * PAD) / rows as f64;
-    let thumb_size = cell_w.min(cell_h).min(MAX_THUMB);
+    let label_reserve = if overlay.is_some() { 14.0 } else { 0.0 };
+    let thumb_size = cell_w.min(cell_h - label_reserve).min(MAX_THUMB);
     let (thumb_h_px, thumb_w_px) = (
         src_h.min(thumb_size as usize),
         src_w.min(thumb_size as usize),
     );
     let raw = data.data();
     let stride_n = 3 * src_h * src_w;
+    let (ov_data, ov_cols) = match overlay {
+        Some(ov) => {
+            let cols_per = if ov.shape().dims().len() == 1 {
+                1
+            } else {
+                ov.shape().dims()[1]
+            };
+            (Some(ov.data()), cols_per)
+        }
+        None => (None, 0),
+    };
     for idx in 0..n {
         let col = idx % cols;
         let row = idx / cols;
         let cell_x = PAD + cell_w * col as f64 + (cell_w - thumb_size) * 0.5;
-        let cell_y = PAD + cell_h * row as f64 + (cell_h - thumb_size) * 0.5;
+        let cell_y = PAD + cell_h * row as f64 + (cell_h - thumb_size - label_reserve) * 0.5;
         let img = &raw[idx * stride_n..(idx + 1) * stride_n];
         render_thumbnail(
             &mut out, img, src_h, src_w, thumb_h_px, thumb_w_px, cell_x, cell_y, thumb_size,
         );
+        if let Some(values) = ov_data {
+            render_overlay_label(
+                &mut out,
+                values,
+                idx,
+                ov_cols,
+                cell_x,
+                cell_y + thumb_size + 1.0,
+                thumb_size,
+            );
+        }
     }
     write_svg_close(&mut out);
     Ok(out)
+}
+
+/// Render the `K` label values for thumbnail `idx` as a
+/// small text caption centered under the thumbnail.
+fn render_overlay_label(
+    out: &mut String,
+    values: &[f64],
+    idx: usize,
+    ov_cols: usize,
+    x: f64,
+    y: f64,
+    thumb_size: f64,
+) {
+    let mut parts: Vec<String> = Vec::with_capacity(ov_cols);
+    for c in 0..ov_cols {
+        let v = values[idx * ov_cols + c];
+        parts.push(format!("{v:.0}"));
+    }
+    let text = parts.join("/");
+    let cx = x + thumb_size * 0.5;
+    out.push_str(&format!(
+        "<text x=\"{cx:.1}\" y=\"{y:.1}\" fill=\"#cdd6f4\" font-size=\"9\" \
+         font-family=\"monospace\" text-anchor=\"middle\" dominant-baseline=\"hanging\">{text}</text>"
+    ));
 }
 
 #[allow(clippy::too_many_arguments)]

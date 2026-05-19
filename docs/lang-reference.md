@@ -385,6 +385,7 @@ initialized at construction). Apply a model to an array with
 | `embed(vocab_size, d_model, seed)` | 3 | Learned `[vocab, d_model]` lookup table. `apply(embed, tokens)` where `tokens` is a rank-1 `[T]` (or rank-2 `[B, T]`) integer array returns `[T, d_model]` (or `[B, T, d_model]`). Gradients accumulate on the embedding rows touched by `tokens`. |
 | `sinusoidal_encoding(seq_len, d_model)` | 2 | Deterministic `[time=seq_len, dim=d_model]` sinusoidal positional table. No parameters. Additive pattern: `apply(embed, toks) + sinusoidal_encoding(T, d)`. |
 | `apply(model, X)` | 2 | Forward pass. For `embed`, `X` is integer tokens; for everything else it is an `[..., d_in]` float array. Fully differentiable through the tape. |
+| `predict_batch(model, X)` | 2 | Saga 29 step 011: forward pass + `argmax` over the trailing axis. Returns integer class indices. Not differentiable -- use `apply(model, X)` inside `grad()` or `adam()` instead. Convenient for evaluation: `preds = predict_batch(mdl, X); accuracy = reduce_add(eq(preds, Y)) / N`. |
 
 ### Data Loading and Dataset Prep
 
