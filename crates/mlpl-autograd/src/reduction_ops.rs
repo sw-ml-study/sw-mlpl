@@ -140,4 +140,25 @@ impl Tensor {
             },
         )
     }
+
+    /// Saga 29 step 007: drop one axis at a single integer
+    /// index. Forward: pick the `axis = idx` slice. Backward:
+    /// scatter the upstream gradient back into a zero-filled
+    /// array of the original shape.
+    #[must_use]
+    pub fn take(&self, axis: usize, idx: usize) -> Self {
+        let v_orig = self.value();
+        let orig_shape = v_orig.shape().clone();
+        let v = v_orig.take(axis, idx).expect("take compatible axis/idx");
+        new_tensor(
+            self,
+            v,
+            NodeKind::Take {
+                parent: self.node,
+                orig_shape,
+                axis,
+                idx,
+            },
+        )
+    }
 }

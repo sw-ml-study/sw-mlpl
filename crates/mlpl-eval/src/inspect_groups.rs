@@ -68,6 +68,11 @@ pub(crate) const BUILTIN_GROUPS: &[FnGroup] = &[
                 "[B,C,H,W] image batch into [B,N,P*P*C] patches",
             ),
             (
+                "take",
+                "take(x, axis, idx)",
+                "drop one axis at a single integer index (tape-differentiable)",
+            ),
+            (
                 "argtop_k",
                 "argtop_k(scores, k)",
                 "indices of top-k entries (descending)",

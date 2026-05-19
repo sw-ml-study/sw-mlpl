@@ -138,6 +138,24 @@ accumulation). `concat` adds `NodeKind::Concat { left, right,
 axis, left_size }`; backward splits the upstream gradient at
 the seam and delivers each half to its parent.
 
+### Single-axis indexing (Saga 29 step 007)
+
+`take(x, axis, idx)` drops one axis at a single integer index,
+returning a `Value::Array` with rank `rank(x) - 1`. Per-axis
+labels propagate: the dropped axis's label is removed and the
+surviving labels are unchanged. Errors cleanly when `axis` is
+out of range or `idx` is out of range for `dims[axis]`.
+
+Differentiable on the tape via `NodeKind::Take { parent,
+orig_shape, axis, idx }`. The backward scatters the upstream
+gradient into a zero-filled array of `orig_shape`, placing the
+upstream slice at position `axis = idx`. This is the
+canonical "index_select"-style gradient: gradient flows only
+through the picked slice.
+
+Out of scope (followups): multi-index `gather`, slice ranges
+`x[a..b]`, and negative indices.
+
 ## Invariants
 
 - Evaluation is deterministic (same AST + env -> same result)

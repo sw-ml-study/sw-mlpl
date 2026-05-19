@@ -1,6 +1,6 @@
 number = 7
 slug = "tensor-take-indexing"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 29 step 007 (inserted prereq for the trained ViT demo):
 tensor-take-inde..."""

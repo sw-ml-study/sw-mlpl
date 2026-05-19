@@ -2096,6 +2096,25 @@ scale transformers; MLPL demos use 1). MLPL builds one with
 residual(chain(rms_norm(d), linear(d, d_ff, s2),
 relu_layer(), linear(d_ff, d, s3))))`.
 
+## take (builtin)
+
+`take(x, axis, idx)` drops one axis at a single integer index
+(Saga 29 step 007). For a rank-`r` input, the result has rank
+`r - 1`; per-axis labels carry through except for the dropped
+one. `axis` and `idx` are eager-evaluated scalars. Driving use
+case is per-image extraction in the ViT trained demo:
+`take(load_preloaded("pets_tiny").X, 0, i)` returns one
+image's `[3, 64, 64]` from the 200-image batch; `take(seq, 1,
+0)` pulls the CLS row out of a `[B, 17, 128]` post-attention
+activation.
+
+Differentiable on the autograd tape. The backward scatters
+the upstream gradient into a zero-filled array of the
+parent's shape, placing the slice's gradient at
+`axis = idx`. Equivalent to PyTorch's `index_select` for a
+single index. Multi-index `gather` and slice ranges are
+deliberate followups.
+
 ## Transpose
 
 Swap rows and columns. `transpose(x)` reverses axis order;
