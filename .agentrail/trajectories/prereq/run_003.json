@@ -1,0 +1,11 @@
+{
+  "task_type": "prereq",
+  "state": {
+    "number": 8,
+    "step": "batch-aware-attention"
+  },
+  "action": "Edit on mlpl-eval model_dispatch.rs (apply_attention rank-3 dispatch + apply_attention_rank2 helper; compute_attn_weights rank-3 dispatch with multi-head reject), Edit on mlpl-eval model_tape.rs (attention_single_head_tape rank dispatch + attention_single_head_tape_rank2 + attention_single_head_tape_rank3 helpers using take/reshape/concat to stitch per-batch outputs), Write on crates/mlpl-eval/tests/batch_attention_tests.rs (6 tests: rank-2 regression, rank-3 shape, per-batch agreement, attention_weights rank-3 row-sums, multi-head reject, gradcheck), Edit on contracts/eval-contract README + docs/glossary.md (Attention batch-aware paragraph), cargo test --workspace + clippy --workspace --all-targets --all-features -- -D warnings + cargo fmt --check (all green), markdown-checker (green), sw-checklist (152 with +2 exception), agentrail insert (this step) shifting vit-single-head-quick-demo to step 009, git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-18T19:06:06"
+}
