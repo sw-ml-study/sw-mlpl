@@ -1,0 +1,11 @@
+{
+  "task_type": "prereq",
+  "state": {
+    "number": 10,
+    "step": "gallery-viz"
+  },
+  "action": "Write on crates/mlpl-viz/src/svg/gallery.rs (render_gallery + block-averaged downsampling + clamping), Edit on crates/mlpl-viz/src/svg/mod.rs (gallery dispatch arm), Edit on crates/mlpl-viz/src/lib.rs (re-export), Write on crates/mlpl-viz/tests/gallery_render_tests.rs (7 tests), Edit on apps/mlpl-web/src/components.rs (alphabetize dropdown render), Edit on apps/mlpl-web/src/demos.rs (take inspection examples appended to Pets demo), Edit on apps/mlpl-web/src/paths.rs (new Vision Transformers in MLPL learning path with 7 steps), Edit on contracts/viz-contract README + docs/glossary.md (Gallery entry) + docs/lang-reference.md (gallery row) + README count drift 270->271, cargo test --workspace + clippy + fmt + markdown-checker (all green), ./scripts/build-pages.sh (rebuilt pages/ with new WASM hash for live deploy), sw-checklist 152 unchanged, git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T11:55:20"
+}
