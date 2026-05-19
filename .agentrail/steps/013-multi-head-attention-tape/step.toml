@@ -1,6 +1,6 @@
 number = 13
 slug = "multi-head-attention-tape"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step 010 (per docs/milestone-vit.md Phase 3): multi-head attention on..."
 role = "legacy"
 context_files = []

@@ -90,6 +90,17 @@ fn propagate(tape: &Tape, id: NodeId) {
             accumulate(&mut nodes[left.0].grad, ga);
             accumulate(&mut nodes[right.0].grad, gb);
         }
+        NodeKind::Stack {
+            parents,
+            axis,
+            parent_size_along_axis,
+        } => {
+            let grads = stack_backward(&upstream, parents.len(), axis, parent_size_along_axis);
+            let mut nodes = tape.nodes_mut();
+            for (pid, g) in parents.iter().zip(grads) {
+                accumulate(&mut nodes[pid.0].grad, g);
+            }
+        }
         NodeKind::Take {
             parent,
             orig_shape,
@@ -142,6 +153,34 @@ fn patchify_backward(upstream: &DenseArray, orig_shape: &Shape, p: usize) -> Den
         }
     }
     DenseArray::new(orig_shape.clone(), out).expect("shape")
+}
+
+fn stack_backward(
+    upstream: &DenseArray,
+    n: usize,
+    axis: usize,
+    parent_size: usize,
+) -> Vec<DenseArray> {
+    let dims = upstream.shape().dims();
+    let outer: usize = dims[..axis].iter().product();
+    let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
+    let parent_stride = parent_size * inner;
+    let row_stride = n * parent_stride;
+    let mut parent_dims = dims.to_vec();
+    parent_dims[axis] = parent_size;
+    let parent_elems: usize = parent_dims.iter().product();
+    let up = upstream.data();
+    let mut outs: Vec<Vec<f64>> = (0..n).map(|_| Vec::with_capacity(parent_elems)).collect();
+    for o in 0..outer {
+        let row_base = o * row_stride;
+        for (k, out) in outs.iter_mut().enumerate() {
+            let src = row_base + k * parent_stride;
+            out.extend_from_slice(&up[src..src + parent_stride]);
+        }
+    }
+    outs.into_iter()
+        .map(|v| DenseArray::new(Shape::new(parent_dims.clone()), v).expect("shape"))
+        .collect()
 }
 
 fn concat_backward(

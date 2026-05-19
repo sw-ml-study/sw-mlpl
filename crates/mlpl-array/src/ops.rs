@@ -493,6 +493,60 @@ impl DenseArray {
     }
 }
 
+impl DenseArray {
+    /// Saga 29 step 013: N-way concatenation along an existing
+    /// axis. All inputs must have identical shape. Output shape
+    /// matches the input shape with `dims[axis]` multiplied by
+    /// `n`. Used by the multi-head attention tape lowering (stack
+    /// per-head outputs along the column axis) and the rank-3
+    /// batched attention path (stack per-batch outputs along the
+    /// batch axis) to replace the previous O(N^2) binary-concat
+    /// chain with a single O(N) op.
+    pub fn stack(arrays: &[&DenseArray], axis: usize) -> Result<DenseArray, ArrayError> {
+        if arrays.is_empty() {
+            return Err(ArrayError::ShapeMismatch {
+                source: 0,
+                target: 1,
+            });
+        }
+        let first = arrays[0];
+        let dims = first.shape().dims();
+        if axis >= dims.len() {
+            return Err(ArrayError::ShapeMismatch {
+                source: axis,
+                target: dims.len(),
+            });
+        }
+        for a in arrays.iter().skip(1) {
+            if a.shape().dims() != dims {
+                return Err(ArrayError::ShapeMismatch {
+                    source: a.shape().dims().len(),
+                    target: dims.len(),
+                });
+            }
+        }
+        let n = arrays.len();
+        let outer: usize = dims[..axis].iter().product();
+        let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
+        let parent_stride = dims[axis] * inner;
+        let mut out_dims = dims.to_vec();
+        out_dims[axis] = n * dims[axis];
+        let mut data: Vec<f64> = Vec::with_capacity(outer * n * parent_stride);
+        for o in 0..outer {
+            for arr in arrays {
+                let start = o * parent_stride;
+                data.extend_from_slice(&arr.data()[start..start + parent_stride]);
+            }
+        }
+        let arr = DenseArray::new(Shape::new(out_dims), data)?;
+        if let Some(lbls) = first.labels() {
+            arr.with_labels(lbls.to_vec())
+        } else {
+            Ok(arr)
+        }
+    }
+}
+
 /// Helper for `DenseArray::concat`: copy chunks from `a` then
 /// `b` along `axis`. For axis 0 we copy whole arrays in
 /// sequence; for axis 1 we interleave per row of axis 0.

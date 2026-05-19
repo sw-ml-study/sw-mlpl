@@ -69,11 +69,13 @@ runs in the "Attention Pattern" demo.
 
 `apply(mdl, X)` and `attention_weights(mdl, X)` accept both
 rank-2 `[seq, d_model]` input and rank-3 `[B, T, d_model]`
-batched input for single-head models (Saga 29 step 008).
-For rank-3 input each batch entry is processed independently
-and the per-batch outputs are stacked back. Multi-head
-(`heads > 1`) plus rank-3 still rejects -- that combination
-lands in Saga 29 step 010.
+batched input for any `heads >= 1` (Saga 29 step 013;
+`d_model` must be divisible by `heads`). For rank-3 input
+each batch entry is processed independently and the per-
+batch outputs are stacked back. The tape lowering uses the
+`stack` primitive for both the per-head join (axis 1) and
+the per-batch join (axis 0), avoiding the O(N^2) cost of a
+chained binary `concat`.
 
 ## Attention map
 
@@ -1954,6 +1956,22 @@ Elementwise square root: `sqrt(x)`. Used in attention
 scoring (`/ sqrt(d_k)`), RMS norm, and PCA's Gram-Schmidt
 normalization. Negative inputs produce NaN; the runtime does
 not raise.
+
+## Stack (tape op)
+
+N-way concatenation of identically-shaped tensors along an
+existing axis, lowered as a single tape node with N parents.
+Used internally by the multi-head attention tape lowering
+(per-head outputs stacked along the column axis) and the
+rank-3 batched attention path (per-batch outputs stacked
+along the batch axis). Replaces the prior chained binary
+`concat`, which had O(N^2) cost in both forward and
+backward; stack is O(N).
+
+Backward splits the upstream gradient into N equal-size
+slabs and routes each to its parent. Same value-equivalence
+as a left-associated `concat` chain, so analytic gradients
+match the chain's exactly (Saga 29 step 013).
 
 ## Step
 

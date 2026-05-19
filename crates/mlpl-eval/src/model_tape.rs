@@ -10,11 +10,11 @@
 //! Coverage today:
 //!
 //! - `linear`, `chain`, activation layers, `residual`, `rms_norm`,
-//!   and single-head `attention` are fully lowered.
-//! - Multi-head attention (`heads > 1`) is not yet supported; the
-//!   per-head slicing it needs is not expressible with the current
-//!   `Tensor` op surface. Use `heads = 1` or inline the per-head
-//!   forward pass in the loss expression for now.
+//!   and single- and multi-head `attention` are fully lowered.
+//! - Saga 29 step 013: multi-head attention on the tape is
+//!   lowered by reshape + take + per-head scaled-dot-product +
+//!   chained concat over the head axis. Backward flows through
+//!   the same primitives.
 
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -76,22 +76,16 @@ pub(crate) fn apply_model_tape(
             heads,
             causal,
         } => {
-            if *heads != 1 {
-                return Err(EvalError::Unsupported(format!(
-                    "grad: apply() through multi-head attention (heads={heads}) is not \
-                     yet supported on the autograd tape; use heads=1 or inline the \
-                     per-head forward pass in the loss expression"
-                )));
-            }
             let inputs = AttentionInputs {
                 wq,
                 wk,
                 wv,
                 wo,
                 d_model: *d_model,
+                heads: *heads,
                 causal: *causal,
             };
-            attention_single_head_tape(&x, &inputs, tape, params)
+            attention_tape(&x, &inputs, tape, params)
         }
         ModelSpec::LinearLora {
             w,
@@ -257,19 +251,18 @@ struct AttentionInputs<'a> {
     wv: &'a str,
     wo: &'a str,
     d_model: usize,
+    heads: usize,
     causal: bool,
 }
 
-/// Single-head scaled-dot-product attention on the tape. Multi-head
-/// requires slicing that the autograd substrate does not yet expose.
-///
-/// Saga 29 step 008: accept rank-3 `[B, T, d_model]` by lowering as
-/// `B` rank-2 attention chains and stitching the per-batch outputs
-/// back via `take` + `reshape(_, [1, T, d_model])` + chained
-/// `concat(..., axis=0)`. The chain is `O(B)` concat depth but every
-/// constituent op (`take`, `reshape`, `concat`) is already on the
-/// tape, so no new tape primitive is needed.
-fn attention_single_head_tape(
+/// Scaled-dot-product attention on the tape. Saga 29 step 013:
+/// supports both single-head (`heads = 1`) and multi-head
+/// (`heads > 1`) with `d_model % heads == 0`. Rank-2 `[T, d]` and
+/// rank-3 `[B, T, d]` inputs both flow through here -- the rank-3
+/// path stacks the per-batch outputs back with `Tensor::stack` to
+/// avoid the O(B^2) concat chain that the earlier rank-3 lowering
+/// produced.
+fn attention_tape(
     x: &Tensor,
     inputs: &AttentionInputs<'_>,
     tape: &Rc<Tape>,
@@ -277,7 +270,7 @@ fn attention_single_head_tape(
 ) -> Result<Tensor, EvalError> {
     let dims = x.value().shape().dims().to_vec();
     if dims.len() == 3 && dims[2] == inputs.d_model {
-        return attention_single_head_tape_rank3(x, inputs, tape, params, dims);
+        return attention_tape_rank3(x, inputs, tape, params, dims);
     }
     if dims.len() != 2 || dims[1] != inputs.d_model {
         return Err(EvalError::Unsupported(format!(
@@ -285,10 +278,10 @@ fn attention_single_head_tape(
             inputs.d_model, inputs.d_model
         )));
     }
-    attention_single_head_tape_rank2(x, inputs, tape, params)
+    attention_tape_rank2(x, inputs, tape, params)
 }
 
-fn attention_single_head_tape_rank2(
+fn attention_tape_rank2(
     x: &Tensor,
     inputs: &AttentionInputs<'_>,
     tape: &Rc<Tape>,
@@ -307,23 +300,99 @@ fn attention_single_head_tape_rank2(
     let q = x.matmul(&wq_t);
     let k = x.matmul(&wk_t);
     let v = x.matmul(&wv_t);
+    let context = if inputs.heads == 1 {
+        attention_single_head_context(&q, &k, &v, inputs.d_model, inputs.causal, tape)?
+    } else {
+        attention_multi_head_context(
+            &q,
+            &k,
+            &v,
+            inputs.d_model,
+            inputs.heads,
+            inputs.causal,
+            tape,
+        )?
+    };
+    Ok(context.matmul(&wo_t))
+}
+
+/// Single-head context: `softmax(scale * Q @ K^T + mask) @ V`.
+/// Output shape matches `Q` (rank-2 `[T, d_model]`).
+fn attention_single_head_context(
+    q: &Tensor,
+    k: &Tensor,
+    v: &Tensor,
+    d_model: usize,
+    causal: bool,
+    tape: &Rc<Tape>,
+) -> Result<Tensor, EvalError> {
     let scale = Tensor::leaf(
         Rc::clone(tape),
-        DenseArray::from_scalar(1.0 / (inputs.d_model as f64).sqrt()),
+        DenseArray::from_scalar(1.0 / (d_model as f64).sqrt()),
         false,
     );
     let scores = q.matmul(&k.transpose()).mul(&scale);
-    let masked = if inputs.causal {
+    let masked = if causal {
         let seq = scores.value().shape().dims()[0];
         let mask = Tensor::leaf(Rc::clone(tape), causal_mask_array(seq)?, false);
         scores.add(&mask)
     } else {
         scores
     };
-    Ok(masked.softmax().matmul(&v).matmul(&wo_t))
+    Ok(masked.softmax().matmul(v))
 }
 
-fn attention_single_head_tape_rank3(
+/// Multi-head context: split Q/K/V column-wise into `heads` slabs
+/// of width `d_k = d_model / heads`, run per-head scaled-dot-
+/// product on each, and concatenate the per-head outputs back
+/// over the column axis. Output shape `[T, d_model]`.
+fn attention_multi_head_context(
+    q: &Tensor,
+    k: &Tensor,
+    v: &Tensor,
+    d_model: usize,
+    heads: usize,
+    causal: bool,
+    tape: &Rc<Tape>,
+) -> Result<Tensor, EvalError> {
+    if !d_model.is_multiple_of(heads) {
+        return Err(EvalError::Unsupported(format!(
+            "attention: d_model ({d_model}) must be divisible by heads ({heads})"
+        )));
+    }
+    let d_k = d_model / heads;
+    let t = q.value().shape().dims()[0];
+    let head_shape = mlpl_array::Shape::new(vec![t, heads, d_k]);
+    let q_split = q.reshape(head_shape.clone());
+    let k_split = k.reshape(head_shape.clone());
+    let v_split = v.reshape(head_shape);
+    let scale = Tensor::leaf(
+        Rc::clone(tape),
+        DenseArray::from_scalar(1.0 / (d_k as f64).sqrt()),
+        false,
+    );
+    let mask = if causal {
+        Some(Tensor::leaf(Rc::clone(tape), causal_mask_array(t)?, false))
+    } else {
+        None
+    };
+    let mut head_outs: Vec<Tensor> = Vec::with_capacity(heads);
+    for h in 0..heads {
+        let q_h = q_split.take(1, h);
+        let k_h = k_split.take(1, h);
+        let v_h = v_split.take(1, h);
+        let scores = q_h.matmul(&k_h.transpose()).mul(&scale);
+        let masked = if let Some(m) = &mask {
+            scores.add(m)
+        } else {
+            scores
+        };
+        head_outs.push(masked.softmax().matmul(&v_h));
+    }
+    Ok(Tensor::stack(&head_outs, 1))
+}
+
+fn attention_tape_rank3(
     x: &Tensor,
     inputs: &AttentionInputs<'_>,
     tape: &Rc<Tape>,
@@ -331,19 +400,18 @@ fn attention_single_head_tape_rank3(
     dims: Vec<usize>,
 ) -> Result<Tensor, EvalError> {
     let (batch, t, d) = (dims[0], dims[1], dims[2]);
-    let mut acc: Option<Tensor> = None;
+    if batch == 0 {
+        return Err(EvalError::Unsupported(
+            "attention: rank-3 input had zero batch entries".into(),
+        ));
+    }
+    let mut per_batch: Vec<Tensor> = Vec::with_capacity(batch);
     for b in 0..batch {
         let x_b = x.take(0, b);
-        let out_b = attention_single_head_tape_rank2(&x_b, inputs, tape, params)?;
-        let out_b_3 = out_b.reshape(mlpl_array::Shape::new(vec![1, t, d]));
-        acc = Some(match acc {
-            None => out_b_3,
-            Some(prev) => prev.concat(&out_b_3, 0),
-        });
+        let out_b = attention_tape_rank2(&x_b, inputs, tape, params)?;
+        per_batch.push(out_b.reshape(mlpl_array::Shape::new(vec![1, t, d])));
     }
-    acc.ok_or_else(|| {
-        EvalError::Unsupported("attention: rank-3 input had zero batch entries".into())
-    })
+    Ok(Tensor::stack(&per_batch, 0))
 }
 
 /// Build a `[seq, seq]` additive causal mask: zero on and below the
