@@ -1,0 +1,11 @@
+number = 7
+slug = "tensor-take-indexing"
+status = "pending"
+description = """
+Saga 29 step 007 (inserted prereq for the trained ViT demo):
+tensor-take-inde..."""
+role = "production"
+context_files = []
+created_at = "2026-05-18T18:13:19"
+task_type = "prereq"
+commits = []
