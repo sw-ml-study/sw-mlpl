@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-18
 
+- saga 29 step 009: trained ViT demo (cat vs dog quick)
+- chore(agentrail): record saga 29 step 008 completion
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 008: batch-aware attention (rank-3 [B, T, d] input)
 - chore(agentrail): insert batch-aware-attention prereq as saga 29 step 008
 - chore(agentrail): record saga 29 step 007 completion
