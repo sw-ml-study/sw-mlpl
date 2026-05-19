@@ -777,6 +777,20 @@ where the desired batch size exceeds device memory.
 every iteration; an explicit accumulator pattern is
 buildable but not first-class.
 
+## Gallery (viz output)
+
+`svg(images, "gallery")` (Saga 29 step 010) renders an
+`[N, 3, H, W]` image batch as an SVG grid of RGB
+thumbnails. Each batch entry is laid out in a ceil-sqrt
+grid, downsampled via block averaging so a 20-image
+pets_tiny slice doesn't emit tens of thousands of unique
+`<rect>` elements. Pixel values are interpreted in the
+`[-1, 1]` normalized space that `load_preloaded("pets_tiny")`
+and `load_images` produce; out-of-range values clamp instead
+of wrap. Future step (010b in the saga ladder) layers a
+3-arg `svg(images, "gallery", overlay)` form that attaches
+per-thumbnail label / prediction text.
+
 ## Gradient Clipping
 
 Capping the L2 norm of the gradient vector before applying

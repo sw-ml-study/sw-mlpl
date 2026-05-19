@@ -311,4 +311,38 @@ pub const PATHS: &[LearningPath] = &[
             },
         ],
     },
+    LearningPath {
+        title: "Vision Transformers in MLPL",
+        blurb: "From a synthetic image to a real cat-vs-dog classifier. The same attention machinery you built for sequences, applied to image patches. Five steps; assumes you have already seen scaled-dot-product attention.",
+        steps: &[
+            Step::Note {
+                title: "How this path is laid out",
+                body: "ViT is not new architecture -- it is the SAME single-head attention block from the transformer demos, fed image patches instead of token embeddings. The first three steps explain the new pieces (patchify, take, batched attention); the last two are the demos that wire them together. The thorough demo (full Oxford-IIIT Pet at 128x128) is still a saga-or-two away; this path takes you through what is shippable today.",
+            },
+            Step::Glossary {
+                term: "patchify (builtin)",
+                why: "ViT's one new primitive on top of standard transformer parts. Cuts an image into a sequence of flattened patches so attention can treat them as tokens.",
+            },
+            Step::Glossary {
+                term: "take (builtin)",
+                why: "Per-batch / per-row indexing. Used by the trained demo to extract single images from `pets_tiny.X` and to pull the first-token output of attention as a CLS-like aggregator.",
+            },
+            Step::Demo {
+                name: "ViT Attention Pattern (no training)",
+                why: "Mechanical end-to-end forward pipeline on a synthetic image: patchify -> linear embed -> concat CLS -> + positional -> attention -> softmax -> heatmap. No training, so the heatmap is random; the demo's point is showing every Phase-1 builtin composing into the recipe.",
+            },
+            Step::Glossary {
+                term: "Oxford-IIIT Pet dataset",
+                why: "The labeled image source. 7,393 cat/dog photos at ~500x500. MLPL ships a 200-image 64x64 subset (pets_tiny) embedded in the WASM binary so the trained demo runs without a server.",
+            },
+            Step::Demo {
+                name: "Pets: cat vs dog (quick)",
+                why: "Trained Vision Transformer end-to-end: 8 balanced images, 30 adam steps, loss curve falls toward 0, training accuracy 1.0. The tail of the demo shows how to inspect the pets tensor with chained `take` calls.",
+            },
+            Step::Note {
+                title: "What is missing for a 'real' ViT demo",
+                body: "Multi-head attention on the tape (Saga 29 step 012), the thorough 128x128 demo trained on the full Oxford-IIIT Pet via the MLX peer (step 013), an `svg(images, \"gallery\", overlay)` viz that shows per-image predictions (step 011, queued), and a `load_image(path)` builtin that lets you classify your own photo (step 014). These all live in `docs/milestone-vit.md`; this path will grow to cover them as they land.",
+            },
+        ],
+    },
 ];

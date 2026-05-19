@@ -1,6 +1,6 @@
 number = 10
 slug = "gallery-viz"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 29 step 010 (inserted prereq, pulled forward from
 Phase 4.5 in docs/mile..."""

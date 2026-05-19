@@ -2,6 +2,7 @@
 
 mod charts;
 mod decision_boundary;
+mod gallery;
 mod heatmap;
 mod scatter;
 
@@ -11,6 +12,7 @@ use mlpl_array::DenseArray;
 
 pub use charts::{render_bar, render_line};
 pub use decision_boundary::render_decision_boundary;
+pub use gallery::render_gallery;
 pub use heatmap::render_heatmap;
 pub use scatter::{render_scatter, render_scatter3d};
 
@@ -120,6 +122,7 @@ pub fn render_with_aux(
         "line" => render_line(data),
         "bar" => render_bar(data),
         "heatmap" => render_heatmap(data),
+        "gallery" => render_gallery(data),
         "decision_boundary" => {
             let training = aux.ok_or_else(|| {
                 VizError::InvalidShape(

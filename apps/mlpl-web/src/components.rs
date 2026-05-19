@@ -91,11 +91,20 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
     let demo_dropdown = if props.tutorial_active {
         html! {}
     } else {
+        // Saga 29 step 010 follow-up: render the dropdown
+        // alphabetically by demo name (case-insensitive) so
+        // users can scan for what they want. The `value`
+        // still carries the original DEMOS index so the
+        // load handler in handlers.rs continues to work
+        // unchanged.
+        let mut sorted: Vec<(usize, &str)> =
+            DEMOS.iter().enumerate().map(|(i, d)| (i, d.name)).collect();
+        sorted.sort_by_key(|(_, name)| name.to_ascii_lowercase());
         html! {
             <select class="demo-select" onchange={on_change} aria-label="Load demo">
                 <option value="" selected=true>{"Load Demo..."}</option>
-                { for DEMOS.iter().enumerate().map(|(i, d)| html!{
-                    <option value={i.to_string()}>{ d.name }</option>
+                { for sorted.iter().map(|(i, name)| html!{
+                    <option value={i.to_string()}>{ *name }</option>
                 }) }
             </select>
         }

@@ -449,6 +449,7 @@ Supported `type` values:
 - `"line"` -- a vector becomes a polyline; an Nx2 matrix becomes (x,y) points connected by lines.
 - `"bar"` -- a vector becomes a bar chart with one bar per element.
 - `"heatmap"` -- an MxN matrix rendered as a viridis-colored grid.
+- `"gallery"` -- Saga 29 step 010: an `[N, 3, H, W]` image batch rendered as an SVG grid of RGB thumbnails. Values in `[-1, 1]` normalized space (clamps out-of-range). Thumbnails are downsampled via block averaging to keep the SVG size tractable for batches like the 20-image pets_tiny slice.
 - `"decision_boundary"` -- a 2D classifier-output grid rendered as a diverging-color surface, with the third argument as an Nx3 `[x, y, label]` training matrix overlaid as colored points.
 
 The browser REPL detects SVG return values and renders them inline.
