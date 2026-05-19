@@ -787,9 +787,15 @@ pets_tiny slice doesn't emit tens of thousands of unique
 `<rect>` elements. Pixel values are interpreted in the
 `[-1, 1]` normalized space that `load_preloaded("pets_tiny")`
 and `load_images` produce; out-of-range values clamp instead
-of wrap. Future step (010b in the saga ladder) layers a
-3-arg `svg(images, "gallery", overlay)` form that attaches
-per-thumbnail label / prediction text.
+of wrap.
+
+3-arg form `svg(images, "gallery", overlay)` (Saga 29 step
+011) attaches a small text caption under each thumbnail.
+`overlay` is `[N]` (one integer per image) or `[N, K]` for
+K up to 4 (e.g. `[N, 2]` of actual / predicted). Values
+render as integers separated by `/`; class-name mapping is
+left to the caller -- pass a normalization-free integer
+tensor and document the mapping in your demo's takeaway.
 
 ## Gradient Clipping
 
@@ -1114,6 +1120,18 @@ case is CLS-token prepending in ViT: `concat(cls, patches, 1)`
 adds a learnable `[B, 1, D]` token to the front of a
 `[B, N, D]` patch sequence so the classifier head can read off
 the CLS row after attention.
+
+## predict_batch (builtin)
+
+`predict_batch(model, X)` (Saga 29 step 011) runs a forward
+pass through `model` and returns argmax over the trailing
+axis as integer class indices. Equivalent to
+`argmax(apply(model, X), last_axis)` but a single builtin
+call so demos read cleanly. Not differentiable -- use
+`apply(model, X)` inside `grad()` or `adam()` instead.
+Driving use case: pair with `eq(preds, Y)` + `reduce_add`
+to compute classification accuracy, or pass to the 3-arg
+`svg(X, "gallery", overlay)` form for a labeled gallery.
 
 ## load_images (builtin)
 

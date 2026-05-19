@@ -264,6 +264,12 @@ pub(crate) fn eval_expr(
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
+        && name == "predict_batch"
+    {
+        let result = crate::model_dispatch::eval_predict_batch(args, env, trace)?;
+        return Ok(Value::Array(result));
+    }
+    if let Expr::FnCall { name, args, .. } = expr
         && name == "attention_weights"
     {
         let result = crate::model_dispatch::eval_attention_weights(args, env, trace)?;

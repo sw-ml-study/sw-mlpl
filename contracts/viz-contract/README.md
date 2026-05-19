@@ -33,7 +33,10 @@ the `render_*` functions. Supported types:
   out-of-range values clamp instead of wrap. Thumbnails are
   downsampled via block averaging so a `[20, 3, 64, 64]`
   pets_tiny slice renders in ~5 MB of SVG rather than 80K
-  unique `<rect>` elements.
+  unique `<rect>` elements. The 3-arg form
+  `svg(images, "gallery", overlay)` (Saga 29 step 011)
+  accepts an `[N]` or `[N, K<=4]` integer overlay and
+  renders the values as text under each thumbnail.
 
 ## Invariants
 

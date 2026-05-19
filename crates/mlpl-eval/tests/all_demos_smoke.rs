@@ -40,6 +40,10 @@ const SKIP_DEDICATED: &[&str] = &[
     // bar; the demo's 100 adam steps take ~60s on CPU so
     // skip it from both the quick and heavy smoke walks.
     "vit_single_head_quick.mlpl",
+    // Saga 29 step 011: dedicated test in
+    // vit_predict_gallery_tests.rs covers the trained ViT
+    // + predict_batch + gallery overlay end-to-end run.
+    "vit_predict_gallery.mlpl",
 ];
 
 const SKIP_EXTERNAL: &[&str] = &["llm_tool.mlpl", "mlx_remote.mlpl"];

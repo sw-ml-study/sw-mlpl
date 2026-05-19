@@ -10,14 +10,14 @@ fn arr(dims: Vec<usize>, data: Vec<f64>) -> DenseArray {
 #[test]
 fn gallery_rejects_non_rank4_input() {
     let x = arr(vec![3, 64, 64], vec![0.0; 3 * 64 * 64]);
-    let err = render_gallery(&x).unwrap_err();
+    let err = render_gallery(&x, None).unwrap_err();
     assert!(matches!(err, VizError::InvalidShape(_)));
 }
 
 #[test]
 fn gallery_rejects_wrong_channel_count() {
     let x = arr(vec![2, 4, 8, 8], vec![0.0; 2 * 4 * 8 * 8]);
-    let err = render_gallery(&x).unwrap_err();
+    let err = render_gallery(&x, None).unwrap_err();
     assert!(matches!(err, VizError::InvalidShape(_)));
 }
 
@@ -38,7 +38,7 @@ fn gallery_renders_single_image() {
         }
     }
     let x = arr(vec![1, 3, 4, 4], data);
-    let svg = render_gallery(&x).expect("render gallery");
+    let svg = render_gallery(&x, None).expect("render gallery");
     assert!(svg.starts_with("<svg"));
     assert!(svg.ends_with("</svg>"));
     // At least one fill="rgb(...)" rect was emitted per pixel.
@@ -66,7 +66,7 @@ fn gallery_layout_uses_grid_for_multi_image_batch() {
         }
     }
     let x = arr(vec![n, 3, h, w], data);
-    let svg = render_gallery(&x).expect("render gallery");
+    let svg = render_gallery(&x, None).expect("render gallery");
     // For a 2x2 thumbnail grid each image's top-left corner
     // should land at a distinct (x, y). We don't try to
     // pin exact pixel positions (those depend on padding /
@@ -83,7 +83,7 @@ fn gallery_layout_uses_grid_for_multi_image_batch() {
 #[test]
 fn gallery_handles_empty_batch() {
     let x = arr(vec![0, 3, 4, 4], vec![]);
-    let svg = render_gallery(&x).expect("render gallery on empty batch");
+    let svg = render_gallery(&x, None).expect("render gallery on empty batch");
     assert!(svg.starts_with("<svg"));
     assert!(svg.ends_with("</svg>"));
 }
@@ -98,7 +98,7 @@ fn gallery_clamps_out_of_range_pixels_without_panicking() {
         .map(|i| if i % 2 == 0 { -1e6 } else { 1e6 })
         .collect();
     let x = arr(vec![n, 3, h, w], data);
-    let svg = render_gallery(&x).expect("render gallery on extreme values");
+    let svg = render_gallery(&x, None).expect("render gallery on extreme values");
     assert!(svg.contains("<rect"));
     // Saturated colors: rgb(0, ...) or rgb(255, ...) should be
     // present somewhere.
@@ -120,4 +120,52 @@ fn dispatch_via_render_gallery_string() {
     let x = arr(vec![n, 3, 4, 4], data);
     let svg = render(&x, "gallery").expect("dispatch through render(...)");
     assert!(svg.starts_with("<svg"));
+}
+
+#[test]
+fn gallery_overlay_one_value_per_thumbnail() {
+    // [4, 3, 4, 4] images + [4] overlay of predictions.
+    let n = 4;
+    let imgs = arr(vec![n, 3, 4, 4], vec![0.0; n * 3 * 4 * 4]);
+    let preds = arr(vec![n], vec![0.0, 1.0, 1.0, 0.0]);
+    let svg = render_gallery(&imgs, Some(&preds)).expect("render gallery with overlay");
+    assert!(svg.starts_with("<svg"));
+    // Each thumbnail gets a <text> caption.
+    let text_count = svg.matches("<text").count();
+    assert_eq!(text_count, n, "expected {n} text labels, got {text_count}");
+    // The label values should appear in the SVG.
+    assert!(svg.contains(">0<") || svg.contains(">1<"));
+}
+
+#[test]
+fn gallery_overlay_two_values_per_thumbnail_actual_predicted() {
+    // [4, 3, 4, 4] images + [4, 2] overlay of actual/predicted.
+    let n = 4;
+    let imgs = arr(vec![n, 3, 4, 4], vec![0.0; n * 3 * 4 * 4]);
+    let pairs = arr(
+        vec![n, 2],
+        vec![
+            0.0, 0.0, // correct cat
+            0.0, 1.0, // misclassified cat
+            1.0, 1.0, // correct dog
+            1.0, 0.0, // misclassified dog
+        ],
+    );
+    let svg = render_gallery(&imgs, Some(&pairs)).expect("render gallery with [N, 2] overlay");
+    // Each thumbnail gets one text caption containing
+    // both values joined by '/'.
+    assert!(svg.contains("0/1") || svg.contains("1/0"));
+}
+
+#[test]
+fn gallery_overlay_shape_mismatch_errors() {
+    let imgs = arr(vec![3, 3, 4, 4], vec![0.0; 3 * 3 * 4 * 4]);
+    // Wrong N.
+    let bad = arr(vec![4], vec![0.0; 4]);
+    let err = render_gallery(&imgs, Some(&bad)).unwrap_err();
+    assert!(matches!(err, VizError::InvalidShape(_)));
+    // Wrong rank.
+    let bad_rank = arr(vec![3, 2, 2], vec![0.0; 12]);
+    let err = render_gallery(&imgs, Some(&bad_rank)).unwrap_err();
+    assert!(matches!(err, VizError::InvalidShape(_)));
 }

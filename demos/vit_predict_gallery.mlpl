@@ -1,0 +1,97 @@
+# Vision Transformer + gallery viz: train the classifier
+# from demos/vit_single_head_quick.mlpl on a balanced
+# 16-image subset of pets_tiny, then visualize each image
+# alongside its actual + predicted label.
+# Saga 29 step 011.
+#
+# The forward pipeline + training loop are identical to
+# the quick demo; the new piece is at the end:
+#
+#   preds_2col = concat(reshape(Y, [16, 1]),
+#                       reshape(preds, [16, 1]), 1)
+#   svg(X, "gallery", preds_2col)
+#
+# which renders the 16 thumbnails with "actual/predicted"
+# captions. Misclassifications stand out because the two
+# numbers disagree (0/1 or 1/0 vs the matching pairs).
+
+# ---- data: 8 cats + 8 dogs from pets_tiny ----
+pets = load_preloaded("pets_tiny")
+c0 = reshape(take(pets.X, 0, 0), [1, 3, 64, 64])
+c1 = reshape(take(pets.X, 0, 1), [1, 3, 64, 64])
+c2 = reshape(take(pets.X, 0, 2), [1, 3, 64, 64])
+c3 = reshape(take(pets.X, 0, 3), [1, 3, 64, 64])
+c4 = reshape(take(pets.X, 0, 4), [1, 3, 64, 64])
+c5 = reshape(take(pets.X, 0, 5), [1, 3, 64, 64])
+c6 = reshape(take(pets.X, 0, 6), [1, 3, 64, 64])
+c7 = reshape(take(pets.X, 0, 7), [1, 3, 64, 64])
+d0 = reshape(take(pets.X, 0, 100), [1, 3, 64, 64])
+d1 = reshape(take(pets.X, 0, 101), [1, 3, 64, 64])
+d2 = reshape(take(pets.X, 0, 102), [1, 3, 64, 64])
+d3 = reshape(take(pets.X, 0, 103), [1, 3, 64, 64])
+d4 = reshape(take(pets.X, 0, 104), [1, 3, 64, 64])
+d5 = reshape(take(pets.X, 0, 105), [1, 3, 64, 64])
+d6 = reshape(take(pets.X, 0, 106), [1, 3, 64, 64])
+d7 = reshape(take(pets.X, 0, 107), [1, 3, 64, 64])
+cats_2 = concat(c0, c1, 0)
+cats_4 = concat(concat(cats_2, c2, 0), c3, 0)
+cats_6 = concat(concat(cats_4, c4, 0), c5, 0)
+cats   = concat(concat(cats_6, c6, 0), c7, 0)
+dogs_2 = concat(d0, d1, 0)
+dogs_4 = concat(concat(dogs_2, d2, 0), d3, 0)
+dogs_6 = concat(concat(dogs_4, d4, 0), d5, 0)
+dogs   = concat(concat(dogs_6, d6, 0), d7, 0)
+X = concat(cats, dogs, 0)
+
+ly0 = reshape(take(pets.Y, 0, 0),   [1])
+ly1 = reshape(take(pets.Y, 0, 1),   [1])
+ly2 = reshape(take(pets.Y, 0, 2),   [1])
+ly3 = reshape(take(pets.Y, 0, 3),   [1])
+ly4 = reshape(take(pets.Y, 0, 4),   [1])
+ly5 = reshape(take(pets.Y, 0, 5),   [1])
+ly6 = reshape(take(pets.Y, 0, 6),   [1])
+ly7 = reshape(take(pets.Y, 0, 7),   [1])
+ld0 = reshape(take(pets.Y, 0, 100), [1])
+ld1 = reshape(take(pets.Y, 0, 101), [1])
+ld2 = reshape(take(pets.Y, 0, 102), [1])
+ld3 = reshape(take(pets.Y, 0, 103), [1])
+ld4 = reshape(take(pets.Y, 0, 104), [1])
+ld5 = reshape(take(pets.Y, 0, 105), [1])
+ld6 = reshape(take(pets.Y, 0, 106), [1])
+ld7 = reshape(take(pets.Y, 0, 107), [1])
+yca_2 = concat(ly0, ly1, 0)
+yca_4 = concat(concat(yca_2, ly2, 0), ly3, 0)
+yca_6 = concat(concat(yca_4, ly4, 0), ly5, 0)
+yca   = concat(concat(yca_6, ly6, 0), ly7, 0)
+ydo_2 = concat(ld0, ld1, 0)
+ydo_4 = concat(concat(ydo_2, ld2, 0), ld3, 0)
+ydo_6 = concat(concat(ydo_4, ld4, 0), ld5, 0)
+ydo   = concat(concat(ydo_6, ld6, 0), ld7, 0)
+Y = concat(yca, ydo, 0)
+
+# ---- model: shared with the quick demo ----
+linear_p   = linear(768, 128, 17)
+attn       = attention(128, 1, 23)
+classifier = chain(linear(128, 64, 31), relu_layer(), linear(64, 2, 37))
+
+# ---- training: 50 full-batch adam steps on 16 images ----
+train 50 {
+  adam(cross_entropy(apply(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [256, 768])), [16, 16, 128])), 1, 0)), Y), [linear_p, attn, classifier], 0.001, 0.9, 0.999, 0.00000001);
+  cross_entropy(apply(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [256, 768])), [16, 16, 128])), 1, 0)), Y)
+}
+
+# ---- evaluation: predict + render the gallery ----
+# predict_batch runs the same forward pipeline through the
+# trained model and returns argmax over the trailing axis
+# as integer class labels.
+preds = predict_batch(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [256, 768])), [16, 16, 128])), 1, 0))
+
+# Stack actual / predicted as a [16, 2] overlay matrix so
+# the gallery renderer prints both under each thumbnail.
+preds_2col = concat(reshape(Y, [16, 1]), reshape(preds, [16, 1]), 1)
+
+# Final accuracy + the labeled gallery render.
+correct  = eq(preds, Y)
+accuracy = reduce_add(correct) / 16
+accuracy
+svg(X, "gallery", preds_2col)

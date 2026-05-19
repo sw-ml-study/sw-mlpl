@@ -339,9 +339,13 @@ pub const PATHS: &[LearningPath] = &[
                 name: "Pets: cat vs dog (quick)",
                 why: "Trained Vision Transformer end-to-end: 8 balanced images, 30 adam steps, loss curve falls toward 0, training accuracy 1.0. The tail of the demo shows how to inspect the pets tensor with chained `take` calls.",
             },
+            Step::Demo {
+                name: "Pets: predict + gallery",
+                why: "The same trained ViT, but now scaled to 16 images and run end-to-end with `predict_batch` + the new 3-arg `svg(X, \"gallery\", overlay)` viz. Each thumbnail gets an `actual / predicted` caption -- you can finally look at a specific cat photo and read what the model said about it.",
+            },
             Step::Note {
                 title: "What is missing for a 'real' ViT demo",
-                body: "Multi-head attention on the tape (Saga 29 step 012), the thorough 128x128 demo trained on the full Oxford-IIIT Pet via the MLX peer (step 013), an `svg(images, \"gallery\", overlay)` viz that shows per-image predictions (step 011, queued), and a `load_image(path)` builtin that lets you classify your own photo (step 014). These all live in `docs/milestone-vit.md`; this path will grow to cover them as they land.",
+                body: "Multi-head attention on the tape (Saga 29 step 012), the thorough 128x128 demo trained on the full Oxford-IIIT Pet via the MLX peer (step 013), and a `load_image(path)` builtin that lets you classify your own photo (step 014). These all live in `docs/milestone-vit.md`; this path will grow to cover them as they land.",
             },
         ],
     },

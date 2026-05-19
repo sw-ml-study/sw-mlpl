@@ -122,7 +122,7 @@ pub fn render_with_aux(
         "line" => render_line(data),
         "bar" => render_bar(data),
         "heatmap" => render_heatmap(data),
-        "gallery" => render_gallery(data),
+        "gallery" => render_gallery(data, aux),
         "decision_boundary" => {
             let training = aux.ok_or_else(|| {
                 VizError::InvalidShape(
