@@ -1,0 +1,9 @@
+number = 14
+slug = "multi-head-attention-viz-demos"
+status = "pending"
+description = "Saga 29 step inserted between 013 (multi-head tape) and the renumbered thorou..."
+role = "production"
+context_files = []
+created_at = "2026-05-19T15:15:13"
+task_type = "demo"
+commits = []
