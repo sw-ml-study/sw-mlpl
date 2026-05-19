@@ -1,0 +1,12 @@
+number = 12
+slug = "value-result-type"
+status = "pending"
+description = """
+Saga 29 step 012 (inserted prereq): value-result-type.
+
+Why: the user asked f..."""
+role = "production"
+context_files = []
+created_at = "2026-05-19T13:41:19"
+task_type = "prereq"
+commits = []
