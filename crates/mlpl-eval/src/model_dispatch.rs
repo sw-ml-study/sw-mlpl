@@ -567,12 +567,35 @@ fn apply_attention(
 ) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
     let d_model = args.d_model;
+    // Saga 29 step 008: accept rank-3 [B, T, d_model] by
+    // looping over the batch axis and stacking the per-batch
+    // [T, d_model] outputs. Multi-head batching follows in
+    // step 010.
+    if dims.len() == 3 && dims[2] == d_model {
+        let (batch, t) = (dims[0], dims[1]);
+        let mut data = Vec::with_capacity(batch * t * d_model);
+        for b in 0..batch {
+            let x_b = x.take(0, b)?;
+            data.extend_from_slice(apply_attention_rank2(&x_b, args, env)?.data());
+        }
+        return Ok(DenseArray::new(Shape::new(vec![batch, t, d_model]), data)?);
+    }
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(
-            "attention: input must be [seq, {d_model}], got {:?}",
+            "attention: input must be [seq, {d_model}] or [B, T, {d_model}], got {:?}",
             dims
         )));
     }
+    apply_attention_rank2(x, args, env)
+}
+
+fn apply_attention_rank2(
+    x: &DenseArray,
+    args: &AttentionArgs<'_>,
+    env: &Environment,
+) -> Result<DenseArray, EvalError> {
+    let dims = x.shape().dims();
+    let d_model = args.d_model;
     let seq = dims[0];
     let d_k = d_model / args.heads;
     let lookup = |n: &str| -> Result<DenseArray, EvalError> {
@@ -730,9 +753,31 @@ fn compute_attn_weights(
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
+    // Saga 29 step 008: rank-3 [B, T, d_model] -> stack the
+    // per-batch single-head weights into [B, T, T]. Multi-
+    // head + rank-3 still rejects; that combination lands in
+    // step 010.
+    if dims.len() == 3 && dims[2] == d_model {
+        if heads != 1 {
+            return Err(EvalError::Unsupported(format!(
+                "attention_weights: rank-3 batched input is only supported for \
+                 heads=1 right now (got heads={heads}); use heads=1 or fold the \
+                 batch dim manually until multi-head tape lowering lands"
+            )));
+        }
+        let (batch, t) = (dims[0], dims[1]);
+        let mut data = Vec::with_capacity(batch * t * t);
+        for b in 0..batch {
+            let x_b = x.take(0, b)?;
+            data.extend_from_slice(
+                compute_attn_weights(&x_b, wq, wk, d_model, heads, causal, env)?.data(),
+            );
+        }
+        return Ok(DenseArray::new(Shape::new(vec![batch, t, t]), data)?);
+    }
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(
-            "attention_weights: input must be [seq, {d_model}], got {:?}",
+            "attention_weights: input must be [seq, {d_model}] or [B, T, {d_model}], got {:?}",
             dims
         )));
     }

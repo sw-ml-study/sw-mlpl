@@ -67,6 +67,14 @@ V`. MLPL builds it into `attention(d_model, heads, seed)`
 and `causal_attention(...)`; the manual three-line version
 runs in the "Attention Pattern" demo.
 
+`apply(mdl, X)` and `attention_weights(mdl, X)` accept both
+rank-2 `[seq, d_model]` input and rank-3 `[B, T, d_model]`
+batched input for single-head models (Saga 29 step 008).
+For rank-3 input each batch entry is processed independently
+and the per-batch outputs are stacked back. Multi-head
+(`heads > 1`) plus rank-3 still rejects -- that combination
+lands in Saga 29 step 010.
+
 ## Attention map
 
 The `[T, T]` matrix of attention weights between every pair

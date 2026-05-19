@@ -262,6 +262,13 @@ struct AttentionInputs<'a> {
 
 /// Single-head scaled-dot-product attention on the tape. Multi-head
 /// requires slicing that the autograd substrate does not yet expose.
+///
+/// Saga 29 step 008: accept rank-3 `[B, T, d_model]` by lowering as
+/// `B` rank-2 attention chains and stitching the per-batch outputs
+/// back via `take` + `reshape(_, [1, T, d_model])` + chained
+/// `concat(..., axis=0)`. The chain is `O(B)` concat depth but every
+/// constituent op (`take`, `reshape`, `concat`) is already on the
+/// tape, so no new tape primitive is needed.
 fn attention_single_head_tape(
     x: &Tensor,
     inputs: &AttentionInputs<'_>,
@@ -269,12 +276,24 @@ fn attention_single_head_tape(
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, EvalError> {
     let dims = x.value().shape().dims().to_vec();
+    if dims.len() == 3 && dims[2] == inputs.d_model {
+        return attention_single_head_tape_rank3(x, inputs, tape, params, dims);
+    }
     if dims.len() != 2 || dims[1] != inputs.d_model {
         return Err(EvalError::Unsupported(format!(
-            "attention: input must be [seq, {}], got {dims:?}",
-            inputs.d_model
+            "attention: input must be [seq, {}] or [B, T, {}], got {dims:?}",
+            inputs.d_model, inputs.d_model
         )));
     }
+    attention_single_head_tape_rank2(x, inputs, tape, params)
+}
+
+fn attention_single_head_tape_rank2(
+    x: &Tensor,
+    inputs: &AttentionInputs<'_>,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
     let fetch = |name: &str| -> Result<Tensor, EvalError> {
         params
             .get(name)
@@ -302,6 +321,29 @@ fn attention_single_head_tape(
         scores
     };
     Ok(masked.softmax().matmul(&v).matmul(&wo_t))
+}
+
+fn attention_single_head_tape_rank3(
+    x: &Tensor,
+    inputs: &AttentionInputs<'_>,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+    dims: Vec<usize>,
+) -> Result<Tensor, EvalError> {
+    let (batch, t, d) = (dims[0], dims[1], dims[2]);
+    let mut acc: Option<Tensor> = None;
+    for b in 0..batch {
+        let x_b = x.take(0, b);
+        let out_b = attention_single_head_tape_rank2(&x_b, inputs, tape, params)?;
+        let out_b_3 = out_b.reshape(mlpl_array::Shape::new(vec![1, t, d]));
+        acc = Some(match acc {
+            None => out_b_3,
+            Some(prev) => prev.concat(&out_b_3, 0),
+        });
+    }
+    acc.ok_or_else(|| {
+        EvalError::Unsupported("attention: rank-3 input had zero batch entries".into())
+    })
 }
 
 /// Build a `[seq, seq]` additive causal mask: zero on and below the
