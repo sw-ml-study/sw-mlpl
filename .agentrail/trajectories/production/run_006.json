@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 9,
+    "step": "vit-single-head-quick-demo"
+  },
+  "action": "Write on demos/vit_single_head_quick.mlpl (full forward pipeline + 100-step adam loop + accuracy eval; balanced 20-image subset via take + concat chain), Edit on crates/mlpl-eval/src/grad.rs (extend collect_params to walk model params inside ArrayLit elements; add reshape arm to eval_tensor_fncall), Write on crates/mlpl-eval/tests/vit_single_head_quick_tests.rs (1 #[ignore]'d integration test asserting >= 60% training accuracy), Edit on crates/mlpl-eval/tests/all_demos_smoke.rs (skip vit_single_head_quick from smoke walks; dedicated test covers it), Edit on apps/mlpl-web/src/demos.rs (new 'Pets: cat vs dog (quick)' DEMOS entry + SKIP_DEMOS addition for the heavy web smoke), Edit on README.md (demo count 23 -> 24), Bash ./scripts/build-pages.sh (rebuilt pages/ with new WASM hash), cargo test --workspace + --release --ignored on the dedicated test (final accuracy 1.0), cargo clippy --workspace --all-targets --all-features -- -D warnings (clean), cargo fmt --check, markdown-checker green, sw-checklist 152 unchanged, git commit + git push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-18T20:18:20"
+}
