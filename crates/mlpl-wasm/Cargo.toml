@@ -8,6 +8,7 @@ version.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+mlpl-array = { path = "../mlpl-array" }
 mlpl-eval = { path = "../mlpl-eval" }
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-trace = { path = "../mlpl-trace" }

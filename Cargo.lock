@@ -2084,6 +2084,7 @@ dependencies = [
 name = "mlpl-wasm"
 version = "0.20.0"
 dependencies = [
+ "mlpl-array",
  "mlpl-eval",
  "mlpl-parser",
  "mlpl-trace",

@@ -69,6 +69,7 @@ pub fn header(props: &HeaderProps) -> Html {
 pub struct ModeBarProps {
     pub on_clear: Callback<MouseEvent>,
     pub on_demo: Callback<usize>,
+    pub on_upload: Callback<web_sys::Event>,
     pub tutorial_active: bool,
 }
 
@@ -114,9 +115,41 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
     } else {
         "Reset REPL"
     };
+    // Saga 29 step 011 follow-up: hidden file input + visible
+    // "Upload Image" button. Clicking the button triggers the
+    // hidden input's file picker; once the user picks a photo,
+    // the change event fires the on_upload callback which
+    // decodes + resizes via Canvas and binds the result as the
+    // `uploaded` variable in the WASM session.
+    let upload_input_ref = use_node_ref();
+    let upload_widget = if props.tutorial_active {
+        html! {}
+    } else {
+        let input_ref = upload_input_ref.clone();
+        let on_click = Callback::from(move |_: MouseEvent| {
+            if let Some(input) = input_ref.cast::<web_sys::HtmlInputElement>() {
+                input.click();
+            }
+        });
+        html! {
+            <>
+                <input
+                    ref={upload_input_ref.clone()}
+                    type="file"
+                    accept="image/*"
+                    style="display: none"
+                    onchange={props.on_upload.clone()}
+                />
+                <button class="ctrl-btn" onclick={on_click} title="Upload a photo (resized to 64x64) and bind as `uploaded` in the REPL.">
+                    {"Upload Image"}
+                </button>
+            </>
+        }
+    };
     html! {
         <div class={cls}>
             { demo_dropdown }
+            { upload_widget }
             <button class="ctrl-btn" onclick={props.on_clear.clone()}>{ clear_label }</button>
         </div>
     }
