@@ -1,6 +1,6 @@
-number = 7
+number = 8
 slug = "vit-single-head-quick-demo"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step 007 (per docs/milestone-vit.md Phase 2 + step 005 in milestone-v..."
 role = "legacy"
 context_files = []
