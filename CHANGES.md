@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- saga 29 step 013: multi-head attention on the tape + Tensor::stack
+- docs: plan for retrofitting Value::Result onto prior demos/tutorials
+- chore(agentrail): record saga 29 step 012 completion + kickoff step 013
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 012: Value::Result<val, err> + ok/err/is_ok/is_err/unwrap/unwrap_or/err_message
 - chore(agentrail): insert value-result-type prereq as saga 29 step 012
 - feat(web): canvas-based photo upload + chunked training in gallery demo
