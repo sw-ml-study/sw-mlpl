@@ -35,6 +35,11 @@ const SKIP_DEDICATED: &[&str] = &[
     "neural_thicket_mlx.mlpl",
     "pca.mlpl",
     "tiny_lm_mlx.mlpl",
+    // Saga 29 step 009: dedicated test in
+    // vit_single_head_quick_tests.rs gates the 60% accuracy
+    // bar; the demo's 100 adam steps take ~60s on CPU so
+    // skip it from both the quick and heavy smoke walks.
+    "vit_single_head_quick.mlpl",
 ];
 
 const SKIP_EXTERNAL: &[&str] = &["llm_tool.mlpl", "mlx_remote.mlpl"];
