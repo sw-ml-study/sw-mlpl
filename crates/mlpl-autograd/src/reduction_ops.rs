@@ -141,6 +141,37 @@ impl Tensor {
         )
     }
 
+    /// Saga 29 step 013: N-way stack of like-shaped tensors
+    /// along an existing axis. All parents must share the same
+    /// tape and the same shape; output shape multiplies
+    /// `dims[axis]` by `parents.len()`. Forward concatenates;
+    /// backward splits the upstream gradient into N equal-size
+    /// slabs and routes each to its parent. Use this instead of
+    /// a chained binary `concat` when stacking many slabs (e.g.,
+    /// per-head attention outputs or per-batch rank-3 outputs).
+    ///
+    /// Panics if `parents` is empty or if any parent has a
+    /// different shape than `parents[0]`.
+    #[must_use]
+    pub fn stack(parents: &[Tensor], axis: usize) -> Self {
+        assert!(!parents.is_empty(), "stack: parents must be non-empty");
+        let first = &parents[0];
+        let parent_size_along_axis = first.value().shape().dims()[axis];
+        let values: Vec<DenseArray> = parents.iter().map(Tensor::value).collect();
+        let refs: Vec<&DenseArray> = values.iter().collect();
+        let value = DenseArray::stack(&refs, axis).expect("stack compatible shapes");
+        let parent_ids = parents.iter().map(|p| p.node).collect::<Vec<_>>();
+        new_tensor(
+            first,
+            value,
+            NodeKind::Stack {
+                parents: parent_ids,
+                axis,
+                parent_size_along_axis,
+            },
+        )
+    }
+
     /// Saga 29 step 007: drop one axis at a single integer
     /// index. Forward: pick the `axis = idx` slice. Backward:
     /// scatter the upstream gradient back into a zero-filled

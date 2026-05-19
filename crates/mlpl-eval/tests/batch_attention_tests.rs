@@ -18,10 +18,6 @@ fn run(src: &str, env: &mut Environment) -> DenseArray {
     eval_program(&parse(&lex(src).unwrap()).unwrap(), env).unwrap()
 }
 
-fn run_err(src: &str, env: &mut Environment) -> mlpl_eval::EvalError {
-    eval_program(&parse(&lex(src).unwrap()).unwrap(), env).unwrap_err()
-}
-
 fn fresh_env_with_model_and_input() -> (Environment, Vec<f64>) {
     let mut env = Environment::new();
     eval_program(
@@ -97,22 +93,33 @@ fn attention_weights_rank3_returns_b_t_t() {
 }
 
 #[test]
-fn rank3_multi_head_still_rejects_with_a_clean_error() {
-    // attention(4, 2, ...) -> heads=2. Rank-3 + multi-head should
-    // raise the "use heads=1 or fold the batch dim" message.
+fn rank3_multi_head_attention_weights_returns_b_heads_t_t() {
+    // Saga 29 step 013: rank-3 + multi-head no longer rejects;
+    // attention_weights returns [B, heads, T, T] for batched
+    // multi-head input.
     let mut env = Environment::new();
     eval_program(
         &parse(&lex("mdl_h2 = attention(4, 2, 17)").unwrap()).unwrap(),
         &mut env,
     )
     .unwrap();
-    env.set("x".into(), arr(vec![2, 3, 4], vec![0.0; 24]));
-    let err = run_err("attention_weights(mdl_h2, x)", &mut env);
-    let msg = format!("{err}");
-    assert!(
-        msg.contains("heads=1") || msg.contains("multi-head"),
-        "expected multi-head rejection message, got: {msg}"
-    );
+    let xs: Vec<f64> = (0..24).map(|i| (i as f64) * 0.01 - 0.1).collect();
+    env.set("x".into(), arr(vec![2, 3, 4], xs));
+    let y = run("attention_weights(mdl_h2, x)", &mut env);
+    assert_eq!(y.shape().dims(), &[2, 2, 3, 3]);
+    // Every per-(batch, head) row should sum to 1.
+    for b in 0..2 {
+        for h in 0..2 {
+            for r in 0..3 {
+                let base = ((b * 2 + h) * 3 + r) * 3;
+                let row_sum: f64 = y.data()[base..base + 3].iter().sum();
+                assert!(
+                    (row_sum - 1.0).abs() < 1e-9,
+                    "batch {b} head {h} row {r}: sum {row_sum} not 1"
+                );
+            }
+        }
+    }
 }
 
 #[test]

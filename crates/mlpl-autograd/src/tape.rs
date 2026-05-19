@@ -111,6 +111,21 @@ pub enum NodeKind {
         /// the gradient.
         left_size: usize,
     },
+    /// Saga 29 step 013: N-way stack of like-shaped parents
+    /// along an existing axis. Forward concatenates each
+    /// parent's slab; backward splits the upstream gradient
+    /// into N equal-size slabs and delivers each to its
+    /// parent. Replaces the prior O(N^2) binary-concat chain
+    /// in the multi-head and rank-3-batched attention paths.
+    Stack {
+        /// Parent node ids in stack order.
+        parents: Vec<NodeId>,
+        /// Axis along which to stack.
+        axis: usize,
+        /// Size of each parent along `axis`. All parents share
+        /// this value (validated at construction).
+        parent_size_along_axis: usize,
+    },
     /// Saga 29 step 007: drop one axis at a single integer
     /// index. The `orig_shape` is the parent's shape;
     /// backward scatters the upstream gradient into a zero-

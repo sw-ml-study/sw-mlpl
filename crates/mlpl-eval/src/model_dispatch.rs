@@ -602,10 +602,11 @@ fn apply_attention(
 ) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
     let d_model = args.d_model;
-    // Saga 29 step 008: accept rank-3 [B, T, d_model] by
-    // looping over the batch axis and stacking the per-batch
-    // [T, d_model] outputs. Multi-head batching follows in
-    // step 010.
+    // Saga 29 step 008 + step 013: accept rank-3 [B, T, d_model]
+    // by looping over the batch axis and stacking the per-batch
+    // [T, d_model] outputs. Multi-head is supported here too --
+    // `apply_attention_rank2` runs the per-head loop in eager
+    // forward, matching the tape lowering in `model_tape`.
     if dims.len() == 3 && dims[2] == d_model {
         let (batch, t) = (dims[0], dims[1]);
         let mut data = Vec::with_capacity(batch * t * d_model);
@@ -788,27 +789,29 @@ fn compute_attn_weights(
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
-    // Saga 29 step 008: rank-3 [B, T, d_model] -> stack the
-    // per-batch single-head weights into [B, T, T]. Multi-
-    // head + rank-3 still rejects; that combination lands in
-    // step 010.
+    // Saga 29 step 008 + step 013: rank-3 [B, T, d_model] is
+    // looped per batch. For heads=1 the per-batch weights are
+    // [T, T]; for heads>1 they are [heads, T, T]. The outer
+    // batch dim is prepended, giving [B, T, T] or
+    // [B, heads, T, T].
     if dims.len() == 3 && dims[2] == d_model {
-        if heads != 1 {
-            return Err(EvalError::Unsupported(format!(
-                "attention_weights: rank-3 batched input is only supported for \
-                 heads=1 right now (got heads={heads}); use heads=1 or fold the \
-                 batch dim manually until multi-head tape lowering lands"
-            )));
-        }
         let (batch, t) = (dims[0], dims[1]);
-        let mut data = Vec::with_capacity(batch * t * t);
+        let inner_shape = if heads == 1 {
+            vec![t, t]
+        } else {
+            vec![heads, t, t]
+        };
+        let inner_elems: usize = inner_shape.iter().product();
+        let mut data = Vec::with_capacity(batch * inner_elems);
         for b in 0..batch {
             let x_b = x.take(0, b)?;
             data.extend_from_slice(
                 compute_attn_weights(&x_b, wq, wk, d_model, heads, causal, env)?.data(),
             );
         }
-        return Ok(DenseArray::new(Shape::new(vec![batch, t, t]), data)?);
+        let mut out_shape = vec![batch];
+        out_shape.extend(inner_shape);
+        return Ok(DenseArray::new(Shape::new(out_shape), data)?);
     }
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(

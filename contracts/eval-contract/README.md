@@ -154,27 +154,37 @@ accumulation). `concat` adds `NodeKind::Concat { left, right,
 axis, left_size }`; backward splits the upstream gradient at
 the seam and delivers each half to its parent.
 
-### Batch-aware attention (Saga 29 step 008)
+### Batch-aware attention (Saga 29 step 008, step 013)
 
 `apply(model, X)` and `attention_weights(model, X)` accept
 both rank-2 `[seq, d_model]` and rank-3 `[B, T, d_model]`
-input for single-head attention (`heads=1`). For rank-3 input
-the forward path loops over the batch axis, runs the existing
-rank-2 attention on each `[T, d_model]` entry, and stacks the
-per-batch outputs back into `[B, T, d_model]`. The tape
-lowering mirrors the structure by emitting `B` rank-2
-attention chains and stitching their per-batch outputs via
-`reshape(_, [1, T, d_model])` + chained `concat(_, _, 0)`,
-which keeps every constituent op on the existing tape
-without a new primitive.
+input for any `heads` value (1 or greater, as long as
+`d_model` is divisible by `heads`). For rank-3 input the
+forward path loops over the batch axis, runs the rank-2
+attention on each `[T, d_model]` entry, and stacks the
+per-batch outputs back into `[B, T, d_model]`.
 
-Multi-head attention (`heads > 1`) still rejects rank-3 input
-with a clean error pointing the user at `heads=1` or
-explicit batch-fold; the multi-head + rank-3 path lands in
-Saga 29 step 010 once the multi-head tape lowering is in
-place. Causal masking works in both rank-2 and rank-3 paths
-since the rank-3 path is just the rank-2 path applied B
-times.
+The tape lowering (Saga 29 step 013) emits the same per-
+batch attention chains but stitches their outputs with
+`Tensor::stack` (one tape node fanning out N parents) instead
+of the prior chained binary `concat`, which removes the
+O(N^2) blow-up. The same `stack` primitive is used to join
+per-head outputs over the column axis in the multi-head
+lowering.
+
+Multi-head attention (`heads > 1`) on the tape: Q, K, V are
+each projected to `[T, d_model]` via the usual matmul, then
+reshaped to `[T, heads, d_model/heads]` and taken-along-axis
+to pull one `[T, d_model/heads]` slab per head. Each head
+runs scaled-dot-product attention on its slab; the per-head
+outputs are stacked along the column axis back to
+`[T, d_model]` and projected through `Wo`. Causal masking
+works in both rank-2 and rank-3 paths.
+
+`attention_weights` returns `[T, T]` (heads=1 rank-2),
+`[heads, T, T]` (heads>1 rank-2), `[B, T, T]` (heads=1
+rank-3), or `[B, heads, T, T]` (heads>1 rank-3) -- the outer
+batch axis is prepended to the per-batch shape.
 
 ### Single-axis indexing (Saga 29 step 007)
 
