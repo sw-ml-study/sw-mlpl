@@ -1,6 +1,6 @@
 number = 8
 slug = "batch-aware-attention"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 29 step 008 (inserted prereq for the trained ViT demo):
 batch-aware-atte..."""
