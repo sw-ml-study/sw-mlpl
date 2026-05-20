@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-20
 
+- docs(language-audit): MLPL vs APL/J/BQN/PyTorch/JAX/Rust + breaking-change candidates
+- chore(agentrail): record saga 29 step 027 completion + kickoff 028
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(diagrams): add 7 ViT-era diagrams + wire into paths
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 026 completion
