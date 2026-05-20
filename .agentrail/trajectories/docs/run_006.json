@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 28,
+    "step": "language-audit-and-breaking-changes"
+  },
+  "action": "Surveyed mlpl-runtime/builtins.rs, mlpl-array ops.rs, lang-reference.md, and existing docs/plan.md to ground findings in actual code. Wrote 711-line doc with per-finding template (category/priority/where + example + precedent + fix + migration). Trimmed redundant per-finding prose to land near the 700-line budget. Wired into docs/plan.md's 'Near-term UX' section + new 'Breaking-change candidates' subsection. Quality: markdown-checker green; sw-checklist 157=parent (hold).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T09:53:29"
+}
