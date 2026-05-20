@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 23,
+    "step": "decision-boundary-gates"
+  },
+  "action": "replaced the AND-only Decision Boundary with a 5-gate version (each gate retrains w/b from zero and renders its own decision_boundary surface); added a sibling 'Decision Boundary: XOR (with MLP)' demo using chain + tanh_layer + adam; verified both via release REPL (linear AND converges to b=-8.54; MLP XOR hits accuracy=1.0); bumped README demo count; ran cargo test + clippy + fmt + sw-checklist + pages rebuild (all green)",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T07:01:27"
+}
