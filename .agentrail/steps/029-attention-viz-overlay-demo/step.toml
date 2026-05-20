@@ -1,6 +1,6 @@
 number = 29
 slug = "attention-viz-overlay-demo"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step 017 (per the original milestone-vit.md Phase 4 step 010, renumbe..."
 role = "legacy"
 context_files = []

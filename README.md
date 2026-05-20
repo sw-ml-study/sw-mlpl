@@ -19,8 +19,8 @@ This repository ships three things together:
 
 ## Tour
 
-The web playground gives you a full REPL plus 28 worked
-demos, 43 tutorial lessons, and a 277-entry glossary --
+The web playground gives you a full REPL plus 29 worked
+demos, 43 tutorial lessons, and a 278-entry glossary --
 all running entirely in your browser via WASM.
 
 ### REPL

@@ -106,7 +106,31 @@ Each `[T, T]` slab is row-stochastic (softmax). Used by
 the ViT attention-pattern demos to render heatmaps over
 patch positions -- with multi-head, the `[heads, T, T]`
 output feeds directly into `svg(_, "heatmap_grid")` for a
-per-head 2x2 grid.
+per-head 2x2 grid. Pair with the [[attention_overlay (viz type)]]
+to see attention painted over the actual image.
+
+## attention_overlay (viz type)
+
+`svg(image, "attention_overlay", attn)` paints a translucent
+viridis-colored heatmap on top of an image. `image` is a
+`[3, H, W]` channel-first RGB tensor (the same layout
+[[load_images (builtin)]] and `load_preloaded("pets_tiny")`
+produce). `attn` is either `[P]` (single head) or `[heads, P]`
+(multi-head), where `P = (H / patch) * (W / patch)` must be
+a perfect square so it can be laid out as a sqrt(P) x sqrt(P)
+patch grid. For multi-head input the output is a
+ceil(sqrt(heads))-column grid of overlaid tiles, one cell per
+head, labeled by head index.
+
+Typical usage after training a Vision Transformer: pick a
+test image, run [[attention_weights (builtin)]] to get
+`[heads, T, T]`, reduce over the query axis to get
+`[heads, T]` per-patch mean incoming attention, and feed
+that to the overlay. Bright yellow patches are "where this
+head pays attention on this image"; dark purple patches are
+ignored. Companion to [[heatmap_grid (viz type)]] -- the
+heatmap_grid shows the full [T, T] matrix per head; the
+overlay shows where on the IMAGE each head looks.
 
 ## Autoencoder
 

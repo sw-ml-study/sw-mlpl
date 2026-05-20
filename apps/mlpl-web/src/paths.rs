@@ -375,6 +375,10 @@ pub const PATHS: &[LearningPath] = &[
                 name: "Pets: multi-head ViT (quick + viz)",
                 why: "The headline demo for the multi-head story. Same architecture as the single-head quick demo but `attention(128, 4)`; after 30 adam steps it renders the four post-training attention maps. Compare with the untrained multi-head pattern demo above to see what specialization gradient descent buys -- the heads start identical and end different.",
             },
+            Step::Demo {
+                name: "Pets: attention overlay (per-head)",
+                why: "Same trained 4-head model, but the attention is rendered OVER the test image instead of as a [16, 16] heatmap. Bright yellow patches are what each head looks at; dark purple are ignored. The heatmap_grid tells you the [T, T] matrix per head; the overlay tells you WHERE on the image each head looks.",
+            },
             Step::Glossary {
                 term: ":upload (REPL command)",
                 why: "Pick a photo from your device. The browser decodes + resizes it to 64x64 and binds the result under your chosen name as `Ok({pixels, h, w})`. A cancelled or unreadable upload binds `Err(\"...\")` instead so the program can branch on success without crashing on an undefined variable.",

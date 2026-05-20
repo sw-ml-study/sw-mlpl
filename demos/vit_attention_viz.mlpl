@@ -1,0 +1,76 @@
+# Attention OVERLAY demo: train a 4-head ViT on a balanced
+# cat/dog subset and render each head's attention on top of
+# the original test image. Saga 29 step 029.
+#
+# Pipeline: same as vit_multihead_quick.mlpl through training.
+# After training, pick a held-out test image, extract its
+# per-head attention map [4, 16, 16] (heads, query patches,
+# key patches), take the average across queries to get [4, 16]
+# (per-head per-patch importance), and render the overlay.
+#
+# Each cell of the output is the SAME test image with a
+# different head's attention painted over it. Patches with
+# high incoming attention are bright yellow; ignored patches
+# stay dark purple. This is the picture you cannot get from
+# the raw heatmap_grid: it shows you WHERE on the cat / dog
+# each head is looking.
+
+# ---- data: balanced 8 cats + 8 dogs ----
+pets = load_preloaded("pets_tiny")
+c0 = reshape(take(pets.X, 0, 0),   [1, 3, 64, 64])
+c1 = reshape(take(pets.X, 0, 1),   [1, 3, 64, 64])
+c2 = reshape(take(pets.X, 0, 2),   [1, 3, 64, 64])
+c3 = reshape(take(pets.X, 0, 3),   [1, 3, 64, 64])
+d0 = reshape(take(pets.X, 0, 100), [1, 3, 64, 64])
+d1 = reshape(take(pets.X, 0, 101), [1, 3, 64, 64])
+d2 = reshape(take(pets.X, 0, 102), [1, 3, 64, 64])
+d3 = reshape(take(pets.X, 0, 103), [1, 3, 64, 64])
+cats = concat(concat(concat(c0, c1, 0), c2, 0), c3, 0)
+dogs = concat(concat(concat(d0, d1, 0), d2, 0), d3, 0)
+X    = concat(cats, dogs, 0)
+
+ly0 = reshape(take(pets.Y, 0, 0),   [1])
+ly1 = reshape(take(pets.Y, 0, 1),   [1])
+ly2 = reshape(take(pets.Y, 0, 2),   [1])
+ly3 = reshape(take(pets.Y, 0, 3),   [1])
+ld0 = reshape(take(pets.Y, 0, 100), [1])
+ld1 = reshape(take(pets.Y, 0, 101), [1])
+ld2 = reshape(take(pets.Y, 0, 102), [1])
+ld3 = reshape(take(pets.Y, 0, 103), [1])
+ycats = concat(concat(concat(ly0, ly1, 0), ly2, 0), ly3, 0)
+ydogs = concat(concat(concat(ld0, ld1, 0), ld2, 0), ld3, 0)
+Y     = concat(ycats, ydogs, 0)
+
+# ---- model: 4-head attention ----
+linear_p   = linear(768, 128, 17)
+attn       = attention(128, 4, 23)
+classifier = chain(linear(128, 64, 31), relu_layer(), linear(64, 2, 37))
+
+# ---- training: 30 full-batch adam steps ----
+train 30 {
+  adam(cross_entropy(apply(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [128, 768])), [8, 16, 128])), 1, 0)), Y), [linear_p, attn, classifier], 0.001, 0.9, 0.999, 0.00000001);
+  cross_entropy(apply(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(X, 16), [128, 768])), [8, 16, 128])), 1, 0)), Y)
+}
+
+loss_curve(last_losses)
+
+# ---- attention maps for one test image (a cat) ----
+# attention_weights returns [4, 16, 16]. To get per-head
+# per-patch importance, average over the query axis: every
+# query patch's attention to patch j is summed and divided
+# by 16. Result is [4, 16].
+test_idx    = 0
+test_img    = reshape(take(pets.X, 0, test_idx), [1, 3, 64, 64])
+test_tokens = reshape(apply(linear_p, reshape(patchify(test_img, 16), [16, 768])), [16, 128])
+attn_maps   = attention_weights(attn, test_tokens)
+per_head    = reduce_add(attn_maps, 1) / 16
+
+# Strip the leading batch axis for the overlay viz: it
+# expects [3, H, W], not [1, 3, H, W].
+img_for_viz = reshape(test_img, [3, 64, 64])
+
+# 2x2 grid of the SAME image, each cell tinted by one head's
+# attention pattern. After 30 adam steps the four heads
+# should NOT look identical -- you can see where each one
+# has concentrated.
+svg(img_for_viz, "attention_overlay", per_head)
