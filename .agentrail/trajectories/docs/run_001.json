@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 20,
+    "step": "vision-path-refresh"
+  },
+  "action": "edited apps/mlpl-web/src/paths.rs Vision Transformers path: bumped step count, refreshed intro note, inserted Glossary entry for :upload, replaced 'Coming next' Note with 'Bring-your-own-image (try it now)' walkthrough, updated 'Beyond this path' to cite better-cat-dog-future-demos.md; audited other paths' 'deferred' refs (all accurate); ran cargo test -p mlpl-web + clippy + fmt + sw-checklist (all green; 157==parent); rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T22:45:57"
+}

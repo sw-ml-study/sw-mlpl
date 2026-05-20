@@ -1,9 +1,10 @@
 number = 20
 slug = "vision-path-refresh"
-status = "in-progress"
+status = "completed"
 description = "Saga 29 step inserted: refresh apps/mlpl-web/src/paths.rs Vision Transformers..."
 role = "production"
 context_files = []
 created_at = "2026-05-19T22:43:45"
+completed_at = "2026-05-19T22:45:57"
 task_type = "docs"
-commits = []
+commits = ["993576303458ad927299ad908e3dd2a06d825fbd"]
