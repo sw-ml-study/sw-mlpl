@@ -398,25 +398,66 @@ In flight as agentrail steps 024 onward, in priority order:
    and added to relevant learning-path Step::Diagram
    entries.
 3. **Language audit + breaking-change candidates**
-   (step 026). MLPL is still in alpha; breaking changes
-   are cheap now and expensive at beta. The audit doc
-   (`docs/language-audit.md`) compares MLPL against
-   APL / J / BQN / Python+PyTorch+JAX / Rust, classifies
-   each finding as MISSING / INCONSISTENT / ERROR-PRONE /
-   ANTI-PATTERN / ALPHA-LEAK, and proposes a specific
-   breaking-change fix with migration cost. Seed list:
-   the closures-don't-differentiate issue forcing inline
-   forward expressions in train blocks; the
-   device("mlx") model-params-must-live-inside-scope
-   gotcha; concat arity overload and axis-in-{0,1} limit;
-   booleans-as-floats; magic-seed thread-through;
-   diagram-type-as-string. Top-tier items pulled forward
-   from the audit doc into a "Breaking-change candidates"
-   section here for saga consideration.
+   (step 028, shipped). `docs/language-audit.md` is the
+   long-form analysis: 21 findings classified MISSING /
+   INCONSISTENT / ERROR-PRONE / ANTI-PATTERN /
+   ALPHA-LEAK against APL / J / BQN / Python+PyTorch+JAX /
+   Rust. Top-tier items pulled forward below.
 
-After 026 lands, the remaining queued saga 29 step is
-the attention-viz overlay demo (027, originally step
+After 028 lands, the remaining queued saga 29 step is
+the attention-viz overlay demo (029, originally step
 010 in milestone-vit.md Phase 4).
+
+## Breaking-change candidates (from docs/language-audit.md)
+
+Recommended for pre-v1.0 saga consideration. Numbers
+are finding IDs in `docs/language-audit.md`.
+
+Critical:
+
+- **#1 Closures-don't-differentiate.** Switch the
+  autograd tape from AST-walking to value-capture.
+  Single biggest user-visible win; dissolves #15 as a
+  side effect. Touches `mlpl-eval/src/grad.rs`,
+  `eval.rs`, every demo's training block.
+- **#2 device("mlx") param relocation.** Add
+  `to_device(target, model)` polymorphism so a CPU
+  model can migrate to MLX without rebuilding inside
+  the scope. Simplifies several MLX demos.
+- **#3 Booleans-as-floats.** Add a `Value::Bool` +
+  `bool` tensor dtype. Promote comparison results.
+  ~40 demos need explicit `to_float` on the boolean
+  -> arithmetic boundary.
+- **#10 vmap.** Add `vmap(f, in_axes, out_axes)` as
+  a batched transform. Pure addition; the second
+  wave of demos benefits.
+- **#12 gather / slice ranges.** `take` is
+  single-index; `gather(x, axis, idx)` accepts a
+  rank-1 int tensor; slice syntax `x[a..b]` parses
+  to a contiguous range. Patchify and the multi-head
+  reshape dance simplify.
+- **#18 concat axis-N.** Drop the `axis in {0, 1}`
+  restriction in `mlpl-array::concat`. Already hit
+  in the rank-3 attention path.
+- **#19 multi-head attention tape.** Lower
+  multi-head onto the same tape primitives as
+  single-head so the multi-head ViT trains
+  end-to-end without the manual per-head workaround.
+
+Nice-to-have (defer):
+
+- #4 global PRNG; #5 :upload error kinds; #6
+  list-variadic `concat`; #8 typed `Viz` dispatch;
+  #9 keyword args for axis; #11 `jit`; #14 named
+  axes (saga 19); #16 model-DSL coverage of
+  `take` / `reshape` / `softmax`; #17 typed
+  `Device::Cpu` / `Device::Mlx`.
+
+Cosmetic:
+
+- #7 builtin naming convention; #13 tacit
+  programming; #20 BUILTINS duplicate guard;
+  #21 sw-checklist policy leak.
 
 ## Deferred primitives queue
 
