@@ -121,8 +121,9 @@ impl Tensor {
         )
     }
 
-    /// Saga 29 step 005: concat `self` with `other` along
-    /// `axis` (0 or 1 supported in this initial release).
+    /// Concat `self` with `other` along `axis`. Any axis in
+    /// `[0, rank)` is supported (saga 30 steps 001-002 lifted
+    /// the original `{0, 1}` restriction).
     #[must_use]
     pub fn concat(&self, other: &Self, axis: usize) -> Self {
         let a = self.value();

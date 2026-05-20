@@ -13,8 +13,10 @@
 //!   and single- and multi-head `attention` are fully lowered.
 //! - Saga 29 step 013: multi-head attention on the tape is
 //!   lowered by reshape + take + per-head scaled-dot-product +
-//!   chained concat over the head axis. Backward flows through
-//!   the same primitives.
+//!   `Tensor::stack` over the head axis. Backward flows through
+//!   the same primitives. (Initial saga-29 versions chained
+//!   binary concats here; step 013 replaced the chain with a
+//!   single `stack` tape node.)
 
 use std::collections::HashMap;
 use std::rc::Rc;
