@@ -1,0 +1,9 @@
+number = 19
+slug = "viz-legends-scales"
+status = "pending"
+description = "Saga 29 step inserted: add legends and axis scales to every viz type that cur..."
+role = "production"
+context_files = []
+created_at = "2026-05-19T22:30:50"
+task_type = "feature"
+commits = []
