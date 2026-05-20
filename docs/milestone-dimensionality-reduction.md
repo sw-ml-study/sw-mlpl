@@ -296,24 +296,32 @@ That framing is baked into Phase 3 (UMAP-vs-X demos), Phase 4
 Phase 6 (path ordering puts PCA -> SNE -> t-SNE -> UMAP as the
 historical-progression spine).
 
-## What I want to confirm before starting
+### Confirmed phase ordering and scoping
 
-- Whether **Phase 1 (critical-dimensions heatmap)** should ship
-  ahead of UMAP. It can land on top of the existing `pca`
-  builtin alone; the new viz is the highest-leverage piece and
-  gives the dim-reduction track a visible win before the UMAP
-  implementation lands. Default plan is yes -- phase 1 first.
-- Whether the `demos/umap_vs_pca.mlpl` and
-  `demos/umap_vs_tsne.mlpl` demos should each include a
-  critical-dimensions heatmap of their input data (so the
-  reader sees what UMAP found AND which input dimensions
-  carried the signal), or whether that should stay in the
-  zoo demo only. Default: include in both -- the viz is the
-  whole point.
-- Whether the **chronological-history milestone** (the
-  sibling proposal) should pull these history-of-DR lessons
-  in by reference (one entry "SNE -> t-SNE -> UMAP" in its
-  spine) rather than duplicating content.
+The three open questions from the first draft are now locked:
+
+1. **Phase 1 (critical-dimensions heatmap) ships first**, ahead
+   of UMAP. The viz lands on the existing `pca` builtin and
+   gives the milestone a visible win before the multi-step UMAP
+   implementation begins. UMAP follows in Phase 2.
+2. **Both `demos/umap_vs_pca.mlpl` and `demos/umap_vs_tsne.mlpl`
+   include the critical-dimensions heatmap of their input
+   data.** Showing UMAP recovered the structure is only half
+   the lesson; showing *which input dimensions carried that
+   structure* is the other half. The heatmap appears alongside
+   the comparison scatter in both demos and in the zoo demo.
+3. **The chronological-history milestone references these
+   lessons rather than duplicating them.** The
+   "SNE: the very-slow ancestor", "t-SNE", and "UMAP: the
+   modern default" lessons created in Phase 4 live in
+   `lessons.rs` / `lessons_advanced.rs` and the history path
+   adds three `Step::Lesson` entries pointing at them by
+   title. Implication: this milestone is a soft prerequisite
+   for the history milestone's coverage of the dim-reduction
+   era; if the user wants to ship the history path first, the
+   three lessons here move to Phase 0 of this milestone (i.e.
+   land before the heatmap viz) so the history path is not
+   blocked.
 - The order of phase 4 (lessons) and phase 5 (path) -- I have
   them sequential here, but they can interleave: write the
   path's skeleton early and fill in lessons as each phase

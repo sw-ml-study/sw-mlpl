@@ -219,6 +219,28 @@ path is just an ordered list. So:
 
 Each path is one entry in `PATHS`; no new content needed.
 
+## Relationship with the dim-reduction milestone (confirmed 2026-05-20)
+
+`docs/milestone-dimensionality-reduction.md` ships three
+focused per-method lessons -- "SNE: the very-slow ancestor",
+"t-SNE: a peek at nonlinear methods", "UMAP: the modern default"
+-- as part of its Phase 4. The chronological-history milestone
+**references those three lessons by title** rather than
+duplicating them. In the chronological path they slot in
+between Word2Vec (2013) and Vision Transformer (2020) in
+publication order:
+
+- 2002 -- "SNE: the very-slow ancestor" (Hinton & Roweis)
+- 2008 -- "t-SNE: a peek at nonlinear methods" (van der Maaten & Hinton)
+- 2018 -- "UMAP: the modern default" (McInnes & Healy)
+
+Implication: the dim-reduction milestone is a soft prerequisite
+for this milestone's coverage of those three years. If this
+milestone ships first, the three lesson slots in the path are
+short stubs that get filled in when the dim-reduction
+milestone's Phase 4 lands. If dim-reduction ships first, the
+slots are populated from day one.
+
 ## Phases
 
 ### Phase 1: lesson scaffolding + the chronological path
