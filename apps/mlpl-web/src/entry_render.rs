@@ -82,10 +82,16 @@ pub(crate) fn render_entry(entry: &HistoryEntry) -> Html {
         // No `mlpl>` prompt, no output pre-formatting; `input` is
         // the heading (e.g. "About this demo" / "What just
         // happened"), `output` is the narration body.
+        //
+        // Saga 29 step 022 + 024: route the body through the
+        // path_body markdown-ish renderer so paragraph splits,
+        // bullets, **bold**, `code`, and `[[glossary-term]]`
+        // links all work in narration bodies the same way
+        // they do in learning-path Note bodies.
         return html! {
             <div class="narration">
                 <div class="narration-heading">{ &entry.input }</div>
-                <div class="narration-body">{ &entry.output }</div>
+                <div class="narration-body">{ crate::path_body::render_body(&entry.output) }</div>
             </div>
         };
     }

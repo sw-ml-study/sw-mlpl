@@ -16,6 +16,7 @@ mod eval_sse;
 mod eval_url;
 #[cfg(target_arch = "wasm32")]
 mod eval_wasm;
+mod glossary_popup;
 mod glossary_view;
 mod handlers;
 mod help;
@@ -207,6 +208,7 @@ fn render(a: RenderArgs) -> Html {
     html! {
         <>
             <GithubCorner url={REPO_URL} />
+            <crate::glossary_popup::GlossaryPopupHost />
             <Header
                 on_help={open_dialog}
                 on_select_repl={cb.repl.clone()}

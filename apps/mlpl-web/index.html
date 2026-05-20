@@ -727,6 +727,77 @@
             padding: 1px 5px;
             border-radius: 3px;
         }
+        /* Saga 29 step 024: [[term]] glossary link. */
+        .glossary-link {
+            display: inline;
+            background: transparent;
+            border: 0;
+            color: var(--sapphire);
+            font-family: inherit;
+            font-size: inherit;
+            padding: 0 1px;
+            cursor: pointer;
+            text-decoration: underline dotted;
+            text-underline-offset: 2px;
+        }
+        .glossary-link:hover {
+            color: var(--sky);
+            text-decoration: underline solid;
+        }
+        .glossary-popup-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.55);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 24px;
+        }
+        .glossary-popup-card {
+            background: var(--mantle);
+            border: 1px solid var(--surface1);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            max-width: 720px;
+            width: 100%;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .glossary-popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--surface1);
+        }
+        .glossary-popup-title {
+            margin: 0;
+            color: var(--text);
+            font-size: 17px;
+            font-family: var(--mono);
+        }
+        .glossary-popup-close {
+            background: transparent;
+            border: 0;
+            color: var(--subtext0);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+        .glossary-popup-close:hover {
+            background: var(--surface1);
+            color: var(--text);
+        }
+        .glossary-popup-body {
+            padding: 14px 18px;
+            overflow-y: auto;
+            color: var(--subtext1);
+            line-height: 1.55;
+        }
         .path-step-error {
             color: var(--red);
             font-style: italic;
