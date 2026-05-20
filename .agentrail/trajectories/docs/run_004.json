@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 26,
+    "step": "demo-multi-part-delineation"
+  },
+  "action": "added Part N of M bordered headers before each Decision Boundary gate variant; called out XOR failure mode with explicit link to the MLP demo; added matching headers to the 6 train chunks in Pets: predict + gallery; wrote new XOR glossary entry with cross-links + history; bumped README glossary count; ran cargo test + clippy + fmt + sw-checklist (all green; 157==parent); rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T08:45:41"
+}
