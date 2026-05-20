@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 29,
+    "step": "attention-viz-overlay-demo"
+  },
+  "action": "Read existing svg renderers (gallery, heatmap) to match style; added render_attention_overlay + render_overlay_grid + parse_overlay_shapes to gallery.rs (kept module at 7 fns, max budget); inlined viridis as a closure inside render_overlay_grid to avoid duplicating the standalone helper; trimmed both new fns to <=50 LOC to keep sw-checklist at parent count; wired dispatch in mod.rs; exported via lib.rs; added 4 tests; wrote demo file with reduce_add(_, 1) / 16 for the per-head per-patch mean; verified end-to-end with release mlpl-repl -f; added web demo entry; updated README demo/glossary counts; added glossary entry attention_overlay (viz type) with cross-links; added Step::Demo to Vision path; ran cargo clippy/fmt/test (release for mlpl-web demo smoke); sw-checklist 157=parent (hold); markdown-checker green; rebuilt + pushed pages/.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T10:25:22"
+}

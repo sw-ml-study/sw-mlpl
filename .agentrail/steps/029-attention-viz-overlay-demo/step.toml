@@ -1,9 +1,10 @@
 number = 29
 slug = "attention-viz-overlay-demo"
-status = "in-progress"
+status = "completed"
 description = "Saga 29 step 017 (per the original milestone-vit.md Phase 4 step 010, renumbe..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-19T21:27:51"
+completed_at = "2026-05-20T10:25:22"
 task_type = "demo"
-commits = []
+commits = ["b3156341ce7861bef9b570f3b4ec90363630ce38"]
