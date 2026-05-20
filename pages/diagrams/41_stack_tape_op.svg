@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 360" width="700" height="360" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:13px;fill:#333">
+  <text x="350" y="22" text-anchor="middle" font-size="16" font-weight="bold">Stack vs chained concat (N = 4 parents)</text>
+
+  <text x="170" y="50" text-anchor="middle" font-size="14" font-weight="bold" fill="#b91c1c">Before: binary concat chain</text>
+  <text x="170" y="68" text-anchor="middle" font-size="11" fill="#666">tape depth = N - 1;  backward cost = O(N^2)</text>
+
+  <!-- left: chained concat -->
+  <g transform="translate(40,90)">
+    <!-- leaves -->
+    <rect x="0" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="20" y="20" text-anchor="middle" font-size="11">a</text>
+    <rect x="50" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="70" y="20" text-anchor="middle" font-size="11">b</text>
+    <rect x="100" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="120" y="20" text-anchor="middle" font-size="11">c</text>
+    <rect x="150" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="170" y="20" text-anchor="middle" font-size="11">d</text>
+
+    <!-- level 1 -->
+    <rect x="10" y="70" width="80" height="30" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="50" y="90" text-anchor="middle" font-size="11">concat(a,b)</text>
+    <line x1="20" y1="30" x2="40" y2="70" stroke="#1f2937"/>
+    <line x1="70" y1="30" x2="60" y2="70" stroke="#1f2937"/>
+
+    <!-- level 2 -->
+    <rect x="20" y="140" width="100" height="30" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="70" y="160" text-anchor="middle" font-size="11">concat(_, c)</text>
+    <line x1="50" y1="100" x2="60" y2="140" stroke="#1f2937"/>
+    <line x1="120" y1="30" x2="100" y2="140" stroke="#1f2937"/>
+
+    <!-- level 3 -->
+    <rect x="30" y="210" width="120" height="30" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="90" y="230" text-anchor="middle" font-size="11">concat(_, d)</text>
+    <line x1="70" y1="170" x2="80" y2="210" stroke="#1f2937"/>
+    <line x1="170" y1="30" x2="120" y2="210" stroke="#1f2937"/>
+
+    <text x="90" y="262" text-anchor="middle" font-style="italic" fill="#666">3 sequential nodes</text>
+    <text x="90" y="280" text-anchor="middle" font-size="11" fill="#666">backward visits each;</text>
+    <text x="90" y="296" text-anchor="middle" font-size="11" fill="#666">each rewrites a buffer</text>
+    <text x="90" y="312" text-anchor="middle" font-size="11" fill="#666">of growing size</text>
+  </g>
+
+  <!-- right: stack -->
+  <text x="500" y="50" text-anchor="middle" font-size="14" font-weight="bold" fill="#15803d">After: single Stack node</text>
+  <text x="500" y="68" text-anchor="middle" font-size="11" fill="#666">tape depth = 1;  backward cost = O(N)</text>
+  <g transform="translate(380,90)">
+    <rect x="0" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="20" y="20" text-anchor="middle" font-size="11">a</text>
+    <rect x="80" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="100" y="20" text-anchor="middle" font-size="11">b</text>
+    <rect x="160" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="180" y="20" text-anchor="middle" font-size="11">c</text>
+    <rect x="240" y="0" width="40" height="30" fill="#fde68a" stroke="#a16207"/><text x="260" y="20" text-anchor="middle" font-size="11">d</text>
+
+    <rect x="30" y="140" width="220" height="30" fill="#dcfce7" stroke="#15803d"/>
+    <text x="140" y="160" text-anchor="middle" font-size="11" font-weight="bold">stack([a, b, c, d], axis)</text>
+
+    <line x1="20" y1="30" x2="80" y2="140" stroke="#1f2937"/>
+    <line x1="100" y1="30" x2="120" y2="140" stroke="#1f2937"/>
+    <line x1="180" y1="30" x2="160" y2="140" stroke="#1f2937"/>
+    <line x1="260" y1="30" x2="200" y2="140" stroke="#1f2937"/>
+
+    <text x="140" y="200" text-anchor="middle" font-style="italic" fill="#666">one tape node, N parents</text>
+    <text x="140" y="218" text-anchor="middle" font-size="11" fill="#666">forward: copy each slab once</text>
+    <text x="140" y="234" text-anchor="middle" font-size="11" fill="#666">backward: split upstream into</text>
+    <text x="140" y="250" text-anchor="middle" font-size="11" fill="#666">N slabs in one pass</text>
+  </g>
+</svg>

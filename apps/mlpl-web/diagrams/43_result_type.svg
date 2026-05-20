@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="600" height="380" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:13px;fill:#333">
+  <text x="300" y="22" text-anchor="middle" font-size="16" font-weight="bold">Value::Result &lt;val, err&gt;</text>
+
+  <!-- root Result -->
+  <rect x="220" y="44" width="160" height="44" fill="#fef3c7" stroke="#a16207" stroke-width="2"/>
+  <text x="300" y="62" text-anchor="middle" font-weight="bold">Value::Result</text>
+  <text x="300" y="80" text-anchor="middle" font-size="11">{ ok: bool, payload: Box&lt;Value&gt; }</text>
+
+  <!-- branches -->
+  <line x1="280" y1="88" x2="180" y2="130" stroke="#1f2937" stroke-width="1.5"/>
+  <line x1="320" y1="88" x2="420" y2="130" stroke="#1f2937" stroke-width="1.5"/>
+
+  <!-- Ok side -->
+  <rect x="40" y="130" width="280" height="56" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+  <text x="180" y="152" text-anchor="middle" font-weight="bold" fill="#15803d">Ok(payload)</text>
+  <text x="180" y="170" text-anchor="middle" font-size="11">ok = true; payload is any Value</text>
+  <text x="180" y="182" text-anchor="middle" font-size="11">(typically Array; for upload: Record)</text>
+
+  <!-- Err side -->
+  <rect x="340" y="130" width="220" height="56" fill="#fee2e2" stroke="#b91c1c" stroke-width="2"/>
+  <text x="450" y="152" text-anchor="middle" font-weight="bold" fill="#b91c1c">Err(payload)</text>
+  <text x="450" y="170" text-anchor="middle" font-size="11">ok = false; payload is</text>
+  <text x="450" y="182" text-anchor="middle" font-size="11">typically Str("message")</text>
+
+  <!-- accessors -->
+  <text x="300" y="222" text-anchor="middle" font-weight="bold">Accessors</text>
+  <g transform="translate(40,238)">
+    <rect x="0" y="0" width="520" height="100" fill="#ffffff" stroke="#9ca3af"/>
+    <text x="10" y="20" font-family="monospace">is_ok(r)</text>
+    <text x="180" y="20" font-size="11">-&gt; 1.0 if r is Ok, else 0.0</text>
+    <text x="10" y="40" font-family="monospace">is_err(r)</text>
+    <text x="180" y="40" font-size="11">-&gt; inverse of is_ok</text>
+    <text x="10" y="60" font-family="monospace">unwrap(r)</text>
+    <text x="180" y="60" font-size="11">-&gt; payload if Ok, else raises UnwrapOnErr(message)</text>
+    <text x="10" y="80" font-family="monospace">err_message(r)</text>
+    <text x="180" y="80" font-size="11">-&gt; payload if Err, raises Unsupported if Ok</text>
+    <text x="10" y="96" font-family="monospace">unwrap_or(r, d)</text>
+    <text x="180" y="96" font-size="11">-&gt; payload if Ok, else evaluates d</text>
+  </g>
+
+  <text x="300" y="358" text-anchor="middle" font-size="11" font-style="italic" fill="#666">First in-tree consumer: the :upload x web-REPL command.</text>
+</svg>
