@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-20
 
+- chore(agentrail): record saga 29 step 025 completion
+- saga 29 step 025: glossary-link content pass + comment-link support
+- chore(agentrail): insert glossary-link-content-pass as step 025
+- fix(glossary-popup): move use_effect_with into the function-component body + add console logs to trace the click chain
+- fix(paths/demos): glossary [[term]] sigils outside backticks so they actually render as links
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 024 completion
 - saga 29 step 024: glossary hyperlinks via [[term]] sigil + modal popup
 - chore(agentrail): queue glossary-hyperlinks + vit-diagrams + language-audit as steps 024-026
