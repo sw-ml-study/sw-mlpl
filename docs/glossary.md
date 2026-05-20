@@ -2295,6 +2295,28 @@ Self-supervised learning is a closely-related modern
 variant where labels are *derived* from the input rather
 than absent.
 
+## :upload (REPL command)
+
+`:upload <name>` (Saga 29 step 016, web REPL only) opens
+the browser's file picker. The user selects an image (any
+PNG / JPEG / WebP / etc. the browser can decode); the
+Canvas API decodes + bilinear-resizes to 64x64 + normalizes
+RGB pixels to f64 in `[-1, 1]`, then binds the result
+under `<name>` as a `Value::Result`:
+
+- On success: `<name> = Ok({pixels: [1, 3, 64, 64], h: 64,
+  w: 64})`. The pixels field is a labeled DenseArray
+  ready to feed directly into a trained ViT classifier.
+- On dismiss: `<name> = Err("cancelled")`. Branch on
+  `is_ok(<name>)` rather than getting tripped by an
+  undefined variable.
+
+This is the first in-tree consumer of the `Value::Result`
+type shipped in Saga 29 step 012. The legacy "Upload
+Image" button takes the same path with `<name> =
+"uploaded"`. Native (terminal) REPLs raise an unsupported
+error -- the picker is browser-only.
+
 ## VAE (Variational Autoencoder)
 
 An autoencoder where the latent space is regularized to

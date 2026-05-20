@@ -82,6 +82,9 @@ Commands (APL-inspired workspace introspection):
   :wsid                workspace summary (APL )WSID)
   :experiments         list captured experiment runs
   :ask <prompt>        send prompt to a local Ollama LLM
+  :upload <name>       open file picker; bind chosen photo as
+                       <name> = Ok({pixels, h, w}) or
+                       Err(\"cancelled\") on dismiss (web only)
   :clear               reset session (vars + models + state)";
 
 pub fn help_text() -> String {

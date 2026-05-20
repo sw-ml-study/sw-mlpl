@@ -1,5 +1,7 @@
 //! WASM bindings for MLPL.
 
+mod upload;
+
 use std::cell::RefCell;
 
 use mlpl_eval::Environment;
@@ -77,6 +79,12 @@ impl WasmSession {
             .map_err(|e| JsValue::from_str(&format!("{e}")))?;
         self.env.borrow_mut().set(name.into(), arr);
         Ok(())
+    }
+}
+
+impl WasmSession {
+    pub(crate) fn env_mut(&self) -> std::cell::RefMut<'_, Environment> {
+        self.env.borrow_mut()
     }
 }
 

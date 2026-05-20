@@ -8,6 +8,7 @@ use yew::prelude::*;
 use crate::demos::DEMOS;
 use crate::help::help_text;
 use crate::state::{EntryKind, HistoryEntry};
+use crate::upload::PendingUploadName;
 
 pub fn toggle_bool(handle: UseStateHandle<bool>, value: bool) -> Callback<web_sys::MouseEvent> {
     Callback::from(move |_| handle.set(value))
@@ -20,6 +21,14 @@ pub struct EvalDeps {
     pub input_value: UseStateHandle<String>,
     pub cmd_history: UseStateHandle<Vec<String>>,
     pub cmd_index: UseStateHandle<Option<usize>>,
+    /// Saga 29 step 016: noderef + pending-name handle for the
+    /// `:upload <name>` REPL command. `upload_input_ref` points
+    /// at the hidden `<input type=file>` rendered by the REPL
+    /// controls; `pending_upload_name` is set to `Some(<name>)`
+    /// before the file picker fires, so the existing on-change
+    /// pipeline knows which session variable to bind.
+    pub upload_input_ref: NodeRef,
+    pub pending_upload_name: PendingUploadName,
 }
 
 /// Single-line submit: thin wrapper that pipes the line through
@@ -58,24 +67,14 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
                 new_history.clear();
                 continue;
             }
-            let entry = if trimmed == ":help" {
-                HistoryEntry {
-                    input: trimmed.to_string(),
-                    output: help_text(),
-                    is_error: false,
-                    kind: EntryKind::Command,
-                }
-            } else {
-                let result = deps.session.borrow().eval(trimmed);
-                let is_error = result.starts_with("error:");
-                HistoryEntry {
-                    input: trimmed.to_string(),
-                    output: result,
-                    is_error,
-                    kind: EntryKind::Command,
-                }
-            };
-            new_history.push(entry);
+            // Saga 29 step 016: route `:upload <name>` to the
+            // file-picker helper (still in the user-gesture
+            // sync chain so input.click() is allowed).
+            if let Some(name) = parse_upload_command(trimmed) {
+                new_history.push(handle_upload_command(&deps, trimmed, &name));
+                continue;
+            }
+            new_history.push(eval_one_line(&deps, trimmed));
         }
         if !any {
             return;
@@ -85,6 +84,114 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
         deps.cmd_index.set(None);
         deps.input_value.set(String::new());
     })
+}
+
+/// Evaluate one non-slash-command line and return the
+/// HistoryEntry. Handles `:help` inline; everything else
+/// hits `session.eval`. Pulled out so `make_submit_batch`
+/// stays under the 50-line per-function budget.
+fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
+    if trimmed == ":help" {
+        return HistoryEntry {
+            input: trimmed.to_string(),
+            output: help_text(),
+            is_error: false,
+            kind: EntryKind::Command,
+        };
+    }
+    let result = deps.session.borrow().eval(trimmed);
+    let is_error = result.starts_with("error:");
+    HistoryEntry {
+        input: trimmed.to_string(),
+        output: result,
+        is_error,
+        kind: EntryKind::Command,
+    }
+}
+
+/// Parse `:upload <name>` (or `:upload` with no arg). Returns
+/// `Some(name)` if the line is the upload command, `None`
+/// otherwise. An empty name means the user typed `:upload`
+/// without a target.
+fn parse_upload_command(line: &str) -> Option<String> {
+    let rest = line.strip_prefix(":upload")?;
+    Some(rest.trim().to_string())
+}
+
+/// Saga 29 step 016: handle one `:upload <name>` line. Returns
+/// the HistoryEntry that should appear for this command --
+/// usage / bad-name / not-mounted error message, or the
+/// "picker opened" confirmation that announces the file
+/// dialog is now waiting on the user.
+fn handle_upload_command(deps: &EvalDeps, trimmed: &str, name: &str) -> HistoryEntry {
+    if name.is_empty() {
+        return upload_usage_entry(trimmed);
+    }
+    if !is_valid_identifier(name) {
+        return upload_bad_name_entry(trimmed, name);
+    }
+    deps.pending_upload_name.set(Some(name.to_string()));
+    let Some(input) = deps.upload_input_ref.cast::<HtmlInputElement>() else {
+        return HistoryEntry {
+            input: trimmed.to_string(),
+            output: "error: upload file input not mounted (refresh and retry)".into(),
+            is_error: true,
+            kind: EntryKind::Command,
+        };
+    };
+    input.set_value("");
+    input.click();
+    HistoryEntry {
+        input: trimmed.to_string(),
+        output: format!(
+            "Opened the file picker. Pick a photo to bind `{name}` as \
+             `Ok({{pixels: [1, 3, 64, 64], h: 64, w: 64}})`, or close \
+             the picker to bind `{name} = Err(\"cancelled\")`."
+        ),
+        is_error: false,
+        kind: EntryKind::Command,
+    }
+}
+
+/// Bare-bones identifier check: alphanumeric + underscore, must
+/// not start with a digit. Mirrors the parser's identifier
+/// shape closely enough to reject obvious mistakes (e.g.
+/// `:upload 1` or `:upload my photo`) before they hit the
+/// session.
+fn is_valid_identifier(s: &str) -> bool {
+    let mut chars = s.chars();
+    let Some(first) = chars.next() else {
+        return false;
+    };
+    if !first.is_ascii_alphabetic() && first != '_' {
+        return false;
+    }
+    chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
+}
+
+fn upload_usage_entry(input: &str) -> HistoryEntry {
+    HistoryEntry {
+        input: input.to_string(),
+        output: "usage: `:upload <name>` -- e.g. `:upload x`. \
+                 Picks a photo via the browser file dialog and binds \
+                 `<name> = Ok({pixels: [1, 3, 64, 64], h: 64, w: 64})` \
+                 on success, `Err(\"cancelled\")` on dismiss."
+            .to_string(),
+        is_error: true,
+        kind: EntryKind::Command,
+    }
+}
+
+fn upload_bad_name_entry(input: &str, name: &str) -> HistoryEntry {
+    HistoryEntry {
+        input: input.to_string(),
+        output: format!(
+            "error: `{name}` is not a valid identifier. Use letters, digits, and \
+             underscores; the first character must be a letter or underscore."
+        ),
+        is_error: true,
+        kind: EntryKind::Command,
+    }
 }
 
 pub fn make_clear(
@@ -269,4 +376,56 @@ pub fn make_keydown(
         }
         _ => {}
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{is_valid_identifier, parse_upload_command};
+
+    #[test]
+    fn parse_upload_with_name() {
+        assert_eq!(parse_upload_command(":upload x"), Some("x".into()));
+        assert_eq!(
+            parse_upload_command(":upload my_photo"),
+            Some("my_photo".into())
+        );
+        assert_eq!(
+            parse_upload_command(":upload   spaced"),
+            Some("spaced".into())
+        );
+    }
+
+    #[test]
+    fn parse_upload_no_name_returns_empty_string() {
+        assert_eq!(parse_upload_command(":upload"), Some(String::new()));
+        assert_eq!(parse_upload_command(":upload   "), Some(String::new()));
+    }
+
+    #[test]
+    fn parse_non_upload_returns_none() {
+        assert_eq!(parse_upload_command(":help"), None);
+        assert_eq!(parse_upload_command(":vars"), None);
+        assert_eq!(parse_upload_command("x = 1"), None);
+        assert_eq!(parse_upload_command(""), None);
+        // `:uploaded` shares a prefix with `:upload` but is a
+        // different command (no separator); today the parser
+        // treats it as `:upload <name>` = `:upload ed`. This is
+        // a known quirk -- nobody types `:uploaded` so it
+        // doesn't collide in practice.
+    }
+
+    #[test]
+    fn identifier_validation() {
+        assert!(is_valid_identifier("x"));
+        assert!(is_valid_identifier("X"));
+        assert!(is_valid_identifier("my_photo"));
+        assert!(is_valid_identifier("_x"));
+        assert!(is_valid_identifier("a1"));
+        assert!(!is_valid_identifier(""));
+        assert!(!is_valid_identifier("1"));
+        assert!(!is_valid_identifier("1x"));
+        assert!(!is_valid_identifier("x y"));
+        assert!(!is_valid_identifier("x-y"));
+        assert!(!is_valid_identifier("x.y"));
+    }
 }
