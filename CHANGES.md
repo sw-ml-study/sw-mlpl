@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-20
 
+- chore(agentrail): record saga 29 step 026 completion
+- saga 29 step 026: numbered Part N of M block headers for multi-part demos + XOR glossary entry
+- chore(agentrail): insert demo-multi-part-delineation as step 026
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 025 completion
 - saga 29 step 025: glossary-link content pass + comment-link support
 - chore(agentrail): insert glossary-link-content-pass as step 025
