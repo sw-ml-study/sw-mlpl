@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-20
 
+- feat(viz): attention_overlay viz type + ViT per-head overlay demo
+- chore(agentrail): record saga 29 step 028 completion + kickoff 029
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(language-audit): MLPL vs APL/J/BQN/PyTorch/JAX/Rust + breaking-change candidates
 - chore(agentrail): record saga 29 step 027 completion + kickoff 028
 - docs(changes): refresh CHANGES.md to HEAD
