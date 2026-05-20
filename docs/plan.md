@@ -378,3 +378,110 @@ strict-fault vs auto-fetch on cross-device ops,
 streaming for long-running blocks. None of these
 gate the design itself, but they shape R1's first
 contract.
+
+## Deferred primitives queue
+
+Living list of small builtin / op gaps encountered
+while building demos. Each entry is one observed
+omission, not a saga -- they accumulate here until a
+demo (or a user) makes one of them load-bearing,
+then it gets pulled forward into a step.
+
+The queue isn't a roadmap. It's an inbox. Items
+graduate to a real saga step when:
+
+- a working demo wants them (and faking it via
+  surrounding ops makes the demo unreadable), OR
+- the surrounding code shape that avoids them
+  trips `sw-checklist` (long function, deep
+  pattern matches), OR
+- a user files them.
+
+### Builtins / tape ops
+
+- **`permute(x, axes)`** -- general axis
+  rearrangement. Today the multi-head attention
+  tape and several reshape-then-take dances would
+  read more clearly with a single `permute` op.
+  Patchify is internally implemented as `reshape +
+  transpose + reshape` for similar reasons; a real
+  `permute` would let the tape carry one node
+  instead of three.
+- **`gather(x, axis, idx)`** -- multi-index
+  generalization of `take`. `take` drops one axis
+  at a single integer index; `gather` would accept
+  an `[K]` int tensor along `axis` and return a
+  `[K]`-sized slab. Wanted by: any "select rows by
+  index" pattern (label-aware batch construction,
+  test-time held-out picking, etc.) and by the
+  embed-table backward.
+- **Slice ranges (`x[a..b]`)** -- contiguous
+  multi-index along one axis. Subsumed by
+  `gather` but worth a dedicated cheap path
+  because it appears in every attention KV-cache
+  / autoregressive-prefix pattern.
+- **`log_softmax(x, axis)`** -- numerically stable
+  version of `log(softmax(x))`. Currently the
+  cross-entropy fused path includes log-softmax
+  internally; exposing the operator lets callers
+  use it in custom losses without re-deriving the
+  stable form.
+- **Higher-axis `concat`** -- the current
+  `concat(a, b, axis)` accepts `axis` in `{0, 1}`.
+  Generalizing to any axis is straightforward (the
+  forward already loops over the trailing
+  dimensions); landed as `Tensor::stack` for the
+  N-way case in Saga 29 step 013 but the binary
+  `concat` is still axis-limited.
+
+### Model DSL layers
+
+- **`layer_norm(d, seed)`** -- per-row mean-center
+  + unit-variance + learned `[d]`-shaped affine
+  (`gamma * x + beta`). The Saga 29 milestone-vit
+  Phase 3 plan lists this as a Tier 2 prereq for
+  the multi-head thorough demo (it shipped against
+  `rms_norm` substitute instead). LayerNorm proper
+  is the upstream-notebook reference; without it
+  the "thorough" demo isn't apples-to-apples with
+  PyTorch's `nn.LayerNorm`.
+- **`gelu(x)` + `gelu_layer()`** -- tanh-
+  approximation GELU: `0.5 * x * (1 + tanh(sqrt(2/pi)
+  * (x + 0.044715 * x^3)))`. Same Phase 3 prereq
+  as `layer_norm`. The thorough ViT shipped against
+  `relu_layer()`.
+
+### REPL / UX
+
+- **`:upload x`** -- file-picker REPL command that
+  binds the chosen image as Value::Result under a
+  caller-chosen name (`Ok({pixels: ..., h: H,
+  w: W})` on success, `Err("cancelled")` on dismiss).
+  Saga 29 step 016 (next agentrail step after the
+  current 015). The current upload UX is a
+  hardcoded `uploaded` variable wired to a button;
+  the REPL command makes it programmatic.
+- **`load_image(path)`** -- single-image CLI
+  builtin to decode one JPG/PNG into a `[3, H, W]`
+  tensor. Companion to the WASM-only file-picker
+  upload path. Phase 4.5 step 010c in the original
+  ViT milestone.
+
+### Value-type accessors
+
+- **`StrList` indexing** -- `xs[i]` or
+  `index(xs, i)` to pull one string from a
+  `Value::StrList`. Today only `list_len(xs)`
+  works. Useful for showing `pets_tiny.names[i]`
+  alongside per-image predictions in the gallery
+  demo.
+
+### When this list gets long
+
+When the queue passes ~12 items, partition it into
+"small inserts" (one step each, can land between
+saga steps as discovered) and "next saga"
+candidates (a coherent group of three or four ops
+worth bundling). Items don't need to be done in
+queue order; pull what unblocks the current
+demo / step.
