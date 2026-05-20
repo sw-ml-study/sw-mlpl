@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- chore(agentrail): record saga 29 step 014 completion + kickoff step 015
+- chore(pages): rebuild for multi-head viz demos + heatmap_grid
+- saga 29 step 014: multi-head attention viz demos + heatmap_grid renderer
+- chore(agentrail): insert multi-head-attention-viz-demos as saga 29 step 014
+- chore(agentrail): record saga 29 step 013 completion + kickoff step 014
+- docs(changes): refresh CHANGES.md to HEAD
 - saga 29 step 013: multi-head attention on the tape + Tensor::stack
 - docs: plan for retrofitting Value::Result onto prior demos/tutorials
 - chore(agentrail): record saga 29 step 012 completion + kickoff step 013
