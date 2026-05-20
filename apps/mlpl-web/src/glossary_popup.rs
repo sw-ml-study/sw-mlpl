@@ -19,7 +19,30 @@ use crate::path_body::render_body;
 #[function_component(GlossaryPopupHost)]
 pub fn glossary_popup_host() -> Html {
     let term = use_state(|| None::<String>);
-    install_listener(&term);
+    let term_for_open = term.clone();
+    let term_for_keydown = term.clone();
+    // The Yew rule-of-hooks requires `use_effect_with` to live at
+    // the top of the function-component body, not inside a helper
+    // -- earlier this hook was wrapped in `install_listener` and
+    // the event listener silently failed to attach.
+    use_effect_with((), move |_| {
+        if let Some(window) = web_sys::window() {
+            let open_closure = make_open_closure(term_for_open);
+            let _ = window.add_event_listener_with_callback(
+                "mlpl-glossary-open",
+                open_closure.as_ref().unchecked_ref(),
+            );
+            open_closure.forget();
+            let keydown_closure = make_esc_closure(term_for_keydown);
+            let _ = window.add_event_listener_with_callback(
+                "keydown",
+                keydown_closure.as_ref().unchecked_ref(),
+            );
+            keydown_closure.forget();
+            web_sys::console::log_1(&"GlossaryPopupHost listeners installed".into());
+        }
+        || ()
+    });
     let Some(open_term) = (*term).clone() else {
         return html! {};
     };
@@ -46,41 +69,18 @@ pub fn glossary_popup_host() -> Html {
     }
 }
 
-fn install_listener(term: &UseStateHandle<Option<String>>) {
-    let term_for_open = term.clone();
-    let term_for_keydown = term.clone();
-    use_effect_with((), move |_| {
-        // Install both listeners on `window`. We can't cleanly
-        // remove them on teardown without keeping owned
-        // function pointers, so we just leak the closures via
-        // `forget()` -- there is only ever one
-        // GlossaryPopupHost mounted, so the leak is bounded.
-        if let Some(window) = web_sys::window() {
-            let open_closure = make_open_closure(term_for_open);
-            let _ = window.add_event_listener_with_callback(
-                "mlpl-glossary-open",
-                open_closure.as_ref().unchecked_ref(),
-            );
-            open_closure.forget();
-            let keydown_closure = make_esc_closure(term_for_keydown);
-            let _ = window.add_event_listener_with_callback(
-                "keydown",
-                keydown_closure.as_ref().unchecked_ref(),
-            );
-            keydown_closure.forget();
-        }
-        || ()
-    });
-}
-
 fn make_open_closure(term: UseStateHandle<Option<String>>) -> Closure<dyn FnMut(web_sys::Event)> {
     Closure::wrap(Box::new(move |e: web_sys::Event| {
+        web_sys::console::log_1(&"mlpl-glossary-open listener fired".into());
         let Ok(custom) = e.dyn_into::<web_sys::CustomEvent>() else {
+            web_sys::console::warn_1(&"event was not a CustomEvent".into());
             return;
         };
         let Some(detail) = custom.detail().as_string() else {
+            web_sys::console::warn_1(&"event detail was not a string".into());
             return;
         };
+        web_sys::console::log_1(&format!("opening glossary popup for: {detail}").into());
         term.set(Some(detail));
     }))
 }

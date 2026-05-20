@@ -32,7 +32,9 @@ fn render_glossary_link(term: String) -> Html {
 }
 
 fn dispatch_glossary_open(term: &str) {
+    web_sys::console::log_1(&format!("glossary link clicked: {term}").into());
     let Some(window) = web_sys::window() else {
+        web_sys::console::warn_1(&"no window for glossary dispatch".into());
         return;
     };
     let init = web_sys::CustomEventInit::new();
@@ -40,9 +42,15 @@ fn dispatch_glossary_open(term: &str) {
     init.set_bubbles(true);
     let Ok(event) = web_sys::CustomEvent::new_with_event_init_dict("mlpl-glossary-open", &init)
     else {
+        web_sys::console::warn_1(&"failed to construct CustomEvent".into());
         return;
     };
-    let _ = window
+    match window
         .unchecked_into::<web_sys::EventTarget>()
-        .dispatch_event(&event);
+        .dispatch_event(&event)
+    {
+        Ok(true) => {}
+        Ok(false) => web_sys::console::warn_1(&"event default-prevented by listener".into()),
+        Err(_) => web_sys::console::warn_1(&"dispatch_event returned err".into()),
+    }
 }
