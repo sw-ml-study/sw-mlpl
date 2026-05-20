@@ -194,27 +194,28 @@ fn concat_backward(
     ld[axis] = left_size;
     let mut rd = dims.to_vec();
     rd[axis] = right_size;
+    // Saga 30 step 002: walk the outer dims (dims[..axis]) and,
+    // for each outer position, peel off `left_size * inner` then
+    // `right_size * inner` elements from the upstream gradient.
+    // `inner` is the product of dims after `axis` (1 for last axis).
+    // Subsumes the original axis-0 / axis-1 branches: at axis=0 the
+    // outer is 1 (empty-product) and the loop runs once on the
+    // whole upstream slab; at axis=1 the outer is dims[0] and
+    // inner is product(dims[2..]).
+    let outer: usize = dims[..axis].iter().product();
+    let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
+    let a_chunk = left_size * inner;
+    let b_chunk = right_size * inner;
     let up = upstream.data();
-    let (la, ra) = if axis == 0 {
-        let trailing: usize = dims[1..].iter().product::<usize>().max(1);
-        let split = left_size * trailing;
-        let total = split + right_size * trailing;
-        (up[..split].to_vec(), up[split..total].to_vec())
-    } else {
-        let trailing: usize = dims[2..].iter().product::<usize>().max(1);
-        let a_chunk = left_size * trailing;
-        let b_chunk = right_size * trailing;
-        let mut la = Vec::with_capacity(dims[0] * a_chunk);
-        let mut rb = Vec::with_capacity(dims[0] * b_chunk);
-        for i in 0..dims[0] {
-            let row = i * (a_chunk + b_chunk);
-            la.extend_from_slice(&up[row..row + a_chunk]);
-            rb.extend_from_slice(&up[row + a_chunk..row + a_chunk + b_chunk]);
-        }
-        (la, rb)
-    };
+    let mut la = Vec::with_capacity(outer * a_chunk);
+    let mut rb = Vec::with_capacity(outer * b_chunk);
+    for o in 0..outer {
+        let row = o * (a_chunk + b_chunk);
+        la.extend_from_slice(&up[row..row + a_chunk]);
+        rb.extend_from_slice(&up[row + a_chunk..row + a_chunk + b_chunk]);
+    }
     let left = DenseArray::new(Shape::new(ld), la).expect("shape");
-    let right = DenseArray::new(Shape::new(rd), ra).expect("shape");
+    let right = DenseArray::new(Shape::new(rd), rb).expect("shape");
     (left, right)
 }
 

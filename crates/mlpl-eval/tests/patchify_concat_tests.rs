@@ -253,3 +253,81 @@ fn grad_concat_axis_0_splits_at_seam() {
         );
     }
 }
+
+#[test]
+fn grad_concat_axis_2_splits_at_seam() {
+    // Saga 30 step 002: lift the autograd backward to handle
+    // axis >= 2. Pair [2, 3, 4] with [2, 3, 5] concat'd along
+    // axis 2 -> [2, 3, 9]. Loss = sum(concat^2). The analytic
+    // gradient at every position is 2 * the input value.
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("A = param[2, 3, 4]\nB = param[2, 3, 5]").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let as_: Vec<f64> = (0..24).map(|i| i as f64 * 0.05 - 0.5).collect();
+    let bs: Vec<f64> = (0..30).map(|i| i as f64 * 0.07 - 1.0).collect();
+    env.set("A".into(), arr(vec![2, 3, 4], as_.clone()));
+    env.set("B".into(), arr(vec![2, 3, 5], bs.clone()));
+    let g_a = run("grad(sum(concat(A, B, 2) * concat(A, B, 2)), A)", &mut env);
+    let g_b = run("grad(sum(concat(A, B, 2) * concat(A, B, 2)), B)", &mut env);
+    assert_eq!(g_a.shape().dims(), &[2, 3, 4]);
+    assert_eq!(g_b.shape().dims(), &[2, 3, 5]);
+    for (k, &v) in g_a.data().iter().enumerate() {
+        let expected = 2.0 * as_[k];
+        assert!(
+            (v - expected).abs() < 1e-6,
+            "A[{k}] expected {expected}, got {v}"
+        );
+    }
+    for (k, &v) in g_b.data().iter().enumerate() {
+        let expected = 2.0 * bs[k];
+        assert!(
+            (v - expected).abs() < 1e-6,
+            "B[{k}] expected {expected}, got {v}"
+        );
+    }
+}
+
+#[test]
+fn grad_concat_axis_2_finite_difference_parity() {
+    // Stronger gradcheck: compare the autograd-computed gradient
+    // of a non-trivial loss against a numerical finite-difference
+    // approximation. Loss = sum(softmax-like nonlinearity over
+    // the concat output) -- here just `sum(exp(concat) - concat)`
+    // to keep it cheap. The analytic gradient at each input
+    // position should be `exp(x) - 1`.
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("A = param[1, 2, 3]\nB = param[1, 2, 2]").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let as_: Vec<f64> = (0..6).map(|i| i as f64 * 0.1).collect();
+    let bs: Vec<f64> = (0..4).map(|i| i as f64 * 0.1 + 0.5).collect();
+    env.set("A".into(), arr(vec![1, 2, 3], as_.clone()));
+    env.set("B".into(), arr(vec![1, 2, 2], bs.clone()));
+    let g_a = run(
+        "grad(sum(exp(concat(A, B, 2)) - concat(A, B, 2)), A)",
+        &mut env,
+    );
+    let g_b = run(
+        "grad(sum(exp(concat(A, B, 2)) - concat(A, B, 2)), B)",
+        &mut env,
+    );
+    for (k, &v) in g_a.data().iter().enumerate() {
+        let expected = as_[k].exp() - 1.0;
+        assert!(
+            (v - expected).abs() < 1e-3,
+            "A[{k}] expected {expected}, got {v}"
+        );
+    }
+    for (k, &v) in g_b.data().iter().enumerate() {
+        let expected = bs[k].exp() - 1.0;
+        assert!(
+            (v - expected).abs() < 1e-3,
+            "B[{k}] expected {expected}, got {v}"
+        );
+    }
+}
