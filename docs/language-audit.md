@@ -653,6 +653,255 @@ audit; note for the saga retrospective.
 
 ---
 
+## Scripting / control-flow gap (added 2026-05-20)
+
+A user asked whether MLPL could be used as a scripting language --
+take command-line arguments and execute different paths through the
+code. Today the answer is no on both halves. The next nine findings
+make it yes. They share a theme: MLPL has been a *demo language*
+where the script writer always knew the data and the path in
+advance. Treating it as a *scripting language* (data unknown at
+write time, paths chosen at run time) needs a small set of language
+additions.
+
+### 22. No surface `if` / `else` -- conditionals via arithmetic masks
+
+**Category:** MISSING **Priority:** critical
+
+Comparison builtins (`eq`, `gt`, `lt`) return `0.0` / `1.0`
+floats; conditional logic is expressed as multiplication by a
+mask. There is no `if cond { then } else { else }` in the parser
+AST (`crates/mlpl-parser/src/ast.rs`). There is no ternary, no
+`cond`, no `where`, no `select`. The Result accessors
+(`unwrap_or(r, default)`) cover the Result branch case but
+nothing else.
+
+```mlpl
+# How a "branch" looks today: mask + multiply
+mask     = gt(x, 0.0)
+positive = x * mask
+negative = x * (1.0 - mask)
+total    = positive + negative * 0.5
+```
+
+For a tensor this is fine and even preferred (no branching = no
+warp divergence on a GPU). For a scalar command-line flag it is
+absurd. A user wanting to write `if --train { train_model } else
+{ predict_only }` has no surface.
+
+**Precedent.** Every comparison language has `if`. APL has the
+inline `:If` plus dyadic `?:`-equivalents; BQN has `f.{cond ? then ; else}`;
+Python `if/elif/else`; Rust `if` as an expression.
+
+**Proposed fix.** Add `if cond { then } else { else }` to the
+parser as an expression (returns the chosen branch's value).
+`cond` is truthy iff non-zero (matches the existing convention)
+or, post-#3, a real `Bool`. Optional `elif`. The tensor case
+stays one mask-multiply.
+
+**Migration cost.** Pure addition. ~10 demos that pre-compute
+masks could be rewritten more readably; not load-bearing.
+
+---
+
+### 23. No `while` loop; `repeat N { }` is fixed-count only
+
+**Category:** MISSING **Priority:** nice-to-have
+
+`repeat N { body }`, `train N { body }`, and `for x in source { body }`
+are the loop forms (docs/lang-reference.md:132-181). All three need
+the bound to be known up front. There is no `while cond { body }`,
+no `loop { ... break }`, no early `break` / `continue`.
+
+Consequence: a script that wants to "train until validation loss
+stops dropping" or "keep generating tokens until the model emits
+EOS" cannot. The `train N { }` block has to over-estimate `N` and
+the user reads the loss curve by hand.
+
+**Precedent.** Every imperative language. JAX has `lax.while_loop`
+(with explicit carry state) because batching wants a static loop
+structure; MLPL is already a tree-walker, so an eager `while` is
+trivial.
+
+**Proposed fix.** Add `while cond { body }` to the parser; body
+value is the last iteration's last expression, like `repeat`.
+Add `break` and `break value` keywords usable inside any loop
+form (including `repeat` and `train`); `break value` makes the
+whole loop return `value`. Also add `continue`.
+
+**Migration cost.** Pure addition. The `train { }` block can keep
+its semantics; users opt in to `while` for adaptive training.
+
+---
+
+### 24. No command-line argument capture in script mode
+
+**Category:** MISSING **Priority:** critical
+
+`mlpl-repl -f script.mlpl arg1 arg2 ...` parses the `-f` flag and
+*silently drops the trailing args* (`apps/mlpl-repl/src/main.rs:17-48`).
+There is no `args()` builtin, no `ARGV`, no positional-binding
+syntax. A user trying to write a script that classifies an image
+named on the command line has no path.
+
+```sh
+# Today: this is just "run the script", trailing args are lost.
+mlpl-repl -f classify.mlpl my_cat.jpg
+```
+
+**Precedent.** Python `sys.argv`; Bash `$1 $2`; Rust
+`std::env::args()`; Julia `ARGS`.
+
+**Proposed fix.** Three small additions:
+
+1. `mlpl-repl -f script.mlpl -- arg1 arg2` passes trailing args
+   through (the `--` separator is conventional).
+2. A new builtin `args()` returns a string list (`Value::StrList`,
+   which already exists from Saga 29 step 002) of the trailing
+   args. Empty list when run from the REPL with no args.
+3. A new builtin `arg(i)` is sugar for `take(args(), 0, i)`.
+
+**Migration cost.** Pure addition; the REPL keeps working without
+the `--`. Two new builtins + a small CLI parser change.
+
+---
+
+### 25. No environment-variable access
+
+**Category:** MISSING **Priority:** nice-to-have
+
+`env("MODEL_PATH")` does not exist. A script that wants to read
+the path to a fine-tuned model from `$MODEL_PATH` has no surface.
+
+**Precedent.** `os.environ` (Python), `std::env::var` (Rust),
+`Sys.getenv` (OCaml), `$ENV{X}` (Perl).
+
+**Proposed fix.** `env(name)` builtin returning `Value::Result` --
+`Ok(Str)` if set, `Err(Str)` if unset. The Result discipline
+matches `:upload` and forces the script writer to handle the
+missing-env case.
+
+**Migration cost.** Pure addition. One builtin in
+`crates/mlpl-runtime/src/builtins.rs`.
+
+---
+
+### 26. No string-to-number parsing
+
+**Category:** MISSING **Priority:** critical (blocks #24 alone)
+
+If `args()` returns a `StrList`, the script has to parse the
+strings before it can use them as scalars. MLPL has no
+`parse_int`, `to_number`, `to_f64`. A user typing
+`mlpl-repl -f train.mlpl -- 100 0.001` cannot turn `"100"` and
+`"0.001"` into the epoch count and learning rate.
+
+**Precedent.** Every language has this. Python `int(s)`, `float(s)`.
+Rust `s.parse::<f64>()`.
+
+**Proposed fix.** Two builtins: `to_number(s)` returns
+`Value::Result<Number, Str>` -- `Ok(n)` on success, `Err(msg)`
+on parse failure (e.g. `"abc"`). `to_int(s)` similar for
+integers. Both Result-typed for the same reason as `env`.
+
+**Migration cost.** Pure addition. Two builtins.
+
+---
+
+### 27. No stdin reading
+
+**Category:** MISSING **Priority:** nice-to-have
+
+`mlpl-repl -f filter.mlpl < data.txt` discards stdin. A script
+that wants to act as a Unix pipe filter has no input.
+
+**Precedent.** `sys.stdin.read()` (Python), `read_to_string`
+(Rust), `getline` (awk).
+
+**Proposed fix.** `read_stdin()` returns `Value::Str` (the
+whole stdin contents). `read_stdin_lines()` returns
+`Value::StrList`. Both block until EOF.
+
+**Migration cost.** Pure addition. Conditional on whether
+stdin is a TTY -- a TTY read should not hang the REPL.
+
+---
+
+### 28. No `print` / explicit script output
+
+**Category:** MISSING **Priority:** critical (blocks scripts alone)
+
+A script's value is whatever its last expression returned;
+intermediate values are silently dropped. In the REPL the user
+sees them because the REPL prints each statement's result. In
+`-f` script mode only the final value is displayed
+(`apps/mlpl-repl/src/main.rs:87-113`). A script that wants to
+print "classifying cat... done" between two computations cannot.
+
+**Precedent.** `print` / `println` is universal. Rust
+`println!`, Python `print`, AWK `print`.
+
+**Proposed fix.** `print(value)` builtin: writes the value's
+display form (the same format the REPL uses) to stdout, plus
+newline. `eprint(value)` writes to stderr. Both return their
+argument unchanged so they compose into expressions:
+`x = print(some_computation)` binds and shows. A `print` that
+returns unit would break the expression-only language model.
+
+**Migration cost.** Pure addition. Two builtins.
+
+---
+
+### 29. No script exit code / error propagation
+
+**Category:** MISSING **Priority:** nice-to-have
+
+If a script encounters an error (an `Err(...)` Result, a parse
+failure, a tensor shape mismatch), the REPL prints the diagnostic
+and exits zero. There is no way for the script to communicate
+"this failed" to a calling shell. Unix scripting depends on
+exit codes.
+
+**Precedent.** `sys.exit(n)` (Python), `exit(n)` (C/Rust),
+`return n` from `main` (Bash).
+
+**Proposed fix.** Two pieces:
+
+1. If the script's final expression is `Err(msg)`, exit non-zero
+   and print `msg` to stderr.
+2. `exit(code)` builtin terminates immediately with the given
+   integer code.
+
+**Migration cost.** Pure addition. Light change in `mlpl-repl`'s
+`run_script` to inspect the final value.
+
+---
+
+### 30. The "script" mental model is unsupported by example demos
+
+**Category:** ANTI-PATTERN **Priority:** nice-to-have
+
+Every demo under `demos/*.mlpl` hard-codes its inputs. None take
+arguments, none branch on user choice, none read stdin or
+files-by-name. The implicit message to a new user is "MLPL is a
+notebook language, not a script language." The findings above
+unlock script use; the demo set should follow with at least one
+example that takes args and branches.
+
+**Precedent.** Most language standard libraries ship at least
+one "command-line tool" example.
+
+**Proposed fix.** Add a `demos/classify.mlpl` once #22, #24, #26,
+#28 land: takes a path argument, loads the image, picks a model
+(passed via `--model` or `$MODEL`), runs inference, prints the
+label and confidence to stdout. Exit code reflects success.
+Document the script pattern in `docs/usage.md`.
+
+**Migration cost.** None for existing surface; one new demo file
++ a section in the usage guide.
+
+---
+
 ## Cross-cutting observations
 
 - The single biggest user-visible win is **fixing
@@ -680,6 +929,11 @@ Critical (recommend pre-v1.0):
 - #15 (downstream of #1)
 - #18 concat axis-N
 - #19 multi-head attention tape
+- **Scripting cluster:** #22 `if`/`else`, #24 args, #26
+  string-to-number, #28 `print`. These four are the minimum
+  set for MLPL to function as a script language; landing any
+  three without the fourth still leaves users blocked. Treat
+  them as one saga.
 
 Nice-to-have:
 
@@ -692,6 +946,11 @@ Nice-to-have:
 - #14 named-axis types (saga 19)
 - #16 model DSL coverage
 - #17 typed device names
+- #23 `while` + `break` / `continue`
+- #25 env-var access
+- #27 stdin
+- #29 script exit code
+- #30 example-demo coverage
 
 Cosmetic:
 

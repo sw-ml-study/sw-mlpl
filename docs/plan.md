@@ -443,6 +443,46 @@ Critical:
   multi-head onto the same tape primitives as
   single-head so the multi-head ViT trains
   end-to-end without the manual per-head workaround.
+- **Scripting cluster (#22 + #24 + #26 + #28).**
+  Surface `if cond { } else { }`, capture trailing
+  CLI args via `args()`, add `to_number(s)` /
+  `to_int(s)` string parsing, and add `print(v)` /
+  `eprint(v)`. The four together let MLPL function
+  as a real scripting language (take an image path
+  from `argv`, branch on a flag, print a label).
+  Landing any three without the fourth still leaves
+  users blocked, so treat them as one saga. See
+  audit findings #22-#30 for the full scripting
+  block (also covers `while`, `break`/`continue`,
+  `env()`, stdin, exit codes, and an example demo).
+
+## Dimensionality-reduction milestone (proposed)
+
+`docs/milestone-dimensionality-reduction.md` is the
+proposed milestone. It expands MLPL's dim-reduction
+surface from today's `pca` + `tsne` pair into a
+guided tour: a new "critical-dimensions heatmap" viz
+showing *which input features matter* (not just where
+points end up), a UMAP implementation, MDS + random
+projection, six tutorial lessons, and a new learning
+path "High-dimensional data, one chart at a time."
+Awaiting the user's go-ahead on phase ordering
+before kickoff.
+
+## Chronological-history learning track (proposed)
+
+`docs/milestone-chronological-history.md` is the
+proposed milestone. Factors today's two summary
+lessons (HISTORY_OF_ML, HOW_MODELS_LEARN) into 24
+focused per-concept lessons (one paper / one idea
+each, ~half runnable, ~half deferred-with-why), then
+adds a new "Chronological history of ML" learning
+path that walks them in publication order. Other
+paths (architecture family, training paradigm,
+runnable-only, deferred-only) reuse the same lesson
+set without duplicating content. Awaiting the user's
+go-ahead on granularity (24 vs ~12 vs ~40 lessons)
+and whether deferred lessons ship in phase 1.
 
 Nice-to-have (defer):
 
