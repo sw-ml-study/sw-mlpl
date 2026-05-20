@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 21,
+    "step": "scrub-saga-meta-from-user-strings"
+  },
+  "action": "bulk sed pass + targeted edits to strip Saga refs from glossary.md, rewrote :upload entry for readability + brevity, edited paths.rs Vision path why-texts and Beyond note, scrubbed demos.rs intros + ProgressNote bodies + one inline comment, edited help.rs and lessons.rs/lessons_advanced.rs lesson intros, ran cargo test + clippy + fmt + markdown-checker + sw-checklist (all green; 157==parent), rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T22:58:53"
+}
