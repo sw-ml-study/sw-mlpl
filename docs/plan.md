@@ -379,6 +379,45 @@ streaming for long-running blocks. None of these
 gate the design itself, but they shape R1's first
 contract.
 
+## Near-term UX + language work (Saga 29 tail)
+
+In flight as agentrail steps 024 onward, in priority order:
+
+1. **Glossary hyperlinks** (step 024). Every glossary
+   term mentioned in a demo intro / takeaway, tutorial
+   lesson, learning-path Note body, or another glossary
+   entry should be a clickable link that pops up the
+   matched glossary definition. Cross-references inside
+   the glossary too. Sigil form `[[term]]` -- explicit so
+   authors control which words become links.
+2. **ViT-era diagrams** (step 025). SVG explainers in
+   `diagrams/` for patchify, multi-head attention, the
+   Stack tape op, the ViT pipeline, the Result type,
+   heatmap_grid, the :upload flow. Each ~300-500 px,
+   hand-drawn, wired into `apps/mlpl-web/src/diagrams.rs`
+   and added to relevant learning-path Step::Diagram
+   entries.
+3. **Language audit + breaking-change candidates**
+   (step 026). MLPL is still in alpha; breaking changes
+   are cheap now and expensive at beta. The audit doc
+   (`docs/language-audit.md`) compares MLPL against
+   APL / J / BQN / Python+PyTorch+JAX / Rust, classifies
+   each finding as MISSING / INCONSISTENT / ERROR-PRONE /
+   ANTI-PATTERN / ALPHA-LEAK, and proposes a specific
+   breaking-change fix with migration cost. Seed list:
+   the closures-don't-differentiate issue forcing inline
+   forward expressions in train blocks; the
+   device("mlx") model-params-must-live-inside-scope
+   gotcha; concat arity overload and axis-in-{0,1} limit;
+   booleans-as-floats; magic-seed thread-through;
+   diagram-type-as-string. Top-tier items pulled forward
+   from the audit doc into a "Breaking-change candidates"
+   section here for saga consideration.
+
+After 026 lands, the remaining queued saga 29 step is
+the attention-viz overlay demo (027, originally step
+010 in milestone-vit.md Phase 4).
+
 ## Deferred primitives queue
 
 Living list of small builtin / op gaps encountered

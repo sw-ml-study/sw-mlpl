@@ -1,0 +1,12 @@
+number = 24
+slug = "glossary-hyperlinks"
+status = "pending"
+description = """
+Saga 29 step inserted: glossary hyperlinks across user-facing surfaces.
+
+Ever..."""
+role = "production"
+context_files = []
+created_at = "2026-05-20T07:19:37"
+task_type = "feature"
+commits = []
