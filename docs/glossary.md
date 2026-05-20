@@ -62,26 +62,27 @@ a loop; building the loop itself is application code.
 
 A layer that computes a weighted average of one set of values
 where the weights come from comparing a query against a set
-of keys. The classic formula is `softmax(Q @ K^T / sqrt(d)) @
+of keys. The classic formula is `[[Softmax]](Q @ K^T / sqrt(d)) @
 V`. MLPL builds it into `attention(d_model, heads, seed)`
-and `causal_attention(...)`; the manual three-line version
-runs in the "Attention Pattern" demo.
+and [[Causal attention]]; the manual three-line version
+runs in the "Attention Pattern" demo. See also
+[[Multi-head attention]] for the `heads > 1` case.
 
-`apply(mdl, X)` and `attention_weights(mdl, X)` accept both
+`apply(mdl, X)` and [[attention_weights (builtin)]] accept both
 rank-2 `[seq, d_model]` input and rank-3 `[B, T, d_model]`
-batched input for any `heads >= 1` (step 013;
-`d_model` must be divisible by `heads`). For rank-3 input
-each batch entry is processed independently and the per-
-batch outputs are stacked back. The tape lowering uses the
-`stack` primitive for both the per-head join (axis 1) and
-the per-batch join (axis 0), avoiding the O(N^2) cost of a
-chained binary `concat`.
+batched input for any `heads >= 1` (`d_model` must be
+divisible by `heads`). For rank-3 input each batch entry is
+processed independently and the per-batch outputs are
+stacked back. The tape lowering uses the [[Stack (tape op)]]
+primitive for both the per-head join (axis 1) and the per-
+batch join (axis 0), avoiding the O(N^2) cost of a chained
+binary [[concat (builtin)]].
 
 ## Attention map
 
 The `[T, T]` matrix of attention weights between every pair
-of positions in a sequence. Renders cleanly as a heatmap.
-Returned by `attention_weights(model, tokens)` in MLPL.
+of positions in a sequence. Renders cleanly as a [[Heatmap]].
+Returned by [[attention_weights (builtin)]] in MLPL.
 
 ## attention_weights (builtin)
 
@@ -1122,8 +1123,9 @@ deliberately not in the WASM dependency tree.
 ## patchify (builtin)
 
 `patchify(x, P)` rearranges a `[B, C, H, W]` image batch into
-`[B, N, P*P*C]` patch tokens. `P` is the
-square patch side length; it must divide both `H` and `W`,
+`[B, N, P*P*C]` patch tokens for a [[ViT (Vision Transformer)]].
+`P` is the square patch side length; it must divide both `H`
+and `W`,
 giving `N = (H/P) * (W/P)` patches per image. Each row of the
 trailing axis is one patch flattened in channel-outer order:
 the element at `(c, dy, dx)` lands at flat index
@@ -1997,12 +1999,12 @@ not raise.
 
 N-way concatenation of identically-shaped tensors along an
 existing axis, lowered as a single tape node with N parents.
-Used internally by the multi-head attention tape lowering
+Used internally by the [[Multi-head attention]] tape lowering
 (per-head outputs stacked along the column axis) and the
 rank-3 batched attention path (per-batch outputs stacked
 along the batch axis). Replaces the prior chained binary
-`concat`, which had O(N^2) cost in both forward and
-backward; stack is O(N).
+[[concat (builtin)]], which had O(N^2) cost in both forward
+and backward; stack is O(N).
 
 Backward splits the upstream gradient into N equal-size
 slabs and routes each to its parent. Same value-equivalence
@@ -2358,10 +2360,20 @@ image into fixed-size patches (e.g. 16x16 pixels),
 flattening each patch into a vector, and treating the
 sequence of patch vectors as tokens (with positional
 embeddings). Showed that the inductive biases of CNNs are
-not strictly required at scale -- pure attention works
+not strictly required at scale -- pure [[Attention]] works
 on images too. Foundation for modern vision-language
-models. **Deferred** in MLPL: needs image inputs + patch-
-embed plumbing.
+models.
+
+Shipped in MLPL via the [[patchify (builtin)]] builtin
+(image -> patch tokens), [[concat (builtin)]] (prepend
+CLS), and [[Multi-head attention]] on the autograd tape
+with the [[Stack (tape op)]] primitive to keep batched
+and multi-head paths O(N) rather than O(N^2). The web
+playground's "Pets: cat vs dog (quick)" and "Pets: multi-
+head ViT (quick + viz)" demos train a tiny ViT on the
+[[Oxford-IIIT Pet dataset]]; the [[:upload (REPL command)]]
+command lets you classify your own photo against the
+trained model.
 
 ## VLM (Vision-Language Models)
 

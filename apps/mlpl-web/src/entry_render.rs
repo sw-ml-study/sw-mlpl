@@ -52,7 +52,18 @@ fn render_input_line(input: &str) -> Html {
     let (code, comment) = split_inline_comment(input);
     let comment_html = match comment {
         Some(c) => {
-            html! { <span class="line-comment">{ format!(" # {c}") }</span> }
+            // Saga 29 step 025: route the comment text through
+            // the markdown-ish renderer so `[[term]]` inside an
+            // MLPL `# comment` becomes a clickable glossary
+            // link. Code (the part before `#`) stays a plain
+            // string -- the lexer parses MLPL source there and
+            // [[ would be ambiguous with array literals.
+            html! {
+                <span class="line-comment">
+                    {" # "}
+                    { crate::path_body::render_inline(c) }
+                </span>
+            }
         }
         None => html! {},
     };

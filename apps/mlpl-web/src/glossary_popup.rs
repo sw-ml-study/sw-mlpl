@@ -21,26 +21,10 @@ pub fn glossary_popup_host() -> Html {
     let term = use_state(|| None::<String>);
     let term_for_open = term.clone();
     let term_for_keydown = term.clone();
-    // The Yew rule-of-hooks requires `use_effect_with` to live at
-    // the top of the function-component body, not inside a helper
-    // -- earlier this hook was wrapped in `install_listener` and
-    // the event listener silently failed to attach.
+    // Yew rule-of-hooks: `use_effect_with` must be called at the
+    // top of the function-component body, not in a helper fn.
     use_effect_with((), move |_| {
-        if let Some(window) = web_sys::window() {
-            let open_closure = make_open_closure(term_for_open);
-            let _ = window.add_event_listener_with_callback(
-                "mlpl-glossary-open",
-                open_closure.as_ref().unchecked_ref(),
-            );
-            open_closure.forget();
-            let keydown_closure = make_esc_closure(term_for_keydown);
-            let _ = window.add_event_listener_with_callback(
-                "keydown",
-                keydown_closure.as_ref().unchecked_ref(),
-            );
-            keydown_closure.forget();
-            web_sys::console::log_1(&"GlossaryPopupHost listeners installed".into());
-        }
+        install_listeners(term_for_open, term_for_keydown);
         || ()
     });
     let Some(open_term) = (*term).clone() else {
@@ -67,6 +51,31 @@ pub fn glossary_popup_host() -> Html {
             </div>
         </div>
     }
+}
+
+/// Wire the two window-level listeners. Called from inside
+/// the use_effect_with closure (not as a hook itself, so it
+/// doesn't trip the rule-of-hooks). Closures are `forget()`d
+/// because GlossaryPopupHost is mounted once for the whole
+/// session; the leak is bounded.
+fn install_listeners(
+    term_for_open: UseStateHandle<Option<String>>,
+    term_for_keydown: UseStateHandle<Option<String>>,
+) {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let open_closure = make_open_closure(term_for_open);
+    let _ = window.add_event_listener_with_callback(
+        "mlpl-glossary-open",
+        open_closure.as_ref().unchecked_ref(),
+    );
+    open_closure.forget();
+    let keydown_closure = make_esc_closure(term_for_keydown);
+    let _ = window
+        .add_event_listener_with_callback("keydown", keydown_closure.as_ref().unchecked_ref());
+    keydown_closure.forget();
+    web_sys::console::log_1(&"GlossaryPopupHost listeners installed".into());
 }
 
 fn make_open_closure(term: UseStateHandle<Option<String>>) -> Closure<dyn FnMut(web_sys::Event)> {
