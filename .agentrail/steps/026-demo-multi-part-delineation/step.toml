@@ -1,0 +1,9 @@
+number = 26
+slug = "demo-multi-part-delineation"
+status = "pending"
+description = "Saga 29 step inserted: demo multi-part delineation. User reports the Decision..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T08:41:20"
+task_type = "docs"
+commits = []
