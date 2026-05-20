@@ -1,0 +1,1 @@
+Saga 29 (vit) completed; closing out before initializing the Tier 1 alpha-leak-cleanup saga (concat axis-N + multi-head attention tape).

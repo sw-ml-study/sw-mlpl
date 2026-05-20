@@ -1,0 +1,9 @@
+number = 5
+slug = "refresh-multihead-demo-takeaways"
+status = "pending"
+description = "Tier 1 saga step 005: rewrite the multi-head pets demo intros and takeaways n..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T13:03:14"
+task_type = "demo"
+commits = []
