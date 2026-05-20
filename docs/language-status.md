@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-20 (saga 30 step 001 shipped).
+Last refreshed: 2026-05-20 (saga 30 step 002 shipped).
 
 ## Active saga
 
 | Slug              | Status   | Steps total | Done | Next step                                |
 |-------------------|----------|-------------|------|------------------------------------------|
-| `tier1-cleanup`   | active   | 6           | 1    | 002 concat-axis-n-backward (audit #18)   |
+| `tier1-cleanup`   | active   | 6           | 2    | 003 drop-rank3-concat-workaround         |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -45,7 +45,7 @@ agentrail.
 | #10 | No `vmap` / batched transform                | proposed    | future                   | --             |
 | #12 | No `gather` / no slice ranges                | proposed    | future                   | --             |
 | #15 | Inline forward expression anti-pattern       | downstream of #1 | --                  | --             |
-| #18 | `concat` axis restricted to `{0, 1}`         | **in flight** | saga 30 (step 001 forward shipped; step 002 backward up next) | step 001: `c133d57` |
+| #18 | `concat` axis restricted to `{0, 1}`         | **shipped** | saga 30 steps 001 (forward) + 002 (backward) | 001: `c133d57`, 002: (pending commit) |
 | #19 | Multi-head attention has forward-only tape   | queued      | saga 30 step 004         | --             |
 | #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
 | #24 | No CLI argument capture in script mode       | proposed    | scripting saga           | --             |
@@ -82,7 +82,10 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-20** -- saga 30 step 002: audit #18 backward lifted.
+  The autograd `concat_backward` now generalizes to any axis,
+  matching the forward. Rank-3 and rank-4 finite-difference
+  gradchecks pass. Closes the audit finding.
 - **2026-05-20** -- saga 30 step 001: audit #18 forward lifted in
   `c133d57`. `mlpl-array::concat` now accepts any `axis` in
-  `[0, rank)`. The autograd backward still restricts axis < 2;
-  step 002 closes that.
+  `[0, rank)`.
