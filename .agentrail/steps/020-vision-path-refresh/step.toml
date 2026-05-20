@@ -1,6 +1,6 @@
 number = 20
 slug = "vision-path-refresh"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted: refresh apps/mlpl-web/src/paths.rs Vision Transformers..."
 role = "production"
 context_files = []

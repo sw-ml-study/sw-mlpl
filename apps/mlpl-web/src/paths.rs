@@ -313,11 +313,11 @@ pub const PATHS: &[LearningPath] = &[
     },
     LearningPath {
         title: "Vision Transformers in MLPL",
-        blurb: "From a synthetic image to a trained multi-head cat-vs-dog classifier with per-head attention visualization. The same attention machinery from the transformer demos, applied to image patches. Eight steps; assumes you have already seen scaled-dot-product attention.",
+        blurb: "From a synthetic image to a trained multi-head cat-vs-dog classifier with per-head attention visualization, ending with uploading a photo from your phone for the trained model to classify. The same attention machinery from the transformer demos, applied to image patches. Nine steps; assumes you have already seen scaled-dot-product attention.",
         steps: &[
             Step::Note {
                 title: "How this path is laid out",
-                body: "ViT is not new architecture -- it is the SAME attention block from the transformer demos, fed image patches instead of token embeddings. The early steps explain the new pieces (patchify, take, batched and multi-head attention); the demos that follow wire them together at three depths: an untrained pattern, a trained single-head classifier with a labeled gallery, and a trained multi-head classifier with per-head attention maps. After this path, the natural next step is bring-your-own-image upload (still in progress as Saga 29 step 016) so you can classify a photo from your phone.",
+                body: "ViT is not new architecture -- it is the SAME attention block from the transformer demos, fed image patches instead of token embeddings. The early steps explain the new pieces (patchify, take, batched and multi-head attention); the demos wire them together at three depths: an untrained pattern, a trained single-head classifier with a labeled gallery, and a trained multi-head classifier with per-head attention maps. The path ends with bring-your-own-image (`:upload x` REPL command) so you can classify a photo from your phone end-to-end.",
             },
             Step::Glossary {
                 term: "patchify (builtin)",
@@ -355,13 +355,17 @@ pub const PATHS: &[LearningPath] = &[
                 name: "Pets: multi-head ViT (quick + viz)",
                 why: "The headline demo for the multi-head story. Same architecture as the single-head quick demo but `attention(128, 4)`; after 30 adam steps it renders the four post-training attention maps. Compare with the untrained multi-head pattern demo above to see what specialization gradient descent buys -- the heads start identical and end different.",
             },
+            Step::Glossary {
+                term: ":upload (REPL command)",
+                why: "Saga 29 step 016 shipped: pick a photo from your device, the browser decodes + resizes to 64x64, binds the result as `<name> = Ok({pixels, h, w})`. A cancelled / unreadable / undecodable upload binds an `Err(\"...\")` instead (Saga 29 step 017 added the four flavors). First in-tree consumer of the `Value::Result` type from step 012.",
+            },
             Step::Note {
-                title: "Coming next: bring-your-own-image",
-                body: "Today you can browse `pets_tiny` and classify any of its 200 photos (`reshape(take(pets.X, 0, i), [1, 3, 64, 64])` then run the predict pipeline). The next step in this path is the `:upload x` REPL command (Saga 29 step 016, in progress): the user picks a photo from their device, the browser decodes + resizes it to 64x64, binds it under a name you choose, and you classify it with the same one-liner. A Result<val, err> type already ships (Saga 29 step 012), so a cancelled upload becomes `x = Err(\"cancelled\")` instead of an undefined variable -- the REPL won't crash on a dismissed dialog.",
+                title: "Bring-your-own-image (try it now)",
+                body: "After running any of the three trained pets demos above, the model bindings (`linear_p`, `attn`, `classifier`) stay in your REPL session. Then type these five lines:\n\n1. `:upload x` -- file picker opens; pick any photo.\n2. `is_ok(x)` -- returns 1 if the upload succeeded, 0 if you dismissed the dialog or the file was not a valid image.\n3. `svg(unwrap(x).pixels, \"gallery\")` -- see the 64x64 resized version.\n4. `img = unwrap(x).pixels` -- pull the tensor out of the Result.\n5. `predict_batch(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(img, 16), [16, 768])), [1, 16, 128])), 1, 0))` -- returns `[0]` for cat or `[1]` for dog.\n\nIf you dismissed the picker, `x = Err(\"cancelled\")` and `is_ok(x)` returns 0. Other Err flavors: `\"decode failed: not a valid image\"` (binary renamed as .jpg), `\"read failed\"` (zero-byte / permissions). Read the diagnostic with `err_message(x)`.\n\nReality check: the in-browser models train on only 8-20 images, so they memorize the training set and tend to classify any unseen photo as a cat. See `docs/better-cat-dog-future-demos.md` for the recommended improvement ladder (full-pets_tiny + val split, confidence threshold, augmentation, etc.).",
             },
             Step::Note {
                 title: "Beyond this path",
-                body: "The full-resolution demo (128x128 input, Oxford-IIIT Pet via fetch_dataset, single transformer block on the MLX peer) is `demos/vit_multihead_thorough.mlpl` (Saga 29 step 015). It runs on Apple Silicon with `--features mlx`; the CPU-only fallback works on any host. Layer norm with learned affine and the tanh-approximation GELU are still pending (Tier 2 builtins from `docs/milestone-vit.md`) and would be the next architectural additions for parity with the upstream notebook.",
+                body: "The full-resolution demo (128x128 input, Oxford-IIIT Pet via fetch_dataset, single transformer block on the MLX peer) is `demos/vit_multihead_thorough.mlpl` (Saga 29 step 015). It runs on Apple Silicon with `--features mlx`; the CPU-only fallback works on any host. Layer norm with learned affine and the tanh-approximation GELU are still pending Tier 2 builtins from `docs/milestone-vit.md` and would be the next architectural additions for parity with the upstream notebook. The 7-demo ladder in `docs/better-cat-dog-future-demos.md` lays out a recommended sequence for making the classifier actually generalize to held-out photos.",
             },
         ],
     },
