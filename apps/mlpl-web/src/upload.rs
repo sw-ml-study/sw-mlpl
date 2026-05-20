@@ -87,15 +87,24 @@ pub fn make_upload_image(
 /// `cancel` event. Wires `Err("cancelled")` under the pending
 /// variable name (if any) so a `:upload x` command leaves
 /// `x = Err("cancelled")` instead of an undefined variable.
+///
+/// Saga 29 step 017 guard: only fires when `pending_name` is
+/// still `Some(_)`. The change-event handler clears
+/// `pending_name` the moment it starts processing a real file
+/// selection -- so if a stray `cancel` event arrives AFTER a
+/// failed decode (some browsers fire both), it sees `None` and
+/// skips, avoiding the "decoder failed but message says
+/// cancelled" bug where a bad-format file appeared to bind
+/// `Err("cancelled")`.
 pub fn make_upload_cancel(
     session: Rc<RefCell<WasmSession>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
     pending_name: PendingUploadName,
 ) -> Callback<Event> {
     Callback::from(move |_: Event| {
-        let name = pending_name
-            .as_ref()
-            .map_or_else(|| DEFAULT_NAME.to_string(), Clone::clone);
+        let Some(name) = pending_name.as_ref().cloned() else {
+            return;
+        };
         pending_name.set(None);
         session.borrow().bind_upload_result_err(&name, "cancelled");
         push_cancel(&history, &name);
@@ -109,32 +118,10 @@ fn start_read(
     name: &str,
 ) -> Result<(), JsValue> {
     let reader = FileReader::new()?;
-    let reader_clone = reader.clone();
-    let session_clone = session.clone();
-    let history_clone = history.clone();
-    let name_clone = name.to_string();
-    let onload = Closure::wrap(Box::new(move |_: Event| match reader_clone.result() {
-        Ok(v) => match v.as_string() {
-            Some(url) => {
-                if let Err(err) =
-                    start_image_load(&url, &session_clone, &history_clone, &name_clone)
-                {
-                    session_clone
-                        .borrow()
-                        .bind_upload_result_err(&name_clone, "image-load failed");
-                    push_error(&history_clone, &name_clone, &format!("{err:?}"));
-                }
-            }
-            None => push_error(
-                &history_clone,
-                &name_clone,
-                "FileReader result was not a string",
-            ),
-        },
-        Err(err) => push_error(&history_clone, &name_clone, &format!("{err:?}")),
-    }) as Box<dyn FnMut(Event)>);
-    reader.set_onload(Some(onload.as_ref().unchecked_ref()));
-    onload.forget();
+    handlers::install_reader_onload(&reader, session, history, name);
+    // Saga 29 step 017: FileReader.onerror fires when the file
+    // is unreadable (zero bytes, permission issue, abort).
+    handlers::install_reader_onerror(&reader, session, history, name);
     reader.read_as_data_url(file)?;
     Ok(())
 }
@@ -146,22 +133,13 @@ fn start_image_load(
     name: &str,
 ) -> Result<(), JsValue> {
     let img = HtmlImageElement::new()?;
-    let img_clone = img.clone();
-    let session_clone = session.clone();
-    let history_clone = history.clone();
-    let name_clone = name.to_string();
-    let onload = Closure::wrap(Box::new(move |_: Event| {
-        if let Err(err) =
-            decode_image_to_session(&img_clone, &session_clone, &history_clone, &name_clone)
-        {
-            session_clone
-                .borrow()
-                .bind_upload_result_err(&name_clone, "decode failed");
-            push_error(&history_clone, &name_clone, &format!("{err:?}"));
-        }
-    }) as Box<dyn FnMut(Event)>);
-    img.set_onload(Some(onload.as_ref().unchecked_ref()));
-    onload.forget();
+    handlers::install_image_onload(&img, session, history, name, decode_image_to_session);
+    // Saga 29 step 017: fires when the browser cannot decode
+    // the data URL (e.g. a non-image file renamed to .jpg).
+    // Without this handler the upload silently fails and a
+    // stray cancel event later binds Err("cancelled"), which
+    // misrepresents the actual failure.
+    handlers::install_image_onerror(&img, session, history, name);
     img.set_src(url);
     Ok(())
 }
@@ -219,11 +197,10 @@ fn decode_image_to_session(
     Ok(())
 }
 
-// History-entry pushers live in a sub-module so the
-// success/cancel/error trio doesn't blow upload.rs past the
-// sw-checklist per-module function-count budget. They share
-// one underlying `push_upload_entry` to centralize the
-// HistoryEntry construction.
+// History-entry pushers + async-handler installers live in
+// sub-modules so the success/cancel/error trio and the four
+// install_*_on{load,error} helpers don't blow upload.rs past
+// the sw-checklist per-module function-count budget.
 use messages::{push_cancel, push_error, push_success};
 
 mod messages {
@@ -281,5 +258,153 @@ mod messages {
             kind: EntryKind::Narration,
         });
         history.set(entries);
+    }
+}
+
+mod handlers {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+
+    use mlpl_wasm::WasmSession;
+    use wasm_bindgen::{JsCast, JsValue, closure::Closure};
+    use web_sys::{Event, FileReader, HtmlImageElement};
+    use yew::UseStateHandle;
+
+    use super::{HistoryEntry, push_error, start_image_load};
+
+    /// Saga 29 step 016: wire FileReader.onload to call
+    /// `start_image_load` with the read-back data URL. Any
+    /// read-side failure (non-string result, error event)
+    /// binds Err("read failed") under the captured name.
+    pub(super) fn install_reader_onload(
+        reader: &FileReader,
+        session: &Rc<RefCell<WasmSession>>,
+        history: &UseStateHandle<Vec<HistoryEntry>>,
+        name: &str,
+    ) {
+        let reader_clone = reader.clone();
+        let session_clone = session.clone();
+        let history_clone = history.clone();
+        let name_clone = name.to_string();
+        let onload = Closure::wrap(Box::new(move |_: Event| match reader_clone.result() {
+            Ok(v) => handle_reader_payload(v, &session_clone, &history_clone, &name_clone),
+            Err(err) => {
+                session_clone
+                    .borrow()
+                    .bind_upload_result_err(&name_clone, "read failed");
+                push_error(&history_clone, &name_clone, &format!("{err:?}"));
+            }
+        }) as Box<dyn FnMut(Event)>);
+        reader.set_onload(Some(onload.as_ref().unchecked_ref()));
+        onload.forget();
+    }
+
+    fn handle_reader_payload(
+        v: JsValue,
+        session: &Rc<RefCell<WasmSession>>,
+        history: &UseStateHandle<Vec<HistoryEntry>>,
+        name: &str,
+    ) {
+        match v.as_string() {
+            Some(url) => {
+                if let Err(err) = start_image_load(&url, session, history, name) {
+                    session
+                        .borrow()
+                        .bind_upload_result_err(name, "image-load failed");
+                    push_error(history, name, &format!("{err:?}"));
+                }
+            }
+            None => {
+                session.borrow().bind_upload_result_err(name, "read failed");
+                push_error(history, name, "FileReader result was not a string");
+            }
+        }
+    }
+
+    /// Saga 29 step 017: wire FileReader.onerror to bind
+    /// Err("read failed") so an unreadable file doesn't fall
+    /// through to a stray cancel event.
+    pub(super) fn install_reader_onerror(
+        reader: &FileReader,
+        session: &Rc<RefCell<WasmSession>>,
+        history: &UseStateHandle<Vec<HistoryEntry>>,
+        name: &str,
+    ) {
+        let session_clone = session.clone();
+        let history_clone = history.clone();
+        let name_clone = name.to_string();
+        let onerror = Closure::wrap(Box::new(move |_: Event| {
+            session_clone
+                .borrow()
+                .bind_upload_result_err(&name_clone, "read failed");
+            push_error(
+                &history_clone,
+                &name_clone,
+                "FileReader emitted an error event",
+            );
+        }) as Box<dyn FnMut(Event)>);
+        reader.set_onerror(Some(onerror.as_ref().unchecked_ref()));
+        onerror.forget();
+    }
+
+    /// Saga 29 step 016: wire `<img>` onload to call the
+    /// caller-supplied decode pipeline (Canvas resize +
+    /// bind_upload_result_ok).
+    pub(super) fn install_image_onload<F>(
+        img: &HtmlImageElement,
+        session: &Rc<RefCell<WasmSession>>,
+        history: &UseStateHandle<Vec<HistoryEntry>>,
+        name: &str,
+        decode: F,
+    ) where
+        F: Fn(
+                &HtmlImageElement,
+                &Rc<RefCell<WasmSession>>,
+                &UseStateHandle<Vec<HistoryEntry>>,
+                &str,
+            ) -> Result<(), JsValue>
+            + 'static,
+    {
+        let img_clone = img.clone();
+        let session_clone = session.clone();
+        let history_clone = history.clone();
+        let name_clone = name.to_string();
+        let onload = Closure::wrap(Box::new(move |_: Event| {
+            if let Err(err) = decode(&img_clone, &session_clone, &history_clone, &name_clone) {
+                session_clone
+                    .borrow()
+                    .bind_upload_result_err(&name_clone, "decode failed");
+                push_error(&history_clone, &name_clone, &format!("{err:?}"));
+            }
+        }) as Box<dyn FnMut(Event)>);
+        img.set_onload(Some(onload.as_ref().unchecked_ref()));
+        onload.forget();
+    }
+
+    /// Saga 29 step 017: wire `<img>` onerror to bind
+    /// Err("decode failed: not a valid image") so a
+    /// renamed-binary upload doesn't fall through silently.
+    pub(super) fn install_image_onerror(
+        img: &HtmlImageElement,
+        session: &Rc<RefCell<WasmSession>>,
+        history: &UseStateHandle<Vec<HistoryEntry>>,
+        name: &str,
+    ) {
+        let session_clone = session.clone();
+        let history_clone = history.clone();
+        let name_clone = name.to_string();
+        let onerror = Closure::wrap(Box::new(move |_: Event| {
+            session_clone
+                .borrow()
+                .bind_upload_result_err(&name_clone, "decode failed: not a valid image");
+            push_error(
+                &history_clone,
+                &name_clone,
+                "the browser could not decode this file as an image \
+                 (e.g. a non-image file renamed to .jpg)",
+            );
+        }) as Box<dyn FnMut(Event)>);
+        img.set_onerror(Some(onerror.as_ref().unchecked_ref()));
+        onerror.forget();
     }
 }

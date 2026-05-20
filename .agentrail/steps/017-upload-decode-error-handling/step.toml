@@ -1,6 +1,6 @@
 number = 17
 slug = "upload-decode-error-handling"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted (bugfix after step 016): wire image-decode and file-rea..."
 role = "production"
 context_files = []
