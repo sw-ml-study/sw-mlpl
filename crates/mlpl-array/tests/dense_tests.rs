@@ -435,3 +435,93 @@ fn binop_partial_labels_match() {
     let r = a.apply_binop(&b, |x, y| x + y).unwrap();
     assert_eq!(r.labels(), Some(&[None, Some("cols".into())][..]));
 }
+
+// -- concat axis-N (saga 30 step 001) --
+
+#[test]
+fn concat_rank3_axis2_shape_and_content() {
+    // a: [2, 2, 3] = 12 elements, b: [2, 2, 4] = 16 elements, concat along axis 2 -> [2, 2, 7].
+    let a_data: Vec<f64> = (0..12).map(|i| i as f64).collect();
+    let b_data: Vec<f64> = (100..116).map(|i| i as f64).collect();
+    let a = DenseArray::new(Shape::new(vec![2, 2, 3]), a_data).unwrap();
+    let b = DenseArray::new(Shape::new(vec![2, 2, 4]), b_data).unwrap();
+    let r = a.concat(&b, 2).expect("rank-3 concat axis 2 must succeed");
+    assert_eq!(r.shape().dims(), &[2, 2, 7]);
+    // For outer index (i, j) the row is a[i, j, 0..3] then b[i, j, 0..4].
+    // First row: a[0,0,0..3] = 0,1,2; b[0,0,0..4] = 100..103 -> indices 0..7 in flat output.
+    assert_eq!(&r.data()[..7], &[0.0, 1.0, 2.0, 100.0, 101.0, 102.0, 103.0]);
+    // Second row: a[0,1,0..3] = 3,4,5; b[0,1,0..4] = 104..107.
+    assert_eq!(
+        &r.data()[7..14],
+        &[3.0, 4.0, 5.0, 104.0, 105.0, 106.0, 107.0]
+    );
+    // Third row: a[1,0,0..3] = 6,7,8; b[1,0,0..4] = 108..111.
+    assert_eq!(
+        &r.data()[14..21],
+        &[6.0, 7.0, 8.0, 108.0, 109.0, 110.0, 111.0]
+    );
+    // Fourth row: a[1,1,0..3] = 9,10,11; b[1,1,0..4] = 112..115.
+    assert_eq!(
+        &r.data()[21..28],
+        &[9.0, 10.0, 11.0, 112.0, 113.0, 114.0, 115.0]
+    );
+}
+
+#[test]
+fn concat_rank4_axis3_shape_and_content() {
+    // a: [2, 1, 2, 2] = 8 elements, b: [2, 1, 2, 1] = 4 elements, concat axis 3 -> [2, 1, 2, 3].
+    let a_data: Vec<f64> = (0..8).map(|i| i as f64).collect();
+    let b_data: Vec<f64> = (50..54).map(|i| i as f64).collect();
+    let a = DenseArray::new(Shape::new(vec![2, 1, 2, 2]), a_data).unwrap();
+    let b = DenseArray::new(Shape::new(vec![2, 1, 2, 1]), b_data).unwrap();
+    let r = a.concat(&b, 3).expect("rank-4 concat axis 3 must succeed");
+    assert_eq!(r.shape().dims(), &[2, 1, 2, 3]);
+    // a[0,0,0,0..2]=0,1; b[0,0,0,0..1]=50 -> 0,1,50
+    assert_eq!(&r.data()[..3], &[0.0, 1.0, 50.0]);
+    // a[0,0,1,0..2]=2,3; b[0,0,1,0..1]=51 -> 2,3,51
+    assert_eq!(&r.data()[3..6], &[2.0, 3.0, 51.0]);
+    // a[1,0,0,0..2]=4,5; b[1,0,0,0..1]=52 -> 4,5,52
+    assert_eq!(&r.data()[6..9], &[4.0, 5.0, 52.0]);
+    // a[1,0,1,0..2]=6,7; b[1,0,1,0..1]=53 -> 6,7,53
+    assert_eq!(&r.data()[9..12], &[6.0, 7.0, 53.0]);
+}
+
+#[test]
+fn concat_rank3_axis0_still_works() {
+    // Regression guard: the axis-0 path still concatenates whole slabs.
+    let a = DenseArray::new(
+        Shape::new(vec![2, 2, 2]),
+        (0..8).map(|i| i as f64).collect(),
+    )
+    .unwrap();
+    let b = DenseArray::new(
+        Shape::new(vec![1, 2, 2]),
+        (100..104).map(|i| i as f64).collect(),
+    )
+    .unwrap();
+    let r = a.concat(&b, 0).expect("rank-3 concat axis 0");
+    assert_eq!(r.shape().dims(), &[3, 2, 2]);
+    assert_eq!(&r.data()[..8], &[0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]);
+    assert_eq!(&r.data()[8..], &[100.0, 101.0, 102.0, 103.0]);
+}
+
+#[test]
+fn concat_rank3_axis1_still_works() {
+    // Regression guard: the axis-1 path still works.
+    let a = DenseArray::new(
+        Shape::new(vec![2, 2, 2]),
+        (0..8).map(|i| i as f64).collect(),
+    )
+    .unwrap();
+    let b = DenseArray::new(
+        Shape::new(vec![2, 1, 2]),
+        (50..54).map(|i| i as f64).collect(),
+    )
+    .unwrap();
+    let r = a.concat(&b, 1).expect("rank-3 concat axis 1");
+    assert_eq!(r.shape().dims(), &[2, 3, 2]);
+    // For i=0: a[0,0..2,:]=[0,1,2,3]; b[0,0,:]=[50,51] -> [0,1,2,3,50,51]
+    assert_eq!(&r.data()[..6], &[0.0, 1.0, 2.0, 3.0, 50.0, 51.0]);
+    // For i=1: a[1,0..2,:]=[4,5,6,7]; b[1,0,:]=[52,53] -> [4,5,6,7,52,53]
+    assert_eq!(&r.data()[6..], &[4.0, 5.0, 6.0, 7.0, 52.0, 53.0]);
+}

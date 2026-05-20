@@ -121,12 +121,28 @@ fn concat_errors_on_mismatched_non_concat_dim() {
 }
 
 #[test]
-fn concat_axis_2_or_higher_errors_in_initial_release() {
+fn concat_axis_2_works_in_rank3() {
+    // Saga 30 step 001 lifted the {0, 1} axis restriction.
+    // [2, 3, 4] cat [2, 3, 5] along axis 2 -> [2, 3, 9]
+    // where each axis-(0,1) cell is the 4 from `a` followed
+    // by the 5 from `b`.
+    let a: Vec<f64> = (0..24).map(|i| i as f64).collect();
+    let b: Vec<f64> = (100..130).map(|i| i as f64).collect();
     let mut env = Environment::new();
-    env.set("a".into(), arr(vec![2, 3, 4], vec![0.0; 24]));
-    env.set("b".into(), arr(vec![2, 3, 4], vec![0.0; 24]));
-    let err = run_err("concat(a, b, 2)", &mut env);
-    assert!(format!("{err}").contains("concat") || format!("{err}").contains("shape"));
+    env.set("a".into(), arr(vec![2, 3, 4], a.clone()));
+    env.set("b".into(), arr(vec![2, 3, 5], b.clone()));
+    let y = run("concat(a, b, 2)", &mut env);
+    assert_eq!(y.shape().dims(), &[2, 3, 9]);
+    // For each (i, j) along axes 0 and 1 the row is
+    // a[i, j, 0..4] then b[i, j, 0..5].
+    // First (0, 0): a[0..4] then b[0..5].
+    assert_eq!(&y.data()[..4], &a[0..4]);
+    assert_eq!(&y.data()[4..9], &b[0..5]);
+    // Last (1, 2): a[20..24] then b[25..30].
+    let last_a_start = a.len() - 4;
+    let last_b_start = b.len() - 5;
+    assert_eq!(&y.data()[45..49], &a[last_a_start..]);
+    assert_eq!(&y.data()[49..54], &b[last_b_start..]);
 }
 
 #[test]
