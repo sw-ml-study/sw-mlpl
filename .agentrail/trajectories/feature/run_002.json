@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 18,
+    "step": "demo-running-spinner"
+  },
+  "action": "added EntryKind::Running variant; entry_render::render_entry Running arm with spinner span; CSS @keyframes spin in index.html (compositor-thread animation); running_message() helper with line-kind dispatch; wired into schedule_demo_line via push_running_marker + replace_running_with_result helpers; refactored make_submit_batch to async via process_next_eval recursive yield; extracted :upload helpers to crate::upload_cmd to keep handlers.rs under file LOC budget; ran scoped tests + clippy + fmt + sw-checklist (all green); rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T22:22:22"
+}
