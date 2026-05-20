@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-20
 
+- docs(plan): scripting audit additions + two milestone proposals
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(glossary): sweep [[term]] cross-reference sigils across older entries
 - fix(web): route glossary panel + path demo previews through render_body
 - chore(agentrail): record saga 29 step 029 completion + saga done
