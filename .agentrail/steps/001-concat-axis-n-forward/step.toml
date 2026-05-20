@@ -1,9 +1,10 @@
 number = 1
 slug = "concat-axis-n-forward"
-status = "pending"
+status = "completed"
 description = "Tier 1 saga step 001: lift the axis > 1 restriction in mlpl-array::concat for..."
 role = "production"
 context_files = []
 created_at = "2026-05-20T13:02:23"
+completed_at = "2026-05-20T15:42:53"
 task_type = "code"
-commits = []
+commits = ["c133d5757f2a28cb0ad266949a90a27f5b95646f"]
