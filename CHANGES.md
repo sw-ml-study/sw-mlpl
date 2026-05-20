@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-20
+
+- chore(agentrail): record saga 29 step 023 completion
+- saga 29 step 023: Decision Boundary walks all five 2-input logic gates + new XOR-with-MLP demo
+
 ## 2026-05-19
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 022 completion
 - saga 29 step 022: markdown-ish renderer for path step bodies
 - chore(agentrail): insert path-step-rich-rendering as step 022
