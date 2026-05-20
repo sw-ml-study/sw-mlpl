@@ -1,0 +1,11 @@
+{
+  "task_type": "code",
+  "state": {
+    "number": 2,
+    "step": "concat-axis-n-backward"
+  },
+  "action": "RED: added grad_concat_axis_2_splits_at_seam and grad_concat_axis_2_finite_difference_parity in mlpl-eval/tests/patchify_concat_tests.rs; verified they failed with out-of-range slice math from the pre-step assumption. GREEN: replaced the two-branch concat_backward in mlpl-autograd/src/backward.rs with a single outer/inner walk mirroring step 001's forward rewrite. No new helper extracted -- the function is 28 lines, well under the LOC budget. Verified all 14 patchify_concat tests pass (12 pre-existing + 2 new); ran cargo test --release on mlpl-autograd + mlpl-eval, all green; workspace clippy clean; sw-checklist 157=parent. Updated docs/lang-reference.md to drop the 'autograd backward still axis<2' qualifier and docs/language-status.md to flip #18 to shipped.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T16:34:25"
+}
