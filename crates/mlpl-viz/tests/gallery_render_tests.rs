@@ -1,7 +1,7 @@
 //! `render_gallery` tests. Saga 29 step 010.
 
 use mlpl_array::{DenseArray, Shape};
-use mlpl_viz::{VizError, render, render_gallery};
+use mlpl_viz::{VizError, render, render_attention_overlay, render_gallery, render_with_aux};
 
 fn arr(dims: Vec<usize>, data: Vec<f64>) -> DenseArray {
     DenseArray::new(Shape::new(dims), data).unwrap()
@@ -167,5 +167,42 @@ fn gallery_overlay_shape_mismatch_errors() {
     // Wrong rank.
     let bad_rank = arr(vec![3, 2, 2], vec![0.0; 12]);
     let err = render_gallery(&imgs, Some(&bad_rank)).unwrap_err();
+    assert!(matches!(err, VizError::InvalidShape(_)));
+}
+
+#[test]
+fn attention_overlay_renders_multi_head_grid() {
+    // 64x64 image; 4 heads x 16 patches.
+    let img = arr(vec![3, 64, 64], vec![0.1; 3 * 64 * 64]);
+    let attn: Vec<f64> = (0..64).map(|i| (i % 16) as f64 / 15.0).collect();
+    let weights = arr(vec![4, 16], attn);
+    let svg = render_attention_overlay(&img, Some(&weights)).expect("render overlay");
+    assert!(svg.starts_with("<svg"));
+    assert!(svg.ends_with("</svg>"));
+    // Overlay should add 4 * 16 = 64 translucent patch rects plus the
+    // underlying image's pixel rects. Any translucent rect is enough.
+    assert!(svg.contains("fill-opacity="));
+}
+
+#[test]
+fn attention_overlay_dispatches_through_render_with_aux() {
+    let img = arr(vec![3, 32, 32], vec![0.0; 3 * 32 * 32]);
+    let attn = arr(vec![16], vec![0.5; 16]);
+    let svg = render_with_aux(&img, "attention_overlay", Some(&attn)).expect("dispatch");
+    assert!(svg.contains("fill-opacity="));
+}
+
+#[test]
+fn attention_overlay_rejects_non_square_patch_count() {
+    let img = arr(vec![3, 64, 64], vec![0.0; 3 * 64 * 64]);
+    let attn = arr(vec![15], vec![0.0; 15]);
+    let err = render_attention_overlay(&img, Some(&attn)).unwrap_err();
+    assert!(matches!(err, VizError::InvalidShape(_)));
+}
+
+#[test]
+fn attention_overlay_rejects_missing_aux() {
+    let img = arr(vec![3, 16, 16], vec![0.0; 3 * 16 * 16]);
+    let err = render_attention_overlay(&img, None).unwrap_err();
     assert!(matches!(err, VizError::InvalidShape(_)));
 }

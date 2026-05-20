@@ -13,7 +13,7 @@ use mlpl_array::DenseArray;
 
 pub use charts::{render_bar, render_line};
 pub use decision_boundary::render_decision_boundary;
-pub use gallery::render_gallery;
+pub use gallery::{render_attention_overlay, render_gallery};
 pub use heatmap::render_heatmap;
 pub use heatmap_grid::render_heatmap_grid;
 pub use scatter::{render_scatter, render_scatter3d};
@@ -157,6 +157,7 @@ pub fn render_with_aux(
         "heatmap" => render_heatmap(data),
         "heatmap_grid" => render_heatmap_grid(data),
         "gallery" => render_gallery(data, aux),
+        "attention_overlay" => render_attention_overlay(data, aux),
         "decision_boundary" => {
             let training = aux.ok_or_else(|| {
                 VizError::InvalidShape(
