@@ -1,6 +1,6 @@
 number = 19
 slug = "viz-legends-scales"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted: add legends and axis scales to every viz type that cur..."
 role = "production"
 context_files = []

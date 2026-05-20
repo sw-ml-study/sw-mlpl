@@ -77,3 +77,25 @@ fn render_bar_via_dispatch() {
     let svg = render(&v, "bar").unwrap();
     assert!(svg.contains("<rect"));
 }
+
+#[test]
+fn line_has_corner_scale_labels() {
+    // Saga 29 step 019: corner labels show min/max for x and y.
+    let v = DenseArray::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0]);
+    let svg = render_line(&v).unwrap();
+    // xmin=0, xmax=4 (vector index range), ymin=1, ymax=5.
+    assert!(svg.contains("0.00"), "expected xmin label 0.00 in: {svg}");
+    assert!(svg.contains("4.00"), "expected xmax label 4.00 in: {svg}");
+    assert!(svg.contains("1.00"), "expected ymin label 1.00 in: {svg}");
+    assert!(svg.contains("5.00"), "expected ymax label 5.00 in: {svg}");
+}
+
+#[test]
+fn bar_has_y_scale_labels() {
+    // Saga 29 step 019: bar y-axis range gets corner labels.
+    let v = DenseArray::from_vec(vec![3.0, 1.0, 4.0]);
+    let svg = render_bar(&v).unwrap();
+    // ymin gets adjusted to 0 (bar baseline), ymax=4.
+    assert!(svg.contains("0.00"), "expected ymin label 0.00 in: {svg}");
+    assert!(svg.contains("4.00"), "expected ymax label 4.00 in: {svg}");
+}

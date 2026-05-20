@@ -56,3 +56,13 @@ fn scatter_handles_negative_coordinates() {
     let svg = render_scatter(&pts).unwrap();
     assert_eq!(svg.matches("<circle").count(), 3);
 }
+
+#[test]
+fn scatter_has_corner_scale_labels() {
+    // Saga 29 step 019: corner labels show min/max x and y.
+    let pts = matrix(3, 2, vec![0.0, 1.0, 5.0, 2.0, 10.0, 3.0]);
+    let svg = render_scatter(&pts).unwrap();
+    assert!(svg.contains("0.00"), "expected xmin label 0.00 in: {svg}");
+    assert!(svg.contains("10.00"), "expected xmax label 10.00 in: {svg}");
+    assert!(svg.contains("3.00"), "expected ymax label 3.00 in: {svg}");
+}

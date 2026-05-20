@@ -2,7 +2,9 @@
 
 use mlpl_array::DenseArray;
 
-use super::{H, PAD, VizError, W, bounds, scale, write_svg_close, write_svg_open};
+use super::{
+    H, PAD, VizError, W, bounds, scale, write_corner_scale_labels, write_svg_close, write_svg_open,
+};
 
 /// Render a vector as a bar chart (one bar per element).
 pub fn render_bar(data: &DenseArray) -> Result<String, VizError> {
@@ -39,6 +41,11 @@ pub fn render_bar(data: &DenseArray) -> Result<String, VizError> {
             "<rect x=\"{x:.1}\" y=\"{y:.1}\" width=\"{bar_w:.1}\" height=\"{bar_h:.1}\" fill=\"#a6e3a1\"/>"
         ));
     }
+    // Saga 29 step 019: scale labels. X axis carries 0..N-1
+    // bar indices (formatted as the actual index range), Y
+    // axis carries the value range.
+    let xmax = if n == 0 { 0.0 } else { (n - 1) as f64 };
+    write_corner_scale_labels(&mut out, 0.0, xmax, ymin, ymax);
     write_svg_close(&mut out);
     Ok(out)
 }
@@ -78,6 +85,8 @@ pub fn render_line(data: &DenseArray) -> Result<String, VizError> {
     out.push_str(&format!(
         "<polyline points=\"{points}\" fill=\"none\" stroke=\"#89b4fa\" stroke-width=\"2\"/>"
     ));
+    // Saga 29 step 019: corner scale labels.
+    write_corner_scale_labels(&mut out, xmin, xmax, ymin, ymax);
     write_svg_close(&mut out);
     Ok(out)
 }

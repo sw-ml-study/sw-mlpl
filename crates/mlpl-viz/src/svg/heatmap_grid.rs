@@ -26,6 +26,8 @@ const CELL_PX: f64 = 220.0;
 const GRID_PAD: f64 = 24.0;
 /// Vertical room reserved for the "head N" label above each cell.
 const LABEL_H: f64 = 18.0;
+/// Vertical room reserved for the min/max scale labels under each cell.
+const SCALE_H: f64 = 14.0;
 
 /// Render `[N, R, C]` as a grid of N heatmaps. Returns
 /// `InvalidShape` for any other rank, for `N == 0`, or for
@@ -46,7 +48,7 @@ pub fn render_heatmap_grid(data: &DenseArray) -> Result<String, VizError> {
     let grid_cols = (n as f64).sqrt().ceil() as usize;
     let grid_rows = n.div_ceil(grid_cols);
     let cell_w_total = CELL_PX + GRID_PAD;
-    let cell_h_total = CELL_PX + GRID_PAD + LABEL_H;
+    let cell_h_total = CELL_PX + GRID_PAD + LABEL_H + SCALE_H;
     let svg_w = GRID_PAD + grid_cols as f64 * cell_w_total;
     let svg_h = GRID_PAD + grid_rows as f64 * cell_h_total;
     let mut out = String::new();
@@ -65,7 +67,8 @@ pub fn render_heatmap_grid(data: &DenseArray) -> Result<String, VizError> {
         let y0 = GRID_PAD + gy as f64 * cell_h_total;
         write_cell_label(&mut out, x0, y0, h);
         let plane = &raw[h * plane_elems..(h + 1) * plane_elems];
-        write_cell_grid(&mut out, x0, y0 + LABEL_H, plane, rows, cols);
+        let (lo, hi) = write_cell_grid(&mut out, x0, y0 + LABEL_H, plane, rows, cols);
+        write_cell_scale(&mut out, x0, y0 + LABEL_H + CELL_PX, lo, hi);
     }
     out.push_str("</svg>");
     Ok(out)
@@ -81,7 +84,19 @@ fn write_cell_label(out: &mut String, x0: f64, y0: f64, h: usize) {
     ));
 }
 
-fn write_cell_grid(out: &mut String, x0: f64, y0: f64, plane: &[f64], rows: usize, cols: usize) {
+/// Render the colored grid for one per-head cell. Returns the
+/// `(lo, hi)` data range so the caller can render a matching
+/// per-cell scale label underneath -- the magnitude differs
+/// between heads (one might max out at 0.3, another at 0.9),
+/// so showing each cell's range is important context.
+fn write_cell_grid(
+    out: &mut String,
+    x0: f64,
+    y0: f64,
+    plane: &[f64],
+    rows: usize,
+    cols: usize,
+) -> (f64, f64) {
     let (lo, hi) = data_range(plane);
     let span = if (hi - lo).abs() < f64::EPSILON {
         1.0
@@ -104,6 +119,46 @@ fn write_cell_grid(out: &mut String, x0: f64, y0: f64, plane: &[f64], rows: usiz
             ));
         }
     }
+    (lo, hi)
+}
+
+/// Saga 29 step 019: tiny scale strip + min/max labels under
+/// each cell. The strip is a horizontal gradient (32 stacked
+/// rectangles, dark-purple -> teal -> yellow). The labels
+/// flank it: lo on the left, hi on the right. Each cell shows
+/// its OWN range because each head's distribution differs.
+fn write_cell_scale(out: &mut String, x0: f64, y_top: f64, lo: f64, hi: f64) {
+    let strip_h: f64 = 4.0;
+    let pad: f64 = 2.0;
+    let label_h: f64 = SCALE_H - strip_h - pad;
+    let strip_y = y_top + pad;
+    let strip_w = CELL_PX;
+    let steps: usize = 32;
+    let step_w = strip_w / steps as f64;
+    for i in 0..steps {
+        let t = (i as f64 + 0.5) / steps as f64;
+        let (red, green, blue) = viridis(t);
+        let x = x0 + step_w * i as f64;
+        out.push_str(&format!(
+            "<rect x=\"{x:.2}\" y=\"{strip_y:.1}\" \
+             width=\"{w:.2}\" height=\"{strip_h:.1}\" \
+             fill=\"rgb({red},{green},{blue})\"/>",
+            w = step_w + 0.5,
+        ));
+    }
+    let text_y = strip_y + strip_h + label_h - 1.0;
+    out.push_str(&format!(
+        "<text x=\"{lx:.1}\" y=\"{text_y:.1}\" fill=\"#cdd6f4\" \
+         font-size=\"10\" font-family=\"monospace\" \
+         text-anchor=\"start\">{lo:.2}</text>",
+        lx = x0,
+    ));
+    out.push_str(&format!(
+        "<text x=\"{rx:.1}\" y=\"{text_y:.1}\" fill=\"#cdd6f4\" \
+         font-size=\"10\" font-family=\"monospace\" \
+         text-anchor=\"end\">{hi:.2}</text>",
+        rx = x0 + strip_w,
+    ));
 }
 
 fn data_range(values: &[f64]) -> (f64, f64) {

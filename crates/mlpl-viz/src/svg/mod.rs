@@ -67,6 +67,37 @@ pub(crate) fn scale(v: f64, lo: f64, hi: f64, axis: u8) -> f64 {
     }
 }
 
+/// Saga 29 step 019: write min/max scale labels at the
+/// corners of the plot area. `xmin/xmax` flank the bottom
+/// axis, `ymin/ymax` flank the left axis. Used by scatter,
+/// line, and bar to make the plot self-explanatory without
+/// a full tick-mark axis system.
+pub(crate) fn write_corner_scale_labels(
+    out: &mut String,
+    xmin: f64,
+    xmax: f64,
+    ymin: f64,
+    ymax: f64,
+) {
+    let x0 = PAD;
+    let x1 = W - PAD;
+    let y0 = PAD;
+    let y1 = H - PAD;
+    let fmt_label = |out: &mut String, x: f64, y: f64, anchor: &str, v: f64| {
+        out.push_str(&format!(
+            "<text x=\"{x:.1}\" y=\"{y:.1}\" fill=\"#cdd6f4\" \
+             font-size=\"10\" font-family=\"monospace\" \
+             text-anchor=\"{anchor}\">{v:.2}</text>"
+        ));
+    };
+    // X-axis labels just below the bottom edge.
+    fmt_label(out, x0, y1 + 11.0, "start", xmin);
+    fmt_label(out, x1, y1 + 11.0, "end", xmax);
+    // Y-axis labels just to the left of the left edge.
+    fmt_label(out, x0 - 4.0, y1, "end", ymin);
+    fmt_label(out, x0 - 4.0, y0 + 4.0, "end", ymax);
+}
+
 pub(crate) fn write_svg_open(out: &mut String) {
     out.push_str(&format!(
         "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {W} {H}\" width=\"{W}\" height=\"{H}\">"
