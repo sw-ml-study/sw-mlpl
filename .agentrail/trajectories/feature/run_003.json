@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 19,
+    "step": "viz-legends-scales"
+  },
+  "action": "added write_corner_scale_labels helper, write_cell_scale for heatmap_grid, draw_legend for decision_boundary; wired into scatter / line / bar / heatmap_grid / decision_boundary; wrote 6 new tests across svg_heatmap_grid_tests (new file), svg_scatter_tests, svg_line_bar_tests, svg_decision_boundary_tests; ran cargo test + clippy + fmt + sw-checklist (all green; 157==parent); rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T22:36:35"
+}
