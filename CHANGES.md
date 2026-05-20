@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- chore(agentrail): record saga 29 step 021 completion
+- saga 29 step 021: scrub developer-process metadata from user-facing strings
+- chore(agentrail): insert scrub-saga-meta-from-user-strings as step 021
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 020 completion
 - saga 29 step 020: vision learning path refresh
 - chore(agentrail): insert vision-path-refresh as step 020
