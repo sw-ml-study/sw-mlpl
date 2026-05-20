@@ -1,0 +1,9 @@
+number = 25
+slug = "vit-era-diagrams"
+status = "pending"
+description = "Saga 29 step inserted: SVG diagrams for ViT-era concepts that don't have visu..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T07:19:37"
+task_type = "docs"
+commits = []
