@@ -135,7 +135,9 @@ fn render_step(props: &PathsViewProps, step: &Step) -> Html {
         }
         Step::Glossary { term, why } => {
             let body = match find_by_term(term) {
-                Some(entry) => html! { <p class="path-step-preview">{ &entry.body }</p> },
+                Some(entry) => {
+                    html! { <div class="path-step-preview">{ crate::path_body::render_body(&entry.body) }</div> }
+                }
                 None => html! {
                     <p class="path-step-error">{ format!("(glossary entry {term:?} not found)") }</p>
                 },
@@ -146,7 +148,7 @@ fn render_step(props: &PathsViewProps, step: &Step) -> Html {
             "Note",
             *title,
             None,
-            html! { <p class="path-step-preview">{ *body }</p> },
+            html! { <div class="path-step-preview">{ crate::path_body::render_body(body) }</div> },
         ),
     };
     let why_html = match why_opt {
