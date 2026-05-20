@@ -1,0 +1,9 @@
+number = 4
+slug = "multihead-attention-tape"
+status = "pending"
+description = "Tier 1 saga step 004: lower multi-head attention onto the same tape primitive..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T13:03:00"
+task_type = "code"
+commits = []

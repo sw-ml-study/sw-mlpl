@@ -1,0 +1,9 @@
+number = 2
+slug = "concat-axis-n-backward"
+status = "pending"
+description = "Tier 1 saga step 002: extend the autograd tape's concat backward to split the..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T13:02:34"
+task_type = "code"
+commits = []
