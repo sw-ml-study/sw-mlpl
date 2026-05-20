@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 16,
+    "step": "upload-repl-command"
+  },
+  "action": "added bind_upload_result_ok/err on WasmSession in new mlpl-wasm/src/upload.rs submodule, refactored apps/mlpl-web/src/upload.rs for caller-named binding + messages::push_* submodule + on_cancel handler, lifted upload_input_ref + pending_upload_name to parent main.rs, intercepted :upload <name> in handlers.rs::make_submit_batch via handle_upload_command + eval_one_line helpers, validated identifier shape, updated help.rs / lang-reference.md / glossary.md + README count, ran scoped tests + clippy + fmt + sw-checklist (all green; 157==parent), rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T21:27:51"
+}
