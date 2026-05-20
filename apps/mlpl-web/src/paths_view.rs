@@ -194,7 +194,7 @@ fn demo_body(props: &PathsViewProps, name: &'static str) -> Html {
     let label = format!("Run demo \"{name}\" in REPL \u{2192}");
     html! {
         <>
-            <p class="path-step-preview">{ demo.intro }</p>
+            <div class="path-step-preview">{ crate::path_body::render_body(demo.intro) }</div>
             <button class="path-jump-btn" onclick={on_run}>{ label }</button>
         </>
     }
