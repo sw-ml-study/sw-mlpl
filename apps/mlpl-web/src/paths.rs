@@ -161,7 +161,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Diagram {
                 slug: "12_attention",
-                why: "softmax(Q K^T / sqrt(d_k)) V. Self-Attention from Scratch lesson + Attention Pattern demo.",
+                why: "softmax(Q K^T / sqrt(d_k)) V. Self-Attention from Scratch lesson + [[Attention]] Pattern demo.",
             },
             Step::Diagram {
                 slug: "13_multi_head_attention",
@@ -365,7 +365,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Demo {
                 name: "Pets: cat vs dog (quick)",
-                why: "Trained single-head Vision Transformer end-to-end: 8 balanced images, 30 adam steps, loss curve falls toward 0, training accuracy 1.0. The tail of the demo shows how to inspect the pets tensor with chained `take` calls.",
+                why: "Trained single-head Vision [[Transformer]] end-to-end: 8 balanced images, 30 adam steps, loss curve falls toward 0, training accuracy 1.0. The tail of the demo shows how to inspect the pets tensor with chained `take` calls.",
             },
             Step::Demo {
                 name: "Pets: predict + gallery",
@@ -389,7 +389,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Diagram {
                 slug: "45_upload_result_flow",
-                why: "End-to-end flow: REPL :upload -> file picker -> Canvas decode -> Ok(Record) / Err(message). Read this before typing the five lines below.",
+                why: "End-to-end flow: REPL :upload -> file picker -> Canvas decode -> Ok([[Record]]) / Err(message). Read this before typing the five lines below.",
             },
             Step::Note {
                 title: "Bring-your-own-image (try it now)",
@@ -397,7 +397,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Note {
                 title: "Beyond this path",
-                body: "**Full-resolution demo.** `demos/vit_multihead_thorough.mlpl` trains the same architecture on 128x128 input from the full Oxford-IIIT Pet (via `fetch_dataset`) inside a `device(\"mlx\")` block. Runs on Apple Silicon with `--features mlx`; falls back to CPU on any other host.\n\n**Pending architectural pieces.** Layer norm with learned affine and the tanh-approximation GELU are not yet builtins. Adding them would close the architectural gap to the upstream ViT notebook.\n\n**Making the classifier actually work on unseen photos.** Today's in-browser trained models overfit hard on 8-20 images and tend to classify every uploaded photo as a cat. The 7-demo improvement ladder in `docs/better-cat-dog-future-demos.md` lays out the recommended sequence: full-pets_tiny + held-out validation split first (no new builtins), then confidence-thresholded \"other\" output, then horizontal-flip augmentation, then AdamW, then LayerNorm + GELU, then the thorough MLX run.",
+                body: "**Full-resolution demo.** `demos/vit_multihead_thorough.mlpl` trains the same architecture on 128x128 input from the full Oxford-IIIT Pet (via `fetch_dataset`) inside a `device(\"mlx\")` block. Runs on Apple Silicon with `--features mlx`; falls back to CPU on any other host.\n\n**Pending architectural pieces.** [[Layer norm]] with learned affine and the tanh-approximation GELU are not yet builtins. Adding them would close the architectural gap to the upstream ViT notebook.\n\n**Making the classifier actually work on unseen photos.** Today's in-browser trained models overfit hard on 8-20 images and tend to classify every uploaded photo as a cat. The 7-demo improvement ladder in `docs/better-cat-dog-future-demos.md` lays out the recommended sequence: full-pets_tiny + held-out validation split first (no new builtins), then confidence-thresholded \"other\" output, then horizontal-flip augmentation, then [[AdamW]], then LayerNorm + GELU, then the thorough MLX run.",
             },
         ],
     },

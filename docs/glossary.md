@@ -29,7 +29,7 @@ b1, b2, eps)` in MLPL.
 
 ## AdamW
 
-Adam with decoupled weight decay. Plain `adam` mixes
+[[Adam]] with decoupled weight decay. Plain `adam` mixes
 weight decay into the gradient before the moment update,
 which interacts oddly with the per-parameter learning-rate
 scaling; AdamW applies the decay directly to the parameter
@@ -62,8 +62,9 @@ a loop; building the loop itself is application code.
 
 A layer that computes a weighted average of one set of values
 where the weights come from comparing a query against a set
-of keys. The classic formula is `[[Softmax]](Q @ K^T / sqrt(d)) @
-V`. MLPL builds it into `attention(d_model, heads, seed)`
+of keys. The classic formula is [[Softmax]] over `Q @ K^T /
+sqrt(d)`, times `V`. MLPL builds it into `attention(d_model,
+heads, seed)`
 and [[Causal attention]]; the manual three-line version
 runs in the "Attention Pattern" demo. See also
 [[Multi-head attention]] for the `heads > 1` case.
@@ -122,7 +123,7 @@ patch grid. For multi-head input the output is a
 ceil(sqrt(heads))-column grid of overlaid tiles, one cell per
 head, labeled by head index.
 
-Typical usage after training a Vision Transformer: pick a
+Typical usage after training a Vision [[Transformer]]: pick a
 test image, run [[attention_weights (builtin)]] to get
 `[heads, T, T]`, reduce over the query axis to get
 `[heads, T]` per-patch mean incoming attention, and feed
@@ -166,7 +167,7 @@ returns the gradient with the same shape as `wrt`. The
 mechanics; the "Logistic Regression" and "Tiny MLP" lessons
 show the manual chain-rule version (`dZ = pred - y`,
 `dW = X^T dZ / N`) that `grad` automates. See also Backward
-pass, Autograd, Chain rule.
+pass, [[Autograd]], [[Chain rule]].
 
 ## Backward pass
 
@@ -253,7 +254,7 @@ centers)` returns `[N, 3]` rows of `[x, y, label]` for `n`
 points around each given center. `circles(seed, n, noise)`
 makes concentric noisy rings; `moons(seed, n, noise)` makes
 the classic two-half-moon pattern. All three appear in the
-"Decision Boundary" / "K-Means" / "Moons MLP" demos.
+"Decision Boundary" / "[[K-Means]]" / "Moons MLP" demos.
 
 ## boundary_2d (builtin)
 
@@ -292,7 +293,7 @@ lands, `:foo` lifts to a function value.
 How well a model's reported confidence matches its actual
 accuracy. A well-calibrated classifier that says "70% sure"
 is right 70% of the time. Modern neural nets are typically
-overconfident. Temperature scaling on logits is the standard
+overconfident. [[Temperature]] scaling on logits is the standard
 post-hoc fix. Deferred in MLPL.
 
 ## Catastrophic Forgetting
@@ -305,7 +306,7 @@ batches), elastic weight consolidation, low-rank adapters
 
 ## Causal attention
 
-Self-attention with a lower-triangular mask before softmax so
+[[Self-attention]] with a lower-triangular mask before softmax so
 position `t` cannot peek at `t+1`. Required for autoregressive
 language models. MLPL: `causal_attention(d_model, heads,
 seed)`.
@@ -319,14 +320,14 @@ tanh_layer(), linear(8, 2, 1))` is a 2-layer MLP.
 
 The calculus identity `d(f(g(x)))/dx = f'(g(x)) * g'(x)`,
 applied recursively to compose gradients across the layers
-of a neural network. Backpropagation IS the chain rule
+of a neural network. [[Backpropagation]] IS the chain rule
 applied to the computation graph: at each node, multiply the
 incoming gradient by the local Jacobian, then propagate
 upstream. MLPL's `grad(loss, wrt)` does this automatically;
 the "Tiny MLP" lesson shows the manual two-layer version
 where the hidden-layer gradient is `dZ1 = (dZ2 W2^T) * (1 -
 H * H)` -- the tanh derivative being the local Jacobian
-factor. See also Backpropagation, Autograd.
+factor. See also Backpropagation, [[Autograd]].
 
 ## Chain of Thought
 
@@ -359,7 +360,7 @@ during backprop. MLPL doesn't ship a checkpoint format yet;
 
 A model whose output is a discrete class. The architecture
 ends in a `[batch, num_classes]` logit matrix; training uses
-`cross_entropy(logits, y)`. See "Linear Softmax Classifier"
+`cross_entropy(logits, y)`. See "Linear [[Softmax]] Classifier"
 demo.
 
 ## CLIP (Contrastive Language-Image Pre-training)
@@ -440,7 +441,7 @@ counts (`reduce_add` to sum a "how many true" tally).
 
 ## Cross-attention
 
-Attention where the queries come from one sequence and the
+[[Attention]] where the queries come from one sequence and the
 keys / values come from a different sequence. Same math as
 self-attention, just with Q from a different source than K
 and V. The weight matrix is `[T_query, T_source]` -- non-
@@ -476,7 +477,7 @@ is a discipline applied on top, not a builtin.
 In high dimensions, points become roughly equidistant, volume
 concentrates near the surface of any hypercube, and density
 estimation becomes intractable. Drives the value of structured
-priors, dimensionality reduction (PCA, t-SNE), and learned
+priors, dimensionality reduction (PCA, [[t-SNE]]), and learned
 representations.
 
 ## :describe (REPL command)
@@ -485,7 +486,7 @@ representations.
 + tag + values preview for an array, layer tree for a model,
 vocab + merge count for a tokenizer, signature for a builtin.
 v0.19 added per-tag bodies (Probability rows show
-the verified-or-violated row-sum invariant; Gradient shows
+the verified-or-violated row-sum invariant; [[Gradient]] shows
 `wrt`, etc.).
 
 ## device block (language keyword)
@@ -541,7 +542,7 @@ internal node tests one feature against a threshold; the
 leaf carries the prediction. Trained greedily by picking
 the split that maximizes information gain (or minimizes
 Gini impurity). Easy to interpret, prone to overfitting --
-the standard fix is ensembling, e.g. Random Forest.
+the standard fix is ensembling, e.g. [[Random Forest]].
 **Deferred** in MLPL: needs a tree data structure and a
 greedy split fitter.
 
@@ -656,7 +657,7 @@ prior tokens (causal self-attention) and to the encoder's
 output (cross-attention). Used for sequence-to-sequence
 tasks like translation. Decoder-only models (GPT-style) skip
 the encoder; encoder-only models (BERT-style) skip the
-decoder. See "Decoder / encoder" for the role of each side.
+decoder. See "[[Decoder / encoder]]" for the role of each side.
 
 ## Ensembling
 
@@ -967,7 +968,7 @@ Mechanistic interpretability is the program of reverse-
 engineering trained neural networks circuit by circuit:
 identifying attention heads, feature directions, and
 algorithms the model implements. The "Embedding exploration"
-demo is a tiny taste -- t-SNE / k-NN over a learned
+demo is a tiny taste -- [[t-SNE]] / k-NN over a learned
 embedding table. Full circuit-level work is out of MLPL's
 v0.19 scope.
 
@@ -992,7 +993,7 @@ a key advertising "what I have to offer"; the dot product `Q
 producing the unnormalized score matrix. In MLPL:
 `K = matmul(X, Wk)` where `Wk` is `[d_model, d_model]` for
 single-head or `[d_model, d_k]` per head. Paired with Query
-(Q) and Value (V).
+(Q) and [[Value (V)]].
 
 ## K-Means
 
@@ -1276,7 +1277,7 @@ pruning + retraining.
 
 Real-world high-dimensional data (images, text, audio) lies
 near a much-lower-dimensional manifold inside the ambient
-space. Justifies dimensionality reduction (PCA, t-SNE, UMAP)
+space. Justifies dimensionality reduction (PCA, [[t-SNE]], UMAP)
 and explains why deep learning works at all -- the network
 need only be expressive on the manifold, not the cube.
 
@@ -1291,7 +1292,7 @@ math primitives (`exp(x)`, `sigmoid(x)`).
 ## Mask
 
 A `0 / 1` (or `0.0 / -inf`) array that nullifies positions in
-a downstream op. Causal attention applies a lower-triangular
+a downstream op. [[Causal attention]] applies a lower-triangular
 `-inf` mask before softmax so future positions get zero
 probability. MLPL handles this internally for
 `causal_attention`; explicit `batch_mask` is also returned by
@@ -1348,7 +1349,7 @@ token. Out of MLPL's current scope.
 
 ## Momentum SGD
 
-Gradient descent with a running velocity. `momentum_sgd(loss,
+[[Gradient descent]] with a running velocity. `momentum_sgd(loss,
 params, lr, beta)` accumulates a momentum vector that
 smooths out gradient noise.
 
@@ -1385,7 +1386,7 @@ num_classes)`.
 breeds, ~200 images per breed), released by the Visual
 Geometry Group at Oxford. Standard cat-vs-dog classification
 benchmark with breed-level subclasses. MLPL uses it as the
-training set for the Vision Transformer demos. The
+training set for the Vision [[Transformer]] demos. The
 filename convention encodes the class: capitalized prefix =
 cat breed (`Abyssinian_1.jpg`), lowercase prefix = dog breed
 (`beagle_3.jpg`). The full ~792 MB tarball lives in a
@@ -1509,7 +1510,7 @@ For a binary classifier: precision = `TP / (TP + FP)` (of
 flagged positives, what fraction were truly positive); recall
 = `TP / (TP + FN)` (of truly-positive examples, what fraction
 did we flag). Tunable via the decision threshold; F1 is the
-harmonic mean. ROC / AUC summarizes the precision-recall
+harmonic mean. [[ROC / AUC]] summarizes the precision-recall
 tradeoff over all thresholds.
 
 ## Preference Learning
@@ -1532,7 +1533,7 @@ layer's weights). **Deferred** in MLPL.
 ## Pretraining / fine-tuning
 
 Pretraining: train a base model on a large generic corpus.
-Fine-tuning: continue training on a smaller, task-specific
+[[Fine-tuning]]: continue training on a smaller, task-specific
 dataset, often with a smaller subset of parameters trainable
 (see LoRA). MLPL's "Tiny LM" demos pretrain; the "LoRA
 Fine-Tuning" lesson fine-tunes.
@@ -1607,7 +1608,7 @@ today  but `quantize` does not.
 
 Storing weights in low-precision integer formats (int8, int4)
 for memory and speed at modest accuracy cost. Often combined
-with LoRA in QLoRA workflows. MLPL stores everything in f64;
+with LoRA in [[QLoRA]] workflows. MLPL stores everything in f64;
 quantization is a deferred follow-up to .
 
 ## Query (Q)
@@ -1617,7 +1618,7 @@ a query asking "what am I looking for?"; the dot product `Q
 @ K^T` measures how strongly each query matches each key. In
 MLPL: `Q = matmul(X, Wq)` where `Wq` is `[d_model, d_model]`
 for single-head or `[d_model, d_k]` per head. Paired with
-Key (K) and Value (V).
+[[Key (K)]] and [[Value (V)]].
 
 ## RAG (Retrieval-Augmented Generation)
 
@@ -1685,7 +1686,7 @@ arrays, strings, models, ...). Unknown-field access returns
 `FieldNotFound { requested, available }` listing the valid
 keys; field access on a non-record returns
 `FieldOnNonRecord { receiver_kind, field }`. Use case: the
-Vision Transformer track wants
+Vision [[Transformer]] track wants
 `load_preloaded("pets_tiny")` to return
 `{X: [200, 3, 64, 64], Y: [200], names: [str]}` -- one builtin,
 three logical outputs, no positional-tuple awkwardness.
@@ -1729,7 +1730,7 @@ deferred enhancement.
 `repeat N { body }` runs the body `N` times with no per-
 iteration index binding. Ancestor of `train { ... }` (which
 DOES bind `step` and capture loss). Use `repeat` for
-iterative algorithms (k-means, power iteration, MLP forward
+iterative algorithms (k-means, [[power iteration]], MLP forward
 + backward demo) where you want a counted loop without the
 training-specific bookkeeping.
 
@@ -1779,7 +1780,7 @@ fallible builtin: parse, file open, fetch, etc.
 
 When an RL agent finds a strategy that maximizes the reward
 signal without solving the intended task -- exploiting bugs
-in the reward function or environment. Goodhart's Law applied
+in the reward function or environment. [[Goodhart's Law]] applied
 to RL. Out of MLPL's current scope.
 
 ## ResNet (Residual Network)
@@ -1839,9 +1840,9 @@ temperature, seed)`.
 The canonical attention formula: `softmax(Q @ K^T / sqrt(d_k),
 1) @ V`. The `sqrt(d_k)` divisor keeps the score variance
 bounded as the key dimension grows so softmax doesn't
-saturate into one-hot. Demos: "Attention Pattern" (heatmap
+saturate into one-hot. Demos: "[[Attention]] Pattern" (heatmap
 of weights only) and "Self-Attention from Scratch" (full
-pipeline including `weights @ V`). Multi-head attention runs
+pipeline including `weights @ V`). [[Multi-head attention]] runs
 this formula in parallel on `d_k = d_model / heads`-wide
 slabs, then concatenates the per-head outputs.
 
@@ -1857,7 +1858,7 @@ bigger models trained on less.
 
 ## Self-attention
 
-Attention where the queries, keys, and values all come from
+[[Attention]] where the queries, keys, and values all come from
 the same input sequence -- each position scores against every
 other position to produce a context-aware representation.
 The diagonal-heavy attention map is the visual signature.
@@ -1980,11 +1981,11 @@ bug).
 
 The output of a softmax over logits divided by a
 *temperature* > 1: `soft_targets = softmax(logits /
-temperature, axis)`. Temperature spreads probability mass
+temperature, axis)`. [[Temperature]] spreads probability mass
 across more classes, so the targets carry richer
 information than a one-hot label about which alternatives
 the teacher considered. Training a student against these
-softer targets via KL divergence is the core of knowledge
+softer targets via [[KL divergence]] is the core of knowledge
 distillation. **Deferred** in MLPL: build by hand from
 `softmax(logits / temperature, axis)`; a `soft_targets`
 helper is on the Module 11 roadmap.
@@ -2053,7 +2054,7 @@ kinds -> `EvalError::MixedArrayLitElements { kinds }` so the
 user sees which positions disagreed. Empty `[]` continues to
 produce an empty `DenseArray` for back-compat.
 
-Use case: the Vision Transformer track wants
+Use case: the Vision [[Transformer]] track wants
 `load_preloaded("pets_tiny")` to return
 `{X: [200, 3, 64, 64], Y: [200], names: ["Abyssinian_1.jpg",
 "beagle_3.jpg", ...]}` -- one record value with three logical
@@ -2108,7 +2109,7 @@ where a human (or curation pipeline) supplied the labels.
 The model minimizes a per-example loss against the label
 -- cross_entropy for classification, MSE for regression.
 MLPL: every classifier demo (Logistic Regression, Tiny
-MLP, Moons MLP, Softmax Classifier) is supervised. Cheap
+MLP, Moons MLP, [[Softmax]] [[Classifier]]) is supervised. Cheap
 and well-understood, but bounded by the supply of
 labeled data.
 
@@ -2138,7 +2139,7 @@ string.
 ## Tanh
 
 `(exp(x) - exp(-x)) / (exp(x) + exp(-x))`. Squashes any real
-number to `[-1, 1]`. Older alternative to ReLU; still
+number to `[-1, 1]`. Older alternative to [[ReLU]]; still
 useful in small MLPs. MLPL: `tanh_layer()` or `tanh_fn`.
 
 ## Temperature
@@ -2313,11 +2314,11 @@ gradient descent will find the right weights.
 ## Unsupervised learning
 
 Training without labels: the model discovers structure in
-the data itself. Clustering, dimensionality reduction,
-density estimation. MLPL: the K-Means demo, the PCA demo,
-and t-SNE (`tsne(X, perp, iters, seed)`) are unsupervised
+the data itself. [[Clustering]], dimensionality reduction,
+density estimation. MLPL: the [[K-Means]] demo, the PCA demo,
+and [[t-SNE]] (`tsne(X, perp, iters, seed)`) are unsupervised
 -- they group / project points using only geometry.
-Self-supervised learning is a closely-related modern
+[[Self-supervised learning]] is a closely-related modern
 variant where labels are *derived* from the input rather
 than absent.
 
@@ -2375,7 +2376,7 @@ proportion to the softmax weights: `out = weights @ V` where
 each output row is a weighted average of the V rows. In
 MLPL: `V = matmul(X, Wv)` where `Wv` is `[d_model, d_model]`
 for single-head or `[d_model, d_k]` per head. Paired with
-Query (Q) and Key (K).
+[[Query (Q)]] and [[Key (K)]].
 
 ## ViT (Vision Transformer)
 
@@ -2446,7 +2447,7 @@ decay is deferred.
 The scheme that sets parameter values before training: zeros
 (biases), small Gaussian (general weights), Xavier / Glorot
 (scaled by fan-in for tanh / sigmoid), He / Kaiming (scaled
-for ReLU). MLPL initializes weights via `randn(seed,
+for [[ReLU]]). MLPL initializes weights via `randn(seed,
 shape)` scaled by 0.5 inside `linear`; explicit
 Xavier / He variants are deferred.
 

@@ -51,7 +51,7 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         demo: "Tiny LM Generate",
         line_idx: 9,
         heading: "Training the language model (~10-30s)",
-        body: "30 Adam steps over a 1-layer transformer (V=260, d=16, block=8). Each step runs a forward pass, a backward pass through the autograd tape, and an Adam update over every model parameter. The browser tab is single-threaded WASM so the page is unresponsive for the duration; this is normal.",
+        body: "30 [[Adam]] steps over a 1-layer transformer (V=260, d=16, block=8). Each step runs a forward pass, a backward pass through the autograd tape, and an Adam update over every model parameter. The browser tab is single-threaded WASM so the page is unresponsive for the duration; this is normal.",
     },
     ProgressNote {
         demo: "Tiny LM Generate",
@@ -69,7 +69,7 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         demo: "Tiny LM",
         line_idx: 9,
         heading: "Training the language model (~10-30s)",
-        body: "30 Adam steps over a 1-layer transformer (V=260, d=16, block=8). The page is unresponsive while WASM runs on the main thread; the loss curve renders once the train block returns.",
+        body: "30 [[Adam]] steps over a 1-layer transformer (V=260, d=16, block=8). The page is unresponsive while WASM runs on the main thread; the loss curve renders once the train block returns.",
     },
     ProgressNote {
         demo: "Tiny MLP",
@@ -99,13 +99,13 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         demo: "Pets: cat vs dog (quick)",
         line_idx: 33,
         heading: "Training the Vision Transformer (~30-60s)",
-        body: "30 full-batch Adam steps on the 8 pet images you just assembled. Each step runs the full forward pipeline (patchify -> linear-embed -> rank-3 attention -> first-token pooling -> 2-layer MLP classifier), pushes a tape of ~hundreds of nodes, runs the backward pass to compute gradients on every model parameter, then applies one Adam update. WASM is single-threaded so the page is unresponsive for the duration; this is normal, not a hang. The loss curve renders right after the train block returns -- you'll see cross-entropy drop from ~0.69 (random) toward 0 (perfect overfit on 8 images).",
+        body: "30 full-batch [[Adam]] steps on the 8 pet images you just assembled. Each step runs the full forward pipeline (patchify -> linear-embed -> rank-3 attention -> first-token pooling -> 2-layer MLP classifier), pushes a tape of ~hundreds of nodes, runs the backward pass to compute gradients on every model parameter, then applies one Adam update. WASM is single-threaded so the page is unresponsive for the duration; this is normal, not a hang. The loss curve renders right after the train block returns -- you'll see cross-entropy drop from ~0.69 (random) toward 0 (perfect overfit on 8 images).",
     },
     ProgressNote {
         demo: "Pets: predict + gallery",
         line_idx: 61,
         heading: "Training the Vision Transformer (6 chunks x 5 steps, ~30-60s)",
-        body: "30 full-batch Adam steps on 16 images, run as 6 separate train blocks of 5 steps each. Each chunk runs synchronously in WASM (~5s of unresponsive UI); the demo runner yields to the browser between chunks so the tab stays responsive end-to-end and you can see incremental progress. Adam momentum persists across chunks via the session env, so this is mathematically equivalent to one `train 30`. After training, the model predicts labels for all 16 images and renders a labeled gallery (actual / predicted under each thumbnail). 0 = cat, 1 = dog.",
+        body: "30 full-batch [[Adam]] steps on 16 images, run as 6 separate train blocks of 5 steps each. Each chunk runs synchronously in WASM (~5s of unresponsive UI); the demo runner yields to the browser between chunks so the tab stays responsive end-to-end and you can see incremental progress. Adam momentum persists across chunks via the session env, so this is mathematically equivalent to one `train 30`. After training, the model predicts labels for all 16 images and renders a labeled gallery (actual / predicted under each thumbnail). 0 = cat, 1 = dog.",
     },
     ProgressNote {
         demo: "Pets: predict + gallery",
@@ -117,7 +117,7 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         demo: "Pets: multi-head ViT (quick + viz)",
         line_idx: 29,
         heading: "Training the 4-head Vision Transformer (~60-90s)",
-        body: "30 full-batch Adam steps on the 8 pet images. Same forward pipeline as the single-head quick demo, but `attention(128, 4)` runs four independent attention heads in parallel and `Tensor::stack` joins their per-head [T, d/h]=[16, 32] outputs back to [16, 128]. Backward fans through every head separately. The tab is unresponsive during the train block; this is normal, not a hang.",
+        body: "30 full-batch [[Adam]] steps on the 8 pet images. Same forward pipeline as the single-head quick demo, but `attention(128, 4)` runs four independent attention heads in parallel and `Tensor::stack` joins their per-head [T, d/h]=[16, 32] outputs back to [16, 128]. Backward fans through every head separately. The tab is unresponsive during the train block; this is normal, not a hang.",
     },
     ProgressNote {
         demo: "Pets: multi-head ViT (quick + viz)",
@@ -156,7 +156,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Attention Pattern",
-        intro: "The scaled-dot-product attention formula from 'Attention is All You Need', spelled out. Two Q and K matrices, scored and softmax'd, rendered as heatmaps. A second self-attention pass (Q attending to itself) shows the diagonal pattern that makes self-attention recognizable on sight.",
+        intro: "The scaled-dot-product attention formula from '[[Attention]] is All You Need', spelled out. Two Q and K matrices, scored and softmax'd, rendered as heatmaps. A second self-attention pass (Q attending to itself) shows the diagonal pattern that makes self-attention recognizable on sight.",
         takeaway: "You just built transformer attention in four lines: matmul + transpose + softmax. The heatmaps show where each query row puts probability mass -- self-attention concentrates on the diagonal; cross-attention doesn't.",
         lines: &[
             "Q = randn(17, [6, 4])                              # 6 queries, 4 dims each",
@@ -174,7 +174,7 @@ pub const DEMOS: &[Demo] = &[
     Demo {
         name: "Self-Attention from Scratch",
         intro: "Build one head of self-attention from primitives, no `attention()` layer involved. Three projection matrices Wq / Wk / Wv turn the input X into Q, K, V; then `softmax(Q K^T / sqrt(d_k)) V` mixes the values according to which keys each query attended to. Tiny T=6, d=4 toy input so every intermediate matrix renders cleanly.",
-        takeaway: "Self-attention is four matmuls, one transpose, one scalar division, one softmax. The score heatmap is what a query is asking; the weight heatmap is what it gets back; the output is the weighted V. With random projections the pattern is noise -- training is what makes the weights specialize on a task.",
+        takeaway: "[[Self-attention]] is four matmuls, one transpose, one scalar division, one softmax. The score heatmap is what a query is asking; the weight heatmap is what it gets back; the output is the weighted V. With random projections the pattern is noise -- training is what makes the weights specialize on a task.",
         lines: &[
             "T = 6                                                # 6 tokens in the sequence",
             "d_model = 4                                          # each token is a 4-dim vector",
@@ -195,7 +195,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Multi-Head Attention from Scratch",
-        intro: "Multi-head attention from primitives. Each head gets a slab of the d_model channels via a column-selector matrix S_h: [d_model, d_k], runs scaled-dot-product attention on its own Q/K/V slabs, and writes back into the full-width output via S_h^T. Tiny T=4, d_model=4, heads=2 (so d_k=2) keeps every per-head [T, T] heatmap interpretable.",
+        intro: "[[Multi-head attention]] from primitives. Each head gets a slab of the d_model channels via a column-selector matrix S_h: [d_model, d_k], runs scaled-dot-product attention on its own Q/K/V slabs, and writes back into the full-width output via S_h^T. Tiny T=4, d_model=4, heads=2 (so d_k=2) keeps every per-head [T, T] heatmap interpretable.",
         takeaway: "Two heads, two different attention patterns. Each head sees only its slab of d_model, so it can specialize. Real `attention(d, heads, seed)` does the slicing in Rust without materializing selector matrices, and adds a final Wo projection -- but the math is the same: per-head softmax(Q K^T / sqrt(d_k)) V, concat, project.",
         lines: &[
             "T = 4                                                # 4 tokens",
@@ -231,7 +231,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Cross-Attention from Scratch",
-        intro: "Cross-attention is the same `softmax(Q K^T / sqrt(d_k)) V` as self-attention, but Q comes from a target sequence (T_tgt=4) and K, V come from a separate source sequence (T_src=6). The weight matrix is `[T_tgt, T_src]` -- non-square -- which is the visual signature: each target query distributes its attention across all source positions, not over its own sequence.",
+        intro: "[[Cross-attention]] is the same `softmax(Q K^T / sqrt(d_k)) V` as self-attention, but Q comes from a target sequence (T_tgt=4) and K, V come from a separate source sequence (T_src=6). The weight matrix is `[T_tgt, T_src]` -- non-square -- which is the visual signature: each target query distributes its attention across all source positions, not over its own sequence.",
         takeaway: "The non-square weight heatmap (4 rows, 6 cols) is the giveaway: target queries are looking at source content, not at themselves. The output is `[T_tgt, d_model]` -- same shape as the target input -- but its values are mixtures of the source's V vectors weighted by query-key similarity. Stack one cross-attention block after a causal-self-attention block and you have a transformer decoder layer.",
         lines: &[
             "T_tgt = 4                                            # target sequence length (decoder side)",
@@ -256,7 +256,7 @@ pub const DEMOS: &[Demo] = &[
     Demo {
         name: "Encoder Block",
         intro: "One transformer encoder block built from the model DSL: pre-norm self-attention with a residual, then pre-norm feedforward (linear -> relu -> linear) with another residual. Same shape in, same shape out. The residual connections let gradients flow past the attention and FFN layers; the pre-norm `rms_norm` keeps activations stable.",
-        takeaway: "An encoder block is just chain(residual(self-attn), residual(ffn)). Stack a dozen of these and you have BERT; add cross-attention and a causal mask and you have a decoder block. The attention heatmap shows what each position is attending to in this single layer; deep encoders compose these patterns into hierarchical representations.",
+        takeaway: "An encoder block is just chain(residual(self-attn), residual(ffn)). Stack a dozen of these and you have [[BERT]]; add cross-attention and a causal mask and you have a decoder block. The attention heatmap shows what each position is attending to in this single layer; deep encoders compose these patterns into hierarchical representations.",
         lines: &[
             "X = randn(0, [4, 8])                                                                                                                                                # 4 tokens of dim 8",
             "encoder = chain(residual(chain(rms_norm(8), attention(8, 1, 1))), residual(chain(rms_norm(8), linear(8, 16, 2), relu_layer(), linear(16, 8, 3))))  # pre-norm self-attn + residual; pre-norm FFN + residual",
@@ -269,7 +269,7 @@ pub const DEMOS: &[Demo] = &[
     Demo {
         name: "Decoder Block",
         intro: "One transformer decoder block: three sub-blocks instead of two. Causal self-attention (target attends only to past target tokens), then cross-attention (target queries attend to encoder output -- built from scratch since MLPL has no cross-attention layer primitive), then a feedforward sub-block. X_tgt is the target sequence (T=4); X_src stands in for the encoder's output (T=6) -- a real pipeline would feed the encoder demo's `out` here.",
-        takeaway: "A decoder block is encoder-block + cross-attention. The cross-attention heatmap is non-square ([T_tgt, T_src]): target queries distributing attention over encoder positions. Stack a dozen of these and you have GPT (decoder-only, drop the cross-attn step) or T5 (encoder-decoder, keep all three).",
+        takeaway: "A decoder block is encoder-block + cross-attention. The cross-attention heatmap is non-square ([T_tgt, T_src]): target queries distributing attention over encoder positions. Stack a dozen of these and you have [[GPT]] (decoder-only, drop the cross-attn step) or T5 (encoder-decoder, keep all three).",
         lines: &[
             "T_tgt = 4                                                                                # target sequence length",
             "T_src = 6                                                                                # source sequence length (encoder output stand-in)",
@@ -526,7 +526,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Moons MLP",
-        intro: "A two-layer tanh MLP trained with Adam + cross-entropy on the 'two moons' synthetic dataset -- two interleaved half-circles that a single linear classifier can't separate. 200 training steps, then accuracy, a loss curve, a confusion matrix, and the learned decision boundary over a 30x30 grid.",
+        intro: "A two-layer tanh MLP trained with [[Adam]] + cross-entropy on the 'two moons' synthetic dataset -- two interleaved half-circles that a single linear classifier can't separate. 200 training steps, then accuracy, a loss curve, a confusion matrix, and the learned decision boundary over a 30x30 grid.",
         takeaway: "A non-linear classifier with ~50 parameters separates the moons. cross_entropy(logits, y) is the canonical classification loss and is differentiable end-to-end through grad. The boundary SVG curves around each moon -- a visual proof that a hidden layer plus a non-linearity learned a non-linear decision surface.",
         lines: &[
             "M = moons(7, 120, 0.08)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              # 120 points in two interleaved half-circles",
@@ -561,7 +561,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "PCA",
-        intro: "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run power iteration to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance.",
+        intro: "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run [[power iteration]] to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance.",
         takeaway: "The scatter is colored by which side of zero each point's projection lands on; the line shows the found principal axis. Power iteration converges in ~10 steps to a direction that's clearly the long axis of the data cloud.",
         lines: &[
             "Xraw = randn(1, [60, 2])                                          # 60 points of isotropic 2D noise",
@@ -618,7 +618,7 @@ pub const DEMOS: &[Demo] = &[
     // run, use the CLI: `mlpl-repl -f demos/tiny_lm.mlpl`.
     Demo {
         name: "Tiny LM Generate",
-        intro: "End-to-end tiny transformer language model: tokenize a small corpus with BPE, wrap inputs as next-token pairs, build a 1-layer model (embed + causal_attention + rms_norm + linear head), train 30 Adam steps, then sample 20 tokens from a prompt and render the attention heatmap. The smallest program that trains and generates text.",
+        intro: "End-to-end tiny transformer language model: tokenize a small corpus with BPE, wrap inputs as next-token pairs, build a 1-layer model (embed + causal_attention + rms_norm + linear head), train 30 [[Adam]] steps, then sample 20 tokens from a prompt and render the attention heatmap. The smallest program that trains and generates text.",
         takeaway: "A language model with a few thousand parameters produced a decoded string from a learned distribution and a [T,T] heatmap of what each position attended to. The loss curve should trend downward; the generated text is noisy because the model and budget are both tiny -- scale V, d, block, and step count for a serious run via the CLI.",
         lines: &[
             "corpus = load_preloaded(\"tiny_corpus\")                                                                                                                                                                                                                                                          # short pangram-style training corpus",
@@ -730,7 +730,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "ViT Attention Pattern (no training)",
-        intro: "Vision Transformer pipeline end-to-end on a synthetic 64x64 RGB image, no training. patchify(x, 16) cuts the image into a 4x4 grid of 16 patches; each patch flattens P*P*C = 768 floats. A linear projection embeds them to d_model=128, a randn CLS token is prepended via concat(cls, patches, 0), a randn positional embedding is added, and one attention head computes its softmax weight matrix [17, 17] (16 patch tokens + 1 CLS). The heatmap is what an UNTRAINED ViT head pays attention to -- essentially nothing useful. The 'Pets: cat vs dog (quick)' demo trains the same architecture on pets_tiny.",
+        intro: "Vision [[Transformer]] pipeline end-to-end on a synthetic 64x64 RGB image, no training. patchify(x, 16) cuts the image into a 4x4 grid of 16 patches; each patch flattens P*P*C = 768 floats. A linear projection embeds them to d_model=128, a randn CLS token is prepended via concat(cls, patches, 0), a randn positional embedding is added, and one attention head computes its softmax weight matrix [17, 17] (16 patch tokens + 1 CLS). The heatmap is what an UNTRAINED ViT head pays attention to -- essentially nothing useful. The 'Pets: cat vs dog (quick)' demo trains the same architecture on pets_tiny.",
         takeaway: "The ViT recipe is shorter than it looks: patchify + linear-embed + CLS-prepend + pos-add + attention. Five new builtins (patchify, concat axis 0, randn, matmul, softmax) compose into the same forward-pass topology the original ViT paper drew. Without training, the attention weights are random; the row-sum sanity check at the end confirms softmax did its job regardless.",
         lines: &[
             "img = randn(101, [1, 3, 64, 64])                       # one synthetic 64x64 RGB image",
@@ -816,7 +816,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Pets: predict + gallery",
-        intro: "Train a Vision Transformer on 16 balanced cat/dog images, then render the labeled gallery: each thumbnail gets an `actual / predicted` caption underneath. Heavy: about 1-3 minutes in the browser. Misclassifications stand out because the two captions disagree (0/1 or 1/0).",
+        intro: "Train a Vision [[Transformer]] on 16 balanced cat/dog images, then render the labeled gallery: each thumbnail gets an `actual / predicted` caption underneath. Heavy: about 1-3 minutes in the browser. Misclassifications stand out because the two captions disagree (0/1 or 1/0).",
         takeaway: "The new pieces vs the quick demo: `predict_batch(model, X)` runs forward and returns argmax integer labels in one call; `svg(images, \"gallery\", overlay)` accepts an optional `[N]` or `[N, K]` overlay tensor and renders the values as text under each thumbnail. With actual + predicted side-by-side, you can finally point at a specific cat/dog photo and see what the model said. The 50-step train loop overfits, so almost every prediction matches the actual; the demonstration is the visualization, not the model quality.",
         lines: &[
             "pets = load_preloaded(\"pets_tiny\")",
@@ -922,7 +922,7 @@ pub const DEMOS: &[Demo] = &[
     Demo {
         name: "ViT Multi-Head Attention Pattern (no training)",
         intro: "The multi-head sibling of the single-head ViT attention pattern demo. Same synthetic 64x64 image, same patchify+linear-embed+CLS+pos pipeline, but `attention(128, 4, ...)` instead of one head. attention_weights returns [4, 17, 17]; the `heatmap_grid` viz type renders all four heads in a 2x2 grid so per-head differences are visible at a glance. UNTRAINED: all four heads draw from the same randn distribution and look uniform-random with no structure. Compare with the trained companion demo to see what gradient descent buys.",
-        takeaway: "Multi-head attention is just single-head attention applied to h independent subspaces of d_model. Before training, the four heads start from independent randn projections and produce four uniformly-random attention patterns. The architecture doesn't tell heads to specialize; the visualization here is the negative control -- the baseline that the trained demo is judged against.",
+        takeaway: "[[Multi-head attention]] is just single-head attention applied to h independent subspaces of d_model. Before training, the four heads start from independent randn projections and produce four uniformly-random attention patterns. The architecture doesn't tell heads to specialize; the visualization here is the negative control -- the baseline that the trained demo is judged against.",
         lines: &[
             "img = randn(101, [1, 3, 64, 64])                       # one synthetic 64x64 RGB image",
             "tokens_4d = patchify(img, 16)                          # [1, 16, 768]",
