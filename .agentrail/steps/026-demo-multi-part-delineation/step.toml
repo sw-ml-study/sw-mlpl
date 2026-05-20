@@ -1,6 +1,6 @@
 number = 26
 slug = "demo-multi-part-delineation"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted: demo multi-part delineation. User reports the Decision..."
 role = "production"
 context_files = []

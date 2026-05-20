@@ -2433,3 +2433,28 @@ session: vars, params, models, tokenizers, optimizer state,
 experiment log, frozen set, tag side-table, peer
 dispatcher. `:wsid` shows the counts; `:vars`, `:models`,
 `:tags`, `:experiments` list contents.
+
+## XOR (not linearly separable)
+
+XOR (exclusive or): the four 2-input boolean cases
+`[0,0] -> 0`, `[0,1] -> 1`, `[1,0] -> 1`, `[1,1] -> 0`.
+Positives sit on one diagonal, negatives on the other. No
+straight line in input space can separate them, so a linear
+classifier (weight vector + [[Sigmoid]]) cannot learn XOR.
+Adding a single hidden layer with a nonlinear activation
+([[Tanh]] or [[ReLU]]) makes XOR learnable -- the hidden layer creates intermediate
+features along each diagonal that the output layer can
+linearly combine.
+
+The web playground walks both cases as paired demos. The
+linear failure case is the fifth part of "Decision
+Boundary: logical gates" (AND, OR, NAND, NOR all succeed;
+XOR's surface stalls near the uniform 0.5 prior). The
+working version is "Decision Boundary: XOR (with MLP)" --
+load it from the demo dropdown after the gates demo to see
+the curved boundary a hidden layer produces.
+
+Historically this is the result Minsky and Papert called
+out in 1969 to argue against shallow perceptrons; the
+multi-layer answer didn't take off until backpropagation
+made it tractable in the mid-1980s.
