@@ -70,6 +70,15 @@ pub struct ModeBarProps {
     pub on_clear: Callback<MouseEvent>,
     pub on_demo: Callback<usize>,
     pub on_upload: Callback<web_sys::Event>,
+    /// Saga 29 step 016: cancel handler for the `<input
+    /// type=file>`'s `cancel` event. Binds `Err("cancelled")`
+    /// under the pending upload name when the user dismisses
+    /// the file picker.
+    pub on_upload_cancel: Callback<web_sys::Event>,
+    /// Saga 29 step 016: lifted to the parent so the
+    /// `:upload <name>` REPL command handler in handlers.rs
+    /// can also click() the input programmatically.
+    pub upload_input_ref: NodeRef,
     pub tutorial_active: bool,
 }
 
@@ -93,11 +102,7 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
         html! {}
     } else {
         // Saga 29 step 010 follow-up: render the dropdown
-        // alphabetically by demo name (case-insensitive) so
-        // users can scan for what they want. The `value`
-        // still carries the original DEMOS index so the
-        // load handler in handlers.rs continues to work
-        // unchanged.
+        // alphabetically by demo name (case-insensitive).
         let mut sorted: Vec<(usize, &str)> =
             DEMOS.iter().enumerate().map(|(i, d)| (i, d.name)).collect();
         sorted.sort_by_key(|(_, name)| name.to_ascii_lowercase());
@@ -116,16 +121,14 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
         "Reset REPL"
     };
     // Saga 29 step 011 follow-up: hidden file input + visible
-    // "Upload Image" button. Clicking the button triggers the
-    // hidden input's file picker; once the user picks a photo,
-    // the change event fires the on_upload callback which
-    // decodes + resizes via Canvas and binds the result as the
-    // `uploaded` variable in the WASM session.
-    let upload_input_ref = use_node_ref();
+    // "Upload Image" button. Step 016: input ref lifted to the
+    // parent so :upload <name> REPL command can click() it,
+    // and the cancel handler binds Err("cancelled") on
+    // dismiss.
     let upload_widget = if props.tutorial_active {
         html! {}
     } else {
-        let input_ref = upload_input_ref.clone();
+        let input_ref = props.upload_input_ref.clone();
         let on_click = Callback::from(move |_: MouseEvent| {
             if let Some(input) = input_ref.cast::<web_sys::HtmlInputElement>() {
                 input.click();
@@ -134,13 +137,14 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
         html! {
             <>
                 <input
-                    ref={upload_input_ref.clone()}
+                    ref={props.upload_input_ref.clone()}
                     type="file"
                     accept="image/*"
                     style="display: none"
                     onchange={props.on_upload.clone()}
+                    oncancel={props.on_upload_cancel.clone()}
                 />
-                <button class="ctrl-btn" onclick={on_click} title="Upload a photo (resized to 64x64) and bind as `uploaded` in the REPL.">
+                <button class="ctrl-btn" onclick={on_click} title="Upload a photo (resized to 64x64). Binds `uploaded = Ok({pixels, h, w})` on success, `Err(\"cancelled\")` on dismiss.">
                     {"Upload Image"}
                 </button>
             </>

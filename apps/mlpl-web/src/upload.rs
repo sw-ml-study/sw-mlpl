@@ -1,19 +1,29 @@
 //! Client-side image upload via the browser's File / Image /
-//! Canvas APIs. Saga 29 step 011 follow-up.
+//! Canvas APIs. Saga 29 step 011 follow-up; step 016 rework.
 //!
-//! The user picks a photo of any size and any browser-
-//! supported format (PNG / JPEG / WebP). The Canvas API
-//! decodes + resizes it to the model's input dimensions
-//! (`TARGET_W` x `TARGET_H`); the resulting RGB pixels get
-//! normalized to f64 in `[-1, 1]` (matching pets_tiny) and
-//! bound under the name `uploaded` in the WASM session.
-//! Once bound, the user can `predict_batch(classifier,
-//! uploaded)` against any trained model in the same
-//! session.
+//! Two entry points share the same Canvas decode + resize
+//! pipeline:
 //!
-//! No server is involved: the JPEG decoder + bilinear
-//! resize happen entirely in the browser, so this works on
-//! the static GitHub Pages live demo.
+//! 1. **Button-bound upload** (`make_upload_image`). Wired to
+//!    a file `<input type="file">`'s `onchange` event. The
+//!    chosen image binds under the name resolved from
+//!    `pending_name`: `Some(name)` if a `:upload <name>` REPL
+//!    command triggered the picker programmatically, else the
+//!    default `"uploaded"` (the legacy button click).
+//!
+//! 2. **`:upload x` REPL command** (Saga 29 step 016). Routed
+//!    in `handlers.rs::make_submit_batch`: setting
+//!    `pending_name` to `Some("x")` and programmatically
+//!    clicking the file input. The handler stays in the
+//!    synchronous chain of the user's Enter keypress, so the
+//!    browser accepts the `click()` as a user gesture.
+//!
+//! Either way, the uploaded image lands as a `Value::Result`
+//! in the WASM session: `Ok({pixels: [1, 3, 64, 64], h: 64,
+//! w: 64})` on success, `Err("cancelled")` if the picker is
+//! dismissed, `Err("...")` for any decode/resize failure.
+//! `:upload x` becomes the first in-tree consumer of the
+//! `Value::Result` type shipped in Saga 29 step 012.
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -30,10 +40,17 @@ use crate::state::{EntryKind, HistoryEntry};
 
 const TARGET_H: u32 = 64;
 const TARGET_W: u32 = 64;
+const DEFAULT_NAME: &str = "uploaded";
+
+/// Caller-chosen variable name for the next upload binding.
+/// `None` = the legacy button-click path (binds `"uploaded"`).
+/// `Some(name)` = the `:upload <name>` REPL path.
+pub type PendingUploadName = UseStateHandle<Option<String>>;
 
 pub fn make_upload_image(
     session: Rc<RefCell<WasmSession>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
+    pending_name: PendingUploadName,
 ) -> Callback<Event> {
     Callback::from(move |e: Event| {
         let target: HtmlInputElement = match e.target_dyn_into() {
@@ -51,11 +68,37 @@ pub fn make_upload_image(
             Some(f) => f,
             None => return,
         };
-        if let Err(err) = start_read(&file, &session, &history) {
-            push_error(&history, &format!("{err:?}"));
+        let name = pending_name
+            .as_ref()
+            .map_or_else(|| DEFAULT_NAME.to_string(), Clone::clone);
+        pending_name.set(None);
+        if let Err(err) = start_read(&file, &session, &history, &name) {
+            session
+                .borrow()
+                .bind_upload_result_err(&name, "decode-init failed");
+            push_error(&history, &name, &format!("{err:?}"));
         }
         // Reset so re-selecting the same file fires `change` again.
         target.set_value("");
+    })
+}
+
+/// Saga 29 step 016: cancel handler for the `<input type=file>`'s
+/// `cancel` event. Wires `Err("cancelled")` under the pending
+/// variable name (if any) so a `:upload x` command leaves
+/// `x = Err("cancelled")` instead of an undefined variable.
+pub fn make_upload_cancel(
+    session: Rc<RefCell<WasmSession>>,
+    history: UseStateHandle<Vec<HistoryEntry>>,
+    pending_name: PendingUploadName,
+) -> Callback<Event> {
+    Callback::from(move |_: Event| {
+        let name = pending_name
+            .as_ref()
+            .map_or_else(|| DEFAULT_NAME.to_string(), Clone::clone);
+        pending_name.set(None);
+        session.borrow().bind_upload_result_err(&name, "cancelled");
+        push_cancel(&history, &name);
     })
 }
 
@@ -63,21 +106,32 @@ fn start_read(
     file: &web_sys::File,
     session: &Rc<RefCell<WasmSession>>,
     history: &UseStateHandle<Vec<HistoryEntry>>,
+    name: &str,
 ) -> Result<(), JsValue> {
     let reader = FileReader::new()?;
     let reader_clone = reader.clone();
     let session_clone = session.clone();
     let history_clone = history.clone();
+    let name_clone = name.to_string();
     let onload = Closure::wrap(Box::new(move |_: Event| match reader_clone.result() {
         Ok(v) => match v.as_string() {
             Some(url) => {
-                if let Err(err) = start_image_load(&url, &session_clone, &history_clone) {
-                    push_error(&history_clone, &format!("{err:?}"));
+                if let Err(err) =
+                    start_image_load(&url, &session_clone, &history_clone, &name_clone)
+                {
+                    session_clone
+                        .borrow()
+                        .bind_upload_result_err(&name_clone, "image-load failed");
+                    push_error(&history_clone, &name_clone, &format!("{err:?}"));
                 }
             }
-            None => push_error(&history_clone, "FileReader result was not a string"),
+            None => push_error(
+                &history_clone,
+                &name_clone,
+                "FileReader result was not a string",
+            ),
         },
-        Err(err) => push_error(&history_clone, &format!("{err:?}")),
+        Err(err) => push_error(&history_clone, &name_clone, &format!("{err:?}")),
     }) as Box<dyn FnMut(Event)>);
     reader.set_onload(Some(onload.as_ref().unchecked_ref()));
     onload.forget();
@@ -89,14 +143,21 @@ fn start_image_load(
     url: &str,
     session: &Rc<RefCell<WasmSession>>,
     history: &UseStateHandle<Vec<HistoryEntry>>,
+    name: &str,
 ) -> Result<(), JsValue> {
     let img = HtmlImageElement::new()?;
     let img_clone = img.clone();
     let session_clone = session.clone();
     let history_clone = history.clone();
+    let name_clone = name.to_string();
     let onload = Closure::wrap(Box::new(move |_: Event| {
-        if let Err(err) = decode_image_to_session(&img_clone, &session_clone, &history_clone) {
-            push_error(&history_clone, &format!("{err:?}"));
+        if let Err(err) =
+            decode_image_to_session(&img_clone, &session_clone, &history_clone, &name_clone)
+        {
+            session_clone
+                .borrow()
+                .bind_upload_result_err(&name_clone, "decode failed");
+            push_error(&history_clone, &name_clone, &format!("{err:?}"));
         }
     }) as Box<dyn FnMut(Event)>);
     img.set_onload(Some(onload.as_ref().unchecked_ref()));
@@ -109,6 +170,7 @@ fn decode_image_to_session(
     img: &HtmlImageElement,
     session: &Rc<RefCell<WasmSession>>,
     history: &UseStateHandle<Vec<HistoryEntry>>,
+    name: &str,
 ) -> Result<(), JsValue> {
     let src_w = img.natural_width();
     let src_h = img.natural_height();
@@ -152,39 +214,72 @@ fn decode_image_to_session(
     }
     session
         .borrow()
-        .bind_image("uploaded", &chw, TARGET_H, TARGET_W)?;
-    push_success(history, src_w, src_h);
+        .bind_upload_result_ok(name, &chw, TARGET_H, TARGET_W)?;
+    push_success(history, name, src_w, src_h);
     Ok(())
 }
 
-fn push_success(history: &UseStateHandle<Vec<HistoryEntry>>, src_w: u32, src_h: u32) {
-    let mut entries: Vec<HistoryEntry> = (**history).clone();
-    entries.push(HistoryEntry {
-        input: "Image uploaded".to_string(),
-        output: format!(
+// History-entry pushers live in a sub-module so the
+// success/cancel/error trio doesn't blow upload.rs past the
+// sw-checklist per-module function-count budget. They share
+// one underlying `push_upload_entry` to centralize the
+// HistoryEntry construction.
+use messages::{push_cancel, push_error, push_success};
+
+mod messages {
+    use super::{EntryKind, HistoryEntry, TARGET_H, TARGET_W, UseStateHandle};
+
+    pub(super) fn push_success(
+        history: &UseStateHandle<Vec<HistoryEntry>>,
+        name: &str,
+        src_w: u32,
+        src_h: u32,
+    ) {
+        let body = format!(
             "Your {src_w}x{src_h} photo was resized to {target_w}x{target_h} by the \
-             browser's Canvas API and bound under `uploaded` as a `[1, 3, \
-             {target_h}, {target_w}]` tensor (RGB pixels normalized to [-1, 1]). \n\n\
-             Try: `uploaded` to inspect; if you have already run the \"Pets: cat vs \
-             dog (quick)\" demo, you can classify your photo with `predict_batch(classifier, \
-             take(apply(attn, reshape(apply(linear_p, reshape(patchify(uploaded, 16), [16, \
-             768])), [1, 16, 128])), 1, 0))` (0 = cat, 1 = dog).",
+             browser's Canvas API and bound as \n\n\
+             `{name} = Ok({{pixels: [1, 3, {target_h}, {target_w}], h: {target_h}, w: {target_w}}})`\n\n\
+             Inspect: `is_ok({name})` (returns 1), `unwrap({name}).pixels` (the tensor), \
+             `unwrap({name}).h` (height), or `svg(unwrap({name}).pixels, \"gallery\")` to view it.\n\n\
+             Classify (after running \"Pets: cat vs dog (quick)\" or \"Pets: multi-head ViT (quick + viz)\"):\n\
+             `img = unwrap({name}).pixels`\n\
+             `predict_batch(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(img, 16), [16, 768])), [1, 16, 128])), 1, 0))` (0 = cat, 1 = dog)",
             target_w = TARGET_W,
             target_h = TARGET_H,
-        ),
-        is_error: false,
-        kind: EntryKind::Narration,
-    });
-    history.set(entries);
-}
+        );
+        push(history, "Image upload OK", name, body, false);
+    }
 
-fn push_error(history: &UseStateHandle<Vec<HistoryEntry>>, msg: &str) {
-    let mut entries: Vec<HistoryEntry> = (**history).clone();
-    entries.push(HistoryEntry {
-        input: "Image upload failed".to_string(),
-        output: msg.to_string(),
-        is_error: true,
-        kind: EntryKind::Narration,
-    });
-    history.set(entries);
+    pub(super) fn push_cancel(history: &UseStateHandle<Vec<HistoryEntry>>, name: &str) {
+        let body = format!(
+            "You closed the file picker without choosing a photo. \
+             `{name}` is now bound to `Err(\"cancelled\")`. \
+             Check with `is_err({name})` or read the message with `err_message({name})`."
+        );
+        push(history, "Image upload cancelled", name, body, false);
+    }
+
+    pub(super) fn push_error(history: &UseStateHandle<Vec<HistoryEntry>>, name: &str, msg: &str) {
+        let body = format!(
+            "{msg}\n\n`{name}` is bound to `Err(\"decode failed\")` -- inspect via `err_message({name})`."
+        );
+        push(history, "Image upload failed", name, body, true);
+    }
+
+    fn push(
+        history: &UseStateHandle<Vec<HistoryEntry>>,
+        title: &str,
+        name: &str,
+        body: String,
+        is_error: bool,
+    ) {
+        let mut entries: Vec<HistoryEntry> = (**history).clone();
+        entries.push(HistoryEntry {
+            input: format!("{title} ({name})"),
+            output: body,
+            is_error,
+            kind: EntryKind::Narration,
+        });
+        history.set(entries);
+    }
 }

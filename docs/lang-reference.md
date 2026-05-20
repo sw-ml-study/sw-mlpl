@@ -404,11 +404,21 @@ for error messages). Display is `Ok(<inner>)` or `Err(<inner>)`.
 | `err_message(r)` | 1 | Return the payload if `Err(_)`. Raises `Unsupported` on `Ok(_)` (no message to return). |
 | `unwrap_or(r, default)` | 2 | Return the payload if `Ok(_)`; otherwise evaluate `default` and return that. |
 
-Motivating use: the upcoming `:upload x` REPL command (Saga 29
-step 013) binds `x = Ok(image)` on a successful file pick and
-`x = Err("cancelled")` when the user dismisses the dialog, so
-the program can branch on `is_ok(x)` instead of getting tripped
-by an undefined name.
+First in-tree consumer: the `:upload x` web-REPL command (Saga
+29 step 016) binds `x = Ok({pixels: [1, 3, 64, 64], h: 64,
+w: 64})` on a successful file pick and `x = Err("cancelled")`
+when the user dismisses the dialog. After upload, branch on
+`is_ok(x)` to classify the photo, or use `unwrap_or` to
+substitute a default tensor. The classify pattern:
+
+```mlpl
+:upload x
+img  = unwrap(x).pixels
+pred = predict_batch(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(img, 16), [16, 768])), [1, 16, 128])), 1, 0))
+```
+
+Returns `[0]` for cat or `[1]` for dog after running one of
+the trained Pets demos.
 
 ### Data Loading and Dataset Prep
 

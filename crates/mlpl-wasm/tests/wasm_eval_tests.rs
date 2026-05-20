@@ -121,3 +121,43 @@ fn eval_svg_unknown_type_is_error() {
     let result = session.eval(r#"svg([[0,0],[1,1]], "rainbow")"#);
     assert!(result.starts_with("error: "), "got: {result}");
 }
+
+/// Saga 29 step 016: bind_upload_result_ok wraps the pixels +
+/// dimensions in `Ok({pixels, h, w})` and binds under the
+/// caller-chosen name. Verify the Result shape via the
+/// existing accessor builtins.
+#[test]
+fn bind_upload_result_ok_round_trips_through_unwrap() {
+    let session = WasmSession::new();
+    let rgb = vec![0.1; 3 * 2 * 2]; // [3, 2, 2] f64 in [-1, 1]
+    session
+        .bind_upload_result_ok("img", &rgb, 2, 2)
+        .expect("bind_upload_result_ok");
+    // `is_ok(img)` returns scalar 1.0.
+    let ok = session.eval("is_ok(img)");
+    assert!(
+        ok.starts_with("1") || ok == "1",
+        "is_ok(img) should be 1, got: {ok}"
+    );
+    // `unwrap(img).h` reads the height scalar back.
+    let h = session.eval("unwrap(img).h");
+    assert!(h.starts_with("2"), "unwrap(img).h should be 2, got: {h}");
+}
+
+/// Saga 29 step 016: bind_upload_result_err binds an Err
+/// wrapping a string message.
+#[test]
+fn bind_upload_result_err_round_trips_through_err_message() {
+    let session = WasmSession::new();
+    session.bind_upload_result_err("img", "cancelled");
+    let is_err = session.eval("is_err(img)");
+    assert!(
+        is_err.starts_with("1") || is_err == "1",
+        "is_err(img) should be 1, got: {is_err}"
+    );
+    let msg = session.eval("err_message(img)");
+    assert!(
+        msg.contains("cancelled"),
+        "err_message(img) should contain 'cancelled', got: {msg}"
+    );
+}
