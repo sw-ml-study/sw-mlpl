@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- chore(agentrail): record saga 29 step 017 completion
+- saga 29 step 017: upload decode-error handling + better-cat-dog demo plan
+- chore(agentrail): insert upload-decode-error-handling as step 017
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 016 completion + kickoff step 017
 - saga 29 step 016: :upload x REPL command (first Value::Result consumer)
 - docs(changes): refresh CHANGES.md to HEAD
