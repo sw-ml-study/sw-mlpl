@@ -329,7 +329,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Glossary {
                 term: "Stack (tape op)",
-                why: "Saga 29 step 013 added a single-node, N-way concatenation along an existing axis so the multi-head autograd tape can join per-head outputs (and the rank-3 path can join per-batch outputs) in O(N) instead of the O(N^2) binary-concat chain it used to build.",
+                why: "Single-node, N-way concatenation along an existing axis. The multi-head autograd tape uses it to join per-head outputs (and the rank-3 path uses it to join per-batch outputs) in O(N) instead of an O(N^2) binary-concat chain.",
             },
             Step::Demo {
                 name: "ViT Attention Pattern (no training)",
@@ -357,7 +357,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Glossary {
                 term: ":upload (REPL command)",
-                why: "Saga 29 step 016 shipped: pick a photo from your device, the browser decodes + resizes to 64x64, binds the result as `<name> = Ok({pixels, h, w})`. A cancelled / unreadable / undecodable upload binds an `Err(\"...\")` instead (Saga 29 step 017 added the four flavors). First in-tree consumer of the `Value::Result` type from step 012.",
+                why: "Pick a photo from your device. The browser decodes + resizes it to 64x64 and binds the result under your chosen name as `Ok({pixels, h, w})`. A cancelled or unreadable upload binds `Err(\"...\")` instead so the program can branch on success without crashing on an undefined variable.",
             },
             Step::Note {
                 title: "Bring-your-own-image (try it now)",
@@ -365,7 +365,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Note {
                 title: "Beyond this path",
-                body: "The full-resolution demo (128x128 input, Oxford-IIIT Pet via fetch_dataset, single transformer block on the MLX peer) is `demos/vit_multihead_thorough.mlpl` (Saga 29 step 015). It runs on Apple Silicon with `--features mlx`; the CPU-only fallback works on any host. Layer norm with learned affine and the tanh-approximation GELU are still pending Tier 2 builtins from `docs/milestone-vit.md` and would be the next architectural additions for parity with the upstream notebook. The 7-demo ladder in `docs/better-cat-dog-future-demos.md` lays out a recommended sequence for making the classifier actually generalize to held-out photos.",
+                body: "The full-resolution demo (128x128 input, Oxford-IIIT Pet via fetch_dataset, single transformer block on the MLX peer) is `demos/vit_multihead_thorough.mlpl`. It runs on Apple Silicon with `--features mlx`; the CPU-only fallback works on any host. Layer norm with learned affine and the tanh-approximation GELU are still pending builtins and would be the next architectural additions for parity with the upstream notebook. The 7-demo ladder in `docs/better-cat-dog-future-demos.md` lays out a recommended sequence for making the classifier actually generalize to held-out photos.",
             },
         ],
     },

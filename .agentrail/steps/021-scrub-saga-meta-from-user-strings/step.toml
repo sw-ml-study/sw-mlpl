@@ -1,6 +1,6 @@
 number = 21
 slug = "scrub-saga-meta-from-user-strings"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted: user-facing strings in the web playground (learning pa..."
 role = "production"
 context_files = []

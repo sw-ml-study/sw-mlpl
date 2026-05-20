@@ -4,7 +4,7 @@ Short definitions for the ML terms that appear in MLPL demos
 and lessons. Alphabetical. Each entry names the closest MLPL
 construct so you can poke at the concept in the REPL. Concepts
 that MLPL does not ship today carry a `deferred` note pointing
-at the saga that may add them; concepts outside MLPL's
+at the future enhancement that may add them; concepts outside MLPL's
 teaching-language scope (MLOps, deployment, monitoring) carry
 an `out of scope` note.
 
@@ -45,7 +45,7 @@ Inputs crafted with small, often imperceptible perturbations
 that flip a model's prediction. The classic image-recognition
 example: change a few pixels and "panda" becomes "gibbon".
 MLPL ships `perturb_params(model, family, sigma, seed)` for
-weight-space perturbation (Saga 20); input-space adversarial
+weight-space perturbation ; input-space adversarial
 attacks are deferred.
 
 ## Agent loop
@@ -69,7 +69,7 @@ runs in the "Attention Pattern" demo.
 
 `apply(mdl, X)` and `attention_weights(mdl, X)` accept both
 rank-2 `[seq, d_model]` input and rank-3 `[B, T, d_model]`
-batched input for any `heads >= 1` (Saga 29 step 013;
+batched input for any `heads >= 1` (step 013;
 `d_model` must be divisible by `heads`). For rank-3 input
 each batch entry is processed independently and the per-
 batch outputs are stacked back. The tape lowering uses the
@@ -90,8 +90,8 @@ Returned by `attention_weights(model, tokens)` in MLPL.
 through any preceding layers in the outer chain, and
 returns just the softmax weight matrix -- without the
 `@ V` value-multiplication and `@ Wo` output-projection
-that `apply(model, X)` would do after it. Saga 11 surface;
-Saga 29 step 013 generalized the return shape to four
+that `apply(model, X)` would do after it. surface;
+step 013 generalized the return shape to four
 cases:
 
 | Input | heads | Output shape |
@@ -186,7 +186,7 @@ A specific encoder-only transformer architecture trained with
 masked-token prediction. Pre-2020-era foundation for many
 classification/QA tasks. MLPL builds tiny LMs in the demo
 suite but does not ship pretrained model weights; loading
-external checkpoints is a future saga.
+external checkpoints is a future enhancement.
 
 ## Bias
 
@@ -358,7 +358,7 @@ points and three centroids.
 ## clone_model (builtin)
 
 `clone_model(m)` deep-copies a `ModelSpec` tree, allocating a
-fresh disjoint set of param names. Saga 20's "Neural Thicket"
+fresh disjoint set of param names. "Neural Thicket"
 ensembling clones a base model into 16 disjoint variants
 before perturbing each.
 
@@ -459,7 +459,7 @@ representations.
 `:describe <name>` prints a typed summary of a binding -- shape
 + tag + values preview for an array, layer tree for a model,
 vocab + merge count for a tokenizer, signature for a builtin.
-Saga 23 v0.19 added per-tag bodies (Probability rows show
+v0.19 added per-tag bodies (Probability rows show
 the verified-or-violated row-sum invariant; Gradient shows
 `wrt`, etc.).
 
@@ -468,8 +468,8 @@ the verified-or-violated row-sum invariant; Gradient shows
 `device("target") { body }` pushes a device target onto a
 stack so ops inside the body dispatch through that backend.
 MLPL: `device("cpu") { ... }` (default), `device("mlx") {
-... }` (Apple MLX, Saga 14), and -- with `--peer` registered
--- a remote service peer (Saga R1). Bindings created inside
+... }` (Apple MLX, ), and -- with `--peer` registered
+-- a remote service peer . Bindings created inside
 the block carry the device tag forward; cross-device ops
 strict-fault.
 
@@ -540,14 +540,14 @@ Generative models that learn to denoise a sequence of
 increasingly noisy versions of the data. State of the art for
 images / video. Out of MLPL's current scope; loading a
 trained checkpoint is the entry point most users want, which
-is a separate saga.
+is a separate effort.
 
 ## Distillation
 
 Training a smaller "student" model to imitate a larger
 "teacher" model's outputs (logits or probabilities) instead
 of the original labels. Compresses knowledge into faster /
-cheaper models. Saga 18 plans MLPL distillation pipelines;
+cheaper models. plans MLPL distillation pipelines;
 deferred in v0.19.
 
 ## Distribution Shift
@@ -582,7 +582,7 @@ deep learning theory.
 A simpler alternative to RLHF that fits a model directly to
 human preferences without training a separate reward model
 or running reinforcement learning. Out of MLPL's current
-scope; preference-data builtins are a future saga.
+scope; preference-data builtins are a future enhancement.
 
 ## Dropout
 
@@ -602,7 +602,7 @@ condition the `train` body on `last_losses` patterns.
 
 `embed_table(model)` walks a `ModelSpec` tree depth-first
 left-to-right and returns the first `Embedding` layer's
-`[vocab, d_model]` matrix as a plain array. Saga 16.5
+`[vocab, d_model]` matrix as a plain array. .5
 shipped this so demos can inspect / project / cluster a
 learned embedding after training.
 
@@ -638,7 +638,7 @@ decoder. See "Decoder / encoder" for the role of each side.
 Running multiple trained models on the same input and
 combining their outputs (averaging logits, voting). Often
 beats any single member at the cost of inference time and
-memory. MLPL's "Neural Thicket" demo (Saga 20) runs a 16-
+memory. MLPL's "Neural Thicket" demo  runs a 16-
 member weight-perturbed ensemble end-to-end.
 
 ## Epoch
@@ -649,7 +649,7 @@ relative; steps are gradient-relative.
 
 ## estimate_train / estimate_hypothetical / feasible / calibrate_device (builtins)
 
-Saga 22's "feasibility" surface. `estimate_train(model, steps,
+"feasibility" surface. `estimate_train(model, steps,
 batch_size, seq_len[, dtype_bytes])` returns a `[5]` array
 `[params, vram_bytes, disk_bytes, flops, wall_seconds]` from
 a `ModelSpec`. `estimate_hypothetical(name, ...)` answers the
@@ -709,7 +709,7 @@ via `llm_call(url, prompt, model)`; no dedicated builtin.
 Continuing training from a pretrained model on a new dataset
 or task. Often paired with `freeze` so only a subset of
 parameters move. MLPL: `lora(model, rank, alpha, seed)` is
-the parameter-efficient form (Saga 15).
+the parameter-efficient form .
 
 ## Flash Attention
 
@@ -732,7 +732,7 @@ mask scaffolding.
 `for row in dataset { body }` streams over rows (or batches)
 of a dataset, binding the row to `row` per iteration. The
 last value of `body` is captured into `last_rows` for
-plotting / inspection. Saga 12 added this construct; the
+plotting / inspection. added this construct; the
 "Loading Data" tutorial walks it end-to-end.
 
 ## Function calling
@@ -757,7 +757,7 @@ expression.
 A parameter the optimizer skips during the update step. The
 gradient still flows through during backprop; only the
 weight update is suppressed. MLPL: `freeze(model)` /
-`unfreeze(model)` from Saga 15.
+`unfreeze(model)` from .
 
 ## Goodhart's Law
 
@@ -799,7 +799,7 @@ buildable but not first-class.
 
 ## Gallery (viz output)
 
-`svg(images, "gallery")` (Saga 29 step 010) renders an
+`svg(images, "gallery")`  renders an
 `[N, 3, H, W]` image batch as an SVG grid of RGB
 thumbnails. Each batch entry is laid out in a ceil-sqrt
 grid, downsampled via block averaging so a 20-image
@@ -809,7 +809,7 @@ pets_tiny slice doesn't emit tens of thousands of unique
 and `load_images` produce; out-of-range values clamp instead
 of wrap.
 
-3-arg form `svg(images, "gallery", overlay)` (Saga 29 step
+3-arg form `svg(images, "gallery", overlay)` (step
 011) attaches a small text caption under each thumbnail.
 `overlay` is `[N]` (one integer per image) or `[N, K]` for
 K up to 4 (e.g. `[N, 2]` of actual / predicted). Values
@@ -872,7 +872,7 @@ matrices.
 
 ## heatmap_grid (viz type)
 
-`svg(data, "heatmap_grid")` (Saga 29 step 014) renders a
+`svg(data, "heatmap_grid")`  renders a
 rank-3 `[N, R, C]` tensor as a grid of N heatmaps. Grid
 layout is `cols = ceil(sqrt(N))`, `rows = ceil(N / cols)`
 (so 2x2 for N=4, 3x3 for N=9, etc.). Each cell carries its
@@ -979,7 +979,7 @@ its assigned points". The K-Means demo runs ten iterations.
 
 `knn(X, k)` returns each row's `k` nearest non-self neighbors
 sorted by ascending distance with lower-index tie-break.
-`[N, k]` integer-index output. Saga 16 ships this for
+`[N, k]` integer-index output. ships this for
 embedding inspection.
 
 ## KV Cache
@@ -1079,8 +1079,8 @@ train a 1-layer transformer end-to-end on a small corpus.
 
 `llm_call(url, prompt, model)` POSTs to an Ollama-compatible
 `/api/generate` endpoint and returns the model's completion
-text as a `Value::Str` string. Saga 19 added this; CLI-only
-in v0.19 (browser CORS / proxy story is a deferred saga).
+text as a `Value::Str` string. added this; CLI-only
+in v0.19 (browser CORS / proxy story is a deferred enhancement).
 
 ## load / load_preloaded (builtins)
 
@@ -1091,7 +1091,7 @@ compiled-in corpora for the web REPL where filesystem access
 is unavailable. Both produce a string for `.txt` and a
 DenseArray (with header autoparse) for `.csv`.
 
-`load_preloaded("pets_tiny")` (Saga 29 step 003) returns a
+`load_preloaded("pets_tiny")`  returns a
 `Value::Record` with three fields: `X` (a `DenseArray` of
 shape `[200, 3, 64, 64]` with `[batch, channel, y, x]` axis
 labels), `Y` (a `[200]` label vector; `0 = cat`, `1 = dog`),
@@ -1102,7 +1102,7 @@ decoder.
 
 ## fetch_dataset (builtin)
 
-`fetch_dataset(name)` (Saga 29 step 004, native-only via the
+`fetch_dataset(name)` (step 004, native-only via the
 `image-io` Cargo feature) is the live counterpart to
 `load_preloaded`. The v0.21 registry recognizes one name --
 `"oxford_iiit_pet"` -- which downloads the upstream
@@ -1122,7 +1122,7 @@ deliberately not in the WASM dependency tree.
 ## patchify (builtin)
 
 `patchify(x, P)` rearranges a `[B, C, H, W]` image batch into
-`[B, N, P*P*C]` patch tokens (Saga 29 step 005). `P` is the
+`[B, N, P*P*C]` patch tokens. `P` is the
 square patch side length; it must divide both `H` and `W`,
 giving `N = (H/P) * (W/P)` patches per image. Each row of the
 trailing axis is one patch flattened in channel-outer order:
@@ -1143,12 +1143,12 @@ general `permute` primitive that MLPL doesn't ship yet.
 
 ## concat (builtin)
 
-`concat(a, b)` (Saga 13) joins two rank-0 or rank-1 arrays
-into a 1-D vector; used by generation loops to append a
-sampled token id to the growing sequence.
+`concat(a, b)` joins two rank-0 or rank-1 arrays into a 1-D
+vector; used by generation loops to append a sampled token id
+to the growing sequence.
 
-`concat(a, b, axis)` (Saga 29 step 005) is the axis-aware
-extension. Both inputs must agree on every dim except `axis`,
+`concat(a, b, axis)` is the axis-aware extension. Both inputs
+must agree on every dim except `axis`,
 where the sizes add. Initial release supports `axis` in
 `{0, 1}` only; higher axes are a follow-up. Differentiable on
 the tape: forward stacks data per the axis layout; backward
@@ -1161,7 +1161,7 @@ the CLS row after attention.
 
 ## predict_batch (builtin)
 
-`predict_batch(model, X)` (Saga 29 step 011) runs a forward
+`predict_batch(model, X)`  runs a forward
 pass through `model` and returns argmax over the trailing
 axis as integer class indices. Equivalent to
 `argmax(apply(model, X), last_axis)` but a single builtin
@@ -1173,7 +1173,7 @@ to compute classification accuracy, or pass to the 3-arg
 
 ## load_images (builtin)
 
-`load_images(dir, [H, W])` (Saga 29 step 003, native-only via
+`load_images(dir, [H, W])` (step 003, native-only via
 the `image-io` Cargo feature) reads every PNG / JPEG under
 `dir`, decodes via magic-byte dispatch to `png` /
 `jpeg-decoder` (smaller dep footprint than `image-rs`),
@@ -1214,7 +1214,7 @@ output instead is the canonical double-softmax bug.
 
 The log of a probability. Numerically stabler than
 multiplying probabilities; `log_softmax` (deferred to a
-later saga) produces them.
+later step) produces them.
 
 ## LoRA (Low-Rank Adaptation)
 
@@ -1359,7 +1359,7 @@ num_classes)`.
 breeds, ~200 images per breed), released by the Visual
 Geometry Group at Oxford. Standard cat-vs-dog classification
 benchmark with breed-level subclasses. MLPL uses it as the
-training set for the Saga 29 Vision Transformer demos. The
+training set for the Vision Transformer demos. The
 filename convention encodes the class: capitalized prefix =
 cat breed (`Abyssinian_1.jpg`), lowercase prefix = dog breed
 (`beagle_3.jpg`). The full ~792 MB tarball lives in a
@@ -1424,7 +1424,7 @@ embedding-cluster inspection.
 the autograd tape tracks; `tensor[d0, d1, ...]` allocates a
 fixed (non-trainable) leaf. Both auto-bind to the assignment
 target's name. Auto-tagged `Weight` / `Bias` per the
-shape-and-position heuristics in Saga 23.
+shape-and-position heuristics in .
 
 ## Padding
 
@@ -1451,7 +1451,7 @@ demo writes it out by hand.
 `perturb_params(m, family, sigma, seed)` walks `m`'s param
 tree, filters by `family` (`"all_layers"`, `"attention_only"`,
 `"mlp_only"`, `"embed_and_head"`), and adds `sigma * randn(seed
-+ i, shape)` to each matching param in place. Saga 20's
++ i, shape)` to each matching param in place. Used by the
 weight-perturbation ensembling pattern.
 
 ## Perceptron
@@ -1575,14 +1575,14 @@ precision (typically bfloat16). Lets fine-tuning fit on
 far smaller GPUs than the base model would otherwise
 allow. Pairs naturally with the chat-template / SFT
 workflow. **Deferred** in MLPL: the LoRA path exists
-today (Saga 17) but `quantize` does not.
+today  but `quantize` does not.
 
 ## Quantization
 
 Storing weights in low-precision integer formats (int8, int4)
 for memory and speed at modest accuracy cost. Often combined
 with LoRA in QLoRA workflows. MLPL stores everything in f64;
-quantization is a deferred follow-up to Saga 15.
+quantization is a deferred follow-up to .
 
 ## Query (Q)
 
@@ -1599,7 +1599,7 @@ Fetch relevant documents from a corpus at query time, prepend
 them to the prompt, and let an LLM answer over the retrieved
 context. Reduces hallucination and lets you cite. MLPL ships
 `pairwise_sqdist` / `knn` for similarity search; full RAG
-pipelines are a deferred saga.
+pipelines are a deferred enhancement.
 
 ## randn / random (builtins)
 
@@ -1648,7 +1648,7 @@ residuals, e.g. XGBoost). **Deferred** in MLPL.
 ## Record
 
 A structured value built from `{name1: expr1, name2: expr2}`
-record-literal syntax (Saga 29 step 001). Field access is
+record-literal syntax . Field access is
 `r.name`. Distinct from `{ stmt; }` blocks, which only appear
 after the `repeat` / `train` / `for` / `experiment` / `device`
 keywords -- at any other position `{` opens a record. Field
@@ -1659,7 +1659,7 @@ arrays, strings, models, ...). Unknown-field access returns
 `FieldNotFound { requested, available }` listing the valid
 keys; field access on a non-record returns
 `FieldOnNonRecord { receiver_kind, field }`. Use case: the
-Saga 29 Vision Transformer track wants
+Vision Transformer track wants
 `load_preloaded("pets_tiny")` to return
 `{X: [200, 3, 64, 64], Y: [200], names: [str]}` -- one builtin,
 three logical outputs, no positional-tuple awkwardness.
@@ -1687,16 +1687,16 @@ or the math builtin path.
 A circular buffer of past experiences (state, action, reward,
 next state) that an off-policy RL algorithm samples from
 during training. Out of MLPL's current scope; RL builtins
-are a future saga.
+are a future enhancement.
 
 ## Representation Learning
 
 The umbrella term for learning useful internal features
 without explicit feature engineering. Self-supervised
 pretraining, autoencoders, contrastive learning all fall
-under it. Saga 16's embedding-visualization tools poke at
+under it. embedding-visualization tools poke at
 representations; full self-supervised pretraining is a
-deferred saga.
+deferred enhancement.
 
 ## repeat block (language keyword)
 
@@ -1714,7 +1714,7 @@ given dim sizes. Total element count must match; otherwise
 `ShapeMismatch`. Clears axis labels (semantic identity is
 lost on shape reflow); `reshape_labeled(x, dims, labels)`
 preserves them by re-stating labels explicitly. Note: also
-clears Saga 23 ValueTags, since the result no longer
+clears ValueTags, since the result no longer
 represents the same domain.
 
 ## Residual
@@ -1725,8 +1725,8 @@ through deep stacks. MLPL: `residual(inner_model)`.
 ## Result type
 
 A `Value::Result { ok: bool, payload: Box<Value> }` wrapper
-for ops that can fail without crashing the REPL (Saga 29
-step 012). `ok(v)` constructs `Ok(v)`; `err(v)` constructs
+for ops that can fail without crashing the REPL. `ok(v)`
+constructs `Ok(v)`; `err(v)` constructs
 `Err(v)` -- typically `err("message")` but any Value
 variant is allowed as the payload. The discriminator is a
 bool, not a tag string, so `is_ok`/`is_err` are O(1) reads.
@@ -1742,7 +1742,7 @@ raise `EvalError::NotAResult { receiver_kind, accessor }`
 on a non-Result first argument.
 
 Motivating use: the upcoming `:upload x` REPL command
-(Saga 29 step 013) binds `x = Ok(image)` on a successful
+ binds `x = Ok(image)` on a successful
 upload or `x = Err("cancelled")` when the user dismisses
 the file picker, so the program can branch on
 `is_ok(x)` rather than getting tripped by an undefined
@@ -1874,7 +1874,7 @@ max / prefix product. Not in v0.19; obvious follow-up to
 ## scatter (builtin)
 
 `scatter(buf, idx, value)` returns a copy of a rank-1 buffer
-with the entry at `idx` replaced by `value`. Saga 20's neural-
+with the entry at `idx` replaced by `value`. neural-
 thicket loop uses it to write each variant's loss into a
 flat `[16]` accumulator before reshaping into the heatmap.
 
@@ -2007,7 +2007,7 @@ backward; stack is O(N).
 Backward splits the upstream gradient into N equal-size
 slabs and routes each to its parent. Same value-equivalence
 as a left-associated `concat` chain, so analytic gradients
-match the chain's exactly (Saga 29 step 013).
+match the chain's exactly.
 
 ## Step
 
@@ -2020,14 +2020,14 @@ backward pass, and one parameter update. Distinct from
 
 A `Value::StrList { items: Vec<String> }` value built from a
 `["a", "b", "c"]` literal whose every element evaluates to a
-string (Saga 29 step 002). The same `[...]` surface syntax
+string . The same `[...]` surface syntax
 dispatches on element kind: all strings -> `StrList`; all
 numbers -> the existing `DenseArray` numeric path; mixed
 kinds -> `EvalError::MixedArrayLitElements { kinds }` so the
 user sees which positions disagreed. Empty `[]` continues to
 produce an empty `DenseArray` for back-compat.
 
-Use case: the Saga 29 Vision Transformer track wants
+Use case: the Vision Transformer track wants
 `load_preloaded("pets_tiny")` to return
 `{X: [200, 3, 64, 64], Y: [200], names: ["Abyssinian_1.jpg",
 "beagle_3.jpg", ...]}` -- one record value with three logical
@@ -2059,7 +2059,7 @@ learning-style decomposition.
 
 ## :tags / :untag (REPL commands)
 
-Saga 23 v0.19 typed-value introspection. `:tags` lists every
+v0.19 typed-value introspection. `:tags` lists every
 binding with an attached `ValueTag` sorted alphabetically,
 showing the tag's display form (e.g. `Probability`,
 `Loss(CrossEntropy)`, `Weight(layer=linear_0, name=W)`).
@@ -2072,7 +2072,7 @@ Parameter-free activation layers wrappable in a `chain(...)`.
 `tanh_layer()` / `relu_layer()` / `softmax_layer()` apply
 their respective elementwise functions. Distinct from the
 math primitives (`tanh_fn`, `sigmoid`) in that layers can
-participate in `apply(model, X)` and Saga 23's structural-
+participate in `apply(model, X)` and structural-
 tail tagging.
 
 ## Supervised learning
@@ -2219,8 +2219,8 @@ relu_layer(), linear(d_ff, d, s3))))`.
 
 ## take (builtin)
 
-`take(x, axis, idx)` drops one axis at a single integer index
-(Saga 29 step 007). For a rank-`r` input, the result has rank
+`take(x, axis, idx)` drops one axis at a single integer
+index. For a rank-`r` input, the result has rank
 `r - 1`; per-axis labels carry through except for the dropped
 one. `axis` and `idx` are eager-evaluated scalars. Driving use
 case is per-image extraction in the ViT trained demo:
@@ -2272,8 +2272,8 @@ is a tiny taste; full uncertainty surface is deferred.
 
 `unfreeze(m)` is the inverse of `freeze(m)` -- removes every
 param of `m` from the env's frozen set so subsequent
-`adam` / `momentum_sgd` updates can move them again. Saga 15
-ships both as the LoRA freeze / unfreeze pair.
+`adam` / `momentum_sgd` updates can move them again. Used
+together as the LoRA freeze / unfreeze pair.
 
 ## Universal Approximation
 
@@ -2297,36 +2297,24 @@ than absent.
 
 ## :upload (REPL command)
 
-`:upload <name>` (Saga 29 step 016, web REPL only) opens
-the browser's file picker. The user selects an image (any
-PNG / JPEG / WebP / etc. the browser can decode); the
-Canvas API decodes + bilinear-resizes to 64x64 + normalizes
-RGB pixels to f64 in `[-1, 1]`, then binds the result
-under `<name>` as a `Value::Result`:
+`:upload <name>` (web REPL only) opens the browser's file
+picker. Pick any image the browser can decode (PNG, JPEG,
+WebP, etc.) and the Canvas API resizes it to 64x64,
+normalizes the RGB pixels into the range `[-1, 1]`, and
+binds the result under your chosen name as a `Result`
+value. On success you get `<name> = Ok({pixels: [1, 3, 64,
+64], h: 64, w: 64})`, ready to feed straight into a
+trained ViT classifier. On dismiss you get `<name> =
+Err("cancelled")`. Bad-format files (a binary renamed
+`.jpg`) bind `Err("decode failed: not a valid image")`;
+unreadable files bind `Err("read failed")`.
 
-- On success: `<name> = Ok({pixels: [1, 3, 64, 64], h: 64,
-  w: 64})`. The pixels field is a labeled DenseArray
-  ready to feed directly into a trained ViT classifier.
-- On dismiss: `<name> = Err("cancelled")`. Branch on
-  `is_ok(<name>)` rather than getting tripped by an
-  undefined variable.
-- On decode failure (e.g. a non-image file with a `.jpg`
-  extension): `<name> = Err("decode failed: not a valid
-  image")`. Saga 29 step 017 wired the `<img>` onerror
-  handler so this case no longer falls through to a stray
-  cancel event.
-- On read failure (zero-byte file, permissions issue, abort
-  mid-read): `<name> = Err("read failed")`. The
-  FileReader.onerror handler covers this. Step 017.
-
-`err_message(<name>)` is the canonical way to inspect which
-of these flavors fired.
-
-This is the first in-tree consumer of the `Value::Result`
-type shipped in Saga 29 step 012. The legacy "Upload
-Image" button takes the same path with `<name> =
-"uploaded"`. Native (terminal) REPLs raise an unsupported
-error -- the picker is browser-only.
+Inspect with `is_ok(<name>)`, `is_err(<name>)`, or read
+the specific message with `err_message(<name>)`. Get the
+tensor out with `unwrap(<name>).pixels`. View it with
+`svg(unwrap(<name>).pixels, "gallery")`. The legacy
+"Upload Image" button uses the same pipeline but writes
+to a hardcoded variable named `uploaded`.
 
 ## VAE (Variational Autoencoder)
 
@@ -2334,14 +2322,14 @@ An autoencoder where the latent space is regularized to
 match a prior distribution (typically Gaussian). The encoder
 outputs `(mean, std)`; the decoder samples from
 `Gaussian(mean, std)`. Trained with reconstruction + KL-
-divergence terms. Saga 24 plans first-class
+divergence terms. plans first-class
 `Distribution` support; VAE demos follow once
 distributions ship.
 
 ## :vars (REPL command)
 
 `:vars` lists every bound array variable with its shape
-(labeled if any axes are named) and Saga 23 ValueTag if any.
+(labeled if any axes are named) and ValueTag if any.
 Trainable params are flagged `[param]`; frozen params show
 in `:wsid`'s frozen-count.
 
@@ -2380,7 +2368,7 @@ embed plumbing.
 Models that take both image and text inputs (e.g. CLIP,
 LLaVA, GPT-4V). Out of MLPL's current scope -- the language
 core is text + tabular today; vision pipelines are a
-follow-up saga.
+follow-up step.
 
 ## Vocabulary
 

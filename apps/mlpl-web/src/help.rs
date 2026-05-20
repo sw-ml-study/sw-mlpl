@@ -77,7 +77,7 @@ Commands (APL-inspired workspace introspection):
   :builtins            list built-in functions by category
   :describe <name>     describe a variable, model, tokenizer,
                        or built-in (with v0.19 typed header)
-  :tags                list every binding's ValueTag (Saga 23)
+  :tags                list every binding's ValueTag
   :untag <name>        clear a binding's auto-attached tag
   :wsid                workspace summary (APL )WSID)
   :experiments         list captured experiment runs
