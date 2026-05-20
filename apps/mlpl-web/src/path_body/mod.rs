@@ -47,7 +47,12 @@ fn render_block(block: Block) -> Html {
     }
 }
 
-fn render_inline(text: &str) -> Html {
+/// Render a single line of body text as a sequence of inline
+/// spans (text, `code`, **bold**, _emph_, `[[term]]`). No
+/// block-level wrapping -- callers that want a paragraph use
+/// `render_body` instead. Used by `entry_render` to put
+/// glossary links inside MLPL `# comment` text.
+pub(crate) fn render_inline(text: &str) -> Html {
     let parts = inline::split(text);
     html! { <>{ for parts.into_iter().map(inline_render::render_span) }</> }
 }
