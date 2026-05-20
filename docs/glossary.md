@@ -83,6 +83,30 @@ The `[T, T]` matrix of attention weights between every pair
 of positions in a sequence. Renders cleanly as a heatmap.
 Returned by `attention_weights(model, tokens)` in MLPL.
 
+## attention_weights (builtin)
+
+`attention_weights(model, X)` walks `model` to its first
+`attention` / `causal_attention` layer, transforms `X`
+through any preceding layers in the outer chain, and
+returns just the softmax weight matrix -- without the
+`@ V` value-multiplication and `@ Wo` output-projection
+that `apply(model, X)` would do after it. Saga 11 surface;
+Saga 29 step 013 generalized the return shape to four
+cases:
+
+| Input | heads | Output shape |
+|-------|-------|--------------|
+| `[T, d_model]`    | 1 | `[T, T]` |
+| `[T, d_model]`    | h | `[h, T, T]` |
+| `[B, T, d_model]` | 1 | `[B, T, T]` |
+| `[B, T, d_model]` | h | `[B, h, T, T]` |
+
+Each `[T, T]` slab is row-stochastic (softmax). Used by
+the ViT attention-pattern demos to render heatmaps over
+patch positions -- with multi-head, the `[heads, T, T]`
+output feeds directly into `svg(_, "heatmap_grid")` for a
+per-head 2x2 grid.
+
 ## Autoencoder
 
 A network trained to reconstruct its input through a low-
@@ -388,12 +412,6 @@ Elementwise predicates returning `0.0` / `1.0`. `gt(a, b)`,
 `lt(a, b)`, `eq(a, b)`. MLPL has no boolean type -- the
 `0 / 1` floats double as masks (multiply to filter) and
 counts (`reduce_add` to sum a "how many true" tally).
-
-## concat (builtin)
-
-`concat(a, b)` stitches two rank-1 vectors end to end. Used
-in the Tiny LM generation loop to grow the prompt
-sequence by appending each newly-sampled token.
 
 ## Cross-attention
 
@@ -851,6 +869,24 @@ Scratch" for a per-head walkthrough.
 `svg(matrix, "heatmap")` renders a `[N, M]` array as a 2-D
 intensity grid. Standard for attention maps and confusion
 matrices.
+
+## heatmap_grid (viz type)
+
+`svg(data, "heatmap_grid")` (Saga 29 step 014) renders a
+rank-3 `[N, R, C]` tensor as a grid of N heatmaps. Grid
+layout is `cols = ceil(sqrt(N))`, `rows = ceil(N / cols)`
+(so 2x2 for N=4, 3x3 for N=9, etc.). Each cell carries its
+own min/max colormap so a sharply-focused panel and a
+diffuse panel both render with visible structure rather
+than washing one out. Each cell has a `head <i>` label
+above it.
+
+Driving use case: multi-head `attention_weights(model, X)`
+returns `[heads, T, T]`; passing that to heatmap_grid lays
+out one heatmap per head so per-head specialization is
+legible at a glance. Used by the
+`vit_attention_pattern_multihead.mlpl` (untrained baseline)
+and `vit_multihead_quick.mlpl` (post-training) demos.
 
 ## hist (builtin)
 
