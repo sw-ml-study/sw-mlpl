@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 25,
+    "step": "glossary-link-content-pass"
+  },
+  "action": "added path_body::render_inline (inline-only variant of render_body); routed entry_render::render_input_line's comment portion through it for [[term]] in MLPL comments; sprinkled [[term]] sigils across Pets/DB/Tiny LM demos and Attention/ViT/Stack/patchify glossary entries; refactored install_listeners helper out of the function-component; ran cargo test + clippy + fmt + sw-checklist (all green; 157==parent); rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T08:20:24"
+}
