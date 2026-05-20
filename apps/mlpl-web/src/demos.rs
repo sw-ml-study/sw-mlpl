@@ -117,7 +117,7 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         demo: "Pets: multi-head ViT (quick + viz)",
         line_idx: 29,
         heading: "Training the 4-head Vision Transformer (~60-90s)",
-        body: "30 full-batch Adam steps on the 8 pet images. Same forward pipeline as the single-head quick demo, but `attention(128, 4)` runs four independent attention heads in parallel and `Tensor::stack` joins their per-head [T, d/h]=[16, 32] outputs back to [16, 128] (Saga 29 step 013 unlocked the multi-head autograd tape). Backward fans through every head separately. The tab is unresponsive during the train block; this is normal, not a hang.",
+        body: "30 full-batch Adam steps on the 8 pet images. Same forward pipeline as the single-head quick demo, but `attention(128, 4)` runs four independent attention heads in parallel and `Tensor::stack` joins their per-head [T, d/h]=[16, 32] outputs back to [16, 128]. Backward fans through every head separately. The tab is unresponsive during the train block; this is normal, not a hang.",
     },
     ProgressNote {
         demo: "Pets: multi-head ViT (quick + viz)",
@@ -629,7 +629,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "ViT Attention Pattern (no training)",
-        intro: "Vision Transformer pipeline end-to-end on a synthetic 64x64 RGB image, no training. patchify(x, 16) cuts the image into a 4x4 grid of 16 patches; each patch flattens P*P*C = 768 floats. A linear projection embeds them to d_model=128, a randn CLS token is prepended via concat(cls, patches, 0), a randn positional embedding is added, and one attention head computes its softmax weight matrix [17, 17] (16 patch tokens + 1 CLS). The heatmap is what an UNTRAINED ViT head pays attention to -- essentially nothing useful. Demo 2 (Saga 29 step 007, coming next) trains the same architecture on pets_tiny.",
+        intro: "Vision Transformer pipeline end-to-end on a synthetic 64x64 RGB image, no training. patchify(x, 16) cuts the image into a 4x4 grid of 16 patches; each patch flattens P*P*C = 768 floats. A linear projection embeds them to d_model=128, a randn CLS token is prepended via concat(cls, patches, 0), a randn positional embedding is added, and one attention head computes its softmax weight matrix [17, 17] (16 patch tokens + 1 CLS). The heatmap is what an UNTRAINED ViT head pays attention to -- essentially nothing useful. The 'Pets: cat vs dog (quick)' demo trains the same architecture on pets_tiny.",
         takeaway: "The ViT recipe is shorter than it looks: patchify + linear-embed + CLS-prepend + pos-add + attention. Five new builtins (patchify, concat axis 0, randn, matmul, softmax) compose into the same forward-pass topology the original ViT paper drew. Without training, the attention weights are random; the row-sum sanity check at the end confirms softmax did its job regardless.",
         lines: &[
             "img = randn(101, [1, 3, 64, 64])                       # one synthetic 64x64 RGB image",
@@ -654,7 +654,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Pets: cat vs dog (quick)",
-        intro: "Trained Vision Transformer end-to-end on a balanced 8-image subset of pets_tiny (4 cats + 4 dogs). 30 full-batch adam steps with single-head attention(128, 1) and a tiny MLP classifier head. Saga 29 step 009. The longer 20-image / 100-step version lives in demos/vit_single_head_quick.mlpl; this in-browser variant is scaled down so the train loop completes in seconds.",
+        intro: "Trained Vision Transformer end-to-end on a balanced 8-image subset of pets_tiny (4 cats + 4 dogs). 30 full-batch adam steps with single-head attention(128, 1) and a tiny MLP classifier head. The longer 20-image / 100-step version lives in demos/vit_single_head_quick.mlpl; this in-browser variant is scaled down so the train loop completes in seconds.",
         takeaway: "ViT in MLPL is the same five-step recipe as the no-training demo plus a train{} block and an adam call. The forward expression has to be inlined into adam because grad walks the expression tree (let-bindings would create non-differentiable leaves). First-token pooling stands in for a learned CLS token. The loss_curve at the end shows binary cross-entropy falling from ~0.69 (random) toward 0 (overfit); the final accuracy on the 8 training images is the scalar at the very bottom.",
         lines: &[
             "# Balanced 8-image subset (4 cats + 4 dogs) extracted",
@@ -715,7 +715,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Pets: predict + gallery",
-        intro: "Train a Vision Transformer on 16 balanced cat/dog images, then render the labeled gallery: each thumbnail gets an `actual / predicted` caption underneath. Saga 29 step 011. Heavy: about 1-3 minutes in the browser. Misclassifications stand out because the two captions disagree (0/1 or 1/0).",
+        intro: "Train a Vision Transformer on 16 balanced cat/dog images, then render the labeled gallery: each thumbnail gets an `actual / predicted` caption underneath. Heavy: about 1-3 minutes in the browser. Misclassifications stand out because the two captions disagree (0/1 or 1/0).",
         takeaway: "The new pieces vs the quick demo: `predict_batch(model, X)` runs forward and returns argmax integer labels in one call; `svg(images, \"gallery\", overlay)` accepts an optional `[N]` or `[N, K]` overlay tensor and renders the values as text under each thumbnail. With actual + predicted side-by-side, you can finally point at a specific cat/dog photo and see what the model said. The 50-step train loop overfits, so almost every prediction matches the actual; the demonstration is the visualization, not the model quality.",
         lines: &[
             "pets = load_preloaded(\"pets_tiny\")",
@@ -802,7 +802,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "ViT Multi-Head Attention Pattern (no training)",
-        intro: "Saga 29 step 014: the multi-head sibling of the single-head ViT attention pattern demo. Same synthetic 64x64 image, same patchify+linear-embed+CLS+pos pipeline, but `attention(128, 4, ...)` instead of one head. attention_weights returns [4, 17, 17]; the new `heatmap_grid` viz type renders all four heads in a 2x2 grid so per-head differences are visible at a glance. UNTRAINED: all four heads draw from the same randn distribution and look uniform-random with no structure. Compare with the trained companion demo to see what gradient descent buys.",
+        intro: "The multi-head sibling of the single-head ViT attention pattern demo. Same synthetic 64x64 image, same patchify+linear-embed+CLS+pos pipeline, but `attention(128, 4, ...)` instead of one head. attention_weights returns [4, 17, 17]; the `heatmap_grid` viz type renders all four heads in a 2x2 grid so per-head differences are visible at a glance. UNTRAINED: all four heads draw from the same randn distribution and look uniform-random with no structure. Compare with the trained companion demo to see what gradient descent buys.",
         takeaway: "Multi-head attention is just single-head attention applied to h independent subspaces of d_model. Before training, the four heads start from independent randn projections and produce four uniformly-random attention patterns. The architecture doesn't tell heads to specialize; the visualization here is the negative control -- the baseline that the trained demo is judged against.",
         lines: &[
             "img = randn(101, [1, 3, 64, 64])                       # one synthetic 64x64 RGB image",
@@ -819,7 +819,7 @@ pub const DEMOS: &[Demo] = &[
             "# attention_weights returns [heads, T, T] for multi-head, rank-2 input.",
             "A = attention_weights(mdl, seq)                        # [4, 17, 17]",
             "# heatmap_grid renders [N, R, C] as a 2x2 grid of",
-            "# heatmaps with per-cell colormaps. New viz type, Saga 29 step 014.",
+            "# heatmaps with per-cell colormaps.",
             "svg(A, \"heatmap_grid\")",
             "# Sanity: per-(head, row) softmax sums = 1.",
             "row_sums = reduce_add(A, 2)                            # [4, 17]",
@@ -828,7 +828,7 @@ pub const DEMOS: &[Demo] = &[
     },
     Demo {
         name: "Pets: multi-head ViT (quick + viz)",
-        intro: "Saga 29 step 014: trained 4-head Vision Transformer on a balanced 8-image cat/dog subset, with per-head attention maps rendered after training. Same architecture as the single-head quick demo but `attention(128, 4)` and an `attention_weights(...)` + `heatmap_grid` viz at the end. Browser-friendly: 30 adam steps on 8 images. Compare the heatmap_grid output here with the UNTRAINED 'ViT Multi-Head Attention Pattern' demo -- the four heads start identical and end specialized.",
+        intro: "Trained 4-head Vision Transformer on a balanced 8-image cat/dog subset, with per-head attention maps rendered after training. Same architecture as the single-head quick demo but `attention(128, 4)` and an `attention_weights(...)` + `heatmap_grid` viz at the end. Browser-friendly: 30 adam steps on 8 images. Compare the heatmap_grid output here with the UNTRAINED 'ViT Multi-Head Attention Pattern' demo -- the four heads start identical and end specialized.",
         takeaway: "What the four heatmaps show: each [16, 16] cell is one attention head's softmax weight matrix. Row i = patch i (in row-major order from top-left to bottom-right of a 4x4 grid over the 64x64 image); column j = how strongly patch i attends to patch j. A bright cell at row i column j means head h thinks patch i should pull information from patch j. After 30 adam steps the heads are NOT identical -- the same architecture, the same input, the same optimizer, but four different attention patterns because each head's Q/K/V projection was randomly initialized to a different starting subspace, and gradient descent then pushed each one toward whatever role minimized cross-entropy for THAT subspace. Compare with the untrained 'ViT Multi-Head Attention Pattern' demo (run it first) where all four heads look the same uniform-random noise -- the specialization here is entirely learned, not architectural. Common post-training patterns: one head concentrates attention into a single column (a 'this patch is salient' detector); one stays diffuse (an 'aggregate everything' channel); the remaining two pick intermediate roles. The architecture says 'split d_model into 4 subspaces and run attention in each'; gradient descent says what each subspace pays attention to.",
         lines: &[
             "pets = load_preloaded(\"pets_tiny\")",
