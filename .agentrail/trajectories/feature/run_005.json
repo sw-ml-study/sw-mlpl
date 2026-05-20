@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 24,
+    "step": "glossary-hyperlinks"
+  },
+  "action": "added Span::Glossary + [[term]] tokenizer in inline.rs; split renderer into inline_render.rs to stay under fn-count budget; created GlossaryPopupHost component with window-event listener + Esc/click-outside dismiss; mounted it at top of main.rs; routed HistoryEntry::Narration through path_body in entry_render.rs; added web-sys features (CustomEvent, CustomEventInit, EventTarget); added CSS for .glossary-link + .glossary-popup-* in index.html; sprinkled [[term]] sigils into the Vision path BYO Note as the first wire-up; ran cargo test + clippy + fmt + sw-checklist (all green; 157==parent); rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T07:30:17"
+}
