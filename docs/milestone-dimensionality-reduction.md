@@ -125,13 +125,17 @@ samples and measure the increase in the embedding's stress /
 reconstruction error. The dimensions whose shuffling most
 disturbs the embedding are the "critical" ones.
 
-### Phase 2: UMAP
+### Phase 2: UMAP (the headline implementation)
 
-UMAP (Uniform Manifold Approximation and Projection) is the
-modern default for 2D visualization of high-D data. The
+UMAP (Uniform Manifold Approximation and Projection, McInnes and
+Healy 2018) is the practical winner the demos point at. The
 implementation is non-trivial -- it builds a k-NN graph, computes
 fuzzy-set membership, and optimizes a low-D layout via stochastic
-gradient descent on a cross-entropy objective.
+gradient descent on a cross-entropy objective. The motivation
+section of every UMAP lesson and demo positions it against PCA
+(linear, fast, throws away non-linear structure) and against
+*SNE methods (described in phase 4, runnable comparison only via
+the existing `tsne` builtin).
 
 Steps (each is its own agentrail step):
 
@@ -144,28 +148,101 @@ Steps (each is its own agentrail step):
    cross-entropy + repulsion objective.
 4. **`umap(X, n_neighbors, min_dist, iters, seed)` builtin** that
    wraps the above into one call. Returns `[N, 2]`.
-5. **Demo** -- `demos/umap.mlpl` on a synthetic three-cluster
-   dataset, side-by-side with `tsne(X, ...)` so the user sees the
-   difference.
 
-### Phase 3: additional methods (one builtin per step)
+### Phase 3: comparison demos (UMAP as the winner)
+
+These are the demos the milestone is built around. Each is a
+side-by-side that ends with "UMAP got the structure the other
+method missed."
+
+1. **`demos/umap_vs_pca.mlpl`** -- a curved manifold dataset
+   (Swiss roll or two-moons embedded in higher D). PCA's linear
+   projection unrolls into a smear because the principal axis
+   crosses the manifold; UMAP recovers the original geometry.
+   Renders both 2D embeddings side by side.
+
+2. **`demos/umap_vs_tsne.mlpl`** -- a multi-cluster dataset where
+   inter-cluster distance is meaningful (e.g. three clusters at
+   distinct radii from origin). t-SNE preserves local structure
+   but distorts global distances; UMAP preserves both. Each
+   embedding gets a colored scatter; the legend calls out which
+   global feature each method preserved.
+
+3. **`demos/dim_reduction_zoo.mlpl`** -- the full lineup: PCA,
+   t-SNE, UMAP, MDS, random projection on one dataset, rendered
+   as a row of five thumbnails with a caption per method. Pure
+   browse-and-compare reference. (Builds on the additional
+   methods in Phase 5.)
+
+The demos prefer UMAP for the obvious-winner cases; the lessons
+in Phase 4 cover the cases where PCA or t-SNE is the right
+choice.
+
+### Phase 4: tutorial lessons (SNE family described, UMAP demoed)
+
+Lessons added to the tutorial track in dependency order:
+
+1. **"Why reduce dimensions?"** -- motivation lesson. The
+   manifold hypothesis; the curse of dimensionality; visualizing
+   high-D data. No code; concept-first.
+
+2. **"PCA: the linear baseline"** -- builds on `demos/pca.mlpl`,
+   adds the loadings view via `pca_components` + `svg(_,
+   "critical_dimensions")`. Positioned as "the fastest answer,
+   the one to try first."
+
+3. **"SNE: the very-slow ancestor"** -- *description-only,
+   no MLPL primitive*. Walks through Hinton and Roweis 2002:
+   gaussian similarity in both high-D and low-D, asymmetric KL
+   divergence, the symmetrization-and-crowding problem that made
+   it slow to converge and prone to collapsing clusters. The
+   lesson includes the equations + a "why it was abandoned"
+   framing; it does NOT propose adding an `sne` builtin since
+   t-SNE strictly dominates.
+
+4. **"t-SNE: a peek at nonlinear methods"** -- the existing
+   `tsne` builtin. Lesson explains van der Maaten and Hinton
+   2008's two fixes (symmetric KL + Student-t in low-D) and
+   notes the Barnes-Hut 2014 follow-up that brought it to
+   O(N log N). The standard "cluster shape is meaningful,
+   distances between clusters are not" caveat. Used in
+   comparison demos but never as the recommended default.
+
+5. **"UMAP: the modern default"** -- the headline lesson.
+   Introduces UMAP from first principles (Riemannian geometry
+   + fuzzy simplicial sets, framed informally), runs the
+   `demos/umap_vs_pca.mlpl` and `demos/umap_vs_tsne.mlpl`
+   demos, and explains *why* UMAP preserves more global
+   structure than t-SNE: the cross-entropy objective penalizes
+   both attractive and repulsive forces evenly, while t-SNE's
+   KL is mostly attractive.
+
+6. **"Reading a critical-dimensions heatmap"** -- a lesson
+   centered on the viz itself. Shows the same data viewed
+   through PCA loadings, permutation sensitivity for t-SNE,
+   and permutation sensitivity for UMAP; teaches the user to
+   read each.
+
+### Phase 5: additional methods (one builtin per step)
+
+These are the "complete the survey" methods. None of them get a
+demo of their own -- they show up in `demos/dim_reduction_zoo.mlpl`
+as side-by-side comparisons against UMAP.
 
 1. **MDS (Multidimensional Scaling)** -- `mds(X, k, iters)`. Pre-
    computes the pairwise distance matrix and finds low-D
    coordinates that preserve those distances. Classical MDS is
    eigendecomposition; metric MDS is SGD. Ship the SGD variant
-   (simpler, reuses t-SNE's optimization loop).
+   (simpler, reuses t-SNE's optimization loop). Briefly
+   mentioned in the UMAP lesson as "the geometric ancestor."
 
 2. **Random Projection** -- `random_projection(X, k, seed)`. The
    Johnson-Lindenstrauss surprising result: a random `[D, k]`
    projection approximately preserves pairwise distances for
-   modest `k`. One-liner implementation; biggest payoff is the
-   lesson about "you do not always need principled methods."
-
-3. **Linear vs nonlinear comparison demo** -- `demos/dim_reduction_zoo.mlpl`:
-   same dataset through `pca`, `random_projection`, `tsne`, `umap`,
-   `mds` side by side. The user sees the strengths and weaknesses
-   of each.
+   modest `k`. One-liner implementation; the payoff is the
+   "you do not always need principled methods" lesson, which
+   gets a short section inside the "Why reduce dimensions?"
+   lesson rather than its own.
 
 Optional steps (added only if a user demand surfaces):
 
@@ -173,40 +250,15 @@ Optional steps (added only if a user demand surfaces):
   expose `kernel_matrix(X, "rbf", gamma)` first.
 - **ICA** -- needs whitening + a contrast function. Useful for
   signal separation but a niche introduction.
+- **Barnes-Hut t-SNE** -- O(N log N) approximation of t-SNE via
+  spatial trees. Useful if MLPL ever wants to demo t-SNE on
+  larger N; deferred until a real demand surfaces.
 
-### Phase 4: tutorial lessons
-
-Lessons added to the tutorial track in dependency order:
-
-1. **"Why reduce dimensions?"** -- motivation lesson. The manifold
-   hypothesis; the curse of dimensionality; visualizing
-   high-D data. No code; concept-first.
-
-2. **"PCA: the linear baseline"** -- builds on `demos/pca.mlpl`,
-   adds the loadings view via `pca_components` + `svg(_,
-   "critical_dimensions")`.
-
-3. **"t-SNE: a peek at nonlinear methods"** -- the existing
-   `tsne` builtin, with the standard "cluster shape is
-   meaningful, distances between clusters are not" caveat.
-
-4. **"UMAP: the modern default"** -- introduces UMAP, compares
-   with t-SNE, shows that UMAP preserves more global structure.
-
-5. **"Random projection: when you do not need PCA"** -- the
-   Johnson-Lindenstrauss lemma in code. One of the best lessons
-   on "principled methods are sometimes overkill."
-
-6. **"Reading a critical-dimensions heatmap"** -- a lesson
-   centered on the viz itself. Shows the same data viewed through
-   PCA loadings, permutation sensitivity for t-SNE, and
-   permutation sensitivity for UMAP; teaches the user to read
-   each.
-
-### Phase 5: learning path
+### Phase 6: learning path
 
 New path **"High-dimensional data, one chart at a time"** in
-`apps/mlpl-web/src/paths.rs`:
+`apps/mlpl-web/src/paths.rs`. Walks PCA -> SNE family ->
+UMAP, then loops back through the critical-dimensions viz:
 
 - Note: "Why this path exists"
 - Glossary: **Manifold Hypothesis**
@@ -218,27 +270,50 @@ New path **"High-dimensional data, one chart at a time"** in
 - Lesson: "PCA: the linear baseline"
 - Demo: existing `demos/pca.mlpl`
 - Glossary: **PCA**
-- Lesson: "t-SNE"
+- Lesson: "SNE: the very-slow ancestor" (description-only)
+- Glossary: **SNE** (new entry)
+- Lesson: "t-SNE: a peek at nonlinear methods"
 - Glossary: **t-SNE**
-- Lesson: "UMAP"
-- Demo: `demos/umap.mlpl`
-- Lesson: "Random projection"
+- Lesson: "UMAP: the modern default"
+- Glossary: **UMAP** (new entry)
+- Demo: `demos/umap_vs_pca.mlpl`
+- Demo: `demos/umap_vs_tsne.mlpl`
 - Lesson: "Reading a critical-dimensions heatmap"
-- Demo: `demos/dim_reduction_zoo.mlpl` (the side-by-side)
+- Demo: `demos/dim_reduction_zoo.mlpl` (the full lineup)
 - Note: "Beyond this path" -- pointer to deferred methods
-  (Isomap, LLE, Kernel PCA, autoencoder embeddings).
+  (Isomap, LLE, Kernel PCA, autoencoder embeddings,
+  Barnes-Hut t-SNE).
+
+## Editorial stance (confirmed 2026-05-20)
+
+User direction: focus demos on UMAP being "better" than PCA and
+the *SNE family; SNE itself is description-only (no builtin --
+it is too slow to be useful and t-SNE dominates anyway), and
+t-SNE is described in detail but only appears in
+demos as the loser in head-to-head comparisons against UMAP.
+That framing is baked into Phase 3 (UMAP-vs-X demos), Phase 4
+(SNE described-only, t-SNE described + comparison-only), and
+Phase 6 (path ordering puts PCA -> SNE -> t-SNE -> UMAP as the
+historical-progression spine).
 
 ## What I want to confirm before starting
 
 - Whether **Phase 1 (critical-dimensions heatmap)** should ship
-  ahead of UMAP / MDS / random projection. It can land on top of
-  the existing `pca` builtin alone; the new viz is the
-  highest-leverage piece.
-- Whether **UMAP** is the right second priority vs random
-  projection (simpler) or MDS (better-known).
-- Whether **glossary cross-link sweep** should run again after
-  the new entries land, or whether the script already running
-  picks up new entries automatically next time it runs.
+  ahead of UMAP. It can land on top of the existing `pca`
+  builtin alone; the new viz is the highest-leverage piece and
+  gives the dim-reduction track a visible win before the UMAP
+  implementation lands. Default plan is yes -- phase 1 first.
+- Whether the `demos/umap_vs_pca.mlpl` and
+  `demos/umap_vs_tsne.mlpl` demos should each include a
+  critical-dimensions heatmap of their input data (so the
+  reader sees what UMAP found AND which input dimensions
+  carried the signal), or whether that should stay in the
+  zoo demo only. Default: include in both -- the viz is the
+  whole point.
+- Whether the **chronological-history milestone** (the
+  sibling proposal) should pull these history-of-DR lessons
+  in by reference (one entry "SNE -> t-SNE -> UMAP" in its
+  spine) rather than duplicating content.
 - The order of phase 4 (lessons) and phase 5 (path) -- I have
   them sequential here, but they can interleave: write the
   path's skeleton early and fill in lessons as each phase
