@@ -1,0 +1,9 @@
+number = 18
+slug = "demo-running-spinner"
+status = "pending"
+description = "Saga 29 step inserted: generic 'something is happening' spinner for the web d..."
+role = "production"
+context_files = []
+created_at = "2026-05-19T22:14:10"
+task_type = "feature"
+commits = []
