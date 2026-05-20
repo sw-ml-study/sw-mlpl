@@ -1,0 +1,9 @@
+number = 17
+slug = "upload-decode-error-handling"
+status = "pending"
+description = "Saga 29 step inserted (bugfix after step 016): wire image-decode and file-rea..."
+role = "production"
+context_files = []
+created_at = "2026-05-19T21:47:38"
+task_type = "bugfix"
+commits = []
