@@ -1,0 +1,11 @@
+{
+  "task_type": "code",
+  "state": {
+    "number": 3,
+    "step": "drop-rank3-concat-workaround"
+  },
+  "action": "Searched for batched / rank-3 / per-batch / workaround / concat patterns in mlpl-eval and mlpl-autograd. Found two live code paths (model_tape.rs:attention_tape_rank3 and model_dispatch.rs's rank-3 eager attention branch), confirmed both already use the correct primitive (Tensor::stack on the tape side; per-batch extend_from_slice on the eager side -- both already O(B) not O(B^2)). Wrote the requested rank3_b2_t4_d8_single_head test verifying shape + spot-check element agreement against rank-2 calls. Swept stale doc comments in model_tape.rs:16 and reduction_ops.rs:124. Quality: cargo test -p mlpl-eval --test batch_attention_tests 7/7 green; broader cargo test --release -p mlpl-autograd -p mlpl-eval all green; workspace clippy clean; sw-checklist 157=parent (hold).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T16:50:10"
+}

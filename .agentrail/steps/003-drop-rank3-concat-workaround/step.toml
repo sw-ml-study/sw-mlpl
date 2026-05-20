@@ -1,9 +1,10 @@
 number = 3
 slug = "drop-rank3-concat-workaround"
-status = "pending"
+status = "completed"
 description = "Tier 1 saga step 003: remove the per-batch workaround in the attention rank-3..."
 role = "production"
 context_files = []
 created_at = "2026-05-20T13:02:44"
+completed_at = "2026-05-20T16:50:10"
 task_type = "code"
-commits = []
+commits = ["c439c5342b61af734dba8a470170fc79417a7e80"]
