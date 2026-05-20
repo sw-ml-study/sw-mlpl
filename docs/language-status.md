@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-20 (saga 30 step 002 shipped).
+Last refreshed: 2026-05-20 (saga 30 step 003 shipped).
 
 ## Active saga
 
 | Slug              | Status   | Steps total | Done | Next step                                |
 |-------------------|----------|-------------|------|------------------------------------------|
-| `tier1-cleanup`   | active   | 6           | 2    | 003 drop-rank3-concat-workaround         |
+| `tier1-cleanup`   | active   | 6           | 3    | 004 multihead-attention-tape (audit #19) |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -82,6 +82,16 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-20** -- saga 30 step 003: no live workaround to drop;
+  the rank-3 attention path already uses `Tensor::stack` (saga 29
+  step 008) which is the correct primitive. Cleaned up two stale
+  doc comments (`model_tape.rs` module doc saying "chained concat
+  over the head axis"; `Tensor::concat` rustdoc saying "0 or 1
+  supported in initial release") that described pre-saga-30
+  behavior. Added a `[B=2, T=4, d_model=8]` rank-3 single-head
+  regression test pinning the shape and per-batch elementwise
+  agreement, so any future regression to a chained-binary-concat
+  lowering would fail.
 - **2026-05-20** -- saga 30 step 002: audit #18 backward lifted.
   The autograd `concat_backward` now generalizes to any axis,
   matching the forward. Rank-3 and rank-4 finite-difference

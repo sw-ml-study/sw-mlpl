@@ -176,3 +176,49 @@ fn rank3_apply_grad_matches_finite_difference_on_wq() {
         "analytic Wq[0, 0] grad {analytic} disagreed with finite-difference {fd}"
     );
 }
+
+#[test]
+fn rank3_b2_t4_d8_single_head_path_pins_shape_and_one_element() {
+    // Saga 30 step 003 regression guard: pin a specific
+    // [B=2, T=4, d_model=8] shape through attention(8, 1) and
+    // verify (a) output shape is [B, T, d_model] and (b) one
+    // element matches the rank-2 reference computation. The
+    // rank-3 path runs the [T, d_model] attention per-batch
+    // and stacks via Tensor::stack -- this test pins that
+    // behavior so any future regression to a chained binary
+    // concat lowering (which would still give the same output
+    // but cost O(B^2) tape nodes) fails loudly. The test
+    // verifies correctness, not the tape-node count; the cost
+    // distinction lives in the doc comment on attention_tape_rank3.
+    let mut env = Environment::new();
+    eval_program(
+        &parse(&lex("mdl = attention(8, 1, 17)").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let xs: Vec<f64> = (0..(2 * 4 * 8))
+        .map(|i| (i as f64) * 0.005 - 0.15)
+        .collect();
+    env.set("X3".into(), arr(vec![2, 4, 8], xs.clone()));
+    env.set("X_b0".into(), arr(vec![4, 8], xs[..32].to_vec()));
+    env.set("X_b1".into(), arr(vec![4, 8], xs[32..].to_vec()));
+    let y3 = run("apply(mdl, X3)", &mut env);
+    let y_b0 = run("apply(mdl, X_b0)", &mut env);
+    let y_b1 = run("apply(mdl, X_b1)", &mut env);
+    assert_eq!(y3.shape().dims(), &[2, 4, 8]);
+    // Spot-check: batch 0 element (1, 3) of rank-3 output must
+    // equal rank-2 output at (1, 3). Flat index = 1*8 + 3 = 11.
+    let r3_b0_t1_d3 = y3.data()[11];
+    let r2_b0_t1_d3 = y_b0.data()[11];
+    assert!(
+        (r3_b0_t1_d3 - r2_b0_t1_d3).abs() < 1e-9,
+        "rank-3 batch-0 [1, 3] = {r3_b0_t1_d3} disagreed with rank-2 [1, 3] = {r2_b0_t1_d3}"
+    );
+    // And a spot-check on batch 1 at element (2, 5). Flat = 2*8+5 = 21.
+    let r3_b1_t2_d5 = y3.data()[32 + 21];
+    let r2_b1_t2_d5 = y_b1.data()[21];
+    assert!(
+        (r3_b1_t2_d5 - r2_b1_t2_d5).abs() < 1e-9,
+        "rank-3 batch-1 [2, 5] = {r3_b1_t2_d5} disagreed with rank-2 [2, 5] = {r2_b1_t2_d5}"
+    );
+}
