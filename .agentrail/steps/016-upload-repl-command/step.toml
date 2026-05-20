@@ -1,0 +1,9 @@
+number = 16
+slug = "upload-repl-command"
+status = "pending"
+description = "Saga 29 step 016 (inserted): :upload x REPL command. Today the web playground..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-19T18:18:00"
+task_type = "feature"
+commits = []
