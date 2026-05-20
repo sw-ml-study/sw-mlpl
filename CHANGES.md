@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-20
 
+- docs(glossary): sweep [[term]] cross-reference sigils across older entries
+- fix(web): route glossary panel + path demo previews through render_body
+- chore(agentrail): record saga 29 step 029 completion + saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(viz): attention_overlay viz type + ViT per-head overlay demo
 - chore(agentrail): record saga 29 step 028 completion + kickoff 029
 - docs(changes): refresh CHANGES.md to HEAD
