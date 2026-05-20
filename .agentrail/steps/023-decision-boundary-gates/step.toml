@@ -1,9 +1,10 @@
 number = 23
 slug = "decision-boundary-gates"
-status = "in-progress"
+status = "completed"
 description = 'Saga 29 step inserted: extend the "Decision Boundary" demo (apps/mlpl-web/src...'
 role = "production"
 context_files = []
 created_at = "2026-05-20T06:56:29"
+completed_at = "2026-05-20T07:01:27"
 task_type = "demo"
-commits = []
+commits = ["85571532dc677326315ebfbb8ceb13c373a9be94"]
