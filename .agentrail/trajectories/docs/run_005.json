@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 27,
+    "step": "vit-era-diagrams"
+  },
+  "action": "Read existing diagram set + paths.rs; hand-authored SVGs in the established viewBox/trebuchet/fill-#333 style with arrow defs; added DIAGRAMS const entries; inserted Step::Diagram entries adjacent to matching Glossary/Demo steps in the Vision path; ran scoped cargo build + clippy + test for mlpl-web; cargo fmt; sw-checklist held at 157; built pages via scripts/build-pages.sh; committed + pushed; refreshed CHANGES.md as a follow-up.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T09:45:52"
+}

@@ -1,9 +1,10 @@
 number = 27
 slug = "vit-era-diagrams"
-status = "in-progress"
+status = "completed"
 description = "Saga 29 step inserted: SVG diagrams for ViT-era concepts that don't have visu..."
 role = "production"
 context_files = []
 created_at = "2026-05-20T07:19:37"
+completed_at = "2026-05-20T09:45:51"
 task_type = "docs"
-commits = []
+commits = ["ed4130edda5f6a186bc5c4c44af19e3973bb95da"]
