@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- chore(agentrail): record saga 29 step 019 completion
+- saga 29 step 019: legends + axis scales for every viz type that lacked them
+- chore(agentrail): insert viz-legends-scales as step 019
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 018 completion
 - saga 29 step 018: generic running spinner for every demo + REPL line
 - chore(agentrail): insert demo-running-spinner as step 018
