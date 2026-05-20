@@ -349,6 +349,38 @@ of a saga), prefer scoped tests for the changed crates
 plus full clippy / fmt / markdown / sw-checklist.
 Document the scoping rationale in the commit message.
 
+### Release-profile tests for demo-heavy crates
+
+For /mw-cp gates that exercise demo-heavy crates
+(`mlpl-eval`, `mlpl-web`, `apps/mlpl-repl`), prefer
+`cargo test --release` over the default `dev` profile.
+The MLPL interpreter walks the AST one node at a time
+through `mlpl-runtime`'s dispatch table; `dev` leaves
+those calls un-inlined, so per-iteration cost is 30-
+60x worse. The `all_demos_smoke::every_quick_demo_runs`
+test (which lexes + parses + evals every web-playground
+demo, including Tiny MLP's `repeat 600` block) takes
+~15+ min in dev and ~1-2 min in release. The longer
+release link step (Criterion + plotters) pays back
+on the first demo-smoke iteration.
+
+Rule of thumb:
+
+- Demo / interpreter-loop tests (`mlpl-eval`,
+  `mlpl-web`, repl integration tests): use `--release`.
+- Pure unit tests (`mlpl-core`, `mlpl-array`,
+  `mlpl-parser`, `mlpl-autograd` gradchecks on small
+  fixtures): dev is fine -- the workload doesn't sit
+  in the interpreter.
+- TDD inner loops where you re-run one test 30 times:
+  stay in dev; the incremental compile is what you want.
+
+NEVER run dev + release back-to-back without a
+`cargo clean` between them when the disk is under
+~15 GB free -- the two `target/` trees add to ~10-15
+GB each. Measure with `du -sh target/` before
+deciding.
+
 ### Pre-save binaries before destructive cleans
 
 When the user explicitly authorizes a `cargo clean` to

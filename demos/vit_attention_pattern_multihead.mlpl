@@ -1,0 +1,58 @@
+# Vision Transformer multi-head attention pattern: a no-
+# training forward pass that renders the per-head softmax
+# weight matrices side by side. Saga 29 step 014.
+#
+# Companion to demos/vit_attention_pattern.mlpl. That demo
+# shows one [17, 17] attention matrix from a single head;
+# this one shows four [17, 17] matrices from heads=4 on the
+# same synthetic image. Because nothing is trained, all four
+# heads draw from the same randn distribution and look
+# similar -- close to uniform-random with no structure. The
+# point is the baseline: this is what multi-head attention
+# looks like BEFORE training has any chance to specialize.
+#
+# Saga 29 step 015 (the trained multi-head demo) runs the
+# same architecture for 100 adam steps and renders the
+# heatmaps again; THAT demo shows the four heads diverging
+# into distinct attention patterns.
+
+# ---- input image (same as the single-head demo) ----
+img = randn(101, [1, 3, 64, 64])
+
+# ---- patchify -> [1, 16, 768] -> [16, 768] ----
+tokens_4d = patchify(img, 16)
+tokens = reshape(tokens_4d, [16, 768])
+
+# ---- linear patch embedding to d_model = 128 ----
+Wp      = randn(201, [768, 128]) / sqrt(768)
+patches = matmul(tokens, Wp)
+
+# ---- CLS token + positional embedding -> [17, 128] ----
+cls = randn(301, [1, 128])
+seq_no_pos = concat(cls, patches, 0)
+pos = randn(401, [17, 128])
+seq = seq_no_pos + pos
+
+# ---- multi-head attention via the Model DSL ----
+# attention(128, 4, 17) builds a 4-head attention layer with
+# d_model = 128, so each head's d_k = 128 / 4 = 32. Saga 29
+# step 013 unlocked rank-2 multi-head on the tape, which is
+# what attention_weights walks here.
+mdl = attention(128, 4, 17)
+
+# attention_weights returns [heads, T, T] for multi-head,
+# rank-2 input. For heads=4, T=17 the result is [4, 17, 17].
+A = attention_weights(mdl, seq)
+
+# ---- visualization ----
+# heatmap_grid renders [N, R, C] as a 2x2 (for N=4) grid of
+# heatmaps. Each cell carries its own min/max colormap so
+# magnitude differences across heads are visible. New viz
+# type, Saga 29 step 014.
+svg(A, "heatmap_grid")
+
+# Sanity check: each (head, row) of A should sum to 1 because
+# row-wise softmax was applied per head. reduce_add along
+# axis 2 gives [4, 17], all entries close to 1.
+row_sums = reduce_add(A, 2)
+row_sums

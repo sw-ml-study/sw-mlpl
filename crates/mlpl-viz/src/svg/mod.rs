@@ -4,6 +4,7 @@ mod charts;
 mod decision_boundary;
 mod gallery;
 mod heatmap;
+mod heatmap_grid;
 mod scatter;
 
 use std::fmt;
@@ -14,6 +15,7 @@ pub use charts::{render_bar, render_line};
 pub use decision_boundary::render_decision_boundary;
 pub use gallery::render_gallery;
 pub use heatmap::render_heatmap;
+pub use heatmap_grid::render_heatmap_grid;
 pub use scatter::{render_scatter, render_scatter3d};
 
 pub(crate) const W: f64 = 400.0;
@@ -122,6 +124,7 @@ pub fn render_with_aux(
         "line" => render_line(data),
         "bar" => render_bar(data),
         "heatmap" => render_heatmap(data),
+        "heatmap_grid" => render_heatmap_grid(data),
         "gallery" => render_gallery(data, aux),
         "decision_boundary" => {
             let training = aux.ok_or_else(|| {
