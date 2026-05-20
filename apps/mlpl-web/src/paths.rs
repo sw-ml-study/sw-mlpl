@@ -365,7 +365,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Note {
                 title: "Beyond this path",
-                body: "The full-resolution demo (128x128 input, Oxford-IIIT Pet via fetch_dataset, single transformer block on the MLX peer) is `demos/vit_multihead_thorough.mlpl`. It runs on Apple Silicon with `--features mlx`; the CPU-only fallback works on any host. Layer norm with learned affine and the tanh-approximation GELU are still pending builtins and would be the next architectural additions for parity with the upstream notebook. The 7-demo ladder in `docs/better-cat-dog-future-demos.md` lays out a recommended sequence for making the classifier actually generalize to held-out photos.",
+                body: "**Full-resolution demo.** `demos/vit_multihead_thorough.mlpl` trains the same architecture on 128x128 input from the full Oxford-IIIT Pet (via `fetch_dataset`) inside a `device(\"mlx\")` block. Runs on Apple Silicon with `--features mlx`; falls back to CPU on any other host.\n\n**Pending architectural pieces.** Layer norm with learned affine and the tanh-approximation GELU are not yet builtins. Adding them would close the architectural gap to the upstream ViT notebook.\n\n**Making the classifier actually work on unseen photos.** Today's in-browser trained models overfit hard on 8-20 images and tend to classify every uploaded photo as a cat. The 7-demo improvement ladder in `docs/better-cat-dog-future-demos.md` lays out the recommended sequence: full-pets_tiny + held-out validation split first (no new builtins), then confidence-thresholded \"other\" output, then horizontal-flip augmentation, then AdamW, then LayerNorm + GELU, then the thorough MLX run.",
             },
         ],
     },

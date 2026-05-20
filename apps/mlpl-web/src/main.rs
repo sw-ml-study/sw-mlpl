@@ -22,6 +22,7 @@ mod help;
 mod intro_md;
 mod lessons;
 mod lessons_advanced;
+mod path_body;
 mod paths;
 mod paths_view;
 #[cfg(test)]

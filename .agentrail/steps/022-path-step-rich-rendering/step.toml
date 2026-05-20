@@ -1,6 +1,6 @@
 number = 22
 slug = "path-step-rich-rendering"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted: upgrade the learning-path step renderer to handle mult..."
 role = "production"
 context_files = []
