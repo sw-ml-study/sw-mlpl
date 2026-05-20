@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-ea907a9b7390588d.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-ea907a9b7390588d_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-b2f2170bb1fe4139.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-b2f2170bb1fe4139_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -361,6 +361,35 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
         .output-line.error {
             color: var(--red);
+        }
+        /* Saga 29 step 018: "this line is running" placeholder.
+           The CSS animation runs on the browser compositor
+           thread, so the spinner keeps turning even while the
+           WASM eval blocks the main JS thread. */
+        .entry.running {
+            opacity: 0.85;
+        }
+        .running-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--yellow);
+        }
+        .running-text {
+            font-style: italic;
+        }
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--surface2);
+            border-top-color: var(--yellow);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
         .output-summary {
             margin: 2px 0 8px 0;
@@ -1002,7 +1031,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-ea907a9b7390588d.js" crossorigin="anonymous" integrity="sha384-7DaKdE5PIaotiEri/BnzPtefwQNp6mPUNs1MhSkUghz/diKJaI/B9dmvevqs32s7"><link rel="preload" href="/sw-mlpl/mlpl-web-ea907a9b7390588d_bg.wasm" crossorigin="anonymous" integrity="sha384-Rb91QA5zqDtNWYtQBbg4r3a5xWs9IVzW/DKkzV1Me7S7O9/DWTzCAYo4358m9WhY" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-b2f2170bb1fe4139.js" crossorigin="anonymous" integrity="sha384-YXIrpOyS+bHiAzbCg5qMCKXTdRodMmpBuLgzD8G+IVk6aj/mhCb3lyOpun8EvsiS"><link rel="preload" href="/sw-mlpl/mlpl-web-b2f2170bb1fe4139_bg.wasm" crossorigin="anonymous" integrity="sha384-2PaQ0P9iSS3NwB/5InQr8zvCt77AHpAtLovyKicxb3OJbot66fYvhxNlwNI/yR44" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>

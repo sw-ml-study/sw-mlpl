@@ -15,6 +15,15 @@ pub enum EntryKind {
     Command,
     /// Demo narration (intro before the run, takeaway after).
     Narration,
+    /// Saga 29 step 018: "this line is currently evaluating"
+    /// placeholder. Pushed before a blocking eval so the
+    /// browser paints a CSS-animated spinner while WASM is
+    /// busy; replaced with a `Command` entry once the eval
+    /// returns. The CSS animation continues even while the
+    /// JS thread is blocked (the browser compositor handles
+    /// it), so the user gets a visible "still alive"
+    /// indicator without needing Web Workers.
+    Running,
 }
 
 #[derive(Clone, Copy, PartialEq)]
