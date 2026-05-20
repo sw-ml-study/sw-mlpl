@@ -113,6 +113,18 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         heading: "Rendering the loss curve + labeled gallery",
         body: "Training is done. Below: the 30-step cross-entropy loss curve (concatenated across the six train chunks), then `predict_batch` runs the trained model over all 16 images, then `svg(X, \"gallery\", preds_2col)` renders the labeled thumbnail grid. Misclassifications stand out because the two captions under a thumbnail disagree (0/1 or 1/0).",
     },
+    ProgressNote {
+        demo: "Pets: multi-head ViT (quick + viz)",
+        line_idx: 29,
+        heading: "Training the 4-head Vision Transformer (~60-90s)",
+        body: "30 full-batch Adam steps on the 8 pet images. Same forward pipeline as the single-head quick demo, but `attention(128, 4)` runs four independent attention heads in parallel and `Tensor::stack` joins their per-head [T, d/h]=[16, 32] outputs back to [16, 128] (Saga 29 step 013 unlocked the multi-head autograd tape). Backward fans through every head separately. The tab is unresponsive during the train block; this is normal, not a hang.",
+    },
+    ProgressNote {
+        demo: "Pets: multi-head ViT (quick + viz)",
+        line_idx: 41,
+        heading: "Rendering the four per-head attention maps",
+        body: "Training is done. `attention_weights(attn, test_tokens)` returns a [4, 16, 16] tensor -- one [16, 16] softmax matrix per head over the 16 image patches. `svg(attn_maps, \"heatmap_grid\")` lays out a 2x2 grid of heatmaps with per-cell colormaps. Each cell shows what its head learned to pay attention to: row i column j is how much head h's i-th patch attends to the j-th patch.\n\nWhat to look for: heads are NOT identical. One typically concentrates on a single column (a 'this patch is the salient one' signal); another spreads attention evenly (an 'aggregate everything' signal); the remaining two pick intermediate patterns. Compare with the untrained 'ViT Multi-Head Attention Pattern' demo where all four heads look uniformly random -- the differences here are entirely the work of gradient descent.",
+    },
 ];
 
 /// Look up progress notes for `(demo_name, line_idx)`. Returns
@@ -817,7 +829,7 @@ pub const DEMOS: &[Demo] = &[
     Demo {
         name: "Pets: multi-head ViT (quick + viz)",
         intro: "Saga 29 step 014: trained 4-head Vision Transformer on a balanced 8-image cat/dog subset, with per-head attention maps rendered after training. Same architecture as the single-head quick demo but `attention(128, 4)` and an `attention_weights(...)` + `heatmap_grid` viz at the end. Browser-friendly: 30 adam steps on 8 images. Compare the heatmap_grid output here with the UNTRAINED 'ViT Multi-Head Attention Pattern' demo -- the four heads start identical and end specialized.",
-        takeaway: "Multi-head specialization is learned, not architected. The architecture says 'split d_model into 4 subspaces and run attention in each'; gradient descent then chooses what each subspace pays attention to. Run the untrained demo first to see the baseline, then run this one to see the four post-training heatmaps. Different heads end up focusing on different patches; one or two often concentrate on a single patch (sharp distributions) while others remain diffuse.",
+        takeaway: "What the four heatmaps show: each [16, 16] cell is one attention head's softmax weight matrix. Row i = patch i (in row-major order from top-left to bottom-right of a 4x4 grid over the 64x64 image); column j = how strongly patch i attends to patch j. A bright cell at row i column j means head h thinks patch i should pull information from patch j. After 30 adam steps the heads are NOT identical -- the same architecture, the same input, the same optimizer, but four different attention patterns because each head's Q/K/V projection was randomly initialized to a different starting subspace, and gradient descent then pushed each one toward whatever role minimized cross-entropy for THAT subspace. Compare with the untrained 'ViT Multi-Head Attention Pattern' demo (run it first) where all four heads look the same uniform-random noise -- the specialization here is entirely learned, not architectural. Common post-training patterns: one head concentrates attention into a single column (a 'this patch is salient' detector); one stays diffuse (an 'aggregate everything' channel); the remaining two pick intermediate roles. The architecture says 'split d_model into 4 subspaces and run attention in each'; gradient descent says what each subspace pays attention to.",
         lines: &[
             "pets = load_preloaded(\"pets_tiny\")",
             "c0 = reshape(take(pets.X, 0, 0), [1, 3, 64, 64])",
