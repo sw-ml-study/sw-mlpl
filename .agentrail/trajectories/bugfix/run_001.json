@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 17,
+    "step": "upload-decode-error-handling"
+  },
+  "action": "wired img.onerror + reader.onerror handlers binding Err('decode failed: ...') and Err('read failed') respectively, added cancel-guard so pending_upload_name=None skips the cancel binding, moved closure installers into upload::handlers sub-module to keep upload.rs under the 7-fn budget, wrote 2 new wasm round-trip tests, updated glossary, added flip/adamw to plan.md queue, wrote docs/better-cat-dog-future-demos.md with 7-demo improvement ladder, ran scoped tests + clippy + fmt + sw-checklist (all green; 157==parent), rebuilt + pushed pages/",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T22:01:34"
+}
