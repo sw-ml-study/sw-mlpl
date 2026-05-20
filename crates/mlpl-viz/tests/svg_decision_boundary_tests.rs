@@ -24,10 +24,22 @@ fn decision_boundary_emits_grid_cells_and_points() {
     let grid = matrix(2, 2, vec![0.1, 0.9, 0.9, 0.1]);
     let train = matrix(2, 3, vec![0.0, 0.0, 0.0, 1.0, 1.0, 1.0]);
     let svg = render_decision_boundary(&grid, &train).unwrap();
-    // background + 4 cells = 5 rects
-    assert_eq!(svg.matches("<rect").count(), 5);
+    // Saga 29 step 019: background + 4 cells + 32 colorbar
+    // segments = 37 rects.
+    assert_eq!(svg.matches("<rect").count(), 37);
     // 2 training-point circles
     assert_eq!(svg.matches("<circle").count(), 2);
+}
+
+#[test]
+fn decision_boundary_has_legend_with_min_max_labels() {
+    // Saga 29 step 019: vertical colorbar shows the grid's
+    // actual min/max as text labels next to the bar.
+    let grid = matrix(2, 2, vec![0.10, 0.50, 0.50, 0.90]);
+    let train = matrix(1, 3, vec![0.5, 0.5, 0.0]);
+    let svg = render_decision_boundary(&grid, &train).unwrap();
+    assert!(svg.contains("0.90"), "expected max label 0.90 in: {svg}");
+    assert!(svg.contains("0.10"), "expected min label 0.10 in: {svg}");
 }
 
 #[test]

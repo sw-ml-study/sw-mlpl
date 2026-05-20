@@ -75,6 +75,9 @@ pub fn render_scatter(data: &DenseArray) -> Result<String, VizError> {
             "<circle cx=\"{cx:.1}\" cy=\"{cy:.1}\" r=\"3\" fill=\"#89b4fa\"/>"
         ));
     }
+    // Saga 29 step 019: corner scale labels so the reader
+    // can map screen position back to data values.
+    super::write_corner_scale_labels(&mut out, xmin, xmax, ymin, ymax);
     write_svg_close(&mut out);
     Ok(out)
 }

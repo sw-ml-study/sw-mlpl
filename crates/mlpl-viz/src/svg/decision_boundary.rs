@@ -36,13 +36,18 @@ pub fn render_decision_boundary(
         write_svg_close(&mut out);
         return Ok(out);
     }
-    draw_surface(&mut out, grid.data(), rows, cols);
+    let (lo, hi) = draw_surface(&mut out, grid.data(), rows, cols);
     draw_points(&mut out, training.data(), train_dims[0]);
+    // Saga 29 step 019: vertical colorbar on the right edge
+    // showing the surface's blue -> beige -> red ramp with the
+    // grid's actual lo/mid/hi values. Matches the heatmap's
+    // legend pattern.
+    draw_legend(&mut out, lo, hi);
     write_svg_close(&mut out);
     Ok(out)
 }
 
-fn draw_surface(out: &mut String, raw: &[f64], rows: usize, cols: usize) {
+fn draw_surface(out: &mut String, raw: &[f64], rows: usize, cols: usize) -> (f64, f64) {
     let (lo, hi) = data_range(raw);
     let span = if (hi - lo).abs() < f64::EPSILON {
         1.0
@@ -62,6 +67,42 @@ fn draw_surface(out: &mut String, raw: &[f64], rows: usize, cols: usize) {
             ));
         }
     }
+    (lo, hi)
+}
+
+/// Saga 29 step 019: vertical colorbar matching the
+/// blue-beige-red ramp used by `draw_surface`. Sits on the
+/// right edge of the plot area.
+fn draw_legend(out: &mut String, lo: f64, hi: f64) {
+    let bar_w: f64 = 10.0;
+    let bar_x: f64 = W - PAD - bar_w - 2.0;
+    let bar_top: f64 = PAD;
+    let bar_h: f64 = H - 2.0 * PAD;
+    let steps: usize = 32;
+    let step_h = bar_h / steps as f64;
+    for i in 0..steps {
+        // i=0 is top of the bar; t=1 corresponds to `hi`.
+        let t = 1.0 - (i as f64 + 0.5) / steps as f64;
+        let (red, green, blue) = ramp(t);
+        let y = bar_top + step_h * i as f64;
+        out.push_str(&format!(
+            "<rect x=\"{bar_x:.1}\" y=\"{y:.1}\" \
+             width=\"{bar_w:.1}\" height=\"{:.2}\" \
+             fill=\"rgb({red},{green},{blue})\"/>",
+            step_h + 0.5,
+        ));
+    }
+    let label_x = bar_x - 3.0;
+    let label = |out: &mut String, y: f64, v: f64| {
+        out.push_str(&format!(
+            "<text x=\"{label_x:.1}\" y=\"{y:.1}\" fill=\"#cdd6f4\" \
+             font-size=\"10\" font-family=\"monospace\" \
+             text-anchor=\"end\" dominant-baseline=\"middle\">{v:.2}</text>"
+        ));
+    };
+    label(out, bar_top + 4.0, hi);
+    label(out, bar_top + bar_h * 0.5, (lo + hi) * 0.5);
+    label(out, bar_top + bar_h - 4.0, lo);
 }
 
 fn draw_points(out: &mut String, tdata: &[f64], n: usize) {
