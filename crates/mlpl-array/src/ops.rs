@@ -443,14 +443,13 @@ impl DenseArray {
         DenseArray::new(Shape::new(vec![b, n_patches, patch_len]), out)
     }
 
-    /// Saga 29 step 005: concat two arrays along `axis`.
-    /// Both inputs must agree on every dim except `axis`,
-    /// where the sizes add. Initial release supports axis
-    /// 0 or 1 only; later steps may extend to arbitrary
-    /// axes if a demo demands it. Labels are taken from
-    /// `self` -- the `other` operand's labels are ignored,
-    /// matching how concat composes inputs of the same
-    /// semantic shape.
+    /// Concat two arrays along `axis`. Both inputs must agree on
+    /// every dim except `axis`, where the sizes add. Any axis in
+    /// `[0, rank)` is supported (Saga 30 step 001 lifted the
+    /// original `{0, 1}` restriction from Saga 29 step 005).
+    /// Labels are taken from `self` -- the `other` operand's
+    /// labels are ignored, matching how concat composes inputs
+    /// of the same semantic shape.
     pub fn concat(&self, other: &DenseArray, axis: usize) -> Result<DenseArray, ArrayError> {
         let a_dims = self.shape().dims();
         let b_dims = other.shape().dims();
@@ -464,12 +463,6 @@ impl DenseArray {
             return Err(ArrayError::ShapeMismatch {
                 source: axis,
                 target: a_dims.len(),
-            });
-        }
-        if axis > 1 {
-            return Err(ArrayError::ShapeMismatch {
-                source: axis,
-                target: 1,
             });
         }
         for (k, (&a, &b)) in a_dims.iter().zip(b_dims.iter()).enumerate() {
@@ -548,27 +541,28 @@ impl DenseArray {
 }
 
 /// Helper for `DenseArray::concat`: copy chunks from `a` then
-/// `b` along `axis`. For axis 0 we copy whole arrays in
-/// sequence; for axis 1 we interleave per row of axis 0.
+/// `b` along `axis`. Generalized for any axis (Saga 30 step 001)
+/// by walking the outer dims (`dims[..axis]`) and, for each
+/// outer position, copying that position's slab of `a`
+/// (`a_dims[axis] * inner` elements) then `b`
+/// (`b_dims[axis] * inner` elements). `inner` is the product of
+/// `dims[axis+1..]`, defaulting to 1 when `axis` is the last
+/// dimension. Reduces to the original axis-0 / axis-1 fast
+/// paths when those axes are picked.
 fn copy_concat_rows(out: &mut Vec<f64>, a: &DenseArray, b: &DenseArray, axis: usize) {
     let a_dims = a.shape().dims();
     let b_dims = b.shape().dims();
-    if axis == 0 {
-        out.extend_from_slice(a.data());
-        out.extend_from_slice(b.data());
-        return;
-    }
-    // axis == 1: for each i along axis 0, copy that slice
-    // of `a` then the matching slice of `b`.
-    let trailing_a: usize = a_dims[2..].iter().product::<usize>() * a_dims[1];
-    let trailing_b: usize = b_dims[2..].iter().product::<usize>() * b_dims[1];
+    let outer: usize = a_dims[..axis].iter().product();
+    let inner: usize = a_dims[axis + 1..].iter().product::<usize>().max(1);
+    let a_slab = a_dims[axis] * inner;
+    let b_slab = b_dims[axis] * inner;
     let a_data = a.data();
     let b_data = b.data();
-    for i in 0..a_dims[0] {
-        let a_start = i * trailing_a;
-        let b_start = i * trailing_b;
-        out.extend_from_slice(&a_data[a_start..a_start + trailing_a]);
-        out.extend_from_slice(&b_data[b_start..b_start + trailing_b]);
+    for o in 0..outer {
+        let a_start = o * a_slab;
+        let b_start = o * b_slab;
+        out.extend_from_slice(&a_data[a_start..a_start + a_slab]);
+        out.extend_from_slice(&b_data[b_start..b_start + b_slab]);
     }
 }
 
