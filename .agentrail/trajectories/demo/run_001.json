@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 14,
+    "step": "multi-head-attention-viz-demos"
+  },
+  "action": "wrote heatmap_grid.rs renderer + wired into mlpl-viz svg dispatch, wrote two new demos + added DEMOS entries, wrote integration tests, updated CLAUDE.md with release-profile rationale, ran scoped dev tests + release demo smoke + clippy + fmt + sw-checklist, committed and pushed source + pages, all green",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-19T17:49:12"
+}
