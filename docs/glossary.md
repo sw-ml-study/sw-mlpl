@@ -2310,6 +2310,17 @@ under `<name>` as a `Value::Result`:
 - On dismiss: `<name> = Err("cancelled")`. Branch on
   `is_ok(<name>)` rather than getting tripped by an
   undefined variable.
+- On decode failure (e.g. a non-image file with a `.jpg`
+  extension): `<name> = Err("decode failed: not a valid
+  image")`. Saga 29 step 017 wired the `<img>` onerror
+  handler so this case no longer falls through to a stray
+  cancel event.
+- On read failure (zero-byte file, permissions issue, abort
+  mid-read): `<name> = Err("read failed")`. The
+  FileReader.onerror handler covers this. Step 017.
+
+`err_message(<name>)` is the canonical way to inspect which
+of these flavors fired.
 
 This is the first in-tree consumer of the `Value::Result`
 type shipped in Saga 29 step 012. The legacy "Upload

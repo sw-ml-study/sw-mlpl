@@ -161,3 +161,33 @@ fn bind_upload_result_err_round_trips_through_err_message() {
         "err_message(img) should contain 'cancelled', got: {msg}"
     );
 }
+
+/// Saga 29 step 017: the decode-failure message that the
+/// `<img>` onerror handler binds when the browser cannot
+/// decode an uploaded file (e.g., a non-image renamed to
+/// .jpg) round-trips through `err_message` so demos can
+/// branch on it ("if err_message starts with 'decode
+/// failed' then ...").
+#[test]
+fn bind_upload_result_err_carries_decode_failed_message() {
+    let session = WasmSession::new();
+    session.bind_upload_result_err("img", "decode failed: not a valid image");
+    let msg = session.eval("err_message(img)");
+    assert!(
+        msg.contains("decode failed"),
+        "err_message(img) should contain 'decode failed', got: {msg}"
+    );
+}
+
+/// Saga 29 step 017: read-failure path (FileReader.onerror)
+/// binds Err("read failed").
+#[test]
+fn bind_upload_result_err_carries_read_failed_message() {
+    let session = WasmSession::new();
+    session.bind_upload_result_err("img", "read failed");
+    let msg = session.eval("err_message(img)");
+    assert!(
+        msg.contains("read failed"),
+        "err_message(img) should contain 'read failed', got: {msg}"
+    );
+}

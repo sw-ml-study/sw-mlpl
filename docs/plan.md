@@ -433,6 +433,29 @@ graduate to a real saga step when:
   dimensions); landed as `Tensor::stack` for the
   N-way case in Saga 29 step 013 but the binary
   `concat` is still axis-limited.
+- **`flip(x, axis)`** -- horizontal / vertical
+  reverse along an axis. Cheap, pure rearrangement,
+  differentiable. Wanted by the pets ViT
+  data-augmentation demo
+  (`docs/better-cat-dog-future-demos.md` #3): pre-
+  computing horizontally-flipped copies doubles the
+  training set for free, which is the highest-
+  leverage generalization win available without new
+  data.
+
+### Optimizers
+
+- **`adamw(loss, params, lr, beta1, beta2, eps,
+  weight_decay)`** -- Adam with decoupled weight
+  decay. Identical to existing `adam` except
+  `param := param - lr * weight_decay * param` is
+  applied after the moment-based update. The
+  standard regularizer for transformers; the pets
+  ViT demos overfit hard today and adamw alone
+  typically claws back 5-10 points of validation
+  accuracy on small datasets. Wanted by the demo
+  ladder in `docs/better-cat-dog-future-demos.md`
+  #4.
 
 ### Model DSL layers
 
