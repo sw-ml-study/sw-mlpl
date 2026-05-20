@@ -313,7 +313,7 @@ pub const PATHS: &[LearningPath] = &[
     },
     LearningPath {
         title: "Vision Transformers in MLPL",
-        blurb: "From a synthetic image to a trained multi-head cat-vs-dog classifier with per-head attention visualization, ending with uploading a photo from your phone for the trained model to classify. The same attention machinery from the transformer demos, applied to image patches. Nine steps; assumes you have already seen scaled-dot-product attention.",
+        blurb: "From a synthetic image to a trained multi-head cat-vs-dog classifier with per-head attention visualization, ending with uploading a photo from your phone for the trained model to classify. The same attention machinery from the transformer demos, applied to image patches. Alternates diagrams, glossary, and demos; assumes you have already seen scaled-dot-product attention.",
         steps: &[
             Step::Note {
                 title: "How this path is laid out",
@@ -323,6 +323,10 @@ pub const PATHS: &[LearningPath] = &[
                 term: "patchify (builtin)",
                 why: "ViT's one new primitive on top of standard transformer parts. Cuts an image into a sequence of flattened patches so attention can treat them as tokens.",
             },
+            Step::Diagram {
+                slug: "39_patchify",
+                why: "How a 64x64 image becomes a [16, 768] token sequence. The first picture that ever made `patchify` click is usually this one.",
+            },
             Step::Glossary {
                 term: "take (builtin)",
                 why: "Per-batch / per-row indexing. Used by the trained demo to extract single images from `pets_tiny.X` and to pull the first-token output of attention as a CLS-like aggregator.",
@@ -331,9 +335,25 @@ pub const PATHS: &[LearningPath] = &[
                 term: "Stack (tape op)",
                 why: "Single-node, N-way concatenation along an existing axis. The multi-head autograd tape uses it to join per-head outputs (and the rank-3 path uses it to join per-batch outputs) in O(N) instead of an O(N^2) binary-concat chain.",
             },
+            Step::Diagram {
+                slug: "41_stack_tape_op",
+                why: "Why we built Stack as a primitive instead of folding N concats. The before/after picture is the autograd cost story in one image.",
+            },
+            Step::Diagram {
+                slug: "40_multi_head_attention",
+                why: "How 4 heads share `d_model` and recombine. Pair this with the multi-head pattern demo below to read the [4, 17, 17] shape correctly.",
+            },
+            Step::Diagram {
+                slug: "42_vit_pipeline",
+                why: "The full forward path with shapes -- image -> patches -> embed + CLS + pos -> attention -> CLS -> MLP -> argmax. The map for everything that follows.",
+            },
             Step::Demo {
                 name: "ViT Attention Pattern (no training)",
                 why: "Mechanical end-to-end forward pipeline on a synthetic image: patchify -> linear embed -> concat CLS -> + positional -> attention -> softmax -> heatmap. No training, so the heatmap is random; the demo's point is showing every Phase-1 builtin composing into the recipe.",
+            },
+            Step::Diagram {
+                slug: "44_heatmap_grid",
+                why: "How `svg(_, \"heatmap_grid\")` unfolds a [N, R, C] tensor into a grid. Required reading before the multi-head pattern demo, otherwise the four-cell layout is mystery geometry.",
             },
             Step::Demo {
                 name: "ViT Multi-Head Attention Pattern (no training)",
@@ -358,6 +378,14 @@ pub const PATHS: &[LearningPath] = &[
             Step::Glossary {
                 term: ":upload (REPL command)",
                 why: "Pick a photo from your device. The browser decodes + resizes it to 64x64 and binds the result under your chosen name as `Ok({pixels, h, w})`. A cancelled or unreadable upload binds `Err(\"...\")` instead so the program can branch on success without crashing on an undefined variable.",
+            },
+            Step::Diagram {
+                slug: "43_result_type",
+                why: "`Value::Result` and its accessors -- `is_ok`, `unwrap`, `err_message`, `unwrap_or`. The shape every `:upload` reply lands in.",
+            },
+            Step::Diagram {
+                slug: "45_upload_result_flow",
+                why: "End-to-end flow: REPL :upload -> file picker -> Canvas decode -> Ok(Record) / Err(message). Read this before typing the five lines below.",
             },
             Step::Note {
                 title: "Bring-your-own-image (try it now)",

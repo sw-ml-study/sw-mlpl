@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 320" width="600" height="320" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:13px;fill:#333">
+  <text x="300" y="22" text-anchor="middle" font-size="16" font-weight="bold">patchify(x, P=16) on a 64x64 RGB image</text>
+
+  <!-- left image with grid -->
+  <g transform="translate(40,50)">
+    <rect x="0" y="0" width="160" height="160" fill="#fef3c7" stroke="#a16207" stroke-width="1.5"/>
+    <!-- 4x4 grid lines -->
+    <line x1="40" y1="0" x2="40" y2="160" stroke="#a16207" stroke-dasharray="3,3"/>
+    <line x1="80" y1="0" x2="80" y2="160" stroke="#a16207" stroke-dasharray="3,3"/>
+    <line x1="120" y1="0" x2="120" y2="160" stroke="#a16207" stroke-dasharray="3,3"/>
+    <line x1="0" y1="40" x2="160" y2="40" stroke="#a16207" stroke-dasharray="3,3"/>
+    <line x1="0" y1="80" x2="160" y2="80" stroke="#a16207" stroke-dasharray="3,3"/>
+    <line x1="0" y1="120" x2="160" y2="120" stroke="#a16207" stroke-dasharray="3,3"/>
+    <text x="80" y="178" text-anchor="middle">input  [1, 3, 64, 64]</text>
+    <text x="80" y="194" text-anchor="middle" font-size="11" fill="#666">4 x 4 = 16 patches; each 16x16x3 = 768 floats</text>
+  </g>
+
+  <!-- arrow -->
+  <g transform="translate(220,120)">
+    <line x1="0" y1="10" x2="100" y2="10" stroke="#1f2937" stroke-width="2" marker-end="url(#arr)"/>
+    <text x="50" y="0" text-anchor="middle" font-style="italic">patchify(x, 16)</text>
+    <text x="50" y="30" text-anchor="middle" font-size="11" fill="#666">flatten + reorder</text>
+  </g>
+
+  <!-- output token matrix -->
+  <g transform="translate(340,50)">
+    <rect x="0" y="0" width="220" height="160" fill="#ddd6fe" stroke="#5b21b6" stroke-width="1.5"/>
+    <!-- rows -->
+    <text x="-6" y="14" text-anchor="end" font-size="11" fill="#5b21b6">patch 0</text>
+    <text x="-6" y="34" text-anchor="end" font-size="11" fill="#5b21b6">patch 1</text>
+    <text x="-6" y="54" text-anchor="end" font-size="11" fill="#5b21b6">patch 2</text>
+    <text x="-6" y="74" text-anchor="end" font-size="11" fill="#5b21b6">...</text>
+    <text x="-6" y="154" text-anchor="end" font-size="11" fill="#5b21b6">patch 15</text>
+    <line x1="0" y1="20" x2="220" y2="20" stroke="#5b21b6" opacity="0.4"/>
+    <line x1="0" y1="40" x2="220" y2="40" stroke="#5b21b6" opacity="0.4"/>
+    <line x1="0" y1="60" x2="220" y2="60" stroke="#5b21b6" opacity="0.4"/>
+    <line x1="0" y1="140" x2="220" y2="140" stroke="#5b21b6" opacity="0.4"/>
+    <text x="110" y="178" text-anchor="middle">output  [1, 16, 768]</text>
+    <text x="110" y="194" text-anchor="middle" font-size="11" fill="#666">one row per patch, row width = P*P*C</text>
+  </g>
+
+  <text x="300" y="240" text-anchor="middle" font-style="italic" fill="#666">channel-outer flattening: index (c, dy, dx) -&gt; c*P*P + dy*P + dx</text>
+  <text x="300" y="262" text-anchor="middle" font-style="italic" fill="#666">patch order (n = i*W/P + j) scans patches row-major across the image</text>
+  <text x="300" y="290" text-anchor="middle" font-size="11" fill="#a16207">Differentiable on the autograd tape: forward is a rearrangement; backward is the inverse indexing.</text>
+
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1f2937"/>
+    </marker>
+  </defs>
+</svg>

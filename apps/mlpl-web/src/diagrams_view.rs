@@ -203,6 +203,41 @@ pub const DIAGRAMS: &[(&str, &str, &str)] = &[
         "Feature Superposition",
         "Network packs more features than dimensions.",
     ),
+    (
+        "39_patchify",
+        "Patchify (ViT)",
+        "64x64 image -> 16 patches -> [16, 768] tokens.",
+    ),
+    (
+        "40_multi_head_attention",
+        "Multi-Head Attention (4-head walkthrough)",
+        "Q/K/V projection -> per-head SDPA -> stack -> Wo.",
+    ),
+    (
+        "41_stack_tape_op",
+        "Stack vs chained concat",
+        "One stack node beats N-1 binary concat nodes.",
+    ),
+    (
+        "42_vit_pipeline",
+        "ViT forward pipeline",
+        "Image -> patches -> embed + CLS + pos -> attn -> CLS -> MLP.",
+    ),
+    (
+        "43_result_type",
+        "Value::Result (Ok / Err)",
+        "ok bool + payload; is_ok / unwrap / err_message / unwrap_or.",
+    ),
+    (
+        "44_heatmap_grid",
+        "heatmap_grid viz",
+        "[N, R, C] tensor unfolds into a 2x2 grid of heatmaps.",
+    ),
+    (
+        "45_upload_result_flow",
+        ":upload x flow",
+        "File picker -> Canvas decode -> Ok(Record) / Err(message).",
+    ),
 ];
 
 #[function_component(DiagramsView)]

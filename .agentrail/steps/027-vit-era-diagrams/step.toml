@@ -1,6 +1,6 @@
 number = 27
 slug = "vit-era-diagrams"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted: SVG diagrams for ViT-era concepts that don't have visu..."
 role = "production"
 context_files = []

@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:13px;fill:#333">
+  <text x="300" y="22" text-anchor="middle" font-size="16" font-weight="bold">Multi-head attention (4 heads)</text>
+
+  <!-- input -->
+  <rect x="40" y="50" width="120" height="40" fill="#fef3c7" stroke="#a16207"/>
+  <text x="100" y="74" text-anchor="middle">X  [T, d_model]</text>
+
+  <!-- Q/K/V projections row -->
+  <g transform="translate(0,120)">
+    <rect x="40" y="0" width="80" height="34" fill="#ddd6fe" stroke="#5b21b6"/>
+    <text x="80" y="22" text-anchor="middle">Q = X@Wq</text>
+    <rect x="130" y="0" width="80" height="34" fill="#ddd6fe" stroke="#5b21b6"/>
+    <text x="170" y="22" text-anchor="middle">K = X@Wk</text>
+    <rect x="220" y="0" width="80" height="34" fill="#ddd6fe" stroke="#5b21b6"/>
+    <text x="260" y="22" text-anchor="middle">V = X@Wv</text>
+    <text x="370" y="22" font-size="11" fill="#666">each is [T, d_model]</text>
+  </g>
+
+  <line x1="100" y1="92" x2="100" y2="118" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- split into heads -->
+  <g transform="translate(40,180)">
+    <text x="0" y="0" font-size="11" fill="#666">reshape Q/K/V to [T, h=4, d_h]; take(_, 1, head_i) for each head:</text>
+  </g>
+
+  <!-- 4 heads -->
+  <g transform="translate(40,200)">
+    <rect x="0"   y="0" width="125" height="60" fill="#fee2e2" stroke="#b91c1c"/>
+    <text x="62" y="20" text-anchor="middle" font-weight="bold">head 0</text>
+    <text x="62" y="38" text-anchor="middle" font-size="11">SDPA</text>
+    <text x="62" y="54" text-anchor="middle" font-size="11">[T, d_h]</text>
+
+    <rect x="135" y="0" width="125" height="60" fill="#fef3c7" stroke="#a16207"/>
+    <text x="197" y="20" text-anchor="middle" font-weight="bold">head 1</text>
+    <text x="197" y="38" text-anchor="middle" font-size="11">SDPA</text>
+    <text x="197" y="54" text-anchor="middle" font-size="11">[T, d_h]</text>
+
+    <rect x="270" y="0" width="125" height="60" fill="#dcfce7" stroke="#15803d"/>
+    <text x="332" y="20" text-anchor="middle" font-weight="bold">head 2</text>
+    <text x="332" y="38" text-anchor="middle" font-size="11">SDPA</text>
+    <text x="332" y="54" text-anchor="middle" font-size="11">[T, d_h]</text>
+
+    <rect x="405" y="0" width="125" height="60" fill="#dbeafe" stroke="#1d4ed8"/>
+    <text x="467" y="20" text-anchor="middle" font-weight="bold">head 3</text>
+    <text x="467" y="38" text-anchor="middle" font-size="11">SDPA</text>
+    <text x="467" y="54" text-anchor="middle" font-size="11">[T, d_h]</text>
+  </g>
+  <text x="40" y="278" font-size="11" fill="#666" font-style="italic">SDPA per head:  softmax(Q_h @ K_h^T / sqrt(d_h))  @  V_h</text>
+
+  <!-- stack -->
+  <g transform="translate(40,300)">
+    <rect x="0" y="0" width="530" height="34" fill="#fde68a" stroke="#a16207"/>
+    <text x="265" y="22" text-anchor="middle" font-weight="bold">Tensor::stack(heads, axis=1) -&gt; [T, h*d_h] = [T, d_model]</text>
+  </g>
+  <line x1="100" y1="260" x2="100" y2="298" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="200" y1="260" x2="200" y2="298" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="305" y1="260" x2="305" y2="298" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr)"/>
+  <line x1="440" y1="260" x2="440" y2="298" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <!-- output projection -->
+  <g transform="translate(40,358)">
+    <rect x="0" y="0" width="530" height="34" fill="#ddd6fe" stroke="#5b21b6"/>
+    <text x="265" y="22" text-anchor="middle" font-weight="bold">Y = stack_out @ Wo  -&gt;  [T, d_model]</text>
+  </g>
+  <line x1="305" y1="335" x2="305" y2="356" stroke="#1f2937" stroke-width="1.5" marker-end="url(#arr)"/>
+
+  <defs>
+    <marker id="arr" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#1f2937"/>
+    </marker>
+  </defs>
+</svg>
