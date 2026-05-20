@@ -1,6 +1,6 @@
 number = 24
 slug = "glossary-hyperlinks"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 29 step inserted: glossary hyperlinks across user-facing surfaces.
 

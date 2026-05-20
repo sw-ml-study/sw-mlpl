@@ -11,6 +11,7 @@
 mod block_acc;
 mod blocks;
 mod inline;
+mod inline_render;
 
 use yew::prelude::*;
 
@@ -48,5 +49,5 @@ fn render_block(block: Block) -> Html {
 
 fn render_inline(text: &str) -> Html {
     let parts = inline::split(text);
-    html! { <>{ for parts.into_iter().map(inline::render_span) }</> }
+    html! { <>{ for parts.into_iter().map(inline_render::render_span) }</> }
 }
