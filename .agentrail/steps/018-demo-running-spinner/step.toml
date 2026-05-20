@@ -1,6 +1,6 @@
 number = 18
 slug = "demo-running-spinner"
-status = "pending"
+status = "in-progress"
 description = "Saga 29 step inserted: generic 'something is happening' spinner for the web d..."
 role = "production"
 context_files = []

@@ -351,6 +351,35 @@
         .output-line.error {
             color: var(--red);
         }
+        /* Saga 29 step 018: "this line is running" placeholder.
+           The CSS animation runs on the browser compositor
+           thread, so the spinner keeps turning even while the
+           WASM eval blocks the main JS thread. */
+        .entry.running {
+            opacity: 0.85;
+        }
+        .running-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--yellow);
+        }
+        .running-text {
+            font-style: italic;
+        }
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--surface2);
+            border-top-color: var(--yellow);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
         .output-summary {
             margin: 2px 0 8px 0;
         }

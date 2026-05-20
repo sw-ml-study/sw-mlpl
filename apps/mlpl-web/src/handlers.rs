@@ -54,36 +54,94 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
     Callback::from(move |lines: Vec<String>| {
         let mut new_history = (*deps.history).clone();
         let mut new_cmds = (*deps.cmd_history).clone();
-        let mut any = false;
+        let mut eval_queue: Vec<String> = Vec::new();
         for line in lines {
             let trimmed = line.trim();
             if trimmed.is_empty() {
                 continue;
             }
-            any = true;
             new_cmds.push(trimmed.to_string());
             if trimmed == ":clear" {
                 deps.session.borrow().clear();
                 new_history.clear();
                 continue;
             }
-            // Saga 29 step 016: route `:upload <name>` to the
-            // file-picker helper (still in the user-gesture
-            // sync chain so input.click() is allowed).
             if let Some(name) = parse_upload_command(trimmed) {
                 new_history.push(handle_upload_command(&deps, trimmed, &name));
                 continue;
             }
-            new_history.push(eval_one_line(&deps, trimmed));
+            // Anything else hits the WASM evaluator, which may
+            // block for seconds; defer to the spinner pipeline
+            // (Saga 29 step 018) so the user sees a running
+            // indicator instead of a frozen page.
+            eval_queue.push(trimmed.to_string());
         }
-        if !any {
+        if new_cmds.is_empty() {
             return;
         }
-        deps.history.set(new_history);
         deps.cmd_history.set(new_cmds);
         deps.cmd_index.set(None);
         deps.input_value.set(String::new());
+        if eval_queue.is_empty() {
+            deps.history.set(new_history);
+            return;
+        }
+        // Saga 29 step 018: push Running markers for each
+        // queued line + paint, then process them one-at-a-time
+        // through Timeout(0) yields so the spinner CSS keeps
+        // animating during each eval.
+        process_next_eval(deps.clone(), new_history, eval_queue, 0);
     })
+}
+
+/// Saga 29 step 018: recursive Timeout-yielding eval loop for
+/// REPL submissions. Pushes a Running marker, yields, evals,
+/// replaces marker with result, recurses to next line.
+fn process_next_eval(
+    deps: EvalDeps,
+    mut history: Vec<HistoryEntry>,
+    queue: Vec<String>,
+    idx: usize,
+) {
+    if idx >= queue.len() {
+        deps.history.set(history);
+        return;
+    }
+    let line = queue[idx].clone();
+    push_running_marker(&mut history, &line);
+    deps.history.set(history.clone());
+    let deps_next = deps.clone();
+    let queue_next = queue.clone();
+    gloo::timers::callback::Timeout::new(0, move || {
+        let entry = eval_one_line(&deps_next, &line);
+        history.pop();
+        history.push(entry);
+        process_next_eval(deps_next, history, queue_next, idx + 1);
+    })
+    .forget();
+}
+
+/// Saga 29 step 018: human-readable "this line is running"
+/// caption tailored to the kind of line. Train blocks call out
+/// the expected duration; everything else gets a generic
+/// "evaluating..." marker that still tells the user the demo
+/// hasn't hung.
+pub(crate) fn running_message(line: &str) -> &'static str {
+    let stripped = line.trim_start();
+    if stripped.starts_with("train ") || stripped.starts_with("train{") {
+        "training... (this can take 30-90 seconds; the page is unresponsive while WASM runs)"
+    } else if stripped.starts_with("repeat ") {
+        "looping... (this can take a few seconds)"
+    } else if stripped.contains("predict_batch")
+        || stripped.contains("apply(")
+        || stripped.contains("attention_weights")
+    {
+        "evaluating... (forward pass through the trained model)"
+    } else if stripped.contains("svg(") {
+        "rendering visualization..."
+    } else {
+        "evaluating..."
+    }
 }
 
 /// Evaluate one non-slash-command line and return the
@@ -109,90 +167,10 @@ fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
     }
 }
 
-/// Parse `:upload <name>` (or `:upload` with no arg). Returns
-/// `Some(name)` if the line is the upload command, `None`
-/// otherwise. An empty name means the user typed `:upload`
-/// without a target.
-fn parse_upload_command(line: &str) -> Option<String> {
-    let rest = line.strip_prefix(":upload")?;
-    Some(rest.trim().to_string())
-}
-
-/// Saga 29 step 016: handle one `:upload <name>` line. Returns
-/// the HistoryEntry that should appear for this command --
-/// usage / bad-name / not-mounted error message, or the
-/// "picker opened" confirmation that announces the file
-/// dialog is now waiting on the user.
-fn handle_upload_command(deps: &EvalDeps, trimmed: &str, name: &str) -> HistoryEntry {
-    if name.is_empty() {
-        return upload_usage_entry(trimmed);
-    }
-    if !is_valid_identifier(name) {
-        return upload_bad_name_entry(trimmed, name);
-    }
-    deps.pending_upload_name.set(Some(name.to_string()));
-    let Some(input) = deps.upload_input_ref.cast::<HtmlInputElement>() else {
-        return HistoryEntry {
-            input: trimmed.to_string(),
-            output: "error: upload file input not mounted (refresh and retry)".into(),
-            is_error: true,
-            kind: EntryKind::Command,
-        };
-    };
-    input.set_value("");
-    input.click();
-    HistoryEntry {
-        input: trimmed.to_string(),
-        output: format!(
-            "Opened the file picker. Pick a photo to bind `{name}` as \
-             `Ok({{pixels: [1, 3, 64, 64], h: 64, w: 64}})`, or close \
-             the picker to bind `{name} = Err(\"cancelled\")`."
-        ),
-        is_error: false,
-        kind: EntryKind::Command,
-    }
-}
-
-/// Bare-bones identifier check: alphanumeric + underscore, must
-/// not start with a digit. Mirrors the parser's identifier
-/// shape closely enough to reject obvious mistakes (e.g.
-/// `:upload 1` or `:upload my photo`) before they hit the
-/// session.
-fn is_valid_identifier(s: &str) -> bool {
-    let mut chars = s.chars();
-    let Some(first) = chars.next() else {
-        return false;
-    };
-    if !first.is_ascii_alphabetic() && first != '_' {
-        return false;
-    }
-    chars.all(|c| c.is_ascii_alphanumeric() || c == '_')
-}
-
-fn upload_usage_entry(input: &str) -> HistoryEntry {
-    HistoryEntry {
-        input: input.to_string(),
-        output: "usage: `:upload <name>` -- e.g. `:upload x`. \
-                 Picks a photo via the browser file dialog and binds \
-                 `<name> = Ok({pixels: [1, 3, 64, 64], h: 64, w: 64})` \
-                 on success, `Err(\"cancelled\")` on dismiss."
-            .to_string(),
-        is_error: true,
-        kind: EntryKind::Command,
-    }
-}
-
-fn upload_bad_name_entry(input: &str, name: &str) -> HistoryEntry {
-    HistoryEntry {
-        input: input.to_string(),
-        output: format!(
-            "error: `{name}` is not a valid identifier. Use letters, digits, and \
-             underscores; the first character must be a letter or underscore."
-        ),
-        is_error: true,
-        kind: EntryKind::Command,
-    }
-}
+// `:upload`-related helpers live in `crate::upload_cmd`
+// (separate file) so handlers.rs stays under the 500-line
+// budget after step 018's spinner pipeline addition.
+use crate::upload_cmd::{handle_upload_command, parse_upload_command};
 
 pub fn make_clear(
     session: Rc<RefCell<WasmSession>>,
@@ -301,31 +279,50 @@ fn schedule_demo_line(
         history.set(entries);
         return;
     }
-    // Pre-line heads-up: any progress notes attached to this
-    // (demo, idx) pair render as Narration entries BEFORE the
-    // line evaluates. The existing Timeout::new(0) below then
-    // yields a macrotask so the browser paints the heads-up
-    // before the WASM eval blocks the main thread.
-    if push_progress_notes(&mut entries, demo.name, idx) {
-        history.set(entries.clone());
-    }
+    push_progress_notes(&mut entries, demo.name, idx);
+    let line = lines[idx];
+    push_running_marker(&mut entries, line);
+    history.set(entries.clone());
     let session_next = Rc::clone(&session);
     let history_next = history.clone();
     gloo::timers::callback::Timeout::new(0, move || {
-        let line = lines[idx];
         let result = session.borrow().eval(line);
-        let is_error = result.starts_with("error:");
-        entries.push(HistoryEntry {
-            input: line.to_string(),
-            output: result,
-            is_error,
-            kind: EntryKind::Command,
-        });
+        replace_running_with_result(&mut entries, line, result);
         history.set(entries.clone());
         schedule_demo_line(session_next, history_next, entries, demo, idx + 1);
     })
     .forget();
 }
+
+/// Saga 29 step 018: push a Running placeholder so the browser
+/// paints a spinner before the (blocking) WASM eval starts.
+fn push_running_marker(entries: &mut Vec<HistoryEntry>, line: &str) {
+    entries.push(HistoryEntry {
+        input: line.to_string(),
+        output: running_message(line).to_string(),
+        is_error: false,
+        kind: EntryKind::Running,
+    });
+}
+
+/// Saga 29 step 018: pop the trailing Running marker and push
+/// the actual Command result. Called from inside the
+/// post-eval Timeout closure once the WASM session returns.
+fn replace_running_with_result(entries: &mut Vec<HistoryEntry>, line: &str, result: String) {
+    let is_error = result.starts_with("error:");
+    entries.pop();
+    entries.push(HistoryEntry {
+        input: line.to_string(),
+        output: result,
+        is_error,
+        kind: EntryKind::Command,
+    });
+}
+
+// `running_message` lives earlier in this module as
+// `pub(crate)` so both the demo runner and the REPL submit
+// pipeline can call it. (A second copy that used to live
+// here was removed in step 018.)
 
 pub fn make_oninput(input_value: UseStateHandle<String>) -> Callback<InputEvent> {
     Callback::from(move |e: InputEvent| {
@@ -380,7 +377,7 @@ pub fn make_keydown(
 
 #[cfg(test)]
 mod tests {
-    use super::{is_valid_identifier, parse_upload_command};
+    use crate::upload_cmd::{is_valid_identifier, parse_upload_command};
 
     #[test]
     fn parse_upload_with_name() {

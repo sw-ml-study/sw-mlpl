@@ -30,6 +30,7 @@ mod state;
 mod summary;
 mod tutorial;
 mod upload;
+mod upload_cmd;
 
 use components::{
     DocDialog, Footer, GithubCorner, Header, HeaderMode, InputRow, ModeBar, TutorialPanel,

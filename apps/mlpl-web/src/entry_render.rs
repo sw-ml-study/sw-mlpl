@@ -89,6 +89,23 @@ pub(crate) fn render_entry(entry: &HistoryEntry) -> Html {
             </div>
         };
     }
+    if entry.kind == EntryKind::Running {
+        // Saga 29 step 018: "this line is currently
+        // evaluating" placeholder. The CSS spinner keeps
+        // animating during the JS-blocking WASM eval because
+        // CSS animations run on the browser compositor, not
+        // the JS thread. Replaced by a `Command` entry when
+        // the eval returns.
+        return html! {
+            <div class="entry running">
+                { render_input_line(&entry.input) }
+                <div class="output-line running-line">
+                    <span class="spinner" aria-hidden="true"></span>
+                    <span class="running-text">{ &entry.output }</span>
+                </div>
+            </div>
+        };
+    }
     let body = if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
         render_svg_body(&entry.output)
     } else if entry.is_error {
