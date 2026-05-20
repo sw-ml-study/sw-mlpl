@@ -268,6 +268,63 @@ Four compounding costs, all diagnosable from the current
   gradcheck, optimizer step) continues to pass, so the
   correctness story is complete.
 
+## Saga 29: Vision Transformer multi-head thorough demo
+
+`demos/vit_multihead_thorough.mlpl` is the deepest end-to-end
+ViT demo MLPL ships: a four-head attention block trained for
+200 adam steps on a balanced 20-image cat-vs-dog subset of
+`pets_tiny`, wrapped in `device("mlx") { ... }` so the forward
+dispatches through `mlpl-mlx` when the binary is built with
+`--features mlx` on Apple Silicon.
+
+### Measured numbers (Apple Silicon, 2026-05-19, release build, CPU fallback)
+
+| Metric | Value |
+|---|---:|
+| Wall time (no-mlx-feature CPU fallback, release) | ~285 s |
+| Training accuracy (200 steps, 20 images, seed=23/17/31/37) | 1.0 |
+| Final cross-entropy loss | < 1e-3 (overfit to the 20-image set) |
+
+The MLX-feature build was not exercised in the step-015
+session because `--features mlx` requires an Xcode-enabled
+toolchain that wasn't available on the dev host at the time.
+The same demo file is the regression baseline for the planned
+Saga R2 (CUDA-as-a-service) -- a future session on an MLX-built
+binary should re-run it and document the device("mlx") timing
+delta here.
+
+### Bottleneck composition
+
+The bulk of the wall time is the AST-walking interpreter
+running the inlined forward expression 200 times. Per step the
+work is:
+
+- `patchify(X, 16)` -> reshape [20, 16, 768]
+- 768 -> 128 patch linear
+- multi-head `attention(128, 4, ...)` -- 4 heads each running
+  scaled-dot-product on [16, 32] slabs, joined via the new
+  `Tensor::stack` op (Saga 29 step 013)
+- `take` of position 0 for CLS-like pooling
+- 2-layer classifier (128 -> 64 -> 2)
+- cross_entropy backward + adam param update
+
+The forward + backward traversal walks ~800 tape nodes per
+step. The dominant cost is the per-node dispatch through
+`mlpl-runtime`, NOT the matmul arithmetic (which would be the
+ratio-shifting factor on a GPU).
+
+### Why this demo matters
+
+Step 013 unlocked the multi-head autograd tape; step 014 shipped
+the visualization that makes specialization legible; this demo
+proves the unlock works end-to-end in the production training
+loop, on real images, at a model size large enough to stress
+the per-head + per-batch stack paths. The `attention_weights`
+output (`[4, 16, 16]`) renders cleanly through
+`svg(_, "heatmap_grid")` and shows four distinct learned
+attention patterns -- not the uniformly-random ones the
+untrained companion demo produces.
+
 ### What's deferred to a future step
 
 A dedicated "MLX throughput" step (slotting naturally before

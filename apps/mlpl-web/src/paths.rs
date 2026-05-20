@@ -313,11 +313,11 @@ pub const PATHS: &[LearningPath] = &[
     },
     LearningPath {
         title: "Vision Transformers in MLPL",
-        blurb: "From a synthetic image to a real cat-vs-dog classifier. The same attention machinery you built for sequences, applied to image patches. Five steps; assumes you have already seen scaled-dot-product attention.",
+        blurb: "From a synthetic image to a trained multi-head cat-vs-dog classifier with per-head attention visualization. The same attention machinery from the transformer demos, applied to image patches. Eight steps; assumes you have already seen scaled-dot-product attention.",
         steps: &[
             Step::Note {
                 title: "How this path is laid out",
-                body: "ViT is not new architecture -- it is the SAME single-head attention block from the transformer demos, fed image patches instead of token embeddings. The first three steps explain the new pieces (patchify, take, batched attention); the last two are the demos that wire them together. The thorough demo (full Oxford-IIIT Pet at 128x128) is still a saga-or-two away; this path takes you through what is shippable today.",
+                body: "ViT is not new architecture -- it is the SAME attention block from the transformer demos, fed image patches instead of token embeddings. The early steps explain the new pieces (patchify, take, batched and multi-head attention); the demos that follow wire them together at three depths: an untrained pattern, a trained single-head classifier with a labeled gallery, and a trained multi-head classifier with per-head attention maps. After this path, the natural next step is bring-your-own-image upload (still in progress as Saga 29 step 016) so you can classify a photo from your phone.",
             },
             Step::Glossary {
                 term: "patchify (builtin)",
@@ -327,9 +327,17 @@ pub const PATHS: &[LearningPath] = &[
                 term: "take (builtin)",
                 why: "Per-batch / per-row indexing. Used by the trained demo to extract single images from `pets_tiny.X` and to pull the first-token output of attention as a CLS-like aggregator.",
             },
+            Step::Glossary {
+                term: "Stack (tape op)",
+                why: "Saga 29 step 013 added a single-node, N-way concatenation along an existing axis so the multi-head autograd tape can join per-head outputs (and the rank-3 path can join per-batch outputs) in O(N) instead of the O(N^2) binary-concat chain it used to build.",
+            },
             Step::Demo {
                 name: "ViT Attention Pattern (no training)",
                 why: "Mechanical end-to-end forward pipeline on a synthetic image: patchify -> linear embed -> concat CLS -> + positional -> attention -> softmax -> heatmap. No training, so the heatmap is random; the demo's point is showing every Phase-1 builtin composing into the recipe.",
+            },
+            Step::Demo {
+                name: "ViT Multi-Head Attention Pattern (no training)",
+                why: "Same pipeline but `attention(128, 4, ...)` -- four heads. attention_weights returns [4, 17, 17] and `svg(_, \"heatmap_grid\")` lays out a 2x2 grid of per-head heatmaps. Untrained, so all four look uniformly random and similar to each other; this is the baseline that the trained multi-head demo is judged against.",
             },
             Step::Glossary {
                 term: "Oxford-IIIT Pet dataset",
@@ -337,15 +345,23 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Demo {
                 name: "Pets: cat vs dog (quick)",
-                why: "Trained Vision Transformer end-to-end: 8 balanced images, 30 adam steps, loss curve falls toward 0, training accuracy 1.0. The tail of the demo shows how to inspect the pets tensor with chained `take` calls.",
+                why: "Trained single-head Vision Transformer end-to-end: 8 balanced images, 30 adam steps, loss curve falls toward 0, training accuracy 1.0. The tail of the demo shows how to inspect the pets tensor with chained `take` calls.",
             },
             Step::Demo {
                 name: "Pets: predict + gallery",
-                why: "The same trained ViT, but now scaled to 16 images and run end-to-end with `predict_batch` + the new 3-arg `svg(X, \"gallery\", overlay)` viz. Each thumbnail gets an `actual / predicted` caption -- you can finally look at a specific cat photo and read what the model said about it.",
+                why: "The same trained ViT, but now scaled to 16 images and run end-to-end with `predict_batch` + the 3-arg `svg(X, \"gallery\", overlay)` viz. Each thumbnail gets an `actual / predicted` caption -- you can finally look at a specific cat photo and read what the model said about it.",
+            },
+            Step::Demo {
+                name: "Pets: multi-head ViT (quick + viz)",
+                why: "The headline demo for the multi-head story. Same architecture as the single-head quick demo but `attention(128, 4)`; after 30 adam steps it renders the four post-training attention maps. Compare with the untrained multi-head pattern demo above to see what specialization gradient descent buys -- the heads start identical and end different.",
             },
             Step::Note {
-                title: "What is missing for a 'real' ViT demo",
-                body: "Multi-head attention on the tape (Saga 29 step 012), the thorough 128x128 demo trained on the full Oxford-IIIT Pet via the MLX peer (step 013), and a `load_image(path)` builtin that lets you classify your own photo (step 014). These all live in `docs/milestone-vit.md`; this path will grow to cover them as they land.",
+                title: "Coming next: bring-your-own-image",
+                body: "Today you can browse `pets_tiny` and classify any of its 200 photos (`reshape(take(pets.X, 0, i), [1, 3, 64, 64])` then run the predict pipeline). The next step in this path is the `:upload x` REPL command (Saga 29 step 016, in progress): the user picks a photo from their device, the browser decodes + resizes it to 64x64, binds it under a name you choose, and you classify it with the same one-liner. A Result<val, err> type already ships (Saga 29 step 012), so a cancelled upload becomes `x = Err(\"cancelled\")` instead of an undefined variable -- the REPL won't crash on a dismissed dialog.",
+            },
+            Step::Note {
+                title: "Beyond this path",
+                body: "The full-resolution demo (128x128 input, Oxford-IIIT Pet via fetch_dataset, single transformer block on the MLX peer) is `demos/vit_multihead_thorough.mlpl` (Saga 29 step 015). It runs on Apple Silicon with `--features mlx`; the CPU-only fallback works on any host. Layer norm with learned affine and the tanh-approximation GELU are still pending (Tier 2 builtins from `docs/milestone-vit.md`) and would be the next architectural additions for parity with the upstream notebook.",
             },
         ],
     },
