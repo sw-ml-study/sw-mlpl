@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-19
 
+- chore(agentrail): record saga 29 step 015 completion + kickoff step 016 (:upload x)
+- saga 29 step 015 polish: gallery viz on multi-head demo + pages rebuild
+- docs: glossary catch-up + plan.md "Deferred primitives queue"
+- saga 29 step 015: vit_multihead_thorough.mlpl + path/demos refresh
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record saga 29 step 014 completion + kickoff step 015
 - chore(pages): rebuild for multi-head viz demos + heatmap_grid
 - saga 29 step 014: multi-head attention viz demos + heatmap_grid renderer
