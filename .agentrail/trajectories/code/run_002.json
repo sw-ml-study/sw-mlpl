@@ -1,0 +1,11 @@
+{
+  "task_type": "code",
+  "state": {
+    "number": 2,
+    "step": "to_number-to_int-env-builtins"
+  },
+  "action": "Eval-side dispatch via a new intercept in eval.rs that calls result_ops::eval_string_to_result. RED: 12 tests using helpers val/err_msg_of/scalar/str_of that unwrap the full Value enum (not just DenseArray). GREEN: 56-line impl with three match arms. Fixed a clippy false-positive (3.14 reads as PI approx_constant) by changing the test value to 4.25. Quality: 12/12 tests green; mlpl-eval clippy clean; sw-checklist 157=parent (hold); markdown-checker green. Docs/glossary updated; README count 279->281.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-21T07:05:49"
+}
