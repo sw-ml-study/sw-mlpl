@@ -1,0 +1,11 @@
+{
+  "task_type": "code",
+  "state": {
+    "number": 4,
+    "step": "multihead-attention-tape"
+  },
+  "action": "Investigate-first per the step prompt: built release mlpl-repl, ran demos/vit_multihead_quick.mlpl end-to-end -> accuracy 1.0 (vs the audit's claim of 'plateau around 0.5'). Built a /tmp script mirroring the 8-sample browser config -> loss 2064 -> 0 in 30 steps, accuracy 1.0. Conclusion: the audit finding was based on a pre-saga-29-step-013 state that has been fixed for months. Wrote multi_head_trains_end_to_end_loss_decreases asserting final loss < 0.7 * initial on a 4-sample / attention(d=8, h=2) / 50-step fixture. Rewrote the audit finding with SHIPPED status (kept original text for traceability) and updated docs/language-status.md. Quality: 8/8 multihead_attention_tape_tests green; clippy clean; sw-checklist 157=parent.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T17:04:00"
+}

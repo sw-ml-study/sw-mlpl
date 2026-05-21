@@ -1,9 +1,10 @@
 number = 4
 slug = "multihead-attention-tape"
-status = "pending"
+status = "completed"
 description = "Tier 1 saga step 004: lower multi-head attention onto the same tape primitive..."
 role = "production"
 context_files = []
 created_at = "2026-05-20T13:03:00"
+completed_at = "2026-05-20T17:04:00"
 task_type = "code"
-commits = []
+commits = ["66d63c95247a9f415d5d1f070623ab4f540c012b"]
