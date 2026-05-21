@@ -93,7 +93,12 @@ pub fn render_gallery(data: &DenseArray, overlay: Option<&DenseArray>) -> Result
         let cell_y = PAD + cell_h * row as f64 + (cell_h - thumb_size - label_reserve) * 0.5;
         let img = &raw[idx * stride_n..(idx + 1) * stride_n];
         render_thumbnail(
-            &mut out, img, src_h, src_w, thumb_h_px, thumb_w_px, cell_x, cell_y, thumb_size,
+            &mut out,
+            img,
+            (src_h, src_w),
+            (thumb_h_px, thumb_w_px),
+            (cell_x, cell_y),
+            thumb_size,
         );
         if let Some(values) = ov_data {
             render_overlay_label(
@@ -135,18 +140,17 @@ fn render_overlay_label(
     ));
 }
 
-#[allow(clippy::too_many_arguments)]
 fn render_thumbnail(
     out: &mut String,
     img: &[f64],
-    src_h: usize,
-    src_w: usize,
-    thumb_h_px: usize,
-    thumb_w_px: usize,
-    cell_x: f64,
-    cell_y: f64,
+    src: (usize, usize),
+    thumb_px: (usize, usize),
+    cell: (f64, f64),
     thumb_size: f64,
 ) {
+    let (src_h, src_w) = src;
+    let (thumb_h_px, thumb_w_px) = thumb_px;
+    let (cell_x, cell_y) = cell;
     let pixel_w = thumb_size / thumb_w_px as f64;
     let pixel_h = thumb_size / thumb_h_px as f64;
     let block_h = src_h as f64 / thumb_h_px as f64;
@@ -163,7 +167,6 @@ fn render_thumbnail(
                 .max(x0 + 1)
                 .min(src_w);
             let mut sum = [0.0_f64; 3];
-            let mut count = 0.0_f64;
             for c in 0..3 {
                 for sy in y0..y1 {
                     for sx in x0..x1 {
@@ -171,7 +174,7 @@ fn render_thumbnail(
                     }
                 }
             }
-            count += ((y1 - y0) * (x1 - x0)) as f64;
+            let count = ((y1 - y0) * (x1 - x0)) as f64;
             let inv = if count > 0.0 { 1.0 / count } else { 1.0 };
             let r = norm_to_u8(sum[0] * inv);
             let g = norm_to_u8(sum[1] * inv);
@@ -227,7 +230,12 @@ pub fn render_attention_overlay(
         let cell_x = PAD + cell_w * col as f64 + (cell_w - tile) * 0.5;
         let cell_y = PAD + cell_h * row as f64 + (cell_h - tile - label_reserve) * 0.5;
         render_thumbnail(
-            &mut out, img_data, src_h, src_w, thumb_h, thumb_w, cell_x, cell_y, tile,
+            &mut out,
+            img_data,
+            (src_h, src_w),
+            (thumb_h, thumb_w),
+            (cell_x, cell_y),
+            tile,
         );
         let slab = &attn_data[h * patches..(h + 1) * patches];
         render_overlay_grid(&mut out, slab, side, cell_x, cell_y, tile);

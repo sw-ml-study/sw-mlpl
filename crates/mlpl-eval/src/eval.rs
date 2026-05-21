@@ -742,6 +742,31 @@ pub(crate) fn eval_expr(
     if let Expr::Device { target, body, .. } = expr {
         return crate::device::eval_device(target, body, env, trace);
     }
+    if let Expr::If {
+        cond,
+        then_body,
+        else_body,
+        ..
+    } = expr
+    {
+        let cond_val = eval_expr(cond, env, trace)?;
+        let truthy = match &cond_val {
+            Value::Array(a) if a.rank() == 0 => a.data()[0] != 0.0,
+            Value::Result { ok, .. } => *ok,
+            other => {
+                return Err(EvalError::Unsupported(format!(
+                    "if condition must be a scalar or Result, got {}",
+                    value_kind(other)
+                )));
+            }
+        };
+        let body = if truthy { then_body } else { else_body };
+        let mut last = Value::Array(DenseArray::from_scalar(0.0));
+        for stmt in body {
+            last = eval_expr(stmt, env, trace)?;
+        }
+        return Ok(last);
+    }
     let (op_name, inputs, result) = match expr {
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),
         Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
@@ -838,8 +863,8 @@ pub(crate) fn eval_expr(
         Expr::Device { .. } => unreachable!(),
         // Saga 29 step 001: RecordLit and FieldAccess are dispatched
         // by the early-return `if let` block at the head of
-        // `eval_expr`, so the big match never sees them.
-        Expr::RecordLit { .. } | Expr::FieldAccess { .. } => unreachable!(),
+        // `eval_expr`. Saga 31 step 004: If is also early-return.
+        Expr::RecordLit { .. } | Expr::FieldAccess { .. } | Expr::If { .. } => unreachable!(),
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;

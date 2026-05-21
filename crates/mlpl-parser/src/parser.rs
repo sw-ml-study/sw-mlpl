@@ -214,6 +214,7 @@ impl<'a> Parser<'a> {
                 Ok(expr)
             }
             TokenKind::Device => self.parse_device(),
+            TokenKind::If => self.parse_if(),
             _ => Err(ParseError::UnexpectedToken {
                 found: describe_kind(&tok.kind),
                 span: tok.span,
@@ -270,6 +271,23 @@ impl<'a> Parser<'a> {
             elems,
             Span::new(open_span.start, close_span.end),
         ))
+    }
+
+    /// Parse `if cond { then } else { else }`. The `else`
+    /// clause is required (no dangling-if). Saga 31 step 004.
+    fn parse_if(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1; // skip 'if'
+        let cond = self.parse_expr(0)?;
+        let (then_body, _then_end) = self.parse_braced_body()?;
+        self.expect(&TokenKind::Else)?;
+        let (else_body, else_end) = self.parse_braced_body()?;
+        Ok(Expr::If {
+            cond: Box::new(cond),
+            then_body,
+            else_body,
+            span: Span::new(start.start, else_end.end),
+        })
     }
 
     fn parse_repeat(&mut self, is_train: bool) -> Result<Expr, ParseError> {

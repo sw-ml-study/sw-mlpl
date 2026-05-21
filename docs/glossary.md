@@ -970,6 +970,30 @@ optimizer betas, etc. MLPL doesn't have a hyperparameter
 sweep DSL today; `experiment "name" { body }` records what
 was tried.
 
+## If expression
+
+`if cond { then } else { else }` is MLPL's branching primitive
+(saga 31 step 004). Like Rust, it is an EXPRESSION not a
+statement -- it returns the value of whichever branch was
+taken, so it composes into bindings: `x = if flag { 100 }
+else { 200 }`. The `else` clause is REQUIRED; a dangling-if
+would force a unit-typed branch which MLPL does not have.
+
+`cond` is truthy when:
+
+- A scalar `Number` that is non-zero (negatives count as
+  truthy; only `0.0` is falsy).
+- A [[Result type]] in its `Ok` state. `Err(_)` is falsy.
+
+All other types (vectors, matrices, strings, records, etc.)
+raise a runtime error. Use `is_ok(r)` to explicitly convert a
+Result to a 0/1 scalar if you want to combine it with arithmetic.
+
+Both branches are body sequences (the final statement's value
+is the branch value), same convention as `repeat` / `train` /
+`for` blocks. Either branch can return any `Value` type --
+strings, vectors, Records, Results -- not just scalars.
+
 ## Instruction tuning
 
 Supervised fine-tuning on (instruction, response) pairs --

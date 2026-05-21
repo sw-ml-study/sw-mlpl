@@ -123,35 +123,17 @@ impl<'a> Lexer<'a> {
             .unwrap()
             .to_owned();
         let kind = match name.as_str() {
-            "repeat" => {
-                self.prev_was_value = false;
-                TokenKind::Repeat
-            }
-            "train" => {
-                self.prev_was_value = false;
-                TokenKind::Train
-            }
-            "for" => {
-                self.prev_was_value = false;
-                TokenKind::For
-            }
-            "in" => {
-                self.prev_was_value = false;
-                TokenKind::In
-            }
-            "experiment" => {
-                self.prev_was_value = false;
-                TokenKind::Experiment
-            }
-            "device" => {
-                self.prev_was_value = false;
-                TokenKind::Device
-            }
-            _ => {
-                self.prev_was_value = true;
-                TokenKind::Ident(name)
-            }
+            "repeat" => TokenKind::Repeat,
+            "train" => TokenKind::Train,
+            "for" => TokenKind::For,
+            "in" => TokenKind::In,
+            "experiment" => TokenKind::Experiment,
+            "device" => TokenKind::Device,
+            "if" => TokenKind::If,
+            "else" => TokenKind::Else,
+            _ => TokenKind::Ident(name),
         };
+        self.prev_was_value = matches!(kind, TokenKind::Ident(_));
         Token {
             kind,
             span: Span::new(start, self.pos),
