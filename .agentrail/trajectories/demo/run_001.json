@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 5,
+    "step": "refresh-multihead-demo-takeaways"
+  },
+  "action": "Read each affected demo string and compared against the empirical run from step 004 (loss 2064 -> 0, accuracy 1.0). Found the demo authors had already calibrated to trained behavior -- the audit's stale plateau claim was never propagated to the demos. Made two small refinements: added the concrete '100% training accuracy in 30 adam steps' to the multi-head ViT intro + takeaway, and changed the attention-overlay's 'should look DIFFERENT' to 'look DIFFERENT after training' since 'should' was a holdover from when the audit claim was treated as a possible reality. Verified via cargo test -p mlpl-web --release (23/23 green); workspace clippy clean; sw-checklist 157=parent; rebuilt pages.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T17:16:32"
+}
