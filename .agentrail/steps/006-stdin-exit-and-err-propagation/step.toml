@@ -1,0 +1,9 @@
+number = 6
+slug = "stdin-exit-and-err-propagation"
+status = "pending"
+description = "Scripting saga step 006: add stdin reads, exit code handling, and Err propaga..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T20:21:52"
+task_type = "code"
+commits = []

@@ -14,14 +14,12 @@ Last refreshed: 2026-05-20 (saga 30 complete -- 6/6 steps shipped).
 
 ## Active saga
 
-| Slug              | Status     | Steps total | Done | Next step                |
-|-------------------|------------|-------------|------|--------------------------|
-| (none)            | --         | --          | --   | pick from queue below    |
+| Slug                | Status   | Steps total | Done | Next step                                |
+|---------------------|----------|-------------|------|------------------------------------------|
+| `scripting-cluster` | active   | 8           | 0    | 001 print-and-eprint-builtins (audit #28) |
 
-The most recent saga `tier1-cleanup` (saga 30) completed
-2026-05-20 with all 6 steps shipped; closed audit findings #18
-and verified #19 was already shipped. `agentrail status` is
-the live source of truth.
+`agentrail status` is the live source of truth; this row is the
+human-readable summary.
 
 ## Saga timeline (oldest first)
 
@@ -29,6 +27,7 @@ the live source of truth.
 |-----------------------|------------|------------------------|---------------------------------------------|
 | `vit` (29)            | shipped    | -- (capability saga)   | Closed 2026-05-20. Archived under `.agentrail-archive/`. |
 | `tier1-cleanup` (30)  | shipped    | #18, #19               | Closed 2026-05-20. Six steps; both findings retired. |
+| `scripting-cluster` (31) | active  | #22, #23, #24, #25, #26, #27, #28, #29, #30 | This saga. 8 steps; turns MLPL into a real scripting language. |
 | Scripting cluster     | proposed   | #22, #24, #26, #28 (+ #23/#25/#27/#29/#30) | The four critical findings ship as one saga; if/else, args(), to_number, print. |
 | Dim reduction         | proposed   | -- (capability saga)   | `docs/milestone-dimensionality-reduction.md`. UMAP-led. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |

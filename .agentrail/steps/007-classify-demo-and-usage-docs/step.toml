@@ -1,0 +1,9 @@
+number = 7
+slug = "classify-demo-and-usage-docs"
+status = "pending"
+description = "Scripting saga step 007: add demos/classify.mlpl as the end-to-end example, p..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T20:22:06"
+task_type = "demo"
+commits = []

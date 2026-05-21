@@ -1,134 +1,186 @@
-# Tier 1 alpha-leak cleanup saga
+# Scripting cluster saga
 
 ## Why this exists
 
-Two findings from `docs/language-audit.md` are both small, high-
-leverage, and already-tripping users in practice. They closed
-out Saga 29 (ViT) as known limitations rather than as bugs to fix.
-This saga retires both before MLPL accumulates more demos and
-documentation on top of the broken behavior.
+MLPL today is a *demo language*: every program hardcodes its inputs,
+no program takes arguments, and a script's only output is its final
+expression. The audit (docs/language-audit.md findings #22-#30)
+identifies a small set of additions that together turn MLPL into a
+real scripting language. The critical four are joined at the hip:
+landing any three without the fourth still leaves a user blocked
+from writing useful scripts. They are treated as one saga here.
 
-- **Audit finding #18 (`concat` axis restricted to `{0, 1}`).** The
-  `mlpl-array::concat` implementation literally errors out if
-  `axis > 1`. The user-visible message is a misleading
-  `ShapeMismatch` rather than "unsupported axis." This was tripped
-  during Saga 29 when joining rank-3 batched-attention outputs
-  along the batch axis required a workaround in
-  `mlpl-eval`'s attention-stack lowering. NumPy, PyTorch, and JAX
-  have supported arbitrary axes since day one.
+- **#22 (`if` / `else`).** No surface conditional expression. Today
+  the only branching mechanism is `unwrap_or(r, default)` on a
+  Result, plus arithmetic masks on tensor data. A script that wants
+  to choose between two paths based on a scalar flag has no surface.
+- **#24 (CLI arguments).** `mlpl-repl -f script.mlpl arg1 arg2`
+  silently drops the trailing args. There is no `args()` builtin,
+  no `ARGV`, no positional-binding syntax.
+- **#26 (string-to-number).** No `to_number(s)` / `to_int(s)`. Even
+  if args() landed, the script could not turn `"42"` into `42`.
+- **#28 (`print`).** A script's value is the last expression only;
+  intermediate values silently drop. There is no `print(value)`.
 
-- **Audit finding #19 (multi-head attention has forward-only tape).**
-  `attention(d_model, heads, seed)` for `heads > 1` runs through
-  the forward pass but the autograd tape stops at the per-head
-  split. Training a multi-head ViT looks like it works -- the
-  loss drops a little and then plateaus -- because the gradient
-  is implicitly zero on the per-head splits. The browser
-  multi-head pets demo demonstrates this directly: 30 adam steps,
-  loss drops a few hundredths, accuracy hovers around 0.5.
+The nice-to-have findings (#23 while / break, #25 env(), #27 stdin,
+#29 exit codes, #30 example demo) round out the saga but the
+critical four are the minimum surface to ship.
 
 ## Goals
 
-- **Correctness.** Multi-head ViTs and any rank-3+ concat path
-  produce correct gradients and shapes. Existing single-head
-  tape behavior is unchanged.
-- **No regression in demos.** All existing Saga 29 demos
-  (single-head ViT, multi-head pets demos, attention overlay)
-  still pass; the multi-head one now actually trains to a
-  higher training accuracy than chance.
-- **Educational visibility.** Where the fix changes
-  user-observable behavior (the multi-head demo loss curve),
-  the demo intro/takeaway are updated so a reader sees the
-  difference.
+- **Correctness.** Each new construct passes its own focused tests;
+  the existing demo set (saga 29 era) keeps passing without rewrite.
+- **Ergonomics.** A 10-line MLPL script that takes a filename
+  argument, loads an image, branches on a flag, and prints a label
+  is achievable after this saga ships.
+- **Compatibility.** The REPL keeps working unchanged for users
+  who never pass args. The `--` separator is optional sugar.
+- **Educational.** A new example demo (`demos/classify.mlpl`)
+  uses every new construct so a reader can copy-paste.
 
 ## Non-goals
 
-- **Replacing the audit's other critical-tier items.** The
-  scripting cluster (#22, #24, #26, #28), `vmap` (#10),
-  `gather` (#12), the closures-don't-differentiate refactor
-  (#1), and the booleans-as-floats lift (#3) are separate
-  sagas. This saga touches only #18 and #19.
-- **Refactoring the autograd tape.** The multi-head tape fix
-  lowers onto existing tape primitives (matmul, softmax,
-  transpose, stack) -- the same primitives single-head
-  already uses. No new tape node types are needed.
-- **Adding new builtins.** Pure capability lift on existing
-  surface.
+- **Type system.** The strings -> number conversion uses the existing
+  `Value::Result` (saga 29 step 012); no new value tagging. Booleans
+  stay 0/1 floats (audit #3 is a separate saga).
+- **Variadic CLI flags.** `args()` returns a `Value::StrList`; the
+  script is responsible for its own flag parsing. No `getopts`,
+  no `clap`-style declarative parsing.
+- **Async I/O.** `read_stdin()` blocks. Multi-stream piping is out.
+- **REPL inline `if`/`while`.** The constructs work at top level
+  in script mode; making them feel natural at the `mlpl>` prompt
+  (multi-line entry, etc.) is a UX polish step that can wait.
 
 ## Dependencies
 
-- The `Stack` tape op (Saga 29 step 008) is already in place.
-  The multi-head tape lowering reuses it for the per-head join.
-- The `concat` axis-N work touches `mlpl-array::concat` and the
-  `copy_concat_rows` helper. The fix generalizes the existing
-  rank-2 stride logic; no new infrastructure.
+- **`Value::Result`** (saga 29 step 012). `env(name)`, `to_number(s)`,
+  and stdin reads return Result to surface failure modes.
+- **`Value::StrList`** (saga 29 step 002). `args()` returns one.
 
 ## What already exists
 
-- `concat(a, b, axis)` for `axis in {0, 1}` on any rank, with
-  full backward through the tape. (`mlpl-array/src/ops.rs:454`,
-  `mlpl-eval/src/grad.rs:164`)
-- `attention(d_model, heads, seed)` forward path for any `heads
-  >= 1`. (`mlpl-runtime/src/builtins.rs`, model DSL surface)
-- Single-head `attention` tape lowering through Q/K/V projection,
-  scaled-dot-product, output projection. (`mlpl-eval/src/grad.rs`)
-- Multi-head pets demos: `vit_multihead_quick.mlpl` (CLI),
-  "Pets: multi-head ViT (quick + viz)" (web), "Pets: attention
-  overlay (per-head)" (web).
+- `mlpl-repl -f script.mlpl` runs a script and prints the final
+  expression's value (`apps/mlpl-repl/src/main.rs`).
+- `Value::Result` + accessors: `is_ok`, `is_err`, `unwrap`,
+  `err_message`, `unwrap_or` (docs/lang-reference.md:401-405).
+- `Value::StrList` (string list) construction via `["a", "b"]`
+  literals (saga 29 step 002).
+- `repeat N { body }` and `train N { body }` loops with body
+  values captured to `last_losses` / `last_rows`. No `break` or
+  `continue`.
+
+## Quality requirements (every step)
+
+Identical to saga 30. TDD; cargo test + clippy + fmt +
+markdown-checker + sw-checklist green; `/mw-cp` checkpoint; push
+after every commit. Each new builtin ships with at least one
+focused test; each new parser construct ships with parser tests +
+eval tests.
 
 ## Steps
 
-### Step 001 -- concat axis-N forward
+### Step 001 -- print + eprint builtins
 
-Lift the `axis > 1` restriction in `mlpl-array::concat`. The
-existing implementation already handles arbitrary rank for axis
-0 and 1; generalize `copy_concat_rows` to copy along any axis
-by computing the outer-stride / inner-stride product. TDD:
-fixture inputs of rank 3 and rank 4 concatenated along axis 2
-and axis 3 respectively, asserted shape + element-wise content.
+Warmup. `print(value)` writes the value's display form (the same
+format the REPL uses for terminal output) to stdout, followed by
+a newline. `eprint(value)` writes to stderr. Both return their
+argument unchanged so they compose: `x = print(some_computation)`
+binds and shows.
 
-### Step 002 -- concat axis-N backward
+TDD: unit tests in mlpl-runtime that capture stdout / stderr (or
+use a writer-injecting test harness) and assert the rendered
+text matches the display contract. Touch
+`crates/mlpl-runtime/src/builtins.rs`, register the names, route
+to a small writer-aware impl.
 
-Generalize the autograd tape's concat backward node to split
-the upstream gradient along the same axis used in the forward.
-Today the backward in `mlpl-eval/src/grad.rs` assumes axis < 2.
-TDD: gradcheck on a rank-3 concat along axis 2, finite-difference
-parity within fp32 tolerance.
+### Step 002 -- to_number + to_int + env builtins
 
-### Step 003 -- drop the rank-3 concat workaround in attention
+Three builtins that all return Result. `to_number("42")` returns
+`Ok(42.0)`. `to_int("3.5")` returns `Err("not an integer")`.
+`env("MODEL_PATH")` returns `Ok("/path")` if set, `Err("MODEL_PATH not set")`
+otherwise. Group together because they share the Result-returning
+shape and the migration cost is identical.
 
-Saga 29's batched-attention stack lowering uses a per-batch
-workaround because rank-3 concat along the batch axis was not
-available. Remove the workaround; replace with the now-direct
-concat. Verify no regression on the single-head batched-attention
-test fixture.
+TDD: unit tests that exercise each builtin's happy path and each
+specific error class.
 
-### Step 004 -- multi-head attention tape lowering
+### Step 003 -- args() builtin + CLI passthrough
 
-Lower `attention(d_model, heads > 1, seed)` onto the same tape
-primitives as `heads = 1`: Q/K/V projection (linear), per-head
-scaled-dot-product (matmul + transpose + scale + softmax +
-matmul), stack along the head axis, output projection (linear).
-Update `mlpl-eval/src/grad.rs` to dispatch multi-head through the
-new lowering. The single-head fast path stays.
+Two parts:
 
-TDD: gradcheck on a small `attention(d=8, h=2)` fixture, finite-
-difference parity. The headline integration test is the
-`vit_multihead_quick.mlpl` demo's training accuracy: must reach
-> 0.8 on the balanced 20-image subset after 100 adam steps
-(today it stays ~0.5).
+1. `args()` builtin returns a `Value::StrList` of the trailing CLI
+   args. Empty list when run via the REPL with no script. Lives in
+   `crates/mlpl-runtime/src/builtins.rs`.
+2. `mlpl-repl` accepts trailing positional args after `-f
+   script.mlpl`. Use the `--` separator convention:
+   `mlpl-repl -f s.mlpl -- foo bar`. Without `--` the existing
+   behavior is preserved (no args).
 
-### Step 005 -- update multi-head pets demos
+TDD: integration test in `crates/mlpl-eval/tests/` that constructs
+a session with pre-set args and asserts `args()` returns the right
+StrList; a separate REPL test in `apps/mlpl-repl/` that spawns
+the binary with `-f ... -- arg1 arg2` and asserts the script's
+output reflects those args.
 
-The browser "Pets: multi-head ViT" demo's takeaway is currently
-calibrated against the plateaued-loss reality. After step 004
-the demo actually trains; the takeaway needs to be rewritten to
-reflect the new behavior. Same for the attention-overlay demo.
-The CLI demo (`vit_multihead_quick.mlpl`) needs its expected-
-accuracy comment refreshed.
+### Step 004 -- if cond { then } else { else } expression
 
-### Step 006 -- close out
+Parser change: add `Expr::If { cond, then, else_ }` to the AST.
+Surface form: `if cond { then_expr } else { else_expr }`. The
+`else` clause is required (no dangling-if). `cond` is truthy iff
+non-zero (matches existing convention for `Value::Number` and
+`Value::Result.ok`).
 
-Update `docs/language-audit.md` findings #18 and #19 with a
-`Fixed in:` line citing the commit SHAs from steps 001 and 004.
-Refresh `docs/plan.md`'s Breaking-change candidates section to
-move both findings to a "Shipped" subsection.
+TDD: parser tests on the surface form; eval tests on `if 1 { 42 }
+else { 99 } == 42` and `if 0 { 42 } else { 99 } == 99`; eval tests
+with non-scalar `cond` that the type system rejects with a clear
+error message.
+
+### Step 005 -- while + break + continue
+
+Parser change: add `Expr::While { cond, body }` to the AST. Add
+`Expr::Break(Option<Expr>)` and `Expr::Continue` as control-flow
+expressions. `break value` from inside any loop (`while`, `repeat`,
+`train`, `for`) makes the loop return `value`. `continue` skips to
+the next iteration. `break` outside a loop is a parse error.
+
+TDD: parser tests; eval tests for each control flow path; a
+test that exercises `break` inside `repeat N { ... }` to confirm
+back-compat with the existing loops.
+
+### Step 006 -- stdin + script exit code + Err propagation
+
+Three small additions in the same step:
+
+1. `read_stdin()` blocks until EOF and returns `Value::Str` with the
+   contents. `read_stdin_lines()` returns a `Value::StrList`.
+2. `exit(code)` builtin terminates the script with the given integer.
+3. In `mlpl-repl`'s `-f` mode, if the script's final expression
+   evaluates to `Err(msg)`, exit non-zero and print `msg` to stderr.
+
+TDD: harness that pipes mock stdin into the REPL binary; assertion
+that an `Err(...)`-tailed script exits with code 1 and prints the
+message; assertion that `exit(0)` ends cleanly and `exit(2)` ends
+with code 2.
+
+### Step 007 -- example script demo + usage doc
+
+`demos/classify.mlpl`: a script that takes a path argument via
+`args()`, loads the image with `load_images`, picks a model
+based on an `--model` flag (parsed by hand from the StrList),
+runs inference, prints the label + confidence, and exits non-zero
+on an unreadable image. Touches none of the runtime; pure
+composition of step 001-006 surface.
+
+Also add a "Scripting in MLPL" section to `docs/usage.md` walking
+the four critical constructs with the demo as the worked example.
+
+TDD: integration test in `crates/mlpl-eval/tests/` that
+exercises the demo end-to-end with a known image path and
+asserts the printed-label match.
+
+### Step 008 -- close out audit findings
+
+Mark #22, #23, #24, #25, #26, #27, #28, #29, and #30 as SHIPPED
+in `docs/language-audit.md` with commit SHAs; move them into the
+Shipped subsection of `docs/plan.md`'s Breaking-change candidates;
+refresh CHANGES.md; update docs/language-status.md.
