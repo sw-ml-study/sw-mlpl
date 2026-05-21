@@ -48,6 +48,30 @@ MLPL ships `perturb_params(model, family, sigma, seed)` for
 weight-space perturbation ; input-space adversarial
 attacks are deferred.
 
+## args / list_get (builtins)
+
+`args()` returns a `StrList` of the trailing CLI args passed
+to the script after the `--` separator:
+`mlpl-repl -f script.mlpl -- foo bar` makes `args()` return
+`["foo", "bar"]`. Empty list when run from the interactive
+REPL or the web playground. The list itself is read-only;
+extract one element at a time with `list_get(args(), i)`.
+
+`list_get(xs, i)` indexes into a `StrList` and returns the
+`i`-th string wrapped in a [[Result type]]: `Ok(string)` when
+`i < len(xs)`; `Err("list_get: index N out of bounds (list
+has M items)")` when out of range. The Result wrap is what
+makes the canonical missing-arg fallback work in one line:
+`name = unwrap_or(list_get(args(), 0), "default-name")`.
+
+Together with [[to_number / to_int (builtins)]] this lets a
+script accept numeric command-line args:
+
+```mlpl
+epochs = unwrap(to_int(unwrap(list_get(args(), 0))))
+lr     = unwrap(to_number(unwrap(list_get(args(), 1))))
+```
+
 ## Agent loop
 
 A control loop where an LLM repeatedly emits a tool-use

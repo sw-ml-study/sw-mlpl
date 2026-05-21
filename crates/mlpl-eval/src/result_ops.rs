@@ -21,6 +21,10 @@ impl Environment {
     pub fn get_result(&self, name: &str) -> Option<&(bool, Value)> {
         self.results.get(name)
     }
+    /// Set trailing CLI args visible to `args()`. Saga 31 step 003.
+    pub fn set_cli_args(&mut self, args: Vec<String>) {
+        self.cli_args = args;
+    }
 }
 
 /// Dispatch one of the Result accessors. The arity check and

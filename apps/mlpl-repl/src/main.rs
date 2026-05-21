@@ -14,7 +14,16 @@ use mlpl_trace::Trace;
 use svg_out::SvgOut;
 
 fn main() {
-    let args: Vec<String> = std::env::args().collect();
+    let raw_args: Vec<String> = std::env::args().collect();
+    // Saga 31 step 003: split on the `--` separator. Everything
+    // before goes to mlpl-repl's own flag parser; everything after
+    // becomes the script's CLI args, visible via the `args()`
+    // builtin. The separator itself is dropped.
+    let (args, script_args): (Vec<String>, Vec<String>) =
+        match raw_args.iter().position(|a| a == "--") {
+            Some(i) => (raw_args[..i].to_vec(), raw_args[i + 1..].to_vec()),
+            None => (raw_args, Vec::new()),
+        };
     if args.iter().any(|a| a == "-V" || a == "--version") {
         version::print();
         return;
@@ -29,6 +38,7 @@ fn main() {
             .cloned()
     };
     let mut env = Environment::new();
+    env.set_cli_args(script_args);
     let trace_flag = args.iter().any(|a| a == "--trace");
     let mut svg_out = SvgOut::new(flag("--svg-out").map(PathBuf::from));
     if let Some(dir) = flag("--data-dir") {

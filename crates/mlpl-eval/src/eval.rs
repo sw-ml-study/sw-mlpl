@@ -207,6 +207,72 @@ pub(crate) fn eval_expr(
     {
         return crate::result_ops::eval_string_to_result(name, args, env, trace);
     }
+    // Saga 31 step 003: args() returns the StrList of trailing CLI
+    // args (after `--` in `mlpl-repl -f script.mlpl -- foo bar`).
+    // Empty list when run interactively or from the web playground.
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "args"
+    {
+        if !args.is_empty() {
+            return Err(EvalError::BadArity {
+                func: "args".into(),
+                expected: 0,
+                got: args.len(),
+            });
+        }
+        return Ok(Value::StrList {
+            items: env.cli_args.clone(),
+        });
+    }
+    // Saga 31 step 003: list_get(xs, i) returns the i-th string of
+    // a StrList wrapped in Value::Result so the caller can recover
+    // from out-of-bounds via `unwrap_or(list_get(args(), 0), "default")`.
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "list_get"
+    {
+        if args.len() != 2 {
+            return Err(EvalError::BadArity {
+                func: "list_get".into(),
+                expected: 2,
+                got: args.len(),
+            });
+        }
+        let xs = eval_expr(&args[0], env, trace)?;
+        let Value::StrList { items } = xs else {
+            return Err(EvalError::Unsupported(format!(
+                "list_get: expected a string-list, got {}",
+                value_kind(&xs)
+            )));
+        };
+        let idx = eval_expr(&args[1], env, trace)?.into_array()?;
+        if idx.rank() != 0 {
+            return Err(EvalError::Unsupported(format!(
+                "list_get: index must be a scalar, got rank {}",
+                idx.rank()
+            )));
+        }
+        let i_raw = idx.data()[0];
+        if i_raw < 0.0 || i_raw.fract() != 0.0 {
+            return Err(EvalError::Unsupported(format!(
+                "list_get: index must be a non-negative integer, got {i_raw}"
+            )));
+        }
+        let i = i_raw as usize;
+        return Ok(if i < items.len() {
+            Value::Result {
+                ok: true,
+                payload: Box::new(Value::Str(items[i].clone())),
+            }
+        } else {
+            Value::Result {
+                ok: false,
+                payload: Box::new(Value::Str(format!(
+                    "list_get: index {i} out of bounds (list has {} items)",
+                    items.len()
+                ))),
+            }
+        });
+    }
     if let Expr::FieldAccess {
         receiver, field, ..
     } = expr

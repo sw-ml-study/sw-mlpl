@@ -131,9 +131,7 @@ fn take_backward(upstream: &DenseArray, orig_shape: &Shape, axis: usize, idx: us
 fn patchify_backward(upstream: &DenseArray, orig_shape: &Shape, p: usize) -> DenseArray {
     let dims = orig_shape.dims();
     let (b, c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
-    let (nh, nw) = (h / p, w / p);
-    let n_patches = nh * nw;
-    let patch_len = p * p * c;
+    let (nh, nw, patch_len) = (h / p, w / p, p * p * c);
     let up = upstream.data();
     let mut out = vec![0.0; b * c * h * w];
     for b_i in 0..b {
@@ -144,7 +142,7 @@ fn patchify_backward(upstream: &DenseArray, orig_shape: &Shape, p: usize) -> Den
                     for dy in 0..p {
                         for dx in 0..p {
                             let dst = ((b_i * c + c_i) * h + i * p + dy) * w + j * p + dx;
-                            let src = (b_i * n_patches + n) * patch_len + c_i * p * p + dy * p + dx;
+                            let src = (b_i * nh * nw + n) * patch_len + c_i * p * p + dy * p + dx;
                             out[dst] = up[src];
                         }
                     }
@@ -165,16 +163,14 @@ fn stack_backward(
     let outer: usize = dims[..axis].iter().product();
     let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
     let parent_stride = parent_size * inner;
-    let row_stride = n * parent_stride;
     let mut parent_dims = dims.to_vec();
     parent_dims[axis] = parent_size;
     let parent_elems: usize = parent_dims.iter().product();
     let up = upstream.data();
     let mut outs: Vec<Vec<f64>> = (0..n).map(|_| Vec::with_capacity(parent_elems)).collect();
     for o in 0..outer {
-        let row_base = o * row_stride;
         for (k, out) in outs.iter_mut().enumerate() {
-            let src = row_base + k * parent_stride;
+            let src = (o * n + k) * parent_stride;
             out.extend_from_slice(&up[src..src + parent_stride]);
         }
     }
