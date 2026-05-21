@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-21 (saga 31 step 003 shipped).
+Last refreshed: 2026-05-21 (saga 31 step 004 shipped).
 
 ## Active saga
 
 | Slug                | Status   | Steps total | Done | Next step                                |
 |---------------------|----------|-------------|------|------------------------------------------|
-| `scripting-cluster` | active   | 8           | 3    | 004 if-else-expression (audit #22) |
+| `scripting-cluster` | active   | 8           | 4    | 005 while-break-continue (audit #23) |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -48,7 +48,7 @@ agentrail.
 | #15 | Inline forward expression anti-pattern       | downstream of #1 | --                  | --             |
 | #18 | `concat` axis restricted to `{0, 1}`         | **shipped** | saga 30 steps 001 (forward) + 002 (backward) | 001: `c133d57`, 002: `4e27f9c` |
 | #19 | Multi-head attention has forward-only tape   | **shipped (stale audit)** | originally saga 29 step 013; verified in saga 30 step 004 | `66d63c9` |
-| #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
+| #22 | No `if` / `else`                             | **shipped** | saga 31 step 004         | `29f6d3a`      |
 | #24 | No CLI argument capture in script mode       | **shipped** | saga 31 step 003         | `cbba20a`      |
 | #26 | No string-to-number parsing                  | **shipped** | saga 31 step 002         | `87f4a2b`      |
 | #28 | No `print` / explicit script output          | **shipped** | saga 31 step 001         | `4f7f1f2`      |
@@ -83,6 +83,19 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-21** -- saga 31 step 004: `if cond { then } else
+  { else }` expression shipped (commit `29f6d3a`). First surface
+  conditional in MLPL; an EXPRESSION (returns a value), not a
+  statement. Truthy on non-zero scalars and `Ok(_)` Results;
+  falsy on `0.0` and `Err(_)`. The `else` clause is required;
+  both branches can return any Value type. 14 new tests in
+  if_else_tests.rs. New TokenKind::If / ::Else; new Expr::If AST
+  variant; new parser rule; early-return eval intercept in the
+  Device-block style. Closes audit #22. sw-checklist
+  ratchet-down: -1 fail, -1 warning. The bigger ratchet-down
+  refactor (splitting fat crates / files) is a separate
+  upcoming commit -- see CLAUDE.md (now updated to clarify
+  the ratchet rule is REDUCE, not HOLD).
 - **2026-05-21** -- saga 31 step 003: args() builtin + CLI
   passthrough shipped. Two-part change: args() returns a StrList
   of the trailing CLI args (after `--`) in mlpl-repl -f mode;
