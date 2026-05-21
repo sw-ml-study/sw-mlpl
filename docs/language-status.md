@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-20 (saga 30 step 003 shipped).
+Last refreshed: 2026-05-20 (saga 30 step 004 shipped).
 
 ## Active saga
 
 | Slug              | Status   | Steps total | Done | Next step                                |
 |-------------------|----------|-------------|------|------------------------------------------|
-| `tier1-cleanup`   | active   | 6           | 3    | 004 multihead-attention-tape (audit #19) |
+| `tier1-cleanup`   | active   | 6           | 4    | 005 refresh-multihead-demo-takeaways     |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -46,7 +46,7 @@ agentrail.
 | #12 | No `gather` / no slice ranges                | proposed    | future                   | --             |
 | #15 | Inline forward expression anti-pattern       | downstream of #1 | --                  | --             |
 | #18 | `concat` axis restricted to `{0, 1}`         | **shipped** | saga 30 steps 001 (forward) + 002 (backward) | 001: `c133d57`, 002: `4e27f9c` |
-| #19 | Multi-head attention has forward-only tape   | queued      | saga 30 step 004         | --             |
+| #19 | Multi-head attention has forward-only tape   | **shipped (stale audit)** | originally saga 29 step 013; verified in saga 30 step 004 | (pending commit) |
 | #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
 | #24 | No CLI argument capture in script mode       | proposed    | scripting saga           | --             |
 | #26 | No string-to-number parsing                  | proposed    | scripting saga           | --             |
@@ -82,6 +82,17 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-20** -- saga 30 step 004: audit finding #19 was stale.
+  Empirical verification: `vit_multihead_quick.mlpl` (heads=4,
+  100 adam steps, 20 samples) reaches accuracy 1.0; the browser
+  config (8 samples, 30 steps) also reaches loss ~0 and accuracy
+  1.0. The multi-head tape was already lowered in saga 29 step
+  013 (reshape + take + per-head SDPA + `Tensor::stack`); the
+  audit was written from an earlier mid-saga-29 state and never
+  refreshed. Added a `multi_head_trains_end_to_end_loss_decreases`
+  regression test pinning the behavior. The audit finding has
+  been rewritten with a SHIPPED status and a "historical claim
+  (now refuted)" section.
 - **2026-05-20** -- saga 30 step 003: no live workaround to drop;
   the rank-3 attention path already uses `Tensor::stack` (saga 29
   step 008) which is the correct primitive. Cleaned up two stale
