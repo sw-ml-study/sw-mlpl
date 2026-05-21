@@ -1198,6 +1198,24 @@ Driving use case: pair with `eq(preds, Y)` + `reduce_add`
 to compute classification accuracy, or pass to the 3-arg
 `svg(X, "gallery", overlay)` form for a labeled gallery.
 
+## print / eprint (builtins)
+
+`print(v)` and `eprint(v)` write `v`'s display form to stdout
+and stderr respectively, followed by a newline. Both return
+`v` unchanged so they compose into expressions:
+`x = print(some_computation)` both binds `x` and shows the
+value, without needing a separate sequencing block. Same
+display contract as the REPL prompt -- a vector prints as
+`1 2 3`, a matrix as space-and-newline-delimited rows, a
+`[[Result type]]` as `Ok(...)` / `Err(...)`.
+
+Driving use case: `mlpl-repl -f script.mlpl` only displays
+the script's FINAL expression by default; `print()` is how a
+script surfaces intermediate values to its operator. Pair
+with `eprint()` to keep diagnostic messages out of the
+script's main output stream so `mlpl-repl -f s.mlpl | grep
+...` works cleanly.
+
 ## load_images (builtin)
 
 `load_images(dir, [H, W])` (step 003, native-only via
