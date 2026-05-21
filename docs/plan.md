@@ -413,6 +413,18 @@ the attention-viz overlay demo (029, originally step
 Recommended for pre-v1.0 saga consideration. Numbers
 are finding IDs in `docs/language-audit.md`.
 
+Shipped:
+
+- **#18 concat axis-N** -- saga 30 steps 001 + 002 + 003
+  (2026-05-20; commits `c133d57`, `4e27f9c`, `c439c53`).
+  `mlpl-array::concat` accepts any `axis` in `[0, rank)`
+  for both forward and autograd backward.
+- **#19 multi-head attention tape** -- the audit was
+  stale; the lowering was shipped in saga 29 step 013.
+  Verified empirically + pinned by a regression test in
+  saga 30 step 004 (2026-05-20; commit `66d63c9`).
+  `vit_multihead_quick.mlpl` reaches accuracy 1.0.
+
 Critical:
 
 - **#1 Closures-don't-differentiate.** Switch the
@@ -436,13 +448,6 @@ Critical:
   rank-1 int tensor; slice syntax `x[a..b]` parses
   to a contiguous range. Patchify and the multi-head
   reshape dance simplify.
-- **#18 concat axis-N.** Drop the `axis in {0, 1}`
-  restriction in `mlpl-array::concat`. Already hit
-  in the rank-3 attention path.
-- **#19 multi-head attention tape.** Lower
-  multi-head onto the same tape primitives as
-  single-head so the multi-head ViT trains
-  end-to-end without the manual per-head workaround.
 - **Scripting cluster (#22 + #24 + #26 + #28).**
   Surface `if cond { } else { }`, capture trailing
   CLI args via `args()`, add `to_number(s)` /

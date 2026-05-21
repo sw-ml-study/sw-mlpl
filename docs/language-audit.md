@@ -581,39 +581,58 @@ deprecation window. Touches `device.rs` plus MLX demos.
 
 ### 18. `concat` axis restricted to `{0, 1}`
 
-**Category:** ALPHA-LEAK
-**Priority:** critical (it has already been hit)
-**Where:** `mlpl-array/src/ops.rs:469`
+**Status:** SHIPPED in saga 30, steps 001 + 002 + 003
+(2026-05-20). Forward axis-N: commit `c133d57`. Autograd
+backward axis-N: commit `4e27f9c`. Rank-3 attention regression
+test + stale-doc sweep: commit `c439c53`. `mlpl-array::concat`
+now accepts any `axis` in `[0, rank)` for both forward and
+autograd backward; rank-3 axis-2 and rank-4 axis-3 fixtures
+verified by finite-difference gradchecks within 1e-3
+tolerance.
 
-The concat implementation literally returns a shape error if `axis
-> 1`. The user-visible error is `ShapeMismatch { source: 2, target:
-1 }` -- which reads as "you passed mismatched shapes" when the real
-error is "concat does not support axis 2 yet". This was tripped
-during the ViT step where joining rank-3 batched-attention outputs
-along the batch axis required a workaround.
+**Category:** ALPHA-LEAK
+**Priority:** critical (it has already been hit) -- now retired
+**Where:** `mlpl-array/src/ops.rs:469` (pre-fix);
+`mlpl-array/src/ops.rs:copy_concat_rows` and
+`mlpl-autograd/src/backward.rs:concat_backward` (post-fix).
+
+The concat implementation literally returned a shape error if
+`axis > 1`. The user-visible error was `ShapeMismatch { source:
+2, target: 1 }` -- which read as "you passed mismatched shapes"
+when the real error was "concat does not support axis 2 yet".
+This was tripped during the ViT step where joining rank-3
+batched-attention outputs along the batch axis required a
+workaround.
 
 **Precedent.** NumPy / PyTorch / JAX all support arbitrary axis
 since day one.
 
-**Proposed fix.** Implement axis-N concat in `mlpl-array`. The
-existing `copy_concat_rows` helper generalizes by computing
-contiguous strides.
+**Fix that shipped.** Replaced `copy_concat_rows` (and the
+mirror in `concat_backward`) with a single outer-dim walk that
+copies `dims[axis] * inner` elements per outer position, where
+`inner = product(dims[axis+1..])`. The new code path subsumes
+the original axis-0 / axis-1 fast paths and generalizes
+naturally to any axis.
 
-**Migration cost.** Drop the workaround in `mlpl-eval`'s
-attention-stack lowering. No demos rewrite.
+**Migration cost.** Pure capability lift; no demos rewritten.
+The rank-3 attention path inspected during step 003 was found
+to already use `Tensor::stack` (saga 29 step 008), so no live
+workaround to drop -- just a regression test pinning the path.
 
 ---
 
 ### 19. `attention(d, h)` -- tape lowering only for `h = 1`
 
-**Status:** SHIPPED (audit was stale -- multi-head tape was
-already lowered in saga 29 step 013 (multi-head attention on
-the tape), not "partially" as this finding originally claimed.
-Discovered during saga 30 step 004's "investigate first"
-phase: an empirical run of `vit_multihead_quick.mlpl` (heads=4,
-100 adam steps, 20 samples) reaches accuracy 1.0; the browser
-config (heads=4, 30 adam steps, 8 samples) reaches loss ~0 and
-accuracy 1.0. Saga 30 step 004 also adds a
+**Status:** SHIPPED in saga 29 step 013 (multi-head attention
+on the tape, several months ago); verified in saga 30 step 004
+commit `66d63c9` (2026-05-20). The audit was stale -- the
+multi-head tape was already lowered, not "partially" as this
+finding originally claimed. Discovered during saga 30 step
+004's "investigate first" phase: an empirical run of
+`vit_multihead_quick.mlpl` (heads=4, 100 adam steps, 20
+samples) reaches accuracy 1.0; the browser config (heads=4,
+30 adam steps, 8 samples) reaches loss ~0 and accuracy 1.0.
+Saga 30 step 004 also adds a
 `multi_head_trains_end_to_end_loss_decreases` regression test
 pinning the behavior so any future regression of the
 multi-head tape catches here.
