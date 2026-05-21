@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 6,
+    "step": "close-out-audit-findings"
+  },
+  "action": "Edited finding #18 in docs/language-audit.md to add a SHIPPED status header citing c133d57 / 4e27f9c / c439c53 (steps 001-003) and reworded the 'Proposed fix' / 'Migration cost' paragraphs to past tense ('Fix that shipped' / 'Pure capability lift; no demos rewritten'). Verified finding #19's step-004 SHIPPED header is in place and tightened its phrasing with the 66d63c9 commit SHA. Created a 'Shipped' subsection at the top of docs/plan.md's Breaking-change candidates and moved both findings into it; the Critical list now starts at #1. Updated docs/language-status.md to clear the active-saga row, mark tier1-cleanup shipped in the timeline, and log step 006 in the Shipped log. Quality: markdown-checker green on all three docs; sw-checklist 157=parent. Refreshed CHANGES.md as a docs-only follow-up.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-20T17:54:59"
+}

@@ -1,5 +1,5 @@
 name = "tier1-cleanup"
-status = "active"
+status = "completed"
 current_step = 6
 created_at = "2026-05-20T13:02:09"
 plan_file = ".agentrail/plan.md"
