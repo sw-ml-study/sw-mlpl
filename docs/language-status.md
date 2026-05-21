@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-20 (saga 30 step 004 shipped).
+Last refreshed: 2026-05-20 (saga 30 step 005 shipped).
 
 ## Active saga
 
 | Slug              | Status   | Steps total | Done | Next step                                |
 |-------------------|----------|-------------|------|------------------------------------------|
-| `tier1-cleanup`   | active   | 6           | 4    | 005 refresh-multihead-demo-takeaways     |
+| `tier1-cleanup`   | active   | 6           | 5    | 006 close-out-audit-findings             |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -82,6 +82,14 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-20** -- saga 30 step 005: tightened the multi-head pets
+  demo intros/takeaways to state concrete accuracy ("training
+  accuracy = 1.0 in 30 adam steps") and dropped a "should look
+  DIFFERENT" hedge in the attention-overlay intro to "look
+  DIFFERENT after training." The existing strings were already
+  describing trained behavior accurately (the demo authors were
+  not fooled by the stale audit); these refinements just make
+  the empirical claim concrete and verifiable.
 - **2026-05-20** -- saga 30 step 004: audit finding #19 was stale.
   Empirical verification: `vit_multihead_quick.mlpl` (heads=4,
   100 adam steps, 20 samples) reaches accuracy 1.0; the browser
