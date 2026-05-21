@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-20 (saga 30 complete -- 6/6 steps shipped).
+Last refreshed: 2026-05-21 (saga 31 step 001 shipped).
 
 ## Active saga
 
 | Slug                | Status   | Steps total | Done | Next step                                |
 |---------------------|----------|-------------|------|------------------------------------------|
-| `scripting-cluster` | active   | 8           | 0    | 001 print-and-eprint-builtins (audit #28) |
+| `scripting-cluster` | active   | 8           | 1    | 002 to_number-to_int-env-builtins (audit #25, #26) |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -51,7 +51,7 @@ agentrail.
 | #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
 | #24 | No CLI argument capture in script mode       | proposed    | scripting saga           | --             |
 | #26 | No string-to-number parsing                  | proposed    | scripting saga           | --             |
-| #28 | No `print` / explicit script output          | proposed    | scripting saga           | --             |
+| #28 | No `print` / explicit script output          | **shipped** | saga 31 step 001         | `4f7f1f2`      |
 
 ## Per-finding status (nice-to-have)
 
@@ -83,6 +83,11 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-21** -- saga 31 step 001: print(v) / eprint(v) builtins
+  shipped (commit `4f7f1f2`). Eval-side dispatch in
+  crates/mlpl-eval/src/eval.rs; writes v's Display form to stdout
+  / stderr with newline and returns v unchanged so calls compose
+  into expressions. Closes audit #28.
 - **2026-05-20** -- saga 30 step 006 (FINAL, saga closed): closed
   out audit findings #18 and #19 in `docs/language-audit.md`
   with shipped headers + commit SHAs; moved both findings into a

@@ -1,6 +1,6 @@
 number = 1
 slug = "print-and-eprint-builtins"
-status = "pending"
+status = "completed"
 description = """
 Scripting saga step 001: add print(value) and eprint(value) builtins.
 
@@ -8,5 +8,6 @@ print(..."""
 role = "production"
 context_files = []
 created_at = "2026-05-20T20:19:51"
+completed_at = "2026-05-21T06:58:00"
 task_type = "code"
-commits = []
+commits = ["4f7f1f28aea6cc788e348e0b292d65da379f4174"]
