@@ -42,10 +42,15 @@ use std::{env, fs, io::Write, process};
 #[cfg(feature = "image-io")]
 use mlpl_eval::decode_and_resize_u8;
 
+#[cfg(feature = "image-io")]
 const TARGET_SIZE: usize = 64;
+#[cfg(feature = "image-io")]
 const CATS_PER_CLASS: usize = 100;
+#[cfg(feature = "image-io")]
 const DOGS_PER_CLASS: usize = 100;
+#[cfg(feature = "image-io")]
 const MAGIC: &[u8; 8] = b"MLPLPETS";
+#[cfg(feature = "image-io")]
 const VERSION: u32 = 1;
 
 #[cfg(feature = "image-io")]

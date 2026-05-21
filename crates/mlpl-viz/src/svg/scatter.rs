@@ -174,30 +174,17 @@ fn project_orthographic(p: (f64, f64, f64)) -> (f64, f64) {
 /// labeled with a letter at the tip. Not scaled with
 /// the data -- the gizmo indicates camera orientation.
 fn render_scatter3d_axes(out: &mut String) {
-    let origin_x = PAD + 20.0;
-    let origin_y = super::H - PAD - 20.0;
-    let len = 24.0;
+    let (ox, oy, len) = (PAD + 20.0, super::H - PAD - 20.0, 24.0);
+    // SVG y grows downward; the projection's y grows upward -- flip the arrow's vertical component.
     for (pt3, label, color) in [
         ((1.0_f64, 0.0, 0.0), "X", "#f38ba8"),
         ((0.0, 1.0, 0.0), "Y", "#a6e3a1"),
         ((0.0, 0.0, 1.0), "Z", "#89b4fa"),
     ] {
         let (dx, dy) = project_orthographic(pt3);
-        // SVG y grows downward; our projection's y grows
-        // upward -- flip the arrow's vertical component.
-        let tip_x = origin_x + dx * len;
-        let tip_y = origin_y - dy * len;
-        out.push_str(&format!(
-            "<line x1=\"{origin_x:.1}\" y1=\"{origin_y:.1}\" \
-             x2=\"{tip_x:.1}\" y2=\"{tip_y:.1}\" \
-             stroke=\"{color}\" stroke-width=\"1.5\"/>"
-        ));
-        out.push_str(&format!(
-            "<text x=\"{:.1}\" y=\"{:.1}\" fill=\"{color}\" \
-             font-family=\"monospace\" font-size=\"11\">{label}</text>",
-            tip_x + 2.0,
-            tip_y - 2.0
-        ));
+        let (tx, ty) = (ox + dx * len, oy - dy * len);
+        out.push_str(&format!("<line x1=\"{ox:.1}\" y1=\"{oy:.1}\" x2=\"{tx:.1}\" y2=\"{ty:.1}\" stroke=\"{color}\" stroke-width=\"1.5\"/>"));
+        out.push_str(&format!("<text x=\"{:.1}\" y=\"{:.1}\" fill=\"{color}\" font-family=\"monospace\" font-size=\"11\">{label}</text>", tx + 2.0, ty - 2.0));
     }
 }
 
@@ -233,23 +220,11 @@ fn render_scatter3d_legend(out: &mut String, labels: &[usize]) {
     unique.dedup();
     let x = super::W - PAD - 60.0;
     let mut y = PAD + 10.0;
-    out.push_str(&format!(
-        "<g class=\"legend\" transform=\"translate(0,0)\"><text x=\"{x:.1}\" y=\"{:.1}\" \
-         fill=\"#cdd6f4\" font-family=\"monospace\" font-size=\"10\">legend</text></g>",
-        y - 2.0
-    ));
+    out.push_str(&format!("<g class=\"legend\" transform=\"translate(0,0)\"><text x=\"{x:.1}\" y=\"{:.1}\" fill=\"#cdd6f4\" font-family=\"monospace\" font-size=\"10\">legend</text></g>", y - 2.0));
     for id in unique {
         y += 14.0;
         let color = PALETTE[id % PALETTE.len()];
-        out.push_str(&format!(
-            "<circle cx=\"{x:.1}\" cy=\"{y:.1}\" r=\"4\" fill=\"{color}\" \
-             stroke=\"#1e1e2e\" stroke-width=\"0.8\"/>"
-        ));
-        out.push_str(&format!(
-            "<text x=\"{:.1}\" y=\"{:.1}\" fill=\"#cdd6f4\" font-family=\"monospace\" \
-             font-size=\"10\">{id}</text>",
-            x + 10.0,
-            y + 3.0
-        ));
+        out.push_str(&format!("<circle cx=\"{x:.1}\" cy=\"{y:.1}\" r=\"4\" fill=\"{color}\" stroke=\"#1e1e2e\" stroke-width=\"0.8\"/>"));
+        out.push_str(&format!("<text x=\"{:.1}\" y=\"{:.1}\" fill=\"#cdd6f4\" font-family=\"monospace\" font-size=\"10\">{id}</text>", x + 10.0, y + 3.0));
     }
 }

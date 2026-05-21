@@ -140,11 +140,11 @@ fn rewrite_linears_to_lora(
     match spec {
         ModelSpec::Linear { w, b } => wrap_linear(env, w, b, ctx),
         ModelSpec::Chain(children) => {
-            let mut out = Vec::with_capacity(children.len());
-            for c in children {
-                out.push(rewrite_linears_to_lora(c, env, ctx)?);
-            }
-            Ok(ModelSpec::Chain(out))
+            let out: Result<Vec<_>, _> = children
+                .into_iter()
+                .map(|c| rewrite_linears_to_lora(c, env, ctx))
+                .collect();
+            Ok(ModelSpec::Chain(out?))
         }
         ModelSpec::Residual(inner) => Ok(ModelSpec::Residual(Box::new(rewrite_linears_to_lora(
             *inner, env, ctx,
@@ -153,10 +153,10 @@ fn rewrite_linears_to_lora(
         | ModelSpec::RmsNorm { .. }
         | ModelSpec::Embedding { .. }
         | ModelSpec::Attention { .. } => Ok(spec),
-        ModelSpec::LinearLora { .. } => Err(EvalError::Unsupported(
-            "lora: unexpected LinearLora in source tree (nested lora check should have caught this)"
-                .into(),
-        )),
+        ModelSpec::LinearLora { .. } => {
+            let msg = "lora: unexpected LinearLora in source tree (nested lora check should have caught this)";
+            Err(EvalError::Unsupported(msg.into()))
+        }
     }
 }
 
