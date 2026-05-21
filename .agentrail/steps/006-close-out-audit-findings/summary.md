@@ -1,0 +1,1 @@
+Closed out saga 30 with audit findings #18 and #19 marked SHIPPED in docs/language-audit.md (commit SHAs cited inline), moved into a new 'Shipped' subsection at the top of docs/plan.md's Breaking-change candidates, and recorded as the most-recent-saga in docs/language-status.md. Refreshed CHANGES.md to HEAD.
