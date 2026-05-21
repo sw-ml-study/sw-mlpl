@@ -199,6 +199,14 @@ pub(crate) fn eval_expr(
         }
         return Ok(v);
     }
+    // Saga 31 step 002: to_number(s) / to_int(s) / env(name).
+    // All three return Value::Result so the caller branches on
+    // success vs failure explicitly via unwrap_or / is_ok.
+    if let Expr::FnCall { name, args, .. } = expr
+        && matches!(name.as_str(), "to_number" | "to_int" | "env")
+    {
+        return crate::result_ops::eval_string_to_result(name, args, env, trace);
+    }
     if let Expr::FieldAccess {
         receiver, field, ..
     } = expr

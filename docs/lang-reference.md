@@ -505,14 +505,20 @@ one call. Each returns an SVG string just like `svg()`.
 
 ## Scripting
 
-Output primitives for `mlpl-repl -f script.mlpl`. Both return their
+Output primitives + Result-returning string conversions for
+`mlpl-repl -f script.mlpl`. The output primitives return their
 argument unchanged so they compose into expressions
 (`x = print(some_computation)` both binds `x` and shows the value).
+The string conversions return `Value::Result` so the caller branches
+explicitly on failure via `is_ok` / `unwrap_or` / `err_message`.
 
 | Function | Args | Description |
 |----------|------|-------------|
 | `print(v)` | 1 | Write `v`'s display form to stdout followed by a newline. Returns `v` unchanged. The display form matches what the REPL prints for `v`'s type. |
 | `eprint(v)` | 1 | Same as `print(v)` but writes to stderr. Useful for diagnostics that should not interleave with the script's main output stream. |
+| `to_number(s)` | 1 | Parse `s` (a `Value::Str`) as an `f64`. Returns `Ok(scalar)` on success; `Err("to_number: cannot parse \"abc\" as a number")` on failure. Leading/trailing whitespace is trimmed. |
+| `to_int(s)` | 1 | Parse `s` as an `i64`, rejecting non-integer numeric strings. Returns `Ok(scalar)`, `Err("to_int: \"3.5\" is not an integer")`, or `Err("to_int: cannot parse \"xyz\" as an integer")`. |
+| `env(name)` | 1 | Read the OS environment variable `name`. Returns `Ok(string-value)` if set; `Err("env: NAME not set")` if unset. Pair with `unwrap_or(env(\"VAR\"), \"default\")` for a fallback. |
 
 ## Array Display
 
