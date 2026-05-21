@@ -1,6 +1,6 @@
 number = 3
 slug = "args-builtin-and-cli-passthrough"
-status = "pending"
+status = "completed"
 description = """
 Scripting saga step 003: add args() builtin + CLI passthrough in mlpl-repl.
 
@@ -8,5 +8,6 @@ Scripting saga step 003: add args() builtin + CLI passthrough in mlpl-repl.
 role = "production"
 context_files = []
 created_at = "2026-05-20T20:20:16"
+completed_at = "2026-05-21T07:20:47"
 task_type = "code"
-commits = []
+commits = ["cbba20a7e73c3d917e797bd64a7a59294a173015"]
