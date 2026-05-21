@@ -14,6 +14,22 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-20
 
+- docs(saga): close out saga 30 -- audit findings #18 and #19 shipped
+- chore(agentrail): record saga 30 step 005 completion + kickoff 006
+- docs(demos): tighten multi-head pets demo strings to concrete accuracy (saga 30 step 005)
+- chore(agentrail): record saga 30 step 004 completion + kickoff 005
+- test(multihead): pin trains-end-to-end + correct stale audit #19
+- chore(agentrail): record saga 30 step 003 + kickoff 004
+- chore(attention): rank-3 regression test + stale-doc cleanup (saga 30 step 003)
+- chore(agentrail): record saga 30 step 002 completion + kickoff 003
+- feat(autograd): generalize concat_backward to any axis (saga 30 step 002, closes audit #18)
+- docs(status): add docs/language-status.md as the language-fix dashboard
+- chore(agentrail): record saga 30 step 001 completion + kickoff 002
+- feat(array): lift concat axis > 1 restriction (saga 30 step 001, audit #18)
+- chore(agentrail): archive saga 29 (vit), init saga 30 (tier1-cleanup)
+- docs(milestones): lock in three confirmed dim-reduction decisions
+- docs(dim-reduction): reframe milestone around UMAP-as-winner
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(plan): scripting audit additions + two milestone proposals
 - docs(changes): refresh CHANGES.md to HEAD
 - docs(glossary): sweep [[term]] cross-reference sigils across older entries
