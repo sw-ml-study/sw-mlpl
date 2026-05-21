@@ -1,0 +1,11 @@
+{
+  "task_type": "code",
+  "state": {
+    "number": 1,
+    "step": "print-and-eprint-builtins"
+  },
+  "action": "Confirmed mlpl-runtime is library-pure (operates on DenseArray, no IO), so print/eprint must live at the eval layer where the broader Value enum + Display impl is. Added an interception block in eval.rs's function-call chain alongside the existing list_len / ok / err / is_ok / unwrap intercepts. Used direct println! / eprintln! against stdout / stderr -- simplest impl; no thread-local writer plumbing. RED: 5 tests in mlpl-eval/tests/print_eprint_tests.rs covering scalar return, vector return, composition into a binding, and arity error. GREEN: 12-line eval rule. Manual stream verification: built release REPL, ran a 3-line script with print + eprint + arithmetic on the print return value; stdout got the print line + the final arithmetic result, stderr got the eprint line. Docs: new Scripting section in lang-reference; new glossary entry; README count bumped 278 -> 279. Quality: cargo test mlpl-eval green; workspace clippy clean; sw-checklist 157=parent (hold).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-21T06:58:00"
+}
