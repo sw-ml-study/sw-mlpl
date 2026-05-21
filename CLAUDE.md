@@ -143,18 +143,29 @@ a safety net for what is not yet committed.
 
 ## sw-checklist ratchet-down (every commit)
 
-Every commit must **strictly lower** the `sw-checklist` failed
-count from its parent. HOLD is not enough. The target is
-**~5 retirements per commit** (so a 5-step saga clears
-~25 errors). The full policy lives in
-`docs/sw-checklist-paydown.md`; the short version:
+Every commit must **strictly lower** BOTH the `sw-checklist`
+failed count AND the warnings count from its parent. HOLD is
+not enough. Per-commit targets: **>= 5 failures retired AND
+>= 15 warnings retired** (warnings target is higher because
+the count is large). The grand goal is zero failures and zero
+warnings; once we reach zero, keep them at zero. Do not defer
+ratchet work to the next commit.
+
+**Alternative when feature work is tight on space:** every few
+saga steps, do a dedicated "tech-debt reduction spike" commit
+that aims to *halve* both counts in one focused session. Queue
+the spike between feature steps.
+
+The full policy lives in `docs/sw-checklist-paydown.md`; the
+short version:
 
 - Run `sw-checklist` before commit. Note the failed count.
 - If your commit introduced any new FAIL, retire it before
   shipping (refactor, extract, bundle args, etc.).
 - Plan retirements as part of every commit, not as a
   hold-the-line floor. Aim for `failed_after <= failed_before
-  - 5`. More is better.
+  - 5` AND `warnings_after <= warnings_before - 5`. More is
+  better.
 - For refactor-heavy work (no new features), retire more --
   splitting a fat module into a sibling crate / sub-module
   can clear 5-15 FAILs at once (file LOC + module-function-
