@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-21 (saga 31 step 002 shipped).
+Last refreshed: 2026-05-21 (saga 31 step 003 shipped).
 
 ## Active saga
 
 | Slug                | Status   | Steps total | Done | Next step                                |
 |---------------------|----------|-------------|------|------------------------------------------|
-| `scripting-cluster` | active   | 8           | 2    | 003 args-builtin-and-cli-passthrough (audit #24) |
+| `scripting-cluster` | active   | 8           | 3    | 004 if-else-expression (audit #22) |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -49,7 +49,7 @@ agentrail.
 | #18 | `concat` axis restricted to `{0, 1}`         | **shipped** | saga 30 steps 001 (forward) + 002 (backward) | 001: `c133d57`, 002: `4e27f9c` |
 | #19 | Multi-head attention has forward-only tape   | **shipped (stale audit)** | originally saga 29 step 013; verified in saga 30 step 004 | `66d63c9` |
 | #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
-| #24 | No CLI argument capture in script mode       | proposed    | scripting saga           | --             |
+| #24 | No CLI argument capture in script mode       | **shipped** | saga 31 step 003         | (pending)      |
 | #26 | No string-to-number parsing                  | **shipped** | saga 31 step 002         | `87f4a2b`      |
 | #28 | No `print` / explicit script output          | **shipped** | saga 31 step 001         | `4f7f1f2`      |
 
@@ -83,6 +83,18 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-21** -- saga 31 step 003: args() builtin + CLI
+  passthrough shipped. Two-part change: args() returns a StrList
+  of the trailing CLI args (after `--`) in mlpl-repl -f mode;
+  list_get(xs, i) -> Result added because StrList had no
+  per-element accessor (you can't index args() without it).
+  Environment carries the args via a new pub(crate) field +
+  set_cli_args() setter. 10 eval-side tests + 4 binary-spawn
+  integration tests in apps/mlpl-repl/tests/. Closes audit #24.
+  Also ratcheted sw-checklist warnings 459 -> 457 by tightening
+  patchify_backward, stack_backward (mlpl-autograd) and
+  probability_invariant (mlpl-eval) below the 25-line warning
+  threshold.
 - **2026-05-21** -- saga 31 step 002: to_number(s), to_int(s),
   env(name) builtins shipped (commit `87f4a2b`). All three return
   Value::Result so callers branch explicitly on failure via

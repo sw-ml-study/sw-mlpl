@@ -117,21 +117,14 @@ fn probability_invariant(arr: &DenseArray) -> String {
     if dims.is_empty() {
         return "row-sum invariant: scalar (skipped)".into();
     }
-    let last = *dims.last().unwrap_or(&0);
+    let last = *dims.last().unwrap();
     if last == 0 {
         return "row-sum invariant: empty (skipped)".into();
     }
     let data = arr.data();
-    let n_rows = data.len() / last;
-    let mut max_dev = 0.0f64;
-    for r in 0..n_rows {
-        let row = &data[r * last..(r + 1) * last];
-        let s: f64 = row.iter().sum();
-        let dev = (s - 1.0).abs();
-        if dev > max_dev {
-            max_dev = dev;
-        }
-    }
+    let max_dev = (0..data.len() / last)
+        .map(|r| (data[r * last..(r + 1) * last].iter().sum::<f64>() - 1.0).abs())
+        .fold(0.0f64, f64::max);
     if max_dev <= 1e-5 {
         format!("row-sum invariant: verified (max deviation {max_dev:.2e})")
     } else {

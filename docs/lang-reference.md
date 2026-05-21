@@ -519,6 +519,8 @@ explicitly on failure via `is_ok` / `unwrap_or` / `err_message`.
 | `to_number(s)` | 1 | Parse `s` (a `Value::Str`) as an `f64`. Returns `Ok(scalar)` on success; `Err("to_number: cannot parse \"abc\" as a number")` on failure. Leading/trailing whitespace is trimmed. |
 | `to_int(s)` | 1 | Parse `s` as an `i64`, rejecting non-integer numeric strings. Returns `Ok(scalar)`, `Err("to_int: \"3.5\" is not an integer")`, or `Err("to_int: cannot parse \"xyz\" as an integer")`. |
 | `env(name)` | 1 | Read the OS environment variable `name`. Returns `Ok(string-value)` if set; `Err("env: NAME not set")` if unset. Pair with `unwrap_or(env(\"VAR\"), \"default\")` for a fallback. |
+| `args()` | 0 | Return a `StrList` of the trailing CLI args passed to the script after the `--` separator (`mlpl-repl -f script.mlpl -- foo bar` makes this `["foo", "bar"]`). Empty list when run from the interactive REPL or the web playground. |
+| `list_get(xs, i)` | 2 | Index into a `StrList` and return the `i`-th string wrapped in `Result`. `Ok(string)` when `i < len(xs)`; `Err("list_get: index N out of bounds (list has M items)")` when out of range. Pair with `unwrap_or(list_get(args(), 0), "default")` for a missing-arg fallback. |
 
 ## Array Display
 

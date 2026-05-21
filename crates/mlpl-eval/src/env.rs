@@ -41,12 +41,9 @@ pub trait PeerDispatcher: Send + Sync + std::fmt::Debug {
 pub struct Environment {
     pub(crate) vars: HashMap<String, DenseArray>,
     pub(crate) params: HashSet<String>,
-    /// Saga 15 step 001: parameters that are still trainable
-    /// (in `params`) and still carry values but that
-    /// `adam` / `momentum_sgd` must skip at the
-    /// optimizer-update stage. Gradient computation is
-    /// unaffected -- the chain rule still flows through
-    /// frozen parameters; only the *update* is suppressed.
+    /// Trainable params that `adam` / `momentum_sgd` skip at the
+    /// update step. Gradients still flow through; only the
+    /// optimizer update is suppressed. Saga 15 step 001.
     pub(crate) frozen_params: HashSet<String>,
     pub(crate) optim_state: OptimizerState,
     pub(crate) models: HashMap<String, ModelSpec>,
@@ -134,6 +131,7 @@ pub struct Environment {
     /// lands here.
     pub(crate) string_lists: HashMap<String, Vec<String>>,
     pub(crate) results: HashMap<String, (bool, Value)>, // Saga 29 step 012
+    pub(crate) cli_args: Vec<String>,                   // Saga 31 step 003
 }
 
 impl Environment {
