@@ -1,9 +1,10 @@
 number = 4
 slug = "if-else-expression"
-status = "pending"
+status = "completed"
 description = "Scripting saga step 004: add 'if cond { then } else { else }' as an expressio..."
 role = "production"
 context_files = []
 created_at = "2026-05-20T20:20:28"
+completed_at = "2026-05-21T09:18:44"
 task_type = "code"
-commits = []
+commits = ["e057823bf2ba0fdf7921f8180c131c1bf0c7784e"]

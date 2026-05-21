@@ -1,0 +1,11 @@
+{
+  "task_type": "code",
+  "state": {
+    "number": 4,
+    "step": "if-else-expression"
+  },
+  "action": "Added TokenKind::If / ::Else, Expr::If AST variant, parse_if helper called from parse_atom, eval intercept in the Device-block style (early-return if-let block in eval_expr). Inlined fmt_record_lit to avoid adding ast.rs's 8th fn (would have introduced a new fn-count FAIL); refactored lex_ident to compute prev_was_value from result-kind matches!() to keep it under 50 lines without adding a helper fn. Refactored render_thumbnail in mlpl-viz/svg/gallery.rs to bundle (src_h, src_w) / (thumb_h, thumb_w) / (cell_x, cell_y) as tuples, dropping the 9-arg clippy::too_many_arguments allow. 14 new tests in if_else_tests.rs covering true/false picks, multi-statement body, nested if, Result-as-cond, branch-returning-Str / -Vector, missing-else parse error, non-scalar Array cond error. Workspace clippy clean; mlpl-parser + mlpl-eval --release sweep green. Honest sw-checklist accounting in the commit body: introduced 3 candidate FAILs, fixed all 3 within the same commit.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-21T09:18:44"
+}
