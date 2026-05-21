@@ -177,6 +177,28 @@ pub(crate) fn eval_expr(
     {
         return crate::result_ops::eval_result_accessor(name, args, env, trace);
     }
+    // Saga 31 step 001: print(v) / eprint(v). Writes the value's
+    // Display form to stdout / stderr (with newline) and returns
+    // the value unchanged so calls compose into expressions
+    // (`x = print(some_computation)` both binds and shows).
+    if let Expr::FnCall { name, args, .. } = expr
+        && matches!(name.as_str(), "print" | "eprint")
+    {
+        if args.len() != 1 {
+            return Err(EvalError::BadArity {
+                func: name.clone(),
+                expected: 1,
+                got: args.len(),
+            });
+        }
+        let v = eval_expr(&args[0], env, trace)?;
+        if name == "print" {
+            println!("{v}");
+        } else {
+            eprintln!("{v}");
+        }
+        return Ok(v);
+    }
     if let Expr::FieldAccess {
         receiver, field, ..
     } = expr

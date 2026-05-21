@@ -503,6 +503,17 @@ one call. Each returns an SVG string just like `svg()`.
 | `confusion_matrix(predicted, actual)` | 2 | KxK heatmap of class-id predictions vs actual labels with cell counts overlaid |
 | `boundary_2d(grid_outputs, dims, points, labels)` | 4 | Render a 2D classifier surface from a length-(rows*cols) vector and `[rows, cols]` dims, with separately-supplied training points and labels |
 
+## Scripting
+
+Output primitives for `mlpl-repl -f script.mlpl`. Both return their
+argument unchanged so they compose into expressions
+(`x = print(some_computation)` both binds `x` and shows the value).
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `print(v)` | 1 | Write `v`'s display form to stdout followed by a newline. Returns `v` unchanged. The display form matches what the REPL prints for `v`'s type. |
+| `eprint(v)` | 1 | Same as `print(v)` but writes to stderr. Useful for diagnostics that should not interleave with the script's main output stream. |
+
 ## Array Display
 
 Arrays are displayed in a row-major layout:
