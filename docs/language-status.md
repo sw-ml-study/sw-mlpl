@@ -49,7 +49,7 @@ agentrail.
 | #18 | `concat` axis restricted to `{0, 1}`         | **shipped** | saga 30 steps 001 (forward) + 002 (backward) | 001: `c133d57`, 002: `4e27f9c` |
 | #19 | Multi-head attention has forward-only tape   | **shipped (stale audit)** | originally saga 29 step 013; verified in saga 30 step 004 | `66d63c9` |
 | #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
-| #24 | No CLI argument capture in script mode       | **shipped** | saga 31 step 003         | (pending)      |
+| #24 | No CLI argument capture in script mode       | **shipped** | saga 31 step 003         | `cbba20a`      |
 | #26 | No string-to-number parsing                  | **shipped** | saga 31 step 002         | `87f4a2b`      |
 | #28 | No `print` / explicit script output          | **shipped** | saga 31 step 001         | `4f7f1f2`      |
 
