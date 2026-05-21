@@ -10,13 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-21 (saga 31 step 001 shipped).
+Last refreshed: 2026-05-21 (saga 31 step 002 shipped).
 
 ## Active saga
 
 | Slug                | Status   | Steps total | Done | Next step                                |
 |---------------------|----------|-------------|------|------------------------------------------|
-| `scripting-cluster` | active   | 8           | 1    | 002 to_number-to_int-env-builtins (audit #25, #26) |
+| `scripting-cluster` | active   | 8           | 2    | 003 args-builtin-and-cli-passthrough (audit #24) |
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -50,7 +50,7 @@ agentrail.
 | #19 | Multi-head attention has forward-only tape   | **shipped (stale audit)** | originally saga 29 step 013; verified in saga 30 step 004 | `66d63c9` |
 | #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
 | #24 | No CLI argument capture in script mode       | proposed    | scripting saga           | --             |
-| #26 | No string-to-number parsing                  | proposed    | scripting saga           | --             |
+| #26 | No string-to-number parsing                  | **shipped** | saga 31 step 002         | `87f4a2b`      |
 | #28 | No `print` / explicit script output          | **shipped** | saga 31 step 001         | `4f7f1f2`      |
 
 ## Per-finding status (nice-to-have)
@@ -67,7 +67,7 @@ agentrail.
 | #16 | Model-DSL doesn't cover `take` / `reshape`   | proposed | future            |
 | #17 | Stringly-typed device names                  | proposed | future            |
 | #23 | No `while` / `break` / `continue`            | proposed | scripting saga    |
-| #25 | No `env()`                                   | proposed | scripting saga    |
+| #25 | No `env()`                                   | **shipped** (saga 31 step 002, `87f4a2b`) | scripting saga    |
 | #27 | No stdin read                                | proposed | scripting saga    |
 | #29 | No script exit code                          | proposed | scripting saga    |
 | #30 | No script-mode example demo                  | proposed | scripting saga    |
@@ -83,6 +83,13 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-21** -- saga 31 step 002: to_number(s), to_int(s),
+  env(name) builtins shipped (commit `87f4a2b`). All three return
+  Value::Result so callers branch explicitly on failure via
+  is_ok / unwrap_or / err_message. Implementation in
+  crates/mlpl-eval/src/result_ops.rs (no new modules because
+  mlpl-eval is already at the sw-checklist module-count cap).
+  Closes audit findings #25 and #26.
 - **2026-05-21** -- saga 31 step 001: print(v) / eprint(v) builtins
   shipped (commit `4f7f1f2`). Eval-side dispatch in
   crates/mlpl-eval/src/eval.rs; writes v's Display form to stdout
