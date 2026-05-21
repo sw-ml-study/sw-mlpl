@@ -174,11 +174,9 @@ fn accumulate_hidden_depth(spec: &ModelSpec, env: &Environment, acc: &mut Stats)
             acc.hidden = acc.hidden.max((*in_dim).max(*out_dim) as f64);
             acc.depth += 1.0;
         }
-        ModelSpec::Chain(children) => {
-            for c in children {
-                accumulate_hidden_depth(c, env, acc);
-            }
-        }
+        ModelSpec::Chain(children) => children
+            .iter()
+            .for_each(|c| accumulate_hidden_depth(c, env, acc)),
         ModelSpec::Residual(inner) => accumulate_hidden_depth(inner, env, acc),
         ModelSpec::Activation(_) | ModelSpec::RmsNorm { .. } => {}
     }

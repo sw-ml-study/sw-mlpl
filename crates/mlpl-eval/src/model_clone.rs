@@ -139,19 +139,16 @@ fn clone_attention(
 ) -> Result<ModelSpec, EvalError> {
     let id = env.next_model_id;
     env.next_model_id += 1;
-    let new_wq = format!("__attn_Wq_{id}");
-    let new_wk = format!("__attn_Wk_{id}");
-    let new_wv = format!("__attn_Wv_{id}");
-    let new_wo = format!("__attn_Wo_{id}");
-    let new_names = [&new_wq, &new_wk, &new_wv, &new_wo];
-    for (old, new) in projections.iter().zip(new_names.iter()) {
+    let names = ["Wq", "Wk", "Wv", "Wo"].map(|tag| format!("__attn_{tag}_{id}"));
+    for (old, new) in projections.iter().zip(names.iter()) {
         copy_param(env, old, new)?;
     }
+    let [wq, wk, wv, wo] = names;
     Ok(ModelSpec::Attention {
-        wq: new_wq,
-        wk: new_wk,
-        wv: new_wv,
-        wo: new_wo,
+        wq,
+        wk,
+        wv,
+        wo,
         d_model,
         heads,
         causal,

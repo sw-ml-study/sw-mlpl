@@ -219,29 +219,33 @@ fn rms_norm_tape(x: &Tensor, tape: &Rc<Tape>) -> Result<Tensor, EvalError> {
 fn onehot_from_tokens(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, EvalError> {
     let dims = tokens.shape().dims();
     if dims.len() != 1 {
-        return Err(EvalError::Unsupported(format!(
-            "embed (tape): tokens must be a 1-D [N] array, got shape {dims:?}"
-        )));
+        let msg = format!("embed (tape): tokens must be a 1-D [N] array, got shape {dims:?}");
+        return Err(EvalError::Unsupported(msg));
     }
     let n = dims[0];
     let mut data = vec![0.0_f64; n * vocab];
     for (row, &id_f) in tokens.data().iter().enumerate() {
-        if !id_f.is_finite() || id_f < 0.0 || id_f.fract() != 0.0 {
-            return Err(EvalError::Unsupported(format!(
-                "embed (tape): token at position {row} = {id_f} is not a non-negative integer"
-            )));
-        }
-        let id = id_f as usize;
-        if id >= vocab {
-            return Err(EvalError::Unsupported(format!(
-                "embed (tape): token at position {row} = {id} out of vocab range [0, {vocab})"
-            )));
-        }
+        let id = validate_token_id(row, id_f, vocab)?;
         data[row * vocab + id] = 1.0;
     }
     DenseArray::new(Shape::new(vec![n, vocab]), data).map_err(|e| {
         EvalError::Unsupported(format!("embed (tape): one-hot construction failed: {e}"))
     })
+}
+
+fn validate_token_id(row: usize, id_f: f64, vocab: usize) -> Result<usize, EvalError> {
+    if !id_f.is_finite() || id_f < 0.0 || id_f.fract() != 0.0 {
+        let msg =
+            format!("embed (tape): token at position {row} = {id_f} is not a non-negative integer");
+        return Err(EvalError::Unsupported(msg));
+    }
+    let id = id_f as usize;
+    if id >= vocab {
+        let msg =
+            format!("embed (tape): token at position {row} = {id} out of vocab range [0, {vocab})");
+        return Err(EvalError::Unsupported(msg));
+    }
+    Ok(id)
 }
 
 /// Bundle of attention parameter names + model dimension so the
