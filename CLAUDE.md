@@ -172,6 +172,42 @@ commits to green; at five-per-commit it's ~30 commits. A
 single refactor saga that splits one fat crate can clear
 many at once and shorten the schedule dramatically.
 
+### How to refactor (see docs/code_metrics.md for full guide)
+
+When choosing how to split an over-limit function or module,
+**follow `docs/code_metrics.md`** -- the project's canonical
+architecture guide. It contains the metric gates, refactoring
+triggers, file-naming conventions, and a refactoring algorithm
+agents should follow. Top directives:
+
+- **Target gates are STRICTER than the sw-checklist FAIL line:**
+  25 LOC / function, 5 functions / module, 5 modules / crate,
+  5 crates / component. (sw-checklist's FAIL line is the
+  fallback floor; aim for the gates.)
+- **`lib.rs` and `mod.rs` are facades only.** No executable
+  logic. Behavior lives in named files. Same rule for `build.rs`.
+- **Split by responsibility, not mechanically.** When a function
+  exceeds 25 LOC, diagnose what TWO jobs it is doing and extract
+  the right one. The "Refactoring Triggers" table in section 2
+  maps common symptoms to the right split.
+- **File-name convention:** `parse.rs` (input -> typed),
+  `validate.rs` (typed -> result), `plan.rs` (config -> plan),
+  `run.rs` (effects), `render.rs` (data -> string), `error.rs`,
+  `model.rs` (data types), `test_support.rs`, `fixtures.rs`.
+  Agents read these names to know where new code belongs.
+- **Move tests out of production modules** when the inline
+  `#[cfg(test)] mod tests { ... }` block distorts readability.
+  Sibling tests directory or `parse_tests.rs` next to `parse.rs`.
+- **Prefer pure free functions over methods on a `Self`** for
+  parsing / validating / transforming / classifying logic.
+  `impl` methods only for constructors, state mutation, and
+  invariant-preserving operations.
+- **Separate decisions from effects.** Pure code decides;
+  thin shell code performs IO / mutation.
+- **Stricter rule:** Do not add new logic to an over-limit
+  function or module. First extract responsibilities into named
+  pure helpers, then add.
+
 ## CHANGES.md discipline (every commit)
 
 `CHANGES.md` is the reverse-chronological log of every
