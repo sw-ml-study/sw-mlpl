@@ -46,7 +46,7 @@ agentrail.
 | #12 | No `gather` / no slice ranges                | proposed    | future                   | --             |
 | #15 | Inline forward expression anti-pattern       | downstream of #1 | --                  | --             |
 | #18 | `concat` axis restricted to `{0, 1}`         | **shipped** | saga 30 steps 001 (forward) + 002 (backward) | 001: `c133d57`, 002: `4e27f9c` |
-| #19 | Multi-head attention has forward-only tape   | **shipped (stale audit)** | originally saga 29 step 013; verified in saga 30 step 004 | (pending commit) |
+| #19 | Multi-head attention has forward-only tape   | **shipped (stale audit)** | originally saga 29 step 013; verified in saga 30 step 004 | `66d63c9` |
 | #22 | No `if` / `else`                             | proposed    | scripting saga           | --             |
 | #24 | No CLI argument capture in script mode       | proposed    | scripting saga           | --             |
 | #26 | No string-to-number parsing                  | proposed    | scripting saga           | --             |
