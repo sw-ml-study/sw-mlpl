@@ -14,6 +14,7 @@ mod experiment;
 #[cfg(feature = "image-io")]
 mod fetch_dataset;
 mod grad;
+mod grad_optim;
 #[cfg(feature = "image-io")]
 mod image_io;
 mod inspect;
