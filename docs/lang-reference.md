@@ -522,6 +522,35 @@ explicitly on failure via `is_ok` / `unwrap_or` / `err_message`.
 | `args()` | 0 | Return a `StrList` of the trailing CLI args passed to the script after the `--` separator (`mlpl-repl -f script.mlpl -- foo bar` makes this `["foo", "bar"]`). Empty list when run from the interactive REPL or the web playground. |
 | `list_get(xs, i)` | 2 | Index into a `StrList` and return the `i`-th string wrapped in `Result`. `Ok(string)` when `i < len(xs)`; `Err("list_get: index N out of bounds (list has M items)")` when out of range. Pair with `unwrap_or(list_get(args(), 0), "default")` for a missing-arg fallback. |
 
+### if / else expression
+
+`if cond { then } else { else }` returns the value of whichever
+branch is chosen. The `else` clause is required (no dangling-if).
+Both bodies are statement sequences, with the final statement's
+value being the branch value -- same convention as `repeat` /
+`train` / `for` blocks.
+
+`cond` is truthy when:
+
+- It is a scalar `Number` and not zero (any non-zero value,
+  including negatives, NaN, and infinity).
+- It is a `Result` and its `ok` field is true (i.e. `Ok(_)`).
+
+Other types (non-scalar arrays, strings, string lists, records,
+etc.) raise a runtime error.
+
+```mlpl
+flag = 1
+x = if flag { 100 } else { 200 }    # x = 100
+
+# Result-as-condition: branches on the Ok / Err discriminant.
+name = unwrap_or(env("USER"), "guest")
+greeting = if env("USER") { "hello " + name } else { "no user" }
+
+# Nested:
+sign = if x { if x > 0 { 1 } else { -1 } } else { 0 }
+```
+
 ## Array Display
 
 Arrays are displayed in a row-major layout:

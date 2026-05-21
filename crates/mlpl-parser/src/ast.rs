@@ -182,6 +182,22 @@ pub enum Expr {
         /// Span covering receiver-start through field-end.
         span: Span,
     },
+    /// `if cond { then } else { else_ }` expression. Saga 31
+    /// step 004. Returns the value of whichever branch was
+    /// taken; both `then` and `else_` are body sequences (the
+    /// final expression's value is the branch value, matching
+    /// `repeat` / `train` body semantics). `else` is required.
+    If {
+        /// Condition expression. Truthy iff non-zero scalar or
+        /// `Ok(_)` Result; everything else is an eval error.
+        cond: Box<Expr>,
+        /// `then` body.
+        then_body: Vec<Expr>,
+        /// `else` body.
+        else_body: Vec<Expr>,
+        /// Span covering `if` keyword through closing `else { }`.
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -206,7 +222,8 @@ impl Expr {
             | Self::Experiment { span: s, .. }
             | Self::Device { span: s, .. }
             | Self::RecordLit { span: s, .. }
-            | Self::FieldAccess { span: s, .. } => *s,
+            | Self::FieldAccess { span: s, .. }
+            | Self::If { span: s, .. } => *s,
         }
     }
 }
@@ -261,17 +278,6 @@ fn fmt_scope(f: &mut fmt::Formatter<'_>, head: &dyn fmt::Display, body: &[Expr])
 /// Render a record literal as `{name1: value1, name2: value2}`.
 /// Saga 29 step 001 -- extracted so the `impl Display for Expr`
 /// match stays under the sw-checklist 50-LOC function budget.
-fn fmt_record_lit(f: &mut fmt::Formatter<'_>, fields: &[(String, Expr)]) -> fmt::Result {
-    write!(f, "{{")?;
-    for (i, (name, value)) in fields.iter().enumerate() {
-        if i > 0 {
-            write!(f, ", ")?;
-        }
-        write!(f, "{name}: {value}")?;
-    }
-    write!(f, "}}")
-}
-
 impl fmt::Display for Expr {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
@@ -283,24 +289,25 @@ impl fmt::Display for Expr {
             Self::StrLit(s, _) => write!(f, "\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\"")),
             Self::Ident(name, _) => write!(f, "{name}"),
             Self::BuiltinRef(name, _) => write!(f, ":{name}"),
-            Self::ArrayLit(elems, _) => {
-                write!(f, "[")?;
-                fmt_comma_seq(f, elems)?;
-                write!(f, "]")
-            }
             Self::BinOp { op, lhs, rhs, .. } => write!(f, "({lhs} {op} {rhs})"),
             Self::UnaryNeg { operand, .. } => write!(f, "(-{operand})"),
-            Self::FnCall { name, args, .. } => {
-                write!(f, "{name}(")?;
-                fmt_comma_seq(f, args)?;
-                write!(f, ")")
-            }
             Self::Assign { name, value, .. } => write!(f, "{name} = {value}"),
-            Self::TensorCtor { kind, shape, .. } => {
-                write!(f, "{kind}[")?;
-                fmt_comma_seq(f, shape)?;
-                write!(f, "]")
+            Self::RecordLit { fields, .. } => {
+                write!(f, "{{")?;
+                for (i, (name, value)) in fields.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{name}: {value}")?;
+                }
+                write!(f, "}}")
             }
+            Self::FieldAccess {
+                receiver, field, ..
+            } => write!(f, "{receiver}.{field}"),
+            Self::ArrayLit(elems, _) => write_seq(f, "[", "]", elems),
+            Self::FnCall { name, args, .. } => write_seq(f, &format!("{name}("), ")", args),
+            Self::TensorCtor { kind, shape, .. } => write_seq(f, &format!("{kind}["), "]", shape),
             Self::Repeat { count, body, .. } => fmt_scope(f, &format_args!("repeat {count}"), body),
             Self::Train { count, body, .. } => fmt_scope(f, &format_args!("train {count}"), body),
             Self::For {
@@ -315,10 +322,24 @@ impl fmt::Display for Expr {
             Self::Device { target, body, .. } => {
                 fmt_scope(f, &format_args!("device(\"{target}\")"), body)
             }
-            Self::RecordLit { fields, .. } => fmt_record_lit(f, fields),
-            Self::FieldAccess {
-                receiver, field, ..
-            } => write!(f, "{receiver}.{field}"),
+            Self::If {
+                cond,
+                then_body,
+                else_body,
+                ..
+            } => {
+                fmt_scope(f, &format_args!("if {cond}"), then_body)?;
+                fmt_scope(f, &format_args!(" else"), else_body)
+            }
         }
     }
+}
+
+/// Open / comma-sequence / close. Inlines what used to be three
+/// arms (ArrayLit, FnCall, TensorCtor) into a single helper so the
+/// `fmt` impl stays under the sw-checklist 50-LOC budget.
+fn write_seq(f: &mut fmt::Formatter<'_>, open: &str, close: &str, items: &[Expr]) -> fmt::Result {
+    write!(f, "{open}")?;
+    fmt_comma_seq(f, items)?;
+    write!(f, "{close}")
 }

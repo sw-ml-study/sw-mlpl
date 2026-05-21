@@ -71,6 +71,12 @@ pub enum TokenKind {
     /// that dispatches ops inside the body through the named
     /// runtime target.
     Device,
+    /// `if` keyword (Saga 31 step 004). Introduces an `if cond
+    /// { then } else { else }` expression that returns the value
+    /// of whichever branch was taken. `else` is required.
+    If,
+    /// `else` keyword (Saga 31 step 004). Always paired with `if`.
+    Else,
     /// Newline (statement separator).
     Newline,
     /// End of input.

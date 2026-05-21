@@ -141,26 +141,36 @@ Run a snapshot before risky agent operations or after creating files
 you haven't yet staged. It does NOT replace normal git tracking — it is
 a safety net for what is not yet committed.
 
-## sw-checklist paydown (every commit)
+## sw-checklist ratchet-down (every commit)
 
-Every commit must HOLD or LOWER the `sw-checklist` failed
-count from its parent. The policy is documented in
+Every commit must **strictly lower** the `sw-checklist` failed
+count from its parent. HOLD is not enough. The target is
+**~5 retirements per commit** (so a 5-step saga clears
+~25 errors). The full policy lives in
 `docs/sw-checklist-paydown.md`; the short version:
 
 - Run `sw-checklist` before commit. Note the failed count.
 - If your commit introduced any new FAIL, retire it before
   shipping (refactor, extract, bundle args, etc.).
-- If your commit can also retire a pre-existing FAIL,
-  pair the retirement with the main work and include a
+- Plan retirements as part of every commit, not as a
+  hold-the-line floor. Aim for `failed_after <= failed_before
+  - 5`. More is better.
+- For refactor-heavy work (no new features), retire more --
+  splitting a fat module into a sibling crate / sub-module
+  can clear 5-15 FAILs at once (file LOC + module-function-
+  count + crate-module-count all simultaneously).
+- Pair retirements with the main work and include a
   `sw-checklist:` trailer in the commit message naming the
-  new count and the retired check.
-- Exceptions (commits that grow the count by at most 1) MUST
-  include `sw-checklist: exception` on its own line with a
-  justification. Use sparingly.
+  new count and the retired checks.
+- Exceptions (commits that grow the count, or merely hold)
+  MUST include `sw-checklist: exception` on its own line with
+  a justification. Use sparingly. State what was tried + why
+  retirements weren't feasible THIS step.
 
 The trajectory at one retirement per commit is roughly 140
-commits to green; a single refactor saga can clear 3-5 at
-once and shorten the schedule.
+commits to green; at five-per-commit it's ~30 commits. A
+single refactor saga that splits one fat crate can clear
+many at once and shorten the schedule dramatically.
 
 ## CHANGES.md discipline (every commit)
 
