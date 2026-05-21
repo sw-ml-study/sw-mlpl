@@ -743,22 +743,21 @@ fn extract_attn_weights(
     }
 }
 
-/// Compute just the softmax attention weights (no value multiply).
-/// Returns `[T, T]` for single-head or `[heads, T, T]` for multi-head.
-#[allow(clippy::too_many_arguments)]
 /// One head's attention weight matrix: `softmax(scale * Q_h @
 /// K_h^T)` with optional causal upper-triangle masking. Returns
-/// `[seq, seq]` for the caller to concatenate.
+/// `[seq, seq]` for the caller to concatenate. Saga 31 step 005
+/// refactor: 8-arg form replaced with bundled tuples so the
+/// fn fits under the 7-arg clippy budget.
 fn attn_head_weights(
     q: &DenseArray,
     k: &DenseArray,
     h: usize,
-    d_k: usize,
-    seq: usize,
-    scale: f64,
-    causal: bool,
+    dims: (usize, usize),
+    cfg: (f64, bool),
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
+    let (d_k, seq) = dims;
+    let (scale, causal) = cfg;
     let q_h = slice_cols(q, h * d_k, d_k)?;
     let k_h = slice_cols(k, h * d_k, d_k)?;
     let kt = crate::device::dispatched_call(env, "transpose", vec![k_h])?;
@@ -832,7 +831,7 @@ fn compute_attn_weights(
     let scale = 1.0 / (d_k as f64).sqrt();
     let mut all = Vec::with_capacity(heads * seq * seq);
     for h in 0..heads {
-        let attn = attn_head_weights(&q, &k, h, d_k, seq, scale, causal, env)?;
+        let attn = attn_head_weights(&q, &k, h, (d_k, seq), (scale, causal), env)?;
         all.extend_from_slice(attn.data());
     }
     let shape = if heads == 1 {

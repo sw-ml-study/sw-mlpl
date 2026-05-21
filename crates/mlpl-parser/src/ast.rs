@@ -292,16 +292,7 @@ impl fmt::Display for Expr {
             Self::BinOp { op, lhs, rhs, .. } => write!(f, "({lhs} {op} {rhs})"),
             Self::UnaryNeg { operand, .. } => write!(f, "(-{operand})"),
             Self::Assign { name, value, .. } => write!(f, "{name} = {value}"),
-            Self::RecordLit { fields, .. } => {
-                write!(f, "{{")?;
-                for (i, (name, value)) in fields.iter().enumerate() {
-                    if i > 0 {
-                        write!(f, ", ")?;
-                    }
-                    write!(f, "{name}: {value}")?;
-                }
-                write!(f, "}}")
-            }
+            Self::RecordLit { fields, .. } => fmt_record_lit(f, fields),
             Self::FieldAccess {
                 receiver, field, ..
             } => write!(f, "{receiver}.{field}"),
@@ -335,9 +326,17 @@ impl fmt::Display for Expr {
     }
 }
 
-/// Open / comma-sequence / close. Inlines what used to be three
-/// arms (ArrayLit, FnCall, TensorCtor) into a single helper so the
-/// `fmt` impl stays under the sw-checklist 50-LOC budget.
+fn fmt_record_lit(f: &mut fmt::Formatter<'_>, fields: &[(String, Expr)]) -> fmt::Result {
+    write!(f, "{{")?;
+    for (i, (name, value)) in fields.iter().enumerate() {
+        if i > 0 {
+            write!(f, ", ")?;
+        }
+        write!(f, "{name}: {value}")?;
+    }
+    write!(f, "}}")
+}
+
 fn write_seq(f: &mut fmt::Formatter<'_>, open: &str, close: &str, items: &[Expr]) -> fmt::Result {
     write!(f, "{open}")?;
     fmt_comma_seq(f, items)?;
