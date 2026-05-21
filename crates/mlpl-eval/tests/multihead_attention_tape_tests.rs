@@ -208,3 +208,60 @@ fn d_model_not_divisible_by_heads_is_rejected_at_construction() {
         "expected divisibility error, got: {msg}"
     );
 }
+
+#[test]
+fn multi_head_trains_end_to_end_loss_decreases() {
+    // Saga 30 step 004: regression guard for audit finding #19.
+    // The audit claimed multi-head attention has forward-only
+    // tape and the loss plateaus around chance on the pets
+    // multi-head demo. Empirical run of vit_multihead_quick.mlpl
+    // (heads=4, 30 adam steps, 8 samples) produced
+    // accuracy=1.0 and final loss = 0.0, so the finding is
+    // stale -- the tape was already lowered in saga 29 step 013.
+    // This test pins the trains-end-to-end behavior so any
+    // future regression of the multi-head tape (e.g. someone
+    // accidentally dropping the per-head Tensor::stack node)
+    // will fail loudly here.
+    //
+    // Tiny fixture: 4 samples, 2 classes, attention(d=8, h=2),
+    // 50 adam steps. With working gradients the loss must
+    // decrease by at least 30% (a very conservative bound;
+    // empirically it goes to ~zero).
+    let mut env = Environment::new();
+    eval_program(
+        &parse(
+            &lex("mdl = attention(8, 2, 17)\n\
+                 classifier = chain(linear(8, 4, 21), relu_layer(), linear(4, 2, 23))")
+            .unwrap(),
+        )
+        .unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    // 4 samples x 3 tokens x d_model=8. Class labels 0, 1, 0, 1
+    // (balanced).
+    let xs: Vec<f64> = (0..(4 * 3 * 8)).map(|i| (i as f64) * 0.02 - 0.5).collect();
+    env.set("X".into(), arr(vec![4, 3, 8], xs));
+    env.set("Y".into(), arr(vec![4], vec![0.0, 1.0, 0.0, 1.0]));
+    // Pull the CLS-like row 0 via take(_, 1, 0).
+    let loss_src = "cross_entropy(apply(classifier, take(apply(mdl, X), 1, 0)), Y)";
+    let train_src = format!(
+        "train 50 {{\n\
+           adam({loss_src}, [mdl, classifier], 0.01, 0.9, 0.999, 0.00000001);\n\
+           {loss_src}\n\
+         }}"
+    );
+    run(&train_src, &mut env);
+    let losses = run("last_losses", &mut env);
+    assert!(
+        losses.shape().dims() == [50],
+        "expected 50 captured losses, got shape {:?}",
+        losses.shape().dims()
+    );
+    let initial = losses.data()[0];
+    let final_ = losses.data()[49];
+    assert!(
+        final_ < 0.7 * initial,
+        "multi-head loss failed to decrease by >= 30%: initial {initial}, final {final_}"
+    );
+}

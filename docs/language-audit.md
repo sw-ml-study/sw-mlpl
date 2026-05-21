@@ -606,26 +606,40 @@ attention-stack lowering. No demos rewrite.
 
 ### 19. `attention(d, h)` -- tape lowering only for `h = 1`
 
+**Status:** SHIPPED (audit was stale -- multi-head tape was
+already lowered in saga 29 step 013 (multi-head attention on
+the tape), not "partially" as this finding originally claimed.
+Discovered during saga 30 step 004's "investigate first"
+phase: an empirical run of `vit_multihead_quick.mlpl` (heads=4,
+100 adam steps, 20 samples) reaches accuracy 1.0; the browser
+config (heads=4, 30 adam steps, 8 samples) reaches loss ~0 and
+accuracy 1.0. Saga 30 step 004 also adds a
+`multi_head_trains_end_to_end_loss_decreases` regression test
+pinning the behavior so any future regression of the
+multi-head tape catches here.
+
 **Category:** ALPHA-LEAK
-**Priority:** critical
-**Where:** `mlpl-eval/src/grad.rs`, `attention` builtin
+**Priority:** critical -- now retired
+**Where:** `mlpl-eval/src/model_tape.rs:attention_multi_head_context`
+(uses reshape + take + per-head SDPA + Tensor::stack)
 
-Single-head attention has full forward + backward through the tape.
-Multi-head attention has forward only. Training a multi-head ViT
-runs but the gradient is implicitly zero on the per-head splits --
-the visible symptom is "loss drops a bit, then plateaus". The
-quick-demo workarounds use the single-head autograd path with a
-manual `apply` over heads.
+**Historical claim (now refuted).** Original audit said
+"single-head attention has full forward + backward; multi-head
+has forward only; loss drops a bit, then plateaus." Empirical
+test refuted this; the multi-head tape lowering through
+`Tensor::stack` (saga 29 step 008's introduction of the
+Stack tape op + step 013's wiring into multi-head attention)
+provides correct gradients to every per-head Q/K/V slab.
 
-**Precedent.** Multi-head attention is one of the headline tape
-operations in any autograd framework.
+**What was already done.** The multi-head tape lowering in
+`crates/mlpl-eval/src/model_tape.rs:attention_multi_head_context`
+walks: reshape Q/K/V to `[T, heads, d_k]`, `take(_, 1, h)` per
+head, run per-head SDPA on the resulting `[T, d_k]` slabs,
+push to `head_outs`, then `Tensor::stack(&head_outs, 1)` to
+recombine. Every step is a tape primitive with backward; the
+gradient flows back to Wq/Wk/Wv per-head correctly.
 
-**Proposed fix.** Lower multi-head attention onto the same tape
-primitives (Q/K/V projection, per-head SDPA, stack, output proj)
-that single-head uses. Saga 29 step 008 partially did this.
-
-**Migration cost.** None for users; pure capability lift. The
-multi-head ViT demo trains end-to-end after this.
+**Migration cost.** None -- already shipped.
 
 ---
 
