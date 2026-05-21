@@ -1,0 +1,12 @@
+number = 1
+slug = "print-and-eprint-builtins"
+status = "pending"
+description = """
+Scripting saga step 001: add print(value) and eprint(value) builtins.
+
+print(..."""
+role = "production"
+context_files = []
+created_at = "2026-05-20T20:19:51"
+task_type = "code"
+commits = []

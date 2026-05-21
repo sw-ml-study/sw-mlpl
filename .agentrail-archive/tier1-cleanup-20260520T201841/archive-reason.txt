@@ -1,0 +1,1 @@
+Saga 30 (tier1-cleanup) closed 2026-05-20 with all 6 steps shipped; audit findings #18 and #19 retired. Archiving before initializing the scripting-cluster saga (audit findings #22 + #24 + #26 + #28 -- the critical Tier 2 language additions: if/else, args(), to_number, print).

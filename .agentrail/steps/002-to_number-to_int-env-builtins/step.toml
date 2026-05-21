@@ -1,0 +1,12 @@
+number = 2
+slug = "to_number-to_int-env-builtins"
+status = "pending"
+description = """
+Scripting saga step 002: add to_number(s), to_int(s), env(name) builtins.
+
+Al..."""
+role = "production"
+context_files = []
+created_at = "2026-05-20T20:20:03"
+task_type = "code"
+commits = []

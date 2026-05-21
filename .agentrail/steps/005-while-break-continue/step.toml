@@ -1,0 +1,13 @@
+number = 5
+slug = "while-break-continue"
+status = "pending"
+description = """
+Scripting saga step 005: add while + break + continue.
+
+Surface forms:
+  whil..."""
+role = "production"
+context_files = []
+created_at = "2026-05-20T20:21:06"
+task_type = "code"
+commits = []

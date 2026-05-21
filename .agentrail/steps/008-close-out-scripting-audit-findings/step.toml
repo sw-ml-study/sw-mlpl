@@ -1,0 +1,9 @@
+number = 8
+slug = "close-out-scripting-audit-findings"
+status = "pending"
+description = "Scripting saga step 008 (FINAL, use --done): close out audit findings #22-#30..."
+role = "production"
+context_files = []
+created_at = "2026-05-20T20:22:18"
+task_type = "docs"
+commits = []
