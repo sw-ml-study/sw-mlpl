@@ -10,23 +10,25 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-20 (saga 30 step 005 shipped).
+Last refreshed: 2026-05-20 (saga 30 complete -- 6/6 steps shipped).
 
 ## Active saga
 
-| Slug              | Status   | Steps total | Done | Next step                                |
-|-------------------|----------|-------------|------|------------------------------------------|
-| `tier1-cleanup`   | active   | 6           | 5    | 006 close-out-audit-findings             |
+| Slug              | Status     | Steps total | Done | Next step                |
+|-------------------|------------|-------------|------|--------------------------|
+| (none)            | --         | --          | --   | pick from queue below    |
 
-`agentrail status` is the live source of truth; this row is the
-human-readable summary.
+The most recent saga `tier1-cleanup` (saga 30) completed
+2026-05-20 with all 6 steps shipped; closed audit findings #18
+and verified #19 was already shipped. `agentrail status` is
+the live source of truth.
 
 ## Saga timeline (oldest first)
 
 | Saga                  | Status     | Audit findings touched | Notes                                       |
 |-----------------------|------------|------------------------|---------------------------------------------|
 | `vit` (29)            | shipped    | -- (capability saga)   | Closed 2026-05-20. Archived under `.agentrail-archive/`. |
-| `tier1-cleanup` (30)  | active     | #18, #19               | This saga.                                  |
+| `tier1-cleanup` (30)  | shipped    | #18, #19               | Closed 2026-05-20. Six steps; both findings retired. |
 | Scripting cluster     | proposed   | #22, #24, #26, #28 (+ #23/#25/#27/#29/#30) | The four critical findings ship as one saga; if/else, args(), to_number, print. |
 | Dim reduction         | proposed   | -- (capability saga)   | `docs/milestone-dimensionality-reduction.md`. UMAP-led. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
@@ -82,6 +84,11 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-20** -- saga 30 step 006 (FINAL, saga closed): closed
+  out audit findings #18 and #19 in `docs/language-audit.md`
+  with shipped headers + commit SHAs; moved both findings into a
+  new "Shipped" subsection at the top of `docs/plan.md`'s
+  Breaking-change candidates. Saga 30 (`tier1-cleanup`) complete.
 - **2026-05-20** -- saga 30 step 005: tightened the multi-head pets
   demo intros/takeaways to state concrete accuracy ("training
   accuracy = 1.0 in 30 adam steps") and dropped a "should look
