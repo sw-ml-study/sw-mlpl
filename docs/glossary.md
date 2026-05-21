@@ -639,6 +639,23 @@ to dense vectors. MLPL: `embed(vocab, d_model, seed)` is a
 Model DSL layer; `embed_table(model)` returns the underlying
 `[vocab, d_model]` matrix.
 
+## env (builtin)
+
+`env(name)` reads the OS environment variable `name` and
+returns a [[Result type]]: `Ok(string-value)` if set,
+`Err("env: NAME not set")` if unset. Lets a script read
+configuration from the shell environment without baking it
+into the source.
+
+Canonical scripting pattern with a default fallback:
+
+```mlpl
+model_path = unwrap_or(env("MODEL_PATH"), "default-model.bin")
+```
+
+Pair with [[args (builtin)]] (saga 31 step 003) to give a
+script both `--flag value` and `$ENV` configuration surfaces.
+
 ## Emergent Behavior
 
 A capability that appears in a large model but is absent or
@@ -2159,6 +2176,25 @@ string.
 `(exp(x) - exp(-x)) / (exp(x) + exp(-x))`. Squashes any real
 number to `[-1, 1]`. Older alternative to [[ReLU]]; still
 useful in small MLPs. MLPL: `tanh_layer()` or `tanh_fn`.
+
+## to_number / to_int (builtins)
+
+`to_number(s)` parses the string `s` as an `f64`;
+`to_int(s)` parses it as an `i64` and rejects non-integer
+numeric strings. Both return a [[Result type]] so the
+caller branches explicitly on failure:
+
+- `to_number("42")` -> `Ok(42)`
+- `to_number("3.14")` -> `Ok(3.14)`
+- `to_number("abc")` -> `Err("to_number: cannot parse \"abc\" as a number")`
+- `to_int("42")` -> `Ok(42)`
+- `to_int("3.5")` -> `Err("to_int: \"3.5\" is not an integer")`
+- `to_int("xyz")` -> `Err("to_int: cannot parse \"xyz\" as an integer")`
+
+Leading and trailing whitespace are trimmed before
+parsing. Pair with [[args (builtin)]] to convert CLI
+string arguments into numeric form, e.g.
+`epochs = unwrap(to_int(arg(0)))`.
 
 ## Temperature
 

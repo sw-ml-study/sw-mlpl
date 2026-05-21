@@ -78,3 +78,61 @@ fn static_name(name: &str) -> &'static str {
         _ => "result-accessor",
     }
 }
+
+/// Dispatch the three Result-returning string conversions
+/// (Saga 31 step 002): `to_number(s)`, `to_int(s)`, `env(name)`.
+/// Each evaluates its single string argument, attempts the
+/// conversion, and wraps the outcome in a `Value::Result`.
+pub(crate) fn eval_string_to_result(
+    name: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    if args.len() != 1 {
+        return Err(EvalError::BadArity {
+            func: name.into(),
+            expected: 1,
+            got: args.len(),
+        });
+    }
+    let arg = eval_expr(&args[0], env, trace)?;
+    let Value::Str(s) = arg else {
+        return Err(EvalError::Unsupported(format!(
+            "{name}: expected a string argument, got {}",
+            value_kind(&arg)
+        )));
+    };
+    let outcome: Result<Value, String> = match name {
+        "to_number" => s
+            .trim()
+            .parse::<f64>()
+            .map(|n| Value::Array(DenseArray::from_scalar(n)))
+            .map_err(|_| format!("to_number: cannot parse {s:?} as a number")),
+        "to_int" => s
+            .trim()
+            .parse::<i64>()
+            .map(|n| Value::Array(DenseArray::from_scalar(n as f64)))
+            .map_err(|_| {
+                if s.trim().parse::<f64>().is_ok() {
+                    format!("to_int: {s:?} is not an integer")
+                } else {
+                    format!("to_int: cannot parse {s:?} as an integer")
+                }
+            }),
+        "env" => std::env::var(&s)
+            .map(Value::Str)
+            .map_err(|_| format!("env: {s} not set")),
+        _ => unreachable!("dispatcher guard kept us in the to_number/to_int/env set"),
+    };
+    Ok(match outcome {
+        Ok(payload) => Value::Result {
+            ok: true,
+            payload: Box::new(payload),
+        },
+        Err(msg) => Value::Result {
+            ok: false,
+            payload: Box::new(Value::Str(msg)),
+        },
+    })
+}
