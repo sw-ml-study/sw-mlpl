@@ -575,9 +575,9 @@ pub(crate) fn eval_expr(
             crate::type_errors::check_loss_consumer(name, loss_arg, env)?;
         }
         let result = if name == "momentum_sgd" {
-            crate::grad::eval_momentum_sgd(args, env)?
+            crate::grad_optim::eval_momentum_sgd(args, env)?
         } else {
-            crate::grad::eval_adam(args, env)?
+            crate::grad_optim::eval_adam(args, env)?
         };
         if let Some(t) = trace.as_mut() {
             let seq = t.events().len() as u64;

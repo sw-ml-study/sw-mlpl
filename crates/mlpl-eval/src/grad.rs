@@ -7,7 +7,6 @@ use std::rc::Rc;
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
-use mlpl_core::Span;
 use mlpl_parser::{BinOpKind, Expr};
 
 use crate::env::Environment;
@@ -288,21 +287,6 @@ pub fn optim_state_mut(env: &mut Environment) -> &mut OptimizerState {
     &mut env.optim_state
 }
 
-/// `momentum_sgd(loss_expr, params, lr, beta)` built-in.
-///
-/// `params` is either a single param identifier or an array literal of
-/// param identifiers. For each param `w`, applies the classical
-/// heavy-ball update with per-param velocity buffer `v` stored on the
-/// environment under `("momentum_sgd", w, "v")`:
-///
-/// ```text
-///     g       = grad(loss_expr, w)
-///     v_new   = beta * v_old + g
-///     w_new   = w - lr * v_new
-/// ```
-///
-/// Returns a scalar zero (the call is invoked for its side effects on
-/// the parameter bindings and optimizer state).
 /// Resolve the optimizer's `params` argument into a flat list of
 /// parameter identifiers. Accepts:
 ///
@@ -311,7 +295,11 @@ pub fn optim_state_mut(env: &mut Environment) -> &mut OptimizerState {
 /// - a model identifier registered via the Saga 11 model DSL:
 ///   `adam(loss, M, ...)` walks `ModelSpec::params()` and returns its
 ///   flat, order-stable parameter list.
-fn collect_params(arg: &Expr, env: &Environment, func: &str) -> Result<Vec<String>, EvalError> {
+pub(crate) fn collect_params(
+    arg: &Expr,
+    env: &Environment,
+    func: &str,
+) -> Result<Vec<String>, EvalError> {
     match arg {
         Expr::Ident(n, _) => {
             if let Some(model) = env.get_model(n) {
@@ -350,206 +338,4 @@ fn collect_params(arg: &Expr, env: &Environment, func: &str) -> Result<Vec<Strin
             "{func}: second argument must be a param identifier, model identifier, or list"
         ))),
     }
-}
-
-pub(crate) fn eval_momentum_sgd(
-    args: &[Expr],
-    env: &mut Environment,
-) -> Result<DenseArray, EvalError> {
-    if args.len() != 4 {
-        return Err(EvalError::BadArity {
-            func: "momentum_sgd".into(),
-            expected: 4,
-            got: args.len(),
-        });
-    }
-    let loss_expr = args[0].clone();
-    let param_names = collect_params(&args[1], env, "momentum_sgd")?;
-    let scalar_arg = |expr: &Expr, env: &mut Environment| -> Result<f64, EvalError> {
-        let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
-        if arr.rank() != 0 {
-            return Err(EvalError::Unsupported(
-                "momentum_sgd: lr and beta must be scalars".into(),
-            ));
-        }
-        Ok(arr.data()[0])
-    };
-    let lr = scalar_arg(&args[2], env)?;
-    let beta = scalar_arg(&args[3], env)?;
-
-    for name in &param_names {
-        if !env.is_param(name) {
-            return Err(EvalError::Unsupported(format!(
-                "momentum_sgd: '{name}' is not a tracked parameter"
-            )));
-        }
-        // Saga 15 step 001: frozen params keep their gradients
-        // flowing through the tape but the optimizer update is
-        // suppressed -- the weight stays put.
-        if env.is_frozen(name) {
-            continue;
-        }
-        let grad_args = [
-            loss_expr.clone(),
-            Expr::Ident(name.clone(), Span::new(0, 0)),
-        ];
-        let g = eval_grad(&grad_args, env)?;
-        let key = ("momentum_sgd".to_string(), name.clone(), "v".to_string());
-        let v_old = env
-            .optim_state
-            .buffers
-            .get(&key)
-            .cloned()
-            .unwrap_or_else(|| DenseArray::zeros(g.shape().clone()));
-        if v_old.shape() != g.shape() {
-            return Err(EvalError::Unsupported(format!(
-                "momentum_sgd: stored velocity shape mismatch for '{name}'"
-            )));
-        }
-        let v_data: Vec<f64> = v_old
-            .data()
-            .iter()
-            .zip(g.data().iter())
-            .map(|(vo, gv)| beta * vo + gv)
-            .collect();
-        let v_new =
-            DenseArray::new(v_old.shape().clone(), v_data).expect("velocity shape matches grad");
-        env.optim_state.buffers.insert(key, v_new.clone());
-
-        let w = env.get(name).cloned().expect("param exists in environment");
-        let w_data: Vec<f64> = w
-            .data()
-            .iter()
-            .zip(v_new.data().iter())
-            .map(|(wv, vv)| wv - lr * vv)
-            .collect();
-        let w_new =
-            DenseArray::new(w.shape().clone(), w_data).expect("weight shape matches velocity");
-        env.set(name.clone(), w_new);
-    }
-    *env.optim_state
-        .steps
-        .entry("momentum_sgd".into())
-        .or_insert(0) += 1;
-    Ok(DenseArray::from_scalar(0.0))
-}
-
-/// `adam(loss_expr, params, lr, b1, b2, eps)` built-in.
-///
-/// Standard Adam with bias correction. Per-param first/second moment
-/// buffers `m`, `v` and a per-optimizer step counter `t` live in
-/// `OptimizerState`. At each call (with `t` post-incremented to start
-/// at 1):
-///
-/// ```text
-///     g     = grad(loss_expr, w)
-///     m     = b1*m + (1 - b1)*g
-///     v     = b2*v + (1 - b2)*g*g
-///     mhat  = m / (1 - b1^t)
-///     vhat  = v / (1 - b2^t)
-///     w     = w - lr * mhat / (sqrt(vhat) + eps)
-/// ```
-pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
-    if args.len() != 6 {
-        return Err(EvalError::BadArity {
-            func: "adam".into(),
-            expected: 6,
-            got: args.len(),
-        });
-    }
-    let loss_expr = args[0].clone();
-    let param_names = collect_params(&args[1], env, "adam")?;
-    let scalar_arg = |expr: &Expr, env: &mut Environment| -> Result<f64, EvalError> {
-        let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
-        if arr.rank() != 0 {
-            return Err(EvalError::Unsupported(
-                "adam: lr/b1/b2/eps must be scalars".into(),
-            ));
-        }
-        Ok(arr.data()[0])
-    };
-    let lr = scalar_arg(&args[2], env)?;
-    let b1 = scalar_arg(&args[3], env)?;
-    let b2 = scalar_arg(&args[4], env)?;
-    let eps = scalar_arg(&args[5], env)?;
-
-    // Step counter is 1-based: bump first, then read.
-    let t = {
-        let entry = env.optim_state.steps.entry("adam".into()).or_insert(0);
-        *entry += 1;
-        *entry
-    };
-    let bc1 = 1.0 - b1.powi(t as i32);
-    let bc2 = 1.0 - b2.powi(t as i32);
-
-    for name in &param_names {
-        if !env.is_param(name) {
-            return Err(EvalError::Unsupported(format!(
-                "adam: '{name}' is not a tracked parameter"
-            )));
-        }
-        // Saga 15 step 001: frozen params keep their gradients
-        // flowing through the tape but the optimizer update is
-        // suppressed -- the weight stays put.
-        if env.is_frozen(name) {
-            continue;
-        }
-        let grad_args = [
-            loss_expr.clone(),
-            Expr::Ident(name.clone(), Span::new(0, 0)),
-        ];
-        let g = eval_grad(&grad_args, env)?;
-        let m_key = ("adam".to_string(), name.clone(), "m".to_string());
-        let v_key = ("adam".to_string(), name.clone(), "v".to_string());
-        let m_old = env
-            .optim_state
-            .buffers
-            .get(&m_key)
-            .cloned()
-            .unwrap_or_else(|| DenseArray::zeros(g.shape().clone()));
-        let v_old = env
-            .optim_state
-            .buffers
-            .get(&v_key)
-            .cloned()
-            .unwrap_or_else(|| DenseArray::zeros(g.shape().clone()));
-        if m_old.shape() != g.shape() || v_old.shape() != g.shape() {
-            return Err(EvalError::Unsupported(format!(
-                "adam: stored moment shape mismatch for '{name}'"
-            )));
-        }
-        let m_data: Vec<f64> = m_old
-            .data()
-            .iter()
-            .zip(g.data().iter())
-            .map(|(mo, gv)| b1 * mo + (1.0 - b1) * gv)
-            .collect();
-        let v_data: Vec<f64> = v_old
-            .data()
-            .iter()
-            .zip(g.data().iter())
-            .map(|(vo, gv)| b2 * vo + (1.0 - b2) * gv * gv)
-            .collect();
-        let m_new = DenseArray::new(g.shape().clone(), m_data).expect("m shape matches grad");
-        let v_new = DenseArray::new(g.shape().clone(), v_data).expect("v shape matches grad");
-
-        let w = env.get(name).cloned().expect("param exists in environment");
-        let w_data: Vec<f64> = w
-            .data()
-            .iter()
-            .zip(m_new.data().iter())
-            .zip(v_new.data().iter())
-            .map(|((wv, mv), vv)| {
-                let mhat = mv / bc1;
-                let vhat = vv / bc2;
-                wv - lr * mhat / (vhat.sqrt() + eps)
-            })
-            .collect();
-        let w_new = DenseArray::new(w.shape().clone(), w_data).expect("weight shape matches grad");
-
-        env.optim_state.buffers.insert(m_key, m_new);
-        env.optim_state.buffers.insert(v_key, v_new);
-        env.set(name.clone(), w_new);
-    }
-    Ok(DenseArray::from_scalar(0.0))
 }
