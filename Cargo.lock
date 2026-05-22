@@ -2132,6 +2132,7 @@ dependencies = [
  "mlpl-parser",
  "mlpl-serve",
  "mlpl-wasm",
+ "mlpl-web-eval",
  "mlpl-web-lessons",
  "mlpl-web-path-body",
  "reqwest",
@@ -2141,6 +2142,19 @@ dependencies = [
  "wasm-bindgen-futures",
  "web-sys",
  "yew",
+]
+
+[[package]]
+name = "mlpl-web-eval"
+version = "0.20.0"
+dependencies = [
+ "gloo 0.11.0",
+ "mlpl-wasm",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

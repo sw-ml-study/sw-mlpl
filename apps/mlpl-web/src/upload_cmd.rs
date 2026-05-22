@@ -6,7 +6,7 @@
 use web_sys::HtmlInputElement;
 
 use crate::handlers::EvalDeps;
-use crate::state::{EntryKind, HistoryEntry};
+use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
 /// Parse `:upload <name>` (or `:upload` with no arg). Returns
 /// `Some(name)` if the line is the upload command, `None`

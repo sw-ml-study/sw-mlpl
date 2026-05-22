@@ -3,8 +3,8 @@ use yew::prelude::*;
 
 use crate::demos::DEMOS;
 use crate::glossary_view::GlossaryView;
-use crate::state::DocTab;
 pub use crate::tutorial::{TutorialPanel, TutorialPanelProps, TutorialView};
+use mlpl_web_eval::state::DocTab;
 
 const LANG_REFERENCE: &str = include_str!("../../../docs/lang-reference.md");
 const USAGE_GUIDE: &str = include_str!("../../../docs/usage.md");

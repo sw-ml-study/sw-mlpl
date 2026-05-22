@@ -36,7 +36,7 @@ use web_sys::{
 };
 use yew::prelude::*;
 
-use crate::state::{EntryKind, HistoryEntry};
+use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
 const TARGET_H: u32 = 64;
 const TARGET_W: u32 = 64;

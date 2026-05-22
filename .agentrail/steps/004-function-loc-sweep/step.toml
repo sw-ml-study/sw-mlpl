@@ -1,6 +1,6 @@
 number = 4
 slug = "function-loc-sweep"
-status = "pending"
+status = "in-progress"
 description = """
 Tech-debt saga step 004: Function LOC sweep.
 
