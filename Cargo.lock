@@ -2132,11 +2132,29 @@ dependencies = [
  "mlpl-parser",
  "mlpl-serve",
  "mlpl-wasm",
+ "mlpl-web-lessons",
+ "mlpl-web-path-body",
  "reqwest",
  "serde_json",
  "tokio",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "web-sys",
+ "yew",
+]
+
+[[package]]
+name = "mlpl-web-lessons"
+version = "0.20.0"
+dependencies = [
+ "yew",
+]
+
+[[package]]
+name = "mlpl-web-path-body"
+version = "0.20.0"
+dependencies = [
+ "wasm-bindgen",
  "web-sys",
  "yew",
 ]

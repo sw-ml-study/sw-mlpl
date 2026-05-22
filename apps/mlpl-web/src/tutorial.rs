@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-pub use crate::lessons::LESSONS;
+pub use mlpl_web_lessons::lessons::LESSONS;
 
 pub fn step_lesson(
     lesson: UseStateHandle<Option<usize>>,
@@ -153,7 +153,7 @@ fn render_lesson(props: &TutorialPanelProps) -> Html {
                 <h2>{ lesson.title }</h2>
                 <button class="run-all-btn" onclick={on_run_all} title="Run every example in this lesson, in order">{"Run all"}</button>
             </div>
-            <div class="tutorial-intro">{ crate::intro_md::render(lesson.intro) }</div>
+            <div class="tutorial-intro">{ mlpl_web_lessons::intro_md::render(lesson.intro) }</div>
             <div class="lesson-examples">
                 { for lesson.examples.iter().map(|line| render_example(line, &props.on_run_example)) }
             </div>

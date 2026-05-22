@@ -14,7 +14,7 @@ use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
 
 use crate::glossary_view::find_by_term;
-use crate::path_body::render_body;
+use mlpl_web_path_body::render_body;
 
 #[function_component(GlossaryPopupHost)]
 pub fn glossary_popup_host() -> Html {

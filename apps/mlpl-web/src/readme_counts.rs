@@ -19,7 +19,7 @@
 //! file-LOC budget.
 
 use crate::demos::DEMOS;
-use crate::lessons::LESSONS;
+use mlpl_web_lessons::lessons::LESSONS;
 
 const README: &str = include_str!("../../../README.md");
 const GLOSSARY: &str = include_str!("../../../docs/glossary.md");
