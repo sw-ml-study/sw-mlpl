@@ -10,13 +10,14 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-21 (saga 31 step 004 shipped).
+Last refreshed: 2026-05-22 (saga 31 closed; all nine findings
+#22-#30 shipped).
 
 ## Active saga
 
-| Slug                | Status   | Steps total | Done | Next step                                |
-|---------------------|----------|-------------|------|------------------------------------------|
-| `scripting-cluster` | active   | 8           | 4    | 005 while-break-continue (audit #23) |
+None. Saga 31 (`scripting-cluster`) closed 2026-05-22. The
+next saga has not yet been selected; candidates live in
+`docs/plan.md`'s Breaking-change candidates list.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -27,8 +28,7 @@ human-readable summary.
 |-----------------------|------------|------------------------|---------------------------------------------|
 | `vit` (29)            | shipped    | -- (capability saga)   | Closed 2026-05-20. Archived under `.agentrail-archive/`. |
 | `tier1-cleanup` (30)  | shipped    | #18, #19               | Closed 2026-05-20. Six steps; both findings retired. |
-| `scripting-cluster` (31) | active  | #22, #23, #24, #25, #26, #27, #28, #29, #30 | This saga. 8 steps; turns MLPL into a real scripting language. |
-| Scripting cluster     | proposed   | #22, #24, #26, #28 (+ #23/#25/#27/#29/#30) | The four critical findings ship as one saga; if/else, args(), to_number, print. |
+| `scripting-cluster` (31) | shipped | #22, #23, #24, #25, #26, #27, #28, #29, #30 | Closed 2026-05-22. Eight steps; turned MLPL into a real scripting language (if/else, while/break/continue, args + CLI passthrough + positional script path, to_number / to_int / env, print / eprint, read_stdin / read_stdin_lines, exit + Err-as-exit-1, `#!/usr/bin/env mlpl-repl` shebang support, `demos/classify.mlpl` worked example). |
 | Dim reduction         | proposed   | -- (capability saga)   | `docs/milestone-dimensionality-reduction.md`. UMAP-led. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
@@ -66,11 +66,11 @@ agentrail.
 | #14 | No named-axis types                          | proposed | saga 19 (queued)  |
 | #16 | Model-DSL doesn't cover `take` / `reshape`   | proposed | future            |
 | #17 | Stringly-typed device names                  | proposed | future            |
-| #23 | No `while` / `break` / `continue`            | proposed | scripting saga    |
+| #23 | No `while` / `break` / `continue`            | **shipped** (saga 31 step 005, `5509e72`) | scripting saga    |
 | #25 | No `env()`                                   | **shipped** (saga 31 step 002, `87f4a2b`) | scripting saga    |
-| #27 | No stdin read                                | proposed | scripting saga    |
-| #29 | No script exit code                          | proposed | scripting saga    |
-| #30 | No script-mode example demo                  | proposed | scripting saga    |
+| #27 | No stdin read                                | **shipped** (saga 31 step 006, `24f1a31`) | scripting saga    |
+| #29 | No script exit code                          | **shipped** (saga 31 step 006, `24f1a31`) | scripting saga    |
+| #30 | No script-mode example demo                  | **shipped** (saga 31 step 007, `4a67ae8`) | scripting saga    |
 
 ## Per-finding status (cosmetic)
 
@@ -83,6 +83,44 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-22** -- saga 31 closed (`scripting-cluster`).
+  Eight steps shipped audit findings #22 / #24 / #25 / #26 /
+  #28 (the four critical scripting findings) plus #23 / #27 /
+  #29 / #30 (the nice-to-have block). MLPL now functions as a
+  real scripting language: take CLI args via `args()`, branch
+  on flags via `if / else`, loop via `while / break /
+  continue`, read stdin, parse strings via `to_number /
+  to_int / env`, print via `print / eprint`, control exit via
+  `exit(code)` + automatic `Err(...)` -> exit-1, and run as
+  `#!/usr/bin/env mlpl-repl` shebang executables. Worked
+  example in `demos/classify.mlpl`. See the saga timeline
+  table above for the per-step commit list.
+- **2026-05-22** -- saga 31 step 007: `demos/classify.mlpl`
+  + positional script path shipped (commit `4a67ae8`).
+  Score-classifier worked example exercises every saga 31
+  builtin / form in ~50 lines; positional `mlpl-repl
+  script.mlpl` enables `#!/usr/bin/env mlpl-repl` shebang
+  scripts. 7 demo subprocess tests + 8 positional-path
+  tests. Closes audit #30. sw-checklist held.
+- **2026-05-22** -- saga 31 step 006: stdin / exit / Err
+  propagation shipped (commit `24f1a31`). `read_stdin()` /
+  `read_stdin_lines()` (block until EOF, TTY-refuse via
+  `IsTerminal`); `exit(code)` (validated 0..=255 then
+  `std::process::exit`); `mlpl-repl -f` mode now maps a
+  final `Err(msg)` to exit 1 + stderr. 11 subprocess tests +
+  8 in-process arity / range tests. Refactor: extracted
+  `eval_program.rs` and `script_mode.rs` retired 2
+  pre-existing FAILs. Closes audit findings #27 and #29.
+- **2026-05-22** -- saga 31 step 005: `while` / `break` /
+  `continue` shipped (commit `5509e72`). `while cond {
+  body }` re-evaluates until cond is falsy or break; `break`
+  / `break value` exits the nearest enclosing while; bare
+  `break` yields 0. `continue` skips to the next condition
+  check. Break/continue outside a loop is a runtime error
+  (`LoopControlOutsideLoop`). 15 tests in
+  `while_loop_tests.rs`. Refactor: extracted
+  `crates/mlpl-parser/src/ast_fmt.rs` retired ast.rs 8-fn
+  FAIL. Closes audit #23.
 - **2026-05-21** -- saga 31 step 004: `if cond { then } else
   { else }` expression shipped (commit `29f6d3a`). First surface
   conditional in MLPL; an EXPRESSION (returns a value), not a

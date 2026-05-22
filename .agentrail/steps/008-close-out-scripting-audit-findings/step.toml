@@ -1,6 +1,6 @@
 number = 8
 slug = "close-out-scripting-audit-findings"
-status = "pending"
+status = "in-progress"
 description = "Scripting saga step 008 (FINAL, use --done): close out audit findings #22-#30..."
 role = "production"
 context_files = []

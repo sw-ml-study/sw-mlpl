@@ -12,8 +12,37 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-22
+
+- chore(agentrail): record saga 31 step 007 completion + kickoff step 008
+- saga 31 step 007: classify demo + positional script path
+- chore(agentrail): record saga 31 step 006 completion + kickoff step 007
+- saga 31 step 006: stdin + exit + Err propagation
+- chore(agentrail): record saga 31 step 005 completion + kickoff step 006
+- saga 31 step 005: while + break + continue
+
+## 2026-05-21
+
+- refactor: warning sweep (-5 warnings) + cfg-gate dead consts
+- refactor(eval): split grad.rs -> grad + grad_optim (-2 fails)
+- refactor(eval): begin eval.rs split + retire 1 fail, partial progress
+- chore(agentrail): revise step 005 prompt to refactor-first
+- docs(claude): point ratchet-down work at docs/code_metrics.md
+- chore(agentrail): record saga 31 step 004 + kickoff 005
+- docs(status): record saga 31 step 004 shipped + ratchet-down note
+- feat(parser+eval): if cond { then } else { else } expression (saga 31 step 004, audit #22)
+- chore(agentrail): record saga 31 step 003 + kickoff 004
+- feat(eval): args() + list_get + CLI passthrough (saga 31 step 003, audit #24)
+- chore(agentrail): record saga 31 step 002 + kickoff 003
+- feat(eval): to_number, to_int, env builtins (saga 31 step 002, audit #25 + #26)
+- chore(agentrail): record saga 31 step 001 + kickoff 002
+- feat(eval): print(v) and eprint(v) builtins (saga 31 step 001, audit #28)
+
 ## 2026-05-20
 
+- chore(agentrail): archive saga 30, init saga 31 (scripting-cluster)
+- chore(agentrail): record saga 30 step 006 completion + saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(saga): close out saga 30 -- audit findings #18 and #19 shipped
 - chore(agentrail): record saga 30 step 005 completion + kickoff 006
 - docs(demos): tighten multi-head pets demo strings to concrete accuracy (saga 30 step 005)

@@ -51,15 +51,13 @@ fn render_picker(on_change: &Callback<Option<(Option<usize>, usize)>>) -> Html {
             </button>
         }
     });
+    let intro = "A curated walk through MLPL's lessons, demos, diagrams, and glossary entries. \
+                 Pick a path that matches your goal -- you can change paths at any time, and \
+                 individual surfaces (REPL, Tutorial, Help -> Diagrams) are still browsable on their own.";
     html! {
         <div class="paths-panel">
             <h2 class="paths-heading">{"Learning paths"}</h2>
-            <p class="paths-intro">
-                {"A curated walk through MLPL's lessons, demos, diagrams, and glossary entries. \
-                  Pick a path that matches your goal -- you can change paths at any time, and \
-                  individual surfaces (REPL, Tutorial, Help -> Diagrams) are still browsable \
-                  on their own."}
-            </p>
+            <p class="paths-intro">{ intro }</p>
             <div class="path-cards">{ for cards }</div>
         </div>
     }

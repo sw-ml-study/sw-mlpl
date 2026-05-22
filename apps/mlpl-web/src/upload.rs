@@ -150,8 +150,7 @@ fn decode_image_to_session(
     history: &UseStateHandle<Vec<HistoryEntry>>,
     name: &str,
 ) -> Result<(), JsValue> {
-    let src_w = img.natural_width();
-    let src_h = img.natural_height();
+    let (src_w, src_h) = (img.natural_width(), img.natural_height());
     let document = web_sys::window()
         .ok_or_else(|| JsValue::from_str("no window"))?
         .document()
@@ -167,21 +166,13 @@ fn decode_image_to_session(
         .ok_or_else(|| JsValue::from_str("no 2d context"))?
         .dyn_into()
         .map_err(|_| JsValue::from_str("not 2d context"))?;
-    ctx.draw_image_with_html_image_element_and_dw_and_dh(
-        img,
-        0.0,
-        0.0,
-        f64::from(TARGET_W),
-        f64::from(TARGET_H),
-    )?;
-    let imgdata: ImageData =
-        ctx.get_image_data(0.0, 0.0, f64::from(TARGET_W), f64::from(TARGET_H))?;
+    let (tw, th) = (f64::from(TARGET_W), f64::from(TARGET_H));
+    ctx.draw_image_with_html_image_element_and_dw_and_dh(img, 0.0, 0.0, tw, th)?;
+    let imgdata: ImageData = ctx.get_image_data(0.0, 0.0, tw, th)?;
     let bytes = imgdata.data();
-    let h = TARGET_H as usize;
-    let w = TARGET_W as usize;
+    let (h, w) = (TARGET_H as usize, TARGET_W as usize);
     let mut chw = vec![0.0_f64; 3 * h * w];
-    // bytes is RGBA in row-major HWC. Re-arrange to CHW and
-    // normalize from u8 [0, 255] -> f64 [-1, 1].
+    // bytes is RGBA in row-major HWC. Re-arrange to CHW + normalize u8 [0,255] -> f64 [-1,1].
     for c in 0..3 {
         for y in 0..h {
             for x in 0..w {

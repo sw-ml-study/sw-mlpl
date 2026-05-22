@@ -167,11 +167,12 @@ pub fn inspect_remote(
     session_id: &str,
     token: &str,
 ) -> Result<InspectResponse, ClientError> {
+    let url = format!(
+        "{}/v1/sessions/{session_id}/inspect",
+        base_url.trim_end_matches('/')
+    );
     let resp = client
-        .get(format!(
-            "{}/v1/sessions/{session_id}/inspect",
-            base_url.trim_end_matches('/')
-        ))
+        .get(url)
         .bearer_auth(token)
         .send()
         .map_err(|e| ClientError::Network(e.to_string()))?;

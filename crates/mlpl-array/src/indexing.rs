@@ -67,24 +67,18 @@ impl DenseArray {
             return Err(ArrayError::EmptyArray);
         }
         let dims = self.shape().dims();
-        if index.len() != dims.len() {
-            return Err(ArrayError::RankMismatch {
-                expected: dims.len(),
-                got: index.len(),
-            });
+        let (expected, got) = (dims.len(), index.len());
+        if got != expected {
+            return Err(ArrayError::RankMismatch { expected, got });
         }
         let mut offset = 0;
         let mut stride = self.elem_count();
-        for (axis, (&idx, &dim)) in index.iter().zip(dims.iter()).enumerate() {
-            if idx >= dim {
-                return Err(ArrayError::IndexOutOfBounds {
-                    axis,
-                    index: idx,
-                    size: dim,
-                });
+        for (axis, (&index, &size)) in index.iter().zip(dims.iter()).enumerate() {
+            if index >= size {
+                return Err(ArrayError::IndexOutOfBounds { axis, index, size });
             }
-            stride /= dim;
-            offset += idx * stride;
+            stride /= size;
+            offset += index * stride;
         }
         Ok(offset)
     }
