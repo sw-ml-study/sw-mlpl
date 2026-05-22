@@ -1021,6 +1021,35 @@ This is the scripting saga's looping primitive; combine with
 for fallible inputs, and [[args() builtin]] for CLI-driven
 iteration.
 
+## Script exit codes
+
+In `mlpl-repl -f script.mlpl` mode (saga 31 step 006), the
+process exit code is determined by the script's final value:
+`Err(msg)` exits `1` and writes `msg` to stderr; everything
+else exits `0`. The `exit(code)` builtin short-circuits with
+the caller-chosen code (must be `0..=255`).
+
+This makes MLPL scripts compose with Unix tooling:
+`mlpl-repl -f check.mlpl && echo ok`, `... || echo "exit $?"`,
+`echo input | mlpl-repl -f filter.mlpl`. See also
+[[Stdin reading]], [[Result type]], and the `print` / `eprint`
+builtins for the input/output side.
+
+## Stdin reading
+
+The `read_stdin()` and `read_stdin_lines()` builtins (saga 31
+step 006) consume the script's stdin to EOF. `read_stdin()`
+returns the whole input as a [[Value::Str]]; `read_stdin_lines()`
+splits on `\n` and returns a [[Value::StrList]] with a trailing
+empty entry stripped. Both refuse to read from an interactive
+TTY -- they return `Err("...stdin is a terminal; pipe input or
+use args() instead")` so the REPL doesn't hang on a stray
+`read_stdin()`.
+
+The intended shape is shell pipes: `cat data.txt | mlpl-repl -f
+filter.mlpl`. Combine with [[Script exit codes]] for
+`set -e`-style chained scripts.
+
 ## Instruction tuning
 
 Supervised fine-tuning on (instruction, response) pairs --

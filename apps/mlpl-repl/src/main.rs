@@ -3,6 +3,7 @@ mod connect;
 mod connect_reattach;
 mod connect_repl;
 mod connect_stream;
+mod script_mode;
 mod svg_out;
 mod version;
 
@@ -52,7 +53,8 @@ fn main() {
             eprintln!("error reading {path}: {e}");
             std::process::exit(1);
         });
-        run_script(&content, &mut env, trace_flag, &mut svg_out);
+        let code = script_mode::run_script(&content, &mut env, trace_flag, &mut svg_out);
+        std::process::exit(code);
     } else {
         run_interactive(&mut env, &mut svg_out);
     }
@@ -91,34 +93,6 @@ fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
         }
 
         eval_line(trimmed, env, tracing, &mut last_trace, svg_out);
-    }
-}
-
-fn run_script(content: &str, env: &mut Environment, tracing: bool, svg_out: &mut SvgOut) {
-    // Strip comment-only lines but preserve structure for multi-line constructs
-    let cleaned: Vec<&str> = content
-        .lines()
-        .map(|line| {
-            let trimmed = line.trim();
-            if trimmed.starts_with('#') { "" } else { line }
-        })
-        .collect();
-    let source = cleaned.join("\n");
-    let trimmed = source.trim();
-    if trimmed.is_empty() {
-        return;
-    }
-    for line in content.lines() {
-        let t = line.trim();
-        if !t.is_empty() && !t.starts_with('#') {
-            println!("> {t}");
-        }
-    }
-    let mut last_trace: Option<Trace> = None;
-    eval_line(trimmed, env, tracing, &mut last_trace, svg_out);
-    if let Some(trace) = &last_trace {
-        println!();
-        print_trace_summary(trace);
     }
 }
 
@@ -276,7 +250,7 @@ fn print_help() {
     print!("{HELP_BODY}");
 }
 
-fn print_trace_summary(trace: &Trace) {
+pub(crate) fn print_trace_summary(trace: &Trace) {
     println!("Trace for: {}", trace.source());
     println!("Events: {}", trace.events().len());
     for event in trace.events() {

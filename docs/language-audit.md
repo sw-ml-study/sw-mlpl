@@ -853,6 +853,14 @@ integers. Both Result-typed for the same reason as `env`.
 
 ### 27. No stdin reading
 
+**Status (Saga 31 step 006):** CLOSED. `read_stdin()` and
+`read_stdin_lines()` ship. Both block until EOF; both refuse
+to read from an interactive TTY (return `Err("...stdin is a
+terminal; pipe input or use args() instead")`). The lines
+form strips a trailing empty entry so `"a\nb\n"` and `"a\nb"`
+both yield `["a", "b"]`. See
+`docs/lang-reference.md#scripting`.
+
 **Category:** MISSING **Priority:** nice-to-have
 
 `mlpl-repl -f filter.mlpl < data.txt` discards stdin. A script
@@ -896,6 +904,16 @@ returns unit would break the expression-only language model.
 ---
 
 ### 29. No script exit code / error propagation
+
+**Status (Saga 31 step 006):** CLOSED. `mlpl-repl -f` now
+returns a real exit code:
+- final value `Err(msg)` -> exit 1, with `msg` on stderr
+- final value `Ok(_)` or any non-`Result` value -> exit 0
+- parse / eval error -> exit 1 (existing behavior, now wired
+  through `std::process::exit`)
+- `exit(code)` builtin short-circuits with the chosen code
+  (validated 0..=255). See
+  `docs/lang-reference.md#script-exit-codes`.
 
 **Category:** MISSING **Priority:** nice-to-have
 
