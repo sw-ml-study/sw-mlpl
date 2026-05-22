@@ -1,9 +1,10 @@
 number = 8
 slug = "close-out-scripting-audit-findings"
-status = "in-progress"
+status = "completed"
 description = "Scripting saga step 008 (FINAL, use --done): close out audit findings #22-#30..."
 role = "production"
 context_files = []
 created_at = "2026-05-20T20:22:18"
+completed_at = "2026-05-22T13:32:30"
 task_type = "docs"
-commits = []
+commits = ["b5a0f1c2714b99d62f157b47d2943f7f1ddc9df9"]
