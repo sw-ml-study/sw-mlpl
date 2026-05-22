@@ -17,14 +17,11 @@ use std::cmp::Ordering;
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
-pub(crate) const NAMES: &[&str] = &["pairwise_sqdist", "knn"];
+pub const NAMES: &[&str] = &["pairwise_sqdist", "knn"];
 
-pub(crate) fn try_call(
-    name: &str,
-    args: Vec<DenseArray>,
-) -> Option<Result<DenseArray, RuntimeError>> {
+pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
         "pairwise_sqdist" => Some(builtin_pairwise_sqdist(args)),
         "knn" => Some(builtin_knn(args)),

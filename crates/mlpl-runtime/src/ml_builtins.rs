@@ -2,7 +2,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 pub(crate) const NAMES: &[&str] = &["softmax", "one_hot", "sinusoidal_encoding", "cross_entropy"];
 

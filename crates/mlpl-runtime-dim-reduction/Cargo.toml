@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-runtime-dim-reduction"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Saga 32 step 002: dimensionality-reduction builtins extracted
+# from mlpl-runtime. Self-contained subtree: tsne_* + pca_builtin.
+# Depends on mlpl-array (for DenseArray) and mlpl-runtime-core
+# (for RuntimeError + Xorshift64). Nothing depends back upward
+# from mlpl-runtime-dim-reduction so the dep graph stays a DAG.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-runtime-core = { path = "../mlpl-runtime-core" }

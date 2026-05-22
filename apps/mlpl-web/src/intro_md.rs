@@ -96,16 +96,12 @@ fn inline(text: &str) -> String {
             '&' => out.push_str("&amp;"),
             '*' if chars.peek() == Some(&'*') => {
                 chars.next();
-                let buf = scan_to(&mut chars, '*', true);
-                out.push_str("<strong>");
-                out.push_str(&inline(&buf));
-                out.push_str("</strong>");
+                let inner = inline(&scan_to(&mut chars, '*', true));
+                out.push_str(&format!("<strong>{inner}</strong>"));
             }
             '`' => {
-                let buf = scan_to(&mut chars, '`', false);
-                out.push_str("<code>");
-                out.push_str(&escape_html(&buf));
-                out.push_str("</code>");
+                let inner = escape_html(&scan_to(&mut chars, '`', false));
+                out.push_str(&format!("<code>{inner}</code>"));
             }
             _ => out.push(c),
         }

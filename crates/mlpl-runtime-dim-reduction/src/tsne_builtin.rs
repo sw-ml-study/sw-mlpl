@@ -14,11 +14,11 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
-use crate::prng::Xorshift64;
 use crate::tsne_affinities::compute_p_matrix;
 use crate::tsne_gradient::tsne_step;
 use crate::tsne_validate::{TsneArgs, validate_tsne_args};
+use mlpl_runtime_core::error::RuntimeError;
+use mlpl_runtime_core::prng::Xorshift64;
 
 const EARLY_EXAG: f64 = 4.0;
 const EARLY_EXAG_END: usize = 100;
@@ -26,12 +26,9 @@ const MOMENTUM_SWITCH: usize = 250;
 const MOMENTUM_EARLY: f64 = 0.5;
 const MOMENTUM_LATE: f64 = 0.8;
 
-pub(crate) const NAMES: &[&str] = &["tsne"];
+pub const NAMES: &[&str] = &["tsne"];
 
-pub(crate) fn try_call(
-    name: &str,
-    args: Vec<DenseArray>,
-) -> Option<Result<DenseArray, RuntimeError>> {
+pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
         "tsne" => Some(builtin_tsne(args)),
         _ => None,

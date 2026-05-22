@@ -18,7 +18,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 /// Number of power-iteration steps per component. 50 is
 /// comfortably convergent at the matrix sizes we expect
@@ -26,12 +26,9 @@ use crate::error::RuntimeError;
 /// deterministic and cheap.
 const POWER_ITERS: usize = 50;
 
-pub(crate) const NAMES: &[&str] = &["pca"];
+pub const NAMES: &[&str] = &["pca"];
 
-pub(crate) fn try_call(
-    name: &str,
-    args: Vec<DenseArray>,
-) -> Option<Result<DenseArray, RuntimeError>> {
+pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
         "pca" => Some(builtin_pca(args)),
         _ => None,

@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-runtime-data"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Saga 32 step 002: dataset / grid / embedding builtins
+# extracted from mlpl-runtime. Self-contained subtree:
+# dataset_builtins (uses dataset_validate), grid_builtin,
+# embedding_builtins. Depends on mlpl-array + mlpl-runtime-core
+# only; nothing depends back up the dep graph (DAG).
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-runtime-core = { path = "../mlpl-runtime-core" }

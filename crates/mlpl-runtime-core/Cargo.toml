@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-runtime-core"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Saga 32 step 002: foundation crate for mlpl-runtime split.
+# Hosts the truly leaf modules from mlpl-runtime that have zero
+# inbound or outbound `use` statements -- `RuntimeError` and the
+# `Xorshift64` PRNG. Both mlpl-runtime and its sibling crates
+# (mlpl-runtime-dimred, future mlpl-runtime-* splits) depend on
+# this crate, which keeps the dep graph a DAG.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }

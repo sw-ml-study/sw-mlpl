@@ -11,7 +11,7 @@
 
 use std::time::Duration;
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 const TIMEOUT_SECS: u64 = 120;
 const BODY_PREVIEW_CHARS: usize = 200;

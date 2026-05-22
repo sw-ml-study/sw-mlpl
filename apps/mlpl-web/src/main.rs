@@ -393,21 +393,15 @@ fn render_tutorial(
     on_run_example: Callback<String>,
     on_run_batch: Callback<Vec<String>>,
 ) -> Html {
-    let Some(idx) = cur else {
-        return html! {};
-    };
-    let on_prev = step_lesson(lesson.clone(), -1);
-    let on_next = step_lesson(lesson.clone(), 1);
-    let on_jump = jump_lesson(lesson.clone());
-    let on_close = Callback::from(move |_| lesson.set(None));
+    let Some(idx) = cur else { return html! {} };
     let props = TutorialPanelProps {
         lesson_idx: idx,
-        on_prev,
-        on_next,
-        on_jump,
+        on_prev: step_lesson(lesson.clone(), -1),
+        on_next: step_lesson(lesson.clone(), 1),
+        on_jump: jump_lesson(lesson.clone()),
+        on_close: Callback::from(move |_| lesson.set(None)),
         on_run_example,
         on_run_batch,
-        on_close,
         initial_view,
     };
     html! { <TutorialPanel ..props /> }

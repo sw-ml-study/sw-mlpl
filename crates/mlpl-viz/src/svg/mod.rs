@@ -3,6 +3,7 @@
 mod charts;
 mod decision_boundary;
 mod gallery;
+mod gallery_layout;
 mod heatmap;
 mod heatmap_grid;
 mod scatter;
