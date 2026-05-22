@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 3,
+    "step": "split-mlpl-web"
+  },
+  "action": "git mv'd path_body subdir's 5 files into crates/mlpl-web-path-body/; renamed mod.rs to lib.rs and promoted render_body/render_inline from pub(crate) to pub. Created Cargo.toml with yew+wasm-bindgen+web-sys deps (needed for inline_render's CustomEvent dispatch). Same pattern for mlpl-web-lessons (lessons.rs + lessons_advanced.rs + intro_md.rs); all items already pub. Used sed to bulk-rewrite crate::path_body:: -> mlpl_web_path_body:: and crate::lessons:: -> mlpl_web_lessons::lessons:: across mlpl-web's source files. Dropped the mod declarations from main.rs. Moved 3 lessons (Running on MLX, Connect to remote, Long training live loss) from inline literals to named consts in lessons_advanced.rs to retire the lessons.rs File-LOC FAIL.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T15:52:16"
+}

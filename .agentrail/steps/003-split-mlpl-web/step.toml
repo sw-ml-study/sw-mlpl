@@ -1,6 +1,6 @@
 number = 3
 slug = "split-mlpl-web"
-status = "in-progress"
+status = "completed"
 description = """
 Tech-debt saga step 003: split mlpl-web (29 modules; max 7).
 
@@ -8,5 +8,6 @@ apps/mlpl-web i..."""
 role = "production"
 context_files = []
 created_at = "2026-05-22T14:40:20"
+completed_at = "2026-05-22T15:52:16"
 task_type = "refactor"
-commits = []
+commits = ["cbc25cc105806c97e2ace4530a47f6cf9b306c7d"]
