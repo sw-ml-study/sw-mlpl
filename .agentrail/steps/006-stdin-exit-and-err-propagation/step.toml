@@ -1,6 +1,6 @@
 number = 6
 slug = "stdin-exit-and-err-propagation"
-status = "pending"
+status = "in-progress"
 description = "Scripting saga step 006: add stdin reads, exit code handling, and Err propaga..."
 role = "production"
 context_files = []

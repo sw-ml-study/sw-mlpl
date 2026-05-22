@@ -15,6 +15,8 @@
 //! - `print(v)` / `eprint(v)` (saga 31 step 001)
 //! - `to_number(s)` / `to_int(s)` / `env(name)` (saga 31 step 002)
 //! - `args()` / `list_get(xs, i)` (saga 31 step 003)
+//! - `read_stdin()` / `read_stdin_lines()` / `exit(code)`
+//!   (saga 31 step 006)
 
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
@@ -47,6 +49,9 @@ pub(crate) fn try_intercept(
         )),
         "args" => Some(eval_args(args, env)),
         "list_get" => Some(eval_list_get(args, env, trace)),
+        "read_stdin" => Some(crate::eval_script::eval_read_stdin(args)),
+        "read_stdin_lines" => Some(crate::eval_script::eval_read_stdin_lines(args)),
+        "exit" => Some(crate::eval_script::eval_exit(args, env, trace)),
         _ => None,
     }
 }

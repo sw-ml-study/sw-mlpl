@@ -521,6 +521,31 @@ explicitly on failure via `is_ok` / `unwrap_or` / `err_message`.
 | `env(name)` | 1 | Read the OS environment variable `name`. Returns `Ok(string-value)` if set; `Err("env: NAME not set")` if unset. Pair with `unwrap_or(env(\"VAR\"), \"default\")` for a fallback. |
 | `args()` | 0 | Return a `StrList` of the trailing CLI args passed to the script after the `--` separator (`mlpl-repl -f script.mlpl -- foo bar` makes this `["foo", "bar"]`). Empty list when run from the interactive REPL or the web playground. |
 | `list_get(xs, i)` | 2 | Index into a `StrList` and return the `i`-th string wrapped in `Result`. `Ok(string)` when `i < len(xs)`; `Err("list_get: index N out of bounds (list has M items)")` when out of range. Pair with `unwrap_or(list_get(args(), 0), "default")` for a missing-arg fallback. |
+| `read_stdin()` | 0 | Block until EOF and return all stdin bytes as a `Value::Str`. Refuses to read from an interactive terminal: `Err("read_stdin: stdin is a terminal; pipe input or use args() instead")` when stdin is a TTY. Pair with `print(read_stdin())` in shell pipes like `echo "hello" \| mlpl-repl -f greet.mlpl`. |
+| `read_stdin_lines()` | 0 | Same EOF read as `read_stdin()` but split on `\n` and return a `StrList`. A trailing newline is stripped so `"a\nb\n"` and `"a\nb"` both yield `["a", "b"]`. Combine with `list_get`/`list_len` for line-oriented input processing. |
+| `exit(code)` | 1 | Terminate the script with the given integer exit code. `code` must be in 0..=255; out-of-range or non-integer codes raise an eval error before the exit fires. `exit(0)` is clean; `exit(1)` is the usual "something went wrong" code. Never returns. |
+
+### Script exit codes
+
+In `mlpl-repl -f script.mlpl` mode, the process exit code is
+determined by the script's final expression:
+
+- Final value is `Err(msg)` -> exit code `1`, with `msg` written
+  to stderr.
+- Final value is `Ok(_)` or any non-`Result` value -> exit code `0`.
+- Parse or eval error -> exit code `1`, with the source line and
+  error written to stderr (existing behavior).
+- `exit(code)` short-circuits all of the above and exits with the
+  caller-chosen code.
+
+This lets MLPL scripts compose with Unix tooling:
+
+```sh
+mlpl-repl -f check.mlpl && echo "ok"
+mlpl-repl -f maybe-fail.mlpl || echo "failed: $?"
+echo "1 2 3" | mlpl-repl -f sum-stdin.mlpl
+```
+
 
 ### if / else expression
 

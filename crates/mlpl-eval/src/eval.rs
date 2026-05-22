@@ -1,4 +1,8 @@
-//! AST-walking evaluator.
+//! AST-walking evaluator: `eval_expr` and its big-shape
+//! constructor helpers (`eval_tensor_ctor`, `eval_repeat`,
+//! `eval_train`). The program-level entry points
+//! (`eval_program*` and the `run_program` loop) live in
+//! `eval_program.rs`.
 
 use mlpl_array::{ArrayError, DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
@@ -12,52 +16,6 @@ use crate::eval_ops::{
     labeled_shape_of,
 };
 use crate::value::{Value, value_kind};
-
-/// Evaluate a program (list of statements). Returns the last result as an array.
-///
-/// If the final value is a string, returns `EvalError::ExpectedArray`.
-/// Use `eval_program_value` to handle both arrays and strings.
-pub fn eval_program(stmts: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
-    eval_program_value(stmts, env)?.into_array()
-}
-
-/// Evaluate a program and return the final value (array or string).
-pub fn eval_program_value(stmts: &[Expr], env: &mut Environment) -> Result<Value, EvalError> {
-    run_program(stmts, env, None)
-}
-
-/// Evaluate a program with tracing enabled. Returns the final array.
-pub fn eval_program_traced(
-    stmts: &[Expr],
-    env: &mut Environment,
-    trace: &mut Trace,
-) -> Result<DenseArray, EvalError> {
-    run_program(stmts, env, Some(trace))?.into_array()
-}
-
-fn run_program(
-    stmts: &[Expr],
-    env: &mut Environment,
-    mut trace: Option<&mut Trace>,
-) -> Result<Value, EvalError> {
-    if stmts.is_empty() {
-        return Err(EvalError::EmptyInput);
-    }
-    let mut result = None;
-    for stmt in stmts {
-        result = Some(match eval_expr(stmt, env, &mut trace) {
-            Ok(v) => v,
-            Err(EvalError::BreakSignal(_)) => {
-                return Err(EvalError::LoopControlOutsideLoop { kind: "break" });
-            }
-            Err(EvalError::ContinueSignal) => {
-                return Err(EvalError::LoopControlOutsideLoop { kind: "continue" });
-            }
-            Err(e) => return Err(e),
-        });
-    }
-    result.ok_or(EvalError::EmptyInput)
-}
 
 pub(crate) fn eval_expr(
     expr: &Expr,

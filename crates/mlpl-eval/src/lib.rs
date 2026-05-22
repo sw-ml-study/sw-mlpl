@@ -10,7 +10,9 @@ mod eval_for;
 mod eval_intercepts;
 mod eval_loop;
 mod eval_ops;
+mod eval_program;
 mod eval_reduce;
+mod eval_script;
 mod experiment;
 #[cfg(feature = "image-io")]
 mod fetch_dataset;
@@ -47,7 +49,9 @@ mod value;
 
 pub use env::{Environment, PeerDispatcher, model_params};
 pub use error::EvalError;
-pub use eval::{eval_program, eval_program_traced, eval_program_value};
+pub use eval_program::{
+    eval_program, eval_program_traced, eval_program_value, eval_program_value_traced,
+};
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
 pub use inspect::inspect;
