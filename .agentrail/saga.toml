@@ -1,6 +1,6 @@
 name = "scripting-cluster"
 status = "active"
-current_step = 5
+current_step = 6
 created_at = "2026-05-20T20:19:38"
 plan_file = ".agentrail/plan.md"
 retroactive = false
