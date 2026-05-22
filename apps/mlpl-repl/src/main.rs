@@ -48,7 +48,7 @@ fn main() {
     if let Some(dir) = flag("--exp-dir") {
         env.set_exp_dir(PathBuf::from(dir));
     }
-    if let Some(path) = flag("-f").or_else(|| flag("--file")) {
+    if let Some(path) = script_mode::resolve_script_path(&args, &flag) {
         let content = std::fs::read_to_string(&path).unwrap_or_else(|e| {
             eprintln!("error reading {path}: {e}");
             std::process::exit(1);

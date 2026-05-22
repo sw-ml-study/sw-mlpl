@@ -1,0 +1,76 @@
+# MLPL scripting-cluster end-to-end demo (saga 31 step 007).
+#
+# Exercises every builtin / form from steps 001-006:
+#   - args()                     (step 003)
+#   - list_get / list_len        (step 003)
+#   - to_number / is_ok / unwrap / err_message  (step 002 + 29.012)
+#   - if / else                  (step 004)
+#   - while / break              (step 005)
+#   - print / eprint             (step 001)
+#   - exit / Err-on-final        (step 006)
+#
+# Usage:
+#   mlpl-repl demos/classify.mlpl -- SCORE
+#   mlpl-repl demos/classify.mlpl -- SCORE verbose
+#   ./demos/classify.mlpl 42                # after chmod +x
+#
+# Reads an integer / float "score" 0..100 from the first CLI
+# argument and prints a label:
+#   score >= 70             -> "high"
+#   30 <= score < 70        -> "medium"
+#   score < 30              -> "low"
+# A second argument `verbose` (any value) writes the parsed
+# score to stderr in addition to the label on stdout.
+#
+# No CLI args -> print a usage line + clean exit. (This keeps
+# the demo smoke-test-friendly: the test runner evaluates each
+# demo with empty args() and expects no panic / no exit(2).)
+
+n = list_len(args())
+
+if n - 0 {
+  # Parse the score argument.
+  raw = unwrap_or(list_get(args(), 0), "0")
+  parsed = to_number(raw)
+  if is_ok(parsed) { 0 } else {
+    eprint(err_message(parsed))
+    exit(2)
+  }
+  score = unwrap(parsed)
+
+  # Classify via thresholds. `gt(a, b)` returns 1.0 / 0.0 so
+  # it composes with `if` cleanly.
+  low = 30
+  high = 70
+  code = if gt(score, high) { 2 } else {
+    if gt(score, low) { 1 } else { 0 }
+  }
+
+  # Pick the label string by code via a `while` + `break`
+  # walk over the labels list -- this is contrived for the
+  # 3-element case but demonstrates the loop-with-break form
+  # that real scripts use for unbounded iteration.
+  labels = ["low", "medium", "high"]
+  i = 0
+  result = while gt(list_len(labels), i) {
+    if i - code { 0 } else { break unwrap(list_get(labels, i)) }
+    i = i + 1
+  }
+  print(result)
+
+  # Verbose mode: dump the parsed score to stderr too.
+  if gt(n, 1) {
+    eprint("score:")
+    eprint(score)
+  } else { 0 }
+
+  # Final value is Ok(label) -- exit 0 with the label echoed
+  # as the script's expression value.
+  ok(result)
+} else {
+  # No-args path: print usage and exit cleanly. Returning
+  # ok("no-input") keeps the final value a non-Err Result so
+  # the script exits 0 under saga 31 step 006's contract.
+  print("usage: classify.mlpl -- SCORE [verbose]")
+  ok("no-input")
+}
