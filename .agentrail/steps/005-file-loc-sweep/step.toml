@@ -1,0 +1,12 @@
+number = 5
+slug = "file-loc-sweep"
+status = "pending"
+description = """
+Tech-debt saga step 005: File LOC sweep.
+
+28 File-LOC FAILs at saga start (fi..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T14:40:37"
+task_type = "refactor"
+commits = []
