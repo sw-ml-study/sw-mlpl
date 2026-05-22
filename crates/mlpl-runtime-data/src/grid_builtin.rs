@@ -2,7 +2,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 /// `grid(bounds, n)` returns an `(n*n) x 2` matrix of `(x, y)` points
 /// covering `[xmin, xmax] x [ymin, ymax]`. `bounds` is the length-4

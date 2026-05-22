@@ -2,7 +2,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 /// Every name dispatched by [`try_call`]. Kept in sync with the
 /// `match name { ... }` block by hand -- a coverage test in

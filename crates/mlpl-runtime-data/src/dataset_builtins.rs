@@ -9,10 +9,10 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
-use crate::prng::Xorshift64;
+use mlpl_runtime_core::error::RuntimeError;
+use mlpl_runtime_core::prng::Xorshift64;
 
-pub(crate) const NAMES: &[&str] = &[
+pub const NAMES: &[&str] = &[
     "shuffle",
     "batch",
     "batch_mask",
@@ -23,10 +23,7 @@ pub(crate) const NAMES: &[&str] = &[
 ];
 
 /// Dispatch dataset builtins. Returns None if not matched.
-pub(crate) fn try_call(
-    name: &str,
-    args: Vec<DenseArray>,
-) -> Option<Result<DenseArray, RuntimeError>> {
+pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
         "shuffle" => Some(builtin_shuffle(name, args)),
         "batch" => Some(builtin_batch(name, args, false)),

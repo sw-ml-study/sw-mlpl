@@ -2,8 +2,8 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
 use crate::math_builtins;
+use mlpl_runtime_core::error::RuntimeError;
 
 /// Names dispatched by the `match` block at the bottom of
 /// `call_builtin`. Excludes names handled by the per-module
@@ -53,7 +53,7 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
     if let Some(result) = crate::random_builtins::try_call(name, args.clone()) {
         return result;
     }
-    if let Some(result) = crate::dataset_builtins::try_call(name, args.clone()) {
+    if let Some(result) = mlpl_runtime_data::dataset_builtins::try_call(name, args.clone()) {
         return result;
     }
     if let Some(result) = crate::ml_builtins::try_call(name, args.clone()) {
@@ -62,13 +62,13 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
     if let Some(result) = crate::ensemble_builtins::try_call(name, args.clone()) {
         return result;
     }
-    if let Some(result) = crate::embedding_builtins::try_call(name, args.clone()) {
+    if let Some(result) = mlpl_runtime_data::embedding_builtins::try_call(name, args.clone()) {
         return result;
     }
-    if let Some(result) = crate::tsne_builtin::try_call(name, args.clone()) {
+    if let Some(result) = mlpl_runtime_dim_reduction::tsne_builtin::try_call(name, args.clone()) {
         return result;
     }
-    if let Some(result) = crate::pca_builtin::try_call(name, args.clone()) {
+    if let Some(result) = mlpl_runtime_dim_reduction::pca_builtin::try_call(name, args.clone()) {
         return result;
     }
     match name {
@@ -87,7 +87,7 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
             check_arity!(name, 2, args);
             Ok(args[0].matmul(&args[1])?)
         }
-        "grid" => crate::grid_builtin::builtin_grid(name, args),
+        "grid" => mlpl_runtime_data::grid_builtin::builtin_grid(name, args),
         "patchify" => builtin_patchify(name, args),
         "concat" => builtin_concat(name, args),
         "take" => builtin_take(name, args),

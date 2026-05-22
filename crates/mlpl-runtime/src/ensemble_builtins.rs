@@ -12,7 +12,7 @@ use std::cmp::Ordering;
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 pub(crate) const NAMES: &[&str] = &["argtop_k", "scatter"];
 

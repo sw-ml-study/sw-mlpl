@@ -7,7 +7,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 /// Validated + normalised `tsne` call parameters.
 pub(crate) struct TsneArgs {

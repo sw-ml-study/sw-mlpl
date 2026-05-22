@@ -3,8 +3,8 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::RuntimeError;
-use crate::prng::Xorshift64;
+use mlpl_runtime_core::error::RuntimeError;
+use mlpl_runtime_core::prng::Xorshift64;
 
 pub(crate) const NAMES: &[&str] = &[
     "random", "randn", "blobs", "moons", "circles", "sample", "top_k",

@@ -17,6 +17,7 @@
 
 use mlpl_array::DenseArray;
 
+use super::gallery_layout::{compute_grid_layout, prepare_overlay, validate_gallery_shapes};
 use super::{H, PAD, VizError, W, write_svg_close, write_svg_open};
 
 /// Maximum displayed thumbnail size (in SVG units). The grid
@@ -35,62 +36,29 @@ const MAX_THUMB: f64 = 60.0;
 /// integers separated by `/`; class-name mapping is the
 /// caller's job.
 pub fn render_gallery(data: &DenseArray, overlay: Option<&DenseArray>) -> Result<String, VizError> {
-    let dims = data.shape().dims();
-    if dims.len() != 4 || dims[1] != 3 {
-        return Err(VizError::InvalidShape(format!(
-            "gallery expects [N, 3, H, W] shape, got {dims:?}"
-        )));
-    }
-    let n = dims[0];
-    let src_h = dims[2];
-    let src_w = dims[3];
-    if let Some(ov) = overlay {
-        let od = ov.shape().dims();
-        let ok = match od.len() {
-            1 => od[0] == n,
-            2 => od[0] == n && od[1] <= 4,
-            _ => false,
-        };
-        if !ok {
-            return Err(VizError::InvalidShape(format!(
-                "gallery overlay must be [N] or [N, K<=4] with N={n}, got {od:?}"
-            )));
-        }
-    }
+    let (n, src_h, src_w) = validate_gallery_shapes(data, overlay)?;
     let mut out = String::new();
     write_svg_open(&mut out);
     if n == 0 || src_h == 0 || src_w == 0 {
         write_svg_close(&mut out);
         return Ok(out);
     }
-    let cols = (n as f64).sqrt().ceil() as usize;
-    let rows = n.div_ceil(cols);
-    let cell_w = (W - 2.0 * PAD) / cols as f64;
-    let cell_h = (H - 2.0 * PAD) / rows as f64;
-    let label_reserve = if overlay.is_some() { 14.0 } else { 0.0 };
-    let thumb_size = cell_w.min(cell_h - label_reserve).min(MAX_THUMB);
+    let layout = compute_grid_layout(n, W, H, PAD, MAX_THUMB, overlay.is_some());
+    let thumb_size = layout.thumb_size;
     let (thumb_h_px, thumb_w_px) = (
         src_h.min(thumb_size as usize),
         src_w.min(thumb_size as usize),
     );
     let raw = data.data();
     let stride_n = 3 * src_h * src_w;
-    let (ov_data, ov_cols) = match overlay {
-        Some(ov) => {
-            let cols_per = if ov.shape().dims().len() == 1 {
-                1
-            } else {
-                ov.shape().dims()[1]
-            };
-            (Some(ov.data()), cols_per)
-        }
-        None => (None, 0),
-    };
+    let (ov_data, ov_cols) = prepare_overlay(overlay);
     for idx in 0..n {
-        let col = idx % cols;
-        let row = idx / cols;
-        let cell_x = PAD + cell_w * col as f64 + (cell_w - thumb_size) * 0.5;
-        let cell_y = PAD + cell_h * row as f64 + (cell_h - thumb_size - label_reserve) * 0.5;
+        let col = idx % layout.cols;
+        let row = idx / layout.cols;
+        let cell_x = PAD + layout.cell_w * col as f64 + (layout.cell_w - thumb_size) * 0.5;
+        let cell_y = PAD
+            + layout.cell_h * row as f64
+            + (layout.cell_h - thumb_size - layout.label_reserve) * 0.5;
         let img = &raw[idx * stride_n..(idx + 1) * stride_n];
         render_thumbnail(
             &mut out,

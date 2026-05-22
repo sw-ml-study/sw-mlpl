@@ -4,7 +4,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::error::RuntimeError;
+use mlpl_runtime_core::error::RuntimeError;
 
 /// Validate the args to `shift_pairs_x` / `shift_pairs_y`:
 /// `(ids: rank-1, block_size: scalar > 0)`. Returns
