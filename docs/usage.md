@@ -28,13 +28,20 @@ mlpl> [1, 2, 3] * 10
 
 ### Running Script Files
 
-Save MLPL code in a `.mlpl` file and run it:
+Save MLPL code in a `.mlpl` file and run it. Both forms work:
 
 ```bash
+# Explicit -f flag (back-compat).
 cargo run -p mlpl-repl -- -f demos/basics.mlpl
+
+# Positional path (saga 31 step 007 -- enables `chmod +x` +
+# `#!/usr/bin/env mlpl-repl` shebang scripts).
+cargo run -p mlpl-repl -- demos/basics.mlpl
 ```
 
-The REPL executes each line and prints results.
+The REPL executes each line and prints results. For the
+script-as-tool story (CLI args, stdin, exit codes), see the
+[Scripting in MLPL](#scripting-in-mlpl) section.
 
 ## REPL Commands
 
@@ -264,6 +271,128 @@ repeat 5 {
   total = total + count
 }
 total    # 15
+```
+
+## Scripting in MLPL
+
+MLPL ships with a small set of builtins that turn `.mlpl` files
+into proper Unix scripts (saga 31): output (`print` / `eprint`),
+string parsing (`to_number` / `to_int` / `env`), CLI args
+(`args` / `list_get` / `list_len`), control flow (`if` / `else`,
+`while` / `break` / `continue`), stdin reading (`read_stdin` /
+`read_stdin_lines`), and process control (`exit`, plus
+automatic exit-code propagation when the script's final value
+is `Err(...)`).
+
+### A first script
+
+The `demos/classify.mlpl` walk-through reads a numeric score
+from the first CLI argument and prints a label:
+
+```bash
+mlpl-repl demos/classify.mlpl -- 42         # prints: medium
+mlpl-repl demos/classify.mlpl -- 95         # prints: high
+mlpl-repl demos/classify.mlpl -- 5          # prints: low
+mlpl-repl demos/classify.mlpl -- 77 verbose # prints: high, with score on stderr
+mlpl-repl demos/classify.mlpl -- banana     # exits 2 with parse error on stderr
+mlpl-repl demos/classify.mlpl               # prints usage, exits 0
+```
+
+The script source (`demos/classify.mlpl`) is the canonical
+worked example for the four critical scripting surfaces:
+
+```mlpl
+n = list_len(args())
+if n - 0 {
+  raw = unwrap_or(list_get(args(), 0), "0")
+  parsed = to_number(raw)
+  if is_ok(parsed) { 0 } else {
+    eprint(err_message(parsed))
+    exit(2)
+  }
+  score = unwrap(parsed)
+  code = if gt(score, 70) { 2 } else { if gt(score, 30) { 1 } else { 0 } }
+  labels = ["low", "medium", "high"]
+  i = 0
+  result = while gt(list_len(labels), i) {
+    if i - code { 0 } else { break unwrap(list_get(labels, i)) }
+    i = i + 1
+  }
+  print(result)
+  ok(result)
+} else {
+  print("usage: classify.mlpl -- SCORE [verbose]")
+  ok("no-input")
+}
+```
+
+### The `--` argument separator
+
+Everything after `--` on the command line becomes the script's
+own CLI args, visible via `args()`. This keeps mlpl-repl's
+flags (`-f`, `--trace`, `--svg-out`, ...) cleanly separated
+from the script's:
+
+```bash
+mlpl-repl my_script.mlpl --trace -- foo bar baz
+#                       ^^^^^^^^    ^^^^^^^^^^^
+#                       repl flag    script args -> args() = ["foo", "bar", "baz"]
+```
+
+### Shebang scripts
+
+Because `#` already begins a line comment in MLPL, a leading
+`#!` line is silently skipped by the lexer. Combine that with
+the positional script-path form to get true Unix-style
+executables:
+
+```mlpl
+#!/usr/bin/env mlpl-repl
+print("hello from a shebang script")
+```
+
+```bash
+chmod +x hello.mlpl
+./hello.mlpl              # runs as a normal command
+./hello.mlpl arg1 arg2    # args() = ["arg1", "arg2"]
+```
+
+### Exit codes
+
+`mlpl-repl` in `-f` (or positional-path) mode maps the
+script's final value to a Unix exit code:
+
+| Final value | Exit code | Notes |
+|-------------|-----------|-------|
+| `Ok(_)` | `0` | success |
+| `Err(msg)` | `1` | `msg` written to stderr |
+| any non-`Result` (scalar, vector, etc.) | `0` | success |
+| parse / eval failure | `1` | source line + error written to stderr |
+| `exit(code)` | `code` | short-circuits everything above; `code` must be `0..=255` |
+
+Compose with `&&` / `||` in the shell:
+
+```bash
+mlpl-repl check.mlpl && echo "ok"
+mlpl-repl maybe-fail.mlpl || echo "failed: $?"
+echo "1 2 3" | mlpl-repl sum-stdin.mlpl
+```
+
+### Reading stdin
+
+`read_stdin()` returns all stdin bytes to EOF as a string;
+`read_stdin_lines()` returns a `StrList` (trailing newline
+stripped). Both refuse to read from an interactive terminal --
+they return `Err("...stdin is a terminal; pipe input or use
+args() instead")` so the REPL never hangs on a stray
+`read_stdin()` at the prompt.
+
+```bash
+echo "hello" | mlpl-repl -f greet.mlpl
+# where greet.mlpl is:
+#   text = read_stdin()
+#   print("you said:")
+#   print(text)
 ```
 
 ## Visualizing Data

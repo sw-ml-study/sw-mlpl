@@ -102,3 +102,20 @@ fn report_script_err(input: &str, e: &dyn std::fmt::Display) -> i32 {
     eprintln!("  error: {e}");
     1
 }
+
+/// Pick the script path from CLI args. Priority order: explicit
+/// `-f` / `--file` flag, then a positional path at `args[1]`
+/// (the slot right after the binary name) so shebang
+/// invocations work. Returns `None` for interactive REPL mode.
+///
+/// Saga 31 step 007: positional form is restricted to `args[1]`
+/// so it does not collide with a flag's positional value
+/// (`--svg-out /tmp/out` etc).
+pub(crate) fn resolve_script_path<F>(args: &[String], flag: &F) -> Option<String>
+where
+    F: Fn(&str) -> Option<String>,
+{
+    flag("-f")
+        .or_else(|| flag("--file"))
+        .or_else(|| args.get(1).filter(|a| !a.starts_with('-')).cloned())
+}

@@ -1,6 +1,6 @@
 number = 7
 slug = "classify-demo-and-usage-docs"
-status = "pending"
+status = "in-progress"
 description = "Scripting saga step 007: add demos/classify.mlpl as the end-to-end example, p..."
 role = "production"
 context_files = []
