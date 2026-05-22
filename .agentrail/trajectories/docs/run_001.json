@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 8,
+    "step": "close-out-scripting-audit-findings"
+  },
+  "action": "Looked up step 001-007 commit SHAs via git log filter. Added SHIPPED status headers with commit refs to each finding in language-audit.md. Moved findings to Shipped subsection of plan.md's Breaking-change candidates (collapsed the Critical bullet that referenced the cluster). Updated language-status.md: cleared active saga row, marked saga 31 shipped in timeline, flipped per-finding rows for #23/#27/#29/#30, prepended saga-close + per-step entries to Shipped log. Regenerated CHANGES.md via ./scripts/gen-changes.sh. Tech-debt sweep: retired two 52-LOC FAILs via in-place compression (decode_image_to_session, eval_on_device_handler), tightened 8 26-27 line fns; rustfmt's struct_lit_width default kept reverting struct-literal compressions back to multi-line.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T13:32:30"
+}
