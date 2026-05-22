@@ -153,6 +153,24 @@ pub enum EvalError {
         /// Name of the accessor that was called.
         accessor: &'static str,
     },
+    /// Saga 31 step 005: internal `break value` signal.
+    /// Propagated by `?` out of a `while` body and caught by
+    /// the loop driver. The value is boxed because
+    /// `Value` is a large enum and inlining it inflates
+    /// `Result<_, EvalError>` across the whole crate. If the
+    /// signal escapes a `while` it becomes the
+    /// `break/continue outside of a loop` error surfaced via
+    /// the `LoopControlOutsideLoop` variant below.
+    BreakSignal(Box<crate::value::Value>),
+    /// Saga 31 step 005: internal `continue` signal.
+    ContinueSignal,
+    /// Saga 31 step 005: `break` or `continue` evaluated
+    /// without an enclosing `while` loop to catch the signal.
+    /// `kind` is `"break"` or `"continue"`.
+    LoopControlOutsideLoop {
+        /// Which keyword triggered this: `"break"` or `"continue"`.
+        kind: &'static str,
+    },
 }
 
 impl std::fmt::Display for EvalError {
@@ -231,6 +249,12 @@ impl std::fmt::Display for EvalError {
                 f,
                 "{accessor}: expected a Result value, got {receiver_kind}"
             ),
+            Self::BreakSignal(_) | Self::ContinueSignal => {
+                write!(f, "internal: loop-control signal escaped (bug)")
+            }
+            Self::LoopControlOutsideLoop { kind } => {
+                write!(f, "{kind} used outside of a while loop")
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 //! Lexer and parser for MLPL source code.
 
 mod ast;
+mod ast_fmt;
 mod error;
 mod lex_util;
 mod lexer;

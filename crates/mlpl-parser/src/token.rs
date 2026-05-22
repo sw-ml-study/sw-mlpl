@@ -77,6 +77,15 @@ pub enum TokenKind {
     If,
     /// `else` keyword (Saga 31 step 004). Always paired with `if`.
     Else,
+    /// `while` keyword (Saga 31 step 005). Introduces a `while cond
+    /// { body }` loop. Exits when `cond` is falsy or `break` fires.
+    While,
+    /// `break` keyword (Saga 31 step 005). Exits the nearest
+    /// enclosing `while` loop. Optionally followed by a value.
+    Break,
+    /// `continue` keyword (Saga 31 step 005). Skips the rest of
+    /// the current `while` iteration; cond is re-checked.
+    Continue,
     /// Newline (statement separator).
     Newline,
     /// End of input.

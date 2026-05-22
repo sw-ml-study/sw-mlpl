@@ -1,8 +1,7 @@
 //! AST node types for MLPL.
 //!
 //! These are parser-owned syntax nodes. They do NOT depend on mlpl-array.
-
-use std::fmt;
+//! `Display` impls and rendering helpers live in `ast_fmt.rs`.
 
 use mlpl_core::Span;
 
@@ -198,6 +197,34 @@ pub enum Expr {
         /// Span covering `if` keyword through closing `else { }`.
         span: Span,
     },
+    /// `while cond { body }` loop. Saga 31 step 005. Body
+    /// re-evaluated until `cond` is falsy (zero scalar or `Err`)
+    /// or a `break` is hit. The whole expression evaluates to
+    /// the break value (default `0`) or `0` if the loop exited
+    /// normally. `cond` truthiness uses the same rule as `if`.
+    While {
+        /// Loop condition, re-evaluated each iteration.
+        cond: Box<Expr>,
+        /// Loop body; statements separated by `;` or newline.
+        body: Vec<Expr>,
+        /// Span covering `while` keyword through closing `}`.
+        span: Span,
+    },
+    /// `break` or `break value` -- exits the nearest enclosing
+    /// `while` loop. The optional value becomes the value of the
+    /// `while` expression; with no value the loop yields `0`.
+    Break {
+        /// Optional break value; `None` is equivalent to scalar `0`.
+        value: Option<Box<Expr>>,
+        /// Span of the `break` keyword and (if present) its value.
+        span: Span,
+    },
+    /// `continue` -- skips the rest of the current `while`
+    /// body and re-checks the condition.
+    Continue {
+        /// Span of the `continue` keyword.
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -205,140 +232,24 @@ impl Expr {
     #[must_use]
     pub fn span(&self) -> Span {
         match self {
-            Self::IntLit(_, s)
-            | Self::FloatLit(_, s)
-            | Self::StrLit(_, s)
-            | Self::Ident(_, s)
-            | Self::BuiltinRef(_, s)
-            | Self::ArrayLit(_, s)
-            | Self::BinOp { span: s, .. }
-            | Self::UnaryNeg { span: s, .. }
-            | Self::FnCall { span: s, .. }
-            | Self::Assign { span: s, .. }
-            | Self::TensorCtor { span: s, .. }
-            | Self::Repeat { span: s, .. }
-            | Self::Train { span: s, .. }
-            | Self::For { span: s, .. }
-            | Self::Experiment { span: s, .. }
-            | Self::Device { span: s, .. }
-            | Self::RecordLit { span: s, .. }
-            | Self::FieldAccess { span: s, .. }
-            | Self::If { span: s, .. } => *s,
+            Self::IntLit(_, s) | Self::FloatLit(_, s) | Self::StrLit(_, s) => *s,
+            Self::Ident(_, s) | Self::BuiltinRef(_, s) | Self::ArrayLit(_, s) => *s,
+            Self::BinOp { span, .. }
+            | Self::UnaryNeg { span, .. }
+            | Self::FnCall { span, .. }
+            | Self::Assign { span, .. }
+            | Self::TensorCtor { span, .. }
+            | Self::Repeat { span, .. }
+            | Self::Train { span, .. }
+            | Self::For { span, .. }
+            | Self::Experiment { span, .. }
+            | Self::Device { span, .. }
+            | Self::RecordLit { span, .. }
+            | Self::FieldAccess { span, .. }
+            | Self::If { span, .. }
+            | Self::While { span, .. }
+            | Self::Break { span, .. }
+            | Self::Continue { span } => *span,
         }
     }
-}
-
-impl fmt::Display for BinOpKind {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            Self::Add => "+",
-            Self::Sub => "-",
-            Self::Mul => "*",
-            Self::Div => "/",
-        };
-        write!(f, "{s}")
-    }
-}
-
-impl fmt::Display for TensorCtorKind {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            Self::Param => "param",
-            Self::Tensor => "tensor",
-        };
-        write!(f, "{s}")
-    }
-}
-
-/// Saga R1 step 003: render a body of statements back
-/// to MLPL source for cross-process transmission. Used
-/// when forwarding `device("mlx") { ... }` blocks to a
-/// peer's eval-on-device endpoint.
-fn fmt_comma_seq(f: &mut fmt::Formatter<'_>, exprs: &[Expr]) -> fmt::Result {
-    for (i, e) in exprs.iter().enumerate() {
-        if i > 0 {
-            write!(f, ", ")?;
-        }
-        write!(f, "{e}")?;
-    }
-    Ok(())
-}
-
-fn fmt_scope(f: &mut fmt::Formatter<'_>, head: &dyn fmt::Display, body: &[Expr]) -> fmt::Result {
-    write!(f, "{head} {{ ")?;
-    for (i, e) in body.iter().enumerate() {
-        if i > 0 {
-            write!(f, "; ")?;
-        }
-        write!(f, "{e}")?;
-    }
-    write!(f, " }}")
-}
-
-/// Render a record literal as `{name1: value1, name2: value2}`.
-/// Saga 29 step 001 -- extracted so the `impl Display for Expr`
-/// match stays under the sw-checklist 50-LOC function budget.
-impl fmt::Display for Expr {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::IntLit(n, _) => write!(f, "{n}"),
-            // Round-trip floats by always including a decimal
-            // point so re-parsing picks FloatLit, not IntLit.
-            Self::FloatLit(x, _) if x.fract() == 0.0 && x.is_finite() => write!(f, "{x:.1}"),
-            Self::FloatLit(x, _) => write!(f, "{x}"),
-            Self::StrLit(s, _) => write!(f, "\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\"")),
-            Self::Ident(name, _) => write!(f, "{name}"),
-            Self::BuiltinRef(name, _) => write!(f, ":{name}"),
-            Self::BinOp { op, lhs, rhs, .. } => write!(f, "({lhs} {op} {rhs})"),
-            Self::UnaryNeg { operand, .. } => write!(f, "(-{operand})"),
-            Self::Assign { name, value, .. } => write!(f, "{name} = {value}"),
-            Self::RecordLit { fields, .. } => fmt_record_lit(f, fields),
-            Self::FieldAccess {
-                receiver, field, ..
-            } => write!(f, "{receiver}.{field}"),
-            Self::ArrayLit(elems, _) => write_seq(f, "[", "]", elems),
-            Self::FnCall { name, args, .. } => write_seq(f, &format!("{name}("), ")", args),
-            Self::TensorCtor { kind, shape, .. } => write_seq(f, &format!("{kind}["), "]", shape),
-            Self::Repeat { count, body, .. } => fmt_scope(f, &format_args!("repeat {count}"), body),
-            Self::Train { count, body, .. } => fmt_scope(f, &format_args!("train {count}"), body),
-            Self::For {
-                binding,
-                source,
-                body,
-                ..
-            } => fmt_scope(f, &format_args!("for {binding} in {source}"), body),
-            Self::Experiment { name, body, .. } => {
-                fmt_scope(f, &format_args!("experiment \"{name}\""), body)
-            }
-            Self::Device { target, body, .. } => {
-                fmt_scope(f, &format_args!("device(\"{target}\")"), body)
-            }
-            Self::If {
-                cond,
-                then_body,
-                else_body,
-                ..
-            } => {
-                fmt_scope(f, &format_args!("if {cond}"), then_body)?;
-                fmt_scope(f, &format_args!(" else"), else_body)
-            }
-        }
-    }
-}
-
-fn fmt_record_lit(f: &mut fmt::Formatter<'_>, fields: &[(String, Expr)]) -> fmt::Result {
-    write!(f, "{{")?;
-    for (i, (name, value)) in fields.iter().enumerate() {
-        if i > 0 {
-            write!(f, ", ")?;
-        }
-        write!(f, "{name}: {value}")?;
-    }
-    write!(f, "}}")
-}
-
-fn write_seq(f: &mut fmt::Formatter<'_>, open: &str, close: &str, items: &[Expr]) -> fmt::Result {
-    write!(f, "{open}")?;
-    fmt_comma_seq(f, items)?;
-    write!(f, "{close}")
 }

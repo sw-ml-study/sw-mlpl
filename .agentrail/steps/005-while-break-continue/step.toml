@@ -1,6 +1,6 @@
 number = 5
 slug = "while-break-continue"
-status = "pending"
+status = "in-progress"
 description = """
 Scripting saga step 005: add while + break + continue.
 

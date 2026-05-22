@@ -551,6 +551,45 @@ greeting = if env("USER") { "hello " + name } else { "no user" }
 sign = if x { if x > 0 { 1 } else { -1 } } else { 0 }
 ```
 
+### while / break / continue
+
+`while cond { body }` re-evaluates `body` until `cond` is falsy
+(same truthiness rule as `if`) or `break` fires. The expression
+evaluates to:
+
+- the `break value` if the loop exited via `break value`
+- scalar `0` if the loop exited via bare `break`
+- scalar `0` if the loop exited because `cond` went falsy
+
+`continue` skips the rest of the current iteration; the condition
+is re-checked. `break` and `continue` are only valid inside a
+`while` body -- using either outside raises a runtime error.
+
+```mlpl
+# Count up to 5 (loop value is 0; i ends at 5).
+i = 0
+while i - 5 { i = i + 1 }
+
+# Break with a value.
+first_good = while 1 {
+  x = next()
+  if is_valid(x) { break x } else { 0 }
+}
+
+# Continue skips the s-update for i == 3.
+i = 0
+s = 0
+while i - 5 {
+  i = i + 1
+  if i - 3 { 0 } else { continue }
+  s = s + 1
+}
+```
+
+Loops do not introduce a new scope: assignments in the body
+persist in the surrounding environment, matching `repeat` /
+`train` / `for` semantics.
+
 ## Array Display
 
 Arrays are displayed in a row-major layout:

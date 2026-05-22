@@ -39,6 +39,9 @@ pub(crate) fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::Device => "'device'".into(),
         TokenKind::If => "'if'".into(),
         TokenKind::Else => "'else'".into(),
+        TokenKind::While => "'while'".into(),
+        TokenKind::Break => "'break'".into(),
+        TokenKind::Continue => "'continue'".into(),
     }
 }
 
