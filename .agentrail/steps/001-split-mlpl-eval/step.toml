@@ -1,6 +1,6 @@
 number = 1
 slug = "split-mlpl-eval"
-status = "in-progress"
+status = "completed"
 description = """
 Tech-debt saga step 001: split mlpl-eval crate.
 
@@ -8,5 +8,6 @@ mlpl-eval has 42 modules (ma..."""
 role = "production"
 context_files = []
 created_at = "2026-05-22T14:39:58"
+completed_at = "2026-05-22T15:12:34"
 task_type = "refactor"
-commits = []
+commits = ["e1ec1373b9f325ff3c9cf9c36c454f7211fd7c7a"]
