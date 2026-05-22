@@ -58,7 +58,7 @@ fn render_input_line(input: &str) -> Html {
         Some(c) => html! {
             <span class="line-comment">
                 {" # "}
-                { crate::path_body::render_inline(c) }
+                { mlpl_web_path_body::render_inline(c) }
             </span>
         },
         None => html! {},
@@ -98,7 +98,7 @@ pub(crate) fn render_entry(entry: &HistoryEntry) -> Html {
         return html! {
             <div class="narration">
                 <div class="narration-heading">{ &entry.input }</div>
-                <div class="narration-body">{ crate::path_body::render_body(&entry.output) }</div>
+                <div class="narration-body">{ mlpl_web_path_body::render_body(&entry.output) }</div>
             </div>
         };
     }

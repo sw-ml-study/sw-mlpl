@@ -125,7 +125,7 @@ pub fn glossary_view() -> Html {
         html! {
             <div class={class} id={e.slug.clone()}>
                 <h3>{ &e.term }</h3>
-                <div class="glossary-body">{ crate::path_body::render_body(&e.body) }</div>
+                <div class="glossary-body">{ mlpl_web_path_body::render_body(&e.body) }</div>
             </div>
         }
     });

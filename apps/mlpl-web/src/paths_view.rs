@@ -15,8 +15,8 @@ use yew::prelude::*;
 use crate::demos::DEMOS;
 use crate::diagrams_view::DIAGRAMS;
 use crate::glossary_view::find_by_term;
-use crate::lessons::LESSONS;
 use crate::paths::{PATHS, Step};
+use mlpl_web_lessons::lessons::LESSONS;
 
 #[derive(Properties, PartialEq)]
 pub struct PathsViewProps {
@@ -134,7 +134,7 @@ fn render_step(props: &PathsViewProps, step: &Step) -> Html {
         Step::Glossary { term, why } => {
             let body = match find_by_term(term) {
                 Some(entry) => {
-                    html! { <div class="path-step-preview">{ crate::path_body::render_body(&entry.body) }</div> }
+                    html! { <div class="path-step-preview">{ mlpl_web_path_body::render_body(&entry.body) }</div> }
                 }
                 None => html! {
                     <p class="path-step-error">{ format!("(glossary entry {term:?} not found)") }</p>
@@ -146,7 +146,7 @@ fn render_step(props: &PathsViewProps, step: &Step) -> Html {
             "Note",
             *title,
             None,
-            html! { <div class="path-step-preview">{ crate::path_body::render_body(body) }</div> },
+            html! { <div class="path-step-preview">{ mlpl_web_path_body::render_body(body) }</div> },
         ),
     };
     let why_html = match why_opt {
@@ -192,7 +192,7 @@ fn demo_body(props: &PathsViewProps, name: &'static str) -> Html {
     let label = format!("Run demo \"{name}\" in REPL \u{2192}");
     html! {
         <>
-            <div class="path-step-preview">{ crate::path_body::render_body(demo.intro) }</div>
+            <div class="path-step-preview">{ mlpl_web_path_body::render_body(demo.intro) }</div>
             <button class="path-jump-btn" onclick={on_run}>{ label }</button>
         </>
     }

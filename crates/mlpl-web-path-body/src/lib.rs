@@ -20,7 +20,7 @@ use blocks::Block;
 /// Render `body` as a sequence of `<p>` / `<ul>` / `<ol>`
 /// blocks. Adjacent bullet lines collapse into one list;
 /// blank lines split paragraphs.
-pub(crate) fn render_body(body: &str) -> Html {
+pub fn render_body(body: &str) -> Html {
     let parsed = blocks::parse_blocks(body);
     html! {
         <div class="path-body">
@@ -52,7 +52,7 @@ fn render_block(block: Block) -> Html {
 /// block-level wrapping -- callers that want a paragraph use
 /// `render_body` instead. Used by `entry_render` to put
 /// glossary links inside MLPL `# comment` text.
-pub(crate) fn render_inline(text: &str) -> Html {
+pub fn render_inline(text: &str) -> Html {
     let parts = inline::split(text);
     html! { <>{ for parts.into_iter().map(inline_render::render_span) }</> }
 }
