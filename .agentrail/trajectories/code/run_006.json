@@ -1,0 +1,11 @@
+{
+  "task_type": "code",
+  "state": {
+    "number": 6,
+    "step": "stdin-exit-and-err-propagation"
+  },
+  "action": "RED: subprocess tests in apps/mlpl-repl/tests/stdin_exit_err_tests.rs first (piping stdin via Command::stdin(Stdio::piped()), asserting exit codes via Output::status::code()), plus arity tests in crates/mlpl-eval/tests/. GREEN: new mlpl-eval/src/eval_script.rs module with eval_read_stdin (uses std::io::IsTerminal::is_terminal for TTY refusal), eval_read_stdin_lines (splits on \\n, strips trailing empty), eval_exit (validates 0..=255 before std::process::exit). New pub eval_program_value_traced API on mlpl-eval (existing eval_program_traced returns DenseArray which cannot carry Err Result). REFACTOR: extracted eval_program.rs from eval.rs and script_mode.rs from main.rs to retire 2 pre-existing FAILs in same commit.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T11:32:43"
+}
