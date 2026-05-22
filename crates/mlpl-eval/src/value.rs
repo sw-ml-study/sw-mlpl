@@ -6,8 +6,8 @@ use std::fmt;
 use mlpl_array::DenseArray;
 
 use crate::error::EvalError;
-use crate::model::ModelSpec;
 use crate::tokenizer::TokenizerSpec;
+use mlpl_eval_core::model::ModelSpec;
 
 /// A runtime value: an array, a string, a model, a tokenizer,
 /// or a peer-resident device tensor reference.

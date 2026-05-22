@@ -19,8 +19,8 @@ use mlpl_parser::Expr;
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::model::ModelSpec;
 use crate::value::Value;
+use mlpl_eval_core::model::ModelSpec;
 
 /// `embed_table(model) -> [vocab, d_model]`. Resolves the
 /// argument to a `ModelSpec`, walks the tree depth-first,

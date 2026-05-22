@@ -25,7 +25,7 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
 
 use crate::error::EvalError;
-use crate::model::{ActKind, ModelSpec};
+use mlpl_eval_core::model::{ActKind, ModelSpec};
 
 /// Tape-side analogue of `model_dispatch::apply_model`. Walks the
 /// model and emits the matching primitive ops on the autograd tape.

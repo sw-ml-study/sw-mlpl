@@ -30,7 +30,7 @@ use mlpl_core::{ActivationKind, LossKind, ValueTag};
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::model::{ActKind, ModelSpec};
+use mlpl_eval_core::model::{ActKind, ModelSpec};
 
 /// Inspect the right-hand side of an assignment and return the
 /// `ValueTag` that producer should auto-attach to the binding,

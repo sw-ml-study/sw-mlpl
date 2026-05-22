@@ -67,11 +67,12 @@ pub fn fetch_session_meta(
     session_id: &str,
     token: &str,
 ) -> Result<SessionMeta, ClientError> {
+    let url = format!(
+        "{}/v1/sessions/{session_id}",
+        base_url.trim_end_matches('/')
+    );
     let resp = client
-        .get(format!(
-            "{}/v1/sessions/{session_id}",
-            base_url.trim_end_matches('/')
-        ))
+        .get(url)
         .bearer_auth(token)
         .send()
         .map_err(|e| ClientError::Network(e.to_string()))?;

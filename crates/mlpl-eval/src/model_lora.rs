@@ -20,8 +20,8 @@ use mlpl_parser::Expr;
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::model::ModelSpec;
 use crate::value::Value;
+use mlpl_eval_core::model::ModelSpec;
 
 /// Shared rewrite context threaded through the `LinearLora`
 /// tree walker. `counter` is mutated as each Linear is

@@ -1,4 +1,10 @@
 //! Expression evaluator for MLPL.
+//!
+//! Saga 32 step 001: the leaf modules `model`, `metric_sink`,
+//! and `inspect_groups` have been extracted into the new
+//! `mlpl-eval-core` crate to start the structural paydown of
+//! the 42-module mlpl-eval. This file re-exports them so
+//! downstream `use mlpl_eval::ModelSpec` etc. is unchanged.
 
 mod auto_tag;
 mod bpe;
@@ -24,12 +30,9 @@ mod inspect;
 
 #[cfg(feature = "image-io")]
 pub use image_io::decode_and_resize_u8;
-mod inspect_groups;
 mod interrupt;
 mod llm_dispatch;
 mod loader;
-mod metric_sink;
-mod model;
 mod model_clone;
 mod model_dispatch;
 mod model_embed_table;
@@ -55,9 +58,8 @@ pub use eval_program::{
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
 pub use inspect::inspect;
-pub use inspect_groups::documented_builtin_names;
 pub use interrupt::Interrupt;
-pub use metric_sink::MetricSink;
-pub use model::ModelSpec;
+pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
+pub use mlpl_eval_core::{MetricSink, ModelSpec};
 pub use tokenizer::TokenizerSpec;
 pub use value::{Value, value_kind};
