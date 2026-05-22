@@ -699,6 +699,12 @@ additions.
 
 ### 22. No surface `if` / `else` -- conditionals via arithmetic masks
 
+**Status:** SHIPPED in saga 31 step 004 (commit 29f6d3a).
+`if cond { then } else { else }` is a surface expression
+returning the chosen branch's value. Truthiness: scalar
+non-zero or `Ok(_)`. `else` is required. See
+`docs/lang-reference.md#if--else-expression`.
+
 **Category:** MISSING **Priority:** critical
 
 Comparison builtins (`eq`, `gt`, `lt`) return `0.0` / `1.0`
@@ -739,14 +745,14 @@ masks could be rewritten more readably; not load-bearing.
 
 ### 23. No `while` loop; `repeat N { }` is fixed-count only
 
-**Status (Saga 31 step 005):** CLOSED. `while cond { body }`
-ships with truthiness matching [[If expression]] (scalar
-non-zero or `Ok(_)`). `break` and `break value` exit the
-nearest enclosing `while`; bare `break` yields `0`. `continue`
-skips to the next condition check. Break/continue outside a
-loop is a runtime error. The `break` keyword is scoped to
-`while` only -- `repeat N { }` / `train N { }` / `for x in
-xs { }` keep their fixed-count semantics. See
+**Status:** SHIPPED in saga 31 step 005 (commit 5509e72).
+`while cond { body }` ships with truthiness matching the `if`
+rule (scalar non-zero or `Ok(_)`). `break` and `break value`
+exit the nearest enclosing `while`; bare `break` yields `0`.
+`continue` skips to the next condition check. Break/continue
+outside a loop is a runtime error. The `break` keyword is
+scoped to `while` only -- `repeat N { }` / `train N { }` /
+`for x in xs { }` keep their fixed-count semantics. See
 `docs/lang-reference.md#while--break--continue`.
 
 **Category:** MISSING **Priority:** nice-to-have
@@ -778,6 +784,13 @@ its semantics; users opt in to `while` for adaptive training.
 ---
 
 ### 24. No command-line argument capture in script mode
+
+**Status:** SHIPPED in saga 31 step 003 (commit cbba20a).
+`args()` returns a `StrList` of trailing CLI args after `--`;
+`list_get(xs, i)` reads with bounds-checked Result return.
+`mlpl-repl script.mlpl -- foo bar` plumbs `foo`, `bar` into
+the script. See `docs/lang-reference.md#scripting`.
+
 
 **Category:** MISSING **Priority:** critical
 
@@ -811,6 +824,12 @@ the `--`. Two new builtins + a small CLI parser change.
 
 ### 25. No environment-variable access
 
+**Status:** SHIPPED in saga 31 step 002 (commit 87f4a2b).
+`env(name)` returns `Ok(string-value)` when set, `Err("env:
+NAME not set")` otherwise. Pair with `unwrap_or(env("VAR"),
+"default")` for fallback.
+
+
 **Category:** MISSING **Priority:** nice-to-have
 
 `env("MODEL_PATH")` does not exist. A script that wants to read
@@ -830,6 +849,13 @@ missing-env case.
 ---
 
 ### 26. No string-to-number parsing
+
+**Status:** SHIPPED in saga 31 step 002 (commit 87f4a2b).
+`to_number(s)` returns `Ok(f64)` / `Err("to_number: cannot
+parse ...")`; `to_int(s)` enforces integer with
+`Err("to_int: \"3.5\" is not an integer")`. Whitespace
+trimmed. Both Result-returning so callers branch on failure.
+
 
 **Category:** MISSING **Priority:** critical (blocks #24 alone)
 
@@ -853,13 +879,13 @@ integers. Both Result-typed for the same reason as `env`.
 
 ### 27. No stdin reading
 
-**Status (Saga 31 step 006):** CLOSED. `read_stdin()` and
-`read_stdin_lines()` ship. Both block until EOF; both refuse
-to read from an interactive TTY (return `Err("...stdin is a
-terminal; pipe input or use args() instead")`). The lines
-form strips a trailing empty entry so `"a\nb\n"` and `"a\nb"`
-both yield `["a", "b"]`. See
-`docs/lang-reference.md#scripting`.
+**Status:** SHIPPED in saga 31 step 006 (commit 24f1a31).
+`read_stdin()` and `read_stdin_lines()` ship. Both block
+until EOF; both refuse to read from an interactive TTY
+(return `Err("...stdin is a terminal; pipe input or use
+args() instead")`). The lines form strips a trailing empty
+entry so `"a\nb\n"` and `"a\nb"` both yield `["a", "b"]`.
+See `docs/lang-reference.md#scripting`.
 
 **Category:** MISSING **Priority:** nice-to-have
 
@@ -879,6 +905,14 @@ stdin is a TTY -- a TTY read should not hang the REPL.
 ---
 
 ### 28. No `print` / explicit script output
+
+**Status:** SHIPPED in saga 31 step 001 (commit 4f7f1f2).
+`print(v)` writes the value's display form to stdout +
+newline; `eprint(v)` writes to stderr. Both return their
+argument unchanged so they compose: `x = print(some_value)`
+both binds and shows. Single-arg, function-call form -- fits
+the existing-builtin shape.
+
 
 **Category:** MISSING **Priority:** critical (blocks scripts alone)
 
@@ -905,12 +939,13 @@ returns unit would break the expression-only language model.
 
 ### 29. No script exit code / error propagation
 
-**Status (Saga 31 step 006):** CLOSED. `mlpl-repl -f` now
-returns a real exit code:
+**Status:** SHIPPED in saga 31 step 006 (commit 24f1a31).
+`mlpl-repl -f` (and positional script path) now returns a
+real exit code:
 - final value `Err(msg)` -> exit 1, with `msg` on stderr
 - final value `Ok(_)` or any non-`Result` value -> exit 0
-- parse / eval error -> exit 1 (existing behavior, now wired
-  through `std::process::exit`)
+- parse / eval error -> exit 1 (now wired through
+  `std::process::exit`)
 - `exit(code)` builtin short-circuits with the chosen code
   (validated 0..=255). See
   `docs/lang-reference.md#script-exit-codes`.
@@ -939,6 +974,14 @@ exit codes.
 ---
 
 ### 30. The "script" mental model is unsupported by example demos
+
+**Status:** SHIPPED in saga 31 step 007 (commit 4a67ae8).
+`demos/classify.mlpl` is the canonical scripting walk-through
+-- a ~50-line score-classifier that exercises every saga 31
+builtin / form in one file. `mlpl-repl` also accepts a
+positional script path so `#!/usr/bin/env mlpl-repl` shebang
+scripts work. See `docs/usage.md#scripting-in-mlpl`.
+
 
 **Category:** ANTI-PATTERN **Priority:** nice-to-have
 

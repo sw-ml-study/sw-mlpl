@@ -343,10 +343,8 @@ fn matmul_labels(
     if let (Some(sa), Some(sb)) = (&al[1], &bl[0])
         && sa != sb
     {
-        return Err(ArrayError::LabelMismatch {
-            expected: al.to_vec(),
-            actual: bl.to_vec(),
-        });
+        let (expected, actual) = (al.to_vec(), bl.to_vec());
+        return Err(ArrayError::LabelMismatch { expected, actual });
     }
     let mut result = vec![al[0].clone()];
     if b.rank() == 2 {

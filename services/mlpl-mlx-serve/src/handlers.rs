@@ -114,31 +114,21 @@ pub async fn eval_on_device_handler(
     Json(body): Json<EvalOnDeviceRequest>,
 ) -> Result<Json<EvalOnDeviceResponse>, (StatusCode, Json<ErrorResponse>)> {
     auth_for_session(&state, id, &headers).await?;
+    let bad = |s: String| (StatusCode::BAD_REQUEST, json_err(s));
     let mut sub = Environment::new();
     for binding in &body.bindings {
-        let arr = crate::wire::decode_from_json(&binding.tensor).map_err(|e| {
-            (
-                StatusCode::BAD_REQUEST,
-                json_err(format!("binding {:?}: {e}", binding.name)),
-            )
-        })?;
+        let arr = crate::wire::decode_from_json(&binding.tensor)
+            .map_err(|e| bad(format!("binding {:?}: {e}", binding.name)))?;
         sub.set(binding.name.clone(), arr);
     }
-    let tokens = lex(&body.program)
-        .map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("lex: {e:?}"))))?;
-    let stmts =
-        parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("parse: {e:?}"))))?;
-    let value = eval_program_value(&stmts, &mut sub)
-        .map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
+    let tokens = lex(&body.program).map_err(|e| bad(format!("lex: {e:?}")))?;
+    let stmts = parse(&tokens).map_err(|e| bad(format!("parse: {e:?}")))?;
+    let value = eval_program_value(&stmts, &mut sub).map_err(|e| bad(format!("{e}")))?;
     let payload = match value {
         Value::Array(a) => {
             let shape = a.shape().dims().to_vec();
             let handle = crate::handles::insert(&state.handles, a).await;
-            EvalResultPayload::Tensor {
-                handle: handle.to_string(),
-                shape,
-                device: "mlx",
-            }
+            EvalResultPayload::Tensor { handle: handle.to_string(), shape, device: "mlx" }
         }
         Value::Str(s) => EvalResultPayload::String { value: s },
         Value::Model(_)
@@ -148,12 +138,10 @@ pub async fn eval_on_device_handler(
         | Value::Record { .. }
         | Value::StrList { .. }
         | Value::Result { .. } => {
-            return Err((
-                StatusCode::BAD_REQUEST,
-                json_err(
-                    "eval-on-device blocks must return a tensor or string in R1 \
-                     (got model / tokenizer / device-tensor / builtin-ref / record / string-list / result)",
-                ),
+            return Err(bad(
+                "eval-on-device blocks must return a tensor or string in R1 \
+                 (got model / tokenizer / device-tensor / builtin-ref / record / string-list / result)"
+                    .into(),
             ));
         }
     };

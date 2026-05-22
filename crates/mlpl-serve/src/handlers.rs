@@ -187,23 +187,24 @@ pub async fn cancel_handler(
     Path(id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<Json<CancelResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let entry = {
-        let interrupts = state.interrupts.read().await;
-        interrupts
-            .get(&id)
-            .cloned()
-            .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?
-    };
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(&headers).ok_or((
+    let not_found = || (StatusCode::NOT_FOUND, json_err("unknown session"));
+    let unauthorized = || {
+        (
             StatusCode::UNAUTHORIZED,
             json_err("missing or invalid authorization"),
-        ))?;
+        )
+    };
+    let entry = state
+        .interrupts
+        .read()
+        .await
+        .get(&id)
+        .cloned()
+        .ok_or_else(not_found)?;
+    if state.auth_mode == AuthMode::Required {
+        let provided = extract_bearer(&headers).ok_or_else(unauthorized)?;
         if !check_token(provided, &entry.token) {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                json_err("missing or invalid authorization"),
-            ));
+            return Err(unauthorized());
         }
     }
     entry.interrupt.set();

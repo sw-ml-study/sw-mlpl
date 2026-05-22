@@ -210,7 +210,9 @@ fn install_sigint_cancel(
     token: String,
 ) {
     let last: Arc<Mutex<Option<Instant>>> = Arc::new(Mutex::new(None));
-    let result = ctrlc::set_handler(move || {
+    // A handler may already be installed (e.g. a prior connect session in the same process);
+    // leave it in place if so -- the double-press path still works.
+    let _ = ctrlc::set_handler(move || {
         let mut last_guard = last.lock().expect("sigint state lock");
         let now = Instant::now();
         if should_double_cancel(*last_guard, now, CANCEL_DOUBLE_WINDOW) {
@@ -224,11 +226,6 @@ fn install_sigint_cancel(
             *last_guard = Some(now);
         }
     });
-    if result.is_err() {
-        // A handler is already installed (e.g. a prior connect
-        // session in the same process). Leave it in place; the
-        // double-press path still works.
-    }
 }
 
 /// Returns `Some(rendered_output)` if the input is a

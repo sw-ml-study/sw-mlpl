@@ -424,6 +424,19 @@ Shipped:
   Verified empirically + pinned by a regression test in
   saga 30 step 004 (2026-05-20; commit `66d63c9`).
   `vit_multihead_quick.mlpl` reaches accuracy 1.0.
+- **#22 / #24 / #25 / #26 / #28 + #23 / #27 / #29 / #30
+  Scripting cluster** -- saga 31 (2026-05-20 ... 2026-
+  05-22). The seven feature commits in saga order:
+  `4f7f1f2` (print/eprint, #28), `87f4a2b` (to_number /
+  to_int / env, #25 + #26), `cbba20a` (args + list_get +
+  CLI passthrough, #24), `29f6d3a` (if/else, #22),
+  `5509e72` (while/break/continue, #23), `24f1a31` (stdin
+  + exit + Err propagation, #27 + #29), `4a67ae8`
+  (classify demo + positional script path / shebang
+  support, #30). MLPL scripts now compose with Unix
+  tooling: take args, branch on flags, read stdin, print
+  output, return exit codes, run as `#!/usr/bin/env
+  mlpl-repl` shebang executables.
 
 Critical:
 
@@ -448,19 +461,6 @@ Critical:
   rank-1 int tensor; slice syntax `x[a..b]` parses
   to a contiguous range. Patchify and the multi-head
   reshape dance simplify.
-- **Scripting cluster (#22 + #24 + #26 + #28).**
-  Surface `if cond { } else { }`, capture trailing
-  CLI args via `args()`, add `to_number(s)` /
-  `to_int(s)` string parsing, and add `print(v)` /
-  `eprint(v)`. The four together let MLPL function
-  as a real scripting language (take an image path
-  from `argv`, branch on a flag, print a label).
-  Landing any three without the fourth still leaves
-  users blocked, so treat them as one saga. See
-  audit findings #22-#30 for the full scripting
-  block (also covers `while`, `break`/`continue`,
-  `env()`, stdin, exit codes, and an example demo).
-
 ## Dimensionality-reduction milestone (proposed)
 
 `docs/milestone-dimensionality-reduction.md` is the
