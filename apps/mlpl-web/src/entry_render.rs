@@ -4,8 +4,8 @@
 
 use yew::prelude::*;
 
-use crate::state::{EntryKind, HistoryEntry};
-use crate::summary;
+use mlpl_web_eval::state::{EntryKind, HistoryEntry};
+use mlpl_web_eval::summary;
 
 fn percent_encode(s: &str) -> String {
     let mut out = String::with_capacity(s.len());

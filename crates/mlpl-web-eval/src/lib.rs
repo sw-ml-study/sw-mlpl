@@ -1,0 +1,17 @@
+//! Saga 32 step 004: web-side eval pipeline extracted from
+//! `apps/mlpl-web`.
+//!
+//! Hosts the four eval-shaped modules (eval, eval_url,
+//! eval_wasm, eval_sse) plus shared state (HistoryEntry,
+//! DocTab) and the numeric-output summarizer. All depend
+//! only on external crates (mlpl-wasm, gloo, web-sys,
+//! serde_json, wasm-bindgen-futures) so this crate is a
+//! clean leaf in the dep DAG.
+
+pub mod eval;
+pub mod eval_sse;
+pub mod eval_url;
+pub mod eval_wasm;
+pub mod state;
+pub mod summary;
+mod summary_stats;

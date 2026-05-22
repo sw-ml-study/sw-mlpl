@@ -20,6 +20,7 @@ mod eval_program;
 mod eval_reduce;
 mod eval_script;
 mod experiment;
+mod experiment_compare;
 #[cfg(feature = "image-io")]
 mod fetch_dataset;
 mod grad;

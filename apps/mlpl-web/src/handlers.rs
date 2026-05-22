@@ -7,8 +7,8 @@ use yew::prelude::*;
 
 use crate::demos::DEMOS;
 use crate::help::help_text;
-use crate::state::{EntryKind, HistoryEntry};
 use crate::upload::PendingUploadName;
+use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
 pub fn toggle_bool(handle: UseStateHandle<bool>, value: bool) -> Callback<web_sys::MouseEvent> {
     Callback::from(move |_| handle.set(value))

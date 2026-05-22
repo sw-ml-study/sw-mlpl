@@ -331,7 +331,7 @@ pub(crate) fn eval_expr(
     if let Expr::FnCall { name, args, .. } = expr
         && name == "compare"
     {
-        return crate::experiment::dispatch_compare(args, env);
+        return crate::experiment_compare::dispatch_compare(args, env);
     }
     if let Expr::FnCall { name, args, .. } = expr
         && (name == "load" || name == "load_preloaded")

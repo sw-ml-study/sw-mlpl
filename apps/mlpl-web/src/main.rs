@@ -11,11 +11,6 @@ mod components;
 mod demos;
 mod diagrams_view;
 mod entry_render;
-mod eval;
-mod eval_sse;
-mod eval_url;
-#[cfg(target_arch = "wasm32")]
-mod eval_wasm;
 mod glossary_popup;
 mod glossary_view;
 mod handlers;
@@ -24,8 +19,6 @@ mod paths;
 mod paths_view;
 #[cfg(test)]
 mod readme_counts;
-mod state;
-mod summary;
 mod tutorial;
 mod upload;
 mod upload_cmd;
@@ -40,7 +33,7 @@ use handlers::{
     make_submit_batch, toggle_bool,
 };
 use mlpl_wasm::WasmSession;
-use state::HistoryEntry;
+use mlpl_web_eval::state::HistoryEntry;
 use tutorial::{jump_lesson, run_example, step_lesson};
 use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
@@ -63,7 +56,7 @@ fn app() -> Html {
     // exercise the REST path end-to-end against an in-process
     // `mlpl-serve`.
     #[cfg(target_arch = "wasm32")]
-    if let Some(url) = eval::current_connect_url_from_window() {
+    if let Some(url) = mlpl_web_eval::eval::current_connect_url_from_window() {
         web_sys::console::log_1(
             &format!("[mlpl-web] ?connect={url} parsed (wiring in step 007)").into(),
         );
