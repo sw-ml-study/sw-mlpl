@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 4,
+    "step": "function-loc-sweep"
+  },
+  "action": "Created mlpl-web-eval skeleton (Cargo.toml with all needed external deps: mlpl-wasm, gloo, serde, serde_json, wasm-bindgen-futures, web-sys; plus reqwest on native test target). git mv'd 6 source files. Promoted render_body/render_inline pub. Split summary.rs three ways: orchestrator (3 fns), stats (5 fns), tests (moved to tests/ dir). Discovered + fixed orphan cfg attribute bug. Updated test files' #[path] attributes to point at the new crate location. Then split experiment_compare from experiment.rs to retire experiment's fn-count FAIL.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T16:17:00"
+}
