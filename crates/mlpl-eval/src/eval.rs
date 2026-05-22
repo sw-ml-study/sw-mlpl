@@ -45,7 +45,16 @@ fn run_program(
     }
     let mut result = None;
     for stmt in stmts {
-        result = Some(eval_expr(stmt, env, &mut trace)?);
+        result = Some(match eval_expr(stmt, env, &mut trace) {
+            Ok(v) => v,
+            Err(EvalError::BreakSignal(_)) => {
+                return Err(EvalError::LoopControlOutsideLoop { kind: "break" });
+            }
+            Err(EvalError::ContinueSignal) => {
+                return Err(EvalError::LoopControlOutsideLoop { kind: "continue" });
+            }
+            Err(e) => return Err(e),
+        });
     }
     result.ok_or(EvalError::EmptyInput)
 }
@@ -626,6 +635,19 @@ pub(crate) fn eval_expr(
         }
         return Ok(last);
     }
+    if let Expr::While { cond, body, .. } = expr {
+        return crate::eval_loop::eval_while(cond, body, env, trace);
+    }
+    if let Expr::Break { value, .. } = expr {
+        let v = match value {
+            Some(inner) => eval_expr(inner, env, trace)?,
+            None => Value::Array(DenseArray::from_scalar(0.0)),
+        };
+        return Err(EvalError::BreakSignal(Box::new(v)));
+    }
+    if matches!(expr, Expr::Continue { .. }) {
+        return Err(EvalError::ContinueSignal);
+    }
     let (op_name, inputs, result) = match expr {
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),
         Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
@@ -723,7 +745,12 @@ pub(crate) fn eval_expr(
         // Saga 29 step 001: RecordLit and FieldAccess are dispatched
         // by the early-return `if let` block at the head of
         // `eval_expr`. Saga 31 step 004: If is also early-return.
-        Expr::RecordLit { .. } | Expr::FieldAccess { .. } | Expr::If { .. } => unreachable!(),
+        Expr::RecordLit { .. }
+        | Expr::FieldAccess { .. }
+        | Expr::If { .. }
+        | Expr::While { .. }
+        | Expr::Break { .. }
+        | Expr::Continue { .. } => unreachable!(),
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;

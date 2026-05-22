@@ -23,6 +23,29 @@ pub(crate) struct Parser<'a> {
     pub(crate) pos: usize,
 }
 
+/// True if `kind` could start a fresh expression. Used by
+/// `break` to decide whether a value follows or the break is
+/// bare. The list is conservative: everything that can begin
+/// an atom (literal, identifier, prefix op, opening delimiter,
+/// keyword-headed expr like `if`) returns true; statement
+/// terminators (`;`, newline, `}`, `)`, EOF, comma) and trailing
+/// keywords (`else`) return false.
+fn can_start_expr(kind: Option<&TokenKind>) -> bool {
+    !matches!(
+        kind,
+        None | Some(
+            TokenKind::Semicolon
+                | TokenKind::Newline
+                | TokenKind::RBrace
+                | TokenKind::RParen
+                | TokenKind::RBracket
+                | TokenKind::Comma
+                | TokenKind::Else
+                | TokenKind::Eof,
+        )
+    )
+}
+
 impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
     pub(crate) fn parse_statement(&mut self) -> Result<Expr, ParseError> {
@@ -215,6 +238,38 @@ impl<'a> Parser<'a> {
             }
             TokenKind::Device => self.parse_device(),
             TokenKind::If => self.parse_if(),
+            TokenKind::While => {
+                let start = self.tokens[self.pos].span;
+                self.pos += 1;
+                let cond = self.parse_expr(0)?;
+                let (body, end) = self.parse_braced_body()?;
+                Ok(Expr::While {
+                    cond: Box::new(cond),
+                    body,
+                    span: Span::new(start.start, end.end),
+                })
+            }
+            TokenKind::Continue => {
+                let span = self.tokens[self.pos].span;
+                self.pos += 1;
+                Ok(Expr::Continue { span })
+            }
+            TokenKind::Break => {
+                let start = self.tokens[self.pos].span;
+                self.pos += 1;
+                let value = if can_start_expr(self.tokens.get(self.pos).map(|t| &t.kind)) {
+                    let v = self.parse_expr(0)?;
+                    let end = v.span().end;
+                    Some((Box::new(v), end))
+                } else {
+                    None
+                };
+                let end = value.as_ref().map_or(start.end, |(_, e)| *e);
+                Ok(Expr::Break {
+                    value: value.map(|(v, _)| v),
+                    span: Span::new(start.start, end),
+                })
+            }
             _ => Err(ParseError::UnexpectedToken {
                 found: describe_kind(&tok.kind),
                 span: tok.span,

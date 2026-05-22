@@ -739,6 +739,16 @@ masks could be rewritten more readably; not load-bearing.
 
 ### 23. No `while` loop; `repeat N { }` is fixed-count only
 
+**Status (Saga 31 step 005):** CLOSED. `while cond { body }`
+ships with truthiness matching [[If expression]] (scalar
+non-zero or `Ok(_)`). `break` and `break value` exit the
+nearest enclosing `while`; bare `break` yields `0`. `continue`
+skips to the next condition check. Break/continue outside a
+loop is a runtime error. The `break` keyword is scoped to
+`while` only -- `repeat N { }` / `train N { }` / `for x in
+xs { }` keep their fixed-count semantics. See
+`docs/lang-reference.md#while--break--continue`.
+
 **Category:** MISSING **Priority:** nice-to-have
 
 `repeat N { body }`, `train N { body }`, and `for x in source { body }`

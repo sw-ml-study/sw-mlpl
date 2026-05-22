@@ -131,6 +131,9 @@ impl<'a> Lexer<'a> {
             "device" => TokenKind::Device,
             "if" => TokenKind::If,
             "else" => TokenKind::Else,
+            "while" => TokenKind::While,
+            "break" => TokenKind::Break,
+            "continue" => TokenKind::Continue,
             _ => TokenKind::Ident(name),
         };
         self.prev_was_value = matches!(kind, TokenKind::Ident(_));

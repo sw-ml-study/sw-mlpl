@@ -98,20 +98,17 @@ pub async fn attach_viz(store: &SharedVizStore, value: &str, kind: &str) -> Atta
         .chars()
         .take(HASH_PREFIX_LEN)
         .collect();
-    store.entries.write().await.insert(
-        hex.clone(),
-        StoredEntry {
-            bytes: value.as_bytes().to_vec(),
-            content_type: "image/svg+xml".into(),
-        },
-    );
-    let url = format!("/v1/viz/{hex}");
+    let entry = StoredEntry {
+        bytes: value.as_bytes().to_vec(),
+        content_type: "image/svg+xml".into(),
+    };
+    store.entries.write().await.insert(hex.clone(), entry);
     let local_path = std::env::var("MLPL_CACHE_DIR")
         .ok()
         .and_then(|dir| mlpl_cli::viz_cache::write_to_cache(value, Path::new(&dir)).ok())
         .map(|p| p.display().to_string());
     AttachedViz {
-        url: Some(url),
+        url: Some(format!("/v1/viz/{hex}")),
         local_path,
     }
 }

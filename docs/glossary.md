@@ -994,6 +994,33 @@ is the branch value), same convention as `repeat` / `train` /
 `for` blocks. Either branch can return any `Value` type --
 strings, vectors, Records, Results -- not just scalars.
 
+## While loop
+
+`while cond { body }` re-evaluates `body` until `cond` is
+falsy (saga 31 step 005). Truthiness matches [[If expression]]
+-- scalar non-zero or `Ok(_)`. The loop expression evaluates
+to scalar `0` on normal exit, or to the `break value` if the
+body exited via `break value`.
+
+`break` and `continue` are the loop-control keywords:
+
+- `break` exits the nearest enclosing `while` immediately.
+  Bare `break` yields `0`; `break value` yields the supplied
+  value (any [[Value type]]).
+- `continue` skips the rest of the current iteration; the
+  condition is re-checked from the top.
+
+Using `break` or `continue` outside a `while` is a runtime
+error (`break used outside of a while loop`). Loops do NOT
+introduce a new variable scope -- assignments in the body
+persist into the surrounding environment, matching the
+`repeat` / `train` / `for` convention.
+
+This is the scripting saga's looping primitive; combine with
+[[If expression]] for conditional break-out, [[Result type]]
+for fallible inputs, and [[args() builtin]] for CLI-driven
+iteration.
+
 ## Instruction tuning
 
 Supervised fine-tuning on (instruction, response) pairs --
