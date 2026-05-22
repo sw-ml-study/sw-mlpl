@@ -1,6 +1,6 @@
 number = 5
 slug = "while-break-continue"
-status = "in-progress"
+status = "completed"
 description = """
 Scripting saga step 005: add while + break + continue.
 
@@ -9,5 +9,6 @@ Surface forms:
 role = "production"
 context_files = []
 created_at = "2026-05-20T20:21:06"
+completed_at = "2026-05-22T10:31:53"
 task_type = "code"
-commits = []
+commits = ["5509e726819c553cd796f9b051f9a4dc2021100d"]
