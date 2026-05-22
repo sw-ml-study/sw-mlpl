@@ -1,0 +1,16 @@
+[package]
+name = "mlpl-eval-core"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Foundational eval-time types extracted from mlpl-eval (saga 32
+# step 001 / 2026-05-22). Hosts ModelSpec, MetricSink trait, and
+# the curated builtin-groups table. Future steps will move
+# EvalError, Value, and Environment here once their cross-deps
+# (BreakSignal payload, Value::Model variant) are untangled. This
+# crate is the "core types" layer the rest of mlpl-eval and its
+# planned sibling crates (mlpl-eval-model, mlpl-eval-grad,
+# mlpl-eval-data) all depend on.
+
+[dependencies]

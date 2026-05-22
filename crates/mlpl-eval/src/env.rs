@@ -11,10 +11,10 @@ use crate::error::EvalError;
 use crate::experiment::ExperimentRecord;
 use crate::grad::OptimizerState;
 use crate::interrupt::Interrupt;
-use crate::metric_sink::MetricSink;
-use crate::model::ModelSpec;
 use crate::tokenizer::TokenizerSpec;
 use crate::value::Value;
+use mlpl_eval_core::metric_sink::MetricSink;
+use mlpl_eval_core::model::ModelSpec;
 
 /// Orchestrator hook for remote device peers. Implemented by
 /// `mlpl-serve`; absent in local REPL / web eval, where device blocks

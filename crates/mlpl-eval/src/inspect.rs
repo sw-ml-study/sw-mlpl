@@ -12,8 +12,8 @@ use mlpl_array::DenseArray;
 use mlpl_core::LabeledShape;
 
 use crate::env::Environment;
-use crate::inspect_groups::BUILTIN_GROUPS;
-use crate::model::{ActKind, ModelSpec};
+use mlpl_eval_core::inspect_groups::BUILTIN_GROUPS;
+use mlpl_eval_core::model::{ActKind, ModelSpec};
 
 /// If `input` is a recognized introspection command, returns the
 /// rendered output. Returns `None` when the command is not one of

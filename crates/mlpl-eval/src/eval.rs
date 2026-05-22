@@ -212,7 +212,9 @@ pub(crate) fn eval_expr(
                 got: args.len(),
             });
         }
-        return Ok(Value::Model(crate::model::ModelSpec::Activation(kind)));
+        return Ok(Value::Model(mlpl_eval_core::model::ModelSpec::Activation(
+            kind,
+        )));
     }
     if let Expr::FnCall { name, args, .. } = expr
         && name == "apply"

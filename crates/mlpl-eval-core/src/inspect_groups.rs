@@ -15,11 +15,13 @@
 
 /// `(name, signature, one-line doc)` row used by both the grouped
 /// `:fns` listing and the flat `:describe <builtin>` lookup.
-pub(crate) type FnEntry = (&'static str, &'static str, &'static str);
+pub type FnEntry = (&'static str, &'static str, &'static str);
 /// `(group_label, entries)` used by `:fns`.
-pub(crate) type FnGroup = (&'static str, &'static [FnEntry]);
+pub type FnGroup = (&'static str, &'static [FnEntry]);
 
-pub(crate) const BUILTIN_GROUPS: &[FnGroup] = &[
+/// Curated grouped builtin table, consumed by `inspect.rs` in
+/// the parent `mlpl-eval` crate to render `:builtins` / `:fns`.
+pub const BUILTIN_GROUPS: &[FnGroup] = &[
     (
         "Array",
         &[

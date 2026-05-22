@@ -14,7 +14,7 @@ use mlpl_parser::Expr;
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::model::ModelSpec;
+use mlpl_eval_core::model::ModelSpec;
 
 const FAMILIES: &[&str] = &["all_layers", "attention_only", "mlp_only", "embed_and_head"];
 

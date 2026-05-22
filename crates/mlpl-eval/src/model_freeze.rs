@@ -14,8 +14,8 @@ use mlpl_parser::Expr;
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::model::ModelSpec;
 use crate::value::Value;
+use mlpl_eval_core::model::ModelSpec;
 
 /// `freeze(m)` -- mark every parameter of `m` as frozen.
 pub(crate) fn eval_freeze(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {

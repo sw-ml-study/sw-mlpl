@@ -12,8 +12,8 @@ use mlpl_trace::Trace;
 
 use crate::env::Environment;
 use crate::error::EvalError;
-use crate::model::{ActKind, ModelSpec};
 use crate::value::Value;
+use mlpl_eval_core::model::{ActKind, ModelSpec};
 
 /// `linear(in_dim, out_dim, seed)`.
 pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
@@ -496,28 +496,30 @@ fn apply_linear_lora(
 fn tokens_to_onehot(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, EvalError> {
     let dims = tokens.shape().dims();
     if dims.len() != 1 {
-        return Err(EvalError::Unsupported(format!(
-            "embed: tokens must be a 1-D [N] array, got shape {dims:?}"
-        )));
+        let msg = format!("embed: tokens must be a 1-D [N] array, got shape {dims:?}");
+        return Err(EvalError::Unsupported(msg));
     }
     let n = dims[0];
     let mut data = vec![0.0_f64; n * vocab];
     for (row, &id_f) in tokens.data().iter().enumerate() {
-        if !id_f.is_finite() || id_f < 0.0 || id_f.fract() != 0.0 {
-            return Err(EvalError::Unsupported(format!(
-                "embed: token at position {row} = {id_f} is not a non-negative integer"
-            )));
-        }
-        let id = id_f as usize;
-        if id >= vocab {
-            return Err(EvalError::Unsupported(format!(
-                "embed: token at position {row} = {id} out of vocab range [0, {vocab})"
-            )));
-        }
+        let id = validate_token_id(row, id_f, vocab)?;
         data[row * vocab + id] = 1.0;
     }
     DenseArray::new(Shape::new(vec![n, vocab]), data)
         .map_err(|e| EvalError::Unsupported(format!("embed: one-hot construction failed: {e}")))
+}
+
+fn validate_token_id(row: usize, id_f: f64, vocab: usize) -> Result<usize, EvalError> {
+    if !id_f.is_finite() || id_f < 0.0 || id_f.fract() != 0.0 {
+        let msg = format!("embed: token at position {row} = {id_f} is not a non-negative integer");
+        return Err(EvalError::Unsupported(msg));
+    }
+    let id = id_f as usize;
+    if id >= vocab {
+        let msg = format!("embed: token at position {row} = {id} out of vocab range [0, {vocab})");
+        return Err(EvalError::Unsupported(msg));
+    }
+    Ok(id)
 }
 
 /// Bundle of `Attention` layer parameters threaded through
@@ -789,28 +791,10 @@ fn compute_attn_weights(
 ) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
     // Saga 29 step 008 + step 013: rank-3 [B, T, d_model] is
-    // looped per batch. For heads=1 the per-batch weights are
-    // [T, T]; for heads>1 they are [heads, T, T]. The outer
-    // batch dim is prepended, giving [B, T, T] or
-    // [B, heads, T, T].
+    // looped per batch via `batched_attn_weights`. Rank-2 is
+    // the base case handled below.
     if dims.len() == 3 && dims[2] == d_model {
-        let (batch, t) = (dims[0], dims[1]);
-        let inner_shape = if heads == 1 {
-            vec![t, t]
-        } else {
-            vec![heads, t, t]
-        };
-        let inner_elems: usize = inner_shape.iter().product();
-        let mut data = Vec::with_capacity(batch * inner_elems);
-        for b in 0..batch {
-            let x_b = x.take(0, b)?;
-            data.extend_from_slice(
-                compute_attn_weights(&x_b, wq, wk, d_model, heads, causal, env)?.data(),
-            );
-        }
-        let mut out_shape = vec![batch];
-        out_shape.extend(inner_shape);
-        return Ok(DenseArray::new(Shape::new(out_shape), data)?);
+        return batched_attn_weights(x, wq, wk, d_model, heads, causal, env);
     }
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(
@@ -840,6 +824,37 @@ fn compute_attn_weights(
         vec![heads, seq, seq]
     };
     Ok(DenseArray::new(Shape::new(shape), all)?)
+}
+
+/// Rank-3 [B, T, d_model] attention-weights driver: walks the
+/// outer batch dim and concatenates each batch element's
+/// rank-2 attention weights. For heads=1 the per-batch shape is
+/// [T, T]; heads>1 yields [heads, T, T]. The batch dim is
+/// prepended, giving [B, T, T] or [B, heads, T, T].
+fn batched_attn_weights(
+    x: &DenseArray,
+    wq: &str,
+    wk: &str,
+    d_model: usize,
+    heads: usize,
+    causal: bool,
+    env: &Environment,
+) -> Result<DenseArray, EvalError> {
+    let dims = x.shape().dims();
+    let (batch, t) = (dims[0], dims[1]);
+    let inner_shape: Vec<usize> = if heads == 1 {
+        vec![t, t]
+    } else {
+        vec![heads, t, t]
+    };
+    let mut data = Vec::with_capacity(batch * inner_shape.iter().product::<usize>());
+    for b in 0..batch {
+        let x_b = x.take(0, b)?;
+        let w_b = compute_attn_weights(&x_b, wq, wk, d_model, heads, causal, env)?;
+        data.extend_from_slice(w_b.data());
+    }
+    let out_shape = std::iter::once(batch).chain(inner_shape).collect();
+    Ok(DenseArray::new(Shape::new(out_shape), data)?)
 }
 
 // Tape lowering of the model DSL lives in `crate::model_tape`; the

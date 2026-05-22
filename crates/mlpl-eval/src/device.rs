@@ -425,7 +425,7 @@ pub(crate) fn eval_to_device(
         if is_model {
             let params: Vec<String> = env
                 .get_model(name)
-                .map(crate::model::ModelSpec::params)
+                .map(mlpl_eval_core::model::ModelSpec::params)
                 .unwrap_or_default();
             for p in params {
                 env.set_tensor_device(p, target.clone());

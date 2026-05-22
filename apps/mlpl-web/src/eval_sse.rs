@@ -22,14 +22,11 @@ use crate::eval::{MetricCb, RemoteMetric, StreamOutcome};
 pub fn parse_sse_stream<R: std::io::BufRead>(reader: R, on_metric: &mut MetricCb) -> StreamOutcome {
     let mut event: Option<String> = None;
     let mut data: Option<String> = None;
+    let err_outcome = |message: String| StreamOutcome::Error { message };
     for line in reader.lines() {
         let line = match line {
             Ok(l) => l,
-            Err(e) => {
-                return StreamOutcome::Error {
-                    message: format!("stream read: {e}"),
-                };
-            }
+            Err(e) => return err_outcome(format!("stream read: {e}")),
         };
         if line.is_empty() {
             if let Some(outcome) = dispatch_sse_frame(event.take(), data.take(), on_metric) {
@@ -41,9 +38,7 @@ pub fn parse_sse_stream<R: std::io::BufRead>(reader: R, on_metric: &mut MetricCb
             data = Some(rest.trim().to_string());
         }
     }
-    StreamOutcome::Error {
-        message: "stream ended without terminal frame".into(),
-    }
+    err_outcome("stream ended without terminal frame".into())
 }
 
 fn dispatch_sse_frame(

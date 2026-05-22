@@ -17,6 +17,7 @@ members = [
   "crates/mlpl-parity-tests",
   "crates/mlpl-parser",
   "crates/mlpl-runtime",
+  "crates/mlpl-eval-core",
   "crates/mlpl-eval",
   "crates/mlpl-trace",
   "crates/mlpl-viz",

@@ -1917,6 +1917,7 @@ dependencies = [
  "mlpl-array",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-eval-core",
  "mlpl-lower-rs",
  "mlpl-mlx-rt",
  "mlpl-parser",
@@ -1931,6 +1932,10 @@ dependencies = [
  "tar",
  "ureq",
 ]
+
+[[package]]
+name = "mlpl-eval-core"
+version = "0.20.0"
 
 [[package]]
 name = "mlpl-lab"
