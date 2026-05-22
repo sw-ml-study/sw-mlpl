@@ -1,9 +1,10 @@
 number = 6
 slug = "stdin-exit-and-err-propagation"
-status = "in-progress"
+status = "completed"
 description = "Scripting saga step 006: add stdin reads, exit code handling, and Err propaga..."
 role = "production"
 context_files = []
 created_at = "2026-05-20T20:21:52"
+completed_at = "2026-05-22T11:32:43"
 task_type = "code"
-commits = []
+commits = ["24f1a313eb5128e333722acc0df7852f754f4039"]
