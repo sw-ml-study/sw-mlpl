@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 1,
+    "step": "split-mlpl-eval"
+  },
+  "action": "Created crates/mlpl-eval-core/{Cargo.toml,src/lib.rs} with deps on nothing (pure type carrier). git mv'd model.rs + metric_sink.rs + inspect_groups.rs into the new crate. Made BUILTIN_GROUPS + FnEntry + FnGroup pub (were pub(crate)) so inspect.rs can reach them cross-crate. Used sed to batch-rewrite 'crate::model::' -> 'mlpl_eval_core::model::' and similar across ~14 mlpl-eval source files. Registered the new crate in workspace Cargo.toml + mlpl-eval/Cargo.toml. Did NOT attempt the model/grad/data sibling splits due to the eval <-> model_dispatch circular dep discovered during analysis.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T15:12:34"
+}
