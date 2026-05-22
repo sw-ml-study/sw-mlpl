@@ -1,0 +1,12 @@
+number = 6
+slug = "clippy-allows-audit"
+status = "pending"
+description = """
+Tech-debt saga step 006: Clippy Allows audit.
+
+12 #[allow(clippy::...)] attri..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T14:40:45"
+task_type = "refactor"
+commits = []

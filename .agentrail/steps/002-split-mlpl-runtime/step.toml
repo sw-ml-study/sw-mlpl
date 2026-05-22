@@ -1,0 +1,12 @@
+number = 2
+slug = "split-mlpl-runtime"
+status = "pending"
+description = """
+Tech-debt saga step 002: split mlpl-runtime crate (18 modules; max 7).
+
+Same ..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T14:40:08"
+task_type = "refactor"
+commits = []

@@ -1,0 +1,12 @@
+number = 7
+slug = "warning-long-tail"
+status = "pending"
+description = """
+Tech-debt saga step 007: warning long-tail sweep.
+
+By this step the FAIL colu..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T14:40:55"
+task_type = "refactor"
+commits = []
