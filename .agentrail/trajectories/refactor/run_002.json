@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 2,
+    "step": "split-mlpl-runtime"
+  },
+  "action": "Created 3 new crate skeletons. git mv'd 7 source files into them. Used sed for bulk crate:: -> mlpl_runtime_core:: rewrites in mlpl-runtime. Promoted pub(crate) -> pub on cross-crate entry points (NAMES, try_call, Xorshift64). Renamed -dimred -> -dim-reduction post-user-feedback (Rust auto-translates the dashes to mlpl_runtime_dim_reduction in code). Extracted render_gallery helpers to gallery_layout.rs sibling module (3 fns; compute_grid_layout returns a GridLayout struct so render_gallery body shrinks 81 -> ~40 lines). Documented the +1 warning as 'sw-checklist: exception' in the commit body with structural justification (extracting siblings creates new Crate-Module-Count warning entries by construction).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T15:42:20"
+}
