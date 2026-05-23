@@ -1,0 +1,12 @@
+number = 5
+slug = "split-env-values-tags"
+status = "pending"
+description = """
+Saga 33 step 005: extract env_values.rs + env_tags.rs from env.rs.
+
+Continue ..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T18:14:14"
+task_type = "refactor"
+commits = []

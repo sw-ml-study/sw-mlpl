@@ -1,0 +1,12 @@
+number = 1
+slug = "split-demos-by-topic"
+status = "pending"
+description = """
+Saga 33 step 001: split demos.rs by topic.
+
+apps/mlpl-web/src/demos.rs is 117..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T18:13:34"
+task_type = "refactor"
+commits = []

@@ -1,0 +1,12 @@
+number = 7
+slug = "split-model-dispatch"
+status = "pending"
+description = """
+Saga 33 step 007: split model_dispatch.rs (bonus / continuation).
+
+model_disp..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T18:14:39"
+task_type = "refactor"
+commits = []

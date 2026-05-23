@@ -1,0 +1,12 @@
+number = 8
+slug = "saga33-close-out"
+status = "pending"
+description = """
+Saga 33 step 008 (FINAL, use --done): saga close-out.
+
+1. Final sw-checklist ..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T18:14:51"
+task_type = "docs"
+commits = []
