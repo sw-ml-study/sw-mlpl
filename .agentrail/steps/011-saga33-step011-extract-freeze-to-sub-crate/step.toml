@@ -1,9 +1,10 @@
 number = 11
 slug = "saga33-step011-extract-freeze-to-sub-crate"
-status = "in-progress"
+status = "completed"
 description = "Now that freeze_inner/unfreeze_inner are generic over HasModels + HasFrozen, ..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-23T14:45:51"
+completed_at = "2026-05-23T15:08:32"
 task_type = "tech-debt"
-commits = []
+commits = ["4cd90457cdd4c11b4c1076269fc794eeeed073ea"]

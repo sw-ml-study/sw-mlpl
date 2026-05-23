@@ -1,0 +1,9 @@
+number = 12
+slug = "saga33-step012-extract-clone-perturb"
+status = "pending"
+description = "Continue analyze extraction with model_clone and model_perturb (similar shape..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-23T15:08:32"
+task_type = "tech-debt"
+commits = []
