@@ -145,13 +145,14 @@ fn eval_tensor_fncall(
             .cloned()
             .ok_or_else(|| EvalError::UndefinedVariable(m.clone()))?;
         let x = eval_tensor_expr(&args[1], env, tape, params)?;
-        return crate::model_tape::apply_model_tape(&model, x, tape, params);
+        return mlpl_models_tape::apply_model_tape(&model, x, tape, params)
+            .map_err(EvalError::from);
     }
     if name == "cross_entropy" {
         arity(2)?;
         let l = eval_tensor_expr(&args[0], env, tape, params)?;
         let t = crate::eval::eval_expr(&args[1], env, &mut None)?.into_array()?;
-        let idx = crate::model_tape::validate_cross_entropy_targets(&l.value(), &t)?;
+        let idx = mlpl_models_tape::validate_cross_entropy_targets(&l.value(), &t)?;
         return Ok(l.cross_entropy(idx));
     }
     if name == "patchify" {

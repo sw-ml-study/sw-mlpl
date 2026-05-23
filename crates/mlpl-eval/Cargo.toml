@@ -39,6 +39,7 @@ image-io = [
 [dependencies]
 mlpl-core = { path = "../mlpl-core" }
 mlpl-eval-core = { path = "../mlpl-eval-core" }
+mlpl-models-tape = { path = "../../components/mlpl-session/crates/mlpl-models-tape" }
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-array = { path = "../mlpl-array" }
 mlpl-autograd = { path = "../mlpl-autograd" }

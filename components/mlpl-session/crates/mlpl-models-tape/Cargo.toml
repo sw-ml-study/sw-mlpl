@@ -1,0 +1,18 @@
+# Saga 33 step 008: autograd tape lowering of the model DSL,
+# extracted from `crates/mlpl-eval/src/model_tape*.rs`. Pure
+# computational kernel -- takes `&HashMap<String, Tensor>` for
+# params and a `&ModelSpec`, returns a `Tensor` graph. No
+# Environment dependency, so this crate doesn't need the env
+# capability traits.
+
+[package]
+name = "mlpl-models-tape"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-autograd = { path = "../../../../crates/mlpl-autograd" }
+mlpl-core = { path = "../../../../crates/mlpl-core" }
+mlpl-eval-core = { path = "../../../../crates/mlpl-eval-core" }
