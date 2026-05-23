@@ -1,0 +1,18 @@
+# Saga 33 step 011: extracted from crates/mlpl-eval/src/
+# model_freeze.rs. The forward pass is generic over the
+# capability traits (HasModels + HasFrozen) from
+# mlpl-env-traits + a caller-supplied resolver closure, so this
+# crate never imports mlpl-eval -- proving the C+D loose-
+# coupling boundary works end-to-end.
+
+[package]
+name = "mlpl-models-freeze"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-env-traits = { path = "../mlpl-env-traits" }
+mlpl-eval-core = { path = "../../../../crates/mlpl-eval-core" }
+mlpl-parser = { path = "../../../../crates/mlpl-parser" }

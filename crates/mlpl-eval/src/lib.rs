@@ -32,7 +32,7 @@ mod env_trait_impls_models;
 mod env_trait_impls_params;
 mod env_vars;
 mod error;
-mod error_from_tape;
+mod error_from_components;
 mod eval;
 mod eval_for;
 mod eval_intercepts;
