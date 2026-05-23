@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 10,
+    "step": "saga33-step010-haspparams-hasfrozen-hasdevices"
+  },
+  "action": "Added trait files at <=3 methods each. Split env_trait_impls.rs into 3 per-trait impl files in mlpl-eval (models/params/frozen). Closure-based injection for the eval_expr dependency: freeze_inner takes F: FnOnce(&Expr, &mut E) -> Result<ModelSpec, EvalError>. The inner body uses only trait methods + ModelSpec (eval-core). cargo build + clippy + tests + sw-checklist all green. HOLD on both ratchet axes; committed with sw-checklist: exception trailer. Now-extractable: model_freeze.rs's inner body can move to a sub-crate without importing mlpl-eval.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T14:45:51"
+}
