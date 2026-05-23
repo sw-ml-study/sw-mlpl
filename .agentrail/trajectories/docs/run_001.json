@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 8,
+    "step": "final-ratchet-and-docs"
+  },
+  "action": "Wrote docs/loose-coupling.md with two complementary lenses (phase separation + compose-not-compress) plus a concrete example refactoring a 27-line decode_directory_to_record into a 5-line orchestrator + 3 leaf helpers. Linked from CLAUDE.md's How-to-refactor section, docs/code_metrics.md header, docs/saga-tech-debt-paydown.md, and 3 memory entries (compose-not-compress + phase-separation + the MEMORY index). Updated docs/language-status.md saga timeline + Shipped log with the honest scoreboard. Regenerated CHANGES.md.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T18:10:49"
+}
