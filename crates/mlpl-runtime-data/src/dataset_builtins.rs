@@ -10,7 +10,6 @@
 use mlpl_array::{DenseArray, Shape};
 
 use mlpl_runtime_core::error::RuntimeError;
-use mlpl_runtime_core::prng::Xorshift64;
 
 pub const NAMES: &[&str] = &[
     "shuffle",
@@ -52,8 +51,8 @@ fn builtin_shuffle(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runt
         });
     }
     let seed = args[1].data()[0] as i64 as u64;
-    let perm = permutation(args[0].shape().dims()[0], seed);
-    gather_rows(&args[0], &perm)
+    let perm = crate::dataset_helpers::permutation(args[0].shape().dims()[0], seed);
+    crate::dataset_helpers::gather_rows(&args[0], &perm)
 }
 
 /// Batch rows along axis 0 into contiguous groups of `size`, with
@@ -160,24 +159,13 @@ fn builtin_split(
     let n = x.shape().dims()[0];
     let n_train = ((n as f64) * frac) as usize;
     let n_train = n_train.clamp(1, n.saturating_sub(1));
-    let perm = permutation(n, seed);
+    let perm = crate::dataset_helpers::permutation(n, seed);
     let chunk: Vec<usize> = if take_train {
         perm[..n_train].to_vec()
     } else {
         perm[n_train..].to_vec()
     };
-    gather_rows(x, &chunk)
-}
-
-/// Fisher-Yates permutation of 0..n using a seeded xorshift64.
-fn permutation(n: usize, seed: u64) -> Vec<usize> {
-    let mut perm: Vec<usize> = (0..n).collect();
-    let mut rng = Xorshift64::new(seed);
-    for i in (1..n).rev() {
-        let j = (rng.next_u64() as usize) % (i + 1);
-        perm.swap(i, j);
-    }
-    perm
+    crate::dataset_helpers::gather_rows(x, &chunk)
 }
 
 /// `shift_pairs_x(ids, block_size)` / `shift_pairs_y(ids, block_size)`.
@@ -205,32 +193,4 @@ fn builtin_shift_pairs(
         }
     }
     Ok(DenseArray::new(Shape::new(vec![b, bs]), data)?)
-}
-
-/// Build a new array whose rows are `x`'s rows at positions given by
-/// `indices`. Preserves every non-axis-0 label; axis-0 label is
-/// dropped because the row identity has changed.
-fn gather_rows(x: &DenseArray, indices: &[usize]) -> Result<DenseArray, RuntimeError> {
-    let dims = x.shape().dims();
-    if dims.is_empty() {
-        return Err(RuntimeError::InvalidArgument {
-            func: "gather_rows".into(),
-            reason: "rank >= 1 required".into(),
-        });
-    }
-    let row_stride: usize = dims[1..].iter().product::<usize>().max(1);
-    let mut data = Vec::with_capacity(indices.len() * row_stride);
-    let src = x.data();
-    for &i in indices {
-        data.extend_from_slice(&src[i * row_stride..(i + 1) * row_stride]);
-    }
-    let mut out_dims = vec![indices.len()];
-    out_dims.extend_from_slice(&dims[1..]);
-    let mut out = DenseArray::new(Shape::new(out_dims), data)?;
-    if let Some(src_labels) = x.labels() {
-        let mut labels = vec![None];
-        labels.extend_from_slice(&src_labels[1..]);
-        out = out.with_labels(labels)?;
-    }
-    Ok(out)
 }

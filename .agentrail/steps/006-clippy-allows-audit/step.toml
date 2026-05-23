@@ -1,6 +1,6 @@
 number = 6
 slug = "clippy-allows-audit"
-status = "pending"
+status = "in-progress"
 description = """
 Tech-debt saga step 006: Clippy Allows audit.
 

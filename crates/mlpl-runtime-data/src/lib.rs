@@ -15,6 +15,7 @@
 //! dispatches to these.
 
 pub mod dataset_builtins;
+pub mod dataset_helpers;
 pub mod dataset_validate;
 pub mod embedding_builtins;
 pub mod grid_builtin;
