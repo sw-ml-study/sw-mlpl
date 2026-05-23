@@ -1,6 +1,6 @@
 number = 5
 slug = "file-loc-sweep"
-status = "pending"
+status = "in-progress"
 description = """
 Tech-debt saga step 005: File LOC sweep.
 

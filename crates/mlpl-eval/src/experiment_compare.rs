@@ -1,7 +1,6 @@
 //! Saga 32 step 004: `compare(name_a, name_b)` builtin dispatch
-//! + record-comparison helpers extracted from `experiment.rs`
-//! so the orchestrator stays under the sw-checklist
-//! function-count budget.
+//! and record-comparison helpers extracted from `experiment.rs`
+//! to keep the orchestrator under the sw-checklist function-count budget.
 
 use mlpl_parser::Expr;
 
