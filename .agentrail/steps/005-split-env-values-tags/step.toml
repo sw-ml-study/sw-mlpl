@@ -1,6 +1,6 @@
 number = 5
 slug = "split-env-values-tags"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 33 step 005: extract env_values.rs + env_tags.rs from env.rs.
 
