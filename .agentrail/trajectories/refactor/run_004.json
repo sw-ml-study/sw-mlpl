@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 4,
+    "step": "split-env-device-peer"
+  },
+  "action": "facade re-export pattern: model_dispatch.rs becomes a thin pub(crate) use re-export so caller call sites stay unchanged. Per-variant helper extraction: each ModelSpec arm of apply_model became a pub(crate) fn in a topical sibling, leaving apply_model as a 12-LOC match dispatcher. Imports rewired for cross-sibling calls (apply_chain/apply_residual recurse through apply_model; extract_attn_weights does too). Kept each new module <=4 fns to stay below the warn threshold.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T08:50:36"
+}
