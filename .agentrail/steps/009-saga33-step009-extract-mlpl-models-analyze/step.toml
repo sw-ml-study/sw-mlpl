@@ -1,0 +1,9 @@
+number = 9
+slug = "saga33-step009-extract-mlpl-models-analyze"
+status = "pending"
+description = "Continue the components/mlpl-session/ extraction with the second sub-crate: m..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-23T12:40:54"
+task_type = "tech-debt"
+commits = []

@@ -1,6 +1,6 @@
 number = 8
 slug = "saga33-close-out"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 33 step 008 (FINAL, use --done): saga close-out.
 
@@ -8,5 +8,6 @@ Saga 33 step 008 (FINAL, use --done): saga close-out.
 role = "production"
 context_files = []
 created_at = "2026-05-22T18:14:51"
+completed_at = "2026-05-23T12:40:54"
 task_type = "docs"
-commits = []
+commits = ["89cb705181165071cb2dcdd6ab9c75f129b0b5d5"]
