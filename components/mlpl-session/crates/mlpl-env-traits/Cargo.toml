@@ -1,0 +1,23 @@
+# Saga 33 step 009: capability traits that abstract access to
+# mlpl-eval's Environment. Downstream consumer crates depend on
+# the traits (`&impl HasModels + HasDevices + ...`), never on
+# the concrete `Environment` struct, so each domain is testable
+# in isolation against a minimal Mock.
+#
+# Traits live in this small foundation crate because they're
+# shared by every future env_* + model_* sub-crate. As state
+# extraction progresses, the trait definitions themselves may
+# migrate into the crate that owns the corresponding state
+# (e.g. HasDevices into mlpl-env-devices), but the consumer
+# call sites won't change.
+
+[package]
+name = "mlpl-env-traits"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-core = { path = "../../../../crates/mlpl-core" }
+mlpl-eval-core = { path = "../../../../crates/mlpl-eval-core" }
