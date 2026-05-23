@@ -1,0 +1,12 @@
+number = 4
+slug = "split-env-device-peer"
+status = "pending"
+description = """
+Saga 33 step 004: extract env_device.rs + env_peer.rs from env.rs.
+
+Continue ..."""
+role = "production"
+context_files = []
+created_at = "2026-05-22T18:14:05"
+task_type = "refactor"
+commits = []
