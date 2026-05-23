@@ -74,6 +74,15 @@ once."
 - No new dependencies. May TRIM existing dependencies where a
   split lets a downstream crate drop a feature it never used.
 
+## Canonical HOW-TO
+
+For the techniques used to refactor wide functions and split
+fat modules, see [`docs/loose-coupling.md`](loose-coupling.md).
+That document captures the four phases (compile time,
+start-up, conditional, dataflow) and the
+compose-don't-compress patterns. Every step in this saga
+applies them.
+
 ## Quality requirements (every step)
 
 Same as saga 31's strict variant:

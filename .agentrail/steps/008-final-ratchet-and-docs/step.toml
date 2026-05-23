@@ -1,6 +1,6 @@
 number = 8
 slug = "final-ratchet-and-docs"
-status = "pending"
+status = "in-progress"
 description = """
 Tech-debt saga step 008 (FINAL, use --done): final ratchet + update docs.
 

@@ -183,13 +183,28 @@ commits to green; at five-per-commit it's ~30 commits. A
 single refactor saga that splits one fat crate can clear
 many at once and shorten the schedule dramatically.
 
-### How to refactor (see docs/code_metrics.md for full guide)
+### How to refactor (see docs/code_metrics.md + docs/loose-coupling.md)
 
 When choosing how to split an over-limit function or module,
 **follow `docs/code_metrics.md`** -- the project's canonical
 architecture guide. It contains the metric gates, refactoring
 triggers, file-naming conventions, and a refactoring algorithm
-agents should follow. Top directives:
+agents should follow.
+
+**`docs/loose-coupling.md` is the companion HOW-TO doc.** It
+captures the four phases code can run in (compile time,
+start-up, conditional, dataflow pipeline) and the
+compose-don't-compress techniques (top-down delegation,
+separated stage definitions, iterator pipelines, building
+chains vs dispatching chains). When a function or module is
+over budget, walk those phases and identify which pieces
+belong to which phase; the over-budget function is almost
+always mixing phases, and the split by phase retires the
+warning naturally. **Do not** try to compress with whitespace
+tricks, `rustfmt::skip`, or `#[allow(...)]` -- the 25 LOC
+budget assumes idiomatic formatting.
+
+Top directives:
 
 - **Target gates are STRICTER than the sw-checklist FAIL line:**
   25 LOC / function, 5 functions / module, 5 modules / crate,

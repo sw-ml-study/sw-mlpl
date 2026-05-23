@@ -10,14 +10,21 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-22 (saga 31 closed; all nine findings
-#22-#30 shipped).
+Last refreshed: 2026-05-22 (saga 32 closed; tech-debt
+paydown landed -8 fails and -2 warnings).
 
 ## Active saga
 
-None. Saga 31 (`scripting-cluster`) closed 2026-05-22. The
+None. Saga 32 (`tech-debt-paydown`) closed 2026-05-22. The
 next saga has not yet been selected; candidates live in
-`docs/plan.md`'s Breaking-change candidates list.
+`docs/plan.md`'s Breaking-change candidates list. Highest-
+value carry-over from saga 32 (documented in the close-out
+commit body): apply the phase-separation lens from
+`docs/loose-coupling.md` to env.rs (55 fns!), demos.rs
+(1179 lines), and model_dispatch.rs (905 lines + 100-LOC
+apply_model). All three FAIL because they conflate
+compile-time data, start-up construction, and per-call
+dispatch in a single file.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -29,6 +36,7 @@ human-readable summary.
 | `vit` (29)            | shipped    | -- (capability saga)   | Closed 2026-05-20. Archived under `.agentrail-archive/`. |
 | `tier1-cleanup` (30)  | shipped    | #18, #19               | Closed 2026-05-20. Six steps; both findings retired. |
 | `scripting-cluster` (31) | shipped | #22, #23, #24, #25, #26, #27, #28, #29, #30 | Closed 2026-05-22. Eight steps; turned MLPL into a real scripting language (if/else, while/break/continue, args + CLI passthrough + positional script path, to_number / to_int / env, print / eprint, read_stdin / read_stdin_lines, exit + Err-as-exit-1, `#!/usr/bin/env mlpl-repl` shebang support, `demos/classify.mlpl` worked example). |
+| `tech-debt-paydown` (32) | shipped | -- (process saga) | Closed 2026-05-22. Eight steps; **delivered -8 fails / -2 warnings vs the "halve both" target of -76 fails / -227 warnings**. Six new sibling crates extracted as clean DAG leaves (mlpl-eval-core, mlpl-runtime-core/-data/-dim-reduction, mlpl-web-eval/-lessons/-path-body) plus several in-crate splits (experiment_compare, inspect_render, image_io_pixels, model_tape_attention, fetch_io, dataset_helpers, ops_concat, gallery_layout). Step 007 documented the "compose-don't-compress" lesson; step 008 wrote `docs/loose-coupling.md` as the canonical HOW-TO. |
 | Dim reduction         | proposed   | -- (capability saga)   | `docs/milestone-dimensionality-reduction.md`. UMAP-led. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
@@ -82,6 +90,39 @@ agentrail.
 | #21 | sw-checklist budget shapes the code          | process, out of scope for audit |
 
 ## Shipped (most recent first)
+
+- **2026-05-22** -- saga 32 (`tech-debt-paydown`) closed.
+  Eight steps; sw-checklist 151 -> 143 fails (-8), 452 ->
+  450 warnings (-2). Far short of the "halve both" target
+  (~75 / ~225). Six new sibling crates extracted as
+  strict-DAG leaves:
+  - `mlpl-eval-core` (model + metric_sink + inspect_groups
+    leaf types).
+  - `mlpl-runtime-core` (RuntimeError + Xorshift64 leaf
+    types) +  `mlpl-runtime-data` (dataset_builtins +
+    embedding_builtins + grid_builtin) + `mlpl-runtime-dim-
+    reduction` (t-SNE + PCA).
+  - `mlpl-web-eval` (eval pipeline + state + summary),
+    `mlpl-web-lessons` (static tutorial content),
+    `mlpl-web-path-body` (markdown-ish renderer).
+  Plus in-crate splits: `experiment_compare.rs`,
+  `inspect_render.rs`, `image_io_pixels.rs`,
+  `model_tape_attention.rs`, `fetch_io.rs`,
+  `dataset_helpers.rs`, `ops_concat.rs`, `gallery_layout.rs`.
+  Step 007 was a no-progress step that surfaced the
+  "compose-don't-compress" anti-pattern: in-place
+  compressions of 27-line warning functions fight rustfmt
+  and net zero. Step 008 captured the lesson in
+  `docs/loose-coupling.md` (the canonical HOW-TO doc for
+  loose coupling refactors) and updated CLAUDE.md +
+  `docs/code_metrics.md` + memory entries to point at it.
+  Highest-value carry-over for the next tech-debt saga:
+  apply the phase-separation lens (compile-time / start-up
+  / conditional / dataflow) to `env.rs` (55 fns),
+  `demos.rs` (1179 lines), and `model_dispatch.rs`
+  (905 lines + the 100-LOC `apply_model` FAIL). All three
+  conflate phases; splits by phase will retire 5+ FAILs
+  per file.
 
 - **2026-05-22** -- saga 31 closed (`scripting-cluster`).
   Eight steps shipped audit findings #22 / #24 / #25 / #26 /

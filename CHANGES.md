@@ -14,6 +14,23 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-22
 
+- chore(agentrail): record saga 32 step 007 (no-progress) + next-step prompt
+- saga 32 step 007: warning-long-tail (partial; rustfmt fights in-place)
+- chore(agentrail): record saga 32 step 006 completion + next-step prompt
+- saga 32 step 006: clippy-audit closure + fn-count spike
+- chore(agentrail): record saga 32 step 005 completion + next-step prompt
+- saga 32 step 005: tech-debt spike (4 module splits, -3 fails)
+- chore(agentrail): record saga 32 step 004 completion + next-step prompt
+- saga 32 step 004: extract mlpl-web-eval crate + split experiment_compare
+- chore(agentrail): record saga 32 step 003 completion + next step (fn-count sweep)
+- saga 32 step 003: extract two clean leaf crates from mlpl-web
+- chore(agentrail): record saga 32 step 002 completion + revised next step
+- saga 32 step 002: split mlpl-runtime into 4 crates (DAG, no cycles)
+- chore(agentrail): record saga 32 step 001 completion + revised next step
+- saga 32 step 001: extract mlpl-eval-core (3 leaf modules)
+- chore(agentrail): archive saga 31, init saga 32 (tech-debt-paydown)
+- chore(agentrail): record saga 31 step 008 completion + close saga
+- saga 31 step 008 (FINAL): close out audit findings #22-#30
 - chore(agentrail): record saga 31 step 007 completion + kickoff step 008
 - saga 31 step 007: classify demo + positional script path
 - chore(agentrail): record saga 31 step 006 completion + kickoff step 007
