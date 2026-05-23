@@ -23,13 +23,8 @@
 
 #![cfg(feature = "image-io")]
 
-use std::collections::BTreeMap;
 use std::fs;
-use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
-
-use mlpl_array::{DenseArray, Shape};
-use sha2::Digest;
 
 use crate::env::Environment;
 use crate::error::EvalError;
@@ -81,11 +76,11 @@ pub(crate) fn eval(env: &Environment, name: &str) -> Result<Value, EvalError> {
     fs::create_dir_all(&dataset_root).map_err(|e| io_err(&dataset_root, e))?;
     let tarball_path = dataset_root.join(spec.tarball);
     let images_path = dataset_root.join(spec.images_subdir);
-    ensure_tarball(&tarball_path, spec.url, spec.sha256)?;
+    crate::fetch_io::ensure_tarball(&tarball_path, spec.url, spec.sha256)?;
     if !images_path.exists() {
-        extract_tarball(&tarball_path, &dataset_root)?;
+        crate::fetch_io::extract_tarball(&tarball_path, &dataset_root)?;
     }
-    decode_directory_to_record(&images_path, spec.target_h, spec.target_w)
+    crate::fetch_io::decode_directory_to_record(&images_path, spec.target_h, spec.target_w)
 }
 
 /// Resolve where dataset files live. Priority: `$MLPL_DATA_DIR`
@@ -113,137 +108,10 @@ fn resolve_data_root(env: &Environment, name: &str) -> Result<PathBuf, EvalError
 /// Always verifies sha256 -- if a stale file is sitting at
 /// the path with the wrong hash, we error rather than silently
 /// trust it.
-fn ensure_tarball(path: &Path, url: &str, expected_sha256: &str) -> Result<(), EvalError> {
-    if path.exists() {
-        let got = sha256_of(path)?;
-        if got == expected_sha256 {
-            return Ok(());
-        }
-        return Err(EvalError::Unsupported(format!(
-            "fetch_dataset: {} sha256 mismatch (expected {expected_sha256}, \
-             got {got}). Delete the file and retry.",
-            path.display()
-        )));
-    }
-    let resp = ureq::get(url)
-        .call()
-        .map_err(|e| EvalError::Unsupported(format!("fetch_dataset: HTTP GET {url}: {e}")))?;
-    let mut reader = resp.into_reader();
-    let mut buf = Vec::new();
-    reader
-        .read_to_end(&mut buf)
-        .map_err(|e| EvalError::Unsupported(format!("fetch_dataset: read body from {url}: {e}")))?;
-    let got = format!("{:x}", sha2::Sha256::digest(&buf));
-    if got != expected_sha256 {
-        return Err(EvalError::Unsupported(format!(
-            "fetch_dataset: downloaded {url} but sha256 was {got} \
-             (expected {expected_sha256})"
-        )));
-    }
-    let mut f = fs::File::create(path).map_err(|e| io_err(path, e))?;
-    f.write_all(&buf).map_err(|e| io_err(path, e))?;
-    Ok(())
-}
-
-fn sha256_of(path: &Path) -> Result<String, EvalError> {
-    let mut f = fs::File::open(path).map_err(|e| io_err(path, e))?;
-    let mut hasher = sha2::Sha256::new();
-    let mut buf = vec![0u8; 64 * 1024];
-    loop {
-        let n = f.read(&mut buf).map_err(|e| io_err(path, e))?;
-        if n == 0 {
-            break;
-        }
-        hasher.update(&buf[..n]);
-    }
-    Ok(format!("{:x}", hasher.finalize()))
-}
-
-fn extract_tarball(tar_path: &Path, dest: &Path) -> Result<(), EvalError> {
-    let f = fs::File::open(tar_path).map_err(|e| io_err(tar_path, e))?;
-    let gz = flate2::read::GzDecoder::new(f);
-    let mut archive = tar::Archive::new(gz);
-    archive.unpack(dest).map_err(|e| {
-        EvalError::Unsupported(format!(
-            "fetch_dataset: tar extract {} -> {}: {e}",
-            tar_path.display(),
-            dest.display()
-        ))
-    })?;
-    Ok(())
-}
-
-/// Scan a directory for PNG / JPEG files, decode + resize +
-/// normalize each, build the `Record{X, Y, names}` payload.
-/// Cat vs dog is encoded in the filename per Oxford-IIIT Pet
-/// convention: capitalized prefix = cat (label 0), lowercase
-/// prefix = dog (label 1).
-fn decode_directory_to_record(images_dir: &Path, h: usize, w: usize) -> Result<Value, EvalError> {
-    let mut paths: Vec<PathBuf> = fs::read_dir(images_dir)
-        .map_err(|e| io_err(images_dir, e))?
-        .filter_map(Result::ok)
-        .map(|e| e.path())
-        .filter(|p| is_image_ext(p))
-        .collect();
-    paths.sort();
-    if paths.is_empty() {
-        return Err(EvalError::Unsupported(format!(
-            "fetch_dataset: no PNG or JPEG files in {}",
-            images_dir.display()
-        )));
-    }
-    let mut x_data: Vec<f64> = Vec::with_capacity(paths.len() * 3 * h * w);
-    let mut y_data: Vec<f64> = Vec::with_capacity(paths.len());
-    let mut names: Vec<String> = Vec::with_capacity(paths.len());
-    for path in &paths {
-        x_data.extend_from_slice(&crate::image_io::decode_and_resize(path, h, w)?);
-        let name = path.file_name().and_then(|n| n.to_str()).ok_or_else(|| {
-            EvalError::Unsupported(format!(
-                "fetch_dataset: non-utf8 filename {}",
-                path.display()
-            ))
-        })?;
-        y_data.push(label_for(name) as f64);
-        names.push(name.to_string());
-    }
-    build_record(paths.len(), 3, h, w, x_data, y_data, names)
-}
-
-fn is_image_ext(p: &Path) -> bool {
-    p.extension()
-        .and_then(|e| e.to_str())
-        .map(|e| matches!(e.to_ascii_lowercase().as_str(), "png" | "jpg" | "jpeg"))
-        .unwrap_or(false)
-}
-
-fn build_record(
-    n: usize,
-    c: usize,
-    h: usize,
-    w: usize,
-    x_data: Vec<f64>,
-    y_data: Vec<f64>,
-    names: Vec<String>,
-) -> Result<Value, EvalError> {
-    let x_arr = DenseArray::new(Shape::new(vec![n, c, h, w]), x_data)?.with_labels(vec![
-        Some("batch".to_string()),
-        Some("channel".to_string()),
-        Some("y".to_string()),
-        Some("x".to_string()),
-    ])?;
-    let y_arr = DenseArray::new(Shape::new(vec![n]), y_data)?
-        .with_labels(vec![Some("batch".to_string())])?;
-    let mut fields = BTreeMap::new();
-    fields.insert("X".to_string(), Value::Array(x_arr));
-    fields.insert("Y".to_string(), Value::Array(y_arr));
-    fields.insert("names".to_string(), Value::StrList { items: names });
-    Ok(Value::Record { fields })
-}
-
 /// Cat (uppercase prefix) -> 0, dog (lowercase prefix) -> 1.
 /// Non-alphabetic prefix surfaces as 255 so the caller can
 /// spot junk in the dataset.
-fn label_for(name: &str) -> u8 {
+pub(crate) fn label_for(name: &str) -> u8 {
     match name.chars().next() {
         Some(c) if c.is_ascii_uppercase() => 0,
         Some(c) if c.is_ascii_lowercase() => 1,
@@ -251,7 +119,7 @@ fn label_for(name: &str) -> u8 {
     }
 }
 
-fn io_err(path: &Path, e: std::io::Error) -> EvalError {
+pub(crate) fn io_err(path: &Path, e: std::io::Error) -> EvalError {
     EvalError::Unsupported(format!("fetch_dataset: {}: {e}", path.display()))
 }
 
@@ -295,7 +163,7 @@ mod tests {
         fs::write(&p, b"hello").unwrap();
         // SHA-256("hello") is well-known.
         assert_eq!(
-            sha256_of(&p).unwrap(),
+            crate::fetch_io::sha256_of(&p).unwrap(),
             "2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824"
         );
     }
@@ -308,7 +176,7 @@ mod tests {
         // SHA-256("abc"):
         let want = "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad";
         // Won't hit the network since the file exists + hash matches.
-        ensure_tarball(&p, "http://invalid.example/never", want).unwrap();
+        crate::fetch_io::ensure_tarball(&p, "http://invalid.example/never", want).unwrap();
     }
 
     #[test]
@@ -316,7 +184,8 @@ mod tests {
         let tmp = temp_dir("ensure-stale");
         let p = tmp.join("blob");
         fs::write(&p, b"abc").unwrap();
-        let err = ensure_tarball(&p, "http://invalid.example/never", "deadbeef").unwrap_err();
+        let err = crate::fetch_io::ensure_tarball(&p, "http://invalid.example/never", "deadbeef")
+            .unwrap_err();
         let msg = format!("{err}");
         assert!(msg.contains("sha256 mismatch"), "got: {msg}");
     }
@@ -341,7 +210,7 @@ mod tests {
         archive.into_inner().unwrap().finish().unwrap();
         let dest = tmp.join("out");
         fs::create_dir_all(&dest).unwrap();
-        extract_tarball(&tar_path, &dest).unwrap();
+        crate::fetch_io::extract_tarball(&tar_path, &dest).unwrap();
         let got = fs::read_to_string(dest.join("hello.txt")).unwrap();
         assert_eq!(got, "hi");
     }
@@ -354,7 +223,7 @@ mod tests {
         write_tiny_png(&tmp.join("Bombay_1.png"), [0, 255, 0]);
         write_tiny_png(&tmp.join("beagle_1.png"), [0, 0, 255]);
         write_tiny_png(&tmp.join("pug_1.png"), [128, 128, 128]);
-        let v = decode_directory_to_record(&tmp, 4, 4).unwrap();
+        let v = crate::fetch_io::decode_directory_to_record(&tmp, 4, 4).unwrap();
         let Value::Record { fields } = v else {
             panic!("expected Record");
         };
@@ -386,7 +255,7 @@ mod tests {
     #[test]
     fn decode_directory_to_record_errors_on_empty_dir() {
         let tmp = temp_dir("decode-empty");
-        let err = decode_directory_to_record(&tmp, 4, 4).unwrap_err();
+        let err = crate::fetch_io::decode_directory_to_record(&tmp, 4, 4).unwrap_err();
         let msg = format!("{err}");
         assert!(msg.contains("no PNG or JPEG"), "got: {msg}");
     }

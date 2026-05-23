@@ -23,6 +23,8 @@ mod experiment;
 mod experiment_compare;
 #[cfg(feature = "image-io")]
 mod fetch_dataset;
+#[cfg(feature = "image-io")]
+mod fetch_io;
 mod grad;
 mod grad_optim;
 #[cfg(feature = "image-io")]
