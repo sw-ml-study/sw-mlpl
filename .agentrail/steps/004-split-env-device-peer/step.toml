@@ -1,6 +1,6 @@
 number = 4
 slug = "split-env-device-peer"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 33 step 004: extract env_device.rs + env_peer.rs from env.rs.
 
