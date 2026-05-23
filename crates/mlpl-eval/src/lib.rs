@@ -27,6 +27,7 @@ mod env_strings;
 mod env_tags;
 mod env_tensor_device;
 mod env_tokenizers;
+mod env_trait_impls;
 mod env_vars;
 mod error;
 mod error_from_tape;

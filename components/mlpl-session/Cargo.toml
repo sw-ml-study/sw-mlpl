@@ -8,7 +8,7 @@
 # target. Pattern follows services/mlpl-mlx-serve/.
 
 [workspace]
-members = ["crates/mlpl-models-tape"]
+members = ["crates/mlpl-env-traits", "crates/mlpl-models-tape"]
 resolver = "2"
 
 [workspace.package]

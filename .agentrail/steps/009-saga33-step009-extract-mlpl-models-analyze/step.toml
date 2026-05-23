@@ -1,6 +1,6 @@
 number = 9
 slug = "saga33-step009-extract-mlpl-models-analyze"
-status = "pending"
+status = "in-progress"
 description = "Continue the components/mlpl-session/ extraction with the second sub-crate: m..."
 role = "legacy"
 context_files = []
