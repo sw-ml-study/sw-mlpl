@@ -1930,6 +1930,7 @@ dependencies = [
  "mlpl-eval-core",
  "mlpl-lower-rs",
  "mlpl-mlx-rt",
+ "mlpl-models-freeze",
  "mlpl-models-tape",
  "mlpl-parser",
  "mlpl-runtime",
@@ -1991,6 +1992,16 @@ dependencies = [
  "mlpl-core",
  "mlpl-rt",
  "mlx-rs",
+]
+
+[[package]]
+name = "mlpl-models-freeze"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-env-traits",
+ "mlpl-eval-core",
+ "mlpl-parser",
 ]
 
 [[package]]

@@ -40,6 +40,7 @@ image-io = [
 mlpl-core = { path = "../mlpl-core" }
 mlpl-eval-core = { path = "../mlpl-eval-core" }
 mlpl-env-traits = { path = "../../components/mlpl-session/crates/mlpl-env-traits" }
+mlpl-models-freeze = { path = "../../components/mlpl-session/crates/mlpl-models-freeze" }
 mlpl-models-tape = { path = "../../components/mlpl-session/crates/mlpl-models-tape" }
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-array = { path = "../mlpl-array" }

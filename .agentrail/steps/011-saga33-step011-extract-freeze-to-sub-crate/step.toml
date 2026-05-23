@@ -1,6 +1,6 @@
 number = 11
 slug = "saga33-step011-extract-freeze-to-sub-crate"
-status = "pending"
+status = "in-progress"
 description = "Now that freeze_inner/unfreeze_inner are generic over HasModels + HasFrozen, ..."
 role = "legacy"
 context_files = []
