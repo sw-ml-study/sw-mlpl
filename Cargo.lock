@@ -1909,6 +1909,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-env-traits"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+ "mlpl-eval-core",
+]
+
+[[package]]
 name = "mlpl-eval"
 version = "0.20.0"
 dependencies = [
@@ -1917,9 +1926,11 @@ dependencies = [
  "mlpl-array",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-lower-rs",
  "mlpl-mlx-rt",
+ "mlpl-models-tape",
  "mlpl-parser",
  "mlpl-runtime",
  "mlpl-trace",
@@ -1980,6 +1991,16 @@ dependencies = [
  "mlpl-core",
  "mlpl-rt",
  "mlx-rs",
+]
+
+[[package]]
+name = "mlpl-models-tape"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-autograd",
+ "mlpl-core",
+ "mlpl-eval-core",
 ]
 
 [[package]]

@@ -1,6 +1,6 @@
 number = 10
 slug = "saga33-step010-haspparams-hasfrozen-hasdevices"
-status = "pending"
+status = "in-progress"
 description = "Continue mlpl-env-traits foundation by adding HasParams + HasFrozen + HasDevi..."
 role = "legacy"
 context_files = []
