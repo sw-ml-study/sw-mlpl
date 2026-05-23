@@ -1,6 +1,6 @@
 number = 6
 slug = "split-env-signals"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 33 step 006: extract env_signals.rs from env.rs (final env.rs split).
 
@@ -8,5 +8,6 @@ C..."""
 role = "production"
 context_files = []
 created_at = "2026-05-22T18:14:24"
+completed_at = "2026-05-23T10:50:06"
 task_type = "refactor"
-commits = []
+commits = ["1035a77b7c3836a58a602825b1d81bd8f01f7eff"]
