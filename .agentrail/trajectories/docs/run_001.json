@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 8,
+    "step": "saga33-close-out"
+  },
+  "action": "Created components/mlpl-session/Cargo.toml as a top-level [workspace] with members=[crates/mlpl-models-tape]. Inside the sub-crate, structured as 7 modules with the apply dispatcher delegating to layer-specific files. Used pattern-match arm helpers (attention_arm, lora_arm) to keep apply_model_tape under the function-LOC budget while pushing the inline ModelSpec struct literals into their helpers. mlpl-eval wires via path = '../../components/mlpl-session/crates/mlpl-models-tape'. Net workspace: 133 fails (no change), 443 warns (+1 vs HEAD~1; structural overhead of creating a 7-module crate added 4 WARNs against 3 retired from mlpl-eval). Committed with 'sw-checklist: exception' trailer documenting the structural-setup nature of this step. Reverted an attempted error.rs:fmt decompose because the extracted fmt_structured was 60-LOC FAIL.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T12:40:54"
+}
