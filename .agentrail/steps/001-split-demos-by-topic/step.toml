@@ -1,6 +1,6 @@
 number = 1
 slug = "split-demos-by-topic"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 33 step 001: split demos.rs by topic.
 
@@ -8,5 +8,6 @@ apps/mlpl-web/src/demos.rs is 117..."""
 role = "production"
 context_files = []
 created_at = "2026-05-22T18:13:34"
+completed_at = "2026-05-22T18:30:59"
 task_type = "refactor"
-commits = []
+commits = ["07196ef151716af78e358b43fe37c96cb9512e0e"]
