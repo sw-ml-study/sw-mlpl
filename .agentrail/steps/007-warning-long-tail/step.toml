@@ -1,6 +1,6 @@
 number = 7
 slug = "warning-long-tail"
-status = "pending"
+status = "in-progress"
 description = """
 Tech-debt saga step 007: warning long-tail sweep.
 

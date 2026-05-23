@@ -147,16 +147,16 @@ fn eval_list_get(
         return Err(EvalError::Unsupported(msg));
     };
     let i = parse_strlist_index(&args[1], env, trace)?;
-    let (ok, s) = match items.get(i) {
-        Some(s) => (true, s.clone()),
-        None => (
-            false,
-            format!(
+    let (ok, s) = items.get(i).map_or_else(
+        || {
+            let msg = format!(
                 "list_get: index {i} out of bounds (list has {} items)",
                 items.len()
-            ),
-        ),
-    };
+            );
+            (false, msg)
+        },
+        |s| (true, s.clone()),
+    );
     Ok(Value::Result {
         ok,
         payload: Box::new(Value::Str(s)),
