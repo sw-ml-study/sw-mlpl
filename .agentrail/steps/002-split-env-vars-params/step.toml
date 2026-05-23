@@ -1,6 +1,6 @@
 number = 2
 slug = "split-env-vars-params"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 33 step 002: extract env_vars.rs from env.rs.
 

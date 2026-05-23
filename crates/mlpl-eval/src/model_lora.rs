@@ -139,13 +139,7 @@ fn rewrite_linears_to_lora(
 ) -> Result<ModelSpec, EvalError> {
     match spec {
         ModelSpec::Linear { w, b } => wrap_linear(env, w, b, ctx),
-        ModelSpec::Chain(children) => {
-            let out: Vec<_> = children
-                .into_iter()
-                .map(|c| rewrite_linears_to_lora(c, env, ctx))
-                .collect::<Result<_, _>>()?;
-            Ok(ModelSpec::Chain(out))
-        }
+        ModelSpec::Chain(children) => rewrite_chain(children, env, ctx),
         ModelSpec::Residual(inner) => {
             let wrapped = rewrite_linears_to_lora(*inner, env, ctx)?;
             Ok(ModelSpec::Residual(Box::new(wrapped)))
@@ -158,6 +152,18 @@ fn rewrite_linears_to_lora(
             "lora: unexpected LinearLora in source tree (nested lora check should have caught this)".into(),
         )),
     }
+}
+
+fn rewrite_chain(
+    children: Vec<ModelSpec>,
+    env: &mut Environment,
+    ctx: &mut LoraCtx,
+) -> Result<ModelSpec, EvalError> {
+    let out: Vec<_> = children
+        .into_iter()
+        .map(|c| rewrite_linears_to_lora(c, env, ctx))
+        .collect::<Result<_, _>>()?;
+    Ok(ModelSpec::Chain(out))
 }
 
 fn wrap_linear(
