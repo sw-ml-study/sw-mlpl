@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 7,
+    "step": "split-model-dispatch"
+  },
+  "action": "Function-first decomposition: every over-budget function (app 104 LOC, render 67 LOC) broke into <=25 LOC helpers. Each new file <=4 fns (PASS no warn). Yew custom hooks via #[hook] attribute let use_state calls migrate from inline App body into named helpers while staying hooks-rules-safe. include! macro requires single expression so main bodies are bare expressions (wasm) or block expressions (native). build.rs delegation pattern keeps the entry point at 9 LOC. Struct-of-structs preserved type safety while reducing 15-field RenderArgs to 4 sub-structs (callbacks/ui/upload/active).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T11:15:55"
+}

@@ -1,6 +1,6 @@
 number = 7
 slug = "split-model-dispatch"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 33 step 007: split model_dispatch.rs (bonus / continuation).
 
@@ -8,5 +8,6 @@ model_disp..."""
 role = "production"
 context_files = []
 created_at = "2026-05-22T18:14:39"
+completed_at = "2026-05-23T11:15:55"
 task_type = "refactor"
-commits = []
+commits = ["aba6e57006ee99c6ba3f2f55f12990c7dfdcf40d"]
