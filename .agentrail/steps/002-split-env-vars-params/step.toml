@@ -1,6 +1,6 @@
 number = 2
 slug = "split-env-vars-params"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 33 step 002: extract env_vars.rs from env.rs.
 
@@ -8,5 +8,6 @@ crates/mlpl-eval/src/env...."""
 role = "production"
 context_files = []
 created_at = "2026-05-22T18:13:49"
+completed_at = "2026-05-22T19:11:21"
 task_type = "refactor"
-commits = []
+commits = ["cb33cea7424517497f2418a06f5c13e8b7f56508"]
