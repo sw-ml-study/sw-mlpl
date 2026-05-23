@@ -1,0 +1,17 @@
+# Saga 33 step 008: nested workspace housing the mlpl-eval session
+# component. Splits Environment + model DSL into loosely-coupled
+# sub-crates (each <= 7 modules) using the C+D pattern:
+# (state struct, inherent methods, capability trait).
+#
+# Path deps reach back into the main workspace via `../../crates/...`;
+# cross-workspace path deps work and build into the consumer's
+# target. Pattern follows services/mlpl-mlx-serve/.
+
+[workspace]
+members = ["crates/mlpl-models-tape"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"

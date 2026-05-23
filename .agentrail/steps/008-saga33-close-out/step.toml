@@ -1,6 +1,6 @@
 number = 8
 slug = "saga33-close-out"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 33 step 008 (FINAL, use --done): saga close-out.
 

@@ -421,7 +421,7 @@ pub(crate) fn eval_expr(
         crate::type_errors::check_logit_consumer("cross_entropy", &args[0], env)?;
         let logits = eval_expr(&args[0], env, trace)?.into_array()?;
         let targets = eval_expr(&args[1], env, trace)?.into_array()?;
-        crate::model_tape::validate_cross_entropy_targets(&logits, &targets)?;
+        mlpl_models_tape::validate_cross_entropy_targets(&logits, &targets)?;
         let result = mlpl_runtime::call_builtin("cross_entropy", vec![logits, targets])?;
         return Ok(Value::Array(result));
     }
