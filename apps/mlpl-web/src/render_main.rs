@@ -76,18 +76,14 @@ fn render_repl_pane(
     } else {
         html! { <Welcome /> }
     };
+    let value = (**input_value).clone();
     html! {
         <>
             <div id="output" class="output">
                 { welcome }
                 { for history.iter().map(render_entry) }
             </div>
-            <InputRow
-                value={(**input_value).clone()}
-                on_input={on_input}
-                on_keydown={on_keydown}
-                in_tutorial={tutorial_active}
-            />
+            <InputRow {value} {on_input} {on_keydown} in_tutorial={tutorial_active} />
         </>
     }
 }
