@@ -141,59 +141,6 @@ impl Environment {
         Self::default()
     }
 
-    /// Look up a variable by name.
-    pub fn get(&self, name: &str) -> Option<&DenseArray> {
-        self.vars.get(name)
-    }
-
-    /// Set a variable binding.
-    pub fn set(&mut self, name: String, value: DenseArray) {
-        self.vars.insert(name, value);
-    }
-
-    /// Set a variable and mark it as a trainable parameter (tracked by `grad`).
-    pub fn set_param(&mut self, name: String, value: DenseArray) {
-        self.params.insert(name.clone());
-        self.vars.insert(name, value);
-    }
-
-    /// Mark an existing variable as a trainable parameter.
-    pub fn mark_param(&mut self, name: &str) {
-        self.params.insert(name.to_string());
-    }
-
-    /// Whether `name` is a trainable parameter in this environment.
-    #[must_use]
-    pub fn is_param(&self, name: &str) -> bool {
-        self.params.contains(name)
-    }
-
-    /// Saga 15 step 001: mark `name` as frozen. `adam` and
-    /// `momentum_sgd` skip any frozen name when applying
-    /// parameter updates.
-    pub fn mark_frozen(&mut self, name: &str) {
-        self.frozen_params.insert(name.to_string());
-    }
-
-    /// Saga 15 step 001: remove `name` from the frozen set.
-    /// No-op if `name` is not currently frozen.
-    pub fn unmark_frozen(&mut self, name: &str) {
-        self.frozen_params.remove(name);
-    }
-
-    /// Saga 15 step 001: whether `name` is currently frozen.
-    #[must_use]
-    pub fn is_frozen(&self, name: &str) -> bool {
-        self.frozen_params.contains(name)
-    }
-
-    /// Iterate over all (name, value) parameter bindings.
-    pub fn params(&self) -> impl Iterator<Item = (&String, &DenseArray)> {
-        self.params
-            .iter()
-            .filter_map(move |n| self.vars.get(n).map(|v| (n, v)))
-    }
-
     /// Look up a model by name (Saga 11). Returns `None` if `name`
     /// is not bound to a model value.
     #[must_use]
@@ -250,12 +197,6 @@ impl Environment {
     #[must_use]
     pub fn experiment_log(&self) -> &[ExperimentRecord] {
         &self.experiment_log
-    }
-
-    /// Iterate over every bound `(name, DenseArray)`. Used by
-    /// `experiment` to scan for `_metric`-suffixed scalars.
-    pub fn vars_iter(&self) -> impl Iterator<Item = (&String, &DenseArray)> {
-        self.vars.iter()
     }
 
     /// Iterate over every bound `(name, ModelSpec)`. Saga 21 step
