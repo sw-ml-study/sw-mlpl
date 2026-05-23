@@ -5,6 +5,7 @@ mod display;
 mod error;
 mod indexing;
 mod ops;
+mod ops_concat;
 mod shape;
 
 pub use dense::DenseArray;

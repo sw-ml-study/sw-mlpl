@@ -27,7 +27,10 @@ mod grad;
 mod grad_optim;
 #[cfg(feature = "image-io")]
 mod image_io;
+#[cfg(feature = "image-io")]
+mod image_io_pixels;
 mod inspect;
+mod inspect_render;
 
 #[cfg(feature = "image-io")]
 pub use image_io::decode_and_resize_u8;
@@ -43,6 +46,7 @@ mod model_freeze;
 mod model_lora;
 mod model_perturb;
 mod model_tape;
+mod model_tape_attention;
 mod pets_tiny;
 mod result_ops;
 mod tag_propagate;

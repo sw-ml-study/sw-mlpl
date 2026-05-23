@@ -152,6 +152,7 @@ impl RemoteEvaluator {
 
     /// Internal hook for `eval_wasm.rs` to receive the shared
     /// state cell without exposing it to external callers.
+    #[allow(dead_code)]
     pub(crate) fn state_handle(&self) -> Rc<RefCell<Option<RemoteSession>>> {
         self.state.clone()
     }

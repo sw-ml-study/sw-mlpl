@@ -9,11 +9,9 @@
 //! grammar and never need to return a value.
 
 use mlpl_array::DenseArray;
-use mlpl_core::LabeledShape;
+use mlpl_eval_core::inspect_groups::BUILTIN_GROUPS;
 
 use crate::env::Environment;
-use mlpl_eval_core::inspect_groups::BUILTIN_GROUPS;
-use mlpl_eval_core::model::{ActKind, ModelSpec};
 
 /// If `input` is a recognized introspection command, returns the
 /// rendered output. Returns `None` when the command is not one of
@@ -36,7 +34,7 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
              built-in surface, use :builtins"
                 .into(),
         ),
-        ":builtins" | ":built-ins" => Some(format_builtins()),
+        ":builtins" | ":built-ins" => Some(crate::inspect_render::format_builtins()),
         ":experiments" => Some(crate::experiment::format_registry(env)),
         ":version" => Some(format!(
             "MLPL v{} -- Array Programming Language for ML\n  \
@@ -88,7 +86,7 @@ fn help_topic(topic: &str, env: &Environment) -> Option<String> {
              built-in surface, use :builtins"
                 .into(),
         ),
-        "builtins" | "built-ins" => Some(format_builtins()),
+        "builtins" | "built-ins" => Some(crate::inspect_render::format_builtins()),
         "wsid" | "workspace" => Some(format!(
             "workspace:\n  variables:       {}\n  parameters:      {}\n  \
              models:          {}\n  optimizer slots: {}",
@@ -116,7 +114,7 @@ fn format_vars(env: &Environment) -> String {
     let mut out = String::new();
     for name in names {
         let arr = &env.vars[name];
-        let shape = format_shape(arr);
+        let shape = crate::inspect_render::format_shape(arr);
         let param_marker = if env.params.contains(name) {
             " [param]"
         } else {
@@ -144,7 +142,7 @@ fn format_models(env: &Environment) -> String {
         let param_count = spec.params().len();
         out.push_str(&format!(
             "  {name}: {} ({param_count} params)\n",
-            render_spec(spec)
+            crate::inspect_render::render_spec(spec)
         ));
     }
     out.truncate(out.trim_end().len());
@@ -152,7 +150,7 @@ fn format_models(env: &Environment) -> String {
 }
 
 fn describe_array(env: &Environment, name: &str, arr: &DenseArray) -> String {
-    let shape = format_shape(arr);
+    let shape = crate::inspect_render::format_shape(arr);
     let param_marker = if env.params.contains(name) {
         " (trainable param)"
     } else {
@@ -188,7 +186,10 @@ fn format_describe(env: &Environment, name: &str) -> String {
         return format!("{name} -- tokenizer\n  {}", tok.describe());
     }
     if let Some(spec) = env.models.get(name) {
-        let mut out = format!("{name} -- model\n  shape: {}\n", render_spec(spec));
+        let mut out = format!(
+            "{name} -- model\n  shape: {}\n",
+            crate::inspect_render::render_spec(spec)
+        );
         let ps = spec.params();
         if ps.is_empty() {
             out.push_str("  params: (none)");
@@ -196,7 +197,10 @@ fn format_describe(env: &Environment, name: &str) -> String {
             out.push_str("  params:\n");
             for p in ps {
                 if let Some(arr) = env.vars.get(&p) {
-                    out.push_str(&format!("    {p}: {}\n", format_shape(arr)));
+                    out.push_str(&format!(
+                        "    {p}: {}\n",
+                        crate::inspect_render::format_shape(arr)
+                    ));
                 }
             }
             out.truncate(out.trim_end().len());
@@ -229,73 +233,3 @@ fn format_describe(env: &Environment, name: &str) -> String {
 // below stays here because it consumes the table for output
 // formatting (private helper) -- the data and the formatting are
 // orthogonal axes of change.
-
-fn format_builtins() -> String {
-    let mut out = String::new();
-    for (group, fns) in BUILTIN_GROUPS {
-        out.push_str(group);
-        out.push('\n');
-        for (_, sig, doc) in *fns {
-            out.push_str(&format!("  {sig:<40} {doc}\n"));
-        }
-        out.push('\n');
-    }
-    out.truncate(out.trim_end().len());
-    out
-}
-
-fn format_shape(arr: &DenseArray) -> String {
-    let dims = arr.shape().dims();
-    if dims.is_empty() {
-        return "scalar".into();
-    }
-    // Labeled (fully or partially) arrays render through `LabeledShape`
-    // Display: `[seq=6, d_model=4]`, `[6, d_model=4]`. Unlabeled
-    // arrays keep the positional `[6, 4]` rendering so existing
-    // :vars/:describe output is unchanged for pre-labels demos.
-    if let Some(labels) = arr.labels() {
-        return LabeledShape::new(dims.to_vec(), labels.to_vec()).to_string();
-    }
-    let inner: Vec<String> = dims.iter().map(usize::to_string).collect();
-    format!("[{}]", inner.join(", "))
-}
-
-fn render_spec(spec: &ModelSpec) -> String {
-    match spec {
-        ModelSpec::Linear { .. } => "linear".into(),
-        ModelSpec::Chain(children) => {
-            let parts: Vec<String> = children.iter().map(render_spec).collect();
-            format!("chain({})", parts.join(" -> "))
-        }
-        ModelSpec::Activation(k) => match k {
-            ActKind::Tanh => "tanh".into(),
-            ActKind::Relu => "relu".into(),
-            ActKind::Softmax => "softmax".into(),
-        },
-        ModelSpec::Residual(inner) => format!("residual({})", render_spec(inner)),
-        ModelSpec::RmsNorm { dim } => format!("rms_norm({dim})"),
-        ModelSpec::Attention {
-            d_model,
-            heads,
-            causal,
-            ..
-        } => {
-            let name = if *causal {
-                "causal_attention"
-            } else {
-                "attention"
-            };
-            format!("{name}(d={d_model}, heads={heads})")
-        }
-        ModelSpec::Embedding { vocab, d_model, .. } => {
-            format!("embed[vocab={vocab}, d={d_model}]")
-        }
-        ModelSpec::LinearLora {
-            in_dim,
-            out_dim,
-            rank,
-            alpha,
-            ..
-        } => format!("lora[linear({in_dim} -> {out_dim}), rank={rank}, alpha={alpha}]"),
-    }
-}
