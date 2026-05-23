@@ -9,6 +9,11 @@
 
 mod components;
 mod demos;
+mod demos_attention;
+mod demos_basics;
+mod demos_lm;
+mod demos_models;
+mod demos_vit;
 mod diagrams_view;
 mod entry_render;
 mod glossary_popup;
