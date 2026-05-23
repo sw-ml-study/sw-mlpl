@@ -1,6 +1,6 @@
 number = 3
 slug = "split-env-models-dirs"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 33 step 003: extract env_models.rs + env_dirs.rs from env.rs.
 
