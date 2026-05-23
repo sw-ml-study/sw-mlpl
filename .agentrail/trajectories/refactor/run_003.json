@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 3,
+    "step": "split-env-models-dirs"
+  },
+  "action": "sibling-impl pattern: each topic gets its own .rs with impl Environment over the same pub(crate) fields; kept each module <=4 fns to stay under the 5-fn warn line; bulk sed extraction; cargo build + clippy + release tests + sw-checklist + fmt all green",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-22T19:30:29"
+}
