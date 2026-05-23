@@ -4,14 +4,14 @@
 //! struct lives in `mlpl-eval` and impls all of these traits
 //! once.
 //!
-//! Saga 33 step 009 seeded this crate with the single
-//! `HasModels` capability. Subsequent steps add more traits as
-//! the corresponding sub-crates are extracted (HasDevices when
-//! mlpl-models-apply leaves mlpl-eval, etc.); putting them in
-//! one foundation crate keeps the trait API in one discoverable
-//! place even when the state impls eventually split across many
-//! sibling crates.
+//! Saga 33 step 009 seeded with `HasModels`; step 010 adds
+//! `HasParams` + `HasFrozen`. Subsequent steps add more traits
+//! as the corresponding sub-crates are extracted.
 
+pub mod frozen;
 pub mod models;
+pub mod params;
 
+pub use frozen::HasFrozen;
 pub use models::HasModels;
+pub use params::HasParams;
