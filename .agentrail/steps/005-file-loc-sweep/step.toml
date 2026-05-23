@@ -1,6 +1,6 @@
 number = 5
 slug = "file-loc-sweep"
-status = "in-progress"
+status = "completed"
 description = """
 Tech-debt saga step 005: File LOC sweep.
 
@@ -8,5 +8,6 @@ Tech-debt saga step 005: File LOC sweep.
 role = "production"
 context_files = []
 created_at = "2026-05-22T14:40:37"
+completed_at = "2026-05-22T17:36:42"
 task_type = "refactor"
-commits = []
+commits = ["7c95f3b9c29732ffc1fa3790c4f2c1b15bf25d9b"]
