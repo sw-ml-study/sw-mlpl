@@ -192,17 +192,33 @@ triggers, file-naming conventions, and a refactoring algorithm
 agents should follow.
 
 **`docs/loose-coupling.md` is the companion HOW-TO doc.** It
-captures the four phases code can run in (compile time,
-start-up, conditional, dataflow pipeline) and the
-compose-don't-compress techniques (top-down delegation,
-separated stage definitions, iterator pipelines, building
-chains vs dispatching chains). When a function or module is
-over budget, walk those phases and identify which pieces
-belong to which phase; the over-budget function is almost
-always mixing phases, and the split by phase retires the
-warning naturally. **Do not** try to compress with whitespace
-tricks, `rustfmt::skip`, or `#[allow(...)]` -- the 25 LOC
-budget assumes idiomatic formatting.
+captures three lenses:
+
+1. **Phase separation** -- code runs at one of four phases
+   (compile time, start-up, conditional, dataflow). When
+   over budget, walk the phases; the over-budget function
+   is almost always mixing phases, and the split by phase
+   retires the warning naturally. A FIFTH phase
+   (pre-compile via `build.rs`) lets external data drive
+   codegen for the other four.
+2. **Compose, don't compress** -- top-down delegation,
+   iterator pipelines, `?`-chained `Result`/`Option`
+   monads, builder/visitor patterns. Functional style is
+   compact style.
+3. **Define once, invoke many** -- macros (per-site cost:
+   one line), trait blanket impls, `const` lookup tables,
+   and `build.rs` codegen drive boilerplate from a single
+   source of truth across initialization, dispatch, docs,
+   and domain logic.
+
+The doc has a **symptom -> technique table** that maps each
+sw-checklist warning category (Function-LOC, Module-Fn-
+Count, File-LOC, Crate-Module-Count, Clippy-Allows) to the
+first refactor to try.
+
+**Do not** try to compress with whitespace tricks,
+`rustfmt::skip`, or `#[allow(...)]` -- the 25 LOC budget
+assumes idiomatic formatting.
 
 Top directives:
 
