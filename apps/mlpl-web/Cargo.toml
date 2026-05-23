@@ -3,6 +3,15 @@ name = "mlpl-web"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
+build = "build.rs"
+
+[lib]
+name = "mlpl_web"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mlpl-web"
+path = "src/main.rs"
 
 [dependencies]
 mlpl-wasm = { path = "../../crates/mlpl-wasm" }
