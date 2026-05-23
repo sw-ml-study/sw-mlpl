@@ -169,11 +169,12 @@ fn builtin_argmax(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runti
 }
 
 fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
-    if args.len() != 1 && args.len() != 2 {
+    let got = args.len();
+    if got != 1 && got != 2 {
         return Err(RuntimeError::ArityMismatch {
             func: name.into(),
             expected: 1,
-            got: args.len(),
+            got,
         });
     }
     let (identity, op): (f64, fn(f64, f64) -> f64) = match name {
@@ -181,19 +182,20 @@ fn builtin_reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runti
         "reduce_mul" => (1.0, |a, b| a * b),
         _ => unreachable!(),
     };
-    if args.len() == 2 {
-        if args[1].rank() != 0 {
-            return Err(RuntimeError::InvalidArgument {
-                func: name.into(),
-                reason: format!("axis must be scalar, got rank {}", args[1].rank()),
-            });
-        }
-        let axis = args[1].data()[0] as usize;
-        Ok(args[0].reduce_axis(axis, identity, op)?)
-    } else {
-        let result = args[0].data().iter().copied().fold(identity, op);
-        Ok(DenseArray::from_scalar(result))
+    if got == 1 {
+        return Ok(DenseArray::from_scalar(
+            args[0].data().iter().copied().fold(identity, op),
+        ));
     }
+    if args[1].rank() != 0 {
+        let reason = format!("axis must be scalar, got rank {}", args[1].rank());
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason,
+        });
+    }
+    let axis = args[1].data()[0] as usize;
+    Ok(args[0].reduce_axis(axis, identity, op)?)
 }
 
 fn builtin_patchify(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
