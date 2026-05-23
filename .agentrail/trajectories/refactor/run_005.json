@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 5,
+    "step": "split-env-values-tags"
+  },
+  "action": "multi-impl pattern as in env.rs/model_dispatch: each topic gets its own .rs with impl DenseArray over the pub(crate) shape/data/labels fields. Pulled helper functions (compute_strides, matmul_labels, merge_labels) into the sibling that owns them or into ops_strides.rs as a shared helper. Deleted ops.rs entirely since every method moved out. cargo build + clippy + tests + sw-checklist all green.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T09:01:34"
+}

@@ -1,6 +1,6 @@
 number = 5
 slug = "split-env-values-tags"
-status = "in-progress"
+status = "completed"
 description = """
 Saga 33 step 005: extract env_values.rs + env_tags.rs from env.rs.
 
@@ -8,5 +8,6 @@ Continue ..."""
 role = "production"
 context_files = []
 created_at = "2026-05-22T18:14:14"
+completed_at = "2026-05-23T09:01:34"
 task_type = "refactor"
-commits = []
+commits = ["9dcba0b4b374efd27252c9db82b1037c7ab314f9"]
