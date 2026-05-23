@@ -2,6 +2,8 @@
 
 This section guides AI coding agents in creating loosely-coupled, functional-style, testable, and maintainable Rust code that fits small-part complexity gates. The principles apply broadly across languages; the examples are Rust.
 
+**Companion document: [`docs/loose-coupling.md`](loose-coupling.md)** captures the HOW: the four phases code can run in (compile time, start-up, conditional, dataflow pipeline) and the compose-don't-compress techniques (top-down delegation, separated stage definitions, iterator pipelines, building chains vs dispatching chains). When a function or module is over the budgets below, walk the four phases and split by phase -- do NOT compress with whitespace tricks or `rustfmt::skip`. The 25-LOC budget assumes idiomatic formatting.
+
 ### Target Metric Gates
 
 | Level | Preferred Gate |
@@ -710,6 +712,8 @@ Refactor and write Rust code according to these gates and layout rules:
 ## Code Metric Gates and Architecture Guide
 
 This section guides AI coding agents in creating loosely-coupled, functional-style, testable, and maintainable Rust code that fits small-part complexity gates. The principles apply broadly across languages; the examples are Rust.
+
+**Companion document: [`docs/loose-coupling.md`](loose-coupling.md)** captures the HOW: the four phases code can run in (compile time, start-up, conditional, dataflow pipeline) and the compose-don't-compress techniques (top-down delegation, separated stage definitions, iterator pipelines, building chains vs dispatching chains). When a function or module is over the budgets below, walk the four phases and split by phase -- do NOT compress with whitespace tricks or `rustfmt::skip`. The 25-LOC budget assumes idiomatic formatting.
 
 ### Target Metric Gates
 
