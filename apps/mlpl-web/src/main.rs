@@ -20,28 +20,30 @@ mod glossary_popup;
 mod glossary_view;
 mod handlers;
 mod help;
+mod mode_callbacks;
+mod mode_path;
+mod mode_select;
 mod paths;
 mod paths_view;
 #[cfg(test)]
 mod readme_counts;
+mod render_main;
+mod render_tutorial;
+mod scroll;
 mod tutorial;
 mod upload;
 mod upload_cmd;
 
-use components::{
-    DocDialog, Footer, GithubCorner, Header, HeaderMode, InputRow, ModeBar, TutorialPanel,
-    TutorialPanelProps, TutorialView, Welcome,
-};
-use entry_render::render_entry;
+use components::{DocDialog, Footer, GithubCorner, Header, HeaderMode, ModeBar, TutorialView};
 use handlers::{
     EvalDeps, make_clear, make_keydown, make_oninput, make_run_demo, make_submit,
     make_submit_batch, toggle_bool,
 };
 use mlpl_wasm::WasmSession;
 use mlpl_web_eval::state::HistoryEntry;
-use tutorial::{jump_lesson, run_example, step_lesson};
-use wasm_bindgen::JsCast;
-use web_sys::HtmlInputElement;
+use render_main::{MainArgs, render_main};
+use scroll::scroll_and_focus;
+use tutorial::run_example;
 use yew::prelude::*;
 
 const REPO_URL: &str = "https://github.com/sw-ml-study/sw-mlpl";
@@ -191,7 +193,7 @@ fn render(a: RenderArgs) -> Html {
     } else {
         HeaderMode::Repl
     };
-    let cb = mode_callbacks(
+    let cb = mode_callbacks::bundle(
         a.lesson_idx.clone(),
         a.path_state.clone(),
         a.tutorial_initial_view.clone(),
@@ -236,183 +238,6 @@ fn render(a: RenderArgs) -> Html {
             <Footer url={REPO_URL} />
             <DocDialog open={*a.dialog_open} on_close={close_dialog} />
         </>
-    }
-}
-
-/// Bundle of mode-switch + paths-callback handlers built
-/// from the shared lesson/path state. Extracted so the
-/// `render` body stays under the function-LOC budget; the
-/// callback closures are otherwise just plumbing.
-struct ModeCallbacks {
-    repl: Callback<MouseEvent>,
-    tutorial: Callback<MouseEvent>,
-    paths: Callback<MouseEvent>,
-    path_change: Callback<Option<(Option<usize>, usize)>>,
-    path_open_lesson: Callback<usize>,
-    path_run_demo: Callback<String>,
-}
-
-fn mode_callbacks(
-    lesson_idx: UseStateHandle<Option<usize>>,
-    path_state: UseStateHandle<Option<(Option<usize>, usize)>>,
-    tutorial_view: UseStateHandle<TutorialView>,
-    on_demo: Callback<usize>,
-) -> ModeCallbacks {
-    let repl = {
-        let l = lesson_idx.clone();
-        let p = path_state.clone();
-        Callback::from(move |_| {
-            l.set(None);
-            p.set(None);
-        })
-    };
-    let tutorial = {
-        let l = lesson_idx.clone();
-        let p = path_state.clone();
-        let v = tutorial_view.clone();
-        Callback::from(move |_| {
-            p.set(None);
-            if l.is_none() {
-                v.set(TutorialView::Toc);
-                l.set(Some(0));
-            }
-        })
-    };
-    let paths = {
-        let l = lesson_idx.clone();
-        let p = path_state.clone();
-        Callback::from(move |_| {
-            l.set(None);
-            if p.is_none() {
-                p.set(Some((None, 0)));
-            }
-        })
-    };
-    let path_change = {
-        let p = path_state.clone();
-        Callback::from(move |next| p.set(next))
-    };
-    let path_open_lesson = {
-        let l = lesson_idx.clone();
-        let p = path_state.clone();
-        let v = tutorial_view;
-        Callback::from(move |i: usize| {
-            p.set(None);
-            v.set(TutorialView::Lesson);
-            l.set(Some(i));
-        })
-    };
-    let path_run_demo = {
-        let p = path_state;
-        Callback::from(move |name: String| {
-            if let Some(idx) = demos::DEMOS.iter().position(|d| d.name == name) {
-                p.set(None);
-                on_demo.emit(idx);
-            }
-        })
-    };
-    ModeCallbacks {
-        repl,
-        tutorial,
-        paths,
-        path_change,
-        path_open_lesson,
-        path_run_demo,
-    }
-}
-
-struct MainArgs<'a> {
-    tutorial_active: bool,
-    paths_active: bool,
-    cur_lesson: Option<usize>,
-    lesson_idx: UseStateHandle<Option<usize>>,
-    initial_view: TutorialView,
-    cur_path: Option<(Option<usize>, usize)>,
-    cb: &'a ModeCallbacks,
-    history: &'a UseStateHandle<Vec<HistoryEntry>>,
-    input_value: &'a UseStateHandle<String>,
-    on_input: Callback<InputEvent>,
-    on_keydown: Callback<web_sys::KeyboardEvent>,
-    on_run_example: Callback<String>,
-    on_run_batch: Callback<Vec<String>>,
-}
-
-fn render_main(a: MainArgs) -> Html {
-    let tutorial_pane = render_tutorial(
-        a.cur_lesson,
-        a.lesson_idx,
-        a.initial_view,
-        a.on_run_example,
-        a.on_run_batch,
-    );
-    let paths_pane = html! {
-        <paths_view::PathsView
-            state={a.cur_path}
-            on_change={a.cb.path_change.clone()}
-            on_open_lesson={a.cb.path_open_lesson.clone()}
-            on_run_demo={a.cb.path_run_demo.clone()}
-        />
-    };
-    let repl_pane = html! {
-        <>
-            <div id="output" class="output">
-                { if a.tutorial_active || a.paths_active { html!{} } else { html!{ <Welcome /> } } }
-                { for a.history.iter().map(render_entry) }
-            </div>
-            <InputRow value={(**a.input_value).clone()} on_input={a.on_input} on_keydown={a.on_keydown} in_tutorial={a.tutorial_active} />
-        </>
-    };
-    if a.tutorial_active {
-        html! {
-            <main class="tutorial-split">
-                <section class="tutorial-pane">{ tutorial_pane }</section>
-                <section class="repl-pane">{ repl_pane }</section>
-            </main>
-        }
-    } else {
-        html! {
-            <main>
-                { tutorial_pane }
-                { paths_pane }
-                { repl_pane }
-            </main>
-        }
-    }
-}
-
-fn render_tutorial(
-    cur: Option<usize>,
-    lesson: UseStateHandle<Option<usize>>,
-    initial_view: TutorialView,
-    on_run_example: Callback<String>,
-    on_run_batch: Callback<Vec<String>>,
-) -> Html {
-    let Some(idx) = cur else { return html! {} };
-    let props = TutorialPanelProps {
-        lesson_idx: idx,
-        on_prev: step_lesson(lesson.clone(), -1),
-        on_next: step_lesson(lesson.clone(), 1),
-        on_jump: jump_lesson(lesson.clone()),
-        on_close: Callback::from(move |_| lesson.set(None)),
-        on_run_example,
-        on_run_batch,
-        initial_view,
-    };
-    html! { <TutorialPanel ..props /> }
-}
-
-fn scroll_and_focus() {
-    if let Some(window) = web_sys::window()
-        && let Some(document) = window.document()
-    {
-        if let Some(el) = document.get_element_by_id("output") {
-            el.set_scroll_top(el.scroll_height());
-        }
-        if let Some(el) = document.get_element_by_id("repl-input")
-            && let Ok(input) = el.dyn_into::<HtmlInputElement>()
-        {
-            let _ = input.focus();
-        }
     }
 }
 

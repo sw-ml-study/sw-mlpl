@@ -1,6 +1,6 @@
 number = 6
 slug = "split-env-signals"
-status = "pending"
+status = "in-progress"
 description = """
 Saga 33 step 006: extract env_signals.rs from env.rs (final env.rs split).
 

@@ -1,0 +1,120 @@
+//! Saga 33 step 006: main-pane composer extracted from
+//! `main.rs::render_main`. The original 42-LOC body inlined
+//! three panes + a shell-layout match; now each pane is its
+//! own helper and `render_main` is a 7-line composer.
+
+use yew::prelude::*;
+
+use crate::components::{InputRow, Welcome};
+use crate::entry_render::render_entry;
+use crate::mode_callbacks::ModeCallbacks;
+use crate::paths_view;
+use crate::render_tutorial::render_tutorial;
+use mlpl_web_eval::state::HistoryEntry;
+
+pub struct MainArgs<'a> {
+    pub tutorial_active: bool,
+    pub paths_active: bool,
+    pub cur_lesson: Option<usize>,
+    pub lesson_idx: UseStateHandle<Option<usize>>,
+    pub initial_view: crate::components::TutorialView,
+    pub cur_path: Option<(Option<usize>, usize)>,
+    pub cb: &'a ModeCallbacks,
+    pub history: &'a UseStateHandle<Vec<HistoryEntry>>,
+    pub input_value: &'a UseStateHandle<String>,
+    pub on_input: Callback<InputEvent>,
+    pub on_keydown: Callback<web_sys::KeyboardEvent>,
+    pub on_run_example: Callback<String>,
+    pub on_run_batch: Callback<Vec<String>>,
+}
+
+pub fn render_main(a: MainArgs) -> Html {
+    let tutorial_pane = render_tutorial(
+        a.cur_lesson,
+        a.lesson_idx,
+        a.initial_view,
+        a.on_run_example,
+        a.on_run_batch,
+    );
+    let paths_pane = render_paths_pane(a.cur_path, a.cb);
+    let repl_pane = render_repl_pane(
+        a.history,
+        a.input_value,
+        a.on_input,
+        a.on_keydown,
+        a.tutorial_active,
+        a.paths_active,
+    );
+    render_main_shell(a.tutorial_active, tutorial_pane, paths_pane, repl_pane)
+}
+
+/// PathsView render: thin wrapper so the parent doesn't need to
+/// know about `paths_view::PathsView`'s prop shape.
+fn render_paths_pane(cur_path: Option<(Option<usize>, usize)>, cb: &ModeCallbacks) -> Html {
+    html! {
+        <paths_view::PathsView
+            state={cur_path}
+            on_change={cb.path_change.clone()}
+            on_open_lesson={cb.path_open_lesson.clone()}
+            on_run_demo={cb.path_run_demo.clone()}
+        />
+    }
+}
+
+/// REPL pane: the welcome banner (only when no other pane is
+/// active), the scrolling history, and the input row.
+fn render_repl_pane(
+    history: &UseStateHandle<Vec<HistoryEntry>>,
+    input_value: &UseStateHandle<String>,
+    on_input: Callback<InputEvent>,
+    on_keydown: Callback<web_sys::KeyboardEvent>,
+    tutorial_active: bool,
+    paths_active: bool,
+) -> Html {
+    let welcome = if tutorial_active || paths_active {
+        html! {}
+    } else {
+        html! { <Welcome /> }
+    };
+    html! {
+        <>
+            <div id="output" class="output">
+                { welcome }
+                { for history.iter().map(render_entry) }
+            </div>
+            <InputRow
+                value={(**input_value).clone()}
+                on_input={on_input}
+                on_keydown={on_keydown}
+                in_tutorial={tutorial_active}
+            />
+        </>
+    }
+}
+
+/// Layout shell: when the tutorial is active, render a 2-pane
+/// split (tutorial + repl); otherwise stack the panes in a
+/// single `<main>` container.
+fn render_main_shell(
+    tutorial_active: bool,
+    tutorial_pane: Html,
+    paths_pane: Html,
+    repl_pane: Html,
+) -> Html {
+    if tutorial_active {
+        html! {
+            <main class="tutorial-split">
+                <section class="tutorial-pane">{ tutorial_pane }</section>
+                <section class="repl-pane">{ repl_pane }</section>
+            </main>
+        }
+    } else {
+        html! {
+            <main>
+                { tutorial_pane }
+                { paths_pane }
+                { repl_pane }
+            </main>
+        }
+    }
+}
