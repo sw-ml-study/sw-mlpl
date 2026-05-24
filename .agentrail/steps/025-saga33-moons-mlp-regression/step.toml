@@ -1,6 +1,6 @@
 number = 25
 slug = "saga33-moons-mlp-regression"
-status = "pending"
+status = "in-progress"
 description = "Investigate and fix the Moons MLP web-demo decision-boundary regression. The ..."
 role = "production"
 context_files = []
