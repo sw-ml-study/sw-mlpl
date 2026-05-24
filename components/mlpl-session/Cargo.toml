@@ -14,6 +14,7 @@ members = [
     "crates/mlpl-models-inspect",
     "crates/mlpl-models-mutate",
     "crates/mlpl-models-tape",
+    "crates/mlpl-models-tune",
 ]
 resolver = "2"
 
