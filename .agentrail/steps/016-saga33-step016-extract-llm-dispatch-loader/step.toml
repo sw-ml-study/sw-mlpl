@@ -1,0 +1,9 @@
+number = 16
+slug = "saga33-step016-extract-llm-dispatch-loader"
+status = "pending"
+description = "Continue analyze extraction. Two remaining model_* files in mlpl-eval: llm_di..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-23T19:37:36"
+task_type = "tech-debt"
+commits = []
