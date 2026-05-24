@@ -1,0 +1,1 @@
+Step 019 moved TokenizerSpec from mlpl-eval to mlpl-eval-core (tiny structural unblock). Both Value::Tokenizer's TokenizerSpec and Value::Model's ModelSpec now live in eval-core; future Value extraction is no longer blocked by these cross-deps. mlpl-eval/tokenizer.rs replaced the local enum with pub use re-export so all existing crate::tokenizer::TokenizerSpec paths kept working.
