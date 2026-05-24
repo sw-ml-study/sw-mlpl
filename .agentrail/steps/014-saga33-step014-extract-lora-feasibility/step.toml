@@ -1,0 +1,9 @@
+number = 14
+slug = "saga33-step014-extract-lora-feasibility"
+status = "pending"
+description = "Continue analyze extraction with model_lora + model_feasibility. lora needs H..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-23T19:15:36"
+task_type = "tech-debt"
+commits = []
