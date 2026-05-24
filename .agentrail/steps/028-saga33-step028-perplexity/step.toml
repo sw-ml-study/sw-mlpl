@@ -1,9 +1,10 @@
 number = 28
 slug = "saga33-step028-perplexity"
-status = "in-progress"
+status = "completed"
 description = "Add a `perplexity(logits, targets)` builtin convenience function. Update the ..."
 role = "production"
 context_files = []
 created_at = "2026-05-24T13:45:44"
+completed_at = "2026-05-24T14:00:35"
 task_type = "feature"
-commits = []
+commits = ["24b5b15a7d3e1f84c4e56e5c3a7eea5afc796656"]

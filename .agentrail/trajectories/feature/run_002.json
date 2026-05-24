@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 28,
+    "step": "saga33-step028-perplexity"
+  },
+  "action": "One-line match arm in try_call avoided adding a fn to the at-max module. Help_completeness test caught the need to update inspect_groups.rs + lang-reference.md together. Perplexity readout placed AFTER loss_curve in each demo so it's the final scalar the user sees -- pedagogically more useful than burying it mid-script. Glossary text updated verbatim per the user's provided wording.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T14:00:35"
+}
