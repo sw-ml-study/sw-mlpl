@@ -1,6 +1,6 @@
 number = 16
 slug = "saga33-step016-extract-llm-dispatch-loader"
-status = "pending"
+status = "in-progress"
 description = "Continue analyze extraction. Two remaining model_* files in mlpl-eval: llm_di..."
 role = "legacy"
 context_files = []

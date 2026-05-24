@@ -1933,6 +1933,7 @@ dependencies = [
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
  "mlpl-models-inspect",
+ "mlpl-models-llm",
  "mlpl-models-mutate",
  "mlpl-models-tape",
  "mlpl-models-tune",
@@ -2025,6 +2026,13 @@ dependencies = [
  "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-parser",
+]
+
+[[package]]
+name = "mlpl-models-llm"
+version = "0.20.0"
+dependencies = [
+ "mlpl-runtime",
 ]
 
 [[package]]

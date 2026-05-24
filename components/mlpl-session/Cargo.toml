@@ -13,6 +13,7 @@ members = [
     "crates/mlpl-models-feasibility",
     "crates/mlpl-models-freeze",
     "crates/mlpl-models-inspect",
+    "crates/mlpl-models-llm",
     "crates/mlpl-models-mutate",
     "crates/mlpl-models-tape",
     "crates/mlpl-models-tune",

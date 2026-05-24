@@ -1,0 +1,13 @@
+# Saga 33 step 016: llm_call(url, prompt, model) dispatcher.
+# Just the Expr -> String -> ollama-call -> String adapter.
+# String-in, string-out; the caller (mlpl-eval) wraps the
+# reply in Value::Str.
+
+[package]
+name = "mlpl-models-llm"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-runtime = { path = "../../../../crates/mlpl-runtime" }
