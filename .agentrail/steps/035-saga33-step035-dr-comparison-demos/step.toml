@@ -1,0 +1,9 @@
+number = 35
+slug = "saga33-step035-dr-comparison-demos"
+status = "pending"
+description = "Phase 3 of the dimensionality reduction milestone (full plan: docs/milestone-..."
+role = "production"
+context_files = []
+created_at = "2026-05-24T15:25:29"
+task_type = "feature"
+commits = []
