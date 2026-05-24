@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 24,
+    "step": "saga33-step024-eval-ops-warns"
+  },
+  "action": "Two-axis split: by phase (topic table vs per-kind describer vs listings) AND by function size (each helper ≤25 LOC). Shared topic_output table consolidates the duplication between :topic and :help topic command surfaces.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T10:17:00"
+}

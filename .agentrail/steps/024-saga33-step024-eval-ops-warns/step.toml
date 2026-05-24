@@ -1,9 +1,10 @@
 number = 24
 slug = "saga33-step024-eval-ops-warns"
-status = "pending"
+status = "completed"
 description = "mlpl-eval still has many Function-LOC WARN entries in inspect.rs, value.rs (f..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-24T09:18:39"
+completed_at = "2026-05-24T10:17:00"
 task_type = "tech-debt"
-commits = []
+commits = ["4880620e439baeb9a9750b7c811ed1ac26f2451e"]
