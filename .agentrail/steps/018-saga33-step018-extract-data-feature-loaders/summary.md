@@ -1,0 +1,1 @@
+Step 018 extracted the pure BPE training + apply + decode algorithm to mlpl-bpe-core sub-crate (9th sub-crate, simplest yet -- zero workspace deps, bytes-in / ids-out). 3 modules with strict <=3 fns each, all PASS. mlpl-eval bpe.rs slimmed from 10 fns to 7 fns by deleting the pure helpers and using mlpl_bpe_core::{train, apply_trained, decode_token} at call sites.

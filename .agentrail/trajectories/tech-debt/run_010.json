@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 18,
+    "step": "saga33-step018-extract-data-feature-loaders"
+  },
+  "action": "Pure-data extraction: BPE algorithm needs only u8/u32 slices, no Value, no env, no parser. The mlpl-eval wrapper continues to handle Value::Str/Value::Array marshalling. Re-exported pub(crate) use mlpl_bpe_core::train so the existing crate::bpe::train path keeps working from tokenizer.rs's train_bpe dispatch. cargo build + clippy all green. HOLD on both ratchet axes since bpe.rs's 10 fns weren't flagged by sw-checklist.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T20:01:04"
+}
