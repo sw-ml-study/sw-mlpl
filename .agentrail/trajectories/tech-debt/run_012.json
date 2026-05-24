@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 20,
+    "step": "saga33-step020-survey-remaining-files"
+  },
+  "action": "FAIL retirement pattern: extract over-budget fn body into sibling module helpers, keep the dispatcher tiny. Used Option<Result> return + if-let dispatch to avoid the helper having to match every variant. cargo build + clippy + sw-checklist all green. -1 FAIL, 0 WARN; FAIL-only net negative warrants exception trailer for WARN hold. This is the first long-standing-debt FAIL retired since the saga began -- fmt was 83 LOC since saga 32 step 001.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T20:13:20"
+}
