@@ -1,6 +1,6 @@
 number = 19
 slug = "saga33-step019-extract-tokenizer-spec"
-status = "pending"
+status = "in-progress"
 description = "Examine tokenizer.rs (206 LOC, has TokenizerSpec enum + dispatch + eval_token..."
 role = "legacy"
 context_files = []
