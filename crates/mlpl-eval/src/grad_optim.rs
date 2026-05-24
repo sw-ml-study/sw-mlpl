@@ -10,10 +10,35 @@
 use mlpl_array::DenseArray;
 use mlpl_core::Span;
 use mlpl_parser::Expr;
+use mlpl_trace::Trace;
 
 use crate::env::Environment;
 use crate::error::EvalError;
 use crate::grad::eval_grad;
+use crate::value::Value;
+
+/// FnCall-dispatch wrapper around `momentum_sgd` / `adam`. Lifted
+/// out of `eval::eval_expr` for saga 33 step 023 so eval.rs drops
+/// below its file LOC budget. Emits a single trace event labelled
+/// with the optimizer name.
+pub(crate) fn eval_optim(
+    name: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+    span: &Span,
+) -> Result<Value, EvalError> {
+    if let Some(loss_arg) = args.first() {
+        crate::type_errors::check_loss_consumer(name, loss_arg, env)?;
+    }
+    let result = if name == "momentum_sgd" {
+        eval_momentum_sgd(args, env)?
+    } else {
+        eval_adam(args, env)?
+    };
+    crate::fncall_trace::push_array_event(trace, name, span, vec![], &result);
+    Ok(Value::Array(result))
+}
 
 /// `momentum_sgd(loss_expr, params, lr, beta)` built-in.
 ///

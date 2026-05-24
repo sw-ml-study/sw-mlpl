@@ -1,6 +1,6 @@
 number = 23
 slug = "saga33-step023-eval-rs-fail"
-status = "pending"
+status = "in-progress"
 description = "Last big mlpl-eval-internal FAIL: eval.rs File-LOC at 841 lines (max 500). Ex..."
 role = "legacy"
 context_files = []
