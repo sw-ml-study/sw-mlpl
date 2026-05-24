@@ -1631,9 +1631,9 @@ critique drove research into multi-layer networks (MLPs).
 
 The exponentiated cross-entropy of a language model on a
 held-out corpus: `exp(cross_entropy_loss)`. Standard LM
-evaluation metric. Lower is better. MLPL doesn't ship a
-dedicated `perplexity` builtin; `exp(cross_entropy(...))`
-gives the same number.
+evaluation metric. Lower is better. MLPL ships
+`perplexity(logits, targets)` as a convenience -- it returns
+`exp(cross_entropy(logits, targets))` in one call.
 
 ## Positional encoding
 

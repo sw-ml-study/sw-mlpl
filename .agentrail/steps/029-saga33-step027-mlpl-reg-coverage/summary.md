@@ -1,0 +1,1 @@
+BLOCKED: pivoted to user-requested perplexity builtin + glossary + demo update. No deliverables shipped under this slug; the coverage work resumes after the perplexity step.

@@ -1,4 +1,4 @@
-number = 29
+number = 30
 slug = "saga33-step029-pca-3d-plotly"
 status = "pending"
 description = "Add an interactive Plotly-based 3D viz to the MLPL web playground, then use i..."

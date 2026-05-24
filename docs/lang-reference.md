@@ -319,6 +319,7 @@ Newlines and semicolons are both statement separators.
 | `softmax(a, axis)` | 2 | Softmax along `axis`, stabilized by subtracting the per-group max before exponentiation. |
 | `one_hot(labels, k)` | 2 | Convert a length-N label vector to an `NxK` one-hot matrix. |
 | `cross_entropy(logits, targets)` | 2 | Scalar mean negative log-likelihood. `logits` is `[N, V]` or `[B, T, V]`; `targets` is `[N]` or `[B, T]` integer-valued. Fused, numerically-stable log-softmax + NLL; fully differentiable wrt `logits` via `grad(...)`. |
+| `perplexity(logits, targets)` | 2 | Convenience: `exp(cross_entropy(logits, targets))`. The canonical language-model evaluation metric (lower is better). Same arg shapes as `cross_entropy`. Forward-only -- use `cross_entropy` directly inside `grad(...)`. |
 | `sample(logits, temperature, seed)` | 3 | Categorical sample from a 1-D `[V]` logit vector. Returns a scalar integer token id. `temperature == 0.0` collapses to `argmax(logits)`; otherwise draws from `softmax(logits / temperature)` via inverse-CDF on a single seeded uniform. Same `(logits, temperature, seed)` always yields the same id. |
 | `top_k(logits, k)` | 2 | Return a `[V]` logit vector with all but the top-`k` entries replaced by `-inf`. Pure (no randomness). Compose with `sample` for top-k sampling: `sample(top_k(logits, k), temperature, seed)`. |
 | `moons(seed, n_per_class, noise)` | 3 | Seeded two-moons dataset; returns an `Nx3` matrix of `[x, y, label]` for `N = 2 * n_per_class`. |
