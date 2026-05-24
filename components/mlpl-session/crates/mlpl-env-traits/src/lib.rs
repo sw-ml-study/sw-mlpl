@@ -4,14 +4,21 @@
 //! struct lives in `mlpl-eval` and impls all of these traits
 //! once.
 //!
-//! Saga 33 step 009 seeded with `HasModels`; step 010 adds
-//! `HasParams` + `HasFrozen`. Subsequent steps add more traits
-//! as the corresponding sub-crates are extracted.
+//! Trait inventory (saga 33 step 012):
+//! - `HasModels` (models.rs)
+//! - `HasParams` (params.rs)
+//! - `HasFrozen` (frozen.rs)
+//! - `HasVars` (vars.rs)
+//! - `HasTensorDevices` + `HasModelIds` (devices.rs)
 
+pub mod devices;
 pub mod frozen;
 pub mod models;
 pub mod params;
+pub mod vars;
 
+pub use devices::{HasModelIds, HasTensorDevices};
 pub use frozen::HasFrozen;
 pub use models::HasModels;
 pub use params::HasParams;
+pub use vars::HasVars;

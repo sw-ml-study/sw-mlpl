@@ -194,7 +194,7 @@ pub(crate) fn eval_expr(
             "rms_norm" => Some(crate::model_dispatch::eval_rms_norm(args, env)),
             "attention" => Some(crate::model_dispatch::eval_attention(args, env, false)),
             "causal_attention" => Some(crate::model_dispatch::eval_attention(args, env, true)),
-            "clone_model" => Some(crate::model_clone::eval_clone_model(args, env)),
+            "clone_model" => Some(crate::model_mutate::eval_clone_model(args, env)),
             "lora" => Some(crate::model_lora::eval_lora(args, env)),
             _ => None,
         };
@@ -243,7 +243,7 @@ pub(crate) fn eval_expr(
     if let Expr::FnCall { name, args, .. } = expr
         && name == "perturb_params"
     {
-        let result = crate::model_perturb::eval_perturb_params(args, env)?;
+        let result = crate::model_mutate::eval_perturb_params(args, env)?;
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr

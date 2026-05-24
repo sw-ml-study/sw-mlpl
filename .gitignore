@@ -3,6 +3,7 @@
 # Saga R1 step 003: services/ workspaces have their
 # own target/ trees.
 /services/*/target/
+/components/*/target/
 
 # Build artifacts -- never tracked
 *.pdf
