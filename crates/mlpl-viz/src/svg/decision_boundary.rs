@@ -56,9 +56,11 @@ fn draw_surface(out: &mut String, raw: &[f64], rows: usize, cols: usize) -> (f64
     };
     let cell_w = (W - 2.0 * PAD) / cols as f64;
     let cell_h = (H - 2.0 * PAD) / rows as f64;
+    // Flip r so math ymin (grid row 0) lands at image bottom, matching
+    // draw_points's math-y-bottom convention (saga 33 step 025).
     for r in 0..rows {
         for c in 0..cols {
-            let t = ((raw[r * cols + c] - lo) / span).clamp(0.0, 1.0);
+            let t = ((raw[(rows - 1 - r) * cols + c] - lo) / span).clamp(0.0, 1.0);
             let (red, green, blue) = ramp(t);
             let x = PAD + cell_w * c as f64;
             let y = PAD + cell_h * r as f64;
