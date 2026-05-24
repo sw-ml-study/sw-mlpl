@@ -1,9 +1,10 @@
 number = 23
 slug = "saga33-step023-eval-rs-fail"
-status = "in-progress"
+status = "completed"
 description = "Last big mlpl-eval-internal FAIL: eval.rs File-LOC at 841 lines (max 500). Ex..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-24T08:30:36"
+completed_at = "2026-05-24T09:18:39"
 task_type = "tech-debt"
-commits = []
+commits = ["0221ebf04922921158a68b82c776cbca9c59208d"]
