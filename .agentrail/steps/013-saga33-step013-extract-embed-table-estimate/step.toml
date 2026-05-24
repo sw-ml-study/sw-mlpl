@@ -1,0 +1,9 @@
+number = 13
+slug = "saga33-step013-extract-embed-table-estimate"
+status = "pending"
+description = "Continue analyze extraction with model_embed_table + model_estimate (both ~si..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-23T18:49:25"
+task_type = "tech-debt"
+commits = []
