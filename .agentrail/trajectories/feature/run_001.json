@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 26,
+    "step": "saga33-step026-mlpl-reg-harness"
+  },
+  "action": "5x5 median region sampling defends against scatter-dot edges and anti-aliasing -- the user's suggested upgrade after seeing the first naive single-pixel capture pick up a dot edge. Bootstrap workflow embedded in lib doc-comment: MLPL_REG_PRINT_GOLDEN=1 prints copy-pasteable Rust array AND writes diagnostic PNG to /tmp/ so the human inspects before pasting. Demo source inlined in test file (per-test self-contained) -- step 027 should mirror this pattern across all ~28 remaining demos.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T12:49:13"
+}
