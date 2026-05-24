@@ -1,6 +1,6 @@
 number = 15
 slug = "saga33-step015-extract-feasibility-with-dispatcher"
-status = "pending"
+status = "in-progress"
 description = "Extract model_feasibility to mlpl-models-feasibility sub-crate. Requires defi..."
 role = "legacy"
 context_files = []

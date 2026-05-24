@@ -28,7 +28,7 @@ mod env_tags;
 mod env_tensor_device;
 mod env_tokenizers;
 mod env_trait_impls_devices;
-mod env_trait_impls_frozen;
+mod env_trait_impls_dispatch;
 mod env_trait_impls_models;
 mod env_trait_impls_params;
 mod env_trait_impls_strings;

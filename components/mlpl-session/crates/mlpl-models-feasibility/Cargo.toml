@@ -1,0 +1,15 @@
+# Saga 33 step 015: calibrate_device + estimate_hypothetical
+# + feasible builtins. The first sub-crate that uses
+# HasDispatch (for calibrate's matmul benchmark) -- the
+# behavior trait introduced in step 015.
+
+[package]
+name = "mlpl-models-feasibility"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-env-traits = { path = "../mlpl-env-traits" }
+mlpl-parser = { path = "../../../../crates/mlpl-parser" }
