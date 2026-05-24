@@ -1,9 +1,10 @@
 number = 27
 slug = "saga33-pets-quick-yield"
-status = "in-progress"
+status = "completed"
 description = "Fix the Pets cat-vs-dog (quick) demo's perceived hang in the web UI. Two-axis..."
 role = "production"
 context_files = []
 created_at = "2026-05-24T12:58:45"
+completed_at = "2026-05-24T13:12:27"
 task_type = "bugfix"
-commits = []
+commits = ["6af235127a2430794b85f2b7d174c7e2f5cbfe2e"]
