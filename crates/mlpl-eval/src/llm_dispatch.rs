@@ -1,13 +1,7 @@
-//! Saga 19 step 001: `llm_call(url, prompt, model)`
-//! eval-side dispatcher.
-//!
-//! Evaluates the three string arguments via
-//! `eval_expr`, calls `mlpl_runtime::call_ollama` for
-//! the actual HTTP exchange, and wraps the reply in
-//! `Value::Str`. The runtime helper owns URL
-//! normalization, JSON parsing, and timeout handling;
-//! this shim is just the `Expr -> String` adapter
-//! plus the `RuntimeError -> EvalError` lift.
+//! Thin wrapper around `mlpl-models-llm::llm_call_inner`.
+//! Evaluates each Expr arg to a String via `eval_expr`, then
+//! delegates the runtime call to the sub-crate and re-wraps
+//! the reply in `Value::Str` at the boundary.
 
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
@@ -22,22 +16,13 @@ pub(crate) fn dispatch(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    if args.len() != 3 {
-        return Err(EvalError::BadArity {
-            func: "llm_call".into(),
-            expected: 3,
-            got: args.len(),
-        });
-    }
-    let mut strs: [String; 3] = [String::new(), String::new(), String::new()];
-    for (i, slot) in strs.iter_mut().enumerate() {
-        match eval_expr(&args[i], env, trace)? {
-            Value::Str(s) => *slot = s,
+    let mut strs: Vec<String> = Vec::with_capacity(args.len());
+    for arg in args {
+        match eval_expr(arg, env, trace)? {
+            Value::Str(s) => strs.push(s),
             _ => return Err(EvalError::ExpectedString),
         }
     }
-    let [url, prompt, model] = strs;
-    let reply = mlpl_runtime::call_ollama(&url, &prompt, &model)
-        .map_err(|e| EvalError::Unsupported(format!("{e}")))?;
+    let reply = mlpl_models_llm::llm_call_inner(&strs)?;
     Ok(Value::Str(reply))
 }

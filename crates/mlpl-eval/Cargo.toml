@@ -43,6 +43,7 @@ mlpl-env-traits = { path = "../../components/mlpl-session/crates/mlpl-env-traits
 mlpl-models-feasibility = { path = "../../components/mlpl-session/crates/mlpl-models-feasibility" }
 mlpl-models-freeze = { path = "../../components/mlpl-session/crates/mlpl-models-freeze" }
 mlpl-models-inspect = { path = "../../components/mlpl-session/crates/mlpl-models-inspect" }
+mlpl-models-llm = { path = "../../components/mlpl-session/crates/mlpl-models-llm" }
 mlpl-models-mutate = { path = "../../components/mlpl-session/crates/mlpl-models-mutate" }
 mlpl-models-tape = { path = "../../components/mlpl-session/crates/mlpl-models-tape" }
 mlpl-models-tune = { path = "../../components/mlpl-session/crates/mlpl-models-tune" }

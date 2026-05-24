@@ -12,6 +12,7 @@
 use mlpl_models_feasibility::FeasibilityError;
 use mlpl_models_freeze::FreezeError;
 use mlpl_models_inspect::InspectError;
+use mlpl_models_llm::LlmError;
 use mlpl_models_mutate::MutateError;
 use mlpl_models_tape::TapeError;
 use mlpl_models_tune::TuneError;
@@ -210,6 +211,19 @@ impl From<FeasibilityError> for EvalError {
             }
             FeasibilityError::Dispatch(d) => Self::Unsupported(format!("{d}")),
             FeasibilityError::ArrayError(e) => Self::ArrayError(e),
+        }
+    }
+}
+
+impl From<LlmError> for EvalError {
+    fn from(e: LlmError) -> Self {
+        match e {
+            LlmError::BadArity { expected, got } => Self::BadArity {
+                func: "llm_call".into(),
+                expected,
+                got,
+            },
+            LlmError::RuntimeMessage(msg) => Self::Unsupported(msg),
         }
     }
 }
