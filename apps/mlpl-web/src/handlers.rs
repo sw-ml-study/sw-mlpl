@@ -125,12 +125,16 @@ fn process_next_eval(
 /// caption tailored to the kind of line. Train blocks call out
 /// the expected duration; everything else gets a generic
 /// "evaluating..." marker that still tells the user the demo
-/// hasn't hung.
+/// hasn't hung. Saga 33 step 027: a "train 5"-shaped chunk
+/// gets a chunk-sized caption so the user understands each
+/// chunk is short and the page will recover between chunks;
+/// large `train 30`+ blocks keep the long-duration warning.
 pub(crate) fn running_message(line: &str) -> &'static str {
     let stripped = line.trim_start();
     if stripped.starts_with("train ") || stripped.starts_with("train{") {
-        "training... (this can take 30-90 seconds; the page is unresponsive while WASM runs)"
-    } else if stripped.starts_with("repeat ") {
+        return train_caption(stripped);
+    }
+    if stripped.starts_with("repeat ") {
         "looping... (this can take a few seconds)"
     } else if stripped.contains("predict_batch")
         || stripped.contains("apply(")
@@ -141,6 +145,25 @@ pub(crate) fn running_message(line: &str) -> &'static str {
         "rendering visualization..."
     } else {
         "evaluating..."
+    }
+}
+
+fn train_caption(stripped: &str) -> &'static str {
+    // Parse the iteration count out of `train N {...}`. Small
+    // chunks (<=10) get a chunk-shaped message ("the page will
+    // un-freeze between chunks"); larger blocks keep the
+    // long-duration warning.
+    let after_train = stripped["train ".len()..].trim_start();
+    let count: usize = after_train
+        .split(|c: char| !c.is_ascii_digit())
+        .next()
+        .unwrap_or("")
+        .parse()
+        .unwrap_or(0);
+    if count > 0 && count <= 10 {
+        "training chunk... (a few seconds; the page un-freezes between chunks)"
+    } else {
+        "training... (this can take 30-90 seconds; the page is unresponsive while WASM runs)"
     }
 }
 
