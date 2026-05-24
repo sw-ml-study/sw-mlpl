@@ -35,6 +35,7 @@ mod env_trait_impls_strings;
 mod env_trait_impls_vars;
 mod env_vars;
 mod error;
+mod error_fmt;
 mod error_from_models;
 mod error_from_tools;
 mod eval;

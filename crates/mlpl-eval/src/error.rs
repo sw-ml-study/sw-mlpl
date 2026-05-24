@@ -175,87 +175,20 @@ pub enum EvalError {
 
 impl std::fmt::Display for EvalError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::EmptyInput => write!(f, "empty input"),
-            Self::UndefinedVariable(name) => write!(f, "undefined variable: {name}"),
-            Self::InvalidRepeatCount => write!(f, "repeat count must be a scalar integer"),
-            Self::InvalidShapeDim => {
-                write!(f, "shape dimension must be a non-negative scalar integer")
-            }
-            Self::Unsupported(msg) => write!(f, "unsupported: {msg}"),
-            Self::ArrayError(e) => write!(f, "array error: {e}"),
-            Self::RuntimeError(e) => write!(f, "{e}"),
-            Self::ExpectedArray => write!(f, "expected an array value, got a string"),
-            Self::ExpectedString => write!(f, "expected a string value"),
-            Self::DeviceTensorFault { peer, device } => {
-                write!(
-                    f,
-                    "tensor lives on {peer}:{device}; use to_device('cpu', x) to fetch"
-                )
-            }
-            Self::BadArity {
-                func,
-                expected,
-                got,
-            } => write!(f, "{func} expects {expected} arguments, got {got}"),
-            Self::VizError(e) => write!(f, "{e}"),
-            Self::ShapeMismatch {
-                op,
-                expected,
-                actual,
-            } => write!(f, "{op}: expected {expected}, got {actual}"),
-            Self::DeviceMismatch {
-                op,
-                expected,
-                actual,
-            } => write!(f, "device mismatch: {op} on {expected} vs {actual}"),
-            Self::TypeMismatch {
-                op,
-                expected,
-                actual,
-                hint,
-            } => write!(
-                f,
-                "type mismatch in {op}: expected {expected}, got {actual}\n  hint: {hint}"
-            ),
-            Self::Cancelled { step, .. } => write!(f, "cancelled at step {step}"),
-            Self::FieldNotFound {
-                requested,
-                available,
-            } => write!(
-                f,
-                "record has no field '{requested}'; available: [{}]",
-                available.join(", ")
-            ),
-            Self::FieldOnNonRecord {
-                receiver_kind,
-                field,
-            } => write!(
-                f,
-                "field access '.{field}' requires a record receiver, got {receiver_kind}"
-            ),
-            Self::MixedArrayLitElements { kinds } => write!(
-                f,
-                "[...] array literal must be all-strings or all-numbers; got mixed kinds: [{}]",
-                kinds.join(", ")
-            ),
-            Self::UnwrapOnErr { message } => {
-                write!(f, "unwrap on an Err value: {message}")
-            }
-            Self::NotAResult {
-                receiver_kind,
-                accessor,
-            } => write!(
-                f,
-                "{accessor}: expected a Result value, got {receiver_kind}"
-            ),
-            Self::BreakSignal(_) | Self::ContinueSignal => {
-                write!(f, "internal: loop-control signal escaped (bug)")
-            }
-            Self::LoopControlOutsideLoop { kind } => {
-                write!(f, "{kind} used outside of a while loop")
-            }
+        // Saga 33 step 020: per-arm fmt helpers live in
+        // `error_fmt.rs`. Each helper returns Some(result) if
+        // it matched the variant; otherwise None and we fall
+        // through to the next group.
+        if let Some(res) = crate::error_fmt::fmt_simple(self, f) {
+            return res;
         }
+        if let Some(res) = crate::error_fmt::fmt_mismatch(self, f) {
+            return res;
+        }
+        if let Some(res) = crate::error_fmt::fmt_record(self, f) {
+            return res;
+        }
+        unreachable!("EvalError variant not covered by fmt_simple / fmt_mismatch / fmt_record")
     }
 }
 
