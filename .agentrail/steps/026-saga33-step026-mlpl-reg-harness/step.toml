@@ -1,0 +1,9 @@
+number = 26
+slug = "saga33-step026-mlpl-reg-harness"
+status = "pending"
+description = "Stand up the visual regression test harness for MLPL demos. This is a NEW tes..."
+role = "production"
+context_files = []
+created_at = "2026-05-24T10:29:40"
+task_type = "feature"
+commits = []

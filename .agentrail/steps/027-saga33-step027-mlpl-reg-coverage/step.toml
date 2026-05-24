@@ -1,0 +1,9 @@
+number = 27
+slug = "saga33-step027-mlpl-reg-coverage"
+status = "pending"
+description = "Fill in the visual regression test coverage for the remaining ~28 MLPL demos...."
+role = "production"
+context_files = []
+created_at = "2026-05-24T10:29:40"
+task_type = "feature"
+commits = []
