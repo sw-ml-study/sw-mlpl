@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 19,
+    "step": "saga33-step019-extract-tokenizer-spec"
+  },
+  "action": "Pure data move: TokenizerSpec enum + describe impl (40 LOC, no env / Value / parser deps). Added src/tokenizer.rs to mlpl-eval-core; updated lib.rs re-exports. mlpl-eval-core grew to 5 modules (WARN crate-mod-count was 4). mlpl-eval-side tokenizer.rs lost the enum definition but kept the env-dependent dispatch fns. cargo build + clippy all green. -1 WARN net this step (mlpl-eval tokenizer.rs dropped a warn after the slim).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T20:06:14"
+}
