@@ -38,6 +38,14 @@ pub(crate) fn format_shape(arr: &DenseArray) -> String {
     format!("[{}]", inner.join(", "))
 }
 
+pub(crate) fn version_string() -> String {
+    format!(
+        "MLPL v{} -- Array Programming Language for ML\n  target: {}",
+        env!("CARGO_PKG_VERSION"),
+        std::env::consts::ARCH,
+    )
+}
+
 pub(crate) fn render_spec(spec: &ModelSpec) -> String {
     match spec {
         ModelSpec::Linear { .. } => "linear".into(),
