@@ -259,13 +259,13 @@ pub(crate) fn eval_expr(
     if let Expr::FnCall { name, args, .. } = expr
         && name == "embed_table"
     {
-        let result = crate::model_embed_table::eval_embed_table(args, env)?;
+        let result = crate::model_inspect::eval_embed_table(args, env)?;
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr
         && name == "estimate_train"
     {
-        let result = crate::model_estimate::eval_estimate_train(args, env)?;
+        let result = crate::model_inspect::eval_estimate_train(args, env)?;
         return Ok(Value::Array(result));
     }
     if let Expr::FnCall { name, args, .. } = expr

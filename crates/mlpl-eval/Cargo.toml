@@ -41,6 +41,7 @@ mlpl-core = { path = "../mlpl-core" }
 mlpl-eval-core = { path = "../mlpl-eval-core" }
 mlpl-env-traits = { path = "../../components/mlpl-session/crates/mlpl-env-traits" }
 mlpl-models-freeze = { path = "../../components/mlpl-session/crates/mlpl-models-freeze" }
+mlpl-models-inspect = { path = "../../components/mlpl-session/crates/mlpl-models-inspect" }
 mlpl-models-mutate = { path = "../../components/mlpl-session/crates/mlpl-models-mutate" }
 mlpl-models-tape = { path = "../../components/mlpl-session/crates/mlpl-models-tape" }
 mlpl-parser = { path = "../mlpl-parser" }

@@ -11,6 +11,7 @@
 members = [
     "crates/mlpl-env-traits",
     "crates/mlpl-models-freeze",
+    "crates/mlpl-models-inspect",
     "crates/mlpl-models-mutate",
     "crates/mlpl-models-tape",
 ]

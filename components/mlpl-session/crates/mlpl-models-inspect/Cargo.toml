@@ -1,0 +1,17 @@
+# Saga 33 step 013: pure-inspection ops over a ModelSpec:
+# embed_table (pull the first Embedding layer's table out) +
+# estimate_train (parameter/VRAM/flop/wall-clock estimator).
+# Generic over HasModels + HasVars + HasFrozen + HasStrings;
+# eval-loop deps (eval_expr, scalar) injected as closures.
+
+[package]
+name = "mlpl-models-inspect"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-env-traits = { path = "../mlpl-env-traits" }
+mlpl-eval-core = { path = "../../../../crates/mlpl-eval-core" }
+mlpl-parser = { path = "../../../../crates/mlpl-parser" }
