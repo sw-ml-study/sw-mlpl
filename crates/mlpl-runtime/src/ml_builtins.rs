@@ -1,10 +1,17 @@
-//! Higher-level ML built-ins: `softmax`, `one_hot`, `sinusoidal_encoding`.
+//! Higher-level ML built-ins: `softmax`, `one_hot`,
+//! `sinusoidal_encoding`, `cross_entropy`, `perplexity`.
 
 use mlpl_array::{DenseArray, Shape};
 
 use mlpl_runtime_core::error::RuntimeError;
 
-pub(crate) const NAMES: &[&str] = &["softmax", "one_hot", "sinusoidal_encoding", "cross_entropy"];
+pub(crate) const NAMES: &[&str] = &[
+    "softmax",
+    "one_hot",
+    "sinusoidal_encoding",
+    "cross_entropy",
+    "perplexity",
+];
 
 /// Dispatch ML built-ins. Returns None if not matched.
 pub(crate) fn try_call(
@@ -16,6 +23,12 @@ pub(crate) fn try_call(
         "one_hot" => Some(builtin_one_hot(name, args)),
         "sinusoidal_encoding" => Some(builtin_sinusoidal_encoding(name, args)),
         "cross_entropy" => Some(builtin_cross_entropy(name, args)),
+        // Perplexity is `exp(cross_entropy(...))` -- inlined here
+        // rather than extracted to a sibling fn so the module's
+        // function count stays at 7 (sw-checklist max).
+        "perplexity" => Some(
+            builtin_cross_entropy(name, args).map(|ce| DenseArray::from_scalar(ce.data()[0].exp())),
+        ),
         _ => None,
     }
 }

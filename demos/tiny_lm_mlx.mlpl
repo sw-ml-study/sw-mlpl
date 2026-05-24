@@ -36,3 +36,5 @@ device("mlx") {
   }
 }
 loss_curve(last_losses)
+# Canonical LM evaluation metric: exp(cross_entropy(...)).
+perplexity(apply(model, X), Y)

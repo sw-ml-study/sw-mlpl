@@ -27,3 +27,5 @@ experiment "tiny_lm" {
   }
 }
 loss_curve(last_losses)
+# Canonical LM evaluation metric: exp(cross_entropy(...)). Lower is better.
+perplexity(apply(model, X), Y)

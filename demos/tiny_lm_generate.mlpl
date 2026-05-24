@@ -27,6 +27,8 @@ experiment "tiny_lm_gen" {
   }
 }
 loss_curve(last_losses)
+# Canonical LM evaluation metric: exp(cross_entropy(...)).
+perplexity(apply(model, X), Y)
 
 # ---- generation ----
 prompt = apply_tokenizer(tok, "to be ")

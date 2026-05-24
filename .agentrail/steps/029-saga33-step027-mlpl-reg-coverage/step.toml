@@ -1,6 +1,6 @@
-number = 28
+number = 29
 slug = "saga33-step027-mlpl-reg-coverage"
-status = "pending"
+status = "blocked"
 description = "Fill in the visual regression test coverage for the remaining ~28 MLPL demos...."
 role = "production"
 context_files = []

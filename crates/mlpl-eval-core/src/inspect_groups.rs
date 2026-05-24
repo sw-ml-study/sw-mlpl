@@ -143,6 +143,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "scalar mean negative log-likelihood",
             ),
             (
+                "perplexity",
+                "perplexity(logits, targets)",
+                "exp(cross_entropy(...)) -- the canonical LM metric",
+            ),
+            (
                 "sinusoidal_encoding",
                 "sinusoidal_encoding(seq_len, d_model)",
                 "sinusoidal positional table",
