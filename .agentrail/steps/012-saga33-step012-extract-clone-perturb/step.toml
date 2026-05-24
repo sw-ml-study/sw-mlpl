@@ -1,6 +1,6 @@
 number = 12
 slug = "saga33-step012-extract-clone-perturb"
-status = "pending"
+status = "in-progress"
 description = "Continue analyze extraction with model_clone and model_perturb (similar shape..."
 role = "legacy"
 context_files = []

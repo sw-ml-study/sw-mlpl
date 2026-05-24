@@ -1,0 +1,18 @@
+# Saga 33 step 012: clone_model + perturb_params extracted
+# from crates/mlpl-eval/src/{model_clone,model_perturb}.rs.
+# Both are model-mutating analyses with similar shape -- take a
+# ModelSpec from a model identifier, walk its params, side-
+# effect into the environment via the env capability traits.
+
+[package]
+name = "mlpl-models-mutate"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-env-traits = { path = "../mlpl-env-traits" }
+mlpl-eval-core = { path = "../../../../crates/mlpl-eval-core" }
+mlpl-parser = { path = "../../../../crates/mlpl-parser" }
+mlpl-runtime = { path = "../../../../crates/mlpl-runtime" }

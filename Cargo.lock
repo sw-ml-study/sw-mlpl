@@ -1931,6 +1931,7 @@ dependencies = [
  "mlpl-lower-rs",
  "mlpl-mlx-rt",
  "mlpl-models-freeze",
+ "mlpl-models-mutate",
  "mlpl-models-tape",
  "mlpl-parser",
  "mlpl-runtime",
@@ -2002,6 +2003,17 @@ dependencies = [
  "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-parser",
+]
+
+[[package]]
+name = "mlpl-models-mutate"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-env-traits",
+ "mlpl-eval-core",
+ "mlpl-parser",
+ "mlpl-runtime",
 ]
 
 [[package]]

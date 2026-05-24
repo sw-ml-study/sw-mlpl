@@ -10,6 +10,7 @@
 //! needing to know about `EvalError`.
 
 use mlpl_models_freeze::FreezeError;
+use mlpl_models_mutate::MutateError;
 use mlpl_models_tape::TapeError;
 
 use crate::error::EvalError;
@@ -48,6 +49,41 @@ impl From<FreezeError> for EvalError {
             FreezeError::NotAModel { func, name } => {
                 Self::Unsupported(format!("{func}: '{name}' is not a model"))
             }
+        }
+    }
+}
+
+impl From<MutateError> for EvalError {
+    fn from(e: MutateError) -> Self {
+        match e {
+            MutateError::BadArity {
+                func,
+                expected,
+                got,
+            } => Self::BadArity {
+                func,
+                expected,
+                got,
+            },
+            MutateError::NotAModel { func, name } => {
+                Self::Unsupported(format!("{func}: '{name}' is not a model"))
+            }
+            MutateError::NotAModelExpr(func) => {
+                Self::Unsupported(format!("{func}: argument must evaluate to a model"))
+            }
+            MutateError::UnknownFamily { family, valid } => Self::Unsupported(format!(
+                "perturb_params: unknown family '{family}' (expected one of {})",
+                valid.join(", ")
+            )),
+            MutateError::UndefinedVariable(name) => Self::UndefinedVariable(name),
+            MutateError::ExpectedString(func) => Self::Unsupported(format!(
+                "{func}: family (second argument) must be a string literal"
+            )),
+            MutateError::ExpectedScalar(func) => {
+                Self::Unsupported(format!("{func}: expected a scalar"))
+            }
+            MutateError::ArrayError(e) => Self::ArrayError(e),
+            MutateError::RuntimeMessage(msg) => Self::Unsupported(msg),
         }
     }
 }

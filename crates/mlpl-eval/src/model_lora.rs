@@ -74,7 +74,7 @@ pub(crate) fn eval_lora(args: &[Expr], env: &mut Environment) -> Result<ModelSpe
     // returned model (and mutating the clone's W via
     // `unfreeze(student)` then training does not touch the
     // caller's source model).
-    let cloned = crate::model_clone::clone_spec(&source, env)?;
+    let cloned = mlpl_models_mutate::clone_spec(&source, env)?;
     let mut ctx = LoraCtx {
         rank,
         alpha,
