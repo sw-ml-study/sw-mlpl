@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 23,
+    "step": "saga33-step023-eval-rs-fail"
+  },
+  "action": "Split monolithic FnCall block via Option<Result> fall-through dispatcher pattern (mirrors eval_intercepts::try_intercept). Each family module ≤4 fns of ≤25 LOC each. Shared trace-event push lifted to fncall_trace to keep matmul / momentum_sgd helpers under the LOC gate.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T09:18:39"
+}
