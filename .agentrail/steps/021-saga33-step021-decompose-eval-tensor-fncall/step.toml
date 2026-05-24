@@ -1,6 +1,6 @@
 number = 21
 slug = "saga33-step021-decompose-eval-tensor-fncall"
-status = "pending"
+status = "in-progress"
 description = "Continue FAIL paydown by decomposing eval_tensor_fncall in grad.rs (86 LOC FA..."
 role = "legacy"
 context_files = []

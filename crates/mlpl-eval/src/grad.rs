@@ -60,7 +60,7 @@ pub(crate) fn eval_grad(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         .unwrap_or_else(|| DenseArray::zeros(wrt_tensor.value().shape().clone())))
 }
 
-fn eval_tensor_expr(
+pub(crate) fn eval_tensor_expr(
     expr: &Expr,
     env: &mut Environment,
     tape: &Rc<Tape>,
@@ -116,87 +116,42 @@ fn eval_tensor_fncall(
     tape: &Rc<Tape>,
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, EvalError> {
-    let arity = |e: usize| -> Result<(), EvalError> {
-        (args.len() == e).then_some(()).ok_or(EvalError::BadArity {
-            func: name.into(),
-            expected: e,
-            got: args.len(),
-        })
-    };
     if let Some(op) = unary_tensor_op(name) {
-        arity(1)?;
-        return Ok(op(&eval_tensor_expr(&args[0], env, tape, params)?));
+        return crate::grad_calls_basic::call_unary(op, args, env, tape, params, name);
     }
-    if name == "matmul" {
-        arity(2)?;
-        let a = eval_tensor_expr(&args[0], env, tape, params)?;
-        let b = eval_tensor_expr(&args[1], env, tape, params)?;
-        return Ok(a.matmul(&b));
+    match name {
+        "matmul" => crate::grad_calls_basic::call_matmul(args, env, tape, params),
+        "apply" => crate::grad_calls_basic::call_apply(args, env, tape, params),
+        "cross_entropy" => crate::grad_calls_basic::call_cross_entropy(args, env, tape, params),
+        "patchify" => crate::grad_calls_shape::call_patchify(args, env, tape, params),
+        "concat" => crate::grad_calls_shape::call_concat(args, env, tape, params),
+        "take" => crate::grad_calls_shape::call_take(args, env, tape, params),
+        "reshape" => crate::grad_calls_shape::call_reshape(args, env, tape, params),
+        _ => Err(EvalError::Unsupported(format!(
+            "grad: function '{name}' not supported inside grad()"
+        ))),
     }
-    if name == "apply" {
-        arity(2)?;
-        let Expr::Ident(m, _) = &args[0] else {
-            return Err(EvalError::Unsupported(
-                "grad: apply's first argument must be a model identifier".into(),
-            ));
-        };
-        let model = env
-            .get_model(m)
-            .cloned()
-            .ok_or_else(|| EvalError::UndefinedVariable(m.clone()))?;
-        let x = eval_tensor_expr(&args[1], env, tape, params)?;
-        return mlpl_models_tape::apply_model_tape(&model, x, tape, params)
-            .map_err(EvalError::from);
-    }
-    if name == "cross_entropy" {
-        arity(2)?;
-        let l = eval_tensor_expr(&args[0], env, tape, params)?;
-        let t = crate::eval::eval_expr(&args[1], env, &mut None)?.into_array()?;
-        let idx = mlpl_models_tape::validate_cross_entropy_targets(&l.value(), &t)?;
-        return Ok(l.cross_entropy(idx));
-    }
-    if name == "patchify" {
-        arity(2)?;
-        let x = eval_tensor_expr(&args[0], env, tape, params)?;
-        let p = tape_scalar_usize(&args[1], env, "patchify: patch_size")?;
-        return Ok(x.patchify(p));
-    }
-    if name == "concat" {
-        arity(3)?;
-        let a = eval_tensor_expr(&args[0], env, tape, params)?;
-        let b = eval_tensor_expr(&args[1], env, tape, params)?;
-        let axis = tape_scalar_usize(&args[2], env, "concat: axis")?;
-        return Ok(a.concat(&b, axis));
-    }
-    if name == "take" {
-        arity(3)?;
-        let x = eval_tensor_expr(&args[0], env, tape, params)?;
-        let axis = tape_scalar_usize(&args[1], env, "take: axis")?;
-        let idx = tape_scalar_usize(&args[2], env, "take: idx")?;
-        return Ok(x.take(axis, idx));
-    }
-    if name == "reshape" {
-        arity(2)?;
-        let x = eval_tensor_expr(&args[0], env, tape, params)?;
-        let dims = eval_shape_dims(
-            match &args[1] {
-                Expr::ArrayLit(elems, _) => elems,
-                _ => {
-                    return Err(EvalError::Unsupported(
-                        "grad: reshape's second argument must be an [int, ...] literal".into(),
-                    ));
-                }
-            },
-            env,
-        )?;
-        return Ok(x.reshape(mlpl_array::Shape::new(dims)));
-    }
-    Err(EvalError::Unsupported(format!(
-        "grad: function '{name}' not supported inside grad()"
-    )))
 }
 
-fn tape_scalar_usize(arg: &Expr, env: &mut Environment, what: &str) -> Result<usize, EvalError> {
+/// Arity check shared by the per-branch helpers. Lifted out
+/// of the original eval_tensor_fncall's local closure so
+/// callers in grad_calls_basic / grad_calls_shape can use it.
+pub(crate) fn arity_check(args: &[Expr], expected: usize, func: &str) -> Result<(), EvalError> {
+    if args.len() == expected {
+        return Ok(());
+    }
+    Err(EvalError::BadArity {
+        func: func.into(),
+        expected,
+        got: args.len(),
+    })
+}
+
+pub(crate) fn tape_scalar_usize(
+    arg: &Expr,
+    env: &mut Environment,
+    what: &str,
+) -> Result<usize, EvalError> {
     let arr = crate::eval::eval_expr(arg, env, &mut None)?.into_array()?;
     if arr.rank() != 0 {
         return Err(EvalError::Unsupported(format!(
@@ -213,7 +168,7 @@ fn tape_scalar_usize(arg: &Expr, env: &mut Environment, what: &str) -> Result<us
     Ok(v as usize)
 }
 
-fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
+pub(crate) fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
     Some(match name {
         "sum" => Tensor::sum,
         "mean" => Tensor::mean,
@@ -231,7 +186,10 @@ fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
     })
 }
 
-fn eval_shape_dims(shape: &[Expr], env: &mut Environment) -> Result<Vec<usize>, EvalError> {
+pub(crate) fn eval_shape_dims(
+    shape: &[Expr],
+    env: &mut Environment,
+) -> Result<Vec<usize>, EvalError> {
     let mut dims = Vec::with_capacity(shape.len());
     for dim_expr in shape {
         let arr = crate::eval::eval_expr(dim_expr, env, &mut None)?.into_array()?;
