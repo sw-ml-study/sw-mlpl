@@ -1,0 +1,1 @@
+Last big mlpl-eval-internal FAIL: eval.rs File-LOC at 841 lines (max 500). Examine the file structure -- which sub-features can split out? eval_expr is the central dispatcher; the value-evaluation paths for different ops can move to sibling files (e.g. record/string-list/builtin-ref Value variants, control-flow forms, scope forms). Target: net-negative FAIL + WARN.
