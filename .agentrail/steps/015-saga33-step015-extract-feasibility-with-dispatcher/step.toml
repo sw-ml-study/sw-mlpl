@@ -1,9 +1,10 @@
 number = 15
 slug = "saga33-step015-extract-feasibility-with-dispatcher"
-status = "in-progress"
+status = "completed"
 description = "Extract model_feasibility to mlpl-models-feasibility sub-crate. Requires defi..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-23T19:24:34"
+completed_at = "2026-05-23T19:37:36"
 task_type = "tech-debt"
-commits = []
+commits = ["61b741a984970ffec8b6a6a9f30cbc28b5bcac6f"]
