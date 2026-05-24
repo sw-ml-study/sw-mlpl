@@ -10,6 +10,7 @@
 [workspace]
 members = [
     "crates/mlpl-env-traits",
+    "crates/mlpl-loader-helpers",
     "crates/mlpl-models-feasibility",
     "crates/mlpl-models-freeze",
     "crates/mlpl-models-inspect",

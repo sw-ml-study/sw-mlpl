@@ -1,0 +1,14 @@
+# Saga 33 step 017: pure-data helpers for the loader builtins,
+# extracted from crates/mlpl-eval/src/loader.rs. No env, no
+# Value, no filesystem: just path-component sandboxing and CSV
+# parsing. The env-dependent eval_load_* wrappers stay in
+# mlpl-eval until a HasDataDir trait lands.
+
+[package]
+name = "mlpl-loader-helpers"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
