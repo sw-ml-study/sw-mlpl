@@ -1,0 +1,9 @@
+number = 18
+slug = "saga33-step018-extract-data-feature-loaders"
+status = "pending"
+description = "Continue loader extraction. The remaining env-dependent loader fns (eval_load..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-23T19:54:56"
+task_type = "tech-debt"
+commits = []

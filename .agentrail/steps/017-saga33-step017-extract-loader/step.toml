@@ -1,9 +1,10 @@
 number = 17
 slug = "saga33-step017-extract-loader"
-status = "in-progress"
+status = "completed"
 description = "Tackle loader.rs. It has these pieces: eval_load (env.data_dir + fs + parse_c..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-23T19:45:52"
+completed_at = "2026-05-23T19:54:56"
 task_type = "tech-debt"
-commits = []
+commits = ["0cb5261ce8d4dab6a9a9cac11bb45836557530e8"]

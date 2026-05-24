@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 17,
+    "step": "saga33-step017-extract-loader"
+  },
+  "action": "Pure-data extraction: helpers needed only &Path, &str, DenseArray -- no env capability traits required. Local LoaderHelperError vocabulary with formatted Display matching the original error strings. From-impl split: error_from_models holds the 4 model-domain impls; error_from_tools holds the 4 workflow-domain impls (Tune, Feasibility, Llm, LoaderHelper). Each impls file <=4 fns (PASS). cargo build + clippy + sw-checklist all green. -3 WARN from removing loader.rs's inline helper warnings.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-23T19:54:56"
+}
