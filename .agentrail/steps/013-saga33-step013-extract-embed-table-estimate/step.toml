@@ -1,9 +1,10 @@
 number = 13
 slug = "saga33-step013-extract-embed-table-estimate"
-status = "in-progress"
+status = "completed"
 description = "Continue analyze extraction with model_embed_table + model_estimate (both ~si..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-23T18:49:25"
+completed_at = "2026-05-23T19:15:36"
 task_type = "tech-debt"
-commits = []
+commits = ["a1a283518b9e7d3afb023aeef937ed1ecf8d467e"]
