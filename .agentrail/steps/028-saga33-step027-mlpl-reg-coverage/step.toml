@@ -1,4 +1,4 @@
-number = 27
+number = 28
 slug = "saga33-step027-mlpl-reg-coverage"
 status = "pending"
 description = "Fill in the visual regression test coverage for the remaining ~28 MLPL demos...."
