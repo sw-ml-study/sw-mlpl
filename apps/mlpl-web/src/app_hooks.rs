@@ -4,6 +4,8 @@
 //! Together they replace 11+ inline `use_state` calls that
 //! previously bloated `App::app`.
 
+use wasm_bindgen::JsCast;
+use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
 
 use crate::app_state::{Sessions, UiState, UploadState};
@@ -58,6 +60,35 @@ pub fn use_upload_state() -> UploadState {
 pub fn use_scroll_effect(active_history: UseStateHandle<Vec<HistoryEntry>>) {
     use_effect_with(active_history, |_| {
         scroll_and_focus();
+        || ()
+    });
+}
+
+/// Wire a window-level Escape-key handler that closes the
+/// doc dialog and the tutorial panel when either is open.
+/// Same pattern the glossary popup already uses
+/// (`crate::glossary_popup`) -- single window listener,
+/// fired once at mount, closures `forget`ed because the App
+/// host is mounted for the session lifetime. Setting a state
+/// handle to its current value is a no-op, so the unconditional
+/// `.set` calls don't cause spurious renders.
+#[hook]
+pub fn use_escape_closes_dialogs(
+    dialog_open: UseStateHandle<bool>,
+    lesson_idx: UseStateHandle<Option<usize>>,
+) {
+    use_effect_with((), move |_| {
+        if let Some(window) = web_sys::window() {
+            let closure = Closure::wrap(Box::new(move |e: web_sys::KeyboardEvent| {
+                if e.key() == "Escape" {
+                    dialog_open.set(false);
+                    lesson_idx.set(None);
+                }
+            }) as Box<dyn FnMut(_)>);
+            let _ = window
+                .add_event_listener_with_callback("keydown", closure.as_ref().unchecked_ref());
+            closure.forget();
+        }
         || ()
     });
 }

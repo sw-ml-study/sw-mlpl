@@ -16,7 +16,9 @@ use yew::prelude::*;
 
 use crate::app_active::active_context;
 use crate::app_callbacks::build_callbacks;
-use crate::app_hooks::{use_scroll_effect, use_sessions, use_ui_state, use_upload_state};
+use crate::app_hooks::{
+    use_escape_closes_dialogs, use_scroll_effect, use_sessions, use_ui_state, use_upload_state,
+};
 use crate::app_log::log_connect_mode;
 use crate::render::{RenderArgs, render};
 
@@ -35,5 +37,6 @@ fn app() -> Html {
     let active = active_context(&sessions, &ui);
     let callbacks = build_callbacks(&active, &upload, &ui);
     use_scroll_effect(active.history.clone());
+    use_escape_closes_dialogs(ui.dialog_open.clone(), ui.lesson_idx.clone());
     render(RenderArgs::from_parts(callbacks, ui, upload, active))
 }
