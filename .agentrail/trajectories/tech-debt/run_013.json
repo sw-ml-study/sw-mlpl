@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 21,
+    "step": "saga33-step021-decompose-eval-tensor-fncall"
+  },
+  "action": "Per-branch helper extraction pattern. Each helper takes (args, env, tape, params) for consistency. Bundled into 2 files (4 fns each) instead of 8 separate files to keep crate-mod-count from creeping. Lifted the inline arity closure to a pub(crate) function so all helpers share it (avoids duplicating the BadArity error construction).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T08:06:08"
+}

@@ -1,0 +1,9 @@
+number = 22
+slug = "saga33-step022-fetch-dataset-fail"
+status = "pending"
+description = "Continue FAIL paydown. Remaining mlpl-eval FAILs (3): fetch_dataset.rs Module..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-24T08:06:08"
+task_type = "tech-debt"
+commits = []
