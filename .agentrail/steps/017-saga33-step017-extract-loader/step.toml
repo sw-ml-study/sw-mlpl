@@ -1,0 +1,9 @@
+number = 17
+slug = "saga33-step017-extract-loader"
+status = "pending"
+description = "Tackle loader.rs. It has these pieces: eval_load (env.data_dir + fs + parse_c..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-23T19:45:52"
+task_type = "tech-debt"
+commits = []
