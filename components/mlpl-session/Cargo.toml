@@ -9,6 +9,7 @@
 
 [workspace]
 members = [
+    "crates/mlpl-bpe-core",
     "crates/mlpl-env-traits",
     "crates/mlpl-loader-helpers",
     "crates/mlpl-models-feasibility",

@@ -1881,6 +1881,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-bpe-core"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-build"
 version = "0.20.0"
 dependencies = [
@@ -1925,6 +1929,7 @@ dependencies = [
  "jpeg-decoder",
  "mlpl-array",
  "mlpl-autograd",
+ "mlpl-bpe-core",
  "mlpl-core",
  "mlpl-env-traits",
  "mlpl-eval-core",

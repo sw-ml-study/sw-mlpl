@@ -37,6 +37,7 @@ image-io = [
 ]
 
 [dependencies]
+mlpl-bpe-core = { path = "../../components/mlpl-session/crates/mlpl-bpe-core" }
 mlpl-core = { path = "../mlpl-core" }
 mlpl-eval-core = { path = "../mlpl-eval-core" }
 mlpl-env-traits = { path = "../../components/mlpl-session/crates/mlpl-env-traits" }
