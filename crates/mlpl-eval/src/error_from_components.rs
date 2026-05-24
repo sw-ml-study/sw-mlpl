@@ -13,6 +13,7 @@ use mlpl_models_freeze::FreezeError;
 use mlpl_models_inspect::InspectError;
 use mlpl_models_mutate::MutateError;
 use mlpl_models_tape::TapeError;
+use mlpl_models_tune::TuneError;
 
 use crate::error::EvalError;
 
@@ -120,6 +121,55 @@ impl From<InspectError> for EvalError {
                 Self::Unsupported(format!("{func}: {name} must be positive, got {value}"))
             }
             InspectError::ArrayError(e) => Self::ArrayError(e),
+        }
+    }
+}
+
+impl From<TuneError> for EvalError {
+    fn from(e: TuneError) -> Self {
+        match e {
+            TuneError::BadArity {
+                func,
+                expected,
+                got,
+            } => Self::BadArity {
+                func,
+                expected,
+                got,
+            },
+            TuneError::NotAModel(name) => {
+                Self::Unsupported(format!("lora: '{name}' is not a model"))
+            }
+            TuneError::NotAModelExpr => {
+                Self::Unsupported("lora: first argument must evaluate to a model".into())
+            }
+            TuneError::NotAScalar => {
+                Self::Unsupported("lora: rank, alpha, and seed must be scalars".into())
+            }
+            TuneError::BadRank(r) => Self::Unsupported(format!(
+                "lora: rank must be a non-negative integer, got {r}"
+            )),
+            TuneError::ZeroRank => Self::Unsupported("lora: rank must be positive, got 0".into()),
+            TuneError::NestedLora => Self::Unsupported(
+                "lora: model already has LoRA adapters; nested lora() is not supported".into(),
+            ),
+            TuneError::UndefinedVariable(name) => Self::UndefinedVariable(name),
+            TuneError::NonRank2Linear { name, rank } => Self::Unsupported(format!(
+                "lora: base Linear W '{name}' must be rank-2, got rank {rank}"
+            )),
+            TuneError::RankTooLarge {
+                rank,
+                in_dim,
+                out_dim,
+            } => Self::Unsupported(format!(
+                "lora: rank {rank} exceeds min(in={in_dim}, out={out_dim}) for this Linear"
+            )),
+            TuneError::UnexpectedLoraInTree => Self::Unsupported(
+                "lora: unexpected LinearLora in source tree (nested lora check should have caught this)".into(),
+            ),
+            TuneError::Mutate(m) => Self::from(m),
+            TuneError::ArrayError(e) => Self::ArrayError(e),
+            TuneError::RuntimeMessage(msg) => Self::Unsupported(msg),
         }
     }
 }

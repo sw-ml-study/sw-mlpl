@@ -1,6 +1,6 @@
 number = 14
 slug = "saga33-step014-extract-lora-feasibility"
-status = "pending"
+status = "in-progress"
 description = "Continue analyze extraction with model_lora + model_feasibility. lora needs H..."
 role = "legacy"
 context_files = []

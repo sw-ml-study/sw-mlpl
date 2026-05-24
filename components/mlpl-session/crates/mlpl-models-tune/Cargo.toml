@@ -1,0 +1,19 @@
+# Saga 33 step 014: lora(m, rank, alpha, seed) -- wrap every
+# Linear in m with trainable low-rank adapters. Generic over
+# HasModels + HasVars + HasParams + HasFrozen +
+# HasTensorDevices + HasModelIds; eval-loop + clone deps
+# injected as closures.
+
+[package]
+name = "mlpl-models-tune"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-env-traits = { path = "../mlpl-env-traits" }
+mlpl-eval-core = { path = "../../../../crates/mlpl-eval-core" }
+mlpl-models-mutate = { path = "../mlpl-models-mutate" }
+mlpl-parser = { path = "../../../../crates/mlpl-parser" }
+mlpl-runtime = { path = "../../../../crates/mlpl-runtime" }

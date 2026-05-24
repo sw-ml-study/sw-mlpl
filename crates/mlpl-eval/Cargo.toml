@@ -44,6 +44,7 @@ mlpl-models-freeze = { path = "../../components/mlpl-session/crates/mlpl-models-
 mlpl-models-inspect = { path = "../../components/mlpl-session/crates/mlpl-models-inspect" }
 mlpl-models-mutate = { path = "../../components/mlpl-session/crates/mlpl-models-mutate" }
 mlpl-models-tape = { path = "../../components/mlpl-session/crates/mlpl-models-tape" }
+mlpl-models-tune = { path = "../../components/mlpl-session/crates/mlpl-models-tune" }
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-array = { path = "../mlpl-array" }
 mlpl-autograd = { path = "../mlpl-autograd" }

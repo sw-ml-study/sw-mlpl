@@ -1934,6 +1934,7 @@ dependencies = [
  "mlpl-models-inspect",
  "mlpl-models-mutate",
  "mlpl-models-tape",
+ "mlpl-models-tune",
  "mlpl-parser",
  "mlpl-runtime",
  "mlpl-trace",
@@ -2035,6 +2036,18 @@ dependencies = [
  "mlpl-autograd",
  "mlpl-core",
  "mlpl-eval-core",
+]
+
+[[package]]
+name = "mlpl-models-tune"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-env-traits",
+ "mlpl-eval-core",
+ "mlpl-models-mutate",
+ "mlpl-parser",
+ "mlpl-runtime",
 ]
 
 [[package]]
