@@ -1928,6 +1928,7 @@ dependencies = [
  "mlpl-core",
  "mlpl-env-traits",
  "mlpl-eval-core",
+ "mlpl-loader-helpers",
  "mlpl-lower-rs",
  "mlpl-mlx-rt",
  "mlpl-models-feasibility",
@@ -1960,6 +1961,13 @@ version = "0.20.0"
 dependencies = [
  "chrono",
  "hostname",
+]
+
+[[package]]
+name = "mlpl-loader-helpers"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]

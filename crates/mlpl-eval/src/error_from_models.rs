@@ -1,0 +1,123 @@
+//! `From<SubCrateError> for EvalError` impls for the
+//! model-domain sub-crates: tape, freeze, mutate, inspect.
+//! Saga 33 step 017: split out of error_from_components.rs to
+//! keep each file <=4 fns (Module-Function-Count PASS).
+//!
+//! Each impl maps the sub-crate's structured error variants
+//! onto EvalError's broader vocabulary so the eval engine
+//! sees one error type at its boundary.
+
+use mlpl_models_freeze::FreezeError;
+use mlpl_models_inspect::InspectError;
+use mlpl_models_mutate::MutateError;
+use mlpl_models_tape::TapeError;
+
+use crate::error::EvalError;
+
+impl From<TapeError> for EvalError {
+    fn from(e: TapeError) -> Self {
+        match e {
+            TapeError::UndefinedVariable(s) => Self::UndefinedVariable(s),
+            TapeError::Unsupported(s) => Self::Unsupported(s),
+            TapeError::ShapeMismatch {
+                op,
+                expected,
+                actual,
+            } => Self::ShapeMismatch {
+                op,
+                expected,
+                actual,
+            },
+            TapeError::ArrayError(e) => Self::ArrayError(e),
+        }
+    }
+}
+
+impl From<FreezeError> for EvalError {
+    fn from(e: FreezeError) -> Self {
+        match e {
+            FreezeError::BadArity {
+                func,
+                expected,
+                got,
+            } => Self::BadArity {
+                func,
+                expected,
+                got,
+            },
+            FreezeError::NotAModel { func, name } => {
+                Self::Unsupported(format!("{func}: '{name}' is not a model"))
+            }
+        }
+    }
+}
+
+impl From<MutateError> for EvalError {
+    fn from(e: MutateError) -> Self {
+        match e {
+            MutateError::BadArity {
+                func,
+                expected,
+                got,
+            } => Self::BadArity {
+                func,
+                expected,
+                got,
+            },
+            MutateError::NotAModel { func, name } => {
+                Self::Unsupported(format!("{func}: '{name}' is not a model"))
+            }
+            MutateError::NotAModelExpr(func) => {
+                Self::Unsupported(format!("{func}: argument must evaluate to a model"))
+            }
+            MutateError::UnknownFamily { family, valid } => Self::Unsupported(format!(
+                "perturb_params: unknown family '{family}' (expected one of {})",
+                valid.join(", ")
+            )),
+            MutateError::UndefinedVariable(name) => Self::UndefinedVariable(name),
+            MutateError::ExpectedString(func) => Self::Unsupported(format!(
+                "{func}: family (second argument) must be a string literal"
+            )),
+            MutateError::ExpectedScalar(func) => {
+                Self::Unsupported(format!("{func}: expected a scalar"))
+            }
+            MutateError::ArrayError(e) => Self::ArrayError(e),
+            MutateError::RuntimeMessage(msg) => Self::Unsupported(msg),
+        }
+    }
+}
+
+impl From<InspectError> for EvalError {
+    fn from(e: InspectError) -> Self {
+        match e {
+            InspectError::BadArity {
+                func,
+                expected,
+                got,
+            } => Self::BadArity {
+                func,
+                expected,
+                got,
+            },
+            InspectError::NotAModel { func, name } => {
+                Self::Unsupported(format!("{func}: '{name}' is not a model"))
+            }
+            InspectError::NotAModelExpr(func) => {
+                Self::Unsupported(format!("{func}: argument must evaluate to a model"))
+            }
+            InspectError::NoEmbedding => {
+                Self::Unsupported("embed_table: model contains no Embedding layer".into())
+            }
+            InspectError::NoTrainableParams => {
+                Self::Unsupported("estimate_train: model has no trainable parameters".into())
+            }
+            InspectError::NotAScalar { func, name, rank } => {
+                Self::Unsupported(format!("{func}: {name} must be a scalar, got rank {rank}"))
+            }
+            InspectError::NotPositive { func, name, value } => {
+                Self::Unsupported(format!("{func}: {name} must be positive, got {value}"))
+            }
+            InspectError::ArrayError(e) => Self::ArrayError(e),
+        }
+    }
+}
