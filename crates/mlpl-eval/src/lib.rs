@@ -53,6 +53,8 @@ mod fetch_dataset;
 #[cfg(feature = "image-io")]
 mod fetch_io;
 mod grad;
+mod grad_calls_basic;
+mod grad_calls_shape;
 mod grad_optim;
 #[cfg(feature = "image-io")]
 mod image_io;
