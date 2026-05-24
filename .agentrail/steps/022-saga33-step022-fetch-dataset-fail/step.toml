@@ -1,6 +1,6 @@
 number = 22
 slug = "saga33-step022-fetch-dataset-fail"
-status = "pending"
+status = "in-progress"
 description = "Continue FAIL paydown. Remaining mlpl-eval FAILs (3): fetch_dataset.rs Module..."
 role = "legacy"
 context_files = []
