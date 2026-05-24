@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 27,
+    "step": "saga33-pets-quick-yield"
+  },
+  "action": "Bisect-by-checkout to commit e538aea (original demo) confirmed loss=130.80 has always been the seed-driven training trajectory -- not a regression, just confusing high values. The actual user-perceived regression was dev-mode WASM perf. Chunking via repeat-of-train mirrors the pattern PETS_PREDICT_GALLERY already uses. The runtime-side fix (true Web Worker eval) is tracked in docs/worker-threads.md and remains the long-term solution -- this step is the surgical workaround.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T13:12:27"
+}
