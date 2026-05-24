@@ -1,6 +1,6 @@
 number = 18
 slug = "saga33-step018-extract-data-feature-loaders"
-status = "pending"
+status = "in-progress"
 description = "Continue loader extraction. The remaining env-dependent loader fns (eval_load..."
 role = "legacy"
 context_files = []

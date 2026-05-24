@@ -1,0 +1,10 @@
+# Saga 33 step 018: pure BPE training + apply + decode
+# algorithm. Bytes-in, ids-out (or vice versa). No env, no
+# Value, no parser -- the mlpl-eval wrapper handles all the
+# Value::Str / Value::Array marshalling.
+
+[package]
+name = "mlpl-bpe-core"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
