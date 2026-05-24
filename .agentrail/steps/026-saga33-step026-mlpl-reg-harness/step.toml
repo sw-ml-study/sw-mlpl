@@ -1,6 +1,6 @@
 number = 26
 slug = "saga33-step026-mlpl-reg-harness"
-status = "pending"
+status = "in-progress"
 description = "Stand up the visual regression test harness for MLPL demos. This is a NEW tes..."
 role = "production"
 context_files = []
