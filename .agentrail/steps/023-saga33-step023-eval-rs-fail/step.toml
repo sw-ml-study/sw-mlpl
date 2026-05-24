@@ -1,0 +1,9 @@
+number = 23
+slug = "saga33-step023-eval-rs-fail"
+status = "pending"
+description = "Last big mlpl-eval-internal FAIL: eval.rs File-LOC at 841 lines (max 500). Ex..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-24T08:30:36"
+task_type = "tech-debt"
+commits = []

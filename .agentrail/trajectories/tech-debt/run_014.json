@@ -1,0 +1,11 @@
+{
+  "task_type": "tech-debt",
+  "state": {
+    "number": 22,
+    "step": "saga33-step022-fetch-dataset-fail"
+  },
+  "action": "#[cfg(test)] #[path = ...] mod ...; declarations in fetch_dataset.rs route to flat sibling files in src/. Helpers use pub(super) for cross-sibling import. All 9 tests pass under --features image-io --lib. cargo build + clippy + sw-checklist all green. Net negative on both ratchet axes.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T08:30:36"
+}
