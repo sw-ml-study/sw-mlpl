@@ -1,9 +1,10 @@
 number = 21
 slug = "saga33-step021-decompose-eval-tensor-fncall"
-status = "in-progress"
+status = "completed"
 description = "Continue FAIL paydown by decomposing eval_tensor_fncall in grad.rs (86 LOC FA..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-23T20:13:20"
+completed_at = "2026-05-24T08:06:08"
 task_type = "tech-debt"
-commits = []
+commits = ["a94dae584361582ae10371507956866fb12a2958"]
