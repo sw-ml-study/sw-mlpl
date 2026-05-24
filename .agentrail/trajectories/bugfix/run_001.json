@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 25,
+    "step": "saga33-moons-mlp-regression"
+  },
+  "action": "Quantitative diagnosis via synthetic row-indexed grid: read SVG fills in top-to-bottom order, assert top is the color of the highest data value. Bug was a math-y vs image-y convention mismatch between two helpers in the same crate. Confirmed bug existed back through cfd4348 (last pages/ rebuild) so it had been latent. Wrote tests that pin orientation INDEPENDENTLY of the model -- so any future renderer regression of the same kind fails fast.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T12:15:40"
+}
