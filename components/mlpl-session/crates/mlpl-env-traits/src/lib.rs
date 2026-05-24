@@ -15,10 +15,12 @@ pub mod devices;
 pub mod frozen;
 pub mod models;
 pub mod params;
+pub mod strings;
 pub mod vars;
 
 pub use devices::{HasModelIds, HasTensorDevices};
 pub use frozen::HasFrozen;
 pub use models::HasModels;
 pub use params::HasParams;
+pub use strings::HasStrings;
 pub use vars::HasVars;

@@ -1,6 +1,6 @@
 number = 13
 slug = "saga33-step013-extract-embed-table-estimate"
-status = "pending"
+status = "in-progress"
 description = "Continue analyze extraction with model_embed_table + model_estimate (both ~si..."
 role = "legacy"
 context_files = []

@@ -10,6 +10,7 @@
 //! needing to know about `EvalError`.
 
 use mlpl_models_freeze::FreezeError;
+use mlpl_models_inspect::InspectError;
 use mlpl_models_mutate::MutateError;
 use mlpl_models_tape::TapeError;
 
@@ -84,6 +85,41 @@ impl From<MutateError> for EvalError {
             }
             MutateError::ArrayError(e) => Self::ArrayError(e),
             MutateError::RuntimeMessage(msg) => Self::Unsupported(msg),
+        }
+    }
+}
+
+impl From<InspectError> for EvalError {
+    fn from(e: InspectError) -> Self {
+        match e {
+            InspectError::BadArity {
+                func,
+                expected,
+                got,
+            } => Self::BadArity {
+                func,
+                expected,
+                got,
+            },
+            InspectError::NotAModel { func, name } => {
+                Self::Unsupported(format!("{func}: '{name}' is not a model"))
+            }
+            InspectError::NotAModelExpr(func) => {
+                Self::Unsupported(format!("{func}: argument must evaluate to a model"))
+            }
+            InspectError::NoEmbedding => {
+                Self::Unsupported("embed_table: model contains no Embedding layer".into())
+            }
+            InspectError::NoTrainableParams => {
+                Self::Unsupported("estimate_train: model has no trainable parameters".into())
+            }
+            InspectError::NotAScalar { func, name, rank } => {
+                Self::Unsupported(format!("{func}: {name} must be a scalar, got rank {rank}"))
+            }
+            InspectError::NotPositive { func, name, value } => {
+                Self::Unsupported(format!("{func}: {name} must be positive, got {value}"))
+            }
+            InspectError::ArrayError(e) => Self::ArrayError(e),
         }
     }
 }
