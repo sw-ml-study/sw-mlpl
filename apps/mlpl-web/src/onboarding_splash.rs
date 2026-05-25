@@ -27,11 +27,13 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
         <div class="splash-backdrop" role="dialog" aria-label="Welcome" onclick={dismiss.clone()}>
             <div class="splash-panel" onclick={stop}>
                 <button class="splash-close" onclick={dismiss} aria-label="Close">{"\u{00d7}"}</button>
-                <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
-                <p class="splash-version">{format!("v{}.{}", env!("CARGO_PKG_VERSION"), env!("BUILD_COMMIT_COUNT"))}</p>
-                <p class="splash-subtitle">
-                    {"An array programming language for learning machine learning, from scalars to transformers."}
-                </p>
+                <div class="splash-header-shim">
+                    <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
+                    <p class="splash-version">{format!("v{}.{}", env!("CARGO_PKG_VERSION"), env!("BUILD_COMMIT_COUNT"))}</p>
+                    <p class="splash-subtitle">
+                        {"An array programming language for learning machine learning, from scalars to transformers."}
+                    </p>
+                </div>
                 <div class="splash-cards">
                     { card(&emit, SplashAction::RunDemo(7), "Run the Basics demo", "See arithmetic, arrays, and broadcasting in action.") }
                     { card(&emit, SplashAction::TypeExpr("1 + 2"), "Try 1 + 2 in the REPL", "Type an expression and press Enter.") }
