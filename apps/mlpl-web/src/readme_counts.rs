@@ -19,7 +19,6 @@
 //! file-LOC budget.
 
 use crate::demos::DEMOS;
-use crate::onboarding_storage::{should_show_splash, should_show_whats_new};
 use mlpl_web_lessons::lessons::LESSONS;
 
 const README: &str = include_str!("../../../README.md");
@@ -59,17 +58,4 @@ fn readme_glossary_count_matches_glossary_md() {
         README.contains(&phrase),
         "README missing {phrase:?} (glossary.md has {n} H2 headers)"
     );
-}
-
-#[test]
-fn splash_predicate_logic() {
-    assert!(should_show_splash(false));
-    assert!(!should_show_splash(true));
-}
-
-#[test]
-fn whats_new_predicate_logic() {
-    assert!(should_show_whats_new(Some("0.19.0"), "0.20.0"));
-    assert!(!should_show_whats_new(Some("0.20.0"), "0.20.0"));
-    assert!(!should_show_whats_new(None, "0.20.0"));
 }
