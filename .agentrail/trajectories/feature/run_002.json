@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "002-splash-overlay"
+  },
+  "action": "Designed with single SplashAction enum to avoid callback proliferation. make_splash_action builder keeps dispatch logic co-located with the component. Removed onboarding_callbacks.rs (was 7 fns of repetitive dismiss+navigate). Trimmed onboarding_storage.rs from 7 to 5 fns by removing trivially-inlineable predicates.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T12:56:50"
+}

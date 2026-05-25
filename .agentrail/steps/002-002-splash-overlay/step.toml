@@ -1,6 +1,6 @@
 number = 2
 slug = "002-splash-overlay"
-status = "in-progress"
+status = "completed"
 description = """
 Step 002: Splash/onboarding overlay.
 
@@ -8,5 +8,6 @@ New SplashOverlay component in onboardi..."""
 role = "production"
 context_files = []
 created_at = "2026-05-25T12:00:02"
+completed_at = "2026-05-25T12:56:50"
 task_type = "feature"
-commits = []
+commits = ["5d41b5d24df8e2d4fa1506e401080cafae2361d1"]
