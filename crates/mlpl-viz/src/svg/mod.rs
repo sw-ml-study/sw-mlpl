@@ -1,6 +1,7 @@
 //! SVG diagram rendering for MLPL arrays.
 
 mod charts;
+mod critical_dimensions;
 mod decision_boundary;
 mod gallery;
 mod gallery_layout;
@@ -13,6 +14,7 @@ use std::fmt;
 use mlpl_array::DenseArray;
 
 pub use charts::{render_bar, render_line};
+pub use critical_dimensions::render_critical_dimensions;
 pub use decision_boundary::render_decision_boundary;
 pub use gallery::{render_attention_overlay, render_gallery};
 pub use heatmap::render_heatmap;
@@ -158,6 +160,7 @@ pub fn render_with_aux(
         "bar" => render_bar(data),
         "heatmap" => render_heatmap(data),
         "heatmap_grid" => render_heatmap_grid(data),
+        "critical_dimensions" => render_critical_dimensions(data, aux),
         "gallery" => render_gallery(data, aux),
         "attention_overlay" => render_attention_overlay(data, aux),
         "decision_boundary" => {

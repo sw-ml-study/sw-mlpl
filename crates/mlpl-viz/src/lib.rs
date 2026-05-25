@@ -13,7 +13,7 @@ pub use analysis::{
 };
 pub use plotly3d::render_plotly3d;
 pub use svg::{
-    VizError, render, render_attention_overlay, render_bar, render_decision_boundary,
-    render_gallery, render_heatmap, render_heatmap_grid, render_line, render_scatter,
-    render_scatter3d, render_with_aux,
+    VizError, render, render_attention_overlay, render_bar, render_critical_dimensions,
+    render_decision_boundary, render_gallery, render_heatmap, render_heatmap_grid, render_line,
+    render_scatter, render_scatter3d, render_with_aux,
 };
