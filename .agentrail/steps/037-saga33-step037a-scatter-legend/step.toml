@@ -1,9 +1,10 @@
 number = 37
 slug = "saga33-step037a-scatter-legend"
-status = "pending"
+status = "completed"
 description = "Add a corner index legend to the 2-D scatter_labeled viz, mirroring the exist..."
 role = "production"
 context_files = []
 created_at = "2026-05-25T08:43:05"
+completed_at = "2026-05-25T08:54:42"
 task_type = "feature"
-commits = []
+commits = ["588779c13186ef6a7241cf42797f912dd40d0eb1"]
