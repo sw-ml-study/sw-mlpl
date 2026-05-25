@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 31,
+    "step": "saga33-step031-dr-pca-components"
+  },
+  "action": "Module split was the load-bearing refactor -- pca_builtin was already at the 7-fn ceiling; adding 2 new builtin entry points required moving the compute helpers out. Refactored extract_components to return (components, eigenvalues) so the variance-explained builtin reuses the same power-iteration trajectory rather than running it again.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T18:38:59"
+}
