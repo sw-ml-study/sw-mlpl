@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 38,
+    "step": "saga33-step037b-legend-outside"
+  },
+  "action": "Added write_svg_open_with_size(out, cw, ch) helper in svg/mod.rs. analysis_scatter_labeled calls it with W + LEGEND_GUTTER (90) and renders legend at x = W + 10. Updated svg_analysis_tests to assert viewBox=0 0 490 300 and cx=410 legend swatches. Updated UMAP_VS_TSNE demo intro/takeaway, TSNE_NONLINEAR + UMAP_MODERN_DEFAULT + READING_CRITICAL_DIMS lesson try_it sections, demos/umap_vs_tsne.mlpl comments. Verified visually by inspecting SVG output.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T09:07:23"
+}
