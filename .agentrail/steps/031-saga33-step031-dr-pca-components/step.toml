@@ -1,9 +1,10 @@
 number = 31
 slug = "saga33-step031-dr-pca-components"
-status = "in-progress"
+status = "completed"
 description = "Phase 1a of the dimensionality reduction milestone (full plan: docs/milestone..."
 role = "production"
 context_files = []
 created_at = "2026-05-24T15:25:29"
+completed_at = "2026-05-24T18:38:59"
 task_type = "feature"
-commits = []
+commits = ["ed2bfe8d465aba58e912cfcdad4e964115f26760"]
