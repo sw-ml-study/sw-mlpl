@@ -120,16 +120,33 @@ fn spotlight_style(r: &Rect) -> String {
 }
 
 fn tooltip_style(r: &Rect, _target: &str) -> String {
-    let vh = web_sys::window()
-        .and_then(|w| w.inner_height().ok())
-        .and_then(|v| v.as_f64())
-        .unwrap_or(800.0);
+    let (vw, vh) = viewport_size();
+    let tw = 340.0;
+    let th = 180.0;
     let below = r.top + r.height + 12.0;
-    let top = if below + 180.0 > vh {
-        (r.top - 180.0 - 12.0).max(8.0)
+    let top = if below + th > vh {
+        (r.top - th - 12.0).max(8.0)
     } else {
         below
     };
-    let left = r.left.max(8.0);
+    let left = r.left.max(8.0).min(vw - tw - 8.0);
     format!("top:{top}px;left:{left}px")
+}
+
+fn viewport_size() -> (f64, f64) {
+    web_sys::window()
+        .map(|w| {
+            let vw = w
+                .inner_width()
+                .ok()
+                .and_then(|v| v.as_f64())
+                .unwrap_or(1200.0);
+            let vh = w
+                .inner_height()
+                .ok()
+                .and_then(|v| v.as_f64())
+                .unwrap_or(800.0);
+            (vw, vh)
+        })
+        .unwrap_or((1200.0, 800.0))
 }
