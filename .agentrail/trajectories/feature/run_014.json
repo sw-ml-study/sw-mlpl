@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 40,
+    "step": "saga33-step037d-introspect-helper"
+  },
+  "action": "Created crates/mlpl-eval/src/inspect_introspect.rs with format_introspect (single fn, ~20 LOC). Added mod declaration in lib.rs and dispatcher arm in inspect.rs::topic_output. Updated apps/mlpl-web/src/demos_basics.rs WORKSPACE_INTROSPECTION to end with the :introspect command. Added introspect_bundles_every_no_arg_section test. Added glossary :introspect entry. Rebuilt pages (WASM hash mlpl-web-d5d693bb01a9afc1).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T10:20:38"
+}
