@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 29,
+    "step": "saga33-step027-mlpl-reg-coverage"
+  },
+  "action": "Batched commits by viz type per the step-026 batch plan: Batch A (synthetic-data filled-region demos, 5 tests), Batch B (trained classifier surfaces, 3 tests incl. XOR-MLP and XOR-linear-failure), Batch C (attention heatmaps, 4 tests), plus moons_mlp from step 026 + softmax_classifier + tiny_lm_generate sweep-ups. Source for each demo inlined as a raw string constant; trailing non-viz lines truncated since run_demo_to_svg captures only the LAST expression. Median-sampling decision documented in step 026's lib doc-comment; thin-line viz (line/loss_curve/scatter) deferred because the 5x5 median picks up background for a 2-pixel polyline -- documented in step 029's commit messages.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T17:04:32"
+}
