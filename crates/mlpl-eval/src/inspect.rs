@@ -63,6 +63,7 @@ fn topic_output(env: &Environment, topic: &str) -> Option<String> {
         "fns" | "functions" => Some(USER_FNS_MSG.into()),
         "builtins" | "built-ins" => Some(crate::inspect_render::format_builtins()),
         "wsid" | "workspace" => Some(crate::inspect_collections::format_wsid(env)),
+        "introspect" => Some(crate::inspect_introspect::format_introspect(env)),
         _ => None,
     }
 }

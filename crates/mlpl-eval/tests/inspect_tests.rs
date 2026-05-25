@@ -171,3 +171,35 @@ fn models_lists_bound_models() {
     assert!(out.contains("lin: linear"), "out was: {out}");
     assert!(out.contains("(2 params)"), "out was: {out}");
 }
+
+#[test]
+fn introspect_bundles_every_no_arg_section() {
+    // Saga 33 step 037d: :introspect concatenates every
+    // no-arg inspector under a `## :<topic>` header. Should
+    // contain at minimum the seven section headers in
+    // fixed order: version, wsid, builtins, vars, models,
+    // experiments, tags.
+    let mut env = Environment::new();
+    eval("x = [1, 2, 3]", &mut env);
+    eval("lin = linear(4, 4, 9)", &mut env);
+    let out = inspect(&mut env, ":introspect").unwrap();
+    for header in [
+        "## :version",
+        "## :wsid",
+        "## :builtins",
+        "## :vars",
+        "## :models",
+        "## :experiments",
+        "## :tags",
+    ] {
+        assert!(out.contains(header), "missing header {header}");
+    }
+    // The bundle should embed the same content the individual
+    // commands return.
+    assert!(out.contains("x: [3]"), "missing :vars content");
+    assert!(out.contains("lin: linear"), "missing :models content");
+    // Header order is fixed -- ":version" comes before ":vars".
+    let v_pos = out.find("## :version").unwrap();
+    let vars_pos = out.find("## :vars").unwrap();
+    assert!(v_pos < vars_pos, "section order broken");
+}
