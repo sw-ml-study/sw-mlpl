@@ -66,26 +66,44 @@ const STEPS: &[TourStep] = &[
     TourStep {
         target: "tab-paths",
         title: "Learning Paths",
-        body: "Structured sequences of lessons, demos, glossary entries, and diagrams. Let's open Paths.",
+        body: "Structured sequences of lessons, demos, glossary entries, and diagrams. Let's open one.",
         click_before: "",
     },
     TourStep {
-        target: "paths-panel",
-        title: "Path Walker",
-        body: "Pick a path, then follow step by step. Lessons and demos open inline; the path remembers your position.",
+        target: "path-card-first",
+        title: "Pick a Path",
+        body: "Each card is a curated walk-through. Let's open the Dimensionality Reduction path.",
         click_before: "[data-tour-target='tab-paths']",
     },
     TourStep {
-        target: "tab-paths",
-        title: "Returning to a Path",
-        body: "After a detour into a lesson or demo, click the Paths tab or the Back to path button to resume where you left off.",
+        target: "paths-walker-body",
+        title: "Walking a Path",
+        body: "You're now inside the path. Each step shows a lesson, demo, glossary entry, or diagram with context. Use the arrow buttons to navigate.",
+        click_before: "[data-tour-target='path-card-first']",
+    },
+    TourStep {
+        target: "path-open-lesson",
+        title: "Open a Lesson from a Path",
+        body: "Click this button to open the lesson in the Tutorial pane. The path remembers where you are.",
         click_before: "",
+    },
+    TourStep {
+        target: "back-to-path",
+        title: "Return to Your Path",
+        body: "After reading the lesson, click this button to jump back to the path at the step you left off. This is how you navigate between paths and lessons without losing your place.",
+        click_before: "[data-tour-target='path-open-lesson']",
+    },
+    TourStep {
+        target: "paths-walker-body",
+        title: "Back on the Path",
+        body: "You're back on the path right where you left off. The path always remembers your position.",
+        click_before: "[data-tour-target='back-to-path']",
     },
     TourStep {
         target: "repl-input",
         title: "Autocomplete",
         body: "Press Ctrl+Space for autocomplete suggestions. Arrow keys to navigate, Enter to accept.",
-        click_before: "[data-tour-target='tab-paths']",
+        click_before: "[data-tour-target='tab-repl']",
     },
 ];
 

@@ -30,7 +30,7 @@ pub fn header(props: &HeaderProps) -> Html {
                 <span class="title-subtitle">{"Array Programming for Machine Learning"}</span>
             </div>
             <div class="header-tabs">
-                <button class={cls(HeaderMode::Repl)} onclick={props.on_select_repl.clone()}>{"REPL"}</button>
+                <button class={cls(HeaderMode::Repl)} onclick={props.on_select_repl.clone()} data-tour-target="tab-repl">{"REPL"}</button>
                 <button class={cls(HeaderMode::Tutorial)} onclick={props.on_select_tutorial.clone()} data-tour-target="tab-tutorial">{"Tutorial"}</button>
                 <button class={cls(HeaderMode::Paths)} onclick={props.on_select_paths.clone()} data-tour-target="tab-paths">{"Paths"}</button>
             </div>
