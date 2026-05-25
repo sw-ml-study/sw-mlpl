@@ -105,6 +105,12 @@ const STEPS: &[TourStep] = &[
         body: "Press Ctrl+Space for autocomplete suggestions. Arrow keys to navigate, Enter to accept.",
         click_before: "[data-tour-target='tab-repl']",
     },
+    TourStep {
+        target: "tour-btn",
+        title: "Retake the Tour",
+        body: "Click this button any time to walk through the tour again.",
+        click_before: "",
+    },
 ];
 
 pub const STEP_COUNT: usize = STEPS.len();
