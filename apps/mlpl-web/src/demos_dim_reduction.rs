@@ -2,7 +2,10 @@
 //! demo entries -- groups PCA, UMAP, MDS, random projection,
 //! and the comparison demos in one file as the milestone
 //! progresses. Saga 33 step 030 seeded it with PCA_3D; step
-//! 032 adds PCA_LOADINGS for the critical-dimensions viz.
+//! 032 added PCA_LOADINGS for the critical-dimensions viz;
+//! step 035 adds the UMAP_VS_PCA / UMAP_VS_TSNE / DIM_REDUCTION_ZOO
+//! comparison demos and registers a dedicated
+//! "Dimensionality reduction" path/category.
 
 use crate::demos::Demo;
 
@@ -50,5 +53,71 @@ pub const PCA_LOADINGS: Demo = Demo {
         "ve = pca_variance_explained(X, 3)                                 # [3]",
         "# Critical-dimensions heatmap with per-row variance percentages.",
         "svg(V, \"critical_dimensions\", ve)",
+    ],
+};
+
+pub const UMAP_VS_PCA: Demo = Demo {
+    name: "UMAP vs PCA",
+    intro: "Two-moons in 2-D, embedded in 5-D with three low-variance noise dimensions, then projected back to 2-D by both [[PCA (Principal Component Analysis)]] (linear) and [[UMAP]] (non-linear / manifold-aware). PCA picks the top two axes of variance; UMAP builds a k-NN graph over the full 5-D distances and runs SGD on the fuzzy simplicial set.",
+    takeaway: "PCA reconstructs something close to the original 2-D moon arcs because the noise dimensions carry less variance than the moons themselves. UMAP recovers the moon arcs from local neighborhood structure -- a different recipe for the same end result. The contrast becomes sharper as you crank up the noise scale on the embed line (the noise dimensions start to dominate variance and PCA falls behind, while UMAP keeps up because its k-NN graph is robust to extra noise dimensions until they truly mask the local geometry).",
+    lines: &[
+        "# Two-moons (100 points, light noise) is the test bed.",
+        "M = moons(7, 100, 0.05)                                            # 100 x 3: x, y, label",
+        "moons2d = matmul(M, [[1, 0], [0, 1], [0, 0]])                       # drop label column",
+        "labels = reshape(matmul(M, [[0], [0], [1]]), [100])                # integer labels",
+        "# Embed in 5-D with three low-variance noise dimensions.",
+        "embed = randn(42, [100, 3]) * 0.3",
+        "X = concat(moons2d, embed, 1)                                      # 100 x 5",
+        "# PCA: top 2 linear principal components.",
+        "pca_proj = pca(X, 2)",
+        "# UMAP: k-NN graph + fuzzy simplicial set + layout SGD.",
+        "umap_proj = umap(X, 15, 0.1, 200, 7)                                # n_neighbors, min_dist, iters, seed",
+        "# Side by side, colored by class.",
+        "scatter_labeled(pca_proj, labels)",
+        "scatter_labeled(umap_proj, labels)",
+    ],
+};
+
+pub const UMAP_VS_TSNE: Demo = Demo {
+    name: "UMAP vs t-SNE",
+    intro: "Three clusters in 4-D where cluster C is five times farther from {A, B} than A is from B. Both [[t-SNE]] and [[UMAP]] use a fuzzy-graph view of local neighborhoods, but they handle GLOBAL inter-cluster distance differently. The comparison shows what t-SNE drops and UMAP keeps.",
+    takeaway: "t-SNE tends to inflate every cluster to a similar size, washing out 'C is much farther than A is from B.' UMAP's repulsive force keeps the relative distances readable -- C ends up clearly farther from {A, B} than A is from B. The structural reason: t-SNE's KL objective is purely local (it normalizes per row), while UMAP's cross-entropy + negative-sampling objective lets the repulsive term carry global signal.",
+    lines: &[
+        "# Three 4-D Gaussian clusters: A at origin, B near A, C 5x farther.",
+        "pts_a = randn(1, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[0, 0, 0, 0]])",
+        "pts_b = randn(2, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[3, 0, 0, 0]])",
+        "pts_c = randn(3, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[15, 0, 0, 0]])",
+        "X = concat(concat(pts_a, pts_b, 0), pts_c, 0)                                       # 90 x 4",
+        "labels = concat(concat(zeros([30]), ones([30]), 0), ones([30]) + 1, 0)              # 30 zeros, 30 ones, 30 twos",
+        "# t-SNE: perplexity-calibrated local KL, no global anchor.",
+        "tsne_proj = tsne(X, 10, 200, 1)",
+        "# UMAP: fuzzy simplicial set + cross-entropy with negative sampling.",
+        "umap_proj = umap(X, 10, 0.1, 200, 1)",
+        "scatter_labeled(tsne_proj, labels)",
+        "scatter_labeled(umap_proj, labels)",
+    ],
+};
+
+pub const DIM_REDUCTION_ZOO: Demo = Demo {
+    name: "Dim-reduction zoo",
+    intro: "[[PCA (Principal Component Analysis)]], [[t-SNE]], and [[UMAP]] applied to the same 5-D three-cluster dataset, rendered as a row of three scatter plots for direct comparison. (MDS and random projection will join the zoo when Phase 5 of the dim-reduction milestone lands -- the lines are queued as TODO comments in the demo source.)",
+    takeaway: "PCA is the cheap linear baseline that preserves the global axes of variance -- clusters land along PC1/PC2 directions. t-SNE inflates each cluster to roughly equal radius, sharpening local boundaries at the cost of global distance. UMAP keeps both: tight clusters AND the relative positions of those clusters in the original 5-D feature space.",
+    lines: &[
+        "# Three 5-D Gaussian clusters at distinct locations.",
+        "pts_a = randn(1, [25, 5]) * 0.4 + matmul(ones([25, 1]), [[0, 0, 0, 0, 0]])",
+        "pts_b = randn(2, [25, 5]) * 0.4 + matmul(ones([25, 1]), [[3, 3, 0, 0, 0]])",
+        "pts_c = randn(3, [25, 5]) * 0.4 + matmul(ones([25, 1]), [[0, 0, 3, 3, 3]])",
+        "X = concat(concat(pts_a, pts_b, 0), pts_c, 0)                                       # 75 x 5",
+        "labels = concat(concat(zeros([25]), ones([25]), 0), ones([25]) + 1, 0)",
+        "# Linear baseline.",
+        "pca_proj = pca(X, 2)",
+        "# Local-only neighborhood projection.",
+        "tsne_proj = tsne(X, 8, 150, 1)",
+        "# Local + global projection.",
+        "umap_proj = umap(X, 8, 0.1, 150, 1)",
+        "# (TODO Phase 5: mds_proj = mds(X, 2), rp_proj = random_projection(X, 2, 7))",
+        "scatter_labeled(pca_proj, labels)",
+        "scatter_labeled(tsne_proj, labels)",
+        "scatter_labeled(umap_proj, labels)",
     ],
 };

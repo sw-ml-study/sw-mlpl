@@ -54,6 +54,56 @@ pub enum Step {
 
 pub const PATHS: &[LearningPath] = &[
     LearningPath {
+        title: "Dimensionality reduction",
+        blurb: "When the data lives in 50 dimensions but the screen has 2: pick a projection. PCA (linear, fast), t-SNE (local-only, dramatic), UMAP (local + global, the modern default). Walk the methods on shared datasets, then read the side-by-side comparisons.",
+        steps: &[
+            Step::Glossary {
+                term: "Dimensionality reduction",
+                why: "Frame the whole path: high-D embeddings live somewhere on a much lower-dim manifold, and projections trade one kind of fidelity for another.",
+            },
+            Step::Demo {
+                name: "PCA",
+                why: "The cheap linear baseline. Power iteration on the covariance matrix finds the top axis of variance; project the points onto it. Linear, fast, throws away every non-linear structure.",
+            },
+            Step::Glossary {
+                term: "PCA (Principal Component Analysis)",
+                why: "What PCA actually does (eigenvectors of the covariance matrix), what it misses (non-linear structure), and the loadings vs projections distinction.",
+            },
+            Step::Demo {
+                name: "PCA 3D (interactive)",
+                why: "Same dataset, but project to 3 components and view in an interactive Plotly viewer. Drag/rotate confirms that well-separated 5-D clusters stay separated along every axis -- harder to fake than a single 2-D shot.",
+            },
+            Step::Demo {
+                name: "PCA loadings (critical dimensions)",
+                why: "Switch from 'where did the points go?' to 'which input dimensions matter?'. The critical-dimensions heatmap shows which features each PC is built from, with per-component variance percentages.",
+            },
+            Step::Glossary {
+                term: "t-SNE",
+                why: "Per-row perplexity-calibrated affinities + Student-t low-D + KL gradient descent. Local neighborhoods are sharp; global distance is noise.",
+            },
+            Step::Glossary {
+                term: "UMAP",
+                why: "Fuzzy simplicial sets + cross-entropy with negative sampling. The modern default for visualizing high-D embeddings -- preserves local AND global structure.",
+            },
+            Step::Demo {
+                name: "UMAP vs PCA",
+                why: "Two-moons embedded in 5-D. PCA reads the linear projection; UMAP reads the local k-NN graph. Both recover the moon arcs but via different recipes.",
+            },
+            Step::Demo {
+                name: "UMAP vs t-SNE",
+                why: "Three clusters where C is 5x farther than A is from B. t-SNE inflates every cluster to similar size; UMAP preserves the relative distance. This is the case the milestone is built around.",
+            },
+            Step::Demo {
+                name: "Dim-reduction zoo",
+                why: "Same dataset, three side-by-side projections (PCA / t-SNE / UMAP). The fastest way to internalize what each method emphasizes.",
+            },
+            Step::Note {
+                title: "What's next",
+                body: "Phase 5 of the dim-reduction milestone adds [[Multidimensional Scaling]] (MDS) and random projection, joining the zoo demo. Phase 4 lands the long-form tutorial lessons (`Why reduce dimensions?`, the SNE-family deep dive, the UMAP first-principles lesson). Track the milestone status in `docs/milestone-dimensionality-reduction.md`.",
+            },
+        ],
+    },
+    LearningPath {
         title: "Zero to LLM",
         blurb: "The spine: orientation -> arrays -> classifiers -> MLP -> autograd -> attention -> transformer -> tiny LM. Twelve steps; assume zero ML background.",
         steps: &[
