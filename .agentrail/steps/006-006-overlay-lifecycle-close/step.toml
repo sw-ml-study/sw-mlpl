@@ -1,6 +1,6 @@
 number = 6
 slug = "006-overlay-lifecycle-close"
-status = "in-progress"
+status = "completed"
 description = """
 Step 006 (FINAL, use --done): Overlay lifecycle + CSS polish + saga close.
 
@@ -8,5 +8,6 @@ E..."""
 role = "production"
 context_files = []
 created_at = "2026-05-25T12:00:32"
+completed_at = "2026-05-25T14:04:40"
 task_type = "meta"
-commits = []
+commits = ["8739b48caa3679a0f0365ecb6d5b7a8b04241827"]
