@@ -1,9 +1,10 @@
 number = 45
 slug = "saga33-step043a-ctrl-space-trigger"
-status = "pending"
+status = "completed"
 description = "Bug fix + UX change: the Tab trigger from step 043 does not work in practice ..."
 role = "production"
 context_files = []
 created_at = "2026-05-25T11:16:54"
+completed_at = "2026-05-25T11:22:09"
 task_type = "feature"
-commits = []
+commits = ["e747746b70385682d25f726980beea9e571a30c1"]
