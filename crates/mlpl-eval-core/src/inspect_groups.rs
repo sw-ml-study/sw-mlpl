@@ -209,6 +209,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "[N,N] squared Euclidean distances",
             ),
             ("knn", "knn(X, k)", "[N,k] nearest-neighbor indices"),
+            (
+                "knn_graph",
+                "knn_graph(X, k)",
+                "[N*k, 3] (i, j, dist) edge list -- UMAP's input layer",
+            ),
             ("pca", "pca(X, k)", "top-k principal-component projection"),
             (
                 "pca_components",

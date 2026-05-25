@@ -1,0 +1,19 @@
+[package]
+name = "mlpl-runtime-umap"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Saga 33 step 033: UMAP builtins (knn_graph + future
+# fuzzy_simplicial_set + umap_layout) extracted into their
+# own sibling crate so the mlpl-runtime-dim-reduction crate
+# stays under the Crate-Module-Count budget. UMAP needs at
+# least three modules (graph + simplicial set + layout SGD),
+# any of which is too large to coexist with the t-SNE + PCA
+# subtree. Depends on mlpl-array (for DenseArray) and
+# mlpl-runtime-core (for RuntimeError). Nothing depends back
+# upward.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-runtime-core = { path = "../mlpl-runtime-core" }
