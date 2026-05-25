@@ -1,0 +1,1 @@
+Overlay lifecycle extraction: moved splash/tour/what's-new from render_shell.rs to render_shell_overlays.rs (3 fns, under target). render_shell drops to 3 fns/17 LOC (-2 warnings retired). Updated language-status.md. Rebuilt pages. CHANGES.md refreshed. Saga 34 complete.
