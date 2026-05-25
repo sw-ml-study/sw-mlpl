@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-db993c209f0f3c37.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-db993c209f0f3c37_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-3db15a52be1d3752.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-3db15a52be1d3752_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -566,6 +566,12 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             border-radius: 12px;
         }
         .splash-panel > * { position: relative; z-index: 1; }
+        .splash-header-shim {
+            background: rgba(30, 30, 46, 0.65);
+            border-radius: 8px;
+            padding: 16px 20px 12px;
+            margin-bottom: 16px;
+        }
         .splash-close {
             position: absolute;
             top: 12px;
@@ -1398,7 +1404,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-db993c209f0f3c37.js" crossorigin="anonymous" integrity="sha384-3QQq91vQw6Pplk6PdZBxDA7BU1otwj7ccX72iU4a5gSMZVWt5FEcCfdgHTFOhRl+"><link rel="preload" href="/sw-mlpl/mlpl-web-db993c209f0f3c37_bg.wasm" crossorigin="anonymous" integrity="sha384-Cp/GOofa4C870qgG3FDJg9RaNtoPstE1HHNDCPav2QvB27mJdS1aLQeiGi+hsOeu" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-3db15a52be1d3752.js" crossorigin="anonymous" integrity="sha384-i8DoagmqODkS/xCydKgqn7KRXtMCKC6qbJ1C/Bg+gXYzIpJPLhAdzzPI+FmhVYDr"><link rel="preload" href="/sw-mlpl/mlpl-web-3db15a52be1d3752_bg.wasm" crossorigin="anonymous" integrity="sha384-9fwh5YxNXSEX3fvJE0haciUVUmuOxLxLIY1g4wOu3EvEOYvABwMGL4umtjcVVcy3" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
