@@ -1,0 +1,1 @@
+DR milestone closeout: marked docs/milestone-dimensionality-reduction.md DONE with per-phase markers. Updated docs/language-status.md with saga 33 shipped entry (all new builtins, viz type, demos, lessons, learning path, crates). Rebuilt pages/ for live demo. Saga 33 complete.
