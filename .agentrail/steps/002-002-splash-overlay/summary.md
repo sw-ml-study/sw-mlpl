@@ -1,0 +1,1 @@
+Splash overlay with splash-bg.png background, SplashAction enum (single-callback dispatch), 4 quick-start cards, dismiss + tour buttons. OnboardingState sub-struct in app_state. Removed predicate functions that inflated module fn count. Wrote docs/feature-design-process.md: design-before-code discipline, budget inventory, general vs domain-specific separation, pattern utilities.
