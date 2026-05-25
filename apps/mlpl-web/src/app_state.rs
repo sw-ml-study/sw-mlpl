@@ -38,6 +38,9 @@ pub struct UiState {
     /// Saga 33 step 043: candidates for the Tab-completion
     /// popup below the REPL input. Empty Vec = popup hidden.
     pub completion_candidates: UseStateHandle<Vec<String>>,
+    /// Saga 33 step 047: highlighted index in the completion
+    /// popup. Resets to 0 when new candidates land.
+    pub completion_selected: UseStateHandle<usize>,
 }
 
 /// Upload-flow state: the hidden `<input type=file>` NodeRef and

@@ -94,6 +94,29 @@ pub const REPL_COMMANDS: &[&str] = &[
 /// stays in sync with parser literals.
 pub const KEYWORDS: &[&str] = &["train", "repeat", "experiment", "for", "in", "param"];
 
+/// Wrap-around index increment for popup navigation.
+pub fn next_index(cur: usize, len: usize) -> usize {
+    if len == 0 {
+        return 0;
+    }
+    (cur + 1) % len
+}
+
+/// Wrap-around index decrement for popup navigation.
+pub fn prev_index(cur: usize, len: usize) -> usize {
+    if len == 0 {
+        return 0;
+    }
+    if cur == 0 { len - 1 } else { cur - 1 }
+}
+
+/// ArrowRight should accept the highlighted candidate only
+/// when the popup is open AND the cursor is at the end of
+/// the input (otherwise ArrowRight is a normal cursor move).
+pub fn should_accept_right(popup_open: bool, cursor: usize, input_len: usize) -> bool {
+    popup_open && cursor >= input_len
+}
+
 /// Saga 33 step 045/046: the completion-popup trigger
 /// predicate. `ctrl_key` is `KeyboardEvent::ctrl_key()`;
 /// `code` is `KeyboardEvent::code()` (returns the physical
@@ -114,17 +137,10 @@ pub enum TabMatch {
     Popup(Vec<String>),
 }
 
-/// Resolve a Tab keypress: build the candidate list from
-/// static names + the runtime builtins iterator, match the
-/// prefix at `cursor`, decide how to react.
-pub fn compute_tab_match<'a, I>(input: &str, cursor: usize, builtins: I) -> TabMatch
+fn build_all_candidates<'a, I>(builtins: I) -> Vec<&'a str>
 where
     I: Iterator<Item = &'a str>,
 {
-    let (_, prefix) = extract_prefix(input, cursor);
-    if prefix.is_empty() {
-        return TabMatch::None;
-    }
     let mut all: Vec<&str> = REPL_COMMANDS
         .iter()
         .chain(KEYWORDS.iter())
@@ -133,6 +149,21 @@ where
         .collect();
     all.sort();
     all.dedup();
+    all
+}
+
+/// Resolve a completion keypress: build the candidate list
+/// from static names + runtime builtins, match the prefix at
+/// `cursor`, decide how to react.
+pub fn compute_tab_match<'a, I>(input: &str, cursor: usize, builtins: I) -> TabMatch
+where
+    I: Iterator<Item = &'a str>,
+{
+    let (_, prefix) = extract_prefix(input, cursor);
+    if prefix.is_empty() {
+        return TabMatch::None;
+    }
+    let all = build_all_candidates(builtins);
     let candidates = match_candidates(prefix, &all);
     match candidates.len() {
         0 => TabMatch::None,
@@ -146,7 +177,10 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::{REPL_COMMANDS, apply_completion, extract_prefix, match_candidates};
+    use super::{
+        REPL_COMMANDS, apply_completion, extract_prefix, match_candidates, next_index, prev_index,
+        should_accept_right,
+    };
 
     #[test]
     fn extract_prefix_on_empty_input_returns_empty() {
@@ -262,6 +296,30 @@ mod tests {
             super::compute_tab_match("foo ", 4, builtins),
             super::TabMatch::None
         ));
+    }
+
+    #[test]
+    fn next_index_wraps_at_end() {
+        assert_eq!(next_index(0, 3), 1);
+        assert_eq!(next_index(2, 3), 0);
+        assert_eq!(next_index(0, 1), 0);
+        assert_eq!(next_index(0, 0), 0);
+    }
+
+    #[test]
+    fn prev_index_wraps_at_start() {
+        assert_eq!(prev_index(0, 3), 2);
+        assert_eq!(prev_index(1, 3), 0);
+        assert_eq!(prev_index(0, 1), 0);
+        assert_eq!(prev_index(0, 0), 0);
+    }
+
+    #[test]
+    fn accept_right_requires_popup_and_cursor_at_end() {
+        assert!(should_accept_right(true, 5, 5));
+        assert!(should_accept_right(true, 6, 5));
+        assert!(!should_accept_right(true, 3, 5));
+        assert!(!should_accept_right(false, 5, 5));
     }
 
     #[test]

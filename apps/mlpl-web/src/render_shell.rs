@@ -59,7 +59,9 @@ fn build_main_args<'a>(
         on_pick_completion: make_pick_completion(
             a.ui.input_value.clone(),
             a.ui.completion_candidates.clone(),
+            a.ui.completion_selected.clone(),
         ),
+        completion_selected: *a.ui.completion_selected,
     }
 }
 
@@ -71,11 +73,13 @@ fn build_main_args<'a>(
 fn make_pick_completion(
     input_value: UseStateHandle<String>,
     completion_candidates: UseStateHandle<Vec<String>>,
+    completion_selected: UseStateHandle<usize>,
 ) -> Callback<String> {
     Callback::from(move |chosen: String| {
         let cur = input_value.len();
         let (out, _) = crate::completion::apply_completion(&input_value, cur, &chosen);
         input_value.set(out);
         completion_candidates.set(Vec::new());
+        completion_selected.set(0);
     })
 }

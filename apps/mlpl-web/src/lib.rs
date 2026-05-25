@@ -32,6 +32,7 @@ pub mod entry_render;
 pub mod glossary_popup;
 pub mod glossary_view;
 pub mod handlers;
+pub mod handlers_popup;
 pub mod help;
 pub mod mode_callbacks;
 pub mod mode_path;

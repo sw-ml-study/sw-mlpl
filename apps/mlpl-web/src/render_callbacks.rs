@@ -30,6 +30,7 @@ pub fn build_input_callbacks(callbacks: &AppCallbacks, ui: &UiState) -> InputCal
             ui.cmd_history.clone(),
             ui.cmd_index.clone(),
             ui.completion_candidates.clone(),
+            ui.completion_selected.clone(),
         ),
         open_dialog: toggle_bool(ui.dialog_open.clone(), true),
         close_dialog: toggle_bool(ui.dialog_open.clone(), false),

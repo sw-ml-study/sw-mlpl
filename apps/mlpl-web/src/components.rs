@@ -165,13 +165,10 @@ pub struct InputRowProps {
     pub on_input: Callback<InputEvent>,
     pub on_keydown: Callback<KeyboardEvent>,
     pub in_tutorial: bool,
-    /// Saga 33 step 043: tab-completion popup candidates.
-    /// Empty Vec hides the popup; non-empty renders a row of
-    /// click-to-pick chips below the input.
     pub completion_candidates: Vec<String>,
-    /// Saga 33 step 043: pick callback for the popup chips.
-    /// Receives the chosen candidate string.
     pub on_pick_completion: Callback<String>,
+    /// Saga 33 step 047: highlighted chip index.
+    pub completion_selected: usize,
 }
 
 #[function_component(InputRow)]
@@ -184,16 +181,18 @@ pub fn input_row(props: &InputRowProps) -> Html {
     let popup = if props.completion_candidates.is_empty() {
         html! {}
     } else {
-        let chips = props.completion_candidates.iter().map(|c| {
+        let sel = props.completion_selected;
+        let chips = props.completion_candidates.iter().enumerate().map(|(i, c)| {
             let cb = props.on_pick_completion.clone();
             let text = c.clone();
             let onclick = Callback::from(move |_| cb.emit(text.clone()));
+            let cls = if i == sel { "completion-chip selected" } else { "completion-chip" };
             html! {
-                <button class="completion-chip" onclick={onclick} title="Click to insert">{ c.clone() }</button>
+                <button class={cls} onclick={onclick} title="Click to insert" role="option" aria-selected={if i == sel { "true" } else { "false" }}>{ c.clone() }</button>
             }
         });
         html! {
-            <div class="completion-popup" role="listbox" aria-label="Tab-completion candidates">
+            <div class="completion-popup" role="listbox" aria-label="Completion candidates">
                 { for chips }
             </div>
         }

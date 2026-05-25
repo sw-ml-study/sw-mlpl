@@ -1,6 +1,6 @@
 number = 47
 slug = "saga33-step046a-popup-arrow-nav"
-status = "pending"
+status = "in-progress"
 description = "Arrow-key navigation for the REPL completion popup. Currently (after step 046..."
 role = "production"
 context_files = []

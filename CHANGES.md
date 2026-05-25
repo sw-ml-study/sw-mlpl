@@ -12,8 +12,143 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-25
+
+- chore(agentrail): insert step 047 (popup arrow-key navigation)
+- chore(agentrail): record saga 33 step 046 completion + kickoff step 047 (milestone close)
+- saga 33 step 046: correct REPL completion trigger Shift+Space -> Ctrl+Space
+- chore(agentrail): record saga 33 step 045 completion + kickoff step 046 (milestone close)
+- saga 33 step 045: swap REPL completion trigger from Tab to Shift+Space
+- chore(agentrail): insert step 045 (Ctrl+Space trigger swap)
+- chore(agentrail): record saga 33 step 043 completion + kickoff step 045 (milestone close)
+- saga 33 step 043: REPL tab-completion MVP (Tab key + click-to-pick chip popup)
+- chore(agentrail): record saga 33 step 042a completion + kickoff step 043 (REPL tab-completion)
+- saga 33 step 042a: sync Dimensionality reduction path with MDS / RP landed
+- chore(agentrail): record saga 33 step 042 completion + kickoff step 043 (REPL tab-completion)
+- saga 33 step 042: path-resume bug fix -- preserve path_state on lesson navigation
+- chore(agentrail): insert step 042 (path-resume bug fix)
+- chore(agentrail): record saga 33 step 041 completion + kickoff step 042 (REPL tab-completion)
+- saga 33 step 041: mds() + random_projection() builtins + new mlpl-runtime-mds-rp crate (+4 warn, exception)
+- chore(agentrail): insert step 042 (REPL tab-completion MVP)
+- chore(agentrail): record saga 33 step 037d completion + kickoff step 041 (MDS / random_projection)
+- saga 33 step 037d: :introspect REPL command bundling every no-arg inspector
+- chore(agentrail): record saga 33 step 037c completion + kickoff step 037d (:introspect helper)
+- saga 33 step 037c: UMAP impl fix -- fit a/b from min_dist, wide coord bound (+1 warn, exception)
+- chore(agentrail): insert UMAP impl fix (039) + :introspect helper (040)
+- chore(agentrail): record saga 33 step 037b completion + kickoff step 037c (umap impl fix)
+- saga 33 step 037b: move scatter_labeled legend outside the plot + class-id narrative
+- chore(agentrail): record saga 33 step 037 completion + kickoff step 037b (umap impl fix)
+- saga 33 step 037: scatter_labeled legend + umap_vs_pca honest-caveat (+1 warn, exception)
+- chore(agentrail): insert step 037 (scatter_labeled legend) -- user request from chat
+- chore(agentrail): record saga 33 step 036 completion + kickoff step 037
+- saga 33 step 036: 6 dim-reduction tutorial lessons + agentrail-sessions plan (+1 warn, exception)
+- chore(agentrail): record saga 33 step 035 completion + kickoff step 036
+- saga 33 step 035: comparison demos + Dimensionality reduction path (UMAP vs PCA / t-SNE / zoo)
+
+## 2026-05-24
+
+- chore(agentrail): record saga 33 step 034 completion + kickoff step 035
+- saga 33 step 034: umap() builtin + fuzzy simplicial set + layout SGD (+2 warn, exception)
+- chore(agentrail): record saga 33 step 033 completion + kickoff step 034
+- saga 33 step 033: knn_graph builtin + mlpl-runtime-umap crate (-1 fail, -1 warn)
+- chore(agentrail): record saga 33 step 032 completion + kickoff step 033
+- chore(pages): rebuild for saga 33 step 032 (critical_dimensions viz + PCA_LOADINGS demo)
+- saga 33 step 032: critical_dimensions viz + PCA_LOADINGS demo (+1 warn)
+- chore(agentrail): record saga 33 step 031 completion + kickoff step 032
+- saga 33 step 031: pca_components + pca_variance_explained builtins (-1 warn)
+- fix(demos): PCA_3D uses randn+concat for 5-D data (blobs is 2-D only)
+- fix(build-pages): use separate dist dir to stop clobbering trunk serve
+- chore(agentrail): record saga 33 step 030 completion + kickoff step 031
+- chore(pages): rebuild for saga 33 step 030 (plotly3d viz)
+- saga 33 step 030: plotly3d interactive viz + PCA_3D demo (+3 warns)
+- chore(agentrail): record saga 33 step 029 completion + kickoff step 030
+- saga 33 step 029 (batch B XOR-gates): linear-classifier XOR failure pinned
+- saga 33 step 029 (batch B+C finish): softmax_classifier + tiny_lm_generate
+- saga 33 step 029 (batch C): mlpl-reg coverage for attention heatmaps
+- chore(pages+agentrail): Escape-fix WASM rebuild + dim-reduction milestone
+- fix(web): Escape key closes doc dialog + tutorial panel (+1 warn)
+- saga 33 step 029 (batch B partial): trained-classifier boundary tests
+- saga 33 step 029 (batch A): mlpl-reg coverage for filled-region viz
+- chore(agentrail): record saga 33 step 028 completion + kickoff step 029
+- chore(pages): rebuild for saga 33 step 028 perplexity demo updates
+- saga 33 step 028: perplexity(logits, targets) builtin + LM demo readouts
+- chore(agentrail): file step 029 -- interactive Plotly 3D PCA demo
+- chore(pages): rebuild after saga 33 step 027 (chunked Pets-quick + serve.sh)
+- chore(agentrail): record saga 33 step 027 completion + kickoff step 028
+- saga 33 step 027: unhang the Pets-quick demo in local dev + tab
+- chore(agentrail): record saga 33 step 026 completion + kickoff step 027
+- saga 33 step 026: mlpl-reg visual regression harness + moons golden
+- docs(post-mortem): Moons MLP decision-boundary y-flip defect-escape analysis
+- chore(agentrail): record saga 33 step 025 completion + kickoff step 026
+- saga 33 step 025: fix Moons MLP decision-boundary y-flip (-1 warn)
+- chore(agentrail): file steps 026 + 027 -- visual regression test suite
+- chore(agentrail): record saga 33 step 024 completion + kickoff step 025-cluster
+- saga 33 step 024: split inspect.rs by responsibility (-5 warns)
+- chore(agentrail): file step 025 -- Moons MLP decision boundary regression
+- chore(agentrail): record saga 33 step 023 completion + kickoff step 024
+- saga 33 step 023: extract FnCall dispatch + block helpers from eval.rs (-1 fail, -2 warns)
+- chore(agentrail): record saga 33 step 022 completion
+- saga 33 step 022: extract fetch_dataset tests (-1 fail, -1 warn)
+- chore(agentrail): record saga 33 step 021 completion
+- saga 33 step 021: decompose eval_tensor_fncall (-1 fail, -2 warns)
+
+## 2026-05-23
+
+- chore(agentrail): record saga 33 step 020 completion
+- saga 33 step 020: decompose fmt for EvalError (-1 fail)
+- chore(agentrail): record saga 33 step 019 completion
+- saga 33 step 019: move TokenizerSpec to mlpl-eval-core (-1 warn)
+- chore(agentrail): record saga 33 step 018 completion
+- saga 33 step 018: extract mlpl-bpe-core (pure BPE algorithm)
+- chore(agentrail): record saga 33 step 017 completion
+- saga 33 step 017: extract loader helpers + split From-impls file (-3 warns)
+- chore(agentrail): record saga 33 step 016 completion
+- saga 33 step 016: extract mlpl-models-llm (llm_call)
+- chore(agentrail): record saga 33 step 015 completion
+- saga 33 step 015: extract mlpl-models-feasibility + add HasDispatch trait
+- chore(agentrail): record saga 33 step 014 completion
+- saga 33 step 014: extract mlpl-models-tune (lora)
+- chore(agentrail): record saga 33 step 013 completion
+- saga 33 step 013: extract mlpl-models-inspect (embed_table + estimate_train)
+- chore(agentrail): record saga 33 step 012 completion
+- saga 33 step 012: extract mlpl-models-mutate (clone + perturb)
+- Merge pull request #5 from sw-ml-study/claude/epic-wright-Pmtxh
+
+## 2026-05-24
+
+- docs: add parallel refactoring guide for multi-agent coordination
+
+## 2026-05-23
+
+- chore(agentrail): record saga 33 step 011 completion
+- saga 33 step 011: extract mlpl-models-freeze + consolidate error_from_components
+- chore(agentrail): record saga 33 step 010 completion
+- saga 33 step 010: HasParams + HasFrozen traits + first generic refactor
+- chore(agentrail): record saga 33 step 009 completion
+- saga 33 step 009: foundation for capability-trait extraction (mlpl-env-traits)
+- chore(agentrail): record saga 33 step 008 completion
+- saga 33 step 008: extract mlpl-models-tape to components/mlpl-session
+- chore(agentrail): record saga 33 step 007 completion
+- saga 33 step 007: mlpl-web lib+bin hybrid + build.rs include! + app/render decompose
+- chore(agentrail): record saga 33 step 006 completion
+- saga 33 step 006: decompose mode_callbacks + main.rs helpers (-2 fails, -2 warns)
+- chore(agentrail): record saga 33 step 005 completion
+- saga 33 step 005: split mlpl-array ops.rs (-1 fail, -1 warn)
+- chore(agentrail): record saga 33 step 004 completion
+- saga 33 step 004: split model_dispatch.rs (-3 fails, -3 warns)
+
 ## 2026-05-22
 
+- chore(agentrail): record saga 33 step 003 completion
+- saga 33 step 003: full env.rs split (-1 fail, -1 warn)
+- chore(agentrail): record saga 33 step 002 completion + step 003 ready
+- saga 33 step 002: extract env_vars.rs + env_params.rs + env_frozen.rs
+- chore(agentrail): record saga 33 step 001 completion + step 002 ready
+- saga 33 step 001: split demos.rs by topic (-1 fail, File-LOC FAIL retired)
+- docs(loose-coupling): expand with macros, FP, type techniques, symptom table
+- chore(agentrail): archive saga 32, init saga 33 (env-demos-paydown)
+- chore(agentrail): record saga 32 step 008 completion + close saga
+- saga 32 step 008 (FINAL): close-out + docs/loose-coupling.md
 - chore(agentrail): record saga 32 step 007 (no-progress) + next-step prompt
 - saga 32 step 007: warning-long-tail (partial; rustfmt fights in-place)
 - chore(agentrail): record saga 32 step 006 completion + next-step prompt

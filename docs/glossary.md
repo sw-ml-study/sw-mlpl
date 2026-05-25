@@ -467,9 +467,23 @@ reserved for browser focus traversal (step 043's
 `preventDefault` was beaten by the browser default).
 
 Behavior: unique match -> inline insertion at the cursor;
-ambiguous match -> a row of click-to-pick chips appears
-below the input. Empty prefix (cursor on whitespace) does
-nothing.
+ambiguous match -> a row of chips appears below the input.
+Empty prefix (cursor on whitespace) does nothing.
+
+Keybindings when the popup is open:
+
+- `ArrowDown` / `ArrowUp` -- navigate the highlighted chip
+  (wraps around at both ends)
+- `Enter` -- accept the highlighted candidate at the cursor
+- `ArrowRight` -- accept the highlighted candidate, but
+  ONLY when the cursor is already at the end of the input;
+  otherwise passes through as a normal cursor move
+- `Escape` -- dismiss the popup without inserting anything
+- Click on any chip -- accept that candidate (same as Enter
+  on the highlighted one)
+
+When the popup is closed, `ArrowUp` / `ArrowDown` navigate
+command history as usual.
 
 Candidate sources, in order: REPL slash-commands
 ([[:vars (REPL command)]], [[:introspect (REPL command)]], ...),
@@ -477,8 +491,7 @@ MLPL keywords (`train`, `repeat`, `experiment`, `for`,
 `in`, `param`), all runtime builtins (every name in
 `mlpl_runtime::runtime_builtin_names()`). Live user-bound
 variable / model names are deferred -- filed as a follow-
-up step. Arrow-key navigation of the chip list is also
-deferred (click is enough for MVP).
+up step.
 
 ## Comparison ops: `gt`, `lt`, `eq` (builtins)
 
