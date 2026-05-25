@@ -46,6 +46,8 @@ pub struct UiState {
 /// Onboarding overlay state (splash + tour + what's-new).
 pub struct OnboardingState {
     pub show_splash: UseStateHandle<bool>,
+    pub show_tour: UseStateHandle<bool>,
+    pub tour_step: UseStateHandle<usize>,
 }
 
 /// Upload-flow state: the hidden `<input type=file>` NodeRef and

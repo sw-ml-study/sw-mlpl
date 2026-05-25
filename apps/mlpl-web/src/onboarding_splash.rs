@@ -45,6 +45,7 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
 
 pub fn make_splash_action(
     splash: UseStateHandle<bool>,
+    tour: UseStateHandle<bool>,
     demo: Callback<usize>,
     input: UseStateHandle<String>,
     lesson: UseStateHandle<Option<usize>>,
@@ -54,7 +55,8 @@ pub fn make_splash_action(
         crate::onboarding_storage::write_splash_dismissed();
         splash.set(false);
         match action {
-            SplashAction::Dismiss | SplashAction::StartTour => {}
+            SplashAction::Dismiss => {}
+            SplashAction::StartTour => tour.set(true),
             SplashAction::RunDemo(idx) => demo.emit(idx),
             SplashAction::TypeExpr(s) => input.set(s.to_string()),
             SplashAction::OpenTutorial => lesson.set(Some(0)),

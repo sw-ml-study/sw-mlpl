@@ -1,6 +1,6 @@
 number = 3
 slug = "003-tour-tooltip"
-status = "pending"
+status = "in-progress"
 description = """
 Step 003: Tour tooltip component.
 
