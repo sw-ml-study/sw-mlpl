@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-25
 
+- chore(agentrail): record saga 33 step 048 completion -- saga 33 DONE
+- saga 33 step 048: dimensionality reduction milestone closeout
+- chore(agentrail): record saga 33 step 047 completion + kickoff step 048 (milestone close)
+- saga 33 step 047: arrow-key navigation for REPL completion popup
 - chore(agentrail): insert step 047 (popup arrow-key navigation)
 - chore(agentrail): record saga 33 step 046 completion + kickoff step 047 (milestone close)
 - saga 33 step 046: correct REPL completion trigger Shift+Space -> Ctrl+Space
