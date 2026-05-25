@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-f55e6758323d369e.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-f55e6758323d369e_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-e3ac97906fce56af.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-e3ac97906fce56af_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -645,13 +645,13 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             position: fixed;
             inset: 0;
             z-index: 290;
-            background: rgba(17, 17, 27, 0.5);
+            background: rgba(17, 17, 27, 0.25);
         }
         .tour-spotlight {
             position: fixed;
             z-index: 295;
             border-radius: 6px;
-            box-shadow: 0 0 0 9999px rgba(17, 17, 27, 0.6);
+            box-shadow: 0 0 0 9999px rgba(17, 17, 27, 0.35), 0 0 16px 4px var(--peach);
             pointer-events: none;
         }
         .tour-tooltip {
@@ -707,19 +707,26 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
 
         .back-to-path-btn {
-            background: transparent;
+            background: var(--surface0, #313244);
             color: var(--peach);
-            border: 1px solid var(--surface2, #45475a);
-            border-radius: 4px;
-            padding: 2px 8px;
+            border: 2px solid var(--peach);
+            border-radius: 6px;
+            padding: 5px 14px;
             font-family: var(--mono);
-            font-size: 12px;
+            font-size: 13px;
+            font-weight: 600;
             cursor: pointer;
             margin-right: 8px;
+            animation: path-pulse 2s ease-in-out infinite;
+        }
+        @keyframes path-pulse {
+            0%, 100% { box-shadow: 0 0 4px rgba(250, 179, 135, 0.3); }
+            50% { box-shadow: 0 0 12px rgba(250, 179, 135, 0.6); }
         }
         .back-to-path-btn:hover {
-            background: var(--surface1, #313244);
+            background: var(--surface1, #45475a);
             border-color: var(--peach);
+            animation: none;
         }
 
         /* Modal */
@@ -1367,7 +1374,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-f55e6758323d369e.js" crossorigin="anonymous" integrity="sha384-IrL0gA3aY4RJWNCdodGbGFV8MRnO5t0JX5Go2rhhKql3iKOIiPp0rTQ4blWst+F/"><link rel="preload" href="/sw-mlpl/mlpl-web-f55e6758323d369e_bg.wasm" crossorigin="anonymous" integrity="sha384-dG0Ei7zo6VrY0ZK3thkOdQvM5NgUAeiXZWff57KDcuNL2G+BHrlTodHm3K0y07aj" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-e3ac97906fce56af.js" crossorigin="anonymous" integrity="sha384-RwtuGcmYTMMBBt/ZIZfwTveXQa+iwZCaGbDS2d/URLWGvdoiWM+8wB0GU373rbNs"><link rel="preload" href="/sw-mlpl/mlpl-web-e3ac97906fce56af_bg.wasm" crossorigin="anonymous" integrity="sha384-rOGbkpzQ+UfXs4FBY+2xwIsUZ6yxWyfNn5Oluf88NWZFO/CZm/wbkDKM9fIq04Sv" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
