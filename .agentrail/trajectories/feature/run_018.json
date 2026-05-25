@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 44,
+    "step": "saga33-step037e-repl-tab-complete"
+  },
+  "action": "Created apps/mlpl-web/src/completion.rs (extract_prefix + match_candidates + apply_completion + compute_tab_match + REPL_COMMANDS + KEYWORDS + 14 unit tests). Added completion_candidates state handle to UiState + use_ui_state. Added Tab arm in make_keydown delegating to handle_tab (reads HtmlInputElement cursor, calls compute_tab_match, dispatches to inline insertion or popup state). Added completion_candidates + on_pick_completion props to InputRow + popup chip rendering. Wired through render_main + render_shell with make_pick_completion callback. Added wasm-target dep for mlpl-eval + pub use runtime_builtin_names in mlpl-eval. CSS for chips and back-to-path button in index.html. Glossary 'Tab completion (REPL)' entry. README count 293->294.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T11:11:39"
+}
