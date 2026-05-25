@@ -363,15 +363,14 @@ pub fn make_keydown(
     completion_candidates: UseStateHandle<Vec<String>>,
 ) -> Callback<KeyboardEvent> {
     Callback::from(move |e: KeyboardEvent| {
-        // Saga 33 step 045: Shift+Space triggers the
-        // completion popup. Guarded ahead of the key-string
+        // Saga 33 step 045/046: Ctrl+Space triggers the
+        // completion popup -- the IDE standard (VS Code,
+        // IntelliJ, Emacs). Guarded ahead of the key-string
         // match because the trigger is a (modifier, code)
-        // pair, not a single named key. Tab is reserved
-        // for browser focus traversal (the step-043 attempt
-        // to override Tab lost to the browser's default);
-        // Shift+Space also avoids the Ctrl+Space binding
-        // some OSes / browsers claim for their own UI.
-        if crate::completion::is_completion_trigger(e.shift_key(), e.code().as_str()) {
+        // pair, not a single named key. Tab is reserved for
+        // browser focus traversal (the step-043 attempt to
+        // override Tab lost to the browser's default).
+        if crate::completion::is_completion_trigger(e.ctrl_key(), e.code().as_str()) {
             e.prevent_default();
             handle_completion(&e, &input_value, &completion_candidates);
             return;
