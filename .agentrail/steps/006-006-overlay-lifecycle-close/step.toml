@@ -1,6 +1,6 @@
 number = 6
 slug = "006-overlay-lifecycle-close"
-status = "pending"
+status = "in-progress"
 description = """
 Step 006 (FINAL, use --done): Overlay lifecycle + CSS polish + saga close.
 
