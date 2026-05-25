@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-76cf7612812d5e15.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-76cf7612812d5e15_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-27a8ba1fa5f00647.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-27a8ba1fa5f00647_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -540,16 +540,10 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             position: fixed;
             inset: 0;
             z-index: 250;
-            background: url('splash-bg.png') center/cover no-repeat;
+            background: rgba(17, 17, 27, 0.55);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .splash-backdrop::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(17, 17, 27, 0.55);
         }
         .splash-panel {
             position: relative;
@@ -559,11 +553,20 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             padding: 40px 48px;
             text-align: center;
             color: var(--text);
-            background: rgba(30, 30, 46, 0.75);
+            background: url('splash-bg.png') center/cover no-repeat;
             border-radius: 12px;
-            backdrop-filter: blur(8px);
             border: 1px solid rgba(69, 71, 90, 0.5);
+            overflow: hidden;
         }
+        .splash-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(30, 30, 46, 0.78);
+            backdrop-filter: blur(4px);
+            border-radius: 12px;
+        }
+        .splash-panel > * { position: relative; z-index: 1; }
         .splash-close {
             position: absolute;
             top: 12px;
@@ -1396,7 +1399,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-76cf7612812d5e15.js" crossorigin="anonymous" integrity="sha384-3QQq91vQw6Pplk6PdZBxDA7BU1otwj7ccX72iU4a5gSMZVWt5FEcCfdgHTFOhRl+"><link rel="preload" href="/sw-mlpl/mlpl-web-76cf7612812d5e15_bg.wasm" crossorigin="anonymous" integrity="sha384-vC64jLffIO6gcV0fv/qrf21uNz56yFn5BUHW7qeZTuSH/ndP9xLiJymYFA67BrkQ" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-27a8ba1fa5f00647.js" crossorigin="anonymous" integrity="sha384-3QQq91vQw6Pplk6PdZBxDA7BU1otwj7ccX72iU4a5gSMZVWt5FEcCfdgHTFOhRl+"><link rel="preload" href="/sw-mlpl/mlpl-web-27a8ba1fa5f00647_bg.wasm" crossorigin="anonymous" integrity="sha384-47dl8WF36uffqXJJSfY/hFjH4fe1kfL3EzUacHbwItLSNN5lrly9svbRmsKC+5pZ" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
