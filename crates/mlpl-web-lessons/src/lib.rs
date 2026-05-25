@@ -12,5 +12,6 @@
 pub mod intro_md;
 pub mod lessons;
 pub mod lessons_advanced;
+pub mod lessons_dim_reduction;
 
 pub use lessons::{LESSONS, Lesson};
