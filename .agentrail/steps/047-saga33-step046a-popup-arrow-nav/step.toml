@@ -1,0 +1,9 @@
+number = 47
+slug = "saga33-step046a-popup-arrow-nav"
+status = "pending"
+description = "Arrow-key navigation for the REPL completion popup. Currently (after step 046..."
+role = "production"
+context_files = []
+created_at = "2026-05-25T11:27:40"
+task_type = "feature"
+commits = []
