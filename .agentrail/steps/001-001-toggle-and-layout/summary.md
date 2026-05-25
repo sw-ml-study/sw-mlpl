@@ -1,0 +1,1 @@
+3D toggle: :3d REPL command + Ctrl+3 hotkey + split layout with empty canvas. viz3d_toggle.rs (2 fns + test). show_3d threaded through UiState -> EvalDeps -> MainArgs -> render_main_shell. CSS grid split layout.
