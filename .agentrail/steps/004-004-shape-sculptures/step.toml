@@ -1,0 +1,12 @@
+number = 4
+slug = "004-shape-sculptures"
+status = "pending"
+description = """
+Phase 3: Shape-aware sculptures.
+
+Replace placeholder boxes with shape-propor..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T16:12:16"
+task_type = "feature"
+commits = []

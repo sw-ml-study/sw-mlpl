@@ -1,0 +1,12 @@
+number = 3
+slug = "003-step-event-pipeline"
+status = "pending"
+description = """
+Phase 2: Step event pipeline.
+
+New viz3d_events.rs module: Stage3dEvent + Sha..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T16:12:08"
+task_type = "feature"
+commits = []
