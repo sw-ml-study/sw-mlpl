@@ -48,6 +48,7 @@ pub struct OnboardingState {
     pub show_splash: UseStateHandle<bool>,
     pub show_tour: UseStateHandle<bool>,
     pub tour_step: UseStateHandle<usize>,
+    pub show_whats_new: UseStateHandle<bool>,
 }
 
 /// Upload-flow state: the hidden `<input type=file>` NodeRef and
