@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-6883167927d5d2f4.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-6883167927d5d2f4_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-4c4a58c101eb18e8.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-4c4a58c101eb18e8_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -17,6 +17,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
 
 </script>
     <link rel="icon" href="/sw-mlpl/favicon-31c28a69865ebe2b.ico" integrity="sha384-dYOp5HPtgcVJNpgY9aJzLcaf8cB2SOg7pMoVVpJ6pdpZI8ww94WDtK16GRLmglhk"/>
+    
     
     
     <style>
@@ -238,6 +239,22 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         .help-btn:hover {
             background: var(--surface1);
             border-color: var(--blue);
+        }
+        .tour-btn-header {
+            background: var(--surface0);
+            color: var(--peach);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            height: 32px;
+            padding: 0 10px;
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+            margin-right: 6px;
+        }
+        .tour-btn-header:hover {
+            background: var(--surface1);
+            border-color: var(--peach);
         }
 
         /* REPL output area */
@@ -518,6 +535,177 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             background: var(--surface2, #45475a);
             border-color: var(--peach);
         }
+        /* Saga 34 step 002: splash overlay */
+        .splash-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 250;
+            background: url('splash-bg.png') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .splash-backdrop::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 17, 27, 0.88);
+        }
+        .splash-panel {
+            position: relative;
+            z-index: 1;
+            max-width: 560px;
+            padding: 32px;
+            text-align: center;
+            color: var(--text);
+        }
+        .splash-panel h2 {
+            font-size: 28px;
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .splash-panel h2 img {
+            width: 36px;
+            height: 36px;
+        }
+        .splash-subtitle {
+            color: var(--subtext0);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+        .splash-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .splash-card {
+            background: var(--surface0, #313244);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 8px;
+            padding: 14px 12px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 14px;
+            text-align: left;
+        }
+        .splash-card:hover {
+            border-color: var(--peach);
+            background: var(--surface1, #45475a);
+        }
+        .splash-card strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--peach);
+            font-size: 15px;
+        }
+        .splash-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .splash-btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid var(--surface2, #45475a);
+        }
+        .splash-btn-primary {
+            background: var(--peach);
+            color: var(--crust);
+            border-color: var(--peach);
+            font-weight: 600;
+        }
+        .splash-btn-secondary {
+            background: transparent;
+            color: var(--text);
+        }
+        .splash-btn:hover {
+            opacity: 0.9;
+        }
+        .whats-new-list {
+            text-align: left;
+            padding-left: 20px;
+            margin: 0 0 20px;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+        .whats-new-list strong { color: var(--peach); }
+        @media (max-width: 600px) {
+            .splash-cards { grid-template-columns: 1fr; }
+            .splash-panel { padding: 20px 16px; }
+        }
+
+        /* Saga 34 step 003: guided tour */
+        .tour-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 290;
+            background: rgba(17, 17, 27, 0.5);
+        }
+        .tour-spotlight {
+            position: fixed;
+            z-index: 295;
+            border-radius: 6px;
+            box-shadow: 0 0 0 9999px rgba(17, 17, 27, 0.6);
+            pointer-events: none;
+        }
+        .tour-tooltip {
+            position: fixed;
+            z-index: 300;
+            background: var(--surface0, #313244);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 8px;
+            padding: 14px 16px;
+            max-width: 340px;
+            color: var(--text);
+            font-size: 14px;
+        }
+        .tour-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .tour-header strong { color: var(--peach); }
+        .tour-close {
+            background: none;
+            border: none;
+            color: var(--subtext0);
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .tour-body { margin: 0 0 12px; line-height: 1.5; }
+        .tour-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tour-counter {
+            color: var(--subtext0);
+            font-size: 12px;
+            margin-right: auto;
+        }
+        .tour-btn {
+            padding: 4px 14px;
+            border-radius: 4px;
+            border: 1px solid var(--surface2, #45475a);
+            background: transparent;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .tour-btn:disabled { opacity: 0.4; cursor: default; }
+        .tour-btn-primary {
+            background: var(--peach);
+            color: var(--crust);
+            border-color: var(--peach);
+        }
+
         .back-to-path-btn {
             background: transparent;
             color: var(--peach);
@@ -1179,7 +1367,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-6883167927d5d2f4.js" crossorigin="anonymous" integrity="sha384-z8aXSKfvrK5temgOo8tPQ3VEaQIena1Bd+8Ycq2p+fSFY4LjPUTLUmph7GmwCUdg"><link rel="preload" href="/sw-mlpl/mlpl-web-6883167927d5d2f4_bg.wasm" crossorigin="anonymous" integrity="sha384-l9px+0/PWpOcXYNoASs/stAsWkyOFuGwina5ZhOzwA6m038j5f59bPF+PzfAgQvg" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-4c4a58c101eb18e8.js" crossorigin="anonymous" integrity="sha384-LVEuuorIn73v7LW0ya+ziXv0zqpqQAAsKuqr2ww3mN1/3A1Uoa8V0wLEOwKJQCHh"><link rel="preload" href="/sw-mlpl/mlpl-web-4c4a58c101eb18e8_bg.wasm" crossorigin="anonymous" integrity="sha384-85UNRJdZ7quU9lkQs6SsJyFZ/wMXAARhvWCa3r1P8sv3hzn600uzQC/uCGzDZjeG" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
