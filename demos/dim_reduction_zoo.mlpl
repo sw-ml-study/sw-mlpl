@@ -1,0 +1,24 @@
+# dim_reduction_zoo: PCA, t-SNE, and UMAP applied to the same
+# 5-D three-cluster dataset, rendered as a row of scatter plots
+# for direct comparison.
+#
+# (MDS and random_projection will join the zoo when Phase 5 of
+# the dimensionality-reduction milestone lands -- those rows are
+# TODO below.)
+#
+# Reading the row: PCA is the cheap linear baseline that
+# preserves global axes of variance; t-SNE inflates local
+# neighborhoods at the cost of global distance; UMAP keeps both.
+pts_a = randn(1, [25, 5]) * 0.4 + matmul(ones([25, 1]), [[0, 0, 0, 0, 0]])
+pts_b = randn(2, [25, 5]) * 0.4 + matmul(ones([25, 1]), [[3, 3, 0, 0, 0]])
+pts_c = randn(3, [25, 5]) * 0.4 + matmul(ones([25, 1]), [[0, 0, 3, 3, 3]])
+X = concat(concat(pts_a, pts_b, 0), pts_c, 0)                                       # 75 x 5
+labels = concat(concat(zeros([25]), ones([25]), 0), ones([25]) + 1, 0)
+pca_proj = pca(X, 2)                                                                 # linear
+tsne_proj = tsne(X, 8, 150, 1)                                                       # local-only
+umap_proj = umap(X, 8, 0.1, 150, 1)                                                  # local + global
+# TODO Phase 5: mds_proj = mds(X, 2)
+# TODO Phase 5: rp_proj = random_projection(X, 2, 7)
+scatter_labeled(pca_proj, labels)
+scatter_labeled(tsne_proj, labels)
+scatter_labeled(umap_proj, labels)

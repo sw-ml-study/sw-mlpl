@@ -161,6 +161,9 @@ pub const DEMOS: &[Demo] = &[
     crate::demos_dim_reduction::PCA_3D,
     crate::demos_dim_reduction::PCA_LOADINGS,
     crate::demos_models::SOFTMAX_CLASSIFIER,
+    crate::demos_dim_reduction::DIM_REDUCTION_ZOO,
+    crate::demos_dim_reduction::UMAP_VS_PCA,
+    crate::demos_dim_reduction::UMAP_VS_TSNE,
     // The interactive `Tiny LM` and `Tiny LM Generate` demos use a
     // smaller configuration than `demos/tiny_lm.mlpl` (V=280, d=32,
     // 200 steps). See demos_lm.rs.

@@ -1,0 +1,30 @@
+# umap_vs_pca: two-moons embedded in 5-D, projected back to 2-D
+# by both PCA (linear) and UMAP (non-linear / manifold-aware).
+#
+# Setup: take the 2-D two-moons dataset, append three small-
+# variance noise dimensions so the data lives in 5-D but its
+# intrinsic structure stays 2-D. Both methods then project down
+# to 2-D.
+#
+# Expectation: PCA recovers something close to the original 2-D
+# layout because the noise dims are low-variance; UMAP recovers
+# the moon arcs from local neighborhood structure regardless of
+# the noise scale -- it preserves manifold structure even when
+# noise dims dominate the linear variance.
+M = moons(7, 100, 0.05)                                            # 100 x 3: x, y, label
+moons2d = matmul(M, [[1, 0], [0, 1], [0, 0]])                       # drop label column
+labels = reshape(matmul(M, [[0], [0], [1]]), [100])                # extract integer labels
+embed = randn(42, [100, 3]) * 0.3                                  # 3 noise dims, smaller variance than the moons
+X = concat(moons2d, embed, 1)                                      # 100 x 5
+# PCA: top 2 linear principal components. Since the moons span
+# more variance than the noise dims, PC1/PC2 should grab the
+# moons structure.
+pca_proj = pca(X, 2)
+# UMAP: builds a k-NN graph, fuzzy simplicial set, then SGD
+# layout. Local neighborhood structure carries the moons even
+# under heavier noise.
+umap_proj = umap(X, 15, 0.1, 200, 7)
+# Two scatter plots, colored by class. Side by side they show
+# "linear" vs "manifold-aware" projection of the same 5-D data.
+scatter_labeled(pca_proj, labels)
+scatter_labeled(umap_proj, labels)

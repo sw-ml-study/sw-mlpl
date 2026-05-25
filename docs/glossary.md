@@ -584,6 +584,30 @@ Stored as a contiguous row-major buffer with no zero-skipping
 (no sparse representation). MLPL's `DenseArray` is the only
 array shape today.
 
+## Dimensionality reduction
+
+Project an `[N, D]` matrix down to `[N, k]` for some `k < D`,
+usually `k = 2` or `3` so the result fits on a screen. Two
+broad families. **Linear** methods rotate the data along
+axes of maximum variance ([[PCA (Principal Component Analysis)]]
+is the canonical example; `pca(X, k)` in MLPL). Fast, exact,
+preserves global variance directions, but throws away every
+non-linear structure -- a curved manifold gets flattened with
+crossings. **Non-linear** / manifold methods build a local
+neighborhood graph and optimize a low-D layout that preserves
+that graph. [[t-SNE]] (`tsne(X, perp, iters, seed)`) inflates
+local neighborhoods at the cost of global distance.
+[[UMAP]] (`umap(X, n_neighbors, min_dist, iters, seed)`)
+preserves both local AND global structure via fuzzy simplicial
+sets + cross-entropy with negative sampling -- the recommended
+modern default for visualizing learned embeddings. Multi-
+dimensional scaling (MDS), Isomap, and Laplacian eigenmaps are
+adjacent methods covered in the dim-reduction milestone's
+Phase 5. See also [[Manifold preservation]] and
+[[Swiss roll]] (the canonical "PCA fails, manifold methods
+win" test bed) and the "Dimensionality reduction" learning
+path for a walk through the demos.
+
 ## Diffusion Models
 
 Generative models that learn to denoise a sequence of
@@ -1419,6 +1443,22 @@ near a much-lower-dimensional manifold inside the ambient
 space. Justifies dimensionality reduction (PCA, [[t-SNE]], UMAP)
 and explains why deep learning works at all -- the network
 need only be expressive on the manifold, not the cube.
+
+## Manifold preservation
+
+A property of a dimensionality-reduction method: distances and
+neighborhoods on the underlying manifold are preserved in the
+low-D projection. Linear methods (PCA) preserve the GLOBAL
+ambient axes of variance but slice through curved manifolds,
+smearing them in projection. Non-linear / manifold methods
+([[t-SNE]], [[UMAP]], Isomap, Laplacian eigenmaps) build a
+local neighborhood graph FIRST -- distances on that graph
+approximate distances on the manifold -- then optimize a low-D
+layout that preserves the graph. UMAP additionally preserves
+GLOBAL inter-cluster distance via its repulsive (negative-
+sampling) term, which is what the "UMAP vs t-SNE" demo
+illustrates. The [[Swiss roll]] is the canonical test bed for
+the linear-vs-manifold contrast.
 
 ## map (deferred higher-order)
 
@@ -2268,6 +2308,21 @@ separable in a transformed space. The dominant pre-deep-
 learning classifier on small / tabular tasks; mostly
 historical now. **Deferred** in MLPL: needs a quadratic-
 program solver (or SMO algorithm).
+
+## Swiss roll
+
+A synthetic 2-D manifold (a rectangular sheet of paper) rolled
+up like a Swiss-roll cake and embedded in 3-D space, then
+projected back to 2-D as a dimensionality-reduction test. The
+canonical "PCA fails, manifold methods win" benchmark: PCA's
+linear axes slice through the roll, producing a smeared 2-D
+shadow that crosses itself; [[t-SNE]] and [[UMAP]] (and Isomap)
+recover the original 2-D rectangle by following the rolled
+surface via local k-NN neighborhoods. MLPL's `umap_vs_pca`
+demo uses two-moons embedded in higher D instead of a true
+Swiss roll because the language does not yet have `sin` / `cos`
+builtins (Swiss-roll construction needs them); when those land
+the demo can swap in the textbook fixture.
 
 ## System prompt
 
