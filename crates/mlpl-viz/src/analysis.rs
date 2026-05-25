@@ -3,7 +3,10 @@
 
 use mlpl_array::DenseArray;
 
-use crate::svg::{H, PAD, VizError, W, bounds, data_range, scale, write_svg_close, write_svg_open};
+use crate::svg::{
+    H, PAD, VizError, W, bounds, data_range, scale, write_svg_close, write_svg_open,
+    write_svg_open_with_size,
+};
 
 type CellFn<'a> = dyn Fn(usize, usize) -> (String, Option<String>) + 'a;
 
@@ -75,12 +78,13 @@ pub fn analysis_scatter_labeled(
         )));
     }
     let mut out = String::new();
-    write_svg_open(&mut out);
+    const LEGEND_GUTTER: f64 = 90.0;
+    write_svg_open_with_size(&mut out, W + LEGEND_GUTTER, H);
     draw_labeled_points(&mut out, points.data(), labels.data(), n, 4);
     let mut uniq: Vec<usize> = labels.data()[..n].iter().map(|&v| v as usize).collect();
     uniq.sort_unstable();
     uniq.dedup();
-    let (x, mut y) = (W - PAD - 60.0, PAD + 10.0);
+    let (x, mut y) = (W + 10.0, PAD + 10.0);
     out.push_str(&format!("<g class=\"legend\"><text x=\"{x:.1}\" y=\"{:.1}\" fill=\"#cdd6f4\" font-family=\"monospace\" font-size=\"10\">legend</text></g>", y - 2.0));
     for id in uniq {
         y += 14.0;

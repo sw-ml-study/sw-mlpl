@@ -66,7 +66,7 @@ pub const TSNE_NONLINEAR: Lesson = Lesson {
         "Y = tsne(X, 10, 200, 1)",
         "scatter_labeled(Y, tl)",
     ],
-    try_it: "Rerun with seed = 2 and seed = 3. Cluster shape and relative orientation will rotate / flip -- t-SNE has rotation and reflection ambiguity. Note also that cluster C in the input is 5x farther from {A, B} than A is from B, but in the t-SNE output you cannot read that ratio. The UMAP lesson next fixes exactly this.",
+    try_it: "Rerun with seed = 2 and seed = 3. Cluster shape and relative orientation will rotate / flip -- t-SNE has rotation and reflection ambiguity. Note also that cluster 2 (class label = 2 in the legend) in the input is 5x farther from clusters 0 and 1 than 0 is from 1, but in the t-SNE output you cannot read that ratio. The UMAP lesson next fixes exactly this.",
 };
 
 pub const UMAP_MODERN_DEFAULT: Lesson = Lesson {
@@ -82,7 +82,7 @@ pub const UMAP_MODERN_DEFAULT: Lesson = Lesson {
         "Y = umap(X, 10, 0.1, 200, 1)",
         "scatter_labeled(Y, tl)",
     ],
-    try_it: "Compare with the t-SNE output from the previous lesson on the SAME data. UMAP should put cluster C visibly farther from {A, B} than A is from B -- the 5x-input-distance ratio survives (at least partially). Then run the 'UMAP vs t-SNE' demo for the side-by-side comparison and the 'UMAP vs PCA' demo for the manifold-vs-linear case (caveat: MLPL's current UMAP uses a simplified a=1, b=1 Student-t curve and a tight coordinate clamp, so on the moons fixture it separates classes but does not yet preserve the crescent shape -- a follow-up step fixes this). The 'Dim-reduction zoo' demo lays out PCA, t-SNE, UMAP in one row.",
+    try_it: "Compare with the t-SNE output from the previous lesson on the SAME data. UMAP should put cluster 2 (class label = 2 in the scatter legend) visibly farther from clusters 0 and 1 than 0 is from 1 -- the 5x-input-distance ratio survives (at least partially). Then run the 'UMAP vs t-SNE' demo for the side-by-side comparison and the 'UMAP vs PCA' demo for the manifold-vs-linear case (caveat: MLPL's current UMAP uses a simplified a=1, b=1 Student-t curve and a tight coordinate clamp, so on the moons fixture it separates classes but does not yet preserve the crescent shape -- a follow-up step fixes this). The 'Dim-reduction zoo' demo lays out PCA, t-SNE, UMAP in one row.",
 };
 
 pub const READING_CRITICAL_DIMS: Lesson = Lesson {
@@ -101,5 +101,5 @@ pub const READING_CRITICAL_DIMS: Lesson = Lesson {
         "ve = pca_variance_explained(X, 3)",
         "svg(V, \"critical_dimensions\", ve)",
     ],
-    try_it: "Bind one cluster's signal to a single dimension: change `cb` to `[5, 0, 0, 0, 0]` and `cc` to `[0, 0, 0, 0, 5]`. Re-run. PC1 should now light up dim 0 strongly (it's what separates cluster B from A); PC2 should light up dim 4 (separates C). Variance-explained percentages should also concentrate: PC1 and PC2 carry the cluster signal; PC3 is noise. The heatmap teaches you which features the projection 'used.'",
+    try_it: "Bind one cluster's signal to a single dimension: change `cb` to `[5, 0, 0, 0, 0]` and `cc` to `[0, 0, 0, 0, 5]`. Re-run. PC1 should now light up dim 0 strongly (it's what separates cluster 1 from 0); PC2 should light up dim 4 (separates cluster 2). Variance-explained percentages should also concentrate: PC1 and PC2 carry the cluster signal; PC3 is noise. The heatmap teaches you which features the projection 'used.'",
 };

@@ -102,8 +102,20 @@ pub(crate) fn write_corner_scale_labels(
 }
 
 pub(crate) fn write_svg_open(out: &mut String) {
+    write_svg_open_with_size(out, W, H);
+}
+
+/// Same as [`write_svg_open`] but with a caller-controlled
+/// outer canvas size. The data area axis lines stay at the
+/// usual `(PAD, W-PAD) x (PAD, H-PAD)` rectangle so existing
+/// point-scaling code keeps working; any extra width / height
+/// past `W` / `H` becomes a gutter the caller can use for
+/// legends, side panels, etc. Saga 33 step 037b: introduced to
+/// let `analysis_scatter_labeled` render its index legend
+/// outside the plot area instead of overlapping data points.
+pub(crate) fn write_svg_open_with_size(out: &mut String, cw: f64, ch: f64) {
     out.push_str(&format!(
-        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {W} {H}\" width=\"{W}\" height=\"{H}\">"
+        "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {cw} {ch}\" width=\"{cw}\" height=\"{ch}\">"
     ));
     out.push_str("<rect width=\"100%\" height=\"100%\" fill=\"#1e1e2e\"/>");
     let (x0, x1, y0, y1) = (PAD, W - PAD, PAD, H - PAD);
