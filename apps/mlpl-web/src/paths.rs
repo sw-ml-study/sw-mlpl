@@ -113,9 +113,17 @@ pub const PATHS: &[LearningPath] = &[
                 name: "UMAP vs t-SNE",
                 why: "Three clusters where C is 5x farther than A is from B. t-SNE inflates every cluster to similar size; UMAP preserves the relative distance. This is the case the milestone is built around.",
             },
+            Step::Glossary {
+                term: "Multidimensional Scaling",
+                why: "What MDS preserves (pairwise distances) and how it differs from PCA (variance directions) and t-SNE/UMAP (local neighborhoods). Background for the next demo.",
+            },
+            Step::Glossary {
+                term: "Johnson-Lindenstrauss Lemma",
+                why: "The sanity-baseline argument: a Gaussian random matrix preserves pairwise distances within (1 +- eps) for modest k. If a learned method does not beat random projection, the learned features are not adding signal.",
+            },
             Step::Demo {
                 name: "Dim-reduction zoo",
-                why: "Same dataset, three side-by-side projections (PCA / t-SNE / UMAP). The fastest way to internalize what each method emphasizes.",
+                why: "Same dataset, FIVE side-by-side projections (PCA / t-SNE / UMAP / MDS / random projection). The fastest way to internalize what each method emphasizes -- variance directions vs local neighborhoods vs pairwise distances vs the JL sanity baseline.",
             },
             Step::Lesson {
                 title: "Reading a critical-dimensions heatmap",
@@ -123,7 +131,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Note {
                 title: "What's next",
-                body: "Phase 5 of the dim-reduction milestone adds [[Multidimensional Scaling]] (MDS) and random projection, joining the zoo demo. Track the milestone status in `docs/milestone-dimensionality-reduction.md`.",
+                body: "The dim-reduction milestone is feature-complete after step 041 (MDS + random projection landed and joined the zoo). The remaining headroom is permutation-sensitivity heatmaps for t-SNE / UMAP (referenced in the 'Reading a critical-dimensions heatmap' lesson) -- those need a small helper builtin and ship as a follow-on saga. Track the milestone status in `docs/milestone-dimensionality-reduction.md`.",
             },
         ],
     },
