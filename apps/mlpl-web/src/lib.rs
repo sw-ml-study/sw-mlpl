@@ -18,6 +18,7 @@ pub mod app_callbacks;
 pub mod app_hooks;
 pub mod app_log;
 pub mod app_state;
+pub mod completion;
 pub mod components;
 pub mod demos;
 pub mod demos_attention;

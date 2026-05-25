@@ -55,5 +55,27 @@ fn build_main_args<'a>(
         on_keydown: inputs.on_keydown.clone(),
         on_run_example,
         on_run_batch: a.callbacks.on_run_batch.clone(),
+        completion_candidates: (*a.ui.completion_candidates).clone(),
+        on_pick_completion: make_pick_completion(
+            a.ui.input_value.clone(),
+            a.ui.completion_candidates.clone(),
+        ),
     }
+}
+
+/// Saga 33 step 043: build the click handler that fires when
+/// the user clicks a tab-completion chip. Inserts the chosen
+/// completion at the cursor position and clears the popup.
+/// Cursor lookup happens at the moment of click against the
+/// current input value (we don't track cursor in app state).
+fn make_pick_completion(
+    input_value: UseStateHandle<String>,
+    completion_candidates: UseStateHandle<Vec<String>>,
+) -> Callback<String> {
+    Callback::from(move |chosen: String| {
+        let cur = input_value.len();
+        let (out, _) = crate::completion::apply_completion(&input_value, cur, &chosen);
+        input_value.set(out);
+        completion_candidates.set(Vec::new());
+    })
 }

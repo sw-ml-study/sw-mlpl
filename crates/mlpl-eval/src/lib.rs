@@ -114,5 +114,6 @@ pub use inspect::inspect;
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
 pub use mlpl_eval_core::{MetricSink, ModelSpec};
+pub use mlpl_runtime::runtime_builtin_names;
 pub use tokenizer::TokenizerSpec;
 pub use value::{Value, value_kind};

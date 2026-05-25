@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-86889f6ab9416a5f.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-86889f6ab9416a5f_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-286b857e8d12e773.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-286b857e8d12e773_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -493,6 +493,44 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             font-family: var(--mono);
             font-size: 15px;
             margin-left: 4px;
+        }
+
+        /* Saga 33 step 043: tab-completion popup chips. */
+        .completion-popup {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 0 20px 8px;
+            font-family: var(--mono);
+        }
+        .completion-chip {
+            background: var(--surface1, #313244);
+            color: var(--text);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .completion-chip:hover {
+            background: var(--surface2, #45475a);
+            border-color: var(--peach);
+        }
+        .back-to-path-btn {
+            background: transparent;
+            color: var(--peach);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: var(--mono);
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        .back-to-path-btn:hover {
+            background: var(--surface1, #313244);
+            border-color: var(--peach);
         }
 
         /* Modal */
@@ -1140,7 +1178,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-86889f6ab9416a5f.js" crossorigin="anonymous" integrity="sha384-FsargM7P4C1LqaLPPWHs+AO8ngjjuuq4lYCChiVypJxF6StgaZ8NA8IIQXfMNBMh"><link rel="preload" href="/sw-mlpl/mlpl-web-86889f6ab9416a5f_bg.wasm" crossorigin="anonymous" integrity="sha384-q/SJF5xGXGfahDKKDpF/1ZPn0PqofNrYYoJx4p007IZ7wshssMX2HTYMgJ26Mjtt" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-286b857e8d12e773.js" crossorigin="anonymous" integrity="sha384-GAJb+q0OFRSLii+ABx6ZBA8neS2rfq2+BtLAikyfwD/fX/092Jpfkue1jJkZE/9t"><link rel="preload" href="/sw-mlpl/mlpl-web-286b857e8d12e773_bg.wasm" crossorigin="anonymous" integrity="sha384-RnnxEoTxeeNj2NgxYf+fu8Q94LtY8NKKfYaIpDmFoowY9MCa7QKpEk4tdJYcakvs" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>

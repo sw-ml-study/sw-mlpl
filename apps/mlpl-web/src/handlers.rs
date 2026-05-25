@@ -2,6 +2,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use mlpl_wasm::WasmSession;
+use wasm_bindgen::JsCast;
 use web_sys::{HtmlInputElement, KeyboardEvent};
 use yew::prelude::*;
 
@@ -359,14 +360,17 @@ pub fn make_keydown(
     input_value: UseStateHandle<String>,
     cmd_history: UseStateHandle<Vec<String>>,
     cmd_index: UseStateHandle<Option<usize>>,
+    completion_candidates: UseStateHandle<Vec<String>>,
 ) -> Callback<KeyboardEvent> {
     Callback::from(move |e: KeyboardEvent| match e.key().as_str() {
         "Enter" => {
             e.prevent_default();
+            completion_candidates.set(Vec::new());
             on_submit.emit((*input_value).clone());
         }
         "ArrowUp" => {
             e.prevent_default();
+            completion_candidates.set(Vec::new());
             let cmds = &*cmd_history;
             if cmds.is_empty() {
                 return;
@@ -381,6 +385,7 @@ pub fn make_keydown(
         }
         "ArrowDown" => {
             e.prevent_default();
+            completion_candidates.set(Vec::new());
             let cmds = &*cmd_history;
             match *cmd_index {
                 Some(i) if i + 1 < cmds.len() => {
@@ -394,8 +399,49 @@ pub fn make_keydown(
                 None => {}
             }
         }
+        "Tab" => {
+            e.prevent_default();
+            handle_tab(&e, &input_value, &completion_candidates);
+        }
         _ => {}
     })
+}
+
+/// Saga 33 step 043: Tab keydown handler. Reads cursor pos
+/// from the underlying HtmlInputElement, runs the candidate
+/// pipeline, and either inserts a unique completion in-place
+/// or pops up the multi-match list.
+fn handle_tab(
+    e: &KeyboardEvent,
+    input_value: &UseStateHandle<String>,
+    completion_candidates: &UseStateHandle<Vec<String>>,
+) {
+    let cursor = e
+        .target()
+        .and_then(|t| t.dyn_into::<HtmlInputElement>().ok())
+        .and_then(|el| el.selection_start().ok().flatten())
+        .map(|p| p as usize)
+        .unwrap_or_else(|| input_value.len());
+    let value = (**input_value).clone();
+    // mlpl-eval is wasm-only in this crate (see Cargo.toml).
+    // On native (tests), the builtin list collapses to empty
+    // -- pure helpers are covered by completion::tests.
+    #[cfg(target_arch = "wasm32")]
+    let builtins: Vec<&str> = mlpl_eval::runtime_builtin_names().collect();
+    #[cfg(not(target_arch = "wasm32"))]
+    let builtins: Vec<&str> = Vec::new();
+    match crate::completion::compute_tab_match(&value, cursor, builtins.iter().copied()) {
+        crate::completion::TabMatch::None => {
+            completion_candidates.set(Vec::new());
+        }
+        crate::completion::TabMatch::Apply { input, cursor: _ } => {
+            input_value.set(input);
+            completion_candidates.set(Vec::new());
+        }
+        crate::completion::TabMatch::Popup(v) => {
+            completion_candidates.set(v);
+        }
+    }
 }
 
 #[cfg(test)]

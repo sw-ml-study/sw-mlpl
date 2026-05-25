@@ -2386,6 +2386,22 @@ called prompt injection. MLPL: not a first-class concept;
 build via `llm_call` with a manually-formatted prompt
 string.
 
+## Tab completion (REPL)
+
+Press `Tab` in the web playground's REPL input to complete
+the token at the cursor. Saga 33 step 043 ships the MVP:
+unique match -> inline insertion; ambiguous match -> a row of
+click-to-pick chips appears below the input. Empty prefix
+(cursor on whitespace) does nothing.
+
+Candidate sources, in order: REPL slash-commands (`:vars`,
+`:introspect`, ...), MLPL keywords (`train`, `repeat`,
+`experiment`, `for`, `in`, `param`), all runtime builtins
+(every name in `mlpl_runtime::runtime_builtin_names()`).
+Live user-bound variable / model names are deferred --
+filed as a follow-up step. Arrow-key navigation of the
+chip list is also deferred (click is enough for MVP).
+
 ## Tanh
 
 `(exp(x) - exp(-x)) / (exp(x) + exp(-x))`. Squashes any real
