@@ -9,7 +9,7 @@
 use yew::prelude::*;
 
 use crate::app_callbacks::AppCallbacks;
-use crate::app_state::{ActiveContext, UiState, UploadState};
+use crate::app_state::{ActiveContext, OnboardingState, UiState, UploadState};
 use crate::render_callbacks::build_input_callbacks;
 use crate::render_modes::derive_modes;
 use crate::render_shell::render_shell;
@@ -23,6 +23,7 @@ pub struct RenderArgs {
     pub ui: UiState,
     pub upload: UploadState,
     pub active: ActiveContext,
+    pub onboarding: OnboardingState,
 }
 
 impl RenderArgs {
@@ -35,12 +36,14 @@ impl RenderArgs {
         ui: UiState,
         upload: UploadState,
         active: ActiveContext,
+        onboarding: OnboardingState,
     ) -> Self {
         Self {
             callbacks,
             ui,
             upload,
             active,
+            onboarding,
         }
     }
 }

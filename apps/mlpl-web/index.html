@@ -7,6 +7,7 @@
     <link data-trunk rel="rust" data-bin="mlpl-web" />
     <link data-trunk rel="icon" href="favicon.ico" />
     <link data-trunk rel="copy-file" href="mlpl-badge.webp" />
+    <link data-trunk rel="copy-file" href="splash-bg.png" />
     <link data-trunk rel="copy-dir" href="diagrams" />
     <style>
         /* Catppuccin Mocha */
@@ -507,6 +508,103 @@
             background: var(--surface2, #45475a);
             border-color: var(--peach);
         }
+        /* Saga 34 step 002: splash overlay */
+        .splash-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 250;
+            background: url('splash-bg.png') center/cover no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .splash-backdrop::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 17, 27, 0.88);
+        }
+        .splash-panel {
+            position: relative;
+            z-index: 1;
+            max-width: 560px;
+            padding: 32px;
+            text-align: center;
+            color: var(--text);
+        }
+        .splash-panel h2 {
+            font-size: 28px;
+            margin: 0 0 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .splash-panel h2 img {
+            width: 36px;
+            height: 36px;
+        }
+        .splash-subtitle {
+            color: var(--subtext0);
+            font-size: 15px;
+            margin-bottom: 24px;
+        }
+        .splash-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .splash-card {
+            background: var(--surface0, #313244);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 8px;
+            padding: 14px 12px;
+            cursor: pointer;
+            color: var(--text);
+            font-size: 14px;
+            text-align: left;
+        }
+        .splash-card:hover {
+            border-color: var(--peach);
+            background: var(--surface1, #45475a);
+        }
+        .splash-card strong {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--peach);
+            font-size: 15px;
+        }
+        .splash-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+        .splash-btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            border: 1px solid var(--surface2, #45475a);
+        }
+        .splash-btn-primary {
+            background: var(--peach);
+            color: var(--crust);
+            border-color: var(--peach);
+            font-weight: 600;
+        }
+        .splash-btn-secondary {
+            background: transparent;
+            color: var(--text);
+        }
+        .splash-btn:hover {
+            opacity: 0.9;
+        }
+        @media (max-width: 600px) {
+            .splash-cards { grid-template-columns: 1fr; }
+            .splash-panel { padding: 20px 16px; }
+        }
+
         .back-to-path-btn {
             background: transparent;
             color: var(--peach);

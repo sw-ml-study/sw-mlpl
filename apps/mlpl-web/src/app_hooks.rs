@@ -8,7 +8,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
 
-use crate::app_state::{Sessions, UiState, UploadState};
+use crate::app_state::{OnboardingState, Sessions, UiState, UploadState};
 use crate::components::TutorialView;
 use crate::scroll::scroll_and_focus;
 use mlpl_wasm::WasmSession;
@@ -41,6 +41,15 @@ pub fn use_ui_state() -> UiState {
         path_state: use_state(|| None::<(Option<usize>, usize)>),
         completion_candidates: use_state(Vec::<String>::new),
         completion_selected: use_state(|| 0_usize),
+    }
+}
+
+/// Allocate onboarding overlay state from localStorage.
+#[hook]
+pub fn use_onboarding_state() -> OnboardingState {
+    let dismissed = crate::onboarding_storage::read_splash_dismissed();
+    OnboardingState {
+        show_splash: use_state(move || !dismissed),
     }
 }
 

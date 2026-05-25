@@ -43,6 +43,11 @@ pub struct UiState {
     pub completion_selected: UseStateHandle<usize>,
 }
 
+/// Onboarding overlay state (splash + tour + what's-new).
+pub struct OnboardingState {
+    pub show_splash: UseStateHandle<bool>,
+}
+
 /// Upload-flow state: the hidden `<input type=file>` NodeRef and
 /// the pending-name slot that bridges the slash-command handler
 /// (sync) and the file picker's async onchange. Saga 29 step 016.

@@ -6,6 +6,7 @@
 use yew::prelude::*;
 
 use crate::mode_callbacks;
+use crate::onboarding_splash::{SplashOverlay, make_splash_action};
 use crate::render::RenderArgs;
 use crate::render_callbacks::InputCallbacks;
 use crate::render_main::{MainArgs, render_main};
@@ -21,22 +22,25 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
         a.ui.tutorial_initial_view.clone(),
         a.callbacks.on_demo.clone(),
     );
-    let on_run_example = run_example(a.callbacks.on_submit.clone(), a.ui.input_value.clone());
-    let on_pick = make_pick_completion(
-        a.ui.input_value.clone(),
-        a.ui.completion_candidates.clone(),
-        a.ui.completion_selected.clone(),
-    );
-    let main_args = build_main_args(&a, &cb, &inputs, &modes, on_run_example, on_pick);
+    let main_args = build_main_args(&a, &cb, &inputs, &modes);
     let chrome = render_shell_chrome(&a, &inputs, &modes, &cb);
     let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog);
-    html! {
-        <>
-            { chrome }
-            { render_main(main_args) }
-            { footer }
-        </>
+    let splash = render_splash(&a);
+    html! { <> { chrome } { render_main(main_args) } { footer } { splash } </> }
+}
+
+fn render_splash(a: &RenderArgs) -> Html {
+    if !*a.onboarding.show_splash {
+        return html! {};
     }
+    let on_action = make_splash_action(
+        a.onboarding.show_splash.clone(),
+        a.callbacks.on_demo.clone(),
+        a.ui.input_value.clone(),
+        a.ui.lesson_idx.clone(),
+        a.ui.path_state.clone(),
+    );
+    html! { <SplashOverlay {on_action} /> }
 }
 
 fn build_main_args<'a>(
@@ -44,8 +48,6 @@ fn build_main_args<'a>(
     cb: &'a mode_callbacks::ModeCallbacks,
     inputs: &InputCallbacks,
     modes: &Modes,
-    on_run_example: Callback<String>,
-    on_pick_completion: Callback<String>,
 ) -> MainArgs<'a> {
     MainArgs {
         tutorial_active: modes.tutorial_active,
@@ -59,10 +61,14 @@ fn build_main_args<'a>(
         input_value: &a.ui.input_value,
         on_input: inputs.on_input.clone(),
         on_keydown: inputs.on_keydown.clone(),
-        on_run_example,
+        on_run_example: run_example(a.callbacks.on_submit.clone(), a.ui.input_value.clone()),
         on_run_batch: a.callbacks.on_run_batch.clone(),
         completion_candidates: (*a.ui.completion_candidates).clone(),
-        on_pick_completion,
+        on_pick_completion: make_pick_completion(
+            a.ui.input_value.clone(),
+            a.ui.completion_candidates.clone(),
+            a.ui.completion_selected.clone(),
+        ),
         completion_selected: *a.ui.completion_selected,
     }
 }
