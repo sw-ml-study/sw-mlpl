@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "001-toggle-and-layout"
+  },
+  "action": "New viz3d_toggle.rs. show_3d state in UiState, intercepted in submit pipeline. Ctrl+3 in use_global_keydown. Split layout in render_main_shell.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T16:20:54"
+}

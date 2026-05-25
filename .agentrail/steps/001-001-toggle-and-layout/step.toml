@@ -1,6 +1,6 @@
 number = 1
 slug = "001-toggle-and-layout"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 1a: 3D toggle infrastructure.
 
@@ -8,5 +8,6 @@ Add show_3d: UseStateHandle<bool> to UiS..."""
 role = "production"
 context_files = []
 created_at = "2026-05-25T16:11:44"
+completed_at = "2026-05-25T16:20:54"
 task_type = "feature"
-commits = []
+commits = ["d7e11289173c2a6b03e51b98d282fff044702060"]
