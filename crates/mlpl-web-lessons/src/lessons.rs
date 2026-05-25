@@ -262,6 +262,7 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Run a full K-Means from the K-Means demo and compare the learned centers to the true centers [[0,0],[4,4],[-4,4]].",
     },
+    crate::lessons_dim_reduction::WHY_REDUCE_DIMENSIONS,
     Lesson {
         title: "Dimensionality Reduction: PCA",
         intro: "Principal Component Analysis finds the direction along which a dataset varies the most. First center the data by subtracting the column means. The covariance matrix is Xc^T Xc / n. Its dominant eigenvector is the first principal component. Power iteration -- repeatedly multiplying a unit vector by the covariance and renormalizing -- converges to that eigenvector without needing an eigensolver. Projecting the centered data onto the principal axis gives a 1D coordinate you can color points by.",
@@ -277,6 +278,11 @@ pub const LESSONS: &[Lesson] = &[
         ],
         try_it: "Change the mixing matrix to [[1, 0], [0, 3]] and verify that the principal axis comes out parallel to (0, 1).",
     },
+    crate::lessons_dim_reduction::PCA_LINEAR_BASELINE,
+    crate::lessons_dim_reduction::SNE_VERY_SLOW_ANCESTOR,
+    crate::lessons_dim_reduction::TSNE_NONLINEAR,
+    crate::lessons_dim_reduction::UMAP_MODERN_DEFAULT,
+    crate::lessons_dim_reduction::READING_CRITICAL_DIMS,
     Lesson {
         title: "Multi-class Classification",
         intro: "Softmax regression generalizes logistic regression to K classes. Logits Z = X W + b are turned into row-normalized probabilities P by softmax(Z, 1), which subtracts the row max for stability and exponentiates. With one-hot labels Y, the cross-entropy gradient is elegant: dZ = P - Y, so dW = X^T (P - Y) / N and db = mean(P - Y, 0). At prediction time, argmax(P, 1) picks the most probable class.",

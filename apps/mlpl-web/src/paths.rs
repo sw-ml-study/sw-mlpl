@@ -55,19 +55,27 @@ pub enum Step {
 pub const PATHS: &[LearningPath] = &[
     LearningPath {
         title: "Dimensionality reduction",
-        blurb: "When the data lives in 50 dimensions but the screen has 2: pick a projection. PCA (linear, fast), t-SNE (local-only, dramatic), UMAP (local + global, the modern default). Walk the methods on shared datasets, then read the side-by-side comparisons.",
+        blurb: "When the data lives in 50 dimensions but the screen has 2: pick a projection. PCA (linear, fast), t-SNE (local-only, dramatic), UMAP (local + global, the modern default). Six tutorial lessons in dependency order, three side-by-side demos at the end.",
         steps: &[
+            Step::Lesson {
+                title: "Why reduce dimensions?",
+                why: "Concept-first motivation: the manifold hypothesis, the curse of dimensionality, why a screen has two axes but a learned embedding has 768. Frame the whole path.",
+            },
             Step::Glossary {
                 term: "Dimensionality reduction",
-                why: "Frame the whole path: high-D embeddings live somewhere on a much lower-dim manifold, and projections trade one kind of fidelity for another.",
+                why: "Reference card for the rest of the path: linear vs manifold methods, what each preserves, the MLPL builtins.",
             },
             Step::Demo {
                 name: "PCA",
-                why: "The cheap linear baseline. Power iteration on the covariance matrix finds the top axis of variance; project the points onto it. Linear, fast, throws away every non-linear structure.",
+                why: "The cheap linear baseline. Power iteration on the covariance matrix finds the top axis of variance; project the points onto it. Linear, fast, deterministic.",
+            },
+            Step::Lesson {
+                title: "PCA: the linear baseline",
+                why: "Goes beyond the demo: pca() vs pca_components() vs pca_variance_explained(), the loadings-vs-projections distinction, when PCA's linear assumption is enough.",
             },
             Step::Glossary {
                 term: "PCA (Principal Component Analysis)",
-                why: "What PCA actually does (eigenvectors of the covariance matrix), what it misses (non-linear structure), and the loadings vs projections distinction.",
+                why: "What PCA actually does (eigenvectors of the covariance matrix), what it misses (non-linear structure).",
             },
             Step::Demo {
                 name: "PCA 3D (interactive)",
@@ -75,15 +83,27 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Demo {
                 name: "PCA loadings (critical dimensions)",
-                why: "Switch from 'where did the points go?' to 'which input dimensions matter?'. The critical-dimensions heatmap shows which features each PC is built from, with per-component variance percentages.",
+                why: "Switch from 'where did the points go?' to 'which input dimensions matter?'. The critical-dimensions heatmap shows which features each PC is built from.",
+            },
+            Step::Lesson {
+                title: "SNE: the very-slow ancestor",
+                why: "t-SNE's predecessor (Hinton + Roweis 2002). Two failure modes -- asymmetric KL and the crowding problem -- set up exactly the two fixes t-SNE makes.",
+            },
+            Step::Lesson {
+                title: "t-SNE: a peek at nonlinear methods",
+                why: "How van der Maaten + Hinton fixed SNE: symmetric P + Student-t low-D affinity. Plus the 'cluster shape is meaningful, distance between clusters is not' caveat.",
             },
             Step::Glossary {
                 term: "t-SNE",
-                why: "Per-row perplexity-calibrated affinities + Student-t low-D + KL gradient descent. Local neighborhoods are sharp; global distance is noise.",
+                why: "Reference card: perplexity, KL, Student-t, why global distance is noise.",
+            },
+            Step::Lesson {
+                title: "UMAP: the modern default",
+                why: "Headline lesson. Riemannian-geometry framing, fuzzy simplicial sets, cross-entropy + negative sampling. Why UMAP preserves both local AND global structure where t-SNE preserves only local.",
             },
             Step::Glossary {
                 term: "UMAP",
-                why: "Fuzzy simplicial sets + cross-entropy with negative sampling. The modern default for visualizing high-D embeddings -- preserves local AND global structure.",
+                why: "Reference card for the lesson: the math vocabulary in one place.",
             },
             Step::Demo {
                 name: "UMAP vs PCA",
@@ -97,9 +117,13 @@ pub const PATHS: &[LearningPath] = &[
                 name: "Dim-reduction zoo",
                 why: "Same dataset, three side-by-side projections (PCA / t-SNE / UMAP). The fastest way to internalize what each method emphasizes.",
             },
+            Step::Lesson {
+                title: "Reading a critical-dimensions heatmap",
+                why: "Viz literacy. How to read the [k, D] critical-dimensions heatmap for PCA loadings; same conventions apply to upcoming permutation-sensitivity heatmaps for t-SNE / UMAP.",
+            },
             Step::Note {
                 title: "What's next",
-                body: "Phase 5 of the dim-reduction milestone adds [[Multidimensional Scaling]] (MDS) and random projection, joining the zoo demo. Phase 4 lands the long-form tutorial lessons (`Why reduce dimensions?`, the SNE-family deep dive, the UMAP first-principles lesson). Track the milestone status in `docs/milestone-dimensionality-reduction.md`.",
+                body: "Phase 5 of the dim-reduction milestone adds [[Multidimensional Scaling]] (MDS) and random projection, joining the zoo demo. Track the milestone status in `docs/milestone-dimensionality-reduction.md`.",
             },
         ],
     },
