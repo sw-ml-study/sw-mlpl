@@ -1,9 +1,10 @@
 number = 47
 slug = "saga33-step046a-popup-arrow-nav"
-status = "in-progress"
+status = "completed"
 description = "Arrow-key navigation for the REPL completion popup. Currently (after step 046..."
 role = "production"
 context_files = []
 created_at = "2026-05-25T11:27:40"
+completed_at = "2026-05-25T11:48:35"
 task_type = "feature"
-commits = []
+commits = ["d60046d8618f97bb1b62204d895754338080b0de"]
