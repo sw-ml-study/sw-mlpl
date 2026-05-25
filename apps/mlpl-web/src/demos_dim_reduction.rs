@@ -100,8 +100,8 @@ pub const UMAP_VS_TSNE: Demo = Demo {
 
 pub const DIM_REDUCTION_ZOO: Demo = Demo {
     name: "Dim-reduction zoo",
-    intro: "[[PCA (Principal Component Analysis)]], [[t-SNE]], and [[UMAP]] applied to the same 5-D three-cluster dataset, rendered as a row of three scatter plots for direct comparison. (MDS and random projection will join the zoo when Phase 5 of the dim-reduction milestone lands -- the lines are queued as TODO comments in the demo source.)",
-    takeaway: "PCA is the cheap linear baseline that preserves the global axes of variance -- clusters land along PC1/PC2 directions. t-SNE inflates each cluster to roughly equal radius, sharpening local boundaries at the cost of global distance. UMAP keeps both: tight clusters AND the relative positions of those clusters in the original 5-D feature space.",
+    intro: "[[PCA (Principal Component Analysis)]], [[t-SNE]], [[UMAP]], [[Multidimensional Scaling]], and [[Johnson-Lindenstrauss Lemma]] random projection -- five methods on the same 5-D three-cluster dataset, rendered as a row of five scatter plots for direct comparison.",
+    takeaway: "PCA is the cheap linear baseline that preserves the global axes of variance -- clusters land along PC1/PC2 directions. t-SNE inflates each cluster to roughly equal radius, sharpening local boundaries at the cost of global distance. UMAP keeps both: tight clusters AND the relative positions of those clusters in the original 5-D feature space. MDS preserves pairwise distances directly (the answer to 'which points are far from which?'). Random projection is the JL sanity baseline -- a Gaussian random matrix preserves all pairwise distances within a (1 +- eps) factor by sheer probability, no optimization needed; if a learned method does not beat random projection, the learned features are not adding signal.",
     lines: &[
         "# Three 5-D Gaussian clusters at distinct locations.",
         "pts_a = randn(1, [25, 5]) * 0.4 + matmul(ones([25, 1]), [[0, 0, 0, 0, 0]])",
@@ -115,9 +115,14 @@ pub const DIM_REDUCTION_ZOO: Demo = Demo {
         "tsne_proj = tsne(X, 8, 150, 1)",
         "# Local + global projection.",
         "umap_proj = umap(X, 8, 0.1, 150, 1)",
-        "# (TODO Phase 5: mds_proj = mds(X, 2), rp_proj = random_projection(X, 2, 7))",
+        "# Preserves pairwise distances directly.",
+        "mds_proj = mds(X, 2, 80, 1)",
+        "# Johnson-Lindenstrauss random-projection sanity baseline.",
+        "rp_proj = random_projection(X, 2, 7)",
         "scatter_labeled(pca_proj, labels)",
         "scatter_labeled(tsne_proj, labels)",
         "scatter_labeled(umap_proj, labels)",
+        "scatter_labeled(mds_proj, labels)",
+        "scatter_labeled(rp_proj, labels)",
     ],
 };

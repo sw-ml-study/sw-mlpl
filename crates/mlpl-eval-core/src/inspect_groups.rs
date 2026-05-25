@@ -231,6 +231,16 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "umap(X, n_neighbors, min_dist, iters, seed)",
                 "UMAP 2D embedding -- preserves both local and global structure",
             ),
+            (
+                "mds",
+                "mds(X, k, iters, seed)",
+                "Multidimensional Scaling -- preserves pairwise distances",
+            ),
+            (
+                "random_projection",
+                "random_projection(X, k, seed)",
+                "Johnson-Lindenstrauss random projection (sanity baseline)",
+            ),
         ],
     ),
     (

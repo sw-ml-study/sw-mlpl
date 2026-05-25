@@ -2241,6 +2241,7 @@ dependencies = [
  "mlpl-runtime-core",
  "mlpl-runtime-data",
  "mlpl-runtime-dim-reduction",
+ "mlpl-runtime-mds-rp",
  "mlpl-runtime-umap",
  "serde_json",
  "ureq",
@@ -2263,6 +2264,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-dim-reduction"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-mds-rp"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
