@@ -20,12 +20,13 @@ pub fn render_shell_chrome(
     inputs: &InputCallbacks,
     modes: &Modes,
     cb: &ModeCallbacks,
+    on_tour: Callback<MouseEvent>,
 ) -> Html {
     html! {
         <>
             <crate::components::GithubCorner url={REPO_URL} />
             <GlossaryPopupHost />
-            { render_shell_header(inputs, modes, cb) }
+            { render_shell_header(inputs, modes, cb, on_tour) }
             { render_shell_modebar(a, modes) }
         </>
     }

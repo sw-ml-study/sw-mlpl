@@ -39,7 +39,11 @@ fn app() -> Html {
     let active = active_context(&sessions, &ui);
     let callbacks = build_callbacks(&active, &upload, &ui);
     use_scroll_effect(active.history.clone());
-    use_escape_closes_dialogs(ui.dialog_open.clone(), ui.lesson_idx.clone());
+    use_escape_closes_dialogs(
+        ui.dialog_open.clone(),
+        ui.lesson_idx.clone(),
+        onboarding.show_tour.clone(),
+    );
     render(RenderArgs::from_parts(
         callbacks, ui, upload, active, onboarding,
     ))

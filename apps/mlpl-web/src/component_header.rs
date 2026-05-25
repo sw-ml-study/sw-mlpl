@@ -10,6 +10,7 @@ pub enum HeaderMode {
 #[derive(Properties, PartialEq)]
 pub struct HeaderProps {
     pub on_help: Callback<MouseEvent>,
+    pub on_tour: Callback<MouseEvent>,
     pub on_select_repl: Callback<MouseEvent>,
     pub on_select_tutorial: Callback<MouseEvent>,
     pub on_select_paths: Callback<MouseEvent>,
@@ -33,6 +34,7 @@ pub fn header(props: &HeaderProps) -> Html {
                 <button class={cls(HeaderMode::Tutorial)} onclick={props.on_select_tutorial.clone()} data-tour-target="tab-tutorial">{"Tutorial"}</button>
                 <button class={cls(HeaderMode::Paths)} onclick={props.on_select_paths.clone()} data-tour-target="tab-paths">{"Paths"}</button>
             </div>
+            <button class="tour-btn-header" onclick={props.on_tour.clone()} aria-label="Guided tour" title="Guided tour">{"Tour"}</button>
             <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation" data-tour-target="help-btn">{"?"}</button>
         </header>
     }
