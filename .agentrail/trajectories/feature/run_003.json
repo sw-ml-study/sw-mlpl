@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "003-tour-tooltip"
+  },
+  "action": "TourTooltip component at 4 fns (warning target). Callback<MouseEvent> props eliminate wrapper closures. render_tour in render_shell.rs builds navigation callbacks from state handles.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T13:19:40"
+}

@@ -1,0 +1,1 @@
+6-step guided tour: TourTooltip component with CSS-only spotlight, positioned via get_bounding_client_rect, Back/Next/Done navigation. Splash StartTour action wires to show_tour. OnboardingState gains show_tour + tour_step fields. Tour CSS with Catppuccin Mocha.
