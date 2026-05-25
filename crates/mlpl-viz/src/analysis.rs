@@ -70,14 +70,23 @@ pub fn analysis_scatter_labeled(
     let n = dims[0];
     if labels.rank() != 1 || labels.data().len() != n {
         return Err(VizError::InvalidShape(format!(
-            "scatter_labeled labels length {} must match {} points",
-            labels.data().len(),
-            n
+            "scatter_labeled labels length {} must match {n}",
+            labels.data().len()
         )));
     }
     let mut out = String::new();
     write_svg_open(&mut out);
     draw_labeled_points(&mut out, points.data(), labels.data(), n, 4);
+    let mut uniq: Vec<usize> = labels.data()[..n].iter().map(|&v| v as usize).collect();
+    uniq.sort_unstable();
+    uniq.dedup();
+    let (x, mut y) = (W - PAD - 60.0, PAD + 10.0);
+    out.push_str(&format!("<g class=\"legend\"><text x=\"{x:.1}\" y=\"{:.1}\" fill=\"#cdd6f4\" font-family=\"monospace\" font-size=\"10\">legend</text></g>", y - 2.0));
+    for id in uniq {
+        y += 14.0;
+        let c = PALETTE[id % PALETTE.len()];
+        out.push_str(&format!("<circle cx=\"{x:.1}\" cy=\"{y:.1}\" r=\"4\" fill=\"{c}\" stroke=\"#1e1e2e\" stroke-width=\"0.8\"/><text x=\"{:.1}\" y=\"{:.1}\" fill=\"#cdd6f4\" font-family=\"monospace\" font-size=\"10\">{id}</text>", x + 10.0, y + 3.0));
+    }
     write_svg_close(&mut out);
     Ok(out)
 }
