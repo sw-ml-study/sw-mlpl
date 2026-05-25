@@ -28,6 +28,7 @@ pub struct MainArgs<'a> {
     pub on_run_batch: Callback<Vec<String>>,
     pub completion_candidates: Vec<String>,
     pub on_pick_completion: Callback<String>,
+    pub completion_selected: usize,
 }
 
 pub fn render_main(a: MainArgs) -> Html {
@@ -40,16 +41,17 @@ pub fn render_main(a: MainArgs) -> Html {
         a.cur_path.is_some(),
     );
     let paths_pane = render_paths_pane(a.cur_path, a.cb);
-    let repl_pane = render_repl_pane(
-        a.history,
-        a.input_value,
-        a.on_input,
-        a.on_keydown,
-        a.tutorial_active,
-        a.paths_active,
-        a.completion_candidates,
-        a.on_pick_completion,
-    );
+    let repl_pane = render_repl_pane(ReplPaneArgs {
+        history: a.history,
+        input_value: a.input_value,
+        on_input: a.on_input,
+        on_keydown: a.on_keydown,
+        tutorial_active: a.tutorial_active,
+        paths_active: a.paths_active,
+        completion_candidates: a.completion_candidates,
+        on_pick_completion: a.on_pick_completion,
+        completion_selected: a.completion_selected,
+    });
     render_main_shell(a.tutorial_active, tutorial_pane, paths_pane, repl_pane)
 }
 
@@ -66,38 +68,39 @@ fn render_paths_pane(cur_path: Option<(Option<usize>, usize)>, cb: &ModeCallback
     }
 }
 
-/// REPL pane: the welcome banner (only when no other pane is
-/// active), the scrolling history, and the input row.
-#[allow(clippy::too_many_arguments)]
-fn render_repl_pane(
-    history: &UseStateHandle<Vec<HistoryEntry>>,
-    input_value: &UseStateHandle<String>,
+struct ReplPaneArgs<'a> {
+    history: &'a UseStateHandle<Vec<HistoryEntry>>,
+    input_value: &'a UseStateHandle<String>,
     on_input: Callback<InputEvent>,
     on_keydown: Callback<web_sys::KeyboardEvent>,
     tutorial_active: bool,
     paths_active: bool,
     completion_candidates: Vec<String>,
     on_pick_completion: Callback<String>,
-) -> Html {
-    let welcome = if tutorial_active || paths_active {
+    completion_selected: usize,
+}
+
+fn render_repl_pane(a: ReplPaneArgs) -> Html {
+    let welcome = if a.tutorial_active || a.paths_active {
         html! {}
     } else {
         html! { <Welcome /> }
     };
-    let value = (**input_value).clone();
+    let value = (**a.input_value).clone();
     html! {
         <>
             <div id="output" class="output">
                 { welcome }
-                { for history.iter().map(render_entry) }
+                { for a.history.iter().map(render_entry) }
             </div>
             <InputRow
                 {value}
-                {on_input}
-                {on_keydown}
-                in_tutorial={tutorial_active}
-                {completion_candidates}
-                {on_pick_completion}
+                on_input={a.on_input}
+                on_keydown={a.on_keydown}
+                in_tutorial={a.tutorial_active}
+                completion_candidates={a.completion_candidates}
+                on_pick_completion={a.on_pick_completion}
+                completion_selected={a.completion_selected}
             />
         </>
     }

@@ -361,97 +361,69 @@ pub fn make_keydown(
     cmd_history: UseStateHandle<Vec<String>>,
     cmd_index: UseStateHandle<Option<usize>>,
     completion_candidates: UseStateHandle<Vec<String>>,
+    completion_selected: UseStateHandle<usize>,
 ) -> Callback<KeyboardEvent> {
     Callback::from(move |e: KeyboardEvent| {
-        // Saga 33 step 045/046: Ctrl+Space triggers the
-        // completion popup -- the IDE standard (VS Code,
-        // IntelliJ, Emacs). Guarded ahead of the key-string
-        // match because the trigger is a (modifier, code)
-        // pair, not a single named key. Tab is reserved for
-        // browser focus traversal (the step-043 attempt to
-        // override Tab lost to the browser's default).
-        if crate::completion::is_completion_trigger(e.ctrl_key(), e.code().as_str()) {
-            e.prevent_default();
-            handle_completion(&e, &input_value, &completion_candidates);
+        if crate::handlers_popup::handle_completion_keys(
+            &e,
+            &input_value,
+            &completion_candidates,
+            &completion_selected,
+        ) {
             return;
         }
         match e.key().as_str() {
             "Enter" => {
                 e.prevent_default();
-                completion_candidates.set(Vec::new());
                 on_submit.emit((*input_value).clone());
             }
             "ArrowUp" => {
                 e.prevent_default();
-                completion_candidates.set(Vec::new());
-                let cmds = &*cmd_history;
-                if cmds.is_empty() {
-                    return;
-                }
-                let new_idx = match *cmd_index {
-                    None => cmds.len() - 1,
-                    Some(0) => 0,
-                    Some(i) => i - 1,
-                };
-                cmd_index.set(Some(new_idx));
-                input_value.set(cmds[new_idx].clone());
+                navigate_history_up(&input_value, &cmd_history, &cmd_index);
             }
             "ArrowDown" => {
                 e.prevent_default();
-                completion_candidates.set(Vec::new());
-                let cmds = &*cmd_history;
-                match *cmd_index {
-                    Some(i) if i + 1 < cmds.len() => {
-                        cmd_index.set(Some(i + 1));
-                        input_value.set(cmds[i + 1].clone());
-                    }
-                    Some(_) => {
-                        cmd_index.set(None);
-                        input_value.set(String::new());
-                    }
-                    None => {}
-                }
+                navigate_history_down(&input_value, &cmd_history, &cmd_index);
             }
             _ => {}
         }
     })
 }
 
-/// Saga 33 step 045 (was step 043's `handle_tab`):
-/// completion keydown handler. Reads cursor pos from the
-/// underlying HtmlInputElement, runs the candidate pipeline,
-/// and either inserts a unique completion in-place or pops
-/// up the multi-match list.
-fn handle_completion(
-    e: &KeyboardEvent,
+fn navigate_history_up(
     input_value: &UseStateHandle<String>,
-    completion_candidates: &UseStateHandle<Vec<String>>,
+    cmd_history: &UseStateHandle<Vec<String>>,
+    cmd_index: &UseStateHandle<Option<usize>>,
 ) {
-    let cursor = e
-        .target()
-        .and_then(|t| t.dyn_into::<HtmlInputElement>().ok())
-        .and_then(|el| el.selection_start().ok().flatten())
-        .map(|p| p as usize)
-        .unwrap_or_else(|| input_value.len());
-    let value = (**input_value).clone();
-    // mlpl-eval is wasm-only in this crate (see Cargo.toml).
-    // On native (tests), the builtin list collapses to empty
-    // -- pure helpers are covered by completion::tests.
-    #[cfg(target_arch = "wasm32")]
-    let builtins: Vec<&str> = mlpl_eval::runtime_builtin_names().collect();
-    #[cfg(not(target_arch = "wasm32"))]
-    let builtins: Vec<&str> = Vec::new();
-    match crate::completion::compute_tab_match(&value, cursor, builtins.iter().copied()) {
-        crate::completion::TabMatch::None => {
-            completion_candidates.set(Vec::new());
+    let cmds = &**cmd_history;
+    if cmds.is_empty() {
+        return;
+    }
+    let new_idx = match **cmd_index {
+        None => cmds.len() - 1,
+        Some(0) => 0,
+        Some(i) => i - 1,
+    };
+    cmd_index.set(Some(new_idx));
+    input_value.set(cmds[new_idx].clone());
+}
+
+fn navigate_history_down(
+    input_value: &UseStateHandle<String>,
+    cmd_history: &UseStateHandle<Vec<String>>,
+    cmd_index: &UseStateHandle<Option<usize>>,
+) {
+    let cmds = &**cmd_history;
+    match **cmd_index {
+        Some(i) if i + 1 < cmds.len() => {
+            cmd_index.set(Some(i + 1));
+            input_value.set(cmds[i + 1].clone());
         }
-        crate::completion::TabMatch::Apply { input, cursor: _ } => {
-            input_value.set(input);
-            completion_candidates.set(Vec::new());
+        Some(_) => {
+            cmd_index.set(None);
+            input_value.set(String::new());
         }
-        crate::completion::TabMatch::Popup(v) => {
-            completion_candidates.set(v);
-        }
+        None => {}
     }
 }
 
