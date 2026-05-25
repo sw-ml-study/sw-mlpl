@@ -21,9 +21,12 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
         let cb = props.on_action.clone();
         Callback::from(move |_: MouseEvent| cb.emit(action.clone()))
     };
+    let dismiss = emit(SplashAction::Dismiss);
+    let stop = Callback::from(|e: MouseEvent| e.stop_propagation());
     html! {
-        <div class="splash-backdrop" role="dialog" aria-label="Welcome">
-            <div class="splash-panel">
+        <div class="splash-backdrop" role="dialog" aria-label="Welcome" onclick={dismiss.clone()}>
+            <div class="splash-panel" onclick={stop}>
+                <button class="splash-close" onclick={dismiss} aria-label="Close">{"\u{00d7}"}</button>
                 <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
                 <p class="splash-version">{format!("v{}.{}", env!("CARGO_PKG_VERSION"), env!("BUILD_COMMIT_COUNT"))}</p>
                 <p class="splash-subtitle">

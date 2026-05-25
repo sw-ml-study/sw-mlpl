@@ -43,6 +43,7 @@ fn app() -> Html {
         ui.dialog_open.clone(),
         ui.lesson_idx.clone(),
         onboarding.show_tour.clone(),
+        onboarding.show_splash.clone(),
     );
     render(RenderArgs::from_parts(
         callbacks, ui, upload, active, onboarding,
