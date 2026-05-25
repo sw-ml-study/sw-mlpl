@@ -1,0 +1,9 @@
+number = 38
+slug = "saga33-step037b-legend-outside"
+status = "in-progress"
+description = "Move the scatter_labeled corner legend OUTSIDE the plot area (user request fr..."
+role = "production"
+context_files = []
+created_at = "2026-05-25T09:01:59"
+task_type = "feature"
+commits = []

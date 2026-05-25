@@ -80,8 +80,8 @@ pub const UMAP_VS_PCA: Demo = Demo {
 
 pub const UMAP_VS_TSNE: Demo = Demo {
     name: "UMAP vs t-SNE",
-    intro: "Three clusters in 4-D where cluster C is five times farther from {A, B} than A is from B. Both [[t-SNE]] and [[UMAP]] use a fuzzy-graph view of local neighborhoods, but they handle GLOBAL inter-cluster distance differently. The comparison shows what t-SNE drops and UMAP keeps.",
-    takeaway: "t-SNE tends to inflate every cluster to a similar size, washing out 'C is much farther than A is from B.' UMAP's repulsive force keeps the relative distances readable -- C ends up clearly farther from {A, B} than A is from B. The structural reason: t-SNE's KL objective is purely local (it normalizes per row), while UMAP's cross-entropy + negative-sampling objective lets the repulsive term carry global signal.",
+    intro: "Three clusters in 4-D where cluster 2 is five times farther from clusters 0 and 1 than cluster 0 is from cluster 1. The legend in each scatter maps integer class id to color: 0 = blue (origin), 1 = pink (near), 2 = green (far). Both [[t-SNE]] and [[UMAP]] use a fuzzy-graph view of local neighborhoods, but they handle GLOBAL inter-cluster distance differently. The comparison shows what t-SNE drops and UMAP keeps.",
+    takeaway: "t-SNE tends to inflate every cluster to a similar size, washing out 'cluster 2 is much farther than 0 is from 1.' UMAP's repulsive force keeps the relative distances readable -- cluster 2 (green) ends up clearly farther from {0, 1} than 0 is from 1. The structural reason: t-SNE's KL objective is purely local (it normalizes per row), while UMAP's cross-entropy + negative-sampling objective lets the repulsive term carry global signal.",
     lines: &[
         "# Three 4-D Gaussian clusters: A at origin, B near A, C 5x farther.",
         "pts_a = randn(1, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[0, 0, 0, 0]])",

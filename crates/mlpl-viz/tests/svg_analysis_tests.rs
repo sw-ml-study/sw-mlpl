@@ -47,6 +47,19 @@ fn scatter_labeled_returns_svg() {
         svg.contains(">0<") && svg.contains(">1<"),
         "label numbers missing"
     );
+    // Saga 33 step 037b: legend lives in an extended right gutter
+    // (canvas width = W + 90 = 490). ViewBox width and the SVG
+    // width attribute reflect that.
+    assert!(
+        svg.contains("viewBox=\"0 0 490 300\""),
+        "extended canvas viewBox missing"
+    );
+    // The legend's x-coord should be past the data area
+    // (W - PAD = 370). Legend swatches at x = W + 10 = 410.
+    assert!(
+        svg.contains("cx=\"410.0\""),
+        "legend swatch should be in the right gutter (x=410)"
+    );
 }
 
 #[test]

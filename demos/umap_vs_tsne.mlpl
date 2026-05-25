@@ -3,14 +3,19 @@
 # of local neighborhoods; they differ in how they preserve the
 # global distance between clusters.
 #
+# Legend mapping (class label -> color in the scatter):
+#   0 = origin cluster (blue)
+#   1 = near-origin cluster (pink)
+#   2 = far-out cluster (green)
+#
 # Expectation: t-SNE tends to inflate every cluster to a similar
-# size, washing out the "C is much farther than A is from B"
+# size, washing out the "class 2 is much farther than 0 is from 1"
 # global signal. UMAP preserves both the local neighborhood
 # structure AND the relative inter-cluster distances -- the
-# embedding shows C visibly separated from {A, B}.
-pts_a = randn(1, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[0, 0, 0, 0]])              # cluster A at origin
-pts_b = randn(2, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[3, 0, 0, 0]])              # cluster B near A
-pts_c = randn(3, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[15, 0, 0, 0]])             # cluster C 5x farther out
+# embedding shows class 2 visibly separated from {0, 1}.
+pts_a = randn(1, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[0, 0, 0, 0]])              # class 0 cluster at origin
+pts_b = randn(2, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[3, 0, 0, 0]])              # class 1 cluster near origin
+pts_c = randn(3, [30, 4]) * 0.5 + matmul(ones([30, 1]), [[15, 0, 0, 0]])             # class 2 cluster 5x farther out
 X = concat(concat(pts_a, pts_b, 0), pts_c, 0)                                       # 90 x 4
 labels = concat(concat(zeros([30]), ones([30]), 0), ones([30]) + 1, 0)              # 30 zeros, 30 ones, 30 twos
 # t-SNE: per-point perplexity-calibrated probabilities + KL on
