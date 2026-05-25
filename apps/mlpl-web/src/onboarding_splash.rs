@@ -25,7 +25,7 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
         <div class="splash-backdrop" role="dialog" aria-label="Welcome">
             <div class="splash-panel">
                 <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
-                <p class="splash-version">{format!("v{} \u{00b7} {}", env!("CARGO_PKG_VERSION"), env!("BUILD_SHA"))}</p>
+                <p class="splash-version">{format!("v{}.{}", env!("CARGO_PKG_VERSION"), env!("BUILD_COMMIT_COUNT"))}</p>
                 <p class="splash-subtitle">
                     {"An array programming language for learning machine learning, from scalars to transformers."}
                 </p>
