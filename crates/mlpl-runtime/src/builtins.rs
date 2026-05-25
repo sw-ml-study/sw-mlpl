@@ -44,33 +44,41 @@ macro_rules! check_arity {
     };
 }
 
+/// Try every external per-module `try_call` dispatcher in
+/// registration order; returns `Some(result)` for the first
+/// module that recognizes `name`. Extracted from
+/// [`call_builtin`] so the latter stays under the
+/// Function-LOC budget as the dispatcher chain grows
+/// (saga 33 step 033 added the UMAP entry, putting the
+/// inline chain over the 50-LOC budget).
+fn try_external_dispatchers(
+    name: &str,
+    args: &[DenseArray],
+) -> Option<Result<DenseArray, RuntimeError>> {
+    math_builtins::try_call(name, args.to_vec())
+        .or_else(|| crate::random_builtins::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_data::dataset_builtins::try_call(name, args.to_vec()))
+        .or_else(|| crate::ml_builtins::try_call(name, args.to_vec()))
+        .or_else(|| crate::ensemble_builtins::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_data::embedding_builtins::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_dim_reduction::tsne_builtin::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_dim_reduction::pca_builtin::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_umap::umap_graph::try_call(name, args.to_vec()))
+}
+
 /// Dispatch a built-in function call by name.
 pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
-    // Try math/constructor builtins first
-    if let Some(result) = math_builtins::try_call(name, args.clone()) {
+    if let Some(result) = try_external_dispatchers(name, &args) {
         return result;
     }
-    if let Some(result) = crate::random_builtins::try_call(name, args.clone()) {
-        return result;
-    }
-    if let Some(result) = mlpl_runtime_data::dataset_builtins::try_call(name, args.clone()) {
-        return result;
-    }
-    if let Some(result) = crate::ml_builtins::try_call(name, args.clone()) {
-        return result;
-    }
-    if let Some(result) = crate::ensemble_builtins::try_call(name, args.clone()) {
-        return result;
-    }
-    if let Some(result) = mlpl_runtime_data::embedding_builtins::try_call(name, args.clone()) {
-        return result;
-    }
-    if let Some(result) = mlpl_runtime_dim_reduction::tsne_builtin::try_call(name, args.clone()) {
-        return result;
-    }
-    if let Some(result) = mlpl_runtime_dim_reduction::pca_builtin::try_call(name, args.clone()) {
-        return result;
-    }
+    match_local_builtin(name, args)
+}
+
+/// Match the local in-crate builtin names. Extracted from
+/// [`call_builtin`] so the outer entry point stays under the
+/// Function-LOC budget; the inner match grows over time as
+/// new local arms are added.
+fn match_local_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     match name {
         "iota" => builtin_iota(name, args),
         "shape" => builtin_shape(name, args),
@@ -79,20 +87,24 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
         "transpose" => builtin_transpose(name, args),
         "reduce_add" | "reduce_mul" => builtin_reduce(name, args),
         "argmax" => builtin_argmax(name, args),
-        "dot" => {
-            check_arity!(name, 2, args);
-            Ok(args[0].dot(&args[1])?)
-        }
-        "matmul" => {
-            check_arity!(name, 2, args);
-            Ok(args[0].matmul(&args[1])?)
-        }
+        "dot" => builtin_dot(name, args),
+        "matmul" => builtin_matmul(name, args),
         "grid" => mlpl_runtime_data::grid_builtin::builtin_grid(name, args),
         "patchify" => builtin_patchify(name, args),
         "concat" => builtin_concat(name, args),
         "take" => builtin_take(name, args),
         _ => Err(RuntimeError::UnknownFunction(name.into())),
     }
+}
+
+fn builtin_dot(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    check_arity!(name, 2, args);
+    Ok(args[0].dot(&args[1])?)
+}
+
+fn builtin_matmul(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    check_arity!(name, 2, args);
+    Ok(args[0].matmul(&args[1])?)
 }
 
 fn builtin_iota(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {

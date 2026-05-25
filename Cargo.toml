@@ -20,6 +20,7 @@ members = [
   "crates/mlpl-runtime",
   "crates/mlpl-runtime-data",
   "crates/mlpl-runtime-dim-reduction",
+  "crates/mlpl-runtime-umap",
   "crates/mlpl-eval-core",
   "crates/mlpl-eval",
   "crates/mlpl-web-eval",

@@ -9,6 +9,7 @@ mlpl-core = { path = "../mlpl-core" }
 mlpl-runtime-core = { path = "../mlpl-runtime-core" }
 mlpl-runtime-data = { path = "../mlpl-runtime-data" }
 mlpl-runtime-dim-reduction = { path = "../mlpl-runtime-dim-reduction" }
+mlpl-runtime-umap = { path = "../mlpl-runtime-umap" }
 mlpl-array = { path = "../mlpl-array" }
 # Saga 19 step 001: `llm_call` POSTs to an Ollama-
 # compatible /api/generate endpoint. ureq is pinned

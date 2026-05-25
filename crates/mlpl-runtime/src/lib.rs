@@ -32,5 +32,6 @@ pub fn runtime_builtin_names() -> impl Iterator<Item = &'static str> {
         .chain(mlpl_runtime_data::embedding_builtins::NAMES)
         .chain(mlpl_runtime_dim_reduction::tsne_builtin::NAMES)
         .chain(mlpl_runtime_dim_reduction::pca_builtin::NAMES)
+        .chain(mlpl_runtime_umap::umap_graph::NAMES)
         .copied()
 }
