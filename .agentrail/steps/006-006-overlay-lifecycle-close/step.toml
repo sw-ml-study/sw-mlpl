@@ -1,0 +1,12 @@
+number = 6
+slug = "006-overlay-lifecycle-close"
+status = "pending"
+description = """
+Step 006 (FINAL, use --done): Overlay lifecycle + CSS polish + saga close.
+
+E..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T12:00:32"
+task_type = "meta"
+commits = []

@@ -1,205 +1,261 @@
-# Saga 33: env.rs and demos.rs paydown
+# Splash Screen + Guided Tour Milestone
+
+Saga 34, proposed.
 
 ## Why this exists
 
-The two biggest structural-debt items carried over from saga
-32 are:
+The MLPL web playground ships 31 demos, 32+ tutorial lessons,
+a glossary, learning paths, a completion popup, and a
+documentation dialog -- but a first-time visitor sees only
+three lines of grey text ("Welcome to MLPL. Type expressions
+and press Enter.") and an empty REPL. There is no onboarding,
+no feature discovery, and no "what's new" announcement
+surface. Users who arrive via a link or search engine must
+self-discover every feature by clicking around.
 
-- **`crates/mlpl-eval/src/env.rs`** (55 methods on the
-  `Environment` struct, 498 lines). The single largest
-  Module-Function-Count FAIL in the workspace by far. The
-  struct conflates start-up construction, per-call mutation,
-  and per-item lookup -- the classic phase-conflation
-  anti-pattern that `docs/loose-coupling.md` flags as the
-  highest-value refactor target.
+This milestone adds three coordinated overlays:
 
-- **`apps/mlpl-web/src/demos.rs`** (1179 lines, 29 inline
-  `Demo` consts in a single `&[Demo]` array). The largest
-  single-file FAIL in the workspace. Pure compile-time data
-  that should live in `const` tables organized by topic.
+1. **Splash/onboarding modal** -- shown on first visit,
+   dismissable, re-showable from a "Tour" button. Uses
+   `images/splash-bg.png` as the background image. Tells
+   the user what MLPL is and offers clickable quick-start
+   actions.
+2. **Guided tour** -- a step-by-step tooltip walkthrough
+   that highlights each major UI element and explains its
+   purpose in one sentence. Navigable with Back/Next/Escape.
+3. **"What's new" modal** -- shown once per version bump,
+   listing recent feature additions. Static content updated
+   each saga.
 
-Saga 32 retired -8 fails and -2 warnings; the two files
-above account for the next ~10-15 fails available at "easy
-to retire if you split by phase" pricing. They are the
-right target for the follow-up saga.
-
-## Approach
-
-Apply the techniques in [`docs/loose-coupling.md`](loose-coupling.md):
-
-- **demos.rs is a phase-1 (compile-time) refactor.** Split
-  by topic into sibling files; each file holds ~5 `pub
-  const FOO: Demo = Demo { ... };` declarations and is
-  150-250 lines. `demos.rs` becomes a thin facade with the
-  `Demo` struct, the `PROGRESS_NOTES` table, the
-  `progress_notes_for` helper, and a `pub const DEMOS:
-  &[Demo] = &[<refs>]` array referring to the topical
-  consts.
-
-- **env.rs is a phase-by-responsibility refactor.** The
-  `Environment` struct stays in `env.rs`; each topical
-  group of methods moves into a sibling `impl Environment`
-  block in its own file (`env_vars.rs`, `env_models.rs`,
-  ...). Rust allows split impl blocks across modules in
-  the same crate, so callers and the struct layout are
-  unchanged. The struct continues to own all the data
-  fields; the sibling files only host method bodies.
-
-## Goals
-
-- Retire `env.rs` Module-Function-Count FAIL (55 -> <=7).
-- Retire `demos.rs` File-LOC FAIL (1179 -> <500).
-- No new FAILs introduced. New sibling modules in `mlpl-eval`
-  are "free" for Crate-Module-Count (already FAILing).
-  `apps/mlpl-web` Crate-Module-Count is already FAILing too;
-  adding topical demo files is also free for that metric.
-- Each new module passes its own fn-count + file-LOC
-  budgets.
-- Strict DAG preserved.
+Together these three surfaces ensure that every user --
+first-timer, returner after a version bump, or someone who
+just forgot what a button does -- can orient within 30
+seconds.
 
 ## Non-goals
 
-- No new builtins, no new language features.
-- No semantic change to `Environment`'s public surface;
-  callers see the same struct + methods.
-- No reorganization of `Demo`'s schema; only the array
-  contents move.
+- **Third-party tour library.** The app is pure Yew (Rust
+  WASM) with inline CSS. Adding a JS tour library (Shepherd,
+  Intro.js) would require JS interop glue and a CDN dep. The
+  tour is simple enough (6 steps) to build natively in Yew.
+- **Animated transitions.** Fade-in/out on the spotlight is
+  nice-to-have but not blocking.
+- **Persistent tour progress.** The tour is short (6 steps).
+  If the user exits mid-tour and re-opens, it restarts from
+  step 1.
+- **Internationalization.** All copy is English, hardcoded as
+  `&'static str` constants.
+- **Mobile-specific layout.** Tour tooltips use the same
+  responsive flow as the rest of the app but no
+  mobile-specific positioning logic is added.
+
+## Dependencies
+
+No hard blockers. All required infrastructure (modal pattern,
+Escape handling, element IDs, Yew component conventions)
+already exists. `web-sys` features `Storage` and `DomRect`
+must be added to `apps/mlpl-web/Cargo.toml` (compile-time
+feature flags, no runtime cost).
+
+## What already exists
+
+- **`Welcome` component** (`components.rs`): three lines of
+  greeting text. Superseded by the splash but stays as the
+  post-dismissal in-REPL greeting.
+- **`DocDialog` component** (`components.rs`): full
+  modal-backdrop + modal-body pattern with tabs, close button,
+  Escape-to-close. Splash and what's-new reuse this CSS
+  pattern.
+- **`GlossaryPopupHost`** (`glossary_popup.rs`): window-level
+  overlay via `use_effect_with` + `Closure::forget`. Tour
+  tooltip follows the same architecture.
+- **Element IDs:** `#repl-input`, `#output`, plus `aria-label`
+  attributes on the demo dropdown, help button, completion
+  popup. Three more `data-tour-target` attributes needed.
+- **Demo runner:** `handlers::make_run_demo` fires a demo by
+  index. Splash's "Try these" buttons reuse
+  `on_demo.emit(idx)`.
+- **Version info:** `BUILD_SHA` + `BUILD_TIMESTAMP` from
+  `build_env.rs`; workspace version `0.20.0` in root
+  `Cargo.toml`.
+- **Background image:** `images/splash-bg.png` (terminal
+  screenshot, dark theme) -- specified by user for the splash
+  overlay background.
+- **UI screenshots:** `images/01-repl.png` through
+  `images/06-glossary.png` -- available for tour step
+  illustrations if needed.
 
 ## Quality requirements (every step)
 
-Same strict gate as saga 32:
+Identical to saga 33. TDD; four `cargo` gates (test, clippy,
+fmt, doc) + `markdown-checker` + `sw-checklist` green;
+`/mw-cp` checkpoint; push after every commit; web changes
+rebuild `pages/`; `.agentrail/` committed.
 
-1. `cargo test --workspace` green.
-2. `cargo clippy --workspace --all-targets --all-features -- -D warnings` green.
-3. `cargo fmt --all -- --check` green.
-4. `markdown-checker` green for any touched docs.
-5. **`sw-checklist` must net-negative on BOTH fails AND
-   warnings vs the previous commit.** Each commit body
-   quotes the before/after counts.
-6. Push after every commit.
+New modules must stay under the project's 5-fn/module,
+500-line/file budgets.
+
+sw-checklist ratchet: each commit must strictly lower BOTH
+the failed count AND the warnings count.
 
 ## Steps
 
-### Step 001 -- split demos.rs by topic
+### Step 001 -- localStorage helper + data-tour-target IDs
 
-Move the 29 `Demo` consts out of `demos.rs` into topical
-sibling files in `apps/mlpl-web/src/`:
+New module `onboarding_storage.rs` (~60 LOC, 3 functions)
+wrapping `web_sys::Storage` for two keys:
 
-- `demos_basics.rs`: arithmetic, arrays, broadcasting, reduce
-  (the first ~8 entries).
-- `demos_models.rs`: linear, chain, residual, attention,
-  embed, lora (~6 entries).
-- `demos_training.rs`: train loops, loss curves, autograd
-  walk-throughs (~5 entries).
-- `demos_viz.rs`: histograms, scatter, decision boundary,
-  embedding viz (~4 entries).
-- `demos_advanced.rs`: tiny LM, ViT, multi-head attention
-  (~3 entries, mostly heavy).
-- `demos_mlx.rs`: MLX-routed variants (~3 entries).
+- `mlpl_splash_dismissed: bool` -- true after dismissal
+- `mlpl_last_seen_version: String` -- version last shown in
+  what's-new
 
-Each entry becomes `pub const NAME: Demo = Demo { ... };`.
-`demos.rs` keeps the `Demo` struct + `ProgressNote` machinery
-+ `pub const DEMOS: &[Demo] = &[crate::demos_basics::*, ...]`
-facade.
+Pure predicates `should_show_splash(dismissed)` and
+`should_show_whats_new(last_seen, current)`.
 
-Target: demos.rs 1179 -> ~150 lines (retires File-LOC FAIL).
-Each topical sibling 150-250 lines (PASS).
+Add `data-tour-target` attributes to six target elements
+in `components.rs` and `render_shell_header.rs`:
+`repl-input`, `demo-select`, `tab-tutorial`, `tab-paths`,
+`help-btn`, `completion-popup`.
 
-### Step 002 -- split env.rs phase 1: extract var + param methods
+Add `"Storage"` and `"DomRect"` to `web-sys` features in
+`Cargo.toml`.
 
-Move the var / param method cluster from `impl Environment`
-in `env.rs` to a new sibling `env_vars.rs`. Methods to move
-(~10): `get`, `set`, `set_param`, `mark_param`, `is_param`,
-`mark_frozen`, `unmark_frozen`, `is_frozen`, `params`,
-`vars_iter`.
+Tests: unit tests for both pure predicates.
 
-Rust allows multiple `impl Environment` blocks across
-modules in the same crate. The struct + its fields stay in
-`env.rs`; the sibling file just adds methods.
+### Step 002 -- Splash/onboarding overlay
 
-After this step env.rs drops ~10 methods (55 -> ~45). Still
-FAIL but progress.
+New `SplashOverlay` component in `onboarding_splash.rs`
+(~120 LOC, 3 functions). Uses `images/splash-bg.png` as
+CSS `background-image` on the backdrop with a dark overlay.
 
-### Step 003 -- split env.rs phase 2: models + tokenizers + dirs
+Contents:
+- Headline: "Welcome to sw-MLPL" with badge image
+- Subtitle: "An array programming language for learning
+  machine learning, from scalars to transformers."
+- Four clickable quick-start cards:
+  1. "Run the Basics demo"
+  2. "Try `1 + 2` in the REPL"
+  3. "Open a tutorial lesson"
+  4. "Explore learning paths"
+- "Dismiss" button (localStorage, closes overlay)
+- "Take a guided tour" button (closes overlay, fires tour)
 
-Move the model / tokenizer / data-dir / experiment-log
-methods to `env_models.rs` and `env_dirs.rs`:
+Integration: rendered conditionally in `render_shell.rs`
+(or new `render_shell_overlays.rs`). New
+`show_splash: UseStateHandle<bool>` in UiState.
 
-- `env_models.rs`: `get_model`, `models_iter`,
-  `set_tokenizer`, `get_tokenizer`, `tokenizers_iter` (5
-  methods).
-- `env_dirs.rs`: `set_data_dir`, `data_dir`, `set_exp_dir`,
-  `exp_dir`, `push_experiment_log`, `experiment_log` (6
-  methods).
+### Step 003 -- Tour tooltip component
 
-env.rs drops ~11 more methods (55 -> ~34).
+New `TourTooltip` component in `onboarding_tour.rs` (~150
+LOC, 4 functions).
 
-### Step 004 -- split env.rs phase 3: device + peer
+`const TOUR_STEPS: &[TourStep]` (6 entries):
 
-Move the device-stack + peer-dispatcher cluster to
-`env_device.rs`:
+1. `repl-input` -- "Type expressions here. Enter to
+   evaluate. Try `1 + 2` or `iota(5)`."
+2. `demo-select` -- "Load a pre-built demo. Each runs a
+   complete example with narration."
+3. `tab-tutorial` -- "Follow guided lessons, from
+   arithmetic to transformers."
+4. `tab-paths` -- "Structured learning paths that sequence
+   lessons, demos, and glossary entries."
+5. `help-btn` -- "Full documentation: language reference,
+   usage guide, glossary, and diagrams."
+6. `repl-input` -- "Press Ctrl+Space for autocomplete.
+   Arrow keys to navigate, Enter to accept."
 
-- `device`, `push_device`, `pop_device`,
-  `take_mlx_fallback_warning`, `tensor_device`,
-  `set_tensor_device`, `set_peer_dispatcher`,
-  `clear_peer_dispatcher`, `peer_dispatcher`,
-  `set_device_tensor`, `get_device_tensor`,
-  `remove_device_tensor` (12 methods, but on related state
-  -- the device stack drives peer dispatch).
+Tooltip positioning via `element.get_bounding_client_rect()`.
+CSS-only spotlight: `box-shadow: 0 0 0 9999px rgba(0,0,0,0.6)`
+on a positioned overlay around the target.
 
-May need to split further into `env_device.rs` (stack +
-fallback) + `env_peer.rs` (dispatcher + device-tensor) if
-12 fns is over budget.
+Back (disabled on step 0), Next, Close (X). Step counter:
+"Step 1 of 6". Escape closes.
 
-env.rs drops ~12 more methods (55 -> ~22).
+### Step 004 -- Tour integration + header button
 
-### Step 005 -- split env.rs phase 4: tags + records + strings
+Wire tour into app lifecycle:
+- `show_tour: UseStateHandle<bool>` +
+  `tour_step: UseStateHandle<usize>` in UiState
+- Splash "Take a guided tour" sets `show_tour = true`
+- Add "Tour" button next to "?" in Header (reuses
+  `.help-btn` CSS)
+- Z-index layering: tour spotlight (300) above DocDialog
+  (200)
+- Escape closes topmost overlay
 
-Move per-value-type accessors to `env_values.rs`:
+### Step 005 -- "What's new" modal
 
-- `set_string`, `get_string`, `set_record`, `get_record`,
-  `set_string_list`, `get_string_list`, `set_builtin_ref`,
-  `get_builtin_ref`, `set_tag`, `get_tag`, `clear_tag`,
-  `tags_iter` (12 methods).
+New `WhatsNewOverlay` in `onboarding_whats_new.rs` (~100
+LOC, 3 functions). Shows when `should_show_whats_new()`
+returns true (stored version < compiled version).
 
-May split into `env_tags.rs` + `env_values.rs` if needed.
+Content: `const WHATS_NEW_ITEMS: &[(&str, &str)]` --
+heading + body pairs. Initial items:
+- "Guided tour" -- "Click Tour to walk through every feature."
+- "REPL autocomplete" -- "Press Ctrl+Space for suggestions."
+- "Dimensionality reduction" -- "UMAP, MDS, random projection,
+  critical-dimensions heatmaps."
 
-env.rs drops ~12 more (55 -> ~10).
+"Got it" dismiss writes current version to localStorage.
 
-### Step 006 -- split env.rs phase 5: signals (metric + interrupt)
+Splash takes priority over what's-new on first visits.
 
-Move signal/lifecycle methods to `env_signals.rs`:
+### Step 006 -- Overlay lifecycle + pages rebuild
 
-- `set_metric_sink`, `clear_metric_sink`, `metric_sink`,
-  `emit_metrics`, `set_interrupt`, `clear_interrupt`,
-  `check_interrupt` (7 methods).
+Extract overlay rendering into `render_shell_overlays.rs`
+if not already done. Single place for overlay priority and
+z-index stacking:
 
-env.rs drops ~7 more (55 -> ~3). Should now PASS the
-fn-count budget.
+Lifecycle rules:
+- First-ever visit: splash shows
+- Splash "Tour" -> splash closes, tour starts
+- Splash "Dismiss" -> splash closes, nothing else
+- Return visit same version: nothing automatic
+- Return visit new version: what's-new shows
+- "Tour" button in header: tour starts unconditionally
+- Escape closes topmost overlay
 
-### Step 007 -- model_dispatch.rs phase split (bonus)
+Final CSS polish: Catppuccin Mocha colors, responsive splash
+cards, tour tooltip arrow, keyboard accessibility,
+aria- attributes.
 
-If steps 001-006 hold + the saga has budget, attack
-`model_dispatch.rs` (16 fns, 905 lines, 100-LOC
-`apply_model`). The file conflates the constructor cluster
-(`eval_linear`, `eval_attention`, etc.; start-up: build a
-ModelSpec) with the dispatcher cluster (`apply_model`,
-`apply_attention`, etc.; per-item: apply the spec).
+Rebuild `pages/` and commit.
 
-Split into:
+## Architecture notes
 
-- `model_dispatch.rs`: the constructor cluster (~7
-  `eval_*` builders for the model DSL).
-- `model_apply.rs`: the dispatcher cluster (`apply_model`,
-  `apply_attention`, etc.).
+### Module budget compliance
 
-The 100-line `apply_model` itself needs the dataflow-
-pipeline refactor: each match arm becomes a named helper
-(`apply_linear`, `apply_chain`, etc.), `apply_model`
-becomes a thin dispatch.
+| New file | Est. LOC | Est. fns | Budget |
+|---|---|---|---|
+| `onboarding_storage.rs` | ~60 | 3 | OK |
+| `onboarding_splash.rs` | ~120 | 3 | OK |
+| `onboarding_tour.rs` | ~150 | 4 | OK |
+| `onboarding_whats_new.rs` | ~100 | 3 | OK |
+| `render_shell_overlays.rs` | ~60 | 2 | OK |
 
-### Step 008 -- final ratchet + saga close
+Total new Rust: ~490 LOC across 5 files.
 
-Final sw-checklist pass. Update `docs/language-status.md`
-with the saga 33 close-out entry. Refresh `CHANGES.md`.
-Mark the saga `complete --done`.
+### Element targeting
+
+`data-tour-target` custom attributes (greppable, no ID
+namespace collision). Tour queries
+`[data-tour-target='name']`.
+
+### localStorage keys
+
+Two keys, `mlpl_`-prefixed:
+- `mlpl_splash_dismissed` -- value `"1"` or absent
+- `mlpl_last_seen_version` -- semver string or absent
+
+Fail-open: absent/unparseable key shows the overlay
+(correct for onboarding).
+
+### Tour tooltip positioning
+
+1. `element.get_bounding_client_rect()` for target's
+   viewport-relative box
+2. Each `TourStep` declares preferred `TooltipPosition`
+   (Below for REPL input, Above for header tabs)
+3. Fallback to opposite side if tooltip would clip
+4. `position: fixed` with computed `top`/`left` inline
+   styles

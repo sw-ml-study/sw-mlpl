@@ -1,0 +1,12 @@
+number = 4
+slug = "004-tour-integration"
+status = "pending"
+description = """
+Step 004: Tour integration + header button.
+
+Wire tour into app lifecycle: sh..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T12:00:17"
+task_type = "feature"
+commits = []

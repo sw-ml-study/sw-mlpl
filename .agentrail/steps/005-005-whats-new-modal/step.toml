@@ -1,0 +1,12 @@
+number = 5
+slug = "005-whats-new-modal"
+status = "pending"
+description = """
+Step 005: What's new modal.
+
+New WhatsNewOverlay in onboarding_whats_new.rs (..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T12:00:22"
+task_type = "feature"
+commits = []
