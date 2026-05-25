@@ -1,9 +1,10 @@
 number = 39
 slug = "saga33-step037c-umap-impl-fix"
-status = "pending"
+status = "completed"
 description = "Fix the simplified UMAP layout so it actually preserves manifold structure (r..."
 role = "production"
 context_files = []
 created_at = "2026-05-25T09:29:32"
+completed_at = "2026-05-25T09:58:56"
 task_type = "feature"
-commits = []
+commits = ["f9abede346366f6d2049475578eaa7c4cdb39a0f"]

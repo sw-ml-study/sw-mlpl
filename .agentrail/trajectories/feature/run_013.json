@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 39,
+    "step": "saga33-step037c-umap-impl-fix"
+  },
+  "action": "Rewrote crates/mlpl-runtime-umap/src/umap_layout.rs: removed const A, B; added fit_ab_params (Gauss-Newton on the McInnes target curve), sample_phi_target, gauss_newton_normals helpers; widened COORD_BOUND to 100; raised INIT_SCALE to 10; plumbed (a, b) through apply_attractive / apply_repulsive / cross_entropy_loss. Added knn-purity manifold test (the centroid-separation test is wrong for interleaved arcs). Removed caveats from UMAP_VS_PCA demo intro/takeaway, UMAP_MODERN_DEFAULT lesson try_it, demos/umap_vs_pca.mlpl source comment. Verified visually by inspecting SVG coordinate distribution (pre-fix piled at clamp walls, post-fix spread across distinct regions per class).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T09:58:56"
+}
