@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 5,
+    "step": "005-whats-new-modal"
+  },
+  "action": "Single-fn component with const ITEMS array. Callback<MouseEvent> prop. Wired inline in render_shell. Reuses splash CSS.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T13:28:39"
+}
