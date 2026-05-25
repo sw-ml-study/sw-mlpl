@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-d788f9bd814ab9ed.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-d788f9bd814ab9ed_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-3be11fec2ea21b59.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-3be11fec2ea21b59_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -1132,7 +1132,15 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
         }
     </style>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-d788f9bd814ab9ed.js" crossorigin="anonymous" integrity="sha384-rKUzI0Flh5hih6Pvvo2OxLeiALyAdvgoICciE3ClGg591goGwYvvYgeyJp/W84v9"><link rel="preload" href="/sw-mlpl/mlpl-web-d788f9bd814ab9ed_bg.wasm" crossorigin="anonymous" integrity="sha384-7fFOAYLkNNWiGMccXFbItJIScFgPM3CqPubfZRcC6Kr/XxEwwRlSOa7Tr3Aj9ip7" as="fetch" type="application/wasm"></head>
+    <!-- Saga 33 step 030: Plotly for the interactive 3D viz
+         used by the dim-reduction demos. Loaded once at page
+         init; the `plotly3d` viz type returns an HTML fragment
+         with an embedded `Plotly.newPlot(...)` call. Integrity
+         hash deliberately omitted; if you want SRI, compute it
+         locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
+         | base64`) and add an integrity attribute. -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-3be11fec2ea21b59.js" crossorigin="anonymous" integrity="sha384-Et5WsfEWiu1gLYR+uPCzwnT5J2yXXvTuKYzCAgzvkSkL+pRAHO0LUsp/IAWATNnx"><link rel="preload" href="/sw-mlpl/mlpl-web-3be11fec2ea21b59_bg.wasm" crossorigin="anonymous" integrity="sha384-4nwvnF8St7pNWDsu/dKpbysb55vbJMRNMjag/Nhrg6qxtO1zUIHY8ix3k+cCW4M3" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
