@@ -1,0 +1,12 @@
+number = 7
+slug = "007-landscape-polish-close"
+status = "pending"
+description = """
+Phase 6 (FINAL, use --done): Landscape + polish + saga close.
+
+GLTF landscape..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T16:12:49"
+task_type = "meta"
+commits = []

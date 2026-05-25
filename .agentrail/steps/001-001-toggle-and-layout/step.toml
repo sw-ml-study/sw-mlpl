@@ -1,0 +1,12 @@
+number = 1
+slug = "001-toggle-and-layout"
+status = "pending"
+description = """
+Phase 1a: 3D toggle infrastructure.
+
+Add show_3d: UseStateHandle<bool> to UiS..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T16:11:44"
+task_type = "feature"
+commits = []

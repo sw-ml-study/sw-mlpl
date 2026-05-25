@@ -1,0 +1,12 @@
+number = 5
+slug = "005-demo-integration"
+status = "pending"
+description = """
+Phase 4: Demo integration.
+
+Wire 2-3 demos to emit Stage3dEvents: Basics (ari..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T16:12:26"
+task_type = "feature"
+commits = []

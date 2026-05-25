@@ -1,0 +1,12 @@
+number = 2
+slug = "002-threejs-bootstrap"
+status = "pending"
+description = """
+Phase 1b: Three.js bootstrap.
+
+Create apps/mlpl-web/js/stage3d.js (~200 LOC J..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T16:11:53"
+task_type = "feature"
+commits = []
