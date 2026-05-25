@@ -221,6 +221,10 @@ function __wbg_get_imports() {
             const ret = arg0.createTextNode(getStringFromWasm0(arg1, arg2));
             return ret;
         },
+        __wbg_ctrlKey_dc8c7fcd63c26948: function(arg0) {
+            const ret = arg0.ctrlKey;
+            return ret;
+        },
         __wbg_data_70ac13c08fd81299: function(arg0, arg1) {
             const ret = arg1.data;
             const ptr1 = passArray8ToWasm0(ret, wasm.__wbindgen_malloc);
@@ -604,10 +608,6 @@ function __wbg_get_imports() {
         },
         __wbg_set_width_81fa781e87b17891: function(arg0, arg1) {
             arg0.width = arg1 >>> 0;
-        },
-        __wbg_shiftKey_44bc0e4535e829c0: function(arg0) {
-            const ret = arg0.shiftKey;
-            return ret;
         },
         __wbg_slice_21f4c5261d1fdd69: function(arg0, arg1) {
             const ret = arg1.slice();
