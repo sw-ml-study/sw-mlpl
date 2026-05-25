@@ -529,16 +529,10 @@
             position: fixed;
             inset: 0;
             z-index: 250;
-            background: url('splash-bg.png') center/cover no-repeat;
+            background: rgba(17, 17, 27, 0.55);
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-        .splash-backdrop::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(17, 17, 27, 0.55);
         }
         .splash-panel {
             position: relative;
@@ -548,11 +542,20 @@
             padding: 40px 48px;
             text-align: center;
             color: var(--text);
-            background: rgba(30, 30, 46, 0.75);
+            background: url('splash-bg.png') center/cover no-repeat;
             border-radius: 12px;
-            backdrop-filter: blur(8px);
             border: 1px solid rgba(69, 71, 90, 0.5);
+            overflow: hidden;
         }
+        .splash-panel::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(30, 30, 46, 0.78);
+            backdrop-filter: blur(4px);
+            border-radius: 12px;
+        }
+        .splash-panel > * { position: relative; z-index: 1; }
         .splash-close {
             position: absolute;
             top: 12px;
