@@ -8,6 +8,7 @@ use yew::prelude::*;
 use crate::mode_callbacks;
 use crate::onboarding_splash::{SplashOverlay, make_splash_action};
 use crate::onboarding_tour::TourTooltip;
+use crate::onboarding_whats_new::WhatsNewOverlay;
 use crate::render::RenderArgs;
 use crate::render_callbacks::InputCallbacks;
 use crate::render_main::{MainArgs, render_main};
@@ -34,7 +35,17 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
     let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog);
     let splash = render_splash(&a);
     let tour = render_tour(&a);
-    html! { <> { chrome } { render_main(main_args) } { footer } { splash } { tour } </> }
+    let wn_h = a.onboarding.show_whats_new.clone();
+    let whats_new = if *a.onboarding.show_whats_new {
+        let on_dismiss = Callback::from(move |_: MouseEvent| {
+            crate::onboarding_storage::write_last_seen_version(env!("CARGO_PKG_VERSION"));
+            wn_h.set(false);
+        });
+        html! { <WhatsNewOverlay {on_dismiss} /> }
+    } else {
+        html! {}
+    };
+    html! { <> { chrome } { render_main(main_args) } { footer } { splash } { whats_new } { tour } </> }
 }
 
 fn render_splash(a: &RenderArgs) -> Html {

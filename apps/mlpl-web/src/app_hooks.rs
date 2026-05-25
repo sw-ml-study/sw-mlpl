@@ -48,10 +48,14 @@ pub fn use_ui_state() -> UiState {
 #[hook]
 pub fn use_onboarding_state() -> OnboardingState {
     let dismissed = crate::onboarding_storage::read_splash_dismissed();
+    let last_ver = crate::onboarding_storage::read_last_seen_version();
+    let cur_ver = env!("CARGO_PKG_VERSION");
+    let show_wn = dismissed && matches!(last_ver.as_deref(), Some(v) if v != cur_ver);
     OnboardingState {
         show_splash: use_state(move || !dismissed),
         show_tour: use_state(|| false),
         tour_step: use_state(|| 0_usize),
+        show_whats_new: use_state(move || show_wn),
     }
 }
 
