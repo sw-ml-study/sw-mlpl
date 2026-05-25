@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 42,
+    "step": "saga33-step041a-path-resume"
+  },
+  "action": "Modified mode_path.rs (removed 2 path_state.set(None) calls, signature changes). Modified render_modes.rs (extracted compute_modes pure helper, updated paths_active predicate, added 4 unit tests). Added on_back_to_path prop to TutorialPanel and 'Back to path' button rendering. Updated render_tutorial.rs to pass the callback when has_active_path. Updated mode_callbacks.rs for the changed signatures. Bumped README glossary count 290->293 for step-041's additions.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T10:49:36"
+}
