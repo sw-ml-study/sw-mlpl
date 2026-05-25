@@ -104,17 +104,17 @@ fn eval_reduce_labeled(
 
 fn eval_load_images(args: &[Expr], env: &mut Environment) -> Result<Value, EvalError> {
     let err = |detail: &str| EvalError::Unsupported(format!("load_images: {detail}"));
-    if args.len() != 2 {
+    let [a0, a1] = args else {
         return Err(EvalError::BadArity {
             func: "load_images".into(),
             expected: 2,
             got: args.len(),
         });
-    }
-    let Expr::StrLit(dir, _) = &args[0] else {
+    };
+    let Expr::StrLit(dir, _) = a0 else {
         return Err(err("arg 0 must be a directory string"));
     };
-    let Expr::ArrayLit(dims, _) = &args[1] else {
+    let Expr::ArrayLit(dims, _) = a1 else {
         return Err(err("arg 1 must be a [H, W] array literal"));
     };
     if dims.len() != 2 {

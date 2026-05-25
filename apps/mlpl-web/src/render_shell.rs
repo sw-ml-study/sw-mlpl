@@ -22,7 +22,12 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
         a.callbacks.on_demo.clone(),
     );
     let on_run_example = run_example(a.callbacks.on_submit.clone(), a.ui.input_value.clone());
-    let main_args = build_main_args(&a, &cb, &inputs, &modes, on_run_example);
+    let on_pick = make_pick_completion(
+        a.ui.input_value.clone(),
+        a.ui.completion_candidates.clone(),
+        a.ui.completion_selected.clone(),
+    );
+    let main_args = build_main_args(&a, &cb, &inputs, &modes, on_run_example, on_pick);
     let chrome = render_shell_chrome(&a, &inputs, &modes, &cb);
     let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog);
     html! {
@@ -40,6 +45,7 @@ fn build_main_args<'a>(
     inputs: &InputCallbacks,
     modes: &Modes,
     on_run_example: Callback<String>,
+    on_pick_completion: Callback<String>,
 ) -> MainArgs<'a> {
     MainArgs {
         tutorial_active: modes.tutorial_active,
@@ -56,11 +62,7 @@ fn build_main_args<'a>(
         on_run_example,
         on_run_batch: a.callbacks.on_run_batch.clone(),
         completion_candidates: (*a.ui.completion_candidates).clone(),
-        on_pick_completion: make_pick_completion(
-            a.ui.input_value.clone(),
-            a.ui.completion_candidates.clone(),
-            a.ui.completion_selected.clone(),
-        ),
+        on_pick_completion,
         completion_selected: *a.ui.completion_selected,
     }
 }

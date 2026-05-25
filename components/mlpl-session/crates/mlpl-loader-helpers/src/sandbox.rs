@@ -23,25 +23,30 @@ fn check_components(rel: &Path, original: &str, root: &Path) -> Result<(), Loade
     let mut depth: i64 = 0;
     for comp in rel.components() {
         match comp {
-            Component::Normal(_) | Component::CurDir => {
-                depth += i64::from(matches!(comp, Component::Normal(_)));
-            }
+            Component::Normal(_) => depth += 1,
+            Component::CurDir => {}
             Component::ParentDir => {
                 depth -= 1;
                 if depth < 0 {
-                    return Err(LoaderHelperError::SandboxEscape {
-                        path: original.into(),
-                        root: root.display().to_string(),
-                    });
+                    return Err(sandbox_err(original, root));
                 }
             }
-            Component::RootDir | Component::Prefix(_) => {
-                return Err(LoaderHelperError::RootedComponent {
-                    path: original.into(),
-                    root: root.display().to_string(),
-                });
-            }
+            _ => return Err(rooted_err(original, root)),
         }
     }
     Ok(())
+}
+
+fn sandbox_err(original: &str, root: &Path) -> LoaderHelperError {
+    LoaderHelperError::SandboxEscape {
+        path: original.into(),
+        root: root.display().to_string(),
+    }
+}
+
+fn rooted_err(original: &str, root: &Path) -> LoaderHelperError {
+    LoaderHelperError::RootedComponent {
+        path: original.into(),
+        root: root.display().to_string(),
+    }
 }
