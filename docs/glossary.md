@@ -1107,6 +1107,22 @@ Running a trained model on new inputs without updating
 weights. In MLPL, just call `apply(model, X)` outside of
 `train { ... }` -- no gradient tape, no optimizer step.
 
+## :introspect (REPL command)
+
+`:introspect` is a bundle command (saga 33 step 037d) that
+concatenates the output of every no-arg inspector into one
+markdown-headered dump. Sections in fixed order:
+[[:version]], [[:wsid (REPL command)]], `:builtins`,
+[[:vars (REPL command)]], [[:models / :tokenizers (REPL commands)]],
+[[:experiments (REPL command)]], [[:tags / :untag (REPL commands)]].
+Each section prints under a `## :<topic>` header so a long
+scroll stays scannable. Arg-taking inspectors
+([[:describe (REPL command)]], `:untag`, `:help`) are NOT
+included -- they need user input and don't fit the "dump
+everything" intent. Useful as the optional last line of any
+demo: when a notebook captures full workspace state you only
+need one command.
+
 ## Interpretability / Mechanistic Interpretability
 
 Mechanistic interpretability is the program of reverse-

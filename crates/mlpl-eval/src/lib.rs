@@ -69,6 +69,7 @@ mod image_io_pixels;
 mod inspect;
 mod inspect_collections;
 mod inspect_describe;
+mod inspect_introspect;
 mod inspect_render;
 
 #[cfg(feature = "image-io")]

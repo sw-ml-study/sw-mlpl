@@ -87,8 +87,8 @@ pub const MATRIX_OPS: Demo = Demo {
 
 pub const WORKSPACE_INTROSPECTION: Demo = Demo {
     name: "Workspace Introspection",
-    intro: "Tour of the REPL's introspection commands: :version, :wsid (workspace ID summary), :vars, :describe, :models, :experiments, :fns. Also shows how the axis-label annotation syntax (M : [batch, feat] = ...) shows up in :vars and :describe output.",
-    takeaway: "You can always ask the REPL what's in your session. :describe on a variable prints shape + labels + a preview; on a model, the layer tree; on a builtin, the signature and one-line doc. :experiments shows every tracked run.",
+    intro: "Tour of the REPL's introspection commands: :version, :wsid (workspace ID summary), :vars, :describe, :models, :experiments, :fns. Also shows how the axis-label annotation syntax (M : [batch, feat] = ...) shows up in :vars and :describe output. The final line uses :introspect, which bundles every no-arg inspector into a single markdown-headered dump -- useful as the optional last line of any demo.",
+    takeaway: "You can always ask the REPL what's in your session. :describe on a variable prints shape + labels + a preview; on a model, the layer tree; on a builtin, the signature and one-line doc. :experiments shows every tracked run. :introspect (saga 33 step 037d) prints the lot in one shot under `## :<topic>` headers -- handy when you want the full snapshot in one scroll.",
     lines: &[
         ":version                                                            # build banner: version + arch + commit + timestamp",
         ":wsid                                                                # workspace summary (var/param/model counts)",
@@ -109,6 +109,7 @@ pub const WORKSPACE_INTROSPECTION: Demo = Demo {
         ":experiments                                                         # list every captured run",
         ":describe matmul                                                     # signature + one-line doc for a builtin",
         ":fns                                                                 # list user-defined functions (none yet)",
+        ":introspect                                                          # bundle every no-arg inspector under ## headers (saga 33 step 037d)",
     ],
 };
 
