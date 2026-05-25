@@ -1,0 +1,1 @@
+Added knn_graph(X, k) -> [N*k, 3] builtin in a new sibling crate mlpl-runtime-umap. Extracted call_builtin chain into try_external_dispatchers + match_local_builtin helpers, retiring its Function-LOC FAIL. 6 unit tests; sw-checklist 129 fail / 445 warn (both -1 from parent). Step 034 will add fuzzy_simplicial_set + umap_layout + the umap() orchestrator.
