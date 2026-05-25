@@ -34,6 +34,12 @@ const STEPS: &[TourStep] = &[
         click_before: "[data-tour-target='help-btn']",
     },
     TourStep {
+        target: "doc-tab-usage",
+        title: "Usage Guide",
+        body: "How to use the playground: REPL commands, keyboard shortcuts, demo runner, and connect mode.",
+        click_before: "[data-tour-target='doc-tab-usage']",
+    },
+    TourStep {
         target: "doc-tab-glossary",
         title: "Glossary",
         body: "Searchable glossary of ML and array-programming terms. Click any [[linked term]] in lessons or demos to jump here.",
@@ -49,7 +55,7 @@ const STEPS: &[TourStep] = &[
         target: "tab-tutorial",
         title: "Tutorial",
         body: "Guided lessons from arithmetic to transformers. Let's open it.",
-        click_before: ".close-btn",
+        click_before: ".modal-backdrop",
     },
     TourStep {
         target: "tutorial-panel",
@@ -82,6 +88,8 @@ const STEPS: &[TourStep] = &[
         click_before: "[data-tour-target='tab-paths']",
     },
 ];
+
+pub const STEP_COUNT: usize = STEPS.len();
 
 #[derive(Properties, PartialEq)]
 pub struct TourProps {
