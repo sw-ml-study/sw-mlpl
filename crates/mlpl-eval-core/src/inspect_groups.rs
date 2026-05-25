@@ -210,6 +210,16 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
             ),
             ("knn", "knn(X, k)", "[N,k] nearest-neighbor indices"),
             ("pca", "pca(X, k)", "top-k principal-component projection"),
+            (
+                "pca_components",
+                "pca_components(X, k)",
+                "[k,D] loadings: row i is the i-th PC direction",
+            ),
+            (
+                "pca_variance_explained",
+                "pca_variance_explained(X, k)",
+                "[k] per-component variance-explained ratios",
+            ),
             ("tsne", "tsne(X, perp, iters, seed)", "t-SNE 2D embedding"),
         ],
     ),
