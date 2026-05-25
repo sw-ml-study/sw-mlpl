@@ -58,5 +58,6 @@ fn build_eval_deps(active: &ActiveContext, upload: &UploadState, ui: &UiState) -
         cmd_index: ui.cmd_index.clone(),
         upload_input_ref: upload.input_ref.clone(),
         pending_upload_name: upload.pending_name.clone(),
+        show_3d: ui.show_3d.clone(),
     }
 }

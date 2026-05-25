@@ -17,7 +17,7 @@ use yew::prelude::*;
 use crate::app_active::active_context;
 use crate::app_callbacks::build_callbacks;
 use crate::app_hooks::{
-    use_escape_closes_dialogs, use_onboarding_state, use_scroll_effect, use_sessions, use_ui_state,
+    use_global_keydown, use_onboarding_state, use_scroll_effect, use_sessions, use_ui_state,
     use_upload_state,
 };
 use crate::app_log::log_connect_mode;
@@ -39,11 +39,12 @@ fn app() -> Html {
     let active = active_context(&sessions, &ui);
     let callbacks = build_callbacks(&active, &upload, &ui);
     use_scroll_effect(active.history.clone());
-    use_escape_closes_dialogs(
+    use_global_keydown(
         ui.dialog_open.clone(),
         ui.lesson_idx.clone(),
         onboarding.show_tour.clone(),
         onboarding.show_splash.clone(),
+        ui.show_3d.clone(),
     );
     render(RenderArgs::from_parts(
         callbacks, ui, upload, active, onboarding,

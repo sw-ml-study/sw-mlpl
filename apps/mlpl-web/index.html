@@ -256,6 +256,26 @@
            the live transcript both have meaningful vertical
            space. Each pane scrolls independently. Stacks
            vertically on narrow viewports. */
+        /* Saga 35: 3D visualization split */
+        main.viz3d-split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: 1fr;
+            gap: 0;
+            overflow: hidden;
+            padding: 0;
+        }
+        .stage3d-pane {
+            background: #0a0a14;
+            border-left: 1px solid var(--surface1);
+            min-height: 300px;
+        }
+        .stage3d-pane canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
         main.tutorial-split {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

@@ -70,3 +70,4 @@ pub mod scroll;
 pub mod tutorial;
 pub mod upload;
 pub mod upload_cmd;
+pub mod viz3d_toggle;

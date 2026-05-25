@@ -41,6 +41,7 @@ pub struct UiState {
     /// Saga 33 step 047: highlighted index in the completion
     /// popup. Resets to 0 when new candidates land.
     pub completion_selected: UseStateHandle<usize>,
+    pub show_3d: UseStateHandle<bool>,
 }
 
 /// Onboarding overlay state (splash + tour + what's-new).

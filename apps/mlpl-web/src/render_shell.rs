@@ -68,6 +68,7 @@ fn build_main_args<'a>(
             a.ui.completion_selected.clone(),
         ),
         completion_selected: *a.ui.completion_selected,
+        show_3d: *a.ui.show_3d,
     }
 }
 
