@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 35,
+    "step": "saga33-step035-dr-comparison-demos"
+  },
+  "action": "Created three .mlpl demo files, added matching Demo entries to demos_dim_reduction.rs (UMAP_VS_PCA, UMAP_VS_TSNE, DIM_REDUCTION_ZOO), registered in DEMOS slice, added 'Dimensionality reduction' LearningPath to paths.rs with Glossary/Demo/Note steps walking the PCA family + new comparisons. Updated README counts. Verified each demo runs via mlpl-repl -f and via the full all_demos_smoke release test (380s).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T08:15:08"
+}
