@@ -362,56 +362,68 @@ pub fn make_keydown(
     cmd_index: UseStateHandle<Option<usize>>,
     completion_candidates: UseStateHandle<Vec<String>>,
 ) -> Callback<KeyboardEvent> {
-    Callback::from(move |e: KeyboardEvent| match e.key().as_str() {
-        "Enter" => {
+    Callback::from(move |e: KeyboardEvent| {
+        // Saga 33 step 045: Shift+Space triggers the
+        // completion popup. Guarded ahead of the key-string
+        // match because the trigger is a (modifier, code)
+        // pair, not a single named key. Tab is reserved
+        // for browser focus traversal (the step-043 attempt
+        // to override Tab lost to the browser's default);
+        // Shift+Space also avoids the Ctrl+Space binding
+        // some OSes / browsers claim for their own UI.
+        if crate::completion::is_completion_trigger(e.shift_key(), e.code().as_str()) {
             e.prevent_default();
-            completion_candidates.set(Vec::new());
-            on_submit.emit((*input_value).clone());
+            handle_completion(&e, &input_value, &completion_candidates);
+            return;
         }
-        "ArrowUp" => {
-            e.prevent_default();
-            completion_candidates.set(Vec::new());
-            let cmds = &*cmd_history;
-            if cmds.is_empty() {
-                return;
+        match e.key().as_str() {
+            "Enter" => {
+                e.prevent_default();
+                completion_candidates.set(Vec::new());
+                on_submit.emit((*input_value).clone());
             }
-            let new_idx = match *cmd_index {
-                None => cmds.len() - 1,
-                Some(0) => 0,
-                Some(i) => i - 1,
-            };
-            cmd_index.set(Some(new_idx));
-            input_value.set(cmds[new_idx].clone());
-        }
-        "ArrowDown" => {
-            e.prevent_default();
-            completion_candidates.set(Vec::new());
-            let cmds = &*cmd_history;
-            match *cmd_index {
-                Some(i) if i + 1 < cmds.len() => {
-                    cmd_index.set(Some(i + 1));
-                    input_value.set(cmds[i + 1].clone());
+            "ArrowUp" => {
+                e.prevent_default();
+                completion_candidates.set(Vec::new());
+                let cmds = &*cmd_history;
+                if cmds.is_empty() {
+                    return;
                 }
-                Some(_) => {
-                    cmd_index.set(None);
-                    input_value.set(String::new());
-                }
-                None => {}
+                let new_idx = match *cmd_index {
+                    None => cmds.len() - 1,
+                    Some(0) => 0,
+                    Some(i) => i - 1,
+                };
+                cmd_index.set(Some(new_idx));
+                input_value.set(cmds[new_idx].clone());
             }
+            "ArrowDown" => {
+                e.prevent_default();
+                completion_candidates.set(Vec::new());
+                let cmds = &*cmd_history;
+                match *cmd_index {
+                    Some(i) if i + 1 < cmds.len() => {
+                        cmd_index.set(Some(i + 1));
+                        input_value.set(cmds[i + 1].clone());
+                    }
+                    Some(_) => {
+                        cmd_index.set(None);
+                        input_value.set(String::new());
+                    }
+                    None => {}
+                }
+            }
+            _ => {}
         }
-        "Tab" => {
-            e.prevent_default();
-            handle_tab(&e, &input_value, &completion_candidates);
-        }
-        _ => {}
     })
 }
 
-/// Saga 33 step 043: Tab keydown handler. Reads cursor pos
-/// from the underlying HtmlInputElement, runs the candidate
-/// pipeline, and either inserts a unique completion in-place
-/// or pops up the multi-match list.
-fn handle_tab(
+/// Saga 33 step 045 (was step 043's `handle_tab`):
+/// completion keydown handler. Reads cursor pos from the
+/// underlying HtmlInputElement, runs the candidate pipeline,
+/// and either inserts a unique completion in-place or pops
+/// up the multi-match list.
+fn handle_completion(
     e: &KeyboardEvent,
     input_value: &UseStateHandle<String>,
     completion_candidates: &UseStateHandle<Vec<String>>,
