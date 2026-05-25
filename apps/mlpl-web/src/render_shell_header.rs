@@ -9,10 +9,16 @@ use crate::mode_callbacks::ModeCallbacks;
 use crate::render_callbacks::InputCallbacks;
 use crate::render_modes::Modes;
 
-pub fn render_shell_header(inputs: &InputCallbacks, modes: &Modes, cb: &ModeCallbacks) -> Html {
+pub fn render_shell_header(
+    inputs: &InputCallbacks,
+    modes: &Modes,
+    cb: &ModeCallbacks,
+    on_tour: Callback<MouseEvent>,
+) -> Html {
     html! {
         <Header
             on_help={inputs.open_dialog.clone()}
+            {on_tour}
             on_select_repl={cb.repl.clone()}
             on_select_tutorial={cb.tutorial.clone()}
             on_select_paths={cb.paths.clone()}

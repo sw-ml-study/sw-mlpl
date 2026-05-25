@@ -1,6 +1,6 @@
 number = 4
 slug = "004-tour-integration"
-status = "pending"
+status = "in-progress"
 description = """
 Step 004: Tour integration + header button.
 

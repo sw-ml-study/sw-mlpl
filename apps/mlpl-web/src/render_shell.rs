@@ -24,7 +24,13 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
         a.callbacks.on_demo.clone(),
     );
     let main_args = build_main_args(&a, &cb, &inputs, &modes);
-    let chrome = render_shell_chrome(&a, &inputs, &modes, &cb);
+    let tour_h = a.onboarding.show_tour.clone();
+    let step_h = a.onboarding.tour_step.clone();
+    let on_tour = Callback::from(move |_: MouseEvent| {
+        tour_h.set(true);
+        step_h.set(0);
+    });
+    let chrome = render_shell_chrome(&a, &inputs, &modes, &cb, on_tour);
     let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog);
     let splash = render_splash(&a);
     let tour = render_tour(&a);
