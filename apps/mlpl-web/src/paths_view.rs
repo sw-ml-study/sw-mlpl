@@ -43,8 +43,13 @@ fn render_picker(on_change: &Callback<Option<(Option<usize>, usize)>>) -> Html {
             let on_change = on_change.clone();
             Callback::from(move |_| on_change.emit(Some((Some(i), 0))))
         };
+        let target = if i == 0 {
+            Some("path-card-first")
+        } else {
+            None
+        };
         html! {
-            <button class="path-card" onclick={on_click}>
+            <button class="path-card" onclick={on_click} data-tour-target={target}>
                 <span class="path-card-title">{ path.title }</span>
                 <span class="path-card-blurb">{ path.blurb }</span>
                 <span class="path-card-meta">{ format!("{} steps", path.steps.len()) }</span>
@@ -91,7 +96,7 @@ fn render_walker(props: &PathsViewProps, path_idx: usize, step_idx: usize) -> Ht
                 </div>
                 <button class="ctrl-btn" onclick={on_close} title="Exit paths mode">{"\u{2715}"}</button>
             </div>
-            <div class="paths-walker-body">{ render_step(props, step) }</div>
+            <div class="paths-walker-body" data-tour-target="paths-walker-body">{ render_step(props, step) }</div>
         </div>
     }
 }
@@ -175,7 +180,7 @@ fn lesson_body(props: &PathsViewProps, title: &'static str) -> Html {
     html! {
         <>
             <p class="path-step-preview">{ LESSONS[i].intro }</p>
-            <button class="path-jump-btn" onclick={on_open}>{ label }</button>
+            <button class="path-jump-btn" onclick={on_open} data-tour-target="path-open-lesson">{ label }</button>
         </>
     }
 }
