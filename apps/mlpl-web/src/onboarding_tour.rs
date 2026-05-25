@@ -57,7 +57,7 @@ pub fn tour_tooltip(props: &TourProps) -> Html {
     let done = props.step + 1 >= STEPS.len();
     html! {
         <>
-            <div class="tour-backdrop" onclick={props.on_close.clone()} />
+            <div class="tour-backdrop" />
             <div class="tour-spotlight" style={spotlight_style(&pos)} />
             <div class="tour-tooltip" style={style}>
                 <div class="tour-header">
@@ -120,7 +120,16 @@ fn spotlight_style(r: &Rect) -> String {
 }
 
 fn tooltip_style(r: &Rect, _target: &str) -> String {
-    let top = r.top + r.height + 12.0;
+    let vh = web_sys::window()
+        .and_then(|w| w.inner_height().ok())
+        .and_then(|v| v.as_f64())
+        .unwrap_or(800.0);
+    let below = r.top + r.height + 12.0;
+    let top = if below + 180.0 > vh {
+        (r.top - 180.0 - 12.0).max(8.0)
+    } else {
+        below
+    };
     let left = r.left.max(8.0);
     format!("top:{top}px;left:{left}px")
 }
