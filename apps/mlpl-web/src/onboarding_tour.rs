@@ -94,7 +94,19 @@ pub struct TourProps {
 #[function_component(TourTooltip)]
 pub fn tour_tooltip(props: &TourProps) -> Html {
     let s = &STEPS[props.step.min(STEPS.len() - 1)];
-    fire_click(s.click_before);
+    let click_sel = s.click_before;
+    let step = props.step;
+    let settled = use_state(|| false);
+    {
+        let settled = settled.clone();
+        use_effect_with(step, move |_| {
+            settled.set(false);
+            fire_click(click_sel);
+            let s2 = settled.clone();
+            gloo::timers::callback::Timeout::new(50, move || s2.set(true)).forget();
+            || ()
+        });
+    }
     let pos = target_position(s.target);
     let style = tooltip_style(&pos);
     let counter = format!("{} / {}", props.step + 1, STEPS.len());
