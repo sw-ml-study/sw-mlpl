@@ -458,13 +458,13 @@ on learned representations. MLPL: build from `dot`,
 
 ## Completion popup (REPL)
 
-Press `Shift+Space` in the web playground's REPL input to
+Press `Ctrl+Space` in the web playground's REPL input to
 complete the token at the cursor. Saga 33 step 043 shipped
-the MVP (originally bound to `Tab`); step 045 swapped to
-`Shift+Space` because `Tab` must be reserved for browser
-element navigation (its default focus-traversal defeated
-`preventDefault`) and `Ctrl+Space` collides with bindings
-some browsers / OSes claim for their own UI.
+the MVP (originally bound to `Tab`); step 045 first swapped
+to `Shift+Space` and step 046 corrected to `Ctrl+Space` --
+the IDE standard (VS Code, IntelliJ, Emacs). `Tab` is
+reserved for browser focus traversal (step 043's
+`preventDefault` was beaten by the browser default).
 
 Behavior: unique match -> inline insertion at the cursor;
 ambiguous match -> a row of click-to-pick chips appears
@@ -2413,8 +2413,9 @@ string.
 ## Tab completion (REPL)
 
 See [[Completion popup (REPL)]]. The original step-043 MVP
-used `Tab` as the trigger; step 045 swapped to `Shift+Space`
-because `Tab` is reserved for browser element navigation.
+used `Tab` as the trigger; step 046 settled on `Ctrl+Space`
+(via a brief `Shift+Space` detour in step 045) because
+`Tab` is reserved for browser element navigation.
 
 ## Tanh
 

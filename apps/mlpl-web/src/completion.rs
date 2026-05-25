@@ -6,12 +6,11 @@
 //! `mlpl_runtime::runtime_builtin_names()` at call sites
 //! since they live in a different crate.
 //!
-//! Trigger: **Shift+Space**. Tab was the original step-043
-//! trigger but the browser's focus-traversal default beat
-//! `preventDefault`; Tab must be reserved for browser
-//! element navigation. Shift+Space avoids both the
-//! focus-traversal conflict and the IDE Ctrl+Space binding
-//! some browsers/OSes claim for their own UI.
+//! Trigger: **Ctrl+Space** (IDE standard -- VS Code,
+//! IntelliJ, Emacs). Tab was the original step-043 trigger
+//! but the browser's focus-traversal default beat
+//! `preventDefault`; Tab is now reserved for browser
+//! element navigation and Ctrl+Space takes over.
 //!
 //! Tests live in this same file: the helpers are pure and
 //! need no Yew runtime.
@@ -95,14 +94,14 @@ pub const REPL_COMMANDS: &[&str] = &[
 /// stays in sync with parser literals.
 pub const KEYWORDS: &[&str] = &["train", "repeat", "experiment", "for", "in", "param"];
 
-/// Saga 33 step 045: the completion-popup trigger predicate.
-/// `shift_key` is `KeyboardEvent::shift_key()`; `code` is
-/// `KeyboardEvent::code()` (returns the physical key name,
-/// e.g. `"Space"`, layout-independent). Returns true for
-/// Shift+Space, which fires the completion lookup. Pure +
-/// trivial; lives here so it's unit-testable.
-pub fn is_completion_trigger(shift_key: bool, code: &str) -> bool {
-    shift_key && code == "Space"
+/// Saga 33 step 045/046: the completion-popup trigger
+/// predicate. `ctrl_key` is `KeyboardEvent::ctrl_key()`;
+/// `code` is `KeyboardEvent::code()` (returns the physical
+/// key name, e.g. `"Space"`, layout-independent). Returns
+/// true for Ctrl+Space, which fires the completion lookup.
+/// Pure + trivial; lives here so it's unit-testable.
+pub fn is_completion_trigger(ctrl_key: bool, code: &str) -> bool {
+    ctrl_key && code == "Space"
 }
 
 /// One Tab-press outcome.
@@ -266,13 +265,13 @@ mod tests {
     }
 
     #[test]
-    fn trigger_predicate_only_fires_on_shift_space() {
+    fn trigger_predicate_only_fires_on_ctrl_space() {
         use super::is_completion_trigger;
-        // shift_key=true + code="Space" -> fire.
+        // ctrl_key=true + code="Space" -> fire.
         assert!(is_completion_trigger(true, "Space"));
-        // Plain Space (no shift) -> normal keypress, no fire.
+        // Plain Space (no ctrl) -> normal keypress, no fire.
         assert!(!is_completion_trigger(false, "Space"));
-        // Shift+Tab -> reserved for browser; no fire.
+        // Ctrl+Tab -> Tab is reserved for browser nav.
         assert!(!is_completion_trigger(true, "Tab"));
         // Plain Tab -> reserved for browser; no fire.
         assert!(!is_completion_trigger(false, "Tab"));
