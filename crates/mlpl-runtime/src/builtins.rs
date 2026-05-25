@@ -65,6 +65,8 @@ fn try_external_dispatchers(
         .or_else(|| mlpl_runtime_dim_reduction::pca_builtin::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_umap::umap_graph::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_umap::umap_builtin::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_mds_rp::mds::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_mds_rp::random_projection::try_call(name, args.to_vec()))
 }
 
 /// Dispatch a built-in function call by name.

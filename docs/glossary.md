@@ -1133,6 +1133,21 @@ demo is a tiny taste -- [[t-SNE]] / k-NN over a learned
 embedding table. Full circuit-level work is out of MLPL's
 v0.19 scope.
 
+## Johnson-Lindenstrauss Lemma
+
+A geometric guarantee: for any `N` points in high-D space,
+a random projection to `k = O(log N / eps^2)` dimensions
+preserves all pairwise distances within a `1 +- eps` factor
+with high probability. The construction is trivial -- a
+Gaussian random matrix scaled by `1/sqrt(k)` -- but the
+guarantee is sharp. MLPL: `random_projection(X, k, seed)`.
+The practical payoff: random projection is the right
+SANITY BASELINE for any learned dim-reduction method. If
+your fancy autoencoder / PCA / UMAP does not beat random
+projection on the downstream task, your method is not
+adding signal beyond raw geometric compression. See also
+[[Multidimensional Scaling]] and [[Dimensionality reduction]].
+
 ## Jailbreaks
 
 Prompt patterns that trick an LLM out of its safety training
@@ -1552,6 +1567,25 @@ smooths out gradient noise.
 
 Regression loss: `mean((pred - target)^2)`. Used when the
 target is continuous rather than a discrete class.
+
+## Multidimensional Scaling
+
+A classical dim-reduction method (Torgerson 1952, Kruskal
+1964): given an `[N, D]` matrix, find `[N, k]` coordinates
+that preserve all pairwise distances as faithfully as
+possible. The classical (metric) MDS solves this via
+eigendecomposition of the double-centered squared-distance
+matrix; the SGD variant minimizes the stress
+`S = sum_{i<j} (||Y_i - Y_j|| - d_ij)^2` directly. MLPL ships
+the SGD variant: `mds(X, k, iters, seed)` returns
+`[N, k]`. MDS preserves PAIRWISE DISTANCES rather than
+variance directions ([[PCA (Principal Component Analysis)]])
+or local neighborhoods ([[t-SNE]] / [[UMAP]]). When the
+question is "which points are far from which?" -- e.g.,
+psychophysics similarity judgments -- MDS is the right tool.
+Related: [[Johnson-Lindenstrauss Lemma]] (random projection
+is a degenerate case where distances are preserved
+probabilistically rather than via optimization).
 
 ## Multi-head attention
 
