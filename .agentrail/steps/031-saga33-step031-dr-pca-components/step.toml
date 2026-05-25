@@ -1,6 +1,6 @@
 number = 31
 slug = "saga33-step031-dr-pca-components"
-status = "pending"
+status = "in-progress"
 description = "Phase 1a of the dimensionality reduction milestone (full plan: docs/milestone..."
 role = "production"
 context_files = []

@@ -463,6 +463,8 @@ the trained Pets demos.
 | `pairwise_sqdist(X)` | 1 | Return the `[N, N]` squared Euclidean distance matrix for an `[N, D]` input. Symmetric, zero diagonal. |
 | `knn(X, k)` | 2 | Return an `[N, k]` integer matrix of the `k` nearest non-self neighbors per row of `X`, sorted by ascending distance. Ties broken by lower original index. |
 | `pca(X, k)` | 2 | Top-`k` principal-component projection of an `[N, D]` matrix via power iteration with deflation. Returns the centered, projected data `[N, k]` (not the components themselves). |
+| `pca_components(X, k)` | 2 | Top-`k` principal-component LOADINGS of an `[N, D]` matrix. Returns `[k, D]` -- row `i` is the i-th principal-component direction in original feature space. Pairs with `svg(_, "critical_dimensions", names)` for per-feature importance heatmaps. |
+| `pca_variance_explained(X, k)` | 2 | Returns a `[k]` vector of variance-explained ratios `lambda_i / trace(Cov)`. Sums to 1.0 when `k == D`. Useful as a legend on the loadings heatmap or as a stopping criterion for picking `k`. |
 | `tsne(X, perplexity, iters, seed)` | 4 | t-SNE 2D embedding of an `[N, D]` matrix. Returns `[N, 2]`. Deterministic for a given seed. Output has rotation / reflection ambiguity; cluster shape is what is meaningful, not absolute coordinates. |
 
 ### Experiments

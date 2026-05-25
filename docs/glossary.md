@@ -1609,8 +1609,14 @@ flat list of names a model owns.
 
 A linear projection that finds the directions of greatest
 variance in a dataset. MLPL: `pca(X, k)` returns the
-top-k projection `[N, k]`. The "PCA via Power Iteration"
-demo writes it out by hand.
+top-k projection `[N, k]`. Companion builtins:
+`pca_components(X, k)` returns the `[k, D]` LOADINGS matrix
+(row `i` = direction of the i-th principal component in
+original feature space), and `pca_variance_explained(X, k)`
+returns the per-component fraction-of-variance vector
+`[k]`. The "PCA via Power Iteration" demo writes the
+projection out by hand; the loadings + variance helpers feed
+the critical-dimensions heatmap (saga 33 step 032).
 
 ## perturb_params (builtin)
 

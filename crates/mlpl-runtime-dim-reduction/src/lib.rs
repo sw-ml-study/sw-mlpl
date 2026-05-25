@@ -13,6 +13,7 @@
 //! depends back up the dep graph, so no cycles.
 
 pub mod pca_builtin;
+mod pca_compute;
 pub mod tsne_affinities;
 pub mod tsne_builtin;
 pub mod tsne_gradient;
