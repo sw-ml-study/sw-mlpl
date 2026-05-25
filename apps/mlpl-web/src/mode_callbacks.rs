@@ -41,8 +41,8 @@ pub fn bundle(
             tutorial_view.clone(),
         ),
         paths: cb_select_paths(lesson_idx.clone(), path_state.clone()),
-        path_change: cb_path_change(path_state.clone()),
-        path_open_lesson: cb_path_open_lesson(lesson_idx, path_state.clone(), tutorial_view),
-        path_run_demo: cb_path_run_demo(path_state, on_demo),
+        path_change: cb_path_change(path_state),
+        path_open_lesson: cb_path_open_lesson(lesson_idx, tutorial_view),
+        path_run_demo: cb_path_run_demo(on_demo),
     }
 }

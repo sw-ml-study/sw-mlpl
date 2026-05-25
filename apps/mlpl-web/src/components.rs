@@ -27,7 +27,7 @@ pub fn github_corner(props: &UrlProps) -> Html {
     }
 }
 
-#[derive(Clone, Copy, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub enum HeaderMode {
     Repl,
     Tutorial,

@@ -62,6 +62,13 @@ pub struct TutorialPanelProps {
     /// straight to the selected lesson's content, since
     /// the user already chose a specific lesson upstream).
     pub initial_view: TutorialView,
+    /// Saga 33 step 042: when the user reached this lesson
+    /// via the Paths walker, this is `Some(callback)` that
+    /// closes the tutorial (clears `lesson_idx`) so the
+    /// walker re-renders at its saved position. `None` when
+    /// the user opened the tutorial directly via the header,
+    /// so the back-link is hidden.
+    pub on_back_to_path: Option<Callback<MouseEvent>>,
 }
 
 #[function_component(TutorialPanel)]
@@ -88,9 +95,15 @@ pub fn tutorial_panel(props: &TutorialPanelProps) -> Html {
         TutorialView::Lesson => render_lesson(props),
     };
     let cls = |t: TutorialView| if *view == t { "tab active" } else { "tab" };
+    let back_to_path = props.on_back_to_path.as_ref().map(|cb| {
+        html! {
+            <button class="back-to-path-btn" onclick={cb.clone()} title="Resume the path walker at your saved position">{"\u{2190} Back to path"}</button>
+        }
+    });
     html! {
         <div class="tutorial-panel">
             <div class="tutorial-header">
+                { back_to_path }
                 <div class="tabs">
                     <button class={cls(TutorialView::Toc)} onclick={on_select_toc}>{"Index"}</button>
                     <button class={cls(TutorialView::Lesson)} onclick={on_select_lesson}>{"Current Lesson"}</button>
