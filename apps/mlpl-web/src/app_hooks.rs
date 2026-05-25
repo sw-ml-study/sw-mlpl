@@ -91,11 +91,13 @@ pub fn use_escape_closes_dialogs(
     dialog_open: UseStateHandle<bool>,
     lesson_idx: UseStateHandle<Option<usize>>,
     show_tour: UseStateHandle<bool>,
+    show_splash: UseStateHandle<bool>,
 ) {
     use_effect_with((), move |_| {
         if let Some(window) = web_sys::window() {
             let closure = Closure::wrap(Box::new(move |e: web_sys::KeyboardEvent| {
                 if e.key() == "Escape" {
+                    show_splash.set(false);
                     show_tour.set(false);
                     dialog_open.set(false);
                     lesson_idx.set(None);
