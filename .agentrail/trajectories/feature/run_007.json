@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 33,
+    "step": "saga33-step033-dr-umap-graph"
+  },
+  "action": "Created crates/mlpl-runtime-umap/{Cargo.toml,src/lib.rs,src/umap_graph.rs} with try_call + builtin_knn_graph + write_nearest_k + validate (4 fns). Wired into workspace, mlpl-runtime/Cargo.toml, runtime_builtin_names() and call_builtin dispatch. Added lang-reference row + inspect_groups entry + 6 unit tests in crates/mlpl-runtime/tests/knn_graph_tests.rs. Refactored call_builtin to extract try_external_dispatchers (Option::or_else chain) and match_local_builtin to retire its 52-LOC Function-LOC FAIL.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-24T19:29:55"
+}
