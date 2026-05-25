@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 36,
+    "step": "saga33-step036-dr-tutorial-lessons"
+  },
+  "action": "Created lessons_dim_reduction.rs (6 const Lesson definitions), added pub mod declaration in lib.rs, inserted references in LESSONS array around the existing PCA lesson. Updated paths.rs Dimensionality reduction path to weave in Lesson steps. Wrote docs/agentrail-sessions-plan.md with triggers / archive destination / compaction strategy / migration procedure. Rebuilt pages/ (WASM hash mlpl-web-76042e1680462255).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T08:32:57"
+}
