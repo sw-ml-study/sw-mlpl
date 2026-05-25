@@ -41,6 +41,7 @@ pub fn use_ui_state() -> UiState {
         path_state: use_state(|| None::<(Option<usize>, usize)>),
         completion_candidates: use_state(Vec::<String>::new),
         completion_selected: use_state(|| 0_usize),
+        show_3d: use_state(|| false),
     }
 }
 
@@ -87,11 +88,12 @@ pub fn use_scroll_effect(active_history: UseStateHandle<Vec<HistoryEntry>>) {
 /// handle to its current value is a no-op, so the unconditional
 /// `.set` calls don't cause spurious renders.
 #[hook]
-pub fn use_escape_closes_dialogs(
+pub fn use_global_keydown(
     dialog_open: UseStateHandle<bool>,
     lesson_idx: UseStateHandle<Option<usize>>,
     show_tour: UseStateHandle<bool>,
     show_splash: UseStateHandle<bool>,
+    show_3d: UseStateHandle<bool>,
 ) {
     use_effect_with((), move |_| {
         if let Some(window) = web_sys::window() {
@@ -101,6 +103,10 @@ pub fn use_escape_closes_dialogs(
                     show_tour.set(false);
                     dialog_open.set(false);
                     lesson_idx.set(None);
+                }
+                if crate::viz3d_toggle::is_3d_hotkey(e.ctrl_key(), e.code().as_str()) {
+                    e.prevent_default();
+                    show_3d.set(!*show_3d);
                 }
             }) as Box<dyn FnMut(_)>);
             let _ = window

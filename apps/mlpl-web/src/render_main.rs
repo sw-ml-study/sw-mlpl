@@ -29,6 +29,7 @@ pub struct MainArgs<'a> {
     pub completion_candidates: Vec<String>,
     pub on_pick_completion: Callback<String>,
     pub completion_selected: usize,
+    pub show_3d: bool,
 }
 
 pub fn render_main(a: MainArgs) -> Html {
@@ -52,7 +53,13 @@ pub fn render_main(a: MainArgs) -> Html {
         on_pick_completion: a.on_pick_completion,
         completion_selected: a.completion_selected,
     });
-    render_main_shell(a.tutorial_active, tutorial_pane, paths_pane, repl_pane)
+    render_main_shell(
+        a.tutorial_active,
+        a.show_3d,
+        tutorial_pane,
+        paths_pane,
+        repl_pane,
+    )
 }
 
 /// PathsView render: thin wrapper so the parent doesn't need to
@@ -111,23 +118,31 @@ fn render_repl_pane(a: ReplPaneArgs) -> Html {
 /// single `<main>` container.
 fn render_main_shell(
     tutorial_active: bool,
+    show_3d: bool,
     tutorial_pane: Html,
     paths_pane: Html,
     repl_pane: Html,
 ) -> Html {
+    let stage = if show_3d {
+        html! { <section class="stage3d-pane"><canvas id="stage3d" /></section> }
+    } else {
+        html! {}
+    };
     if tutorial_active {
         html! {
             <main class="tutorial-split">
                 <section class="tutorial-pane">{ tutorial_pane }</section>
-                <section class="repl-pane">{ repl_pane }</section>
+                <section class="repl-pane">{ repl_pane }{ stage }</section>
             </main>
         }
     } else {
+        let cls = if show_3d { "viz3d-split" } else { "" };
         html! {
-            <main>
+            <main class={cls}>
                 { tutorial_pane }
                 { paths_pane }
                 { repl_pane }
+                { stage }
             </main>
         }
     }

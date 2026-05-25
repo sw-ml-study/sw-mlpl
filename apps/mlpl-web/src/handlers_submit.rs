@@ -23,6 +23,7 @@ pub struct EvalDeps {
     /// before the file picker fires, so the existing on-change
     /// pipeline knows which session variable to bind.
     pub upload_input_ref: NodeRef,
+    pub show_3d: UseStateHandle<bool>,
     pub pending_upload_name: PendingUploadName,
 }
 
@@ -59,6 +60,10 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
             if trimmed == ":clear" {
                 deps.session.borrow().clear();
                 new_history.clear();
+                continue;
+            }
+            if let Some(explicit) = crate::viz3d_toggle::parse_3d_command(trimmed) {
+                deps.show_3d.set(explicit.unwrap_or(!*deps.show_3d));
                 continue;
             }
             if let Some(name) = parse_upload_command(trimmed) {
