@@ -456,6 +456,30 @@ embedding-based retrieval (RAG) and nearest-neighbor lookup
 on learned representations. MLPL: build from `dot`,
 `sqrt`, `reduce_add` -- no dedicated builtin.
 
+## Completion popup (REPL)
+
+Press `Shift+Space` in the web playground's REPL input to
+complete the token at the cursor. Saga 33 step 043 shipped
+the MVP (originally bound to `Tab`); step 045 swapped to
+`Shift+Space` because `Tab` must be reserved for browser
+element navigation (its default focus-traversal defeated
+`preventDefault`) and `Ctrl+Space` collides with bindings
+some browsers / OSes claim for their own UI.
+
+Behavior: unique match -> inline insertion at the cursor;
+ambiguous match -> a row of click-to-pick chips appears
+below the input. Empty prefix (cursor on whitespace) does
+nothing.
+
+Candidate sources, in order: REPL slash-commands
+([[:vars (REPL command)]], [[:introspect (REPL command)]], ...),
+MLPL keywords (`train`, `repeat`, `experiment`, `for`,
+`in`, `param`), all runtime builtins (every name in
+`mlpl_runtime::runtime_builtin_names()`). Live user-bound
+variable / model names are deferred -- filed as a follow-
+up step. Arrow-key navigation of the chip list is also
+deferred (click is enough for MVP).
+
 ## Comparison ops: `gt`, `lt`, `eq` (builtins)
 
 Elementwise predicates returning `0.0` / `1.0`. `gt(a, b)`,
@@ -2388,19 +2412,9 @@ string.
 
 ## Tab completion (REPL)
 
-Press `Tab` in the web playground's REPL input to complete
-the token at the cursor. Saga 33 step 043 ships the MVP:
-unique match -> inline insertion; ambiguous match -> a row of
-click-to-pick chips appears below the input. Empty prefix
-(cursor on whitespace) does nothing.
-
-Candidate sources, in order: REPL slash-commands (`:vars`,
-`:introspect`, ...), MLPL keywords (`train`, `repeat`,
-`experiment`, `for`, `in`, `param`), all runtime builtins
-(every name in `mlpl_runtime::runtime_builtin_names()`).
-Live user-bound variable / model names are deferred --
-filed as a follow-up step. Arrow-key navigation of the
-chip list is also deferred (click is enough for MVP).
+See [[Completion popup (REPL)]]. The original step-043 MVP
+used `Tab` as the trigger; step 045 swapped to `Shift+Space`
+because `Tab` is reserved for browser element navigation.
 
 ## Tanh
 

@@ -1,9 +1,17 @@
-//! Saga 33 step 043: REPL tab-completion. Pure helpers --
-//! prefix extraction, candidate matching, completion
-//! application -- plus the static candidate list (REPL
-//! commands + language keywords). Builtin names are
-//! sourced from `mlpl_runtime::runtime_builtin_names()` at
-//! call sites since they live in a different crate.
+//! Saga 33 step 043 + 045: REPL completion popup. Pure
+//! helpers -- prefix extraction, candidate matching,
+//! completion application, the trigger-key predicate --
+//! plus the static candidate list (REPL commands + language
+//! keywords). Builtin names are sourced from
+//! `mlpl_runtime::runtime_builtin_names()` at call sites
+//! since they live in a different crate.
+//!
+//! Trigger: **Shift+Space**. Tab was the original step-043
+//! trigger but the browser's focus-traversal default beat
+//! `preventDefault`; Tab must be reserved for browser
+//! element navigation. Shift+Space avoids both the
+//! focus-traversal conflict and the IDE Ctrl+Space binding
+//! some browsers/OSes claim for their own UI.
 //!
 //! Tests live in this same file: the helpers are pure and
 //! need no Yew runtime.
@@ -86,6 +94,16 @@ pub const REPL_COMMANDS: &[&str] = &[
 /// Static MLPL language keywords. Small enough to enumerate;
 /// stays in sync with parser literals.
 pub const KEYWORDS: &[&str] = &["train", "repeat", "experiment", "for", "in", "param"];
+
+/// Saga 33 step 045: the completion-popup trigger predicate.
+/// `shift_key` is `KeyboardEvent::shift_key()`; `code` is
+/// `KeyboardEvent::code()` (returns the physical key name,
+/// e.g. `"Space"`, layout-independent). Returns true for
+/// Shift+Space, which fires the completion lookup. Pure +
+/// trivial; lives here so it's unit-testable.
+pub fn is_completion_trigger(shift_key: bool, code: &str) -> bool {
+    shift_key && code == "Space"
+}
 
 /// One Tab-press outcome.
 pub enum TabMatch {
@@ -245,5 +263,21 @@ mod tests {
             super::compute_tab_match("foo ", 4, builtins),
             super::TabMatch::None
         ));
+    }
+
+    #[test]
+    fn trigger_predicate_only_fires_on_shift_space() {
+        use super::is_completion_trigger;
+        // shift_key=true + code="Space" -> fire.
+        assert!(is_completion_trigger(true, "Space"));
+        // Plain Space (no shift) -> normal keypress, no fire.
+        assert!(!is_completion_trigger(false, "Space"));
+        // Shift+Tab -> reserved for browser; no fire.
+        assert!(!is_completion_trigger(true, "Tab"));
+        // Plain Tab -> reserved for browser; no fire.
+        assert!(!is_completion_trigger(false, "Tab"));
+        // Layout-independent: `code()` returns "Space" even
+        // on non-US keyboards; `key()` would vary.
+        assert!(!is_completion_trigger(true, "KeyJ"));
     }
 }
