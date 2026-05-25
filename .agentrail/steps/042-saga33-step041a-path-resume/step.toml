@@ -1,0 +1,9 @@
+number = 42
+slug = "saga33-step041a-path-resume"
+status = "pending"
+description = "UX bug fix: clicking a lesson or demo from the Paths walker erases the user's..."
+role = "production"
+context_files = []
+created_at = "2026-05-25T10:42:47"
+task_type = "feature"
+commits = []

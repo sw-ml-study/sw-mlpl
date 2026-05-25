@@ -1,4 +1,4 @@
-number = 42
+number = 43
 slug = "saga33-step037e-repl-tab-complete"
 status = "pending"
 description = "Add tab-completion to the web-UI REPL input (apps/mlpl-web). MVP scope: REPL ..."
