@@ -1,0 +1,9 @@
+number = 37
+slug = "saga33-step037a-scatter-legend"
+status = "pending"
+description = "Add a corner index legend to the 2-D scatter_labeled viz, mirroring the exist..."
+role = "production"
+context_files = []
+created_at = "2026-05-25T08:43:05"
+task_type = "feature"
+commits = []
