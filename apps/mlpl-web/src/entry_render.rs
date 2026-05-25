@@ -119,7 +119,15 @@ pub(crate) fn render_entry(entry: &HistoryEntry) -> Html {
             </div>
         };
     }
-    let body = if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
+    let body = if !entry.is_error
+        && entry
+            .output
+            .trim_start()
+            .starts_with(crate::plotly_panel::PLOTLY_MARKER)
+    {
+        // Saga 33 step 030: interactive Plotly 3D viz.
+        html! { <crate::plotly_panel::PlotlyPanel payload={ entry.output.clone() } /> }
+    } else if !entry.is_error && entry.output.trim_start().starts_with("<svg") {
         render_svg_body(&entry.output)
     } else if entry.is_error {
         html! { <pre class={"output-line error"}>{ &entry.output }</pre> }

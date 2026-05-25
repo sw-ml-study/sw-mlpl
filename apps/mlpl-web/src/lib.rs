@@ -22,6 +22,7 @@ pub mod components;
 pub mod demos;
 pub mod demos_attention;
 pub mod demos_basics;
+pub mod demos_dim_reduction;
 pub mod demos_lm;
 pub mod demos_models;
 pub mod demos_vit;
@@ -36,6 +37,7 @@ pub mod mode_path;
 pub mod mode_select;
 pub mod paths;
 pub mod paths_view;
+mod plotly_panel;
 #[cfg(test)]
 mod readme_counts;
 pub mod render;

@@ -59,10 +59,5 @@ svg(surface_xor, "decision_boundary", tp_xor)
 fn decision_boundary_gates_xor_failure_matches_baseline() {
     let svg = run_demo_to_svg(DEMO_SRC).expect("run_demo_to_svg");
     let raster = rasterize(&svg).expect("rasterize");
-    check_or_print_golden(
-        "decision_boundary_gates",
-        &raster,
-        SAMPLE_POINTS,
-        GOLDEN,
-    );
+    check_or_print_golden("decision_boundary_gates", &raster, SAMPLE_POINTS, GOLDEN);
 }
