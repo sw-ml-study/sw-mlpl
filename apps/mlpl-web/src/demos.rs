@@ -159,6 +159,7 @@ pub const DEMOS: &[Demo] = &[
     crate::demos_models::MOONS_MLP,
     crate::demos_models::PCA,
     crate::demos_dim_reduction::PCA_3D,
+    crate::demos_dim_reduction::PCA_LOADINGS,
     crate::demos_models::SOFTMAX_CLASSIFIER,
     // The interactive `Tiny LM` and `Tiny LM Generate` demos use a
     // smaller configuration than `demos/tiny_lm.mlpl` (V=280, d=32,

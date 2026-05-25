@@ -1,6 +1,6 @@
 number = 32
 slug = "saga33-step032-dr-critical-dims-viz"
-status = "pending"
+status = "in-progress"
 description = "Phase 1b of the dimensionality reduction milestone (full plan: docs/milestone..."
 role = "production"
 context_files = []
