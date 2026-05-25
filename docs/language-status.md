@@ -10,21 +10,13 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-22 (saga 32 closed; tech-debt
-paydown landed -8 fails and -2 warnings).
+Last refreshed: 2026-05-25 (saga 33 closed; env.rs + demos.rs
+paydown + dimensionality reduction milestone + REPL completion).
 
 ## Active saga
 
-None. Saga 32 (`tech-debt-paydown`) closed 2026-05-22. The
-next saga has not yet been selected; candidates live in
-`docs/plan.md`'s Breaking-change candidates list. Highest-
-value carry-over from saga 32 (documented in the close-out
-commit body): apply the phase-separation lens from
-`docs/loose-coupling.md` to env.rs (55 fns!), demos.rs
-(1179 lines), and model_dispatch.rs (905 lines + 100-LOC
-apply_model). All three FAIL because they conflate
-compile-time data, start-up construction, and per-call
-dispatch in a single file.
+None. Saga 33 closed 2026-05-25. Planning saga 34
+(splash screen + guided tour).
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -37,7 +29,7 @@ human-readable summary.
 | `tier1-cleanup` (30)  | shipped    | #18, #19               | Closed 2026-05-20. Six steps; both findings retired. |
 | `scripting-cluster` (31) | shipped | #22, #23, #24, #25, #26, #27, #28, #29, #30 | Closed 2026-05-22. Eight steps; turned MLPL into a real scripting language (if/else, while/break/continue, args + CLI passthrough + positional script path, to_number / to_int / env, print / eprint, read_stdin / read_stdin_lines, exit + Err-as-exit-1, `#!/usr/bin/env mlpl-repl` shebang support, `demos/classify.mlpl` worked example). |
 | `tech-debt-paydown` (32) | shipped | -- (process saga) | Closed 2026-05-22. Eight steps; **delivered -8 fails / -2 warnings vs the "halve both" target of -76 fails / -227 warnings**. Six new sibling crates extracted as clean DAG leaves (mlpl-eval-core, mlpl-runtime-core/-data/-dim-reduction, mlpl-web-eval/-lessons/-path-body) plus several in-crate splits (experiment_compare, inspect_render, image_io_pixels, model_tape_attention, fetch_io, dataset_helpers, ops_concat, gallery_layout). Step 007 documented the "compose-don't-compress" lesson; step 008 wrote `docs/loose-coupling.md` as the canonical HOW-TO. |
-| Dim reduction         | proposed   | -- (capability saga)   | `docs/milestone-dimensionality-reduction.md`. UMAP-led. |
+| `env-demos-paydown` (33) | shipped | -- (mixed saga) | Closed 2026-05-25. 48 steps. env.rs split (55->3 fns), demos.rs split (1179->150 lines), model_dispatch.rs split, DR milestone (UMAP, MDS, random projection, PCA loadings/variance, knn_graph, critical_dimensions viz, 6 lessons, 5 demos, 1 learning path), REPL completion popup (Ctrl+Space trigger, arrow-key navigation), visual regression harness, moons MLP fix, perplexity builtin. sw-checklist 143->130 fails, 450->460 warnings. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
 The "proposed" sagas have full milestone docs; the user has
@@ -91,6 +83,28 @@ agentrail.
 
 ## Shipped (most recent first)
 
+- **2026-05-25** -- saga 33 (`env-demos-paydown`) closed.
+  48 steps spanning structural paydown + the dimensionality
+  reduction capability milestone + REPL UX improvements.
+  **Dimensionality reduction milestone** (steps 030-048):
+  new builtins `pca_components(X, k)`,
+  `pca_variance_explained(X, k)`, `knn_graph(X, k)`,
+  `umap(X, n_neighbors, min_dist, iters, seed)`,
+  `mds(X, k, iters, seed)`,
+  `random_projection(X, k, seed)`; new viz type
+  `critical_dimensions`; 5 demos (PCA 3D interactive, PCA
+  loadings, UMAP vs PCA, UMAP vs t-SNE, Dim-reduction
+  zoo); 6 tutorial lessons (Why reduce dimensions, PCA
+  the linear baseline, SNE the very-slow ancestor, t-SNE
+  a peek at nonlinear methods, UMAP the modern default,
+  Reading a critical-dimensions heatmap); 1 learning path
+  ("Dimensionality reduction"). New crates:
+  `mlpl-runtime-umap`, `mlpl-runtime-mds-rp`. **REPL
+  completion** (steps 044-047): Ctrl+Space popup with
+  candidate matching, arrow-key navigation, Enter/Escape/
+  ArrowRight acceptance. **Other**: visual regression test
+  harness, moons MLP fix, `perplexity()` builtin, scatter
+  legend outside plot, path-resume bug fix.
 - **2026-05-22** -- saga 32 (`tech-debt-paydown`) closed.
   Eight steps; sw-checklist 151 -> 143 fails (-8), 452 ->
   450 warnings (-2). Far short of the "halve both" target
