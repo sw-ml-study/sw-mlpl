@@ -1,0 +1,10 @@
+number = 46
+slug = "saga33-step045a-ctrl-space-correction"
+status = "completed"
+description = "Trigger correction: swap Shift+Space back to Ctrl+Space for the REPL completi..."
+role = "production"
+context_files = []
+created_at = "2026-05-25T11:24:23"
+completed_at = "2026-05-25T11:26:16"
+task_type = "feature"
+commits = ["515192f2d03c0d2fd159ecf2f9ce118a0ad73fe0"]

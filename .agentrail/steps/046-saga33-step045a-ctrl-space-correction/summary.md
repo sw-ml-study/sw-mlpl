@@ -1,0 +1,1 @@
+Corrected the REPL completion trigger from Shift+Space (step 045) back to Ctrl+Space (the IDE standard). Symmetric reversal of step 045's swap: handler reads e.ctrl_key, predicate matches, glossary updated, pages rebuilt. 15 completion unit tests pass.

@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 46,
+    "step": "saga33-step045a-ctrl-space-correction"
+  },
+  "action": "Symmetric reversal of step 045: is_completion_trigger parameter renamed shift_key->ctrl_key, body changed accordingly. Handler guard reads e.ctrl_key(). Glossary entries restored to Ctrl+Space framing. Test renamed back to ctrl_space; assertions intact.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T11:26:16"
+}
