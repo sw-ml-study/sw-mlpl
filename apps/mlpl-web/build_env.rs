@@ -10,7 +10,10 @@ use std::process::Command;
 pub fn emit_build_env_vars() {
     let host = run_cmd("hostname", &[]);
     let sha = run_cmd("git", &["rev-parse", "--short", "HEAD"]);
-    let commit_count = run_cmd("git", &["rev-list", "--count", "HEAD"]);
+    let raw_count: usize = run_cmd("git", &["rev-list", "--count", "HEAD"])
+        .parse()
+        .unwrap_or(0);
+    let commit_count = (raw_count + 1).to_string();
     let timestamp = run_cmd("date", &["-u", "+%Y-%m-%dT%H:%M:%SZ"]);
     println!("cargo:rustc-env=BUILD_HOST={host}");
     println!("cargo:rustc-env=BUILD_SHA={sha}");
