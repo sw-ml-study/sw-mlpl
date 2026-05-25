@@ -35,6 +35,7 @@ pub fn render_main(a: MainArgs) -> Html {
         a.initial_view,
         a.on_run_example,
         a.on_run_batch,
+        a.cur_path.is_some(),
     );
     let paths_pane = render_paths_pane(a.cur_path, a.cb);
     let repl_pane = render_repl_pane(
