@@ -1121,6 +1121,14 @@
             color: var(--text);
         }
     </style>
+    <!-- Saga 33 step 030: Plotly for the interactive 3D viz
+         used by the dim-reduction demos. Loaded once at page
+         init; the `plotly3d` viz type returns an HTML fragment
+         with an embedded `Plotly.newPlot(...)` call. Integrity
+         hash deliberately omitted; if you want SRI, compute it
+         locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
+         | base64`) and add an integrity attribute. -->
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="app"></div>

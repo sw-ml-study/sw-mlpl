@@ -153,6 +153,7 @@ pub fn render_with_aux(
     match type_name {
         "scatter" => render_scatter(data),
         "scatter3d" => render_scatter3d(data),
+        "plotly3d" => crate::plotly3d::render_plotly3d(data, aux),
         "line" => render_line(data),
         "bar" => render_bar(data),
         "heatmap" => render_heatmap(data),
@@ -160,13 +161,14 @@ pub fn render_with_aux(
         "gallery" => render_gallery(data, aux),
         "attention_overlay" => render_attention_overlay(data, aux),
         "decision_boundary" => {
-            let training = aux.ok_or_else(|| {
-                VizError::InvalidShape(
-                    "decision_boundary requires a third argument (training points Nx3)".into(),
-                )
-            })?;
-            render_decision_boundary(data, training)
+            render_decision_boundary(data, aux.ok_or_else(decision_boundary_missing_aux)?)
         }
         other => Err(VizError::UnknownType(other.to_string())),
     }
+}
+
+fn decision_boundary_missing_aux() -> VizError {
+    VizError::InvalidShape(
+        "decision_boundary requires a third argument (training points Nx3)".into(),
+    )
 }
