@@ -151,6 +151,56 @@ fn umap_attractive_gradient_matches_finite_difference() {
 }
 
 #[test]
+fn umap_preserves_moons_manifold_via_knn_purity() {
+    // Saga 33 step 037c: with min_dist-fitted a/b and the
+    // wider COORD_BOUND, UMAP should preserve the two-moons
+    // MANIFOLD structure (not just cluster separation).
+    // Moons are INTERLEAVED arcs, so centroid-distance
+    // tests do not apply; the right manifold check is k-NN
+    // purity: for each embedded point, what fraction of its
+    // k nearest neighbors share its label? On well-preserved
+    // moons, every point's neighbors are mostly within its
+    // own arc and purity should be > 0.9.
+    let moons = call_builtin("moons", vec![scalar(7.0), scalar(100.0), scalar(0.05)]).unwrap();
+    let mut x_data = Vec::with_capacity(100 * 2);
+    let mut labels = Vec::with_capacity(100);
+    for i in 0..100 {
+        x_data.push(moons.data()[i * 3]);
+        x_data.push(moons.data()[i * 3 + 1]);
+        labels.push(moons.data()[i * 3 + 2] as usize);
+    }
+    let x = mat(100, 2, &x_data);
+    let y = call_builtin("umap", umap_args(x, 15.0, 0.1, 200.0, 7.0)).unwrap();
+    let d = y.data();
+    let k = 5;
+    let mut total_purity = 0.0;
+    for i in 0..100 {
+        let (px, py) = (d[i * 2], d[i * 2 + 1]);
+        // brute-force k-NN in the embedding
+        let mut dists: Vec<(f64, usize)> = (0..100)
+            .filter(|&j| j != i)
+            .map(|j| {
+                let dx = d[j * 2] - px;
+                let dy = d[j * 2 + 1] - py;
+                (dx * dx + dy * dy, j)
+            })
+            .collect();
+        dists.sort_by(|a, b| a.0.partial_cmp(&b.0).unwrap());
+        let same = dists
+            .iter()
+            .take(k)
+            .filter(|(_, j)| labels[*j] == labels[i])
+            .count();
+        total_purity += same as f64 / k as f64;
+    }
+    let mean_purity = total_purity / 100.0;
+    assert!(
+        mean_purity > 0.9,
+        "moons manifold not preserved: mean k-NN purity = {mean_purity:.3} (expected > 0.9)"
+    );
+}
+
+#[test]
 fn umap_preserves_two_cluster_separation() {
     // After UMAP, the two well-separated input clusters
     // should still be well-separated in the embedding.

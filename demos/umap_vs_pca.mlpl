@@ -7,13 +7,10 @@
 # to 2-D.
 #
 # Expectation: PCA recovers something close to the original 2-D
-# layout because the noise dims are low-variance; UMAP separates
-# the two classes from local neighborhood structure but the
-# simplified MLPL impl (a=1, b=1 Student-t curve, tight coord
-# clamp, no spectral init) does NOT preserve the crescent shape
-# yet. A follow-up saga step fits a/b from min_dist and removes
-# the clamp so the arcs return -- until then PCA wins this
-# particular comparison visually.
+# layout because the noise dims are low-variance; UMAP recovers
+# the two moons from local neighborhood structure with the a/b
+# curve params fitted from min_dist (saga 33 step 037c). Both
+# scatters show class 0 / class 1 as visually distinct regions.
 M = moons(7, 100, 0.05)                                            # 100 x 3: x, y, label
 moons2d = matmul(M, [[1, 0], [0, 1], [0, 0]])                       # drop label column
 labels = reshape(matmul(M, [[0], [0], [1]]), [100])                # extract integer labels
