@@ -64,6 +64,7 @@ pub mod render_shell_chrome;
 pub mod render_shell_footer;
 pub mod render_shell_header;
 pub mod render_shell_modebar;
+pub mod render_shell_overlays;
 pub mod render_tutorial;
 pub mod scroll;
 pub mod tutorial;

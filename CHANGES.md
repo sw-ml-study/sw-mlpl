@@ -14,6 +14,18 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-25
 
+- chore(agentrail): record saga 34 step 005 completion + advance to step 006
+- saga 34 step 005: what's-new modal (version-bump triggered)
+- docs: sw-checklist mitigations guide (prevention + fix per check type)
+- chore(agentrail): record saga 34 step 004 completion + advance to step 005
+- saga 34 step 004: Tour header button + Escape closes tour
+- chore(agentrail): record saga 34 step 003 completion + advance to step 004
+- saga 34 step 003: tour tooltip component + splash-to-tour wiring
+- docs: mlpl-web target architecture + update feature design process
+- chore(agentrail): record saga 34 step 002 completion + advance to step 003
+- saga 34 step 002: splash overlay + feature design process doc
+- chore(agentrail): record saga 34 step 001 completion + advance to step 002
+- saga 34 step 001: localStorage helper + data-tour-target IDs + decompose components.rs and handlers.rs
 - chore(agentrail): archive saga 33 + init saga 34 (splash-tour)
 - docs: add saga 34 milestone plan (splash screen + guided tour)
 - docs(changes): refresh CHANGES.md to HEAD + fix em-dashes
