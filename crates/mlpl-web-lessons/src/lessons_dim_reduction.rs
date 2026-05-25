@@ -82,7 +82,7 @@ pub const UMAP_MODERN_DEFAULT: Lesson = Lesson {
         "Y = umap(X, 10, 0.1, 200, 1)",
         "scatter_labeled(Y, tl)",
     ],
-    try_it: "Compare with the t-SNE output from the previous lesson on the SAME data. UMAP should put cluster C visibly farther from {A, B} than A is from B -- the 5x-input-distance ratio survives (at least partially). Then run the 'UMAP vs t-SNE' demo for the side-by-side comparison and the 'UMAP vs PCA' demo for the manifold-vs-linear case. The 'Dim-reduction zoo' demo lays out PCA, t-SNE, UMAP in one row.",
+    try_it: "Compare with the t-SNE output from the previous lesson on the SAME data. UMAP should put cluster C visibly farther from {A, B} than A is from B -- the 5x-input-distance ratio survives (at least partially). Then run the 'UMAP vs t-SNE' demo for the side-by-side comparison and the 'UMAP vs PCA' demo for the manifold-vs-linear case (caveat: MLPL's current UMAP uses a simplified a=1, b=1 Student-t curve and a tight coordinate clamp, so on the moons fixture it separates classes but does not yet preserve the crescent shape -- a follow-up step fixes this). The 'Dim-reduction zoo' demo lays out PCA, t-SNE, UMAP in one row.",
 };
 
 pub const READING_CRITICAL_DIMS: Lesson = Lesson {

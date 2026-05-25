@@ -38,7 +38,15 @@ fn scatter_labeled_returns_svg() {
     let labels = vector(vec![0.0, 1.0, 0.0, 1.0]);
     let svg = analysis_scatter_labeled(&pts, &labels).unwrap();
     assert!(svg.starts_with("<svg"));
-    assert_eq!(svg.matches("<circle").count(), 4);
+    // 4 data point circles + 2 legend swatches (one per unique label).
+    assert_eq!(svg.matches("<circle").count(), 6);
+    // Legend block + numeric labels rendered.
+    assert!(svg.contains("class=\"legend\""), "legend group missing");
+    assert!(svg.contains(">legend<"), "legend header missing");
+    assert!(
+        svg.contains(">0<") && svg.contains(">1<"),
+        "label numbers missing"
+    );
 }
 
 #[test]
