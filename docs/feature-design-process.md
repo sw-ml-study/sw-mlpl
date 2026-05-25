@@ -45,20 +45,21 @@ For each new concern, answer:
 
 ### 3. Design for the budgets (not against them)
 
-The budgets are:
+Warnings and FAILs are both problems to fix -- different
+severity, same obligation. Never trade a FAIL retirement
+for warning growth. Fix warnings; FAILs shrink naturally.
 
-| Metric | Warning | FAIL | Design target |
-|--------|---------|------|---------------|
-| Function LOC | >25 | >50 | <=20 |
-| Module fn count | >4 | >7 | <=4 |
-| File LOC | >350 | >500 | <=250 |
-| Crate module count | >4 | >7 | <=4 |
-| Struct fields | n/a | n/a | 5 +/- 2 |
+| Metric | Design target | Warning (=problem) | FAIL (=worse problem) |
+|--------|--------------|--------------------|-----------------------|
+| Function LOC | <=20 | >25 | >50 |
+| Module fn count | <=4 | >4 | >7 |
+| File LOC | <=250 | >350 | >500 |
+| Crate module count | <=4 | >4 | >7 |
+| Struct fields | 5 +/- 2 | n/a | n/a |
 
-**Design target is STRICTER than the warning line.** If you
-design to the warning line, any growth pushes you over. If
-you design to the target, you have room for the inevitable
-small additions.
+**Every commit must reduce the total problem count
+(warnings + FAILs).** If a feature adds warnings, the
+design is wrong -- redesign before committing.
 
 Practical implications:
 
