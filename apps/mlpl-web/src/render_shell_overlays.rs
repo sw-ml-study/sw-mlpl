@@ -43,7 +43,7 @@ fn render_tour(a: &RenderArgs) -> Html {
     let sh = a.onboarding.tour_step.clone();
     let th = a.onboarding.show_tour.clone();
     let on_next = Callback::from(move |_: MouseEvent| {
-        if *sh + 1 >= 12 {
+        if *sh + 1 >= crate::onboarding_tour::STEP_COUNT {
             th.set(false);
         } else {
             sh.set(*sh + 1);
