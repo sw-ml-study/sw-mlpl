@@ -226,6 +226,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "[k] per-component variance-explained ratios",
             ),
             ("tsne", "tsne(X, perp, iters, seed)", "t-SNE 2D embedding"),
+            (
+                "umap",
+                "umap(X, n_neighbors, min_dist, iters, seed)",
+                "UMAP 2D embedding -- preserves both local and global structure",
+            ),
         ],
     ),
     (

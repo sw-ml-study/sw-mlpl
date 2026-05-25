@@ -467,6 +467,7 @@ the trained Pets demos.
 | `pca_components(X, k)` | 2 | Top-`k` principal-component LOADINGS of an `[N, D]` matrix. Returns `[k, D]` -- row `i` is the i-th principal-component direction in original feature space. Pairs with `svg(_, "critical_dimensions", names)` for per-feature importance heatmaps. |
 | `pca_variance_explained(X, k)` | 2 | Returns a `[k]` vector of variance-explained ratios `lambda_i / trace(Cov)`. Sums to 1.0 when `k == D`. Useful as a legend on the loadings heatmap or as a stopping criterion for picking `k`. |
 | `tsne(X, perplexity, iters, seed)` | 4 | t-SNE 2D embedding of an `[N, D]` matrix. Returns `[N, 2]`. Deterministic for a given seed. Output has rotation / reflection ambiguity; cluster shape is what is meaningful, not absolute coordinates. |
+| `umap(X, n_neighbors, min_dist, iters, seed)` | 5 | UMAP 2D embedding of an `[N, D]` matrix. Returns `[N, 2]`. Builds a k-NN graph (k = `n_neighbors`), computes the fuzzy simplicial set (per-row sigma calibration + symmetric fuzzy union), then optimizes the layout via SGD on a cross-entropy + repulsion objective with negative sampling. `min_dist` is a soft floor on attractive distances; smaller values pack clusters tighter. Deterministic given the same `seed`. Preserves both local neighborhoods (like t-SNE) AND global inter-cluster distances (unlike t-SNE) -- the recommended default for visualizing high-D embeddings. |
 
 ### Experiments
 

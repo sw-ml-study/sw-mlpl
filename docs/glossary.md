@@ -2437,7 +2437,35 @@ preserves Logit / Probability / etc. tags.
 A non-linear projection that emphasizes local neighborhoods
 when reducing high-dimensional points to 2-D. MLPL:
 `tsne(X, perplexity, iters, seed)`. See "Embedding
-exploration" lesson.
+exploration" lesson. Compare with [[UMAP]], which preserves
+global inter-cluster distance in addition to local structure
+and is the recommended modern default.
+
+## UMAP
+
+Uniform Manifold Approximation and Projection (McInnes and
+Healy, 2018). A non-linear dimensionality reduction method that
+projects high-D points down to 2-D (or 3-D) while preserving
+*both* local neighborhood structure (like [[t-SNE]]) AND global
+inter-cluster distances (unlike [[t-SNE]], which tends to
+inflate well-separated clusters). The intuition is
+Riemannian-geometric: assume the data lies on a smooth manifold
+of unknown curvature, locally approximate that manifold by
+fuzzy simplicial sets (per-point neighborhood graphs whose edge
+weights are fuzzy-set memberships), then find a low-D
+embedding whose fuzzy graph is as close as possible to the
+high-D one in cross-entropy. The optimization is stochastic
+gradient descent with negative sampling -- repulsive force is
+estimated per step from a random subset of non-neighbor pairs
+rather than the O(N^2) all-pairs sum t-SNE pays. MLPL:
+`umap(X, n_neighbors, min_dist, iters, seed)` returns `[N, 2]`.
+`n_neighbors` controls how much local vs global structure is
+weighted (typical: 10-30); `min_dist` is a soft floor on
+attractive distances (typical: 0.1-0.5). UMAP is the
+recommended default for visualizing learned embeddings; it
+underpins the comparison demos in the dimensionality-reduction
+milestone (see `demos/umap_vs_pca.mlpl` and
+`demos/umap_vs_tsne.mlpl`).
 
 ## U-Net
 
