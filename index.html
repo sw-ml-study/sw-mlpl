@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-3db15a52be1d3752.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-3db15a52be1d3752_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-8906a3f3adad67fe.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-8906a3f3adad67fe_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -562,15 +562,15 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             content: '';
             position: absolute;
             inset: 0;
-            background: rgba(30, 30, 46, 0.55);
+            background: rgba(20, 24, 48, 0.45);
             border-radius: 12px;
         }
         .splash-panel > * { position: relative; z-index: 1; }
         .splash-header-shim {
-            background: rgba(30, 30, 46, 0.65);
+            background: rgba(20, 28, 58, 0.7);
             border-radius: 8px;
-            padding: 16px 20px 12px;
-            margin-bottom: 16px;
+            padding: 20px 24px 16px;
+            margin-bottom: 20px;
         }
         .splash-close {
             position: absolute;
@@ -578,33 +578,35 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             right: 16px;
             background: none;
             border: none;
-            color: var(--subtext0);
-            font-size: 22px;
+            color: #cdd6f4;
+            font-size: 24px;
             cursor: pointer;
         }
-        .splash-close:hover { color: var(--text); }
+        .splash-close:hover { color: #fff; }
         .splash-panel h2 {
-            font-size: 32px;
+            font-size: 38px;
             margin: 0 0 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 14px;
+            color: #fff;
         }
         .splash-panel h2 img {
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
         }
         .splash-version {
-            color: var(--subtext1, #a6adc8);
+            color: #bac2de;
             font-family: var(--mono);
-            font-size: 12px;
+            font-size: 14px;
             margin: 0 0 10px;
         }
         .splash-subtitle {
-            color: var(--subtext0);
-            font-size: 16px;
-            margin-bottom: 28px;
+            color: #cdd6f4;
+            font-size: 18px;
+            margin-bottom: 0;
+            line-height: 1.5;
         }
         .splash-cards {
             display: grid;
@@ -613,25 +615,24 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             margin-bottom: 28px;
         }
         .splash-card {
-            background: rgba(49, 50, 68, 0.6);
-            border: 1px solid rgba(69, 71, 90, 0.6);
+            background: rgba(20, 28, 58, 0.65);
+            border: 1px solid rgba(80, 90, 140, 0.5);
             border-radius: 8px;
-            padding: 16px 14px;
+            padding: 18px 16px;
             cursor: pointer;
-            color: var(--text);
-            font-size: 14px;
+            color: #e0e4f0;
+            font-size: 16px;
             text-align: left;
-            backdrop-filter: blur(4px);
         }
         .splash-card:hover {
             border-color: var(--peach);
-            background: rgba(69, 71, 90, 0.6);
+            background: rgba(30, 40, 80, 0.7);
         }
         .splash-card strong {
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
             color: var(--peach);
-            font-size: 15px;
+            font-size: 17px;
         }
         .splash-actions {
             display: flex;
@@ -639,11 +640,11 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             justify-content: center;
         }
         .splash-btn {
-            padding: 10px 24px;
+            padding: 12px 28px;
             border-radius: 6px;
-            font-size: 14px;
+            font-size: 16px;
             cursor: pointer;
-            border: 1px solid rgba(69, 71, 90, 0.6);
+            border: 1px solid rgba(80, 90, 140, 0.5);
         }
         .splash-btn-primary {
             background: var(--peach);
@@ -652,9 +653,8 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             font-weight: 600;
         }
         .splash-btn-secondary {
-            background: rgba(49, 50, 68, 0.6);
-            color: var(--text);
-            backdrop-filter: blur(4px);
+            background: rgba(20, 28, 58, 0.65);
+            color: #e0e4f0;
         }
         .splash-btn:hover { opacity: 0.9; }
         .whats-new-list {
@@ -1404,7 +1404,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-3db15a52be1d3752.js" crossorigin="anonymous" integrity="sha384-i8DoagmqODkS/xCydKgqn7KRXtMCKC6qbJ1C/Bg+gXYzIpJPLhAdzzPI+FmhVYDr"><link rel="preload" href="/sw-mlpl/mlpl-web-3db15a52be1d3752_bg.wasm" crossorigin="anonymous" integrity="sha384-9fwh5YxNXSEX3fvJE0haciUVUmuOxLxLIY1g4wOu3EvEOYvABwMGL4umtjcVVcy3" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-8906a3f3adad67fe.js" crossorigin="anonymous" integrity="sha384-i8DoagmqODkS/xCydKgqn7KRXtMCKC6qbJ1C/Bg+gXYzIpJPLhAdzzPI+FmhVYDr"><link rel="preload" href="/sw-mlpl/mlpl-web-8906a3f3adad67fe_bg.wasm" crossorigin="anonymous" integrity="sha384-+BivtSeng93sQdB2HOlnuvfgGFrhvuxnJXleBNzrQy8eDe5IHuaZfXQ/I+wwodGc" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
