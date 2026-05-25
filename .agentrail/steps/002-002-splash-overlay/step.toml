@@ -1,0 +1,12 @@
+number = 2
+slug = "002-splash-overlay"
+status = "pending"
+description = """
+Step 002: Splash/onboarding overlay.
+
+New SplashOverlay component in onboardi..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T12:00:02"
+task_type = "feature"
+commits = []

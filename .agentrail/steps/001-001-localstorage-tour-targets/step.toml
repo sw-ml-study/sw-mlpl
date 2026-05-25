@@ -1,0 +1,12 @@
+number = 1
+slug = "001-localstorage-tour-targets"
+status = "pending"
+description = """
+Step 001: localStorage helper + data-tour-target IDs.
+
+New module onboarding_..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T11:59:52"
+task_type = "feature"
+commits = []

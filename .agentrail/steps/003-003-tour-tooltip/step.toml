@@ -1,0 +1,12 @@
+number = 3
+slug = "003-tour-tooltip"
+status = "pending"
+description = """
+Step 003: Tour tooltip component.
+
+New TourTooltip component in onboarding_to..."""
+role = "production"
+context_files = []
+created_at = "2026-05-25T12:00:11"
+task_type = "feature"
+commits = []
