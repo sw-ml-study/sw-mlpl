@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 37,
+    "step": "saga33-step037a-scatter-legend"
+  },
+  "action": "Inlined legend rendering into analysis_scatter_labeled to keep analysis.rs at 7 fns (extracting a helper would push it to 8 = FAIL). Updated svg_analysis_tests to expect 4 data + 2 legend circles and check for legend class/text. Added caveat prose to UMAP_VS_PCA Demo entry, UMAP_MODERN_DEFAULT lesson try_it, and demos/umap_vs_pca.mlpl. Rebuilt pages.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T08:54:42"
+}
