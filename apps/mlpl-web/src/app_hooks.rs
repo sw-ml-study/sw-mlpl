@@ -50,6 +50,8 @@ pub fn use_onboarding_state() -> OnboardingState {
     let dismissed = crate::onboarding_storage::read_splash_dismissed();
     OnboardingState {
         show_splash: use_state(move || !dismissed),
+        show_tour: use_state(|| false),
+        tour_step: use_state(|| 0_usize),
     }
 }
 

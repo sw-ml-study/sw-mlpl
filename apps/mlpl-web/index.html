@@ -605,6 +605,72 @@
             .splash-panel { padding: 20px 16px; }
         }
 
+        /* Saga 34 step 003: guided tour */
+        .tour-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 290;
+            background: rgba(17, 17, 27, 0.5);
+        }
+        .tour-spotlight {
+            position: fixed;
+            z-index: 295;
+            border-radius: 6px;
+            box-shadow: 0 0 0 9999px rgba(17, 17, 27, 0.6);
+            pointer-events: none;
+        }
+        .tour-tooltip {
+            position: fixed;
+            z-index: 300;
+            background: var(--surface0, #313244);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 8px;
+            padding: 14px 16px;
+            max-width: 340px;
+            color: var(--text);
+            font-size: 14px;
+        }
+        .tour-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .tour-header strong { color: var(--peach); }
+        .tour-close {
+            background: none;
+            border: none;
+            color: var(--subtext0);
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .tour-body { margin: 0 0 12px; line-height: 1.5; }
+        .tour-nav {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tour-counter {
+            color: var(--subtext0);
+            font-size: 12px;
+            margin-right: auto;
+        }
+        .tour-btn {
+            padding: 4px 14px;
+            border-radius: 4px;
+            border: 1px solid var(--surface2, #45475a);
+            background: transparent;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .tour-btn:disabled { opacity: 0.4; cursor: default; }
+        .tour-btn-primary {
+            background: var(--peach);
+            color: var(--crust);
+            border-color: var(--peach);
+        }
+
         .back-to-path-btn {
             background: transparent;
             color: var(--peach);

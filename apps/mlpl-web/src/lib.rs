@@ -48,6 +48,7 @@ pub mod mode_path;
 pub mod mode_select;
 pub mod onboarding_splash;
 pub mod onboarding_storage;
+pub mod onboarding_tour;
 pub mod paths;
 pub mod paths_view;
 mod plotly_panel;

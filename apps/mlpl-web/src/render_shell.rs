@@ -7,6 +7,7 @@ use yew::prelude::*;
 
 use crate::mode_callbacks;
 use crate::onboarding_splash::{SplashOverlay, make_splash_action};
+use crate::onboarding_tour::TourTooltip;
 use crate::render::RenderArgs;
 use crate::render_callbacks::InputCallbacks;
 use crate::render_main::{MainArgs, render_main};
@@ -26,7 +27,8 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
     let chrome = render_shell_chrome(&a, &inputs, &modes, &cb);
     let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog);
     let splash = render_splash(&a);
-    html! { <> { chrome } { render_main(main_args) } { footer } { splash } </> }
+    let tour = render_tour(&a);
+    html! { <> { chrome } { render_main(main_args) } { footer } { splash } { tour } </> }
 }
 
 fn render_splash(a: &RenderArgs) -> Html {
@@ -35,12 +37,38 @@ fn render_splash(a: &RenderArgs) -> Html {
     }
     let on_action = make_splash_action(
         a.onboarding.show_splash.clone(),
+        a.onboarding.show_tour.clone(),
         a.callbacks.on_demo.clone(),
         a.ui.input_value.clone(),
         a.ui.lesson_idx.clone(),
         a.ui.path_state.clone(),
     );
     html! { <SplashOverlay {on_action} /> }
+}
+
+fn render_tour(a: &RenderArgs) -> Html {
+    if !*a.onboarding.show_tour {
+        return html! {};
+    }
+    let step = *a.onboarding.tour_step;
+    let sh = a.onboarding.tour_step.clone();
+    let th = a.onboarding.show_tour.clone();
+    let on_next = Callback::from(move |_: MouseEvent| {
+        if *sh + 1 >= 6 {
+            th.set(false);
+        } else {
+            sh.set(*sh + 1);
+        }
+    });
+    let sh2 = a.onboarding.tour_step.clone();
+    let on_prev = Callback::from(move |_: MouseEvent| {
+        if *sh2 > 0 {
+            sh2.set(*sh2 - 1);
+        }
+    });
+    let ch = a.onboarding.show_tour.clone();
+    let on_close = Callback::from(move |_: MouseEvent| ch.set(false));
+    html! { <TourTooltip {step} {on_next} {on_prev} {on_close} /> }
 }
 
 fn build_main_args<'a>(
