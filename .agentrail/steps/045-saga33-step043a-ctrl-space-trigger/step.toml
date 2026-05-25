@@ -1,0 +1,9 @@
+number = 45
+slug = "saga33-step043a-ctrl-space-trigger"
+status = "pending"
+description = "Bug fix + UX change: the Tab trigger from step 043 does not work in practice ..."
+role = "production"
+context_files = []
+created_at = "2026-05-25T11:16:54"
+task_type = "feature"
+commits = []
