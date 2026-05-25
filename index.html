@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-a08761ec0e247399.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-a08761ec0e247399_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-2644eae50f61a53e.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-2644eae50f61a53e_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -267,6 +267,26 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
            the live transcript both have meaningful vertical
            space. Each pane scrolls independently. Stacks
            vertically on narrow viewports. */
+        /* Saga 35: 3D visualization split */
+        main.viz3d-split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-rows: 1fr;
+            gap: 0;
+            overflow: hidden;
+            padding: 0;
+        }
+        .stage3d-pane {
+            background: #0a0a14;
+            border-left: 1px solid var(--surface1);
+            min-height: 300px;
+        }
+        .stage3d-pane canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
         main.tutorial-split {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -1404,7 +1424,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-a08761ec0e247399.js" crossorigin="anonymous" integrity="sha384-mOrjGXtodD8sWi+JVb7FUD4szY2IACjd1YLw5Rol36RLNnTNopcZrR7u+c12mnaM"><link rel="preload" href="/sw-mlpl/mlpl-web-a08761ec0e247399_bg.wasm" crossorigin="anonymous" integrity="sha384-8csQiKW4nNGhkDjih3uYuu8D/wxukOYBfG6KKSP+tE/MbpD2GRu2w76DZzUhqEJN" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-2644eae50f61a53e.js" crossorigin="anonymous" integrity="sha384-LCWdaaexnZkWTjK2/jtoMtMhU4AKnDy+AibMOHK9ETD3Xxqa0izK+khnrUITrPXm"><link rel="preload" href="/sw-mlpl/mlpl-web-2644eae50f61a53e_bg.wasm" crossorigin="anonymous" integrity="sha384-a5g1poOyHFHOm4oSOSLbraQADFTwxiaEM8krXGTq/7vkdFYICHJ6UHNHak6c505L" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
