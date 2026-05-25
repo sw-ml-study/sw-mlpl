@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-c7e6e65707186b84.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-c7e6e65707186b84_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-6e629c7b0d736678.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-6e629c7b0d736678_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -570,6 +570,12 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         .splash-panel h2 img {
             width: 36px;
             height: 36px;
+        }
+        .splash-version {
+            color: var(--subtext1, #a6adc8);
+            font-family: var(--mono);
+            font-size: 12px;
+            margin: 0 0 8px;
         }
         .splash-subtitle {
             color: var(--subtext0);
@@ -1374,7 +1380,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-c7e6e65707186b84.js" crossorigin="anonymous" integrity="sha384-CRWWtyfWXjVn/K2tZjWbhZ1DWhIsOGZcFlp9zt2bSjw1HZzVC4BZSyw/7/TdAMmh"><link rel="preload" href="/sw-mlpl/mlpl-web-c7e6e65707186b84_bg.wasm" crossorigin="anonymous" integrity="sha384-GdXF+aO7emtthss57nW3XeqDYGI1oPXMdivZYGCKW6J46OgsBMgFP4jsYUYVPPEp" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-6e629c7b0d736678.js" crossorigin="anonymous" integrity="sha384-CRWWtyfWXjVn/K2tZjWbhZ1DWhIsOGZcFlp9zt2bSjw1HZzVC4BZSyw/7/TdAMmh"><link rel="preload" href="/sw-mlpl/mlpl-web-6e629c7b0d736678_bg.wasm" crossorigin="anonymous" integrity="sha384-ZNAaAgnOUmbxy1F85Mxk6xPvl9VZYGPVeUbNpyKqaq1qgoWBDWcBCFFCxZOCLpti" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
