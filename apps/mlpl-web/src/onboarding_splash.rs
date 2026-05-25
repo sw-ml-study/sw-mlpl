@@ -36,7 +36,7 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
                 </div>
                 <div class="splash-cards">
                     { card(&emit, SplashAction::RunDemo(7), "Run the Basics demo", "See arithmetic, arrays, and broadcasting in action.") }
-                    { card(&emit, SplashAction::TypeExpr("1 + 2"), "Try 1 + 2 in the REPL", "Type an expression and press Enter.") }
+                    { card(&emit, SplashAction::TypeExpr("1 + 2"), "Try 1 + 2 in the REPL", "Type an expression and press Enter, or :help for the function list.") }
                     { card(&emit, SplashAction::OpenTutorial, "Open a tutorial lesson", "Guided lessons from scalars to attention.") }
                     { card(&emit, SplashAction::OpenPaths, "Explore learning paths", "Structured sequences of lessons and demos.") }
                 </div>
