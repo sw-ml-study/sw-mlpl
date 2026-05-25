@@ -1,0 +1,1 @@
+What's-new modal: WhatsNewOverlay component (1 fn) triggered by version mismatch in localStorage. 4 feature items. Splash takes priority on first visits. Dismiss writes current version. Inlined in render_shell to avoid fn-count growth.
