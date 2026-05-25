@@ -1,0 +1,10 @@
+number = 43
+slug = "saga33-step042a-path-docs-mds-sync"
+status = "completed"
+description = "Quick docs-sync: the Dimensionality reduction learning path in apps/mlpl-web/..."
+role = "production"
+context_files = []
+created_at = "2026-05-25T10:53:51"
+completed_at = "2026-05-25T10:55:31"
+task_type = "feature"
+commits = ["1efb807aa9c3e45c39172a58d01352ff13314e9b"]
