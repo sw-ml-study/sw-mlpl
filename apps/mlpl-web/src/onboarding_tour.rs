@@ -5,38 +5,81 @@ struct TourStep {
     target: &'static str,
     title: &'static str,
     body: &'static str,
+    click_before: &'static str,
 }
 
 const STEPS: &[TourStep] = &[
     TourStep {
         target: "repl-input",
         title: "REPL Input",
-        body: "Type expressions here. Press Enter to evaluate. Try 1 + 2 or iota(5).",
+        body: "Type expressions here and press Enter to evaluate. Try 1 + 2 or iota(5).",
+        click_before: "",
     },
     TourStep {
         target: "demo-select",
         title: "Demos",
-        body: "Load a pre-built demo. Each runs a complete example with narration.",
-    },
-    TourStep {
-        target: "tab-tutorial",
-        title: "Tutorial",
-        body: "Follow guided lessons, from arithmetic to transformers.",
-    },
-    TourStep {
-        target: "tab-paths",
-        title: "Learning Paths",
-        body: "Structured sequences of lessons, demos, and glossary entries.",
+        body: "Pick a pre-built demo from this dropdown. Each runs a complete example with intro and takeaway narration.",
+        click_before: "",
     },
     TourStep {
         target: "help-btn",
         title: "Documentation",
-        body: "Full language reference, usage guide, glossary, and architecture diagrams.",
+        body: "Click ? to open the docs panel. Let's look inside.",
+        click_before: "",
+    },
+    TourStep {
+        target: "doc-tab-reference",
+        title: "Language Reference",
+        body: "Full syntax, every builtin function, and operator reference in one scrollable page.",
+        click_before: "[data-tour-target='help-btn']",
+    },
+    TourStep {
+        target: "doc-tab-glossary",
+        title: "Glossary",
+        body: "Searchable glossary of ML and array-programming terms. Click any [[linked term]] in lessons or demos to jump here.",
+        click_before: "[data-tour-target='doc-tab-glossary']",
+    },
+    TourStep {
+        target: "doc-tab-diagrams",
+        title: "Diagrams",
+        body: "Architecture and concept diagrams. Visual companions to the lessons.",
+        click_before: "[data-tour-target='doc-tab-diagrams']",
+    },
+    TourStep {
+        target: "tab-tutorial",
+        title: "Tutorial",
+        body: "Guided lessons from arithmetic to transformers. Let's open it.",
+        click_before: ".close-btn",
+    },
+    TourStep {
+        target: "tutorial-panel",
+        title: "Lesson Index",
+        body: "Pick any lesson to start. Each has explanations and runnable code examples in the REPL pane on the right.",
+        click_before: "[data-tour-target='tab-tutorial']",
+    },
+    TourStep {
+        target: "tab-paths",
+        title: "Learning Paths",
+        body: "Structured sequences of lessons, demos, glossary entries, and diagrams. Let's open Paths.",
+        click_before: "",
+    },
+    TourStep {
+        target: "paths-panel",
+        title: "Path Walker",
+        body: "Pick a path, then follow step by step. Lessons and demos open inline; the path remembers your position.",
+        click_before: "[data-tour-target='tab-paths']",
+    },
+    TourStep {
+        target: "tab-paths",
+        title: "Returning to a Path",
+        body: "After a detour into a lesson or demo, click the Paths tab or the Back to path button to resume where you left off.",
+        click_before: "",
     },
     TourStep {
         target: "repl-input",
         title: "Autocomplete",
         body: "Press Ctrl+Space for autocomplete suggestions. Arrow keys to navigate, Enter to accept.",
+        click_before: "[data-tour-target='tab-paths']",
     },
 ];
 
@@ -51,8 +94,9 @@ pub struct TourProps {
 #[function_component(TourTooltip)]
 pub fn tour_tooltip(props: &TourProps) -> Html {
     let s = &STEPS[props.step.min(STEPS.len() - 1)];
+    fire_click(s.click_before);
     let pos = target_position(s.target);
-    let style = tooltip_style(&pos, s.target);
+    let style = tooltip_style(&pos);
     let counter = format!("{} / {}", props.step + 1, STEPS.len());
     let done = props.step + 1 >= STEPS.len();
     html! {
@@ -62,7 +106,7 @@ pub fn tour_tooltip(props: &TourProps) -> Html {
             <div class="tour-tooltip" style={style}>
                 <div class="tour-header">
                     <strong>{ s.title }</strong>
-                    <button class="tour-close" onclick={props.on_close.clone()} aria-label="Close tour">{"x"}</button>
+                    <button class="tour-close" onclick={props.on_close.clone()} aria-label="Close tour">{"\u{00d7}"}</button>
                 </div>
                 <p class="tour-body">{ s.body }</p>
                 <div class="tour-nav">
@@ -77,6 +121,15 @@ pub fn tour_tooltip(props: &TourProps) -> Html {
     }
 }
 
+fn fire_click(selector: &str) {
+    if selector.is_empty() {
+        return;
+    }
+    if let Some(el) = query(selector) {
+        el.unchecked_into::<web_sys::HtmlElement>().click();
+    }
+}
+
 struct Rect {
     top: f64,
     left: f64,
@@ -85,14 +138,9 @@ struct Rect {
 }
 
 fn target_position(target: &str) -> Rect {
-    let sel = format!("[data-tour-target='{target}']");
-    web_sys::window()
-        .and_then(|w| w.document())
-        .and_then(|d| d.query_selector(&sel).ok()?)
+    query(&format!("[data-tour-target='{target}']"))
         .map(|el| {
-            let r = el
-                .unchecked_into::<web_sys::Element>()
-                .get_bounding_client_rect();
+            let r = el.get_bounding_client_rect();
             Rect {
                 top: r.top(),
                 left: r.left(),
@@ -108,21 +156,24 @@ fn target_position(target: &str) -> Rect {
         })
 }
 
+fn query(sel: &str) -> Option<web_sys::Element> {
+    web_sys::window()?.document()?.query_selector(sel).ok()?
+}
+
 fn spotlight_style(r: &Rect) -> String {
-    let pad = 6.0;
+    let p = 6.0;
     format!(
         "top:{}px;left:{}px;width:{}px;height:{}px",
-        r.top - pad,
-        r.left - pad,
-        r.width + pad * 2.0,
-        r.height + pad * 2.0,
+        r.top - p,
+        r.left - p,
+        r.width + p * 2.0,
+        r.height + p * 2.0
     )
 }
 
-fn tooltip_style(r: &Rect, _target: &str) -> String {
+fn tooltip_style(r: &Rect) -> String {
     let (vw, vh) = viewport_size();
-    let tw = 340.0;
-    let th = 180.0;
+    let (tw, th) = (340.0, 180.0);
     let below = r.top + r.height + 12.0;
     let top = if below + th > vh {
         (r.top - th - 12.0).max(8.0)
