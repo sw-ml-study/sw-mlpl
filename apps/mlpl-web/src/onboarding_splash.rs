@@ -52,7 +52,6 @@ pub fn make_splash_action(
     path: UseStateHandle<Option<(Option<usize>, usize)>>,
 ) -> Callback<SplashAction> {
     Callback::from(move |action: SplashAction| {
-        crate::onboarding_storage::write_splash_dismissed();
         splash.set(false);
         match action {
             SplashAction::Dismiss => {}
