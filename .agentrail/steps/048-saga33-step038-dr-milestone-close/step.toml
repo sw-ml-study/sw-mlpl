@@ -1,6 +1,6 @@
 number = 48
 slug = "saga33-step038-dr-milestone-close"
-status = "pending"
+status = "in-progress"
 description = "Closeout step for the dimensionality reduction milestone (full plan: docs/mil..."
 role = "production"
 context_files = []

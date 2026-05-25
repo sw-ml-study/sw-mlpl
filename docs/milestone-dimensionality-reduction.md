@@ -1,7 +1,6 @@
 # Dimensionality Reduction Milestone
 
-Proposed (saga number TBD; deliberately not numbered until the user
-approves the plan).
+**Status: DONE** (saga 33 steps 030-047, closed 2026-05-25).
 
 ## Why this exists
 
@@ -90,7 +89,7 @@ output for PCA / UMAP / MDS, captured as a static fixture --
 
 ## Phases
 
-### Phase 1: critical-dimensions heatmap (visual primitive)
+### Phase 1: critical-dimensions heatmap (visual primitive) -- DONE (steps 031-032)
 
 This is the headline visual and the highest-leverage step.
 PCA today returns the *projected* data but throws away the
@@ -125,7 +124,7 @@ samples and measure the increase in the embedding's stress /
 reconstruction error. The dimensions whose shuffling most
 disturbs the embedding are the "critical" ones.
 
-### Phase 2: UMAP (the headline implementation)
+### Phase 2: UMAP (the headline implementation) -- DONE (steps 033-034)
 
 UMAP (Uniform Manifold Approximation and Projection, McInnes and
 Healy 2018) is the practical winner the demos point at. The
@@ -149,7 +148,7 @@ Steps (each is its own agentrail step):
 4. **`umap(X, n_neighbors, min_dist, iters, seed)` builtin** that
    wraps the above into one call. Returns `[N, 2]`.
 
-### Phase 3: comparison demos (UMAP as the winner)
+### Phase 3: comparison demos (UMAP as the winner) -- DONE (step 035)
 
 These are the demos the milestone is built around. Each is a
 side-by-side that ends with "UMAP got the structure the other
@@ -178,7 +177,7 @@ The demos prefer UMAP for the obvious-winner cases; the lessons
 in Phase 4 cover the cases where PCA or t-SNE is the right
 choice.
 
-### Phase 4: tutorial lessons (SNE family described, UMAP demoed)
+### Phase 4: tutorial lessons (SNE family described, UMAP demoed) -- DONE (step 036)
 
 Lessons added to the tutorial track in dependency order:
 
@@ -223,7 +222,7 @@ Lessons added to the tutorial track in dependency order:
    and permutation sensitivity for UMAP; teaches the user to
    read each.
 
-### Phase 5: additional methods (one builtin per step)
+### Phase 5: additional methods (one builtin per step) -- DONE (step 041)
 
 These are the "complete the survey" methods. None of them get a
 demo of their own -- they show up in `demos/dim_reduction_zoo.mlpl`
@@ -254,7 +253,7 @@ Optional steps (added only if a user demand surfaces):
   spatial trees. Useful if MLPL ever wants to demo t-SNE on
   larger N; deferred until a real demand surfaces.
 
-### Phase 6: learning path
+### Phase 6: learning path -- DONE (steps 036, 042-043)
 
 New path **"High-dimensional data, one chart at a time"** in
 `apps/mlpl-web/src/paths.rs`. Walks PCA -> SNE family ->
