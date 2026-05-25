@@ -484,6 +484,44 @@
             margin-left: 4px;
         }
 
+        /* Saga 33 step 043: tab-completion popup chips. */
+        .completion-popup {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 0 20px 8px;
+            font-family: var(--mono);
+        }
+        .completion-chip {
+            background: var(--surface1, #313244);
+            color: var(--text);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .completion-chip:hover {
+            background: var(--surface2, #45475a);
+            border-color: var(--peach);
+        }
+        .back-to-path-btn {
+            background: transparent;
+            color: var(--peach);
+            border: 1px solid var(--surface2, #45475a);
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: var(--mono);
+            font-size: 12px;
+            cursor: pointer;
+            margin-right: 8px;
+        }
+        .back-to-path-btn:hover {
+            background: var(--surface1, #313244);
+            border-color: var(--peach);
+        }
+
         /* Modal */
         .modal-backdrop {
             position: fixed;

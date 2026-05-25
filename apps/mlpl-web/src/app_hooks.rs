@@ -39,6 +39,7 @@ pub fn use_ui_state() -> UiState {
         lesson_idx: use_state(|| None::<usize>),
         tutorial_initial_view: use_state(|| TutorialView::Toc),
         path_state: use_state(|| None::<(Option<usize>, usize)>),
+        completion_candidates: use_state(Vec::<String>::new),
     }
 }
 

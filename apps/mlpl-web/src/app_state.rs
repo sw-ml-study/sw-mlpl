@@ -35,6 +35,9 @@ pub struct UiState {
     pub lesson_idx: UseStateHandle<Option<usize>>,
     pub tutorial_initial_view: UseStateHandle<TutorialView>,
     pub path_state: UseStateHandle<Option<(Option<usize>, usize)>>,
+    /// Saga 33 step 043: candidates for the Tab-completion
+    /// popup below the REPL input. Empty Vec = popup hidden.
+    pub completion_candidates: UseStateHandle<Vec<String>>,
 }
 
 /// Upload-flow state: the hidden `<input type=file>` NodeRef and
