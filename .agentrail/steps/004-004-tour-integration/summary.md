@@ -1,0 +1,1 @@
+Tour header button (peach text, right margin for octocat clearance). Escape closes tour via updated use_escape_closes_dialogs. on_tour callback threaded through render_shell -> chrome -> header. Zero new warnings.
