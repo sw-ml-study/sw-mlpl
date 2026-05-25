@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-25
 
+- chore(agentrail): archive saga 33 + init saga 34 (splash-tour)
+- docs: add saga 34 milestone plan (splash screen + guided tour)
+- docs(changes): refresh CHANGES.md to HEAD + fix em-dashes
 - chore(agentrail): record saga 33 step 048 completion -- saga 33 DONE
 - saga 33 step 048: dimensionality reduction milestone closeout
 - chore(agentrail): record saga 33 step 047 completion + kickoff step 048 (milestone close)
