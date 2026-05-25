@@ -1,9 +1,10 @@
 number = 40
 slug = "saga33-step037d-introspect-helper"
-status = "pending"
+status = "completed"
 description = "Add an :introspect REPL slash-command that bundles the existing inspector com..."
 role = "production"
 context_files = []
 created_at = "2026-05-25T09:29:32"
+completed_at = "2026-05-25T10:20:38"
 task_type = "feature"
-commits = []
+commits = ["a592be88d310ce266d359f84e6e485fc61bf2eda"]

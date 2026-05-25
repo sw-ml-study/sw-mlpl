@@ -1,0 +1,1 @@
+Added :introspect REPL slash-command bundling every no-arg inspector (:version, :wsid, :builtins, :vars, :models, :experiments, :tags) into one markdown-headered dump. Wired into the Workspace Introspection demo's final line, added unit test asserting section content + header order, and a glossary entry cross-linking each bundled command.
