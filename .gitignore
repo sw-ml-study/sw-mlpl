@@ -18,3 +18,4 @@ books/*/book/
 # (used to build the committed pets_tiny.bin fixture, not
 # checked in themselves -- the tarball is ~792 MB).
 /data/
+/dist-pages/
