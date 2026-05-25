@@ -97,11 +97,11 @@ pub fn tutorial_panel(props: &TutorialPanelProps) -> Html {
     let cls = |t: TutorialView| if *view == t { "tab active" } else { "tab" };
     let back_to_path = props.on_back_to_path.as_ref().map(|cb| {
         html! {
-            <button class="back-to-path-btn" onclick={cb.clone()} title="Resume the path walker at your saved position">{"\u{2190} Back to path"}</button>
+            <button class="back-to-path-btn" onclick={cb.clone()} title="Resume the path walker at your saved position" data-tour-target="back-to-path">{"\u{2190} Back to path"}</button>
         }
     });
     html! {
-        <div class="tutorial-panel">
+        <div class="tutorial-panel" data-tour-target="tutorial-panel">
             <div class="tutorial-header">
                 { back_to_path }
                 <div class="tabs">

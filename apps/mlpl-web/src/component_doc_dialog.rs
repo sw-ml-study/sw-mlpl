@@ -43,10 +43,10 @@ pub fn doc_dialog(props: &DocDialogProps) -> Html {
             <div class="modal" onclick={stop}>
                 <div class="modal-header">
                     <div class="tabs">
-                        <button class={cls(DocTab::LangReference)} onclick={setter(DocTab::LangReference)}>{"Language Reference"}</button>
-                        <button class={cls(DocTab::Usage)} onclick={setter(DocTab::Usage)}>{"Usage Guide"}</button>
-                        <button class={cls(DocTab::Glossary)} onclick={setter(DocTab::Glossary)}>{"Glossary"}</button>
-                        <button class={cls(DocTab::Diagrams)} onclick={setter(DocTab::Diagrams)}>{"Diagrams"}</button>
+                        <button class={cls(DocTab::LangReference)} onclick={setter(DocTab::LangReference)} data-tour-target="doc-tab-reference">{"Language Reference"}</button>
+                        <button class={cls(DocTab::Usage)} onclick={setter(DocTab::Usage)} data-tour-target="doc-tab-usage">{"Usage Guide"}</button>
+                        <button class={cls(DocTab::Glossary)} onclick={setter(DocTab::Glossary)} data-tour-target="doc-tab-glossary">{"Glossary"}</button>
+                        <button class={cls(DocTab::Diagrams)} onclick={setter(DocTab::Diagrams)} data-tour-target="doc-tab-diagrams">{"Diagrams"}</button>
                     </div>
                     <button class="close-btn" onclick={props.on_close.clone()} aria-label="Close">{"×"}</button>
                 </div>
