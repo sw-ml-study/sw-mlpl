@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "004-tour-integration"
+  },
+  "action": "Added on_tour prop to HeaderProps, Tour button in header, Escape handler expanded, callback threading through 4 files. No new modules or functions.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T13:23:30"
+}

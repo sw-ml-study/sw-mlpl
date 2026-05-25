@@ -1,6 +1,6 @@
 number = 4
 slug = "004-tour-integration"
-status = "in-progress"
+status = "completed"
 description = """
 Step 004: Tour integration + header button.
 
@@ -8,5 +8,6 @@ Wire tour into app lifecycle: sh..."""
 role = "production"
 context_files = []
 created_at = "2026-05-25T12:00:17"
+completed_at = "2026-05-25T13:23:30"
 task_type = "feature"
-commits = []
+commits = ["2aa3b676d89372e3d650a62ecf933471fec98a3e"]
