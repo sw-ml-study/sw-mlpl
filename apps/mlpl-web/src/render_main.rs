@@ -10,6 +10,7 @@ use crate::entry_render::render_entry;
 use crate::mode_callbacks::ModeCallbacks;
 use crate::paths_view;
 use crate::render_tutorial::render_tutorial;
+use crate::viz3d_panel::Stage3dPanel;
 use mlpl_web_eval::state::HistoryEntry;
 
 pub struct MainArgs<'a> {
@@ -124,7 +125,7 @@ fn render_main_shell(
     repl_pane: Html,
 ) -> Html {
     let stage = if show_3d {
-        html! { <section class="stage3d-pane"><canvas id="stage3d" /></section> }
+        html! { <section class="stage3d-pane"><Stage3dPanel /></section> }
     } else {
         html! {}
     };
