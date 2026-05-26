@@ -6,6 +6,7 @@
 use yew::prelude::*;
 
 use crate::components::{InputRow, Welcome};
+use crate::editor_panel::EditorPanel;
 use crate::entry_render::render_entry;
 use crate::mode_callbacks::ModeCallbacks;
 use crate::paths_view;
@@ -31,9 +32,22 @@ pub struct MainArgs<'a> {
     pub on_pick_completion: Callback<String>,
     pub completion_selected: usize,
     pub show_3d: bool,
+    pub editor_active: bool,
+    pub editor_content: UseStateHandle<String>,
 }
 
 pub fn render_main(a: MainArgs) -> Html {
+    let editor_pane = if a.editor_active {
+        let content = (*a.editor_content).clone();
+        let on_change = {
+            let h = a.editor_content.clone();
+            Callback::from(move |s: String| h.set(s))
+        };
+        let noop = Callback::from(|_: MouseEvent| {});
+        html! { <EditorPanel {content} {on_change} on_run={noop.clone()} on_load={noop.clone()} on_save={noop.clone()} on_clear={noop} /> }
+    } else {
+        html! {}
+    };
     let tutorial_pane = render_tutorial(
         a.cur_lesson,
         a.lesson_idx,
@@ -57,6 +71,8 @@ pub fn render_main(a: MainArgs) -> Html {
     render_main_shell(
         a.tutorial_active,
         a.show_3d,
+        a.editor_active,
+        editor_pane,
         tutorial_pane,
         paths_pane,
         repl_pane,
@@ -120,6 +136,8 @@ fn render_repl_pane(a: ReplPaneArgs) -> Html {
 fn render_main_shell(
     tutorial_active: bool,
     show_3d: bool,
+    editor_active: bool,
+    editor_pane: Html,
     tutorial_pane: Html,
     paths_pane: Html,
     repl_pane: Html,
@@ -140,6 +158,7 @@ fn render_main_shell(
         let cls = if show_3d { "viz3d-split" } else { "" };
         html! {
             <main class={cls}>
+                { editor_pane }
                 { tutorial_pane }
                 { paths_pane }
                 { repl_pane }

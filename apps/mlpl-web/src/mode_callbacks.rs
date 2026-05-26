@@ -18,6 +18,7 @@ pub struct ModeCallbacks {
     pub repl: Callback<MouseEvent>,
     pub tutorial: Callback<MouseEvent>,
     pub paths: Callback<MouseEvent>,
+    pub editor: Callback<MouseEvent>,
     pub path_change: Callback<Option<(Option<usize>, usize)>>,
     pub path_open_lesson: Callback<usize>,
     pub path_run_demo: Callback<String>,
@@ -32,15 +33,31 @@ pub fn bundle(
     path_state: UseStateHandle<Option<(Option<usize>, usize)>>,
     tutorial_view: UseStateHandle<TutorialView>,
     on_demo: Callback<usize>,
+    editor_open: UseStateHandle<bool>,
 ) -> ModeCallbacks {
+    let ed = editor_open.clone();
+    let ed_lesson = lesson_idx.clone();
+    let ed_path = path_state.clone();
     ModeCallbacks {
-        repl: cb_select_repl(lesson_idx.clone(), path_state.clone()),
+        repl: {
+            let ed = editor_open.clone();
+            let r = cb_select_repl(lesson_idx.clone(), path_state.clone());
+            Callback::from(move |e: MouseEvent| {
+                ed.set(false);
+                r.emit(e);
+            })
+        },
         tutorial: cb_select_tutorial(
             lesson_idx.clone(),
             path_state.clone(),
             tutorial_view.clone(),
         ),
         paths: cb_select_paths(lesson_idx.clone(), path_state.clone()),
+        editor: Callback::from(move |_: MouseEvent| {
+            ed_lesson.set(None);
+            ed_path.set(None);
+            ed.set(true);
+        }),
         path_change: cb_path_change(path_state),
         path_open_lesson: cb_path_open_lesson(lesson_idx, tutorial_view),
         path_run_demo: cb_path_run_demo(on_demo),

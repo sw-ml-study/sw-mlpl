@@ -21,6 +21,7 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
         a.ui.path_state.clone(),
         a.ui.tutorial_initial_view.clone(),
         a.callbacks.on_demo.clone(),
+        a.ui.editor_open.clone(),
     );
     let main_args = build_main_args(&a, &cb, &inputs, &modes);
     let th = a.onboarding.show_tour.clone();
@@ -69,6 +70,8 @@ fn build_main_args<'a>(
         ),
         completion_selected: *a.ui.completion_selected,
         show_3d: *a.ui.show_3d,
+        editor_active: modes.editor_active,
+        editor_content: a.ui.editor_content.clone(),
     }
 }
 
