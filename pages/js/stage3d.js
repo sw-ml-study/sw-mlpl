@@ -303,7 +303,21 @@ function shapeMesh(shape, color) {
 
 window.__stage3d_add_step = function(ev) {
     if (!ev) return;
-    if (!scene) { pendingEvents.push(ev); return; }
+    if (!scene) {
+        pendingEvents.push(ev);
+        if (pendingEvents.length === 1) {
+            const poll = () => {
+                if (scene && pendingEvents.length > 0) {
+                    const queued = pendingEvents.splice(0);
+                    for (const e of queued) window.__stage3d_add_step(e);
+                } else if (pendingEvents.length > 0) {
+                    requestAnimationFrame(poll);
+                }
+            };
+            requestAnimationFrame(poll);
+        }
+        return;
+    }
     const x = stepCount * SPACING;
     stepCount++;
     const color = opColor(ev.label);
