@@ -1,4 +1,5 @@
 use serde::Serialize;
+use wasm_bindgen::JsCast;
 
 #[derive(Serialize)]
 pub struct ShapeInfo {
@@ -16,11 +17,18 @@ pub struct Stage3dEvent {
 }
 
 pub fn emit(event: &Stage3dEvent) {
-    let Ok(json) = serde_json::to_string(event) else {
+    let Ok(js_val) = serde_wasm_bindgen::to_value(event) else {
         return;
     };
-    let escaped = json.replace('\\', "\\\\").replace('\'', "\\'");
-    let _ = js_sys::eval(&format!("window.__stage3d_add_step('{escaped}')"));
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let Ok(func) = js_sys::Reflect::get(&window, &"__stage3d_add_step".into()) else {
+        return;
+    };
+    if let Some(f) = func.dyn_ref::<js_sys::Function>() {
+        let _ = f.call1(&window, &js_val);
+    }
 }
 
 /// Parse shape from MLPL's space-separated display format.
