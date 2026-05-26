@@ -1,0 +1,1 @@
+Demos emit 3D events: schedule_demo_line emits Stage3dEvent with parsed shape after each eval. Demo start clears the 3D scene. All demos auto-populate the stage when :3d is active. No show_3d threading needed -- JS no-ops when scene is null.
