@@ -147,4 +147,7 @@ fn render_main_shell(
             </main>
         }
     }
+    // Note: in viz3d-split mode, CSS flex-direction:column
+    // stacks output, input-wrap, and stage3d-pane vertically.
+    // The .output gets max-height:40vh; stage3d-pane fills the rest.
 }
