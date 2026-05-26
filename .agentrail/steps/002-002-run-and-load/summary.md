@@ -1,0 +1,1 @@
+Run parses editor lines (skips empty/comments), submits via on_run_batch. Load opens file picker for .mlpl/.txt, reads into textarea via FileReader. Clear resets content. Save still no-op.
