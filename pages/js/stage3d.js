@@ -26,6 +26,28 @@ function createGround() {
     scene.add(groundPlane);
 }
 
+function createLegend() {
+    const marks = [1, 10, 100, 1000, 10000];
+    const labels = ['1', '10', '100', '1K', '10K'];
+    const mat = new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.5 });
+    const z = 4;
+    for (let i = 0; i < marks.length; i++) {
+        const s = logDim(marks[i]);
+        const cube = new THREE.Mesh(new THREE.BoxGeometry(s, 0.15, 0.15), mat);
+        const x = -8 + i * 3;
+        cube.position.set(x, 0.08, z);
+        scene.add(cube);
+        const lbl = makeLabel(labels[i]);
+        lbl.scale.set(1.2, 0.3, 1);
+        lbl.position.set(x, 0.5, z);
+        scene.add(lbl);
+    }
+    const title = makeLabel('elements');
+    title.scale.set(1.5, 0.3, 1);
+    title.position.set(-8 + 2 * 3, 0.9, z);
+    scene.add(title);
+}
+
 function createMountains() {
     const farMat = new THREE.MeshStandardMaterial({ color: 0x8B6B4A, flatShading: true });
     const nearMat = new THREE.MeshStandardMaterial({ color: 0x5A8A4A, flatShading: true });
@@ -135,6 +157,7 @@ window.__stage3d_init = function(canvas) {
         scene.background = new THREE.Color(0xd8e4f0);
         scene.fog = new THREE.FogExp2(0xd8e4f0, 0.008);
         createGround();
+        createLegend();
         createMountains();
         createLights();
     }
