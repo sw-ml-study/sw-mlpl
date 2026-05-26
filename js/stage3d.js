@@ -304,7 +304,7 @@ function shapeMesh(shape, color) {
 
 window.__stage3d_add_step = function(ev) {
     if (!ev) return;
-    console.log('[stage3d] add_step, scene:', !!scene, 'label:', ev.label);
+    console.log('[stage3d] add_step, scene:', !!scene, 'pending:', pendingEvents.length, 'label:', ev?.label);
     if (!scene) {
         pendingEvents.push(ev);
         if (pendingEvents.length === 1) {
