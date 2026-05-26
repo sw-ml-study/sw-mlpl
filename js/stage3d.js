@@ -147,12 +147,8 @@ function onCanvasClick(e) {
     if (hits.length === 0) return;
     const hit = hits[0].object;
     const ud = hit.userData;
-    if (!ud) return;
-    if (ud.stepIdx !== undefined) panToStep(ud.stepIdx);
-    const name = ud.varName;
-    if (name) {
-        window.dispatchEvent(new CustomEvent('stage3d-inspect', { detail: { name } }));
-    }
+    if (!ud || !ud.varName) return;
+    window.dispatchEvent(new CustomEvent('stage3d-inspect', { detail: { name: ud.varName } }));
 }
 
 function onCanvasKey(e) {
