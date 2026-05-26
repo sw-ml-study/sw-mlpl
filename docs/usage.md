@@ -48,7 +48,21 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | Command | Description |
 |---------|-------------|
 | `:help` | Show built-in function list and syntax summary |
-| `:clear` | Reset all variables to start fresh |
+| `:help <topic>` | Focused help: vars, models, fns, builtins, describe |
+| `:clear` | Reset all variables, models, and session state |
+| `:vars` | List bound variables with shape and tag |
+| `:models` | List bound models with layer structure |
+| `:builtins` | List built-in functions by category |
+| `:describe <name>` | Describe a variable, model, tokenizer, or built-in |
+| `:introspect` | Run all no-arg inspectors at once |
+| `:tags` | List every binding's ValueTag |
+| `:untag <name>` | Clear a binding's auto-attached tag |
+| `:wsid` | Workspace summary |
+| `:experiments` | List captured experiment runs |
+| `:upload <name>` | Open file picker; bind photo as a variable (web only) |
+| `:3d` | Open 3D visualization stage (also Ctrl+3) |
+| `:2d` | Close 3D visualization stage |
+| `:3d on` / `:3d off` | Explicit 3D on/off (case-insensitive) |
 | `:trace on` | Enable execution tracing |
 | `:trace off` | Disable execution tracing |
 | `:trace` | Show summary of last trace |
