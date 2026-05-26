@@ -9,13 +9,13 @@ const activeAnims = [];
 let prevMesh = null;
 
 function createGround() {
-    const grid = new THREE.GridHelper(40, 40, 0x444466, 0x222233);
+    const grid = new THREE.GridHelper(200, 200, 0xcccccc, 0xdddddd);
     grid.position.y = 0;
     scene.add(grid);
 
     const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(40, 40),
-        new THREE.MeshStandardMaterial({ color: 0x181825, roughness: 0.9 })
+        new THREE.PlaneGeometry(200, 200),
+        new THREE.MeshStandardMaterial({ color: 0xeeeee8, roughness: 0.95 })
     );
     plane.rotation.x = -Math.PI / 2;
     plane.position.y = -0.01;
@@ -23,12 +23,36 @@ function createGround() {
     scene.add(plane);
 }
 
+function createMountains() {
+    const farMat = new THREE.MeshStandardMaterial({ color: 0x8B6B4A, flatShading: true });
+    const nearMat = new THREE.MeshStandardMaterial({ color: 0x5A8A4A, flatShading: true });
+    for (let i = -10; i < 10; i++) {
+        const x = i * 20 + Math.random() * 8;
+        const h = 8 + Math.random() * 12;
+        const w = 6 + Math.random() * 8;
+        const far = new THREE.Mesh(new THREE.ConeGeometry(w, h, 5 + Math.floor(Math.random() * 3)), farMat);
+        far.position.set(x, h / 2, -60 - Math.random() * 20);
+        scene.add(far);
+    }
+    for (let i = -10; i < 10; i++) {
+        const x = i * 15 + Math.random() * 6;
+        const h = 3 + Math.random() * 5;
+        const w = 4 + Math.random() * 5;
+        const near = new THREE.Mesh(new THREE.ConeGeometry(w, h, 4 + Math.floor(Math.random() * 3)), nearMat);
+        near.position.set(x, h / 2, -25 - Math.random() * 15);
+        scene.add(near);
+    }
+}
+
 function createLights() {
-    scene.add(new THREE.AmbientLight(0x8888aa, 0.6));
-    const dir = new THREE.DirectionalLight(0xffffff, 0.8);
-    dir.position.set(5, 10, 7);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+    const dir = new THREE.DirectionalLight(0xfff8e8, 0.9);
+    dir.position.set(10, 15, 10);
     dir.castShadow = true;
     scene.add(dir);
+    const fill = new THREE.DirectionalLight(0x8888cc, 0.3);
+    fill.position.set(-5, 5, 10);
+    scene.add(fill);
 }
 
 function animate() {
@@ -104,7 +128,7 @@ window.__stage3d_init = function(canvas) {
         return;
     }
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0a0a14);
+    scene.background = new THREE.Color(0xd8e4f0);
 
     camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 200);
     camera.position.set(0, 6, 12);
@@ -121,9 +145,10 @@ window.__stage3d_init = function(canvas) {
     controls.update();
 
     createGround();
+    createMountains();
     createLights();
 
-    scene.fog = new THREE.FogExp2(0x0a0a14, 0.02);
+    scene.fog = new THREE.FogExp2(0xd8e4f0, 0.008);
 
     canvas.tabIndex = 0;
     canvas.addEventListener('keydown', onCanvasKey);
@@ -163,18 +188,18 @@ function showTooltip(mesh, text) {
     if (activeTooltip) { scene.remove(activeTooltip); activeTooltip = null; }
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 512; canvas.height = 64;
-    ctx.fillStyle = 'rgba(30, 40, 80, 0.9)';
-    ctx.roundRect(0, 0, 512, 64, 8); ctx.fill();
-    ctx.fillStyle = '#fab387'; ctx.font = 'bold 16px monospace';
-    ctx.fillText(text.substring(0, 56), 12, 28);
-    const shape = mesh.userData?.label || '';
-    ctx.fillStyle = '#cdd6f4'; ctx.font = '13px monospace';
-    ctx.fillText(shape.substring(0, 60), 12, 50);
+    canvas.width = 512; canvas.height = 72;
+    ctx.fillStyle = 'rgba(20, 30, 60, 0.7)';
+    ctx.roundRect(4, 4, 504, 64, 16); ctx.fill();
+    ctx.fillStyle = '#ffcc44'; ctx.font = 'bold 17px monospace';
+    ctx.fillText(text.substring(0, 50), 16, 30);
+    const detail = mesh.userData?.label || '';
+    ctx.fillStyle = '#e8eaf0'; ctx.font = '14px monospace';
+    ctx.fillText(detail.substring(0, 55), 16, 52);
     const tex = new THREE.CanvasTexture(canvas);
-    const mat = new THREE.SpriteMaterial({ map: tex });
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(4, 0.5, 1);
+    sprite.scale.set(4.5, 0.6, 1);
     const pos = mesh.position || mesh.parent?.position;
     if (pos) sprite.position.set(pos.x, pos.y + 1.8, pos.z);
     else sprite.position.set(0, 2, 0);
@@ -205,8 +230,9 @@ window.__stage3d_teardown = function() {
 
 const SPACING = 2.5;
 const OP_COLORS = {
-    matmul: 0x6688cc, train: 0xcc6666, softmax: 0x66cc88,
-    cross_entropy: 0xcc6666, reshape: 0x88aacc, default: 0x8888aa
+    matmul: 0x44aaff, train: 0xff5577, softmax: 0x44ffaa,
+    cross_entropy: 0xff6688, reshape: 0xaa88ff, reduce: 0xffaa44,
+    iota: 0x00ddcc, randn: 0xff88dd, svg: 0xffcc44, default: 0x66bbff
 };
 
 function opColor(label) {
@@ -219,20 +245,21 @@ function opColor(label) {
 function makeLabel(text) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 256; canvas.height = 64;
-    ctx.fillStyle = '#1e1e2e'; ctx.fillRect(0, 0, 256, 64);
-    ctx.fillStyle = '#cdd6f4'; ctx.font = '14px monospace';
-    ctx.fillText(text.substring(0, 36), 8, 24);
+    canvas.width = 320; canvas.height = 48;
+    ctx.fillStyle = 'rgba(20, 30, 60, 0.65)';
+    ctx.roundRect(2, 2, 316, 44, 12); ctx.fill();
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 15px monospace';
+    ctx.fillText(text.substring(0, 40), 12, 30);
     const tex = new THREE.CanvasTexture(canvas);
-    const mat = new THREE.SpriteMaterial({ map: tex });
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(2.5, 0.6, 1);
+    sprite.scale.set(3, 0.45, 1);
     return sprite;
 }
 
 function shapeMesh(shape, color) {
     const rank = shape.length;
-    const mat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.85 });
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.1 });
     if (rank === 0) {
         return new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mat);
     }
