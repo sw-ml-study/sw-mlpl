@@ -43,8 +43,26 @@ pub fn render_main(a: MainArgs) -> Html {
             let h = a.editor_content.clone();
             Callback::from(move |s: String| h.set(s))
         };
+        let on_run = {
+            let batch = a.on_run_batch.clone();
+            let ec = a.editor_content.clone();
+            Callback::from(move |_: MouseEvent| {
+                let lines: Vec<String> = (*ec)
+                    .lines()
+                    .map(|l| l.trim().to_string())
+                    .filter(|l| !l.is_empty() && !l.starts_with('#'))
+                    .collect();
+                if !lines.is_empty() {
+                    batch.emit(lines);
+                }
+            })
+        };
+        let on_clear = {
+            let h = a.editor_content.clone();
+            Callback::from(move |_: MouseEvent| h.set(String::new()))
+        };
         let noop = Callback::from(|_: MouseEvent| {});
-        html! { <EditorPanel {content} {on_change} on_run={noop.clone()} on_load={noop.clone()} on_save={noop.clone()} on_clear={noop} /> }
+        html! { <EditorPanel {content} {on_change} {on_run} on_save={noop} {on_clear} /> }
     } else {
         html! {}
     };
