@@ -364,6 +364,15 @@ function panToStep(idx) {
     controls.update();
 }
 
+window.__stage3d_reset_view = function() {
+    if (!camera) return;
+    clearSelection();
+    viewStep = 0;
+    camera.position.set(0, 6, 12);
+    controls.target.set(0, 0.5, 0);
+    controls.update();
+};
+
 window.__stage3d_prev = function() { clearSelection(); panToStep(viewStep - 1); };
 window.__stage3d_next = function() { clearSelection(); panToStep(viewStep + 1); };
 window.__stage3d_home = function() { clearSelection(); panToStep(0); };

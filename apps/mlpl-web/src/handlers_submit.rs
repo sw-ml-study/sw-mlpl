@@ -65,8 +65,16 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
                 }
                 continue;
             }
-            if let Some(new_val) = crate::viz3d_toggle::parse_3d_command(trimmed) {
-                deps.show_3d.set(new_val);
+            if let Some(cmd) = crate::viz3d_toggle::parse_3d_command(trimmed) {
+                match cmd {
+                    crate::viz3d_toggle::Viz3dCmd::On => deps.show_3d.set(true),
+                    crate::viz3d_toggle::Viz3dCmd::Off => deps.show_3d.set(false),
+                    crate::viz3d_toggle::Viz3dCmd::Reset => {
+                        let _ = js_sys::eval(
+                            "window.__stage3d_reset_view && window.__stage3d_reset_view()",
+                        );
+                    }
+                }
                 continue;
             }
             if let Some(name) = parse_upload_command(trimmed) {
