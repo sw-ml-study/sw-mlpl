@@ -33,6 +33,7 @@ pub struct MainArgs<'a> {
     pub completion_selected: usize,
     pub show_3d: bool,
     pub editor_active: bool,
+    pub editor_open: UseStateHandle<bool>,
     pub editor_content: UseStateHandle<String>,
 }
 
@@ -46,6 +47,7 @@ pub fn render_main(a: MainArgs) -> Html {
         let on_run = {
             let batch = a.on_run_batch.clone();
             let ec = a.editor_content.clone();
+            let eo = a.editor_open.clone();
             Callback::from(move |_: MouseEvent| {
                 let lines: Vec<String> = (*ec)
                     .lines()
@@ -53,6 +55,7 @@ pub fn render_main(a: MainArgs) -> Html {
                     .filter(|l| !l.is_empty() && !l.starts_with('#'))
                     .collect();
                 if !lines.is_empty() {
+                    eo.set(false);
                     batch.emit(lines);
                 }
             })
