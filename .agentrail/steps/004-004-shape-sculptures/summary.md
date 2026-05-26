@@ -1,0 +1,1 @@
+Shape-aware 3D sculptures: scalar=sphere, vector=bar, matrix=rectangle, tensor=stacked slabs. shape_from_output() parses real shape from eval output. Labels show name:[shape] Rn. D3.js v7 loaded via CDN importmap.
