@@ -273,6 +273,10 @@ function makeLabel(text) {
     return sprite;
 }
 
+function logDim(n) {
+    return Math.max(0.3, Math.min(6, Math.log2(Math.max(n, 1)) * 0.5 + 0.3));
+}
+
 function shapeMesh(shape, color) {
     const rank = shape.length;
     const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.1 });
@@ -280,18 +284,18 @@ function shapeMesh(shape, color) {
         return new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mat);
     }
     if (rank === 1) {
-        const w = Math.min(shape[0] * 0.15, 3);
+        const w = logDim(shape[0]);
         return new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, 0.25), mat);
     }
     if (rank === 2) {
-        const w = Math.min(shape[1] * 0.15, 3);
-        const h = Math.min(shape[0] * 0.15, 2);
+        const w = logDim(shape[1]);
+        const h = logDim(shape[0]);
         return new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.12), mat);
     }
-    const w = Math.min((shape[2] || 1) * 0.12, 2.5);
-    const h = Math.min((shape[1] || 1) * 0.12, 1.5);
+    const w = logDim(shape[2] || 1);
+    const h = logDim(shape[1] || 1);
     const group = new THREE.Group();
-    const layers = Math.min(shape[0] || 1, 8);
+    const layers = Math.min(Math.ceil(logDim(shape[0] || 1) * 2), 8);
     for (let i = 0; i < layers; i++) {
         const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), mat.clone());
         slab.position.z = i * 0.15 - (layers * 0.15) / 2;
