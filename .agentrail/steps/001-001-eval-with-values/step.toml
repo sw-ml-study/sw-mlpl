@@ -1,0 +1,12 @@
+number = 1
+slug = "001-eval-with-values"
+status = "pending"
+description = """
+Step 001: Add eval_with_values to WasmSession.
+
+Add a new method to WasmSessi..."""
+role = "production"
+context_files = []
+created_at = "2026-05-26T16:27:35"
+task_type = "feature"
+commits = []

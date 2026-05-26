@@ -1,0 +1,12 @@
+number = 3
+slug = "003-value-coloring"
+status = "pending"
+description = """
+Step 003: Value-colored sculptures.
+
+Update stage3d.js to use element values ..."""
+role = "production"
+context_files = []
+created_at = "2026-05-26T16:27:35"
+task_type = "feature"
+commits = []
