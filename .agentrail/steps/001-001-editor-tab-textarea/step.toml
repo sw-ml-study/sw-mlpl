@@ -1,6 +1,6 @@
 number = 1
 slug = "001-editor-tab-textarea"
-status = "in-progress"
+status = "completed"
 description = """
 Step 001: Editor tab + textarea.
 
@@ -8,5 +8,6 @@ New HeaderMode::Editor. Add Editor tab to t..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T12:11:05"
+completed_at = "2026-05-26T12:17:04"
 task_type = "feature"
-commits = []
+commits = ["c4bfdf3c4998cc630a73b80e77c91f7f5680edd4"]
