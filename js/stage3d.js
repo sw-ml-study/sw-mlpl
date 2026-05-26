@@ -179,35 +179,26 @@ function onCanvasClick(e) {
     const hit = hits[0].object;
     const ud = hit.userData;
     if (!ud) return;
-    const text = ud.varName ? `${ud.varName} = ${ud.label}` : ud.label || '';
-    if (!text) return;
-    showTooltip(hit, text);
+    showDetail(ud);
 }
 
-let activeTooltip = null;
-
-function showTooltip(mesh, text) {
-    if (activeTooltip) { scene.remove(activeTooltip); activeTooltip = null; }
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = 512; canvas.height = 72;
-    ctx.fillStyle = 'rgba(20, 30, 60, 0.7)';
-    ctx.roundRect(4, 4, 504, 64, 16); ctx.fill();
-    ctx.fillStyle = '#ffcc44'; ctx.font = 'bold 17px monospace';
-    ctx.fillText(text.substring(0, 50), 16, 30);
-    const detail = mesh.userData?.label || '';
-    ctx.fillStyle = '#e8eaf0'; ctx.font = '14px monospace';
-    ctx.fillText(detail.substring(0, 55), 16, 52);
-    const tex = new THREE.CanvasTexture(canvas);
-    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
-    const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(4.5, 0.6, 1);
-    const pos = mesh.position || mesh.parent?.position;
-    if (pos) sprite.position.set(pos.x, pos.y + 1.8, pos.z);
-    else sprite.position.set(0, 2, 0);
-    scene.add(sprite);
-    activeTooltip = sprite;
-    setTimeout(() => { if (activeTooltip === sprite) { scene.remove(sprite); activeTooltip = null; } }, 5000);
+function showDetail(ud) {
+    const el = document.getElementById('stage3d-detail');
+    if (!el) return;
+    const name = ud.varName || '';
+    const label = ud.label || '';
+    const shape = ud.shape || [];
+    const rank = shape.length;
+    const dims = shape.length ? `[${shape.join(', ')}]` : 'scalar';
+    const elements = ud.elements || (shape.length ? shape.reduce((a, b) => a * b, 1) : 1);
+    const bytes = elements * 8;
+    const mem = bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+    el.innerHTML = `
+        <div class="stage3d-detail-title">${name ? name + ' =' : ''} ${label}</div>
+        <div class="stage3d-detail-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>
+        <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>
+    `;
+    el.style.display = 'block';
 }
 
 function onCanvasKey(e) {
@@ -300,7 +291,7 @@ window.__stage3d_add_step = function(ev) {
     const rawName = ev.output?.name || '';
     const isVar = ev.label.includes('=');
     const varName = isVar ? rawName : null;
-    mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1 };
+    mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0 };
     if (mesh.children) mesh.children.forEach(c => c.userData = mesh.userData);
     scene.add(mesh);
     stepObjects.push(mesh);
