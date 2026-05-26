@@ -17,6 +17,7 @@ pub fn make_run_demo(
             return;
         };
         session.borrow().clear();
+        let _ = js_sys::eval("window.__stage3d_clear && window.__stage3d_clear()");
         // Lead with a narration panel framing what the demo does
         // and why. Demo lines follow; the takeaway narration lands
         // after the final line in `schedule_demo_line`. Also bind
@@ -113,6 +114,20 @@ fn schedule_demo_line(
     let history_next = history.clone();
     gloo::timers::callback::Timeout::new(0, move || {
         let result = session.borrow().eval(line);
+        let is_error = result.starts_with("error:");
+        if !is_error {
+            let (shape, elements) = crate::viz3d_events::shape_from_output(&result);
+            crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
+                step_idx: 0,
+                label: line.to_string(),
+                output: crate::viz3d_events::ShapeInfo {
+                    name: line.split('=').next().unwrap_or(line).trim().to_string(),
+                    shape: shape.clone(),
+                    rank: shape.len(),
+                    elements,
+                },
+            });
+        }
         replace_running_with_result(&mut entries, line, result);
         history.set(entries.clone());
         schedule_demo_line(session_next, history_next, entries, demo, idx + 1);
