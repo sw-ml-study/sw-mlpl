@@ -119,11 +119,37 @@ window.__stage3d_init = function(canvas) {
     createGround();
     createLights();
 
+    scene.fog = new THREE.FogExp2(0x0a0a14, 0.02);
+
     canvas.tabIndex = 0;
     canvas.addEventListener('keydown', onCanvasKey);
+    canvas.addEventListener('click', onCanvasClick);
     window.addEventListener('resize', resize);
     animate();
 };
+
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function onCanvasClick(e) {
+    if (!renderer || !camera) return;
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    const meshes = stepObjects.filter(o => o.isMesh || o.isGroup);
+    const targets = [];
+    for (const obj of meshes) {
+        if (obj.isMesh) targets.push(obj);
+        if (obj.children) obj.children.forEach(c => { if (c.isMesh) targets.push(c); });
+    }
+    const hits = raycaster.intersectObjects(targets, false);
+    if (hits.length === 0) return;
+    const hit = hits[0].object;
+    const name = hit.userData?.varName;
+    if (!name) return;
+    window.dispatchEvent(new CustomEvent('stage3d-inspect', { detail: { name } }));
+}
 
 function onCanvasKey(e) {
     if (e.key === 'ArrowRight') { e.preventDefault(); panToStep(viewStep + 1); }
@@ -205,6 +231,9 @@ window.__stage3d_add_step = function(ev) {
     const mesh = shapeMesh(shape, color);
     mesh.position.set(x, 0.6, 0);
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
+    const name = ev.output?.name || ev.label;
+    mesh.userData = { varName: name, stepIdx: stepCount - 1 };
+    if (mesh.children) mesh.children.forEach(c => c.userData = mesh.userData);
     scene.add(mesh);
     stepObjects.push(mesh);
     prevMesh = mesh;
