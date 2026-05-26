@@ -114,6 +114,18 @@ fn process_next_eval(
     let queue_next = queue.clone();
     gloo::timers::callback::Timeout::new(0, move || {
         let entry = eval_one_line(&deps_next, &line);
+        if *deps_next.show_3d && !entry.is_error {
+            crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
+                step_idx: idx,
+                label: line.clone(),
+                output: crate::viz3d_events::ShapeInfo {
+                    name: line.split('=').next().unwrap_or(&line).trim().to_string(),
+                    shape: vec![],
+                    rank: 0,
+                    elements: 1,
+                },
+            });
+        }
         history.pop();
         history.push(entry);
         process_next_eval(deps_next, history, queue_next, idx + 1);

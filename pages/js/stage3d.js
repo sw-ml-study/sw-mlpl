@@ -76,6 +76,51 @@ window.__stage3d_destroy = function() {
     scene = camera = renderer = controls = animId = null;
 };
 
-window.__stage3d_add_step = function(_json) {
-    // placeholder -- step 003 will implement
+const SPACING = 2.5;
+const OP_COLORS = {
+    matmul: 0x6688cc, train: 0xcc6666, softmax: 0x66cc88,
+    cross_entropy: 0xcc6666, reshape: 0x88aacc, default: 0x8888aa
+};
+
+function opColor(label) {
+    for (const [key, color] of Object.entries(OP_COLORS)) {
+        if (label.includes(key)) return color;
+    }
+    return OP_COLORS.default;
+}
+
+function makeLabel(text) {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 256; canvas.height = 64;
+    ctx.fillStyle = '#1e1e2e'; ctx.fillRect(0, 0, 256, 64);
+    ctx.fillStyle = '#cdd6f4'; ctx.font = '14px monospace';
+    ctx.fillText(text.substring(0, 36), 8, 24);
+    const tex = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: tex });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(2.5, 0.6, 1);
+    return sprite;
+}
+
+window.__stage3d_add_step = function(json) {
+    if (!scene) return;
+    const ev = typeof json === 'string' ? JSON.parse(json) : json;
+    const x = ev.step_idx * SPACING;
+    const color = opColor(ev.label);
+    const box = new THREE.Mesh(
+        new THREE.BoxGeometry(1.2, 0.8, 0.8),
+        new THREE.MeshStandardMaterial({ color })
+    );
+    box.position.set(x, 0.5, 0);
+    box.castShadow = true;
+    scene.add(box);
+
+    const label = makeLabel(ev.label);
+    label.position.set(x, 1.4, 0);
+    scene.add(label);
+
+    camera.position.set(x + 3, 4, 8);
+    controls.target.set(x, 0.5, 0);
+    controls.update();
 };
