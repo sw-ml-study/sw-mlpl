@@ -235,8 +235,9 @@ window.__stage3d_add_step = function(ev) {
     const mesh = shapeMesh(shape, color);
     mesh.position.set(x, 0.6, 0);
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
-    const rawName = ev.output?.name || ev.label;
-    const varName = rawName.includes('=') ? rawName : null;
+    const rawName = ev.output?.name || '';
+    const isVar = ev.label.includes('=');
+    const varName = isVar ? rawName : null;
     mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1 };
     if (mesh.children) mesh.children.forEach(c => c.userData = mesh.userData);
     scene.add(mesh);
