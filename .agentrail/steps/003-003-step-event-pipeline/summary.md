@@ -1,0 +1,1 @@
+Step event pipeline: Stage3dEvent + ShapeInfo structs, emit() via js_sys::eval, eval pipeline emits after each successful REPL line when show_3d is true. JS side places colored BoxGeometry with label sprite, camera auto-pans. Added js-sys + serde deps.
