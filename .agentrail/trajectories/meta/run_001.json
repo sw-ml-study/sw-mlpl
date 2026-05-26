@@ -1,0 +1,11 @@
+{
+  "task_type": "meta",
+  "state": {
+    "number": 4,
+    "step": "004-polish-close"
+  },
+  "action": "Help text + language-status.md + pages rebuild.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-26T15:36:11"
+}
