@@ -1,0 +1,1 @@
+Editor tab with textarea UI shell. EditorPanel component (1 fn) with toolbar buttons (Run/Load/Save/Clear -- no-op for step 002). HeaderMode::Editor added. Mode system tracks editor_open. Editor clears lesson/path state on open.
