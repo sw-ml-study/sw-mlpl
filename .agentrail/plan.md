@@ -1,243 +1,91 @@
-# 3D Visualization Stage Milestone
+# Script Editor Milestone
 
-Saga 35, proposed.
+Saga 36, proposed.
 
-## Vision
+## Why this exists
 
-A parallel 3D viewport runs alongside the REPL, showing
-intermediate computation values as sculptural objects on a
-persistent "stage." The stage is a large horizontal
-landscape (salt flat, distant mountains) where each demo
-step occupies a spatial position -- a 3D storyboard of the
-computation's history.
+The web REPL is ephemeral and single-line. Users can't
+save work, load scripts, or edit multi-line programs.
+The desktop `mlpl-repl -f script.mlpl` supports file
+execution but the web UI has no equivalent.
 
-The camera pans along the timeline to show past steps
-(frozen sculptures) and the current step (possibly
-animating). Individual values -- scalars, vectors, matrices,
-tensors -- are rendered as 3D forms whose shape, rank,
-size, and structure are visually apparent.
+## Deliverables
 
-Think of a game's avatar sprite strip: the full stage is a
-large pre-composed 3D scene, and the viewport shows a
-window into the section relevant to the current step.
-
-## Non-goals (initial pass)
-
-- **Accurate tensor visualization.** The first pass uses
-  labeled placeholder boxes (shape + rank text labels on
-  colored cubes/planes). Accurate heatmap textures,
-  element-level detail, and animated transforms come in
-  later iterations.
-- **Every demo covered.** Initial integration covers 1-2
-  demos (e.g., Basics and a simple training loop) as proof
-  of concept. Full coverage is iterative.
-- **Mobile support.** WebGL/Three.js on mobile is
-  unreliable. The 3D view is desktop-only; mobile hides
-  the toggle.
-- **Persistent 3D assets.** The landscape/stage is
-  procedurally generated or loaded from a simple GLTF
-  asset, not a large pre-baked world.
+1. **Upload .mlpl** -- file picker button loads a text
+   file and runs it line by line (like a demo).
+2. **Inline editor** -- a multi-line text area where
+   users type or paste scripts. Run button executes all
+   lines. Stays in the browser.
+3. **Download .mlpl** -- saves the current REPL history
+   (input lines only) as a downloadable .mlpl file.
+4. **Edit + re-run** -- after running a script, the
+   editor retains the source so the user can edit and
+   re-run without re-uploading.
 
 ## Architecture
 
-### Technology
+### Editor panel
 
-**Three.js** via JavaScript interop (wasm-bindgen) for the
-3D scene: scene graph, PerspectiveCamera, OrbitControls,
-lighting, geometry, GLTF loading.
+A new tab in the header: "Editor" alongside REPL,
+Tutorial, Paths. The editor panel shows a `<textarea>`
+(or a lightweight code editor like CodeMirror/Monaco
+if we want syntax highlighting later -- textarea for
+MVP).
 
-**D3.js** for data-driven animation of many moving data
-points within each sculpture. When a weight matrix updates
-during training, D3 transitions drive per-element color
-and height changes across hundreds of cells simultaneously.
-Three.js owns the 3D camera and stage layout; D3 owns the
-per-element animation within each sculpture's texture or
-instanced mesh. D3 is also the right tool for 2D overlays
-(axis labels, value histograms) rendered as HTML layers
-positioned relative to 3D objects via CSS2DRenderer.
+Buttons: Run (execute all lines), Clear, Save (.mlpl
+download), Load (file picker).
 
-### Integration pattern
+### Execution
 
-```
-+------------------+     +-------------------+
-|  Yew App (WASM)  |     | Three.js (JS)     |
-|                  |     |                   |
-|  REPL eval       |---->| scene.add(mesh)   |
-|  demo runner     |     | camera.pan(step)  |
-|  step events     |     | animate()         |
-|                  |<----| click events      |
-+------------------+     +-------------------+
-        ^                        ^
-        |                        |
-   Yew state handles     <canvas> element
-   (show_3d, step_idx)   managed by Three.js
-```
+Lines execute through the existing `on_run_batch`
+callback (same path as tutorial Run All). Each line
+becomes a history entry. The :3d integration works
+automatically -- if 3D is on, each line emits a
+sculpture.
 
-**Communication:** Yew owns the eval pipeline and emits
-"step events" (step index, value shapes, operation name)
-to JS via `wasm_bindgen` exports. The JS side manages the
-Three.js scene, adds/updates meshes, and moves the camera.
-Click events on 3D objects emit back to Yew via
-`CustomEvent`.
+### File format
 
-**The JS module** lives in `apps/mlpl-web/js/stage3d.js`
-(or a small npm-free bundle). Loaded via a `<script>` tag
-with `type="module"`. Three.js loaded from CDN or vendored.
+Plain text, one MLPL expression per line. Comments
+start with `#`. Empty lines are skipped. Extension
+`.mlpl`. This matches the desktop `mlpl-repl -f`
+format exactly.
 
-### Toggle mechanism
+### Download
 
-- **REPL command:** `:3d` toggles the 3D viewport on/off.
-  `:3d on` / `:3d off` for explicit control.
-- **Hotkey:** `Ctrl+3` toggles (mirrors the REPL command).
-- **State:** `show_3d: UseStateHandle<bool>` in UiState,
-  default false.
-- **Layout:** When on, the main area splits into a 2-pane
-  layout (REPL left, 3D viewport right) or the 3D view
-  replaces the output area. The split mirrors the existing
-  tutorial split pattern.
+Collects all input lines from the REPL history
+(filtering out narration/system entries), joins with
+newlines, triggers a browser download via
+`Blob` + `URL.createObjectURL` + click-on-anchor
+pattern.
 
-### Step event protocol
+## Steps
 
-Each eval step emits a `Stage3dEvent` to the JS side:
+### Step 001 -- Editor tab + textarea
 
-```rust
-pub struct Stage3dEvent {
-    pub step_idx: usize,
-    pub label: String,        // "matmul(W, x)"
-    pub inputs: Vec<ShapeInfo>,
-    pub output: ShapeInfo,
-}
+New HeaderMode::Editor. Clicking the Editor tab shows
+a full-height textarea with monospace font. Run button
+at the top. No execution yet -- just the UI shell.
 
-pub struct ShapeInfo {
-    pub name: String,    // "W"
-    pub shape: Vec<usize>, // [3, 5]
-    pub rank: usize,
-    pub element_count: usize,
-}
-```
+### Step 002 -- Run + Load
 
-The JS side maps each event to a 3D "sculpture" placed at
-`x = step_idx * spacing` on the stage. Inputs are rendered
-as smaller objects flowing into the operation; the output
-is rendered as the result object.
+Run button submits all non-empty non-comment lines
+via on_run_batch. Load button opens a file picker
+that reads a .mlpl text file into the editor textarea.
 
-### Stage landscape
+### Step 003 -- Save/download
 
-The "salt flat" ground plane extends along the x-axis.
-Mountains or a skybox provide depth cues. Each step gets
-a position along x. The camera starts at step 0 and
-tracks the current step. OrbitControls allow the user to
-freely look around; double-click snaps back to the current
-step.
+Save button collects REPL input history, creates a
+Blob, triggers download as `session.mlpl`. Also a
+"Copy to editor" button that loads history into the
+editor for editing.
 
-Initial implementation: a white PlaneGeometry ground with
-grid lines, no mountains. The landscape can evolve
-independently of the step visualization logic.
+### Step 004 -- Polish + integration
 
-## Phases
-
-### Phase 1: Infrastructure (toggle + canvas + Three.js bootstrap)
-
-**Deliverables:**
-
-1. `show_3d` state handle in UiState, toggled by `:3d`
-   REPL command and Ctrl+3 hotkey.
-2. When `show_3d` is true, render a `<canvas id="stage3d">`
-   element in a split pane alongside the REPL output.
-3. `apps/mlpl-web/js/stage3d.js`: Three.js bootstrap
-   (scene, camera, renderer, OrbitControls, ground plane,
-   ambient light). Renders an empty stage.
-4. Yew calls `window.__stage3d_init(canvas)` on mount and
-   `window.__stage3d_destroy()` on unmount.
-5. Trunk `<link data-trunk rel="copy-file">` for the JS
-   module + Three.js vendor bundle.
-
-**No step events yet.** Just the empty stage with camera
-controls.
-
-### Phase 2: Step event pipeline
-
-**Deliverables:**
-
-1. `Stage3dEvent` + `ShapeInfo` structs in a new
-   `viz3d_events.rs` module.
-2. Eval pipeline emits events via
-   `window.__stage3d_add_step(json)` after each REPL
-   eval or demo line.
-3. JS side receives events and places a labeled
-   placeholder box at `(step_idx * 2, 0, 0)`.
-4. Camera auto-pans to the latest step.
-
-**Placeholder rendering:** A colored `BoxGeometry` with
-`TextSprite` label showing `"matmul [3,5] -> [3,3]"`.
-Color encodes the operation type (blue = matmul, green =
-activation, red = loss, gray = assignment).
-
-### Phase 3: Shape-aware sculptures
-
-Replace placeholder boxes with shape-proportional meshes:
-
-- Scalar: small sphere
-- Vector `[N]`: horizontal bar, length proportional to N
-- Matrix `[M, N]`: flat rectangle, M x N proportional
-- Rank-3+ tensor `[B, M, N]`: stacked rectangles (B
-  layers)
-
-Labels show `name: [shape]` and `rank R, N elements`.
-
-### Phase 4: Demo integration
-
-Wire up 2-3 demos to emit step events:
-
-1. **Basics** -- simple arithmetic, arrays, reshape.
-   Shows scalars flowing into vectors flowing into
-   matrices.
-2. **Loss Curve** -- training loop iterations. Each
-   iteration is a step; loss value shown as a vertical
-   bar whose height tracks the loss.
-3. **Moons MLP** -- forward pass through layers. Each
-   layer is a transform sculpture (input -> weights ->
-   output).
-
-### Phase 5: Animation + transitions
-
-Current-step sculpture animates:
-- Matrix multiply: input matrices slide together, output
-  grows from their intersection.
-- Activation function: elements visually shift (e.g.,
-  negative elements squash to zero for ReLU).
-- Reshape: elements rearrange into the new shape.
-
-Past steps freeze in place as the camera advances.
-
-### Phase 6: Landscape + polish
-
-- GLTF landscape asset (salt flat + distant mountains)
-  or procedural skybox.
-- Fog for depth.
-- Shadow casting from sculptures onto the ground.
-- Click a past sculpture to inspect its value in the
-  REPL (emit `:describe <var>` via CustomEvent).
+Keyboard shortcut Ctrl+Enter to run from editor.
+Line numbers in the textarea (CSS counter or
+pre-line numbering). Editor retains content across
+tab switches. Tour stop for the editor.
 
 ## Quality requirements
 
-Same as saga 34. TDD where possible (event structs and
-shape-to-mesh mapping are pure and testable). JS code
-tested via manual verification in the browser. Each phase
-is independently deployable with the feature toggled off
-by default.
-
-The Three.js dependency is loaded only when the 3D view
-is activated (lazy-load the module on first `:3d on`).
-No bundle-size impact when the feature is off.
-
-## Module budget plan
-
-| New module | Concern | Est. fns | Est. LOC |
-|---|---|---|---|
-| `viz3d_toggle.rs` | `:3d` command + Ctrl+3 handler | 2 | ~30 |
-| `viz3d_events.rs` | Stage3dEvent + ShapeInfo structs | 2 | ~40 |
-| `viz3d_panel.rs` | Canvas element + split layout | 2 | ~40 |
-| `js/stage3d.js` | Three.js scene management | JS | ~200 |
-
-All Rust modules under 4-fn warning target.
+Same as saga 35. Warning-target design. Pages rebuild.

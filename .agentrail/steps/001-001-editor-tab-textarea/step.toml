@@ -1,0 +1,12 @@
+number = 1
+slug = "001-editor-tab-textarea"
+status = "pending"
+description = """
+Step 001: Editor tab + textarea.
+
+New HeaderMode::Editor. Add Editor tab to t..."""
+role = "production"
+context_files = []
+created_at = "2026-05-26T12:11:05"
+task_type = "feature"
+commits = []

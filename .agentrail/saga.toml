@@ -1,6 +1,6 @@
-name = "3d-viz-stage"
-status = "completed"
-current_step = 7
-created_at = "2026-05-25T16:11:32"
+name = "script-editor"
+status = "active"
+current_step = 1
+created_at = "2026-05-26T12:10:56"
 plan_file = ".agentrail/plan.md"
 retroactive = false
