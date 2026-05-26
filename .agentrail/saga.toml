@@ -1,6 +1,6 @@
-name = "script-editor"
-status = "completed"
-current_step = 4
-created_at = "2026-05-26T12:10:56"
+name = "3d-scale-connections"
+status = "active"
+current_step = 1
+created_at = "2026-05-26T15:29:01"
 plan_file = ".agentrail/plan.md"
 retroactive = false
