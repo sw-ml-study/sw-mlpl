@@ -34,18 +34,6 @@ pub struct MainArgs<'a> {
 }
 
 pub fn render_main(a: MainArgs) -> Html {
-    let batch_for_inspect = a.on_run_batch.clone();
-    let on_3d_inspect = Callback::from(move |name: String| {
-        let cmd = if name.contains('=') {
-            format!(
-                ":describe {}",
-                name.split('=').next().unwrap_or(&name).trim()
-            )
-        } else {
-            name
-        };
-        batch_for_inspect.emit(vec![cmd]);
-    });
     let tutorial_pane = render_tutorial(
         a.cur_lesson,
         a.lesson_idx,
@@ -69,7 +57,6 @@ pub fn render_main(a: MainArgs) -> Html {
     render_main_shell(
         a.tutorial_active,
         a.show_3d,
-        on_3d_inspect,
         tutorial_pane,
         paths_pane,
         repl_pane,
@@ -133,13 +120,12 @@ fn render_repl_pane(a: ReplPaneArgs) -> Html {
 fn render_main_shell(
     tutorial_active: bool,
     show_3d: bool,
-    on_3d_inspect: Callback<String>,
     tutorial_pane: Html,
     paths_pane: Html,
     repl_pane: Html,
 ) -> Html {
     let stage = if show_3d {
-        html! { <section class="stage3d-pane"><Stage3dPanel on_inspect={on_3d_inspect} /></section> }
+        html! { <section class="stage3d-pane"><Stage3dPanel /></section> }
     } else {
         html! {}
     };

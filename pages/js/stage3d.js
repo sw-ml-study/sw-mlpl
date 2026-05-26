@@ -99,6 +99,10 @@ function resize() {
 }
 
 window.__stage3d_init = function(canvas) {
+    if (scene && renderer) {
+        renderer.domElement = canvas;
+        return;
+    }
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0x0a0a14);
 
@@ -147,8 +151,36 @@ function onCanvasClick(e) {
     if (hits.length === 0) return;
     const hit = hits[0].object;
     const ud = hit.userData;
-    if (!ud || !ud.varName) return;
-    window.dispatchEvent(new CustomEvent('stage3d-inspect', { detail: { name: ud.varName } }));
+    if (!ud) return;
+    const text = ud.varName ? `${ud.varName} = ${ud.label}` : ud.label || '';
+    if (!text) return;
+    showTooltip(hit, text);
+}
+
+let activeTooltip = null;
+
+function showTooltip(mesh, text) {
+    if (activeTooltip) { scene.remove(activeTooltip); activeTooltip = null; }
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = 512; canvas.height = 64;
+    ctx.fillStyle = 'rgba(30, 40, 80, 0.9)';
+    ctx.roundRect(0, 0, 512, 64, 8); ctx.fill();
+    ctx.fillStyle = '#fab387'; ctx.font = 'bold 16px monospace';
+    ctx.fillText(text.substring(0, 56), 12, 28);
+    const shape = mesh.userData?.label || '';
+    ctx.fillStyle = '#cdd6f4'; ctx.font = '13px monospace';
+    ctx.fillText(shape.substring(0, 60), 12, 50);
+    const tex = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: tex });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(4, 0.5, 1);
+    const pos = mesh.position || mesh.parent?.position;
+    if (pos) sprite.position.set(pos.x, pos.y + 1.8, pos.z);
+    else sprite.position.set(0, 2, 0);
+    scene.add(sprite);
+    activeTooltip = sprite;
+    setTimeout(() => { if (activeTooltip === sprite) { scene.remove(sprite); activeTooltip = null; } }, 5000);
 }
 
 function onCanvasKey(e) {
@@ -159,6 +191,11 @@ function onCanvasKey(e) {
 }
 
 window.__stage3d_destroy = function() {
+    // No-op: scene persists across Yew component remounts.
+    // Only :3d off / :clear destroys state.
+};
+
+window.__stage3d_teardown = function() {
     if (animId) cancelAnimationFrame(animId);
     window.removeEventListener('resize', resize);
     if (renderer) renderer.dispose();
