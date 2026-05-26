@@ -30,23 +30,21 @@ function createGround() {
 function createLegend() {
     const marks = [1, 10, 100, 1000, 10000];
     const labels = ['1', '10', '100', '1K', '10K'];
-    const mat = new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.5 });
+    const mat = new THREE.MeshStandardMaterial({ color: 0x6688bb, roughness: 0.4 });
     const z = 8;
     const startX = -15;
     for (let i = 0; i < marks.length; i++) {
         const s = logDim(marks[i]);
-        const cube = new THREE.Mesh(new THREE.BoxGeometry(s, 0.15, 0.15), mat);
-        const x = startX + i * 3;
-        cube.position.set(x, 0.08, z);
+        const cube = new THREE.Mesh(new THREE.BoxGeometry(s, 0.2, 0.2), mat);
+        const x = startX + i * 3.5;
+        cube.position.set(x, 0.1, z);
         scene.add(cube);
-        const lbl = makeLabel(labels[i]);
-        lbl.scale.set(1.2, 0.3, 1);
-        lbl.position.set(x, 0.5, z);
+        const lbl = makeLabel(labels[i], { fontSize: 22, color: '#ffcc44', bg: 'rgba(20, 30, 60, 0.8)', w: 160, h: 48, scale: [1.4, 0.4, 1] });
+        lbl.position.set(x, 0.7, z);
         scene.add(lbl);
     }
-    const title = makeLabel('elements');
-    title.scale.set(1.5, 0.3, 1);
-    title.position.set(startX + 2 * 3, 0.9, z);
+    const title = makeLabel('SCALE (elements)', { fontSize: 20, color: '#88bbff', bg: 'rgba(20, 30, 60, 0.85)', w: 360, h: 48, scale: [3, 0.4, 1] });
+    title.position.set(startX + 2 * 3.5, 1.3, z);
     scene.add(title);
 }
 
@@ -283,18 +281,19 @@ function opColor(label) {
     return OP_COLORS.default;
 }
 
-function makeLabel(text) {
+function makeLabel(text, opts) {
+    const { fontSize = 18, color = '#ffffff', bg = 'rgba(20, 30, 60, 0.7)', w = 400, h = 56, scale = [3.5, 0.5, 1] } = opts || {};
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    canvas.width = 320; canvas.height = 48;
-    ctx.fillStyle = 'rgba(20, 30, 60, 0.65)';
-    ctx.roundRect(2, 2, 316, 44, 12); ctx.fill();
-    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 15px monospace';
-    ctx.fillText(text.substring(0, 40), 12, 30);
+    canvas.width = w; canvas.height = h;
+    ctx.fillStyle = bg;
+    ctx.roundRect(2, 2, w - 4, h - 4, 12); ctx.fill();
+    ctx.fillStyle = color; ctx.font = `bold ${fontSize}px monospace`;
+    ctx.fillText(text.substring(0, 50), 14, h * 0.6);
     const tex = new THREE.CanvasTexture(canvas);
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
     const sprite = new THREE.Sprite(mat);
-    sprite.scale.set(3, 0.45, 1);
+    sprite.scale.set(...scale);
     return sprite;
 }
 
