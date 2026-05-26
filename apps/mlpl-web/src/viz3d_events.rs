@@ -23,52 +23,27 @@ pub fn emit(event: &Stage3dEvent) {
     let _ = js_sys::eval(&format!("window.__stage3d_add_step('{escaped}')"));
 }
 
+/// Parse shape from MLPL's space-separated display format.
+/// Scalar: "3" -> ([], 1). Vector: "0 1 2" -> ([3], 3).
+/// Matrix: "0 1\n2 3" -> ([2, 2], 4).
 pub fn shape_from_output(output: &str) -> (Vec<usize>, usize) {
     let trimmed = output.trim();
-    if trimmed.is_empty() || !trimmed.starts_with('[') {
+    if trimmed.is_empty() {
         return (vec![], 0);
     }
-    let rank = trimmed.bytes().take_while(|&b| b == b'[').count();
-    let flat: Vec<&str> = trimmed
-        .replace(['[', ']'], " ")
-        .split_whitespace()
-        .filter(|s| !s.is_empty() && !s.ends_with(','))
-        .chain(
-            trimmed
-                .replace(['[', ']'], " ")
-                .split_whitespace()
-                .filter(|s| s.ends_with(',')),
-        )
+    let lines: Vec<&str> = trimmed
+        .lines()
+        .map(str::trim)
+        .filter(|l| !l.is_empty())
         .collect();
-    let elements = trimmed
-        .matches(|c: char| c.is_ascii_digit() || c == '.' || c == '-')
-        .count()
-        .max(1);
-    let shape = match rank {
-        0 => vec![],
-        1 => vec![count_top_elements(trimmed)],
-        _ => infer_shape(trimmed, rank),
-    };
-    (shape, elements)
-}
-
-fn count_top_elements(s: &str) -> usize {
-    s.trim_start_matches('[')
-        .trim_end_matches(']')
-        .split(',')
-        .filter(|p| !p.trim().is_empty())
-        .count()
-}
-
-fn infer_shape(s: &str, rank: usize) -> Vec<usize> {
-    if rank == 2 {
-        let rows = s.trim_start_matches('[').trim_end_matches(']');
-        let row_count = rows.matches('[').count();
-        let first_row = rows.split(']').next().unwrap_or("");
-        let cols = count_top_elements(first_row);
-        vec![row_count, cols]
+    let cols = lines[0].split_whitespace().count();
+    let elements = lines.len() * cols;
+    if lines.len() == 1 && cols == 1 {
+        (vec![], 1)
+    } else if lines.len() == 1 {
+        (vec![cols], elements)
     } else {
-        vec![rank]
+        (vec![lines.len(), cols], elements)
     }
 }
 
@@ -91,5 +66,21 @@ mod tests {
         let json = serde_json::to_string(&ev).unwrap();
         assert!(json.contains("\"step_idx\":0"));
         assert!(json.contains("\"rank\":0"));
+    }
+
+    #[test]
+    fn shape_scalar() {
+        assert_eq!(shape_from_output("3"), (vec![], 1));
+    }
+
+    #[test]
+    fn shape_vector() {
+        assert_eq!(shape_from_output("0 1 2 3 4"), (vec![5], 5));
+    }
+
+    #[test]
+    fn shape_matrix() {
+        let out = "0 1 2 3\n4 5 6 7\n8 9 10 11";
+        assert_eq!(shape_from_output(out), (vec![3, 4], 12));
     }
 }
