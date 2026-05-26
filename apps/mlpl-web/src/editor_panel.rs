@@ -53,6 +53,15 @@ pub fn editor_panel(props: &EditorProps) -> Html {
             input.set_value("");
         })
     };
+    let on_keydown = {
+        let run = props.on_run.clone();
+        Callback::from(move |e: web_sys::KeyboardEvent| {
+            if e.ctrl_key() && e.key() == "Enter" {
+                e.prevent_default();
+                run.emit(e.unchecked_into());
+            }
+        })
+    };
     html! {
         <div class="editor-panel">
             <div class="editor-toolbar">
@@ -68,6 +77,7 @@ pub fn editor_panel(props: &EditorProps) -> Html {
                 placeholder={"# Type or paste MLPL script here\nx = iota(10)\nreshape(x, [2, 5])"}
                 value={props.content.clone()}
                 oninput={on_input}
+                onkeydown={on_keydown}
             />
         </div>
     }

@@ -126,7 +126,6 @@ function resize() {
 }
 
 window.__stage3d_init = function(canvas) {
-    console.log('[stage3d] init called, pendingEvents:', pendingEvents.length);
     if (animId) cancelAnimationFrame(animId);
     if (controls) controls.dispose();
     if (renderer) renderer.dispose();
@@ -304,7 +303,6 @@ function shapeMesh(shape, color) {
 
 window.__stage3d_add_step = function(ev) {
     if (!ev) return;
-    console.log('[stage3d] add_step, scene:', !!scene, 'pending:', pendingEvents.length, 'label:', ev?.label);
     if (!scene) {
         pendingEvents.push(ev);
         if (pendingEvents.length === 1) {
