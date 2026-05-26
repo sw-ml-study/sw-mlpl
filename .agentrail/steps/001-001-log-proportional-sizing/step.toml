@@ -1,0 +1,12 @@
+number = 1
+slug = "001-log-proportional-sizing"
+status = "pending"
+description = """
+Phase 2a step 1: Log-proportional sculpture sizing.
+
+Replace linear-proportio..."""
+role = "production"
+context_files = []
+created_at = "2026-05-26T15:29:24"
+task_type = "feature"
+commits = []

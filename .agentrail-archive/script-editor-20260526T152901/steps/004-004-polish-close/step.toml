@@ -1,0 +1,13 @@
+number = 4
+slug = "004-polish-close"
+status = "completed"
+description = """
+Step 004 (FINAL, use --done): Polish + saga close.
+
+Ctrl+Enter runs from edit..."""
+role = "production"
+context_files = []
+created_at = "2026-05-26T12:11:16"
+completed_at = "2026-05-26T13:48:08"
+task_type = "meta"
+commits = ["9e165693473567ddb3ff3e6bb8e7a9632fa2266c"]
