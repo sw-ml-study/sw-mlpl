@@ -1,0 +1,1 @@
+Ctrl+Enter to run from editor. Removed debug console.log. Updated language-status.md. Editor tour stop and glossary already in place. Content persists across tab switches.
