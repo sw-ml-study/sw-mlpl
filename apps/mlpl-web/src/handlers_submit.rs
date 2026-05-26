@@ -60,6 +60,9 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
             if trimmed == ":clear" {
                 deps.session.borrow().clear();
                 new_history.clear();
+                if *deps.show_3d {
+                    let _ = js_sys::eval("window.__stage3d_clear && window.__stage3d_clear()");
+                }
                 continue;
             }
             if let Some(explicit) = crate::viz3d_toggle::parse_3d_command(trimmed) {
@@ -117,7 +120,7 @@ fn process_next_eval(
         if *deps_next.show_3d && !entry.is_error {
             let (shape, elements) = crate::viz3d_events::shape_from_output(&entry.output);
             crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
-                step_idx: idx,
+                step_idx: 0,
                 label: line.clone(),
                 output: crate::viz3d_events::ShapeInfo {
                     name: line.split('=').next().unwrap_or(&line).trim().to_string(),

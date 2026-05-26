@@ -33,6 +33,7 @@ pub fn make_clear(
     Callback::from(move |_| {
         session.borrow().clear();
         history.set(Vec::new());
+        let _ = js_sys::eval("window.__stage3d_clear && window.__stage3d_clear()");
     })
 }
 
