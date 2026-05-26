@@ -45,6 +45,7 @@ fn render_tour(a: &RenderArgs) -> Html {
     let on_next = Callback::from(move |_: MouseEvent| {
         if *sh + 1 >= crate::onboarding_tour::STEP_COUNT {
             th.set(false);
+            let _ = js_sys::eval("window.__stage3d_reset_view && window.__stage3d_reset_view()");
         } else {
             sh.set(*sh + 1);
         }
@@ -56,6 +57,9 @@ fn render_tour(a: &RenderArgs) -> Html {
         }
     });
     let ch = a.onboarding.show_tour.clone();
-    let on_close = Callback::from(move |_: MouseEvent| ch.set(false));
+    let on_close = Callback::from(move |_: MouseEvent| {
+        ch.set(false);
+        let _ = js_sys::eval("window.__stage3d_reset_view && window.__stage3d_reset_view()");
+    });
     html! { <TourTooltip {step} {on_next} {on_prev} {on_close} /> }
 }
