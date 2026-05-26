@@ -1,0 +1,1 @@
+Save downloads editor content as session.mlpl. 3D scene persists across tab switches -- init recreates renderer+controls for new canvas while keeping scene+camera+objects.
