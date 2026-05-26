@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let scene, camera, renderer, controls, animId;
 let stepCount = 0;
+let viewStep = 0;
 const stepObjects = [];
 
 function createGround() {
@@ -153,15 +154,31 @@ window.__stage3d_add_step = function(ev) {
     scene.add(label);
     stepObjects.push(label);
 
+    viewStep = stepCount - 1;
     camera.position.set(x + 3, 4, 8);
     controls.target.set(x, 0.5, 0);
     controls.update();
 };
 
+function panToStep(idx) {
+    if (!camera || idx < 0 || idx >= stepCount) return;
+    viewStep = idx;
+    const x = idx * SPACING;
+    camera.position.set(x + 3, 4, 8);
+    controls.target.set(x, 0.5, 0);
+    controls.update();
+}
+
+window.__stage3d_prev = function() { panToStep(viewStep - 1); };
+window.__stage3d_next = function() { panToStep(viewStep + 1); };
+window.__stage3d_home = function() { panToStep(0); };
+window.__stage3d_end = function() { panToStep(stepCount - 1); };
+
 window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
     stepObjects.length = 0;
     stepCount = 0;
+    viewStep = 0;
     if (camera) {
         camera.position.set(0, 6, 12);
         controls.target.set(0, 0.5, 0);
