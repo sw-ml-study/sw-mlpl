@@ -1,6 +1,6 @@
 number = 3
 slug = "003-connection-arrows"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2a step 3: Connection arrows between steps.
 
@@ -8,5 +8,6 @@ When a step's label refere..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T15:29:24"
+completed_at = "2026-05-26T15:34:40"
 task_type = "feature"
-commits = []
+commits = ["3767ff0cfc8cc072cce2736696680cd4421f7f19"]

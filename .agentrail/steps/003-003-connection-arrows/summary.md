@@ -1,0 +1,1 @@
+Connection arrows: curved tubes between dependent steps. Regex word-boundary matching on RHS finds variable references. QuadraticBezierCurve3 arching above ground. varPositions map tracks definitions.
