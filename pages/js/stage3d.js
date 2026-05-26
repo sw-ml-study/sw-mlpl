@@ -5,6 +5,8 @@ let scene, camera, renderer, controls, animId;
 let stepCount = 0;
 let viewStep = 0;
 const stepObjects = [];
+const activeAnims = [];
+let prevMesh = null;
 
 function createGround() {
     const grid = new THREE.GridHelper(40, 40, 0x444466, 0x222233);
@@ -31,8 +33,58 @@ function createLights() {
 
 function animate() {
     animId = requestAnimationFrame(animate);
+    const now = performance.now();
+    for (let i = activeAnims.length - 1; i >= 0; i--) {
+        const a = activeAnims[i];
+        const t = Math.min((now - a.start) / a.duration, 1);
+        a.update(t);
+        if (t >= 1) activeAnims.splice(i, 1);
+    }
     controls.update();
     renderer.render(scene, camera);
+}
+
+function easeOutBack(t) {
+    const c = 1.7;
+    return 1 + (t - 1) ** 3 * (c + 1) + (t - 1) ** 2 * c;
+}
+
+function animateEntry(mesh) {
+    mesh.scale.set(0, 0, 0);
+    activeAnims.push({
+        start: performance.now(),
+        duration: 500,
+        update(t) {
+            const s = easeOutBack(t);
+            mesh.scale.set(s, s, s);
+        }
+    });
+}
+
+function dimPrevious(mesh) {
+    if (!mesh) return;
+    const mats = mesh.material ? [mesh.material] : [];
+    if (mesh.children) mesh.children.forEach(c => { if (c.material) mats.push(c.material); });
+    for (const m of mats) {
+        m.emissive?.setHex(0x000000);
+        m.opacity = 0.6;
+    }
+}
+
+function glowNew(mesh, color) {
+    const mats = mesh.material ? [mesh.material] : [];
+    if (mesh.children) mesh.children.forEach(c => { if (c.material) mats.push(c.material); });
+    for (const m of mats) m.emissive?.setHex(color);
+    activeAnims.push({
+        start: performance.now(),
+        duration: 1000,
+        update(t) {
+            const intensity = 1 - t;
+            for (const m of mats) {
+                if (m.emissiveIntensity !== undefined) m.emissiveIntensity = intensity * 0.5;
+            }
+        }
+    });
 }
 
 function resize() {
@@ -140,11 +192,15 @@ window.__stage3d_add_step = function(ev) {
     stepCount++;
     const color = opColor(ev.label);
     const shape = ev.output?.shape || [];
+    dimPrevious(prevMesh);
     const mesh = shapeMesh(shape, color);
     mesh.position.set(x, 0.6, 0);
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
     scene.add(mesh);
     stepObjects.push(mesh);
+    animateEntry(mesh);
+    glowNew(mesh, color);
+    prevMesh = mesh;
 
     const rank = shape.length;
     const dims = shape.length ? `[${shape.join(',')}]` : 'scalar';
@@ -177,8 +233,10 @@ window.__stage3d_end = function() { panToStep(stepCount - 1); };
 window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
     stepObjects.length = 0;
+    activeAnims.length = 0;
     stepCount = 0;
     viewStep = 0;
+    prevMesh = null;
     if (camera) {
         camera.position.set(0, 6, 12);
         controls.target.set(0, 0.5, 0);
