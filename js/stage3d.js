@@ -185,16 +185,18 @@ function onCanvasClick(e) {
     showDetail(ud);
 }
 
+let selectionPointer = null;
+
 function selectMesh(mesh) {
-    if (selectedMesh) {
-        const old = selectedMesh.material ? [selectedMesh.material] : [];
-        if (selectedMesh.parent?.children) selectedMesh.parent.children.forEach(c => { if (c.material) old.push(c.material); });
-        for (const m of old) { if (m.emissive) m.emissive.setHex(0x000000); m.emissiveIntensity = 0; }
-    }
-    selectedMesh = mesh;
-    const mats = mesh.material ? [mesh.material] : [];
-    if (mesh.parent?.children) mesh.parent.children.forEach(c => { if (c.material) mats.push(c.material); });
-    for (const m of mats) { if (m.emissive) { m.emissive.setHex(0xffcc44); m.emissiveIntensity = 0.4; } }
+    if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
+    const pos = mesh.position?.clone() || mesh.parent?.position?.clone();
+    if (!pos) return;
+    const geo = new THREE.ConeGeometry(0.15, 0.4, 4);
+    geo.rotateX(Math.PI);
+    const mat = new THREE.MeshStandardMaterial({ color: 0xffcc44, emissive: 0xffcc44, emissiveIntensity: 0.6 });
+    selectionPointer = new THREE.Mesh(geo, mat);
+    selectionPointer.position.set(pos.x, pos.y + 1.2, pos.z);
+    scene.add(selectionPointer);
 }
 
 function showDetail(ud) {
@@ -326,6 +328,12 @@ window.__stage3d_add_step = function(ev) {
     controls.update();
 };
 
+function clearSelection() {
+    if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
+    const el = document.getElementById('stage3d-detail');
+    if (el) el.style.display = 'none';
+}
+
 function panToStep(idx) {
     if (!camera || idx < 0 || idx >= stepCount) return;
     const dx = (idx - viewStep) * SPACING;
@@ -335,10 +343,10 @@ function panToStep(idx) {
     controls.update();
 }
 
-window.__stage3d_prev = function() { panToStep(viewStep - 1); };
-window.__stage3d_next = function() { panToStep(viewStep + 1); };
-window.__stage3d_home = function() { panToStep(0); };
-window.__stage3d_end = function() { panToStep(stepCount - 1); };
+window.__stage3d_prev = function() { clearSelection(); panToStep(viewStep - 1); };
+window.__stage3d_next = function() { clearSelection(); panToStep(viewStep + 1); };
+window.__stage3d_home = function() { clearSelection(); panToStep(0); };
+window.__stage3d_end = function() { clearSelection(); panToStep(stepCount - 1); };
 
 window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
