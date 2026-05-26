@@ -8,25 +8,27 @@ const stepObjects = [];
 const activeAnims = [];
 let prevMesh = null;
 
-function createGround() {
-    const grid = new THREE.GridHelper(200, 200, 0xcccccc, 0xdddddd);
-    grid.position.y = 0;
-    scene.add(grid);
+let groundPlane, groundGrid;
 
-    const plane = new THREE.Mesh(
-        new THREE.PlaneGeometry(200, 200),
+function createGround() {
+    groundGrid = new THREE.GridHelper(2000, 2000, 0xcccccc, 0xdddddd);
+    groundGrid.position.y = 0;
+    scene.add(groundGrid);
+
+    groundPlane = new THREE.Mesh(
+        new THREE.PlaneGeometry(2000, 200),
         new THREE.MeshStandardMaterial({ color: 0xeeeee8, roughness: 0.95 })
     );
-    plane.rotation.x = -Math.PI / 2;
-    plane.position.y = -0.01;
-    plane.receiveShadow = true;
-    scene.add(plane);
+    groundPlane.rotation.x = -Math.PI / 2;
+    groundPlane.position.y = -0.01;
+    groundPlane.receiveShadow = true;
+    scene.add(groundPlane);
 }
 
 function createMountains() {
     const farMat = new THREE.MeshStandardMaterial({ color: 0x8B6B4A, flatShading: true });
     const nearMat = new THREE.MeshStandardMaterial({ color: 0x5A8A4A, flatShading: true });
-    for (let i = -10; i < 10; i++) {
+    for (let i = -40; i < 40; i++) {
         const x = i * 20 + Math.random() * 8;
         const h = 8 + Math.random() * 12;
         const w = 6 + Math.random() * 8;
@@ -34,7 +36,7 @@ function createMountains() {
         far.position.set(x, h / 2, -60 - Math.random() * 20);
         scene.add(far);
     }
-    for (let i = -10; i < 10; i++) {
+    for (let i = -40; i < 40; i++) {
         const x = i * 15 + Math.random() * 6;
         const h = 3 + Math.random() * 5;
         const w = 4 + Math.random() * 5;
