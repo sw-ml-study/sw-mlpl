@@ -133,9 +133,8 @@ function shapeMesh(shape, color) {
     return group;
 }
 
-window.__stage3d_add_step = function(json) {
-    if (!scene) return;
-    const ev = typeof json === 'string' ? JSON.parse(json) : json;
+window.__stage3d_add_step = function(ev) {
+    if (!scene || !ev) return;
     const x = stepCount * SPACING;
     stepCount++;
     const color = opColor(ev.label);
