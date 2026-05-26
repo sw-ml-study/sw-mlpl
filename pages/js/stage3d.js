@@ -6,6 +6,7 @@ let stepCount = 0;
 let viewStep = 0;
 const stepObjects = [];
 const activeAnims = [];
+const pendingEvents = [];
 let prevMesh = null;
 
 let groundPlane, groundGrid;
@@ -158,6 +159,11 @@ window.__stage3d_init = function(canvas) {
     canvas.addEventListener('click', onCanvasClick);
     window.addEventListener('resize', resize);
     animate();
+
+    if (pendingEvents.length > 0) {
+        const queued = pendingEvents.splice(0);
+        for (const ev of queued) window.__stage3d_add_step(ev);
+    }
 };
 
 const raycaster = new THREE.Raycaster();
@@ -296,7 +302,8 @@ function shapeMesh(shape, color) {
 }
 
 window.__stage3d_add_step = function(ev) {
-    if (!scene || !ev) return;
+    if (!ev) return;
+    if (!scene) { pendingEvents.push(ev); return; }
     const x = stepCount * SPACING;
     stepCount++;
     const color = opColor(ev.label);
@@ -352,6 +359,7 @@ window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
     stepObjects.length = 0;
     activeAnims.length = 0;
+    pendingEvents.length = 0;
     stepCount = 0;
     viewStep = 0;
     prevMesh = null;
