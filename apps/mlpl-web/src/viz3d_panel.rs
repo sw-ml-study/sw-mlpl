@@ -1,3 +1,4 @@
+use wasm_bindgen::JsCast;
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
@@ -17,14 +18,35 @@ extern "C" {
     fn __stage3d_end();
 }
 
+#[derive(Properties, PartialEq)]
+pub struct Stage3dProps {
+    pub on_inspect: Callback<String>,
+}
+
 #[function_component(Stage3dPanel)]
-pub fn stage3d_panel() -> Html {
+pub fn stage3d_panel(props: &Stage3dProps) -> Html {
     let node = use_node_ref();
     let node_c = node.clone();
+    let on_inspect = props.on_inspect.clone();
     use_effect_with((), move |_| {
         if let Some(canvas) = node_c.cast::<web_sys::HtmlCanvasElement>() {
             __stage3d_init(&canvas);
         }
+        let cb = Closure::wrap(Box::new(move |e: web_sys::CustomEvent| {
+            let name = e.detail().as_string().or_else(|| {
+                js_sys::Reflect::get(&e.detail(), &"name".into())
+                    .ok()?
+                    .as_string()
+            });
+            if let Some(n) = name {
+                on_inspect.emit(n);
+            }
+        }) as Box<dyn FnMut(_)>);
+        if let Some(w) = web_sys::window() {
+            let _ =
+                w.add_event_listener_with_callback("stage3d-inspect", cb.as_ref().unchecked_ref());
+        }
+        cb.forget();
         || {
             __stage3d_destroy();
         }

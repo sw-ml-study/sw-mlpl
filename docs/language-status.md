@@ -15,7 +15,7 @@ guided tour + what's-new modal).
 
 ## Active saga
 
-None. Saga 34 (`splash-tour`) closed 2026-05-25.
+None. Saga 35 (`3d-viz-stage`) closed 2026-05-25.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -30,6 +30,7 @@ human-readable summary.
 | `tech-debt-paydown` (32) | shipped | -- (process saga) | Closed 2026-05-22. Eight steps; **delivered -8 fails / -2 warnings vs the "halve both" target of -76 fails / -227 warnings**. Six new sibling crates extracted as clean DAG leaves (mlpl-eval-core, mlpl-runtime-core/-data/-dim-reduction, mlpl-web-eval/-lessons/-path-body) plus several in-crate splits (experiment_compare, inspect_render, image_io_pixels, model_tape_attention, fetch_io, dataset_helpers, ops_concat, gallery_layout). Step 007 documented the "compose-don't-compress" lesson; step 008 wrote `docs/loose-coupling.md` as the canonical HOW-TO. |
 | `env-demos-paydown` (33) | shipped | -- (mixed saga) | Closed 2026-05-25. 48 steps. env.rs split (55->3 fns), demos.rs split (1179->150 lines), model_dispatch.rs split, DR milestone (UMAP, MDS, random projection, PCA loadings/variance, knn_graph, critical_dimensions viz, 6 lessons, 5 demos, 1 learning path), REPL completion popup (Ctrl+Space trigger, arrow-key navigation), visual regression harness, moons MLP fix, perplexity builtin. sw-checklist 143->130 fails, 450->460 warnings. |
 | `splash-tour` (34) | shipped | -- (UX saga) | Closed 2026-05-25. 6 steps. Splash overlay (first-visit welcome with splash-bg.png, 4 quick-start cards), 6-step guided tour (CSS spotlight, tooltip positioning), what's-new modal (version-bump triggered), Tour header button, Escape closes overlays. Decomposed components.rs (6 files) + handlers.rs (3 files) by concern. Process docs: feature-design-process.md, sw-checklist-mitigations.md, mlpl-web-architecture.md. |
+| `3d-viz-stage` (35) | shipped | -- (capability saga) | Closed 2026-05-25. 7 steps. 3D visualization stage: :3d toggle + Ctrl+3, Three.js scene with OrbitControls, step event pipeline (eval emits shapes), shape-aware sculptures (scalar/vector/matrix/tensor), demo integration, click-to-inspect (:describe via raycaster), nav buttons + arrow keys, fog. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
 The "proposed" sagas have full milestone docs; the user has
