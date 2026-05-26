@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "002-extend-stage3d-event"
+  },
+  "action": "ShapeInfo extended with values + summary fields. build_shape_info + compute_summary. eval_one_line_with_3d for REPL, eval_with_values in demo runner.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-26T16:44:23"
+}
