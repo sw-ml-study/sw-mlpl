@@ -1,0 +1,1 @@
+Stage3dEvent now carries optional values (<=1000 elements) or ArraySummary (min/max/mean/std/histogram). build_shape_info() selects variant. Both REPL and demo pipelines use eval_with_values(). JS receives values via serde_wasm_bindgen.
