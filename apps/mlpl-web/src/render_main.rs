@@ -36,7 +36,15 @@ pub struct MainArgs<'a> {
 pub fn render_main(a: MainArgs) -> Html {
     let batch_for_inspect = a.on_run_batch.clone();
     let on_3d_inspect = Callback::from(move |name: String| {
-        batch_for_inspect.emit(vec![format!(":describe {name}")]);
+        let cmd = if name.contains('=') {
+            format!(
+                ":describe {}",
+                name.split('=').next().unwrap_or(&name).trim()
+            )
+        } else {
+            name
+        };
+        batch_for_inspect.emit(vec![cmd]);
     });
     let tutorial_pane = render_tutorial(
         a.cur_lesson,
