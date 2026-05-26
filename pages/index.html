@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-41a63b2fe6e16d0.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-41a63b2fe6e16d0_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-23340c74daa2e200.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-23340c74daa2e200_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -281,27 +281,48 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         /* Saga 35: 3D visualization split */
         main.viz3d-split {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
             grid-template-rows: 1fr;
             gap: 0;
             overflow: hidden;
             padding: 0;
         }
         .stage3d-pane {
-            background: #0a0a14;
+            display: flex;
+            flex-direction: column;
             border-left: 1px solid var(--surface1);
             min-height: 300px;
         }
         .stage3d-wrap {
             position: relative;
-            width: 100%;
-            height: 100%;
+            flex: 1;
+            min-height: 0;
         }
         .stage3d-wrap canvas {
             width: 100%;
             height: 100%;
             display: block;
         }
+        .stage3d-detail {
+            background: var(--mantle);
+            border-top: 1px solid var(--surface1);
+            padding: 10px 16px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text);
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        .stage3d-detail-title {
+            color: var(--peach);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .stage3d-detail-row {
+            color: var(--subtext0);
+            line-height: 1.6;
+        }
+        .stage3d-detail-row strong { color: var(--text); }
         .stage3d-nav {
             position: absolute;
             bottom: 12px;
@@ -1465,7 +1486,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-41a63b2fe6e16d0.js" crossorigin="anonymous" integrity="sha384-6eBCnRdtNJ2YcxG7oSrOccPBZyabjljoka1d63hJnGO+a5zaAwG6gtcJmU+cVzY/"><link rel="preload" href="/sw-mlpl/mlpl-web-41a63b2fe6e16d0_bg.wasm" crossorigin="anonymous" integrity="sha384-SkGhX9HqWqEtB2B/Ekq9vwIjky+GF/zcAj5esxiIIND+YPYVeiZ1wr7YsFB2R55h" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-23340c74daa2e200.js" crossorigin="anonymous" integrity="sha384-6eBCnRdtNJ2YcxG7oSrOccPBZyabjljoka1d63hJnGO+a5zaAwG6gtcJmU+cVzY/"><link rel="preload" href="/sw-mlpl/mlpl-web-23340c74daa2e200_bg.wasm" crossorigin="anonymous" integrity="sha384-iKzz/fA9d0TfcYVkA6rtVY2KFyFa77BcFf0hIFCUDb/x+CZ/tQ9BvR6E5ofo6IIN" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>

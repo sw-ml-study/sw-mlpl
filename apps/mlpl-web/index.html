@@ -270,27 +270,48 @@
         /* Saga 35: 3D visualization split */
         main.viz3d-split {
             display: grid;
-            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
             grid-template-rows: 1fr;
             gap: 0;
             overflow: hidden;
             padding: 0;
         }
         .stage3d-pane {
-            background: #0a0a14;
+            display: flex;
+            flex-direction: column;
             border-left: 1px solid var(--surface1);
             min-height: 300px;
         }
         .stage3d-wrap {
             position: relative;
-            width: 100%;
-            height: 100%;
+            flex: 1;
+            min-height: 0;
         }
         .stage3d-wrap canvas {
             width: 100%;
             height: 100%;
             display: block;
         }
+        .stage3d-detail {
+            background: var(--mantle);
+            border-top: 1px solid var(--surface1);
+            padding: 10px 16px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--text);
+            max-height: 160px;
+            overflow-y: auto;
+        }
+        .stage3d-detail-title {
+            color: var(--peach);
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .stage3d-detail-row {
+            color: var(--subtext0);
+            line-height: 1.6;
+        }
+        .stage3d-detail-row strong { color: var(--text); }
         .stage3d-nav {
             position: absolute;
             bottom: 12px;

@@ -34,14 +34,17 @@ pub fn stage3d_panel() -> Html {
     let home = Callback::from(|_: MouseEvent| __stage3d_home());
     let end = Callback::from(|_: MouseEvent| __stage3d_end());
     html! {
-        <div class="stage3d-wrap">
-            <canvas ref={node} id="stage3d" />
-            <div class="stage3d-nav">
-                <button class="stage3d-btn" onclick={home} title="First step">{"\u{23ee}"}</button>
-                <button class="stage3d-btn" onclick={prev} title="Previous step">{"\u{25c0}"}</button>
-                <button class="stage3d-btn" onclick={next} title="Next step">{"\u{25b6}"}</button>
-                <button class="stage3d-btn" onclick={end} title="Latest step">{"\u{23ed}"}</button>
+        <>
+            <div class="stage3d-wrap">
+                <canvas ref={node} id="stage3d" />
+                <div class="stage3d-nav">
+                    <button class="stage3d-btn" onclick={home} title="First step">{"\u{23ee}"}</button>
+                    <button class="stage3d-btn" onclick={prev} title="Previous step">{"\u{25c0}"}</button>
+                    <button class="stage3d-btn" onclick={next} title="Next step">{"\u{25b6}"}</button>
+                    <button class="stage3d-btn" onclick={end} title="Latest step">{"\u{23ed}"}</button>
+                </div>
             </div>
-        </div>
+            <div id="stage3d-detail" class="stage3d-detail" style="display:none" />
+        </>
     }
 }
