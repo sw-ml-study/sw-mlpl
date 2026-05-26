@@ -67,10 +67,12 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
                 continue;
             }
             if let Some(explicit) = crate::viz3d_toggle::parse_3d_command(trimmed) {
-                deps.show_3d.set(explicit.unwrap_or(!*deps.show_3d));
-                // Defer remaining eval_queue lines so the 3D
-                // panel has time to mount before events fire.
-                deferred_after_3d = true;
+                let new_val = explicit.unwrap_or(!*deps.show_3d);
+                let was_off = !*deps.show_3d;
+                deps.show_3d.set(new_val);
+                if new_val && was_off {
+                    deferred_after_3d = true;
+                }
                 continue;
             }
             if let Some(name) = parse_upload_command(trimmed) {

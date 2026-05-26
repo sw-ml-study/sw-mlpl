@@ -100,6 +100,12 @@ const STEPS: &[TourStep] = &[
         click_before: "[data-tour-target='back-to-path']",
     },
     TourStep {
+        target: "tab-editor",
+        title: "Script Editor",
+        body: "Write or load multi-line MLPL scripts. Click Run to execute, Save to download as .mlpl, Load to open a file.",
+        click_before: "[data-tour-target='tab-editor']",
+    },
+    TourStep {
         target: "repl-input",
         title: "Autocomplete",
         body: "Press Ctrl+Space for autocomplete suggestions. Arrow keys to navigate, Enter to accept.",
