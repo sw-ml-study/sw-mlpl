@@ -83,8 +83,80 @@ impl WasmSession {
 }
 
 impl WasmSession {
+    pub fn eval_with_values(&self, input: &str) -> EvalResult {
+        eval_input_with_values(input, &mut self.env.borrow_mut())
+    }
+
     pub(crate) fn env_mut(&self) -> std::cell::RefMut<'_, Environment> {
         self.env.borrow_mut()
+    }
+}
+
+pub struct EvalResult {
+    pub display: String,
+    pub values: Option<Vec<f64>>,
+    pub shape: Vec<usize>,
+}
+
+fn eval_input_with_values(input: &str, env: &mut Environment) -> EvalResult {
+    let trimmed = input.trim();
+    if trimmed.is_empty() {
+        return EvalResult {
+            display: String::new(),
+            values: None,
+            shape: vec![],
+        };
+    }
+    if let Some(out) = mlpl_eval::inspect(env, trimmed) {
+        return EvalResult {
+            display: out,
+            values: None,
+            shape: vec![],
+        };
+    }
+    let tokens = match mlpl_parser::lex(trimmed) {
+        Ok(t) => t,
+        Err(e) => {
+            return EvalResult {
+                display: format!("error: {e}"),
+                values: None,
+                shape: vec![],
+            };
+        }
+    };
+    let stmts = match mlpl_parser::parse(&tokens) {
+        Ok(s) if s.is_empty() => {
+            return EvalResult {
+                display: String::new(),
+                values: None,
+                shape: vec![],
+            };
+        }
+        Ok(s) => s,
+        Err(e) => {
+            return EvalResult {
+                display: format!("error: {e}"),
+                values: None,
+                shape: vec![],
+            };
+        }
+    };
+    match mlpl_eval::eval_program_value(&stmts, env) {
+        Ok(mlpl_eval::Value::Array(ref arr)) => EvalResult {
+            display: format!("{}", mlpl_eval::Value::Array(arr.clone())),
+            values: Some(arr.data().to_vec()),
+            shape: arr.shape().dims().to_vec(),
+        },
+        Ok(value) => EvalResult {
+            display: format!("{value}"),
+            values: None,
+            shape: vec![],
+        },
+        Err(e) => EvalResult {
+            display: format!("error: {e}"),
+            values: None,
+            shape: vec![],
+        },
     }
 }
 
