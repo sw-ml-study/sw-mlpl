@@ -67,9 +67,8 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
                 continue;
             }
             if let Some(new_val) = crate::viz3d_toggle::parse_3d_command(trimmed) {
-                let was_off = !*deps.show_3d;
                 deps.show_3d.set(new_val);
-                if new_val && was_off {
+                if new_val {
                     deferred_after_3d = true;
                 }
                 continue;
