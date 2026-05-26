@@ -1,0 +1,12 @@
+number = 2
+slug = "002-extend-stage3d-event"
+status = "pending"
+description = """
+Step 002: Extend Stage3dEvent with values.
+
+Add optional values field to Stag..."""
+role = "production"
+context_files = []
+created_at = "2026-05-26T16:27:35"
+task_type = "feature"
+commits = []
