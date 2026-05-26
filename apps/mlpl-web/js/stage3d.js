@@ -7,6 +7,7 @@ let viewStep = 0;
 const stepObjects = [];
 const activeAnims = [];
 const pendingEvents = [];
+const varPositions = {};
 let prevMesh = null;
 
 let groundPlane, groundGrid;
@@ -328,6 +329,26 @@ function shapeMesh(shape, color) {
     return group;
 }
 
+function drawConnections(label, targetX) {
+    const rhs = label.includes('=') ? label.split('=').slice(1).join('=') : label;
+    for (const [name, srcX] of Object.entries(varPositions)) {
+        if (srcX === targetX) continue;
+        const re = new RegExp('\\b' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b');
+        if (!re.test(rhs)) continue;
+        const mid = (srcX + targetX) / 2;
+        const curve = new THREE.QuadraticBezierCurve3(
+            new THREE.Vector3(srcX, 0.3, 0),
+            new THREE.Vector3(mid, 1.5, -0.5),
+            new THREE.Vector3(targetX, 0.3, 0)
+        );
+        const geo = new THREE.TubeGeometry(curve, 20, 0.02, 4, false);
+        const mat = new THREE.MeshBasicMaterial({ color: 0x888899, transparent: true, opacity: 0.5 });
+        const tube = new THREE.Mesh(geo, mat);
+        scene.add(tube);
+        stepObjects.push(tube);
+    }
+}
+
 window.__stage3d_add_step = function(ev) {
     if (!ev) return;
     if (!scene) {
@@ -361,6 +382,9 @@ window.__stage3d_add_step = function(ev) {
     scene.add(mesh);
     stepObjects.push(mesh);
     prevMesh = mesh;
+
+    if (varName) varPositions[varName] = x;
+    drawConnections(ev.label, x);
 
     const rank = shape.length;
     const dims = shape.length ? `[${shape.join(',')}]` : 'scalar';
@@ -408,6 +432,7 @@ window.__stage3d_end = function() { clearSelection(); panToStep(stepCount - 1); 
 window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
     stepObjects.length = 0;
+    for (const k of Object.keys(varPositions)) delete varPositions[k];
     activeAnims.length = 0;
     pendingEvents.length = 0;
     stepCount = 0;
