@@ -31,13 +31,16 @@ pub fn emit(event: &Stage3dEvent) {
     }
 }
 
-/// Parse shape from MLPL's space-separated display format.
-/// Scalar: "3" -> ([], 1). Vector: "0 1 2" -> ([3], 3).
-/// Matrix: "0 1\n2 3" -> ([2, 2], 4).
+/// Parse shape from MLPL output. Handles two formats:
+/// 1. Summary: `<DenseArray shape=[10, 10] elems=100 ...>`
+/// 2. Values: space-separated rows (`0 1 2\n3 4 5`)
 pub fn shape_from_output(output: &str) -> (Vec<usize>, usize) {
     let trimmed = output.trim();
     if trimmed.is_empty() {
         return (vec![], 0);
+    }
+    if let Some(parsed) = parse_dense_array_summary(trimmed) {
+        return parsed;
     }
     let lines: Vec<&str> = trimmed
         .lines()
@@ -46,13 +49,28 @@ pub fn shape_from_output(output: &str) -> (Vec<usize>, usize) {
         .collect();
     let cols = lines[0].split_whitespace().count();
     let elements = lines.len() * cols;
-    if lines.len() == 1 && cols == 1 {
-        (vec![], 1)
-    } else if lines.len() == 1 {
-        (vec![cols], elements)
-    } else {
-        (vec![lines.len(), cols], elements)
+    match (lines.len(), cols) {
+        (1, 1) => (vec![], 1),
+        (1, _) => (vec![cols], elements),
+        _ => (vec![lines.len(), cols], elements),
     }
+}
+
+fn parse_dense_array_summary(s: &str) -> Option<(Vec<usize>, usize)> {
+    if !s.starts_with("<DenseArray") {
+        return None;
+    }
+    let shape_start = s.find("shape=[")? + 7;
+    let shape_end = s[shape_start..].find(']')? + shape_start;
+    let shape: Vec<usize> = s[shape_start..shape_end]
+        .split(',')
+        .filter_map(|p| p.trim().parse().ok())
+        .collect();
+    let elems = s
+        .find("elems=")
+        .and_then(|i| s[i + 6..].split_whitespace().next()?.parse().ok())
+        .unwrap_or_else(|| shape.iter().product());
+    Some((shape, elems))
 }
 
 #[cfg(test)]
@@ -90,5 +108,17 @@ mod tests {
     fn shape_matrix() {
         let out = "0 1 2 3\n4 5 6 7\n8 9 10 11";
         assert_eq!(shape_from_output(out), (vec![3, 4], 12));
+    }
+
+    #[test]
+    fn shape_dense_array_summary() {
+        let out = "<DenseArray shape=[10, 10] elems=100 first=[0, 1, 2, ...]>";
+        assert_eq!(shape_from_output(out), (vec![10, 10], 100));
+    }
+
+    #[test]
+    fn shape_dense_array_vector() {
+        let out = "<DenseArray shape=[100] elems=100 first=[0, 1, 2, ...]>";
+        assert_eq!(shape_from_output(out), (vec![100], 100));
     }
 }
