@@ -1,0 +1,1 @@
+Entry animation: new sculptures scale up with easeOutBack bounce (500ms), glow with emissive pulse (1s fade), previous step dims (opacity 0.6). Animation system uses activeAnims array ticked each render frame. All JS-side.
