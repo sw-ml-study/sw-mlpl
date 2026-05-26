@@ -119,9 +119,18 @@ window.__stage3d_init = function(canvas) {
     createGround();
     createLights();
 
+    canvas.tabIndex = 0;
+    canvas.addEventListener('keydown', onCanvasKey);
     window.addEventListener('resize', resize);
     animate();
 };
+
+function onCanvasKey(e) {
+    if (e.key === 'ArrowRight') { e.preventDefault(); panToStep(viewStep + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); panToStep(viewStep - 1); }
+    else if (e.key === 'Home') { e.preventDefault(); panToStep(0); }
+    else if (e.key === 'End') { e.preventDefault(); panToStep(stepCount - 1); }
+}
 
 window.__stage3d_destroy = function() {
     if (animId) cancelAnimationFrame(animId);
@@ -216,10 +225,10 @@ window.__stage3d_add_step = function(ev) {
 
 function panToStep(idx) {
     if (!camera || idx < 0 || idx >= stepCount) return;
+    const dx = (idx - viewStep) * SPACING;
     viewStep = idx;
-    const x = idx * SPACING;
-    camera.position.set(x + 3, 4, 8);
-    controls.target.set(x, 0.5, 0);
+    camera.position.x += dx;
+    controls.target.x += dx;
     controls.update();
 }
 
