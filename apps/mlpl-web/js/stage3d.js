@@ -125,15 +125,22 @@ function resize() {
 }
 
 window.__stage3d_init = function(canvas) {
-    if (scene && renderer) {
-        renderer.domElement = canvas;
-        return;
-    }
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xd8e4f0);
+    if (animId) cancelAnimationFrame(animId);
+    if (controls) controls.dispose();
+    if (renderer) renderer.dispose();
 
-    camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 200);
-    camera.position.set(0, 6, 12);
+    if (!scene) {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0xd8e4f0);
+        scene.fog = new THREE.FogExp2(0xd8e4f0, 0.008);
+        createGround();
+        createMountains();
+        createLights();
+    }
+    if (!camera) {
+        camera = new THREE.PerspectiveCamera(50, canvas.clientWidth / canvas.clientHeight, 0.1, 200);
+        camera.position.set(0, 6, 12);
+    }
 
     renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     renderer.setPixelRatio(window.devicePixelRatio);
@@ -141,16 +148,10 @@ window.__stage3d_init = function(canvas) {
     renderer.shadowMap.enabled = true;
 
     controls = new OrbitControls(camera, canvas);
-    controls.target.set(0, 0.5, 0);
+    controls.target.set(controls.target.x, 0.5, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
     controls.update();
-
-    createGround();
-    createMountains();
-    createLights();
-
-    scene.fog = new THREE.FogExp2(0xd8e4f0, 0.008);
 
     canvas.tabIndex = 0;
     canvas.addEventListener('keydown', onCanvasKey);

@@ -61,8 +61,22 @@ pub fn render_main(a: MainArgs) -> Html {
             let h = a.editor_content.clone();
             Callback::from(move |_: MouseEvent| h.set(String::new()))
         };
-        let noop = Callback::from(|_: MouseEvent| {});
-        html! { <EditorPanel {content} {on_change} {on_run} on_save={noop} {on_clear} /> }
+        let on_save = {
+            let ec = a.editor_content.clone();
+            Callback::from(move |_: MouseEvent| {
+                let text = (*ec).clone();
+                if text.is_empty() {
+                    return;
+                }
+                let _ = js_sys::eval(&format!(
+                    "{{const b=new Blob([decodeURIComponent('{}')],{{type:'text/plain'}});\
+                     const a=document.createElement('a');a.href=URL.createObjectURL(b);\
+                     a.download='session.mlpl';a.click();URL.revokeObjectURL(a.href);}}",
+                    js_sys::encode_uri_component(&text)
+                ));
+            })
+        };
+        html! { <EditorPanel {content} {on_change} {on_run} {on_save} {on_clear} /> }
     } else {
         html! {}
     };
