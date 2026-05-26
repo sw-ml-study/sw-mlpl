@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "004-shape-sculptures"
+  },
+  "action": "shapeMesh() in stage3d.js dispatches on rank. shape_from_output() in viz3d_events.rs parses bracket nesting. D3 importmap entry added.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T17:33:45"
+}
