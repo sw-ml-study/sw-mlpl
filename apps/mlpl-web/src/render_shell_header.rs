@@ -22,6 +22,7 @@ pub fn render_shell_header(
             on_select_repl={cb.repl.clone()}
             on_select_tutorial={cb.tutorial.clone()}
             on_select_paths={cb.paths.clone()}
+            on_select_editor={cb.editor.clone()}
             mode={modes.header_mode}
         />
     }

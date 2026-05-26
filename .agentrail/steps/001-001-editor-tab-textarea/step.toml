@@ -1,6 +1,6 @@
 number = 1
 slug = "001-editor-tab-textarea"
-status = "pending"
+status = "in-progress"
 description = """
 Step 001: Editor tab + textarea.
 

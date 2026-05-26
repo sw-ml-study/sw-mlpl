@@ -42,6 +42,8 @@ pub fn use_ui_state() -> UiState {
         completion_candidates: use_state(Vec::<String>::new),
         completion_selected: use_state(|| 0_usize),
         show_3d: use_state(|| false),
+        editor_open: use_state(|| false),
+        editor_content: use_state(String::new),
     }
 }
 

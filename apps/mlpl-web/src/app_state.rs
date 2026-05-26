@@ -42,6 +42,8 @@ pub struct UiState {
     /// popup. Resets to 0 when new candidates land.
     pub completion_selected: UseStateHandle<usize>,
     pub show_3d: UseStateHandle<bool>,
+    pub editor_open: UseStateHandle<bool>,
+    pub editor_content: UseStateHandle<String>,
 }
 
 /// Onboarding overlay state (splash + tour + what's-new).

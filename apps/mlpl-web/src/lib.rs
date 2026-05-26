@@ -34,6 +34,7 @@ pub mod demos_lm;
 pub mod demos_models;
 pub mod demos_vit;
 pub mod diagrams_view;
+pub mod editor_panel;
 pub mod entry_render;
 pub mod glossary_popup;
 pub mod glossary_view;
