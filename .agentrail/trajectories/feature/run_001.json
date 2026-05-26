@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "001-log-proportional-sizing"
+  },
+  "action": "Replaced linear sizing in shapeMesh() with logDim(). Tensor layers also log-scaled.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-26T15:31:26"
+}
