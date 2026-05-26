@@ -162,6 +162,7 @@ window.__stage3d_init = function(canvas) {
 
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
+let selectedMesh = null;
 
 function onCanvasClick(e) {
     if (!renderer || !camera) return;
@@ -180,7 +181,20 @@ function onCanvasClick(e) {
     const hit = hits[0].object;
     const ud = hit.userData;
     if (!ud) return;
+    selectMesh(hit);
     showDetail(ud);
+}
+
+function selectMesh(mesh) {
+    if (selectedMesh) {
+        const old = selectedMesh.material ? [selectedMesh.material] : [];
+        if (selectedMesh.parent?.children) selectedMesh.parent.children.forEach(c => { if (c.material) old.push(c.material); });
+        for (const m of old) { if (m.emissive) m.emissive.setHex(0x000000); m.emissiveIntensity = 0; }
+    }
+    selectedMesh = mesh;
+    const mats = mesh.material ? [mesh.material] : [];
+    if (mesh.parent?.children) mesh.parent.children.forEach(c => { if (c.material) mats.push(c.material); });
+    for (const m of mats) { if (m.emissive) { m.emissive.setHex(0xffcc44); m.emissiveIntensity = 0.4; } }
 }
 
 function showDetail(ud) {
