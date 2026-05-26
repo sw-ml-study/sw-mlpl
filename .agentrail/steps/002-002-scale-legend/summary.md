@@ -1,0 +1,1 @@
+Scale legend: 5 reference bars (1, 10, 100, 1K, 10K) on the ground plane at log2 proportional widths with label sprites. Uses logDim() for consistent sizing with sculptures.

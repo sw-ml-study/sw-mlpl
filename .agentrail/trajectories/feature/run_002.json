@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "002-scale-legend"
+  },
+  "action": "createLegend() in stage3d.js with logDim() bars + makeLabel() sprites.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-26T15:32:49"
+}

@@ -1,6 +1,6 @@
 number = 2
 slug = "002-scale-legend"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2a step 2: Graduated scale legend.
 
@@ -8,5 +8,6 @@ Add a reference bar on the ground p..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T15:29:24"
+completed_at = "2026-05-26T15:32:49"
 task_type = "feature"
-commits = []
+commits = ["0071cbcb5bd6370a4bcf2c52ccb35687e4bae544"]
