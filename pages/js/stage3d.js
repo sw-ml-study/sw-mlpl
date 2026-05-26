@@ -103,21 +103,50 @@ function makeLabel(text) {
     return sprite;
 }
 
+function shapeMesh(shape, color) {
+    const rank = shape.length;
+    const mat = new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.85 });
+    if (rank === 0) {
+        return new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mat);
+    }
+    if (rank === 1) {
+        const w = Math.min(shape[0] * 0.15, 3);
+        return new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, 0.25), mat);
+    }
+    if (rank === 2) {
+        const w = Math.min(shape[1] * 0.15, 3);
+        const h = Math.min(shape[0] * 0.15, 2);
+        return new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.12), mat);
+    }
+    const w = Math.min((shape[2] || 1) * 0.12, 2.5);
+    const h = Math.min((shape[1] || 1) * 0.12, 1.5);
+    const group = new THREE.Group();
+    const layers = Math.min(shape[0] || 1, 8);
+    for (let i = 0; i < layers; i++) {
+        const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), mat.clone());
+        slab.position.z = i * 0.15 - (layers * 0.15) / 2;
+        slab.castShadow = true;
+        group.add(slab);
+    }
+    return group;
+}
+
 window.__stage3d_add_step = function(json) {
     if (!scene) return;
     const ev = typeof json === 'string' ? JSON.parse(json) : json;
     const x = ev.step_idx * SPACING;
     const color = opColor(ev.label);
-    const box = new THREE.Mesh(
-        new THREE.BoxGeometry(1.2, 0.8, 0.8),
-        new THREE.MeshStandardMaterial({ color })
-    );
-    box.position.set(x, 0.5, 0);
-    box.castShadow = true;
-    scene.add(box);
+    const shape = ev.output?.shape || [];
+    const mesh = shapeMesh(shape, color);
+    mesh.position.set(x, 0.6, 0);
+    if (mesh.castShadow !== undefined) mesh.castShadow = true;
+    scene.add(mesh);
 
-    const label = makeLabel(ev.label);
-    label.position.set(x, 1.4, 0);
+    const rank = shape.length;
+    const dims = shape.length ? `[${shape.join(',')}]` : 'scalar';
+    const text = `${ev.output?.name || ''}: ${dims} R${rank}`;
+    const label = makeLabel(text);
+    label.position.set(x, 1.6, 0);
     scene.add(label);
 
     camera.position.set(x + 3, 4, 8);
