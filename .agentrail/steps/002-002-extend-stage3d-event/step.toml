@@ -1,6 +1,6 @@
 number = 2
 slug = "002-extend-stage3d-event"
-status = "pending"
+status = "in-progress"
 description = """
 Step 002: Extend Stage3dEvent with values.
 

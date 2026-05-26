@@ -7,6 +7,19 @@ pub struct ShapeInfo {
     pub shape: Vec<usize>,
     pub rank: usize,
     pub elements: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub values: Option<Vec<f64>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub summary: Option<ArraySummary>,
+}
+
+#[derive(Serialize)]
+pub struct ArraySummary {
+    pub min: f64,
+    pub max: f64,
+    pub mean: f64,
+    pub std: f64,
+    pub histogram: Vec<usize>,
 }
 
 #[derive(Serialize)]
@@ -14,6 +27,56 @@ pub struct Stage3dEvent {
     pub step_idx: usize,
     pub label: String,
     pub output: ShapeInfo,
+}
+
+const MAX_INLINE_ELEMENTS: usize = 1000;
+
+pub fn build_shape_info(name: String, shape: Vec<usize>, values: Option<Vec<f64>>) -> ShapeInfo {
+    let elements = if shape.is_empty() {
+        1
+    } else {
+        shape.iter().product()
+    };
+    let (vals, summary) = match values {
+        Some(ref v) if v.len() <= MAX_INLINE_ELEMENTS => (Some(v.clone()), None),
+        Some(ref v) => (None, Some(compute_summary(v))),
+        None => (None, None),
+    };
+    ShapeInfo {
+        name,
+        shape: shape.clone(),
+        rank: shape.len(),
+        elements,
+        values: vals,
+        summary,
+    }
+}
+
+fn compute_summary(data: &[f64]) -> ArraySummary {
+    let n = data.len() as f64;
+    let min = data.iter().cloned().fold(f64::INFINITY, f64::min);
+    let max = data.iter().cloned().fold(f64::NEG_INFINITY, f64::max);
+    let mean = data.iter().sum::<f64>() / n;
+    let var = data.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / n;
+    let std = var.sqrt();
+    let bins = 16;
+    let range = if (max - min).abs() < 1e-12 {
+        1.0
+    } else {
+        max - min
+    };
+    let mut histogram = vec![0usize; bins];
+    for &v in data {
+        let idx = ((v - min) / range * (bins as f64 - 1.0)).round() as usize;
+        histogram[idx.min(bins - 1)] += 1;
+    }
+    ArraySummary {
+        min,
+        max,
+        mean,
+        std,
+        histogram,
+    }
 }
 
 pub fn emit(event: &Stage3dEvent) {
@@ -82,12 +145,7 @@ mod tests {
         let ev = Stage3dEvent {
             step_idx: 0,
             label: "x = 1 + 2".into(),
-            output: ShapeInfo {
-                name: "x".into(),
-                shape: vec![],
-                rank: 0,
-                elements: 1,
-            },
+            output: build_shape_info("x".into(), vec![], None),
         };
         let json = serde_json::to_string(&ev).unwrap();
         assert!(json.contains("\"step_idx\":0"));
