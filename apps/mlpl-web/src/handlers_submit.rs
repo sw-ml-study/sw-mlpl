@@ -120,20 +120,7 @@ fn process_next_eval(
     let deps_next = deps.clone();
     let queue_next = queue.clone();
     gloo::timers::callback::Timeout::new(0, move || {
-        let entry = eval_one_line(&deps_next, &line);
-        if !entry.is_error && !line.starts_with(':') {
-            let (shape, elements) = crate::viz3d_events::shape_from_output(&entry.output);
-            crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
-                step_idx: 0,
-                label: line.clone(),
-                output: crate::viz3d_events::ShapeInfo {
-                    name: line.split('=').next().unwrap_or(&line).trim().to_string(),
-                    shape: shape.clone(),
-                    rank: shape.len(),
-                    elements,
-                },
-            });
-        }
+        let entry = eval_one_line_with_3d(&deps_next, &line);
         history.pop();
         history.push(entry);
         process_next_eval(deps_next, history, queue_next, idx + 1);
@@ -187,10 +174,34 @@ fn train_caption(stripped: &str) -> &'static str {
     }
 }
 
-/// Evaluate one non-slash-command line and return the
-/// HistoryEntry. Handles `:help` inline; everything else
-/// hits `session.eval`. Pulled out so `make_submit_batch`
-/// stays under the 50-line per-function budget.
+fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
+    if line == ":help" || line.starts_with(':') {
+        return eval_one_line(deps, line);
+    }
+    #[cfg(target_arch = "wasm32")]
+    {
+        let r = deps.session.borrow().eval_with_values(line);
+        let is_error = r.display.starts_with("error:");
+        if !is_error {
+            let name = line.split('=').next().unwrap_or(line).trim().to_string();
+            let info = crate::viz3d_events::build_shape_info(name, r.shape, r.values);
+            crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
+                step_idx: 0,
+                label: line.to_string(),
+                output: info,
+            });
+        }
+        return HistoryEntry {
+            input: line.to_string(),
+            output: r.display,
+            is_error,
+            kind: EntryKind::Command,
+        };
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    eval_one_line(deps, line)
+}
+
 fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
     if trimmed == ":help" {
         return HistoryEntry {
