@@ -91,6 +91,7 @@ Commands (APL-inspired workspace introspection):
                        Err(\"cancelled\") on dismiss (web only)
   :3d                  open 3D visualization stage (Ctrl+3)
   :2d                  close 3D visualization stage
+  :3d reset            reset 3D camera to default position
   :clear               reset session (vars + models + state)";
 
 pub fn help_text() -> String {
