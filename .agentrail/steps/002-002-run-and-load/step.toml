@@ -1,0 +1,12 @@
+number = 2
+slug = "002-run-and-load"
+status = "pending"
+description = """
+Step 002: Run + Load.
+
+Run button submits all non-empty non-comment lines fro..."""
+role = "production"
+context_files = []
+created_at = "2026-05-26T12:11:16"
+task_type = "feature"
+commits = []
