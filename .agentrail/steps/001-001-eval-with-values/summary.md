@@ -1,0 +1,1 @@
+eval_with_values() on WasmSession returns EvalResult with display string + optional raw array data + shape. Non-wasm_bindgen impl block.

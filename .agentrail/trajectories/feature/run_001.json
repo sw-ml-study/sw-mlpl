@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "001-eval-with-values"
+  },
+  "action": "EvalResult struct + eval_input_with_values() that extracts DenseArray data from Value::Array.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-26T16:32:01"
+}
