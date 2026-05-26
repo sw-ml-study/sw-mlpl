@@ -51,7 +51,6 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
         let mut new_history = (*deps.history).clone();
         let mut new_cmds = (*deps.cmd_history).clone();
         let mut eval_queue: Vec<String> = Vec::new();
-        let mut deferred_after_3d = false;
         for line in lines {
             let trimmed = line.trim();
             if trimmed.is_empty() {
@@ -68,9 +67,6 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
             }
             if let Some(new_val) = crate::viz3d_toggle::parse_3d_command(trimmed) {
                 deps.show_3d.set(new_val);
-                if new_val {
-                    deferred_after_3d = true;
-                }
                 continue;
             }
             if let Some(name) = parse_upload_command(trimmed) {
@@ -93,16 +89,7 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
             deps.history.set(new_history);
             return;
         }
-        if deferred_after_3d {
-            let deps2 = deps.clone();
-            deps.history.set(new_history.clone());
-            gloo::timers::callback::Timeout::new(300, move || {
-                process_next_eval(deps2, new_history, eval_queue, 0);
-            })
-            .forget();
-        } else {
-            process_next_eval(deps.clone(), new_history, eval_queue, 0);
-        }
+        process_next_eval(deps.clone(), new_history, eval_queue, 0);
     })
 }
 
