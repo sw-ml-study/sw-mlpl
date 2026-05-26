@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 5,
+    "step": "005-demo-integration"
+  },
+  "action": "Added emission to schedule_demo_line Timeout closure. Added __stage3d_clear call to make_run_demo. Always-emit pattern avoids threading show_3d through demo runner.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-25T18:01:20"
+}
