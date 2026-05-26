@@ -113,7 +113,7 @@ fn process_next_eval(
     let queue_next = queue.clone();
     gloo::timers::callback::Timeout::new(0, move || {
         let entry = eval_one_line(&deps_next, &line);
-        if *deps_next.show_3d && !entry.is_error && !line.starts_with(':') {
+        if !entry.is_error && !line.starts_with(':') {
             let (shape, elements) = crate::viz3d_events::shape_from_output(&entry.output);
             crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
                 step_idx: 0,
