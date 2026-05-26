@@ -51,6 +51,7 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
         let mut new_history = (*deps.history).clone();
         let mut new_cmds = (*deps.cmd_history).clone();
         let mut eval_queue: Vec<String> = Vec::new();
+        let mut deferred_after_3d = false;
         for line in lines {
             let trimmed = line.trim();
             if trimmed.is_empty() {
@@ -67,6 +68,9 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
             }
             if let Some(explicit) = crate::viz3d_toggle::parse_3d_command(trimmed) {
                 deps.show_3d.set(explicit.unwrap_or(!*deps.show_3d));
+                // Defer remaining eval_queue lines so the 3D
+                // panel has time to mount before events fire.
+                deferred_after_3d = true;
                 continue;
             }
             if let Some(name) = parse_upload_command(trimmed) {
@@ -89,11 +93,16 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
             deps.history.set(new_history);
             return;
         }
-        // Saga 29 step 018: push Running markers for each
-        // queued line + paint, then process them one-at-a-time
-        // through Timeout(0) yields so the spinner CSS keeps
-        // animating during each eval.
-        process_next_eval(deps.clone(), new_history, eval_queue, 0);
+        if deferred_after_3d {
+            let deps2 = deps.clone();
+            deps.history.set(new_history.clone());
+            gloo::timers::callback::Timeout::new(300, move || {
+                process_next_eval(deps2, new_history, eval_queue, 0);
+            })
+            .forget();
+        } else {
+            process_next_eval(deps.clone(), new_history, eval_queue, 0);
+        }
     })
 }
 
