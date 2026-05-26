@@ -1,0 +1,1 @@
+Click-to-inspect: raycaster on canvas click finds mesh, reads userData.varName, dispatches CustomEvent, Yew submits :describe <name>. Fog (FogExp2) for depth. Updated language-status.md. Pages rebuilt. Saga 35 complete.
