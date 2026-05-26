@@ -146,7 +146,9 @@ function onCanvasClick(e) {
     const hits = raycaster.intersectObjects(targets, false);
     if (hits.length === 0) return;
     const hit = hits[0].object;
-    const name = hit.userData?.varName;
+    const ud = hit.userData;
+    if (!ud) return;
+    const name = ud.varName || ud.label;
     if (!name) return;
     window.dispatchEvent(new CustomEvent('stage3d-inspect', { detail: { name } }));
 }
@@ -231,8 +233,9 @@ window.__stage3d_add_step = function(ev) {
     const mesh = shapeMesh(shape, color);
     mesh.position.set(x, 0.6, 0);
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
-    const name = ev.output?.name || ev.label;
-    mesh.userData = { varName: name, stepIdx: stepCount - 1 };
+    const rawName = ev.output?.name || ev.label;
+    const varName = rawName.includes('=') ? rawName : null;
+    mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1 };
     if (mesh.children) mesh.children.forEach(c => c.userData = mesh.userData);
     scene.add(mesh);
     stepObjects.push(mesh);
