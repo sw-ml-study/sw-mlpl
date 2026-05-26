@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-30193815c1372ed4.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-30193815c1372ed4_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-4070555992810259.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-4070555992810259_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -292,10 +292,40 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             border-left: 1px solid var(--surface1);
             min-height: 300px;
         }
-        .stage3d-pane canvas {
+        .stage3d-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        .stage3d-wrap canvas {
             width: 100%;
             height: 100%;
             display: block;
+        }
+        .stage3d-nav {
+            position: absolute;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 6px;
+            background: rgba(17, 17, 27, 0.7);
+            border-radius: 6px;
+            padding: 4px 8px;
+        }
+        .stage3d-btn {
+            background: none;
+            border: 1px solid var(--surface2, #45475a);
+            color: var(--text);
+            border-radius: 4px;
+            width: 32px;
+            height: 28px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .stage3d-btn:hover {
+            background: var(--surface1, #313244);
+            border-color: var(--peach);
         }
 
         main.tutorial-split {
@@ -1435,7 +1465,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-30193815c1372ed4.js" crossorigin="anonymous" integrity="sha384-w8n+LZHdiMaannZLyTpjmXXx9HJLFDjHtnleMxefelAkrYgKOUG0O+Y10RS1bV0l"><link rel="preload" href="/sw-mlpl/mlpl-web-30193815c1372ed4_bg.wasm" crossorigin="anonymous" integrity="sha384-88DTsVQRGiId0U5NqP5UsPh4wIfVJEJ+Khy0/7YOucMolqlBiyh6hfILLRYm0+bp" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-4070555992810259.js" crossorigin="anonymous" integrity="sha384-6eBCnRdtNJ2YcxG7oSrOccPBZyabjljoka1d63hJnGO+a5zaAwG6gtcJmU+cVzY/"><link rel="preload" href="/sw-mlpl/mlpl-web-4070555992810259_bg.wasm" crossorigin="anonymous" integrity="sha384-PIyzqc2QWcpq4bxbKvmKhcJbJc5C5zfRj8mBFPaIGFoJ4PnWMk1v7cVM19CsWfvq" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
 </body>
