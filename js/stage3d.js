@@ -2,6 +2,8 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 let scene, camera, renderer, controls, animId;
+let stepCount = 0;
+const stepObjects = [];
 
 function createGround() {
     const grid = new THREE.GridHelper(40, 40, 0x444466, 0x222233);
@@ -134,13 +136,15 @@ function shapeMesh(shape, color) {
 window.__stage3d_add_step = function(json) {
     if (!scene) return;
     const ev = typeof json === 'string' ? JSON.parse(json) : json;
-    const x = ev.step_idx * SPACING;
+    const x = stepCount * SPACING;
+    stepCount++;
     const color = opColor(ev.label);
     const shape = ev.output?.shape || [];
     const mesh = shapeMesh(shape, color);
     mesh.position.set(x, 0.6, 0);
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
     scene.add(mesh);
+    stepObjects.push(mesh);
 
     const rank = shape.length;
     const dims = shape.length ? `[${shape.join(',')}]` : 'scalar';
@@ -148,8 +152,20 @@ window.__stage3d_add_step = function(json) {
     const label = makeLabel(text);
     label.position.set(x, 1.6, 0);
     scene.add(label);
+    stepObjects.push(label);
 
     camera.position.set(x + 3, 4, 8);
     controls.target.set(x, 0.5, 0);
     controls.update();
+};
+
+window.__stage3d_clear = function() {
+    for (const obj of stepObjects) scene.remove(obj);
+    stepObjects.length = 0;
+    stepCount = 0;
+    if (camera) {
+        camera.position.set(0, 6, 12);
+        controls.target.set(0, 0.5, 0);
+        controls.update();
+    }
 };
