@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "003-save-download"
+  },
+  "action": "Save via Blob+createObjectURL+encodeURIComponent. __stage3d_init refactored to preserve scene/camera, recreate renderer/controls for new canvas element.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-26T12:29:59"
+}
