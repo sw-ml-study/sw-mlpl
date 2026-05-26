@@ -1,0 +1,1 @@
+Log-proportional sizing: logDim(n) = log2(n)*0.5 + 0.3 clamped [0.3, 6]. Vectors, matrices, and tensors now scale logarithmically so a [3] and [300] are both visible.

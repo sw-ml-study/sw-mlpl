@@ -1,6 +1,6 @@
 number = 1
 slug = "001-log-proportional-sizing"
-status = "in-progress"
+status = "completed"
 description = """
 Phase 2a step 1: Log-proportional sculpture sizing.
 
@@ -8,5 +8,6 @@ Replace linear-proportio..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T15:29:24"
+completed_at = "2026-05-26T15:31:26"
 task_type = "feature"
-commits = []
+commits = ["a48258218f39d104567dd43241b305357d408264"]
