@@ -51,11 +51,14 @@ full list):
   lm         shift_pairs_x, shift_pairs_y, last_row, concat,
              attention_weights, argtop_k, scatter
   experiment compare
+  loss       cross_entropy, perplexity
   embed      pairwise_sqdist, knn, tsne, pca, embed_table
+  dimreduce  pca_components, pca_variance_explained,
+             knn_graph, umap, mds, random_projection
   estimate   estimate_train, estimate_hypothetical, feasible,
              calibrate_device
-  viz        svg, hist, scatter_labeled, loss_curve,
-             confusion_matrix, boundary_2d
+  viz        svg, hist, scatter_labeled, scatter3d,
+             loss_curve, confusion_matrix, boundary_2d
   llm        llm_call
 
 Higher-order: reduce(:op, x[, axis]) where :op is one of
@@ -82,9 +85,12 @@ Commands (APL-inspired workspace introspection):
   :wsid                workspace summary (APL )WSID)
   :experiments         list captured experiment runs
   :ask <prompt>        send prompt to a local Ollama LLM
+  :introspect          run all no-arg inspectors at once
   :upload <name>       open file picker; bind chosen photo as
                        <name> = Ok({pixels, h, w}) or
                        Err(\"cancelled\") on dismiss (web only)
+  :3d                  open 3D visualization stage (Ctrl+3)
+  :2d                  close 3D visualization stage
   :clear               reset session (vars + models + state)";
 
 pub fn help_text() -> String {

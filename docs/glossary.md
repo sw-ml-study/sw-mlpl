@@ -8,6 +8,28 @@ at the future enhancement that may add them; concepts outside MLPL's
 teaching-language scope (MLOps, deployment, monitoring) carry
 an `out of scope` note.
 
+## 3D Visualization Stage
+
+A parallel 3D viewport showing computation history as
+sculptural objects on a landscape stage. Toggle with `:3d`
+(on) / `:2d` (off) or `Ctrl+3`. Each eval step places a
+shape-proportional mesh: scalar = sphere, vector = bar,
+matrix = rectangle, rank-3+ tensor = stacked slabs. Colors
+encode the operation type. Arrow keys and nav buttons pan
+the camera. Click a sculpture to see details (shape, rank,
+elements, memory). The stage persists across tab switches;
+`:clear` / Reset REPL clears it.
+
+## Script Editor (web UI)
+
+A multi-line text editor tab in the web playground for
+writing, loading, and running `.mlpl` scripts. Buttons:
+Run (executes all non-comment lines), Load (file picker
+for `.mlpl` / `.txt`), Save (downloads as `session.mlpl`),
+Clear. Comments start with `#`. The shebang line
+`#!/usr/bin/env mlpl-repl` is skipped automatically.
+Content persists across tab switches.
+
 ## abs (builtin)
 
 Elementwise absolute value: `abs(x)` returns `|x|` for each
