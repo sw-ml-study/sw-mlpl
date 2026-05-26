@@ -31,11 +31,12 @@ function createLegend() {
     const marks = [1, 10, 100, 1000, 10000];
     const labels = ['1', '10', '100', '1K', '10K'];
     const mat = new THREE.MeshStandardMaterial({ color: 0x888899, roughness: 0.5 });
-    const z = 4;
+    const z = 8;
+    const startX = -15;
     for (let i = 0; i < marks.length; i++) {
         const s = logDim(marks[i]);
         const cube = new THREE.Mesh(new THREE.BoxGeometry(s, 0.15, 0.15), mat);
-        const x = -8 + i * 3;
+        const x = startX + i * 3;
         cube.position.set(x, 0.08, z);
         scene.add(cube);
         const lbl = makeLabel(labels[i]);
@@ -45,7 +46,7 @@ function createLegend() {
     }
     const title = makeLabel('elements');
     title.scale.set(1.5, 0.3, 1);
-    title.position.set(-8 + 2 * 3, 0.9, z);
+    title.position.set(startX + 2 * 3, 0.9, z);
     scene.add(title);
 }
 
@@ -341,8 +342,8 @@ function drawConnections(label, targetX) {
             new THREE.Vector3(mid, 1.5, -0.5),
             new THREE.Vector3(targetX, 0.3, 0)
         );
-        const geo = new THREE.TubeGeometry(curve, 20, 0.02, 4, false);
-        const mat = new THREE.MeshBasicMaterial({ color: 0x888899, transparent: true, opacity: 0.5 });
+        const geo = new THREE.TubeGeometry(curve, 20, 0.04, 6, false);
+        const mat = new THREE.MeshBasicMaterial({ color: 0xffaa44, transparent: true, opacity: 0.7 });
         const tube = new THREE.Mesh(geo, mat);
         scene.add(tube);
         stepObjects.push(tube);
