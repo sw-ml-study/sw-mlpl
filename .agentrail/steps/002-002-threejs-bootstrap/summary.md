@@ -1,0 +1,1 @@
+Three.js bootstrap: scene with dark background, PerspectiveCamera, OrbitControls with damping, grid ground plane, ambient + directional lighting, render loop. CDN importmap for Three.js v0.170.0. Stage3dPanel Yew component manages canvas lifecycle via use_effect.
