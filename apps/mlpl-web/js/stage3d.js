@@ -198,8 +198,6 @@ window.__stage3d_add_step = function(ev) {
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
     scene.add(mesh);
     stepObjects.push(mesh);
-    animateEntry(mesh);
-    glowNew(mesh, color);
     prevMesh = mesh;
 
     const rank = shape.length;
