@@ -1,0 +1,1 @@
+Glossary: Bottleneck + Reconstruction Error. Backdrop: wider (6x), lower (2/3 below ground), z=-140.
