@@ -1,0 +1,1 @@
+Step 006 (FINAL, use --done): docs, help, glossary, tour, pages, language-status. Mark --done.

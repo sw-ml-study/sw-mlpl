@@ -1,6 +1,6 @@
-name = "element-data-pipeline"
-status = "completed"
-current_step = 5
-created_at = "2026-05-26T16:27:09"
+name = "cnn-builtins-viz"
+status = "active"
+current_step = 1
+created_at = "2026-05-26T19:47:40"
 plan_file = ".agentrail/plan.md"
 retroactive = false
