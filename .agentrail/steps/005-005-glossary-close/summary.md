@@ -1,0 +1,1 @@
+Glossary entries for RNN, LSTM, Vanishing Gradient, Hidden State. Updated help.rs with rnn_cell/lstm_cell. language-status.md records saga 41 closure. All 39 demos pass.
