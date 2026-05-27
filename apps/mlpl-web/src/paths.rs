@@ -220,7 +220,22 @@ pub const PATHS: &[LearningPath] = &[
                 name: "ViT Attention Pattern (no training)",
                 why: "The full ViT forward pipeline on a synthetic image, untrained. Shows every builtin composing into the recipe.",
             },
-            // 20. CLIP (2021)
+            // 20. Diffusion Models (2020)
+            Step::Note {
+                title: "2020 -- Diffusion models",
+                body: "Learn to reverse a noise process: start with pure noise, iteratively denoise toward a data sample (Ho et al., DDPM 2020). Training is simple (predict the noise added at each step), generation is slow (many denoising steps). Foundation for Stable Diffusion (2022), DALL-E 2 (2022), and Midjourney. Wider adoption: 2022 (text-to-image explosion). Largely replaced GANs for image generation. MLPL does not ship diffusion primitives.",
+            },
+            // 21. RAG (2020)
+            Step::Note {
+                title: "2020 -- Retrieval-Augmented Generation",
+                body: "Combine a retriever (search over a document corpus) with a generator (LLM) so the model can cite external knowledge instead of relying on memorized parameters (Lewis et al., 2020). The retriever finds relevant passages; the generator conditions on them. Foundation for grounded AI assistants, enterprise search, and reducing hallucination. Wider adoption: 2023+ (every major LLM product). MLPL has a glossary entry but no retrieval primitives.",
+            },
+            // 22. In-Context Learning (2020)
+            Step::Note {
+                title: "2020 -- In-Context Learning",
+                body: "An emergent capability of large language models: provide examples in the prompt and the model learns the pattern without weight updates (Brown et al., GPT-3 2020). Zero-shot (no examples), few-shot (a handful), and many-shot variants. Not explicitly trained for -- it emerges from pre-training on diverse text at sufficient scale. Changed how practitioners use LLMs: prompt engineering replaced fine-tuning for many tasks.",
+            },
+            // 23. CLIP (2021)
             Step::Note {
                 title: "2021 -- CLIP: connecting vision and language",
                 body: "Dual-encoder contrastive learning: an image encoder and a text encoder trained to agree on matching pairs (Radford et al., 2021). Zero-shot image classification by comparing image embeddings to text-label embeddings. Foundation for text-to-image models (DALL-E, Stable Diffusion). MLPL has the attention primitives but not the dual-encoder training loop.",
@@ -229,7 +244,7 @@ pub const PATHS: &[LearningPath] = &[
                 term: "CLIP (Contrastive Language-Image Pre-training)",
                 why: "Dual-encoder image+text contrastive model. Zero-shot classification via embedding similarity.",
             },
-            // 21. LoRA (2021)
+            // 24. LoRA (2021)
             Step::Note {
                 title: "2021 -- LoRA: efficient fine-tuning",
                 body: "Low-rank adapters: freeze the base model, train only small rank-r matrices injected at each layer (Hu et al., 2021). Reduces trainable parameters by 10,000x while matching full fine-tuning quality. Enables fine-tuning large models on consumer hardware. Refinements: QLoRA (2023) adds 4-bit quantization. MLPL ships lora(model, rank, seed) in the model DSL.",
@@ -238,16 +253,21 @@ pub const PATHS: &[LearningPath] = &[
                 title: "LoRA Fine-Tuning",
                 why: "The MLPL lesson that demonstrates LoRA: freeze base weights, train rank-r adapters, compare loss curves.",
             },
-            // 22. RLHF (2022)
+            // 25. Chain-of-Thought (2022)
             Step::Note {
-                title: "2022 -- RLHF: learning from human preferences",
-                body: "Reinforcement Learning from Human Feedback: SFT (supervised fine-tuning) -> train a reward model on human comparisons -> optimize the policy with PPO against the reward model (Ouyang et al., 2022). The alignment technique that made ChatGPT. Refinements: DPO (2023) removes the reward model entirely. Constitutional AI (2022) uses AI feedback instead of human feedback. MLPL has glossary entries but no RL primitives.",
+                title: "2022 -- Chain-of-Thought prompting",
+                body: "Adding 'Let's think step by step' to a prompt dramatically improves LLM reasoning on math and logic problems (Wei et al., 2022). The model generates intermediate reasoning steps before the final answer. Foundation for inference-time compute scaling: more thinking tokens = better answers. Refinements: Tree-of-Thought (2023), self-consistency (sample multiple chains, take majority vote).",
+            },
+            // 26. RLHF + Constitutional AI (2022)
+            Step::Note {
+                title: "2022 -- RLHF and Constitutional AI",
+                body: "Reinforcement Learning from Human Feedback: SFT -> reward model -> PPO policy optimization (Ouyang et al., 2022). The alignment technique behind ChatGPT. Constitutional AI (Bai et al., Anthropic 2022) replaces human labelers with AI feedback guided by a written constitution. Refinements: DPO (Rafailov et al., 2023) removes the reward model entirely, training directly on preference pairs.",
             },
             Step::Glossary {
                 term: "RLHF (Reinforcement Learning from Human Feedback)",
                 why: "The three-stage alignment pipeline: SFT, reward model, PPO. How ChatGPT was trained.",
             },
-            // 23. Mixture of Experts (2022)
+            // 27. Mixture of Experts (2022)
             Step::Note {
                 title: "2017/2022 -- Mixture of Experts",
                 body: "Route each token to k-of-N expert sub-networks (Shazeer et al. 2017; Fedus et al. 2022 scaled it). Each token uses only a fraction of the model's parameters, so compute cost scales sub-linearly with parameter count. GPT-4 and Mixtral are rumored/confirmed MoE architectures. Key challenge: load balancing across experts. MLPL does not ship MoE primitives.",
@@ -256,7 +276,12 @@ pub const PATHS: &[LearningPath] = &[
                 term: "MoE (Mixture of Experts)",
                 why: "k-of-N routed experts per FFN. Compute scales sub-linearly with parameters.",
             },
-            // 24. Mamba / SSM (2023)
+            // 28. JEPA (2023)
+            Step::Note {
+                title: "2023 -- JEPA: Joint Embedding Predictive Architecture",
+                body: "Predict missing information in embedding space rather than pixel space (Assran et al., I-JEPA 2023; framework by LeCun). Instead of reconstructing masked patches (like MAE), predict their latent representations. Avoids the shortcut problem where models learn to copy low-level textures. Part of LeCun's vision for a 'world model' that learns structured representations without generative reconstruction. Active research area.",
+            },
+            // 29. Mamba / SSM (2023)
             Step::Note {
                 title: "2023 -- Mamba and state-space models",
                 body: "Selective state-space models: an alternative to attention that runs in O(n) instead of O(n^2) (Gu and Dao, 2023). Mamba adds input-dependent selection to the S4 framework (Gu et al. 2021), achieving transformer-quality on language tasks with linear scaling. Whether SSMs fully replace transformers is an open question. MLPL does not ship SSM primitives.",
@@ -265,9 +290,24 @@ pub const PATHS: &[LearningPath] = &[
                 term: "State Space Models / Mamba",
                 why: "Selective state-space alternative to attention. O(n) sequence processing.",
             },
+            // 30. HRM + TRM (2025)
             Step::Note {
-                title: "What comes next",
-                body: "The field moves fast. As of 2024-2025: scaling laws (Chinchilla), multimodal models (GPT-4V, Gemini), long-context attention (ring attention, Infini-attention), inference-time compute (chain-of-thought, tree search), and post-training alignment (RLHF, DPO, Constitutional AI) are the active frontiers. MLPL will add builtins as the pedagogical need arises -- the architecture zoo path has the latest status.",
+                title: "2025 -- Hierarchical and Tiny Recursive Models",
+                body: "Two papers that challenge the scaling paradigm. HRM (Wang et al., 2025): a 27M-parameter recurrent architecture inspired by hierarchical brain processing achieves near-perfect Sudoku/maze results and strong ARC scores with only 1000 training samples. TRM (Jolicoeur-Martineau, 2025): simplifies HRM to a single 2-layer 7M-parameter network that recurses over its own output, scoring 45% on ARC-AGI-1 -- outperforming DeepSeek R1, o3-mini, and Gemini 2.5 Pro with less than 0.01% of their parameters. Key insight: recursive computation depth, not model width, drives generalization on abstract reasoning.",
+            },
+            // 31. RLM (2025)
+            Step::Note {
+                title: "2025 -- Recursive Language Models",
+                body: "An inference paradigm where an LLM treats long prompts as an external environment, programmatically decomposing and recursively calling itself over prompt snippets (Zhang, Kraska, Khattab, 2025). Processes inputs up to 100x beyond the model's context window while outperforming vanilla frontier models. Reframes long-context processing as recursive self-invocation rather than context-window expansion. RLM-Qwen3-8B approaches GPT-5 quality on long-context tasks.",
+            },
+            // 32. ICRL (2026)
+            Step::Note {
+                title: "2026 -- In-Context Reinforcement Learning for tool use",
+                body: "An RL-only framework that eliminates supervised fine-tuning by using few-shot in-context examples during RL rollouts, gradually reducing examples as the model learns independent tool use (Ye, Zhao, Duan et al., 2026). Achieves state-of-the-art on reasoning and tool-use benchmarks. Signals a shift: RL alone, with the right scaffolding, can teach complex behaviors that previously required curated SFT datasets.",
+            },
+            Step::Note {
+                title: "The emerging pattern",
+                body: "The 2024-2026 papers share a theme: depth of reasoning matters more than width of parameters. HRM and TRM show that tiny recursive models outperform billion-parameter LLMs on abstract reasoning. RLM shows that recursive self-invocation beats longer context windows. ICRL shows that RL scaffolding can replace supervised data. Chain-of-Thought showed that more thinking tokens improve answers. The frontier is shifting from 'how big is the model' to 'how deeply does it think'.",
             },
         ],
     },
