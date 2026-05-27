@@ -1,6 +1,6 @@
 number = 1
 slug = "history-path-definition"
-status = "pending"
+status = "completed"
 description = """
 Step 001: Chronological History path definition.
 
@@ -8,5 +8,6 @@ Create "A Short History of ..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T15:49:39"
+completed_at = "2026-05-27T15:53:31"
 task_type = "feature"
-commits = []
+commits = ["9ddd8119b0e4015496b93fe0cf4c680d0a96382e"]
