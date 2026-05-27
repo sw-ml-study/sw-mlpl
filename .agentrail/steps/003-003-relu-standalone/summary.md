@@ -1,0 +1,1 @@
+relu(x) = elementwise max(0, x). Standalone builtin separate from relu_layer(). One line in math_builtins dispatch.

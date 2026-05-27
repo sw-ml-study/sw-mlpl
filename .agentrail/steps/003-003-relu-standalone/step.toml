@@ -1,6 +1,6 @@
 number = 3
 slug = "003-relu-standalone"
-status = "in-progress"
+status = "completed"
 description = """
 Step 003: standalone relu(x) builtin.
 
@@ -8,5 +8,6 @@ Add relu(x) = max(0, x) as an elementw..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T19:47:57"
+completed_at = "2026-05-27T10:25:42"
 task_type = "feature"
-commits = []
+commits = ["1baa76522b5ccbd0814ed95b81eb78a36bd61874"]
