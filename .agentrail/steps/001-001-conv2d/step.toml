@@ -1,6 +1,6 @@
 number = 1
 slug = "001-conv2d"
-status = "pending"
+status = "in-progress"
 description = """
 Step 001: conv2d builtin.
 
