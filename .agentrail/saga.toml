@@ -1,5 +1,5 @@
 name = "rnn-lstm-builtins"
-status = "active"
+status = "completed"
 current_step = 5
 created_at = "2026-05-27T13:19:54"
 plan_file = ".agentrail/plan.md"

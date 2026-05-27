@@ -1,0 +1,11 @@
+{
+  "task_type": "meta",
+  "state": {
+    "number": 5,
+    "step": "005-glossary-close"
+  },
+  "action": "Edit glossary.md, help.rs, language-status.md. Markdown check. Demo smoke test.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T15:15:11"
+}
