@@ -1,6 +1,6 @@
 number = 3
 slug = "003-sequence-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Step 003: RNN sequence demo.
 

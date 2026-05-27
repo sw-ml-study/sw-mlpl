@@ -15,11 +15,11 @@ let prevMesh = null;
 function createBackdrop() {
     new THREE.TextureLoader().load('salt-flat.jpg', tex => {
         const aspect = tex.image.width / tex.image.height;
-        const h = 120;
-        const w = h * aspect * 6;
+        const h = 400;
+        const w = h * aspect * 8;
         const mat = new THREE.MeshBasicMaterial({ map: tex, fog: false });
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
-        plane.position.set(0, h * 0.17, -140);
+        plane.position.set(0, -h * 0.15, -180);
         scene.add(plane);
     });
 }
