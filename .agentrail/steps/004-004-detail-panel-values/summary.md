@@ -1,0 +1,1 @@
+Detail panel shows values (first 20, or matrix table), min/max/mean/std stats, and histogram for large arrays. Values + summary stored on mesh userData.

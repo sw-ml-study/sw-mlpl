@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "004-detail-panel-values"
+  },
+  "action": "showDetail() extended with computeStats, renderStats, renderValues, renderHistogram. Values/summary stored on userData from event.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-26T19:19:47"
+}
