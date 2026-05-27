@@ -42,24 +42,19 @@ function createGround() {
 }
 
 function createLegend() {
-    const marks = [1, 10, 100, 1000, 10000];
-    const labels = ['1', '10', '100', '1K', '10K'];
-    const mat = new THREE.MeshStandardMaterial({ color: 0x6688bb, roughness: 0.4 });
-    const z = 8;
-    const startX = -15;
+    const marks = [10, 100, 1000];
+    const labels = ['10 elements', '100 elements', '1K elements'];
+    const mat = new THREE.MeshStandardMaterial({ color: 0x8899bb, roughness: 0.3, metalness: 0.1 });
     for (let i = 0; i < marks.length; i++) {
-        const s = logDim(marks[i]);
-        const cube = new THREE.Mesh(new THREE.BoxGeometry(s, 0.2, 0.2), mat);
-        const x = startX + i * 3.5;
-        cube.position.set(x, 0.1, z);
+        const d = logDim(marks[i]);
+        const cube = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, d), mat.clone());
+        const x = -(i + 1) * SPACING;
+        cube.position.set(x, 0.08, -d / 2);
         scene.add(cube);
-        const lbl = makeLabel(labels[i], { fontSize: 22, color: '#ffcc44', bg: 'rgba(20, 30, 60, 0.8)', w: 160, h: 48, scale: [1.4, 0.4, 1] });
-        lbl.position.set(x, 0.7, z);
+        const lbl = makeLabel(labels[i], { fontSize: 18, color: '#aabbdd', bg: 'rgba(20, 30, 60, 0.7)', w: 280, h: 44, scale: [2.5, 0.4, 1] });
+        lbl.position.set(x, 0.6, 0);
         scene.add(lbl);
     }
-    const title = makeLabel('SCALE (elements)', { fontSize: 20, color: '#88bbff', bg: 'rgba(20, 30, 60, 0.85)', w: 360, h: 48, scale: [3, 0.4, 1] });
-    title.position.set(startX + 2 * 3.5, 1.3, z);
-    scene.add(title);
 }
 
 function createMountains() {
