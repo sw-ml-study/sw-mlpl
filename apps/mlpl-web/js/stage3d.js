@@ -13,7 +13,7 @@ const varPositions = {};
 let prevMesh = null;
 
 function createBackdrop() {
-    new THREE.TextureLoader().load('salt-flat-pano.jpg', tex => {
+    new THREE.TextureLoader().load('salt-flat-pano.jpg?ts=1779917889011', tex => {
         const aspect = tex.image.width / tex.image.height;
         const h = 200;
         const w = h * aspect * 6;
