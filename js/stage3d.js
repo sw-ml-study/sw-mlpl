@@ -608,3 +608,33 @@ window.__stage3d_clear = function() {
         controls.update();
     }
 };
+
+// Resize handle: drag to adjust REPL output height
+(function() {
+    let dragging = false;
+    let startY = 0;
+    let startH = 0;
+    let outputEl = null;
+
+    document.addEventListener('mousedown', e => {
+        if (!e.target.closest('#viz3d-resize')) return;
+        outputEl = document.querySelector('main.viz3d-split > .output');
+        if (!outputEl) return;
+        dragging = true;
+        startY = e.clientY;
+        startH = outputEl.offsetHeight;
+        e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (!dragging || !outputEl) return;
+        const dy = e.clientY - startY;
+        const newH = Math.max(60, Math.min(window.innerHeight * 0.7, startH + dy));
+        outputEl.style.height = newH + 'px';
+    });
+
+    document.addEventListener('mouseup', () => {
+        dragging = false;
+        outputEl = null;
+    });
+})();
