@@ -1,6 +1,6 @@
 number = 2
 slug = "002-lstm-cell"
-status = "pending"
+status = "in-progress"
 description = """
 Step 002: lstm_cell builtin.
 

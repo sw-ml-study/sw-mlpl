@@ -214,7 +214,7 @@ pub const MOONS_MLP: Demo = Demo {
 };
 
 pub const PCA: Demo = Demo {
-    category: "Classification",
+    category: "Dim Reduction",
     name: "PCA",
     intro: "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run [[power iteration]] to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance.",
     takeaway: "The scatter is colored by which side of zero each point's projection lands on; the line shows the found principal axis. Power iteration converges in ~10 steps to a direction that's clearly the long axis of the data cloud.",
