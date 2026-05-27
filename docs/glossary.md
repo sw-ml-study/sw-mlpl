@@ -2118,12 +2118,44 @@ modern instruction-tuned LLMs. Out of MLPL's current scope.
 Root-mean-square normalization: `x / sqrt(mean(x^2) + eps)`.
 A simpler alternative to LayerNorm. MLPL: `rms_norm(dim)`.
 
-## RNN / LSTM / GRU
+## Hidden State
 
-Recurrent network families that process sequences one token
-at a time and pass a hidden state forward. Largely displaced
-by transformers for language tasks. MLPL does not ship
-recurrent layers in v0.19; deferred.
+The fixed-size vector a recurrent network carries from one
+time step to the next. It is the network's "memory" of
+everything it has seen so far. At each step the cell reads
+one new input and produces an updated hidden state. In MLPL,
+`rnn_cell` and `lstm_cell` both accept and return hidden
+state vectors. See also: RNN, LSTM, Vanishing Gradient.
+
+## RNN (Recurrent Neural Network)
+
+A network that processes sequences one element at a time,
+updating a hidden state at each step:
+`h_t = tanh(W_ih @ x_t + W_hh @ h_{t-1} + bias)`. The
+same weights are reused at every step (weight sharing).
+MLPL: `rnn_cell(input, hidden, W_ih, W_hh, bias)` computes
+one step; unroll in user code for a full sequence.
+
+## LSTM (Long Short-Term Memory)
+
+An RNN variant with gated memory that solves the vanishing
+gradient problem. Adds a cell state alongside the hidden
+state, controlled by three gates: forget (what to discard),
+input (what to store), and output (what to expose). MLPL:
+`lstm_cell(input, hidden, cell, W, bias)` returns a
+concatenated `[hidden; cell]` vector. Split with
+`reshape` + `take` to extract each.
+
+## Vanishing Gradient
+
+The problem that causes vanilla RNNs to forget early inputs
+in long sequences. Because the hidden state passes through
+`tanh` at every step, gradients shrink exponentially during
+backpropagation through time. After ~10-20 steps the
+gradient signal from early inputs is effectively zero, so
+the network cannot learn long-range dependencies. LSTM and
+GRU solve this with gated shortcuts that let gradients
+flow unchanged across many steps.
 
 ## ROC / AUC
 
