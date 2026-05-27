@@ -1,7 +1,7 @@
 use mlpl_array::{DenseArray, Shape};
 use mlpl_runtime_core::error::RuntimeError;
 
-pub(crate) const NAMES: &[&str] = &["conv2d"];
+pub(crate) const NAMES: &[&str] = &["conv2d", "pool2d"];
 
 pub(crate) fn try_call(
     name: &str,
@@ -9,6 +9,7 @@ pub(crate) fn try_call(
 ) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
         "conv2d" => Some(conv2d(args)),
+        "pool2d" => Some(pool2d(args)),
         _ => None,
     }
 }
@@ -89,6 +90,69 @@ fn conv2d(args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     )?)
 }
 
+fn pool2d(args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 3 {
+        return Err(RuntimeError::ArityMismatch {
+            func: "pool2d".into(),
+            expected: 3,
+            got: args.len(),
+        });
+    }
+    let input = &args[0];
+    let size = &args[1];
+    let mode_arr = &args[2];
+
+    let id = input.shape().dims();
+    if id.len() != 4 {
+        return Err(RuntimeError::InvalidArgument {
+            func: "pool2d".into(),
+            reason: format!("input must be [B,C,H,W], got rank {}", id.len()),
+        });
+    }
+    let sd = size.data();
+    if sd.len() != 2 {
+        return Err(RuntimeError::InvalidArgument {
+            func: "pool2d".into(),
+            reason: format!("size must be [pH, pW], got {} elements", sd.len()),
+        });
+    }
+    let (ph, pw) = (sd[0] as usize, sd[1] as usize);
+    let (b, c, h, w) = (id[0], id[1], id[2], id[3]);
+    let h_out = h / ph;
+    let w_out = w / pw;
+
+    let mode_val = mode_arr.data();
+    let is_max = mode_val.first().copied().unwrap_or(0.0) != 0.0;
+
+    let idata = input.data();
+    let mut out = vec![0.0f64; b * c * h_out * w_out];
+    for bi in 0..b {
+        for ci in 0..c {
+            for oh in 0..h_out {
+                for ow in 0..w_out {
+                    let mut val = if is_max { f64::NEG_INFINITY } else { 0.0 };
+                    for fh in 0..ph {
+                        for fw in 0..pw {
+                            let v = idata
+                                [bi * c * h * w + ci * h * w + (oh * ph + fh) * w + ow * pw + fw];
+                            if is_max {
+                                val = val.max(v);
+                            } else {
+                                val += v;
+                            }
+                        }
+                    }
+                    if !is_max {
+                        val /= (ph * pw) as f64;
+                    }
+                    out[bi * c * h_out * w_out + ci * h_out * w_out + oh * w_out + ow] = val;
+                }
+            }
+        }
+    }
+    Ok(DenseArray::new(Shape::new(vec![b, c, h_out, w_out]), out)?)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -110,5 +174,33 @@ mod tests {
         assert_eq!(d[1], 54.0);
         assert_eq!(d[2], 81.0);
         assert_eq!(d[3], 90.0);
+    }
+
+    #[test]
+    fn pool2d_max() {
+        let input = DenseArray::new(
+            Shape::new(vec![1, 1, 4, 4]),
+            (0..16).map(|i| i as f64).collect(),
+        )
+        .unwrap();
+        let size = DenseArray::new(Shape::new(vec![2]), vec![2.0, 2.0]).unwrap();
+        let mode = DenseArray::from_scalar(1.0);
+        let result = pool2d(vec![input, size, mode]).unwrap();
+        assert_eq!(result.shape().dims(), &[1, 1, 2, 2]);
+        assert_eq!(result.data(), &[5.0, 7.0, 13.0, 15.0]);
+    }
+
+    #[test]
+    fn pool2d_avg() {
+        let input = DenseArray::new(
+            Shape::new(vec![1, 1, 4, 4]),
+            (0..16).map(|i| i as f64).collect(),
+        )
+        .unwrap();
+        let size = DenseArray::new(Shape::new(vec![2]), vec![2.0, 2.0]).unwrap();
+        let mode = DenseArray::from_scalar(0.0);
+        let result = pool2d(vec![input, size, mode]).unwrap();
+        assert_eq!(result.shape().dims(), &[1, 1, 2, 2]);
+        assert_eq!(result.data(), &[2.5, 4.5, 10.5, 12.5]);
     }
 }

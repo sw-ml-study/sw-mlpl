@@ -1,6 +1,6 @@
 number = 2
 slug = "002-pool2d"
-status = "pending"
+status = "in-progress"
 description = """
 Step 002: pool2d builtin.
 
