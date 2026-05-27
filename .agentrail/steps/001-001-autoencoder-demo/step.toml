@@ -1,6 +1,6 @@
 number = 1
 slug = "001-autoencoder-demo"
-status = "in-progress"
+status = "completed"
 description = """
 Step 001: Autoencoder demo.
 
@@ -8,5 +8,6 @@ Build a demo using existing builtins -- no new r..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T12:34:42"
+completed_at = "2026-05-27T12:36:30"
 task_type = "feature"
-commits = []
+commits = ["775540d7c2226293444fb306f27f681006ff07ab"]

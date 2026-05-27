@@ -1,0 +1,1 @@
+Autoencoder demo: encoder 8->5->3, decoder 3->5->8, 30 adam steps on MSE. Shows before/after reconstruction + latent bottleneck. No new builtins needed.
