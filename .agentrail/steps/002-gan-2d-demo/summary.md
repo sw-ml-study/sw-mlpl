@@ -1,0 +1,1 @@
+GAN (2D circle) demo: Generator (2->8->2) learns to produce unit circle points via alternating adam updates against Discriminator (2->8->1). 50 training steps. Registered under GAN category. All 40 demos pass.
