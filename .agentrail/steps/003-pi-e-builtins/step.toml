@@ -1,0 +1,12 @@
+number = 3
+slug = "pi-e-builtins"
+status = "pending"
+description = """
+Step 003: pi() and e() zero-arg builtins.
+
+Add pi and e to math_builtins.rs N..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T16:51:32"
+task_type = "feature"
+commits = []

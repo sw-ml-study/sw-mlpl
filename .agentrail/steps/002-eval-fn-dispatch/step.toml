@@ -1,0 +1,12 @@
+number = 2
+slug = "eval-fn-dispatch"
+status = "pending"
+description = """
+Step 002: Eval: function storage + call dispatch.
+
+Store defined functions in..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T16:51:32"
+task_type = "feature"
+commits = []
