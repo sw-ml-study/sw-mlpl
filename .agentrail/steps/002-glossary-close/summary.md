@@ -1,0 +1,1 @@
+language-status.md updated with saga 44 closure and saga 46 proposal. Chronological History path complete.

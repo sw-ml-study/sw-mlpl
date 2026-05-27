@@ -1,9 +1,10 @@
 number = 2
 slug = "glossary-close"
-status = "pending"
+status = "completed"
 description = "Step 002 (FINAL, use --done): language-status.md update. Demo smoke test. Mar..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T15:49:39"
+completed_at = "2026-05-27T15:54:11"
 task_type = "docs"
-commits = []
+commits = ["350c150f0933268e7f55fad9d43089d149e7da24"]
