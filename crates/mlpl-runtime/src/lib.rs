@@ -6,6 +6,7 @@
 //! so downstream `use mlpl_runtime::RuntimeError` keeps working.
 
 mod builtins;
+mod conv_builtins;
 mod ensemble_builtins;
 mod llm_builtins;
 mod math_builtins;
@@ -25,6 +26,7 @@ pub fn runtime_builtin_names() -> impl Iterator<Item = &'static str> {
     builtins::LOCAL_NAMES
         .iter()
         .chain(math_builtins::NAMES)
+        .chain(conv_builtins::NAMES)
         .chain(random_builtins::NAMES)
         .chain(mlpl_runtime_data::dataset_builtins::NAMES)
         .chain(ml_builtins::NAMES)
