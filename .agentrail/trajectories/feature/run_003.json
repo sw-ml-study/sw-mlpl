@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "003-sequence-demo"
+  },
+  "action": "New demos_rnn.rs. Backdrop h=400 w=3200 y=-60 z=-180.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T14:22:49"
+}
