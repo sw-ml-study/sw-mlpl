@@ -227,7 +227,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Diagram {
                 slug: "08_cnn",
-                why: "Conv + pool + FC. Glossary only -- no conv2d primitive in MLPL.",
+                why: "Conv + pool + FC. MLPL ships conv2d and pool2d builtins (saga 39) plus a Simple CNN demo.",
             },
             Step::Diagram {
                 slug: "09_resnet",
@@ -235,11 +235,11 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Diagram {
                 slug: "10_rnn",
-                why: "Hidden state passed through time. Glossary only -- deferred.",
+                why: "Hidden state passed through time. MLPL ships rnn_cell (saga 41) plus an RNN sequence demo.",
             },
             Step::Diagram {
                 slug: "11_lstm",
-                why: "Gated RNN cell. Glossary only -- deferred.",
+                why: "Gated RNN cell with four gates. MLPL ships lstm_cell (saga 41) plus an LSTM sequence demo.",
             },
             Step::Diagram {
                 slug: "12_attention",
@@ -480,6 +480,140 @@ pub const PATHS: &[LearningPath] = &[
             Step::Note {
                 title: "Beyond this path",
                 body: "**Full-resolution demo.** `demos/vit_multihead_thorough.mlpl` trains the same architecture on 128x128 input from the full Oxford-IIIT Pet (via `fetch_dataset`) inside a `device(\"mlx\")` block. Runs on Apple Silicon with `--features mlx`; falls back to CPU on any other host.\n\n**Pending architectural pieces.** [[Layer norm]] with learned affine and the tanh-approximation GELU are not yet builtins. Adding them would close the architectural gap to the upstream ViT notebook.\n\n**Making the classifier actually work on unseen photos.** Today's in-browser trained models overfit hard on 8-20 images and tend to classify every uploaded photo as a cat. The 7-demo improvement ladder in `docs/better-cat-dog-future-demos.md` lays out the recommended sequence: full-pets_tiny + held-out validation split first (no new builtins), then confidence-thresholded \"other\" output, then horizontal-flip augmentation, then [[AdamW]], then LayerNorm + GELU, then the thorough MLX run.",
+            },
+        ],
+    },
+    LearningPath {
+        title: "Architecture Zoo: from pixels to language",
+        blurb: "How machines learn to see, generate, and remember. Walk the four major ML architecture families in dependency order: CNN (spatial structure), RNN/LSTM (sequential memory), Autoencoder/GAN (generative models), and Transformer (global attention). Each group pairs a glossary orientation with runnable demos.",
+        steps: &[
+            Step::Note {
+                title: "What is an architecture?",
+                body: "Each ML architecture exploits a different kind of structure in data. A CNN exploits spatial locality (nearby pixels matter most). An RNN exploits sequential order (what came before matters). An autoencoder exploits compressibility (data lives on a low-dimensional manifold). A GAN exploits adversarial feedback. A transformer exploits long-range attention. This path walks them in order of increasing complexity.",
+            },
+            // --- Group 1: See (spatial structure) ---
+            Step::Note {
+                title: "Group 1: See (spatial structure)",
+                body: "CNNs exploit the fact that nearby pixels are more related than distant ones. A small sliding filter (kernel) scans the image, producing a feature map that detects edges, textures, or shapes. Pooling then shrinks the spatial dimensions, keeping the strongest signals. Stacking conv + pool layers builds a hierarchy: edges -> textures -> parts -> objects.",
+            },
+            Step::Glossary {
+                term: "Convolution",
+                why: "The core CNN operation: a small filter slides across the input, computing dot products at each position. MLPL: conv2d(input, filters, stride, padding).",
+            },
+            Step::Glossary {
+                term: "Feature map",
+                why: "The output of a convolutional layer: one 2D grid per filter, each highlighting a different pattern in the input.",
+            },
+            Step::Glossary {
+                term: "Pooling",
+                why: "Controlled information loss: shrink spatial dimensions by taking the max or average over small windows. MLPL: pool2d(input, size, mode).",
+            },
+            Step::Demo {
+                name: "Simple CNN",
+                why: "A minimal conv2d -> relu -> pool2d -> flatten -> linear pipeline on a 4x4 synthetic input. Shows the shape transformations at each stage.",
+            },
+            Step::Diagram {
+                slug: "08_cnn",
+                why: "The canonical CNN diagram: input -> conv+relu -> pool -> conv+relu -> pool -> flatten -> FC. MLPL ships conv2d and pool2d builtins (saga 39).",
+            },
+            // --- Group 2: Remember (sequential structure) ---
+            Step::Note {
+                title: "Group 2: Remember (sequential order)",
+                body: "RNNs process sequences one element at a time, carrying a hidden state forward like a running summary. At each step the cell reads one new input and updates its memory. The same weights are reused at every step (weight sharing). The problem: vanilla RNNs forget early inputs after ~10-20 steps because gradients vanish through repeated tanh squashing.",
+            },
+            Step::Glossary {
+                term: "RNN (Recurrent Neural Network)",
+                why: "The basic recurrent cell: h_t = tanh(W_ih @ x_t + W_hh @ h_{t-1} + bias). MLPL: rnn_cell(input, hidden, W_ih, W_hh, bias).",
+            },
+            Step::Demo {
+                name: "RNN (sequence)",
+                why: "A 5-step unrolled RNN showing hidden state evolution. Each rnn_cell call is one tick; watch the hidden vector change at each time step.",
+            },
+            Step::Glossary {
+                term: "Vanishing Gradient",
+                why: "Why vanilla RNNs forget: gradients shrink exponentially through repeated tanh, losing signal from early inputs.",
+            },
+            Step::Glossary {
+                term: "LSTM (Long Short-Term Memory)",
+                why: "Gated RNN with separate cell state: forget/input/output gates control what to keep, add, and expose. Solves vanishing gradients.",
+            },
+            Step::Demo {
+                name: "LSTM (sequence memory)",
+                why: "A 10-step unrolled LSTM -- twice the length of the RNN demo. The cell state carries information across many steps without washing out.",
+            },
+            Step::Glossary {
+                term: "Hidden State",
+                why: "The fixed-size vector a recurrent network carries between time steps -- the network's memory of everything it has seen so far.",
+            },
+            Step::Diagram {
+                slug: "10_rnn",
+                why: "Hidden state passed through time. MLPL ships rnn_cell (saga 41).",
+            },
+            Step::Diagram {
+                slug: "11_lstm",
+                why: "The four-gate LSTM cell. MLPL ships lstm_cell (saga 41).",
+            },
+            // --- Group 3: Create (generative structure) ---
+            Step::Note {
+                title: "Group 3: Create (generative models)",
+                body: "Generative models learn to produce new data that resembles the training set. An autoencoder compresses data through a bottleneck and reconstructs it -- the bottleneck forces the model to learn the essential structure. A GAN pits a Generator against a Discriminator in an adversarial game -- the Generator improves by fooling the Discriminator.",
+            },
+            Step::Glossary {
+                term: "Bottleneck",
+                why: "The narrow layer in an autoencoder that forces compression. The network must learn which features matter enough to preserve.",
+            },
+            Step::Demo {
+                name: "Autoencoder (8 to 3 to 8)",
+                why: "Encoder shrinks 8 dimensions to 3, decoder expands back to 8. Train with MSE reconstruction loss. The bottleneck vector is the learned compressed representation.",
+            },
+            Step::Glossary {
+                term: "Reconstruction Error",
+                why: "How well the autoencoder recovers the original input from the bottleneck. Lower = better compression without information loss.",
+            },
+            Step::Glossary {
+                term: "GAN (Generative Adversarial Network)",
+                why: "Two networks in competition: Generator creates fakes, Discriminator catches them. At equilibrium the Generator produces realistic data.",
+            },
+            Step::Demo {
+                name: "GAN (2D circle)",
+                why: "Generator learns to produce unit-circle points from random noise. 50 alternating adam steps train Generator and Discriminator in competition.",
+            },
+            Step::Glossary {
+                term: "Latent Space",
+                why: "The internal representation space -- hidden-layer activations that are often more semantically structured than the raw input.",
+            },
+            // --- Group 4: Attend (global structure) ---
+            Step::Note {
+                title: "Group 4: Attend (global attention)",
+                body: "Transformers replaced RNNs for most sequence tasks by using attention instead of recurrence. Attention lets every position look at every other position in parallel -- no sequential bottleneck, no vanishing gradients. The cost is O(n^2) in sequence length, but the parallelism makes it faster on modern hardware.",
+            },
+            Step::Diagram {
+                slug: "12_attention",
+                why: "The attention formula: softmax(QK^T / sqrt(d_k)) V. The diagram that makes it click.",
+            },
+            Step::Lesson {
+                title: "Self-Attention from Scratch",
+                why: "Build one head of attention from primitives: three projections (Q/K/V), scaled dot-product, softmax, weighted sum.",
+            },
+            Step::Demo {
+                name: "Multi-Head Attention from Scratch",
+                why: "Multiple attention heads run in parallel, each on a d_k slab. The from-scratch implementation shows how heads split and recombine.",
+            },
+            Step::Diagram {
+                slug: "17_gpt_decoder_only",
+                why: "Stacked causal-self-attention blocks. This IS the Tiny LM architecture.",
+            },
+            Step::Demo {
+                name: "Tiny LM Generate",
+                why: "End-to-end: BPE tokenizer + 1-layer transformer trained 30 steps, then sampled to generate text. The smallest program that learns to talk.",
+            },
+            Step::Note {
+                title: "Why transformers replaced RNNs",
+                body: "RNNs process tokens one at a time -- each step waits for the previous one. Transformers process all tokens in parallel via attention. RNNs compress history into a fixed-size hidden state that forgets; transformers let every token attend to every other token directly. The tradeoff: transformers need O(n^2) memory for n tokens, but modern hardware makes that worthwhile up to ~128K tokens.",
+            },
+            Step::Note {
+                title: "Where to go from here",
+                body: "You have seen the four major architecture families. The 'Zero to LLM' path goes deeper into transformers. The 'Build a transformer from primitives' path constructs encoder and decoder blocks step by step. The 'Vision Transformers' path applies attention to image patches. Each architecture here has a dedicated demo you can re-run and modify in the REPL.",
             },
         ],
     },
