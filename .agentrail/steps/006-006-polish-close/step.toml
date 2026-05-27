@@ -1,9 +1,10 @@
 number = 6
 slug = "006-polish-close"
-status = "in-progress"
+status = "completed"
 description = "Step 006 (FINAL, use --done): docs, help, glossary, tour, pages, language-sta..."
 role = "production"
 context_files = []
 created_at = "2026-05-26T19:47:57"
+completed_at = "2026-05-27T11:40:50"
 task_type = "meta"
-commits = []
+commits = ["b9601283e729c36d233c981ca003669e3ae94da2"]

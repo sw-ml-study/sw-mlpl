@@ -1,0 +1,11 @@
+{
+  "task_type": "meta",
+  "state": {
+    "number": 6,
+    "step": "006-polish-close"
+  },
+  "action": "help.rs + language-status.md + pages.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T11:40:50"
+}
