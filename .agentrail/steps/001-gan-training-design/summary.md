@@ -1,0 +1,1 @@
+sin/cos builtins, GAN training design validated (alternating adam with model DSL), BUILTIN_GROUPS completeness fixed (added 11 missing builtins to inspect_groups + lang-reference). All 4 help completeness tests + 39 demo smoke tests pass.
