@@ -1,0 +1,1 @@
+Step 003 (FINAL, use --done): Glossary entries (GAN, Generator, Discriminator, Adversarial Training, Latent Space). Help text update. language-status.md. Demo smoke test. Mark --done.
