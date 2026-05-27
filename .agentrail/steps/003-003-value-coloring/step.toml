@@ -1,6 +1,6 @@
 number = 3
 slug = "003-value-coloring"
-status = "in-progress"
+status = "completed"
 description = """
 Step 003: Value-colored sculptures.
 
@@ -8,5 +8,6 @@ Update stage3d.js to use element values ..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T16:27:35"
+completed_at = "2026-05-26T19:14:28"
 task_type = "feature"
-commits = []
+commits = ["4ef68c0528e52d9c6434b8b296d6b4058f765b6b"]
