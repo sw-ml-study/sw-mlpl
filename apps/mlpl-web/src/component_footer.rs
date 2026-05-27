@@ -4,12 +4,18 @@ use crate::components::UrlProps;
 
 #[function_component(Footer)]
 pub fn footer(props: &UrlProps) -> Html {
-    let build_info = [
+    let version = format!(
+        "v{}.{}",
+        env!("CARGO_PKG_VERSION"),
+        env!("BUILD_COMMIT_COUNT")
+    );
+    let build_info = format!(
+        "{} \u{00b7} {} \u{00b7} {} \u{00b7} {}",
+        version,
         env!("BUILD_HOST"),
         env!("BUILD_SHA"),
-        env!("BUILD_TIMESTAMP"),
-    ]
-    .join(" \u{00b7} ");
+        env!("BUILD_TIMESTAMP")
+    );
     html! {
         <footer>
             <span>{"MIT License"}</span>
