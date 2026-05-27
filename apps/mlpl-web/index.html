@@ -1552,8 +1552,10 @@
     <div id="app"></div>
     <script>
     window.__initResize = function(handle) {
+        console.log('[resize] initResize called', handle);
         let dragging = false, startY = 0, startH = 0, outputEl = null;
         handle.addEventListener('mousedown', function(e) {
+            console.log('[resize] mousedown on handle');
             outputEl = document.querySelector('.viz3d-split .output') || document.getElementById('output');
             if (!outputEl) return;
             dragging = true;
