@@ -286,6 +286,16 @@ distillation because there is no architecture mismatch to
 explain. **Deferred** in MLPL: blocked on `kl_div` /
 `soft_targets` builtins.
 
+## Bottleneck (autoencoder)
+
+The narrow middle layer of an [[Autoencoder]] where the
+input is compressed to its smallest representation. The
+encoder maps input to the bottleneck; the decoder maps
+back. The bottleneck dimension controls the tradeoff
+between compression and reconstruction quality. MLPL
+demo: the Autoencoder (simple) demo compresses 8
+dimensions to a 3-element bottleneck vector.
+
 ## BPE (Byte-Pair Encoding)
 
 A subword tokenizer that starts from raw bytes and greedily
@@ -1989,6 +1999,15 @@ Out of scope for the initial step: record destructuring in
 let-bindings (`let {X, Y} = r`), record-update / spread syntax
 (`{..r, X: new_x}`), pattern matching on records. Each is a
 separate follow-up if a use case appears.
+
+## Reconstruction Error
+
+The difference between an [[Autoencoder]]'s input and its
+output. Typically measured as mean squared error (MSE):
+`reduce_add((output - input) * (output - input), 0) / N`.
+Lower is better -- zero means perfect reconstruction.
+Training minimizes this loss, forcing the [[Bottleneck
+(autoencoder)]] to retain essential structure.
 
 ## Regularization
 
