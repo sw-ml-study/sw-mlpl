@@ -1,0 +1,1 @@
+Simple CNN demo: img[1,1,8,8] -> conv2d -> relu -> pool2d -> conv2d -> reshape -> [4] feature vector. Shape annotations show spatial shrinkage.

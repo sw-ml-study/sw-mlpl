@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "004-cnn-demo"
+  },
+  "action": "New demos_cnn.rs with SIMPLE_CNN. Registered in DEMOS array. README count 34->35.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T11:38:07"
+}
