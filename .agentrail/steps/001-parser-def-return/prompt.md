@@ -1,0 +1,3 @@
+Step 001: Parser: def + return AST nodes.
+
+Add Expr::FnDef { name, params, body, span } and Expr::Return { value, span } to the AST. Parse "def prefix:name(arg1, arg2) { body }" -- reject names without a colon (no namespace prefix). Parse "return expr" inside function bodies. Colon in identifiers is only valid after "def" keyword. TDD: write parser tests first (valid def, missing colon rejection, return parsing, nested def rejection).
