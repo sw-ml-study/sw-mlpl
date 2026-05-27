@@ -178,7 +178,10 @@ fn render_main_shell(
     repl_pane: Html,
 ) -> Html {
     let stage = if show_3d {
-        html! { <section class="stage3d-pane"><Stage3dPanel /></section> }
+        html! { <>
+            <div class="resize-handle" id="viz3d-resize" />
+            <section class="stage3d-pane"><Stage3dPanel /></section>
+        </> }
     } else {
         html! {}
     };
