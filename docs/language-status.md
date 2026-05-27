@@ -15,7 +15,7 @@ guided tour + what's-new modal).
 
 ## Active saga
 
-None. Saga 39 (`cnn-builtins-viz`) closed 2026-05-27.
+None. Saga 40 (`autoencoder-demo`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -35,6 +35,7 @@ human-readable summary.
 | `3d-scale-connections` (37) | shipped | -- (capability saga) | Closed 2026-05-26. 4 steps. Log-proportional sizing, scale legend, connection arrows between dependent steps, :3d reset command. |
 | `element-data-pipeline` (38) | shipped | -- (capability saga) | Closed 2026-05-26. 5 steps. eval_with_values API, element values in Stage3dEvent, value-colored sculptures (bar charts, cell grids, diverging colormap), detail panel with stats + histogram. |
 | `cnn-builtins-viz` (39) | shipped | -- (capability saga) | Closed 2026-05-27. 6 steps. conv2d, pool2d, relu standalone, Simple CNN demo, 3D stacked heatmap channels for rank-4 tensors. |
+| `autoencoder-demo` (40) | shipped | -- (content saga) | Closed 2026-05-27. 4 steps. Autoencoder demo (encoder 8->3, decoder 3->8), bottleneck hint in 3D detail, glossary entries (Bottleneck, Reconstruction Error), salt flat backdrop. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
 The "proposed" sagas have full milestone docs; the user has

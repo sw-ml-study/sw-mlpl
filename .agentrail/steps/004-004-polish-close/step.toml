@@ -1,6 +1,6 @@
 number = 4
 slug = "004-polish-close"
-status = "pending"
+status = "in-progress"
 description = "Step 004 (FINAL, use --done): language-status, pages rebuild, saga close. Mar..."
 role = "production"
 context_files = []
