@@ -28,6 +28,7 @@ pub mod component_welcome;
 pub mod components;
 pub mod demos;
 pub mod demos_attention;
+pub mod demos_autoencoder;
 pub mod demos_basics;
 pub mod demos_cnn;
 pub mod demos_dim_reduction;
