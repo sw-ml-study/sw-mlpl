@@ -317,7 +317,7 @@
             padding: 0;
         }
         main.viz3d-split > .output {
-            max-height: 40vh;
+            height: 30vh;
             overflow-y: auto;
             flex-shrink: 0;
             padding: 8px 20px;
@@ -325,9 +325,28 @@
         main.viz3d-split > .input-wrap {
             flex-shrink: 0;
         }
+        main.viz3d-split > .resize-handle {
+            height: 6px;
+            background: var(--surface1);
+            cursor: ns-resize;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        main.viz3d-split > .resize-handle::after {
+            content: '';
+            width: 40px;
+            height: 3px;
+            background: var(--surface2);
+            border-radius: 2px;
+        }
+        main.viz3d-split > .resize-handle:hover {
+            background: var(--blue);
+        }
         main.viz3d-split > .stage3d-pane {
             flex: 1;
-            min-height: 200px;
+            min-height: 120px;
         }
         .stage3d-pane {
             display: flex;
