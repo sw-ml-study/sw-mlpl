@@ -226,7 +226,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "Dual-encoder contrastive learning: an image encoder and a text encoder trained to agree on matching pairs (Radford et al., 2021). Zero-shot image classification by comparing image embeddings to text-label embeddings. Foundation for text-to-image models (DALL-E, Stable Diffusion). MLPL has the attention primitives but not the dual-encoder training loop.",
             },
             Step::Glossary {
-                term: "CLIP",
+                term: "CLIP (Contrastive Language-Image Pre-training)",
                 why: "Dual-encoder image+text contrastive model. Zero-shot classification via embedding similarity.",
             },
             // 21. LoRA (2021)
@@ -244,7 +244,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "Reinforcement Learning from Human Feedback: SFT (supervised fine-tuning) -> train a reward model on human comparisons -> optimize the policy with PPO against the reward model (Ouyang et al., 2022). The alignment technique that made ChatGPT. Refinements: DPO (2023) removes the reward model entirely. Constitutional AI (2022) uses AI feedback instead of human feedback. MLPL has glossary entries but no RL primitives.",
             },
             Step::Glossary {
-                term: "RLHF",
+                term: "RLHF (Reinforcement Learning from Human Feedback)",
                 why: "The three-stage alignment pipeline: SFT, reward model, PPO. How ChatGPT was trained.",
             },
             // 23. Mixture of Experts (2022)
@@ -347,7 +347,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "Generative models learn to produce new data that resembles the training set. An autoencoder compresses data through a bottleneck and reconstructs it -- the bottleneck forces the model to learn the essential structure. A GAN pits a Generator against a Discriminator in an adversarial game -- the Generator improves by fooling the Discriminator.",
             },
             Step::Glossary {
-                term: "Bottleneck",
+                term: "Bottleneck (autoencoder)",
                 why: "The narrow layer in an autoencoder that forces compression. The network must learn which features matter enough to preserve.",
             },
             Step::Demo {
