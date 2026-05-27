@@ -617,12 +617,15 @@ window.__stage3d_clear = function() {
     let outputEl = null;
 
     document.addEventListener('mousedown', e => {
-        if (!e.target.closest('#viz3d-resize')) return;
-        outputEl = document.querySelector('main.viz3d-split > .output');
+        const handle = document.getElementById('viz3d-resize');
+        if (!handle || !handle.contains(e.target)) return;
+        outputEl = document.querySelector('.viz3d-split .output') || document.getElementById('output');
         if (!outputEl) return;
         dragging = true;
         startY = e.clientY;
-        startH = outputEl.offsetHeight;
+        startH = outputEl.getBoundingClientRect().height;
+        document.body.style.cursor = 'ns-resize';
+        document.body.style.userSelect = 'none';
         e.preventDefault();
     });
 
@@ -631,9 +634,14 @@ window.__stage3d_clear = function() {
         const dy = e.clientY - startY;
         const newH = Math.max(60, Math.min(window.innerHeight * 0.7, startH + dy));
         outputEl.style.height = newH + 'px';
+        e.preventDefault();
     });
 
     document.addEventListener('mouseup', () => {
+        if (dragging) {
+            document.body.style.cursor = '';
+            document.body.style.userSelect = '';
+        }
         dragging = false;
         outputEl = null;
     });
