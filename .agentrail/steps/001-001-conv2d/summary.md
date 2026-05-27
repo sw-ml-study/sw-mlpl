@@ -1,0 +1,1 @@
+conv2d builtin: [B,C_in,H,W] x [C_out,C_in,kH,kW] -> [B,C_out,H',W']. Pure nested loops. Unit test passes. Registered in dispatch + name iterator.
