@@ -1,0 +1,1 @@
+Upload & Inspect Image demo under Basics (synthetic [1,3,64,64] pixels, shape/mean/min/max/gallery/histogram). REPL-to-Script milestone doc. All 41 demos pass.
