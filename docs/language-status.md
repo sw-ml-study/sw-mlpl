@@ -39,7 +39,8 @@ human-readable summary.
 | `rnn-lstm-builtins` (41) | shipped | -- (capability saga) | Closed 2026-05-27. 5 steps. rnn_cell and lstm_cell builtins, RNN sequence demo (5-step), LSTM sequence memory demo (10-step), glossary (RNN, LSTM, Vanishing Gradient, Hidden State). |
 | `gan-demo` (42) | shipped | -- (content saga) | Closed 2026-05-27. 3 steps. sin/cos builtins, GAN (2D circle) demo with alternating adam, glossary (GAN, Generator, Discriminator, Adversarial Training), BUILTIN_GROUPS completeness fix (11 builtins). |
 | `architecture-zoo-path` (43) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "From Pixels to Language" learning path with 4 groups (See/Remember/Create/Attend), 27 steps. Updated 3 stale Visual path diagram entries. |
-| Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
+| `chronological-history-path` (44) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "A chronological history of ML" path with 24 eras (1943-2023), year-centric framing. |
+| UDF + control flow | proposed | -- (capability saga) | `docs/milestone-udf-control-flow.md`. def keyword, u:/vendor: namespace, return, pi()/e(), optional match. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
