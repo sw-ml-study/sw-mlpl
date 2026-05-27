@@ -1,6 +1,6 @@
 number = 1
 slug = "001-conv2d"
-status = "in-progress"
+status = "completed"
 description = """
 Step 001: conv2d builtin.
 
@@ -8,5 +8,6 @@ Implement conv2d(input, filters, stride, padding) ..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T19:47:57"
+completed_at = "2026-05-26T19:51:32"
 task_type = "feature"
-commits = []
+commits = ["acf04bb7bdb36a10cba570f9d4f0252fc1b92c88"]
