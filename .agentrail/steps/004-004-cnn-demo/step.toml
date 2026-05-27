@@ -1,6 +1,6 @@
 number = 4
 slug = "004-cnn-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Step 004: Simple CNN demo.
 
