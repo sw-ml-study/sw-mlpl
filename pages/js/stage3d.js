@@ -218,13 +218,14 @@ let selectionPointer = null;
 
 function selectMesh(mesh) {
     if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
-    const pos = mesh.position?.clone() || mesh.parent?.position?.clone();
-    if (!pos) return;
+    const worldPos = new THREE.Vector3();
+    const target = mesh.parent?.isGroup ? mesh.parent : mesh;
+    target.getWorldPosition(worldPos);
     const geo = new THREE.ConeGeometry(0.15, 0.4, 4);
     geo.rotateX(Math.PI);
     const mat = new THREE.MeshStandardMaterial({ color: 0xffcc44, emissive: 0xffcc44, emissiveIntensity: 0.6 });
     selectionPointer = new THREE.Mesh(geo, mat);
-    selectionPointer.position.set(pos.x, pos.y + 1.2, pos.z);
+    selectionPointer.position.set(worldPos.x, worldPos.y + 1.5, worldPos.z);
     scene.add(selectionPointer);
 }
 
