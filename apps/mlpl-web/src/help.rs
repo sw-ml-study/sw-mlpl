@@ -31,7 +31,8 @@ full list):
              reduce, reduce_add, reduce_mul, argmax, mean
   labels     label, relabel, reshape_labeled, labels
   linalg     dot, matmul
-  math       exp, log, sqrt, abs, pow, sigmoid, tanh_fn
+  math       exp, log, sqrt, abs, sin, cos, pow, sigmoid,
+             tanh_fn
   ctors      zeros, ones, fill, grid, random, randn,
              blobs, moons, circles
   compare    gt, lt, eq
