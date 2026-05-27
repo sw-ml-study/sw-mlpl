@@ -1,6 +1,6 @@
 number = 4
 slug = "004-cnn-demo"
-status = "in-progress"
+status = "completed"
 description = """
 Step 004: Simple CNN demo.
 
@@ -8,5 +8,6 @@ New demo 'Simple CNN' that builds a 2-layer CNN p..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T19:47:57"
+completed_at = "2026-05-27T11:38:07"
 task_type = "feature"
-commits = []
+commits = ["10cb6823de4c0f63e932411648f8e05448ac4bd6"]
