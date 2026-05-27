@@ -1,0 +1,12 @@
+number = 2
+slug = "002-lstm-cell"
+status = "pending"
+description = """
+Step 002: lstm_cell builtin.
+
+Implement lstm_cell(input, hidden, cell, W_i, W..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T13:20:15"
+task_type = "feature"
+commits = []

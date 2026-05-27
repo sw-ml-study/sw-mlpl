@@ -1,0 +1,12 @@
+number = 1
+slug = "001-rnn-cell"
+status = "pending"
+description = """
+Step 001: rnn_cell builtin.
+
+Implement rnn_cell(input, hidden, W_ih, W_hh, bi..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T13:20:15"
+task_type = "feature"
+commits = []
