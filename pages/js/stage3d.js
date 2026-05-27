@@ -12,6 +12,18 @@ const pendingEvents = [];
 const varPositions = {};
 let prevMesh = null;
 
+function createBackdrop() {
+    new THREE.TextureLoader().load('salt-flat.jpg', tex => {
+        const aspect = tex.image.width / tex.image.height;
+        const h = 80;
+        const w = h * aspect * 4;
+        const mat = new THREE.MeshBasicMaterial({ map: tex, fog: false });
+        const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
+        plane.position.set(0, h * 0.35, -120);
+        scene.add(plane);
+    });
+}
+
 let groundPlane, groundGrid;
 
 function createGround() {
@@ -156,12 +168,9 @@ window.__stage3d_init = function(canvas) {
 
     if (!scene) {
         scene = new THREE.Scene();
-        scene.background = new THREE.Color(0xd8e4f0);
-        new THREE.TextureLoader().load('salt-flat.jpg', tex => {
-            tex.mapping = THREE.EquirectangularReflectionMapping;
-            scene.background = tex;
-        });
-        scene.fog = new THREE.FogExp2(0xd8e4f0, 0.006);
+        scene.background = new THREE.Color(0xc8d8e8);
+        scene.fog = new THREE.FogExp2(0xc8d8e8, 0.004);
+        createBackdrop();
         createGround();
         createLegend();
         createMountains();
