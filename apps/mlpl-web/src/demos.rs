@@ -1,12 +1,7 @@
 pub struct Demo {
     pub name: &'static str,
-    /// One-to-three-sentence framing shown before the demo runs:
-    /// what the demo does and why. Intentionally short -- the
-    /// code is the real lesson.
+    pub category: &'static str,
     pub intro: &'static str,
-    /// One-to-three-sentence takeaway shown after the demo's last
-    /// line completes: what the output proves and where to go
-    /// next. Paired with `intro` to bookend the run.
     pub takeaway: &'static str,
     pub lines: &'static [&'static str],
 }

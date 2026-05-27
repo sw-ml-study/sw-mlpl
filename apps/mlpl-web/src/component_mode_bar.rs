@@ -3,6 +3,18 @@ use yew::prelude::*;
 
 use crate::demos::DEMOS;
 
+fn grouped_demos() -> Vec<(&'static str, Vec<(usize, &'static str)>)> {
+    let mut map: std::collections::BTreeMap<&str, Vec<(usize, &str)>> =
+        std::collections::BTreeMap::new();
+    for (i, d) in DEMOS.iter().enumerate() {
+        map.entry(d.category).or_default().push((i, d.name));
+    }
+    for items in map.values_mut() {
+        items.sort_by_key(|(_, name)| name.to_ascii_lowercase());
+    }
+    map.into_iter().collect()
+}
+
 #[derive(Properties, PartialEq)]
 pub struct ModeBarProps {
     pub on_clear: Callback<MouseEvent>,
@@ -39,16 +51,16 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
     let demo_dropdown = if props.tutorial_active {
         html! {}
     } else {
-        // Saga 29 step 010 follow-up: render the dropdown
-        // alphabetically by demo name (case-insensitive).
-        let mut sorted: Vec<(usize, &str)> =
-            DEMOS.iter().enumerate().map(|(i, d)| (i, d.name)).collect();
-        sorted.sort_by_key(|(_, name)| name.to_ascii_lowercase());
+        let groups = grouped_demos();
         html! {
             <select class="demo-select" onchange={on_change} aria-label="Load demo" data-tour-target="demo-select">
                 <option value="" selected=true>{"Load Demo..."}</option>
-                { for sorted.iter().map(|(i, name)| html!{
-                    <option value={i.to_string()}>{ *name }</option>
+                { for groups.iter().map(|(cat, items)| html! {
+                    <optgroup label={*cat}>
+                        { for items.iter().map(|(i, name)| html! {
+                            <option value={i.to_string()}>{ *name }</option>
+                        }) }
+                    </optgroup>
                 }) }
             </select>
         }

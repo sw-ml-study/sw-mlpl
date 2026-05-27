@@ -1,7 +1,8 @@
 use crate::demos::Demo;
 
 pub const SIMPLE_CNN: Demo = Demo {
-    name: "Simple CNN",
+    category: "CNN",
+    name: "CNN (simple)",
     intro: "A convolutional neural network pipeline on a tiny 8x8 synthetic image. \
             Shows how conv2d shrinks the spatial dimensions while relu clips negatives \
             and pool2d downsamples. The shapes are the story: [1,1,8,8] -> conv2d -> \

@@ -4,6 +4,7 @@
 use crate::demos::Demo;
 
 pub const VIT_ATTENTION_PATTERN: Demo = Demo {
+    category: "Vision (ViT)",
     name: "ViT Attention Pattern (no training)",
     intro: "Vision [[Transformer]] pipeline end-to-end on a synthetic 64x64 RGB image, no training. patchify(x, 16) cuts the image into a 4x4 grid of 16 patches; each patch flattens P*P*C = 768 floats. A linear projection embeds them to d_model=128, a randn CLS token is prepended via concat(cls, patches, 0), a randn positional embedding is added, and one attention head computes its softmax weight matrix [17, 17] (16 patch tokens + 1 CLS). The heatmap is what an UNTRAINED ViT head pays attention to -- essentially nothing useful. The 'Pets: cat vs dog (quick)' demo trains the same architecture on pets_tiny.",
     takeaway: "The ViT recipe is shorter than it looks: patchify + linear-embed + CLS-prepend + pos-add + attention. Five new builtins (patchify, concat axis 0, randn, matmul, softmax) compose into the same forward-pass topology the original ViT paper drew. Without training, the attention weights are random; the row-sum sanity check at the end confirms softmax did its job regardless.",
@@ -30,6 +31,7 @@ pub const VIT_ATTENTION_PATTERN: Demo = Demo {
 };
 
 pub const PETS_CAT_VS_DOG_QUICK: Demo = Demo {
+    category: "Vision (ViT)",
     name: "Pets: cat vs dog (quick)",
     intro: "Trained [[ViT (Vision Transformer)]] end-to-end on a balanced 8-image subset of [[Oxford-IIIT Pet dataset]] (4 cats + 4 dogs). 30 full-batch [[Adam]] steps with single-head [[Attention]] (`attention(128, 1)`) and a tiny [[MLP (Multi-Layer Perceptron)]] classifier head. The longer 20-image / 100-step version lives in `demos/vit_single_head_quick.mlpl`; this in-browser variant is scaled down so the train loop completes in seconds. The 30 adam steps run as 6 chunks of `train 5 { ... }` so the browser tab stays responsive between chunks (a single `train 30` would block the WASM thread for the whole run).",
     takeaway: "ViT in MLPL is the same five-step recipe as the no-training demo plus a [[Train (loop)]] and an [[Adam]] call. The forward expression has to be inlined into [[Adam]] because [[Backpropagation]] walks the expression tree (let-bindings would create non-differentiable leaves). First-token pooling stands in for a learned CLS token. Each `train 5` chunk overwrites `last_losses`, so the demo accumulates `all_losses = concat(all_losses, last_losses, 0)` between chunks; Adam momentum persists across chunks via the session env, so this is mathematically identical to a single `train 30`. The loss curve at the end shows binary [[Cross entropy]] falling from ~0.69 (random) toward 0 (overfit); the final accuracy on the 8 training images is the scalar at the very bottom.",
@@ -108,6 +110,7 @@ pub const PETS_CAT_VS_DOG_QUICK: Demo = Demo {
 };
 
 pub const PETS_PREDICT_GALLERY: Demo = Demo {
+    category: "Vision (ViT)",
     name: "Pets: predict + gallery",
     intro: "Train a Vision [[Transformer]] on 16 balanced cat/dog images, then render the labeled gallery: each thumbnail gets an `actual / predicted` caption underneath. Heavy: about 1-3 minutes in the browser. Misclassifications stand out because the two captions disagree (0/1 or 1/0).",
     takeaway: "The new pieces vs the quick demo: `predict_batch(model, X)` runs forward and returns argmax integer labels in one call; `svg(images, \"gallery\", overlay)` accepts an optional `[N]` or `[N, K]` overlay tensor and renders the values as text under each thumbnail. With actual + predicted side-by-side, you can finally point at a specific cat/dog photo and see what the model said. The 50-step train loop overfits, so almost every prediction matches the actual; the demonstration is the visualization, not the model quality.",
@@ -214,6 +217,7 @@ pub const PETS_PREDICT_GALLERY: Demo = Demo {
 };
 
 pub const VIT_MULTI_HEAD_ATTENTION_PATTERN: Demo = Demo {
+    category: "Vision (ViT)",
     name: "ViT Multi-Head Attention Pattern (no training)",
     intro: "The multi-head sibling of the single-head ViT attention pattern demo. Same synthetic 64x64 image, same patchify+linear-embed+CLS+pos pipeline, but `attention(128, 4, ...)` instead of one head. attention_weights returns [4, 17, 17]; the `heatmap_grid` viz type renders all four heads in a 2x2 grid so per-head differences are visible at a glance. UNTRAINED: all four heads draw from the same randn distribution and look uniform-random with no structure. Compare with the trained companion demo to see what gradient descent buys.",
     takeaway: "[[Multi-head attention]] is just single-head attention applied to h independent subspaces of d_model. Before training, the four heads start from independent randn projections and produce four uniformly-random attention patterns. The architecture doesn't tell heads to specialize; the visualization here is the negative control -- the baseline that the trained demo is judged against.",
@@ -241,6 +245,7 @@ pub const VIT_MULTI_HEAD_ATTENTION_PATTERN: Demo = Demo {
 };
 
 pub const PETS_MULTI_HEAD_VIT: Demo = Demo {
+    category: "Vision (ViT)",
     name: "Pets: multi-head ViT (quick + viz)",
     intro: "Trained 4-head [[ViT (Vision Transformer)]] on a balanced 8-image cat/dog subset, reaching 100% training accuracy in 30 [[Adam]] steps with per-head attention maps rendered after training. Same architecture as the single-head quick demo but [[Multi-head attention]] (`attention(128, 4)`) and an [[attention_weights (builtin)]] + [[heatmap_grid (viz type)]] viz at the end. Compare the heatmap_grid output here with the UNTRAINED 'ViT Multi-Head Attention Pattern' demo -- the four heads start identical and end specialized. (Click any underlined term to open its glossary entry.)",
     takeaway: "Training accuracy = 1.0 -- the four heads + classifier learn the 8-image set in 30 adam steps. The four [16, 16] cells show what each attention head learned: row i = patch i (in row-major order from top-left to bottom-right of a 4x4 grid over the 64x64 image); column j = how strongly patch i attends to patch j. A bright cell at row i column j means head h thinks patch i should pull information from patch j. After training the heads are NOT identical -- the same architecture, the same input, the same optimizer, but four different attention patterns because each head's Q/K/V projection was randomly initialized to a different starting subspace, and gradient descent then pushed each one toward whatever role minimized cross-entropy for THAT subspace. Compare with the untrained 'ViT Multi-Head Attention Pattern' demo (run it first) where all four heads look the same uniform-random noise -- the specialization here is entirely learned, not architectural. Common post-training patterns: one head concentrates attention into a single column (a 'this patch is salient' detector); one stays diffuse (an 'aggregate everything' channel); the remaining two pick intermediate roles. The architecture says 'split d_model into 4 subspaces and run attention in each'; gradient descent says what each subspace pays attention to.",
@@ -299,6 +304,7 @@ pub const PETS_MULTI_HEAD_VIT: Demo = Demo {
 };
 
 pub const PETS_ATTENTION_OVERLAY: Demo = Demo {
+    category: "Vision (ViT)",
     name: "Pets: attention overlay (per-head)",
     intro: "Same trained 4-head [[ViT (Vision Transformer)]] as the multi-head demo above (training accuracy 1.0 on the 8-image set after 30 adam steps), but the per-head attention is rendered OVER the test image instead of as an abstract [16, 16] matrix. Each cell of the output is the same cat photo with one head's attention pattern painted on top: bright yellow patches are what THAT head attends to, dark purple patches are ignored. The four cells look DIFFERENT after training -- the heads start identical at initialization and end specialized via gradient descent. Uses the new [[attention_overlay (viz type)]] viz. (Click any underlined term to open its glossary entry.)",
     takeaway: "What you are looking at: the SAME 64x64 cat image rendered four times, with one of the trained model's attention heads overlaid on each copy. The overlay is a 4x4 grid of translucent rectangles (one per ViT patch, since 64/16 = 4); each rectangle's color is its incoming attention summed over all query patches and mapped through viridis. The painting tells you which regions of the cat each head decided were worth aggregating evidence from. Compare with the side-by-side heatmap_grid demo above -- that view gives you the [16, 16] matrix per head (every query-to-key pair), but it does NOT tell you where on the image each patch SITS. The overlay does. Common patterns to look for after training: one head fixating on a single bright region (eyes / face / silhouette), one head spreading attention thinly across many patches, two intermediate heads. The architecture says 'four independent attention subspaces'; the overlay shows you what gradient descent decided those subspaces SHOULD pay attention to on this particular cat.",
