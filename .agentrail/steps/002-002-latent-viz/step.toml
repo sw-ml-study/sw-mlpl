@@ -1,0 +1,12 @@
+number = 2
+slug = "002-latent-viz"
+status = "pending"
+description = """
+Step 002: Latent space visualization in 3D.
+
+After training the autoencoder, ..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T12:34:42"
+task_type = "feature"
+commits = []

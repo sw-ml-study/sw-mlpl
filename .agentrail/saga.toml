@@ -1,6 +1,6 @@
-name = "cnn-builtins-viz"
-status = "completed"
-current_step = 6
-created_at = "2026-05-26T19:47:40"
+name = "autoencoder-demo"
+status = "active"
+current_step = 1
+created_at = "2026-05-27T12:34:25"
 plan_file = ".agentrail/plan.md"
 retroactive = false
