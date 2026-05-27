@@ -1,0 +1,1 @@
+Step 005 (FINAL, use --done): Glossary entries (RNN, LSTM, Vanishing gradient, Hidden state). Help text update. language-status.md. Pages rebuild. Demo smoke test. Mark --done.
