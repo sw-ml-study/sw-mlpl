@@ -1,0 +1,1 @@
+pool2d(input, size, mode): max (mode=1) and avg (mode=0) pooling. Input [B,C,H,W], size [pH,pW]. Two unit tests pass.
