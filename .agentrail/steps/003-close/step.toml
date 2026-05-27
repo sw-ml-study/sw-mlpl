@@ -1,0 +1,9 @@
+number = 3
+slug = "close"
+status = "pending"
+description = "Step 003 (FINAL, use --done): language-status.md update. Demo smoke test. Mar..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T16:09:01"
+task_type = "docs"
+commits = []
