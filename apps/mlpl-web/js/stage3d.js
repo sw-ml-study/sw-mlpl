@@ -157,7 +157,11 @@ window.__stage3d_init = function(canvas) {
     if (!scene) {
         scene = new THREE.Scene();
         scene.background = new THREE.Color(0xd8e4f0);
-        scene.fog = new THREE.FogExp2(0xd8e4f0, 0.008);
+        new THREE.TextureLoader().load('salt-flat.jpg', tex => {
+            tex.mapping = THREE.EquirectangularReflectionMapping;
+            scene.background = tex;
+        });
+        scene.fog = new THREE.FogExp2(0xd8e4f0, 0.006);
         createGround();
         createLegend();
         createMountains();
