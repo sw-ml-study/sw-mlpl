@@ -1,6 +1,6 @@
 number = 1
 slug = "zoo-path-definition"
-status = "pending"
+status = "completed"
 description = """
 Step 001: Architecture Zoo path definition.
 
@@ -8,5 +8,6 @@ Create the "From Pixels to Langu..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T15:43:50"
+completed_at = "2026-05-27T15:46:32"
 task_type = "feature"
-commits = []
+commits = ["fca275b065d8f0467acedcf8aaf2e884e490f1f9"]

@@ -1,0 +1,1 @@
+Architecture Zoo 'From Pixels to Language' path with 4 groups (See/Remember/Create/Attend), 27 steps referencing existing demos, glossary entries, diagrams, and connector notes. Updated 3 stale Visual path diagram entries for CNN/RNN/LSTM.
