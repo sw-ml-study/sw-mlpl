@@ -1,6 +1,6 @@
 number = 2
 slug = "data-path"
-status = "pending"
+status = "completed"
 description = """
 Step 002: Data & Exploration learning path.
 
@@ -8,5 +8,6 @@ Create the path in paths.rs cove..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T16:09:01"
+completed_at = "2026-05-27T16:13:36"
 task_type = "feature"
-commits = []
+commits = ["54d3be95b2c1b165746dc692e17f6d5a6a568f1e"]

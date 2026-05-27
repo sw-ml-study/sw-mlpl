@@ -1,0 +1,1 @@
+Data & Exploration path with 16 steps: arrays, synthetic data, visualization, upload & inspect, loading data, named axes. Bridges to modeling paths.
