@@ -5,6 +5,7 @@
 use crate::demos::Demo;
 
 pub const ANALYSIS_HELPERS: Demo = Demo {
+    category: "Basics",
     name: "Analysis Helpers",
     intro: "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model.",
     takeaway: "Six one-liners, six labeled plots. Every helper under 'analysis' in the docs takes arrays you already have and returns an SVG -- no separate plotting library, no config blocks.",
@@ -19,6 +20,7 @@ pub const ANALYSIS_HELPERS: Demo = Demo {
 };
 
 pub const BASICS: Demo = Demo {
+    category: "Basics",
     name: "Basics",
     intro: "The smallest possible MLPL tour: scalar arithmetic, elementwise array arithmetic with broadcasting, variable binding, and unary negation. If this makes sense, you can read the rest of the demos.",
     takeaway: "Operators apply elementwise; scalars broadcast; variables persist across REPL lines. That's the substrate every other demo builds on.",
@@ -36,6 +38,7 @@ pub const BASICS: Demo = Demo {
 };
 
 pub const LOSS_CURVE: Demo = Demo {
+    category: "Basics",
     name: "Loss Curve",
     intro: "Sweep a single weight across 25 values, compute the MSE loss against a linear target at each one, and plot the result. No training -- just the shape of the loss landscape.",
     takeaway: "A smooth parabolic curve with a clear minimum near the true weight. This is what gradient descent is walking down when you train; seeing the bowl makes the 'minimize the loss' story tangible.",
@@ -53,6 +56,7 @@ pub const LOSS_CURVE: Demo = Demo {
 };
 
 pub const MATH_FUNCTIONS: Demo = Demo {
+    category: "Basics",
     name: "Math Functions",
     intro: "The scalar and elementwise math primitives MLPL inherits from NumPy/APL conventions: exp, log, sqrt, abs, pow, sigmoid, tanh. Works on scalars and arrays uniformly.",
     takeaway: "Every primitive broadcasts over array inputs without a loop. If you know these names from NumPy you already know MLPL's math surface.",
@@ -70,6 +74,7 @@ pub const MATH_FUNCTIONS: Demo = Demo {
 };
 
 pub const MATRIX_OPS: Demo = Demo {
+    category: "Basics",
     name: "Matrix Ops",
     intro: "Build a 3x4 matrix from iota, transpose it, read its shape and rank, and sum along both axes. The axis argument to reduce_add is how you go from a 2D tensor to a row-sum or column-sum vector.",
     takeaway: "reshape moves between flat and multi-dimensional views without copying; transpose swaps axes; reduce_add with an axis drops that axis. This is the APL half of MLPL -- shape is first-class and cheap to manipulate.",
@@ -86,6 +91,7 @@ pub const MATRIX_OPS: Demo = Demo {
 };
 
 pub const WORKSPACE_INTROSPECTION: Demo = Demo {
+    category: "Basics",
     name: "Workspace Introspection",
     intro: "Tour of the REPL's introspection commands: :version, :wsid (workspace ID summary), :vars, :describe, :models, :experiments, :fns. Also shows how the axis-label annotation syntax (M : [batch, feat] = ...) shows up in :vars and :describe output. The final line uses :introspect, which bundles every no-arg inspector into a single markdown-headered dump -- useful as the optional last line of any demo.",
     takeaway: "You can always ask the REPL what's in your session. :describe on a variable prints shape + labels + a preview; on a model, the layer tree; on a builtin, the signature and one-line doc. :experiments shows every tracked run. :introspect (saga 33 step 037d) prints the lot in one shot under `## :<topic>` headers -- handy when you want the full snapshot in one scroll.",
@@ -114,6 +120,7 @@ pub const WORKSPACE_INTROSPECTION: Demo = Demo {
 };
 
 pub const VISUALIZATIONS: Demo = Demo {
+    category: "Basics",
     name: "Visualizations",
     intro: "The four primitive svg() types -- scatter, line, bar, heatmap -- each in one line. Rendered inline; a download button next to each SVG saves it as a file.",
     takeaway: "Every plot is one call with a data array and a type string. There is no plotting API to learn beyond 'pass the right shape.'",

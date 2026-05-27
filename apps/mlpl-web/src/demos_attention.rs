@@ -4,6 +4,7 @@
 use crate::demos::Demo;
 
 pub const ATTENTION_PATTERN: Demo = Demo {
+    category: "Attention",
     name: "Attention Pattern",
     intro: "The scaled-dot-product attention formula from '[[Attention]] is All You Need', spelled out. Two Q and K matrices, scored and softmax'd, rendered as heatmaps. A second self-attention pass (Q attending to itself) shows the diagonal pattern that makes self-attention recognizable on sight.",
     takeaway: "You just built transformer attention in four lines: matmul + transpose + softmax. The heatmaps show where each query row puts probability mass -- self-attention concentrates on the diagonal; cross-attention doesn't.",
@@ -22,6 +23,7 @@ pub const ATTENTION_PATTERN: Demo = Demo {
 };
 
 pub const SELF_ATTENTION_FROM_SCRATCH: Demo = Demo {
+    category: "Attention",
     name: "Self-Attention from Scratch",
     intro: "Build one head of self-attention from primitives, no `attention()` layer involved. Three projection matrices Wq / Wk / Wv turn the input X into Q, K, V; then `softmax(Q K^T / sqrt(d_k)) V` mixes the values according to which keys each query attended to. Tiny T=6, d=4 toy input so every intermediate matrix renders cleanly.",
     takeaway: "[[Self-attention]] is four matmuls, one transpose, one scalar division, one softmax. The score heatmap is what a query is asking; the weight heatmap is what it gets back; the output is the weighted V. With random projections the pattern is noise -- training is what makes the weights specialize on a task.",
@@ -45,6 +47,7 @@ pub const SELF_ATTENTION_FROM_SCRATCH: Demo = Demo {
 };
 
 pub const MULTI_HEAD_ATTENTION_FROM_SCRATCH: Demo = Demo {
+    category: "Attention",
     name: "Multi-Head Attention from Scratch",
     intro: "[[Multi-head attention]] from primitives. Each head gets a slab of the d_model channels via a column-selector matrix S_h: [d_model, d_k], runs scaled-dot-product attention on its own Q/K/V slabs, and writes back into the full-width output via S_h^T. Tiny T=4, d_model=4, heads=2 (so d_k=2) keeps every per-head [T, T] heatmap interpretable.",
     takeaway: "Two heads, two different attention patterns. Each head sees only its slab of d_model, so it can specialize. Real `attention(d, heads, seed)` does the slicing in Rust without materializing selector matrices, and adds a final Wo projection -- but the math is the same: per-head softmax(Q K^T / sqrt(d_k)) V, concat, project.",
@@ -82,6 +85,7 @@ pub const MULTI_HEAD_ATTENTION_FROM_SCRATCH: Demo = Demo {
 };
 
 pub const CROSS_ATTENTION_FROM_SCRATCH: Demo = Demo {
+    category: "Attention",
     name: "Cross-Attention from Scratch",
     intro: "[[Cross-attention]] is the same `softmax(Q K^T / sqrt(d_k)) V` as self-attention, but Q comes from a target sequence (T_tgt=4) and K, V come from a separate source sequence (T_src=6). The weight matrix is `[T_tgt, T_src]` -- non-square -- which is the visual signature: each target query distributes its attention across all source positions, not over its own sequence.",
     takeaway: "The non-square weight heatmap (4 rows, 6 cols) is the giveaway: target queries are looking at source content, not at themselves. The output is `[T_tgt, d_model]` -- same shape as the target input -- but its values are mixtures of the source's V vectors weighted by query-key similarity. Stack one cross-attention block after a causal-self-attention block and you have a transformer decoder layer.",
@@ -107,6 +111,7 @@ pub const CROSS_ATTENTION_FROM_SCRATCH: Demo = Demo {
 };
 
 pub const ENCODER_BLOCK: Demo = Demo {
+    category: "Attention",
     name: "Encoder Block",
     intro: "One transformer encoder block built from the model DSL: pre-norm self-attention with a residual, then pre-norm feedforward (linear -> relu -> linear) with another residual. Same shape in, same shape out. The residual connections let gradients flow past the attention and FFN layers; the pre-norm `rms_norm` keeps activations stable.",
     takeaway: "An encoder block is just chain(residual(self-attn), residual(ffn)). Stack a dozen of these and you have [[BERT]]; add cross-attention and a causal mask and you have a decoder block. The attention heatmap shows what each position is attending to in this single layer; deep encoders compose these patterns into hierarchical representations.",
@@ -121,6 +126,7 @@ pub const ENCODER_BLOCK: Demo = Demo {
 };
 
 pub const DECODER_BLOCK: Demo = Demo {
+    category: "Attention",
     name: "Decoder Block",
     intro: "One transformer decoder block: three sub-blocks instead of two. Causal self-attention (target attends only to past target tokens), then cross-attention (target queries attend to encoder output -- built from scratch since MLPL has no cross-attention layer primitive), then a feedforward sub-block. X_tgt is the target sequence (T=4); X_src stands in for the encoder's output (T=6) -- a real pipeline would feed the encoder demo's `out` here.",
     takeaway: "A decoder block is encoder-block + cross-attention. The cross-attention heatmap is non-square ([T_tgt, T_src]): target queries distributing attention over encoder positions. Stack a dozen of these and you have [[GPT]] (decoder-only, drop the cross-attn step) or T5 (encoder-decoder, keep all three).",

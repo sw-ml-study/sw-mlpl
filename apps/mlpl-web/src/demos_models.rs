@@ -4,6 +4,7 @@
 use crate::demos::Demo;
 
 pub const DECISION_BOUNDARY_LOGICAL_GATES: Demo = Demo {
+    category: "Classification",
     name: "Decision Boundary: logical gates",
     intro: "Train the same 2-weight logistic regression on five 2-input boolean functions (AND, OR, NAND, NOR, XOR) and render the learned probability [[Decision boundary]] for each. Four of the five gates train to a clean linear boundary. The fifth -- XOR -- does not, because no straight line can separate the four XOR points. This is the canonical motivation for hidden layers and nonlinearity. To see XOR actually solved, load the 'Decision Boundary: XOR (with MLP)' demo next.",
     takeaway: "Linear classifiers can fit AND, OR, NAND, NOR perfectly because each of those functions has a single straight line that separates the positives from the negatives. XOR breaks that property -- its positives sit on one diagonal (0,1) and (1,0); its negatives on the other (0,0) and (1,1). No line passes between them. The XOR surface here stalls at a roughly-uniform 0.5 probability everywhere because the optimizer found the LEAST-bad linear fit, and the least-bad linear fit is to give up. The 'Decision Boundary: XOR (with MLP)' demo adds one hidden layer + [[Tanh]] and recovers a curved boundary that separates the points cleanly.",
@@ -96,6 +97,7 @@ pub const DECISION_BOUNDARY_LOGICAL_GATES: Demo = Demo {
 };
 
 pub const DECISION_BOUNDARY_XOR: Demo = Demo {
+    category: "Classification",
     name: "Decision Boundary: XOR (with MLP)",
     intro: "Same XOR data as the 'Decision Boundary: logical gates' demo, but with a 2-layer MLP (linear -> tanh -> linear) trained via adam instead of a single linear layer trained via hand-rolled gradient descent. The hidden layer + nonlinearity is what turns XOR into a learnable problem. The decision_boundary render at the end shows the curved boundary the linear demo could not produce.",
     takeaway: "Two layers + a nonlinearity = a much more expressive class of functions. The hidden layer learns intermediate features (one neuron lights up on one diagonal, another on the other diagonal); the output layer combines those features into the XOR answer. The exact shape of the learned boundary depends on the random init seed; common patterns are a 'saddle' surface that pinches between the two positive points or an 'X' of red on the diagonal that contains [0,1] and [1,0]. Either way, the four training points sit on the correct side of the boundary -- something the linear demo's last svg() output could not achieve.",
@@ -127,6 +129,7 @@ pub const DECISION_BOUNDARY_XOR: Demo = Demo {
 };
 
 pub const KMEANS: Demo = Demo {
+    category: "Classification",
     name: "K-Means",
     intro: "K-means clustering without loops over points: all distances computed in one matmul, cluster assignments via argmax, and centroid updates via a one-hot-matrix-times-data trick. Three blobs in 2D, three centroids, ten iterations.",
     takeaway: "The final scatter shows points colored by their assigned cluster and the three centroids as a separate plot. Unsupervised -- no labels were passed in; the algorithm discovered the three groups from geometry alone.",
@@ -146,6 +149,7 @@ pub const KMEANS: Demo = Demo {
 };
 
 pub const LOGISTIC_REGRESSION: Demo = Demo {
+    category: "Classification",
     name: "Logistic Regression",
     intro: "The hello-world of supervised learning: 2D AND with hand-rolled gradient descent, final-accuracy check, a bar chart of per-point predictions, and a 1D loss sweep along the weight direction showing the minimum the optimizer found.",
     takeaway: "Accuracy prints as 1.0; the bar chart shows confident [0, 0, 0, 1] predictions; the loss curve has a clean bowl shape. This is the sanity-check pattern every classifier should pass.",
@@ -173,6 +177,7 @@ pub const LOGISTIC_REGRESSION: Demo = Demo {
 };
 
 pub const MOONS_MLP: Demo = Demo {
+    category: "Classification",
     name: "Moons MLP",
     intro: "A two-layer tanh MLP trained with [[Adam]] + cross-entropy on the 'two moons' synthetic dataset -- two interleaved half-circles that a single linear classifier can't separate. 200 training steps, then accuracy, a loss curve, a confusion matrix, and the learned decision boundary over a 30x30 grid.",
     takeaway: "A non-linear classifier with ~50 parameters separates the moons. cross_entropy(logits, y) is the canonical classification loss and is differentiable end-to-end through grad. The boundary SVG curves around each moon -- a visual proof that a hidden layer plus a non-linearity learned a non-linear decision surface.",
@@ -209,6 +214,7 @@ pub const MOONS_MLP: Demo = Demo {
 };
 
 pub const PCA: Demo = Demo {
+    category: "Classification",
     name: "PCA",
     intro: "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run [[power iteration]] to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance.",
     takeaway: "The scatter is colored by which side of zero each point's projection lands on; the line shows the found principal axis. Power iteration converges in ~10 steps to a direction that's clearly the long axis of the data cloud.",
@@ -230,6 +236,7 @@ pub const PCA: Demo = Demo {
 };
 
 pub const SOFTMAX_CLASSIFIER: Demo = Demo {
+    category: "Classification",
     name: "Softmax Classifier",
     intro: "Three-class classification on 90 blob points. softmax + cross-entropy gradient descent (done in closed form here -- P - Y IS the gradient through the softmax+CE pair), then the usual accuracy / confusion-matrix / decision-boundary close.",
     takeaway: "A single linear layer with three output heads separates three well-spaced clusters. The decision boundary shows three roughly-wedge-shaped regions, one per class.",

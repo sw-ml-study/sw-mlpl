@@ -4,6 +4,7 @@
 use crate::demos::Demo;
 
 pub const TINY_LM_GENERATE: Demo = Demo {
+    category: "Language Models",
     name: "Tiny LM Generate",
     intro: "End-to-end tiny transformer language model: tokenize a small corpus with BPE, wrap inputs as next-token pairs, build a 1-layer model (embed + causal_attention + rms_norm + linear head), train 30 [[Adam]] steps, then sample 20 tokens from a prompt and render the attention heatmap. The smallest program that trains and generates text.",
     takeaway: "A language model with a few thousand parameters produced a decoded string from a learned distribution and a [T,T] heatmap of what each position attended to. The loss curve should trend downward; the generated text is noisy because the model and budget are both tiny -- scale V, d, block, and step count for a serious run via the CLI.",
@@ -31,6 +32,7 @@ pub const TINY_LM_GENERATE: Demo = Demo {
 };
 
 pub const TINY_LM: Demo = Demo {
+    category: "Language Models",
     name: "Tiny LM",
     intro: "Training-only variant of the Tiny LM: same model shape ([[Embedding]] + [[Attention]] (causal) + RMS norm + linear head, V=260, d=16, block=8), wrapped in [[experiment block (language keyword)]] so the final metric is logged, then plot the loss curve across 30 [[Adam]] steps. No generation -- just a clean 'does the loss go down' demo.",
     takeaway: "Loss curve trends downward over 30 steps; the [[experiment block (language keyword)]] registry records the run's final loss metric. For generation + attention visualization, see 'Tiny LM Generate'. For a serious run with V=280 and 200 steps, use the CLI: `mlpl-repl -f demos/tiny_lm.mlpl`.",
@@ -51,6 +53,7 @@ pub const TINY_LM: Demo = Demo {
 };
 
 pub const TINY_MLP: Demo = Demo {
+    category: "Language Models",
     name: "Tiny MLP",
     intro: "A hand-rolled 2-layer MLP on four blobs (two per class, XOR-ish layout). Forward + backward pass written out explicitly so every gradient is visible -- no autograd, no Model DSL. Ends with the decision-boundary render over a 30x30 grid.",
     takeaway: "You can see every matmul and every elementwise op in the training loop. For the same model with autograd hiding the backward pass, see 'Moons MLP'; for the same model as a Model DSL composition, see the tutorial's 'Model Composition' lesson.",

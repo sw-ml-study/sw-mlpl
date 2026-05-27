@@ -10,6 +10,7 @@
 use crate::demos::Demo;
 
 pub const PCA_3D: Demo = Demo {
+    category: "Dim Reduction",
     name: "PCA 3D (interactive)",
     intro: "Three 5-D Gaussian clusters projected to their top three principal components and rendered as an interactive [[PCA (Principal Component Analysis)]] viewer via the new `svg(_, \"plotly3d\", labels)` viz type. Drag to rotate, scroll to zoom, double-click to reset. Click any point and the browser console logs which sample + cluster it belongs to (the click handler is wired but the REPL panel hookup is a follow-up step).",
     takeaway: "Three well-separated clusters fall into three corners of the 3D PCA embedding. Unlike the static 2D `scatter_labeled` rendering, you can rotate to confirm the separation holds along every axis -- the answer to the user question 'are these clusters actually distinct, or is the projection hiding overlap?'. The plot is driven by Plotly via a self-contained HTML/JS payload returned from the new viz type; integrates the existing `pca` builtin without further plumbing.",
@@ -34,6 +35,7 @@ pub const PCA_3D: Demo = Demo {
 };
 
 pub const PCA_LOADINGS: Demo = Demo {
+    category: "Dim Reduction",
     name: "PCA loadings (critical dimensions)",
     intro: "Same three-cluster 5-D dataset as the PCA 3D demo, but instead of plotting the projected points we plot the LOADINGS -- the directions in original feature space that each principal component aligns with. This is the [[PCA (Principal Component Analysis)]] answer to 'which input dimensions matter?'. The new `pca_components(X, k)` builtin returns the `[k, D]` loadings matrix; the new `pca_variance_explained(X, k)` builtin returns the per-component variance fractions. The `svg(_, \"critical_dimensions\", _)` viz renders both as a heatmap with PC labels.",
     takeaway: "Each row is one principal component (PC1, PC2, PC3); each column is one input dimension (0..4). Bright cells = features that dominate that component; dark cells = features that contribute little. With three well-separated clusters in 5-D, the top two components usually capture >90% of the variance (see the per-row percentages on the right) and pull from a handful of features each. The same `critical_dimensions` viz will be reused in the dim-reduction milestone for UMAP / t-SNE permutation-sensitivity heatmaps once those land.",
@@ -57,6 +59,7 @@ pub const PCA_LOADINGS: Demo = Demo {
 };
 
 pub const UMAP_VS_PCA: Demo = Demo {
+    category: "Dim Reduction",
     name: "UMAP vs PCA",
     intro: "Two-moons in 2-D, embedded in 5-D with three low-variance noise dimensions, then projected back to 2-D by both [[PCA (Principal Component Analysis)]] (linear) and [[UMAP]] (non-linear / manifold-aware). PCA picks the top two axes of variance; UMAP builds a k-NN graph over the full 5-D distances and runs SGD on the fuzzy simplicial set with `a, b` curve params fitted from `min_dist`.",
     takeaway: "PCA reconstructs the moon arcs because the noise dimensions carry less variance than the moons themselves -- you can see crescents along PC1/PC2. UMAP recovers the two moons from local neighborhood structure: class 0 lands in one region of the embedding, class 1 in the other, with minimal cross-mixing -- a different recipe for the same end result. The legend in each scatter maps integer class id to color: 0 = blue, 1 = pink.",
@@ -79,6 +82,7 @@ pub const UMAP_VS_PCA: Demo = Demo {
 };
 
 pub const UMAP_VS_TSNE: Demo = Demo {
+    category: "Dim Reduction",
     name: "UMAP vs t-SNE",
     intro: "Three clusters in 4-D where cluster 2 is five times farther from clusters 0 and 1 than cluster 0 is from cluster 1. The legend in each scatter maps integer class id to color: 0 = blue (origin), 1 = pink (near), 2 = green (far). Both [[t-SNE]] and [[UMAP]] use a fuzzy-graph view of local neighborhoods, but they handle GLOBAL inter-cluster distance differently. The comparison shows what t-SNE drops and UMAP keeps.",
     takeaway: "t-SNE tends to inflate every cluster to a similar size, washing out 'cluster 2 is much farther than 0 is from 1.' UMAP's repulsive force keeps the relative distances readable -- cluster 2 (green) ends up clearly farther from {0, 1} than 0 is from 1. The structural reason: t-SNE's KL objective is purely local (it normalizes per row), while UMAP's cross-entropy + negative-sampling objective lets the repulsive term carry global signal.",
@@ -99,6 +103,7 @@ pub const UMAP_VS_TSNE: Demo = Demo {
 };
 
 pub const DIM_REDUCTION_ZOO: Demo = Demo {
+    category: "Dim Reduction",
     name: "Dim-reduction zoo",
     intro: "[[PCA (Principal Component Analysis)]], [[t-SNE]], [[UMAP]], [[Multidimensional Scaling]], and [[Johnson-Lindenstrauss Lemma]] random projection -- five methods on the same 5-D three-cluster dataset, rendered as a row of five scatter plots for direct comparison.",
     takeaway: "PCA is the cheap linear baseline that preserves the global axes of variance -- clusters land along PC1/PC2 directions. t-SNE inflates each cluster to roughly equal radius, sharpening local boundaries at the cost of global distance. UMAP keeps both: tight clusters AND the relative positions of those clusters in the original 5-D feature space. MDS preserves pairwise distances directly (the answer to 'which points are far from which?'). Random projection is the JL sanity baseline -- a Gaussian random matrix preserves all pairwise distances within a (1 +- eps) factor by sheer probability, no optimization needed; if a learned method does not beat random projection, the learned features are not adding signal.",
