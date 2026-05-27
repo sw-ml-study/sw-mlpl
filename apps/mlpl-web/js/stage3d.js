@@ -517,7 +517,7 @@ window.__stage3d_add_step = function(ev) {
     const isVar = ev.label.includes('=');
     const varName = isVar ? rawName : null;
     mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0, values, summary: ev.output?.summary || null };
-    if (mesh.children) mesh.children.forEach(c => c.userData = mesh.userData);
+    mesh.traverse(c => { if (c !== mesh) c.userData = mesh.userData; });
     scene.add(mesh);
     stepObjects.push(mesh);
     prevMesh = mesh;
