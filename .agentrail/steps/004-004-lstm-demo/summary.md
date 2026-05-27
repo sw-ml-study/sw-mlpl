@@ -1,0 +1,1 @@
+LSTM sequence demo: 10-step unrolled lstm_cell with hidden/cell state splitting via reshape+take. Registered as 'LSTM (sequence memory)' in RNN category. All 39 demos pass smoke test.
