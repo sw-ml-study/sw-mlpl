@@ -1,0 +1,1 @@
+Chronological History path with 24 eras (1943-2023), year-centric framing with publication/adoption/refinement dates. Links to 5 existing lessons, 5 demos, 12 glossary entries, 16 connector Notes. Also wrote docs/milestone-udf-control-flow.md for saga 46.
