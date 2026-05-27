@@ -1,0 +1,1 @@
+RNN (sequence) demo: 5-step unroll of rnn_cell with evolving hidden state. All 37 demos pass smoke test. Backdrop: 4x larger, lowered so only photo mountain peaks show above our 3D hills.

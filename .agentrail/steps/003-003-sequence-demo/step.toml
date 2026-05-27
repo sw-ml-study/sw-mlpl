@@ -1,6 +1,6 @@
 number = 3
 slug = "003-sequence-demo"
-status = "in-progress"
+status = "completed"
 description = """
 Step 003: RNN sequence demo.
 
@@ -8,5 +8,6 @@ New demo 'RNN (character prediction)' that unro..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T13:20:15"
+completed_at = "2026-05-27T14:22:49"
 task_type = "feature"
-commits = []
+commits = ["98253e742f8497525bbdfaa688d917ec8d0fc110"]
