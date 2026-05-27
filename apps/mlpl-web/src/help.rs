@@ -52,6 +52,7 @@ full list):
              attention_weights, argtop_k, scatter
   experiment compare
   conv       conv2d, pool2d
+  rnn        rnn_cell, lstm_cell
   loss       cross_entropy, perplexity
   embed      pairwise_sqdist, knn, tsne, pca, embed_table
   dimreduce  pca_components, pca_variance_explained,

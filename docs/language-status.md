@@ -36,6 +36,7 @@ human-readable summary.
 | `element-data-pipeline` (38) | shipped | -- (capability saga) | Closed 2026-05-26. 5 steps. eval_with_values API, element values in Stage3dEvent, value-colored sculptures (bar charts, cell grids, diverging colormap), detail panel with stats + histogram. |
 | `cnn-builtins-viz` (39) | shipped | -- (capability saga) | Closed 2026-05-27. 6 steps. conv2d, pool2d, relu standalone, Simple CNN demo, 3D stacked heatmap channels for rank-4 tensors. |
 | `autoencoder-demo` (40) | shipped | -- (content saga) | Closed 2026-05-27. 4 steps. Autoencoder demo (encoder 8->3, decoder 3->8), bottleneck hint in 3D detail, glossary entries (Bottleneck, Reconstruction Error), salt flat backdrop. |
+| `rnn-lstm-builtins` (41) | shipped | -- (capability saga) | Closed 2026-05-27. 5 steps. rnn_cell and lstm_cell builtins, RNN sequence demo (5-step), LSTM sequence memory demo (10-step), glossary (RNN, LSTM, Vanishing Gradient, Hidden State). |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
 The "proposed" sagas have full milestone docs; the user has
