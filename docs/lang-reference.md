@@ -285,7 +285,11 @@ Newlines and semicolons are both statement separators.
 | `log(a)` | 1 | Element-wise natural logarithm |
 | `sqrt(a)` | 1 | Element-wise square root |
 | `abs(a)` | 1 | Element-wise absolute value |
+| `floor(a)` | 1 | Element-wise floor (round toward negative infinity) |
+| `ceil(a)` | 1 | Element-wise ceiling (round toward positive infinity) |
+| `round(a)` | 1 | Element-wise round to nearest integer |
 | `pow(a, b)` | 2 | Element-wise a^b |
+| `mod(a, b)` | 2 | Element-wise remainder (a % b). Broadcasts like other binary ops. |
 
 ### ML Activations
 
