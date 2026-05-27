@@ -168,7 +168,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "Normalize activations per mini-batch to stabilize training (Ioffe and Szegedy, 2015). Reduces internal covariate shift -- each layer sees inputs with stable statistics. Enables much higher learning rates and faster convergence. Nearly universal in CNNs and feedforward nets. Later alternatives: Layer Norm (2016, used in transformers), Group Norm (2018), RMS Norm. MLPL ships rms_norm for transformers.",
             },
             Step::Glossary {
-                term: "Batch normalization",
+                term: "Batch Normalization",
                 why: "Per-batch mean/variance normalization. MLPL ships rms_norm (the transformer variant).",
             },
             // 15. ResNet (2015)
@@ -177,7 +177,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "y = x + f(x): the residual connection (He et al., 2015). Solved the degradation problem -- deeper networks were performing worse than shallower ones. Skip connections let gradients flow directly through the identity path. Won ImageNet 2015 with 152 layers. Now universal: every transformer block uses residual connections. MLPL: residual(inner) in the model DSL.",
             },
             Step::Glossary {
-                term: "Residual connection",
+                term: "Residual",
                 why: "y = x + f(x). MLPL's residual(inner) wraps any layer with a skip connection.",
             },
             // 16. Attention / Transformer (2017)
@@ -262,7 +262,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "Selective state-space models: an alternative to attention that runs in O(n) instead of O(n^2) (Gu and Dao, 2023). Mamba adds input-dependent selection to the S4 framework (Gu et al. 2021), achieving transformer-quality on language tasks with linear scaling. Whether SSMs fully replace transformers is an open question. MLPL does not ship SSM primitives.",
             },
             Step::Glossary {
-                term: "Mamba / SSM",
+                term: "State Space Models / Mamba",
                 why: "Selective state-space alternative to attention. O(n) sequence processing.",
             },
             Step::Note {

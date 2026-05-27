@@ -893,6 +893,16 @@ or task. Often paired with `freeze` so only a subset of
 parameters move. MLPL: `lora(model, rank, alpha, seed)` is
 the parameter-efficient form .
 
+## Feature map
+
+The output of a convolutional layer: one 2D grid per filter,
+each highlighting a different pattern (edges, textures,
+shapes) in the input. A conv2d layer with 16 filters
+produces 16 feature maps. Stacking conv layers builds a
+hierarchy: early maps detect edges, later maps detect
+complex structures. MLPL: the `[B, C_out, H, W]` output of
+`conv2d` is a batch of feature maps.
+
 ## Flash Attention
 
 A re-implementation of attention that fuses the softmax with
@@ -1843,6 +1853,15 @@ held-out corpus: `exp(cross_entropy_loss)`. Standard LM
 evaluation metric. Lower is better. MLPL ships
 `perplexity(logits, targets)` as a convenience -- it returns
 `exp(cross_entropy(logits, targets))` in one call.
+
+## Pooling
+
+Controlled information loss: shrink spatial dimensions by
+taking the max or average over small non-overlapping windows.
+Max pooling keeps the strongest activation in each window;
+average pooling keeps the mean. Reduces computation and adds
+translation invariance. MLPL: `pool2d(input, size, mode)`
+where `mode=1` is max and `mode=0` is average.
 
 ## Positional encoding
 
