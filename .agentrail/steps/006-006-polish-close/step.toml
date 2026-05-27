@@ -1,6 +1,6 @@
 number = 6
 slug = "006-polish-close"
-status = "pending"
+status = "in-progress"
 description = "Step 006 (FINAL, use --done): docs, help, glossary, tour, pages, language-sta..."
 role = "production"
 context_files = []
