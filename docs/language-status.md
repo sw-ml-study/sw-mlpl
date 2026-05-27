@@ -40,7 +40,9 @@ human-readable summary.
 | `gan-demo` (42) | shipped | -- (content saga) | Closed 2026-05-27. 3 steps. sin/cos builtins, GAN (2D circle) demo with alternating adam, glossary (GAN, Generator, Discriminator, Adversarial Training), BUILTIN_GROUPS completeness fix (11 builtins). |
 | `architecture-zoo-path` (43) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "From Pixels to Language" learning path with 4 groups (See/Remember/Create/Attend), 27 steps. Updated 3 stale Visual path diagram entries. |
 | `chronological-history-path` (44) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "A chronological history of ML" path with 24 eras (1943-2023), year-centric framing. |
+| `data-exploration-path` (45) | shipped | -- (content saga) | Closed 2026-05-27. 3 steps. Upload & Inspect Image demo (Basics), Data & Exploration path (16 steps), REPL-to-Script milestone doc. |
 | UDF + control flow | proposed | -- (capability saga) | `docs/milestone-udf-control-flow.md`. def keyword, u:/vendor: namespace, return, pi()/e(), optional match. |
+| REPL to Script | proposed | -- (content saga) | `docs/milestone-repl-to-script.md`. Learning path from interactive REPL to .mlpl scripts. Depends on UDF saga. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
