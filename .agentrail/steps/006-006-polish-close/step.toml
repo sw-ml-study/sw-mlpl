@@ -1,0 +1,9 @@
+number = 6
+slug = "006-polish-close"
+status = "pending"
+description = "Step 006 (FINAL, use --done): docs, help, glossary, tour, pages, language-sta..."
+role = "production"
+context_files = []
+created_at = "2026-05-26T19:47:57"
+task_type = "meta"
+commits = []
