@@ -1,0 +1,12 @@
+number = 1
+slug = "upload-demo"
+status = "pending"
+description = """
+Step 001: Upload & Inspect Image demo under Basics.
+
+Create a new demo showin..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T16:09:01"
+task_type = "feature"
+commits = []
