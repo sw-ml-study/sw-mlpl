@@ -1,0 +1,11 @@
+{
+  "task_type": "meta",
+  "state": {
+    "number": 4,
+    "step": "004-polish-close"
+  },
+  "action": "Docs + pages.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T12:43:02"
+}
