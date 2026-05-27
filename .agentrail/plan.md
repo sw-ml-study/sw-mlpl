@@ -1,15 +1,14 @@
-# Architecture Zoo Path Assembly
+# Chronological History Learning Path
 
-Assemble the 'From Pixels to Language' learning path from
-existing demos, lessons, and glossary entries across CNN,
-RNN/LSTM, Autoencoder, GAN, and Transformer content.
-Write connector notes where needed.
+Assemble the 'A Short History of ML' learning path from
+existing lessons, glossary entries, and connector Notes.
+24 eras from McCulloch-Pitts (1943) to Mamba (2023).
 
 ## Steps
 
-1. Architecture Zoo path definition (paths.rs) with all
-   4 groups: See (CNN), Remember (RNN/LSTM), Create
-   (Autoencoder/GAN), Attend (Transformer). Update stale
-   diagram path entries (CNN/RNN now shipped). Demo smoke test.
+1. Path definition in paths.rs with all 24 eras, using
+   existing Lessons where available and Notes for eras
+   that lack dedicated lessons. Glossary references for
+   all key terms. Demo smoke test.
 
-2. Glossary + language-status + saga close.
+2. language-status.md update + saga close.
