@@ -1,0 +1,1 @@
+rnn_cell(input, hidden, W_ih, W_hh, bias): one Elman RNN step. tanh(W_ih@input + W_hh@hidden + bias). Unit test passes.
