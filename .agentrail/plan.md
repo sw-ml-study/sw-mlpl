@@ -1,16 +1,15 @@
-# GAN Demo
+# Architecture Zoo Path Assembly
 
-Build a simple GAN (Generative Adversarial Network) demo
-that learns a 2D distribution. The generator maps random
-noise to 2D points; the discriminator classifies real vs
-fake. Train with alternating grad() updates using the
-existing train block.
+Assemble the 'From Pixels to Language' learning path from
+existing demos, lessons, and glossary entries across CNN,
+RNN/LSTM, Autoencoder, GAN, and Transformer content.
+Write connector notes where needed.
 
 ## Steps
 
-1. GAN training loop design + discriminator/generator
-   builtins or macros if needed
-2. Simple GAN demo (2D circle distribution)
-3. Glossary (GAN, Generator, Discriminator, Adversarial
-   Training, Latent Space) + help text + language-status
-   + saga close
+1. Architecture Zoo path definition (paths.rs) with all
+   4 groups: See (CNN), Remember (RNN/LSTM), Create
+   (Autoencoder/GAN), Attend (Transformer). Update stale
+   diagram path entries (CNN/RNN now shipped). Demo smoke test.
+
+2. Glossary + language-status + saga close.
