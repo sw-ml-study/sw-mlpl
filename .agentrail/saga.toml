@@ -1,5 +1,5 @@
 name = "gan-demo"
-status = "active"
+status = "completed"
 current_step = 3
 created_at = "2026-05-27T15:19:41"
 plan_file = ".agentrail/plan.md"

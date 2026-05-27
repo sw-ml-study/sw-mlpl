@@ -1,0 +1,1 @@
+Glossary entries: GAN, Generator, Discriminator, Adversarial Training. language-status.md updated. Saga 42 complete.
