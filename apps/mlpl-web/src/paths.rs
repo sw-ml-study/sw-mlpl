@@ -835,4 +835,74 @@ pub const PATHS: &[LearningPath] = &[
             },
         ],
     },
+    LearningPath {
+        title: "Data & Exploration",
+        blurb: "Before you model, explore. This path walks the data side of ML: creating arrays, uploading images, inspecting shapes, visualizing distributions, generating synthetic datasets, and preparing data for training. Every step produces a picture or a number -- no models, no gradients, just getting to know your data.",
+        steps: &[
+            Step::Note {
+                title: "Why exploration matters",
+                body: "Most ML failures are data failures. A model trained on skewed data learns skewed patterns. A model trained on the wrong scale diverges. Spending 10 minutes looking at histograms and scatter plots before training saves hours of debugging after. This path builds the habits.",
+            },
+            Step::Lesson {
+                title: "Hello Numbers",
+                why: "Scalars, operators, the REPL. The absolute starting point -- everything else is arrays of numbers.",
+            },
+            Step::Lesson {
+                title: "Arrays",
+                why: "Vectors and their shapes. iota(n) generates a sequence; reshape changes the layout. Arrays are the container for every dataset.",
+            },
+            Step::Lesson {
+                title: "Matrices",
+                why: "Reshape, transpose, slicing with take. A dataset is a matrix: rows are samples, columns are features.",
+            },
+            Step::Demo {
+                name: "Basics",
+                why: "Scalar arithmetic, elementwise ops, broadcasting, variable binding. The five-minute tour.",
+            },
+            Step::Demo {
+                name: "Math Functions",
+                why: "exp, log, sqrt, abs, sin, cos, sigmoid, tanh. The elementwise toolkit you will use for feature engineering and activation functions.",
+            },
+            Step::Note {
+                title: "Generating synthetic data",
+                body: "MLPL ships several synthetic dataset generators: blobs(seed, n, centers) for Gaussian clusters, moons(seed, n, noise) for two interleaving arcs, circles(seed, n, noise) for concentric rings, and random/randn for uniform/normal noise. Each returns a matrix ready for plotting or training. Seeded for reproducibility.",
+            },
+            Step::Demo {
+                name: "Matrix Operations",
+                why: "Reshape, transpose, matmul, dot. The shape-manipulation toolkit for arranging data into the format a model expects.",
+            },
+            Step::Lesson {
+                title: "Visualizing Data",
+                why: "svg(data, type) renders inline: line, bar, heatmap, scatter. One function, many views.",
+            },
+            Step::Demo {
+                name: "Visualizations",
+                why: "Line plots, bar charts, heatmaps in one line each. The visual vocabulary for data exploration.",
+            },
+            Step::Demo {
+                name: "Analysis Helpers",
+                why: "hist, scatter_labeled, loss_curve, confusion_matrix, boundary_2d. Higher-level plots that answer specific questions about your data or model.",
+            },
+            Step::Demo {
+                name: "Upload & Inspect Image",
+                why: "Bring your own data: :upload, check is_ok, inspect shape/mean/min/max, render with svg gallery, histogram of pixel intensities.",
+            },
+            Step::Glossary {
+                term: ":upload (REPL command)",
+                why: "The browser file picker: pick a photo, get a Result with pixels, height, width.",
+            },
+            Step::Lesson {
+                title: "Loading Data",
+                why: "load(path) reads CSV or text files. The terminal REPL needs --data-dir; the web playground has load_preloaded for bundled datasets.",
+            },
+            Step::Lesson {
+                title: "Named Axes",
+                why: "label(x, names) attaches semantic names to dimensions. 'batch', 'features', 'time' -- makes shapes self-documenting.",
+            },
+            Step::Note {
+                title: "From exploration to modeling",
+                body: "You now know how to create, load, inspect, and visualize data in MLPL. The next step is modeling: the 'Zero to LLM' path starts with logistic regression and builds to transformers. The 'Architecture Zoo' path surveys CNN, RNN, GAN, and attention side by side. Pick the one that matches your curiosity.",
+            },
+        ],
+    },
 ];
