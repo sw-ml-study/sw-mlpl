@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "004-lstm-demo"
+  },
+  "action": "Write demos_rnn.rs LSTM_SEQUENCE const, register in demos.rs, release smoke test",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T14:45:25"
+}

@@ -1,6 +1,6 @@
 number = 4
 slug = "004-lstm-demo"
-status = "pending"
+status = "completed"
 description = """
 Step 004: LSTM sequence demo.
 
@@ -8,5 +8,6 @@ New demo 'LSTM (sequence memory)' showing LSTM..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T13:20:15"
+completed_at = "2026-05-27T14:45:25"
 task_type = "feature"
-commits = []
+commits = ["cd0768788b99fef706d6716302a98d4002dbc7a7"]
