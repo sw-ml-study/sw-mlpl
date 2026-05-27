@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-8c062aae33c891c1.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-8c062aae33c891c1_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-2ae467a88030c0e8.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-2ae467a88030c0e8_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -330,8 +330,10 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
         main.viz3d-split > .output {
             height: 30vh;
+            min-height: 40px;
             overflow-y: auto;
-            flex-shrink: 0;
+            flex-shrink: 1;
+            flex-grow: 0;
             padding: 8px 20px;
         }
         main.viz3d-split > .input-wrap {
@@ -1559,7 +1561,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-8c062aae33c891c1.js" crossorigin="anonymous" integrity="sha384-NiUxulST7mjnaAN6LN0cEnzB44Cy0DgFzcWr+mtLO8GKNmRkWoIfjbQu9iq1btCY"><link rel="preload" href="/sw-mlpl/mlpl-web-8c062aae33c891c1_bg.wasm" crossorigin="anonymous" integrity="sha384-F9i++IVpQvlQgCweh5cM7KVzeDNhXN/xnyq98QgFn7i6MmE9MGL9ir0AJDUjs9EU" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-2ae467a88030c0e8.js" crossorigin="anonymous" integrity="sha384-NiUxulST7mjnaAN6LN0cEnzB44Cy0DgFzcWr+mtLO8GKNmRkWoIfjbQu9iq1btCY"><link rel="preload" href="/sw-mlpl/mlpl-web-2ae467a88030c0e8_bg.wasm" crossorigin="anonymous" integrity="sha384-bXrw0O7cJ3jq3d7DW9PrImXYl/3H3lP+QBwclTl+5F6ApqRefPPGSE60N8eFC8e0" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
@@ -1580,7 +1582,9 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         });
         document.addEventListener('mousemove', function(e) {
             if (!dragging || !outputEl) return;
-            outputEl.style.height = Math.max(60, Math.min(window.innerHeight * 0.7, startH + (e.clientY - startY))) + 'px';
+            var h = Math.max(40, Math.min(window.innerHeight * 0.7, startH + (e.clientY - startY)));
+            outputEl.style.setProperty('height', h + 'px', 'important');
+            outputEl.style.setProperty('flex-basis', h + 'px', 'important');
             e.preventDefault();
         });
         document.addEventListener('mouseup', function() {
