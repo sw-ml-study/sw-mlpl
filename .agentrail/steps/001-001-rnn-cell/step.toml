@@ -1,6 +1,6 @@
 number = 1
 slug = "001-rnn-cell"
-status = "pending"
+status = "in-progress"
 description = """
 Step 001: rnn_cell builtin.
 
