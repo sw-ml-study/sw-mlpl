@@ -1,6 +1,6 @@
 number = 4
 slug = "004-detail-panel-values"
-status = "in-progress"
+status = "completed"
 description = """
 Step 004: Show values in the detail panel.
 
@@ -8,5 +8,6 @@ When clicking a sculpture that ha..."""
 role = "production"
 context_files = []
 created_at = "2026-05-26T16:27:35"
+completed_at = "2026-05-26T19:19:47"
 task_type = "feature"
-commits = []
+commits = ["aa442b330fa9e6b1bd55be74687f8f5b710904c1"]

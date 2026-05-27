@@ -1,6 +1,6 @@
 name = "element-data-pipeline"
 status = "active"
-current_step = 4
+current_step = 5
 created_at = "2026-05-26T16:27:09"
 plan_file = ".agentrail/plan.md"
 retroactive = false
