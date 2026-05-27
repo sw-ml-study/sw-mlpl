@@ -159,6 +159,7 @@ pub const DEMOS: &[Demo] = &[
     crate::demos_dim_reduction::PCA_LOADINGS,
     crate::demos_rnn::RNN_SEQUENCE,
     crate::demos_rnn::LSTM_SEQUENCE,
+    crate::demos_gan::GAN_2D,
     crate::demos_models::SOFTMAX_CLASSIFIER,
     crate::demos_dim_reduction::DIM_REDUCTION_ZOO,
     crate::demos_dim_reduction::UMAP_VS_PCA,
