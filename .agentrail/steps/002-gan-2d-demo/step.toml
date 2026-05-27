@@ -1,6 +1,6 @@
 number = 2
 slug = "gan-2d-demo"
-status = "pending"
+status = "completed"
 description = """
 Step 002: Simple GAN demo (2D circle distribution).
 
@@ -8,5 +8,6 @@ Create demos_gan.rs with..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T15:19:54"
+completed_at = "2026-05-27T15:33:51"
 task_type = "feature"
-commits = []
+commits = ["f138830a352946f1c79053bd8141aa7ed0ce13d8"]
