@@ -32,6 +32,7 @@ pub mod demos_autoencoder;
 pub mod demos_basics;
 pub mod demos_cnn;
 pub mod demos_dim_reduction;
+pub mod demos_gan;
 pub mod demos_lm;
 pub mod demos_models;
 pub mod demos_rnn;
