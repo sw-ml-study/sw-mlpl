@@ -1,0 +1,1 @@
+Rank-4 [B,C,H,W] tensors render as stacked heatmap grids (1 per channel, up to 8). convChannelStack() with per-cell diverging colormap. Falls back to slabs for large tensors.
