@@ -45,6 +45,7 @@ function createLegend() {
     const marks = [10, 100, 1000];
     const labels = ['10 elements', '100 elements', '1K elements'];
     const mat = new THREE.MeshStandardMaterial({ color: 0x8899bb, roughness: 0.3, metalness: 0.1 });
+    const midX = -2 * SPACING;
     for (let i = 0; i < marks.length; i++) {
         const d = logDim(marks[i]);
         const cube = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.15, d), mat.clone());
@@ -55,6 +56,9 @@ function createLegend() {
         lbl.position.set(x, 0.6, 0);
         scene.add(lbl);
     }
+    const title = makeLabel('LOGARITHMIC SCALE', { fontSize: 20, color: '#ffcc44', bg: 'rgba(20, 30, 60, 0.8)', w: 380, h: 48, scale: [3.5, 0.5, 1] });
+    title.position.set(midX, 1.2, 0);
+    scene.add(title);
 }
 
 function createMountains() {
@@ -584,7 +588,7 @@ function clearSelection() {
 }
 
 function panToStep(idx) {
-    if (!camera || idx < 0 || idx >= stepCount) return;
+    if (!camera || idx < -3 || idx >= stepCount) return;
     const dx = (idx - viewStep) * SPACING;
     viewStep = idx;
     camera.position.x += dx;
