@@ -1,6 +1,6 @@
 number = 4
 slug = "004-detail-panel-values"
-status = "pending"
+status = "in-progress"
 description = """
 Step 004: Show values in the detail panel.
 
