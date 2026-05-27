@@ -284,6 +284,7 @@ Newlines and semicolons are both statement separators.
 | `exp(a)` | 1 | Element-wise e^x |
 | `log(a)` | 1 | Element-wise natural logarithm |
 | `sqrt(a)` | 1 | Element-wise square root |
+| `relu(a)` | 1 | Element-wise max(0, a). Standalone version of the model-DSL relu_layer(). |
 | `abs(a)` | 1 | Element-wise absolute value |
 | `floor(a)` | 1 | Element-wise floor (round toward negative infinity) |
 | `ceil(a)` | 1 | Element-wise ceiling (round toward positive infinity) |
