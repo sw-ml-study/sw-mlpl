@@ -1,6 +1,6 @@
 number = 2
 slug = "002-latent-viz"
-status = "pending"
+status = "in-progress"
 description = """
 Step 002: Latent space visualization in 3D.
 
