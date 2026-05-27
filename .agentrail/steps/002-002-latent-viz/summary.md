@@ -1,0 +1,1 @@
+Bottleneck hint in detail panel for small rank-1 vectors. Existing 3D pipeline handles autoencoder shapes well (wide->narrow->wide with arrows).
