@@ -1,0 +1,6 @@
+name = "architecture-zoo-path"
+status = "completed"
+current_step = 2
+created_at = "2026-05-27T15:43:40"
+plan_file = ".agentrail/plan.md"
+retroactive = false
