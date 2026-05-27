@@ -68,6 +68,7 @@ pub mod render_shell_header;
 pub mod render_shell_modebar;
 pub mod render_shell_overlays;
 pub mod render_tutorial;
+pub mod resize_handle;
 pub mod scroll;
 pub mod tutorial;
 pub mod upload;

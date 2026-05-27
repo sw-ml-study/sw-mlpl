@@ -1551,10 +1551,9 @@
 <body>
     <div id="app"></div>
     <script>
-    (function() {
+    window.__initResize = function(handle) {
         let dragging = false, startY = 0, startH = 0, outputEl = null;
-        document.addEventListener('mousedown', function(e) {
-            if (e.target.id !== 'viz3d-resize') return;
+        handle.addEventListener('mousedown', function(e) {
             outputEl = document.querySelector('.viz3d-split .output') || document.getElementById('output');
             if (!outputEl) return;
             dragging = true;
@@ -1563,6 +1562,7 @@
             document.body.style.cursor = 'ns-resize';
             document.body.style.userSelect = 'none';
             e.preventDefault();
+            e.stopPropagation();
         });
         document.addEventListener('mousemove', function(e) {
             if (!dragging || !outputEl) return;
@@ -1573,7 +1573,7 @@
             if (dragging) { document.body.style.cursor = ''; document.body.style.userSelect = ''; }
             dragging = false; outputEl = null;
         });
-    })();
+    };
     </script>
 </body>
 </html>
