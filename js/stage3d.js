@@ -4,7 +4,9 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 let scene, camera, renderer, controls, animId;
 let stepCount = 0;
 let viewStep = 0;
+let selectedStepIdx = -1;
 const stepObjects = [];
+const stepMeshes = [];
 const activeAnims = [];
 const pendingEvents = [];
 const varPositions = {};
@@ -227,6 +229,16 @@ function selectMesh(mesh) {
     selectionPointer = new THREE.Mesh(geo, mat);
     selectionPointer.position.set(worldPos.x, worldPos.y + 1.5, worldPos.z);
     scene.add(selectionPointer);
+    selectedStepIdx = mesh.userData?.stepIdx ?? -1;
+}
+
+function selectStep(idx) {
+    if (idx < 0 || idx >= stepMeshes.length) return;
+    const mesh = stepMeshes[idx];
+    if (!mesh) return;
+    selectMesh(mesh);
+    showDetail(mesh.userData);
+    panToStep(idx);
 }
 
 function showDetail(ud) {
@@ -295,10 +307,15 @@ function renderHistogram(hist) {
 }
 
 function onCanvasKey(e) {
-    if (e.key === 'ArrowRight') { e.preventDefault(); panToStep(viewStep + 1); }
-    else if (e.key === 'ArrowLeft') { e.preventDefault(); panToStep(viewStep - 1); }
-    else if (e.key === 'Home') { e.preventDefault(); panToStep(0); }
-    else if (e.key === 'End') { e.preventDefault(); panToStep(stepCount - 1); }
+    if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        if (selectedStepIdx >= 0) selectStep(selectedStepIdx + 1); else panToStep(viewStep + 1);
+    } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (selectedStepIdx >= 0) selectStep(selectedStepIdx - 1); else panToStep(viewStep - 1);
+    } else if (e.key === 'Home') { e.preventDefault(); clearSelection(); panToStep(0); }
+    else if (e.key === 'End') { e.preventDefault(); clearSelection(); panToStep(stepCount - 1); }
+    else if (e.key === 'Escape') { clearSelection(); }
 }
 
 window.__stage3d_destroy = function() {
@@ -520,6 +537,7 @@ window.__stage3d_add_step = function(ev) {
     mesh.traverse(c => { if (c !== mesh) c.userData = mesh.userData; });
     scene.add(mesh);
     stepObjects.push(mesh);
+    stepMeshes.push(mesh);
     prevMesh = mesh;
 
     if (varName) varPositions[varName] = x;
@@ -541,6 +559,7 @@ window.__stage3d_add_step = function(ev) {
 
 function clearSelection() {
     if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
+    selectedStepIdx = -1;
     const el = document.getElementById('stage3d-detail');
     if (el) el.style.display = 'none';
 }
@@ -563,14 +582,20 @@ window.__stage3d_reset_view = function() {
     controls.update();
 };
 
-window.__stage3d_prev = function() { clearSelection(); panToStep(viewStep - 1); };
-window.__stage3d_next = function() { clearSelection(); panToStep(viewStep + 1); };
+window.__stage3d_prev = function() {
+    if (selectedStepIdx >= 0) { selectStep(selectedStepIdx - 1); } else { panToStep(viewStep - 1); }
+};
+window.__stage3d_next = function() {
+    if (selectedStepIdx >= 0) { selectStep(selectedStepIdx + 1); } else { panToStep(viewStep + 1); }
+};
 window.__stage3d_home = function() { clearSelection(); panToStep(0); };
 window.__stage3d_end = function() { clearSelection(); panToStep(stepCount - 1); };
 
 window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
     stepObjects.length = 0;
+    stepMeshes.length = 0;
+    selectedStepIdx = -1;
     for (const k of Object.keys(varPositions)) delete varPositions[k];
     activeAnims.length = 0;
     pendingEvents.length = 0;
