@@ -61,6 +61,17 @@ training. **Deferred** in MLPL: `adam(loss, params, lr,
 b1, b2, eps)` ships today; an `adamw` variant with explicit
 `weight_decay` is on the regularization-tour roadmap.
 
+## Adversarial Training
+
+A training paradigm where two networks compete: the
+Generator tries to produce realistic data and the
+Discriminator tries to distinguish real from fake. Each
+network's loss depends on the other's output, creating a
+minimax game. In MLPL, this is implemented as two
+alternating `adam()` calls in a single `train` block -- one
+updates D's weights while G is fixed, then one updates G's
+weights while D is fixed. See also: GAN.
+
 ## Adversarial examples
 
 Inputs crafted with small, often imperceptible perturbations
@@ -653,6 +664,17 @@ Stored as a contiguous row-major buffer with no zero-skipping
 (no sparse representation). MLPL's `DenseArray` is the only
 array shape today.
 
+## Discriminator
+
+The half of a GAN that classifies inputs as real or fake.
+Takes data (real or generated) and outputs a score between
+0 (fake) and 1 (real) via sigmoid. In MLPL's GAN demo,
+`D = chain(linear(2, 8, seed), relu_layer(), linear(8, 1,
+seed2))` maps 2D points to a scalar real/fake score. The
+Discriminator trains on both real data and the Generator's
+fakes, getting better at telling them apart. See also: GAN,
+Generator.
+
 ## Dimensionality reduction
 
 Project an `[N, D]` matrix down to `[N, k]` for some `k < D`,
@@ -918,6 +940,28 @@ A parameter the optimizer skips during the update step. The
 gradient still flows through during backprop; only the
 weight update is suppressed. MLPL: `freeze(model)` /
 `unfreeze(model)` from .
+
+## GAN (Generative Adversarial Network)
+
+A framework where two networks train simultaneously in
+competition. The Generator creates fake data from random
+noise; the Discriminator classifies inputs as real or fake.
+The Generator improves by fooling the Discriminator; the
+Discriminator improves by catching fakes. At equilibrium
+the Generator produces data indistinguishable from real.
+MLPL: the "GAN (2D circle)" demo trains both networks with
+alternating `adam()` calls inside one `train` block. See
+also: Generator, Discriminator, Adversarial Training.
+
+## Generator
+
+The half of a GAN that creates fake data. Maps random noise
+(from the latent space) through learned weights to produce
+output that should resemble real data. In MLPL's GAN demo,
+`G = chain(linear(2, 8, seed), relu_layer(), linear(8, 2,
+seed2))` maps 2D noise to 2D points approximating a circle.
+The Generator never sees real data directly -- it only
+receives gradient signal through the Discriminator.
 
 ## Goodhart's Law
 

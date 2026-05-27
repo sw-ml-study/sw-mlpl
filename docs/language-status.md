@@ -37,6 +37,7 @@ human-readable summary.
 | `cnn-builtins-viz` (39) | shipped | -- (capability saga) | Closed 2026-05-27. 6 steps. conv2d, pool2d, relu standalone, Simple CNN demo, 3D stacked heatmap channels for rank-4 tensors. |
 | `autoencoder-demo` (40) | shipped | -- (content saga) | Closed 2026-05-27. 4 steps. Autoencoder demo (encoder 8->3, decoder 3->8), bottleneck hint in 3D detail, glossary entries (Bottleneck, Reconstruction Error), salt flat backdrop. |
 | `rnn-lstm-builtins` (41) | shipped | -- (capability saga) | Closed 2026-05-27. 5 steps. rnn_cell and lstm_cell builtins, RNN sequence demo (5-step), LSTM sequence memory demo (10-step), glossary (RNN, LSTM, Vanishing Gradient, Hidden State). |
+| `gan-demo` (42) | shipped | -- (content saga) | Closed 2026-05-27. 3 steps. sin/cos builtins, GAN (2D circle) demo with alternating adam, glossary (GAN, Generator, Discriminator, Adversarial Training), BUILTIN_GROUPS completeness fix (11 builtins). |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
 The "proposed" sagas have full milestone docs; the user has
