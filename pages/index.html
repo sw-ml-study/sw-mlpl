@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-4f5b13a621826be4.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-4f5b13a621826be4_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-833d112150bf9dc0.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-833d112150bf9dc0_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -1558,8 +1558,33 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-4f5b13a621826be4.js" crossorigin="anonymous" integrity="sha384-eiaLmbFphT6Ke4zbz8eMz+C7oUW1HQamKAUicQpl7/b3Yu95w0CE8CN91+wPa/vY"><link rel="preload" href="/sw-mlpl/mlpl-web-4f5b13a621826be4_bg.wasm" crossorigin="anonymous" integrity="sha384-vglii5V4Fx5g+c1MNS1vbquYeD22cE+HcrcY3rup9R+eFFsb+weiSeDUGjj7/I9/" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-833d112150bf9dc0.js" crossorigin="anonymous" integrity="sha384-eiaLmbFphT6Ke4zbz8eMz+C7oUW1HQamKAUicQpl7/b3Yu95w0CE8CN91+wPa/vY"><link rel="preload" href="/sw-mlpl/mlpl-web-833d112150bf9dc0_bg.wasm" crossorigin="anonymous" integrity="sha384-D5fCCF/AeGkVzLf2infVAI5MkJgT937Z/sNP7yVXP2ziUdlcB2H3DYGDZ6l6/8+T" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
+    <script>
+    (function() {
+        let dragging = false, startY = 0, startH = 0, outputEl = null;
+        document.addEventListener('mousedown', function(e) {
+            if (e.target.id !== 'viz3d-resize') return;
+            outputEl = document.querySelector('.viz3d-split .output') || document.getElementById('output');
+            if (!outputEl) return;
+            dragging = true;
+            startY = e.clientY;
+            startH = outputEl.getBoundingClientRect().height;
+            document.body.style.cursor = 'ns-resize';
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        });
+        document.addEventListener('mousemove', function(e) {
+            if (!dragging || !outputEl) return;
+            outputEl.style.height = Math.max(60, Math.min(window.innerHeight * 0.7, startH + (e.clientY - startY))) + 'px';
+            e.preventDefault();
+        });
+        document.addEventListener('mouseup', function() {
+            if (dragging) { document.body.style.cursor = ''; document.body.style.userSelect = ''; }
+            dragging = false; outputEl = null;
+        });
+    })();
+    </script>
 </body>
 </html>
