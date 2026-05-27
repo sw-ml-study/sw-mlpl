@@ -131,3 +131,32 @@ pub const VISUALIZATIONS: Demo = Demo {
         "svg(reshape(iota(25), [5, 5]), \"heatmap\")            # MxN -> viridis grid",
     ],
 };
+
+pub const UPLOAD_INSPECT: Demo = Demo {
+    category: "Basics",
+    name: "Upload & Inspect Image",
+    intro: "How to bring your own image into MLPL. Type :upload x in the REPL \
+            to open your device's file picker. The browser decodes and resizes \
+            the photo to 64x64 and binds it as a Result -- Ok({pixels, h, w}) \
+            on success, Err(message) on cancel or decode failure. This demo \
+            simulates the workflow with synthetic pixel data so you can see \
+            the inspection pattern before trying :upload yourself.",
+    takeaway: "The pattern is always: :upload name, then is_ok(name) to check, \
+               then unwrap(name).pixels to get the tensor. From there, shape, \
+               mean, min, max tell you what you have. svg(pixels, \"gallery\") \
+               renders it as a thumbnail grid. Try :upload x now and repeat \
+               these steps on your own photo.",
+    lines: &[
+        "# Simulate an uploaded 64x64 RGB image (batch of 1)",
+        "pixels = reshape(random(42, [12288]), [1, 3, 64, 64])",
+        "shape(pixels)",
+        "# Inspect the pixel values",
+        "mean(pixels)",
+        "reduce(:min, pixels)",
+        "reduce(:max, pixels)",
+        "# Display as a gallery thumbnail",
+        "svg(pixels, \"gallery\")",
+        "# Histogram of pixel intensities",
+        "hist(reshape(pixels, [12288]), 20)",
+    ],
+};
