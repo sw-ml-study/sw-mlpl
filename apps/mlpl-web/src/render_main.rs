@@ -11,6 +11,7 @@ use crate::entry_render::render_entry;
 use crate::mode_callbacks::ModeCallbacks;
 use crate::paths_view;
 use crate::render_tutorial::render_tutorial;
+use crate::resize_handle::ResizeHandle;
 use crate::viz3d_panel::Stage3dPanel;
 use mlpl_web_eval::state::HistoryEntry;
 
@@ -179,7 +180,7 @@ fn render_main_shell(
 ) -> Html {
     let stage = if show_3d {
         html! { <>
-            <div class="resize-handle" id="viz3d-resize" />
+            <ResizeHandle />
             <section class="stage3d-pane"><Stage3dPanel /></section>
         </> }
     } else {
