@@ -99,7 +99,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "Weight sharing and translation invariance for image recognition (LeCun, 1989). LeNet-5 read handwritten zip codes at the US Postal Service. The same idea -- small learned filters sliding across the input -- is still the foundation of computer vision. Wider adoption: 2012 (AlexNet). Refinements: VGGNet (2014), Inception (2014), ResNet (2015).",
             },
             Step::Demo {
-                name: "Simple CNN",
+                name: "CNN (simple)",
                 why: "A minimal conv2d -> relu -> pool2d pipeline. MLPL ships these builtins (saga 39).",
             },
             // 6. Universal approximation (1989)
@@ -297,7 +297,7 @@ pub const PATHS: &[LearningPath] = &[
                 why: "Controlled information loss: shrink spatial dimensions by taking the max or average over small windows. MLPL: pool2d(input, size, mode).",
             },
             Step::Demo {
-                name: "Simple CNN",
+                name: "CNN (simple)",
                 why: "A minimal conv2d -> relu -> pool2d -> flatten -> linear pipeline on a 4x4 synthetic input. Shows the shape transformations at each stage.",
             },
             Step::Diagram {
@@ -351,7 +351,7 @@ pub const PATHS: &[LearningPath] = &[
                 why: "The narrow layer in an autoencoder that forces compression. The network must learn which features matter enough to preserve.",
             },
             Step::Demo {
-                name: "Autoencoder (8 to 3 to 8)",
+                name: "Autoencoder (simple)",
                 why: "Encoder shrinks 8 dimensions to 3, decoder expands back to 8. Train with MSE reconstruction loss. The bottleneck vector is the learned compressed representation.",
             },
             Step::Glossary {
@@ -480,7 +480,7 @@ pub const PATHS: &[LearningPath] = &[
                 body: "MLPL ships several synthetic dataset generators: blobs(seed, n, centers) for Gaussian clusters, moons(seed, n, noise) for two interleaving arcs, circles(seed, n, noise) for concentric rings, and random/randn for uniform/normal noise. Each returns a matrix ready for plotting or training. Seeded for reproducibility.",
             },
             Step::Demo {
-                name: "Matrix Operations",
+                name: "Matrix Ops",
                 why: "Reshape, transpose, matmul, dot. The shape-manipulation toolkit for arranging data into the format a model expects.",
             },
             Step::Lesson {
