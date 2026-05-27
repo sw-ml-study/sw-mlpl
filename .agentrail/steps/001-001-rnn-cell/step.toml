@@ -1,6 +1,6 @@
 number = 1
 slug = "001-rnn-cell"
-status = "in-progress"
+status = "completed"
 description = """
 Step 001: rnn_cell builtin.
 
@@ -8,5 +8,6 @@ Implement rnn_cell(input, hidden, W_ih, W_hh, bi..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T13:20:15"
+completed_at = "2026-05-27T13:22:33"
 task_type = "feature"
-commits = []
+commits = ["7e7dd94ef1c3134348ccc8d03677a49e909b25a5"]
