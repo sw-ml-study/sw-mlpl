@@ -286,6 +286,8 @@ Newlines and semicolons are both statement separators.
 | `sqrt(a)` | 1 | Element-wise square root |
 | `relu(a)` | 1 | Element-wise max(0, a). Standalone version of the model-DSL relu_layer(). |
 | `abs(a)` | 1 | Element-wise absolute value |
+| `sin(a)` | 1 | Element-wise sine (radians) |
+| `cos(a)` | 1 | Element-wise cosine (radians) |
 | `floor(a)` | 1 | Element-wise floor (round toward negative infinity) |
 | `ceil(a)` | 1 | Element-wise ceiling (round toward positive infinity) |
 | `round(a)` | 1 | Element-wise round to nearest integer |
@@ -392,6 +394,15 @@ initialized at construction). Apply a model to an array with
 | `sinusoidal_encoding(seq_len, d_model)` | 2 | Deterministic `[time=seq_len, dim=d_model]` sinusoidal positional table. No parameters. Additive pattern: `apply(embed, toks) + sinusoidal_encoding(T, d)`. |
 | `apply(model, X)` | 2 | Forward pass. For `embed`, `X` is integer tokens; for everything else it is an `[..., d_in]` float array. Fully differentiable through the tape. |
 | `predict_batch(model, X)` | 2 | Saga 29 step 011: forward pass + `argmax` over the trailing axis. Returns integer class indices. Not differentiable -- use `apply(model, X)` inside `grad()` or `adam()` instead. Convenient for evaluation: `preds = predict_batch(mdl, X); accuracy = reduce_add(eq(preds, Y)) / N`. |
+
+### CNN + RNN builtins
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `conv2d(input, filters, stride, padding)` | 4 | 2D convolution. `input`: `[B,C_in,H,W]`, `filters`: `[C_out,C_in,kH,kW]`. `stride` and `padding` are scalars. Returns `[B,C_out,H_out,W_out]`. |
+| `pool2d(input, size, mode)` | 3 | 2D pooling. `mode=1` max pooling, `mode=0` average pooling. `size` is the square pool window side. |
+| `rnn_cell(input, hidden, W_ih, W_hh, bias)` | 5 | One Elman RNN step: `tanh(W_ih @ input + W_hh @ hidden + bias)`. Returns updated hidden state. |
+| `lstm_cell(input, hidden, cell, W, bias)` | 5 | One LSTM step. `W`: `[4*hd, id+hd]`, `bias`: `[4*hd, 1]`. Returns `[2*hd, 1]` = concat(new_hidden, new_cell). Split with `reshape` + `take`. |
 
 ### Result type (Saga 29 step 012)
 
