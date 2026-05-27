@@ -319,8 +319,10 @@
         }
         main.viz3d-split > .output {
             height: 30vh;
+            min-height: 40px;
             overflow-y: auto;
-            flex-shrink: 0;
+            flex-shrink: 1;
+            flex-grow: 0;
             padding: 8px 20px;
         }
         main.viz3d-split > .input-wrap {
@@ -1569,7 +1571,9 @@
         });
         document.addEventListener('mousemove', function(e) {
             if (!dragging || !outputEl) return;
-            outputEl.style.height = Math.max(60, Math.min(window.innerHeight * 0.7, startH + (e.clientY - startY))) + 'px';
+            var h = Math.max(40, Math.min(window.innerHeight * 0.7, startH + (e.clientY - startY)));
+            outputEl.style.setProperty('height', h + 'px', 'important');
+            outputEl.style.setProperty('flex-basis', h + 'px', 'important');
             e.preventDefault();
         });
         document.addEventListener('mouseup', function() {
