@@ -15,7 +15,7 @@ guided tour + what's-new modal).
 
 ## Active saga
 
-None. Saga 37 (`3d-scale-connections`) closed 2026-05-26.
+None. Saga 38 (`element-data-pipeline`) closed 2026-05-26.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -33,6 +33,7 @@ human-readable summary.
 | `3d-viz-stage` (35) | shipped | -- (capability saga) | Closed 2026-05-25. 7 steps. 3D visualization stage: :3d toggle + Ctrl+3, Three.js scene with OrbitControls, step event pipeline (eval emits shapes), shape-aware sculptures (scalar/vector/matrix/tensor), demo integration, click-to-inspect (:describe via raycaster), nav buttons + arrow keys, fog. |
 | `script-editor` (36) | shipped | -- (UX saga) | Closed 2026-05-26. 4 steps. Script editor tab with Run/Load/Save/Clear, file picker for .mlpl upload, Ctrl+Enter to run, Blob download. |
 | `3d-scale-connections` (37) | shipped | -- (capability saga) | Closed 2026-05-26. 4 steps. Log-proportional sizing, scale legend, connection arrows between dependent steps, :3d reset command. |
+| `element-data-pipeline` (38) | shipped | -- (capability saga) | Closed 2026-05-26. 5 steps. eval_with_values API, element values in Stage3dEvent, value-colored sculptures (bar charts, cell grids, diverging colormap), detail panel with stats + histogram. |
 | Chronological history | proposed   | -- (content saga)      | `docs/milestone-chronological-history.md`. 24 per-concept lessons. |
 
 The "proposed" sagas have full milestone docs; the user has

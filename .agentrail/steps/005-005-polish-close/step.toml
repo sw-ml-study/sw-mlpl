@@ -1,6 +1,6 @@
 number = 5
 slug = "005-polish-close"
-status = "pending"
+status = "in-progress"
 description = """
 Step 005 (FINAL, use --done): Polish + saga close.
 
