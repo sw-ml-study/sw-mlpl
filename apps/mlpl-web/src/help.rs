@@ -51,6 +51,7 @@ full list):
   lm         shift_pairs_x, shift_pairs_y, last_row, concat,
              attention_weights, argtop_k, scatter
   experiment compare
+  conv       conv2d, pool2d
   loss       cross_entropy, perplexity
   embed      pairwise_sqdist, knn, tsne, pca, embed_table
   dimreduce  pca_components, pca_variance_explained,
