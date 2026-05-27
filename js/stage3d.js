@@ -239,12 +239,58 @@ function showDetail(ud) {
     const elements = ud.elements || (shape.length ? shape.reduce((a, b) => a * b, 1) : 1);
     const bytes = elements * 8;
     const mem = bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
-    el.innerHTML = `
+    let html = `
         <div class="stage3d-detail-title">${name ? name + ' =' : ''} ${label}</div>
         <div class="stage3d-detail-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>
-        <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>
-    `;
+        <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>`;
+    const vals = ud.values;
+    const summary = ud.summary;
+    if (vals && vals.length > 0) {
+        const stats = computeStats(vals);
+        html += renderStats(stats);
+        html += renderValues(vals, shape);
+    } else if (summary) {
+        html += renderStats(summary);
+        html += renderHistogram(summary.histogram);
+    }
+    el.innerHTML = html;
     el.style.display = 'block';
+}
+
+function computeStats(vals) {
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const mean = vals.reduce((a, b) => a + b, 0) / vals.length;
+    const std = Math.sqrt(vals.reduce((a, v) => a + (v - mean) ** 2, 0) / vals.length);
+    return { min, max, mean, std };
+}
+
+function renderStats(s) {
+    return `<div class="stage3d-detail-row"><strong>Min:</strong> ${s.min.toFixed(4)} &nbsp; <strong>Max:</strong> ${s.max.toFixed(4)} &nbsp; <strong>Mean:</strong> ${s.mean.toFixed(4)} &nbsp; <strong>Std:</strong> ${s.std.toFixed(4)}</div>`;
+}
+
+function renderValues(vals, shape) {
+    const show = vals.slice(0, 20);
+    const fmt = show.map(v => v % 1 === 0 ? v.toString() : v.toFixed(3));
+    const suffix = vals.length > 20 ? ` ... (${vals.length - 20} more)` : '';
+    if (shape.length === 2 && shape[1] <= 10 && vals.length <= 20) {
+        let table = '<div class="stage3d-detail-row" style="font-family:var(--mono);font-size:12px">';
+        for (let r = 0; r < shape[0] && r * shape[1] < 20; r++) {
+            const row = fmt.slice(r * shape[1], (r + 1) * shape[1]).join('  ');
+            table += row + '<br>';
+        }
+        return table + '</div>';
+    }
+    return `<div class="stage3d-detail-row" style="font-family:var(--mono);font-size:12px">${fmt.join(', ')}${suffix}</div>`;
+}
+
+function renderHistogram(hist) {
+    if (!hist || hist.length === 0) return '';
+    const max = Math.max(...hist);
+    const bars = hist.map(h => {
+        const pct = max > 0 ? (h / max * 100) : 0;
+        return `<span style="display:inline-block;width:12px;height:${pct * 0.3}px;background:#ffaa44;margin:0 1px;vertical-align:bottom"></span>`;
+    }).join('');
+    return `<div class="stage3d-detail-row" style="height:35px;line-height:35px">${bars}</div>`;
 }
 
 function onCanvasKey(e) {
@@ -435,7 +481,7 @@ window.__stage3d_add_step = function(ev) {
     const rawName = ev.output?.name || '';
     const isVar = ev.label.includes('=');
     const varName = isVar ? rawName : null;
-    mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0 };
+    mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0, values, summary: ev.output?.summary || null };
     if (mesh.children) mesh.children.forEach(c => c.userData = mesh.userData);
     scene.add(mesh);
     stepObjects.push(mesh);
