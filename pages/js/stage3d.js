@@ -347,7 +347,7 @@ window.__stage3d_teardown = function() {
     scene = camera = renderer = controls = animId = null;
 };
 
-const SPACING = 2.5;
+const SPACING = 5.0;
 const OP_COLORS = {
     matmul: 0x44aaff, train: 0xff5577, softmax: 0x44ffaa,
     cross_entropy: 0xff6688, reshape: 0xaa88ff, reduce: 0xffaa44,
@@ -392,28 +392,28 @@ function valueColor(v, min, max) {
 
 function shapeMesh(shape, color, values) {
     const rank = shape.length;
-    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.1 });
+    const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.2, metalness: 0.15 });
 
     if (rank === 0) {
         if (values && values.length === 1) {
-            const c = values[0] >= 0 ? new THREE.Color(0.9, 0.4, 0.3) : new THREE.Color(0.3, 0.4, 0.9);
-            mat.color = c;
+            mat.color = values[0] >= 0 ? new THREE.Color(0.95, 0.5, 0.35) : new THREE.Color(0.35, 0.5, 0.95);
         }
-        return new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mat);
+        return new THREE.Mesh(new THREE.SphereGeometry(0.4, 20, 20), mat);
     }
 
+    // Vector: bars recede into Z
     if (rank === 1 && values && values.length <= 64) {
         const group = new THREE.Group();
         const n = values.length;
         const min = Math.min(...values);
         const max = Math.max(...values);
-        const totalW = logDim(n);
-        const barW = totalW / n * 0.8;
+        const totalD = logDim(n);
+        const barD = totalD / n * 0.85;
         for (let i = 0; i < n; i++) {
-            const h = Math.max(0.05, Math.abs(values[i]) / (Math.max(Math.abs(min), Math.abs(max)) || 1) * 0.8);
-            const bmat = new THREE.MeshStandardMaterial({ color: valueColor(values[i], min, max), roughness: 0.3 });
-            const bar = new THREE.Mesh(new THREE.BoxGeometry(barW, h, barW), bmat);
-            bar.position.x = (i - n / 2) * (totalW / n);
+            const h = Math.max(0.08, Math.abs(values[i]) / (Math.max(Math.abs(min), Math.abs(max)) || 1) * 1.0);
+            const bmat = new THREE.MeshStandardMaterial({ color: valueColor(values[i], min, max), roughness: 0.2, metalness: 0.15 });
+            const bar = new THREE.Mesh(new THREE.BoxGeometry(barD * 0.7, h, barD * 0.7), bmat);
+            bar.position.z = -(i - n / 2) * (totalD / n);
             bar.position.y = h / 2;
             bar.castShadow = true;
             group.add(bar);
@@ -422,24 +422,26 @@ function shapeMesh(shape, color, values) {
     }
 
     if (rank === 1) {
-        const w = logDim(shape[0]);
-        return new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, 0.25), mat);
+        const d = logDim(shape[0]);
+        return new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, d), mat);
     }
 
+    // Matrix with values: cols across X, rows recede into Z
     if (rank === 2 && values && values.length <= 400) {
         const rows = shape[0], cols = shape[1];
         const group = new THREE.Group();
         const min = Math.min(...values);
         const max = Math.max(...values);
-        const cellW = logDim(cols) / cols;
-        const cellH = logDim(rows) / rows;
+        const cellW = Math.max(0.08, logDim(cols) / cols);
+        const cellD = Math.max(0.08, logDim(rows) / rows);
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const v = values[r * cols + c];
-                const cmat = new THREE.MeshStandardMaterial({ color: valueColor(v, min, max), roughness: 0.3 });
-                const cell = new THREE.Mesh(new THREE.BoxGeometry(cellW * 0.9, cellH * 0.9, 0.08), cmat);
+                const cmat = new THREE.MeshStandardMaterial({ color: valueColor(v, min, max), roughness: 0.2, metalness: 0.15 });
+                const cell = new THREE.Mesh(new THREE.BoxGeometry(cellW * 0.88, 0.12, cellD * 0.88), cmat);
                 cell.position.x = (c - cols / 2) * cellW;
-                cell.position.y = (rows / 2 - r) * cellH;
+                cell.position.z = -(r - rows / 2) * cellD;
+                cell.position.y = 0.06;
                 cell.castShadow = true;
                 group.add(cell);
             }
@@ -447,23 +449,28 @@ function shapeMesh(shape, color, values) {
         return group;
     }
 
+    // Matrix without values: width X, depth Z
     if (rank === 2) {
         const w = logDim(shape[1]);
-        const h = logDim(shape[0]);
-        return new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.12), mat);
+        const d = logDim(shape[0]);
+        return new THREE.Mesh(new THREE.BoxGeometry(w, 0.15, d), mat);
     }
 
+    // Rank-4 conv: stacked channel heatmaps receding into Z
     if (rank === 4 && values && values.length <= 512) {
         return convChannelStack(shape, values);
     }
 
+    // Generic rank-3+: slabs stacked into Z
     const w = logDim(shape[rank - 1] || 1);
-    const h = logDim(shape[rank - 2] || 1);
+    const h = 0.15;
     const group = new THREE.Group();
     const layers = Math.min(Math.ceil(logDim(shape[0] || 1) * 2), 8);
+    const d = logDim(shape[rank - 2] || 1);
     for (let i = 0; i < layers; i++) {
-        const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.08), mat.clone());
-        slab.position.z = i * 0.15 - (layers * 0.15) / 2;
+        const slab = new THREE.Mesh(new THREE.BoxGeometry(w, h, d * 0.9), mat.clone());
+        slab.position.z = -i * (d + 0.1);
+        slab.position.y = 0.08 + i * 0.05;
         slab.castShadow = true;
         group.add(slab);
     }
@@ -478,8 +485,8 @@ function convChannelStack(shape, values) {
     const gridW = logDim(w);
     const gridH = logDim(h);
     const cellW = gridW / w;
-    const cellH = gridH / h;
-    const spacing = 0.3;
+    const cellD = gridH / h;
+    const spacing = 0.4;
     const maxChannels = Math.min(c, 8);
     for (let ci = 0; ci < maxChannels; ci++) {
         const channelGroup = new THREE.Group();
@@ -487,14 +494,15 @@ function convChannelStack(shape, values) {
         for (let r = 0; r < h; r++) {
             for (let col = 0; col < w; col++) {
                 const v = values[offset + r * w + col] || 0;
-                const cmat = new THREE.MeshStandardMaterial({ color: valueColor(v, min, max), roughness: 0.3 });
-                const cell = new THREE.Mesh(new THREE.BoxGeometry(cellW * 0.85, cellH * 0.85, 0.06), cmat);
+                const cmat = new THREE.MeshStandardMaterial({ color: valueColor(v, min, max), roughness: 0.2, metalness: 0.15 });
+                const cell = new THREE.Mesh(new THREE.BoxGeometry(cellW * 0.85, 0.1, cellD * 0.85), cmat);
                 cell.position.x = (col - w / 2) * cellW;
-                cell.position.y = (h / 2 - r) * cellH;
+                cell.position.z = -(r - h / 2) * cellD;
+                cell.position.y = 0.05;
                 channelGroup.add(cell);
             }
         }
-        channelGroup.position.z = ci * spacing - (maxChannels * spacing) / 2;
+        channelGroup.position.y = ci * spacing;
         group.add(channelGroup);
     }
     return group;
