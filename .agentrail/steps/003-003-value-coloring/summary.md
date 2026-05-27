@@ -1,0 +1,1 @@
+Value-colored sculptures: scalar color=pos/neg, vector bar chart with per-element height+color, matrix cell grid with diverging colormap. valueColor() blue-white-red mapping. Falls back to solid color for large/missing values.
