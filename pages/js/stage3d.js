@@ -271,6 +271,9 @@ function showDetail(ud) {
         <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>`;
     const vals = ud.values;
     const summary = ud.summary;
+    if (elements <= 8 && rank === 1 && elements > 0) {
+        html += `<div class="stage3d-detail-row" style="color:var(--peach)"><strong>Compact representation</strong> (${elements} elements${elements <= 4 ? ' -- bottleneck?' : ''})</div>`;
+    }
     if (vals && vals.length > 0) {
         const stats = computeStats(vals);
         html += renderStats(stats);
