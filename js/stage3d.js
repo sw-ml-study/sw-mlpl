@@ -420,8 +420,12 @@ function shapeMesh(shape, color, values) {
         return new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.12), mat);
     }
 
-    const w = logDim(shape[2] || 1);
-    const h = logDim(shape[1] || 1);
+    if (rank === 4 && values && values.length <= 512) {
+        return convChannelStack(shape, values);
+    }
+
+    const w = logDim(shape[rank - 1] || 1);
+    const h = logDim(shape[rank - 2] || 1);
     const group = new THREE.Group();
     const layers = Math.min(Math.ceil(logDim(shape[0] || 1) * 2), 8);
     for (let i = 0; i < layers; i++) {
@@ -429,6 +433,36 @@ function shapeMesh(shape, color, values) {
         slab.position.z = i * 0.15 - (layers * 0.15) / 2;
         slab.castShadow = true;
         group.add(slab);
+    }
+    return group;
+}
+
+function convChannelStack(shape, values) {
+    const [_b, c, h, w] = shape;
+    const group = new THREE.Group();
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const gridW = logDim(w);
+    const gridH = logDim(h);
+    const cellW = gridW / w;
+    const cellH = gridH / h;
+    const spacing = 0.3;
+    const maxChannels = Math.min(c, 8);
+    for (let ci = 0; ci < maxChannels; ci++) {
+        const channelGroup = new THREE.Group();
+        const offset = ci * h * w;
+        for (let r = 0; r < h; r++) {
+            for (let col = 0; col < w; col++) {
+                const v = values[offset + r * w + col] || 0;
+                const cmat = new THREE.MeshStandardMaterial({ color: valueColor(v, min, max), roughness: 0.3 });
+                const cell = new THREE.Mesh(new THREE.BoxGeometry(cellW * 0.85, cellH * 0.85, 0.06), cmat);
+                cell.position.x = (col - w / 2) * cellW;
+                cell.position.y = (h / 2 - r) * cellH;
+                channelGroup.add(cell);
+            }
+        }
+        channelGroup.position.z = ci * spacing - (maxChannels * spacing) / 2;
+        group.add(channelGroup);
     }
     return group;
 }
