@@ -301,21 +301,78 @@ function logDim(n) {
     return Math.max(0.3, Math.min(6, Math.log2(Math.max(n, 1)) * 0.5 + 0.3));
 }
 
-function shapeMesh(shape, color) {
+function valueColor(v, min, max) {
+    const range = Math.abs(max - min) < 1e-12 ? 1 : max - min;
+    const t = (v - min) / range;
+    const r = t < 0.5 ? 0.3 : 0.3 + (t - 0.5) * 2 * 0.7;
+    const g = 1 - Math.abs(t - 0.5) * 2;
+    const b = t > 0.5 ? 0.3 : 0.3 + (0.5 - t) * 2 * 0.7;
+    return new THREE.Color(r, g, b);
+}
+
+function shapeMesh(shape, color, values) {
     const rank = shape.length;
     const mat = new THREE.MeshStandardMaterial({ color, roughness: 0.3, metalness: 0.1 });
+
     if (rank === 0) {
+        if (values && values.length === 1) {
+            const c = values[0] >= 0 ? new THREE.Color(0.9, 0.4, 0.3) : new THREE.Color(0.3, 0.4, 0.9);
+            mat.color = c;
+        }
         return new THREE.Mesh(new THREE.SphereGeometry(0.3, 16, 16), mat);
     }
+
+    if (rank === 1 && values && values.length <= 64) {
+        const group = new THREE.Group();
+        const n = values.length;
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const totalW = logDim(n);
+        const barW = totalW / n * 0.8;
+        for (let i = 0; i < n; i++) {
+            const h = Math.max(0.05, Math.abs(values[i]) / (Math.max(Math.abs(min), Math.abs(max)) || 1) * 0.8);
+            const bmat = new THREE.MeshStandardMaterial({ color: valueColor(values[i], min, max), roughness: 0.3 });
+            const bar = new THREE.Mesh(new THREE.BoxGeometry(barW, h, barW), bmat);
+            bar.position.x = (i - n / 2) * (totalW / n);
+            bar.position.y = h / 2;
+            bar.castShadow = true;
+            group.add(bar);
+        }
+        return group;
+    }
+
     if (rank === 1) {
         const w = logDim(shape[0]);
         return new THREE.Mesh(new THREE.BoxGeometry(w, 0.25, 0.25), mat);
     }
+
+    if (rank === 2 && values && values.length <= 400) {
+        const rows = shape[0], cols = shape[1];
+        const group = new THREE.Group();
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const cellW = logDim(cols) / cols;
+        const cellH = logDim(rows) / rows;
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const v = values[r * cols + c];
+                const cmat = new THREE.MeshStandardMaterial({ color: valueColor(v, min, max), roughness: 0.3 });
+                const cell = new THREE.Mesh(new THREE.BoxGeometry(cellW * 0.9, cellH * 0.9, 0.08), cmat);
+                cell.position.x = (c - cols / 2) * cellW;
+                cell.position.y = (rows / 2 - r) * cellH;
+                cell.castShadow = true;
+                group.add(cell);
+            }
+        }
+        return group;
+    }
+
     if (rank === 2) {
         const w = logDim(shape[1]);
         const h = logDim(shape[0]);
         return new THREE.Mesh(new THREE.BoxGeometry(w, h, 0.12), mat);
     }
+
     const w = logDim(shape[2] || 1);
     const h = logDim(shape[1] || 1);
     const group = new THREE.Group();
@@ -371,7 +428,8 @@ window.__stage3d_add_step = function(ev) {
     const color = opColor(ev.label);
     const shape = ev.output?.shape || [];
     dimPrevious(prevMesh);
-    const mesh = shapeMesh(shape, color);
+    const values = ev.output?.values || null;
+    const mesh = shapeMesh(shape, color, values);
     mesh.position.set(x, 0.6, 0);
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
     const rawName = ev.output?.name || '';
