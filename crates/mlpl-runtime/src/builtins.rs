@@ -57,6 +57,7 @@ fn try_external_dispatchers(
 ) -> Option<Result<DenseArray, RuntimeError>> {
     math_builtins::try_call(name, args.to_vec())
         .or_else(|| crate::conv_builtins::try_call(name, args.to_vec()))
+        .or_else(|| crate::rnn_builtins::try_call(name, args.to_vec()))
         .or_else(|| crate::random_builtins::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_data::dataset_builtins::try_call(name, args.to_vec()))
         .or_else(|| crate::ml_builtins::try_call(name, args.to_vec()))
