@@ -1,0 +1,1 @@
+lstm_cell: 4-gate LSTM (input/forget/cell/output), concat weights, returns [2*hd,1]=[hidden;cell]. Also fixed PCA category (Classification->Dim Reduction) and added v0.20.0.nnnn to footer.
