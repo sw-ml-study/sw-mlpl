@@ -1,6 +1,6 @@
 number = 1
 slug = "001-autoencoder-demo"
-status = "pending"
+status = "in-progress"
 description = """
 Step 001: Autoencoder demo.
 
