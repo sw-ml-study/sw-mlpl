@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "gan-training-design"
+  },
+  "action": "Add sin/cos to math_builtins.rs, add 11 entries to inspect_groups.rs, update lang-reference.md + help.rs, prototype GAN in /tmp, validate alternating adam pattern.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T15:31:53"
+}
