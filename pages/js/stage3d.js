@@ -66,7 +66,7 @@ function createMountains() {
         const h = 3 + Math.random() * 5;
         const w = 4 + Math.random() * 5;
         const near = new THREE.Mesh(new THREE.ConeGeometry(w, h, 4 + Math.floor(Math.random() * 3)), nearMat);
-        near.position.set(x, h / 2, -25 - Math.random() * 15);
+        near.position.set(x, h / 2, -45 - Math.random() * 12);
         scene.add(near);
     }
 }
