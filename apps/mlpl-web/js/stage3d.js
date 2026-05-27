@@ -13,13 +13,13 @@ const varPositions = {};
 let prevMesh = null;
 
 function createBackdrop() {
-    new THREE.TextureLoader().load('salt-flat.jpg', tex => {
+    new THREE.TextureLoader().load('salt-flat-pano.jpg', tex => {
         const aspect = tex.image.width / tex.image.height;
-        const h = 800;
-        const w = h * aspect * 16;
+        const h = 200;
+        const w = h * aspect * 6;
         const mat = new THREE.MeshBasicMaterial({ map: tex, fog: false });
         const plane = new THREE.Mesh(new THREE.PlaneGeometry(w, h), mat);
-        plane.position.set(0, -h * 0.35, -200);
+        plane.position.set(0, 18, -160);
         scene.add(plane);
     });
 }
