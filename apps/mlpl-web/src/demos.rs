@@ -149,6 +149,7 @@ pub const DEMOS: &[Demo] = &[
     crate::demos_attention::ENCODER_BLOCK,
     crate::demos_attention::DECODER_BLOCK,
     crate::demos_basics::BASICS,
+    crate::demos_cnn::SIMPLE_CNN,
     crate::demos_models::DECISION_BOUNDARY_LOGICAL_GATES,
     crate::demos_models::DECISION_BOUNDARY_XOR,
     crate::demos_models::KMEANS,
