@@ -8,7 +8,6 @@
 mod builtins;
 mod ensemble_builtins;
 mod llm_builtins;
-mod ml_builtins;
 mod random_builtins;
 
 pub use builtins::call_builtin;
@@ -29,7 +28,7 @@ pub fn runtime_builtin_names() -> impl Iterator<Item = &'static str> {
         .chain(mlpl_runtime_rnn::NAMES)
         .chain(random_builtins::NAMES)
         .chain(mlpl_runtime_data::dataset_builtins::NAMES)
-        .chain(ml_builtins::NAMES)
+        .chain(mlpl_runtime_ml::NAMES)
         .chain(ensemble_builtins::NAMES)
         .chain(mlpl_runtime_data::embedding_builtins::NAMES)
         .chain(mlpl_runtime_dim_reduction::tsne_builtin::NAMES)

@@ -11,6 +11,7 @@ mlpl-runtime-math = { path = "../mlpl-runtime-math" }
 mlpl-runtime-conv = { path = "../mlpl-runtime-conv" }
 mlpl-runtime-rnn = { path = "../mlpl-runtime-rnn" }
 mlpl-runtime-array = { path = "../mlpl-runtime-array" }
+mlpl-runtime-ml = { path = "../mlpl-runtime-ml" }
 mlpl-runtime-data = { path = "../mlpl-runtime-data" }
 mlpl-runtime-dim-reduction = { path = "../mlpl-runtime-dim-reduction" }
 mlpl-runtime-umap = { path = "../mlpl-runtime-umap" }
