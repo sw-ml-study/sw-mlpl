@@ -501,7 +501,7 @@ pub const PATHS: &[LearningPath] = &[
             },
             Step::Lesson {
                 title: "Arrays",
-                why: "Vectors and their shapes. iota(n) generates a sequence; reshape changes the layout. Arrays are the container for every dataset.",
+                why: "Vectors and their shapes. range(n) generates a sequence; reshape changes the layout. Arrays are the container for every dataset.",
             },
             Step::Lesson {
                 title: "Matrices",

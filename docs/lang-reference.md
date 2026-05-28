@@ -120,7 +120,7 @@ is allowed. Scope is flat. Assignment returns the assigned value.
 
 ```
 reshape([1, 2, 3, 4], [2, 2])
-iota(6)
+range(6)
 reduce_add([1, 2, 3])
 matmul(A, B)
 ```
@@ -176,7 +176,7 @@ is collected into a `last_rows` vector in the environment (mirrors
 full batched representation doesn't fit:
 
 ```
-for row in reshape(iota(6), [3, 2]) { reduce_add(row) }
+for row in reshape(range(6), [3, 2]) { reduce_add(row) }
 last_rows   # [1, 5, 9]
 ```
 
@@ -210,7 +210,7 @@ matmul (contraction axis validated), reductions (the reduced axis's
 label drops), and `map()`.
 
 ```
-M : [batch, feat] = reshape(iota(6), [2, 3])
+M : [batch, feat] = reshape(range(6), [2, 3])
 labels(M)                         # "batch,feat"
 reduce_add(M, "feat")             # reduce by axis name
 labels(transpose(M))              # swaps labels alongside dims
@@ -650,7 +650,7 @@ mlpl> 42
 42
 mlpl> [1, 2, 3]
 1 2 3
-mlpl> reshape(iota(6), [2, 3])
+mlpl> reshape(range(6), [2, 3])
 0 1 2
 3 4 5
 ```

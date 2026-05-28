@@ -28,5 +28,7 @@ pub const USER_FUNCTIONS: Demo = Demo {
         "def u:safe_div(a, b) { if eq(b, 0) { return 0 } else { a / b } }",
         "u:safe_div(10, 3)",
         "u:safe_div(10, 0)",
+        "# List all defined functions",
+        ":fns",
     ],
 };
