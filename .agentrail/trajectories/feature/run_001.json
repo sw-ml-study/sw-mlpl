@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "parser-def-return"
+  },
+  "action": "Edit token.rs, lexer.rs, ast.rs, ast_fmt.rs, parser.rs, stmts.rs, error.rs, eval.rs, lower-rs/lib.rs. Write def_parse_tests.rs. Update keyword_smoke.rs.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T17:00:29"
+}
