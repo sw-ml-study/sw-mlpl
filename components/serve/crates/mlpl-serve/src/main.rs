@@ -14,33 +14,36 @@ use mlpl_serve::auth::AuthMode;
 use mlpl_serve::peers::{build_registry, parse_peer_arg};
 use mlpl_serve::server::run;
 
-const DEFAULT_BIND: &str = "127.0.0.1:6464";
+pub(crate) const DEFAULT_BIND: &str = "127.0.0.1:6464";
 
-struct Args {
-    bind: SocketAddr,
-    auth: AuthMode,
-    peer_pairs: Vec<(String, String)>,
-    insecure_peers: bool,
-    static_dir: Option<PathBuf>,
-    tls_cert: Option<PathBuf>,
-    tls_key: Option<PathBuf>,
+pub(crate) struct Args {
+    pub(crate) bind: SocketAddr,
+    pub(crate) auth: AuthMode,
+    pub(crate) peer_pairs: Vec<(String, String)>,
+    pub(crate) insecure_peers: bool,
+    pub(crate) static_dir: Option<PathBuf>,
+    pub(crate) tls_cert: Option<PathBuf>,
+    pub(crate) tls_key: Option<PathBuf>,
     self_signed: bool,
     /// Saga 21.5 step 006: when set, the router is wrapped in
     /// a `tower-http` CORS layer that allows browsers on this
     /// origin to reach `/v1/*`. Required for the connect-mode
     /// `apps/mlpl-web` running on a different origin (e.g.
     /// `https://sw-ml-study.github.io/sw-mlpl/`).
-    cors_allow: Option<String>,
+    pub(crate) cors_allow: Option<String>,
     /// Saga 21.5 step 010: when set, every successful `/eval`
     /// flushes the slim per-session state (token + timestamps +
     /// variable bindings) to this JSON file. Startup reads the
     /// same file so a restart picks up the prior session map.
     /// Absent means in-memory-only (legacy behavior).
-    persist: Option<PathBuf>,
+    pub(crate) persist: Option<PathBuf>,
 }
 
+
+mod args;
+
 fn main() -> ExitCode {
-    let args = match parse_args(std::env::args().skip(1)) {
+    let args = match args::parse_args(std::env::args().skip(1)) {
         Ok(a) => a,
         Err(msg) => {
             eprintln!("{msg}");
@@ -86,79 +89,9 @@ fn run_main(args: Args) -> Result<(), String> {
         .map_err(|e| format!("{e}"))
 }
 
-fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args, String> {
-    let mut bind: SocketAddr = DEFAULT_BIND.parse().expect("default bind parses");
-    let mut auth = AuthMode::Required;
-    let mut peer_pairs: Vec<(String, String)> = Vec::new();
-    let mut insecure_peers = false;
-    let mut static_dir: Option<PathBuf> = None;
-    let mut tls_cert: Option<PathBuf> = None;
-    let mut tls_key: Option<PathBuf> = None;
-    let mut self_signed = false;
-    let mut cors_allow: Option<String> = None;
-    let mut persist: Option<PathBuf> = None;
-    let mut it = iter.into_iter();
-    while let Some(arg) = it.next() {
-        match arg.as_str() {
-            "--bind" => {
-                let v = it.next().ok_or("--bind requires a value")?;
-                bind = v
-                    .parse()
-                    .map_err(|e| format!("--bind: invalid SocketAddr {v:?}: {e}"))?;
-            }
-            "--auth" => {
-                auth = match it.next().ok_or("--auth requires a value")?.as_str() {
-                    "required" => AuthMode::Required,
-                    "disabled" => AuthMode::Disabled,
-                    o => return Err(format!("--auth: expected required|disabled, got {o:?}")),
-                };
-            }
-            "--peer" => peer_pairs.push(parse_peer_arg(
-                &it.next().ok_or("--peer requires a value")?,
-            )?),
-            "--insecure-peers" => insecure_peers = true,
-            "--static-dir" => {
-                static_dir = Some(parse_static_dir(
-                    it.next().ok_or("--static-dir requires a value")?,
-                )?);
-            }
-            "--tls-cert" => {
-                tls_cert = Some(PathBuf::from(
-                    it.next().ok_or("--tls-cert requires a value")?,
-                ));
-            }
-            "--tls-key" => {
-                tls_key = Some(PathBuf::from(
-                    it.next().ok_or("--tls-key requires a value")?,
-                ));
-            }
-            "--self-signed" => self_signed = true,
-            "--cors-allow" => {
-                cors_allow = Some(it.next().ok_or("--cors-allow requires a value")?);
-            }
-            "--persist" => {
-                persist = Some(PathBuf::from(it.next().ok_or("--persist requires a path")?));
-            }
-            "-h" | "--help" => {
-                print_usage();
-                std::process::exit(0);
-            }
-            other => return Err(format!("unknown argument {other:?}")),
-        }
-    }
-    Ok(Args {
-        bind,
-        auth,
-        peer_pairs,
-        insecure_peers,
-        static_dir,
-        tls_cert,
-        tls_key,
-        self_signed,
-        cors_allow,
-        persist,
-    })
-}
+
+
+
 
 /// Resolve the three TLS-related flags into an
 /// `Option<RustlsConfig>`. Mutually exclusive: pass either
@@ -188,13 +121,7 @@ async fn build_tls(
     }
 }
 
-fn parse_static_dir(value: String) -> Result<PathBuf, String> {
-    let path = PathBuf::from(&value);
-    if !path.is_dir() {
-        return Err(format!("--static-dir: not a directory: {value}"));
-    }
-    Ok(path)
-}
+
 
 fn print_banner(args: &Args, peers: &mlpl_serve::peers::PeerRegistry, tls_set: bool) {
     let scheme = if tls_set { "https" } else { "http" };
@@ -213,7 +140,7 @@ fn print_banner(args: &Args, peers: &mlpl_serve::peers::PeerRegistry, tls_set: b
     );
 }
 
-fn print_usage() {
+pub(crate) fn print_usage() {
     eprintln!(
         "usage: mlpl-serve [--bind <host:port>] [--auth <required|disabled>]\n\
          \x20            [--peer <device>=<url>]... [--insecure-peers]\n\
