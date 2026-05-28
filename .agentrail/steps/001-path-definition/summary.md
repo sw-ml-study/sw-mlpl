@@ -1,0 +1,1 @@
+Optimizers & Regularization path: 19 steps, 4 sections (gradient descent, Adam, regularization, LoRA). 11 paths total.
