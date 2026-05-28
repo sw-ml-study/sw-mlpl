@@ -1,1 +1,1 @@
-# components/web/ — mlpl-web + mlpl-web-lessons + mlpl-web-path-body
+# components/cli/ — mlpl-cli + mlpl + mlpl-repl + mlpl-build + mlpl-lab

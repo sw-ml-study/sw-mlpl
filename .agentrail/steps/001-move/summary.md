@@ -1,1 +1,1 @@
-Moved mlpl-web + mlpl-web-lessons + mlpl-web-path-body into components/web/.
+Moved mlpl-cli + mlpl + mlpl-repl + mlpl-build + mlpl-lab into components/cli/. apps/ now empty.
