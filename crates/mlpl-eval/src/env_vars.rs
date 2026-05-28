@@ -20,6 +20,10 @@ impl Environment {
         self.vars.insert(name, value);
     }
 
+    pub(crate) fn remove_var(&mut self, name: &str) {
+        self.vars.remove(name);
+    }
+
     /// Iterate over every bound `(name, DenseArray)`. Used by
     /// `experiment` to scan for `_metric`-suffixed scalars.
     pub fn vars_iter(&self) -> impl Iterator<Item = (&String, &DenseArray)> {

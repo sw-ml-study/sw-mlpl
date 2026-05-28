@@ -195,6 +195,39 @@ impl<'a> Parser<'a> {
                         return self.parse_tensor_ctor(kind, start);
                     }
                 }
+                // Namespaced call: ident ':' name '('
+                if let Some(TokenKind::BuiltinRef(local)) =
+                    self.tokens.get(self.pos).map(|t| &t.kind)
+                {
+                    let local = local.clone();
+                    let full_name = format!("{name}:{local}");
+                    self.pos += 1;
+                    if self.is(TokenKind::LParen) {
+                        self.pos += 1;
+                        let mut args = Vec::new();
+                        if !self.is(TokenKind::RParen) {
+                            args.push(self.parse_expr(0)?);
+                            while self.is(TokenKind::Comma) {
+                                self.pos += 1;
+                                args.push(self.parse_expr(0)?);
+                            }
+                        }
+                        if !self.is(TokenKind::RParen) {
+                            return Err(ParseError::UnclosedDelimiter {
+                                open: "(".into(),
+                                span: start,
+                            });
+                        }
+                        let end = self.tokens[self.pos].span;
+                        self.pos += 1;
+                        return Ok(Expr::FnCall {
+                            name: full_name,
+                            args,
+                            span: Span::new(start.start, end.end),
+                        });
+                    }
+                    return Ok(Expr::Ident(full_name, start));
+                }
                 // Function call: ident '('
                 if self.is(TokenKind::LParen) {
                     self.pos += 1; // skip '('
