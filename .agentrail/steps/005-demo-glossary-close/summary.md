@@ -1,0 +1,1 @@
+UDF demo (def, call, recursion, pi, return). iota->range in 4 demo files + intro text. def syntax in help.rs. Glossary: UDF, Scope, Recursion. language-status.md closure. All 42 demos pass.

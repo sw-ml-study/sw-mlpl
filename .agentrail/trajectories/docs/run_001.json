@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 5,
+    "step": "demo-glossary-close"
+  },
+  "action": "Write demos_udf.rs. Edit demos_basics/cnn/gan/models.rs, demos.rs, lib.rs, help.rs, glossary.md, language-status.md.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T17:19:48"
+}
