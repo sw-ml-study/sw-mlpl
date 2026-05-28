@@ -11,3 +11,4 @@ mlpl-core = { path = "../mlpl-core" }
 mlpl-array-ops-matmul = { path = "../mlpl-array-ops-matmul" }
 mlpl-array-ops-reduce = { path = "../mlpl-array-ops-reduce" }
 mlpl-array-ops-compose = { path = "../mlpl-array-ops-compose" }
+mlpl-array-ops-shape = { path = "../mlpl-array-ops-shape" }

@@ -2,6 +2,7 @@
 
 use mlpl_array_ops_compose::prelude::*;
 use mlpl_array_ops_matmul::prelude::*;
+use mlpl_array_ops_shape::prelude::*;
 use std::rc::Rc;
 
 use mlpl_array::{DenseArray, Shape};

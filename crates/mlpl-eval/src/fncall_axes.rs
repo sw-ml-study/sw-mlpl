@@ -10,6 +10,7 @@
 //! duplicating the per-element type check.
 
 use mlpl_array::Shape;
+use mlpl_array_ops_shape::prelude::*;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 

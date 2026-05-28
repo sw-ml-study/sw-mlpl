@@ -1953,6 +1953,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
  "mlpl-core",
 ]
 
@@ -1979,12 +1980,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-array-ops-shape"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-autograd"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
  "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
  "mlpl-core",
 ]
 
@@ -2053,6 +2062,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
  "mlpl-autograd",
  "mlpl-bpe-core",
  "mlpl-core",
@@ -2274,6 +2284,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
  "mlpl-core",
 ]
 
@@ -2305,6 +2316,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
  "mlpl-runtime-core",
 ]
 

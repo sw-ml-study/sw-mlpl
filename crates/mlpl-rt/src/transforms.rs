@@ -5,6 +5,7 @@
 
 use mlpl_array::{ArrayError, DenseArray, Shape};
 use mlpl_array_ops_reduce::prelude::*;
+use mlpl_array_ops_shape::prelude::*;
 
 /// `reshape(a, dims)` -- reinterpret `a` with new dims. Element
 /// count must match or `ArrayError::ShapeMismatch` is returned.

@@ -51,6 +51,7 @@ mlpl-models-tape = { path = "../../components/mlpl-session/crates/mlpl-models-ta
 mlpl-models-tune = { path = "../../components/mlpl-session/crates/mlpl-models-tune" }
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
+mlpl-array-ops-shape = { path = "../../components/lang-core/crates/mlpl-array-ops-shape" }
 mlpl-array-ops-compose = { path = "../../components/lang-core/crates/mlpl-array-ops-compose" }
 mlpl-array-ops-reduce = { path = "../../components/lang-core/crates/mlpl-array-ops-reduce" }
 mlpl-array-ops-matmul = { path = "../../components/lang-core/crates/mlpl-array-ops-matmul" }
