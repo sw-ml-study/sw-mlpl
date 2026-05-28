@@ -1,0 +1,1 @@
+Retired 4 mlpl-web Function LOC FAILs (editor_panel, render_main, mode_bar, make_submit_batch). Pre-empted spill-over by extracting handlers_running.rs. 20 -> 16 FAILs.
