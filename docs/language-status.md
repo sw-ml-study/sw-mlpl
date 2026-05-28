@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 57 closed; native-rt component).
+Last refreshed: 2026-05-27 (saga 58 closed; viz component).
 
 ## Active saga
 
-None. Saga 57 (`component-native-rt`) closed 2026-05-27.
+None. Saga 58 (`component-viz`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -52,6 +52,7 @@ human-readable summary.
 | `component-runtime` (55) | shipped | -- (structural saga) | Closed 2026-05-27. 4 steps. Created components/runtime/ and bulk-moved 11 runtime crates from crates/: mlpl-runtime (dispatch), mlpl-runtime-core, and the 9 concern-grouped sibling crates (math, conv, rnn, array, ml, data, dim-reduction, umap, mds-rp -- already sparse from saga 50). Updated 5 external consumer Cargo.toml refs and fixed intra-component cross-references to lang-core. sw-checklist: 287->288 passed (+1), 132 fails unchanged, 472 warnings unchanged. The runtime family had no remaining FAILs (saga 50 already retired them). Several WARNs remain (dim-reduction 7 modules, validate fns over 25 LOC); flagged for a future `runtime-warn-paydown` saga. |
 | `component-autograd` (56) | shipped | -- (structural saga) | Closed 2026-05-27. 3 steps (1 deferred). Created components/autograd/ and moved mlpl-autograd + mlpl-trace. Decomposition of mlpl-autograd's FAILs (reduction_ops 11 fns, backward 11 fns, propagate 77 LOC) deferred to a focused future saga since impl Tensor blocks span the modules. sw-checklist: 288 passed unchanged, 132 fails unchanged, 472 warnings unchanged (structural move). |
 | `component-native-rt` (57) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Created components/native-rt/ and moved mlpl-rt + mlpl-mlx-rt. Updated 4 consumer Cargo.toml refs. Structural move; no FAIL/WARN delta. |
+| `component-viz` (58) | shipped | -- (structural saga) | Closed 2026-05-27. 3 steps (1 deferred). Created components/viz/ and moved mlpl-viz. Decompose step deferred (13-module FAIL persists) since chart functions share VizError and need shared-error-crate or extension-trait design. Future viz-decompose saga. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
