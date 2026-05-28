@@ -1,0 +1,1 @@
+Created .cargo/config.toml at repo root with [build] target-dir = "target". Verified shared target works from main workspace, components/mlpl-session/, and services/mlpl-mlx-serve/. Reclaimed ~2GB of stale per-component target dirs.
