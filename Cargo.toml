@@ -1,8 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/mlpl-rt",
-  "crates/mlpl-mlx-rt",
   # Saga R1 step 003: mlpl-mlx-serve moved to
   # services/mlpl-mlx-serve/ with its own
   # [workspace] declaration so its target/ tree is

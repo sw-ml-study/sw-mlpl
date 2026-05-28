@@ -17,9 +17,9 @@ default = []
 mlx = ["dep:mlx-rs"]
 
 [dependencies]
-mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
-mlpl-array-ops-matmul = { path = "../../components/lang-core/crates/mlpl-array-ops-matmul" }
-mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }
+mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
+mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
 
 # Pinned by Saga 14 plan (risk/mitigation item): upstream ABI can
 # shift between minor versions. Bump deliberately, not transitively.

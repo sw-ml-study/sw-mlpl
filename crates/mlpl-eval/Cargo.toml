@@ -60,7 +60,7 @@ mlpl-autograd = { path = "../../components/autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../components/runtime/crates/mlpl-runtime" }
 mlpl-trace = { path = "../../components/autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../mlpl-viz" }
-mlpl-mlx-rt = { path = "../mlpl-mlx-rt", optional = true }
+mlpl-mlx-rt = { path = "../../components/native-rt/crates/mlpl-mlx-rt", optional = true }
 png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }
 tar = { version = "0.4", optional = true }

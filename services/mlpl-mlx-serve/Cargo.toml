@@ -34,7 +34,7 @@ path = "src/main.rs"
 mlpl-serve = { path = "../../crates/mlpl-serve" }
 mlpl-eval = { path = "../../crates/mlpl-eval" }
 mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
-mlpl-mlx-rt = { path = "../../crates/mlpl-mlx-rt" }
+mlpl-mlx-rt = { path = "../../components/native-rt/crates/mlpl-mlx-rt" }
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }

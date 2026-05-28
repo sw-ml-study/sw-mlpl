@@ -1,1 +1,0 @@
-DEFERRED: mlpl-autograd's FAILs (reduction_ops 11 fns, backward 11 fns, propagate 77 LOC) require extension-trait restructuring of impl Tensor blocks. Splitting requires careful design: Tensor type ownership, public accessor expansion, ~50+ call site migrations. Defer to a focused future saga (autograd-decompose) rather than expand saga 56's scope. The move itself was successful.
