@@ -9,7 +9,7 @@ members = [
   # separate from the main workspace's. Build via
   # `cd services/mlpl-mlx-serve && cargo build`.
   "crates/mlpl-lower-rs",
-  "crates/mlpl-macro",
+  
   "crates/mlpl",
   "crates/mlpl-bench",
   "crates/mlpl-parity-tests",

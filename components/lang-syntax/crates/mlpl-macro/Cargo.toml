@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-macro"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+proc-macro = true
+
+[dependencies]
+mlpl-lower-rs = { path = "../../../../crates/mlpl-lower-rs" }
+mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
+mlpl-parser = { path = "../../../../crates/mlpl-parser" }
+proc-macro2 = "1"
+quote = "1"

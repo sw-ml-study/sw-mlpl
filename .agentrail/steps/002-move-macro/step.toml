@@ -1,6 +1,6 @@
 number = 2
 slug = "move-macro"
-status = "pending"
+status = "in-progress"
 description = "Move crates/mlpl-macro to components/lang-syntax/crates/mlpl-macro. Update wo..."
 role = "production"
 context_files = []
