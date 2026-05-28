@@ -1,0 +1,1 @@
+Saga 54 close. sw-checklist: 247->287 passed (+40), 132 fails unchanged, 472 warnings unchanged. Created components/lang-syntax/ with 9 sparse crates (lexer family decomposed into 7, parser family into 2, plus mlpl-macro and mlpl-lower-rs).
