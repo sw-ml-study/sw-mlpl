@@ -14,8 +14,8 @@ name = "mlpl-web"
 path = "src/main.rs"
 
 [dependencies]
-mlpl-wasm = { path = "../../components/wasm/crates/mlpl-wasm" }
-mlpl-web-eval = { path = "../../components/wasm/crates/mlpl-web-eval" }
+mlpl-wasm = { path = "../../../wasm/crates/mlpl-wasm" }
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
 mlpl-web-lessons = { path = "../../crates/mlpl-web-lessons" }
 mlpl-web-path-body = { path = "../../crates/mlpl-web-path-body" }
 yew = { version = "0.21", features = ["csr"] }
@@ -69,11 +69,11 @@ wasm-bindgen-futures = "0.4"
 # Native builds don't need this dep -- the keydown handler
 # cfg-gates the lookup to an empty Vec, and the pure helpers
 # in `completion.rs` are exercised separately.
-mlpl-eval = { path = "../../components/eval/crates/mlpl-eval" }
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 
 [dev-dependencies]
-mlpl-eval = { path = "../../components/eval/crates/mlpl-eval" }
-mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-parser = { path = "../../../lang-syntax/crates/mlpl-parser" }
 mlpl-serve = { path = "../../crates/mlpl-serve" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 axum = "0.7"

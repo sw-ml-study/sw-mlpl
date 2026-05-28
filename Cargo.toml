@@ -13,14 +13,11 @@ members = [
   "crates/mlpl-parity-tests",
   
   
-  "crates/mlpl-web-lessons",
-  "crates/mlpl-web-path-body",
   "crates/mlpl-ml",
   "crates/mlpl-cli",
   "crates/mlpl-reg",
   "crates/mlpl-serve",
   "apps/mlpl-repl",
-  "apps/mlpl-web",
   "apps/mlpl-lab",
   "apps/mlpl-build",
 ]
