@@ -1,0 +1,1 @@
+Extracted ApplyBinopExt to mlpl-array-ops-element. ops_binop.rs deleted from mlpl-array. mlpl-array now has 7 modules -- the 13-module Crate Module Count FAIL is RETIRED! sw-checklist: 248->247 passed, 133->132 fails (-1 FAIL!), 471->472 warnings (+1). First FAIL retirement of saga 53.

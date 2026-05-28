@@ -1,9 +1,10 @@
 number = 6
 slug = "split-ops-element"
-status = "in-progress"
+status = "completed"
 description = "Extract ops_binop.rs + ops_strides.rs into mlpl-array-ops-element. Define App..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:28:05"
+completed_at = "2026-05-27T20:59:43"
 task_type = "refactor"
-commits = []
+commits = ["67a81ae5325fd52e92d8f9608241a8dca37ad881"]
