@@ -38,8 +38,8 @@ image-io = [
 
 [dependencies]
 mlpl-bpe-core = { path = "../../../mlpl-session/crates/mlpl-bpe-core" }
-mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
-mlpl-eval-core = { path = "../../../lang-core/crates/mlpl-eval-core" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
 mlpl-env-traits = { path = "../../../mlpl-session/crates/mlpl-env-traits" }
 mlpl-loader-helpers = { path = "../../../mlpl-session/crates/mlpl-loader-helpers" }
 mlpl-models-feasibility = { path = "../../../mlpl-session/crates/mlpl-models-feasibility" }
@@ -50,12 +50,12 @@ mlpl-models-mutate = { path = "../../../mlpl-session/crates/mlpl-models-mutate" 
 mlpl-models-tape = { path = "../../../mlpl-session/crates/mlpl-models-tape" }
 mlpl-models-tune = { path = "../../../mlpl-session/crates/mlpl-models-tune" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
-mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
-mlpl-array-ops-element = { path = "../../../lang-core/crates/mlpl-array-ops-element" }
-mlpl-array-ops-shape = { path = "../../../lang-core/crates/mlpl-array-ops-shape" }
-mlpl-array-ops-compose = { path = "../../../lang-core/crates/mlpl-array-ops-compose" }
-mlpl-array-ops-reduce = { path = "../../../lang-core/crates/mlpl-array-ops-reduce" }
-mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-array-ops-element = { path = "../../../array-element/crates/mlpl-array-ops-element" }
+mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
+mlpl-array-ops-compose = { path = "../../../array-compose/crates/mlpl-array-ops-compose" }
+mlpl-array-ops-reduce = { path = "../../../array-compose/crates/mlpl-array-ops-reduce" }
+mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }

@@ -7,5 +7,5 @@ version.workspace = true
 # ParseError + describe_kind for the MLPL lexer.
 
 [dependencies]
-mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-lexer-token = { path = "../mlpl-lexer-token" }

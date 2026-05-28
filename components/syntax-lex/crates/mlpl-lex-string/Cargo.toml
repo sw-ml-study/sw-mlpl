@@ -7,6 +7,6 @@ version.workspace = true
 # String literal lexing with UTF-8 support.
 
 [dependencies]
-mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-lexer-token = { path = "../../../syntax-tokens/crates/mlpl-lexer-token" }
 mlpl-lexer-error = { path = "../../../syntax-tokens/crates/mlpl-lexer-error" }

@@ -10,6 +10,6 @@ version.workspace = true
 # upward from mlpl-runtime-math so the dep graph stays a DAG.
 
 [dependencies]
-mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
-mlpl-array-ops-element = { path = "../../../lang-core/crates/mlpl-array-ops-element" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-array-ops-element = { path = "../../../array-element/crates/mlpl-array-ops-element" }
 mlpl-runtime-core = { path = "../../../runtime-core/crates/mlpl-runtime-core" }

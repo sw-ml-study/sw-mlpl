@@ -8,5 +8,5 @@ version.workspace = true
 # Lives as a sibling of mlpl-array so the parent crate stays sparse.
 
 [dependencies]
-mlpl-array = { path = "../mlpl-array" }
-mlpl-core = { path = "../mlpl-core" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }

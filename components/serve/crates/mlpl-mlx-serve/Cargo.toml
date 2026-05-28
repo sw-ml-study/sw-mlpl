@@ -19,7 +19,7 @@ mlpl-serve = { path = "../mlpl-serve" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt" }
-mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
 tower = "0.4"

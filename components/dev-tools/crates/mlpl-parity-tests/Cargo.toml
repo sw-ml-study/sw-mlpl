@@ -11,8 +11,8 @@ publish = false
 path = "src/lib.rs"
 
 [dev-dependencies]
-mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
-mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
+mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }

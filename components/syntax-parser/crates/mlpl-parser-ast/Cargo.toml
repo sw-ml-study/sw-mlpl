@@ -9,4 +9,4 @@ version.workspace = true
 # Display impls must live alongside their types (Rust orphan rule).
 
 [dependencies]
-mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
