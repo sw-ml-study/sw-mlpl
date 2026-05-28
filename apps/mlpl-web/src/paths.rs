@@ -640,6 +640,84 @@ pub const PATHS: &[LearningPath] = &[
         ],
     },
     LearningPath {
+        title: "Optimizers & Regularization",
+        blurb: "How to make training faster, more stable, and less likely to overfit. Walk from hand-rolled gradient descent through momentum, Adam, learning rate schedules, regularization techniques, and parameter-efficient fine-tuning (LoRA). Each step builds on the last.",
+        steps: &[
+            Step::Note {
+                title: "Why optimizers matter",
+                body: "Gradient descent is simple: subtract the gradient times a learning rate. But vanilla SGD is slow (zig-zags in narrow valleys), sensitive to learning rate, and has no memory of previous steps. Every optimizer improvement since 1986 has been about fixing one of these problems.",
+            },
+            Step::Glossary {
+                term: "Gradient descent",
+                why: "The foundation: w = w - lr * grad(loss, w). Everything else is a refinement of this update rule.",
+            },
+            Step::Lesson {
+                title: "Machine Learning: Logistic Regression",
+                why: "Hand-rolled gradient descent on 4 data points. See the raw update rule before any optimizer hides it.",
+            },
+            Step::Demo {
+                name: "Loss Curve",
+                why: "Sweep a weight across 25 values and plot MSE. The parabolic bowl is what gradient descent walks down.",
+            },
+            Step::Glossary {
+                term: "Momentum SGD",
+                why: "Add a velocity term: v = beta*v + grad; w = w - lr*v. Smooths zig-zags, accelerates in consistent gradient directions. MLPL: momentum_sgd(loss, params, lr, beta).",
+            },
+            Step::Glossary {
+                term: "Adam",
+                why: "Per-parameter adaptive learning rates: first moment (momentum) + second moment (RMSProp) + bias correction. The default optimizer since ~2016. MLPL: adam(loss, params, lr, b1, b2, eps).",
+            },
+            Step::Lesson {
+                title: "Optimizers and Schedules",
+                why: "Compare momentum_sgd and adam side-by-side. See how cosine_schedule and linear_warmup shape the learning rate over training.",
+            },
+            Step::Glossary {
+                term: "Learning Rate Schedules",
+                why: "Start high (fast early progress), decay low (fine-tune near the minimum). Cosine annealing and linear warmup are the two MLPL ships.",
+            },
+            Step::Glossary {
+                term: "Learning rate",
+                why: "The single most important hyperparameter. Too high: diverge. Too low: stuck. Schedules automate the tradeoff.",
+            },
+            Step::Note {
+                title: "Regularization: fighting overfitting",
+                body: "A model that memorizes training data but fails on new data is overfitting. Regularization techniques add friction that prevents memorization: dropout randomly silences neurons, weight decay shrinks weights toward zero, early stopping halts training before the model starts memorizing. The goal is a model that generalizes.",
+            },
+            Step::Glossary {
+                term: "Overfitting / Underfitting",
+                why: "Training loss keeps falling but validation loss rises. The model has memorized the training data.",
+            },
+            Step::Glossary {
+                term: "Regularization",
+                why: "Any technique that reduces overfitting: dropout, weight decay, data augmentation, early stopping.",
+            },
+            Step::Glossary {
+                term: "Dropout",
+                why: "Randomly zero activations during training. Forces redundant representations. MLPL does not ship dropout (models are small enough).",
+            },
+            Step::Glossary {
+                term: "Batch Normalization",
+                why: "Normalize activations per mini-batch. Stabilizes training, enables higher learning rates. MLPL ships rms_norm (the transformer variant).",
+            },
+            Step::Note {
+                title: "Parameter-efficient fine-tuning",
+                body: "Fine-tuning a large pre-trained model means updating all its parameters on a new task. LoRA freezes the base model and trains only small rank-r adapter matrices at each layer -- 10,000x fewer trainable parameters, similar quality. This makes fine-tuning practical on consumer hardware.",
+            },
+            Step::Glossary {
+                term: "LoRA (Low-Rank Adaptation)",
+                why: "Freeze base weights, train rank-r adapters. MLPL: lora(model, rank, alpha, seed).",
+            },
+            Step::Lesson {
+                title: "LoRA Fine-Tuning",
+                why: "The MLPL lesson: freeze a pre-trained model, add LoRA adapters, compare loss curves with and without freezing.",
+            },
+            Step::Note {
+                title: "The optimizer landscape",
+                body: "SGD -> Momentum -> Adam is the historical arc. Schedules (cosine, warmup) shape the learning rate over time. Regularization (dropout, weight decay, batch norm) prevents overfitting. LoRA makes fine-tuning cheap. Modern training combines all of these: Adam with cosine schedule, warmup, and LoRA adapters on a frozen base model.",
+            },
+        ],
+    },
+    LearningPath {
         title: "REPL to Script",
         blurb: "Graduate from one-line REPL exploration to multi-line scripts to saved .mlpl files. Learn the editor, the save/load workflow, terminal script mode, user-defined functions, and script arguments. Eight steps; assumes you have run a few REPL expressions already.",
         steps: &[
