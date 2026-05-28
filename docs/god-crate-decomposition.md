@@ -2,7 +2,7 @@
 
 This doc captures the strategy for fixing the two largest module-count
 FAILs in the codebase: `mlpl-eval` (96 modules) and `mlpl-web` (75
-modules). Both are "god crates" — single workspace members that
+modules). Both are "god crates" -- single workspace members that
 centralize an entire feature area instead of spreading its concerns
 across multiple sibling crates.
 
