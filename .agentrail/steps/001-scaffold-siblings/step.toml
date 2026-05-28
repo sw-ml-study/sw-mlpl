@@ -1,9 +1,10 @@
 number = 1
 slug = "scaffold-siblings"
-status = "in-progress"
+status = "completed"
 description = "Scaffold 5 sibling crates in components/lang-core/crates/: mlpl-array-ops-mat..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:28:05"
+completed_at = "2026-05-27T20:29:33"
 task_type = "infra"
-commits = []
+commits = ["c8d3749307e82c77272c902dfc461731149b973a"]
