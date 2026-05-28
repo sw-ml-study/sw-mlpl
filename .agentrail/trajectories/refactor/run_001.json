@@ -4,8 +4,8 @@
     "number": 1,
     "step": "move"
   },
-  "action": "Bulk move + path sweeps.",
+  "action": "move",
   "result": "success",
   "reward": 1,
-  "timestamp": "2026-05-27T21:35:45"
+  "timestamp": "2026-05-27T21:37:25"
 }
