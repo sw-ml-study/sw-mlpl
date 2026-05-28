@@ -42,7 +42,7 @@ human-readable summary.
 | `chronological-history-path` (44) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "A chronological history of ML" path with 24 eras (1943-2023), year-centric framing. |
 | `data-exploration-path` (45) | shipped | -- (content saga) | Closed 2026-05-27. 3 steps. Upload & Inspect Image demo (Basics), Data & Exploration path (16 steps), REPL-to-Script milestone doc. |
 | `udf-control-flow` (46) | shipped | -- (capability saga) | Closed 2026-05-27. 5 steps. def u:name(args) { body }, return, pi(), e(), range() alias for iota(), UDF demo, 16 eval tests, glossary (UDF, Scope, Recursion). |
-| REPL to Script | proposed | -- (content saga) | `docs/milestone-repl-to-script.md`. Learning path from interactive REPL to .mlpl scripts. Depends on UDF saga. |
+| `repl-to-script-path` (47) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "REPL to Script" learning path (9 steps). |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
