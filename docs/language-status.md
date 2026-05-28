@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 67 closed; runtime split into sub-components).
+Last refreshed: 2026-05-27 (saga 72 closed; function-loc paydown).
 
 ## Active saga
 
-None. Saga 67 (`split-runtime-component`) closed 2026-05-27.
+None. Saga 72 (`function-loc-paydown-resume`) closed 2026-05-28.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -60,6 +60,7 @@ human-readable summary.
 | `component-serve` (63) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-serve + mlpl-mlx-serve into components/serve/. services/ directory now empty. |
 | `component-dev-tools-and-final` (64) | shipped | -- (structural saga, MIGRATION COMPLETE) | Closed 2026-05-27. 2 steps. Moved final 4 crates: bench/parity-tests/reg to components/dev-tools/, mlpl-ml to components/runtime/. Removed root Cargo.toml. Added per-workspace [patch.crates-io] for vendor/mlx-rs. **The flat crates/ apps/ services/ are now empty (removed).** Every crate lives in exactly one of 13 component workspaces: autograd, cli, dev-tools, eval, lang-core, lang-syntax, native-rt, runtime, serve, viz, wasm, web, mlpl-session. sw-checklist: 290->296 passed, 132 fails, 472 warnings unchanged. |
 | `split-runtime-component` (67) | shipped | -- (structural saga) | Closed 2026-05-27. 8 steps. components/runtime/ (12 crates -- over the <=4-per-workspace cap) split into 6 sparse sub-components: runtime-core (2), runtime-element (2), runtime-layers (3), runtime-data (1), runtime-dr (3), ml-helpers (1). 16 Cargo.toml path-refs updated. All 18 workspaces compile clean. sw-checklist: 296 passed, 21 fails, 281 warns (in our code; vendor excluded). Structural; no FAIL/WARN delta. Other over-cap components remain: lang-syntax (11), mlpl-session (10), lang-core (8), cli (5) -- follow-up sagas. |
+| `function-loc-paydown-resume` (72) | shipped | -- (refactor saga) | Closed 2026-05-28. 4 steps. Retired 6 Function LOC FAILs across mlpl-web (editor_panel 69, render_main 76, mode_bar 75, make_submit_batch 54), mlpl-wasm (eval_input_with_values 61), mlpl-serve (parse_args 73) via the extract-helpers pattern. sw-checklist (ours-only): 20 -> 14 fails (-6). Web spill-over (handlers_submit > module-fn cap) pre-empted by extracting handlers_running.rs. Serve spill-over pre-empted by extracting args.rs. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
