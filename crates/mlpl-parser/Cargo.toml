@@ -6,4 +6,4 @@ version.workspace = true
 
 [dependencies]
 mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }
-mlpl-lexer = { path = "../mlpl-lexer" }
+mlpl-lexer = { path = "../../components/lang-syntax/crates/mlpl-lexer" }

@@ -2114,7 +2114,58 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-lex-ident"
+version = "0.20.0"
+dependencies = [
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lex-number"
+version = "0.20.0"
+dependencies = [
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lex-punct"
+version = "0.20.0"
+dependencies = [
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lex-string"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+ "mlpl-lexer-error",
+ "mlpl-lexer-token",
+]
+
+[[package]]
 name = "mlpl-lexer"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+ "mlpl-lex-ident",
+ "mlpl-lex-number",
+ "mlpl-lex-punct",
+ "mlpl-lex-string",
+ "mlpl-lexer-error",
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lexer-error"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lexer-token"
 version = "0.20.0"
 dependencies = [
  "mlpl-core",

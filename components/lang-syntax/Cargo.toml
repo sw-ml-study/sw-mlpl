@@ -8,6 +8,13 @@
 
 [workspace]
 members = [
+    "crates/mlpl-lex-ident",
+    "crates/mlpl-lex-number",
+    "crates/mlpl-lex-punct",
+    "crates/mlpl-lex-string",
+    "crates/mlpl-lexer",
+    "crates/mlpl-lexer-error",
+    "crates/mlpl-lexer-token",
     "crates/mlpl-lower-rs",
     "crates/mlpl-macro",
 ]

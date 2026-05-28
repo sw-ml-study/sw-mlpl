@@ -1,6 +1,6 @@
 number = 4
 slug = "move-and-split-lexer"
-status = "pending"
+status = "in-progress"
 description = "Move + split mlpl-lexer. After move, decompose into sibling crates: mlpl-lexe..."
 role = "production"
 context_files = []

@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-lex-number"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Integer + float literal lexing.
+
+[dependencies]
+mlpl-lexer-token = { path = "../mlpl-lexer-token" }

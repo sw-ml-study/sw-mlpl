@@ -2,7 +2,7 @@
 
 use mlpl_core::Span;
 
-use crate::token::TokenKind;
+use mlpl_lexer_token::TokenKind;
 
 /// Render a `TokenKind` as the human-readable string used in
 /// `ParseError::UnexpectedToken` messages. Lives in this module
