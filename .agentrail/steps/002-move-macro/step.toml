@@ -1,0 +1,9 @@
+number = 2
+slug = "move-macro"
+status = "pending"
+description = "Move crates/mlpl-macro to components/lang-syntax/crates/mlpl-macro. Update wo..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:01:57"
+task_type = "refactor"
+commits = []

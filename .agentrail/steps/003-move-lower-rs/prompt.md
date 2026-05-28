@@ -1,0 +1,1 @@
+Move crates/mlpl-lower-rs to components/lang-syntax/crates/mlpl-lower-rs. Update workspace members + path references in dependents (mlpl-macro, mlpl-eval, mlpl-bench, mlpl-parity-tests, mlpl-build).

@@ -1,0 +1,19 @@
+# Saga 54: components/lang-syntax/ nested workspace.
+#
+# Houses the source-text-to-AST pipeline: lexer family + parser
+# family + macro + lower-rs. Depends on lang-core only.
+#
+# Build cache is shared via `.cargo/config.toml` at the repo root
+# (saga 51), so this workspace writes to `sw-mlpl/target/`.
+
+[workspace]
+members = []
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
