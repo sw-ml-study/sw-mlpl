@@ -64,6 +64,10 @@ full list):
              loss_curve, confusion_matrix, boundary_2d
   llm        llm_call
 
+User-defined functions:
+  def u:name(args) { body }   define a function (u: prefix)
+  return [expr]               early exit from a function body
+
 Higher-order: reduce(:op, x[, axis]) where :op is one of
   :add  /  :+    sum
   :mul  /  :*    product

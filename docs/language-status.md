@@ -41,7 +41,7 @@ human-readable summary.
 | `architecture-zoo-path` (43) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "From Pixels to Language" learning path with 4 groups (See/Remember/Create/Attend), 27 steps. Updated 3 stale Visual path diagram entries. |
 | `chronological-history-path` (44) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "A chronological history of ML" path with 24 eras (1943-2023), year-centric framing. |
 | `data-exploration-path` (45) | shipped | -- (content saga) | Closed 2026-05-27. 3 steps. Upload & Inspect Image demo (Basics), Data & Exploration path (16 steps), REPL-to-Script milestone doc. |
-| UDF + control flow | proposed | -- (capability saga) | `docs/milestone-udf-control-flow.md`. def keyword, u:/vendor: namespace, return, pi()/e(), optional match. |
+| `udf-control-flow` (46) | shipped | -- (capability saga) | Closed 2026-05-27. 5 steps. def u:name(args) { body }, return, pi(), e(), range() alias for iota(), UDF demo, 16 eval tests, glossary (UDF, Scope, Recursion). |
 | REPL to Script | proposed | -- (content saga) | `docs/milestone-repl-to-script.md`. Learning path from interactive REPL to .mlpl scripts. Depends on UDF saga. |
 
 The "proposed" sagas have full milestone docs; the user has

@@ -172,6 +172,7 @@ pub const DEMOS: &[Demo] = &[
     crate::demos_lm::TINY_MLP,
     crate::demos_basics::WORKSPACE_INTROSPECTION,
     crate::demos_basics::UPLOAD_INSPECT,
+    crate::demos_udf::USER_FUNCTIONS,
     crate::demos_basics::VISUALIZATIONS,
     crate::demos_vit::VIT_ATTENTION_PATTERN,
     crate::demos_vit::PETS_CAT_VS_DOG_QUICK,

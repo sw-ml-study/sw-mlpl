@@ -16,7 +16,7 @@ pub const GAN_2D: Demo = Demo {
                attempt at circle-like 2D points.",
     lines: &[
         "# Real data: 16 points on the unit circle",
-        "angles = reshape(iota(16), [16, 1]) * 0.3927",
+        "angles = reshape(range(16), [16, 1]) * 0.3927",
         "real = concat(cos(angles), sin(angles), 1)",
         "# Generator: noise [16,2] -> hidden [16,8] -> points [16,2]",
         "G = chain(linear(2, 8, 10), relu_layer(), linear(8, 2, 11))",
