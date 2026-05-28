@@ -1,25 +1,13 @@
-# Retire Function LOC FAILs in our code (saga 66)
+# Split components/runtime/ into 6 sub-components (saga 67)
 
-7 single-function FAILs (>50 LOC) across 4 components. Each is a
-mechanical "extract helpers" refactor. High ROI: ~30 minutes per
-function for -1 FAIL each.
+components/runtime/ has 12 crates — way over the 4-crate cap.
+Split into themed sub-components:
 
-## Targets
+- components/runtime-core/      mlpl-runtime + mlpl-runtime-core (2)
+- components/runtime-element/   mlpl-runtime-math + mlpl-runtime-array (2)
+- components/runtime-layers/    mlpl-runtime-conv + mlpl-runtime-rnn + mlpl-runtime-ml (3)
+- components/runtime-data/      mlpl-runtime-data (1)
+- components/runtime-dr/        mlpl-runtime-dim-reduction + mlpl-runtime-umap + mlpl-runtime-mds-rp (3)
+- components/ml-helpers/        mlpl-ml (1)
 
-| Component | File | Function | Lines |
-|-----------|------|----------|-------|
-| autograd | backward.rs | propagate | 77 |
-| web | editor_panel.rs | editor_panel | 69 |
-| web | render_main.rs | render_main | 76 |
-| web | component_mode_bar.rs | mode_bar | 75 |
-| web | handlers_submit.rs | make_submit_batch | 54 |
-| wasm | lib.rs | eval_input_with_values | 61 |
-| serve | main.rs | parse_args | 73 |
-
-## Step plan
-
-1. autograd-propagate
-2. web-fails (4 functions, one step)
-3. wasm-eval-input
-4. serve-parse-args
-5. close
+Each sub-component has 1-3 crates. All under the warning line.

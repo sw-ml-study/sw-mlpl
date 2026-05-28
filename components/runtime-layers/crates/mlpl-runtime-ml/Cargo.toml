@@ -1,0 +1,13 @@
+[package]
+name = "mlpl-runtime-ml"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Higher-level ML builtins (softmax, one_hot, sinusoidal_encoding,
+# cross_entropy, perplexity) extracted from mlpl-runtime's ml_builtins.rs.
+# Self-contained: depends on mlpl-array and mlpl-runtime-core only.
+
+[dependencies]
+mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-runtime-core = { path = "../../../runtime-core/crates/mlpl-runtime-core" }

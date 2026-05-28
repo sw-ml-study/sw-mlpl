@@ -1,1 +1,0 @@
-Refactor 4 mlpl-web functions: editor_panel (69), render_main (76), mode_bar (75), make_submit_batch (54). Extract sub-component / per-branch helpers. Each under 50 (target under 25).

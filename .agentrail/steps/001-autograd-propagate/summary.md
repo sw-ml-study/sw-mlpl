@@ -1,1 +1,0 @@
-Split propagate 77-LOC into per-kind helpers. -1 FAIL. backward.rs module-fn count worsened (still 1 FAIL though, same axis).

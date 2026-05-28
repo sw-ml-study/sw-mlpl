@@ -15,4 +15,4 @@ mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
 mlpl-env-traits = { path = "../mlpl-env-traits" }
 mlpl-eval-core = { path = "../../../lang-core/crates/mlpl-eval-core" }
 mlpl-parser = { path = "../../../lang-syntax/crates/mlpl-parser" }
-mlpl-runtime = { path = "../../../runtime/crates/mlpl-runtime" }
+mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
