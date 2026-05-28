@@ -1,0 +1,9 @@
+number = 2
+slug = "web-fails"
+status = "pending"
+description = "Refactor 4 mlpl-web functions: editor_panel (69), render_main (76), mode_bar ..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T22:01:41"
+task_type = "refactor"
+commits = []
