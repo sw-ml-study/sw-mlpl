@@ -15,17 +15,6 @@ members = [
   "crates/mlpl-parity-tests",
   
   
-  "crates/mlpl-runtime-core",
-  "crates/mlpl-runtime-math",
-  "crates/mlpl-runtime-conv",
-  "crates/mlpl-runtime-rnn",
-  "crates/mlpl-runtime-array",
-  "crates/mlpl-runtime-ml",
-  "crates/mlpl-runtime",
-  "crates/mlpl-runtime-data",
-  "crates/mlpl-runtime-dim-reduction",
-  "crates/mlpl-runtime-umap",
-  "crates/mlpl-runtime-mds-rp",
   "crates/mlpl-eval",
   "crates/mlpl-web-eval",
   "crates/mlpl-web-lessons",

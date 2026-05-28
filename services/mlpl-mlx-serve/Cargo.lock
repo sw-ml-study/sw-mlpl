@@ -872,10 +872,50 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-array-ops-compose"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-array-ops-element"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-array-ops-matmul"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-array-ops-reduce"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-array-ops-shape"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-autograd"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
  "mlpl-core",
 ]
 
@@ -915,6 +955,11 @@ name = "mlpl-eval"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
  "mlpl-autograd",
  "mlpl-bpe-core",
  "mlpl-core",
@@ -941,7 +986,58 @@ name = "mlpl-eval-core"
 version = "0.20.0"
 
 [[package]]
+name = "mlpl-lex-ident"
+version = "0.20.0"
+dependencies = [
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lex-number"
+version = "0.20.0"
+dependencies = [
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lex-punct"
+version = "0.20.0"
+dependencies = [
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lex-string"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+ "mlpl-lexer-error",
+ "mlpl-lexer-token",
+]
+
+[[package]]
 name = "mlpl-lexer"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+ "mlpl-lex-ident",
+ "mlpl-lex-number",
+ "mlpl-lex-punct",
+ "mlpl-lex-string",
+ "mlpl-lexer-error",
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lexer-error"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+ "mlpl-lexer-token",
+]
+
+[[package]]
+name = "mlpl-lexer-token"
 version = "0.20.0"
 dependencies = [
  "mlpl-core",
@@ -959,6 +1055,7 @@ name = "mlpl-mlx-rt"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-core",
 ]
 
@@ -1034,6 +1131,7 @@ name = "mlpl-models-tape"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-core",
  "mlpl-eval-core",
@@ -1057,6 +1155,14 @@ version = "0.20.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer",
+ "mlpl-parser-ast",
+]
+
+[[package]]
+name = "mlpl-parser-ast"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
 ]
 
 [[package]]
@@ -1084,6 +1190,10 @@ name = "mlpl-runtime-array"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
  "mlpl-runtime-core",
 ]
 
@@ -1123,6 +1233,7 @@ name = "mlpl-runtime-math"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-element",
  "mlpl-runtime-core",
 ]
 
@@ -1147,6 +1258,8 @@ name = "mlpl-runtime-rnn"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
  "mlpl-runtime-core",
 ]
 
