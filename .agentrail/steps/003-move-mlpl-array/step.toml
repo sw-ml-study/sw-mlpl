@@ -1,9 +1,10 @@
 number = 3
 slug = "move-mlpl-array"
-status = "in-progress"
+status = "completed"
 description = "Move mlpl-array (the biggest fan-out: ~30 referrers). Same recipe as move-mlp..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:13:51"
+completed_at = "2026-05-27T20:22:09"
 task_type = "refactor"
-commits = []
+commits = ["c597732f15e428f995fdb7ebcdc3c27fbf7004e7"]
