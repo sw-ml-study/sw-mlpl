@@ -1,0 +1,3 @@
+Step 001: Training Paradigms learning path.
+
+Create the path in paths.rs with 4 groups: Supervised (logistic regression, MLP, cross-entropy, adam), Unsupervised (K-Means, PCA, t-SNE, UMAP), Self-supervised (masked LM, attention, BERT concept, contrastive), Reinforcement (RLHF concept, reward, PPO concept). Reference existing demos, lessons, glossary. Connector notes for paradigms without demos. Demo smoke test.

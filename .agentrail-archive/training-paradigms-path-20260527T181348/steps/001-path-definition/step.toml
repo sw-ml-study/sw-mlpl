@@ -1,0 +1,13 @@
+number = 1
+slug = "path-definition"
+status = "completed"
+description = """
+Step 001: Training Paradigms learning path.
+
+Create the path in paths.rs with..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T18:03:10"
+completed_at = "2026-05-27T18:07:20"
+task_type = "feature"
+commits = ["e2db5ea9e96ec8302b14b02dc6a0b7e7b0c735ee"]
