@@ -11,6 +11,7 @@ use mlpl_runtime_core::error::RuntimeError;
 /// own `NAMES` constant).
 pub(crate) const LOCAL_NAMES: &[&str] = &[
     "iota",
+    "range",
     "shape",
     "rank",
     "reshape",
@@ -85,7 +86,7 @@ pub fn call_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
 /// new local arms are added.
 fn match_local_builtin(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     match name {
-        "iota" => builtin_iota(name, args),
+        "iota" | "range" => builtin_iota(name, args),
         "shape" => builtin_shape(name, args),
         "rank" => builtin_rank(name, args),
         "reshape" => builtin_reshape(name, args),

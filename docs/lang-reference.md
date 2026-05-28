@@ -258,7 +258,8 @@ Newlines and semicolons are both statement separators.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `iota(n)` | 1 | Integers 0, 1, ..., n-1 as a vector |
+| `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) |
+| `iota(n)` | 1 | Alias for `range(n)` (APL heritage) |
 | `shape(a)` | 1 | Dimension vector of array |
 | `rank(a)` | 1 | Number of dimensions (scalar) |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
@@ -281,6 +282,8 @@ Newlines and semicolons are both statement separators.
 
 | Function | Args | Description |
 |----------|------|-------------|
+| `pi()` | 0 | The constant 3.14159265358979... |
+| `e()` | 0 | The constant 2.71828182845904... |
 | `exp(a)` | 1 | Element-wise e^x |
 | `log(a)` | 1 | Element-wise natural logarithm |
 | `sqrt(a)` | 1 | Element-wise square root |

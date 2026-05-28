@@ -9,6 +9,8 @@ use mlpl_runtime_core::error::RuntimeError;
 /// `mlpl-eval/tests/help_completeness_tests.rs` asserts each
 /// entry is documented in `docs/lang-reference.md`.
 pub(crate) const NAMES: &[&str] = &[
+    "pi",
+    "e",
     "exp",
     "log",
     "sqrt",
@@ -42,6 +44,8 @@ pub(crate) fn try_call(
     args: Vec<DenseArray>,
 ) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
+        "pi" => Some(zero_arg(name, args, std::f64::consts::PI)),
+        "e" => Some(zero_arg(name, args, std::f64::consts::E)),
         "exp" => Some(unary(name, args, f64::exp)),
         "log" => Some(unary(name, args, f64::ln)),
         "sqrt" => Some(unary(name, args, f64::sqrt)),
@@ -77,6 +81,17 @@ pub(crate) fn try_call(
         "last_row" => Some(array_util(name, args)),
         _ => None,
     }
+}
+
+fn zero_arg(name: &str, args: Vec<DenseArray>, val: f64) -> Result<DenseArray, RuntimeError> {
+    if !args.is_empty() {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 0,
+            got: args.len(),
+        });
+    }
+    Ok(DenseArray::from_scalar(val))
 }
 
 fn unary(name: &str, args: Vec<DenseArray>, f: fn(f64) -> f64) -> Result<DenseArray, RuntimeError> {
