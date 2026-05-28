@@ -7,7 +7,19 @@
 # extractions; this saga regroups them under the runtime component.
 
 [workspace]
-members = []
+members = [
+    "crates/mlpl-runtime",
+    "crates/mlpl-runtime-array",
+    "crates/mlpl-runtime-conv",
+    "crates/mlpl-runtime-core",
+    "crates/mlpl-runtime-data",
+    "crates/mlpl-runtime-dim-reduction",
+    "crates/mlpl-runtime-math",
+    "crates/mlpl-runtime-mds-rp",
+    "crates/mlpl-runtime-ml",
+    "crates/mlpl-runtime-rnn",
+    "crates/mlpl-runtime-umap",
+]
 resolver = "2"
 
 [workspace.package]

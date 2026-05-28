@@ -1,6 +1,6 @@
 number = 2
 slug = "bulk-move"
-status = "pending"
+status = "in-progress"
 description = "git mv all 11 runtime crates from crates/ to components/runtime/crates/. Upda..."
 role = "production"
 context_files = []
