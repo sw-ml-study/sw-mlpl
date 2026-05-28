@@ -1,1 +1,0 @@
-Final migration saga 64. Moved last 4 crates: bench/parity-tests/reg to components/dev-tools/, mlpl-ml to components/runtime/. Removed root Cargo.toml. Added per-workspace mlx-rs patches. Fixed mlpl-mlx-serve workspace conflict and mlpl-web include_str paths. crates/, apps/, services/ now empty (removed). 13 components live. sw-checklist: 290->296 passed, 132 fails, 472 warnings.

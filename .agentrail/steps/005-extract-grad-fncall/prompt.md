@@ -1,0 +1,1 @@
+Extract this file group into a sibling crate within components/eval/. Sibling depends on mlpl-eval for shared types. Update mlpl-eval's lib.rs to remove the moved mod declarations.
