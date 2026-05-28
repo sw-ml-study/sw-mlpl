@@ -171,6 +171,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-bpe-core"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-core"
 version = "0.20.0"
 dependencies = [
@@ -191,6 +195,29 @@ name = "mlpl-eval-core"
 version = "0.20.0"
 
 [[package]]
+name = "mlpl-lexer"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-loader-helpers"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-models-feasibility"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-env-traits",
+ "mlpl-parser",
+]
+
+[[package]]
 name = "mlpl-models-freeze"
 version = "0.20.0"
 dependencies = [
@@ -198,6 +225,23 @@ dependencies = [
  "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-parser",
+]
+
+[[package]]
+name = "mlpl-models-inspect"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-env-traits",
+ "mlpl-eval-core",
+ "mlpl-parser",
+]
+
+[[package]]
+name = "mlpl-models-llm"
+version = "0.20.0"
+dependencies = [
+ "mlpl-runtime",
 ]
 
 [[package]]
@@ -222,10 +266,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-models-tune"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-env-traits",
+ "mlpl-eval-core",
+ "mlpl-models-mutate",
+ "mlpl-parser",
+ "mlpl-runtime",
+]
+
+[[package]]
 name = "mlpl-parser"
 version = "0.20.0"
 dependencies = [
  "mlpl-core",
+ "mlpl-lexer",
 ]
 
 [[package]]
@@ -234,11 +291,34 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-runtime-array",
+ "mlpl-runtime-conv",
  "mlpl-runtime-core",
  "mlpl-runtime-data",
  "mlpl-runtime-dim-reduction",
+ "mlpl-runtime-math",
+ "mlpl-runtime-mds-rp",
+ "mlpl-runtime-ml",
+ "mlpl-runtime-rnn",
+ "mlpl-runtime-umap",
  "serde_json",
  "ureq",
+]
+
+[[package]]
+name = "mlpl-runtime-array"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-conv"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
 ]
 
 [[package]]
@@ -258,6 +338,46 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-dim-reduction"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-math"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-mds-rp"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-ml"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-rnn"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-umap"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",

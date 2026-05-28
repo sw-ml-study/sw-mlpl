@@ -1,0 +1,40 @@
+---
+title: U-Net
+---
+flowchart LR
+
+  input("Input image / latent")
+  down1("Down block 1")
+  down2("Down block 2")
+  bottleneck("Bottleneck")
+  up2("Up block 2")
+  up1("Up block 1")
+  out("Output")
+
+  input --> down1
+  down1 --> down2
+  down2 --> bottleneck
+  bottleneck --> up2
+  up2 --> up1
+  up1 --> out
+  down2 ==>|skip| up2
+  down1 ==>|skip| up1
+
+  classDef data fill:#eef,stroke:#668,stroke-width:1px;
+  classDef tensor fill:#e8f4ff,stroke:#3973ac,stroke-width:1px;
+  classDef op fill:#fff7e6,stroke:#b37700,stroke-width:1px;
+  classDef block fill:#f4ecff,stroke:#7e57c2,stroke-width:1px;
+  classDef model fill:#ecfff4,stroke:#2e8b57,stroke-width:1px;
+  classDef loss fill:#ffecec,stroke:#cc4444,stroke-width:2px;
+  classDef grad fill:#fff0f5,stroke:#cc3377,stroke-width:1px;
+  classDef memory fill:#f0f0f0,stroke:#666,stroke-width:1px;
+  classDef gpu fill:#eefaf8,stroke:#088,stroke-width:1px;
+  classDef frozen fill:#f5f5f5,stroke:#999,stroke-dasharray: 5 5;
+  classDef adapter fill:#fffbe6,stroke:#aa8800,stroke-width:2px;
+  class input tensor;
+  class down1 block;
+  class down2 block;
+  class bottleneck model;
+  class up2 block;
+  class up1 block;
+  class out tensor;

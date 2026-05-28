@@ -16,7 +16,9 @@
 # its own target subdirectory.
 
 [workspace]
-members = []
+members = [
+    "crates/mlpl-core",
+]
 resolver = "2"
 
 [workspace.package]

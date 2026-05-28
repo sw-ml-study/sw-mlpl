@@ -5,7 +5,7 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-mlpl-core = { path = "../mlpl-core" }
+mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }
 mlpl-runtime-core = { path = "../mlpl-runtime-core" }
 mlpl-runtime-math = { path = "../mlpl-runtime-math" }
 mlpl-runtime-conv = { path = "../mlpl-runtime-conv" }
