@@ -1,6 +1,6 @@
 number = 3
 slug = "pi-e-builtins"
-status = "pending"
+status = "completed"
 description = """
 Step 003: pi() and e() zero-arg builtins.
 
@@ -8,5 +8,6 @@ Add pi and e to math_builtins.rs N..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T16:51:32"
+completed_at = "2026-05-27T17:13:57"
 task_type = "feature"
-commits = []
+commits = ["4f2b12436ffd7b88855b9488b580df15a3d94458"]

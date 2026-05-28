@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "pi-e-builtins"
+  },
+  "action": "Edit math_builtins.rs, builtins.rs, inspect_groups.rs, lang-reference.md, help.rs",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T17:13:57"
+}
