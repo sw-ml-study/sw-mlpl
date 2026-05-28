@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 54 closed; lang-syntax with decomposed lexer).
+Last refreshed: 2026-05-27 (saga 55 closed; runtime component).
 
 ## Active saga
 
-None. Saga 54 (`component-lang-syntax`) closed 2026-05-27.
+None. Saga 55 (`component-runtime`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -49,6 +49,7 @@ human-readable summary.
 | `component-lang-core` (52) | shipped | -- (structural saga) | Closed 2026-05-27. 5 steps. First component-migration saga: created `components/lang-core/` nested workspace and moved the three foundational crates (mlpl-core, mlpl-array, mlpl-eval-core) into it. Updated 51 dependent Cargo.toml path references across all four workspaces (main, lang-core, mlpl-session, mlpl-mlx-serve). sw-checklist: 221->222 passed (+1), 133 fails unchanged, 474 warnings unchanged. Structural -- enables future grouped extractions inside lang-core (e.g., splitting mlpl-array's 13 modules across sibling crates). Pattern established for subsequent sagas 53+: one saga per component, bottom-up. |
 | `lang-core-decompose-array` (53) | shipped | -- (refactor saga) | Closed 2026-05-27. 7 steps. Decomposed mlpl-array (13 modules, Crate Module Count FAIL) into 5 sparse sibling crates within components/lang-core/ using the extension-trait pattern: `mlpl-array-ops-matmul` (MatmulExt, DotExt), `-reduce` (ReduceAxisExt, ArgmaxAxisExt), `-compose` (ConcatExt, StackExt fn, PatchifyExt, TakeExt), `-shape` (ReshapeExt, TransposeExt), `-element` (ApplyBinopExt). Call sites preserved via `use mlpl_array_ops_*::prelude::*;` -- no API churn for the 600+ `a.matmul(&b)`-style calls. sw-checklist: 222->247 passed (+25), **133->132 fails (-1 FAIL retired)**, 474->472 warnings (-2). Each op's body opportunistically shrunk while migrating (matmul 50->32, reduce_axis 46->11, argmax_axis 44->13, etc.). Establishes the move-AND-split pattern: component migrations must split crowded crates inside the component, not just move them. |
 | `component-lang-syntax` (54) | shipped | -- (structural saga) | Closed 2026-05-27. 6 steps. Created components/lang-syntax/ with the source-text-to-AST family. Moved + decomposed mlpl-lexer into 7 sparse siblings (mlpl-lexer-token, mlpl-lexer-error, mlpl-lex-string, mlpl-lex-number, mlpl-lex-punct, mlpl-lex-ident, mlpl-lexer orchestrator). Moved + split mlpl-parser into mlpl-parser-ast (types + Display impls, Display orphan rule) and mlpl-parser (Parser logic + re-exports for downstream backward compat). Moved mlpl-macro and mlpl-lower-rs unchanged. sw-checklist: 247->287 passed (+40), 132 fails unchanged, 472 warnings unchanged. Big PASS gain from 9 new sparse crates each contributing clean PASS lines. mlpl-lexer's prior lex_util 6-fn WARN + lex_ident 32-LOC WARN retired through structural split. |
+| `component-runtime` (55) | shipped | -- (structural saga) | Closed 2026-05-27. 4 steps. Created components/runtime/ and bulk-moved 11 runtime crates from crates/: mlpl-runtime (dispatch), mlpl-runtime-core, and the 9 concern-grouped sibling crates (math, conv, rnn, array, ml, data, dim-reduction, umap, mds-rp -- already sparse from saga 50). Updated 5 external consumer Cargo.toml refs and fixed intra-component cross-references to lang-core. sw-checklist: 287->288 passed (+1), 132 fails unchanged, 472 warnings unchanged. The runtime family had no remaining FAILs (saga 50 already retired them). Several WARNs remain (dim-reduction 7 modules, validate fns over 25 LOC); flagged for a future `runtime-warn-paydown` saga. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
