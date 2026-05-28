@@ -1,9 +1,10 @@
 number = 7
 slug = "close"
-status = "pending"
+status = "completed"
 description = "FINAL step (use --done): run sw-checklist and report delta against saga start..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:28:05"
+completed_at = "2026-05-27T21:00:24"
 task_type = "docs"
-commits = []
+commits = ["1017045e88c7ebc86ef71009bc1c9423a32a68da"]
