@@ -1,0 +1,1 @@
+Extract ops_concat.rs (5 functions: concat, stack, patchify, take, plus internal) into mlpl-array-ops-compose. Define ConcatExt, StackExt, PatchifyExt, TakeExt. Opportunistically shrink the 4 over-25-LOC functions (patchify 43, stack 43, take 41, concat 34) by extracting validation and per-shape helpers.

@@ -1,0 +1,1 @@
+Extract ops_binop.rs + ops_strides.rs into mlpl-array-ops-element. Define ApplyBinopExt or wider ElementOpsExt covering apply_binop and any map/element-wise ops. Opportunistically shrink apply_binop (43 lines).

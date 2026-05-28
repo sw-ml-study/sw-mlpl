@@ -1,0 +1,9 @@
+number = 3
+slug = "split-ops-reduce"
+status = "pending"
+description = "Extract ops_reduce.rs into mlpl-array-ops-reduce sibling crate using extensio..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T20:28:05"
+task_type = "refactor"
+commits = []

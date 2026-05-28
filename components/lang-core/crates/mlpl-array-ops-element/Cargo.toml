@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-array-ops-element"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Element-wise extension traits (apply_binop, stride helpers) for
+# DenseArray.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }

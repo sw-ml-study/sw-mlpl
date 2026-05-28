@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-array-ops-compose"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Composition extension traits (concat, stack, patchify, take) for
+# DenseArray.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
