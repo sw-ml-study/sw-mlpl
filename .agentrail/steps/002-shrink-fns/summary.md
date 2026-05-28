@@ -1,0 +1,1 @@
+Extracted 4 new crates (mlpl-runtime-math, mlpl-runtime-conv, mlpl-runtime-rnn, mlpl-lexer) and created ast_fmt_compound.rs. Retired 7 FAILs: math_builtins 8-fn module, conv2d 75-LOC, pool2d 62-LOC, lstm_cell 56-LOC, mlpl-runtime 9 modules, mlpl-parser 10 modules, ast_fmt fmt 62-LOC. sw-checklist: 141->134 failed, 473->478 warnings.
