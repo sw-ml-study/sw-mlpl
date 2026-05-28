@@ -1,0 +1,1 @@
+Extracted ReshapeExt and TransposeExt to mlpl-array-ops-shape. ops_reshape.rs and ops_transpose.rs deleted. New crate is fully PASS (all checks). transpose function split into permute_data + attach_reversed_labels helpers. sw-checklist: 249->248 passed, 133 fails, 471 warns unchanged.
