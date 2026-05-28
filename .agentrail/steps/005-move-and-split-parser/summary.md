@@ -1,0 +1,1 @@
+Moved mlpl-parser into lang-syntax and split: mlpl-parser-ast (types + Display impls due to orphan rule) + mlpl-parser (Parser logic + entry + stmts + record_parser). mlpl-parser now has 4 modules, parser-ast has 4 modules. 18 consumer paths updated. sw-checklist: 281->287 passed, 132 fails, 473->472 warnings.

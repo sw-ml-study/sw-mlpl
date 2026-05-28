@@ -1,9 +1,10 @@
 number = 5
 slug = "move-and-split-parser"
-status = "in-progress"
+status = "completed"
 description = "Move + split mlpl-parser. After move, decompose: mlpl-parser-ast (Expr, BinOp..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T21:01:58"
+completed_at = "2026-05-27T21:13:03"
 task_type = "refactor"
-commits = []
+commits = ["034ff4b79774bd19e9c672340569c867fd33f4ba"]
