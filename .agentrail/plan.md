@@ -1,11 +1,21 @@
-# Warning/FAIL Ratchet-Down Spike
+# Shared `target/` infrastructure (saga 51)
 
-Focused tech-debt reduction targeting FAILs from this
-session's work. Priority: split paths.rs (1162 lines),
-shrink over-LOC functions in runtime and web crates.
+Set up a single shared `target/` directory at the repo root so all
+workspaces (main + each component) write to the same build cache.
+This enables the upcoming component-migration sagas (52+) without
+exploding disk usage.
 
 ## Steps
 
-1. Split paths.rs into per-path files. Reduce File LOC FAIL.
-2. Shrink over-50-LOC functions (math_builtins, ast_fmt, stmts).
-3. language-status + saga close.
+1. Create `.cargo/config.toml` at repo root with
+   `[build] target-dir = "target"`. Verify `cargo check` from
+   main workspace + from `components/mlpl-session/` and
+   `services/mlpl-mlx-serve/` all resolve to the same target dir.
+   `du -sh target/` before and after should not grow significantly.
+2. language-status update + saga close.
+
+## Why one saga for this?
+
+The shared-target config is the prerequisite for every component
+migration. It lives by itself in saga 51 so the migration sagas
+(saga 52 onward, one per component) start from a clean baseline.

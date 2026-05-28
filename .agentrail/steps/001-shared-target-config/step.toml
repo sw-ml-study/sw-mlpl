@@ -1,0 +1,9 @@
+number = 1
+slug = "shared-target-config"
+status = "in-progress"
+description = 'Create .cargo/config.toml at repo root with [build] target-dir = "target" (re...'
+role = "production"
+context_files = []
+created_at = "2026-05-27T20:08:32"
+task_type = "infra"
+commits = []
