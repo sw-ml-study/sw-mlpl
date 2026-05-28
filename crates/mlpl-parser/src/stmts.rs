@@ -8,9 +8,9 @@
 use mlpl_core::Span;
 
 use crate::ast::Expr;
-use crate::error::{ParseError, describe_kind};
 use crate::parser::Parser;
-use crate::token::TokenKind;
+use mlpl_lexer::TokenKind;
+use mlpl_lexer::{ParseError, describe_kind};
 
 impl Parser<'_> {
     /// Parse `name : [axis1, axis2, ...] = value` and desugar to

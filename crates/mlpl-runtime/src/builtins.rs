@@ -2,7 +2,6 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::math_builtins;
 use mlpl_runtime_core::error::RuntimeError;
 
 /// Names dispatched by the `match` block at the bottom of
@@ -56,9 +55,9 @@ fn try_external_dispatchers(
     name: &str,
     args: &[DenseArray],
 ) -> Option<Result<DenseArray, RuntimeError>> {
-    math_builtins::try_call(name, args.to_vec())
-        .or_else(|| crate::conv_builtins::try_call(name, args.to_vec()))
-        .or_else(|| crate::rnn_builtins::try_call(name, args.to_vec()))
+    mlpl_runtime_math::try_call(name, args.to_vec())
+        .or_else(|| mlpl_runtime_conv::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_rnn::try_call(name, args.to_vec()))
         .or_else(|| crate::random_builtins::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_data::dataset_builtins::try_call(name, args.to_vec()))
         .or_else(|| crate::ml_builtins::try_call(name, args.to_vec()))

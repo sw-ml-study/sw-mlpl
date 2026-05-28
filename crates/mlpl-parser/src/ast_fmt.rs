@@ -1,16 +1,11 @@
-//! `Display` impls for AST nodes plus the shared rendering
-//! helpers (`fmt_scope`, `fmt_comma_seq`, `fmt_record_lit`,
-//! `write_seq`). Extracted from `ast.rs` so the AST module
-//! itself only declares types + spans, keeping it under the
-//! sw-checklist module-fn-count cap.
-//!
-//! Used by `device("mlx") { ... }` block forwarding (Saga R1
-//! step 003) and by user-facing error messages that quote
-//! source spans back to the caller.
+//! `Display` impls for AST nodes. Compound-expression helpers
+//! live in `ast_fmt_compound` to keep both modules under the
+//! sw-checklist function-count budget.
 
 use std::fmt;
 
 use crate::ast::{BinOpKind, Expr, TensorCtorKind};
+use crate::ast_fmt_compound::{fmt_fn_def, fmt_if_expr, fmt_record_lit, fmt_scope};
 
 impl fmt::Display for BinOpKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -44,15 +39,10 @@ fn fmt_comma_seq(f: &mut fmt::Formatter<'_>, exprs: &[Expr]) -> fmt::Result {
     Ok(())
 }
 
-fn fmt_scope(f: &mut fmt::Formatter<'_>, head: &dyn fmt::Display, body: &[Expr]) -> fmt::Result {
-    write!(f, "{head} {{ ")?;
-    for (i, e) in body.iter().enumerate() {
-        if i > 0 {
-            write!(f, "; ")?;
-        }
-        write!(f, "{e}")?;
-    }
-    write!(f, " }}")
+fn write_seq(f: &mut fmt::Formatter<'_>, open: &str, close: &str, items: &[Expr]) -> fmt::Result {
+    write!(f, "{open}")?;
+    fmt_comma_seq(f, items)?;
+    write!(f, "{close}")
 }
 
 impl fmt::Display for Expr {
@@ -93,46 +83,16 @@ impl fmt::Display for Expr {
                 then_body,
                 else_body,
                 ..
-            } => {
-                fmt_scope(f, &format_args!("if {cond}"), then_body)?;
-                fmt_scope(f, &format_args!(" else"), else_body)
-            }
+            } => fmt_if_expr(f, cond, then_body, else_body),
             Self::While { cond, body, .. } => fmt_scope(f, &format_args!("while {cond}"), body),
             Self::Break { value: None, .. } => write!(f, "break"),
             Self::Break { value: Some(v), .. } => write!(f, "break {v}"),
             Self::Continue { .. } => write!(f, "continue"),
             Self::FnDef {
                 name, params, body, ..
-            } => {
-                write!(f, "def {name}(")?;
-                for (i, p) in params.iter().enumerate() {
-                    if i > 0 {
-                        write!(f, ", ")?;
-                    }
-                    write!(f, "{p}")?;
-                }
-                write!(f, ")")?;
-                fmt_scope(f, &"", body)
-            }
+            } => fmt_fn_def(f, name, params, body),
             Self::Return { value: None, .. } => write!(f, "return"),
             Self::Return { value: Some(v), .. } => write!(f, "return {v}"),
         }
     }
-}
-
-fn fmt_record_lit(f: &mut fmt::Formatter<'_>, fields: &[(String, Expr)]) -> fmt::Result {
-    write!(f, "{{")?;
-    for (i, (name, value)) in fields.iter().enumerate() {
-        if i > 0 {
-            write!(f, ", ")?;
-        }
-        write!(f, "{name}: {value}")?;
-    }
-    write!(f, "}}")
-}
-
-fn write_seq(f: &mut fmt::Formatter<'_>, open: &str, close: &str, items: &[Expr]) -> fmt::Result {
-    write!(f, "{open}")?;
-    fmt_comma_seq(f, items)?;
-    write!(f, "{close}")
 }

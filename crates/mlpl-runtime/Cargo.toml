@@ -7,6 +7,9 @@ version.workspace = true
 [dependencies]
 mlpl-core = { path = "../mlpl-core" }
 mlpl-runtime-core = { path = "../mlpl-runtime-core" }
+mlpl-runtime-math = { path = "../mlpl-runtime-math" }
+mlpl-runtime-conv = { path = "../mlpl-runtime-conv" }
+mlpl-runtime-rnn = { path = "../mlpl-runtime-rnn" }
 mlpl-runtime-data = { path = "../mlpl-runtime-data" }
 mlpl-runtime-dim-reduction = { path = "../mlpl-runtime-dim-reduction" }
 mlpl-runtime-umap = { path = "../mlpl-runtime-umap" }

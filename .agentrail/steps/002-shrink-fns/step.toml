@@ -1,6 +1,6 @@
 number = 2
 slug = "shrink-fns"
-status = "pending"
+status = "in-progress"
 description = """
 Step 002: Shrink over-50-LOC functions.
 

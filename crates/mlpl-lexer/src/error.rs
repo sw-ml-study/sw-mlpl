@@ -1,4 +1,4 @@
-//! Error types for mlpl-parser.
+//! Error types for MLPL lexing and parsing.
 
 use mlpl_core::Span;
 
@@ -7,7 +7,7 @@ use crate::token::TokenKind;
 /// Render a `TokenKind` as the human-readable string used in
 /// `ParseError::UnexpectedToken` messages. Lives in this module
 /// because it is part of error surface formatting.
-pub(crate) fn describe_kind(kind: &TokenKind) -> String {
+pub fn describe_kind(kind: &TokenKind) -> String {
     match kind {
         TokenKind::Eof => "end of input".into(),
         TokenKind::Newline => "newline".into(),

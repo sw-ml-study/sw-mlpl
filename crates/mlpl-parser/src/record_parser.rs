@@ -28,9 +28,9 @@ use std::collections::HashSet;
 use mlpl_core::Span;
 
 use crate::ast::Expr;
-use crate::error::{ParseError, describe_kind};
 use crate::parser::Parser;
-use crate::token::TokenKind;
+use mlpl_lexer::TokenKind;
+use mlpl_lexer::{ParseError, describe_kind};
 
 impl Parser<'_> {
     /// Caller has just consumed an `LBrace` at `open_span`.
