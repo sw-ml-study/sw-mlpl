@@ -25,7 +25,8 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
     (
         "Array",
         &[
-            ("iota", "iota(n)", "integers 0..n as a vector"),
+            ("range", "range(n)", "integers 0..n as a vector (preferred)"),
+            ("iota", "iota(n)", "alias for range(n) (APL heritage)"),
             ("shape", "shape(a)", "dimension vector of a"),
             (
                 "labels",
@@ -96,6 +97,8 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
     (
         "Math",
         &[
+            ("pi", "pi()", "3.14159265... (zero-arg constant)"),
+            ("e", "e()", "2.71828182... (zero-arg constant)"),
             ("exp", "exp(a)", "elementwise exponential"),
             ("log", "log(a)", "elementwise natural log"),
             ("sqrt", "sqrt(a)", "elementwise square root"),
