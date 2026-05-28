@@ -1,9 +1,10 @@
 number = 5
 slug = "split-ops-shape"
-status = "in-progress"
+status = "completed"
 description = "Extract ops_reshape.rs + ops_transpose.rs into mlpl-array-ops-shape. Define R..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:28:05"
+completed_at = "2026-05-27T20:56:22"
 task_type = "refactor"
-commits = []
+commits = ["36c93928fecbba256306357e9de51a98de079f27"]
