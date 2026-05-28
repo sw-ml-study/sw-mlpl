@@ -1,4 +1,5 @@
 use mlpl_array::{ArrayError, DenseArray, Shape};
+use mlpl_array_ops_shape::prelude::*;
 
 // -- Reshape --
 

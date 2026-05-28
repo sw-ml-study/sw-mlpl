@@ -2,6 +2,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_matmul::prelude::*;
+use mlpl_array_ops_shape::prelude::*;
 
 use crate::ops::{accumulate, softmax_backward};
 use crate::tape::{NodeId, NodeKind, Tape};

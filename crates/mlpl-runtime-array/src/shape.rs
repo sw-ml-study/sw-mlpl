@@ -1,4 +1,5 @@
 use mlpl_array::{DenseArray, Shape};
+use mlpl_array_ops_shape::prelude::*;
 use mlpl_runtime_core::error::RuntimeError;
 
 use crate::arity_err;

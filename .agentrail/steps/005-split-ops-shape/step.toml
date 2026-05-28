@@ -1,6 +1,6 @@
 number = 5
 slug = "split-ops-shape"
-status = "pending"
+status = "in-progress"
 description = "Extract ops_reshape.rs + ops_transpose.rs into mlpl-array-ops-shape. Define R..."
 role = "production"
 context_files = []
