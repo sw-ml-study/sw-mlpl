@@ -17,9 +17,8 @@
 
 use crate::env::Environment;
 
-const USER_FNS_MSG: &str = "(no user-defined functions)\n\
-user functions are not yet a language feature; for the \
-built-in surface, use :builtins";
+const NO_USER_FNS_MSG: &str = "(no user-defined functions yet)\n\
+define with: def u:name(args) { body }";
 
 const HELP_DESCRIBE_MSG: &str = ":describe <name>\n  \
 print the shape and a values preview \
@@ -60,7 +59,14 @@ fn topic_output(env: &Environment, topic: &str) -> Option<String> {
     match topic {
         "vars" | "variables" => Some(crate::inspect_collections::format_vars(env)),
         "models" => Some(crate::inspect_collections::format_models(env)),
-        "fns" | "functions" => Some(USER_FNS_MSG.into()),
+        "fns" | "functions" => {
+            let sigs = env.user_fn_signatures();
+            if sigs.is_empty() {
+                Some(NO_USER_FNS_MSG.into())
+            } else {
+                Some(sigs.join("\n"))
+            }
+        }
         "builtins" | "built-ins" => Some(crate::inspect_render::format_builtins()),
         "wsid" | "workspace" => Some(crate::inspect_collections::format_wsid(env)),
         "introspect" => Some(crate::inspect_introspect::format_introspect(env)),
