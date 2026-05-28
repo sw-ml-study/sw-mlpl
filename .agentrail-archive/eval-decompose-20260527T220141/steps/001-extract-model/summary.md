@@ -1,0 +1,1 @@
+BLOCKED: Cycle dep: model_* extraction creates mlpl-eval -> mlpl-eval-model -> mlpl-eval. Decomposing mlpl-eval requires extracting Environment/Value/EvalError types into a shared core crate first (or trait abstraction). Deferring saga 65 in favor of mlx-rs >500-LOC file splits the user requested.

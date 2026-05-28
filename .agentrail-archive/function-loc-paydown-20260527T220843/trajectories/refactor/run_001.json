@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 1,
+    "step": "autograd-propagate"
+  },
+  "action": "Extract 8 prop_X helpers, each delegated from the match arm.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T22:03:32"
+}
