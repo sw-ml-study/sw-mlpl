@@ -1,0 +1,1 @@
+Eval: user_fns HashMap in Environment, FnDef stores functions, colon-containing FnCall dispatches through call_user_fn with scope save/restore, ReturnSignal control flow. Parser extended for ns:name(args) calls. 10 eval tests pass.
