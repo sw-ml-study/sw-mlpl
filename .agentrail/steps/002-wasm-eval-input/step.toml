@@ -1,6 +1,6 @@
 number = 2
 slug = "wasm-eval-input"
-status = "pending"
+status = "in-progress"
 description = "Refactor mlpl-wasm eval_input_with_values (61 lines)."
 role = "production"
 context_files = []
