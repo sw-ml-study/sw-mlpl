@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 62 closed; cli component).
+Last refreshed: 2026-05-27 (saga 63 closed; serve component).
 
 ## Active saga
 
-None. Saga 62 (`component-cli`) closed 2026-05-27.
+None. Saga 63 (`component-serve`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -57,6 +57,7 @@ human-readable summary.
 | `component-wasm` (60) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-wasm + mlpl-web-eval to components/wasm/. |
 | `component-web` (61) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-web (app, 75 modules FAIL preserved), mlpl-web-lessons, mlpl-web-path-body into components/web/. Decompose deferred. |
 | `component-cli` (62) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-cli + mlpl + mlpl-repl + mlpl-build + mlpl-lab into components/cli/. apps/ directory now empty. |
+| `component-serve` (63) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-serve + mlpl-mlx-serve into components/serve/. services/ directory now empty. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
