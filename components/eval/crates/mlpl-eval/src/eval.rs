@@ -10,9 +10,9 @@ use mlpl_parser::{Expr, TensorCtorKind};
 use mlpl_trace::{Trace, TraceEvent, TraceValue};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::eval_ops::{eval_binop, eval_fncall, eval_svg, flatten_evaluated_arrays};
-use crate::value::{Value, value_kind};
+use mlpl_eval_types::{Value, value_kind};
 
 pub(crate) fn eval_expr(
     expr: &Expr,

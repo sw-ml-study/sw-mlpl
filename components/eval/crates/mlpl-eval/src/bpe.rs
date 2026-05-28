@@ -8,9 +8,9 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::tokenizer::TokenizerSpec;
-use crate::value::Value;
+use mlpl_eval_types::Value;
 
 pub(crate) use mlpl_bpe_core::train;
 

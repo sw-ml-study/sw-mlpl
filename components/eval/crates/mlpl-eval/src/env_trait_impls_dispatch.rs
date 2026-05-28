@@ -7,7 +7,7 @@ use mlpl_array::DenseArray;
 use mlpl_env_traits::{DispatchError, HasDispatch};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 impl HasDispatch for Environment {
     fn dispatch(&self, op: &str, args: Vec<DenseArray>) -> Result<DenseArray, DispatchError> {

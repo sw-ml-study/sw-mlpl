@@ -1,10 +1,28 @@
-# Function LOC FAILs paydown -- resume (saga 72)
+# Phase 1.5: extract eval-types (saga 73)
 
-Saga 66 was archived as Active after step 001 (autograd propagate)
-shipped. Resume the remaining 6 single-function refactors:
+Move the kitchen-sink types (Value, EvalError, TokenizerSpec) +
+their From impls into a small mlpl-eval-types crate. Unlocks the
+Phase 1 extraction backlog (fetch, experiment, tag, singletons).
 
-- mlpl-web:    editor_panel (69), render_main (76), mode_bar (75), make_submit_batch (54)
-- mlpl-wasm:   eval_input_with_values (61)
-- mlpl-serve:  parse_args (73)
+## Files to move
 
-Each step retires -1 FAIL via the "extract helpers" pattern.
+- value.rs (Value enum)
+- error.rs (EvalError enum)
+- error_fmt.rs (Display for EvalError)
+- error_from_models.rs (From impls for mlpl-models-* errors)
+- error_from_tools.rs (From impls for tool errors)
+- tokenizer.rs (TokenizerSpec)
+
+= 6 files into components/eval-types/crates/mlpl-eval-types/
+
+## Cross-component deps the new crate gains
+
+mlpl-array, mlpl-core, mlpl-eval-core (already external to eval) +
+8 models-* crates (for the From impls -- carried due to Rust orphan
+rule on `From<ForeignError> for EvalError`).
+
+## Step plan
+
+1. scaffold + move files
+2. update mlpl-eval's ~42 internal callers to use mlpl_eval_types::*
+3. close

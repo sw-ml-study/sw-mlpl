@@ -8,7 +8,7 @@ use mlpl_parser::Expr;
 use mlpl_trace::{Trace, TraceValue};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
 
 /// Evaluate a `for` loop. See the `Expr::For` variant docstring for

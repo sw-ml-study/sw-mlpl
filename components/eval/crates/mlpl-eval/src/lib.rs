@@ -35,10 +35,6 @@ mod env_trait_impls_strings;
 mod env_trait_impls_vars;
 mod env_user_fns;
 mod env_vars;
-mod error;
-mod error_fmt;
-mod error_from_models;
-mod error_from_tools;
 mod eval;
 mod eval_blocks;
 mod eval_fncalls;
@@ -96,10 +92,9 @@ mod tag_propagate;
 mod tag_render;
 mod tokenizer;
 mod type_errors;
-mod value;
 
 pub use env::{Environment, PeerDispatcher, model_params};
-pub use error::EvalError;
+pub use mlpl_eval_types::EvalError;
 pub use eval_program::{
     eval_program, eval_program_traced, eval_program_value, eval_program_value_traced,
 };
@@ -113,4 +108,4 @@ pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
 pub use mlpl_eval_core::{MetricSink, ModelSpec};
 pub use mlpl_runtime::runtime_builtin_names;
 pub use tokenizer::TokenizerSpec;
-pub use value::{Value, value_kind};
+pub use mlpl_eval_types::{Value, value_kind};

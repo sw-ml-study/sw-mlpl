@@ -1,0 +1,14 @@
+# Saga 73: shared types for the mlpl-eval god-crate decomposition.
+# Houses Value, EvalError, TokenizerSpec + their cross-crate From impls.
+
+[workspace]
+members = ["crates/mlpl-eval-types"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"

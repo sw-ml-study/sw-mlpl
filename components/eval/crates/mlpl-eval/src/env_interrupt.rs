@@ -5,7 +5,7 @@
 //! endpoint can trip the bool from a different thread.
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::interrupt::Interrupt;
 
 impl Environment {

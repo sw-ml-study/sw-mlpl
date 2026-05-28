@@ -6,7 +6,7 @@ use std::fmt;
 use mlpl_array::DenseArray;
 
 use crate::error::EvalError;
-use crate::tokenizer::TokenizerSpec;
+use mlpl_eval_core::TokenizerSpec;
 use mlpl_eval_core::model::ModelSpec;
 
 /// A runtime value: an array, a string, a model, a tokenizer,

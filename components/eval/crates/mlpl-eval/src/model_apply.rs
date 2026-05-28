@@ -8,7 +8,7 @@
 use mlpl_array::DenseArray;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::model_apply_attention::{AttentionArgs, apply_attention};
 use crate::model_apply_compose::{apply_chain, apply_residual, apply_rms_norm};
 use crate::model_apply_lora::{LinearLoraInputs, apply_linear_lora};

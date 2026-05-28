@@ -22,7 +22,7 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_trace::TraceValue;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 /// Cancellation token. Cheap to `clone` (shared `Arc`). The same
 /// instance is held by the session map (cancel handler flips it)

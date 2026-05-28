@@ -5,6 +5,7 @@
 //! differentiable scatter-back gradient.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_array_ops_compose::prelude::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 

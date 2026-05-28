@@ -18,9 +18,9 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
-use crate::value::{Value, value_kind};
+use mlpl_eval_types::{Value, value_kind};
 
 /// Drive a `while cond { body }` loop. Truthiness of `cond`
 /// matches the `if` rule: rank-0 array (non-zero is true) or

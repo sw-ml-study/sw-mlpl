@@ -10,7 +10,7 @@ use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::{BinOpKind, Expr};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 /// Evaluate a `grad(expr, wrt)` call and return the gradient array of
 /// the scalar expression `expr` with respect to the parameter `wrt`.

@@ -6,8 +6,8 @@
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::error::EvalError;
-use crate::value::Value;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 use mlpl_eval_core::model::{ActKind, ModelSpec};
 
 /// `chain(layer_a, layer_b, ...)`. Each argument must evaluate to a

@@ -27,8 +27,8 @@ use std::fs;
 use std::path::{Path, PathBuf};
 
 use crate::env::Environment;
-use crate::error::EvalError;
-use crate::value::Value;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 
 const OXFORD_PET_URL: &str = "https://www.robots.ox.ac.uk/~vgg/data/pets/data/images.tar.gz";
 const OXFORD_PET_SHA256: &str = "67195c5e1c01f1ab5f9b6a5d22b8c27a580d896ece458917e61d459337fa318d";

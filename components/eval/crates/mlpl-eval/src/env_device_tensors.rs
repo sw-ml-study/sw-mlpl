@@ -4,7 +4,7 @@
 //! actual tensor data lives on the peer.
 
 use crate::env::Environment;
-use crate::value::Value;
+use mlpl_eval_types::Value;
 
 impl Environment {
     pub fn set_device_tensor(&mut self, name: String, value: Value) {

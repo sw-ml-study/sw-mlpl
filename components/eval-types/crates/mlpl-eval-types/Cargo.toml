@@ -1,0 +1,32 @@
+[package]
+name = "mlpl-eval-types"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Shared mlpl-eval types: Value, EvalError, TokenizerSpec, and the
+# From<ForeignError> impls bridging models-* / loader errors into
+# EvalError. Owned together so the orphan rule is satisfied without
+# the consumer crates needing to reach back through mlpl-eval.
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
+mlpl-eval-image = { path = "../../../eval-image/crates/mlpl-eval-image", optional = true }
+mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
+
+# Models families -- needed only for the From impls.
+mlpl-loader-helpers = { path = "../../../session-infra/crates/mlpl-loader-helpers" }
+mlpl-models-feasibility = { path = "../../../models-read/crates/mlpl-models-feasibility" }
+mlpl-models-freeze = { path = "../../../models-read/crates/mlpl-models-freeze" }
+mlpl-models-inspect = { path = "../../../models-read/crates/mlpl-models-inspect" }
+mlpl-models-llm = { path = "../../../models-llm/crates/mlpl-models-llm" }
+mlpl-models-mutate = { path = "../../../models-write/crates/mlpl-models-mutate" }
+mlpl-models-tape = { path = "../../../models-write/crates/mlpl-models-tape" }
+mlpl-models-tune = { path = "../../../models-write/crates/mlpl-models-tune" }
+
+[features]
+default = []
+image-io = ["dep:mlpl-eval-image", "mlpl-eval-image/image-io"]

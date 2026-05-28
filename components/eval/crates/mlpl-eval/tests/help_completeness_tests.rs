@@ -30,7 +30,7 @@
 
 use std::collections::HashSet;
 
-const LANG_REFERENCE: &str = include_str!("../../../docs/lang-reference.md");
+const LANG_REFERENCE: &str = include_str!("../../../../../docs/lang-reference.md");
 
 #[test]
 fn every_builtin_groups_name_is_in_lang_reference() {

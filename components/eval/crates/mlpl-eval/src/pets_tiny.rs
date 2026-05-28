@@ -28,8 +28,8 @@ use std::collections::BTreeMap;
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::EvalError;
-use crate::value::Value;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 
 const MAGIC: &[u8; 8] = b"MLPLPETS";
 const VERSION: u32 = 1;

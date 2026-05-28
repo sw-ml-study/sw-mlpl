@@ -1,0 +1,9 @@
+number = 1
+slug = "scaffold-and-move"
+status = "in-progress"
+description = "Create eval-types component + crate, move 6 files, set up deps."
+role = "production"
+context_files = []
+created_at = "2026-05-28T11:31:03"
+task_type = "refactor"
+commits = []

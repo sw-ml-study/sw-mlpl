@@ -6,7 +6,7 @@
 use mlpl_array::{DenseArray, Shape};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::model_apply::apply_model;
 use mlpl_eval_core::model::ModelSpec;
 

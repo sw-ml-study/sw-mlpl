@@ -12,7 +12,7 @@ use mlpl_parser::{Expr, TensorCtorKind};
 use mlpl_trace::{Trace, TraceValue};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
 
 pub(crate) fn eval_tensor_ctor(

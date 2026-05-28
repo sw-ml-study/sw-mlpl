@@ -13,31 +13,31 @@ use crate::experiment::{ExperimentRecord, read_records_from_disk};
 pub(crate) fn dispatch_compare(
     args: &[Expr],
     env: &mut crate::env::Environment,
-) -> Result<crate::value::Value, crate::error::EvalError> {
+) -> Result<mlpl_eval_types::Value, mlpl_eval_types::EvalError> {
     if args.len() != 2 {
-        return Err(crate::error::EvalError::BadArity {
+        return Err(mlpl_eval_types::EvalError::BadArity {
             func: "compare".into(),
             expected: 2,
             got: args.len(),
         });
     }
     let Expr::StrLit(a, _) = &args[0] else {
-        return Err(crate::error::EvalError::Unsupported(
+        return Err(mlpl_eval_types::EvalError::Unsupported(
             "compare: arguments must be string literals".into(),
         ));
     };
     let Expr::StrLit(b, _) = &args[1] else {
-        return Err(crate::error::EvalError::Unsupported(
+        return Err(mlpl_eval_types::EvalError::Unsupported(
             "compare: arguments must be string literals".into(),
         ));
     };
     let ra = latest_by_name(env, a).ok_or_else(|| {
-        crate::error::EvalError::Unsupported(format!("compare: no run named {a:?}"))
+        mlpl_eval_types::EvalError::Unsupported(format!("compare: no run named {a:?}"))
     })?;
     let rb = latest_by_name(env, b).ok_or_else(|| {
-        crate::error::EvalError::Unsupported(format!("compare: no run named {b:?}"))
+        mlpl_eval_types::EvalError::Unsupported(format!("compare: no run named {b:?}"))
     })?;
-    Ok(crate::value::Value::Str(render_compare(&ra, &rb)))
+    Ok(mlpl_eval_types::Value::Str(render_compare(&ra, &rb)))
 }
 
 fn latest_by_name(env: &crate::env::Environment, name: &str) -> Option<ExperimentRecord> {

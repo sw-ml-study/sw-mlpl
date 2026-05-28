@@ -6,7 +6,7 @@
 use std::collections::BTreeMap;
 
 use crate::env::Environment;
-use crate::value::Value;
+use mlpl_eval_types::Value;
 
 impl Environment {
     /// Saga 29 step 001: bind a record value.

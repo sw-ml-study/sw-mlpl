@@ -11,7 +11,7 @@ use mlpl_trace::{Trace, TraceValue};
 use serde::{Deserialize, Serialize};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 /// One recorded run. Written to `<exp_dir>/<name>/<ts>/run.json`
 /// by the terminal REPL; also appended to `env.experiment_log`
