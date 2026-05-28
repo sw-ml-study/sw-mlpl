@@ -1,9 +1,10 @@
 number = 2
 slug = "split-ops-matmul"
-status = "in-progress"
+status = "completed"
 description = "Extract ops_matmul.rs from mlpl-array into the sibling crate mlpl-array-ops-m..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:28:05"
+completed_at = "2026-05-27T20:37:05"
 task_type = "refactor"
-commits = []
+commits = ["eba98c6ac148c5eb0ac4edfde90e3bfb49f1b00c"]
