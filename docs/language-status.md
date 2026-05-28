@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 63 closed; serve component).
+Last refreshed: 2026-05-27 (saga 64 closed; migration finalized).
 
 ## Active saga
 
-None. Saga 63 (`component-serve`) closed 2026-05-27.
+None. Saga 64 (`component-dev-tools-and-final`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -58,6 +58,7 @@ human-readable summary.
 | `component-web` (61) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-web (app, 75 modules FAIL preserved), mlpl-web-lessons, mlpl-web-path-body into components/web/. Decompose deferred. |
 | `component-cli` (62) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-cli + mlpl + mlpl-repl + mlpl-build + mlpl-lab into components/cli/. apps/ directory now empty. |
 | `component-serve` (63) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-serve + mlpl-mlx-serve into components/serve/. services/ directory now empty. |
+| `component-dev-tools-and-final` (64) | shipped | -- (structural saga, MIGRATION COMPLETE) | Closed 2026-05-27. 2 steps. Moved final 4 crates: bench/parity-tests/reg to components/dev-tools/, mlpl-ml to components/runtime/. Removed root Cargo.toml. Added per-workspace [patch.crates-io] for vendor/mlx-rs. **The flat crates/ apps/ services/ are now empty (removed).** Every crate lives in exactly one of 13 component workspaces: autograd, cli, dev-tools, eval, lang-core, lang-syntax, native-rt, runtime, serve, viz, wasm, web, mlpl-session. sw-checklist: 290->296 passed, 132 fails, 472 warnings unchanged. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
