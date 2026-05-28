@@ -43,7 +43,7 @@ pub(crate) fn call_user_fn(
             }
         }
     }
-    let result = eval_body(&f.body, env, trace);
+    let result = eval_body(f.body_exprs(), env, trace);
     for (param, old) in &saved {
         match old {
             Some(v) => env.set(param.clone(), v.clone()),

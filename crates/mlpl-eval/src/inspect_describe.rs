@@ -14,6 +14,9 @@ use mlpl_eval_core::model::ModelSpec;
 use crate::env::Environment;
 
 pub(crate) fn format_describe(env: &Environment, name: &str) -> String {
+    if let Some(desc) = env.describe_fn(name) {
+        return desc;
+    }
     if let Some(tok) = env.tokenizers.get(name) {
         return format!("{name} -- tokenizer\n  {}", tok.describe());
     }

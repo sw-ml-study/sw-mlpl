@@ -233,10 +233,7 @@ pub(crate) fn eval_expr(
     {
         env.define_fn(
             name.clone(),
-            crate::env_user_fns::UserFn {
-                params: params.clone(),
-                body: body.clone(),
-            },
+            crate::env_user_fns::UserFn::new(params.clone(), body.clone()),
         );
         return Ok(Value::Array(DenseArray::from_scalar(0.0)));
     }
