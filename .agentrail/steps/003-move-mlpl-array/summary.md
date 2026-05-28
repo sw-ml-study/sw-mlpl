@@ -1,0 +1,1 @@
+Moved mlpl-array from crates/ to components/lang-core/crates/. Updated 32 dependent Cargo.toml files: 23 in main crates/, 1 in services/, 8 in components/mlpl-session/. mlpl-array's own mlpl-core ref now uses ../mlpl-core (same component). All 4 workspaces compile clean.

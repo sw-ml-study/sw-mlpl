@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 3,
+    "step": "move-mlpl-array"
+  },
+  "action": "git mv, bulk sed across 32 Cargo.toml files using three different path-pattern substitutions, verified all 4 workspaces build.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T20:22:09"
+}
