@@ -1,6 +1,6 @@
 number = 4
 slug = "recursion-scoping-tests"
-status = "pending"
+status = "completed"
 description = """
 Step 004: Recursion + scoping integration tests.
 
@@ -8,5 +8,6 @@ Fibonacci, factorial, mutua..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T16:51:32"
+completed_at = "2026-05-27T17:16:04"
 task_type = "feature"
-commits = []
+commits = ["c4e324740a9568efcab8c236db3c7643c8bb3581"]

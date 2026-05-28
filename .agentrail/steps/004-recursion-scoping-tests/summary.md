@@ -1,0 +1,1 @@
+6 new UDF tests: factorial, return-outside-fn, redefine, nested calls, pi-in-udf, range-in-udf. Total 16 tests, all pass.
