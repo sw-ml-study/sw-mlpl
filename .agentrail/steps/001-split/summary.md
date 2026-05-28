@@ -1,1 +1,0 @@
-Split lang-core into 4 sub-components.

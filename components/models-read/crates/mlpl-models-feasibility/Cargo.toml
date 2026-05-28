@@ -11,5 +11,5 @@ version.workspace = true
 
 [dependencies]
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
-mlpl-env-traits = { path = "../mlpl-env-traits" }
+mlpl-env-traits = { path = "../../../session-infra/crates/mlpl-env-traits" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
