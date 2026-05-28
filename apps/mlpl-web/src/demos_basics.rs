@@ -15,7 +15,7 @@ pub const ANALYSIS_HELPERS: Demo = Demo {
         "loss_curve([5, 3, 2, 1.5, 1.0, 0.7, 0.5, 0.4, 0.3, 0.25])           # training-loss line plot",
         "confusion_matrix([0, 1, 2, 1, 0], [0, 1, 1, 1, 0])                  # KxK predicted-vs-actual heatmap",
         "gx = grid([0, 1, 0, 1], 20)                                         # 20x20 (x, y) input-space grid",
-        "boundary_2d(reshape(iota(400), [400]) / 400, [20, 20], [[0,0],[1,1]], [0, 1])  # synthetic gradient surface as boundary",
+        "boundary_2d(reshape(range(400), [400]) / 400, [20, 20], [[0,0],[1,1]], [0, 1])  # synthetic gradient surface as boundary",
     ],
 };
 
@@ -45,7 +45,7 @@ pub const LOSS_CURVE: Demo = Demo {
     lines: &[
         "x = [0, 1, 2, 3, 4]                                # input x-values",
         "y = [0, 2, 4, 6, 8]                                # target y-values (slope 2)",
-        "ws = iota(25) / 4 - 1                              # 25 candidate weights from -1 to 5",
+        "ws = range(25) / 4 - 1                              # 25 candidate weights from -1 to 5",
         "WS = reshape(ws, [25, 1])                          # column vector of weights",
         "preds = matmul(WS, reshape(x, [1, 5]))             # prediction for each weight x each x-value",
         "YS = matmul(ones([25, 1]), reshape(y, [1, 5]))     # broadcast targets across the 25 weights",
@@ -76,10 +76,10 @@ pub const MATH_FUNCTIONS: Demo = Demo {
 pub const MATRIX_OPS: Demo = Demo {
     category: "Basics",
     name: "Matrix Ops",
-    intro: "Build a 3x4 matrix from iota, transpose it, read its shape and rank, and sum along both axes. The axis argument to reduce_add is how you go from a 2D tensor to a row-sum or column-sum vector.",
+    intro: "Build a 3x4 matrix from range, transpose it, read its shape and rank, and sum along both axes. The axis argument to reduce_add is how you go from a 2D tensor to a row-sum or column-sum vector.",
     takeaway: "reshape moves between flat and multi-dimensional views without copying; transpose swaps axes; reduce_add with an axis drops that axis. This is the APL half of MLPL -- shape is first-class and cheap to manipulate.",
     lines: &[
-        "x = iota(12)                       # flat 0..11 vector",
+        "x = range(12)                       # flat 0..11 vector",
         "m = reshape(x, [3, 4])             # reshape to a 3x4 matrix",
         "m                                  # display the matrix",
         "transpose(m)                       # swap to 4x3",
@@ -99,8 +99,8 @@ pub const WORKSPACE_INTROSPECTION: Demo = Demo {
         ":version                                                            # build banner: version + arch + commit + timestamp",
         ":wsid                                                                # workspace summary (var/param/model counts)",
         "x = 42                                                               # bind a scalar",
-        "v = iota(5)                                                          # bind a 5-vector",
-        "M : [batch, feat] = reshape(iota(6), [2, 3])                         # bind a labeled-axis matrix",
+        "v = range(5)                                                          # bind a 5-vector",
+        "M : [batch, feat] = reshape(range(6), [2, 3])                         # bind a labeled-axis matrix",
         ":vars                                                                # list all bound variables with shape + tag",
         ":describe v                                                          # shape + values preview for a variable",
         "mdl = chain(linear(2, 4, 11), relu_layer(), linear(4, 2, 12))        # bind a model",
@@ -128,7 +128,7 @@ pub const VISUALIZATIONS: Demo = Demo {
         "svg([[0,0],[1,1],[2,4],[3,9],[4,16]], \"scatter\")    # Nx2 -> circle per row",
         "svg([1, 3, 2, 5, 4, 6], \"line\")                      # vector -> polyline",
         "svg([3, 1, 4, 1, 5, 9, 2, 6], \"bar\")                 # vector -> bar chart",
-        "svg(reshape(iota(25), [5, 5]), \"heatmap\")            # MxN -> viridis grid",
+        "svg(reshape(range(25), [5, 5]), \"heatmap\")            # MxN -> viridis grid",
     ],
 };
 

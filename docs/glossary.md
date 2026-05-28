@@ -2063,6 +2063,15 @@ let-bindings (`let {X, Y} = r`), record-update / spread syntax
 (`{..r, X: new_x}`), pattern matching on records. Each is a
 separate follow-up if a use case appears.
 
+## Recursion
+
+A function calling itself. MLPL user-defined functions
+support recursion: `def u:fib(n) { if gt(n, 1) {
+u:fib(n - 1) + u:fib(n - 2) } else { n } }`. The function
+name is bound before the body executes, so self-reference
+works. No tail-call optimization -- deep recursion will
+hit a stack limit.
+
 ## Reconstruction Error
 
 The difference between an [[Autoencoder]]'s input and its
@@ -2253,6 +2262,14 @@ of weights only) and "Self-Attention from Scratch" (full
 pipeline including `weights @ V`). [[Multi-head attention]] runs
 this formula in parallel on `d_k = d_model / heads`-wide
 slabs, then concatenates the per-head outputs.
+
+## Scope (variable)
+
+The region of code where a variable name is visible. MLPL
+uses lexical scoping: a function body can read variables
+from the enclosing scope, but function parameters shadow
+outer variables only during the call and restore after.
+Builtin names are global and cannot be shadowed by `def`.
 
 ## Scaling Laws
 
@@ -2819,6 +2836,16 @@ tensor out with `unwrap(<name>).pixels`. View it with
 `svg(unwrap(<name>).pixels, "gallery")`. The legacy
 "Upload Image" button uses the same pipeline but writes
 to a hardcoded variable named `uploaded`.
+
+## User-Defined Function (UDF)
+
+A function written in MLPL with `def ns:name(params) { body }`.
+Names require a colon namespace prefix: `u:` for end users,
+`vendor:` for packages. Builtin names (no colon) cannot be
+shadowed. The last expression in the body is the return
+value; use `return expr` for early exit. Functions support
+recursion and read (but do not mutate) outer variables.
+MLPL: `def u:double(x) { x * 2 }` then `u:double(21)`.
 
 ## VAE (Variational Autoencoder)
 

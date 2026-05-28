@@ -13,7 +13,7 @@ pub const SIMPLE_CNN: Demo = Demo {
                classifier reads.",
     lines: &[
         "# Synthetic 8x8 grayscale image (batch=1, channels=1)",
-        "img = reshape(iota(64) / 64, [1, 1, 8, 8])",
+        "img = reshape(range(64) / 64, [1, 1, 8, 8])",
         "shape(img)                                                # [1, 1, 8, 8]",
         "# First conv layer: 2 filters of size 3x3",
         "f1 = reshape(randn(42, [18]), [2, 1, 3, 3])",

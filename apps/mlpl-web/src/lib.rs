@@ -36,6 +36,7 @@ pub mod demos_gan;
 pub mod demos_lm;
 pub mod demos_models;
 pub mod demos_rnn;
+pub mod demos_udf;
 pub mod demos_vit;
 pub mod diagrams_view;
 pub mod editor_panel;
