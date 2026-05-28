@@ -71,14 +71,38 @@ These groups have minimal or no dependency on the kitchen-sink type
 and can move out today:
 
 **mlpl-eval:**
-- `image_*` (2 files, 0 Environment refs) -> `components/eval-image/`
-- `fetch_*` (6 files, 1 Environment ref) -> `components/eval-fetch/`
-- `experiment_*` (2 files, 1 ref) -> `components/eval-experiment/`
-- `inspect_*` (5 files, 3 refs) -> `components/eval-inspect/` (some
-  inspect functions need Environment access; lift to extension trait
-  or pass smaller types)
+- `image_*` (2 files, 0 Environment refs, 0 Value refs) -> SHIPPED in saga 71
 
-Drops mlpl-eval from 96 to ~80 modules. Still FAIL but big reduction.
+**Phase 1 candidates that LOOKED clean but aren't:**
+After saga 71 shipped, a survey of the remaining candidate groups
+found that all of them have hidden ties to one of the two kitchen-sink
+types (`Environment` or `Value`):
+
+- `fetch_*` (6 files): returns `Result<Value, EvalError>`. Value is
+  the kitchen sink. Needs `Value` extraction or a per-extraction
+  intermediate type.
+- `experiment_*` (2 files): `ExperimentRecord` is held inside
+  `Environment` itself (`pub(crate) experiment_log: Vec<ExperimentRecord>`).
+  Splitting requires either moving `ExperimentRecord` to a shared
+  types crate or keeping `experiment.rs` with `env.rs`.
+- `inspect_*` (5 files): 24 env method calls. Heavy Environment
+  integration; needs trait inversion.
+- `grad_*` (4 files): 20 env method calls. Same as inspect.
+- `tag_*` (2 files): only 3 env calls (`tags_iter`, `get_tag`), and
+  no Value usage -- looked clean. BUT `tag_propagate.rs` uses
+  `EvalError::TypeMismatch { op, expected, actual, hint }` (a
+  structured variant, not the simple `Unsupported(String)`). Also
+  calls into `crate::auto_tag::for_assign`. So tag extraction needs
+  the structured-error pattern, not the image pattern.
+
+**Singletons surveyed:**
+- `bpe.rs`, `pets_tiny.rs`, `tokenizer.rs`, `llm_dispatch.rs`,
+  `loader.rs`, `interrupt.rs`: all use `Value`. Same blocker.
+
+**Conclusion:** Phase 1 effectively ended with image. Everything else
+requires Phase 1.5 (extract Value + EvalError into a shared types
+crate) before any further extraction can happen without architectural
+gymnastics.
 
 **mlpl-web:**
 - `demos_*` (12) -> `components/web-demos/`
@@ -87,6 +111,43 @@ Drops mlpl-eval from 96 to ~80 modules. Still FAIL but big reduction.
 - `viz3d_*` (3) -> `components/web-viz3d/`
 
 Drops mlpl-web from 75 to ~50 modules. Still FAIL but big reduction.
+
+### Phase 1.5: extract Value + EvalError into a types crate
+
+Before any further Phase 1 extractions can succeed, the kitchen-sink
+types `Value` and `EvalError` need to move into a small shared crate:
+
+```
+components/eval-types/crates/mlpl-eval-types/  (~3 modules)
+- value.rs        (Value enum, Value::Array, Value::Record, etc.)
+- error.rs        (EvalError enum + all variants)
+- tokenizer.rs    (TokenizerSpec, used by Value)
+```
+
+This breaks the cycle: future siblings like `mlpl-eval-fetch`
+depend on `mlpl-eval-types` for Value + EvalError. mlpl-eval also
+depends on mlpl-eval-types and the siblings, but the siblings do
+NOT depend on mlpl-eval -- DAG preserved.
+
+Catches:
+
+- `EvalError` has variants whose payload comes from mlpl-array
+  (`ArrayError`), mlpl-runtime (`RuntimeError`), and downstream
+  models crates. The `From` impls in `error_from_models.rs` and
+  `error_from_tools.rs` reference 8+ external error types. Either:
+  - Keep those `From` impls in mlpl-eval (carry the foreign
+    impl-side) and only move the `EvalError` enum itself to
+    eval-types.
+  - Or move the From impls too, which means eval-types gains 8+
+    cross-component deps.
+- `Value::Record` holds a `BTreeMap<String, Value>` -- recursive.
+  Fine.
+- `Value` has methods like `value_kind()` and `Display` -- need
+  to move with it.
+
+After eval-types lands, the Phase 1 extraction backlog above (fetch,
+experiment, tag, singletons like bpe / pets_tiny / tokenizer-builtins)
+becomes truly mechanical.
 
 ### Phase 2: trait inversion (the hard lift)
 
