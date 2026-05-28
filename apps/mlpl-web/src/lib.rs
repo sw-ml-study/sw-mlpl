@@ -57,7 +57,11 @@ pub mod onboarding_storage;
 pub mod onboarding_tour;
 pub mod onboarding_whats_new;
 pub mod paths;
+mod paths_architectures;
+mod paths_history;
+mod paths_skills;
 pub mod paths_view;
+mod paths_visual;
 mod plotly_panel;
 #[cfg(test)]
 mod readme_counts;
