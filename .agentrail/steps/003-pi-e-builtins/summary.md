@@ -1,0 +1,1 @@
+pi() and e() zero-arg builtins. range(n) as preferred alias for iota(n). All documented in inspect_groups, lang-reference, help.rs. 4 completeness tests + 41 demos pass.
