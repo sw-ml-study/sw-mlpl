@@ -5,6 +5,7 @@
 //! d_model] is looped per batch via `batched_attn_weights`.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_array_ops_compose::prelude::*;
 
 use crate::env::Environment;
 use crate::error::EvalError;

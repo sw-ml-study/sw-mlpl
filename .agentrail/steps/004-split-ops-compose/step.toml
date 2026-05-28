@@ -1,6 +1,6 @@
 number = 4
 slug = "split-ops-compose"
-status = "pending"
+status = "in-progress"
 description = "Extract ops_concat.rs (5 functions: concat, stack, patchify, take, plus inter..."
 role = "production"
 context_files = []
