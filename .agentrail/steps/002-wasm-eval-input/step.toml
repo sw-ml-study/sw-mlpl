@@ -1,0 +1,9 @@
+number = 2
+slug = "wasm-eval-input"
+status = "pending"
+description = "Refactor mlpl-wasm eval_input_with_values (61 lines)."
+role = "production"
+context_files = []
+created_at = "2026-05-28T09:54:08"
+task_type = "refactor"
+commits = []

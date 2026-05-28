@@ -1,0 +1,9 @@
+number = 1
+slug = "web-fails"
+status = "in-progress"
+description = "Refactor mlpl-web's 4 FAILs into helpers, each function <50 LOC."
+role = "production"
+context_files = []
+created_at = "2026-05-28T09:54:08"
+task_type = "refactor"
+commits = []

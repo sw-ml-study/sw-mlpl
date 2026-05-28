@@ -1,1 +1,0 @@
-Saga 71 close.

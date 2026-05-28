@@ -34,77 +34,68 @@ pub struct ModeBarProps {
 
 #[function_component(ModeBar)]
 pub fn mode_bar(props: &ModeBarProps) -> Html {
-    let on_demo = props.on_demo.clone();
-    let on_change = Callback::from(move |e: Event| {
-        let target: HtmlSelectElement = e.target_unchecked_into();
-        let idx = target.value();
-        if let Ok(i) = idx.parse::<usize>() {
-            on_demo.emit(i);
-            target.set_value("");
-        }
-    });
-    let cls = if props.tutorial_active {
-        "modebar tutorial"
-    } else {
-        "modebar repl"
-    };
-    let demo_dropdown = if props.tutorial_active {
-        html! {}
-    } else {
-        let groups = grouped_demos();
-        html! {
-            <select class="demo-select" onchange={on_change} aria-label="Load demo" data-tour-target="demo-select">
-                <option value="" selected=true>{"Load Demo..."}</option>
-                { for groups.iter().map(|(cat, items)| html! {
-                    <optgroup label={*cat}>
-                        { for items.iter().map(|(i, name)| html! {
-                            <option value={i.to_string()}>{ *name }</option>
-                        }) }
-                    </optgroup>
-                }) }
-            </select>
-        }
-    };
-    let clear_label = if props.tutorial_active {
-        "Reset Tutorial"
-    } else {
-        "Reset REPL"
-    };
-    // Saga 29 step 011 follow-up: hidden file input + visible
-    // "Upload Image" button. Step 016: input ref lifted to the
-    // parent so :upload <name> REPL command can click() it,
-    // and the cancel handler binds Err("cancelled") on
-    // dismiss.
-    let upload_widget = if props.tutorial_active {
-        html! {}
-    } else {
-        let input_ref = props.upload_input_ref.clone();
-        let on_click = Callback::from(move |_: MouseEvent| {
-            if let Some(input) = input_ref.cast::<web_sys::HtmlInputElement>() {
-                input.click();
-            }
-        });
-        html! {
-            <>
-                <input
-                    ref={props.upload_input_ref.clone()}
-                    type="file"
-                    accept="image/*"
-                    style="display: none"
-                    onchange={props.on_upload.clone()}
-                    oncancel={props.on_upload_cancel.clone()}
-                />
-                <button class="ctrl-btn" onclick={on_click} title="Upload a photo (resized to 64x64). Binds `uploaded = Ok({pixels, h, w})` on success, `Err(\"cancelled\")` on dismiss.">
-                    {"Upload Image"}
-                </button>
-            </>
-        }
-    };
+    let cls = if props.tutorial_active { "modebar tutorial" } else { "modebar repl" };
+    let demo_dropdown = render_demo_dropdown(props.tutorial_active, props.on_demo.clone());
+    let upload_widget = render_upload_widget(props);
+    let clear_label = if props.tutorial_active { "Reset Tutorial" } else { "Reset REPL" };
     html! {
         <div class={cls}>
             { demo_dropdown }
             { upload_widget }
             <button class="ctrl-btn" onclick={props.on_clear.clone()}>{ clear_label }</button>
         </div>
+    }
+}
+
+fn render_demo_dropdown(tutorial_active: bool, on_demo: Callback<usize>) -> Html {
+    if tutorial_active {
+        return html! {};
+    }
+    let on_change = Callback::from(move |e: Event| {
+        let target: HtmlSelectElement = e.target_unchecked_into();
+        if let Ok(i) = target.value().parse::<usize>() {
+            on_demo.emit(i);
+            target.set_value("");
+        }
+    });
+    let groups = grouped_demos();
+    html! {
+        <select class="demo-select" onchange={on_change} aria-label="Load demo" data-tour-target="demo-select">
+            <option value="" selected=true>{"Load Demo..."}</option>
+            { for groups.iter().map(|(cat, items)| html! {
+                <optgroup label={*cat}>
+                    { for items.iter().map(|(i, name)| html! {
+                        <option value={i.to_string()}>{ *name }</option>
+                    }) }
+                </optgroup>
+            }) }
+        </select>
+    }
+}
+
+fn render_upload_widget(props: &ModeBarProps) -> Html {
+    if props.tutorial_active {
+        return html! {};
+    }
+    let input_ref = props.upload_input_ref.clone();
+    let on_click = Callback::from(move |_: MouseEvent| {
+        if let Some(input) = input_ref.cast::<web_sys::HtmlInputElement>() {
+            input.click();
+        }
+    });
+    html! {
+        <>
+            <input
+                ref={props.upload_input_ref.clone()}
+                type="file"
+                accept="image/*"
+                style="display: none"
+                onchange={props.on_upload.clone()}
+                oncancel={props.on_upload_cancel.clone()}
+            />
+            <button class="ctrl-btn" onclick={on_click} title="Upload a photo (resized to 64x64). Binds `uploaded = Ok({pixels, h, w})` on success, `Err(\"cancelled\")` on dismiss.">
+                {"Upload Image"}
+            </button>
+        </>
     }
 }

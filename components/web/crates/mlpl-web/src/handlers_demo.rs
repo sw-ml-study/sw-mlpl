@@ -5,7 +5,7 @@ use mlpl_wasm::WasmSession;
 use yew::prelude::*;
 
 use crate::demos::DEMOS;
-use crate::handlers_submit::{push_running_marker, replace_running_with_result};
+use crate::handlers_running::{push_running_marker, replace_running_with_result};
 use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
 pub fn make_run_demo(
