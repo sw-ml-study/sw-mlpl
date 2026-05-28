@@ -1,133 +1,66 @@
-# User-Defined Functions + Control Flow
+# REPL to Script Learning Path
 
-Proposed milestone (saga 46).
+Proposed milestone (saga TBD, after UDF saga).
 
-## What exists today
+## Why this exists
 
-MLPL has these control-flow constructs (all added by saga 31):
+MLPL has two execution modes: interactive REPL and script
+files (.mlpl via `mlpl-repl -f file.mlpl`). The web
+playground adds a third: the Editor tab with Run/Load/Save.
+But there is no guided walk that teaches a learner to
+graduate from one-line REPL exploration to multi-line
+scripts to saved .mlpl files.
 
-- `if cond { then } else { else_ }` -- conditional expression
-- `while cond { body }` -- conditional loop
-- `break` -- exit a while loop early
-- `repeat N { body }` -- counted loop
-- `train N { body }` -- counted loop with loss tracking + adam
-- `for x in expr { body }` -- iteration over arrays
+## Goals
 
-MLPL has NO user-defined functions. All callable names are
-builtins hardcoded in Rust (`match name { ... }` in
-`builtins.rs` and `eval_fncalls.rs`).
+- **Progression.** REPL exploration -> multi-line editor ->
+  .mlpl file -> script with arguments.
+- **Practical.** Each step produces something the learner
+  keeps -- a saved script, a workflow, a habit.
+- **Connects to UDFs.** Once `def u:name(args) { body }`
+  lands (saga 46), scripts become reusable libraries.
 
-## What this saga adds
+## Learning path steps (proposed)
 
-### 1. User-defined functions (`def`)
+1. **Note: "From exploration to automation"** -- framing.
+   The REPL is for exploring; scripts are for repeating.
 
-```
-def u:circle_area(r) {
-    pi() * r * r
-}
-u:circle_area(5)
-```
+2. **Lesson: "REPL basics"** -- existing "Hello Numbers"
+   and "Variables" lessons. Variables persist across lines;
+   `:vars` shows what is bound; `:clear` resets.
 
-Key design decisions:
+3. **Lesson: "Multi-line in the editor"** -- the Editor tab.
+   Type multiple lines, Ctrl+Enter to run. Output appears
+   in the REPL pane. Copy/paste between REPL and editor.
 
-- **Namespace**: colon separator. `u:name` for end users,
-  `vendor:name` for add-on packages. Names without `:` are
-  reserved for builtins. Parser enforces this: `def area(r)`
-  is rejected because `area` has no namespace prefix.
+4. **Note: "Saving your work"** -- Save button downloads
+   a .mlpl file. Load button reads one back. The browser
+   does not persist state -- save early, save often.
 
-- **Syntax**: `def prefix:name(arg1, arg2, ...) { body }`.
-  Body is a sequence of expressions; the last expression's
-  value is the return value.
+5. **Demo: "Script workflow"** -- a short .mlpl script
+   that loads data, trains a model, and prints results.
+   Shows the pattern: setup, train, evaluate, report.
 
-- **Scoping**: lexical. Parameters are local to the function
-  body. The function can read (but not write) variables from
-  the enclosing scope (closure over the environment at
-  definition time).
+6. **Lesson: "Running scripts from the terminal"** --
+   `mlpl-repl -f my_script.mlpl`. Stdin piping splits
+   `repeat {}` blocks (known limitation); always use `-f`.
 
-- **Recursion**: allowed. The function name is bound before
-  the body executes, so `def u:fib(n) { if gt(n, 1) { ... }
-  else { n } }` works.
+7. **Note: "Script arguments"** -- `args()` and
+   `list_get(args(), 0)` for parameterized scripts.
+   `mlpl-repl -f script.mlpl -- arg1 arg2`.
 
-- **No overloading**: one definition per name. Re-defining
-  overwrites silently (like variable assignment).
-
-- **No variadic args**: fixed arity, checked at call site.
-
-### 2. `return` (optional, for early exit)
-
-```
-def u:safe_div(a, b) {
-    if eq(b, 0) { return 0 }
-    a / b
-}
-```
-
-Without `return`, the last expression is the return value
-(like Rust). `return expr` exits early with `expr`.
-
-### 3. `pi()` and `e()` zero-arg builtins
-
-Trivial additions. `pi()` returns 3.14159265358979...,
-`e()` returns 2.71828182845904.... Both are reserved
-builtin names (no `:` prefix).
-
-### 4. `match` / pattern dispatch (stretch goal)
-
-```
-match shape(x) {
-    [1] => "scalar"
-    [n] => "vector of " + str(n)
-    [r, c] => "matrix"
-    _ => "higher rank"
-}
-```
-
-This is a stretch goal. If it complicates the parser
-significantly, defer to a later saga. The `if/else` chain
-covers all cases, just less elegantly.
-
-## What this saga does NOT add
-
-- **Closures as values** (passing functions as arguments).
-  Requires a `Value::Function` variant and higher-order
-  dispatch. Deferred.
-- **`do-while`**. `while` + initial setup covers all cases.
-- **`select`/`case`**. `match` is the modern version.
-- **Type annotations**. MLPL is dynamically typed.
-- **Modules / imports**. The `vendor:` prefix is the
-  namespace mechanism; actual module loading is deferred.
-
-## Suggested steps
-
-1. **Parser: `def` + `return`**. Add `Expr::FnDef` and
-   `Expr::Return` AST nodes. Parse `def prefix:name(args)
-   { body }`. Reject names without `:` prefix. TDD.
-
-2. **Eval: function storage + call dispatch**. Store
-   defined functions in `Environment`. On call, create a
-   child scope with args bound, evaluate the body, return
-   the last value. Handle `return` as a control-flow
-   signal (like `break`). TDD.
-
-3. **`pi()` and `e()` builtins**. Trivial zero-arg math
-   constants. Add to math_builtins.rs NAMES, try_call,
-   inspect_groups, lang-reference, help.rs. TDD.
-
-4. **Recursion + scoping tests**. Fibonacci, factorial,
-   mutual recursion (if two `def`s reference each other).
-   Verify lexical scoping: inner function reads outer vars
-   but does not mutate them.
-
-5. **Demo + glossary + path entry + saga close**. A demo
-   showing UDF definition and use. Glossary entries for
-   Function, Scope, Recursion. Update help text.
-
-## Quality requirements
-
-Same as all sagas. TDD. sw-checklist budgets. Every commit
-reduces warnings.
+8. **Note: "Toward functions"** -- teaser for UDFs.
+   Once `def u:name(args) { body }` lands, scripts
+   become reusable libraries. The `u:` namespace keeps
+   user functions separate from builtins.
 
 ## Dependencies
 
-None. All prerequisite control flow (`if/else`, `while`,
-`for`, `break`) already exists.
+- Saga 46 (UDFs) should land first so step 8 has
+  runnable content instead of a "coming soon" note.
+- Editor tab (saga 36) already exists.
+- Script mode (mlpl-repl -f) already exists.
+
+## Quality requirements
+
+Same as all sagas. Pure content -- no new builtins needed.
