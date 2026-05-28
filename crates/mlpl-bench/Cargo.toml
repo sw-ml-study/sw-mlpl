@@ -16,7 +16,7 @@ default = []
 mlx = ["mlpl-eval/mlx"]
 
 [dependencies]
-mlpl-rt = { path = "../mlpl-rt" }
+mlpl-rt = { path = "../../components/native-rt/crates/mlpl-rt" }
 
 [dev-dependencies]
 criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }

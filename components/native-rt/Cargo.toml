@@ -1,0 +1,17 @@
+# Saga 57: components/native-rt/ nested workspace.
+# Native (non-WASM) execution backends: mlpl-rt, mlpl-mlx-rt.
+
+[workspace]
+members = [
+    "crates/mlpl-mlx-rt",
+    "crates/mlpl-rt",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
