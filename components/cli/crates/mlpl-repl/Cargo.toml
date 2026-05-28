@@ -41,7 +41,7 @@ ctrlc = "3"
 [dev-dependencies]
 # Spin up `mlpl-serve` in-process for `--connect`
 # integration tests on a random localhost port.
-mlpl-serve = { path = "../../crates/mlpl-serve" }
+mlpl-serve = { path = "../../../serve/crates/mlpl-serve" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 axum = "0.7"
 # Saga 21.5 step 009: MLPL_REPL_SESSION_FILE persistence

@@ -14,7 +14,7 @@ use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
-const GLOSSARY_MD: &str = include_str!("../../../docs/glossary.md");
+const GLOSSARY_MD: &str = include_str!("../../../../../docs/glossary.md");
 
 pub struct GlossaryEntry {
     pub term: String,

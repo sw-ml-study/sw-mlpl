@@ -7,3 +7,8 @@ license = "MIT OR Apache-2.0"
 version = "0.20.0"
 [workspace.lints.clippy]
 pedantic = "warn"
+
+# Saga 64: each top-level workspace that transitively uses mlx-rs
+# carries its own patch since Cargo evaluates patches per-workspace.
+[patch.crates-io]
+mlx-rs = { path = "../../vendor/mlx-rs" }

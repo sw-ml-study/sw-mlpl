@@ -1,21 +1,5 @@
-# Saga R1 step 003: mlpl-mlx-serve moved out of the
-# main `crates/` workspace into its own `services/`
-# workspace so its target/ tree is separate. The
-# main workspace no longer compiles axum + tokio +
-# reqwest + bincode + base64 for mlpl-mlx-serve's
-# sake -- a measurable disk-pressure win on the
-# constrained Mac dev host. Path deps reach back
-# into the main workspace via `../../crates/...`;
-# cross-workspace path deps work and build into the
-# consumer's target.
-[workspace]
-members = ["."]
-resolver = "2"
-
-[workspace.package]
-edition = "2024"
-license = "MIT OR Apache-2.0"
-version = "0.20.0"
+# Saga 63: mlpl-mlx-serve moved into components/serve/ alongside
+# mlpl-serve. Now a sibling member of the serve component workspace.
 
 [package]
 name = "mlpl-mlx-serve"

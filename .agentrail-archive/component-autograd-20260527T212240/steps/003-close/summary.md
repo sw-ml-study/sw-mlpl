@@ -1,0 +1,1 @@
+Saga 56 close. Moved autograd + trace into components/autograd/. sw-checklist: 288 passed, 132 fails, 472 warnings (all unchanged; structural). autograd FAIL decomposition deferred to future saga.

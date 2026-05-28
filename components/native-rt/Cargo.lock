@@ -373,8 +373,6 @@ dependencies = [
 [[package]]
 name = "mlx-rs"
 version = "0.25.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3a0f592c5839b0237b3072530b1d3c503923579a2009ee0761df3edd1b1f27b"
 dependencies = [
  "dyn-clone",
  "half",

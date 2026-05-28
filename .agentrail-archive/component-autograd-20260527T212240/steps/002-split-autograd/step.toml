@@ -1,0 +1,10 @@
+number = 2
+slug = "split-autograd"
+status = "completed"
+description = "Decompose mlpl-autograd's two FAIL modules (reduction_ops 11 fns, backward 11..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:19:14"
+completed_at = "2026-05-27T21:21:10"
+task_type = "refactor"
+commits = ["48d626dcc8af12f5fe9cbfe02bef0cc3cdf42fad"]

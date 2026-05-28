@@ -17,6 +17,7 @@ members = [
     "crates/mlpl-runtime-math",
     "crates/mlpl-runtime-mds-rp",
     "crates/mlpl-runtime-ml",
+    "crates/mlpl-ml",
     "crates/mlpl-runtime-rnn",
     "crates/mlpl-runtime-umap",
 ]

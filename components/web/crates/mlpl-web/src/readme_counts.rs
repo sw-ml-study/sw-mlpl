@@ -21,8 +21,8 @@
 use crate::demos::DEMOS;
 use mlpl_web_lessons::lessons::LESSONS;
 
-const README: &str = include_str!("../../../README.md");
-const GLOSSARY: &str = include_str!("../../../docs/glossary.md");
+const README: &str = include_str!("../../../../../README.md");
+const GLOSSARY: &str = include_str!("../../../../../docs/glossary.md");
 
 fn glossary_entries() -> usize {
     GLOSSARY.lines().filter(|l| l.starts_with("## ")).count()

@@ -1,0 +1,1 @@
+After bulk-move, check sw-checklist for crowded crates in components/runtime/. Likely candidates: mlpl-runtime-dim-reduction (7 modules), mlpl-runtime-umap (5 modules), mlpl-runtime-data (6 modules). If any are at or near limit, split into siblings within the runtime component.

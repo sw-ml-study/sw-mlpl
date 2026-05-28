@@ -1,0 +1,1 @@
+Moved mlpl-cli + mlpl + mlpl-repl + mlpl-build + mlpl-lab into components/cli/. apps/ now empty.
