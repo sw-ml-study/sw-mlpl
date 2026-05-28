@@ -1,1 +1,0 @@
-FINAL --done: sw-checklist delta + language-status update.

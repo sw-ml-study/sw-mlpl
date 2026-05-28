@@ -46,73 +46,103 @@ fn propagate(tape: &Tape, id: NodeId) {
         };
         (node.kind.clone(), upstream)
     };
-
     match kind {
         NodeKind::Leaf => {}
         NodeKind::Unary { op, parent } => prop_unary(tape, id, parent, op, &upstream),
         NodeKind::Binary { op, left, right } => prop_binary(tape, left, right, op, &upstream),
         NodeKind::SumAll { parent } => prop_sum_mean(tape, parent, &upstream, false),
         NodeKind::MeanAll { parent } => prop_sum_mean(tape, parent, &upstream, true),
-        NodeKind::Softmax { parent, axis } => {
-            let y = tape.nodes()[id.0].value.clone();
-            let grad = softmax_backward(&y, &upstream, axis);
-            accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
-        }
-        NodeKind::Transpose { parent } => {
-            let grad = upstream.transpose();
-            accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
-        }
-        NodeKind::Reshape { parent, orig_shape } => {
-            let grad = upstream.reshape(orig_shape).expect("reshape back");
-            accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
-        }
+        NodeKind::Softmax { parent, axis } => prop_softmax(tape, id, parent, axis, &upstream),
+        NodeKind::Transpose { parent } => prop_transpose(tape, parent, &upstream),
+        NodeKind::Reshape { parent, orig_shape } => prop_reshape(tape, parent, &orig_shape, &upstream),
         NodeKind::MatMul { left, right } => prop_matmul(tape, left, right, &upstream),
-        NodeKind::CrossEntropy { logits, targets } => {
-            let logits_val = tape.nodes()[logits.0].value.clone();
-            let g = upstream.data()[0];
-            let grad = crate::tensor_ops::cross_entropy_backward(&logits_val, &targets, g);
-            accumulate(&mut tape.nodes_mut()[logits.0].grad, grad);
+        NodeKind::CrossEntropy { logits, targets } => prop_cross_entropy(tape, logits, &targets, &upstream),
+        NodeKind::Patchify { parent, orig_shape, patch_size } => {
+            prop_patchify(tape, parent, &orig_shape, patch_size, &upstream)
         }
-        NodeKind::Patchify {
-            parent,
-            orig_shape,
-            patch_size,
-        } => {
-            let g = patchify_backward(&upstream, &orig_shape, patch_size);
-            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
+        NodeKind::Concat { left, right, axis, left_size } => {
+            prop_concat(tape, left, right, axis, left_size, &upstream)
         }
-        NodeKind::Concat {
-            left,
-            right,
-            axis,
-            left_size,
-        } => {
-            let (ga, gb) = concat_backward(&upstream, axis, left_size);
-            let mut nodes = tape.nodes_mut();
-            accumulate(&mut nodes[left.0].grad, ga);
-            accumulate(&mut nodes[right.0].grad, gb);
+        NodeKind::Stack { parents, axis, parent_size_along_axis } => {
+            prop_stack(tape, &parents, axis, parent_size_along_axis, &upstream)
         }
-        NodeKind::Stack {
-            parents,
-            axis,
-            parent_size_along_axis,
-        } => {
-            let grads = stack_backward(&upstream, parents.len(), axis, parent_size_along_axis);
-            let mut nodes = tape.nodes_mut();
-            for (pid, g) in parents.iter().zip(grads) {
-                accumulate(&mut nodes[pid.0].grad, g);
-            }
-        }
-        NodeKind::Take {
-            parent,
-            orig_shape,
-            axis,
-            idx,
-        } => {
-            let g = take_backward(&upstream, &orig_shape, axis, idx);
-            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
+        NodeKind::Take { parent, orig_shape, axis, idx } => {
+            prop_take(tape, parent, &orig_shape, axis, idx, &upstream)
         }
     }
+}
+
+fn prop_softmax(tape: &Tape, id: NodeId, parent: NodeId, axis: usize, upstream: &DenseArray) {
+    let y = tape.nodes()[id.0].value.clone();
+    let grad = softmax_backward(&y, upstream, axis);
+    accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
+}
+
+fn prop_transpose(tape: &Tape, parent: NodeId, upstream: &DenseArray) {
+    accumulate(&mut tape.nodes_mut()[parent.0].grad, upstream.transpose());
+}
+
+fn prop_reshape(tape: &Tape, parent: NodeId, orig_shape: &Shape, upstream: &DenseArray) {
+    let grad = upstream.reshape(orig_shape.clone()).expect("reshape back");
+    accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
+}
+
+fn prop_cross_entropy(tape: &Tape, logits: NodeId, targets: &[usize], upstream: &DenseArray) {
+    let logits_val = tape.nodes()[logits.0].value.clone();
+    let g = upstream.data()[0];
+    let grad = crate::tensor_ops::cross_entropy_backward(&logits_val, targets, g);
+    accumulate(&mut tape.nodes_mut()[logits.0].grad, grad);
+}
+
+fn prop_patchify(
+    tape: &Tape,
+    parent: NodeId,
+    orig_shape: &Shape,
+    patch_size: usize,
+    upstream: &DenseArray,
+) {
+    let g = patchify_backward(upstream, orig_shape, patch_size);
+    accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
+}
+
+fn prop_concat(
+    tape: &Tape,
+    left: NodeId,
+    right: NodeId,
+    axis: usize,
+    left_size: usize,
+    upstream: &DenseArray,
+) {
+    let (ga, gb) = concat_backward(upstream, axis, left_size);
+    let mut nodes = tape.nodes_mut();
+    accumulate(&mut nodes[left.0].grad, ga);
+    accumulate(&mut nodes[right.0].grad, gb);
+}
+
+fn prop_stack(
+    tape: &Tape,
+    parents: &[NodeId],
+    axis: usize,
+    parent_size: usize,
+    upstream: &DenseArray,
+) {
+    let grads = stack_backward(upstream, parents.len(), axis, parent_size);
+    let mut nodes = tape.nodes_mut();
+    for (pid, g) in parents.iter().zip(grads) {
+        accumulate(&mut nodes[pid.0].grad, g);
+    }
+}
+
+fn prop_take(
+    tape: &Tape,
+    parent: NodeId,
+    orig_shape: &Shape,
+    axis: usize,
+    idx: usize,
+    upstream: &DenseArray,
+) {
+    let g = take_backward(upstream, orig_shape, axis, idx);
+    accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
 }
 
 fn take_backward(upstream: &DenseArray, orig_shape: &Shape, axis: usize, idx: usize) -> DenseArray {
