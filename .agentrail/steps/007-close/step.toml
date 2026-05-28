@@ -1,9 +1,0 @@
-number = 7
-slug = "close"
-status = "pending"
-description = "FINAL --done: sw-checklist delta + language-status update."
-role = "production"
-context_files = []
-created_at = "2026-05-27T21:47:39"
-task_type = "docs"
-commits = []
