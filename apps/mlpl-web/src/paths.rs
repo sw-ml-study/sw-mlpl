@@ -682,6 +682,100 @@ pub const PATHS: &[LearningPath] = &[
         ],
     },
     LearningPath {
+        title: "Training Paradigms",
+        blurb: "How do models learn? Four paradigms, each exploiting a different kind of signal: labeled data (supervised), structure in unlabeled data (unsupervised), self-generated labels (self-supervised), and reward from an environment (reinforcement). This path walks them in historical order with runnable demos where MLPL has the primitives.",
+        steps: &[
+            Step::Note {
+                title: "What is a training paradigm?",
+                body: "A training paradigm is the answer to 'where does the learning signal come from?' Supervised learning has a teacher (labeled data). Unsupervised learning has no teacher (find structure). Self-supervised learning manufactures its own labels from the data. Reinforcement learning has a reward signal from an environment. Each paradigm suits different problems.",
+            },
+            // --- Group 1: Supervised ---
+            Step::Note {
+                title: "Group 1: Supervised learning",
+                body: "The classic: given input X and label y, minimize the loss between the model's prediction and the true label. Gradient descent on a differentiable loss function. Every classification and regression demo in MLPL uses supervised learning. The paradigm that powered ML from the 1950s through the 2010s.",
+            },
+            Step::Glossary {
+                term: "Supervised learning",
+                why: "The paradigm: labeled data + loss function + gradient descent.",
+            },
+            Step::Lesson {
+                title: "Machine Learning: Logistic Regression",
+                why: "The hello-world: fit weights to labeled data with hand-rolled gradient descent.",
+            },
+            Step::Demo {
+                name: "Moons MLP",
+                why: "A 2-layer MLP trained with adam + cross-entropy on the two-moons dataset. The canonical supervised pipeline.",
+            },
+            Step::Glossary {
+                term: "Cross entropy",
+                why: "The standard classification loss: -sum(y * log(pred)). Differentiable end-to-end through grad.",
+            },
+            Step::Glossary {
+                term: "Adam",
+                why: "The default optimizer: per-parameter adaptive learning rates with momentum.",
+            },
+            // --- Group 2: Unsupervised ---
+            Step::Note {
+                title: "Group 2: Unsupervised learning",
+                body: "No labels at all. The model discovers structure in the data: clusters (K-Means), principal axes (PCA), local neighborhoods (t-SNE, UMAP). The loss is internal -- distance to centroids, variance explained, KL divergence. Unsupervised methods are often used as preprocessing (dimensionality reduction before classification) or exploration (what groups exist in my data?).",
+            },
+            Step::Glossary {
+                term: "Unsupervised learning",
+                why: "The paradigm: no labels, learn structure from data geometry.",
+            },
+            Step::Lesson {
+                title: "Unsupervised: K-Means",
+                why: "Assign points to K clusters, move centers to cluster means, repeat. The simplest unsupervised algorithm.",
+            },
+            Step::Lesson {
+                title: "Dimensionality Reduction: PCA",
+                why: "Find the axes of maximum variance. Unsupervised: no labels, just geometry.",
+            },
+            Step::Demo {
+                name: "Dim-reduction zoo",
+                why: "Five unsupervised projections side-by-side: PCA, t-SNE, UMAP, MDS, random projection.",
+            },
+            // --- Group 3: Self-supervised ---
+            Step::Note {
+                title: "Group 3: Self-supervised learning",
+                body: "Manufacture labels from the data itself. Mask a word and predict it (BERT). Predict the next token (GPT). Crop an image patch and predict its embedding (JEPA). The key insight: you can create billions of labeled examples for free from unlabeled data. This paradigm powers all modern foundation models -- they pre-train self-supervised, then fine-tune supervised.",
+            },
+            Step::Glossary {
+                term: "Self-supervised learning",
+                why: "The paradigm: labels come from the data itself (masked prediction, next-token, contrastive pairs).",
+            },
+            Step::Demo {
+                name: "Tiny LM Generate",
+                why: "Next-token prediction: the model predicts each token given the previous ones. The labels are the text itself, shifted by one position.",
+            },
+            Step::Lesson {
+                title: "Self-Attention from Scratch",
+                why: "Attention is the mechanism that makes self-supervised pre-training scale. Every position attends to every other position in parallel.",
+            },
+            Step::Glossary {
+                term: "BERT",
+                why: "Masked language modeling: mask 15% of tokens, predict them from context. The encoder-side self-supervised paradigm.",
+            },
+            // --- Group 4: Reinforcement ---
+            Step::Note {
+                title: "Group 4: Reinforcement learning",
+                body: "An agent takes actions in an environment and receives rewards. The learning signal is sparse and delayed -- the agent must explore to discover which actions lead to high reward. No labeled examples at all; the agent generates its own training data by interacting with the environment. RLHF applies this to LLMs: the 'environment' is human preference judgments.",
+            },
+            Step::Glossary {
+                term: "RLHF (Reinforcement Learning from Human Feedback)",
+                why: "The paradigm applied to LLM alignment: SFT -> reward model -> PPO. Human preferences replace environment rewards.",
+            },
+            Step::Glossary {
+                term: "Reward Hacking",
+                why: "The dark side of RL: the agent optimizes the reward signal rather than the intended behavior. Goodhart's Law in action.",
+            },
+            Step::Note {
+                title: "The paradigm spectrum",
+                body: "These paradigms are not mutually exclusive. Modern training often combines them: pre-train self-supervised (GPT-style next-token), fine-tune supervised (SFT on instruction data), then align with RL (RLHF/DPO on human preferences). The paradigm tells you where the gradient comes from at each stage.",
+            },
+        ],
+    },
+    LearningPath {
         title: "Vision Transformers in MLPL",
         blurb: "From a synthetic image to a trained multi-head cat-vs-dog classifier with per-head attention visualization, ending with uploading a photo from your phone for the trained model to classify. The same attention machinery from the transformer demos, applied to image patches. Alternates diagrams, glossary, and demos; assumes you have already seen scaled-dot-product attention.",
         steps: &[
