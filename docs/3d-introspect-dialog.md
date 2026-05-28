@@ -149,20 +149,22 @@ browser; may need a "compute..." spinner).
 - No dependence on the god-crate-decomposition sagas -- this is
   pure mlpl-web work.
 
-## Open questions
+## Resolved scoping decisions
 
-1. Should the dialog persist its DR selection across
-   open/close cycles? (Convenience vs. UX consistency.)
-2. For composites, do we descend into nested chains (chain of
-   chains) recursively, or only one level?
-3. What happens for VERY large tensors (e.g. 64x64 images x 1000
-   batch = 4M floats)? Render a sample, render lazily, or refuse
-   with a hint?
-4. Mobile / touch -- does the modal work on phone-sized
-   viewports? (Probably degrade gracefully to a list view.)
+1. **DR persistence across open/close cycles?** No -- recompute on
+   re-open if the user re-selects. Keeps state simple.
+2. **Composite descent depth?** One level only for v1. Don't recurse
+   into chains-of-chains.
+3. **Very large tensors?** Don't render the whole thing. Show the
+   shape + size up front, then offer to visualize a SAMPLE the user
+   chooses (e.g., first N elements, a randomly sampled subset, a
+   single image from a batch) -- whatever reduces to a UI-responsive
+   render. The dialog asks rather than guessing.
+4. **Mobile / touch?** Desktop / tablet web first. Mobile drill-down
+   may be hard; degrade gracefully -- ideally show the stats + raw-
+   values cards but skip the interactive 3D close-up.
 
 ## Status
 
-**Proposed, not scheduled.** This doc captures the design before
-any code lands. Convert to a saga via `agentrail init` when
-prioritized.
+**Proposed, scope decisions resolved.** Ready to convert to a
+saga via `agentrail init` when prioritized.
