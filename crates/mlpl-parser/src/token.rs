@@ -86,6 +86,10 @@ pub enum TokenKind {
     /// `continue` keyword (Saga 31 step 005). Skips the rest of
     /// the current `while` iteration; cond is re-checked.
     Continue,
+    /// `def` keyword (Saga 46). Introduces a user-defined function.
+    Def,
+    /// `return` keyword (Saga 46). Early exit from a UDF body.
+    Return,
     /// Newline (statement separator).
     Newline,
     /// End of input.

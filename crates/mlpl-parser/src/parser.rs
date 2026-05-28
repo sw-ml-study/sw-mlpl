@@ -30,7 +30,7 @@ pub(crate) struct Parser<'a> {
 /// keyword-headed expr like `if`) returns true; statement
 /// terminators (`;`, newline, `}`, `)`, EOF, comma) and trailing
 /// keywords (`else`) return false.
-fn can_start_expr(kind: Option<&TokenKind>) -> bool {
+pub(crate) fn can_start_expr(kind: Option<&TokenKind>) -> bool {
     !matches!(
         kind,
         None | Some(
@@ -49,6 +49,12 @@ fn can_start_expr(kind: Option<&TokenKind>) -> bool {
 impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
     pub(crate) fn parse_statement(&mut self) -> Result<Expr, ParseError> {
+        if self.tokens[self.pos].kind == TokenKind::Def {
+            return self.parse_def();
+        }
+        if self.tokens[self.pos].kind == TokenKind::Return {
+            return self.parse_return();
+        }
         if self.tokens[self.pos].kind == TokenKind::Repeat {
             return self.parse_repeat(false);
         }

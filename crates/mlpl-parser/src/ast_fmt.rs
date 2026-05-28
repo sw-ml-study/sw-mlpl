@@ -101,6 +101,21 @@ impl fmt::Display for Expr {
             Self::Break { value: None, .. } => write!(f, "break"),
             Self::Break { value: Some(v), .. } => write!(f, "break {v}"),
             Self::Continue { .. } => write!(f, "continue"),
+            Self::FnDef {
+                name, params, body, ..
+            } => {
+                write!(f, "def {name}(")?;
+                for (i, p) in params.iter().enumerate() {
+                    if i > 0 {
+                        write!(f, ", ")?;
+                    }
+                    write!(f, "{p}")?;
+                }
+                write!(f, ")")?;
+                fmt_scope(f, &"", body)
+            }
+            Self::Return { value: None, .. } => write!(f, "return"),
+            Self::Return { value: Some(v), .. } => write!(f, "return {v}"),
         }
     }
 }

@@ -133,6 +133,72 @@ impl Parser<'_> {
         })
     }
 
+    /// Parse `def ns:name(p1, p2) { body }`. Name must have a
+    /// colon namespace prefix (Ident + BuiltinRef pair).
+    pub(crate) fn parse_def(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1; // skip 'def'
+        let tok = &self.tokens[self.pos];
+        let TokenKind::Ident(ns) = &tok.kind else {
+            return Err(ParseError::UnexpectedToken {
+                found: describe_kind(&tok.kind),
+                span: tok.span,
+            });
+        };
+        let ns = ns.clone();
+        self.pos += 1;
+        let tok = &self.tokens[self.pos];
+        let TokenKind::BuiltinRef(local) = &tok.kind else {
+            return Err(ParseError::UnexpectedToken {
+                found: "def requires a namespaced name (e.g. u:myFunc)".into(),
+                span: tok.span,
+            });
+        };
+        let name = format!("{ns}:{local}");
+        self.pos += 1;
+        self.expect(&TokenKind::LParen)?;
+        let mut params = Vec::new();
+        while !self.is(TokenKind::RParen) {
+            let tok = &self.tokens[self.pos];
+            let TokenKind::Ident(p) = &tok.kind else {
+                return Err(ParseError::UnexpectedToken {
+                    found: describe_kind(&tok.kind),
+                    span: tok.span,
+                });
+            };
+            params.push(p.clone());
+            self.pos += 1;
+            if self.is(TokenKind::Comma) {
+                self.pos += 1;
+            }
+        }
+        self.expect(&TokenKind::RParen)?;
+        let (body, end) = self.parse_braced_body()?;
+        Ok(Expr::FnDef {
+            name,
+            params,
+            body,
+            span: Span::new(start.start, end.end),
+        })
+    }
+
+    /// Parse `return` or `return expr`.
+    pub(crate) fn parse_return(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1;
+        let value = if crate::parser::can_start_expr(self.tokens.get(self.pos).map(|t| &t.kind)) {
+            let v = self.parse_expr(0)?;
+            Some(Box::new(v))
+        } else {
+            None
+        };
+        let end = value.as_ref().map_or(start, |v| v.span());
+        Ok(Expr::Return {
+            value,
+            span: Span::new(start.start, end.end),
+        })
+    }
+
     /// Consume `{ stmt? (sep stmt)* }` and return the parsed body
     /// plus the closing brace's span. Shared by `parse_repeat`
     /// (which also handles `train`) and `parse_for`.
