@@ -1,0 +1,1 @@
+Scaffold components/lang-syntax/ workspace.
