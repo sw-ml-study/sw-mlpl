@@ -1,13 +1,12 @@
 number = 1
 slug = "path-definition"
-status = "completed"
+status = "pending"
 description = """
-Step 001: REPL to Script learning path.
+Step 001: Training Paradigms learning path.
 
-Create the path in paths.rs covering..."""
+Create the path in paths.rs with..."""
 role = "production"
 context_files = []
-created_at = "2026-05-27T17:29:08"
-completed_at = "2026-05-27T17:30:57"
+created_at = "2026-05-27T18:03:10"
 task_type = "feature"
-commits = ["2130b3f9a357cf8843e6d33abc5ca9cec1f1dea1"]
+commits = []
