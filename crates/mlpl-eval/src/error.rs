@@ -164,6 +164,8 @@ pub enum EvalError {
     BreakSignal(Box<crate::value::Value>),
     /// Saga 31 step 005: internal `continue` signal.
     ContinueSignal,
+    /// Saga 46: internal `return` signal from a UDF body.
+    ReturnSignal(Box<crate::value::Value>),
     /// Saga 31 step 005: `break` or `continue` evaluated
     /// without an enclosing `while` loop to catch the signal.
     /// `kind` is `"break"` or `"continue"`.

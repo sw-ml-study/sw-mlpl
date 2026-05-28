@@ -132,6 +132,7 @@ pub struct Environment {
     pub(crate) string_lists: HashMap<String, Vec<String>>,
     pub(crate) results: HashMap<String, (bool, Value)>, // Saga 29 step 012
     pub(crate) cli_args: Vec<String>,                   // Saga 31 step 003
+    pub(crate) user_fns: HashMap<String, crate::env_user_fns::UserFn>,
 }
 
 impl Environment {

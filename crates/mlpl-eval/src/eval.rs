@@ -178,6 +178,11 @@ pub(crate) fn eval_expr(
         }
         return Ok(Value::Array(result));
     }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name.contains(':')
+    {
+        return crate::eval_user_fn::call_user_fn(name, args, env, trace);
+    }
     if let Some(r) = crate::eval_fncalls::try_dispatch(expr, env, trace) {
         return r;
     }
@@ -222,16 +227,25 @@ pub(crate) fn eval_expr(
     if matches!(expr, Expr::Continue { .. }) {
         return Err(EvalError::ContinueSignal);
     }
-    if let Expr::FnDef { .. } = expr {
-        return Err(EvalError::Unsupported(
-            "def: user-defined functions not yet implemented (coming in saga 46 step 002)".into(),
-        ));
+    if let Expr::FnDef {
+        name, params, body, ..
+    } = expr
+    {
+        env.define_fn(
+            name.clone(),
+            crate::env_user_fns::UserFn {
+                params: params.clone(),
+                body: body.clone(),
+            },
+        );
+        return Ok(Value::Array(DenseArray::from_scalar(0.0)));
     }
-    if let Expr::Return { .. } = expr {
-        return Err(EvalError::Unsupported(
-            "return: user-defined functions not yet implemented (coming in saga 46 step 002)"
-                .into(),
-        ));
+    if let Expr::Return { value, .. } = expr {
+        let v = match value {
+            Some(inner) => eval_expr(inner, env, trace)?,
+            None => Value::Array(DenseArray::from_scalar(0.0)),
+        };
+        return Err(EvalError::ReturnSignal(Box::new(v)));
     }
     let (op_name, inputs, result) = match expr {
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),

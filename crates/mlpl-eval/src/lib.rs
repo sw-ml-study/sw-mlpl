@@ -33,6 +33,7 @@ mod env_trait_impls_models;
 mod env_trait_impls_params;
 mod env_trait_impls_strings;
 mod env_trait_impls_vars;
+mod env_user_fns;
 mod env_vars;
 mod error;
 mod error_fmt;
@@ -48,6 +49,7 @@ mod eval_ops;
 mod eval_program;
 mod eval_reduce;
 mod eval_script;
+mod eval_user_fn;
 mod experiment;
 mod experiment_compare;
 #[cfg(feature = "image-io")]
