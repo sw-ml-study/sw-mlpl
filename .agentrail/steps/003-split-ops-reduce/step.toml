@@ -1,6 +1,6 @@
 number = 3
 slug = "split-ops-reduce"
-status = "pending"
+status = "in-progress"
 description = "Extract ops_reduce.rs into mlpl-array-ops-reduce sibling crate using extensio..."
 role = "production"
 context_files = []
