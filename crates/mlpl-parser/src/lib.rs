@@ -1,17 +1,13 @@
-//! Lexer and parser for MLPL source code.
+//! Parser for MLPL source code. Lexer and token types live in
+//! the `mlpl-lexer` crate.
 
 mod ast;
 mod ast_fmt;
-mod error;
-mod lex_util;
-mod lexer;
+mod ast_fmt_compound;
 mod parser;
 mod record_parser;
 mod stmts;
-mod token;
 
 pub use ast::{BinOpKind, Expr, TensorCtorKind};
-pub use error::ParseError;
-pub use lexer::lex;
+pub use mlpl_lexer::{ParseError, Token, TokenKind, lex};
 pub use parser::parse;
-pub use token::{Token, TokenKind};

@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-runtime-math"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Math and constructor builtins extracted from mlpl-runtime.
+# Self-contained: depends on mlpl-array (for DenseArray/Shape) and
+# mlpl-runtime-core (for RuntimeError). Nothing depends back
+# upward from mlpl-runtime-math so the dep graph stays a DAG.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-runtime-core = { path = "../mlpl-runtime-core" }

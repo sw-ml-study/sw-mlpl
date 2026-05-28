@@ -2062,6 +2062,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-lexer"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+]
+
+[[package]]
 name = "mlpl-loader-helpers"
 version = "0.20.0"
 dependencies = [
@@ -2189,6 +2196,7 @@ name = "mlpl-parser"
 version = "0.20.0"
 dependencies = [
  "mlpl-core",
+ "mlpl-lexer",
 ]
 
 [[package]]
@@ -2238,13 +2246,24 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-runtime-conv",
  "mlpl-runtime-core",
  "mlpl-runtime-data",
  "mlpl-runtime-dim-reduction",
+ "mlpl-runtime-math",
  "mlpl-runtime-mds-rp",
+ "mlpl-runtime-rnn",
  "mlpl-runtime-umap",
  "serde_json",
  "ureq",
+]
+
+[[package]]
+name = "mlpl-runtime-conv"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
 ]
 
 [[package]]
@@ -2271,7 +2290,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-runtime-math"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-runtime-mds-rp"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-rnn"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
@@ -2350,6 +2385,7 @@ version = "0.20.0"
 dependencies = [
  "axum",
  "gloo 0.11.0",
+ "js-sys",
  "mlpl-eval",
  "mlpl-parser",
  "mlpl-serve",
@@ -2358,6 +2394,8 @@ dependencies = [
  "mlpl-web-lessons",
  "mlpl-web-path-body",
  "reqwest",
+ "serde",
+ "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "tokio",
  "wasm-bindgen",
