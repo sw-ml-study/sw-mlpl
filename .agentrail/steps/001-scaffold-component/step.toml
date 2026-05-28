@@ -1,0 +1,9 @@
+number = 1
+slug = "scaffold-component"
+status = "in-progress"
+description = "Create the components/lang-core/ nested workspace scaffold. Make components/l..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T20:13:51"
+task_type = "infra"
+commits = []

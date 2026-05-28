@@ -1,0 +1,9 @@
+number = 3
+slug = "move-mlpl-array"
+status = "pending"
+description = "Move mlpl-array (the biggest fan-out: ~30 referrers). Same recipe as move-mlp..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T20:13:51"
+task_type = "refactor"
+commits = []

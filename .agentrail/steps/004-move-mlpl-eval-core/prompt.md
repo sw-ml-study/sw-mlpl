@@ -1,0 +1,1 @@
+Move mlpl-eval-core (~7 referrers, smaller batch). Same recipe. After this step, components/lang-core/ has all three foundational crates and the main workspace's foundational deps are now in the component.

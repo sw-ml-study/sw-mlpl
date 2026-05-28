@@ -1,21 +1,54 @@
-# Shared `target/` infrastructure (saga 51)
+# components/lang-core/ migration (saga 52)
 
-Set up a single shared `target/` directory at the repo root so all
-workspaces (main + each component) write to the same build cache.
-This enables the upcoming component-migration sagas (52+) without
-exploding disk usage.
+First component-migration saga. Move the three foundational crates
+(mlpl-core, mlpl-array, mlpl-eval-core) into a new
+`components/lang-core/` nested workspace. Bottom of the dep stack,
+so every other crate's path references must be updated.
 
-## Steps
+## Why these three together
 
-1. Create `.cargo/config.toml` at repo root with
-   `[build] target-dir = "target"`. Verify `cargo check` from
-   main workspace + from `components/mlpl-session/` and
-   `services/mlpl-mlx-serve/` all resolve to the same target dir.
-   `du -sh target/` before and after should not grow significantly.
-2. language-status update + saga close.
+- mlpl-core: spans, identifiers, base types -- depended on by ~15
+- mlpl-array: DenseArray, Shape -- depended on by ~30
+- mlpl-eval-core: shared eval types -- depended on by ~7
 
-## Why one saga for this?
+All Layer 0-1, no intra-workspace deps among them except
+mlpl-array -> mlpl-core. Move them together so referrers update
+once, not three times.
 
-The shared-target config is the prerequisite for every component
-migration. It lives by itself in saga 51 so the migration sagas
-(saga 52 onward, one per component) start from a clean baseline.
+## Step plan
+
+1. **scaffold-component**: create `components/lang-core/Cargo.toml`
+   (workspace manifest), `components/lang-core/crates/` empty
+   directory. Verify the empty component workspace builds.
+2. **move-mlpl-core**: `git mv crates/mlpl-core
+   components/lang-core/crates/mlpl-core`. Update root Cargo.toml
+   members. Update every Cargo.toml that has
+   `mlpl-core = { path = "../mlpl-core" }` to point to the new
+   location. Verify full workspace build.
+3. **move-mlpl-array**: `git mv` then update all referrers (the
+   biggest batch -- ~30 crates).
+4. **move-mlpl-eval-core**: `git mv` then update all referrers
+   (~7 crates).
+5. **close**: language-status update, --done.
+
+Each step ends with a green `cargo check --workspace` and pushed
+commits, so no step leaves the tree broken.
+
+## Path-reference rules
+
+Crates currently in `crates/<foo>/` referring to a moved crate:
+`mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }`
+
+Crates in `components/<other>/crates/<foo>/` referring to a moved
+crate: `mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }`
+
+Crates in `apps/<foo>/` referring to a moved crate:
+`mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }`
+
+Crates in `services/<foo>/` referring to a moved crate:
+`mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }`
+
+## Shared target
+
+Already in place from saga 51. The new component workspace inherits
+.cargo/config.toml automatically and writes to the same target/.

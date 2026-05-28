@@ -1,0 +1,28 @@
+# Saga 52: components/lang-core/ nested workspace.
+#
+# Houses the foundational data types that every other component
+# depends on:
+#   - mlpl-core: spans, identifiers, base types
+#   - mlpl-array: DenseArray, Shape (pure compute substrate)
+#   - mlpl-eval-core: shared eval types
+#
+# Pattern matches components/mlpl-session/: a nested workspace
+# whose member crates are removed from the main workspace's
+# members list. Path deps reach across components via relative
+# paths like `../../../<other-component>/crates/<dep>`.
+#
+# Build cache is shared via `.cargo/config.toml` at the repo root
+# (saga 51), so this workspace writes to `sw-mlpl/target/` not
+# its own target subdirectory.
+
+[workspace]
+members = []
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
