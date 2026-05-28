@@ -1,0 +1,19 @@
+[package]
+name = "mlpl-runtime-mds-rp"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Saga 33 step 041 (Phase 5 of the dim-reduction milestone):
+# the "complete the survey" methods. Multidimensional Scaling
+# (mds) and Johnson-Lindenstrauss random projection
+# (random_projection). Carved out of mlpl-runtime-dim-reduction
+# (which is at 7 modules = WARN; further growth = FAIL) into a
+# dedicated sibling crate, same pattern as mlpl-runtime-umap.
+# Depends only on mlpl-array (for DenseArray) and
+# mlpl-runtime-core (for RuntimeError + Xorshift64). Nothing
+# depends back upward.
+
+[dependencies]
+mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-runtime-core = { path = "../../../runtime-core/crates/mlpl-runtime-core" }

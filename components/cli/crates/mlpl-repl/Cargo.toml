@@ -25,7 +25,7 @@ mlpl-cli = { path = "../../crates/mlpl-cli" }
 # pulls in ureq / serde_json directly. The local
 # system-prompt + workspace framing stays here in
 # `ask.rs`; only the POST is shared.
-mlpl-runtime = { path = "../../../runtime/crates/mlpl-runtime" }
+mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 # Saga 21 step 002: `--connect <url>` mode delegates
 # evaluation to a remote `mlpl-serve`. Blocking
 # reqwest avoids pulling tokio into the REPL crate

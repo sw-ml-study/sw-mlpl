@@ -1,0 +1,52 @@
+//! Thin wrappers around `mlpl-models-inspect`'s
+//! `embed_table_inner` + `estimate_train_inner`. Bundles the
+//! eval-loop resolver closures so eval.rs call sites stay
+//! signature-compatible.
+
+use mlpl_array::DenseArray;
+use mlpl_parser::Expr;
+
+use crate::env::Environment;
+use crate::error::EvalError;
+use crate::value::Value;
+use mlpl_eval_core::model::ModelSpec;
+
+pub(crate) fn eval_embed_table(
+    args: &[Expr],
+    env: &mut Environment,
+) -> Result<DenseArray, EvalError> {
+    mlpl_models_inspect::embed_table_inner(args, env, model_resolver)
+}
+
+pub(crate) fn eval_estimate_train(
+    args: &[Expr],
+    env: &mut Environment,
+) -> Result<DenseArray, EvalError> {
+    mlpl_models_inspect::estimate_train_inner(args, env, model_resolver, pos_scalar_resolver)
+}
+
+fn model_resolver(expr: &Expr, env: &mut Environment) -> Result<ModelSpec, EvalError> {
+    match crate::eval::eval_expr(expr, env, &mut None)? {
+        Value::Model(m) => Ok(m),
+        _ => Err(EvalError::Unsupported(
+            "first argument must evaluate to a model".into(),
+        )),
+    }
+}
+
+fn pos_scalar_resolver(expr: &Expr, env: &mut Environment, name: &str) -> Result<f64, EvalError> {
+    let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
+    if arr.rank() != 0 {
+        return Err(EvalError::Unsupported(format!(
+            "estimate_train: {name} must be a scalar, got rank {}",
+            arr.rank()
+        )));
+    }
+    let v = arr.data()[0];
+    if !v.is_finite() || v <= 0.0 {
+        return Err(EvalError::Unsupported(format!(
+            "estimate_train: {name} must be positive, got {v}"
+        )));
+    }
+    Ok(v)
+}
