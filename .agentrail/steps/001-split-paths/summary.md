@@ -1,0 +1,1 @@
+Split paths.rs from 1162 to 67 lines. 4 sub-files all under 500 lines. File LOC FAIL retired.
