@@ -43,6 +43,7 @@ human-readable summary.
 | `data-exploration-path` (45) | shipped | -- (content saga) | Closed 2026-05-27. 3 steps. Upload & Inspect Image demo (Basics), Data & Exploration path (16 steps), REPL-to-Script milestone doc. |
 | `udf-control-flow` (46) | shipped | -- (capability saga) | Closed 2026-05-27. 5 steps. def u:name(args) { body }, return, pi(), e(), range() alias for iota(), UDF demo, 16 eval tests, glossary (UDF, Scope, Recursion). |
 | `repl-to-script-path` (47) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "REPL to Script" learning path (9 steps). |
+| `training-paradigms-path` (48) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "Training Paradigms" learning path (16 steps, 4 groups). |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
