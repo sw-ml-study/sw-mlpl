@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 50 closed; runtime extraction).
+Last refreshed: 2026-05-27 (saga 51 closed; shared-target infra).
 
 ## Active saga
 
-None. Saga 50 (`warning-ratchet-spike`) closed 2026-05-27.
+None. Saga 51 (`shared-target-infra`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -45,6 +45,7 @@ human-readable summary.
 | `training-paradigms-path` (48) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "Training Paradigms" learning path (16 steps, 4 groups). |
 | `optimizers-regularization-path` (49) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "Optimizers & Regularization" learning path (19 steps). |
 | `warning-ratchet-spike` (50) | shipped | -- (refactor saga) | Closed 2026-05-27. 5 steps. Extracted 6 new crates from mlpl-runtime + mlpl-parser: mlpl-runtime-math, mlpl-runtime-conv, mlpl-runtime-rnn, mlpl-runtime-array, mlpl-runtime-ml, mlpl-lexer. Plus ast_fmt_compound.rs helper in parser. sw-checklist 141->133 fails (-8), 473->474 warnings. Big wins: builtins.rs 16->3 fns, mlpl-runtime 9->4 modules, mlpl-parser 10->6 modules, conv2d/pool2d/lstm_cell/fmt all retired (FAIL->WARN or PASS). Note: extractions landed flat in `crates/`; component-restructure saga (51+) will migrate them into `components/`. |
+| `shared-target-infra` (51) | shipped | -- (infra saga) | Closed 2026-05-27. 2 steps. Added `.cargo/config.toml` at repo root with `[build] target-dir = "target"` so every workspace (main, components/*, services/*) writes to ONE shared target/ tree. Reclaimed ~2GB of stale per-component target dirs. Prerequisite for the component-migration sagas (52+) that will migrate the workspace from flat `crates/` into `components/<feature>/crates/` bottom-up. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
