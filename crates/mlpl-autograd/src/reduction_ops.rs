@@ -1,5 +1,6 @@
 //! Reduction, shape, and matmul methods on [`Tensor`].
 
+use mlpl_array_ops_compose::prelude::*;
 use mlpl_array_ops_matmul::prelude::*;
 use std::rc::Rc;
 
@@ -161,7 +162,7 @@ impl Tensor {
         let parent_size_along_axis = first.value().shape().dims()[axis];
         let values: Vec<DenseArray> = parents.iter().map(Tensor::value).collect();
         let refs: Vec<&DenseArray> = values.iter().collect();
-        let value = DenseArray::stack(&refs, axis).expect("stack compatible shapes");
+        let value = stack(&refs, axis).expect("stack compatible shapes");
         let parent_ids = parents.iter().map(|p| p.node).collect::<Vec<_>>();
         new_tensor(
             first,

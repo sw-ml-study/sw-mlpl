@@ -5,7 +5,6 @@ mod display;
 mod error;
 mod indexing;
 mod ops_binop;
-mod ops_concat;
 mod ops_reshape;
 mod ops_strides;
 mod ops_transpose;

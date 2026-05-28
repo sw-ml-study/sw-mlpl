@@ -5,6 +5,7 @@
 //! lives in `apply_attn_head`; column slicing in `slice_cols`.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_array_ops_compose::prelude::*;
 
 use crate::env::Environment;
 use crate::error::EvalError;

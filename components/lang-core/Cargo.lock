@@ -19,6 +19,7 @@ name = "mlpl-array"
 version = "0.20.0"
 dependencies = [
  "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
  "mlpl-core",
 ]
 
