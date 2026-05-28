@@ -1,2 +1,1 @@
-# components/wasm/ migration (saga 60)
-Move mlpl-wasm + mlpl-web-eval into components/wasm/.
+# components/web/ — mlpl-web + mlpl-web-lessons + mlpl-web-path-body

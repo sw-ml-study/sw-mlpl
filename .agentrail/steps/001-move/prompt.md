@@ -1,1 +1,1 @@
-Move + path updates
+Move + paths
