@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 4,
+    "step": "extract-runtime-ml"
+  },
+  "action": "Created new crate with shared arity_err helper, split each WARN-level function into validate + compute halves, used Params struct for softmax to pass validated state.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T19:58:10"
+}
