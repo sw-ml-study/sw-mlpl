@@ -26,7 +26,6 @@ members = [
   "crates/mlpl-runtime-dim-reduction",
   "crates/mlpl-runtime-umap",
   "crates/mlpl-runtime-mds-rp",
-  "crates/mlpl-eval-core",
   "crates/mlpl-eval",
   "crates/mlpl-web-eval",
   "crates/mlpl-web-lessons",

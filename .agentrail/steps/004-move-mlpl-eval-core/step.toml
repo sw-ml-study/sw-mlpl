@@ -1,6 +1,6 @@
 number = 4
 slug = "move-mlpl-eval-core"
-status = "pending"
+status = "in-progress"
 description = "Move mlpl-eval-core (~7 referrers, smaller batch). Same recipe. After this st..."
 role = "production"
 context_files = []
