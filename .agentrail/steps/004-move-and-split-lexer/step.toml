@@ -1,0 +1,9 @@
+number = 4
+slug = "move-and-split-lexer"
+status = "pending"
+description = "Move + split mlpl-lexer. After move, decompose into sibling crates: mlpl-lexe..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:01:58"
+task_type = "refactor"
+commits = []

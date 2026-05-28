@@ -1,0 +1,1 @@
+Move crates/mlpl-macro to components/lang-syntax/crates/mlpl-macro. Update workspace members in both root and lang-syntax Cargo.toml. Update path references in dependents (mlpl-macro is depended on by what? grep first).

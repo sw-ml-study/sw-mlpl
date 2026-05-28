@@ -1,73 +1,46 @@
-# Decompose mlpl-array into sparse siblings (saga 53)
+# components/lang-syntax/ migration + split (saga 54)
 
-Saga 52 moved mlpl-array into components/lang-core/ but left its
-13 modules intact -- still a Crate Module Count FAIL. The
-component migration is incomplete without the SPLIT.
+Move + DECOMPOSE the lexer/parser/macro/lower-rs family into a
+new `components/lang-syntax/` workspace. Apply the move-AND-split
+principle: every crowded crate must be split into sparse siblings
+inside the component, not just moved.
 
-Goal: decompose the 13-module mlpl-array into multiple sparse
-sibling crates within components/lang-core/. Use the
-extension-trait pattern so all 600+ call sites of `a.matmul(&b)`
-etc. keep working with one new `use` line per file.
+## Crowded crates to split
 
-## Why extension traits
-
-Operations currently live as `impl DenseArray { fn matmul(...) }`.
-Splitting these to free functions in another crate breaks every
-call site (`a.matmul(&b)` -> `matmul(&a, &b)`).
-
-Extension traits keep the method syntax:
-```rust
-// In mlpl-array-matmul:
-pub trait MatmulExt {
-    fn matmul(&self, other: &DenseArray) -> Result<DenseArray, ArrayError>;
-}
-impl MatmulExt for DenseArray { ... }
-pub mod prelude { pub use super::MatmulExt; }
-
-// At call sites (one-line change per file):
-use mlpl_array_matmul::prelude::*;
-a.matmul(&b)?  // unchanged
-```
-
-## Proposed splits
-
-After saga 53, components/lang-core/crates/ contains:
-- mlpl-core: spans, identifiers, base types (unchanged)
-- mlpl-array: DenseArray + Shape + dense/shape/error/display/indexing
-  (5-6 modules, sparse)
-- mlpl-array-ops-element: ops_binop, ops_strides as extension trait
-- mlpl-array-ops-shape: ops_reshape, ops_transpose
-- mlpl-array-ops-reduce: ops_reduce (reduce_axis, argmax_axis)
-- mlpl-array-ops-compose: ops_concat (concat, stack, patchify, take)
-- mlpl-array-ops-matmul: ops_matmul (matmul, dot)
-- mlpl-eval-core (unchanged)
-
-mlpl-array goes from 13 modules (FAIL) to ~6 (PASS).
-Each new sibling has 1-2 modules and 1-4 functions (PASS).
-
-Also opportunistically retires Function LOC warnings as we touch
-each operation (matmul 50, reduce_axis 46, argmax_axis 44,
-patchify 43, stack 43, apply_binop 43, take 41, concat 34,
-transpose 37).
+- `mlpl-lexer`: 5 modules + 7-fn lexer.rs WARN + 6-fn lex_util.rs WARN +
+  3 long-fn WARNs (next_token 35, lex_ident 32, describe_kind 39).
+  Plan to split into ~6 sibling crates by lexing concern.
+- `mlpl-parser`: 6 modules at limit + ast_fmt 7-fn WARN + parser.rs
+  5-fn WARN + parser.rs 415-line file WARN + fmt() 49-line WARN.
+  Plan to split into ~4 sibling crates by parsing concern.
 
 ## Step plan
 
-1. **scaffold-siblings**: create the 5 new sibling crate skeletons
-   (Cargo.toml + lib.rs + prelude) and register in lang-core
-   workspace. Verify empty siblings + main + others all build.
-2. **split-ops-matmul**: extract ops_matmul.rs into mlpl-array-ops-matmul
-   as MatmulExt + DotExt. Update mlpl-array's lib.rs to remove the
-   moved file. Find and update all callers (~50 sites likely) to add
-   the `use` line. Verify build + tests.
-3. **split-ops-reduce**: extract ops_reduce.rs (ReduceExt, ArgmaxExt).
-4. **split-ops-compose**: extract ops_concat.rs (ConcatExt, StackExt,
-   PatchifyExt, TakeExt).
-5. **split-ops-shape**: extract ops_reshape.rs + ops_transpose.rs
-   (ReshapeExt, TransposeExt).
-6. **split-ops-element**: extract ops_binop.rs + ops_strides.rs.
-7. **close**: sw-checklist delta. Expect mlpl-array FAIL retired
-   plus 8-10 Function LOC warnings retired.
+1. **scaffold**: create `components/lang-syntax/` workspace.
+2. **move-macro**: move mlpl-macro (small, leaf).
+3. **move-lower-rs**: move mlpl-lower-rs (depends on parser only).
+4. **move-and-split-lexer**: move mlpl-lexer into the new component,
+   then decompose it into sibling crates: mlpl-lexer-token (types),
+   mlpl-lexer-error (ParseError + describe_kind), mlpl-lex-string
+   (string literal + utf-8), mlpl-lex-number, mlpl-lex-punct
+   (whitespace + single_char + builtin_ref), mlpl-lex-ident
+   (keyword recognition + identifier), and mlpl-lexer (Lexer driver
+   + entry point) calling all the helpers.
+5. **move-and-split-parser**: move mlpl-parser into the new
+   component, then decompose: mlpl-parser-ast (AST types),
+   mlpl-parser-fmt (Display impls), mlpl-parser-stmts
+   (statement parsing), mlpl-parser-records (record literal +
+   field access), mlpl-parser (main parser entry).
+6. **close**: sw-checklist delta, language-status update.
 
-Each step ends with green cargo check + test from all 4 workspaces
-and is committed individually -- if a step fails, the tree is still
-on a working revision.
+## Expected sw-checklist deltas
+
+Each split should retire WARNs through structural decomposition:
+- lexer family: ~5 WARNs retired (lex_util 6-fn, lexer.rs 7-fn,
+  describe_kind 39, next_token 35, lex_ident 32)
+- parser family: ~4 WARNs retired (ast_fmt 7-fn, parser.rs 5-fn,
+  parser.rs 415-line, fmt 49)
+
+Plus any structural FAILs if module counts go over budget for the
+mlpl-parser/lexer crates that currently FAIL. (They're at WARN now,
+not FAIL, so no FAILs to retire from this saga's primary work.)

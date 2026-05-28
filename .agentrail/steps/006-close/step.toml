@@ -1,0 +1,9 @@
+number = 6
+slug = "close"
+status = "pending"
+description = "FINAL (use --done): run sw-checklist, report FAIL/WARN delta against saga 54 ..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:01:58"
+task_type = "docs"
+commits = []
