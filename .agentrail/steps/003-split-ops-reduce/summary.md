@@ -1,0 +1,1 @@
+Extracted ReduceAxisExt + ArgmaxAxisExt to mlpl-array-ops-reduce. ops_reduce.rs deleted from mlpl-array. Shared axis-walk helper retires both 46-LOC and 44-LOC warnings (now 11 and 13 lines). Made compute_strides pub. sw-checklist: 251 passed, 133 fails, 474->473 warnings (-1).
