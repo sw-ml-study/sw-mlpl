@@ -74,7 +74,7 @@ pub fn editor_panel(props: &EditorProps) -> Html {
             <textarea
                 class="editor-textarea"
                 spellcheck="false"
-                placeholder={"# Type or paste MLPL script here\nx = iota(10)\nreshape(x, [2, 5])"}
+                placeholder={"# Type or paste MLPL script here\nx = range(10)\nreshape(x, [2, 5])"}
                 value={props.content.clone()}
                 oninput={on_input}
                 onkeydown={on_keydown}
