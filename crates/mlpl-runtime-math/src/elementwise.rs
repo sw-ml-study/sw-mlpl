@@ -1,4 +1,5 @@
 use mlpl_array::DenseArray;
+use mlpl_array_ops_element::prelude::*;
 use mlpl_runtime_core::error::RuntimeError;
 
 pub(crate) fn zero_arg(

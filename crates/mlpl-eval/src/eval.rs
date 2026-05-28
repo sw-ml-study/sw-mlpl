@@ -5,6 +5,7 @@
 //! `run_program` loop) live in `eval_program.rs`.
 
 use mlpl_array::DenseArray;
+use mlpl_array_ops_element::prelude::*;
 use mlpl_parser::{Expr, TensorCtorKind};
 use mlpl_trace::{Trace, TraceEvent, TraceValue};
 

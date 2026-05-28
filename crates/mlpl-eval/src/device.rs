@@ -27,6 +27,7 @@
 //! warning so the user knows their code ran on the wrong device.
 
 use mlpl_array::{ArrayError, DenseArray};
+use mlpl_array_ops_element::prelude::*;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 

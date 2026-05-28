@@ -1,4 +1,11 @@
-//! Element-wise extension traits (apply_binop, stride helpers)
-//! for DenseArray. Body extracted from mlpl-array in saga 53.
+//! Element-wise extension trait (apply_binop) for DenseArray.
+//! Body extracted from mlpl-array in saga 53.
 
-pub mod prelude {}
+mod binop;
+mod merge_labels;
+
+pub use binop::ApplyBinopExt;
+
+pub mod prelude {
+    pub use super::ApplyBinopExt;
+}

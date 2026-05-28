@@ -1951,6 +1951,7 @@ name = "mlpl-array"
 version = "0.20.0"
 dependencies = [
  "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
@@ -1959,6 +1960,13 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-compose"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-array-ops-element"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
@@ -1992,6 +2000,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-shape",
  "mlpl-core",
@@ -2060,6 +2069,7 @@ dependencies = [
  "jpeg-decoder",
  "mlpl-array",
  "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
@@ -2283,6 +2293,7 @@ name = "mlpl-rt"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-element",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
@@ -2356,6 +2367,7 @@ name = "mlpl-runtime-math"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-element",
  "mlpl-runtime-core",
 ]
 
@@ -2380,6 +2392,7 @@ name = "mlpl-runtime-rnn"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
  "mlpl-runtime-core",
 ]
