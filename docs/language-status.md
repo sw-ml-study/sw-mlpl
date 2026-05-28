@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 59 closed; eval component).
+Last refreshed: 2026-05-27 (saga 60 closed; wasm component).
 
 ## Active saga
 
-None. Saga 59 (`component-eval`) closed 2026-05-27.
+None. Saga 60 (`component-wasm`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -54,6 +54,7 @@ human-readable summary.
 | `component-native-rt` (57) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Created components/native-rt/ and moved mlpl-rt + mlpl-mlx-rt. Updated 4 consumer Cargo.toml refs. Structural move; no FAIL/WARN delta. |
 | `component-viz` (58) | shipped | -- (structural saga) | Closed 2026-05-27. 3 steps (1 deferred). Created components/viz/ and moved mlpl-viz. Decompose step deferred (13-module FAIL persists) since chart functions share VizError and need shared-error-crate or extension-trait design. Future viz-decompose saga. |
 | `component-eval` (59) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-eval to components/eval/. 96-module FAIL preserved; decompose deferred to a focused eval-decompose saga. |
+| `component-wasm` (60) | shipped | -- (structural saga) | Closed 2026-05-27. 2 steps. Moved mlpl-wasm + mlpl-web-eval to components/wasm/. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
