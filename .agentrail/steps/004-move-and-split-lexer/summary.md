@@ -1,0 +1,1 @@
+Decomposed mlpl-lexer into 7 sparse siblings: lexer-token, lexer-error, lex-string, lex-number, lex-punct, lex-ident, lexer (orchestrator with re-exports). sw-checklist: 247->281 passed (+34!), 132 fails, 472->473 warnings. mlpl-parser still works through re-exports.
