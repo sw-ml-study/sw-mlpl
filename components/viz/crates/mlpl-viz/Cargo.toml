@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-viz"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }

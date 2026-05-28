@@ -17,7 +17,6 @@ members = [
   "crates/mlpl-web-eval",
   "crates/mlpl-web-lessons",
   "crates/mlpl-web-path-body",
-  "crates/mlpl-viz",
   "crates/mlpl-wasm",
   "crates/mlpl-ml",
   "crates/mlpl-cli",

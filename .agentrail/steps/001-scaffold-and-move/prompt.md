@@ -1,1 +1,1 @@
-Create components/native-rt/ workspace. Move mlpl-rt and mlpl-mlx-rt into it. Update workspace members + path refs in consumers (mlpl-bench, mlpl-eval, mlpl-mlx-serve, mlpl, mlpl-repl). Fix intra-crate cross-component paths.
+Create components/viz/ workspace. Move mlpl-viz crate into it. Update 4 consumer Cargo.toml paths (mlpl-eval, mlpl-cli, mlpl-wasm, mlpl-serve). Fix cross-component paths inside mlpl-viz. Verify all workspaces build.

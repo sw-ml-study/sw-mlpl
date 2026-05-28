@@ -1,0 +1,16 @@
+# Saga 58: components/viz/ nested workspace.
+# Visualization rendering (SVG charts + 3D Plotly + analysis).
+
+[workspace]
+members = [
+    "crates/mlpl-viz",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
