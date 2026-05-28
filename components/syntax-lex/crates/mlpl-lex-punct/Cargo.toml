@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-lex-punct"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Punctuation + whitespace + builtin-ref lexing helpers.
+
+[dependencies]
+mlpl-lexer-token = { path = "../../../syntax-tokens/crates/mlpl-lexer-token" }

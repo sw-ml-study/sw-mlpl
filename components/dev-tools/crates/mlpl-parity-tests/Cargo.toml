@@ -13,6 +13,6 @@ path = "src/lib.rs"
 [dev-dependencies]
 mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
-mlpl-lower-rs = { path = "../../../lang-syntax/crates/mlpl-lower-rs" }
+mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
 mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
-mlpl-parser = { path = "../../../lang-syntax/crates/mlpl-parser" }
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }

@@ -5,5 +5,5 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-mlpl-macro = { path = "../../../lang-syntax/crates/mlpl-macro" }
+mlpl-macro = { path = "../../../syntax-codegen/crates/mlpl-macro" }
 mlpl-rt = { path = "../../../native-rt/crates/mlpl-rt" }

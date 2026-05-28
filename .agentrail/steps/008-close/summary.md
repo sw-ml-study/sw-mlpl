@@ -1,1 +1,0 @@
-Saga 67 close. components/runtime/ split into 6 sparse sub-components, each <=3 crates. sw-checklist: 296/21/281 in our code. Structural. Other over-cap components flagged for follow-up: lang-syntax (11), mlpl-session (10), lang-core (8), cli (5).
