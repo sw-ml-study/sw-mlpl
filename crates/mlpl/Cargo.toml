@@ -1,9 +1,0 @@
-[package]
-name = "mlpl"
-edition.workspace = true
-license.workspace = true
-version.workspace = true
-
-[dependencies]
-mlpl-macro = { path = "../../components/lang-syntax/crates/mlpl-macro" }
-mlpl-rt = { path = "../../components/native-rt/crates/mlpl-rt" }
