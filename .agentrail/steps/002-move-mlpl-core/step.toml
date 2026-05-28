@@ -1,9 +1,10 @@
 number = 2
 slug = "move-mlpl-core"
-status = "in-progress"
+status = "completed"
 description = "Move mlpl-core into the lang-core component. Steps: 1) git mv crates/mlpl-cor..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:13:51"
+completed_at = "2026-05-27T20:19:02"
 task_type = "refactor"
-commits = []
+commits = ["6d725ba5a08cef45acca486be6946457b3559c25"]
