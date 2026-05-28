@@ -1,0 +1,1 @@
+Saga 52 close. sw-checklist delta: 221->222 passed (+1), 133 fails unchanged, 474 warnings unchanged. Structural saga: enables future improvements inside lang-core without unblocking individual FAILs. Three foundational crates (mlpl-core, mlpl-array, mlpl-eval-core) now in components/lang-core/. 51 dependent Cargo.toml path references updated across 4 workspaces.
