@@ -1,0 +1,9 @@
+number = 3
+slug = "close"
+status = "pending"
+description = "Step 003 (FINAL, use --done): sw-checklist before/after comparison. language-..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T18:19:58"
+task_type = "docs"
+commits = []

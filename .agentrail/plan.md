@@ -1,14 +1,11 @@
-# Optimizers & Regularization Learning Path
+# Warning/FAIL Ratchet-Down Spike
 
-Walk the evolution of how models are trained efficiently:
-hand-rolled gradient descent, momentum SGD, Adam, learning
-rate schedules, regularization (dropout concept, weight
-decay concept), and parameter-efficient fine-tuning (LoRA).
+Focused tech-debt reduction targeting FAILs from this
+session's work. Priority: split paths.rs (1162 lines),
+shrink over-LOC functions in runtime and web crates.
 
 ## Steps
 
-1. Path definition in paths.rs with groups: gradient descent
-   basics, momentum + Adam, schedules, regularization concepts,
-   LoRA. Demo smoke test.
-
-2. language-status.md + saga close.
+1. Split paths.rs into per-path files. Reduce File LOC FAIL.
+2. Shrink over-50-LOC functions (math_builtins, ast_fmt, stmts).
+3. language-status + saga close.
