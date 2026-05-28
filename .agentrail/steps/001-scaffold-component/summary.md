@@ -1,0 +1,1 @@
+Scaffolded components/lang-core/ with empty members workspace. Pattern matches components/mlpl-session/. Shares target/ via saga 51's .cargo/config.toml. Ready for crate moves in steps 002-004.
