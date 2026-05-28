@@ -11,7 +11,7 @@ version.workspace = true
 # existing `mlpl_lexer::{Token, TokenKind, ParseError, ...}` imports.
 
 [dependencies]
-mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-lex-ident = { path = "../../../syntax-lex/crates/mlpl-lex-ident" }
 mlpl-lex-number = { path = "../../../syntax-lex/crates/mlpl-lex-number" }
 mlpl-lex-punct = { path = "../../../syntax-lex/crates/mlpl-lex-punct" }

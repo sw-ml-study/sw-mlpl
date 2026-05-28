@@ -1,7 +1,6 @@
-# Split lang-syntax (11 crates) into sparse sub-components (saga 68)
+# Split lang-core/ (8 crates) into sparse sub-components (saga 69)
 
-- syntax-tokens (2):  mlpl-lexer-token, mlpl-lexer-error
-- syntax-lex (4):     mlpl-lex-string, mlpl-lex-number, mlpl-lex-punct, mlpl-lex-ident
-- syntax-lexer (1):   mlpl-lexer
-- syntax-parser (2):  mlpl-parser, mlpl-parser-ast
-- syntax-codegen (2): mlpl-macro, mlpl-lower-rs
+- types (2): mlpl-core, mlpl-eval-core
+- array (1): mlpl-array
+- array-element (2): mlpl-array-ops-element, mlpl-array-ops-shape
+- array-compose (3): mlpl-array-ops-compose, mlpl-array-ops-matmul, mlpl-array-ops-reduce

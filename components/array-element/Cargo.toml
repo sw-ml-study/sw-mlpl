@@ -1,0 +1,16 @@
+# Saga 69: split out from components/lang-core/.
+
+[workspace]
+members = [
+    "crates/mlpl-array-ops-element",
+    "crates/mlpl-array-ops-shape",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"

@@ -12,4 +12,4 @@ version.workspace = true
 # this crate, which keeps the dep graph a DAG.
 
 [dependencies]
-mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }

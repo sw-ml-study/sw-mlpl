@@ -8,4 +8,4 @@ version.workspace = true
 # DenseArray.
 
 [dependencies]
-mlpl-array = { path = "../mlpl-array" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }

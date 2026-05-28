@@ -7,4 +7,4 @@ version.workspace = true
 # Reduction extension traits (reduce_axis, argmax_axis) for DenseArray.
 
 [dependencies]
-mlpl-array = { path = "../mlpl-array" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }

@@ -10,5 +10,5 @@ path = "src/main.rs"
 
 [dependencies]
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
-mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
+mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }

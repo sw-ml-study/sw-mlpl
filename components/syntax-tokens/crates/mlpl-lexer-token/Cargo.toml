@@ -7,4 +7,4 @@ version.workspace = true
 # Token types for the MLPL lexer.
 
 [dependencies]
-mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
