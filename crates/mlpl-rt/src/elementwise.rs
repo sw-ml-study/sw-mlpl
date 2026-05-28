@@ -11,6 +11,7 @@
 //! pass through, or `LabelMismatch` is raised.
 
 use mlpl_array::{ArrayError, DenseArray};
+use mlpl_array_ops_element::prelude::*;
 
 /// Elementwise `a + b` with scalar broadcasting.
 pub fn add(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {

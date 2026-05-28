@@ -1,6 +1,6 @@
 number = 6
 slug = "split-ops-element"
-status = "pending"
+status = "in-progress"
 description = "Extract ops_binop.rs + ops_strides.rs into mlpl-array-ops-element. Define App..."
 role = "production"
 context_files = []

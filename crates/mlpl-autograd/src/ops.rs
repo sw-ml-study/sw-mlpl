@@ -1,6 +1,7 @@
 //! Op enums and forward/backward helpers for autograd nodes.
 
 use mlpl_array::DenseArray;
+use mlpl_array_ops_element::prelude::*;
 
 /// Unary elementwise op.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -4,7 +4,6 @@ mod dense;
 mod display;
 mod error;
 mod indexing;
-mod ops_binop;
 mod ops_strides;
 mod shape;
 
