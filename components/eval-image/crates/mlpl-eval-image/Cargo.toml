@@ -1,0 +1,20 @@
+[package]
+name = "mlpl-eval-image"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Image decode (PNG, JPEG) + bilinear resize. Extracted from
+# mlpl-eval as the first god-crate-decomposition step. Returns
+# its own ImageError; mlpl-eval converts via `From<ImageError>
+# for EvalError` at the boundary.
+
+[features]
+default = []
+# Compile in the actual PNG + JPEG decoders. When off, decode_*
+# returns ImageError. Same gating as mlpl-eval's image-io feature.
+image-io = ["dep:png", "dep:jpeg-decoder"]
+
+[dependencies]
+png = { version = "0.17", optional = true }
+jpeg-decoder = { version = "0.3", optional = true }

@@ -28,6 +28,8 @@ mlx = ["dep:mlpl-mlx-rt", "mlpl-mlx-rt/mlx"]
 # itself (same pinned version + minimal-features as
 # `mlpl-runtime`'s `llm_call` shim).
 image-io = [
+    "dep:mlpl-eval-image",
+    "mlpl-eval-image/image-io",
     "dep:png",
     "dep:jpeg-decoder",
     "dep:tar",
@@ -61,6 +63,7 @@ mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
 mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true }
+mlpl-eval-image = { path = "../../../eval-image/crates/mlpl-eval-image", optional = true }
 png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }
 tar = { version = "0.4", optional = true }
