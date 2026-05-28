@@ -1,0 +1,1 @@
+Extracted mlpl-runtime-array crate from mlpl-runtime/src/builtins.rs. Split 13 array/shape/reduce/slice builtins across 4 focused modules (shape, compute, reduce, slice). builtins.rs collapses from 16 functions (FAIL) to 3 (just dispatch glue). Retired argmax 36-LOC and reduce 29-LOC warnings by splitting into smaller pieces. sw-checklist: 134->133 failed, 478->477 warnings.
