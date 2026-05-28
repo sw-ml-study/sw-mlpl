@@ -1,0 +1,9 @@
+number = 4
+slug = "close"
+status = "pending"
+description = "FINAL --done: sw-checklist + docs."
+role = "production"
+context_files = []
+created_at = "2026-05-28T09:54:08"
+task_type = "docs"
+commits = []

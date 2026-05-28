@@ -47,6 +47,7 @@ pub mod handlers;
 pub mod handlers_demo;
 pub mod handlers_input;
 pub mod handlers_popup;
+pub mod handlers_running;
 pub mod handlers_submit;
 pub mod help;
 pub mod mode_callbacks;

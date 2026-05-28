@@ -15,53 +15,10 @@ pub struct EditorProps {
 #[function_component(EditorPanel)]
 pub fn editor_panel(props: &EditorProps) -> Html {
     let file_ref = use_node_ref();
-    let on_input = {
-        let cb = props.on_change.clone();
-        Callback::from(move |e: InputEvent| {
-            let ta: HtmlTextAreaElement = e.target_unchecked_into();
-            cb.emit(ta.value());
-        })
-    };
-    let on_load_click = {
-        let r = file_ref.clone();
-        Callback::from(move |_: MouseEvent| {
-            if let Some(el) = r.cast::<HtmlInputElement>() {
-                el.click();
-            }
-        })
-    };
-    let on_file_change = {
-        let cb = props.on_change.clone();
-        Callback::from(move |e: Event| {
-            let input: HtmlInputElement = e.target_unchecked_into();
-            let Some(file) = input.files().and_then(|f| f.get(0)) else {
-                return;
-            };
-            let reader = FileReader::new().unwrap();
-            let cb2 = cb.clone();
-            let onload = Closure::wrap(Box::new(move |e: web_sys::ProgressEvent| {
-                let reader: FileReader = e.target().unwrap().unchecked_into();
-                if let Ok(text) = reader.result()
-                    && let Some(s) = text.as_string()
-                {
-                    cb2.emit(s);
-                }
-            }) as Box<dyn FnMut(_)>);
-            reader.set_onload(Some(onload.as_ref().unchecked_ref()));
-            onload.forget();
-            let _ = reader.read_as_text(&file);
-            input.set_value("");
-        })
-    };
-    let on_keydown = {
-        let run = props.on_run.clone();
-        Callback::from(move |e: web_sys::KeyboardEvent| {
-            if e.ctrl_key() && e.key() == "Enter" {
-                e.prevent_default();
-                run.emit(e.unchecked_into());
-            }
-        })
-    };
+    let on_input = make_input_handler(props.on_change.clone());
+    let on_load_click = make_load_click_handler(file_ref.clone());
+    let on_file_change = make_file_change_handler(props.on_change.clone());
+    let on_keydown = make_keydown_handler(props.on_run.clone());
     html! {
         <div class="editor-panel">
             <div class="editor-toolbar">
@@ -81,4 +38,51 @@ pub fn editor_panel(props: &EditorProps) -> Html {
             />
         </div>
     }
+}
+
+fn make_input_handler(on_change: Callback<String>) -> Callback<InputEvent> {
+    Callback::from(move |e: InputEvent| {
+        let ta: HtmlTextAreaElement = e.target_unchecked_into();
+        on_change.emit(ta.value());
+    })
+}
+
+fn make_load_click_handler(file_ref: NodeRef) -> Callback<MouseEvent> {
+    Callback::from(move |_: MouseEvent| {
+        if let Some(el) = file_ref.cast::<HtmlInputElement>() {
+            el.click();
+        }
+    })
+}
+
+fn make_file_change_handler(on_change: Callback<String>) -> Callback<Event> {
+    Callback::from(move |e: Event| {
+        let input: HtmlInputElement = e.target_unchecked_into();
+        let Some(file) = input.files().and_then(|f| f.get(0)) else {
+            return;
+        };
+        let reader = FileReader::new().unwrap();
+        let cb = on_change.clone();
+        let onload = Closure::wrap(Box::new(move |e: web_sys::ProgressEvent| {
+            let r: FileReader = e.target().unwrap().unchecked_into();
+            if let Ok(text) = r.result()
+                && let Some(s) = text.as_string()
+            {
+                cb.emit(s);
+            }
+        }) as Box<dyn FnMut(_)>);
+        reader.set_onload(Some(onload.as_ref().unchecked_ref()));
+        onload.forget();
+        let _ = reader.read_as_text(&file);
+        input.set_value("");
+    })
+}
+
+fn make_keydown_handler(on_run: Callback<MouseEvent>) -> Callback<web_sys::KeyboardEvent> {
+    Callback::from(move |e: web_sys::KeyboardEvent| {
+        if e.ctrl_key() && e.key() == "Enter" {
+            e.prevent_default();
+            on_run.emit(e.unchecked_into());
+        }
+    })
 }

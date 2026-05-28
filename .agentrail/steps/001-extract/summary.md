@@ -1,1 +1,0 @@
-Extracted image_io + image_io_pixels into components/eval-image/. Used local ImageError type to avoid the cycle through EvalError. 3 call sites updated. mlpl-eval down to 94 modules. All workspaces compile.

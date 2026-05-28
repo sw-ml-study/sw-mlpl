@@ -40,47 +40,7 @@ pub struct MainArgs<'a> {
 
 pub fn render_main(a: MainArgs) -> Html {
     let editor_pane = if a.editor_active {
-        let content = (*a.editor_content).clone();
-        let on_change = {
-            let h = a.editor_content.clone();
-            Callback::from(move |s: String| h.set(s))
-        };
-        let on_run = {
-            let batch = a.on_run_batch.clone();
-            let ec = a.editor_content.clone();
-            let eo = a.editor_open.clone();
-            Callback::from(move |_: MouseEvent| {
-                let lines: Vec<String> = (*ec)
-                    .lines()
-                    .map(|l| l.trim().to_string())
-                    .filter(|l| !l.is_empty() && !l.starts_with('#'))
-                    .collect();
-                if !lines.is_empty() {
-                    eo.set(false);
-                    batch.emit(lines);
-                }
-            })
-        };
-        let on_clear = {
-            let h = a.editor_content.clone();
-            Callback::from(move |_: MouseEvent| h.set(String::new()))
-        };
-        let on_save = {
-            let ec = a.editor_content.clone();
-            Callback::from(move |_: MouseEvent| {
-                let text = (*ec).clone();
-                if text.is_empty() {
-                    return;
-                }
-                let _ = js_sys::eval(&format!(
-                    "{{const b=new Blob([decodeURIComponent('{}')],{{type:'text/plain'}});\
-                     const a=document.createElement('a');a.href=URL.createObjectURL(b);\
-                     a.download='session.mlpl';a.click();URL.revokeObjectURL(a.href);}}",
-                    js_sys::encode_uri_component(&text)
-                ));
-            })
-        };
-        html! { <EditorPanel {content} {on_change} {on_run} {on_save} {on_clear} /> }
+        render_editor_pane(&a)
     } else {
         html! {}
     };
@@ -113,6 +73,54 @@ pub fn render_main(a: MainArgs) -> Html {
         paths_pane,
         repl_pane,
     )
+}
+
+/// Build the EditorPanel with its 4 callbacks (change, run, clear, save).
+fn render_editor_pane(a: &MainArgs) -> Html {
+    let content = (*a.editor_content).clone();
+    let on_change = {
+        let h = a.editor_content.clone();
+        Callback::from(move |s: String| h.set(s))
+    };
+    let on_run = make_editor_run_callback(a);
+    let on_clear = {
+        let h = a.editor_content.clone();
+        Callback::from(move |_: MouseEvent| h.set(String::new()))
+    };
+    let on_save = make_editor_save_callback(a.editor_content.clone());
+    html! { <EditorPanel {content} {on_change} {on_run} {on_save} {on_clear} /> }
+}
+
+fn make_editor_run_callback(a: &MainArgs) -> Callback<MouseEvent> {
+    let batch = a.on_run_batch.clone();
+    let ec = a.editor_content.clone();
+    let eo = a.editor_open.clone();
+    Callback::from(move |_: MouseEvent| {
+        let lines: Vec<String> = (*ec)
+            .lines()
+            .map(|l| l.trim().to_string())
+            .filter(|l| !l.is_empty() && !l.starts_with('#'))
+            .collect();
+        if !lines.is_empty() {
+            eo.set(false);
+            batch.emit(lines);
+        }
+    })
+}
+
+fn make_editor_save_callback(ec: UseStateHandle<String>) -> Callback<MouseEvent> {
+    Callback::from(move |_: MouseEvent| {
+        let text = (*ec).clone();
+        if text.is_empty() {
+            return;
+        }
+        let _ = js_sys::eval(&format!(
+            "{{const b=new Blob([decodeURIComponent('{}')],{{type:'text/plain'}});\
+             const a=document.createElement('a');a.href=URL.createObjectURL(b);\
+             a.download='session.mlpl';a.click();URL.revokeObjectURL(a.href);}}",
+            js_sys::encode_uri_component(&text)
+        ));
+    })
 }
 
 /// PathsView render: thin wrapper so the parent doesn't need to

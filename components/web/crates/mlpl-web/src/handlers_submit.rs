@@ -52,40 +52,7 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
         let mut new_cmds = (*deps.cmd_history).clone();
         let mut eval_queue: Vec<String> = Vec::new();
         for line in lines {
-            let trimmed = line.trim();
-            if trimmed.is_empty() {
-                continue;
-            }
-            new_cmds.push(trimmed.to_string());
-            if trimmed == ":clear" {
-                deps.session.borrow().clear();
-                new_history.clear();
-                if *deps.show_3d {
-                    let _ = js_sys::eval("window.__stage3d_clear && window.__stage3d_clear()");
-                }
-                continue;
-            }
-            if let Some(cmd) = crate::viz3d_toggle::parse_3d_command(trimmed) {
-                match cmd {
-                    crate::viz3d_toggle::Viz3dCmd::On => deps.show_3d.set(true),
-                    crate::viz3d_toggle::Viz3dCmd::Off => deps.show_3d.set(false),
-                    crate::viz3d_toggle::Viz3dCmd::Reset => {
-                        let _ = js_sys::eval(
-                            "window.__stage3d_reset_view && window.__stage3d_reset_view()",
-                        );
-                    }
-                }
-                continue;
-            }
-            if let Some(name) = parse_upload_command(trimmed) {
-                new_history.push(handle_upload_command(&deps, trimmed, &name));
-                continue;
-            }
-            // Anything else hits the WASM evaluator, which may
-            // block for seconds; defer to the spinner pipeline
-            // (Saga 29 step 018) so the user sees a running
-            // indicator instead of a frozen page.
-            eval_queue.push(trimmed.to_string());
+            classify_line(&deps, line, &mut new_history, &mut new_cmds, &mut eval_queue);
         }
         if new_cmds.is_empty() {
             return;
@@ -99,6 +66,50 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
         }
         process_next_eval(deps.clone(), new_history, eval_queue, 0);
     })
+}
+
+/// Classify one submitted line: `:clear` / `:3d ...` / upload commands
+/// run immediately; everything else is queued for the WASM evaluator.
+fn classify_line(
+    deps: &EvalDeps,
+    line: String,
+    new_history: &mut Vec<HistoryEntry>,
+    new_cmds: &mut Vec<String>,
+    eval_queue: &mut Vec<String>,
+) {
+    let trimmed = line.trim();
+    if trimmed.is_empty() {
+        return;
+    }
+    new_cmds.push(trimmed.to_string());
+    if trimmed == ":clear" {
+        deps.session.borrow().clear();
+        new_history.clear();
+        if *deps.show_3d {
+            let _ = js_sys::eval("window.__stage3d_clear && window.__stage3d_clear()");
+        }
+        return;
+    }
+    if let Some(cmd) = crate::viz3d_toggle::parse_3d_command(trimmed) {
+        apply_3d_command(deps, cmd);
+        return;
+    }
+    if let Some(name) = parse_upload_command(trimmed) {
+        new_history.push(handle_upload_command(deps, trimmed, &name));
+        return;
+    }
+    eval_queue.push(trimmed.to_string());
+}
+
+fn apply_3d_command(deps: &EvalDeps, cmd: crate::viz3d_toggle::Viz3dCmd) {
+    match cmd {
+        crate::viz3d_toggle::Viz3dCmd::On => deps.show_3d.set(true),
+        crate::viz3d_toggle::Viz3dCmd::Off => deps.show_3d.set(false),
+        crate::viz3d_toggle::Viz3dCmd::Reset => {
+            let _ =
+                js_sys::eval("window.__stage3d_reset_view && window.__stage3d_reset_view()");
+        }
+    }
 }
 
 /// Saga 29 step 018: recursive Timeout-yielding eval loop for
@@ -115,7 +126,7 @@ fn process_next_eval(
         return;
     }
     let line = queue[idx].clone();
-    push_running_marker(&mut history, &line);
+    crate::handlers_running::push_running_marker(&mut history, &line);
     deps.history.set(history.clone());
     let deps_next = deps.clone();
     let queue_next = queue.clone();
@@ -139,7 +150,7 @@ fn process_next_eval(
 pub(crate) fn running_message(line: &str) -> &'static str {
     let stripped = line.trim_start();
     if stripped.starts_with("train ") || stripped.starts_with("train{") {
-        return train_caption(stripped);
+        return crate::handlers_running::train_caption(stripped);
     }
     if stripped.starts_with("repeat ") {
         "looping... (this can take a few seconds)"
@@ -155,24 +166,7 @@ pub(crate) fn running_message(line: &str) -> &'static str {
     }
 }
 
-fn train_caption(stripped: &str) -> &'static str {
-    // Parse the iteration count out of `train N {...}`. Small
-    // chunks (<=10) get a chunk-shaped message ("the page will
-    // un-freeze between chunks"); larger blocks keep the
-    // long-duration warning.
-    let after_train = stripped["train ".len()..].trim_start();
-    let count: usize = after_train
-        .split(|c: char| !c.is_ascii_digit())
-        .next()
-        .unwrap_or("")
-        .parse()
-        .unwrap_or(0);
-    if count > 0 && count <= 10 {
-        "training chunk... (a few seconds; the page un-freezes between chunks)"
-    } else {
-        "training... (this can take 30-90 seconds; the page is unresponsive while WASM runs)"
-    }
-}
+
 
 fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
     if line == ":help" || line.starts_with(':') {
@@ -221,31 +215,6 @@ fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
     }
 }
 
-/// Saga 29 step 018: push a Running placeholder so the browser
-/// paints a spinner before the (blocking) WASM eval starts.
-pub(crate) fn push_running_marker(entries: &mut Vec<HistoryEntry>, line: &str) {
-    entries.push(HistoryEntry {
-        input: line.to_string(),
-        output: running_message(line).to_string(),
-        is_error: false,
-        kind: EntryKind::Running,
-    });
-}
 
-/// Saga 29 step 018: pop the trailing Running marker and push
-/// the actual Command result. Called from inside the
-/// post-eval Timeout closure once the WASM session returns.
-pub(crate) fn replace_running_with_result(
-    entries: &mut Vec<HistoryEntry>,
-    line: &str,
-    result: String,
-) {
-    let is_error = result.starts_with("error:");
-    entries.pop();
-    entries.push(HistoryEntry {
-        input: line.to_string(),
-        output: result,
-        is_error,
-        kind: EntryKind::Command,
-    });
-}
+
+
