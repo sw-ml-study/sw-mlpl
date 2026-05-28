@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 2,
+    "step": "move-mlpl-core"
+  },
+  "action": "git mv, sed substitution across Cargo.toml files, verified all four workspaces build, fmt + clippy clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T20:19:02"
+}
