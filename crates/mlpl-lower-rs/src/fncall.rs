@@ -146,5 +146,5 @@ fn lower_matmul(ctx: &Ctx, args: &[Expr]) -> Result<TokenStream, LowerError> {
     }
     let a = lower_expr(ctx, &args[0])?;
     let b = lower_expr(ctx, &args[1])?;
-    Ok(quote! { (#a).matmul(&(#b)).unwrap() })
+    Ok(quote! { mlpl_array_ops_matmul::MatmulExt::matmul(&(#a), &(#b)).unwrap() })
 }

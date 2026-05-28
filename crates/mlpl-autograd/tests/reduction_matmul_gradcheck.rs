@@ -5,6 +5,7 @@
 //! for array-valued roots it differentiates `sum(y)` wrt inputs.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_array_ops_matmul::prelude::*;
 use mlpl_autograd::{Tape, Tensor};
 
 const EPS: f64 = 1e-6;

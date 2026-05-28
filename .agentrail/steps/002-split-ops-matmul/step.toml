@@ -1,6 +1,6 @@
 number = 2
 slug = "split-ops-matmul"
-status = "pending"
+status = "in-progress"
 description = "Extract ops_matmul.rs from mlpl-array into the sibling crate mlpl-array-ops-m..."
 role = "production"
 context_files = []

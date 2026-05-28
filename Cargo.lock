@@ -1950,6 +1950,15 @@ dependencies = [
 name = "mlpl-array"
 version = "0.20.0"
 dependencies = [
+ "mlpl-array-ops-matmul",
+ "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-array-ops-matmul"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
  "mlpl-core",
 ]
 
@@ -1958,6 +1967,7 @@ name = "mlpl-autograd"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-core",
 ]
 
@@ -1967,6 +1977,7 @@ version = "0.20.0"
 dependencies = [
  "criterion",
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-eval",
  "mlpl-lower-rs",
  "mlpl-parser",
@@ -1981,6 +1992,7 @@ version = "0.20.0"
 name = "mlpl-build"
 version = "0.20.0"
 dependencies = [
+ "mlpl-array-ops-matmul",
  "mlpl-lower-rs",
  "mlpl-parser",
 ]
@@ -2021,6 +2033,7 @@ dependencies = [
  "flate2",
  "jpeg-decoder",
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-bpe-core",
  "mlpl-core",
@@ -2088,6 +2101,7 @@ dependencies = [
 name = "mlpl-macro"
 version = "0.20.0"
 dependencies = [
+ "mlpl-array-ops-matmul",
  "mlpl-lower-rs",
  "mlpl-parser",
  "proc-macro2",
@@ -2107,6 +2121,7 @@ name = "mlpl-mlx-rt"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-core",
  "mlpl-rt",
  "mlx-rs",
@@ -2164,6 +2179,7 @@ name = "mlpl-models-tape"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-core",
  "mlpl-eval-core",
@@ -2186,6 +2202,7 @@ name = "mlpl-parity-tests"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-eval",
  "mlpl-lower-rs",
  "mlpl-parser",
@@ -2265,6 +2282,7 @@ name = "mlpl-runtime-array"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-runtime-core",
 ]
 
@@ -2328,6 +2346,7 @@ name = "mlpl-runtime-rnn"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-array-ops-matmul",
  "mlpl-runtime-core",
 ]
 
