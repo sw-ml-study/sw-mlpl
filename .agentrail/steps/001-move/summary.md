@@ -1,1 +1,1 @@
-Moved mlpl-cli + mlpl + mlpl-repl + mlpl-build + mlpl-lab into components/cli/. apps/ now empty.
+Moved mlpl-serve + mlpl-mlx-serve into components/serve/. services/ now empty.
