@@ -9,3 +9,4 @@ mlpl-core = { path = "../mlpl-core" }
 
 [dev-dependencies]
 mlpl-array-ops-matmul = { path = "../mlpl-array-ops-matmul" }
+mlpl-array-ops-reduce = { path = "../mlpl-array-ops-reduce" }

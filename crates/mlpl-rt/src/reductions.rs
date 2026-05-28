@@ -14,6 +14,7 @@
 //! scalar.
 
 use mlpl_array::{ArrayError, DenseArray, Shape};
+use mlpl_array_ops_reduce::prelude::*;
 
 /// Product reduction. `axis = None` collapses to a scalar over the
 /// flat data; `axis = Some(ax)` removes one dimension and returns a

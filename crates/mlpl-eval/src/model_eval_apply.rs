@@ -6,6 +6,7 @@
 //! `model_attn_weights::extract_attn_weights`.
 
 use mlpl_array::DenseArray;
+use mlpl_array_ops_reduce::prelude::*;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
