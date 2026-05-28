@@ -19,3 +19,10 @@ books/*/book/
 # checked in themselves -- the tarball is ~792 MB).
 /data/
 /dist-pages/
+
+# macOS Finder metadata
+.DS_Store
+**/.DS_Store
+
+# Scratch directory for prereq prompts, drafts, generated diagrams
+/tmp/
