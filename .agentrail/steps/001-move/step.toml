@@ -1,0 +1,10 @@
+number = 1
+slug = "move"
+status = "completed"
+description = "Move mlpl-eval to components/eval/. Update path refs in consumers."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:29:20"
+completed_at = "2026-05-27T21:30:29"
+task_type = "refactor"
+commits = ["bdbc936e120dd6b9dda512aac1ff19e4d2296cad"]
