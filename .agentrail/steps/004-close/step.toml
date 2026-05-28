@@ -1,0 +1,9 @@
+number = 4
+slug = "close"
+status = "pending"
+description = "FINAL (use --done): sw-checklist delta vs saga 55 start. Update docs/language..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:14:17"
+task_type = "docs"
+commits = []
