@@ -14,7 +14,7 @@ members = [
   "crates/mlpl-bench",
   "crates/mlpl-parity-tests",
   
-  "crates/mlpl-parser",
+  
   "crates/mlpl-runtime-core",
   "crates/mlpl-runtime-math",
   "crates/mlpl-runtime-conv",

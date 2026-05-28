@@ -2304,6 +2304,14 @@ version = "0.20.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer",
+ "mlpl-parser-ast",
+]
+
+[[package]]
+name = "mlpl-parser-ast"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
 ]
 
 [[package]]

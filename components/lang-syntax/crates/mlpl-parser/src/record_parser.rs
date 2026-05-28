@@ -27,10 +27,10 @@ use std::collections::HashSet;
 
 use mlpl_core::Span;
 
-use crate::ast::Expr;
 use crate::parser::Parser;
 use mlpl_lexer::TokenKind;
 use mlpl_lexer::{ParseError, describe_kind};
+use mlpl_parser_ast::Expr;
 
 impl Parser<'_> {
     /// Caller has just consumed an `LBrace` at `open_span`.

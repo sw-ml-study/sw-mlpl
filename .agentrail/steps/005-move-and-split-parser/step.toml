@@ -1,6 +1,6 @@
 number = 5
 slug = "move-and-split-parser"
-status = "pending"
+status = "in-progress"
 description = "Move + split mlpl-parser. After move, decompose: mlpl-parser-ast (Expr, BinOp..."
 role = "production"
 context_files = []

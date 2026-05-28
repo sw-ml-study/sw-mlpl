@@ -1,0 +1,12 @@
+[package]
+name = "mlpl-parser-ast"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# AST types (Expr, BinOpKind, TensorCtorKind) + their Display impls.
+# Sibling of mlpl-parser. Pure data + formatting; no parser logic.
+# Display impls must live alongside their types (Rust orphan rule).
+
+[dependencies]
+mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }

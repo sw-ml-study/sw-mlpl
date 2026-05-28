@@ -22,12 +22,12 @@ mlpl-rt = { path = "../mlpl-rt" }
 criterion = { version = "0.5", default-features = false, features = ["cargo_bench_support"] }
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-eval = { path = "../mlpl-eval" }
-mlpl-parser = { path = "../mlpl-parser" }
+mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 
 [build-dependencies]
 mlpl-lower-rs = { path = "../../components/lang-syntax/crates/mlpl-lower-rs" }
 mlpl-array-ops-matmul = { path = "../../components/lang-core/crates/mlpl-array-ops-matmul" }
-mlpl-parser = { path = "../mlpl-parser" }
+mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 
 [[bench]]
 name = "interp_vs_compiled"

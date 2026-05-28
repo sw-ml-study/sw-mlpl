@@ -10,6 +10,6 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-eval = { path = "../mlpl-eval" }
-mlpl-parser = { path = "../mlpl-parser" }
+mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 mlpl-trace = { path = "../mlpl-trace" }
 wasm-bindgen = "0.2"
