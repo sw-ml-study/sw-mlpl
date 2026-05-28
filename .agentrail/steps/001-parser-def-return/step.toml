@@ -1,6 +1,6 @@
 number = 1
 slug = "parser-def-return"
-status = "pending"
+status = "completed"
 description = """
 Step 001: Parser: def + return AST nodes.
 
@@ -8,5 +8,6 @@ Add Expr::FnDef { name, params, bo..."""
 role = "production"
 context_files = []
 created_at = "2026-05-27T16:51:32"
+completed_at = "2026-05-27T17:00:29"
 task_type = "feature"
-commits = []
+commits = ["16bf6c37eec3608916a9f7e6c418f2e250235a28"]

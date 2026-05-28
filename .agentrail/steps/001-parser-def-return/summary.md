@@ -1,0 +1,1 @@
+Parser for def + return: Expr::FnDef and Expr::Return AST nodes, Def/Return token kinds, lexer keywords, parse_def (namespace enforcement via Ident+BuiltinRef) and parse_return. Eval stubs. 6 parser tests + 4 keyword smoke fragments. Full workspace clippy clean.
