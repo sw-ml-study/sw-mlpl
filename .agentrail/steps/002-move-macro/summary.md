@@ -1,0 +1,1 @@
+Moved mlpl-macro to components/lang-syntax/crates/. Updated 1 consumer (crates/mlpl) + mlpl-macro's own 3 cross-component deps.
