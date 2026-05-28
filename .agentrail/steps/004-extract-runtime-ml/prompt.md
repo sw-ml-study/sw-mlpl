@@ -1,0 +1,1 @@
+Extract mlpl-runtime/src/ml_builtins.rs into new crate mlpl-runtime-ml. Current state: 7 functions (WARN), with multiple Function LOC WARNs: cross_entropy_indices 44, parse_sinusoidal_args 32, builtin_softmax 49, builtin_one_hot 36. Split into focused modules to retire WARNs. Update mlpl-runtime to delegate. Reduces mlpl-runtime module count further (6 -> 5).

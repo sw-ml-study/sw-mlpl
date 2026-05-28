@@ -22,6 +22,7 @@ members = [
   "crates/mlpl-runtime-conv",
   "crates/mlpl-runtime-rnn",
   "crates/mlpl-runtime-array",
+  "crates/mlpl-runtime-ml",
   "crates/mlpl-runtime",
   "crates/mlpl-runtime-data",
   "crates/mlpl-runtime-dim-reduction",
