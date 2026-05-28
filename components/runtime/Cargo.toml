@@ -1,0 +1,19 @@
+# Saga 55: components/runtime/ nested workspace.
+#
+# Houses the built-in function runtime: dispatch crate plus the
+# concern-grouped sibling crates (math, conv, rnn, array, ml,
+# data, dim-reduction, umap, mds-rp) and runtime-core (RuntimeError
+# + prng). Each sibling is already sparse from saga 50's earlier
+# extractions; this saga regroups them under the runtime component.
+
+[workspace]
+members = []
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"

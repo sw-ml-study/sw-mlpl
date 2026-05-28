@@ -1,0 +1,9 @@
+number = 3
+slug = "review-for-splits"
+status = "pending"
+description = "After bulk-move, check sw-checklist for crowded crates in components/runtime/..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:14:17"
+task_type = "refactor"
+commits = []

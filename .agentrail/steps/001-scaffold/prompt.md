@@ -1,1 +1,1 @@
-Create components/lang-syntax/ nested workspace with empty members list. Pattern matches components/lang-core/. Verify main + lang-core + new workspace all build.
+Create components/runtime/ workspace skeleton.

@@ -1,0 +1,9 @@
+number = 2
+slug = "bulk-move"
+status = "pending"
+description = "git mv all 11 runtime crates from crates/ to components/runtime/crates/. Upda..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:14:17"
+task_type = "refactor"
+commits = []

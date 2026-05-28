@@ -1,46 +1,33 @@
-# components/lang-syntax/ migration + split (saga 54)
+# components/runtime/ migration (saga 55)
 
-Move + DECOMPOSE the lexer/parser/macro/lower-rs family into a
-new `components/lang-syntax/` workspace. Apply the move-AND-split
-principle: every crowded crate must be split into sparse siblings
-inside the component, not just moved.
+Move the runtime family (11 crates) into a new
+`components/runtime/` workspace. Most crates are already sparse
+from saga 50's earlier extractions; the big work here is the
+bulk move + path updates.
 
-## Crowded crates to split
+## Crates to move
 
-- `mlpl-lexer`: 5 modules + 7-fn lexer.rs WARN + 6-fn lex_util.rs WARN +
-  3 long-fn WARNs (next_token 35, lex_ident 32, describe_kind 39).
-  Plan to split into ~6 sibling crates by lexing concern.
-- `mlpl-parser`: 6 modules at limit + ast_fmt 7-fn WARN + parser.rs
-  5-fn WARN + parser.rs 415-line file WARN + fmt() 49-line WARN.
-  Plan to split into ~4 sibling crates by parsing concern.
+From crates/ to components/runtime/crates/:
+- mlpl-runtime-core
+- mlpl-runtime-math
+- mlpl-runtime-conv
+- mlpl-runtime-rnn
+- mlpl-runtime-array
+- mlpl-runtime-ml
+- mlpl-runtime-data
+- mlpl-runtime-dim-reduction
+- mlpl-runtime-umap
+- mlpl-runtime-mds-rp
+- mlpl-runtime
 
 ## Step plan
 
-1. **scaffold**: create `components/lang-syntax/` workspace.
-2. **move-macro**: move mlpl-macro (small, leaf).
-3. **move-lower-rs**: move mlpl-lower-rs (depends on parser only).
-4. **move-and-split-lexer**: move mlpl-lexer into the new component,
-   then decompose it into sibling crates: mlpl-lexer-token (types),
-   mlpl-lexer-error (ParseError + describe_kind), mlpl-lex-string
-   (string literal + utf-8), mlpl-lex-number, mlpl-lex-punct
-   (whitespace + single_char + builtin_ref), mlpl-lex-ident
-   (keyword recognition + identifier), and mlpl-lexer (Lexer driver
-   + entry point) calling all the helpers.
-5. **move-and-split-parser**: move mlpl-parser into the new
-   component, then decompose: mlpl-parser-ast (AST types),
-   mlpl-parser-fmt (Display impls), mlpl-parser-stmts
-   (statement parsing), mlpl-parser-records (record literal +
-   field access), mlpl-parser (main parser entry).
-6. **close**: sw-checklist delta, language-status update.
-
-## Expected sw-checklist deltas
-
-Each split should retire WARNs through structural decomposition:
-- lexer family: ~5 WARNs retired (lex_util 6-fn, lexer.rs 7-fn,
-  describe_kind 39, next_token 35, lex_ident 32)
-- parser family: ~4 WARNs retired (ast_fmt 7-fn, parser.rs 5-fn,
-  parser.rs 415-line, fmt 49)
-
-Plus any structural FAILs if module counts go over budget for the
-mlpl-parser/lexer crates that currently FAIL. (They're at WARN now,
-not FAIL, so no FAILs to retire from this saga's primary work.)
+1. **scaffold**: create components/runtime/ workspace.
+2. **bulk-move**: git mv all 11 crates, update workspace members
+   (remove from root, add to runtime), update inter-crate paths
+   inside the family (now siblings = `../mlpl-runtime-X`) and
+   external consumer paths (now point into components/runtime/).
+3. **review-for-splits**: identify any remaining over-budget crates
+   (e.g. mlpl-runtime-dim-reduction at 7 modules) and decompose
+   if it would retire FAILs/WARNs.
+4. **close**: sw-checklist delta + language-status update.
