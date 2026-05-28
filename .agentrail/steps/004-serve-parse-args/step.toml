@@ -1,0 +1,9 @@
+number = 4
+slug = "serve-parse-args"
+status = "pending"
+description = "Refactor mlpl-serve's parse_args (73 lines) in main.rs into per-arg helpers."
+role = "production"
+context_files = []
+created_at = "2026-05-27T22:01:41"
+task_type = "refactor"
+commits = []

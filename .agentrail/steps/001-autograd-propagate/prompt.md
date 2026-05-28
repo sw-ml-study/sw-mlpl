@@ -1,0 +1,1 @@
+Refactor mlpl-autograd's propagate function (77 lines) in backward.rs into orchestrator + helpers, each under 25 lines. Verify tests pass.
