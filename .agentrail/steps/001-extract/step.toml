@@ -1,0 +1,9 @@
+number = 1
+slug = "extract"
+status = "in-progress"
+description = "Extract image_io + image_io_pixels"
+role = "production"
+context_files = []
+created_at = "2026-05-28T08:32:44"
+task_type = "refactor"
+commits = []

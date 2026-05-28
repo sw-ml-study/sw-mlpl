@@ -856,6 +856,7 @@ dependencies = [
  "mlpl-core",
  "mlpl-env-traits",
  "mlpl-eval-core",
+ "mlpl-eval-image",
  "mlpl-loader-helpers",
  "mlpl-lower-rs",
  "mlpl-mlx-rt",
@@ -882,6 +883,14 @@ dependencies = [
 [[package]]
 name = "mlpl-eval-core"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-eval-image"
+version = "0.20.0"
+dependencies = [
+ "jpeg-decoder",
+ "png",
+]
 
 [[package]]
 name = "mlpl-lex-ident"

@@ -121,7 +121,7 @@ pub(crate) fn eval_load_images(
     let per_image = 3 * h * w;
     let mut data = Vec::with_capacity(paths.len() * per_image);
     for path in &paths {
-        let pixels = crate::image_io::decode_and_resize(path, h, w)?;
+        let pixels = mlpl_eval_image::decode_and_resize(path, h, w)?;
         data.extend_from_slice(&pixels);
     }
     let labels = vec![

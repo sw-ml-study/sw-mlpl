@@ -109,7 +109,7 @@ pub(crate) fn decode_directory_to_record(
     let mut y_data: Vec<f64> = Vec::with_capacity(paths.len());
     let mut names: Vec<String> = Vec::with_capacity(paths.len());
     for path in &paths {
-        x_data.extend_from_slice(&crate::image_io::decode_and_resize(path, h, w)?);
+        x_data.extend_from_slice(&mlpl_eval_image::decode_and_resize(path, h, w)?);
         let name = path.file_name().and_then(|n| n.to_str()).ok_or_else(|| {
             EvalError::Unsupported(format!(
                 "fetch_dataset: non-utf8 filename {}",

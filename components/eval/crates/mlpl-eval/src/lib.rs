@@ -64,18 +64,11 @@ mod grad;
 mod grad_calls_basic;
 mod grad_calls_shape;
 mod grad_optim;
-#[cfg(feature = "image-io")]
-mod image_io;
-#[cfg(feature = "image-io")]
-mod image_io_pixels;
 mod inspect;
 mod inspect_collections;
 mod inspect_describe;
 mod inspect_introspect;
 mod inspect_render;
-
-#[cfg(feature = "image-io")]
-pub use image_io::decode_and_resize_u8;
 mod interrupt;
 mod llm_dispatch;
 mod loader;
@@ -112,6 +105,8 @@ pub use eval_program::{
 };
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
+#[cfg(feature = "image-io")]
+pub use mlpl_eval_image::decode_and_resize_u8;
 pub use inspect::inspect;
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;

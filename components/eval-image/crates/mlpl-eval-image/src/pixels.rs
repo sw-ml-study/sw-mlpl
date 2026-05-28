@@ -7,7 +7,7 @@
 
 use std::path::Path;
 
-use crate::error::EvalError;
+use crate::ImageError;
 
 /// Convert decoded PNG bytes into an `[H, W, 3]` RGB buffer,
 /// expanding grayscale / RGBA / grayscale-alpha sources as
@@ -19,9 +19,9 @@ pub(crate) fn expand_to_rgb(
     color: png::ColorType,
     depth: png::BitDepth,
     path: &Path,
-) -> Result<Vec<u8>, EvalError> {
+) -> Result<Vec<u8>, ImageError> {
     if depth != png::BitDepth::Eight {
-        return Err(EvalError::Unsupported(format!(
+        return Err(ImageError::new(format!(
             "load_images: only 8-bit PNGs supported (got {depth:?} for {})",
             path.display()
         )));
@@ -43,7 +43,7 @@ pub(crate) fn expand_to_rgb(
             }
             Ok(out)
         }
-        png::ColorType::Indexed => Err(EvalError::Unsupported(format!(
+        png::ColorType::Indexed => Err(ImageError::new(format!(
             "load_images: indexed/palette PNGs not supported in {}",
             path.display()
         ))),

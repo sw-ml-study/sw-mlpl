@@ -1,6 +1,7 @@
-# Split mlpl-session/ (10 crates) into sparse sub-components (saga 70)
+# Extract image_* from mlpl-eval (saga 71)
 
-- session-infra (3):  mlpl-bpe-core, mlpl-env-traits, mlpl-loader-helpers
-- models-read (3):    mlpl-models-feasibility, mlpl-models-freeze, mlpl-models-inspect
-- models-write (3):   mlpl-models-mutate, mlpl-models-tape, mlpl-models-tune
-- models-llm (1):     mlpl-models-llm
+First Phase-1 god-crate-decomposition saga. Move the 2 image_io
+files into components/eval-image/. Image code only uses
+EvalError::Unsupported(String); avoid cycle by defining
+mlpl-eval-image's own ImageError type and `impl From<ImageError>
+for EvalError` in mlpl-eval.
