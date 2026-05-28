@@ -6,7 +6,7 @@ version.workspace = true
 description = "Visual regression test harness for MLPL demos (saga 33 step 026)."
 
 [dependencies]
-mlpl-array = { path = "../mlpl-array" }
+mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-eval = { path = "../mlpl-eval" }
 mlpl-parser = { path = "../mlpl-parser" }
 resvg = { version = "0.45", default-features = false, features = ["text", "memmap-fonts"] }

@@ -11,5 +11,5 @@ version.workspace = true
 # only; nothing depends back up the dep graph (DAG).
 
 [dependencies]
-mlpl-array = { path = "../mlpl-array" }
+mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-runtime-core = { path = "../mlpl-runtime-core" }

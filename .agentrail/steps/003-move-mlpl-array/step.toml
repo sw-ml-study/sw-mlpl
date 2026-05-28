@@ -1,6 +1,6 @@
 number = 3
 slug = "move-mlpl-array"
-status = "pending"
+status = "in-progress"
 description = "Move mlpl-array (the biggest fan-out: ~30 referrers). Same recipe as move-mlp..."
 role = "production"
 context_files = []
