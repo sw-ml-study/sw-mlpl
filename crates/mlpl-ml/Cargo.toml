@@ -5,5 +5,5 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-mlpl-array = { path = "../mlpl-array" }
+mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-runtime = { path = "../mlpl-runtime" }

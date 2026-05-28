@@ -18,6 +18,6 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-mlpl-array = { path = "../../../../crates/mlpl-array" }
+mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
 mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../../crates/mlpl-eval-core" }

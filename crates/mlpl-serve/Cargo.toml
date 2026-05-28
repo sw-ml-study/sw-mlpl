@@ -20,7 +20,7 @@ path = "src/main.rs"
 [dependencies]
 mlpl-parser = { path = "../mlpl-parser" }
 mlpl-eval = { path = "../mlpl-eval" }
-mlpl-array = { path = "../mlpl-array" }
+mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
 # Saga 21.5 step 001: ReceiverStream adapter so an axum SSE

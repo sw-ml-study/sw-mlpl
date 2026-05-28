@@ -17,7 +17,7 @@ default = []
 mlx = ["dep:mlx-rs"]
 
 [dependencies]
-mlpl-array = { path = "../mlpl-array" }
+mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }
 
 # Pinned by Saga 14 plan (risk/mitigation item): upstream ABI can
