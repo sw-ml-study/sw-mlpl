@@ -1,1 +1,1 @@
-Step 002 (FINAL, use --done): language-status.md update. Demo smoke test. Mark --done.
+Step 002 (FINAL, use --done): language-status.md + saga close.
