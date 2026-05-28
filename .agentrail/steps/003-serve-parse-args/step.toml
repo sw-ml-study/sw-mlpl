@@ -1,6 +1,6 @@
 number = 3
 slug = "serve-parse-args"
-status = "pending"
+status = "in-progress"
 description = "Refactor mlpl-serve parse_args (73 lines) into per-flag helpers."
 role = "production"
 context_files = []
