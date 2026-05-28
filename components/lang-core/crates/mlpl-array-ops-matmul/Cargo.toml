@@ -1,0 +1,12 @@
+[package]
+name = "mlpl-array-ops-matmul"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Matrix-multiplication + dot-product extension traits for DenseArray.
+# Lives as a sibling of mlpl-array so the parent crate stays sparse.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-core = { path = "../mlpl-core" }

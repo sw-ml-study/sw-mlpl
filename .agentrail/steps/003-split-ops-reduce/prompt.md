@@ -1,0 +1,1 @@
+Extract ops_reduce.rs into mlpl-array-ops-reduce sibling crate using extension traits (ReduceExt with reduce_axis, ArgmaxExt with argmax_axis). Same recipe as split-ops-matmul. Also opportunistically shrink the two long functions (reduce_axis 46 lines, argmax_axis 44 lines) below the 25-LOC warning threshold by extracting per-axis helpers.

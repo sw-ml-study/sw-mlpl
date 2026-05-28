@@ -1,0 +1,9 @@
+number = 1
+slug = "scaffold-siblings"
+status = "in-progress"
+description = "Scaffold 5 sibling crates in components/lang-core/crates/: mlpl-array-ops-mat..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T20:28:05"
+task_type = "infra"
+commits = []

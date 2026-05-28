@@ -18,6 +18,11 @@
 [workspace]
 members = [
     "crates/mlpl-array",
+    "crates/mlpl-array-ops-compose",
+    "crates/mlpl-array-ops-element",
+    "crates/mlpl-array-ops-matmul",
+    "crates/mlpl-array-ops-reduce",
+    "crates/mlpl-array-ops-shape",
     "crates/mlpl-core",
     "crates/mlpl-eval-core",
 ]

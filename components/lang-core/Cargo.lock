@@ -22,6 +22,42 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-array-ops-compose"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-array-ops-element"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-array-ops-matmul"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-array-ops-reduce"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-array-ops-shape"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-core"
 version = "0.20.0"
 dependencies = [

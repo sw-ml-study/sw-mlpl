@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-array-ops-reduce"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Reduction extension traits (reduce_axis, argmax_axis) for DenseArray.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }

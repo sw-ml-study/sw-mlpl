@@ -1,0 +1,1 @@
+Extract ops_reshape.rs + ops_transpose.rs into mlpl-array-ops-shape. Define ReshapeExt, TransposeExt. Opportunistically shrink transpose (37 lines).

@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-array-ops-shape"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Shape-manipulation extension traits (reshape, transpose) for
+# DenseArray.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
