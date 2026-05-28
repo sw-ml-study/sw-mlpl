@@ -1,6 +1,6 @@
-# Split lang-core/ (8 crates) into sparse sub-components (saga 69)
+# Split mlpl-session/ (10 crates) into sparse sub-components (saga 70)
 
-- types (2): mlpl-core, mlpl-eval-core
-- array (1): mlpl-array
-- array-element (2): mlpl-array-ops-element, mlpl-array-ops-shape
-- array-compose (3): mlpl-array-ops-compose, mlpl-array-ops-matmul, mlpl-array-ops-reduce
+- session-infra (3):  mlpl-bpe-core, mlpl-env-traits, mlpl-loader-helpers
+- models-read (3):    mlpl-models-feasibility, mlpl-models-freeze, mlpl-models-inspect
+- models-write (3):   mlpl-models-mutate, mlpl-models-tape, mlpl-models-tune
+- models-llm (1):     mlpl-models-llm
