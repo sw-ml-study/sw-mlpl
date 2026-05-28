@@ -1,9 +1,10 @@
 number = 1
 slug = "scaffold-component"
-status = "in-progress"
+status = "completed"
 description = "Create the components/lang-core/ nested workspace scaffold. Make components/l..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:13:51"
+completed_at = "2026-05-27T20:15:12"
 task_type = "infra"
-commits = []
+commits = ["16037a21dd36e4a42b0fc64d3936851545a9eea2"]
