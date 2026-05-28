@@ -1,9 +1,10 @@
 number = 1
 slug = "move"
-status = "in-progress"
+status = "completed"
 description = "Move + path updates"
 role = "production"
 context_files = []
 created_at = "2026-05-27T21:31:27"
+completed_at = "2026-05-27T21:32:06"
 task_type = "refactor"
-commits = []
+commits = ["4f3fb5776e35c205db9c07ffe5ea336c089cc369"]
