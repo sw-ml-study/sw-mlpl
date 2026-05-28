@@ -13,7 +13,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
-WEB_DIR="$PROJECT_DIR/apps/mlpl-web"
+WEB_DIR="$PROJECT_DIR/components/web/crates/mlpl-web"
 PAGES_DIST="$PROJECT_DIR/dist-pages"
 
 echo "=== Building pages/ ==="
