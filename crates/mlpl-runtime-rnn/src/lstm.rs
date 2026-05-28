@@ -1,4 +1,5 @@
 use mlpl_array::{DenseArray, Shape};
+use mlpl_array_ops_matmul::prelude::*;
 use mlpl_runtime_core::error::RuntimeError;
 
 pub(crate) fn lstm_cell(args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {

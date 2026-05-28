@@ -7,6 +7,7 @@
 //! op is generic enough that a dedicated wrapper would be cruft.
 
 use mlpl_array::{ArrayError, DenseArray};
+use mlpl_array_ops_matmul::prelude::*;
 use mlpl_core::Span;
 use mlpl_parser::Expr;
 use mlpl_trace::{Trace, TraceValue};

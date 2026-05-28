@@ -6,4 +6,5 @@ version.workspace = true
 
 [dependencies]
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
+mlpl-array-ops-matmul = { path = "../../components/lang-core/crates/mlpl-array-ops-matmul" }
 mlpl-runtime-core = { path = "../mlpl-runtime-core" }

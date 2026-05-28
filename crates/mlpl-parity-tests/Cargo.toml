@@ -14,4 +14,5 @@ path = "src/lib.rs"
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-eval = { path = "../mlpl-eval" }
 mlpl-lower-rs = { path = "../mlpl-lower-rs" }
+mlpl-array-ops-matmul = { path = "../../components/lang-core/crates/mlpl-array-ops-matmul" }
 mlpl-parser = { path = "../mlpl-parser" }

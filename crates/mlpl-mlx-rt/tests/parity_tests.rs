@@ -21,6 +21,7 @@
 
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 
+use mlpl_array_ops_matmul::prelude::*;
 use mlpl_mlx_rt::{DenseArray, Shape};
 
 /// Tolerance budget for MLX (fp32) vs CPU (f64) parity. See the

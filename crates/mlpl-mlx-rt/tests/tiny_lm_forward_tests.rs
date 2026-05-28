@@ -21,6 +21,7 @@
 
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 
+use mlpl_array_ops_matmul::prelude::*;
 use mlpl_mlx_rt::{ArrayError, DenseArray, Shape};
 
 /// Tolerance for the end-to-end forward parity. The Tiny LM

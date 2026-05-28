@@ -6,7 +6,6 @@ mod error;
 mod indexing;
 mod ops_binop;
 mod ops_concat;
-mod ops_matmul;
 mod ops_reduce;
 mod ops_reshape;
 mod ops_strides;

@@ -11,6 +11,7 @@
 //!    auto-freeze, verified through the full forward-and-
 //!    backward path).
 
+use mlpl_array_ops_matmul::prelude::*;
 use std::collections::HashMap;
 
 use mlpl_array::{DenseArray, Shape};

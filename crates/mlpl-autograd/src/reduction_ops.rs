@@ -1,5 +1,6 @@
 //! Reduction, shape, and matmul methods on [`Tensor`].
 
+use mlpl_array_ops_matmul::prelude::*;
 use std::rc::Rc;
 
 use mlpl_array::{DenseArray, Shape};

@@ -1,4 +1,5 @@
 use mlpl_array::DenseArray;
+use mlpl_array_ops_matmul::prelude::*;
 use mlpl_runtime_core::error::RuntimeError;
 
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
