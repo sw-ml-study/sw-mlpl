@@ -10,7 +10,7 @@ path = "src/lib.rs"
 [dependencies]
 mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 mlpl-eval = { path = "../mlpl-eval" }
-mlpl-trace = { path = "../mlpl-trace" }
+mlpl-trace = { path = "../../components/autograd/crates/mlpl-trace" }
 # Saga 21 step 003: CLI viz cache strategy. Content-
 # addressed SVG paths under $MLPL_CACHE_DIR (default
 # dirs::cache_dir().join("mlpl")) replace the old

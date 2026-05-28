@@ -56,9 +56,9 @@ mlpl-array-ops-shape = { path = "../../components/lang-core/crates/mlpl-array-op
 mlpl-array-ops-compose = { path = "../../components/lang-core/crates/mlpl-array-ops-compose" }
 mlpl-array-ops-reduce = { path = "../../components/lang-core/crates/mlpl-array-ops-reduce" }
 mlpl-array-ops-matmul = { path = "../../components/lang-core/crates/mlpl-array-ops-matmul" }
-mlpl-autograd = { path = "../mlpl-autograd" }
+mlpl-autograd = { path = "../../components/autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../components/runtime/crates/mlpl-runtime" }
-mlpl-trace = { path = "../mlpl-trace" }
+mlpl-trace = { path = "../../components/autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../mlpl-viz" }
 mlpl-mlx-rt = { path = "../mlpl-mlx-rt", optional = true }
 png = { version = "0.17", optional = true }
