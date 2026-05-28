@@ -101,62 +101,42 @@ pub struct EvalResult {
 fn eval_input_with_values(input: &str, env: &mut Environment) -> EvalResult {
     let trimmed = input.trim();
     if trimmed.is_empty() {
-        return EvalResult {
-            display: String::new(),
-            values: None,
-            shape: vec![],
-        };
+        return empty_result();
     }
     if let Some(out) = mlpl_eval::inspect(env, trimmed) {
-        return EvalResult {
-            display: out,
-            values: None,
-            shape: vec![],
-        };
+        return text_result(out);
     }
     let tokens = match mlpl_parser::lex(trimmed) {
         Ok(t) => t,
-        Err(e) => {
-            return EvalResult {
-                display: format!("error: {e}"),
-                values: None,
-                shape: vec![],
-            };
-        }
+        Err(e) => return text_result(format!("error: {e}")),
     };
     let stmts = match mlpl_parser::parse(&tokens) {
-        Ok(s) if s.is_empty() => {
-            return EvalResult {
-                display: String::new(),
-                values: None,
-                shape: vec![],
-            };
-        }
+        Ok(s) if s.is_empty() => return empty_result(),
         Ok(s) => s,
-        Err(e) => {
-            return EvalResult {
-                display: format!("error: {e}"),
-                values: None,
-                shape: vec![],
-            };
-        }
+        Err(e) => return text_result(format!("error: {e}")),
     };
     match mlpl_eval::eval_program_value(&stmts, env) {
-        Ok(mlpl_eval::Value::Array(ref arr)) => EvalResult {
+        Ok(value) => value_to_result(value),
+        Err(e) => text_result(format!("error: {e}")),
+    }
+}
+
+fn empty_result() -> EvalResult {
+    EvalResult { display: String::new(), values: None, shape: vec![] }
+}
+
+fn text_result(display: String) -> EvalResult {
+    EvalResult { display, values: None, shape: vec![] }
+}
+
+fn value_to_result(value: mlpl_eval::Value) -> EvalResult {
+    match value {
+        mlpl_eval::Value::Array(ref arr) => EvalResult {
             display: format!("{}", mlpl_eval::Value::Array(arr.clone())),
             values: Some(arr.data().to_vec()),
             shape: arr.shape().dims().to_vec(),
         },
-        Ok(value) => EvalResult {
-            display: format!("{value}"),
-            values: None,
-            shape: vec![],
-        },
-        Err(e) => EvalResult {
-            display: format!("error: {e}"),
-            values: None,
-            shape: vec![],
-        },
+        other => text_result(format!("{other}")),
     }
 }
 
