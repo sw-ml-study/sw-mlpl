@@ -1,0 +1,12 @@
+number = 2
+slug = "shrink-fns"
+status = "pending"
+description = """
+Step 002: Shrink over-50-LOC functions.
+
+Target: math_builtins.rs (8 fns -> s..."""
+role = "production"
+context_files = []
+created_at = "2026-05-27T18:19:58"
+task_type = "refactor"
+commits = []
