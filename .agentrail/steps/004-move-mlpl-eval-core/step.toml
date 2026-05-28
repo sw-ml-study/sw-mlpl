@@ -1,0 +1,9 @@
+number = 4
+slug = "move-mlpl-eval-core"
+status = "pending"
+description = "Move mlpl-eval-core (~7 referrers, smaller batch). Same recipe. After this st..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T20:13:51"
+task_type = "refactor"
+commits = []
