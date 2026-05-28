@@ -10,12 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-25 (saga 34 closed; splash screen +
-guided tour + what's-new modal).
+Last refreshed: 2026-05-27 (saga 50 closed; runtime extraction).
 
 ## Active saga
 
-None. Saga 40 (`autoencoder-demo`) closed 2026-05-27.
+None. Saga 50 (`warning-ratchet-spike`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -45,6 +44,7 @@ human-readable summary.
 | `repl-to-script-path` (47) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "REPL to Script" learning path (9 steps). |
 | `training-paradigms-path` (48) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "Training Paradigms" learning path (16 steps, 4 groups). |
 | `optimizers-regularization-path` (49) | shipped | -- (content saga) | Closed 2026-05-27. 2 steps. "Optimizers & Regularization" learning path (19 steps). |
+| `warning-ratchet-spike` (50) | shipped | -- (refactor saga) | Closed 2026-05-27. 5 steps. Extracted 6 new crates from mlpl-runtime + mlpl-parser: mlpl-runtime-math, mlpl-runtime-conv, mlpl-runtime-rnn, mlpl-runtime-array, mlpl-runtime-ml, mlpl-lexer. Plus ast_fmt_compound.rs helper in parser. sw-checklist 141->133 fails (-8), 473->474 warnings. Big wins: builtins.rs 16->3 fns, mlpl-runtime 9->4 modules, mlpl-parser 10->6 modules, conv2d/pool2d/lstm_cell/fmt all retired (FAIL->WARN or PASS). Note: extractions landed flat in `crates/`; component-restructure saga (51+) will migrate them into `components/`. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
