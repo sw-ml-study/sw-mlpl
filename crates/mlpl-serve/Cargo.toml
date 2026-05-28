@@ -18,7 +18,7 @@ name = "mlpl-serve"
 path = "src/main.rs"
 
 [dependencies]
-mlpl-parser = { path = "../mlpl-parser" }
+mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 mlpl-eval = { path = "../mlpl-eval" }
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 axum = "0.7"

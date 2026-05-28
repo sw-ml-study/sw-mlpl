@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-parser"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-lexer = { path = "../mlpl-lexer" }
+mlpl-parser-ast = { path = "../mlpl-parser-ast" }

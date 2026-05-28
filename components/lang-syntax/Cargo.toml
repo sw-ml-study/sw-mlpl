@@ -17,6 +17,8 @@ members = [
     "crates/mlpl-lexer-token",
     "crates/mlpl-lower-rs",
     "crates/mlpl-macro",
+    "crates/mlpl-parser",
+    "crates/mlpl-parser-ast",
 ]
 resolver = "2"
 

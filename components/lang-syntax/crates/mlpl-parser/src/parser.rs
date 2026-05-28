@@ -2,8 +2,8 @@
 
 use mlpl_core::Span;
 
-use crate::ast::{BinOpKind, Expr, TensorCtorKind};
 use mlpl_lexer::{ParseError, Token, TokenKind, describe_kind};
+use mlpl_parser_ast::{BinOpKind, Expr, TensorCtorKind};
 
 /// Parse a token stream into a list of expression statements.
 pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {

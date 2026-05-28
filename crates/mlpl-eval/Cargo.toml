@@ -49,7 +49,7 @@ mlpl-models-llm = { path = "../../components/mlpl-session/crates/mlpl-models-llm
 mlpl-models-mutate = { path = "../../components/mlpl-session/crates/mlpl-models-mutate" }
 mlpl-models-tape = { path = "../../components/mlpl-session/crates/mlpl-models-tape" }
 mlpl-models-tune = { path = "../../components/mlpl-session/crates/mlpl-models-tune" }
-mlpl-parser = { path = "../mlpl-parser" }
+mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
 mlpl-array-ops-element = { path = "../../components/lang-core/crates/mlpl-array-ops-element" }
 mlpl-array-ops-shape = { path = "../../components/lang-core/crates/mlpl-array-ops-shape" }

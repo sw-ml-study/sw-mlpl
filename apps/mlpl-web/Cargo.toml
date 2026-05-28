@@ -73,7 +73,7 @@ mlpl-eval = { path = "../../crates/mlpl-eval" }
 
 [dev-dependencies]
 mlpl-eval = { path = "../../crates/mlpl-eval" }
-mlpl-parser = { path = "../../crates/mlpl-parser" }
+mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 mlpl-serve = { path = "../../crates/mlpl-serve" }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 axum = "0.7"

@@ -7,10 +7,10 @@
 
 use mlpl_core::Span;
 
-use crate::ast::Expr;
 use crate::parser::Parser;
 use mlpl_lexer::TokenKind;
 use mlpl_lexer::{ParseError, describe_kind};
+use mlpl_parser_ast::Expr;
 
 impl Parser<'_> {
     /// Parse `name : [axis1, axis2, ...] = value` and desugar to

@@ -12,7 +12,7 @@ default = []
 mlx = ["mlpl-eval/mlx"]
 
 [dependencies]
-mlpl-parser = { path = "../../crates/mlpl-parser" }
+mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 mlpl-eval = { path = "../../crates/mlpl-eval" }
 mlpl-trace = { path = "../../crates/mlpl-trace" }
 # Saga 21 step 003: viz_cache transforms SVG return

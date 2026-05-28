@@ -10,6 +10,6 @@ proc-macro = true
 [dependencies]
 mlpl-lower-rs = { path = "../mlpl-lower-rs" }
 mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
-mlpl-parser = { path = "../../../../crates/mlpl-parser" }
+mlpl-parser = { path = "../mlpl-parser" }
 proc-macro2 = "1"
 quote = "1"
