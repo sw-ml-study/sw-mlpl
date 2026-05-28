@@ -30,6 +30,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-eval-core"
+version = "0.20.0"
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"

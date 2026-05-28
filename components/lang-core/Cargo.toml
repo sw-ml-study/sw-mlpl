@@ -19,6 +19,7 @@
 members = [
     "crates/mlpl-array",
     "crates/mlpl-core",
+    "crates/mlpl-eval-core",
 ]
 resolver = "2"
 
