@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 2,
+    "step": "split-ops-matmul"
+  },
+  "action": "Created dot.rs, matmul.rs, labels.rs in new crate. Used extension trait + free helpers. Bulk script to add deps + use lines. cargo fmt + clippy clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-27T20:37:05"
+}
