@@ -14,6 +14,6 @@ version.workspace = true
 [dependencies]
 mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
 mlpl-array-ops-matmul = { path = "../../../lang-core/crates/mlpl-array-ops-matmul" }
-mlpl-autograd = { path = "../../../../crates/mlpl-autograd" }
+mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../lang-core/crates/mlpl-eval-core" }

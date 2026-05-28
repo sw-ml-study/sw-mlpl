@@ -1,1 +1,0 @@
-Bulk-moved 11 runtime crates from crates/ to components/runtime/. Updated intra-runtime cross-component paths and 5 external consumer Cargo.toml refs. All 6 workspaces compile, runtime tests pass. sw-checklist: 287->288 passed, 132 fails, 472 warnings unchanged (structural).
