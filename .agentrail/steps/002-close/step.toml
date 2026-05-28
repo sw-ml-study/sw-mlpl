@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "FINAL --done. crates/ is now empty (or just .gitkeep)."
 role = "production"
 context_files = []
 created_at = "2026-05-27T21:38:00"
+completed_at = "2026-05-27T21:44:35"
 task_type = "docs"
-commits = []
+commits = ["1190e8493ffccab81dec6d0ce804b9341379efdf"]
