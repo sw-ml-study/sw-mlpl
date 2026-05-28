@@ -8,7 +8,7 @@ version.workspace = true
 path = "src/lib.rs"
 
 [dependencies]
-mlpl-parser = { path = "../../../lang-syntax/crates/mlpl-parser" }
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 # Saga 21 step 003: CLI viz cache strategy. Content-
