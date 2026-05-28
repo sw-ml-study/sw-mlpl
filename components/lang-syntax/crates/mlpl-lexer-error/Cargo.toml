@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-lexer-error"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# ParseError + describe_kind for the MLPL lexer.
+
+[dependencies]
+mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }
+mlpl-lexer-token = { path = "../mlpl-lexer-token" }

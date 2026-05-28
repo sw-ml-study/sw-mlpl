@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-lexer-token"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Token types for the MLPL lexer.
+
+[dependencies]
+mlpl-core = { path = "../../../lang-core/crates/mlpl-core" }

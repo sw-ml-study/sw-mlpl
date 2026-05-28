@@ -1,8 +1,0 @@
-[package]
-name = "mlpl-lexer"
-edition.workspace = true
-license.workspace = true
-version.workspace = true
-
-[dependencies]
-mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }

@@ -1,12 +1,13 @@
-//! Lexer for MLPL source code.
+//! `Lexer` driver: walks source bytes, delegates to per-concern
+//! sibling crates, and produces a flat `Vec<Token>`.
 
 use mlpl_core::Span;
-
-use crate::error::ParseError;
-use crate::lex_util::{
-    lex_builtin_ref, lex_number, lex_string, single_char_token, skip_whitespace,
-};
-use crate::token::{Token, TokenKind};
+use mlpl_lex_ident::lex_ident;
+use mlpl_lex_number::lex_number;
+use mlpl_lex_punct::{lex_builtin_ref, single_char_token, skip_whitespace};
+use mlpl_lex_string::lex_string;
+use mlpl_lexer_error::ParseError;
+use mlpl_lexer_token::{Token, TokenKind};
 
 /// Tokenize MLPL source code.
 pub fn lex(source: &str) -> Result<Vec<Token>, ParseError> {
@@ -74,7 +75,9 @@ impl<'a> Lexer<'a> {
             return self.lex_digit();
         }
         if b.is_ascii_alphabetic() || b == b'_' {
-            return Ok(self.lex_ident());
+            let (kind, end) = lex_ident(self.bytes, self.pos);
+            let is_val = matches!(kind, TokenKind::Ident(_));
+            return Ok(self.make_tok(kind, end, is_val));
         }
         let ch = self.source[self.pos..].chars().next().unwrap();
         Err(ParseError::UnexpectedCharacter {
@@ -84,64 +87,19 @@ impl<'a> Lexer<'a> {
     }
 
     fn lex_minus(&mut self) -> Result<Token, ParseError> {
-        if let Some((tok, end)) = lex_number(self.bytes, self.pos).filter(|_| !self.prev_was_value)
+        if let Some((kind, end)) = lex_number(self.bytes, self.pos).filter(|_| !self.prev_was_value)
         {
-            let span = Span::new(self.pos, end);
-            self.pos = end;
-            self.prev_was_value = true;
-            return Ok(Token { kind: tok, span });
+            return Ok(self.make_tok(kind, end, true));
         }
-        let tok = Token {
-            kind: TokenKind::Minus,
-            span: Span::new(self.pos, self.pos + 1),
-        };
-        self.pos += 1;
-        self.prev_was_value = false;
-        Ok(tok)
+        Ok(self.make_tok(TokenKind::Minus, self.pos + 1, false))
     }
 
     fn lex_digit(&mut self) -> Result<Token, ParseError> {
-        if let Some((tok, end)) = lex_number(self.bytes, self.pos) {
-            let span = Span::new(self.pos, end);
-            self.pos = end;
-            self.prev_was_value = true;
-            return Ok(Token { kind: tok, span });
+        if let Some((kind, end)) = lex_number(self.bytes, self.pos) {
+            return Ok(self.make_tok(kind, end, true));
         }
         Err(ParseError::InvalidNumber {
             span: Span::new(self.pos, self.pos + 1),
         })
-    }
-
-    fn lex_ident(&mut self) -> Token {
-        let start = self.pos;
-        while self.pos < self.bytes.len()
-            && (self.bytes[self.pos].is_ascii_alphanumeric() || self.bytes[self.pos] == b'_')
-        {
-            self.pos += 1;
-        }
-        let name = std::str::from_utf8(&self.bytes[start..self.pos])
-            .unwrap()
-            .to_owned();
-        let kind = match name.as_str() {
-            "repeat" => TokenKind::Repeat,
-            "train" => TokenKind::Train,
-            "for" => TokenKind::For,
-            "in" => TokenKind::In,
-            "experiment" => TokenKind::Experiment,
-            "device" => TokenKind::Device,
-            "if" => TokenKind::If,
-            "else" => TokenKind::Else,
-            "while" => TokenKind::While,
-            "break" => TokenKind::Break,
-            "continue" => TokenKind::Continue,
-            "def" => TokenKind::Def,
-            "return" => TokenKind::Return,
-            _ => TokenKind::Ident(name),
-        };
-        self.prev_was_value = matches!(kind, TokenKind::Ident(_));
-        Token {
-            kind,
-            span: Span::new(start, self.pos),
-        }
     }
 }

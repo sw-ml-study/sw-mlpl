@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-lex-ident"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Identifier + keyword lexing.
+
+[dependencies]
+mlpl-lexer-token = { path = "../mlpl-lexer-token" }
