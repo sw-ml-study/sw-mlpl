@@ -62,3 +62,44 @@ fn undefined_fn() {
     let out = run("u:nonexistent(1)");
     assert!(out.contains("ERROR"), "expected error, got: {out}");
 }
+
+#[test]
+fn factorial() {
+    let src = "def u:fact(n) { if gt(n, 1) { n * u:fact(n - 1) } else { 1 } }\nu:fact(6)";
+    assert_eq!(run(src), "720");
+}
+
+#[test]
+fn return_outside_fn_is_error() {
+    let out = run("return 42");
+    assert!(
+        out.contains("ERROR"),
+        "return outside fn should error: {out}"
+    );
+}
+
+#[test]
+fn redefine_overwrites() {
+    assert_eq!(run("def u:f() { 1 }\ndef u:f() { 2 }\nu:f()"), "2");
+}
+
+#[test]
+fn nested_call() {
+    let src = "def u:sq(x) { x * x }\ndef u:sum_sq(a, b) { u:sq(a) + u:sq(b) }\nu:sum_sq(3, 4)";
+    assert_eq!(run(src), "25");
+}
+
+#[test]
+fn pi_in_udf() {
+    let src = "def u:circle(r) { pi() * r * r }\nu:circle(1)";
+    let val: f64 = run(src).parse().unwrap();
+    assert!((val - std::f64::consts::PI).abs() < 1e-10);
+}
+
+#[test]
+fn range_in_udf() {
+    assert_eq!(
+        run("def u:first_n(n) { range(n) }\nu:first_n(4)"),
+        "0 1 2 3"
+    );
+}
