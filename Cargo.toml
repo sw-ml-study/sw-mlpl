@@ -1,7 +1,6 @@
 [workspace]
 resolver = "2"
 members = [
-  "crates/mlpl-core",
   "crates/mlpl-array",
   "crates/mlpl-rt",
   "crates/mlpl-mlx-rt",

@@ -1,0 +1,35 @@
+---
+title: Perceptron
+---
+flowchart LR
+
+  x1("x1")
+  x2("x2")
+  x3("x3")
+  sum(("Weighted sum"))
+  act("Activation")
+  y("Output")
+
+  x1 -->|w1| sum
+  x2 -->|w2| sum
+  x3 -->|w3| sum
+  sum --> act
+  act --> y
+
+  classDef data fill:#eef,stroke:#668,stroke-width:1px;
+  classDef tensor fill:#e8f4ff,stroke:#3973ac,stroke-width:1px;
+  classDef op fill:#fff7e6,stroke:#b37700,stroke-width:1px;
+  classDef block fill:#f4ecff,stroke:#7e57c2,stroke-width:1px;
+  classDef model fill:#ecfff4,stroke:#2e8b57,stroke-width:1px;
+  classDef loss fill:#ffecec,stroke:#cc4444,stroke-width:2px;
+  classDef grad fill:#fff0f5,stroke:#cc3377,stroke-width:1px;
+  classDef memory fill:#f0f0f0,stroke:#666,stroke-width:1px;
+  classDef gpu fill:#eefaf8,stroke:#088,stroke-width:1px;
+  classDef frozen fill:#f5f5f5,stroke:#999,stroke-dasharray: 5 5;
+  classDef adapter fill:#fffbe6,stroke:#aa8800,stroke-width:2px;
+  class x1 data;
+  class x2 data;
+  class x3 data;
+  class sum op;
+  class act op;
+  class y data;

@@ -1,0 +1,41 @@
+---
+title: Transformer Encoder Stack
+---
+flowchart TD
+
+  tokens("Tokens")
+  embed("Token + position embeddings")
+  attn("Self-attention")
+  addnorm1("Add + Norm")
+  ffn("Feed-forward MLP")
+  addnorm2("Add + Norm")
+  repeat[["Repeat N layers"]]
+  encoded("Encoded sequence")
+
+  tokens --> embed
+  embed --> attn
+  attn --> addnorm1
+  addnorm1 --> ffn
+  ffn --> addnorm2
+  addnorm2 --> repeat
+  repeat --> encoded
+
+  classDef data fill:#eef,stroke:#668,stroke-width:1px;
+  classDef tensor fill:#e8f4ff,stroke:#3973ac,stroke-width:1px;
+  classDef op fill:#fff7e6,stroke:#b37700,stroke-width:1px;
+  classDef block fill:#f4ecff,stroke:#7e57c2,stroke-width:1px;
+  classDef model fill:#ecfff4,stroke:#2e8b57,stroke-width:1px;
+  classDef loss fill:#ffecec,stroke:#cc4444,stroke-width:2px;
+  classDef grad fill:#fff0f5,stroke:#cc3377,stroke-width:1px;
+  classDef memory fill:#f0f0f0,stroke:#666,stroke-width:1px;
+  classDef gpu fill:#eefaf8,stroke:#088,stroke-width:1px;
+  classDef frozen fill:#f5f5f5,stroke:#999,stroke-dasharray: 5 5;
+  classDef adapter fill:#fffbe6,stroke:#aa8800,stroke-width:2px;
+  class tokens data;
+  class embed tensor;
+  class attn block;
+  class addnorm1 op;
+  class ffn block;
+  class addnorm2 op;
+  class repeat model;
+  class encoded tensor;

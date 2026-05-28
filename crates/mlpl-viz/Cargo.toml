@@ -6,5 +6,5 @@ version.workspace = true
 
 [dependencies]
 mlpl-array = { path = "../mlpl-array" }
-mlpl-core = { path = "../mlpl-core" }
+mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }
 mlpl-trace = { path = "../mlpl-trace" }

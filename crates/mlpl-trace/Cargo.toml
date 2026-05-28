@@ -5,7 +5,7 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-mlpl-core = { path = "../mlpl-core" }
+mlpl-core = { path = "../../components/lang-core/crates/mlpl-core" }
 mlpl-array = { path = "../mlpl-array" }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

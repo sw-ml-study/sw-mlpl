@@ -1,6 +1,6 @@
 number = 2
 slug = "move-mlpl-core"
-status = "pending"
+status = "in-progress"
 description = "Move mlpl-core into the lang-core component. Steps: 1) git mv crates/mlpl-cor..."
 role = "production"
 context_files = []
