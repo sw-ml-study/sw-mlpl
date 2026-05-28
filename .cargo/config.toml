@@ -1,0 +1,20 @@
+# Single shared target directory for the whole repo.
+#
+# Cargo discovers this config by walking up from the invocation
+# directory. Any `cargo` command -- whether run from this main
+# workspace, from a nested component workspace under components/,
+# or from a service under services/ -- resolves to the same
+# target/ tree at the repo root.
+#
+# Why: as the project decomposes into many component workspaces
+# (saga 51+), each would otherwise grow its own multi-GB target/.
+# A single shared target keeps disk usage bounded (~25 GB after a
+# full build vs N x 25 GB) and makes cross-workspace incremental
+# rebuilds cache-warm.
+#
+# `target-dir` is relative to this config file's directory, so it
+# resolves to sw-mlpl/target/ regardless of where cargo is invoked
+# from.
+
+[build]
+target-dir = "target"
