@@ -1,0 +1,1 @@
+Extracted ConcatExt + StackExt (free fn) + TakeExt + PatchifyExt to mlpl-array-ops-compose. ops_concat.rs deleted. 4 LOC WARNs retired (patchify 43, concat 34, stack 43, take 41) + ops_concat module-fn WARN. New crate has 5 modules (WARN, fine) and 2 module-fn warnings. sw-checklist: 251->249 passed, 133 fails, 473->471 warnings (-2).

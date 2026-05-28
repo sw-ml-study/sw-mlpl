@@ -1,9 +1,10 @@
 number = 4
 slug = "split-ops-compose"
-status = "in-progress"
+status = "completed"
 description = "Extract ops_concat.rs (5 functions: concat, stack, patchify, take, plus inter..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:28:05"
+completed_at = "2026-05-27T20:54:34"
 task_type = "refactor"
-commits = []
+commits = ["3e270c7f951d9bf04e5d2ef5a80d7adaa8c4589b"]
