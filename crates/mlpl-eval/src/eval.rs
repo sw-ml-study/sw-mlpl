@@ -222,6 +222,17 @@ pub(crate) fn eval_expr(
     if matches!(expr, Expr::Continue { .. }) {
         return Err(EvalError::ContinueSignal);
     }
+    if let Expr::FnDef { .. } = expr {
+        return Err(EvalError::Unsupported(
+            "def: user-defined functions not yet implemented (coming in saga 46 step 002)".into(),
+        ));
+    }
+    if let Expr::Return { .. } = expr {
+        return Err(EvalError::Unsupported(
+            "return: user-defined functions not yet implemented (coming in saga 46 step 002)"
+                .into(),
+        ));
+    }
     let (op_name, inputs, result) = match expr {
         Expr::IntLit(n, _) => ("literal", vec![], DenseArray::from_scalar(*n as f64)),
         Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
@@ -328,7 +339,9 @@ pub(crate) fn eval_expr(
         | Expr::If { .. }
         | Expr::While { .. }
         | Expr::Break { .. }
-        | Expr::Continue { .. } => unreachable!(),
+        | Expr::Continue { .. }
+        | Expr::FnDef { .. }
+        | Expr::Return { .. } => unreachable!(),
     };
     if let Some(t) = trace.as_mut() {
         let seq = t.events().len() as u64;

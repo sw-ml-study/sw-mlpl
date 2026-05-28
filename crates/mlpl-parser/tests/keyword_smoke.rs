@@ -58,6 +58,14 @@ const FRAGMENTS: &[(&str, &str)] = &[
     // Comments
     ("end-of-line comment", "1 + 2 # trailing"),
     ("comment-only line", "# nothing\nx = 1"),
+    // User-defined functions
+    ("def", "def u:area(r) { r * r }"),
+    ("def multi-param", "def u:add(a, b) { a + b }"),
+    (
+        "def with return",
+        "def u:safe(x) { if gt(x, 0) { return x } else { return 0 } }",
+    ),
+    ("return bare", "def u:noop() { return }"),
     // Statement separators
     ("semicolon", "a = 1; b = 2; a + b"),
     ("newline", "a = 1\nb = 2\na + b"),

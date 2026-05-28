@@ -42,6 +42,8 @@ pub(crate) fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::While => "'while'".into(),
         TokenKind::Break => "'break'".into(),
         TokenKind::Continue => "'continue'".into(),
+        TokenKind::Def => "'def'".into(),
+        TokenKind::Return => "'return'".into(),
     }
 }
 

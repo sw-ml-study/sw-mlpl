@@ -225,6 +225,26 @@ pub enum Expr {
         /// Span of the `continue` keyword.
         span: Span,
     },
+    /// `def ns:name(param1, param2) { body }` -- user-defined
+    /// function. Name must contain a colon (namespace prefix).
+    FnDef {
+        /// Full function name including namespace (e.g. `u:area`).
+        name: String,
+        /// Parameter names.
+        params: Vec<String>,
+        /// Body expressions; last value is the return value.
+        body: Vec<Expr>,
+        /// Span covering `def` through closing `}`.
+        span: Span,
+    },
+    /// `return expr` -- early exit from a UDF body. Without a
+    /// value, returns scalar 0 (same as bare `break`).
+    Return {
+        /// Optional return value.
+        value: Option<Box<Expr>>,
+        /// Span of `return` keyword and optional value.
+        span: Span,
+    },
 }
 
 impl Expr {
@@ -249,7 +269,9 @@ impl Expr {
             | Self::If { span, .. }
             | Self::While { span, .. }
             | Self::Break { span, .. }
-            | Self::Continue { span } => *span,
+            | Self::Continue { span }
+            | Self::FnDef { span, .. }
+            | Self::Return { span, .. } => *span,
         }
     }
 }
