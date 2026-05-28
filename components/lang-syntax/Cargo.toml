@@ -8,6 +8,7 @@
 
 [workspace]
 members = [
+    "crates/mlpl-lower-rs",
     "crates/mlpl-macro",
 ]
 resolver = "2"

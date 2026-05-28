@@ -5,6 +5,6 @@ license.workspace = true
 version.workspace = true
 
 [dependencies]
-mlpl-parser = { path = "../mlpl-parser" }
+mlpl-parser = { path = "../../../../crates/mlpl-parser" }
 proc-macro2 = "1"
 quote = "1"
