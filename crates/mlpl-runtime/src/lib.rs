@@ -24,6 +24,7 @@ pub fn runtime_builtin_names() -> impl Iterator<Item = &'static str> {
     builtins::LOCAL_NAMES
         .iter()
         .chain(mlpl_runtime_math::NAMES)
+        .chain(mlpl_runtime_array::NAMES)
         .chain(mlpl_runtime_conv::NAMES)
         .chain(mlpl_runtime_rnn::NAMES)
         .chain(random_builtins::NAMES)

@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-runtime-array"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Array shape / reduce / linalg / slice builtins extracted from
+# mlpl-runtime's builtins.rs (which was at 16 functions, FAIL).
+# Self-contained: depends on mlpl-array (DenseArray/Shape) and
+# mlpl-runtime-core (RuntimeError). Nothing depends back upward,
+# so the dep graph stays a DAG.
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+mlpl-runtime-core = { path = "../mlpl-runtime-core" }

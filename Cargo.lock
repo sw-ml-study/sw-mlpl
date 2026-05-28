@@ -2246,6 +2246,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-runtime-array",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",
  "mlpl-runtime-data",
@@ -2256,6 +2257,14 @@ dependencies = [
  "mlpl-runtime-umap",
  "serde_json",
  "ureq",
+]
+
+[[package]]
+name = "mlpl-runtime-array"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
 ]
 
 [[package]]

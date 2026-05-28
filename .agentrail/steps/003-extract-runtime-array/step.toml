@@ -1,0 +1,9 @@
+number = 3
+slug = "extract-runtime-array"
+status = "in-progress"
+description = "Extract array/shape/reduce builtins from mlpl-runtime/src/builtins.rs (16 fns..."
+role = "production"
+context_files = []
+created_at = "2026-05-27T19:24:43"
+task_type = "refactor"
+commits = []
