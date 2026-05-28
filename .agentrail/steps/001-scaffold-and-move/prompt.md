@@ -1,1 +1,0 @@
-Create components/viz/ workspace. Move mlpl-viz crate into it. Update 4 consumer Cargo.toml paths (mlpl-eval, mlpl-cli, mlpl-wasm, mlpl-serve). Fix cross-component paths inside mlpl-viz. Verify all workspaces build.

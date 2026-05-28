@@ -32,7 +32,7 @@ path = "src/main.rs"
 
 [dependencies]
 mlpl-serve = { path = "../../crates/mlpl-serve" }
-mlpl-eval = { path = "../../crates/mlpl-eval" }
+mlpl-eval = { path = "../../components/eval/crates/mlpl-eval" }
 mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 mlpl-mlx-rt = { path = "../../components/native-rt/crates/mlpl-mlx-rt" }
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }

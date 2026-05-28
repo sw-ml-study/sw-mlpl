@@ -1,1 +1,0 @@
-DEFERRED: viz decompose requires either an extension-trait pattern for chart functions (they're free functions but share VizError) or a shared error crate. Skip for now to maintain saga 58 scope. Future viz-decompose saga.
