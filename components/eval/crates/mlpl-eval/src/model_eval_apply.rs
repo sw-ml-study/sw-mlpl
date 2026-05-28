@@ -11,7 +11,7 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::model_apply::apply_model;
 use crate::model_attn_weights::extract_attn_weights;
 use mlpl_eval_core::model::ModelSpec;

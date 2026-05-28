@@ -9,7 +9,7 @@ use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::grad::{arity_check, eval_shape_dims, eval_tensor_expr, tape_scalar_usize};
 
 pub(crate) fn call_patchify(

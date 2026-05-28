@@ -9,8 +9,8 @@ use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::error::EvalError;
-use crate::value::Value;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 use mlpl_eval_core::model::ModelSpec;
 
 /// `clone_model(m)` entry point.

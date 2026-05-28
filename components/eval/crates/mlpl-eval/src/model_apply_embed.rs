@@ -6,7 +6,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 /// Convert an integer-valued token id array (1-D `[N]`) into a
 /// `[N, vocab]` one-hot matrix. Token ids must be non-negative

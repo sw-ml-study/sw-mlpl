@@ -9,9 +9,9 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
-use crate::value::{Value, value_kind};
+use mlpl_eval_types::{Value, value_kind};
 
 impl Environment {
     pub fn set_result(&mut self, name: String, ok: bool, payload: Value) {

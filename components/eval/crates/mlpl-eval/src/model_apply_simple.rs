@@ -7,7 +7,7 @@
 use mlpl_array::{DenseArray, Shape};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::model_apply_embed::tokens_to_onehot;
 use mlpl_eval_core::model::ActKind;
 

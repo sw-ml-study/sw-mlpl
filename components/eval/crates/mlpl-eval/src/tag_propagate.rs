@@ -23,7 +23,7 @@ use mlpl_core::{LossKind, ValueTag};
 use mlpl_parser::{BinOpKind, Expr};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 const HINT_DOMAIN_MISMATCH: &str = "\
 operands live in different typed-value domains. fix: convert one \

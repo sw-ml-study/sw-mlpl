@@ -61,7 +61,7 @@ const HEAVY_TRAINING: &[&str] = &[
 ];
 
 fn discover() -> Vec<PathBuf> {
-    let demos_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../demos");
+    let demos_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../../demos");
     let entries = fs::read_dir(&demos_dir)
         .unwrap_or_else(|e| panic!("read demos dir {}: {e}", demos_dir.display()));
     let mut out: Vec<PathBuf> = entries

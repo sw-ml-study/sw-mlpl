@@ -857,6 +857,7 @@ dependencies = [
  "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-eval-image",
+ "mlpl-eval-types",
  "mlpl-loader-helpers",
  "mlpl-lower-rs",
  "mlpl-mlx-rt",
@@ -890,6 +891,26 @@ version = "0.20.0"
 dependencies = [
  "jpeg-decoder",
  "png",
+]
+
+[[package]]
+name = "mlpl-eval-types"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+ "mlpl-eval-core",
+ "mlpl-eval-image",
+ "mlpl-loader-helpers",
+ "mlpl-models-feasibility",
+ "mlpl-models-freeze",
+ "mlpl-models-inspect",
+ "mlpl-models-llm",
+ "mlpl-models-mutate",
+ "mlpl-models-tape",
+ "mlpl-models-tune",
+ "mlpl-runtime",
+ "mlpl-viz",
 ]
 
 [[package]]

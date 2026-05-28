@@ -3,7 +3,7 @@
 use std::fs;
 
 use super::_test_helpers::{temp_dir, write_tiny_png};
-use crate::value::Value;
+use mlpl_eval_types::Value;
 
 #[test]
 fn extract_tarball_unpacks_files_into_dest() {

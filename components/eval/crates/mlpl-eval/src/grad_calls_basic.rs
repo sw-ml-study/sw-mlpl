@@ -12,7 +12,7 @@ use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::grad::{arity_check, eval_tensor_expr};
 
 pub(crate) fn call_unary(

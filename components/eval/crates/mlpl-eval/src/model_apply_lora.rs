@@ -6,7 +6,7 @@
 use mlpl_array::{DenseArray, Shape};
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 /// Named-field inputs for one `apply_linear_lora` call so the
 /// helper stays at 3 args (x, inputs, env) and does not trip

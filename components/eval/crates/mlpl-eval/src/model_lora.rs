@@ -5,8 +5,8 @@
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::error::EvalError;
-use crate::value::Value;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 use mlpl_eval_core::model::ModelSpec;
 
 pub(crate) fn eval_lora(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {

@@ -25,8 +25,8 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_loader_helpers::{parse_csv, resolve_in_sandbox};
 
 use crate::env::Environment;
-use crate::error::EvalError;
-use crate::value::Value;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 
 /// Compiled-in preloaded corpora. Keeping the registry tiny and
 /// explicit; the web REPL's WASM binary carries these as string

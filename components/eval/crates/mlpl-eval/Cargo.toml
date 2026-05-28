@@ -28,6 +28,7 @@ mlx = ["dep:mlpl-mlx-rt", "mlpl-mlx-rt/mlx"]
 # itself (same pinned version + minimal-features as
 # `mlpl-runtime`'s `llm_call` shim).
 image-io = [
+    "mlpl-eval-types/image-io",
     "dep:mlpl-eval-image",
     "mlpl-eval-image/image-io",
     "dep:png",
@@ -42,6 +43,7 @@ image-io = [
 mlpl-bpe-core = { path = "../../../session-infra/crates/mlpl-bpe-core" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
 mlpl-env-traits = { path = "../../../session-infra/crates/mlpl-env-traits" }
 mlpl-loader-helpers = { path = "../../../session-infra/crates/mlpl-loader-helpers" }
 mlpl-models-feasibility = { path = "../../../models-read/crates/mlpl-models-feasibility" }

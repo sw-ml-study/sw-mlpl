@@ -8,7 +8,7 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_compose::prelude::*;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::model_apply::apply_model;
 use crate::model_apply_attention::slice_cols;
 use mlpl_eval_core::model::ModelSpec;

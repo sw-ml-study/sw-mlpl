@@ -768,6 +768,7 @@ dependencies = [
  "mlpl-core",
  "mlpl-env-traits",
  "mlpl-eval-core",
+ "mlpl-eval-types",
  "mlpl-loader-helpers",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
@@ -787,6 +788,25 @@ dependencies = [
 [[package]]
 name = "mlpl-eval-core"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-eval-types"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+ "mlpl-eval-core",
+ "mlpl-loader-helpers",
+ "mlpl-models-feasibility",
+ "mlpl-models-freeze",
+ "mlpl-models-inspect",
+ "mlpl-models-llm",
+ "mlpl-models-mutate",
+ "mlpl-models-tape",
+ "mlpl-models-tune",
+ "mlpl-runtime",
+ "mlpl-viz",
+]
 
 [[package]]
 name = "mlpl-lex-ident"

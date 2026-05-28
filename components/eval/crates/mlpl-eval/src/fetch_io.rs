@@ -13,8 +13,8 @@ use std::path::{Path, PathBuf};
 use mlpl_array::{DenseArray, Shape};
 use sha2::Digest;
 
-use crate::error::EvalError;
-use crate::value::Value;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 
 use crate::fetch_dataset::{io_err, label_for};
 

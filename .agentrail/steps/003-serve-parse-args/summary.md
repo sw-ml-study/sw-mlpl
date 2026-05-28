@@ -1,1 +1,0 @@
-Retired serve parse_args 73-LOC FAIL. Extracted to args.rs module to keep main.rs under module-fn cap. 15 -> 14 fails.

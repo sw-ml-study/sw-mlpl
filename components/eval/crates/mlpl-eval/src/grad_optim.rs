@@ -13,9 +13,9 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::grad::eval_grad;
-use crate::value::Value;
+use mlpl_eval_types::Value;
 
 /// FnCall-dispatch wrapper around `momentum_sgd` / `adam`. Lifted
 /// out of `eval::eval_expr` for saga 33 step 023 so eval.rs drops

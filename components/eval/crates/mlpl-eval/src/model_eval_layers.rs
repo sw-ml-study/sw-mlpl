@@ -9,7 +9,7 @@ use mlpl_core::ValueTag;
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::model_dispatch_scalar::{scalar_f64, scalar_usize};
 use mlpl_eval_core::model::ModelSpec;
 

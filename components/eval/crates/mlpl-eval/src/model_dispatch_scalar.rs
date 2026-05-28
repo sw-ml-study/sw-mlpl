@@ -6,7 +6,7 @@
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 
 pub(crate) fn scalar_f64(expr: &Expr, env: &mut Environment, func: &str) -> Result<f64, EvalError> {
     let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;

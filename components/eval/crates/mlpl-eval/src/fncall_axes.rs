@@ -15,9 +15,9 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
-use crate::value::Value;
+use mlpl_eval_types::Value;
 
 pub(crate) fn try_dispatch(
     name: &str,

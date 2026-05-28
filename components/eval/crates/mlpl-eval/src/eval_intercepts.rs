@@ -22,9 +22,9 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::error::EvalError;
+use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
-use crate::value::{Value, value_kind};
+use mlpl_eval_types::{Value, value_kind};
 
 /// Try matching `expr` against one of the FnCall intercepts in
 /// this module. Returns `Some(result)` when matched, `None` if
