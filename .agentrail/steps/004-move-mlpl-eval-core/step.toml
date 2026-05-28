@@ -1,9 +1,10 @@
 number = 4
 slug = "move-mlpl-eval-core"
-status = "in-progress"
+status = "completed"
 description = "Move mlpl-eval-core (~7 referrers, smaller batch). Same recipe. After this st..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T20:13:51"
+completed_at = "2026-05-27T20:23:36"
 task_type = "refactor"
-commits = []
+commits = ["a38344c8c0e54a51e1781efc0a8e9ab913c2129d"]

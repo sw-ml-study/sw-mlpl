@@ -1,0 +1,1 @@
+Moved mlpl-eval-core from crates/ to components/lang-core/crates/. Updated 7 dependent Cargo.toml files: 1 in main crates/ (mlpl-eval), 6 in components/mlpl-session/. All three foundational crates (mlpl-core, mlpl-array, mlpl-eval-core) now in components/lang-core/. All 4 workspaces compile clean.
