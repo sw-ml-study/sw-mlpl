@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Step 002 (FINAL, use --done): language-status.md + saga close."
 role = "production"
 context_files = []
 created_at = "2026-05-27T18:13:55"
+completed_at = "2026-05-27T18:16:56"
 task_type = "docs"
-commits = []
+commits = ["0e257f9c20120ec9e8832616d39d82172904d25e"]
