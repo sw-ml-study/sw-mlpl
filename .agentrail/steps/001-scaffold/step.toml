@@ -1,9 +1,10 @@
 number = 1
 slug = "scaffold"
-status = "in-progress"
+status = "completed"
 description = "Create components/runtime/ workspace skeleton."
 role = "production"
 context_files = []
 created_at = "2026-05-27T21:14:17"
+completed_at = "2026-05-27T21:14:42"
 task_type = "infra"
-commits = []
+commits = ["a0ce345c66e25a08295ebbcec2183ded9ff0da70"]
