@@ -7,7 +7,7 @@ description = "Visual regression test harness for MLPL demos (saga 33 step 026).
 
 [dependencies]
 mlpl-array = { path = "../../components/lang-core/crates/mlpl-array" }
-mlpl-eval = { path = "../mlpl-eval" }
+mlpl-eval = { path = "../../components/eval/crates/mlpl-eval" }
 mlpl-parser = { path = "../../components/lang-syntax/crates/mlpl-parser" }
 resvg = { version = "0.45", default-features = false, features = ["text", "memmap-fonts"] }
 tiny-skia = "0.11"

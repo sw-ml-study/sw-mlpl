@@ -1,0 +1,15 @@
+# Saga 59: components/eval/ nested workspace.
+# Tree-walking interpreter (mlpl-eval). 96 modules currently FAIL;
+# decomposition deferred to a future eval-decompose saga.
+
+[workspace]
+members = ["crates/mlpl-eval"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
