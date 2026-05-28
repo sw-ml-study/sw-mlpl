@@ -1,7 +1,7 @@
-number = 1
-slug = "scaffold-and-move"
+number = 2
+slug = "decompose"
 status = "completed"
-description = "Create components/viz/ workspace. Move mlpl-viz crate into it. Update 4 consu..."
+description = "Split mlpl-viz's 13 modules into ~8 sparse sibling crates within components/v..."
 role = "production"
 context_files = []
 created_at = "2026-05-27T21:27:16"
