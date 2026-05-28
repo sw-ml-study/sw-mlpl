@@ -10,11 +10,11 @@ status of any finding. Saga 30's step 006 doubles as the
 audit-closeout step; analogous steps in later sagas should do the
 same for their findings.
 
-Last refreshed: 2026-05-27 (saga 52 closed; components/lang-core/).
+Last refreshed: 2026-05-27 (saga 53 closed; mlpl-array decomposed into 5 sibling crates).
 
 ## Active saga
 
-None. Saga 52 (`component-lang-core`) closed 2026-05-27.
+None. Saga 53 (`lang-core-decompose-array`) closed 2026-05-27.
 
 `agentrail status` is the live source of truth; this row is the
 human-readable summary.
@@ -47,6 +47,7 @@ human-readable summary.
 | `warning-ratchet-spike` (50) | shipped | -- (refactor saga) | Closed 2026-05-27. 5 steps. Extracted 6 new crates from mlpl-runtime + mlpl-parser: mlpl-runtime-math, mlpl-runtime-conv, mlpl-runtime-rnn, mlpl-runtime-array, mlpl-runtime-ml, mlpl-lexer. Plus ast_fmt_compound.rs helper in parser. sw-checklist 141->133 fails (-8), 473->474 warnings. Big wins: builtins.rs 16->3 fns, mlpl-runtime 9->4 modules, mlpl-parser 10->6 modules, conv2d/pool2d/lstm_cell/fmt all retired (FAIL->WARN or PASS). Note: extractions landed flat in `crates/`; component-restructure saga (51+) will migrate them into `components/`. |
 | `shared-target-infra` (51) | shipped | -- (infra saga) | Closed 2026-05-27. 2 steps. Added `.cargo/config.toml` at repo root with `[build] target-dir = "target"` so every workspace (main, components/*, services/*) writes to ONE shared target/ tree. Reclaimed ~2GB of stale per-component target dirs. Prerequisite for the component-migration sagas (52+) that will migrate the workspace from flat `crates/` into `components/<feature>/crates/` bottom-up. |
 | `component-lang-core` (52) | shipped | -- (structural saga) | Closed 2026-05-27. 5 steps. First component-migration saga: created `components/lang-core/` nested workspace and moved the three foundational crates (mlpl-core, mlpl-array, mlpl-eval-core) into it. Updated 51 dependent Cargo.toml path references across all four workspaces (main, lang-core, mlpl-session, mlpl-mlx-serve). sw-checklist: 221->222 passed (+1), 133 fails unchanged, 474 warnings unchanged. Structural -- enables future grouped extractions inside lang-core (e.g., splitting mlpl-array's 13 modules across sibling crates). Pattern established for subsequent sagas 53+: one saga per component, bottom-up. |
+| `lang-core-decompose-array` (53) | shipped | -- (refactor saga) | Closed 2026-05-27. 7 steps. Decomposed mlpl-array (13 modules, Crate Module Count FAIL) into 5 sparse sibling crates within components/lang-core/ using the extension-trait pattern: `mlpl-array-ops-matmul` (MatmulExt, DotExt), `-reduce` (ReduceAxisExt, ArgmaxAxisExt), `-compose` (ConcatExt, StackExt fn, PatchifyExt, TakeExt), `-shape` (ReshapeExt, TransposeExt), `-element` (ApplyBinopExt). Call sites preserved via `use mlpl_array_ops_*::prelude::*;` -- no API churn for the 600+ `a.matmul(&b)`-style calls. sw-checklist: 222->247 passed (+25), **133->132 fails (-1 FAIL retired)**, 474->472 warnings (-2). Each op's body opportunistically shrunk while migrating (matmul 50->32, reduce_axis 46->11, argmax_axis 44->13, etc.). Establishes the move-AND-split pattern: component migrations must split crowded crates inside the component, not just move them. |
 
 The "proposed" sagas have full milestone docs; the user has
 confirmed the editorial stances. They are not yet initialized in
