@@ -3,8 +3,8 @@ use yew::prelude::*;
 use crate::glossary_view::GlossaryView;
 use mlpl_web_eval::state::DocTab;
 
-const LANG_REFERENCE: &str = include_str!("../../../docs/lang-reference.md");
-const USAGE_GUIDE: &str = include_str!("../../../docs/usage.md");
+const LANG_REFERENCE: &str = include_str!("../../../../../docs/lang-reference.md");
+const USAGE_GUIDE: &str = include_str!("../../../../../docs/usage.md");
 
 #[derive(Properties, PartialEq)]
 pub struct DocDialogProps {

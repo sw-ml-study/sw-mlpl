@@ -1,0 +1,1 @@
+Moved mlpl-autograd + mlpl-trace into components/autograd/. 6 consumer Cargo.toml refs updated. Tests green. autograd FAILs (reduction_ops 11 fns, backward 11 fns, propagate 77 LOC) deferred to a future autograd-decompose saga since the impl Tensor blocks span those modules and need careful extension-trait restructuring.

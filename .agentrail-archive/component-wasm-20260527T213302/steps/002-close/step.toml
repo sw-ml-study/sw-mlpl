@@ -1,0 +1,10 @@
+number = 2
+slug = "close"
+status = "completed"
+description = "FINAL --done"
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:31:27"
+completed_at = "2026-05-27T21:32:07"
+task_type = "docs"
+commits = ["7f3e07906f814a2672ab65b3e080d815ce77c118"]

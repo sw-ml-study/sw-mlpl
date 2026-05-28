@@ -1,0 +1,10 @@
+number = 1
+slug = "move"
+status = "completed"
+description = "Move + paths"
+role = "production"
+context_files = []
+created_at = "2026-05-27T21:34:44"
+completed_at = "2026-05-27T21:35:45"
+task_type = "refactor"
+commits = ["92543f6252c4d21d7d6ca1676dcb5a3d7d2db101"]

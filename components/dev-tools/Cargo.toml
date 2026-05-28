@@ -1,0 +1,12 @@
+# Saga 64: components/dev-tools/ nested workspace.
+# Test/bench infrastructure: mlpl-bench, mlpl-parity-tests, mlpl-reg.
+
+[workspace]
+members = ["crates/mlpl-bench", "crates/mlpl-parity-tests", "crates/mlpl-reg"]
+resolver = "2"
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+[workspace.lints.clippy]
+pedantic = "warn"

@@ -1,0 +1,1 @@
+Create components/autograd/ workspace and move mlpl-autograd + mlpl-trace into it. Update workspace memberships and path references in consumers (mlpl-eval, mlpl-cli, models-tape, mlx-rt, viz). Within autograd, fix cross-component paths to lang-core and runtime. Verify all workspaces compile + tests pass.

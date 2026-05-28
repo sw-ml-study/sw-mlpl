@@ -1,0 +1,1 @@
+Create components/native-rt/ workspace. Move mlpl-rt and mlpl-mlx-rt into it. Update workspace members + path refs in consumers (mlpl-bench, mlpl-eval, mlpl-mlx-serve, mlpl, mlpl-repl). Fix intra-crate cross-component paths.
