@@ -14,8 +14,8 @@ name = "mlpl-web"
 path = "src/main.rs"
 
 [dependencies]
-mlpl-wasm = { path = "../../crates/mlpl-wasm" }
-mlpl-web-eval = { path = "../../crates/mlpl-web-eval" }
+mlpl-wasm = { path = "../../components/wasm/crates/mlpl-wasm" }
+mlpl-web-eval = { path = "../../components/wasm/crates/mlpl-web-eval" }
 mlpl-web-lessons = { path = "../../crates/mlpl-web-lessons" }
 mlpl-web-path-body = { path = "../../crates/mlpl-web-path-body" }
 yew = { version = "0.21", features = ["csr"] }

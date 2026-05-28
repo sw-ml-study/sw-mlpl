@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-wasm"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+mlpl-array = { path = "../../../lang-core/crates/mlpl-array" }
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-parser = { path = "../../../lang-syntax/crates/mlpl-parser" }
+mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
+wasm-bindgen = "0.2"

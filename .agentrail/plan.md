@@ -1,3 +1,2 @@
-# components/eval/ migration (saga 59)
-Move mlpl-eval (96 modules, FAIL) into components/eval/. Decompose
-deferred to a focused future saga.
+# components/wasm/ migration (saga 60)
+Move mlpl-wasm + mlpl-web-eval into components/wasm/.

@@ -1,0 +1,9 @@
+[workspace]
+members = ["crates/mlpl-wasm", "crates/mlpl-web-eval"]
+resolver = "2"
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+[workspace.lints.clippy]
+pedantic = "warn"
