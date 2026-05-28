@@ -1,6 +1,6 @@
 number = 3
 slug = "move-lower-rs"
-status = "pending"
+status = "in-progress"
 description = "Move crates/mlpl-lower-rs to components/lang-syntax/crates/mlpl-lower-rs. Upd..."
 role = "production"
 context_files = []

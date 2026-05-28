@@ -8,7 +8,7 @@ members = [
   # [workspace] declaration so its target/ tree is
   # separate from the main workspace's. Build via
   # `cd services/mlpl-mlx-serve && cargo build`.
-  "crates/mlpl-lower-rs",
+  
   
   "crates/mlpl",
   "crates/mlpl-bench",
