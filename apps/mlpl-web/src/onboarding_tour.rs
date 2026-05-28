@@ -12,7 +12,7 @@ const STEPS: &[TourStep] = &[
     TourStep {
         target: "repl-input",
         title: "REPL Input",
-        body: "Type expressions here and press Enter to evaluate. Try 1 + 2 or iota(5).",
+        body: "Type expressions here and press Enter to evaluate. Try 1 + 2 or range(5).",
         click_before: "",
     },
     TourStep {
