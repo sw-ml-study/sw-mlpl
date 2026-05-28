@@ -1,9 +1,10 @@
 number = 4
 slug = "close"
-status = "pending"
+status = "completed"
 description = "FINAL --done: sw-checklist + docs."
 role = "production"
 context_files = []
 created_at = "2026-05-28T09:54:08"
+completed_at = "2026-05-28T11:28:29"
 task_type = "docs"
-commits = []
+commits = ["a476097237111a2b8d2523d9c259273552c42f0f"]
