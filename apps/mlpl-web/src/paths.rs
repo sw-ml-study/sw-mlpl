@@ -640,6 +640,48 @@ pub const PATHS: &[LearningPath] = &[
         ],
     },
     LearningPath {
+        title: "REPL to Script",
+        blurb: "Graduate from one-line REPL exploration to multi-line scripts to saved .mlpl files. Learn the editor, the save/load workflow, terminal script mode, user-defined functions, and script arguments. Eight steps; assumes you have run a few REPL expressions already.",
+        steps: &[
+            Step::Note {
+                title: "From exploration to automation",
+                body: "The REPL is for exploring: try an expression, see the result, adjust. Once you have something that works, you want to save it, run it again, and share it. This path walks the progression from interactive one-liners to reusable scripts.",
+            },
+            Step::Lesson {
+                title: "Hello Numbers",
+                why: "The REPL basics: type an expression, press Enter, see the result. Variables persist across lines. :vars shows what is bound.",
+            },
+            Step::Lesson {
+                title: "Variables",
+                why: "Name your intermediate values. x = range(10) binds an array; x persists until :clear. Variable names are your working memory.",
+            },
+            Step::Demo {
+                name: "Workspace Introspection",
+                why: "The REPL's self-awareness: :vars, :describe, :models, :fns, :wsid. Know what is in your session before you save it.",
+            },
+            Step::Note {
+                title: "The Editor tab",
+                body: "Click the Editor tab to get a multi-line text area. Type or paste several lines of MLPL, then press Ctrl+Enter (or the Run button) to execute them all. Output appears in the REPL pane below. The editor is a scratchpad -- it does not save automatically.",
+            },
+            Step::Note {
+                title: "Saving and loading scripts",
+                body: "The Save button downloads your editor content as a .mlpl file. The Load button opens a file picker to load a .mlpl file into the editor. The browser does not persist state between sessions -- save early, save often. You can also copy/paste between the editor and any text editor on your machine.",
+            },
+            Step::Demo {
+                name: "User-Defined Functions",
+                why: "def u:name(args) { body } defines a reusable function. This is how scripts become libraries: define your functions at the top, call them below.",
+            },
+            Step::Note {
+                title: "Running scripts from the terminal",
+                body: "The terminal REPL runs .mlpl files directly: mlpl-repl -f my_script.mlpl. Use -f (not stdin piping) because piping splits multi-line blocks like repeat {} across lines. Script arguments: mlpl-repl -f script.mlpl -- arg1 arg2. Inside the script, args() returns a string list and list_get(args(), 0) extracts one argument.",
+            },
+            Step::Note {
+                title: "What comes next",
+                body: "You now know the full REPL-to-script workflow: explore interactively, draft in the editor, save as .mlpl, run from the terminal with arguments. User-defined functions (def u:name) let you build reusable libraries. The Architecture Zoo and Zero to LLM paths show what to build with these tools.",
+            },
+        ],
+    },
+    LearningPath {
         title: "Vision Transformers in MLPL",
         blurb: "From a synthetic image to a trained multi-head cat-vs-dog classifier with per-head attention visualization, ending with uploading a photo from your phone for the trained model to classify. The same attention machinery from the transformer demos, applied to image patches. Alternates diagrams, glossary, and demos; assumes you have already seen scaled-dot-product attention.",
         steps: &[
