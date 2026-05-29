@@ -45,6 +45,17 @@ pub fn stage3d_panel() -> Html {
                 </div>
             </div>
             <div id="stage3d-detail" class="stage3d-detail" style="display:none" />
+            // Close-up inspector dialog. Hidden by default;
+            // the JS click-handler on the yellow selection
+            // pointer populates body content and shows it.
+            // Close button + Escape key handled in stage3d.js.
+            <div id="stage3d-inspector" class="stage3d-inspector" style="display:none">
+                <div id="stage3d-inspector-backdrop" class="stage3d-inspector-backdrop" />
+                <div class="stage3d-inspector-panel">
+                    <button id="stage3d-inspector-close" class="stage3d-inspector-close" title="Close (Esc)">{"\u{00d7}"}</button>
+                    <div id="stage3d-inspector-body" class="stage3d-inspector-body" />
+                </div>
+            </div>
         </>
     }
 }

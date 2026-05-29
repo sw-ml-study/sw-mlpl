@@ -62,22 +62,27 @@ function createLegend() {
 }
 
 function createMountains() {
+    // Far mountains: shorter, wider, packed shoulder-to-shoulder
+    // so no sky shows between them.
     const farMat = new THREE.MeshStandardMaterial({ color: 0x8B6B4A, flatShading: true });
     const nearMat = new THREE.MeshStandardMaterial({ color: 0x5A8A4A, flatShading: true });
-    for (let i = -40; i < 40; i++) {
-        const x = i * 20 + Math.random() * 8;
-        const h = 8 + Math.random() * 12;
-        const w = 6 + Math.random() * 8;
+    for (let i = -100; i < 100; i++) {
+        const x = i * 8 + (Math.random() - 0.5) * 2;
+        const h = 5 + Math.random() * 5;
+        const w = 12 + Math.random() * 6;
         const far = new THREE.Mesh(new THREE.ConeGeometry(w, h, 5 + Math.floor(Math.random() * 3)), farMat);
-        far.position.set(x, h / 2, -60 - Math.random() * 20);
+        far.position.set(x, h / 2, -60 - Math.random() * 10);
         scene.add(far);
     }
-    for (let i = -40; i < 40; i++) {
-        const x = i * 15 + Math.random() * 6;
-        const h = 3 + Math.random() * 5;
-        const w = 4 + Math.random() * 5;
+    // Near hills: shorter still, wider, no gaps, pushed back to
+    // sit right in front of the mountains (was z=-45..-57, now
+    // z=-55..-58 so the green band hugs the brown band).
+    for (let i = -100; i < 100; i++) {
+        const x = i * 6 + (Math.random() - 0.5) * 1.5;
+        const h = 2 + Math.random() * 2.5;
+        const w = 9 + Math.random() * 4;
         const near = new THREE.Mesh(new THREE.ConeGeometry(w, h, 4 + Math.floor(Math.random() * 3)), nearMat);
-        near.position.set(x, h / 2, -45 - Math.random() * 12);
+        near.position.set(x, h / 2, -55 - Math.random() * 3);
         scene.add(near);
     }
 }
@@ -195,6 +200,13 @@ window.__stage3d_init = function(canvas) {
     canvas.addEventListener('keydown', onCanvasKey);
     canvas.addEventListener('click', onCanvasClick);
     window.addEventListener('resize', resize);
+    // Inspector dialog: close button + backdrop close. Both
+    // re-bound on every init in case the DOM nodes were
+    // re-rendered.
+    const closeBtn = document.getElementById('stage3d-inspector-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeInspector);
+    const backdrop = document.getElementById('stage3d-inspector-backdrop');
+    if (backdrop) backdrop.addEventListener('click', closeInspector);
     animate();
 
     if (pendingEvents.length > 0) {
@@ -213,6 +225,17 @@ function onCanvasClick(e) {
     mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
+    // Hit-test the selection pointer first so it short-circuits
+    // any sculpture under or behind it: a click on the yellow
+    // marker opens the close-up inspector for the currently
+    // selected mesh.
+    if (selectionPointer) {
+        const pHits = raycaster.intersectObject(selectionPointer, false);
+        if (pHits.length > 0) {
+            openInspector();
+            return;
+        }
+    }
     const meshes = stepObjects.filter(o => o.isMesh || o.isGroup);
     const targets = [];
     for (const obj of meshes) {
@@ -235,13 +258,93 @@ function selectMesh(mesh) {
     const worldPos = new THREE.Vector3();
     const target = mesh.parent?.isGroup ? mesh.parent : mesh;
     target.getWorldPosition(worldPos);
-    const geo = new THREE.ConeGeometry(0.15, 0.4, 4);
+    // Pointer sized up a touch so it's a comfortable click target.
+    const geo = new THREE.ConeGeometry(0.22, 0.55, 4);
     geo.rotateX(Math.PI);
     const mat = new THREE.MeshStandardMaterial({ color: 0xffcc44, emissive: 0xffcc44, emissiveIntensity: 0.6 });
     selectionPointer = new THREE.Mesh(geo, mat);
     selectionPointer.position.set(worldPos.x, worldPos.y + 1.5, worldPos.z);
+    selectionPointer.userData = { isSelectionPointer: true, sourceMesh: mesh };
     scene.add(selectionPointer);
     selectedStepIdx = mesh.userData?.stepIdx ?? -1;
+}
+
+// Close-up inspector dialog. Opens with the currently selected
+// sculpture's tensor info in a centered modal panel. The full
+// 3D close-up scene + interactive axis-slicing tour are tracked
+// in docs/3d-introspect-dialog.md; this is the v0 starter that
+// makes the yellow pointer clickable and surfaces the existing
+// detail data + a sampled values dump in one clean dialog.
+function openInspector() {
+    if (selectedStepIdx < 0 || selectedStepIdx >= stepMeshes.length) return;
+    const mesh = stepMeshes[selectedStepIdx];
+    if (!mesh || !mesh.userData) return;
+    const dlg = document.getElementById('stage3d-inspector');
+    const body = document.getElementById('stage3d-inspector-body');
+    if (!dlg || !body) return;
+    body.innerHTML = renderInspectorBody(mesh.userData);
+    dlg.style.display = 'block';
+    // ESC closes; one listener per open so we can detach on close.
+    const onKey = (e) => { if (e.key === 'Escape') closeInspector(); };
+    document.addEventListener('keydown', onKey);
+    dlg.dataset.escListener = '1';
+    dlg._escHandler = onKey;
+}
+
+function closeInspector() {
+    const dlg = document.getElementById('stage3d-inspector');
+    if (!dlg) return;
+    dlg.style.display = 'none';
+    if (dlg._escHandler) {
+        document.removeEventListener('keydown', dlg._escHandler);
+        delete dlg._escHandler;
+    }
+}
+
+function renderInspectorBody(ud) {
+    const name = ud.varName || '';
+    const label = ud.label || '';
+    const shape = ud.shape || [];
+    const dims = shape.length ? '[' + shape.join(', ') + ']' : 'scalar';
+    const rank = shape.length;
+    const elements = ud.elements || (shape.length ? shape.reduce((a, b) => a * b, 1) : 1);
+    const bytes = elements * 8;
+    const mem = bytes < 1024 ? `${bytes} B`
+              : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB`
+              : `${(bytes / 1048576).toFixed(1)} MB`;
+    const headline = `${name ? name + ' = ' : ''}${label}`;
+    let html = `<h2>${escapeHtml(headline)}</h2>`;
+    html += `<div class="insp-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>`;
+    html += `<div class="insp-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>`;
+    if (ud.values && ud.values.length) {
+        const stats = computeStats(ud.values);
+        html += `<div class="insp-section-title">Statistics</div>` + renderStats(stats);
+        html += `<div class="insp-section-title">Values (first ${Math.min(ud.values.length, 64)})</div>`;
+        html += `<div class="insp-values">${formatInspectorValues(ud.values, 64)}</div>`;
+    } else if (ud.summary) {
+        html += `<div class="insp-section-title">Statistics</div>` + renderStats(ud.summary);
+        html += `<div class="insp-hint">Tensor is too large for an inline values dump; statistics shown above are computed from the full set.</div>`;
+    }
+    html += `<div class="insp-hint">Interactive 3D close-up + axis-label slicing + drill-down for composite objects is queued (see docs/3d-introspect-dialog.md).</div>`;
+    return html;
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[c]));
+}
+
+function formatInspectorValues(vals, limit) {
+    const n = Math.min(vals.length, limit);
+    const out = [];
+    for (let i = 0; i < n; i++) {
+        out.push(vals[i].toFixed(4).padStart(10));
+        if ((i + 1) % 8 === 0) out.push('\n');
+        else out.push(' ');
+    }
+    if (vals.length > limit) out.push(`\n... (${(vals.length - limit).toLocaleString()} more)`);
+    return out.join('').trimEnd();
 }
 
 function selectStep(idx) {
@@ -613,6 +716,7 @@ window.__stage3d_next = function() {
 };
 window.__stage3d_home = function() { clearSelection(); panToStep(0); };
 window.__stage3d_end = function() { clearSelection(); panToStep(stepCount - 1); };
+window.__stage3d_close_inspector = closeInspector;
 
 window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
