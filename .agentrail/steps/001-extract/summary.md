@@ -1,0 +1,1 @@
+Extracted pets_tiny into mlpl-eval-pets-tiny. mlpl-eval 89->88 modules. load() 63-LOC FAIL retired via split. sw-checklist 320->325 PASS, 14 fails, 290->292 warns.
