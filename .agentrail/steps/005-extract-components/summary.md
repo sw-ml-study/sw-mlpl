@@ -1,1 +1,0 @@
-Extracted components cluster (7 files, 47 -> 40 modules in mlpl-web) into components/web-components/ as 2-crate sub-component: -chrome (header/footer/github_corner) + -content (doc_dialog/input_row/mode_bar/welcome). Two knock-ons: Footer gained FooterProps with build_info prop (build.rs lives only in mlpl-web); doc_dialog rewired diagrams_view ref to mlpl_web_paths::diagrams.

@@ -1,3 +1,4 @@
+use mlpl_web_viz_ir::VizNode;
 use serde::Serialize;
 use wasm_bindgen::JsCast;
 
@@ -11,6 +12,12 @@ pub struct ShapeInfo {
     pub values: Option<Vec<f64>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub summary: Option<ArraySummary>,
+    /// Saga A (viz-ir-scaffold): optional IR payload describing
+    /// how the inspector dialog should render this tensor.
+    /// `None` falls through to the current text body; future
+    /// sagas populate it and add per-kind renderers.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub viz: Option<VizNode>,
 }
 
 #[derive(Serialize)]
@@ -49,6 +56,7 @@ pub fn build_shape_info(name: String, shape: Vec<usize>, values: Option<Vec<f64>
         elements,
         values: vals,
         summary,
+        viz: None,
     }
 }
 

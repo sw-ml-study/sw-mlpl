@@ -1,1 +1,0 @@
-Carve paths cluster (paths.rs + paths_*.rs, 6 files) out of mlpl-web into components/web-paths/. Check paths.rs deps on demos -- after saga 82 step 1, demos lives in mlpl-web-demos, so paths-* sub-crate likely needs mlpl-web-demos as a path dep.

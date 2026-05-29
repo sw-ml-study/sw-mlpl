@@ -1,1 +1,0 @@
-Carve glossary_popup + glossary_view (2 files) out of mlpl-web into components/web-glossary/ with mlpl-web-glossary crate (single crate; only 2 modules + lib facade). Re-export under crate::glossary_popup / crate::glossary_view aliases.

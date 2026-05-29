@@ -297,6 +297,15 @@ function selectMesh(mesh) {
 // in docs/3d-introspect-dialog.md; this is the v0 starter that
 // makes the yellow pointer clickable and surfaces the existing
 // detail data + a sampled values dump in one clean dialog.
+// Viz-IR renderer registry. Saga A (viz-ir-scaffold) ships an
+// empty registry: the dispatch site recognizes userData.viz?.kind
+// but every kind currently falls through to the existing text
+// body. Sagas B+ register one entry per kind:
+//   vizRenderers.attention = (ud, viz) => '<svg>...</svg>'
+//   vizRenderers.composite = (ud, viz) => '<div class="sankey">...</div>'
+// renderInspectorBody calls the matching renderer when present.
+const vizRenderers = Object.create(null);
+
 function openInspector() {
     if (selectedStepIdx < 0 || selectedStepIdx >= stepMeshes.length) return;
     const mesh = stepMeshes[selectedStepIdx];
@@ -349,6 +358,18 @@ function closeInspector() {
 }
 
 function renderInspectorBody(ud) {
+    // Viz-IR dispatch: if a renderer is registered for this
+    // sculpture's viz.kind, use it; otherwise fall through to
+    // the existing text body. Saga A registers nothing -- the
+    // type field rides through but doesn't change UX.
+    const viz = ud.viz;
+    if (viz && typeof viz.kind === 'string' && vizRenderers[viz.kind]) {
+        try {
+            return vizRenderers[viz.kind](ud, viz);
+        } catch (e) {
+            console.warn('viz-ir renderer failed; falling back to text body', e);
+        }
+    }
     const name = ud.varName || '';
     const label = ud.label || '';
     const shape = ud.shape || [];
@@ -764,6 +785,17 @@ window.__stage3d_next = function() {
 window.__stage3d_home = function() { clearSelection(); panToStep(0); };
 window.__stage3d_end = function() { clearSelection(); panToStep(stepCount - 1); };
 window.__stage3d_close_inspector = closeInspector;
+// Saga A (viz-ir-scaffold): future renderer sagas register one
+// function per VizKind without having to edit this file.
+//   window.__viz_register('attention', (userData, vizNode) => '<svg>...</svg>');
+// The dispatch site in renderInspectorBody picks the matching
+// renderer when present; absent kinds fall through to the
+// existing text body.
+window.__viz_register = function(kind, renderer) {
+    if (typeof kind === 'string' && typeof renderer === 'function') {
+        vizRenderers[kind] = renderer;
+    }
+};
 
 window.__stage3d_clear = function() {
     for (const obj of stepObjects) scene.remove(obj);
