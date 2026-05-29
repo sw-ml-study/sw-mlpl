@@ -169,7 +169,7 @@ pub const BPE_ATTENTION_LABELS: Demo = Demo {
     lines: &[
         "# Saga BPE-2: end-to-end BPE labels on an attention heatmap.",
         "corpus = \"the quick brown fox jumps over the lazy dog\"      # 9 ASCII words",
-        "tok    = train_bpe(corpus, 20, 0)                            # 20 merges -> small vocab",
+        "tok    = train_bpe(corpus, 80, 0)                            # 80 merges -> multi-char tokens emerge",
         "ids    = apply_tokenizer(tok, corpus)                        # rank-1 token ids",
         "labels = decode_each(tok, ids)                                # StrList: per-token byte strings",
         "# Above `labels` rides through ShapeInfo.string_list and is",

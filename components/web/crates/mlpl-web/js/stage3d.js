@@ -468,6 +468,20 @@ function renderAttentionHeatmap(ud, viz) {
         const x = padL + j * cellW + cellW / 2;
         svg += `<text x="${x}" y="${padT - 8}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext1)">${escapeHtml(kLabels[j])}</text>`;
     }
+    // Per-slice min/max so the viridis ramp stretches across
+    // the visible range. Untrained attention is row-wise
+    // softmax of randn noise: every cell sits near 1/N (0.023
+    // for N=43), so clamping to [0, 1] collapses every color
+    // to the same dark purple. Normalizing to [sliceMin,
+    // sliceMax] makes the (still subtle) per-cell differences
+    // visible.
+    let sliceMin = Infinity, sliceMax = -Infinity;
+    for (let idx = layerHeadOffset; idx < layerHeadOffset + q * k; idx++) {
+        const v = a.weights[idx] || 0;
+        if (v < sliceMin) sliceMin = v;
+        if (v > sliceMax) sliceMax = v;
+    }
+    const sliceRange = sliceMax - sliceMin;
     // Cells + row labels (left).
     let maxRowSum = 0;
     const rowSums = new Float64Array(q);
@@ -478,7 +492,8 @@ function renderAttentionHeatmap(ud, viz) {
             rowSum += v;
             const x = padL + j * cellW;
             const y = padT + i * cellH;
-            const col = viridis(Math.max(0, Math.min(1, v)));
+            const t = sliceRange > 1e-12 ? (v - sliceMin) / sliceRange : 0.5;
+            const col = viridis(Math.max(0, Math.min(1, t)));
             const tip = `(${escapeHtml(qLabels[i])}, ${escapeHtml(kLabels[j])}) = ${v.toFixed(4)}`;
             svg += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${col}" stroke="rgba(0,0,0,0.15)" stroke-width="0.5"><title>${tip}</title></rect>`;
         }
@@ -816,8 +831,13 @@ function showDetail(ud) {
     const vizHint = vizKind && vizRenderers[vizKind]
         ? `<div class="stage3d-detail-row" style="color:var(--peach)"><strong>${vizKind}</strong> view available -- click the yellow pointer to open it.</div>`
         : '';
+    // Same de-dup logic as the dialog renderers: don't prepend
+    // `<name> =` when the label already starts with it.
+    const startsWithName = name
+        && new RegExp(`^\\s*${name}\\s*=`).test(label);
+    const title = startsWithName || !name ? label : `${name} = ${label}`;
     let html = `
-        <div class="stage3d-detail-title">${name ? name + ' =' : ''} ${label}</div>
+        <div class="stage3d-detail-title">${title}</div>
         <div class="stage3d-detail-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>
         <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>${vizHint}`;
     const vals = ud.values;
@@ -1116,6 +1136,15 @@ window.__stage3d_add_step = function(ev) {
     // is a chain without grepping the source line.
     const detectedViz = detectViz(ev.label, shape, values, ev.output);
     const viz = ev.output?.viz || detectedViz || null;
+    if (window.__viz_debug !== false && (ev.output?.viz || viz)) {
+        // Saga D diagnostic. Silence with window.__viz_debug = false.
+        console.log('[viz-ir] sculpture', {
+            label: ev.label,
+            rust_viz_present: !!ev.output?.viz,
+            kind: viz?.kind,
+            renderer_registered: viz?.kind ? !!vizRenderers[viz.kind] : false,
+        });
+    }
     mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0, values, summary: ev.output?.summary || null, viz };
     mesh.traverse(c => { if (c !== mesh) c.userData = mesh.userData; });
     scene.add(mesh);
