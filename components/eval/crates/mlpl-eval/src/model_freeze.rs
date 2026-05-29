@@ -7,9 +7,9 @@ use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
+use mlpl_eval_core::model::ModelSpec;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
-use mlpl_eval_core::model::ModelSpec;
 
 /// `freeze(m)` entry point: dispatches to the generic body in
 /// `mlpl-models-freeze::freeze_inner`, passing the eval-loop

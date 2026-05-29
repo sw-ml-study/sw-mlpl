@@ -31,13 +31,13 @@ fn apply_one_arg<I: Iterator<Item = String>>(
     it: &mut I,
     acc: &mut Args,
 ) -> Result<(), String> {
-    let need = |it: &mut I, flag: &str| {
-        it.next().ok_or_else(|| format!("{flag} requires a value"))
-    };
+    let need = |it: &mut I, flag: &str| it.next().ok_or_else(|| format!("{flag} requires a value"));
     match arg {
         "--bind" => {
             let v = need(it, "--bind")?;
-            acc.bind = v.parse().map_err(|e| format!("--bind: invalid SocketAddr {v:?}: {e}"))?;
+            acc.bind = v
+                .parse()
+                .map_err(|e| format!("--bind: invalid SocketAddr {v:?}: {e}"))?;
         }
         "--auth" => {
             acc.auth = match need(it, "--auth")?.as_str() {

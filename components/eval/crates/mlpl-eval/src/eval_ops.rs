@@ -6,8 +6,8 @@ use mlpl_parser::{BinOpKind, Expr};
 use mlpl_trace::{Trace, TraceValue};
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
+use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
 pub(crate) fn eval_binop(

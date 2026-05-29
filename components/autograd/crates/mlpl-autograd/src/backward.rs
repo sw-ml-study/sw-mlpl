@@ -54,21 +54,35 @@ fn propagate(tape: &Tape, id: NodeId) {
         NodeKind::MeanAll { parent } => prop_sum_mean(tape, parent, &upstream, true),
         NodeKind::Softmax { parent, axis } => prop_softmax(tape, id, parent, axis, &upstream),
         NodeKind::Transpose { parent } => prop_transpose(tape, parent, &upstream),
-        NodeKind::Reshape { parent, orig_shape } => prop_reshape(tape, parent, &orig_shape, &upstream),
+        NodeKind::Reshape { parent, orig_shape } => {
+            prop_reshape(tape, parent, &orig_shape, &upstream)
+        }
         NodeKind::MatMul { left, right } => prop_matmul(tape, left, right, &upstream),
-        NodeKind::CrossEntropy { logits, targets } => prop_cross_entropy(tape, logits, &targets, &upstream),
-        NodeKind::Patchify { parent, orig_shape, patch_size } => {
-            prop_patchify(tape, parent, &orig_shape, patch_size, &upstream)
+        NodeKind::CrossEntropy { logits, targets } => {
+            prop_cross_entropy(tape, logits, &targets, &upstream)
         }
-        NodeKind::Concat { left, right, axis, left_size } => {
-            prop_concat(tape, left, right, axis, left_size, &upstream)
-        }
-        NodeKind::Stack { parents, axis, parent_size_along_axis } => {
-            prop_stack(tape, &parents, axis, parent_size_along_axis, &upstream)
-        }
-        NodeKind::Take { parent, orig_shape, axis, idx } => {
-            prop_take(tape, parent, &orig_shape, axis, idx, &upstream)
-        }
+        NodeKind::Patchify {
+            parent,
+            orig_shape,
+            patch_size,
+        } => prop_patchify(tape, parent, &orig_shape, patch_size, &upstream),
+        NodeKind::Concat {
+            left,
+            right,
+            axis,
+            left_size,
+        } => prop_concat(tape, left, right, axis, left_size, &upstream),
+        NodeKind::Stack {
+            parents,
+            axis,
+            parent_size_along_axis,
+        } => prop_stack(tape, &parents, axis, parent_size_along_axis, &upstream),
+        NodeKind::Take {
+            parent,
+            orig_shape,
+            axis,
+            idx,
+        } => prop_take(tape, parent, &orig_shape, axis, idx, &upstream),
     }
 }
 

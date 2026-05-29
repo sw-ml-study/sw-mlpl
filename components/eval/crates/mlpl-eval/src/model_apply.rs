@@ -8,12 +8,12 @@
 use mlpl_array::DenseArray;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::model_apply_attention::{AttentionArgs, apply_attention};
 use crate::model_apply_compose::{apply_chain, apply_residual, apply_rms_norm};
 use crate::model_apply_lora::{LinearLoraInputs, apply_linear_lora};
 use crate::model_apply_simple::{apply_activation, apply_embedding, apply_linear};
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_types::EvalError;
 
 /// Forward-pass dispatcher for the model DSL: maps each
 /// `ModelSpec` variant to its per-variant helper. Saga 33

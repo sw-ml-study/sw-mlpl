@@ -8,9 +8,9 @@ use mlpl_core::ValueTag;
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::model_dispatch_scalar::{scalar_f64, scalar_usize};
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_types::EvalError;
 
 pub(crate) fn eval_attention(
     args: &[Expr],

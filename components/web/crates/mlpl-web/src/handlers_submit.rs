@@ -52,7 +52,13 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
         let mut new_cmds = (*deps.cmd_history).clone();
         let mut eval_queue: Vec<String> = Vec::new();
         for line in lines {
-            classify_line(&deps, line, &mut new_history, &mut new_cmds, &mut eval_queue);
+            classify_line(
+                &deps,
+                line,
+                &mut new_history,
+                &mut new_cmds,
+                &mut eval_queue,
+            );
         }
         if new_cmds.is_empty() {
             return;
@@ -106,8 +112,7 @@ fn apply_3d_command(deps: &EvalDeps, cmd: crate::viz3d_toggle::Viz3dCmd) {
         crate::viz3d_toggle::Viz3dCmd::On => deps.show_3d.set(true),
         crate::viz3d_toggle::Viz3dCmd::Off => deps.show_3d.set(false),
         crate::viz3d_toggle::Viz3dCmd::Reset => {
-            let _ =
-                js_sys::eval("window.__stage3d_reset_view && window.__stage3d_reset_view()");
+            let _ = js_sys::eval("window.__stage3d_reset_view && window.__stage3d_reset_view()");
         }
     }
 }
@@ -166,8 +171,6 @@ pub(crate) fn running_message(line: &str) -> &'static str {
     }
 }
 
-
-
 fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
     if line == ":help" || line.starts_with(':') {
         return eval_one_line(deps, line);
@@ -214,7 +217,3 @@ fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
         kind: EntryKind::Command,
     }
 }
-
-
-
-

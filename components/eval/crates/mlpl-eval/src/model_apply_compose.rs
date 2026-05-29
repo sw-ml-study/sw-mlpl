@@ -6,9 +6,9 @@
 use mlpl_array::{DenseArray, Shape};
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::model_apply::apply_model;
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_types::EvalError;
 
 /// `apply(Chain([a, b, ...]), x)` = `apply(b, apply(a, x))`.
 pub(crate) fn apply_chain(

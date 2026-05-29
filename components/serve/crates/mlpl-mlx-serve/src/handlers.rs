@@ -128,7 +128,11 @@ pub async fn eval_on_device_handler(
         Value::Array(a) => {
             let shape = a.shape().dims().to_vec();
             let handle = crate::handles::insert(&state.handles, a).await;
-            EvalResultPayload::Tensor { handle: handle.to_string(), shape, device: "mlx" }
+            EvalResultPayload::Tensor {
+                handle: handle.to_string(),
+                shape,
+                device: "mlx",
+            }
         }
         Value::Str(s) => EvalResultPayload::String { value: s },
         Value::Model(_)

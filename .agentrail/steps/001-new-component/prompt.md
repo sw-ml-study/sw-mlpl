@@ -1,0 +1,1 @@
+Create components/web-completion/ + mlpl-web-completion crate. Move completion.rs (and its inline tests) verbatim. Wire mlpl-web Cargo.toml dep + re-export pub use.

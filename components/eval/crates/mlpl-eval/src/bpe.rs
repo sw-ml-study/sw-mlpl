@@ -8,8 +8,8 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::tokenizer::TokenizerSpec;
+use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
 pub(crate) use mlpl_bpe_core::train;

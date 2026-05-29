@@ -1,1 +1,1 @@
-Split mlpl-web/src/viz3d_events.rs (11 fns FAIL) by moving the inline #[cfg(test)] mod tests {6 fns} into viz3d_events_tests.rs via #[path] include.
+Extract mlpl-web/src/completion.rs (28 fns FAIL) into a new components/web-completion/ workspace with crate mlpl-web-completion. mlpl-web depends on it and re-exports. Retires completion.rs FAIL AND drops mlpl-web crate module count from 77 to 76 (single-file extraction, but enables the next 6 similar carve-outs).

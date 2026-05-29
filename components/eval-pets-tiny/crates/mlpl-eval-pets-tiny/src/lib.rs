@@ -47,7 +47,11 @@ const PETS_TINY_BIN: &[u8] = include_bytes!("../../../../eval/crates/mlpl-eval/d
 /// `names` (a `Value::StrList`).
 pub fn load() -> Result<Value, EvalError> {
     let (header, body) = parse_header(PETS_TINY_BIN)?;
-    let Sections { y_bytes, names_bytes, pixels } = parse_sections(body, &header)?;
+    let Sections {
+        y_bytes,
+        names_bytes,
+        pixels,
+    } = parse_sections(body, &header)?;
     let names = decode_names(names_bytes);
     let x_arr = build_x_array(pixels, &header)?;
     let y_arr = build_y_array(y_bytes)?;
@@ -75,12 +79,8 @@ fn parse_sections<'a>(body: &'a [u8], h: &Header) -> Result<Sections<'a>, EvalEr
     if body.len() < cur + 4 {
         return Err(corrupt("name-table length missing"));
     }
-    let names_len = u32::from_le_bytes([
-        body[cur],
-        body[cur + 1],
-        body[cur + 2],
-        body[cur + 3],
-    ]) as usize;
+    let names_len =
+        u32::from_le_bytes([body[cur], body[cur + 1], body[cur + 2], body[cur + 3]]) as usize;
     cur += 4;
     if body.len() < cur + names_len {
         return Err(corrupt("name-table truncated"));
@@ -112,12 +112,14 @@ fn decode_names(names_bytes: &[u8]) -> Vec<String> {
 fn build_x_array(pixels: &[u8], h: &Header) -> Result<DenseArray, EvalError> {
     // X: u8 -> f64 in [-1, 1]
     let x_data: Vec<f64> = pixels.iter().map(|b| f64::from(*b) / 127.5 - 1.0).collect();
-    Ok(DenseArray::new(Shape::new(vec![h.n, h.c, h.h, h.w]), x_data)?.with_labels(vec![
-        Some("batch".to_string()),
-        Some("channel".to_string()),
-        Some("y".to_string()),
-        Some("x".to_string()),
-    ])?)
+    Ok(
+        DenseArray::new(Shape::new(vec![h.n, h.c, h.h, h.w]), x_data)?.with_labels(vec![
+            Some("batch".to_string()),
+            Some("channel".to_string()),
+            Some("y".to_string()),
+            Some("x".to_string()),
+        ])?,
+    )
 }
 
 fn build_y_array(y_bytes: &[u8]) -> Result<DenseArray, EvalError> {

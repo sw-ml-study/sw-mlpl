@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-web-completion"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_completion"
+path = "src/lib.rs"
+
+[dependencies]

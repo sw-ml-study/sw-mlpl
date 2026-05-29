@@ -13,8 +13,8 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::grad::eval_grad;
+use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
 /// FnCall-dispatch wrapper around `momentum_sgd` / `adam`. Lifted

@@ -7,9 +7,9 @@
 use mlpl_array::{DenseArray, Shape};
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::model_apply_embed::tokens_to_onehot;
 use mlpl_eval_core::model::ActKind;
+use mlpl_eval_types::EvalError;
 
 /// `apply(Linear{w, b}, x)` = `x @ w + bias_broadcast(b)`.
 pub(crate) fn apply_linear(

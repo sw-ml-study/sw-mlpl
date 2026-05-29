@@ -1,1 +1,0 @@
-Saga 78 close.

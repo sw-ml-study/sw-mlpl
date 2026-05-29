@@ -32,11 +32,19 @@ pub(crate) fn eval_input_with_values(input: &str, env: &mut Environment) -> Eval
 }
 
 fn empty_result() -> EvalResult {
-    EvalResult { display: String::new(), values: None, shape: vec![] }
+    EvalResult {
+        display: String::new(),
+        values: None,
+        shape: vec![],
+    }
 }
 
 fn text_result(display: String) -> EvalResult {
-    EvalResult { display, values: None, shape: vec![] }
+    EvalResult {
+        display,
+        values: None,
+        shape: vec![],
+    }
 }
 
 fn value_to_result(value: mlpl_eval::Value) -> EvalResult {
