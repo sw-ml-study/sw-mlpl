@@ -29,6 +29,10 @@ mlpl-web-onboarding = { path = "../../../web-onboarding/crates/mlpl-web-onboardi
 mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
 mlpl-web-paths = { path = "../../../web-paths/crates/mlpl-web-paths" }
 mlpl-web-paths-data = { path = "../../../web-paths/crates/mlpl-web-paths-data" }
+mlpl-web-render-aux = { path = "../../../web-render/crates/mlpl-web-render-aux" }
+mlpl-web-render-core = { path = "../../../web-render/crates/mlpl-web-render-core" }
+mlpl-web-render-shell = { path = "../../../web-render/crates/mlpl-web-render-shell" }
+mlpl-web-render-types = { path = "../../../web-render/crates/mlpl-web-render-types" }
 mlpl-web-viz3d = { path = "../../../web-viz3d/crates/mlpl-web-viz3d" }
 mlpl-web-lessons = { path = "../../crates/mlpl-web-lessons" }
 mlpl-web-path-body = { path = "../../crates/mlpl-web-path-body" }

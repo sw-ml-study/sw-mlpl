@@ -1,0 +1,25 @@
+[package]
+name = "mlpl-web-render-shell"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_render_shell"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-components-chrome = { path = "../../../web-components/crates/mlpl-web-components-chrome" }
+mlpl-web-components-content = { path = "../../../web-components/crates/mlpl-web-components-content" }
+mlpl-web-glossary = { path = "../../../web-glossary/crates/mlpl-web-glossary" }
+mlpl-web-handlers-eval = { path = "../../../web-handlers/crates/mlpl-web-handlers-eval" }
+mlpl-web-handlers-upload = { path = "../../../web-handlers/crates/mlpl-web-handlers-upload" }
+mlpl-web-mode = { path = "../../../web-mode/crates/mlpl-web-mode" }
+mlpl-web-onboarding = { path = "../../../web-onboarding/crates/mlpl-web-onboarding" }
+mlpl-web-completion = { path = "../../../web-completion/crates/mlpl-web-completion" }
+mlpl-web-paths = { path = "../../../web-paths/crates/mlpl-web-paths" }
+mlpl-web-render-core = { path = "../mlpl-web-render-core" }
+mlpl-web-render-types = { path = "../mlpl-web-render-types" }
+mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
+js-sys = "0.3"
+yew = { version = "0.21", features = ["csr"] }

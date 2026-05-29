@@ -15,13 +15,14 @@
 use yew::prelude::*;
 
 use crate::app_active::active_context;
-use crate::app_callbacks::build_callbacks;
 use crate::app_hooks::{
     use_global_keydown, use_onboarding_state, use_scroll_effect, use_sessions, use_ui_state,
     use_upload_state,
 };
 use crate::app_log::log_connect_mode;
-use crate::render::{RenderArgs, render};
+use mlpl_web_render_shell::shell::render;
+use mlpl_web_render_types::app_callbacks::build_callbacks;
+use mlpl_web_render_types::args::RenderArgs;
 
 /// Mount the Yew application. Called from `src/main_wasm_body.rs`
 /// via `include!()` from `src/main.rs`.
@@ -46,7 +47,29 @@ fn app() -> Html {
         onboarding.show_splash.clone(),
         ui.show_3d.clone(),
     );
+    // Saga 82: only this crate's build.rs emits the BUILD_*
+    // env vars; format them here and thread down via
+    // RenderArgs.
+    let build_info = format!(
+        "v{}.{} \u{00b7} {} \u{00b7} {} \u{00b7} {}",
+        env!("CARGO_PKG_VERSION"),
+        env!("BUILD_COMMIT_COUNT"),
+        env!("BUILD_HOST"),
+        env!("BUILD_SHA"),
+        env!("BUILD_TIMESTAMP"),
+    );
+    let version_label = format!(
+        "v{}.{}",
+        env!("CARGO_PKG_VERSION"),
+        env!("BUILD_COMMIT_COUNT"),
+    );
     render(RenderArgs::from_parts(
-        callbacks, ui, upload, active, onboarding,
+        callbacks,
+        ui,
+        upload,
+        active,
+        onboarding,
+        build_info.into(),
+        version_label.into(),
     ))
 }

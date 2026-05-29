@@ -1,9 +1,10 @@
 number = 7
 slug = "extract-mode"
-status = "in-progress"
+status = "completed"
 description = "Carve mode_callbacks + mode_path + mode_select (3 files) out of mlpl-web into..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-28T22:37:44"
+completed_at = "2026-05-28T22:44:13"
 task_type = "refactor"
-commits = []
+commits = ["c69d62a7a4e41897127dbd74c3da4bab05508737"]
