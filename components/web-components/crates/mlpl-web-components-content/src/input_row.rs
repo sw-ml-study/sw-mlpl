@@ -11,6 +11,12 @@ pub struct InputRowProps {
     pub on_pick_completion: Callback<String>,
     /// Saga 33 step 047: highlighted chip index.
     pub completion_selected: usize,
+    /// Saga 83: contextual Reset callback. Renders next to the
+    /// input as "Reset Tutorial" when `in_tutorial`, "Reset REPL"
+    /// otherwise. The button used to live in the top mode bar
+    /// but was too far from where output appeared; moving it
+    /// next to the prompt makes the affordance obvious.
+    pub on_clear: Callback<MouseEvent>,
 }
 
 #[function_component(InputRow)]
@@ -39,6 +45,11 @@ pub fn input_row(props: &InputRowProps) -> Html {
             </div>
         }
     };
+    let clear_label = if props.in_tutorial {
+        "Reset Tutorial"
+    } else {
+        "Reset REPL"
+    };
     html! {
         <div class="input-wrap">
             <div class={label_class}>{ label_text }</div>
@@ -54,6 +65,13 @@ pub fn input_row(props: &InputRowProps) -> Html {
                     oninput={props.on_input.clone()}
                     onkeydown={props.on_keydown.clone()}
                 />
+                <button
+                    class="ctrl-btn input-row-clear"
+                    onclick={props.on_clear.clone()}
+                    title="Clear all output from this session"
+                >
+                    { clear_label }
+                </button>
             </div>
             { popup }
         </div>

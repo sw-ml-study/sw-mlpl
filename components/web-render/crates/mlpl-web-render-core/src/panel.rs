@@ -30,6 +30,10 @@ pub struct MainArgs<'a> {
     pub on_keydown: Callback<web_sys::KeyboardEvent>,
     pub on_run_example: Callback<String>,
     pub on_run_batch: Callback<Vec<String>>,
+    /// Saga 83: Reset callback moved from the top mode bar
+    /// into the input row. Clears the active session's history
+    /// (tutorial or main, depending on `tutorial_active`).
+    pub on_clear: Callback<MouseEvent>,
     pub completion_candidates: Vec<String>,
     pub on_pick_completion: Callback<String>,
     pub completion_selected: usize,
@@ -59,6 +63,7 @@ pub fn render_main(a: MainArgs) -> Html {
         input_value: a.input_value,
         on_input: a.on_input,
         on_keydown: a.on_keydown,
+        on_clear: a.on_clear,
         tutorial_active: a.tutorial_active,
         paths_active: a.paths_active,
         completion_candidates: a.completion_candidates,
@@ -142,6 +147,7 @@ struct ReplPaneArgs<'a> {
     input_value: &'a UseStateHandle<String>,
     on_input: Callback<InputEvent>,
     on_keydown: Callback<web_sys::KeyboardEvent>,
+    on_clear: Callback<MouseEvent>,
     tutorial_active: bool,
     paths_active: bool,
     completion_candidates: Vec<String>,
@@ -166,6 +172,7 @@ fn render_repl_pane(a: ReplPaneArgs) -> Html {
                 {value}
                 on_input={a.on_input}
                 on_keydown={a.on_keydown}
+                on_clear={a.on_clear}
                 in_tutorial={a.tutorial_active}
                 completion_candidates={a.completion_candidates}
                 on_pick_completion={a.on_pick_completion}
