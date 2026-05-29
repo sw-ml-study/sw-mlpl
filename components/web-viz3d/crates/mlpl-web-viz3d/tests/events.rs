@@ -1,8 +1,8 @@
-//! Saga 78: tests for `viz3d_events` extracted to keep the
-//! parent module under the sw-checklist function count limit.
-//! Loaded via `#[path]` include so `super::*` still resolves.
+//! Saga 80: integration tests for mlpl-web-viz3d's events
+//! module. Lives in `tests/` (saga 79 pattern) so test fns
+//! don't pollute the src module function count.
 
-use super::*;
+use mlpl_web_viz3d::events::{Stage3dEvent, build_shape_info, shape_from_output};
 
 #[test]
 fn event_serializes() {

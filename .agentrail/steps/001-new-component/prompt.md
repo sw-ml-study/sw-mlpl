@@ -1,1 +1,1 @@
-Create components/web-completion/ + mlpl-web-completion crate. Move completion.rs (and its inline tests) verbatim. Wire mlpl-web Cargo.toml dep + re-export pub use.
+Create components/web-viz3d/ + mlpl-web-viz3d crate housing events, panel, toggle modules. Move test file to tests/. Update mlpl-web Cargo dep + lib.rs aliases.

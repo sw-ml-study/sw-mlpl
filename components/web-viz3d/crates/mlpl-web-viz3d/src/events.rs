@@ -135,7 +135,3 @@ fn parse_dense_array_summary(s: &str) -> Option<(Vec<usize>, usize)> {
         .unwrap_or_else(|| shape.iter().product());
     Some((shape, elems))
 }
-
-#[cfg(test)]
-#[path = "viz3d_events_tests.rs"]
-mod tests;

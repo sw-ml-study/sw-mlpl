@@ -1813,6 +1813,7 @@ dependencies = [
  "mlpl-web-eval",
  "mlpl-web-lessons",
  "mlpl-web-path-body",
+ "mlpl-web-viz3d",
  "reqwest",
  "serde",
  "serde-wasm-bindgen 0.6.5",
@@ -1852,6 +1853,18 @@ dependencies = [
 name = "mlpl-web-path-body"
 version = "0.20.0"
 dependencies = [
+ "wasm-bindgen",
+ "web-sys",
+ "yew",
+]
+
+[[package]]
+name = "mlpl-web-viz3d"
+version = "0.20.0"
+dependencies = [
+ "js-sys",
+ "serde",
+ "serde-wasm-bindgen 0.6.5",
  "wasm-bindgen",
  "web-sys",
  "yew",
