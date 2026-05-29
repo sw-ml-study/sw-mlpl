@@ -1,9 +1,10 @@
 number = 1
 slug = "split"
-status = "in-progress"
+status = "completed"
 description = "Split tests"
 role = "production"
 context_files = []
 created_at = "2026-05-28T18:03:28"
+completed_at = "2026-05-28T18:15:37"
 task_type = "refactor"
-commits = []
+commits = ["1898257ca68b14760f1f6bb50c471a9a4d89f451"]
