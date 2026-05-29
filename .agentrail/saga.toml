@@ -1,5 +1,5 @@
 name = "web-eval-split-wasm"
-status = "active"
+status = "completed"
 current_step = 1
 created_at = "2026-05-28T19:00:49"
 plan_file = ".agentrail/plan.md"
