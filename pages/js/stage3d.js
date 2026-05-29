@@ -107,6 +107,18 @@ function animate() {
         a.update(t);
         if (t >= 1) activeAnims.splice(i, 1);
     }
+    // Pulse the selection pointer to advertise that it's
+    // clickable. Sine wave on emissiveIntensity over ~1.4s;
+    // also gently bobs the cone up and down so the affordance
+    // catches the eye in peripheral vision.
+    if (selectionPointer) {
+        const phase = (now - selectionPointerStart) / 1400;
+        const s = (Math.sin(phase * Math.PI * 2) + 1) * 0.5; // 0..1
+        if (selectionPointer.material) {
+            selectionPointer.material.emissiveIntensity = 0.45 + s * 0.55;
+        }
+        selectionPointer.position.y = selectionPointerBaseY + s * 0.12;
+    }
     controls.update();
     renderer.render(scene, camera);
 }
@@ -252,6 +264,11 @@ function onCanvasClick(e) {
 }
 
 let selectionPointer = null;
+// Anchored base Y + start timestamp drive the bob + glow
+// animation in animate(); reset whenever a new mesh becomes
+// the selection.
+let selectionPointerBaseY = 0;
+let selectionPointerStart = 0;
 
 function selectMesh(mesh) {
     if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
@@ -266,6 +283,11 @@ function selectMesh(mesh) {
     selectionPointer.position.set(worldPos.x, worldPos.y + 1.5, worldPos.z);
     selectionPointer.userData = { isSelectionPointer: true, sourceMesh: mesh };
     scene.add(selectionPointer);
+    // Reset the pulse animation so each fresh selection starts
+    // at the brightest point of the cycle -- bigger visual
+    // pop the moment the user clicks something.
+    selectionPointerBaseY = worldPos.y + 1.5;
+    selectionPointerStart = performance.now();
     selectedStepIdx = mesh.userData?.stepIdx ?? -1;
 }
 
@@ -299,12 +321,30 @@ function closeInspector() {
         document.removeEventListener('keydown', dlg._escHandler);
         delete dlg._escHandler;
     }
-    // Restore focus to the canvas so arrow keys keep
-    // navigating between steps without the user having to
-    // click into the 3D space again.
+    // Restore focus to the canvas so arrow keys resume working
+    // on the selected mesh without the user having to click
+    // back into the 3D space.
+    //
+    // Deferred to the next animation frame because Chromium
+    // restores focus to the document body AFTER the current
+    // click event finishes propagating; calling focus() here
+    // synchronously gets immediately overridden. requestAnimationFrame
+    // sidesteps that by waiting for the focus restoration to
+    // settle. activeElement.blur() drops the close-button or
+    // backdrop from the focus ring first so the rAF focus()
+    // isn't competing with a delayed steal.
+    if (document.activeElement && document.activeElement !== document.body) {
+        try { document.activeElement.blur(); } catch (_) {}
+    }
     const canvas = renderer && renderer.domElement;
     if (canvas && typeof canvas.focus === 'function') {
-        canvas.focus({ preventScroll: true });
+        // Belt-and-suspenders: confirm tabIndex is still
+        // present (would be lost if Yew replaced the canvas
+        // node) before asking the browser to focus it.
+        if (!canvas.hasAttribute('tabindex')) canvas.tabIndex = 0;
+        requestAnimationFrame(() => {
+            try { canvas.focus({ preventScroll: true }); } catch (_) {}
+        });
     }
 }
 
