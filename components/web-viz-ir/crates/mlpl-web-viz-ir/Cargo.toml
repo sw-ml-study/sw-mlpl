@@ -1,0 +1,12 @@
+[package]
+name = "mlpl-web-viz-ir"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_viz_ir"
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }

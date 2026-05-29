@@ -1,1 +1,0 @@
-Carve mode_callbacks + mode_path + mode_select (3 files) out of mlpl-web into components/web-mode/ with a single mlpl-web-mode crate. 3 modules + lib = 4. mode_path uses crate::demos (now mlpl-web-demos) + crate::mode_select; mode_select uses crate::components::TutorialView (now mlpl-web-components facade). Re-export under crate::mode_* names.

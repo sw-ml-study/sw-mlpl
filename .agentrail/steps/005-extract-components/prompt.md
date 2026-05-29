@@ -1,1 +1,0 @@
-Carve component_* + components.rs (7 files) out of mlpl-web into components/web-components/. components.rs is a re-export facade for the 6 component_* files. May fit in single crate (7 modules at limit) or need a 2-crate split if any component_* introduces new modules. Update mlpl-web to alias under crate::components and individual crate::component_* paths.

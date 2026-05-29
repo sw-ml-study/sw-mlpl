@@ -10,6 +10,7 @@ path = "src/lib.rs"
 
 [dependencies]
 js-sys = "0.3"
+mlpl-web-viz-ir = { path = "../../../web-viz-ir/crates/mlpl-web-viz-ir" }
 serde = { version = "1", features = ["derive"] }
 serde-wasm-bindgen = "0.6"
 wasm-bindgen = "0.2"

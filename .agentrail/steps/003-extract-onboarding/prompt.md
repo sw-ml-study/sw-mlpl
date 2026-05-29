@@ -1,1 +1,0 @@
-Carve onboarding_splash + onboarding_tour + onboarding_storage + onboarding_whats_new (4 files) out of mlpl-web into components/web-onboarding/ with mlpl-web-onboarding crate. Single crate since 4 modules + lib.rs facade = 5 modules (PASS at <=7). Re-export via crate::onboarding_* aliases.
