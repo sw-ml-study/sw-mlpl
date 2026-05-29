@@ -973,7 +973,10 @@ window.__stage3d_add_step = function(ev) {
 
     const rank = shape.length;
     const dims = shape.length ? `[${shape.join(',')}]` : 'scalar';
-    const text = `${ev.output?.name || ''}: ${dims} R${rank}`;
+    // Step number prefix so the user can match what they
+    // click in 3D against the "Step N of M" caption in the
+    // bottom detail strip and the inspector dialog.
+    const text = `#${stepCount}: ${ev.output?.name || ''} ${dims} R${rank}`;
     const label = makeLabel(text);
     label.position.set(x, 1.6, 0);
     scene.add(label);
