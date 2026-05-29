@@ -310,6 +310,18 @@ const vizRenderers = Object.create(null);
 // renderers can swap in without touching the JS detection.
 const SOFTMAX_RE = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*softmax\s*\(/;
 function detectViz(label, shape, values) {
+    // Saga B debug -- remove once verified. Log every event so
+    // the user can see in DevTools whether the detection ever
+    // gets the inputs it needs. Turn off via window.__viz_debug = false.
+    if (window.__viz_debug !== false) {
+        console.log('[viz-ir] detectViz', {
+            label,
+            shape,
+            values_len: values ? values.length : null,
+            matched: !!(values && shape.length === 2 && shape[0] === shape[1]
+                && SOFTMAX_RE.test(label || '')),
+        });
+    }
     if (!label || !shape || !values) return null;
     // Rank-2 square + a softmax assignment is the attention.mlpl
     // pattern (and the prevailing convention even outside it).
