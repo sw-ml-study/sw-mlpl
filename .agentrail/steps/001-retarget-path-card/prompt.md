@@ -1,0 +1,1 @@
+In paths_view.rs render_picker, change the data-tour-target='path-card-first' marker to attach to the LearningPath whose title == 'Dimensionality Reduction' (not always position 0). Rename the marker to path-card-dim-reduction for clarity and update both references in onboarding_tour.rs. Rebuild pages/. Verify wasm32 build + native tests.
