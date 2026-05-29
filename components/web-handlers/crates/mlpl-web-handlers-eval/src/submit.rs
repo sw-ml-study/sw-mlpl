@@ -159,7 +159,12 @@ fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
         let is_error = r.display.starts_with("error:");
         if !is_error {
             let name = line.split('=').next().unwrap_or(line).trim().to_string();
-            let info = mlpl_web_viz3d::events::build_shape_info(name, r.shape, r.values);
+            let info = mlpl_web_viz3d::events::build_shape_info_full(
+                name,
+                r.shape,
+                r.values,
+                r.string_list,
+            );
             mlpl_web_viz3d::events::emit(&mlpl_web_viz3d::events::Stage3dEvent {
                 step_idx: 0,
                 label: line.to_string(),

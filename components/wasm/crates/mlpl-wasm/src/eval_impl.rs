@@ -6,6 +6,11 @@ pub struct EvalResult {
     pub display: String,
     pub values: Option<Vec<f64>>,
     pub shape: Vec<usize>,
+    /// Saga BPE-1: populated when the evaluated value is a
+    /// `Value::StrList` (produced by `decode_each(...)` or
+    /// `[...]` string literals). Lets the viz layer attach
+    /// per-token labels to attention sculptures.
+    pub string_list: Option<Vec<String>>,
 }
 
 pub(crate) fn eval_input_with_values(input: &str, env: &mut Environment) -> EvalResult {
@@ -36,6 +41,7 @@ fn empty_result() -> EvalResult {
         display: String::new(),
         values: None,
         shape: vec![],
+        string_list: None,
     }
 }
 
@@ -44,6 +50,7 @@ fn text_result(display: String) -> EvalResult {
         display,
         values: None,
         shape: vec![],
+        string_list: None,
     }
 }
 
@@ -53,6 +60,13 @@ fn value_to_result(value: mlpl_eval::Value) -> EvalResult {
             display: format!("{}", mlpl_eval::Value::Array(arr.clone())),
             values: Some(arr.data().to_vec()),
             shape: arr.shape().dims().to_vec(),
+            string_list: None,
+        },
+        mlpl_eval::Value::StrList { ref items } => EvalResult {
+            display: format!("{}", mlpl_eval::Value::StrList { items: items.clone() }),
+            values: None,
+            shape: vec![items.len()],
+            string_list: Some(items.clone()),
         },
         other => text_result(format!("{other}")),
     }

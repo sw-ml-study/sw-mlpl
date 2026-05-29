@@ -37,6 +37,7 @@ pub(crate) fn dispatch(
         "train_bpe" => Some(dispatch_train_bpe(args, env, trace)),
         "apply_tokenizer" => Some(crate::bpe::dispatch_apply(args, env, trace)),
         "decode" => Some(crate::bpe::dispatch_decode(args, env, trace)),
+        "decode_each" => Some(crate::bpe::dispatch_decode_each(args, env, trace)),
         _ => None,
     }
 }

@@ -323,6 +323,17 @@ function selectMesh(mesh) {
 // Empty kinds fall through to the existing text body.
 const vizRenderers = Object.create(null);
 
+// Saga BPE-1: most-recently-seen string list, set whenever a
+// sculpture's userData carries a string_list (the JS side of
+// the Value::StrList plumbing through ShapeInfo). The next
+// attention sculpture's detector consumes + clears this -- so
+// `labels = decode_each(tok, ids)` immediately followed by
+// `A = attention_weights(...)` lands the labels on A's heatmap
+// axes. Cleared after consumption so a stray label list from
+// far back doesn't accidentally label an unrelated attention
+// matrix.
+let pendingTokenLabels = null;
+
 // Saga B: detect tensors that are attention weights and stamp
 // a VizNode-shaped object onto userData. JS-side heuristic for
 // now; richer evaluator-driven detection lands in saga C when
@@ -331,14 +342,22 @@ const vizRenderers = Object.create(null);
 // renderers can swap in without touching the JS detection.
 const SOFTMAX_RE = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*softmax\s*\(/;
 const ATTN_WEIGHTS_RE = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*attention_weights\s*\(/;
-function detectViz(label, shape, values) {
+function detectViz(label, shape, values, output) {
+    // Saga BPE-1: if this sculpture is itself a string list,
+    // remember it as the pending token labels for the next
+    // attention sculpture and return null (no inspector view
+    // for a label list itself today).
+    if (output && Array.isArray(output.string_list)) {
+        pendingTokenLabels = output.string_list.slice();
+        return null;
+    }
     if (!label || !shape || !values) return null;
     // Saga B pattern: rank-2 square + softmax assignment.
     if (shape.length === 2 && shape[0] === shape[1] && shape[0] >= 2
         && values.length === shape[0] * shape[1]
         && SOFTMAX_RE.test(label)) {
         const n = shape[0];
-        const tokens = Array.from({ length: n }, (_, i) => ({ index: i }));
+        const tokens = consumeTokenLabels(n);
         return {
             kind: 'attention',
             attention: {
@@ -359,7 +378,7 @@ function detectViz(label, shape, values) {
         && ATTN_WEIGHTS_RE.test(label)) {
         const h = shape[0];
         const n = shape[1];
-        const tokens = Array.from({ length: n }, (_, i) => ({ index: i }));
+        const tokens = consumeTokenLabels(n);
         return {
             kind: 'attention',
             attention: {
@@ -372,6 +391,27 @@ function detectViz(label, shape, values) {
         };
     }
     return null;
+}
+
+// Saga BPE-1: pull the pending token labels (or fall back to
+// integer indices) and clear the pending slot so each label
+// list flows into exactly one attention sculpture. `n` is the
+// number of tokens the attention matrix expects on each axis;
+// a length mismatch falls back to indices and warns to the
+// console so the demo author can see the misalignment.
+function consumeTokenLabels(n) {
+    const pending = pendingTokenLabels;
+    pendingTokenLabels = null;
+    if (pending && pending.length === n) {
+        return pending.map(s => ({ str: s }));
+    }
+    if (pending && pending.length !== n) {
+        console.warn(
+            `[viz-ir] string_list length ${pending.length} does not match ` +
+            `attention size ${n}; falling back to integer indices.`,
+        );
+    }
+    return Array.from({ length: n }, (_, i) => ({ index: i }));
 }
 
 // Viridis ramp (matches mlpl-viz/src/svg/heatmap_grid.rs).
@@ -970,7 +1010,7 @@ window.__stage3d_add_step = function(ev) {
     const rawName = ev.output?.name || '';
     const isVar = ev.label.includes('=');
     const varName = isVar ? rawName : null;
-    const viz = detectViz(ev.label, shape, values);
+    const viz = detectViz(ev.label, shape, values, ev.output);
     mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0, values, summary: ev.output?.summary || null, viz };
     mesh.traverse(c => { if (c !== mesh) c.userData = mesh.userData; });
     scene.add(mesh);
