@@ -5,8 +5,8 @@
 
 use yew::prelude::*;
 
-use crate::components::TutorialView;
-use crate::demos;
+use mlpl_web_demos as demos;
+use mlpl_web_tutorial::TutorialView;
 
 /// PathsView -> parent: replace the entire paths state. PathsView
 /// owns its own picker/walker transitions; the parent just stores

@@ -4,7 +4,7 @@
 
 use yew::prelude::*;
 
-use crate::components::TutorialView;
+use mlpl_web_tutorial::TutorialView;
 
 /// "Switch to REPL": clear both lesson and path state so the main
 /// pane shows the input + history.

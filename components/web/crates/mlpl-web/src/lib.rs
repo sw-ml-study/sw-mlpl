@@ -58,9 +58,9 @@ pub mod handlers {
 
     pub use mlpl_web_handlers_upload::eval_deps::EvalDeps;
 }
-pub mod mode_callbacks;
-pub mod mode_path;
-pub mod mode_select;
+pub use mlpl_web_mode::callbacks as mode_callbacks;
+pub use mlpl_web_mode::path as mode_path;
+pub use mlpl_web_mode::select as mode_select;
 pub use mlpl_web_onboarding::splash as onboarding_splash;
 pub use mlpl_web_onboarding::storage as onboarding_storage;
 pub use mlpl_web_onboarding::tour as onboarding_tour;
@@ -83,9 +83,9 @@ pub mod render_shell_overlays;
 pub mod render_tutorial;
 pub mod resize_handle;
 pub mod scroll;
-pub mod tutorial;
 pub use mlpl_web_handlers_upload::upload;
 pub use mlpl_web_handlers_upload::upload_cmd;
+pub use mlpl_web_tutorial as tutorial;
 pub use mlpl_web_viz3d::events as viz3d_events;
 pub use mlpl_web_viz3d::panel as viz3d_panel;
 pub use mlpl_web_viz3d::toggle as viz3d_toggle;

@@ -26,30 +26,9 @@ fn percent_encode(s: &str) -> String {
 /// leading `#`, trimmed). MLPL's parser already drops `#`
 /// comments; this is purely for the UI to render the
 /// commentary as an annotation alongside the code.
-pub(crate) fn split_inline_comment(line: &str) -> (&str, Option<&str>) {
-    let mut in_str = false;
-    let bytes = line.as_bytes();
-    for (i, &b) in bytes.iter().enumerate() {
-        match b {
-            b'"' => in_str = !in_str,
-            b'#' if !in_str => {
-                let code = line[..i].trim_end();
-                let comment = line[i + 1..].trim();
-                let comment_opt = if comment.is_empty() {
-                    None
-                } else {
-                    Some(comment)
-                };
-                return (code, comment_opt);
-            }
-            _ => {}
-        }
-    }
-    (line, None)
-}
 
 fn render_input_line(input: &str) -> Html {
-    let (code, comment) = split_inline_comment(input);
+    let (code, comment) = mlpl_web_tutorial::split_inline_comment(input);
     // Saga 29 step 025: route the comment text through the markdown-ish renderer so
     // `[[term]]` inside an MLPL `# comment` becomes a clickable glossary link. Code (the
     // part before `#`) stays a plain string -- the lexer parses MLPL source there and

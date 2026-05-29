@@ -1819,10 +1819,12 @@ dependencies = [
  "mlpl-web-handlers-input",
  "mlpl-web-handlers-upload",
  "mlpl-web-lessons",
+ "mlpl-web-mode",
  "mlpl-web-onboarding",
  "mlpl-web-path-body",
  "mlpl-web-paths",
  "mlpl-web-paths-data",
+ "mlpl-web-tutorial",
  "mlpl-web-viz3d",
  "reqwest",
  "serde",
@@ -1956,6 +1958,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-web-mode"
+version = "0.20.0"
+dependencies = [
+ "mlpl-web-demos",
+ "mlpl-web-tutorial",
+ "yew",
+]
+
+[[package]]
 name = "mlpl-web-onboarding"
 version = "0.20.0"
 dependencies = [
@@ -1989,6 +2000,15 @@ dependencies = [
 [[package]]
 name = "mlpl-web-paths-data"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-web-tutorial"
+version = "0.20.0"
+dependencies = [
+ "mlpl-web-lessons",
+ "web-sys",
+ "yew",
+]
 
 [[package]]
 name = "mlpl-web-viz3d"

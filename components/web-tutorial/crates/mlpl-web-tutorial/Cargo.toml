@@ -1,0 +1,18 @@
+[package]
+name = "mlpl-web-tutorial"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_tutorial"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-lessons = { path = "../../../web/crates/mlpl-web-lessons" }
+web-sys = { version = "0.3", features = [
+    "Element",
+    "HtmlElement",
+    "MouseEvent",
+] }
+yew = { version = "0.21", features = ["csr"] }

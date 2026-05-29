@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-web-mode"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_mode"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
+mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
+yew = { version = "0.21", features = ["csr"] }
