@@ -13,7 +13,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
 
-use crate::glossary_view::find_by_term;
+use crate::view::find_by_term;
 use mlpl_web_path_body::render_body;
 
 #[function_component(GlossaryPopupHost)]
