@@ -66,7 +66,7 @@ pub(crate) fn eval_load(env: &Environment, path: &str) -> Result<Value, EvalErro
 /// Dispatch `load_preloaded(name)`.
 pub(crate) fn eval_load_preloaded(name: &str) -> Result<Value, EvalError> {
     if name == "pets_tiny" {
-        return crate::pets_tiny::load();
+        return mlpl_eval_pets_tiny::load();
     }
     PRELOADED
         .iter()

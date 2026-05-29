@@ -43,6 +43,7 @@ image-io = [
 mlpl-bpe-core = { path = "../../../session-infra/crates/mlpl-bpe-core" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-pets-tiny = { path = "../../../eval-pets-tiny/crates/mlpl-eval-pets-tiny" }
 mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
 mlpl-env-traits = { path = "../../../session-infra/crates/mlpl-env-traits" }
 mlpl-loader-helpers = { path = "../../../session-infra/crates/mlpl-loader-helpers" }

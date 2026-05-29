@@ -1,0 +1,13 @@
+[package]
+name = "mlpl-eval-pets-tiny"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Tiny Oxford Pets fixture loader (saga 29 step 003). Extracted
+# from mlpl-eval as the first Phase 1 extraction unlocked by
+# saga 73's eval-types crate.
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }

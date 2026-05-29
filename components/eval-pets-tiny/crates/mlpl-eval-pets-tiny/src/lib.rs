@@ -39,74 +39,91 @@ const VERSION: u32 = 1;
 /// `data/oxford-iiit-pet/images/` checkout. Empty until that
 /// script runs; the test gate (and any live caller) will
 /// fail-fast with a clear message if so.
-const PETS_TINY_BIN: &[u8] = include_bytes!("../data/pets_tiny.bin");
+const PETS_TINY_BIN: &[u8] = include_bytes!("../../../../eval/crates/mlpl-eval/data/pets_tiny.bin");
 
 /// Read the embedded fixture, expand the u8 pixel data to
 /// f64 in [-1, 1], and return a `Value::Record` with fields
 /// `X` ([N, 3, H, W] with axis labels), `Y` ([N]), and
 /// `names` (a `Value::StrList`).
-pub(crate) fn load() -> Result<Value, EvalError> {
+pub fn load() -> Result<Value, EvalError> {
     let (header, body) = parse_header(PETS_TINY_BIN)?;
-    let Header { n, c, h, w } = header;
-    let mut cursor = 0usize;
-    if body.len() < n {
-        return Err(corrupt("Y labels truncated"));
-    }
-    let y_bytes = &body[cursor..cursor + n];
-    cursor += n;
-    if body.len() < cursor + 4 {
-        return Err(corrupt("name-table length missing"));
-    }
-    let names_len = u32::from_le_bytes([
-        body[cursor],
-        body[cursor + 1],
-        body[cursor + 2],
-        body[cursor + 3],
-    ]) as usize;
-    cursor += 4;
-    if body.len() < cursor + names_len {
-        return Err(corrupt("name-table truncated"));
-    }
-    let names_bytes = &body[cursor..cursor + names_len];
-    cursor += names_len;
-    let per_image = c * h * w;
-    let pixel_bytes = n * per_image;
-    if body.len() < cursor + pixel_bytes {
-        return Err(corrupt("pixel data truncated"));
-    }
-    let pixels = &body[cursor..cursor + pixel_bytes];
-
-    let names: Vec<String> = if names_len == 0 {
-        Vec::new()
-    } else {
-        names_bytes
-            .split(|b| *b == 0)
-            .filter(|s| !s.is_empty())
-            .map(|s| String::from_utf8_lossy(s).into_owned())
-            .collect()
-    };
-
-    // X: u8 -> f64 in [-1, 1]
-    let mut x_data = Vec::with_capacity(pixel_bytes);
-    for &b in pixels {
-        x_data.push(f64::from(b) / 127.5 - 1.0);
-    }
-    let x_arr = DenseArray::new(Shape::new(vec![n, c, h, w]), x_data)?.with_labels(vec![
-        Some("batch".to_string()),
-        Some("channel".to_string()),
-        Some("y".to_string()),
-        Some("x".to_string()),
-    ])?;
-
-    let y_data: Vec<f64> = y_bytes.iter().map(|b| f64::from(*b)).collect();
-    let y_arr = DenseArray::new(Shape::new(vec![n]), y_data)?
-        .with_labels(vec![Some("batch".to_string())])?;
-
+    let Sections { y_bytes, names_bytes, pixels } = parse_sections(body, &header)?;
+    let names = decode_names(names_bytes);
+    let x_arr = build_x_array(pixels, &header)?;
+    let y_arr = build_y_array(y_bytes)?;
     let mut fields = BTreeMap::new();
     fields.insert("X".to_string(), Value::Array(x_arr));
     fields.insert("Y".to_string(), Value::Array(y_arr));
     fields.insert("names".to_string(), Value::StrList { items: names });
     Ok(Value::Record { fields })
+}
+
+struct Sections<'a> {
+    y_bytes: &'a [u8],
+    names_bytes: &'a [u8],
+    pixels: &'a [u8],
+}
+
+fn parse_sections<'a>(body: &'a [u8], h: &Header) -> Result<Sections<'a>, EvalError> {
+    let Header { n, c, h: ph, w } = *h;
+    let mut cur = 0;
+    if body.len() < n {
+        return Err(corrupt("Y labels truncated"));
+    }
+    let y_bytes = &body[cur..cur + n];
+    cur += n;
+    if body.len() < cur + 4 {
+        return Err(corrupt("name-table length missing"));
+    }
+    let names_len = u32::from_le_bytes([
+        body[cur],
+        body[cur + 1],
+        body[cur + 2],
+        body[cur + 3],
+    ]) as usize;
+    cur += 4;
+    if body.len() < cur + names_len {
+        return Err(corrupt("name-table truncated"));
+    }
+    let names_bytes = &body[cur..cur + names_len];
+    cur += names_len;
+    let pixel_bytes = n * c * ph * w;
+    if body.len() < cur + pixel_bytes {
+        return Err(corrupt("pixel data truncated"));
+    }
+    Ok(Sections {
+        y_bytes,
+        names_bytes,
+        pixels: &body[cur..cur + pixel_bytes],
+    })
+}
+
+fn decode_names(names_bytes: &[u8]) -> Vec<String> {
+    if names_bytes.is_empty() {
+        return Vec::new();
+    }
+    names_bytes
+        .split(|b| *b == 0)
+        .filter(|s| !s.is_empty())
+        .map(|s| String::from_utf8_lossy(s).into_owned())
+        .collect()
+}
+
+fn build_x_array(pixels: &[u8], h: &Header) -> Result<DenseArray, EvalError> {
+    // X: u8 -> f64 in [-1, 1]
+    let x_data: Vec<f64> = pixels.iter().map(|b| f64::from(*b) / 127.5 - 1.0).collect();
+    Ok(DenseArray::new(Shape::new(vec![h.n, h.c, h.h, h.w]), x_data)?.with_labels(vec![
+        Some("batch".to_string()),
+        Some("channel".to_string()),
+        Some("y".to_string()),
+        Some("x".to_string()),
+    ])?)
+}
+
+fn build_y_array(y_bytes: &[u8]) -> Result<DenseArray, EvalError> {
+    let y_data: Vec<f64> = y_bytes.iter().map(|b| f64::from(*b)).collect();
+    Ok(DenseArray::new(Shape::new(vec![y_data.len()]), y_data)?
+        .with_labels(vec![Some("batch".to_string())])?)
 }
 
 struct Header {
