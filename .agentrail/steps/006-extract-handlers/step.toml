@@ -1,9 +1,10 @@
 number = 6
 slug = "extract-handlers"
-status = "in-progress"
+status = "completed"
 description = "Carve handlers_* + handlers.rs + upload_cmd.rs out of mlpl-web into component..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-28T22:26:24"
+completed_at = "2026-05-28T22:37:44"
 task_type = "refactor"
-commits = []
+commits = ["831bf1fc1bfa196e56a77fd3d32a427ae7115b49"]

@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 6,
+    "step": "extract-handlers"
+  },
+  "action": "git mv 8 files + delete handlers.rs; extract EvalDeps into eval_deps.rs (upload crate); extract make_clear / toggle_bool into focused files; lift pub(crate) -> pub for tested helpers; 4 inline tests moved to tests/ integration; 3-crate sub-component with DAG -upload -> -eval, -input independent.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-28T22:37:44"
+}

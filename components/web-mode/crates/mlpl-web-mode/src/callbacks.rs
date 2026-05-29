@@ -6,9 +6,9 @@
 
 use yew::prelude::*;
 
-use crate::components::TutorialView;
-use crate::mode_path::{cb_path_change, cb_path_open_lesson, cb_path_run_demo};
-use crate::mode_select::{cb_select_paths, cb_select_repl, cb_select_tutorial};
+use crate::path::{cb_path_change, cb_path_open_lesson, cb_path_run_demo};
+use crate::select::{cb_select_paths, cb_select_repl, cb_select_tutorial};
+use mlpl_web_tutorial::TutorialView;
 
 /// Flat record of the six callbacks consumed by the top-level
 /// shell html!. Kept as a flat struct so call sites can pattern-

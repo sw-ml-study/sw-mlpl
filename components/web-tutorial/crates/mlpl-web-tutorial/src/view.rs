@@ -181,7 +181,7 @@ fn render_example(line: &'static str, on_run: &Callback<String>) -> Html {
         let line_str = line.to_string();
         Callback::from(move |_| on_run.emit(line_str.clone()))
     };
-    let (code, tip) = crate::entry_render::split_inline_comment(line);
+    let (code, tip) = crate::comment::split_inline_comment(line);
     let title = tip
         .map(|t| format!("{t}\n\nClick to run."))
         .unwrap_or_else(|| "Click to run".to_string());

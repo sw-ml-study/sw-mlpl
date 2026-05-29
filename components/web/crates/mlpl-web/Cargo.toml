@@ -24,7 +24,9 @@ mlpl-web-glossary = { path = "../../../web-glossary/crates/mlpl-web-glossary" }
 mlpl-web-handlers-eval = { path = "../../../web-handlers/crates/mlpl-web-handlers-eval" }
 mlpl-web-handlers-input = { path = "../../../web-handlers/crates/mlpl-web-handlers-input" }
 mlpl-web-handlers-upload = { path = "../../../web-handlers/crates/mlpl-web-handlers-upload" }
+mlpl-web-mode = { path = "../../../web-mode/crates/mlpl-web-mode" }
 mlpl-web-onboarding = { path = "../../../web-onboarding/crates/mlpl-web-onboarding" }
+mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
 mlpl-web-paths = { path = "../../../web-paths/crates/mlpl-web-paths" }
 mlpl-web-paths-data = { path = "../../../web-paths/crates/mlpl-web-paths-data" }
 mlpl-web-viz3d = { path = "../../../web-viz3d/crates/mlpl-web-viz3d" }
