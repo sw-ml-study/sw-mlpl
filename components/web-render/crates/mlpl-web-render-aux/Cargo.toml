@@ -1,0 +1,28 @@
+[package]
+name = "mlpl-web-render-aux"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_render_aux"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+mlpl-web-path-body = { path = "../../../web/crates/mlpl-web-path-body" }
+mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+    "Element",
+    "FileReader",
+    "HtmlDivElement",
+    "HtmlElement",
+    "HtmlInputElement",
+    "HtmlTextAreaElement",
+    "MouseEvent",
+    "Node",
+    "NodeList",
+] }
+js-sys = "0.3"
+yew = { version = "0.21", features = ["csr"] }

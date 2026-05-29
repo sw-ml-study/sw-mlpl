@@ -1,0 +1,23 @@
+[package]
+name = "mlpl-web-render-types"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_render_types"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-wasm = { path = "../../../wasm/crates/mlpl-wasm" }
+mlpl-web-components-chrome = { path = "../../../web-components/crates/mlpl-web-components-chrome" }
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+mlpl-web-handlers-eval = { path = "../../../web-handlers/crates/mlpl-web-handlers-eval" }
+mlpl-web-handlers-upload = { path = "../../../web-handlers/crates/mlpl-web-handlers-upload" }
+mlpl-web-paths-data = { path = "../../../web-paths/crates/mlpl-web-paths-data" }
+mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
+web-sys = { version = "0.3", features = [
+    "KeyboardEvent",
+    "MouseEvent",
+] }
+yew = { version = "0.21", features = ["csr"] }

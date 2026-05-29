@@ -1,0 +1,33 @@
+[package]
+name = "mlpl-web-render-core"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_render_core"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-components-chrome = { path = "../../../web-components/crates/mlpl-web-components-chrome" }
+mlpl-web-components-content = { path = "../../../web-components/crates/mlpl-web-components-content" }
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+mlpl-web-handlers-eval = { path = "../../../web-handlers/crates/mlpl-web-handlers-eval" }
+mlpl-web-handlers-input = { path = "../../../web-handlers/crates/mlpl-web-handlers-input" }
+mlpl-web-handlers-upload = { path = "../../../web-handlers/crates/mlpl-web-handlers-upload" }
+mlpl-web-mode = { path = "../../../web-mode/crates/mlpl-web-mode" }
+mlpl-web-paths = { path = "../../../web-paths/crates/mlpl-web-paths" }
+mlpl-web-render-aux = { path = "../mlpl-web-render-aux" }
+mlpl-web-render-types = { path = "../mlpl-web-render-types" }
+mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
+mlpl-web-viz3d = { path = "../../../web-viz3d/crates/mlpl-web-viz3d" }
+js-sys = "0.3"
+web-sys = { version = "0.3", features = [
+    "Event",
+    "EventTarget",
+    "HtmlElement",
+    "KeyboardEvent",
+    "MouseEvent",
+    "Window",
+] }
+yew = { version = "0.21", features = ["csr"] }

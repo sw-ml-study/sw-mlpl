@@ -56,6 +56,10 @@ pub fn use_onboarding_state() -> OnboardingState {
         show_tour: use_state(|| false),
         tour_step: use_state(|| 0_usize),
         show_whats_new: use_state(|| false),
+        // Saga 82: persisted by the "what's new" close
+        // callback in render-shell, which has no access to
+        // BUILD_*.
+        last_seen_version: env!("CARGO_PKG_VERSION").to_string(),
     }
 }
 

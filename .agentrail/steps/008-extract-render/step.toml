@@ -1,0 +1,9 @@
+number = 8
+slug = "extract-render"
+status = "in-progress"
+description = "Carve render*, render_* (10 files) + resize_handle.rs (related) out of mlpl-w..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-28T22:44:13"
+task_type = "refactor"
+commits = []

@@ -14,11 +14,11 @@
 
 pub mod app;
 pub mod app_active;
-pub mod app_callbacks;
+pub use mlpl_web_render_types::app_callbacks;
 pub mod app_hooks;
 pub mod app_log;
-pub mod app_state;
 pub use mlpl_web_completion as completion;
+pub use mlpl_web_render_types::state as app_state;
 /// Yew components facade. The chrome (header / footer /
 /// GithubCorner) lives in `mlpl-web-components-chrome`; the
 /// content widgets (doc dialog, input row, mode bar, welcome)
@@ -38,11 +38,11 @@ pub mod components {
     pub use crate::tutorial::{TutorialPanel, TutorialPanelProps, TutorialView};
 }
 pub use mlpl_web_demos as demos;
-pub use mlpl_web_paths::diagrams as diagrams_view;
-pub mod editor_panel;
-pub mod entry_render;
 pub use mlpl_web_glossary::popup as glossary_popup;
 pub use mlpl_web_glossary::view as glossary_view;
+pub use mlpl_web_paths::diagrams as diagrams_view;
+pub use mlpl_web_render_aux::editor_panel;
+pub use mlpl_web_render_aux::entry as entry_render;
 /// Handlers facade. Saga 82 split the original handlers cluster
 /// into three sub-crates: input (keyboard + popup + toggle),
 /// upload (image upload + upload_cmd + EvalDeps), and eval
@@ -67,21 +67,27 @@ pub use mlpl_web_onboarding::tour as onboarding_tour;
 pub use mlpl_web_onboarding::whats_new as onboarding_whats_new;
 pub use mlpl_web_paths::view as paths_view;
 pub use mlpl_web_paths_data as paths;
-mod plotly_panel;
+pub use mlpl_web_render_aux::plotly_panel;
 #[cfg(test)]
 mod readme_counts;
-pub mod render;
-pub mod render_callbacks;
-pub mod render_main;
-pub mod render_modes;
-pub mod render_shell;
-pub mod render_shell_chrome;
-pub mod render_shell_footer;
-pub mod render_shell_header;
-pub mod render_shell_modebar;
-pub mod render_shell_overlays;
-pub mod render_tutorial;
-pub mod resize_handle;
+pub use mlpl_web_render_aux::resize_handle;
+pub use mlpl_web_render_aux::tutorial as render_tutorial;
+pub use mlpl_web_render_core::callbacks as render_callbacks;
+pub use mlpl_web_render_core::modes as render_modes;
+pub use mlpl_web_render_core::panel as render_main;
+pub use mlpl_web_render_shell::chrome as render_shell_chrome;
+pub use mlpl_web_render_shell::footer as render_shell_footer;
+pub use mlpl_web_render_shell::header as render_shell_header;
+pub use mlpl_web_render_shell::modebar as render_shell_modebar;
+pub use mlpl_web_render_shell::overlays as render_shell_overlays;
+pub use mlpl_web_render_shell::shell as render_shell;
+/// Render entry alias. Saga 82 split the original `render.rs`
+/// into `mlpl_web_render_shell::shell::render` (entry) +
+/// `mlpl_web_render_types::args::RenderArgs` (struct).
+pub mod render {
+    pub use mlpl_web_render_shell::shell::render;
+    pub use mlpl_web_render_types::args::RenderArgs;
+}
 pub mod scroll;
 pub use mlpl_web_handlers_upload::upload;
 pub use mlpl_web_handlers_upload::upload_cmd;
