@@ -1,5 +1,1 @@
-# Split mlpl-build main.rs tests into a sibling module (saga 75)
-
-main.rs has 9 production fns + 6 inline tests = 15 (FAIL).
-Move tests to a separate module (build_tests.rs or similar)
-to retire the Module Function Count FAIL.
+Split mlpl-wasm/src/lib.rs (12 fns FAIL) into siblings: session.rs (WasmSession + impls), eval_impl.rs (eval_input + result helpers). lib.rs becomes facade with eval_line + re-exports.
