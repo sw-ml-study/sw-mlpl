@@ -1,0 +1,16 @@
+[workspace]
+members = [
+    "crates/mlpl-web-demos",
+    "crates/mlpl-web-demos-basic",
+    "crates/mlpl-web-demos-types",
+    "crates/mlpl-web-demos-vision",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"

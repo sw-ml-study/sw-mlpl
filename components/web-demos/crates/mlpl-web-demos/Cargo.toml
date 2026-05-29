@@ -1,0 +1,18 @@
+[package]
+name = "mlpl-web-demos"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_demos"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-demos-basic = { path = "../mlpl-web-demos-basic" }
+mlpl-web-demos-types = { path = "../mlpl-web-demos-types" }
+mlpl-web-demos-vision = { path = "../mlpl-web-demos-vision" }
+
+[dev-dependencies]
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
