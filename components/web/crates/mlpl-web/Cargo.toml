@@ -19,6 +19,7 @@ mlpl-web-completion = { path = "../../../web-completion/crates/mlpl-web-completi
 mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
 mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
 mlpl-web-glossary = { path = "../../../web-glossary/crates/mlpl-web-glossary" }
+mlpl-web-onboarding = { path = "../../../web-onboarding/crates/mlpl-web-onboarding" }
 mlpl-web-viz3d = { path = "../../../web-viz3d/crates/mlpl-web-viz3d" }
 mlpl-web-lessons = { path = "../../crates/mlpl-web-lessons" }
 mlpl-web-path-body = { path = "../../crates/mlpl-web-path-body" }

@@ -13,6 +13,12 @@ pub enum SplashAction {
 #[derive(Properties, PartialEq)]
 pub struct SplashProps {
     pub on_action: Callback<SplashAction>,
+    /// Pre-formatted version label ("vX.Y.Z.<commits>"). Saga 82
+    /// extracted splash.rs out of mlpl-web; only mlpl-web's
+    /// build.rs emits BUILD_COMMIT_COUNT, so the host crate
+    /// formats the string with its own `env!()` macros and
+    /// hands it in.
+    pub version_label: AttrValue,
 }
 
 #[function_component(SplashOverlay)]
@@ -29,7 +35,7 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
                 <button class="splash-close" onclick={dismiss} aria-label="Close">{"\u{00d7}"}</button>
                 <div class="splash-header-shim">
                     <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
-                    <p class="splash-version">{format!("v{}.{}", env!("CARGO_PKG_VERSION"), env!("BUILD_COMMIT_COUNT"))}</p>
+                    <p class="splash-version">{&props.version_label}</p>
                     <p class="splash-subtitle">
                         {"An array programming language for learning machine learning, from scalars to transformers."}
                     </p>

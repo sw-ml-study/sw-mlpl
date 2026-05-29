@@ -25,14 +25,25 @@ fn render_splash(a: &RenderArgs) -> Html {
     if !*a.onboarding.show_splash {
         return html! {};
     }
-    html! { <SplashOverlay on_action={make_splash_action(
-        a.onboarding.show_splash.clone(),
-        a.onboarding.show_tour.clone(),
-        a.callbacks.on_demo.clone(),
-        a.ui.input_value.clone(),
-        a.ui.lesson_idx.clone(),
-        a.ui.path_state.clone(),
-    )} /> }
+    // Saga 82: SplashOverlay moved to mlpl-web-onboarding;
+    // only this crate's build.rs emits BUILD_COMMIT_COUNT, so
+    // format the version string here and hand it in.
+    let version_label = format!(
+        "v{}.{}",
+        env!("CARGO_PKG_VERSION"),
+        env!("BUILD_COMMIT_COUNT")
+    );
+    html! { <SplashOverlay
+        on_action={make_splash_action(
+            a.onboarding.show_splash.clone(),
+            a.onboarding.show_tour.clone(),
+            a.callbacks.on_demo.clone(),
+            a.ui.input_value.clone(),
+            a.ui.lesson_idx.clone(),
+            a.ui.path_state.clone(),
+        )}
+        version_label={version_label}
+    /> }
 }
 
 fn render_tour(a: &RenderArgs) -> Html {

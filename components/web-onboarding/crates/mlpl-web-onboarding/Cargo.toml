@@ -1,0 +1,22 @@
+[package]
+name = "mlpl-web-onboarding"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_onboarding"
+path = "src/lib.rs"
+
+[dependencies]
+gloo = "0.10"
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+    "Document",
+    "DomRect",
+    "Element",
+    "HtmlElement",
+    "Storage",
+    "Window",
+] }
+yew = { version = "0.21", features = ["csr"] }
