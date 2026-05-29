@@ -1,7 +1,7 @@
 use yew::prelude::*;
 
-use crate::glossary_view::GlossaryView;
 use mlpl_web_eval::state::DocTab;
+use mlpl_web_glossary::view::GlossaryView;
 
 const LANG_REFERENCE: &str = include_str!("../../../../../docs/lang-reference.md");
 const USAGE_GUIDE: &str = include_str!("../../../../../docs/usage.md");
@@ -24,7 +24,7 @@ pub fn doc_dialog(props: &DocDialogProps) -> Html {
         DocTab::LangReference => html! { <pre class="doc-content">{ LANG_REFERENCE }</pre> },
         DocTab::Usage => html! { <pre class="doc-content">{ USAGE_GUIDE }</pre> },
         DocTab::Glossary => html! { <GlossaryView /> },
-        DocTab::Diagrams => html! { <crate::diagrams_view::DiagramsView /> },
+        DocTab::Diagrams => html! { <mlpl_web_paths::diagrams::DiagramsView /> },
     };
     let cls = |t: DocTab| {
         if *active_tab == t {

@@ -1,21 +1,25 @@
+//! Page footer with legal blurb, links, and a build-info
+//! summary. Saga 82 moved this out of mlpl-web; the
+//! `BUILD_HOST` / `BUILD_SHA` / `BUILD_TIMESTAMP` /
+//! `BUILD_COMMIT_COUNT` env vars are emitted only by
+//! mlpl-web's build.rs, so the host crate formats the
+//! `build_info` string with its own `env!()` macros and
+//! hands it in via FooterProps.
+
 use yew::prelude::*;
 
-use crate::components::UrlProps;
+#[derive(Properties, PartialEq)]
+pub struct FooterProps {
+    /// URL the GitHub link points to.
+    pub url: &'static str,
+    /// Pre-formatted build-info chip rendered at the right
+    /// edge: version + host + sha + timestamp, joined with
+    /// the same middot separator the rest of the footer uses.
+    pub build_info: AttrValue,
+}
 
 #[function_component(Footer)]
-pub fn footer(props: &UrlProps) -> Html {
-    let version = format!(
-        "v{}.{}",
-        env!("CARGO_PKG_VERSION"),
-        env!("BUILD_COMMIT_COUNT")
-    );
-    let build_info = format!(
-        "{} \u{00b7} {} \u{00b7} {} \u{00b7} {}",
-        version,
-        env!("BUILD_HOST"),
-        env!("BUILD_SHA"),
-        env!("BUILD_TIMESTAMP")
-    );
+pub fn footer(props: &FooterProps) -> Html {
     html! {
         <footer>
             <span>{"MIT License"}</span>
@@ -32,7 +36,7 @@ pub fn footer(props: &UrlProps) -> Html {
             <span class="footer-sep">{"\u{00b7}"}</span>
             <a href="https://www.youtube.com/@SoftwareWrighter" target="_blank" rel="noopener">{"YouTube"}</a>
             <span class="footer-sep">{"\u{00b7}"}</span>
-            <span>{ build_info }</span>
+            <span>{ &props.build_info }</span>
         </footer>
     }
 }

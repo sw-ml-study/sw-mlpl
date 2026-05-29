@@ -1,12 +1,9 @@
-use yew::prelude::*;
+//! GithubCorner badge (the corner ribbon linking to the repo)
+//! and the shared `UrlProps` -- used by both `GithubCorner` and
+//! `Footer` to take a `&'static str` URL. Extracted from
+//! mlpl-web/src/components.rs during saga 82.
 
-pub use crate::component_doc_dialog::{DocDialog, DocDialogProps};
-pub use crate::component_footer::Footer;
-pub use crate::component_header::{Header, HeaderMode, HeaderProps};
-pub use crate::component_input_row::{InputRow, InputRowProps};
-pub use crate::component_mode_bar::{ModeBar, ModeBarProps};
-pub use crate::component_welcome::Welcome;
-pub use crate::tutorial::{TutorialPanel, TutorialPanelProps, TutorialView};
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct UrlProps {

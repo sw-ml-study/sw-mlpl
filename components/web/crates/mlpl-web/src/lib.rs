@@ -19,13 +19,24 @@ pub mod app_hooks;
 pub mod app_log;
 pub mod app_state;
 pub use mlpl_web_completion as completion;
-pub mod component_doc_dialog;
-pub mod component_footer;
-pub mod component_header;
-pub mod component_input_row;
-pub mod component_mode_bar;
-pub mod component_welcome;
-pub mod components;
+/// Yew components facade. The chrome (header / footer /
+/// GithubCorner) lives in `mlpl-web-components-chrome`; the
+/// content widgets (doc dialog, input row, mode bar, welcome)
+/// live in `mlpl-web-components-content`; tutorial pieces stay
+/// in `crate::tutorial` for now. Saga 82 moved everything but
+/// tutorial.
+pub mod components {
+    pub use mlpl_web_components_chrome::footer::{Footer, FooterProps};
+    pub use mlpl_web_components_chrome::github_corner::{GithubCorner, UrlProps};
+    pub use mlpl_web_components_chrome::header::{Header, HeaderMode, HeaderProps};
+
+    pub use mlpl_web_components_content::doc_dialog::{DocDialog, DocDialogProps};
+    pub use mlpl_web_components_content::input_row::{InputRow, InputRowProps};
+    pub use mlpl_web_components_content::mode_bar::{ModeBar, ModeBarProps};
+    pub use mlpl_web_components_content::welcome::Welcome;
+
+    pub use crate::tutorial::{TutorialPanel, TutorialPanelProps, TutorialView};
+}
 pub use mlpl_web_demos as demos;
 pub use mlpl_web_paths::diagrams as diagrams_view;
 pub mod editor_panel;

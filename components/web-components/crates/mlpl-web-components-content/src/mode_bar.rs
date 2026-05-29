@@ -1,7 +1,7 @@
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 
-use crate::demos::DEMOS;
+use mlpl_web_demos::DEMOS;
 
 fn grouped_demos() -> Vec<(&'static str, Vec<(usize, &'static str)>)> {
     let mut map: std::collections::BTreeMap<&str, Vec<(usize, &str)>> =
