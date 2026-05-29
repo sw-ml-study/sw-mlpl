@@ -11,7 +11,6 @@ use mlpl_web_render_types::args::RenderArgs;
 pub fn render_shell_modebar(a: &RenderArgs, modes: &Modes) -> Html {
     html! {
         <ModeBar
-            on_clear={a.callbacks.on_clear.clone()}
             on_demo={a.callbacks.on_demo.clone()}
             on_upload={a.callbacks.on_upload.clone()}
             on_upload_cancel={a.callbacks.on_upload_cancel.clone()}

@@ -73,6 +73,7 @@ fn build_main_args<'a>(
         on_keydown: inputs.on_keydown.clone(),
         on_run_example: run_example(a.callbacks.on_submit.clone(), a.ui.input_value.clone()),
         on_run_batch: a.callbacks.on_run_batch.clone(),
+        on_clear: a.callbacks.on_clear.clone(),
         completion_candidates: (*a.ui.completion_candidates).clone(),
         on_pick_completion: make_pick_completion(
             a.ui.input_value.clone(),

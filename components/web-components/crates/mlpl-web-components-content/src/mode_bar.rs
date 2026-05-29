@@ -17,7 +17,6 @@ fn grouped_demos() -> Vec<(&'static str, Vec<(usize, &'static str)>)> {
 
 #[derive(Properties, PartialEq)]
 pub struct ModeBarProps {
-    pub on_clear: Callback<MouseEvent>,
     pub on_demo: Callback<usize>,
     pub on_upload: Callback<web_sys::Event>,
     /// Saga 29 step 016: cancel handler for the `<input
@@ -41,16 +40,10 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
     };
     let demo_dropdown = render_demo_dropdown(props.tutorial_active, props.on_demo.clone());
     let upload_widget = render_upload_widget(props);
-    let clear_label = if props.tutorial_active {
-        "Reset Tutorial"
-    } else {
-        "Reset REPL"
-    };
     html! {
         <div class={cls}>
             { demo_dropdown }
             { upload_widget }
-            <button class="ctrl-btn" onclick={props.on_clear.clone()}>{ clear_label }</button>
         </div>
     }
 }
