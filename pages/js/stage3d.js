@@ -361,10 +361,10 @@ function selectMesh(mesh) {
         //   [ open <kind> view ]
         const labelText = `[ open ${vizKind} view ]`;
         selectionLabel = makeLabel(labelText, {
-            fontSize: 30, color: '#1e1e2e',
+            fontSize: 44, color: '#1e1e2e',
             bg: '#ffcc44',
-            w: 560, h: 92,
-            scale: [2.6, 0.42, 1],
+            w: 760, h: 140,
+            scale: [3.6, 0.68, 1],
         });
         // Position the label to the right of the "?" icon, at
         // about the same height; both billboard so the layout
@@ -920,6 +920,19 @@ function closeInspector() {
         requestAnimationFrame(() => {
             try { canvas.focus({ preventScroll: true }); } catch (_) {}
         });
+    }
+    // Saga E follow-up: guarantee the "?" icon + label are
+    // back in scene after the dialog closes, so the user can
+    // re-open the inspector without re-clicking the sculpture.
+    // Re-runs selectMesh on the currently selected mesh which
+    // re-creates both objects fresh -- a no-op for state but
+    // resets their animation rhythm to the new "just opened"
+    // moment.
+    if (selectedStepIdx >= 0 && selectedStepIdx < stepMeshes.length) {
+        const mesh = stepMeshes[selectedStepIdx];
+        if (mesh && (!selectionPointer || !mesh.userData)) {
+            selectMesh(mesh);
+        }
     }
 }
 
