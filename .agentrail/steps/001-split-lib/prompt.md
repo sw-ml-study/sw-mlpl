@@ -1,0 +1,1 @@
+Split mlpl-wasm/src/lib.rs (12 fns FAIL) into siblings: session.rs (WasmSession + impls), eval_impl.rs (eval_input + result helpers). lib.rs becomes facade.
