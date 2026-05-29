@@ -1,1 +1,0 @@
-Saga BPE-1: add decode_each builtin returning StrList + plumb StrList through EvalResult and ShapeInfo so JS can read string-list payloads. See docs/viz-ir-plan.md saga C BPE follow-up.
