@@ -39,9 +39,45 @@ pub(crate) fn eval_input_with_values(input: &str, env: &mut Environment) -> Eval
         Err(e) => return text_result(format!("error: {e}")),
     };
     match mlpl_eval::eval_program_value(&stmts, env) {
-        Ok(value) => value_to_result(value),
+        Ok(value) => {
+            let mut result = value_to_result(value);
+            // Saga D fix: `mdl = attention(...)` and other
+            // assignments-to-Model bind the Model into env.models
+            // and return a scalar placeholder, so the
+            // value_to_result match arm never sees a Value::Model
+            // for assigned models. Look up the assigned variable
+            // in env.models when the eval path produced no viz
+            // and the line looks like a plain assignment. Cheap
+            // -- it's a HashMap hit on a name the user just typed.
+            if result.viz_node.is_none()
+                && let Some(name) = extract_assigned_name(trimmed)
+                && let Some(spec) = env.get_model(&name)
+            {
+                result.viz_node = Some(model_to_viz_node(spec));
+            }
+            result
+        }
         Err(e) => text_result(format!("error: {e}")),
     }
+}
+
+/// Extract the LHS identifier of `<name> = <expr>`. Returns
+/// `None` for non-assignment lines (no `=`) or anything where
+/// the LHS contains non-identifier characters. Used by the
+/// saga D viz lookup to find a Model that was just bound to
+/// `name`.
+fn extract_assigned_name(line: &str) -> Option<String> {
+    let eq_pos = line.find('=')?;
+    let lhs = line[..eq_pos].trim();
+    if lhs.is_empty() {
+        return None;
+    }
+    if !lhs.chars().all(|c| c.is_alphanumeric() || c == '_')
+        || !lhs.chars().next().is_some_and(|c| c.is_alphabetic() || c == '_')
+    {
+        return None;
+    }
+    Some(lhs.to_string())
 }
 
 fn empty_result() -> EvalResult {
