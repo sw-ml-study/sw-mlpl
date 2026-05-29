@@ -107,35 +107,22 @@ function animate() {
         a.update(t);
         if (t >= 1) activeAnims.splice(i, 1);
     }
-    // Pulse the selection pointer with a "tap" rhythm so it
-    // reads as a finger pressing a button rather than as a
-    // static cursor. Sharp down-stroke (~20% of cycle) then
-    // slow recovery (~60%) then brief hold (~20%) at the top
-    // before the next tap. Glow brightens during the down-
-    // stroke so the impact frame is the brightest.
+    // Pulse the selection pointer ("?" icon sprite). Scale
+    // grows + shrinks on a quick rhythm so the icon "bounces"
+    // toward the viewer -- reads as "look here / click me"
+    // without the directional ambiguity the old cone had.
     if (selectionPointer) {
-        const period = 900; // ms
+        const period = 1200; // ms
         const t = ((now - selectionPointerStart) % period) / period;
-        let depth, glow;
-        if (t < 0.2) {
-            // Down stroke: fast accelerating dip.
-            const u = t / 0.2;
-            depth = u * u * 0.28;
-            glow = 0.55 + u * 0.45;
-        } else if (t < 0.8) {
-            // Recovery: ease back up.
-            const u = (t - 0.2) / 0.6;
-            depth = (1 - u) * 0.28;
-            glow = 1.0 - u * 0.55;
-        } else {
-            // Brief hold at the top before the next tap.
-            depth = 0;
-            glow = 0.45;
-        }
+        const phase = Math.sin(t * Math.PI * 2);
+        const scale = selectionPointerBaseScale * (1 + 0.18 * phase);
+        selectionPointer.scale.set(scale, scale, 1);
+        // Material opacity oscillates subtly so the icon also
+        // "breathes" against the background, even when the
+        // camera angle hides scale changes.
         if (selectionPointer.material) {
-            selectionPointer.material.emissiveIntensity = glow;
+            selectionPointer.material.opacity = 0.85 + 0.15 * (phase + 1) * 0.5;
         }
-        selectionPointer.position.y = selectionPointerBaseY - depth;
     }
     controls.update();
     renderer.render(scene, camera);
@@ -333,6 +320,10 @@ let selectionLabel = null;
 // the selection.
 let selectionPointerBaseY = 0;
 let selectionPointerStart = 0;
+// Saga E: base sprite scale captured at selectMesh time so
+// the pulse animation in animate() can multiply by a sine
+// modulation without drifting.
+let selectionPointerBaseScale = 0.85;
 
 function selectMesh(mesh) {
     if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
@@ -340,39 +331,45 @@ function selectMesh(mesh) {
     const worldPos = new THREE.Vector3();
     const target = mesh.parent?.isGroup ? mesh.parent : mesh;
     target.getWorldPosition(worldPos);
-    // Pointer sized up a touch so it's a comfortable click target.
-    const geo = new THREE.ConeGeometry(0.22, 0.55, 4);
-    geo.rotateX(Math.PI);
-    const mat = new THREE.MeshStandardMaterial({ color: 0xffcc44, emissive: 0xffcc44, emissiveIntensity: 0.6 });
-    selectionPointer = new THREE.Mesh(geo, mat);
-    selectionPointer.position.set(worldPos.x, worldPos.y + 1.5, worldPos.z);
+    // Selection pointer is a circular "?" / "i" icon sprite --
+    // an unmistakable "click for more" affordance. Sprites are
+    // billboarded (always camera-facing) so the symbol never
+    // looks slanted regardless of orbit angle. Bigger than the
+    // old cone because users reported it was easy to miss.
+    const vizKind = mesh.userData?.viz?.kind;
+    const hasRichView = vizKind && vizRenderers[vizKind];
+    selectionPointer = makeIcon(hasRichView ? '?' : 'i', {
+        fontSize: 96, fg: '#1e1e2e', bg: '#ffcc44', size: 192,
+        scale: [0.85, 0.85, 1],
+    });
+    selectionPointer.position.set(worldPos.x, worldPos.y + 1.6, worldPos.z);
     selectionPointer.userData = { isSelectionPointer: true, sourceMesh: mesh };
     scene.add(selectionPointer);
     // Reset the pulse animation so each fresh selection starts
     // at the brightest point of the cycle -- bigger visual
     // pop the moment the user clicks something.
-    selectionPointerBaseY = worldPos.y + 1.5;
+    selectionPointerBaseY = worldPos.y + 1.6;
     selectionPointerStart = performance.now();
+    selectionPointerBaseScale = 0.85;
     selectedStepIdx = mesh.userData?.stepIdx ?? -1;
     // Discoverability: if a viz renderer is registered for this
-    // sculpture's viz.kind, hover a small label next to the
-    // pointer so the user knows the click goes somewhere
-    // richer than the text body. Cleared when selection changes.
-    const vizKind = mesh.userData?.viz?.kind;
-    if (vizKind && vizRenderers[vizKind]) {
+    // sculpture's viz.kind, hover a label next to the icon so
+    // the user knows the click goes somewhere richer than the
+    // text body. Cleared when selection changes.
+    if (hasRichView) {
         // Bracketed text + leading triangle reads as a button:
-        //   [ ▶ open <kind> view ]
-        // Wider sprite gives a comfortable click target; the
-        // raycaster in onCanvasClick treats label hits the same
-        // as pointer hits.
-        const labelText = `[ ▶ open ${vizKind} view ]`;
+        //   [ open <kind> view ]
+        const labelText = `[ open ${vizKind} view ]`;
         selectionLabel = makeLabel(labelText, {
-            fontSize: 24, color: '#ffcc44',
-            bg: 'rgba(20, 22, 30, 0.9)',
-            w: 440, h: 62,
-            scale: [2.0, 0.3, 1],
+            fontSize: 30, color: '#1e1e2e',
+            bg: '#ffcc44',
+            w: 560, h: 92,
+            scale: [2.6, 0.42, 1],
         });
-        selectionLabel.position.set(worldPos.x + 1.6, worldPos.y + 1.7, worldPos.z);
+        // Position the label to the right of the "?" icon, at
+        // about the same height; both billboard so the layout
+        // stays readable from any orbit angle.
+        selectionLabel.position.set(worldPos.x + 2.0, worldPos.y + 1.6, worldPos.z);
         scene.add(selectionLabel);
     }
 }
@@ -1126,6 +1123,43 @@ function makeLabel(text, opts) {
     ctx.roundRect(2, 2, w - 4, h - 4, 12); ctx.fill();
     ctx.fillStyle = color; ctx.font = `bold ${fontSize}px monospace`;
     ctx.fillText(text.substring(0, 50), 14, h * 0.6);
+    const tex = new THREE.CanvasTexture(canvas);
+    const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
+    const sprite = new THREE.Sprite(mat);
+    sprite.scale.set(...scale);
+    return sprite;
+}
+
+// Circular icon sprite (e.g. "?" or "i") -- used for the
+// selection pointer to read as a "more info" affordance
+// rather than a downward arrow. Sprites are always
+// camera-facing so the symbol stays upright.
+function makeIcon(symbol, opts) {
+    const {
+        fontSize = 96, fg = '#1e1e2e', bg = '#ffcc44',
+        size = 192, scale = [0.85, 0.85, 1],
+    } = opts || {};
+    const canvas = document.createElement('canvas');
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    // Filled circle backdrop with a thin contrasting ring so
+    // the icon stands out against both bright (white grid) and
+    // dark (mountains) parts of the stage.
+    const cx = size / 2, cy = size / 2, r = size / 2 - 8;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    ctx.fillStyle = bg;
+    ctx.fill();
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = 'rgba(20, 22, 30, 0.85)';
+    ctx.stroke();
+    // Centered symbol.
+    ctx.fillStyle = fg;
+    ctx.font = `bold ${fontSize}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(symbol, cx, cy + size * 0.02);
     const tex = new THREE.CanvasTexture(canvas);
     const mat = new THREE.SpriteMaterial({ map: tex, transparent: true });
     const sprite = new THREE.Sprite(mat);
