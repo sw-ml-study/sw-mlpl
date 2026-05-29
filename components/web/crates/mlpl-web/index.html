@@ -387,6 +387,89 @@
             line-height: 1.6;
         }
         .stage3d-detail-row strong { color: var(--text); }
+        /* Close-up inspector dialog opened from the yellow
+           selection-pointer click. Modal layer + centered
+           panel; matches the splash/tour visual language. */
+        .stage3d-inspector {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+        }
+        .stage3d-inspector-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(20, 22, 30, 0.75);
+            cursor: pointer;
+        }
+        .stage3d-inspector-panel {
+            position: relative;
+            margin: 4vh auto 0;
+            width: min(720px, 92vw);
+            max-height: 88vh;
+            background: var(--base);
+            border: 1px solid var(--surface1);
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .stage3d-inspector-close {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: var(--subtext1);
+            font-size: 24px;
+            cursor: pointer;
+            line-height: 1;
+            padding: 4px 8px;
+        }
+        .stage3d-inspector-close:hover { color: var(--text); }
+        .stage3d-inspector-body {
+            padding: 28px 24px 24px;
+            font-family: var(--mono);
+            font-size: 14px;
+            color: var(--text);
+            overflow-y: auto;
+        }
+        .stage3d-inspector-body h2 {
+            font-size: 20px;
+            color: var(--peach);
+            margin: 0 0 14px;
+        }
+        .stage3d-inspector-body .insp-row {
+            color: var(--subtext0);
+            line-height: 1.8;
+            margin-bottom: 4px;
+        }
+        .stage3d-inspector-body .insp-row strong { color: var(--text); }
+        .stage3d-inspector-body .insp-section-title {
+            color: var(--mauve);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 16px 0 6px;
+        }
+        .stage3d-inspector-body .insp-values {
+            background: var(--mantle);
+            border: 1px solid var(--surface0);
+            border-radius: 4px;
+            padding: 8px 10px;
+            font-size: 12px;
+            line-height: 1.5;
+            color: var(--subtext1);
+            max-height: 200px;
+            overflow: auto;
+            white-space: pre;
+        }
+        .stage3d-inspector-body .insp-hint {
+            color: var(--overlay1);
+            font-size: 12px;
+            font-style: italic;
+            margin-top: 14px;
+        }
         .stage3d-nav {
             position: absolute;
             bottom: 12px;
