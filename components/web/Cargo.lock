@@ -1812,6 +1812,7 @@ dependencies = [
  "mlpl-web-completion",
  "mlpl-web-demos",
  "mlpl-web-eval",
+ "mlpl-web-glossary",
  "mlpl-web-lessons",
  "mlpl-web-path-body",
  "mlpl-web-viz3d",
@@ -1868,6 +1869,16 @@ dependencies = [
  "serde_json",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "mlpl-web-glossary"
+version = "0.20.0"
+dependencies = [
+ "mlpl-web-path-body",
+ "wasm-bindgen",
+ "web-sys",
+ "yew",
 ]
 
 [[package]]
