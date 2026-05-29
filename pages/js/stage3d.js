@@ -330,10 +330,10 @@ const vizRenderers = Object.create(null);
 // mlpl-web-viz-ir's VizNode + AttentionViz so future Rust-side
 // renderers can swap in without touching the JS detection.
 const SOFTMAX_RE = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*softmax\s*\(/;
+const ATTN_WEIGHTS_RE = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*attention_weights\s*\(/;
 function detectViz(label, shape, values) {
     if (!label || !shape || !values) return null;
-    // Rank-2 square + a softmax assignment is the attention.mlpl
-    // pattern (and the prevailing convention even outside it).
+    // Saga B pattern: rank-2 square + softmax assignment.
     if (shape.length === 2 && shape[0] === shape[1] && shape[0] >= 2
         && values.length === shape[0] * shape[1]
         && SOFTMAX_RE.test(label)) {
@@ -346,6 +346,27 @@ function detectViz(label, shape, values) {
                 key_tokens: tokens,
                 weights: Array.from(values),
                 layout: { rank: 'qk', q: n, k: n },
+                causal: false,
+            },
+        };
+    }
+    // Saga C pattern: rank-3 [H, Q, K] from attention_weights(...).
+    // Used by the vit multi-head demos. Each head's [Q, K] slice
+    // is a row-stochastic attention matrix; the renderer adds a
+    // head-selector dropdown.
+    if (shape.length === 3 && shape[1] === shape[2] && shape[1] >= 2
+        && values.length === shape[0] * shape[1] * shape[2]
+        && ATTN_WEIGHTS_RE.test(label)) {
+        const h = shape[0];
+        const n = shape[1];
+        const tokens = Array.from({ length: n }, (_, i) => ({ index: i }));
+        return {
+            kind: 'attention',
+            attention: {
+                query_tokens: tokens,
+                key_tokens: tokens,
+                weights: Array.from(values),
+                layout: { rank: 'head_qk', head: h, q: n, k: n },
                 causal: false,
             },
         };
@@ -371,18 +392,31 @@ function tokenLabel(t) {
     return '';
 }
 
+// Saga C: persistent head index across head-selector clicks
+// within a single dialog open. Reset to 0 on every fresh
+// openInspector so each new sculpture starts at head 0.
+let inspectorHeadIdx = 0;
+
 function renderAttentionHeatmap(ud, viz) {
     const a = viz.attention;
     if (!a || !a.weights || !a.weights.length) {
         return '<div class="insp-hint">attention payload missing</div>';
     }
+    const layout = a.layout || { rank: 'qk' };
+    // numHeads = 1 for rank-2 qk, H for rank-3 head_qk, H for
+    // rank-4 batch_head_qk (batch slice is a future saga).
+    const numHeads = layout.rank === 'head_qk' || layout.rank === 'batch_head_qk'
+        ? Math.max(1, layout.head | 0)
+        : 1;
+    if (inspectorHeadIdx < 0 || inspectorHeadIdx >= numHeads) inspectorHeadIdx = 0;
     const qLabels = (a.query_tokens || []).map(tokenLabel);
     const kLabels = (a.key_tokens || []).map(tokenLabel);
     const q = qLabels.length;
     const k = kLabels.length;
-    // Sample one matrix when the payload has head/batch dimensions.
-    const head = a.head || 0;
-    const layerHeadOffset = head * q * k;
+    // Offset into the flat weights array for the currently
+    // selected head. Rank-2 qk has no head dimension, so the
+    // offset is 0.
+    const layerHeadOffset = numHeads > 1 ? inspectorHeadIdx * q * k : 0;
     const cellW = Math.max(20, Math.min(48, Math.floor(560 / Math.max(k, 8))));
     const cellH = cellW;
     const padL = 36, padT = 24, padR = 90;
@@ -430,15 +464,67 @@ function renderAttentionHeatmap(ud, viz) {
 
     const name = ud.varName || '';
     const headline = `${name ? name + ' = ' : ''}${ud.label || ''}`;
+    // Head selector: visible only when the payload has a head
+    // dimension. Each option re-renders the body with the new
+    // head index by setting inspectorHeadIdx and calling
+    // refreshInspectorBody() (which knows which sculpture is
+    // currently open).
+    let headSelector = '';
+    if (numHeads > 1) {
+        const opts = Array.from({ length: numHeads }, (_, i) => {
+            const sel = i === inspectorHeadIdx ? ' selected' : '';
+            return `<option value="${i}"${sel}>Head ${i}</option>`;
+        }).join('');
+        headSelector = `
+            <div class="insp-row" style="margin-top:10px">
+                <label style="margin-right:8px"><strong>Head:</strong></label>
+                <select class="ctrl-btn" onchange="window.__viz_attention_set_head(this.value)">${opts}</select>
+                <span style="margin-left:12px;color:var(--subtext0);font-size:12px">
+                    Showing head ${inspectorHeadIdx + 1} of ${numHeads}.
+                </span>
+            </div>`;
+    }
+    // Per-head stats: compute over the visible matrix slice so
+    // the numbers reflect what the user is looking at, not the
+    // whole multi-head tensor.
+    const slice = a.weights.slice(layerHeadOffset, layerHeadOffset + q * k);
     return `
         <h2>${escapeHtml(headline)}</h2>
-        <div class="insp-row"><strong>Attention pattern</strong> &nbsp; <strong>Shape:</strong> [${q}, ${k}] &nbsp; (row-wise softmax)</div>
+        <div class="insp-row"><strong>Attention pattern</strong> &nbsp; <strong>Shape:</strong> ${layoutSummary(layout, q, k)} &nbsp; (row-wise softmax)</div>
+        ${headSelector}
         <div class="insp-row" style="margin-top:14px">${svg}</div>
-        <div class="insp-section-title">Statistics</div>
-        ${ud.values && ud.values.length ? renderStats(computeStats(ud.values)) : ''}
-        <div class="insp-hint">Saga B v0: integer indices as labels; saga C threads BPE tokens. Saga F adds D3 hover-to-trace.</div>
+        <div class="insp-section-title">Statistics for current head</div>
+        ${renderStats(computeStats(slice))}
+        <div class="insp-hint">Saga C v0: integer indices as labels; real BPE tokens land in the next saga (requires evaluator-side tokenizer plumbing).</div>
     `;
 }
+
+function layoutSummary(layout, q, k) {
+    if (layout.rank === 'head_qk') return `[H=${layout.head}, Q=${q}, K=${k}]`;
+    if (layout.rank === 'batch_head_qk') return `[B=${layout.batch}, H=${layout.head}, Q=${q}, K=${k}]`;
+    return `[${q}, ${k}]`;
+}
+
+// Re-render the currently-open inspector body. Called by the
+// head selector's onchange so changing heads is a body refresh,
+// not a full open/close cycle (preserves scroll position +
+// avoids the ESC-listener churn).
+function refreshInspectorBody() {
+    if (selectedStepIdx < 0 || selectedStepIdx >= stepMeshes.length) return;
+    const mesh = stepMeshes[selectedStepIdx];
+    if (!mesh || !mesh.userData) return;
+    const body = document.getElementById('stage3d-inspector-body');
+    if (!body) return;
+    body.innerHTML = renderInspectorBody(mesh.userData);
+}
+
+// Exposed for the head-selector onchange handler inline in the
+// rendered SVG. Defaults to 0 when the conversion fails.
+window.__viz_attention_set_head = function(value) {
+    const idx = parseInt(value, 10);
+    inspectorHeadIdx = Number.isFinite(idx) && idx >= 0 ? idx : 0;
+    refreshInspectorBody();
+};
 
 // Register the renderer so renderInspectorBody picks it up when
 // userData.viz.kind === 'attention'. window.__viz_register is
@@ -452,6 +538,10 @@ function openInspector() {
     const dlg = document.getElementById('stage3d-inspector');
     const body = document.getElementById('stage3d-inspector-body');
     if (!dlg || !body) return;
+    // Reset multi-slice selectors so each open lands on the
+    // first head / first batch slot regardless of where the
+    // previous open left them.
+    inspectorHeadIdx = 0;
     body.innerHTML = renderInspectorBody(mesh.userData);
     dlg.style.display = 'block';
     // ESC closes; one listener per open so we can detach on close.
