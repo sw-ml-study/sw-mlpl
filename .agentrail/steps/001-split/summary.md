@@ -1,0 +1,1 @@
+Split mlpl-build main.rs (15 fns) by extracting test block to main_tests.rs (#[path] include) and render_cargo_toml + candidate_names to template.rs. -1 FAIL.
