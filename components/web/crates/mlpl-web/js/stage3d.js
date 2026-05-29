@@ -615,6 +615,8 @@ function renderAttentionHeatmap(ud, viz) {
     // the numbers reflect what the user is looking at, not the
     // whole multi-head tensor.
     const slice = a.weights.slice(layerHeadOffset, layerHeadOffset + q * k);
+    const currentMesh = selectedStepIdx >= 0 ? stepMeshes[selectedStepIdx] : null;
+    const derivation = renderDerivation(currentMesh);
     return `
         <h2>${escapeHtml(headline)}</h2>
         <div class="insp-row"><strong>Attention pattern</strong> &nbsp; <strong>Shape:</strong> ${layoutSummary(layout, q, k)} &nbsp; (row-wise softmax)</div>
@@ -622,7 +624,8 @@ function renderAttentionHeatmap(ud, viz) {
         <div class="insp-row" style="margin-top:14px">${svg}</div>
         <div class="insp-section-title">Statistics for current head</div>
         ${renderStats(computeStats(slice))}
-        <div class="insp-hint">Saga C v0: integer indices as labels; real BPE tokens land in the next saga (requires evaluator-side tokenizer plumbing).</div>
+        ${derivation}
+        <div class="insp-hint">Click any step in the derivation above to jump the inspector to that tensor. Saga E v0 uses plain text; MathJax landings in a follow-up.</div>
     `;
 }
 
@@ -650,6 +653,118 @@ function refreshInspectorBody() {
 window.__viz_attention_set_head = function(value) {
     const idx = parseInt(value, 10);
     inspectorHeadIdx = Number.isFinite(idx) && idx >= 0 ? idx : 0;
+    refreshInspectorBody();
+};
+
+// Saga E: derivation tracing -- walk back through stepMeshes
+// starting from `mesh` and collect every named ancestor.
+// Returns an array of `{ stepIdx, varName, label }` ordered
+// from the earliest producer to the selected mesh itself.
+// Cycle-safe via a visited set keyed by varName.
+function buildDerivation(mesh) {
+    const out = [];
+    if (!mesh || !mesh.userData) return out;
+    const visited = new Set();
+    const idsRe = /[A-Za-z_][A-Za-z0-9_]*/g;
+    const queue = [];
+    if (mesh.userData.varName) queue.push(mesh.userData.varName);
+    while (queue.length > 0) {
+        const name = queue.shift();
+        if (visited.has(name)) continue;
+        visited.add(name);
+        // Look up the most recent step that bound this name.
+        // varName is unique within a session because re-binding
+        // produces a new sculpture with the same varName -- the
+        // most recent one wins, which is what we want.
+        let producerIdx = -1;
+        for (let i = stepMeshes.length - 1; i >= 0; i--) {
+            const m = stepMeshes[i];
+            if (m && m.userData && m.userData.varName === name) {
+                producerIdx = i;
+                break;
+            }
+        }
+        if (producerIdx < 0) continue;
+        const pmesh = stepMeshes[producerIdx];
+        const label = pmesh.userData.label || '';
+        out.unshift({
+            stepIdx: producerIdx,
+            varName: name,
+            label,
+            shape: pmesh.userData.shape || [],
+        });
+        // Pull idents from the RHS of `<name> = <rhs>` and queue
+        // them for the next round. Restrict to the RHS so a
+        // binding like `x = f(x)` doesn't immediately re-queue x.
+        const eqIdx = label.indexOf('=');
+        if (eqIdx < 0) continue;
+        const rhs = label.slice(eqIdx + 1);
+        const matches = rhs.match(idsRe) || [];
+        for (const id of matches) {
+            // Skip builtin names + control keywords; those are
+            // function calls, not tensor inputs.
+            if (BUILTIN_SKIP.has(id)) continue;
+            if (!visited.has(id)) queue.push(id);
+        }
+    }
+    return out;
+}
+
+// Common MLPL builtins / keywords that appear on the RHS of
+// binding lines. Listed here so the derivation walk doesn't try
+// to find a sculpture for `softmax`, `matmul`, etc. Underscored
+// pseudo-types like `int`, `bool`, etc. aren't represented in
+// MLPL so we don't add them.
+const BUILTIN_SKIP = new Set([
+    'matmul', 'transpose', 'softmax', 'sqrt', 'reshape',
+    'reduce_add', 'reduce', 'sum', 'mean', 'std', 'min', 'max',
+    'randn', 'iota', 'range', 'zeros', 'ones', 'embed',
+    'attention', 'attention_weights', 'causal_attention',
+    'apply', 'apply_tokenizer', 'train_bpe', 'decode',
+    'decode_each', 'linear', 'rms_norm', 'chain', 'residual',
+    'concat', 'patchify', 'svg', 'sin', 'cos', 'exp', 'log',
+    'relu', 'relu_layer', 'tanh_layer', 'softmax_layer',
+    'load_preloaded', 'tokenizer',
+]);
+
+// Saga E: render the derivation list. Each step is a button
+// that jumps the selection to that step + re-renders the body.
+function renderDerivation(mesh) {
+    const chain = buildDerivation(mesh);
+    if (chain.length === 0) return '';
+    const rows = chain.map(step => {
+        const shape = step.shape.length
+            ? `[${step.shape.join(', ')}]`
+            : 'scalar';
+        const eqIdx = step.label.indexOf('=');
+        const rhs = eqIdx >= 0 ? step.label.slice(eqIdx + 1).trim() : step.label;
+        // Strip trailing `# comment` so the derivation reads
+        // cleanly. Demos pad with whitespace for alignment;
+        // collapsing that here keeps the rendered list narrow.
+        const hashIdx = rhs.indexOf('#');
+        const cleanRhs = (hashIdx >= 0 ? rhs.slice(0, hashIdx) : rhs).trim();
+        const isCurrent = step.stepIdx === selectedStepIdx;
+        const cls = isCurrent ? 'insp-deriv-step current' : 'insp-deriv-step';
+        return `
+            <button class="${cls}" onclick="window.__viz_jump_step(${step.stepIdx})" title="Jump to step ${step.stepIdx + 1}">
+                <span class="insp-deriv-name">${escapeHtml(step.varName)}</span>
+                <span class="insp-deriv-eq">=</span>
+                <span class="insp-deriv-rhs">${escapeHtml(cleanRhs)}</span>
+                <span class="insp-deriv-shape">${escapeHtml(shape)}</span>
+            </button>`;
+    }).join('');
+    return `
+        <div class="insp-section-title">Derivation</div>
+        <div class="insp-derivation">${rows}</div>
+    `;
+}
+
+// Exposed for the derivation step buttons. Selects the new
+// step (which moves the yellow pointer + updates the bottom
+// strip) and re-renders the inspector body to point at the
+// new tensor.
+window.__viz_jump_step = function(idx) {
+    selectStep(idx);
     refreshInspectorBody();
 };
 
@@ -850,6 +965,11 @@ function renderInspectorBody(ud) {
         html += `<div class="insp-section-title">Statistics</div>` + renderStats(ud.summary);
         html += `<div class="insp-hint">Tensor is too large for an inline values dump; statistics shown above are computed from the full set.</div>`;
     }
+    // Saga E: derivation walk -- show the producer chain for
+    // any sculpture, not just attention. Each step is clickable
+    // and jumps the inspector to that tensor.
+    const currentMesh = selectedStepIdx >= 0 ? stepMeshes[selectedStepIdx] : null;
+    html += renderDerivation(currentMesh);
     html += `<div class="insp-hint">Interactive 3D close-up + axis-label slicing + drill-down for composite objects is queued (see docs/3d-introspect-dialog.md).</div>`;
     return html;
 }

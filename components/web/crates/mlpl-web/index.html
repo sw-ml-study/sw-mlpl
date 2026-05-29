@@ -470,6 +470,54 @@
             font-style: italic;
             margin-top: 14px;
         }
+        /* Saga E: op derivation list inside the inspector. Each
+           step is a clickable button row so the user can walk
+           backward through the producer chain. Current-step row
+           is highlighted in peach. */
+        .stage3d-inspector-body .insp-derivation {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-top: 6px;
+        }
+        .stage3d-inspector-body .insp-deriv-step {
+            display: grid;
+            grid-template-columns: max-content max-content 1fr max-content;
+            gap: 8px;
+            align-items: baseline;
+            text-align: left;
+            background: var(--mantle);
+            border: 1px solid var(--surface0);
+            border-radius: 4px;
+            padding: 6px 10px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--subtext1);
+            cursor: pointer;
+        }
+        .stage3d-inspector-body .insp-deriv-step:hover {
+            background: var(--surface0);
+            border-color: var(--surface1);
+        }
+        .stage3d-inspector-body .insp-deriv-step.current {
+            border-color: var(--peach);
+        }
+        .stage3d-inspector-body .insp-deriv-name {
+            color: var(--peach);
+            font-weight: bold;
+        }
+        .stage3d-inspector-body .insp-deriv-eq {
+            color: var(--overlay0);
+        }
+        .stage3d-inspector-body .insp-deriv-rhs {
+            color: var(--text);
+            overflow-wrap: anywhere;
+        }
+        .stage3d-inspector-body .insp-deriv-shape {
+            color: var(--mauve);
+            font-size: 11px;
+            white-space: nowrap;
+        }
         .stage3d-nav {
             position: absolute;
             bottom: 12px;
