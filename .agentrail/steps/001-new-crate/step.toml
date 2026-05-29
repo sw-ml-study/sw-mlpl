@@ -1,9 +1,0 @@
-number = 1
-slug = "new-crate"
-status = "in-progress"
-description = "Create components/web-viz-ir/ workspace + mlpl-web-viz-ir crate per docs/viz-..."
-role = "production"
-context_files = []
-created_at = "2026-05-29T12:19:53"
-task_type = "refactor"
-commits = []
