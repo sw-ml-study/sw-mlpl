@@ -462,8 +462,15 @@ function renderAttentionHeatmap(ud, viz) {
     svg += `<text x="12" y="${padT + q * cellH / 2}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext0)" transform="rotate(-90 12 ${padT + q * cellH / 2})">query tokens</text>`;
     svg += `</svg>`;
 
+    // The source line already starts with `<var> = ...` when
+    // ud.label is from a binding, so don't double up. Only
+    // prepend the var name when the label is something else
+    // (a bare expression or a non-binding line).
+    const label = ud.label || '';
     const name = ud.varName || '';
-    const headline = `${name ? name + ' = ' : ''}${ud.label || ''}`;
+    const startsWithName = name
+        && new RegExp(`^\\s*${name}\\s*=`).test(label);
+    const headline = startsWithName || !name ? label : `${name} = ${label}`;
     // Head selector: visible only when the payload has a head
     // dimension. Each option re-renders the body with the new
     // head index by setting inspectorHeadIdx and calling
@@ -609,7 +616,10 @@ function renderInspectorBody(ud) {
     const mem = bytes < 1024 ? `${bytes} B`
               : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB`
               : `${(bytes / 1048576).toFixed(1)} MB`;
-    const headline = `${name ? name + ' = ' : ''}${label}`;
+    // Same de-dup logic as the attention renderer.
+    const startsWithName = name
+        && new RegExp(`^\\s*${name}\\s*=`).test(label);
+    const headline = startsWithName || !name ? label : `${name} = ${label}`;
     let html = `<h2>${escapeHtml(headline)}</h2>`;
     html += `<div class="insp-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>`;
     html += `<div class="insp-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>`;
