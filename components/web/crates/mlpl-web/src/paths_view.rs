@@ -46,9 +46,11 @@ fn render_picker(on_change: &Callback<Option<(Option<usize>, usize)>>) -> Html {
         // The Tour narration ("Let's open the Dimensionality Reduction
         // path") and the highlighted card must agree, so the
         // `path-card-dim-reduction` marker is anchored to the
-        // Dimensionality Reduction card by title -- not to position 0,
-        // which has shifted as PATHS gets reordered.
-        let target = if path.title == "Dimensionality Reduction" {
+        // Dimensionality Reduction card by title (case-insensitive --
+        // the const uses "Dimensionality reduction" with a lowercase
+        // 'r') -- not to position 0, which has shifted as PATHS gets
+        // reordered.
+        let target = if path.title.eq_ignore_ascii_case("Dimensionality reduction") {
             Some("path-card-dim-reduction")
         } else {
             None
