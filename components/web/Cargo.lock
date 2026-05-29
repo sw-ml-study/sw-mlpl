@@ -1814,6 +1814,7 @@ dependencies = [
  "mlpl-web-eval",
  "mlpl-web-glossary",
  "mlpl-web-lessons",
+ "mlpl-web-onboarding",
  "mlpl-web-path-body",
  "mlpl-web-viz3d",
  "reqwest",
@@ -1885,6 +1886,16 @@ dependencies = [
 name = "mlpl-web-lessons"
 version = "0.20.0"
 dependencies = [
+ "yew",
+]
+
+[[package]]
+name = "mlpl-web-onboarding"
+version = "0.20.0"
+dependencies = [
+ "gloo 0.10.0",
+ "wasm-bindgen",
+ "web-sys",
  "yew",
 ]
 
