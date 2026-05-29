@@ -160,3 +160,29 @@ pub const UPLOAD_INSPECT: Demo = Demo {
         "hist(reshape(pixels, [12288]), 20)",
     ],
 };
+
+pub const BPE_ATTENTION_LABELS: Demo = Demo {
+    category: "Basics",
+    name: "BPE-Labeled Attention Pattern",
+    intro: "Saga BPE-2: tokenize a short text with train_bpe + apply_tokenizer, decode each token id back to its byte string via decode_each, then run attention on the embedded sequence. Click the `A` sculpture (rank-3 [heads, T, T] attention weights) and the heatmap axes label rows + columns with the actual BPE pieces -- not integer indices -- because `labels = decode_each(...)` rode through the new ShapeInfo.string_list channel into the next attention sculpture.",
+    takeaway: "Per-token visualization needs the per-token labels alongside the data. decode_each is the BPE-side counterpart to decode (which collapses the whole id sequence into one string); the viz plumbing in ShapeInfo carries the resulting StrList forward so the next attention heatmap renders with real tokens on its axes. Untrained: the heatmap is randn noise; the point here is that the labels flow, not that the model knows anything.",
+    lines: &[
+        "# Saga BPE-2: end-to-end BPE labels on an attention heatmap.",
+        "corpus = \"the quick brown fox jumps over the lazy dog\"      # 9 ASCII words",
+        "tok    = train_bpe(corpus, 20, 0)                            # 20 merges -> small vocab",
+        "ids    = apply_tokenizer(tok, corpus)                        # rank-1 token ids",
+        "labels = decode_each(tok, ids)                                # StrList: per-token byte strings",
+        "# Above `labels` rides through ShapeInfo.string_list and is",
+        "# attached to the NEXT attention sculpture as its axis labels.",
+        "d = 16                                                         # embedding dim",
+        "V = 300                                                        # max vocab id + slack (BPE vocab = 256 + merges)",
+        "emb = embed(V, d, 1)                                          # embedding layer",
+        "seq = apply(emb, ids)                                         # [N, d] embedded sequence",
+        "# Two-head attention, max sequence length 64 (well above the corpus length).",
+        "mdl    = attention(d, 2, 64)",
+        "A      = attention_weights(mdl, seq)                          # [2, N, N]",
+        "svg(A, \"heatmap_grid\")                                       # peek before clicking",
+        "# Click the `A` sculpture in the 3D stage -- the dialog should",
+        "# show real BPE pieces on the axes instead of 0..N-1.",
+    ],
+};
