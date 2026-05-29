@@ -122,6 +122,7 @@ fn schedule_demo_line(
                 r.shape,
                 r.values,
                 r.string_list,
+                r.viz_node,
             );
             mlpl_web_viz3d::events::emit(&mlpl_web_viz3d::events::Stage3dEvent {
                 step_idx: 0,

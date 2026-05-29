@@ -1795,6 +1795,7 @@ dependencies = [
  "mlpl-eval",
  "mlpl-parser",
  "mlpl-trace",
+ "mlpl-web-viz-ir",
  "wasm-bindgen",
 ]
 
