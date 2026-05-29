@@ -1,1 +1,1 @@
-BPE follow-up part 2: add a demo that exercises BPE-1's pipeline end to end. Demo: train_bpe a tiny corpus, apply_tokenizer, decode_each into labels, embed + attention -> click attention sculpture, see real BPE pieces on axes.
+Saga D from docs/viz-ir-plan.md. Make Value::Model emit a VizNode { kind: Composite, sankey: SankeyViz } from the model spec tree. JS registers a Plotly Sankey renderer. Demo proof: open vit_multihead, click the mdl sculpture, see ribbons through Q/K/V projection -> softmax -> output.

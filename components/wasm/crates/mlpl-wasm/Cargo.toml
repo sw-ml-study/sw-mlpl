@@ -12,4 +12,5 @@ mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
+mlpl-web-viz-ir = { path = "../../../web-viz-ir/crates/mlpl-web-viz-ir" }
 wasm-bindgen = "0.2"

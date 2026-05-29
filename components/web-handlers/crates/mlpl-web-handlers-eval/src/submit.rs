@@ -164,6 +164,7 @@ fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
                 r.shape,
                 r.values,
                 r.string_list,
+                r.viz_node,
             );
             mlpl_web_viz3d::events::emit(&mlpl_web_viz3d::events::Stage3dEvent {
                 step_idx: 0,

@@ -57,19 +57,20 @@ pub fn build_shape_info(
     shape: Vec<usize>,
     values: Option<Vec<f64>>,
 ) -> ShapeInfo {
-    build_shape_info_full(name, shape, values, None)
+    build_shape_info_full(name, shape, values, None, None)
 }
 
-/// Saga BPE-1: same as `build_shape_info` but with the
-/// optional `string_list` field threaded through. Demo /
-/// submit code that knows it just evaluated a `Value::StrList`
-/// passes the per-token strings here so the JS dispatch can
-/// use them as labels for the next attention sculpture.
+/// Saga BPE-1 + saga D: same as `build_shape_info` but with
+/// the optional `string_list` and pre-built `viz` payloads
+/// threaded through. Demo / submit code passes whatever
+/// extras the underlying `Value` produced so the JS
+/// dispatch can pick a renderer.
 pub fn build_shape_info_full(
     name: String,
     shape: Vec<usize>,
     values: Option<Vec<f64>>,
     string_list: Option<Vec<String>>,
+    viz: Option<VizNode>,
 ) -> ShapeInfo {
     let elements = if shape.is_empty() {
         1
@@ -88,7 +89,7 @@ pub fn build_shape_info_full(
         elements,
         values: vals,
         summary,
-        viz: None,
+        viz,
         string_list,
     }
 }

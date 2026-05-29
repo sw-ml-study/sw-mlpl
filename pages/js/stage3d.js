@@ -578,6 +578,104 @@ window.__viz_attention_set_head = function(value) {
 // also exposed for renderers that live outside this file.
 vizRenderers['attention'] = renderAttentionHeatmap;
 
+// Saga D: composite (chain / residual model) renderer. Plotly
+// Sankey for the model spec walk built on the Rust side --
+// nodes are layer ops, edges are tensor flows. Plotly is
+// already loaded by index.html for the existing scatter / 3D
+// scenes, so no new bundle cost.
+function renderCompositeSankey(ud, viz) {
+    const sankey = viz.sankey;
+    if (!sankey || !sankey.nodes || !sankey.edges) {
+        return '<div class="insp-hint">composite sankey payload missing</div>';
+    }
+    if (typeof Plotly === 'undefined') {
+        return '<div class="insp-hint">Plotly is not loaded; cannot render Sankey.</div>';
+    }
+    // Plotly Sankey takes parallel arrays of source / target /
+    // value indices, where nodes are referenced by integer
+    // position in the labels array. Map our string ids ->
+    // indices.
+    const idIndex = new Map();
+    const labels = [];
+    const colors = [];
+    sankey.nodes.forEach((n, i) => {
+        idIndex.set(n.id, i);
+        labels.push(n.label);
+        colors.push(opColorHex(n.op_kind));
+    });
+    const source = [], target = [], value = [];
+    sankey.edges.forEach(e => {
+        const s = idIndex.get(e.from);
+        const t = idIndex.get(e.to);
+        if (s === undefined || t === undefined) return;
+        source.push(s);
+        target.push(t);
+        value.push(Math.max(1, e.width));
+    });
+    const containerId = 'composite-sankey-' + Math.random().toString(36).slice(2, 8);
+    // Plotly.newPlot needs a real DOM node, so defer rendering
+    // until the returned HTML is mounted. requestAnimationFrame
+    // is enough because openInspector calls body.innerHTML = ...
+    // synchronously before display:block.
+    requestAnimationFrame(() => {
+        const el = document.getElementById(containerId);
+        if (!el) return;
+        const trace = {
+            type: 'sankey',
+            orientation: 'h',
+            node: {
+                pad: 14,
+                thickness: 18,
+                line: { color: 'rgba(0,0,0,0.4)', width: 0.5 },
+                label: labels,
+                color: colors,
+            },
+            link: { source, target, value, color: 'rgba(180, 180, 220, 0.35)' },
+        };
+        const layout = {
+            margin: { l: 12, r: 12, t: 8, b: 8 },
+            paper_bgcolor: 'transparent',
+            plot_bgcolor: 'transparent',
+            font: { color: '#cdd6f4', family: 'monospace', size: 12 },
+            height: Math.max(280, 32 * sankey.nodes.length),
+        };
+        Plotly.newPlot(el, [trace], layout, {
+            displayModeBar: false,
+            responsive: true,
+        });
+    });
+    const name = ud.varName || '';
+    const label = ud.label || '';
+    const startsWithName = name
+        && new RegExp(`^\\s*${name}\\s*=`).test(label);
+    const headline = startsWithName || !name ? label : `${name} = ${label}`;
+    return `
+        <h2>${escapeHtml(headline)}</h2>
+        <div class="insp-row"><strong>Composite model</strong> &nbsp; <strong>${sankey.nodes.length} nodes</strong> &nbsp; <strong>${sankey.edges.length} edges</strong></div>
+        <div id="${containerId}" style="margin-top:14px;width:100%;min-height:280px"></div>
+        <div class="insp-hint">Saga D v0: leaf layers + flat Chain. Residual currently flattens into its inner chain (the layer labels carry a *res tag); the bypass edge + nested-chain drill-down land in a follow-up saga.</div>
+    `;
+}
+
+// Per-op-kind node colors so the Sankey reads at a glance:
+// embedding pink, attention violet, linear/norm warm, etc.
+function opColorHex(kind) {
+    switch ((kind || '').toLowerCase()) {
+        case 'input':            return '#74c7ec';
+        case 'output':           return '#a6e3a1';
+        case 'embed':            return '#f5c2e7';
+        case 'attention':        return '#cba6f7';
+        case 'causal_attention': return '#cba6f7';
+        case 'linear':           return '#fab387';
+        case 'linear_lora':      return '#f9e2af';
+        case 'rms_norm':         return '#94e2d5';
+        case 'activation':       return '#89b4fa';
+        default:                 return '#bac2de';
+    }
+}
+
+vizRenderers['composite'] = renderCompositeSankey;
+
 function openInspector() {
     if (selectedStepIdx < 0 || selectedStepIdx >= stepMeshes.length) return;
     const mesh = stepMeshes[selectedStepIdx];
@@ -1010,7 +1108,14 @@ window.__stage3d_add_step = function(ev) {
     const rawName = ev.output?.name || '';
     const isVar = ev.label.includes('=');
     const varName = isVar ? rawName : null;
-    const viz = detectViz(ev.label, shape, values, ev.output);
+    // Saga D: the Rust side now ships its own viz payloads
+    // (composite Sankey for Value::Model). Prefer those when
+    // present and only fall back to JS detection heuristics
+    // for tensors. Rust-side viz wins because it has typed
+    // access to the underlying value -- e.g. it knows a chain
+    // is a chain without grepping the source line.
+    const detectedViz = detectViz(ev.label, shape, values, ev.output);
+    const viz = ev.output?.viz || detectedViz || null;
     mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0, values, summary: ev.output?.summary || null, viz };
     mesh.traverse(c => { if (c !== mesh) c.userData = mesh.userData; });
     scene.add(mesh);
