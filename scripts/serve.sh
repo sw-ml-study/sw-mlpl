@@ -16,7 +16,7 @@ set -euo pipefail
 #   scripts/serve.sh --no-release   # dev (faster recompile)
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-WEB_DIR="$(dirname "$SCRIPT_DIR")/apps/mlpl-web"
+WEB_DIR="$(dirname "$SCRIPT_DIR")/components/web/crates/mlpl-web"
 
 PORT=9957
 PROFILE_FLAG="--release"
