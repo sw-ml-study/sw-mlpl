@@ -1,31 +1,9 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
-use mlpl_wasm::WasmSession;
 use yew::prelude::*;
 
 use crate::help::help_text;
-use crate::upload::PendingUploadName;
-use crate::upload_cmd::{handle_upload_command, parse_upload_command};
 use mlpl_web_eval::state::{EntryKind, HistoryEntry};
-
-#[derive(Clone)]
-pub struct EvalDeps {
-    pub session: Rc<RefCell<WasmSession>>,
-    pub history: UseStateHandle<Vec<HistoryEntry>>,
-    pub input_value: UseStateHandle<String>,
-    pub cmd_history: UseStateHandle<Vec<String>>,
-    pub cmd_index: UseStateHandle<Option<usize>>,
-    /// Saga 29 step 016: noderef + pending-name handle for the
-    /// `:upload <name>` REPL command. `upload_input_ref` points
-    /// at the hidden `<input type=file>` rendered by the REPL
-    /// controls; `pending_upload_name` is set to `Some(<name>)`
-    /// before the file picker fires, so the existing on-change
-    /// pipeline knows which session variable to bind.
-    pub upload_input_ref: NodeRef,
-    pub show_3d: UseStateHandle<bool>,
-    pub pending_upload_name: PendingUploadName,
-}
+use mlpl_web_handlers_upload::eval_deps::EvalDeps;
+use mlpl_web_handlers_upload::upload_cmd::{handle_upload_command, parse_upload_command};
 
 /// Single-line submit: thin wrapper that pipes the line through
 /// the batch path so there is exactly one place that mutates
@@ -96,7 +74,7 @@ fn classify_line(
         }
         return;
     }
-    if let Some(cmd) = crate::viz3d_toggle::parse_3d_command(trimmed) {
+    if let Some(cmd) = mlpl_web_viz3d::toggle::parse_3d_command(trimmed) {
         apply_3d_command(deps, cmd);
         return;
     }
@@ -107,11 +85,11 @@ fn classify_line(
     eval_queue.push(trimmed.to_string());
 }
 
-fn apply_3d_command(deps: &EvalDeps, cmd: crate::viz3d_toggle::Viz3dCmd) {
+fn apply_3d_command(deps: &EvalDeps, cmd: mlpl_web_viz3d::toggle::Viz3dCmd) {
     match cmd {
-        crate::viz3d_toggle::Viz3dCmd::On => deps.show_3d.set(true),
-        crate::viz3d_toggle::Viz3dCmd::Off => deps.show_3d.set(false),
-        crate::viz3d_toggle::Viz3dCmd::Reset => {
+        mlpl_web_viz3d::toggle::Viz3dCmd::On => deps.show_3d.set(true),
+        mlpl_web_viz3d::toggle::Viz3dCmd::Off => deps.show_3d.set(false),
+        mlpl_web_viz3d::toggle::Viz3dCmd::Reset => {
             let _ = js_sys::eval("window.__stage3d_reset_view && window.__stage3d_reset_view()");
         }
     }
@@ -131,7 +109,7 @@ fn process_next_eval(
         return;
     }
     let line = queue[idx].clone();
-    crate::handlers_running::push_running_marker(&mut history, &line);
+    crate::running::push_running_marker(&mut history, &line);
     deps.history.set(history.clone());
     let deps_next = deps.clone();
     let queue_next = queue.clone();
@@ -155,7 +133,7 @@ fn process_next_eval(
 pub(crate) fn running_message(line: &str) -> &'static str {
     let stripped = line.trim_start();
     if stripped.starts_with("train ") || stripped.starts_with("train{") {
-        return crate::handlers_running::train_caption(stripped);
+        return crate::running::train_caption(stripped);
     }
     if stripped.starts_with("repeat ") {
         "looping... (this can take a few seconds)"
@@ -181,8 +159,8 @@ fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
         let is_error = r.display.starts_with("error:");
         if !is_error {
             let name = line.split('=').next().unwrap_or(line).trim().to_string();
-            let info = crate::viz3d_events::build_shape_info(name, r.shape, r.values);
-            crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
+            let info = mlpl_web_viz3d::events::build_shape_info(name, r.shape, r.values);
+            mlpl_web_viz3d::events::emit(&mlpl_web_viz3d::events::Stage3dEvent {
                 step_idx: 0,
                 label: line.to_string(),
                 output: info,

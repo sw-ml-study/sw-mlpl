@@ -21,6 +21,9 @@ mlpl-web-components-content = { path = "../../../web-components/crates/mlpl-web-
 mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
 mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
 mlpl-web-glossary = { path = "../../../web-glossary/crates/mlpl-web-glossary" }
+mlpl-web-handlers-eval = { path = "../../../web-handlers/crates/mlpl-web-handlers-eval" }
+mlpl-web-handlers-input = { path = "../../../web-handlers/crates/mlpl-web-handlers-input" }
+mlpl-web-handlers-upload = { path = "../../../web-handlers/crates/mlpl-web-handlers-upload" }
 mlpl-web-onboarding = { path = "../../../web-onboarding/crates/mlpl-web-onboarding" }
 mlpl-web-paths = { path = "../../../web-paths/crates/mlpl-web-paths" }
 mlpl-web-paths-data = { path = "../../../web-paths/crates/mlpl-web-paths-data" }

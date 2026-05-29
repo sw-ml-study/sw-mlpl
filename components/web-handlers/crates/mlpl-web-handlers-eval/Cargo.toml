@@ -1,0 +1,27 @@
+[package]
+name = "mlpl-web-handlers-eval"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_handlers_eval"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-wasm = { path = "../../../wasm/crates/mlpl-wasm" }
+mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+mlpl-web-handlers-upload = { path = "../mlpl-web-handlers-upload" }
+mlpl-web-viz3d = { path = "../../../web-viz3d/crates/mlpl-web-viz3d" }
+gloo = "0.10"
+wasm-bindgen = "0.2"
+web-sys = { version = "0.3", features = [
+    "Event",
+    "EventTarget",
+    "HtmlElement",
+    "MouseEvent",
+    "Window",
+] }
+yew = { version = "0.21", features = ["csr"] }
+js-sys = "0.3"

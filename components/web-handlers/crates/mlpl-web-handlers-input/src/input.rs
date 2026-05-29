@@ -18,7 +18,7 @@ pub fn make_keydown(
     completion_selected: UseStateHandle<usize>,
 ) -> Callback<KeyboardEvent> {
     Callback::from(move |e: KeyboardEvent| {
-        if crate::handlers_popup::handle_completion_keys(
+        if crate::popup::handle_completion_keys(
             &e,
             &input_value,
             &completion_candidates,

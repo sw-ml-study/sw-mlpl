@@ -11,7 +11,7 @@ pub fn handle_completion_keys(
     candidates: &UseStateHandle<Vec<String>>,
     selected: &UseStateHandle<usize>,
 ) -> bool {
-    if crate::completion::is_completion_trigger(e.ctrl_key(), e.code().as_str()) {
+    if mlpl_web_completion::is_completion_trigger(e.ctrl_key(), e.code().as_str()) {
         e.prevent_default();
         fire_completion(e, input_value, candidates, selected);
         return true;
@@ -32,12 +32,12 @@ fn handle_popup_key(
     match e.key().as_str() {
         "ArrowDown" => {
             e.prevent_default();
-            selected.set(crate::completion::next_index(**selected, len));
+            selected.set(mlpl_web_completion::next_index(**selected, len));
             true
         }
         "ArrowUp" => {
             e.prevent_default();
-            selected.set(crate::completion::prev_index(**selected, len));
+            selected.set(mlpl_web_completion::prev_index(**selected, len));
             true
         }
         "Enter" => {
@@ -63,7 +63,7 @@ fn handle_right(
     selected: &UseStateHandle<usize>,
 ) -> bool {
     let cursor = cursor_position(e);
-    if crate::completion::should_accept_right(true, cursor, input_value.len()) {
+    if mlpl_web_completion::should_accept_right(true, cursor, input_value.len()) {
         e.prevent_default();
         accept_selected(input_value, candidates, selected);
         true
@@ -80,7 +80,7 @@ fn accept_selected(
     let idx = (**selected).min(candidates.len().saturating_sub(1));
     if let Some(chosen) = candidates.get(idx) {
         let cur = input_value.len();
-        let (out, _) = crate::completion::apply_completion(input_value, cur, chosen);
+        let (out, _) = mlpl_web_completion::apply_completion(input_value, cur, chosen);
         input_value.set(out);
     }
     candidates.set(Vec::new());
@@ -110,17 +110,17 @@ fn apply_tab_match(
     candidates: &UseStateHandle<Vec<String>>,
     selected: &UseStateHandle<usize>,
 ) {
-    match crate::completion::compute_tab_match(value, cursor, builtins.iter().copied()) {
-        crate::completion::TabMatch::None => {
+    match mlpl_web_completion::compute_tab_match(value, cursor, builtins.iter().copied()) {
+        mlpl_web_completion::TabMatch::None => {
             candidates.set(Vec::new());
             selected.set(0);
         }
-        crate::completion::TabMatch::Apply { input, cursor: _ } => {
+        mlpl_web_completion::TabMatch::Apply { input, cursor: _ } => {
             input_value.set(input);
             candidates.set(Vec::new());
             selected.set(0);
         }
-        crate::completion::TabMatch::Popup(v) => {
+        mlpl_web_completion::TabMatch::Popup(v) => {
             candidates.set(v);
             selected.set(0);
         }

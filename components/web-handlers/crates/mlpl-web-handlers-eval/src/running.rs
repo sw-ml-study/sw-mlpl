@@ -28,7 +28,7 @@ pub(crate) fn train_caption(stripped: &str) -> &'static str {
 pub(crate) fn push_running_marker(entries: &mut Vec<HistoryEntry>, line: &str) {
     entries.push(HistoryEntry {
         input: line.to_string(),
-        output: crate::handlers_submit::running_message(line).to_string(),
+        output: crate::submit::running_message(line).to_string(),
         is_error: false,
         kind: EntryKind::Running,
     });
