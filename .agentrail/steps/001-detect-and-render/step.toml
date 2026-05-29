@@ -1,9 +1,0 @@
-number = 1
-slug = "detect-and-render"
-status = "in-progress"
-description = "1. In stage3d.js __stage3d_add_step, regex-detect '<var> = softmax(' on event..."
-role = "production"
-context_files = []
-created_at = "2026-05-29T12:27:04"
-task_type = "feature"
-commits = []
