@@ -768,6 +768,7 @@ dependencies = [
  "mlpl-core",
  "mlpl-env-traits",
  "mlpl-eval-core",
+ "mlpl-eval-pets-tiny",
  "mlpl-eval-types",
  "mlpl-loader-helpers",
  "mlpl-models-feasibility",
@@ -788,6 +789,14 @@ dependencies = [
 [[package]]
 name = "mlpl-eval-core"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-eval-pets-tiny"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-eval-types",
+]
 
 [[package]]
 name = "mlpl-eval-types"

@@ -86,7 +86,6 @@ mod model_freeze;
 mod model_inspect;
 mod model_lora;
 mod model_mutate;
-mod pets_tiny;
 mod result_ops;
 mod tag_propagate;
 mod tag_render;

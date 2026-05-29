@@ -1,0 +1,9 @@
+number = 1
+slug = "extract"
+status = "in-progress"
+description = "Extract"
+role = "production"
+context_files = []
+created_at = "2026-05-28T17:58:30"
+task_type = "refactor"
+commits = []
