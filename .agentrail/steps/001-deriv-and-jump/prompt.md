@@ -1,0 +1,1 @@
+buildDerivation(mesh) walks stepMeshes by parent name; for each match, find idents on RHS and recurse. Render as a clickable list above/below the heatmap. Clicking a step calls window.__viz_jump_step which selects that step + re-renders the inspector body to point at that tensor.
