@@ -32,7 +32,7 @@
    MLPL demo opens, the user clicks a specific sculpture, sees the
    target renderer. No renderer ships without its proof demo.
 5. **Components**: each new viz layer is its own component workspace
-   following the saga 79+ pattern (≤4 crates per component, lib.rs
+   following the saga 79+ pattern (<=4 crates per component, lib.rs
    as facade).
 
 ## Information needed from each target demo
@@ -248,7 +248,7 @@ Steps:
 ### Saga D: `viz-sankey-composite-tiny-lm`
 
 **Goal**: click the `model` sculpture (the chain itself),
-see a Plotly Sankey of token flow through embed -> norm →
+see a Plotly Sankey of token flow through embed -> norm ->
 attention -> MLP -> out.
 
 Steps:
@@ -269,7 +269,7 @@ Steps:
 ### Saga E: `viz-derivation-steps-attention`
 
 **Goal**: click an attention sculpture, see the math
-derivation as a step list (`Q = X · Wq`, `scores = Q · K^T /
+derivation as a step list (`Q = X * Wq`, `scores = Q * K^T /
 sqrt(d)`, ...). Each line is clickable: clicking re-opens the
 inspector on the intermediate tensor.
 
