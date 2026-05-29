@@ -264,6 +264,11 @@ function onCanvasClick(e) {
 }
 
 let selectionPointer = null;
+// Saga B: a small "click for <kind>" floating label rendered
+// next to the pointer when the selected sculpture has a
+// registered viz renderer. Discoverability nudge so the user
+// can tell at a glance which sculptures carry rich views.
+let selectionLabel = null;
 // Anchored base Y + start timestamp drive the bob + glow
 // animation in animate(); reset whenever a new mesh becomes
 // the selection.
@@ -272,6 +277,7 @@ let selectionPointerStart = 0;
 
 function selectMesh(mesh) {
     if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
+    if (selectionLabel) { scene.remove(selectionLabel); selectionLabel = null; }
     const worldPos = new THREE.Vector3();
     const target = mesh.parent?.isGroup ? mesh.parent : mesh;
     target.getWorldPosition(worldPos);
@@ -289,6 +295,21 @@ function selectMesh(mesh) {
     selectionPointerBaseY = worldPos.y + 1.5;
     selectionPointerStart = performance.now();
     selectedStepIdx = mesh.userData?.stepIdx ?? -1;
+    // Discoverability: if a viz renderer is registered for this
+    // sculpture's viz.kind, hover a small label next to the
+    // pointer so the user knows the click goes somewhere
+    // richer than the text body. Cleared when selection changes.
+    const vizKind = mesh.userData?.viz?.kind;
+    if (vizKind && vizRenderers[vizKind]) {
+        selectionLabel = makeLabel(`click for ${vizKind}`, {
+            fontSize: 22, color: '#ffcc44',
+            bg: 'rgba(20, 22, 30, 0.85)',
+            w: 320, h: 56,
+            scale: [1.6, 0.28, 1],
+        });
+        selectionLabel.position.set(worldPos.x + 1.4, worldPos.y + 1.7, worldPos.z);
+        scene.add(selectionLabel);
+    }
 }
 
 // Close-up inspector dialog. Opens with the currently selected
@@ -310,18 +331,6 @@ const vizRenderers = Object.create(null);
 // renderers can swap in without touching the JS detection.
 const SOFTMAX_RE = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*softmax\s*\(/;
 function detectViz(label, shape, values) {
-    // Saga B debug -- remove once verified. Log every event so
-    // the user can see in DevTools whether the detection ever
-    // gets the inputs it needs. Turn off via window.__viz_debug = false.
-    if (window.__viz_debug !== false) {
-        console.log('[viz-ir] detectViz', {
-            label,
-            shape,
-            values_len: values ? values.length : null,
-            matched: !!(values && shape.length === 2 && shape[0] === shape[1]
-                && SOFTMAX_RE.test(label || '')),
-        });
-    }
     if (!label || !shape || !values) return null;
     // Rank-2 square + a softmax assignment is the attention.mlpl
     // pattern (and the prevailing convention even outside it).
@@ -565,10 +574,14 @@ function showDetail(ud) {
     const elements = ud.elements || (shape.length ? shape.reduce((a, b) => a * b, 1) : 1);
     const bytes = elements * 8;
     const mem = bytes < 1024 ? `${bytes} B` : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB` : `${(bytes / 1048576).toFixed(1)} MB`;
+    const vizKind = ud.viz?.kind;
+    const vizHint = vizKind && vizRenderers[vizKind]
+        ? `<div class="stage3d-detail-row" style="color:var(--peach)"><strong>${vizKind}</strong> view available -- click the yellow pointer to open it.</div>`
+        : '';
     let html = `
         <div class="stage3d-detail-title">${name ? name + ' =' : ''} ${label}</div>
         <div class="stage3d-detail-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>
-        <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>`;
+        <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>${vizHint}`;
     const vals = ud.values;
     const summary = ud.summary;
     if (elements <= 8 && rank === 1 && elements > 0) {
@@ -884,6 +897,7 @@ window.__stage3d_add_step = function(ev) {
 
 function clearSelection() {
     if (selectionPointer) { scene.remove(selectionPointer); selectionPointer = null; }
+    if (selectionLabel) { scene.remove(selectionLabel); selectionLabel = null; }
     selectedStepIdx = -1;
     const el = document.getElementById('stage3d-detail');
     if (el) el.style.display = 'none';
