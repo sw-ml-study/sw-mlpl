@@ -299,6 +299,13 @@ function closeInspector() {
         document.removeEventListener('keydown', dlg._escHandler);
         delete dlg._escHandler;
     }
+    // Restore focus to the canvas so arrow keys keep
+    // navigating between steps without the user having to
+    // click into the 3D space again.
+    const canvas = renderer && renderer.domElement;
+    if (canvas && typeof canvas.focus === 'function') {
+        canvas.focus({ preventScroll: true });
+    }
 }
 
 function renderInspectorBody(ud) {
