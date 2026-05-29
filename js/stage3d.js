@@ -229,6 +229,7 @@ window.__stage3d_init = function(canvas) {
     canvas.tabIndex = 0;
     canvas.addEventListener('keydown', onCanvasKey);
     canvas.addEventListener('click', onCanvasClick);
+    canvas.addEventListener('pointermove', onCanvasHover);
     window.addEventListener('resize', resize);
     // Inspector dialog: close button + backdrop close. Both
     // re-bound on every init in case the DOM nodes were
@@ -248,6 +249,38 @@ window.__stage3d_init = function(canvas) {
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
 let selectedMesh = null;
+
+// Cheap per-frame hit-test on the two affordance objects
+// (yellow tap pointer + bracketed label) so the OS cursor
+// becomes a hand whenever the user is over either one. Only
+// these two objects are raycast against -- sculptures don't
+// need a hover cursor because clicking anywhere on a
+// sculpture is the normal selection action, no special
+// affordance there.
+function onCanvasHover(e) {
+    if (!renderer || !camera) return;
+    if (!selectionPointer && !selectionLabel) {
+        if (renderer.domElement.style.cursor !== 'default') {
+            renderer.domElement.style.cursor = 'default';
+        }
+        return;
+    }
+    const rect = renderer.domElement.getBoundingClientRect();
+    mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(mouse, camera);
+    let hovering = false;
+    if (selectionPointer && raycaster.intersectObject(selectionPointer, false).length > 0) {
+        hovering = true;
+    }
+    if (!hovering && selectionLabel && raycaster.intersectObject(selectionLabel, false).length > 0) {
+        hovering = true;
+    }
+    const next = hovering ? 'pointer' : 'default';
+    if (renderer.domElement.style.cursor !== next) {
+        renderer.domElement.style.cursor = next;
+    }
+}
 
 function onCanvasClick(e) {
     if (!renderer || !camera) return;
@@ -1210,6 +1243,11 @@ function clearSelection() {
     selectedStepIdx = -1;
     const el = document.getElementById('stage3d-detail');
     if (el) el.style.display = 'none';
+    // Drop a stale hand cursor that might still be set from a
+    // previous hover when we tore down the pointer / label.
+    if (renderer && renderer.domElement) {
+        renderer.domElement.style.cursor = 'default';
+    }
 }
 
 function panToStep(idx) {
