@@ -248,8 +248,8 @@ Steps:
 ### Saga D: `viz-sankey-composite-tiny-lm`
 
 **Goal**: click the `model` sculpture (the chain itself),
-see a Plotly Sankey of token flow through embed → norm →
-attention → MLP → out.
+see a Plotly Sankey of token flow through embed -> norm →
+attention -> MLP -> out.
 
 Steps:
 1. Extend evaluator: `chain(...)` and `residual(...)` produce
@@ -269,7 +269,7 @@ Steps:
 ### Saga E: `viz-derivation-steps-attention`
 
 **Goal**: click an attention sculpture, see the math
-derivation as a step list (`Q = X · Wq`, `scores = Q · Kᵀ /
+derivation as a step list (`Q = X · Wq`, `scores = Q · K^T /
 sqrt(d)`, ...). Each line is clickable: clicking re-opens the
 inspector on the intermediate tensor.
 
@@ -332,7 +332,7 @@ Steps:
    `:trace json` or branch. Recommend: extend, since trace
    already has the timing + step structure we want.
 2. **WASM-side vs JS-side rendering**: today's modal renders in
-   JS. Sagas B-E could render server-side (in Rust → SVG
+   JS. Sagas B-E could render server-side (in Rust -> SVG
    strings) which keeps logic in one language and gets us
    sw-checklist coverage, OR client-side in JS for flexibility.
    Recommend: WASM-side SVG strings for heatmap + derivation;
