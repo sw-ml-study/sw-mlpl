@@ -107,17 +107,35 @@ function animate() {
         a.update(t);
         if (t >= 1) activeAnims.splice(i, 1);
     }
-    // Pulse the selection pointer to advertise that it's
-    // clickable. Sine wave on emissiveIntensity over ~1.4s;
-    // also gently bobs the cone up and down so the affordance
-    // catches the eye in peripheral vision.
+    // Pulse the selection pointer with a "tap" rhythm so it
+    // reads as a finger pressing a button rather than as a
+    // static cursor. Sharp down-stroke (~20% of cycle) then
+    // slow recovery (~60%) then brief hold (~20%) at the top
+    // before the next tap. Glow brightens during the down-
+    // stroke so the impact frame is the brightest.
     if (selectionPointer) {
-        const phase = (now - selectionPointerStart) / 1400;
-        const s = (Math.sin(phase * Math.PI * 2) + 1) * 0.5; // 0..1
-        if (selectionPointer.material) {
-            selectionPointer.material.emissiveIntensity = 0.45 + s * 0.55;
+        const period = 900; // ms
+        const t = ((now - selectionPointerStart) % period) / period;
+        let depth, glow;
+        if (t < 0.2) {
+            // Down stroke: fast accelerating dip.
+            const u = t / 0.2;
+            depth = u * u * 0.28;
+            glow = 0.55 + u * 0.45;
+        } else if (t < 0.8) {
+            // Recovery: ease back up.
+            const u = (t - 0.2) / 0.6;
+            depth = (1 - u) * 0.28;
+            glow = 1.0 - u * 0.55;
+        } else {
+            // Brief hold at the top before the next tap.
+            depth = 0;
+            glow = 0.45;
         }
-        selectionPointer.position.y = selectionPointerBaseY + s * 0.12;
+        if (selectionPointer.material) {
+            selectionPointer.material.emissiveIntensity = glow;
+        }
+        selectionPointer.position.y = selectionPointerBaseY - depth;
     }
     controls.update();
     renderer.render(scene, camera);
@@ -237,13 +255,21 @@ function onCanvasClick(e) {
     mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
     raycaster.setFromCamera(mouse, camera);
-    // Hit-test the selection pointer first so it short-circuits
-    // any sculpture under or behind it: a click on the yellow
-    // marker opens the close-up inspector for the currently
-    // selected mesh.
+    // Hit-test the selection pointer + label first so they
+    // short-circuit any sculpture under or behind: a click on
+    // either opens the inspector for the currently selected
+    // mesh. The label is a Sprite which raycasts fine; both
+    // are sized large enough to feel like buttons.
     if (selectionPointer) {
         const pHits = raycaster.intersectObject(selectionPointer, false);
         if (pHits.length > 0) {
+            openInspector();
+            return;
+        }
+    }
+    if (selectionLabel) {
+        const lHits = raycaster.intersectObject(selectionLabel, false);
+        if (lHits.length > 0) {
             openInspector();
             return;
         }
@@ -301,13 +327,19 @@ function selectMesh(mesh) {
     // richer than the text body. Cleared when selection changes.
     const vizKind = mesh.userData?.viz?.kind;
     if (vizKind && vizRenderers[vizKind]) {
-        selectionLabel = makeLabel(`click for ${vizKind}`, {
-            fontSize: 22, color: '#ffcc44',
-            bg: 'rgba(20, 22, 30, 0.85)',
-            w: 320, h: 56,
-            scale: [1.6, 0.28, 1],
+        // Bracketed text + leading triangle reads as a button:
+        //   [ ▶ open <kind> view ]
+        // Wider sprite gives a comfortable click target; the
+        // raycaster in onCanvasClick treats label hits the same
+        // as pointer hits.
+        const labelText = `[ ▶ open ${vizKind} view ]`;
+        selectionLabel = makeLabel(labelText, {
+            fontSize: 24, color: '#ffcc44',
+            bg: 'rgba(20, 22, 30, 0.9)',
+            w: 440, h: 62,
+            scale: [2.0, 0.3, 1],
         });
-        selectionLabel.position.set(worldPos.x + 1.4, worldPos.y + 1.7, worldPos.z);
+        selectionLabel.position.set(worldPos.x + 1.6, worldPos.y + 1.7, worldPos.z);
         scene.add(selectionLabel);
     }
 }
