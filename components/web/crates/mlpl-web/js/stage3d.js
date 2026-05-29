@@ -297,14 +297,132 @@ function selectMesh(mesh) {
 // in docs/3d-introspect-dialog.md; this is the v0 starter that
 // makes the yellow pointer clickable and surfaces the existing
 // detail data + a sampled values dump in one clean dialog.
-// Viz-IR renderer registry. Saga A (viz-ir-scaffold) ships an
-// empty registry: the dispatch site recognizes userData.viz?.kind
-// but every kind currently falls through to the existing text
-// body. Sagas B+ register one entry per kind:
-//   vizRenderers.attention = (ud, viz) => '<svg>...</svg>'
-//   vizRenderers.composite = (ud, viz) => '<div class="sankey">...</div>'
-// renderInspectorBody calls the matching renderer when present.
+// Viz-IR renderer registry. Saga A (viz-ir-scaffold) ships the
+// dispatch site; sagas B+ register one entry per VizKind here.
+// Empty kinds fall through to the existing text body.
 const vizRenderers = Object.create(null);
+
+// Saga B: detect tensors that are attention weights and stamp
+// a VizNode-shaped object onto userData. JS-side heuristic for
+// now; richer evaluator-driven detection lands in saga C when
+// real tokens come into scope. The shape of the object mirrors
+// mlpl-web-viz-ir's VizNode + AttentionViz so future Rust-side
+// renderers can swap in without touching the JS detection.
+const SOFTMAX_RE = /^\s*[A-Za-z_][A-Za-z0-9_]*\s*=\s*softmax\s*\(/;
+function detectViz(label, shape, values) {
+    if (!label || !shape || !values) return null;
+    // Rank-2 square + a softmax assignment is the attention.mlpl
+    // pattern (and the prevailing convention even outside it).
+    if (shape.length === 2 && shape[0] === shape[1] && shape[0] >= 2
+        && values.length === shape[0] * shape[1]
+        && SOFTMAX_RE.test(label)) {
+        const n = shape[0];
+        const tokens = Array.from({ length: n }, (_, i) => ({ index: i }));
+        return {
+            kind: 'attention',
+            attention: {
+                query_tokens: tokens,
+                key_tokens: tokens,
+                weights: Array.from(values),
+                layout: { rank: 'qk', q: n, k: n },
+                causal: false,
+            },
+        };
+    }
+    return null;
+}
+
+// Viridis ramp (matches mlpl-viz/src/svg/heatmap_grid.rs).
+function viridis(t) {
+    const stops = [[68, 1, 84], [33, 145, 140], [253, 231, 37]];
+    const [a, b, f] = t < 0.5 ? [stops[0], stops[1], t * 2] : [stops[1], stops[2], (t - 0.5) * 2];
+    const r = Math.round(a[0] + (b[0] - a[0]) * f);
+    const g = Math.round(a[1] + (b[1] - a[1]) * f);
+    const bl = Math.round(a[2] + (b[2] - a[2]) * f);
+    return `rgb(${r}, ${g}, ${bl})`;
+}
+
+function tokenLabel(t) {
+    if (t == null) return '';
+    if (typeof t === 'string') return t;
+    if (typeof t.str === 'string') return t.str;
+    if (typeof t.index === 'number') return String(t.index);
+    return '';
+}
+
+function renderAttentionHeatmap(ud, viz) {
+    const a = viz.attention;
+    if (!a || !a.weights || !a.weights.length) {
+        return '<div class="insp-hint">attention payload missing</div>';
+    }
+    const qLabels = (a.query_tokens || []).map(tokenLabel);
+    const kLabels = (a.key_tokens || []).map(tokenLabel);
+    const q = qLabels.length;
+    const k = kLabels.length;
+    // Sample one matrix when the payload has head/batch dimensions.
+    const head = a.head || 0;
+    const layerHeadOffset = head * q * k;
+    const cellW = Math.max(20, Math.min(48, Math.floor(560 / Math.max(k, 8))));
+    const cellH = cellW;
+    const padL = 36, padT = 24, padR = 90;
+    const w = padL + k * cellW + padR;
+    const h = padT + q * cellH + 30;
+    let svg = `<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-width:680px;background:var(--mantle);border-radius:6px">`;
+    // Key axis labels (top).
+    for (let j = 0; j < k; j++) {
+        const x = padL + j * cellW + cellW / 2;
+        svg += `<text x="${x}" y="${padT - 8}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext1)">${escapeHtml(kLabels[j])}</text>`;
+    }
+    // Cells + row labels (left).
+    let maxRowSum = 0;
+    const rowSums = new Float64Array(q);
+    for (let i = 0; i < q; i++) {
+        let rowSum = 0;
+        for (let j = 0; j < k; j++) {
+            const v = a.weights[layerHeadOffset + i * k + j] || 0;
+            rowSum += v;
+            const x = padL + j * cellW;
+            const y = padT + i * cellH;
+            const col = viridis(Math.max(0, Math.min(1, v)));
+            const tip = `(${escapeHtml(qLabels[i])}, ${escapeHtml(kLabels[j])}) = ${v.toFixed(4)}`;
+            svg += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${col}" stroke="rgba(0,0,0,0.15)" stroke-width="0.5"><title>${tip}</title></rect>`;
+        }
+        rowSums[i] = rowSum;
+        if (rowSum > maxRowSum) maxRowSum = rowSum;
+        const ry = padT + i * cellH + cellH / 2 + 4;
+        svg += `<text x="${padL - 6}" y="${ry}" text-anchor="end" font-size="11" font-family="var(--mono)" fill="var(--subtext1)">${escapeHtml(qLabels[i])}</text>`;
+    }
+    // Row-sum bars (right) so the user can see softmax normalization.
+    const barBase = padL + k * cellW + 8;
+    const barW = padR - 16;
+    for (let i = 0; i < q; i++) {
+        const y = padT + i * cellH + cellH * 0.2;
+        const bh = cellH * 0.6;
+        const frac = maxRowSum > 0 ? rowSums[i] / Math.max(1, maxRowSum) : 0;
+        svg += `<rect x="${barBase}" y="${y}" width="${barW * frac}" height="${bh}" fill="var(--peach)" opacity="0.6"><title>row sum = ${rowSums[i].toFixed(4)}</title></rect>`;
+        svg += `<text x="${barBase + barW + 4}" y="${y + bh / 2 + 4}" text-anchor="start" font-size="10" font-family="var(--mono)" fill="var(--subtext0)">${rowSums[i].toFixed(2)}</text>`;
+    }
+    // Axis titles.
+    svg += `<text x="${padL + k * cellW / 2}" y="${h - 8}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext0)">key tokens</text>`;
+    svg += `<text x="12" y="${padT + q * cellH / 2}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext0)" transform="rotate(-90 12 ${padT + q * cellH / 2})">query tokens</text>`;
+    svg += `</svg>`;
+
+    const name = ud.varName || '';
+    const headline = `${name ? name + ' = ' : ''}${ud.label || ''}`;
+    return `
+        <h2>${escapeHtml(headline)}</h2>
+        <div class="insp-row"><strong>Attention pattern</strong> &nbsp; <strong>Shape:</strong> [${q}, ${k}] &nbsp; (row-wise softmax)</div>
+        <div class="insp-row" style="margin-top:14px">${svg}</div>
+        <div class="insp-section-title">Statistics</div>
+        ${ud.values && ud.values.length ? renderStats(computeStats(ud.values)) : ''}
+        <div class="insp-hint">Saga B v0: integer indices as labels; saga C threads BPE tokens. Saga F adds D3 hover-to-trace.</div>
+    `;
+}
+
+// Register the renderer so renderInspectorBody picks it up when
+// userData.viz.kind === 'attention'. window.__viz_register is
+// also exposed for renderers that live outside this file.
+vizRenderers['attention'] = renderAttentionHeatmap;
 
 function openInspector() {
     if (selectedStepIdx < 0 || selectedStepIdx >= stepMeshes.length) return;
@@ -727,7 +845,8 @@ window.__stage3d_add_step = function(ev) {
     const rawName = ev.output?.name || '';
     const isVar = ev.label.includes('=');
     const varName = isVar ? rawName : null;
-    mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0, values, summary: ev.output?.summary || null };
+    const viz = detectViz(ev.label, shape, values);
+    mesh.userData = { varName, label: ev.label, stepIdx: stepCount - 1, shape, elements: ev.output?.elements || 0, values, summary: ev.output?.summary || null, viz };
     mesh.traverse(c => { if (c !== mesh) c.userData = mesh.userData; });
     scene.add(mesh);
     stepObjects.push(mesh);
