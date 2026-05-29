@@ -1,0 +1,17 @@
+[package]
+name = "mlpl-web-paths"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_paths"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
+mlpl-web-glossary = { path = "../../../web-glossary/crates/mlpl-web-glossary" }
+mlpl-web-lessons = { path = "../../../web/crates/mlpl-web-lessons" }
+mlpl-web-path-body = { path = "../../../web/crates/mlpl-web-path-body" }
+mlpl-web-paths-data = { path = "../mlpl-web-paths-data" }
+yew = { version = "0.21", features = ["csr"] }

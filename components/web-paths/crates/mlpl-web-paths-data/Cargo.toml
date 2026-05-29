@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-web-paths-data"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_paths_data"
+path = "src/lib.rs"
+
+[dependencies]

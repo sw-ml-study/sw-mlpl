@@ -1,4 +1,4 @@
-use crate::paths::{LearningPath, Step};
+use crate::types::{LearningPath, Step};
 
 pub(super) const PATH_BUILD_A_TRANSFORMER_FROM_PRIMITIVES: LearningPath = LearningPath {
     title: "Build a transformer from primitives",

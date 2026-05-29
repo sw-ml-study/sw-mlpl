@@ -1816,6 +1816,8 @@ dependencies = [
  "mlpl-web-lessons",
  "mlpl-web-onboarding",
  "mlpl-web-path-body",
+ "mlpl-web-paths",
+ "mlpl-web-paths-data",
  "mlpl-web-viz3d",
  "reqwest",
  "serde",
@@ -1907,6 +1909,22 @@ dependencies = [
  "web-sys",
  "yew",
 ]
+
+[[package]]
+name = "mlpl-web-paths"
+version = "0.20.0"
+dependencies = [
+ "mlpl-web-demos",
+ "mlpl-web-glossary",
+ "mlpl-web-lessons",
+ "mlpl-web-path-body",
+ "mlpl-web-paths-data",
+ "yew",
+]
+
+[[package]]
+name = "mlpl-web-paths-data"
+version = "0.20.0"
 
 [[package]]
 name = "mlpl-web-viz3d"

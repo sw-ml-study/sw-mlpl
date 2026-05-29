@@ -1,4 +1,4 @@
-use crate::paths::{LearningPath, Step};
+use crate::types::{LearningPath, Step};
 
 pub(super) const PATH_ARCHITECTURE_ZOO__FROM_PIXELS_TO_LANGUAGE: LearningPath = LearningPath {
     title: "Architecture Zoo: from pixels to language",

@@ -12,11 +12,11 @@
 
 use yew::prelude::*;
 
-use crate::demos::DEMOS;
-use crate::diagrams_view::DIAGRAMS;
-use crate::glossary_view::find_by_term;
-use crate::paths::{PATHS, Step};
+use crate::diagrams::DIAGRAMS;
+use mlpl_web_demos::DEMOS;
+use mlpl_web_glossary::view::find_by_term;
 use mlpl_web_lessons::lessons::LESSONS;
+use mlpl_web_paths_data::{PATHS, Step};
 
 #[derive(Properties, PartialEq)]
 pub struct PathsViewProps {

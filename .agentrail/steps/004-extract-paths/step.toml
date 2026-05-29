@@ -1,0 +1,9 @@
+number = 4
+slug = "extract-paths"
+status = "in-progress"
+description = "Carve paths cluster (paths.rs + paths_*.rs, 6 files) out of mlpl-web into com..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-28T22:14:49"
+task_type = "refactor"
+commits = []
