@@ -18,6 +18,13 @@ pub struct ShapeInfo {
     /// sagas populate it and add per-kind renderers.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub viz: Option<VizNode>,
+    /// Saga BPE-1: per-token string list when the sculpture was
+    /// emitted from a `Value::StrList`. The JS dispatch site
+    /// remembers the most-recently-seen string list and pairs
+    /// it as axis labels when the next attention sculpture
+    /// (rank-2 / rank-3 / rank-4 softmaxed matrix) arrives.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub string_list: Option<Vec<String>>,
 }
 
 #[derive(Serialize)]
@@ -45,7 +52,25 @@ pub struct Stage3dEvent {
 // session rather than pre-bundling them at trace time.
 const MAX_INLINE_ELEMENTS: usize = 4096;
 
-pub fn build_shape_info(name: String, shape: Vec<usize>, values: Option<Vec<f64>>) -> ShapeInfo {
+pub fn build_shape_info(
+    name: String,
+    shape: Vec<usize>,
+    values: Option<Vec<f64>>,
+) -> ShapeInfo {
+    build_shape_info_full(name, shape, values, None)
+}
+
+/// Saga BPE-1: same as `build_shape_info` but with the
+/// optional `string_list` field threaded through. Demo /
+/// submit code that knows it just evaluated a `Value::StrList`
+/// passes the per-token strings here so the JS dispatch can
+/// use them as labels for the next attention sculpture.
+pub fn build_shape_info_full(
+    name: String,
+    shape: Vec<usize>,
+    values: Option<Vec<f64>>,
+    string_list: Option<Vec<String>>,
+) -> ShapeInfo {
     let elements = if shape.is_empty() {
         1
     } else {
@@ -64,6 +89,7 @@ pub fn build_shape_info(name: String, shape: Vec<usize>, values: Option<Vec<f64>
         values: vals,
         summary,
         viz: None,
+        string_list,
     }
 }
 

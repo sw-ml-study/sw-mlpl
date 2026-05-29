@@ -84,6 +84,26 @@ pub(crate) fn dispatch_decode(
     }
 }
 
+/// `decode_each(tok, tokens)` dispatch helper. Saga BPE-1
+/// (viz follow-up): returns a `Value::StrList` with one
+/// decoded string per token id, so per-token visualization
+/// renderers (attention heatmap axis labels) can be paired
+/// with the token array. Sibling to `decode` which collapses
+/// the whole sequence into a single string.
+pub(crate) fn dispatch_decode_each(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    arity(args, 2, "decode_each")?;
+    let tok = resolve_tokenizer(&args[0], env, trace)?;
+    let arr = crate::eval::eval_expr(&args[1], env, trace)?.into_array()?;
+    match tok {
+        TokenizerSpec::ByteLevel => decode_bytes_each(&arr),
+        TokenizerSpec::BpeMerges { merges, .. } => decode_bpe_ids_each(&arr, &merges),
+    }
+}
+
 fn arity(args: &[Expr], expected: usize, func: &str) -> Result<(), EvalError> {
     if args.len() == expected {
         return Ok(());
@@ -138,4 +158,53 @@ fn decode_bpe_ids(arr: &DenseArray, merges: &[(u32, u32)]) -> Result<Value, Eval
             String::from_utf8_lossy(&e.into_bytes()).into_owned(),
         )),
     }
+}
+
+/// Per-token byte-level decode -- one decoded `String` per
+/// element of the input id array. Saga BPE-1.
+fn decode_bytes_each(arr: &DenseArray) -> Result<Value, EvalError> {
+    if arr.rank() > 1 {
+        return Err(EvalError::Unsupported(format!(
+            "decode_each: expected rank <= 1 token array, got rank {}",
+            arr.rank()
+        )));
+    }
+    let mut items = Vec::with_capacity(arr.data().len());
+    for (i, &v) in arr.data().iter().enumerate() {
+        if v < 0.0 || v.fract() != 0.0 || v > 255.0 {
+            return Err(EvalError::Unsupported(format!(
+                "decode_each: cell {i} = {v} is not a byte-valued token id"
+            )));
+        }
+        let b = v as u8;
+        items.push(String::from_utf8_lossy(&[b]).into_owned());
+    }
+    Ok(Value::StrList { items })
+}
+
+/// Per-token BPE decode -- one decoded `String` per element
+/// of the input id array. Saga BPE-1; mirrors `decode_bpe_ids`
+/// but emits a `StrList` of per-token strings instead of one
+/// joined string. The renderer pairs these with attention
+/// weights as axis labels.
+fn decode_bpe_ids_each(arr: &DenseArray, merges: &[(u32, u32)]) -> Result<Value, EvalError> {
+    if arr.rank() > 1 {
+        return Err(EvalError::Unsupported(format!(
+            "decode_each: expected rank <= 1 token array, got rank {}",
+            arr.rank()
+        )));
+    }
+    let mut items = Vec::with_capacity(arr.data().len());
+    for (i, &v) in arr.data().iter().enumerate() {
+        if v < 0.0 || v.fract() != 0.0 {
+            return Err(EvalError::Unsupported(format!(
+                "decode_each: cell {i} = {v} is not a non-negative integer token id"
+            )));
+        }
+        let mut bytes: Vec<u8> = Vec::new();
+        mlpl_bpe_core::decode_token(v as u32, merges, &mut bytes);
+        let s = String::from_utf8_lossy(&bytes).into_owned();
+        items.push(s);
+    }
+    Ok(Value::StrList { items })
 }
