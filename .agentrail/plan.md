@@ -1,1 +1,1 @@
-Split mlpl-web-eval/src/eval_wasm.rs (9 fns FAIL) by extracting helpers (wasm_create_session + wasm_eval_stream + wasm_eval_stream_inner) into eval_wasm_helpers.rs.
+Split mlpl-web/src/viz3d_events.rs (11 fns FAIL) by moving the inline #[cfg(test)] mod tests {6 fns} into viz3d_events_tests.rs via #[path] include.

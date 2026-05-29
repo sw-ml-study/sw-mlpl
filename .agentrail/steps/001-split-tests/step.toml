@@ -1,0 +1,9 @@
+number = 1
+slug = "split-tests"
+status = "in-progress"
+description = "Extract inline tests block from viz3d_events.rs."
+role = "production"
+context_files = []
+created_at = "2026-05-28T19:15:30"
+task_type = "refactor"
+commits = []
