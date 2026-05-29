@@ -1,0 +1,20 @@
+[package]
+name = "mlpl-web-components-content"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_components_content"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+mlpl-web-glossary = { path = "../../../web-glossary/crates/mlpl-web-glossary" }
+mlpl-web-paths = { path = "../../../web-paths/crates/mlpl-web-paths" }
+web-sys = { version = "0.3", features = [
+    "HtmlSelectElement",
+    "KeyboardEvent",
+] }
+yew = { version = "0.21", features = ["csr"] }

@@ -1,0 +1,9 @@
+number = 5
+slug = "extract-components"
+status = "in-progress"
+description = "Carve component_* + components.rs (7 files) out of mlpl-web into components/w..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-28T22:19:41"
+task_type = "refactor"
+commits = []

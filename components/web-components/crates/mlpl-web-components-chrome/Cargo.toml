@@ -1,0 +1,12 @@
+[package]
+name = "mlpl-web-components-chrome"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_components_chrome"
+path = "src/lib.rs"
+
+[dependencies]
+yew = { version = "0.21", features = ["csr"] }
