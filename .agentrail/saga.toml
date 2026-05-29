@@ -1,5 +1,5 @@
 name = "wasm-split-lib"
-status = "active"
+status = "completed"
 current_step = 1
 created_at = "2026-05-28T18:20:35"
 plan_file = ".agentrail/plan.md"
