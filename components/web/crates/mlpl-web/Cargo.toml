@@ -17,6 +17,7 @@ path = "src/main.rs"
 mlpl-wasm = { path = "../../../wasm/crates/mlpl-wasm" }
 mlpl-web-completion = { path = "../../../web-completion/crates/mlpl-web-completion" }
 mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+mlpl-web-viz3d = { path = "../../../web-viz3d/crates/mlpl-web-viz3d" }
 mlpl-web-lessons = { path = "../../crates/mlpl-web-lessons" }
 mlpl-web-path-body = { path = "../../crates/mlpl-web-path-body" }
 yew = { version = "0.21", features = ["csr"] }

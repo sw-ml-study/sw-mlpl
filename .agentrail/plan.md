@@ -1,1 +1,1 @@
-Extract mlpl-web/src/completion.rs (28 fns FAIL) into a new components/web-completion/ workspace with crate mlpl-web-completion. mlpl-web depends on it and re-exports. Retires completion.rs FAIL AND drops mlpl-web crate module count from 77 to 76 (single-file extraction, but enables the next 6 similar carve-outs).
+Extract mlpl-web's viz3d_events/_panel/_toggle (3 src + 1 test file, 15 prod fns total) into new components/web-viz3d/ workspace with mlpl-web-viz3d crate. mlpl-web 76 -> 73 modules. Re-export under crate::viz3d_* aliases to keep handlers + render unchanged.
