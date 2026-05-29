@@ -1,0 +1,9 @@
+number = 1
+slug = "split-wasm"
+status = "in-progress"
+description = "Split eval_wasm.rs by moving 3 internal helpers to eval_wasm_helpers.rs."
+role = "production"
+context_files = []
+created_at = "2026-05-28T19:00:49"
+task_type = "refactor"
+commits = []

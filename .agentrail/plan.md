@@ -1,1 +1,1 @@
-Split mlpl-wasm/src/lib.rs (12 fns FAIL) into siblings: session.rs (WasmSession + impls), eval_impl.rs (eval_input + result helpers). lib.rs becomes facade with eval_line + re-exports.
+Split mlpl-web-eval/src/eval_wasm.rs (9 fns FAIL) by extracting helpers (wasm_create_session + wasm_eval_stream + wasm_eval_stream_inner) into eval_wasm_helpers.rs.

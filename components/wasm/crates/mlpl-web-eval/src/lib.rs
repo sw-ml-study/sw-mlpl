@@ -12,6 +12,7 @@ pub mod eval;
 pub mod eval_sse;
 pub mod eval_url;
 pub mod eval_wasm;
+pub(crate) mod eval_wasm_helpers;
 pub mod state;
 pub mod summary;
 mod summary_stats;
