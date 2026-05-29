@@ -5,14 +5,14 @@
 
 use web_sys::HtmlInputElement;
 
-use crate::handlers::EvalDeps;
+use crate::eval_deps::EvalDeps;
 use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
 /// Parse `:upload <name>` (or `:upload` with no arg). Returns
 /// `Some(name)` if the line is the upload command, `None`
 /// otherwise. An empty name means the user typed `:upload`
 /// without a target.
-pub(crate) fn parse_upload_command(line: &str) -> Option<String> {
+pub fn parse_upload_command(line: &str) -> Option<String> {
     let rest = line.strip_prefix(":upload")?;
     Some(rest.trim().to_string())
 }
@@ -21,7 +21,7 @@ pub(crate) fn parse_upload_command(line: &str) -> Option<String> {
 /// Returns the HistoryEntry that should appear for this
 /// command -- usage / bad-name / not-mounted error message,
 /// or the "picker opened" confirmation.
-pub(crate) fn handle_upload_command(deps: &EvalDeps, trimmed: &str, name: &str) -> HistoryEntry {
+pub fn handle_upload_command(deps: &EvalDeps, trimmed: &str, name: &str) -> HistoryEntry {
     if name.is_empty() {
         return usage_entry(trimmed);
     }
@@ -51,7 +51,7 @@ pub(crate) fn handle_upload_command(deps: &EvalDeps, trimmed: &str, name: &str) 
     }
 }
 
-pub(crate) fn is_valid_identifier(s: &str) -> bool {
+pub fn is_valid_identifier(s: &str) -> bool {
     let mut chars = s.chars();
     let Some(first) = chars.next() else {
         return false;

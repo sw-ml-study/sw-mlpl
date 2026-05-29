@@ -43,13 +43,21 @@ pub mod editor_panel;
 pub mod entry_render;
 pub use mlpl_web_glossary::popup as glossary_popup;
 pub use mlpl_web_glossary::view as glossary_view;
-pub mod handlers;
-pub mod handlers_demo;
-pub mod handlers_input;
-pub mod handlers_popup;
-pub mod handlers_running;
-pub mod handlers_submit;
-pub mod help;
+/// Handlers facade. Saga 82 split the original handlers cluster
+/// into three sub-crates: input (keyboard + popup + toggle),
+/// upload (image upload + upload_cmd + EvalDeps), and eval
+/// (submit + demo + clear + help + running). External call sites
+/// keep using `crate::handlers::*`.
+pub mod handlers {
+    pub use mlpl_web_handlers_eval::clear::make_clear;
+    pub use mlpl_web_handlers_eval::demo::make_run_demo;
+    pub use mlpl_web_handlers_eval::submit::{make_submit, make_submit_batch};
+
+    pub use mlpl_web_handlers_input::input::{make_keydown, make_oninput};
+    pub use mlpl_web_handlers_input::toggle::toggle_bool;
+
+    pub use mlpl_web_handlers_upload::eval_deps::EvalDeps;
+}
 pub mod mode_callbacks;
 pub mod mode_path;
 pub mod mode_select;
@@ -76,8 +84,8 @@ pub mod render_tutorial;
 pub mod resize_handle;
 pub mod scroll;
 pub mod tutorial;
-pub mod upload;
-pub mod upload_cmd;
+pub use mlpl_web_handlers_upload::upload;
+pub use mlpl_web_handlers_upload::upload_cmd;
 pub use mlpl_web_viz3d::events as viz3d_events;
 pub use mlpl_web_viz3d::panel as viz3d_panel;
 pub use mlpl_web_viz3d::toggle as viz3d_toggle;

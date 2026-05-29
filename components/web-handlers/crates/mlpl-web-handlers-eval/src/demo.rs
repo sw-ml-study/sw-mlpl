@@ -4,8 +4,8 @@ use std::rc::Rc;
 use mlpl_wasm::WasmSession;
 use yew::prelude::*;
 
-use crate::demos::DEMOS;
-use crate::handlers_running::{push_running_marker, replace_running_with_result};
+use crate::running::{push_running_marker, replace_running_with_result};
+use mlpl_web_demos::DEMOS;
 use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
 pub fn make_run_demo(
@@ -63,7 +63,7 @@ pub fn make_run_demo(
 /// takeaway. Uses MLPL's string-assignment syntax through `eval`
 /// so the binding goes through the existing string-variable
 /// surface (Saga 12 step 009) -- no new plumbing.
-fn bind_demo_metadata(session: &WasmSession, demo: &crate::demos::Demo) {
+fn bind_demo_metadata(session: &WasmSession, demo: &mlpl_web_demos::Demo) {
     let body = format!(
         "{}\n\nAbout this demo:\n  {}\n\nTakeaway:\n  {}",
         demo.name, demo.intro, demo.takeaway,
@@ -74,7 +74,7 @@ fn bind_demo_metadata(session: &WasmSession, demo: &crate::demos::Demo) {
 
 fn push_progress_notes(entries: &mut Vec<HistoryEntry>, demo_name: &str, idx: usize) -> bool {
     let mut had = false;
-    for note in crate::demos::progress_notes_for(demo_name, idx) {
+    for note in mlpl_web_demos::progress_notes_for(demo_name, idx) {
         entries.push(HistoryEntry {
             input: note.heading.to_string(),
             output: note.body.to_string(),
@@ -90,7 +90,7 @@ fn schedule_demo_line(
     session: Rc<RefCell<WasmSession>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
     mut entries: Vec<HistoryEntry>,
-    demo: &'static crate::demos::Demo,
+    demo: &'static mlpl_web_demos::Demo,
     idx: usize,
 ) {
     let lines = demo.lines;
@@ -117,8 +117,8 @@ fn schedule_demo_line(
         let is_error = r.display.starts_with("error:");
         if !is_error {
             let name = line.split('=').next().unwrap_or(line).trim().to_string();
-            let info = crate::viz3d_events::build_shape_info(name, r.shape, r.values);
-            crate::viz3d_events::emit(&crate::viz3d_events::Stage3dEvent {
+            let info = mlpl_web_viz3d::events::build_shape_info(name, r.shape, r.values);
+            mlpl_web_viz3d::events::emit(&mlpl_web_viz3d::events::Stage3dEvent {
                 step_idx: 0,
                 label: line.to_string(),
                 output: info,

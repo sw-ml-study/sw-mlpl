@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 5,
+    "step": "extract-components"
+  },
+  "action": "git mv 6 files + delete components.rs facade; extract GithubCorner into github_corner.rs; split into 2 thematic sub-crates; refactor Footer props (UrlProps -> FooterProps with build_info); inline pub mod components facade in mlpl-web lib.rs combining sub-crate re-exports + tutorial.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-28T22:26:24"
+}
