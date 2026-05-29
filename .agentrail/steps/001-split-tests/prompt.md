@@ -1,0 +1,1 @@
+Extract inline tests block from viz3d_events.rs.
