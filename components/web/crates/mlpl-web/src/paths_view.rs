@@ -43,8 +43,13 @@ fn render_picker(on_change: &Callback<Option<(Option<usize>, usize)>>) -> Html {
             let on_change = on_change.clone();
             Callback::from(move |_| on_change.emit(Some((Some(i), 0))))
         };
-        let target = if i == 0 {
-            Some("path-card-first")
+        // The Tour narration ("Let's open the Dimensionality Reduction
+        // path") and the highlighted card must agree, so the
+        // `path-card-dim-reduction` marker is anchored to the
+        // Dimensionality Reduction card by title -- not to position 0,
+        // which has shifted as PATHS gets reordered.
+        let target = if path.title == "Dimensionality Reduction" {
+            Some("path-card-dim-reduction")
         } else {
             None
         };

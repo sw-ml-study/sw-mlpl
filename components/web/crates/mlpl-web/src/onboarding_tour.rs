@@ -70,7 +70,7 @@ const STEPS: &[TourStep] = &[
         click_before: "",
     },
     TourStep {
-        target: "path-card-first",
+        target: "path-card-dim-reduction",
         title: "Pick a Path",
         body: "Each card is a curated walk-through. Let's open the Dimensionality Reduction path.",
         click_before: "[data-tour-target='tab-paths']",
@@ -79,7 +79,7 @@ const STEPS: &[TourStep] = &[
         target: "paths-walker-body",
         title: "Walking a Path",
         body: "You're now inside the path. Each step shows a lesson, demo, glossary entry, or diagram with context. Use the arrow buttons to navigate.",
-        click_before: "[data-tour-target='path-card-first']",
+        click_before: "[data-tour-target='path-card-dim-reduction']",
     },
     TourStep {
         target: "path-open-lesson",

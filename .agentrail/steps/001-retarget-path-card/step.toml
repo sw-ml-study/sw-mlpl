@@ -1,0 +1,9 @@
+number = 1
+slug = "retarget-path-card"
+status = "in-progress"
+description = "In paths_view.rs render_picker, change the data-tour-target='path-card-first'..."
+role = "production"
+context_files = []
+created_at = "2026-05-28T21:42:15"
+task_type = "bugfix"
+commits = []
