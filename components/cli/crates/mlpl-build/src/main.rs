@@ -24,6 +24,9 @@ use std::process::{Command, ExitCode};
 
 use args::{Args, USAGE};
 
+
+mod template;
+
 fn main() -> ExitCode {
     let argv: Vec<String> = std::env::args().collect();
     let args = match Args::parse(&argv) {
@@ -76,7 +79,7 @@ fn run(args: &Args) -> Result<(), String> {
         release_dir.push(d);
     }
     release_dir.push("release");
-    let candidates = candidate_names(args.target.as_deref(), std::env::consts::EXE_SUFFIX);
+    let candidates = template::candidate_names(args.target.as_deref(), std::env::consts::EXE_SUFFIX);
     let binary = candidates
         .iter()
         .map(|name| release_dir.join(name))
@@ -124,79 +127,15 @@ fn make_temp_project(workspace: &Path) -> Result<PathBuf, String> {
     let tmp = base.join(format!("mlpl-build-{pid}-{nanos}"));
     std::fs::create_dir_all(tmp.join("src"))
         .map_err(|e| format!("creating temp dir {}: {e}", tmp.display()))?;
-    let cargo_toml = render_cargo_toml(workspace)?;
+    let cargo_toml = template::render_cargo_toml(workspace)?;
     std::fs::write(tmp.join("Cargo.toml"), cargo_toml)
         .map_err(|e| format!("writing Cargo.toml: {e}"))?;
     Ok(tmp)
 }
 
-/// Candidate filenames cargo might produce for the temp
-/// project's bin target. Two variations:
-/// 1. Cargo crates have historically used either dashed or
-///    underscored binary names (depends on cargo version);
-///    we try both.
-/// 2. The file extension depends on `target`: `.wasm` for
-///    `wasm32-unknown-unknown`, otherwise the platform's
-///    executable suffix (`.exe` on Windows, empty on
-///    Mac/Linux). Issue #3.5: Windows builds produced
-///    `mlpl-build-user.exe` but the lookup only checked
-///    unsuffixed names; cargo build "succeeded" but
-///    mlpl-build still bailed.
-fn candidate_names(target: Option<&str>, exe_suffix: &str) -> Vec<String> {
-    let suffix = if target == Some("wasm32-unknown-unknown") {
-        ".wasm"
-    } else {
-        exe_suffix
-    };
-    vec![
-        format!("mlpl-build-user{suffix}"),
-        format!("mlpl_build_user{suffix}"),
-    ]
-}
 
-/// Build the temp project's Cargo.toml string. Extracted from
-/// `make_temp_project` so the OS-path / TOML-escape interaction
-/// (issue #3) can be unit-tested without spawning `cargo build`.
-///
-/// Issue #3 root cause: the previous version formatted the
-/// `path = "..."` value as a TOML *basic* string with double
-/// quotes. On Windows the workspace path contains backslashes
-/// (`C:\Users\bill\...`) and TOML treats `\U` inside a basic
-/// string as the start of an 8-digit-hex unicode escape, so
-/// `cargo build` failed with "invalid unicode 8-digit hex code"
-/// before ever invoking rustc.
-///
-/// Fix: build the dependency path with `PathBuf::join` so
-/// separators are OS-native, and emit it as a TOML *literal*
-/// string (single quotes). Literal strings forbid escape
-/// processing, so backslashes survive verbatim. Forward slashes
-/// also work (Cargo accepts both on Windows), but literal
-/// strings handle the general case including UNC paths.
-fn render_cargo_toml(workspace: &Path) -> Result<String, String> {
-    let mlpl_crate = workspace.join("crates").join("mlpl");
-    let mlpl_crate_str = mlpl_crate
-        .to_str()
-        .ok_or_else(|| format!("non-UTF-8 path: {}", mlpl_crate.display()))?;
-    if mlpl_crate_str.contains('\'') {
-        return Err(format!(
-            "workspace path {mlpl_crate_str:?} contains a single quote, \
-             which would break the TOML literal-string we emit"
-        ));
-    }
-    Ok(format!(
-        "[package]\n\
-         name = \"mlpl-build-user\"\n\
-         edition = \"2024\"\n\
-         version = \"0.0.0\"\n\
-         \n\
-         [[bin]]\n\
-         name = \"mlpl-build-user\"\n\
-         path = \"src/main.rs\"\n\
-         \n\
-         [dependencies]\n\
-         mlpl = {{ path = '{mlpl_crate_str}' }}\n"
-    ))
-}
+
+
 
 fn write_main_rs(tmp: &Path, src: &str) -> Result<(), String> {
     // MLPL source with newlines goes inside the `mlpl!` macro; the
@@ -221,102 +160,5 @@ fn write_main_rs(tmp: &Path, src: &str) -> Result<(), String> {
     Ok(())
 }
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    /// Issue #3 regression: a Windows-style workspace path
-    /// containing backslashes (and a `\U` that TOML's
-    /// basic-string parser would interpret as a unicode escape)
-    /// must be emitted inside a TOML *literal* string so the
-    /// backslashes survive verbatim and never reach the basic-
-    /// string escape parser. The separator after `crates` /
-    /// `mlpl` may be either `/` or `\` depending on host OS
-    /// (PathBuf::join uses native), and Cargo accepts both on
-    /// Windows -- what matters is single quotes, not slashes.
-    #[test]
-    fn render_cargo_toml_handles_windows_backslash_path() {
-        let win_path = PathBuf::from(r"C:\Users\bill\Documents\Projects\sw-mlpl");
-        let toml = render_cargo_toml(&win_path).expect("render");
-        // The whole path -- backslashes intact -- must be
-        // inside single quotes (TOML literal string).
-        assert!(
-            toml.contains(r"path = 'C:\Users\bill\Documents\Projects\sw-mlpl"),
-            "Windows backslashes were not preserved verbatim, got:\n{toml}"
-        );
-        // And it must NOT be inside a double-quoted basic
-        // string -- that is what triggered issue #3.
-        assert!(
-            !toml.contains(r#"path = "C:\"#),
-            "path was emitted as a basic string; TOML would \
-             interpret backslashes as escapes. Full output:\n{toml}"
-        );
-        // Sanity: the `\U` in `\Users` is the specific sequence
-        // that produced "invalid unicode 8-digit hex code" in
-        // the issue. Confirm the line containing it is the
-        // literal-string form.
-        let line = toml
-            .lines()
-            .find(|l| l.contains(r"\Users"))
-            .expect("path line");
-        assert!(
-            line.contains("'") && !line.contains('"'),
-            "the path line still uses double quotes: {line:?}"
-        );
-    }
-
-    #[test]
-    fn render_cargo_toml_handles_unix_path() {
-        let unix_path = PathBuf::from("/Users/mike/github/sw-ml-study/sw-mlpl");
-        let toml = render_cargo_toml(&unix_path).expect("render");
-        assert!(
-            toml.contains("mlpl = { path = '/Users/mike/github/sw-ml-study/sw-mlpl/crates/mlpl' }"),
-            "expected unix-path literal, got:\n{toml}"
-        );
-    }
-
-    #[test]
-    fn render_cargo_toml_rejects_path_with_single_quote() {
-        let weird = PathBuf::from("/tmp/mike's project");
-        let err = render_cargo_toml(&weird).expect_err("should reject");
-        assert!(err.contains("single quote"), "msg was: {err}");
-    }
-
-    /// Issue: Windows native builds produce `mlpl-build-user.exe`
-    /// but the candidate list previously hard-coded unsuffixed
-    /// names, so mlpl-build reported "no expected output found"
-    /// after a successful cargo build. This regression guard
-    /// asserts the suffix is honored.
-    #[test]
-    fn candidate_names_appends_exe_suffix_on_windows() {
-        let names = candidate_names(None, ".exe");
-        assert_eq!(
-            names,
-            vec![
-                "mlpl-build-user.exe".to_string(),
-                "mlpl_build_user.exe".to_string()
-            ]
-        );
-    }
-
-    #[test]
-    fn candidate_names_unsuffixed_on_unix() {
-        let names = candidate_names(None, "");
-        assert_eq!(
-            names,
-            vec!["mlpl-build-user".to_string(), "mlpl_build_user".to_string()]
-        );
-    }
-
-    #[test]
-    fn candidate_names_uses_wasm_extension_for_wasm32_target() {
-        // Wasm extension wins over the host's exe suffix.
-        let names = candidate_names(Some("wasm32-unknown-unknown"), ".exe");
-        assert_eq!(
-            names,
-            vec![
-                "mlpl-build-user.wasm".to_string(),
-                "mlpl_build_user.wasm".to_string()
-            ]
-        );
-    }
-}
+#[path = "main_tests.rs"]
+mod tests;
