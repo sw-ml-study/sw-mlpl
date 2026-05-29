@@ -1,0 +1,13 @@
+[package]
+name = "mlpl-web-demos-types"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_demos_types"
+path = "src/lib.rs"
+
+[dependencies]
+
+[dev-dependencies]

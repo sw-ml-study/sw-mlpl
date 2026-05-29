@@ -1,0 +1,9 @@
+number = 1
+slug = "extract-demos"
+status = "in-progress"
+description = "Carve demos cluster out of mlpl-web into components/web-demos/ workspace. 12 ..."
+role = "production"
+context_files = []
+created_at = "2026-05-28T21:44:34"
+task_type = "refactor"
+commits = []

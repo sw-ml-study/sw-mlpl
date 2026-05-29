@@ -1810,6 +1810,7 @@ dependencies = [
  "mlpl-serve",
  "mlpl-wasm",
  "mlpl-web-completion",
+ "mlpl-web-demos",
  "mlpl-web-eval",
  "mlpl-web-lessons",
  "mlpl-web-path-body",
@@ -1828,6 +1829,33 @@ dependencies = [
 [[package]]
 name = "mlpl-web-completion"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-web-demos"
+version = "0.20.0"
+dependencies = [
+ "mlpl-web-demos-basic",
+ "mlpl-web-demos-types",
+ "mlpl-web-demos-vision",
+]
+
+[[package]]
+name = "mlpl-web-demos-basic"
+version = "0.20.0"
+dependencies = [
+ "mlpl-web-demos-types",
+]
+
+[[package]]
+name = "mlpl-web-demos-types"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-web-demos-vision"
+version = "0.20.0"
+dependencies = [
+ "mlpl-web-demos-types",
+]
 
 [[package]]
 name = "mlpl-web-eval"
