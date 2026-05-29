@@ -36,7 +36,14 @@ pub struct Stage3dEvent {
     pub output: ShapeInfo,
 }
 
-const MAX_INLINE_ELEMENTS: usize = 1000;
+// Saga C: bumped from 1000 to 4096 so rank-3 attention
+// tensors stay inlined and the viz-IR detector can build the
+// heatmap payload. Covers `[H, Q, K]` up to roughly H=4 with
+// Q=K=32, or H=16 with Q=K=16. Larger tensors still fall
+// through to the summary-only path; in the long term the
+// renderer should request values on-demand from the WASM
+// session rather than pre-bundling them at trace time.
+const MAX_INLINE_ELEMENTS: usize = 4096;
 
 pub fn build_shape_info(name: String, shape: Vec<usize>, values: Option<Vec<f64>>) -> ShapeInfo {
     let elements = if shape.is_empty() {
