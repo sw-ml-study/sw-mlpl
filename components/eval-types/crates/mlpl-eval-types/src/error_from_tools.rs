@@ -119,7 +119,6 @@ impl From<LoaderHelperError> for EvalError {
     }
 }
 
-
 #[cfg(feature = "image-io")]
 impl From<mlpl_eval_image::ImageError> for crate::error::EvalError {
     fn from(e: mlpl_eval_image::ImageError) -> Self {

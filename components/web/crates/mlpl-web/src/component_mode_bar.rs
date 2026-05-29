@@ -34,10 +34,18 @@ pub struct ModeBarProps {
 
 #[function_component(ModeBar)]
 pub fn mode_bar(props: &ModeBarProps) -> Html {
-    let cls = if props.tutorial_active { "modebar tutorial" } else { "modebar repl" };
+    let cls = if props.tutorial_active {
+        "modebar tutorial"
+    } else {
+        "modebar repl"
+    };
     let demo_dropdown = render_demo_dropdown(props.tutorial_active, props.on_demo.clone());
     let upload_widget = render_upload_widget(props);
-    let clear_label = if props.tutorial_active { "Reset Tutorial" } else { "Reset REPL" };
+    let clear_label = if props.tutorial_active {
+        "Reset Tutorial"
+    } else {
+        "Reset REPL"
+    };
     html! {
         <div class={cls}>
             { demo_dropdown }

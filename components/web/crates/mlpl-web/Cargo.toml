@@ -15,6 +15,7 @@ path = "src/main.rs"
 
 [dependencies]
 mlpl-wasm = { path = "../../../wasm/crates/mlpl-wasm" }
+mlpl-web-completion = { path = "../../../web-completion/crates/mlpl-web-completion" }
 mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
 mlpl-web-lessons = { path = "../../crates/mlpl-web-lessons" }
 mlpl-web-path-body = { path = "../../crates/mlpl-web-path-body" }

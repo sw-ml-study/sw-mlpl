@@ -23,8 +23,8 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
+use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
 /// `read_stdin()` -- block until EOF, return all bytes as a

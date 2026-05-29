@@ -18,7 +18,7 @@ pub mod app_callbacks;
 pub mod app_hooks;
 pub mod app_log;
 pub mod app_state;
-pub mod completion;
+pub use mlpl_web_completion as completion;
 pub mod component_doc_dialog;
 pub mod component_footer;
 pub mod component_header;

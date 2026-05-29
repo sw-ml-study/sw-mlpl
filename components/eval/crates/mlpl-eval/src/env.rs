@@ -7,14 +7,14 @@ use std::sync::Arc;
 use mlpl_array::DenseArray;
 use mlpl_core::ValueTag;
 
-use mlpl_eval_types::EvalError;
 use crate::experiment::ExperimentRecord;
 use crate::grad::OptimizerState;
 use crate::interrupt::Interrupt;
 use crate::tokenizer::TokenizerSpec;
-use mlpl_eval_types::Value;
 use mlpl_eval_core::metric_sink::MetricSink;
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_types::EvalError;
+use mlpl_eval_types::Value;
 
 /// Orchestrator hook for remote device peers. Implemented by
 /// `mlpl-serve`; absent in local REPL / web eval, where device blocks

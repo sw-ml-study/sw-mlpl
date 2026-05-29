@@ -1,0 +1,9 @@
+number = 1
+slug = "new-component"
+status = "in-progress"
+description = "Create components/web-completion/ + mlpl-web-completion crate. Move completio..."
+role = "production"
+context_files = []
+created_at = "2026-05-28T21:02:55"
+task_type = "refactor"
+commits = []

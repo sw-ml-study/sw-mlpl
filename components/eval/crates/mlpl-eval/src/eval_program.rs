@@ -17,8 +17,8 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::eval::eval_expr;
+use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
 /// Evaluate a program (list of statements). Returns the last result as an array.

@@ -1809,6 +1809,7 @@ dependencies = [
  "mlpl-parser",
  "mlpl-serve",
  "mlpl-wasm",
+ "mlpl-web-completion",
  "mlpl-web-eval",
  "mlpl-web-lessons",
  "mlpl-web-path-body",
@@ -1822,6 +1823,10 @@ dependencies = [
  "web-sys",
  "yew",
 ]
+
+[[package]]
+name = "mlpl-web-completion"
+version = "0.20.0"
 
 [[package]]
 name = "mlpl-web-eval"

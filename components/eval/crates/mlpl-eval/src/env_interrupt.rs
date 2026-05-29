@@ -5,8 +5,8 @@
 //! endpoint can trip the bool from a different thread.
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::interrupt::Interrupt;
+use mlpl_eval_types::EvalError;
 
 impl Environment {
     /// Saga 21.5 step 003: install a cancellation token. The

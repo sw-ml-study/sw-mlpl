@@ -9,9 +9,9 @@ use mlpl_core::ValueTag;
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::model_dispatch_scalar::{scalar_f64, scalar_usize};
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_types::EvalError;
 
 /// `linear(in_dim, out_dim, seed)`.
 pub(crate) fn eval_linear(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {

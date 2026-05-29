@@ -39,7 +39,6 @@ pub(crate) struct Args {
     pub(crate) persist: Option<PathBuf>,
 }
 
-
 mod args;
 
 fn main() -> ExitCode {
@@ -89,10 +88,6 @@ fn run_main(args: Args) -> Result<(), String> {
         .map_err(|e| format!("{e}"))
 }
 
-
-
-
-
 /// Resolve the three TLS-related flags into an
 /// `Option<RustlsConfig>`. Mutually exclusive: pass either
 /// `--tls-cert` + `--tls-key` together, or `--self-signed`,
@@ -120,8 +115,6 @@ async fn build_tls(
         }
     }
 }
-
-
 
 fn print_banner(args: &Args, peers: &mlpl_serve::peers::PeerRegistry, tls_set: bool) {
     let scheme = if tls_set { "https" } else { "http" };

@@ -115,8 +115,7 @@ fn decode_png(bytes: &[u8], path: &Path) -> Result<(Vec<u8>, usize, usize), Imag
     buf.truncate(info.buffer_size());
     let h = info.height as usize;
     let w = info.width as usize;
-    let rgb =
-        crate::pixels::expand_to_rgb(&buf, h, w, info.color_type, info.bit_depth, path)?;
+    let rgb = crate::pixels::expand_to_rgb(&buf, h, w, info.color_type, info.bit_depth, path)?;
     Ok((rgb, h, w))
 }
 

@@ -8,10 +8,10 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_compose::prelude::*;
 
 use crate::env::Environment;
-use mlpl_eval_types::EvalError;
 use crate::model_apply::apply_model;
 use crate::model_apply_attention::slice_cols;
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_types::EvalError;
 
 /// Walk the model tree, threading `x` through each layer until
 /// we hit the first `Attention` node; then return its softmax

@@ -93,18 +93,18 @@ mod tokenizer;
 mod type_errors;
 
 pub use env::{Environment, PeerDispatcher, model_params};
-pub use mlpl_eval_types::EvalError;
 pub use eval_program::{
     eval_program, eval_program_traced, eval_program_value, eval_program_value_traced,
 };
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
-#[cfg(feature = "image-io")]
-pub use mlpl_eval_image::decode_and_resize_u8;
 pub use inspect::inspect;
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
 pub use mlpl_eval_core::{MetricSink, ModelSpec};
+#[cfg(feature = "image-io")]
+pub use mlpl_eval_image::decode_and_resize_u8;
+pub use mlpl_eval_types::EvalError;
+pub use mlpl_eval_types::{Value, value_kind};
 pub use mlpl_runtime::runtime_builtin_names;
 pub use tokenizer::TokenizerSpec;
-pub use mlpl_eval_types::{Value, value_kind};
