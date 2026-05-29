@@ -1,4 +1,4 @@
-use crate::paths::{LearningPath, Step};
+use crate::types::{LearningPath, Step};
 
 pub(super) const PATH_VISION_TRANSFORMERS_IN_MLPL: LearningPath = LearningPath {
     title: "Vision Transformers in MLPL",

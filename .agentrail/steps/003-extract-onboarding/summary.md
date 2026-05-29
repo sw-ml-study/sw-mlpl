@@ -1,0 +1,1 @@
+Extracted onboarding cluster (4 files, 58 -> 54 modules in mlpl-web) into components/web-onboarding/ with mlpl-web-onboarding crate. Two follow-on fixes: SplashOverlay gained a version_label prop (build.rs's BUILD_COMMIT_COUNT lives only in mlpl-web) and web-sys gained the DomRect feature for tour.rs's get_bounding_client_rect call.

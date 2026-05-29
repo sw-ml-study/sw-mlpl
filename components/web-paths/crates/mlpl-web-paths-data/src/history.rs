@@ -1,4 +1,4 @@
-use crate::paths::{LearningPath, Step};
+use crate::types::{LearningPath, Step};
 
 pub(super) const PATH_A_CHRONOLOGICAL_HISTORY_OF_ML: LearningPath = LearningPath {
     title: "A chronological history of ML",
