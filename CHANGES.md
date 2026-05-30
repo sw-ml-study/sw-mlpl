@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- saga(step 003): complete demo tiers+gating+seeding; queue MLX GPU training (004)
+- chore(pages): rebuild for device-tiered demo dropdown gating
+- feat(demos): device-tier demo dropdown gating + seed connect/MLX demos (saga Phase 1)
+- feat(demos): demo capability tiers (cpu/live, connect, mlx, cuda) — saga Phase 1 foundation
+- docs(saga): demo device-tiers + the MLX-training-is-forward-only finding
+- saga(step 002): complete ollama-settings-web-wiring; queue demo-group + gating (003)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for :models ollama + :ask server-default
 - feat(web): :models ollama + :ask server-default (saga Phase 0 web)
 - saga(step 001): complete ollama-settings-exposure; queue web wiring (002)
