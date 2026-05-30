@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-30
+
+- chore(pages): rebuild for 2D/3D toggle + focus + taller output
+- feat(web): 2D/3D toggle on REPL rows + focus on load + taller output
+- fix(demos): classify.mlpl usage needs the -- separator
+
 ## 2026-05-29
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for ML-themed UDF demo
 - feat(demos): make User-Defined Functions demo ML-themed
 - docs(memory): explain MLPL's RAII-based memory model
