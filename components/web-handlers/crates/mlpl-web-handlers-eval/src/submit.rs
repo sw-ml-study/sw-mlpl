@@ -111,9 +111,14 @@ pub(crate) fn process_next_eval(
     let line = queue[idx].clone();
     crate::running::push_running_marker(&mut history, &line);
     deps.history.set(history.clone());
-    // Connect mode (?connect=<url>): route real expressions + the
-    // `:ask` shortcut to mlpl-serve (async, server-side) so the
-    // browser never blocks. Returns true when it took the eval.
+    // Connect mode (?connect=<url>): `:models ollama` lists the
+    // server's Ollama models; real expressions + the `:ask`
+    // shortcut route to mlpl-serve (async, server-side) so the
+    // browser never blocks. Each returns true when it took the line.
+    #[cfg(target_arch = "wasm32")]
+    if crate::connect::try_ollama_models(&deps, &history, &queue, idx, &line) {
+        return;
+    }
     #[cfg(target_arch = "wasm32")]
     if crate::connect::try_connect_eval(&deps, &history, &queue, idx, &line) {
         return;

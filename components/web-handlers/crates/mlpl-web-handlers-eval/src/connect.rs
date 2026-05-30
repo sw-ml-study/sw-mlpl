@@ -94,8 +94,7 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
         let esc = |s: &str| s.replace('\\', "\\\\").replace('"', "\\\"");
         let question = esc(q.trim().trim_matches('"').trim());
         let system = esc(&build_ask_system(history));
-        let url = query_param("ollama", ASK_URL);
-        let model = query_param("model", ASK_MODEL);
+        let (url, model) = ask_endpoint();
         return Some(format!(
             "llm_call(\"{url}\", \"{question}\", \"{model}\", \"{system}\")"
         ));
@@ -104,6 +103,59 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
         return None;
     }
     Some(line.to_string())
+}
+
+/// Resolve the `(host, model)` for `:ask`: an explicit `?ollama=` /
+/// `?model=` page override wins; else the server-configured default
+/// primed on connect (`GET /v1/ollama/config`); else the built-in
+/// constants.
+fn ask_endpoint() -> (String, String) {
+    let (def_url, def_model) = mlpl_web_eval::ollama_fetch::ollama_default()
+        .unwrap_or_else(|| (ASK_URL.to_string(), ASK_MODEL.to_string()));
+    (
+        query_param("ollama", &def_url),
+        query_param("model", &def_model),
+    )
+}
+
+/// Connect-mode `:models ollama`: fetch the server's Ollama model
+/// list (`GET /v1/ollama/tags`) and render it as a history entry,
+/// chaining the rest of the queue. Returns true when it took the
+/// line (connect mode + the exact command); false to fall through
+/// to local handling.
+pub(crate) fn try_ollama_models(
+    deps: &EvalDeps,
+    history: &[HistoryEntry],
+    queue: &[String],
+    idx: usize,
+    line: &str,
+) -> bool {
+    if line.trim() != ":models ollama" {
+        return false;
+    }
+    let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
+        return false;
+    };
+    let hist_handle = deps.history.clone();
+    let deps_c = deps.clone();
+    let queue_c = queue.to_vec();
+    let mut hist_c = history.to_vec();
+    mlpl_web_eval::ollama_fetch::fetch_ollama_models(
+        base,
+        Box::new(move |result: String| {
+            let is_error = result.starts_with("error:");
+            hist_c.pop();
+            hist_c.push(HistoryEntry {
+                input: ":models ollama".to_string(),
+                output: result,
+                is_error,
+                kind: EntryKind::Command,
+            });
+            hist_handle.set(hist_c.clone());
+            crate::submit::process_next_eval(deps_c, hist_c, queue_c, idx + 1);
+        }),
+    );
+    true
 }
 
 /// Dispatch `line` to the connected server (async) when a connect

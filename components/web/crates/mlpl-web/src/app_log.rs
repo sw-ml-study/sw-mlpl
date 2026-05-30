@@ -13,6 +13,11 @@ pub fn log_connect_mode() {
     #[cfg(target_arch = "wasm32")]
     if let Some(url) = mlpl_web_eval::eval::current_connect_url_from_window() {
         web_sys::console::log_1(&format!("[mlpl-web] connect mode: {url}").into());
+        // Prime the server-configured Ollama default (host + model)
+        // so `:ask` can fall back to it without a `?ollama=`/`?model=`
+        // override. Fire-and-forget; failures leave the built-in
+        // defaults in place.
+        mlpl_web_eval::ollama_fetch::prime_ollama_default(url);
     }
 }
 
