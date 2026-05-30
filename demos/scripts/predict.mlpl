@@ -1,0 +1,22 @@
+#!/usr/bin/env mlpl-repl
+# Logistic-regression inference from the command line: apply a
+# (pretend already-trained) 1-feature model to the input arg.
+#   p = sigmoid(w * x + b),  class = 1 if p > 0.5 else 0
+#
+# Usage (the `--` separator is required):
+#   ./demos/scripts/predict.mlpl -- 2.5
+#
+# Exit codes: 0 (Ok) on success; 1 if the arg is not a number.
+# Demonstrates: a trained-weights "model" + sigmoid activation +
+# a thresholded decision, all driven by a CLI arg.
+w = 0.8
+b = 0 - 1.0
+raw = unwrap_or(list_get(args(), 0), "0")
+parsed = to_number(raw)
+if is_ok(parsed) { 0 } else { eprint(err_message(parsed)); exit(1) }
+x = unwrap(parsed)
+p = sigmoid(w * x + b)
+print("input:", x)
+print("prob: ", p)
+print("class:", if gt(p, 0.5) { 1 } else { 0 })
+ok(p)

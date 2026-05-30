@@ -1,0 +1,29 @@
+#!/usr/bin/env mlpl-repl
+# Standardize (z-score normalize) the numeric CLI args:
+#   z_i = (x_i - mean) / std
+# the classic ML feature-preprocessing step.
+#
+# Usage (the `--` separator is required):
+#   ./demos/scripts/zscore.mlpl -- 10 12 23 23 16 23 21 16
+#
+# Prints mean, std, then one "z:" line per input. Exit 0 (Ok);
+# exit 2 with a usage line when given fewer than 2 args.
+# Demonstrates: a user-defined helper (u:nth reads + parses the
+# i-th arg) plus two accumulation passes (mean, then variance)
+# and a third pass mapping each input to its standardized value.
+def u:nth(i) { unwrap_or(to_number(unwrap_or(list_get(args(), i), "0")), 0) }
+n = list_len(args())
+if gt(n, 1) { 0 } else { eprint("usage: zscore.mlpl -- N N [N ...]"); exit(2) }
+sum = 0
+i = 0
+while gt(n, i) { sum = sum + u:nth(i); i = i + 1 }
+mean = sum / n
+ss = 0
+i = 0
+while gt(n, i) { d = u:nth(i) - mean; ss = ss + d * d; i = i + 1 }
+std = sqrt(ss / n)
+print("mean:", mean)
+print("std: ", std)
+i = 0
+while gt(n, i) { print("z:", (u:nth(i) - mean) / std); i = i + 1 }
+ok(mean)

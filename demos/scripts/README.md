@@ -4,6 +4,10 @@ Runnable `.mlpl` scripts that use a `#!/usr/bin/env mlpl-repl`
 shebang, read positional arguments via `args()`, and set a Unix
 exit code. They are the CLI counterpart to the in-browser demos.
 
+Two are plain numeric utilities (`sum`, `stats`); two are small
+ML use-cases (`predict` = logistic-regression inference,
+`zscore` = feature standardization).
+
 ## Running
 
 `mlpl-repl` must be on your `PATH` (install with `sw-install`).
@@ -38,8 +42,15 @@ here demonstrate this:
 |--------|------|--------|------|
 | `sum.mlpl` | `-- 3 4 5` | `12` | 0 |
 | `sum.mlpl` | `-- 2 banana` | parse error on stderr | 1 |
-| `stats.mlpl` | `-- 10 20 30` | `3` / `60` / `20` | 0 |
+| `stats.mlpl` | `-- 10 20 30` | `count: 3` / `sum: 60` / `mean: 20` | 0 |
 | `stats.mlpl` | (none) | usage line on stderr | 2 |
+| `predict.mlpl` | `-- 2.5` | `prob: 0.73` / `class: 1` | 0 |
+| `zscore.mlpl` | `-- 10 12 23 ...` | `mean:` / `std:` / one `z:` per input | 0 |
+
+The ML scripts: `predict.mlpl` applies a (pretend pre-trained)
+1-feature logistic-regression model -- `sigmoid(w*x + b)` then a
+0.5 threshold. `zscore.mlpl` standardizes its inputs with a
+`u:nth` user-defined helper and two accumulation passes.
 
 ## See also
 
