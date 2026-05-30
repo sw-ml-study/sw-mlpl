@@ -100,6 +100,11 @@ fn eval_result_ctor(
     })
 }
 
+// Variadic + space-joined (println-style) so labelled output like
+// `print("count:", n)` works without string concatenation: each
+// argument is rendered (strings literally, arrays/numbers via
+// Display) and joined with a single space. Returns the last
+// argument so `print(x)` still yields x.
 fn eval_print(
     name: &str,
     args: &[Expr],
@@ -107,31 +112,22 @@ fn eval_print(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     if args.is_empty() {
-        return Err(EvalError::BadArity {
-            func: name.into(),
-            expected: 1,
-            got: 0,
-        });
+        return Err(EvalError::Unsupported(format!(
+            "{name}: expects at least one argument"
+        )));
     }
-    // Variadic + space-joined (println-style) so labelled output
-    // like `print("count:", n)` works without string concatenation:
-    // each argument is rendered (strings literally, arrays/numbers
-    // via Display) and joined with a single space. Returns the last
-    // argument so `print(x)` still yields x.
-    let mut parts = Vec::with_capacity(args.len());
-    let mut last = Value::Array(mlpl_array::DenseArray::from_scalar(0.0));
+    let mut vals = Vec::with_capacity(args.len());
     for arg in args {
-        let v = eval_expr(arg, env, trace)?;
-        parts.push(format!("{v}"));
-        last = v;
+        vals.push(eval_expr(arg, env, trace)?);
     }
-    let line = parts.join(" ");
+    let rendered: Vec<String> = vals.iter().map(|v| v.to_string()).collect();
+    let line = rendered.join(" ");
     if name == "print" {
         println!("{line}");
     } else {
         eprintln!("{line}");
     }
-    Ok(last)
+    Ok(vals.pop().unwrap())
 }
 
 fn eval_args(args: &[Expr], env: &Environment) -> Result<Value, EvalError> {
