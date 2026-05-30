@@ -12,8 +12,406 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-29
+
+- saga(viz-derivation-mathjax): complete 001-mathjax-latex
+- fix(viz): correct derivation hint now that MathJax has landed
+- feat(viz): MathJax-rendered derivation steps (saga E follow-up)
+- feat(viz): bigger label + restore "?" icon after inspector close
+- feat(viz): "?" / "i" icon pointer + bigger label
+- feat(viz): op derivation chain in the inspector (saga E)
+- feat(viz): hand cursor when hovering the pointer or label
+- feat(viz): clickable label + tap-rhythm pointer
+- fix(viz): look up Models in env after assignment (saga D fix)
+- fix(viz): normalize heatmap colors per slice + bump BPE merges + diag log
+- feat(viz): composite Sankey for model sculptures (saga D)
+- feat(viz): BPE attention demo — labels flow into the heatmap (saga BPE-2)
+- feat(viz): decode_each builtin + StrList plumbing (saga BPE-1)
+- fix(viz): drop duplicate var name in inspector headline
+- feat(viz): step number prefix on every sculpture's 3D label
+- fix(viz): inline values up to 4096 elements so rank-3 attention fires
+- feat(viz): rank-3 attention heatmap + head selector (saga C)
+- feat(viz): discoverability nudge + drop saga-B debug log
+- debug(viz): log detectViz inputs so we can see why heatmap isn't firing
+- feat(viz): first IR renderer -- SVG attention heatmap (saga B)
+- feat(viz-ir): scaffold the Viz IR + dispatch site (saga A)
+- docs(viz-plan): fix more non-ASCII chars (<=, *, ->)
+- docs(viz-plan): replace non-ASCII -> and K^T to satisfy markdown-checker
+- docs: planning doc for the Viz IR + ML visualization sagas
+- fix(web): inspector close restores focus + pointer pulses
+- fix(web): restore canvas focus when closing the inspector
+- feat(web): denser landscape + clickable pointer opens inspector
+
+## 2026-05-28
+
+- feat(web): move Reset button into the REPL input row
+- fix(scripts): point serve.sh at components/web/crates/mlpl-web
+- refactor(web): extract render cluster to web-render (saga 82 step 8)
+- refactor(web): extract tutorial + mode clusters (saga 82 step 7)
+- refactor(web): extract handlers cluster to web-handlers (saga 82 step 6)
+- refactor(web): extract components cluster to web-components (saga 82 step 5)
+- refactor(web): extract paths cluster to web-paths (saga 82 step 4)
+- refactor(web): extract onboarding cluster to web-onboarding (saga 82 step 3)
+- refactor(web): extract glossary cluster to web-glossary (saga 82 step 2)
+- refactor(web): extract demos cluster to web-demos sub-component (saga 82 step 1)
+- fix(web): Tour casing -- match Dimensionality Reduction by case
+- chore(agentrail): tour-fix-default-path saga close
+- fix(web): re-anchor Tour path-card marker to Dimensionality Reduction
+- chore(agentrail): saga 80 close
+- refactor(web): extract viz3d_* to mlpl-web-viz3d component (saga 80)
+- chore(agentrail): saga 79 close
+- refactor(web): extract completion to mlpl-web-completion component (saga 79)
+- chore(agentrail): saga 78 close
+- refactor(web): split viz3d_events tests to retire 11-fn FAIL (saga 78)
+- chore(agentrail): saga 77 close
+- refactor(web-eval): split eval_wasm.rs to retire 9-fn FAIL (saga 77)
+- chore(agentrail): saga 76 close
+- refactor(wasm): split mlpl-wasm/lib.rs to retire 12-fn FAIL (saga 76)
+- chore(agentrail): saga 75 close
+- refactor(build): split mlpl-build main.rs to retire 15-fn FAIL (saga 75)
+- chore(agentrail): saga 74 close
+- refactor(eval): extract pets_tiny into its own crate (saga 74)
+- chore(agentrail): saga 73 close
+- refactor(eval): extract eval-types component (saga 73)
+- docs(3d-introspect): resolve scope decisions
+- docs: add 3D object introspect dialog feature proposal
+- chore(agentrail): saga 72 close
+- docs: saga 72 close
+- refactor(serve): split parse_args 73->17 LOC into args.rs (saga 72 step 003)
+- chore(agentrail): saga 72 step 002 complete
+- refactor(wasm): split eval_input_with_values 61->17 LOC (saga 72 step 002)
+- chore(agentrail): saga 72 step 001 complete
+- refactor(web): retire 4 Function LOC FAILs (saga 72 step 001)
+- docs(god-crate): Phase 1 ended with image; need Phase 1.5 types extraction
+- chore(agentrail): saga 71 close
+- refactor(eval): extract image_io into components/eval-image/ (saga 71)
+
+## 2026-05-27
+
+- docs(god-crate): replace em-dash with ASCII --
+- docs: god-crate decomposition strategy for mlpl-eval + mlpl-web
+- chore(pages): rebuild for component restructure (apps/mlpl-web -> components/web/)
+- chore(agentrail): saga 70 close
+- refactor(components): split mlpl-session/ into 4 sparse sub-components (saga 70)
+- chore(agentrail): saga 69 close
+- refactor(components): split lang-core/ into 4 sparse sub-components (saga 69)
+- chore(agentrail): saga 68 close
+- refactor(components): split lang-syntax/ into 5 sparse sub-components (saga 68)
+- chore(agentrail): saga 67 close
+- docs: saga 67 close (runtime split)
+- refactor(components): split runtime/ into 6 sparse sub-components (saga 67)
+- chore: clean up stale references from saga 64+65
+- chore(agentrail): saga 66 step 001 complete
+- refactor(autograd): split propagate into per-NodeKind helpers (saga 66 step 001)
+- chore(agentrail): saga 65 (eval-decompose) blocked on type cycle, pivot to arithmetic.rs split
+- chore(agentrail): saga 64 close - migration complete
+- docs: saga 64 close - migration complete
+- refactor(component): empty crates/ apps/ services/ — finalize migration (saga 64)
+- chore(agentrail): saga 63 close
+- docs: saga 63 close
+- refactor(component): move serve family to components/serve/ (saga 63)
+- chore(agentrail): saga 62 close
+- docs: saga 62 close
+- refactor(component): move cli family to components/cli/ (saga 62)
+- chore(agentrail): saga 61 close
+- docs: saga 61 close
+- refactor(component): move web crates to components/web/ (saga 61)
+- fix(web-tests): update path attributes for moved mlpl-web-eval
+- chore(agentrail): saga 60 close
+- docs: saga 60 close
+- refactor(component): move mlpl-wasm + mlpl-web-eval to components/wasm/ (saga 60)
+- chore(agentrail): saga 59 close
+- docs: saga 59 close
+- refactor(component): move mlpl-eval to components/eval/ (saga 59)
+- chore(agentrail): record saga 58 close
+- docs(language-status): record saga 58 close
+- chore(agentrail): record saga 58 step 002 deferral
+- refactor(component): move mlpl-viz to components/viz/ (saga 58 step 001)
+- chore(agentrail): record saga 57 close
+- docs(language-status): record saga 57 close (component-native-rt)
+- refactor(component): move mlpl-rt + mlpl-mlx-rt to components/native-rt/ (saga 57)
+- chore(agentrail): record saga 56 step 003 completion + close
+- docs(language-status): record saga 56 close (component-autograd)
+- chore(agentrail): record saga 56 step 002 deferral
+- chore(agentrail): record saga 56 step 001 completion
+- refactor(component): move autograd+trace to components/autograd/ (saga 56 step 001)
+- chore(agentrail): record saga 55 step 004 completion + close
+- docs(language-status): record saga 55 close (component-runtime)
+- chore(agentrail): record saga 55 step 003 (review-for-splits) completion
+- chore(agentrail): record saga 55 step 002 completion
+- refactor(component): move 11 runtime crates to components/runtime/ (saga 55 step 002)
+- chore(agentrail): record saga 55 step 001 completion
+- build(component): scaffold components/runtime/ workspace (saga 55 step 001)
+- chore(agentrail): record saga 54 step 006 completion + close
+- docs(language-status): record saga 54 close (component-lang-syntax)
+- chore(agentrail): record saga 54 step 005 completion
+- refactor(component): move + split mlpl-parser into ast sibling (saga 54 step 005)
+- chore(agentrail): record saga 54 step 004 completion
+- refactor(component): move + decompose mlpl-lexer (saga 54 step 004)
+- chore(agentrail): record saga 54 step 003 completion
+- refactor(component): move mlpl-lower-rs to components/lang-syntax/ (saga 54 step 003)
+- chore(agentrail): record saga 54 step 002 completion
+- refactor(component): move mlpl-macro to components/lang-syntax/ (saga 54 step 002)
+- chore(agentrail): record saga 54 step 001 completion
+- build(component): scaffold components/lang-syntax/ workspace (saga 54 step 001)
+- chore(agentrail): record saga 53 step 007 completion + close
+- docs(language-status): record saga 53 close (decompose-array, -1 FAIL)
+- chore(agentrail): record saga 53 step 006 completion
+- refactor(array): extract ApplyBinopExt (saga 53 step 006) -- FAIL retired
+- chore(agentrail): record saga 53 step 005 completion
+- refactor(array): extract ReshapeExt+TransposeExt (saga 53 step 005)
+- chore(agentrail): record saga 53 step 004 completion
+- refactor(array): extract ConcatExt+StackExt+PatchifyExt+TakeExt (saga 53 step 004)
+- chore(agentrail): record saga 53 step 003 completion
+- refactor(array): extract ReduceAxisExt+ArgmaxAxisExt (saga 53 step 003)
+- chore(agentrail): record saga 53 step 002 completion
+- refactor(array): extract MatmulExt+DotExt to mlpl-array-ops-matmul (saga 53 step 002)
+- chore(agentrail): record saga 53 step 001 completion
+- build(component): scaffold 5 mlpl-array sibling crates (saga 53 step 001)
+- chore(agentrail): record saga 52 step 005 completion + close
+- docs(language-status): record saga 52 close (component-lang-core)
+- chore(agentrail): record saga 52 step 004 completion
+- refactor(component): move mlpl-eval-core to components/lang-core/ (saga 52 step 004)
+- chore(agentrail): record saga 52 step 003 completion
+- refactor(component): move mlpl-array to components/lang-core/ (saga 52 step 003)
+- chore(agentrail): record saga 52 step 002 completion
+- chore(git): un-track tmp/ and .DS_Store, add gitignore patterns
+- refactor(component): move mlpl-core to components/lang-core/ (saga 52 step 002)
+- chore(agentrail): record saga 52 step 001 completion
+- build(component): scaffold components/lang-core/ workspace (saga 52 step 001)
+- chore(agentrail): record saga 51 step 002 completion + close
+- docs(language-status): record saga 51 close (shared-target-infra)
+- chore(agentrail): record saga 51 step 001 completion
+- build(config): shared target/ across all workspaces (saga 51 step 001)
+- chore(agentrail): record saga 50 step 005 completion
+- docs(language-status): record saga 50 close (warning-ratchet-spike)
+- chore(agentrail): record saga 50 step 004 completion
+- refactor(runtime): extract mlpl-runtime-ml, retire 4 Function LOC warnings
+- chore(agentrail): record saga 50 step 003 completion
+- refactor(runtime): extract mlpl-runtime-array, retire builtins.rs 16-fn FAIL
+- chore(agentrail): record saga 50 step 002 completion
+- refactor(crates): extract 4 new crates, retire 7 FAILs
+- chore(agentrail): record saga 50 step 001 completion
+- refactor(paths): split paths.rs (1162 -> 67 lines) into 4 files
+- chore(agentrail): archive saga 49, init saga 50 (warning-ratchet-spike)
+- chore(agentrail): record saga 49 completion (optimizers-regularization-path)
+- saga 49 step 002: language-status update + saga close
+- chore(agentrail): record saga 49 step 001 completion
+- saga 49 step 001: Optimizers & Regularization learning path
+- chore(agentrail): archive saga 48, init saga 49 (optimizers-regularization-path)
+- chore(agentrail): record saga 48 completion (training-paradigms-path)
+- saga 48 step 002: language-status update + saga close
+- chore(agentrail): record saga 48 step 001 completion
+- saga 48 step 001: Training Paradigms learning path
+- chore(agentrail): archive saga 47, init saga 48 (training-paradigms-path)
+- fix: add :fns to UDF demo + replace iota with range everywhere
+- chore(agentrail): record saga 47 completion (repl-to-script-path)
+- saga 47 step 002: language-status update + saga close
+- chore(agentrail): record saga 47 step 001 completion
+- saga 47 step 001: REPL to Script learning path
+- chore(agentrail): archive saga 46, init saga 47 (repl-to-script-path)
+- feat(udf): :fns listing, :describe for UDFs, docstrings
+- chore(agentrail): record saga 46 completion (udf-control-flow)
+- saga 46 step 005: UDF demo + glossary + iota->range in demos + close
+- chore(agentrail): record saga 46 step 004 completion
+- saga 46 step 004: recursion + scoping integration tests
+- fix(ui): replace iota with range in banner, editor, tour
+- chore(agentrail): record saga 46 step 003 completion
+- saga 46 step 003: pi(), e() builtins + range() alias for iota()
+- chore(agentrail): record saga 46 step 002 completion
+- saga 46 step 002: eval function storage + call dispatch
+- chore(agentrail): record saga 46 step 001 completion
+- saga 46 step 001: parser for def + return
+- chore(agentrail): archive saga 45, init saga 46 (udf-control-flow)
+- feat(paths): extend chronological history to 2026
+- fix(paths): correct 3 more glossary term mismatches
+- fix(paths): correct 3 demo name mismatches
+- fix(paths): add missing glossary entries + fix term mismatches
+- fix(paths): alphabetical ordering of learning paths
+- fix(paths): two-column grid layout + scrollable panel
+- chore(agentrail): record saga 45 completion (data-exploration-path)
+- saga 45 step 003: language-status update + saga close
+- chore(agentrail): record saga 45 step 002 completion
+- saga 45 step 002: Data & Exploration learning path
+- chore(agentrail): record saga 45 step 001 completion
+- saga 45 step 001: Upload & Inspect Image demo + REPL-to-Script milestone
+- chore(agentrail): archive saga 44, init saga 45 (data-exploration-path)
+- chore(agentrail): record saga 44 completion (chronological-history-path)
+- saga 44 step 002: language-status update + saga close
+- chore(agentrail): record saga 44 step 001 completion
+- saga 44 step 001: chronological history path + saga 46 milestone doc
+- chore(agentrail): archive saga 43, init saga 44 (chronological-history-path)
+- chore(agentrail): record saga 43 completion (architecture-zoo-path)
+- saga 43 step 002: language-status update + saga close
+- chore(agentrail): record saga 43 step 001 completion
+- saga 43 step 001: Architecture Zoo learning path
+- chore(agentrail): archive saga 42, init saga 43 (architecture-zoo-path)
+- chore(agentrail): record saga 42 completion (gan-demo)
+- saga 42 step 003: glossary (GAN, Generator, Discriminator, Adversarial Training) + close
+- chore(agentrail): record saga 42 step 002 completion + advance to step 003
+- saga 42 step 002: GAN (2D circle) demo
+- chore(agentrail): record saga 42 step 001 completion + advance to step 002
+- saga 42 step 001: sin/cos builtins + GAN training design
+- chore(agentrail): archive saga 41, init saga 42 (gan-demo)
+- chore(agentrail): record saga 41 completion (rnn-lstm-builtins)
+- saga 41 step 005: glossary (RNN, LSTM, Vanishing Gradient, Hidden State) + close
+- chore(agentrail): record saga 41 step 004 completion + advance to step 005
+- saga 41 step 004: LSTM sequence demo
+- fix(3d-viz): add cache-bust param to panorama texture load
+- fix(3d-viz): use mirrored mountain panorama strip as backdrop
+- fix(3d-viz): backdrop 8x larger, much lower
+- chore(agentrail): record saga 41 step 003 completion
+- saga 41 step 003: RNN sequence demo + backdrop fix
+- chore(agentrail): record saga 41 step 002 completion
+- saga 41 step 002: lstm_cell builtin + PCA category fix + footer version
+- feat(3d-viz): legend reachable via left arrow + group label
+- chore(agentrail): record saga 41 step 001 completion
+- saga 41 step 001: rnn_cell builtin
+- chore(agentrail): archive saga 40 + init saga 41 (rnn-lstm-builtins) with 5 steps
+- fix(demo): autoencoder demo rewritten to pass smoke test
+- feat(3d-viz): legend as Z-receding reference bars at steps -1,-2,-3
+- feat(3d-viz): wider spacing + Z-receding orientation + improved materials
+- chore(agentrail): record saga 40 step 004 completion -- saga 40 DONE
+- saga 40 step 004: language-status + saga close
+- chore(agentrail): record saga 40 step 003 completion
+- saga 40 step 003: glossary entries + backdrop position fix
+- chore(agentrail): record saga 40 step 002 completion
+- saga 40 step 002: bottleneck hint in 3D detail panel
+- chore(agentrail): record saga 40 step 001 completion
+- saga 40 step 001: Autoencoder (simple) demo
+- chore(agentrail): archive saga 39 + init saga 40 (autoencoder-demo) with 4 steps
+- feat(3d-viz): salt-flat.jpg as wide backdrop plane with parallax
+- fix(resize): use flex-basis !important + flex-shrink:1 for output
+- feat(3d-viz): salt-flat.jpg skybox background + resize debug
+- debug(resize): add console.log to initResize and mousedown
+- fix(3d-viz): resize handle via Yew component + __initResize
+- fix(3d-viz): move resize handler to inline script (not ES module)
+- feat: grouped demo dropdown + rename Simple CNN -> CNN (simple)
+- fix(3d-viz): move green hills closer to brown mountains
+- fix(3d-viz): resize handle drag now works
+- feat(3d-viz): draggable resize handle between REPL and 3D pane
+- feat(3d-viz): arrow nav moves pointer + updates detail panel
+- fix(3d-viz): propagate userData to all descendants, not just children
+- docs: Architecture Zoo learning path milestone plan
+- chore(agentrail): record saga 39 step 006 completion -- saga 39 DONE
+- saga 39 step 006: help text (conv2d, pool2d) + language-status + close
+- chore(agentrail): record saga 39 step 005 completion
+- saga 39 step 005: 3D conv visualization (stacked heatmap channels)
+- chore(agentrail): record saga 39 step 004 completion
+- saga 39 step 004: Simple CNN demo
+- chore(agentrail): record saga 39 step 003 completion
+- saga 39 step 003: standalone relu(x) builtin
+- chore(agentrail): record saga 39 step 002 completion
+- saga 39 step 002: pool2d builtin (max and avg)
+
+## 2026-05-26
+
+- chore(agentrail): record saga 39 step 001 completion
+- saga 39 step 001: conv2d builtin
+- chore(agentrail): archive saga 38 + init saga 39 (cnn-builtins-viz) with 6 steps
+- feat: add floor, ceil, round, mod builtins
+- fix(3d-viz): pointer uses world position for group meshes
+- chore(agentrail): record saga 38 step 005 completion -- saga 38 DONE
+- saga 38 step 005: language-status update + saga close
+- chore(agentrail): record saga 38 step 004 completion
+- saga 38 step 004: detail panel shows values, stats, histogram
+- chore(agentrail): record saga 38 step 003 completion
+- saga 38 step 003: value-colored sculptures
+- chore(agentrail): record saga 38 step 002 completion
+- saga 38 step 002: element values in Stage3dEvent
+- fix(3d-viz): larger labels, brighter legend with SCALE title
+- chore(agentrail): record saga 38 step 001 completion
+- saga 38 step 001: eval_with_values on WasmSession
+- fix(3d-viz): legend moved to x=-15 z=8, brighter connection arrows
+- chore(agentrail): archive saga 37 + init saga 38 (element-data-pipeline) with 5 steps
+- chore(agentrail): record saga 37 step 004 completion -- saga 37 DONE
+- saga 37 step 004: :3d reset in help + language-status + saga close
+- chore(agentrail): record saga 37 step 003 completion
+- saga 37 step 003: connection arrows between dependent steps
+- chore(agentrail): record saga 37 step 002 completion
+- saga 37 step 002: graduated scale legend on ground plane
+- chore(agentrail): record saga 37 step 001 completion
+- saga 37 step 001: log-proportional sculpture sizing
+- chore(agentrail): archive saga 36 + init saga 37 (3d-scale-connections) with 4 steps
+- fix(3d-viz): :3d reset command + auto-reset after tour ends
+- chore(agentrail): record saga 36 step 004 completion -- saga 36 DONE
+- saga 36 step 004: Ctrl+Enter to run + debug logs removed + saga close
+- fix(3d-viz): always emit 3D events, don't check stale show_3d
+- debug(3d-viz): add console.log to init and add_step
+- fix(3d-viz): rAF polling for pending events when scene not ready
+- fix(3d-viz): JS-side event queue replaces Rust-side 300ms defer
+- fix: Run switches to REPL view + gold pointer instead of glow
+- fix(3d-viz): always defer after :3d on + click highlights selected
+- docs: update help, usage, glossary for :3d/:2d, editor, perplexity, dim-reduction
+- fix(3d-viz): :3d idempotent (always ON), :2d for OFF, case-insensitive
+- fix(3d-viz): :3d toggle preserves scene + Editor tour stop
+- fix(3d-viz): defer eval lines 300ms after :3d in a batch
+- chore(agentrail): record saga 36 step 003 completion + advance to step 004
+- saga 36 step 003: Save download + 3D scene survives tab switch
+- chore(agentrail): record saga 36 step 002 completion + advance to step 003
+- saga 36 step 002: Run + Load buttons wired
+- chore(agentrail): record saga 36 step 001 completion + advance to step 002
+- saga 36 step 001: Editor tab + textarea UI shell
+- chore(agentrail): archive saga 35 + init saga 36 (script-editor) with 4 steps
+- docs: milestone plan for script editor (saga 36)
+- fix(3d-viz): parse DenseArray summary format for shape/elements
+- feat(3d-viz): full-width vertical stack layout for :3d mode
+- feat(3d-viz): 3-pane layout + click-to-detail panel
+- fix(3d-viz): ground plane 2000 units wide, mountains span full range
+- docs: 3D visualization phase 2 plan (scale, structure, animation)
+- feat(3d-viz): landscape + bright sculptures + translucent labels
+
 ## 2026-05-25
 
+- fix(3d-viz): click shows 3D tooltip instead of REPL output
+- fix(3d-viz): click-to-inspect no longer pans or resets zoom
+- fix(3d-viz): check label for '=' to detect variables, not extracted name
+- fix(3d-viz): click sculpture pans to it, only :describe for variables
+- fix(3d-viz): click-to-inspect uses variable name, not expression
+- chore(agentrail): record saga 35 step 007 completion -- saga 35 DONE
+- saga 35 step 007: click-to-inspect + fog + saga close
+- fix(3d-viz): pan preserves zoom + arrow key navigation
+- fix(3d-viz): remove decorative bounce/glow, keep dim-previous
+- chore(agentrail): record saga 35 step 006 completion + advance to step 007
+- saga 35 step 006: entry animation + glow + dim previous
+- feat(3d-viz): prev/next/home/end navigation buttons on stage
+- fix(3d-viz): use serde-wasm-bindgen for event emission, not eval
+- chore(agentrail): record saga 35 step 005 completion + advance to step 006
+- saga 35 step 005: demos emit 3D events to the stage
+- fix(3d-viz): global step counter + clear on reset + shape parser fix
+- fix(3d-viz): parse MLPL space-separated output format, not brackets
+- chore(agentrail): record saga 35 step 004 completion + advance to step 005
+- saga 35 step 004: shape-aware 3D sculptures + D3.js loaded
+- chore(agentrail): record saga 35 step 003 completion + advance to step 004
+- saga 35 step 003: step event pipeline (eval -> 3D boxes)
+- chore(agentrail): record saga 35 step 002 completion + advance to step 003
+- saga 35 step 002: Three.js bootstrap with scene + camera + controls
+- chore(agentrail): record saga 35 step 001 completion + advance to step 002
+- saga 35 step 001: 3D toggle infrastructure + split layout
+- fix(tour): final stop highlights Tour button for retake
+- chore(agentrail): init saga 35 (3d-viz-stage) with 7 steps
+- docs: milestone plan for 3D visualization stage (saga 35)
+- chore(agentrail): archive saga 34 (splash-tour)
+- fix(tour): full path walk-through + UI reset + autocomplete fix
+- fix(tour): reset UI to REPL mode on start + add Usage tab stop
+- feat(splash): light blue lines in background image
+- fix(splash): REPL card mentions :help alongside 1 + 2
+- fix(splash): larger fonts, whiter text, blue-tinted shims
+- fix(splash): translucent shim behind title/version/subtitle
+- fix(splash): update splash-bg.png to brain network art + cache bust
+- fix(splash): reduce panel overlay to 55% so background image shows through
+- fix(splash): background image inside the dialog panel, not behind it
+- fix(splash): 3-way dismiss + bg image visible + translucent UI
+- fix(splash): commit count +1 so splash matches the shipping commit
+- fix(splash): show v0.20.0.nnnn (commit count) not SHA
+- fix(tour): defer click_before to use_effect + 50ms settle
+- feat(splash): show version + build SHA on splash screen
+- fix(splash): show every page load, no localStorage persistence
+- feat(tour): 12-step interactive tour that opens each feature
+- fix(tour): clamp tooltip left edge to viewport width
+- fix(tour): tooltip renders above target when below would clip; backdrop click no longer dismisses
+- chore(agentrail): record saga 34 step 006 completion -- saga 34 DONE
+- saga 34 step 006: overlay lifecycle extraction + pages rebuild + saga close
 - chore(agentrail): record saga 34 step 005 completion + advance to step 006
 - saga 34 step 005: what's-new modal (version-bump triggered)
 - docs: sw-checklist mitigations guide (prevention + fix per check type)
@@ -44,7 +442,7 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 - chore(agentrail): record saga 33 step 042a completion + kickoff step 043 (REPL tab-completion)
 - saga 33 step 042a: sync Dimensionality reduction path with MDS / RP landed
 - chore(agentrail): record saga 33 step 042 completion + kickoff step 043 (REPL tab-completion)
-- saga 33 step 042: path-resume bug fix -- preserve path_state on lesson navigation
+- saga 33 step 042: path-resume bug fix — preserve path_state on lesson navigation
 - chore(agentrail): insert step 042 (path-resume bug fix)
 - chore(agentrail): record saga 33 step 041 completion + kickoff step 042 (REPL tab-completion)
 - saga 33 step 041: mds() + random_projection() builtins + new mlpl-runtime-mds-rp crate (+4 warn, exception)
@@ -52,13 +450,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 - chore(agentrail): record saga 33 step 037d completion + kickoff step 041 (MDS / random_projection)
 - saga 33 step 037d: :introspect REPL command bundling every no-arg inspector
 - chore(agentrail): record saga 33 step 037c completion + kickoff step 037d (:introspect helper)
-- saga 33 step 037c: UMAP impl fix -- fit a/b from min_dist, wide coord bound (+1 warn, exception)
+- saga 33 step 037c: UMAP impl fix — fit a/b from min_dist, wide coord bound (+1 warn, exception)
 - chore(agentrail): insert UMAP impl fix (039) + :introspect helper (040)
 - chore(agentrail): record saga 33 step 037b completion + kickoff step 037c (umap impl fix)
 - saga 33 step 037b: move scatter_labeled legend outside the plot + class-id narrative
 - chore(agentrail): record saga 33 step 037 completion + kickoff step 037b (umap impl fix)
 - saga 33 step 037: scatter_labeled legend + umap_vs_pca honest-caveat (+1 warn, exception)
-- chore(agentrail): insert step 037 (scatter_labeled legend) -- user request from chat
+- chore(agentrail): insert step 037 (scatter_labeled legend) — user request from chat
 - chore(agentrail): record saga 33 step 036 completion + kickoff step 037
 - saga 33 step 036: 6 dim-reduction tutorial lessons + agentrail-sessions plan (+1 warn, exception)
 - chore(agentrail): record saga 33 step 035 completion + kickoff step 036
