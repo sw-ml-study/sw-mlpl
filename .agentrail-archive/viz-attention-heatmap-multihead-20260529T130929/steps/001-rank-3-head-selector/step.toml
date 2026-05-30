@@ -1,0 +1,10 @@
+number = 1
+slug = "rank-3-head-selector"
+status = "completed"
+description = "1. Add detection for '<var> = attention_weights(' producing rank-3 [H, Q, K] ..."
+role = "production"
+context_files = []
+created_at = "2026-05-29T13:00:47"
+completed_at = "2026-05-29T13:09:29"
+task_type = "feature"
+commits = ["8c9343421d95d82fe1bc3f72e90b89bda2441ba9"]

@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 1,
+    "step": "extract-demos"
+  },
+  "action": "Read demos.rs structure; mapped cross-crate deps; designed 4-crate web-demos sub-component plan.",
+  "result": "failure: User interrupted with Tour bug; deferred.",
+  "reward": 0,
+  "timestamp": "2026-05-28T21:42:15"
+}

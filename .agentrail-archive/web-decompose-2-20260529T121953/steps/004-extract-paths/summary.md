@@ -1,0 +1,1 @@
+Extracted paths cluster + bundled diagrams_view (7 files, 54 -> 47 modules in mlpl-web) into components/web-paths/ as 2-crate sub-component: -data (types + PATHS + 4 theme modules) and facade (view + diagrams). diagrams_view bundled here because the path walker renders diagram steps inline. Original paths.rs split into types.rs + aggregator.rs + lib.rs facade.

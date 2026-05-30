@@ -1,0 +1,1 @@
+Extracted glossary cluster (2 files, 60 -> 58 modules in mlpl-web) into components/web-glossary/ with single mlpl-web-glossary crate. popup.rs + view.rs renamed without prefix; mlpl-web re-exports under original namespaces.

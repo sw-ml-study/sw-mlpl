@@ -1,0 +1,1 @@
+BPE follow-up part 1: Rust builtin decode_each(tokenizer, ids) -> StrList + plumbing of Value::StrList through EvalResult -> ShapeInfo -> Stage3dEvent so the JS side can read string-list payloads. No demo or JS changes this saga -- just the plumbing. Saga BPE-2 will add the demo + JS detection + association with attention sculptures.

@@ -1,0 +1,1 @@
+BPE-1 plumbing: decode_each builtin (StrList output), Value::StrList -> EvalResult.string_list -> ShapeInfo.string_list -> JS pendingTokenLabels -> consumed by next attention detection as query/key tokens. End-to-end Rust side done; saga BPE-2 adds the demo + the verifiable visible labels.

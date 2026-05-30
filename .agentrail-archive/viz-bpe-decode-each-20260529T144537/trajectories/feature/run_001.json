@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "rust-builtin-and-plumbing"
+  },
+  "action": "Rust: bpe.rs dispatch + 2 per-token helpers; tokenizer.rs registration; EvalResult and ShapeInfo new optional fields; build_shape_info_full as wider entry; submit/demo call site updates. JS: detectViz 4th arg, pendingTokenLabels module slot, consumeTokenLabels helper with length-mismatch warning, mapping to {str: s} token form.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-29T14:45:37"
+}

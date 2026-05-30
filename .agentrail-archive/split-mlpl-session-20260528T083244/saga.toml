@@ -1,0 +1,6 @@
+name = "split-mlpl-session"
+status = "completed"
+current_step = 2
+created_at = "2026-05-27T22:15:54"
+plan_file = ".agentrail/plan.md"
+retroactive = false

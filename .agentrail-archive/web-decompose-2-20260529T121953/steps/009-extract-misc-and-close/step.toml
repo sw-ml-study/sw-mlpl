@@ -1,0 +1,10 @@
+number = 9
+slug = "extract-misc-and-close"
+status = "completed"
+description = "Finish saga 82. Split render_entry (74 LOC FAIL) by responsibility. Extract a..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-28T23:01:01"
+completed_at = "2026-05-29T12:19:53"
+task_type = "refactor"
+commits = ["db2178a292d02051f529d3d0859270e502c2dad7"]

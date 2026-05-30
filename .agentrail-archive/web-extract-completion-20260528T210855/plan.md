@@ -1,0 +1,1 @@
+Extract mlpl-web/src/completion.rs (28 fns FAIL) into a new components/web-completion/ workspace with crate mlpl-web-completion. mlpl-web depends on it and re-exports. Retires completion.rs FAIL AND drops mlpl-web crate module count from 77 to 76 (single-file extraction, but enables the next 6 similar carve-outs).

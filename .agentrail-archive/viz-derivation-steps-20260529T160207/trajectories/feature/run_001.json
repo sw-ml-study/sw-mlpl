@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "deriv-and-jump"
+  },
+  "action": "buildDerivation BFS walk with BUILTIN_SKIP filter; renderDerivation builds button rows with grid layout; window.__viz_jump_step jumps + refreshes; CSS for the row + hover + current state.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-29T16:02:07"
+}

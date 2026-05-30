@@ -1,0 +1,1 @@
+Surveyed demos extraction approach (12 modules; needs 4-crate sub-component split). User pivoted to Tour default-path bugfix mid-survey -- no code committed for this step. Demos extraction will resume in a new saga.

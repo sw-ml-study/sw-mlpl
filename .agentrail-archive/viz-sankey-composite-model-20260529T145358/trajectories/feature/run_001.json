@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "sankey-payload"
+  },
+  "action": "Rust: extended EvalResult with viz_node; added model_to_viz_node + walk_model + emit_leaf helpers in eval_impl.rs; re-exported ActKind; build_shape_info_full grows viz param. JS: dispatch prefers Rust-side viz; Plotly Sankey renderer with op_kind color palette; requestAnimationFrame-deferred Plotly.newPlot bind to freshly-mounted container.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-29T14:53:58"
+}

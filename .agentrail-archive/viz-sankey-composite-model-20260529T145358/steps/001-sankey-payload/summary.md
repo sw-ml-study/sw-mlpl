@@ -1,0 +1,1 @@
+Saga D: composite Sankey for Value::Model sculptures. Rust side walks ModelSpec into a SankeyViz payload that rides through ShapeInfo.viz; JS Plotly Sankey renderer registered as the 'composite' kind. Plotly was already loaded, zero new bundle. Residual flattens with a *res tag in v0; bypass edge + nested-chain drill-down deferred.

@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 9,
+    "step": "extract-misc-and-close"
+  },
+  "action": "n/a (pivot)",
+  "result": "failure: Saga 82 stayed open across sessions; viz work is its own saga.",
+  "reward": 0,
+  "timestamp": "2026-05-29T12:19:53"
+}

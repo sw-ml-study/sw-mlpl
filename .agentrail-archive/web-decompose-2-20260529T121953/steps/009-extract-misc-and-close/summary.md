@@ -1,0 +1,1 @@
+Deferring extract-misc-and-close (saga 82 step 9) and viz-ir-scaffold (saga 82 step 10) -- starting saga A (viz-ir-scaffold) as its own saga per docs/viz-ir-plan.md. mlpl-web is at 10 modules; finishing the misc carve to retire the crate-module-count FAIL is queued for a future session.

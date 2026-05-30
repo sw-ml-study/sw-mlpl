@@ -1,0 +1,1 @@
+BPE-2 ships the BPE attention demo. New const in basics.rs + aggregator.rs registration. Exercises BPE-1's full pipeline: decode_each -> StrList -> ShapeInfo.string_list -> pendingTokenLabels -> attention sculpture axes show real tokens.

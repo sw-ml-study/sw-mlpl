@@ -1,0 +1,10 @@
+number = 3
+slug = "extract-onboarding"
+status = "completed"
+description = "Carve onboarding_splash + onboarding_tour + onboarding_storage + onboarding_w..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-28T22:07:08"
+completed_at = "2026-05-28T22:14:49"
+task_type = "refactor"
+commits = ["1213f252b2f4094ca947aa38fbed1335b5001a5c"]
