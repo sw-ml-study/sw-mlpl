@@ -1102,7 +1102,7 @@ function navInspector(dir) {
     const next = selectedStepIdx + dir;
     if (next < 0 || next >= stepMeshes.length) return;
     selectStep(next);
-    refreshInspectorBody();
+    if (isInspectorOpen()) refreshInspectorBody();
 }
 
 function renderInspectorBody(ud) {
@@ -1610,11 +1610,14 @@ window.__stage3d_reset_view = function() {
     controls.update();
 };
 
+// Route the on-screen prev/next buttons through navInspector so
+// they refresh the open dialog body too (not just the 3D
+// selection) -- matching the Left/Right arrow-key carousel.
 window.__stage3d_prev = function() {
-    if (selectedStepIdx >= 0) { selectStep(selectedStepIdx - 1); } else { panToStep(viewStep - 1); }
+    if (selectedStepIdx >= 0) { navInspector(-1); } else { panToStep(viewStep - 1); }
 };
 window.__stage3d_next = function() {
-    if (selectedStepIdx >= 0) { selectStep(selectedStepIdx + 1); } else { panToStep(viewStep + 1); }
+    if (selectedStepIdx >= 0) { navInspector(1); } else { panToStep(viewStep + 1); }
 };
 window.__stage3d_home = function() { clearSelection(); panToStep(0); };
 window.__stage3d_end = function() { clearSelection(); panToStep(stepCount - 1); };
