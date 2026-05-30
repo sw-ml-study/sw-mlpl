@@ -693,7 +693,13 @@
         }
         .output-line {
             color: var(--subtext1);
-            white-space: pre;
+            /* pre-wrap keeps array column alignment (spaces +
+               newlines) but wraps long lines -- e.g. an :ask /
+               llm_call reply -- so they fit the pane instead of
+               scrolling off to the right. overflow-wrap breaks
+               any single over-long token. */
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
             margin-left: 0;
             font-family: var(--mono);
             font-size: 15px;
