@@ -98,7 +98,7 @@ fn apply_3d_command(deps: &EvalDeps, cmd: mlpl_web_viz3d::toggle::Viz3dCmd) {
 /// Saga 29 step 018: recursive Timeout-yielding eval loop for
 /// REPL submissions. Pushes a Running marker, yields, evals,
 /// replaces marker with result, recurses to next line.
-fn process_next_eval(
+pub(crate) fn process_next_eval(
     deps: EvalDeps,
     mut history: Vec<HistoryEntry>,
     queue: Vec<String>,
@@ -111,6 +111,13 @@ fn process_next_eval(
     let line = queue[idx].clone();
     crate::running::push_running_marker(&mut history, &line);
     deps.history.set(history.clone());
+    // Connect mode (?connect=<url>): route real expressions + the
+    // `:ask` shortcut to mlpl-serve (async, server-side) so the
+    // browser never blocks. Returns true when it took the eval.
+    #[cfg(target_arch = "wasm32")]
+    if crate::connect::try_connect_eval(&deps, &history, &queue, idx, &line) {
+        return;
+    }
     let deps_next = deps.clone();
     let queue_next = queue.clone();
     gloo::timers::callback::Timeout::new(0, move || {
