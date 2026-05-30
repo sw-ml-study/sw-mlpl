@@ -1,0 +1,12 @@
+number = 1
+slug = "ollama-settings-exposure"
+status = "pending"
+description = """
+Phase 0 of the local-gpu-agentic saga (see docs/saga-local-gpu-agentic.md).
+
+..."""
+role = "production"
+context_files = []
+created_at = "2026-05-30T14:51:19"
+task_type = "feature"
+commits = []
