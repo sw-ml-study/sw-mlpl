@@ -1,8 +1,9 @@
-//! Saga 82: demo `Demo` + `ProgressNote` types + `PROGRESS_NOTES`
-//! + `progress_notes_for` extracted into mlpl-web-demos-types so
-//! every demo sub-crate (basic, vision, the facade's own 5) can
-//! reference a single shared `Demo` struct without depending on
-//! a sibling demo crate.
+//! Shared demo types for the web playground demo cluster: the
+//! `Demo` struct, `ProgressNote` with `PROGRESS_NOTES`, and
+//! `progress_notes_for`. Extracted into mlpl-web-demos-types
+//! (saga 82) so every themed sub-crate (basic, vision, the
+//! facade's own demos) references one shared `Demo` struct
+//! without depending on a sibling demo crate.
 
 pub struct Demo {
     pub name: &'static str,
@@ -10,6 +11,68 @@ pub struct Demo {
     pub intro: &'static str,
     pub takeaway: &'static str,
     pub lines: &'static [&'static str],
+}
+
+/// Which compute backend a demo targets. `Cpu` demos run anywhere,
+/// including the in-browser WASM interpreter on the public live
+/// demo. `Mlx` (Apple GPU) and `Cuda` (NVIDIA/Linux GPU) are
+/// SEPARATE, connect-only groups -- each needs a `mlpl-serve` with
+/// the matching device peer and never runs on the public live demo.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Device {
+    Cpu,
+    Mlx,
+    Cuda,
+}
+
+/// A demo's runtime-requirement tier. Demos absent from
+/// [`DEMO_CAPABILITIES`] default to [`Capability::CPU_LIVE`] --
+/// runnable everywhere.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct Capability {
+    /// True when the demo needs a connected `mlpl-serve`; such
+    /// demos render visible-but-not-runnable on the public live
+    /// demo (which has no server).
+    pub requires_connect: bool,
+    pub device: Device,
+}
+
+impl Capability {
+    /// The default tier: CPU, runnable on the public live demo.
+    pub const CPU_LIVE: Self = Self {
+        requires_connect: false,
+        device: Device::Cpu,
+    };
+}
+
+/// Per-demo capability overrides, keyed by `Demo::name`. Anything
+/// absent is [`Capability::CPU_LIVE`]; only connect/GPU demos need
+/// an entry. MLX and CUDA are deliberately distinct devices so the
+/// UI can group and gate them separately.
+pub const DEMO_CAPABILITIES: &[(&str, Capability)] = &[
+    (
+        "Ask Ollama (contextual)",
+        Capability {
+            requires_connect: true,
+            device: Device::Cpu,
+        },
+    ),
+    (
+        "MLX LoRA fine-tune",
+        Capability {
+            requires_connect: true,
+            device: Device::Mlx,
+        },
+    ),
+];
+
+/// The capability tier for `demo_name`, defaulting to
+/// [`Capability::CPU_LIVE`] when the demo has no override.
+pub fn capability_for(demo_name: &str) -> Capability {
+    DEMO_CAPABILITIES
+        .iter()
+        .find(|(n, _)| *n == demo_name)
+        .map_or(Capability::CPU_LIVE, |(_, c)| *c)
 }
 
 /// A heads-up rendered before a single long-running demo line.
