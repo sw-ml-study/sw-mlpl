@@ -8,6 +8,7 @@
 //! `:upload <name>` lines through).
 
 pub mod clear;
+pub mod connect;
 pub mod demo;
 pub mod help;
 pub mod running;

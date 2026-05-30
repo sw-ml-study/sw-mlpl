@@ -14,8 +14,39 @@
 
 #![cfg(target_arch = "wasm32")]
 
+use crate::eval::current_connect_url_from_window;
 use crate::eval::{Evaluator, MetricCb, RemoteEvaluator, ResultCb, StreamCb};
 use crate::eval_wasm_helpers::{wasm_create_session, wasm_eval_stream};
+
+thread_local! {
+    // One persistent RemoteEvaluator per page so the server-side
+    // session (workspace state) is reused across submitted lines.
+    static CONNECT_EVALUATOR: std::cell::RefCell<Option<RemoteEvaluator>> =
+        const { std::cell::RefCell::new(None) };
+}
+
+/// Connect-mode one-shot eval. When `?connect=<url>` is present in
+/// the page URL, route `program` to that `mlpl-serve` over the
+/// REST eval API (async, server-side) and fire `on_result` with
+/// the server's value -- so `llm_call` / MLX-GPU work run on the
+/// server and never block (or panic) the browser. Returns true
+/// when it took the eval; false (leaving `on_result` uncalled)
+/// when no connect URL is set, so the caller does local eval.
+pub fn connect_eval(program: &str, on_result: ResultCb) -> bool {
+    let Some(url) = current_connect_url_from_window() else {
+        return false;
+    };
+    CONNECT_EVALUATOR.with(|cell| {
+        if cell.borrow().is_none() {
+            *cell.borrow_mut() = Some(RemoteEvaluator::new(url));
+        }
+        cell.borrow()
+            .as_ref()
+            .expect("evaluator set above")
+            .eval(program, on_result);
+    });
+    true
+}
 
 impl Evaluator for RemoteEvaluator {
     fn eval(&self, program: &str, on_result: ResultCb) {
