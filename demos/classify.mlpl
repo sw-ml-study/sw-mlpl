@@ -12,7 +12,7 @@
 # Usage:
 #   mlpl-repl demos/classify.mlpl -- SCORE
 #   mlpl-repl demos/classify.mlpl -- SCORE verbose
-#   ./demos/classify.mlpl 42                # after chmod +x
+#   ./demos/classify.mlpl -- 42             # after chmod +x (the -- is required)
 #
 # Reads an integer / float "score" 0..100 from the first CLI
 # argument and prints a label:
