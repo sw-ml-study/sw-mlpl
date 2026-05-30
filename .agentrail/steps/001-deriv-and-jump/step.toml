@@ -1,9 +1,0 @@
-number = 1
-slug = "deriv-and-jump"
-status = "in-progress"
-description = "buildDerivation(mesh) walks stepMeshes by parent name; for each match, find i..."
-role = "production"
-context_files = []
-created_at = "2026-05-29T15:59:45"
-task_type = "feature"
-commits = []

@@ -643,6 +643,7 @@ function refreshInspectorBody() {
     const body = document.getElementById('stage3d-inspector-body');
     if (!body) return;
     body.innerHTML = renderInspectorBody(mesh.userData);
+    typesetInspectorBody();
 }
 
 // Exposed for the head-selector onchange handler inline in the
@@ -724,6 +725,85 @@ const BUILTIN_SKIP = new Set([
     'load_preloaded', 'tokenizer',
 ]);
 
+// Saga E follow-up: cached lazy-loader for MathJax. First
+// inspector open triggers the network fetch; subsequent opens
+// resolve immediately. CDN script tag injection over the
+// promise + MathJax startup hook -- the same pattern Plotly
+// uses elsewhere on the page.
+let mathJaxPromise = null;
+function loadMathJax() {
+    if (mathJaxPromise) return mathJaxPromise;
+    mathJaxPromise = new Promise((resolve, reject) => {
+        window.MathJax = {
+            tex: {
+                inlineMath: [['\\(', '\\)']],
+                processEnvironments: false,
+            },
+            options: { skipHtmlTags: ['script', 'noscript', 'style', 'textarea'] },
+            startup: {
+                ready: () => { window.MathJax.startup.defaultReady(); resolve(); },
+            },
+        };
+        const s = document.createElement('script');
+        s.src = 'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js';
+        s.async = true;
+        s.onerror = () => reject(new Error('MathJax failed to load'));
+        document.head.appendChild(s);
+    });
+    return mathJaxPromise;
+}
+
+// Convert an MLPL RHS expression to LaTeX. Iterative
+// innermost-first replacement so nested calls collapse one
+// layer per pass:
+//   softmax(matmul(Q, transpose(K)) / sqrt(4), 1)
+//     -> softmax(matmul(Q, K^T) / \sqrt{4}, 1)
+//     -> softmax(Q \cdot K^T / \sqrt{4}, 1)
+//     -> \text{softmax}(Q \cdot K^T / \sqrt{4})
+// Function calls without a dedicated rewrite get a generic
+// \text{name}(args). Brackets in array literals stay raw.
+function mlplToLatex(expr) {
+    if (!expr) return '';
+    let cur = expr;
+    let prev = '';
+    let guard = 0;
+    while (cur !== prev && guard < 16) {
+        prev = cur;
+        // transpose(x) where x has no parens -> x^T
+        cur = cur.replace(/transpose\(([^()]+)\)/g, '$1^T');
+        // sqrt(x) where x has no parens -> \sqrt{x}
+        cur = cur.replace(/sqrt\(([^()]+)\)/g, '\\sqrt{$1}');
+        // matmul(a, b) where a + b have no parens or commas
+        cur = cur.replace(/matmul\(([^,()]+),\s*([^()]+)\)/g, '$1 \\cdot $2');
+        // softmax(x, axis) -> \text{softmax}(x); drops the axis
+        cur = cur.replace(/softmax\(([^()]+?),\s*\d+\)/g, '\\text{softmax}($1)');
+        // Generic funcName(args) where args have no nested
+        // parens -- wraps the name in \text{}. Skips the
+        // already-converted commands above (their leading
+        // backslash makes the first capture not start with a
+        // letter).
+        cur = cur.replace(/(?<![\\a-zA-Z_])([a-z_]\w*)\(([^()]*)\)/g, '\\text{$1}($2)');
+        guard += 1;
+    }
+    return cur;
+}
+
+// After the inspector body innerHTML is set, ask MathJax to
+// typeset it. No-op when MathJax hasn't finished loading.
+// Promise-chained off loadMathJax so the first call kicks the
+// fetch + waits; subsequent calls resolve immediately.
+function typesetInspectorBody() {
+    const body = document.getElementById('stage3d-inspector-body');
+    if (!body) return;
+    loadMathJax().then(() => {
+        if (window.MathJax && window.MathJax.typesetPromise) {
+            window.MathJax.typesetPromise([body]).catch(e => {
+                console.warn('[viz-ir] MathJax typeset failed', e);
+            });
+        }
+    }).catch(() => {});
+}
+
 // Saga E: render the derivation list. Each step is a button
 // that jumps the selection to that step + re-renders the body.
 function renderDerivation(mesh) {
@@ -742,11 +822,18 @@ function renderDerivation(mesh) {
         const cleanRhs = (hashIdx >= 0 ? rhs.slice(0, hashIdx) : rhs).trim();
         const isCurrent = step.stepIdx === selectedStepIdx;
         const cls = isCurrent ? 'insp-deriv-step current' : 'insp-deriv-step';
+        // Saga E follow-up: wrap the LaTeX-converted RHS in
+        // inline-math delimiters. MathJax replaces the span's
+        // content with rendered math after typesetInspectorBody
+        // runs; until it loads, the spans show the raw LaTeX
+        // which still reads better than the original MLPL.
+        const latexRhs = mlplToLatex(cleanRhs);
+        const latexName = `\\(${escapeHtml(step.varName)}\\)`;
         return `
             <button class="${cls}" onclick="window.__viz_jump_step(${step.stepIdx})" title="Jump to step ${step.stepIdx + 1}">
-                <span class="insp-deriv-name">${escapeHtml(step.varName)}</span>
+                <span class="insp-deriv-name">${latexName}</span>
                 <span class="insp-deriv-eq">=</span>
-                <span class="insp-deriv-rhs">${escapeHtml(cleanRhs)}</span>
+                <span class="insp-deriv-rhs">\\(${latexRhs}\\)</span>
                 <span class="insp-deriv-shape">${escapeHtml(shape)}</span>
             </button>`;
     }).join('');
@@ -881,6 +968,7 @@ function openInspector() {
     inspectorHeadIdx = 0;
     body.innerHTML = renderInspectorBody(mesh.userData);
     dlg.style.display = 'block';
+    typesetInspectorBody();
     // ESC closes; one listener per open so we can detach on close.
     const onKey = (e) => { if (e.key === 'Escape') closeInspector(); };
     document.addEventListener('keydown', onKey);
