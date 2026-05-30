@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- chore(pages): rebuild for saga F attention hover-trace
+- feat(viz): saga F -- hover-to-trace on the attention heatmap
+- docs(viz): track the viz-ir brainstorm doc
+- chore(deps): sync Cargo.lock with committed mlpl-web-viz-ir dep
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for 2D/3D toggle + focus + taller output
 - feat(web): 2D/3D toggle on REPL rows + focus on load + taller output
 - fix(demos): classify.mlpl usage needs the -- separator
