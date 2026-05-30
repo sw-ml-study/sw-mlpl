@@ -3,8 +3,8 @@
 #
 # Usage (the `--` separator is required so the args reach the
 # script rather than mlpl-repl's own flag parser):
-#   mlpl-repl scripts/examples/sum.mlpl -- 3 4 5     # -> 12
-#   ./scripts/examples/sum.mlpl -- 3 4 5             # after chmod +x
+#   mlpl-repl demos/scripts/sum.mlpl -- 3 4 5     # -> 12
+#   ./demos/scripts/sum.mlpl -- 3 4 5             # after chmod +x
 #
 # Exit codes: 0 (Ok) on success; 1 if any argument is not a
 # number. With no args it prints 0.

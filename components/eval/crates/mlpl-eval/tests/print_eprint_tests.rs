@@ -56,7 +56,7 @@ fn print_composes_into_binding() {
 }
 
 #[test]
-fn print_rejects_wrong_arity() {
+fn print_rejects_zero_args() {
     let mut env = Environment::new();
     let err = eval_program(&parse(&lex("print()").unwrap()).unwrap(), &mut env).unwrap_err();
     let msg = format!("{err}");
@@ -64,10 +64,16 @@ fn print_rejects_wrong_arity() {
         msg.contains("print") && msg.contains("expects"),
         "expected arity error mentioning print, got: {msg}"
     );
-    let err2 = eval_program(&parse(&lex("print(1, 2)").unwrap()).unwrap(), &mut env).unwrap_err();
-    let msg2 = format!("{err2}");
-    assert!(
-        msg2.contains("print"),
-        "expected error mentioning print, got: {msg2}"
-    );
+}
+
+#[test]
+fn print_is_variadic_and_returns_last() {
+    // print/eprint are variadic + space-joined (println-style) so
+    // labelled output like `print("count:", n)` works without string
+    // concatenation. The return value is the last argument, so
+    // single-arg `print(x)` still yields x.
+    let mut env = Environment::new();
+    let r = run("print(\"count:\", 21, 2)", &mut env);
+    assert_eq!(r.shape(), &Shape::scalar());
+    assert_eq!(r.data(), &[2.0]);
 }

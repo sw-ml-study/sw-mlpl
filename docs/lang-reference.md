@@ -540,8 +540,8 @@ explicitly on failure via `is_ok` / `unwrap_or` / `err_message`.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `print(v)` | 1 | Write `v`'s display form to stdout followed by a newline. Returns `v` unchanged. The display form matches what the REPL prints for `v`'s type. |
-| `eprint(v)` | 1 | Same as `print(v)` but writes to stderr. Useful for diagnostics that should not interleave with the script's main output stream. |
+| `print(v, ...)` | 1+ | Write each argument's display form to stdout, space-joined (println-style), then a newline. Returns the last argument (so `print(v)` still yields `v`). Variadic, so labelled output works without string concatenation: `print("count:", n)` prints `count: 3`. The display form matches what the REPL prints for each value's type. |
+| `eprint(v, ...)` | 1+ | Same as `print` but writes to stderr. Useful for diagnostics that should not interleave with the script's main output stream. |
 | `to_number(s)` | 1 | Parse `s` (a `Value::Str`) as an `f64`. Returns `Ok(scalar)` on success; `Err("to_number: cannot parse \"abc\" as a number")` on failure. Leading/trailing whitespace is trimmed. |
 | `to_int(s)` | 1 | Parse `s` as an `i64`, rejecting non-integer numeric strings. Returns `Ok(scalar)`, `Err("to_int: \"3.5\" is not an integer")`, or `Err("to_int: cannot parse \"xyz\" as an integer")`. |
 | `env(name)` | 1 | Read the OS environment variable `name`. Returns `Ok(string-value)` if set; `Err("env: NAME not set")` if unset. Pair with `unwrap_or(env(\"VAR\"), \"default\")` for a fallback. |
