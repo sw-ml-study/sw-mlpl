@@ -479,6 +479,24 @@
             color: var(--text);
             overflow-y: auto;
         }
+        /* "Ask the LLM about this" row at the top of the inspector. */
+        .stage3d-inspector-body .insp-ask {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .stage3d-inspector-body .insp-ask-input {
+            flex: 1;
+            background: var(--mantle);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 13px;
+            padding: 6px 9px;
+            outline: none;
+        }
+        .stage3d-inspector-body .insp-ask-input:focus { border-color: var(--blue); }
         .stage3d-inspector-body h2 {
             font-size: 20px;
             color: var(--peach);

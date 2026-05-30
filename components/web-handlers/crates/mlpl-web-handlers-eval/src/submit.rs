@@ -190,11 +190,36 @@ fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
     eval_one_line(deps, line)
 }
 
+/// `:history` output -- the recent REPL command lines, so the
+/// user (and the `:ask` LLM, which also receives this) can see
+/// what has been run.
+fn history_listing(deps: &EvalDeps) -> String {
+    let lines: Vec<String> = deps
+        .history
+        .iter()
+        .filter(|e| matches!(e.kind, EntryKind::Command))
+        .map(|e| format!("mlpl> {}", e.input.trim()))
+        .collect();
+    if lines.is_empty() {
+        "(no commands run yet)".to_string()
+    } else {
+        lines.join("\n")
+    }
+}
+
 fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
     if trimmed == ":help" {
         return HistoryEntry {
             input: trimmed.to_string(),
             output: help_text(),
+            is_error: false,
+            kind: EntryKind::Command,
+        };
+    }
+    if trimmed == ":history" {
+        return HistoryEntry {
+            input: trimmed.to_string(),
+            output: history_listing(deps),
             is_error: false,
             kind: EntryKind::Command,
         };

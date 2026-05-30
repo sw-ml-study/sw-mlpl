@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-f1a1d628926b6d84.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-f1a1d628926b6d84_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-2d82703ed73b3e6.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-2d82703ed73b3e6_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -31,7 +31,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
     }
     </script>
-    <script type="module" src="js/stage3d.js?v=5c8232442951"></script>
+    <script type="module" src="js/stage3d.js?v=c0fd6172e7e4"></script>
     <style>
         /* Catppuccin Mocha */
         :root {
@@ -490,6 +490,24 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--text);
             overflow-y: auto;
         }
+        /* "Ask the LLM about this" row at the top of the inspector. */
+        .stage3d-inspector-body .insp-ask {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .stage3d-inspector-body .insp-ask-input {
+            flex: 1;
+            background: var(--mantle);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 13px;
+            padding: 6px 9px;
+            outline: none;
+        }
+        .stage3d-inspector-body .insp-ask-input:focus { border-color: var(--blue); }
         .stage3d-inspector-body h2 {
             font-size: 20px;
             color: var(--peach);
@@ -1783,7 +1801,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-f1a1d628926b6d84.js" crossorigin="anonymous" integrity="sha384-zGTTc+8JscsDvHRa3tY3/aNO4YoCo7/kcCq6SQkBoJy8rnby3P0HhWUZp8EBfvBU"><link rel="preload" href="/sw-mlpl/mlpl-web-f1a1d628926b6d84_bg.wasm" crossorigin="anonymous" integrity="sha384-da4BPX/kTzdU6FkE4AAeZ8Wzmjr8BD/kE8Bd7LZTy6u3xGnG76Ifh7klFtSvlyfG" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-2d82703ed73b3e6.js" crossorigin="anonymous" integrity="sha384-LS/1e7aq2+sSY314w1Ma9JFFwyw950AhXCO5DgDO8PRKDfW/LcoeA0T0j0tZ5TaP"><link rel="preload" href="/sw-mlpl/mlpl-web-2d82703ed73b3e6_bg.wasm" crossorigin="anonymous" integrity="sha384-64mie3BJTxuyUElw8tAHGAeRmGfp0lXFM3qzfMMjPmB5+lD1zbS4klGu5dJ4UbXb" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>

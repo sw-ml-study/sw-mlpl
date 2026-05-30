@@ -11,20 +11,89 @@ use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 use mlpl_web_handlers_upload::eval_deps::EvalDeps;
 
 /// Default Ollama endpoint + model backing the `:ask` shortcut.
+/// Overridable per page via `?ollama=<url>` / `?model=<name>` so
+/// the demo can point at a remote GPU box + a bigger tool-capable
+/// model (e.g. `?ollama=http://large12:11434&model=qwen2.5-coder:14b`).
+/// mlpl-serve runs the `llm_call` server-side, so the target host
+/// just has to be reachable from the server (no browser CORS).
 const ASK_URL: &str = "http://localhost:11434";
 const ASK_MODEL: &str = "qwen2.5:0.5b";
 
+/// System/meta preamble prepended to every `:ask` so even broad
+/// questions ("describe this environment") are grounded in what
+/// MLPL is and what context the user can surface, rather than the
+/// model guessing about generic OS/web environments.
+const ASK_SYSTEM: &str = "You are an assistant embedded INSIDE the sw-MLPL REPL -- an APL/J/BQN-inspired array and tensor language for machine learning, with a 3D visualization playground (the REPL renders each result as a 3D sculpture: tensors as grids/bars, attention as heatmaps, models as Sankey diagrams). You are NOT a generic cloud/AWS/web assistant; EVERY question is about sw-MLPL. The user runs MLPL expressions in this REPL; `:help` lists the builtins and `:history` shows recent commands. The user's recent REPL activity and any selected 3D sculpture are provided below as your context -- use them. Answer concisely and specifically about sw-MLPL.";
+
+/// Read a URL query parameter, falling back to `default` when it
+/// is absent or empty. (`name` is a fixed literal, never user
+/// input, so the inlined script is safe.)
+fn query_param(name: &str, default: &str) -> String {
+    let script = format!("new URLSearchParams(location.search).get('{name}') || ''");
+    js_sys::eval(&script)
+        .ok()
+        .and_then(|v| v.as_string())
+        .filter(|s| !s.is_empty())
+        .unwrap_or_else(|| default.to_string())
+}
+
+/// Plain-text summary of the sculpture the user is currently
+/// inspecting (via the `window.__stage3d_context()` JS hook), or
+/// empty when nothing is selected.
+fn selection_context() -> String {
+    js_sys::eval("window.__stage3d_context ? window.__stage3d_context() : ''")
+        .ok()
+        .and_then(|v| v.as_string())
+        .unwrap_or_default()
+}
+
+/// Summarize the recent REPL activity (last few command/result
+/// pairs) so `:ask` can answer questions about "what is being run
+/// in the REPL" -- the Gemini-in-Colab experience. Newest entries
+/// are kept; long outputs are truncated char-safely.
+fn repl_history_context(history: &[HistoryEntry]) -> String {
+    let mut recent: Vec<String> = history
+        .iter()
+        .rev()
+        .filter(|e| matches!(e.kind, EntryKind::Command))
+        .take(6)
+        .map(|e| {
+            let out: String = e.output.trim().chars().take(180).collect();
+            format!("mlpl> {} => {}", e.input.trim(), out)
+        })
+        .collect();
+    recent.reverse();
+    recent.join(" | ")
+}
+
+/// Build the full `:ask` prompt: meta preamble + recent REPL
+/// activity + the selected sculpture (if any) + the question.
+fn build_ask_prompt(question: &str, history: &[HistoryEntry]) -> String {
+    let mut p = ASK_SYSTEM.to_string();
+    let recent = repl_history_context(history);
+    if !recent.is_empty() {
+        p.push_str(&format!(" Recent REPL activity (oldest first): {recent}."));
+    }
+    let sel = selection_context();
+    if !sel.is_empty() {
+        p.push_str(&format!(" Selected 3D sculpture: {sel}."));
+    }
+    p.push_str(&format!(" User question: {question}"));
+    p
+}
+
 /// Map a submitted line to the program to send to the server.
-/// `:ask <question>` becomes an `llm_call`; a bare expression
-/// passes through unchanged; any other slash-command returns
-/// `None` to stay local (UI state lives in the browser).
-fn connect_program(line: &str) -> Option<String> {
+/// `:ask <question>` becomes an `llm_call` whose prompt carries
+/// the REPL/session context; a bare expression passes through; any
+/// other slash-command returns `None` to stay local.
+fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
     let t = line.trim_start();
     if let Some(q) = t.strip_prefix(":ask ") {
-        let esc = q.trim().replace('\\', "\\\\").replace('"', "\\\"");
-        return Some(format!(
-            "llm_call(\"{ASK_URL}\", \"{esc}\", \"{ASK_MODEL}\")"
-        ));
+        let prompt = build_ask_prompt(q.trim().trim_matches('"').trim(), history);
+        let esc = prompt.replace('\\', "\\\\").replace('"', "\\\"");
+        let url = query_param("ollama", ASK_URL);
+        let model = query_param("model", ASK_MODEL);
+        return Some(format!("llm_call(\"{url}\", \"{esc}\", \"{model}\")"));
     }
     if t.starts_with(':') {
         return None;
@@ -44,7 +113,7 @@ pub(crate) fn try_connect_eval(
     idx: usize,
     line: &str,
 ) -> bool {
-    let Some(program) = connect_program(line) else {
+    let Some(program) = connect_program(line, history) else {
         return false;
     };
     let hist_handle = deps.history.clone();
