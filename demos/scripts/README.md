@@ -12,16 +12,16 @@ before `--` is parsed as mlpl-repl's own flags, everything after
 becomes the script's `args()`:
 
 ```sh
-mlpl-repl scripts/examples/sum.mlpl -- 3 4 5      # -> 12
-mlpl-repl scripts/examples/stats.mlpl -- 10 20 30 # -> 3 / 60 / 20
+mlpl-repl demos/scripts/sum.mlpl -- 3 4 5      # -> 12
+mlpl-repl demos/scripts/stats.mlpl -- 10 20 30 # -> 3 / 60 / 20
 ```
 
 To run a script directly via its shebang, make it executable
 first; the `--` is still required:
 
 ```sh
-chmod +x scripts/examples/*.mlpl
-./scripts/examples/sum.mlpl -- 3 4 5
+chmod +x demos/scripts/*.mlpl
+./demos/scripts/sum.mlpl -- 3 4 5
 ```
 
 A leading `#!` line is a comment to the MLPL lexer, so the
