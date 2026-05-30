@@ -1,9 +1,10 @@
 number = 3
 slug = "local-gpu-demo-group-gating"
-status = "pending"
+status = "completed"
 description = "Phase 1 of local-gpu-agentic: create the 'Local GPU / connect-mode' demo SECT..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-30T15:53:00"
+completed_at = "2026-05-30T16:51:34"
 task_type = "feature"
-commits = []
+commits = ["e8ec05ba938015c4e982bcf233fb6dc219ad9ef7"]
