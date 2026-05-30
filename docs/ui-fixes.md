@@ -50,7 +50,7 @@ install), `[ ]` not started.
   - `-v` / `--verbose` to opt into the echo (and trace);
   - `-h` / `--help` usage output;
   - `-V` / `--version` (confirm it works in all paths).
-- [x] **CLI demo scripts.** `scripts/examples/{sum,stats}.mlpl`
+- [x] **CLI demo scripts.** `demos/scripts/{sum,stats}.mlpl`
   + README: shebang + `args()` + exit codes. Created, tested
   against the installed binary; pending commit.
 
@@ -59,6 +59,6 @@ install), `[ ]` not started.
 - The `--` separator is required to pass args to a script
   (`mlpl-repl script.mlpl -- ARG`); bare positionals after the
   script path are not captured. Documented in
-  `demos/classify.mlpl` and `scripts/examples/README.md`.
+  `demos/classify.mlpl` and `demos/scripts/README.md`.
 - Web fixes are batched into a single `pages/` rebuild + deploy
   to avoid repeated multi-GB WASM builds.
