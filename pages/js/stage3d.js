@@ -622,7 +622,7 @@ function renderAttentionHeatmap(ud, viz) {
         <div class="insp-section-title">Statistics for current head</div>
         ${renderStats(computeStats(slice))}
         ${derivation}
-        <div class="insp-hint">Click any step in the derivation above to jump the inspector to that tensor. Saga E v0 uses plain text; MathJax landings in a follow-up.</div>
+        <div class="insp-hint">Click any step in the derivation above to jump the inspector to that tensor. Each step renders as math (MathJax) once it loads.</div>
     `;
 }
 
