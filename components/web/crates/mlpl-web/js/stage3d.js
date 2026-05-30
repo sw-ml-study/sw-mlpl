@@ -884,7 +884,7 @@ function renderDerivation(mesh) {
         // runs; until it loads, the spans show the raw LaTeX
         // which still reads better than the original MLPL.
         const latexRhs = mlplToLatex(cleanRhs);
-        const latexName = `\\(${escapeHtml(step.varName)}\\)`;
+        const latexName = `\\(${braceSubscripts(escapeHtml(step.varName))}\\)`;
         return `
             <button class="${cls}" onclick="window.__viz_jump_step(${step.stepIdx})" title="Jump to step ${step.stepIdx + 1}">
                 <span class="insp-deriv-name">${latexName}</span>
