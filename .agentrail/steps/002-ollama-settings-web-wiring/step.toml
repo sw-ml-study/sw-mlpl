@@ -1,9 +1,10 @@
 number = 2
 slug = "ollama-settings-web-wiring"
-status = "pending"
+status = "completed"
 description = "Phase 0 part 2 (web side) of local-gpu-agentic. The server now exposes GET /v..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-30T15:16:22"
+completed_at = "2026-05-30T15:53:00"
 task_type = "feature"
-commits = []
+commits = ["0e945eb8a9faada7b33821f74f61b8d01c4c2c87"]

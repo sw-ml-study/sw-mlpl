@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "ollama-settings-web-wiring"
+  },
+  "action": "Explore agent to map WASM connect HTTP (gloo::net, spawn_local, ResultCb); new ollama_fetch module in web-eval (crate already over module budget so no new FAIL); +2 fns in connect.rs staying within 7-fn cap; trimmed ollama_models_text under 25 LOC; Playwright end-to-end verify.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-30T15:53:00"
+}
