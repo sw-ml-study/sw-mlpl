@@ -1,0 +1,26 @@
+mlpl-repl -- MLPL interactive REPL and script runner
+
+USAGE:
+  mlpl-repl                              Start the interactive REPL
+  mlpl-repl <script.mlpl> [-- ARGS]      Run a script (positional path)
+  mlpl-repl -f <script.mlpl> [-- ARGS]   Run a script (explicit -f flag)
+
+SCRIPT ARGUMENTS:
+  Pass arguments to a script after a `--` separator; the script reads
+  them with args() / list_get / list_len. Everything before `--` is
+  parsed as mlpl-repl's own flags, so the `--` is required:
+    mlpl-repl demos/classify.mlpl -- 95
+
+FLAGS:
+  -h, --help          Show this help and exit
+  -V, --version       Show version and exit
+  -v, --verbose       Echo each script line as it runs (quiet by default)
+      --trace         Print a trace summary after the script
+      --svg-out DIR   Write SVG visualization output to DIR
+      --data-dir DIR  Set the dataset directory
+      --exp-dir DIR   Set the experiment directory
+
+EXIT CODES (script mode):
+  0   success: final value is Ok(...) or a non-Result, or exit(0)
+  1   final value is Err(...) (message on stderr), or a read error
+  N   exit(N) was called explicitly

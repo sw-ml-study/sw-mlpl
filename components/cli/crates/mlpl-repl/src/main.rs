@@ -1,66 +1,26 @@
+mod args;
 mod ask;
 mod connect;
 mod connect_reattach;
 mod connect_repl;
 mod connect_stream;
+mod run;
 mod script_mode;
 mod svg_out;
 mod version;
 
 use std::io::{self, BufRead, Write};
-use std::path::PathBuf;
 
 use mlpl_eval::Environment;
 use mlpl_trace::Trace;
 use svg_out::SvgOut;
 
 fn main() {
-    let raw_args: Vec<String> = std::env::args().collect();
-    // Saga 31 step 003: split on the `--` separator. Everything
-    // before goes to mlpl-repl's own flag parser; everything after
-    // becomes the script's CLI args, visible via the `args()`
-    // builtin. The separator itself is dropped.
-    let (args, script_args): (Vec<String>, Vec<String>) =
-        match raw_args.iter().position(|a| a == "--") {
-            Some(i) => (raw_args[..i].to_vec(), raw_args[i + 1..].to_vec()),
-            None => (raw_args, Vec::new()),
-        };
-    if args.iter().any(|a| a == "-V" || a == "--version") {
-        version::print();
-        return;
-    }
-    if connect_repl::try_dispatch_args(&args) {
-        return;
-    }
-    let flag = |name: &str| -> Option<String> {
-        args.iter()
-            .position(|a| a == name)
-            .and_then(|p| args.get(p + 1))
-            .cloned()
-    };
-    let mut env = Environment::new();
-    env.set_cli_args(script_args);
-    let trace_flag = args.iter().any(|a| a == "--trace");
-    let mut svg_out = SvgOut::new(flag("--svg-out").map(PathBuf::from));
-    if let Some(dir) = flag("--data-dir") {
-        env.set_data_dir(PathBuf::from(dir));
-    }
-    if let Some(dir) = flag("--exp-dir") {
-        env.set_exp_dir(PathBuf::from(dir));
-    }
-    if let Some(path) = script_mode::resolve_script_path(&args, &flag) {
-        let content = std::fs::read_to_string(&path).unwrap_or_else(|e| {
-            eprintln!("error reading {path}: {e}");
-            std::process::exit(1);
-        });
-        let code = script_mode::run_script(&content, &mut env, trace_flag, &mut svg_out);
-        std::process::exit(code);
-    } else {
-        run_interactive(&mut env, &mut svg_out);
-    }
+    let config = args::parse(std::env::args().collect());
+    run::run(config);
 }
 
-fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
+pub(crate) fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
     println!("{}", version::banner());
     println!("Type :help for commands, exit or Ctrl-D to quit.");
     println!();

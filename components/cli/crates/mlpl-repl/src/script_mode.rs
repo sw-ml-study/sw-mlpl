@@ -21,6 +21,7 @@ pub(crate) fn run_script(
     content: &str,
     env: &mut Environment,
     tracing: bool,
+    verbose: bool,
     svg_out: &mut SvgOut,
 ) -> i32 {
     let cleaned: Vec<&str> = content
@@ -35,10 +36,15 @@ pub(crate) fn run_script(
     if trimmed.is_empty() {
         return 0;
     }
-    for line in content.lines() {
-        let t = line.trim();
-        if !t.is_empty() && !t.starts_with('#') {
-            println!("> {t}");
+    // Quiet by default: only echo each script line under -v so
+    // the script's actual output is not buried (the old behavior
+    // echoed every line unconditionally).
+    if verbose {
+        for line in content.lines() {
+            let t = line.trim();
+            if !t.is_empty() && !t.starts_with('#') {
+                println!("> {t}");
+            }
         }
     }
     let mut last_trace: Option<Trace> = None;
@@ -103,19 +109,30 @@ fn report_script_err(input: &str, e: &dyn std::fmt::Display) -> i32 {
     1
 }
 
+/// Flags that consume the following arg as their value. A bare
+/// arg sitting right after one of these is that value, not the
+/// script path.
+const VALUE_FLAGS: &[&str] = &["-f", "--file", "--svg-out", "--data-dir", "--exp-dir"];
+
 /// Pick the script path from CLI args. Priority order: explicit
-/// `-f` / `--file` flag, then a positional path at `args[1]`
-/// (the slot right after the binary name) so shebang
-/// invocations work. Returns `None` for interactive REPL mode.
+/// `-f` / `--file` flag, then the first positional path -- the
+/// first bare arg (not a flag, not a value-flag's value) after
+/// the binary name. Returns `None` for interactive REPL mode.
 ///
-/// Saga 31 step 007: positional form is restricted to `args[1]`
-/// so it does not collide with a flag's positional value
-/// (`--svg-out /tmp/out` etc).
+/// Scanning for the first eligible positional (rather than
+/// fixing it at `args[1]`, as saga 31 step 007 originally did)
+/// lets boolean flags like `-v` precede the script path
+/// (`mlpl-repl -v script.mlpl`) while still not mistaking a
+/// value-flag's argument (`--svg-out /tmp/out`) for the script.
 pub(crate) fn resolve_script_path<F>(args: &[String], flag: &F) -> Option<String>
 where
     F: Fn(&str) -> Option<String>,
 {
-    flag("-f")
-        .or_else(|| flag("--file"))
-        .or_else(|| args.get(1).filter(|a| !a.starts_with('-')).cloned())
+    if let Some(path) = flag("-f").or_else(|| flag("--file")) {
+        return Some(path);
+    }
+    args.iter().enumerate().skip(1).find_map(|(i, a)| {
+        let is_value = VALUE_FLAGS.contains(&args[i - 1].as_str());
+        (!a.starts_with('-') && !is_value).then(|| a.clone())
+    })
 }
