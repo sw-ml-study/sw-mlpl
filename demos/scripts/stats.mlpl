@@ -1,10 +1,10 @@
 #!/usr/bin/env mlpl-repl
 # Print the count, sum, and mean of the numeric CLI arguments,
-# one value per line.
+# one labelled line each.
 #
 # Usage (the `--` separator is required):
-#   mlpl-repl scripts/examples/stats.mlpl -- 10 20 30   # -> 3 / 60 / 20
-#   ./scripts/examples/stats.mlpl -- 10 20 30           # after chmod +x
+#   mlpl-repl demos/scripts/stats.mlpl -- 10 20 30   # count: 3 / sum: 60 / mean: 20
+#   ./demos/scripts/stats.mlpl -- 10 20 30           # after chmod +x
 #
 # Exit codes: 0 (Ok) on success; 2 with a usage line on stderr
 # when given no arguments. Non-numeric args count as 0 (lenient).
@@ -23,7 +23,7 @@ while gt(n, i) {
   total = total + unwrap_or(to_number(unwrap_or(list_get(args(), i), "0")), 0)
   i = i + 1
 }
-print(n)
-print(total)
-print(total / n)
+print("count:", n)
+print("sum:", total)
+print("mean:", total / n)
 ok(total / n)
