@@ -19,7 +19,7 @@ use crate::app_hooks::{
     use_focus_after_splash, use_global_keydown, use_onboarding_state, use_scroll_effect,
     use_sessions, use_ui_state, use_upload_state,
 };
-use crate::app_log::log_connect_mode;
+use crate::app_log::{log_connect_mode, use_ask_hook};
 use mlpl_web_render_shell::shell::render;
 use mlpl_web_render_types::app_callbacks::build_callbacks;
 use mlpl_web_render_types::args::RenderArgs;
@@ -41,6 +41,7 @@ fn app() -> Html {
     let callbacks = build_callbacks(&active, &upload, &ui);
     use_scroll_effect(active.history.clone());
     use_focus_after_splash(onboarding.show_splash.clone());
+    use_ask_hook(callbacks.on_submit.clone());
     use_global_keydown(
         ui.dialog_open.clone(),
         ui.lesson_idx.clone(),

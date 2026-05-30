@@ -652,7 +652,7 @@ function refreshInspectorBody() {
     if (!mesh || !mesh.userData) return;
     const body = document.getElementById('stage3d-inspector-body');
     if (!body) return;
-    body.innerHTML = renderInspectorBody(mesh.userData);
+    body.innerHTML = askRow() + renderInspectorBody(mesh.userData);
     typesetInspectorBody();
     wireAttentionTrace();
 }
@@ -1026,7 +1026,7 @@ function openInspector() {
     // first head / first batch slot regardless of where the
     // previous open left them.
     inspectorHeadIdx = 0;
-    body.innerHTML = renderInspectorBody(mesh.userData);
+    body.innerHTML = askRow() + renderInspectorBody(mesh.userData);
     dlg.style.display = 'block';
     typesetInspectorBody();
     wireAttentionTrace();
@@ -1098,6 +1098,28 @@ function isInspectorOpen() {
     return !!dlg && dlg.style.display === 'block';
 }
 
+// Plain-text summary of the currently-selected sculpture, fed to
+// the LLM as context by the connect-mode `:ask` / Explain button.
+// Empty string when nothing is selected so the caller can fall
+// back to a context-free question.
+window.__stage3d_context = function() {
+    if (selectedStepIdx < 0 || selectedStepIdx >= stepMeshes.length) return '';
+    const ud = stepMeshes[selectedStepIdx].userData;
+    if (!ud) return '';
+    const shape = ud.shape && ud.shape.length ? `[${ud.shape.join(', ')}]` : 'scalar';
+    const parts = [`MLPL sculpture "${ud.label || ud.varName || '?'}", shape ${shape}`];
+    if (ud.viz && ud.viz.kind) parts.push(`viz kind: ${ud.viz.kind}`);
+    const s = ud.summary;
+    if (s && typeof s.min === 'number') {
+        parts.push(`stats min=${s.min.toFixed(4)} max=${s.max.toFixed(4)} mean=${s.mean.toFixed(4)}`);
+    }
+    const deriv = buildDerivation(stepMeshes[selectedStepIdx]);
+    if (deriv && deriv.length) {
+        parts.push('derivation: ' + deriv.map(d => (d.label || d.varName)).join(' ; '));
+    }
+    return parts.join('. ');
+};
+
 // Carousel: with the inspector open, jump the selection to the
 // previous/next sculpture and refresh the dialog in place, so
 // the user can scroll through views with the arrow keys instead
@@ -1108,6 +1130,29 @@ function navInspector(dir) {
     selectStep(next);
     if (isInspectorOpen()) refreshInspectorBody();
 }
+
+// "Ask the LLM about this" row prepended to every inspector body.
+// Submitting closes the dialog (so the answer is visible in the
+// REPL output) and routes a `:ask` through window.__mlpl_ask --
+// the connect-mode pipeline attaches this sculpture's context.
+function askRow() {
+    return `<div class="insp-ask">
+        <input id="insp-ask-input" class="insp-ask-input" type="text"
+            placeholder="Ask about this sculpture (connect mode)..."
+            onkeydown="if(event.key==='Enter'){window.__viz_ask_dialog()}" />
+        <button class="ctrl-btn" onclick="window.__viz_ask_dialog()">Ask</button>
+    </div>`;
+}
+
+window.__viz_ask_dialog = function() {
+    const inp = document.getElementById('insp-ask-input');
+    const q = inp ? inp.value.trim() : '';
+    if (!q) return;
+    closeInspector();
+    if (typeof window.__mlpl_ask === 'function') {
+        window.__mlpl_ask(q);
+    }
+};
 
 function renderInspectorBody(ud) {
     // Viz-IR dispatch: if a renderer is registered for this
