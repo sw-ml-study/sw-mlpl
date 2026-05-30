@@ -38,6 +38,10 @@ pub struct MainArgs<'a> {
     pub on_pick_completion: Callback<String>,
     pub completion_selected: usize,
     pub show_3d: bool,
+    /// Flip 2D <-> 3D from the input-row toggle. Threaded down
+    /// to the shared InputRow so both REPLs (main + tutorial)
+    /// carry the control.
+    pub on_toggle_3d: Callback<MouseEvent>,
     pub editor_active: bool,
     pub editor_open: UseStateHandle<bool>,
     pub editor_content: UseStateHandle<String>,
@@ -69,11 +73,12 @@ pub fn render_main(a: MainArgs) -> Html {
         completion_candidates: a.completion_candidates,
         on_pick_completion: a.on_pick_completion,
         completion_selected: a.completion_selected,
+        show_3d: a.show_3d,
+        on_toggle_3d: a.on_toggle_3d,
     });
     render_main_shell(
         a.tutorial_active,
         a.show_3d,
-        a.editor_active,
         editor_pane,
         tutorial_pane,
         paths_pane,
@@ -153,6 +158,8 @@ struct ReplPaneArgs<'a> {
     completion_candidates: Vec<String>,
     on_pick_completion: Callback<String>,
     completion_selected: usize,
+    show_3d: bool,
+    on_toggle_3d: Callback<MouseEvent>,
 }
 
 fn render_repl_pane(a: ReplPaneArgs) -> Html {
@@ -177,6 +184,8 @@ fn render_repl_pane(a: ReplPaneArgs) -> Html {
                 completion_candidates={a.completion_candidates}
                 on_pick_completion={a.on_pick_completion}
                 completion_selected={a.completion_selected}
+                show_3d={a.show_3d}
+                on_toggle_3d={a.on_toggle_3d}
             />
         </>
     }
@@ -188,7 +197,6 @@ fn render_repl_pane(a: ReplPaneArgs) -> Html {
 fn render_main_shell(
     tutorial_active: bool,
     show_3d: bool,
-    editor_active: bool,
     editor_pane: Html,
     tutorial_pane: Html,
     paths_pane: Html,
@@ -223,5 +231,6 @@ fn render_main_shell(
     }
     // Note: in viz3d-split mode, CSS flex-direction:column
     // stacks output, input-wrap, and stage3d-pane vertically.
-    // The .output gets max-height:40vh; stage3d-pane fills the rest.
+    // The .output gets height:45vh; stage3d-pane fills the rest
+    // (the drag handle lets the user rebalance).
 }

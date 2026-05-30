@@ -26,7 +26,6 @@ fn percent_encode(s: &str) -> String {
 /// leading `#`, trimmed). MLPL's parser already drops `#`
 /// comments; this is purely for the UI to render the
 /// commentary as an annotation alongside the code.
-
 fn render_input_line(input: &str) -> Html {
     let (code, comment) = mlpl_web_tutorial::split_inline_comment(input);
     // Saga 29 step 025: route the comment text through the markdown-ish renderer so

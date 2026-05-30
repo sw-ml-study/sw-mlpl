@@ -17,6 +17,34 @@ pub struct InputRowProps {
     /// but was too far from where output appeared; moving it
     /// next to the prompt makes the affordance obvious.
     pub on_clear: Callback<MouseEvent>,
+    /// Whether the 3D stage is currently shown. Drives which
+    /// half of the `2D | 3D` toggle is bold (active).
+    pub show_3d: bool,
+    /// Flip 2D <-> 3D. A visual convenience for the `:2d` /
+    /// `:3d` commands; both drive the same global `show_3d`
+    /// state, so the button, the commands, and Ctrl+3 stay in
+    /// sync. Lives on every REPL input line (main + tutorial).
+    pub on_toggle_3d: Callback<MouseEvent>,
+}
+
+/// Render the `2D | 3D` segmented control. The active mode is
+/// bold and inert; the other mode is a link-styled button that
+/// flips the view. Clicking the active half is a no-op by
+/// design -- the user clicks the half they want to switch TO.
+fn render_mode_toggle(show_3d: bool, on_toggle: &Callback<MouseEvent>) -> Html {
+    let title = "Switch 2D / 3D view (same as the :2d and :3d commands)";
+    let opt = |is_active: bool, label: &'static str| -> Html {
+        if is_active {
+            html! { <span class="mode-opt active">{ label }</span> }
+        } else {
+            html! { <button class="mode-opt" onclick={on_toggle.clone()}>{ label }</button> }
+        }
+    };
+    html! {
+        <span class="mode-toggle" title={title}>
+            { opt(!show_3d, "2D") }<span class="mode-sep">{"|"}</span>{ opt(show_3d, "3D") }
+        </span>
+    }
 }
 
 #[function_component(InputRow)]
@@ -65,6 +93,7 @@ pub fn input_row(props: &InputRowProps) -> Html {
                     oninput={props.on_input.clone()}
                     onkeydown={props.on_keydown.clone()}
                 />
+                { render_mode_toggle(props.show_3d, &props.on_toggle_3d) }
                 <button
                     class="ctrl-btn input-row-clear"
                     onclick={props.on_clear.clone()}

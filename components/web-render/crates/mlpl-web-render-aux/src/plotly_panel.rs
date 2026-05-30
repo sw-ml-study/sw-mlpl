@@ -8,7 +8,6 @@
 //! `<script>` element carrying the same text content -- which
 //! the browser DOES execute. Saga 33 step 030.
 
-use wasm_bindgen::JsCast;
 use web_sys::HtmlDivElement;
 use yew::prelude::*;
 

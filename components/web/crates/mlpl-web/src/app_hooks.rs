@@ -85,6 +85,22 @@ pub fn use_scroll_effect(active_history: UseStateHandle<Vec<HistoryEntry>>) {
     });
 }
 
+/// Focus the REPL input once the splash overlay is dismissed.
+/// Keyed on the splash flag: when it flips to `false` (close
+/// button, Escape, or a starting state of false) the effect
+/// fires and focuses `#repl-input` so the user can type a
+/// command -- including `:3d` -- without first clicking. While
+/// the splash is up the input is unreachable, so we skip.
+#[hook]
+pub fn use_focus_after_splash(show_splash: UseStateHandle<bool>) {
+    use_effect_with(*show_splash, |open| {
+        if !*open {
+            scroll_and_focus();
+        }
+        || ()
+    });
+}
+
 /// Wire a window-level Escape-key handler that closes the
 /// doc dialog and the tutorial panel when either is open.
 /// Same pattern the glossary popup already uses
