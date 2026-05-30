@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-29
 
+- chore(pages): rebuild for ML-themed UDF demo
+- feat(demos): make User-Defined Functions demo ML-themed
+- docs(memory): explain MLPL's RAII-based memory model
+- docs(changes): refresh CHANGES.md to HEAD
 - saga(viz-derivation-mathjax): complete 001-mathjax-latex
 - fix(viz): correct derivation hint now that MathJax has landed
 - feat(viz): MathJax-rendered derivation steps (saga E follow-up)
