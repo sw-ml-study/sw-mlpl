@@ -28,6 +28,8 @@ proxy; that is Saga 21's job.
 ```
 llm_call(url: string, prompt: string, model: string)
   -> string
+llm_call(url: string, prompt: string, model: string,
+         system: string) -> string
 ```
 
 - **`url`** -- string scalar. Ollama base URL
@@ -41,6 +43,12 @@ llm_call(url: string, prompt: string, model: string)
   in the request body.
 - **`model`** -- string scalar. Ollama model name
   (`"llama3.2"`, `"qwen2.5-coder"`, etc.).
+- **`system`** -- optional string scalar. When
+  present and non-empty, sets Ollama's `system`
+  (grounding) field in the request body; omitted
+  from the body when empty or not supplied. Weak
+  models follow a real system message far better
+  than the same text prepended to the prompt.
 - **Returns** -- string scalar (`Value::Str`)
   containing the model's completion text from the
   response's `response` field.
@@ -56,6 +64,9 @@ Request body (JSON):
 ```json
 {"model": "<model>", "prompt": "<prompt>", "stream": false}
 ```
+
+When a non-empty `system` argument is supplied, a
+`"system": "<system>"` field is added to the body.
 
 POSTed with `Content-Type: application/json` to the
 resolved URL. Response is parsed as JSON; the string

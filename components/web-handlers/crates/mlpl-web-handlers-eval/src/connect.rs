@@ -66,9 +66,11 @@ fn repl_history_context(history: &[HistoryEntry]) -> String {
     recent.join(" | ")
 }
 
-/// Build the full `:ask` prompt: meta preamble + recent REPL
-/// activity + the selected sculpture (if any) + the question.
-fn build_ask_prompt(question: &str, history: &[HistoryEntry]) -> String {
+/// Build the `:ask` system message: meta preamble + recent REPL
+/// activity + the selected sculpture (if any). This goes in
+/// Ollama's `system` role (not the prompt), which weak models
+/// follow far better. The question is sent as the user prompt.
+fn build_ask_system(history: &[HistoryEntry]) -> String {
     let mut p = ASK_SYSTEM.to_string();
     let recent = repl_history_context(history);
     if !recent.is_empty() {
@@ -78,22 +80,25 @@ fn build_ask_prompt(question: &str, history: &[HistoryEntry]) -> String {
     if !sel.is_empty() {
         p.push_str(&format!(" Selected 3D sculpture: {sel}."));
     }
-    p.push_str(&format!(" User question: {question}"));
     p
 }
 
 /// Map a submitted line to the program to send to the server.
-/// `:ask <question>` becomes an `llm_call` whose prompt carries
-/// the REPL/session context; a bare expression passes through; any
-/// other slash-command returns `None` to stay local.
+/// `:ask <question>` becomes a 4-arg `llm_call` -- the question is
+/// the user prompt and the grounding/context rides in the `system`
+/// field. A bare expression passes through; any other slash-command
+/// returns `None` to stay local.
 fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
     let t = line.trim_start();
     if let Some(q) = t.strip_prefix(":ask ") {
-        let prompt = build_ask_prompt(q.trim().trim_matches('"').trim(), history);
-        let esc = prompt.replace('\\', "\\\\").replace('"', "\\\"");
+        let esc = |s: &str| s.replace('\\', "\\\\").replace('"', "\\\"");
+        let question = esc(q.trim().trim_matches('"').trim());
+        let system = esc(&build_ask_system(history));
         let url = query_param("ollama", ASK_URL);
         let model = query_param("model", ASK_MODEL);
-        return Some(format!("llm_call(\"{url}\", \"{esc}\", \"{model}\")"));
+        return Some(format!(
+            "llm_call(\"{url}\", \"{question}\", \"{model}\", \"{system}\")"
+        ));
     }
     if t.starts_with(':') {
         return None;

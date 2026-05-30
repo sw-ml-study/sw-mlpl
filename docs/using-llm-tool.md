@@ -42,6 +42,7 @@ CLI-vs-web matrix.
 
 ```
 llm_call(url, prompt, model) -> string
+llm_call(url, prompt, model, system) -> string
 ```
 
 - **`url`** -- string scalar. Ollama base URL
@@ -53,6 +54,13 @@ llm_call(url, prompt, model) -> string
 - **`prompt`** -- string scalar. The user prompt.
 - **`model`** -- string scalar. Ollama model name
   (`"llama3.2"`, `"qwen2.5-coder"`, etc.).
+- **`system`** -- optional string scalar. When given
+  and non-empty, populates Ollama's `system`
+  (grounding/instruction) role rather than the user
+  prompt. Weak models follow a real system message
+  far better than the same text inlined in the
+  prompt; the web `:ask` uses this for its
+  "you are inside sw-MLPL" preamble + REPL context.
 - **Returns** -- string scalar (`Value::Str`)
   containing the model's completion text.
 - **Timeout** -- 120 seconds. Same as the `:ask`
