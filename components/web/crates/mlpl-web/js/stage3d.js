@@ -208,9 +208,14 @@ window.__stage3d_init = function(canvas) {
     renderer.shadowMap.enabled = true;
 
     controls = new OrbitControls(camera, canvas);
-    controls.target.set(controls.target.x, 0.5, 0);
     controls.enableDamping = true;
     controls.dampingFactor = 0.08;
+    // Reset to the default head-on framing on every (re)mount so
+    // toggling 3D off and back on always restores the expected
+    // horizontal view, no matter where the camera was orbited or
+    // which sculpture was last focused.
+    camera.position.set(0, 6, 12);
+    controls.target.set(0, 0.5, 0);
     controls.update();
 
     canvas.tabIndex = 0;
@@ -787,7 +792,19 @@ function mlplToLatex(expr) {
         cur = cur.replace(/(?<![\\a-zA-Z_])([a-z_]\w*)\(([^()]*)\)/g, '\\text{$1}($2)');
         guard += 1;
     }
-    return cur;
+    return braceSubscripts(cur);
+}
+
+// MathJax treats only the first char after `_` as the subscript,
+// so `d_model` renders as d-sub-m followed by full-size "odel".
+// Wrap multi-char (and single-char, harmlessly) subscripts in
+// braces: `d_model` -> `d_{model}`. The leading alternation
+// consumes whole `\text{...}` spans untouched so underscores in
+// function names (reduce_add, causal_attention) stay literal
+// text rather than becoming spurious subscripts.
+function braceSubscripts(s) {
+    return s.replace(/\\text\{[^}]*\}|_([A-Za-z][A-Za-z0-9]*)/g,
+        (m, sub) => (sub ? `_{${sub}}` : m));
 }
 
 // After the inspector body innerHTML is set, ask MathJax to
@@ -1009,8 +1026,15 @@ function openInspector() {
     dlg.style.display = 'block';
     typesetInspectorBody();
     wireAttentionTrace();
-    // ESC closes; one listener per open so we can detach on close.
-    const onKey = (e) => { if (e.key === 'Escape') closeInspector(); };
+    // While open, this document-level handler owns the keys:
+    // Escape closes; Left/Right step the carousel to the
+    // previous/next sculpture's view. One listener per open so we
+    // can detach it on close.
+    const onKey = (e) => {
+        if (e.key === 'Escape') { closeInspector(); }
+        else if (e.key === 'ArrowRight') { e.preventDefault(); navInspector(1); }
+        else if (e.key === 'ArrowLeft') { e.preventDefault(); navInspector(-1); }
+    };
     document.addEventListener('keydown', onKey);
     dlg.dataset.escListener = '1';
     dlg._escHandler = onKey;
@@ -1062,6 +1086,23 @@ function closeInspector() {
             selectMesh(mesh);
         }
     }
+}
+
+// True while the close-up inspector dialog is showing.
+function isInspectorOpen() {
+    const dlg = document.getElementById('stage3d-inspector');
+    return !!dlg && dlg.style.display === 'block';
+}
+
+// Carousel: with the inspector open, jump the selection to the
+// previous/next sculpture and refresh the dialog in place, so
+// the user can scroll through views with the arrow keys instead
+// of close -> move -> reopen. Clamped at the ends.
+function navInspector(dir) {
+    const next = selectedStepIdx + dir;
+    if (next < 0 || next >= stepMeshes.length) return;
+    selectStep(next);
+    refreshInspectorBody();
 }
 
 function renderInspectorBody(ud) {
@@ -1217,6 +1258,12 @@ function renderHistogram(hist) {
 }
 
 function onCanvasKey(e) {
+    // While the inspector is open the dialog's own key handler
+    // owns Escape (close) and the arrows (carousel), so the
+    // canvas handler stays out of the way. This also stops
+    // Escape from clearing the selection / (i) behind the open
+    // dialog, so Escape now matches the X / click-outside paths.
+    if (isInspectorOpen()) return;
     if (e.key === 'ArrowRight') {
         e.preventDefault();
         if (selectedStepIdx >= 0) selectStep(selectedStepIdx + 1); else panToStep(viewStep + 1);
