@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-73ea9ee97a0c060f.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-73ea9ee97a0c060f_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-b4f14319e24ad17a.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-b4f14319e24ad17a_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -332,13 +332,35 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             /* Give the REPL output roughly half the height so it
                stays readable when 3D is open. The stage3d-pane
                takes the rest (flex:1); the drag handle lets the
-               user rebalance from this default. */
+               user rebalance from this default. min-height keeps
+               at least ~4 output lines visible even on a short
+               viewport, so 3D can never squeeze the output down
+               to just the prompt. */
             height: 45vh;
-            min-height: 40px;
+            min-height: 7em;
             overflow-y: auto;
             flex-shrink: 1;
             flex-grow: 0;
             padding: 8px 20px;
+        }
+        /* Scroll-up affordance: a sticky hint pinned to the top
+           of the output pane so it's obvious there is earlier
+           output above the visible (auto-scrolled-to-bottom)
+           tail. Only in 3D split, where vertical space is tight. */
+        main.viz3d-split > .output::before {
+            content: "\2191 scroll up for earlier output";
+            position: sticky;
+            top: 0;
+            z-index: 2;
+            display: block;
+            margin: -8px -20px 6px;
+            padding: 2px 0;
+            text-align: center;
+            font-size: 10px;
+            letter-spacing: 0.04em;
+            color: var(--subtext0);
+            background: var(--mantle);
+            border-bottom: 1px solid var(--surface1);
         }
         main.viz3d-split > .input-wrap {
             flex-shrink: 0;
@@ -1755,7 +1777,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-73ea9ee97a0c060f.js" crossorigin="anonymous" integrity="sha384-WD5W1J+ZC+6P+AyhfUYmOi+7Pgp4YZzyemY6mCXScVI3mB+asDH+SXGrdlD6TAUX"><link rel="preload" href="/sw-mlpl/mlpl-web-73ea9ee97a0c060f_bg.wasm" crossorigin="anonymous" integrity="sha384-gNSWgvTO7U7vg9l5UCCJzq+7Z02qC45Y91RJbZrNm8syj9qfMZ1F5dxl/R6T8XE5" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-b4f14319e24ad17a.js" crossorigin="anonymous" integrity="sha384-WD5W1J+ZC+6P+AyhfUYmOi+7Pgp4YZzyemY6mCXScVI3mB+asDH+SXGrdlD6TAUX"><link rel="preload" href="/sw-mlpl/mlpl-web-b4f14319e24ad17a_bg.wasm" crossorigin="anonymous" integrity="sha384-6rCOYL4hFVEZcqEoz36Ony2Hbmf6tWAnXmrhH1WSnlHhLLFYrcQgeJ6n6uVmtuPZ" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
