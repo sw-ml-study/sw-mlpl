@@ -1,0 +1,9 @@
+number = 3
+slug = "local-gpu-demo-group-gating"
+status = "pending"
+description = "Phase 1 of local-gpu-agentic: create the 'Local GPU / connect-mode' demo SECT..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-30T15:53:00"
+task_type = "feature"
+commits = []
