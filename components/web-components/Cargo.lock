@@ -1374,6 +1374,7 @@ dependencies = [
  "mlpl-eval",
  "mlpl-parser",
  "mlpl-trace",
+ "mlpl-web-viz-ir",
  "wasm-bindgen",
 ]
 
@@ -1477,6 +1478,13 @@ dependencies = [
 [[package]]
 name = "mlpl-web-paths-data"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-web-viz-ir"
+version = "0.20.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "num_cpus"

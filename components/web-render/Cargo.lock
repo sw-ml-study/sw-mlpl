@@ -1374,6 +1374,7 @@ dependencies = [
  "mlpl-eval",
  "mlpl-parser",
  "mlpl-trace",
+ "mlpl-web-viz-ir",
  "wasm-bindgen",
 ]
 
@@ -1620,10 +1621,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-web-viz-ir"
+version = "0.20.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "mlpl-web-viz3d"
 version = "0.20.0"
 dependencies = [
  "js-sys",
+ "mlpl-web-viz-ir",
  "serde",
  "serde-wasm-bindgen 0.6.5",
  "wasm-bindgen",
