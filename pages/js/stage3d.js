@@ -1427,6 +1427,14 @@ function shapeMesh(shape, color, values) {
         return group;
     }
 
+    // Multi-head attention [H, Q, K]: lay each head out as its own
+    // value heatmap side-by-side along X (a horizontal filmstrip),
+    // so the heads read as a row instead of slabs receding into Z.
+    if (rank === 3 && shape[1] === shape[2] && values
+        && values.length === shape[0] * shape[1] * shape[2] && values.length <= 1300) {
+        return multiHeadStrip(shape, values);
+    }
+
     // Matrix without values: width X, depth Z
     if (rank === 2) {
         const w = logDim(shape[1]);
@@ -1451,6 +1459,35 @@ function shapeMesh(shape, color, values) {
         slab.position.y = 0.08 + i * 0.05;
         slab.castShadow = true;
         group.add(slab);
+    }
+    return group;
+}
+
+// Build a horizontal strip of per-head heatmaps for a rank-3
+// [H, Q, K] tensor: each head is its own value heatmap at its own
+// X offset, the whole strip centered on the sculpture origin so
+// multi-head attention reads as a row of heads.
+function multiHeadStrip(shape, values) {
+    const heads = shape[0], n = shape[1];
+    const group = new THREE.Group();
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const cell = Math.max(0.08, logDim(n) / n);
+    const pitch = n * cell + cell * 1.2;
+    for (let hi = 0; hi < heads; hi++) {
+        const base = hi * n * n;
+        const xHead = (hi - (heads - 1) / 2) * pitch;
+        for (let r = 0; r < n; r++) {
+            for (let c = 0; c < n; c++) {
+                const cmat = new THREE.MeshStandardMaterial({ color: valueColor(values[base + r * n + c], min, max), roughness: 0.2, metalness: 0.15 });
+                const box = new THREE.Mesh(new THREE.BoxGeometry(cell * 0.88, 0.12, cell * 0.88), cmat);
+                box.position.x = xHead + (c - n / 2) * cell;
+                box.position.z = -(r - n / 2) * cell;
+                box.position.y = 0.06;
+                box.castShadow = true;
+                group.add(box);
+            }
+        }
     }
     return group;
 }
