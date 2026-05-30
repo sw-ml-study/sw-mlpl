@@ -1,0 +1,28 @@
+#!/usr/bin/env mlpl-repl
+# Sum the numeric CLI arguments.
+#
+# Usage (the `--` separator is required so the args reach the
+# script rather than mlpl-repl's own flag parser):
+#   mlpl-repl scripts/examples/sum.mlpl -- 3 4 5     # -> 12
+#   ./scripts/examples/sum.mlpl -- 3 4 5             # after chmod +x
+#
+# Exit codes: 0 (Ok) on success; 1 if any argument is not a
+# number. With no args it prints 0.
+#
+# Demonstrates: args(), list_len, list_get, to_number / is_ok /
+# unwrap / err_message, a while loop, eprint, and exit().
+
+n = list_len(args())
+total = 0
+i = 0
+while gt(n, i) {
+  raw = unwrap_or(list_get(args(), i), "0")
+  parsed = to_number(raw)
+  if is_ok(parsed) { total = total + unwrap(parsed) } else {
+    eprint(err_message(parsed))
+    exit(1)
+  }
+  i = i + 1
+}
+print(total)
+ok(total)
