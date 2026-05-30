@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- fix(viz): brace subscripts in the derivation variable name too
+- chore(pages): rebuild -- carousel button refresh + stage3d.js cache-bust
+- fix(viz): prev/next buttons refresh dialog; cache-bust stage3d.js
+- docs: mark UI/CLI checklist items done; refresh CHANGES.md
 - chore(pages): rebuild for inspector/REPL fixes
 - fix(viz): subscript bracing, Escape parity, arrow carousel, camera reset, taller output
 - feat(repl): quiet script mode + -h/-v/-V; main delegates to args/run
