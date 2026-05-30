@@ -1,7 +1,6 @@
 //! Saga 72 step 003: argument parsing extracted from main.rs
 //! to keep its function count under the sw-checklist module-fn cap.
 
-use std::net::SocketAddr;
 use std::path::PathBuf;
 
 use crate::{Args, AuthMode, DEFAULT_BIND, parse_peer_arg, print_usage};
@@ -18,6 +17,9 @@ pub(crate) fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args
         self_signed: false,
         cors_allow: None,
         persist: None,
+        ollama_host: None,
+        ollama_model: None,
+        ollama_allow: Vec::new(),
     };
     let mut it = iter.into_iter();
     while let Some(arg) = it.next() {
@@ -54,6 +56,9 @@ fn apply_one_arg<I: Iterator<Item = String>>(
         "--self-signed" => acc.self_signed = true,
         "--cors-allow" => acc.cors_allow = Some(need(it, "--cors-allow")?),
         "--persist" => acc.persist = Some(PathBuf::from(need(it, "--persist")?)),
+        "--ollama-host" => acc.ollama_host = Some(need(it, "--ollama-host")?),
+        "--ollama-model" => acc.ollama_model = Some(need(it, "--ollama-model")?),
+        "--ollama-allow" => acc.ollama_allow.push(need(it, "--ollama-allow")?),
         "-h" | "--help" => {
             print_usage();
             std::process::exit(0);

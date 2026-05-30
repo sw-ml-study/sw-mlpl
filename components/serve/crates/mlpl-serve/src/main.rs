@@ -11,6 +11,7 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use mlpl_serve::auth::AuthMode;
+use mlpl_serve::config::{RunConfig, ServeConfig, resolve_ollama};
 use mlpl_serve::peers::{build_registry, parse_peer_arg};
 use mlpl_serve::server::run;
 
@@ -37,6 +38,15 @@ pub(crate) struct Args {
     /// same file so a restart picks up the prior session map.
     /// Absent means in-memory-only (legacy behavior).
     pub(crate) persist: Option<PathBuf>,
+    /// Phase 0 (local-gpu-agentic): override the default Ollama
+    /// host (`--ollama-host`), default model (`--ollama-model`),
+    /// and add allow-listed hosts the server may reach
+    /// (`--ollama-allow`, repeatable). The resolved host is always
+    /// allow-listed. `OLLAMA_HOST` env is the host fallback below
+    /// the flag.
+    pub(crate) ollama_host: Option<String>,
+    pub(crate) ollama_model: Option<String>,
+    pub(crate) ollama_allow: Vec<String>,
 }
 
 mod args;
@@ -75,17 +85,33 @@ fn run_main(args: Args) -> Result<(), String> {
     ))?;
     let peers = build_registry(args.peer_pairs.clone(), args.insecure_peers)?;
     print_banner(&args, &peers, tls.is_some());
+    let env_host = std::env::var("OLLAMA_HOST").ok();
     let Args {
         bind,
         auth,
         static_dir,
         cors_allow,
         persist,
+        ollama_host,
+        ollama_model,
+        ollama_allow,
         ..
     } = args;
-    runtime
-        .block_on(run(bind, auth, peers, static_dir, tls, cors_allow, persist))
-        .map_err(|e| format!("{e}"))
+    let ollama = resolve_ollama(ollama_host, env_host, ollama_model, ollama_allow);
+    let serve = ServeConfig {
+        static_dir,
+        cors_origin: cors_allow,
+        persist_path: persist,
+        ollama,
+    };
+    let cfg = RunConfig {
+        addr: bind,
+        auth_mode: auth,
+        peers,
+        tls,
+        serve,
+    };
+    runtime.block_on(run(cfg)).map_err(|e| format!("{e}"))
 }
 
 /// Resolve the three TLS-related flags into an

@@ -11,9 +11,12 @@
 //! shell around `server::run(addr, auth_mode)`.
 
 pub mod auth;
+pub mod config;
 pub mod handlers;
+pub mod ollama;
 pub mod peers;
 pub mod persist;
+pub mod router_layers;
 pub mod server;
 pub mod sessions;
 pub mod viz_storage;

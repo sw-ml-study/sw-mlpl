@@ -11,6 +11,7 @@ use axum::extract::Path;
 use axum::routing::post;
 use axum::{Json, Router};
 use mlpl_serve::auth::AuthMode;
+use mlpl_serve::config::ServeConfig;
 use mlpl_serve::peers::build_registry;
 use mlpl_serve::server::build_app_with_peers_cors;
 use serde_json::Value as JsonValue;
@@ -24,7 +25,7 @@ async fn start_orchestrator(peer_addr: SocketAddr) -> SocketAddr {
     let peers = build_registry(vec![("mlx".into(), format!("http://{peer_addr}"))], false).unwrap();
     let listener = std::net::TcpListener::bind("127.0.0.1:0").unwrap();
     let addr = listener.local_addr().unwrap();
-    let app = build_app_with_peers_cors(AuthMode::Required, peers, None, None, None);
+    let app = build_app_with_peers_cors(AuthMode::Required, peers, ServeConfig::default());
     listener.set_nonblocking(true).unwrap();
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
@@ -178,9 +179,7 @@ async fn device_block_without_peer_falls_back_to_existing_behavior() {
     let app = build_app_with_peers_cors(
         AuthMode::Required,
         Arc::new(HashMap::new()),
-        None,
-        None,
-        None,
+        ServeConfig::default(),
     );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();

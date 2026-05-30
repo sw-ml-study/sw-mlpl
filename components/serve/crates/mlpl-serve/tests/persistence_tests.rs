@@ -17,6 +17,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use mlpl_serve::auth::AuthMode;
+use mlpl_serve::config::ServeConfig;
 use mlpl_serve::peers::empty_registry;
 use mlpl_serve::server::build_app_with_peers_cors;
 use serde_json::Value as JsonValue;
@@ -28,9 +29,10 @@ async fn start_server(persist_path: Option<PathBuf>) -> SocketAddr {
     let app = build_app_with_peers_cors(
         AuthMode::Required,
         empty_registry(),
-        None,
-        None,
-        persist_path,
+        ServeConfig {
+            persist_path,
+            ..Default::default()
+        },
     );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();

@@ -139,6 +139,12 @@ biggest unknown, de-risk in order:
 
 ## References
 
+- `docs/SmolLM2-demo-plan.md` -- the pre-existing SmolLM2 135M
+  LoRA-on-MLX demo plan. Phases 4-5 here build on it; note its
+  decision that base weights + adapters live OUTSIDE this language
+  repo (in `softwarewrighter/efficient-llm`), which refines the
+  "demo-initiated download" policy above: the fetch caches into an
+  external location, not the MLPL repo tree.
 - `docs/agentic-ask-plan.md` -- the agentic `:ask` detail.
 - `docs/using-llm-tool.md`, `contracts/eval-contract/llm-call.md`.
 - `components/models-write/crates/mlpl-models-tune/` -- `lora()`.
