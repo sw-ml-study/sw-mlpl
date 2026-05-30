@@ -35,6 +35,21 @@ pub fn current_connect_url_from_window() -> Option<String> {
     parse_connect_url(&search)
 }
 
+/// True when the page is in connect mode (`?connect=<url>` set).
+/// Cross-target: always `false` on native builds (no browser, no
+/// connect URL) so demo capability-gating compiles everywhere.
+#[must_use]
+pub fn is_connected() -> bool {
+    #[cfg(target_arch = "wasm32")]
+    {
+        current_connect_url_from_window().is_some()
+    }
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        false
+    }
+}
+
 /// Minimal `%`-decoder for the `connect=` value. Web URLs use a
 /// small subset (`%3A` -> `:`, `%2F` -> `/`); pulling in a full
 /// `urlencoding` crate for one query parameter is overkill.
