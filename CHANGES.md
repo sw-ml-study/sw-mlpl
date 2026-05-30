@@ -14,6 +14,19 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- chore(pages): rebuild for llm_call system-field :ask
+- feat(llm): optional `system` arg for llm_call (Ollama system role)
+- docs(ask): saga plan for agentic, tool-using :ask (RLM-like)
+- feat(web): contextual :ask (REPL history + selection) + Ask button + :history
+- fix(web): wrap long REPL output (:ask / llm_call replies)
+- feat(web): connect-mode evaluator swap (SSE) + :ask Ollama shortcut
+- feat(examples): add ML-use-case shebang scripts (predict, zscore)
+- refactor(eval): keep eval_print under the 25-LOC budget
+- feat(eval): variadic print/eprint for labelled output
+- fix(viz): space steps by sculpture width so wide objects don't overlap
+- refactor(examples): move CLI demo scripts to demos/scripts/
+- feat(viz): multi-head attention lays heads out horizontally
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(viz): brace subscripts in the derivation variable name too
 - chore(pages): rebuild -- carousel button refresh + stage3d.js cache-bust
 - fix(viz): prev/next buttons refresh dialog; cache-bust stage3d.js
