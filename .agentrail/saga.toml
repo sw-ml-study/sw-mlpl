@@ -1,5 +1,5 @@
 name = "viz-derivation-mathjax"
-status = "active"
+status = "completed"
 current_step = 1
 created_at = "2026-05-29T17:47:54"
 plan_file = ".agentrail/plan.md"
