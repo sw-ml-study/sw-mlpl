@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- chore(pages): rebuild for inspector/REPL fixes
+- fix(viz): subscript bracing, Escape parity, arrow carousel, camera reset, taller output
+- feat(repl): quiet script mode + -h/-v/-V; main delegates to args/run
+- docs(ui): capture UI/CLI review feedback as a checklist
+- feat(examples): shebang CLI demo scripts (args + exit codes)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for saga F attention hover-trace
 - feat(viz): saga F -- hover-to-trace on the attention heatmap
 - docs(viz): track the viz-ir brainstorm doc
