@@ -524,11 +524,12 @@ function renderAttentionHeatmap(ud, viz) {
     const padL = 36, padT = 24, padR = 90;
     const w = padL + k * cellW + padR;
     const h = padT + q * cellH + 30;
-    let svg = `<svg viewBox="0 0 ${w} ${h}" width="100%" style="max-width:680px;background:var(--mantle);border-radius:6px">`;
-    // Key axis labels (top).
+    let svg = `<svg class="attn-svg" viewBox="0 0 ${w} ${h}" width="100%" style="max-width:680px;background:var(--mantle);border-radius:6px">`;
+    // Key axis labels (top). data-c lets the hover-trace
+    // (saga F) light a whole column when this label is hovered.
     for (let j = 0; j < k; j++) {
         const x = padL + j * cellW + cellW / 2;
-        svg += `<text x="${x}" y="${padT - 8}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext1)">${escapeHtml(kLabels[j])}</text>`;
+        svg += `<text class="attn-klabel" data-c="${j}" x="${x}" y="${padT - 8}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext1)">${escapeHtml(kLabels[j])}</text>`;
     }
     // Per-slice min/max so the viridis ramp stretches across
     // the visible range. Untrained attention is row-wise
@@ -557,12 +558,12 @@ function renderAttentionHeatmap(ud, viz) {
             const t = sliceRange > 1e-12 ? (v - sliceMin) / sliceRange : 0.5;
             const col = viridis(Math.max(0, Math.min(1, t)));
             const tip = `(${escapeHtml(qLabels[i])}, ${escapeHtml(kLabels[j])}) = ${v.toFixed(4)}`;
-            svg += `<rect x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${col}" stroke="rgba(0,0,0,0.15)" stroke-width="0.5"><title>${tip}</title></rect>`;
+            svg += `<rect class="attn-cell" data-r="${i}" data-c="${j}" x="${x}" y="${y}" width="${cellW}" height="${cellH}" fill="${col}" stroke="rgba(0,0,0,0.15)" stroke-width="0.5"><title>${tip}</title></rect>`;
         }
         rowSums[i] = rowSum;
         if (rowSum > maxRowSum) maxRowSum = rowSum;
         const ry = padT + i * cellH + cellH / 2 + 4;
-        svg += `<text x="${padL - 6}" y="${ry}" text-anchor="end" font-size="11" font-family="var(--mono)" fill="var(--subtext1)">${escapeHtml(qLabels[i])}</text>`;
+        svg += `<text class="attn-qlabel" data-r="${i}" x="${padL - 6}" y="${ry}" text-anchor="end" font-size="11" font-family="var(--mono)" fill="var(--subtext1)">${escapeHtml(qLabels[i])}</text>`;
     }
     // Row-sum bars (right) so the user can see softmax normalization.
     const barBase = padL + k * cellW + 8;
@@ -644,6 +645,7 @@ function refreshInspectorBody() {
     if (!body) return;
     body.innerHTML = renderInspectorBody(mesh.userData);
     typesetInspectorBody();
+    wireAttentionTrace();
 }
 
 // Exposed for the head-selector onchange handler inline in the
@@ -802,6 +804,43 @@ function typesetInspectorBody() {
             });
         }
     }).catch(() => {});
+}
+
+// Saga F: hover-to-trace on the attention heatmap. Hovering a
+// cell dims the rest of the grid and keeps that cell's row +
+// column lit, along with their two token labels -- so the user
+// can read "which query attends to which key" at a glance.
+// Hovering a query label lights its whole row; a key label its
+// whole column. Pure SVG + class toggles via event delegation;
+// D3 (already in the importmap) is reserved for the richer
+// scrubber trace in a later saga. Re-wired on every body
+// render because innerHTML replaces the <svg> element.
+function wireAttentionTrace() {
+    const body = document.getElementById('stage3d-inspector-body');
+    const svg = body && body.querySelector('.attn-svg');
+    if (!svg) return;
+    const cells = svg.querySelectorAll('.attn-cell');
+    const qlabels = svg.querySelectorAll('.attn-qlabel');
+    const klabels = svg.querySelectorAll('.attn-klabel');
+    const apply = (r, c) => {
+        svg.classList.add('tracing');
+        cells.forEach(el => el.classList.toggle('attn-hl',
+            (r !== null && +el.dataset.r === r) || (c !== null && +el.dataset.c === c)));
+        qlabels.forEach(el => el.classList.toggle('attn-hl', r !== null && +el.dataset.r === r));
+        klabels.forEach(el => el.classList.toggle('attn-hl', c !== null && +el.dataset.c === c));
+    };
+    const clear = () => {
+        svg.classList.remove('tracing');
+        svg.querySelectorAll('.attn-hl').forEach(el => el.classList.remove('attn-hl'));
+    };
+    svg.addEventListener('mouseover', e => {
+        const t = e.target;
+        if (t.classList.contains('attn-cell')) apply(+t.dataset.r, +t.dataset.c);
+        else if (t.classList.contains('attn-qlabel')) apply(+t.dataset.r, null);
+        else if (t.classList.contains('attn-klabel')) apply(null, +t.dataset.c);
+        else clear();
+    });
+    svg.addEventListener('mouseleave', clear);
 }
 
 // Saga E: render the derivation list. Each step is a button
@@ -969,6 +1008,7 @@ function openInspector() {
     body.innerHTML = renderInspectorBody(mesh.userData);
     dlg.style.display = 'block';
     typesetInspectorBody();
+    wireAttentionTrace();
     // ESC closes; one listener per open so we can detach on close.
     const onKey = (e) => { if (e.key === 'Escape') closeInspector(); };
     document.addEventListener('keydown', onKey);
