@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- chore(pages): rebuild for :models ollama + :ask server-default
+- feat(web): :models ollama + :ask server-default (saga Phase 0 web)
+- saga(step 001): complete ollama-settings-exposure; queue web wiring (002)
+- feat(serve): server-owned Ollama config + /v1/ollama/* endpoints (saga Phase 0)
+- chore(agentrail): track accumulated saga archives
+- chore(saga): start local-gpu-agentic saga + plan
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for llm_call system-field :ask
 - feat(llm): optional `system` arg for llm_call (Ollama system role)
 - docs(ask): saga plan for agentic, tool-using :ask (RLM-like)
