@@ -10,6 +10,10 @@ const stepMeshes = [];
 const activeAnims = [];
 const pendingEvents = [];
 const varPositions = {};
+// World X of each step's center. Spacing is variable (not
+// stepCount * SPACING) so wide sculptures don't overlap neighbors.
+const stepX = [];
+let lastHalfW = -1;
 let prevMesh = null;
 
 function createBackdrop() {
@@ -1467,6 +1471,15 @@ function shapeMesh(shape, color, values) {
 // [H, Q, K] tensor: each head is its own value heatmap at its own
 // X offset, the whole strip centered on the sculpture origin so
 // multi-head attention reads as a row of heads.
+// Half the world-space X extent of a sculpture (mesh or group),
+// measured at the local origin before it is positioned. Used to
+// space steps so wide sculptures don't overlap their neighbors.
+function sculptureHalfWidth(mesh) {
+    const box = new THREE.Box3().setFromObject(mesh);
+    const w = box.max.x - box.min.x;
+    return Number.isFinite(w) && w > 0 ? w / 2 : 0.5;
+}
+
 function multiHeadStrip(shape, values) {
     const heads = shape[0], n = shape[1];
     const group = new THREE.Group();
@@ -1560,13 +1573,23 @@ window.__stage3d_add_step = function(ev) {
         }
         return;
     }
-    const x = stepCount * SPACING;
-    stepCount++;
     const color = opColor(ev.label);
     const shape = ev.output?.shape || [];
     dimPrevious(prevMesh);
     const values = ev.output?.values || null;
     const mesh = shapeMesh(shape, color, values);
+    // Variable spacing: measure this sculpture's width and place it
+    // far enough from the previous step that wide objects (e.g. a
+    // multi-head heatmap strip) don't overlap. Narrow steps keep the
+    // default SPACING; wide ones push the row out.
+    const halfW = sculptureHalfWidth(mesh);
+    const MIN_GAP = 2.0;
+    const x = stepCount === 0
+        ? 0
+        : stepX[stepCount - 1] + Math.max(SPACING, lastHalfW + halfW + MIN_GAP);
+    stepX.push(x);
+    lastHalfW = halfW;
+    stepCount++;
     mesh.position.set(x, 0.6, 0);
     if (mesh.castShadow !== undefined) mesh.castShadow = true;
     const rawName = ev.output?.name || '';
@@ -1611,7 +1634,9 @@ window.__stage3d_add_step = function(ev) {
     stepObjects.push(label);
 
     viewStep = stepCount - 1;
-    camera.position.set(x + 3, 4, 8);
+    // Pull the camera back for wide sculptures so the whole row of
+    // heads fits in frame.
+    camera.position.set(x + 3, 4, Math.max(8, halfW * 2.4));
     controls.target.set(x, 0.5, 0);
     controls.update();
 };
@@ -1629,9 +1654,16 @@ function clearSelection() {
     }
 }
 
+// World X of a step index, honoring variable spacing. Negative
+// indices (pre-roll toward the legend) fall back to the uniform
+// SPACING grid.
+function stepXAt(i) {
+    return i >= 0 && i < stepX.length ? stepX[i] : i * SPACING;
+}
+
 function panToStep(idx) {
     if (!camera || idx < -3 || idx >= stepCount) return;
-    const dx = (idx - viewStep) * SPACING;
+    const dx = stepXAt(idx) - stepXAt(viewStep);
     viewStep = idx;
     camera.position.x += dx;
     controls.target.x += dx;
@@ -1679,6 +1711,8 @@ window.__stage3d_clear = function() {
     for (const k of Object.keys(varPositions)) delete varPositions[k];
     activeAnims.length = 0;
     pendingEvents.length = 0;
+    stepX.length = 0;
+    lastHalfW = -1;
     stepCount = 0;
     viewStep = 0;
     prevMesh = null;
