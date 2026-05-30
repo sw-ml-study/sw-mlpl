@@ -9,10 +9,12 @@ use mlpl_eval::{EvalError, PeerDispatcher, Value};
 use serde::{Deserialize, Serialize};
 
 use crate::auth::AuthMode;
+use crate::config::{OllamaConfig, RunConfig, ServeConfig};
 use crate::handlers::{
     cancel_handler, create_session_handler, eval_handler, health_handler, inspect_handler,
     session_meta_handler,
 };
+use crate::ollama::{config_handler as ollama_config_handler, tags_handler as ollama_tags_handler};
 use crate::peers::{PeerRegistry, PeerSessionMap};
 use crate::sessions::{InterruptMap, SessionMap, new_interrupt_map, new_map};
 use crate::viz_storage::{SharedVizStore, get_handler, new_store, upload_handler};
@@ -75,6 +77,10 @@ pub struct AppState {
     /// previous one left off. `None` keeps the legacy
     /// in-memory-only behavior.
     pub persist_path: Option<std::path::PathBuf>,
+    /// Phase 0 (local-gpu-agentic): server-owned Ollama defaults +
+    /// allow-list, read by the `/v1/ollama/*` endpoints so the web
+    /// `:ask` does not have to carry the host/model in its URL.
+    pub ollama: OllamaConfig,
 }
 
 #[derive(Debug)]
@@ -206,7 +212,11 @@ impl PeerDispatcher for RemoteMlxDispatcher {
 /// register peers, a CORS origin, or a persistence path
 /// up-front.
 pub fn build_app(auth_mode: AuthMode) -> Router {
-    build_app_with_peers_cors(auth_mode, crate::peers::empty_registry(), None, None, None)
+    build_app_with_peers_cors(
+        auth_mode,
+        crate::peers::empty_registry(),
+        ServeConfig::default(),
+    )
 }
 
 /// Saga R1 step 003 + Saga 25 step A: build the router with an
@@ -221,10 +231,14 @@ pub fn build_app(auth_mode: AuthMode) -> Router {
 pub fn build_app_with_peers_cors(
     auth_mode: AuthMode,
     peers: crate::peers::PeerRegistry,
-    static_dir: Option<&std::path::Path>,
-    cors_origin: Option<String>,
-    persist_path: Option<std::path::PathBuf>,
+    serve: ServeConfig,
 ) -> Router {
+    let ServeConfig {
+        static_dir,
+        cors_origin,
+        persist_path,
+        ollama,
+    } = serve;
     let sessions = new_map();
     let interrupts = new_interrupt_map();
     crate::persist::maybe_load(persist_path.as_deref(), &sessions, &interrupts);
@@ -236,8 +250,9 @@ pub fn build_app_with_peers_cors(
         peer_sessions: PeerSessionMap::default(),
         auth_mode,
         persist_path,
+        ollama,
     };
-    let mut router = Router::new()
+    let router = Router::new()
         .route("/v1/health", get(health_handler))
         .route("/v1/sessions", post(create_session_handler))
         .route("/v1/sessions/:id", get(session_meta_handler))
@@ -250,23 +265,10 @@ pub fn build_app_with_peers_cors(
         .route("/v1/sessions/:id/inspect", get(inspect_handler))
         .route("/v1/viz", post(upload_handler))
         .route("/v1/viz/:id", get(get_handler))
+        .route("/v1/ollama/config", get(ollama_config_handler))
+        .route("/v1/ollama/tags", get(ollama_tags_handler))
         .with_state(state);
-    if let Some(dir) = static_dir {
-        let serve = tower_http::services::ServeDir::new(dir);
-        router = router.nest_service("/sw-mlpl", serve);
-    }
-    if let Some(origin) = cors_origin {
-        use axum::http::{Method, header};
-        let origin_header = origin
-            .parse::<axum::http::HeaderValue>()
-            .expect("--cors-allow value must be a valid origin header");
-        let layer = tower_http::cors::CorsLayer::new()
-            .allow_origin(origin_header)
-            .allow_methods([Method::GET, Method::POST, Method::OPTIONS])
-            .allow_headers([header::AUTHORIZATION, header::CONTENT_TYPE]);
-        router = router.layer(layer);
-    }
-    router
+    crate::router_layers::apply_static_and_cors(router, static_dir, cors_origin)
 }
 
 /// Bind the listener at `addr`, refuse insecure
@@ -285,25 +287,18 @@ pub fn build_app_with_peers_cors(
 /// terminates TLS for the /v1 API and the static UI.
 pub type TlsConfig = Option<axum_server::tls_rustls::RustlsConfig>;
 
-pub async fn run(
-    addr: SocketAddr,
-    auth_mode: AuthMode,
-    peers: crate::peers::PeerRegistry,
-    static_dir: Option<std::path::PathBuf>,
-    tls: TlsConfig,
-    cors_origin: Option<String>,
-    persist_path: Option<std::path::PathBuf>,
-) -> Result<(), ServerError> {
+pub async fn run(cfg: RunConfig) -> Result<(), ServerError> {
+    let RunConfig {
+        addr,
+        auth_mode,
+        peers,
+        tls,
+        serve,
+    } = cfg;
     if !addr.ip().is_loopback() && auth_mode == AuthMode::Disabled {
         return Err(ServerError::InsecureBind { addr });
     }
-    let app = build_app_with_peers_cors(
-        auth_mode,
-        peers,
-        static_dir.as_deref(),
-        cors_origin,
-        persist_path,
-    );
+    let app = build_app_with_peers_cors(auth_mode, peers, serve);
     match tls {
         Some(config) => axum_server::bind_rustls(addr, config)
             .serve(app.into_make_service())

@@ -7,6 +7,7 @@
 use std::net::SocketAddr;
 
 use mlpl_serve::auth::AuthMode;
+use mlpl_serve::config::{RunConfig, ServeConfig};
 use mlpl_serve::server::{ServerError, build_app, build_app_with_peers_cors, run};
 use serde_json::Value as JsonValue;
 
@@ -205,15 +206,13 @@ async fn run_rejects_non_loopback_with_auth_disabled() {
     // don't actually expect to bind it. The safety
     // check should fail before bind.
     let addr: SocketAddr = "0.0.0.0:0".parse().unwrap();
-    let err = run(
+    let err = run(RunConfig {
         addr,
-        AuthMode::Disabled,
-        mlpl_serve::peers::empty_registry(),
-        None,
-        None,
-        None,
-        None,
-    )
+        auth_mode: AuthMode::Disabled,
+        peers: mlpl_serve::peers::empty_registry(),
+        tls: None,
+        serve: ServeConfig::default(),
+    })
     .await
     .unwrap_err();
     let msg = format!("{err}");
@@ -347,9 +346,10 @@ async fn static_dir_serves_index_at_sw_mlpl_prefix() {
     let app = build_app_with_peers_cors(
         AuthMode::Required,
         mlpl_serve::peers::empty_registry(),
-        Some(&tmp),
-        None,
-        None,
+        ServeConfig {
+            static_dir: Some(tmp.clone()),
+            ..Default::default()
+        },
     );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();
@@ -389,15 +389,13 @@ async fn self_signed_serves_health_over_tls() {
     let (tls_config, fingerprint) = mlpl_serve::tls::self_signed_loopback().await.unwrap();
     assert!(fingerprint.contains(':'), "fingerprint format wrong");
     tokio::spawn(async move {
-        let _ = run(
+        let _ = run(RunConfig {
             addr,
-            AuthMode::Required,
-            mlpl_serve::peers::empty_registry(),
-            None,
-            Some(tls_config),
-            None,
-            None,
-        )
+            auth_mode: AuthMode::Required,
+            peers: mlpl_serve::peers::empty_registry(),
+            tls: Some(tls_config),
+            serve: ServeConfig::default(),
+        })
         .await;
     });
     // Brief settle for the listener.

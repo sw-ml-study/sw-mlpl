@@ -10,6 +10,7 @@
 use std::net::SocketAddr;
 
 use mlpl_serve::auth::AuthMode;
+use mlpl_serve::config::ServeConfig;
 use mlpl_serve::peers::empty_registry;
 use mlpl_serve::server::build_app_with_peers_cors;
 
@@ -19,9 +20,10 @@ async fn start_server_with_cors(origin: Option<&str>) -> SocketAddr {
     let app = build_app_with_peers_cors(
         AuthMode::Required,
         empty_registry(),
-        None,
-        origin.map(str::to_string),
-        None,
+        ServeConfig {
+            cors_origin: origin.map(str::to_string),
+            ..Default::default()
+        },
     );
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();
