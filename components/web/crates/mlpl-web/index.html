@@ -386,6 +386,25 @@
             font-weight: bold;
             margin-bottom: 4px;
         }
+        /* Saga F: attention heatmap hover-to-trace. While
+           tracing, non-highlighted cells + token labels dim so
+           the hovered query's row and key's column stay legible
+           (Alammar-style "who attends to whom"). */
+        .attn-svg .attn-cell { cursor: crosshair; }
+        .attn-svg .attn-qlabel, .attn-svg .attn-klabel { cursor: pointer; }
+        .attn-svg .attn-cell,
+        .attn-svg .attn-qlabel,
+        .attn-svg .attn-klabel { transition: opacity 0.08s ease; }
+        .attn-svg.tracing .attn-cell { opacity: 0.22; }
+        .attn-svg.tracing .attn-cell.attn-hl { opacity: 1; }
+        .attn-svg.tracing .attn-qlabel,
+        .attn-svg.tracing .attn-klabel { opacity: 0.3; }
+        .attn-svg.tracing .attn-qlabel.attn-hl,
+        .attn-svg.tracing .attn-klabel.attn-hl {
+            opacity: 1;
+            font-weight: 700;
+            fill: var(--peach);
+        }
         .stage3d-detail-row {
             color: var(--subtext0);
             line-height: 1.6;
