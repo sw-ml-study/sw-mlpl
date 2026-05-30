@@ -48,6 +48,27 @@ fn llm_call_happy_path_returns_response_field() {
 }
 
 #[test]
+fn llm_call_optional_system_arg_lands_in_body() {
+    let mut server = mockito::Server::new();
+    let mock = server
+        .mock("POST", "/api/generate")
+        .match_body(mockito::Matcher::PartialJsonString(
+            r#"{"prompt":"why?","system":"you are in sw-MLPL"}"#.into(),
+        ))
+        .with_status(200)
+        .with_body(r#"{"response":"ok"}"#)
+        .create();
+
+    let mut env = Environment::new();
+    let src = format!(
+        r#"llm_call("{}", "why?", "m", "you are in sw-MLPL")"#,
+        server.url()
+    );
+    assert_eq!(as_str(run_ok(&mut env, &src)), "ok");
+    mock.assert();
+}
+
+#[test]
 fn llm_call_appends_api_generate_when_missing() {
     let mut server = mockito::Server::new();
     let mock = server

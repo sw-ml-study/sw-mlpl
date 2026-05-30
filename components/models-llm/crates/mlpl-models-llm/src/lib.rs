@@ -26,11 +26,14 @@ impl std::fmt::Display for LlmError {
 
 impl std::error::Error for LlmError {}
 
-/// `llm_call(url, prompt, model)` -- the 3 strings must be
-/// pre-resolved by the caller.
+/// `llm_call(url, prompt, model)` or `llm_call(url, prompt, model,
+/// system)` -- the strings must be pre-resolved by the caller. The
+/// optional 4th `system` arg populates Ollama's system/grounding
+/// role (weak models follow it far better than an inlined preamble).
 pub fn llm_call_inner(strs: &[String]) -> Result<String, LlmError> {
-    let [url, prompt, model] = match strs {
-        [a, b, c] => [a, b, c],
+    let (url, prompt, model, system) = match strs {
+        [a, b, c] => (a, b, c, ""),
+        [a, b, c, d] => (a, b, c, d.as_str()),
         _ => {
             return Err(LlmError::BadArity {
                 expected: 3,
@@ -38,6 +41,6 @@ pub fn llm_call_inner(strs: &[String]) -> Result<String, LlmError> {
             });
         }
     };
-    mlpl_runtime::call_ollama(url, prompt, model)
+    mlpl_runtime::call_ollama_with_system(url, prompt, model, system)
         .map_err(|e| LlmError::RuntimeMessage(format!("{e}")))
 }

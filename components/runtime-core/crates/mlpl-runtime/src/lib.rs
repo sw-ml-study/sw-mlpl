@@ -8,10 +8,11 @@
 mod builtins;
 mod ensemble_builtins;
 mod llm_builtins;
+mod llm_http;
 mod random_builtins;
 
 pub use builtins::call_builtin;
-pub use llm_builtins::call_ollama;
+pub use llm_builtins::{call_ollama, call_ollama_with_system};
 pub use mlpl_runtime_core::RuntimeError;
 
 /// Iterate every builtin name dispatched by [`call_builtin`].

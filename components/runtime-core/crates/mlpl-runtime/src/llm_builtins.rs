@@ -9,12 +9,9 @@
 //! (pure-IO helpers in `mlpl-runtime`, `Expr`-aware
 //! shims in `mlpl-eval`).
 
-use std::time::Duration;
-
 use mlpl_runtime_core::error::RuntimeError;
 
-const TIMEOUT_SECS: u64 = 120;
-const BODY_PREVIEW_CHARS: usize = 200;
+use crate::llm_http::{ask_body, send_ask};
 
 /// POST `prompt` to an Ollama-compatible
 /// `/api/generate` endpoint at `url` and return the
@@ -31,46 +28,22 @@ const BODY_PREVIEW_CHARS: usize = 200;
 /// dispatcher lifts this into an `EvalError` for
 /// MLPL surface error reporting.
 pub fn call_ollama(url: &str, prompt: &str, model: &str) -> Result<String, RuntimeError> {
+    call_ollama_with_system(url, prompt, model, "")
+}
+
+/// Like [`call_ollama`] but also sets Ollama's `system` field
+/// (its grounding/instruction channel) when `system` is non-empty.
+/// `:ask` uses this to put the "you are inside sw-MLPL" preamble +
+/// session context in the system role, which weak models follow
+/// far better than the same text inlined in the prompt.
+pub fn call_ollama_with_system(
+    url: &str,
+    prompt: &str,
+    model: &str,
+    system: &str,
+) -> Result<String, RuntimeError> {
     let resolved = resolve_url(url);
-    let body = serde_json::json!({
-        "model": model,
-        "prompt": prompt,
-        "stream": false,
-    });
-    let agent = ureq::AgentBuilder::new()
-        .timeout(Duration::from_secs(TIMEOUT_SECS))
-        .build();
-    let resp = match agent
-        .post(&resolved)
-        .set("Content-Type", "application/json")
-        .send_json(body)
-    {
-        Ok(r) => r,
-        Err(ureq::Error::Status(code, r)) => {
-            let preview: String = r
-                .into_string()
-                .unwrap_or_default()
-                .chars()
-                .take(BODY_PREVIEW_CHARS)
-                .collect();
-            return Err(RuntimeError::InvalidArgument {
-                func: "llm_call".into(),
-                reason: format!("POST {resolved} returned {code}: {preview}"),
-            });
-        }
-        Err(e) => {
-            return Err(RuntimeError::InvalidArgument {
-                func: "llm_call".into(),
-                reason: format!("POST {resolved} failed: {e}"),
-            });
-        }
-    };
-    let json: serde_json::Value = resp
-        .into_json()
-        .map_err(|e| RuntimeError::InvalidArgument {
-            func: "llm_call".into(),
-            reason: format!("invalid JSON from {resolved}: {e}"),
-        })?;
+    let json = send_ask(&resolved, ask_body(prompt, model, system))?;
     parse_response(&json)
 }
 
