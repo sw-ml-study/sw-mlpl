@@ -1,0 +1,10 @@
+number = 1
+slug = "rust-builtin-and-plumbing"
+status = "completed"
+description = "Saga BPE-1: add decode_each builtin returning StrList + plumb StrList through..."
+role = "production"
+context_files = []
+created_at = "2026-05-29T14:37:31"
+completed_at = "2026-05-29T14:45:37"
+task_type = "feature"
+commits = ["75178dd2b7add5c4ee894598382076006a678237"]

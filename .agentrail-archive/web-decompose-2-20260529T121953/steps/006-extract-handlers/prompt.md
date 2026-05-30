@@ -1,0 +1,1 @@
+Carve handlers_* + handlers.rs + upload_cmd.rs out of mlpl-web into components/web-handlers/. handlers.rs is the re-export facade. handlers_demo references crate::demos (now mlpl_web_demos), handlers_submit references crate::help::help_text + crate::upload + crate::upload_cmd. Look at upload + upload_cmd cluster size to decide if they go into web-handlers or web-misc.

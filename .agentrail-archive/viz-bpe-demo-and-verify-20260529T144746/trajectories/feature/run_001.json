@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "new-demo"
+  },
+  "action": "Single Demo const + aggregator slot; lines are end-to-end MLPL (train_bpe, apply_tokenizer, decode_each, embed, attention, attention_weights, svg). Documented the consumption pattern in the demo body so future readers see how labels flow.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-29T14:47:46"
+}

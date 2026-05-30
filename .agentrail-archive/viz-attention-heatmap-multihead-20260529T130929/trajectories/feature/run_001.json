@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "rank-3-head-selector"
+  },
+  "action": "Additive detection for attention_weights pattern; layout-aware renderer; head selector with inline onchange handler -> window.__viz_attention_set_head -> refreshInspectorBody (partial rerender). inspectorHeadIdx tracked at module scope; reset on every openInspector.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-29T13:09:29"
+}

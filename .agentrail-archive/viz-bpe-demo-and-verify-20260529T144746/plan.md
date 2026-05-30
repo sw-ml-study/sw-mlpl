@@ -1,0 +1,1 @@
+BPE follow-up part 2: add a demo that exercises BPE-1's pipeline end to end. Demo: train_bpe a tiny corpus, apply_tokenizer, decode_each into labels, embed + attention -> click attention sculpture, see real BPE pieces on axes.

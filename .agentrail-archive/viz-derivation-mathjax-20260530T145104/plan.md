@@ -1,0 +1,1 @@
+Saga E follow-up: lazy-load MathJax on first inspector open + convert MLPL RHS to LaTeX so derivation steps render as math typography (Q dot K^T / sqrt(d) etc.) instead of monospace text. No new visible features; the derivation panel reads as math.

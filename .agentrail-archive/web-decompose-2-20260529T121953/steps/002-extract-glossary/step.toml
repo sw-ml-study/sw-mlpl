@@ -1,0 +1,10 @@
+number = 2
+slug = "extract-glossary"
+status = "completed"
+description = "Carve glossary_popup + glossary_view (2 files) out of mlpl-web into component..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-28T21:59:54"
+completed_at = "2026-05-28T22:07:08"
+task_type = "refactor"
+commits = ["2602f692c57500affa42ad399a5ff741c1c382b4"]

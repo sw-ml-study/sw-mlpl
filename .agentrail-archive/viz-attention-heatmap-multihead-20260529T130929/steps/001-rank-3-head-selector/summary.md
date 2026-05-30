@@ -1,0 +1,1 @@
+Saga C: rank-3 head_qk layout detection + renderer head selector. Targets vit_attention_pattern_multihead.mlpl ([4, 17, 17] from attention_weights(mdl, seq)). Saga B rank-2 still works for the attention/vit single-head demos. Per-head stats slice. BPE-token plumbing for tiny_lm split out as future saga since it needs Rust eval changes.

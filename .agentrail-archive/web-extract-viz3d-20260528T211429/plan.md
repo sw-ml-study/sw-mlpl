@@ -1,0 +1,1 @@
+Extract mlpl-web's viz3d_events/_panel/_toggle (3 src + 1 test file, 15 prod fns total) into new components/web-viz3d/ workspace with mlpl-web-viz3d crate. mlpl-web 76 -> 73 modules. Re-export under crate::viz3d_* aliases to keep handlers + render unchanged.

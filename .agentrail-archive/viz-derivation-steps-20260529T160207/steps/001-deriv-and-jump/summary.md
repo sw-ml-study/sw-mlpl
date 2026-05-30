@@ -1,0 +1,1 @@
+Saga E v0: derivation walk + clickable jump-to-step. Hooks into the attention renderer AND the default text body so every sculpture with a producer chain gets the panel. Plain HTML; MathJax queued.

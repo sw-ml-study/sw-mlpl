@@ -1,0 +1,1 @@
+viz-derivation-mathjax complete; starting local-gpu-agentic saga

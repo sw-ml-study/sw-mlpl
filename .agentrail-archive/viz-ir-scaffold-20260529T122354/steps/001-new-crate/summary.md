@@ -1,0 +1,1 @@
+Saga A complete. New crate mlpl-web-viz-ir at components/web-viz-ir with VizKind/VizNode/AxisDim/AttentionViz/SankeyViz types + Serialize derives. viz3d ShapeInfo gains Option<VizNode>; viz3d depends on viz-ir. stage3d.js gains vizRenderers registry + dispatch site + window.__viz_register helper. Component clean: 6 PASS, 0 FAIL, 1 WARN.

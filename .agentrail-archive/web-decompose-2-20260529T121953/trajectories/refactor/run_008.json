@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 8,
+    "step": "extract-render"
+  },
+  "action": "git mv 15 files into 4 sub-crates by responsibility; resolved cycle (RenderArgs+Modes+InputCallbacks -> types, render() entry -> shell); refactored Footer + Splash + WhatsNew to consume build_info/version_label/last_seen_version props instead of env!(); 14 pub use aliases in mlpl-web lib.rs for backward-compat namespaces.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-28T23:01:01"
+}

@@ -1,0 +1,1 @@
+Saga A from docs/viz-ir-plan.md: ship the IR types + the JS dispatch site, no visible UX change. Future sagas (B-G) populate the IR for specific demos + add per-VizKind renderers.
