@@ -29,7 +29,7 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use mlpl_wasm::WasmSession;
-use wasm_bindgen::{JsCast, JsValue, closure::Closure};
+use wasm_bindgen::{JsCast, JsValue};
 use web_sys::{
     CanvasRenderingContext2d, Event, FileReader, HtmlCanvasElement, HtmlImageElement,
     HtmlInputElement, ImageData,

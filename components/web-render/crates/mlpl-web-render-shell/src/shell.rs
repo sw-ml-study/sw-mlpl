@@ -82,6 +82,10 @@ fn build_main_args<'a>(
         ),
         completion_selected: *a.ui.completion_selected,
         show_3d: *a.ui.show_3d,
+        on_toggle_3d: {
+            let s = a.ui.show_3d.clone();
+            Callback::from(move |_: MouseEvent| s.set(!*s))
+        },
         editor_active: modes.editor_active,
         editor_open: a.ui.editor_open.clone(),
         editor_content: a.ui.editor_content.clone(),

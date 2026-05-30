@@ -318,7 +318,11 @@
             padding: 0;
         }
         main.viz3d-split > .output {
-            height: 30vh;
+            /* Give the REPL output roughly half the height so it
+               stays readable when 3D is open. The stage3d-pane
+               takes the rest (flex:1); the drag handle lets the
+               user rebalance from this default. */
+            height: 45vh;
             min-height: 40px;
             overflow-y: auto;
             flex-shrink: 1;
@@ -796,6 +800,39 @@
             padding: 4px 10px;
             font-size: 12px;
             flex-shrink: 0;
+        }
+        /* 2D | 3D view toggle, sits just before Reset on every
+           REPL input line. Active half is bold + inert; the
+           other half is a link-styled button that flips the
+           view (same effect as the :2d / :3d commands). */
+        .input-row .mode-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-left: 12px;
+            flex-shrink: 0;
+            font-family: var(--mono);
+            font-size: 13px;
+        }
+        .input-row .mode-toggle .mode-sep {
+            color: var(--surface2, #45475a);
+        }
+        .input-row .mode-toggle .mode-opt {
+            background: none;
+            border: none;
+            padding: 0 2px;
+            font-family: var(--mono);
+            font-size: 13px;
+            color: var(--blue);
+            cursor: pointer;
+        }
+        .input-row .mode-toggle button.mode-opt:hover {
+            text-decoration: underline;
+        }
+        .input-row .mode-toggle .mode-opt.active {
+            color: var(--text);
+            font-weight: 700;
+            cursor: default;
         }
 
         /* Saga 33 step 043: tab-completion popup chips. */
