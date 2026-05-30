@@ -70,6 +70,50 @@ network. Any future shell-like capability is native-CLI-only, off
 by default behind an explicit `--allow-shell` flag, never compiled
 into WASM.
 
+## Demo capability tiers (device gating)
+
+Demos declare a capability tier; the UI gates them by it. MLX
+(Apple GPU) and CUDA (NVIDIA/Linux GPU) are SEPARATE groups; both
+are connect-only + device-specific and NOT runnable on the public
+GitHub Pages live demo. CPU-based training IS runnable on the live
+demo (the in-browser WASM interpreter runs it, slowly).
+
+| Tier | Runs on live demo? | Needs | Examples |
+|------|--------------------|-------|----------|
+| `cpu` | YES (in-browser WASM) | nothing | tiny LoRA fine-tune (the 6.12 -> 1.34 run), core playground |
+| `connect` | NO (needs a server) | `mlpl-serve` | contextual `:ask` (Ollama), `:models ollama` |
+| `mlx` | NO | `mlpl-serve` + Mac MLX peer | MLX-accelerated demos (Apple Silicon) |
+| `cuda` | NO (future) | `mlpl-serve` + Linux CUDA peer | future CUDA-accelerated demos |
+
+Registry flag shape (Phase 1): each demo carries
+`{ requires_connect: bool, device: cpu|mlx|cuda }`. The public
+build renders `connect`/`mlx`/`cuda` demos visible-but-not-runnable
+with a "needs a connected mlpl-serve (+ <device> peer)" affordance;
+`cpu` demos run everywhere.
+
+## CRITICAL reality: MLX training is forward-only on the GPU today
+
+Server-side MLX does NOT yet run a full training loop on the GPU.
+With `device("mlx")`, only the FORWARD pass (matmul, attention,
+softmax, cross-entropy) dispatches to MLX via `mlpl-mlx-rt`; the
+BACKWARD pass (autograd in `mlpl-autograd`) and the adam optimizer
+updates (`mlpl-eval/src/grad_optim.rs`, plain `Vec<f64>` math) run
+on CPU. `mlpl-mlx-rt` exports forward ops only -- no MLX
+backward/gradient/optimizer. So `device("mlx") { train { adam } }`
+is a HYBRID (forward on GPU, backward+update on CPU), confirmed by
+`grad_mlx_tests.rs` / `tiny_lm_mlx_demo_tests.rs` (parity, not GPU
+execution of the backward/update).
+
+Consequence for the plan:
+
+- A NEW phase is required to make the full fine-tune loop run on the
+  GPU: implement MLX backward + an MLX-resident adam (extend
+  `mlpl-mlx-rt` + the autograd/optimizer path so gradients and
+  moment buffers stay on-device, no per-step CPU round-trip).
+- Until that lands, the MLX demo must be HONESTLY labeled as
+  "forward pass on GPU; gradient + optimizer on CPU" -- not
+  "training runs on the GPU".
+
 ## "Measurable learning" -- the success metric
 
 Every training/fine-tuning demo must assert a measurable delta on
@@ -109,11 +153,21 @@ biggest unknown, de-risk in order:
   host + model (config / flags / `OLLAMA_HOST`); `GET <host>/api/tags`
   -> a `:models ollama` listing + UI picker. (Per-`:ask --model`
   override DEFERRED at user request.)
-- **Phase 1 -- Local GPU demo group + live-demo gating.** A "Local
-  GPU" demo category. Verify `lora_finetune_mlx` shows measurable
-  learning (held-out metric + smoke assertion). Add a
-  `requires_connect` flag so connect/GPU-only demos render
-  visible-but-not-runnable on the public GitHub Pages demo.
+- **Phase 1 -- Demo capability tiers + gating.** Tag every demo
+  with `{ requires_connect, device: cpu|mlx|cuda }`. Separate demo
+  sections for `connect`, `mlx`, and (future) `cuda`; `cpu` demos
+  (incl. the tiny LoRA fine-tune) run on the public live demo,
+  GPU/connect demos render visible-but-not-runnable there. Seed:
+  the CPU LoRA fine-tune (live, measurable 6.12->1.34) and the
+  contextual `:ask` (connect). The MLX section's training entry is
+  HONESTLY labeled "forward on GPU, backward+adam on CPU" until the
+  phase below lands.
+- **Phase 1b -- Full MLX GPU training loop.** Make the fine-tune
+  loop actually run on the GPU: MLX backward + MLX-resident adam
+  (extend `mlpl-mlx-rt` and the autograd/optimizer path so
+  gradients + moment buffers stay on-device, no per-step CPU
+  round-trip). Only after this is the MLX demo a true GPU
+  fine-tune. CUDA is the same shape on a Linux peer (later).
 - **Phase 2 -- Agentic tool-using `:ask`.** Server-side
   `/api/chat` loop with `tools`: the model requests context
   (`get_recent_history`, `get_workspace_vars`, `describe_variable`,
