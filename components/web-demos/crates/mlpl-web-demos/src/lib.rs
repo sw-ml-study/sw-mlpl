@@ -12,4 +12,7 @@ pub mod models;
 pub mod rnn;
 
 pub use aggregator::DEMOS;
-pub use mlpl_web_demos_types::{Demo, PROGRESS_NOTES, ProgressNote, progress_notes_for};
+pub use mlpl_web_demos_types::{
+    Capability, DEMO_CAPABILITIES, Demo, Device, PROGRESS_NOTES, ProgressNote, capability_for,
+    progress_notes_for,
+};

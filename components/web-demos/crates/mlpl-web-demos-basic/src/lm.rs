@@ -3,6 +3,48 @@
 
 use mlpl_web_demos_types::Demo;
 
+/// Client-server demo (Phase 0/1, local-gpu-agentic): ask a local
+/// Ollama model a question grounded in the REPL session. Connect
+/// mode only -- on the public live demo this is visible but not
+/// runnable. Capability: `requires_connect` (device cpu) via the
+/// `DEMO_CAPABILITIES` table; the dropdown groups + disables it.
+pub const ASK_OLLAMA_CONTEXTUAL: Demo = Demo {
+    category: "Client-server",
+    name: "Ask Ollama (contextual)",
+    intro: "Ask a local Ollama model a question grounded in your sw-MLPL session. The server sends your question + a 'you are inside the sw-MLPL REPL' system prompt + your recent REPL activity to Ollama, so the answer is about MLPL specifically, not generic cloud trivia. Connect mode only (needs a running mlpl-serve); on the public demo this is visible but not runnable.",
+    takeaway: "`:models ollama` lists the server's models; `:ask` routes your question through the server to Ollama with session context attached -- the Gemini-in-Colab experience for an array language.",
+    lines: &[
+        ":models ollama",
+        ":ask \"what does this REPL do, and what have I run so far?\"",
+    ],
+};
+
+/// MLX (Apple GPU) demo: LoRA fine-tune with the forward pass on
+/// the GPU via `device("mlx")`. Connect mode + a Mac MLX peer
+/// only. HONEST LABEL: today only the forward pass runs on MLX;
+/// the backward pass + Adam update run on CPU (full-GPU training
+/// is a planned follow-up, saga Phase 1b). Capability: mlx +
+/// requires_connect, so it lands in its own MLX section.
+pub const MLX_LORA_FINETUNE: Demo = Demo {
+    category: "MLX (Apple GPU)",
+    name: "MLX LoRA fine-tune",
+    intro: "LoRA fine-tune a tiny language model with the forward pass on the Apple GPU via MLX. Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public demo. NOTE: today device(\"mlx\") accelerates only the forward pass -- the backward pass and the Adam optimizer still run on CPU. Full-GPU training is a planned follow-up. Watch the fine-tune loss fall as the adapters learn.",
+    takeaway: "device(\"mlx\") routes the forward matmuls/attention to the GPU; lora() freezes the base and trains only the low-rank adapters, so the model specializes on a new corpus cheaply. Fine-tune loss drops from ~6 toward ~1.",
+    lines: &[
+        "corpus = load_preloaded(\"tiny_shakespeare_snippet\")  # base corpus",
+        "tok    = train_bpe(corpus, 280, 0)                    # 280-token BPE",
+        "ids    = apply_tokenizer(tok, corpus)",
+        "X = reshape(shift_pairs_x(ids, 32), [reduce_mul(shape(shift_pairs_x(ids, 32)))])",
+        "Y = reshape(shift_pairs_y(ids, 32), [reduce_mul(shape(shift_pairs_y(ids, 32)))])",
+        "V = 280 ; d = 32 ; h = 1",
+        "base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 4))  # tiny base LM",
+        "experiment \"mlx_base\" { train 40 { adam(cross_entropy(apply(base, X), Y), base, 0.001, 0.9, 0.999, 0.00000001) } }  # pretrain the base",
+        "student = lora(base, 8, 16.0, 0)                      # wrap with rank-8 LoRA, freeze the base",
+        "device(\"mlx\") { experiment \"mlx_lora\" { train 40 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(student, X), Y) } } }  # fine-tune adapters; fwd on GPU",
+        "loss_curve(last_losses)                               # watch the fine-tune loss drop",
+    ],
+};
+
 pub const TINY_LM_GENERATE: Demo = Demo {
     category: "Language Models",
     name: "Tiny LM Generate",

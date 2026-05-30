@@ -14,6 +14,8 @@ use crate::{autoencoder, dim_reduction, gan, models, rnn};
 
 // Demos are listed alphabetically by `name`.
 pub const DEMOS: &[Demo] = &[
+    lm::ASK_OLLAMA_CONTEXTUAL,
+    lm::MLX_LORA_FINETUNE,
     basics::ANALYSIS_HELPERS,
     attention::ATTENTION_PATTERN,
     attention::SELF_ATTENTION_FROM_SCRATCH,
