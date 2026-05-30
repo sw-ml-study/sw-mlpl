@@ -23,6 +23,20 @@ touch "$PROJECT_DIR/pages/.nojekyll"
 trunk build --release --public-url /sw-mlpl/ --dist "$PAGES_DIST"
 rsync -a --delete --exclude='.nojekyll' "$PAGES_DIST/" "$PROJECT_DIR/pages/"
 
+# Cache-bust js/stage3d.js. Unlike the trunk WASM bundle, this
+# file is referenced by a stable, non-hashed URL, so browsers
+# cache it and keep serving stale JS across deploys. Stamp the
+# <script src> with a content hash so each change forces a
+# refetch (no manual hard-refresh needed).
+STAGE_JS="$PROJECT_DIR/pages/js/stage3d.js"
+INDEX="$PROJECT_DIR/pages/index.html"
+if [ -f "$STAGE_JS" ] && [ -f "$INDEX" ]; then
+    VER=$(md5 -q "$STAGE_JS" 2>/dev/null | cut -c1-12)
+    [ -z "$VER" ] && VER=$(date +%s)
+    sed -i '' "s|js/stage3d\.js[^\"\']*|js/stage3d.js?v=$VER|g" "$INDEX"
+    echo "Stamped stage3d.js cache-bust: ?v=$VER"
+fi
+
 echo "=== Done ==="
 echo "Pages built in: $PROJECT_DIR/pages/"
 echo "To deploy: git add pages/ && git commit && git push"
