@@ -1,9 +1,10 @@
 number = 1
 slug = "mathjax-latex"
-status = "in-progress"
+status = "completed"
 description = "loadMathJax() returns a cached promise that lazy-loads from CDN on first call..."
 role = "production"
 context_files = []
 created_at = "2026-05-29T17:47:54"
+completed_at = "2026-05-29T18:03:25"
 task_type = "feature"
-commits = []
+commits = ["feceb6804ef026dbd6585376a06c59988b4515fa"]
