@@ -103,6 +103,9 @@ async fn wasm_eval(
     if let Some(err) = body.get("error").and_then(|v| v.as_str()) {
         return format!("error: {err}");
     }
+    // Phase 1c: emit a 3D sculpture from the response's viz data so
+    // server-evaluated results populate the 3D view too.
+    crate::connect_viz::emit_from_response(program, &body);
     body.get("value")
         .and_then(|v| v.as_str())
         .map_or_else(|| format!("error: missing value: {body}"), str::to_string)
