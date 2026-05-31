@@ -182,5 +182,10 @@ fn dispatch_demo_line_connected(
         hist.set(entries_c.clone());
         schedule_demo_line(sess, hist.clone(), entries_c, demo, idx + 1);
     });
-    crate::connect::dispatch_demo_line(line, entries, cont)
+    // Connect-only demos (MLX/CUDA tier) run their heavy lines on the
+    // server so the browser main thread stays responsive (no "page
+    // unresponsive" freeze) and the GPU does the work. CPU-tier demos
+    // route only :ask/:models and keep plain lines local (3D).
+    let route_all = mlpl_web_demos::capability_for(demo.name).requires_connect;
+    crate::connect::dispatch_demo_line(line, entries, route_all, cont)
 }
