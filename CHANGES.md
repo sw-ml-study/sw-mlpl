@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-31
 
+- feat(viz): model Sankey over connect (Phase 1c part 2) -- "3D everywhere" for models
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(viz): multi-head attention heads recede toward the mountains (-Z); doc the orientation rule
 
 ## 2026-05-30
