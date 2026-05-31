@@ -1,7 +1,7 @@
 # Parallel Refactoring with Multiple AI Coding Agents
 
 This document describes how to coordinate large-scale refactoring
-across multiple AI coding agents (Claude, Codex, Gemini,
+across multiple AI coding agents (Claude, Codex,
 OpenCode/GLM-5, etc.) working in parallel on separate clones of the
 repository.
 
@@ -82,7 +82,7 @@ source files.
 | Agent D | clone-d | `refactor/array-autograd` | `mlpl-array`, `mlpl-autograd` | Split fat modules, extract test helpers |
 
 Agents are not tied to a specific AI product. Any agent slot can be
-filled by Claude, Codex, Gemini, OpenCode, or another tool.
+filled by Claude, Codex, OpenCode, or another tool.
 
 ## Task packet format
 

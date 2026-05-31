@@ -5,7 +5,7 @@
 MLPL has trained a tiny language model end-to-end since Saga 13.
 The next obvious "real architecture" demo is vision: a Vision
 Transformer on the Oxford-IIIT Pet dataset, discriminating cats
-from dogs. The reference implementation is two Colab notebooks
+from dogs. The reference implementation is two notebooks
 (`Basic_Vision_Transformer_(ViT).ipynb`,
 `Image_balanced_Basic_Vision_Transformer_(ViT).ipynb`) in the
 sibling `Vision-Transformer-ViT` checkout; the demo plan derived
