@@ -110,6 +110,31 @@ fn schedule_demo_line(
     let line = lines[idx];
     push_running_marker(&mut entries, line);
     history.set(entries.clone());
+    // Connect mode: route the line through the server (so loaded
+    // demos behave like typed lines -- `:models ollama`, `:ask`,
+    // and bare expressions hit mlpl-serve instead of the local
+    // session). Falls through to local eval when not connected or
+    // for non-eligible commands.
+    #[cfg(target_arch = "wasm32")]
+    if mlpl_web_eval::eval_url::is_connected()
+        && dispatch_demo_line_connected(&session, &history, &entries, demo, idx, line)
+    {
+        return;
+    }
+    run_demo_line_local(session, history, entries, demo, idx, line);
+}
+
+/// Evaluate one demo line in the local in-process WASM session
+/// (the non-connect path), in its own `Timeout` tick so the
+/// browser paints between lines, then recurse to the next line.
+fn run_demo_line_local(
+    session: Rc<RefCell<WasmSession>>,
+    history: UseStateHandle<Vec<HistoryEntry>>,
+    mut entries: Vec<HistoryEntry>,
+    demo: &'static mlpl_web_demos::Demo,
+    idx: usize,
+    line: &'static str,
+) {
     let session_next = Rc::clone(&session);
     let history_next = history.clone();
     gloo::timers::callback::Timeout::new(0, move || {
@@ -135,4 +160,27 @@ fn schedule_demo_line(
         schedule_demo_line(session_next, history_next, entries, demo, idx + 1);
     })
     .forget();
+}
+
+/// Connect-mode demo line: dispatch to the server and continue the
+/// demo when the async result lands. Returns false (caller does
+/// local eval) for lines the server path does not handle.
+#[cfg(target_arch = "wasm32")]
+fn dispatch_demo_line_connected(
+    session: &Rc<RefCell<WasmSession>>,
+    history: &UseStateHandle<Vec<HistoryEntry>>,
+    entries: &[HistoryEntry],
+    demo: &'static mlpl_web_demos::Demo,
+    idx: usize,
+    line: &'static str,
+) -> bool {
+    let mut entries_c = entries.to_vec();
+    let hist = history.clone();
+    let sess = Rc::clone(session);
+    let cont: mlpl_web_eval::eval::ResultCb = Box::new(move |display: String| {
+        replace_running_with_result(&mut entries_c, line, display);
+        hist.set(entries_c.clone());
+        schedule_demo_line(sess, hist.clone(), entries_c, demo, idx + 1);
+    });
+    crate::connect::dispatch_demo_line(line, entries, cont)
 }
