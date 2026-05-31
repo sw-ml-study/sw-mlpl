@@ -7,7 +7,6 @@
 //! rather than bit-for-bit equality -- see that module's docstring.
 
 use mlpl_array::{ArrayError, DenseArray, Shape};
-use mlpl_array_ops_matmul::prelude::*;
 
 use crate::common::{dense_to_mlx, finalize, matmul_labels, mlx_to_dense_data};
 

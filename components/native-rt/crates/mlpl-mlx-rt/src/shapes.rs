@@ -13,6 +13,7 @@
 //! - `transpose` reverses the label list alongside the axes.
 
 use mlpl_array::{ArrayError, DenseArray, Shape};
+use mlpl_array_ops_shape::prelude::*;
 
 use crate::common::{dense_to_mlx, finalize, mlx_to_dense_data};
 

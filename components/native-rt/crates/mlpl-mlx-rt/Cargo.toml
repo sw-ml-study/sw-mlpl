@@ -19,6 +19,7 @@ mlx = ["dep:mlx-rs"]
 [dependencies]
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
+mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 
 # Pinned by Saga 14 plan (risk/mitigation item): upstream ABI can
