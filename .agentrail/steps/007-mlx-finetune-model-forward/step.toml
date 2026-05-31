@@ -1,0 +1,9 @@
+number = 7
+slug = "mlx-finetune-model-forward"
+status = "pending"
+description = "Step 007 (approach A, the bulk): express the full MLX LoRA demo model forward..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-31T13:57:03"
+task_type = "feature"
+commits = []
