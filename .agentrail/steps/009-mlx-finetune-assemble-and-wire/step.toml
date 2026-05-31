@@ -1,9 +1,10 @@
 number = 9
 slug = "mlx-finetune-assemble-and-wire"
-status = "in-progress"
+status = "completed"
 description = "Step 009 (FINALE of the MLX full-GPU LoRA fine-tune): assemble the MLX forwar..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-31T14:12:26"
+completed_at = "2026-05-31T14:29:08"
 task_type = "feature"
-commits = []
+commits = ["4fc8b87b5702ba7763cff654374772c193fac94e"]

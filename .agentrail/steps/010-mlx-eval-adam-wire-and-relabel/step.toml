@@ -1,0 +1,9 @@
+number = 10
+slug = "mlx-eval-adam-wire-and-relabel"
+status = "pending"
+description = "Step 010 (TRUE FINALE of MLX full-GPU LoRA): wire the assembled mlpl-mlx-mode..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-31T14:29:08"
+task_type = "feature"
+commits = []
