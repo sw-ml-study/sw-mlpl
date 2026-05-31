@@ -58,17 +58,33 @@ Emacs (minimal PATH) finds the installed binary."
   "Expand BODY according to MLPL source block PARAMS."
   body)
 
-(defun org-babel-execute:mlpl (body params)
-  "Execute a block of MLPL code with BODY and PARAMS.
-Return the result as a string."
-  (let* ((full-body (org-babel-expand-body:mlpl body params))
-         (result-params (cdr (assq :result-params params)))
-         (prog (org-babel-mlpl--program))
+(defvar org-babel-mlpl--sessions (make-hash-table :test 'equal)
+  "Per-session accumulated state.
+Maps a `:session' name to a cons (ACCUMULATED-SOURCE . LAST-OUTPUT).
+MLPL has no live interpreter process, so a \"session\" is the
+concatenation of every block run in it so far: each block re-runs the
+whole accumulated program through `mlpl-repl -f' and returns only the
+output its own lines added.  MLPL script output is deterministic and
+append-only, so the delta is exact.")
+
+(defun org-babel-mlpl-reset-session (&optional session)
+  "Clear accumulated state for SESSION (or all sessions when nil).
+Call before re-running a buffer top-to-bottom interactively so blocks
+are not appended to the session twice."
+  (interactive)
+  (if session
+      (remhash session org-babel-mlpl--sessions)
+    (clrhash org-babel-mlpl--sessions))
+  (message "MLPL session(s) reset"))
+
+(defun org-babel-mlpl--run-source (source)
+  "Run SOURCE through `mlpl-repl -f'; return (EXIT-CODE . OUTPUT)."
+  (let* ((prog (org-babel-mlpl--program))
          (tmp-file (make-temp-file "mlpl-ob-" nil ".mlpl"))
          (out-file (make-temp-file "mlpl-ob-out-" nil ".txt"))
          (svg-dir (make-temp-file "mlpl-ob-svg-" t))
          exit-code output)
-    (write-region full-body nil tmp-file nil 'silent)
+    (write-region source nil tmp-file nil 'silent)
     (setq exit-code
           (apply #'call-process (car prog) nil (list :file out-file) nil
                  (append (cdr prog) (list "-f" tmp-file "--svg-out" svg-dir))))
@@ -77,10 +93,38 @@ Return the result as a string."
                    (buffer-string)))
     (delete-file tmp-file)
     (delete-file out-file)
+    (cons exit-code output)))
+
+(defun org-babel-mlpl--session-output (session body)
+  "Append BODY to SESSION's program, re-run it, return the new output only."
+  (let* ((prev (gethash session org-babel-mlpl--sessions '("" . "")))
+         (new-src (concat (car prev) body "\n"))
+         (res (org-babel-mlpl--run-source new-src))
+         (new-out (cdr res)))
+    (unless (zerop (car res))
+      (org-babel-eval-error-notify (car res) new-out))
+    (puthash session (cons new-src new-out) org-babel-mlpl--sessions)
+    (if (string-prefix-p (cdr prev) new-out)
+        (substring new-out (length (cdr prev)))
+      new-out)))
+
+(defun org-babel-execute:mlpl (body params)
+  "Execute a block of MLPL code with BODY and PARAMS.
+With `:session NAME', state accumulates across blocks that share NAME --
+variables bound in one block are visible in later ones.  Returns the
+result as a string."
+  (let* ((full-body (org-babel-expand-body:mlpl body params))
+         (result-params (cdr (assq :result-params params)))
+         (session (let ((s (cdr (assq :session params))))
+                    (and s (not (string= s "none")) s)))
+         (output
+          (if session
+              (org-babel-mlpl--session-output session full-body)
+            (let ((res (org-babel-mlpl--run-source full-body)))
+              (unless (zerop (car res))
+                (org-babel-eval-error-notify (car res) (cdr res)))
+              (cdr res)))))
     (cond
-     ((not (zerop exit-code))
-      (org-babel-eval-error-notify exit-code output)
-      nil)
      ((string-match-p "<svg" output)
       output)
      (t
@@ -137,9 +181,11 @@ Return the result as a string."
                             ""))))
       output)))
 
-(defun org-babel-prep-session:mlpl (session params)
-  "Prepare SESSION for MLPL evaluation."
-  (error "MLPL sessions are not yet supported"))
+(defun org-babel-prep-session:mlpl (_session _params)
+  "MLPL has no live session buffer to switch to.
+`:session' state is the accumulated program (see
+`org-babel-mlpl--sessions'); there is no inferior process to visit."
+  (error "MLPL :session has no live buffer; state accumulates per block"))
 
 (defun org-babel-mlpl-var-to-mlpl (var)
   "Convert an elisp VAR to an MLPL value string."

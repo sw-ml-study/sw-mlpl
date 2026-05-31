@@ -26,3 +26,6 @@ books/*/book/
 
 # Scratch directory for prereq prompts, drafts, generated diagrams
 /tmp/
+
+# Generated HTML from literate Org examples (regenerate with publish.sh)
+examples/literate/*.html

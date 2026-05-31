@@ -87,7 +87,37 @@ SVG-producing blocks emit raw `<svg>` (render with `org-toggle-inline-images`
 when exported to HTML). Point at a non-default build with
 `(setq org-babel-mlpl-command "/absolute/path/to/mlpl-repl")`. Editing
 a block with `C-c '` opens it in `mlpl-mode` (registered via
-`org-src-lang-modes`). Sessions are not yet supported.
+`org-src-lang-modes`).
+
+#### Sessions (`:session`)
+
+With `:session NAME`, state accumulates across blocks that share NAME --
+a variable bound in one block is visible in later ones, just like
+successive REPL lines. MLPL has no live interpreter process, so a
+session is the concatenation of every block run in it: each block
+re-runs the whole accumulated program through `mlpl-repl -f` and returns
+only the output its own lines added (script output is deterministic and
+append-only, so the delta is exact).
+
+Re-running a buffer top-to-bottom interactively would append the blocks
+twice; call `M-x org-babel-mlpl-reset-session` first (the batch
+publisher does this automatically).
+
+#### Literate example + batch publish
+
+`examples/literate/basics.org` recreates the web "Basics" demo as a
+literate tour: nine `:session`-shared blocks with prose between them.
+Publish it (or any literate MLPL Org doc) to standalone HTML, in batch,
+with no interactive Emacs:
+
+```bash
+./examples/literate/publish.sh examples/literate/basics.org
+```
+
+That launches `emacs -Q --batch`, loads `elisp/mlpl-all.el` (which
+resolves `mlpl-repl`), resets the session, evaluates the buffer, and
+writes `basics.html` beside the source. See
+`examples/literate/README.md`.
 
 ### Manual
 
