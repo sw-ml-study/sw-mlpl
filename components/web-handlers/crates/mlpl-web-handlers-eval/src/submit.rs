@@ -212,7 +212,21 @@ fn history_listing(deps: &EvalDeps) -> String {
     }
 }
 
+/// Shown for `:ask` when there is no connected server (e.g. the
+/// public live demo). `:ask` needs a server to reach an LLM, so we
+/// give a clear notice instead of lexing the question as MLPL
+/// (which errors on punctuation like `?`).
+const ASK_NEEDS_SERVER: &str = "`:ask` needs a connected mlpl-serve to reach an LLM. Open the REPL with `?connect=<server-url>` (with mlpl-serve + Ollama running). It is not available on the public demo.";
+
 fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
+    if trimmed == ":ask" || trimmed.starts_with(":ask ") {
+        return HistoryEntry {
+            input: trimmed.to_string(),
+            output: ASK_NEEDS_SERVER.to_string(),
+            is_error: false,
+            kind: EntryKind::Command,
+        };
+    }
     if trimmed == ":help" {
         return HistoryEntry {
             input: trimmed.to_string(),
