@@ -55,3 +55,11 @@ pub use matmul::matmul;
 pub use reductions::{argmax, cross_entropy, log_softmax, mean, reduce_mul, softmax};
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use shapes::{reshape, transpose};
+
+// Conversion helpers + the MLX array type, re-exported so a higher
+// crate (mlpl-eval's MLX LoRA path) can move weights in/out as
+// `mlx_rs::Array` without depending on mlx-rs directly.
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+pub use common::{dense_to_mlx, mlx_to_dense_data};
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+pub use mlx_rs::Array;

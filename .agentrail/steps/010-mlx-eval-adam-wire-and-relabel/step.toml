@@ -1,6 +1,6 @@
 number = 10
 slug = "mlx-eval-adam-wire-and-relabel"
-status = "pending"
+status = "in-progress"
 description = "Step 010 (TRUE FINALE of MLX full-GPU LoRA): wire the assembled mlpl-mlx-mode..."
 role = "legacy"
 context_files = []
