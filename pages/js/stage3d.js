@@ -1532,22 +1532,28 @@ function sculptureHalfWidth(mesh) {
 }
 
 function multiHeadStrip(shape, values) {
+    // Orientation rule (docs/3d-viz.md "Dimension orientation"):
+    // the HEAD axis recedes toward the mountains (-Z) so the heads
+    // read as a row of maps marching into the distance; within each
+    // head the QUERY axis rises toward the sky (+Y, row 0 on top)
+    // and the KEY axis spreads left/right (X). Each head is thus a
+    // vertical heatmap wall facing the camera.
     const heads = shape[0], n = shape[1];
     const group = new THREE.Group();
     const min = Math.min(...values);
     const max = Math.max(...values);
     const cell = Math.max(0.08, logDim(n) / n);
-    const pitch = n * cell + cell * 1.2;
+    const headPitch = Math.max(1.2, n * cell * 0.6);
     for (let hi = 0; hi < heads; hi++) {
         const base = hi * n * n;
-        const xHead = (hi - (heads - 1) / 2) * pitch;
+        const zHead = -hi * headPitch;
         for (let r = 0; r < n; r++) {
             for (let c = 0; c < n; c++) {
                 const cmat = new THREE.MeshStandardMaterial({ color: valueColor(values[base + r * n + c], min, max), roughness: 0.2, metalness: 0.15 });
-                const box = new THREE.Mesh(new THREE.BoxGeometry(cell * 0.88, 0.12, cell * 0.88), cmat);
-                box.position.x = xHead + (c - n / 2) * cell;
-                box.position.z = -(r - n / 2) * cell;
-                box.position.y = 0.06;
+                const box = new THREE.Mesh(new THREE.BoxGeometry(cell * 0.88, cell * 0.88, 0.12), cmat);
+                box.position.x = (c - n / 2) * cell;
+                box.position.y = (n / 2 - r) * cell + 0.06;
+                box.position.z = zHead;
                 box.castShadow = true;
                 group.add(box);
             }
