@@ -91,7 +91,22 @@ build renders `connect`/`mlx`/`cuda` demos visible-but-not-runnable
 with a "needs a connected mlpl-serve (+ <device> peer)" affordance;
 `cpu` demos run everywhere.
 
-## CRITICAL reality: MLX training is forward-only on the GPU today
+## RESOLVED (step 010, 2026-05-31): MLX LoRA training is now full-GPU
+
+The limitation described below is FIXED for the LoRA fine-tune path.
+Under `device("mlx")`, `eval_adam` now detects a head-only LoRA model
+(the demo architecture) and runs the whole fine-tune step on the GPU:
+the loss is built as an `mlx_rs`-traceable graph over the adapters
+(`mlpl-mlx-model::demo_forward`), differentiated by `value_and_grad`,
+and the adapters are updated by an MLX-resident Adam (`adam_update`),
+with moments persisted in `env.optim_state` across steps. Any other
+model/device falls back to the CPU tape path. Parity-tested vs CPU in
+`lora_mlx_demo_tests.rs` (loss curve within fp32 tol; frozen base
+bit-identical). The `MLX LoRA fine-tune` demo is relabeled true-GPU.
+General (non-LoRA) `device("mlx")` training still uses the CPU tape;
+the section below documents that original state.
+
+## CRITICAL reality: MLX training was forward-only on the GPU (pre-step-010)
 
 Server-side MLX does NOT yet run a full training loop on the GPU.
 With `device("mlx")`, only the FORWARD pass (matmul, attention,

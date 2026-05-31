@@ -175,6 +175,24 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
     let bc1 = 1.0 - b1.powi(t as i32);
     let bc2 = 1.0 - b2.powi(t as i32);
 
+    // Step 010: on `device("mlx")`, a head-only LoRA fine-tune step runs
+    // forward + backward + optimizer on the GPU via `value_and_grad` +
+    // an MLX adam. `try_lora_adam` returns None for any other model or
+    // device, falling through to the CPU tape path below.
+    #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+    {
+        let hp = mlpl_mlx_train::AdamHp {
+            lr: lr as f32,
+            b1: b1 as f32,
+            b2: b2 as f32,
+            eps: eps as f32,
+            t: t as i32,
+        };
+        if let Some(res) = crate::grad_optim_mlx::try_lora_adam(&loss_expr, &args[1], &hp, env) {
+            return res;
+        }
+    }
+
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(

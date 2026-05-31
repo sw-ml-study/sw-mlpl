@@ -60,6 +60,12 @@ mod grad;
 mod grad_calls_basic;
 mod grad_calls_shape;
 mod grad_optim;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod grad_optim_mlx;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod grad_optim_mlx_demo;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod grad_optim_mlx_step;
 mod inspect;
 mod inspect_collections;
 mod inspect_describe;

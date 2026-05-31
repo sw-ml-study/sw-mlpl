@@ -11,7 +11,21 @@ default = []
 # crate itself triple-gates on macOS + aarch64, so building with
 # this feature on a non-Apple host still compiles and falls back
 # to CPU at runtime with a one-time warning.
-mlx = ["dep:mlpl-mlx-rt", "mlpl-mlx-rt/mlx"]
+# Saga local-gpu-agentic step 010: the `mlx` feature also pulls the
+# on-device LoRA training stack (autodiff kernel + forward primitives +
+# the assembled demo model) so `eval_adam` can run a true-GPU LoRA
+# fine-tune. All triple-gate internally, so a non-Apple build with this
+# feature still compiles and falls back to the CPU tape path.
+mlx = [
+    "dep:mlpl-mlx-rt",
+    "mlpl-mlx-rt/mlx",
+    "dep:mlpl-mlx-train",
+    "mlpl-mlx-train/mlx",
+    "dep:mlpl-mlx-forward",
+    "mlpl-mlx-forward/mlx",
+    "dep:mlpl-mlx-model",
+    "mlpl-mlx-model/mlx",
+]
 # Saga 29 step 003: PNG / JPEG decode for the `load_images(dir,
 # [H, W])` builtin. Off by default so the WASM target stays
 # clean -- the browser REPL can still call
@@ -66,6 +80,9 @@ mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
 mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true }
+mlpl-mlx-train = { path = "../../../native-rt/crates/mlpl-mlx-train", optional = true }
+mlpl-mlx-forward = { path = "../../../native-rt/crates/mlpl-mlx-forward", optional = true }
+mlpl-mlx-model = { path = "../../../mlx-model/crates/mlpl-mlx-model", optional = true }
 mlpl-eval-image = { path = "../../../eval-image/crates/mlpl-eval-image", optional = true }
 png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }
