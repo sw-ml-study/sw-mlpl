@@ -1550,6 +1550,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-model-viz"
+version = "0.20.0"
+dependencies = [
+ "mlpl-eval",
+ "mlpl-web-viz-ir",
+]
+
+[[package]]
 name = "mlpl-models-feasibility"
 version = "0.20.0"
 dependencies = [
@@ -1752,7 +1760,9 @@ dependencies = [
  "mlpl-array",
  "mlpl-cli",
  "mlpl-eval",
+ "mlpl-model-viz",
  "mlpl-parser",
+ "mlpl-web-viz-ir",
  "rand 0.8.6",
  "rcgen",
  "reqwest",
@@ -1793,6 +1803,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-eval",
+ "mlpl-model-viz",
  "mlpl-parser",
  "mlpl-trace",
  "mlpl-web-viz-ir",
@@ -1898,6 +1909,8 @@ version = "0.20.0"
 dependencies = [
  "gloo 0.11.0",
  "mlpl-wasm",
+ "mlpl-web-viz-ir",
+ "mlpl-web-viz3d",
  "reqwest",
  "serde",
  "serde_json",
