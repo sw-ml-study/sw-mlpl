@@ -45,6 +45,10 @@ pub(crate) fn build_eval_response(
     attached: AttachedViz,
 ) -> EvalResponse {
     let (shape, values, string_list) = value_viz(value);
+    let viz_node = match value {
+        Value::Model(spec) => Some(mlpl_model_viz::model_to_viz_node(spec)),
+        _ => None,
+    };
     EvalResponse {
         value: formatted,
         kind,
@@ -53,5 +57,6 @@ pub(crate) fn build_eval_response(
         shape,
         values,
         string_list,
+        viz_node,
     }
 }

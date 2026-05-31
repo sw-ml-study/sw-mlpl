@@ -28,6 +28,10 @@ mlx = ["mlpl-eval/mlx"]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
+# Phase 1c part 2: build a model's Sankey VizNode server-side so a
+# model evaluated in connect mode renders its decomposition.
+mlpl-web-viz-ir = { path = "../../../web-viz-ir/crates/mlpl-web-viz-ir" }
+mlpl-model-viz = { path = "../../../web-viz-ir/crates/mlpl-model-viz" }
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
 # Saga 21.5 step 001: ReceiverStream adapter so an axum SSE

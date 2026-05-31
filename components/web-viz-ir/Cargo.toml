@@ -1,5 +1,5 @@
 [workspace]
-members = ["crates/mlpl-web-viz-ir"]
+members = ["crates/mlpl-web-viz-ir", "crates/mlpl-model-viz"]
 resolver = "2"
 
 [workspace.package]

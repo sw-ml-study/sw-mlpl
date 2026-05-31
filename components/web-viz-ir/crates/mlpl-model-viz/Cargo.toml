@@ -1,0 +1,16 @@
+[package]
+name = "mlpl-model-viz"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_model_viz"
+path = "src/lib.rs"
+
+# Phase 1c part 2: translate a `ModelSpec` into a viz-IR `VizNode`
+# (Composite Sankey). Shared by mlpl-wasm (local eval) and mlpl-serve
+# (connect-mode eval) so a model renders the same Sankey either way.
+[dependencies]
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-web-viz-ir = { path = "../mlpl-web-viz-ir" }

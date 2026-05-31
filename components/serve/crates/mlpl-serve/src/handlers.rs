@@ -59,6 +59,11 @@ pub struct EvalResponse {
     pub values: Option<Vec<f64>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub string_list: Option<Vec<String>>,
+    /// Phase 1c part 2: a model's Sankey decomposition, so a model
+    /// evaluated in connect mode renders its diagram. `None` for
+    /// non-model results.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub viz_node: Option<mlpl_web_viz_ir::VizNode>,
 }
 
 #[derive(Serialize)]

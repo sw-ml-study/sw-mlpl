@@ -102,6 +102,27 @@ async fn eval_returns_viz_shape_and_values() {
 }
 
 #[tokio::test]
+async fn eval_model_returns_sankey_viz_node() {
+    // Phase 1c part 2: a model evaluated server-side carries its
+    // Sankey decomposition so connect-mode renders the diagram.
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+    let resp = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/sessions/{id}/eval"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({"program": "chain(linear(4, 3, 0), relu_layer())"}))
+        .send()
+        .await
+        .unwrap();
+    let body: JsonValue = resp.json().await.unwrap();
+    let nodes = body["viz_node"]["sankey"]["nodes"].as_array();
+    assert!(
+        nodes.is_some_and(|n| n.len() >= 3),
+        "model eval should carry a Sankey viz_node (input + layers + output): {body}"
+    );
+}
+
+#[tokio::test]
 async fn eval_persists_state_across_calls() {
     let addr = start_server(AuthMode::Required).await;
     let (id, token) = create_session(addr).await;
