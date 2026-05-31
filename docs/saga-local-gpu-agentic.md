@@ -170,6 +170,44 @@ approach B: mlx-rt backward -> autograd dispatch -> on-device adam),
 each parity-tested vs CPU within fp32 tolerance, ending with the
 demo relabeled hybrid -> true-GPU.
 
+### Step 005 result (2026-05-31): approach A DECIDED + spike proven
+
+**Decision: approach A** (MLX built-in autodiff). The vendored
+`mlx-rs` (0.25.3) exposes `transforms::value_and_grad` /
+`value_and_grad_with_argnums` (closure `|&[Array]| -> Result<Vec<Array>>`
+-> `(values, grads)`) AND an `optimizers` module (Adam/AdamW/Adamax).
+So the MLX fine-tune step can be differentiated on-device with zero
+hand-written backward formulas -- approach B (porting ~19 formulas) is
+abandoned.
+
+**Spike (proven, parity-tested):** new sibling crate
+`components/native-rt/crates/mlpl-mlx-train` ("refactor up and out":
+training is a distinct concern from the forward-only `mlpl-mlx-rt`,
+so its own crate; native-rt now has 3 crates, within the <=4 budget;
+sw-checklist 6 passed / 0 failed / 0 warnings). It provides:
+
+- `loss_and_grads(params, loss_fn)` -- wraps `value_and_grad_with_argnums`
+  over all params; returns the scalar loss + one gradient `Array` each.
+- `MlxAdam` -- Adam whose m/v moment buffers ARE `mlx_rs::Array`; the
+  update is pure MLX elementwise ops, so gradients and optimizer state
+  never leave the device.
+
+Two gated tests pass on Apple Silicon (`cargo test -p mlpl-mlx-train
+--features mlx`): `value_and_grad` matches the analytic least-squares
+gradient at w=0 (parity), and `MlxAdam` drives a tiny regression to
+the closed-form solution. Forward + backward + optimizer all on MLX.
+`mlx-sys` builds in ~80s with `accelerate` (no Metal/Xcode needed).
+
+**Next (step 006, `mlx-finetune-loop-value-and-grad`):** wire this
+into the real MLX LoRA fine-tune loop. When `device("mlx")`, the
+fine-tune step builds its loss as a traceable closure over the LoRA
+adapter params and uses `loss_and_grads` + `MlxAdam` instead of the
+CPU tape (`mlpl-autograd`) + CPU adam (`grad_optim.rs`). Parity-test
+the LoRA loss curve vs the CPU path within fp32 tolerance, then
+relabel the `MLX LoRA fine-tune` demo hybrid -> true-GPU. The CPU
+`backward.rs` 19-fn FAIL is now orthogonal debt (approach A bypasses
+it for the MLX path); retire it separately via the sibling-crate split.
+
 ## "Measurable learning" -- the success metric
 
 Every training/fine-tuning demo must assert a measurable delta on
