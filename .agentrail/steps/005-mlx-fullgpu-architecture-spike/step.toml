@@ -1,6 +1,6 @@
 number = 5
 slug = "mlx-fullgpu-architecture-spike"
-status = "pending"
+status = "in-progress"
 description = """
 MLX full-GPU training: ARCHITECTURE DECISION + spike (Phase 1b cont.).
 

@@ -329,8 +329,16 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
  "mlpl-core",
  "mlpl-rt",
+ "mlx-rs",
+]
+
+[[package]]
+name = "mlpl-mlx-train"
+version = "0.20.0"
+dependencies = [
  "mlx-rs",
 ]
 
