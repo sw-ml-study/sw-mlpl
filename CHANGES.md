@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- chore(pages): rebuild for 3D-in-connect + :ask-notice fixes
+- fix(web): demos keep 3D in connect mode; non-connect :ask gives a notice
+- fix(mlx): repair mlpl-mlx-rt build against mlx-rs 0.25.3 (bitrot)
+- docs: scrub remaining Gemini/Colab name mentions
+- chore(pages): rebuild for :models ollama [host] override
+- feat(demos): ':models ollama [host]' per-call host override
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for demo connect-mode routing fix
 - fix(demos): route loaded demos through connect mode; scrub Gemini/Colab metaphor
 - docs(changes): refresh CHANGES.md to HEAD
