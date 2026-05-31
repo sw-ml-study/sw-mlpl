@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { mathRenderable, mlplToLatex, braceSubscripts } from './derivation_latex.js';
 
 let scene, camera, renderer, controls, animId;
 let stepCount = 0;
@@ -764,52 +765,8 @@ function loadMathJax() {
     return mathJaxPromise;
 }
 
-// Convert an MLPL RHS expression to LaTeX. Iterative
-// innermost-first replacement so nested calls collapse one
-// layer per pass:
-//   softmax(matmul(Q, transpose(K)) / sqrt(4), 1)
-//     -> softmax(matmul(Q, K^T) / \sqrt{4}, 1)
-//     -> softmax(Q \cdot K^T / \sqrt{4}, 1)
-//     -> \text{softmax}(Q \cdot K^T / \sqrt{4})
-// Function calls without a dedicated rewrite get a generic
-// \text{name}(args). Brackets in array literals stay raw.
-function mlplToLatex(expr) {
-    if (!expr) return '';
-    let cur = expr;
-    let prev = '';
-    let guard = 0;
-    while (cur !== prev && guard < 16) {
-        prev = cur;
-        // transpose(x) where x has no parens -> x^T
-        cur = cur.replace(/transpose\(([^()]+)\)/g, '$1^T');
-        // sqrt(x) where x has no parens -> \sqrt{x}
-        cur = cur.replace(/sqrt\(([^()]+)\)/g, '\\sqrt{$1}');
-        // matmul(a, b) where a + b have no parens or commas
-        cur = cur.replace(/matmul\(([^,()]+),\s*([^()]+)\)/g, '$1 \\cdot $2');
-        // softmax(x, axis) -> \text{softmax}(x); drops the axis
-        cur = cur.replace(/softmax\(([^()]+?),\s*\d+\)/g, '\\text{softmax}($1)');
-        // Generic funcName(args) where args have no nested
-        // parens -- wraps the name in \text{}. Skips the
-        // already-converted commands above (their leading
-        // backslash makes the first capture not start with a
-        // letter).
-        cur = cur.replace(/(?<![\\a-zA-Z_])([a-z_]\w*)\(([^()]*)\)/g, '\\text{$1}($2)');
-        guard += 1;
-    }
-    return braceSubscripts(cur);
-}
-
-// MathJax treats only the first char after `_` as the subscript,
-// so `d_model` renders as d-sub-m followed by full-size "odel".
-// Wrap multi-char (and single-char, harmlessly) subscripts in
-// braces: `d_model` -> `d_{model}`. The leading alternation
-// consumes whole `\text{...}` spans untouched so underscores in
-// function names (reduce_add, causal_attention) stay literal
-// text rather than becoming spurious subscripts.
-function braceSubscripts(s) {
-    return s.replace(/\\text\{[^}]*\}|_([A-Za-z][A-Za-z0-9]*)/g,
-        (m, sub) => (sub ? `_{${sub}}` : m));
-}
+// mlplToLatex + braceSubscripts moved to ./derivation_latex.js
+// (imported at the top) so they can be unit-tested under node.
 
 // After the inspector body innerHTML is set, ask MathJax to
 // typeset it. No-op when MathJax hasn't finished loading.
@@ -882,18 +839,22 @@ function renderDerivation(mesh) {
         const cleanRhs = (hashIdx >= 0 ? rhs.slice(0, hashIdx) : rhs).trim();
         const isCurrent = step.stepIdx === selectedStepIdx;
         const cls = isCurrent ? 'insp-deriv-step current' : 'insp-deriv-step';
-        // Saga E follow-up: wrap the LaTeX-converted RHS in
-        // inline-math delimiters. MathJax replaces the span's
-        // content with rendered math after typesetInspectorBody
-        // runs; until it loads, the spans show the raw LaTeX
-        // which still reads better than the original MLPL.
-        const latexRhs = mlplToLatex(cleanRhs);
-        const latexName = `\\(${braceSubscripts(escapeHtml(step.varName))}\\)`;
+        // Saga E follow-up: wrap math RHS in inline-math delimiters;
+        // MathJax typesets them after typesetInspectorBody runs.
+        // Statements / blocks (def/while/`{ }`/`;`) are NOT math --
+        // feeding their literal braces to MathJax throws "Extra close
+        // brace", so render those as plain code instead.
+        const nameHtml = mathRenderable(step.varName)
+            ? `\\(${braceSubscripts(escapeHtml(step.varName))}\\)`
+            : `<code class="insp-deriv-code">${escapeHtml(step.varName)}</code>`;
+        const rhsHtml = mathRenderable(cleanRhs)
+            ? `\\(${mlplToLatex(cleanRhs)}\\)`
+            : `<code class="insp-deriv-code">${escapeHtml(cleanRhs)}</code>`;
         return `
             <button class="${cls}" onclick="window.__viz_jump_step(${step.stepIdx})" title="Jump to step ${step.stepIdx + 1}">
-                <span class="insp-deriv-name">${latexName}</span>
+                <span class="insp-deriv-name">${nameHtml}</span>
                 <span class="insp-deriv-eq">=</span>
-                <span class="insp-deriv-rhs">\\(${latexRhs}\\)</span>
+                <span class="insp-deriv-rhs">${rhsHtml}</span>
                 <span class="insp-deriv-shape">${escapeHtml(shape)}</span>
             </button>`;
     }).join('');
