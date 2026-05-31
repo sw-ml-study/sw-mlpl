@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-31
 
+- feat(elisp): ob-mlpl :session support + literate Basics demo with batch HTML publish
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(elisp): one-shot mlpl-all.el loader + ob-mlpl org-babel + paren regression gate
 - fix(emacs): resolve mlpl-repl binary (sw-install fallback + clear error); clarify loading
 - fix(emacs): define mlpl-badge-file + mlpl-demos-dir in mlpl-menu.el; doc connect/:ask/MLX
