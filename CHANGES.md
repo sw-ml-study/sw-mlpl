@@ -14,6 +14,25 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-31
 
+- chore(agentrail): record step 010 completion -- MLX full-GPU LoRA track DONE
+- chore(pages): rebuild for true-GPU MLX LoRA demo relabel (step 010)
+- feat(mlx): wire eval_adam to true-GPU LoRA fine-tune + relabel demo (step 010)
+- fix(mlx): correct demo_forward to match the real demo architecture (step 010 progress)
+- feat(mlx): expose dense_to_mlx/mlx_to_dense_data + Array (step 010 foundation)
+- chore(agentrail): record step 009 completion + define step 010 (eval_adam wire + relabel true-GPU)
+- feat(mlx): full demo model trains on MLX -- assembled forward (step 009 slice)
+- chore(agentrail): record step 008 completion + define step 009 (assemble + wire + relabel true-GPU)
+- feat(mlx): causal self-attention forward in MLX ops (step 008 slice)
+- chore(agentrail): record step 007 completion + define step 008 (MLX causal attention)
+- feat(mlx): MLX-native forward primitives -- embed, rms_norm, cross_entropy (step 007 slice)
+- chore(agentrail): record step 006 completion + define step 007 (MLX model forward + integration)
+- feat(mlx): on-device LoRA training kernel -- lora_linear + value_and_grad + MlxAdam (step 006 slice)
+- chore(agentrail): record step 005 completion + define step 006 (MLX approach A integration)
+- feat(mlx): prove approach A -- on-device autodiff + Adam (step 005 spike)
+- chore(agentrail): record step 004 completion (MLX full-GPU scoping)
+- docs(saga): scope MLX full-GPU training (step 004) + insert architecture-spike step
+- docs(plan): literate-demos saga plan (connect-demo canned-output showcase)
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(elisp): ob-mlpl :session support + literate Basics demo with batch HTML publish
 - docs(changes): refresh CHANGES.md to HEAD
 - feat(elisp): one-shot mlpl-all.el loader + ob-mlpl org-babel + paren regression gate
