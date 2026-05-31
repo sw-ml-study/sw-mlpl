@@ -242,6 +242,25 @@ hybrid -> true-GPU. This forward reimplementation is the bulk; split
 into its own crate (e.g. `mlpl-mlx-forward`) if it grows the module
 budget.
 
+### Step 007 slice (2026-05-31): forward primitives in MLX ops
+
+New crate `components/native-rt/crates/mlpl-mlx-forward` (native-rt now
+4 crates, at the <=4 budget; sw-checklist 6 passed / 0 failed / 0
+warnings) implements the non-attention forward primitives as
+`mlx_rs::Array` ops, each parity-tested vs a hand-computed reference:
+
+- `embed(onehot, table)` -- embedding as a one-hot matmul (traceable +
+  differentiable w.r.t. the table, unlike an index gather).
+- `rms_norm(x, gamma, eps)` -- `x / sqrt(mean(x^2)+eps) * gamma`.
+- `cross_entropy(logits, targets_onehot)` -- stable `logsumexp_axis`
+  minus the picked logit, mean over rows.
+
+These are forward-VALUE tests (no `value_and_grad`), so they run in
+parallel. Remaining for the demo: `causal_attention` (step 008), then
+assemble the full forward into the `train_steps` loss closure, wire
+into `eval_adam`'s MLX path, parity-test vs the CPU demo, and relabel
+the demo true-GPU (step 009).
+
 ## "Measurable learning" -- the success metric
 
 Every training/fine-tuning demo must assert a measurable delta on

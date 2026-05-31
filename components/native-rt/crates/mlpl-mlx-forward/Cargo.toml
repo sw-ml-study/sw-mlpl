@@ -1,0 +1,20 @@
+[package]
+# Saga local-gpu-agentic step 007: MLX-native forward primitives for
+# the LoRA fine-tune model, expressed in mlx_rs::Array ops so the whole
+# forward is one traceable graph for value_and_grad. Separate crate
+# from the training kernel (mlpl-mlx-train) and the eager op shim
+# (mlpl-mlx-rt) -- "refactor up and out". Apple-Silicon only, gated so
+# the crate stays cross-platform-buildable (exports nothing off-target).
+name = "mlpl-mlx-forward"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+mlx = ["dep:mlx-rs"]
+
+[dependencies]
+mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
+  "accelerate",
+] }
