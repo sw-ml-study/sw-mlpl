@@ -18,7 +18,7 @@ the MLX peer.
 
 ## Why this is better than a notebook
 
-- The upstream reference is two Colab notebooks (basic and balanced)
+- The upstream reference is two reference notebooks (basic and balanced)
   whose cell order matters and whose hyperparameters live in opaque
   cell-scope state. The sw-MLPL version is one program that runs the
   same way from REPL, compiled-app, or `mlpl-repl --connect`.
@@ -41,7 +41,7 @@ the MLX peer.
 
 Keep this entirely inside `sw-mlpl`. Unlike HRM/BDH/TRM, there is no
 external "sw track" repo for ViT yet -- the upstream
-`weagan/Vision-Transformer-ViT` is a paper-companion Colab, not a
+`weagan/Vision-Transformer-ViT` is a paper-companion notebook, not a
 project we contribute back to. Living in-tree also lets the demos
 ship in the web REPL tutorial and the bundled demo dropdown.
 
@@ -384,7 +384,7 @@ pipelines.
 
 ## References
 
-- Upstream Colab notebooks (cat/dog ViT, basic and balanced
+- Upstream reference notebooks (cat/dog ViT, basic and balanced
   variants):
   - <https://github.com/weagan/Vision-Transformer-ViT>
 - "An Image is Worth 16x16 Words: Transformers for Image Recognition

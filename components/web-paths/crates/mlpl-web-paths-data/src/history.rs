@@ -240,7 +240,7 @@ pub(super) const PATH_A_CHRONOLOGICAL_HISTORY_OF_ML: LearningPath = LearningPath
         // 30. HRM + TRM (2025)
         Step::Note {
             title: "2025 -- Hierarchical and Tiny Recursive Models",
-            body: "Two papers that challenge the scaling paradigm. HRM (Wang et al., 2025): a 27M-parameter recurrent architecture inspired by hierarchical brain processing achieves near-perfect Sudoku/maze results and strong ARC scores with only 1000 training samples. TRM (Jolicoeur-Martineau, 2025): simplifies HRM to a single 2-layer 7M-parameter network that recurses over its own output, scoring 45% on ARC-AGI-1 -- outperforming DeepSeek R1, o3-mini, and Gemini 2.5 Pro with less than 0.01% of their parameters. Key insight: recursive computation depth, not model width, drives generalization on abstract reasoning.",
+            body: "Two papers that challenge the scaling paradigm. HRM (Wang et al., 2025): a 27M-parameter recurrent architecture inspired by hierarchical brain processing achieves near-perfect Sudoku/maze results and strong ARC scores with only 1000 training samples. TRM (Jolicoeur-Martineau, 2025): simplifies HRM to a single 2-layer 7M-parameter network that recurses over its own output, scoring 45% on ARC-AGI-1 -- outperforming several far larger frontier reasoning models (e.g. DeepSeek R1, o3-mini) with less than 0.01% of their parameters. Key insight: recursive computation depth, not model width, drives generalization on abstract reasoning.",
         },
         // 31. RLM (2025)
         Step::Note {
