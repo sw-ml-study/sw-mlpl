@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- feat(web): emit 3D from server-evaluated results -- Phase 1c part 1b ("3D everywhere")
+- feat(serve): eval response carries viz data (shape/values) -- Phase 1c part 1a
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(web): connect-only demos run server-side so the browser stays responsive
 - docs(saga): add Phase 1c (viz passthrough -- '3D everywhere') as the GPU-demo gate
 - docs(changes): refresh CHANGES.md to HEAD
