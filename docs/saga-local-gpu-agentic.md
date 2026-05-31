@@ -114,6 +114,62 @@ Consequence for the plan:
   "forward pass on GPU; gradient + optimizer on CPU" -- not
   "training runs on the GPU".
 
+### Step 004 scoping (2026-05-31): code map + the architecture fork
+
+A read-through of the relevant crates (no build) pins the work:
+
+- **`mlpl-mlx-rt`** (`components/native-rt/crates/`): 7 modules of
+  FORWARD ops only (matmul, add/sub/mul/div/neg, exp/log/relu/sigmoid/
+  tanh, softmax/log_softmax/cross_entropy/mean/reduce_mul/argmax,
+  transpose/reshape). MLX arrays are `mlx_rs::Array`; ops are free
+  functions; everything triple-gated
+  `cfg(all(target_os="macos", target_arch="aarch64", feature="mlx"))`.
+  No backward/gradient/optimizer op exists.
+- **Forward dispatch** lives in `mlpl-eval/src/device.rs`
+  (`try_mlx_dispatch`, `dispatched_call`): only fires when
+  `env.device()=="mlx"`. Device is a `String` on `Environment`'s
+  device stack -- it does NOT travel on the tensor/tape node level.
+- **`mlpl-autograd`**: the tape is CPU f64; `backward.rs` has 19
+  functions and carries NO device info. The MLX hook
+  (`materialize_tape_on_mlx`) only round-trips forward VALUES to fp32
+  so CPU backward matches MLX within tolerance -- backward itself is
+  always CPU.
+- **adam** (`mlpl-eval/src/grad_optim.rs`): moment buffers are
+  `Vec<f64>` in `Environment::optim_state`; every step calls
+  `eval_grad` (CPU tape build + backward) and does the update in f64.
+  A full per-step CPU round-trip.
+
+**Architecture fork (decide in step 005 BEFORE implementing):**
+
+- **A) MLX built-in autodiff (recommended).** Express the MLX
+  fine-tune step's forward as an `mlx_rs`-traceable function and use
+  `value_and_grad`/`grad` for on-device gradients; keep moment buffers
+  as `mlx_rs::Array`. Bypasses the 19 hand-written backward formulas
+  for the MLX path -- far less code, no parity drift -- at the cost of
+  restructuring the MLX loop to build an MLX graph rather than the CPU
+  tape.
+- **B) Hand-port backward to MLX.** Add MLX backward ops to
+  `mlpl-mlx-rt` and make `mlpl-autograd` dispatch backward to MLX when
+  `device=="mlx"`, plus an on-device adam. Keeps the tape architecture
+  but is ~19 formulas to port and parity-maintain.
+
+**sw-checklist note:** `backward.rs` (19 fns) and `mlpl-mlx-rt`
+(`reductions.rs` 7 fns; 7 modules) are already over budget. Splitting
+`backward.rs` into sibling files would push the crate past the
+7-module FAIL line -- trading one FAIL for another. The correct fix is
+a sibling crate (e.g. `mlpl-autograd-backward`) inside the autograd
+component with dependency inversion (`Tensor::backward()` must not
+re-enter), which is its own step, not incidental paydown.
+
+**Decomposition:** step 004 = scope + decompose + disk recovery (the
+shared `target/` had grown to 40 GB with 24 GiB free; cleared to 63
+GiB free). Step **005 (`mlx-fullgpu-architecture-spike`)** resolves
+the fork with a small spike build and defines the implementation
+follow-ons (approach A: traceable-forward then value_and_grad+adam;
+approach B: mlx-rt backward -> autograd dispatch -> on-device adam),
+each parity-tested vs CPU within fp32 tolerance, ending with the
+demo relabeled hybrid -> true-GPU.
+
 ## "Measurable learning" -- the success metric
 
 Every training/fine-tuning demo must assert a measurable delta on
