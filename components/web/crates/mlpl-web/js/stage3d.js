@@ -1459,21 +1459,28 @@ function shapeMesh(shape, color, values) {
         return new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.3, d), mat);
     }
 
-    // Matrix with values: cols across X, rows recede into Z
+    // Matrix with values: the LONGER axis recedes toward the
+    // mountains (-Z), the shorter is width (X); the sheet lies flat
+    // so the grid reads from above. (docs/3d-orientation.md)
     if (rank === 2 && values && values.length <= 400) {
         const rows = shape[0], cols = shape[1];
         const group = new THREE.Group();
         const min = Math.min(...values);
         const max = Math.max(...values);
-        const cellW = Math.max(0.08, logDim(cols) / cols);
-        const cellD = Math.max(0.08, logDim(rows) / rows);
+        const rowsRecede = rows >= cols;
+        const depthN = rowsRecede ? rows : cols;
+        const widthN = rowsRecede ? cols : rows;
+        const cellD = Math.max(0.08, logDim(depthN) / depthN);
+        const cellW = Math.max(0.08, logDim(widthN) / widthN);
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 const v = values[r * cols + c];
                 const cmat = new THREE.MeshStandardMaterial({ color: valueColor(v, min, max), roughness: 0.2, metalness: 0.15 });
                 const cell = new THREE.Mesh(new THREE.BoxGeometry(cellW * 0.88, 0.12, cellD * 0.88), cmat);
-                cell.position.x = (c - cols / 2) * cellW;
-                cell.position.z = -(r - rows / 2) * cellD;
+                const depthIdx = rowsRecede ? r : c;
+                const widthIdx = rowsRecede ? c : r;
+                cell.position.z = -(depthIdx - depthN / 2) * cellD;
+                cell.position.x = (widthIdx - widthN / 2) * cellW;
                 cell.position.y = 0.06;
                 cell.castShadow = true;
                 group.add(cell);
@@ -1490,11 +1497,12 @@ function shapeMesh(shape, color, values) {
         return multiHeadStrip(shape, values);
     }
 
-    // Matrix without values: width X, depth Z
+    // Matrix without values: LONGEST axis recedes toward the
+    // mountains (-Z), shorter is width (X). (docs/3d-orientation.md)
     if (rank === 2) {
-        const w = logDim(shape[1]);
-        const d = logDim(shape[0]);
-        return new THREE.Mesh(new THREE.BoxGeometry(w, 0.15, d), mat);
+        const longer = logDim(Math.max(shape[0], shape[1]));
+        const shorter = logDim(Math.min(shape[0], shape[1]));
+        return new THREE.Mesh(new THREE.BoxGeometry(shorter, 0.15, longer), mat);
     }
 
     // Rank-4 conv: stacked channel heatmaps receding into Z
