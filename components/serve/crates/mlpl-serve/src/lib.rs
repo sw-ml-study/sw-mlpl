@@ -12,6 +12,7 @@
 
 pub mod auth;
 pub mod config;
+pub mod eval_viz;
 pub mod handlers;
 pub mod ollama;
 pub mod peers;
