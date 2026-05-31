@@ -1,0 +1,24 @@
+# Saga local-gpu-agentic step 009: components/mlx-model/ nested
+# workspace. Assembles the MLX forward primitives (mlpl-mlx-forward) +
+# training kernel (mlpl-mlx-train) into the demo LoRA model forward, run
+# fully on the GPU. Its own component ("refactor up and out") so
+# native-rt stays at its 4-crate budget.
+
+[workspace]
+members = [
+    "crates/mlpl-mlx-model",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
+
+# Each workspace that transitively uses mlx-rs carries its own patch
+# (Cargo evaluates patches per-workspace -- Saga 64).
+[patch.crates-io]
+mlx-rs = { path = "../../vendor/mlx-rs" }

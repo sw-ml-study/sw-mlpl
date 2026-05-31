@@ -1,6 +1,6 @@
 number = 9
 slug = "mlx-finetune-assemble-and-wire"
-status = "pending"
+status = "in-progress"
 description = "Step 009 (FINALE of the MLX full-GPU LoRA fine-tune): assemble the MLX forwar..."
 role = "legacy"
 context_files = []
