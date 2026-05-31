@@ -128,10 +128,14 @@ pub(crate) fn dispatch_demo_line(
         mlpl_web_eval::ollama_fetch::fetch_ollama_models(base, host, on_result);
         return true;
     }
-    // ONLY the server-required commands route remotely. Plain MLPL
-    // demo lines stay local so they keep emitting 3D viz events
-    // (the connect path returns just a display string, no shape /
-    // values -- routing everything there silently broke 3D).
+    // ONLY `:ask` (needs the LLM) routes remotely today. Plain MLPL
+    // demo lines -- including `device("mlx")` blocks -- stay LOCAL so
+    // they keep emitting 3D viz events: the connect path returns just
+    // a display string (no shape/values/viz), so routing them there
+    // loses 3D. Routing `device("mlx")` to the server's GPU is
+    // unblocked once the eval response carries viz data back (the
+    // "3D everywhere" viz-passthrough step); until then GPU-vs-3D is
+    // a trade and we keep 3D.
     if t.starts_with(":ask ") {
         if let Some(program) = connect_program(line, history) {
             return mlpl_web_eval::eval_wasm::connect_eval(&program, on_result);
