@@ -1,0 +1,9 @@
+{
+  "name": "mlpl-web-js",
+  "private": true,
+  "type": "module",
+  "description": "ES modules for the mlpl-web 3D viz (stage3d.js + helpers). type:module lets node --test import the pure helpers (derivation_latex.js); the browser loads them as <script type=module>.",
+  "scripts": {
+    "test": "node --test"
+  }
+}
