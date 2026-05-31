@@ -1,9 +1,10 @@
 number = 7
 slug = "mlx-finetune-model-forward"
-status = "in-progress"
+status = "completed"
 description = "Step 007 (approach A, the bulk): express the full MLX LoRA demo model forward..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-31T13:57:03"
+completed_at = "2026-05-31T14:02:59"
 task_type = "feature"
-commits = []
+commits = ["b6af66cfae19c49f77bd67d5ebfa6eb8347730e6"]
