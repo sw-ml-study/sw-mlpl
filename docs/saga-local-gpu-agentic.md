@@ -278,6 +278,37 @@ cross_entropy). Step 009 assembles them into the `train_steps` loss
 closure, wires `eval_adam`'s MLX-LoRA path, parity-tests the loss
 curve vs the CPU demo, and relabels the demo true-GPU.
 
+### Step 009 slice (2026-05-31): the full demo model trains on MLX
+
+New component `components/mlx-model/crates/mlpl-mlx-model` (its own
+component so native-rt stays at 4 crates; sw-checklist 7 passed / 0
+failed / 0 warnings) assembles the demo architecture into one traceable
+graph:
+
+- `DemoWeights` -- the frozen base weights (embed table, the two
+  RMSNorm gammas, attention Wq/Wk/Wv/Wo, head W, causal mask).
+- `demo_forward(weights, adapters, x_onehot, y_onehot)` -- runs
+  `embed -> rms_norm -> causal_attention -> (residual) -> rms_norm ->
+  lora head -> cross_entropy`. The 4 attention projections and the head
+  are LoRA-wrapped; their 10 adapter Arrays are the traced params (each
+  projection's effective weight is `w + scale*(a@b)`, computed inside
+  the graph). Base weights are captured constants.
+
+A gated test trains the adapters with `MlxAdam` via `train_steps` and
+asserts the cross-entropy drops -- gradients flow through the WHOLE
+assembled model and the optimizer reduces the loss, all on the GPU.
+This is the last technical unknown; what remains is interpreter glue.
+
+**Remaining (step 010, the true finale):** wire `eval_adam` -- when
+`device("mlx")` and all trainable params are LoRA adapters, extract the
+base weights + adapters from the Environment as `mlx_rs::Array`
+(`dense_to_mlx`), substitute the traced adapters into a `demo_forward`
+closure, run `loss_and_grads` + `MlxAdam`, and write the updated
+adapters back (`mlx_to_dense_data`) each step. Then parity-test the
+loss curve vs the CPU path (`lora_mlx_demo_tests.rs`) within fp32 tol
+and relabel the `MLX LoRA fine-tune` demo hybrid -> true-GPU. (This
+glue is Apple-only; see the CUDA-pivot note below.)
+
 ## "Measurable learning" -- the success metric
 
 Every training/fine-tuning demo must assert a measurable delta on

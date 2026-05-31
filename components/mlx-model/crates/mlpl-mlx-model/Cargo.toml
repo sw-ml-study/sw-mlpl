@@ -1,0 +1,22 @@
+[package]
+# Saga local-gpu-agentic step 009: the demo LoRA model forward
+# assembled from MLX primitives, run as ONE traceable graph over the
+# LoRA adapters so a fine-tune step's forward + backward + optimizer all
+# run on the Apple GPU. Apple-Silicon only; gated like the other MLX
+# crates so it stays cross-platform-buildable (exports nothing
+# off-target).
+name = "mlpl-mlx-model"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+mlx = ["dep:mlx-rs", "mlpl-mlx-forward/mlx", "mlpl-mlx-train/mlx"]
+
+[dependencies]
+mlpl-mlx-forward = { path = "../../../native-rt/crates/mlpl-mlx-forward" }
+mlpl-mlx-train = { path = "../../../native-rt/crates/mlpl-mlx-train" }
+mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
+  "accelerate",
+] }
