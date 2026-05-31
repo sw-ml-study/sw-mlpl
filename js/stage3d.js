@@ -1727,7 +1727,12 @@ function stepXAt(i) {
 }
 
 function panToStep(idx) {
-    if (!camera || idx < -3 || idx >= stepCount) return;
+    if (!camera || stepCount === 0) return;
+    // Clamp to a valid sculpture so Left/Right never drift into the
+    // empty space below the first object or past the last. Going
+    // left from the first object stays on the first (and vice
+    // versa) -- keeps the view centered on a real, valid object.
+    idx = Math.max(0, Math.min(idx, stepCount - 1));
     const dx = stepXAt(idx) - stepXAt(viewStep);
     viewStep = idx;
     camera.position.x += dx;
