@@ -8,28 +8,91 @@ MLPL includes a full Emacs integration in `elisp/`, providing editing, REPL inte
 
 ```
 elisp/
-  mlpl.el          Entry point / loader
+  mlpl-all.el      One-shot loader: loads everything, in order (START HERE)
+  mlpl.el          Entry point / loader for the four core modules
   mlpl-mode.el     Major mode for .mlpl files
   mlpl-repl.el     Comint-based REPL integration
   mlpl-svg.el      SVG display (inline + gallery)
   mlpl-menu.el     Interactive SVG menus (tutorial, demos, help)
+  mlpl-fold.el     Result folding for long output
+  ob-mlpl.el       Org-babel backend (#+begin_src mlpl)
+  mlpl-org.el      Org helpers (C-c C-c, table import)
+  mlpl-bootstrap.el  All-in-one self-contained bundle (alternative)
 ```
 
 ### Module Dependency Graph
 
 ```
-mlpl.el (loader)
-  +-- mlpl-mode.el       (no deps beyond Emacs)
-  +-- mlpl-repl.el       (requires: comint, mlpl-mode)
-  +-- mlpl-svg.el        (no deps beyond Emacs)
-  +-- mlpl-menu.el       (requires: mlpl-svg)
+mlpl-all.el (one-shot loader)
+  +-- mlpl.el (loader)
+  |     +-- mlpl-mode.el     (no deps beyond Emacs)
+  |     +-- mlpl-repl.el     (requires: comint, mlpl-mode)
+  |     +-- mlpl-svg.el      (no deps beyond Emacs)
+  |     +-- mlpl-menu.el     (requires: mlpl-svg)
+  +-- mlpl-fold.el           (no deps beyond Emacs)
+  +-- ob-mlpl.el             (requires: ob, soft mlpl-repl)   [if Org present]
+  +-- mlpl-org.el            (requires: ob-mlpl, mlpl-fold)   [if Org present]
 ```
+
+A regression gate (`scripts/test-elisp.sh`) checks that every
+`elisp/*.el` has balanced parens and that `mlpl-all.el` loads under
+`emacs -Q` with all modules `featurep`. Run it after editing any
+`.el` file.
 
 ## Installation
 
+### One-shot loader (recommended)
+
+The simplest entry point is `mlpl-all.el`. Load that ONE file and
+everything works -- it locates its own directory, puts it on
+`load-path`, and `require`s every module in dependency order (the four
+core modules, result folding, and -- when Org is present -- org-babel
+plus the Org helpers). No manual `load-path` setup, no eval'ing the
+`mlpl-*.el` files one at a time.
+
+```elisp
+;; In *scratch* (C-x C-e after the form) or your init file:
+(load-file "/path/to/sw-mlpl/elisp/mlpl-all.el")
+```
+
+`M-x load-file RET /path/to/sw-mlpl/elisp/mlpl-all.el RET` works too.
+After it loads, `M-x mlpl-all-version` echoes which modules came up.
+The REPL/org-babel binary is auto-resolved (see "Finding the
+`mlpl-repl` binary" below), so a GUI Emacs with a minimal PATH still
+finds `mlpl-repl`.
+
+### Org-babel (`#+begin_src mlpl` blocks)
+
+When Org is available, `mlpl-all.el` loads `ob-mlpl.el`, so MLPL source
+blocks evaluate with `C-c C-c`:
+
+```org
+#+begin_src mlpl :results output
+x = reshape(range(6), [2,3])
+x
+#+end_src
+```
+
+`C-c C-c` on the block runs the code through `mlpl-repl -f` (the binary
+resolved the same way as the interactive REPL -- `exec-path` first,
+then the `sw-install` location) and inserts the result:
+
+```org
+#+RESULTS:
+: 0 1 2
+: 3 4 5
+```
+
+SVG-producing blocks emit raw `<svg>` (render with `org-toggle-inline-images`
+when exported to HTML). Point at a non-default build with
+`(setq org-babel-mlpl-command "/absolute/path/to/mlpl-repl")`. Editing
+a block with `C-c '` opens it in `mlpl-mode` (registered via
+`org-src-lang-modes`). Sessions are not yet supported.
+
 ### Manual
 
-Add the `elisp/` dir to `load-path`, then `(require 'mlpl)`. This one
+If you'd rather wire it up by hand, add the `elisp/` dir to
+`load-path`, then `(require 'mlpl)`. This one
 `require` pulls in the four core modules (`mlpl-mode`, `mlpl-repl`,
 `mlpl-svg`, `mlpl-menu`) so editing, the REPL, SVG display, and the
 menu/demos all work. **Do NOT eval the individual `mlpl-*.el` files
@@ -44,11 +107,16 @@ you can load with no `load-path` setup -- but use *either* `(require
 (require 'mlpl)
 ```
 
-Optional extras (org-babel, folding) are separate `require`s:
+Optional extras (org-babel, folding) are separate `require`s -- or
+just use the one-shot loader above, which pulls them in automatically
+when Org is present:
 
 ```elisp
-(require 'ob-mlpl)    ; Org-babel: #+begin_src mlpl blocks
 (require 'mlpl-fold)  ; result folding
+(when (require 'org nil t)
+  (require 'ob-mlpl)  ; Org-babel: #+begin_src mlpl blocks
+  (require 'mlpl-org) ; C-c C-c on a block, table import, result folding
+  (add-to-list 'org-src-lang-modes '("mlpl" . mlpl)))
 ```
 
 ### Finding the `mlpl-repl` binary

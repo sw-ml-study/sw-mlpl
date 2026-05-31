@@ -130,7 +130,7 @@
                       (mlpl-fold--insert text)
                       (org-babel-result-cond
                        ((eq (char-after end) ?\n) (insert "\n"))
-                       ((eq (char-after end) ?\s) (insert " ")))))))))))
+                       ((eq (char-after end) ?\s) (insert " "))))))))))
 
 (provide 'mlpl-org)
 ;;; mlpl-org.el ends here
