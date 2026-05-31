@@ -1,6 +1,6 @@
 number = 7
 slug = "mlx-finetune-model-forward"
-status = "pending"
+status = "in-progress"
 description = "Step 007 (approach A, the bulk): express the full MLX LoRA demo model forward..."
 role = "legacy"
 context_files = []
