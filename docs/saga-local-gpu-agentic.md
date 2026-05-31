@@ -206,8 +206,19 @@ biggest unknown, de-risk in order:
   Then an agentic `:ask` advises on the fine-tune from the real
   metrics, and the result can be served via Ollama.
 
+## 3D dimension orientation (cross-cutting, normative)
+
+All 3D sculptures must follow `docs/3d-orientation.md`: longest
+dimension recedes toward the mountains (-Z), 2nd-longest rises to
+the sky (+Y), 3rd spreads left/right (X); stacked maps (attention
+heads, conv channels) lay out as a row of maps receding along -Z.
+Phase 1c part 1 fixed the per-head attention overlay
+(`multiHeadStrip`); rank-2 matrices + conv stacks remain to align.
+This rule keeps getting re-broken -- renderers cite the doc inline.
+
 ## References
 
+- `docs/3d-orientation.md` -- normative axis-mapping rule above.
 - `docs/SmolLM2-demo-plan.md` -- the pre-existing SmolLM2 135M
   LoRA-on-MLX demo plan. Phases 4-5 here build on it; note its
   decision that base weights + adapters live OUTSIDE this language
