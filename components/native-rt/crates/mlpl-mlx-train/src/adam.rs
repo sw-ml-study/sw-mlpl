@@ -56,18 +56,19 @@ impl MlxAdam {
         Ok(())
     }
 
-    /// The per-parameter Adam math: update moments, bias-correct, step.
+    /// The per-parameter Adam math, delegating to the stateless
+    /// [`crate::kernel::adam_update`] and storing the new moments.
     fn update_one(&self, p: &Array, g: &Array, m: &mut Array, v: &mut Array) -> Result<Array> {
-        *m = m
-            .multiply(Array::from_f32(self.b1))?
-            .add(g.multiply(Array::from_f32(1.0 - self.b1))?)?;
-        *v = v
-            .multiply(Array::from_f32(self.b2))?
-            .add(g.square()?.multiply(Array::from_f32(1.0 - self.b2))?)?;
-        let mhat = m.divide(Array::from_f32(1.0 - self.b1.powi(self.t)))?;
-        let vhat = v.divide(Array::from_f32(1.0 - self.b2.powi(self.t)))?;
-        let denom = vhat.sqrt()?.add(Array::from_f32(self.eps))?;
-        let update = mhat.divide(denom)?.multiply(Array::from_f32(self.lr))?;
-        p.subtract(update)
+        let hp = crate::kernel::AdamHp {
+            lr: self.lr,
+            b1: self.b1,
+            b2: self.b2,
+            eps: self.eps,
+            t: self.t,
+        };
+        let (w_new, m_new, v_new) = crate::kernel::adam_update(p, g, m, v, &hp)?;
+        *m = m_new;
+        *v = v_new;
+        Ok(w_new)
     }
 }

@@ -54,3 +54,38 @@ where
     }
     Ok(curve)
 }
+
+/// Adam hyperparameters + the 1-based step counter `t`. Bundled so
+/// callers (and [`adam_update`]) pass one value instead of five.
+pub struct AdamHp {
+    pub lr: f32,
+    pub b1: f32,
+    pub b2: f32,
+    pub eps: f32,
+    pub t: i32,
+}
+
+/// One stateless Adam update for a single parameter, returning
+/// `(w_new, m_new, v_new)`. For callers that persist moment buffers
+/// externally (e.g. the interpreter's per-step MLX LoRA path, which
+/// keeps m/v in the eval Environment between `adam(...)` calls) rather
+/// than inside an [`MlxAdam`].
+pub fn adam_update(
+    w: &Array,
+    g: &Array,
+    m: &Array,
+    v: &Array,
+    hp: &AdamHp,
+) -> Result<(Array, Array, Array)> {
+    let m_new = m
+        .multiply(Array::from_f32(hp.b1))?
+        .add(g.multiply(Array::from_f32(1.0 - hp.b1))?)?;
+    let v_new = v
+        .multiply(Array::from_f32(hp.b2))?
+        .add(g.square()?.multiply(Array::from_f32(1.0 - hp.b2))?)?;
+    let mhat = m_new.divide(Array::from_f32(1.0 - hp.b1.powi(hp.t)))?;
+    let vhat = v_new.divide(Array::from_f32(1.0 - hp.b2.powi(hp.t)))?;
+    let denom = vhat.sqrt()?.add(Array::from_f32(hp.eps))?;
+    let w_new = w.subtract(mhat.divide(denom)?.multiply(Array::from_f32(hp.lr))?)?;
+    Ok((w_new, m_new, v_new))
+}

@@ -19,17 +19,18 @@ pub const ASK_OLLAMA_CONTEXTUAL: Demo = Demo {
     ],
 };
 
-/// MLX (Apple GPU) demo: LoRA fine-tune with the forward pass on
-/// the GPU via `device("mlx")`. Connect mode + a Mac MLX peer
-/// only. HONEST LABEL: today only the forward pass runs on MLX;
-/// the backward pass + Adam update run on CPU (full-GPU training
-/// is a planned follow-up, saga Phase 1b). Capability: mlx +
+/// MLX (Apple GPU) demo: a TRUE-GPU LoRA fine-tune via `device("mlx")`
+/// -- forward, backward, AND the Adam optimizer all run on the Apple
+/// GPU (saga Phase 1b, step 010). The fine-tune step's loss is built as
+/// an `mlx_rs`-traceable graph over the LoRA adapters and differentiated
+/// with `value_and_grad`; an MLX-resident Adam updates the adapters
+/// on-device. Connect mode + a Mac MLX peer only. Capability: mlx +
 /// requires_connect, so it lands in its own MLX section.
 pub const MLX_LORA_FINETUNE: Demo = Demo {
     category: "MLX (Apple GPU)",
     name: "MLX LoRA fine-tune",
-    intro: "LoRA fine-tune a tiny language model with the forward pass on the Apple GPU via MLX. Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public demo. NOTE: today device(\"mlx\") accelerates only the forward pass -- the backward pass and the Adam optimizer still run on CPU. Full-GPU training is a planned follow-up. Watch the fine-tune loss fall as the adapters learn.",
-    takeaway: "device(\"mlx\") routes the forward matmuls/attention to the GPU; lora() freezes the base and trains only the low-rank adapters, so the model specializes on a new corpus cheaply. Fine-tune loss drops from ~6 toward ~1.",
+    intro: "LoRA fine-tune a tiny language model entirely on the Apple GPU via MLX -- forward, backward, AND the Adam optimizer all run on-device (no CPU round-trip). Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public browser demo. Under device(\"mlx\"), the fine-tune step is traced by mlx_rs value_and_grad and the adapters are updated by an MLX-resident Adam, parity-tested against the CPU path within fp32 tolerance. Watch the fine-tune loss fall as the adapters learn.",
+    takeaway: "device(\"mlx\") runs the whole fine-tune step on the GPU; lora() freezes the base and trains only the low-rank adapters, so the model specializes on a new corpus cheaply. Fine-tune loss drops from ~6 toward ~1.",
     lines: &[
         "corpus = load_preloaded(\"tiny_shakespeare_snippet\")  # base corpus",
         "tok    = train_bpe(corpus, 280, 0)                    # 280-token BPE",

@@ -22,7 +22,7 @@ mod kernel;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use adam::MlxAdam;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-pub use kernel::{lora_linear, loss_and_grads, train_steps};
+pub use kernel::{AdamHp, adam_update, lora_linear, loss_and_grads, train_steps};
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx", test))]
 mod kernel_tests;

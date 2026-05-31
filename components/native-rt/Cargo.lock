@@ -324,6 +324,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-mlx-forward"
+version = "0.20.0"
+dependencies = [
+ "mlx-rs",
+]
+
+[[package]]
 name = "mlpl-mlx-rt"
 version = "0.20.0"
 dependencies = [
