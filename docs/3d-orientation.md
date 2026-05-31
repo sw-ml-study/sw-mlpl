@@ -38,10 +38,12 @@ mountains" means for the Pets per-head attention overlay.
 
 - [x] Multi-head attention `[H, Q, K]` (`multiHeadStrip` in
   `stage3d.js`): heads recede along -Z; query up, key left/right.
-- [ ] Rank-2 matrices (`shapeMesh` rank-2 branch): currently lay
-  flat in the XZ plane (rows -Z, cols X, no +Y). Target: the longer
-  of (rows, cols) recedes (-Z), the shorter rises (+Y) -- i.e. the
-  matrix stands up as a wall rather than lying flat.
+- [x] Rank-2 matrices (`shapeMesh` rank-2 branches, with + without
+  values): the LONGER of (rows, cols) recedes toward the mountains
+  (-Z), the shorter is width (X); the sheet lies flat so the grid
+  reads from above. (A single matrix is not a stack, so it stays
+  flat rather than standing up -- the +Y axis is reserved for the
+  middle dimension of rank-3 tensors / the per-map axis of stacks.)
 - [ ] Conv channel stacks `[C, H, W]` (`convChannelStack`): apply
   the stacked-maps rule (channels recede -Z; H up, W left/right).
 - [ ] General rank-1/rank-3+ tensors: audit against the rule.
