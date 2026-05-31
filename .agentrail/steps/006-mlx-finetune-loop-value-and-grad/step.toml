@@ -1,6 +1,6 @@
 number = 6
 slug = "mlx-finetune-loop-value-and-grad"
-status = "pending"
+status = "in-progress"
 description = "Step 006 (approach A integration): wire mlpl-mlx-train into the real MLX LoRA..."
 role = "legacy"
 context_files = []

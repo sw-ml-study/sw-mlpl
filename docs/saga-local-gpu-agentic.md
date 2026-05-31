@@ -208,6 +208,40 @@ relabel the `MLX LoRA fine-tune` demo hybrid -> true-GPU. The CPU
 `backward.rs` 19-fn FAIL is now orthogonal debt (approach A bypasses
 it for the MLX path); retire it separately via the sibling-crate split.
 
+### Step 006 slice (2026-05-31): on-device LoRA training kernel proven
+
+`mlpl-mlx-train` now has the full on-device training kernel and proves
+the LoRA mechanism end-to-end (it was the linreg spike before):
+
+- `lora_linear(x, w, a, b, scale)` -- the traceable LoRA forward
+  `x @ (w + scale*(a@b))` in MLX ops, differentiable w.r.t. the
+  adapters.
+- `train_steps(params, adam, n, loss_fn)` -- runs the on-device loop
+  (forward + `value_and_grad` backward + `MlxAdam` update), returning
+  the loss curve. Nothing round-trips to the CPU.
+
+Two gated tests pass on Apple Silicon: `value_and_grad` matches a
+finite-difference gradient over BOTH adapters (parity), and `MlxAdam`
+drives a frozen-base + rank-1-adapter problem to a collapsed loss.
+Crate stays clean (4 modules, sw-checklist 6 passed / 0 failed / 0
+warnings). MLX's `value_and_grad` mutates global trace state and is
+not thread-safe, so the gradient tests serialize on a crate-local
+`MLX_TEST_LOCK` (the parallel eager parity tests in `mlpl-mlx-rt` are
+unaffected) -- do not run grad tests in parallel.
+
+**Remaining for the demo (step 007, `mlx-finetune-model-forward`):**
+express the FULL demo model forward -- embed (one-hot matmul), causal
+attention, rms_norm, linear, cross_entropy -- as `mlx_rs::Array` ops
+(the interpreter forward is eager/CPU-materialized and cannot be
+traced as-is), assemble it into the `train_steps` loss closure over
+the LoRA adapters, wire it into `eval_adam`'s MLX path (read base
+params + adapters from the Environment, write adapters back each
+step), parity-test the loss curve vs the CPU path
+(`lora_mlx_demo_tests.rs`) within fp32 tol, then relabel the demo
+hybrid -> true-GPU. This forward reimplementation is the bulk; split
+into its own crate (e.g. `mlpl-mlx-forward`) if it grows the module
+budget.
+
 ## "Measurable learning" -- the success metric
 
 Every training/fine-tuning demo must assert a measurable delta on
