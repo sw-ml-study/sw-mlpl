@@ -285,29 +285,53 @@ component so native-rt stays at 4 crates; sw-checklist 7 passed / 0
 failed / 0 warnings) assembles the demo architecture into one traceable
 graph:
 
-- `DemoWeights` -- the frozen base weights (embed table, the two
-  RMSNorm gammas, attention Wq/Wk/Wv/Wo, head W, causal mask).
+- `DemoWeights` -- the frozen base weights (embed table, attention
+  Wq/Wk/Wv/Wo, head W + bias, an all-ones gamma, causal mask).
 - `demo_forward(weights, adapters, x_onehot, y_onehot)` -- runs
   `embed -> rms_norm -> causal_attention -> (residual) -> rms_norm ->
-  lora head -> cross_entropy`. The 4 attention projections and the head
-  are LoRA-wrapped; their 10 adapter Arrays are the traced params (each
-  projection's effective weight is `w + scale*(a@b)`, computed inside
-  the graph). Base weights are captured constants.
+  lora head -> cross_entropy`. Base weights are captured constants; the
+  traced params are the head's single `[A, B]` adapter pair.
 
 A gated test trains the adapters with `MlxAdam` via `train_steps` and
 asserts the cross-entropy drops -- gradients flow through the WHOLE
 assembled model and the optimizer reduces the loss, all on the GPU.
 This is the last technical unknown; what remains is interpreter glue.
 
-**Remaining (step 010, the true finale):** wire `eval_adam` -- when
-`device("mlx")` and all trainable params are LoRA adapters, extract the
-base weights + adapters from the Environment as `mlx_rs::Array`
-(`dense_to_mlx`), substitute the traced adapters into a `demo_forward`
-closure, run `loss_and_grads` + `MlxAdam`, and write the updated
-adapters back (`mlx_to_dense_data`) each step. Then parity-test the
-loss curve vs the CPU path (`lora_mlx_demo_tests.rs`) within fp32 tol
-and relabel the `MLX LoRA fine-tune` demo hybrid -> true-GPU. (This
-glue is Apple-only; see the CUDA-pivot note below.)
+### Step 010 progress (2026-05-31): exact CPU-match findings
+
+Wiring requires `demo_forward` to match the CPU `apply_model` EXACTLY
+(else the parity test diverges). Reading the CPU primitives corrected
+several wrong assumptions (the forward is now fixed accordingly):
+
+- **RMSNorm is gamma-free**, `eps = 1e-8` (`model_apply_compose.rs`):
+  `y = x / sqrt(mean(x^2) + eps)`. The `RmsNorm` layer has NO params
+  (`params()` returns empty), so the MLX path passes an all-ones gamma.
+- **Only the head is LoRA-adapted.** `lora()` rewrites `Linear` ->
+  `LinearLora`, but the attention projections live in the separate
+  `Attention { wq, wk, wv, wo }` variant, NOT `Linear` -- so they stay
+  FROZEN. The demo therefore has ONE adapter pair (`__lora_A_0`,
+  `__lora_B_0`) on the head, not one per projection.
+- **The head LoRA carries a bias** (`model_apply_lora.rs`):
+  `x @ w + (alpha/rank) * (x @ a @ b) + b`.
+- **Attention** (h=1, `model_apply_attention.rs`): `scale = 1/sqrt(d_k)`,
+  `d_k = d_model/heads`; matches `causal_attention` for the single-head
+  demo.
+
+So `mlpl-mlx-model` now also exposes the converters it needs:
+`mlpl-mlx-rt::{dense_to_mlx, mlx_to_dense_data, Array}` are now public.
+
+**Remaining (the finish):** add `mlpl-mlx-train` + `mlpl-mlx-model` to
+`mlpl-eval`'s `mlx` feature; a new `grad_optim_mlx.rs` that, when
+`device("mlx")` and the only non-frozen params are the head adapters
+AND the model matches the demo shape (else fall back to CPU): walks the
+student `ModelSpec` for the frozen weights + adapter names, extracts X/Y
+from the `cross_entropy(apply(model, X), Y)` loss expr, builds one-hots,
+runs one `loss_and_grads` + a stateless MLX adam update per step
+(persisting m/v in `env.optim_state` like the CPU path), writes the
+adapters back. Branch at the top of `eval_adam`. Then assert the
+`device("mlx")` loss curve matches the CPU path in `lora_mlx_demo_tests.rs`
+within fp32 tol, and relabel the `MLX LoRA fine-tune` demo hybrid ->
+true-GPU. (Apple-only glue; see the CUDA-pivot note below.)
 
 ## "Measurable learning" -- the success metric
 
