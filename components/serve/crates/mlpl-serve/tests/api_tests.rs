@@ -79,6 +79,29 @@ async fn eval_runs_program_against_session_env() {
 }
 
 #[tokio::test]
+async fn eval_returns_viz_shape_and_values() {
+    // Phase 1c: the eval response carries shape + flat values so the
+    // connect-mode web UI can emit a 3D sculpture for a result that
+    // was evaluated server-side.
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+    let resp = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/sessions/{id}/eval"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({"program": "iota(6)"}))
+        .send()
+        .await
+        .unwrap();
+    let body: JsonValue = resp.json().await.unwrap();
+    assert_eq!(body["shape"], serde_json::json!([6]), "shape rides back");
+    assert_eq!(
+        body["values"],
+        serde_json::json!([0.0, 1.0, 2.0, 3.0, 4.0, 5.0]),
+        "flat values ride back for 3D"
+    );
+}
+
+#[tokio::test]
 async fn eval_persists_state_across_calls() {
     let addr = start_server(AuthMode::Required).await;
     let (id, token) = create_session(addr).await;

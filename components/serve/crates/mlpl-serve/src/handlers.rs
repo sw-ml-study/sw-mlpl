@@ -50,6 +50,15 @@ pub struct EvalResponse {
     /// directly; absent when no cache dir is configured.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub viz_local_path: Option<String>,
+    /// Phase 1c: viz data so the connect-mode web UI can emit a 3D
+    /// sculpture for a server-evaluated result. `shape` empty +
+    /// `values`/`string_list` absent for non-array/list results.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub shape: Vec<usize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub values: Option<Vec<f64>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub string_list: Option<Vec<String>>,
 }
 
 #[derive(Serialize)]
@@ -164,12 +173,9 @@ pub async fn eval_handler(
     let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
     drop(sessions);
     crate::persist::maybe_flush(&state).await;
-    Ok(Json(EvalResponse {
-        value: formatted,
-        kind,
-        viz_url: attached.url,
-        viz_local_path: attached.local_path,
-    }))
+    Ok(Json(crate::eval_viz::build_eval_response(
+        &value, kind, formatted, attached,
+    )))
 }
 
 /// `POST /v1/sessions/{id}/cancel` -- requires bearer
