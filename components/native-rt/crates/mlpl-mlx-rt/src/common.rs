@@ -24,7 +24,7 @@ use mlx_rs::Array as MlxArray;
 /// The caller is responsible for any shape validation -- this
 /// helper trusts `dims` and only handles the f64 -> f32 cast plus
 /// the i32 dims conversion MLX expects.
-pub(crate) fn dense_to_mlx(data: &[f64], dims: &[usize]) -> MlxArray {
+pub fn dense_to_mlx(data: &[f64], dims: &[usize]) -> MlxArray {
     let data_f32: Vec<f32> = data.iter().map(|&x| x as f32).collect();
     let shape: Vec<i32> = dims.iter().map(|&d| d as i32).collect();
     MlxArray::from_slice(&data_f32, &shape)
@@ -35,7 +35,7 @@ pub(crate) fn dense_to_mlx(data: &[f64], dims: &[usize]) -> MlxArray {
 /// `.eval()` forces MLX's lazy graph so `as_slice` sees real data.
 /// The caller decides what shape (and labels) the resulting
 /// `DenseArray` wears.
-pub(crate) fn mlx_to_dense_data(mlx: MlxArray) -> Vec<f64> {
+pub fn mlx_to_dense_data(mlx: MlxArray) -> Vec<f64> {
     mlx.eval()
         .expect("mlx eval on pre-validated shapes should not fail");
     let out: &[f32] = mlx.as_slice();
