@@ -1,0 +1,151 @@
+#+TITLE: MLPL Basics -- a Literate Tour
+#+SUBTITLE: the web "Basics" demo, recreated as runnable Org-babel
+#+AUTHOR: MLPL
+#+OPTIONS: toc:2 num:t
+#+PROPERTY: header-args:mlpl :session basics :results output :exports both
+
+This document recreates the *Basics* demo from the MLPL web playground
+as a literate program. Every step below is a live MLPL source block:
+when this file is published (see [[*Publishing this document][Publishing
+this document]]) each block is evaluated in order, the output is captured
+beneath it, and the prose ties the steps together.
+
+The blocks share one ~:session basics~, so a variable bound in an early
+block is still in scope later -- exactly like typing successive lines
+into the REPL. That session is the whole point of this tour: MLPL state
+persists across "REPL lines", and Org-babel lets us narrate each line.
+
+* Scalar arithmetic
+
+MLPL starts where every language does: arithmetic. Operators are
+ordinary infix; a bare expression on its own line echoes its value.
+
+#+begin_src mlpl
+1 + 2
+#+end_src
+
+#+RESULTS:
+: 3
+
+Multiplication is the same shape:
+
+#+begin_src mlpl
+3 * 4
+#+end_src
+
+#+RESULTS:
+: 12
+
+One thing that surprises NumPy refugees: *every* number is an ~f64~.
+There is no integer type and therefore no integer division -- ~10 / 3~
+is a true ratio, not a floored ~3~.
+
+#+begin_src mlpl
+10 / 3
+#+end_src
+
+#+RESULTS:
+: 3.3333333333333335
+
+* Arrays and broadcasting
+
+Arrays are written with brackets. Binary operators apply *elementwise*,
+so two equal-length vectors add position by position:
+
+#+begin_src mlpl
+[1, 2, 3] + [4, 5, 6]
+#+end_src
+
+#+RESULTS:
+: 5 7 9
+
+When one side is a scalar it *broadcasts* across the whole array -- the
+~10~ below is applied to each element rather than requiring a vector of
+tens:
+
+#+begin_src mlpl
+[1, 2, 3] * 10
+#+end_src
+
+#+RESULTS:
+: 10 20 30
+
+* Variables persist across blocks
+
+Here is where the session earns its keep. Binding ~x~ produces no
+output -- assignment is silent -- but the name is now part of the
+session.
+
+#+begin_src mlpl
+x = [10, 20, 30]
+#+end_src
+
+#+RESULTS:
+
+The next block is a *separate* source block, evaluated as its own step,
+yet ~x~ is still in scope. ~y~ is a new vector; ~x~ is untouched
+(arrays are values, not mutated in place):
+
+#+begin_src mlpl
+y = x + 1
+y
+#+end_src
+
+#+RESULTS:
+: 11 21 31
+
+To prove ~x~ survived unchanged, echo it again from yet another block:
+
+#+begin_src mlpl
+x
+#+end_src
+
+#+RESULTS:
+: 10 20 30
+
+* Unary negation
+
+Finally, the unary minus negates every element -- a one-character
+demonstration that prefix operators broadcast just like the binary ones:
+
+#+begin_src mlpl
+-[1, 2, 3]
+#+end_src
+
+#+RESULTS:
+: -1 -2 -3
+
+And because the session is still live, we can negate the ~x~ we bound
+three blocks ago:
+
+#+begin_src mlpl
+-x
+#+end_src
+
+#+RESULTS:
+: -10 -20 -30
+
+* Takeaway
+
+Operators apply elementwise; scalars broadcast; variables persist
+across blocks (REPL lines). That is the substrate every other MLPL demo
+builds on. The same ~:session~ mechanism scales to the larger demos --
+loss curves, autograd training loops, attention maps -- where each step
+depends on state the previous steps established.
+
+* Publishing this document
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+To run every block and produce a standalone HTML file, in batch, with
+no interactive Emacs:
+
+#+begin_src sh :eval no
+./examples/literate/publish.sh examples/literate/basics.org
+#+end_src
+
+That script launches ~emacs -Q --batch~, loads the MLPL Org-babel
+support via ~elisp/mlpl-all.el~ (which resolves the ~mlpl-repl~ binary
+for you), resets the session, evaluates the buffer top to bottom, and
+exports ~basics.html~ next to this file.

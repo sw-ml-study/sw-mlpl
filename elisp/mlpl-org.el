@@ -86,10 +86,7 @@
          (when (mlpl-fold--should-fold-p text)
            (let ((inhibit-read-only t))
              (delete-region beg end)
-             (mlpl-fold--insert text)
-             (org-babel-result-cond
-              ((eq (char-after end) ?\n) (insert "\n"))
-              ((eq (char-after end) ?\s) (insert " "))))))))))
+             (mlpl-fold--insert text))))))))
 
 (defun mlpl-org-unfold-all ()
   "Expand all folded results in the current Org buffer."
@@ -116,21 +113,30 @@
   (when (org-in-src-block-p 'mlpl)
     (use-local-map mlpl-org-mode-map)))
 
-(add-hook 'org-babel-after-execute-hook
-          (lambda ()
-            (when (eq org-babel-current-lang 'mlpl)
+(defun mlpl-org--maybe-fold-result ()
+  "After executing an MLPL block, fold its result if it is large.
+Interactive only -- batch publishing keeps full results so the HTML is
+complete.  Detects the just-executed block's language correctly and is
+wrapped so it can never error out the surrounding execute."
+  (when (and (not noninteractive)
+             (derived-mode-p 'org-mode))
+    (ignore-errors
+      (let ((info (org-babel-get-src-block-info t)))
+        (when (and info (string= (car info) "mlpl"))
+          (let ((result-pos (org-babel-where-is-src-block-result)))
+            (when result-pos
               (save-excursion
-                (org-babel-goto-named-result org-babel-current-result-params)
+                (goto-char result-pos)
+                (forward-line 1)
                 (let* ((beg (point))
                        (end (org-babel-result-end))
                        (text (buffer-substring-no-properties beg end)))
                   (when (mlpl-fold--should-fold-p text)
                     (let ((inhibit-read-only t))
                       (delete-region beg end)
-                      (mlpl-fold--insert text)
-                      (org-babel-result-cond
-                       ((eq (char-after end) ?\n) (insert "\n"))
-                       ((eq (char-after end) ?\s) (insert " "))))))))))
+                      (mlpl-fold--insert text))))))))))))
+
+(add-hook 'org-babel-after-execute-hook #'mlpl-org--maybe-fold-result)
 
 (provide 'mlpl-org)
 ;;; mlpl-org.el ends here
