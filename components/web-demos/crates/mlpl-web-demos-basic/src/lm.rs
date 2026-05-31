@@ -12,7 +12,7 @@ pub const ASK_OLLAMA_CONTEXTUAL: Demo = Demo {
     category: "Client-server",
     name: "Ask Ollama (contextual)",
     intro: "Ask a local Ollama model a question grounded in your sw-MLPL session. The server sends your question + a 'you are inside the sw-MLPL REPL' system prompt + your recent REPL activity to Ollama, so the answer is about MLPL specifically, not generic cloud trivia. Connect mode only (needs a running mlpl-serve); on the public demo this is visible but not runnable.",
-    takeaway: "`:models ollama` lists the server's models; `:ask` routes your question through the server to Ollama with session context attached -- the Gemini-in-Colab experience for an array language.",
+    takeaway: "`:models ollama` lists the server's models; `:ask` routes your question through the server to Ollama with your REPL session context attached, so the answer is about your actual MLPL work, not generic trivia.",
     lines: &[
         ":models ollama",
         ":ask \"what does this REPL do, and what have I run so far?\"",

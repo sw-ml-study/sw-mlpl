@@ -49,7 +49,7 @@ fn selection_context() -> String {
 
 /// Summarize the recent REPL activity (last few command/result
 /// pairs) so `:ask` can answer questions about "what is being run
-/// in the REPL" -- the Gemini-in-Colab experience. Newest entries
+/// in the REPL" -- an in-context REPL assistant. Newest entries
 /// are kept; long outputs are truncated char-safely.
 fn repl_history_context(history: &[HistoryEntry]) -> String {
     let mut recent: Vec<String> = history
@@ -103,6 +103,31 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
         return None;
     }
     Some(line.to_string())
+}
+
+/// Route one demo line through the connected server (connect mode):
+/// the `:models ollama` listing, the `:ask` shortcut, or a bare
+/// expression. Fires `on_result` with the display string when the
+/// server responds. Returns true when it took the line; false for a
+/// non-eligible `:` command so the demo runner falls back to local
+/// eval. Shared by the demo runner so loaded demos behave like
+/// typed lines in connect mode.
+pub(crate) fn dispatch_demo_line(
+    line: &str,
+    history: &[HistoryEntry],
+    on_result: mlpl_web_eval::eval::ResultCb,
+) -> bool {
+    if line.trim() == ":models ollama" {
+        let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
+            return false;
+        };
+        mlpl_web_eval::ollama_fetch::fetch_ollama_models(base, on_result);
+        return true;
+    }
+    match connect_program(line, history) {
+        Some(program) => mlpl_web_eval::eval_wasm::connect_eval(&program, on_result),
+        None => false,
+    }
 }
 
 /// Resolve the `(host, model)` for `:ask`: an explicit `?ollama=` /
