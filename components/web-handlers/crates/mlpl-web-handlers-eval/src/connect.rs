@@ -115,6 +115,7 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
 pub(crate) fn dispatch_demo_line(
     line: &str,
     history: &[HistoryEntry],
+    route_all: bool,
     on_result: mlpl_web_eval::eval::ResultCb,
 ) -> bool {
     let t = line.trim();
@@ -128,18 +129,20 @@ pub(crate) fn dispatch_demo_line(
         mlpl_web_eval::ollama_fetch::fetch_ollama_models(base, host, on_result);
         return true;
     }
-    // ONLY `:ask` (needs the LLM) routes remotely today. Plain MLPL
-    // demo lines -- including `device("mlx")` blocks -- stay LOCAL so
-    // they keep emitting 3D viz events: the connect path returns just
-    // a display string (no shape/values/viz), so routing them there
-    // loses 3D. Routing `device("mlx")` to the server's GPU is
-    // unblocked once the eval response carries viz data back (the
-    // "3D everywhere" viz-passthrough step); until then GPU-vs-3D is
-    // a trade and we keep 3D.
     if t.starts_with(":ask ") {
         if let Some(program) = connect_program(line, history) {
             return mlpl_web_eval::eval_wasm::connect_eval(&program, on_result);
         }
+    }
+    // `route_all` is set for connect-only demos (MLX/CUDA tier):
+    // their heavy training runs server-side so the browser main
+    // thread stays responsive (and uses the GPU). CPU-tier demos
+    // pass `route_all=false`, so plain MLPL lines stay LOCAL and keep
+    // emitting 3D viz (the connect path returns only a display
+    // string). Full 3D for server-routed lines arrives with the
+    // viz-passthrough step.
+    if route_all && !t.starts_with(':') {
+        return mlpl_web_eval::eval_wasm::connect_eval(line, on_result);
     }
     false
 }
