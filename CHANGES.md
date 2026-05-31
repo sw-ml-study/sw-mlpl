@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-05-31
+
+- fix(viz): multi-head attention heads recede toward the mountains (-Z); doc the orientation rule
+
 ## 2026-05-30
 
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(web): emit 3D from server-evaluated results -- Phase 1c part 1b ("3D everywhere")
 - feat(serve): eval response carries viz data (shape/values) -- Phase 1c part 1a
 - docs(changes): refresh CHANGES.md to HEAD
