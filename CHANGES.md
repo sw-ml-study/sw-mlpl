@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- chore(pages): rebuild for demo connect-mode routing fix
+- fix(demos): route loaded demos through connect mode; scrub Gemini/Colab metaphor
+- docs(changes): refresh CHANGES.md to HEAD
 - saga(step 003): complete demo tiers+gating+seeding; queue MLX GPU training (004)
 - chore(pages): rebuild for device-tiered demo dropdown gating
 - feat(demos): device-tier demo dropdown gating + seed connect/MLX demos (saga Phase 1)
