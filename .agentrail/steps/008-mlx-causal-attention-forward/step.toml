@@ -1,9 +1,10 @@
 number = 8
 slug = "mlx-causal-attention-forward"
-status = "in-progress"
+status = "completed"
 description = "Step 008: implement causal_attention as a traceable mlx_rs::Array forward in ..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-31T14:02:59"
+completed_at = "2026-05-31T14:12:26"
 task_type = "feature"
-commits = []
+commits = ["5630360ae7cb83da31d79ded0c2d2cc076487592"]
