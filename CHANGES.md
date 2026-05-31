@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-31
 
+- fix(viz): derivation renders statements as plain code (no MathJax "Extra close brace") + regression test
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(viz): clamp 3D step navigation so Left/Right never drift past the first/last object
 - docs(changes): refresh CHANGES.md to HEAD
 - fix(viz): rank-2 matrices recede longest-axis toward the mountains (orientation rule)
