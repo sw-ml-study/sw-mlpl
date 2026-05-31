@@ -1,0 +1,9 @@
+number = 11
+slug = "agentic-ask-phase2"
+status = "pending"
+description = "Phase 2 of local-gpu-agentic: agentic, tool-using :ask. Server-side /api/chat..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-31T15:22:16"
+task_type = "feature"
+commits = []
