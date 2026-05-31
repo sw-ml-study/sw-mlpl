@@ -17,6 +17,13 @@ path = "src/lib.rs"
 name = "mlpl-serve"
 path = "src/main.rs"
 
+[features]
+# Pass through mlpl-eval's MLX feature so a server built with
+# `--features mlx` on Apple Silicon runs `device("mlx") { }` blocks
+# (forwarded from the connect-mode web demos) on the GPU in-process.
+# Off by default; non-Apple / CI builds stay CPU-only.
+mlx = ["mlpl-eval/mlx"]
+
 [dependencies]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }

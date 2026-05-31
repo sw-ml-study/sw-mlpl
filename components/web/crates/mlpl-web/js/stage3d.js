@@ -1136,6 +1136,12 @@ function navInspector(dir) {
 // REPL output) and routes a `:ask` through window.__mlpl_ask --
 // the connect-mode pipeline attaches this sculpture's context.
 function askRow() {
+    // `:ask` needs a connected mlpl-serve to reach an LLM, so the
+    // ask input + button only appear in connect mode (?connect=).
+    // On the public live demo they would just error, so hide them.
+    if (!new URLSearchParams(location.search).get('connect')) {
+        return '';
+    }
     return `<div class="insp-ask">
         <input id="insp-ask-input" class="insp-ask-input" type="text"
             placeholder="Ask about this sculpture (connect mode)..."
