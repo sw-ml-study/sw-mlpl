@@ -168,6 +168,21 @@ biggest unknown, de-risk in order:
   gradients + moment buffers stay on-device, no per-step CPU
   round-trip). Only after this is the MLX demo a true GPU
   fine-tune. CUDA is the same shape on a Linux peer (later).
+- **Phase 1c -- Viz passthrough ("3D everywhere").** The UI -- the
+  3D view especially -- should show results regardless of WHERE the
+  work ran (local WASM, the MLX peer, a future CUDA peer). Today the
+  connect-mode eval response is just `{value, kind}` (a display
+  string), so server-evaluated lines emit NO 3D. Make the eval
+  response carry viz data so the client emits the 3D event for ANY
+  result: (1) `shape` + flat `values` (+ `string_list`) first --
+  covers basic tensor/grid/bar sculptures, no new serialization;
+  (2) `viz_node` later (attention heatmaps, Sankey) -- requires
+  making `VizNode` (mlpl-web-viz-ir) `Serialize`/`Deserialize` and
+  extracting it server-side (today that lives in `mlpl-wasm`'s
+  `eval_with_values`, not a shared crate). This is the GATE that
+  lets `device("mlx")`/`device("cuda")` blocks route to the server
+  (GPU) WITHOUT losing 3D -- the real form of the web MLX demo. The
+  `mlpl-serve` `mlx` feature (shipped) is the server-side half.
 - **Phase 2 -- Agentic tool-using `:ask`.** Server-side
   `/api/chat` loop with `tools`: the model requests context
   (`get_recent_history`, `get_workspace_vars`, `describe_variable`,
