@@ -6,7 +6,8 @@
 //! backward formulas, no CPU round-trip. The companion [`MlxAdam`]
 //! keeps its first/second moment buffers as `mlx_rs::Array` and does
 //! the parameter update with MLX elementwise ops, so gradients and
-//! optimizer state never leave the device.
+//! optimizer state never leave the device. [`train_steps`] ties them
+//! into a step loop; [`lora_linear`] is the traceable LoRA forward.
 //!
 //! Sibling to the forward-only `mlpl-mlx-rt`. Gated behind the same
 //! three conditions (the `mlx` feature, `target_os = "macos"`,
@@ -16,12 +17,19 @@
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod adam;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-mod autodiff;
+mod kernel;
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use adam::MlxAdam;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-pub use autodiff::loss_and_grads;
+pub use kernel::{lora_linear, loss_and_grads, train_steps};
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx", test))]
-mod spike_tests;
+mod kernel_tests;
+
+// MLX's `value_and_grad` transform mutates a global trace/graph state
+// and is NOT safe to run concurrently. cargo runs `#[test]`s in
+// parallel, so every test that builds a gradient must serialize on
+// this lock (poison-tolerant: a failing test must not wedge the rest).
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx", test))]
+pub(crate) static MLX_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
