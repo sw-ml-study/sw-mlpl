@@ -29,9 +29,41 @@ mlpl.el (loader)
 
 ### Manual
 
+Add the `elisp/` dir to `load-path`, then `(require 'mlpl)`. This one
+`require` pulls in the four core modules (`mlpl-mode`, `mlpl-repl`,
+`mlpl-svg`, `mlpl-menu`) so editing, the REPL, SVG display, and the
+menu/demos all work. **Do NOT eval the individual `mlpl-*.el` files
+one at a time** -- they have load-order dependencies, so a partial
+load leaves the REPL/menu/demos broken. (The all-in-one bundle
+`mlpl-bootstrap.el` is the alternative: a single self-contained file
+you can load with no `load-path` setup -- but use *either* `(require
+'mlpl)` *or* the bundle, not both.)
+
 ```elisp
-(add-to-list 'load-path "/path/to/sw-mlpl/elisp")
+(add-to-list 'load-path "/path/to/sw-mlpl/elisp")  ; full path to the elisp dir
 (require 'mlpl)
+```
+
+Optional extras (org-babel, folding) are separate `require`s:
+
+```elisp
+(require 'ob-mlpl)    ; Org-babel: #+begin_src mlpl blocks
+(require 'mlpl-fold)  ; result folding
+```
+
+### Finding the `mlpl-repl` binary
+
+`mlpl-repl-start` runs the program named by `mlpl-repl-command`
+(default `"mlpl-repl"`). GUI Emacs -- especially on macOS -- starts
+with a minimal PATH that usually omits `~/.local/softwarewrighter/bin`
+(the `sw-install` location), so a bare `mlpl-repl` fails with
+"Searching for program: No such file or directory". The REPL resolver
+falls back to `~/.local/softwarewrighter/bin/mlpl-repl` automatically;
+if your binary lives elsewhere, set the full path:
+
+```elisp
+(setq mlpl-repl-command "/absolute/path/to/mlpl-repl")
+;; or, for an MLX-enabled / connect-mode build, see "Connect mode" below.
 ```
 
 ### Use-package
