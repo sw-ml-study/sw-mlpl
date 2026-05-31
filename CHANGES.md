@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- fix(web): connect-only demos run server-side so the browser stays responsive
+- docs(saga): add Phase 1c (viz passthrough -- '3D everywhere') as the GPU-demo gate
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(web): hide :ask affordance on live-demo; keep device(mlx) local for 3D; serve mlx feature
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for 3D-in-connect + :ask-notice fixes
