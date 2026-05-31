@@ -1,9 +1,10 @@
 number = 10
 slug = "mlx-eval-adam-wire-and-relabel"
-status = "in-progress"
+status = "completed"
 description = "Step 010 (TRUE FINALE of MLX full-GPU LoRA): wire the assembled mlpl-mlx-mode..."
 role = "legacy"
 context_files = []
 created_at = "2026-05-31T14:29:08"
+completed_at = "2026-05-31T15:22:16"
 task_type = "feature"
-commits = []
+commits = ["6a4275fec843dc3ca00b000ab2f55f3846b4a8f2"]

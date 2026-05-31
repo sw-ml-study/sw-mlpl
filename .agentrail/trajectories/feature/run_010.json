@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 10,
+    "step": "mlx-eval-adam-wire-and-relabel"
+  },
+  "action": "Explore-mapped ModelSpec/Environment/loss-expr; gated mlx deps on eval (feature+optional, lock propagation committed); ModelSpec walk + loss-expr AST match for X/Y; per-step stateless MLX adam persisting m/v in optim_state; cleared regression (AdamHp struct removed clippy-allow FAIL; module split cleared LOC warnings); fixed pre-existing demo-file test path; loosened parity tol to fp32-realistic + replaced adapter-bit-parity with loss-curve+learning checks (no blind golden rebase); cargo test/clippy/fmt --features mlx --release single-threaded; rebuilt pages",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-05-31T15:22:16"
+}
