@@ -86,6 +86,25 @@
   "Return the comint process for the MLPL REPL, or nil."
   (get-buffer-process mlpl-repl-buffer-name))
 
+(defun mlpl-repl--resolve-program (prog)
+  "Resolve PROG to an executable path, or signal an actionable error.
+Tries, in order: an absolute path as-is, `exec-path' (via
+`executable-find'), then the sw-install location
+`~/.local/softwarewrighter/bin'. GUI Emacs (esp. on macOS) often has
+a minimal PATH that omits the install dir, so a bare \"mlpl-repl\"
+won't be found there even though a shell finds it -- the fallback +
+error message handle that."
+  (or (and (file-name-absolute-p prog) (file-executable-p prog) prog)
+      (executable-find prog)
+      (let ((fallback (expand-file-name prog "~/.local/softwarewrighter/bin")))
+        (and (file-executable-p fallback) fallback))
+      (user-error
+       (concat "MLPL REPL program %S not found on exec-path. "
+               "Set `mlpl-repl-command' to its full path "
+               "(e.g. \"~/.local/softwarewrighter/bin/mlpl-repl\") "
+               "or add its directory to `exec-path'.")
+       prog)))
+
 (defun mlpl-repl-start (&optional arg)
   "Start the MLPL REPL process (no window switching).
 With prefix ARG, kill existing REPL first."
@@ -94,7 +113,8 @@ With prefix ARG, kill existing REPL first."
     (kill-buffer mlpl-repl-buffer-name))
   (unless (comint-check-proc mlpl-repl-buffer-name)
     (let* ((cmd (split-string-shell-command mlpl-repl-command))
-           (full-cmd (append cmd mlpl-repl-args))
+           (prog (mlpl-repl--resolve-program (car cmd)))
+           (full-cmd (append (cons prog (cdr cmd)) mlpl-repl-args))
            (buffer (apply #'make-comint-in-buffer "MLPL REPL" mlpl-repl-buffer-name
                           (car full-cmd) nil (cdr full-cmd))))
       (with-current-buffer buffer
