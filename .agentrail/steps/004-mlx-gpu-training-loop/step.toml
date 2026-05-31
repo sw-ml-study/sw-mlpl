@@ -1,6 +1,6 @@
 number = 4
 slug = "mlx-gpu-training-loop"
-status = "pending"
+status = "in-progress"
 description = "Phase 1b of local-gpu-agentic: make the LoRA fine-tune loop actually run on t..."
 role = "legacy"
 context_files = []
