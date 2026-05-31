@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-31
 
+- feat(elisp): one-shot mlpl-all.el loader + ob-mlpl org-babel + paren regression gate
+- fix(emacs): resolve mlpl-repl binary (sw-install fallback + clear error); clarify loading
+- fix(emacs): define mlpl-badge-file + mlpl-demos-dir in mlpl-menu.el; doc connect/:ask/MLX
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(viz): derivation renders statements as plain code (no MathJax "Extra close brace") + regression test
 - docs(changes): refresh CHANGES.md to HEAD
 - fix(viz): clamp 3D step navigation so Left/Right never drift past the first/last object
