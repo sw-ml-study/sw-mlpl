@@ -10,6 +10,22 @@
   "MLPL interactive menus and tutorials."
   :group 'mlpl)
 
+;; These are also defined in mlpl-bootstrap.el (the single-file
+;; bundle); duplicated here so the modular load (mlpl.el ->
+;; mlpl-menu.el) does not hit a void-variable when `mlpl-menu`
+;; auto-detects the badge image / demos dir.
+(defcustom mlpl-badge-file nil
+  "Path to the MLPL badge image file (e.g. mlpl-badge.png).
+Auto-detected from installed location if nil."
+  :type '(choice (const :tag "Auto-detect" nil) file)
+  :group 'mlpl-menu)
+
+(defcustom mlpl-demos-dir nil
+  "Path to the MLPL demos directory.
+Auto-detected from installed location if nil."
+  :type '(choice (const :tag "Auto-detect" nil) directory)
+  :group 'mlpl-menu)
+
 (defvar mlpl-menu--color-bg "#1e1e2e")
 (defvar mlpl-menu--color-surface "#313244")
 (defvar mlpl-menu--color-overlay "#45475a")

@@ -257,6 +257,57 @@ M-x mlpl-menu      ;; or C-c C-h in a .mlpl buffer
 
 Navigate with `n`/`p`, select with `RET`. The Tutorial walks through all language features. The Demos submenu lists all scripts in `demos/`.
 
+### Connect mode, `:ask`, and MLX training
+
+The Emacs REPL runs the `mlpl-repl` binary as a Comint inferior
+process, so EVERYTHING the CLI REPL supports is available by typing
+into the `*MLPL REPL*` buffer -- including the connect/server
+workflows (`:ask`, `--connect`, `device("mlx")`). The browser is not
+required for these.
+
+Pick the REPL binary + mode with `mlpl-repl-command`:
+
+```elisp
+;; Local (default): runtime runs in-process.
+(setq mlpl-repl-command "mlpl-repl")
+;; Local GPU: an MLX-enabled build runs device("mlx") on the Mac GPU.
+(setq mlpl-repl-command "/path/to/mlx-build/mlpl-repl")
+;; Client/server: route eval to a running mlpl-serve (its GPU/peer).
+(setq mlpl-repl-command "mlpl-repl --connect http://127.0.0.1:6464")
+```
+
+**`:ask` (LLM with REPL context).** Works in any mode. The CLI
+`:ask` reads `OLLAMA_HOST` (default `http://localhost:11434`) and
+`OLLAMA_MODEL` (default `llama3.2`) from the environment, so launch
+Emacs pointed at your Ollama box:
+
+```bash
+OLLAMA_HOST=http://large12.local:11434 OLLAMA_MODEL=qwen2.5-coder:14b emacs
+```
+
+Then in the REPL: `:ask what did I just train?` -- the question is
+sent with recent REPL history + `:models` + any demo narration as
+context.
+
+**MLX training.** Two routes:
+
+- Local GPU: point `mlpl-repl-command` at an MLX-enabled build, then
+  `device("mlx") { train ... }` runs on the Mac GPU in the inferior
+  process.
+- Offload (client/server): run `mlpl-serve --features mlx` and set
+  `mlpl-repl-command` to `mlpl-repl --connect <url>`. Eval (including
+  the `device("mlx")` block) runs server-side on the GPU, exactly
+  like the web connect mode; connect mode adds slash-commands
+  (`:inspect`, `:vars`) and cancel.
+
+**Models.** `:models` lists the MLPL models bound in the session (in
+any mode). The web-only `:models ollama` host listing is not a CLI
+command; in Emacs use `OLLAMA_MODEL` / a shell `ollama list`, and
+`:ask` uses the configured model.
+
+See `docs/using-cli-server.md` and `docs/using-ollama.md` for the
+server + Ollama setup these reuse.
+
 ## Architecture Decisions
 
 ### Major Mode (not Minor)
