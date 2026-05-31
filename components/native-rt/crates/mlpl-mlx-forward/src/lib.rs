@@ -11,8 +11,12 @@
 //! aarch64); off-target the crate builds but exports nothing.
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod attention;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod forward;
 
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+pub use attention::{causal_attention, causal_mask};
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use forward::{cross_entropy, embed, rms_norm};
 
