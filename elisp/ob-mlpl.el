@@ -5,10 +5,34 @@
 ;; Package-Requires: ((emacs "26.1") (org "9.0"))
 
 (require 'ob)
+;; Soft: reuse the REPL's binary resolver (exec-path + sw-install
+;; fallback) when the full package is loaded; ob-mlpl still works
+;; standalone via the inline fallback in `org-babel-mlpl--program'.
+(require 'mlpl-repl nil t)
 
 (defgroup ob-mlpl nil
   "Org-babel support for MLPL."
   :group 'org)
+
+(defun org-babel-mlpl--program ()
+  "Resolve the mlpl-repl program named by `org-babel-mlpl-command'.
+Returns (PROGRAM . EXTRA-ARGS). PROGRAM is resolved via the REPL's
+resolver when available (exec-path then ~/.local/softwarewrighter/bin),
+else `executable-find' with the same sw-install fallback -- so GUI
+Emacs (minimal PATH) finds the installed binary."
+  (let* ((parts (split-string-shell-command org-babel-mlpl-command))
+         (prog (car parts))
+         (resolved
+          (cond
+           ((fboundp 'mlpl-repl--resolve-program)
+            (mlpl-repl--resolve-program prog))
+           ((executable-find prog))
+           ((let ((fb (expand-file-name prog "~/.local/softwarewrighter/bin")))
+              (and (file-executable-p fb) fb)))
+           (t (user-error
+               "MLPL block: program %S not found; set `org-babel-mlpl-command' to its full path"
+               prog)))))
+    (cons resolved (cdr parts))))
 
 (defcustom org-babel-mlpl-command "mlpl-repl"
   "Command used to evaluate MLPL code blocks."
@@ -39,16 +63,15 @@
 Return the result as a string."
   (let* ((full-body (org-babel-expand-body:mlpl body params))
          (result-params (cdr (assq :result-params params)))
-         (session (cdr (assq :session params)))
-         (cmd org-babel-mlpl-command)
+         (prog (org-babel-mlpl--program))
          (tmp-file (make-temp-file "mlpl-ob-" nil ".mlpl"))
          (out-file (make-temp-file "mlpl-ob-out-" nil ".txt"))
+         (svg-dir (make-temp-file "mlpl-ob-svg-" t))
          exit-code output)
     (write-region full-body nil tmp-file nil 'silent)
     (setq exit-code
-          (call-process cmd nil (list :file out-file) nil
-                        "-f" tmp-file "--svg-out"
-                        (make-temp-file "mlpl-ob-svg-" nil ".dir")))
+          (apply #'call-process (car prog) nil (list :file out-file) nil
+                 (append (cdr prog) (list "-f" tmp-file "--svg-out" svg-dir))))
     (setq output (with-temp-buffer
                    (insert-file-contents out-file)
                    (buffer-string)))
@@ -56,7 +79,8 @@ Return the result as a string."
     (delete-file out-file)
     (cond
      ((not (zerop exit-code))
-      (org-babel-error-exit exit-code output))
+      (org-babel-eval-error-notify exit-code output)
+      nil)
      ((string-match-p "<svg" output)
       output)
      (t

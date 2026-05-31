@@ -54,7 +54,7 @@
                 (if (= n 0)
                     (unless (string-match-p "^[+-]?0" tok)
                       (setq ok nil))
-                  (push n nums)))
+                  (push n nums))))
             (when ok
               (push (nreverse nums) rows))))))
     (when ok (nreverse rows))))
