@@ -117,11 +117,15 @@ pub(crate) fn dispatch_demo_line(
     history: &[HistoryEntry],
     on_result: mlpl_web_eval::eval::ResultCb,
 ) -> bool {
-    if line.trim() == ":models ollama" {
+    let t = line.trim();
+    if t == ":models ollama" || t.starts_with(":models ollama ") {
+        let host = t
+            .strip_prefix(":models ollama ")
+            .map(|h| h.trim().to_string());
         let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
             return false;
         };
-        mlpl_web_eval::ollama_fetch::fetch_ollama_models(base, on_result);
+        mlpl_web_eval::ollama_fetch::fetch_ollama_models(base, host, on_result);
         return true;
     }
     match connect_program(line, history) {
@@ -155,23 +159,29 @@ pub(crate) fn try_ollama_models(
     idx: usize,
     line: &str,
 ) -> bool {
-    if line.trim() != ":models ollama" {
+    let t = line.trim();
+    if t != ":models ollama" && !t.starts_with(":models ollama ") {
         return false;
     }
+    let host = t
+        .strip_prefix(":models ollama ")
+        .map(|h| h.trim().to_string());
     let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
         return false;
     };
     let hist_handle = deps.history.clone();
     let deps_c = deps.clone();
     let queue_c = queue.to_vec();
+    let line_in = t.to_string();
     let mut hist_c = history.to_vec();
     mlpl_web_eval::ollama_fetch::fetch_ollama_models(
         base,
+        host,
         Box::new(move |result: String| {
             let is_error = result.starts_with("error:");
             hist_c.pop();
             hist_c.push(HistoryEntry {
-                input: ":models ollama".to_string(),
+                input: line_in,
                 output: result,
                 is_error,
                 kind: EntryKind::Command,

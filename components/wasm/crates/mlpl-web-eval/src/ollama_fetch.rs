@@ -46,15 +46,18 @@ pub fn prime_ollama_default(base_url: String) {
 
 /// Async `GET <base>/v1/ollama/tags`; fires `on_result` with a
 /// human-readable model listing (or an `error:`-prefixed message)
-/// for the `:models ollama` REPL command.
-pub fn fetch_ollama_models(base_url: String, on_result: ResultCb) {
+/// for the `:models ollama [host]` REPL command. `host` (the
+/// optional per-call override) is forwarded as `?host=` and must
+/// be allow-listed on the server.
+pub fn fetch_ollama_models(base_url: String, host: Option<String>, on_result: ResultCb) {
     wasm_bindgen_futures::spawn_local(async move {
-        on_result(ollama_models_text(&base_url).await);
+        on_result(ollama_models_text(&base_url, host.as_deref()).await);
     });
 }
 
-async fn ollama_models_text(base_url: &str) -> String {
-    let url = format!("{}/v1/ollama/tags", base_url.trim_end_matches('/'));
+async fn ollama_models_text(base_url: &str, host: Option<&str>) -> String {
+    let suffix = host.map(|h| format!("?host={h}")).unwrap_or_default();
+    let url = format!("{}/v1/ollama/tags{suffix}", base_url.trim_end_matches('/'));
     let resp = match gloo::net::http::Request::get(&url).send().await {
         Ok(r) => r,
         Err(e) => return format!("error: {e}"),
