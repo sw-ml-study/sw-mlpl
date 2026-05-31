@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-05-30
 
+- feat(web): hide :ask affordance on live-demo; keep device(mlx) local for 3D; serve mlx feature
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for 3D-in-connect + :ask-notice fixes
 - fix(web): demos keep 3D in connect mode; non-connect :ask gives a notice
 - fix(mlx): repair mlpl-mlx-rt build against mlx-rs 0.25.3 (bitrot)
