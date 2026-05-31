@@ -1,0 +1,9 @@
+number = 6
+slug = "mlx-finetune-loop-value-and-grad"
+status = "pending"
+description = "Step 006 (approach A integration): wire mlpl-mlx-train into the real MLX LoRA..."
+role = "legacy"
+context_files = []
+created_at = "2026-05-31T13:36:14"
+task_type = "feature"
+commits = []
