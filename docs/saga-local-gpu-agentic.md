@@ -261,6 +261,23 @@ assemble the full forward into the `train_steps` loss closure, wire
 into `eval_adam`'s MLX path, parity-test vs the CPU demo, and relabel
 the demo true-GPU (step 009).
 
+### Step 008 slice (2026-05-31): causal attention
+
+`mlpl-mlx-forward` gains `attention.rs` (crate stays 4 modules / 0
+warnings): `causal_attention(x, wq, wk, wv, wo, mask)` =
+`softmax((Q Kᵀ)/sqrt(d_k) + mask) V` then the output projection, plus a
+`causal_mask(t)` builder (0 on/below the diagonal, large-negative
+above). Single-head (h=1, matching the demo's `causal_attention(d, 1,
+_)`); multi-head per-head slabs are a later extension. Parity-tested
+vs a hand-computed identity-weight case (T=2): row 0 attends only to
+key 0, row 1 mixes by `softmax([0, 1/sqrt2])`.
+
+All forward primitives for the demo model now exist in MLX ops
+(embed, rms_norm, causal_attention, linear via `lora_linear`,
+cross_entropy). Step 009 assembles them into the `train_steps` loss
+closure, wires `eval_adam`'s MLX-LoRA path, parity-tests the loss
+curve vs the CPU demo, and relabels the demo true-GPU.
+
 ## "Measurable learning" -- the success metric
 
 Every training/fine-tuning demo must assert a measurable delta on

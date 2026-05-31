@@ -2,7 +2,7 @@
 //! reference. These build forward VALUES only (no value_and_grad), so
 //! they are safe to run in parallel.
 
-use crate::{cross_entropy, embed, rms_norm};
+use crate::{causal_attention, causal_mask, cross_entropy, embed, rms_norm};
 use mlx_rs::Array;
 
 #[test]
@@ -38,4 +38,19 @@ fn cross_entropy_matches_reference() {
         "{}",
         ce.item::<f32>()
     );
+}
+
+#[test]
+fn causal_attention_matches_reference() {
+    // T=2, d=2, identity Q/K/V/O, x = I. Row 0 can only attend to key 0
+    // (causal mask) -> out0 = v0 = [1, 0]. Row 1 attends both: scores
+    // [0, 1/sqrt2], softmax -> [0.3302, 0.6698], out1 = that mix of v.
+    let ident = Array::from_slice(&[1.0f32, 0.0, 0.0, 1.0], &[2, 2]);
+    let x = Array::from_slice(&[1.0f32, 0.0, 0.0, 1.0], &[2, 2]);
+    let out = causal_attention(&x, &ident, &ident, &ident, &ident, &causal_mask(2)).unwrap();
+    let o = out.as_slice::<f32>();
+    let want = [1.0f32, 0.0, 0.3302, 0.6698];
+    for (got, w) in o.iter().zip(want) {
+        assert!((got - w).abs() < 2e-3, "attention out {o:?} vs {want:?}");
+    }
 }
