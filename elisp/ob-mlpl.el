@@ -108,6 +108,20 @@ are not appended to the session twice."
         (substring new-out (length (cdr prev)))
       new-out)))
 
+(defun org-babel-mlpl--inline-svgs (output)
+  "Replace each `viz: <path>.svg' line in OUTPUT with the file's contents.
+`mlpl-repl --svg-out DIR' writes plots to files and prints a `viz:'
+reference; inlining the raw `<svg>' lets it embed (with `:results raw')
+in the exported HTML."
+  (replace-regexp-in-string
+   "^viz: \\(.*\\.svg\\)$"
+   (lambda (m)
+     (let ((path (match-string 1 m)))
+       (if (file-readable-p path)
+           (with-temp-buffer (insert-file-contents path) (buffer-string))
+         m)))
+   output))
+
 (defun org-babel-execute:mlpl (body params)
   "Execute a block of MLPL code with BODY and PARAMS.
 With `:session NAME', state accumulates across blocks that share NAME --
@@ -117,13 +131,14 @@ result as a string."
          (result-params (cdr (assq :result-params params)))
          (session (let ((s (cdr (assq :session params))))
                     (and s (not (string= s "none")) s)))
-         (output
+         (raw
           (if session
               (org-babel-mlpl--session-output session full-body)
             (let ((res (org-babel-mlpl--run-source full-body)))
               (unless (zerop (car res))
                 (org-babel-eval-error-notify (car res) (cdr res)))
-              (cdr res)))))
+              (cdr res))))
+         (output (org-babel-mlpl--inline-svgs raw)))
     (cond
      ((string-match-p "<svg" output)
       output)
