@@ -95,6 +95,9 @@ serde_json = "1"
 
 [dev-dependencies]
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
+# Tic-tac-toe engine + optimal-game corpus for the fine-tune win-rate
+# test (the model learns to play; we play it vs a random opponent).
+mlpl-tictactoe = { path = "../../../games/crates/mlpl-tictactoe" }
 # Saga 19 step 001: stub Ollama HTTP responses for
 # `llm_call` tests without requiring a live server.
 mockito = "1"

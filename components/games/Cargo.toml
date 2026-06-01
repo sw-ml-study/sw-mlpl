@@ -1,0 +1,17 @@
+# Saga: tic-tac-toe fine-tuning demo. Game environments used to show a
+# tiny model learning a strategy (no-strategy -> never-lose vs random)
+# via LoRA fine-tuning. First member: mlpl-tictactoe (board + minimax +
+# self-play harness + optimal-game corpus generator).
+[workspace]
+members = [
+    "crates/mlpl-tictactoe",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
