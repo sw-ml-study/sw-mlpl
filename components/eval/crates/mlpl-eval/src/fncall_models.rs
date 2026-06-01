@@ -50,6 +50,8 @@ fn try_model_ctor(
         "causal_attention" => Some(crate::model_dispatch::eval_attention(args, env, true)),
         "clone_model" => Some(crate::model_mutate::eval_clone_model(args, env)),
         "lora" => Some(crate::model_lora::eval_lora(args, env)),
+        "save_model" => Some(crate::model_io::eval_save_model(args, env)),
+        "load_model" => Some(crate::model_io::eval_load_model(args, env)),
         _ => None,
     }
 }

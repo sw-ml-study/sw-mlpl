@@ -14,3 +14,7 @@ version.workspace = true
 # mlpl-eval-data) all depend on.
 
 [dependencies]
+# Saga: model save/load. Serialize ModelSpec + a weight snapshot so a
+# fine-tuned model can be persisted and reloaded (train once, compare
+# many times) instead of retrained every run.
+serde = { version = "1", features = ["derive"] }

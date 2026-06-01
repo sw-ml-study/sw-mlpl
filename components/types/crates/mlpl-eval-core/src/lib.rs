@@ -12,8 +12,10 @@
 pub mod inspect_groups;
 pub mod metric_sink;
 pub mod model;
+pub mod snapshot;
 pub mod tokenizer;
 
 pub use metric_sink::MetricSink;
 pub use model::{ActKind, ModelSpec};
+pub use snapshot::{ModelSnapshot, ParamEntry};
 pub use tokenizer::TokenizerSpec;

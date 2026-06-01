@@ -12,7 +12,7 @@
 //! sidesteps the symbol-table problem and keeps the surface uniform.
 
 /// Activation kind for the parameter-free activation layers.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum ActKind {
     /// Element-wise hyperbolic tangent.
     Tanh,
@@ -24,7 +24,7 @@ pub enum ActKind {
 
 /// A model node. Built up step by step over Saga 11; later steps add
 /// `Residual`, `Norm`, and `Attention` variants.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ModelSpec {
     /// `linear(in_dim, out_dim, seed)` -- y = X @ W + b.
     Linear {

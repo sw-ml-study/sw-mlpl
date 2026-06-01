@@ -90,6 +90,7 @@ mod model_eval_layers;
 mod model_feasibility;
 mod model_freeze;
 mod model_inspect;
+mod model_io;
 mod model_lora;
 mod model_mutate;
 mod result_ops;
