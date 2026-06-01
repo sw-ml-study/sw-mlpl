@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-01
+
+- feat(eval): model save_model / load_model (persist trained models)
+- feat(literate): MLX LoRA fine-tune literate page + ob-mlpl SVG inlining
+
 ## 2026-05-31
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record step 010 completion -- MLX full-GPU LoRA track DONE
 - chore(pages): rebuild for true-GPU MLX LoRA demo relabel (step 010)
 - feat(mlx): wire eval_adam to true-GPU LoRA fine-tune + relabel demo (step 010)
