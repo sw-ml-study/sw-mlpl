@@ -1,0 +1,13 @@
+[package]
+# Tic-tac-toe environment: board + win-check, minimax (optimal play),
+# a self-play harness parameterized by two move-pickers, and an
+# optimal-game corpus generator (cells 0..8 -> chars 'a'..'i', so the
+# games train through MLPL's text LM pipeline unchanged). Pure Rust,
+# no deps. Used to demonstrate a tiny model learning tic-tac-toe
+# strategy via fine-tuning.
+name = "mlpl-tictactoe"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]

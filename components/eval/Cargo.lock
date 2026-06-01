@@ -874,6 +874,7 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-tictactoe",
  "mlpl-trace",
  "mlpl-viz",
  "mockito",
@@ -1227,6 +1228,10 @@ dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
 ]
+
+[[package]]
+name = "mlpl-tictactoe"
+version = "0.20.0"
 
 [[package]]
 name = "mlpl-trace"
