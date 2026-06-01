@@ -39,10 +39,20 @@
    'org-babel-load-languages
    '((mlpl . t) (shell . t)))
 
+  ;; 2b. Honor MLPL_REPL_CMD so a doc that needs a specific build (e.g.
+  ;; an mlx-enabled `mlpl-repl` for the true-GPU MLX demo) can point at
+  ;; it without touching the user's installed binary.
+  (when-let ((cmd (getenv "MLPL_REPL_CMD")))
+    (setq org-babel-mlpl-command cmd))
+
   ;; 3-5. Execute then export.
   (with-current-buffer (find-file-noselect org-file)
     (when (fboundp 'org-babel-mlpl-reset-session)
       (org-babel-mlpl-reset-session))
+    ;; Clear any baked-in results so a re-publish is reproducible --
+    ;; `:results raw'/`html' blocks are not always auto-replaced in
+    ;; place, which would leave stale lines next to the fresh ones.
+    (org-babel-remove-result-one-or-many t)
     (org-babel-execute-buffer)
     (save-buffer)
     (let ((html (org-html-export-to-html)))

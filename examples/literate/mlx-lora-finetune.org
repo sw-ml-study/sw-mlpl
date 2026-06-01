@@ -1,0 +1,163 @@
+#+TITLE: MLX LoRA Fine-Tune -- a Literate, True-GPU Walkthrough
+#+SUBTITLE: the connect-only "MLX LoRA fine-tune" demo, run on Apple Silicon
+#+OPTIONS: toc:2 num:nil
+#+PROPERTY: header-args:mlpl :session mlx :results output :exports both
+
+#+begin_export html
+<p style="border:1px solid #c33;background:#fdd;padding:0.6em 1em;border-radius:6px">
+<b>Apple-Silicon, true-GPU.</b> Every <code>device("mlx")</code> block below
+runs its forward pass, backward pass, <em>and</em> the Adam optimizer on the
+Apple GPU via MLX. This is <b>not runnable in the public browser demo</b>
+(WASM is CPU-only and has no MLX peer) -- which is exactly why it ships as a
+literate page: the blocks were executed by an MLX-enabled <code>mlpl-repl</code>
+on Apple Silicon, and the outputs below are that real run.
+</p>
+#+end_export
+
+This recreates the playground's *MLX LoRA fine-tune* demo as a literate
+program. We pretrain a tiny language model, wrap it with LoRA adapters,
+measure it, fine-tune *only the adapters* on the Apple GPU, and measure
+again -- showing concrete *before vs after* learning, not just a loss
+curve. The blocks share one ~:session mlx~, so state threads through
+exactly as if typed into the REPL.
+
+* Step 1 -- prepare the corpus
+
+Load a snippet of tiny-Shakespeare, train a 280-token BPE tokenizer,
+encode to ids, and build next-token (X -> Y) training pairs with a
+context window of 32.
+
+#+begin_src mlpl
+corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+X = reshape(shift_pairs_x(ids, 32), [reduce_mul(shape(shift_pairs_x(ids, 32)))])
+Y = reshape(shift_pairs_y(ids, 32), [reduce_mul(shape(shift_pairs_y(ids, 32)))])
+shape(X)
+#+end_src
+
+#+RESULTS:
+: 1440
+
+* Step 2 -- define and pretrain a tiny language model
+
+A minimal decoder (embedding, one causal-attention block, a final norm,
+a linear head), pretrained for 20 Adam steps so it has some structure to
+specialize from.
+
+#+begin_src mlpl
+V = 280 ; d = 32 ; h = 1
+base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 4))
+experiment "mlx_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.001, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
+last_losses
+#+end_src
+
+#+RESULTS:
+: 8.68136971043806 8.479659270714212 8.331590410080342 8.21171550130538 8.100017723741562 7.993941863529588 7.899131414926591 7.80915004961342 7.723233447602549 7.642093413934386 7.563260901407564 7.485415227365 7.407264393415567 7.328405222459636 7.246101261046494 7.167768467081705 7.099577433663841 7.033722772291006 6.964698489447701 6.8934535871286355
+
+* Step 3 -- wrap with LoRA, then measure BEFORE fine-tuning
+
+~lora(base, 8, 16.0, 0)~ freezes every base weight and adds rank-8
+adapters to the head (the adapter ~B~ inits to zero, so the student
+*starts identical to the base*). We capture two baselines: *perplexity*
+(=exp(cross-entropy); lower is better) and a *sampled continuation* of
+the prompt ="the "=.
+
+#+begin_src mlpl
+student = lora(base, 8, 16.0, 0)
+ppl_before = perplexity(apply(student, X), Y)
+ppl_before
+#+end_src
+
+#+RESULTS:
+: 985.8000915387879
+
+#+begin_src mlpl
+seq = apply_tokenizer(tok, "the ")
+repeat 24 { logits = apply(student, seq); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); seq = concat(seq, nxt) }
+decode(tok, seq)
+#+end_src
+
+#+RESULTS:
+: the CCCCCCCCCCCC
+
+* Step 4 -- fine-tune the adapters on the GPU
+
+Inside ~device("mlx")~, the fine-tune step's loss is built as a single
+MLX graph over the adapters, differentiated by ~value_and_grad~, and the
+adapters are updated by an MLX-resident Adam -- *forward, backward, and
+optimizer all on the Apple GPU*. Only the adapters move; the base stays
+frozen.
+
+#+begin_src mlpl
+device("mlx") { experiment "mlx_lora" { train 25 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(student, X), Y) } } }
+last_losses
+#+end_src
+
+#+RESULTS:
+: 6.83217651782934 6.74291122666956 6.628285598772657 6.490025032379681 6.331251335515088 6.157513425815848 5.977511291052338 5.801906353010584 5.640299835371345 5.495988610370392 5.36622914520038 5.2495815626717235 5.14656578830672 5.055138285529712 4.971804954912224 4.894986647359877 4.825626947191008 4.763785922469428 4.707254658526657 4.653446047397294 4.600424801125833 4.547765264379033 4.496109911894309 4.4461920328402105 4.398226003728822
+
+* Step 5 -- measure AFTER fine-tuning (the payoff)
+
+Same model, same prompt, same sampling seeds -- only the adapters
+changed. Compare these two numbers and the two continuations to the
+baselines in Step 3.
+
+#+begin_src mlpl
+ppl_after = perplexity(apply(student, X), Y)
+ppl_after
+#+end_src
+
+#+RESULTS:
+: 81.30647459034984
+
+#+begin_src mlpl
+gen = apply_tokenizer(tok, "the ")
+repeat 24 { logits = apply(student, gen); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); gen = concat(gen, nxt) }
+decode(tok, gen)
+#+end_src
+
+#+RESULTS:
+: the E g g g g g g g g g g g
+
+Perplexity falls more than 12x (985.8 -> 81.3): after fine-tuning the
+model assigns far higher probability to the true next token -- a
+concrete before/after demonstration that the GPU fine-tune actually
+taught the adapters, not merely that a loss number dropped. (At d=32 on
+a tiny corpus the model is far too small for fluent prose, so both
+sampled continuations are repetitive; the rigorous signal here is the
+perplexity, while the sampled distribution does visibly shift.)
+
+* Step 6 -- the fine-tune loss curve
+
+#+begin_src mlpl :results html
+loss_curve(last_losses)
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"><rect width="100%" height="100%" fill="#1e1e2e"/><line x1="30" y1="270" x2="370" y2="270" stroke="#45475a" stroke-width="1"/><line x1="30" y1="30" x2="30" y2="270" stroke="#45475a" stroke-width="1"/><polyline points="30.0,30.0 44.2,38.8 58.3,50.1 72.5,63.7 86.7,79.4 100.8,96.5 115.0,114.3 129.2,131.6 143.3,147.5 157.5,161.8 171.7,174.5 185.8,186.1 200.0,196.2 214.2,205.2 228.3,213.4 242.5,221.0 256.7,227.9 270.8,234.0 285.0,239.5 299.2,244.8 313.3,250.1 327.5,255.3 341.7,260.3 355.8,265.3 370.0,270.0" fill="none" stroke="#a6e3a1" stroke-width="2"/><text x="30.0" y="18" fill="#cdd6f4" font-family="monospace" font-size="12">loss</text><text x="4" y="34.0" fill="#a6adc8" font-family="monospace" font-size="10">6.832</text><text x="4" y="270.0" fill="#a6adc8" font-family="monospace" font-size="10">4.398</text></svg>
+#+end_export
+
+* How this was run
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+This page needs an MLX-enabled ~mlpl-repl~ (Apple Silicon). Build it once
+(this does NOT touch your installed binary):
+
+#+begin_src sh :eval no
+cargo build -p mlpl-repl --features mlx --release   # -> target/release/mlpl-repl
+#+end_src
+
+Then publish, pointing the Org-babel backend at that build:
+
+#+begin_src sh :eval no
+MLPL_REPL_CMD="$PWD/target/release/mlpl-repl" \
+  ./examples/literate/publish.sh examples/literate/mlx-lora-finetune.org
+#+end_src
+
+Off Apple Silicon, ~device("mlx")~ transparently falls back to CPU (the
+numbers still match within fp32 tolerance), so the page still publishes --
+it just won't be running on a GPU.
