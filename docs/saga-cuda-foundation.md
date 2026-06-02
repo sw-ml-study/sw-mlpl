@@ -109,10 +109,20 @@ one-time warning (mirror `mlpl-eval/src/device.rs`).
    match the CPU path on the RTX 5060 Ti within fp32 tol, plus
    parser + to_device cases. sw-checklist net -1 warning (502;
    retired device.rs file-LOC + 8 clippy format-arg lints).
-4. **cuda-forward-and-model** -- `mlpl-cuda-forward` (embed,
-   rms_norm, causal_attention, cross_entropy) + `mlpl-cuda-model`
-   (`demo_forward`), each parity-tested vs the CPU primitives and
-   the MLX reference.
+4. **cuda-forward-and-model** -- DONE. New `components/cuda-model/`
+   workspace (its own component so cuda-rt stays at its 4-crate
+   budget): `mlpl-cuda-forward` (traceable candle primitives -- embed
+   one-hot matmul, gamma-free rms_norm eps=1e-8, single-head
+   causal_attention scale=1/sqrt(d_k), one-hot cross_entropy, plus
+   lora_linear) and `mlpl-cuda-model` (`DemoWeights` + `demo_forward`
+   assembling embed -> rms_norm -> causal_attention -> residual ->
+   rms_norm -> LoRA head + bias -> cross_entropy). All ops fully
+   candle-traceable (no CPU gather), so autograd flows through the
+   whole graph. Primitives parity-tested vs hand-computed references
+   on the GPU; a gated test trains the head adapters via candle
+   AdamW and the cross-entropy drops -- gradients flow through the
+   assembled model on the RTX 5060 Ti. Warning-free; baseline held
+   (502).
 5. **cuda-lora-demo** -- `mlpl-cuda-train` (candle autodiff +
    on-device Adam) wired into `eval_adam`'s CUDA branch (analog of
    `grad_optim_mlx.rs`); first CUDA demo `demos/lora_finetune_cuda.mlpl`

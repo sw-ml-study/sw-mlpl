@@ -1,0 +1,21 @@
+# Saga cuda-foundation step 005: components/cuda-model/ nested
+# workspace. The CUDA analog of components/mlx-model/ -- traceable
+# forward primitives (mlpl-cuda-forward) + the assembled demo model
+# (mlpl-cuda-model). Its own component so cuda-rt stays at its
+# <=4-crate budget. Linux + x86_64 + the `cuda` feature gate
+# everything; off-target the crates export nothing.
+
+[workspace]
+members = [
+    "crates/mlpl-cuda-forward",
+    "crates/mlpl-cuda-model",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"

@@ -1,0 +1,26 @@
+[package]
+# Saga cuda-foundation step 005: the assembled demo LoRA fine-tune
+# model forward, the CUDA analog of mlpl-mlx-model. One traceable
+# candle graph (embed -> rms_norm -> causal_attention -> residual ->
+# rms_norm -> LoRA head -> cross_entropy) differentiable w.r.t. the
+# head adapters. Linux/x86_64 + the `cuda` feature gate everything.
+name = "mlpl-cuda-model"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+cuda = ["dep:candle-core", "dep:candle-nn", "mlpl-cuda-forward/cuda"]
+
+[dependencies]
+candle-core = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+candle-nn = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+mlpl-cuda-forward = { path = "../mlpl-cuda-forward" }
+
+[lints]
+workspace = true

@@ -1,6 +1,6 @@
 number = 5
 slug = "cuda-forward-and-model"
-status = "pending"
+status = "in-progress"
 description = "Step 4 of cuda-foundation: create mlpl-cuda-forward (embed via one-hot matmul..."
 role = "production"
 context_files = []
