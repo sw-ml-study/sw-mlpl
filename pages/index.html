@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-750bcee0d57fae67.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-750bcee0d57fae67_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-bf56e9d00c124c20.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-bf56e9d00c124c20_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -1416,6 +1416,19 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--sky);
             text-decoration: underline solid;
         }
+        /* [label](url) hyperlink (e.g. a demo's literate-walkthrough
+           link). Bright blue + slightly larger for readability on the
+           dark narration surface. */
+        .path-body-link {
+            color: var(--blue);
+            font-weight: 600;
+            font-size: 1.05em;
+            text-decoration: underline solid;
+            text-underline-offset: 2px;
+        }
+        .path-body-link:hover {
+            color: var(--sky);
+        }
         .glossary-popup-overlay {
             position: fixed;
             inset: 0;
@@ -1801,7 +1814,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-750bcee0d57fae67.js" crossorigin="anonymous" integrity="sha384-yKv7i7YWY27VGHR3nM6JYeI2wEuwbNBx4M5DRjLN9bP/igwJlHIwTVx4YIQdQ5+H"><link rel="preload" href="/sw-mlpl/mlpl-web-750bcee0d57fae67_bg.wasm" crossorigin="anonymous" integrity="sha384-H6+Ejcjoz0xy6zYmfo4g8KFMSyBsecv6Gk0Cp/5DVnz50Fw36HFr8ILmpeY0w5fC" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-bf56e9d00c124c20.js" crossorigin="anonymous" integrity="sha384-O2XbmhcFrIAFtR1v7Oy8FVu3tu1sghfQYhuA9GHcXmjpqqj1cFw5xxUpoScy6bLc"><link rel="preload" href="/sw-mlpl/mlpl-web-bf56e9d00c124c20_bg.wasm" crossorigin="anonymous" integrity="sha384-zWTykdQ83gtnden6HnFqbw+laMYFFokctVZjCytUMYmEgHqVEsgL/6Hyv8Ss/hOd" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
