@@ -101,9 +101,7 @@ mod model_mutate;
 mod result_ops;
 mod tag_propagate;
 mod tag_render;
-mod tictactoe_play;
 mod tokenizer;
-mod ttt_data;
 mod type_errors;
 
 pub use env::{Environment, PeerDispatcher, model_params};
