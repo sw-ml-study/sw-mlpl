@@ -25,17 +25,23 @@ pub(crate) fn emit_from_response(program: &str, body: &Json) {
     let viz_node: Option<VizNode> = body
         .get("viz_node")
         .and_then(|v| serde_json::from_value(v.clone()).ok());
-    if shape.is_empty() && viz_node.is_none() {
-        return;
-    }
-    let values = body["values"]
+    let values: Option<Vec<f64>> = body["values"]
         .as_array()
         .map(|a| a.iter().filter_map(Json::as_f64).collect());
-    let string_list = body["string_list"].as_array().map(|a| {
+    let string_list: Option<Vec<String>> = body["string_list"].as_array().map(|a| {
         a.iter()
             .filter_map(|v| v.as_str().map(String::from))
             .collect()
     });
+    // No-op only for a bare string / `:ask` reply -- nothing to render.
+    // A SCALAR has an empty shape but carries `values` (server sends
+    // shape=null, values=[x]); emit it so connect-mode scalars render
+    // like local ones (matches the CPU/local path -- issue #8).
+    let has_values = values.as_ref().is_some_and(|v| !v.is_empty());
+    let has_strings = string_list.as_ref().is_some_and(|v| !v.is_empty());
+    if shape.is_empty() && viz_node.is_none() && !has_values && !has_strings {
+        return;
+    }
     let name = program
         .split('=')
         .next()
