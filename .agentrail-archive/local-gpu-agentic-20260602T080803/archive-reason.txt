@@ -1,0 +1,1 @@
+Branch-local park: cuda-foundation branch only. local-gpu-agentic stays live on main (step 011 agentic-ask-phase2 pending). Archived here solely to free .agentrail/ for the CUDA saga on this branch; checkout main to resume the parked saga.

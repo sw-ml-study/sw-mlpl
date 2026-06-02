@@ -1,0 +1,21 @@
+# Saga cuda-foundation step 001: components/cuda-rt/ nested
+# workspace. Native NVIDIA/CUDA execution backend, mirroring
+# components/native-rt/ (MLX). Its own component so native-rt stays
+# at its <=4-crate budget and the heavy `candle` dependency tree
+# does not pollute the MLX/native build. Linux + x86_64 + the
+# `cuda` feature gate everything; off-target the crates export
+# nothing and stay cross-platform-buildable.
+
+[workspace]
+members = [
+    "crates/mlpl-cuda-train",
+]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
