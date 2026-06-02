@@ -1,9 +1,10 @@
 number = 3
 slug = "mlpl-cuda-nn"
-status = "in-progress"
+status = "completed"
 description = "Step (was 2b) of cuda-foundation: create mlpl-cuda-nn (in the components/cuda..."
 role = "production"
 context_files = []
 created_at = "2026-06-02T09:49:12"
+completed_at = "2026-06-02T11:49:26"
 task_type = "production"
-commits = []
+commits = ["3d8d1cc15cd3bb0e539e884d235c39644a588b39"]
