@@ -12,8 +12,16 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-02
+
+- chore(pages): rebuild with connect-mode 3D scalar fix (issue #8)
+- fix(web): render scalars in the 3D stage for connect-mode demos (issue #8)
+
 ## 2026-06-01
 
+- chore(pages): rebuild for all-MLPL tic-tac-toe demo (no ttt_* builtins)
+- feat: re-point tic-tac-toe demo to the MLPL engine; remove ttt_* builtins
+- docs: tictactoe-mlpl-engine saga status (engine+demo+org-doc done; builtin removal deferred)
 - docs(literate): rewrite tic-tac-toe page as all-MLPL (no ttt_* builtins)
 - feat(mlpl): end-to-end tic-tac-toe demo in pure MLPL (no ttt_* builtins)
 - feat(mlpl): add best_move + encode -- the tic-tac-toe engine, in MLPL
