@@ -85,10 +85,15 @@ one-time warning (mirror `mlpl-eval/src/device.rs`).
    step 2b (`mlpl-cuda-nn`): candle lacks a `prod` reduction and
    `cross_entropy` parity is fiddly, and those ops overlap the
    step-4 candle forward.
-2b. **mlpl-cuda-nn** -- activations (`exp`/`log`/`relu`/`sigmoid`/
-   `tanh`), reductions (`mean`/`reduce_mul`/`argmax`), and
-   `softmax`/`log_softmax`/`cross_entropy` over candle, parity-tested
-   vs CPU. `reduce_mul` may delegate to CPU (candle has no `prod`).
+2b. **mlpl-cuda-nn** -- DONE. The activations turned out to be
+   elementwise unary maps, so they moved into `mlpl-cuda-elementwise`
+   (`exp`/`log`/`relu`/`sigmoid`/`tanh` alongside `neg`, via a shared
+   `unary!` macro). `mlpl-cuda-nn` is then cleanly reductions
+   (`mean`/`argmax` on the GPU; `reduce_mul` delegates to the CPU --
+   candle has no `prod`), normalization (`softmax`/`log_softmax`), and
+   `cross_entropy` (GPU row-LSE + CPU gather, mirroring `mlpl-rt`).
+   3 logic modules (reduce/norm/loss), all warning-free; parity-tested
+   vs the CPU path on the GPU. Baseline held (0 new failures/warnings).
 3. **cuda-dispatch-wire** -- generalize `try_mlx_dispatch` /
    `dispatched_call` in `mlpl-eval/src/device.rs` so `device("cuda")`
    routes through `mlpl-cuda-rt`; CPU fallback + one-time warning

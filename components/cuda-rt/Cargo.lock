@@ -627,11 +627,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-array-ops-element"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-array-ops-matmul"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-array-ops-reduce"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]
@@ -653,8 +667,21 @@ name = "mlpl-cuda-elementwise"
 version = "0.20.0"
 dependencies = [
  "candle-core",
+ "candle-nn",
  "mlpl-array",
  "mlpl-cuda-rt",
+ "mlpl-rt",
+]
+
+[[package]]
+name = "mlpl-cuda-nn"
+version = "0.20.0"
+dependencies = [
+ "candle-core",
+ "candle-nn",
+ "mlpl-array",
+ "mlpl-cuda-rt",
+ "mlpl-rt",
 ]
 
 [[package]]
@@ -673,6 +700,17 @@ version = "0.20.0"
 dependencies = [
  "candle-core",
  "candle-nn",
+]
+
+[[package]]
+name = "mlpl-rt"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-element",
+ "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
+ "mlpl-core",
 ]
 
 [[package]]

@@ -1,10 +1,10 @@
 [package]
-# Saga cuda-foundation step 002: CUDA elementwise primitives, the
-# candle analog of `mlpl-mlx-rt::elementwise`. A sibling of
-# `mlpl-cuda-rt` (not a module of it) so each crate stays within the
-# module/function budgets. Reuses cuda-rt's device + conversion
-# plumbing. Linux/x86_64 + the `cuda` feature gate everything.
-name = "mlpl-cuda-elementwise"
+# Saga cuda-foundation step 003: CUDA nn op surface (activations,
+# reductions, softmax/cross_entropy) -- the candle analog of
+# mlpl-mlx-rt's activations + reductions. Sibling of mlpl-cuda-rt in
+# the cuda-rt workspace. Linux/x86_64 + the `cuda` feature gate
+# everything; off-target the crate exports nothing.
+name = "mlpl-cuda-nn"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
@@ -22,9 +22,8 @@ candle-nn = { version = "0.9", optional = true, default-features = false, featur
 ] }
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-cuda-rt = { path = "../mlpl-cuda-rt" }
-
-[dev-dependencies]
-# Activation parity reference: the CPU DenseArray ops in mlpl-rt.
+# CPU fallback for reduce_mul (candle has no prod reduction) -- the
+# op is low-value on the GPU, so it delegates to the CPU runtime.
 mlpl-rt = { path = "../../../native-rt/crates/mlpl-rt" }
 
 [lints]
