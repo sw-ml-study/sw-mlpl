@@ -227,8 +227,13 @@ fn native_eval(base_url: &str, state: &RefCell<Option<RemoteSession>>, program: 
 }
 
 /// Saga 21.5 step 007: cheap-to-clone Send-able handle for
-/// firing a cancel POST from a different thread (native test)
-/// or event-loop tick (browser).
+/// firing a cancel POST from a different thread (native test).
+/// Native-only: the fields are read solely by `cancel()`
+/// (`cfg(not(wasm32))`), and the constructor `cancel_handle()`
+/// lives in the native `RemoteEvaluator` impl. WASM cancels
+/// in-tick on the single-threaded JS event loop, so the struct
+/// is not compiled there (it would be dead code).
+#[cfg(not(target_arch = "wasm32"))]
 #[derive(Clone)]
 pub struct CancelHandle {
     base_url: String,
@@ -236,12 +241,12 @@ pub struct CancelHandle {
     token: String,
 }
 
+#[cfg(not(target_arch = "wasm32"))]
 impl CancelHandle {
     /// Best-effort POST `/v1/sessions/<id>/cancel`. Errors are
     /// swallowed because cancel-from-side-thread inherently
     /// races with the in-flight stream; the eval result already
     /// surfaces via `StreamOutcome::Cancelled`.
-    #[cfg(not(target_arch = "wasm32"))]
     pub fn cancel(&self) {
         let url = format!(
             "{}/v1/sessions/{}/cancel",
