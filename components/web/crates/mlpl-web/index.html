@@ -1405,6 +1405,19 @@
             color: var(--sky);
             text-decoration: underline solid;
         }
+        /* [label](url) hyperlink (e.g. a demo's literate-walkthrough
+           link). Bright blue + slightly larger for readability on the
+           dark narration surface. */
+        .path-body-link {
+            color: var(--blue);
+            font-weight: 600;
+            font-size: 1.05em;
+            text-decoration: underline solid;
+            text-underline-offset: 2px;
+        }
+        .path-body-link:hover {
+            color: var(--sky);
+        }
         .glossary-popup-overlay {
             position: fixed;
             inset: 0;

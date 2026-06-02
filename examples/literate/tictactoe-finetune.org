@@ -1,0 +1,38 @@
+#+TITLE: Tic-Tac-Toe: Fine-Tuning to a Winning Strategy on the Apple GPU
+#+SUBTITLE: the connect-only "MLX tic-tac-toe fine-tune" demo, shown by playing -- not by a loss curve
+#+OPTIONS: toc:2 num:nil
+#+PROPERTY: header-args:mlpl :session ttt :results output :exports both
+
+#+begin_export html
+<p style="border:1px solid #c33;background:#fdd;padding:0.6em 1em;border-radius:6px">
+<b>Apple-Silicon, true-GPU.</b> The <code>device("mlx")</code> fine-tune block
+below runs its forward pass, backward pass, <em>and</em> the Adam optimizer on
+the Apple GPU via MLX. This is <b>not runnable in the public browser demo</b>
+(WASM is CPU-only, no MLX peer) -- which is why it ships as a literate page:
+the blocks were executed by an MLX-enabled <code>mlpl-repl</code> on Apple
+Silicon, and the numbers and chart below are that real run.
+</p>
+#+end_export
+
+This is the 1:1 companion to the playground's *MLX tic-tac-toe fine-tune*
+demo. We fine-tune a tiny board-state policy on the Apple GPU and then
+*demonstrate* the result the honest way: by playing 100 games against a
+random opponent and counting wins/ties/losses, *before* and *after*. No
+"trust me, the loss dropped" -- you watch the piles of losses turn into
+piles of wins. The blocks share one ~:session ttt~, so state threads
+through exactly as if typed into the REPL.
+
+* Step 1 -- the dataset: every position, labelled with its best move
+
+~ttt_boards()~ enumerates every reachable non-terminal position (deduped,
+from the side-to-move's perspective) and one-hot-encodes each of the nine
+cells as ~[empty, mine, theirs]~ -- 27 features. ~ttt_moves()~ gives the
+matching label: the optimal move from a minimax solver. Together they are
+the complete supervised policy.
+
+#+begin_src mlpl
+X = ttt_boards()
+Y = ttt_moves()
+shape(X)
+#+end_src
+

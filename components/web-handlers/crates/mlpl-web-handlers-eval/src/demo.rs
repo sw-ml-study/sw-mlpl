@@ -26,7 +26,7 @@ pub fn make_run_demo(
         bind_demo_metadata(&session.borrow(), demo);
         let intro_entry = HistoryEntry {
             input: format!("About this demo -- {}", demo.name),
-            output: demo.intro.to_string(),
+            output: intro_with_literate_link(demo),
             is_error: false,
             kind: EntryKind::Narration,
         };
@@ -56,6 +56,20 @@ pub fn make_run_demo(
         // the UI paint.
         schedule_demo_line(session.clone(), history.clone(), entries, demo, 0);
     })
+}
+
+/// The demo intro, with a "literate walkthrough" link appended when
+/// the demo has a companion org-mode HTML (bundled under `literate/`).
+/// For connect-only demos the link is the way to see what the demo
+/// does without a server -- the page is a real recorded run.
+fn intro_with_literate_link(demo: &mlpl_web_demos::Demo) -> String {
+    match mlpl_web_demos::literate_for(demo.name) {
+        Some(file) => format!(
+            "{}\n\n[Emacs Org-mode literate walkthrough](literate/{file}) -- every step run and explained, with the before/after chart.",
+            demo.intro
+        ),
+        None => demo.intro.to_string(),
+    }
 }
 
 /// Bind `_demo` as a string variable in the session so typing

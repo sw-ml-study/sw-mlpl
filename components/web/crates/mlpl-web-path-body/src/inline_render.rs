@@ -15,6 +15,9 @@ pub(super) fn render_span(span: Span) -> Html {
         Span::Bold(s) => html! { <strong>{ s }</strong> },
         Span::Emph(s) => html! { <em>{ s }</em> },
         Span::Glossary(term) => render_glossary_link(term),
+        Span::Link { text, url } => html! {
+            <a class="path-body-link" href={url} target="_blank" rel="noopener">{ text }</a>
+        },
     }
 }
 

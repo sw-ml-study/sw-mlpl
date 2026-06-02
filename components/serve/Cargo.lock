@@ -1138,7 +1138,10 @@ dependencies = [
  "mlpl-eval-pets-tiny",
  "mlpl-eval-types",
  "mlpl-loader-helpers",
+ "mlpl-mlx-forward",
+ "mlpl-mlx-model",
  "mlpl-mlx-rt",
+ "mlpl-mlx-train",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
  "mlpl-models-inspect",
@@ -1148,6 +1151,7 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-tictactoe",
  "mlpl-trace",
  "mlpl-viz",
  "serde",
@@ -1157,6 +1161,9 @@ dependencies = [
 [[package]]
 name = "mlpl-eval-core"
 version = "0.20.0"
+dependencies = [
+ "serde",
+]
 
 [[package]]
 name = "mlpl-eval-pets-tiny"
@@ -1251,6 +1258,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-mlx-forward"
+version = "0.20.0"
+dependencies = [
+ "mlx-rs",
+]
+
+[[package]]
+name = "mlpl-mlx-model"
+version = "0.20.0"
+dependencies = [
+ "mlpl-mlx-forward",
+ "mlpl-mlx-train",
+ "mlx-rs",
+]
+
+[[package]]
 name = "mlpl-mlx-rt"
 version = "0.20.0"
 dependencies = [
@@ -1279,6 +1302,13 @@ dependencies = [
  "tokio",
  "tower 0.4.13",
  "uuid",
+]
+
+[[package]]
+name = "mlpl-mlx-train"
+version = "0.20.0"
+dependencies = [
+ "mlx-rs",
 ]
 
 [[package]]
@@ -1510,6 +1540,10 @@ dependencies = [
  "tower-http 0.5.2",
  "uuid",
 ]
+
+[[package]]
+name = "mlpl-tictactoe"
+version = "0.20.0"
 
 [[package]]
 name = "mlpl-trace"
