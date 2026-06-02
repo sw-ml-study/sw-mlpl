@@ -1,9 +1,10 @@
 number = 2
 slug = "mlpl-cuda-rt"
-status = "in-progress"
+status = "completed"
 description = "Step 2 of cuda-foundation: create components/native-rt/crates/mlpl-cuda-rt mi..."
 role = "production"
 context_files = []
 created_at = "2026-06-02T08:08:52"
+completed_at = "2026-06-02T09:49:53"
 task_type = "production"
-commits = []
+commits = ["155fbb6b718143c2bdfd927b0eb9902ac945c0c8"]
