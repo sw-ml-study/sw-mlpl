@@ -1,38 +1,139 @@
-#+TITLE: Tic-Tac-Toe: Fine-Tuning to a Winning Strategy on the Apple GPU
-#+SUBTITLE: the connect-only "MLX tic-tac-toe fine-tune" demo, shown by playing -- not by a loss curve
+#+TITLE: Tic-Tac-Toe, End to End, in MLPL
+#+SUBTITLE: build the game, derive optimal play, train a policy, prove it by playing -- all in the array language
 #+OPTIONS: toc:2 num:nil
 #+PROPERTY: header-args:mlpl :session ttt :results output :exports both
 
-#+begin_export html
-<p style="border:1px solid #c33;background:#fdd;padding:0.6em 1em;border-radius:6px">
-<b>Apple-Silicon, true-GPU.</b> The <code>device("mlx")</code> fine-tune block
-below runs its forward pass, backward pass, <em>and</em> the Adam optimizer on
-the Apple GPU via MLX. This is <b>not runnable in the public browser demo</b>
-(WASM is CPU-only, no MLX peer) -- which is why it ships as a literate page:
-the blocks were executed by an MLX-enabled <code>mlpl-repl</code> on Apple
-Silicon, and the numbers and chart below are that real run.
-</p>
-#+end_export
+This is the tic-tac-toe demo written entirely in MLPL -- no
+domain-specific builtins. We build the game engine, derive the optimal
+policy with alpha-beta minimax, encode boards for a tiny neural net,
+generate the training set by self-play, train a board -> move
+classifier, and *prove it learned* by playing 100... well, a few dozen
+games against a random opponent, before vs after, shown as a waffle.
 
-This is the 1:1 companion to the playground's *MLX tic-tac-toe fine-tune*
-demo. We fine-tune a tiny board-state policy on the Apple GPU and then
-*demonstrate* the result the honest way: by playing 100 games against a
-random opponent and counting wins/ties/losses, *before* and *after*. No
-"trust me, the loss dropped" -- you watch the piles of losses turn into
-piles of wins. The blocks share one ~:session ttt~, so state threads
-through exactly as if typed into the REPL.
+The only "ML primitives" are ~chain~/~linear~/~apply~/~adam~/~svg~; the
+game logic is all MLPL. The blocks share one ~:session ttt~, so
+definitions thread through.
 
-* Step 1 -- the dataset: every position, labelled with its best move
+* The board, and winning, as a matmul
 
-~ttt_boards()~ enumerates every reachable non-terminal position (deduped,
-from the side-to-move's perspective) and one-hot-encodes each of the nine
-cells as ~[empty, mine, theirs]~ -- 27 features. ~ttt_moves()~ gives the
-matching label: the optimal move from a minimax solver. Together they are
-the complete supervised policy.
+Nine cells, row-major: ~+1~ = X (moves first), ~-1~ = O, ~0~ = empty.
+A side wins by owning a line. The eight lines are the rows of a constant
+~[8,9]~ incidence matrix ~M~; then ~M @ board~ is the eight line-sums,
+and a sum of ~+3~ / ~-3~ means X / O has that line. Winner detection is
+one matrix multiply.
 
 #+begin_src mlpl
-X = ttt_boards()
-Y = ttt_moves()
+lines_m = reshape([
+  1,1,1,0,0,0,0,0,0,  0,0,0,1,1,1,0,0,0,  0,0,0,0,0,0,1,1,1,
+  1,0,0,1,0,0,1,0,0,  0,1,0,0,1,0,0,1,0,  0,0,1,0,0,1,0,0,1,
+  1,0,0,0,1,0,0,0,1,  0,0,1,0,1,0,1,0,0], [8, 9])
+def u:winner(board) { sums = reshape(matmul(lines_m, reshape(board, [9, 1])), [8]); if gt(reduce_add(eq(sums, 3), 0), 0) { 1 } else { if gt(reduce_add(eq(sums, -3), 0), 0) { -1 } else { 0 } } }
+def u:terminal(board) { if gt(abs(u:winner(board)), 0) { 1 } else { eq(reduce_add(abs(board), 0), 9) } }
+# X top row -> 1 ; O left column -> -1 ; mixed -> 0
+[u:winner([1,1,1, 0,-1,0, -1,0,0]), u:winner([-1,1,1, -1,1,0, -1,0,0]), u:winner([1,-1,1, -1,1,-1, -1,1,-1])]
+#+end_src
+
+#+RESULTS:
+: 1 -1 0
+
+* Optimal play, by alpha-beta minimax
+
+The label every training example needs is "the best move here." ~u:ab~
+is the game-theoretic value under perfect play (recursion -- needs the
+per-call scope fix, issue #6); a ~done~ flag prunes the move scan once
+alpha >= beta. ~u:best_move~ returns the optimal cell.
+
+#+begin_src mlpl
+def u:mx(a, b) { if gt(a, b) { a } else { b } }
+def u:mn(a, b) { if gt(a, b) { b } else { a } }
+def u:ge(a, b) { if gt(a, b) { 1 } else { eq(a, b) } }
+def u:ab(board, player, alpha, beta) { w = u:winner(board); if gt(abs(w), 0) { w } else { if eq(reduce_add(abs(board), 0), 9) { 0 } else { best = 0 - 2 * player; a = alpha; b = beta; done = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { if eq(done, 0) { nb = board + player * eq(iota(9), c); s = u:ab(nb, 0 - player, a, b); if eq(player, 1) { best = u:mx(best, s); a = u:mx(a, best) } else { best = u:mn(best, s); b = u:mn(b, best) }; if u:ge(a, b) { done = 1 } else { 0 } } else { 0 } } else { 0 } }; best } } }
+def u:best_move(board, player) { bv = 0 - 2 * player; bc = 0; seen = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { nb = board + player * eq(iota(9), c); v = u:ab(nb, 0 - player, 0 - 2, 2); ti = if eq(seen, 0) { 1 } else { if eq(player, 1) { gt(v, bv) } else { gt(bv, v) } }; if ti { bv = v; bc = c; seen = 1 } else { 0 } } else { 0 } }; bc }
+# value of a near-won board (-> 1) ; optimal reply on a mid-game board
+[u:ab([1,1,0, 0,-1,0, 0,0,-1], 1, 0 - 2, 2), u:best_move([1,-1,0, 0,1,0, 0,0,0], -1)]
+#+end_src
+
+#+RESULTS:
+: 1 2
+
+* Encoding a board for the net
+
+The classifier reads each cell from the side-to-move's perspective as a
+3-way one-hot ~[empty, mine, theirs]~ -- 27 features, color-agnostic so
+one policy plays either side.
+
+#+begin_src mlpl
+def u:encode(board, mover) { e = eq(board, 0); m = eq(board, mover); t = eq(board, 0 - mover); reshape(concat(concat(reshape(e, [9, 1]), reshape(m, [9, 1]), 1), reshape(t, [9, 1]), 1), [27]) }
+# X at 0, empty at 1, O at 2 -> [0,1,0, 1,0,0, 0,0,1, ...]
+u:encode([1, 0, -1, 0, 0, 0, 0, 0, 0], 1)
+#+end_src
+
+#+RESULTS:
+: 0 1 0 1 0 0 0 0 1 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0
+
+* The training set, by self-play
+
+~u:rmove~ picks a random legal cell (~argmax~ of random noise masked to
+empties). We play ~ng~ random games and, from move 1 onward (skipping
+the slow empty-board root search), collect each position's encoding
+paired with its minimax-optimal move. Accumulating a growing matrix uses
+a ~while~ loop (MLPL's ~for~ is a fixed-shape scan; ~while~ is the
+general loop).
+
+#+begin_src mlpl
+def u:rmove(board, s) { argmax(random(s, [9]) * eq(board, 0), 0) }
+ng = 20
+seed = 1
+g = 0
+started = 0
+dx = fill([1, 27], 0)
+dy = fill([1, 1], 0)
+while gt(ng, g) { board = fill([9], 0); board = board + eq(iota(9), u:rmove(board, seed)); seed = seed + 1; player = 0 - 1; while eq(u:terminal(board), 0) { xr = reshape(u:encode(board, player), [1, 27]); yr = reshape(u:best_move(board, player), [1, 1]); if eq(started, 0) { dx = xr; dy = yr; started = 1 } else { dx = concat(dx, xr, 0); dy = concat(dy, yr, 0) }; board = board + player * eq(iota(9), u:rmove(board, seed)); seed = seed + 1; player = 0 - player }; g = g + 1 }
+N = reshape(take(shape(dx), 0, 0), [])
+X = dx
+Y = reshape(dy, [N])
 shape(X)
 #+end_src
 
+#+RESULTS:
+: 134 27
+
+* Train the classifier, and prove it by playing
+
+~u:omove~ is the model's move: encode the board, run the forward pass,
+take the highest-scoring legal cell. ~u:play_o~ plays the model (global
+~m~) as O against a random X for ~n~ games and tallies ~[losses, ties,
+wins]~. We measure the untrained net, train on the self-play set, and
+measure again. The waffle: top band = before, bottom = after; red loss,
+gray tie, green win. Piles of losses become wins.
+
+#+begin_src mlpl :results html
+def u:omove(board) { logits = reshape(apply(m, reshape(u:encode(board, 0 - 1), [1, 27])), [9]); argmax(logits + (eq(board, 0) - 1) * 1000, 0) }
+def u:play_o(n) { loss = 0; tie = 0; win = 0; g = 0; s = 90000; while gt(n, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, s); s = s + 1 } else { mv = u:omove(board) }; board = board + player * eq(iota(9), mv); player = 0 - player }; w = u:winner(board); if eq(w, 1) { loss = loss + 1 } else { if eq(w, 0 - 1) { win = win + 1 } else { tie = tie + 1 } }; g = g + 1 }; reshape(concat(concat(reshape(loss, [1]), reshape(tie, [1]), 0), reshape(win, [1]), 0), [3]) }
+m = chain(linear(27, 32, 0), relu_layer(), linear(32, 9, 1))
+before = u:play_o(40)
+experiment "ttt" { train 250 { adam(cross_entropy(apply(m, X), Y), m, 0.05, 0.9, 0.999, 0.00000001) } }
+after = u:play_o(40)
+svg(reshape(concat(before, after), [2, 3]), "waffle")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 211 190" width="211" height="190"><rect width="100%" height="100%" fill="#1e1e2e"/><line x1="30" y1="270" x2="370" y2="270" stroke="#45475a" stroke-width="1"/><line x1="30" y1="30" x2="30" y2="270" stroke="#45475a" stroke-width="1"/><rect width="100%" height="100%" fill="#1e1e2e"/><rect x="12.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="69.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="88.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="107.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="126.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="145.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="164.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="183.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="12.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="69.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="88.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="107.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="126.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="145.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="164.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="183.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="12.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="50.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="69.0" y="50.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="88.0" y="50.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="107.0" y="50.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="126.0" y="50.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="145.0" y="50.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="164.0" y="50.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="50.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="12.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="31.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="50.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="69.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="88.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="107.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="126.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="145.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="164.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="12.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="69.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="88.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="107.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="126.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="145.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="164.0" y="102.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="183.0" y="102.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="12.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="31.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="50.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="69.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="88.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="107.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="126.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="145.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="164.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="183.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="12.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="31.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="50.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="69.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="88.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="107.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="126.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="145.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="164.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="12.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="31.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="50.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="69.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="88.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="107.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="126.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="145.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="164.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/></svg>
+#+end_export
+
+* How this was run
+:PROPERTIES:
+:UNNUMBERED: notoc
+:END:
+
+#+begin_src sh :eval no
+cargo build -p mlpl-repl --release
+MLPL_REPL_CMD="$PWD/target/release/mlpl-repl" \
+  ./examples/literate/publish.sh examples/literate/tictactoe-finetune.org
+#+end_src
+
+CPU-only -- runs anywhere. The same program is in
+~examples/tictactoe-demo.mlpl~. Scale ~ng~ / train steps / hidden width
+up for a stronger policy; wrap the train block in ~device("mlx") { ... }~
+with ~lora(...)~ for the Apple-GPU fine-tune flavor.
