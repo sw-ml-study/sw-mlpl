@@ -77,6 +77,28 @@ any backend.
    and add GPU identity (name, memory, compute-cap) to
    `/api/devices` so the UI labels each comparison column.
 
+## Serving + LAN access (requirement)
+
+The dev workflow needs a remote LAN client (e.g. a laptop) to reach
+the connect server + web UI running on this Arch box. Reality today:
+
+- `mlpl-serve --bind 0.0.0.0:6464` already binds on all interfaces;
+  non-loopback binds REQUIRE `--auth required` (auth-disabled is
+  loopback-only, a deliberate RCE guard -- the server evaluates
+  arbitrary pasted MLPL).
+- The same `mlpl-serve` serves the web playground via
+  `--static-dir <web-dist>` at `<scheme>://<bind>/sw-mlpl/`.
+- So one process is both the static UI host and the connect target.
+
+The CUDA connect-peer step (saga 1, step 7) must therefore verify
+the LAN path end to end, not just loopback: bind `0.0.0.0`, serve
+the UI, connect a remote browser via `?connect=`, and confirm the
+SSE eval stream + `/api/devices` work cross-host. The known gotcha
+is TLS/CORS over the LAN: the self-signed cert is loopback-only, so
+a LAN client needs either plain HTTP (browser mixed-content / SSE
+caveats) or a cert valid for the box's LAN name/IP. Resolve this in
+step 7.
+
 ## Cross-cutting: define-once consolidation
 
 Today a demo's source can live in three places (the `.mlpl` CLI
