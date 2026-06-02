@@ -383,14 +383,22 @@ impl<'a> Parser<'a> {
         let start = self.tokens[self.pos].span;
         self.pos += 1; // skip 'if'
         let cond = self.parse_expr(0)?;
-        let (then_body, _then_end) = self.parse_braced_body()?;
-        self.expect(&TokenKind::Else)?;
-        let (else_body, else_end) = self.parse_braced_body()?;
+        let (then_body, then_end) = self.parse_braced_body()?;
+        // `else` is optional: a bare `if cond { body }` is a valid
+        // statement-position conditional whose value is the body when
+        // taken and `0` otherwise (issue #6 / C3).
+        let (else_body, end) = if self.is(TokenKind::Else) {
+            self.pos += 1;
+            let (eb, ee) = self.parse_braced_body()?;
+            (eb, ee.end)
+        } else {
+            (Vec::new(), then_end.end)
+        };
         Ok(Expr::If {
             cond: Box::new(cond),
             then_body,
             else_body,
-            span: Span::new(start.start, else_end.end),
+            span: Span::new(start.start, end),
         })
     }
 
