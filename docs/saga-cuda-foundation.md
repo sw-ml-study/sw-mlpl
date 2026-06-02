@@ -94,10 +94,21 @@ one-time warning (mirror `mlpl-eval/src/device.rs`).
    `cross_entropy` (GPU row-LSE + CPU gather, mirroring `mlpl-rt`).
    3 logic modules (reduce/norm/loss), all warning-free; parity-tested
    vs the CPU path on the GPU. Baseline held (0 new failures/warnings).
-3. **cuda-dispatch-wire** -- generalize `try_mlx_dispatch` /
-   `dispatched_call` in `mlpl-eval/src/device.rs` so `device("cuda")`
-   routes through `mlpl-cuda-rt`; CPU fallback + one-time warning
-   preserved; device dispatch tests extended for cuda.
+3. **cuda-dispatch-wire** -- DONE. `device("cuda")` now computes on
+   the GPU through the interpreter. The op-dispatch lives in a new
+   `mlpl-eval/src/device_dispatch.rs` (extracted to keep `device.rs`
+   in budget); one `op_dispatch!` macro generates both
+   `try_mlx_dispatch` and `try_cuda_dispatch` (define once -- MLX and
+   CUDA share an op surface), and `dispatched_call` routes
+   `env.device()=="cuda"` through `mlpl-cuda-rt` +
+   `mlpl-cuda-elementwise` + `mlpl-cuda-nn`. CPU fallback + a
+   generalized one-time warning preserved; `to_device` accepts
+   `cuda` (extracted to `device_to.rs`). `mlpl-eval` gains a `cuda`
+   feature pulling the three crates. TDD: `cuda_parity` tests
+   (linear / chain-MLP / tiny-LM `apply` inside `device("cuda")`)
+   match the CPU path on the RTX 5060 Ti within fp32 tol, plus
+   parser + to_device cases. sw-checklist net -1 warning (502;
+   retired device.rs file-LOC + 8 clippy format-arg lints).
 4. **cuda-forward-and-model** -- `mlpl-cuda-forward` (embed,
    rms_norm, causal_attention, cross_entropy) + `mlpl-cuda-model`
    (`demo_forward`), each parity-tested vs the CPU primitives and

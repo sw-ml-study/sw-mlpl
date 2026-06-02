@@ -70,16 +70,34 @@ fn to_device_stamps_the_expected_tag() {
 #[test]
 fn to_device_rejects_unknown_target() {
     let mut env = Environment::new();
-    let err = run_err("x = iota(3)\n to_device(x, \"cuda\")", &mut env);
+    // "cpu"/"mlx"/"cuda" are valid; anything else is rejected. Use a
+    // clearly-bogus sentinel (not a real accelerator name like "tpu"/
+    // "rocm" that could become a valid target later and silently turn
+    // this rejection test into a no-op).
+    let err = run_err(
+        "x = iota(3)\n to_device(x, \"not-a-real-device\")",
+        &mut env,
+    );
     match err {
         EvalError::Unsupported(msg) => {
             assert!(
-                msg.contains("cuda"),
+                msg.contains("not-a-real-device"),
                 "error should name the bad target: {msg}"
             );
         }
         other => panic!("expected Unsupported, got {other:?}"),
     }
+}
+
+#[test]
+fn to_device_accepts_cuda_and_stamps_tag() {
+    // Saga cuda-foundation step 004: "cuda" is now a valid target.
+    let mut env = Environment::new();
+    run(
+        "x = reshape(iota(4), [2, 2])\n to_device(x, \"cuda\")",
+        &mut env,
+    );
+    assert_eq!(env.tensor_device("x"), "cuda");
 }
 
 // -- Device mismatch on apply --
@@ -219,5 +237,82 @@ mod mlx_parity {
         let cpu = run_forward(&cpu_src);
         let mlx = run_forward(&mlx_src);
         assert_close(&cpu, &mlx, FP32_TOL);
+    }
+}
+
+// -- CUDA model parity (gated on cuda feature + Linux/x86_64) --
+//
+// Saga cuda-foundation step 004: inside `device("cuda") { }`,
+// `apply(model, X)` routes matmul/softmax/add/etc through the CUDA
+// runtime. Shapes + labels match the CPU path exactly; numbers match
+// within the documented fp32 tolerance. Mirrors `mlx_parity`.
+#[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
+mod cuda_parity {
+    use super::*;
+    use mlpl_array::DenseArray;
+
+    const FP32_TOL: f64 = 1e-3;
+
+    fn assert_close(a: &DenseArray, b: &DenseArray, tol: f64) {
+        assert_eq!(a.shape(), b.shape(), "shape mismatch");
+        assert_eq!(a.labels(), b.labels(), "label mismatch");
+        for (i, (x, y)) in a.data().iter().zip(b.data().iter()).enumerate() {
+            assert!(
+                (x - y).abs() <= tol,
+                "elem {i}: cpu={x} cuda={y} diff={} tol={tol}",
+                (x - y).abs()
+            );
+        }
+    }
+
+    fn run_forward(src: &str) -> DenseArray {
+        let mut env = Environment::new();
+        run(src, &mut env)
+    }
+
+    #[test]
+    fn linear_forward_matches_cpu_within_fp32_tolerance() {
+        let cpu = run_forward(
+            "m = linear(4, 3, 7)\n\
+             x = reshape(iota(8), [2, 4])\n\
+             apply(m, x)",
+        );
+        let cuda = run_forward(
+            "device(\"cuda\") { m = linear(4, 3, 7) }\n\
+             x = reshape(iota(8), [2, 4])\n\
+             to_device(x, \"cuda\")\n\
+             device(\"cuda\") { apply(m, x) }",
+        );
+        assert_close(&cpu, &cuda, FP32_TOL);
+    }
+
+    #[test]
+    fn chain_mlp_forward_matches_cpu_within_fp32_tolerance() {
+        let cpu = run_forward(
+            "m = chain(linear(4, 8, 1), tanh_layer(), linear(8, 2, 2))\n\
+             x = reshape(iota(12), [3, 4])\n\
+             apply(m, x)",
+        );
+        let cuda = run_forward(
+            "device(\"cuda\") { m = chain(linear(4, 8, 1), tanh_layer(), linear(8, 2, 2)) }\n\
+             x = reshape(iota(12), [3, 4])\n\
+             to_device(x, \"cuda\")\n\
+             device(\"cuda\") { apply(m, x) }",
+        );
+        assert_close(&cpu, &cuda, FP32_TOL);
+    }
+
+    #[test]
+    fn tiny_lm_forward_matches_cpu_within_fp32_tolerance() {
+        let model = "chain(embed(6, 4, 0), residual(chain(rms_norm(4), \
+             causal_attention(4, 1, 1))), rms_norm(4), linear(4, 6, 2))";
+        let cpu_src = format!("m = {model}\n x = [1, 3, 5, 2]\n apply(m, x)");
+        let cuda_src = format!(
+            "device(\"cuda\") {{ m = {model} }}\n \
+             x = [1, 3, 5, 2]\n \
+             to_device(x, \"cuda\")\n \
+             device(\"cuda\") {{ apply(m, x) }}"
+        );
+        assert_close(&run_forward(&cpu_src), &run_forward(&cuda_src), FP32_TOL);
     }
 }

@@ -166,8 +166,7 @@ fn adam_accepts_loss_first_arg() {
         Ok(_) => {}
         Err(err) => assert!(
             type_mismatch_msg(&err).is_none(),
-            "Loss-tagged loss should pass the type predicate; got TypeMismatch: {:?}",
-            err
+            "Loss-tagged loss should pass the type predicate; got TypeMismatch: {err:?}"
         ),
     }
 }

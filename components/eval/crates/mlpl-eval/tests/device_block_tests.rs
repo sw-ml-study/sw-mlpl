@@ -57,6 +57,17 @@ fn parser_emits_device_variant_for_cpu() {
 }
 
 #[test]
+fn parser_emits_device_variant_for_cuda() {
+    let stmts = parse(&lex("device(\"cuda\") { x = 1 }").unwrap()).unwrap();
+    matches!(
+        &stmts[0],
+        Expr::Device { target, .. } if target == "cuda"
+    )
+    .then_some(())
+    .expect("expected Expr::Device with target=cuda");
+}
+
+#[test]
 fn parser_accepts_unknown_target_strings() {
     // Any string parses; the evaluator decides whether to warn.
     parse(&lex("device(\"future-cuda\") { x = 1 }").unwrap()).unwrap();
@@ -92,6 +103,18 @@ fn cpu_block_yields_body_last_value() {
         "device('cpu') body should produce iota(5)'s shape"
     );
     assert_eq!(r.data(), &[0.0, 1.0, 2.0, 3.0, 4.0]);
+}
+
+#[test]
+fn cuda_block_yields_body_last_value() {
+    // device("cuda") evaluates its body whether or not the cuda
+    // backend is compiled in: GPU dispatch when built (Linux/x86_64
+    // + cuda feature), CPU fallback otherwise. The result is identical
+    // for this exact integer op (reshape only rearranges).
+    let mut env = Environment::new();
+    let r = run("device(\"cuda\") { reshape(iota(6), [2, 3]) }", &mut env);
+    assert_eq!(r.shape().dims(), &[2, 3]);
+    assert_eq!(r.data(), &[0.0, 1.0, 2.0, 3.0, 4.0, 5.0]);
 }
 
 #[test]

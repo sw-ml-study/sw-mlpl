@@ -26,6 +26,20 @@ mlx = [
     "dep:mlpl-mlx-model",
     "mlpl-mlx-model/mlx",
 ]
+# Saga cuda-foundation step 004: dispatch ops inside
+# `device("cuda") { }` blocks through the CUDA (candle) runtime
+# crates. Off by default; the crates triple-gate on
+# `target_os = "linux"` + `target_arch = "x86_64"` + their own
+# `cuda` feature, so enabling this on a non-Linux/non-GPU host
+# still compiles and falls back to the CPU path.
+cuda = [
+    "dep:mlpl-cuda-rt",
+    "mlpl-cuda-rt/cuda",
+    "dep:mlpl-cuda-elementwise",
+    "mlpl-cuda-elementwise/cuda",
+    "dep:mlpl-cuda-nn",
+    "mlpl-cuda-nn/cuda",
+]
 # Saga 29 step 003: PNG / JPEG decode for the `load_images(dir,
 # [H, W])` builtin. Off by default so the WASM target stays
 # clean -- the browser REPL can still call
@@ -83,6 +97,9 @@ mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true 
 mlpl-mlx-train = { path = "../../../native-rt/crates/mlpl-mlx-train", optional = true }
 mlpl-mlx-forward = { path = "../../../native-rt/crates/mlpl-mlx-forward", optional = true }
 mlpl-mlx-model = { path = "../../../mlx-model/crates/mlpl-mlx-model", optional = true }
+mlpl-cuda-rt = { path = "../../../cuda-rt/crates/mlpl-cuda-rt", optional = true }
+mlpl-cuda-elementwise = { path = "../../../cuda-rt/crates/mlpl-cuda-elementwise", optional = true }
+mlpl-cuda-nn = { path = "../../../cuda-rt/crates/mlpl-cuda-nn", optional = true }
 mlpl-eval-image = { path = "../../../eval-image/crates/mlpl-eval-image", optional = true }
 png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }

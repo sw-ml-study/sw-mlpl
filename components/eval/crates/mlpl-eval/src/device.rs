@@ -26,8 +26,9 @@
 //! block falls back to CPU, and `eval_device` emits a one-time
 //! warning so the user knows their code ran on the wrong device.
 
-use mlpl_array::{ArrayError, DenseArray};
-use mlpl_array_ops_element::prelude::*;
+#[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
+use mlpl_array::ArrayError;
+use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
@@ -52,10 +53,10 @@ pub(crate) fn eval_device(
             return result;
         }
     }
-    if target == "mlx" && !mlx_available() && env.take_mlx_fallback_warning() {
+    if !device_available(target) && env.take_device_fallback_warning() {
         eprintln!(
-            "warning: device(\"mlx\") block requested but the mlx \
-             feature is not compiled in; falling back to CPU."
+            "warning: device(\"{target}\") block requested but the \
+             {target} feature is not compiled in; falling back to CPU."
         );
     }
     env.push_device(target.to_string());
@@ -84,10 +85,9 @@ fn collect_array_bindings(
         .collect()
 }
 
-/// Whether the running build can actually dispatch through MLX.
-/// Combines the Cargo feature gate with the Apple-Silicon target
-/// gate so the answer is a single bool the rest of the module can
-/// branch on.
+/// Whether the running build can dispatch through MLX (Apple) or
+/// CUDA (Linux): each `const fn` combines its Cargo feature gate with
+/// its target OS/arch gate.
 const fn mlx_available() -> bool {
     cfg!(all(
         feature = "mlx",
@@ -95,98 +95,42 @@ const fn mlx_available() -> bool {
         target_arch = "aarch64"
     ))
 }
+const fn cuda_available() -> bool {
+    cfg!(all(
+        feature = "cuda",
+        target_os = "linux",
+        target_arch = "x86_64"
+    ))
+}
 
-/// Dispatch a named op through `mlpl-mlx-rt` when the running build
-/// supports it. Returns `None` to mean "this op is not in the
-/// MLX surface, run it on CPU"; `Some(Ok(arr))` for a successful
-/// MLX result; `Some(Err(e))` for an MLX-side validation error
-/// (caller should surface it the same way the CPU path would).
+/// Whether `target`'s GPU backend can actually dispatch in this build
+/// (`cpu`/anything else always "runs", on CPU). Drives the one-time
+/// CPU-fallback warning in `eval_device` / `eval_to_device`.
+pub(crate) fn device_available(target: &str) -> bool {
+    match target {
+        "mlx" => mlx_available(),
+        "cuda" => cuda_available(),
+        _ => true,
+    }
+}
+
+// The op-dispatch machinery (the `op_dispatch!` macro,
+// `try_mlx_dispatch`/`try_cuda_dispatch`, `lift_array_error`, and
+// `dispatched_call`) lives in `device_dispatch` -- extracted to keep
+// this module within the file-size budget. `dispatched_call` is
+// re-exported so existing `crate::device::dispatched_call` call sites
+// (Model DSL forward helpers, `eval_binop`/`eval_fncall`) resolve
+// unchanged.
+pub(crate) use crate::device_dispatch::dispatched_call;
+
+// `materialize_tape_on_mlx` (below) reruns forward ops through MLX.
 #[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
-pub(crate) fn try_mlx_dispatch(
-    name: &str,
-    args: &[DenseArray],
-) -> Option<Result<DenseArray, ArrayError>> {
-    use mlpl_mlx_rt as mx;
-    Some(match (name, args.len()) {
-        ("matmul", 2) => mx::matmul(&args[0], &args[1]),
-        ("add", 2) => mx::add(&args[0], &args[1]),
-        ("sub", 2) => mx::sub(&args[0], &args[1]),
-        ("mul", 2) => mx::mul(&args[0], &args[1]),
-        ("div", 2) => mx::div(&args[0], &args[1]),
-        ("neg", 1) => Ok(mx::neg(&args[0])),
-        ("exp", 1) => Ok(mx::exp(&args[0])),
-        ("log", 1) => Ok(mx::log(&args[0])),
-        ("relu", 1) => Ok(mx::relu(&args[0])),
-        ("sigmoid", 1) => Ok(mx::sigmoid(&args[0])),
-        ("tanh" | "tanh_fn", 1) => Ok(mx::tanh(&args[0])),
-        ("transpose", 1) => Ok(mx::transpose(&args[0])),
-        ("reshape", 2) => {
-            let dims: Vec<usize> = args[1].data().iter().map(|&d| d as usize).collect();
-            mx::reshape(&args[0], &dims)
-        }
-        ("softmax", 2) => mx::softmax(&args[0], args[1].data()[0] as usize),
-        ("log_softmax", 2) => mx::log_softmax(&args[0], args[1].data()[0] as usize),
-        ("cross_entropy", 2) => mx::cross_entropy(&args[0], &args[1]),
-        ("reduce_mul", 1) => mx::reduce_mul(&args[0], None),
-        ("reduce_mul", 2) => mx::reduce_mul(&args[0], Some(args[1].data()[0] as usize)),
-        ("mean", 1) => mx::mean(&args[0], None),
-        ("mean", 2) => mx::mean(&args[0], Some(args[1].data()[0] as usize)),
-        ("argmax", 1) => mx::argmax(&args[0], None),
-        ("argmax", 2) => mx::argmax(&args[0], Some(args[1].data()[0] as usize)),
-        _ => return None,
-    })
-}
+use crate::device_dispatch::try_mlx_dispatch;
 
-/// Stub for builds without MLX support. Always returns `None` so
-/// every dispatch site falls back to the CPU path.
-#[cfg(not(all(feature = "mlx", target_os = "macos", target_arch = "aarch64")))]
-pub(crate) fn try_mlx_dispatch(
-    _name: &str,
-    _args: &[DenseArray],
-) -> Option<Result<DenseArray, ArrayError>> {
-    None
-}
-
-/// Map an `mlpl-mlx-rt` `ArrayError` to the eval-layer error type so
-/// the caller can route through the same `?` chain that the CPU
-/// path uses. Pulled out so `eval_binop` and `eval_fncall` can
-/// share it without each duplicating the conversion.
-pub(crate) fn lift_array_error(err: ArrayError) -> EvalError {
-    EvalError::from(err)
-}
-
-/// Run a named builtin with `env`'s active device in mind
-/// (Saga 14 step 005). When `env.device() == "mlx"` and the op is
-/// in the `mlpl-mlx-rt` surface, route through `try_mlx_dispatch`.
-/// Otherwise fall back to the CPU path: elementwise arithmetic
-/// lowers to `DenseArray::apply_binop`/`map`, everything else
-/// goes through `mlpl_runtime::call_builtin`. Used by
-/// `eval_binop`, `eval_fncall`, and every Model DSL forward
-/// helper so the device decision lives in exactly one place.
-pub(crate) fn dispatched_call(
-    env: &Environment,
-    name: &str,
-    args: Vec<DenseArray>,
-) -> Result<DenseArray, EvalError> {
-    if env.device() == "mlx"
-        && let Some(result) = try_mlx_dispatch(name, &args)
-    {
-        return result.map_err(lift_array_error);
-    }
-    match (name, args.len()) {
-        ("add", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a + b)?),
-        ("sub", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a - b)?),
-        ("mul", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a * b)?),
-        ("div", 2) => Ok(args[0].apply_binop(&args[1], |a, b| a / b)?),
-        ("neg", 1) => Ok(args[0].map(|v| -v)),
-        // Model DSL activation names; `mlpl_runtime::call_builtin`
-        // does not own `tanh`/`relu` directly, so the CPU fallback
-        // lowers them to `DenseArray::map`.
-        ("tanh", 1) => Ok(args[0].map(f64::tanh)),
-        ("relu", 1) => Ok(args[0].map(|v| if v > 0.0 { v } else { 0.0 })),
-        _ => Ok(mlpl_runtime::call_builtin(name, args)?),
-    }
-}
+// The `to_device(x, target)` builtin lives in `device_to` (its own
+// concern). Re-exported so `crate::device::eval_to_device` call sites
+// resolve unchanged.
+pub(crate) use crate::device_to::eval_to_device;
 
 /// Re-execute every non-leaf node on `tape` through `mlpl-mlx-rt` so
 /// each `NodeData::value` carries the MLX-rounded forward value
@@ -355,90 +299,4 @@ fn rerun_binary(
         Some(Err(e)) => Err(e),
         None => op.forward(a, b),
     }
-}
-
-/// `to_device(x, target)` builtin (Saga 14 step 005). Records the
-/// target on the environment's per-tensor device map when `x` is a
-/// variable reference, so subsequent `apply(model, ...)` calls can
-/// see the placement. When `x` evaluates to a bare array literal,
-/// the move is purely metadata and there is no named binding to
-/// stamp; the tensor still round-trips cleanly because values
-/// stay CPU-resident until gradient/optimizer steps ship in
-/// later phases. Unknown targets are an error.
-pub(crate) fn eval_to_device(
-    args: &[Expr],
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<Value, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::BadArity {
-            func: "to_device".into(),
-            expected: 2,
-            got: args.len(),
-        });
-    }
-    let (target, value_expr) = match (&args[0], &args[1]) {
-        (Expr::StrLit(s, _), value) => (s.clone(), value),
-        (value, Expr::StrLit(s, _)) => (s.clone(), value),
-        _ => {
-            return Err(EvalError::Unsupported(
-                "to_device: one argument must be a string literal target".into(),
-            ));
-        }
-    };
-    if target != "cpu" && target != "mlx" {
-        return Err(EvalError::Unsupported(format!(
-            "to_device: unknown target '{target}' (expected 'cpu' or 'mlx')"
-        )));
-    }
-    if target == "mlx" && !mlx_available() && env.take_mlx_fallback_warning() {
-        eprintln!(
-            "warning: to_device(..., \"mlx\") requested but the mlx \
-             feature is not compiled in; placement recorded but \
-             values stay CPU-resident."
-        );
-    }
-    // If the argument is an identifier, stamp the device on the
-    // binding so models that reference it downstream see the new
-    // placement. Also propagate to model params when the name
-    // resolves to a model.
-    if target == "cpu" {
-        let value = crate::eval::eval_expr(value_expr, env, trace)?;
-        if let Value::DeviceTensor { peer, handle, .. } = value {
-            let arr = env
-                .peer_dispatcher()
-                .ok_or_else(|| EvalError::Unsupported("to_device: no peer dispatcher".into()))?
-                .fetch_tensor(&peer, &handle)?;
-            if let Expr::Ident(name, _) = value_expr {
-                env.set(name.clone(), arr.clone());
-                env.remove_device_tensor(name);
-                env.set_tensor_device(name.clone(), "cpu".into());
-            }
-            return Ok(Value::Array(arr));
-        }
-        if let Expr::Ident(name, _) = value_expr {
-            env.set_tensor_device(name.clone(), "cpu".into());
-        }
-        return value.into_array().map(Value::Array);
-    }
-    if let Expr::Ident(name, _) = value_expr {
-        let is_model = env.get_model(name).is_some();
-        if is_model {
-            let params: Vec<String> = env
-                .get_model(name)
-                .map(mlpl_eval_core::model::ModelSpec::params)
-                .unwrap_or_default();
-            for p in params {
-                env.set_tensor_device(p, target.clone());
-            }
-            // Models don't correspond to a single DenseArray value; return
-            // a scalar zero so `to_device(model, "mlx")` can appear in
-            // statement position the same way model assignments do.
-            return Ok(Value::Array(DenseArray::from_scalar(0.0)));
-        }
-        env.set_tensor_device(name.clone(), target.clone());
-    }
-    crate::eval::eval_expr(value_expr, env, trace)
-        .and_then(Value::into_array)
-        .map(Value::Array)
 }

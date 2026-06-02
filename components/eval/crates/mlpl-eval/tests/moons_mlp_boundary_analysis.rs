@@ -13,7 +13,7 @@ fn run_and_get_p1(src: &str) -> Vec<f64> {
     let val = eval_program_value(&stmts, &mut env).expect("eval");
     match val {
         Value::Array(a) => a.data().to_vec(),
-        other => panic!("demo must return Value::Array, got {:?}", other),
+        other => panic!("demo must return Value::Array, got {other:?}"),
     }
 }
 
@@ -85,7 +85,7 @@ fn print_grid_ascii(label: &str, p1: &[f64]) {
         let row: String = (0..30)
             .map(|c| if p1[r * 30 + c] > 0.5 { '#' } else { '.' })
             .collect();
-        println!("{:2}: {}", r, row);
+        println!("{r:2}: {row}");
     }
 }
 
@@ -110,8 +110,8 @@ fn boundary_stats(label: &str, p1: &[f64]) {
     let row_mean_var = row_means.iter().map(|m| (m - mean).powi(2)).sum::<f64>() / n as f64;
     let col_mean_var = col_means.iter().map(|m| (m - mean).powi(2)).sum::<f64>() / n as f64;
     println!("\n{label} stats:");
-    println!("  mean(p1)      = {:.4}", mean);
-    println!("  total_var     = {:.4}", total_var);
+    println!("  mean(p1)      = {mean:.4}");
+    println!("  total_var     = {total_var:.4}");
     println!(
         "  row_mean_var  = {:.4}  ({:>2}% of total) -- variance ACROSS rows (y-sensitivity)",
         row_mean_var,

@@ -95,8 +95,7 @@ fn compute_attn_weights(
     }
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(
-            "attention_weights: input must be [seq, {d_model}] or [B, T, {d_model}], got {:?}",
-            dims
+            "attention_weights: input must be [seq, {d_model}] or [B, T, {d_model}], got {dims:?}"
         )));
     }
     let seq = dims[0];

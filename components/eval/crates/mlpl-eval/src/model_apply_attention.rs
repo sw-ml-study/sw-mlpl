@@ -57,8 +57,7 @@ pub(crate) fn apply_attention(
     }
     if dims.len() != 2 || dims[1] != d_model {
         return Err(EvalError::Unsupported(format!(
-            "attention: input must be [seq, {d_model}] or [B, T, {d_model}], got {:?}",
-            dims
+            "attention: input must be [seq, {d_model}] or [B, T, {d_model}], got {dims:?}"
         )));
     }
     apply_attention_rank2(x, args, env)
