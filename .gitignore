@@ -4,6 +4,13 @@
 # own target/ trees.
 /services/*/target/
 /components/*/target/
+# trunk dev build output for the web app (deploy uses pages/ +
+# dist-pages/, both handled separately).
+/components/web/dist/
+
+# Claude Code local state: per-machine settings + runtime locks
+# (settings.local.json, scheduled_tasks.lock). Not project source.
+.claude/
 
 # Build artifacts -- never tracked
 *.pdf
