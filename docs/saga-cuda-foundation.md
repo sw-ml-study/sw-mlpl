@@ -52,7 +52,7 @@ kernels + autodiff, explicitly rejected on the MLX track).
 
 | MLX crate | Role | CUDA crate to build |
 |---|---|---|
-| `mlpl-mlx-rt` | forward ops | `mlpl-cuda-rt` |
+| `mlpl-mlx-rt` | forward ops | `mlpl-cuda-rt` (matmul/shape/convert) + `mlpl-cuda-elementwise` (arith) + `mlpl-cuda-nn` (activations/reductions) |
 | `mlpl-mlx-forward` | embed / rms_norm / attention / cross-entropy | `mlpl-cuda-forward` |
 | `mlpl-mlx-train` | autodiff + on-device Adam | `mlpl-cuda-train` |
 | `mlpl-mlx-model` | `demo_forward` assembly | `mlpl-cuda-model` |
@@ -74,9 +74,21 @@ one-time warning (mirror `mlpl-eval/src/device.rs`).
    in the crate README (`CUDA_COMPUTE_CAP=120`, `/opt/cuda` env).
    candle (approach A) confirmed viable -- the rest of the saga
    proceeds on it.
-2. **mlpl-cuda-rt** -- forward ops crate (matmul, elementwise,
-   activations, softmax/reduce), gated; parity-tested vs CPU
-   (`mlpl-array`).
+2. **mlpl-cuda-rt** -- DONE. The core tensor ops split into two
+   warning-free sibling crates (the eager surface is too large for
+   one crate under the <=4 fn/module + <=4 module/crate budgets):
+   `mlpl-cuda-rt` (convert/device plumbing, `matmul`, `reshape`,
+   `transpose`) and `mlpl-cuda-elementwise` (`add`/`sub`/`mul`/`div`
+   with scalar broadcast, `neg`). Both gated; 6 GPU parity tests
+   pass vs the CPU path within fp32 tol. The nn surface
+   (activations, softmax/reduce, `cross_entropy`) is split out to
+   step 2b (`mlpl-cuda-nn`): candle lacks a `prod` reduction and
+   `cross_entropy` parity is fiddly, and those ops overlap the
+   step-4 candle forward.
+2b. **mlpl-cuda-nn** -- activations (`exp`/`log`/`relu`/`sigmoid`/
+   `tanh`), reductions (`mean`/`reduce_mul`/`argmax`), and
+   `softmax`/`log_softmax`/`cross_entropy` over candle, parity-tested
+   vs CPU. `reduce_mul` may delegate to CPU (candle has no `prod`).
 3. **cuda-dispatch-wire** -- generalize `try_mlx_dispatch` /
    `dispatched_call` in `mlpl-eval/src/device.rs` so `device("cuda")`
    routes through `mlpl-cuda-rt`; CPU fallback + one-time warning

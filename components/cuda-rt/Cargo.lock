@@ -620,6 +620,54 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-array"
+version = "0.20.0"
+dependencies = [
+ "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-array-ops-matmul"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-array-ops-shape"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-core"
+version = "0.20.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "mlpl-cuda-elementwise"
+version = "0.20.0"
+dependencies = [
+ "candle-core",
+ "mlpl-array",
+ "mlpl-cuda-rt",
+]
+
+[[package]]
+name = "mlpl-cuda-rt"
+version = "0.20.0"
+dependencies = [
+ "candle-core",
+ "mlpl-array",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
+]
+
+[[package]]
 name = "mlpl-cuda-train"
 version = "0.20.0"
 dependencies = [

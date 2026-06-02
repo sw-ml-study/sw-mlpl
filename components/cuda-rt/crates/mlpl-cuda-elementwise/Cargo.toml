@@ -1,0 +1,24 @@
+[package]
+# Saga cuda-foundation step 002: CUDA elementwise primitives, the
+# candle analog of `mlpl-mlx-rt::elementwise`. A sibling of
+# `mlpl-cuda-rt` (not a module of it) so each crate stays within the
+# module/function budgets. Reuses cuda-rt's device + conversion
+# plumbing. Linux/x86_64 + the `cuda` feature gate everything.
+name = "mlpl-cuda-elementwise"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+cuda = ["dep:candle-core", "mlpl-cuda-rt/cuda"]
+
+[dependencies]
+candle-core = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-cuda-rt = { path = "../mlpl-cuda-rt" }
+
+[lints]
+workspace = true
