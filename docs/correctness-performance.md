@@ -66,7 +66,13 @@ the body in a fresh child variable frame and not leak local assignments
 into the caller / sibling frames. Reads of outer variables may remain
 (documented "access to outer variables"), but writes must be local.
 
-### C2 (limitation): newlines forbidden inside array literals
+### C2 (limitation): newlines forbidden inside array literals -- FIXED (aeb480e2)
+
+Fixed: `parse_array_lit` now skips newline tokens (`skip_newlines`)
+around elements/commas, so a matrix can span lines. Tests in
+`mlpl-parser/tests/multiline_array_tests.rs`.
+
+Original report:
 
 Repro:
 
@@ -140,10 +146,10 @@ Fix the correctness bugs that make recursion / array literals usable.
    the variable namespaces per call; local writes do not leak to caller
    / siblings; outer reads still work. Regression tests in
    `fn_scope.rs` (recursion-with-locals, factorial, no-leak). (Fixed C1.)
-2. **multiline-array** -- make the lexer/parser treat newlines as
-   insignificant inside `[ ]` (and call-arg `( )`). Test: the C2 repro
-   yields `1 2 3 4`; a multi-line matrix `reshape`s correctly.
-   (Fixes C2.)
+2. **multiline-array** -- DONE (aeb480e2). `parse_array_lit` skips
+   newlines inside `[ ]`; a multi-line matrix parses. Tests in
+   `multiline_array_tests.rs`. (Fixed C2. Call-arg `( )` newlines remain
+   a future nicety, not needed for matrix literals.)
 3. **bare-if-diagnostic** -- either accept statement-position `if`
    without `else`, or produce a precise diagnostic pointing at the
    missing `else`. (Fixes C3.)
