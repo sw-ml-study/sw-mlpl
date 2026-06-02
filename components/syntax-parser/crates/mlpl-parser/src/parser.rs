@@ -344,14 +344,7 @@ impl<'a> Parser<'a> {
     fn parse_array_lit(&mut self) -> Result<Expr, ParseError> {
         let open_span = self.tokens[self.pos].span;
         self.pos += 1;
-        let mut elems = Vec::new();
-        if !self.is(TokenKind::RBracket) {
-            elems.push(self.parse_expr(0)?);
-            while self.is(TokenKind::Comma) {
-                self.pos += 1;
-                elems.push(self.parse_expr(0)?);
-            }
-        }
+        let elems = self.parse_array_elems()?;
         if !self.is(TokenKind::RBracket) {
             return Err(ParseError::UnclosedDelimiter {
                 open: "[".into(),
@@ -364,6 +357,24 @@ impl<'a> Parser<'a> {
             elems,
             Span::new(open_span.start, close_span.end),
         ))
+    }
+
+    /// Parse the comma-separated elements of an array literal. Newlines
+    /// are insignificant (commas separate), so a matrix can span lines.
+    fn parse_array_elems(&mut self) -> Result<Vec<Expr>, ParseError> {
+        let mut elems = Vec::new();
+        self.skip_newlines();
+        if !self.is(TokenKind::RBracket) {
+            elems.push(self.parse_expr(0)?);
+            self.skip_newlines();
+            while self.is(TokenKind::Comma) {
+                self.pos += 1;
+                self.skip_newlines();
+                elems.push(self.parse_expr(0)?);
+                self.skip_newlines();
+            }
+        }
+        Ok(elems)
     }
 
     /// Parse `if cond { then } else { else }`. The `else`
@@ -409,6 +420,15 @@ impl<'a> Parser<'a> {
                 TokenKind::Newline | TokenKind::Semicolon
             )
         {
+            self.pos += 1;
+        }
+    }
+
+    /// Skip newline tokens only (not `;`). Used inside bracketed
+    /// constructs (array literals) where newlines are insignificant --
+    /// commas separate elements -- so a matrix can span lines (C2).
+    pub(crate) fn skip_newlines(&mut self) {
+        while self.pos < self.tokens.len() && self.tokens[self.pos].kind == TokenKind::Newline {
             self.pos += 1;
         }
     }
