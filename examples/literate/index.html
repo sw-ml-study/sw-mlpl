@@ -28,11 +28,11 @@ run top-to-bottom and its real output baked in. The 1:1 companions to the playgr
 demos &mdash; especially the connect-only ones the public browser demo can't run.</p>
 <ul>
   <li>
-    <a class="title" href="tictactoe-finetune.html">Tic-Tac-Toe: fine-tuning to a winning strategy</a>
-    <span class="tag mlx">MLX &middot; Apple GPU</span>
-    <p class="desc">LoRA-fine-tune a tiny board-state policy on the Apple GPU until it
-    stops losing to a random opponent. Shown by <em>playing</em> &mdash; a before/after
-    win/tie/loss waffle (65 losses &rarr; 0), not a loss curve.</p>
+    <a class="title" href="tictactoe-finetune.html">Tic-Tac-Toe, end to end, in MLPL</a>
+    <span class="tag cpu">CPU &middot; runs anywhere</span>
+    <p class="desc">The whole game in the array language: winner-detection as a matmul,
+    alpha-beta minimax, a self-play training set, a board &rarr; move classifier, and a
+    before/after win/tie/loss waffle &mdash; no domain-specific builtins.</p>
   </li>
   <li>
     <a class="title" href="mlx-lora-finetune.html">MLX LoRA fine-tune (true-GPU walkthrough)</a>
