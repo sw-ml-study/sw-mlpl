@@ -34,6 +34,17 @@ def u:ge(a, b) { if gt(a, b) { 1 } else { eq(a, b) } }
 # is reached -- the prune that skips the expensive recursion.
 def u:ab(board, player, alpha, beta) { w = u:winner(board); if gt(abs(w), 0) { w } else { if eq(reduce_add(abs(board), 0), 9) { 0 } else { best = 0 - 2 * player; a = alpha; b = beta; done = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { if eq(done, 0) { nb = board + player * eq(iota(9), c); s = u:ab(nb, 0 - player, a, b); if eq(player, 1) { best = u:mx(best, s); a = u:mx(a, best) } else { best = u:mn(best, s); b = u:mn(b, best) }; if u:ge(a, b) { done = 1 } else { 0 } } else { 0 } } else { 0 } }; best } } }
 
-# Optimal value with X to move: a near-won board (-> 1) and the empty
-# board (-> 0, the famous draw under perfect play).
-[u:ab([1, 1, 0, 0, -1, 0, 0, 0, -1], 1, 0 - 2, 2), u:ab([0, 0, 0, 0, 0, 0, 0, 0, 0], 1, 0 - 2, 2)]
+# best_move: the optimal cell for `player`. Evaluate each legal move's
+# resulting position with a full-window alpha-beta search and keep the
+# best (max for X / min for O). This is the training-label oracle.
+def u:best_move(board, player) { bv = 0 - 2 * player; bc = 0; seen = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { nb = board + player * eq(iota(9), c); v = u:ab(nb, 0 - player, 0 - 2, 2); take_it = if eq(seen, 0) { 1 } else { if eq(player, 1) { gt(v, bv) } else { gt(bv, v) } }; if take_it { bv = v; bc = c; seen = 1 } else { 0 } } else { 0 } }; bc }
+
+# encode: a board, from `mover`'s perspective, as 27 one-hot features --
+# each cell -> [empty, mine, theirs]. The classifier's input; side-
+# agnostic so one policy plays either side.
+def u:encode(board, mover) { e = eq(board, 0); m = eq(board, mover); t = eq(board, 0 - mover); cols = concat(concat(reshape(e, [9, 1]), reshape(m, [9, 1]), 1), reshape(t, [9, 1]), 1); reshape(cols, [27]) }
+
+# Demonstrate the whole engine: optimal value of a near-won board (-> 1)
+# and the empty board (-> 0, perfect-play draw); the optimal opening move
+# (a corner, 0); and the winner of an X-top-row board (-> 1).
+[u:ab([1, 1, 0, 0, -1, 0, 0, 0, -1], 1, 0 - 2, 2), u:ab([0, 0, 0, 0, 0, 0, 0, 0, 0], 1, 0 - 2, 2), u:best_move([0, 0, 0, 0, 0, 0, 0, 0, 0], 1), u:winner([1, 1, 1, 0, -1, 0, -1, 0, 0])]
