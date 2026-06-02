@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- fix(eval): per-call scope for user functions (issue #6 / C1)
+- docs(changes): refresh CHANGES.md to HEAD
 - docs: capture MLPL correctness + performance gaps and fix sagas
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for MLX tic-tac-toe demo + literate links

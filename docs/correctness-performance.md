@@ -33,7 +33,13 @@ two correctness bugs and the performance wall below.
 
 ## Correctness issues (issue #6)
 
-### C1 (HIGH): user-function calls share caller locals (no per-call scope)
+### C1 (HIGH): user-function calls share caller locals (no per-call scope) -- FIXED (c40f9a68)
+
+Fixed: `call_user_fn` now snapshots the variable namespaces and restores
+them on return (per-call scope); `env_scope.rs`. Repro now returns
+`3 5 1`; regression tests in `mlpl-eval/tests/fn_scope.rs`.
+
+Original report:
 
 A recursive call overwrites the caller's locals, so a function that
 binds a local, recurses, then reads that local gets the deepest frame's
@@ -130,10 +136,10 @@ elegant showcase if leaning into the array-language angle.
 
 Fix the correctness bugs that make recursion / array literals usable.
 
-1. **fn-scope** -- give `call_user_fn` a fresh local frame per call;
-   local writes do not leak to caller / siblings; outer reads still
-   work. Regression test: the C1 repro returns `3 5 1`; a recursive
-   factorial and a minimax toy return correct values. (Fixes C1.)
+1. **fn-scope** -- DONE (c40f9a68). `call_user_fn` snapshots/restores
+   the variable namespaces per call; local writes do not leak to caller
+   / siblings; outer reads still work. Regression tests in
+   `fn_scope.rs` (recursion-with-locals, factorial, no-leak). (Fixed C1.)
 2. **multiline-array** -- make the lexer/parser treat newlines as
    insignificant inside `[ ]` (and call-arg `( )`). Test: the C2 repro
    yields `1 2 3 4`; a multi-line matrix `reshape`s correctly.
