@@ -27,6 +27,9 @@ use std::collections::HashSet;
 const SKIP_DEMOS: &[&str] = &[
     "LLM Tool Use",
     "MLX Remote Runner",
+    // 1500-step fine-tune over the full policy dataset: ~minutes on the
+    // CPU fallback (it runs in ~2s on the GPU). Heavy test covers it.
+    "MLX tic-tac-toe fine-tune",
     "Tiny LM",
     "Tiny LM Generate",
     "Moons MLP",

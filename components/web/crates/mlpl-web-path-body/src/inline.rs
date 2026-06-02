@@ -15,6 +15,12 @@ pub(crate) enum Span {
     /// the top-level `GlossaryPopupHost` component
     /// listens for that event and opens the popup.
     Glossary(String),
+    /// `[label](url)` -- a plain hyperlink (opens in a new tab).
+    /// Used e.g. to link a demo's intro to its literate walkthrough.
+    Link {
+        text: String,
+        url: String,
+    },
 }
 
 /// Tokenize inline span markers. Greedy + first-match wins;
@@ -48,6 +54,16 @@ fn try_match_span(bytes: &[u8], i: usize, c: u8) -> Option<(Span, usize)> {
     if c == b'[' && i + 1 < bytes.len() && bytes[i + 1] == b'[' {
         return match_until_pair(bytes, i + 2, b']', b']')
             .map(|(s, end)| (Span::Glossary(s), end - i));
+    }
+    // `[label](url)` -- a single `[` (not the `[[` glossary sigil)
+    // followed by `](`. Reuses `match_until` for both halves.
+    if c == b'['
+        && let Some((text, after)) = match_until(bytes, i + 1, b']')
+        && after < bytes.len()
+        && bytes[after] == b'('
+        && let Some((url, end)) = match_until(bytes, after + 1, b')')
+    {
+        return Some((Span::Link { text, url }, end - i));
     }
     if c == b'`' {
         return match_until(bytes, i + 1, b'`').map(|(s, end)| (Span::Code(s), end - i));
@@ -108,6 +124,19 @@ mod tests {
         // both render as literal text rather than crashing.
         assert!(matches!(&split("[not a link]")[0], Span::Text(_)));
         assert!(matches!(&split("[[unterminated")[0], Span::Text(_)));
+    }
+
+    #[test]
+    fn markdown_link_parses() {
+        // [label](url) -> Span::Link; surrounding text segments.
+        let spans = split("see [the doc](literate/x.html) now");
+        assert!(matches!(&spans[0], Span::Text(t) if t == "see "));
+        assert!(
+            matches!(&spans[1], Span::Link { text, url } if text == "the doc" && url == "literate/x.html")
+        );
+        assert!(matches!(&spans[2], Span::Text(t) if t == " now"));
+        // A bare [bracketed] with no (url) stays literal text.
+        assert!(matches!(&split("[just text]")[0], Span::Text(_)));
     }
 
     #[test]

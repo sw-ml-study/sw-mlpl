@@ -6,6 +6,6 @@
 pub mod registry;
 
 pub use registry::{
-    Capability, DEMO_CAPABILITIES, Demo, Device, PROGRESS_NOTES, ProgressNote, capability_for,
-    progress_notes_for,
+    Capability, DEMO_CAPABILITIES, Demo, Device, LITERATE_DOCS, PROGRESS_NOTES, ProgressNote,
+    capability_for, literate_for, progress_notes_for,
 };

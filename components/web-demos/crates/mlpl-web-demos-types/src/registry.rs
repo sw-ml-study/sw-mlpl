@@ -64,6 +64,13 @@ pub const DEMO_CAPABILITIES: &[(&str, Capability)] = &[
             device: Device::Mlx,
         },
     ),
+    (
+        "MLX tic-tac-toe fine-tune",
+        Capability {
+            requires_connect: true,
+            device: Device::Mlx,
+        },
+    ),
 ];
 
 /// The capability tier for `demo_name`, defaulting to
@@ -73,6 +80,26 @@ pub fn capability_for(demo_name: &str) -> Capability {
         .iter()
         .find(|(n, _)| *n == demo_name)
         .map_or(Capability::CPU_LIVE, |(_, c)| *c)
+}
+
+/// Per-demo companion literate HTML, keyed by `Demo::name`. The value
+/// is the file under the deployed `literate/` directory (see
+/// `examples/literate/*.org` -> published `.html`, bundled into
+/// `pages/literate/`). A demo with an entry shows a "literate
+/// walkthrough" link in its intro -- especially useful for
+/// connect-only demos that the public live demo cannot run.
+pub const LITERATE_DOCS: &[(&str, &str)] = &[
+    ("Basics", "basics.html"),
+    ("MLX LoRA fine-tune", "mlx-lora-finetune.html"),
+    ("MLX tic-tac-toe fine-tune", "tictactoe-finetune.html"),
+];
+
+/// The companion literate HTML filename for `demo_name`, if any.
+pub fn literate_for(demo_name: &str) -> Option<&'static str> {
+    LITERATE_DOCS
+        .iter()
+        .find(|(n, _)| *n == demo_name)
+        .map(|(_, f)| *f)
 }
 
 /// A heads-up rendered before a single long-running demo line.

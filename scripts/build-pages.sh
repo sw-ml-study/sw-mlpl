@@ -37,6 +37,17 @@ if [ -f "$STAGE_JS" ] && [ -f "$INDEX" ]; then
     echo "Stamped stage3d.js cache-bust: ?v=$VER"
 fi
 
+# Bundle the literate-programming HTML outputs (companions to the
+# connect-only demos) into pages/literate/. The rsync --delete above
+# only mirrors the trunk dist, so copy these after it. Demos link to
+# them via the registry's LITERATE_DOCS map.
+LITERATE_SRC="$PROJECT_DIR/examples/literate"
+if [ -d "$LITERATE_SRC" ]; then
+    mkdir -p "$PROJECT_DIR/pages/literate"
+    cp "$LITERATE_SRC"/*.html "$PROJECT_DIR/pages/literate/" 2>/dev/null || true
+    echo "Bundled literate HTML: $(ls "$PROJECT_DIR/pages/literate" | tr '\n' ' ')"
+fi
+
 echo "=== Done ==="
 echo "Pages built in: $PROJECT_DIR/pages/"
 echo "To deploy: git add pages/ && git commit && git push"

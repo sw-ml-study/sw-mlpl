@@ -16,6 +16,7 @@ use crate::{autoencoder, dim_reduction, gan, models, rnn};
 pub const DEMOS: &[Demo] = &[
     lm::ASK_OLLAMA_CONTEXTUAL,
     lm::MLX_LORA_FINETUNE,
+    lm::MLX_TICTACTOE_FINETUNE,
     basics::ANALYSIS_HELPERS,
     attention::ATTENTION_PATTERN,
     attention::SELF_ATTENTION_FROM_SCRATCH,

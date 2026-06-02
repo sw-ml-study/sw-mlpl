@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MLPL Literate Walkthroughs</title>
+<style>
+  body { background:#1e1e2e; color:#cdd6f4; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+         max-width:760px; margin:0 auto; padding:2.5rem 1.25rem; line-height:1.55; }
+  h1 { color:#a6e3a1; font-size:1.6rem; margin-bottom:0.25rem; }
+  p.lede { color:#a6adc8; margin-top:0; }
+  ul { list-style:none; padding:0; }
+  li { background:#181825; border:1px solid #313244; border-radius:8px; padding:1rem 1.1rem; margin:0.9rem 0; }
+  li a.title { color:#89b4fa; font-size:1.15rem; font-weight:600; text-decoration:none; }
+  li a.title:hover { text-decoration:underline; }
+  li .desc { color:#bac2de; margin:0.35rem 0 0; font-size:0.95rem; }
+  .tag { display:inline-block; font-size:0.72rem; font-weight:600; border-radius:4px; padding:0.1rem 0.45rem; margin-left:0.5rem; vertical-align:middle; }
+  .tag.cpu { background:#313244; color:#a6e3a1; }
+  .tag.mlx { background:#45203a; color:#f38ba8; }
+  footer { color:#6c7086; font-size:0.85rem; margin-top:2rem; border-top:1px solid #313244; padding-top:1rem; }
+  footer a { color:#89b4fa; }
+</style>
+</head>
+<body>
+<h1>MLPL Literate Walkthroughs</h1>
+<p class="lede">Org-mode documents whose MLPL source blocks are <em>live</em>: each was
+run top-to-bottom and its real output baked in. The 1:1 companions to the playground
+demos &mdash; especially the connect-only ones the public browser demo can't run.</p>
+<ul>
+  <li>
+    <a class="title" href="tictactoe-finetune.html">Tic-Tac-Toe: fine-tuning to a winning strategy</a>
+    <span class="tag mlx">MLX &middot; Apple GPU</span>
+    <p class="desc">LoRA-fine-tune a tiny board-state policy on the Apple GPU until it
+    stops losing to a random opponent. Shown by <em>playing</em> &mdash; a before/after
+    win/tie/loss waffle (65 losses &rarr; 0), not a loss curve.</p>
+  </li>
+  <li>
+    <a class="title" href="mlx-lora-finetune.html">MLX LoRA fine-tune (true-GPU walkthrough)</a>
+    <span class="tag mlx">MLX &middot; Apple GPU</span>
+    <p class="desc">LoRA-fine-tune a tiny language model on the Apple GPU &mdash; forward,
+    backward, and Adam all on-device &mdash; with a concrete before/after perplexity drop.</p>
+  </li>
+  <li>
+    <a class="title" href="basics.html">Basics: a literate REPL tour</a>
+    <span class="tag cpu">CPU &middot; runs anywhere</span>
+    <p class="desc">The playground's Basics demo as a literate program: arrays, broadcasting,
+    and visualization across nine shared-session source blocks.</p>
+  </li>
+</ul>
+<footer>
+  Generated from <code>examples/literate/*.org</code> via
+  <code>examples/literate/publish.sh</code>. &nbsp;<a href="../">&larr; Back to the MLPL playground</a>
+</footer>
+</body>
+</html>

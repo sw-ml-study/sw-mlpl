@@ -46,6 +46,28 @@ pub const MLX_LORA_FINETUNE: Demo = Demo {
     ],
 };
 
+/// Connect-only MLX demo (requires_connect, Device::Mlx via
+/// `DEMO_CAPABILITIES`): the GPU fine-tune whose improvement is shown by
+/// PLAYING, not by a loss curve. Lands in the MLX section.
+pub const MLX_TICTACTOE_FINETUNE: Demo = Demo {
+    category: "MLX (Apple GPU)",
+    name: "MLX tic-tac-toe fine-tune",
+    intro: "Fine-tune a tiny board-state policy on the Apple GPU to PLAY tic-tac-toe, and prove it learned by playing 100 games against a random opponent -- before vs after -- not by a loss number. ttt_boards()/ttt_moves() are the supervised policy (every position + its optimal move); the model maps a board to a move; under device(\"mlx\") the LoRA fine-tune's forward, backward, and Adam all run on-device. Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public browser demo.",
+    takeaway: "The waffle says it all: red = loss, gray = tie, green = win, one block per game. The untrained net loses most games (top band); after the GPU fine-tune the trained policy essentially never loses (bottom band). From no strategy to a winning one -- observable, not 'trust me'.",
+    lines: &[
+        "X = ttt_boards()                                     # [N, 27] one-hot boards",
+        "Y = ttt_moves()                                      # [N] optimal move per board",
+        "base = chain(linear(27, 128, 0), relu_layer(), linear(128, 9, 1))  # board -> move scores",
+        "m = lora(base, 8, 16.0, 0)                           # wrap with LoRA, freeze the base",
+        "before = play_vs_random(m, 100)                      # untrained: [losses, ties, wins]",
+        "before",
+        "device(\"mlx\") { experiment \"ttt\" { train 1500 { adam(cross_entropy(apply(m, X), Y), m, 0.05, 0.9, 0.999, 0.00000001) } } }  # fine-tune on the GPU",
+        "after = play_vs_random(m, 100)                       # trained: [losses, ties, wins]",
+        "after",
+        "svg(reshape(concat(before, after), [2, 3]), \"waffle\")  # before (top) vs after (bottom)",
+    ],
+};
+
 pub const TINY_LM_GENERATE: Demo = Demo {
     category: "Language Models",
     name: "Tiny LM Generate",
