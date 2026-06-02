@@ -1,0 +1,33 @@
+[package]
+# Saga cuda-foundation step 002: CUDA forward-op runtime, the
+# candle analog of `mlpl-mlx-rt`. Core tensor ops (matmul,
+# elementwise, shapes) over candle Tensors on the GPU; the nn
+# surface (activations, reductions, softmax) lives in the sibling
+# `mlpl-cuda-nn`. Linux/x86_64 + the `cuda` feature gate everything;
+# off-target the crate exports nothing (CPU path stays authoritative).
+name = "mlpl-cuda-rt"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+# Pulls the candle CUDA backend. cudarc resolves the toolkit at
+# build time; set CUDA_COMPUTE_CAP=120 for Blackwell (sm_120).
+cuda = ["dep:candle-core"]
+
+[dependencies]
+candle-core = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
+
+[dev-dependencies]
+# Parity reference for matmul: the CPU DenseArray.matmul. Dev-only
+# so the crate stays decoupled from the CPU runtime at link time.
+# Elementwise references are hand-computed in the tests.
+mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
+
+[lints]
+workspace = true

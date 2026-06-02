@@ -8,6 +8,8 @@
 
 [workspace]
 members = [
+    "crates/mlpl-cuda-elementwise",
+    "crates/mlpl-cuda-rt",
     "crates/mlpl-cuda-train",
 ]
 resolver = "2"
