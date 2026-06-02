@@ -29,10 +29,11 @@ demos &mdash; especially the connect-only ones the public browser demo can't run
 <ul>
   <li>
     <a class="title" href="tictactoe-finetune.html">Tic-Tac-Toe, end to end, in MLPL</a>
-    <span class="tag cpu">CPU &middot; runs anywhere</span>
-    <p class="desc">The whole game in the array language: winner-detection as a matmul,
-    alpha-beta minimax, a self-play training set, a board &rarr; move classifier, and a
-    before/after win/tie/loss waffle &mdash; no domain-specific builtins.</p>
+    <span class="tag mlx">MLX &middot; Apple GPU</span>
+    <p class="desc">The whole game in the array language &mdash; winner as a matmul,
+    alpha-beta minimax, a self-play training set &mdash; then a board &rarr; move policy
+    LoRA-fine-tuned on the Apple GPU. Proven by playing: a before/after waffle (30 losses
+    &rarr; 2). No domain-specific builtins.</p>
   </li>
   <li>
     <a class="title" href="mlx-lora-finetune.html">MLX LoRA fine-tune (true-GPU walkthrough)</a>
