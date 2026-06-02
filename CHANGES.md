@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- fix(parser): allow newlines inside array literals (issue #6 / C2)
+- docs: mark C1 (fn-scope) fixed + refresh CHANGES
 - fix(eval): per-call scope for user functions (issue #6 / C1)
 - docs(changes): refresh CHANGES.md to HEAD
 - docs: capture MLPL correctness + performance gaps and fix sagas
