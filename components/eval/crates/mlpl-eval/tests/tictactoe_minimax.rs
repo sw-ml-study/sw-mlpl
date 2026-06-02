@@ -28,7 +28,7 @@ fn mlpl_minimax_gives_optimal_values() {
         .unwrap()
         .join()
         .unwrap();
-    // Near-won board with X to move -> 1; empty board -> 0 (the
-    // perfect-play draw). Empty was the bug: pre-C1 it returned 1.
-    assert_eq!(r, vec![1.0, 0.0]);
+    // [ab(near-won)=1, ab(empty)=0 (perfect-play draw; pre-C1 bug
+    // returned 1), best_move(empty)=0 (corner), winner(X-top-row)=1].
+    assert_eq!(r, vec![1.0, 0.0, 0.0, 1.0]);
 }
