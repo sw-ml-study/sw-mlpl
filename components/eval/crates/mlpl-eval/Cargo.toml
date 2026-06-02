@@ -79,6 +79,9 @@ mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
+# Tic-tac-toe engine: powers the `play_vs_random` builtin (the
+# fine-tune win-rate demo). A pure leaf crate -- no cycle.
+mlpl-tictactoe = { path = "../../../games/crates/mlpl-tictactoe" }
 mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true }
 mlpl-mlx-train = { path = "../../../native-rt/crates/mlpl-mlx-train", optional = true }
 mlpl-mlx-forward = { path = "../../../native-rt/crates/mlpl-mlx-forward", optional = true }
@@ -95,9 +98,6 @@ serde_json = "1"
 
 [dev-dependencies]
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
-# Tic-tac-toe engine + optimal-game corpus for the fine-tune win-rate
-# test (the model learns to play; we play it vs a random opponent).
-mlpl-tictactoe = { path = "../../../games/crates/mlpl-tictactoe" }
 # Saga 19 step 001: stub Ollama HTTP responses for
 # `llm_call` tests without requiring a live server.
 mockito = "1"

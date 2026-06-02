@@ -8,6 +8,7 @@ mod gallery_layout;
 mod heatmap;
 mod heatmap_grid;
 mod scatter;
+mod waffle;
 
 use std::fmt;
 
@@ -20,6 +21,7 @@ pub use gallery::{render_attention_overlay, render_gallery};
 pub use heatmap::render_heatmap;
 pub use heatmap_grid::render_heatmap_grid;
 pub use scatter::{render_scatter, render_scatter3d};
+pub use waffle::render_waffle;
 
 pub(crate) const W: f64 = 400.0;
 pub(crate) const H: f64 = 300.0;
@@ -172,6 +174,7 @@ pub fn render_with_aux(
         "bar" => render_bar(data),
         "heatmap" => render_heatmap(data),
         "heatmap_grid" => render_heatmap_grid(data),
+        "waffle" => render_waffle(data),
         "critical_dimensions" => render_critical_dimensions(data, aux),
         "gallery" => render_gallery(data, aux),
         "attention_overlay" => render_attention_overlay(data, aux),

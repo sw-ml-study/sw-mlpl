@@ -11,12 +11,16 @@
 //! (loses to a random opponent) to a winning one (never loses) after
 //! LoRA fine-tuning on the optimal-game corpus.
 
+pub mod arena;
 pub mod board;
 pub mod corpus;
 pub mod minimax;
 pub mod play;
+pub mod policy;
 
+pub use arena::play_vs_random_counts;
 pub use board::{Board, Outcome};
 pub use corpus::{char_corpus, hero_vs_random_games, optimal_games};
 pub use minimax::best_moves;
 pub use play::{Rng, play_game, random_move};
+pub use policy::{encode, policy_dataset};
