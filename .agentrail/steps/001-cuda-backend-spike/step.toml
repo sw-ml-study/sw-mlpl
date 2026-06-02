@@ -1,0 +1,9 @@
+number = 1
+slug = "cuda-backend-spike"
+status = "in-progress"
+description = "Step 1 (GO/NO-GO GATE) of cuda-foundation: prove the candle CUDA backend work..."
+role = "production"
+context_files = []
+created_at = "2026-06-02T08:08:52"
+task_type = "spike"
+commits = []

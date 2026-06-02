@@ -1,0 +1,29 @@
+[package]
+# Saga cuda-foundation step 001 (the GO/NO-GO spike): CUDA
+# on-device training primitives -- autodiff via candle's
+# `Tensor::backward` + an on-device optimizer (candle-nn). The
+# CUDA analog of `mlpl-mlx-train` (MLX "approach A": framework
+# autodiff + optimizer, zero hand-written backward). Linux/x86_64
+# only; gated behind the `cuda` feature so the crate stays
+# cross-platform-buildable (exports nothing off-target).
+name = "mlpl-cuda-train"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+# Pulls the candle CUDA backend. cudarc resolves the CUDA toolkit
+# at build time; set CUDA_COMPUTE_CAP=120 for Blackwell (sm_120).
+cuda = ["dep:candle-core", "dep:candle-nn"]
+
+[dependencies]
+candle-core = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+candle-nn = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+
+[lints]
+workspace = true

@@ -65,12 +65,15 @@ one-time warning (mirror `mlpl-eval/src/device.rs`).
 
 ## Steps
 
-1. **cuda-backend-spike** -- add a gated spike crate; prove
-   `candle` value/grad (`Tensor::backward`) + an Adam step reduce a
-   tiny regression loss ON the RTX 5060 Ti. De-risk sm_120 / CUDA
-   13.2 (pin candle/cudarc versions that support it; record the
-   build incantation). Parity vs the analytic gradient. This is the
-   go/no-go gate for candle.
+1. **cuda-backend-spike** -- DONE (GO). Gated crate
+   `components/cuda-rt/crates/mlpl-cuda-train` proves candle's CUDA
+   backend on the RTX 5060 Ti: 3 GPU tests pass (device init,
+   autodiff gradient == closed-form least-squares gradient, Adam
+   collapses the loss on-device). Pinned candle-core/nn 0.9.2 +
+   cudarc 0.19.7 build for `sm_120` / CUDA 13.2; build incantation
+   in the crate README (`CUDA_COMPUTE_CAP=120`, `/opt/cuda` env).
+   candle (approach A) confirmed viable -- the rest of the saga
+   proceeds on it.
 2. **mlpl-cuda-rt** -- forward ops crate (matmul, elementwise,
    activations, softmax/reduce), gated; parity-tested vs CPU
    (`mlpl-array`).
