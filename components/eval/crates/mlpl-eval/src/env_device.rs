@@ -26,11 +26,12 @@ impl Environment {
         self.device_stack.pop();
     }
 
-    /// Take ownership of the "have we already warned about an MLX
-    /// fallback?" flag. Returns `true` the first time it is
-    /// called per `Environment`, `false` thereafter, so callers
-    /// can emit a warning at most once.
-    pub fn take_mlx_fallback_warning(&mut self) -> bool {
+    /// Take ownership of the "have we already warned about a GPU
+    /// (MLX/CUDA) -> CPU fallback?" flag. Returns `true` the first
+    /// time it is called per `Environment`, `false` thereafter, so
+    /// callers emit the fallback warning at most once. A build is
+    /// only ever one GPU backend, so a single latch suffices.
+    pub fn take_device_fallback_warning(&mut self) -> bool {
         if self.mlx_fallback_warned {
             return false;
         }

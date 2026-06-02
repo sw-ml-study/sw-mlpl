@@ -78,7 +78,7 @@ fn vit_predict_gallery_demo_runs_end_to_end() {
     // Final value is the svg(...) call returning a Value::Str.
     match v {
         Value::Str(s) => {
-            assert!(s.contains("<svg"), "expected svg output, got {:.80}", s);
+            assert!(s.contains("<svg"), "expected svg output, got {s:.80}");
             // Overlay text elements present.
             assert!(
                 s.contains("<text"),

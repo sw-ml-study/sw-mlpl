@@ -9,6 +9,8 @@
 mod auto_tag;
 mod bpe;
 mod device;
+mod device_dispatch;
+mod device_to;
 mod env;
 mod env_builtin_refs;
 mod env_device;

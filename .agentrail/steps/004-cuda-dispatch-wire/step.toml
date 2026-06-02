@@ -1,6 +1,6 @@
 number = 4
 slug = "cuda-dispatch-wire"
-status = "pending"
+status = "in-progress"
 description = "Step 3 of cuda-foundation: wire device('cuda') dispatch in components/eval/cr..."
 role = "production"
 context_files = []
