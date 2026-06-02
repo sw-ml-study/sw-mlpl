@@ -53,3 +53,29 @@ fn scalar_broadcast_and_neg() {
         &[-1.0, -2.0, -3.0, -4.0],
     );
 }
+
+#[test]
+fn activations_match_cpu() {
+    let a = arr(vec![5], vec![-1.0, -0.25, 0.0, 0.5, 2.0]);
+    assert_within(
+        mlpl_cuda_elementwise::exp(&a).data(),
+        mlpl_rt::exp(&a).data(),
+    );
+    assert_within(
+        mlpl_cuda_elementwise::relu(&a).data(),
+        mlpl_rt::relu(&a).data(),
+    );
+    assert_within(
+        mlpl_cuda_elementwise::sigmoid(&a).data(),
+        mlpl_rt::sigmoid(&a).data(),
+    );
+    assert_within(
+        mlpl_cuda_elementwise::tanh(&a).data(),
+        mlpl_rt::tanh(&a).data(),
+    );
+    let pos = arr(vec![3], vec![0.5, 1.0, 4.0]);
+    assert_within(
+        mlpl_cuda_elementwise::log(&pos).data(),
+        mlpl_rt::log(&pos).data(),
+    );
+}
