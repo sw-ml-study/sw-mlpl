@@ -1,9 +1,10 @@
 number = 5
 slug = "cuda-forward-and-model"
-status = "in-progress"
+status = "completed"
 description = "Step 4 of cuda-foundation: create mlpl-cuda-forward (embed via one-hot matmul..."
 role = "production"
 context_files = []
 created_at = "2026-06-02T08:08:52"
+completed_at = "2026-06-02T15:50:30"
 task_type = "production"
-commits = []
+commits = ["a2d7b9709505ef8909d6db0ffe0f3f9d2bbf735d"]
