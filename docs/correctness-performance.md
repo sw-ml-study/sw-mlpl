@@ -184,14 +184,27 @@ Make recursive / array-heavy MLPL fast enough for real algorithms.
    (boolean mask -> indices) used by `legal`. (P-C, plus the legal-moves
    gap.)
 
-### Saga: tictactoe-mlpl-engine (depends on both above)
+### Saga: tictactoe-mlpl-engine (mostly done)
 
 Replace the `ttt_boards` / `ttt_moves` / `play_vs_random` Rust builtins
-with MLPL definitions (`winner` via the incidence matmul, `legal`,
-`encode`, `minimax`, dataset enumeration, self-play loop), update the
-literate page + web demo to define and use them, and remove the builtins
-from `mlpl-eval`. Blocked on language-correctness (recursion) and
-interpreter-and-search-performance (so the dataset generates in seconds).
+with MLPL. DONE so far:
+
+- Engine in MLPL: `u:winner` (incidence matmul), `u:ab` (alpha-beta
+  minimax), `u:best_move`, `u:encode`, `u:terminal`
+  (`examples/tictactoe-minimax.mlpl`, 0d76c26c).
+- Self-play dataset generator + full pipeline (dataset -> train -> play
+  -> waffle), all MLPL, verified before/after improvement
+  (`examples/tictactoe-demo.mlpl`, 4a1ebb67). `while` accumulation; no
+  dedup/memo needed (measured).
+- Literate page rewritten to all-MLPL steps (4d177ce6).
+
+DEFERRED (user decision, "org doc all-MLPL now, defer builtin removal"):
+removing the `ttt_*` builtins from `mlpl-eval` and re-pointing the
+connect-only MLX GPU demo (+ classifier_winrate / play_vs_random tests)
+onto the MLPL engine. The MLPL self-play dataset is smaller/slower to
+generate than the instant `ttt_boards()` 4520-set, so the GPU demo's
+65->0 before/after needs re-tuning on the MLPL dataset before the
+builtins can go. Scheduled follow-up.
 
 ## Measurement: is the dataset generatable without new primitives? (yes)
 
