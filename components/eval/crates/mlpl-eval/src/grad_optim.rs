@@ -191,6 +191,13 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         if let Some(res) = crate::grad_optim_mlx::try_lora_adam(&loss_expr, &args[1], &hp, env) {
             return res;
         }
+        // The tic-tac-toe board-policy MLP (Chain[LinearLora, relu,
+        // LinearLora]) fine-tunes on the GPU via the same kernel.
+        if let Some(res) =
+            crate::grad_optim_mlx_mlp_step::try_mlp_adam(&loss_expr, &args[1], &hp, env)
+        {
+            return res;
+        }
     }
 
     for name in &param_names {

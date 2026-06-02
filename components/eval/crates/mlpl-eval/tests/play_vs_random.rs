@@ -27,6 +27,17 @@ play_vs_random(m, 30)\n",
 }
 
 #[test]
+fn ttt_dataset_builtins_have_matching_shapes() {
+    // ttt_boards() is [N, 27]; ttt_moves() is [N]; same N.
+    let boards = eval("X = ttt_boards()\nshape(X)\n");
+    let moves = eval("Y = ttt_moves()\nshape(Y)\n");
+    assert_eq!(boards.len(), 2, "boards is a 2-D [N, 27] array");
+    assert_eq!(boards[1], 27.0, "27 one-hot board features");
+    assert_eq!(moves.len(), 1, "moves is a 1-D [N] label vector");
+    assert_eq!(boards[0], moves[0], "one move label per board");
+}
+
+#[test]
 fn play_vs_random_unknown_model_errors() {
     let mut env = Environment::new();
     let prog = parse(&lex("play_vs_random(nope, 5)").unwrap()).unwrap();
