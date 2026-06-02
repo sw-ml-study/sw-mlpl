@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- perf(mlpl): alpha-beta minimax in MLPL -- ~20x over naive (issue #7, P-B)
+- docs: mark C3 fixed + language-correctness saga complete
 - fix(parser): allow bare if without else (issue #6 / C3)
 - docs: mark C2 (multiline arrays) fixed + refresh CHANGES
 - fix(parser): allow newlines inside array literals (issue #6 / C2)
