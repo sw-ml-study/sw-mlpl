@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- feat(tictactoe): board-state policy classifier + play_vs_random + waffle viz
+- feat(games): mlpl-tictactoe engine + win-rate harness (de-risk finding)
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(eval): model save_model / load_model (persist trained models)
 - feat(literate): MLX LoRA fine-tune literate page + ob-mlpl SVG inlining
 
