@@ -96,6 +96,7 @@ mod model_mutate;
 mod result_ops;
 mod tag_propagate;
 mod tag_render;
+mod tictactoe_play;
 mod tokenizer;
 mod type_errors;
 

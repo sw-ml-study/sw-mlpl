@@ -10,7 +10,9 @@
 
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
-use mlpl_tictactoe::{Board, Outcome, char_corpus, hero_vs_random_games, play_game, random_move, Rng};
+use mlpl_tictactoe::{
+    Board, Outcome, Rng, char_corpus, hero_vs_random_games, play_game, random_move,
+};
 
 fn run(env: &mut Environment, src: &str) {
     eval_program(&parse(&lex(src).unwrap()).unwrap(), env).unwrap();
