@@ -127,8 +127,13 @@ Fixes, highest leverage first:
   distinct states; evaluate each once (~100x: 549k -> 5.5k). Needs a
   dict / hashmap primitive keyed by a board hash (real language gap --
   records are fixed-field).
-- **P-B. Alpha-beta pruning.** 10-100x, no new primitive; free once C1
-  is fixed.
+- **P-B. Alpha-beta pruning.** DONE (00136990). ~20x: empty-board
+  worst case went from ~10.8s (naive) to ~0.46s (alpha-beta, release,
+  for the win+empty pair) and is now correct (empty -> 0). Pure MLPL,
+  no new primitive. See `examples/tictactoe-minimax.mlpl` +
+  `mlpl-eval/tests/tictactoe_minimax.rs`. Pruning uses a `done` flag
+  because `break` is not yet allowed inside `for` (only `while`) -- see
+  new findings below.
 - **P-C. Vectorized DP over all states.** Enumerate states as `[N,9]`,
   batch winners via one `[8,9] @ [9,N]` matmul, propagate minimax values
   ply-by-ply with array reduces. Replaces 549k recursive calls with a
@@ -166,8 +171,8 @@ multi-line matrix literals, and bare-`if` guards now work.
 
 Make recursive / array-heavy MLPL fast enough for real algorithms.
 
-1. **alpha-beta** -- once C1 is fixed, add alpha-beta to the MLPL
-   minimax pattern (demo-side) and document the idiom. (P-B.)
+1. **alpha-beta** -- DONE (00136990). MLPL alpha-beta minimax,
+   ~10.8s -> ~0.46s, correct. (P-B.)
 2. **memo-dict-primitive** -- add a dict / hashmap value + builtins
    (`dict`, `get`, `set`, `has`) keyed by an array hash, enabling
    transposition tables and dedup (also unblocks `unique`). (P-A.)
@@ -187,6 +192,19 @@ with MLPL definitions (`winner` via the incidence matmul, `legal`,
 literate page + web demo to define and use them, and remove the builtins
 from `mlpl-eval`. Blocked on language-correctness (recursion) and
 interpreter-and-search-performance (so the dataset generates in seconds).
+
+## New findings (during P-B)
+
+- **`break` / `continue` only work in `while`, not `for`.** `break`
+  inside a `for` body errors "break used outside of a while loop".
+  Workaround: a `done` flag that gates the loop body. Should be lifted
+  (loop-control should work in `for` too). Candidate for the
+  language-correctness saga's backlog.
+- **Deep MLPL recursion uses a lot of interpreter stack.** Tic-tac-toe
+  minimax (depth 9) overflows the default debug test-thread stack; the
+  release repl and a 64MB test thread are fine. Worth bounding /
+  flattening the interpreter's per-call stack usage (part of P-D,
+  interpreter work).
 
 ## Interim state
 
