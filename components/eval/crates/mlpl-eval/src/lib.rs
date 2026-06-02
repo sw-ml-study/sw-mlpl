@@ -22,6 +22,7 @@ mod env_models;
 mod env_params;
 mod env_peer;
 mod env_records;
+mod env_scope;
 mod env_string_lists;
 mod env_strings;
 mod env_tags;

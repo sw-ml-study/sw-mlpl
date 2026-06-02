@@ -28,12 +28,25 @@ pub(crate) fn call_user_fn(
         .iter()
         .map(|a| eval_expr(a, env, trace))
         .collect::<Result<_, _>>()?;
-    let saved: Vec<(String, Option<DenseArray>)> = f
-        .params
-        .iter()
-        .map(|p| (p.clone(), env.get(p).cloned()))
-        .collect();
-    for (param, val) in f.params.iter().zip(&evaluated) {
+    // Fresh local scope per call: snapshot the variable namespaces, run
+    // the body, then restore -- so locals (and rebound params) do not
+    // leak into the caller or sibling/recursive frames (issue #6 / C1).
+    let snapshot = env.snapshot_scope();
+    let result = run_body(&f, name, &evaluated, env, trace);
+    env.restore_scope(snapshot);
+    result
+}
+
+/// Bind params into the (already-snapshotted) scope and evaluate the
+/// body. The caller restores the scope afterwards regardless of outcome.
+fn run_body(
+    f: &crate::env_user_fns::UserFn,
+    name: &str,
+    evaluated: &[Value],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    for (param, val) in f.params.iter().zip(evaluated) {
         match val {
             Value::Array(a) => env.set(param.clone(), a.clone()),
             _ => {
@@ -43,14 +56,7 @@ pub(crate) fn call_user_fn(
             }
         }
     }
-    let result = eval_body(f.body_exprs(), env, trace);
-    for (param, old) in &saved {
-        match old {
-            Some(v) => env.set(param.clone(), v.clone()),
-            None => env.remove_var(param),
-        }
-    }
-    result
+    eval_body(f.body_exprs(), env, trace)
 }
 
 fn eval_body(
