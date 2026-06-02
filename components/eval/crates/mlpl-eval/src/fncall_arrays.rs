@@ -43,6 +43,12 @@ pub(crate) fn try_dispatch(
     if name == "play_vs_random" && args.len() == 2 {
         return Some(crate::tictactoe_play::eval_play_vs_random(args, env));
     }
+    if name == "ttt_boards" && args.is_empty() {
+        return Some(crate::ttt_data::eval_ttt_boards());
+    }
+    if name == "ttt_moves" && args.is_empty() {
+        return Some(crate::ttt_data::eval_ttt_moves());
+    }
     None
 }
 

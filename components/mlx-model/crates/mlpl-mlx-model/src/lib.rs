@@ -14,10 +14,16 @@
 //! off-target the crate builds but exports nothing.
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod mlp;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod model;
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+pub use mlp::{MlpWeights, mlp_forward};
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use model::{DemoWeights, demo_forward};
 
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx", test))]
+mod mlp_tests;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx", test))]
 mod model_tests;

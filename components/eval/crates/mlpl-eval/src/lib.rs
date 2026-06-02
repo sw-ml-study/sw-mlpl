@@ -65,6 +65,10 @@ mod grad_optim_mlx;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod grad_optim_mlx_demo;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod grad_optim_mlx_mlp;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+mod grad_optim_mlx_mlp_step;
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod grad_optim_mlx_step;
 mod inspect;
 mod inspect_collections;
@@ -98,6 +102,7 @@ mod tag_propagate;
 mod tag_render;
 mod tictactoe_play;
 mod tokenizer;
+mod ttt_data;
 mod type_errors;
 
 pub use env::{Environment, PeerDispatcher, model_params};
