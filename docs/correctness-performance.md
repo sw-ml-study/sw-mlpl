@@ -87,7 +87,14 @@ Expected the 4-vector `1 2 3 4`; actual `error: unexpected token
 matrix). Newlines inside `[ ]` (ideally `( )` too) should be
 insignificant.
 
-### C3 (minor): bare `if` without `else` as a statement
+### C3 (minor): bare `if` without `else` as a statement -- FIXED (d36b91fa)
+
+Fixed: `else` is now optional in `parse_if` (bare statement-position
+`if` parses with an empty `else_body`; eval yields the body when taken,
+`0` otherwise). Tests in `mlpl-parser/tests/bare_if_tests.rs` and
+`mlpl-eval/tests/bare_if.rs`.
+
+Original report:
 
 `if gt(x, 0) { x }` on its own line errors at the trailing newline (`if`
 parses as an expression requiring `else`). Either support
@@ -138,9 +145,10 @@ elegant showcase if leaning into the array-language angle.
 
 ## Sagas
 
-### Saga: language-correctness (prerequisite)
+### Saga: language-correctness (prerequisite) -- COMPLETE
 
-Fix the correctness bugs that make recursion / array literals usable.
+All three fixed (C1 c40f9a68, C2 aeb480e2, C3 d36b91fa). Recursion,
+multi-line matrix literals, and bare-`if` guards now work.
 
 1. **fn-scope** -- DONE (c40f9a68). `call_user_fn` snapshots/restores
    the variable namespaces per call; local writes do not leak to caller
@@ -150,9 +158,9 @@ Fix the correctness bugs that make recursion / array literals usable.
    newlines inside `[ ]`; a multi-line matrix parses. Tests in
    `multiline_array_tests.rs`. (Fixed C2. Call-arg `( )` newlines remain
    a future nicety, not needed for matrix literals.)
-3. **bare-if-diagnostic** -- either accept statement-position `if`
-   without `else`, or produce a precise diagnostic pointing at the
-   missing `else`. (Fixes C3.)
+3. **bare-if-diagnostic** -- DONE (d36b91fa). `else` is optional;
+   statement-position `if` parses and evaluates (`0` when not taken).
+   (Fixed C3.)
 
 ### Saga: interpreter-and-search-performance
 

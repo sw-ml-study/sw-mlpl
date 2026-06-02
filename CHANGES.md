@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- fix(parser): allow bare if without else (issue #6 / C3)
+- docs: mark C2 (multiline arrays) fixed + refresh CHANGES
 - fix(parser): allow newlines inside array literals (issue #6 / C2)
 - docs: mark C1 (fn-scope) fixed + refresh CHANGES
 - fix(eval): per-call scope for user functions (issue #6 / C1)
