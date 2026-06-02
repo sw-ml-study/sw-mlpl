@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- docs(literate): rewrite tic-tac-toe page as all-MLPL (no ttt_* builtins)
+- feat(mlpl): end-to-end tic-tac-toe demo in pure MLPL (no ttt_* builtins)
+- feat(mlpl): add best_move + encode -- the tic-tac-toe engine, in MLPL
+- docs(perf): measure best_move by depth -- no new primitive needed
+- docs: P-B (alpha-beta) done + break-in-for / stack-depth findings
 - perf(mlpl): alpha-beta minimax in MLPL -- ~20x over naive (issue #7, P-B)
 - docs: mark C3 fixed + language-correctness saga complete
 - fix(parser): allow bare if without else (issue #6 / C3)
