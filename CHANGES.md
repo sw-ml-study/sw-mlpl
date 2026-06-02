@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- docs: capture MLPL correctness + performance gaps and fix sagas
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for MLX tic-tac-toe demo + literate links
 - feat(web): MLX tic-tac-toe demo + literate-walkthrough links
 - feat(mlx): fine-tune the tic-tac-toe board policy on the Apple GPU
