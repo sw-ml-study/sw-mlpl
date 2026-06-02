@@ -1447,7 +1447,6 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-parser",
  "mlpl-runtime",
- "mlpl-tictactoe",
  "mlpl-trace",
  "mlpl-viz",
  "serde",
@@ -1781,10 +1780,6 @@ dependencies = [
  "tower-http 0.5.2",
  "uuid",
 ]
-
-[[package]]
-name = "mlpl-tictactoe"
-version = "0.20.0"
 
 [[package]]
 name = "mlpl-trace"
