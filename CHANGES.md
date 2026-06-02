@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-01
 
+- chore(pages): rebuild for MLX tic-tac-toe demo + literate links
+- feat(web): MLX tic-tac-toe demo + literate-walkthrough links
+- feat(mlx): fine-tune the tic-tac-toe board policy on the Apple GPU
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(tictactoe): board-state policy classifier + play_vs_random + waffle viz
 - feat(games): mlpl-tictactoe engine + win-rate harness (de-risk finding)
 - docs(changes): refresh CHANGES.md to HEAD
