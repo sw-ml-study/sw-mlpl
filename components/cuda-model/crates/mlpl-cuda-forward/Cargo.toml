@@ -1,0 +1,25 @@
+[package]
+# Saga cuda-foundation step 005: traceable forward primitives in
+# candle Tensor ops -- the CUDA analog of mlpl-mlx-forward (+ the
+# lora_linear that lived in mlpl-mlx-train). Differentiable: candle
+# autograd flows through every op, so the assembled demo model trains
+# on the GPU. Linux/x86_64 + the `cuda` feature gate everything.
+name = "mlpl-cuda-forward"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+cuda = ["dep:candle-core", "dep:candle-nn"]
+
+[dependencies]
+candle-core = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+candle-nn = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+
+[lints]
+workspace = true
