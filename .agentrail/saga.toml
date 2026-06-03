@@ -1,6 +1,6 @@
 name = "cuda-demo-parity"
 status = "active"
-current_step = 2
+current_step = 3
 created_at = "2026-06-03T13:57:50"
 plan_file = ".agentrail/plan.md"
 retroactive = false
