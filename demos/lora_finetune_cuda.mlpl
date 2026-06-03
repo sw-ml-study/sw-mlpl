@@ -1,0 +1,58 @@
+# LoRA fine-tune on CUDA (Saga cuda-foundation step 006).
+#
+# Under device("cuda") the FULL fine-tune step -- forward, backward,
+# AND the Adam update -- runs on the NVIDIA GPU via candle autograd,
+# for the head-only-LoRA demo architecture:
+#   embed -> residual(rms_norm -> causal_attention) -> rms_norm
+#         -> LoRA head.
+# lora() adapts only the head Linear (the attention projections live
+# in the Attention layer, which lora() leaves frozen), so the whole
+# fine-tune step is a single traceable candle graph differentiated
+# w.r.t. the head [A, B] adapters. The base pre-train stays on CPU
+# (cheap + deterministic); the fine-tune loop is the GPU story.
+#
+# Connect-only (the browser cannot reach a GPU). Run via the CLI on a
+# Linux + NVIDIA host built with the `cuda` feature:
+#   cargo run -p mlpl-repl --features cuda --release -- \
+#     -f demos/lora_finetune_cuda.mlpl
+# or serve it (mlpl-serve --features cuda) and connect the REPL.
+# Without the cuda feature it still runs -- on the CPU.
+
+# ---- 1. Base model + tiny token corpus (CPU) ----
+ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
+X_all = shift_pairs_x(ids, 4)
+Y_all = shift_pairs_y(ids, 4)
+X     = reshape(X_all, [reduce_mul(shape(X_all))])
+Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
+
+V = 16 ; d = 8 ; h = 1
+base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
+
+experiment "lora_cuda_base_pretrain" {
+  train 20 {
+    adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001);
+    loss_metric = cross_entropy(apply(base, X), Y)
+  }
+}
+
+# ---- 2. LoRA-wrap the base (CPU) ----
+# lora() allocates the head adapters and freezes every base param.
+student = lora(base, 2, 4.0, 7)
+
+# ---- 3. CUDA fine-tune loop (full step on the GPU) ----
+# to_device stamps the cuda placement on every student param and on
+# the input tokens; apply + cross_entropy + the Adam update then run
+# on the GPU through candle. The loss curve drops -- measurable
+# learning on the device.
+device("cuda") {
+  to_device(student, "cuda")
+  to_device(X, "cuda")
+
+  experiment "lora_cuda_finetune" {
+    train 30 {
+      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
+      loss_metric = cross_entropy(apply(student, X), Y)
+    }
+  }
+}
+loss_curve(last_losses)

@@ -1,6 +1,6 @@
 number = 6
 slug = "cuda-lora-demo"
-status = "pending"
+status = "in-progress"
 description = "Step 5 of cuda-foundation (the vertical-slice finale): create mlpl-cuda-train..."
 role = "production"
 context_files = []
