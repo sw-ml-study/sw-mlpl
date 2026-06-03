@@ -67,6 +67,41 @@ pub const CUDA_LORA_FINETUNE: Demo = Demo {
     ],
 };
 
+/// Connect-only CUDA demo (requires_connect, Device::Cuda via
+/// `DEMO_CAPABILITIES`): the CUDA analog of `MLX_TICTACTOE_FINETUNE` --
+/// the same self-play + board-policy-MLP fine-tune, run on an NVIDIA GPU.
+/// The model is `Chain[LinearLora, relu, LinearLora]`, which eval_adam's
+/// CUDA branch fine-tunes on-device (`grad_optim_cuda_mlp`). Lands in the
+/// CUDA section.
+pub const CUDA_TICTACTOE_FINETUNE: Demo = Demo {
+    category: "CUDA (NVIDIA GPU)",
+    name: "CUDA tic-tac-toe fine-tune",
+    intro: "The whole game in MLPL -- no domain-specific builtins. We build the engine (winner as a matmul, alpha-beta minimax, board encoding), GENERATE the training set by self-play + minimax labels, LoRA-fine-tune a board -> move policy on an NVIDIA GPU via CUDA, and PROVE it learned by playing vs a random opponent before and after -- a red/gray/green waffle, not a loss curve. Needs a connected mlpl-serve with a Linux CUDA peer (the self-play search + GPU fine-tune run server-side); not runnable on the public browser demo.",
+    takeaway: "Winner detection is one matmul with an [8,9] line-incidence matrix; the optimal policy is a recursive alpha-beta minimax; the dataset is self-play (a while-loop accumulator). device(\"cuda\") runs the board-policy MLP (Chain[LinearLora, relu, LinearLora]) LoRA fine-tune on the GPU via candle autograd. The waffle's bottom band (after) has more green/gray and less red than the top (before): from no strategy toward a winning one, shown by playing.",
+    lines: &[
+        "lines_m = reshape([1,1,1,0,0,0,0,0,0, 0,0,0,1,1,1,0,0,0, 0,0,0,0,0,0,1,1,1, 1,0,0,1,0,0,1,0,0, 0,1,0,0,1,0,0,1,0, 0,0,1,0,0,1,0,0,1, 1,0,0,0,1,0,0,0,1, 0,0,1,0,1,0,1,0,0], [8, 9])  # the 8 lines",
+        "def u:winner(board) { sums = reshape(matmul(lines_m, reshape(board, [9, 1])), [8]); if gt(reduce_add(eq(sums, 3), 0), 0) { 1 } else { if gt(reduce_add(eq(sums, -3), 0), 0) { -1 } else { 0 } } }  # winner = a matmul",
+        "def u:terminal(board) { if gt(abs(u:winner(board)), 0) { 1 } else { eq(reduce_add(abs(board), 0), 9) } }",
+        "def u:mx(a, b) { if gt(a, b) { a } else { b } }",
+        "def u:mn(a, b) { if gt(a, b) { b } else { a } }",
+        "def u:ge(a, b) { if gt(a, b) { 1 } else { eq(a, b) } }",
+        "def u:ab(board, player, alpha, beta) { w = u:winner(board); if gt(abs(w), 0) { w } else { if eq(reduce_add(abs(board), 0), 9) { 0 } else { best = 0 - 2 * player; a = alpha; b = beta; done = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { if eq(done, 0) { nb = board + player * eq(iota(9), c); s = u:ab(nb, 0 - player, a, b); if eq(player, 1) { best = u:mx(best, s); a = u:mx(a, best) } else { best = u:mn(best, s); b = u:mn(b, best) }; if u:ge(a, b) { done = 1 } else { 0 } } else { 0 } } else { 0 } }; best } } }  # alpha-beta minimax",
+        "def u:best_move(board, player) { bv = 0 - 2 * player; bc = 0; seen = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { nb = board + player * eq(iota(9), c); v = u:ab(nb, 0 - player, 0 - 2, 2); ti = if eq(seen, 0) { 1 } else { if eq(player, 1) { gt(v, bv) } else { gt(bv, v) } }; if ti { bv = v; bc = c; seen = 1 } else { 0 } } else { 0 } }; bc }  # the label oracle",
+        "def u:encode(board, mover) { e = eq(board, 0); m = eq(board, mover); t = eq(board, 0 - mover); reshape(concat(concat(reshape(e, [9, 1]), reshape(m, [9, 1]), 1), reshape(t, [9, 1]), 1), [27]) }  # 27 one-hot features",
+        "def u:rmove(board, s) { argmax(random(s, [9]) * eq(board, 0), 0) }  # random legal move",
+        "def u:omove(board) { logits = reshape(apply(m, reshape(u:encode(board, 0 - 1), [1, 27])), [9]); argmax(logits + (eq(board, 0) - 1) * 1000, 0) }  # the model's move",
+        "def u:play_o(n) { loss = 0; tie = 0; win = 0; g = 0; s = 90000; while gt(n, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, s); s = s + 1 } else { mv = u:omove(board) }; board = board + player * eq(iota(9), mv); player = 0 - player }; w = u:winner(board); if eq(w, 1) { loss = loss + 1 } else { if eq(w, 0 - 1) { win = win + 1 } else { tie = tie + 1 } }; g = g + 1 }; reshape(concat(concat(reshape(loss, [1]), reshape(tie, [1]), 0), reshape(win, [1]), 0), [3]) }  # play vs random",
+        "ng = 24 ; seed = 1 ; g = 0 ; started = 0 ; dx = fill([1, 27], 0) ; dy = fill([1, 1], 0)  # 24 self-play games (~10s CPU minimax) -- enough to learn; the GPU does the fine-tune",
+        "while gt(ng, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, seed); seed = seed + 1 } else { bm = u:best_move(board, 0 - 1); xr = reshape(u:encode(board, 0 - 1), [1, 27]); yr = reshape(bm, [1, 1]); if eq(started, 0) { dx = xr; dy = yr; started = 1 } else { dx = concat(dx, xr, 0); dy = concat(dy, yr, 0) }; mv = bm }; board = board + player * eq(iota(9), mv); player = 0 - player }; g = g + 1 }  # on-policy self-play: X random, O optimal; collect O's positions + optimal move",
+        "N = reshape(take(shape(dx), 0, 0), []) ; X = dx ; Y = reshape(dy, [N]) ; shape(X)",
+        "base = chain(linear(27, 64, 0), relu_layer(), linear(64, 9, 1)) ; m = lora(base, 8, 16.0, 0)  # LoRA board-policy MLP",
+        "before = u:play_o(40)                                # untrained: [losses, ties, wins]",
+        "device(\"cuda\") { experiment \"ttt_cuda\" { train 6000 { adam(cross_entropy(apply(m, X), Y), m, 0.05, 0.9, 0.999, 0.00000001) } } }  # fine-tune the board-policy MLP on the NVIDIA GPU (~10s of sustained GPU work)",
+        "after = u:play_o(40)                                 # trained: [losses, ties, wins]",
+        "svg(reshape(concat(before, after), [2, 3]), \"waffle\")  # before (top) vs after (bottom)",
+    ],
+};
+
 /// Connect-only MLX demo (requires_connect, Device::Mlx via
 /// `DEMO_CAPABILITIES`): the GPU fine-tune whose improvement is shown by
 /// PLAYING, not by a loss curve. Lands in the MLX section.
@@ -88,7 +123,7 @@ pub const MLX_TICTACTOE_FINETUNE: Demo = Demo {
         "def u:rmove(board, s) { argmax(random(s, [9]) * eq(board, 0), 0) }  # random legal move",
         "def u:omove(board) { logits = reshape(apply(m, reshape(u:encode(board, 0 - 1), [1, 27])), [9]); argmax(logits + (eq(board, 0) - 1) * 1000, 0) }  # the model's move",
         "def u:play_o(n) { loss = 0; tie = 0; win = 0; g = 0; s = 90000; while gt(n, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, s); s = s + 1 } else { mv = u:omove(board) }; board = board + player * eq(iota(9), mv); player = 0 - player }; w = u:winner(board); if eq(w, 1) { loss = loss + 1 } else { if eq(w, 0 - 1) { win = win + 1 } else { tie = tie + 1 } }; g = g + 1 }; reshape(concat(concat(reshape(loss, [1]), reshape(tie, [1]), 0), reshape(win, [1]), 0), [3]) }  # play vs random",
-        "ng = 90 ; seed = 1 ; g = 0 ; started = 0 ; dx = fill([1, 27], 0) ; dy = fill([1, 1], 0)",
+        "ng = 24 ; seed = 1 ; g = 0 ; started = 0 ; dx = fill([1, 27], 0) ; dy = fill([1, 1], 0)  # 24 self-play games (~10s CPU minimax) -- enough to learn; the GPU does the fine-tune",
         "while gt(ng, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, seed); seed = seed + 1 } else { bm = u:best_move(board, 0 - 1); xr = reshape(u:encode(board, 0 - 1), [1, 27]); yr = reshape(bm, [1, 1]); if eq(started, 0) { dx = xr; dy = yr; started = 1 } else { dx = concat(dx, xr, 0); dy = concat(dy, yr, 0) }; mv = bm }; board = board + player * eq(iota(9), mv); player = 0 - player }; g = g + 1 }  # on-policy self-play: X random, O optimal; collect O's positions + optimal move",
         "N = reshape(take(shape(dx), 0, 0), []) ; X = dx ; Y = reshape(dy, [N]) ; shape(X)",
         "base = chain(linear(27, 64, 0), relu_layer(), linear(64, 9, 1)) ; m = lora(base, 8, 16.0, 0)  # LoRA policy",

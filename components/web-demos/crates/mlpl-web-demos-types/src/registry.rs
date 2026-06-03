@@ -78,6 +78,13 @@ pub const DEMO_CAPABILITIES: &[(&str, Capability)] = &[
             device: Device::Cuda,
         },
     ),
+    (
+        "CUDA tic-tac-toe fine-tune",
+        Capability {
+            requires_connect: true,
+            device: Device::Cuda,
+        },
+    ),
 ];
 
 /// Whether a demo with capability `cap` should be DISABLED
@@ -160,6 +167,18 @@ pub struct ProgressNote {
 /// numbers err on the high side so a faster machine never
 /// sees the heads-up linger longer than the actual op.
 pub const PROGRESS_NOTES: &[ProgressNote] = &[
+    ProgressNote {
+        demo: "CUDA tic-tac-toe fine-tune",
+        line_idx: 13,
+        heading: "Generating the self-play dataset on the CPU (~10s)",
+        body: "This line plays 24 tic-tac-toe games where O uses recursive alpha-beta minimax to pick the optimal move -- pure game-tree search in the interpreter, so it runs on the CPU and the GPU stays idle here. That is expected: the GPU's turn is the next step (the LoRA fine-tune). Watch nvtop light up on the train line, not this one.",
+    },
+    ProgressNote {
+        demo: "CUDA tic-tac-toe fine-tune",
+        line_idx: 17,
+        heading: "Fine-tuning the policy on the NVIDIA GPU (~10s)",
+        body: "6000 Adam steps over the board-policy MLP, each a forward + backward + optimizer update run on the GPU via candle (device(\"cuda\")). This is the GPU-bound phase -- nvtop should show sustained utilization. The same train on the CPU is ~50x slower.",
+    },
     ProgressNote {
         demo: "Tiny LM Generate",
         line_idx: 1,
