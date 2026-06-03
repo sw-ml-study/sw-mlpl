@@ -1,9 +1,10 @@
 number = 2
 slug = "cuda-mlp-dispatch"
-status = "in-progress"
+status = "completed"
 description = "Step 2 of cuda-demo-parity: grad_optim_cuda_mlp + grad_optim_cuda_mlp_step in..."
 role = "production"
 context_files = []
 created_at = "2026-06-03T13:57:50"
+completed_at = "2026-06-03T15:25:12"
 task_type = "production"
-commits = []
+commits = ["b4461ee4610937c902ba3007a5eb9e00f036e3fa"]
