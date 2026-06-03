@@ -70,13 +70,20 @@ mod grad_optim_mlx;
 #[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
 mod grad_optim_cuda;
 #[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
+mod grad_optim_cuda_mlp;
+#[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
 mod grad_optim_cuda_step;
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
 mod grad_optim_mlx_demo;
-#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+// The board-policy MLP recognizer is device-agnostic (ModelSpec + names);
+// shared by the MLX and CUDA MLP fast paths.
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
 mod grad_optim_mlx_mlp;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod grad_optim_mlx_mlp_step;
