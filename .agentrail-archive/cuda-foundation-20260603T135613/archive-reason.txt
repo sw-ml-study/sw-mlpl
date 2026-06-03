@@ -1,0 +1,1 @@
+cuda-foundation complete (7/7, vertical slice GPU-proven). Branch-local archive to free .agentrail/ for cuda-demo-parity on this branch; cuda-foundation stays on its own branch.

@@ -1,6 +1,6 @@
 number = 2
 slug = "cuda-mlp-dispatch"
-status = "pending"
+status = "in-progress"
 description = "Step 2 of cuda-demo-parity: grad_optim_cuda_mlp + grad_optim_cuda_mlp_step in..."
 role = "production"
 context_files = []
