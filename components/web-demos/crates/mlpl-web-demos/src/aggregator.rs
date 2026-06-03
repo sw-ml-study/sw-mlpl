@@ -1,5 +1,5 @@
 //! Aggregated `DEMOS` list spanning the three demo sub-crates
-//! + this facade crate's own 5 modules. Saga 82 carved the
+//! plus this facade crate's own 5 modules. Saga 82 carved the
 //! original `crate::demos::DEMOS` const out of mlpl-web into
 //! this aggregator so each cluster (basic, vision, this
 //! crate's autoencoder/gan/models/dim_reduction/rnn) lives in

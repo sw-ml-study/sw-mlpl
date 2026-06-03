@@ -3,7 +3,26 @@
 //! connect/GPU demos carry an override, with MLX and CUDA kept as
 //! distinct devices so the UI groups + gates them separately.
 
-use mlpl_web_demos_types::{Capability, Device, capability_for};
+use mlpl_web_demos_types::{Capability, Device, capability_for, demo_disabled};
+
+#[test]
+fn gating_keys_off_peer_device_set() {
+    let cuda = capability_for("CUDA LoRA fine-tune");
+    let mlx = capability_for("MLX LoRA fine-tune");
+    let live = Capability::CPU_LIVE;
+    // Live demos are always runnable; connect demos need a connection.
+    assert!(!demo_disabled(&live, false, &[]));
+    assert!(demo_disabled(&cuda, false, &[]));
+    // Connected to a CUDA peer: the CUDA demo runs, the MLX demo stays
+    // disabled (the peer does not offer mlx) -- gating off the real set.
+    let cuda_peer = [Device::Cpu, Device::Cuda];
+    assert!(!demo_disabled(&cuda, true, &cuda_peer));
+    assert!(demo_disabled(&mlx, true, &cuda_peer));
+    // Connected to an MLX peer: the reverse.
+    let mlx_peer = [Device::Cpu, Device::Mlx];
+    assert!(demo_disabled(&cuda, true, &mlx_peer));
+    assert!(!demo_disabled(&mlx, true, &mlx_peer));
+}
 
 #[test]
 fn unlisted_demo_defaults_to_cpu_live() {

@@ -9,6 +9,7 @@
 //! clean leaf in the dep DAG.
 
 pub mod connect_viz;
+pub mod devices;
 pub mod eval;
 pub mod eval_sse;
 pub mod eval_url;

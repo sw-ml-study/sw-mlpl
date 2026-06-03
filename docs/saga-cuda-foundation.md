@@ -142,18 +142,37 @@ one-time warning (mirror `mlpl-eval/src/device.rs`).
    Deferred to step 6 (connect-peer): the public WASM playground
    rebuild (`build-pages.sh`) -- bundled with that step's UI
    device-gating change to avoid a double WASM build.
-6. **cuda-connect-peer** -- `mlpl-cuda-serve` so
-   `mlpl-serve --features cuda` on Linux is a connect-mode peer;
-   add a `GET /api/devices` capability probe so the UI knows whether
-   a connected server offers `mlx`, `cuda`, or neither, and gates
-   demos by the live peer instead of a static guess. This is what
-   makes "connect to a Mac and/or this Arch box" honest.
+6. **cuda-connect-peer** -- DONE. This Arch box is now a connect-mode
+   CUDA peer. `mlpl-serve` (and `mlpl-repl`) gained a `cuda` feature
+   passthrough, so `mlpl-serve --features cuda --bind 0.0.0.0:6464
+   --auth required --static-dir pages` serves the playground AND runs
+   `device("cuda")` blocks in-process on the GPU (no separate peer
+   process needed -- the GPU box IS the connect server). `GET
+   /v1/devices` reports the build's real device set (`cpu`/`cuda`/`mlx`);
+   the web UI probes it on connect (`mlpl-web-eval::devices`,
+   `use_peer_devices` hook) and gates demos via the pure, tested
+   `demo_disabled(cap, connected, peer_devices)` -- so connected to this
+   CUDA peer the CUDA demo is runnable and the MLX demos are disabled
+   (and vice versa on an Apple peer), keying off the peer's real
+   capability instead of a static guess. `build-pages.sh` made
+   Linux-portable; the WASM playground rebuilt with the CUDA demo +
+   gating. Verified end-to-end on the LAN: a CUDA LoRA fine-tune runs
+   on the RTX 5060 Ti through the connect server.
 
-## Out of scope (this saga)
+The cuda-foundation vertical slice is COMPLETE: engine
+(`mlpl-cuda-rt`/`-elementwise`/`-nn`) -> dispatch -> forward/model ->
+LoRA demo -> connect peer, all proven on the GPU.
 
-- Mirroring the other 3 MLX demos (tiny_lm, neural_thicket,
-  mlx_remote) + their org docs -- a FOLLOW-UP saga once the vertical
-  slice is green.
+## Out of scope (this saga -- follow-up: `cuda-demo-parity`)
+
+- The CUDA **tic-tac-toe fine-tune** demo (the board-policy MLP --
+  `Chain[LinearLora, relu, LinearLora]`, two adapted layers). This
+  saga ported only the head-only-LoRA fast path
+  (`grad_optim_cuda`); the MLP fast path (the MLX `grad_optim_mlx_mlp`
+  analog) + a `mlpl-cuda-model` mlp_forward are the follow-up saga.
+- The other MLX demos (tiny_lm, neural_thicket, mlx_remote) +
+  their org docs.
+- See `docs/gpu-demos-roadmap.md` for the full demo matrix.
 - SmolLM2 loader / LLaMA-style ops (saga `local-gpu-agentic`
   Phases 4-5, now CUDA candidates -- later).
 - Agentic `:ask` Phase 2/3 -- parked on `main` as

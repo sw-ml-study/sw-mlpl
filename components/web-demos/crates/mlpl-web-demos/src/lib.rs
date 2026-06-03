@@ -14,5 +14,5 @@ pub mod rnn;
 pub use aggregator::DEMOS;
 pub use mlpl_web_demos_types::{
     Capability, DEMO_CAPABILITIES, Demo, Device, LITERATE_DOCS, PROGRESS_NOTES, ProgressNote,
-    capability_for, literate_for, progress_notes_for,
+    capability_for, demo_disabled, literate_for, progress_notes_for,
 };

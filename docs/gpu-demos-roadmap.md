@@ -115,10 +115,13 @@ viz data to flow back from peers, not just a display string.
 
 ## Saga roadmap
 
-1. **cuda-foundation** (ACTIVE) -- CUDA engine (`mlpl-cuda-rt` ->
+1. **cuda-foundation** (DONE) -- CUDA engine (`mlpl-cuda-rt` ->
    dispatch -> forward/model -> train) + the first CUDA demo (LoRA:
-   CLI + Web + org) + single-connect peer (`mlpl-cuda-serve` +
-   `/api/devices`). Proves the whole vertical slice on this box.
+   CLI + Web + org) + single-connect peer (`mlpl-serve --features
+   cuda` + `GET /v1/devices` + UI device-gating). The whole vertical
+   slice runs on the RTX 5060 Ti, parity-tested vs CPU. The CUDA
+   **tic-tac-toe** demo (board-policy MLP) is explicitly the next
+   saga's job (`cuda-demo-parity`), not this one.
 2. **mlx-demo-consolidation** -- the define-once tooling, then fill
    the MLX gaps: tic-tac-toe CLI; Tiny LM Web + org; Neural Thicket
    Web + org; mlx_remote Web + org. Result: MLX = 4 ML x (CLI+Web+

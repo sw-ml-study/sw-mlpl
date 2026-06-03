@@ -1,39 +1,8 @@
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 
-use mlpl_web_demos::{DEMOS, Device, capability_for};
-
-/// One dropdown option: `(demo index, name, disabled)`.
-type DemoOption = (usize, &'static str, bool);
-/// Dropdown sections: `(section label, options)`.
-type DemoGroups = Vec<(&'static str, Vec<DemoOption>)>;
-
-/// Group demos for the dropdown by capability tier. `cpu`/live
-/// demos keep their authored category; connect-only demos get
-/// their own device-tier sections (MLX and CUDA deliberately
-/// separate). The bool is `disabled`: connect/GPU demos are
-/// visible-but-not-runnable when no server is connected (the
-/// public live demo). `connected` comes from connect-mode
-/// detection so the same build gates correctly in both modes.
-fn grouped_demos(connected: bool) -> DemoGroups {
-    let mut map: std::collections::BTreeMap<&str, Vec<DemoOption>> =
-        std::collections::BTreeMap::new();
-    for (i, d) in DEMOS.iter().enumerate() {
-        let cap = capability_for(d.name);
-        let section = match cap.device {
-            Device::Mlx => "MLX - Apple GPU (connect)",
-            Device::Cuda => "CUDA - Linux GPU (connect)",
-            Device::Cpu if cap.requires_connect => "Client-server (connect)",
-            Device::Cpu => d.category,
-        };
-        let disabled = cap.requires_connect && !connected;
-        map.entry(section).or_default().push((i, d.name, disabled));
-    }
-    for items in map.values_mut() {
-        items.sort_by_key(|(_, name, _)| name.to_ascii_lowercase());
-    }
-    map.into_iter().collect()
-}
+use crate::demo_gating::{grouped_demos, use_peer_devices};
+use mlpl_web_demos::Device;
 
 #[derive(Properties, PartialEq)]
 pub struct ModeBarProps {
@@ -58,7 +27,12 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
     } else {
         "modebar repl"
     };
-    let demo_dropdown = render_demo_dropdown(props.tutorial_active, props.on_demo.clone());
+    // Probe the connected peer's real device set, so the dropdown gates
+    // GPU demos by what THIS peer offers (CUDA on a Linux peer, MLX on
+    // an Apple peer) -- not a static guess.
+    let peer_devices = use_peer_devices();
+    let demo_dropdown =
+        render_demo_dropdown(props.tutorial_active, props.on_demo.clone(), &peer_devices);
     let upload_widget = render_upload_widget(props);
     html! {
         <div class={cls}>
@@ -68,7 +42,11 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
     }
 }
 
-fn render_demo_dropdown(tutorial_active: bool, on_demo: Callback<usize>) -> Html {
+fn render_demo_dropdown(
+    tutorial_active: bool,
+    on_demo: Callback<usize>,
+    peer_devices: &[Device],
+) -> Html {
     if tutorial_active {
         return html! {};
     }
@@ -79,7 +57,8 @@ fn render_demo_dropdown(tutorial_active: bool, on_demo: Callback<usize>) -> Html
             target.set_value("");
         }
     });
-    let groups = grouped_demos(mlpl_web_eval::eval_url::is_connected());
+    let connected = mlpl_web_eval::eval_url::is_connected();
+    let groups = grouped_demos(connected, peer_devices);
     html! {
         <select class="demo-select" onchange={on_change} aria-label="Load demo" data-tour-target="demo-select">
             <option value="" selected=true>{"Load Demo..."}</option>

@@ -245,6 +245,37 @@ async fn health_returns_ok_and_version() {
 }
 
 #[tokio::test]
+async fn devices_reports_compiled_capabilities() {
+    let addr = start_server(AuthMode::Required).await;
+    let resp = reqwest::Client::new()
+        .get(format!("http://{addr}/v1/devices"))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200);
+    let body: JsonValue = resp.json().await.unwrap();
+    let names: Vec<&str> = body["devices"]
+        .as_array()
+        .expect("devices array")
+        .iter()
+        .map(|d| d.as_str().unwrap())
+        .collect();
+    assert!(names.contains(&"cpu"), "cpu always available: {names:?}");
+    // `/v1/devices` reflects the build: `cuda` is present iff this
+    // server was compiled with the cuda feature on Linux/x86_64.
+    let cuda_built = cfg!(all(
+        feature = "cuda",
+        target_os = "linux",
+        target_arch = "x86_64"
+    ));
+    assert_eq!(
+        names.contains(&"cuda"),
+        cuda_built,
+        "cuda capability tracks the build: {names:?}"
+    );
+}
+
+#[tokio::test]
 async fn run_rejects_non_loopback_with_auth_disabled() {
     // Pick an arbitrary non-loopback address; we
     // don't actually expect to bind it. The safety
