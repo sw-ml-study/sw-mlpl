@@ -170,8 +170,8 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
     ProgressNote {
         demo: "CUDA tic-tac-toe fine-tune",
         line_idx: 13,
-        heading: "Generating the self-play dataset on the CPU (~10s)",
-        body: "This line plays 24 tic-tac-toe games where O uses recursive alpha-beta minimax to pick the optimal move -- pure game-tree search in the interpreter, so it runs on the CPU and the GPU stays idle here. That is expected: the GPU's turn is the next step (the LoRA fine-tune). Watch nvtop light up on the train line, not this one.",
+        heading: "Generating the self-play dataset on the CPU (~4s)",
+        body: "This line plays 8 tic-tac-toe games where O uses recursive alpha-beta minimax to pick the optimal move -- pure game-tree search in the interpreter, so it runs on the CPU and the GPU stays idle here. That is expected: the GPU's turn is the next step (the LoRA fine-tune). Watch nvtop light up on the train line, not this one.",
     },
     ProgressNote {
         demo: "CUDA tic-tac-toe fine-tune",
