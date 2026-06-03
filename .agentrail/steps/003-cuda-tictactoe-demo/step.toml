@@ -1,0 +1,9 @@
+number = 3
+slug = "cuda-tictactoe-demo"
+status = "pending"
+description = "Step 3 of cuda-demo-parity: the CUDA tic-tac-toe fine-tune demo. Mirror the M..."
+role = "production"
+context_files = []
+created_at = "2026-06-03T13:57:50"
+task_type = "production"
+commits = []

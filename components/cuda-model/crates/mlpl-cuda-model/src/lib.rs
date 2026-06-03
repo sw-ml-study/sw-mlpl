@@ -10,7 +10,11 @@
 //! crate exports nothing. This file is a FACADE (CLAUDE.md).
 
 #[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
+mod mlp;
+#[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
 mod model;
 
+#[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
+pub use mlp::{MlpWeights, mlp_forward};
 #[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
 pub use model::{DemoWeights, demo_forward};
