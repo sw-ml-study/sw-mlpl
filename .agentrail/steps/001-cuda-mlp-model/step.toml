@@ -1,9 +1,10 @@
 number = 1
 slug = "cuda-mlp-model"
-status = "in-progress"
+status = "completed"
 description = "Step 1 of cuda-demo-parity: add mlp_forward + MlpWeights to mlpl-cuda-model (..."
 role = "production"
 context_files = []
 created_at = "2026-06-03T13:57:50"
+completed_at = "2026-06-03T14:00:13"
 task_type = "production"
-commits = []
+commits = ["e75ebc7e3520a846d6481539003b896d0a541ad0"]
