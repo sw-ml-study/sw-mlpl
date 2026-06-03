@@ -71,6 +71,13 @@ pub const DEMO_CAPABILITIES: &[(&str, Capability)] = &[
             device: Device::Mlx,
         },
     ),
+    (
+        "CUDA LoRA fine-tune",
+        Capability {
+            requires_connect: true,
+            device: Device::Cuda,
+        },
+    ),
 ];
 
 /// The capability tier for `demo_name`, defaulting to
@@ -92,6 +99,7 @@ pub const LITERATE_DOCS: &[(&str, &str)] = &[
     ("Basics", "basics.html"),
     ("MLX LoRA fine-tune", "mlx-lora-finetune.html"),
     ("MLX tic-tac-toe fine-tune", "tictactoe-finetune.html"),
+    ("CUDA LoRA fine-tune", "cuda-lora-finetune.html"),
 ];
 
 /// The companion literate HTML filename for `demo_name`, if any.

@@ -46,6 +46,27 @@ pub const MLX_LORA_FINETUNE: Demo = Demo {
     ],
 };
 
+/// Connect-only CUDA demo (requires_connect, Device::Cuda via
+/// `DEMO_CAPABILITIES`): the CUDA analog of `MLX_LORA_FINETUNE` -- the
+/// same head-only-LoRA fine-tune, run on an NVIDIA GPU via candle.
+pub const CUDA_LORA_FINETUNE: Demo = Demo {
+    category: "CUDA (NVIDIA GPU)",
+    name: "CUDA LoRA fine-tune",
+    intro: "LoRA fine-tune a tiny language model on an NVIDIA GPU via CUDA -- forward, backward, AND the Adam optimizer all run on-device through candle autograd (no CPU round-trip). Needs a connected mlpl-serve with a Linux CUDA peer; not runnable on the public browser demo. Under device(\"cuda\"), the fine-tune step is one traceable candle graph differentiated by backward and the adapters are updated by a candle Adam, parity-tested against the CPU path within fp32 tolerance. Watch the fine-tune loss fall as the adapters learn.",
+    takeaway: "device(\"cuda\") runs the whole fine-tune step on the GPU; lora() freezes the base and trains only the low-rank head adapters, so the model specializes on a new corpus cheaply. The CUDA loss curve matches the CPU path within fp32 tolerance.",
+    lines: &[
+        "ids = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0]  # tiny token corpus",
+        "X = reshape(shift_pairs_x(ids, 4), [reduce_mul(shape(shift_pairs_x(ids, 4)))])",
+        "Y = reshape(shift_pairs_y(ids, 4), [reduce_mul(shape(shift_pairs_y(ids, 4)))])",
+        "V = 16 ; d = 8 ; h = 1",
+        "base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))  # head-only-LoRA demo arch",
+        "experiment \"cuda_base\" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001) } }  # pretrain the base",
+        "student = lora(base, 2, 4.0, 7)                       # wrap with rank-2 LoRA, freeze the base",
+        "device(\"cuda\") { experiment \"cuda_lora\" { train 30 { adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(student, X), Y) } } }  # full fine-tune step on the GPU",
+        "loss_curve(last_losses)                               # watch the fine-tune loss drop",
+    ],
+};
+
 /// Connect-only MLX demo (requires_connect, Device::Mlx via
 /// `DEMO_CAPABILITIES`): the GPU fine-tune whose improvement is shown by
 /// PLAYING, not by a loss curve. Lands in the MLX section.

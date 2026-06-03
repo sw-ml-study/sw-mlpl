@@ -123,13 +123,25 @@ one-time warning (mirror `mlpl-eval/src/device.rs`).
    AdamW and the cross-entropy drops -- gradients flow through the
    assembled model on the RTX 5060 Ti. Warning-free; baseline held
    (502).
-5. **cuda-lora-demo** -- `mlpl-cuda-train` (candle autodiff +
-   on-device Adam) wired into `eval_adam`'s CUDA branch (analog of
-   `grad_optim_mlx.rs`); first CUDA demo `demos/lora_finetune_cuda.mlpl`
-   + literate `examples/literate/cuda-lora-finetune.org`; flip the
-   registry entry to runnable-on-connected-CUDA-peer. Parity: the
-   `device("cuda")` LoRA loss curve matches the CPU path within fp32
-   tol.
+5. **cuda-lora-demo** -- DONE. The vertical slice is closed: a
+   `device("cuda")` LoRA fine-tune runs forward + backward + Adam on
+   the RTX 5060 Ti through the interpreter. `mlpl-cuda-train` (candle
+   `loss_and_grads` + stateless `adam_update`) wired into
+   `eval_adam`'s CUDA branch via new `grad_optim_cuda` +
+   `grad_optim_cuda_step` (analogs of the MLX glue; the
+   demo-architecture recognition `grad_optim_mlx_demo` is now shared).
+   `mlpl-repl` gained a `cuda` feature passthrough. Artifacts:
+   `demos/lora_finetune_cuda.mlpl`; the registry entry "CUDA LoRA
+   fine-tune" (`{requires_connect, device: Cuda}` + catalog demo +
+   literate mapping); and the literate page
+   `examples/literate/cuda-lora-finetune.org` -> published to
+   `pages/literate/cuda-lora-finetune.html` on the GPU (fine-tune
+   loss 0.855 -> 0.211). PARITY (the real test): the `device("cuda")`
+   LoRA loss curve matches the CPU path within fp32 tol
+   (`cuda_lora_demo_tests.rs`, V=16/d=8/h=1/rank=2/3 steps) on the GPU.
+   Deferred to step 6 (connect-peer): the public WASM playground
+   rebuild (`build-pages.sh`) -- bundled with that step's UI
+   device-gating change to avoid a double WASM build.
 6. **cuda-connect-peer** -- `mlpl-cuda-serve` so
    `mlpl-serve --features cuda` on Linux is a connect-mode peer;
    add a `GET /api/devices` capability probe so the UI knows whether

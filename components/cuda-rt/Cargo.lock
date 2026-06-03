@@ -699,7 +699,6 @@ name = "mlpl-cuda-train"
 version = "0.20.0"
 dependencies = [
  "candle-core",
- "candle-nn",
 ]
 
 [[package]]

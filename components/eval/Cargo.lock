@@ -1309,6 +1309,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-cuda-forward"
+version = "0.20.0"
+dependencies = [
+ "candle-core",
+ "candle-nn",
+]
+
+[[package]]
+name = "mlpl-cuda-model"
+version = "0.20.0"
+dependencies = [
+ "candle-core",
+ "candle-nn",
+ "mlpl-cuda-forward",
+]
+
+[[package]]
 name = "mlpl-cuda-nn"
 version = "0.20.0"
 dependencies = [
@@ -1329,6 +1346,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-cuda-train"
+version = "0.20.0"
+dependencies = [
+ "candle-core",
+]
+
+[[package]]
 name = "mlpl-env-traits"
 version = "0.20.0"
 dependencies = [
@@ -1341,6 +1365,7 @@ dependencies = [
 name = "mlpl-eval"
 version = "0.20.0"
 dependencies = [
+ "candle-core",
  "flate2",
  "jpeg-decoder",
  "mlpl-array",
@@ -1353,8 +1378,11 @@ dependencies = [
  "mlpl-bpe-core",
  "mlpl-core",
  "mlpl-cuda-elementwise",
+ "mlpl-cuda-forward",
+ "mlpl-cuda-model",
  "mlpl-cuda-nn",
  "mlpl-cuda-rt",
+ "mlpl-cuda-train",
  "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-eval-image",

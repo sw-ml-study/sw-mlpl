@@ -200,6 +200,24 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         }
     }
 
+    // Saga cuda-foundation step 006: the same head-only LoRA fine-tune
+    // step runs on an NVIDIA GPU under `device("cuda")` via candle
+    // autograd + a candle adam. Returns None for any other model or
+    // device, falling through to the CPU tape path below.
+    #[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
+    {
+        let hp = mlpl_cuda_train::AdamHp {
+            lr,
+            b1,
+            b2,
+            eps,
+            t: t as i32,
+        };
+        if let Some(res) = crate::grad_optim_cuda::try_lora_adam(&loss_expr, &args[1], &hp, env) {
+            return res;
+        }
+    }
+
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(

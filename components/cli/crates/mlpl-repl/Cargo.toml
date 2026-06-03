@@ -10,6 +10,11 @@ default = []
 # `device("mlx") { }` blocks in scripts run via `mlpl-repl -f`
 # dispatch through `mlpl-mlx-rt`. Triple-gated inside `mlpl-mlx-rt`.
 mlx = ["mlpl-eval/mlx"]
+# Saga cuda-foundation step 006: pass through `mlpl-eval`'s cuda
+# feature so `device("cuda") { }` blocks in scripts run via
+# `mlpl-repl -f` dispatch through the CUDA (candle) runtime. Gated
+# inside the cuda crates (Linux + x86_64 + GPU).
+cuda = ["mlpl-eval/cuda"]
 
 [dependencies]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
