@@ -1,0 +1,9 @@
+number = 2
+slug = "cuda-mlp-dispatch"
+status = "pending"
+description = "Step 2 of cuda-demo-parity: grad_optim_cuda_mlp + grad_optim_cuda_mlp_step in..."
+role = "production"
+context_files = []
+created_at = "2026-06-03T13:57:50"
+task_type = "production"
+commits = []
