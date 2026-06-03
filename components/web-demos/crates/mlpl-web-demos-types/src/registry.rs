@@ -80,6 +80,26 @@ pub const DEMO_CAPABILITIES: &[(&str, Capability)] = &[
     ),
 ];
 
+/// Whether a demo with capability `cap` should be DISABLED
+/// (visible-but-not-runnable) in the UI, given the page connection
+/// state and the connected peer's device set (from `GET /v1/devices`).
+///
+/// Gating keys off the peer's REAL capability, not a static guess: a
+/// connect demo is runnable only when `connected` AND the peer offers
+/// the demo's device. Every peer has `cpu`, so a cpu connect demo
+/// needs only a connection; an `mlx`/`cuda` demo needs that GPU in the
+/// peer's set -- so a CUDA demo lights up against a CUDA peer but stays
+/// disabled against an MLX-only peer (and vice versa). Non-connect
+/// (live) demos are always runnable.
+#[must_use]
+pub fn demo_disabled(cap: &Capability, connected: bool, peer_devices: &[Device]) -> bool {
+    if !cap.requires_connect {
+        return false;
+    }
+    let peer_offers = cap.device == Device::Cpu || peer_devices.contains(&cap.device);
+    !(connected && peer_offers)
+}
+
 /// The capability tier for `demo_name`, defaulting to
 /// [`Capability::CPU_LIVE`] when the demo has no override.
 pub fn capability_for(demo_name: &str) -> Capability {

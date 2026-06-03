@@ -1,6 +1,6 @@
 number = 7
 slug = "cuda-connect-peer"
-status = "pending"
+status = "in-progress"
 description = "Step 6 of cuda-foundation: make this Arch box a connect-mode CUDA peer and le..."
 role = "production"
 context_files = []

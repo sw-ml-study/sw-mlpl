@@ -31,9 +31,17 @@ rsync -a --delete --exclude='.nojekyll' "$PAGES_DIST/" "$PROJECT_DIR/pages/"
 STAGE_JS="$PROJECT_DIR/pages/js/stage3d.js"
 INDEX="$PROJECT_DIR/pages/index.html"
 if [ -f "$STAGE_JS" ] && [ -f "$INDEX" ]; then
-    VER=$(md5 -q "$STAGE_JS" 2>/dev/null | cut -c1-12)
+    # Portable content hash: md5sum (Linux) or md5 -q (macOS).
+    if command -v md5sum >/dev/null 2>&1; then
+        VER=$(md5sum "$STAGE_JS" | cut -c1-12)
+    else
+        VER=$(md5 -q "$STAGE_JS" 2>/dev/null | cut -c1-12)
+    fi
     [ -z "$VER" ] && VER=$(date +%s)
-    sed -i '' "s|js/stage3d\.js[^\"\']*|js/stage3d.js?v=$VER|g" "$INDEX"
+    # `sed -i.bak` is portable across GNU and BSD sed (bare `-i ''`
+    # is BSD-only and errors on Linux).
+    sed -i.bak "s|js/stage3d\.js[^\"\']*|js/stage3d.js?v=$VER|g" "$INDEX"
+    rm -f "$INDEX.bak"
     echo "Stamped stage3d.js cache-bust: ?v=$VER"
 fi
 

@@ -9,6 +9,7 @@
 //! - `mode_bar` -- yew, mlpl-web-demos, web-sys HtmlSelectElement.
 //! - `welcome` -- yew.
 
+pub mod demo_gating;
 pub mod doc_dialog;
 pub mod input_row;
 pub mod mode_bar;

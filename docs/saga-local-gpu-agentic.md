@@ -83,7 +83,7 @@ demo (the in-browser WASM interpreter runs it, slowly).
 | `cpu` | YES (in-browser WASM) | nothing | tiny LoRA fine-tune (the 6.12 -> 1.34 run), core playground |
 | `connect` | NO (needs a server) | `mlpl-serve` | contextual `:ask` (Ollama), `:models ollama` |
 | `mlx` | NO | `mlpl-serve` + Mac MLX peer | MLX-accelerated demos (Apple Silicon) |
-| `cuda` | NO (future) | `mlpl-serve` + Linux CUDA peer | future CUDA-accelerated demos |
+| `cuda` | NO | `mlpl-serve --features cuda` (Linux + NVIDIA) | CUDA LoRA fine-tune (live; see saga `cuda-foundation`) |
 
 Registry flag shape (Phase 1): each demo carries
 `{ requires_connect: bool, device: cpu|mlx|cuda }`. The public

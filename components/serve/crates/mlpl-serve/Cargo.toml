@@ -23,6 +23,12 @@ path = "src/main.rs"
 # (forwarded from the connect-mode web demos) on the GPU in-process.
 # Off by default; non-Apple / CI builds stay CPU-only.
 mlx = ["mlpl-eval/mlx"]
+# Saga cuda-foundation step 007: pass through mlpl-eval's cuda feature
+# so a server built with `--features cuda` on Linux + NVIDIA runs
+# `device("cuda") { }` blocks (forwarded from connect-mode web demos)
+# on the GPU in-process. Off by default; non-Linux / CI builds stay
+# CPU-only. This is what makes this box a connect-mode CUDA peer.
+cuda = ["mlpl-eval/cuda"]
 
 [dependencies]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
