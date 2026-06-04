@@ -1,0 +1,121 @@
+#+TITLE: Tic-Tac-Toe, End to End, in MLPL -- Fine-Tuned on the NVIDIA GPU
+#+SUBTITLE: build the game, derive optimal play, train a policy on CUDA, prove it by playing -- no domain-specific builtins
+#+OPTIONS: toc:2 num:nil
+#+PROPERTY: header-args:mlpl :session cuda_ttt :results output :exports both
+
+#+begin_export html
+<p style="border:1px solid #c33;background:#fdd;padding:0.6em 1em;border-radius:6px">
+<b>NVIDIA/CUDA, true-GPU.</b> When published on a Linux + NVIDIA host with a
+CUDA-enabled <code>mlpl-repl</code>, the <code>device("cuda")</code> fine-tune
+block runs its forward pass, backward pass, <em>and</em> the Adam optimizer on
+the GPU via <a href="https://github.com/huggingface/candle">candle</a>. This is
+<b>not runnable in the public browser demo</b> (WASM is CPU-only and has no CUDA
+peer) -- which is why it ships as a literate page. The board-policy MLP fine-tune
+is parity-tested against the CPU path within fp32 tolerance.
+</p>
+#+end_export
+
+The tic-tac-toe demo, entirely in MLPL -- no domain-specific builtins. We
+build the game engine, derive the optimal policy by alpha-beta minimax,
+encode boards, GENERATE the training set by self-play, LoRA-fine-tune a
+board -> move policy on the NVIDIA GPU, and *prove it learned* by playing
+vs a random opponent before and after, shown as a waffle. The only "ML
+primitives" are ~chain~/~linear~/~lora~/~apply~/~adam~/~svg~; the game is all
+MLPL. Blocks share one ~:session cuda_ttt~.
+
+* The board, and winning, as a matmul
+
+~+1~ = X (moves first), ~-1~ = O, ~0~ = empty. The eight lines are rows of a
+constant ~[8,9]~ incidence matrix; the matmul with the board gives the
+line-sums, and a sum of ~+3~/~-3~ means X/O won -- winner detection is one
+matmul.
+
+#+begin_src mlpl
+lines_m = reshape([
+  1,1,1,0,0,0,0,0,0,  0,0,0,1,1,1,0,0,0,  0,0,0,0,0,0,1,1,1,
+  1,0,0,1,0,0,1,0,0,  0,1,0,0,1,0,0,1,0,  0,0,1,0,0,1,0,0,1,
+  1,0,0,0,1,0,0,0,1,  0,0,1,0,1,0,1,0,0], [8, 9])
+def u:winner(board) { sums = reshape(matmul(lines_m, reshape(board, [9, 1])), [8]); if gt(reduce_add(eq(sums, 3), 0), 0) { 1 } else { if gt(reduce_add(eq(sums, -3), 0), 0) { -1 } else { 0 } } }
+def u:terminal(board) { if gt(abs(u:winner(board)), 0) { 1 } else { eq(reduce_add(abs(board), 0), 9) } }
+[u:winner([1,1,1, 0,-1,0, -1,0,0]), u:winner([-1,1,1, -1,1,0, -1,0,0]), u:winner([1,-1,1, -1,1,-1, -1,1,-1])]
+#+end_src
+
+#+RESULTS:
+: 1 -1 0
+
+* Optimal play, by alpha-beta minimax
+
+~u:ab~ is the value of a position under optimal play (recursive alpha-beta,
+in pure MLPL ~for~/~if~); ~u:best_move~ picks the optimal cell for a player.
+This is the label oracle for the training set.
+
+#+begin_src mlpl
+def u:mx(a, b) { if gt(a, b) { a } else { b } }
+def u:mn(a, b) { if gt(a, b) { b } else { a } }
+def u:ge(a, b) { if gt(a, b) { 1 } else { eq(a, b) } }
+def u:ab(board, player, alpha, beta) { w = u:winner(board); if gt(abs(w), 0) { w } else { if eq(reduce_add(abs(board), 0), 9) { 0 } else { best = 0 - 2 * player; a = alpha; b = beta; done = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { if eq(done, 0) { nb = board + player * eq(iota(9), c); s = u:ab(nb, 0 - player, a, b); if eq(player, 1) { best = u:mx(best, s); a = u:mx(a, best) } else { best = u:mn(best, s); b = u:mn(b, best) }; if u:ge(a, b) { done = 1 } else { 0 } } else { 0 } } else { 0 } }; best } } }
+def u:best_move(board, player) { bv = 0 - 2 * player; bc = 0; seen = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { nb = board + player * eq(iota(9), c); v = u:ab(nb, 0 - player, 0 - 2, 2); ti = if eq(seen, 0) { 1 } else { if eq(player, 1) { gt(v, bv) } else { gt(bv, v) } }; if ti { bv = v; bc = c; seen = 1 } else { 0 } } else { 0 } }; bc }
+[u:ab([1,1,0, 0,-1,0, 0,0,-1], 1, 0 - 2, 2), u:best_move([1,-1,0, 0,1,0, 0,0,0], -1)]
+#+end_src
+
+#+RESULTS:
+: 1 2
+
+* Encoding a board, and the self-play training set
+
+~u:encode~ turns a board into 27 one-hot features (empty/mine/theirs per
+cell). Then on-policy self-play: X plays random, O plays optimal, and we
+collect every position O faced plus its optimal move -- ~X~ and ~Y~ for the
+fine-tune. Eight games is plenty (the minimax labels are deterministic).
+
+#+begin_src mlpl
+def u:encode(board, mover) { e = eq(board, 0); m = eq(board, mover); t = eq(board, 0 - mover); reshape(concat(concat(reshape(e, [9, 1]), reshape(m, [9, 1]), 1), reshape(t, [9, 1]), 1), [27]) }
+def u:rmove(board, s) { argmax(random(s, [9]) * eq(board, 0), 0) }
+ng = 8 ; seed = 1 ; g = 0 ; started = 0 ; dx = fill([1, 27], 0) ; dy = fill([1, 1], 0)
+while gt(ng, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, seed); seed = seed + 1 } else { bm = u:best_move(board, 0 - 1); xr = reshape(u:encode(board, 0 - 1), [1, 27]); yr = reshape(bm, [1, 1]); if eq(started, 0) { dx = xr; dy = yr; started = 1 } else { dx = concat(dx, xr, 0); dy = concat(dy, yr, 0) }; mv = bm }; board = board + player * eq(iota(9), mv); player = 0 - player }; g = g + 1 }
+N = reshape(take(shape(dx), 0, 0), []) ; X = dx ; Y = reshape(dy, [N])
+shape(X)
+#+end_src
+
+#+RESULTS:
+: 29 27
+
+* Train on the NVIDIA GPU, and prove it by playing
+
+The policy is ~lora(chain(linear, relu_layer, linear))~ -- the board-policy
+MLP (both linears LoRA-adapted), which eval_adam's CUDA branch fine-tunes
+on-device. We measure win/tie/loss vs a random opponent BEFORE, fine-tune
+under ~device("cuda")~ on the GPU, measure AFTER, and render the before/after
+waffle. Fewer losses, more wins = it learned.
+
+#+begin_src mlpl :results output html
+def u:omove(board) { logits = reshape(apply(m, reshape(u:encode(board, 0 - 1), [1, 27])), [9]); argmax(logits + (eq(board, 0) - 1) * 1000, 0) }
+def u:play_o(n) { loss = 0; tie = 0; win = 0; g = 0; s = 90000; while gt(n, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, s); s = s + 1 } else { mv = u:omove(board) }; board = board + player * eq(iota(9), mv); player = 0 - player }; w = u:winner(board); if eq(w, 1) { loss = loss + 1 } else { if eq(w, 0 - 1) { win = win + 1 } else { tie = tie + 1 } }; g = g + 1 }; reshape(concat(concat(reshape(loss, [1]), reshape(tie, [1]), 0), reshape(win, [1]), 0), [3]) }
+base = chain(linear(27, 64, 0), relu_layer(), linear(64, 9, 1)) ; m = lora(base, 8, 16.0, 0)
+before = u:play_o(40)
+device("cuda") { experiment "ttt_cuda" { train 6000 { adam(cross_entropy(apply(m, X), Y), m, 0.05, 0.9, 0.999, 0.00000001) } } }
+after = u:play_o(40)
+svg(reshape(concat(before, after), [2, 3]), "waffle")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 211 190" width="211" height="190"><rect width="100%" height="100%" fill="#1e1e2e"/><line x1="30" y1="270" x2="370" y2="270" stroke="#45475a" stroke-width="1"/><line x1="30" y1="30" x2="30" y2="270" stroke="#45475a" stroke-width="1"/><rect width="100%" height="100%" fill="#1e1e2e"/><rect x="12.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="69.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="88.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="107.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="126.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="145.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="164.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="183.0" y="12.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="12.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="69.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="88.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="107.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="126.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="145.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="164.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="183.0" y="31.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="12.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="69.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="88.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="107.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="126.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="145.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="164.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="183.0" y="50.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="12.0" y="69.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="69.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="50.0" y="69.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="69.0" y="69.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="88.0" y="69.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="107.0" y="69.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="126.0" y="69.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="145.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="164.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="69.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="12.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="69.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="88.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="107.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="126.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="145.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="164.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="183.0" y="102.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="12.0" y="121.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="31.0" y="121.0" width="16" height="16" rx="2" fill="#f38ba8"/><rect x="50.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="69.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="88.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="107.0" y="121.0" width="16" height="16" rx="2" fill="#6c7086"/><rect x="126.0" y="121.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="145.0" y="121.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="164.0" y="121.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="121.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="12.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="31.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="50.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="69.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="88.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="107.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="126.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="145.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="164.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="140.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="12.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="31.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="50.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="69.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="88.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="107.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="126.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="145.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="164.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/><rect x="183.0" y="159.0" width="16" height="16" rx="2" fill="#a6e3a1"/></svg>
+#+end_export
+
+* How this was run
+
+Publish this page (executing every block on the GPU, baking results) with a
+CUDA-enabled ~mlpl-repl~ on PATH:
+
+#+begin_src sh :exports code
+  CUDA_COMPUTE_CAP=120 cargo build -p mlpl-repl --features cuda --release
+  MLPL_REPL_CMD=target/release/mlpl-repl \
+    ./examples/literate/publish.sh examples/literate/cuda-tictactoe.org
+#+end_src
+
+#+RESULTS:
+
+Off a CUDA host, ~device("cuda")~ transparently falls back to CPU (the
+numbers still match within fp32 tolerance), so the page still publishes --
+it just won't be running on a GPU.

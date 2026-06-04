@@ -35,7 +35,7 @@ esac
 if [ "$DO_SERVE" -eq 1 ]; then
     echo "=== [serve] Building mlpl-serve (--features cuda, release) ==="
     cd "$PROJECT_DIR/components/serve"
-    cargo build -p mlpl-serve --features cuda --release
+    "$SCRIPT_DIR/serial.sh" cargo build -p mlpl-serve --features cuda --release
 fi
 
 if [ "$DO_PAGES" -eq 1 ]; then

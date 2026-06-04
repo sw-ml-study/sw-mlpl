@@ -20,8 +20,13 @@ echo "=== Building pages/ ==="
 cd "$WEB_DIR"
 mkdir -p "$PROJECT_DIR/pages"
 touch "$PROJECT_DIR/pages/.nojekyll"
-trunk build --release --public-url /sw-mlpl/ --dist "$PAGES_DIST"
-rsync -a --delete --exclude='.nojekyll' "$PAGES_DIST/" "$PROJECT_DIR/pages/"
+"$SCRIPT_DIR/serial.sh" trunk build --release --public-url /sw-mlpl/ --dist "$PAGES_DIST"
+# Exclude literate/ from --delete: the deployed literate HTML is COMMITTED
+# under pages/literate/ (examples/literate/*.html is gitignored/transient).
+# Without this, --delete wipes pages/literate/ -- which is how the literate
+# pages were lost on past rebuilds. The cp below re-bundles any freshly
+# published examples/literate/*.html over the committed ones.
+rsync -a --delete --exclude='.nojekyll' --exclude='literate/' "$PAGES_DIST/" "$PROJECT_DIR/pages/"
 
 # Cache-bust js/stage3d.js. Unlike the trunk WASM bundle, this
 # file is referenced by a stable, non-hashed URL, so browsers

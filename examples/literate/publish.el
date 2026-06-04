@@ -33,8 +33,11 @@
   (require 'ob)
   (require 'org)
 
-  ;; 2. No interactive "evaluate this block?" prompt in batch.
+  ;; 2. No interactive "evaluate this block?" prompt in batch, and no
+  ;; `file.org~` backups (save-buffer would otherwise leave a stray,
+  ;; gitignore-missing backup beside the source).
   (setq org-confirm-babel-evaluate nil)
+  (setq make-backup-files nil)
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((mlpl . t) (shell . t)))
