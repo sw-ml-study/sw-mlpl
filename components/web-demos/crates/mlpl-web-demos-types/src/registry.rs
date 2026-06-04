@@ -127,6 +127,7 @@ pub const LITERATE_DOCS: &[(&str, &str)] = &[
     ("MLX LoRA fine-tune", "mlx-lora-finetune.html"),
     ("MLX tic-tac-toe fine-tune", "tictactoe-finetune.html"),
     ("CUDA LoRA fine-tune", "cuda-lora-finetune.html"),
+    ("CUDA tic-tac-toe fine-tune", "cuda-tictactoe.html"),
 ];
 
 /// The companion literate HTML filename for `demo_name`, if any.

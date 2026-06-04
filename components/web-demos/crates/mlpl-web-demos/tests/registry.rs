@@ -30,6 +30,9 @@ const SKIP_DEMOS: &[&str] = &[
     // 1500-step fine-tune over the full policy dataset: ~minutes on the
     // CPU fallback (it runs in ~2s on the GPU). Heavy test covers it.
     "MLX tic-tac-toe fine-tune",
+    // 6000-step board-policy fine-tune + self-play minimax: ~minutes on
+    // the CPU fallback (it runs in ~10s on the GPU). Heavy test covers it.
+    "CUDA tic-tac-toe fine-tune",
     "Tiny LM",
     "Tiny LM Generate",
     "Moons MLP",
