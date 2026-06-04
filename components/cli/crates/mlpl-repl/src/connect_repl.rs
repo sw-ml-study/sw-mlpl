@@ -256,29 +256,39 @@ fn dispatch_slash(
             }
         }
         _ if input == ":ask" || input.starts_with(":ask ") => {
-            // Connect-mode `:ask` does NOT thread server
-            // workspace context into the prompt -- the
-            // server-side framing path would need the inspect
-            // snapshot composed into ask.rs's helpers, which
-            // is a follow-up. The local OLLAMA_HOST /
-            // OLLAMA_MODEL env vars still apply.
-            let question = input.strip_prefix(":ask").unwrap_or("").trim();
-            if question.is_empty() {
-                eprintln!("usage: :ask <question>");
-            } else {
-                let host = std::env::var("OLLAMA_HOST")
-                    .unwrap_or_else(|_| "http://localhost:11434".into());
-                let model = std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| "llama3.2".into());
-                match mlpl_runtime::call_ollama(&host, question, &model) {
-                    Ok(answer) => println!("{}", answer.trim_end()),
-                    Err(e) => eprintln!("error: {e}"),
-                }
-            }
+            ask_cmd(input.strip_prefix(":ask").unwrap_or("").trim());
             Some(String::new())
         }
         _ => Some(format!(
             "{input}: not supported in --connect mode (try :vars, :models, :experiments, :tokenizers, :wsid, :ask, :help)"
         )),
+    }
+}
+
+/// Connect-mode `:ask` -- `:ask models`, `:ask use <model>`, or a
+/// question. The model is resolved by [`crate::ask_model`] (session
+/// override -> `$OLLAMA_MODEL` -> median installed model -> fallback).
+/// Server workspace context isn't threaded into the prompt yet (follow-up);
+/// `OLLAMA_HOST` selects the Ollama endpoint.
+fn ask_cmd(arg: &str) {
+    let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
+    if arg == "models" {
+        println!("{}", crate::ask_model::list(&host));
+    } else if let Some(name) = arg.strip_prefix("use ").map(str::trim) {
+        if name.is_empty() {
+            eprintln!("usage: :ask use <model>   (see :ask models)");
+        } else {
+            crate::ask_model::set_model(name);
+            println!("ask model set to {name}");
+        }
+    } else if arg.is_empty() {
+        eprintln!("usage: :ask <question>  |  :ask models  |  :ask use <model>");
+    } else {
+        let model = crate::ask_model::resolve(&host);
+        match mlpl_runtime::call_ollama(&host, arg, &model) {
+            Ok(answer) => println!("{}", answer.trim_end()),
+            Err(e) => eprintln!("error: {e}"),
+        }
     }
 }
 

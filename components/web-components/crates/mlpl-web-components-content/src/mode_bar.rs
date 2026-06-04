@@ -1,7 +1,7 @@
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 
-use crate::demo_gating::{grouped_demos, use_peer_devices};
+use crate::demo_gating::{disabled_hint, grouped_demos, use_peer_devices};
 use mlpl_web_demos::Device;
 
 #[derive(Properties, PartialEq)]
@@ -63,9 +63,12 @@ fn render_demo_dropdown(
         <select class="demo-select" onchange={on_change} aria-label="Load demo" data-tour-target="demo-select">
             <option value="" selected=true>{"Load Demo..."}</option>
             { for groups.iter().map(|(cat, items)| html! {
-                <optgroup label={*cat}>
-                    { for items.iter().map(|(i, name, disabled)| html! {
-                        <option value={i.to_string()} disabled={*disabled}>{ *name }</option>
+                <optgroup label={*cat} title={(*cat).to_string()}>
+                    { for items.iter().map(|(i, name, disabled)| {
+                        let hint = disabled.then(|| AttrValue::from(disabled_hint(cat)));
+                        html! {
+                            <option value={i.to_string()} disabled={*disabled} title={hint}>{ *name }</option>
+                        }
                     }) }
                 </optgroup>
             }) }
