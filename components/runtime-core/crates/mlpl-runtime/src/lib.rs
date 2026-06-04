@@ -13,6 +13,7 @@ mod random_builtins;
 
 pub use builtins::call_builtin;
 pub use llm_builtins::{call_ollama, call_ollama_with_system};
+pub use llm_http::{list_models, median_model};
 pub use mlpl_runtime_core::RuntimeError;
 
 /// Iterate every builtin name dispatched by [`call_builtin`].

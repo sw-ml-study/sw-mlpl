@@ -48,13 +48,41 @@ The `:ask` command sends:
    large sessions do not overflow the model's context.
 4. The user's question.
 
+### Choosing the model
+
+`:ask` resolves the model in this precedence (highest first):
+
+1. an explicit `:ask use <name>` for the session,
+2. `$OLLAMA_MODEL`,
+3. a **median-by-size auto-pick** from the models actually
+   installed at `$OLLAMA_HOST` -- not too small (weak answers),
+   not too big (slow); embedding models are skipped,
+4. a small built-in fallback name.
+
+So `:ask` works out of the box against whatever Ollama has,
+without pulling a specific default. List and switch interactively:
+
+```text
+mlpl> :ask models            # installed models by size, current marked
+mlpl> :ask use llama3:latest # pick one for this session
+mlpl> :ask what did I train?
+```
+
+When running through a connect server, set the server's default
+explicitly with `mlpl-serve --ollama-model <name>`; the web `:ask`
+uses that, falling back to the same median auto-pick if the
+configured model isn't installed (so it never 404s on a missing
+default).
+
 ### Configuration
 
 - `OLLAMA_HOST` -- default `http://localhost:11434`. Change to
   point at a remote or containerized Ollama.
-- `OLLAMA_MODEL` -- default `llama3.2`. Any model you have
-  pulled locally works; `qwen2.5-coder` is a strong alternative
-  when the question is code-shaped.
+- `OLLAMA_MODEL` -- overrides the auto-pick (see above). Any model
+  you have pulled locally works; `qwen2.5-coder` is a strong
+  alternative when the question is code-shaped.
+- `mlpl-serve --ollama-model <name>` -- the server-side default for
+  the web `:ask` (and `--ollama-host`).
 - Timeout is 120 seconds. Streaming is a Saga 19 follow-up; for
   now the REPL blocks until Ollama returns the full response.
 

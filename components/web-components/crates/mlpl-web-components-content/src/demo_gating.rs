@@ -41,6 +41,20 @@ pub fn grouped_demos(connected: bool, peer_devices: &[Device]) -> DemoGroups {
     map.into_iter().collect()
 }
 
+/// Tooltip text for a DISABLED demo option, explaining how to enable it.
+/// Keyed off the dropdown section label (which encodes the device tier),
+/// since a disabled GPU demo just needs the right connected peer.
+#[must_use]
+pub fn disabled_hint(section: &str) -> &'static str {
+    if section.starts_with("CUDA") {
+        "Available when connected to a server on a machine with an NVIDIA GPU (CUDA) -- e.g. a Linux box. Run mlpl-serve --features cuda there and connect to it."
+    } else if section.starts_with("MLX") {
+        "Available when connected to a server on an Apple-Silicon Mac (MLX GPU). Run mlpl-serve there and connect to it."
+    } else {
+        "Available when connected to an mlpl-serve instance. Use the Connect button to point at a running server."
+    }
+}
+
 /// Map `GET /v1/devices` name strings to [`Device`]s. Unknown dropped.
 fn devices_from_names(names: &[String]) -> Vec<Device> {
     names

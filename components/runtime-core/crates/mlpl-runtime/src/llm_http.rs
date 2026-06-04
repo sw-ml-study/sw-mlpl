@@ -55,6 +55,41 @@ pub(crate) fn send_ask(
     })
 }
 
+/// GET `{host}/api/tags` -> the installed models as `(name, size_bytes)`,
+/// dropping embedding models (useless for `:ask`). Errors are returned as
+/// strings (callers treat "can't list" as "no models, use the fallback").
+pub fn list_models(host: &str) -> Result<Vec<(String, u64)>, String> {
+    let url = format!("{}/api/tags", host.trim_end_matches('/'));
+    let agent = ureq::AgentBuilder::new()
+        .timeout(Duration::from_secs(10))
+        .build();
+    let resp = agent
+        .get(&url)
+        .call()
+        .map_err(|e| format!("GET {url}: {e}"))?;
+    let v: serde_json::Value = resp.into_json().map_err(|e| format!("decode {url}: {e}"))?;
+    let models = v["models"].as_array().into_iter().flatten();
+    Ok(models
+        .filter_map(|m| {
+            let name = m["name"].as_str().unwrap_or_default();
+            (!name.is_empty() && !name.contains("embed"))
+                .then(|| (name.to_string(), m["size"].as_u64().unwrap_or(0)))
+        })
+        .collect())
+}
+
+/// The median-by-size model name -- the "not too small (weak), not too
+/// big (slow)" pick. `None` if no models are installed.
+#[must_use]
+pub fn median_model(models: &[(String, u64)]) -> Option<String> {
+    if models.is_empty() {
+        return None;
+    }
+    let mut sorted = models.to_vec();
+    sorted.sort_by_key(|(_, size)| *size);
+    Some(sorted[sorted.len() / 2].0.clone())
+}
+
 /// Build the error for a non-2xx response, with a char-safe
 /// preview of the (possibly large) error body.
 fn http_status_error(resolved: &str, code: u16, r: ureq::Response) -> RuntimeError {

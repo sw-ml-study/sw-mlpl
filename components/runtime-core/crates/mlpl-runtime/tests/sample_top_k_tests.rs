@@ -63,7 +63,7 @@ fn sample_temperature_zero_matches_argmax() {
         for seed in [0u64, 1, 7, 99] {
             let r =
                 call_builtin("sample", vec![vec1(c), scalar(0.0), scalar(seed as f64)]).unwrap();
-            assert_eq!(r.data()[0] as usize, argmax(c), "case={:?}", c);
+            assert_eq!(r.data()[0] as usize, argmax(c), "case={c:?}");
         }
     }
 }

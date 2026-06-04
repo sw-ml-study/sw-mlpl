@@ -31,28 +31,37 @@
 use mlpl_eval::Environment;
 
 const DEFAULT_HOST: &str = "http://localhost:11434";
-const DEFAULT_MODEL: &str = "llama3.2";
 
-/// Dispatch `:ask <question>` -- called from the main REPL
-/// command table. Prints the answer to stdout or an
-/// actionable-to-fix error to stderr.
-pub fn dispatch(question: &str, env: &Environment) {
-    let question = question.trim();
-    if question.is_empty() {
-        eprintln!("usage: :ask <question>");
-        eprintln!("  example: :ask what did I just train?");
+/// Dispatch `:ask <question>` / `:ask models` / `:ask use <model>` --
+/// called from the main REPL command table. The model is resolved by
+/// [`crate::ask_model`] (session override -> `$OLLAMA_MODEL` -> median
+/// installed model -> fallback). Prints to stdout, errors to stderr.
+pub fn dispatch(arg: &str, env: &Environment) {
+    let arg = arg.trim();
+    let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| DEFAULT_HOST.into());
+    if arg == "models" {
+        println!("{}", crate::ask_model::list(&host));
         return;
     }
-    let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| DEFAULT_HOST.into());
-    let model = std::env::var("OLLAMA_MODEL").unwrap_or_else(|_| DEFAULT_MODEL.into());
-    let prompt = build_prompt(env, question);
-    match mlpl_runtime::call_ollama(&host, &prompt, &model) {
+    if let Some(name) = arg.strip_prefix("use ").map(str::trim) {
+        if name.is_empty() {
+            eprintln!("usage: :ask use <model>   (see :ask models)");
+        } else {
+            crate::ask_model::set_model(name);
+            println!("ask model set to {name}");
+        }
+        return;
+    }
+    if arg.is_empty() {
+        eprintln!("usage: :ask <question>  |  :ask models  |  :ask use <model>");
+        return;
+    }
+    let model = crate::ask_model::resolve(&host);
+    match mlpl_runtime::call_ollama(&host, &build_prompt(env, arg), &model) {
         Ok(answer) => println!("{}", answer.trim_end()),
         Err(e) => {
             eprintln!("error: {e}");
-            eprintln!("  :ask needs a running Ollama server at {host}.");
-            eprintln!("  Start one with: ollama serve && ollama pull {model}");
-            eprintln!("  Override host/model with OLLAMA_HOST / OLLAMA_MODEL env vars.");
+            eprintln!("  :ask needs Ollama at {host} with model '{model}'; try `:ask models`.");
         }
     }
 }

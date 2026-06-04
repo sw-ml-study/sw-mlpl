@@ -21,10 +21,41 @@ pub struct TagsQuery {
 
 /// `GET /v1/ollama/config` -> the server-configured default host +
 /// model, so the web `:ask` can default to them without carrying
-/// the host/model in the page URL.
+/// the host/model in the page URL. The model is the configured default
+/// when it is actually installed, otherwise a median-size installed
+/// model (so `:ask` never 404s on a missing default). Override the
+/// configured default with `mlpl-serve --ollama-model <name>`.
 pub async fn config_handler(State(state): State<AppState>) -> Json<Value> {
-    let o = &state.ollama;
-    Json(json!({ "host": o.default_host, "model": o.default_model }))
+    let host = state.ollama.default_host.clone();
+    let configured = state.ollama.default_model.clone();
+    let model = tokio::task::spawn_blocking(move || resolve_model(&host, &configured))
+        .await
+        .unwrap_or_else(|_| state.ollama.default_model.clone());
+    Json(json!({ "host": state.ollama.default_host, "model": model }))
+}
+
+/// The effective `:ask` model for `host`: the `configured` model if it is
+/// installed there, else a median-by-size installed model (not too small
+/// / weak, not too big / slow), else `configured` (Ollama unreachable).
+fn resolve_model(host: &str, configured: &str) -> String {
+    let Ok(tags) = fetch_tags(host) else {
+        return configured.to_string();
+    };
+    let mut models: Vec<(String, u64)> = tags["models"]
+        .as_array()
+        .into_iter()
+        .flatten()
+        .filter_map(|m| {
+            let n = m["name"].as_str().unwrap_or_default();
+            (!n.is_empty() && !n.contains("embed"))
+                .then(|| (n.to_string(), m["size"].as_u64().unwrap_or(0)))
+        })
+        .collect();
+    if models.is_empty() || models.iter().any(|(n, _)| n == configured) {
+        return configured.to_string();
+    }
+    models.sort_by_key(|(_, size)| *size);
+    models[models.len() / 2].0.clone()
 }
 
 /// `GET /v1/ollama/tags?host=<optional>` -> the Ollama model list

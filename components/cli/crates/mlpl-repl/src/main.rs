@@ -1,5 +1,6 @@
 mod args;
 mod ask;
+mod ask_model;
 mod connect;
 mod connect_reattach;
 mod connect_repl;
@@ -192,7 +193,10 @@ Commands:
   :fns                 list user-defined functions (none yet)
   :builtins            list built-in functions by category
   :describe <name>     describe a variable, model, string, or built-in
-  :ask <question>      ask a local Ollama server about the session -- set OLLAMA_HOST / OLLAMA_MODEL to override; Saga 19 preview, see docs/using-ollama.md
+  :ask <question>      ask a local Ollama server about the session
+  :ask models          list installed Ollama models (marks the current pick)
+  :ask use <model>     select the Ollama model for this session
+                       (default: $OLLAMA_MODEL, else a median-size installed model; OLLAMA_HOST overrides the host). See docs/using-ollama.md
   :wsid                workspace summary (var/param/model counts)
   :clear               reset all variables
   :trace on/off        toggle execution tracing
