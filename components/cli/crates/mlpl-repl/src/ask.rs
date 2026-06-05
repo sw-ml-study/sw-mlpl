@@ -32,36 +32,24 @@ use mlpl_eval::Environment;
 
 const DEFAULT_HOST: &str = "http://localhost:11434";
 
-/// Dispatch `:ask <question>` / `:ask models` / `:ask use <model>` --
-/// called from the main REPL command table. The model is resolved by
-/// [`crate::ask_model`] (session override -> `$OLLAMA_MODEL` -> median
-/// installed model -> fallback). Prints to stdout, errors to stderr.
-pub fn dispatch(arg: &str, env: &Environment) {
-    let arg = arg.trim();
+/// Dispatch `:ask <question>` -- the argument is sent verbatim to the
+/// model (no subcommands). The model is resolved by [`crate::ask_model`]
+/// (session `:connect set` -> `$OLLAMA_MODEL` -> median installed model
+/// -> fallback). List/select models with `:connect list` / `:connect
+/// set <model>`. Prints to stdout, errors to stderr.
+pub fn dispatch(question: &str, env: &Environment) {
+    let question = question.trim();
+    if question.is_empty() {
+        eprintln!("usage: :ask <question>   (see `:connect list` / `:connect set <model>`)");
+        return;
+    }
     let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| DEFAULT_HOST.into());
-    if arg == "models" {
-        println!("{}", crate::ask_model::list(&host));
-        return;
-    }
-    if let Some(name) = arg.strip_prefix("use ").map(str::trim) {
-        if name.is_empty() {
-            eprintln!("usage: :ask use <model>   (see :ask models)");
-        } else {
-            crate::ask_model::set_model(name);
-            println!("ask model set to {name}");
-        }
-        return;
-    }
-    if arg.is_empty() {
-        eprintln!("usage: :ask <question>  |  :ask models  |  :ask use <model>");
-        return;
-    }
     let model = crate::ask_model::resolve(&host);
-    match mlpl_runtime::call_ollama(&host, &build_prompt(env, arg), &model) {
+    match mlpl_runtime::call_ollama(&host, &build_prompt(env, question), &model) {
         Ok(answer) => println!("{}", answer.trim_end()),
         Err(e) => {
             eprintln!("error: {e}");
-            eprintln!("  :ask needs Ollama at {host} with model '{model}'; try `:ask models`.");
+            eprintln!("  :ask needs Ollama at {host} with model '{model}'; try `:connect list`.");
         }
     }
 }

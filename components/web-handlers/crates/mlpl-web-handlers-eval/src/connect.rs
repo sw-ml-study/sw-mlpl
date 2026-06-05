@@ -106,7 +106,7 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
 }
 
 /// Route one demo line through the connected server (connect mode):
-/// the `:models ollama` listing, the `:ask` shortcut, or a bare
+/// the `:connect list` listing, the `:ask` shortcut, or a bare
 /// expression. Fires `on_result` with the display string when the
 /// server responds. Returns true when it took the line; false for a
 /// non-eligible `:` command so the demo runner falls back to local
@@ -119,9 +119,9 @@ pub(crate) fn dispatch_demo_line(
     on_result: mlpl_web_eval::eval::ResultCb,
 ) -> bool {
     let t = line.trim();
-    if t == ":models ollama" || t.starts_with(":models ollama ") {
+    if t == ":connect list" || t.starts_with(":connect list ") {
         let host = t
-            .strip_prefix(":models ollama ")
+            .strip_prefix(":connect list ")
             .map(|h| h.trim().to_string());
         let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
             return false;
@@ -147,20 +147,19 @@ pub(crate) fn dispatch_demo_line(
     false
 }
 
-/// Resolve the `(host, model)` for `:ask`: an explicit `?ollama=` /
-/// `?model=` page override wins; else the server-configured default
-/// primed on connect (`GET /v1/ollama/config`); else the built-in
-/// constants.
+/// Resolve the `(host, model)` for `:ask`. Host: `?ollama=` page
+/// override, else the connect-primed default, else the constant. Model:
+/// a `:connect set <model>` session pick wins, then `?model=`, then the
+/// connect-primed default, then the constant.
 fn ask_endpoint() -> (String, String) {
     let (def_url, def_model) = mlpl_web_eval::ollama_fetch::ollama_default()
         .unwrap_or_else(|| (ASK_URL.to_string(), ASK_MODEL.to_string()));
-    (
-        query_param("ollama", &def_url),
-        query_param("model", &def_model),
-    )
+    let model = mlpl_web_eval::ollama_fetch::selected_model()
+        .unwrap_or_else(|| query_param("model", &def_model));
+    (query_param("ollama", &def_url), model)
 }
 
-/// Connect-mode `:models ollama`: fetch the server's Ollama model
+/// Connect-mode `:connect list`: fetch the server's Ollama model
 /// list (`GET /v1/ollama/tags`) and render it as a history entry,
 /// chaining the rest of the queue. Returns true when it took the
 /// line (connect mode + the exact command); false to fall through
@@ -173,11 +172,11 @@ pub(crate) fn try_ollama_models(
     line: &str,
 ) -> bool {
     let t = line.trim();
-    if t != ":models ollama" && !t.starts_with(":models ollama ") {
+    if t != ":connect list" && !t.starts_with(":connect list ") {
         return false;
     }
     let host = t
-        .strip_prefix(":models ollama ")
+        .strip_prefix(":connect list ")
         .map(|h| h.trim().to_string());
     let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
         return false;

@@ -102,7 +102,7 @@ fn pca_variance_explained_descending() {
     // Power iteration extracts in descending eigenvalue order,
     // so the ratio sequence must be non-increasing.
     for w in d.windows(2) {
-        assert!(w[0] >= w[1] - 1e-9, "ratios not descending: {:?}", d);
+        assert!(w[0] >= w[1] - 1e-9, "ratios not descending: {d:?}");
     }
 }
 
