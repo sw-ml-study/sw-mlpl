@@ -50,9 +50,13 @@ The `:ask` command sends:
 
 ### Choosing the model
 
-`:ask` resolves the model in this precedence (highest first):
+`:ask <question>` sends the argument verbatim to the model.
+Listing and selecting the model is done with `:connect`, NOT `:ask`
+(so question text is never mistaken for a subcommand).
 
-1. an explicit `:ask use <name>` for the session,
+The model is resolved in this precedence (highest first):
+
+1. an explicit `:connect set <name>` for the session,
 2. `$OLLAMA_MODEL`,
 3. a **median-by-size auto-pick** from the models actually
    installed at `$OLLAMA_HOST` -- not too small (weak answers),
@@ -63,8 +67,8 @@ So `:ask` works out of the box against whatever Ollama has,
 without pulling a specific default. List and switch interactively:
 
 ```text
-mlpl> :ask models            # installed models by size, current marked
-mlpl> :ask use llama3:latest # pick one for this session
+mlpl> :connect list            # installed models by size, current marked
+mlpl> :connect set llama3:latest  # pick one for this session
 mlpl> :ask what did I train?
 ```
 

@@ -111,7 +111,7 @@ pub(crate) fn process_next_eval(
     let line = queue[idx].clone();
     crate::running::push_running_marker(&mut history, &line);
     deps.history.set(history.clone());
-    // Connect mode (?connect=<url>): `:models ollama` lists the
+    // Connect mode (?connect=<url>): `:connect list` lists the
     // server's Ollama models; real expressions + the `:ask`
     // shortcut route to mlpl-serve (async, server-side) so the
     // browser never blocks. Each returns true when it took the line.
@@ -216,13 +216,43 @@ fn history_listing(deps: &EvalDeps) -> String {
 /// public live demo). `:ask` needs a server to reach an LLM, so we
 /// give a clear notice instead of lexing the question as MLPL
 /// (which errors on punctuation like `?`).
-const ASK_NEEDS_SERVER: &str = "`:ask` needs a connected mlpl-serve to reach an LLM. Open the REPL with `?connect=<server-url>` (with mlpl-serve + Ollama running). It is not available on the public demo.";
+const ASK_NEEDS_SERVER: &str = "`:ask` is not available on the public demo -- it needs a connected mlpl-serve with Ollama running. Run `mlpl-serve` on a local machine (with `ollama serve`) and open this REPL with `?connect=<server-url>`, or use the Connect button. The CUDA / MLX demos additionally need that server on a host with the matching GPU (Linux+NVIDIA for CUDA, Apple Silicon for MLX).";
+
+/// Text for `:connect <arg>` outside the async connect path. `set
+/// <model>` selects the `:ask` model for the session (local/sync);
+/// `list` / bare need a connected server (handled upstream when one is
+/// connected, so here it means "not connected").
+fn connect_command_text(arg: &str) -> String {
+    if let Some(name) = arg.strip_prefix("set ").map(str::trim) {
+        if name.is_empty() {
+            return "usage: :connect set <model>   (see :connect list)".to_string();
+        }
+        #[cfg(target_arch = "wasm32")]
+        mlpl_web_eval::ollama_fetch::set_selected_model(name);
+        format!("ask model set to {name}")
+    } else if arg == "list" || arg.is_empty() {
+        format!("`:connect list` needs a connected mlpl-serve to query its Ollama models. {ASK_NEEDS_SERVER}")
+    } else {
+        format!("unknown :connect subcommand '{arg}' (try: list  |  set <model>)")
+    }
+}
 
 fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
     if trimmed == ":ask" || trimmed.starts_with(":ask ") {
         return HistoryEntry {
             input: trimmed.to_string(),
             output: ASK_NEEDS_SERVER.to_string(),
+            is_error: false,
+            kind: EntryKind::Command,
+        };
+    }
+    if trimmed == ":connect" || trimmed.starts_with(":connect ") {
+        // `:connect set <model>` is local/sync; `:connect list` needs a
+        // connected server (the async listing is handled upstream in
+        // connect mode, so reaching here means not connected).
+        return HistoryEntry {
+            input: trimmed.to_string(),
+            output: connect_command_text(trimmed.strip_prefix(":connect").unwrap_or("").trim()),
             is_error: false,
             kind: EntryKind::Command,
         };

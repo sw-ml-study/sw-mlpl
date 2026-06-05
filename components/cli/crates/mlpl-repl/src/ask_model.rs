@@ -1,7 +1,7 @@
 //! Ollama-model selection shared by `:ask` (standalone + connect REPL).
 //!
 //! Resolution precedence, highest first:
-//!   1. an explicit `:ask use <name>` for this session,
+//!   1. an explicit `:connect set <name>` for this session,
 //!   2. `$OLLAMA_MODEL`,
 //!   3. a median-by-size auto-pick from the installed models (not too
 //!      small / weak, not too big / slow),
@@ -12,7 +12,7 @@ use std::sync::Mutex;
 static OVERRIDE: Mutex<Option<String>> = Mutex::new(None);
 const FALLBACK_MODEL: &str = "llama3.2";
 
-/// Set the session model (`:ask use <name>`).
+/// Set the session model (`:connect set <name>`).
 pub fn set_model(name: &str) {
     *OVERRIDE.lock().unwrap() = Some(name.to_string());
 }
@@ -34,7 +34,30 @@ pub fn resolve(host: &str) -> String {
         .unwrap_or_else(|| FALLBACK_MODEL.to_string())
 }
 
-/// Render the `:ask models` listing for `host`, marking the current pick.
+/// Handle `:connect list` / `:connect set <model>` (Ollama model
+/// management) against `host`. Returns the text to print.
+pub fn connect_cmd(arg: &str, host: &str) -> String {
+    let arg = arg.trim();
+    if arg == "list" {
+        list(host)
+    } else if let Some(name) = arg.strip_prefix("set ").map(str::trim) {
+        if name.is_empty() {
+            "usage: :connect set <model>   (see :connect list)".to_string()
+        } else {
+            set_model(name);
+            format!("ask model set to {name}")
+        }
+    } else if arg.is_empty() {
+        format!(
+            "current :ask model: {}\nusage: :connect list  |  :connect set <model>",
+            resolve(host)
+        )
+    } else {
+        format!("unknown :connect subcommand '{arg}' (try: list  |  set <model>)")
+    }
+}
+
+/// Render the `:connect list` model listing for `host`, marking the pick.
 pub fn list(host: &str) -> String {
     let mut models = match mlpl_runtime::list_models(host) {
         Ok(m) if !m.is_empty() => m,
@@ -52,5 +75,18 @@ pub fn list(host: &str) -> String {
         format!("  {name:<30} {:>5.1} GB{mark}", *size as f64 / 1e9)
     });
     let body = rows.collect::<Vec<_>>().join("\n");
-    format!("Ollama models at {host}:\n{body}\n(select with `:ask use <name>`)")
+    format!("Ollama models at {host}:\n{body}\n(select with `:connect set <name>`)")
+}
+
+#[cfg(test)]
+mod tests {
+    // `:connect set <model>` selects the model and `resolve` returns it.
+    // The session override short-circuits before `$OLLAMA_MODEL` and any
+    // network probe, so this is deterministic + offline-safe.
+    #[test]
+    fn connect_set_selects_model_for_ask() {
+        let out = super::connect_cmd("set foo:bar", "http://127.0.0.1:1");
+        assert!(out.contains("foo:bar"), "unexpected: {out}");
+        assert_eq!(super::resolve("http://127.0.0.1:1"), "foo:bar");
+    }
 }

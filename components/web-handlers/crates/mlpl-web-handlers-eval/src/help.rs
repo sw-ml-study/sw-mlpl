@@ -91,7 +91,9 @@ Commands (APL-inspired workspace introspection):
   :untag <name>        clear a binding's auto-attached tag
   :wsid                workspace summary (APL )WSID)
   :experiments         list captured experiment runs
-  :ask <prompt>        send prompt to a local Ollama LLM
+  :ask <prompt>        send prompt (verbatim) to a connected Ollama LLM
+  :connect list        list the server's Ollama models
+  :connect set <model> pick the Ollama model for :ask this session
   :introspect          run all no-arg inspectors at once
   :upload <name>       open file picker; bind chosen photo as
                        <name> = Ok({pixels, h, w}) or

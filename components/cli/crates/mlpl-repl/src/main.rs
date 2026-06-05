@@ -99,6 +99,12 @@ fn handle_command(
         _ if input == ":ask" || input.starts_with(":ask ") => {
             ask::dispatch(input.strip_prefix(":ask").unwrap_or("").trim(), env);
         }
+        _ if input == ":connect" || input.starts_with(":connect ") => {
+            let host =
+                std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
+            let arg = input.strip_prefix(":connect").unwrap_or("").trim();
+            println!("{}", ask_model::connect_cmd(arg, &host));
+        }
         _ => match mlpl_eval::inspect(env, input) {
             Some(out) => println!("{out}"),
             None => eprintln!("Unknown command: {input}. Type :help for available commands."),
@@ -193,10 +199,10 @@ Commands:
   :fns                 list user-defined functions (none yet)
   :builtins            list built-in functions by category
   :describe <name>     describe a variable, model, string, or built-in
-  :ask <question>      ask a local Ollama server about the session
-  :ask models          list installed Ollama models (marks the current pick)
-  :ask use <model>     select the Ollama model for this session
-                       (default: $OLLAMA_MODEL, else a median-size installed model; OLLAMA_HOST overrides the host). See docs/using-ollama.md
+  :ask <question>      ask a local Ollama server about the session (arg is sent verbatim to the model)
+  :connect list        list installed Ollama models (marks the current pick)
+  :connect set <model> select the Ollama model for this session
+                       (default model: $OLLAMA_MODEL, else a median-size installed model; OLLAMA_HOST overrides the host). See docs/using-ollama.md
   :wsid                workspace summary (var/param/model counts)
   :clear               reset all variables
   :trace on/off        toggle execution tracing

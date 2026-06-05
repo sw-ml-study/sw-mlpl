@@ -1,5 +1,5 @@
 //! Connect-mode fetches of the server's Ollama settings: the model
-//! list (`GET /v1/ollama/tags`) backing `:models ollama`, and the
+//! list (`GET /v1/ollama/tags`) backing `:connect list`, and the
 //! default host+model (`GET /v1/ollama/config`) primed on connect so
 //! `:ask` can fall back to the server config when the page carries
 //! no `?ollama=` / `?model=` override. Phase 0 part 2 of the
@@ -14,6 +14,9 @@ thread_local! {
     // (host, model) from GET /v1/ollama/config, primed once on connect.
     static OLLAMA_DEFAULT: std::cell::RefCell<Option<(String, String)>> =
         const { std::cell::RefCell::new(None) };
+    // Session model override from `:connect set <model>`.
+    static OLLAMA_SELECTED: std::cell::RefCell<Option<String>> =
+        const { std::cell::RefCell::new(None) };
 }
 
 /// The server-configured default `(host, model)` if it has been
@@ -21,6 +24,17 @@ thread_local! {
 /// `?ollama=` / `?model=` override.
 pub fn ollama_default() -> Option<(String, String)> {
     OLLAMA_DEFAULT.with(|c| c.borrow().clone())
+}
+
+/// Set the session model (`:connect set <model>`); `:ask` uses it over
+/// any `?model=` page override and the server default.
+pub fn set_selected_model(name: &str) {
+    OLLAMA_SELECTED.with(|c| *c.borrow_mut() = Some(name.to_string()));
+}
+
+/// The session model override from `:connect set`, if any.
+pub fn selected_model() -> Option<String> {
+    OLLAMA_SELECTED.with(|c| c.borrow().clone())
 }
 
 /// Fire-and-forget `GET <base>/v1/ollama/config`, caching
@@ -46,7 +60,7 @@ pub fn prime_ollama_default(base_url: String) {
 
 /// Async `GET <base>/v1/ollama/tags`; fires `on_result` with a
 /// human-readable model listing (or an `error:`-prefixed message)
-/// for the `:models ollama [host]` REPL command. `host` (the
+/// for the `:connect list [host]` REPL command. `host` (the
 /// optional per-call override) is forwarded as `?host=` and must
 /// be allow-listed on the server.
 pub fn fetch_ollama_models(base_url: String, host: Option<String>, on_result: ResultCb) {
@@ -69,13 +83,38 @@ async fn ollama_models_text(base_url: &str, host: Option<&str>) -> String {
         Ok(j) => j,
         Err(e) => return format!("error: decode: {e}"),
     };
-    let names: Vec<&str> = body["models"]
-        .as_array()
-        .map(|a| a.iter().filter_map(|m| m["name"].as_str()).collect())
+    format_model_list(&body)
+}
+
+/// Render the model list: each model by size (desc), marking the one
+/// `:ask` would use (the `:connect set` selection, else the server
+/// default). The footer points at `:connect set <name>`.
+fn format_model_list(body: &serde_json::Value) -> String {
+    let current = selected_model()
+        .or_else(|| ollama_default().map(|(_, m)| m))
         .unwrap_or_default();
-    if names.is_empty() {
-        "(no Ollama models on the configured host)".to_string()
-    } else {
-        format!("Ollama models ({}):\n  {}", names.len(), names.join("\n  "))
+    let mut rows: Vec<(String, u64)> = body["models"]
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .filter_map(|m| Some((m["name"].as_str()?.to_string(), m["size"].as_u64()?)))
+                .collect()
+        })
+        .unwrap_or_default();
+    if rows.is_empty() {
+        return "(no Ollama models on the configured host)".to_string();
     }
+    rows.sort_by_key(|(_, s)| std::cmp::Reverse(*s));
+    let lines: Vec<String> = rows
+        .iter()
+        .map(|(n, s)| {
+            let mark = if *n == current { "   <- current" } else { "" };
+            format!("  {n:<30} {:>5.1} GB{mark}", *s as f64 / 1e9)
+        })
+        .collect();
+    format!(
+        "Ollama models ({}):\n{}\n(select with `:connect set <name>`)",
+        rows.len(),
+        lines.join("\n")
+    )
 }

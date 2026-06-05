@@ -259,37 +259,39 @@ fn dispatch_slash(
             ask_cmd(input.strip_prefix(":ask").unwrap_or("").trim());
             Some(String::new())
         }
+        _ if input == ":connect" || input.starts_with(":connect ") => {
+            connect_cmd(input.strip_prefix(":connect").unwrap_or("").trim());
+            Some(String::new())
+        }
         _ => Some(format!(
-            "{input}: not supported in --connect mode (try :vars, :models, :experiments, :tokenizers, :wsid, :ask, :help)"
+            "{input}: not supported in --connect mode (try :vars, :models, :experiments, :tokenizers, :wsid, :ask, :connect, :help)"
         )),
     }
 }
 
-/// Connect-mode `:ask` -- `:ask models`, `:ask use <model>`, or a
-/// question. The model is resolved by [`crate::ask_model`] (session
-/// override -> `$OLLAMA_MODEL` -> median installed model -> fallback).
-/// Server workspace context isn't threaded into the prompt yet (follow-up);
-/// `OLLAMA_HOST` selects the Ollama endpoint.
+/// Connect-mode `:ask <question>` -- the argument is sent verbatim to
+/// the model. Model resolution lives in [`crate::ask_model`]; list/select
+/// with `:connect list` / `:connect set <model>`. Server workspace
+/// context isn't threaded into the prompt yet; `OLLAMA_HOST` selects the
+/// Ollama endpoint.
 fn ask_cmd(arg: &str) {
-    let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
-    if arg == "models" {
-        println!("{}", crate::ask_model::list(&host));
-    } else if let Some(name) = arg.strip_prefix("use ").map(str::trim) {
-        if name.is_empty() {
-            eprintln!("usage: :ask use <model>   (see :ask models)");
-        } else {
-            crate::ask_model::set_model(name);
-            println!("ask model set to {name}");
-        }
-    } else if arg.is_empty() {
-        eprintln!("usage: :ask <question>  |  :ask models  |  :ask use <model>");
-    } else {
-        let model = crate::ask_model::resolve(&host);
-        match mlpl_runtime::call_ollama(&host, arg, &model) {
-            Ok(answer) => println!("{}", answer.trim_end()),
-            Err(e) => eprintln!("error: {e}"),
-        }
+    if arg.is_empty() {
+        eprintln!("usage: :ask <question>   (see :connect list / :connect set <model>)");
+        return;
     }
+    let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
+    let model = crate::ask_model::resolve(&host);
+    match mlpl_runtime::call_ollama(&host, arg, &model) {
+        Ok(answer) => println!("{}", answer.trim_end()),
+        Err(e) => eprintln!("error: {e}"),
+    }
+}
+
+/// Connect-mode `:connect list` / `:connect set <model>` -- Ollama model
+/// management against `$OLLAMA_HOST`.
+fn connect_cmd(arg: &str) {
+    let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
+    println!("{}", crate::ask_model::connect_cmd(arg, &host));
 }
 
 fn format_inspect(command: &str, snap: &InspectResponse) -> String {

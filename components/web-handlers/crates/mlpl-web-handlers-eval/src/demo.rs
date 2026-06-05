@@ -125,7 +125,7 @@ fn schedule_demo_line(
     push_running_marker(&mut entries, line);
     history.set(entries.clone());
     // Connect mode: route the line through the server (so loaded
-    // demos behave like typed lines -- `:models ollama`, `:ask`,
+    // demos behave like typed lines -- `:connect list`, `:ask`,
     // and bare expressions hit mlpl-serve instead of the local
     // session). Falls through to local eval when not connected or
     // for non-eligible commands.
