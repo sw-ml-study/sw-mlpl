@@ -12,8 +12,45 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-04
+
+- fix(ask): model commands are :connect list/set (not :ask subcommands); clearer offline messages
+- feat(ask): Ollama model auto-pick + :ask models/use + disabled-demo tooltips
+- fix(literate): CUDA literate docs on the live demo + index, fix org truncation, add regression guard
+
+## 2026-06-03
+
+- chore(agentrail): record cuda-demo-parity step 003 completion (saga done)
+- fix(cuda): cut tic-tac-toe self-play to 8 games (~4s) -- snappy review build
+- feat(cuda): cuda-demo-parity step 3 -- CUDA tic-tac-toe demo + snappier UX
+- chore(agentrail): record cuda-demo-parity step 002 completion
+- feat(cuda): cuda-demo-parity step 2 -- board-policy MLP fast path under device("cuda")
+- chore(agentrail): track archived cuda-foundation saga + step 002 begin
+- chore(agentrail): record cuda-demo-parity step 001 completion
+- feat(cuda): cuda-demo-parity step 1 -- board-policy MLP forward on the GPU
+- chore(agentrail): record cuda-foundation step 007 completion (saga done)
+- feat(cuda): connect-mode CUDA peer + device-gated UI -- saga vertical slice complete
+
 ## 2026-06-02
 
+- chore(agentrail): record cuda-foundation step 006 completion
+- feat(cuda): device("cuda") LoRA fine-tune end-to-end -- vertical slice closed
+- chore(agentrail): record cuda-foundation step 005 completion
+- feat(cuda): mlpl-cuda-forward + mlpl-cuda-model -- demo_forward trains on GPU
+- chore(agentrail): record cuda-foundation step 004 completion
+- feat(cuda): wire device("cuda") dispatch through mlpl-eval (GPU live)
+- chore(agentrail): record cuda-foundation step 003 completion
+- feat(cuda): mlpl-cuda-nn reductions/softmax + activations into elementwise
+- docs(roadmap): capture LAN/0.0.0.0 serving requirement for connect step
+- chore(agentrail): record cuda-foundation step 002 completion
+- feat(cuda): mlpl-cuda-rt + mlpl-cuda-elementwise forward ops (GPU parity)
+- docs(roadmap): GPU demos + multi-backend connect program plan
+- chore(agentrail): record cuda-foundation step 001 completion (candle spike GO)
+- feat(cuda): candle CUDA backend spike -- GO on Blackwell/CUDA 13.2
+- chore(wasm): sync Cargo.lock (mlpl-eval-core gained serde)
+- chore(gitignore): ignore .claude/ local state + components/web/dist/ trunk output
+- fix(web-eval): clippy-clean on the wasm target -- gate CancelHandle to native
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild with connect-mode 3D scalar fix (issue #8)
 - fix(web): render scalars in the 3D stage for connect-mode demos (issue #8)
 
