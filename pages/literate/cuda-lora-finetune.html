@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-06-02 Tue 17:29 -->
+<!-- 2026-06-05 Fri 07:56 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CUDA LoRA Fine-Tune &#x2013; a Literate, True-GPU Walkthrough</title>
@@ -203,319 +203,225 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orge7b2b66">Step 1 &#x2013; prepare the corpus</a></li>
-<li><a href="#orgd42efd0">Step 2 &#x2013; define and pretrain a tiny language model</a></li>
-<li><a href="#org0f010d3">Step 3 &#x2013; wrap with LoRA (freeze the base)</a></li>
-<li><a href="#org93f1921">Step 4 &#x2013; fine-tune the adapters on the GPU</a></li>
-<li><a href="#org4fc1e25">Step 5 &#x2013; the fine-tune loss curve</a></li>
+<li><a href="#org7103fb0">Step 1 &#x2013; prepare the corpus</a></li>
+<li><a href="#org20531d4">Step 2 &#x2013; define and pretrain a tiny language model</a></li>
+<li><a href="#orgb61424f">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</a></li>
+<li><a href="#orgfa5a05e">Step 4 &#x2013; fine-tune the adapters on the GPU</a></li>
+<li><a href="#orgf2518d0">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</a></li>
+<li><a href="#orgc31638b">Step 6 &#x2013; the fine-tune loss curve</a></li>
 </ul>
 </div>
 </div>
 <p style="border:1px solid #c33;background:#fdd;padding:0.6em 1em;border-radius:6px">
-<b>NVIDIA/CUDA, true-GPU.</b> When published on a Linux + NVIDIA host with a
-CUDA-enabled <code>mlpl-repl</code>, every <code>device("cuda")</code> block
-below runs its forward pass, backward pass, <em>and</em> the Adam optimizer on
-the GPU via <a href="https://github.com/huggingface/candle">candle</a>. This is
-<b>not runnable in the public browser demo</b> (WASM is CPU-only and has no CUDA
-peer) -- which is why it ships as a literate page. The fine-tune step is one
-traceable candle graph differentiated by <code>backward</code>; its loss curve
-is parity-tested against the CPU path within fp32 tolerance.
+<b>NVIDIA/CUDA, true-GPU.</b> Every <code>device("cuda")</code> block below
+runs its forward pass, backward pass, <em>and</em> the Adam optimizer on the
+NVIDIA GPU via <a href="https://github.com/huggingface/candle">candle</a>. This
+is <b>not runnable in the public browser demo</b> (WASM is CPU-only and has no
+CUDA peer) -- which is exactly why it ships as a literate page: the blocks were
+executed by a CUDA-enabled <code>mlpl-repl</code> on a Linux + NVIDIA host, and
+the outputs below are that real run.
 </p>
 
 <p>
 This recreates the playground's <b>CUDA LoRA fine-tune</b> demo as a literate
-program. We pretrain a tiny language model, wrap it with LoRA adapters,
-fine-tune <b>only the head adapters</b> on the NVIDIA GPU, and watch the loss
-fall &#x2013; concrete learning on the device. The blocks share one
-<code>:session cuda</code>, so state threads through exactly as if typed into the REPL.
+program. It is the CUDA analog of the <b>MLX LoRA fine-tune</b> walkthrough &#x2013;
+identical steps, only <code>device("cuda")</code> instead of <code>device("mlx")</code>. We
+pretrain a tiny language model, wrap it with LoRA adapters, measure it,
+fine-tune <b>only the adapters</b> on the NVIDIA GPU, and measure again &#x2013;
+showing concrete <b>before vs after</b> learning, not just a loss curve. The
+blocks share one <code>:session cuda</code>, so state threads through exactly as if
+typed into the REPL.
 </p>
-<div id="outline-container-orge7b2b66" class="outline-2">
-<h2 id="orge7b2b66">Step 1 &#x2013; prepare the corpus</h2>
-<div class="outline-text-2" id="text-orge7b2b66">
+<div id="outline-container-org7103fb0" class="outline-2">
+<h2 id="org7103fb0">Step 1 &#x2013; prepare the corpus</h2>
+<div class="outline-text-2" id="text-org7103fb0">
 <p>
-A tiny fixed token corpus, turned into next-token (X -&gt; Y) training pairs
-with a context window of 4. (The demo uses explicit ids so it is fully
-self-contained and fast; swap in <code>train_bpe</code> on real text for a serious
-run.)
+Load a snippet of tiny-Shakespeare, train a 280-token BPE tokenizer,
+encode to ids, and build next-token (X -&gt; Y) training pairs with a
+context window of 32.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
+<pre class="src src-mlpl">corpus = load_preloaded("tiny_shakespeare_snippet")
+tok    = train_bpe(corpus, 280, 0)
+ids    = apply_tokenizer(tok, corpus)
+X = reshape(shift_pairs_x(ids, 32), [reduce_mul(shape(shift_pairs_x(ids, 32)))])
+Y = reshape(shift_pairs_y(ids, 32), [reduce_mul(shape(shift_pairs_y(ids, 32)))])
 shape(X)
 </pre>
 </div>
 
 <pre class="example">
-16
+1440
 </pre>
 </div>
 </div>
-<div id="outline-container-orgd42efd0" class="outline-2">
-<h2 id="orgd42efd0">Step 2 &#x2013; define and pretrain a tiny language model</h2>
-<div class="outline-text-2" id="text-orgd42efd0">
+<div id="outline-container-org20531d4" class="outline-2">
+<h2 id="org20531d4">Step 2 &#x2013; define and pretrain a tiny language model</h2>
+<div class="outline-text-2" id="text-org20531d4">
 <p>
-A minimal decoder &#x2013; embedding, one causal-attention block, a final RMS
-norm, and a linear head &#x2013; pretrained for 20 Adam steps on the CPU so it
-has some structure to specialize from. This is the <b>head-only-LoRA demo
-architecture</b>: <code>lora()</code> adapts only the head <code>Linear</code> (the attention
-projections live in the <code>Attention</code> layer and stay frozen), so the whole
-fine-tune step is a single graph differentiable w.r.t. the head adapters.
+A minimal decoder (embedding, one causal-attention block, a final norm,
+a linear head), pretrained for 20 Adam steps so it has some structure to
+specialize from.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
+<pre class="src src-mlpl">V = 280 ; d = 32 ; h = 1
+base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 4))
+experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.001, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
 last_losses
 </pre>
 </div>
 
-<pre class="example" id="orge7c4342">
-  ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-student = lora(base, 2, 4.0, 7)
-shape(X)
-device("cuda") {
-  to_device(student, "cuda")
-  to_device(X, "cuda")
-  experiment "cuda_lora" {
-    train 30 {
-      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
-      loss_metric = cross_entropy(apply(student, X), Y)
-    }
-  }
-}
-last_losses
-loss_curve(last_losses)
-ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-  error: device mismatch: apply on cpu vs cuda
+<pre class="example">
+8.748087078871551 8.556515224936417 8.374789080456024 8.2292430940222 8.088912927120974 7.9501537209206745 7.822384960039974 7.702769117559668 7.589426658793876 7.475659719397106 7.361660820476453 7.245777031342536 7.132938368249842 7.036058560056138 6.931899933236404 6.825627580515069 6.723534595757975 6.622502452566158 6.519077135403341 6.439220037847968
 </pre>
 </div>
 </div>
-<div id="outline-container-org0f010d3" class="outline-2">
-<h2 id="org0f010d3">Step 3 &#x2013; wrap with LoRA (freeze the base)</h2>
-<div class="outline-text-2" id="text-org0f010d3">
+<div id="outline-container-orgb61424f" class="outline-2">
+<h2 id="orgb61424f">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</h2>
+<div class="outline-text-2" id="text-orgb61424f">
 <p>
-<code>lora(base, 2, 4.0, 7)</code> freezes every base weight and adds a rank-2
-adapter pair on the head. Only those adapters train from here.
+<code>lora(base, 8, 16.0, 0)</code> freezes every base weight and adds rank-8
+adapters to the head (the adapter <code>B</code> inits to zero, so the student
+<b>starts identical to the base</b>). We capture two baselines: <b>perplexity</b>
+(<code>exp(cross-entropy); lower is better) and a *sampled continuation* of
+the prompt ="the "</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">student = lora(base, 2, 4.0, 7)
-shape(X)
+<pre class="src src-mlpl">student = lora(base, 8, 16.0, 0)
+ppl_before = perplexity(apply(student, X), Y)
+ppl_before
 </pre>
 </div>
 
-<pre class="example" id="orgb263e01">
-  ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-student = lora(base, 2, 4.0, 7)
-shape(X)
-device("cuda") {
-  to_device(student, "cuda")
-  to_device(X, "cuda")
-  experiment "cuda_lora" {
-    train 30 {
-      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
-      loss_metric = cross_entropy(apply(student, X), Y)
-    }
-  }
-}
-last_losses
-loss_curve(last_losses)
-ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-student = lora(base, 2, 4.0, 7)
-shape(X)
-  error: device mismatch: apply on cpu vs cuda
+<pre class="example">
+625.9184167007902
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-mlpl">seq = apply_tokenizer(tok, "the ")
+repeat 24 { logits = apply(student, seq); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); seq = concat(seq, nxt) }
+decode(tok, seq)
+</pre>
+</div>
+
+<pre class="example">
+the CCCCCCCCCCCC
 </pre>
 </div>
 </div>
-<div id="outline-container-org93f1921" class="outline-2">
-<h2 id="org93f1921">Step 4 &#x2013; fine-tune the adapters on the GPU</h2>
-<div class="outline-text-2" id="text-org93f1921">
+<div id="outline-container-orgfa5a05e" class="outline-2">
+<h2 id="orgfa5a05e">Step 4 &#x2013; fine-tune the adapters on the GPU</h2>
+<div class="outline-text-2" id="text-orgfa5a05e">
 <p>
-<code>to_device(student, "cuda")</code> + <code>to_device(X, "cuda")</code> stamp the CUDA
-placement; inside <code>device("cuda")</code>, <code>apply</code> + <code>cross_entropy</code> + the Adam
-update all run on the GPU through candle. Watch the loss fall.
+Inside <code>device("cuda")</code>, the fine-tune step is one traceable candle
+graph over the adapters, differentiated by <code>backward</code>, and the adapters
+are updated by a candle Adam &#x2013; <b>forward, backward, and optimizer all on
+the NVIDIA GPU</b>. Only the adapters move; the base stays frozen.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">device("cuda") {
-  to_device(student, "cuda")
-  to_device(X, "cuda")
-  experiment "cuda_lora" {
-    train 30 {
-      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
-      loss_metric = cross_entropy(apply(student, X), Y)
-    }
-  }
-}
+<pre class="src src-mlpl">device("cuda") { experiment "cuda_lora" { train 25 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(student, X), Y) } } }
 last_losses
 </pre>
 </div>
 
-<pre class="example" id="org38246eb">
-  ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-student = lora(base, 2, 4.0, 7)
-shape(X)
-device("cuda") {
-  to_device(student, "cuda")
-  to_device(X, "cuda")
-  experiment "cuda_lora" {
-    train 30 {
-      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
-      loss_metric = cross_entropy(apply(student, X), Y)
-    }
-  }
-}
-last_losses
-loss_curve(last_losses)
-ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-student = lora(base, 2, 4.0, 7)
-shape(X)
-device("cuda") {
-  to_device(student, "cuda")
-  to_device(X, "cuda")
-  experiment "cuda_lora" {
-    train 30 {
-      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
-      loss_metric = cross_entropy(apply(student, X), Y)
-    }
-  }
-}
-last_losses
-  error: device mismatch: apply on cpu vs cuda
+<pre class="example">
+6.349223708994379 6.213732804121422 6.035280688159431 5.820439835881928 5.584292973011285 5.351586547183255 5.148975384323652 4.98457387266443 4.845299113114293 4.723219366956176 4.620552020121121 4.539821354838601 4.474434202358667 4.412057126074641 4.346068450604383 4.279629049679461 4.217657050184844 4.1619442620057345 4.1114097642888 4.062399089324685 4.013292900438474 3.9659534316095195 3.9230260768053635 3.8854941164114183 3.8523719128068215
 </pre>
 </div>
 </div>
-<div id="outline-container-org4fc1e25" class="outline-2">
-<h2 id="org4fc1e25">Step 5 &#x2013; the fine-tune loss curve</h2>
-<div class="outline-text-2" id="text-org4fc1e25">
+<div id="outline-container-orgf2518d0" class="outline-2">
+<h2 id="orgf2518d0">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</h2>
+<div class="outline-text-2" id="text-orgf2518d0">
+<p>
+Same model, same prompt, same sampling seeds &#x2013; only the adapters
+changed. Compare these two numbers and the two continuations to the
+baselines in Step 3.
+</p>
+
+<div class="org-src-container">
+<pre class="src src-mlpl">ppl_after = perplexity(apply(student, X), Y)
+ppl_after
+</pre>
+</div>
+
+<pre class="example">
+47.10466178035338
+</pre>
+
+
+<div class="org-src-container">
+<pre class="src src-mlpl">gen = apply_tokenizer(tok, "the ")
+repeat 24 { logits = apply(student, gen); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); gen = concat(gen, nxt) }
+decode(tok, gen)
+</pre>
+</div>
+
+<pre class="example">
+the �YYYYYYYYYYYHFiii
+</pre>
+
+
+<p>
+Perplexity falls sharply: after fine-tuning the model assigns far higher
+probability to the true next token &#x2013; a concrete before/after
+demonstration that the GPU fine-tune actually taught the adapters, not
+merely that a loss number dropped. (At d=32 on a tiny corpus the model is
+far too small for fluent prose, so both sampled continuations are
+repetitive; the rigorous signal here is the perplexity, while the sampled
+distribution does visibly shift.) The CUDA loss curve is parity-tested
+against the CPU path within fp32 tolerance.
+</p>
+</div>
+</div>
+<div id="outline-container-orgc31638b" class="outline-2">
+<h2 id="orgc31638b">Step 6 &#x2013; the fine-tune loss curve</h2>
+<div class="outline-text-2" id="text-orgc31638b">
 <div class="org-src-container">
 <pre class="src src-mlpl">loss_curve(last_losses)
 </pre>
 </div>
 
-<pre class="example" id="orgad89a34">
-  ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-student = lora(base, 2, 4.0, 7)
-shape(X)
-device("cuda") {
-  to_device(student, "cuda")
-  to_device(X, "cuda")
-  experiment "cuda_lora" {
-    train 30 {
-      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
-      loss_metric = cross_entropy(apply(student, X), Y)
-    }
-  }
-}
-last_losses
-loss_curve(last_losses)
-ids   = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0, 1, 3, 5, 7, 2, 4, 6, 0]
-X_all = shift_pairs_x(ids, 4)
-Y_all = shift_pairs_y(ids, 4)
-X     = reshape(X_all, [reduce_mul(shape(X_all))])
-Y     = reshape(Y_all, [reduce_mul(shape(Y_all))])
-shape(X)
-V = 16 ; d = 8 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 2))
-experiment "cuda_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
-last_losses
-student = lora(base, 2, 4.0, 7)
-shape(X)
-device("cuda") {
-  to_device(student, "cuda")
-  to_device(X, "cuda")
-  experiment "cuda_lora" {
-    train 30 {
-      adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001);
-      loss_metric = cross_entropy(apply(student, X), Y)
-    }
-  }
-}
-last_losses
-loss_curve(last_losses)
-  error: device mismatch: apply on cpu vs cuda
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"><rect width="100%" height="100%" fill="#1e1e2e"/><line x1="30" y1="270" x2="370" y2="270" stroke="#45475a" stroke-width="1"/><line x1="30" y1="30" x2="30" y2="270" stroke="#45475a" stroke-width="1"/><polyline points="30.0,30.0 44.2,43.0 58.3,60.2 72.5,80.8 86.7,103.5 100.8,125.9 115.0,145.4 129.2,161.2 143.3,174.6 157.5,186.3 171.7,196.2 185.8,203.9 200.0,210.2 214.2,216.2 228.3,222.5 242.5,228.9 256.7,234.9 270.8,240.2 285.0,245.1 299.2,249.8 313.3,254.5 327.5,259.1 341.7,263.2 355.8,266.8 370.0,270.0" fill="none" stroke="#a6e3a1" stroke-width="2"/><text x="30.0" y="18" fill="#cdd6f4" font-family="monospace" font-size="12">loss</text><text x="4" y="34.0" fill="#a6adc8" font-family="monospace" font-size="10">6.349</text><text x="4" y="270.0" fill="#a6adc8" font-family="monospace" font-size="10">3.852</text></svg>
+</div>
+</div>
+<div id="outline-container-org022e167" class="outline-2">
+<h2 id="org022e167">How this was run</h2>
+<div class="outline-text-2" id="text-org022e167">
+<p>
+This page needs a CUDA-enabled <code>mlpl-repl</code> (Linux + NVIDIA). Build it once
+(this does NOT touch your installed binary):
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">CUDA_COMPUTE_CAP=120 cargo build -p mlpl-repl --features cuda --release   # -&gt; target/release/mlpl-repl
 </pre>
+</div>
 
 <p>
-The curve drops over the 30 fine-tune steps: measurable learning, run
-end-to-end on the NVIDIA GPU. The same curve on the CPU path matches this
-one within fp32 tolerance (the <code>lora_cuda_finetune_matches_cpu</code> parity
-test), so "it ran on the GPU" and "it learned the same thing" are both
-checkable, not asserted.
+Then publish, pointing the Org-babel backend at that build:
+</p>
+
+<div class="org-src-container">
+<pre class="src src-sh">CUDA_COMPUTE_CAP=120 MLPL_REPL_CMD="$PWD/target/release/mlpl-repl" \
+  ./examples/literate/publish.sh examples/literate/cuda-lora-finetune.org
+</pre>
+</div>
+
+<p>
+Off a CUDA host, <code>device("cuda")</code> transparently falls back to CPU (the
+numbers still match within fp32 tolerance), so the page still publishes &#x2013;
+it just won't be running on a GPU.
 </p>
 </div>
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Created: 2026-06-02 Tue 17:29</p>
+<p class="date">Created: 2026-06-05 Fri 07:56</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

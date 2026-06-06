@@ -1664,6 +1664,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "rayon",
 ]
 
 [[package]]
