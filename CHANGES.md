@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-05
+
+- perf(array): parallelize CPU matmul (rayon) + make CUDA LoRA demo mirror MLX
+
 ## 2026-06-04
 
+- docs(changes): refresh CHANGES.md to HEAD (86c2c51f)
 - fix(ask): model commands are :connect list/set (not :ask subcommands); clearer offline messages
 - feat(ask): Ollama model auto-pick + :ask models/use + disabled-demo tooltips
 - fix(literate): CUDA literate docs on the live demo + index, fix org truncation, add regression guard
