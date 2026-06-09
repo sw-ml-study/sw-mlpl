@@ -204,6 +204,32 @@ a tape during the forward pass; calling `grad(loss, wrt)`
 walks the tape backwards to compute the gradient with respect
 to a tracked parameter.
 
+## Autoregression
+
+Generating a sequence one element at a time, where each new
+element is predicted from all the previous ones -- including the
+model's own earlier outputs, fed back in as input. A language
+model is autoregressive: it predicts the next token from the
+tokens so far, picks one, appends it, and repeats. In training
+this is "next-token prediction" -- [[Cross entropy]] of the
+predicted distribution against the true next token at every
+position at once (teacher forcing); at generation time the loop
+runs for real, feeding each chosen token back in.
+
+Not a primitive: MLPL builds it from existing pieces, so no new
+builtin or demo is required. A [[Causal attention]] model (so
+position `t` never sees `t+1`) plus a generation loop, e.g.
+`repeat N { logits = apply(m, seq); nxt = sample(top_k(last_row(logits), 20), 0.8, step); seq = concat(seq, nxt) }`.
+MLPL: `causal_attention` + `apply` + `last_row` + `sample` /
+`top_k` + `concat`. See the "Tiny LM Generate" demo and the
+generation steps of the LoRA fine-tune literate pages; the
+tic-tac-toe demos apply the same idea to board states, not text.
+
+Distinct from the classical-statistics sense (an AR(p)
+time-series model, where a value is a fixed linear function of
+its last p values). MLPL's neural, [[Sampling]]-driven
+next-token form is the "AI autoregression" the demos use.
+
 ## Axis
 
 A dimension of a tensor. A `[batch, vocab]` tensor has
