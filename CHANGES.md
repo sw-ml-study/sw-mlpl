@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-09
+
+- docs(glossary): define Autoregression (AI next-token vs classical AR)
+
 ## 2026-06-05
 
+- docs(changes): refresh CHANGES.md to HEAD (4a8de239)
 - perf(array): parallelize CPU matmul (rayon) + make CUDA LoRA demo mirror MLX
 
 ## 2026-06-04
