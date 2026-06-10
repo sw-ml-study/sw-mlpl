@@ -18,8 +18,11 @@ use mlpl_monitor_types::Snapshot;
 use mlpl_monitor_types::spark::{metric_percents, sparkline};
 use yew::prelude::*;
 
-const POLL_MS: u32 = 2000;
-const WINDOW: usize = 30;
+// Poll fast (the /v1/stats CPU window is ~120ms, so ~400ms avoids
+// overlap) so even a sub-second GPU fine-tune yields several samples
+// instead of a single bar.
+const POLL_MS: u32 = 400;
+const WINDOW: usize = 48;
 const LABELS: [&str; 4] = ["CPU", "RAM", "GPU", "VRAM"];
 
 /// Ring buffers of the four metric percentages + the freshest snapshot
