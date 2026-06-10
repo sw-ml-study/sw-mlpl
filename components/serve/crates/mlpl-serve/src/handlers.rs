@@ -271,11 +271,18 @@ async fn run_eval(
     let (mut session, value) = join.map_err(|_| "eval task panicked".to_string())?;
     session.env.clear_peer_dispatcher();
     session.env.clear_interrupt();
+    // Surface any user-visible notices (e.g. a silent GPU->CPU fallback)
+    // by prepending them to the result -- but not to an SVG/viz payload,
+    // whose leading `<svg` the client sniffs for.
+    let notices = session.env.take_notices();
     let out = match value {
         Ok(v) => {
             session.last_eval_at = Some(crate::sessions::now_unix_seconds());
             let kind = value_kind(&v);
-            let formatted = format!("{v}");
+            let mut formatted = format!("{v}");
+            if !notices.is_empty() && !formatted.trim_start().starts_with("<svg") {
+                formatted = format!("{}\n{formatted}", notices.join("\n"));
+            }
             let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
             Ok(crate::eval_viz::build_eval_response(
                 &v, kind, formatted, attached,

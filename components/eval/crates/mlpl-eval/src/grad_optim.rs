@@ -224,6 +224,18 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         }
     }
 
+    // Reaching the CPU tape under a GPU device means no GPU fast path
+    // matched this model (only head-only LoRA + the board-policy MLP are
+    // GPU-accelerated today). Surface that to the user once per eval --
+    // the fallback is otherwise silent (looks like the GPU is idle).
+    if env.device() != "cpu" {
+        let dev = env.device().to_string();
+        env.push_notice_once(format!(
+            "note: adam under device(\"{dev}\") ran on the CPU -- this model has no GPU \
+             fast path yet (only head-only LoRA and the board-policy MLP are GPU-accelerated). \
+             See docs/future-saga-gpu-training.md."
+        ));
+    }
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(
