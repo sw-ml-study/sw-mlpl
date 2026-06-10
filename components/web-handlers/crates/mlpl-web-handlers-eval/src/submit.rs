@@ -115,12 +115,23 @@ pub(crate) fn process_next_eval(
     // server's Ollama models; real expressions + the `:ask`
     // shortcut route to mlpl-serve (async, server-side) so the
     // browser never blocks. Each returns true when it took the line.
+    // A pending `:reset` confirmation (armed on the previous line) wins
+    // over every other interpretation of this line -- so the y/N answer
+    // is never lexed as MLPL.
+    #[cfg(target_arch = "wasm32")]
+    if crate::connect::try_reset_answer(&deps, &history, &queue, idx, &line) {
+        return;
+    }
     #[cfg(target_arch = "wasm32")]
     if crate::connect::try_ollama_models(&deps, &history, &queue, idx, &line) {
         return;
     }
     #[cfg(target_arch = "wasm32")]
     if crate::connect::try_status(&deps, &history, &queue, idx, &line) {
+        return;
+    }
+    #[cfg(target_arch = "wasm32")]
+    if crate::connect::try_reset(&deps, &history, &queue, idx, &line) {
         return;
     }
     #[cfg(target_arch = "wasm32")]
@@ -291,6 +302,17 @@ fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
         return HistoryEntry {
             input: trimmed.to_string(),
             output: STATUS_LOCAL.to_string(),
+            is_error: false,
+            kind: EntryKind::Command,
+        };
+    }
+    if trimmed == ":reset" {
+        // Connect-mode `:reset` is handled async upstream
+        // (connect::try_reset); reaching here means no server, so
+        // there is no backend work to cancel.
+        return HistoryEntry {
+            input: trimmed.to_string(),
+            output: "Nothing to reset -- local browser mode, no connected server.".to_string(),
             is_error: false,
             kind: EntryKind::Command,
         };

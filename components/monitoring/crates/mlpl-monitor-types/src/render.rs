@@ -3,7 +3,7 @@
 //! the CLI. Kept here, beside the wire type, so there is one canonical
 //! formatting and it is unit-testable without a browser.
 
-use crate::Snapshot;
+use crate::{Gpu, Snapshot};
 
 /// Format an optional megabyte count as gibibytes with one decimal, or
 /// `"n/a"` when absent. Converts through `u32` (megabytes well under
@@ -23,19 +23,36 @@ pub fn pct(p: Option<f64>) -> String {
     p.map_or_else(|| "n/a".to_string(), |v| format!("{v:.0}%"))
 }
 
-/// The four resource lines of a `:status` report (CPU, RAM, GPU, VRAM).
-/// The caller frames these with the connect URL, device list, and
-/// Ollama state.
+/// One GPU line, e.g. `"    GPU 0: NVIDIA RTX 5080  88%  VRAM 2.1 / 15.9 GB"`.
 #[must_use]
-pub fn status_lines(s: &Snapshot) -> Vec<String> {
-    vec![
-        format!("  CPU  : {}", pct(s.cpu_pct)),
-        format!("  RAM  : {} / {} GB", gb(s.ram_used_mb), gb(s.ram_total_mb)),
-        format!("  GPU  : {}", pct(s.gpu_pct)),
+pub fn gpu_line(index: usize, g: &Gpu) -> String {
+    let name = g.name.as_deref().unwrap_or("GPU");
+    format!(
+        "    GPU {index}: {name}  {}  VRAM {} / {} GB",
+        pct(g.pct),
+        gb(g.vram_used_mb),
+        gb(g.vram_total_mb)
+    )
+}
+
+/// The resource lines of one backend in a `:status` report: CPU, RAM,
+/// then one line per GPU (or a single "GPU : none" line on a GPU-less
+/// host). The caller frames these with the backend index, connect URL,
+/// device list, and Ollama state.
+#[must_use]
+pub fn snapshot_lines(s: &Snapshot) -> Vec<String> {
+    let mut lines = vec![
+        format!("    CPU  : {}", pct(s.cpu_pct)),
         format!(
-            "  VRAM : {} / {} GB",
-            gb(s.vram_used_mb),
-            gb(s.vram_total_mb)
+            "    RAM  : {} / {} GB",
+            gb(s.ram_used_mb),
+            gb(s.ram_total_mb)
         ),
-    ]
+    ];
+    if s.gpus.is_empty() {
+        lines.push("    GPU  : none".to_string());
+    } else {
+        lines.extend(s.gpus.iter().enumerate().map(|(i, g)| gpu_line(i, g)));
+    }
+    lines
 }

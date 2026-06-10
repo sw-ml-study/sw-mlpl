@@ -247,6 +247,115 @@ pub(crate) fn try_status(
     true
 }
 
+/// Synchronously replace the trailing running-marker with a finished
+/// command entry and chain the rest of the queue. For connect commands
+/// that resolve without a fetch (the `:reset` prompt and its abort).
+fn chain_entry(
+    deps: &EvalDeps,
+    history: &[HistoryEntry],
+    queue: &[String],
+    idx: usize,
+    entry: (&str, &str, bool),
+) {
+    let (input, output, is_error) = entry;
+    let mut hist_c = history.to_vec();
+    hist_c.pop();
+    hist_c.push(HistoryEntry {
+        input: input.to_string(),
+        output: output.to_string(),
+        is_error,
+        kind: EntryKind::Command,
+    });
+    deps.history.set(hist_c.clone());
+    crate::submit::process_next_eval(deps.clone(), hist_c, queue.to_vec(), idx + 1);
+}
+
+/// Connect-mode `:reset` (step 1 of 2): ARM the confirmation and print a
+/// (y/N) prompt. `:reset` cancels ALL in-flight work on the backend, so
+/// it never fires on a stray keystroke -- the POST happens only if the
+/// next line confirms (`try_reset_answer`). Returns false in local mode
+/// so the "nothing to reset" handler runs instead.
+pub(crate) fn try_reset(
+    deps: &EvalDeps,
+    history: &[HistoryEntry],
+    queue: &[String],
+    idx: usize,
+    line: &str,
+) -> bool {
+    if line.trim() != ":reset" || mlpl_web_eval::eval::current_connect_url_from_window().is_none() {
+        return false;
+    }
+    mlpl_web_eval::stats_fetch::arm_reset();
+    let prompt = "Cancel ALL in-flight work on the connected backend? This aborts every \
+                  running eval / training loop. Type `y` (or `yes`) to confirm; \
+                  anything else aborts.  (y/N)";
+    chain_entry(deps, history, queue, idx, (":reset", prompt, false));
+    true
+}
+
+/// Consume a pending `:reset` confirmation. Runs FIRST in the dispatch
+/// chain but only acts when `:reset` was armed on the previous line:
+/// `y`/`yes` -> POST /v1/reset; anything else -> abort, no changes.
+/// Returns true when it consumed the line.
+pub(crate) fn try_reset_answer(
+    deps: &EvalDeps,
+    history: &[HistoryEntry],
+    queue: &[String],
+    idx: usize,
+    line: &str,
+) -> bool {
+    if !mlpl_web_eval::stats_fetch::take_reset_armed() {
+        return false;
+    }
+    let ans = line.trim().to_ascii_lowercase();
+    if ans == "y" || ans == "yes" {
+        post_reset(deps, history, queue, idx);
+    } else {
+        chain_entry(
+            deps,
+            history,
+            queue,
+            idx,
+            (line, "reset aborted -- no changes.", false),
+        );
+    }
+    true
+}
+
+/// POST `/v1/reset` (confirmed): cancel all in-flight evals on the
+/// server, render the cancel count, and chain the queue.
+fn post_reset(deps: &EvalDeps, history: &[HistoryEntry], queue: &[String], idx: usize) {
+    let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
+        chain_entry(
+            deps,
+            history,
+            queue,
+            idx,
+            (":reset", "error: not connected", true),
+        );
+        return;
+    };
+    let hist_handle = deps.history.clone();
+    let deps_c = deps.clone();
+    let queue_c = queue.to_vec();
+    let mut hist_c = history.to_vec();
+    mlpl_web_eval::stats_fetch::fetch_reset(
+        base,
+        Box::new(move |result: String| {
+            let is_error = result.starts_with("error:");
+            hist_c.pop();
+            hist_c.push(HistoryEntry {
+                input: ":reset".to_string(),
+                output: result,
+                is_error,
+                kind: EntryKind::Command,
+            });
+            hist_handle.set(hist_c.clone());
+            crate::submit::process_next_eval(deps_c, hist_c, queue_c, idx + 1);
+        }),
+    );
+}
+
 /// Dispatch `line` to the connected server (async) when a connect
 /// URL is set and the line is server-eligible, chaining the rest
 /// of the queue in the result callback so line order is kept.

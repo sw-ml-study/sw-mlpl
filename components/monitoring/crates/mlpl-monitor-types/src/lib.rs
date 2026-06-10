@@ -9,4 +9,4 @@
 pub mod render;
 pub mod snapshot;
 
-pub use snapshot::Snapshot;
+pub use snapshot::{Gpu, Snapshot};
