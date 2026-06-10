@@ -12,6 +12,13 @@ path = "src/lib.rs"
 mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
 mlpl-web-path-body = { path = "../../../web/crates/mlpl-web-path-body" }
 mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
+# Live "evaluating..." telemetry panel: poll the connected backend's
+# /v1/stats and draw CPU/GPU/RAM/VRAM sparklines. Shared wire type +
+# pure sparkline rendering from the monitoring component (leaf dep).
+mlpl-monitor-types = { path = "../../../monitoring/crates/mlpl-monitor-types" }
+gloo = { version = "0.11", features = ["net", "timers", "futures"] }
+wasm-bindgen-futures = "0.4"
+serde_json = "1"
 wasm-bindgen = "0.2"
 web-sys = { version = "0.3", features = [
     "Element",

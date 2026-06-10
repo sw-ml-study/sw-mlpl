@@ -103,9 +103,14 @@ async fn status_report(base_url: &str, ollama_ready: bool) -> String {
     } else {
         "not configured"
     };
+    let host = devices
+        .as_ref()
+        .and_then(|d| d.get("hostname"))
+        .and_then(serde_json::Value::as_str);
+    let head = host.map_or_else(|| format!("[1] {base}"), |h| format!("[1] {h}  ({base})"));
     let mut out = vec![
         "Status: 1 backend connected".to_string(),
-        format!("[1] {base}"),
+        head,
         format!("    devices : {}", device_list(devices.as_ref())),
     ];
     out.extend(snapshot_lines(&snap));

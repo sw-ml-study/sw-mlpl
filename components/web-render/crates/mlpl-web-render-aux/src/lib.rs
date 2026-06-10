@@ -8,4 +8,5 @@ pub mod editor_panel;
 pub mod entry;
 pub mod plotly_panel;
 pub mod resize_handle;
+pub mod telemetry_panel;
 pub mod tutorial;

@@ -94,6 +94,9 @@ pub fn render_entry(entry: &HistoryEntry) -> Html {
                     <span class="spinner" aria-hidden="true"></span>
                     <span class="running-text">{ &entry.output }</span>
                 </div>
+                // Live backend CPU/GPU/RAM/VRAM sparklines while a
+                // connect-mode eval runs; renders nothing in local mode.
+                <crate::telemetry_panel::TelemetryPanel />
             </div>
         };
     }

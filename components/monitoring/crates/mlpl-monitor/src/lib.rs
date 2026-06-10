@@ -8,6 +8,8 @@
 //! field is `None` (a valid, honest "unknown" reading).
 
 mod gather;
+mod host;
 
 pub use gather::snapshot;
+pub use host::hostname;
 pub use mlpl_monitor_types::Snapshot;

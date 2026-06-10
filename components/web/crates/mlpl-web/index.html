@@ -754,6 +754,32 @@
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
+        .telemetry-panel {
+            margin: 4px 0 2px 24px;
+            font-family: var(--mono);
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .telemetry-row {
+            display: flex;
+            gap: 8px;
+            line-height: 1.35;
+        }
+        .telemetry-label {
+            color: var(--subtext1, #9aa);
+            width: 3.2em;
+        }
+        .telemetry-spark {
+            color: var(--green, #8ada8a);
+            letter-spacing: 1px;
+            min-width: 13em;
+            white-space: pre;
+        }
+        .telemetry-val {
+            color: var(--subtext1, #9aa);
+            text-align: right;
+            width: 3em;
+        }
         .output-summary {
             margin: 2px 0 8px 0;
         }

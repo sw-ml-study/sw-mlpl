@@ -11,6 +11,10 @@ use serde::Serialize;
 #[derive(Serialize)]
 pub struct DevicesResponse {
     pub devices: Vec<&'static str>,
+    /// Host network name (for `:status` to show before the connect IP).
+    /// `None` when the host cannot report it.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hostname: Option<String>,
 }
 
 /// The devices this build can dispatch: `cpu` always, plus `mlx` /
@@ -36,10 +40,11 @@ pub fn compiled_devices() -> Vec<&'static str> {
     devices
 }
 
-/// Report this server's in-process device set.
+/// Report this server's in-process device set + host name.
 pub async fn devices_handler() -> impl IntoResponse {
     Json(DevicesResponse {
         devices: compiled_devices(),
+        hostname: mlpl_monitor::hostname(),
     })
 }
 
