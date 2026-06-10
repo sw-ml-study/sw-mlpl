@@ -1,0 +1,9 @@
+number = 1
+slug = "diffusion-2d-demo"
+status = "in-progress"
+description = "Step 1 of stable-diffusion: ship the diffusion ALGORITHM in the browser (tiny..."
+role = "production"
+context_files = []
+created_at = "2026-06-09T17:46:29"
+task_type = "production"
+commits = []
