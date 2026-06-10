@@ -1,12 +1,14 @@
 //! `<TelemetryPanel>` -- live backend CPU/GPU/RAM/VRAM sparklines shown
-//! beneath the "evaluating..." marker during a connect-mode eval.
+//! beside the "evaluating..." marker during a connect-mode eval.
 //!
-//! Mount starts a ~2.5s poll of `GET /v1/stats`; unmount (when the
-//! marker is replaced by the result) drops the interval, so polling is
-//! bounded to the lifetime of the running line. Renders nothing in
-//! local mode (no connected backend to poll). The sample buffers live
-//! in a `RefCell` (the poll closure appends without the stale
-//! state-handle problem); a bumped `use_state` seq drives the re-render.
+//! Mount starts a ~2s poll of `GET /v1/stats`; unmount (when the marker
+//! is replaced by the result) drops the interval, so polling is bounded
+//! to the lifetime of the running line. Renders nothing in local mode
+//! (no connected backend). Sample buffers live in a `RefCell` (the poll
+//! closure appends without the stale state-handle problem); a
+//! seq-bumped `use_state` drives the re-render -- bumped on EVERY poll
+//! (success or error) so a failed fetch surfaces its error rather than
+//! freezing the panel.
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -16,17 +18,18 @@ use mlpl_monitor_types::Snapshot;
 use mlpl_monitor_types::spark::{metric_percents, sparkline};
 use yew::prelude::*;
 
-const POLL_MS: u32 = 2500;
-const WINDOW: usize = 24;
-const LABELS: [&str; 4] = ["CPU ", "RAM ", "GPU ", "VRAM"];
+const POLL_MS: u32 = 2000;
+const WINDOW: usize = 30;
+const LABELS: [&str; 4] = ["CPU", "RAM", "GPU", "VRAM"];
 
 /// Ring buffers of the four metric percentages + the freshest snapshot
-/// (for the numeric labels) + a monotonic seq the component mirrors
-/// into a `use_state` to force a re-render on each new sample.
+/// + the last fetch error (shown when polling fails) + a monotonic seq
+/// the component mirrors into a `use_state` to force a re-render.
 #[derive(Default)]
 struct Series {
     rows: [Vec<u32>; 4],
     latest: Option<Snapshot>,
+    note: Option<String>,
     seq: u32,
 }
 
@@ -40,44 +43,74 @@ impl Series {
             }
         }
         self.latest = Some(s);
+        self.note = None;
         self.seq = self.seq.wrapping_add(1);
     }
 }
 
-/// One-shot `GET <base>/v1/stats`; on success appends to the buffers
-/// and bumps `tick` (its new value forces the component to re-render).
+/// `GET <url>` -> Snapshot, with a human-readable error string on any
+/// transport / status / decode failure (surfaced in the panel).
+async fn fetch_snapshot(url: &str) -> Result<Snapshot, String> {
+    let resp = gloo::net::http::Request::get(url)
+        .send()
+        .await
+        .map_err(|e| format!("net: {e}"))?;
+    if !resp.ok() {
+        return Err(format!("HTTP {}", resp.status()));
+    }
+    resp.json::<Snapshot>()
+        .await
+        .map_err(|e| format!("decode: {e}"))
+}
+
+/// One poll: fetch, record success or error into the buffers, then bump
+/// `tick` (its new value forces the component to re-render either way).
 fn poll_once(base: &str, series: &Rc<RefCell<Series>>, tick: &UseStateHandle<u32>) {
     let url = format!("{}/v1/stats", base.trim_end_matches('/'));
     let series = series.clone();
     let tick = tick.clone();
     wasm_bindgen_futures::spawn_local(async move {
-        if let Ok(resp) = gloo::net::http::Request::get(&url).send().await {
-            if let Ok(snap) = resp.json::<Snapshot>().await {
-                series.borrow_mut().push(snap);
-                let seq = series.borrow().seq;
-                tick.set(seq);
+        let outcome = fetch_snapshot(&url).await;
+        let seq = {
+            let mut s = series.borrow_mut();
+            match outcome {
+                Ok(snap) => s.push(snap),
+                Err(e) => {
+                    s.note = Some(e);
+                    s.seq = s.seq.wrapping_add(1);
+                }
             }
-        }
+            s.seq
+        };
+        tick.set(seq);
     });
 }
 
 fn render_rows(series: &Series) -> Html {
     let pcts = series.latest.as_ref().map_or([0u32; 4], metric_percents);
-    let rows = series
+    let metrics = series
         .rows
         .iter()
         .enumerate()
         .map(|(i, buf)| {
             html! {
-                <div class="telemetry-row">
+                <span class="telemetry-metric">
                     <span class="telemetry-label">{ LABELS[i] }</span>
                     <span class="telemetry-spark">{ sparkline(buf, 100) }</span>
                     <span class="telemetry-val">{ format!("{}%", pcts[i]) }</span>
-                </div>
+                </span>
             }
         })
         .collect::<Html>();
-    html! { <div class="telemetry-panel">{ rows }</div> }
+    let note = series.note.as_ref().map_or_else(
+        || html! {},
+        |n| html! { <span class="telemetry-note">{ format!("(stats {n})") }</span> },
+    );
+    html! {
+        <div class="telemetry-panel">
+            <div class="telemetry-line">{ metrics }{ note }</div>
+        </div>
+    }
 }
 
 #[function_component(TelemetryPanel)]
