@@ -8,5 +8,6 @@
 
 pub mod render;
 pub mod snapshot;
+pub mod spark;
 
 pub use snapshot::{Gpu, Snapshot};

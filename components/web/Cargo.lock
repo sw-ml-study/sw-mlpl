@@ -2096,11 +2096,15 @@ version = "0.20.0"
 name = "mlpl-web-render-aux"
 version = "0.20.0"
 dependencies = [
+ "gloo 0.11.0",
  "js-sys",
+ "mlpl-monitor-types",
  "mlpl-web-eval",
  "mlpl-web-path-body",
  "mlpl-web-tutorial",
+ "serde_json",
  "wasm-bindgen",
+ "wasm-bindgen-futures",
  "web-sys",
  "yew",
 ]

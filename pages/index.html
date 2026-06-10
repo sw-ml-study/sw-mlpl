@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-c9db01154d93d235.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-c9db01154d93d235_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-952b6a93041f9c56.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-952b6a93041f9c56_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -764,6 +764,32 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         @keyframes spin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
+        }
+        .telemetry-panel {
+            margin: 4px 0 2px 24px;
+            font-family: var(--mono);
+            font-size: 13px;
+            opacity: 0.85;
+        }
+        .telemetry-row {
+            display: flex;
+            gap: 8px;
+            line-height: 1.35;
+        }
+        .telemetry-label {
+            color: var(--subtext1, #9aa);
+            width: 3.2em;
+        }
+        .telemetry-spark {
+            color: var(--green, #8ada8a);
+            letter-spacing: 1px;
+            min-width: 13em;
+            white-space: pre;
+        }
+        .telemetry-val {
+            color: var(--subtext1, #9aa);
+            text-align: right;
+            width: 3em;
         }
         .output-summary {
             margin: 2px 0 8px 0;
@@ -1814,7 +1840,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-c9db01154d93d235.js" crossorigin="anonymous" integrity="sha384-MG3UuFAGkHV50LV4tD5VVRTdVUhinaiNjTkNfABhgrom63doTROpsXIV/hn3AooB"><link rel="preload" href="/sw-mlpl/mlpl-web-c9db01154d93d235_bg.wasm" crossorigin="anonymous" integrity="sha384-w0cV9DbEfjS9YZr0NW6b8HBv0TFHre7FVBdtJcSx+N9miqpOmLSbJ/Ub9RGZGp4W" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-952b6a93041f9c56.js" crossorigin="anonymous" integrity="sha384-OJRYKKhKETrevzUE7te0rmL/4T+2dnAj93LSs4rjdReLeIBtd6jnY5jhwVtosIaL"><link rel="preload" href="/sw-mlpl/mlpl-web-952b6a93041f9c56_bg.wasm" crossorigin="anonymous" integrity="sha384-DnGcNgjDpdwXCo/hqJh5jgmei6K40QO0JBvYL4QWQKIdmdI/r5KdrImLcvofNre0" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
