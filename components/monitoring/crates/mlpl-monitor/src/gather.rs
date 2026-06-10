@@ -17,7 +17,13 @@ pub async fn snapshot() -> Snapshot {
     use mlpl_monitor_types::Gpu;
     let cpu_pct = cpu_percent().await;
     let ram = mem::usage();
-    let gpus = gpu::query()
+    // nvidia-smi can block for a while under heavy GPU load (e.g. while a
+    // large Ollama model loads), so run it off the async runtime to keep
+    // /v1/stats responsive for the live telemetry pollers.
+    let gpu_rows = tokio::task::spawn_blocking(gpu::query)
+        .await
+        .unwrap_or_default();
+    let gpus = gpu_rows
         .into_iter()
         .map(|(name, pct, used, total)| Gpu {
             name: Some(name),
