@@ -72,6 +72,11 @@ pub struct CancelResponse {
 }
 
 #[derive(Serialize)]
+pub struct ResetResponse {
+    pub cancelled: usize,
+}
+
+#[derive(Serialize)]
 pub struct ErrorResponse {
     pub error: String,
 }
@@ -220,6 +225,27 @@ pub async fn cancel_handler(
     }
     entry.interrupt.set();
     Ok(Json(CancelResponse { cancelled: true }))
+}
+
+/// `POST /v1/reset` -- no auth, no session id. Sets the interrupt flag
+/// on EVERY registered session so any in-flight eval (notably a
+/// training loop) aborts at its next checkpoint and releases the
+/// sessions write-lock. This is the UI's recovery path when it has lost
+/// its session id+token (e.g. after a shift-reload during a heavy
+/// demo): a fresh page can free the backend without a process restart.
+/// It deliberately needs no bearer (the reloaded page has none) and
+/// uses the lock-free interrupt map, so it runs even while an orphaned
+/// eval holds the sessions write-lock. Threat model: loopback/LAN; the
+/// blast radius is "cancel in-flight work", not data access or code
+/// execution. Returns how many sessions were signalled.
+pub async fn reset_handler(State(state): State<AppState>) -> impl IntoResponse {
+    let interrupts = state.interrupts.read().await;
+    for entry in interrupts.values() {
+        entry.interrupt.set();
+    }
+    Json(ResetResponse {
+        cancelled: interrupts.len(),
+    })
 }
 
 /// `GET /v1/health` -- no auth. Liveness +

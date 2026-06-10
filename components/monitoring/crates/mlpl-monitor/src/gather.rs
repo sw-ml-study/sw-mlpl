@@ -14,16 +14,23 @@ const CPU_WINDOW_MS: u64 = 120;
 #[cfg(target_os = "linux")]
 pub async fn snapshot() -> Snapshot {
     use mlpl_monitor_linux::{gpu, mem};
+    use mlpl_monitor_types::Gpu;
     let cpu_pct = cpu_percent().await;
     let ram = mem::usage();
-    let g = gpu::query();
+    let gpus = gpu::query()
+        .into_iter()
+        .map(|(name, pct, used, total)| Gpu {
+            name: Some(name),
+            pct: Some(pct),
+            vram_used_mb: Some(used),
+            vram_total_mb: Some(total),
+        })
+        .collect();
     Snapshot {
         cpu_pct,
         ram_used_mb: ram.map(|r| r.0),
         ram_total_mb: ram.map(|r| r.1),
-        gpu_pct: g.map(|x| x.0),
-        vram_used_mb: g.map(|x| x.1),
-        vram_total_mb: g.map(|x| x.2),
+        gpus,
     }
 }
 

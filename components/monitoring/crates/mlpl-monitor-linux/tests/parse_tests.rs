@@ -32,14 +32,26 @@ fn parse_meminfo_rejects_missing_available() {
 }
 
 #[test]
-fn parse_smi_reads_first_gpu_row() {
-    let (pct, used, total) = gpu::parse_smi("0, 278, 16311\n1, 9000, 16311\n").expect("smi parses");
-    assert!((pct - 0.0).abs() < f64::EPSILON);
-    assert_eq!(used, 278);
-    assert_eq!(total, 16311);
+fn parse_smi_reads_all_gpu_rows_with_names() {
+    let rows = gpu::parse_smi(
+        "NVIDIA GeForce RTX 5080, 88, 2100, 16311\nNVIDIA GeForce RTX 5080, 0, 10, 16311\n",
+    );
+    assert_eq!(rows.len(), 2);
+    assert_eq!(rows[0].0, "NVIDIA GeForce RTX 5080");
+    assert!((rows[0].1 - 88.0).abs() < f64::EPSILON);
+    assert_eq!(rows[0].2, 2100);
+    assert_eq!(rows[1].3, 16311);
 }
 
 #[test]
-fn parse_smi_rejects_short_row() {
-    assert_eq!(gpu::parse_smi("88\n"), None);
+fn parse_smi_skips_short_rows() {
+    // First row malformed (no numbers) -> skipped; second row kept.
+    let rows = gpu::parse_smi("88\nNVIDIA A, 5, 100, 200\n");
+    assert_eq!(rows.len(), 1);
+    assert_eq!(rows[0].0, "NVIDIA A");
+}
+
+#[test]
+fn parse_smi_empty_is_empty() {
+    assert!(gpu::parse_smi("").is_empty());
 }
