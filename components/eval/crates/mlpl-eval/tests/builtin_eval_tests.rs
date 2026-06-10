@@ -24,6 +24,25 @@ fn iota_5() {
 }
 
 #[test]
+fn linspace_inclusive() {
+    let arr = eval("linspace(0.0, 1.0, 5)").unwrap();
+    assert_eq!(arr.shape(), &Shape::vector(5));
+    assert_eq!(arr.data(), &[0.0, 0.25, 0.5, 0.75, 1.0]);
+}
+
+#[test]
+fn linspace_single_is_start() {
+    assert_eq!(eval("linspace(3.0, 9.0, 1)").unwrap().data(), &[3.0]);
+}
+
+#[test]
+fn cumprod_running_product() {
+    let arr = eval("cumprod([1.0, 2.0, 3.0, 4.0])").unwrap();
+    assert_eq!(arr.shape(), &Shape::vector(4));
+    assert_eq!(arr.data(), &[1.0, 2.0, 6.0, 24.0]);
+}
+
+#[test]
 fn shape_vector() {
     let arr = eval("shape([1, 2, 3])").unwrap();
     assert_eq!(arr.shape(), &Shape::vector(1));

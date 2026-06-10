@@ -35,6 +35,9 @@ const SKIP_DEMOS: &[&str] = &[
     "CUDA tic-tac-toe fine-tune",
     "Tiny LM",
     "Tiny LM Generate",
+    // 200-step train over a multi-timestep noised dataset: heavy. The
+    // diffusion_2d eval test covers correctness; heavy test covers the run.
+    "Diffusion (2D points)",
     "Moons MLP",
     "Circles MLP",
     "Transformer Block",

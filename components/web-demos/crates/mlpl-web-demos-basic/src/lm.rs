@@ -218,3 +218,27 @@ pub const TINY_MLP: Demo = Demo {
         "boundary_2d(p1, [30, 30], X, y)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          # the decision surface that XOR needs",
     ],
 };
+
+/// The diffusion ALGORITHM with no conv and no pretrained weights, on a
+/// 2D dataset so it runs on the browser CPU. Step 1 of the
+/// stable-diffusion saga; see docs/saga-stable-diffusion.md.
+pub const DIFFUSION_2D: Demo = Demo {
+    category: "Generative Models",
+    name: "Diffusion (2D points)",
+    intro: "How diffusion models generate -- the whole algorithm in MLPL, no convolution and no pretrained weights, so it runs on the browser CPU. We build a linear NOISE SCHEDULE (linspace betas -> cumprod alpha-bar), run the FORWARD process to noise the two-moons dataset at every timestep, train a tiny MLP to PREDICT the added noise, then run the REVERSE process: start from pure noise and denoise step by step back onto the moons. This is the non-autoregressive way to generate (see the Glossary's Autoregression / Diffusion entries); image U-Nets and real Stable Diffusion scale the same recipe on a connected GPU.",
+    takeaway: "A diffusion model is just a noise-predictor plus a schedule. The noise-prediction loss falls as the MLP learns to undo the forward noising; the reverse loop then turns random points into samples shaped like the data. linspace/cumprod build the schedule; the forward step is one line (sqrt(abar)*x0 + sqrt(1-abar)*noise).",
+    lines: &[
+        "M  = moons(1, 120, 0.08)                       # two-moons (x, y, label)",
+        "X0 = matmul(M, [[1, 0], [0, 1], [0, 0]])       # drop the label -> [120, 2] points",
+        "N  = 120",
+        "T = 12 ; betas = linspace(0.0001, 0.08, T) ; alphas = 1 - betas ; abar = cumprod(alphas)  # linear noise schedule",
+        "started = 0 ; TX = fill([1, 3], 0) ; TY = fill([1, 2], 0) ; t = 0",
+        "while gt(T, t) { ab = take(abar, 0, t) ; eps = randn(t + 7, [N, 2]) ; Xt = sqrt(ab) * X0 + sqrt(1 - ab) * eps ; tcol = fill([N, 1], t / T) ; xin = concat(Xt, tcol, 1) ; if eq(started, 0) { TX = xin ; TY = eps ; started = 1 } else { TX = concat(TX, xin, 0) ; TY = concat(TY, eps, 0) } ; t = t + 1 }  # forward-noise at every timestep; collect (x_t, t) -> the noise added",
+        "m = chain(linear(3, 64, 0), relu_layer(), linear(64, 2, 1))  # the denoiser: predicts the noise from (point, timestep)",
+        "experiment \"diffusion_2d\" { train 200 { adam(mean((apply(m, TX) - TY) * (apply(m, TX) - TY)), m, 0.01, 0.9, 0.999, 0.00000001) ; loss_metric = mean((apply(m, TX) - TY) * (apply(m, TX) - TY)) } }  # train the noise-predictor",
+        "loss_curve(last_losses)                        # noise-prediction loss falls",
+        "xs = randn(99, [N, 2]) ; i = 0",
+        "while gt(T, i) { t = T - 1 - i ; ab = take(abar, 0, t) ; a = take(alphas, 0, t) ; b = take(betas, 0, t) ; tcol = fill([N, 1], t / T) ; eps = apply(m, concat(xs, tcol, 1)) ; xs = (xs - (b / sqrt(1 - ab)) * eps) / sqrt(a) ; i = i + 1 }  # reverse: denoise from pure noise back toward the manifold",
+        "svg(xs, \"scatter\")                            # the generated points",
+    ],
+};
