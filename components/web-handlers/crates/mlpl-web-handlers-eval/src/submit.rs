@@ -66,6 +66,18 @@ fn classify_line(
         return;
     }
     new_cmds.push(trimmed.to_string());
+    // `:<cmd> --help` is REPL command help (vs bare args = command
+    // input). Intercept it here so it works in both connect + local mode
+    // and never routes to the server / Ollama.
+    if let Some(help) = crate::help::command_help(trimmed) {
+        new_history.push(HistoryEntry {
+            input: trimmed.to_string(),
+            output: help,
+            is_error: false,
+            kind: EntryKind::Command,
+        });
+        return;
+    }
     if trimmed == ":clear" {
         deps.session.borrow().clear();
         new_history.clear();
