@@ -38,6 +38,8 @@ const SKIP_DEMOS: &[&str] = &[
     // 200-step train over a multi-timestep noised dataset: heavy. The
     // diffusion_2d eval test covers correctness; heavy test covers the run.
     "Diffusion (2D points)",
+    // 1200-step adversarial train (D + 2x G per step): heavy.
+    "GAN (2D circle)",
     "Moons MLP",
     "Circles MLP",
     "Transformer Block",
