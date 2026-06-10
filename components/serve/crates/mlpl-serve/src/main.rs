@@ -69,11 +69,27 @@ fn main() -> ExitCode {
     }
 }
 
+/// Cap rayon's global thread pool at `cores - 2` (min 1) so the array
+/// crate's parallel matmul can never saturate every core. Without this,
+/// a CPU-heavy eval (e.g. an attention + vocab-projection pretrain)
+/// starves the async runtime and concurrent requests -- notably the
+/// telemetry panel's `GET /v1/stats` polls -- queue until the eval ends.
+/// Reserving 2 cores keeps HTTP serving responsive during the eval.
+/// Best-effort: a no-op if the global pool is already initialized.
+fn reserve_cores_for_serving() {
+    let total = std::thread::available_parallelism().map_or(4, std::num::NonZeroUsize::get);
+    let workers = total.saturating_sub(2).max(1);
+    let _ = rayon::ThreadPoolBuilder::new()
+        .num_threads(workers)
+        .build_global();
+}
+
 /// Build the tokio runtime, resolve TLS + peers, and dispatch to
 /// `server::run`. Extracted from `main` so the body stays under
 /// the sw-checklist 50-line LOC budget while still surfacing
 /// every error to stderr.
 fn run_main(args: Args) -> Result<(), String> {
+    reserve_cores_for_serving();
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()

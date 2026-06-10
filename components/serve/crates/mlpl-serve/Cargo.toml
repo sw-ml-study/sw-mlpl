@@ -42,6 +42,11 @@ mlpl-model-viz = { path = "../../../web-viz-ir/crates/mlpl-model-viz" }
 # live "evaluating..." sparklines + the :status self-test. Platform
 # sources live in the monitoring component; serve stays platform-agnostic.
 mlpl-monitor = { path = "../../../monitoring/crates/mlpl-monitor" }
+# Cap rayon's global pool at startup (cores - 2) so the parallel matmul
+# leaves headroom for the async runtime to keep serving /v1/stats (the
+# live telemetry panel) while a CPU-heavy eval runs. Same rayon the
+# array crate's matmul uses, configured via its global pool.
+rayon = "1"
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
 # Saga 21.5 step 001: ReceiverStream adapter so an axum SSE

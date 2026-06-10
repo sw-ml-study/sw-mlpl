@@ -2121,6 +2121,7 @@ dependencies = [
  "mlpl-parser",
  "mlpl-web-viz-ir",
  "rand 0.8.6",
+ "rayon",
  "rcgen",
  "reqwest",
  "rustls",
