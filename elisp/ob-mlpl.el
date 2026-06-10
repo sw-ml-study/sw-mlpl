@@ -58,23 +58,52 @@ Emacs (minimal PATH) finds the installed binary."
   "Expand BODY according to MLPL source block PARAMS."
   body)
 
-(defvar org-babel-mlpl--sessions (make-hash-table :test 'equal)
-  "Per-session accumulated state.
-Maps a `:session' name to a cons (ACCUMULATED-SOURCE . LAST-OUTPUT).
-MLPL has no live interpreter process, so a \"session\" is the
-concatenation of every block run in it so far: each block re-runs the
-whole accumulated program through `mlpl-repl -f' and returns only the
-output its own lines added.  MLPL script output is deterministic and
-append-only, so the delta is exact.")
+(defvar org-babel-mlpl--procs (make-hash-table :test 'equal)
+  "Maps a `:session' name to a cons (PROCESS . SVG-DIR).
+The PROCESS is a persistent `mlpl-repl --babel-session' that keeps one
+live interpreter Environment: each block's lines are sent to it and the
+state (variables, models, tokenizers, optimizer moments) persists, so a
+block is O(1) in the prior blocks rather than re-running the whole
+accumulated program.  Reusing the script path keeps per-block output
+identical to `mlpl-repl -f'.")
+
+(defconst org-babel-mlpl--block-eof "__MLPL_BABEL_EOF__"
+  "Line sent after a block to ask the session to evaluate it.")
+(defconst org-babel-mlpl--block-done "__MLPL_BABEL_DONE__"
+  "Line the session prints after a block's output, framing the result.")
+
+(defun org-babel-mlpl--proc (session)
+  "Get or start the persistent `--babel-session' process for SESSION.
+Returns a cons (PROCESS . SVG-DIR)."
+  (let ((cell (gethash session org-babel-mlpl--procs)))
+    (if (and cell (process-live-p (car cell)))
+        cell
+      (let* ((prog (org-babel-mlpl--program))
+             (svg-dir (make-temp-file "mlpl-ob-svg-" t))
+             (buf (generate-new-buffer (format " *mlpl-session:%s*" session)))
+             (proc (apply #'start-process
+                          (format "mlpl-session:%s" session) buf (car prog)
+                          (append (cdr prog)
+                                  (list "--babel-session" "--svg-out" svg-dir))))
+             (new (cons proc svg-dir)))
+        (set-process-query-on-exit-flag proc nil)
+        (puthash session new org-babel-mlpl--procs)
+        new))))
 
 (defun org-babel-mlpl-reset-session (&optional session)
-  "Clear accumulated state for SESSION (or all sessions when nil).
-Call before re-running a buffer top-to-bottom interactively so blocks
-are not appended to the session twice."
+  "Kill the persistent process(es) for SESSION (or all when nil).
+Call before re-running a buffer top-to-bottom so each block starts from
+a fresh interpreter Environment."
   (interactive)
-  (if session
-      (remhash session org-babel-mlpl--sessions)
-    (clrhash org-babel-mlpl--sessions))
+  (let ((kill (lambda (cell)
+                (when (process-live-p (car cell))
+                  (delete-process (car cell))))))
+    (if session
+        (when-let ((cell (gethash session org-babel-mlpl--procs)))
+          (funcall kill cell)
+          (remhash session org-babel-mlpl--procs))
+      (maphash (lambda (_k cell) (funcall kill cell)) org-babel-mlpl--procs)
+      (clrhash org-babel-mlpl--procs)))
   (message "MLPL session(s) reset"))
 
 (defun org-babel-mlpl--run-source (source)
@@ -96,17 +125,29 @@ are not appended to the session twice."
     (cons exit-code output)))
 
 (defun org-babel-mlpl--session-output (session body)
-  "Append BODY to SESSION's program, re-run it, return the new output only."
-  (let* ((prev (gethash session org-babel-mlpl--sessions '("" . "")))
-         (new-src (concat (car prev) body "\n"))
-         (res (org-babel-mlpl--run-source new-src))
-         (new-out (cdr res)))
-    (unless (zerop (car res))
-      (org-babel-eval-error-notify (car res) new-out))
-    (puthash session (cons new-src new-out) org-babel-mlpl--sessions)
-    (if (string-prefix-p (cdr prev) new-out)
-        (substring new-out (length (cdr prev)))
-      new-out)))
+  "Evaluate BODY in SESSION's persistent process; return its output.
+Sends BODY plus the EOF sentinel, then collects everything the process
+prints up to the DONE sentinel -- that block's output, with state
+carried over from earlier blocks in the session."
+  (let* ((cell (org-babel-mlpl--proc session))
+         (proc (car cell))
+         (buf (process-buffer proc))
+         (start (with-current-buffer buf (point-max)))
+         (done-re (concat "^" (regexp-quote org-babel-mlpl--block-done) "$"))
+         (deadline (+ (float-time) 600)))
+    (process-send-string proc (concat body "\n" org-babel-mlpl--block-eof "\n"))
+    (catch 'done
+      (while t
+        (with-current-buffer buf
+          (save-excursion
+            (goto-char start)
+            (when (re-search-forward done-re nil t)
+              (throw 'done
+                     (string-trim
+                      (buffer-substring-no-properties start (match-beginning 0)))))))
+        (when (> (float-time) deadline)
+          (error "MLPL session %S timed out waiting for block result" session))
+        (accept-process-output proc 0.2)))))
 
 (defun org-babel-mlpl--inline-svgs (output)
   "Replace each `viz: <path>.svg' line in OUTPUT with the file's contents.
@@ -196,11 +237,12 @@ result as a string."
                             ""))))
       output)))
 
-(defun org-babel-prep-session:mlpl (_session _params)
-  "MLPL has no live session buffer to switch to.
-`:session' state is the accumulated program (see
-`org-babel-mlpl--sessions'); there is no inferior process to visit."
-  (error "MLPL :session has no live buffer; state accumulates per block"))
+(defun org-babel-prep-session:mlpl (session _params)
+  "Return the buffer of SESSION's persistent `--babel-session' process,
+starting it if needed."
+  (if (and session (not (string= session "none")))
+      (process-buffer (car (org-babel-mlpl--proc session)))
+    (error "MLPL :session needs a name (got %S)" session)))
 
 (defun org-babel-mlpl-var-to-mlpl (var)
   "Convert an elisp VAR to an MLPL value string."

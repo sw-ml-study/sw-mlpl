@@ -30,6 +30,8 @@ pub(crate) struct Config {
     pub exp_dir: Option<PathBuf>,
     pub trace: bool,
     pub verbose: bool,
+    /// `--babel-session`: persistent stdin block loop for ob-mlpl.
+    pub babel_session: bool,
 }
 
 /// Parse raw argv (including argv[0]) into a `Config`.
@@ -45,6 +47,7 @@ pub(crate) fn parse(raw: Vec<String>) -> Config {
         trace: args.iter().any(|a| a == "--trace"),
         // Quiet by default; -v/--verbose echoes each script line.
         verbose: args.iter().any(|a| a == "-v" || a == "--verbose"),
+        babel_session: args.iter().any(|a| a == "--babel-session"),
         script_args,
         connect_args: args,
     }
