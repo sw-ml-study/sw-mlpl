@@ -6,6 +6,7 @@
 //! crate is a pure leaf -- no platform code -- so both the server and
 //! any client can depend on the same contract.
 
+pub mod render;
 pub mod snapshot;
 
 pub use snapshot::Snapshot;
