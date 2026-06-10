@@ -120,6 +120,10 @@ pub(crate) fn process_next_eval(
         return;
     }
     #[cfg(target_arch = "wasm32")]
+    if crate::connect::try_status(&deps, &history, &queue, idx, &line) {
+        return;
+    }
+    #[cfg(target_arch = "wasm32")]
     if crate::connect::try_connect_eval(&deps, &history, &queue, idx, &line) {
         return;
     }
@@ -218,6 +222,11 @@ fn history_listing(deps: &EvalDeps) -> String {
 /// (which errors on punctuation like `?`).
 const ASK_NEEDS_SERVER: &str = "`:ask` is not available on the public demo -- it needs a connected mlpl-serve with Ollama running. Run `mlpl-serve` on a local machine (with `ollama serve`) and open this REPL with `?connect=<server-url>`, or use the Connect button. The CUDA / MLX demos additionally need that server on a host with the matching GPU (Linux+NVIDIA for CUDA, Apple Silicon for MLX).";
 
+/// Shown for `:status` when no server is connected. Connect mode
+/// answers `:status` with a live backend report (devices + CPU/RAM/
+/// GPU/VRAM); here there is no backend to probe.
+const STATUS_LOCAL: &str = "Status: local (browser) mode -- no connected server.\n  device  : cpu (browser WASM)\n  Live CPU/GPU/RAM/VRAM telemetry, :ask, and the CUDA/MLX demos need a\n  connected mlpl-serve -- open with ?connect=<url> or the Connect button.";
+
 /// Text for `:connect <arg>` outside the async connect path. `set
 /// <model>` selects the `:ask` model for the session (local/sync);
 /// `list` / bare need a connected server (handled upstream when one is
@@ -231,7 +240,9 @@ fn connect_command_text(arg: &str) -> String {
         mlpl_web_eval::ollama_fetch::set_selected_model(name);
         format!("ask model set to {name}")
     } else if arg == "list" || arg.is_empty() {
-        format!("`:connect list` needs a connected mlpl-serve to query its Ollama models. {ASK_NEEDS_SERVER}")
+        format!(
+            "`:connect list` needs a connected mlpl-serve to query its Ollama models. {ASK_NEEDS_SERVER}"
+        )
     } else {
         format!("unknown :connect subcommand '{arg}' (try: list  |  set <model>)")
     }
@@ -269,6 +280,17 @@ fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
         return HistoryEntry {
             input: trimmed.to_string(),
             output: history_listing(deps),
+            is_error: false,
+            kind: EntryKind::Command,
+        };
+    }
+    if trimmed == ":status" {
+        // Connect-mode `:status` is handled async upstream
+        // (connect::try_status); reaching here means no server is
+        // connected, so report local browser mode.
+        return HistoryEntry {
+            input: trimmed.to_string(),
+            output: STATUS_LOCAL.to_string(),
             is_error: false,
             kind: EntryKind::Command,
         };

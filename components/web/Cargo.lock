@@ -1980,6 +1980,7 @@ version = "0.20.0"
 dependencies = [
  "futures",
  "gloo 0.11.0",
+ "mlpl-monitor-types",
  "mlpl-wasm",
  "mlpl-web-viz-ir",
  "mlpl-web-viz3d",

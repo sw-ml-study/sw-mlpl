@@ -205,6 +205,48 @@ pub(crate) fn try_ollama_models(
     true
 }
 
+/// Connect-mode `:status`: probe the server's `/v1/devices` +
+/// `/v1/stats` and render a self-test report (devices, live
+/// CPU/RAM/GPU/VRAM, Ollama state) as a history entry, chaining the
+/// rest of the queue. Returns true when it took the line (connect mode
+/// + the exact command); false to fall through to the local handler.
+pub(crate) fn try_status(
+    deps: &EvalDeps,
+    history: &[HistoryEntry],
+    queue: &[String],
+    idx: usize,
+    line: &str,
+) -> bool {
+    if line.trim() != ":status" {
+        return false;
+    }
+    let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
+        return false;
+    };
+    let ollama_ready = mlpl_web_eval::ollama_fetch::ollama_default().is_some();
+    let hist_handle = deps.history.clone();
+    let deps_c = deps.clone();
+    let queue_c = queue.to_vec();
+    let mut hist_c = history.to_vec();
+    mlpl_web_eval::stats_fetch::fetch_status(
+        base,
+        ollama_ready,
+        Box::new(move |result: String| {
+            let is_error = result.starts_with("error:");
+            hist_c.pop();
+            hist_c.push(HistoryEntry {
+                input: ":status".to_string(),
+                output: result,
+                is_error,
+                kind: EntryKind::Command,
+            });
+            hist_handle.set(hist_c.clone());
+            crate::submit::process_next_eval(deps_c, hist_c, queue_c, idx + 1);
+        }),
+    );
+    true
+}
+
 /// Dispatch `line` to the connected server (async) when a connect
 /// URL is set and the line is server-eligible, chaining the rest
 /// of the queue in the result callback so line order is kept.

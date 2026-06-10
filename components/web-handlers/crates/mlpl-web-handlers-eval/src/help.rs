@@ -91,6 +91,8 @@ Commands (APL-inspired workspace introspection):
   :untag <name>        clear a binding's auto-attached tag
   :wsid                workspace summary (APL )WSID)
   :experiments         list captured experiment runs
+  :status              backend self-test: devices + live CPU/RAM/
+                       GPU/VRAM of the connected server (or local mode)
   :ask <prompt>        send prompt (verbatim) to a connected Ollama LLM
   :connect list        list the server's Ollama models
   :connect set <model> pick the Ollama model for :ask this session

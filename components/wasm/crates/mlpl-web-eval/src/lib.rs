@@ -17,5 +17,6 @@ pub mod eval_wasm;
 pub(crate) mod eval_wasm_helpers;
 pub mod ollama_fetch;
 pub mod state;
+pub mod stats_fetch;
 pub mod summary;
 mod summary_stats;
