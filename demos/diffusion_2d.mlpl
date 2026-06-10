@@ -1,44 +1,46 @@
-# Diffusion on 2D points -- the diffusion algorithm with no conv, no
-# pretrained weights: forward-noise a dataset over a schedule, train a
-# tiny MLP to predict the added noise, then reverse-sample from pure
-# noise back onto the data manifold. Runs on the CPU (browser-friendly).
+# Diffusion on 2D points -- the diffusion algorithm with no conv and no
+# pretrained weights, so it runs on the browser CPU. WHAT TO LOOK FOR:
+# two scatter plots. The FIRST is the real data (two crescent "moons").
+# The LAST is what the model GENERATED from pure random noise -- it
+# should trace those same two moons. That is the whole point: the model
+# turned noise into samples shaped like the data it learned from.
 
-# ----- data: the two-moons manifold, drop the label column -----
-M  = moons(1, 120, 0.08)                       # [120, 3] (x, y, label)
-X0 = matmul(M, [[1, 0], [0, 1], [0, 0]])       # [120, 2] points
-N  = 120
+# ----- the data we want to learn to generate: the two-moons manifold -----
+M  = moons(1, 100, 0.06)                       # [100, 3] (x, y, label)
+X0 = matmul(M, [[1, 0], [0, 1], [0, 0]])       # drop the label -> [100, 2]
+N  = 100
+svg(X0, "scatter")                             # TARGET: the two moons we want to reproduce
 
-# ----- noise schedule: linear betas -> alphas -> alpha-bar -----
-T     = 12
-betas = linspace(0.0001, 0.08, T)              # variance added per step
+# ----- noise schedule: how much noise is added at each of T steps -----
+T     = 16
+betas = linspace(0.0001, 0.07, T)              # variance added per step
 alphas = 1 - betas
-abar  = cumprod(alphas)                         # cumulative product
+abar  = cumprod(alphas)                         # alpha-bar: how much of x0 survives by step t
 
-# ----- build the training set: noise X0 at every timestep t, recording
-# the input [x_t, t/T] and the target (the noise that was added) -----
+# ----- forward (noising) process: noise X0 at every timestep and record
+# (noisy point, t) -> the exact noise that was added (the training target) -----
 started = 0
 TX = fill([1, 3], 0)
 TY = fill([1, 2], 0)
 t = 0
 while gt(T, t) {
-  ab   = take(abar, 0, t)                       # alpha-bar at t (scalar)
-  eps  = randn(t + 7, [N, 2])                   # the noise to predict
-  Xt   = sqrt(ab) * X0 + sqrt(1 - ab) * eps     # forward (noising) process
-  tcol = fill([N, 1], t / T)                    # timestep feature
-  xin  = concat(Xt, tcol, 1)                    # [N, 3]
+  ab   = take(abar, 0, t)
+  eps  = randn(t + 7, [N, 2])                   # the noise to be predicted
+  Xt   = sqrt(ab) * X0 + sqrt(1 - ab) * eps     # x_t: x0 partially drowned in noise
+  tcol = fill([N, 1], t / T)
+  xin  = concat(Xt, tcol, 1)                    # [N, 3] = (point, timestep)
   if eq(started, 0) { TX = xin ; TY = eps ; started = 1 } else { TX = concat(TX, xin, 0) ; TY = concat(TY, eps, 0) } ;
   t = t + 1
 }
-shape(TX)                                        # [T*N, 3]
 
-# ----- the denoiser: a tiny MLP predicting the noise from (point, t) -----
+# ----- the denoiser: a tiny MLP that predicts the noise from (point, t) -----
 m = chain(linear(3, 64, 0), relu_layer(), linear(64, 2, 1))
-experiment "diffusion_2d" { train 200 { adam(mean((apply(m, TX) - TY) * (apply(m, TX) - TY)), m, 0.01, 0.9, 0.999, 0.00000001) ; loss_metric = mean((apply(m, TX) - TY) * (apply(m, TX) - TY)) } }
-loss_curve(last_losses)                          # noise-prediction loss falls
+experiment "diffusion_2d" { train 300 { adam(mean((apply(m, TX) - TY) * (apply(m, TX) - TY)), m, 0.01, 0.9, 0.999, 0.00000001) ; loss_metric = mean((apply(m, TX) - TY) * (apply(m, TX) - TY)) } }
+loss_curve(last_losses)                          # the noise-prediction loss should fall toward ~0.3
 
-# ----- reverse (denoising) process: start from noise, walk t = T-1 .. 0,
-# subtract the predicted noise each step (deterministic / DDIM-style) -----
-xs = randn(99, [N, 2])
+# ----- reverse (denoising) process: start from PURE NOISE and walk the
+# schedule backward, subtracting the predicted noise each step -----
+xs = randn(99, [N, 2])                           # pure Gaussian noise -- no data at all
 i = 0
 while gt(T, i) {
   t    = T - 1 - i
@@ -46,8 +48,10 @@ while gt(T, i) {
   a    = take(alphas, 0, t)
   b    = take(betas, 0, t)
   tcol = fill([N, 1], t / T)
-  eps  = apply(m, concat(xs, tcol, 1))
-  xs   = (xs - (b / sqrt(1 - ab)) * eps) / sqrt(a) ;
+  eps  = apply(m, concat(xs, tcol, 1))          # what noise does the model think is here?
+  mu   = (xs - (b / sqrt(1 - ab)) * eps) / sqrt(a)   # DDPM posterior mean
+  z    = randn(i + 200, [N, 2])
+  xs   = mu + (1 - eq(t, 0)) * sqrt(b) * z ;     # take a step back, add a little noise (none on the last step)
   i = i + 1
 }
-svg(xs, "scatter")                               # generated points (vs the moons)
+svg(xs, "scatter")                               # GENERATED: should trace the two moons above (some scatter is normal for a tiny model)
