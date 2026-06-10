@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-09
 
+- docs(saga): plan Stable Diffusion (text-to-image) as the next, high-priority saga
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(glossary): define Autoregression (AI next-token vs classical AR)
 
 ## 2026-06-05
