@@ -54,6 +54,10 @@ fn init(config: &Config) -> Session {
 /// Execute phase: run the script (then exit with its code) or
 /// drop into the interactive REPL.
 fn execute(config: &Config, s: &mut Session) {
+    if config.babel_session {
+        crate::babel_session::run_session(&mut s.env, &mut s.svg_out, s.trace, s.verbose);
+        return;
+    }
     if let Some(path) = &config.script {
         let content = std::fs::read_to_string(path).unwrap_or_else(|e| {
             eprintln!("error reading {path}: {e}");

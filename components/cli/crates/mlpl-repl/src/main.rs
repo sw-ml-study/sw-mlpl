@@ -1,6 +1,7 @@
 mod args;
 mod ask;
 mod ask_model;
+mod babel_session;
 mod connect;
 mod connect_reattach;
 mod connect_repl;
