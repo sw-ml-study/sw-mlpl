@@ -16,7 +16,7 @@
 
 use crate::eval::current_connect_url_from_window;
 use crate::eval::{Evaluator, MetricCb, RemoteEvaluator, ResultCb, StreamCb};
-use crate::eval_wasm_helpers::{wasm_create_session, wasm_eval_stream};
+use crate::eval_wasm_helpers::{wasm_create_session, wasm_eval_stream, with_deadline};
 
 thread_local! {
     // One persistent RemoteEvaluator per page so the server-side
@@ -92,7 +92,13 @@ async fn wasm_eval(
         Ok(r) => r,
         Err(e) => return format!("error: {e}"),
     };
-    let resp = match req.send().await {
+    // Generous deadline: GPU fine-tunes can legitimately take a while,
+    // but bound it so a wedged backend fails instead of hanging forever.
+    let resp = match with_deadline(90_000, "eval", async {
+        req.send().await.map_err(|e| e.to_string())
+    })
+    .await
+    {
         Ok(r) => r,
         Err(e) => return format!("error: {e}"),
     };
