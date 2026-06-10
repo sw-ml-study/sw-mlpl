@@ -12,6 +12,8 @@ use mlpl_runtime_core::error::RuntimeError;
 pub const NAMES: &[&str] = &[
     "iota",
     "range",
+    "linspace",
+    "cumprod",
     "shape",
     "rank",
     "reshape",
@@ -31,6 +33,8 @@ pub const NAMES: &[&str] = &[
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
         "iota" | "range" => Some(compute::iota(name, args)),
+        "linspace" => Some(compute::linspace(name, args)),
+        "cumprod" => Some(reduce::cumprod(name, args)),
         "shape" => Some(shape::shape(name, args)),
         "rank" => Some(shape::rank(name, args)),
         "reshape" => Some(shape::reshape(name, args)),

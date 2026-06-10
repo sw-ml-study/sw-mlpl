@@ -725,13 +725,33 @@ Phase 5. See also [[Manifold preservation]] and
 win" test bed) and the "Dimensionality reduction" learning
 path for a walk through the demos.
 
+## DDPM (Denoising Diffusion Probabilistic Model)
+
+The standard training/sampling recipe for [[Diffusion Models]]:
+train a network to predict the noise added to a sample at a
+random timestep (MSE of predicted vs actual noise), then sample
+by starting from pure noise and applying the learned reverse
+step down the [[Noise schedule]]. DDIM is a faster,
+deterministic sampler over the same trained model. MLPL: the
+"Diffusion (2D points)" demo trains an MLP noise-predictor and
+reverse-samples on a CPU-runnable 2D dataset.
+
 ## Diffusion Models
 
-Generative models that learn to denoise a sequence of
-increasingly noisy versions of the data. State of the art for
-images / video. Out of MLPL's current scope; loading a
-trained checkpoint is the entry point most users want, which
-is a separate effort.
+Generative models that turn noise into data by reversing a
+gradual noising process. The FORWARD (noising) process adds
+Gaussian noise over a [[Noise schedule]] until the sample is
+pure noise; a network then learns the REVERSE (denoising)
+process, predicting and removing noise step by step to
+synthesize new samples. The non-autoregressive counterpart to
+next-token generation (see [[Autoregression]]) -- it refines a
+whole sample at once rather than emitting it left to right.
+State of the art for images/video. MLPL builds the algorithm
+from existing pieces (a `linspace`/`cumprod` schedule, an MLP
+denoiser, `adam`); the in-browser "Diffusion (2D points)" demo
+teaches it on tiny data, and the stable-diffusion saga scales
+it to image U-Nets and real text-to-image on a connected GPU.
+See [[DDPM]].
 
 ## Distillation
 
@@ -1751,6 +1771,17 @@ this split.
 tree summary; `:tokenizers` does the same for tokenizer
 bindings. Sibling commands to `:vars` for the non-array
 namespaces.
+
+## Noise schedule
+
+The sequence of variances added at each step of a [[Diffusion
+Models]] forward process. A linear schedule picks betas with
+`linspace(beta_min, beta_max, T)`; the alphas are `1 - betas`
+and the cumulative product `alpha_bar = cumprod(alphas)` gives
+the one-shot noising `x_t = sqrt(alpha_bar_t) * x_0 +
+sqrt(1 - alpha_bar_t) * noise`. Cosine schedules add noise more
+gently early on. MLPL: `linspace` + `cumprod` build it directly;
+see the "Diffusion (2D points)" demo.
 
 ## One-hot encoding
 
