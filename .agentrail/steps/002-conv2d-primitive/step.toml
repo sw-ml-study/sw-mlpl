@@ -1,0 +1,9 @@
+number = 2
+slug = "conv2d-primitive"
+status = "pending"
+description = "Step 2: conv2d (+ conv_transpose2d or upsample_nearest) forward + autograd ba..."
+role = "legacy"
+context_files = []
+created_at = "2026-06-09T18:13:42"
+task_type = "production"
+commits = []
