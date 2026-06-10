@@ -15,7 +15,7 @@ mlpl-monitor-types = { path = "../mlpl-monitor-types" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 mlpl-monitor-linux = { path = "../mlpl-monitor-linux" }
-tokio = { version = "1", features = ["time"] }
+tokio = { version = "1", features = ["time", "rt"] }
 
 [lints]
 workspace = true

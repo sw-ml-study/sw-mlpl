@@ -1,6 +1,6 @@
 number = 2
 slug = "conv2d-primitive"
-status = "pending"
+status = "in-progress"
 description = "Step 2: conv2d (+ conv_transpose2d or upsample_nearest) forward + autograd ba..."
 role = "legacy"
 context_files = []

@@ -92,9 +92,18 @@ pub fn watch(base_url: String, samples: u32, on_result: ResultCb) {
     wasm_bindgen_futures::spawn_local(async move {
         let url = format!("{}/v1/stats", base_url.trim_end_matches('/'));
         for _ in 0..samples {
-            if let Ok(resp) = gloo::net::http::Request::get(&url).send().await
-                && let Ok(snap) = resp.json::<Snapshot>().await
-            {
+            // Bound EACH sample so a slow /v1/stats (e.g. while a big
+            // Ollama model loads and nvidia-smi blocks) can't hang the
+            // whole watch loop. A timed-out sample is skipped.
+            let got = crate::eval_wasm_helpers::with_deadline(1500, "stats", async {
+                let resp = gloo::net::http::Request::get(&url)
+                    .send()
+                    .await
+                    .map_err(|e| e.to_string())?;
+                resp.json::<Snapshot>().await.map_err(|e| e.to_string())
+            })
+            .await;
+            if let Ok(snap) = got {
                 push(&snap);
             }
             gloo::timers::future::TimeoutFuture::new(300).await;
