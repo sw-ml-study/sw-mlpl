@@ -1,0 +1,1 @@
+Step 2: conv2d (+ conv_transpose2d or upsample_nearest) forward + autograd backward on CPU and the CUDA/MLX device backends; group_norm, silu, sin/cos if missing. Glossary: Convolution/Conv2d, Group normalization, SiLU. Gradcheck parity (CPU) + device parity. Enables the image-diffusion U-Net (step 3).
