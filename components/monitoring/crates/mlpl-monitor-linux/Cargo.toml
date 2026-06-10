@@ -1,0 +1,16 @@
+[package]
+name = "mlpl-monitor-linux"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Linux telemetry sources for mlpl-monitor: CPU% from /proc/stat, RAM
+# from /proc/meminfo, GPU%/VRAM by shelling out to `nvidia-smi`. Each
+# source splits a pure `parse_*` (unit-tested) from the thin IO `read`
+# that feeds it. Linux-only; the MLX server gets a sibling
+# mlpl-monitor-macos crate behind the same facade.
+
+[dependencies]
+
+[lints]
+workspace = true

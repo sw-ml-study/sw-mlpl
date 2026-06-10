@@ -1,0 +1,21 @@
+[package]
+name = "mlpl-monitor"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Backend resource-telemetry facade. `snapshot()` returns a
+# mlpl-monitor-types::Snapshot gathered from the host's platform
+# sources, so callers (mlpl-serve's /v1/stats) stay platform-agnostic.
+# The platform source crate is target-gated: Linux today, a macOS
+# sibling later for the MLX server -- no caller or wire change needed.
+
+[dependencies]
+mlpl-monitor-types = { path = "../mlpl-monitor-types" }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+mlpl-monitor-linux = { path = "../mlpl-monitor-linux" }
+tokio = { version = "1", features = ["time"] }
+
+[lints]
+workspace = true

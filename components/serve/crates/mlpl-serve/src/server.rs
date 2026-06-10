@@ -256,6 +256,7 @@ pub fn build_app_with_peers_cors(
     let router = Router::new()
         .route("/v1/health", get(health_handler))
         .route("/v1/devices", get(devices_handler))
+        .route("/v1/stats", get(crate::devices::stats_handler))
         .route("/v1/sessions", post(create_session_handler))
         .route("/v1/sessions/:id", get(session_meta_handler))
         .route("/v1/sessions/:id/eval", post(eval_handler))
