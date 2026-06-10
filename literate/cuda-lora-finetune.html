@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-06-05 Fri 07:56 -->
+<!-- 2026-06-09 Tue 17:33 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>CUDA LoRA Fine-Tune &#x2013; a Literate, True-GPU Walkthrough</title>
@@ -203,12 +203,12 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org7103fb0">Step 1 &#x2013; prepare the corpus</a></li>
-<li><a href="#org20531d4">Step 2 &#x2013; define and pretrain a tiny language model</a></li>
-<li><a href="#orgb61424f">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</a></li>
-<li><a href="#orgfa5a05e">Step 4 &#x2013; fine-tune the adapters on the GPU</a></li>
-<li><a href="#orgf2518d0">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</a></li>
-<li><a href="#orgc31638b">Step 6 &#x2013; the fine-tune loss curve</a></li>
+<li><a href="#orgbb1407b">Step 1 &#x2013; prepare the corpus</a></li>
+<li><a href="#org43701dd">Step 2 &#x2013; define and pretrain a tiny language model</a></li>
+<li><a href="#orgb6de369">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</a></li>
+<li><a href="#orgcee06c0">Step 4 &#x2013; fine-tune the adapters on the GPU</a></li>
+<li><a href="#org1d472a7">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</a></li>
+<li><a href="#orga815029">Step 6 &#x2013; the fine-tune loss curve</a></li>
 </ul>
 </div>
 </div>
@@ -232,9 +232,9 @@ showing concrete <b>before vs after</b> learning, not just a loss curve. The
 blocks share one <code>:session cuda</code>, so state threads through exactly as if
 typed into the REPL.
 </p>
-<div id="outline-container-org7103fb0" class="outline-2">
-<h2 id="org7103fb0">Step 1 &#x2013; prepare the corpus</h2>
-<div class="outline-text-2" id="text-org7103fb0">
+<div id="outline-container-orgbb1407b" class="outline-2">
+<h2 id="orgbb1407b">Step 1 &#x2013; prepare the corpus</h2>
+<div class="outline-text-2" id="text-orgbb1407b">
 <p>
 Load a snippet of tiny-Shakespeare, train a 280-token BPE tokenizer,
 encode to ids, and build next-token (X -&gt; Y) training pairs with a
@@ -256,9 +256,9 @@ shape(X)
 </pre>
 </div>
 </div>
-<div id="outline-container-org20531d4" class="outline-2">
-<h2 id="org20531d4">Step 2 &#x2013; define and pretrain a tiny language model</h2>
-<div class="outline-text-2" id="text-org20531d4">
+<div id="outline-container-org43701dd" class="outline-2">
+<h2 id="org43701dd">Step 2 &#x2013; define and pretrain a tiny language model</h2>
+<div class="outline-text-2" id="text-org43701dd">
 <p>
 A minimal decoder (embedding, one causal-attention block, a final norm,
 a linear head), pretrained for 20 Adam steps so it has some structure to
@@ -278,9 +278,9 @@ last_losses
 </pre>
 </div>
 </div>
-<div id="outline-container-orgb61424f" class="outline-2">
-<h2 id="orgb61424f">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</h2>
-<div class="outline-text-2" id="text-orgb61424f">
+<div id="outline-container-orgb6de369" class="outline-2">
+<h2 id="orgb6de369">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</h2>
+<div class="outline-text-2" id="text-orgb6de369">
 <p>
 <code>lora(base, 8, 16.0, 0)</code> freezes every base weight and adds rank-8
 adapters to the head (the adapter <code>B</code> inits to zero, so the student
@@ -313,9 +313,9 @@ the CCCCCCCCCCCC
 </pre>
 </div>
 </div>
-<div id="outline-container-orgfa5a05e" class="outline-2">
-<h2 id="orgfa5a05e">Step 4 &#x2013; fine-tune the adapters on the GPU</h2>
-<div class="outline-text-2" id="text-orgfa5a05e">
+<div id="outline-container-orgcee06c0" class="outline-2">
+<h2 id="orgcee06c0">Step 4 &#x2013; fine-tune the adapters on the GPU</h2>
+<div class="outline-text-2" id="text-orgcee06c0">
 <p>
 Inside <code>device("cuda")</code>, the fine-tune step is one traceable candle
 graph over the adapters, differentiated by <code>backward</code>, and the adapters
@@ -334,9 +334,9 @@ last_losses
 </pre>
 </div>
 </div>
-<div id="outline-container-orgf2518d0" class="outline-2">
-<h2 id="orgf2518d0">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</h2>
-<div class="outline-text-2" id="text-orgf2518d0">
+<div id="outline-container-org1d472a7" class="outline-2">
+<h2 id="org1d472a7">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</h2>
+<div class="outline-text-2" id="text-org1d472a7">
 <p>
 Same model, same prompt, same sampling seeds &#x2013; only the adapters
 changed. Compare these two numbers and the two continuations to the
@@ -378,9 +378,9 @@ against the CPU path within fp32 tolerance.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc31638b" class="outline-2">
-<h2 id="orgc31638b">Step 6 &#x2013; the fine-tune loss curve</h2>
-<div class="outline-text-2" id="text-orgc31638b">
+<div id="outline-container-orga815029" class="outline-2">
+<h2 id="orga815029">Step 6 &#x2013; the fine-tune loss curve</h2>
+<div class="outline-text-2" id="text-orga815029">
 <div class="org-src-container">
 <pre class="src src-mlpl">loss_curve(last_losses)
 </pre>
@@ -389,9 +389,9 @@ against the CPU path within fp32 tolerance.
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"><rect width="100%" height="100%" fill="#1e1e2e"/><line x1="30" y1="270" x2="370" y2="270" stroke="#45475a" stroke-width="1"/><line x1="30" y1="30" x2="30" y2="270" stroke="#45475a" stroke-width="1"/><polyline points="30.0,30.0 44.2,43.0 58.3,60.2 72.5,80.8 86.7,103.5 100.8,125.9 115.0,145.4 129.2,161.2 143.3,174.6 157.5,186.3 171.7,196.2 185.8,203.9 200.0,210.2 214.2,216.2 228.3,222.5 242.5,228.9 256.7,234.9 270.8,240.2 285.0,245.1 299.2,249.8 313.3,254.5 327.5,259.1 341.7,263.2 355.8,266.8 370.0,270.0" fill="none" stroke="#a6e3a1" stroke-width="2"/><text x="30.0" y="18" fill="#cdd6f4" font-family="monospace" font-size="12">loss</text><text x="4" y="34.0" fill="#a6adc8" font-family="monospace" font-size="10">6.349</text><text x="4" y="270.0" fill="#a6adc8" font-family="monospace" font-size="10">3.852</text></svg>
 </div>
 </div>
-<div id="outline-container-org022e167" class="outline-2">
-<h2 id="org022e167">How this was run</h2>
-<div class="outline-text-2" id="text-org022e167">
+<div id="outline-container-orgf2d671e" class="outline-2">
+<h2 id="orgf2d671e">How this was run</h2>
+<div class="outline-text-2" id="text-orgf2d671e">
 <p>
 This page needs a CUDA-enabled <code>mlpl-repl</code> (Linux + NVIDIA). Build it once
 (this does NOT touch your installed binary):
@@ -421,7 +421,7 @@ it just won't be running on a GPU.
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="date">Created: 2026-06-05 Fri 07:56</p>
+<p class="date">Created: 2026-06-09 Tue 17:33</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
