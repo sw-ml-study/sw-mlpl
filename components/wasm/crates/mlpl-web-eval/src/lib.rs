@@ -20,3 +20,4 @@ pub mod state;
 pub mod stats_fetch;
 pub mod summary;
 mod summary_stats;
+pub mod telemetry_trace;

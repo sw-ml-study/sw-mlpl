@@ -10,3 +10,10 @@ path = "src/lib.rs"
 
 [dependencies]
 yew = { version = "0.21", features = ["csr"] }
+# Connect button: discover backends from a serving proxy (GET
+# /v1/backends) and navigate to ?connect=<url>; warn when no proxy
+# (the static GitHub Pages demo). Needs fetch + window.location.
+gloo = { version = "0.11", features = ["net"] }
+wasm-bindgen-futures = "0.4"
+serde_json = "1"
+web-sys = { version = "0.3", features = ["Window", "Location"] }

@@ -122,6 +122,16 @@ fn schedule_demo_line(
     }
     push_progress_notes(&mut entries, demo.name, idx);
     let line = lines[idx];
+    // The live telemetry panel is meaningful only when this line runs on
+    // the server: a connect-required (CUDA/MLX) demo's non-`:` lines.
+    // CPU-tier demos run in the browser, so begin(false) hides the panel.
+    #[cfg(target_arch = "wasm32")]
+    {
+        let remote = mlpl_web_eval::eval_url::is_connected()
+            && mlpl_web_demos::capability_for(demo.name).requires_connect
+            && !line.trim_start().starts_with(':');
+        mlpl_web_eval::telemetry_trace::begin(remote);
+    }
     push_running_marker(&mut entries, line);
     history.set(entries.clone());
     // Connect mode: route the line through the server (so loaded
@@ -192,7 +202,16 @@ fn dispatch_demo_line_connected(
     let hist = history.clone();
     let sess = Rc::clone(session);
     let cont: mlpl_web_eval::eval::ResultCb = Box::new(move |display: String| {
-        replace_running_with_result(&mut entries_c, line, display);
+        // Persist the backend-load sparkline below a server-run demo line
+        // so a brief GPU blip survives the marker being replaced.
+        let out = match (
+            display.starts_with("error:"),
+            mlpl_web_eval::telemetry_trace::summary(),
+        ) {
+            (false, Some(tel)) => format!("{display}\n{tel}"),
+            _ => display,
+        };
+        replace_running_with_result(&mut entries_c, line, out);
         hist.set(entries_c.clone());
         schedule_demo_line(sess, hist.clone(), entries_c, demo, idx + 1);
     });

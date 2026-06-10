@@ -109,6 +109,10 @@ pub(crate) fn process_next_eval(
         return;
     }
     let line = queue[idx].clone();
+    // Decide telemetry remoteness BEFORE the marker renders, so the live
+    // panel only mounts for server-side evals (not browser-local ones).
+    #[cfg(target_arch = "wasm32")]
+    crate::connect::begin_eval_telemetry(&line, &history);
     crate::running::push_running_marker(&mut history, &line);
     deps.history.set(history.clone());
     // Connect mode (?connect=<url>): `:connect list` lists the

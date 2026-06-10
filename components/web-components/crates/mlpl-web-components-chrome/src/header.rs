@@ -37,6 +37,7 @@ pub fn header(props: &HeaderProps) -> Html {
                 <button class={cls(HeaderMode::Paths)} onclick={props.on_select_paths.clone()} data-tour-target="tab-paths">{"Paths"}</button>
                 <button class={cls(HeaderMode::Editor)} onclick={props.on_select_editor.clone()} data-tour-target="tab-editor">{"Editor"}</button>
             </div>
+            <crate::connect_button::ConnectButton />
             <button class="tour-btn-header" onclick={props.on_tour.clone()} aria-label="Guided tour" title="Guided tour" data-tour-target="tour-btn">{"Tour"}</button>
             <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation" data-tour-target="help-btn">{"?"}</button>
         </header>

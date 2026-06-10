@@ -5,6 +5,7 @@
 //! mlpl-web re-exports these symbols under `crate::components::*`
 //! so existing call sites stay unchanged.
 
+pub mod connect_button;
 pub mod footer;
 pub mod github_corner;
 pub mod header;
