@@ -51,7 +51,7 @@ pub fn disabled_hint(section: &str) -> &'static str {
     } else if section.starts_with("MLX") {
         "Available when connected to a server on an Apple-Silicon Mac (MLX GPU). Run mlpl-serve there and connect to it."
     } else {
-        "Available when connected to an mlpl-serve instance. Use the Connect button to point at a running server."
+        "Available when connected to an mlpl-serve instance. Append ?connect=<server-url> to this page's URL to point at a running server."
     }
 }
 
