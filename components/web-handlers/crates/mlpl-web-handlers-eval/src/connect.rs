@@ -105,6 +105,17 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
     Some(line.to_string())
 }
 
+/// Set up the telemetry trace for the eval about to run. It is `remote`
+/// (live panel shown) only when connected AND the line is a server
+/// -routed program (a bare expression or `:ask`); browser-local evals
+/// `begin(false)` so the panel stays hidden for a computation that runs
+/// in the browser, not on the server.
+pub(crate) fn begin_eval_telemetry(line: &str, history: &[HistoryEntry]) {
+    let remote = mlpl_web_eval::eval::current_connect_url_from_window().is_some()
+        && connect_program(line, history).is_some();
+    mlpl_web_eval::telemetry_trace::begin(remote);
+}
+
 /// Route one demo line through the connected server (connect mode):
 /// the `:connect list` listing, the `:ask` shortcut, or a bare
 /// expression. Fires `on_result` with the display string when the
@@ -217,33 +228,37 @@ pub(crate) fn try_status(
     idx: usize,
     line: &str,
 ) -> bool {
-    if line.trim() != ":status" {
+    let t = line.trim();
+    if t != ":status" && t != ":status watch" {
         return false;
     }
     let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
         return false;
     };
-    let ollama_ready = mlpl_web_eval::ollama_fetch::ollama_default().is_some();
     let hist_handle = deps.history.clone();
     let deps_c = deps.clone();
     let queue_c = queue.to_vec();
+    let input = t.to_string();
     let mut hist_c = history.to_vec();
-    mlpl_web_eval::stats_fetch::fetch_status(
-        base,
-        ollama_ready,
-        Box::new(move |result: String| {
-            let is_error = result.starts_with("error:");
-            hist_c.pop();
-            hist_c.push(HistoryEntry {
-                input: ":status".to_string(),
-                output: result,
-                is_error,
-                kind: EntryKind::Command,
-            });
-            hist_handle.set(hist_c.clone());
-            crate::submit::process_next_eval(deps_c, hist_c, queue_c, idx + 1);
-        }),
-    );
+    let cb: mlpl_web_eval::eval::ResultCb = Box::new(move |result: String| {
+        let is_error = result.starts_with("error:");
+        hist_c.pop();
+        hist_c.push(HistoryEntry {
+            input: input.clone(),
+            output: result,
+            is_error,
+            kind: EntryKind::Command,
+        });
+        hist_handle.set(hist_c.clone());
+        crate::submit::process_next_eval(deps_c, hist_c, queue_c, idx + 1);
+    });
+    if t == ":status watch" {
+        // bounded burst (~12 samples, ~3.6s) -> persisted sparkline
+        mlpl_web_eval::telemetry_trace::watch(base, 12, cb);
+    } else {
+        let ollama_ready = mlpl_web_eval::ollama_fetch::ollama_default().is_some();
+        mlpl_web_eval::stats_fetch::fetch_status(base, ollama_ready, cb);
+    }
     true
 }
 
@@ -380,10 +395,17 @@ pub(crate) fn try_connect_eval(
         &program,
         Box::new(move |result: String| {
             let is_error = result.starts_with("error:");
+            // Persist the backend-load sparkline collected by the live
+            // panel so the trace (incl. a brief GPU blip) survives the
+            // marker being replaced. Only when samples were collected.
+            let output = match (is_error, mlpl_web_eval::telemetry_trace::summary()) {
+                (false, Some(tel)) => format!("{result}\n{tel}"),
+                _ => result,
+            };
             hist_c.pop();
             hist_c.push(HistoryEntry {
                 input: line_c.clone(),
-                output: result,
+                output,
                 is_error,
                 kind: EntryKind::Command,
             });

@@ -1835,6 +1835,7 @@ dependencies = [
  "mlpl-parser",
  "mlpl-web-viz-ir",
  "rand 0.8.6",
+ "rayon",
  "rcgen",
  "reqwest",
  "rustls",
@@ -1932,6 +1933,10 @@ version = "0.20.0"
 name = "mlpl-web-components-chrome"
 version = "0.20.0"
 dependencies = [
+ "gloo 0.11.0",
+ "serde_json",
+ "wasm-bindgen-futures",
+ "web-sys",
  "yew",
 ]
 

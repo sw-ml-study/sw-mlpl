@@ -74,7 +74,12 @@ fn poll_once(base: &str, series: &Rc<RefCell<Series>>, tick: &UseStateHandle<u32
         let seq = {
             let mut s = series.borrow_mut();
             match outcome {
-                Ok(snap) => s.push(snap),
+                Ok(snap) => {
+                    // Mirror into the shared trace so the sparkline
+                    // PERSISTS in the result after the marker unmounts.
+                    mlpl_web_eval::telemetry_trace::push(&snap);
+                    s.push(snap);
+                }
                 Err(e) => {
                     s.note = Some(e);
                     s.seq = s.seq.wrapping_add(1);
@@ -115,7 +120,13 @@ fn render_rows(series: &Series) -> Html {
 
 #[function_component(TelemetryPanel)]
 pub fn telemetry_panel() -> Html {
-    let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
+    // Only show for evals that actually run on the SERVER -- a browser
+    // -local eval (CPU-tier demo) would otherwise display server CPU
+    // that has nothing to do with where it runs. Both conditions are
+    // stable for the panel's lifetime, so the early return is safe
+    // before the hooks.
+    let connected = mlpl_web_eval::eval::current_connect_url_from_window();
+    let (Some(base), true) = (connected, mlpl_web_eval::telemetry_trace::is_remote()) else {
         return html! {};
     };
     let series = use_mut_ref(Series::default);
@@ -124,6 +135,8 @@ pub fn telemetry_panel() -> Html {
         let series = series.clone();
         let tick = tick.clone();
         use_effect_with((), move |_| {
+            // The trace was reset by the dispatcher (begin) before this
+            // marker; just start polling.
             poll_once(&base, &series, &tick);
             let interval = Interval::new(POLL_MS, move || poll_once(&base, &series, &tick));
             move || drop(interval)

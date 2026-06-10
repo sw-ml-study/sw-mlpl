@@ -93,6 +93,8 @@ Commands (APL-inspired workspace introspection):
   :experiments         list captured experiment runs
   :status              backend self-test: connected backend(s),
                        devices + GPU type(s), live CPU/RAM/GPU/VRAM
+  :status watch        sample the backend for a few seconds and draw
+                       CPU/GPU/RAM/VRAM sparklines (on demand)
   :reset               cancel all in-flight work on the connected
                        backend (recover from a hung/slow demo)
   :ask <prompt>        send prompt (verbatim) to a connected Ollama LLM
