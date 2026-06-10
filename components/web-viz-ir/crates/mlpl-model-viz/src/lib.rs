@@ -106,12 +106,20 @@ fn walk_model(spec: &ModelSpec, prev_id: &str, b: &mut SankeyBuilder, in_residua
             (*d_model as f64).max(1.0),
         ),
         ModelSpec::Attention { causal, .. } => {
-            let n = if *causal { "causal_attention" } else { "attention" };
+            let n = if *causal {
+                "causal_attention"
+            } else {
+                "attention"
+            };
             b.emit_leaf(n, n, prev_id, in_residual, 48.0)
         }
-        ModelSpec::RmsNorm { dim } => {
-            b.emit_leaf("rms_norm", &format!("rms_norm ({dim})"), prev_id, in_residual, 16.0)
-        }
+        ModelSpec::RmsNorm { dim } => b.emit_leaf(
+            "rms_norm",
+            &format!("rms_norm ({dim})"),
+            prev_id,
+            in_residual,
+            16.0,
+        ),
         ModelSpec::Activation(kind) => {
             let label = match kind {
                 ActKind::Tanh => "tanh",

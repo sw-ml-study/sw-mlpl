@@ -52,11 +52,7 @@ pub struct Stage3dEvent {
 // session rather than pre-bundling them at trace time.
 const MAX_INLINE_ELEMENTS: usize = 4096;
 
-pub fn build_shape_info(
-    name: String,
-    shape: Vec<usize>,
-    values: Option<Vec<f64>>,
-) -> ShapeInfo {
+pub fn build_shape_info(name: String, shape: Vec<usize>, values: Option<Vec<f64>>) -> ShapeInfo {
     build_shape_info_full(name, shape, values, None, None)
 }
 
