@@ -45,9 +45,20 @@ fn scatter_rejects_vector_input() {
 
 #[test]
 fn scatter_rejects_wrong_column_count() {
-    let m = matrix(2, 3, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    // Nx2 and Nx3 are valid; Nx4 is not.
+    let m = matrix(2, 4, vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0]);
     let result = render_scatter(&m);
     assert!(result.is_err());
+}
+
+#[test]
+fn scatter_nx3_colors_points_by_class() {
+    // 3rd column is the class -> two classes -> two distinct fills.
+    let m = matrix(3, 3, vec![0.0, 0.0, 0.0, 1.0, 1.0, 1.0, 2.0, 2.0, 0.0]);
+    let svg = render_scatter(&m).unwrap();
+    assert_eq!(svg.matches("<circle").count(), 3);
+    assert!(svg.contains("#89b4fa"), "class 0 color in: {svg}");
+    assert!(svg.contains("#f38ba8"), "class 1 color in: {svg}");
 }
 
 #[test]
