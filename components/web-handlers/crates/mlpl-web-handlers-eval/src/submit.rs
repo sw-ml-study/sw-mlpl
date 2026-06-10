@@ -231,12 +231,12 @@ fn history_listing(deps: &EvalDeps) -> String {
 /// public live demo). `:ask` needs a server to reach an LLM, so we
 /// give a clear notice instead of lexing the question as MLPL
 /// (which errors on punctuation like `?`).
-const ASK_NEEDS_SERVER: &str = "`:ask` is not available on the public demo -- it needs a connected mlpl-serve with Ollama running. Run `mlpl-serve` on a local machine (with `ollama serve`) and open this REPL with `?connect=<server-url>`, or use the Connect button. The CUDA / MLX demos additionally need that server on a host with the matching GPU (Linux+NVIDIA for CUDA, Apple Silicon for MLX).";
+const ASK_NEEDS_SERVER: &str = "`:ask` is not available on the public demo -- it needs a connected mlpl-serve with Ollama running. Run `mlpl-serve` on a local machine (with `ollama serve`), then open this REPL with `?connect=<server-url>` appended to the page URL (e.g. `...?connect=http://host:6464`). The CUDA / MLX demos additionally need that server on a host with the matching GPU (Linux+NVIDIA for CUDA, Apple Silicon for MLX).";
 
 /// Shown for `:status` when no server is connected. Connect mode
 /// answers `:status` with a live backend report (devices + CPU/RAM/
 /// GPU/VRAM); here there is no backend to probe.
-const STATUS_LOCAL: &str = "Status: local (browser) mode -- no connected server.\n  device  : cpu (browser WASM)\n  Live CPU/GPU/RAM/VRAM telemetry, :ask, and the CUDA/MLX demos need a\n  connected mlpl-serve -- open with ?connect=<url> or the Connect button.";
+const STATUS_LOCAL: &str = "Status: 0 backends connected -- local (browser) mode.\n  device  : cpu (browser WASM)\n  Live CPU/GPU/RAM/VRAM telemetry, :ask, and the CUDA/MLX demos need a\n  connected mlpl-serve. Start one (mlpl-serve --bind 0.0.0.0:6464\n  --auth required), then append ?connect=<server-url> to this page's URL\n  (e.g. ?connect=http://host:6464).";
 
 /// Text for `:connect <arg>` outside the async connect path. `set
 /// <model>` selects the `:ask` model for the session (local/sync);

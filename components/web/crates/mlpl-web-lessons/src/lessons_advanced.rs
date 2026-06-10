@@ -316,7 +316,7 @@ pub const RUNNING_ON_MLX: Lesson = Lesson {
 
 pub const CONNECT_TO_REMOTE: Lesson = Lesson {
     title: "Connect to a remote MLPL server",
-    intro: "MLPL added a connect mode to both the CLI REPL and the web REPL. Run `mlpl-serve --bind 127.0.0.1:6464 --auth required` on a beefier host, then point the client at it: the local Environment goes unused and the workspace lives on the server. The CLI form is `mlpl-repl --connect <url>`; the web form is the same browser tab as this tutorial, opened with `?server=<url>` appended. Slash commands (`:vars`, `:models`, `:experiments`, `:wsid`) round-trip through `/inspect` so they show the server's state. `--session <id> --token <tok>` reattaches to an existing session instead of spawning a fresh one; passing `mlpl-serve --persist <dir>` makes those sessions survive a server restart. Use it when you want to drive an MLX-accelerated MacBook from a laptop, or share a live workspace between the CLI and the browser.",
+    intro: "MLPL added a connect mode to both the CLI REPL and the web REPL. Run `mlpl-serve --bind 127.0.0.1:6464 --auth required` on a beefier host, then point the client at it: the local Environment goes unused and the workspace lives on the server. The CLI form is `mlpl-repl --connect <url>`; the web form is the same browser tab as this tutorial, opened with `?connect=<url>` appended. Slash commands (`:vars`, `:models`, `:experiments`, `:wsid`) round-trip through `/inspect` so they show the server's state. `--session <id> --token <tok>` reattaches to an existing session instead of spawning a fresh one; passing `mlpl-serve --persist <dir>` makes those sessions survive a server restart. Use it when you want to drive an MLX-accelerated MacBook from a laptop, or share a live workspace between the CLI and the browser.",
     examples: &[
         "x = 42",
         "x + 1",
@@ -325,7 +325,7 @@ pub const CONNECT_TO_REMOTE: Lesson = Lesson {
         "range(5)",
         "shape(range(5))",
     ],
-    try_it: "Open this tutorial with `?server=<your-mlpl-serve-url>` in the URL bar. The same workspace is now reachable from `mlpl-repl --connect <url>` on the same host -- run :vars in both and watch the bindings line up. Then stop the server, restart it with --persist /tmp/mlpl-sessions, and rerun :vars -- empty (the original session was in-memory only). Run a new program, restart again, and :vars should now show the persisted bindings.",
+    try_it: "Open this tutorial with `?connect=<your-mlpl-serve-url>` in the URL bar. The same workspace is now reachable from `mlpl-repl --connect <url>` on the same host -- run :vars in both and watch the bindings line up. Then stop the server, restart it with --persist /tmp/mlpl-sessions, and rerun :vars -- empty (the original session was in-memory only). Run a new program, restart again, and :vars should now show the persisted bindings.",
 };
 
 pub const LIVE_LOSS_STREAMING: Lesson = Lesson {
