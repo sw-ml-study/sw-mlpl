@@ -85,6 +85,11 @@ pub struct Environment {
     /// first `device("mlx") { }` entry under that condition; the
     /// warning is emitted at most once per `Environment`.
     pub(crate) mlx_fallback_warned: bool,
+    /// User-visible notices collected during one eval (e.g. "adam under
+    /// device(\"cuda\") ran on CPU"). Drained at the eval boundary and
+    /// prepended to the result so the user sees when a GPU device
+    /// silently fell back to CPU. Deduped within an eval.
+    pub(crate) notices: Vec<String>,
     /// Optional remote peer dispatcher installed by the orchestrator
     /// around one eval call. Local eval leaves this unset.
     pub(crate) peer_dispatcher: Option<Arc<dyn PeerDispatcher>>,

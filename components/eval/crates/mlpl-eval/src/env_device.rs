@@ -38,4 +38,19 @@ impl Environment {
         self.mlx_fallback_warned = true;
         true
     }
+
+    /// Record a user-visible notice once per eval (deduped by text), to
+    /// be drained at the eval boundary and shown to the user -- e.g.
+    /// when a GPU device silently fell back to CPU for an unsupported
+    /// model shape.
+    pub fn push_notice_once(&mut self, msg: String) {
+        if !self.notices.contains(&msg) {
+            self.notices.push(msg);
+        }
+    }
+
+    /// Drain the collected notices (called at the eval boundary).
+    pub fn take_notices(&mut self) -> Vec<String> {
+        std::mem::take(&mut self.notices)
+    }
 }
