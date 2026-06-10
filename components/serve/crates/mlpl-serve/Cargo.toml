@@ -38,6 +38,10 @@ mlpl-array = { path = "../../../array/crates/mlpl-array" }
 # model evaluated in connect mode renders its decomposition.
 mlpl-web-viz-ir = { path = "../../../web-viz-ir/crates/mlpl-web-viz-ir" }
 mlpl-model-viz = { path = "../../../web-viz-ir/crates/mlpl-model-viz" }
+# GET /v1/stats backend telemetry (CPU/RAM/GPU/VRAM) for the REPL's
+# live "evaluating..." sparklines + the :status self-test. Platform
+# sources live in the monitoring component; serve stays platform-agnostic.
+mlpl-monitor = { path = "../../../monitoring/crates/mlpl-monitor" }
 axum = "0.7"
 tokio = { version = "1", features = ["full"] }
 # Saga 21.5 step 001: ReceiverStream adapter so an axum SSE

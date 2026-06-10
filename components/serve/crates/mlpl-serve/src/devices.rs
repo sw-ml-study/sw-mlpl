@@ -42,3 +42,12 @@ pub async fn devices_handler() -> impl IntoResponse {
         devices: compiled_devices(),
     })
 }
+
+/// `GET /v1/stats` -- backend resource telemetry (CPU%, system RAM,
+/// GPU%, VRAM) for the REPL's live "evaluating..." sparklines and the
+/// `:status` self-test. Delegates to the platform-pluggable
+/// `mlpl-monitor` crate, so on a CUDA Linux peer it reports real
+/// numbers and on a host without a given source the field is `null`.
+pub async fn stats_handler() -> impl IntoResponse {
+    Json(mlpl_monitor::snapshot().await)
+}

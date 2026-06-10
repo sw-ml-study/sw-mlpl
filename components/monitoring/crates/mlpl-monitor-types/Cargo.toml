@@ -1,0 +1,20 @@
+[package]
+name = "mlpl-monitor-types"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Shared wire types for backend resource telemetry (GET /v1/stats):
+# the Snapshot struct that mlpl-serve serializes and the web REPL
+# deserializes for its live "evaluating..." sparklines and :status.
+# No platform dependencies -- one contract for the CUDA Linux peer
+# and the future MLX macOS peer alike.
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1"
+
+[lints]
+workspace = true
