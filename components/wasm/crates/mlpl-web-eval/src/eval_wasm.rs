@@ -92,9 +92,14 @@ async fn wasm_eval(
         Ok(r) => r,
         Err(e) => return format!("error: {e}"),
     };
-    // Generous deadline: GPU fine-tunes can legitimately take a while,
-    // but bound it so a wedged backend fails instead of hanging forever.
-    let resp = match with_deadline(90_000, "eval", async {
+    // Generous deadline: a connect eval can legitimately run minutes --
+    // a CPU base-pretrain step (e.g. the CUDA LoRA demo's `train 40` over
+    // the full corpus) or a GPU fine-tune. Match mlpl-serve's own 600s
+    // peer-forward timeout (peers.rs PEER_TIMEOUT_SECS) so the client never
+    // gives up before the server would. The short 6s session-creation
+    // deadline (eval_wasm_helpers.rs) is the real "is the backend up?"
+    // fail-fast; once a session exists, long compute is expected.
+    let resp = match with_deadline(600_000, "eval", async {
         req.send().await.map_err(|e| e.to_string())
     })
     .await
