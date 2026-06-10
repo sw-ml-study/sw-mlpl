@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-952b6a93041f9c56.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-952b6a93041f9c56_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-b03769305dd9c428.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-b03769305dd9c428_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -766,31 +766,26 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             to { transform: rotate(360deg); }
         }
         .telemetry-panel {
-            margin: 4px 0 2px 24px;
+            margin: 2px 0 2px 24px;
             font-family: var(--mono);
             font-size: 13px;
             opacity: 0.85;
         }
-        .telemetry-row {
+        .telemetry-line {
             display: flex;
-            gap: 8px;
-            line-height: 1.35;
+            flex-wrap: wrap;
+            gap: 14px;
+            align-items: center;
         }
-        .telemetry-label {
-            color: var(--subtext1, #9aa);
-            width: 3.2em;
-        }
+        .telemetry-metric { white-space: nowrap; }
+        .telemetry-label { color: var(--subtext1, #9aa); margin-right: 5px; }
         .telemetry-spark {
             color: var(--green, #8ada8a);
             letter-spacing: 1px;
-            min-width: 13em;
             white-space: pre;
         }
-        .telemetry-val {
-            color: var(--subtext1, #9aa);
-            text-align: right;
-            width: 3em;
-        }
+        .telemetry-val { color: var(--subtext1, #9aa); margin-left: 5px; }
+        .telemetry-note { color: var(--peach, #e0a060); }
         .output-summary {
             margin: 2px 0 8px 0;
         }
@@ -1840,7 +1835,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-952b6a93041f9c56.js" crossorigin="anonymous" integrity="sha384-OJRYKKhKETrevzUE7te0rmL/4T+2dnAj93LSs4rjdReLeIBtd6jnY5jhwVtosIaL"><link rel="preload" href="/sw-mlpl/mlpl-web-952b6a93041f9c56_bg.wasm" crossorigin="anonymous" integrity="sha384-DnGcNgjDpdwXCo/hqJh5jgmei6K40QO0JBvYL4QWQKIdmdI/r5KdrImLcvofNre0" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-b03769305dd9c428.js" crossorigin="anonymous" integrity="sha384-1c/R8074zPvbnnQxbfmOUELUiBL16MR/P9/lLtgeLKo/aciAWVGv7QM3dkJVo1q+"><link rel="preload" href="/sw-mlpl/mlpl-web-b03769305dd9c428_bg.wasm" crossorigin="anonymous" integrity="sha384-/0yfaCgHA0t5pet8371Vi41NCicSIIzC7y0My6UHYGtAD+lpVTrTM7+d6VaT8LVu" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
