@@ -7,9 +7,9 @@
 
 # ----- the data we want to learn to generate: the two-moons manifold -----
 M  = moons(1, 100, 0.06)                       # [100, 3] (x, y, label)
+svg(M, "scatter")                              # TARGET: the two moons, colored by label (blue vs red)
 X0 = matmul(M, [[1, 0], [0, 1], [0, 0]])       # drop the label -> [100, 2]
 N  = 100
-svg(X0, "scatter")                             # TARGET: the two moons we want to reproduce
 
 # ----- noise schedule: how much noise is added at each of T steps -----
 T     = 16

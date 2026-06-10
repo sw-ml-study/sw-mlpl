@@ -229,9 +229,9 @@ pub const DIFFUSION_2D: Demo = Demo {
     takeaway: "Compare the two scatter plots: the model turned pure noise into points shaped like the two-moons data it learned from -- generation, not memorization. A diffusion model is just a noise-predictor plus a schedule: the loss curve falls as the MLP learns to undo the forward noising, then the reverse loop walks noise back onto the manifold. Some scatter in the output is normal for a tiny model; the recognizable two-crescent shape is the signal.",
     lines: &[
         "M  = moons(1, 100, 0.06)                       # two-moons data (x, y, label)",
+        "svg(M, \"scatter\")                             # TARGET: the two moons, colored by label (blue vs red)",
         "X0 = matmul(M, [[1, 0], [0, 1], [0, 0]])       # drop the label -> [100, 2] points",
         "N  = 100",
-        "svg(X0, \"scatter\")                            # TARGET: the two moons we want to reproduce",
         "T = 16 ; betas = linspace(0.0001, 0.07, T) ; alphas = 1 - betas ; abar = cumprod(alphas)  # linear noise schedule",
         "started = 0 ; TX = fill([1, 3], 0) ; TY = fill([1, 2], 0) ; t = 0",
         "while gt(T, t) { ab = take(abar, 0, t) ; eps = randn(t + 7, [N, 2]) ; Xt = sqrt(ab) * X0 + sqrt(1 - ab) * eps ; tcol = fill([N, 1], t / T) ; xin = concat(Xt, tcol, 1) ; if eq(started, 0) { TX = xin ; TY = eps ; started = 1 } else { TX = concat(TX, xin, 0) ; TY = concat(TY, eps, 0) } ; t = t + 1 }  # forward-noise at every timestep; collect (x_t, t) -> the noise added",

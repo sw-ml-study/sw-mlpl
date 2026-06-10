@@ -47,15 +47,18 @@ struct ProjectedBounds {
     ymax: f64,
 }
 
-/// Render an Nx2 matrix as a 2-D scatter plot.
+/// Render a 2-D scatter plot. `[N, 2]` plots all points in one color;
+/// `[N, 3]` reads the 3rd column as an integer class and colors each
+/// point from `PALETTE` (so e.g. the two moons / labeled clusters are
+/// visually distinct).
 pub fn render_scatter(data: &DenseArray) -> Result<String, VizError> {
     let dims = data.shape().dims();
-    if dims.len() != 2 || dims[1] != 2 {
+    if dims.len() != 2 || (dims[1] != 2 && dims[1] != 3) {
         return Err(VizError::InvalidShape(format!(
-            "scatter expects Nx2 matrix, got {dims:?}"
+            "scatter expects Nx2 or Nx3 (x, y, class) matrix, got {dims:?}"
         )));
     }
-    let n = dims[0];
+    let (n, cols) = (dims[0], dims[1]);
     let mut out = String::new();
     write_svg_open(&mut out);
 
@@ -65,14 +68,19 @@ pub fn render_scatter(data: &DenseArray) -> Result<String, VizError> {
     }
 
     let raw = data.data();
-    let (xs, ys): (Vec<f64>, Vec<f64>) = (0..n).map(|i| (raw[i * 2], raw[i * 2 + 1])).unzip();
+    let (xs, ys): (Vec<f64>, Vec<f64>) = (0..n).map(|i| (raw[i * cols], raw[i * cols + 1])).unzip();
     let (xmin, xmax) = bounds(&xs);
     let (ymin, ymax) = bounds(&ys);
     for i in 0..n {
         let cx = scale(xs[i], xmin, xmax, 0);
         let cy = scale(ys[i], ymin, ymax, 1);
+        let fill = if cols == 3 {
+            PALETTE[(raw[i * cols + 2].max(0.0) as usize) % PALETTE.len()]
+        } else {
+            PALETTE[0]
+        };
         out.push_str(&format!(
-            "<circle cx=\"{cx:.1}\" cy=\"{cy:.1}\" r=\"3\" fill=\"#89b4fa\"/>"
+            "<circle cx=\"{cx:.1}\" cy=\"{cy:.1}\" r=\"3\" fill=\"{fill}\"/>"
         ));
     }
     // Saga 29 step 019: corner scale labels so the reader

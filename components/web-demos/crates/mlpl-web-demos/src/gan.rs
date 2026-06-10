@@ -13,13 +13,17 @@ pub const GAN_2D: Demo = Demo {
             circle WITHOUT ever seeing it directly (its only signal is D's \
             gradient). Each loss is written inline in its adam() call so adam \
             can differentiate it.",
-    takeaway: "Compare the two scatters: the Generator's points trace the unit \
-               circle, learned purely from the Discriminator's feedback -- it \
-               never saw the circle. Two networks competing drive both to \
-               improve; this adversarial loop is the core GAN idea. (GANs are \
-               finicky -- the ring may be slightly loose or uneven; that is \
-               normal for a tiny GAN.) Diffusion (the 'Diffusion (2D points)' \
-               demo) reaches a similar goal by denoising instead of competing.",
+    takeaway: "Compare the two scatters: the target circle (top) vs the \
+               Generator's points (bottom), learned purely from the \
+               Discriminator's feedback -- it never saw the circle. Two \
+               networks competing is the core GAN idea. EXPECT IMPERFECTION: \
+               a tiny vanilla GAN like this often suffers MODE COLLAPSE -- the \
+               generator covers only part of the circle (an arc or clump) \
+               rather than the whole ring. That is a real, well-known GAN \
+               failure mode, not a bug in the demo; stabilizing it needs \
+               bigger nets / tricks (a GPU-scale follow-up). Diffusion (the \
+               'Diffusion (2D points)' demo) is steadier -- it denoises \
+               instead of competing.",
     lines: &[
         "n = 64",
         "angles = reshape(range(n), [n, 1]) * 0.0981748          # 64 angles around the circle",
