@@ -12,9 +12,12 @@ use crate::auth::AuthMode;
 use crate::peers::PeerRegistry;
 use crate::server::TlsConfig;
 
-/// Default Ollama endpoint + model when nothing is configured.
+/// Default Ollama endpoint + model when nothing is configured. The
+/// model `"auto"` is a sentinel: pick a median-size installed model
+/// (capable, not the weakest) at connect time, rather than hardcoding a
+/// tiny default that hallucinates. Override with `--ollama-model`.
 const DEFAULT_OLLAMA_HOST: &str = "http://localhost:11434";
-const DEFAULT_OLLAMA_MODEL: &str = "qwen2.5:0.5b";
+const DEFAULT_OLLAMA_MODEL: &str = "auto";
 
 /// Server-owned Ollama settings: the default host + model the web
 /// `:ask` falls back to, plus the allow-list of hosts the server is
