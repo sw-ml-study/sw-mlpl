@@ -11,10 +11,11 @@ use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
-use mlpl_eval::{Environment, Value, eval_program_value};
+use mlpl_eval::{Environment, Interrupt, Value, eval_program_value};
 use mlpl_parser::{lex, parse};
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+use tokio::sync::oneshot;
 use uuid::Uuid;
 
 use crate::auth::{AuthMode, check_token, extract_bearer};
@@ -136,56 +137,155 @@ pub async fn create_session_handler(State(state): State<AppState>) -> impl IntoR
     )
 }
 
-/// `POST /v1/sessions/{id}/eval` -- requires bearer
-/// when `auth_mode == Required`. Lex + parse + run
-/// the program against the session's env, return
-/// the stringified value + kind.
+/// `POST /v1/sessions/{id}/eval` -- requires bearer when
+/// `auth_mode == Required`. Lex + parse, then run the program OFF the
+/// global session lock: the session is taken out of the map, evaluated
+/// on a `spawn_blocking` task, and reinserted -- so a long eval never
+/// blocks new-session creation or other serving (notably the telemetry
+/// panel's `/v1/stats`). An `AbortGuard` trips the session interrupt if
+/// the client disconnects mid-eval (a shift-reload), so the eval aborts
+/// at its next checkpoint instead of orphaning and wedging the server.
 pub async fn eval_handler(
     State(state): State<AppState>,
     Path(id): Path<Uuid>,
     headers: HeaderMap,
     Json(body): Json<EvalRequest>,
 ) -> Result<Json<EvalResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let mut sessions = state.sessions.write().await;
-    let session = sessions
-        .get_mut(&id)
-        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(&headers).ok_or((
-            StatusCode::UNAUTHORIZED,
-            json_err("missing or invalid authorization"),
-        ))?;
-        if !check_token(provided, &session.token) {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                json_err("missing or invalid authorization"),
-            ));
-        }
-    }
     let tokens =
         lex(&body.program).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
     let stmts =
         parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
-    install_session_interrupt(&state, &id, session).await;
+    let (session, interrupt) = take_session_for_eval(&state, id, &headers).await?;
+    let rx = spawn_eval(&state, id, session, stmts);
+    let mut guard = AbortGuard {
+        interrupt,
+        armed: true,
+    };
+    let result = rx.await;
+    guard.armed = false;
+    match result {
+        Ok(Ok(resp)) => Ok(Json(resp)),
+        Ok(Err(e)) => Err((StatusCode::BAD_REQUEST, json_err(e))),
+        Err(_) => Err((
+            StatusCode::INTERNAL_SERVER_ERROR,
+            json_err("eval task dropped"),
+        )),
+    }
+}
+
+/// Trips a session's interrupt when dropped while still armed -- the
+/// cancel-on-disconnect mechanism. `eval_handler` disarms it on normal
+/// completion; if the handler future is instead dropped (client
+/// disconnect), the drop sets the interrupt and the in-flight eval
+/// aborts at its next checkpoint.
+struct AbortGuard {
+    interrupt: Interrupt,
+    armed: bool,
+}
+
+impl Drop for AbortGuard {
+    fn drop(&mut self) {
+        if self.armed {
+            self.interrupt.set();
+        }
+    }
+}
+
+/// Authenticate, take the session OUT of the map (so the eval does not
+/// hold the global write lock), reset + install its interrupt, and wire
+/// the peer dispatcher. Returns the owned session + a clone of its
+/// interrupt for the `AbortGuard`.
+async fn take_session_for_eval(
+    state: &AppState,
+    id: Uuid,
+    headers: &HeaderMap,
+) -> Result<(crate::sessions::Session, Interrupt), (StatusCode, Json<ErrorResponse>)> {
+    let unauthorized = || {
+        (
+            StatusCode::UNAUTHORIZED,
+            json_err("missing or invalid authorization"),
+        )
+    };
+    let entry = state
+        .interrupts
+        .read()
+        .await
+        .get(&id)
+        .cloned()
+        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
+    if state.auth_mode == AuthMode::Required {
+        let provided = extract_bearer(headers).ok_or_else(unauthorized)?;
+        if !check_token(provided, &entry.token) {
+            return Err(unauthorized());
+        }
+    }
+    entry.interrupt.reset();
+    let mut session = state
+        .sessions
+        .write()
+        .await
+        .remove(&id)
+        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
+    session.env.set_interrupt(entry.interrupt.clone());
     session
         .env
         .set_peer_dispatcher(Arc::new(crate::server::RemoteMlxDispatcher::new(
             state.peers.clone(),
             state.peer_sessions.clone(),
         )));
-    let value = eval_program_value(&stmts, &mut session.env);
+    Ok((session, entry.interrupt))
+}
+
+/// Spawn the eval as a detached task (so it unwinds cleanly even if the
+/// handler future is dropped on disconnect) and deliver the built
+/// response over a oneshot.
+fn spawn_eval(
+    state: &AppState,
+    id: Uuid,
+    session: crate::sessions::Session,
+    stmts: Vec<mlpl_parser::Expr>,
+) -> oneshot::Receiver<Result<EvalResponse, String>> {
+    let (tx, rx) = oneshot::channel();
+    let state = state.clone();
+    tokio::spawn(async move {
+        let resp = run_eval(&state, id, session, stmts).await;
+        let _ = tx.send(resp);
+    });
+    rx
+}
+
+/// Body of the eval task: evaluate on a blocking thread, clear the
+/// env's per-eval hooks, build the response (with viz attach) on
+/// success, ALWAYS reinsert the session, and flush persistence.
+async fn run_eval(
+    state: &AppState,
+    id: Uuid,
+    mut session: crate::sessions::Session,
+    stmts: Vec<mlpl_parser::Expr>,
+) -> Result<EvalResponse, String> {
+    let join = tokio::task::spawn_blocking(move || {
+        let value = eval_program_value(&stmts, &mut session.env);
+        (session, value)
+    })
+    .await;
+    let (mut session, value) = join.map_err(|_| "eval task panicked".to_string())?;
     session.env.clear_peer_dispatcher();
     session.env.clear_interrupt();
-    let value = value.map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
-    let kind = value_kind(&value);
-    let formatted = format!("{value}");
-    session.last_eval_at = Some(crate::sessions::now_unix_seconds());
-    let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
-    drop(sessions);
-    crate::persist::maybe_flush(&state).await;
-    Ok(Json(crate::eval_viz::build_eval_response(
-        &value, kind, formatted, attached,
-    )))
+    let out = match value {
+        Ok(v) => {
+            session.last_eval_at = Some(crate::sessions::now_unix_seconds());
+            let kind = value_kind(&v);
+            let formatted = format!("{v}");
+            let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
+            Ok(crate::eval_viz::build_eval_response(
+                &v, kind, formatted, attached,
+            ))
+        }
+        Err(e) => Err(format!("{e}")),
+    };
+    state.sessions.write().await.insert(id, session);
+    crate::persist::maybe_flush(state).await;
+    out
 }
 
 /// `POST /v1/sessions/{id}/cancel` -- requires bearer
