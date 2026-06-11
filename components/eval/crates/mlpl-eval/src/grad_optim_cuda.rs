@@ -56,3 +56,41 @@ fn run_step(
     step_adapter(env, &layout.head_b_adapter, &grads[1], hp)?;
     Ok(DenseArray::from_scalar(f64::from(loss)))
 }
+
+/// Convert the device-agnostic hyperparameters to candle's.
+fn to_cuda_hp(hp: &crate::gpu_step::AdamHp) -> AdamHp {
+    AdamHp {
+        lr: hp.lr,
+        b1: hp.b1,
+        b2: hp.b2,
+        eps: hp.eps,
+        t: hp.t,
+    }
+}
+
+/// The CUDA [`GpuAdamStep`](crate::gpu_step::GpuAdamStep) -- registered
+/// on every `Environment` in a cuda/linux/x86_64 build.
+#[derive(Debug)]
+pub(crate) struct CudaGpuAdam;
+
+impl crate::gpu_step::GpuAdamStep for CudaGpuAdam {
+    fn try_lora_adam(
+        &self,
+        loss: &Expr,
+        model: &Expr,
+        hp: &crate::gpu_step::AdamHp,
+        env: &mut Environment,
+    ) -> Option<Result<DenseArray, EvalError>> {
+        try_lora_adam(loss, model, &to_cuda_hp(hp), env)
+    }
+
+    fn try_mlp_adam(
+        &self,
+        loss: &Expr,
+        model: &Expr,
+        hp: &crate::gpu_step::AdamHp,
+        env: &mut Environment,
+    ) -> Option<Result<DenseArray, EvalError>> {
+        crate::grad_optim_cuda_mlp::try_mlp_adam(loss, model, &to_cuda_hp(hp), env)
+    }
+}

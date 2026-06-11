@@ -93,6 +93,15 @@ pub struct Environment {
     /// Optional remote peer dispatcher installed by the orchestrator
     /// around one eval call. Local eval leaves this unset.
     pub(crate) peer_dispatcher: Option<Arc<dyn PeerDispatcher>>,
+    /// The GPU optimizer step for this build, installed by `new`.
+    /// `eval_adam` calls it device-agnostically. Only exists on a GPU
+    /// build (CUDA on Linux, MLX on Apple); a CPU-only build has no
+    /// `gpu_step` module/field at all.
+    #[cfg(any(
+        all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+        all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+    ))]
+    pub(crate) gpu_step: Option<Arc<dyn crate::gpu_step::GpuAdamStep>>,
     /// Peer-resident tensor handles bound by assignment.
     pub(crate) device_tensors: HashMap<String, Value>,
     /// Saga 23 step 001: optional ValueTag attached per binding
@@ -141,10 +150,37 @@ pub struct Environment {
 }
 
 impl Environment {
-    /// Create an empty environment.
+    /// Create an empty environment. On a GPU build it installs this
+    /// build's GPU optimizer step so `eval_adam` can dispatch to it.
     #[must_use]
     pub fn new() -> Self {
-        Self::default()
+        #[cfg(any(
+            all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+            all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+        ))]
+        {
+            Self {
+                gpu_step: crate::gpu_step::default_gpu_step(),
+                ..Self::default()
+            }
+        }
+        #[cfg(not(any(
+            all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+            all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+        )))]
+        {
+            Self::default()
+        }
+    }
+
+    /// This build's GPU optimizer step, if any (cloned `Arc`, so the
+    /// caller can hold it while mutably borrowing the env for the step).
+    #[cfg(any(
+        all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+        all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+    ))]
+    pub(crate) fn gpu_step(&self) -> Option<Arc<dyn crate::gpu_step::GpuAdamStep>> {
+        self.gpu_step.clone()
     }
 }
 

@@ -175,51 +175,30 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
     let bc1 = 1.0 - b1.powi(t as i32);
     let bc2 = 1.0 - b2.powi(t as i32);
 
-    // Step 010: on `device("mlx")`, a head-only LoRA fine-tune step runs
-    // forward + backward + optimizer on the GPU via `value_and_grad` +
-    // an MLX adam. `try_lora_adam` returns None for any other model or
-    // device, falling through to the CPU tape path below.
-    #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+    // GPU fast path: under a GPU device, try this build's registered
+    // step (head-only LoRA, then the board-policy MLP). Either `None`
+    // (unrecognized model) falls through to the CPU tape below. The whole
+    // block is conditional on a GPU backend being configured -- on a
+    // CPU-only build the `gpu_step` module/field do not exist -- and it
+    // names no backend: the specifics live behind `GpuAdamStep`.
+    #[cfg(any(
+        all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+        all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+    ))]
+    if env.device() != "cpu"
+        && let Some(step) = env.gpu_step()
     {
-        let hp = mlpl_mlx_train::AdamHp {
-            lr: lr as f32,
-            b1: b1 as f32,
-            b2: b2 as f32,
-            eps: eps as f32,
-            t: t as i32,
-        };
-        if let Some(res) = crate::grad_optim_mlx::try_lora_adam(&loss_expr, &args[1], &hp, env) {
-            return res;
-        }
-        // The tic-tac-toe board-policy MLP (Chain[LinearLora, relu,
-        // LinearLora]) fine-tunes on the GPU via the same kernel.
-        if let Some(res) =
-            crate::grad_optim_mlx_mlp_step::try_mlp_adam(&loss_expr, &args[1], &hp, env)
-        {
-            return res;
-        }
-    }
-
-    // Saga cuda-foundation step 006: the same head-only LoRA fine-tune
-    // step runs on an NVIDIA GPU under `device("cuda")` via candle
-    // autograd + a candle adam. Returns None for any other model or
-    // device, falling through to the CPU tape path below.
-    #[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
-    {
-        let hp = mlpl_cuda_train::AdamHp {
+        let hp = crate::gpu_step::AdamHp {
             lr,
             b1,
             b2,
             eps,
             t: t as i32,
         };
-        if let Some(res) = crate::grad_optim_cuda::try_lora_adam(&loss_expr, &args[1], &hp, env) {
+        if let Some(res) = step.try_lora_adam(&loss_expr, &args[1], &hp, env) {
             return res;
         }
-        // The tic-tac-toe board-policy MLP (Chain[LinearLora, relu,
-        // LinearLora]) fine-tunes on the NVIDIA GPU via the same kernel.
-        if let Some(res) = crate::grad_optim_cuda_mlp::try_mlp_adam(&loss_expr, &args[1], &hp, env)
-        {
+        if let Some(res) = step.try_mlp_adam(&loss_expr, &args[1], &hp, env) {
             return res;
         }
     }
