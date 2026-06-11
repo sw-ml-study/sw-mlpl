@@ -15,7 +15,7 @@ use mlpl_eval::{Environment, eval_program_value};
 use mlpl_parser::{lex, parse};
 
 fn load_demo() -> String {
-    std::fs::read_to_string("../../demos/vit_multihead_thorough.mlpl")
+    std::fs::read_to_string("../../../../demos/vit_multihead_thorough.mlpl")
         .expect("vit_multihead_thorough.mlpl readable")
 }
 

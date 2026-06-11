@@ -16,8 +16,8 @@ use mlpl_eval::{Environment, Value, eval_program_value};
 use mlpl_parser::{lex, parse};
 
 fn demo_source() -> String {
-    let path =
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../demos/vit_attention_pattern.mlpl");
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../../demos/vit_attention_pattern.mlpl");
     fs::read_to_string(&path).unwrap_or_else(|e| panic!("read {}: {e}", path.display()))
 }
 

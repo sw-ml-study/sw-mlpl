@@ -193,7 +193,7 @@ fn neural_thicket_mlx_demo_file_parses() {
     // validates the exact bytes on disk).
     let src = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../demos/neural_thicket_mlx.mlpl"
+        "/../../../../demos/neural_thicket_mlx.mlpl"
     ))
     .expect("read demos/neural_thicket_mlx.mlpl");
     let tokens = lex(&src).expect("demo lexes");

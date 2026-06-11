@@ -68,8 +68,8 @@ fn predict_batch_unknown_model_error() {
 #[test]
 #[ignore = "trained ViT + predict + gallery: 50 adam steps on B=16 (~2-3 minutes on CPU)"]
 fn vit_predict_gallery_demo_runs_end_to_end() {
-    let path =
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../demos/vit_predict_gallery.mlpl");
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../../../demos/vit_predict_gallery.mlpl");
     let src = fs::read_to_string(&path).expect("read demo file");
     let tokens = lex(&src).expect("lex");
     let stmts = parse(&tokens).expect("parse");
