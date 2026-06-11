@@ -91,7 +91,7 @@ fn tiny_lm_mlx_demo_file_parses() {
     // logic; this one validates the exact bytes in the demo).
     let src = std::fs::read_to_string(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../demos/tiny_lm_mlx.mlpl"
+        "/../../../../demos/tiny_lm_mlx.mlpl"
     ))
     .expect("read demos/tiny_lm_mlx.mlpl");
     let tokens = lex(&src).expect("demo lexes");

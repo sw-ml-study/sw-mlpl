@@ -29,7 +29,7 @@ fn vit_attention_pattern_multihead_demo_runs_end_to_end() {
     // Full evaluation including the trailing row_sums echo.
     // Asserting the final value is a tensor whose entries
     // are all 1 (softmax row sums per head).
-    let demo = load_demo("../../demos/vit_attention_pattern_multihead.mlpl");
+    let demo = load_demo("../../../../demos/vit_attention_pattern_multihead.mlpl");
     let stmts = parse(&lex(&demo).unwrap()).unwrap();
     let mut env = Environment::new();
     let v = eval_program_value(&stmts, &mut env).unwrap();
@@ -47,7 +47,7 @@ fn vit_attention_pattern_multihead_demo_runs_end_to_end() {
 fn vit_attention_pattern_multihead_demo_emits_heatmap_grid_svg() {
     // Same demo but trimmed so the final statement is the
     // svg() call; we then check the SVG has four head labels.
-    let demo = load_demo("../../demos/vit_attention_pattern_multihead.mlpl");
+    let demo = load_demo("../../../../demos/vit_attention_pattern_multihead.mlpl");
     let mut trimmed = String::new();
     for line in demo.lines() {
         trimmed.push_str(line);
@@ -82,7 +82,7 @@ fn vit_attention_pattern_multihead_demo_emits_heatmap_grid_svg() {
 #[ignore = "100 adam steps on a 20-image batch + 4-head attention; takes ~60-90s on CPU"]
 #[test]
 fn vit_multihead_quick_demo_runs_end_to_end() {
-    let demo = load_demo("../../demos/vit_multihead_quick.mlpl");
+    let demo = load_demo("../../../../demos/vit_multihead_quick.mlpl");
     let stmts = parse(&lex(&demo).unwrap()).unwrap();
     let mut env = Environment::new();
     let v = eval_program_value(&stmts, &mut env).unwrap();
