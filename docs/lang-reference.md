@@ -268,6 +268,8 @@ Newlines and semicolons are both statement separators.
 | `reduce(:op, a, axis)` | 3 | Same, restricted to a single axis. |
 | `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |
 | `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
+| `cumprod(v)` | 1 | Cumulative product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). |
+| `linspace(start, stop, n)` | 3 | `n` evenly-spaced values from `start` to `stop` inclusive, as a rank-1 vector. |
 | `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
 | `scatter(buffer, indices, values)` | 3 | Accumulate `values` into `buffer` at positions given by `indices`. Returns a new buffer; the input is not mutated. Used inside `repeat N { ... }` loops to track per-index scores without explicit indexing. |
 
