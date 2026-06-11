@@ -57,3 +57,41 @@ fn run_step(
     step_adapter(env, &layout.head_b_adapter, &grads[1], hp)?;
     Ok(DenseArray::from_scalar(f64::from(loss)))
 }
+
+/// Convert the device-agnostic hyperparameters to MLX's (f32).
+fn to_mlx_hp(hp: &crate::gpu_step::AdamHp) -> AdamHp {
+    AdamHp {
+        lr: hp.lr as f32,
+        b1: hp.b1 as f32,
+        b2: hp.b2 as f32,
+        eps: hp.eps as f32,
+        t: hp.t,
+    }
+}
+
+/// The MLX [`GpuAdamStep`](crate::gpu_step::GpuAdamStep) -- registered
+/// on every `Environment` in an mlx/macos/aarch64 build.
+#[derive(Debug)]
+pub(crate) struct MlxGpuAdam;
+
+impl crate::gpu_step::GpuAdamStep for MlxGpuAdam {
+    fn try_lora_adam(
+        &self,
+        loss: &Expr,
+        model: &Expr,
+        hp: &crate::gpu_step::AdamHp,
+        env: &mut Environment,
+    ) -> Option<Result<DenseArray, EvalError>> {
+        try_lora_adam(loss, model, &to_mlx_hp(hp), env)
+    }
+
+    fn try_mlp_adam(
+        &self,
+        loss: &Expr,
+        model: &Expr,
+        hp: &crate::gpu_step::AdamHp,
+        env: &mut Environment,
+    ) -> Option<Result<DenseArray, EvalError>> {
+        crate::grad_optim_mlx_mlp_step::try_mlp_adam(loss, model, &to_mlx_hp(hp), env)
+    }
+}
