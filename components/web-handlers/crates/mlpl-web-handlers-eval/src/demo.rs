@@ -201,12 +201,14 @@ fn dispatch_demo_line_connected(
     let mut entries_c = entries.to_vec();
     let hist = history.clone();
     let sess = Rc::clone(session);
+    // This demo line's telemetry generation (begin()'d before its marker).
+    let gen_id = mlpl_web_eval::telemetry_trace::current_gen();
     let cont: mlpl_web_eval::eval::ResultCb = Box::new(move |display: String| {
         // Persist the backend-load sparkline below a server-run demo line
         // so a brief GPU blip survives the marker being replaced.
         let out = match (
             display.starts_with("error:"),
-            mlpl_web_eval::telemetry_trace::summary(),
+            mlpl_web_eval::telemetry_trace::summary(gen_id),
         ) {
             (false, Some(tel)) => format!("{display}\n{tel}"),
             _ => display,

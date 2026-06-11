@@ -393,6 +393,10 @@ pub(crate) fn try_connect_eval(
     let queue_c = queue.to_vec();
     let line_c = line.to_string();
     let mut hist_c = history.to_vec();
+    // Capture THIS eval's telemetry generation now (synchronous with its
+    // begin()); read only that gen_id's sparkline when the result lands, so
+    // a concurrent watch/eval can't intermix.
+    let gen_id = mlpl_web_eval::telemetry_trace::current_gen();
     mlpl_web_eval::eval_wasm::connect_eval(
         &program,
         Box::new(move |result: String| {
@@ -400,7 +404,7 @@ pub(crate) fn try_connect_eval(
             // Persist the backend-load sparkline collected by the live
             // panel so the trace (incl. a brief GPU blip) survives the
             // marker being replaced. Only when samples were collected.
-            let output = match (is_error, mlpl_web_eval::telemetry_trace::summary()) {
+            let output = match (is_error, mlpl_web_eval::telemetry_trace::summary(gen_id)) {
                 (false, Some(tel)) => format!("{result}\n{tel}"),
                 _ => result,
             };

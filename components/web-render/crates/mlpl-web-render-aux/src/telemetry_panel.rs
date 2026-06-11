@@ -68,7 +68,7 @@ async fn fetch_snapshot(url: &str) -> Result<Snapshot, String> {
 
 /// One poll: fetch, record success or error into the buffers, then bump
 /// `tick` (its new value forces the component to re-render either way).
-fn poll_once(base: &str, series: &Rc<RefCell<Series>>, tick: &UseStateHandle<u32>) {
+fn poll_once(base: &str, gen_id: u32, series: &Rc<RefCell<Series>>, tick: &UseStateHandle<u32>) {
     let url = format!("{}/v1/stats", base.trim_end_matches('/'));
     let series = series.clone();
     let tick = tick.clone();
@@ -78,9 +78,10 @@ fn poll_once(base: &str, series: &Rc<RefCell<Series>>, tick: &UseStateHandle<u32
             let mut s = series.borrow_mut();
             match outcome {
                 Ok(snap) => {
-                    // Mirror into the shared trace so the sparkline
-                    // PERSISTS in the result after the marker unmounts.
-                    mlpl_web_eval::telemetry_trace::push(&snap);
+                    // Mirror into THIS eval's generation so the sparkline
+                    // PERSISTS in the result after the marker unmounts,
+                    // isolated from any other concurrent eval/watch.
+                    mlpl_web_eval::telemetry_trace::push(gen_id, &snap);
                     s.push(snap);
                 }
                 Err(e) => {
@@ -123,27 +124,32 @@ fn render_rows(series: &Series) -> Html {
 
 #[function_component(TelemetryPanel)]
 pub fn telemetry_panel() -> Html {
-    // Only show for evals that actually run on the SERVER -- a browser
-    // -local eval (CPU-tier demo) would otherwise display server CPU
-    // that has nothing to do with where it runs. Both conditions are
-    // stable for the panel's lifetime, so the early return is safe
-    // before the hooks.
-    let connected = mlpl_web_eval::eval::current_connect_url_from_window();
-    let (Some(base), true) = (connected, mlpl_web_eval::telemetry_trace::is_remote()) else {
-        return html! {};
-    };
+    // Capture THIS eval's generation + connect URL once at mount (hooks,
+    // always called). The panel only shows for a server-side eval -- a
+    // browser-local eval (CPU-tier demo) would otherwise display server
+    // CPU unrelated to where it runs.
+    let gen_id = *use_state(mlpl_web_eval::telemetry_trace::current_gen);
+    let base = (*use_state(mlpl_web_eval::eval::current_connect_url_from_window)).clone();
     let series = use_mut_ref(Series::default);
     let tick = use_state(|| 0u32);
+    let active = base.is_some() && mlpl_web_eval::telemetry_trace::is_remote(gen_id);
     {
         let series = series.clone();
         let tick = tick.clone();
-        use_effect_with((), move |_| {
-            // The trace was reset by the dispatcher (begin) before this
-            // marker; just start polling.
-            poll_once(&base, &series, &tick);
-            let interval = Interval::new(POLL_MS, move || poll_once(&base, &series, &tick));
+        let base = base.clone();
+        use_effect_with(active, move |&active| {
+            let mut interval = None;
+            if let (true, Some(b)) = (active, base) {
+                poll_once(&b, gen_id, &series, &tick);
+                interval = Some(Interval::new(POLL_MS, move || {
+                    poll_once(&b, gen_id, &series, &tick)
+                }));
+            }
             move || drop(interval)
         });
+    }
+    if !active {
+        return html! {};
     }
     render_rows(&series.borrow())
 }
