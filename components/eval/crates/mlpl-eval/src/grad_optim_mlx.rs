@@ -1,51 +1,35 @@
-//! Step 010: true-GPU LoRA fine-tune step. When `device("mlx")` and the
-//! model is the demo architecture (head-only LoRA), run one fine-tune
-//! step's forward + backward + optimizer on the Apple GPU --
-//! `mlpl-mlx-model::demo_forward` differentiated by `value_and_grad`,
-//! updated by a stateless MLX adam -- instead of the CPU autograd tape.
-//! Optimizer moments persist across steps in `env.optim_state` (same as
-//! the CPU path), since the interpreter calls `adam(...)` once per step.
-//! The per-step plumbing lives in `grad_optim_mlx_step`.
+//! Step 010: true-GPU LoRA fine-tune step. Runs one fine-tune step's
+//! forward + backward + optimizer for the head-only LoRA architecture on
+//! the Apple GPU -- `mlpl-mlx-model::demo_forward` differentiated by
+//! `value_and_grad`, updated by a stateless MLX adam -- instead of the
+//! CPU autograd tape. Optimizer moments persist across steps via the
+//! `GpuEnv` accessor. Architecture RECOGNITION is interpreter-coupled and
+//! lives in `grad_optim::eval_adam`; this module gets the resolved
+//! `DemoLayout` + input tensors. The MLX analog of `grad_optim_cuda`.
 
-use crate::env::Environment;
-use crate::grad_optim_mlx_demo::{DemoLayout, demo_layout, extract_xy};
+use crate::gpu_step::GpuEnv;
+use crate::grad_optim_mlx_demo::DemoLayout;
+use crate::grad_optim_mlx_mlp::LoraNames;
 use crate::grad_optim_mlx_step::{build_weights, step_adapter, tokens_mlx};
 use mlpl_array::DenseArray;
 use mlpl_eval_types::EvalError;
 use mlpl_mlx_model::demo_forward;
 use mlpl_mlx_rt::dense_to_mlx;
 use mlpl_mlx_train::{AdamHp, loss_and_grads};
-use mlpl_parser::Expr;
 
-/// MLX fast path for a head-only LoRA fine-tune step. Returns `None` to
-/// fall back to the CPU tape adam (non-mlx device, or a model that is
-/// not the recognized demo architecture).
-pub(crate) fn try_lora_adam(
-    loss: &Expr,
-    model_arg: &Expr,
-    hp: &AdamHp,
-    env: &mut Environment,
-) -> Option<Result<DenseArray, EvalError>> {
-    if env.device() != "mlx" {
-        return None;
-    }
-    let layout = demo_layout(model_arg, env)?;
-    let (xt, yt) = extract_xy(loss, env)?;
-    Some(run_step(&layout, &xt, &yt, hp, env))
-}
-
+/// One head-only LoRA fine-tune step on the GPU for the resolved layout.
 fn run_step(
     layout: &DemoLayout,
     xt: &DenseArray,
     yt: &DenseArray,
     hp: &AdamHp,
-    env: &mut Environment,
+    env: &mut dyn GpuEnv,
 ) -> Result<DenseArray, EvalError> {
     let x_oh = tokens_mlx(xt, layout.vocab)?;
     let y_oh = tokens_mlx(yt, layout.vocab)?;
     let w = build_weights(layout, env, xt.data().len())?;
     let pull = |n: &str| {
-        let d = env.get(n).expect("adapter present");
+        let d = env.binding(n).expect("adapter present");
         dense_to_mlx(d.data(), d.shape().dims())
     };
     let adapters = [pull(&layout.head_a), pull(&layout.head_b_adapter)];
@@ -75,23 +59,26 @@ fn to_mlx_hp(hp: &crate::gpu_step::AdamHp) -> AdamHp {
 pub(crate) struct MlxGpuAdam;
 
 impl crate::gpu_step::GpuAdamStep for MlxGpuAdam {
-    fn try_lora_adam(
+    fn run_lora_step(
         &self,
-        loss: &Expr,
-        model: &Expr,
+        layout: &DemoLayout,
+        x: &DenseArray,
+        y: &DenseArray,
         hp: &crate::gpu_step::AdamHp,
-        env: &mut Environment,
-    ) -> Option<Result<DenseArray, EvalError>> {
-        try_lora_adam(loss, model, &to_mlx_hp(hp), env)
+        env: &mut dyn GpuEnv,
+    ) -> Result<DenseArray, EvalError> {
+        run_step(layout, x, y, &to_mlx_hp(hp), env)
     }
 
-    fn try_mlp_adam(
+    fn run_mlp_step(
         &self,
-        loss: &Expr,
-        model: &Expr,
+        l1: &LoraNames,
+        head: &LoraNames,
+        x: &DenseArray,
+        y: &DenseArray,
         hp: &crate::gpu_step::AdamHp,
-        env: &mut Environment,
-    ) -> Option<Result<DenseArray, EvalError>> {
-        crate::grad_optim_mlx_mlp_step::try_mlp_adam(loss, model, &to_mlx_hp(hp), env)
+        env: &mut dyn GpuEnv,
+    ) -> Result<DenseArray, EvalError> {
+        crate::grad_optim_mlx_mlp_step::run_step(l1, head, x, y, &to_mlx_hp(hp), env)
     }
 }
