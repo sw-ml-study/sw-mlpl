@@ -11,7 +11,7 @@ use mlpl_eval_types::EvalError;
 /// Convert an integer-valued token id array (1-D `[N]`) into a
 /// `[N, vocab]` one-hot matrix. Token ids must be non-negative
 /// integers in `[0, vocab)`.
-pub(crate) fn tokens_to_onehot(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, EvalError> {
+pub fn tokens_to_onehot(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, EvalError> {
     let dims = tokens.shape().dims();
     if dims.len() != 1 {
         let msg = format!("embed: tokens must be a 1-D [N] array, got shape {dims:?}");

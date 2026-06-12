@@ -1,19 +1,19 @@
 //! The on-device fine-tune step for the tic-tac-toe board-policy MLP on
 //! CUDA: forward + backward + Adam over the four LoRA adapters on the
-//! NVIDIA GPU, frozen bases, moments persisted via the `GpuEnv`
-//! accessor. The CUDA analog of `grad_optim_mlx_mlp_step`. Recognition
-//! (`mlp_layout`) is interpreter-coupled and lives in `eval_adam`; this
-//! module gets the resolved `LoraNames` layout + input tensors.
+//! NVIDIA GPU, frozen bases, moments persisted via the `mlpl_eval::GpuEnv`
+//! accessor. Recognition (`mlp_layout`) is interpreter-coupled and lives
+//! in `mlpl-eval::eval_adam`; this module gets the resolved `LoraNames`
+//! layout + input tensors.
 
-use crate::gpu_step::GpuEnv;
-use crate::grad_optim_cuda_step::{step_adapter, tokens_cuda};
-use crate::grad_optim_mlx_mlp::LoraNames;
 use candle_core::Tensor;
 use mlpl_array::DenseArray;
 use mlpl_cuda_model::{MlpWeights, mlp_forward};
 use mlpl_cuda_rt::dense_to_cuda;
 use mlpl_cuda_train::{AdamHp, loss_and_grads};
+use mlpl_eval::{GpuEnv, LoraNames};
 use mlpl_eval_types::EvalError;
+
+use crate::cuda_step::{step_adapter, tokens_cuda};
 
 fn pull(env: &dyn GpuEnv, n: &str) -> Tensor {
     let d = env.binding(n).expect("param present");

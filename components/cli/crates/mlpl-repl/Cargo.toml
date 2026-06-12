@@ -14,11 +14,12 @@ mlx = ["mlpl-eval/mlx"]
 # feature so `device("cuda") { }` blocks in scripts run via
 # `mlpl-repl -f` dispatch through the CUDA (candle) runtime. Gated
 # inside the cuda crates (Linux + x86_64 + GPU).
-cuda = ["mlpl-eval/cuda"]
+cuda = ["mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cuda-eval/cuda"]
 
 [dependencies]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-cuda-eval = { path = "../../../cuda-eval/crates/mlpl-cuda-eval", optional = true }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 # Saga 21 step 003: viz_cache transforms SVG return
 # values into `viz: <path>` for both local and

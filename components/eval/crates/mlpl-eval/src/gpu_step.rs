@@ -19,12 +19,12 @@ use crate::grad_optim_mlx_mlp::LoraNames;
 
 // The environment accessor lives in its own module; re-exported here so
 // `crate::gpu_step::GpuEnv` keeps resolving for the backend compute.
-pub(crate) use crate::gpu_env::GpuEnv;
+pub use crate::gpu_env::GpuEnv;
 
 /// Device-agnostic Adam hyperparameters; each backend converts to its
 /// own (`mlpl_cuda_train` / `mlpl_mlx_train`).
 #[derive(Clone, Copy, Debug)]
-pub(crate) struct AdamHp {
+pub struct AdamHp {
     pub lr: f64,
     pub b1: f64,
     pub b2: f64,
@@ -35,7 +35,7 @@ pub(crate) struct AdamHp {
 /// One GPU optimizer step for a RECOGNIZED architecture. Recognition is
 /// done by the caller (`eval_adam`); the impl gets the resolved layout +
 /// input tensors + the [`GpuEnv`] accessor, and returns the step loss.
-pub(crate) trait GpuAdamStep: std::fmt::Debug + Send + Sync {
+pub trait GpuAdamStep: std::fmt::Debug + Send + Sync {
     /// Head-only LoRA fine-tune step.
     fn run_lora_step(
         &self,
@@ -57,14 +57,19 @@ pub(crate) trait GpuAdamStep: std::fmt::Debug + Send + Sync {
     ) -> Result<DenseArray, EvalError>;
 }
 
-/// The CUDA step (cuda/linux/x86_64 build).
+/// The CUDA step moved to the sibling `mlpl-cuda-eval` crate (S3), so
+/// this crate has no in-crate CUDA default. The binary registers
+/// `mlpl_cuda_eval::gpu_step()` via `register_gpu_step` at startup, so
+/// `installed_gpu_step` returns the registered step; this `None` is only
+/// the fallback when nothing is registered (e.g. a CUDA build that never
+/// calls the registration path).
 #[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
 #[must_use]
 pub(crate) fn default_gpu_step() -> Option<Arc<dyn GpuAdamStep>> {
-    Some(Arc::new(crate::grad_optim_cuda::CudaGpuAdam))
+    None
 }
 
-/// The MLX step (mlx/macos/aarch64 build).
+/// The MLX step (mlx/macos/aarch64 build). Still in-crate until S4.
 #[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
 #[must_use]
 pub(crate) fn default_gpu_step() -> Option<Arc<dyn GpuAdamStep>> {

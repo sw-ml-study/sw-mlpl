@@ -1,7 +1,7 @@
 //! Per-step plumbing for the MLX LoRA path (see `grad_optim_mlx`):
 //! one-hot inputs, the frozen-weight bundle, and the on-device adam
 //! update with moments persisted via the `GpuEnv` accessor. The MLX
-//! analog of `grad_optim_cuda_step`.
+//! analog of mlpl-cuda-eval::cuda_step.
 
 use crate::gpu_step::GpuEnv;
 use crate::grad_optim_mlx_demo::DemoLayout;

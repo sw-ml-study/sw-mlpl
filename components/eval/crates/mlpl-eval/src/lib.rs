@@ -89,16 +89,10 @@ mod gpu_registry;
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
 mod gpu_step;
+// The MLX compute is still in-crate (moves to mlpl-mlx-eval in S4); the
+// CUDA compute moved to the sibling mlpl-cuda-eval crate in S3.
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod grad_optim_mlx;
-// Device-agnostic demo-architecture recognition (ModelSpec + loss-expr
-// parsing); shared by the MLX and CUDA LoRA fast paths.
-#[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
-mod grad_optim_cuda;
-#[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
-mod grad_optim_cuda_mlp;
-#[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
-mod grad_optim_cuda_step;
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
@@ -154,13 +148,31 @@ pub use eval_program::{
 };
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
-// GPU optimizer-step registration: the binary registers this build's
-// step once at startup (cycle-break, S2). Only present on a GPU build.
+// The GPU optimizer-step seam (S1-S3): the public surface the sibling
+// `mlpl-cuda-eval` / `mlpl-mlx-eval` compute crates build against -- the
+// step trait, the narrow env accessor, the hyperparameters, the resolved
+// layouts (the recognizers stay here, interpreter-coupled), plus the
+// registration the binary drives. Only present on a GPU build.
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
-pub use gpu_registry::register_default_gpu_step;
+pub use gpu_registry::{register_default_gpu_step, register_gpu_step};
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+pub use gpu_step::{AdamHp, GpuAdamStep, GpuEnv};
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+pub use grad_optim_mlx_demo::DemoLayout;
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+pub use grad_optim_mlx_mlp::LoraNames;
 pub use inspect::inspect;
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
@@ -170,4 +182,9 @@ pub use mlpl_eval_image::decode_and_resize_u8;
 pub use mlpl_eval_types::EvalError;
 pub use mlpl_eval_types::{Value, value_kind};
 pub use mlpl_runtime::runtime_builtin_names;
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+pub use model_apply_embed::tokens_to_onehot;
 pub use tokenizer::TokenizerSpec;

@@ -1,7 +1,7 @@
 //! The on-device fine-tune step for the tic-tac-toe board-policy MLP:
 //! forward + backward + Adam over the four LoRA adapters on the Apple
 //! GPU, frozen bases, moments persisted via the `GpuEnv` accessor. The
-//! MLX analog of `grad_optim_cuda_mlp`. Recognition (`mlp_layout`) is
+//! MLX analog of mlpl-cuda-eval::cuda_mlp. Recognition (`mlp_layout`) is
 //! interpreter-coupled and lives in `eval_adam`; this module gets the
 //! resolved `LoraNames` layout + input tensors.
 

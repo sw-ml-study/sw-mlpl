@@ -1,17 +1,14 @@
-//! Per-step plumbing for the CUDA LoRA path (see `grad_optim_cuda`):
-//! one-hot inputs, the frozen-weight bundle, and the on-device adam
-//! update with moments persisted in `env.optim_state`. The CUDA analog
-//! of `grad_optim_mlx_step`.
+//! Per-step plumbing for the CUDA LoRA path (see `cuda_lora`): one-hot
+//! inputs, the frozen-weight bundle, and the on-device adam update with
+//! moments persisted via the `mlpl_eval::GpuEnv` accessor.
 
-use crate::gpu_step::GpuEnv;
-use crate::grad_optim_mlx_demo::DemoLayout;
-use crate::model_apply_embed::tokens_to_onehot;
 use candle_core::Tensor;
 use mlpl_array::DenseArray;
 use mlpl_cuda_forward::causal_mask;
 use mlpl_cuda_model::DemoWeights;
 use mlpl_cuda_rt::{cuda_device, cuda_to_dense_data, dense_to_cuda};
 use mlpl_cuda_train::{AdamHp, adam_update};
+use mlpl_eval::{DemoLayout, GpuEnv, tokens_to_onehot};
 use mlpl_eval_types::EvalError;
 
 /// Lower integer token ids `[N]` to a one-hot `[N, vocab]` candle tensor.
@@ -51,8 +48,8 @@ pub(crate) fn build_weights(
     })
 }
 
-/// One on-device adam step for `param`: read its moments from
-/// `env.optim_state` (keyed like the CPU path), update, and write the
+/// One on-device adam step for `param`: read its moments via the
+/// `GpuEnv` accessor (keyed like the CPU path), update, and write the
 /// new weight + moments back into the Environment.
 pub(crate) fn step_adapter(
     env: &mut dyn GpuEnv,

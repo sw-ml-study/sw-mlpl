@@ -91,10 +91,11 @@ fn reserve_cores_for_serving() {
 /// constructing it -- which is what lets the compute move to sibling
 /// crates in S3/S4. A no-op on a CPU-only build.
 fn register_gpu_step() {
-    #[cfg(any(
-        all(target_os = "linux", target_arch = "x86_64", feature = "cuda"),
-        all(target_os = "macos", target_arch = "aarch64", feature = "mlx")
-    ))]
+    // CUDA (S3): the step lives in the sibling mlpl-cuda-eval crate.
+    #[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
+    mlpl_eval::register_gpu_step(mlpl_cuda_eval::gpu_step());
+    // MLX: still in-crate until S4, registered via the no-arg default.
+    #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
     mlpl_eval::register_default_gpu_step();
 }
 

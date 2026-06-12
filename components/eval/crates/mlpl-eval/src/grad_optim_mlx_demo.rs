@@ -11,7 +11,7 @@ use mlpl_parser::Expr;
 
 /// Param names recovered from the demo model. Everything but the head
 /// adapters (`head_a`, `head_b_adapter`) is a frozen base weight.
-pub(crate) struct DemoLayout {
+pub struct DemoLayout {
     pub embed_table: String,
     pub vocab: usize,
     pub wq: String,

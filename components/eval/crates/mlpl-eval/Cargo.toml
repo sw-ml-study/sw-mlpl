@@ -26,12 +26,17 @@ mlx = [
     "dep:mlpl-mlx-model",
     "mlpl-mlx-model/mlx",
 ]
-# Saga cuda-foundation step 004: dispatch ops inside
-# `device("cuda") { }` blocks through the CUDA (candle) runtime
-# crates. Off by default; the crates triple-gate on
-# `target_os = "linux"` + `target_arch = "x86_64"` + their own
-# `cuda` feature, so enabling this on a non-Linux/non-GPU host
-# still compiles and falls back to the CPU path.
+# Saga cuda-foundation step 004 + GPU workspace split S3: dispatch ops
+# inside `device("cuda") { }` blocks through the CUDA (candle) runtime
+# crates (per-op: matmul / cross_entropy / ... in device_dispatch), and
+# enable the device-agnostic GPU optimizer seam (gpu_step / gpu_env /
+# gpu_registry + the DemoLayout/LoraNames recognizers). The OPTIMIZER
+# compute (forward/model/train/candle) moved to the sibling
+# mlpl-cuda-eval crate in S3, so it is no longer pulled here; a build that
+# wants the LoRA/MLP GPU fast path registers `mlpl_cuda_eval::gpu_step()`
+# (the binaries do this at startup). The crates triple-gate internally, so
+# enabling this on a non-Linux/non-GPU host still compiles + falls back to
+# the CPU path.
 cuda = [
     "dep:mlpl-cuda-rt",
     "mlpl-cuda-rt/cuda",
@@ -39,16 +44,6 @@ cuda = [
     "mlpl-cuda-elementwise/cuda",
     "dep:mlpl-cuda-nn",
     "mlpl-cuda-nn/cuda",
-    # Saga cuda-foundation step 006: the LoRA fine-tune path also pulls
-    # the traceable forward (mlpl-cuda-forward), the assembled demo
-    # model (mlpl-cuda-model), and the training kernel (mlpl-cuda-train).
-    "dep:mlpl-cuda-forward",
-    "mlpl-cuda-forward/cuda",
-    "dep:mlpl-cuda-model",
-    "mlpl-cuda-model/cuda",
-    "dep:mlpl-cuda-train",
-    "mlpl-cuda-train/cuda",
-    "dep:candle-core",
 ]
 # Saga 29 step 003: PNG / JPEG decode for the `load_images(dir,
 # [H, W])` builtin. Off by default so the WASM target stays
@@ -110,12 +105,6 @@ mlpl-mlx-model = { path = "../../../mlx-model/crates/mlpl-mlx-model", optional =
 mlpl-cuda-rt = { path = "../../../cuda-rt/crates/mlpl-cuda-rt", optional = true }
 mlpl-cuda-elementwise = { path = "../../../cuda-rt/crates/mlpl-cuda-elementwise", optional = true }
 mlpl-cuda-nn = { path = "../../../cuda-rt/crates/mlpl-cuda-nn", optional = true }
-mlpl-cuda-forward = { path = "../../../cuda-model/crates/mlpl-cuda-forward", optional = true }
-mlpl-cuda-model = { path = "../../../cuda-model/crates/mlpl-cuda-model", optional = true }
-mlpl-cuda-train = { path = "../../../cuda-rt/crates/mlpl-cuda-train", optional = true }
-candle-core = { version = "0.9", optional = true, default-features = false, features = [
-  "cuda",
-] }
 mlpl-eval-image = { path = "../../../eval-image/crates/mlpl-eval-image", optional = true }
 png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }

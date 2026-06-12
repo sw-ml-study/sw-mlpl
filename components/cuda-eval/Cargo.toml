@@ -1,0 +1,19 @@
+# GPU workspace split, S3: components/cuda-eval/ nested workspace.
+# Holds mlpl-cuda-eval -- the CUDA compute for the device-agnostic GPU
+# optimizer-step seam defined in mlpl-eval. Splitting it out of mlpl-eval
+# breaks the cycle: mlpl-eval no longer constructs the CUDA impl, so this
+# crate can depend on mlpl-eval (for the seam) without a loop. Linux +
+# x86_64 + the `cuda` feature gate everything; off-target it exports
+# nothing. The MLX analog (mlpl-mlx-eval) lands in S4.
+
+[workspace]
+members = ["crates/mlpl-cuda-eval"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
