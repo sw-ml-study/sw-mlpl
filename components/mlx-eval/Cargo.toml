@@ -1,0 +1,24 @@
+# GPU workspace split, S4: components/mlx-eval/ nested workspace.
+# Holds mlpl-mlx-eval -- the MLX (Apple GPU) compute for the
+# device-agnostic GPU optimizer-step seam defined in mlpl-eval. Splitting
+# it out of mlpl-eval breaks the cycle: mlpl-eval no longer constructs the
+# MLX impl, so this crate can depend on mlpl-eval (for the seam) without a
+# loop. macOS + aarch64 + the `mlx` feature gate everything; off-target it
+# exports nothing. The Apple analog of S3's mlpl-cuda-eval.
+
+[workspace]
+members = ["crates/mlpl-mlx-eval"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"
+
+# Saga 64: each top-level workspace that transitively uses mlx-rs carries
+# its own patch since Cargo evaluates patches per-workspace.
+[patch.crates-io]
+mlx-rs = { path = "../../vendor/mlx-rs" }

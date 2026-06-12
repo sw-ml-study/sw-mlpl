@@ -1,8 +1,10 @@
 //! Recognizer for the tic-tac-toe board-policy LoRA model
 //! (`Chain[LinearLora, relu, LinearLora]` -- the shape
 //! `lora(chain(linear, relu_layer(), linear))` produces): the per-layer
-//! frozen-base + adapter param names the MLX fine-tune step needs. The
-//! on-device step itself lives in `grad_optim_mlx_mlp_step`.
+//! frozen-base + adapter param names the GPU fine-tune step needs. This
+//! recognizer is device-agnostic and shared by both backends; the
+//! on-device MLP step lives in the sibling compute crates
+//! (`mlpl-mlx-eval::mlx_mlp`, `mlpl-cuda-eval::cuda_mlp`).
 
 use crate::env::Environment;
 use mlpl_eval_core::ModelSpec;

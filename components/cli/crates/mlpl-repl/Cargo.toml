@@ -9,7 +9,7 @@ default = []
 # Saga 14 step 008: pass through `mlpl-eval`'s mlx feature so
 # `device("mlx") { }` blocks in scripts run via `mlpl-repl -f`
 # dispatch through `mlpl-mlx-rt`. Triple-gated inside `mlpl-mlx-rt`.
-mlx = ["mlpl-eval/mlx"]
+mlx = ["mlpl-eval/mlx", "dep:mlpl-mlx-eval", "mlpl-mlx-eval/mlx"]
 # Saga cuda-foundation step 006: pass through `mlpl-eval`'s cuda
 # feature so `device("cuda") { }` blocks in scripts run via
 # `mlpl-repl -f` dispatch through the CUDA (candle) runtime. Gated
@@ -20,6 +20,7 @@ cuda = ["mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cuda-eval/cuda"]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-cuda-eval = { path = "../../../cuda-eval/crates/mlpl-cuda-eval", optional = true }
+mlpl-mlx-eval = { path = "../../../mlx-eval/crates/mlpl-mlx-eval", optional = true }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 # Saga 21 step 003: viz_cache transforms SVG return
 # values into `viz: <path>` for both local and

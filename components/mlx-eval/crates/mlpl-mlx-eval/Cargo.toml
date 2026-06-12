@@ -1,0 +1,37 @@
+[package]
+name = "mlpl-mlx-eval"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+# The MLX LoRA / MLP fine-tune compute. Pulls mlpl-eval's `mlx` feature
+# (which enables the GPU seam: GpuAdamStep / GpuEnv / AdamHp / DemoLayout /
+# LoraNames) plus the mlx-rs-backed runtime + model + train crates.
+# Everything triple-gates on macos/aarch64 internally, so enabling this on
+# a non-Apple host still compiles to an empty crate.
+mlx = [
+    "mlpl-eval/mlx",
+    "dep:mlpl-mlx-rt",
+    "mlpl-mlx-rt/mlx",
+    "dep:mlpl-mlx-train",
+    "mlpl-mlx-train/mlx",
+    "dep:mlpl-mlx-forward",
+    "mlpl-mlx-forward/mlx",
+    "dep:mlpl-mlx-model",
+    "mlpl-mlx-model/mlx",
+]
+
+[dependencies]
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true }
+mlpl-mlx-train = { path = "../../../native-rt/crates/mlpl-mlx-train", optional = true }
+mlpl-mlx-forward = { path = "../../../native-rt/crates/mlpl-mlx-forward", optional = true }
+mlpl-mlx-model = { path = "../../../mlx-model/crates/mlpl-mlx-model", optional = true }
+
+[dev-dependencies]
+# The moved mlx demo parity test lexes+parses+evals MLPL source.
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
