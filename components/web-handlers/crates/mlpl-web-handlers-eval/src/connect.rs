@@ -74,6 +74,19 @@ fn repl_history_context(history: &[HistoryEntry]) -> String {
 /// follow far better. The question is sent as the user prompt.
 fn build_ask_system(history: &[HistoryEntry]) -> String {
     let mut p = ASK_SYSTEM.to_string();
+    // Ground the model in the active demo: the "About this demo -- <name>"
+    // narration names the task (e.g. tic-tac-toe) and the body describes
+    // it, which the per-line command history alone does not -- so the model
+    // answers about THIS demo instead of guessing a similar one (e.g.
+    // Othello). (`make_run_demo` stores the heading in mixed case.)
+    if let Some(intro) = history
+        .iter()
+        .rev()
+        .find(|e| matches!(e.kind, EntryKind::Narration) && e.input.starts_with("About this demo"))
+    {
+        let body: String = intro.output.trim().chars().take(400).collect();
+        p.push_str(&format!(" Active demo -- {}: {body}.", intro.input.trim()));
+    }
     let recent = repl_history_context(history);
     if !recent.is_empty() {
         p.push_str(&format!(" Recent REPL activity (oldest first): {recent}."));
