@@ -22,10 +22,10 @@ pub fn resolve(host: &str) -> String {
     if let Some(m) = OVERRIDE.lock().unwrap().clone() {
         return m;
     }
-    if let Ok(m) = std::env::var("OLLAMA_MODEL") {
-        if !m.is_empty() {
-            return m;
-        }
+    if let Ok(m) = std::env::var("OLLAMA_MODEL")
+        && !m.is_empty()
+    {
+        return m;
     }
     mlpl_runtime::list_models(host)
         .ok()
