@@ -118,9 +118,18 @@ Recommended staging (each verifiable; MLX needs an Apple build):
   fine-tune runs on-device (a non-bit-identical-to-CPU guard in the moved
   test proves it is not a silent CPU fallback); trimmed mlpl-eval mlx suite
   935/0/9. With both compute crates split out, mlpl-eval is now fully
-  backend-agnostic (seam only). CUDA unchanged by S4 but needs a Linux
-  re-verify: gpu_registry/gpu_step dropped default_gpu_step (the cuda
-  branch already registers via mlpl_cuda_eval::gpu_step()).
+  backend-agnostic (seam only). CUDA re-verified on Linux after S4
+  (02c0fc11): mlpl-eval/mlpl-cuda-eval/serve/repl build + clippy clean with
+  --features cuda, the cuda branch registers mlpl_cuda_eval::gpu_step(),
+  and repl device("cuda") train100 runs in 0.585s with the unchanged loss
+  curve. The cuda demo tests gained the same not-bit-identical-to-CPU guard
+  as the mlx test, so a silent CPU fallback can no longer pass trivially.
+
+The four-stage split is COMPLETE: the device-agnostic seam lives in
+mlpl-eval; the CUDA compute in components/cuda-eval (mlpl-cuda-eval); the
+MLX compute in components/mlx-eval (mlpl-mlx-eval); binaries register the
+right backend's `gpu_step()` at startup. This is the per-crate separation;
+the separate-`target/` workspace partition above remains a future saga.
 
 Other tensions:
 - `mlpl-serve` either lives in shared (optional cuda/mlx deps per
