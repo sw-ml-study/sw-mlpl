@@ -191,6 +191,7 @@ fn introspect_bundles_every_no_arg_section() {
         "## :builtins",
         "## :vars",
         "## :models",
+        "## :fns",
         "## :experiments",
         "## :tags",
     ] {
@@ -200,6 +201,16 @@ fn introspect_bundles_every_no_arg_section() {
     // commands return.
     assert!(out.contains("x: [3]"), "missing :vars content");
     assert!(out.contains("lin: linear"), "missing :models content");
+    // The trailing connect-mode section names the server-side
+    // introspectors and disambiguates :models from :connect list.
+    assert!(
+        out.contains("## connect-mode introspection"),
+        "missing connect-mode section"
+    );
+    assert!(
+        out.contains(":connect list") && out.contains("NOT the same as :models"),
+        "connect-mode note should distinguish :connect list from :models"
+    );
     // Header order is fixed -- ":version" comes before ":vars".
     let v_pos = out.find("## :version").unwrap();
     let vars_pos = out.find("## :vars").unwrap();
