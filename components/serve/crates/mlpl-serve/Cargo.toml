@@ -33,6 +33,10 @@ cuda = ["mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cuda-eval/cuda"]
 [dependencies]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+# `median_model` -- the shared `:ask` default-model policy (skip embedding
+# + sub-viable models, then median-by-size). resolve_model delegates to it
+# so the server and the CLI repl pick the same way (no drift).
+mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-cuda-eval = { path = "../../../cuda-eval/crates/mlpl-cuda-eval", optional = true }
 mlpl-mlx-eval = { path = "../../../mlx-eval/crates/mlpl-mlx-eval", optional = true }
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
