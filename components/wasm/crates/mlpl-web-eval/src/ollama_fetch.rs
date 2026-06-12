@@ -86,9 +86,10 @@ async fn ollama_models_text(base_url: &str, host: Option<&str>) -> String {
     format_model_list(&body)
 }
 
-/// Render the model list: each model by size (desc), marking the one
-/// `:ask` would use (the `:connect set` selection, else the server
-/// default). The footer points at `:connect set <name>`.
+/// Render the model list: each model by size (desc), flagging embedding
+/// models (not usable for `:ask`) and marking the one `:ask` would use
+/// (the `:connect set` selection, else the server default). A header names
+/// the current `:ask` model; the footer points at `:connect set <name>`.
 fn format_model_list(body: &serde_json::Value) -> String {
     let current = selected_model()
         .or_else(|| ollama_default().map(|(_, m)| m))
@@ -108,12 +109,26 @@ fn format_model_list(body: &serde_json::Value) -> String {
     let lines: Vec<String> = rows
         .iter()
         .map(|(n, s)| {
-            let mark = if *n == current { "   <- current" } else { "" };
+            // Embedding models stay listed (for embedding demos) but are
+            // flagged as unusable for :ask; the active model is marked.
+            let mark = if n.contains("embed") {
+                "   (embedding -- not for :ask)"
+            } else if *n == current {
+                "   <- current"
+            } else {
+                ""
+            };
             format!("  {n:<30} {:>5.1} GB{mark}", *s as f64 / 1e9)
         })
         .collect();
+    let current_line = if current.is_empty() {
+        "(none -- the server auto-picks one)".to_string()
+    } else {
+        current
+    };
     format!(
-        "Ollama models ({}):\n{}\n(select with `:connect set <name>`)",
+        "Ollama models ({}) -- current :ask model: {current_line}\n{}\n\
+         (select with `:connect set <name>`)",
         rows.len(),
         lines.join("\n")
     )
