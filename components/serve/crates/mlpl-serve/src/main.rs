@@ -84,11 +84,26 @@ fn reserve_cores_for_serving() {
         .build_global();
 }
 
+/// GPU workspace split, S2 (cycle-break): register this build's GPU
+/// optimizer step once at startup so `device("cuda"|"mlx") { }` blocks
+/// (forwarded from the connect-mode web demos) run on the GPU in-process.
+/// `mlpl-eval::Environment::new` reads the registered step instead of
+/// constructing it -- which is what lets the compute move to sibling
+/// crates in S3/S4. A no-op on a CPU-only build.
+fn register_gpu_step() {
+    #[cfg(any(
+        all(target_os = "linux", target_arch = "x86_64", feature = "cuda"),
+        all(target_os = "macos", target_arch = "aarch64", feature = "mlx")
+    ))]
+    mlpl_eval::register_default_gpu_step();
+}
+
 /// Build the tokio runtime, resolve TLS + peers, and dispatch to
 /// `server::run`. Extracted from `main` so the body stays under
 /// the sw-checklist 50-line LOC budget while still surfacing
 /// every error to stderr.
 fn run_main(args: Args) -> Result<(), String> {
+    register_gpu_step();
     reserve_cores_for_serving();
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
