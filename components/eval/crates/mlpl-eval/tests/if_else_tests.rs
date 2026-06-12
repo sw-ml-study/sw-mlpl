@@ -119,7 +119,11 @@ fn bare_if_without_else_parses() {
     // condition is truthy, otherwise a no-op). This used to be a parse
     // error; the test now asserts the new, intended behavior.
     let stmts = parse(&lex("if 1 { 42 }").unwrap()).expect("bare if without else should parse");
-    assert_eq!(stmts.len(), 1, "expected one parsed statement, got: {stmts:?}");
+    assert_eq!(
+        stmts.len(),
+        1,
+        "expected one parsed statement, got: {stmts:?}"
+    );
 }
 
 #[test]
