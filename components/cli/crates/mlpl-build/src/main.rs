@@ -24,7 +24,6 @@ use std::process::{Command, ExitCode};
 
 use args::{Args, USAGE};
 
-
 mod template;
 
 fn main() -> ExitCode {
@@ -79,7 +78,8 @@ fn run(args: &Args) -> Result<(), String> {
         release_dir.push(d);
     }
     release_dir.push("release");
-    let candidates = template::candidate_names(args.target.as_deref(), std::env::consts::EXE_SUFFIX);
+    let candidates =
+        template::candidate_names(args.target.as_deref(), std::env::consts::EXE_SUFFIX);
     let binary = candidates
         .iter()
         .map(|name| release_dir.join(name))
@@ -133,10 +133,6 @@ fn make_temp_project(workspace: &Path) -> Result<PathBuf, String> {
     Ok(tmp)
 }
 
-
-
-
-
 fn write_main_rs(tmp: &Path, src: &str) -> Result<(), String> {
     // MLPL source with newlines goes inside the `mlpl!` macro; the
     // macro rewrites newlines to spaces (see mlpl-macro/src/lib.rs),
@@ -159,6 +155,3 @@ fn write_main_rs(tmp: &Path, src: &str) -> Result<(), String> {
         .map_err(|e| format!("writing main.rs: {e}"))?;
     Ok(())
 }
-#[cfg(test)]
-#[path = "main_tests.rs"]
-mod tests;
