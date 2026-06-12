@@ -7,6 +7,22 @@
 
 use crate::env::Environment;
 
+/// Shown by `:fns` and the `:introspect` `## :fns` section when the
+/// session has no user-defined functions yet.
+pub(crate) const NO_USER_FNS_MSG: &str = "(no user-defined functions yet)\n\
+define with: def u:name(args) { body }";
+
+/// The user-defined function signatures (`:fns`), one per line, or the
+/// "none yet" hint. Shared by the `:fns` command and `:introspect`.
+pub(crate) fn format_fns(env: &Environment) -> String {
+    let sigs = env.user_fn_signatures();
+    if sigs.is_empty() {
+        NO_USER_FNS_MSG.to_string()
+    } else {
+        sigs.join("\n")
+    }
+}
+
 pub(crate) fn format_vars(env: &Environment) -> String {
     if env.vars.is_empty() {
         return "(no variables bound)".into();
@@ -33,8 +49,13 @@ pub(crate) fn format_vars(env: &Environment) -> String {
 }
 
 pub(crate) fn format_models(env: &Environment) -> String {
+    // ":models" lists the MLPL model objects YOU built in this workspace
+    // (chain(...), etc.) -- distinct from ":connect list", which lists the
+    // connected server's Ollama LLMs for ":ask".
     if env.models.is_empty() {
-        return "(no models bound)".into();
+        return "(no models in this workspace yet -- build one with chain(...). \
+                For the server's LLMs, see :connect list.)"
+            .into();
     }
     let mut names: Vec<&String> = env.models.keys().collect();
     names.sort();
