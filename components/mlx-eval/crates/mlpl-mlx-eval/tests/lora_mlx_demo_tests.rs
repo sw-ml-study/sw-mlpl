@@ -84,6 +84,12 @@ student = lora(base, 2, 4.0, 7)\n\
 ";
 
 fn run_finetune(mlx: bool) -> (HashMap<String, Vec<f64>>, DenseArray) {
+    // S4: the MLX step now lives in this crate. Register it BEFORE
+    // `Environment::new` -- the env captures the installed step at
+    // construction -- so the device("mlx") fine-tune runs on the Apple GPU
+    // (the in-crate fallback was removed when the compute left mlpl-eval).
+    // Idempotent and harmless on the CPU path (device("cpu") skips it).
+    mlpl_eval::register_gpu_step(mlpl_mlx_eval::gpu_step());
     let mut env = Environment::new();
     run(&mut env, BASE_SETUP);
 
@@ -124,6 +130,19 @@ fn lora_mlx_finetune_matches_cpu_within_fp32_tolerance() {
         "last_losses",
     );
 
+    // Guard against a silent CPU fallback -- the trap S4 introduces by
+    // removing the in-crate default (if the step is registered AFTER
+    // `Environment::new`, the env never sees it and adam runs on the CPU
+    // tape, making this "matches CPU" test pass trivially). A true-GPU
+    // fp32 `value_and_grad` run diverges from the f64 CPU trajectory in
+    // the low bits, so a bit-identical curve means the MLX step never ran.
+    assert_ne!(
+        cpu_losses.data(),
+        mlx_losses.data(),
+        "mlx loss curve is bit-identical to the CPU curve -- the GPU step \
+         did not run (registration must precede Environment::new)"
+    );
+
     // The MLX path actually learns (the recorded curve drops), so a
     // matching loss curve means matching learning, not two flat lines.
     let ml = mlx_losses.data();
@@ -152,6 +171,9 @@ fn lora_mlx_finetune_leaves_frozen_base_bit_identical_on_both_paths() {
     // dispatch, which lives in grad.rs (CPU-side). Both paths
     // must honor it identically -- freezing is backend-
     // independent by design.
+    // Register before any Environment::new (it captures the step at
+    // construction); idempotent, and the CPU iteration ignores it.
+    mlpl_eval::register_gpu_step(mlpl_mlx_eval::gpu_step());
     for mlx in [false, true] {
         let mut env = Environment::new();
         run(&mut env, BASE_SETUP);
@@ -163,6 +185,7 @@ fn lora_mlx_finetune_leaves_frozen_base_bit_identical_on_both_paths() {
             loss_metric = cross_entropy(apply(student, X), Y) \
         }";
         if mlx {
+            mlpl_eval::register_gpu_step(mlpl_mlx_eval::gpu_step());
             let wrapped = format!(
                 "device(\"mlx\") {{ \
                    to_device(student, \"mlx\"); \

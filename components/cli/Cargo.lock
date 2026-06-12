@@ -1825,10 +1825,7 @@ dependencies = [
  "mlpl-eval-pets-tiny",
  "mlpl-eval-types",
  "mlpl-loader-helpers",
- "mlpl-mlx-forward",
- "mlpl-mlx-model",
  "mlpl-mlx-rt",
- "mlpl-mlx-train",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
  "mlpl-models-inspect",
@@ -1969,6 +1966,19 @@ dependencies = [
  "mlpl-parser",
  "proc-macro2",
  "quote",
+]
+
+[[package]]
+name = "mlpl-mlx-eval"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-eval",
+ "mlpl-eval-types",
+ "mlpl-mlx-forward",
+ "mlpl-mlx-model",
+ "mlpl-mlx-rt",
+ "mlpl-mlx-train",
 ]
 
 [[package]]
@@ -2130,6 +2140,7 @@ dependencies = [
  "mlpl-cli",
  "mlpl-cuda-eval",
  "mlpl-eval",
+ "mlpl-mlx-eval",
  "mlpl-parser",
  "mlpl-runtime",
  "mlpl-serve",

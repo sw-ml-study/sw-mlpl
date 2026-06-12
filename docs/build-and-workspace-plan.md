@@ -106,9 +106,21 @@ Recommended staging (each verifiable; MLX needs an Apple build):
   CUDA; the binary registers `mlpl_cuda_eval::gpu_step()`. The in-crate
   fallback is RETAINED (not deleted) -- the MLX in-crate demo tests still
   need it; S4 deletes it. Verified on Linux: identical loss curve, 0.585s.
-- S4: create `mlpl-mlx-eval`, mirror the move (mlx compute + mlx demo
-  tests). Then `default_gpu_step` + the installed_gpu_step fallback can be
-  deleted and registration becomes mandatory. Verify on Apple.
+- S4 [DONE]: created components/mlx-eval/ (mlpl-mlx-eval) and moved the mlx
+  optimizer compute (mlx_lora/mlx_mlp/mlx_step) + the lora_mlx demo test
+  there. mlpl-eval dropped mlpl-mlx-{train,forward,model}; KEPT mlpl-mlx-rt
+  for per-op device_dispatch. `default_gpu_step` AND the installed_gpu_step
+  fallback are DELETED -- registration is now mandatory: the binary
+  registers `mlpl_mlx_eval::gpu_step()` (serve/main.rs + repl/run.rs) and
+  the moved demo test registers its own crate's step BEFORE
+  Environment::new (the env captures the step at construction). Verified on
+  Apple: serve+repl build --features mlx clippy-clean; the GPU LoRA
+  fine-tune runs on-device (a non-bit-identical-to-CPU guard in the moved
+  test proves it is not a silent CPU fallback); trimmed mlpl-eval mlx suite
+  935/0/9. With both compute crates split out, mlpl-eval is now fully
+  backend-agnostic (seam only). CUDA unchanged by S4 but needs a Linux
+  re-verify: gpu_registry/gpu_step dropped default_gpu_step (the cuda
+  branch already registers via mlpl_cuda_eval::gpu_step()).
 
 Other tensions:
 - `mlpl-serve` either lives in shared (optional cuda/mlx deps per

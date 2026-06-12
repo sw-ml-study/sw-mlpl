@@ -11,20 +11,16 @@ default = []
 # crate itself triple-gates on macOS + aarch64, so building with
 # this feature on a non-Apple host still compiles and falls back
 # to CPU at runtime with a one-time warning.
-# Saga local-gpu-agentic step 010: the `mlx` feature also pulls the
-# on-device LoRA training stack (autodiff kernel + forward primitives +
-# the assembled demo model) so `eval_adam` can run a true-GPU LoRA
-# fine-tune. All triple-gate internally, so a non-Apple build with this
-# feature still compiles and falls back to the CPU tape path.
+# The `mlx` feature pulls only the `mlpl-mlx-rt` runtime, for `device("mlx")`
+# op dispatch (device_dispatch.rs). The on-device LoRA/MLP training compute
+# moved to the sibling `mlpl-mlx-eval` crate in S4 (the analog of the CUDA
+# split in S3), so its stack (autodiff kernel + forward primitives + demo
+# model) is no longer pulled here; a build that wants the GPU fast path
+# registers `mlpl_mlx_eval::gpu_step()`. Triple-gates internally, so a
+# non-Apple build with this feature still compiles (CPU tape path).
 mlx = [
     "dep:mlpl-mlx-rt",
     "mlpl-mlx-rt/mlx",
-    "dep:mlpl-mlx-train",
-    "mlpl-mlx-train/mlx",
-    "dep:mlpl-mlx-forward",
-    "mlpl-mlx-forward/mlx",
-    "dep:mlpl-mlx-model",
-    "mlpl-mlx-model/mlx",
 ]
 # Saga cuda-foundation step 004 + GPU workspace split S3: dispatch ops
 # inside `device("cuda") { }` blocks through the CUDA (candle) runtime
@@ -99,9 +95,6 @@ mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
 mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true }
-mlpl-mlx-train = { path = "../../../native-rt/crates/mlpl-mlx-train", optional = true }
-mlpl-mlx-forward = { path = "../../../native-rt/crates/mlpl-mlx-forward", optional = true }
-mlpl-mlx-model = { path = "../../../mlx-model/crates/mlpl-mlx-model", optional = true }
 mlpl-cuda-rt = { path = "../../../cuda-rt/crates/mlpl-cuda-rt", optional = true }
 mlpl-cuda-elementwise = { path = "../../../cuda-rt/crates/mlpl-cuda-elementwise", optional = true }
 mlpl-cuda-nn = { path = "../../../cuda-rt/crates/mlpl-cuda-nn", optional = true }

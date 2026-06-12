@@ -94,9 +94,9 @@ fn register_gpu_step() {
     // CUDA (S3): the step lives in the sibling mlpl-cuda-eval crate.
     #[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
     mlpl_eval::register_gpu_step(mlpl_cuda_eval::gpu_step());
-    // MLX: still in-crate until S4, registered via the no-arg default.
+    // MLX (S4): the step lives in the sibling mlpl-mlx-eval crate.
     #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-    mlpl_eval::register_default_gpu_step();
+    mlpl_eval::register_gpu_step(mlpl_mlx_eval::gpu_step());
 }
 
 /// Build the tokio runtime, resolve TLS + peers, and dispatch to

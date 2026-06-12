@@ -1,12 +1,10 @@
-//! Per-step plumbing for the MLX LoRA path (see `grad_optim_mlx`):
-//! one-hot inputs, the frozen-weight bundle, and the on-device adam
-//! update with moments persisted via the `GpuEnv` accessor. The MLX
-//! analog of mlpl-cuda-eval::cuda_step.
+//! Per-step plumbing for the MLX LoRA path (see `mlx_lora`): one-hot
+//! inputs, the frozen-weight bundle, and the on-device adam update with
+//! moments persisted via the `mlpl_eval::GpuEnv` accessor. The MLX analog
+//! of mlpl-cuda-eval::cuda_step.
 
-use crate::gpu_step::GpuEnv;
-use crate::grad_optim_mlx_demo::DemoLayout;
-use crate::model_apply_embed::tokens_to_onehot;
 use mlpl_array::DenseArray;
+use mlpl_eval::{DemoLayout, GpuEnv, tokens_to_onehot};
 use mlpl_eval_types::EvalError;
 use mlpl_mlx_forward::causal_mask;
 use mlpl_mlx_model::DemoWeights;

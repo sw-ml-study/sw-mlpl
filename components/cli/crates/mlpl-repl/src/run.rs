@@ -23,12 +23,12 @@ pub(crate) fn run(config: Config) {
     // GPU workspace split (S2 cycle-break, S3 cuda crate): register this
     // build's GPU optimizer step once before any `Environment::new`, so
     // `device(...)` blocks in scripts run on the GPU. No-op on a CPU build.
-    // CUDA's step lives in the sibling mlpl-cuda-eval crate (S3); MLX is
-    // still in-crate until S4 (registered via the no-arg default).
+    // CUDA's step lives in the sibling mlpl-cuda-eval crate (S3); MLX's in
+    // mlpl-mlx-eval (S4).
     #[cfg(all(target_os = "linux", target_arch = "x86_64", feature = "cuda"))]
     mlpl_eval::register_gpu_step(mlpl_cuda_eval::gpu_step());
     #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-    mlpl_eval::register_default_gpu_step();
+    mlpl_eval::register_gpu_step(mlpl_mlx_eval::gpu_step());
     match config.info {
         Info::Version => return crate::version::print(),
         Info::HelpLong => return print!("{}", crate::version::help_long()),

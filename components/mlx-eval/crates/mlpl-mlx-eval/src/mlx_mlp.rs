@@ -5,10 +5,9 @@
 //! interpreter-coupled and lives in `eval_adam`; this module gets the
 //! resolved `LoraNames` layout + input tensors.
 
-use crate::gpu_step::GpuEnv;
-use crate::grad_optim_mlx_mlp::LoraNames;
-use crate::grad_optim_mlx_step::{step_adapter, tokens_mlx};
+use crate::mlx_step::{step_adapter, tokens_mlx};
 use mlpl_array::DenseArray;
+use mlpl_eval::{GpuEnv, LoraNames};
 use mlpl_eval_types::EvalError;
 use mlpl_mlx_model::{MlpWeights, mlp_forward};
 use mlpl_mlx_rt::{Array, dense_to_mlx};

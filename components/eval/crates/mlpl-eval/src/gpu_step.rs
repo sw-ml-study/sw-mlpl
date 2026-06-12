@@ -9,8 +9,6 @@
 //! and can move to sibling cuda/mlx crates. See
 //! docs/build-and-workspace-plan.md.
 
-use std::sync::Arc;
-
 use mlpl_array::DenseArray;
 use mlpl_eval_types::EvalError;
 
@@ -57,21 +55,10 @@ pub trait GpuAdamStep: std::fmt::Debug + Send + Sync {
     ) -> Result<DenseArray, EvalError>;
 }
 
-/// The CUDA step moved to the sibling `mlpl-cuda-eval` crate (S3), so
-/// this crate has no in-crate CUDA default. The binary registers
-/// `mlpl_cuda_eval::gpu_step()` via `register_gpu_step` at startup, so
-/// `installed_gpu_step` returns the registered step; this `None` is only
-/// the fallback when nothing is registered (e.g. a CUDA build that never
-/// calls the registration path).
-#[cfg(all(feature = "cuda", target_os = "linux", target_arch = "x86_64"))]
-#[must_use]
-pub(crate) fn default_gpu_step() -> Option<Arc<dyn GpuAdamStep>> {
-    None
-}
-
-/// The MLX step (mlx/macos/aarch64 build). Still in-crate until S4.
-#[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
-#[must_use]
-pub(crate) fn default_gpu_step() -> Option<Arc<dyn GpuAdamStep>> {
-    Some(Arc::new(crate::grad_optim_mlx::MlxGpuAdam))
-}
+// Both GPU compute impls now live in sibling crates -- CUDA in
+// mlpl-cuda-eval (S3), MLX in mlpl-mlx-eval (S4) -- so this crate
+// constructs no `GpuAdamStep`. The binary registers the right one at
+// startup via `register_gpu_step`; there is no in-crate default, so the
+// GPU fast path requires registration (an unregistered GPU build falls
+// back to the CPU tape with a one-time notice, see
+// `grad_optim::eval_adam`).

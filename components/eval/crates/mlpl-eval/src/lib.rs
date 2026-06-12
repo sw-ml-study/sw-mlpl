@@ -89,10 +89,11 @@ mod gpu_registry;
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
 mod gpu_step;
-// The MLX compute is still in-crate (moves to mlpl-mlx-eval in S4); the
-// CUDA compute moved to the sibling mlpl-cuda-eval crate in S3.
-#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-mod grad_optim_mlx;
+// The GPU LoRA/MLP COMPUTE moved to sibling crates -- CUDA to
+// mlpl-cuda-eval (S3), MLX to mlpl-mlx-eval (S4). Only the device-agnostic
+// architecture RECOGNIZERS stay here (they read ModelSpecs + eval the X/Y
+// exprs, so they are interpreter-coupled); the seam (gpu_step) hands the
+// recognized layout to whichever backend the binary registered.
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
@@ -105,10 +106,6 @@ mod grad_optim_mlx_demo;
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
 mod grad_optim_mlx_mlp;
-#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-mod grad_optim_mlx_mlp_step;
-#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-mod grad_optim_mlx_step;
 mod inspect;
 mod inspect_collections;
 mod inspect_describe;
@@ -157,7 +154,7 @@ pub use grad::{OptimizerState, optim_state, optim_state_mut};
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
-pub use gpu_registry::{register_default_gpu_step, register_gpu_step};
+pub use gpu_registry::register_gpu_step;
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
