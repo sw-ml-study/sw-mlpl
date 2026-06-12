@@ -85,12 +85,23 @@ constructs the impls; `mlpl-serve` (feature-gated) installs the right
 `GpuAdamStep` via `Environment::install_gpu_step` at session creation.
 
 Recommended staging (each verifiable; MLX needs an Apple build):
-- S1: introduce `GpuEnv` + reshape `GpuAdamStep` to `run_*_step(layout,
-  x, y, hp, &mut dyn GpuEnv)`; move recognition into `eval_adam`. Impls
-  stay in mlpl-eval. Verify CUDA fast path unchanged. (In-crate, no new
-  crates yet -- this is the risky/delicate part; do it first and verify.)
-- S2: break the cycle -- `install_gpu_step` + serve install.
-- S3: create `mlpl-cuda-eval`, move the cuda compute. Verify on Linux.
+- S1 [DONE, c15799d7]: introduce `GpuEnv` + reshape `GpuAdamStep` to
+  `run_*_step(layout, x, y, hp, &mut dyn GpuEnv)`; move recognition into
+  `eval_adam`. Impls stay in mlpl-eval. CUDA fast path verified unchanged
+  (device("cuda") train100 0.49s); MLX verified on Apple (938 passed).
+  Trait/impl split into gpu_env.rs + env_gpu.rs (facade discipline).
+- S2 [DONE, ab895c82]: break the cycle. `Environment::new` reads a
+  process-global registry (gpu_registry) instead of naming the concrete
+  impl; binaries (mlpl-serve run_main, mlpl-repl run) call
+  `register_default_gpu_step()` at startup. A cfg-gated in-crate fallback
+  to `default_gpu_step()` keeps the in-crate GPU tests green until S3.
+  (Deviation: process-global register-at-startup, not a per-session
+  `install_gpu_step` -- Environment is built at ~6 sites.)
+- S3 [next]: create `mlpl-cuda-eval`, move the cuda compute
+  (grad_optim_cuda*). Make the seam pub (GpuAdamStep, GpuEnv, AdamHp) +
+  DemoLayout/LoraNames fields pub so the sibling crate can read them.
+  Delete the in-crate fallback; binary registers `mlpl_cuda_eval`'s step.
+  Move the cuda demo tests to the new crate. Verify on Linux.
 - S4: create `mlpl-mlx-eval`, mirror. Verify on Apple.
 
 Other tensions:
