@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-11
 
+- refactor(eval): cycle-break -- register GPU step at binary startup (S2)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(fmt): wrap assert_eq! in if_else_tests to satisfy rustfmt
 - refactor(eval): device-agnostic GpuEnv/GpuAdamStep seam for cuda+mlx
 - docs(workspace-split): concrete seam design for moving GPU impls to sibling crates
