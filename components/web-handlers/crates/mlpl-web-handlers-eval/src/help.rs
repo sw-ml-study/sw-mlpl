@@ -84,7 +84,8 @@ Commands (APL-inspired workspace introspection):
                         asks the model \"help\")
   :version             sw-MLPL version + target arch
   :vars                list bound variables with shape and tag
-  :models              list bound models with layer structure
+  :models              MLPL models you built here (layer trees) --
+                       NOT the server LLMs (see :connect list)
   :tokenizers          list bound tokenizer values
   :fns                 list user-defined functions (APL )FNS)
   :builtins            list built-in functions by category
@@ -101,7 +102,7 @@ Commands (APL-inspired workspace introspection):
   :reset               cancel all in-flight work on the connected
                        backend (recover from a hung/slow demo)
   :ask <prompt>        send prompt (verbatim) to a connected Ollama LLM
-  :connect list        list the server's Ollama models
+  :connect list        the server's Ollama LLMs for :ask (not :models)
   :connect set <model> pick the Ollama model for :ask this session
   :introspect          run all no-arg inspectors at once
   :upload <name>       open file picker; bind chosen photo as

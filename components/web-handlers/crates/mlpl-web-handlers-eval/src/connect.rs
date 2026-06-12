@@ -172,11 +172,12 @@ fn ask_endpoint() -> (String, String) {
     (query_param("ollama", &def_url), model)
 }
 
-/// Connect-mode `:connect list`: fetch the server's Ollama model
-/// list (`GET /v1/ollama/tags`) and render it as a history entry,
-/// chaining the rest of the queue. Returns true when it took the
-/// line (connect mode + the exact command); false to fall through
-/// to local handling.
+/// Connect-mode `:connect list` (and bare `:connect`, which aliases to
+/// it when connected): fetch the server's Ollama model list (`GET
+/// /v1/ollama/tags`) and render it as a history entry, chaining the rest
+/// of the queue. Returns true when it took the line (connect mode + the
+/// command); false to fall through to local handling -- so when NOT
+/// connected, bare `:connect` still reaches the "needs a server" message.
 pub(crate) fn try_ollama_models(
     deps: &EvalDeps,
     history: &[HistoryEntry],
@@ -185,7 +186,7 @@ pub(crate) fn try_ollama_models(
     line: &str,
 ) -> bool {
     let t = line.trim();
-    if t != ":connect list" && !t.starts_with(":connect list ") {
+    if t != ":connect" && t != ":connect list" && !t.starts_with(":connect list ") {
         return false;
     }
     let host = t
