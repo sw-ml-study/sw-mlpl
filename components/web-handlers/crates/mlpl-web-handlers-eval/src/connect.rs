@@ -131,10 +131,12 @@ pub(crate) fn dispatch_demo_line(
     route_all: bool,
     on_result: mlpl_web_eval::eval::ResultCb,
 ) -> bool {
-    // Demo lines carry trailing `# comment` annotations. Strip them for
-    // COMMAND matching (so `:connect list # ...` is not read as a host and
-    // `:status # ...` matches), but keep the original `line` for the plain
-    // MLPL routing below, where a `#` may live inside a string literal.
+    // Demo lines carry trailing `# comment` annotations. Strip them only
+    // for matching `:status` / `:connect list` (so `:connect list # ...`
+    // is not read as a host and `:status # ...` matches). `:ask` and plain
+    // MLPL lines keep the ORIGINAL `line`: `:ask` sends its prompt to
+    // Ollama verbatim (a `#` is part of the question, not a comment), and
+    // a plain MLPL line may carry a `#` inside a string literal.
     let cmd_line = line.split('#').next().unwrap_or(line);
     let t = cmd_line.trim();
     if t == ":status" {
@@ -156,7 +158,8 @@ pub(crate) fn dispatch_demo_line(
         return true;
     }
     if t.starts_with(":ask ") {
-        if let Some(program) = connect_program(cmd_line, history) {
+        // Verbatim: the whole prompt (including any `#`) goes to Ollama.
+        if let Some(program) = connect_program(line, history) {
             return mlpl_web_eval::eval_wasm::connect_eval(&program, on_result);
         }
     }
