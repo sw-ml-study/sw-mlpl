@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-11
 
+- docs(plan): record CUDA post-S4 re-verify; mark 4-stage split complete
+- docs(changes): refresh CHANGES.md to HEAD
 - test(cuda-eval): guard cuda demo tests against silent CPU fallback (S4 trap)
 - docs(changes): refresh CHANGES.md to HEAD (S4 + mlpl-build fix)
 - refactor(eval): move MLX compute to sibling mlpl-mlx-eval crate (S4)
