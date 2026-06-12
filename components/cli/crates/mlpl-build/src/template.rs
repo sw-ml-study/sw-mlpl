@@ -70,3 +70,11 @@ pub(crate) fn candidate_names(target: Option<&str>, exe_suffix: &str) -> Vec<Str
         format!("mlpl_build_user{suffix}"),
     ]
 }
+
+// Unit tests for the two functions above, in a sibling file (the
+// `*_tests.rs` convention) so the production module stays lean. Declared
+// here -- not at the crate root -- and backed by one file, so it adds a
+// single module (4 total, within budget) rather than crate sprawl.
+#[cfg(test)]
+#[path = "template_tests.rs"]
+mod tests;
