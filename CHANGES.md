@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-11
 
+- docs(plan): mark S3 done in the GPU workspace-split plan
+- refactor(eval): move CUDA compute to sibling mlpl-cuda-eval crate (S3)
+- fix(repl): collapse OLLAMA_MODEL if into a let-chain (clippy 1.94)
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(plan): mark S1+S2 done in the GPU workspace-split plan
 - docs(changes): refresh CHANGES.md to HEAD
 - refactor(eval): cycle-break -- register GPU step at binary startup (S2)
