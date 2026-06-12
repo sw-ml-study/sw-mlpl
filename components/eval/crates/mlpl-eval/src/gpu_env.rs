@@ -14,7 +14,7 @@ use mlpl_array::DenseArray;
 /// moment buffer keyed by `(optimizer, param, suffix)`. Keeping this
 /// minimal lets the GPU crates depend on a tight interface instead of
 /// `Environment`'s internals.
-pub(crate) trait GpuEnv {
+pub trait GpuEnv {
     fn binding(&self, name: &str) -> Option<&DenseArray>;
     fn set_binding(&mut self, name: String, value: DenseArray);
     fn optim_buffer(&self, opt: &str, param: &str, suffix: &str) -> Option<&DenseArray>;

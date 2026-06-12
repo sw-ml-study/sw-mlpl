@@ -4,12 +4,15 @@
 //! the cycle-break. `Environment::new` no longer NAMES the concrete
 //! `GpuAdamStep` impl -- it reads whatever was registered here. The
 //! binary (`mlpl-serve` / `mlpl-repl`, feature-gated) registers the right
-//! step once at startup via [`register_default_gpu_step`]. Today the
-//! default is still constructed inside this crate (`default_gpu_step`);
-//! in S3/S4 that constructor moves to the sibling `mlpl-cuda-eval` /
-//! `mlpl-mlx-eval` crates and the binary registers THEIR step instead --
-//! at which point the in-crate fallback below is deleted and registration
-//! becomes mandatory.
+//! step once at startup.
+//!
+//! Post-S3: the CUDA step lives in the sibling `mlpl-cuda-eval` crate, so
+//! the binary registers `mlpl_cuda_eval::gpu_step()` via
+//! [`register_gpu_step`] and `default_gpu_step()` returns `None` on CUDA.
+//! The MLX step is still in-crate, so the binary still uses the no-arg
+//! [`register_default_gpu_step`] there. S4 moves MLX out too, after which
+//! `default_gpu_step` (and the fallback below) can be deleted and
+//! registration becomes mandatory.
 
 use std::sync::{Arc, OnceLock};
 
@@ -22,7 +25,7 @@ static GPU_STEP: OnceLock<Arc<dyn GpuAdamStep>> = OnceLock::new();
 
 /// Register `step` as this process's GPU optimizer step. Idempotent:
 /// only the first registration takes effect.
-pub(crate) fn register_gpu_step(step: Arc<dyn GpuAdamStep>) {
+pub fn register_gpu_step(step: Arc<dyn GpuAdamStep>) {
     let _ = GPU_STEP.set(step);
 }
 
@@ -38,60 +41,10 @@ pub fn register_default_gpu_step() {
 
 /// This process's installed GPU step: the registered one if a binary set
 /// it, else the in-crate default. The fallback keeps `Environment::new`
-/// working for callers that don't register (the in-crate GPU tests, the
-/// REPL before its register call) and is removed in S3 when the concrete
-/// impl leaves this crate.
+/// working for callers that don't register -- the MLX in-crate GPU demo
+/// tests, and the REPL before its register call. On CUDA the default is
+/// `None` (the step moved to `mlpl-cuda-eval`); the fallback is deleted in
+/// S4 once MLX moves out too and registration becomes mandatory.
 pub(crate) fn installed_gpu_step() -> Option<Arc<dyn GpuAdamStep>> {
     GPU_STEP.get().cloned().or_else(default_gpu_step)
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::gpu_step::{AdamHp, GpuEnv};
-    use crate::grad_optim_mlx_demo::DemoLayout;
-    use crate::grad_optim_mlx_mlp::LoraNames;
-    use mlpl_array::DenseArray;
-    use mlpl_eval_types::EvalError;
-
-    #[derive(Debug)]
-    struct Dummy;
-    impl GpuAdamStep for Dummy {
-        fn run_lora_step(
-            &self,
-            _l: &DemoLayout,
-            _x: &DenseArray,
-            _y: &DenseArray,
-            _hp: &AdamHp,
-            _e: &mut dyn GpuEnv,
-        ) -> Result<DenseArray, EvalError> {
-            unreachable!("test never runs the step")
-        }
-        fn run_mlp_step(
-            &self,
-            _l1: &LoraNames,
-            _h: &LoraNames,
-            _x: &DenseArray,
-            _y: &DenseArray,
-            _hp: &AdamHp,
-            _e: &mut dyn GpuEnv,
-        ) -> Result<DenseArray, EvalError> {
-            unreachable!("test never runs the step")
-        }
-    }
-
-    #[test]
-    fn registered_step_is_what_new_environments_see() {
-        let dummy: Arc<dyn GpuAdamStep> = Arc::new(Dummy);
-        register_gpu_step(dummy.clone());
-        let got = installed_gpu_step().expect("a step is installed");
-        assert!(
-            Arc::ptr_eq(&got, &dummy),
-            "registered step must win over the in-crate fallback"
-        );
-        // Idempotent: a second register does not replace the first.
-        register_gpu_step(Arc::new(Dummy));
-        let again = installed_gpu_step().expect("still installed");
-        assert!(Arc::ptr_eq(&again, &dummy), "first registration wins");
-    }
 }

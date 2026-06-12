@@ -28,11 +28,12 @@ mlx = ["mlpl-eval/mlx"]
 # `device("cuda") { }` blocks (forwarded from connect-mode web demos)
 # on the GPU in-process. Off by default; non-Linux / CI builds stay
 # CPU-only. This is what makes this box a connect-mode CUDA peer.
-cuda = ["mlpl-eval/cuda"]
+cuda = ["mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cuda-eval/cuda"]
 
 [dependencies]
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-cuda-eval = { path = "../../../cuda-eval/crates/mlpl-cuda-eval", optional = true }
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
 # Phase 1c part 2: build a model's Sankey VizNode server-side so a
 # model evaluated in connect mode renders its decomposition.

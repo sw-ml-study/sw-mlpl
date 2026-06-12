@@ -9,12 +9,12 @@ use mlpl_eval_core::ModelSpec;
 use mlpl_parser::Expr;
 
 /// The frozen-base + adapter param names of one LoRA-adapted linear.
-pub(crate) struct LoraNames {
-    pub(crate) w: String,
-    pub(crate) b: String,
-    pub(crate) a: String,
-    pub(crate) b_adapter: String,
-    pub(crate) scale: f32,
+pub struct LoraNames {
+    pub w: String,
+    pub b: String,
+    pub a: String,
+    pub b_adapter: String,
+    pub scale: f32,
 }
 
 /// Recognize `Chain[LinearLora, Activation(Relu), LinearLora]` and

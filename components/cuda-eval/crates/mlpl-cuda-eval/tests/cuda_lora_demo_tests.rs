@@ -59,6 +59,9 @@ student = lora(base, 2, 4.0, 7)\n\
 ";
 
 fn run_finetune(cuda: bool) -> DenseArray {
+    // S3: the CUDA step now lives in this crate; register it so
+    // Environment::new picks it up for the device("cuda") fast path.
+    mlpl_eval::register_gpu_step(mlpl_cuda_eval::gpu_step());
     let mut env = Environment::new();
     run(&mut env, BASE_SETUP);
     let finetune = "train 3 { \

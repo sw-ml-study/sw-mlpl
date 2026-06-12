@@ -1736,6 +1736,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-cuda-eval"
+version = "0.20.0"
+dependencies = [
+ "candle-core",
+ "mlpl-array",
+ "mlpl-cuda-elementwise",
+ "mlpl-cuda-forward",
+ "mlpl-cuda-model",
+ "mlpl-cuda-nn",
+ "mlpl-cuda-rt",
+ "mlpl-cuda-train",
+ "mlpl-eval",
+ "mlpl-eval-types",
+]
+
+[[package]]
 name = "mlpl-cuda-forward"
 version = "0.20.0"
 dependencies = [
@@ -1792,7 +1808,6 @@ dependencies = [
 name = "mlpl-eval"
 version = "0.20.0"
 dependencies = [
- "candle-core",
  "mlpl-array",
  "mlpl-array-ops-compose",
  "mlpl-array-ops-element",
@@ -1803,11 +1818,8 @@ dependencies = [
  "mlpl-bpe-core",
  "mlpl-core",
  "mlpl-cuda-elementwise",
- "mlpl-cuda-forward",
- "mlpl-cuda-model",
  "mlpl-cuda-nn",
  "mlpl-cuda-rt",
- "mlpl-cuda-train",
  "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-eval-pets-tiny",
@@ -2116,6 +2128,7 @@ dependencies = [
  "ctrlc",
  "hostname",
  "mlpl-cli",
+ "mlpl-cuda-eval",
  "mlpl-eval",
  "mlpl-parser",
  "mlpl-runtime",

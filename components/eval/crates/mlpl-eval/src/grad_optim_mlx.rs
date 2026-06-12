@@ -5,7 +5,7 @@
 //! CPU autograd tape. Optimizer moments persist across steps via the
 //! `GpuEnv` accessor. Architecture RECOGNITION is interpreter-coupled and
 //! lives in `grad_optim::eval_adam`; this module gets the resolved
-//! `DemoLayout` + input tensors. The MLX analog of `grad_optim_cuda`.
+//! `DemoLayout` + input tensors. The CUDA analog now lives in mlpl-cuda-eval::cuda_lora.
 
 use crate::gpu_step::GpuEnv;
 use crate::grad_optim_mlx_demo::DemoLayout;

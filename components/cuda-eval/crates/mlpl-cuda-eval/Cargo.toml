@@ -1,0 +1,47 @@
+[package]
+name = "mlpl-cuda-eval"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+# The CUDA LoRA / MLP fine-tune compute. Pulls mlpl-eval's `cuda` feature
+# (which enables the GPU seam: GpuAdamStep / GpuEnv / AdamHp / DemoLayout /
+# LoraNames) plus the candle-backed CUDA runtime + model + train crates.
+# Everything triple-gates on linux/x86_64 internally, so enabling this on a
+# non-Linux host still compiles to an empty crate.
+cuda = [
+    "mlpl-eval/cuda",
+    "dep:mlpl-cuda-rt",
+    "mlpl-cuda-rt/cuda",
+    "dep:mlpl-cuda-elementwise",
+    "mlpl-cuda-elementwise/cuda",
+    "dep:mlpl-cuda-nn",
+    "mlpl-cuda-nn/cuda",
+    "dep:mlpl-cuda-forward",
+    "mlpl-cuda-forward/cuda",
+    "dep:mlpl-cuda-model",
+    "mlpl-cuda-model/cuda",
+    "dep:mlpl-cuda-train",
+    "mlpl-cuda-train/cuda",
+    "dep:candle-core",
+]
+
+[dependencies]
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+mlpl-cuda-rt = { path = "../../../cuda-rt/crates/mlpl-cuda-rt", optional = true }
+mlpl-cuda-elementwise = { path = "../../../cuda-rt/crates/mlpl-cuda-elementwise", optional = true }
+mlpl-cuda-nn = { path = "../../../cuda-rt/crates/mlpl-cuda-nn", optional = true }
+mlpl-cuda-forward = { path = "../../../cuda-model/crates/mlpl-cuda-forward", optional = true }
+mlpl-cuda-model = { path = "../../../cuda-model/crates/mlpl-cuda-model", optional = true }
+mlpl-cuda-train = { path = "../../../cuda-rt/crates/mlpl-cuda-train", optional = true }
+candle-core = { version = "0.9", optional = true, default-features = false, features = [
+  "cuda",
+] }
+
+[dev-dependencies]
+# The moved cuda demo parity tests lex+parse+eval MLPL source.
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
