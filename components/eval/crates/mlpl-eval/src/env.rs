@@ -160,7 +160,7 @@ impl Environment {
         ))]
         {
             Self {
-                gpu_step: crate::gpu_step::default_gpu_step(),
+                gpu_step: crate::gpu_registry::installed_gpu_step(),
                 ..Self::default()
             }
         }

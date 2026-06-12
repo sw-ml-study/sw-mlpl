@@ -83,6 +83,11 @@ mod gpu_env;
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
+mod gpu_registry;
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
 mod gpu_step;
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 mod grad_optim_mlx;
@@ -149,6 +154,13 @@ pub use eval_program::{
 };
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};
+// GPU optimizer-step registration: the binary registers this build's
+// step once at startup (cycle-break, S2). Only present on a GPU build.
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+pub use gpu_registry::register_default_gpu_step;
 pub use inspect::inspect;
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
