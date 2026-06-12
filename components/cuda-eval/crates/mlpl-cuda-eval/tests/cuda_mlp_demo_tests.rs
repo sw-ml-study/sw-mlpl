@@ -84,6 +84,18 @@ fn mlp_cuda_finetune_matches_cpu_within_fp32_tolerance() {
     assert_eq!(cpu_losses.shape().dims(), cuda_losses.shape().dims());
     assert_close_slice(cpu_losses.data(), cuda_losses.data(), FP32_TOL);
 
+    // Guard against a silent CPU fallback (the S4 trap: a step registered
+    // after `Environment::new` is never seen, so adam runs on the f64 CPU
+    // tape and this "matches CPU" test passes trivially). A true-GPU fp32
+    // candle run diverges from the f64 trajectory in the low bits, so a
+    // bit-identical curve means the CUDA MLP step never ran.
+    assert_ne!(
+        cpu_losses.data(),
+        cuda_losses.data(),
+        "cuda mlp loss curve is bit-identical to the CPU curve -- the GPU \
+         step did not run (registration must precede Environment::new)"
+    );
+
     // Not two flat lines: the optimizer actually moved the loss on the
     // GPU, so a matching curve means matching *learning*.
     let g = cuda_losses.data();

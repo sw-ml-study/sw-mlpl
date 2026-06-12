@@ -98,6 +98,19 @@ fn lora_cuda_finetune_matches_cpu_within_fp32_tolerance() {
         "last_losses",
     );
 
+    // Guard against a silent CPU fallback -- the trap S4 introduces by
+    // removing the in-crate default (if the step is registered AFTER
+    // `Environment::new`, the env never sees it and adam runs on the CPU
+    // tape, making this "matches CPU" test pass trivially). A true-GPU
+    // fp32 candle run diverges from the f64 CPU trajectory in the low
+    // bits, so a bit-identical curve means the CUDA step never ran.
+    assert_ne!(
+        cpu_losses.data(),
+        cuda_losses.data(),
+        "cuda loss curve is bit-identical to the CPU curve -- the GPU step \
+         did not run (registration must precede Environment::new)"
+    );
+
     // The CUDA path actually learns (the recorded curve drops), so a
     // matching curve means matching learning, not two flat lines.
     let gl = cuda_losses.data();
