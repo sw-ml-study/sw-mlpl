@@ -1,8 +1,9 @@
 //! Per-step plumbing for the MLX LoRA path (see `grad_optim_mlx`):
 //! one-hot inputs, the frozen-weight bundle, and the on-device adam
-//! update with moments persisted in `env.optim_state`.
+//! update with moments persisted via the `GpuEnv` accessor. The MLX
+//! analog of `grad_optim_cuda_step`.
 
-use crate::env::Environment;
+use crate::gpu_step::GpuEnv;
 use crate::grad_optim_mlx_demo::DemoLayout;
 use crate::model_apply_embed::tokens_to_onehot;
 use mlpl_array::DenseArray;
@@ -22,16 +23,16 @@ pub(crate) fn tokens_mlx(tokens: &DenseArray, vocab: usize) -> Result<Array, Eva
 /// gamma-free) and the mask is sized to the token count `seq`.
 pub(crate) fn build_weights(
     layout: &DemoLayout,
-    env: &Environment,
+    env: &dyn GpuEnv,
     seq: usize,
 ) -> Result<DemoWeights, EvalError> {
     let get = |n: &str| -> Result<Array, EvalError> {
         let d = env
-            .get(n)
+            .binding(n)
             .ok_or_else(|| EvalError::UndefinedVariable(n.into()))?;
         Ok(dense_to_mlx(d.data(), d.shape().dims()))
     };
-    let d_model = env.get(&layout.wq).map_or(0, |a| a.shape().dims()[0]);
+    let d_model = env.binding(&layout.wq).map_or(0, |a| a.shape().dims()[0]);
     Ok(DemoWeights {
         embed: get(&layout.embed_table)?,
         wq: get(&layout.wq)?,
@@ -47,31 +48,29 @@ pub(crate) fn build_weights(
     })
 }
 
-/// One on-device adam step for `param`: read its moments from
-/// `env.optim_state` (keyed like the CPU path), update, and write the
+/// One on-device adam step for `param`: read its moments via the
+/// `GpuEnv` accessor (keyed like the CPU path), update, and write the
 /// new weight + moments back into the Environment.
 pub(crate) fn step_adapter(
-    env: &mut Environment,
+    env: &mut dyn GpuEnv,
     param: &str,
     grad: &Array,
     hp: &AdamHp,
 ) -> Result<(), EvalError> {
-    let dims = env.get(param).expect("adapter present").shape().clone();
-    let cur = dense_to_mlx(env.get(param).unwrap().data(), dims.dims());
-    let key = |suf: &str| ("adam".to_string(), param.to_string(), suf.to_string());
-    let zero = || dense_to_mlx(&vec![0.0; dims.elem_count()], dims.dims());
-    let load = |suf: &str| {
-        env.optim_state
-            .buffers
-            .get(&key(suf))
-            .map_or_else(zero, |d| dense_to_mlx(d.data(), d.shape().dims()))
+    let dims = env.binding(param).expect("adapter present").shape().clone();
+    let cur = dense_to_mlx(env.binding(param).unwrap().data(), dims.dims());
+    let load = |suf: &str, e: &dyn GpuEnv| {
+        e.optim_buffer("adam", param, suf).map_or_else(
+            || dense_to_mlx(&vec![0.0; dims.elem_count()], dims.dims()),
+            |d| dense_to_mlx(d.data(), d.shape().dims()),
+        )
     };
-    let (m, v) = (load("m"), load("v"));
+    let (m, v) = (load("m", env), load("v", env));
     let (w_new, m_new, v_new) = adam_update(&cur, grad, &m, &v, hp)
         .map_err(|e| EvalError::Unsupported(format!("mlx lora: {e}")))?;
     let flat = |a: Array| DenseArray::new(dims.clone(), mlx_to_dense_data(a));
-    env.set(param.to_string(), flat(w_new)?);
-    env.optim_state.buffers.insert(key("m"), flat(m_new)?);
-    env.optim_state.buffers.insert(key("v"), flat(v_new)?);
+    env.set_binding(param.to_string(), flat(w_new)?);
+    env.set_optim_buffer("adam", param, "m", flat(m_new)?);
+    env.set_optim_buffer("adam", param, "v", flat(v_new)?);
     Ok(())
 }

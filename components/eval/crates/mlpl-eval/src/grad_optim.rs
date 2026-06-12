@@ -195,11 +195,18 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
             eps,
             t: t as i32,
         };
-        if let Some(res) = step.try_lora_adam(&loss_expr, &args[1], &hp, env) {
-            return res;
+        // Recognition is interpreter-coupled (demo_layout/mlp_layout read
+        // models; extract_xy evals the X/Y exprs), so it stays here; the
+        // GPU step then gets only the resolved layout + tensors.
+        if let Some(layout) = crate::grad_optim_mlx_demo::demo_layout(&args[1], env)
+            && let Some((x, y)) = crate::grad_optim_mlx_demo::extract_xy(&loss_expr, env)
+        {
+            return step.run_lora_step(&layout, &x, &y, &hp, env);
         }
-        if let Some(res) = step.try_mlp_adam(&loss_expr, &args[1], &hp, env) {
-            return res;
+        if let Some((l1, head)) = crate::grad_optim_mlx_mlp::mlp_layout(&args[1], env)
+            && let Some((x, y)) = crate::grad_optim_mlx_demo::extract_xy(&loss_expr, env)
+        {
+            return step.run_mlp_step(&l1, &head, &x, &y, &hp, env);
         }
     }
 

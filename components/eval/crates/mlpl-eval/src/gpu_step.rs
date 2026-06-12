@@ -1,21 +1,25 @@
 //! The device-agnostic GPU optimizer-step seam.
 //!
 //! Only compiled when a GPU backend is configured (CUDA on
-//! linux/x86_64, MLX on macos/aarch64) -- on a CPU-only build this
-//! module does not exist, so there is no unused GPU machinery. The
-//! interpreter (`grad_optim::eval_adam`) calls `GpuAdamStep` without
-//! referencing any backend crate directly; the impls live in the
-//! feature-gated `grad_optim_cuda` / `grad_optim_mlx` modules and can
-//! later move to sibling cuda/mlx crates. See
-//! docs/build-and-workspace-plan.md + future-saga-gpu-training.md.
+//! linux/x86_64, MLX on macos/aarch64). The interpreter-coupled
+//! RECOGNITION (`demo_layout` / `mlp_layout` read models; `extract_xy`
+//! calls `eval_expr`) stays in `grad_optim::eval_adam`; this seam gives
+//! the GPU compute only the recognized layout + input tensors + a narrow
+//! [`GpuEnv`] accessor, so the impls reference no interpreter / ModelSpec
+//! and can move to sibling cuda/mlx crates. See
+//! docs/build-and-workspace-plan.md.
 
 use std::sync::Arc;
 
 use mlpl_array::DenseArray;
 use mlpl_eval_types::EvalError;
-use mlpl_parser::Expr;
 
-use crate::env::Environment;
+use crate::grad_optim_mlx_demo::DemoLayout;
+use crate::grad_optim_mlx_mlp::LoraNames;
+
+// The environment accessor lives in its own module; re-exported here so
+// `crate::gpu_step::GpuEnv` keeps resolving for the backend compute.
+pub(crate) use crate::gpu_env::GpuEnv;
 
 /// Device-agnostic Adam hyperparameters; each backend converts to its
 /// own (`mlpl_cuda_train` / `mlpl_mlx_train`).
@@ -28,26 +32,29 @@ pub(crate) struct AdamHp {
     pub t: i32,
 }
 
-/// A GPU-resident optimizer step for a recognized model architecture,
-/// implemented by the CUDA / MLX backends. `None` means "not this
-/// architecture / device" -> the CPU autograd tape handles it.
+/// One GPU optimizer step for a RECOGNIZED architecture. Recognition is
+/// done by the caller (`eval_adam`); the impl gets the resolved layout +
+/// input tensors + the [`GpuEnv`] accessor, and returns the step loss.
 pub(crate) trait GpuAdamStep: std::fmt::Debug + Send + Sync {
     /// Head-only LoRA fine-tune step.
-    fn try_lora_adam(
+    fn run_lora_step(
         &self,
-        loss: &Expr,
-        model: &Expr,
+        layout: &DemoLayout,
+        x: &DenseArray,
+        y: &DenseArray,
         hp: &AdamHp,
-        env: &mut Environment,
-    ) -> Option<Result<DenseArray, EvalError>>;
-    /// Board-policy MLP (`Chain[LinearLora, relu, LinearLora]`) step.
-    fn try_mlp_adam(
+        env: &mut dyn GpuEnv,
+    ) -> Result<DenseArray, EvalError>;
+    /// Board-policy MLP step (`Chain[LinearLora, relu, LinearLora]`).
+    fn run_mlp_step(
         &self,
-        loss: &Expr,
-        model: &Expr,
+        l1: &LoraNames,
+        head: &LoraNames,
+        x: &DenseArray,
+        y: &DenseArray,
         hp: &AdamHp,
-        env: &mut Environment,
-    ) -> Option<Result<DenseArray, EvalError>>;
+        env: &mut dyn GpuEnv,
+    ) -> Result<DenseArray, EvalError>;
 }
 
 /// The CUDA step (cuda/linux/x86_64 build).

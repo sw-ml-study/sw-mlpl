@@ -18,6 +18,13 @@ mod env_device_tensors;
 mod env_dirs;
 mod env_exp_log;
 mod env_frozen;
+// The shared `GpuEnv` accessor impl for `Environment`; only on a GPU
+// build, backend-agnostic (CUDA + MLX share it).
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+mod env_gpu;
 mod env_interrupt;
 mod env_metric_sink;
 mod env_models;
@@ -63,9 +70,15 @@ mod grad;
 mod grad_calls_basic;
 mod grad_calls_shape;
 mod grad_optim;
-// Device-agnostic GPU optimizer-step seam (GpuAdamStep trait + AdamHp).
-// Only exists when a GPU backend is configured, so a CPU-only build has
-// no unused GPU machinery (no clippy overrides needed).
+// Device-agnostic GPU optimizer-step seam: the `GpuEnv` accessor trait
+// (gpu_env) and the `GpuAdamStep` step trait + `AdamHp` (gpu_step). Only
+// exist when a GPU backend is configured, so a CPU-only build has no
+// unused GPU machinery (no clippy overrides needed).
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+mod gpu_env;
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
