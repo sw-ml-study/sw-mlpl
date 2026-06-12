@@ -96,7 +96,14 @@ pub fn render_entry(entry: &HistoryEntry) -> Html {
                 </div>
                 // Live backend CPU/GPU/RAM/VRAM sparklines while a
                 // connect-mode eval runs; renders nothing in local mode.
-                <crate::telemetry_panel::TelemetryPanel />
+                // Keyed by the eval generation so a LOADED DEMO (which
+                // reuses one running-entry position across lines) remounts
+                // the panel per line -- a propless component is otherwise
+                // skipped on re-render, freezing it on the first line's
+                // (browser-local) generation and never activating for a
+                // later server-side `:ask`.
+                <crate::telemetry_panel::TelemetryPanel
+                    key={mlpl_web_eval::telemetry_trace::current_gen()} />
             </div>
         };
     }

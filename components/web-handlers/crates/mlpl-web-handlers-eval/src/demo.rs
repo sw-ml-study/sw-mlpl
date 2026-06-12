@@ -122,15 +122,17 @@ fn schedule_demo_line(
     }
     push_progress_notes(&mut entries, demo.name, idx);
     let line = lines[idx];
-    // The live telemetry panel is meaningful only when this line runs on
-    // the server: a connect-required (CUDA/MLX) demo's non-`:` lines.
-    // CPU-tier demos run in the browser, so begin(false) hides the panel.
+    // Telemetry panel only for SERVER-side lines (browser free to sample):
+    // MLX/CUDA compute lines, or any `:ask` (LLM runs server-side). Local
+    // evals block the sampler -> no panel (see docs/worker-threads.md).
     #[cfg(target_arch = "wasm32")]
     {
-        let remote = mlpl_web_eval::eval_url::is_connected()
-            && mlpl_web_demos::capability_for(demo.name).requires_connect
-            && !line.trim_start().starts_with(':');
-        mlpl_web_eval::telemetry_trace::begin(remote);
+        let lt = line.trim_start();
+        let server_side = mlpl_web_eval::eval_url::is_connected()
+            && (lt.starts_with(":ask")
+                || (mlpl_web_demos::capability_for(demo.name).requires_connect
+                    && !lt.starts_with(':')));
+        mlpl_web_eval::telemetry_trace::begin(server_side);
     }
     push_running_marker(&mut entries, line);
     history.set(entries.clone());

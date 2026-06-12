@@ -124,11 +124,13 @@ fn render_rows(series: &Series) -> Html {
 
 #[function_component(TelemetryPanel)]
 pub fn telemetry_panel() -> Html {
-    // Capture THIS eval's generation + connect URL once at mount (hooks,
-    // always called). The panel only shows for a server-side eval -- a
-    // browser-local eval (CPU-tier demo) would otherwise display server
-    // CPU unrelated to where it runs.
-    let gen_id = *use_state(mlpl_web_eval::telemetry_trace::current_gen);
+    // Read THIS eval's generation EACH render (not captured once at mount):
+    // a loaded demo can reuse the same panel instance across lines, where a
+    // captured gen_id would stay the first line's (browser-local, never
+    // remote) and the panel would never activate for a later `:ask`. The
+    // panel only shows for a server-side eval -- a browser-local eval would
+    // otherwise display server CPU unrelated to where it runs.
+    let gen_id = mlpl_web_eval::telemetry_trace::current_gen();
     let base = (*use_state(mlpl_web_eval::eval::current_connect_url_from_window)).clone();
     let series = use_mut_ref(Series::default);
     let tick = use_state(|| 0u32);
@@ -137,7 +139,9 @@ pub fn telemetry_panel() -> Html {
         let series = series.clone();
         let tick = tick.clone();
         let base = base.clone();
-        use_effect_with(active, move |&active| {
+        // Re-run when EITHER `active` or the generation changes, so a panel
+        // reused across demo lines restarts polling for the new eval.
+        use_effect_with((active, gen_id), move |&(active, gen_id)| {
             let mut interval = None;
             if let (true, Some(b)) = (active, base) {
                 poll_once(&b, gen_id, &series, &tick);
