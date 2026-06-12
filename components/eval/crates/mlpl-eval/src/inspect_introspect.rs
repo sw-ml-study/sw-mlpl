@@ -27,7 +27,7 @@ use crate::tag_render::format_tags;
 /// named (not dumped) so the surface is complete and `:models` above is
 /// not confused with `:connect list`.
 const CONNECT_MODE_NOTE: &str = "\n\n## connect-mode introspection\n\n\
-(these need a connected mlpl-serve via ?connect=<url>, so they are named here, not dumped above)\n  \
+(live server-side commands -- named here, not captured in this in-process snapshot; run each directly)\n  \
 :status        backend self-test: devices + live CPU/GPU/RAM\n  \
 :connect list  the server's installed Ollama LLMs, for :ask -- NOT the same as :models above\n  \
 :ask <prompt>  ask the connected LLM about your session";
