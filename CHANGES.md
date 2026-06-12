@@ -12,8 +12,52 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-11
+
+- chore(fmt): wrap assert_eq! in if_else_tests to satisfy rustfmt
+- refactor(eval): device-agnostic GpuEnv/GpuAdamStep seam for cuda+mlx
+- docs(workspace-split): concrete seam design for moving GPU impls to sibling crates
+- test(eval): update two stale tests to confirmed-intended new behavior
+- fix(pages): commit the actual WASM bundle (index.html referenced an uncommitted one)
+- fix(eval-tests): correct stale demo paths after component migration
+- fix(help): register linspace + cumprod in BUILTIN_GROUPS + lang-reference
+
+## 2026-06-10
+
+- refactor(eval): device-trait seam for GPU adam + serve-mlx.sh
+- docs+scripts: three build modes (CUDA / MLX / pages-only) + workspace-split plan
+- fix(telemetry): per-eval generations so concurrent watch/evals don't share a trace
+- fix(telemetry): :status watch can't hang on a slow /v1/stats + nvidia-smi off the async runtime
+- fix(web): harden :ask system prompt -- forbid inventing commands, list the real ones
+- feat(web): :<cmd> --help convention (REPL help) vs bare args (command input)
+- fix(serve): default :ask model to "auto" (median-size) instead of the tiny 0.5b
+- feat(eval): warn (user-visible) when device("cuda"/"mlx") silently falls back to CPU
+- feat(demos): CUDA/MLX LoRA demos go all-GPU (drop CPU pretrain + loss_metric)
+- fix(web): Connect button shows connection status + Disconnect when connected
+
 ## 2026-06-09
 
+- fix(web): poll telemetry every ~400ms (was 2s) so short evals get a real sparkline
+- feat(web): Connect button + persistent sparkline trace + :status watch + remote-only panel
+- fix(web): correct connect instructions -- there is no "Connect button"
+- fix(serve): eval off the global lock + cancel-on-disconnect (no more wedge)
+- fix(serve): cap rayon at cores-2 so eval can't starve /v1/stats serving
+- fix(web): telemetry panel -- surface fetch errors + always re-render + compact layout
+- feat(web): live CPU/GPU/RAM/VRAM sparklines during eval + hostname in :status
+- chore(pages): rebuild with :status + :reset commands
+- feat(web): :reset (y/N safeguard) + multi-GPU backend-list :status
+- feat(web): :status backend self-test command (devices + live CPU/RAM/GPU/VRAM)
+- style(viz): cargo fmt drift in model-viz + web-viz3d
+- feat(monitoring): /v1/stats backend telemetry (new monitoring component)
+- fix(web): raise connect eval deadline 90s->600s to match server
+- chore(serve): sync rayon into 4 Cargo.lock files + add serve-cuda.sh helper
+- fix(web): connect requests fail fast (timeout) instead of hanging the REPL
+- feat(viz): color scatter by class; colored moons target; honest GAN framing
+- fix(demos): recognizable output for the GAN and Diffusion 2D demos
+- chore(agentrail): record stable-diffusion step 001 completion
+- feat(diffusion): stable-diffusion step 1 -- 2D diffusion demo (browser, no conv)
+- saga: kick off stable-diffusion (archive cuda-demo-parity); step 1 = 2D diffusion demo
+- docs(changes): refresh CHANGES.md to HEAD
 - perf(ob-mlpl): persistent --babel-session for O(n) literate publishes
 - docs(changes): refresh CHANGES.md to HEAD
 - docs(saga): plan Stable Diffusion (text-to-image) as the next, high-priority saga
