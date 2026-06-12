@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-11
 
+- refactor(eval): move MLX compute to sibling mlpl-mlx-eval crate (S4)
+- fix(build): restore mlpl-build unit tests dropped by a botched extraction
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(plan): mark S3 done in the GPU workspace-split plan
 - refactor(eval): move CUDA compute to sibling mlpl-cuda-eval crate (S3)
 - fix(repl): collapse OLLAMA_MODEL if into a let-chain (clippy 1.94)
