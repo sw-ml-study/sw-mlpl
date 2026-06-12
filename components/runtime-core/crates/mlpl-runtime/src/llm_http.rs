@@ -78,16 +78,44 @@ pub fn list_models(host: &str) -> Result<Vec<(String, u64)>, String> {
         .collect())
 }
 
-/// The median-by-size model name -- the "not too small (weak), not too
-/// big (slow)" pick. `None` if no models are installed.
-#[must_use]
-pub fn median_model(models: &[(String, u64)]) -> Option<String> {
-    if models.is_empty() {
-        return None;
-    }
+/// Below ~2 GB (roughly a 3B-parameter model at typical quantization) a
+/// model is too small/weak to give useful general `:ask` answers; the
+/// median pick skips these so a cluster of toy/experimental installs does
+/// not drag the default onto a weak model.
+const MIN_VIABLE_MODEL_BYTES: u64 = 2_000_000_000;
+
+/// Median-by-size name of a non-empty model slice.
+fn median_by_size(models: &[&(String, u64)]) -> String {
     let mut sorted = models.to_vec();
     sorted.sort_by_key(|(_, size)| *size);
-    Some(sorted[sorted.len() / 2].0.clone())
+    sorted[sorted.len() / 2].0.clone()
+}
+
+/// The `:ask` default model: the median-by-size model that can actually
+/// hold a conversation. Two filters before the median:
+/// - embedding models are excluded outright -- they return vectors, not
+///   text, so they can never answer a prompt (a large embed model would
+///   otherwise win the median);
+/// - models below `MIN_VIABLE_MODEL_BYTES` are skipped, UNLESS that would
+///   leave nothing (a host with only small models still gets a pick).
+///
+/// `None` only when no chat-capable model is installed.
+#[must_use]
+pub fn median_model(models: &[(String, u64)]) -> Option<String> {
+    let chat: Vec<&(String, u64)> = models
+        .iter()
+        .filter(|(name, _)| !name.contains("embed"))
+        .collect();
+    let viable: Vec<&(String, u64)> = chat
+        .iter()
+        .copied()
+        .filter(|(_, size)| *size >= MIN_VIABLE_MODEL_BYTES)
+        .collect();
+    match (viable.is_empty(), chat.is_empty()) {
+        (false, _) => Some(median_by_size(&viable)),
+        (true, false) => Some(median_by_size(&chat)),
+        (true, true) => None,
+    }
 }
 
 /// Build the error for a non-2xx response, with a char-safe

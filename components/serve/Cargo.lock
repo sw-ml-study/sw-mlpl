@@ -2143,6 +2143,7 @@ dependencies = [
  "mlpl-model-viz",
  "mlpl-monitor",
  "mlpl-parser",
+ "mlpl-runtime",
  "mlpl-web-viz-ir",
  "rand 0.8.6",
  "rayon",
