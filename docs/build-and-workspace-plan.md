@@ -54,17 +54,49 @@ Proposed grouping into top-level cargo workspaces, each with its own
    the vendored `mlx-rs`, and a `mlpl-serve` built with `--features mlx`.
    Apple Silicon only.
 
-Tensions to resolve in the saga:
-- `mlpl-eval` currently owns BOTH `grad_optim_cuda*` and `grad_optim_mlx*`
-  (feature-gated). To split cleanly, the GPU fast-paths would move behind
-  a trait/registry the shared `eval` calls, with cuda/mlx crates providing
-  the impls -- so `eval` itself stays device-agnostic and in the shared
-  workspace. This is the same "device-aware" refactor that
-  `docs/future-saga-gpu-training.md` needs, so do them together.
-- `mlpl-serve` would either live in shared (with optional cuda/mlx
-  dependencies pulled in per workspace) or be built per-GPU-workspace.
-- Separate `target/`s cost disk; keep the shared workspace's `target/` as
-  the big one and the gpu workspaces small.
+### Concrete seam design (worked out 2026-06-11)
+
+The device-trait seam (commit 282b0870) was step one. To actually MOVE the
+impls to sibling crates, the constraint discovered is: the architecture
+RECOGNIZERS are interpreter-coupled and must stay in `mlpl-eval`:
+- `grad_optim_mlx_demo::extract_xy` calls `crate::eval::eval_expr` to
+  evaluate the X/Y argument expressions.
+- `demo_layout` / the MLP recognizer read `ModelSpec`s and bindings.
+
+So the split is recognition-in-eval, compute-in-gpu-crate:
+
+1. `mlpl-eval::eval_adam` runs the recognizers (it has the interpreter)
+   and obtains `(layout, X, Y)`.
+2. It calls a reshaped `GpuAdamStep`:
+   `run_lora_step(&self, layout: &DemoLayout, x: &DenseArray, y:
+   &DenseArray, hp: &AdamHp, env: &mut dyn GpuEnv)` (and `run_mlp_step`).
+3. `GpuEnv` is a NARROW accessor trait (keeps mlpl-eval's general surface
+   tight -- no broad `pub` on get/set): just what the compute needs --
+   read/write a named adapter weight, and read/write an Adam moment
+   buffer `(opt, param, suffix) -> DenseArray`. `Environment` impls it.
+4. `DemoLayout` / `MlpLayout` + `AdamHp` + `GpuAdamStep` + `GpuEnv` become
+   the public seam (in `mlpl-eval`, cfg "any GPU").
+
+Then the cuda/mlx crates contain ONLY candle/mlx compute (build the
+device tensors from the accessor, forward/backward via candle/mlx
+autograd, adam update, write back via the accessor) -- no interpreter, no
+ModelSpec parsing. The cycle breaks because `mlpl-eval` no longer
+constructs the impls; `mlpl-serve` (feature-gated) installs the right
+`GpuAdamStep` via `Environment::install_gpu_step` at session creation.
+
+Recommended staging (each verifiable; MLX needs an Apple build):
+- S1: introduce `GpuEnv` + reshape `GpuAdamStep` to `run_*_step(layout,
+  x, y, hp, &mut dyn GpuEnv)`; move recognition into `eval_adam`. Impls
+  stay in mlpl-eval. Verify CUDA fast path unchanged. (In-crate, no new
+  crates yet -- this is the risky/delicate part; do it first and verify.)
+- S2: break the cycle -- `install_gpu_step` + serve install.
+- S3: create `mlpl-cuda-eval`, move the cuda compute. Verify on Linux.
+- S4: create `mlpl-mlx-eval`, mirror. Verify on Apple.
+
+Other tensions:
+- `mlpl-serve` either lives in shared (optional cuda/mlx deps per
+  workspace) or is built per-GPU-workspace.
+- Separate `target/`s cost disk; keep the shared workspace's the big one.
 
 Until the restructure lands, the three build scripts above are the
 supported way to build each mode.
