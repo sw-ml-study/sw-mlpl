@@ -131,7 +131,20 @@ pub(crate) fn dispatch_demo_line(
     route_all: bool,
     on_result: mlpl_web_eval::eval::ResultCb,
 ) -> bool {
-    let t = line.trim();
+    // Demo lines carry trailing `# comment` annotations. Strip them for
+    // COMMAND matching (so `:connect list # ...` is not read as a host and
+    // `:status # ...` matches), but keep the original `line` for the plain
+    // MLPL routing below, where a `#` may live inside a string literal.
+    let cmd_line = line.split('#').next().unwrap_or(line);
+    let t = cmd_line.trim();
+    if t == ":status" {
+        let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
+            return false;
+        };
+        let ready = mlpl_web_eval::ollama_fetch::ollama_default().is_some();
+        mlpl_web_eval::stats_fetch::fetch_status(base, ready, on_result);
+        return true;
+    }
     if t == ":connect list" || t.starts_with(":connect list ") {
         let host = t
             .strip_prefix(":connect list ")
@@ -143,7 +156,7 @@ pub(crate) fn dispatch_demo_line(
         return true;
     }
     if t.starts_with(":ask ") {
-        if let Some(program) = connect_program(line, history) {
+        if let Some(program) = connect_program(cmd_line, history) {
             return mlpl_web_eval::eval_wasm::connect_eval(&program, on_result);
         }
     }
