@@ -97,12 +97,18 @@ Recommended staging (each verifiable; MLX needs an Apple build):
   to `default_gpu_step()` keeps the in-crate GPU tests green until S3.
   (Deviation: process-global register-at-startup, not a per-session
   `install_gpu_step` -- Environment is built at ~6 sites.)
-- S3 [next]: create `mlpl-cuda-eval`, move the cuda compute
-  (grad_optim_cuda*). Make the seam pub (GpuAdamStep, GpuEnv, AdamHp) +
-  DemoLayout/LoraNames fields pub so the sibling crate can read them.
-  Delete the in-crate fallback; binary registers `mlpl_cuda_eval`'s step.
-  Move the cuda demo tests to the new crate. Verify on Linux.
-- S4: create `mlpl-mlx-eval`, mirror. Verify on Apple.
+- S3 [DONE, 1d8d6f79]: created components/cuda-eval/ (mlpl-cuda-eval) and
+  moved the cuda optimizer compute (cuda_lora/cuda_mlp/cuda_step) + the
+  cuda demo tests there. Seam made pub (GpuAdamStep / GpuEnv / AdamHp /
+  DemoLayout / LoraNames + tokens_to_onehot + register_gpu_step). mlpl-eval
+  dropped candle + mlpl-cuda-{forward,model,train}; KEPT mlpl-cuda-{rt,nn,
+  elementwise} for per-op device_dispatch. default_gpu_step() is None on
+  CUDA; the binary registers `mlpl_cuda_eval::gpu_step()`. The in-crate
+  fallback is RETAINED (not deleted) -- the MLX in-crate demo tests still
+  need it; S4 deletes it. Verified on Linux: identical loss curve, 0.585s.
+- S4: create `mlpl-mlx-eval`, mirror the move (mlx compute + mlx demo
+  tests). Then `default_gpu_step` + the installed_gpu_step fallback can be
+  deleted and registration becomes mandatory. Verify on Apple.
 
 Other tensions:
 - `mlpl-serve` either lives in shared (optional cuda/mlx deps per
