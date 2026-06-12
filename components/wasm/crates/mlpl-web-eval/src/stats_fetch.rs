@@ -99,9 +99,14 @@ async fn status_report(base_url: &str, ollama_ready: bool) -> String {
     };
     let snap: Snapshot = serde_json::from_value(stats).unwrap_or_default();
     let ollama = if ollama_ready {
-        "configured (:ask ready)"
+        let model = crate::ollama_fetch::selected_model()
+            .or_else(|| crate::ollama_fetch::ollama_default().map(|(_, m)| m));
+        match model {
+            Some(m) => format!("configured (:ask ready) -- model: {m}"),
+            None => "configured (:ask ready)".to_string(),
+        }
     } else {
-        "not configured"
+        "not configured".to_string()
     };
     let host = devices
         .as_ref()

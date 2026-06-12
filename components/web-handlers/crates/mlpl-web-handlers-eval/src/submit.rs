@@ -263,6 +263,12 @@ fn connect_command_text(arg: &str) -> String {
         if name.is_empty() {
             return "usage: :connect set <model>   (see :connect list)".to_string();
         }
+        if name.contains("embed") {
+            return format!(
+                "'{name}' is an embedding model (returns vectors, not text) -- it can't \
+                 answer :ask. Pick a chat model instead (see :connect list)."
+            );
+        }
         #[cfg(target_arch = "wasm32")]
         mlpl_web_eval::ollama_fetch::set_selected_model(name);
         format!("ask model set to {name}")
