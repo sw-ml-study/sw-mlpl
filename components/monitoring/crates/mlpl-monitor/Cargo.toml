@@ -15,6 +15,13 @@ mlpl-monitor-types = { path = "../mlpl-monitor-types" }
 
 [target.'cfg(target_os = "linux")'.dependencies]
 mlpl-monitor-linux = { path = "../mlpl-monitor-linux" }
+
+[target.'cfg(target_os = "macos")'.dependencies]
+mlpl-monitor-macos = { path = "../mlpl-monitor-macos" }
+
+# The GPU query runs off the async runtime; needed on every host that has
+# a platform source (Linux + macOS).
+[target.'cfg(any(target_os = "linux", target_os = "macos"))'.dependencies]
 tokio = { version = "1", features = ["time", "rt"] }
 
 [lints]

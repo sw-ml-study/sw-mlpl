@@ -2,6 +2,7 @@
 members = [
     "crates/mlpl-monitor-types",
     "crates/mlpl-monitor-linux",
+    "crates/mlpl-monitor-macos",
     "crates/mlpl-monitor",
 ]
 resolver = "2"

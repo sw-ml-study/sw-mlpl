@@ -1,0 +1,19 @@
+[package]
+name = "mlpl-monitor-macos"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# macOS telemetry sources for mlpl-monitor, all WITHOUT sudo: CPU% from
+# the Mach `host_statistics64(HOST_CPU_LOAD_INFO)` tick counters (the
+# library analog of Linux's /proc/stat), RAM from `vm_stat` + `sysctl
+# hw.memsize`, GPU%/VRAM from `ioreg -c IOAccelerator` (the analog of
+# `nvidia-smi`). Each source splits a pure `parse_*` (unit-tested) from the
+# thin IO that feeds it. The Apple analog of mlpl-monitor-linux.
+
+[dependencies]
+# No external deps: CPU via `top`, RAM via `vm_stat`/`sysctl`, GPU via
+# `ioreg` -- all parsed from subprocess output, all without sudo.
+
+[lints]
+workspace = true
