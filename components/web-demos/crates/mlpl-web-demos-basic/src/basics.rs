@@ -117,7 +117,7 @@ pub const WORKSPACE_INTROSPECTION: Demo = Demo {
         ":fns                                                                 # list user-defined functions (none yet)",
         ":status                                                              # connect mode: backend devices + live CPU/GPU/RAM (needs ?connect=)",
         ":connect list                                                        # connect mode: the server's Ollama LLMs for :ask -- NOT the :models above",
-        ":ask \"what have I built in this workspace so far?\"                    # connect mode: ask the LLM, with your session as context",
+        ":ask \"what have I built in this workspace so far?\"",
         ":introspect                                                          # bundle every no-arg inspector + name the connect-mode ones (saga 33 step 037d)",
     ],
 };
