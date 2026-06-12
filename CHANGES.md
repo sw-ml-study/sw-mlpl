@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-11
 
+- docs(plan): mark S1+S2 done in the GPU workspace-split plan
+- docs(changes): refresh CHANGES.md to HEAD
 - refactor(eval): cycle-break -- register GPU step at binary startup (S2)
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(fmt): wrap assert_eq! in if_else_tests to satisfy rustfmt
