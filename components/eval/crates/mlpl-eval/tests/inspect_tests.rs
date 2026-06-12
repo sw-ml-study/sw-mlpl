@@ -132,7 +132,9 @@ fn fns_reports_no_user_functions_yet() {
     let mut env = Environment::new();
     let out = inspect(&mut env, ":fns").unwrap();
     assert!(out.contains("no user-defined functions"), "out was: {out}");
-    assert!(out.contains(":builtins"), "out was: {out}");
+    // The empty-state hint now points at how to DEFINE a user function
+    // (more useful here than the old `:builtins` cross-reference).
+    assert!(out.contains("def u:name"), "out was: {out}");
 }
 
 #[test]

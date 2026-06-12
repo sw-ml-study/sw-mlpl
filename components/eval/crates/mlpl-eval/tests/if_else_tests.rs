@@ -113,13 +113,13 @@ fn if_cond_non_scalar_array_errors() {
 }
 
 #[test]
-fn missing_else_is_parse_error() {
-    let err = parse(&lex("if 1 { 42 }").unwrap()).unwrap_err();
-    let msg = format!("{err:?}");
-    assert!(
-        msg.contains("else") || msg.contains("Unexpected") || msg.contains("Eof"),
-        "expected parse error about missing else, got: {msg}"
-    );
+fn bare_if_without_else_parses() {
+    // Issue #6 / commit d36b91fa intentionally made the `else` clause
+    // optional: `if cond { body }` is valid (it yields the body when the
+    // condition is truthy, otherwise a no-op). This used to be a parse
+    // error; the test now asserts the new, intended behavior.
+    let stmts = parse(&lex("if 1 { 42 }").unwrap()).expect("bare if without else should parse");
+    assert_eq!(stmts.len(), 1, "expected one parsed statement, got: {stmts:?}");
 }
 
 #[test]
