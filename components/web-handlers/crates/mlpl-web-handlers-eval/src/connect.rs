@@ -28,6 +28,27 @@ CRITICAL: Do NOT invent, guess, or hallucinate commands, syntax, model names, or
 DO NOT WRITE MLPL CODE unless you are CERTAIN of the exact syntax (ideally only code you can see in this session's context): MLPL is an array language, NOT Python -- it has NO `+=`/`-=`, NO `==` (use `eq(a, b)`), NO lambdas or `->`, NO `filter`/`map`/`print`/`length`/`strcat`/`append`, and `device(\"...\")`, `experiment`, and `train`/`repeat` ALWAYS take a `{ ... }` block (a bare `device(\"mlx\")` is a syntax error). If you are not sure code will run, DESCRIBE the approach in plain words and tell the user to read the demo/its literate walkthrough and `:help` -- never emit a code block you have not actually seen run. When the user asks how to do something in the REPL: for command help tell them to run `:help` (lists all commands) or `:<cmd> --help` (help for one command, e.g. `:ask --help`); to see or change which LLM answers their `:ask`, tell them `:connect list` (lists the installed Ollama models) then `:connect set <name>`. \
 The user's recent REPL activity and any selected 3D sculpture are provided below as your context -- use them. Answer concisely and specifically about sw-MLPL.";
 
+/// Compact MLPL syntax cheat-sheet prepended to the builtin signatures in
+/// [`mlpl_reference`]. The CORRECT forms (vs the Python-isms the prompt
+/// forbids), so when code is warranted the model writes valid MLPL.
+const MLPL_SYNTAX: &str = " MLPL quick reference -- use EXACTLY these forms. \
+Assign `name = expr`; comment `# ...`; compare with `eq(a,b)` / `gt(a,b)` / `lt(a,b)` (there is no `==`/`<`/`>`); \
+EVERY block uses braces: `device(\"mlx\") { ... }`, `experiment \"name\" { ... }`, `train N { ... }`, `repeat N { ... }`, `if c { ... } else { ... }`; \
+define a function with `def u:name(a, b) { body }` -- the `u:` prefix is REQUIRED and there is NO `return` (the block's last expression is its value) -- then call it `u:name(args)`; iterate with `for x in iota(n) { ... }` or `while cond { ... }`; index/slice a tensor with `take(x, axis, i)`. \
+Statements inside a block are separated by `;`. The COMPLETE builtin set follows (call ONLY these exact signatures -- there is no filter/map/print/length/strcat/append):";
+
+/// The compact MLPL reference for the `:ask` system prompt: the syntax
+/// cheat-sheet plus every builtin's signature, grouped, sourced from the
+/// curated `BUILTIN_GROUPS` table so it never drifts from the real set.
+fn mlpl_reference() -> String {
+    let mut r = MLPL_SYNTAX.to_string();
+    for (group, entries) in mlpl_eval_core::inspect_groups::BUILTIN_GROUPS {
+        let sigs: Vec<&str> = entries.iter().map(|&(_, sig, _)| sig).collect();
+        r.push_str(&format!(" [{group}] {}.", sigs.join(", ")));
+    }
+    r
+}
+
 /// Read a URL query parameter, falling back to `default` when it
 /// is absent or empty. (`name` is a fixed literal, never user
 /// input, so the inlined script is safe.)
@@ -75,11 +96,10 @@ fn repl_history_context(history: &[HistoryEntry]) -> String {
 /// follow far better. The question is sent as the user prompt.
 fn build_ask_system(history: &[HistoryEntry]) -> String {
     let mut p = ASK_SYSTEM.to_string();
-    // Ground the model in the active demo: the "About this demo -- <name>"
-    // narration names the task (e.g. tic-tac-toe) and the body describes
-    // it, which the per-line command history alone does not -- so the model
-    // answers about THIS demo instead of guessing a similar one (e.g.
-    // Othello). (`make_run_demo` stores the heading in mixed case.)
+    // Compact MLPL reference (syntax + builtin signatures) -- real forms.
+    p.push_str(&mlpl_reference());
+    // Ground the model in the active demo (its "About this demo -- <name>"
+    // narration names the task, e.g. tic-tac-toe) so it doesn't guess Othello.
     if let Some(intro) = history
         .iter()
         .rev()
