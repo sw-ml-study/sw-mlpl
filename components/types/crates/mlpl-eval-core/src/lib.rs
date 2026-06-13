@@ -9,12 +9,14 @@
 //! extraction can proceed without a back-cycle through
 //! mlpl-eval.
 
+pub mod indent;
 pub mod inspect_groups;
 pub mod metric_sink;
 pub mod model;
 pub mod snapshot;
 pub mod tokenizer;
 
+pub use indent::indent_source;
 pub use metric_sink::MetricSink;
 pub use model::{ActKind, ModelSpec};
 pub use snapshot::{ModelSnapshot, ParamEntry};
