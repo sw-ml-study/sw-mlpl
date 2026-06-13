@@ -573,6 +573,24 @@
             overflow: auto;
             white-space: pre;
         }
+        /* A formatted source listing (a user-function `def`, or any
+           multi-line block from the source indenter). Like .insp-values
+           but it is the headline, so it uses the body text color and
+           wraps long lines while preserving indentation. Unscoped so the
+           inspector ("I") panel and the hover detail panel share it. */
+        .insp-listing {
+            background: var(--mantle);
+            border: 1px solid var(--surface0);
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin: 0 0 12px;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.45;
+            color: var(--text);
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
         .stage3d-inspector-body .insp-hint {
             color: var(--overlay1);
             font-size: 12px;

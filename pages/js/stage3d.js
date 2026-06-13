@@ -590,15 +590,6 @@ function renderAttentionHeatmap(ud, viz) {
     svg += `<text x="12" y="${padT + q * cellH / 2}" text-anchor="middle" font-size="11" font-family="var(--mono)" fill="var(--subtext0)" transform="rotate(-90 12 ${padT + q * cellH / 2})">query tokens</text>`;
     svg += `</svg>`;
 
-    // The source line already starts with `<var> = ...` when
-    // ud.label is from a binding, so don't double up. Only
-    // prepend the var name when the label is something else
-    // (a bare expression or a non-binding line).
-    const label = ud.label || '';
-    const name = ud.varName || '';
-    const startsWithName = name
-        && new RegExp(`^\\s*${name}\\s*=`).test(label);
-    const headline = startsWithName || !name ? label : `${name} = ${label}`;
     // Head selector: visible only when the payload has a head
     // dimension. Each option re-renders the body with the new
     // head index by setting inspectorHeadIdx and calling
@@ -626,7 +617,7 @@ function renderAttentionHeatmap(ud, viz) {
     const currentMesh = selectedStepIdx >= 0 ? stepMeshes[selectedStepIdx] : null;
     const derivation = renderDerivation(currentMesh);
     return `
-        <h2>${escapeHtml(headline)}</h2>
+        ${headlineHtml(ud.varName || '', ud.label || '')}
         <div class="insp-row"><strong>Attention pattern</strong> &nbsp; <strong>Shape:</strong> ${layoutSummary(layout, q, k)} &nbsp; (row-wise softmax)</div>
         ${headSelector}
         <div class="insp-row" style="margin-top:14px">${svg}</div>
@@ -944,13 +935,8 @@ function renderCompositeSankey(ud, viz) {
             responsive: true,
         });
     });
-    const name = ud.varName || '';
-    const label = ud.label || '';
-    const startsWithName = name
-        && new RegExp(`^\\s*${name}\\s*=`).test(label);
-    const headline = startsWithName || !name ? label : `${name} = ${label}`;
     return `
-        <h2>${escapeHtml(headline)}</h2>
+        ${headlineHtml(ud.varName || '', ud.label || '')}
         <div class="insp-row"><strong>Composite model</strong> &nbsp; <strong>${sankey.nodes.length} nodes</strong> &nbsp; <strong>${sankey.edges.length} edges</strong></div>
         <div id="${containerId}" style="margin-top:14px;width:100%;min-height:280px"></div>
         <div class="insp-hint">Saga D v0: leaf layers + flat Chain. Residual currently flattens into its inner chain (the layer labels carry a *res tag); the bypass edge + nested-chain drill-down land in a follow-up saga.</div>
@@ -1144,11 +1130,7 @@ function renderInspectorBody(ud) {
     const mem = bytes < 1024 ? `${bytes} B`
               : bytes < 1048576 ? `${(bytes / 1024).toFixed(1)} KB`
               : `${(bytes / 1048576).toFixed(1)} MB`;
-    // Same de-dup logic as the attention renderer.
-    const startsWithName = name
-        && new RegExp(`^\\s*${name}\\s*=`).test(label);
-    const headline = startsWithName || !name ? label : `${name} = ${label}`;
-    let html = `<h2>${escapeHtml(headline)}</h2>`;
+    let html = headlineHtml(name, label);
     html += `<div class="insp-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>`;
     html += `<div class="insp-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>`;
     if (ud.values && ud.values.length) {
@@ -1173,6 +1155,36 @@ function escapeHtml(s) {
     return String(s).replace(/[&<>"']/g, c => ({
         '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
     }[c]));
+}
+
+function escapeRegExp(s) {
+    return String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+// True for a formatted source listing -- a function definition or any
+// multi-line block the source indenter produced. These render verbatim in
+// a monospace <pre> (newlines/indentation survive) rather than a collapsed
+// one-line heading.
+function isListing(text) {
+    return text.includes('\n') || /^\s*def\s/.test(text);
+}
+
+// De-dup a single-line binding's leading `name =`: the source line already
+// reads `<var> = ...`, so don't prepend the var name again. (Never used for
+// listings, where there is no binding name to hoist.)
+function dedupName(name, text) {
+    const startsWithName = name
+        && new RegExp(`^\\s*${escapeRegExp(name)}\\s*=`).test(text);
+    return startsWithName || !name ? text : `${name} = ${text}`;
+}
+
+// Inspector "I"-panel headline: a <pre> listing for function defs / blocks,
+// otherwise a one-line <h2>. Shared by every inspector dialog renderer.
+function headlineHtml(name, label) {
+    const text = label || '';
+    return isListing(text)
+        ? `<pre class="insp-listing">${escapeHtml(text)}</pre>`
+        : `<h2>${escapeHtml(dedupName(name, text))}</h2>`;
 }
 
 function formatInspectorValues(vals, limit) {
@@ -1211,13 +1223,14 @@ function showDetail(ud) {
     const vizHint = vizKind && vizRenderers[vizKind]
         ? `<div class="stage3d-detail-row" style="color:var(--peach)"><strong>${vizKind}</strong> view available -- click the yellow pointer to open it.</div>`
         : '';
-    // Same de-dup logic as the dialog renderers: don't prepend
-    // `<name> =` when the label already starts with it.
-    const startsWithName = name
-        && new RegExp(`^\\s*${name}\\s*=`).test(label);
-    const title = startsWithName || !name ? label : `${name} = ${label}`;
+    // Listings (function defs / multi-line blocks) render verbatim in a
+    // monospace <pre>; single-line bindings keep the title row. Shared
+    // formatting with the inspector "I" panels.
+    const titleHtml = isListing(label)
+        ? `<pre class="insp-listing">${escapeHtml(label)}</pre>`
+        : `<div class="stage3d-detail-title">${escapeHtml(dedupName(name, label))}</div>`;
     let html = `
-        <div class="stage3d-detail-title">${title}</div>
+        ${titleHtml}
         <div class="stage3d-detail-row"><strong>Shape:</strong> ${dims} &nbsp; <strong>Rank:</strong> ${rank} &nbsp; <strong>Elements:</strong> ${elements.toLocaleString()} &nbsp; <strong>Memory:</strong> ~${mem}</div>
         <div class="stage3d-detail-row"><strong>Step:</strong> ${ud.stepIdx !== undefined ? ud.stepIdx + 1 : '?'} of ${stepCount}</div>${vizHint}`;
     const vals = ud.values;
