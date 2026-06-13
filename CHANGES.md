@@ -12,8 +12,41 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-13
+
+- chore(pages): rebuild for :list command + indented 3D UDF source
+- feat(eval+web): :list <fn> command and indented UDF source in 3D view
+- chore(lock): sync mlpl-eval-core into the web workspace lockfile
+- chore(pages): rebuild for :ask MLPL reference
+- feat(ask): give the LLM a compact MLPL reference (syntax + builtin signatures)
+
+## 2026-06-12
+
+- chore(pages): rebuild for :ask no-fabricated-code prompt
+- fix(ask): forbid fabricated MLPL code in the :ask system prompt
+- chore(pages): rebuild for Workspace Introspection demo trim
+- fix(demos): Workspace Introspection no longer repeats itself
+- chore(pages): rebuild for :ask grounding + demo sparklines
+- fix(telemetry): live sparklines during a demo :ask (and any server-side demo line)
+- fix(ask): ground :ask in the active demo so it stops hallucinating (TTT vs Othello)
+- chore(pages): rebuild for verbatim :ask fix
+- fix(connect): :ask sends its prompt verbatim (a # is part of the question)
+- chore(pages): rebuild for connect-mode demo :status/:connect fix
+- fix(connect): demo lines route :status and strip the # comment for :connect/:ask
+- chore(lock): sync mlpl-monitor-macos into the web workspace lockfile
+- chore(pages): rebuild for connect-mode introspection demo + :connect/:models help
+- feat(connect): introspection demo + help show connect-mode commands; fix bare :connect
+- feat(inspect): :introspect adds :fns + a connect-mode section; clarify :models
+- feat(monitor): macOS telemetry backend (CPU/RAM/GPU sparklines, no sudo)
+- fix(scripts): serial.sh falls back to a mkdir lock when flock is absent
+- chore(pages): rebuild for connect-mode :ask/:connect UI changes
+- feat(connect): flag embedding models + show current :ask model in REPL UI
+- docs: add running-with-apple-silicon.md (the connect-server runbook)
+- fix(ask): default :ask model skips embedding and toy models before median
+
 ## 2026-06-11
 
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(plan): record CUDA post-S4 re-verify; mark 4-stage split complete
 - docs(changes): refresh CHANGES.md to HEAD
 - test(cuda-eval): guard cuda demo tests against silent CPU fallback (S4 trap)
