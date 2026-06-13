@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-13
 
+- fix(viz3d): render UDF/source listings formatted in 3D inspector panels
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for :list command + indented 3D UDF source
 - feat(eval+web): :list <fn> command and indented UDF source in 3D view
 - chore(lock): sync mlpl-eval-core into the web workspace lockfile
