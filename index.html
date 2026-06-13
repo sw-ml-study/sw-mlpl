@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-cbc48b2d8ee120bf.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-cbc48b2d8ee120bf_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-73749fa9479c9054.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-73749fa9479c9054_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -31,7 +31,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
     }
     </script>
-    <script type="module" src="js/stage3d.js?v=993a90aa4740"></script>
+    <script type="module" src="js/stage3d.js?v=8558760912a9"></script>
     <style>
         /* Catppuccin Mocha */
         :root {
@@ -583,6 +583,24 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             max-height: 200px;
             overflow: auto;
             white-space: pre;
+        }
+        /* A formatted source listing (a user-function `def`, or any
+           multi-line block from the source indenter). Like .insp-values
+           but it is the headline, so it uses the body text color and
+           wraps long lines while preserving indentation. Unscoped so the
+           inspector ("I") panel and the hover detail panel share it. */
+        .insp-listing {
+            background: var(--mantle);
+            border: 1px solid var(--surface0);
+            border-radius: 4px;
+            padding: 10px 12px;
+            margin: 0 0 12px;
+            font-family: var(--mono);
+            font-size: 13px;
+            line-height: 1.45;
+            color: var(--text);
+            white-space: pre-wrap;
+            overflow-x: auto;
         }
         .stage3d-inspector-body .insp-hint {
             color: var(--overlay1);
@@ -1881,7 +1899,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-cbc48b2d8ee120bf.js" crossorigin="anonymous" integrity="sha384-HU+T+7XRaT01ms/HU5QD34qFWHuU6nzL4bhRTYhRo+tk/Dn/lN3bGM5f6mhDJqip"><link rel="preload" href="/sw-mlpl/mlpl-web-cbc48b2d8ee120bf_bg.wasm" crossorigin="anonymous" integrity="sha384-MgkA3NcrNk4Gkh2z/2KiiFk+qTm83Wl0yk8ew33sKbDdtCYPfmPNf23QgkzpF68z" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-73749fa9479c9054.js" crossorigin="anonymous" integrity="sha384-HU+T+7XRaT01ms/HU5QD34qFWHuU6nzL4bhRTYhRo+tk/Dn/lN3bGM5f6mhDJqip"><link rel="preload" href="/sw-mlpl/mlpl-web-73749fa9479c9054_bg.wasm" crossorigin="anonymous" integrity="sha384-1qCtFfb7sYyDLbJdFN+tRw1MJUZFMAvvPf9jrOVSFaWS0gBqNJNgTjzMnY1etbk8" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
