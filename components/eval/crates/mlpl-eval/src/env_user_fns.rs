@@ -63,4 +63,19 @@ impl Environment {
         }
         Some(out)
     }
+
+    /// The full `def` source for `:list <fn>`, re-indented so control flow
+    /// (`if`/`else`/`while`/`for`) reads instead of running off one flat
+    /// line. `None` if no such user function is defined.
+    pub fn list_fn(&self, name: &str) -> Option<String> {
+        let f = self.user_fns.get(name)?;
+        let body: Vec<String> = f.body.iter().map(ToString::to_string).collect();
+        let flat = format!(
+            "def {}({}) {{ {} }}",
+            name,
+            f.params.join(", "),
+            body.join("; ")
+        );
+        Some(mlpl_eval_core::indent_source(&flat))
+    }
 }

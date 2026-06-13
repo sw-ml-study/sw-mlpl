@@ -110,6 +110,7 @@ mod inspect;
 mod inspect_collections;
 mod inspect_describe;
 mod inspect_introspect;
+mod inspect_list;
 mod inspect_render;
 mod interrupt;
 mod llm_dispatch;

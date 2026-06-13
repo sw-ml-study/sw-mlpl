@@ -211,7 +211,7 @@ fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
             );
             mlpl_web_viz3d::events::emit(&mlpl_web_viz3d::events::Stage3dEvent {
                 step_idx: 0,
-                label: line.to_string(),
+                label: mlpl_eval_core::indent_source(line),
                 output: info,
             });
         }

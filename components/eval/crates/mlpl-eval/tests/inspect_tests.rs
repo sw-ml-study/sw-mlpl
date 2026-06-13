@@ -216,3 +216,34 @@ fn introspect_bundles_every_no_arg_section() {
     let vars_pos = out.find("## :vars").unwrap();
     assert!(v_pos < vars_pos, "section order broken");
 }
+
+#[test]
+fn list_formats_a_user_function_with_indentation() {
+    let mut env = Environment::new();
+    eval("def u:sign(x) { if gt(x, 0) { 1 } else { 0 } }", &mut env);
+    let out = inspect(&mut env, ":list u:sign").unwrap();
+    assert!(out.contains("def u:sign(x) {"), "header: {out}");
+    // Body indented one level; nested then/else bodies indented deeper;
+    // `else` rides the closing brace's line.
+    assert!(out.contains("\n    if gt(x, 0) {"), "if at depth 1: {out}");
+    assert!(out.contains("\n        1"), "then-body at depth 2: {out}");
+    assert!(out.contains("} else {"), "else on the brace line: {out}");
+    assert!(
+        out.trim_end().ends_with("\n}"),
+        "closing brace on its own line: {out}"
+    );
+}
+
+#[test]
+fn list_unknown_function_is_a_friendly_message() {
+    let mut env = Environment::new();
+    let out = inspect(&mut env, ":list u:nope").unwrap();
+    assert!(out.contains("no user function named"), "out: {out}");
+}
+
+#[test]
+fn list_without_a_name_prints_usage() {
+    let mut env = Environment::new();
+    let out = inspect(&mut env, ":list").unwrap();
+    assert!(out.contains("usage: :list"), "out: {out}");
+}

@@ -32,10 +32,7 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
     let mut parts = topic.split_whitespace();
     let head = parts.next()?;
     let arg = parts.next();
-    if let Some(out) = topic_output(env, head) {
-        return Some(out);
-    }
-    match head {
+    topic_output(env, head).or_else(|| match head {
         "version" => Some(crate::inspect_render::version_string()),
         "experiments" => Some(crate::experiment::format_registry(env)),
         "tags" => Some(crate::tag_render::format_tags(env)),
@@ -43,10 +40,11 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
             Some(name) => crate::inspect_describe::format_describe(env, name),
             None => "usage: :describe <name>".into(),
         }),
+        "list" => Some(crate::inspect_list::list_or_usage(env, arg)),
         "untag" => Some(handle_untag(env, arg)),
         "help" => arg.and_then(|t| help_topic(t, env)),
         _ => None,
-    }
+    })
 }
 
 /// Topic names shared between `:topic` and `:help topic` so both
