@@ -93,8 +93,8 @@ pub const MATRIX_OPS: Demo = Demo {
 pub const WORKSPACE_INTROSPECTION: Demo = Demo {
     category: "Basics",
     name: "Workspace Introspection",
-    intro: "Tour of the REPL's introspection commands: :version, :wsid (workspace ID summary), :vars, :describe, :models, :fns, :experiments. Also shows how the axis-label annotation syntax (M : [batch, feat] = ...) shows up in :vars and :describe output. When connected to an mlpl-serve (?connect=<url>) you also get the connect-mode introspectors -- :status (live CPU/GPU/RAM), :connect list (the server's Ollama LLMs for :ask), and :ask itself. NOTE the difference: :models lists the MLPL model objects YOU built here; :connect list lists the server's LLMs for :ask -- they are not the same. The final line, :introspect, bundles every no-arg inspector (and names the connect-mode ones) into a single markdown-headered dump.",
-    takeaway: "You can always ask the REPL what's in your session. :describe on a variable prints shape + labels + a preview; on a model, the layer tree; on a builtin, the signature and one-line doc. :experiments shows every tracked run. Don't confuse :models (your workspace's MLPL models) with :connect list (the connected server's Ollama LLMs for :ask). :introspect (saga 33 step 037d) prints the lot in one shot under `## :<topic>` headers, with a trailing connect-mode section -- handy when you want the full snapshot in one scroll.",
+    intro: "Tour of the REPL's introspection commands: :version, :wsid (workspace ID summary), :vars, :describe, :models, :fns, :experiments. Also shows how the axis-label annotation syntax (M : [batch, feat] = ...) shows up in :vars and :describe output. When connected to an mlpl-serve (?connect=<url>) you also get the connect-mode introspectors -- :status (live CPU/GPU/RAM), :connect list (the server's Ollama LLMs for :ask), and :ask itself. NOTE the difference: :models lists the MLPL model objects YOU built here; :connect list lists the server's LLMs for :ask -- they are not the same. To avoid repeating all of this, the demo does NOT run :introspect -- that one command bundles every no-arg inspector (and names the connect-mode ones) into one markdown-headered dump; run it yourself to see the whole snapshot in a single scroll.",
+    takeaway: "You can always ask the REPL what's in your session. :describe on a variable prints shape + labels + a preview; on a model, the layer tree; on a builtin, the signature and one-line doc. :experiments shows every tracked run. Don't confuse :models (your workspace's MLPL models) with :connect list (the connected server's Ollama LLMs for :ask). When you want the lot in one shot rather than command-by-command, run :introspect (saga 33 step 037d) -- it prints every no-arg inspector under `## :<topic>` headers with a trailing connect-mode section.",
     lines: &[
         ":version                                                            # build banner: version + arch + commit + timestamp",
         ":wsid                                                                # workspace summary (var/param/model counts)",
@@ -118,7 +118,6 @@ pub const WORKSPACE_INTROSPECTION: Demo = Demo {
         ":status                                                              # connect mode: backend devices + live CPU/GPU/RAM (needs ?connect=)",
         ":connect list                                                        # connect mode: the server's Ollama LLMs for :ask -- NOT the :models above",
         ":ask \"what have I built in this workspace so far?\"",
-        ":introspect                                                          # bundle every no-arg inspector + name the connect-mode ones (saga 33 step 037d)",
     ],
 };
 
