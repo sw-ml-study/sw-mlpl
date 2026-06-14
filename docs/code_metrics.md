@@ -700,6 +700,33 @@ This is a precision tool, not a loophole. Reaching for `.inc` to hide an
 over-budget *function* (one with logic) is a violation; the gate is telling
 you to decompose, and you must.
 
+**Never move these out, even though they are "lists":**
+
+- **`use` statements.** A long `use` list is a *coupling* signal -- this file
+  depends on many things. When it exceeds the budget it is a bad smell, and
+  hiding it in a `.inc` adds obfuscation *on top of* the smell, which is
+  strictly worse. The fix is to reduce the coupling (fewer dependencies,
+  narrower interface) or split the file so each piece depends on less.
+- **`mod` declarations.** Same: too many modules in a crate is a real signal
+  to detect and fix by splitting the crate into themed sub-components, not to
+  hide. `lib.rs`/`mod.rs` stay visible facades (section 13).
+
+The discriminator is not "is it a list?" but **"does this list's length tell a
+reader something they need to know about how this file relates to the rest of
+the codebase?"** If yes (its `use`/`mod` coupling surface), it stays visible
+and you fix the underlying coupling. If no (a flat `extern`/data/const list
+the reader merely scans), `.inc` is appropriate.
+
+**`extern` / FFI blocks are the borderline case -- group with care.** A small,
+cohesive FFI list bound to a *single* external boundary (e.g. the handful of
+JS functions one component calls) is a scan-only list and may live in a
+`.inc`. But if the FFI surface is large or growing, that itself is a coupling
+smell: prefer splitting it across more modules (or crates) with fewer
+declarations each, so a reader can fit each boundary into short-term memory,
+over hiding one fat list. The goal is always that someone can easily reason
+about a source file and its relationships to other files. Smart grouping
+matters more than the raw count.
+
 ---
 
 ### 16. Final Agent Directive
@@ -1460,6 +1487,33 @@ Rules for this exception:
 This is a precision tool, not a loophole. Reaching for `.inc` to hide an
 over-budget *function* (one with logic) is a violation; the gate is telling
 you to decompose, and you must.
+
+**Never move these out, even though they are "lists":**
+
+- **`use` statements.** A long `use` list is a *coupling* signal -- this file
+  depends on many things. When it exceeds the budget it is a bad smell, and
+  hiding it in a `.inc` adds obfuscation *on top of* the smell, which is
+  strictly worse. The fix is to reduce the coupling (fewer dependencies,
+  narrower interface) or split the file so each piece depends on less.
+- **`mod` declarations.** Same: too many modules in a crate is a real signal
+  to detect and fix by splitting the crate into themed sub-components, not to
+  hide. `lib.rs`/`mod.rs` stay visible facades (section 13).
+
+The discriminator is not "is it a list?" but **"does this list's length tell a
+reader something they need to know about how this file relates to the rest of
+the codebase?"** If yes (its `use`/`mod` coupling surface), it stays visible
+and you fix the underlying coupling. If no (a flat `extern`/data/const list
+the reader merely scans), `.inc` is appropriate.
+
+**`extern` / FFI blocks are the borderline case -- group with care.** A small,
+cohesive FFI list bound to a *single* external boundary (e.g. the handful of
+JS functions one component calls) is a scan-only list and may live in a
+`.inc`. But if the FFI surface is large or growing, that itself is a coupling
+smell: prefer splitting it across more modules (or crates) with fewer
+declarations each, so a reader can fit each boundary into short-term memory,
+over hiding one fat list. The goal is always that someone can easily reason
+about a source file and its relationships to other files. Smart grouping
+matters more than the raw count.
 
 ---
 
