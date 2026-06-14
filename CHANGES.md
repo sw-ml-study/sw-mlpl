@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-14
 
+- feat(paths): beginner spine + generative-families learning paths (plan item 4)
+- docs(metrics): never .inc use/mod lists -- coupling signals stay visible
+- docs(changes): refresh CHANGES.md to HEAD
 - refactor(viz3d)+docs: move FFI extern list to a .inc include (metric exception)
 - docs(changes): refresh CHANGES.md to HEAD
 - feat(viz+demos): loss_landscape + "How Gradient Descent Works" demo
