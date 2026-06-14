@@ -143,7 +143,12 @@ Primary files:
       "Watch a Model Learn (overfitting)" demo (train vs validation on shared
       axes, rendered at the halfway mark and the end). A true in-place
       live-loss panel over the SSE stream remains a connect-path follow-up.
-- [ ] 3. Gradient-descent / backprop visualization
+- [x] 3. Gradient-descent / backprop visualization -- `loss_landscape`
+      builtin (a 2-weight loss surface heatmap with the optimizer trajectory
+      walked across it) + the "How Gradient Descent Works" demo, which fits
+      y = w*x + b, draws the whole loss surface, walks gradient descent
+      downhill on it, and shows the loss falling and the gradient magnitude
+      shrinking as the path flattens.
 - [ ] 4. Beginner spine path + generative-families lesson
 
 Each item ships as its own commit (or small commit series), holds the

@@ -125,6 +125,7 @@ pub(crate) fn eval_analysis_helper(
             | "scatter_labeled"
             | "loss_curve"
             | "train_val_curve"
+            | "loss_landscape"
             | "confusion_matrix"
             | "boundary_2d"
     ) {
@@ -135,58 +136,8 @@ pub(crate) fn eval_analysis_helper(
         .map(|a| eval_expr(a, env, trace).and_then(Value::into_array))
         .collect();
     Some(match evaluated {
-        Ok(arrs) => call_analysis(name, &arrs),
+        Ok(arrs) => crate::analysis_dispatch::call_analysis(name, &arrs),
         Err(e) => Err(e),
-    })
-}
-
-fn call_analysis(name: &str, a: &[DenseArray]) -> Result<String, EvalError> {
-    let bad_arity = |expected: usize| EvalError::BadArity {
-        func: name.into(),
-        expected,
-        got: a.len(),
-    };
-    Ok(match name {
-        "hist" => {
-            if a.len() != 2 {
-                return Err(bad_arity(2));
-            }
-            if a[1].rank() != 0 {
-                return Err(EvalError::ExpectedString);
-            }
-            mlpl_viz::analysis_hist(&a[0], a[1].data()[0] as usize)?
-        }
-        "scatter_labeled" => {
-            if a.len() != 2 {
-                return Err(bad_arity(2));
-            }
-            mlpl_viz::analysis_scatter_labeled(&a[0], &a[1])?
-        }
-        "loss_curve" => {
-            if a.len() != 1 {
-                return Err(bad_arity(1));
-            }
-            mlpl_viz::analysis_loss_curve(&a[0])?
-        }
-        "train_val_curve" => {
-            if a.len() != 2 {
-                return Err(bad_arity(2));
-            }
-            mlpl_viz::analysis_train_val_curve(&a[0], &a[1])?
-        }
-        "confusion_matrix" => {
-            if a.len() != 2 {
-                return Err(bad_arity(2));
-            }
-            mlpl_viz::analysis_confusion_matrix(&a[0], &a[1])?
-        }
-        "boundary_2d" => {
-            if a.len() != 4 {
-                return Err(bad_arity(4));
-            }
-            mlpl_viz::analysis_boundary_2d(&a[0], &a[1], &a[2], &a[3])?
-        }
-        _ => unreachable!(),
     })
 }
 

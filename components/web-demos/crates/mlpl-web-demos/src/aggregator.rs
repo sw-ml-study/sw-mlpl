@@ -32,6 +32,7 @@ pub const DEMOS: &[Demo] = &[
     cnn::SIMPLE_CNN,
     models::DECISION_BOUNDARY_LOGICAL_GATES,
     models::DECISION_BOUNDARY_XOR,
+    models::HOW_GRADIENT_DESCENT_WORKS,
     models::KMEANS,
     models::LOGISTIC_REGRESSION,
     basics::LOSS_CURVE,

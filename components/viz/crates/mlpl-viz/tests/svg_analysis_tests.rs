@@ -1,7 +1,7 @@
 use mlpl_array::{DenseArray, Shape};
 use mlpl_viz::{
     analysis_boundary_2d, analysis_confusion_matrix, analysis_hist, analysis_loss_curve,
-    analysis_scatter_labeled, analysis_train_val_curve,
+    analysis_loss_landscape, analysis_scatter_labeled, analysis_train_val_curve,
 };
 
 fn vector(data: Vec<f64>) -> DenseArray {
@@ -118,6 +118,44 @@ fn train_val_curve_rejects_non_vector() {
     let v = vector(vec![1.0, 2.0]);
     assert!(analysis_train_val_curve(&m, &v).is_err());
     assert!(analysis_train_val_curve(&v, &m).is_err());
+}
+
+#[test]
+fn loss_landscape_draws_surface_and_trajectory() {
+    let surface = vector((0..16).map(|i| i as f64).collect()); // 4x4 bowl-ish
+    let dims = vector(vec![4.0, 4.0]);
+    let path = matrix(4, 2, vec![0.1, 0.9, 0.3, 0.6, 0.5, 0.3, 0.7, 0.1]);
+    let svg = analysis_loss_landscape(&surface, &dims, &path).unwrap();
+    assert!(svg.starts_with("<svg"), "svg: {svg}");
+    // 16 surface cells, each an rgb() fill (the background rect is a hex fill).
+    assert_eq!(
+        svg.matches("fill=\"rgb(").count(),
+        16,
+        "16 surface cells: {svg}"
+    );
+    assert_eq!(svg.matches("<polyline").count(), 1, "one trajectory: {svg}");
+    // Start (green) and end (red) markers.
+    assert_eq!(
+        svg.matches("<circle").count(),
+        2,
+        "start+end markers: {svg}"
+    );
+    assert!(
+        svg.contains("#a6e3a1") && svg.contains("#f38ba8"),
+        "marker colors: {svg}"
+    );
+}
+
+#[test]
+fn loss_landscape_rejects_bad_shapes() {
+    let surface = vector((0..16).map(|i| i as f64).collect());
+    let dims = vector(vec![4.0, 4.0]);
+    // path must be [N, 2], not a vector.
+    assert!(analysis_loss_landscape(&surface, &dims, &vector(vec![0.1, 0.2])).is_err());
+    // surface length must equal rows*cols.
+    let bad_dims = vector(vec![3.0, 4.0]);
+    let path = matrix(1, 2, vec![0.5, 0.5]);
+    assert!(analysis_loss_landscape(&surface, &bad_dims, &path).is_err());
 }
 
 #[test]
