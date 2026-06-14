@@ -149,7 +149,17 @@ Primary files:
       y = w*x + b, draws the whole loss surface, walks gradient descent
       downhill on it, and shows the loss falling and the gradient magnitude
       shrinking as the path flattens.
-- [ ] 4. Beginner spine path + generative-families lesson
+- [x] 4. Beginner spine path + generative-families lesson -- two new learning
+      paths in `mlpl-web-paths-data`: "How does ML work? (start here)"
+      sequences Hello Numbers -> Basics -> How Gradient Descent Works -> Watch
+      a Model Learn -> XOR-MLP -> Tiny LM Generate with glossary anchors; "How
+      models generate" contrasts the autoencoder / GAN / diffusion families on
+      toy 2D data. Both registered in the paths aggregator. (A path-reference
+      resolution test is a worthwhile follow-up -- bad refs currently fall
+      back silently in the UI.)
+
+All four plan items are done. Follow-ups: a small warning-paydown pass
+(current 332 vs 331 baseline) and a PATHS reference-resolution test.
 
 Each item ships as its own commit (or small commit series), holds the
 sw-checklist FAIL/WARN counts flat for our code (`sw-checklist components/`),
