@@ -308,3 +308,42 @@ pub(super) const PATH_TRAINING_PARADIGMS: LearningPath = LearningPath {
         },
     ],
 };
+
+pub(super) const PATH_HOW_MODELS_GENERATE: LearningPath = LearningPath {
+    title: "How models generate",
+    blurb: "Most demos so far are discriminative -- given an input, predict a label. Generative models do the opposite: they learn the shape of the data well enough to produce NEW samples. There is more than one way to do that. This path walks three families side by side on toy 2D data, so you can see how each one actually makes a sample.",
+    steps: &[
+        Step::Note {
+            title: "Discriminative vs generative",
+            body: "A discriminative model draws a boundary between classes (cat vs dog). A generative model learns the distribution itself, so it can sample fresh points that look like the training data. The three families below reach that goal by very different routes: compress-and-rebuild, a forger-vs-detective game, and gradually removing noise.",
+        },
+        Step::Demo {
+            name: "Autoencoder (simple)",
+            why: "Family 1 -- compression. Squeeze the input through a narrow bottleneck and rebuild it. The model is forced to learn the essential structure; the bottleneck is a learned representation you can sample from.",
+        },
+        Step::Glossary {
+            term: "Autoencoder",
+            why: "Encoder shrinks to a latent code; decoder expands back. Reconstruction error is the whole training signal.",
+        },
+        Step::Demo {
+            name: "GAN (2D circle)",
+            why: "Family 2 -- adversarial. A generator tries to fake points on a circle while a discriminator learns to spot fakes. They improve by competing; watch for mode collapse, the classic GAN failure.",
+        },
+        Step::Glossary {
+            term: "GAN (Generative Adversarial Network)",
+            why: "Two networks, opposed objectives. The generator never sees real data directly -- only the discriminator's verdict.",
+        },
+        Step::Demo {
+            name: "Diffusion (2D points)",
+            why: "Family 3 -- denoising. Slowly add noise to data until it is pure static, then train a model to undo one step of that. Generation runs the noising backwards. This is the engine behind modern image models.",
+        },
+        Step::Glossary {
+            term: "Diffusion Models",
+            why: "Forward process destroys structure with noise; the learned reverse process rebuilds it from random noise into a fresh sample.",
+        },
+        Step::Note {
+            title: "Same goal, different trade-offs",
+            body: "Autoencoders are simple and stable but their samples can be blurry. GANs produce sharp samples but train unstably and can collapse. Diffusion models are stable AND high quality but slow to sample (many denoising steps). Every modern generative system is a refinement of one of these three ideas.",
+        },
+    ],
+};

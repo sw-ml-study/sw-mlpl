@@ -294,3 +294,54 @@ pub(super) const PATH_ZERO_TO_LLM: LearningPath = LearningPath {
         },
     ],
 };
+
+pub(super) const PATH_HOW_DOES_ML_WORK__START_HERE: LearningPath = LearningPath {
+    title: "How does ML work? (start here)",
+    blurb: "The single best place to begin. No prior ML needed -- if you can read a little arithmetic, you can follow this. We build the one idea under everything (adjust some numbers to make predictions less wrong), watch it happen on screen, see how it goes wrong, and finish at a model that generates text. Ten short steps; every one shows a picture or a number.",
+    steps: &[
+        Step::Note {
+            title: "What you are about to learn",
+            body: "Machine learning sounds mysterious, but the core loop is simple: a model is just a bag of numbers (its 'weights'); you measure how wrong its predictions are (the 'loss'); and you nudge the numbers to make the loss smaller. Repeat a few thousand times and the numbers become a model that recognizes images or writes text. This path shows that loop directly -- you will literally watch a model roll downhill toward a good answer.",
+        },
+        Step::Lesson {
+            title: "Hello Numbers",
+            why: "Start at zero: scalars, operators, the REPL. Everything in ML is arithmetic on arrays of numbers, so we begin with the numbers.",
+        },
+        Step::Demo {
+            name: "Basics",
+            why: "The five-minute tour -- arrays, elementwise math, broadcasting. This is the raw material every model is built from.",
+        },
+        Step::Demo {
+            name: "How Gradient Descent Works",
+            why: "The heart of the whole field, made visible. Fit a line by drawing the entire loss surface and watching the optimizer walk downhill into the valley. After this, 'training' is no longer a black box.",
+        },
+        Step::Glossary {
+            term: "Gradient descent",
+            why: "The name for that downhill walk. The gradient is the slope; you step against it to reduce the loss.",
+        },
+        Step::Glossary {
+            term: "Loss Landscape",
+            why: "The surface you just watched. Training is search for its lowest point.",
+        },
+        Step::Demo {
+            name: "Watch a Model Learn (overfitting)",
+            why: "Now a real (over-powered) network on noisy data. Training and validation loss are plotted together so you see the model start to memorize noise -- the most important failure mode in ML.",
+        },
+        Step::Glossary {
+            term: "Overfitting / Underfitting",
+            why: "The gap you saw between the green and orange curves. Memorizing the training set is not the same as learning.",
+        },
+        Step::Demo {
+            name: "Decision Boundary: XOR (with MLP)",
+            why: "Why we stack layers: a single linear model cannot separate XOR, but one hidden layer + a nonlinearity bends the boundary until it can. The leap from 'line' to 'neural network'.",
+        },
+        Step::Demo {
+            name: "Tiny LM Generate",
+            why: "The payoff: the same downhill loop, scaled up to a 1-layer transformer that learns a tiny language and generates text token by token. From 'adjust two numbers' to 'write sentences' -- same idea throughout.",
+        },
+        Step::Note {
+            title: "Where to go next",
+            body: "You now have the whole loop end to end. To go deeper: 'Zero to LLM' rebuilds this story with more rigor; 'Build a transformer from primitives' opens up the attention machinery inside Tiny LM; and 'How models generate' (below) contrasts the different ways a model can produce new data.",
+        },
+    ],
+};
