@@ -6,6 +6,7 @@
 //! the 42-module mlpl-eval. This file re-exports them so
 //! downstream `use mlpl_eval::ModelSpec` etc. is unchanged.
 
+mod analysis_dispatch;
 mod auto_tag;
 mod bpe;
 mod device;

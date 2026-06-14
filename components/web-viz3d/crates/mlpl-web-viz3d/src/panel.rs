@@ -1,22 +1,6 @@
 use wasm_bindgen::prelude::*;
 use yew::prelude::*;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = window)]
-    fn __stage3d_init(canvas: &web_sys::HtmlCanvasElement);
-    #[wasm_bindgen(js_namespace = window)]
-    fn __stage3d_destroy();
-    #[wasm_bindgen(js_namespace = window)]
-    fn __stage3d_prev();
-    #[wasm_bindgen(js_namespace = window)]
-    fn __stage3d_next();
-    #[wasm_bindgen(js_namespace = window)]
-    fn __stage3d_home();
-    #[wasm_bindgen(js_namespace = window)]
-    fn __stage3d_end();
-}
-
 #[function_component(Stage3dPanel)]
 pub fn stage3d_panel() -> Html {
     let node = use_node_ref();
@@ -58,4 +42,23 @@ pub fn stage3d_panel() -> Html {
             </div>
         </>
     }
+}
+
+// JS bridge to the THREE.js stage in stage3d.js. These are extern
+// declarations (no Rust body); kept after the component so a function-LOC
+// counter does not span the bodyless `fn name();` decls into the component.
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_init(canvas: &web_sys::HtmlCanvasElement);
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_destroy();
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_prev();
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_next();
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_home();
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_end();
 }

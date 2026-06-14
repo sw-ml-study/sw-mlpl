@@ -529,6 +529,7 @@ one call. Each returns an SVG string just like `svg()`.
 | `scatter_labeled(points, labels)` | 2 | Nx2 points colored by a length-N cluster-id vector |
 | `loss_curve(losses)` | 1 | Vector of losses rendered as a line plot with axis labels |
 | `train_val_curve(train, val)` | 2 | Two loss vectors (training green, validation peach) on shared axes; the gap between them is overfitting |
+| `loss_landscape(surface, dims, path)` | 3 | A `rows*cols` loss surface (dark = low loss) over `[rows, cols]` dims, overlaid with an optimizer trajectory `[N, 2]` of points normalized to `[0, 1]`; green dot = start, red = end |
 | `confusion_matrix(predicted, actual)` | 2 | KxK heatmap of class-id predictions vs actual labels with cell counts overlaid |
 | `boundary_2d(grid_outputs, dims, points, labels)` | 4 | Render a 2D classifier surface from a length-(rows*cols) vector and `[rows, cols]` dims, with separately-supplied training points and labels |
 

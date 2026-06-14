@@ -359,6 +359,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "train vs validation loss (overfitting gap)",
             ),
             (
+                "loss_landscape",
+                "loss_landscape(surface, dims, path)",
+                "2-weight loss surface + optimizer trajectory",
+            ),
+            (
                 "confusion_matrix",
                 "confusion_matrix(pred, truth)",
                 "KxK heatmap",

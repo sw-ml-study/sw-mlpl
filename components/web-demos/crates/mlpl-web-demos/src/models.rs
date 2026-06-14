@@ -213,6 +213,37 @@ pub const MOONS_MLP: Demo = Demo {
     ],
 };
 
+pub const HOW_GRADIENT_DESCENT_WORKS: Demo = Demo {
+    category: "Basics",
+    name: "How Gradient Descent Works",
+    intro: "The one idea under all of ML, made visible. We fit a straight line y = w*x + b to noisy data by minimizing the mean-squared error -- a function of just two numbers, the slope w and the bias b. Because there are only two, we can draw the entire loss surface as a heatmap (dark = low loss = good fit) and then watch gradient descent walk across it with [[loss_landscape]]. The white path starts at the green dot (a bad guess) and steps downhill to the red dot in the dark basin. Two more charts show the loss falling and the gradient magnitude shrinking as the path flattens out.",
+    takeaway: "The gradient is just the slope of the loss surface at your current point -- it points uphill, so we step the opposite way (w - lr*dw). On the heatmap that is literally a ball rolling downhill into the valley. Two things to notice: the steps are BIG where the surface is steep (far from the minimum) and get SMALL as it flattens near the bottom -- that is why the gradient-magnitude chart decays toward zero and the loss curve levels off. The final w and b land near the true 2 and 1. Every optimizer in the other demos (Adam, momentum) is a smarter version of this same downhill walk, just in thousands of dimensions you cannot draw.",
+    lines: &[
+        "x = linspace(-2, 2, 11)                       # 11 input points",
+        "y = 2 * x + 1 + randn(5, [11]) * 0.3          # noisy line: true slope 2, bias 1",
+        "G = grid([-1, 5, -3, 3], 28)                  # 28x28 grid of (w, b) guesses -> [784, 2]",
+        "wcol = reshape(take(transpose(G), 0, 0), [784, 1])  # every grid w",
+        "bcol = reshape(take(transpose(G), 0, 1), [784, 1])  # every grid b",
+        "preds = matmul(wcol, reshape(x, [1, 11])) + matmul(bcol, ones([1, 11]))  # [784, 11] predictions",
+        "resid = preds - matmul(ones([784, 1]), reshape(y, [1, 11]))             # errors at every grid point",
+        "surf = reduce_add(resid * resid, 1) / 11      # mean-squared error per (w, b) -> the loss surface",
+        "w = 4.5                                       # starting guess (deliberately bad)",
+        "b = -2.5",
+        "losses = []                                   # loss recorded each step",
+        "gmags = []                                    # gradient magnitude each step",
+        "path = [[w, b]]                               # trajectory, primed with the start point",
+        "repeat 40 { e = (w * x + b) - y; dw = mean(e * x) * 2; db = mean(e) * 2; losses = concat(losses, [mean(e * e)]); gmags = concat(gmags, [sqrt(dw * dw + db * db)]); w = w - 0.08 * dw; b = b - 0.08 * db; path = concat(path, [[w, b]], 0) }  # 40 downhill steps",
+        "pathn = (path - matmul(ones([41, 1]), [[-1, -3]])) / matmul(ones([41, 1]), [[6, 6]])  # normalize to [0,1] over the grid bounds",
+        "loss_landscape(surf, [28, 28], pathn)         # the walk downhill on the loss surface",
+        "loss_curve(losses)                            # loss falling step by step",
+        "svg(gmags, \"line\")                            # gradient magnitude shrinking toward zero",
+        "wfit = w                                      # learned slope (near 2)",
+        "wfit",
+        "bfit = b                                      # learned bias (near 1)",
+        "bfit",
+    ],
+};
+
 pub const WATCH_MODEL_LEARN: Demo = Demo {
     category: "Classification",
     name: "Watch a Model Learn (overfitting)",
