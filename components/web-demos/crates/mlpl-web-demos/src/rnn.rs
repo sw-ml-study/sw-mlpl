@@ -1,7 +1,7 @@
 use mlpl_web_demos_types::Demo;
 
 pub const RNN_SEQUENCE: Demo = Demo {
-    category: "RNN",
+    category: "Sequence Models",
     name: "RNN (sequence)",
     intro: "A simple recurrent neural network unrolled over a 5-step sequence. \
             At each step, rnn_cell reads one input and updates the hidden state. \
@@ -26,7 +26,7 @@ pub const RNN_SEQUENCE: Demo = Demo {
 };
 
 pub const LSTM_SEQUENCE: Demo = Demo {
-    category: "RNN",
+    category: "Sequence Models",
     name: "LSTM (sequence memory)",
     intro: "An LSTM cell unrolled over a 10-step sequence -- twice as long as \
             the simple RNN demo. LSTM adds a separate 'cell state' that carries \
