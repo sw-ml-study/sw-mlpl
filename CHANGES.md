@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-14
+
+- feat(viz+demos): loss_landscape + "How Gradient Descent Works" demo
+
 ## 2026-06-13
 
+- docs(testing): testing cadence -- when to run the slow interpreter/demo tests
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for train_val_curve + Watch a Model Learn demo
 - feat(viz+demos): train_val_curve + "Watch a Model Learn" overfitting demo
 - docs(plan): beginner ML comprehension roadmap -- make the process visible
