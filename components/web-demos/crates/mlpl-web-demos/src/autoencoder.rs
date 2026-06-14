@@ -1,7 +1,7 @@
 use mlpl_web_demos_types::Demo;
 
 pub const AUTOENCODER: Demo = Demo {
-    category: "Autoencoder",
+    category: "Generative Models",
     name: "Autoencoder (simple)",
     intro: "An autoencoder compresses input through a narrow bottleneck, then \
             reconstructs it. The encoder shrinks 8 dimensions to 3; the decoder \

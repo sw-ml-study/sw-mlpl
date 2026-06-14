@@ -1,7 +1,7 @@
 use mlpl_web_demos_types::Demo;
 
 pub const SIMPLE_CNN: Demo = Demo {
-    category: "CNN",
+    category: "Vision",
     name: "CNN (simple)",
     intro: "A convolutional neural network pipeline on a tiny 8x8 synthetic image. \
             Shows how conv2d shrinks the spatial dimensions while relu clips negatives \
