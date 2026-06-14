@@ -43,16 +43,15 @@ fn validate(a: &DenseArray, ps: usize) -> Result<P, ArrayError> {
     if ps == 0 || h % ps != 0 || w % ps != 0 {
         return Err(bad_shape(ps, h.min(w)));
     }
-    let (nh, nw) = (h / ps, w / ps);
     Ok(P {
         b,
         c,
         h,
         w,
         p: ps,
-        nh,
-        nw,
-        n_patches: nh * nw,
+        nh: h / ps,
+        nw: w / ps,
+        n_patches: (h / ps) * (w / ps),
         patch_len: ps * ps * c,
     })
 }
