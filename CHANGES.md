@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-14
 
+- test(paths)+chore: path-ref resolution test + warning paydown
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(paths): beginner spine + generative-families learning paths (plan item 4)
 - docs(metrics): never .inc use/mod lists -- coupling signals stay visible
 - docs(changes): refresh CHANGES.md to HEAD
