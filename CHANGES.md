@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-13
 
+- chore(pages): rebuild for train_val_curve + Watch a Model Learn demo
+- feat(viz+demos): train_val_curve + "Watch a Model Learn" overfitting demo
+- docs(plan): beginner ML comprehension roadmap -- make the process visible
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(viz3d): render UDF/source listings formatted in 3D inspector panels
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for :list command + indented 3D UDF source
