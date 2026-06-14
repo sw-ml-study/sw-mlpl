@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-14
 
+- refactor(demos): fuller category taxonomy -- merge scattered groups
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(demos): "Watch a Model Generalize" companion + rethink demo groups
 - docs(changes): refresh CHANGES.md to HEAD
 - test(paths)+chore: path-ref resolution test + warning paydown
