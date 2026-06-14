@@ -158,8 +158,11 @@ Primary files:
       resolution test is a worthwhile follow-up -- bad refs currently fall
       back silently in the UI.)
 
-All four plan items are done. Follow-ups: a small warning-paydown pass
-(current 332 vs 331 baseline) and a PATHS reference-resolution test.
+All four plan items are done. Follow-ups also landed: a PATHS
+reference-resolution test (`path_refs_resolve.rs` -- every `Step::Demo` /
+`Step::Glossary` must resolve, so a mistyped reference fails the build
+instead of silently falling back in the UI) and a warning-paydown pass.
+Final sw-checklist: 18 FAIL / 330 WARN (both below the 20 / 331 baseline).
 
 Each item ships as its own commit (or small commit series), holds the
 sw-checklist FAIL/WARN counts flat for our code (`sw-checklist components/`),

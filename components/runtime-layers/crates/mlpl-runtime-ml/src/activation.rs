@@ -34,12 +34,10 @@ fn validate_softmax_args(name: &str, args: &[DenseArray]) -> Result<SoftmaxParam
             reason: format!("axis {axis} out of range for rank {}", dims.len()),
         });
     }
-    let axis_size = dims[axis];
-    let axis_stride: usize = dims[axis + 1..].iter().product();
     Ok(SoftmaxParams {
+        axis_size: dims[axis],
+        axis_stride: dims[axis + 1..].iter().product(),
         dims,
-        axis_size,
-        axis_stride,
     })
 }
 
