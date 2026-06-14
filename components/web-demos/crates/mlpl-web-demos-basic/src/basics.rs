@@ -38,7 +38,7 @@ pub const BASICS: Demo = Demo {
 };
 
 pub const LOSS_CURVE: Demo = Demo {
-    category: "Basics",
+    category: "Training & Learning",
     name: "Loss Curve",
     intro: "Sweep a single weight across 25 values, compute the MSE loss against a linear target at each one, and plot the result. No training -- just the shape of the loss landscape.",
     takeaway: "A smooth parabolic curve with a clear minimum near the true weight. This is what gradient descent is walking down when you train; seeing the bowl makes the 'minimize the loss' story tangible.",

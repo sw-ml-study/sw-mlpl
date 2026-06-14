@@ -1,6 +1,8 @@
-//! Dimensionality reduction demos. Home for all dim-reduction
-//! demo entries -- groups PCA, UMAP, MDS, random projection,
-//! and the comparison demos in one file as the milestone
+//! Unsupervised-exploration demos: dimensionality reduction
+//! (PCA, UMAP, MDS, random projection + comparisons) plus
+//! K-Means clustering (category "Clustering"). Grouped here as
+//! the "learn structure from unlabeled data" family. This file
+//! was seeded for dim-reduction as the milestone
 //! progresses. Saga 33 step 030 seeded it with PCA_3D; step
 //! 032 added PCA_LOADINGS for the critical-dimensions viz;
 //! step 035 adds the UMAP_VS_PCA / UMAP_VS_TSNE / DIM_REDUCTION_ZOO
@@ -129,5 +131,47 @@ pub const DIM_REDUCTION_ZOO: Demo = Demo {
         "scatter_labeled(umap_proj, labels)",
         "scatter_labeled(mds_proj, labels)",
         "scatter_labeled(rp_proj, labels)",
+    ],
+};
+
+pub const KMEANS: Demo = Demo {
+    category: "Clustering",
+    name: "K-Means",
+    intro: "K-means clustering without loops over points: all distances computed in one matmul, cluster assignments via argmax, and centroid updates via a one-hot-matrix-times-data trick. Three blobs in 2D, three centroids, ten iterations.",
+    takeaway: "The final scatter shows points colored by their assigned cluster and the three centroids as a separate plot. Unsupervised -- no labels were passed in; the algorithm discovered the three groups from geometry alone.",
+    lines: &[
+        "D = blobs(7, 30, [[0, 0], [4, 4], [-4, 4]])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          # 90 points across three blobs (with labels)",
+        "X = matmul(D, [[1,0],[0,1],[0,0]])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  # drop the label column for unsupervised work",
+        "C = [[1, 1], [3, 3], [-3, 3]]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       # 3 initial centroids",
+        "repeat 10 { sqX = reshape(reduce_add(X*X, 1), [90, 1]); sqC = reshape(reduce_add(C*C, 1), [1, 3]); XC = matmul(X, transpose(C)); dists = matmul(sqX, ones([1, 3])) + matmul(ones([90, 1]), sqC) - 2*XC; clus = argmax(-1 * dists, 1); jj = reshape(range(3), [3, 1]); ll = reshape(clus, [1, 90]); diff = matmul(jj, ones([1, 90])) - matmul(ones([3, 1]), ll); A = eq(diff, 0); counts = reshape(reduce_add(A, 1), [3, 1]); sums = matmul(A, X); C = sums / matmul(counts, ones([1, 2])) }                                                                                                                                                                                              # 10 iterations of assign + update -- no per-point loop",
+        "sqX = reshape(reduce_add(X*X, 1), [90, 1])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          # per-point squared norms (final assignment)",
+        "sqC = reshape(reduce_add(C*C, 1), [1, 3])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          # per-centroid squared norms",
+        "XC = matmul(X, transpose(C))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       # cross-products",
+        "dists = matmul(sqX, ones([1, 3])) + matmul(ones([90, 1]), sqC) - 2*XC                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              # squared-distance matrix [90, 3]",
+        "clus = argmax(-1 * dists, 1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       # nearest centroid per point (argmax of negative distance)",
+        "scatter_labeled(X, clus)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            # points colored by cluster",
+        "svg(C, \"scatter\")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  # final centroid positions",
+    ],
+};
+
+pub const PCA: Demo = Demo {
+    category: "Dim Reduction",
+    name: "PCA",
+    intro: "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run [[power iteration]] to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance.",
+    takeaway: "The scatter is colored by which side of zero each point's projection lands on; the line shows the found principal axis. Power iteration converges in ~10 steps to a direction that's clearly the long axis of the data cloud.",
+    lines: &[
+        "Xraw = randn(1, [60, 2])                                          # 60 points of isotropic 2D noise",
+        "X = matmul(Xraw, [[1, 2], [0, 0.3]])                              # stretch into an anisotropic cloud",
+        "cm = reduce_add(X, 0) / 60                                        # column means -- the centroid",
+        "Xc = X - matmul(ones([60, 1]), reshape(cm, [1, 2]))               # center the data",
+        "Cov = matmul(transpose(Xc), Xc) / 60                              # 2x2 covariance matrix",
+        "v = [1, 0]                                                         # initial guess for the top eigenvector",
+        "repeat 10 { v = matmul(Cov, v); v = v / sqrt(dot(v, v)) }         # power iteration: 10 multiplies + normalize",
+        "coords = reshape(matmul(Xc, reshape(v, [2, 1])), [60])            # project each point onto the principal axis",
+        "labels = gt(coords, 0)                                             # which side of the axis each point lands on",
+        "ends = matmul(reshape([-3, 3], [2, 1]), reshape(v, [1, 2]))       # endpoints of the axis line in centered space",
+        "line = ends + matmul(ones([2, 1]), reshape(cm, [1, 2]))           # shift the line back into original space",
+        "scatter_labeled(X, labels)                                         # data colored by side of the principal axis",
+        "svg(line, \"line\")                                                 # the principal axis itself",
     ],
 };

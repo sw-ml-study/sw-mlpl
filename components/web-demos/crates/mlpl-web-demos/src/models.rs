@@ -128,26 +128,6 @@ pub const DECISION_BOUNDARY_XOR: Demo = Demo {
     ],
 };
 
-pub const KMEANS: Demo = Demo {
-    category: "Classification",
-    name: "K-Means",
-    intro: "K-means clustering without loops over points: all distances computed in one matmul, cluster assignments via argmax, and centroid updates via a one-hot-matrix-times-data trick. Three blobs in 2D, three centroids, ten iterations.",
-    takeaway: "The final scatter shows points colored by their assigned cluster and the three centroids as a separate plot. Unsupervised -- no labels were passed in; the algorithm discovered the three groups from geometry alone.",
-    lines: &[
-        "D = blobs(7, 30, [[0, 0], [4, 4], [-4, 4]])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          # 90 points across three blobs (with labels)",
-        "X = matmul(D, [[1,0],[0,1],[0,0]])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  # drop the label column for unsupervised work",
-        "C = [[1, 1], [3, 3], [-3, 3]]                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       # 3 initial centroids",
-        "repeat 10 { sqX = reshape(reduce_add(X*X, 1), [90, 1]); sqC = reshape(reduce_add(C*C, 1), [1, 3]); XC = matmul(X, transpose(C)); dists = matmul(sqX, ones([1, 3])) + matmul(ones([90, 1]), sqC) - 2*XC; clus = argmax(-1 * dists, 1); jj = reshape(range(3), [3, 1]); ll = reshape(clus, [1, 90]); diff = matmul(jj, ones([1, 90])) - matmul(ones([3, 1]), ll); A = eq(diff, 0); counts = reshape(reduce_add(A, 1), [3, 1]); sums = matmul(A, X); C = sums / matmul(counts, ones([1, 2])) }                                                                                                                                                                                              # 10 iterations of assign + update -- no per-point loop",
-        "sqX = reshape(reduce_add(X*X, 1), [90, 1])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          # per-point squared norms (final assignment)",
-        "sqC = reshape(reduce_add(C*C, 1), [1, 3])                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          # per-centroid squared norms",
-        "XC = matmul(X, transpose(C))                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       # cross-products",
-        "dists = matmul(sqX, ones([1, 3])) + matmul(ones([90, 1]), sqC) - 2*XC                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              # squared-distance matrix [90, 3]",
-        "clus = argmax(-1 * dists, 1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       # nearest centroid per point (argmax of negative distance)",
-        "scatter_labeled(X, clus)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            # points colored by cluster",
-        "svg(C, \"scatter\")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  # final centroid positions",
-    ],
-};
-
 pub const LOGISTIC_REGRESSION: Demo = Demo {
     category: "Classification",
     name: "Logistic Regression",
@@ -214,10 +194,10 @@ pub const MOONS_MLP: Demo = Demo {
 };
 
 pub const HOW_GRADIENT_DESCENT_WORKS: Demo = Demo {
-    category: "Basics",
+    category: "Training & Learning",
     name: "How Gradient Descent Works",
     intro: "The one idea under all of ML, made visible. We fit a straight line y = w*x + b to noisy data by minimizing the mean-squared error -- a function of just two numbers, the slope w and the bias b. Because there are only two, we can draw the entire loss surface as a heatmap (dark = low loss = good fit) and then watch gradient descent walk across it with [[loss_landscape]]. The white path starts at the green dot (a bad guess) and steps downhill to the red dot in the dark basin. Two more charts show the loss falling and the gradient magnitude shrinking as the path flattens out.",
-    takeaway: "The gradient is just the slope of the loss surface at your current point -- it points uphill, so we step the opposite way (w - lr*dw). On the heatmap that is literally a ball rolling downhill into the valley. Two things to notice: the steps are BIG where the surface is steep (far from the minimum) and get SMALL as it flattens near the bottom -- that is why the gradient-magnitude chart decays toward zero and the loss curve levels off. The final w and b land near the true 2 and 1. Every optimizer in the other demos (Adam, momentum) is a smarter version of this same downhill walk, just in thousands of dimensions you cannot draw.",
+    takeaway: "The gradient is just the slope of the loss surface at your current point -- it points uphill, so we step the opposite way (w - lr*dw). On the heatmap that is literally a ball rolling downhill into the valley. Two things to notice: the steps are BIG where the surface is steep (far from the minimum) and get SMALL as it flattens near the bottom -- that is why the gradient-magnitude chart decays toward zero and the loss curve levels off. The final w and b land near the true 2 and 1. Every optimizer in the other demos (Adam, momentum) is a smarter version of this same downhill walk, just in thousands of dimensions you cannot draw. Next, watch a real network run this loop on data: 'Watch a Model Learn (overfitting)' shows it going wrong, and 'Watch a Model Generalize (no overfitting)' shows it going right.",
     lines: &[
         "x = linspace(-2, 2, 11)                       # 11 input points",
         "y = 2 * x + 1 + randn(5, [11]) * 0.3          # noisy line: true slope 2, bias 1",
@@ -245,10 +225,10 @@ pub const HOW_GRADIENT_DESCENT_WORKS: Demo = Demo {
 };
 
 pub const WATCH_MODEL_LEARN: Demo = Demo {
-    category: "Classification",
+    category: "Training & Learning",
     name: "Watch a Model Learn (overfitting)",
     intro: "Training is a process, not a single result -- so watch it happen. An over-capacity MLP (two 32-wide hidden layers, ~1300 weights) trains on just 30 noisy 'moons' points while a separate 200-point validation set scores it every few steps. Both losses are plotted on one chart with [[train_val_curve]]: the green training curve and the peach validation curve. The chart is rendered once at the halfway mark and again at the end so you see the two lines pull apart.",
-    takeaway: "The gap between the green line and the peach line IS overfitting. Early on both fall together -- the model is learning real structure shared by train and validation. Then the training loss keeps dropping (often all the way toward zero) while the validation loss flattens and usually turns back up: past that point the network is memorizing the 30 training points' noise instead of the underlying shape, so it does WORSE on data it has not seen. A small/noisy training set plus a high-capacity model is the classic recipe; the cures are more data, fewer parameters, or regularization (dropout, weight decay, early stopping).",
+    takeaway: "The gap between the green line and the peach line IS overfitting. Early on both fall together -- the model is learning real structure shared by train and validation. Then the training loss keeps dropping (often all the way toward zero) while the validation loss flattens and usually turns back up: past that point the network is memorizing the 30 training points' noise instead of the underlying shape, so it does WORSE on data it has not seen. A small/noisy training set plus a high-capacity model is the classic recipe; the cures are more data, fewer parameters, or regularization (dropout, weight decay, early stopping). The companion demo 'Watch a Model Generalize (no overfitting)' applies the first two cures and shows the gap close; 'How Gradient Descent Works' shows the training loop underneath, one step at a time.",
     lines: &[
         "Mtr = moons(7, 30, 0.30)                      # tiny, noisy training set -- easy to memorize",
         "Xtr = matmul(Mtr, [[1,0],[0,1],[0,0]])        # [30, 2] inputs",
@@ -286,25 +266,41 @@ pub const WATCH_MODEL_LEARN: Demo = Demo {
     ],
 };
 
-pub const PCA: Demo = Demo {
-    category: "Dim Reduction",
-    name: "PCA",
-    intro: "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run [[power iteration]] to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance.",
-    takeaway: "The scatter is colored by which side of zero each point's projection lands on; the line shows the found principal axis. Power iteration converges in ~10 steps to a direction that's clearly the long axis of the data cloud.",
+pub const WATCH_MODEL_GENERALIZE: Demo = Demo {
+    category: "Training & Learning",
+    name: "Watch a Model Generalize (no overfitting)",
+    intro: "The companion to 'Watch a Model Learn (overfitting)' -- same idea, fixed. That demo starved a big network on 30 noisy points and watched validation loss peel away. Here we apply the cures: a much larger training set (200 points) and a right-sized model (a single 16-unit hidden layer, ~80 weights instead of ~1300). We train in five short bursts, scoring a separate 200-point validation set after each, and plot both losses with [[train_val_curve]]. This time the two lines fall together and stay together.",
+    takeaway: "Good training looks like this: the green (train) and peach (validation) curves descend side by side and both settle low -- the small, stable gap between them is healthy generalization, not overfitting. The difference from the overfitting demo is not a cleverer optimizer; it is the data-to-capacity balance. With enough examples relative to its number of weights, the network has to learn the real shape of the moons (which transfers to unseen points) because it cannot memorize 200 points the way it memorized 30. Final validation accuracy prints near 0.9+. The takeaways: more data and a model sized to the problem are the first and cheapest defenses against overfitting. See 'Watch a Model Learn (overfitting)' for the failure this fixes, and 'How Gradient Descent Works' for the downhill walk every training step is doing.",
     lines: &[
-        "Xraw = randn(1, [60, 2])                                          # 60 points of isotropic 2D noise",
-        "X = matmul(Xraw, [[1, 2], [0, 0.3]])                              # stretch into an anisotropic cloud",
-        "cm = reduce_add(X, 0) / 60                                        # column means -- the centroid",
-        "Xc = X - matmul(ones([60, 1]), reshape(cm, [1, 2]))               # center the data",
-        "Cov = matmul(transpose(Xc), Xc) / 60                              # 2x2 covariance matrix",
-        "v = [1, 0]                                                         # initial guess for the top eigenvector",
-        "repeat 10 { v = matmul(Cov, v); v = v / sqrt(dot(v, v)) }         # power iteration: 10 multiplies + normalize",
-        "coords = reshape(matmul(Xc, reshape(v, [2, 1])), [60])            # project each point onto the principal axis",
-        "labels = gt(coords, 0)                                             # which side of the axis each point lands on",
-        "ends = matmul(reshape([-3, 3], [2, 1]), reshape(v, [1, 2]))       # endpoints of the axis line in centered space",
-        "line = ends + matmul(ones([2, 1]), reshape(cm, [1, 2]))           # shift the line back into original space",
-        "scatter_labeled(X, labels)                                         # data colored by side of the principal axis",
-        "svg(line, \"line\")                                                 # the principal axis itself",
+        "Mtr = moons(7, 200, 0.20)                     # 200 training points -- plenty of data",
+        "Xtr = matmul(Mtr, [[1,0],[0,1],[0,0]])        # [200, 2] inputs",
+        "ytr = reshape(matmul(Mtr, [[0],[0],[1]]), [200])  # [200] labels",
+        "Mva = moons(23, 200, 0.20)                    # 200 separate validation points",
+        "Xva = matmul(Mva, [[1,0],[0,1],[0,0]])        # [200, 2] inputs",
+        "yva = reshape(matmul(Mva, [[0],[0],[1]]), [200])  # [200] labels",
+        "mdl = chain(linear(2, 16, 1), tanh_layer(), linear(16, 2, 2))  # right-sized: one 16-unit hidden layer",
+        "trh = [cross_entropy(apply(mdl, Xtr), ytr)]   # epoch-0 training loss",
+        "vah = [cross_entropy(apply(mdl, Xva), yva)]   # epoch-0 validation loss",
+        "train 20 { adam(cross_entropy(apply(mdl, Xtr), ytr), mdl, 0.06, 0.9, 0.999, 0.00000001); cross_entropy(apply(mdl, Xtr), ytr) }  # epoch 1",
+        "trh = concat(trh, [cross_entropy(apply(mdl, Xtr), ytr)])",
+        "vah = concat(vah, [cross_entropy(apply(mdl, Xva), yva)])",
+        "train 20 { adam(cross_entropy(apply(mdl, Xtr), ytr), mdl, 0.06, 0.9, 0.999, 0.00000001); cross_entropy(apply(mdl, Xtr), ytr) }  # epoch 2",
+        "trh = concat(trh, [cross_entropy(apply(mdl, Xtr), ytr)])",
+        "vah = concat(vah, [cross_entropy(apply(mdl, Xva), yva)])",
+        "train 20 { adam(cross_entropy(apply(mdl, Xtr), ytr), mdl, 0.06, 0.9, 0.999, 0.00000001); cross_entropy(apply(mdl, Xtr), ytr) }  # epoch 3",
+        "trh = concat(trh, [cross_entropy(apply(mdl, Xtr), ytr)])",
+        "vah = concat(vah, [cross_entropy(apply(mdl, Xva), yva)])",
+        "train_val_curve(trh, vah)                     # halfway: both curves falling together",
+        "train 20 { adam(cross_entropy(apply(mdl, Xtr), ytr), mdl, 0.06, 0.9, 0.999, 0.00000001); cross_entropy(apply(mdl, Xtr), ytr) }  # epoch 4",
+        "trh = concat(trh, [cross_entropy(apply(mdl, Xtr), ytr)])",
+        "vah = concat(vah, [cross_entropy(apply(mdl, Xva), yva)])",
+        "train 20 { adam(cross_entropy(apply(mdl, Xtr), ytr), mdl, 0.06, 0.9, 0.999, 0.00000001); cross_entropy(apply(mdl, Xtr), ytr) }  # epoch 5",
+        "trh = concat(trh, [cross_entropy(apply(mdl, Xtr), ytr)])",
+        "vah = concat(vah, [cross_entropy(apply(mdl, Xva), yva)])",
+        "train_val_curve(trh, vah)                     # final: train and validation stay close and low",
+        "preds = argmax(softmax(apply(mdl, Xva), 1), 1)  # predicted class per validation point",
+        "val_accuracy = mean(eq(preds, yva))           # fraction correct on UNSEEN data",
+        "val_accuracy",
     ],
 };
 

@@ -45,6 +45,9 @@ const SKIP_DEMOS: &[&str] = &[
     // a 200-point set: heavy on the dev profile. The train_val_curve eval
     // test covers the dispatch + accumulation; heavy test covers the run.
     "Watch a Model Learn (overfitting)",
+    // Companion: 100 Adam steps on a 200-point train + 200-point val set.
+    // Heavy on dev; generalize_demo_tests.rs covers the run + accuracy.
+    "Watch a Model Generalize (no overfitting)",
     "Circles MLP",
     "Transformer Block",
     "Pets: cat vs dog (quick)",
