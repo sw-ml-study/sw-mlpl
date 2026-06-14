@@ -184,7 +184,7 @@ pub const TINY_LM: Demo = Demo {
 };
 
 pub const TINY_MLP: Demo = Demo {
-    category: "Language Models",
+    category: "Training & Learning",
     name: "Tiny MLP",
     intro: "A hand-rolled 2-layer MLP on four blobs (two per class, XOR-ish layout). Forward + backward pass written out explicitly so every gradient is visible -- no autograd, no Model DSL. Ends with the decision-boundary render over a 30x30 grid.",
     takeaway: "You can see every matmul and every elementwise op in the training loop. For the same model with autograd hiding the backward pass, see 'Moons MLP'; for the same model as a Model DSL composition, see the tutorial's 'Model Composition' lesson.",
