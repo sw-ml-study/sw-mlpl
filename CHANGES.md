@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-14
 
+- refactor(viz3d)+docs: move FFI extern list to a .inc include (metric exception)
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(viz+demos): loss_landscape + "How Gradient Descent Works" demo
 
 ## 2026-06-13
