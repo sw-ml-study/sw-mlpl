@@ -121,7 +121,12 @@ pub(crate) fn eval_analysis_helper(
 ) -> Option<Result<String, EvalError>> {
     if !matches!(
         name,
-        "hist" | "scatter_labeled" | "loss_curve" | "confusion_matrix" | "boundary_2d"
+        "hist"
+            | "scatter_labeled"
+            | "loss_curve"
+            | "train_val_curve"
+            | "confusion_matrix"
+            | "boundary_2d"
     ) {
         return None;
     }
@@ -162,6 +167,12 @@ fn call_analysis(name: &str, a: &[DenseArray]) -> Result<String, EvalError> {
                 return Err(bad_arity(1));
             }
             mlpl_viz::analysis_loss_curve(&a[0])?
+        }
+        "train_val_curve" => {
+            if a.len() != 2 {
+                return Err(bad_arity(2));
+            }
+            mlpl_viz::analysis_train_val_curve(&a[0], &a[1])?
         }
         "confusion_matrix" => {
             if a.len() != 2 {

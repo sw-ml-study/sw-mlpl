@@ -58,6 +58,7 @@ pub const DEMOS: &[Demo] = &[
     basics::UPLOAD_INSPECT,
     udf::USER_FUNCTIONS,
     basics::VISUALIZATIONS,
+    models::WATCH_MODEL_LEARN,
     basics::BPE_ATTENTION_LABELS,
     vit::VIT_ATTENTION_PATTERN,
     vit::PETS_CAT_VS_DOG_QUICK,

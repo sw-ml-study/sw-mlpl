@@ -1,7 +1,7 @@
 use mlpl_array::{DenseArray, Shape};
 use mlpl_viz::{
     analysis_boundary_2d, analysis_confusion_matrix, analysis_hist, analysis_loss_curve,
-    analysis_scatter_labeled,
+    analysis_scatter_labeled, analysis_train_val_curve,
 };
 
 fn vector(data: Vec<f64>) -> DenseArray {
@@ -81,6 +81,43 @@ fn loss_curve_returns_svg() {
 fn loss_curve_rejects_non_vector() {
     let m = matrix(2, 2, vec![1.0, 2.0, 3.0, 4.0]);
     assert!(analysis_loss_curve(&m).is_err());
+}
+
+#[test]
+fn train_val_curve_draws_two_lines() {
+    // train keeps falling; val bottoms out and turns up (overfitting).
+    let train = vector(vec![2.0, 1.2, 0.7, 0.4, 0.2, 0.1]);
+    let val = vector(vec![2.0, 1.3, 0.9, 0.85, 0.95, 1.2]);
+    let svg = analysis_train_val_curve(&train, &val).unwrap();
+    assert!(svg.starts_with("<svg"));
+    // One polyline per series.
+    assert_eq!(svg.matches("<polyline").count(), 2, "svg was: {svg}");
+    // Color-keyed legend names both series.
+    assert!(
+        svg.contains(">train<") && svg.contains(">val<"),
+        "legend: {svg}"
+    );
+    assert!(
+        svg.contains("#a6e3a1") && svg.contains("#fab387"),
+        "colors: {svg}"
+    );
+}
+
+#[test]
+fn train_val_curve_handles_unequal_lengths() {
+    // Validation recorded once per epoch, training once per step: lengths differ.
+    let train = vector(vec![2.0, 1.5, 1.0, 0.8, 0.6, 0.5, 0.4, 0.3]);
+    let val = vector(vec![1.9, 1.1, 0.9]);
+    let svg = analysis_train_val_curve(&train, &val).unwrap();
+    assert_eq!(svg.matches("<polyline").count(), 2, "svg was: {svg}");
+}
+
+#[test]
+fn train_val_curve_rejects_non_vector() {
+    let m = matrix(2, 2, vec![1.0, 2.0, 3.0, 4.0]);
+    let v = vector(vec![1.0, 2.0]);
+    assert!(analysis_train_val_curve(&m, &v).is_err());
+    assert!(analysis_train_val_curve(&v, &m).is_err());
 }
 
 #[test]

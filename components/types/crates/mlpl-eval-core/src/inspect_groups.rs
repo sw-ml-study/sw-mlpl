@@ -354,6 +354,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
             ),
             ("loss_curve", "loss_curve(losses)", "training loss curve"),
             (
+                "train_val_curve",
+                "train_val_curve(train, val)",
+                "train vs validation loss (overfitting gap)",
+            ),
+            (
                 "confusion_matrix",
                 "confusion_matrix(pred, truth)",
                 "KxK heatmap",
