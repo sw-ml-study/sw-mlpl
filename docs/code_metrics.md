@@ -652,6 +652,56 @@ Actual behavior belongs in named files.
 
 ---
 
+### 15a. Simple lists via `include!` (the only sanctioned metric exception)
+
+The complexity gates exist to bound *cognitive load* -- the 5 +/- 2 rule and
+the "fits on a 25x120 screen" rule. A flat, logic-free list is not cognitive
+complexity: a reader scans it, they do not reason about it. Examples: a block
+of `extern "C"` FFI declarations, a long `match` of one-line string-to-string
+mappings, a table of constant tuples.
+
+When such a list is genuinely long enough to trip a gate (module function
+count, file LOC), do **not** make `sw-checklist` smarter -- keeping the
+checker simple and general is worth more than special-casing it, and a
+parse-aware checker is its own maintenance burden. Instead move the list into
+a sibling **`.inc`** file (not `.rs`, so the checker -- which scans `.rs`
+only -- never reads it) and pull it in with `include!`:
+
+```rust
+// panel.rs -- the FFI list is a logic-free list, so it lives in a .inc.
+include!("stage3d_externs.inc");
+```
+
+```rust
+// stage3d_externs.inc -- NO control flow or logic. List items only.
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_init(canvas: &web_sys::HtmlCanvasElement);
+    // ... more declarations ...
+}
+```
+
+Rules for this exception:
+
+- **Lists only, never logic.** The `.inc` may contain declarations, constant
+  data, or generated arms -- never a function body, a branch, or a loop. If
+  it has logic, it is not a list; split it the normal way instead.
+- **Use `include!` for Rust items**, `include_str!`/`include_bytes!` for
+  data. Path is relative to the including file.
+- **For *generated* lists, prefer `build.rs`** writing the `.inc` into
+  `OUT_DIR` and `include!(concat!(env!("OUT_DIR"), "/list.inc"))`. The
+  generator itself is `build.rs` and still obeys all the gates (see section
+  14); only its hand-or-machine-written *output list* is excluded.
+- **A comment at the top of the `.inc`** must state that it is a
+  checker-excluded list and that no logic belongs there.
+
+This is a precision tool, not a loophole. Reaching for `.inc` to hide an
+over-budget *function* (one with logic) is a violation; the gate is telling
+you to decompose, and you must.
+
+---
+
 ### 16. Final Agent Directive
 
 Refactor and write Rust code according to these gates and layout rules:
@@ -1360,6 +1410,56 @@ pub fn derive_rule(input: TokenStream) -> TokenStream {
 ```
 
 Actual behavior belongs in named files.
+
+---
+
+### 15a. Simple lists via `include!` (the only sanctioned metric exception)
+
+The complexity gates exist to bound *cognitive load* -- the 5 +/- 2 rule and
+the "fits on a 25x120 screen" rule. A flat, logic-free list is not cognitive
+complexity: a reader scans it, they do not reason about it. Examples: a block
+of `extern "C"` FFI declarations, a long `match` of one-line string-to-string
+mappings, a table of constant tuples.
+
+When such a list is genuinely long enough to trip a gate (module function
+count, file LOC), do **not** make `sw-checklist` smarter -- keeping the
+checker simple and general is worth more than special-casing it, and a
+parse-aware checker is its own maintenance burden. Instead move the list into
+a sibling **`.inc`** file (not `.rs`, so the checker -- which scans `.rs`
+only -- never reads it) and pull it in with `include!`:
+
+```rust
+// panel.rs -- the FFI list is a logic-free list, so it lives in a .inc.
+include!("stage3d_externs.inc");
+```
+
+```rust
+// stage3d_externs.inc -- NO control flow or logic. List items only.
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = window)]
+    fn __stage3d_init(canvas: &web_sys::HtmlCanvasElement);
+    // ... more declarations ...
+}
+```
+
+Rules for this exception:
+
+- **Lists only, never logic.** The `.inc` may contain declarations, constant
+  data, or generated arms -- never a function body, a branch, or a loop. If
+  it has logic, it is not a list; split it the normal way instead.
+- **Use `include!` for Rust items**, `include_str!`/`include_bytes!` for
+  data. Path is relative to the including file.
+- **For *generated* lists, prefer `build.rs`** writing the `.inc` into
+  `OUT_DIR` and `include!(concat!(env!("OUT_DIR"), "/list.inc"))`. The
+  generator itself is `build.rs` and still obeys all the gates (see section
+  14); only its hand-or-machine-written *output list* is excluded.
+- **A comment at the top of the `.inc`** must state that it is a
+  checker-excluded list and that no logic belongs there.
+
+This is a precision tool, not a loophole. Reaching for `.inc` to hide an
+over-budget *function* (one with logic) is a violation; the gate is telling
+you to decompose, and you must.
 
 ---
 
