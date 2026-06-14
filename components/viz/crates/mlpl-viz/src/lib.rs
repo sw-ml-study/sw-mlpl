@@ -6,6 +6,7 @@ pub mod analysis;
 mod boundary_2d_validate;
 mod plotly3d;
 pub mod svg;
+mod train_curve;
 
 pub use analysis::{
     analysis_boundary_2d, analysis_confusion_matrix, analysis_hist, analysis_loss_curve,
@@ -17,3 +18,4 @@ pub use svg::{
     render_decision_boundary, render_gallery, render_heatmap, render_heatmap_grid, render_line,
     render_scatter, render_scatter3d, render_with_aux,
 };
+pub use train_curve::analysis_train_val_curve;

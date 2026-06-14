@@ -138,8 +138,11 @@ Primary files:
 
 ## Sequencing and status
 
-- [ ] 1. Plan (this doc)
-- [ ] 2. Live training visualization
+- [x] 1. Plan (this doc)
+- [x] 2. Live training visualization -- `train_val_curve` builtin + the
+      "Watch a Model Learn (overfitting)" demo (train vs validation on shared
+      axes, rendered at the halfway mark and the end). A true in-place
+      live-loss panel over the SSE stream remains a connect-path follow-up.
 - [ ] 3. Gradient-descent / backprop visualization
 - [ ] 4. Beginner spine path + generative-families lesson
 

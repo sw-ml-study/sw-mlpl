@@ -169,6 +169,12 @@ pub struct ProgressNote {
 /// sees the heads-up linger longer than the actual op.
 pub const PROGRESS_NOTES: &[ProgressNote] = &[
     ProgressNote {
+        demo: "Watch a Model Learn (overfitting)",
+        line_idx: 9,
+        heading: "Training in six short bursts (~10s total on the CPU)",
+        body: "The model trains 25 Adam steps at a time, six times over, scoring both the 30-point training set and the 200-point validation set after each burst. The page repaints between bursts -- the train_val_curve renders at the halfway mark and again at the end so you can watch the green (train) and peach (validation) lines pull apart. The widening gap is overfitting.",
+    },
+    ProgressNote {
         demo: "CUDA tic-tac-toe fine-tune",
         line_idx: 13,
         heading: "Generating the self-play dataset on the CPU (~4s)",

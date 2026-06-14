@@ -41,6 +41,10 @@ const SKIP_DEMOS: &[&str] = &[
     // 1200-step adversarial train (D + 2x G per step): heavy.
     "GAN (2D circle)",
     "Moons MLP",
+    // ~150 Adam steps over six chunks plus per-chunk train+val scoring on
+    // a 200-point set: heavy on the dev profile. The train_val_curve eval
+    // test covers the dispatch + accumulation; heavy test covers the run.
+    "Watch a Model Learn (overfitting)",
     "Circles MLP",
     "Transformer Block",
     "Pets: cat vs dog (quick)",
