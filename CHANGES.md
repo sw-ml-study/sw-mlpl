@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-14
 
+- fix(viz+demos): train/val curves were hidden by an axis-squashing outlier
+- docs(changes): refresh CHANGES.md to HEAD
 - refactor(demos): fuller category taxonomy -- merge scattered groups
 - docs(changes): refresh CHANGES.md to HEAD
 - feat(demos): "Watch a Model Generalize" companion + rethink demo groups
