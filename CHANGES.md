@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-14
 
+- fix(connect): honest UI when an HTTPS demo can't reach an HTTP server
+- chore(lockfiles): sync runtime-layers + web-render Cargo.lock
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(viz+demos): train/val curves were hidden by an axis-squashing outlier
 - docs(changes): refresh CHANGES.md to HEAD
 - refactor(demos): fuller category taxonomy -- merge scattered groups
