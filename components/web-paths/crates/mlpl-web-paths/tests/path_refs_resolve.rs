@@ -9,6 +9,19 @@ use mlpl_web_glossary::view::find_by_term;
 use mlpl_web_paths_data::{PATHS, Step};
 
 #[test]
+fn paths_are_well_formed() {
+    // Guards the build.rs codegen from paths.toml: a parse error or dropped
+    // table would silently shrink PATHS. Every path keeps a title and at
+    // least one step, and the full set survives.
+    assert!(PATHS.len() >= 13, "expected >= 13 paths, got {}", PATHS.len());
+    for p in PATHS {
+        assert!(!p.title.is_empty(), "a path has an empty title");
+        assert!(!p.blurb.is_empty(), "path {:?} has an empty blurb", p.title);
+        assert!(!p.steps.is_empty(), "path {:?} has no steps", p.title);
+    }
+}
+
+#[test]
 fn every_demo_and_glossary_reference_resolves() {
     let mut dangling: Vec<String> = Vec::new();
     for path in PATHS {
