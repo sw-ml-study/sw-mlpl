@@ -1,18 +1,15 @@
-//! Web playground demo registry -- facade over the
-//! mlpl-web-demos-* sub-crates. Re-exports the shared `Demo`
-//! type, the progress-notes helpers, and the aggregated
-//! `DEMOS` constant so mlpl-web can keep using `crate::demos::*`
-//! call sites unchanged via a top-level `pub use` alias.
+//! Web playground demo registry. The demo content (category / name / intro /
+//! takeaway / MLPL `lines`) lives in `demos.toml`; `build.rs` generates the
+//! aggregated `DEMOS` const from it into `OUT_DIR` (included below), so the
+//! prose + demo code stay in data and out of Rust source. The shared `Demo`
+//! type, the capability / progress-note helpers, and the per-demo side tables
+//! are re-exported from `mlpl-web-demos-types` so `mlpl_web_demos::*` call
+//! sites stay unchanged.
 
-pub mod aggregator;
-pub mod autoencoder;
-pub mod dim_reduction;
-pub mod gan;
-pub mod models;
-pub mod rnn;
-
-pub use aggregator::DEMOS;
 pub use mlpl_web_demos_types::{
     Capability, DEMO_CAPABILITIES, Demo, Device, LITERATE_DOCS, PROGRESS_NOTES, ProgressNote,
     capability_for, demo_disabled, literate_for, progress_notes_for,
 };
+
+// `pub const DEMOS: &[Demo]`, generated from demos.toml by build.rs.
+include!(concat!(env!("OUT_DIR"), "/demos.rs"));

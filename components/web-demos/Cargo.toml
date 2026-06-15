@@ -1,9 +1,7 @@
 [workspace]
 members = [
     "crates/mlpl-web-demos",
-    "crates/mlpl-web-demos-basic",
     "crates/mlpl-web-demos-types",
-    "crates/mlpl-web-demos-vision",
 ]
 resolver = "2"
 
