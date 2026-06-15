@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-14
 
+- refactor(paths): move path prose to paths.toml + build.rs codegen (pilot)
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(paths): add "Watch a Model Generalize" follow-on to the start-here path
 - docs(changes): refresh CHANGES.md to HEAD
 - fix(connect): honest UI when an HTTPS demo can't reach an HTTP server
