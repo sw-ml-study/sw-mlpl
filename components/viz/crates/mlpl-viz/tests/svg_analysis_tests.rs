@@ -101,6 +101,11 @@ fn train_val_curve_draws_two_lines() {
         svg.contains("#a6e3a1") && svg.contains("#fab387"),
         "colors: {svg}"
     );
+    // Distinct dash patterns so the lines stay legible when they overlap.
+    assert!(
+        svg.contains("stroke-dasharray=\"8 4\"") && svg.contains("stroke-dasharray=\"2 4\""),
+        "distinct dash patterns: {svg}"
+    );
 }
 
 #[test]
