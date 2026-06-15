@@ -1940,6 +1940,7 @@ name = "mlpl-web-components-chrome"
 version = "0.20.0"
 dependencies = [
  "gloo 0.11.0",
+ "mlpl-web-eval",
  "serde_json",
  "wasm-bindgen-futures",
  "web-sys",

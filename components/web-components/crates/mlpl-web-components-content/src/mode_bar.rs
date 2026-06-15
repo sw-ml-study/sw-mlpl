@@ -57,7 +57,12 @@ fn render_demo_dropdown(
             target.set_value("");
         }
     });
-    let connected = mlpl_web_eval::eval_url::is_connected();
+    // "Connected" only counts when the server is actually reachable: an
+    // https demo page cannot reach an http connect server (mixed content),
+    // so gate those connect demos as disconnected rather than enabling a
+    // button that will only fail.
+    let connected = mlpl_web_eval::eval_url::is_connected()
+        && mlpl_web_eval::connect_guard::connect_blocked_reason().is_none();
     let groups = grouped_demos(connected, peer_devices);
     html! {
         <select class="demo-select" onchange={on_change} aria-label="Load demo" data-tour-target="demo-select">
