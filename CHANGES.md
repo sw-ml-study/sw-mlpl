@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-15
 
+- docs(demos): detailed per-visualization comments in the Visualizations demo
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(demos): expand the Visualizations demo into a full viz tour
 - docs(changes): refresh CHANGES.md to HEAD
 - feat(demos): "Gradient Flow (backprop)" -- per-layer gradient magnitudes
