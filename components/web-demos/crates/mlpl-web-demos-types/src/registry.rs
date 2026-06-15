@@ -172,13 +172,13 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         demo: "Watch a Model Learn (overfitting)",
         line_idx: 9,
         heading: "Training in six short bursts (~10s total on the CPU)",
-        body: "The model trains 25 Adam steps at a time, six times over, scoring both the 30-point training set and the 200-point validation set after each burst. The page repaints between bursts -- the train_val_curve renders at the halfway mark and again at the end so you can watch the green (train) and peach (validation) lines pull apart. The widening gap is overfitting.",
+        body: "The model trains 25 Adam steps at a time, six times over, scoring both the 30-point training set and the 200-point validation set after each burst. The page repaints between bursts -- the train_val_curve renders at the halfway mark and again at the end so you can watch the green dashed (train) and peach dotted (validation) lines pull apart. The widening gap is overfitting.",
     },
     ProgressNote {
         demo: "Watch a Model Generalize (no overfitting)",
         line_idx: 9,
         heading: "Training in five short bursts (~10s total on the CPU)",
-        body: "Same loop as the overfitting demo, but with a much larger training set (200 points) and a right-sized network. Watch the green (train) and peach (validation) curves fall together and stay close -- the small, stable gap is healthy generalization. Validation accuracy prints at the end.",
+        body: "Same loop as the overfitting demo, but with a much larger training set (200 points) and a right-sized network. Watch the green dashed (train) and peach dotted (validation) curves fall together and stay close -- the small, stable gap is healthy generalization. Validation accuracy prints at the end.",
     },
     ProgressNote {
         demo: "CUDA tic-tac-toe fine-tune",

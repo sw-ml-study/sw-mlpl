@@ -27,7 +27,10 @@ fn train_val_curve_dispatches_to_two_polylines() {
     let svg = run_str("train_val_curve([2, 1.2, 0.6, 0.3], [2, 1.3, 1.1, 1.4])");
     assert!(svg.starts_with("<svg"), "svg: {svg}");
     assert_eq!(svg.matches("<polyline").count(), 2, "svg: {svg}");
-    assert!(svg.contains(">train<") && svg.contains(">val<"), "legend: {svg}");
+    assert!(
+        svg.contains(">train<") && svg.contains(">val<"),
+        "legend: {svg}"
+    );
 }
 
 #[test]
@@ -53,8 +56,8 @@ fn watch_model_learn_structure_runs_in_miniature() {
          Xva = matmul(Mva, [[1,0],[0,1],[0,0]])\n\
          yva = reshape(matmul(Mva, [[0],[0],[1]]), [20])\n\
          mdl = chain(linear(2, 8, 1), tanh_layer(), linear(8, 2, 2))\n\
-         trh = [cross_entropy(apply(mdl, Xtr), ytr)]\n\
-         vah = [cross_entropy(apply(mdl, Xva), yva)]\n\
+         trh = []\n\
+         vah = []\n\
          train 2 { adam(cross_entropy(apply(mdl, Xtr), ytr), mdl, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(mdl, Xtr), ytr) }\n\
          trh = concat(trh, [cross_entropy(apply(mdl, Xtr), ytr)])\n\
          vah = concat(vah, [cross_entropy(apply(mdl, Xva), yva)])\n\

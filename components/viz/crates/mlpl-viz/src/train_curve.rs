@@ -26,8 +26,11 @@ pub fn analysis_train_val_curve(train: &DenseArray, val: &DenseArray) -> Result<
     let combined: Vec<f64> = tr.iter().chain(va).copied().collect();
     let (ymin, ymax) = bounds(&combined);
     let xmax = tr.len().max(va.len()).saturating_sub(1).max(1) as f64;
-    out.push_str(&loss_line(tr, ymin, ymax, xmax, TRAIN_COLOR));
-    out.push_str(&loss_line(va, ymin, ymax, xmax, VAL_COLOR));
+    // Distinct dash patterns (train long-dash, val dotted) so the two lines
+    // stay legible even when a well-generalizing model makes them nearly
+    // coincide -- you see alternating green dashes and peach dots.
+    out.push_str(&loss_line(tr, ymin, ymax, xmax, TRAIN_COLOR, "8 4"));
+    out.push_str(&loss_line(va, ymin, ymax, xmax, VAL_COLOR, "2 4"));
     out.push_str(&legend(ymin, ymax));
     write_svg_close(&mut out);
     Ok(out)
@@ -43,8 +46,9 @@ fn require_vector(a: &DenseArray) -> Result<(), VizError> {
     Ok(())
 }
 
-/// One polyline mapping a loss vector across the shared [ymin, ymax] axis.
-fn loss_line(raw: &[f64], ymin: f64, ymax: f64, xmax: f64, color: &str) -> String {
+/// One `dash`-patterned polyline mapping a loss vector across the shared
+/// `[ymin, ymax]` axis.
+fn loss_line(raw: &[f64], ymin: f64, ymax: f64, xmax: f64, color: &str, dash: &str) -> String {
     if raw.is_empty() {
         return String::new();
     }
@@ -56,7 +60,10 @@ fn loss_line(raw: &[f64], ymin: f64, ymax: f64, xmax: f64, color: &str) -> Strin
         let (cx, cy) = (scale(i as f64, 0.0, xmax, 0), scale(v, ymin, ymax, 1));
         pts.push_str(&format!("{cx:.1},{cy:.1}"));
     }
-    format!("<polyline points=\"{pts}\" fill=\"none\" stroke=\"{color}\" stroke-width=\"2\"/>")
+    format!(
+        "<polyline points=\"{pts}\" fill=\"none\" stroke=\"{color}\" \
+         stroke-width=\"2\" stroke-dasharray=\"{dash}\"/>"
+    )
 }
 
 /// Color-keyed "train"/"val" labels plus the y-axis bound readouts.
