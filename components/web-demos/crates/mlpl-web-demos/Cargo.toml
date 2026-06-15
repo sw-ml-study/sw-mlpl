@@ -3,15 +3,21 @@ name = "mlpl-web-demos"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
+build = "build.rs"
 
 [lib]
 name = "mlpl_web_demos"
 path = "src/lib.rs"
 
 [dependencies]
-mlpl-web-demos-basic = { path = "../mlpl-web-demos-basic" }
 mlpl-web-demos-types = { path = "../mlpl-web-demos-types" }
-mlpl-web-demos-vision = { path = "../mlpl-web-demos-vision" }
+
+# build.rs reads demos.toml and generates the DEMOS const into OUT_DIR, so the
+# demo prose + MLPL lines live in data, not Rust source. Build-only -- not in
+# the wasm bundle.
+[build-dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"
 
 [dev-dependencies]
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
