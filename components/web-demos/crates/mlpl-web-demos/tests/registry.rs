@@ -90,6 +90,17 @@ fn learning_rate_demo_evals() {
 }
 
 #[test]
+fn visualizations_demo_evals() {
+    // The viz tour renders 12 different plots from toy data -- the synthetic
+    // shapes are the risk, so eval the exact generated lines here.
+    let d = DEMOS
+        .iter()
+        .find(|d| d.name == "Visualizations")
+        .expect("Visualizations demo present");
+    run_demo(d.name, d.lines).expect("Visualizations demo evals");
+}
+
+#[test]
 fn gradient_flow_demo_evals() {
     // Light (one forward + four grads, no training loop): eval the exact
     // generated lines here rather than waiting for the full quick smoke.
