@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-15
+
+- refactor(demos): move demo content to demos.toml + build.rs codegen
+
 ## 2026-06-14
 
+- docs(changes): refresh CHANGES.md to HEAD
 - refactor(paths): move path prose to paths.toml + build.rs codegen (pilot)
 - docs(changes): refresh CHANGES.md to HEAD
 - fix(paths): add "Watch a Model Generalize" follow-on to the start-here path
