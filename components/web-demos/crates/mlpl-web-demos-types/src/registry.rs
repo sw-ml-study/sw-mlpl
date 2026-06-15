@@ -175,6 +175,12 @@ pub const PROGRESS_NOTES: &[ProgressNote] = &[
         body: "The model trains 25 Adam steps at a time, six times over, scoring both the 30-point training set and the 200-point validation set after each burst. The page repaints between bursts -- the train_val_curve renders at the halfway mark and again at the end so you can watch the green dashed (train) and peach dotted (validation) lines pull apart. The widening gap is overfitting.",
     },
     ProgressNote {
+        demo: "Taming Overfitting: Weight Decay",
+        line_idx: 17,
+        heading: "Training in six bursts with an L2 penalty (~10s on the CPU)",
+        body: "Same over-capacity net and tiny noisy data as the overfitting demo, but the loss now adds lam * sum(W*W), which pushes the weights toward zero. The page repaints between bursts; the train_val_curve renders at the halfway mark and the end. Watch the validation curve stay near the training curve instead of peeling away.",
+    },
+    ProgressNote {
         demo: "Watch a Model Generalize (no overfitting)",
         line_idx: 9,
         heading: "Training in five short bursts (~10s total on the CPU)",
