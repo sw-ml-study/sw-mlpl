@@ -90,6 +90,18 @@ fn learning_rate_demo_evals() {
 }
 
 #[test]
+fn gradient_flow_demo_evals() {
+    // Light (one forward + four grads, no training loop): eval the exact
+    // generated lines here rather than waiting for the full quick smoke.
+    let name = "Gradient Flow (backprop)";
+    let d = DEMOS
+        .iter()
+        .find(|d| d.name == name)
+        .expect("gradient-flow demo present");
+    run_demo(d.name, d.lines).expect("gradient-flow demo evals");
+}
+
+#[test]
 fn every_quick_web_demo_runs() {
     let mut failures: Vec<String> = Vec::new();
     for demo in DEMOS.iter() {
