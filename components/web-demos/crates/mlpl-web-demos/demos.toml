@@ -1199,6 +1199,39 @@ lines = [
 ]
 
 [[demos]]
+category = "Training & Learning"
+name = "Gradient Flow (backprop)"
+intro = "Training updates every weight by its gradient -- but where do those gradients come from? Backpropagation: the error at the output is sent BACKWARD through the network, layer by layer, and each layer's gradient is the running product of the layers above it. We build a deep 4-layer net with sigmoid activations, read each layer's gradient with grad(), and chart the magnitudes. The bars make 'backprop' concrete: a real number per layer saying how big a learning signal it received."
+takeaway = "The bars shrink toward the input (left): the output layer (rightmost) gets a gradient many times larger than the first layer's. That is the vanishing-gradient problem -- backprop multiplies a sigmoid derivative (at most 0.25) at every layer, so after a few layers the signal is tiny and the early layers barely learn. It is exactly why deep networks were hard to train until three fixes arrived: non-saturating activations (ReLU, whose derivative is 1, not 0.25), residual/skip connections that let the gradient bypass layers, and normalization. Note grad() needs the whole forward written inline -- it computes the gradient of one expression, it cannot trace a stored value back to a weight."
+lines = [
+    "M = moons(7, 40, 0.2)                         # a small dataset -- we only need ONE backward pass",
+    "X = matmul(M, [[1,0],[0,1],[0,0]])",
+    "y = reshape(matmul(M, [[0],[0],[1]]), [40])",
+    "O = ones([40, 1])                             # bias-broadcast column",
+    "W1 = param[2, 12]                             # a deep net: 4 weight layers (declares trainable)",
+    "b1 = param[1, 12]",
+    "W2 = param[12, 12]",
+    "b2 = param[1, 12]",
+    "W3 = param[12, 12]",
+    "b3 = param[1, 12]",
+    "W4 = param[12, 2]",
+    "b4 = param[1, 2]",
+    "W1 = randn(1, [2, 12])                        # seeded random init",
+    "W2 = randn(2, [12, 12])",
+    "W3 = randn(3, [12, 12])",
+    "W4 = randn(4, [12, 2])",
+    "g1 = grad(cross_entropy(matmul(sigmoid(matmul(sigmoid(matmul(sigmoid(matmul(X, W1) + matmul(O, b1)), W2) + matmul(O, b2)), W3) + matmul(O, b3)), W4) + matmul(O, b4), y), W1)  # gradient at the INPUT layer (whole forward inline)",
+    "m1 = sqrt(reduce_add(g1 * g1))                # its magnitude (length of the gradient vector)",
+    "g2 = grad(cross_entropy(matmul(sigmoid(matmul(sigmoid(matmul(sigmoid(matmul(X, W1) + matmul(O, b1)), W2) + matmul(O, b2)), W3) + matmul(O, b3)), W4) + matmul(O, b4), y), W2)",
+    "m2 = sqrt(reduce_add(g2 * g2))",
+    "g3 = grad(cross_entropy(matmul(sigmoid(matmul(sigmoid(matmul(sigmoid(matmul(X, W1) + matmul(O, b1)), W2) + matmul(O, b2)), W3) + matmul(O, b3)), W4) + matmul(O, b4), y), W3)",
+    "m3 = sqrt(reduce_add(g3 * g3))",
+    "g4 = grad(cross_entropy(matmul(sigmoid(matmul(sigmoid(matmul(sigmoid(matmul(X, W1) + matmul(O, b1)), W2) + matmul(O, b2)), W3) + matmul(O, b3)), W4) + matmul(O, b4), y), W4)  # gradient at the OUTPUT layer",
+    "m4 = sqrt(reduce_add(g4 * g4))",
+    "svg([m1, m2, m3, m4], \"bar\")                  # one bar per layer: input (left) -> output (right)",
+]
+
+[[demos]]
 category = "Basics"
 name = "BPE-Labeled Attention Pattern"
 intro = "Saga BPE-2: tokenize a short text with train_bpe + apply_tokenizer, decode each token id back to its byte string via decode_each, then run attention on the embedded sequence. Click the `A` sculpture (rank-3 [heads, T, T] attention weights) and the heatmap axes label rows + columns with the actual BPE pieces -- not integer indices -- because `labels = decode_each(...)` rode through the new ShapeInfo.string_list channel into the next attention sculpture."
