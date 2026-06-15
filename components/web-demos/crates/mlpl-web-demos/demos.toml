@@ -1117,6 +1117,88 @@ lines = [
 ]
 
 [[demos]]
+category = "Training & Learning"
+name = "Taming Overfitting: Weight Decay"
+intro = "The third cure for overfitting, after 'more data' and 'a smaller model': regularization. We take an over-capacity net (a 32-unit hidden layer, ~130 weights) and the same tiny 30-point noisy dataset that made 'Watch a Model Learn (overfitting)' memorize -- but add an L2 penalty to the loss: lam * sum(W*W). That term punishes large weights, so the optimizer can lower the loss either by fitting the data or by shrinking the weights, and shrinking wins on the noise. We score a held-out 200-point set and plot both losses with [[train_val_curve]]."
+takeaway = "The penalty keeps the weights small, and a small-weight network is a simpler function that cannot carve itself around individual noisy points -- so the green dashed (train) and peach dotted (validation) curves stay close instead of pulling apart, and validation accuracy on unseen data lands around 0.8. This is the same over-capacity model that overfit in 'Watch a Model Learn (overfitting)'; the only change is the lam * sum(W*W) term in the loss. Bigger lam means a simpler model (more bias, less variance); too big and it underfits. Weight decay, dropout, and early stopping are the standard regularizers -- this is the simplest, and it is one extra term."
+lines = [
+    "Mtr = moons(7, 30, 0.30)                      # the same tiny, noisy training set that overfit before",
+    "Xtr = matmul(Mtr, [[1,0],[0,1],[0,0]])",
+    "ytr = reshape(matmul(Mtr, [[0],[0],[1]]), [30])",
+    "Mva = moons(101, 200, 0.30)                   # 200 held-out validation points",
+    "Xva = matmul(Mva, [[1,0],[0,1],[0,0]])",
+    "yva = reshape(matmul(Mva, [[0],[0],[1]]), [200])",
+    "O30 = ones([30, 1])                           # bias-broadcast helpers",
+    "O200 = ones([200, 1])",
+    "W1 = param[2, 32]                             # over-capacity: a 32-unit hidden layer (declares trainable)",
+    "b1 = param[1, 32]",
+    "W2 = param[32, 2]",
+    "b2 = param[1, 2]",
+    "W1 = randn(11, [2, 32]) * 0.5                 # seeded init",
+    "W2 = randn(12, [32, 2]) * 0.5",
+    "lam = 0.03                                    # weight-decay strength (the L2 penalty coefficient)",
+    "trh = []",
+    "vah = []",
+    "train 25 { adam(cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) + lam * (sum(W1 * W1) + sum(W2 * W2)), [W1, b1, W2, b2], 0.05, 0.9, 0.999, 0.00000001); cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) }  # epoch 1: loss = data loss + L2 penalty",
+    "trh = concat(trh, [cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr)])  # record the DATA loss only",
+    "vah = concat(vah, [cross_entropy(matmul(tanh_fn(matmul(Xva, W1) + matmul(O200, b1)), W2) + matmul(O200, b2), yva)])",
+    "train 25 { adam(cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) + lam * (sum(W1 * W1) + sum(W2 * W2)), [W1, b1, W2, b2], 0.05, 0.9, 0.999, 0.00000001); cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) }  # epoch 2",
+    "trh = concat(trh, [cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr)])",
+    "vah = concat(vah, [cross_entropy(matmul(tanh_fn(matmul(Xva, W1) + matmul(O200, b1)), W2) + matmul(O200, b2), yva)])",
+    "train 25 { adam(cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) + lam * (sum(W1 * W1) + sum(W2 * W2)), [W1, b1, W2, b2], 0.05, 0.9, 0.999, 0.00000001); cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) }  # epoch 3",
+    "trh = concat(trh, [cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr)])",
+    "vah = concat(vah, [cross_entropy(matmul(tanh_fn(matmul(Xva, W1) + matmul(O200, b1)), W2) + matmul(O200, b2), yva)])",
+    "train_val_curve(trh, vah)                     # halfway: train and validation tracking together",
+    "train 25 { adam(cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) + lam * (sum(W1 * W1) + sum(W2 * W2)), [W1, b1, W2, b2], 0.05, 0.9, 0.999, 0.00000001); cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) }  # epoch 4",
+    "trh = concat(trh, [cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr)])",
+    "vah = concat(vah, [cross_entropy(matmul(tanh_fn(matmul(Xva, W1) + matmul(O200, b1)), W2) + matmul(O200, b2), yva)])",
+    "train 25 { adam(cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) + lam * (sum(W1 * W1) + sum(W2 * W2)), [W1, b1, W2, b2], 0.05, 0.9, 0.999, 0.00000001); cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) }  # epoch 5",
+    "trh = concat(trh, [cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr)])",
+    "vah = concat(vah, [cross_entropy(matmul(tanh_fn(matmul(Xva, W1) + matmul(O200, b1)), W2) + matmul(O200, b2), yva)])",
+    "train 25 { adam(cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) + lam * (sum(W1 * W1) + sum(W2 * W2)), [W1, b1, W2, b2], 0.05, 0.9, 0.999, 0.00000001); cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr) }  # epoch 6",
+    "trh = concat(trh, [cross_entropy(matmul(tanh_fn(matmul(Xtr, W1) + matmul(O30, b1)), W2) + matmul(O30, b2), ytr)])",
+    "vah = concat(vah, [cross_entropy(matmul(tanh_fn(matmul(Xva, W1) + matmul(O200, b1)), W2) + matmul(O200, b2), yva)])",
+    "train_val_curve(trh, vah)                     # final: the gap stayed small -- the penalty tamed it",
+    "preds = argmax(softmax(matmul(tanh_fn(matmul(Xva, W1) + matmul(O200, b1)), W2) + matmul(O200, b2), 1), 1)",
+    "val_accuracy = mean(eq(preds, yva))           # accuracy on unseen data (~0.8, despite the over-capacity net)",
+    "val_accuracy",
+]
+
+[[demos]]
+category = "Training & Learning"
+name = "Learning Rate: too big, too small, just right"
+intro = "The learning rate is the size of each downhill step, and it is the single most important knob in training. We reuse the loss surface from 'How Gradient Descent Works' (fitting y = w*x + b) and run gradient descent from the SAME bad starting guess three times, changing only the step size. The white path on each [[loss_landscape]] shows what happens."
+takeaway = "Too small (0.003): the steps are so tiny the path barely leaves the start -- it would get there eventually, but you would wait forever and waste compute. Just right (0.15): the path walks straight down into the dark basin in a handful of steps. Too big (0.7): each step overshoots the minimum so badly that the loss grows instead of shrinking -- the path zig-zags and flies off the chart as the weights blow up (NaNs, in a real run). The usable range is wide but bounded; people find it by trying a few values an order of magnitude apart, or use a schedule that starts higher and decays. Adam (in the other demos) adapts an effective step per weight, which makes it far more forgiving than this raw gradient descent."
+lines = [
+    "x = linspace(-2, 2, 11)",
+    "y = 2 * x + 1 + randn(5, [11]) * 0.3          # the same noisy line as 'How Gradient Descent Works'",
+    "G = grid([-1, 5, -3, 3], 28)                  # 28x28 grid of (w, b) guesses",
+    "wcol = reshape(take(transpose(G), 0, 0), [784, 1])",
+    "bcol = reshape(take(transpose(G), 0, 1), [784, 1])",
+    "preds = matmul(wcol, reshape(x, [1, 11])) + matmul(bcol, ones([1, 11]))",
+    "resid = preds - matmul(ones([784, 1]), reshape(y, [1, 11]))",
+    "surf = reduce_add(resid * resid, 1) / 11      # the shared loss surface (dark = low loss)",
+    "w = 4.5                                       # TOO SMALL (lr = 0.003): the path barely moves",
+    "b = -2.5",
+    "path = [[w, b]]",
+    "repeat 40 { e = (w * x + b) - y; dw = mean(e * x) * 2; db = mean(e) * 2; w = w - 0.003 * dw; b = b - 0.003 * db; path = concat(path, [[w, b]], 0) }",
+    "pathn = (path - matmul(ones([41, 1]), [[-1, -3]])) / matmul(ones([41, 1]), [[6, 6]])",
+    "loss_landscape(surf, [28, 28], pathn)         # too small: stuck near the start",
+    "w = 4.5                                       # JUST RIGHT (lr = 0.15): straight down into the basin",
+    "b = -2.5",
+    "path = [[w, b]]",
+    "repeat 40 { e = (w * x + b) - y; dw = mean(e * x) * 2; db = mean(e) * 2; w = w - 0.15 * dw; b = b - 0.15 * db; path = concat(path, [[w, b]], 0) }",
+    "pathn = (path - matmul(ones([41, 1]), [[-1, -3]])) / matmul(ones([41, 1]), [[6, 6]])",
+    "loss_landscape(surf, [28, 28], pathn)         # just right: reaches the dark basin",
+    "w = 4.5                                       # TOO BIG (lr = 0.7): overshoots and diverges",
+    "b = -2.5",
+    "path = [[w, b]]",
+    "repeat 40 { e = (w * x + b) - y; dw = mean(e * x) * 2; db = mean(e) * 2; w = w - 0.7 * dw; b = b - 0.7 * db; path = concat(path, [[w, b]], 0) }",
+    "pathn = (path - matmul(ones([41, 1]), [[-1, -3]])) / matmul(ones([41, 1]), [[6, 6]])",
+    "loss_landscape(surf, [28, 28], pathn)         # too big: zig-zags off the chart",
+]
+
+[[demos]]
 category = "Basics"
 name = "BPE-Labeled Attention Pattern"
 intro = "Saga BPE-2: tokenize a short text with train_bpe + apply_tokenizer, decode each token id back to its byte string via decode_each, then run attention on the embedded sequence. Click the `A` sculpture (rank-3 [heads, T, T] attention weights) and the heatmap axes label rows + columns with the actual BPE pieces -- not integer indices -- because `labels = decode_each(...)` rode through the new ShapeInfo.string_list channel into the next attention sculpture."

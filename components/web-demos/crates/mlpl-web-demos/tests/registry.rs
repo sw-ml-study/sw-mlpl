@@ -48,6 +48,9 @@ const SKIP_DEMOS: &[&str] = &[
     // Companion: 100 Adam steps on a 200-point train + 200-point val set.
     // Heavy on dev; generalize_demo_tests.rs covers the run + accuracy.
     "Watch a Model Generalize (no overfitting)",
+    // 150 Adam steps over a hand-rolled net + L2 penalty. Heavy on dev;
+    // regularization_lr_tests.rs covers the run + accuracy.
+    "Taming Overfitting: Weight Decay",
     "Circles MLP",
     "Transformer Block",
     "Pets: cat vs dog (quick)",
@@ -72,6 +75,18 @@ fn run_demo(demo_name: &str, lines: &[&str]) -> Result<(), String> {
             .map_err(|e| format!("[{demo_name} line {i}] eval: {e:?}"))?;
     }
     Ok(())
+}
+
+#[test]
+fn learning_rate_demo_evals() {
+    // Light (scalar GD), so eval the exact generated lines here rather than
+    // waiting for the full quick smoke -- catches any demos.toml typo.
+    let name = "Learning Rate: too big, too small, just right";
+    let d = DEMOS
+        .iter()
+        .find(|d| d.name == name)
+        .expect("LR demo present");
+    run_demo(d.name, d.lines).expect("LR demo evals");
 }
 
 #[test]
