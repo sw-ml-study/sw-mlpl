@@ -36,6 +36,13 @@ pub fn connect_eval(program: &str, on_result: ResultCb) -> bool {
     let Some(url) = current_connect_url_from_window() else {
         return false;
     };
+    // The browser will block this fetch (https page -> http server) before it
+    // leaves the tab. Short-circuit with a clear explanation instead of a
+    // cryptic "Failed to fetch".
+    if let Some(reason) = crate::connect_guard::connect_blocked_reason() {
+        on_result(format!("error: {reason}"));
+        return true;
+    }
     CONNECT_EVALUATOR.with(|cell| {
         if cell.borrow().is_none() {
             *cell.borrow_mut() = Some(RemoteEvaluator::new(url));

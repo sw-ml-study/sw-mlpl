@@ -8,6 +8,7 @@
 //! serde_json, wasm-bindgen-futures) so this crate is a
 //! clean leaf in the dep DAG.
 
+pub mod connect_guard;
 pub mod connect_viz;
 pub mod devices;
 pub mod eval;

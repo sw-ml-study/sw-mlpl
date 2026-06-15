@@ -64,6 +64,11 @@ fn set_connect(url: Option<&str>) {
 /// connected to (+ devices) for a Disconnect; otherwise the proxy's
 /// backend list, or the no-proxy note.
 async fn discover(connected: Option<String>) -> Panel {
+    // An https demo page can't reach an http connect server (mixed content);
+    // show why instead of trying to fetch /v1/devices and failing.
+    if let Some(reason) = mlpl_web_eval::connect_guard::connect_blocked_reason() {
+        return Panel::Note(reason);
+    }
     if let Some(url) = connected {
         let info = get_json(&format!("{}/v1/devices", url.trim_end_matches('/'))).await;
         let field = |k: &str| info.as_ref().and_then(|b| b.get(k));
@@ -154,8 +159,14 @@ pub fn connect_button() -> Html {
             });
         })
     };
-    let label = if connected.is_some() {
+    // Only claim "Connected" when the server is actually reachable. When the
+    // connect URL is blocked (https page -> http server), keep the button on
+    // "Connect" with a warning glyph; clicking explains why.
+    let blocked = mlpl_web_eval::connect_guard::connect_blocked_reason().is_some();
+    let label = if connected.is_some() && !blocked {
         "Connected \u{2713}"
+    } else if blocked {
+        "Connect \u{26a0}"
     } else {
         "Connect"
     };
