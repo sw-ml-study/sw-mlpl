@@ -1,16 +1,14 @@
 //! Learning paths: curated ordered walks through the
 //! tutorial / demo / diagram / glossary surfaces.
 //!
-//! Saga 82 split the original `paths.rs` into a types module
-//! (`LearningPath` + `Step`), an aggregator module (the `PATHS`
-//! const), and per-theme data modules. lib.rs stays a facade.
+//! The path PROSE lives in `paths.toml`; `build.rs` generates the `PATHS`
+//! const from it into `OUT_DIR` (included below), so content stays in data
+//! and out of Rust source. `types` holds the `LearningPath` + `Step` defs the
+//! generated const references. lib.rs stays a facade.
 
-pub mod aggregator;
-pub mod architectures;
-pub mod history;
-pub mod skills;
 pub mod types;
-pub mod visual;
 
-pub use aggregator::PATHS;
 pub use types::{LearningPath, Step};
+
+// `pub const PATHS: &[LearningPath]`, generated from paths.toml by build.rs.
+include!(concat!(env!("OUT_DIR"), "/paths.rs"));
