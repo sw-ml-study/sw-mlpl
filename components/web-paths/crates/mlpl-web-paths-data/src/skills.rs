@@ -319,17 +319,17 @@ pub(super) const PATH_HOW_DOES_ML_WORK__START_HERE: LearningPath = LearningPath 
             term: "Gradient descent",
             why: "The name for that downhill walk. The gradient is the slope; you step against it to reduce the loss.",
         },
-        Step::Glossary {
-            term: "Loss Landscape",
-            why: "The surface you just watched. Training is search for its lowest point.",
-        },
         Step::Demo {
             name: "Watch a Model Learn (overfitting)",
             why: "Now a real (over-powered) network on noisy data. Training and validation loss are plotted together so you see the model start to memorize noise -- the most important failure mode in ML.",
         },
         Step::Glossary {
             term: "Overfitting / Underfitting",
-            why: "The gap you saw between the green and orange curves. Memorizing the training set is not the same as learning.",
+            why: "The gap you saw between the green dashed and peach dotted curves. Memorizing the training set is not the same as learning.",
+        },
+        Step::Demo {
+            name: "Watch a Model Generalize (no overfitting)",
+            why: "The cure, in action: the same loop with ample data and a right-sized model, so train and validation fall together and stay low. The contrast with the demo above is the whole lesson -- overfitting is a data-vs-capacity balance, not a bug.",
         },
         Step::Demo {
             name: "Decision Boundary: XOR (with MLP)",
