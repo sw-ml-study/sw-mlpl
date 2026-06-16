@@ -33,7 +33,11 @@ pub fn mode_bar(props: &ModeBarProps) -> Html {
     let peer_devices = use_peer_devices();
     let demo_dropdown =
         render_demo_dropdown(props.tutorial_active, props.on_demo.clone(), &peer_devices);
-    let upload_widget = render_upload_widget(props);
+    let upload_widget = if props.tutorial_active {
+        html! {}
+    } else {
+        render_upload_widget(props)
+    };
     html! {
         <div class={cls}>
             { demo_dropdown }
@@ -82,9 +86,6 @@ fn render_demo_dropdown(
 }
 
 fn render_upload_widget(props: &ModeBarProps) -> Html {
-    if props.tutorial_active {
-        return html! {};
-    }
     let input_ref = props.upload_input_ref.clone();
     let on_click = Callback::from(move |_: MouseEvent| {
         if let Some(input) = input_ref.cast::<web_sys::HtmlInputElement>() {

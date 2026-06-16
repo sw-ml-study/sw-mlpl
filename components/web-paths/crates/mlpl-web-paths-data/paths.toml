@@ -44,6 +44,11 @@ name = "Watch a Model Generalize (no overfitting)"
 
 [[paths.steps]]
 kind = "demo"
+why = "The third cure, when you cannot get more data or shrink the model: regularization. Same over-capacity net on the same tiny data, but an L2 penalty in the loss keeps the weights small -- and the validation gap closes. Overfit, generalize, regularize: the full story."
+name = "Taming Overfitting: Weight Decay"
+
+[[paths.steps]]
+kind = "demo"
 why = "Why we stack layers: a single linear model cannot separate XOR, but one hidden layer + a nonlinearity bends the boundary until it can. The leap from 'line' to 'neural network'."
 name = "Decision Boundary: XOR (with MLP)"
 
