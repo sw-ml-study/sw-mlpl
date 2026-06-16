@@ -2044,6 +2044,8 @@ dependencies = [
 name = "mlpl-web-lessons"
 version = "0.20.0"
 dependencies = [
+ "serde",
+ "toml",
  "yew",
 ]
 
