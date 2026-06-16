@@ -3,12 +3,16 @@ name = "mlpl-web-lessons"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
+build = "build.rs"
 
-# Saga 32 step 003: tutorial-lesson static content extracted
-# from apps/mlpl-web. Self-contained leaf crate: `lessons.rs`
-# (basic/intermediate lessons + Lesson type), `lessons_advanced`
-# (saga-era deeper lessons), and `intro_md` (the tutorial-intro
-# markdown-to-html renderer). Only `yew` is external.
+# Tutorial-lesson content. The PROSE + example code live in lessons.toml;
+# build.rs generates the LESSONS const from it. `lessons` holds the Lesson
+# type + generated array, `intro_md` the tutorial-intro markdown renderer.
 
 [dependencies]
 yew = { version = "0.21", features = ["csr"] }
+
+# build-only -- the toml parser is not in the wasm bundle.
+[build-dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "0.8"

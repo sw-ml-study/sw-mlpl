@@ -1,0 +1,862 @@
+[[lessons]]
+title = "What is ML, and why are we here?"
+intro = "Machine learning is what you do when you cannot write the rules but you can show examples. Instead of `if x > 0.5 then ...`, you collect labeled data, define a parameterized function (a model), pick a loss that scores its predictions against the labels, and use gradient descent to nudge the parameters toward lower loss. Every classifier, regressor, MLP, attention block, and language model in this tutorial is a variation on that recipe -- linear regression is the smallest example, GPT is the largest. MLPL exists to make the variation visible: the inner loop of any model is a few lines of array code, not a wall of framework tensors. Read each lesson's `examples` block as a small worked example of the recipe; the `try_it` line at the end is a knob to twist."
+examples = [
+    "X = [[0,0],[0,1],[1,0],[1,1]]",
+    "y = [0, 0, 0, 1]",
+    "w = zeros([2])",
+    "b = 0",
+    "z = matmul(X, reshape(w, [2, 1])) + b",
+    "pred = sigmoid(z)",
+    "loss = mean((pred - reshape(y, [4, 1])) * (pred - reshape(y, [4, 1])))",
+    "loss",
+]
+try_it = 'The next lessons walk the recipe end-to-end on increasingly capable models. "Hello Numbers" starts with the smallest possible MLPL expressions; "Logistic Regression" trains the toy classifier this lesson sketched; "Tiny LM" trains a 1-layer transformer.'
+
+[[lessons]]
+title = "A short history of ML"
+intro = "Each ML era introduced one architectural idea that solved a problem the prior generation could not. The **Perceptron** (Rosenblatt 1958) -- a single linear layer plus a threshold -- proved that a machine could learn from labeled examples; AI winter set in when Minsky and Papert showed it could not solve XOR. The **MLP** (multi-layer perceptron) crossed that gap by adding a hidden layer + a non-linear activation, but training was unwieldy until **backpropagation** was popularized (Rumelhart, Hinton, Williams 1986). **CNNs** (LeCun 1989) used weight-sharing and convolutions to handle images; **RNNs** and **LSTMs** (1997) handled sequences. The **Transformer** (Vaswani et al. 2017) replaced recurrence with attention, unlocking the LM era we are in now. MLPL ships the Perceptron, MLP, and Transformer pieces directly; CNN and RNN are deferred so the historical arc is teachable but not yet runnable in MLPL."
+examples = [
+    "perceptron = chain(linear(2, 1, 0), tanh_layer())",
+    "shape(apply(perceptron, [[0,0],[0,1],[1,0],[1,1]]))",
+    "mlp = chain(linear(2, 4, 1), tanh_layer(), linear(4, 1, 2))",
+    "shape(apply(mlp, [[0,0],[0,1],[1,0],[1,1]]))",
+    "attn_layer = attention(8, 1, 3)",
+    "shape(apply(attn_layer, randn(0, [4, 8])))",
+]
+try_it = "The progression from perceptron to MLP to transformer is two architectural leaps: adding a hidden layer (Perceptron -> MLP solves XOR) and replacing matrix mixing across positions with attention (MLP -> Transformer solves long-range dependencies). Try classifying the XOR data with `perceptron` (it cannot) and then with `mlp` (it can) by training each through `train` blocks."
+
+[[lessons]]
+title = "How models learn: a short history of training paradigms"
+intro = """
+Architecture (Perceptron / MLP / Transformer) is half the story of ML history; the other half is **how models get their training signal**.
+
+## Working in MLPL today
+
+- **Supervised learning** -- the classical paradigm. Minimize a per-example loss against human-supplied labels (Logistic Regression, Tiny MLP, Softmax Classifier demos).
+- **Unsupervised learning** -- drop the labels entirely and discover structure from geometry alone. K-Means clusters, PCA finds the principal axis, t-SNE preserves local distances.
+- **Self-supervised learning** -- keep the supervised loss, but derive the labels from the input itself. Next-token prediction is the canonical example: MLPL's `shift_pairs_x` / `shift_pairs_y` pairing in the Tiny LM demo is exactly this. The label for token t is just token t+1, no humans involved.
+
+---
+
+## The LLM-era stack (mostly deferred in MLPL today)
+
+Modern LLMs start with a long self-supervised pretraining phase, then layer on smaller human-touched stages:
+
+- **RLHF** -- preference learning over (chosen, rejected) pairs. Deferred: needs a preference loss surface.
+- **Distillation** -- train a student against a teacher's softened logits via KL-divergence. Deferred: needs `kl_div` / `soft_targets` builtins (the Module 11 blocker in `docs/course-outline.md`).
+- **Self-play** -- an agent generates its own training signal by playing itself, the AlphaGo / AlphaZero pattern. Deferred: needs environment + reward primitives.
+
+---
+
+## Why the arc isn't strictly chronological
+
+Supervised learning never went away -- it just stopped being enough on its own at scale. Today's frontier models still use it, layered between self-supervised pretraining and the human-touched stages above. Each new paradigm extends the toolkit; none replace what came before."""
+examples = [
+    "y_true = [0, 1, 0, 1]  # Supervised paradigm: each input row needs a known label, supplied by a human or curation pipeline. Here y_true is a length-4 vector of class ids -- we are TELLING the model the right answer for each example.",
+    "logits = [[2.0, -1.0], [-0.5, 1.5], [1.0, 0.0], [-1.0, 1.0]]  # A 4-row x 2-class logit matrix. In a real classifier this would be the output of `apply(model, X)`; here we hardcode it so the loss math is visible without training.",
+    "supervised_loss = cross_entropy(logits, y_true)  # cross_entropy(logits, labels) is the canonical supervised loss for classification. Minimizing it via gradient descent makes the model assign higher logit to the correct class on each row.",
+    "supervised_loss  # The scalar loss prints. Lower = better. In a real training loop we would call grad(supervised_loss, ...) and step the weights.",
+    "X = randn(0, [60, 2])  # Unsupervised paradigm: no labels at all. We start with 60 random points in 2D and ask: what STRUCTURE is in this data? The next line manufactures structure by stretching the cloud along one axis.",
+    "X_pca = pca(matmul(X, [[1, 2], [0, 0.3]]), 2)  # Stretch X anisotropically with a 2x2 transform, then project onto the top 2 principal components. PCA found the high-variance axis using only geometry -- zero labels were used.",
+    "shape(X_pca)  # [60, 2] -- same shape as the (stretched) input. PCA is a CHANGE OF BASIS to the axes ranked by variance, not a dimensionality cut here.",
+    "ids = [3, 7, 2, 9, 4, 1, 8, 5, 6, 0]  # Self-supervised paradigm: a sequence of token ids. Pretend this came from running tokenize_bytes on a corpus. There are no human labels, but we will MANUFACTURE labels from the data itself on the next line.",
+    "self_X = shift_pairs_x(ids, 4)  # Build input windows of length 4 by sliding over `ids`. Each window says: 'given these 4 tokens...'",
+    "self_Y = shift_pairs_y(ids, 4)  # ...what is the very next token? The label for window i is just ids[i+4]. No human ever said 'this is the right answer' -- we DERIVED labels from the input itself. This is exactly how every modern LLM is pretrained.",
+    "shape(self_X)  # Confirm the [windows, 4] shape -- each row is an X for one training example.",
+    "shape(self_Y)  # Same number of rows as self_X. The (X, Y) pair feeds straight into a supervised loss like cross_entropy(apply(model, X), Y), but no human labels exist.",
+]
+try_it = "The three working examples cover supervised / unsupervised / self-supervised. RLHF, distillation, and self-play are deferred until MLPL ships preference loss + `kl_div` + environment primitives. Try sketching distillation by hand: pick a teacher logit vector `t = [2.0, -1.0, 0.5]`, soften with temperature 2 via `softmax(t / 2.0, 0)`, and a student via `softmax(s / 2.0, 0)`; the KL loss is `reduce_add(p * (log(p) - log(q)))` -- that's the formula a future `kl_div` builtin would wrap. The Module 11 distillation gap in `docs/course-outline.md` traces exactly this missing piece."
+
+[[lessons]]
+title = "Why backprop?"
+intro = """Backpropagation is just the chain rule applied to a computation graph. Before it was popularized in 1986, the gradient of a model's loss was a per-architecture derivation: hand-derive `dW = X^T (pred - y) / N` for linear regression, a different formula for logistic regression, and a third for a two-layer MLP. Backprop generalizes that work: build the forward graph; the backward walk produces every gradient automatically. The "Logistic Regression" and "Tiny MLP" lessons in this tutorial show the manual chain-rule version (`dZ2 = pred - y`, `dZ1 = (dZ2 W2^T) * (1 - H * H)`); the "Automatic Differentiation" lesson shows the `grad(loss, wrt)` version that automates it. Both compute the same gradient. The win is not faster math -- it is faster *iteration*: changing your loss or your model no longer means redoing pages of derivative calculus."""
+examples = [
+    "X = [[1.0], [2.0], [3.0]]",
+    "y = [2.0, 4.0, 6.0]",
+    "W = param[1, 1]",
+    "W = randn(0, [1, 1])",
+    "pred = matmul(X, W)",
+    "manual_dW = matmul(transpose(X), reshape(pred - reshape(y, [3, 1]), [3, 1])) / 3.0",
+    "loss = mean((pred - reshape(y, [3, 1])) * (pred - reshape(y, [3, 1])))",
+    'auto_dW = grad(loss, "W")',
+    "manual_dW",
+    "auto_dW",
+]
+try_it = "Confirm `manual_dW` and `auto_dW` are the same up to floating-point noise. Then change the loss expression (e.g. add a regularizer `+ 0.01 * reduce_add(W * W)`) and watch how `grad` keeps working without any hand-derivation -- which is the entire point of backprop."
+
+[[lessons]]
+title = "Hello Numbers"
+intro = "MLPL starts with simple arithmetic. Numbers are scalars. The four basic operators (+, -, *, /) work as you expect, and parentheses control order of operations."
+examples = [
+    "1 + 2",
+    "3 * 4",
+    "10 / 3",
+    "2 + 3 * 4",
+    "(2 + 3) * 4",
+    "-5",
+    "-3 + 7",
+]
+try_it = "Try computing the area of a circle with radius 5: 3.14 * 5 * 5"
+
+[[lessons]]
+title = "Arrays"
+intro = "Arrays are MLPL's main data type. Square brackets create a vector. Operators apply element-wise. A scalar is automatically broadcast to match an array's shape."
+examples = [
+    "[1, 2, 3]",
+    "[1, 2, 3] + [4, 5, 6]",
+    "[10, 20, 30] - [1, 2, 3]",
+    "[1, 2, 3] * 10",
+    "100 + [1, 2, 3]",
+    "-[1, 2, 3]",
+]
+try_it = "Create a vector and double every element. Then add 1 to each."
+
+[[lessons]]
+title = "Variables"
+intro = "Bind values to names with =. Variables persist across REPL lines, so you can build up larger computations. Reassignment is allowed."
+examples = [
+    "x = 42",
+    "x + 1",
+    "x * x",
+    "name = [10, 20, 30]",
+    "doubled = name * 2",
+    "doubled",
+    "x = 100",
+    "x",
+]
+try_it = "Store your favorite number in `n`, then compute n * n - n."
+
+[[lessons]]
+title = "Built-in Functions"
+intro = "Functions are called with parentheses. range(n) generates the sequence 0..n-1. shape() and rank() inspect arrays. reduce_add and reduce_mul sum or multiply all elements."
+examples = [
+    "range(5)",
+    "range(10)",
+    "v = range(6)",
+    "shape(v)",
+    "rank(v)",
+    "reduce_add(v)",
+    "reduce_mul([1, 2, 3, 4])",
+]
+try_it = "Use range and reduce_add to compute the sum 0 + 1 + ... + 99."
+
+[[lessons]]
+title = "Matrices"
+intro = "reshape turns a flat vector into a multi-dimensional array. transpose flips rows and columns. Reductions can target a specific axis: 0 collapses rows, 1 collapses columns."
+examples = [
+    "x = range(12)",
+    "m = reshape(x, [3, 4])",
+    "m",
+    "transpose(m)",
+    "shape(m)",
+    "reduce_add(m, 0)",
+    "reduce_add(m, 1)",
+]
+try_it = "Build a 2x5 matrix from range(10) and sum each column."
+
+[[lessons]]
+title = "Named Axes"
+intro = 'Axes can carry names as well as sizes. Attach them with label(x, ["a", "b"]) or the annotation syntax x : [a, b] = ... . labels(x) reads them back as a comma-joined string. transpose swaps labels alongside dims. reshape clears labels (the new axes are genuinely new); reshape_labeled attaches fresh labels in one step. Reductions and softmax accept an axis name -- reduce_add(x, "feat") -- instead of a positional integer. matmul requires the contraction axis labels to match; a disagreement surfaces as a ShapeMismatch error that names both labeled shapes. relabel(x, [...]) is the explicit escape hatch when you want to override labels mid-expression.'
+examples = [
+    "v : [seq] = range(5)",
+    "labels(v)",
+    "M : [batch, feat] = reshape(range(6), [2, 3])",
+    "labels(M)",
+    "labels(transpose(M))",
+    "labels(reshape(M, [6]))",
+    'labels(reshape_labeled(range(6), [2, 3], ["rows", "cols"]))',
+    'reduce_add(M, "feat")',
+    'labels(reduce_add(M, "feat"))',
+    "A : [seq, d] = reshape(range(6), [2, 3])",
+    "B : [d, heads] = reshape(range(12), [3, 4])",
+    "labels(matmul(A, B))",
+    'labels(relabel(v, ["time"]))',
+]
+try_it = "Create Q : [seq, d_k] and K : [seq, d_k], then read the labels of matmul(Q, transpose(K)). What axis names come out?"
+
+[[lessons]]
+title = "Loading Data"
+intro = "Text and CSV corpora enter MLPL through load() and load_preloaded(). The terminal REPL reads relative paths under its --data-dir sandbox; the web REPL uses a compiled-in corpus registry instead of the filesystem. shuffle(x, seed) permutes rows deterministically. batch(x, size) packs rows into fixed-size batches with zero-padding; batch_mask(x, size) gives the matching 0/1 mask so training code can ignore padded rows. split(x, train_frac, seed) and val_split(x, train_frac, seed) share a seed to return disjoint training and validation chunks. for row in ds { body } iterates rank-(r-1) slices along axis 0 and captures each iteration's final value into last_rows."
+examples = [
+    'text = load_preloaded("tiny_corpus")',
+    "text",
+    "data = reshape(range(12), [6, 2])",
+    "shuffled = shuffle(data, 7)",
+    "shuffled",
+    "b = batch(range(5), 2)",
+    "b",
+    "batch_mask(range(5), 2)",
+    "trset = split(range(10), 0.8, 42)",
+    "vaset = val_split(range(10), 0.8, 42)",
+    "trset",
+    "vaset",
+    "for row in reshape(range(6), [3, 2]) { reduce_add(row) }",
+    "last_rows",
+]
+try_it = "Load tiny_corpus, then use shape() to find its length. Then split range(20) into 80/20 trset/vaset chunks and verify they cover the full 20-element range. (Named `trset`/`vaset` because `train` is a language keyword for training loops.)"
+
+[[lessons]]
+title = "Tokenizing Text"
+intro = "Byte-level tokenization turns a string into a sequence of byte indices 0..=255. tokenize_bytes(str) encodes; decode_bytes(tokens) decodes. BPE (byte-pair encoding) compresses common byte pairs into new tokens: train_bpe(corpus, vocab_size, seed) returns a trained tokenizer (a Value::Tokenizer); apply_tokenizer(tok, text) encodes through it; decode(tok, tokens) is the inverse. The round-trip decode(tok, apply_tokenizer(tok, s)) == s holds for every byte sequence, whether or not s was in the training corpus. :describe on a tokenizer reports vocab size and merge count."
+examples = [
+    'tokenize_bytes("hello")',
+    "decode_bytes([104, 101, 108, 108, 111])",
+    'decode_bytes(tokenize_bytes("round trip"))',
+    'bpe = train_bpe("abababab", 260, 7)',
+    'apply_tokenizer(bpe, "abababab")',
+    'decode(bpe, apply_tokenizer(bpe, "unseen text"))',
+    'corpus = load_preloaded("tiny_corpus")',
+    "bpe2 = train_bpe(corpus, 320, 0)",
+    "shape(apply_tokenizer(bpe2, corpus))",
+]
+try_it = "Train a BPE tokenizer on the preloaded corpus with vocab 320. Then tokenize a different short sentence through it and confirm decode round-trips it."
+
+[[lessons]]
+title = "Linear Algebra"
+intro = "dot(a, b) computes the dot product of two vectors. matmul(A, B) is matrix multiplication: an [m, k] matrix times a [k, n] matrix yields an [m, n] result. These are the building blocks of ML."
+examples = [
+    "dot([1, 2, 3], [4, 5, 6])",
+    "A = reshape(range(4), [2, 2])",
+    "B = reshape([1, 0, 0, 1], [2, 2])",
+    "matmul(A, B)",
+    "W = reshape([1, 2, 3, 4, 5, 6], [3, 2])",
+    "x = reshape([1, 1], [2, 1])",
+    "matmul(W, x)",
+]
+try_it = "Multiply a 2x3 matrix by a 3x1 column vector. What's the result shape?"
+
+[[lessons]]
+title = "Math and Activations"
+intro = "exp, log, sqrt, abs apply element-wise. pow does element-wise exponentiation. sigmoid and tanh_fn are smooth activation functions used in neural networks."
+examples = [
+    "exp(0)",
+    "exp([0, 1, 2])",
+    "log(exp(1))",
+    "sqrt([1, 4, 9, 16])",
+    "abs([-3, 0, 5])",
+    "pow([2, 3, 4], 2)",
+    "sigmoid(0)",
+    "sigmoid([-2, -1, 0, 1, 2])",
+    "tanh_fn([-1, 0, 1])",
+]
+try_it = "Apply sigmoid to a vector of negative numbers. What's the range?"
+
+[[lessons]]
+title = "Comparisons and Logic"
+intro = "gt, lt, eq compare element-wise and return 0 or 1. Multiplying by a comparison result acts as a mask. mean gives the arithmetic mean of all elements."
+examples = [
+    "gt([3, 1, 4], 2)",
+    "lt([1, 5, 3], 4)",
+    "eq([1, 2, 3], [1, 0, 3])",
+    "scores = [55, 72, 88, 91, 43]",
+    "passed = gt(scores, 60)",
+    "passed",
+    "mean(passed)",
+    "mean(scores)",
+]
+try_it = "Compute the fraction of elements in range(10) that are greater than 5."
+
+[[lessons]]
+title = "Loops and Iteration"
+intro = "repeat N { body } runs the body N times. Combined with assignment, this lets you accumulate values or run iterative algorithms. This is the foundation for gradient descent."
+examples = [
+    "x = 0",
+    "repeat 10 { x = x + 1 }",
+    "x",
+    "total = 0",
+    "repeat 100 { total = total + 1 }",
+    "total",
+    "v = ones([3])",
+    "repeat 5 { v = v * 2 }",
+    "v",
+]
+try_it = "Use repeat to compute 2^10 by doubling a variable starting at 1."
+
+[[lessons]]
+title = "Machine Learning: Logistic Regression"
+intro = "Now the payoff. Train a 2-input logistic regression model to learn the AND gate. The model is just matmul + sigmoid. Gradient descent updates the weights to minimize prediction error. After 300 iterations the model is 100% accurate."
+examples = [
+    "X = [[0,0],[0,1],[1,0],[1,1]]",
+    "y = [0, 0, 0, 1]",
+    "w = zeros([2])",
+    "b = 0",
+    "lr = 1.0",
+    "n = 4",
+    "repeat 300 { z = matmul(X, reshape(w, [2, 1])) + b; pred = sigmoid(z); dz = pred - reshape(y, [4, 1]); dw = reshape(matmul(transpose(X), dz), [2]) / n; db = mean(dz); w = w - lr * dw; b = b - lr * db }",
+    "w",
+    "b",
+    "pred = sigmoid(matmul(X, reshape(w, [2, 1])) + b)",
+    "rounded = gt(pred, 0.5)",
+    "accuracy = mean(eq(reshape(rounded, [4]), y))",
+    "accuracy",
+    'svg(reshape(pred, [4]), "bar")',
+]
+try_it = "Change y to [0, 1, 1, 1] and retrain. You just learned the OR gate!"
+
+[[lessons]]
+title = "Visualizing Data"
+intro = 'svg(data, type) renders an array as an inline SVG diagram. Four diagram types are built in: "scatter" for an Nx2 matrix of (x,y) points, "line" for a vector or Nx2 matrix, "bar" for a vector, and "heatmap" for an MxN matrix. The browser REPL displays the SVG inline.'
+examples = [
+    'svg([[0,0],[1,1],[2,4],[3,9],[4,16]], "scatter")',
+    'svg([1, 3, 2, 5, 4, 6], "line")',
+    'svg([3, 1, 4, 1, 5, 9, 2, 6], "bar")',
+    'svg(reshape(range(25), [5, 5]), "heatmap")',
+    "ws = range(20) / 4 - 2",
+    "losses = ws * ws + 1",
+    'svg(losses, "line")',
+]
+try_it = "Build a vector of squares with range and pow, then render it as a bar chart."
+
+[[lessons]]
+title = "Visualizing Analyses"
+intro = "High-level helpers compute the right view of your data and render a complete diagram in one call. hist makes a histogram, scatter_labeled colors points by cluster id, loss_curve plots a training loss vector, confusion_matrix renders a KxK heatmap of class predictions vs actuals, and boundary_2d renders a 2D classifier decision surface with training points overlaid."
+examples = [
+    "hist([1, 2, 2, 3, 3, 3, 4, 4, 5], 5)",
+    "scatter_labeled([[0,0],[1,1],[0,1],[1,0]], [0, 0, 1, 1])",
+    "loss_curve([5, 3, 2, 1.5, 1.0, 0.7, 0.5, 0.4, 0.3, 0.25])",
+    "confusion_matrix([0, 1, 2, 1, 0], [0, 1, 1, 1, 0])",
+]
+try_it = "Generate a histogram of range(20) with 5 bins."
+
+[[lessons]]
+title = "Unsupervised: K-Means"
+intro = "K-Means clustering finds K groups in unlabeled data by repeating two steps: (1) assign each point to its nearest cluster center, and (2) move each center to the mean of its assigned points. We use blobs() to make a synthetic dataset, then express the whole Lloyd iteration with matmul, reduce_add, and argmax -- no per-point loops. The assignment mask is built from eq(range(K), labels) broadcast via matmul."
+examples = [
+    "D = blobs(7, 20, [[0, 0], [4, 4], [-4, 4]])",
+    "X = matmul(D, [[1,0],[0,1],[0,0]])",
+    "C = [[1, 1], [3, 3], [-3, 3]]",
+    "sqX = reshape(reduce_add(X*X, 1), [60, 1])",
+    "sqC = reshape(reduce_add(C*C, 1), [1, 3])",
+    "dists = matmul(sqX, ones([1, 3])) + matmul(ones([60, 1]), sqC) - 2 * matmul(X, transpose(C))",
+    "clus = argmax(-1 * dists, 1)",
+    "scatter_labeled(X, clus)",
+]
+try_it = "Run a full K-Means from the K-Means demo and compare the learned centers to the true centers [[0,0],[4,4],[-4,4]]."
+
+[[lessons]]
+title = "Why reduce dimensions?"
+intro = "Two motivations. (1) Visualization: a screen has two coordinates; high-dim data does not. To eyeball a learned embedding -- 'are the cat images close to the dog images, or far?' -- you need a 2-D projection. (2) The manifold hypothesis: real high-D data (images, embeddings, text representations) lies near a much lower-dimensional manifold inside the ambient space. A 768-D ViT embedding might effectively live on a 10-D manifold; dimensionality reduction finds that manifold. The methods divide into LINEAR (PCA: rotate the data along axes of maximum variance) vs MANIFOLD (t-SNE, UMAP: build a local-neighborhood graph, then optimize a low-D layout that preserves it). Linear is fast and exact; manifold methods recover curved structure that linear projections smear. No code in this lesson -- just the framing. The next five lessons walk the methods in order."
+examples = [
+    "# No code -- this lesson is concept-first.",
+    "# The following 5 lessons walk PCA, SNE, t-SNE, UMAP,",
+    "# and how to read a critical-dimensions heatmap.",
+]
+try_it = "Open the 'Dimensionality reduction' learning path from the Paths tab for a curated walk through the demos and glossary entries this lesson points at. The path takes ~15 minutes; each step has a one-line 'why this is here' framing."
+
+[[lessons]]
+title = "Dimensionality Reduction: PCA"
+intro = "Principal Component Analysis finds the direction along which a dataset varies the most. First center the data by subtracting the column means. The covariance matrix is Xc^T Xc / n. Its dominant eigenvector is the first principal component. Power iteration -- repeatedly multiplying a unit vector by the covariance and renormalizing -- converges to that eigenvector without needing an eigensolver. Projecting the centered data onto the principal axis gives a 1D coordinate you can color points by."
+examples = [
+    "Xraw = randn(1, [60, 2])",
+    "X = matmul(Xraw, [[1, 2], [0, 0.3]])",
+    "cm = reduce_add(X, 0) / 60",
+    "Xc = X - matmul(ones([60, 1]), reshape(cm, [1, 2]))",
+    "Cov = matmul(transpose(Xc), Xc) / 60",
+    "v = [1, 0]",
+    "repeat 10 { v = matmul(Cov, v); v = v / sqrt(dot(v, v)) }",
+    "v",
+]
+try_it = "Change the mixing matrix to [[1, 0], [0, 3]] and verify that the principal axis comes out parallel to (0, 1)."
+
+[[lessons]]
+title = "PCA: the linear baseline"
+intro = "PCA finds the directions of maximum variance in your data. Power iteration converges to the dominant eigenvector of the covariance matrix without an eigensolver. MLPL ships three builtins: pca(X, k) returns the projected data [N, k], pca_components(X, k) returns the loadings [k, D] (each row is one principal-component direction in original feature space), and pca_variance_explained(X, k) returns the [k] variance fractions each component captures. Loadings answer a different question than projections: not 'where did the points go?' but 'which input dimensions drive each component?'. The critical-dimensions heatmap viz renders the loadings with per-component variance percentages. PCA is linear -- it cannot recover curved manifolds -- but it is fast, deterministic, and interpretable. Try it first; reach for UMAP only when PCA's smear is unacceptable."
+examples = [
+    "# Three well-separated 5-D Gaussian clusters.",
+    "ca = [0, 0, 0, 0, 0]",
+    "cb = [5, 5, 5, 5, 5]",
+    "cc = [-5, 5, -5, 5, -5]",
+    "pa = randn(1, [30, 5]) * 0.5 + matmul(ones([30, 1]), reshape(ca, [1, 5]))",
+    "pb = randn(2, [30, 5]) * 0.5 + matmul(ones([30, 1]), reshape(cb, [1, 5]))",
+    "pc = randn(3, [30, 5]) * 0.5 + matmul(ones([30, 1]), reshape(cc, [1, 5]))",
+    "X = concat(concat(pa, pb, 0), pc, 0)",
+    "# Top-2 PROJECTION: where did the points go?",
+    "proj = pca(X, 2)",
+    "tl = concat(concat(zeros([30]), ones([30]), 0), ones([30]) + 1, 0)",
+    "scatter_labeled(proj, tl)",
+    "# Top-3 LOADINGS: which input dims drive each component?",
+    "V = pca_components(X, 3)",
+    "ve = pca_variance_explained(X, 3)",
+    'svg(V, "critical_dimensions", ve)',
+]
+try_it = "Run the 'PCA loadings (critical dimensions)' demo for the full setup. Then change one cluster center so only dim 0 differs (e.g., cb = [5, 0, 0, 0, 0]) and re-render. PC1 should now light up cell 0 strongly (that's the only feature carrying signal) and the other cells should be near zero. The variance-explained percentages also shift: PC1 grabs more, PC2 / PC3 less."
+
+[[lessons]]
+title = "SNE: the very-slow ancestor"
+intro = "Stochastic Neighbor Embedding (Hinton + Roweis, 2002) is t-SNE's predecessor. The setup: high-dim conditional probabilities p_{j|i} = softmax over Gaussian similarities; low-dim conditional probabilities q_{j|i} = softmax over Gaussian similarities again; loss = sum of KL(p_i || q_i). Gradient descent on the low-D coordinates. The math is clean. Two reasons it was abandoned: (1) Asymmetry: p_{j|i} != p_{i|j}, so the loss has no symmetric structure -- the gradient is awkward and the embedding's quality depends on which side of the KL you minimize. (2) Crowding: in low-D, the Gaussian tail decays too fast; well-separated high-D clusters get crushed into one blob because there is not enough 'low-D room' to spread them out. t-SNE fixes both. There is no `sne` builtin -- nobody runs SNE today -- but the failure modes set up why the t-SNE design choices are what they are."
+examples = [
+    "# No builtin: this lesson describes a method that was",
+    "# replaced. Run the t-SNE lesson next to see the fixes.",
+    "# The two t-SNE innovations: (1) symmetric p_ij = (p_{j|i} +",
+    "# p_{i|j}) / 2N, and (2) Student-t (heavy-tailed) q_ij in",
+    "# the low-dim space so well-separated clusters stay separated.",
+]
+try_it = "Look up Hinton + Roweis 2002 (NeurIPS) if you want the original paper. Then read the t-SNE lesson next to see how van der Maaten + Hinton 2008 fixed asymmetry and the crowding problem in one move."
+
+[[lessons]]
+title = "t-SNE: a peek at nonlinear methods"
+intro = "t-SNE (van der Maaten + Hinton, 2008) is SNE with two fixes. (1) SYMMETRIZE: p_ij = (p_{j|i} + p_{i|j}) / 2N, so the loss is symmetric and the gradient is clean. (2) HEAVY-TAILED Q: replace the low-dim Gaussian with a Student-t (Cauchy) distribution. The fat tail means well-separated points in high-D can be put far apart in low-D without the gradient pulling them back -- the crowding problem dissolves. The objective is KL(P || Q) with a single P matrix; gradient descent on the low-D coordinates Y. Perplexity sets the per-row scale: it is the 'effective number of neighbors' you want each point to attend to (typical: 5-50). MLPL: tsne(X, perplexity, iters, seed) returns [N, 2]. Caveat: t-SNE's KL is PURELY LOCAL -- it normalizes per row -- so the distance between clusters in the output is meaningless. Cluster SHAPE is meaningful; cluster POSITION is not."
+examples = [
+    "pa = randn(1, [25, 4]) * 0.5 + matmul(ones([25, 1]), [[0, 0, 0, 0]])",
+    "pb = randn(2, [25, 4]) * 0.5 + matmul(ones([25, 1]), [[3, 0, 0, 0]])",
+    "pc = randn(3, [25, 4]) * 0.5 + matmul(ones([25, 1]), [[15, 0, 0, 0]])",
+    "X = concat(concat(pa, pb, 0), pc, 0)",
+    "tl = concat(concat(zeros([25]), ones([25]), 0), ones([25]) + 1, 0)",
+    "Y = tsne(X, 10, 200, 1)",
+    "scatter_labeled(Y, tl)",
+]
+try_it = "Rerun with seed = 2 and seed = 3. Cluster shape and relative orientation will rotate / flip -- t-SNE has rotation and reflection ambiguity. Note also that cluster 2 (class label = 2 in the legend) in the input is 5x farther from clusters 0 and 1 than 0 is from 1, but in the t-SNE output you cannot read that ratio. The UMAP lesson next fixes exactly this."
+
+[[lessons]]
+title = "UMAP: the modern default"
+intro = "UMAP (McInnes + Healy, 2018) is the modern non-linear dimensionality reduction default. The intuition is Riemannian-geometric: assume the data lies on a smooth manifold; approximate that manifold by a fuzzy simplicial complex -- a local-neighborhood graph whose edge weights are fuzzy-set memberships, calibrated per-point so each point has the same effective Shannon entropy of memberships. Then optimize a low-D layout whose own fuzzy graph is as close as possible to the high-D one, in cross-entropy. The optimization is SGD with negative sampling: per attractive update, sample N_NEG random non-neighbor pairs for the repulsive term. The repulsive term is what gives UMAP its global-distance preservation (t-SNE's KL has no such term -- only local affinities matter). MLPL: umap(X, n_neighbors, min_dist, iters, seed) returns [N, 2]. n_neighbors trades local vs global structure (smaller = more local); min_dist is a soft floor on attractive distances (smaller = tighter clusters)."
+examples = [
+    "# Same three-cluster dataset as the t-SNE lesson.",
+    "pa = randn(1, [25, 4]) * 0.5 + matmul(ones([25, 1]), [[0, 0, 0, 0]])",
+    "pb = randn(2, [25, 4]) * 0.5 + matmul(ones([25, 1]), [[3, 0, 0, 0]])",
+    "pc = randn(3, [25, 4]) * 0.5 + matmul(ones([25, 1]), [[15, 0, 0, 0]])",
+    "X = concat(concat(pa, pb, 0), pc, 0)",
+    "tl = concat(concat(zeros([25]), ones([25]), 0), ones([25]) + 1, 0)",
+    "Y = umap(X, 10, 0.1, 200, 1)",
+    "scatter_labeled(Y, tl)",
+]
+try_it = "Compare with the t-SNE output from the previous lesson on the SAME data. UMAP should put cluster 2 (class label = 2 in the scatter legend) visibly farther from clusters 0 and 1 than 0 is from 1 -- the 5x-input-distance ratio survives (at least partially). Then run the 'UMAP vs t-SNE' demo for the side-by-side comparison and the 'UMAP vs PCA' demo for the manifold-vs-linear case. The 'Dim-reduction zoo' demo lays out PCA, t-SNE, UMAP in one row."
+
+[[lessons]]
+title = "Reading a critical-dimensions heatmap"
+intro = 'The critical-dimensions viz `svg(V, "critical_dimensions", ve)` is k rows (one per component) by D columns (one per input feature). Bright cells = features that dominate that component; dark = features that contribute little. Per-row variance-explained percentages annotate the right margin. The viz is built for PCA loadings but reads cleanly for any [k, D] component / sensitivity matrix. Reading conventions: (1) Components are ORDERED by variance -- PC1 carries the most. If PC1 is dim, dim 1 percentages will be small and the LOADINGS will spread across many features (the data has no dominant direction). (2) Signs are ambiguous: -loading and +loading both contribute, what matters is the magnitude. The viz uses absolute value internally. (3) Permutation sensitivity (a future builtin) reuses the same viz: rows are output dimensions; columns are which input feature was permuted; brightness = how much the output moved. Same v reading rules apply.'
+examples = [
+    "# Same three-cluster 5-D data; this time look at PC loadings.",
+    "ca = [0, 0, 0, 0, 0]",
+    "cb = [5, 5, 5, 5, 5]",
+    "cc = [-5, 5, -5, 5, -5]",
+    "pa = randn(1, [30, 5]) * 0.5 + matmul(ones([30, 1]), reshape(ca, [1, 5]))",
+    "pb = randn(2, [30, 5]) * 0.5 + matmul(ones([30, 1]), reshape(cb, [1, 5]))",
+    "pc = randn(3, [30, 5]) * 0.5 + matmul(ones([30, 1]), reshape(cc, [1, 5]))",
+    "X = concat(concat(pa, pb, 0), pc, 0)",
+    "V = pca_components(X, 3)",
+    "ve = pca_variance_explained(X, 3)",
+    'svg(V, "critical_dimensions", ve)',
+]
+try_it = "Bind one cluster's signal to a single dimension: change `cb` to `[5, 0, 0, 0, 0]` and `cc` to `[0, 0, 0, 0, 5]`. Re-run. PC1 should now light up dim 0 strongly (it's what separates cluster 1 from 0); PC2 should light up dim 4 (separates cluster 2). Variance-explained percentages should also concentrate: PC1 and PC2 carry the cluster signal; PC3 is noise. The heatmap teaches you which features the projection 'used.'"
+
+[[lessons]]
+title = "Multi-class Classification"
+intro = "Softmax regression generalizes logistic regression to K classes. Logits Z = X W + b are turned into row-normalized probabilities P by softmax(Z, 1), which subtracts the row max for stability and exponentiates. With one-hot labels Y, the cross-entropy gradient is elegant: dZ = P - Y, so dW = X^T (P - Y) / N and db = mean(P - Y, 0). At prediction time, argmax(P, 1) picks the most probable class."
+examples = [
+    "Z = [[1, 2, 3], [2, 0, -1]]",
+    "softmax(Z, 1)",
+    "one_hot([0, 2, 1, 0], 3)",
+]
+try_it = "Run the Softmax Classifier demo and read off the diagonal of the confusion matrix -- those are the correctly classified points."
+
+[[lessons]]
+title = "Going Non-Linear: A Tiny MLP"
+intro = "A single-layer softmax classifier can only draw straight lines. Adding a hidden layer with a non-linear activation lets the network bend the decision boundary around the data. A 2 -> 8 -> 2 MLP with tanh activations learns the XOR pattern that the linear model from the previous lesson cannot. The backward pass uses the chain rule: dZ2 = P - Y at the output, and the hidden-layer gradient is dZ1 = (dZ2 W2^T) * (1 - H*H), which is the tanh derivative applied element-wise."
+examples = [
+    "D = blobs(3, 20, [[-2,-2],[2,2],[-2,2],[2,-2]])",
+    "X = matmul(D, [[1,0],[0,1],[0,0]])",
+    "raw = reshape(matmul(D, [[0],[0],[1]]), [80])",
+    "y = gt(raw, 1.5)",
+    "Y = one_hot(y, 2)",
+    "W1 = randn(5, [2, 8]) * 0.5",
+    "W2 = randn(6, [8, 2]) * 0.5",
+]
+try_it = "Try running the Tiny MLP demo, then the Softmax Classifier demo on the same data -- compare the boundary shapes."
+
+[[lessons]]
+title = "Automatic Differentiation"
+intro = "MLPL has built-in autograd. Declare a trainable leaf with param[shape] and compute gradients with grad(loss_expr, wrt). Inside grad(), array ops are recorded on a tape and a reverse pass returns the gradient with the same shape as wrt. The classic recipe is: build a scalar loss from your params, call grad, and step the param against its gradient (W <- W - lr * grad). That gives you SGD without writing a single chain-rule formula by hand."
+examples = [
+    "x = param[1]",
+    "grad((x - 3) * (x - 3), x)",
+    "x = x - 0.5 * grad((x - 3) * (x - 3), x)",
+    "x",
+    "repeat 20 { x = x - 0.3 * grad((x - 3) * (x - 3), x) }",
+    "x",
+    "X = [[1],[2],[3],[4]]",
+    "Yc = [[2],[4],[6],[8]]",
+    "w = param[1, 1]",
+    "lr = 0.05",
+    "repeat 100 { w = w - lr * grad(mean((matmul(X, w) - Yc) * (matmul(X, w) - Yc)), w) }",
+    "w",
+    "matmul(X, w)",
+]
+try_it = "Change Yc to [[3],[5],[7],[9]] (slope 2, intercept 1) and retrain. The fit will be slightly off because this model has no bias term -- try adding b = param[1, 1] and a matmul(ones([4,1]), b) bias inside the loss expression."
+
+[[lessons]]
+title = "Attention Patterns"
+intro = "Scaled dot-product attention is a single matrix expression: A = softmax(Q K^T / sqrt(d), 1). Each row of A is a probability distribution over the keys -- a weight map for one query. The scaling by sqrt(d) keeps the scores from growing with the key dimension so softmax doesn't saturate. When K = Q (self-attention), each token's highest score is on itself, so the diagonal of A dominates. Rendering A as a heatmap shows the full attention pattern at a glance."
+examples = [
+    "Q = randn(17, [6, 4])",
+    "K = randn(23, [6, 4])",
+    "scores = matmul(Q, transpose(K)) / sqrt(4)",
+    "A = softmax(scores, 1)",
+    'svg(A, "heatmap")',
+]
+try_it = "Set K = Q and re-render the heatmap -- notice how the diagonal becomes the brightest cell in each row."
+
+[[lessons]]
+title = "Self-Attention from Scratch"
+intro = "Self-attention is four matmuls, one transpose, one scalar division, one softmax. Each of the T input tokens emits three projections: Q (the query, what am I looking for?), K (the key, what do I advertise?), and V (the value, what do I share if attended-to?). The scaled-dot-product expression `softmax(Q K^T / sqrt(d_k), 1) V` produces the per-token output by mixing all V rows according to how strongly each query matched each key. Building one head from primitives -- without the `attention()` layer -- makes the formula visible: three projection matmuls, the score matmul, the softmax, the final value matmul. With random Wq/Wk/Wv the weight heatmap is noise; training those projections is what turns attention into something useful."
+examples = [
+    "T = 6  # Number of tokens in the toy input. Six is enough to show off the pattern in a [T, T] heatmap without overwhelming the eye.",
+    "d_model = 4  # Embedding width per token. In a real transformer this is 256-4096; we use 4 so each intermediate matrix has shape you can read in your head.",
+    "X : [seq, d] = randn(0, [T, d_model])  # The input: a [6, 4] block of random floats. Every later step transforms X into something the attention mechanism can consume.",
+    "Wq = randn(1, [d_model, d_model])  # The query projection matrix. In a trained model Wq is what learns 'how should this token frame its question to the rest of the sequence?' Random here = no learned behavior.",
+    "Wk = randn(2, [d_model, d_model])  # The key projection. Trained Wk learns 'how should each token advertise itself so other tokens can decide whether to attend to it?'",
+    "Wv = randn(3, [d_model, d_model])  # The value projection. Trained Wv learns 'what content should this token contribute when other tokens choose to mix me in?'",
+    "Q = matmul(X, Wq)  # Project every token through Wq -- now each row of Q is one token's query vector. Same shape as X: [T, d_model].",
+    "K = matmul(X, Wk)  # Same, but for keys. Q and K are the two sides of the dot-product comparison on the next line.",
+    "V = matmul(X, Wv)  # Same, but for values. V is what gets MIXED at the end -- the attention weights tell us how much of each row to take.",
+    "scores = matmul(Q, transpose(K)) / sqrt(d_model)  # The all-pairs comparison: scores[i, j] = how strongly token i's query matched token j's key. Dividing by sqrt(d_model) keeps the variance bounded so softmax does not saturate.",
+    "weights = softmax(scores, 1)  # Per-row softmax turns the [T, T] scores into [T, T] probability distributions: each row sums to 1, every token spends 100% of its attention across the keys.",
+    'svg(weights, "heatmap")  # Render the attention pattern. With random Q/K it looks like noise; train Wq/Wk/Wv on a real task and the heatmap develops structure (e.g. diagonal in self-attention, off-diagonal in cross-attention).',
+    "out = matmul(weights, V)  # Mix the values according to the attention weights. Row i of out is a weighted average of all V rows, with weights from row i of `weights`.",
+    "shape(out)  # [T, d_model] -- same shape as the input. Attention is shape-preserving by construction, which is why we can stack it.",
+]
+try_it = "Add a causal mask: replace the upper triangle of `scores` with -1e9 before the softmax (use `gt` and an indices grid) and re-render the weight heatmap. The lower-triangular pattern is what `causal_attention()` builds in."
+
+[[lessons]]
+title = "Multi-Head Attention from Scratch"
+intro = "Multi-head attention runs `h` copies of single-head attention in parallel on `d_k = d_model / h`-wide slabs, then concatenates the per-head outputs and projects through one final Wo. MLPL has no surface column-slicing op, so each head's slab is built explicitly via a selector matrix S_h: [d_model, d_k] (1s where this head's columns belong, 0s elsewhere). Multiplying full-width Q / K / V by S_h projects them down to the per-head width; multiplying the per-head output by S_h^T scatters it back into the full d_model width with zeros in the other heads' columns. Summing across heads recovers the concatenation. Each head's [T, T] weight heatmap shows a distinct attention pattern -- the model can dedicate one head per type of relationship in the input."
+examples = [
+    "T = 4  # Sequence length. Small so each [T, T] head heatmap renders large enough to read.",
+    "d_model = 4  # Total embedding width PER TOKEN. Will be split across heads.",
+    "heads = 2  # Number of parallel attention heads. Real transformers use 8-32; we use 2 so you can see the per-head difference.",
+    "d_k = d_model / heads  # Per-head width. With d_model=4 and heads=2, each head sees 2 dims of every token. Smaller heads = more specialization, more total parameters in Wq/Wk/Wv stays constant.",
+    "X : [seq, d] = randn(0, [T, d_model])  # Input: [4, 4] random rows. Each row is one token's full d_model-wide embedding.",
+    "Wq = randn(1, [d_model, d_model])  # FULL-WIDTH query projection. Learns one combined mapping that gets sliced into per-head views below. Real transformers often skip the slicing and just have h smaller projection matrices, but the math is identical.",
+    "Wk = randn(2, [d_model, d_model])  # Full-width key projection. Same shape as Wq.",
+    "Wv = randn(3, [d_model, d_model])  # Full-width value projection. Same shape.",
+    "S0 = [[1,0],[0,1],[0,0],[0,0]]  # Selector for head 0: a [d_model, d_k] matrix that picks COLUMNS 0 and 1 of any tensor it left-multiplies. Crude column-slicing, since MLPL has no surface slice op.",
+    "S1 = [[0,0],[0,0],[1,0],[0,1]]  # Selector for head 1: picks columns 2 and 3. Together S0 and S1 partition d_model into the two heads.",
+    "Q = matmul(X, Wq)  # Project everything once, then split per-head below. Keeps the matmul count down and matches what real implementations do.",
+    "K = matmul(X, Wk)  # Same for keys.",
+    "V = matmul(X, Wv)  # Same for values.",
+    "W0 = softmax(matmul(matmul(Q, S0), transpose(matmul(K, S0))) / sqrt(d_k), 1)  # Head 0's [T, T] attention weights. Q*S0 = head-0 slab of Q ([T, d_k]); K*S0 = head-0 slab of K. Then standard scaled-dot-product softmax. Note sqrt(d_k), NOT sqrt(d_model) -- each head normalizes by ITS dimension.",
+    "W1 = softmax(matmul(matmul(Q, S1), transpose(matmul(K, S1))) / sqrt(d_k), 1)  # Head 1's [T, T] attention weights. Same expression, different selector.",
+    """svg(W0, "heatmap")  # Render head 0's attention pattern.""",
+    """svg(W1, "heatmap")  # Render head 1's attention pattern. Compare it to W0 -- the two heads produce DIFFERENT patterns even though they read the same input X. That is the entire point of multi-head: each head can specialize.""",
+    "out0 = matmul(W0, matmul(V, S0))  # Mix head 0's weights with head 0's V slab. Output is [T, d_k] for this head.",
+    "out1 = matmul(W1, matmul(V, S1))  # Same for head 1.",
+    "out = matmul(out0, transpose(S0)) + matmul(out1, transpose(S1))  # Scatter each head's narrow [T, d_k] output back into the full [T, d_model] width via S_h^T (zeros in the OTHER head's columns), then sum. This recovers what real implementations do via concatenate.",
+    "Wo = randn(7, [d_model, d_model])  # Output projection. After concat, the heads' outputs go through one final mixing matrix Wo. This is what lets information FLOW between the heads' specializations.",
+    "shape(matmul(out, Wo))  # [T, d_model] -- back to input shape. Multi-head attention is also shape-preserving.",
+]
+try_it = "Replace the from-scratch pipeline with the model layer: `m = attention(4, 2, 0); apply(m, X)` and `attention_weights(m, X)` (which returns `[heads, T, T]` for multi-head). The math is the same; the layer just hides the slicing behind a single name."
+
+[[lessons]]
+title = "Cross-Attention from Scratch"
+intro = "Cross-attention is what couples a transformer's decoder to its encoder: each target-side query attends to every source-side key, then mixes the source's V vectors into the target output. Mathematically it's identical to self-attention -- `softmax(Q K^T / sqrt(d_k)) V` -- but the inputs are split: Q is built from the target sequence (here T_tgt=4 random rows), while K and V are built from the source (T_src=6). The weight heatmap is `[T_tgt, T_src]` -- non-square -- which is the visual giveaway. Each row is one target query's distribution over source positions; each output row is the corresponding weighted average of V. Stack one cross-attention block after a causal-self-attention block and you have a transformer decoder layer; MLPL has no built-in cross-attention layer because the from-scratch pipeline is the same primitives you already know."
+examples = [
+    "T_tgt = 4  # Target sequence length (4 rows of TARGET tokens). In a translation pipeline, this is the partial English output the decoder is generating.",
+    "T_src = 6  # Source sequence length (6 rows of SOURCE tokens). In translation, this is the encoded French input the decoder needs to attend to.",
+    "d_model = 4  # Shared embedding width across both sequences. Cross-attention requires source and target to be in the same vector space.",
+    "X_tgt : [seq, d] = randn(0, [T_tgt, d_model])  # Target embeddings. In a real model these come from the decoder's preceding self-attention layer.",
+    "X_src : [seq, d] = randn(1, [T_src, d_model])  # Source embeddings. In a real model these come from the encoder's final layer (a [T_src, d_model] block of contextualized representations).",
+    "Wq = randn(2, [d_model, d_model])  # Query projection. The TARGET side asks the questions, so Q is built from X_tgt below.",
+    "Wk = randn(3, [d_model, d_model])  # Key projection. The SOURCE side advertises content, so K is built from X_src.",
+    "Wv = randn(4, [d_model, d_model])  # Value projection. Also from the source -- the source provides the content that gets mixed into the target output.",
+    "Q = matmul(X_tgt, Wq)  # Each target token emits its query. Shape [T_tgt, d_model].",
+    "K = matmul(X_src, Wk)  # Each SOURCE token emits its key. Shape [T_src, d_model] -- different row count from Q.",
+    "V = matmul(X_src, Wv)  # Each source token emits its value. Shape [T_src, d_model].",
+    "weights = softmax(matmul(Q, transpose(K)) / sqrt(d_model), 1)  # The score matrix is [T_tgt, T_src] -- non-square. Each row is one target query's distribution over source keys. Per-row softmax = each target token's attention spend across the source.",
+    "shape(weights)  # Confirm [T_tgt, T_src] = [4, 6]. Non-square is the cross-attention signature; if this came back square you would know you accidentally did self-attention.",
+    'svg(weights, "heatmap")  # Render the cross-attention pattern. The 4-row, 6-column heatmap reveals which source positions each target token is reading from. In a trained translator, this often aligns roughly word-for-word.',
+    "out = matmul(weights, V)  # Mix the source values according to the target-side weights. Each output row is one target token's weighted average of source content.",
+    "shape(out)  # [T_tgt, d_model] = [4, 4]. The output has the TARGET's row count and the shared d_model width -- shape suitable for the decoder's next sub-block (FFN).",
+]
+try_it = "Set X_src = X_tgt and re-run -- the weight heatmap collapses to T x T (square) and you have self-attention. Cross-attention's distinguishing feature is just the non-square shape that comes from Q and K/V having different row counts."
+
+[[lessons]]
+title = "Encoder Block"
+intro = "One layer of a transformer encoder is just `chain(residual(pre_norm + self_attn), residual(pre_norm + ffn))`: two sub-blocks, each with a pre-normalization and a skip connection. The first sub-block lets every position mix information with every other (no causal mask in an encoder); the second sub-block applies a position-wise nonlinear transformation via two linear layers with a relu in between. Stacking N of these is what BERT does; replacing self-attention with causal self-attention and adding a third (cross-attention) sub-block is what a decoder layer does. The model DSL builds the whole block in five lines, and `attention_weights(encoder, X)` walks the chain to render the [T, T] attention pattern of just the self-attn sub-block."
+examples = [
+    "X = randn(0, [4, 8])  # Input: 4 tokens, d_model=8 each. We are about to push X through one full encoder block and check that shape comes out unchanged.",
+    "encoder = chain(residual(chain(rms_norm(8), attention(8, 1, 1))), residual(chain(rms_norm(8), linear(8, 16, 2), relu_layer(), linear(16, 8, 3))))  # The whole block in one expression. Outer `chain` runs sub-block 1 then sub-block 2. Each sub-block is `residual(chain(pre_norm, layer))` -- so the actual computation is X + layer(rms_norm(X)). Sub-block 1's layer is single-head self-attention. Sub-block 2's layer is FFN: linear(8 -> 16) -> relu -> linear(16 -> 8).",
+    "out = apply(encoder, X)  # One forward pass through both sub-blocks. The model layer hides all the internal apply() calls -- you just give it X.",
+    "shape(out)  # [4, 8] -- same as the input. Shape preservation is what makes encoder blocks STACKABLE: out becomes the input of the next block.",
+    "bare_attn = attention(8, 1, 1)  # A standalone self-attention layer with the SAME seed as the one buried inside `encoder`. This is the only way to extract attention_weights -- the model walker does not recurse into nested chains/residuals.",
+    'svg(attention_weights(bare_attn, X), "heatmap")  # Render the [T, T] attention pattern of the bare self-attention layer applied to X (NOT to the post-rms_norm transformed input -- this is an approximation). With random weights the pattern is noise; train the encoder on a real task and structure emerges.',
+]
+try_it = "Build a second encoder block inline (same chain expression with fresh seeds 4/5/6) and chain them: deeper = chain(encoder, encoder2). Shape is unchanged; the attention pattern at each layer differs because layer 2 sees layer 1's output. Real transformers stack 12-100+ blocks."
+
+[[lessons]]
+title = "Decoder Block"
+intro = "A transformer decoder block is the encoder block plus a cross-attention sub-block in the middle. Three sub-blocks total: (1) causal self-attention -- the target position can only attend to itself and earlier positions, enforced by `causal_attention(d, h, s)`'s lower-triangular mask; (2) cross-attention -- target queries (Q from `H`) attend to encoder output (K, V from `X_src`), built from scratch with matmul + softmax because MLPL has no cross-attention layer primitive; (3) feedforward -- the same `linear -> relu -> linear` MLP as the encoder. Each sub-block has its own pre-norm + residual. Stack a dozen of these and you have GPT (decoder-only, drop the cross-attn step) or T5 (encoder-decoder, keep all three). The cross-attention heatmap is `[T_tgt, T_src]` -- non-square -- which visually distinguishes it from self-attention."
+examples = [
+    "T_tgt = 4  # Target sequence length. In language generation, this is the number of tokens the decoder has produced so far.",
+    "T_src = 6  # Source sequence length. Stand-in for the encoder's output -- in a real pipeline, replace X_src below with `apply(encoder, X)`.",
+    "d_model = 8  # Shared embedding width. Both the target and source must live in the same d_model space for cross-attention to work.",
+    "d_ff = 16  # FFN hidden width. Conventional ratio is d_ff = 4 * d_model; we use 2x to keep numbers small.",
+    "X_tgt = randn(0, [T_tgt, d_model])  # Target tokens. In generation these come from the previous decoder layer; here they are random.",
+    "X_src = randn(1, [T_src, d_model])  # Source tokens (encoder output stand-in).",
+    "self_attn = residual(chain(rms_norm(d_model), causal_attention(d_model, 1, 2)))  # Sub-block 1: causal self-attention with pre-norm + residual. The CAUSAL mask is what makes a decoder a decoder -- token t can only attend to itself and earlier targets, never to future ones. (At training time the whole sequence is visible; the mask makes the model behave as if it weren't.)",
+    "H = apply(self_attn, X_tgt)  # Run sub-block 1. H has the same shape as X_tgt; each row now mixes information from earlier target rows.",
+    "pre_xattn = rms_norm(d_model)  # Pre-normalization for the cross-attention sub-block. We apply it to H (the target side) before computing queries.",
+    "H_norm = apply(pre_xattn, H)  # Normalized H, ready to be the source of cross-attention queries.",
+    "Wq = randn(3, [d_model, d_model])  # Cross-attention Q projection (target side).",
+    "Wk = randn(4, [d_model, d_model])  # Cross-attention K projection (source side).",
+    "Wv = randn(5, [d_model, d_model])  # Cross-attention V projection (source side).",
+    "weights = softmax(matmul(matmul(H_norm, Wq), transpose(matmul(X_src, Wk))) / sqrt(d_model), 1)  # The cross-attention score matrix is [T_tgt, T_src] -- non-square -- with per-row softmax. Each target token now has a probability distribution over source positions saying 'which source token am I copying from?'",
+    'svg(weights, "heatmap")  # Render the [T_tgt, T_src] heatmap. In a trained encoder-decoder this often shows a roughly diagonal alignment -- target token i tends to attend to source token i (with phrase-level reordering for tasks like translation).',
+    "H2 = H + matmul(weights, matmul(X_src, Wv))  # The cross-attention residual: H + (cross_attn output). matmul(X_src, Wv) is V; weights @ V mixes source values per target query. Add to H to keep the residual signal.",
+    "ffn = residual(chain(rms_norm(d_model), linear(d_model, d_ff, 6), relu_layer(), linear(d_ff, d_model, 7)))  # Sub-block 3: position-wise feedforward, same as encoder. Pre-norm + linear -> relu -> linear + residual.",
+    "out = apply(ffn, H2)  # Final decoder block output. Same shape as X_tgt: stackable.",
+    "shape(out)  # [T_tgt, d_model] = [4, 8]. Decoder blocks preserve target shape; stack a dozen and you have a real decoder. Drop the cross-attention step (sub-block 2) and you have a GPT-style decoder-only block.",
+]
+try_it = "Drop the cross-attention sub-block (just leave self-attn + ffn) and you have a decoder-only block in the GPT style. Or stack the encoder demo's encoder before this decoder, feeding `apply(encoder, X_src)` as the new X_src -- that's the encoder-decoder pipeline, which a future builtin would package as one piece."
+
+[[lessons]]
+title = "Optimizers and Schedules"
+intro = "Hand-rolled SGD is fine for one parameter, but real training needs momentum, Adam, and a structured loop. MLPL provides momentum_sgd(loss, params, lr, beta) and adam(loss, params, lr, b1, b2, eps) as built-ins -- both maintain per-parameter state across calls so you can just call them in a loop. The train N { body } construct does the loop for you: it binds the iteration index to `step`, runs the body, and captures the value of the body's final expression into a vector named `last_losses`. cosine_schedule(step, total, lr_min, lr_max) and linear_warmup(step, warmup, lr) are pure scalar helpers you can drop into any optimizer call."
+examples = [
+    "W = param[1]",
+    "W = randn(1, [1]) * 2",
+    "train 50 { adam(sum(W*W), W, 0.1, 0.9, 0.999, 0.00000001); reduce_add(W*W) }",
+    "W",
+    "shape(last_losses)",
+    "loss_curve(last_losses)",
+    "cosine_schedule(0, 100, 0.001, 0.1)",
+    "cosine_schedule(50, 100, 0.001, 0.1)",
+    "cosine_schedule(100, 100, 0.001, 0.1)",
+    "linear_warmup(0, 10, 0.1)",
+    "linear_warmup(5, 10, 0.1)",
+    "linear_warmup(20, 10, 0.1)",
+]
+try_it = "Swap adam for momentum_sgd(sum(W*W), W, 0.1, 0.9) inside the train block and re-run. Then plot the new last_losses with loss_curve and compare how quickly each optimizer drives W to zero."
+
+[[lessons]]
+title = "Model Composition (the Model DSL)"
+intro = "Once you have more than one layer, inlining the full forward pass inside every loss expression gets noisy fast. MLPL's model DSL lets you describe the network as data: linear(in, out, seed) is an atomic layer, chain(a, b, ...) composes layers in sequence, and tanh_layer() / relu_layer() / softmax_layer() are parameter-free activation layers. apply(model, X) runs the forward pass. Optimizers accept a model identifier directly and walk its parameter tree, so adam(loss, mdl, lr, b1, b2, eps) trains every W and b the model owns in one call. A 2 -> 8 -> 2 tanh MLP becomes a one-liner, and the full training loop fits in a single train block. Labeling the input as X : [batch, feat] lets the batch axis label flow through the whole forward pass -- labels(apply(mdl, X)) reports batch, ... so you can read what each axis is at every stage."
+examples = [
+    "mdl = chain(linear(2, 8, 11), tanh_layer(), linear(8, 2, 12))",
+    "M = moons(7, 60, 0.08)",
+    "X : [batch, feat] = matmul(M, [[1,0],[0,1],[0,0]])",
+    "labels(apply(mdl, X))",
+    "y = reshape(matmul(M, [[0],[0],[1]]), [60])",
+    "Y = one_hot(y, 2)",
+    "train 100 { adam(mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)), mdl, 0.05, 0.9, 0.999, 0.00000001); mean((apply(mdl, X) - Y) * (apply(mdl, X) - Y)) }",
+    "loss_curve(last_losses)",
+    "P = softmax(apply(mdl, X), 1)",
+    "pred = argmax(P, 1)",
+    "mean(eq(pred, y))",
+    "G = grid([-1.5, 2.5, -1, 1.5], 30)",
+    "GP = softmax(apply(mdl, G), 1)",
+    "p1 = reshape(matmul(GP, [[0],[1]]), [900])",
+    "boundary_2d(p1, [30, 30], X, y)",
+]
+try_it = "Widen the hidden layer from 8 to 32 by editing the first linear call, or add a second tanh block by extending the chain to chain(linear(2, 8, 11), tanh_layer(), linear(8, 8, 14), tanh_layer(), linear(8, 2, 12)). Run the train block again and watch the decision boundary curve more sharply around the moons."
+
+[[lessons]]
+title = "Experiments"
+intro = 'experiment "name" { body } wraps a block so any scalar variable whose name ends in _metric is captured as a run metric. After the block runs, the record lands in env.experiment_log (always) and on disk under --exp-dir/<name>/<timestamp>/run.json (terminal REPL only). :experiments lists every recorded run, merging memory and disk. compare("a", "b") returns a Value::Str with side-by-side most-recent runs by name and per-metric deltas. Use this to keep a notebook reproducible: seeds, params, and final metrics stay together.'
+examples = [
+    'experiment "baseline" { loss_metric = 0.5; accuracy_metric = 0.82 }',
+    'experiment "tweak" { loss_metric = 0.3; accuracy_metric = 0.91 }',
+    ":experiments",
+    'compare("baseline", "tweak")',
+    'experiment "with-params" { W = param[2, 3]; loss_metric = 0.1 }',
+    ":experiments",
+]
+try_it = "Run two experiment blocks with different metric values, then call compare to see the delta. Which metric improved? Which regressed?"
+
+[[lessons]]
+title = "Workspace Introspection"
+intro = "APL shaped its workspace around a handful of system commands -- )WSID for the current workspace id, )VARS for the variable table, )FNS for the function table, )CLEAR to wipe, and similar. MLPL keeps the same habit but spells them with a leading colon. :version prints the build info. :wsid shows counts of variables, trainable parameters, models, and optimizer state slots. :vars and :models list bindings with their shapes. :describe <name> prints richer detail -- an array's values preview, a model's layer tree, a tokenizer's vocab and merge count, or a built-in's one-line doc. :builtins prints every built-in grouped by category. :experiments lists every recorded run. :fns is the APL analogue for user-defined functions (a placeholder today; user functions aren't a language feature yet). :clear (APL's )CLEAR) resets the whole workspace. MLPL doesn't expose APL's []IO toggle -- array indexing is 0-origin throughout."
+examples = [
+    ":version",
+    ":wsid",
+    "x = 42",
+    "v = range(5)",
+    "M : [batch, feat] = reshape(range(6), [2, 3])",
+    ":vars",
+    ":describe v",
+    "mdl = chain(linear(2, 4, 11), relu_layer(), linear(4, 2, 12))",
+    ":models",
+    ":describe mdl",
+    "W = param[3, 2]",
+    ":wsid",
+    ":describe matmul",
+]
+try_it = "Bind a few of your own variables, then use :describe on each. Try :describe on a built-in you haven't used yet -- every name in :builtins is a valid :describe argument."
+
+[[lessons]]
+title = "Language Model Basics"
+intro = "MLPL adds the four primitives every transformer LM needs on top of the Model DSL. embed(vocab, d_model, seed) is a learned [vocab, d_model] lookup table: apply(emb, toks) gathers one row per integer token id and returns [T, d_model]. sinusoidal_encoding(T, d_model) is a deterministic [time=T, dim=d_model] positional table you add to the embeddings so the network can tell positions apart. causal_attention(d_model, heads, seed) is the same self-attention as attention(...) but with a lower-triangular mask on the pre-softmax scores, so position t never peeks at t+1. cross_entropy(logits, targets) returns a numerically-stable scalar mean negative log-likelihood over [N, V] logits and [N] integer targets, fully differentiable through the tape. Chain them together and you have the forward pass of a language model -- no training needed to see the pieces fit."
+examples = [
+    "E = embed(8, 4, 0)",
+    "toks = [1, 3, 5, 2]",
+    "emb = apply(E, toks)",
+    "shape(emb)",
+    "PE = sinusoidal_encoding(4, 4)",
+    "labels(PE)",
+    "pos_emb = emb + PE",
+    "shape(pos_emb)",
+    "model = chain(embed(8, 4, 0), residual(chain(rms_norm(4), causal_attention(4, 1, 1))), linear(4, 8, 2))",
+    "logits = apply(model, toks)",
+    "shape(logits)",
+    "targets = [3, 5, 2, 0]",
+    "cross_entropy(logits, targets)",
+    'svg(softmax(logits, 1), "heatmap")',
+]
+try_it = "Replace causal_attention with the unmasked attention(4, 1, 1) and re-render the softmax(logits, 1) heatmap. Do earlier rows change? The mask is why they shouldn't, and why they do when it's gone."
+
+[[lessons]]
+title = "Training and Generating"
+intro = """End-to-end: train a tiny LM on a preloaded corpus, wrap it in experiment "name" { ... } so the final loss is recorded, then sample tokens one at a time from the trained model. The generation loop is the standard recipe -- apply(model, seq) -> last_row(...) to keep only the final position's logits -> top_k(logits, k) to restrict to the k most likely tokens -> sample(logits, temperature, seed) to draw one id -> concat(seq, nxt) to append. After generating, attention_weights(model, X) pulls the [T, T] causal weight matrix out of the first attention layer so svg(..., "heatmap") shows what the model looked at while scoring each position. This is a small budget (30 steps on a short corpus) chosen to stay interactive in the browser; scale up V, d, block size, and step count for a serious run."""
+examples = [
+    'corpus = load_preloaded("tiny_corpus")',
+    "tok    = train_bpe(corpus, 260, 0)",
+    "ids    = apply_tokenizer(tok, corpus)",
+    "X_all  = shift_pairs_x(ids, 8)",
+    "Y_all  = shift_pairs_y(ids, 8)",
+    "X      = reshape(X_all, [reduce_mul(shape(X_all))])",
+    "Y      = reshape(Y_all, [reduce_mul(shape(Y_all))])",
+    "V = 260 ; d = 16 ; h = 1",
+    "model = chain(embed(V, d, 0), causal_attention(d, h, 1), rms_norm(d), linear(d, V, 2))",
+    'experiment "tutorial_tiny_lm" { train 30 { adam(cross_entropy(apply(model, X), Y), model, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(model, X), Y) } }',
+    "loss_curve(last_losses)",
+    'prompt = apply_tokenizer(tok, "the ")',
+    "seq    = prompt",
+    "repeat 20 { logits = apply(model, seq); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); seq = concat(seq, nxt) }",
+    "decode(tok, seq)",
+    'viz_ids = apply_tokenizer(tok, "the quick")',
+    "attn_w  = attention_weights(model, viz_ids)",
+    'svg(attn_w, "heatmap")',
+]
+try_it = "Re-run the repeat 20 { ... } block with a higher temperature (1.5) and a wider top-k (40). Does the generated decode become less repetitive? Then run :experiments to see the recorded tutorial_tiny_lm run."
+
+[[lessons]]
+title = "Running on MLX"
+intro = 'MLPL adds device("target") { body } so the same source runs on CPU or Apple MLX without edits. Browser WASM is CPU-only, so device("mlx") { ... } is a no-op here (values/shapes still match). On Apple Silicon with `cargo run -p mlpl-repl --features mlx`, matmul/softmax/autograd dispatch through mlpl-mlx-rt. docs/using-mlx.md + docs/benchmarks.md have measured throughput -- a measurement run produced 0.26x on tiny_lm_train_step, under the 5x gate. Lesson here is source-level parity, not speed.'
+examples = [
+    'device("cpu") { randn(7, [4, 8]) }',
+    'device("mlx") { randn(7, [4, 8]) }',
+    'device("mlx") { m = linear(4, 3, 0) }',
+    'x = reshape(range(8), [2, 4]) ; to_device(x, "mlx")',
+    'device("mlx") { apply(m, x) }',
+]
+try_it = """Build a model outside any device block, then apply(m, X) inside device("mlx") { ... } with to_device(X, "mlx"). MLPL raises EvalError::DeviceMismatch naming the op and both sides' devices."""
+
+[[lessons]]
+title = "Connect to a remote MLPL server"
+intro = "MLPL added a connect mode to both the CLI REPL and the web REPL. Run `mlpl-serve --bind 127.0.0.1:6464 --auth required` on a beefier host, then point the client at it: the local Environment goes unused and the workspace lives on the server. The CLI form is `mlpl-repl --connect <url>`; the web form is the same browser tab as this tutorial, opened with `?connect=<url>` appended. Slash commands (`:vars`, `:models`, `:experiments`, `:wsid`) round-trip through `/inspect` so they show the server's state. `--session <id> --token <tok>` reattaches to an existing session instead of spawning a fresh one; passing `mlpl-serve --persist <dir>` makes those sessions survive a server restart. Use it when you want to drive an MLX-accelerated MacBook from a laptop, or share a live workspace between the CLI and the browser."
+examples = [
+    "x = 42",
+    "x + 1",
+    ":vars",
+    ":wsid",
+    "range(5)",
+    "shape(range(5))",
+]
+try_it = "Open this tutorial with `?connect=<your-mlpl-serve-url>` in the URL bar. The same workspace is now reachable from `mlpl-repl --connect <url>` on the same host -- run :vars in both and watch the bindings line up. Then stop the server, restart it with --persist /tmp/mlpl-sessions, and rerun :vars -- empty (the original session was in-memory only). Run a new program, restart again, and :vars should now show the persisted bindings."
+
+[[lessons]]
+title = "Long training, live loss"
+intro = "MLPL added Server-Sent-Events streaming to the eval endpoint, so a `train { }` block reports per-step `loss_metric` values as they land instead of buffering everything until the program finishes. In connect mode (CLI or web), any line containing `train { ... }` automatically routes through `/eval_stream` and renders the loss-curve chart line-by-line. A Ctrl-C in the CLI -- or the 'Cancel' button in the web REPL -- POSTs to `/cancel`; the server's interrupt token short-circuits the next step boundary, the streaming endpoint flushes a `cancelled` frame carrying the partial losses, and the client renders the curve up to the cancel point. The non-streaming `/eval` endpoint is still used for everything else to avoid the SSE overhead."
+examples = [
+    "model = chain(linear(2, 8, 11), tanh_layer(), linear(8, 2, 12))",
+    "X = randn(0, [16, 2])",
+    "Y = [0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0]",
+    "train 50 { adam(cross_entropy(apply(model, X), Y), model, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(model, X), Y) }",
+    "loss_curve(last_losses)",
+]
+try_it = "Run the train block above with the step count cranked up to 500. The loss chart updates as the metrics land; hit Cancel partway through and the curve freezes at the cancel point. `last_losses` will contain only the steps that completed before the cancel. Tip: in local WASM mode the streaming path is a no-op (everything runs synchronously); the live behavior only shows up in connect mode."
+
+[[lessons]]
+title = "Neural Thickets"
+intro = "Four builtins ship that compose into the Neural Thickets (RandOpt-style) workflow: clone_model(m) deep-copies a model with fresh param names, perturb_params(m, family, sigma, seed) adds Gaussian noise to a named family of params (all_layers / attention_only / mlp_only / embed_and_head), argtop_k(values, k) returns indices of the K best entries, and scatter(buffer, index, value) writes one scalar into a rank-1 buffer. The pattern: train a base, clone N times, perturb each clone along some family, score each on held-out tokens, argtop_k the specialists, ensemble. This lesson runs a tiny 4x4 sweep (V=8, d=4) so the whole heatmap renders in the browser; demos/neural_thicket.mlpl has the full Shakespeare version and docs/using-perturbation.md has the retrospective."
+examples = [
+    "base = chain(embed(8, 4, 0), residual(chain(rms_norm(4), causal_attention(4, 1, 1))), residual(chain(rms_norm(4), linear(4, 8, 2), relu_layer(), linear(8, 4, 3))), rms_norm(4), linear(4, 8, 4))",
+    "val_X = [1, 3, 5, 7, 2, 4, 6, 0]",
+    "val_Y = [3, 5, 7, 2, 4, 6, 0, 1]",
+    "v = clone_model(base)",
+    'perturb_params(v, "attention_only", 0.05, 42)',
+    "cross_entropy(apply(v, val_X), val_Y)",
+    "sigma = 0.05",
+    "losses = zeros([16])",
+    'for i in [0, 1, 2, 3] { v = clone_model(base); perturb_params(v, "all_layers", sigma, i + 100); losses = scatter(losses, i, cross_entropy(apply(v, val_X), val_Y)) }',
+    'for i in [0, 1, 2, 3] { v = clone_model(base); perturb_params(v, "attention_only", sigma, i + 200); losses = scatter(losses, 4 + i, cross_entropy(apply(v, val_X), val_Y)) }',
+    'for i in [0, 1, 2, 3] { v = clone_model(base); perturb_params(v, "mlp_only", sigma, i + 300); losses = scatter(losses, 8 + i, cross_entropy(apply(v, val_X), val_Y)) }',
+    'for i in [0, 1, 2, 3] { v = clone_model(base); perturb_params(v, "embed_and_head", sigma, i + 400); losses = scatter(losses, 12 + i, cross_entropy(apply(v, val_X), val_Y)) }',
+    "heat = reshape(losses, [4, 4])",
+    'svg(heat, "heatmap")',
+    "best_idx = argtop_k(-1.0 * losses, 4)",
+]
+try_it = "Rerun the sweep at sigma = 0.2 and at sigma = 0.01. How does the heatmap change? At large sigma, every family's loss blows up; at small sigma the heatmap stays close to base. Then try swapping apply(v, val_X) for apply(base, val_X) in one family to see the base's loss show up as a row."
+
+[[lessons]]
+title = "LoRA Fine-Tuning"
+intro = "Three builtins ship for parameter-efficient fine-tuning: freeze(m) marks every param of m frozen (adam / momentum_sgd skip frozen names), unfreeze(m) is the inverse, and lora(m, rank, alpha, seed) wraps every Linear in m with two low-rank adapter matrices A [in, rank] and B [rank, out] and auto-freezes every non-adapter param in the returned student. Forward is y = X @ W + (alpha / rank) * X @ A @ B + b. B zero-inits so apply(lora_m, X) matches the base exactly before any gradient step; A inits as scaled randn so learning has somewhere to go. Only the adapters train. This lesson runs a tiny interactive version (V=8, d=4, rank=2) so the forward and the learned adapter render quickly in the browser; demos/lora_finetune.mlpl has the full Shakespeare version and docs/using-lora.md has the retrospective."
+examples = [
+    "base = chain(embed(8, 4, 0), residual(chain(rms_norm(4), causal_attention(4, 1, 1))), linear(4, 8, 1))",
+    "student = lora(base, 2, 4.0, 7)",
+    "X = [1, 3, 5, 7, 2, 4, 6, 0] ; Y = [3, 5, 7, 2, 4, 6, 0, 1]",
+    "train 10 { adam(cross_entropy(apply(student, X), Y), student, 0.05, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(student, X), Y) }",
+    "loss_curve(last_losses)",
+    "cross_entropy(apply(student, X), Y)",
+    "cross_entropy(apply(base, X), Y)",
+]
+try_it = "The two cross_entropy lines after training should report different numbers: student's loss went down during fine-tune, but base's loss is unchanged because lora() auto-froze the base -- adam only moved the adapters. Try unfreeze(student) before the train block and re-run: now both losses move."
+
+[[lessons]]
+title = "Embedding exploration"
+intro = """Five builtins ship for inspecting any rank-2 [N, D] array you want to treat as a set of points. pairwise_sqdist(X) returns the [N, N] squared-Euclidean distance matrix; knn(X, k) returns each row's k nearest non-self neighbors sorted by ascending distance; tsne(X, perplexity, iters, seed) runs classic van der Maaten t-SNE to reduce to [N, 2]; pca(X, k) returns the top-k PCA projection [N, k] via power iteration + Gram-Schmidt deflation (v0.14.1); embed_table(model) walks a ModelSpec tree and returns the first Embedding layer's [vocab, d_model] table (v0.14.1). Plus svg(pts, "scatter3d") renders [N, 3] as an orthographic 3-D scatter with axis gizmos. This lesson runs a 6-point fixture in 3-D so every render is instant in the browser; demos/embedding_viz.mlpl has the training story with a learned [12, 8] embedding table and docs/using-embeddings.md has the retrospective."""
+examples = [
+    "X = reshape([0.0, 0.0, 2.0, 0.1, 0.1, 2.0, -0.1, 0.0, 2.1, 2.0, 0.0, 0.0, 2.1, 0.1, 0.0, 1.9, -0.1, 0.0], [6, 3])",
+    "pairwise_sqdist(X)",
+    "knn(X, 2)",
+    'svg(X, "scatter3d")',
+    "emb_2d = tsne(X, 2.0, 100, 7)",
+    'svg(emb_2d, "scatter")',
+    "pca_2d = pca(X, 2)",
+    'svg(pca_2d, "scatter")',
+    "emb = embed(6, 3, 0)",
+    'svg(embed_table(emb), "scatter3d")',
+]
+try_it = "knn(X, 2) should list indices from X's own cluster -- rows 0/1/2 are near [0,0,2] and rows 3/4/5 are near [2,0,0]. pca_2d vs emb_2d: t-SNE rotates and flips between seeds and emphasizes local structure; PCA is deterministic and linear, so pca_2d keeps the two clusters on a single axis. embed_table(emb) returns the raw [6, 3] lookup table of a freshly-initialized embedding layer -- untrained, so the scatter is a tiny gaussian cloud. Run train ...adam over emb and re-call embed_table to see the learned rows."
+
+[[lessons]]
+title = "Typed ML Values"
+intro = "A curated Tier A typed-value vocabulary -- Logit, Probability, LogProbability, Loss, Gradient, Weight, Bias, Activation, LearningRate, Labels, AttentionMap -- attached to bindings via a side table on Environment. The runtime auto-tags producers (softmax -> Probability, cross_entropy -> Loss, grad -> Gradient, linear -> Weight + Bias, apply on a Linear-tailed model -> Logit). Predicate consumers reject mismatched tags with EvalError::TypeMismatch carrying a 3-5 line tutoring hint. Tags propagate through arithmetic / transpose / reshape / reductions: Logit + Logit stays Logit, Loss survives mean/reduce_add, reshape clears, and domain-mixing combos like Logit + Probability raise a tutoring TypeMismatch. New REPL commands :tags lists every tagged binding and :untag clears one. Untyped programs keep working unchanged (gradual-typing additivity). This lesson walks the canonical pipeline -- logits to probs to loss to gradient to weight update -- and demos the canonical double-softmax bug now caught at the call site."
+examples = [
+    "L = randn(0, [2, 3])",
+    ":describe L",
+    "probs = softmax(L, 1)",
+    ":describe probs",
+    "T = [0.0, 1.0]",
+    "loss = cross_entropy(L, T)",
+    ":describe loss",
+    ":tags",
+    "loss = cross_entropy(probs, T)",
+    "lr = cosine_schedule(0, 100, 0.001, 0.01)",
+    ":describe lr",
+    "W = param[3, 4]",
+    "X = randn(0, [2, 3])",
+    "Y = matmul(X, W)",
+    "g = grad(mean(Y), W)",
+    ":describe g",
+    "A = randn(1, [2, 3])",
+    "B = randn(2, [2, 3])",
+    ":untag A",
+    ":untag B",
+    "B_lp = log_softmax(B, 1)",
+    "L1 = randn(3, [2, 3])",
+    "L2 = randn(4, [2, 3])",
+    "sum_logits = L1 + L2",
+    ":describe sum_logits",
+    "mean_loss = mean(L1 + L2)",
+    "L_tag = randn(5, [2, 3])",
+    "P_tag = softmax(L_tag, 1)",
+    "mix = L_tag + P_tag",
+    ":untag P_tag",
+    "mix = L_tag + P_tag",
+    ":describe mix",
+    "mdl = chain(linear(3, 4, 0), softmax_layer())",
+    "out = apply(mdl, randn(0, [2, 3]))",
+    ":describe out",
+]
+try_it = "After the cross_entropy(probs, T) line failed with the double-softmax tutoring hint, try cross_entropy(softmax(L, 1), T) -- same bug, inline form. Then call :describe on every Weight in the workspace: walk through :vars first to find the auto-generated names like __linear_W_0. Finally, build a chain with a relu_layer tail and inspect apply(mdl, X) -- the result is tagged Activation(layer, kind=Relu), not Logit, because the structural-tail walk reaches relu_layer before any Linear."
