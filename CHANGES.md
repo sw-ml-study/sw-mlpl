@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-15
 
+- polish(beginner): slot weight-decay into the spine path + ratchet down checklist
+- docs(changes): refresh CHANGES.md to HEAD
 - refactor(lessons): move tutorial content to lessons.toml + build.rs codegen
 - docs(changes): refresh CHANGES.md to HEAD
 - docs(demos): detailed per-visualization comments in the Visualizations demo
