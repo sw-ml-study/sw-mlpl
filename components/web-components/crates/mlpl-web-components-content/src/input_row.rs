@@ -47,6 +47,29 @@ fn render_mode_toggle(show_3d: bool, on_toggle: &Callback<MouseEvent>) -> Html {
     }
 }
 
+/// Render the completion-candidate popup. Empty when there are no
+/// candidates; otherwise one clickable chip per candidate, with the
+/// selected chip highlighted and announced via `aria-selected`.
+fn render_completion_popup(candidates: &[String], sel: usize, on_pick: &Callback<String>) -> Html {
+    if candidates.is_empty() {
+        return html! {};
+    }
+    let chips = candidates.iter().enumerate().map(|(i, c)| {
+        let cb = on_pick.clone();
+        let text = c.clone();
+        let onclick = Callback::from(move |_| cb.emit(text.clone()));
+        let cls = if i == sel { "completion-chip selected" } else { "completion-chip" };
+        html! {
+            <button class={cls} onclick={onclick} title="Click to insert" role="option" aria-selected={if i == sel { "true" } else { "false" }}>{ c.clone() }</button>
+        }
+    });
+    html! {
+        <div class="completion-popup" role="listbox" aria-label="Completion candidates" data-tour-target="completion-popup">
+            { for chips }
+        </div>
+    }
+}
+
 #[function_component(InputRow)]
 pub fn input_row(props: &InputRowProps) -> Html {
     let (label_text, label_class) = if props.in_tutorial {
@@ -54,25 +77,11 @@ pub fn input_row(props: &InputRowProps) -> Html {
     } else {
         ("(REPL)", "session-label repl")
     };
-    let popup = if props.completion_candidates.is_empty() {
-        html! {}
-    } else {
-        let sel = props.completion_selected;
-        let chips = props.completion_candidates.iter().enumerate().map(|(i, c)| {
-            let cb = props.on_pick_completion.clone();
-            let text = c.clone();
-            let onclick = Callback::from(move |_| cb.emit(text.clone()));
-            let cls = if i == sel { "completion-chip selected" } else { "completion-chip" };
-            html! {
-                <button class={cls} onclick={onclick} title="Click to insert" role="option" aria-selected={if i == sel { "true" } else { "false" }}>{ c.clone() }</button>
-            }
-        });
-        html! {
-            <div class="completion-popup" role="listbox" aria-label="Completion candidates" data-tour-target="completion-popup">
-                { for chips }
-            </div>
-        }
-    };
+    let popup = render_completion_popup(
+        &props.completion_candidates,
+        props.completion_selected,
+        &props.on_pick_completion,
+    );
     let clear_label = if props.in_tutorial {
         "Reset Tutorial"
     } else {

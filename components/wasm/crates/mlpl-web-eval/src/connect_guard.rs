@@ -8,6 +8,9 @@
 //! and explain the block -- rather than claim "Connected" and then fail
 //! every request with a cryptic "Failed to fetch".
 
+/// Only the wasm `connect_blocked_reason` consumes this; native builds
+/// never reach it, so gate the const to avoid a dead-code warning there.
+#[cfg(target_arch = "wasm32")]
 const MIXED_CONTENT_MSG: &str = "Connect mode is unavailable from the public HTTPS demo. \
 Browsers block requests from an https:// page to a plain http:// server (mixed content), and a \
 cross-origin server also needs CORS. To use connect mode, open the playground from the server \

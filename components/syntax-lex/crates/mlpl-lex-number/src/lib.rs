@@ -23,10 +23,17 @@ pub fn lex_number(bytes: &[u8], start: usize) -> Option<(TokenKind, usize)> {
         while pos < bytes.len() && bytes[pos].is_ascii_digit() {
             pos += 1;
         }
-        let s = std::str::from_utf8(&bytes[start..pos]).unwrap();
-        Some((TokenKind::FloatLit(s.parse().ok()?), pos))
-    } else {
-        let s = std::str::from_utf8(&bytes[start..pos]).unwrap();
-        Some((TokenKind::IntLit(s.parse().ok()?), pos))
     }
+    let s = std::str::from_utf8(&bytes[start..pos]).unwrap();
+    finish(s, pos, has_fraction)
+}
+
+/// Parse the matched digits into a `Float`/`Int` token at `pos`.
+fn finish(s: &str, pos: usize, is_float: bool) -> Option<(TokenKind, usize)> {
+    let kind = if is_float {
+        TokenKind::FloatLit(s.parse().ok()?)
+    } else {
+        TokenKind::IntLit(s.parse().ok()?)
+    };
+    Some((kind, pos))
 }
