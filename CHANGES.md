@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-15
 
+- refactor(lessons): move tutorial content to lessons.toml + build.rs codegen
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(demos): detailed per-visualization comments in the Visualizations demo
 - docs(changes): refresh CHANGES.md to HEAD
 - feat(demos): expand the Visualizations demo into a full viz tour
