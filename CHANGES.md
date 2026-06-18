@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-18
 
+- feat(glossary): fuzzy search (substring, plurals, aliases)
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(glossary): quantization terms + alphabetical browse order
 - docs(changes): refresh CHANGES.md to HEAD
 - fix(web): render lesson markdown in path view + add *emph* support
