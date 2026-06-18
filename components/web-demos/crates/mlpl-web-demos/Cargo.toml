@@ -19,6 +19,7 @@ mlpl-web-demos-types = { path = "../mlpl-web-demos-types" }
 serde = { version = "1", features = ["derive"] }
 toml = "0.8"
 
+# No heavy dev-deps: the demo-eval smoke test (which needs the interpreter)
+# lives in the sibling `mlpl-web-demos-smoke` crate, so the metadata tests
+# here compile without rebuilding mlpl-eval. See docs/modular-build.md.
 [dev-dependencies]
-mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
-mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }

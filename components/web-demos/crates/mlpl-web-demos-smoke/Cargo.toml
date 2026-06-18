@@ -1,0 +1,22 @@
+[package]
+name = "mlpl-web-demos-smoke"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Test-only harness: evals every demo's MLPL `lines` through the real
+# interpreter. It lives in its own crate so the heavy mlpl-eval / mlpl-parser
+# dependency stays OUT of mlpl-web-demos -- the facade's light metadata tests
+# (capability / literate / codegen) then compile in seconds instead of
+# rebuilding the whole interpreter. See docs/modular-build.md.
+
+[lib]
+name = "mlpl_web_demos_smoke"
+path = "src/lib.rs"
+
+[dependencies]
+
+[dev-dependencies]
+mlpl-web-demos = { path = "../mlpl-web-demos" }
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }

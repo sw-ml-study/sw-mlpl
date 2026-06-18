@@ -2,6 +2,7 @@
 members = [
     "crates/mlpl-web-demos",
     "crates/mlpl-web-demos-types",
+    "crates/mlpl-web-demos-smoke",
 ]
 resolver = "2"
 

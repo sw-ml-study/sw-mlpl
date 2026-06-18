@@ -1,9 +1,9 @@
-//! Phase 1 (local-gpu-agentic): demo capability tiers. Unlisted
-//! demos default to CPU/live (runnable on the public demo); only
-//! connect/GPU demos carry an override, with MLX and CUDA kept as
+//! Demo capability tiers, now generated from `demos.toml`'s `[[capabilities]]`
+//! table. Unlisted demos default to CPU/live (runnable on the public demo);
+//! only connect/GPU demos carry an override, with MLX and CUDA kept as
 //! distinct devices so the UI groups + gates them separately.
 
-use mlpl_web_demos_types::{Capability, Device, capability_for, demo_disabled};
+use mlpl_web_demos::{Capability, Device, capability_for, demo_disabled};
 
 #[test]
 fn gating_keys_off_peer_device_set() {
