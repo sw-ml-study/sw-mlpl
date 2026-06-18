@@ -7,8 +7,8 @@ use mlpl_web_tutorial::LESSONS;
 #[test]
 fn lessons_are_well_formed() {
     assert!(
-        LESSONS.len() >= 49,
-        "expected >= 49 lessons, got {}",
+        LESSONS.len() >= 57,
+        "expected >= 57 lessons, got {}",
         LESSONS.len()
     );
     for l in LESSONS {

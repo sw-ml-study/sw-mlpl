@@ -860,3 +860,261 @@ examples = [
     ":describe out",
 ]
 try_it = "After the cross_entropy(probs, T) line failed with the double-softmax tutoring hint, try cross_entropy(softmax(L, 1), T) -- same bug, inline form. Then call :describe on every Weight in the workspace: walk through :vars first to find the auto-generated names like __linear_W_0. Finally, build a chain with a relu_layer tail and inspect apply(mdl, X) -- the result is tagged Activation(layer, kind=Relu), not Logit, because the structural-tail walk reaches relu_layer before any Linear."
+
+[[lessons]]
+title = "Quantization 1: why shrink the numbers?"
+intro = """
+A trained model is just a big bag of numbers (its weights). By default each number is a 16- or 32-bit float. **Quantization** stores each number in fewer bits -- 8, 4, even ~2 -- so the model takes less memory, less memory bandwidth, and often runs faster.
+
+## Why it matters
+
+- **Memory.** A 7-billion-parameter model at FP16 is ~14 GB -- too big for an 8 GB laptop GPU. The same model at 4-bit is ~3.5 GB and fits.
+- **Bandwidth + speed.** Inference is usually *memory-bound*: the bottleneck is moving weights from memory to the compute units. Half the bits, roughly half the traffic, so it runs faster even though the math is the same.
+- **Reach.** Quantization is the single technique that lets large models run on consumer hardware (phones, laptops, a single GPU) instead of a datacenter.
+
+## The catch
+
+Fewer bits means each weight is stored less precisely, so quantization *adds error*. The whole craft -- and the rest of this path -- is about getting the size win while keeping that error small enough that the model's answers barely change. The example shows the headline tradeoff: FP16 vs 4-bit for a 7B model.
+"""
+examples = [
+    "params = 7000000000        # a 7B model",
+    "gb_fp16 = params * 2 / 1000000000   # FP16 = 2 bytes/weight",
+    "gb_q4   = params * 0.5 / 1000000000 # 4-bit ~ 0.5 bytes/weight",
+    "gb_fp16",
+    "gb_q4",
+    "gb_fp16 / gb_q4            # the compression ratio",
+]
+try_it = "Change params to 70000000000 (70B). FP16 needs ~140 GB (a multi-GPU server); 4-bit needs ~35 GB (one high-end GPU). Quantization is what moves a model from 'datacenter only' to 'runs on my machine'."
+
+[[lessons]]
+title = "Quantization 2: how numbers are stored (FP32, FP16, BF16, FP8)"
+intro = """
+Before shrinking numbers, know how a float is built. A floating-point number splits its bits into three fields: a **sign** (1 bit), an **exponent** (range -- how big or small), and a **mantissa** (precision -- how many significant digits).
+
+## The common formats
+
+- **FP32** (4 bytes): 1 sign, 8 exponent, 23 mantissa. The training default; lots of range and precision.
+- **FP16** (2 bytes): 1 sign, 5 exponent, 10 mantissa. Half the size. Precise, but its small 5-bit exponent has a narrow range (~6e-5 to 65504) -- big activations overflow to infinity.
+- **BF16** (2 bytes): 1 sign, **8** exponent, 7 mantissa. Same range as FP32 (the 8-bit exponent) but coarser precision (7 mantissa bits). This range is why BF16 is the modern training default: it almost never overflows, and training tolerates low precision better than it tolerates overflow.
+- **FP8** (1 byte): two flavors, E4M3 (more precision) and E5M2 (more range). Emerging for inference and even training on the newest hardware.
+
+## The lesson
+
+**Exponent bits buy range; mantissa bits buy precision.** FP16 and BF16 are the same size but spend their bits differently -- FP16 favors precision, BF16 favors range. Quantization (next lessons) pushes this further: throw away almost all the bits and reconstruct the value with a separate scale factor. The example contrasts FP16 vs BF16 precision: number of distinct mantissa steps.
+"""
+examples = [
+    "fp16_mantissa = 10        # FP16 precision bits",
+    "bf16_mantissa = 7         # BF16 precision bits",
+    "fp16_steps = pow(2, fp16_mantissa)   # 1024 steps per binade",
+    "bf16_steps = pow(2, bf16_mantissa)   # 128 steps per binade",
+    "fp16_steps",
+    "bf16_steps",
+    "fp16_steps / bf16_steps   # FP16 is 8x finer-grained",
+]
+try_it = "FP16 resolves 8x more finely than BF16 within a given exponent range, but BF16 reaches FP32's full range. Neither is 'better' -- they trade precision against range. Training picks BF16 (range matters more); naive inference often used FP16 (precision matters more) before integer quantization took over."
+
+[[lessons]]
+title = "Quantization 3: integer quantization (scale, zero-point, rounding)"
+intro = """
+Integer quantization is the workhorse. The idea: store each weight as a small **integer**, plus one shared **scale** (a float) that maps integers back to real values. Reconstruct with `value ~ integer * scale`.
+
+## The recipe (symmetric, per-tensor)
+
+1. Find the largest magnitude in the tensor: `amax = max(abs(W))`.
+2. Pick the integer range. Signed n-bit covers `[-(2^(n-1)-1), 2^(n-1)-1]` -- for 8-bit that is `[-127, 127]`.
+3. **Scale** = `amax / 127`. Each integer step is worth `scale` real units.
+4. **Quantize**: `q = round(W / scale)` -- the stored integers.
+5. **Dequantize**: `W_hat = q * scale` -- the approximation the model actually uses.
+
+The gap `W - W_hat` is the **quantization error**, bounded by half a step (`scale/2`).
+
+## Two design choices
+
+- **Symmetric vs asymmetric.** Symmetric uses scale only (range centered on 0). **Asymmetric** adds a **zero-point** (an integer offset) so the range can sit off-center -- better for lopsided data like post-ReLU activations that are all positive. (In GGUF names, this is the `_0` = symmetric vs `_1` = asymmetric distinction.)
+- **Granularity.** One scale **per-tensor** is cheapest but a single outlier weight inflates `amax` and wastes range on everyone else. **Per-channel** or **per-block** (one scale per row, or per group of 32-256 weights) spends a few more bits on scales to keep error low. This per-block idea is the seed of the k-quants two lessons from now.
+
+The example quantizes a tiny weight vector to ~4-bit and measures the error.
+"""
+examples = [
+    "w = [0.12, -0.55, 0.93, -0.08, 0.31]   # toy weights",
+    "scale = 0.93 / 7          # amax=0.93, signed 4-bit range [-7,7]",
+    "q = round(w / scale)      # the stored integers",
+    "q",
+    "dq = q * scale            # dequantized approximation",
+    "dq",
+    "mean((w - dq) * (w - dq)) # mean squared quantization error",
+]
+try_it = "Print q -- those small integers are all that gets stored (plus the one scale). Change scale to use 127 instead of 7 (8-bit): the integers grow and the error shrinks toward zero. That is the bits-vs-error tradeoff, made of one round() and one multiply."
+
+[[lessons]]
+title = "Quantization 4: the bit-width ladder (8 -> 6 -> 4 -> 2 -> 1.58)"
+intro = """
+Quantization is not one setting but a ladder. Each rung down halves (roughly) the storage and raises the error. Where you stand on the ladder is the central decision.
+
+## The rungs
+
+- **8-bit (INT8).** ~255 levels. Near-lossless for most models; the safe default when you just want to halve FP16.
+- **6-bit.** ~63 levels. Still very close to the original; a common 'high quality' inference setting.
+- **4-bit.** ~15 levels. The popular sweet spot -- big size win, small quality loss *with good methods* (per-block scales, calibration). Naive 4-bit is rougher.
+- **2-bit.** ~3-4 levels. Aggressive. Round-to-nearest falls apart here; only advanced methods (importance matrices, codebooks -- the IQ family) make 2-bit usable, and only on large models.
+- **1.58-bit (ternary).** Each weight is one of **three** values: -1, 0, +1. Three states carry `log2(3) ~ 1.58` bits of information -- hence the name. This is **BitNet b1.58**: instead of quantizing a finished FP model, the model is *trained from scratch* with ternary weights, so it learns to work within the constraint. At scale it can match an FP16 baseline.
+
+## The shape of the tradeoff
+
+Error does not grow linearly -- it is gentle from 8 to 4 bits, then steepens sharply below 4. That cliff is why 4-bit is so popular (just before the drop) and why sub-4-bit needs cleverness rather than plain rounding. The example quantizes the same vector at 8, 4, and 2 bits so you can watch the error climb.
+"""
+examples = [
+    "w = [0.12, -0.55, 0.93, -0.08, 0.31]",
+    "q8 = round(w / (0.93 / 127)) * (0.93 / 127)   # 8-bit",
+    "q4 = round(w / (0.93 / 7))   * (0.93 / 7)     # 4-bit",
+    "q2 = round(w / (0.93 / 1))   * (0.93 / 1)     # ~2-bit (ternary-ish)",
+    "mean((w - q8) * (w - q8))    # tiny error",
+    "mean((w - q4) * (w - q4))    # modest error",
+    "mean((w - q2) * (w - q2))    # large error -- the cliff",
+]
+try_it = "The 8-bit error is near zero; 4-bit is modest; 2-bit jumps by orders of magnitude. That non-linear jump is the whole reason advanced low-bit methods (IQ quants, BitNet) exist: plain rounding is fine at 4 bits and unusable at 2, so below 4 you need a smarter scheme."
+
+[[lessons]]
+title = "Quantization 5: reading the names (FP, INT, K, Q, IQ, and _S/_M/_L)"
+intro = """
+Download a model from the community (GGUF files for llama.cpp) and you face names like `Q4_K_M`, `IQ2_XXS`, `Q8_0`, `Q6_K`. They are not random -- each part tells you the method and the size/quality tier.
+
+## The families
+
+- **F16 / F32 (FP).** Not quantized -- the full float weights. The baseline everything else is measured against.
+- **Q*_0 / Q*_1 (legacy INT block quants).** The original llama.cpp scheme. Weights in blocks of 32 share a scale. `_0` = symmetric (scale only); `_1` = asymmetric (scale + min). Examples: `Q4_0`, `Q4_1`, `Q8_0`. `Q8_0` is 8-bit and near-lossless. Mostly superseded now, but `Q8_0` is still common.
+- **Q*_K (k-quants).** The modern integer scheme. A 'super-block' of 256 weights is split into sub-blocks, each with its own quantized scale, plus a super-block scale on top -- bits are spent where the data needs them. Examples: `Q2_K`, `Q3_K`, `Q4_K`, `Q5_K`, `Q6_K`. Better quality per bit than the legacy `Q*_0`.
+- **IQ* (i-quants / importance quants).** The lowest-bit family. They use an **importance matrix** (imatrix) computed from calibration data to protect the weights that matter most, plus codebook/non-linear encoding. This is what makes 2-3 bit usable. Examples: `IQ2_XXS`, `IQ2_S`, `IQ3_M`, `IQ4_XS`, `IQ4_NL` (NL = non-linear).
+
+## The modifiers (_S, _M, _L, _XS, _XXS)
+
+Within a family the suffix is the **size/quality tier** -- it picks which tensors get extra bits:
+
+- `_S` = Small, `_M` = Medium, `_L` = Large. Bigger letter = more quality + more size. `Q4_K_M`, for instance, keeps most tensors at 4-bit but bumps a few sensitive ones (like attention value and the second feed-forward matrix) to 6-bit; `Q4_K_S` is more uniformly 4-bit (smaller, slightly worse).
+- `_XS`, `_XXS` = extra-small, extra-extra-small (IQ family) -- even more aggressive than `_S`.
+
+## How to read one
+
+`Q4_K_M` = **Q**uantized, **4**-bit, **K**-quant method, **M**edium tier. `IQ2_XXS` = **i**mportance-matrix **Q**uant, **2**-bit, extra-extra-small. Once you can parse the name, you can predict its size and roughly its quality. The example shows the bits-per-weight that drive file size.
+"""
+examples = [
+    "bpw_q8_0  = 8.5    # 8-bit + block scales",
+    "bpw_q6_k  = 6.6",
+    "bpw_q4_k_m = 4.85  # the popular default",
+    "bpw_iq2_m = 2.7",
+    "bpw_ternary = 1.58 # BitNet b1.58",
+    "params = 7000000000",
+    "params * bpw_q4_k_m / 8 / 1000000000   # ~GB for Q4_K_M 7B",
+]
+try_it = "Swap bpw_q4_k_m for bpw_iq2_m in the last line: the same 7B model drops from ~4.2 GB to ~2.4 GB. The name encodes the size. Next lesson: how these methods were invented; the one after: which to actually pick."
+
+[[lessons]]
+title = "Quantization 6: a short history of the methods"
+intro = """
+Each quantization advance solved a failure of the one before -- the same pattern as the architecture history, but for *compression*.
+
+## The arc
+
+- **Early INT8 PTQ (CNNs, ~2016-2020).** Mobile/edge inference quantized convolutional nets to 8-bit, with per-channel scales and sometimes quantization-aware training (QAT). Worked because 8-bit barely loses anything.
+- **LLM.int8() (2022).** Naive INT8 broke on large transformers because a few **outlier** activation channels dominate. Dettmers et al. kept those few channels in FP16 and quantized the rest to INT8 -- the first robust 8-bit for LLMs.
+- **GPTQ (2022).** One-shot 4-bit *weight* quantization using second-order (Hessian) information to compensate, row by row, for the error each rounding introduces. Made 4-bit LLMs practical without retraining.
+- **k-quants (2023, llama.cpp).** Super-blocks with hierarchical scales (the `Q*_K` family). A pure-engineering win: much better quality per bit than the legacy `Q*_0`, and the reason `Q4_K_M` became the default.
+- **AWQ (2023).** Activation-aware: identify the ~1% of weight channels that matter most (by activation magnitude) and protect them. Strong 4-bit with no backprop.
+- **QLoRA / NF4 (2023).** A 4-bit **NormalFloat** data type matched to the bell-curve distribution of weights, enabling *fine-tuning* a 4-bit-frozen model through LoRA adapters. Put fine-tuning of big models on a single GPU.
+- **imatrix + IQ quants (2024).** An **importance matrix** from calibration data, plus codebook encoding, pushed usable quantization below 3 bits (`IQ2_*`, `IQ3_*`).
+- **BitNet b1.58 (2024).** Stopped quantizing a finished model and instead *trained* ternary (-1/0/+1) weights from scratch. At scale, ~1.58 bits per weight matching an FP16 baseline -- the ratio is `log2(3)`.
+
+## The throughline
+
+Two ideas recur: **spend bits where they matter** (per-channel, k-quants, AWQ, imatrix) and **compensate for rounding error** (GPTQ) -- or sidestep both by **training within the constraint** (QAT, BitNet). The example computes the 1.58 figure directly.
+"""
+examples = [
+    "log(3) / log(2)   # bits to name one of 3 states = log2(3) ~ 1.585",
+    "states = 3",
+    "bits_per_weight = log(states) / log(2)",
+    "bits_per_weight",
+    "weights = 1000000000",
+    "weights * bits_per_weight / 8 / 1000000000   # GB for 1B ternary weights",
+    "1 / bits_per_weight   # vs 1 bit: ternary costs 0.58 extra bits for the 0 state",
+]
+try_it = "The 0 state is what makes ternary 1.58 bits instead of 1: three choices, not two. BitNet's bet is that allowing -1/0/+1 (the 0 lets a weight 'turn off') is worth the 0.58 extra bits over pure binary, and that training from scratch beats quantizing afterward."
+
+[[lessons]]
+title = "Quantization 7: training vs inference (PTQ, QAT, and the conversion trap)"
+intro = """
+*When* quantization happens relative to training decides how much quality you keep. There are three regimes, and a classic mistake that bridges them.
+
+## The three regimes
+
+- **Post-training quantization (PTQ).** Train in floating point (BF16/FP16), then quantize the finished weights. No retraining -- cheap and fast. The model never *saw* quantization, but at 4 bits and up the perturbation is small enough that behavior barely shifts. This is what almost every GGUF download is: an FP model converted to `Q*_K` / `IQ*` after the fact.
+- **Quantization-aware training (QAT).** Simulate the rounding *during* training -- a 'fake quant' rounds the weights in the forward pass while gradients flow in full precision (the straight-through estimator). The model adapts its weights to be robust to the coarse grid. More expensive, but it is what holds quality together at 2-3 bits where PTQ collapses.
+- **Native low-bit training (BitNet).** The extreme of QAT: train *at* the target precision (ternary) from scratch. Zero train/inference mismatch, so it gets the best low-bit quality -- at the cost of training a model specifically for that format.
+
+## The good, the bad, and the ugly of converting
+
+- **Good:** FP model -> PTQ to 8 / 6 / 4-bit. The train-vs-inference precision gap is tiny; it works out of the box. This is the everyday case and why `Q4_K_M` is safe.
+- **Bad:** FP model -> naive PTQ to 2-3 bit. The model never learned to tolerate that much rounding, so quality craters. The fixes are QAT, or protection at conversion time (imatrix / the IQ family).
+- **Ugly:** train or fine-tune at one precision and deploy at a *different, lower* one. A weight nudged to 0.46 because the model assumed fine (say 8-bit) steps lands on the wrong value when forced onto a coarse (2-bit) grid -- it snaps to 0. The carefully-learned values were tuned for a grid they no longer live on. Re-quantizing an already-quantized-then-fine-tuned model (double rounding), or calibrating an imatrix on data unlike real use, are variants of the same mismatch.
+
+## QLoRA: matching by construction
+
+QLoRA fine-tunes with the base model *kept* 4-bit (NF4) throughout, training only small FP LoRA adapters. Because the base is quantized during training, train and inference agree on the base precision -- no mismatch there. The catch is the adapters are FP: merge them back and re-quantize and you can reintroduce the gap.
+
+## The rule
+
+**Use the model at the precision it was trained or calibrated for.** PTQ to ~4 bits is a small, safe mismatch. Anything lower needs the model to have *known* about the quantization (QAT / BitNet) or to be *protected* during conversion (imatrix / IQ). The example shows the conversion trap: a value tuned for a fine grid, forced onto a coarse one.
+"""
+examples = [
+    "w_tuned = 0.46           # a weight learned assuming fine (8-bit) steps",
+    "grid8 = 1.0 / 127        # the 8-bit step it was tuned for",
+    "grid2 = 1.0 / 1          # the 2-bit step it's forced into at deploy",
+    "round(w_tuned / grid8) * grid8   # ~0.46 -- faithful",
+    "round(w_tuned / grid2) * grid2   # snaps to 0 -- the conversion trap",
+    "abs(w_tuned - round(w_tuned / grid8) * grid8)   # tiny mismatch",
+    "abs(w_tuned - round(w_tuned / grid2) * grid2)   # huge mismatch",
+]
+try_it = "The same weight is faithful on the grid it was tuned for and lost on a coarser one. That gap is why you cannot freely down-convert a model to a much lower bit-width and expect it to behave: PTQ to 4-bit is fine, but going lower needs QAT, native low-bit training, or imatrix protection so the model is prepared for the grid it will actually run on."
+
+[[lessons]]
+title = "Quantization 8: what to prefer, what to avoid"
+intro = """
+Knowing the names, here is how to actually choose -- the practical payoff of this path.
+
+## The tradeoff curve
+
+Plot quality (e.g. perplexity, lower is better) against file size. The curve is flat-then-cliff: from FP16 down to ~4-5 bits you lose almost nothing; below ~3 bits quality drops fast. You want to sit just before the cliff that fits your hardware.
+
+## Defaults worth memorizing
+
+- **Q4_K_M** -- the community default. ~4.85 bits/weight, roughly half of FP16, with quality loss most people never notice. Start here.
+- **Q5_K_M / Q6_K** -- when you have the memory and want to be safe. Q6_K is very close to FP16.
+- **Q8_0** -- near-lossless, but 8.5 bits/weight; usually not worth it over Q6_K unless you are debugging quality.
+
+## When you must go low (fit a big model in little VRAM)
+
+- Prefer **IQ** quants with an imatrix (`IQ4_XS`, `IQ3_M`, `IQ2_M`) over legacy or even k-quants at the same size -- they are measurably better at low bit.
+- A bigger model at low bit can still beat a smaller model at high bit -- but not always; test on your task.
+
+## What to avoid
+
+- **Q2_K / Q3_K_S on small models (<= 7B).** Low bit hurts small models far more than large ones; a 7B at Q2 is often worse than a 3B at Q5. Big models are more redundant and tolerate aggressive quantization better.
+- **Legacy Q4_0 / Q4_1** when a K or IQ option exists at the same size -- they are strictly worse now.
+- **Sub-4-bit without an imatrix** -- plain low-bit rounding is the failure mode the IQ family was built to fix.
+
+## The one-line rules
+
+1. Default to **Q4_K_M**; go up (Q5/Q6) for quality, down (IQ) only to fit hardware.
+2. **Quantize for inference; keep BF16/FP16 for training.**
+3. **Prefer a smaller model at high bit over a bigger model at very low bit** unless you have measured otherwise. The example sizes a model against an 8 GB budget.
+"""
+examples = [
+    "vram_gb = 8                # your GPU budget",
+    "bytes = vram_gb * 1000000000",
+    "params_q4 = bytes / 0.6    # ~4.85 bits/weight ~ 0.6 bytes",
+    "params_q4 / 1000000000     # ~13B params fit at Q4_K_M",
+    "params_q6 = bytes / 0.83   # Q6_K ~ 6.6 bits ~ 0.83 bytes",
+    "params_q6 / 1000000000     # fewer params, higher quality",
+    "params_iq2 = bytes / 0.34  # IQ2 ~ 2.7 bits -- biggest model, lowest quality",
+    "params_iq2 / 1000000000",
+]
+try_it = "Same 8 GB fits a ~13B at Q4_K_M, a ~10B at Q6_K, or a ~24B at IQ2. The choice is model-size vs per-weight-quality at fixed memory. The usual winner is the largest model you can fit at Q4_K_M or better -- drop to IQ only when a must-have model will not otherwise fit."
