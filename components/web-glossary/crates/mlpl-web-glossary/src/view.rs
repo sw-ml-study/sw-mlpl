@@ -43,6 +43,9 @@ pub fn find_by_term(term: &str) -> Option<&'static GlossaryEntry> {
         .find(|e| e.term.to_ascii_lowercase() == q)
 }
 
+/// Parse `GLOSSARY_MD` into an intro blurb + per-term entries, sorted
+/// alphabetically (case-insensitive) so entries appended to glossary.md
+/// still browse under the right letter regardless of file order.
 fn parse_glossary() -> GlossaryDoc {
     let mut intro = String::new();
     let mut entries = Vec::new();
@@ -65,6 +68,7 @@ fn parse_glossary() -> GlossaryDoc {
             });
         }
     }
+    entries.sort_by_key(|e| e.term.to_ascii_lowercase());
     GlossaryDoc { intro, entries }
 }
 
