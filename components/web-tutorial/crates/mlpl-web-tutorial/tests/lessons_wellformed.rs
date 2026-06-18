@@ -13,7 +13,11 @@ fn lessons_are_well_formed() {
     );
     for l in LESSONS {
         assert!(!l.title.is_empty(), "a lesson has an empty title");
-        assert!(!l.intro.is_empty(), "lesson {:?} has an empty intro", l.title);
+        assert!(
+            !l.intro.is_empty(),
+            "lesson {:?} has an empty intro",
+            l.title
+        );
         assert!(
             !l.examples.is_empty(),
             "lesson {:?} has no examples",

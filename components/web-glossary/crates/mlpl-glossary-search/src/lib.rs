@@ -1,11 +1,12 @@
-//! Fuzzy matching for the glossary search box. Operates on term strings only
-//! (no `GlossaryEntry` import) so it stays a leaf of the module DAG -- `view`
-//! depends on `search`, not the reverse.
+//! Fuzzy matching for the glossary search box. A standalone, dependency-free
+//! crate: it operates on term strings only, so it has no yew / wasm ties and
+//! can be unit-tested directly. The web UI (`mlpl-web-glossary`) calls
+//! [`best_match`] with its entry terms.
 //!
 //! A typed query is matched in tiers, best first: exact term, first-word
 //! prefix (the type-ahead feel), any-word prefix, substring anywhere, then a
 //! plural-folded substring. A small alias table maps cross-spellings
-//! (`bfloat16` -> `bf16`) that no substring rule would catch. `best_match`
+//! (`bfloat16` -> `bf16`) that no substring rule would catch. [`best_match`]
 //! returns the index of the best entry, ties broken by position (the entry
 //! list is sorted, so that is the alphabetically-first match).
 

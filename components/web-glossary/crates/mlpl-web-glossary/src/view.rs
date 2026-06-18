@@ -3,10 +3,11 @@
 //! Parses `docs/glossary.md` (`include_str!`'d at compile time)
 //! into per-term entries with stable id slugs, then renders a
 //! search box plus a scrollable list. Typing in the search box
-//! jumps the list to the first term whose first word matches
-//! the typed prefix (case-insensitive). Educational-first: a
-//! student looking for "MLP" types M, L, P and watches the
-//! list scroll to MLP without a mouse round-trip.
+//! jumps the list to the best fuzzy match (exact / prefix /
+//! substring / plural / alias) via the `mlpl-glossary-search`
+//! crate. Educational-first: a student looking for "MLP" types
+//! M, L, P and watches the list scroll to MLP without a mouse
+//! round-trip; "k-quants" still finds "K-quant".
 
 use std::sync::OnceLock;
 
@@ -104,7 +105,8 @@ pub fn glossary_view() -> Html {
         || ()
     });
 
-    let matched = crate::search::best_match(&query, g.entries.iter().map(|e| e.term.as_str()));
+    let matched =
+        mlpl_glossary_search::best_match(&query, g.entries.iter().map(|e| e.term.as_str()));
     let entries_html = g.entries.iter().enumerate().map(|(i, e)| {
         let class = if Some(i) == matched {
             "glossary-entry matched"
@@ -133,7 +135,8 @@ pub fn glossary_view() -> Html {
 }
 
 fn scroll_to_match(query: &str, entries: &[GlossaryEntry]) {
-    let Some(idx) = crate::search::best_match(query, entries.iter().map(|e| e.term.as_str()))
+    let Some(idx) =
+        mlpl_glossary_search::best_match(query, entries.iter().map(|e| e.term.as_str()))
     else {
         return;
     };
