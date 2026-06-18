@@ -186,7 +186,7 @@ fn lesson_body(props: &PathsViewProps, title: &'static str) -> Html {
     let label = format!("Open lesson \"{title}\" \u{2192}");
     html! {
         <>
-            <p class="path-step-preview">{ LESSONS[i].intro }</p>
+            <div class="path-step-preview">{ mlpl_web_lessons::intro_md::render(LESSONS[i].intro) }</div>
             <button class="path-jump-btn" onclick={on_open} data-tour-target="path-open-lesson">{ label }</button>
         </>
     }
