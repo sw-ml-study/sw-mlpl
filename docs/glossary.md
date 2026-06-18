@@ -3044,3 +3044,401 @@ Historically this is the result Minsky and Papert called
 out in 1969 to argue against shallow perceptrons; the
 multi-layer answer didn't take off until backpropagation
 made it tractable in the mid-1980s.
+
+## FP32
+
+32-bit floating point (4 bytes/number): 1 sign bit, 8
+exponent bits, 23 mantissa bits. Full precision -- the
+default for training and the baseline that [[Quantization]]
+is measured against. See [[Exponent and mantissa]].
+
+## FP16
+
+16-bit "half" floating point (2 bytes): 1 sign, 5 exponent,
+10 mantissa. Half the size of [[FP32]] with good precision,
+but the small 5-bit exponent gives a narrow range (~6e-5 to
+65504) so large activations can overflow to infinity. Often
+written `F16` in GGUF files. Contrast [[BF16]].
+
+## BF16
+
+bfloat16 (2 bytes): 1 sign, 8 exponent, 7 mantissa. Same
+size as [[FP16]] but spends bits differently -- the full
+8-bit exponent gives [[FP32]]'s range with coarser
+precision. The modern training default, because training
+tolerates low precision better than overflow. See
+[[Exponent and mantissa]].
+
+## FP8
+
+8-bit floating point (1 byte), in two flavors: `E4M3` (4
+exponent, 3 mantissa -- more precision) and `E5M2` (more
+range). Emerging for inference and training on the newest
+hardware. Smaller than INT8 quant in bytes but a true float
+format, not a scaled integer. See [[Scale (quantization)]].
+
+## Exponent and mantissa
+
+The two number-carrying fields of a floating-point value
+(besides the sign bit). The **exponent** sets the range (how
+big or small); the **mantissa** sets the precision (how many
+significant digits). [[FP16]] and [[BF16]] are the same size
+but split these differently -- FP16 favors mantissa
+(precision), BF16 favors exponent (range).
+
+## Quantization error
+
+The gap between an original weight and its
+[[Quantization]]-then-dequantized value. For
+round-to-nearest it is bounded by half a scale step. Error
+grows gently from 8-bit to 4-bit, then climbs steeply below
+4-bit -- the "cliff" that makes sub-4-bit quantization hard.
+See [[Scale (quantization)]].
+
+## Bits per weight
+
+The average number of bits used to store one weight (bpw),
+including the overhead of block scales. It sets a quantized
+model's file size: `size ~= params * bpw / 8`. Examples:
+`Q8_0` ~8.5, `Q6_K` ~6.6, [[Q4_K_M]] ~4.85, `IQ2_M` ~2.7,
+ternary ~1.58. See [[BitNet b1.58 (1.58-bit)]].
+
+## Scale (quantization)
+
+The shared floating-point multiplier that maps stored
+integers back to real values: `value ~= integer * scale`.
+For symmetric per-tensor quant, `scale = max(abs(W)) / qmax`
+(e.g. `qmax = 127` for signed 8-bit). The single number that
+makes integer [[Quantization]] reversible. See [[Zero-point]].
+
+## Zero-point
+
+An integer offset added to scaled values so the representable
+range can sit off-center: `value ~= (integer - zero_point) *
+scale`. Used by **asymmetric** quantization for lopsided data
+(e.g. all-positive post-ReLU activations). See [[Symmetric
+and asymmetric quantization]] and [[Scale (quantization)]].
+
+## Symmetric and asymmetric quantization
+
+Two ways to place the integer grid. **Symmetric** centers it
+on zero and uses a scale only (GGUF `_0` types).
+**Asymmetric** adds a [[Zero-point]] so the grid can shift to
+fit lopsided data (GGUF `_1` types). Asymmetric fits the data
+better at the cost of storing one extra number per block.
+
+## Per-tensor, per-channel, and per-block quantization
+
+The granularity of the [[Scale (quantization)]].
+**Per-tensor** uses one scale for a whole weight matrix --
+cheapest, but one outlier inflates the scale and wastes range
+on everyone else. **Per-channel** uses one scale per row;
+**per-block** uses one per group of 32-256 weights. Finer
+granularity spends a few extra bits on scales to cut
+[[Quantization error]] -- the idea [[K-quant]] is built on.
+
+## Activation outlier
+
+A few channels of a transformer's activations whose
+magnitudes are far larger than the rest. They break naive
+INT8 quantization (they dominate the scale); [[LLM.int8()]]
+handles them by keeping those channels in [[FP16]]. The
+reason weight quantization is easier than activation
+quantization.
+
+## Ternary weights
+
+Weights restricted to three values: -1, 0, +1. Three states
+carry `log2(3) ~= 1.58` bits, so ternary is "1.58-bit". The 0
+lets a weight switch off (sparsity), which is why ternary
+beats pure binary. See [[BitNet b1.58 (1.58-bit)]].
+
+## BitNet b1.58 (1.58-bit)
+
+A model trained from scratch with [[Ternary weights]] (-1/0/
++1), so it learns to work within the constraint rather than
+being quantized after the fact. At scale it can match an
+[[FP16]] baseline at ~1.58 [[Bits per weight]] -- the extreme
+end of [[Quantization-aware training (QAT)]] (Ma et al.,
+2024).
+
+## GGUF
+
+The file format used by llama.cpp to ship quantized models.
+A GGUF file's name encodes its quantization type -- e.g.
+[[Q4_K_M]], `IQ2_XXS`, `Q8_0` -- which tells you the
+bit-width, method, and size tier. See [[K-quant]], [[i-quant
+(IQ)]], and [[Quant size modifiers (S, M, L)]].
+
+## K-quant
+
+The modern integer-quantization scheme in [[GGUF]] (the `_K`
+types, `Q2_K` through `Q6_K`). A [[Super-block]] of 256
+weights is split into sub-blocks, each with its own quantized
+scale, plus a super-block scale on top -- so bits are spent
+where the data needs them. Better quality per bit than the
+legacy `Q4_0`-style types. The `_K` in a name means k-quant.
+See [[Legacy quants (Q4_0, Q4_1)]].
+
+## Super-block
+
+A block of 256 weights (in [[K-quant]]) subdivided into
+smaller sub-blocks. The super-block carries one
+floating-point scale; each sub-block carries its own low-bit
+quantized scale. This hierarchy is how k-quants get fine
+[[Per-tensor, per-channel, and per-block quantization]] cheaply.
+
+## i-quant (IQ)
+
+The lowest-bit [[GGUF]] family (`IQ1_*` through `IQ4_*`).
+i-quants use an [[Importance matrix (imatrix)]] to protect
+the weights that matter most, plus codebook / non-linear
+encoding, which is what makes 2-3 bit usable where plain
+rounding fails. The `IQ` prefix means importance-quant.
+
+## Importance matrix (imatrix)
+
+A table of per-weight (or per-channel) importance scores
+computed by running calibration data through the model.
+Low-bit [[i-quant (IQ)]] methods use it to decide which
+weights to encode carefully and which to round hard -- the
+key to sub-3-bit quality. Calibrating on data unlike real use
+weakens it.
+
+## Quant size modifiers (S, M, L)
+
+The suffix on a [[K-quant]] name that picks a size/quality
+tier by mixing precisions across tensors. `_S` = Small, `_M`
+= Medium, `_L` = Large; bigger letter = more quality + more
+size. [[Q4_K_M]] keeps most tensors at 4-bit but bumps a few
+sensitive ones to 6-bit; [[Q4_K_S]] is more uniformly 4-bit.
+See also [[Extra-small quant tiers (XS, XXS)]] and [[XL quant
+tier]].
+
+## Extra-small quant tiers (XS, XXS)
+
+Size suffixes below `_S`, used mostly by [[i-quant (IQ)]]
+types: `_XS` (extra-small) and `_XXS` (extra-extra-small),
+e.g. `IQ2_XXS`, [[IQ4_XS]]. The smallest, most aggressive
+tiers -- maximum compression, lowest quality. See [[Quant
+size modifiers (S, M, L)]].
+
+## XL quant tier
+
+A size suffix above `_L` (extra-large), seen on [[Unsloth
+Dynamic (UD-)]] types like `UD-Q4_K_XL`. Spends extra bits on
+the most sensitive tensors for quality closer to the next
+bit-width up, at a larger file size. See [[Quant size
+modifiers (S, M, L)]].
+
+## Unsloth Dynamic (UD-)
+
+A `UD-` prefix (Unsloth's "Dynamic" quants) marks a GGUF that
+quantizes different layers to different bit-widths using a
+calibration analysis -- keeping more bits where the model is
+sensitive and fewer where it is not. Examples: `UD-Q4_K_XL`,
+`UD-IQ2_M`, `UD-Q2_K_XL`. A per-layer refinement of
+[[K-quant]] / [[i-quant (IQ)]]; read the rest of the name
+normally.
+
+## Legacy quants (Q4_0, Q4_1)
+
+The original [[GGUF]] integer scheme, before [[K-quant]]. A
+block of 32 weights shares one scale (`_0`, symmetric) or a
+scale plus a minimum (`_1`, asymmetric). Mostly superseded by
+K and [[i-quant (IQ)]] at the same size -- prefer those --
+though [[Q8_0]] remains common. See [[Symmetric and
+asymmetric quantization]].
+
+## NL (non-linear quant)
+
+The `NL` suffix (as in [[IQ4_NL]]) marks a non-linear
+quantization grid: the representable levels are spaced to
+match the bell-curve distribution of weights instead of
+evenly, cutting [[Quantization error]] for the same bit
+count. Related idea: [[NF4 (NormalFloat 4-bit)]].
+
+## Post-training quantization (PTQ)
+
+Quantizing a model's weights AFTER training in floating
+point, with no retraining. Cheap and fast; the default for
+8/6/4-bit and what nearly every [[GGUF]] download is. The
+model never saw quantization, so quality holds at 4+ bits but
+degrades below. Contrast [[Quantization-aware training
+(QAT)]].
+
+## Quantization-aware training (QAT)
+
+Training with the quantization rounding simulated in the
+forward pass (a "fake quant"), so the model adapts its
+weights to the coarse grid; gradients still flow in full
+precision via the [[Straight-through estimator]]. More
+expensive than [[Post-training quantization (PTQ)]] but holds
+quality at very low bit-widths. [[BitNet b1.58 (1.58-bit)]]
+is the extreme (train at the target precision).
+
+## Straight-through estimator
+
+The trick that makes [[Quantization-aware training (QAT)]]
+work: the forward pass rounds (a step function with zero
+gradient almost everywhere), but the backward pass pretends
+the rounding was the identity, so gradients pass straight
+through to the underlying full-precision weights.
+
+## GPTQ
+
+A one-shot 4-bit [[Post-training quantization (PTQ)]] method
+(2022) that uses second-order (Hessian) information to
+compensate, column by column, for the error each rounding
+introduces. Made 4-bit LLMs practical without retraining.
+
+## AWQ
+
+Activation-aware Weight Quantization (2023): identify the
+~1% of weight channels that matter most (by [[Activation
+outlier]] magnitude) and protect them, quantizing
+the rest to 4-bit. Strong low-bit quality with no backprop.
+
+## QLoRA
+
+Fine-tuning with the base model kept 4-bit ([[NF4 (NormalFloat
+4-bit)]]) and frozen, training only small floating-point LoRA
+adapters (2023). Put fine-tuning of large models on a single
+GPU. Because the base stays quantized during training, there
+is no train/inference precision mismatch on the base.
+
+## NF4 (NormalFloat 4-bit)
+
+A 4-bit data type whose 16 levels are placed to match the
+bell-curve (normal) distribution of neural-network weights,
+so each level is "used" equally often. Introduced with
+[[QLoRA]]; a non-linear grid like [[IQ4_NL]]. See [[NL
+(non-linear quant)]].
+
+## LLM.int8()
+
+An 8-bit [[Post-training quantization (PTQ)]] method (2022)
+that fixed naive INT8's failure on large transformers: it
+keeps the few [[Activation outlier]] channels in
+[[FP16]] and quantizes the rest to INT8. The first robust
+8-bit for LLMs.
+
+## Q8_0
+
+8-bit legacy/block quant (~8.5 [[Bits per weight]]). Near-
+lossless -- the safe choice when you just want to halve
+[[FP16]] with no visible quality loss. Still common despite
+newer methods. See [[Legacy quants (Q4_0, Q4_1)]].
+
+## Q6_K
+
+6-bit [[K-quant]] (~6.6 [[Bits per weight]]). Very close to
+[[FP16]] quality; the high-quality inference setting when you
+have the memory. The next step down from [[Q8_0]] for far
+less size.
+
+## Q5_K_S
+
+5-bit [[K-quant]], Small tier. A bit smaller and slightly
+lower quality than [[Q5_K_M]]. See [[Quant size modifiers (S,
+M, L)]].
+
+## Q5_K_M
+
+5-bit [[K-quant]], Medium tier (~5.5 [[Bits per weight]]). A
+safe "quality" choice above [[Q4_K_M]] when memory allows.
+
+## Q4_K_M
+
+4-bit [[K-quant]], Medium tier (~4.85 [[Bits per weight]]).
+The community default: roughly half of [[FP16]] with quality
+loss most people never notice. Bumps a few sensitive tensors
+to 6-bit. Start here; go up ([[Q5_K_M]] / [[Q6_K]]) for
+quality.
+
+## Q4_K_S
+
+4-bit [[K-quant]], Small tier. More uniformly 4-bit than
+[[Q4_K_M]] -- a little smaller and slightly lower quality.
+
+## Q3_K_M
+
+3-bit [[K-quant]], Medium tier. Noticeably lower quality than
+4-bit; usable on large models, risky on small ones. Prefer an
+[[i-quant (IQ)]] at this size if available.
+
+## Q3_K_S
+
+3-bit [[K-quant]], Small tier. Aggressive; quality drops
+fast, especially on small models. Avoid below ~13B unless you
+must. See [[Quant size modifiers (S, M, L)]].
+
+## Q2_K
+
+2-bit [[K-quant]] (~2.6 [[Bits per weight]]). The smallest
+k-quant; quality is shaky and craters on small models. At
+this size an [[i-quant (IQ)]] (`IQ2_M`, `IQ2_XS`) is usually
+better.
+
+## IQ4_XS
+
+4-bit [[i-quant (IQ)]], extra-small tier (~4.25 [[Bits per
+weight]]). Uses an [[Importance matrix (imatrix)]] to beat
+[[Q4_K_S]] at a slightly smaller size -- a good low-4-bit
+pick. See [[Extra-small quant tiers (XS, XXS)]].
+
+## IQ4_NL
+
+4-bit [[i-quant (IQ)]] with a [[NL (non-linear quant)]] grid. Similar size to legacy `Q4_0` but better
+quality thanks to the bell-curve-matched levels; a drop-in
+upgrade where `Q4_0` was used.
+
+## IQ3_XXS
+
+3-bit [[i-quant (IQ)]], extra-extra-small tier (~3.0 [[Bits
+per weight]]). Very aggressive; relies on the [[Importance
+matrix (imatrix)]] to stay usable. For fitting a big model in
+little memory.
+
+## IQ2_M
+
+2-bit [[i-quant (IQ)]], Medium tier (~2.7 [[Bits per
+weight]]). About the lowest bit-width that stays usable, and
+only on large models with a good [[Importance matrix
+(imatrix)]]. Beats [[Q2_K]] at a similar size.
+
+## INT8
+
+8-bit integer quantization: each weight stored as an integer
+in `[-127, 127]` with a shared [[Scale (quantization)]].
+~255 levels -- near-lossless for most models and the safe way
+to halve [[FP16]]. The 8-bit rung of the [[Quantization]]
+ladder; the GGUF form is [[Q8_0]]. A scaled integer, unlike
+the floating-point [[FP8]]. See [[LLM.int8()]] for the
+outlier issue on large transformers.
+
+## INT4
+
+4-bit integer quantization: ~15 levels. The popular sweet
+spot -- a big size win with small quality loss, but only with
+good methods ([[K-quant]], [[GPTQ]], [[AWQ]], an [[Importance
+matrix (imatrix)]]); naive per-tensor 4-bit is rougher. GGUF
+forms include [[Q4_K_M]] and [[IQ4_XS]]. See [[Bits per
+weight]].
+
+## IQ2
+
+The 2-bit [[i-quant (IQ)]] family (`IQ2_XXS`, `IQ2_XS`,
+`IQ2_S`, [[IQ2_M]]). About the lowest bit-width that stays
+usable, and only on large models with a good [[Importance
+matrix (imatrix)]]. At this size i-quants beat the
+[[K-quant]] [[Q2_K]]. See [[Extra-small quant tiers (XS,
+XXS)]].
+
+## IQ3
+
+The 3-bit [[i-quant (IQ)]] family (`IQ3_XXS`, `IQ3_S`,
+`IQ3_M`). Uses an [[Importance matrix (imatrix)]] to stay
+usable below 4-bit; a better choice than [[Q3_K_S]] /
+[[Q3_K_M]] at the same size for fitting a big model in little
+memory.
