@@ -21,15 +21,7 @@ pub fn compute_modes(
     let tutorial_active = cur_lesson.is_some();
     let paths_active = cur_path.is_some() && !tutorial_active;
     let editor_active = editor_open && !tutorial_active && !paths_active;
-    let header_mode = if editor_active {
-        HeaderMode::Editor
-    } else if paths_active {
-        HeaderMode::Paths
-    } else if tutorial_active {
-        HeaderMode::Tutorial
-    } else {
-        HeaderMode::Repl
-    };
+    let header_mode = pick_header_mode(editor_active, paths_active, tutorial_active);
     Modes {
         cur_lesson,
         cur_path,
@@ -37,5 +29,19 @@ pub fn compute_modes(
         paths_active,
         editor_active,
         header_mode,
+    }
+}
+
+/// The header chrome that matches whichever pane is active (precedence:
+/// editor > paths > tutorial > the default REPL).
+fn pick_header_mode(editor: bool, paths: bool, tutorial: bool) -> HeaderMode {
+    if editor {
+        HeaderMode::Editor
+    } else if paths {
+        HeaderMode::Paths
+    } else if tutorial {
+        HeaderMode::Tutorial
+    } else {
+        HeaderMode::Repl
     }
 }

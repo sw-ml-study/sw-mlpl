@@ -1607,3 +1607,173 @@ lines = [
     "img_for_viz = reshape(test_img, [3, 64, 64])",
     'svg(img_for_viz, "attention_overlay", per_head)',
 ]
+
+# ============================================================
+# Per-demo metadata (keyed by demo name). Folded in from the old
+# hand-maintained consts in mlpl-web-demos-types/registry.rs so the
+# gating tier, literate-walkthrough link, and long-run heads-up notes
+# live beside the demos themselves. build.rs generates DEMO_CAPABILITIES,
+# LITERATE_DOCS, and PROGRESS_NOTES from these.
+# ============================================================
+
+[[capabilities]]
+name = "Ask Ollama (contextual)"
+requires_connect = true
+device = "cpu"
+
+[[capabilities]]
+name = "MLX LoRA fine-tune"
+requires_connect = true
+device = "mlx"
+
+[[capabilities]]
+name = "MLX tic-tac-toe fine-tune"
+requires_connect = true
+device = "mlx"
+
+[[capabilities]]
+name = "CUDA LoRA fine-tune"
+requires_connect = true
+device = "cuda"
+
+[[capabilities]]
+name = "CUDA tic-tac-toe fine-tune"
+requires_connect = true
+device = "cuda"
+
+[[literate]]
+name = "Basics"
+html = "basics.html"
+
+[[literate]]
+name = "MLX LoRA fine-tune"
+html = "mlx-lora-finetune.html"
+
+[[literate]]
+name = "MLX tic-tac-toe fine-tune"
+html = "tictactoe-finetune.html"
+
+[[literate]]
+name = "CUDA LoRA fine-tune"
+html = "cuda-lora-finetune.html"
+
+[[literate]]
+name = "CUDA tic-tac-toe fine-tune"
+html = "cuda-tictactoe.html"
+
+[[progress_notes]]
+demo = "Watch a Model Learn (overfitting)"
+line_idx = 9
+heading = "Training in six short bursts (~10s total on the CPU)"
+body = "The model trains 25 Adam steps at a time, six times over, scoring both the 30-point training set and the 200-point validation set after each burst. The page repaints between bursts -- the train_val_curve renders at the halfway mark and again at the end so you can watch the green dashed (train) and peach dotted (validation) lines pull apart. The widening gap is overfitting."
+
+[[progress_notes]]
+demo = "Taming Overfitting: Weight Decay"
+line_idx = 17
+heading = "Training in six bursts with an L2 penalty (~10s on the CPU)"
+body = "Same over-capacity net and tiny noisy data as the overfitting demo, but the loss now adds lam * sum(W*W), which pushes the weights toward zero. The page repaints between bursts; the train_val_curve renders at the halfway mark and the end. Watch the validation curve stay near the training curve instead of peeling away."
+
+[[progress_notes]]
+demo = "Watch a Model Generalize (no overfitting)"
+line_idx = 9
+heading = "Training in five short bursts (~10s total on the CPU)"
+body = "Same loop as the overfitting demo, but with a much larger training set (200 points) and a right-sized network. Watch the green dashed (train) and peach dotted (validation) curves fall together and stay close -- the small, stable gap is healthy generalization. Validation accuracy prints at the end."
+
+[[progress_notes]]
+demo = "CUDA tic-tac-toe fine-tune"
+line_idx = 13
+heading = "Generating the self-play dataset on the CPU (~4s)"
+body = "This line plays 8 tic-tac-toe games where O uses recursive alpha-beta minimax to pick the optimal move -- pure game-tree search in the interpreter, so it runs on the CPU and the GPU stays idle here. That is expected: the GPU's turn is the next step (the LoRA fine-tune). Watch nvtop light up on the train line, not this one."
+
+[[progress_notes]]
+demo = "CUDA tic-tac-toe fine-tune"
+line_idx = 17
+heading = "Fine-tuning the policy on the NVIDIA GPU (~10s)"
+body = '6000 Adam steps over the board-policy MLP, each a forward + backward + optimizer update run on the GPU via candle (device("cuda")). This is the GPU-bound phase -- nvtop should show sustained utilization. The same train on the CPU is ~50x slower.'
+
+[[progress_notes]]
+demo = "Tiny LM Generate"
+line_idx = 1
+heading = "Training the BPE tokenizer"
+body = "train_bpe walks the corpus and learns 260 byte-pair merges. A few seconds; the corpus is small but the merge loop is O(merges * pairs)."
+
+[[progress_notes]]
+demo = "Tiny LM Generate"
+line_idx = 9
+heading = "Training the language model (~10-30s)"
+body = "30 [[Adam]] steps over a 1-layer transformer (V=260, d=16, block=8). Each step runs a forward pass, a backward pass through the autograd tape, and an Adam update over every model parameter. The browser tab is single-threaded WASM so the page is unresponsive for the duration; this is normal."
+
+[[progress_notes]]
+demo = "Tiny LM Generate"
+line_idx = 13
+heading = "Generating 20 tokens (~3-8s)"
+body = "Each token is a forward pass on the growing sequence, top_k restriction, and a multinomial sample. The output is decoded BPE bytes back to text once the loop finishes."
+
+[[progress_notes]]
+demo = "Tiny LM"
+line_idx = 1
+heading = "Training the BPE tokenizer"
+body = "train_bpe walks the corpus and learns 260 byte-pair merges. A few seconds."
+
+[[progress_notes]]
+demo = "Tiny LM"
+line_idx = 9
+heading = "Training the language model (~10-30s)"
+body = "30 [[Adam]] steps over a 1-layer transformer (V=260, d=16, block=8). The page is unresponsive while WASM runs on the main thread; the loss curve renders once the train block returns."
+
+[[progress_notes]]
+demo = "Tiny MLP"
+line_idx = 10
+heading = "Training the hand-rolled MLP (~5-10s)"
+body = "600 iterations of an explicit forward + backward pass on 80 points. No autograd -- every gradient is written out so you can see the chain rule run."
+
+[[progress_notes]]
+demo = "Moons MLP"
+line_idx = 7
+heading = "Training with Adam (~10-20s)"
+body = "200 train steps on 120 points through the autograd tape. The decision-boundary surface that follows is the visible payoff."
+
+[[progress_notes]]
+demo = "Logistic Regression"
+line_idx = 7
+heading = "Gradient descent (~2-5s)"
+body = "300 iterations of explicit logistic-regression gradient descent on four points. Short but visibly blocks the tab."
+
+[[progress_notes]]
+demo = "Softmax Classifier"
+line_idx = 9
+heading = "Training the softmax classifier (~3-8s)"
+body = "300 explicit-gradient steps over 90 points and 3 classes. The decision-boundary plot at the end shows the three wedges this minimization carved out."
+
+[[progress_notes]]
+demo = "Pets: cat vs dog (quick)"
+line_idx = 33
+heading = "Training the Vision Transformer (~30-60s)"
+body = "30 full-batch [[Adam]] steps on the 8 pet images you just assembled. Each step runs the full forward pipeline (patchify -> linear-embed -> rank-3 attention -> first-token pooling -> 2-layer MLP classifier), pushes a tape of ~hundreds of nodes, runs the backward pass to compute gradients on every model parameter, then applies one Adam update. WASM is single-threaded so the page is unresponsive for the duration; this is normal, not a hang. The loss curve renders right after the train block returns -- you'll see cross-entropy drop from ~0.69 (random) toward 0 (perfect overfit on 8 images)."
+
+[[progress_notes]]
+demo = "Pets: predict + gallery"
+line_idx = 61
+heading = "Training the Vision Transformer (6 chunks x 5 steps, ~30-60s)"
+body = "30 full-batch [[Adam]] steps on 16 images, run as 6 separate train blocks of 5 steps each. Each chunk runs synchronously in WASM (~5s of unresponsive UI); the demo runner yields to the browser between chunks so the tab stays responsive end-to-end and you can see incremental progress. Adam momentum persists across chunks via the session env, so this is mathematically equivalent to one `train 30`. After training, the model predicts labels for all 16 images and renders a labeled gallery (actual / predicted under each thumbnail). 0 = cat, 1 = dog."
+
+[[progress_notes]]
+demo = "Pets: predict + gallery"
+line_idx = 73
+heading = "Rendering the loss curve + labeled gallery"
+body = 'Training is done. Below: the 30-step cross-entropy loss curve (concatenated across the six train chunks), then `predict_batch` runs the trained model over all 16 images, then `svg(X, "gallery", preds_2col)` renders the labeled thumbnail grid. Misclassifications stand out because the two captions under a thumbnail disagree (0/1 or 1/0).'
+
+[[progress_notes]]
+demo = "Pets: multi-head ViT (quick + viz)"
+line_idx = 29
+heading = "Training the 4-head Vision Transformer (~60-90s)"
+body = "30 full-batch [[Adam]] steps on the 8 pet images. Same forward pipeline as the single-head quick demo, but `attention(128, 4)` runs four independent attention heads in parallel and `Tensor::stack` joins their per-head [T, d/h]=[16, 32] outputs back to [16, 128]. Backward fans through every head separately. The tab is unresponsive during the train block; this is normal, not a hang."
+
+[[progress_notes]]
+demo = "Pets: multi-head ViT (quick + viz)"
+line_idx = 41
+heading = "Rendering the four per-head attention maps"
+body = """
+Training is done. `attention_weights(attn, test_tokens)` returns a [4, 16, 16] tensor -- one [16, 16] softmax matrix per head over the 16 image patches. `svg(attn_maps, "heatmap_grid")` lays out a 2x2 grid of heatmaps with per-cell colormaps. Each cell shows what its head learned to pay attention to: row i column j is how much head h's i-th patch attends to the j-th patch.
+
+What to look for: heads are NOT identical. One typically concentrates on a single column (a 'this patch is the salient one' signal); another spreads attention evenly (an 'aggregate everything' signal); the remaining two pick intermediate patterns. Compare with the untrained 'ViT Multi-Head Attention Pattern' demo where all four heads look uniformly random -- the differences here are entirely the work of gradient descent."""

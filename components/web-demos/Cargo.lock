@@ -631,11 +631,18 @@ dependencies = [
 name = "mlpl-web-demos"
 version = "0.20.0"
 dependencies = [
- "mlpl-eval",
- "mlpl-parser",
  "mlpl-web-demos-types",
  "serde",
  "toml",
+]
+
+[[package]]
+name = "mlpl-web-demos-smoke"
+version = "0.20.0"
+dependencies = [
+ "mlpl-eval",
+ "mlpl-parser",
+ "mlpl-web-demos",
 ]
 
 [[package]]

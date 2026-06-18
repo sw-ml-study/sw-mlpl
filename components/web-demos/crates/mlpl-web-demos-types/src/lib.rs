@@ -5,7 +5,4 @@
 
 pub mod registry;
 
-pub use registry::{
-    Capability, DEMO_CAPABILITIES, Demo, Device, LITERATE_DOCS, PROGRESS_NOTES, ProgressNote,
-    capability_for, demo_disabled, literate_for, progress_notes_for,
-};
+pub use registry::{Capability, Demo, Device, ProgressNote, demo_disabled};

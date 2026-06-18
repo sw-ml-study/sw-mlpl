@@ -12,7 +12,7 @@
 //! blocks (whitespace-normalized). A truncated `.org` then fails loudly:
 //! its block list no longer matches the deployed html's.
 
-use mlpl_web_demos_types::LITERATE_DOCS;
+use mlpl_web_demos::LITERATE_DOCS;
 use std::path::PathBuf;
 
 /// Walk up from this crate's manifest dir to the repo root (the first

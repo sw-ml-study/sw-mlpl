@@ -1,27 +1,21 @@
-//! Saga 82: web demo registry smoke -- walks every entry in
-//! `DEMOS`, lexes + parses + evals each line in a fresh shared
-//! environment to catch syntax / runtime drift the moment a
-//! demo string in this file falls behind language changes.
-//! Mirrors what the "Run demo" button does in the browser,
-//! minus the visualization output.
+//! Web demo registry smoke -- walks every entry in `DEMOS`, lexes + parses +
+//! evals each line in a fresh shared environment to catch syntax / runtime
+//! drift the moment a demo string falls behind language changes. Mirrors what
+//! the "Run demo" button does in the browser, minus the visualization output.
 //!
-//! Skipped: REPL slash-commands (`:tags x`) and pure
-//! comments are not parseable as expressions; the browser
-//! handles those as side-channel commands. For long-running
-//! training demos we follow the same split as
-//! `all_demos_smoke`: a quick test exercises everything
-//! except the heavy ones, and a `#[ignore]`-gated test
-//! covers the heavies on demand.
+//! This lives in `mlpl-web-demos-smoke` (not `mlpl-web-demos`) so the heavy
+//! mlpl-eval / mlpl-parser dependency stays off the facade's light metadata
+//! tests. See docs/modular-build.md.
 //!
-//! `PROGRESS_NOTES` invariant: every entry's `demo` matches
-//! a real `Demo::name` and `line_idx` is within that demo's
-//! `lines` length. A mismatch would silently fail to render
-//! the heads-up note in the browser.
+//! Skipped: REPL slash-commands (`:tags x`) and pure comments are not
+//! parseable as expressions; the browser handles those as side-channel
+//! commands. For long-running training demos we follow the same split as
+//! `all_demos_smoke`: a quick test exercises everything except the heavy
+//! ones, and a `#[ignore]`-gated test covers the heavies on demand.
 
 use mlpl_eval::{Environment, eval_program_value};
 use mlpl_parser::{lex, parse};
-use mlpl_web_demos::{DEMOS, PROGRESS_NOTES};
-use std::collections::HashSet;
+use mlpl_web_demos::DEMOS;
 
 /// Demos that call external services or do heavy training.
 const SKIP_DEMOS: &[&str] = &[
@@ -77,39 +71,24 @@ fn run_demo(demo_name: &str, lines: &[&str]) -> Result<(), String> {
     Ok(())
 }
 
+fn eval_named(name: &str) {
+    let d = DEMOS.iter().find(|d| d.name == name).expect("demo present");
+    run_demo(d.name, d.lines).expect("demo evals");
+}
+
 #[test]
 fn learning_rate_demo_evals() {
-    // Light (scalar GD), so eval the exact generated lines here rather than
-    // waiting for the full quick smoke -- catches any demos.toml typo.
-    let name = "Learning Rate: too big, too small, just right";
-    let d = DEMOS
-        .iter()
-        .find(|d| d.name == name)
-        .expect("LR demo present");
-    run_demo(d.name, d.lines).expect("LR demo evals");
+    eval_named("Learning Rate: too big, too small, just right");
 }
 
 #[test]
 fn visualizations_demo_evals() {
-    // The viz tour renders 12 different plots from toy data -- the synthetic
-    // shapes are the risk, so eval the exact generated lines here.
-    let d = DEMOS
-        .iter()
-        .find(|d| d.name == "Visualizations")
-        .expect("Visualizations demo present");
-    run_demo(d.name, d.lines).expect("Visualizations demo evals");
+    eval_named("Visualizations");
 }
 
 #[test]
 fn gradient_flow_demo_evals() {
-    // Light (one forward + four grads, no training loop): eval the exact
-    // generated lines here rather than waiting for the full quick smoke.
-    let name = "Gradient Flow (backprop)";
-    let d = DEMOS
-        .iter()
-        .find(|d| d.name == name)
-        .expect("gradient-flow demo present");
-    run_demo(d.name, d.lines).expect("gradient-flow demo evals");
+    eval_named("Gradient Flow (backprop)");
 }
 
 #[test]
@@ -151,31 +130,5 @@ fn every_heavy_web_demo_runs() {
         "{} heavy web demo(s) regressed:\n  - {}",
         failures.len(),
         failures.join("\n  - ")
-    );
-}
-
-#[test]
-fn progress_notes_reference_real_demo_lines() {
-    let demos: HashSet<&str> = DEMOS.iter().map(|d| d.name).collect();
-    let mut bad: Vec<String> = Vec::new();
-    for note in PROGRESS_NOTES.iter() {
-        if !demos.contains(note.demo) {
-            bad.push(format!("unknown demo {:?}", note.demo));
-            continue;
-        }
-        let demo = DEMOS.iter().find(|d| d.name == note.demo).unwrap();
-        if note.line_idx >= demo.lines.len() {
-            bad.push(format!(
-                "{}: line_idx {} >= lines.len() {}",
-                note.demo,
-                note.line_idx,
-                demo.lines.len()
-            ));
-        }
-    }
-    assert!(
-        bad.is_empty(),
-        "PROGRESS_NOTES drift:\n  - {}",
-        bad.join("\n  - ")
     );
 }
