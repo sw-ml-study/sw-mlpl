@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-06-18
+
+- refactor(demos): fold per-demo metadata into demos.toml + split heavy smoke test
+
 ## 2026-06-15
 
+- docs(changes): refresh CHANGES.md to HEAD
 - polish(beginner): slot weight-decay into the spine path + ratchet down checklist
 - docs(changes): refresh CHANGES.md to HEAD
 - refactor(lessons): move tutorial content to lessons.toml + build.rs codegen
