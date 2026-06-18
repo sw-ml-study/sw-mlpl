@@ -1535,6 +1535,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-glossary-search"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-lex-ident"
 version = "0.20.0"
 dependencies = [
@@ -1993,6 +1997,7 @@ dependencies = [
 name = "mlpl-web-glossary"
 version = "0.20.0"
 dependencies = [
+ "mlpl-glossary-search",
  "mlpl-web-path-body",
  "wasm-bindgen",
  "web-sys",

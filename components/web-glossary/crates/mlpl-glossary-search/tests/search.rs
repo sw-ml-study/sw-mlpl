@@ -1,7 +1,6 @@
-//! Glossary fuzzy-matcher tests. An integration test (not a src module) so
-//! `search.rs` stays under the module budgets.
+//! Glossary fuzzy-matcher tests.
 
-use mlpl_web_glossary::search::best_match;
+use mlpl_glossary_search::best_match;
 
 const TERMS: &[&str] = &[
     "Activation outlier",

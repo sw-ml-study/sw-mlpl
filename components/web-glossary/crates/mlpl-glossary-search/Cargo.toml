@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-glossary-search"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Pure fuzzy term-matching for the glossary search box. No yew / wasm deps --
+# a leaf crate so the matching logic is testable on its own and the web UI
+# crate (mlpl-web-glossary) just depends on it.
+
+[lib]
+name = "mlpl_glossary_search"
+path = "src/lib.rs"
+
+[dependencies]
