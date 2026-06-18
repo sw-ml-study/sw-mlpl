@@ -6,4 +6,5 @@
 //! names so callers stay unchanged.
 
 pub mod popup;
+pub mod search;
 pub mod view;
