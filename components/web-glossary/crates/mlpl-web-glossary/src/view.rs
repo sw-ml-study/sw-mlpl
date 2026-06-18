@@ -87,21 +87,6 @@ fn slugify(term: &str) -> String {
     out.trim_matches('-').to_string()
 }
 
-/// Find the first entry whose first whitespace-delimited word
-/// starts with `query` (case-insensitive). Returns the entry's
-/// index in `entries`, or `None` for an empty / unmatched
-/// query.
-fn find_match(query: &str, entries: &[GlossaryEntry]) -> Option<usize> {
-    let q = query.trim().to_lowercase();
-    if q.is_empty() {
-        return None;
-    }
-    entries.iter().position(|e| {
-        let first_word = e.term.split_whitespace().next().unwrap_or("");
-        first_word.to_lowercase().starts_with(&q)
-    })
-}
-
 #[function_component(GlossaryView)]
 pub fn glossary_view() -> Html {
     let g = doc();
@@ -119,7 +104,7 @@ pub fn glossary_view() -> Html {
         || ()
     });
 
-    let matched = find_match(&query, &g.entries);
+    let matched = crate::search::best_match(&query, g.entries.iter().map(|e| e.term.as_str()));
     let entries_html = g.entries.iter().enumerate().map(|(i, e)| {
         let class = if Some(i) == matched {
             "glossary-entry matched"
@@ -148,7 +133,8 @@ pub fn glossary_view() -> Html {
 }
 
 fn scroll_to_match(query: &str, entries: &[GlossaryEntry]) {
-    let Some(idx) = find_match(query, entries) else {
+    let Some(idx) = crate::search::best_match(query, entries.iter().map(|e| e.term.as_str()))
+    else {
         return;
     };
     let Some(window) = web_sys::window() else {
