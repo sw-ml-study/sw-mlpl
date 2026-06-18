@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-18
 
+- feat(quant): Quantization teaching path -- 8 lessons + learning path
+- docs(changes): refresh CHANGES.md to HEAD
 - refactor(demos): fold per-demo metadata into demos.toml + split heavy smoke test
 
 ## 2026-06-15
