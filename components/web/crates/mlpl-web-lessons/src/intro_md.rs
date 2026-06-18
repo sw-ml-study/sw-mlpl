@@ -12,8 +12,13 @@
 //! - `---` (line-level, alone)         -> `<hr class="lesson-separator"/>`
 //! - blank line                        -> paragraph break
 //! - `**bold**` (inline)               -> `<strong>`
+//! - `*emph*` (inline, word-boundary)  -> `<em>`
 //! - `` `code` `` (inline)             -> `<code>`
 //! - everything else                   -> `<p class="lesson-paragraph">`
+//!
+//! `*emph*` opens only at a word boundary (start, or after whitespace /
+//! an opening bracket), so mid-word asterisks stay literal -- e.g. the
+//! `Q*_K` / `IQ*` quant-name wildcards are NOT turned into italics.
 //!
 //! Lessons that don't use any markers render exactly as
 //! before: one paragraph, no surprise styling. Authors opt
@@ -86,10 +91,12 @@ fn flush_bullets(out: &mut String, b: &mut Vec<String>) {
 /// `**bold**` and `` `code` ``. Bold contents are recursively
 /// inline-formatted (so escaping stays consistent); code
 /// contents are only HTML-escaped (no nested formatting).
-fn inline(text: &str) -> String {
+pub(crate) fn inline(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     let mut chars = text.chars().peekable();
+    let mut prev: Option<char> = None;
     while let Some(c) = chars.next() {
+        let at_boundary = prev.is_none_or(|p| p.is_whitespace() || "([{\"'".contains(p));
         match c {
             '<' => out.push_str("&lt;"),
             '>' => out.push_str("&gt;"),
@@ -99,12 +106,17 @@ fn inline(text: &str) -> String {
                 let inner = inline(&scan_to(&mut chars, '*', true));
                 out.push_str(&format!("<strong>{inner}</strong>"));
             }
-            '`' => {
-                let inner = escape_html(&scan_to(&mut chars, '`', false));
-                out.push_str(&format!("<code>{inner}</code>"));
+            '*' if at_boundary => {
+                let inner = inline(&scan_to(&mut chars, '*', false));
+                out.push_str(&format!("<em>{inner}</em>"));
             }
+            '`' => out.push_str(&format!(
+                "<code>{}</code>",
+                escape_html(&scan_to(&mut chars, '`', false))
+            )),
             _ => out.push(c),
         }
+        prev = Some(c);
     }
     out
 }

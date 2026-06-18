@@ -5,6 +5,8 @@
 //! - `intro_md`: the tutorial-intro markdown-to-html renderer (`render`).
 
 pub mod intro_md;
+#[cfg(test)]
+mod intro_md_tests;
 pub mod lessons;
 
 pub use lessons::{LESSONS, Lesson};
