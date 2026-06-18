@@ -1415,3 +1415,57 @@ slug = "17_gpt_decoder_only"
 kind = "demo"
 why = "End-to-end: BPE tokenizer + 1-layer transformer LM trained 30 steps on a tiny corpus, then sampled to generate text. The smallest program that learns to talk."
 name = "Tiny LM Generate"
+
+[[paths]]
+title = "Quantization: shrink models without breaking them"
+blurb = "How big models are squeezed to run on small hardware -- and how to read the cryptic names (Q4_K_M, IQ2_XXS) you meet when downloading one. A teaching path: why quantization works, the number formats, the integer-quantization mechanism, the bit-width ladder down to 1.58-bit ternary, the GGUF naming taxonomy, the history of the methods, how training-time vs inference-time quantization interact, and a practical 'what to prefer / what to avoid' finish. Eight short lessons; each has a tiny runnable snippet, but the point is the ideas, not the code."
+
+[[paths.steps]]
+kind = "note"
+title = "What this path is about"
+body = "A trained model is a giant bag of numbers. Quantization stores each number in fewer bits so the model fits in less memory and runs faster -- the technique that lets large models run on a laptop instead of a datacenter. This path is teaching-first: by the end you will understand the value of quantization, the tradeoff it makes, the families of methods (FP, INT, K-quants, IQ), what the size modifiers (_S/_M/_L/_XS) mean, and -- most useful -- which quantization to actually pick and which to avoid."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 1: why shrink the numbers?"
+why = "Start with the motivation and the headline tradeoff: a 7B model is 14 GB at FP16 and 3.5 GB at 4-bit. Memory, bandwidth, and reach -- versus added error."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 2: how numbers are stored (FP32, FP16, BF16, FP8)"
+why = "Know the raw material first: sign / exponent / mantissa, and why exponent bits buy range while mantissa bits buy precision. This is why BF16 is the training default."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 3: integer quantization (scale, zero-point, rounding)"
+why = "The workhorse mechanism: store small integers plus a shared scale, reconstruct with a multiply. Symmetric vs asymmetric, per-tensor vs per-block -- the seeds of everything that follows."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 4: the bit-width ladder (8 -> 6 -> 4 -> 2 -> 1.58)"
+why = "Walk down the ladder and watch the error climb -- gently to 4 bits, then a cliff. Why 4-bit is the sweet spot and why sub-4-bit needs cleverness, ending at ternary 1.58-bit."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 5: reading the names (FP, INT, K, Q, IQ, and _S/_M/_L)"
+why = "Decode the GGUF names you meet on every download. Q4_K_M = 4-bit k-quant, medium tier; IQ2_XXS = 2-bit importance-quant, extra-extra-small. Parse the name, predict the size and quality."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 6: a short history of the methods"
+why = "How we got here: INT8 PTQ, LLM.int8 outliers, GPTQ, k-quants, AWQ, QLoRA/NF4, imatrix/IQ, BitNet 1.58. Each step fixed a failure of the last."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 7: training vs inference (PTQ, QAT, and the conversion trap)"
+why = "The crucial relationship: quantizing after training (PTQ) vs training aware of it (QAT) vs training at the target precision (BitNet) -- and the good/bad/ugly of converting a model to a precision it was never trained for."
+
+[[paths.steps]]
+kind = "lesson"
+title = "Quantization 8: what to prefer, what to avoid"
+why = "The practical payoff: Q4_K_M as the default, Q5/Q6 for quality, IQ only to fit hardware; avoid Q2/Q3 on small models and legacy Q4_0. The rules for choosing at a fixed memory budget."
+
+[[paths.steps]]
+kind = "note"
+title = "Where to go next"
+body = "You can now read a quantized-model name on sight, explain why 4-bit is safe but 2-bit is hard, and choose a quant for your hardware. The throughline to remember: spend bits where they matter, compensate for rounding error, or train within the constraint -- every method is one of those three moves. For the training side that quantization compresses, see the 'How does ML work?' path; for what the weights actually do, the transformer paths."
