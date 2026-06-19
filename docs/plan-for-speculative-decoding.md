@@ -81,11 +81,14 @@ from one family.
 
 ### Caveats on model choice
 
-- **Qwen3 is risky.** The grounding doc suggests a Qwen3 0.6B -> 4B pair, but
-  mlx-lm issue #846 reports Qwen3 speculative decoding **skips tokens /
-  produces incorrect output**. Prefer **Qwen2.5 / Qwen2.5-Coder** or
-  **Llama-3.x** until that is fixed; if Qwen3 is used, verify the
-  greedy-identity check (Section 5) passes first.
+- **Qwen3 is risky -- avoid for MLX speculative decoding for now.** The
+  grounding doc suggests a Qwen3 0.6B -> 4B pair, but mlx-lm issue #846 reports
+  Qwen3 speculative decoding **skips tokens / produces incorrect output**.
+  Prefer **Qwen2.5 / Qwen2.5-Coder** or **Llama-3.x**. Only revisit Qwen3 once
+  #846 is **confirmed fixed in the mlx-lm version you actually have installed**
+  (check `pip show mlx-lm` against the issue's closing/fix release -- an
+  upstream fix does not help an older pinned install), and even then run the
+  greedy-identity check (Section 5) first to confirm.
 - **Avoid MoE targets.** mlx-lm issue #1132: speculative decoding can be
   *slower* than target-alone on Mixture-of-Experts models whose active
   parameter count is near the draft size.
@@ -158,24 +161,31 @@ Three configurations, the same prompt set, fixed seed, fixed `max_tokens`:
 
 ## 6. Commands (verified against `mlx-lm`)
 
-Baseline (target alone):
+**Lead with the refactor prompt** -- it is structured/code-heavy, so draft
+acceptance (and thus the speedup) is high and visible. Use the SAME prompt for
+baseline and speculative so the A/B is fair.
 
-```bash
-mlx_lm.generate \
-  --model mlx-community/Qwen2.5-Coder-7B-Instruct-4bit \
-  --prompt "Write a Rust function that parses a comma-separated list of integers with good error messages." \
-  --max-tokens 512 --temp 0.0
-```
-
-Speculative:
+Speculative (the lead demo command):
 
 ```bash
 mlx_lm.generate \
   --model mlx-community/Qwen2.5-Coder-7B-Instruct-4bit \
   --draft-model mlx-community/Qwen2.5-Coder-0.5B-Instruct-4bit \
   --num-draft-tokens 4 \
-  --prompt "Write a Rust function that parses a comma-separated list of integers with good error messages." \
-  --max-tokens 512 --temp 0.0
+  --prompt "Refactor this Rust parser into small pure functions with tests." \
+  --max-tokens 512 \
+  --temp 0.0
+```
+
+Baseline (same prompt, target alone -- drop `--draft-model` /
+`--num-draft-tokens`):
+
+```bash
+mlx_lm.generate \
+  --model mlx-community/Qwen2.5-Coder-7B-Instruct-4bit \
+  --prompt "Refactor this Rust parser into small pure functions with tests." \
+  --max-tokens 512 \
+  --temp 0.0
 ```
 
 Wall-clock A/B with hyperfine:
