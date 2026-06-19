@@ -9,6 +9,7 @@ name = "mlpl_web_glossary"
 path = "src/lib.rs"
 
 [dependencies]
+mlpl-glossary-data = { path = "../mlpl-glossary-data" }
 mlpl-glossary-search = { path = "../mlpl-glossary-search" }
 mlpl-web-path-body = { path = "../../../web/crates/mlpl-web-path-body" }
 wasm-bindgen = "0.2"

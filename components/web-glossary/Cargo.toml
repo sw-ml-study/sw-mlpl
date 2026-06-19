@@ -1,5 +1,9 @@
 [workspace]
-members = ["crates/mlpl-web-glossary", "crates/mlpl-glossary-search"]
+members = [
+    "crates/mlpl-web-glossary",
+    "crates/mlpl-glossary-search",
+    "crates/mlpl-glossary-data",
+]
 resolver = "2"
 
 [workspace.package]
