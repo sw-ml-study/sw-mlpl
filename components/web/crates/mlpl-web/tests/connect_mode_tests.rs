@@ -14,15 +14,15 @@
 //! does not need a server.
 
 #[allow(dead_code)]
-#[path = "../../../components/wasm/crates/mlpl-web-eval/src/eval.rs"]
+#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval.rs"]
 mod eval;
 
 #[allow(dead_code)]
-#[path = "../../../components/wasm/crates/mlpl-web-eval/src/eval_sse.rs"]
+#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_sse.rs"]
 mod eval_sse;
 
 #[allow(dead_code)]
-#[path = "../../../components/wasm/crates/mlpl-web-eval/src/eval_url.rs"]
+#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_url.rs"]
 mod eval_url;
 
 use std::cell::RefCell;
