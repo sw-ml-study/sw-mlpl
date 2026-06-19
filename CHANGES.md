@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-18
 
+- refactor(glossary): split data layer into mlpl-glossary-data crate
+- fix(web-tests): correct stale #[path] to mlpl-web-eval src modules
+- docs(changes): refresh CHANGES.md to HEAD
 - refactor(glossary): extract fuzzy matcher into its own crate
 - docs(changes): refresh CHANGES.md to HEAD
 - feat(glossary): fuzzy search (substring, plurals, aliases)
