@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-glossary-data"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Glossary data layer: parses docs/glossary.md (include_str!'d) into entries
+# and looks them up by term. Pure -- no yew/wasm deps -- so it is a leaf the
+# web UI crate (mlpl-web-glossary) depends on. See docs/modular-build.md.
+
+[lib]
+name = "mlpl_glossary_data"
+path = "src/lib.rs"
+
+[dependencies]

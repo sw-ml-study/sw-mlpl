@@ -592,6 +592,14 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
 
 [[package]]
+name = "mlpl-glossary-data"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-glossary-search"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-web-demos"
 version = "0.20.0"
 dependencies = [
@@ -608,6 +616,8 @@ version = "0.20.0"
 name = "mlpl-web-glossary"
 version = "0.20.0"
 dependencies = [
+ "mlpl-glossary-data",
+ "mlpl-glossary-search",
  "mlpl-web-path-body",
  "wasm-bindgen",
  "web-sys",
