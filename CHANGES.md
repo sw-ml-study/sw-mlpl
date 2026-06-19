@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-06-19
 
+- docs(spec-decoding): lead with refactor prompt; sharpen Qwen3 caveat
+- docs(changes): refresh CHANGES.md to HEAD
 - docs: plan for demonstrating speculative decoding with MLX
 
 ## 2026-06-18
