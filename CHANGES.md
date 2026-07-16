@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-16
+
+- chore(pages): rebuild WASM bundle for Structure Zoo demo (disp/depth)
+- feat(array): APL2 Stage 1 -- depth() + disp() structural introspection
+
 ## 2026-06-19
 
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(spec-decoding): lead with refactor prompt; sharpen Qwen3 caveat
 - docs(changes): refresh CHANGES.md to HEAD
 - docs: plan for demonstrating speculative decoding with MLX
