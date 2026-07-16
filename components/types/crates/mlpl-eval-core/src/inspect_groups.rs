@@ -34,6 +34,16 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "comma-joined axis labels of a (empty for positional)",
             ),
             ("rank", "rank(a)", "number of dimensions of a"),
+            (
+                "depth",
+                "depth(a)",
+                "nesting depth: 0 for a scalar, 1 for a flat array",
+            ),
+            (
+                "disp",
+                "disp(a)",
+                "ASCII box diagram of a showing its rank, shape, and depth",
+            ),
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),
             (
