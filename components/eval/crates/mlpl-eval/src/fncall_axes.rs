@@ -29,8 +29,28 @@ pub(crate) fn try_dispatch(
         "reshape_labeled" => Some(eval_reshape_labeled(args, env, trace)),
         "label" | "relabel" => Some(eval_label_relabel(name, args, env, trace)),
         "labels" => Some(eval_labels(args, env, trace)),
+        "disp" => Some(eval_disp(args, env, trace)),
         _ => None,
     }
+}
+
+/// `disp(a)` -- ASCII box diagram of `a` showing its rank, shape, and
+/// depth. Returns a `Value::Str` the REPL prints (or the web playground
+/// renders) verbatim.
+fn eval_disp(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    if args.len() != 1 {
+        return Err(EvalError::BadArity {
+            func: "disp".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    }
+    let arr = eval_expr(&args[0], env, trace)?.into_array()?;
+    Ok(Value::Str(mlpl_array::box_display(&arr)))
 }
 
 fn eval_reshape_labeled(

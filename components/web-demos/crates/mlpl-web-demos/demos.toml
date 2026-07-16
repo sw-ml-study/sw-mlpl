@@ -123,6 +123,21 @@ lines = [
 
 [[demos]]
 category = "Basics"
+name = "Structure Zoo (rank / shape / depth)"
+intro = "Every value in MLPL has a STRUCTURE -- a rank (how many axes), a shape (how big each axis is), and a depth (how deeply nested). This demo introduces two APL-inspired introspection builtins that make that structure visible: depth(a) reports the nesting level, and disp(a) draws an ASCII box diagram (MLPL's answer to APL's ]display). We walk a scalar, a vector, a matrix, and a 3-tensor, then point the same disp() at a real neural-net weight matrix -- so you build shape intuition before wiring up a model."
+takeaway = "rank counts axes, shape sizes them, depth measures nesting (0 for a scalar, 1 for any flat array today; higher once nested arrays land). disp() frames rank <= 2 as a grid and rank >= 3 as a labeled stack of leading-axis slices, with a rank/shape/depth footer -- the same tool works on a toy iota tensor and on a randn() weight matrix. Reach for disp() whenever a shape mismatch surprises you."
+lines = [
+    "disp(5)                              # a scalar: rank 0, shape [], depth 0",
+    "disp([1, 2, 3])                      # a vector: rank 1, shape [3]",
+    "disp(reshape(iota(6), [2, 3]))       # a matrix: rank 2, shape [2, 3]",
+    "disp(reshape(iota(12), [2, 2, 3]))   # a 3-tensor: stacked leading-axis slices",
+    "W = randn(0, [3, 4])                 # a real weight matrix",
+    "disp(W)                              # same tool, real NN weights",
+    "depth(W)                             # introspection: 1 (flat array)",
+]
+
+[[demos]]
+category = "Basics"
 name = "Analysis Helpers"
 intro = "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model."
 takeaway = "Six one-liners, six labeled plots. Every helper under 'analysis' in the docs takes arrays you already have and returns an SVG -- no separate plotting library, no config blocks."
