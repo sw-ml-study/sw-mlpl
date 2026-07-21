@@ -277,6 +277,26 @@ Newlines and semicolons are both statement separators.
 | `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
 | `scatter(buffer, indices, values)` | 3 | Accumulate `values` into `buffer` at positions given by `indices`. Returns a new buffer; the input is not mutated. Used inside `repeat N { ... }` loops to track per-index scores without explicit indexing. |
 
+#### Tensor terminology bridge
+
+The structural-introspection builtins come from the APL/APL2 lineage,
+but every one maps onto a familiar tensor concept. The names mostly
+agree across ecosystems -- with two traps worth memorizing (marked
+below).
+
+| MLPL builtin | Tensor concept | NumPy | PyTorch | Note |
+|--------------|----------------|-------|---------|------|
+| `rank(a)` | number of axes | `.ndim` | `.dim()` | Not linear-algebra rank (column-span dimension) or LoRA rank (adapter inner dim). |
+| `shape(a)` | shape / dims | `.shape` | `.shape` | Clean match everywhere. |
+| `size(a)` | element count (numel) | `.size` | `.numel()` | TRAP: PyTorch `.size()` and MATLAB `size()` return the *shape*, not the count. MLPL follows NumPy / TensorFlow: `size` is numel. |
+| `tally(a)` | leading-axis length | `len(a)` | `.size(0)` | The count of major cells: usually the batch size `N`, sequence length, or row count. |
+| `depth(a)` | nesting level | -- | -- | TRAP: not the same as rank. A rank-5 *dense* tensor still has depth 1; depth only exceeds 1 for ragged / nested arrays (cf. `RaggedTensor`, `NestedTensor`), which arrive in a later stage. |
+| `disp(a)` | structural pretty-print | `repr(a)` | `print(a)` | APL's `]display`. Note MATLAB's `disp` just prints values; MLPL's draws a box diagram framing rank / shape / depth. |
+
+Rules of thumb: `rank` counts axes, `shape` sizes them, `size` counts
+every element, `tally` counts rows (the leading axis), and `depth`
+counts levels of nesting (not axes).
+
 ### Linear Algebra
 
 | Function | Args | Description |
