@@ -157,7 +157,7 @@ try_it = "Build a 2x5 matrix from range(10) and sum each column."
 
 [[lessons]]
 title = "Seeing Structure: rank, shape, depth"
-intro = "Every value has a structural type you can inspect. shape(x) gives the dim-size vector; rank(x) counts the dims; size(x) is the total element count (numel); tally(x) is the length of the leading axis (how many major cells / rows); depth(x) is the nesting level (0 for a scalar, 1 for any flat array today). disp(x) draws an ASCII box diagram that shows rank, shape, and depth all at once -- MLPL's answer to APL's display. Reach for disp whenever an intermediate array surprises you."
+intro = "Every value has a structural type you can inspect. shape(x) gives the dim-size vector (NumPy .shape); rank(x) counts the dims (NumPy .ndim); size(x) is the total element count / numel (NumPy .size, PyTorch .numel -- but note PyTorch's .size() returns the shape instead!); tally(x) is the length of the leading axis, i.e. how many rows / batch items (Python len(x)); depth(x) is the nesting level (0 for a scalar, 1 for any flat array today -- NOT the same as rank: a rank-5 dense tensor still has depth 1). disp(x) draws an ASCII box diagram that shows rank, shape, and depth all at once -- MLPL's answer to APL's display. Reach for disp whenever an intermediate array surprises you."
 examples = [
     "m = reshape(range(6), [2, 3])",
     "shape(m)",

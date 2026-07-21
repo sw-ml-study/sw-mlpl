@@ -699,7 +699,11 @@ depth is `0` or `1`; once nested/boxed arrays land (APL2
 staging plan Stage 6) the same builtin reports deeper values.
 Pairs with `shape`, `rank`, `size`, and `tally` as the
 structural-introspection set; `disp(x)` shows all of them at
-once. APL heritage.
+once. APL heritage. Do NOT confuse depth with rank: a rank-5
+dense tensor still has depth 1. Rank counts axes; depth counts
+levels of nesting. Depth only exceeds 1 for ragged / nested
+arrays (cf. `RaggedTensor`, `NestedTensor`), so there is no
+everyday dense-tensor analog until then.
 
 ## disp (builtin)
 
@@ -708,7 +712,10 @@ the rank, shape, and depth of `x` visible: rank <= 2 renders
 as a framed grid, rank >= 3 as a labeled stack of
 leading-axis slices, with a `rank R  shape [..]  depth D`
 footer. MLPL's answer to APL's `]display`. Print it in the
-REPL to see an array's structure at a glance.
+REPL to see an array's structure at a glance. (Unlike MATLAB's
+`disp`, which just prints values, MLPL's `disp` draws the box
+frame around rank / shape / depth -- closer to NumPy `repr` or
+PyTorch `print` but structure-first.)
 
 ## Discriminator
 
@@ -2084,10 +2091,12 @@ deterministic given the same seed.
 The number of dimensions of a tensor. A scalar has rank 0; a
 vector rank 1; a matrix rank 2; a `[batch, time, dim]`
 tensor rank 3. MLPL: `rank(x)` returns the count;
-`shape(x)` returns the dim sizes. Distinct from "rank" in
-linear algebra (the dimension of a matrix's column span)
-and from "low-rank" in LoRA (the small inner dimension of
-the adapter matrices A and B).
+`shape(x)` returns the dim sizes. Matches NumPy `.ndim` /
+PyTorch `.dim()`. Distinct from "rank" in
+linear algebra (the dimension of a matrix's column span),
+from "low-rank" in LoRA (the small inner dimension of
+the adapter matrices A and B), and from `depth`, which
+counts levels of nesting rather than axes.
 
 ## reduce (builtin)
 
@@ -2448,7 +2457,11 @@ APL's monadic tally, J's `#`): a scalar tallies to `1`, and a
 rank >= 1 array tallies to `shape[0]`. For a `[2, 3]` matrix
 `size` is `6` while `tally` is `2`. Both round out the
 structural-introspection set with `shape`, `rank`, `depth`,
-and `disp`.
+and `disp`. Tensor mapping: `size` is NumPy's `.size` /
+PyTorch's `.numel()` (element count) -- but beware, PyTorch's
+`.size()` and MATLAB's `size()` return the SHAPE instead;
+`tally` is `len(x)` / `x.shape[0]`, usually the batch size or
+row count.
 
 ## shift_pairs_x / shift_pairs_y (builtins)
 
