@@ -264,6 +264,8 @@ Newlines and semicolons are both statement separators.
 | `rank(a)` | 1 | Number of dimensions (scalar) |
 | `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any flat array. Reports higher depths once nested arrays land. APL heritage. |
 | `disp(a)` | 1 | Returns an ASCII box diagram (a `Value::Str`) that makes the rank, shape, and depth of `a` visible: rank <= 2 as a framed grid, rank >= 3 as a labeled stack of leading-axis slices, plus a `rank R  shape [..]  depth D` footer. MLPL's answer to APL's `]display`. |
+| `size(a)` | 1 | Total element count (scalar): the product of the shape (numel). A scalar has size `1`; `size(reshape(iota(6), [2, 3]))` is `6`. |
+| `tally(a)` | 1 | Length of the leading axis (scalar): the number of major cells (APL's monadic tally, J's `#`). A scalar tallies to `1`; a rank >= 1 array tallies to `shape[0]`. Contrast with `size`, which counts every element. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `transpose(a)` | 1 | Reverse axis order |
 | `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |

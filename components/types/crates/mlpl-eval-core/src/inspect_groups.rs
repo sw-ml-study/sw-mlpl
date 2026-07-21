@@ -44,6 +44,12 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "disp(a)",
                 "ASCII box diagram of a showing its rank, shape, and depth",
             ),
+            ("size", "size(a)", "total element count of a (numel)"),
+            (
+                "tally",
+                "tally(a)",
+                "length of the leading axis of a (major-cell count)",
+            ),
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),
             (
