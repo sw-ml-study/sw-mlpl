@@ -5,6 +5,7 @@ mod compute;
 mod reduce;
 mod shape;
 mod slice;
+mod transform;
 
 use mlpl_array::DenseArray;
 use mlpl_runtime_core::error::RuntimeError;
@@ -17,6 +18,8 @@ pub const NAMES: &[&str] = &[
     "shape",
     "rank",
     "depth",
+    "size",
+    "tally",
     "reshape",
     "transpose",
     "reduce_add",
@@ -39,8 +42,10 @@ pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, 
         "shape" => Some(shape::shape(name, args)),
         "rank" => Some(shape::rank(name, args)),
         "depth" => Some(shape::depth(name, args)),
-        "reshape" => Some(shape::reshape(name, args)),
-        "transpose" => Some(shape::transpose(name, args)),
+        "size" => Some(shape::size(name, args)),
+        "tally" => Some(shape::tally(name, args)),
+        "reshape" => Some(transform::reshape(name, args)),
+        "transpose" => Some(transform::transpose(name, args)),
         "reduce_add" | "reduce_mul" => Some(reduce::reduce(name, args)),
         "argmax" => Some(reduce::argmax(name, args)),
         "dot" => Some(compute::dot(name, args)),

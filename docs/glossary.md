@@ -690,6 +690,26 @@ Stored as a contiguous row-major buffer with no zero-skipping
 (no sparse representation). MLPL's `DenseArray` is the only
 array shape today.
 
+## depth (builtin)
+
+`depth(x)` returns the nesting level of a value (APL2 sense):
+`0` for a scalar, `1` for any flat array (vector, matrix, or
+higher-rank). MLPL's `DenseArray` is always flat today, so
+depth is `0` or `1`; once nested/boxed arrays land (APL2
+staging plan Stage 6) the same builtin reports deeper values.
+Pairs with `shape`, `rank`, `size`, and `tally` as the
+structural-introspection set; `disp(x)` shows all of them at
+once. APL heritage.
+
+## disp (builtin)
+
+`disp(x)` returns an ASCII box diagram (a string) that makes
+the rank, shape, and depth of `x` visible: rank <= 2 renders
+as a framed grid, rank >= 3 as a labeled stack of
+leading-axis slices, with a `rank R  shape [..]  depth D`
+footer. MLPL's answer to APL's `]display`. Print it in the
+REPL to see an array's structure at a glance.
+
 ## Discriminator
 
 The half of a GAN that classifies inputs as real or fake.
@@ -2415,7 +2435,20 @@ causal-feature-aware training.
 dims (a single scalar). Together they describe an array's
 structural type. Shape-mismatch errors at runtime cite the
 `shape(x)` of the offending operand; named-axis arrays
-render as `[batch=4, vocab=8]` instead of `[4, 8]`.
+render as `[batch=4, vocab=8]` instead of `[4, 8]`. See also
+`size` / `tally` (element and major-cell counts), `depth`,
+and `disp`.
+
+## size / tally (builtins)
+
+`size(x)` returns the total element count (numel) as a
+scalar -- the product of the shape. `tally(x)` returns the
+length of the leading axis (the number of major cells,
+APL's monadic tally, J's `#`): a scalar tallies to `1`, and a
+rank >= 1 array tallies to `shape[0]`. For a `[2, 3]` matrix
+`size` is `6` while `tally` is `2`. Both round out the
+structural-introspection set with `shape`, `rank`, `depth`,
+and `disp`.
 
 ## shift_pairs_x / shift_pairs_y (builtins)
 

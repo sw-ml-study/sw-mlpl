@@ -156,6 +156,22 @@ examples = [
 try_it = "Build a 2x5 matrix from range(10) and sum each column."
 
 [[lessons]]
+title = "Seeing Structure: rank, shape, depth"
+intro = "Every value has a structural type you can inspect. shape(x) gives the dim-size vector; rank(x) counts the dims; size(x) is the total element count (numel); tally(x) is the length of the leading axis (how many major cells / rows); depth(x) is the nesting level (0 for a scalar, 1 for any flat array today). disp(x) draws an ASCII box diagram that shows rank, shape, and depth all at once -- MLPL's answer to APL's display. Reach for disp whenever an intermediate array surprises you."
+examples = [
+    "m = reshape(range(6), [2, 3])",
+    "shape(m)",
+    "rank(m)",
+    "size(m)",
+    "tally(m)",
+    "depth(m)",
+    "disp(m)",
+    "disp(range(4))",
+    "disp(5)",
+]
+try_it = "Reshape range(24) into a [2, 3, 4] tensor and pass it to disp. What are its rank, size, and tally?"
+
+[[lessons]]
 title = "Named Axes"
 intro = 'Axes can carry names as well as sizes. Attach them with label(x, ["a", "b"]) or the annotation syntax x : [a, b] = ... . labels(x) reads them back as a comma-joined string. transpose swaps labels alongside dims. reshape clears labels (the new axes are genuinely new); reshape_labeled attaches fresh labels in one step. Reductions and softmax accept an axis name -- reduce_add(x, "feat") -- instead of a positional integer. matmul requires the contraction axis labels to match; a disagreement surfaces as a ShapeMismatch error that names both labeled shapes. relabel(x, [...]) is the explicit escape hatch when you want to override labels mid-expression.'
 examples = [
