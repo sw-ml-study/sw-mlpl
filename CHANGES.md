@@ -12,8 +12,16 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-21
+
+- chore(pages): rebuild WASM bundle for tensor terminology bridge
+- docs(glossary,lang-ref): tensor terminology bridge for introspection builtins
+- chore(pages): rebuild WASM bundle for size/tally (Structure Zoo + lesson)
+- feat(array): APL2 Stage 1 -- size() + tally() structural introspection
+
 ## 2026-07-16
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild WASM bundle for Structure Zoo demo (disp/depth)
 - feat(array): APL2 Stage 1 -- depth() + disp() structural introspection
 
