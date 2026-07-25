@@ -11,8 +11,8 @@ lines = [
 [[demos]]
 category = "CUDA (NVIDIA GPU)"
 name = "CUDA LoRA fine-tune"
-intro = """Train a tiny language model's LoRA adapters ENTIRELY on an NVIDIA GPU via CUDA -- forward, backward, AND the Adam optimizer all run on-device through candle autograd, no CPU round-trip. 1500 training steps run on the GPU; watch the live telemetry sparkline light up the GPU (~60% sustained) while the CPU stays near idle. Needs a connected mlpl-serve with a Linux CUDA peer; not runnable on the public browser demo. lora() freezes the base and trains only the low-rank adapters. NOTE: today only the LoRA adapter step is GPU-accelerated -- full base-model training still falls back to CPU -- so this demo skips a (slow, CPU-only) base-pretrain step and trains the adapters directly on the GPU. The CUDA analog of 'MLX LoRA fine-tune'; only device("cuda") differs."""
-takeaway = """device("cuda") runs the whole training step on the GPU: the live sparkline shows sustained GPU utilization for the full run while the CPU stays near idle -- this is what 'on the GPU' looks like. lora() trains only the low-rank adapters, so it is cheap. last_losses fills automatically from the training loss (no extra forward pass), so the curve falls as the adapters learn. Same demo as the MLX version; only the device differs."""
+intro = """Train a tiny language model's LoRA adapters ENTIRELY on an NVIDIA GPU via CUDA -- forward, backward, AND the Adam optimizer all run on-device through candle autograd, no CPU round-trip. 1500 training steps run on the GPU; watch the LIVE LOSS curve grow point by point (streamed per step over SSE) while the telemetry sparklines light up the GPU (~60% sustained) and the CPU stays near idle. Needs a connected mlpl-serve with a Linux CUDA peer; not runnable on the public browser demo. lora() freezes the base and trains only the low-rank adapters. NOTE: today only the LoRA adapter step is GPU-accelerated -- full base-model training still falls back to CPU -- so this demo skips a (slow, CPU-only) base-pretrain step and trains the adapters directly on the GPU. The CUDA analog of 'MLX LoRA fine-tune'; only device("cuda") differs."""
+takeaway = """device("cuda") runs the whole training step on the GPU: the LOSS row and live loss chart stream the training loss in real time (each train step emits it automatically -- no extra forward pass), while the hardware sparklines show sustained GPU utilization on the same clock -- what the model learns and what the hardware does, one picture. The final chart persists under the result. lora() trains only the low-rank adapters, so it is cheap. Same demo as the MLX version; only the device differs."""
 lines = [
     'corpus = load_preloaded("tiny_shakespeare_snippet")  # base corpus',
     "tok    = train_bpe(corpus, 280, 0)                    # 280-token BPE",
@@ -22,7 +22,7 @@ lines = [
     "V = 280 ; d = 32 ; h = 1",
     "base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 4))  # tiny base LM",
     "student = lora(base, 16, 16.0, 0)                     # rank-16 LoRA, freeze the base",
-    'device("cuda") { experiment "cuda_lora" { train 1500 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001) } } }  # 1500 steps on the GPU -- watch the GPU sparkline',
+    'device("cuda") { experiment "cuda_lora" { train 1500 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001) } } }  # 1500 GPU steps -- watch the [[Loss]] stream live beside the GPU sparkline',
     "loss_curve(last_losses)                               # the GPU-trained loss falling",
 ]
 
@@ -78,8 +78,8 @@ lines = [
 [[demos]]
 category = "MLX (Apple GPU)"
 name = "MLX LoRA fine-tune"
-intro = """Train a tiny language model's LoRA adapters ENTIRELY on the Apple GPU via MLX -- forward, backward, AND the Adam optimizer all run on-device, no CPU round-trip. 1500 training steps run on the GPU; watch the live telemetry sparkline show GPU activity while the CPU stays near idle. Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public browser demo. lora() freezes the base and trains only the low-rank adapters. NOTE: today only the LoRA adapter step is GPU-accelerated -- full base-model training still falls back to CPU -- so this demo skips a (slow, CPU-only) base-pretrain step and trains the adapters directly on the GPU. The MLX analog of 'CUDA LoRA fine-tune'; only device("mlx") differs."""
-takeaway = 'device("mlx") runs the whole training step on the GPU: the live sparkline shows GPU utilization for the run while the CPU stays near idle. lora() trains only the low-rank adapters, so it is cheap. last_losses fills automatically from the training loss (no extra forward pass), so the curve falls as the adapters learn. Same demo as the CUDA version; only the device differs.'
+intro = """Train a tiny language model's LoRA adapters ENTIRELY on the Apple GPU via MLX -- forward, backward, AND the Adam optimizer all run on-device, no CPU round-trip. 1500 training steps run on the GPU; watch the LIVE LOSS curve grow point by point (streamed per step over SSE) while the telemetry sparklines show GPU activity and the CPU stays near idle. Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public browser demo. lora() freezes the base and trains only the low-rank adapters. NOTE: today only the LoRA adapter step is GPU-accelerated -- full base-model training still falls back to CPU -- so this demo skips a (slow, CPU-only) base-pretrain step and trains the adapters directly on the GPU. The MLX analog of 'CUDA LoRA fine-tune'; only device("mlx") differs."""
+takeaway = 'device("mlx") runs the whole training step on the GPU: the LOSS row and live loss chart stream the training loss in real time (each train step emits it automatically -- no extra forward pass), while the hardware sparklines show GPU activity on the same clock. The final chart persists under the result. lora() trains only the low-rank adapters, so it is cheap. Same demo as the CUDA version; only the device differs.'
 lines = [
     'corpus = load_preloaded("tiny_shakespeare_snippet")  # base corpus',
     "tok    = train_bpe(corpus, 280, 0)                    # 280-token BPE",
@@ -89,7 +89,7 @@ lines = [
     "V = 280 ; d = 32 ; h = 1",
     "base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 4))  # tiny base LM",
     "student = lora(base, 16, 16.0, 0)                     # rank-16 LoRA, freeze the base",
-    'device("mlx") { experiment "mlx_lora" { train 1500 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001) } } }  # 1500 steps on the GPU -- watch the GPU sparkline',
+    'device("mlx") { experiment "mlx_lora" { train 1500 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001) } } }  # 1500 GPU steps -- watch the [[Loss]] stream live beside the GPU sparkline',
     "loss_curve(last_losses)                               # the GPU-trained loss falling",
 ]
 

@@ -1,6 +1,6 @@
 number = 7
 slug = "docs-pages-retrospective"
-status = "pending"
+status = "in-progress"
 description = "Glossary/tour/lesson pointers for the live panels, literate notes, pages/ reb..."
 role = "validation"
 context_files = []
