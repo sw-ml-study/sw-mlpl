@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "implicit-loss-metric"
+  },
+  "action": "TDD: serve wire test + client round-trip test first; 2-line eval change; responsibility split for ratchet",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-25T13:34:01"
+}
