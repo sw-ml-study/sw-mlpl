@@ -5,12 +5,11 @@ mod dense;
 mod display;
 mod error;
 mod indexing;
-mod ops_strides;
 mod shape;
 
 pub use box_display::box_display;
 pub use dense::DenseArray;
 pub use error::ArrayError;
 pub use mlpl_core::LabeledShape;
-pub use ops_strides::compute_strides;
 pub use shape::Shape;
+pub use shape::compute_strides;

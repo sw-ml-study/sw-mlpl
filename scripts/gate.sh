@@ -28,6 +28,12 @@ PKG_ARGS=()
 for p in "$@"; do PKG_ARGS+=(-p "$p"); done
 
 cd "$WS"
+echo "=== Cargo.lock consistency ==="
+# A stale lock here means a manifest changed (possibly in ANOTHER
+# workspace this one path-depends on) without the lock being
+# regenerated -- fix with scripts/check-locks.sh --fix.
+"$SERIAL" cargo metadata --locked --format-version 1 >/dev/null
+
 echo "=== rustfmt --check (${*}) ==="
 "$SERIAL" cargo fmt "${PKG_ARGS[@]}" -- --check
 

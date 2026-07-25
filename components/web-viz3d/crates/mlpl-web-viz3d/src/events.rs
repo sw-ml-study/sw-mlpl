@@ -97,6 +97,19 @@ fn compute_summary(data: &[f64]) -> ArraySummary {
     let mean = data.iter().sum::<f64>() / n;
     let var = data.iter().map(|x| (x - mean).powi(2)).sum::<f64>() / n;
     let std = var.sqrt();
+    let histogram = histogram_of(data, min, max);
+    ArraySummary {
+        min,
+        max,
+        mean,
+        std,
+        histogram,
+    }
+}
+
+/// 16-bin histogram of `data` over `[min, max]` (degenerate ranges
+/// collapse into the first bin).
+fn histogram_of(data: &[f64], min: f64, max: f64) -> Vec<usize> {
     let bins = 16;
     let range = if (max - min).abs() < 1e-12 {
         1.0
@@ -108,13 +121,7 @@ fn compute_summary(data: &[f64]) -> ArraySummary {
         let idx = ((v - min) / range * (bins as f64 - 1.0)).round() as usize;
         histogram[idx.min(bins - 1)] += 1;
     }
-    ArraySummary {
-        min,
-        max,
-        mean,
-        std,
-        histogram,
-    }
+    histogram
 }
 
 pub fn emit(event: &Stage3dEvent) {
