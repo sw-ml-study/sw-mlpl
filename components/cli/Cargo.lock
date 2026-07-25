@@ -2098,12 +2098,17 @@ name = "mlpl-monitor"
 version = "0.20.0"
 dependencies = [
  "mlpl-monitor-linux",
+ "mlpl-monitor-macos",
  "mlpl-monitor-types",
  "tokio",
 ]
 
 [[package]]
 name = "mlpl-monitor-linux"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-monitor-macos"
 version = "0.20.0"
 
 [[package]]
@@ -2283,6 +2288,7 @@ dependencies = [
  "mlpl-model-viz",
  "mlpl-monitor",
  "mlpl-parser",
+ "mlpl-runtime",
  "mlpl-web-viz-ir",
  "rand 0.8.6",
  "rayon",
