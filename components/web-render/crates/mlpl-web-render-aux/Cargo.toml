@@ -16,6 +16,9 @@ mlpl-web-tutorial = { path = "../../../web-tutorial/crates/mlpl-web-tutorial" }
 # /v1/stats and draw CPU/GPU/RAM/VRAM sparklines. Shared wire type +
 # pure sparkline rendering from the monitoring component (leaf dep).
 mlpl-monitor-types = { path = "../../../monitoring/crates/mlpl-monitor-types" }
+# Live loss panel during streamed connect-mode trains (sibling crate so
+# both this crate's module count and the panel's UI deps stay bounded).
+mlpl-web-render-live = { path = "../mlpl-web-render-live" }
 gloo = { version = "0.11", features = ["net", "timers", "futures"] }
 wasm-bindgen-futures = "0.4"
 serde_json = "1"

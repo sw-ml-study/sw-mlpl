@@ -16,9 +16,10 @@ fn binary_path() -> PathBuf {
 }
 
 fn demo_path() -> PathBuf {
-    // CARGO_MANIFEST_DIR is apps/mlpl-repl; the demo lives at
-    // ../../demos/classify.mlpl from there.
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../demos/classify.mlpl")
+    // CARGO_MANIFEST_DIR is components/cli/crates/mlpl-repl; the demo
+    // lives at the repo root's demos/ (stale ../../ fixed after the
+    // saga-62 components/ move).
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../../demos/classify.mlpl")
 }
 
 fn run_with_args(args: &[&str]) -> std::process::Output {

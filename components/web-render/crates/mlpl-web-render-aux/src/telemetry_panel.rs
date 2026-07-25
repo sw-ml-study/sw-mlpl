@@ -25,9 +25,10 @@ const POLL_MS: u32 = 400;
 const WINDOW: usize = 48;
 const LABELS: [&str; 4] = ["CPU", "RAM", "GPU", "VRAM"];
 
-/// Ring buffers of the four metric percentages + the freshest snapshot
-/// + the last fetch error (shown when polling fails) + a monotonic seq
-/// the component mirrors into a `use_state` to force a re-render.
+/// Ring buffers of the four metric percentages, plus the freshest
+/// snapshot, the last fetch error (shown when polling fails), and a
+/// monotonic seq the component mirrors into a `use_state` to force a
+/// re-render.
 #[derive(Default)]
 struct Series {
     rows: [Vec<u32>; 4],
@@ -68,6 +69,9 @@ async fn fetch_snapshot(url: &str) -> Result<Snapshot, String> {
 
 /// One poll: fetch, record success or error into the buffers, then bump
 /// `tick` (its new value forces the component to re-render either way).
+/// Successful snapshots also mirror into THIS eval's generation so the
+/// sparkline PERSISTS in the result after the marker unmounts, isolated
+/// from any other concurrent eval/watch.
 fn poll_once(base: &str, gen_id: u32, series: &Rc<RefCell<Series>>, tick: &UseStateHandle<u32>) {
     let url = format!("{}/v1/stats", base.trim_end_matches('/'));
     let series = series.clone();
@@ -78,9 +82,6 @@ fn poll_once(base: &str, gen_id: u32, series: &Rc<RefCell<Series>>, tick: &UseSt
             let mut s = series.borrow_mut();
             match outcome {
                 Ok(snap) => {
-                    // Mirror into THIS eval's generation so the sparkline
-                    // PERSISTS in the result after the marker unmounts,
-                    // isolated from any other concurrent eval/watch.
                     mlpl_web_eval::telemetry_trace::push(gen_id, &snap);
                     s.push(snap);
                 }
@@ -101,15 +102,7 @@ fn render_rows(series: &Series) -> Html {
         .rows
         .iter()
         .enumerate()
-        .map(|(i, buf)| {
-            html! {
-                <span class="telemetry-metric">
-                    <span class="telemetry-label">{ LABELS[i] }</span>
-                    <span class="telemetry-spark">{ sparkline(buf, 100) }</span>
-                    <span class="telemetry-val">{ format!("{}%", pcts[i]) }</span>
-                </span>
-            }
-        })
+        .map(|(i, buf)| metric_row(i, buf, pcts[i]))
         .collect::<Html>();
     let note = series.note.as_ref().map_or_else(
         || html! {},
@@ -119,6 +112,17 @@ fn render_rows(series: &Series) -> Html {
         <div class="telemetry-panel">
             <div class="telemetry-line">{ metrics }{ note }</div>
         </div>
+    }
+}
+
+/// One labeled sparkline cell (label / bars / current percent).
+fn metric_row(i: usize, buf: &[u32], pct: u32) -> Html {
+    html! {
+        <span class="telemetry-metric">
+            <span class="telemetry-label">{ LABELS[i] }</span>
+            <span class="telemetry-spark">{ sparkline(buf, 100) }</span>
+            <span class="telemetry-val">{ format!("{pct}%") }</span>
+        </span>
     }
 }
 

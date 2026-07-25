@@ -50,7 +50,7 @@ pub(crate) fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
             break;
         }
 
-        if handle_command(trimmed, &mut tracing, &last_trace, env) {
+        if trimmed.starts_with(':') && handle_command(trimmed, &mut tracing, &last_trace, env) {
             continue;
         }
 
@@ -64,10 +64,9 @@ fn handle_command(
     last_trace: &Option<Trace>,
     env: &mut Environment,
 ) -> bool {
-    if !input.starts_with(':') {
-        return false;
+    if handle_trace_command(input, tracing, last_trace) || handle_ask_connect(input, env) {
+        return true;
     }
-    let no_trace = || eprintln!("No trace available. Use :trace on first.");
     match input {
         ":help" => print_help(),
         ":version" => println!("{}", version::banner()),
@@ -75,6 +74,35 @@ fn handle_command(
             *env = Environment::new();
             println!("Environment cleared.");
         }
+        _ => match mlpl_eval::inspect(env, input) {
+            Some(out) => println!("{out}"),
+            None => eprintln!("Unknown command: {input}. Type :help for available commands."),
+        },
+    }
+    true
+}
+
+/// The LLM-facing commands (`:ask ...`, `:connect ...`), split from
+/// `handle_command` to keep it inside the LOC budget.
+fn handle_ask_connect(input: &str, env: &mut Environment) -> bool {
+    if input == ":ask" || input.starts_with(":ask ") {
+        ask::dispatch(input.strip_prefix(":ask").unwrap_or("").trim(), env);
+    } else if input == ":connect" || input.starts_with(":connect ") {
+        let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
+        let arg = input.strip_prefix(":connect").unwrap_or("").trim();
+        println!("{}", ask_model::connect_cmd(arg, &host));
+    } else {
+        return false;
+    }
+    true
+}
+
+/// The `:trace ...` family (toggle, summary, json print, json-to-file),
+/// split from `handle_command` so each stays inside the LOC budget.
+/// Returns false for non-trace commands.
+fn handle_trace_command(input: &str, tracing: &mut bool, last_trace: &Option<Trace>) -> bool {
+    let no_trace = || eprintln!("No trace available. Use :trace on first.");
+    match input {
         ":trace on" | ":trace off" => {
             *tracing = input == ":trace on";
             println!("Tracing {}.", if *tracing { "enabled" } else { "disabled" });
@@ -88,30 +116,25 @@ fn handle_command(
             None => no_trace(),
         },
         _ if input.starts_with(":trace json ") => {
-            let path = input.strip_prefix(":trace json ").unwrap().trim();
-            match last_trace {
-                Some(t) => match std::fs::write(path, t.to_json()) {
-                    Ok(()) => println!("Trace written to {path}"),
-                    Err(e) => eprintln!("error writing file: {e}"),
-                },
-                None => no_trace(),
-            }
+            write_trace_json(
+                input.strip_prefix(":trace json ").unwrap().trim(),
+                last_trace,
+            );
         }
-        _ if input == ":ask" || input.starts_with(":ask ") => {
-            ask::dispatch(input.strip_prefix(":ask").unwrap_or("").trim(), env);
-        }
-        _ if input == ":connect" || input.starts_with(":connect ") => {
-            let host =
-                std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
-            let arg = input.strip_prefix(":connect").unwrap_or("").trim();
-            println!("{}", ask_model::connect_cmd(arg, &host));
-        }
-        _ => match mlpl_eval::inspect(env, input) {
-            Some(out) => println!("{out}"),
-            None => eprintln!("Unknown command: {input}. Type :help for available commands."),
-        },
+        _ => return false,
     }
     true
+}
+
+/// `:trace json <path>`: dump the last trace to a file.
+fn write_trace_json(path: &str, last_trace: &Option<Trace>) {
+    match last_trace {
+        Some(t) => match std::fs::write(path, t.to_json()) {
+            Ok(()) => println!("Trace written to {path}"),
+            Err(e) => eprintln!("error writing file: {e}"),
+        },
+        None => eprintln!("No trace available. Use :trace on first."),
+    }
 }
 
 fn eval_line(

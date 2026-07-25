@@ -77,13 +77,7 @@ pub fn fetch_session_meta(
         .send()
         .map_err(|e| ClientError::Network(e.to_string()))?;
     if !resp.status().is_success() {
-        let status = resp.status().as_u16();
-        let body = resp.text().unwrap_or_default();
-        let message = serde_json::from_str::<serde_json::Value>(&body)
-            .ok()
-            .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(str::to_string))
-            .unwrap_or(body);
-        return Err(ClientError::Server { status, message });
+        return Err(crate::connect::server_error(resp));
     }
     resp.json()
         .map_err(|e| ClientError::Network(format!("decode: {e}")))

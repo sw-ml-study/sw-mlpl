@@ -117,18 +117,17 @@ fn exit_with_custom_code() {
 #[test]
 fn exit_skips_remaining_statements() {
     // exit() never returns, so the print after it must not fire.
-    // The source echo at the top of run_script prints each input
-    // line, including `print("AFTER_EXIT")`, so the assertion has
-    // to count occurrences: 1 (echo only) vs 2 (echo + print
-    // output). 2 means the print fired and exit did not
-    // short-circuit.
+    // Script mode is quiet by default (source echo is -v only), so
+    // AFTER_EXIT must not appear at all: an occurrence means the
+    // print fired and exit did not short-circuit. (This test
+    // previously expected 1 from the old unconditional echo.)
     let script = write_script("exit_short", "exit(3)\nprint(\"AFTER_EXIT\")\n");
     let out = run_no_stdin(&script);
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert_eq!(out.status.code(), Some(3));
     let occurrences = stdout.matches("AFTER_EXIT").count();
     assert_eq!(
-        occurrences, 1,
+        occurrences, 0,
         "exit should have short-circuited; AFTER_EXIT appeared {occurrences} times in stdout: {stdout}"
     );
 }

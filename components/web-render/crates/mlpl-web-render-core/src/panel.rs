@@ -163,11 +163,8 @@ struct ReplPaneArgs<'a> {
 }
 
 fn render_repl_pane(a: ReplPaneArgs) -> Html {
-    let welcome = if a.tutorial_active || a.paths_active {
-        html! {}
-    } else {
-        html! { <Welcome /> }
-    };
+    // Option<Html> renders as nothing when None.
+    let welcome = (!a.tutorial_active && !a.paths_active).then(|| html! { <Welcome /> });
     let value = (**a.input_value).clone();
     html! {
         <>

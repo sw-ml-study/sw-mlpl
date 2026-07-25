@@ -216,3 +216,44 @@ async fn stream_eval_error_surfaces_as_error_outcome() {
     .await;
     result.unwrap();
 }
+
+/// Connect-telemetry step 002: metric frames stream into the
+/// per-generation loss trace exactly as the live panel consumes them --
+/// one point per frame, in arrival order, with a consuming summary
+/// line left over for the result entry.
+#[tokio::test(flavor = "multi_thread")]
+async fn streamed_metrics_feed_the_live_loss_trace() {
+    let addr = start_server().await;
+    let base = format!("http://{addr}");
+    let result = tokio::task::spawn_blocking(move || {
+        use mlpl_web_eval::loss_trace;
+        let gen_id = 777_002;
+        let program = "train 4 { loss_metric = 4 - step ; 4 - step }";
+        assert!(
+            mlpl_web_eval::connect_guard::program_streams_metrics(program),
+            "train programs route to the streaming path"
+        );
+        let remote = RemoteEvaluator::new(&base);
+        let done: Rc<RefCell<Option<StreamOutcome>>> = Rc::new(RefCell::new(None));
+        let d = done.clone();
+        remote.eval_stream(
+            program,
+            Box::new(move |m: &RemoteMetric| loss_trace::push(gen_id, &m.name, m.value)),
+            Box::new(move |o: StreamOutcome| *d.borrow_mut() = Some(o)),
+        );
+        assert!(
+            matches!(done.borrow_mut().take(), Some(StreamOutcome::Done { .. })),
+            "stream should complete"
+        );
+        let (train, val) = loss_trace::series(gen_id);
+        assert_eq!(train, vec![4.0, 3.0, 2.0, 1.0]);
+        assert!(val.is_empty());
+        assert_eq!(loss_trace::seq(gen_id), 4);
+        let s = loss_trace::summary(gen_id).expect("summary for streamed gen");
+        assert!(s.contains("4 steps"), "step count in summary: {s}");
+        assert!(s.contains("1.0000"), "final loss in summary: {s}");
+        assert!(loss_trace::summary(gen_id).is_none(), "summary consumes");
+    })
+    .await;
+    result.unwrap();
+}

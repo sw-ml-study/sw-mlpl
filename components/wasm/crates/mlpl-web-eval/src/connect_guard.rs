@@ -45,3 +45,34 @@ pub fn connect_blocked_reason() -> Option<String> {
 pub fn connect_blocked_reason() -> Option<String> {
     None
 }
+
+/// Whether `program` contains a `train N { ... }` block -- the only
+/// construct that emits per-step `*_metric` SSE frames, and therefore
+/// the only kind of connect eval routed through the streaming endpoint.
+/// Plain evals keep the JSON `/eval` path, which carries the 3D-viz
+/// payload the stream's `done` frame does not.
+#[must_use]
+pub fn program_streams_metrics(program: &str) -> bool {
+    let t = program.trim_start();
+    if t.starts_with(':') || t.starts_with("llm_call(") {
+        return false;
+    }
+    has_train_block(t)
+}
+
+/// `train` as a standalone word with a `{` somewhere after it, so
+/// `retrain_flag` / `trainx` (and "train" inside an `:ask` question,
+/// which has no block) do not count.
+fn has_train_block(t: &str) -> bool {
+    let bytes = t.as_bytes();
+    for (i, _) in t.match_indices("train") {
+        let boundary_before =
+            i == 0 || !(bytes[i - 1].is_ascii_alphanumeric() || bytes[i - 1] == b'_');
+        let after = bytes.get(i + 5);
+        let boundary_after = matches!(after, Some(c) if c.is_ascii_whitespace() || *c == b'{');
+        if boundary_before && boundary_after && t[i..].contains('{') {
+            return true;
+        }
+    }
+    false
+}

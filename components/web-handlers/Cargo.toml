@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "crates/mlpl-web-ask",
     "crates/mlpl-web-handlers-eval",
     "crates/mlpl-web-handlers-input",
     "crates/mlpl-web-handlers-upload",

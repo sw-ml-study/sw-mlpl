@@ -17,7 +17,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
-#[cfg(target_arch = "wasm32")]
 #[allow(unused_imports)]
 pub use crate::eval_url::current_connect_url_from_window;
 #[allow(unused_imports)]
