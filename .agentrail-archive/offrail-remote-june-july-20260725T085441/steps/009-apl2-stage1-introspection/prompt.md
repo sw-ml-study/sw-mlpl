@@ -1,0 +1,1 @@
+APL2 Stage 1 structural introspection builtins: depth() + disp(), size() + tally(), Structure Zoo demo/lesson wiring, and the tensor terminology bridge docs.

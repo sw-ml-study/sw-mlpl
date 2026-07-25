@@ -1,0 +1,1 @@
+Move lesson, demo, and learning-path content out of Rust source into lessons.toml / demos.toml / paths.toml with build.rs codegen; fold per-demo metadata in and split the heavy smoke test.

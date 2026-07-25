@@ -1,0 +1,1 @@
+Harden connect-mode :ask -- ground answers in the active demo, give the LLM a compact MLPL reference, forbid fabricated MLPL code, send prompts verbatim, route demo lines correctly, pick a sane default model, and show honest UI when HTTPS cannot reach an HTTP server.

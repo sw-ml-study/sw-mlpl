@@ -1,0 +1,18 @@
+number = 2
+slug = "macos-telemetry-sparklines"
+status = "completed"
+description = "Add a macOS telemetry backend to mlpl-monitor (CPU via top, RAM via vm_stat, ..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T08:52:21"
+completed_at = "2026-07-25T08:53:51"
+task_type = "feature"
+commits = [
+    "48c53624579982d9bfae8fd3b464632424273539",
+    "e2fe60f365bc34f2915e36ce7824213d732ea194",
+    "10bc4a3c04439402ed2fbd7e772701e1ccf8c713",
+    "2c889de6f04ba9097cc0f3c955aacea075f98e0d",
+    "5fdf62bbe1c81bf84ab2743d31025f1d5ec19310",
+    "5729ffd862b0bb838254d3108c7414d1ebed0405",
+    "5b32b6f6d4ec66294f7d2969433ff89901aaf96e",
+]
