@@ -1,0 +1,1 @@
+Glossary/tour/lesson pointers for the live panels, literate notes, pages/ rebuild (web source changed), CHANGES refresh, saga retrospective in docs/saga.md. See docs/saga-connect-telemetry.md step 4.

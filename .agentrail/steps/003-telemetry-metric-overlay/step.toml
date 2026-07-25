@@ -1,0 +1,9 @@
+number = 3
+slug = "telemetry-metric-overlay"
+status = "pending"
+description = "Time-align the TelemetryPanel resource sparklines with the live loss panel (s..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T09:08:20"
+task_type = "feature"
+commits = []
