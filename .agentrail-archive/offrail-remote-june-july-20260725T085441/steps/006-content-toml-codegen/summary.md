@@ -1,0 +1,1 @@
+Retroactive: lessons/demos/paths content moved to TOML + build.rs codegen; heavy smoke test split.

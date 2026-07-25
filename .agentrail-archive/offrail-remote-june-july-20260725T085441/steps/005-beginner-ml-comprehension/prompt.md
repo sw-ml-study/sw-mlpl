@@ -1,0 +1,1 @@
+Execute the beginner ML comprehension roadmap: train_val_curve + Watch a Model Learn (overfitting), loss_landscape + How Gradient Descent Works, gradient-flow demo, weight-decay/LR triptych, Watch a Model Generalize, beginner spine + generative-families learning paths, demo taxonomy rework.

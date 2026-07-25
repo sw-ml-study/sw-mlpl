@@ -1,0 +1,6 @@
+name = "offrail-remote-june-july"
+status = "completed"
+current_step = 10
+created_at = "2026-07-25T08:52:21"
+plan_file = ".agentrail/plan.md"
+retroactive = true

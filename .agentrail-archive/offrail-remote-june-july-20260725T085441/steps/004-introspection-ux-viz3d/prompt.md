@@ -1,0 +1,1 @@
+Add :list <fn> and render indented/formatted UDF source listings in the 3D inspector panels.

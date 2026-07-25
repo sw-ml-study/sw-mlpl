@@ -1,0 +1,1 @@
+Retroactive saga: records off-rail remote development 2026-06-12..2026-07-21 (range 36a45e6b..8728fb22). Created and archived during agentrail/git reconciliation on 2026-07-25.

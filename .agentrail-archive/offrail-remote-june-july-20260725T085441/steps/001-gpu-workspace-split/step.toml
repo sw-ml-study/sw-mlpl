@@ -1,0 +1,30 @@
+number = 1
+slug = "gpu-workspace-split"
+status = "completed"
+description = "Split CUDA/MLX GPU compute out of mlpl-eval into sibling crates (mlpl-cuda-ev..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T08:52:21"
+completed_at = "2026-07-25T08:53:10"
+task_type = "refactor"
+commits = [
+    "f39fdfcef37004cb69d07dff7ea459554294d27b",
+    "282b08708233b23ebaa6e5295a1aca1d72d4579d",
+    "b4e1c66ff461172c6031d34e7062e04d6fe1bd1f",
+    "c15799d7e97b7fe4e8dd88fd363d1d7928aaabaa",
+    "77568545bdbe1246c388136283997732c103f254",
+    "ab895c82aae593f40f79567a74bb885848bd471e",
+    "31348c8b2711c09125488f5aa07f41e87f08a8bb",
+    "1f4214b717de67dca8691ed7a3632ead21393204",
+    "1d8d6f795c60b0c76e694b9290ab7edb38bf63bb",
+    "bd67dcfb1242713356db55dacddb9ede4cf1a0a7",
+    "657037f67e7f386adaa0f6ff32fc18e61e3e1e6f",
+    "9b7b37ac51bd1f4f984fdcc1d8ff77087470badf",
+    "02c0fc11cf428c4c0111583d1d0c32d3b620d1bd",
+    "e7c6443d8c6483e72d6add835f3f0dbde4ba8367",
+    "e32a1b86d876c23d07533e403684460681060685",
+    "f446d2760cfdad680dd6a8e12f8d3106f59a3668",
+    "0de75df60482047a87056d9c9a1faa4aec540cd8",
+    "ef72a467ca3f9da5cd91d281184e12d5742de96b",
+    "5b32b6f6d4ec66294f7d2969433ff89901aaf96e",
+]

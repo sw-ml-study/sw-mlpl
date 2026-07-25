@@ -1,0 +1,1 @@
+Split CUDA/MLX GPU compute out of mlpl-eval into sibling crates (mlpl-cuda-eval, mlpl-mlx-eval) behind a device-agnostic GpuEnv/GpuAdamStep seam; add three build modes (CUDA / MLX / pages-only) and fix post-migration breakage.

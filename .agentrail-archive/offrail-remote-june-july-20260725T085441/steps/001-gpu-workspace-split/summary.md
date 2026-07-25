@@ -1,0 +1,1 @@
+Retroactive: 4-stage GPU workspace split (mlpl-cuda-eval, mlpl-mlx-eval) with device-trait seam, build modes, and post-migration fixups. Reconstructed from git history 2026-07-25.

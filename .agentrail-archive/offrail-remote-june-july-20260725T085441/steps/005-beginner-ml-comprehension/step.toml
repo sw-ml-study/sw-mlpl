@@ -1,0 +1,30 @@
+number = 5
+slug = "beginner-ml-comprehension"
+status = "completed"
+description = "Execute the beginner ML comprehension roadmap: train_val_curve + Watch a Mode..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T08:52:21"
+completed_at = "2026-07-25T08:53:51"
+task_type = "feature"
+commits = [
+    "b4da33f1167dce0dfcad1032de7bc509115c5757",
+    "cc3ef2b8cafe773165d781f03882c021a8634029",
+    "c325b2e4ee88749fb8f5ead197c88bc1e74127f6",
+    "36587b077da77daa8843b218639b1ac431b41aac",
+    "fe1719f609ff645848538b6e050dcff597d3e7fc",
+    "5dbaa57bcf169600b1ed1277992771e6b4ae493e",
+    "113c6f4d16c729c84985d9cce140f2a7e10a48cd",
+    "722bf33af798205a2478c18d33920bab355bc038",
+    "4d5a25c855b90bab09295185ec9016ec8403391d",
+    "3ac707e7ce5f7d6522626cc0f4cbfb78146f51bd",
+    "be60a53871124074501a782dedf3c9c1f8b5b313",
+    "24257c0ab1badfb9949e96513b03b22db9f7d851",
+    "5d88feec7969714293400b6aed6de732c4ee0cb1",
+    "98010452124a77b9e752c8eb2a97cf020fbdd43a",
+    "222065eb1cba3eb398b5eafc2b99bd87b5b222e7",
+    "7b8853a3ecc994b4f764633e94faf5fb6bf2c264",
+    "c23902bc51ec47474c15fdfeaf1e7c9e06b4838f",
+    "da4b7b45fdd218d2b59ef5d9b0a76653208f2bb1",
+    "5b32b6f6d4ec66294f7d2969433ff89901aaf96e",
+]

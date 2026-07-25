@@ -1,0 +1,1 @@
+Quantization teaching path (8 lessons), glossary quantization terms + alphabetical browse, glossary fuzzy search (substring/plurals/aliases) with the matcher and data layer split into their own crates.
