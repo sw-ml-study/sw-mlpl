@@ -21,6 +21,14 @@ mod eval;
 #[allow(dead_code)]
 #[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_sse.rs"]
 mod eval_sse;
+#[allow(dead_code)]
+#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_native.rs"]
+mod eval_native;
+
+#[allow(dead_code)]
+#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_native_stream.rs"]
+mod eval_native_stream;
+
 
 #[allow(dead_code)]
 #[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_url.rs"]
