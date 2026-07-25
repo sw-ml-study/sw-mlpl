@@ -286,3 +286,40 @@ async fn eval_stream_lex_error_returns_400_plain_json() {
         "expected JSON body for lex/parse error, got {ct:?}"
     );
 }
+
+/// Connect-telemetry step 003: a train block with NO explicit
+/// `*_metric` binding still streams its per-step training loss as the
+/// implicit `loss` metric -- the live loss panel works for every
+/// streamed train (e.g. the CUDA/MLX LoRA demos) with zero content
+/// changes and zero recompute. Explicit bindings suppress the
+/// implicit frame (covered by eval_stream_emits_metric_events_during_train,
+/// which sees ONLY loss_metric frames).
+#[tokio::test]
+async fn eval_stream_emits_implicit_loss_for_plain_train() {
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+
+    // Body's final value IS the per-step loss: 4 - step.
+    let program = "train 4 { 4 - step }";
+    let resp = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/sessions/{id}/eval_stream"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({"program": program}))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200);
+    let frames = read_sse_frames(resp).await;
+    let metrics: Vec<&SseFrame> = frames.iter().filter(|f| f.event == "metric").collect();
+    assert_eq!(metrics.len(), 4, "one implicit frame per step: {frames:?}");
+    for (i, m) in metrics.iter().enumerate() {
+        assert_eq!(m.data["name"], "loss");
+        assert_eq!(m.data["step"], i as u64);
+        let expected = 4.0 - i as f64;
+        let got = m.data["value"].as_f64().unwrap();
+        assert!(
+            (got - expected).abs() < 1e-9,
+            "step {i}: {got} != {expected}"
+        );
+    }
+}

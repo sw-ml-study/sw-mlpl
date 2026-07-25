@@ -15,6 +15,8 @@ pub mod config;
 pub mod devices;
 pub mod eval_viz;
 pub mod handlers;
+pub mod handlers_eval_task;
+pub mod handlers_inspect;
 pub mod ollama;
 pub mod peers;
 pub mod persist;

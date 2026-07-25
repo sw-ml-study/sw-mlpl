@@ -1,4 +1,4 @@
-number = 4
+number = 5
 slug = "telemetry-metric-overlay"
 status = "pending"
 description = "Time-align the TelemetryPanel resource sparklines with the live loss panel (s..."

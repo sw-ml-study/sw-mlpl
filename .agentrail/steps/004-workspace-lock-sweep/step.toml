@@ -1,4 +1,4 @@
-number = 3
+number = 4
 slug = "workspace-lock-sweep"
 status = "pending"
 description = "Maintenance insert discovered in step 002: 13 component workspaces fail cargo..."

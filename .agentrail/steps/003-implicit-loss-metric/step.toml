@@ -1,0 +1,9 @@
+number = 3
+slug = "implicit-loss-metric"
+status = "in-progress"
+description = 'Auto-emit the train loop per-step loss as an implicit "loss" metric when the ...'
+role = "production"
+context_files = []
+created_at = "2026-07-25T13:06:47"
+task_type = "feature"
+commits = []
