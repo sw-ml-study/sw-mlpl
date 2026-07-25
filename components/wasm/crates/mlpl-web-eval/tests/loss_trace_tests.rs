@@ -98,3 +98,13 @@ fn train_programs_stream_metrics_other_programs_do_not() {
     assert!(!program_streams_metrics("retrain_flag = 1"));
     assert!(!program_streams_metrics("trainx = { }"));
 }
+
+#[test]
+fn spark_line_normalizes_to_glyph_range() {
+    let s = loss_trace::spark_line(&[4.0, 3.0, 2.0, 1.0]);
+    assert_eq!(s.chars().count(), 4);
+    let first = s.chars().next().unwrap();
+    let last = s.chars().last().unwrap();
+    assert!(first > last, "falling loss renders falling bars: {s}");
+    assert!(loss_trace::spark_line(&[]).is_empty());
+}

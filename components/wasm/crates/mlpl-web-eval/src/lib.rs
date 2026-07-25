@@ -12,6 +12,8 @@ pub mod connect_guard;
 pub mod connect_viz;
 pub mod devices;
 pub mod eval;
+mod eval_native;
+mod eval_native_stream;
 pub mod eval_sse;
 pub mod eval_url;
 pub mod eval_wasm;

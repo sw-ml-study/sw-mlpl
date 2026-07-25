@@ -1,6 +1,6 @@
 number = 6
 slug = "telemetry-metric-overlay"
-status = "pending"
+status = "in-progress"
 description = "Time-align the TelemetryPanel resource sparklines with the live loss panel (s..."
 role = "production"
 context_files = []

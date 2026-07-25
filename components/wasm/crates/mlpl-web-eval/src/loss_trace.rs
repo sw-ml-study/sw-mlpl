@@ -131,3 +131,11 @@ fn percents(vals: &[f64]) -> Vec<u32> {
         })
         .collect()
 }
+
+/// Text sparkline of a loss series (min -> lowest bar, max -> highest),
+/// for the LOSS row the telemetry panel time-aligns with its hardware
+/// rows. Empty input yields an empty string.
+#[must_use]
+pub fn spark_line(vals: &[f64]) -> String {
+    mlpl_monitor_types::spark::sparkline(&percents(vals), 100)
+}

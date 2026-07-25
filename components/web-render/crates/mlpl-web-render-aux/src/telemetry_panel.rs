@@ -32,6 +32,10 @@ const LABELS: [&str; 4] = ["CPU", "RAM", "GPU", "VRAM"];
 #[derive(Default)]
 struct Series {
     rows: [Vec<u32>; 4],
+    /// Streamed training loss sampled on the SAME poll clock as the
+    /// hardware rows (connect-telemetry step 006), so "GPU busy" and
+    /// "loss falling" read as one time-aligned story.
+    loss: Vec<f64>,
     latest: Option<Snapshot>,
     note: Option<String>,
     seq: u32,
@@ -110,7 +114,7 @@ fn render_rows(series: &Series) -> Html {
     );
     html! {
         <div class="telemetry-panel">
-            <div class="telemetry-line">{ metrics }{ note }</div>
+            <div class="telemetry-line">{ metrics }{ loss_row(&series.loss) }{ note }</div>
         </div>
     }
 }
@@ -122,6 +126,21 @@ fn metric_row(i: usize, buf: &[u32], pct: u32) -> Html {
             <span class="telemetry-label">{ LABELS[i] }</span>
             <span class="telemetry-spark">{ sparkline(buf, 100) }</span>
             <span class="telemetry-val">{ format!("{pct}%") }</span>
+        </span>
+    }
+}
+
+/// The time-aligned LOSS row: latest streamed loss + its sparkline on
+/// the shared clock/window. Empty until the eval streams metric frames.
+fn loss_row(loss: &[f64]) -> Html {
+    let Some(&last) = loss.last() else {
+        return html! {};
+    };
+    html! {
+        <span class="telemetry-metric">
+            <span class="telemetry-label">{ "LOSS" }</span>
+            <span class="telemetry-spark">{ mlpl_web_eval::loss_trace::spark_line(loss) }</span>
+            <span class="telemetry-val">{ format!("{last:.4}") }</span>
         </span>
     }
 }
@@ -146,10 +165,25 @@ pub fn telemetry_panel() -> Html {
         // Re-run when EITHER `active` or the generation changes, so a panel
         // reused across demo lines restarts polling for the new eval.
         use_effect_with((active, gen_id), move |&(active, gen_id)| {
+            // Loss sampling shares poll_once's clock so the LOSS row
+            // stays column-aligned with the hardware rows.
+            let sample_loss = {
+                let series = series.clone();
+                move |gen_id: u32| {
+                    if let Some(&v) = mlpl_web_eval::loss_trace::series(gen_id).0.last() {
+                        let mut s = series.borrow_mut();
+                        s.loss.push(v);
+                        if s.loss.len() > WINDOW {
+                            s.loss.remove(0);
+                        }
+                    }
+                }
+            };
             let mut interval = None;
             if let (true, Some(b)) = (active, base) {
                 poll_once(&b, gen_id, &series, &tick);
                 interval = Some(Interval::new(POLL_MS, move || {
+                    sample_loss(gen_id);
                     poll_once(&b, gen_id, &series, &tick)
                 }));
             }
