@@ -2032,6 +2032,7 @@ dependencies = [
  "mlpl-web-demos",
  "mlpl-web-eval",
  "mlpl-web-handlers-upload",
+ "mlpl-web-render-live",
  "mlpl-web-viz3d",
  "wasm-bindgen",
  "web-sys",

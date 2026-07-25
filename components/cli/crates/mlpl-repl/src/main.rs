@@ -6,6 +6,7 @@ mod connect;
 mod connect_reattach;
 mod connect_repl;
 mod connect_stream;
+mod render;
 mod run;
 mod script_mode;
 mod svg_out;

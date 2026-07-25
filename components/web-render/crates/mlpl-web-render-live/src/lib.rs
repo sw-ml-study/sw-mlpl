@@ -2,5 +2,6 @@
 //! SVG builder for the live loss chart, and the Yew panel that polls
 //! `mlpl_web_eval::loss_trace` while a streamed train block runs.
 
+pub mod embed;
 pub mod loss_panel;
 pub mod loss_svg;
