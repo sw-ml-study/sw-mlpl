@@ -1,5 +1,5 @@
 name = "connect-telemetry"
-status = "active"
+status = "completed"
 current_step = 7
 created_at = "2026-07-25T09:08:20"
 plan_file = ".agentrail/plan.md"
