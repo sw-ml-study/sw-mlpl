@@ -1,0 +1,1 @@
+Docs + demo copy + pages rebuild: lang-reference streaming-metrics section, LoRA demo copy describes live loss/LOSS row/persisted chart, beginner-ML plan follow-up closed, saga retrospective in saga.md, saga marked complete in plan docs, pages/ bundle rebuilt (f3a655e1) for deploy-on-merge. Saga connect-telemetry COMPLETE: 18->8 failed, 323->311 warnings across the saga.
