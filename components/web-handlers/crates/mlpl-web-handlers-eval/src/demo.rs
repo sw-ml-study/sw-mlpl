@@ -215,13 +215,13 @@ fn dispatch_demo_line_connected(
             (false, Some(tel)) => format!("{display}\n{tel}"),
             _ => display,
         };
-        // Streamed live-loss record (train-bearing connect lines): same
-        // persistence idea as the backend-load sparkline above.
+        // Streamed live-loss record (train-bearing connect lines): the
+        // final chart + one-line record, chart first like the live view.
         let out = match (
             out.starts_with("error:"),
-            mlpl_web_eval::loss_trace::summary(gen_id),
+            mlpl_web_render_live::embed::final_report(gen_id),
         ) {
-            (false, Some(loss)) => format!("{out}\n{loss}"),
+            (false, Some(report)) => format!("{out}{report}"),
             _ => out,
         };
         replace_running_with_result(&mut entries_c, line, out);

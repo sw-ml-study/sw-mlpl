@@ -38,21 +38,23 @@ fn handle_escape(
     if pos >= bytes.len() {
         return Err(unclosed(start));
     }
-    let ch = match bytes[pos] {
-        b'"' => '"',
-        b'\\' => '\\',
-        b'n' => '\n',
-        b't' => '\t',
-        b'r' => '\r',
-        other => {
-            return Err(ParseError::UnexpectedCharacter {
-                ch: other as char,
-                span: Span::new(pos - 1, pos + 1),
-            });
-        }
-    };
-    value.push(ch);
+    value.push(escape_char(bytes[pos], pos)?);
     Ok(pos + 1)
+}
+
+/// Map one escape byte (the char after `\\`) to its literal.
+fn escape_char(byte: u8, pos: usize) -> Result<char, ParseError> {
+    match byte {
+        b'"' => Ok('"'),
+        b'\\' => Ok('\\'),
+        b'n' => Ok('\n'),
+        b't' => Ok('\t'),
+        b'r' => Ok('\r'),
+        other => Err(ParseError::UnexpectedCharacter {
+            ch: other as char,
+            span: Span::new(pos - 1, pos + 1),
+        }),
+    }
 }
 
 fn handle_utf8_char(bytes: &[u8], pos: usize, value: &mut String) -> Result<usize, ParseError> {

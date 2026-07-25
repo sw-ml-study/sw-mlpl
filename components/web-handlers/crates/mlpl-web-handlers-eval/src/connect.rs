@@ -334,11 +334,11 @@ pub(crate) fn try_connect_eval(
                 (false, Some(tel)) => format!("{result}\n{tel}"),
                 _ => result,
             };
-            // Same persistence for the streamed live-loss curve: a
-            // one-line sparkline record under the result once the
-            // panel unmounts.
-            let output = match (is_error, mlpl_web_eval::loss_trace::summary(gen_id)) {
-                (false, Some(loss)) => format!("{output}\n{loss}"),
+            // Persist the streamed live-loss curve: the final chart +
+            // one-line record under the result once the panel unmounts
+            // (chart first, matching the during-training layout).
+            let output = match (is_error, mlpl_web_render_live::embed::final_report(gen_id)) {
+                (false, Some(report)) => format!("{output}{report}"),
                 _ => output,
             };
             hist_c.pop();
