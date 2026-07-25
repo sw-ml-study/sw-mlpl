@@ -2,6 +2,7 @@
 members = [
     "crates/mlpl-web-render-aux",
     "crates/mlpl-web-render-core",
+    "crates/mlpl-web-render-live",
     "crates/mlpl-web-render-shell",
     "crates/mlpl-web-render-types",
 ]

@@ -1,0 +1,18 @@
+[package]
+name = "mlpl-web-render-live"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_render_live"
+path = "src/lib.rs"
+
+# Live-during-eval panels (connect-telemetry saga). Everything here
+# compiles natively too (the panel's interval simply never fires
+# outside a browser), so `cargo test` covers the pure SVG builder and
+# downstream UI crates keep building on the native test target.
+[dependencies]
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+gloo = { version = "0.11", features = ["timers"] }
+yew = { version = "0.21", features = ["csr"] }

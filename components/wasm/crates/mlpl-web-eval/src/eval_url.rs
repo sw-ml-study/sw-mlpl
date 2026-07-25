@@ -27,12 +27,21 @@ pub fn parse_connect_url(search: &str) -> Option<String> {
 /// Browser-only convenience: read `window.location.search` and
 /// run it through `parse_connect_url`. Returns `None` outside a
 /// browser context.
-#[cfg(target_arch = "wasm32")]
 #[must_use]
 pub fn current_connect_url_from_window() -> Option<String> {
-    let window = web_sys::window()?;
-    let search = window.location().search().ok()?;
-    parse_connect_url(&search)
+    #[cfg(target_arch = "wasm32")]
+    {
+        let window = web_sys::window()?;
+        let search = window.location().search().ok()?;
+        parse_connect_url(&search)
+    }
+    // Native builds have no browser window, hence no connect URL --
+    // the `None` (same shape as `is_connected` below) lets UI crates
+    // that read the connect URL compile and test natively.
+    #[cfg(not(target_arch = "wasm32"))]
+    {
+        None
+    }
 }
 
 /// True when the page is in connect mode (`?connect=<url>` set).

@@ -101,6 +101,11 @@ fn render_running(entry: &HistoryEntry) -> Html {
             </div>
             <crate::telemetry_panel::TelemetryPanel
                 key={mlpl_web_eval::telemetry_trace::current_gen()} />
+            // Live loss curve for streamed connect-mode train blocks
+            // (connect-telemetry step 002); renders nothing until the
+            // eval actually streams metric frames.
+            <mlpl_web_render_live::loss_panel::LiveLossPanel
+                key={format!("loss-{}", mlpl_web_eval::telemetry_trace::current_gen())} />
         </div>
     }
 }

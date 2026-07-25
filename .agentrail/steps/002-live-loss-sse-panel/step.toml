@@ -1,6 +1,6 @@
 number = 2
 slug = "live-loss-sse-panel"
-status = "pending"
+status = "in-progress"
 description = "Build the in-place live loss panel for connect mode: append a point per SSE `..."
 role = "production"
 context_files = []

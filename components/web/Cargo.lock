@@ -1940,6 +1940,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-web-ask"
+version = "0.20.0"
+dependencies = [
+ "js-sys",
+ "mlpl-eval-core",
+ "mlpl-web-eval",
+]
+
+[[package]]
 name = "mlpl-web-completion"
 version = "0.20.0"
 
@@ -1986,6 +1995,7 @@ version = "0.20.0"
 dependencies = [
  "futures",
  "gloo 0.11.0",
+ "js-sys",
  "mlpl-monitor-types",
  "mlpl-wasm",
  "mlpl-web-viz-ir",
@@ -1993,6 +2003,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
 ]
@@ -2017,6 +2028,7 @@ dependencies = [
  "js-sys",
  "mlpl-eval-core",
  "mlpl-wasm",
+ "mlpl-web-ask",
  "mlpl-web-demos",
  "mlpl-web-eval",
  "mlpl-web-handlers-upload",
@@ -2116,6 +2128,7 @@ dependencies = [
  "mlpl-monitor-types",
  "mlpl-web-eval",
  "mlpl-web-path-body",
+ "mlpl-web-render-live",
  "mlpl-web-tutorial",
  "serde_json",
  "wasm-bindgen",
@@ -2142,6 +2155,15 @@ dependencies = [
  "mlpl-web-tutorial",
  "mlpl-web-viz3d",
  "web-sys",
+ "yew",
+]
+
+[[package]]
+name = "mlpl-web-render-live"
+version = "0.20.0"
+dependencies = [
+ "gloo 0.11.0",
+ "mlpl-web-eval",
  "yew",
 ]
 

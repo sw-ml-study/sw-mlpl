@@ -1141,6 +1141,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-glossary-data"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-glossary-search"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-lex-ident"
 version = "0.20.0"
 dependencies = [
@@ -1487,6 +1495,7 @@ version = "0.20.0"
 dependencies = [
  "futures",
  "gloo 0.11.0",
+ "js-sys",
  "mlpl-monitor-types",
  "mlpl-wasm",
  "mlpl-web-viz-ir",
@@ -1494,6 +1503,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
 ]
@@ -1502,6 +1512,8 @@ dependencies = [
 name = "mlpl-web-glossary"
 version = "0.20.0"
 dependencies = [
+ "mlpl-glossary-data",
+ "mlpl-glossary-search",
  "mlpl-web-path-body",
  "wasm-bindgen",
  "web-sys",

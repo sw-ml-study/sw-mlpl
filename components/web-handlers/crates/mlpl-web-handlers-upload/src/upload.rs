@@ -204,16 +204,14 @@ mod messages {
         src_h: u32,
     ) {
         let body = format!(
-            "Your {src_w}x{src_h} photo was resized to {target_w}x{target_h} by the \
+            "Your {src_w}x{src_h} photo was resized to {TARGET_W}x{TARGET_H} by the \
              browser's Canvas API and bound as \n\n\
-             `{name} = Ok({{pixels: [1, 3, {target_h}, {target_w}], h: {target_h}, w: {target_w}}})`\n\n\
+             `{name} = Ok({{pixels: [1, 3, {TARGET_H}, {TARGET_W}], h: {TARGET_H}, w: {TARGET_W}}})`\n\n\
              Inspect: `is_ok({name})` (returns 1), `unwrap({name}).pixels` (the tensor), \
              `unwrap({name}).h` (height), or `svg(unwrap({name}).pixels, \"gallery\")` to view it.\n\n\
              Classify (after running \"Pets: cat vs dog (quick)\" or \"Pets: multi-head ViT (quick + viz)\"):\n\
              `img = unwrap({name}).pixels`\n\
-             `predict_batch(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(img, 16), [16, 768])), [1, 16, 128])), 1, 0))` (0 = cat, 1 = dog)",
-            target_w = TARGET_W,
-            target_h = TARGET_H,
+             `predict_batch(classifier, take(apply(attn, reshape(apply(linear_p, reshape(patchify(img, 16), [16, 768])), [1, 16, 128])), 1, 0))` (0 = cat, 1 = dog)"
         );
         push(history, "Image upload OK", name, body, false);
     }

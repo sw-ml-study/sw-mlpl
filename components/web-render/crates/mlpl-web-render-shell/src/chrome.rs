@@ -20,14 +20,31 @@ pub fn render_shell_chrome(
     inputs: &InputCallbacks,
     modes: &Modes,
     cb: &ModeCallbacks,
-    on_tour: Callback<MouseEvent>,
 ) -> Html {
     html! {
         <>
             <mlpl_web_components_chrome::github_corner::GithubCorner url={REPO_URL} />
             <GlossaryPopupHost />
-            { render_shell_header(inputs, modes, cb, on_tour) }
+            { render_shell_header(inputs, modes, cb, make_tour_callback(a)) }
             { render_shell_modebar(a, modes) }
         </>
     }
+}
+
+/// The "Tour" button handler: close any lesson/path/dialog, rewind to
+/// step 0, and show the onboarding tour.
+fn make_tour_callback(a: &RenderArgs) -> Callback<MouseEvent> {
+    let (th, sh) = (
+        a.onboarding.show_tour.clone(),
+        a.onboarding.tour_step.clone(),
+    );
+    let (lesson, path) = (a.ui.lesson_idx.clone(), a.ui.path_state.clone());
+    let dialog = a.ui.dialog_open.clone();
+    Callback::from(move |_: MouseEvent| {
+        lesson.set(None);
+        path.set(None);
+        dialog.set(false);
+        sh.set(0);
+        th.set(true);
+    })
 }

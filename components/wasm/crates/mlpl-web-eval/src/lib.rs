@@ -16,6 +16,8 @@ pub mod eval_sse;
 pub mod eval_url;
 pub mod eval_wasm;
 pub(crate) mod eval_wasm_helpers;
+pub(crate) mod eval_wasm_stream;
+pub mod loss_trace;
 pub mod ollama_fetch;
 pub mod state;
 pub mod stats_fetch;

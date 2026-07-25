@@ -839,6 +839,24 @@
         }
         .telemetry-val { color: var(--subtext1, #9aa); margin-left: 5px; }
         .telemetry-note { color: var(--peach, #e0a060); }
+        /* Live loss curve during a streamed connect-mode train
+           (connect-telemetry step 002). */
+        .loss-panel {
+            margin: 4px 0 4px 24px;
+            max-width: 420px;
+        }
+        .loss-panel svg {
+            display: block;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 4px;
+        }
+        .loss-caption {
+            font-family: var(--mono);
+            font-size: 12px;
+            color: var(--subtext1, #9aa);
+            margin-top: 2px;
+        }
         .output-summary {
             margin: 2px 0 8px 0;
         }

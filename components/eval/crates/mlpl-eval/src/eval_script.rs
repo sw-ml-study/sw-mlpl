@@ -77,6 +77,10 @@ pub(crate) fn eval_exit(
             "exit: code must be an integer in 0..=255, got {v}"
         )));
     }
+    // Flush stdout first: `process::exit` skips destructors, and any
+    // buffered output (e.g. the script-mode source echo when stdout is
+    // a pipe) would otherwise be lost.
+    let _ = std::io::Write::flush(&mut std::io::stdout());
     std::process::exit(v as i32);
 }
 
