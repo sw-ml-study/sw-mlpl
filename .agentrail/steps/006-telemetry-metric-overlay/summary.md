@@ -1,0 +1,1 @@
+LOSS row added to TelemetryPanel, sampled on the shared 400ms clock/window with the hardware rows (time-aligned per the saga vision); loss_trace::spark_line renders it. Ratchet: eval.rs native split (17-fn FAIL retired) + pets-tiny parse.rs split (8 failed / 311 warnings).
