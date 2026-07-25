@@ -1,6 +1,11 @@
 # Future saga: Stable Diffusion (text-to-image) in sw-MLPL
 
-**Priority: HIGH -- intended as the next saga.** Seed input for
+**Status (2026-07-25): PARKED after step 001.** The saga kicked off in
+June (step 001 diffusion-2d-demo shipped: linspace/cumprod, the 2D
+diffusion demo, glossary terms); step 002 (conv2d) was never started and
+the saga is archived at `.agentrail-archive/stable-diffusion-20260725T084701/`.
+Resume from step 2 below after the connect-telemetry saga
+(`docs/saga-connect-telemetry.md`). Seed input for
 `agentrail init` (name, vision, phased steps, what it builds on, the
 browser-vs-connect split, risks). Companion to
 `docs/future-sagas-multibackend-specdecode.md` and
