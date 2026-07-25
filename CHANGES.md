@@ -12,8 +12,32 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-25
+
+- Merge feature/connect-telemetry: live training signals in the web UI
+- chore(agentrail): record connect-telemetry step 007 completion (saga done)
+- docs+pages(saga): connect-telemetry retrospective, demo copy, live-demo rebuild (step 007)
+- chore(agentrail): record connect-telemetry step 006 completion (LOSS row overlay)
+- feat(web): time-aligned LOSS row in the telemetry sparklines (step 006)
+- chore(agentrail): record connect-telemetry step 005 completion (lock sweep + guards)
+- chore(locks): sweep 13 stale workspace locks + add consistency guards (step 005)
+- chore(agentrail): record connect-telemetry step 004 completion (persist final loss chart)
+- feat(web): persist the final loss chart into the streamed-train result (step 004)
+- chore(agentrail): record connect-telemetry step 003 completion (implicit loss metric)
+- feat(eval): implicit per-step loss metric for streamed trains (step 003)
+- chore(agentrail): insert workspace-lock-sweep as step 003
+- chore(agentrail): record connect-telemetry step 002 completion (live loss panel)
+- feat(web): live loss panel over SSE for connect-mode trains (step 002)
+- chore(agentrail): record connect-telemetry step 001 completion (reconciliation)
+- chore(agentrail): kick off connect-telemetry saga
+- docs(plan): capture all planned work -- connect-telemetry scope, saga queue, SD parked
+- chore(agentrail): retroactively record June-July off-rail work
+- chore(agentrail): park stable-diffusion saga (archive after step 001)
+- chore(cli): regenerate stale Cargo.lock for upstream manifest changes
+
 ## 2026-07-21
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild WASM bundle for tensor terminology bridge
 - docs(glossary,lang-ref): tensor terminology bridge for introspection builtins
 - chore(pages): rebuild WASM bundle for size/tally (Structure Zoo + lesson)
