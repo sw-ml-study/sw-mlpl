@@ -257,3 +257,29 @@ async fn streamed_metrics_feed_the_live_loss_trace() {
     .await;
     result.unwrap();
 }
+
+/// Connect-telemetry step 003: a metric-less train block streams the
+/// implicit `loss` metric, and the loss trace charts it as the train
+/// series -- so the live panel lights up for unmodified demos.
+#[tokio::test(flavor = "multi_thread")]
+async fn plain_train_streams_implicit_loss_into_the_trace() {
+    let addr = start_server().await;
+    let base = format!("http://{addr}");
+    let result = tokio::task::spawn_blocking(move || {
+        use mlpl_web_eval::loss_trace;
+        let gen_id = 777_003;
+        let remote = RemoteEvaluator::new(&base);
+        let (metrics, outcome) = drive_stream(&remote, "train 3 { 9 - step }");
+        assert!(matches!(outcome, StreamOutcome::Done { .. }));
+        assert_eq!(metrics.len(), 3, "implicit loss frames: {metrics:?}");
+        for m in &metrics {
+            assert_eq!(m.name, "loss");
+            loss_trace::push(gen_id, &m.name, m.value);
+        }
+        let (train, val) = loss_trace::series(gen_id);
+        assert_eq!(train, vec![9.0, 8.0, 7.0]);
+        assert!(val.is_empty());
+    })
+    .await;
+    result.unwrap();
+}

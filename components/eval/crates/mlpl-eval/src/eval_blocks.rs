@@ -119,7 +119,7 @@ pub(crate) fn eval_train(
         };
         losses.push(scalar_loss);
         last = step_val;
-        env.emit_metrics(i);
+        env.emit_metrics(i, scalar_loss);
     }
     let losses_arr =
         DenseArray::new(Shape::new(vec![losses.len()]), losses).expect("losses shape matches data");
