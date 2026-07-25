@@ -1,0 +1,9 @@
+number = 3
+slug = "workspace-lock-sweep"
+status = "pending"
+description = "Maintenance insert discovered in step 002: 13 component workspaces fail cargo..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T12:30:07"
+task_type = "chore"
+commits = []
