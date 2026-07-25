@@ -1,0 +1,11 @@
+{
+  "task_type": "meta",
+  "state": {
+    "number": 1,
+    "step": "reconcile-and-kickoff"
+  },
+  "action": "agentrail audit/abort/archive/init/add/complete, git archaeology, docs",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-25T09:08:33"
+}
