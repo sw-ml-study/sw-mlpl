@@ -141,8 +141,12 @@ Primary files:
 - [x] 1. Plan (this doc)
 - [x] 2. Live training visualization -- `train_val_curve` builtin + the
       "Watch a Model Learn (overfitting)" demo (train vs validation on shared
-      axes, rendered at the halfway mark and the end). A true in-place
-      live-loss panel over the SSE stream remains a connect-path follow-up.
+      axes, rendered at the halfway mark and the end). The connect-path
+      follow-up shipped in the connect-telemetry saga (2026-07-25): a
+      live in-place loss panel over the SSE stream, an implicit per-step
+      `loss` metric for metric-less train blocks, a time-aligned LOSS
+      sparkline row beside the hardware telemetry, and the final chart
+      persisting into the result entry.
 - [x] 3. Gradient-descent / backprop visualization -- `loss_landscape`
       builtin (a 2-weight loss surface heatmap with the optimizer trajectory
       walked across it) + the "How Gradient Descent Works" demo, which fits

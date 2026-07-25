@@ -917,3 +917,26 @@ Text", "Experiments"). String-valued variable bindings
 (`corpus = load_preloaded("...")`) via new
 `Environment::strings` map. Delivered v0.9.0. See
 `docs/milestone-tokenizers.md`.
+
+## Saga: Connect Telemetry (COMPLETE, 2026-07-25)
+
+Live training signals in the web UI (branch
+`feature/connect-telemetry`; scope in `docs/saga-connect-telemetry.md`).
+When a browser is connected to an `mlpl-serve` peer, a `train` block
+now feels live: per-step metrics stream over SSE (`SseFeed` incremental
+parser + true `ReadableStream` chunk reads in WASM, replacing the
+whole-body read that batched every frame), a 2D live loss chart grows
+point by point beside the hardware sparklines, a time-aligned LOSS row
+joins the CPU/RAM/GPU/VRAM rows on the same 400ms clock, and the final
+chart persists into the result entry above the one-line loss record.
+Metric-less train blocks stream their own per-step loss as the implicit
+`loss` metric (zero recompute; explicit `*_metric` bindings suppress
+it), so the CUDA/MLX LoRA demos went live with no content changes.
+Along the way: agentrail was reconciled with the June-July off-rail
+history (retroactive saga `offrail-remote-june-july`), the stable
+-diffusion saga was parked after step 001, mlpl-web-render-aux's
+native-compile breakage was fixed (wasm-gated telemetry_trace), all 14
+stale workspace locks were regenerated with guards added
+(`scripts/check-locks.sh` + a gate.sh lock check), and sw-checklist
+went from 18 failed / 323 warnings to 8 / 311 across six ratcheting
+commits.

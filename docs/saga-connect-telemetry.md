@@ -1,5 +1,10 @@
 # Saga: Connect Telemetry (live training signals in the web UI)
 
+**Status: COMPLETE (2026-07-25).** All steps shipped the same day it
+was kicked off, plus two pulled-forward inserts (implicit `loss`
+metric; persisted final chart) and a workspace-lock sweep. See the
+retrospective in `docs/saga.md`.
+
 Kicked off 2026-07-25 on branch `feature/connect-telemetry`. Follow-on to
 the beginner-ML comprehension work (`docs/beginner-ml-comprehension-plan.md`,
 items 1-4 shipped June-July): item 2 closed with the note that "a true

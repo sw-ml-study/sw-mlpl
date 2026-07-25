@@ -16,9 +16,10 @@ quantization path, glossary search, APL2 Stage 1) was developed off-rail
 and is recorded retroactively in the archived saga
 `offrail-remote-june-july` (see `.agentrail-archive/`).
 
-- **Active: connect-telemetry** -- live loss over SSE + time-aligned
-  resource sparklines in connect mode. Scope: `docs/saga-connect-telemetry.md`.
-  Branch: `feature/connect-telemetry`.
+- **Complete (2026-07-25): connect-telemetry** -- live loss over SSE +
+  time-aligned resource sparklines in connect mode, implicit per-step
+  loss metric, persisted final chart. Scope:
+  `docs/saga-connect-telemetry.md`; retrospective in `docs/saga.md`.
 - **Parked: stable-diffusion** -- step 001 (browser diffusion demo)
   shipped; conv2d and up remain. Resume after connect-telemetry.
   Scope: `docs/future-saga-stable-diffusion.md`.
