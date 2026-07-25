@@ -1,0 +1,1 @@
+Regenerated all 13 stale workspace Cargo.locks; repo-wide sweep passes. Added guards: gate.sh lock check + scripts/check-locks.sh (--fix) + modular-build.md discipline note. Ratchet: mlpl-array module-count FAIL retired (ops_strides merged into shape.rs, Display impl to display.rs) + 2 LOC warnings (9 failed / 314 warnings).
