@@ -8,6 +8,35 @@ built-ins, and six end-to-end demos, but every demo still carries
 its own hand-written gradients. Everything downstream of autograd
 depends on removing that limitation.
 
+## Active and queued sagas (as of 2026-07-25)
+
+The June-July 2026 work (GPU workspace split, macOS telemetry, :ask
+hardening, beginner-ML comprehension demos, content TOML codegen,
+quantization path, glossary search, APL2 Stage 1) was developed off-rail
+and is recorded retroactively in the archived saga
+`offrail-remote-june-july` (see `.agentrail-archive/`).
+
+- **Complete (2026-07-25): connect-telemetry** -- live loss over SSE +
+  time-aligned resource sparklines in connect mode, implicit per-step
+  loss metric, persisted final chart. Scope:
+  `docs/saga-connect-telemetry.md`; retrospective in `docs/saga.md`.
+- **Parked: stable-diffusion** -- step 001 (browser diffusion demo)
+  shipped; conv2d and up remain. Resume after connect-telemetry.
+  Scope: `docs/future-saga-stable-diffusion.md`.
+- **Queued: APL2 staging, stages 2+** -- `docs/apl2-staging-plan.md`
+  (Stage 1 depth/disp/size/tally shipped July).
+- **Queued: speculative decoding (MLX)** --
+  `docs/plan-for-speculative-decoding.md` and
+  `docs/future-sagas-multibackend-specdecode.md`.
+- **Queued: GPU training** -- `docs/future-saga-gpu-training.md`.
+- **Recurring: tech-debt ratchet spikes** --
+  `docs/saga-tech-debt-paydown.md` + `docs/sw-checklist-paydown.md`,
+  interleaved every few steps per CLAUDE.md.
+- **Planned follow-up: workspace partition** -- split the multi-context
+  build into per-component workspaces; `docs/build-and-workspace-plan.md`
+  and `docs/modular-build.md` (partially realized by the June GPU
+  workspace split).
+
 ## Guiding principles
 
 - Each saga delivers a visible user-facing win (a demo or a

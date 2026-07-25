@@ -1,0 +1,1 @@
+BLOCKED: Parked: untouched since 2026-06-09 while June-July development proceeded off-rail on a remote host. Remaining steps (conv2d, tiny-unet, SD-connect) stay captured in docs/future-saga-stable-diffusion.md.

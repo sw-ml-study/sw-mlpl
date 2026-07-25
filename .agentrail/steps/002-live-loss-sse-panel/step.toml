@@ -1,0 +1,10 @@
+number = 2
+slug = "live-loss-sse-panel"
+status = "completed"
+description = "Build the in-place live loss panel for connect mode: append a point per SSE `..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T09:08:20"
+completed_at = "2026-07-25T12:29:31"
+task_type = "feature"
+commits = ["8b3a64c8215f812f6c835686b16e6e04f35687e2"]

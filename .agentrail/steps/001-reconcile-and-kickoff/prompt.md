@@ -1,0 +1,1 @@
+Reconcile agentrail with June-July off-rail history (park stable-diffusion, create+archive retroactive saga offrail-remote-june-july), capture all planned work in docs, sync the stale cli Cargo.lock, and kick off the connect-telemetry saga.

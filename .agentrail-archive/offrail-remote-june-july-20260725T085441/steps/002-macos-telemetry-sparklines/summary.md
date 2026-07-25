@@ -1,0 +1,1 @@
+Retroactive: macOS telemetry backend for /v1/stats + :status sparklines (top/vm_stat/ioreg, no sudo), sparkline concurrency fixes, Apple Silicon runbook.

@@ -145,14 +145,8 @@ pub fn eval_remote(
         .json(&serde_json::json!({"program": program}))
         .send()
         .map_err(|e| ClientError::Network(e.to_string()))?;
-    let status = resp.status().as_u16();
     if !resp.status().is_success() {
-        let body = resp.text().unwrap_or_default();
-        let message = serde_json::from_str::<serde_json::Value>(&body)
-            .ok()
-            .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(str::to_string))
-            .unwrap_or(body);
-        return Err(ClientError::Server { status, message });
+        return Err(server_error(resp));
     }
     resp.json()
         .map_err(|e| ClientError::Network(format!("decode: {e}")))
@@ -176,15 +170,21 @@ pub fn inspect_remote(
         .bearer_auth(token)
         .send()
         .map_err(|e| ClientError::Network(e.to_string()))?;
-    let status = resp.status().as_u16();
     if !resp.status().is_success() {
-        let body = resp.text().unwrap_or_default();
-        let message = serde_json::from_str::<serde_json::Value>(&body)
-            .ok()
-            .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(str::to_string))
-            .unwrap_or(body);
-        return Err(ClientError::Server { status, message });
+        return Err(server_error(resp));
     }
     resp.json()
         .map_err(|e| ClientError::Network(format!("decode: {e}")))
+}
+
+/// Map a non-2xx response to `ClientError::Server`, extracting the
+/// JSON `error` field when the body carries one.
+pub(crate) fn server_error(resp: reqwest::blocking::Response) -> ClientError {
+    let status = resp.status().as_u16();
+    let body = resp.text().unwrap_or_default();
+    let message = serde_json::from_str::<serde_json::Value>(&body)
+        .ok()
+        .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(str::to_string))
+        .unwrap_or(body);
+    ClientError::Server { status, message }
 }

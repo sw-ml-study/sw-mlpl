@@ -1,0 +1,16 @@
+number = 6
+slug = "content-toml-codegen"
+status = "completed"
+description = "Move lesson, demo, and learning-path content out of Rust source into lessons...."
+role = "production"
+context_files = []
+created_at = "2026-07-25T08:52:21"
+completed_at = "2026-07-25T08:53:51"
+task_type = "refactor"
+commits = [
+    "b9132c1a1337a4bc9c9131771f96d451075978ef",
+    "8415ab16f2f19812ddbb46f0d91dfc3408b75789",
+    "655a834b8d03570d0f1ae1d5deca238bd4bf955e",
+    "2e7df60e864eddb1627d4713caa6e8b843492191",
+    "5b32b6f6d4ec66294f7d2969433ff89901aaf96e",
+]

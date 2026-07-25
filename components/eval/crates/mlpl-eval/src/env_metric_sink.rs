@@ -38,7 +38,14 @@ impl Environment {
     /// iteration; no-op when no sink is installed. Extracted
     /// from `eval_train` to keep that function under the
     /// sw-checklist 50-line budget.
-    pub(crate) fn emit_metrics(&self, step: usize) {
+    ///
+    /// Connect-telemetry step 003: when the block defines NO
+    /// explicit `*_metric` binding, the train loop's own per-step
+    /// loss (`step_loss` -- already computed, no recompute) is
+    /// emitted as the implicit `loss` metric, so every streamed
+    /// train feeds the live loss panel. Explicit bindings suppress
+    /// the implicit frame.
+    pub(crate) fn emit_metrics(&self, step: usize, step_loss: f64) {
         let Some(sink) = self.metric_sink() else {
             return;
         };
@@ -47,6 +54,10 @@ impl Environment {
             .filter(|(name, arr)| name.ends_with("_metric") && arr.rank() == 0)
             .map(|(name, arr)| (name.clone(), arr.data()[0]))
             .collect();
+        if metrics.is_empty() {
+            sink.emit("loss", step, step_loss);
+            return;
+        }
         for (name, value) in metrics {
             sink.emit(&name, step, value);
         }

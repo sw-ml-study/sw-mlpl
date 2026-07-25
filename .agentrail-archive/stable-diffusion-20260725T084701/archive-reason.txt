@@ -1,0 +1,1 @@
+Parked after step 001 (diffusion-2d-demo shipped). Steps 2-4 remain planned in docs/future-saga-stable-diffusion.md; saga to be resumed after connect-telemetry. Archived during agentrail/git reconciliation on 2026-07-25.

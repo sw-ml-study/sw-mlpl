@@ -1,0 +1,1 @@
+Time-align the TelemetryPanel resource sparklines with the live loss panel (shared clock/window) so hardware effort and learning progress read as one story during a connect train. See docs/saga-connect-telemetry.md step 3.

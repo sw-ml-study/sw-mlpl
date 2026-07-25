@@ -1,0 +1,1 @@
+Retroactive: connect-mode :ask hardening -- demo grounding, compact MLPL reference, no fabricated code, verbatim prompts, demo-line routing, default model choice, HTTPS/HTTP honesty.

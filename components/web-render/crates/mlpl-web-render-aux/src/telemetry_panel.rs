@@ -25,12 +25,17 @@ const POLL_MS: u32 = 400;
 const WINDOW: usize = 48;
 const LABELS: [&str; 4] = ["CPU", "RAM", "GPU", "VRAM"];
 
-/// Ring buffers of the four metric percentages + the freshest snapshot
-/// + the last fetch error (shown when polling fails) + a monotonic seq
-/// the component mirrors into a `use_state` to force a re-render.
+/// Ring buffers of the four metric percentages, plus the freshest
+/// snapshot, the last fetch error (shown when polling fails), and a
+/// monotonic seq the component mirrors into a `use_state` to force a
+/// re-render.
 #[derive(Default)]
 struct Series {
     rows: [Vec<u32>; 4],
+    /// Streamed training loss sampled on the SAME poll clock as the
+    /// hardware rows (connect-telemetry step 006), so "GPU busy" and
+    /// "loss falling" read as one time-aligned story.
+    loss: Vec<f64>,
     latest: Option<Snapshot>,
     note: Option<String>,
     seq: u32,
@@ -68,6 +73,9 @@ async fn fetch_snapshot(url: &str) -> Result<Snapshot, String> {
 
 /// One poll: fetch, record success or error into the buffers, then bump
 /// `tick` (its new value forces the component to re-render either way).
+/// Successful snapshots also mirror into THIS eval's generation so the
+/// sparkline PERSISTS in the result after the marker unmounts, isolated
+/// from any other concurrent eval/watch.
 fn poll_once(base: &str, gen_id: u32, series: &Rc<RefCell<Series>>, tick: &UseStateHandle<u32>) {
     let url = format!("{}/v1/stats", base.trim_end_matches('/'));
     let series = series.clone();
@@ -78,9 +86,6 @@ fn poll_once(base: &str, gen_id: u32, series: &Rc<RefCell<Series>>, tick: &UseSt
             let mut s = series.borrow_mut();
             match outcome {
                 Ok(snap) => {
-                    // Mirror into THIS eval's generation so the sparkline
-                    // PERSISTS in the result after the marker unmounts,
-                    // isolated from any other concurrent eval/watch.
                     mlpl_web_eval::telemetry_trace::push(gen_id, &snap);
                     s.push(snap);
                 }
@@ -101,15 +106,7 @@ fn render_rows(series: &Series) -> Html {
         .rows
         .iter()
         .enumerate()
-        .map(|(i, buf)| {
-            html! {
-                <span class="telemetry-metric">
-                    <span class="telemetry-label">{ LABELS[i] }</span>
-                    <span class="telemetry-spark">{ sparkline(buf, 100) }</span>
-                    <span class="telemetry-val">{ format!("{}%", pcts[i]) }</span>
-                </span>
-            }
-        })
+        .map(|(i, buf)| metric_row(i, buf, pcts[i]))
         .collect::<Html>();
     let note = series.note.as_ref().map_or_else(
         || html! {},
@@ -117,8 +114,34 @@ fn render_rows(series: &Series) -> Html {
     );
     html! {
         <div class="telemetry-panel">
-            <div class="telemetry-line">{ metrics }{ note }</div>
+            <div class="telemetry-line">{ metrics }{ loss_row(&series.loss) }{ note }</div>
         </div>
+    }
+}
+
+/// One labeled sparkline cell (label / bars / current percent).
+fn metric_row(i: usize, buf: &[u32], pct: u32) -> Html {
+    html! {
+        <span class="telemetry-metric">
+            <span class="telemetry-label">{ LABELS[i] }</span>
+            <span class="telemetry-spark">{ sparkline(buf, 100) }</span>
+            <span class="telemetry-val">{ format!("{pct}%") }</span>
+        </span>
+    }
+}
+
+/// The time-aligned LOSS row: latest streamed loss + its sparkline on
+/// the shared clock/window. Empty until the eval streams metric frames.
+fn loss_row(loss: &[f64]) -> Html {
+    let Some(&last) = loss.last() else {
+        return html! {};
+    };
+    html! {
+        <span class="telemetry-metric">
+            <span class="telemetry-label">{ "LOSS" }</span>
+            <span class="telemetry-spark">{ mlpl_web_eval::loss_trace::spark_line(loss) }</span>
+            <span class="telemetry-val">{ format!("{last:.4}") }</span>
+        </span>
     }
 }
 
@@ -142,10 +165,25 @@ pub fn telemetry_panel() -> Html {
         // Re-run when EITHER `active` or the generation changes, so a panel
         // reused across demo lines restarts polling for the new eval.
         use_effect_with((active, gen_id), move |&(active, gen_id)| {
+            // Loss sampling shares poll_once's clock so the LOSS row
+            // stays column-aligned with the hardware rows.
+            let sample_loss = {
+                let series = series.clone();
+                move |gen_id: u32| {
+                    if let Some(&v) = mlpl_web_eval::loss_trace::series(gen_id).0.last() {
+                        let mut s = series.borrow_mut();
+                        s.loss.push(v);
+                        if s.loss.len() > WINDOW {
+                            s.loss.remove(0);
+                        }
+                    }
+                }
+            };
             let mut interval = None;
             if let (true, Some(b)) = (active, base) {
                 poll_once(&b, gen_id, &series, &tick);
                 interval = Some(Interval::new(POLL_MS, move || {
+                    sample_loss(gen_id);
                     poll_once(&b, gen_id, &series, &tick)
                 }));
             }

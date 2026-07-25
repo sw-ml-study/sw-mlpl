@@ -55,44 +55,36 @@ pub enum ArrayError {
     },
 }
 
-impl std::fmt::Display for ArrayError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl ArrayError {
+    /// Human-readable description shared by `Display`.
+    fn message(&self) -> String {
         match self {
             Self::DataLengthMismatch { expected, got } => {
-                write!(
-                    f,
-                    "data length {got} does not match shape element count {expected}"
-                )
+                format!("data length {got} does not match shape element count {expected}")
             }
             Self::ShapeMismatch { source, target } => {
-                write!(f, "shape mismatch: {source} vs {target} elements")
+                format!("shape mismatch: {source} vs {target} elements")
             }
             Self::IndexOutOfBounds { axis, index, size } => {
-                write!(
-                    f,
-                    "index {index} out of bounds for axis {axis} with size {size}"
-                )
+                format!("index {index} out of bounds for axis {axis} with size {size}")
             }
             Self::RankMismatch { expected, got } => {
-                write!(
-                    f,
-                    "index has {got} components but array has rank {expected}"
-                )
+                format!("index has {got} components but array has rank {expected}")
             }
-            Self::EmptyArray => write!(f, "cannot index an empty array"),
+            Self::EmptyArray => "cannot index an empty array".to_string(),
             Self::LabelsRankMismatch { rank, labels } => {
-                write!(
-                    f,
-                    "label list has {labels} entries but array has rank {rank}"
-                )
+                format!("label list has {labels} entries but array has rank {rank}")
             }
             Self::LabelMismatch { expected, actual } => {
-                write!(
-                    f,
-                    "axis label mismatch: expected {expected:?}, got {actual:?}"
-                )
+                format!("axis label mismatch: expected {expected:?}, got {actual:?}")
             }
         }
+    }
+}
+
+impl std::fmt::Display for ArrayError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.message())
     }
 }
 

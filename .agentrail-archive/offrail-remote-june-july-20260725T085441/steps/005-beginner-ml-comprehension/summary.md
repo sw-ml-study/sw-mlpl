@@ -1,0 +1,1 @@
+Retroactive: beginner ML comprehension roadmap items 1-4 -- train_val_curve, loss_landscape, gradient-flow, weight-decay/LR demos, generalize demo, beginner spine + generative-families paths. Named follow-up: live-loss SSE panel (-> connect-telemetry saga).

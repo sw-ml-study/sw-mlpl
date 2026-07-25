@@ -1,6 +1,5 @@
 use yew::prelude::*;
 
-use crate::help::help_text;
 use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 use mlpl_web_handlers_upload::eval_deps::EvalDeps;
 use mlpl_web_handlers_upload::upload_cmd::{handle_upload_command, parse_upload_command};
@@ -38,18 +37,29 @@ pub fn make_submit_batch(deps: EvalDeps) -> Callback<Vec<String>> {
                 &mut eval_queue,
             );
         }
-        if new_cmds.is_empty() {
-            return;
-        }
-        deps.cmd_history.set(new_cmds);
-        deps.cmd_index.set(None);
-        deps.input_value.set(String::new());
-        if eval_queue.is_empty() {
-            deps.history.set(new_history);
-            return;
-        }
-        process_next_eval(deps.clone(), new_history, eval_queue, 0);
+        commit_batch(&deps, new_history, new_cmds, eval_queue);
     })
+}
+
+/// Commit the classified batch exactly once: skip empty submissions,
+/// then either paint the history or start the eval queue.
+fn commit_batch(
+    deps: &EvalDeps,
+    history: Vec<HistoryEntry>,
+    cmds: Vec<String>,
+    queue: Vec<String>,
+) {
+    if cmds.is_empty() {
+        return;
+    }
+    deps.cmd_history.set(cmds);
+    deps.cmd_index.set(None);
+    deps.input_value.set(String::new());
+    if queue.is_empty() {
+        deps.history.set(history);
+        return;
+    }
+    process_next_eval(deps.clone(), history, queue, 0);
 }
 
 /// Classify one submitted line: `:clear` / `:3d ...` / upload commands
@@ -226,115 +236,14 @@ fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
     eval_one_line(deps, line)
 }
 
-/// `:history` output -- the recent REPL command lines, so the
-/// user (and the `:ask` LLM, which also receives this) can see
-/// what has been run.
-fn history_listing(deps: &EvalDeps) -> String {
-    let lines: Vec<String> = deps
-        .history
-        .iter()
-        .filter(|e| matches!(e.kind, EntryKind::Command))
-        .map(|e| format!("mlpl> {}", e.input.trim()))
-        .collect();
-    if lines.is_empty() {
-        "(no commands run yet)".to_string()
-    } else {
-        lines.join("\n")
-    }
-}
-
-/// Shown for `:ask` when there is no connected server (e.g. the
-/// public live demo). `:ask` needs a server to reach an LLM, so we
-/// give a clear notice instead of lexing the question as MLPL
-/// (which errors on punctuation like `?`).
-const ASK_NEEDS_SERVER: &str = "`:ask` is not available on the public demo -- it needs a connected mlpl-serve with Ollama running. Run `mlpl-serve` on a local machine (with `ollama serve`), then open this REPL with `?connect=<server-url>` appended to the page URL (e.g. `...?connect=http://host:6464`). The CUDA / MLX demos additionally need that server on a host with the matching GPU (Linux+NVIDIA for CUDA, Apple Silicon for MLX).";
-
-/// Shown for `:status` when no server is connected. Connect mode
-/// answers `:status` with a live backend report (devices + CPU/RAM/
-/// GPU/VRAM); here there is no backend to probe.
-const STATUS_LOCAL: &str = "Status: 0 backends connected -- local (browser) mode.\n  device  : cpu (browser WASM)\n  Live CPU/GPU/RAM/VRAM telemetry, :ask, and the CUDA/MLX demos need a\n  connected mlpl-serve. Start one (mlpl-serve --bind 0.0.0.0:6464\n  --auth required), then append ?connect=<server-url> to this page's URL\n  (e.g. ?connect=http://host:6464).";
-
-/// Text for `:connect <arg>` outside the async connect path. `set
-/// <model>` selects the `:ask` model for the session (local/sync);
-/// `list` / bare need a connected server (handled upstream when one is
-/// connected, so here it means "not connected").
-fn connect_command_text(arg: &str) -> String {
-    if let Some(name) = arg.strip_prefix("set ").map(str::trim) {
-        if name.is_empty() {
-            return "usage: :connect set <model>   (see :connect list)".to_string();
-        }
-        if name.contains("embed") {
-            return format!(
-                "'{name}' is an embedding model (returns vectors, not text) -- it can't \
-                 answer :ask. Pick a chat model instead (see :connect list)."
-            );
-        }
-        #[cfg(target_arch = "wasm32")]
-        mlpl_web_eval::ollama_fetch::set_selected_model(name);
-        format!("ask model set to {name}")
-    } else if arg == "list" || arg.is_empty() {
-        format!(
-            "`:connect list` needs a connected mlpl-serve to query its Ollama models. {ASK_NEEDS_SERVER}"
-        )
-    } else {
-        format!("unknown :connect subcommand '{arg}' (try: list  |  set <model>)")
-    }
-}
-
+/// Evaluate one REPL line: canned command replies (`:help`,
+/// `:history`, `:status`, ...) come from `help::command_reply`;
+/// anything else evaluates in the local WASM session.
 fn eval_one_line(deps: &EvalDeps, trimmed: &str) -> HistoryEntry {
-    if trimmed == ":ask" || trimmed.starts_with(":ask ") {
+    if let Some(output) = crate::help::command_reply(deps, trimmed) {
         return HistoryEntry {
             input: trimmed.to_string(),
-            output: ASK_NEEDS_SERVER.to_string(),
-            is_error: false,
-            kind: EntryKind::Command,
-        };
-    }
-    if trimmed == ":connect" || trimmed.starts_with(":connect ") {
-        // `:connect set <model>` is local/sync; `:connect list` needs a
-        // connected server (the async listing is handled upstream in
-        // connect mode, so reaching here means not connected).
-        return HistoryEntry {
-            input: trimmed.to_string(),
-            output: connect_command_text(trimmed.strip_prefix(":connect").unwrap_or("").trim()),
-            is_error: false,
-            kind: EntryKind::Command,
-        };
-    }
-    if trimmed == ":help" {
-        return HistoryEntry {
-            input: trimmed.to_string(),
-            output: help_text(),
-            is_error: false,
-            kind: EntryKind::Command,
-        };
-    }
-    if trimmed == ":history" {
-        return HistoryEntry {
-            input: trimmed.to_string(),
-            output: history_listing(deps),
-            is_error: false,
-            kind: EntryKind::Command,
-        };
-    }
-    if trimmed == ":status" {
-        // Connect-mode `:status` is handled async upstream
-        // (connect::try_status); reaching here means no server is
-        // connected, so report local browser mode.
-        return HistoryEntry {
-            input: trimmed.to_string(),
-            output: STATUS_LOCAL.to_string(),
-            is_error: false,
-            kind: EntryKind::Command,
-        };
-    }
-    if trimmed == ":reset" {
-        // Connect-mode `:reset` is handled async upstream
-        // (connect::try_reset); reaching here means no server, so
-        // there is no backend work to cancel.
-        return HistoryEntry {
-            input: trimmed.to_string(),
-            output: "Nothing to reset -- local browser mode, no connected server.".to_string(),
+            output,
             is_error: false,
             kind: EntryKind::Command,
         };

@@ -101,6 +101,11 @@ fn render_running(entry: &HistoryEntry) -> Html {
             </div>
             <crate::telemetry_panel::TelemetryPanel
                 key={mlpl_web_eval::telemetry_trace::current_gen()} />
+            // Live loss curve for streamed connect-mode train blocks
+            // (connect-telemetry step 002); renders nothing until the
+            // eval actually streams metric frames.
+            <mlpl_web_render_live::loss_panel::LiveLossPanel
+                key={format!("loss-{}", mlpl_web_eval::telemetry_trace::current_gen())} />
         </div>
     }
 }
@@ -114,6 +119,13 @@ fn render_result_body(entry: &HistoryEntry) -> Html {
     }
     if !entry.is_error && out.starts_with("<svg") {
         return render_svg_body(&entry.output);
+    }
+    // Streamed-train results carry the final loss chart embedded on
+    // its own line (connect-telemetry step 004): text, chart, text.
+    if !entry.is_error
+        && let Some((pre, svg, post)) = mlpl_web_render_live::embed::split_embedded_svg(out)
+    {
+        return mlpl_web_render_live::embed::render_composite(&pre, svg, &post);
     }
     if entry.is_error {
         return html! { <pre class={"output-line error"}>{ &entry.output }</pre> };

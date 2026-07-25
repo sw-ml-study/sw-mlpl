@@ -16,18 +16,10 @@ pub struct EditorProps {
 pub fn editor_panel(props: &EditorProps) -> Html {
     let file_ref = use_node_ref();
     let on_input = make_input_handler(props.on_change.clone());
-    let on_load_click = make_load_click_handler(file_ref.clone());
-    let on_file_change = make_file_change_handler(props.on_change.clone());
     let on_keydown = make_keydown_handler(props.on_run.clone());
     html! {
         <div class="editor-panel">
-            <div class="editor-toolbar">
-                <button class="editor-btn editor-btn-run" onclick={props.on_run.clone()}>{"Run"}</button>
-                <button class="editor-btn" onclick={on_load_click}>{"Load"}</button>
-                <input ref={file_ref} type="file" accept=".mlpl,.txt" style="display:none" onchange={on_file_change} />
-                <button class="editor-btn" onclick={props.on_save.clone()}>{"Save"}</button>
-                <button class="editor-btn" onclick={props.on_clear.clone()}>{"Clear"}</button>
-            </div>
+            { toolbar(props, &file_ref) }
             <textarea
                 class="editor-textarea"
                 spellcheck="false"
@@ -36,6 +28,22 @@ pub fn editor_panel(props: &EditorProps) -> Html {
                 oninput={on_input}
                 onkeydown={on_keydown}
             />
+        </div>
+    }
+}
+
+/// The Run / Load / Save / Clear button row (plus the hidden file
+/// input the Load button forwards to).
+fn toolbar(props: &EditorProps, file_ref: &NodeRef) -> Html {
+    let on_load_click = make_load_click_handler(file_ref.clone());
+    let on_file_change = make_file_change_handler(props.on_change.clone());
+    html! {
+        <div class="editor-toolbar">
+            <button class="editor-btn editor-btn-run" onclick={props.on_run.clone()}>{"Run"}</button>
+            <button class="editor-btn" onclick={on_load_click}>{"Load"}</button>
+            <input ref={file_ref.clone()} type="file" accept=".mlpl,.txt" style="display:none" onchange={on_file_change} />
+            <button class="editor-btn" onclick={props.on_save.clone()}>{"Save"}</button>
+            <button class="editor-btn" onclick={props.on_clear.clone()}>{"Clear"}</button>
         </div>
     }
 }

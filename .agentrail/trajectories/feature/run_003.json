@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "persist-final-loss-chart"
+  },
+  "action": "TDD embed tests first; marker-style embedded SVG following PLOTLY_MARKER precedent; responsibility splits for ratchet",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-25T13:50:09"
+}

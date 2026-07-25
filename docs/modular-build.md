@@ -86,3 +86,17 @@ this; a workspace-level test harness is the scaled-up version.
   test-harness crate, not the content crate's own `tests/`.
 - Content (prose, demo code, lesson text) -> `.toml` + `build.rs` codegen in
   the feature component; light well-formedness tests stay in the crate.
+
+## Lock-file discipline across workspaces
+
+Each component workspace's `Cargo.lock` also pins path-dependencies
+owned by OTHER workspaces, so a manifest change in one component
+silently strands the locks of every downstream workspace until someone
+builds there. Two guards (added 2026-07-25 after a 14-workspace drift):
+
+- `scripts/gate.sh` verifies the gated workspace's lock
+  (`cargo metadata --locked`) before fmt/clippy/test.
+- `scripts/check-locks.sh` sweeps every component workspace;
+  `--fix` regenerates stale locks in place. Run it after changing any
+  `Cargo.toml`, and commit the regenerated locks together with the
+  manifest change.

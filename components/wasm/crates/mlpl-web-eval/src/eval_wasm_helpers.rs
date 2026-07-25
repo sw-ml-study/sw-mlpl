@@ -1,12 +1,14 @@
 //! Saga 77: WASM-only HTTP helpers extracted from `eval_wasm.rs`
 //! so the parent stays under the sw-checklist function count limit.
+//! Connect-telemetry step 002 moved the streaming transport to its
+//! own sibling (`eval_wasm_stream.rs`) and pulled the non-streaming
+//! `wasm_eval` body here, split decision-from-transport.
 
 #![cfg(target_arch = "wasm32")]
 
 use std::cell::RefCell;
 
-use crate::eval::{MetricCb, RemoteSession, StreamOutcome};
-use crate::eval_sse::parse_sse_stream;
+use crate::eval::RemoteSession;
 
 /// Race a connect-server request against a timeout so a wedged or absent
 /// `mlpl-serve` fails FAST with a clear message instead of hanging the
@@ -53,39 +55,44 @@ pub(crate) async fn wasm_create_session(base_url: &str) -> Result<RemoteSession,
     Ok(RemoteSession { session_id, token })
 }
 
-pub(crate) async fn wasm_eval_stream(
+/// Non-streaming connect eval: ensure a session, POST `/eval`, and
+/// render the JSON body as the REPL display string.
+pub(crate) async fn wasm_eval(
     base_url: &str,
     state: &RefCell<Option<RemoteSession>>,
     program: &str,
-    mut on_metric: MetricCb,
-) -> StreamOutcome {
-    match wasm_eval_stream_inner(base_url, state, program, &mut on_metric).await {
-        Ok(outcome) => outcome,
-        Err(message) => StreamOutcome::Error { message },
+) -> String {
+    if state.borrow().is_none() {
+        match wasm_create_session(base_url).await {
+            Ok(s) => *state.borrow_mut() = Some(s),
+            Err(e) => return format!("error: {e}"),
+        }
+    }
+    let s = state
+        .borrow()
+        .as_ref()
+        .expect("session created above")
+        .clone();
+    match send_eval_request(base_url, &s, program).await {
+        Ok(body) => eval_body_display(program, &body),
+        Err(e) => format!("error: {e}"),
     }
 }
 
-// Inner helper returning `Result<StreamOutcome, String>` so the
-// `?` operator can collapse the half-dozen fallible
-// `gloo::net::http` steps into one error path. Browser fetch
-// responses don't expose a Rust `BufRead`, so we pull the whole
-// body as a string and feed it through the shared SSE parser --
-// this forfeits true live streaming on WASM (frames batch at
-// body end). A follow-up step will switch to ReadableStream
-// chunk reads via web-sys.
-async fn wasm_eval_stream_inner(
+/// POST `/v1/sessions/<id>/eval` and decode the JSON body. Generous
+/// deadline: a connect eval can legitimately run minutes -- a CPU
+/// base-pretrain step or a GPU fine-tune. Match mlpl-serve's own 600s
+/// peer-forward timeout (peers.rs PEER_TIMEOUT_SECS) so the client
+/// never gives up before the server would. The short 6s
+/// session-creation deadline above is the real "is the backend up?"
+/// fail-fast; once a session exists, long compute is expected.
+async fn send_eval_request(
     base_url: &str,
-    state: &RefCell<Option<RemoteSession>>,
+    s: &RemoteSession,
     program: &str,
-    on_metric: &mut MetricCb,
-) -> Result<StreamOutcome, String> {
-    if state.borrow().is_none() {
-        let s = wasm_create_session(base_url).await?;
-        *state.borrow_mut() = Some(s);
-    }
-    let s = state.borrow().as_ref().expect("session").clone();
+) -> Result<serde_json::Value, String> {
     let url = format!(
-        "{}/v1/sessions/{}/eval_stream",
+        "{}/v1/sessions/{}/eval",
         base_url.trim_end_matches('/'),
         s.session_id
     );
@@ -94,12 +101,22 @@ async fn wasm_eval_stream_inner(
         .header("Content-Type", "application/json")
         .body(serde_json::json!({"program": program}).to_string())
         .map_err(|e| e.to_string())?;
-    let resp = req.send().await.map_err(|e| e.to_string())?;
-    if !resp.ok() {
-        return Ok(StreamOutcome::Error {
-            message: resp.text().await.unwrap_or_default(),
-        });
+    let resp = with_deadline(600_000, "eval", async {
+        req.send().await.map_err(|e| e.to_string())
+    })
+    .await?;
+    resp.json().await.map_err(|e| format!("decode: {e}"))
+}
+
+/// Interpret the `/eval` response body: surface `error`, emit the 3D
+/// sculpture from the viz payload (Phase 1c), and return the display
+/// value.
+fn eval_body_display(program: &str, body: &serde_json::Value) -> String {
+    if let Some(err) = body.get("error").and_then(|v| v.as_str()) {
+        return format!("error: {err}");
     }
-    let text = resp.text().await.unwrap_or_default();
-    Ok(parse_sse_stream(std::io::Cursor::new(text), on_metric))
+    crate::connect_viz::emit_from_response(program, body);
+    body.get("value")
+        .and_then(|v| v.as_str())
+        .map_or_else(|| format!("error: missing value: {body}"), str::to_string)
 }

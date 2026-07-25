@@ -1,0 +1,19 @@
+[package]
+name = "mlpl-web-ask"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[lib]
+name = "mlpl_web_ask"
+path = "src/lib.rs"
+
+# `:ask` prompt construction, extracted from mlpl-web-handlers-eval's
+# connect.rs: the system-prompt grounding rules, the compact MLPL
+# reference (from the curated BUILTIN_GROUPS table), the page-context
+# readers, and the endpoint/model resolution. Browser-only like its
+# origin module -- native builds compile the crate away.
+[dependencies]
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+js-sys = "0.3"

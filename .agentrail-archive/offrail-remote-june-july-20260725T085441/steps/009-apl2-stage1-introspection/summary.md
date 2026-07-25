@@ -1,0 +1,1 @@
+Retroactive: APL2 Stage 1 introspection -- depth/disp/size/tally + Structure Zoo + terminology bridge. Stages 2+ remain in docs/apl2-staging-plan.md.

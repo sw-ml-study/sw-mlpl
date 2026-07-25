@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 7,
+    "step": "docs-pages-retrospective"
+  },
+  "action": "scoped text-sensitive demo tests (release); build-pages.sh; docs",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-25T15:49:48"
+}

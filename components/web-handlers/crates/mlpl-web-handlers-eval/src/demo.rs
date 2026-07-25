@@ -215,6 +215,15 @@ fn dispatch_demo_line_connected(
             (false, Some(tel)) => format!("{display}\n{tel}"),
             _ => display,
         };
+        // Streamed live-loss record (train-bearing connect lines): the
+        // final chart + one-line record, chart first like the live view.
+        let out = match (
+            out.starts_with("error:"),
+            mlpl_web_render_live::embed::final_report(gen_id),
+        ) {
+            (false, Some(report)) => format!("{out}{report}"),
+            _ => out,
+        };
         replace_running_with_result(&mut entries_c, line, out);
         hist.set(entries_c.clone());
         schedule_demo_line(sess, hist.clone(), entries_c, demo, idx + 1);

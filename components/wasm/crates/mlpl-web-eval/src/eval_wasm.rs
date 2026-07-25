@@ -16,7 +16,8 @@
 
 use crate::eval::current_connect_url_from_window;
 use crate::eval::{Evaluator, MetricCb, RemoteEvaluator, ResultCb, StreamCb};
-use crate::eval_wasm_helpers::{wasm_create_session, wasm_eval_stream, with_deadline};
+use crate::eval_wasm_helpers::wasm_eval;
+use crate::eval_wasm_stream::wasm_eval_stream;
 
 thread_local! {
     // One persistent RemoteEvaluator per page so the server-side
@@ -55,6 +56,35 @@ pub fn connect_eval(program: &str, on_result: ResultCb) -> bool {
     true
 }
 
+/// Connect eval that STREAMS per-step metrics into `loss_trace` when
+/// the program contains a train block -- feeding the live loss panel --
+/// and takes the plain JSON path otherwise (which carries the 3D-viz
+/// payload the stream's `done` frame does not). Same contract as
+/// [`connect_eval`]: true when it took the eval. Metric frames land in
+/// THIS eval's generation, so concurrent evals never intermix curves.
+pub fn connect_eval_auto(program: &str, on_result: ResultCb) -> bool {
+    if !crate::connect_guard::program_streams_metrics(program) {
+        return connect_eval(program, on_result);
+    }
+    let Some(url) = current_connect_url_from_window() else {
+        return false;
+    };
+    if let Some(reason) = crate::connect_guard::connect_blocked_reason() {
+        on_result(format!("error: {reason}"));
+        return true;
+    }
+    let gen_id = crate::telemetry_trace::current_gen();
+    CONNECT_EVALUATOR.with(|cell| {
+        if cell.borrow().is_none() {
+            *cell.borrow_mut() = Some(RemoteEvaluator::new(url));
+        }
+        let ev = cell.borrow();
+        let evaluator = ev.as_ref().expect("evaluator set above");
+        crate::eval_wasm_stream::stream_into_loss_trace(evaluator, program, gen_id, on_result);
+    });
+    true
+}
+
 impl Evaluator for RemoteEvaluator {
     fn eval(&self, program: &str, on_result: ResultCb) {
         let base = self.base_url().to_string();
@@ -68,65 +98,6 @@ impl Evaluator for RemoteEvaluator {
     fn clear(&self) {
         self.clear_state();
     }
-}
-
-async fn wasm_eval(
-    base_url: &str,
-    state: &std::cell::RefCell<Option<crate::eval::RemoteSession>>,
-    program: &str,
-) -> String {
-    if state.borrow().is_none() {
-        match wasm_create_session(base_url).await {
-            Ok(s) => *state.borrow_mut() = Some(s),
-            Err(e) => return format!("error: {e}"),
-        }
-    }
-    let s = state
-        .borrow()
-        .as_ref()
-        .expect("session created above")
-        .clone();
-    let url = format!(
-        "{}/v1/sessions/{}/eval",
-        base_url.trim_end_matches('/'),
-        s.session_id
-    );
-    let req = match gloo::net::http::Request::post(&url)
-        .header("Authorization", &format!("Bearer {}", s.token))
-        .header("Content-Type", "application/json")
-        .body(serde_json::json!({"program": program}).to_string())
-    {
-        Ok(r) => r,
-        Err(e) => return format!("error: {e}"),
-    };
-    // Generous deadline: a connect eval can legitimately run minutes --
-    // a CPU base-pretrain step (e.g. the CUDA LoRA demo's `train 40` over
-    // the full corpus) or a GPU fine-tune. Match mlpl-serve's own 600s
-    // peer-forward timeout (peers.rs PEER_TIMEOUT_SECS) so the client never
-    // gives up before the server would. The short 6s session-creation
-    // deadline (eval_wasm_helpers.rs) is the real "is the backend up?"
-    // fail-fast; once a session exists, long compute is expected.
-    let resp = match with_deadline(600_000, "eval", async {
-        req.send().await.map_err(|e| e.to_string())
-    })
-    .await
-    {
-        Ok(r) => r,
-        Err(e) => return format!("error: {e}"),
-    };
-    let body: serde_json::Value = match resp.json().await {
-        Ok(j) => j,
-        Err(e) => return format!("error: decode: {e}"),
-    };
-    if let Some(err) = body.get("error").and_then(|v| v.as_str()) {
-        return format!("error: {err}");
-    }
-    // Phase 1c: emit a 3D sculpture from the response's viz data so
-    // server-evaluated results populate the 3D view too.
-    crate::connect_viz::emit_from_response(program, &body);
-    body.get("value")
-        .and_then(|v| v.as_str())
-        .map_or_else(|| format!("error: missing value: {body}"), str::to_string)
 }
 
 impl RemoteEvaluator {

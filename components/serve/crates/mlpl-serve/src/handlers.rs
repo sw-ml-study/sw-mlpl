@@ -11,17 +11,21 @@ use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
-use mlpl_eval::{Environment, Interrupt, Value, eval_program_value};
+use mlpl_eval::{Interrupt, Value};
 use mlpl_parser::{lex, parse};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
-use tokio::sync::oneshot;
 use uuid::Uuid;
 
 use crate::auth::{AuthMode, check_token, extract_bearer};
 use crate::server::AppState;
 
-const VARS_CAP: usize = 200;
+// Connect-telemetry step 003 (ratchet): the introspection handlers and
+// the eval-task machinery moved to sibling modules; re-export so
+// existing `crate::handlers::` / `mlpl_serve::handlers::` paths hold.
+pub(crate) use crate::handlers_eval_task::{spawn_eval, take_session_for_eval};
+pub use crate::handlers_inspect::{
+    InspectResponse, SessionMetaResponse, VarSnapshot, inspect_handler, session_meta_handler,
+};
 
 #[derive(Serialize)]
 pub struct CreateSessionResponse {
@@ -86,39 +90,6 @@ pub struct ErrorResponse {
 pub struct HealthResponse {
     pub status: &'static str,
     pub version: &'static str,
-}
-
-#[derive(Serialize)]
-pub struct VarSnapshot {
-    pub name: String,
-    pub shape: Vec<usize>,
-    pub is_param: bool,
-}
-
-#[derive(Serialize)]
-pub struct InspectResponse {
-    pub vars: Vec<VarSnapshot>,
-    pub models: Vec<String>,
-    pub tokenizers: Vec<String>,
-    pub experiments: Vec<String>,
-    pub more: usize,
-}
-
-/// Saga 21.5 step 009: `GET /v1/sessions/{id}` response.
-/// Superset of `InspectResponse` plus the session id and
-/// creation/last-eval timestamps the reattach client uses to
-/// render a "you are rejoining a session last touched N seconds
-/// ago" banner.
-#[derive(Serialize)]
-pub struct SessionMetaResponse {
-    pub session_id: Uuid,
-    pub created_at: u64,
-    pub last_eval_at: Option<u64>,
-    pub vars: Vec<VarSnapshot>,
-    pub models: Vec<String>,
-    pub tokenizers: Vec<String>,
-    pub experiments: Vec<String>,
-    pub more: usize,
 }
 
 /// `POST /v1/sessions` -- no auth. Creates a fresh
@@ -191,110 +162,6 @@ impl Drop for AbortGuard {
     }
 }
 
-/// Authenticate, take the session OUT of the map (so the eval does not
-/// hold the global write lock), reset + install its interrupt, and wire
-/// the peer dispatcher. Returns the owned session + a clone of its
-/// interrupt for the `AbortGuard`.
-async fn take_session_for_eval(
-    state: &AppState,
-    id: Uuid,
-    headers: &HeaderMap,
-) -> Result<(crate::sessions::Session, Interrupt), (StatusCode, Json<ErrorResponse>)> {
-    let unauthorized = || {
-        (
-            StatusCode::UNAUTHORIZED,
-            json_err("missing or invalid authorization"),
-        )
-    };
-    let entry = state
-        .interrupts
-        .read()
-        .await
-        .get(&id)
-        .cloned()
-        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(headers).ok_or_else(unauthorized)?;
-        if !check_token(provided, &entry.token) {
-            return Err(unauthorized());
-        }
-    }
-    entry.interrupt.reset();
-    let mut session = state
-        .sessions
-        .write()
-        .await
-        .remove(&id)
-        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
-    session.env.set_interrupt(entry.interrupt.clone());
-    session
-        .env
-        .set_peer_dispatcher(Arc::new(crate::server::RemoteMlxDispatcher::new(
-            state.peers.clone(),
-            state.peer_sessions.clone(),
-        )));
-    Ok((session, entry.interrupt))
-}
-
-/// Spawn the eval as a detached task (so it unwinds cleanly even if the
-/// handler future is dropped on disconnect) and deliver the built
-/// response over a oneshot.
-fn spawn_eval(
-    state: &AppState,
-    id: Uuid,
-    session: crate::sessions::Session,
-    stmts: Vec<mlpl_parser::Expr>,
-) -> oneshot::Receiver<Result<EvalResponse, String>> {
-    let (tx, rx) = oneshot::channel();
-    let state = state.clone();
-    tokio::spawn(async move {
-        let resp = run_eval(&state, id, session, stmts).await;
-        let _ = tx.send(resp);
-    });
-    rx
-}
-
-/// Body of the eval task: evaluate on a blocking thread, clear the
-/// env's per-eval hooks, build the response (with viz attach) on
-/// success, ALWAYS reinsert the session, and flush persistence.
-async fn run_eval(
-    state: &AppState,
-    id: Uuid,
-    mut session: crate::sessions::Session,
-    stmts: Vec<mlpl_parser::Expr>,
-) -> Result<EvalResponse, String> {
-    let join = tokio::task::spawn_blocking(move || {
-        let value = eval_program_value(&stmts, &mut session.env);
-        (session, value)
-    })
-    .await;
-    let (mut session, value) = join.map_err(|_| "eval task panicked".to_string())?;
-    session.env.clear_peer_dispatcher();
-    session.env.clear_interrupt();
-    // Surface any user-visible notices (e.g. a silent GPU->CPU fallback)
-    // by prepending them to the result -- but not to an SVG/viz payload,
-    // whose leading `<svg` the client sniffs for.
-    let notices = session.env.take_notices();
-    let out = match value {
-        Ok(v) => {
-            session.last_eval_at = Some(crate::sessions::now_unix_seconds());
-            let kind = value_kind(&v);
-            let mut formatted = format!("{v}");
-            if !notices.is_empty() && !formatted.trim_start().starts_with("<svg") {
-                formatted = format!("{}\n{formatted}", notices.join("\n"));
-            }
-            let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
-            Ok(crate::eval_viz::build_eval_response(
-                &v, kind, formatted, attached,
-            ))
-        }
-        Err(e) => Err(format!("{e}")),
-    };
-    state.sessions.write().await.insert(id, session);
-    crate::persist::maybe_flush(state).await;
-    out
-}
-
 /// `POST /v1/sessions/{id}/cancel` -- requires bearer
 /// when `auth_mode == Required`. Flips the session's
 /// shared `Interrupt` bool so any in-flight eval
@@ -362,109 +229,6 @@ pub async fn health_handler() -> impl IntoResponse {
         status: "ok",
         version: env!("CARGO_PKG_VERSION"),
     })
-}
-
-/// `GET /v1/sessions/{id}/inspect` -- requires
-/// bearer when `auth_mode == Required`. Returns a
-/// JSON snapshot of the session's workspace
-/// (variable names + shapes + `[param]` tags, model
-/// names, tokenizer names, experiment names). Vars
-/// capped at 200 entries; the `more` field reports
-/// how many were truncated.
-pub async fn inspect_handler(
-    State(state): State<AppState>,
-    Path(id): Path<Uuid>,
-    headers: HeaderMap,
-) -> Result<Json<InspectResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let sessions = state.sessions.read().await;
-    let session = sessions
-        .get(&id)
-        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(&headers).ok_or((
-            StatusCode::UNAUTHORIZED,
-            json_err("missing or invalid authorization"),
-        ))?;
-        if !check_token(provided, &session.token) {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                json_err("missing or invalid authorization"),
-            ));
-        }
-    }
-    Ok(Json(snapshot_env(&session.env)))
-}
-
-/// `GET /v1/sessions/{id}` -- requires bearer when
-/// `auth_mode == Required`. Returns the session's bearer-token
-/// signed metadata: creation + last-eval timestamps plus the
-/// same workspace summary `/inspect` returns. Saga 21.5 step
-/// 009 -- backs `mlpl-repl --connect --session <id>`.
-pub async fn session_meta_handler(
-    State(state): State<AppState>,
-    Path(id): Path<Uuid>,
-    headers: HeaderMap,
-) -> Result<Json<SessionMetaResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let sessions = state.sessions.read().await;
-    let session = sessions
-        .get(&id)
-        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(&headers).ok_or((
-            StatusCode::UNAUTHORIZED,
-            json_err("missing or invalid authorization"),
-        ))?;
-        if !check_token(provided, &session.token) {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                json_err("missing or invalid authorization"),
-            ));
-        }
-    }
-    let snap = snapshot_env(&session.env);
-    Ok(Json(SessionMetaResponse {
-        session_id: id,
-        created_at: session.created_at,
-        last_eval_at: session.last_eval_at,
-        vars: snap.vars,
-        models: snap.models,
-        tokenizers: snap.tokenizers,
-        experiments: snap.experiments,
-        more: snap.more,
-    }))
-}
-
-fn snapshot_env(env: &Environment) -> InspectResponse {
-    let mut vars: Vec<VarSnapshot> = env
-        .vars_iter()
-        .map(|(name, arr)| VarSnapshot {
-            name: name.clone(),
-            shape: arr.shape().dims().to_vec(),
-            is_param: env.is_param(name),
-        })
-        .collect();
-    vars.sort_by(|a, b| a.name.cmp(&b.name));
-    let total = vars.len();
-    let more = total.saturating_sub(VARS_CAP);
-    vars.truncate(VARS_CAP);
-    let mut models: Vec<String> = env.models_iter().map(|(n, _)| n.clone()).collect();
-    models.sort();
-    let mut tokenizers: Vec<String> = env.tokenizers_iter().map(|(n, _)| n.clone()).collect();
-    tokenizers.sort();
-    let mut experiments: Vec<String> = env
-        .experiment_log()
-        .iter()
-        .map(|r| r.name.clone())
-        .collect();
-    experiments.sort();
-    experiments.dedup();
-    InspectResponse {
-        vars,
-        models,
-        tokenizers,
-        experiments,
-        more,
-    }
 }
 
 pub(crate) fn json_err(msg: impl Into<String>) -> Json<ErrorResponse> {

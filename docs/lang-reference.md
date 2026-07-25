@@ -201,6 +201,21 @@ compare("baseline", "variant")
 :experiments
 ```
 
+### Streaming metrics (connect mode)
+
+When a program runs on a connected `mlpl-serve` peer, every `train`
+iteration also streams metrics to the client as SSE `metric` frames,
+driving the web playground's live loss panel and LOSS sparkline row:
+
+- every scalar bound to a `*_metric` name inside the block streams
+  per step under that name (a `val`-prefixed name, e.g.
+  `val_loss_metric`, charts as the validation series);
+- when the block binds NO `*_metric` name, the block's own per-step
+  loss (its final expression, the same scalar that fills
+  `last_losses`) streams as the implicit `loss` metric -- so a plain
+  `train N { ... }` shows a live loss curve with no extra code and no
+  recompute.
+
 ## Labeled Axes
 
 An assignment may carry axis labels as metadata so label mismatches

@@ -8,7 +8,7 @@ use std::io::{self, BufRead, Write};
 use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
-use crate::connect::{ClientError, InspectResponse, build_client, eval_remote, inspect_remote};
+use crate::connect::{ClientError, build_client, eval_remote, inspect_remote};
 use crate::connect_reattach::{Reattach, print_welcome_banner, resolve_session};
 use crate::connect_stream::{
     CANCEL_DOUBLE_WINDOW, ConnectArgsError, ConnectMode, eval_remote_stream, parse_connect_args,
@@ -166,7 +166,7 @@ fn eval_and_print(
         Err(ClientError::Cancelled {
             step,
             partial_losses,
-        }) => render_cancellation(step, &partial_losses),
+        }) => crate::render::render_cancellation(step, &partial_losses),
         Err(e) => eprintln!("  {program}\n  error: {e}"),
     }
 }
@@ -176,27 +176,6 @@ fn eval_and_print(
 /// preview of the partial loss curve so the user can see how far
 /// the train got before they tapped Ctrl-Ctrl-C. The full curve
 /// is still available via `:vars` (`last_losses`).
-fn render_cancellation(step: usize, partial_losses: &[f64]) {
-    eprintln!(
-        "  cancelled at step {step} ({} partial loss{} captured; see :vars last_losses)",
-        partial_losses.len(),
-        if partial_losses.len() == 1 { "" } else { "es" }
-    );
-    if !partial_losses.is_empty() {
-        let preview: Vec<String> = partial_losses
-            .iter()
-            .take(5)
-            .map(|v| format!("{v:.4}"))
-            .collect();
-        let ellipsis = if partial_losses.len() > 5 {
-            ", ..."
-        } else {
-            ""
-        };
-        eprintln!("  losses: [{}{ellipsis}]", preview.join(", "));
-    }
-}
-
 /// Saga 21.5 step 003: install the SIGINT handler that turns a
 /// double-Ctrl-C inside the cancel window into a `/cancel` POST.
 /// `ctrlc::set_handler` is process-global (and can only be
@@ -251,7 +230,7 @@ fn dispatch_slash(
         ":help" => Some(CONNECT_HELP.into()),
         ":vars" | ":models" | ":experiments" | ":tokenizers" | ":wsid" => {
             match inspect_remote(client, base_url, session_id, token) {
-                Ok(snap) => Some(format_inspect(input, &snap)),
+                Ok(snap) => Some(crate::render::format_inspect(input, &snap)),
                 Err(e) => Some(format!("error: {e}")),
             }
         }
@@ -292,49 +271,4 @@ fn ask_cmd(arg: &str) {
 fn connect_cmd(arg: &str) {
     let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
     println!("{}", crate::ask_model::connect_cmd(arg, &host));
-}
-
-fn format_inspect(command: &str, snap: &InspectResponse) -> String {
-    let mut out = String::new();
-    let render_names = |out: &mut String, label: &str, names: &[String]| {
-        if names.is_empty() {
-            out.push_str(&format!("(no {label})"));
-        } else {
-            for n in names {
-                out.push_str(&format!("  {n}\n"));
-            }
-            out.truncate(out.trim_end().len());
-        }
-    };
-    match command {
-        ":vars" => {
-            if snap.vars.is_empty() {
-                out.push_str("(no variables)");
-            } else {
-                for v in &snap.vars {
-                    let tag = if v.is_param { " [param]" } else { "" };
-                    let dims: Vec<String> = v.shape.iter().map(|d| d.to_string()).collect();
-                    out.push_str(&format!("  {}: [{}]{tag}\n", v.name, dims.join(", ")));
-                }
-                if snap.more > 0 {
-                    out.push_str(&format!("  ... ({} more)\n", snap.more));
-                }
-                out.truncate(out.trim_end().len());
-            }
-        }
-        ":models" => render_names(&mut out, "models", &snap.models),
-        ":tokenizers" => render_names(&mut out, "tokenizers", &snap.tokenizers),
-        ":experiments" => render_names(&mut out, "experiments", &snap.experiments),
-        ":wsid" => {
-            out.push_str(&format!(
-                "workspace (remote):\n  variables: {}\n  models:    {}\n  tokenizers: {}\n  experiments: {}",
-                snap.vars.len() + snap.more,
-                snap.models.len(),
-                snap.tokenizers.len(),
-                snap.experiments.len()
-            ));
-        }
-        _ => unreachable!("dispatch_slash filters before format_inspect"),
-    }
-    out
 }

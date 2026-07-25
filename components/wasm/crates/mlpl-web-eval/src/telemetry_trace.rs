@@ -8,7 +8,11 @@
 //! their sparklines stay isolated. Old gens are pruned (bounded memory);
 //! `summary` removes the gen_id it reads.
 
-#![cfg(target_arch = "wasm32")]
+// The store itself is pure std + mlpl-monitor-types, so it compiles
+// (and the UI crates that read it test) natively; only the `watch`
+// burst below is browser-only. Connect-telemetry step 002 lifted the
+// old file-level wasm gate that kept every native downstream build of
+// the render crates from compiling.
 
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -16,6 +20,7 @@ use std::collections::HashMap;
 use mlpl_monitor_types::Snapshot;
 use mlpl_monitor_types::spark::{metric_percents, sparkline};
 
+#[cfg(target_arch = "wasm32")]
 use crate::eval::ResultCb;
 
 const WINDOW: usize = 60;
@@ -102,7 +107,9 @@ pub fn summary(gen_id: u32) -> Option<String> {
 
 /// On-demand bounded burst for `:status watch`: its own generation, poll
 /// `/v1/stats` `samples` times (~300ms apart, each bounded), then fire
-/// `on_result` with the sparkline summary. Auto-stops.
+/// `on_result` with the sparkline summary. Auto-stops. Browser-only:
+/// the fetch/timer stack does not exist natively.
+#[cfg(target_arch = "wasm32")]
 pub fn watch(base_url: String, samples: u32, on_result: ResultCb) {
     let gen_id = begin(true);
     wasm_bindgen_futures::spawn_local(async move {

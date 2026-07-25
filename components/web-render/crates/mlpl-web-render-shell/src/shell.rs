@@ -35,19 +35,7 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
         a.ui.editor_open.clone(),
     );
     let main_args = build_main_args(&a, &cb, &inputs, &modes);
-    let th = a.onboarding.show_tour.clone();
-    let sh = a.onboarding.tour_step.clone();
-    let lesson = a.ui.lesson_idx.clone();
-    let path = a.ui.path_state.clone();
-    let dialog = a.ui.dialog_open.clone();
-    let on_tour = Callback::from(move |_: MouseEvent| {
-        lesson.set(None);
-        path.set(None);
-        dialog.set(false);
-        sh.set(0);
-        th.set(true);
-    });
-    let chrome = render_shell_chrome(&a, &inputs, &modes, &cb, on_tour);
+    let chrome = render_shell_chrome(&a, &inputs, &modes, &cb);
     let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog, a.build_info.clone());
     let overlays = render_overlays(&a);
     html! { <> { chrome } { render_main(main_args) } { footer } { overlays } </> }

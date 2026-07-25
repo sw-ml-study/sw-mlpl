@@ -59,11 +59,7 @@ fn render_tour(a: &RenderArgs) -> Html {
         }
     });
     let sh2 = a.onboarding.tour_step.clone();
-    let on_prev = Callback::from(move |_: MouseEvent| {
-        if *sh2 > 0 {
-            sh2.set(*sh2 - 1);
-        }
-    });
+    let on_prev = Callback::from(move |_: MouseEvent| sh2.set((*sh2).saturating_sub(1)));
     let ch = a.onboarding.show_tour.clone();
     let on_close = Callback::from(move |_: MouseEvent| {
         ch.set(false);

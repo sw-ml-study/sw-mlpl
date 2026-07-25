@@ -68,3 +68,17 @@ fn write_row(f: &mut fmt::Formatter<'_>, values: &[f64]) -> fmt::Result {
     }
     Ok(())
 }
+
+/// `Display` for `Shape` lives beside the other rendering code.
+impl std::fmt::Display for crate::Shape {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[")?;
+        for (i, d) in self.dims().iter().enumerate() {
+            if i > 0 {
+                write!(f, ", ")?;
+            }
+            write!(f, "{d}")?;
+        }
+        write!(f, "]")
+    }
+}

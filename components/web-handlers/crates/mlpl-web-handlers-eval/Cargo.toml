@@ -12,6 +12,11 @@ path = "src/lib.rs"
 # The curated builtin table (BUILTIN_GROUPS) for the :ask system prompt's
 # compact MLPL reference, so the LLM uses real builtins/signatures.
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+# `:ask` prompt construction (system grounding + MLPL reference +
+# endpoint resolution), extracted from connect.rs.
+mlpl-web-ask = { path = "../mlpl-web-ask" }
+# Final loss chart persisted into a streamed train's result entry.
+mlpl-web-render-live = { path = "../../../web-render/crates/mlpl-web-render-live" }
 mlpl-wasm = { path = "../../../wasm/crates/mlpl-wasm" }
 mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
 mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }

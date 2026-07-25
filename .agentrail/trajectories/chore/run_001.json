@@ -1,0 +1,11 @@
+{
+  "task_type": "chore",
+  "state": {
+    "number": 5,
+    "step": "workspace-lock-sweep"
+  },
+  "action": "cargo metadata --locked sweep + regeneration; guard script; gate.sh integration",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-25T15:16:08"
+}

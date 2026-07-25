@@ -167,3 +167,84 @@ pub fn command_help(line: &str) -> Option<String> {
         .map(str::trim)?;
     command_help_body(cmd).map(|body| format!("{cmd} -- {body}"))
 }
+
+/// Shown for `:ask` when there is no connected server (e.g. the
+/// public live demo). `:ask` needs a server to reach an LLM, so we
+/// give a clear notice instead of lexing the question as MLPL
+/// (which errors on punctuation like `?`).
+const ASK_NEEDS_SERVER: &str = "`:ask` is not available on the public demo -- it needs a connected mlpl-serve with Ollama running. Run `mlpl-serve` on a local machine (with `ollama serve`), then open this REPL with `?connect=<server-url>` appended to the page URL (e.g. `...?connect=http://host:6464`). The CUDA / MLX demos additionally need that server on a host with the matching GPU (Linux+NVIDIA for CUDA, Apple Silicon for MLX).";
+
+/// Shown for `:status` when no server is connected. Connect mode
+/// answers `:status` with a live backend report (devices + CPU/RAM/
+/// GPU/VRAM); here there is no backend to probe.
+const STATUS_LOCAL: &str = "Status: 0 backends connected -- local (browser) mode.\n  device  : cpu (browser WASM)\n  Live CPU/GPU/RAM/VRAM telemetry, :ask, and the CUDA/MLX demos need a\n  connected mlpl-serve. Start one (mlpl-serve --bind 0.0.0.0:6464\n  --auth required), then append ?connect=<server-url> to this page's URL\n  (e.g. ?connect=http://host:6464).";
+
+/// Canned local-mode replies for REPL `:commands` that need no eval.
+/// Connect-mode variants (`:status` probe, async `:connect list`,
+/// `:reset` confirm) are handled upstream in `connect.rs`; reaching
+/// here means no server is connected. `None` -> evaluate as MLPL.
+pub(crate) fn command_reply(
+    deps: &mlpl_web_handlers_upload::eval_deps::EvalDeps,
+    trimmed: &str,
+) -> Option<String> {
+    if trimmed == ":ask" || trimmed.starts_with(":ask ") {
+        return Some(ASK_NEEDS_SERVER.to_string());
+    }
+    if trimmed == ":connect" || trimmed.starts_with(":connect ") {
+        let arg = trimmed.strip_prefix(":connect").unwrap_or("").trim();
+        return Some(connect_command_text(arg));
+    }
+    match trimmed {
+        ":help" => Some(help_text()),
+        ":history" => Some(history_listing(deps)),
+        ":status" => Some(STATUS_LOCAL.to_string()),
+        ":reset" => {
+            Some("Nothing to reset -- local browser mode, no connected server.".to_string())
+        }
+        _ => None,
+    }
+}
+
+/// `:history` output -- the recent REPL command lines, so the
+/// user (and the `:ask` LLM, which also receives this) can see
+/// what has been run.
+fn history_listing(deps: &mlpl_web_handlers_upload::eval_deps::EvalDeps) -> String {
+    let lines: Vec<String> = deps
+        .history
+        .iter()
+        .filter(|e| matches!(e.kind, mlpl_web_eval::state::EntryKind::Command))
+        .map(|e| format!("mlpl> {}", e.input.trim()))
+        .collect();
+    if lines.is_empty() {
+        "(no commands run yet)".to_string()
+    } else {
+        lines.join("\n")
+    }
+}
+
+/// Text for `:connect <arg>` outside the async connect path. `set
+/// <model>` selects the `:ask` model for the session (local/sync);
+/// `list` / bare need a connected server (handled upstream when one is
+/// connected, so here it means "not connected").
+fn connect_command_text(arg: &str) -> String {
+    if let Some(name) = arg.strip_prefix("set ").map(str::trim) {
+        if name.is_empty() {
+            return "usage: :connect set <model>   (see :connect list)".to_string();
+        }
+        if name.contains("embed") {
+            return format!(
+                "'{name}' is an embedding model (returns vectors, not text) -- it can't \
+                 answer :ask. Pick a chat model instead (see :connect list)."
+            );
+        }
+        #[cfg(target_arch = "wasm32")]
+        mlpl_web_eval::ollama_fetch::set_selected_model(name);
+        format!("ask model set to {name}")
+    } else if arg == "list" || arg.is_empty() {
+        format!(
+            "`:connect list` needs a connected mlpl-serve to query its Ollama models. {ASK_NEEDS_SERVER}"
+        )
+    } else {
+        format!("unknown :connect subcommand '{arg}' (try: list  |  set <model>)")
+    }
+}

@@ -1,65 +1,72 @@
-# Saga: Stable Diffusion (text-to-image)
+# Saga: Connect Telemetry (live training signals in the web UI)
 
-Active-saga plan. Full scoping + rationale lives in
-`docs/future-saga-stable-diffusion.md`; this is the executable step
-breakdown. Diffusion is the non-autoregressive generation path (see the
-glossary [[Autoregression]] entry): start from noise, iteratively
-denoise.
+Kicked off 2026-07-25 on branch `feature/connect-telemetry`. Follow-on to
+the beginner-ML comprehension work (`docs/beginner-ml-comprehension-plan.md`,
+items 1-4 shipped June-July): item 2 closed with the note that "a true
+in-place live-loss panel over the SSE stream remains a connect-path
+follow-up." This saga is that follow-up.
 
-Strategy: ship the diffusion *algorithm* in the browser first (tiny,
-no conv), then add `conv2d` for image U-Nets (GPU), then real Stable
-Diffusion via candle-transformers on a connected GPU peer.
+## Vision
+
+When a browser is connected to an `mlpl-serve` peer, training should feel
+live: the loss curve grows point by point while the `train` block runs, and
+the machine's vital signs (CPU/GPU/RAM/VRAM) scroll alongside it, so a
+learner sees BOTH what the model is learning and what the hardware is doing
+to learn it. Today those signals exist but are disconnected: per-step
+`event: metric` SSE frames already stream on the connect path
+(`components/wasm/crates/mlpl-web-eval/src/eval_sse.rs`), resource
+sparklines already poll `/v1/stats` every 400ms (`TelemetryPanel`,
+`components/web-render/crates/mlpl-web-render-aux/src/telemetry_panel.rs`),
+and `train_val_curve` renders a static SVG only at checkpoints.
+
+## What this enables, and where it surfaces in the UI
+
+- **UI change (connect mode)**: a live loss panel -- an in-place chart that
+  appends a point per `metric` frame during `train`, replacing the
+  "Evaluating..." dead air. Train + validation series on shared axes so
+  overfitting appears as a widening gap while it happens.
+- **UI change (connect mode)**: the existing `TelemetryPanel` sparklines
+  rendered in the same visual frame as the live loss, time-aligned, so
+  "GPU busy" and "loss falling" read as one story.
+- **Demo upgrades, not new demos**: "Watch a Model Learn (overfitting)" and
+  "How Gradient Descent Works" gain live behavior when connected; the
+  chunked-repaint fallback keeps them working on the public CPU/browser
+  demo.
+- **Glossary/tour wiring**: pointers from the live panel to the relevant
+  terms (Loss, Overfitting, Epoch) per the beginner-spine conventions.
 
 ## Steps
 
-1. **diffusion-2d-demo** -- the diffusion algorithm, browser-runnable,
-   no conv. Add the two small pure-array builtins the noise schedule
-   needs: `linspace(start, stop, n)` and `cumprod(v)` (TDD: unit tests +
-   gradcheck where applicable). Glossary: Diffusion model, Forward
-   (noising) / Reverse (denoising) process, DDPM, Noise schedule. A
-   `demos/diffusion_2d.mlpl` + web-demos registry entry: forward-noise a
-   2D dataset (moons) over a linear beta schedule, train a tiny MLP to
-   predict the added noise, reverse-sample from noise back onto the data
-   manifold, scatter before/after. TDD: an eval test that the trained
-   denoiser's reverse samples land closer to the manifold than the
-   untrained baseline.
+1. **reconcile-and-kickoff** (meta) -- reconcile agentrail with the
+   June-July off-rail history (audit -> retroactive saga -> archives), park
+   stable-diffusion, capture planned work in docs, kick off this saga.
+2. **live-loss-sse-panel** -- the in-place live loss chart fed by SSE
+   `metric` frames on the connect path, with train/val series and the
+   chunked local-path fallback. TDD: frame-to-point reducer and panel
+   state tested in `mlpl-web-eval` / `mlpl-web-render-aux`; a connect-mode
+   test drives a scripted metric stream.
+3. **telemetry-metric-overlay** -- time-align `TelemetryPanel` resource
+   sparklines with the live loss panel (shared clock/window), so hardware
+   effort and learning progress are read together during a connect train.
+4. **docs-pages-retrospective** -- glossary/tour/lesson pointers, literate
+   notes, `pages/` rebuild (web source changed), CHANGES refresh, and the
+   saga retrospective in `docs/saga.md`.
 
-2. **conv2d-primitive** -- `conv2d` (+ `conv_transpose2d` or
-   `upsample_nearest`) forward + autograd backward on CPU and the
-   device backends; `group_norm`, `silu`, `sin`/`cos` if missing.
-   Glossary: Convolution / Conv2d, Group normalization, SiLU. Gradcheck
-   parity (CPU) + device parity.
+## Constraints and risks
 
-3. **tiny-unet-diffusion** -- a small conv U-Net image diffusion
-   (MNIST-scale), trained + sampled under `device("cuda")` /
-   `device("mlx")`. Timestep embedding, group_norm, silu, upsample.
-   Connect-only demo + literate page.
+- Single-threaded WASM blocks during local eval (`docs/worker-threads.md`):
+  live-per-step animation is a connect-path feature; the local path stays
+  chunked. Do not promise per-step animation in the browser-only demo.
+- SSE frame cadence under fast small models can outpace repaint; the panel
+  must coalesce frames (append in batches per animation frame).
+- Keep the sw-checklist ratchet: new panel code lands as small named
+  modules per docs/code_metrics.md gates (25 LOC / 5 fns / 5 modules).
 
-4. **stable-diffusion-connect** -- real text-to-image: add
-   `candle-transformers` to the CUDA/MLX serve build (feature-gated),
-   a safetensors pretrained-weight loader, cross-attention + CLIP
-   wiring, and a `text_to_image(prompt, steps)` form under
-   `device("cuda")`. Connect-only demo + true-GPU literate page. May
-   split into sub-steps (weights loader; CLIP+U-Net+VAE wiring; demo).
+## Relationship to other planned work
 
-## Browser vs connect
-
-- Step 1 runs fully in the browser (CPU/WASM): tiny MLP denoiser, no
-  big weights, no conv.
-- Steps 3-4 are connect-only (conv-heavy / GB weights -> GPU + server),
-  gated by the peer's real device like the other CUDA/MLX demos.
-
-## De-risking
-
-- Keep step 1's in-browser demo MLP-only (no conv) so it ships without a
-  CPU conv-backward dependency; conv lands in step 2 and the conv demos
-  are GPU/connect-gated.
-- `candle-transformers` is added ONLY to the serve build (feature-gated),
-  never the WASM bundle (disk + bundle size).
-- Fixed seeds so literate publishing is reproducible.
-
-## References
-
-- `docs/future-saga-stable-diffusion.md` (scoping + risks).
-- The MLX/CUDA LoRA demos + literate pages (the connect + true-GPU
-  literate pattern to mirror for steps 3-4).
+- `docs/future-saga-stable-diffusion.md` -- parked 2026-07-25 after its
+  step 001; resumes after this saga (conv2d is unaffected by this work).
+- `docs/apl2-staging-plan.md` -- APL2 stages 2+ queue behind this saga.
+- `docs/plan-for-speculative-decoding.md` -- MLX spec-decoding demo,
+  future saga.
+- `docs/saga-tech-debt-paydown.md` -- ratchet spikes interleave as usual.

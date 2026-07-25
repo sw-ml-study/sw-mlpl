@@ -1,0 +1,1 @@
+Add a macOS telemetry backend to mlpl-monitor (CPU via top, RAM via vm_stat, GPU via ioreg, no sudo) so /v1/stats and REPL :status sparklines report real numbers on Apple Silicon; fix live-sparkline concurrency and add the connect-server runbook.
