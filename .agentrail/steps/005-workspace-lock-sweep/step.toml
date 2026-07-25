@@ -1,6 +1,6 @@
 number = 5
 slug = "workspace-lock-sweep"
-status = "pending"
+status = "in-progress"
 description = "Maintenance insert discovered in step 002: 13 component workspaces fail cargo..."
 role = "production"
 context_files = []

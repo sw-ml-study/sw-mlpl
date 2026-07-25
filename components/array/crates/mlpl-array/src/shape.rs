@@ -52,15 +52,13 @@ impl Shape {
     }
 }
 
-impl std::fmt::Display for Shape {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "[")?;
-        for (i, d) in self.dims.iter().enumerate() {
-            if i > 0 {
-                write!(f, ", ")?;
-            }
-            write!(f, "{d}")?;
-        }
-        write!(f, "]")
+/// Compute strides for row-major layout. Shared by `transpose`,
+/// `reduce_axis`, and `argmax_axis` (moved here from the retired
+/// single-function ops_strides module).
+pub fn compute_strides(dims: &[usize]) -> Vec<usize> {
+    let mut strides = vec![1; dims.len()];
+    for i in (0..dims.len().saturating_sub(1)).rev() {
+        strides[i] = strides[i + 1] * dims[i + 1];
     }
+    strides
 }
