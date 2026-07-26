@@ -1,6 +1,6 @@
 number = 8
 slug = "life-demo"
-status = "pending"
+status = "in-progress"
 description = "Game of Life saga step 3: 'Game of Life (APL classic)' demo -- multi-variant ..."
 role = "production"
 context_files = []

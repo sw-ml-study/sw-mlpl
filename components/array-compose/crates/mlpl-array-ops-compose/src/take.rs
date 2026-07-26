@@ -22,7 +22,7 @@ impl TakeExt for DenseArray {
     }
 }
 
-fn validate(a: &DenseArray, axis: usize, idx: usize) -> Result<(), ArrayError> {
+pub(crate) fn validate(a: &DenseArray, axis: usize, idx: usize) -> Result<(), ArrayError> {
     let dims = a.shape().dims();
     if axis >= dims.len() {
         return Err(ArrayError::ShapeMismatch {

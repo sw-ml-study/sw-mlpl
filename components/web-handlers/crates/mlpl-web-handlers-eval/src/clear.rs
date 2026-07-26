@@ -7,7 +7,10 @@ use std::cell::RefCell;
 use std::rc::Rc;
 
 use mlpl_wasm::WasmSession;
-use mlpl_web_eval::state::{EntryKind, HistoryEntry};
+#[cfg(target_arch = "wasm32")]
+use mlpl_web_eval::state::EntryKind;
+use mlpl_web_eval::state::HistoryEntry;
+#[cfg(target_arch = "wasm32")]
 use mlpl_web_handlers_upload::eval_deps::EvalDeps;
 use yew::prelude::*;
 
@@ -25,8 +28,11 @@ pub fn make_clear(
 // Connect-mode `:reset` POST (moved from connect.rs, which sat at
 // its file-LOC budget): session-clearing is this module's job, and
 // the server-side reset is the connect-mode half of that story.
+// Wasm-only like connect.rs itself -- the native build compiles
+// the whole connect layer away.
 /// POST `/v1/reset` (confirmed): cancel all in-flight evals on the
 /// server, render the cancel count, and chain the queue.
+#[cfg(target_arch = "wasm32")]
 pub(crate) fn post_reset(deps: &EvalDeps, history: &[HistoryEntry], queue: &[String], idx: usize) {
     let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
         crate::connect::chain_entry(

@@ -150,6 +150,46 @@ lines = [
 
 [[demos]]
 category = "Basics"
+name = "Game of Life (APL classic)"
+intro = "Conway's Game of Life is THE classic array-language program: the famous APL2 one-liner computes every cell's next state at once, with no loops over cells. This demo builds it three ways, in ascending APL2-ness, on a 7x7 torus: seed a glider with composed scatter calls (functional puts -- see the lens finale in Structure Zoo), count all 8 neighbors with rotate (APL's cyclic shift), then apply the rule as pure array arithmetic. Variant A is the readable functional rule; variant B stacks the 8 shifted boards into a rank-3 tensor and reduces down the stack (closest to the APL one-liner's shape); variant C shows what rotate replaced -- a permutation-matrix matmul, where the permutation matrix is just a rotated identity. The finale runs 24 generations and hands the frames tensor to svg(F, \"life\"), an SMIL-animated grid: the whole animation is one self-contained SVG value."
+takeaway = "One rule, zero cell loops: rotate shifts the WHOLE board 8 ways, + sums the neighbor counts, and gt(eq(N,3) + G*eq(N,2), 0) is the entire Life rule -- birth on 3, survival on 2 or 3. The rank-3 stack variant is the same computation with the 8 shifts made visible as an [8,7,7] tensor reduced along axis 0; the permutation-matmul variant shows a cyclic shift IS a matmul by a rotated identity. disp shows every intermediate structure, and the animated grid is a plain value -- replayable, downloadable, no script. Road to the full APL2 one-liner: docs/future-saga-game-of-life.md."
+lines = [
+    "b = fill([49], 0)                                    # a flat 7x7 board, all dead",
+    "b = scatter(scatter(b, 9, 1), 17, 1)                 # seed a glider: composed functional PUTs ...",
+    "b = scatter(scatter(scatter(b, 22, 1), 23, 1), 24, 1)  # ... (flat index = row*7 + col)",
+    "G = reshape(b, [7, 7])                               # fold flat -> board",
+    "disp(G)                                              # there's the glider",
+    "up = rotate(G, 1, 0)                                 # rotate = APL's cyclic shift: whole board up ...",
+    "dn = rotate(G, 0 - 1, 0)                             # ... down (no unary minus: spell -1 as 0 - 1)",
+    "lf = rotate(G, 1, 1)                                 # ... left",
+    "rt = rotate(G, 0 - 1, 1)                             # ... right",
+    "N = up + dn + lf + rt + rotate(up, 1, 1) + rotate(up, 0 - 1, 1) + rotate(dn, 1, 1) + rotate(dn, 0 - 1, 1)  # all 8 neighbor counts at once",
+    "disp(N)                                              # neighbor counts as a structure",
+    "G2 = gt(eq(N, 3) + G * eq(N, 2), 0)                  # VARIANT A -- the whole Life rule, functionally",
+    "disp(G2)                                             # one generation later",
+    "S = reshape(up, [1, 7, 7])                           # VARIANT B -- stack the 8 shifted boards ...",
+    "S = concat(S, reshape(dn, [1, 7, 7]), 0)             # ... into a rank-3 [8, 7, 7] tensor",
+    "S = concat(S, reshape(lf, [1, 7, 7]), 0)",
+    "S = concat(S, reshape(rt, [1, 7, 7]), 0)",
+    "S = concat(S, reshape(rotate(up, 1, 1), [1, 7, 7]), 0)",
+    "S = concat(S, reshape(rotate(up, 0 - 1, 1), [1, 7, 7]), 0)",
+    "S = concat(S, reshape(rotate(dn, 1, 1), [1, 7, 7]), 0)",
+    "S = concat(S, reshape(rotate(dn, 0 - 1, 1), [1, 7, 7]), 0)",
+    "N2 = reduce_add(S, 0)                                # reduce down the stack = the APL one-liner's +/",
+    "reduce(:and, eq(reshape(N2, [49]), reshape(N, [49])))  # 1 -- same counts as variant A",
+    "P = rotate(one_hot(iota(7), 7), 1, 0)                # VARIANT C -- a permutation matrix is a rotated identity",
+    "reduce(:and, eq(reshape(matmul(P, G), [49]), reshape(up, [49])))  # 1 -- matmul-shift == rotate",
+    "def u:life(g) { a = rotate(g, 1, 0); b2 = rotate(g, 0 - 1, 0); n = a + b2 + rotate(g, 1, 1) + rotate(g, 0 - 1, 1) + rotate(a, 1, 1) + rotate(a, 0 - 1, 1) + rotate(b2, 1, 1) + rotate(b2, 0 - 1, 1); gt(eq(n, 3) + g * eq(n, 2), 0) }  # the step function: variant A, named",
+    "F = reshape(G, [1, 7, 7])                            # frames tensor, generation 0",
+    "g = G",
+    "i = 0",
+    "while lt(i, 23) { g = u:life(g); F = concat(F, reshape(g, [1, 7, 7]), 0); i = i + 1 }  # 24 generations",
+    "shape(F)                                             # [24, 7, 7]",
+    "svg(F, \"life\")                                      # the animated grid: one self-contained SVG value",
+]
+
+[[demos]]
+category = "Basics"
 name = "Analysis Helpers"
 intro = "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model."
 takeaway = "Six one-liners, six labeled plots. Every helper under 'analysis' in the docs takes arrays you already have and returns an SVG -- no separate plotting library, no config blocks."

@@ -62,19 +62,10 @@ pub trait RotateExt {
 
 impl RotateExt for DenseArray {
     fn rotate(&self, k: i64, axis: usize) -> Result<DenseArray, ArrayError> {
+        crate::take::validate(self, axis, 0)?;
         let dims = self.shape().dims();
-        if axis >= dims.len() {
-            return Err(ArrayError::ShapeMismatch {
-                source: axis,
-                target: dims.len(),
-            });
-        }
         let n = dims[axis];
-        let shift = if n == 0 {
-            0
-        } else {
-            k.rem_euclid(n as i64) as usize
-        };
+        let shift = k.rem_euclid(n as i64) as usize;
         let outer: usize = dims[..axis].iter().product();
         let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
         let out = rotated_data(self.data(), outer, n, shift, inner);

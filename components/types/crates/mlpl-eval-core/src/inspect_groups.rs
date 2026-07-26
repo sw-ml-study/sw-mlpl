@@ -114,7 +114,7 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
             (
                 "scatter",
                 "scatter(buf, idx, vals)",
-                "accumulate vals into buf at idx",
+                "copy of rank-1 buf with buf[idx] replaced by val (single cell)",
             ),
         ],
     ),
