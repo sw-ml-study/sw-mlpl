@@ -1,8 +1,9 @@
 number = 4
 slug = "demo-session-continuity"
-status = "in-progress"
+status = "completed"
 description = "Regression fix: running a demo must NOT reset the REPL. Demos should append t..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T09:10:29"
-commits = []
+completed_at = "2026-07-26T09:25:21"
+commits = ["58eeec2d806c9a4efead8b4158eca55583e13527"]
