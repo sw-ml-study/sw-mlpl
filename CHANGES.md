@@ -14,6 +14,15 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-26
 
+- step 008-life-demo: record completion
+- feat(demos): Game of Life (APL classic) -- three engines + animation
+- docs(guidelines): scope tests to changed components only
+- step 007-life-widget: record completion
+- feat(viz): svg(frames, "life") -- SMIL-animated life grid widget
+- step 006-rotate-builtin: record completion
+- feat(lang): rotate(x, k, axis) builtin -- cyclic shift, all layers
+- docs(errors): error-handling guide + option/result design note
+- docs(changes): refresh CHANGES.md to HEAD
 - step 005-functional-lenses: record completion
 - feat(demos): functional-lens finale in Structure Zoo + lens design note
 - docs(changes): refresh CHANGES.md to HEAD
