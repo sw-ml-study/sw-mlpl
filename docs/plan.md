@@ -25,6 +25,10 @@ and is recorded retroactively in the archived saga
   Scope: `docs/future-saga-stable-diffusion.md`.
 - **Queued: APL2 staging, stages 2+** -- `docs/apl2-staging-plan.md`
   (Stage 1 depth/disp/size/tally shipped July).
+- **Queued: classical ML demos (kNN + Naive Bayes) + glossary gap
+  fill** -- `docs/future-saga-classical-ml.md` (book-curriculum
+  coverage analysis; 7 missing glossary entries; two pure-array
+  demos, no new builtins needed).
 - **Queued: speculative decoding (MLX)** --
   `docs/plan-for-speculative-decoding.md` and
   `docs/future-sagas-multibackend-specdecode.md`.
