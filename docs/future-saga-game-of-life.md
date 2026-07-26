@@ -89,6 +89,64 @@ Stage 4's `rotate(x, k, axis)` the 8 shifts collapse to
 original; with Stage 3's `outer`/`inner` it becomes a genuine
 transliteration. Life is the ideal motivating demo for both stages.
 
+## APL2-ness audit: what the research kept and what it dropped
+
+The keyword-APL study (and both verified variants above) solve Life
+with the APL SUBSET -- flat arrays, shifts, reductions, masks. The
+one-liner's genuinely APL2 parts got unrolled away:
+
+| One-liner fragment | APL2 feature | Status in the unrolled forms |
+| --- | --- | --- |
+| enclose omega / take-mix | nested arrays (THE APL2 feature) | dropped -- board stays flat |
+| the strand `1 omega` | heterogeneous 2-item vector (scalar + whole board as items) | dropped -- folded into the rule predicate |
+| outer-rotate over the boxed board | operators mapping over nested items | approximated by loops / a rank-3 stack |
+| or.and against the strand | generalized inner product over nested operands | unrolled to `(N==3) or (N==4 and alive)` |
+| rotate, `+/`, `=` | classic APL, NOT APL2-specific | these are the parts we kept |
+
+A third variant, verified live 2026-07-26, is the closest FLAT shadow
+of the APL2 idiom: build the shifted boards as a rank-3 `[9, n, n]`
+stack (offsets stored as data -- `dr`/`dc` lookup vectors, arrays as
+control flow) and take `reduce_add(S, 0)` as the literal `+/` over the
+stack axis. Identical glider evolution to both other forms. Two
+findings along the way: `concat` grows cleanly from an empty
+`fill([0, n, n], 0)` tensor, and `for` requires loop-carried values to
+keep a constant shape (grow with `while` instead) -- a limitation
+Stage 3's `outer` dissolves, since APL2 would not loop at all.
+
+## APL2 opportunities (general, ranked by ML value)
+
+1. **Stage 6 nested arrays** -- ragged token sequences and
+   lists-of-tensors are the ML case that flat arrays genuinely cannot
+   express; Stage 1's `depth`/`disp` are already waiting for depth to
+   become real.
+2. **Function operands for operators, including `u:` functions** --
+   the `:op` BuiltinRef mechanism exists (reduce template); letting
+   `each`/`outer`/`inner`/`scan` take USER functions is the
+   generalized-operator spirit that made APL2 composable.
+3. **Stages 2-3 (`each`/`cells`/`scan`, `outer`/`inner`)** -- planned;
+   Life hands `outer`/`inner` their motivating demo before attention
+   does.
+4. **Indexed/selective assignment** -- APL2's selective assignment has
+   no MLPL analog (no scatter). Life seeding needed a 64-element
+   literal; kNN needed one_hot-matmul gathers. A `put(x, idx, v)` +
+   vector-index gather pair is small and high-leverage.
+5. **Strands / mixed vectors** -- mostly falls out of Stage 6 boxes;
+   `Value::StrList` / records are the current stand-ins.
+
+## Life as the APL2 staging showcase
+
+- **v0 (today)**: functional 9-neighborhood, permutation-matmul
+  shifts -- ships as the demo now.
+- **v1 (today)**: the `[9, n, n]` stack + `reduce_add(S, 0)` -- the
+  flat shadow of `+/,`; worth a demo line to foreshadow the nested
+  version.
+- **v2 (Stages 3-4)**: `outer(:shift, ...)`-built stack + `rotate` --
+  reads like the one-liner minus the boxes.
+- **v3 (Stage 6 capstone)**: enclose the board, outer-rotate the BOX
+  into a 3x3 nested array of boards (`disp` renders a board-of-boards
+  frame!), strand `[1, G]`, `inner(:or, :and, ...)` -- the APL2
+  finale, and the natural acceptance demo for Stage 6 itself.
+
 ## The animated grid widget: `svg(frames, "life")`
 
 Today each generation renders as a separate `svg(G, "heatmap")` --

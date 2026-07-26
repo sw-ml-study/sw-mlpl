@@ -166,3 +166,15 @@ last. This is the stage that makes APL2 depth real and visualizable.
 3. Stage 4 is plumbing that Stages 2 and 3 make meaningful.
 4. Stage 5 composes everything into the explicit encode/decode capstone.
 5. Stage 6 is the only data-model change, so it is isolated and last.
+
+## Motivating capstone: Conway's Game of Life
+
+`docs/future-saga-game-of-life.md` (2026-07-26) audits the classic
+one-liner against these stages: Life runs TODAY on the flat subset
+(permutation-matmul shifts, verified live), Stage 3 + 4 make it read
+like the APL, and the Stage 6 nested-array version (enclosed board,
+outer-rotate over the box, strand inner product) is the natural
+acceptance demo for Stage 6 itself. The audit also surfaced two
+stage-adjacent gaps: operators should accept `u:` function operands
+(not just builtins), and there is no indexed/selective assignment
+(`put`/scatter) -- both worth folding into Stage 2/5 scoping.
