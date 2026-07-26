@@ -1,8 +1,9 @@
 number = 6
 slug = "rotate-builtin"
-status = "in-progress"
+status = "completed"
 description = "Game of Life saga step 1 (user-prioritized ahead of remaining tech-debt split..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T09:31:57"
-commits = []
+completed_at = "2026-07-26T12:26:18"
+commits = ["90cf85c8dbd717e38bfb851b07d7b5af336541b6"]
