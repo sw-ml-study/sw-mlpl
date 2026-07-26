@@ -1,0 +1,9 @@
+number = 3
+slug = "naive-bayes-demo"
+status = "pending"
+description = "Gaussian Naive Bayes demo per docs/future-saga-classical-ml.md step 3: masked..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T18:52:01"
+task_type = "feature"
+commits = []

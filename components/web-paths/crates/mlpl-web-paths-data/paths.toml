@@ -28,6 +28,11 @@ why = "The name for that downhill walk. The gradient is the slope; you step agai
 term = "Gradient descent"
 
 [[paths.steps]]
+kind = "glossary"
+why = "And the model you just fit has a name too: y = w*x + b trained on squared error is linear regression, the doorway model of the whole field."
+term = "Linear Regression"
+
+[[paths.steps]]
 kind = "demo"
 why = "Now a real (over-powered) network on noisy data. Training and validation loss are plotted together so you see the model start to memorize noise -- the most important failure mode in ML."
 name = "Watch a Model Learn (overfitting)"
@@ -745,6 +750,11 @@ body = "Gradient descent is simple: subtract the gradient times a learning rate.
 kind = "glossary"
 why = "The foundation: w = w - lr * grad(loss, w). Everything else is a refinement of this update rule."
 term = "Gradient descent"
+
+[[paths.steps]]
+kind = "glossary"
+why = "The smallest useful classifier: a linear model through a sigmoid, and the discriminative half of the classic generative-vs-discriminative pairing."
+term = "Logistic Regression"
 
 [[paths.steps]]
 kind = "lesson"

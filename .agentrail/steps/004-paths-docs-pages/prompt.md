@@ -1,0 +1,1 @@
+Register both demos in the taxonomy + beginner-path stop, lang-reference note, pages/ rebuild, CHANGES refresh, saga retrospective per docs/future-saga-classical-ml.md step 4.

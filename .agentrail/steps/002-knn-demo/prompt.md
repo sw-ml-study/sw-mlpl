@@ -1,0 +1,1 @@
+K-Nearest Neighbors demo per docs/future-saga-classical-ml.md step 2: blobs data, distance matrix via matmul, top_k vote, accuracy vs majority baseline (TDD), scatter render, Classical ML demo category.

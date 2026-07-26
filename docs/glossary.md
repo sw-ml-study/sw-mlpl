@@ -3488,3 +3488,70 @@ The 3-bit [[i-quant (IQ)]] family (`IQ3_XXS`, `IQ3_S`,
 usable below 4-bit; a better choice than [[Q3_K_S]] /
 [[Q3_K_M]] at the same size for fitting a big model in little
 memory.
+
+## Linear Regression
+
+Fit y = W*x + b by minimizing squared error -- the simplest
+supervised model and the doorway to everything else. In MLPL
+there is no closed-form normal-equation builtin; you solve it
+the way you solve every model here, with [[Gradient descent]]:
+the "How Gradient Descent Works" demo IS linear regression,
+fitting y = w*x + b while walking the [[Loss]] surface downhill.
+Add a [[Sigmoid]] on top and you have [[Logistic Regression]].
+
+## Logistic Regression
+
+A linear model pushed through a [[Sigmoid]] so the output reads
+as a probability, trained on cross-entropy loss -- the smallest
+useful classifier and the discriminative counterpart to
+[[Naive Bayes]]. Hands-on: the "Logistic Regression" demo and
+the "Machine Learning: Logistic Regression" lesson train one on
+moons data and draw its decision boundary; the two "Decision
+Boundary" demos show what a single linear unit can and cannot
+separate (XOR needs an [[MLP (Multi-Layer Perceptron)]]).
+
+## k-Nearest Neighbors
+
+Classify a point by majority vote of the k closest training
+points -- no training phase at all; the distance matrix IS the
+model. Deeply array-spirited: squared distances are
+|a|^2 + |b|^2 - 2ab (one matmul plus two reductions), the
+neighbor pick is top_k, the vote is one_hot + reduce_add +
+argmax. MLPL ships the [[knn (builtin)]] for neighbor indices
+(used in embedding inspection); a worked classifier demo is
+planned (see docs/future-saga-classical-ml.md). Contrast
+[[K-Means]], which clusters unlabeled data instead of voting
+with labels.
+
+## Naive Bayes
+
+A generative classifier: apply Bayes' rule with the "naive"
+assumption that features are independent given the class. The
+Gaussian variant needs only per-class feature means and
+variances -- masked reductions in array terms -- and predicts by
+argmax over summed log-densities. Fast, surprisingly strong on
+small data, and the classic generative-vs-discriminative foil
+to [[Logistic Regression]]; a demo contrasting the two on the
+same moons data is planned (docs/future-saga-classical-ml.md).
+
+## Gradient Boosting
+
+An ensemble built sequentially: each new weak learner (almost
+always a shallow [[Decision Tree]]) is fit to the residual
+errors of the ensemble so far, and predictions are the sum of
+all learners. Where [[Random Forest]] reduces variance by
+averaging independent trees, boosting reduces bias by stacking
+corrections -- see [[Ensembling]] for the umbrella idea.
+**Deferred** in MLPL: greedy tree fitting is control-flow-heavy
+and non-differentiable, so it stays a glossary concept.
+
+## XGBoost
+
+"Extreme Gradient Boosting" -- an engineered implementation of
+[[Gradient Boosting]] with a regularized objective,
+second-order (Newton) update steps, histogram-based split
+search, and native sparsity handling. The de-facto strong
+baseline for tabular data. **Deferred** in MLPL: library-scale
+engineering, not an array-language teaching target; read the
+[[Decision Tree]] and [[Gradient Boosting]] entries for the
+ideas it builds on.

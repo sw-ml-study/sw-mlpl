@@ -1,0 +1,1 @@
+Gaussian Naive Bayes demo per docs/future-saga-classical-ml.md step 3: masked class means/variances, log-density argmax, decision boundary vs the Logistic Regression demo on the same moons data (TDD).

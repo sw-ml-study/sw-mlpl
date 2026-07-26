@@ -1,0 +1,9 @@
+number = 2
+slug = "knn-demo"
+status = "pending"
+description = "K-Nearest Neighbors demo per docs/future-saga-classical-ml.md step 2: blobs d..."
+role = "production"
+context_files = []
+created_at = "2026-07-25T18:52:01"
+task_type = "feature"
+commits = []

@@ -20,7 +20,7 @@ This repository ships three things together:
 ## Tour
 
 The web playground gives you a full REPL plus 55 worked
-demos, 58 tutorial lessons, and a 367-entry glossary --
+demos, 58 tutorial lessons, and a 373-entry glossary --
 all running entirely in your browser via WASM.
 
 ### REPL
@@ -77,7 +77,7 @@ a tiny LM end-to-end.
 
 ![? dialog -- Glossary](images/06-glossary.png?ts=1777922058129)
 
-The third tab. 367 alphabetical entries covering every
+The third tab. 373 alphabetical entries covering every
 language keyword, builtin, and ML concept the demos
 touch. Type-to-jump search at the top: typing `M`,
 `L`, `P` scrolls to MLP. Each entry names the closest
