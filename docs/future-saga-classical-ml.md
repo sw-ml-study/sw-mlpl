@@ -1,6 +1,11 @@
-# Future saga: Classical ML in an array language (kNN + Naive Bayes)
+# Saga: Classical ML in an array language (kNN + Naive Bayes)
 
-Seed input for `agentrail init`. Captures (1) how the playground's
+**Status: COMPLETE (2026-07-25).** All four steps shipped same-day;
+retrospective in `docs/saga.md`. One correction found during
+implementation: Ensemble Learning was already covered by the existing
+Ensembling glossary entry, so six entries were added, not seven.
+
+Originally the seed input for `agentrail init`. Captures (1) how the playground's
 demos, tutorials, and glossary map onto a classical-ML book
 curriculum, (2) the gaps that mapping exposes, and (3) a concrete plan
 for the two gaps worth closing with hands-on demos. Reference

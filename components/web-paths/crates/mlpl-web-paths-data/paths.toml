@@ -59,6 +59,16 @@ name = "Decision Boundary: XOR (with MLP)"
 
 [[paths.steps]]
 kind = "demo"
+why = "A detour that keeps you honest: not everything is gradient descent. k-nearest-neighbors has NO training phase -- one matmul computes every distance, and the neighbors simply vote."
+name = "K-Nearest Neighbors"
+
+[[paths.steps]]
+kind = "demo"
+why = "The other classical family: MODEL each class as a Gaussian cloud and apply Bayes' rule -- a closed-form fit on the same moons the MLP trains on, so you can see exactly what assumptions buy and cost."
+name = "Naive Bayes (Gaussian)"
+
+[[paths.steps]]
+kind = "demo"
 why = "The payoff: the same downhill loop, scaled up to a 1-layer transformer that learns a tiny language and generates text token by token. From 'adjust two numbers' to 'write sentences' -- same idea throughout."
 name = "Tiny LM Generate"
 

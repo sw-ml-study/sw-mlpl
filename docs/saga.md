@@ -940,3 +940,26 @@ stale workspace locks were regenerated with guards added
 (`scripts/check-locks.sh` + a gate.sh lock check), and sw-checklist
 went from 18 failed / 323 warnings to 8 / 311 across six ratcheting
 commits.
+
+## Saga: Classical ML (COMPLETE, 2026-07-25)
+
+Book-parallel coverage for the classical branch of the curriculum
+(scope + coverage analysis in `docs/future-saga-classical-ml.md`).
+Six glossary entries filled the verified gaps (Linear Regression,
+Logistic Regression, k-Nearest Neighbors, Naive Bayes, Gradient
+Boosting, XGBoost -- Ensembling already existed), with Linear/Logistic
+Regression glossary stops added to the beginner spine and Zero-to-LLM
+paths. Two demos opened the new Classical ML category, both pure array
+programs with zero new builtins, every line validated against a live
+mlpl-serve before landing: "K-Nearest Neighbors" (all test-train
+distances in one matmul via the |a|^2 + |b|^2 - 2ab identity, checked
+against pairwise_sqdist to ~1e-15; five argmax-and-mask rounds vote;
+1.0 accuracy vs 0.33 baseline) and "Naive Bayes (Gaussian)" (masked-
+matmul means/variances, Bayes-rule argmax, 0.85 vs 0.5 on the same
+moons the MLP demo trains on, with a P(class 1) heatmap showing the
+quadratic Gaussian boundary). The beginner spine gained a "not
+everything is gradient descent" detour through both. Trees/boosting
+stay glossary-level by design. Drive-by: the demo smoke suite's
+45-minute hang on GPU-less hosts (LoRA fine-tunes missing from
+SKIP_DEMOS) was found and fixed, with per-demo wall-clock prints
+added; the suite runs in 28s.

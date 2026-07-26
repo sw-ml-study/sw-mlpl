@@ -1,6 +1,6 @@
 number = 4
 slug = "paths-docs-pages"
-status = "pending"
+status = "in-progress"
 description = "Register both demos in the taxonomy + beginner-path stop, lang-reference note..."
 role = "validation"
 context_files = []

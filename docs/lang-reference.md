@@ -531,6 +531,13 @@ the trained Pets demos.
 | `mds(X, k, iters, seed)` | 4 | Multidimensional Scaling: project `[N, D]` to `[N, k]` by minimizing the stress `sum_{i<j} (||Y_i - Y_j|| - d_ij)^2` between low-D coordinates `Y` and the input pairwise Euclidean distances `d_ij`. SGD with linear LR decay; deterministic given `seed`. Use when you want a projection that preserves PAIRWISE DISTANCES rather than variance directions (PCA) or local neighborhoods (t-SNE / UMAP). |
 | `random_projection(X, k, seed)` | 3 | Johnson-Lindenstrauss random projection: multiply `[N, D]` by a seeded Gaussian random matrix `R [D, k]` scaled by `1/sqrt(k)`, giving `[N, k]`. For modest `k = O(log N / eps^2)` the JL lemma guarantees all pairwise distances are preserved within a `1 +- eps` factor. Useful as a sanity baseline against PCA / t-SNE / UMAP -- if a learned method does not beat random projection, the learned features are not adding value. |
 
+These primitives also carry the classical-ML story: the
+"K-Nearest Neighbors" demo builds the cross-set distance matrix
+from the `|a|^2 + |b|^2 - 2ab` identity (and checks it against
+`pairwise_sqdist`), and "Naive Bayes (Gaussian)" fits a generative
+classifier with two masked `matmul`s -- no training loop. See the
+Classical ML demo category and `docs/future-saga-classical-ml.md`.
+
 ### Experiments
 
 | Function | Args | Description |
