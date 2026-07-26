@@ -3,22 +3,15 @@
 use std::net::SocketAddr;
 
 use axum::Router;
-use axum::routing::{get, post};
 use mlpl_array::DenseArray;
 use mlpl_eval::{EvalError, PeerDispatcher, Value};
 use serde::{Deserialize, Serialize};
 
 use crate::auth::AuthMode;
-use crate::config::{OllamaConfig, RunConfig, ServeConfig};
-use crate::devices::devices_handler;
-use crate::handlers::{
-    cancel_handler, create_session_handler, eval_handler, health_handler, inspect_handler,
-    session_meta_handler,
-};
-use crate::ollama::{config_handler as ollama_config_handler, tags_handler as ollama_tags_handler};
+use crate::config::{RunConfig, ServeConfig};
 use crate::peers::{PeerRegistry, PeerSessionMap};
-use crate::sessions::{InterruptMap, SessionMap, new_interrupt_map, new_map};
-use crate::viz_storage::{SharedVizStore, get_handler, new_store, upload_handler};
+use crate::sessions::{new_interrupt_map, new_map};
+use crate::viz_storage::new_store;
 
 /// Errors the server can fail with at startup or
 /// while serving. Translated to stderr + non-zero
@@ -50,39 +43,7 @@ impl std::fmt::Display for ServerError {
 
 impl std::error::Error for ServerError {}
 
-/// Shared state on the application: the session map,
-/// the peer registry (Saga R1 step 003), and the
-/// configured auth mode.
-#[derive(Clone)]
-pub struct AppState {
-    pub sessions: SessionMap,
-    /// Saga 21.5 step 003: parallel map keyed by
-    /// session id, holding `(token, Interrupt)` for
-    /// the `/cancel` handler so flipping the bool
-    /// does not have to take the sessions lock (which
-    /// is held by an in-flight eval).
-    pub interrupts: InterruptMap,
-    /// Saga 21.5 step 004: content-addressed store for
-    /// `POST /v1/viz` / `GET /v1/viz/:id`. The eval
-    /// pipeline detects SVG-returning programs and
-    /// stashes their bytes here so the eval response
-    /// can carry a `viz_url`.
-    pub viz: SharedVizStore,
-    pub peers: PeerRegistry,
-    pub peer_sessions: PeerSessionMap,
-    pub auth_mode: AuthMode,
-    /// Saga 21.5 step 010: when `Some`, every successful
-    /// `/eval` flushes the slim per-session state (token +
-    /// timestamps + variable bindings) to this JSON file so
-    /// a fresh `mlpl-serve` process can pick up where the
-    /// previous one left off. `None` keeps the legacy
-    /// in-memory-only behavior.
-    pub persist_path: Option<std::path::PathBuf>,
-    /// Phase 0 (local-gpu-agentic): server-owned Ollama defaults +
-    /// allow-list, read by the `/v1/ollama/*` endpoints so the web
-    /// `:ask` does not have to carry the host/model in its URL.
-    pub ollama: OllamaConfig,
-}
+pub use mlpl_serve_state::config::AppState;
 
 #[derive(Debug)]
 pub struct RemoteMlxDispatcher {
@@ -90,11 +51,7 @@ pub struct RemoteMlxDispatcher {
     sessions: PeerSessionMap,
 }
 
-#[derive(Serialize)]
-pub struct EvalOnDeviceBinding {
-    pub name: String,
-    pub tensor: String,
-}
+pub use mlpl_serve_state::peers::EvalOnDeviceBinding;
 
 #[derive(Serialize)]
 struct EvalOnDeviceRequest {
@@ -253,26 +210,8 @@ pub fn build_app_with_peers_cors(
         persist_path,
         ollama,
     };
-    let router = Router::new()
-        .route("/v1/health", get(health_handler))
-        .route("/v1/devices", get(devices_handler))
-        .route("/v1/stats", get(crate::devices::stats_handler))
-        .route("/v1/reset", post(crate::handlers::reset_handler))
-        .route("/v1/sessions", post(create_session_handler))
-        .route("/v1/sessions/:id", get(session_meta_handler))
-        .route("/v1/sessions/:id/eval", post(eval_handler))
-        .route(
-            "/v1/sessions/:id/eval_stream",
-            post(crate::sse::eval_stream_handler),
-        )
-        .route("/v1/sessions/:id/cancel", post(cancel_handler))
-        .route("/v1/sessions/:id/inspect", get(inspect_handler))
-        .route("/v1/viz", post(upload_handler))
-        .route("/v1/viz/:id", get(get_handler))
-        .route("/v1/ollama/config", get(ollama_config_handler))
-        .route("/v1/ollama/tags", get(ollama_tags_handler))
-        .with_state(state);
-    crate::router_layers::apply_static_and_cors(router, static_dir, cors_origin)
+    let router = crate::handlers::v1_router(state);
+    mlpl_serve_core::router_layers::apply_static_and_cors(router, static_dir, cors_origin)
 }
 
 /// Bind the listener at `addr`, refuse insecure
@@ -289,7 +228,7 @@ pub fn build_app_with_peers_cors(
 /// HTTP path; `Some(config)` switches to
 /// `axum_server::bind_rustls` so the same listener
 /// terminates TLS for the /v1 API and the static UI.
-pub type TlsConfig = Option<axum_server::tls_rustls::RustlsConfig>;
+pub use mlpl_serve_core::tls::TlsConfig;
 
 pub async fn run(cfg: RunConfig) -> Result<(), ServerError> {
     let RunConfig {

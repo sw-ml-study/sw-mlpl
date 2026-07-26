@@ -25,7 +25,7 @@ use mlpl_eval::{Environment, Interrupt};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::sessions::{InterruptEntry, InterruptMap, Session, SessionMap};
+use mlpl_serve_core::sessions::{InterruptEntry, InterruptMap, Session, SessionMap};
 
 /// On-disk row for one session.
 #[derive(Serialize, Deserialize, Debug)]
@@ -75,32 +75,10 @@ pub async fn save_sessions(
     // `Session`, but the signature accepts both maps so callers
     // (eval_handler) can pass the state by reference.
     let _ = interrupts;
-    let mut rows: Vec<PersistedSession> = Vec::with_capacity(sessions_guard.len());
-    for (id, session) in sessions_guard.iter() {
-        let vars = session
-            .env
-            .vars_iter()
-            .map(|(name, arr)| PersistedVar {
-                name: name.clone(),
-                shape: arr.shape().dims().to_vec(),
-                data: arr.data().to_vec(),
-            })
-            .collect();
-        let params = session
-            .env
-            .vars_iter()
-            .filter(|(name, _)| session.env.is_param(name))
-            .map(|(name, _)| name.clone())
-            .collect();
-        rows.push(PersistedSession {
-            session_id: *id,
-            token: session.token.clone(),
-            created_at: session.created_at,
-            last_eval_at: session.last_eval_at,
-            vars,
-            params,
-        });
-    }
+    let rows: Vec<PersistedSession> = sessions_guard
+        .iter()
+        .map(|(id, session)| session_row(*id, session))
+        .collect();
     let file = PersistFile {
         persist_version: PERSIST_VERSION,
         sessions: rows,
@@ -118,43 +96,18 @@ pub async fn save_sessions(
 /// empty session map in either case, matching the legacy
 /// in-memory-only behavior.
 pub async fn load_sessions(path: &Path, sessions: &SessionMap, interrupts: &InterruptMap) {
-    let Ok(bytes) = std::fs::read(path) else {
+    let Some(file) = read_persist_file(path) else {
         return;
     };
-    let Ok(file): Result<PersistFile, _> = serde_json::from_slice(&bytes) else {
-        return;
-    };
-    if file.persist_version != PERSIST_VERSION {
-        // Unknown schema version: don't crash, just skip.
-        // (A future saga can add migration paths here.)
-        return;
-    }
     let mut sessions_guard = sessions.write().await;
     let mut interrupts_guard = interrupts.write().await;
     for row in file.sessions {
-        let mut env = Environment::default();
-        let params_set: HashMap<String, ()> = row.params.iter().map(|p| (p.clone(), ())).collect();
-        for v in row.vars {
-            let arr = match DenseArray::new(Shape::new(v.shape), v.data) {
-                Ok(a) => a,
-                Err(_) => continue,
-            };
-            env.set(v.name.clone(), arr);
-            if params_set.contains_key(&v.name) {
-                env.mark_param(&v.name);
-            }
-        }
-        let session = Session {
-            token: row.token.clone(),
-            env,
-            created_at: row.created_at,
-            last_eval_at: row.last_eval_at,
-        };
-        sessions_guard.insert(row.session_id, session);
+        let (id, token, session) = restore_row(row);
+        sessions_guard.insert(id, session);
         interrupts_guard.insert(
-            row.session_id,
+            id,
             InterruptEntry {
-                token: row.token,
+                token,
                 interrupt: Interrupt::new(),
             },
         );
@@ -165,7 +118,7 @@ pub async fn load_sessions(path: &Path, sessions: &SessionMap, interrupts: &Inte
 /// failure, no-op when no `--persist` path is configured.
 /// Lives here so `handlers.rs::eval_handler` stays under its
 /// sw-checklist 50-line budget after threading persistence.
-pub async fn maybe_flush(state: &crate::server::AppState) {
+pub async fn maybe_flush(state: &crate::config::AppState) {
     if let Some(path) = state.persist_path.as_deref()
         && let Err(e) = save_sessions(path, &state.sessions, &state.interrupts).await
     {
@@ -188,4 +141,64 @@ pub fn maybe_load(path: Option<&Path>, sessions: &SessionMap, interrupts: &Inter
     tokio::task::block_in_place(|| {
         tokio::runtime::Handle::current().block_on(load_sessions(&p, &s, &i));
     });
+}
+
+/// Snapshot one live session into its on-disk row. Pure.
+fn session_row(id: Uuid, session: &Session) -> PersistedSession {
+    let vars = session
+        .env
+        .vars_iter()
+        .map(|(name, arr)| PersistedVar {
+            name: name.clone(),
+            shape: arr.shape().dims().to_vec(),
+            data: arr.data().to_vec(),
+        })
+        .collect();
+    let params = session
+        .env
+        .vars_iter()
+        .filter(|(name, _)| session.env.is_param(name))
+        .map(|(name, _)| name.clone())
+        .collect();
+    PersistedSession {
+        session_id: id,
+        token: session.token.clone(),
+        created_at: session.created_at,
+        last_eval_at: session.last_eval_at,
+        vars,
+        params,
+    }
+}
+
+/// Rebuild a live session from its on-disk row, skipping any
+/// variable whose shape/data no longer reconstructs. Pure.
+fn restore_row(row: PersistedSession) -> (Uuid, String, Session) {
+    let mut env = Environment::default();
+    let params_set: HashMap<String, ()> = row.params.iter().map(|p| (p.clone(), ())).collect();
+    for v in row.vars {
+        let arr = match DenseArray::new(Shape::new(v.shape), v.data) {
+            Ok(a) => a,
+            Err(_) => continue,
+        };
+        env.set(v.name.clone(), arr);
+        if params_set.contains_key(&v.name) {
+            env.mark_param(&v.name);
+        }
+    }
+    let session = Session {
+        token: row.token.clone(),
+        env,
+        created_at: row.created_at,
+        last_eval_at: row.last_eval_at,
+    };
+    (row.session_id, row.token, session)
+}
+
+/// Read + parse the persist file; `None` for a missing, malformed,
+/// or unknown-schema-version file (a future saga can add migration
+/// paths). Callers treat `None` as "start empty" -- never an error.
+fn read_persist_file(path: &Path) -> Option<PersistFile> {
+    let bytes = std::fs::read(path).ok()?;
+    let file: PersistFile = serde_json::from_slice(&bytes).ok()?;
+    (file.persist_version == PERSIST_VERSION).then_some(file)
 }

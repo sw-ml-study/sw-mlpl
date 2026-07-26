@@ -117,25 +117,7 @@ fn run_main(args: Args) -> Result<(), String> {
     ))?;
     let peers = build_registry(args.peer_pairs.clone(), args.insecure_peers)?;
     print_banner(&args, &peers, tls.is_some());
-    let env_host = std::env::var("OLLAMA_HOST").ok();
-    let Args {
-        bind,
-        auth,
-        static_dir,
-        cors_allow,
-        persist,
-        ollama_host,
-        ollama_model,
-        ollama_allow,
-        ..
-    } = args;
-    let ollama = resolve_ollama(ollama_host, env_host, ollama_model, ollama_allow);
-    let serve = ServeConfig {
-        static_dir,
-        cors_origin: cors_allow,
-        persist_path: persist,
-        ollama,
-    };
+    let (bind, auth, serve) = serve_config(args);
     let cfg = RunConfig {
         addr: bind,
         auth_mode: auth,
@@ -228,4 +210,30 @@ pub(crate) fn print_usage() {
          \x20     serves the web UI at https://127.0.0.1:6464/sw-mlpl/\n\
          \x20     -- compatible with browsers that enforce HTTPS-First."
     );
+}
+
+/// Fold the parsed CLI flags (+ `OLLAMA_HOST`) into the bind
+/// address, auth mode, and `ServeConfig`. Pure except for the
+/// env read; extracted from `run_main` for the LOC budget.
+fn serve_config(args: Args) -> (std::net::SocketAddr, AuthMode, ServeConfig) {
+    let env_host = std::env::var("OLLAMA_HOST").ok();
+    let Args {
+        bind,
+        auth,
+        static_dir,
+        cors_allow,
+        persist,
+        ollama_host,
+        ollama_model,
+        ollama_allow,
+        ..
+    } = args;
+    let ollama = resolve_ollama(ollama_host, env_host, ollama_model, ollama_allow);
+    let serve = ServeConfig {
+        static_dir,
+        cors_origin: cors_allow,
+        persist_path: persist,
+        ollama,
+    };
+    (bind, auth, serve)
 }

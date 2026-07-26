@@ -1,6 +1,6 @@
 number = 3
 slug = "serve-split"
-status = "pending"
+status = "in-progress"
 description = "mlpl-serve 17 modules -> sibling crates by responsibility (handlers/session v..."
 role = "production"
 context_files = []

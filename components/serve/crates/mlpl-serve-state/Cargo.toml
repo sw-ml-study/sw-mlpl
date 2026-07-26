@@ -1,0 +1,24 @@
+[package]
+name = "mlpl-serve-state"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Server-state layer of the serve crate family: AppState, config,
+# peer registry, persistence, Ollama proxy, viz HTTP handlers. Split
+# from mlpl-serve (tech-debt spike step 003).
+[dependencies]
+mlpl-serve-core = { path = "../mlpl-serve-core" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
+bincode = "1"
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-web-viz-ir = { path = "../../../web-viz-ir/crates/mlpl-web-viz-ir" }
+axum = "0.7"
+reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tokio = { version = "1", features = ["sync", "rt", "fs"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+base64 = "0.22"
+sha2 = "0.10"

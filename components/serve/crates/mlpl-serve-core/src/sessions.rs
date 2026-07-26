@@ -24,6 +24,12 @@ use rand::distributions::Alphanumeric;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
+use axum::Json;
+use axum::http::{HeaderMap, StatusCode};
+
+use crate::auth::{AuthMode, check_token, extract_bearer};
+use crate::eval_viz::{ErrorResponse, json_err};
+
 const TOKEN_LEN: usize = 32;
 
 /// One client session. Holds the bearer token and a
@@ -126,4 +132,29 @@ fn generate_token() -> String {
         .take(TOKEN_LEN)
         .map(char::from)
         .collect()
+}
+
+/// Shared bearer gate for session-scoped handlers: `Ok(())` when
+/// `auth_mode` is `Disabled` or the request carries a bearer that
+/// matches `token`. Every session handler (eval, eval_stream,
+/// cancel, inspect, session-meta) had its own copy of this block;
+/// centralizing it here retires those duplicates.
+pub fn require_bearer(
+    auth_mode: AuthMode,
+    token: &str,
+    headers: &HeaderMap,
+) -> Result<(), (StatusCode, Json<ErrorResponse>)> {
+    let unauthorized = || {
+        (
+            StatusCode::UNAUTHORIZED,
+            json_err("missing or invalid authorization"),
+        )
+    };
+    if auth_mode == AuthMode::Required {
+        let provided = extract_bearer(headers).ok_or_else(unauthorized)?;
+        if !check_token(provided, token) {
+            return Err(unauthorized());
+        }
+    }
+    Ok(())
 }

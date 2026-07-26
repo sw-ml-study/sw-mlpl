@@ -8,9 +8,11 @@
 use std::net::SocketAddr;
 use std::path::PathBuf;
 
-use crate::auth::AuthMode;
-use crate::peers::PeerRegistry;
-use crate::server::TlsConfig;
+use crate::peers::{PeerRegistry, PeerSessionMap};
+use mlpl_serve_core::auth::AuthMode;
+use mlpl_serve_core::sessions::{InterruptMap, SessionMap};
+use mlpl_serve_core::store::SharedVizStore;
+use mlpl_serve_core::tls::TlsConfig;
 
 /// Default Ollama endpoint + model when nothing is configured. The
 /// model `"auto"` is a sentinel: pick a median-size installed model
@@ -101,4 +103,39 @@ pub struct RunConfig {
     pub peers: PeerRegistry,
     pub tls: TlsConfig,
     pub serve: ServeConfig,
+}
+
+// ---- Shared per-process server state (merged from app_state.rs) ----
+/// Shared state on the application: the session map,
+/// the peer registry (Saga R1 step 003), and the
+/// configured auth mode.
+#[derive(Clone)]
+pub struct AppState {
+    pub sessions: SessionMap,
+    /// Saga 21.5 step 003: parallel map keyed by
+    /// session id, holding `(token, Interrupt)` for
+    /// the `/cancel` handler so flipping the bool
+    /// does not have to take the sessions lock (which
+    /// is held by an in-flight eval).
+    pub interrupts: InterruptMap,
+    /// Saga 21.5 step 004: content-addressed store for
+    /// `POST /v1/viz` / `GET /v1/viz/:id`. The eval
+    /// pipeline detects SVG-returning programs and
+    /// stashes their bytes here so the eval response
+    /// can carry a `viz_url`.
+    pub viz: SharedVizStore,
+    pub peers: PeerRegistry,
+    pub peer_sessions: PeerSessionMap,
+    pub auth_mode: AuthMode,
+    /// Saga 21.5 step 010: when `Some`, every successful
+    /// `/eval` flushes the slim per-session state (token +
+    /// timestamps + variable bindings) to this JSON file so
+    /// a fresh `mlpl-serve` process can pick up where the
+    /// previous one left off. `None` keeps the legacy
+    /// in-memory-only behavior.
+    pub persist_path: Option<std::path::PathBuf>,
+    /// Phase 0 (local-gpu-agentic): server-owned Ollama defaults +
+    /// allow-list, read by the `/v1/ollama/*` endpoints so the web
+    /// `:ask` does not have to carry the host/model in its URL.
+    pub ollama: OllamaConfig,
 }

@@ -22,15 +22,17 @@ path = "src/main.rs"
 # `--features mlx` on Apple Silicon runs `device("mlx") { }` blocks
 # (forwarded from the connect-mode web demos) on the GPU in-process.
 # Off by default; non-Apple / CI builds stay CPU-only.
-mlx = ["mlpl-eval/mlx", "dep:mlpl-mlx-eval", "mlpl-mlx-eval/mlx"]
+mlx = ["mlpl-serve-core/mlx", "mlpl-eval/mlx", "dep:mlpl-mlx-eval", "mlpl-mlx-eval/mlx"]
 # Saga cuda-foundation step 007: pass through mlpl-eval's cuda feature
 # so a server built with `--features cuda` on Linux + NVIDIA runs
 # `device("cuda") { }` blocks (forwarded from connect-mode web demos)
 # on the GPU in-process. Off by default; non-Linux / CI builds stay
 # CPU-only. This is what makes this box a connect-mode CUDA peer.
-cuda = ["mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cuda-eval/cuda"]
+cuda = ["mlpl-serve-core/cuda", "mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cuda-eval/cuda"]
 
 [dependencies]
+mlpl-serve-core = { path = "../mlpl-serve-core" }
+mlpl-serve-state = { path = "../mlpl-serve-state" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 # `median_model` -- the shared `:ask` default-model policy (skip embedding

@@ -11,7 +11,7 @@ use axum::Router;
 /// `static_dir` mounts the UI under `/sw-mlpl`; `cors_origin` wraps
 /// `/v1/*` in a `tower-http` CORS layer for a cross-origin browser
 /// REPL. Each is a no-op when `None`.
-pub(crate) fn apply_static_and_cors(
+pub fn apply_static_and_cors(
     mut router: Router,
     static_dir: Option<PathBuf>,
     cors_origin: Option<String>,

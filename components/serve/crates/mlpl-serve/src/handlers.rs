@@ -11,19 +11,24 @@ use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
-use mlpl_eval::{Interrupt, Value};
+use mlpl_eval::Interrupt;
 use mlpl_parser::{lex, parse};
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use uuid::Uuid;
 
-use crate::auth::{AuthMode, check_token, extract_bearer};
 use crate::server::AppState;
+
+// Wire/response types + helpers shared with the lower layers live in
+// mlpl-serve-core; re-exported so crate::handlers:: paths keep working.
+pub use mlpl_serve_core::eval_viz::{
+    ErrorResponse, EvalRequest, EvalResponse, json_err, value_kind,
+};
 
 // Connect-telemetry step 003 (ratchet): the introspection handlers and
 // the eval-task machinery moved to sibling modules; re-export so
 // existing `crate::handlers::` / `mlpl_serve::handlers::` paths hold.
 pub(crate) use crate::handlers_eval_task::{spawn_eval, take_session_for_eval};
-pub use crate::handlers_inspect::{
+pub use mlpl_serve_state::handlers_inspect::{
     InspectResponse, SessionMetaResponse, VarSnapshot, inspect_handler, session_meta_handler,
 };
 
@@ -31,44 +36,6 @@ pub use crate::handlers_inspect::{
 pub struct CreateSessionResponse {
     pub session_id: Uuid,
     pub token: String,
-}
-
-#[derive(Deserialize)]
-pub struct EvalRequest {
-    pub program: String,
-}
-
-#[derive(Serialize)]
-pub struct EvalResponse {
-    pub value: String,
-    pub kind: &'static str,
-    /// Saga 21.5 step 004: when the eval returned an SVG-shaped
-    /// string, the server stashes the bytes in the `viz_storage`
-    /// content-addressed store and surfaces the URL here.
-    /// `None` (skipped on serialization) for non-SVG results.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub viz_url: Option<String>,
-    /// Saga 21.5 step 004: server-side path inside
-    /// `MLPL_CACHE_DIR` (when set) where the same SVG was also
-    /// written. The dev-loopback case (`mlpl-serve` and
-    /// `mlpl-repl` on one host) lets the client open the file
-    /// directly; absent when no cache dir is configured.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub viz_local_path: Option<String>,
-    /// Phase 1c: viz data so the connect-mode web UI can emit a 3D
-    /// sculpture for a server-evaluated result. `shape` empty +
-    /// `values`/`string_list` absent for non-array/list results.
-    #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub shape: Vec<usize>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub values: Option<Vec<f64>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub string_list: Option<Vec<String>>,
-    /// Phase 1c part 2: a model's Sankey decomposition, so a model
-    /// evaluated in connect mode renders its diagram. `None` for
-    /// non-model results.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub viz_node: Option<mlpl_web_viz_ir::VizNode>,
 }
 
 #[derive(Serialize)]
@@ -79,11 +46,6 @@ pub struct CancelResponse {
 #[derive(Serialize)]
 pub struct ResetResponse {
     pub cancelled: usize,
-}
-
-#[derive(Serialize)]
-pub struct ErrorResponse {
-    pub error: String,
 }
 
 #[derive(Serialize)]
@@ -122,10 +84,7 @@ pub async fn eval_handler(
     headers: HeaderMap,
     Json(body): Json<EvalRequest>,
 ) -> Result<Json<EvalResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let tokens =
-        lex(&body.program).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
-    let stmts =
-        parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
+    let stmts = parse_program(&body.program)?;
     let (session, interrupt) = take_session_for_eval(&state, id, &headers).await?;
     let rx = spawn_eval(&state, id, session, stmts);
     let mut guard = AbortGuard {
@@ -177,26 +136,14 @@ pub async fn cancel_handler(
     Path(id): Path<Uuid>,
     headers: HeaderMap,
 ) -> Result<Json<CancelResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let not_found = || (StatusCode::NOT_FOUND, json_err("unknown session"));
-    let unauthorized = || {
-        (
-            StatusCode::UNAUTHORIZED,
-            json_err("missing or invalid authorization"),
-        )
-    };
     let entry = state
         .interrupts
         .read()
         .await
         .get(&id)
         .cloned()
-        .ok_or_else(not_found)?;
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(&headers).ok_or_else(unauthorized)?;
-        if !check_token(provided, &entry.token) {
-            return Err(unauthorized());
-        }
-    }
+        .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
+    mlpl_serve_core::sessions::require_bearer(state.auth_mode, &entry.token, &headers)?;
     entry.interrupt.set();
     Ok(Json(CancelResponse { cancelled: true }))
 }
@@ -231,10 +178,6 @@ pub async fn health_handler() -> impl IntoResponse {
     })
 }
 
-pub(crate) fn json_err(msg: impl Into<String>) -> Json<ErrorResponse> {
-    Json(ErrorResponse { error: msg.into() })
-}
-
 /// Saga 21.5 step 003: clone the session's shared `Interrupt`
 /// out of the parallel map, `reset()` it (so a prior cancel
 /// doesn't contaminate this call), and install it into the
@@ -252,16 +195,51 @@ pub(crate) async fn install_session_interrupt(
     }
 }
 
-pub(crate) fn value_kind(value: &Value) -> &'static str {
-    match value {
-        Value::Array(_) => "array",
-        Value::Str(_) => "string",
-        Value::Model(_) => "model",
-        Value::Tokenizer(_) => "tokenizer",
-        Value::DeviceTensor { .. } => "device-tensor",
-        Value::BuiltinRef { .. } => "builtin-ref",
-        Value::Record { .. } => "record",
-        Value::StrList { .. } => "string-list",
-        Value::Result { .. } => "result",
-    }
+/// Lex + parse `program`, mapping either failure to a 400 with the
+/// debug-formatted error. Shared by `/eval` and `/eval_stream`.
+pub(crate) fn parse_program(
+    program: &str,
+) -> Result<Vec<mlpl_parser::Expr>, (StatusCode, Json<ErrorResponse>)> {
+    let tokens = lex(program).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
+    parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))
+}
+
+/// The full `/v1` route table over a ready `AppState`. Extracted
+/// from `server::build_app_with_peers_cors` for the LOC budget.
+pub(crate) fn v1_router(state: AppState) -> axum::Router {
+    use axum::routing::{get, post};
+    axum::Router::new()
+        .route("/v1/health", get(health_handler))
+        .route(
+            "/v1/devices",
+            get(mlpl_serve_core::devices::devices_handler),
+        )
+        .route("/v1/stats", get(mlpl_serve_core::devices::stats_handler))
+        .route("/v1/reset", post(reset_handler))
+        .route("/v1/sessions", post(create_session_handler))
+        .route("/v1/sessions/:id", get(session_meta_handler))
+        .route("/v1/sessions/:id/eval", post(eval_handler))
+        .route(
+            "/v1/sessions/:id/eval_stream",
+            post(crate::sse::eval_stream_handler),
+        )
+        .route("/v1/sessions/:id/cancel", post(cancel_handler))
+        .route("/v1/sessions/:id/inspect", get(inspect_handler))
+        .route(
+            "/v1/viz",
+            post(mlpl_serve_state::viz_handlers::upload_handler),
+        )
+        .route(
+            "/v1/viz/:id",
+            get(mlpl_serve_state::viz_handlers::get_handler),
+        )
+        .route(
+            "/v1/ollama/config",
+            get(mlpl_serve_state::ollama::config_handler),
+        )
+        .route(
+            "/v1/ollama/tags",
+            get(mlpl_serve_state::ollama::tags_handler),
+        )
+        .with_state(state)
 }

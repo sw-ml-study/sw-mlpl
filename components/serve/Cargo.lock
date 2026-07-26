@@ -2162,6 +2162,8 @@ dependencies = [
  "mlpl-monitor",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-serve-core",
+ "mlpl-serve-state",
  "mlpl-web-viz-ir",
  "rand 0.8.6",
  "rayon",
@@ -2177,6 +2179,50 @@ dependencies = [
  "tokio-stream",
  "tower 0.4.13",
  "tower-http 0.5.2",
+ "uuid",
+]
+
+[[package]]
+name = "mlpl-serve-core"
+version = "0.20.0"
+dependencies = [
+ "axum",
+ "axum-server",
+ "base64",
+ "mlpl-cli",
+ "mlpl-eval",
+ "mlpl-model-viz",
+ "mlpl-monitor",
+ "mlpl-web-viz-ir",
+ "rand 0.8.6",
+ "rcgen",
+ "rustls",
+ "serde",
+ "serde_json",
+ "sha2",
+ "subtle",
+ "tokio",
+ "tower-http 0.5.2",
+ "uuid",
+]
+
+[[package]]
+name = "mlpl-serve-state"
+version = "0.20.0"
+dependencies = [
+ "axum",
+ "base64",
+ "bincode",
+ "mlpl-array",
+ "mlpl-eval",
+ "mlpl-runtime",
+ "mlpl-serve-core",
+ "mlpl-web-viz-ir",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2",
+ "tokio",
  "uuid",
 ]
 
@@ -2892,6 +2938,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ef86cd5876211988985292b91c96a8f2d298df24e75989a43a3c73f2d4d8168b"
 dependencies = [
  "aws-lc-rs",
+ "log",
  "once_cell",
  "ring",
  "rustls-pki-types",

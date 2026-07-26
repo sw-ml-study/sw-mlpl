@@ -17,6 +17,12 @@ use mlpl_eval::EvalError;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
+#[derive(Serialize)]
+pub struct EvalOnDeviceBinding {
+    pub name: String,
+    pub tensor: String,
+}
+
 const PEER_TIMEOUT_SECS: u64 = 600;
 
 /// One registered peer. The blocking reqwest client
@@ -173,7 +179,7 @@ impl PeerSessionMap {
 
 pub fn encode_bindings(
     bindings: HashMap<String, DenseArray>,
-) -> Result<Vec<crate::server::EvalOnDeviceBinding>, EvalError> {
+) -> Result<Vec<EvalOnDeviceBinding>, EvalError> {
     bindings
         .into_iter()
         .map(|(name, arr)| {
@@ -187,7 +193,7 @@ pub fn encode_bindings(
                 data,
             })
             .map_err(|e| EvalError::Unsupported(format!("wire encode: {e}")))?;
-            Ok(crate::server::EvalOnDeviceBinding {
+            Ok(EvalOnDeviceBinding {
                 name,
                 tensor: BASE64.encode(bytes),
             })

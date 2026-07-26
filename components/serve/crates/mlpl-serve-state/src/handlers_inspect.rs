@@ -10,9 +10,8 @@ use mlpl_eval::Environment;
 use serde::Serialize;
 use uuid::Uuid;
 
-use crate::auth::{AuthMode, check_token, extract_bearer};
-use crate::handlers::{ErrorResponse, json_err};
-use crate::server::AppState;
+use crate::config::AppState;
+use mlpl_serve_core::eval_viz::{ErrorResponse, json_err};
 
 const VARS_CAP: usize = 200;
 
@@ -65,18 +64,7 @@ pub async fn inspect_handler(
     let session = sessions
         .get(&id)
         .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(&headers).ok_or((
-            StatusCode::UNAUTHORIZED,
-            json_err("missing or invalid authorization"),
-        ))?;
-        if !check_token(provided, &session.token) {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                json_err("missing or invalid authorization"),
-            ));
-        }
-    }
+    mlpl_serve_core::sessions::require_bearer(state.auth_mode, &session.token, &headers)?;
     Ok(Json(snapshot_env(&session.env)))
 }
 
@@ -94,18 +82,7 @@ pub async fn session_meta_handler(
     let session = sessions
         .get(&id)
         .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
-    if state.auth_mode == AuthMode::Required {
-        let provided = extract_bearer(&headers).ok_or((
-            StatusCode::UNAUTHORIZED,
-            json_err("missing or invalid authorization"),
-        ))?;
-        if !check_token(provided, &session.token) {
-            return Err((
-                StatusCode::UNAUTHORIZED,
-                json_err("missing or invalid authorization"),
-            ));
-        }
-    }
+    mlpl_serve_core::sessions::require_bearer(state.auth_mode, &session.token, &headers)?;
     let snap = snapshot_env(&session.env);
     Ok(Json(SessionMetaResponse {
         session_id: id,

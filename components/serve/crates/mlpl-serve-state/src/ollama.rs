@@ -11,7 +11,7 @@ use axum::http::StatusCode;
 use serde::Deserialize;
 use serde_json::{Value, json};
 
-use crate::server::AppState;
+use crate::config::AppState;
 
 /// Optional `?host=` override for `GET /v1/ollama/tags`.
 #[derive(Deserialize)]

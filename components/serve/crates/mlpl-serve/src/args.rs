@@ -49,6 +49,21 @@ fn apply_one_arg<I: Iterator<Item = String>>(
             };
         }
         "--peer" => acc.peer_pairs.push(parse_peer_arg(&need(it, "--peer")?)?),
+        other => return apply_extra_arg(other, it, acc),
+    }
+    Ok(())
+}
+
+/// Second half of the flag table: TLS, CORS, persistence, and
+/// Ollama flags, plus help/unknown. Split from `apply_one_arg`
+/// for the function-LOC budget.
+fn apply_extra_arg<I: Iterator<Item = String>>(
+    arg: &str,
+    it: &mut I,
+    acc: &mut Args,
+) -> Result<(), String> {
+    let need = |it: &mut I, flag: &str| it.next().ok_or_else(|| format!("{flag} requires a value"));
+    match arg {
         "--insecure-peers" => acc.insecure_peers = true,
         "--static-dir" => acc.static_dir = Some(parse_static_dir(need(it, "--static-dir")?)?),
         "--tls-cert" => acc.tls_cert = Some(PathBuf::from(need(it, "--tls-cert")?)),
