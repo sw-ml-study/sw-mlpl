@@ -12,6 +12,11 @@ work is not reflected there, the next session cannot see it.
 Before reporting work as complete:
 
 - Confirm the active step is reflected in `.agentrail/` and committed.
+- Scope test runs to the top-level cargo workspaces (components)
+  you actually changed -- plus dependents that compile your change
+  via path deps. Never run the all-components sweep for a scoped
+  change; per-crate `cargo test -p` is the default. (Full policy:
+  CLAUDE.md "Scope tests to what you changed".)
 - Run the project's pre-commit gate (tests, lint, format) before
   `agentrail complete`, not after.
 - If you discover unplanned work, prefer `agentrail insert` / `agentrail add`
@@ -308,6 +313,27 @@ cargo fmt --all -- --check                          # check format
 markdown-checker -f "**/*.md"                       # validate markdown
 sw-checklist                                        # project standards
 ```
+
+### Scope tests to what you changed (MANDATORY)
+
+This is a multi-workspace monorepo: each `components/<name>/` is
+its own top-level cargo workspace. Before a commit:
+
+- Run tests ONLY in the components (workspaces) where you made
+  changes, plus any component whose tests exercise the changed
+  code through a path dependency (e.g. `components/web`'s
+  connect/streaming harnesses build `mlpl-serve`).
+- Within a workspace, prefer per-crate / per-test-file scoping
+  (`cargo test -p <crate>`, `cargo test -p <crate> --test <file>`)
+  over the bare workspace run when only one crate changed.
+- Do NOT run the full cross-workspace test sweep "just to be
+  safe" -- it wastes minutes-to-hours (the mlpl-eval suite alone
+  is 900+ tests) and adds nothing for an isolated change. CI and
+  dedicated release steps own the full sweep.
+- fmt / clippy follow the same rule: run them in the touched
+  workspaces, not repo-wide.
+- sw-checklist and markdown-checker stay repo-wide (they are
+  fast and their budgets are global).
 
 ## CRITICAL: AgentRail Session Protocol (MUST follow exactly)
 
