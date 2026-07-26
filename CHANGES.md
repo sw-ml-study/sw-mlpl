@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-26
 
+- step 005-functional-lenses: record completion
+- feat(demos): functional-lens finale in Structure Zoo + lens design note
+- docs(changes): refresh CHANGES.md to HEAD
 - step 004-demo-session-continuity: record completion
 - chore(pages): rebuild for demo session continuity + :ask multi-demo grounding
 - fix(web): demos run in the SAME REPL session; :ask sees all of them
