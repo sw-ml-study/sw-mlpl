@@ -1,5 +1,10 @@
 [workspace]
-members = ["crates/mlpl-mlx-serve", "crates/mlpl-serve"]
+members = [
+    "crates/mlpl-mlx-serve",
+    "crates/mlpl-serve",
+    "crates/mlpl-serve-core",
+    "crates/mlpl-serve-state",
+]
 resolver = "2"
 [workspace.package]
 edition = "2024"
