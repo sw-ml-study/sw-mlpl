@@ -119,10 +119,10 @@ fn schedule_demo_line(
     #[cfg(target_arch = "wasm32")]
     {
         let lt = line.trim_start();
+        let cap = mlpl_web_demos::capability_for(demo.name);
         let server_side = mlpl_web_eval::eval_url::is_connected()
             && (lt.starts_with(":ask")
-                || (mlpl_web_demos::capability_for(demo.name).requires_connect
-                    && !lt.starts_with(':')));
+                || ((cap.requires_connect || cap.prefers_connect) && !lt.starts_with(':')));
         mlpl_web_eval::telemetry_trace::begin(server_side);
     }
     push_running_marker(&mut entries, line);
@@ -223,6 +223,7 @@ fn dispatch_demo_line_connected(
     // server so the browser main thread stays responsive (no "page
     // unresponsive" freeze) and the GPU does the work. CPU-tier demos
     // route only :ask/:models and keep plain lines local (3D).
-    let route_all = mlpl_web_demos::capability_for(demo.name).requires_connect;
+    let cap = mlpl_web_demos::capability_for(demo.name);
+    let route_all = cap.requires_connect || cap.prefers_connect;
     crate::connect::dispatch_demo_line(line, entries, route_all, cont)
 }

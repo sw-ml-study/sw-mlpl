@@ -53,6 +53,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),
             (
+                "emit_frame",
+                "emit_frame(name, step, x)",
+                "stream tensor x as a live frame (connect mode); no-op locally; returns x",
+            ),
+            (
                 "rotate",
                 "rotate(x, k, axis)",
                 "cyclic shift along axis; negative k (spell it 0 - k) rotates the other way",

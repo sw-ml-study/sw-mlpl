@@ -183,7 +183,7 @@ lines = [
     "F = reshape(G, [1, 7, 7])                            # frames tensor, generation 0",
     "g = G",
     "i = 0",
-    "while lt(i, 23) { g = u:life(g); F = concat(F, reshape(g, [1, 7, 7]), 0); i = i + 1 }  # 24 generations",
+    "while lt(i, 23) { g = u:life(g); emit_frame(\"life\", i, g); F = concat(F, reshape(g, [1, 7, 7]), 0); i = i + 1 }  # 24 generations; emit_frame streams each board LIVE in connect mode",
     "shape(F)                                             # [24, 7, 7]",
     "svg(F, \"life\")                                      # the animated grid: one self-contained SVG value",
 ]
@@ -1723,6 +1723,14 @@ lines = [
 # live beside the demos themselves. build.rs generates DEMO_CAPABILITIES,
 # LITERATE_DOCS, and PROGRESS_NOTES from these.
 # ============================================================
+
+[[capabilities]]
+# Runs fine in the browser; when a server is connected the whole
+# demo routes server-side so emit_frame() streams the live board.
+name = "Game of Life (APL classic)"
+requires_connect = false
+prefers_connect = true
+device = "cpu"
 
 [[capabilities]]
 name = "Ask Ollama (contextual)"

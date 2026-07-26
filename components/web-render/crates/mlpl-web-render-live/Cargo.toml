@@ -14,5 +14,10 @@ path = "src/lib.rs"
 # downstream UI crates keep building on the native test target.
 [dependencies]
 mlpl-web-eval = { path = "../../../wasm/crates/mlpl-web-eval" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+# The live board reuses the same "life" grid renderer the SMIL
+# widget uses (T = 1 -> static grid), so live and persisted views
+# cannot drift.
+mlpl-viz-marks = { path = "../../../viz/crates/mlpl-viz-marks" }
 gloo = { version = "0.11", features = ["timers"] }
 yew = { version = "0.21", features = ["csr"] }

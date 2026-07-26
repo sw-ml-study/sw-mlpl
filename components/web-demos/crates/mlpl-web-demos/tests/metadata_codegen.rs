@@ -10,8 +10,8 @@ use mlpl_web_demos::{DEMO_CAPABILITIES, LITERATE_DOCS, PROGRESS_NOTES, progress_
 fn metadata_tables_survive_codegen() {
     assert_eq!(
         DEMO_CAPABILITIES.len(),
-        5,
-        "connect/GPU capability overrides"
+        6,
+        "connect/GPU/prefers-connect capability overrides"
     );
     assert_eq!(LITERATE_DOCS.len(), 5, "literate walkthrough links");
     assert_eq!(PROGRESS_NOTES.len(), 19, "long-run heads-up notes");

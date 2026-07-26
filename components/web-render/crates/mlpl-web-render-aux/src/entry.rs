@@ -106,6 +106,11 @@ fn render_running(entry: &HistoryEntry) -> Html {
             // eval actually streams metric frames.
             <mlpl_web_render_live::loss_panel::LiveLossPanel
                 key={format!("loss-{}", mlpl_web_eval::telemetry_trace::current_gen())} />
+            // Live board grid for streamed evals that emit tensor
+            // frames via emit_frame() (Game of Life saga step 4);
+            // renders nothing until a frame actually arrives.
+            <mlpl_web_render_live::loss_panel::LiveLifePanel
+                key={format!("life-{}", mlpl_web_eval::telemetry_trace::current_gen())} />
         </div>
     }
 }

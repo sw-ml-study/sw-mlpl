@@ -1,6 +1,6 @@
 number = 9
 slug = "life-live-frame-trace"
-status = "pending"
+status = "in-progress"
 description = "Game of Life saga step 4: live frame_trace finale. Add a 'frame' SSE event (n..."
 role = "production"
 context_files = []

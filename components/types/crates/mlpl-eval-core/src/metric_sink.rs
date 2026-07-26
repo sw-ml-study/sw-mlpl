@@ -18,4 +18,12 @@ pub trait MetricSink: Send + Sync + std::fmt::Debug {
     /// iteration index; `value` is the scalar contents of the
     /// `DenseArray`.
     fn emit(&self, name: &str, step: usize, value: f64);
+
+    /// Game of Life saga step 4: called by the `emit_frame(name,
+    /// step, x)` builtin with a whole TENSOR per emission -- the
+    /// frame-stream analog of `emit`. Default no-op so scalar-only
+    /// sinks (and every existing implementor) need no change.
+    fn emit_frame(&self, name: &str, step: usize, shape: &[usize], values: &[f64]) {
+        let _ = (name, step, shape, values);
+    }
 }

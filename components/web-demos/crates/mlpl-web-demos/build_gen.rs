@@ -33,6 +33,8 @@ struct DemoRow {
 struct CapRow {
     name: String,
     requires_connect: bool,
+    #[serde(default)]
+    prefers_connect: bool,
     device: String,
 }
 
@@ -86,9 +88,10 @@ fn render_meta(doc: &Doc) -> String {
         .iter()
         .map(|c| {
             format!(
-                "({:?},Capability{{requires_connect:{},device:{}}}),",
+                "({:?},Capability{{requires_connect:{},prefers_connect:{},device:{}}}),",
                 c.name,
                 c.requires_connect,
+                c.prefers_connect,
                 device(&c.device)
             )
         })

@@ -103,7 +103,7 @@ async fn read_sse_stream(
         .get_reader()
         .dyn_into()
         .map_err(|_| "no stream reader".to_string())?;
-    let mut feed = SseFeed::default();
+    let mut feed = SseFeed::default().with_generation(crate::telemetry_trace::current_gen());
     loop {
         let chunk = wasm_bindgen_futures::JsFuture::from(reader.read())
             .await

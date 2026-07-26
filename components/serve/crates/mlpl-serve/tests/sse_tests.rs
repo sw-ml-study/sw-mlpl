@@ -323,3 +323,32 @@ async fn eval_stream_emits_implicit_loss_for_plain_train() {
         );
     }
 }
+
+#[tokio::test]
+async fn eval_stream_emits_frame_events_for_emit_frame_calls() {
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+    let program = "g = reshape(iota(4), [2, 2]); i = 0; while lt(i, 3) { emit_frame(\"life\", i, g); i = i + 1 }";
+    let resp = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/sessions/{id}/eval_stream"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({ "program": program }))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200);
+    let frames = read_sse_frames(resp).await;
+    let tensor_frames: Vec<&SseFrame> = frames.iter().filter(|f| f.event == "frame").collect();
+    assert_eq!(
+        tensor_frames.len(),
+        3,
+        "one frame event per emit_frame call"
+    );
+    let f0 = &tensor_frames[0].data;
+    assert_eq!(f0["name"], "life");
+    assert_eq!(f0["shape"], serde_json::json!([2, 2]));
+    assert_eq!(f0["values"], serde_json::json!([0.0, 1.0, 2.0, 3.0]));
+    assert_eq!(tensor_frames[2].data["step"], 2);
+    let terminals: Vec<&SseFrame> = frames.iter().filter(|f| f.event == "done").collect();
+    assert_eq!(terminals.len(), 1);
+}

@@ -57,7 +57,9 @@ pub fn program_streams_metrics(program: &str) -> bool {
     if t.starts_with(':') || t.starts_with("llm_call(") {
         return false;
     }
-    has_train_block(t)
+    // `emit_frame(...)` lines stream live tensor frames (Game of
+    // Life saga step 4) exactly like train blocks stream metrics.
+    has_train_block(t) || t.contains("emit_frame(")
 }
 
 /// `train` as a standalone word with a `{` somewhere after it, so

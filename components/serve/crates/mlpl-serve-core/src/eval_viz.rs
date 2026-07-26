@@ -123,6 +123,16 @@ pub enum SseEvent {
         step: usize,
         value: f64,
     },
+    /// One live tensor frame from the `emit_frame(name, step, x)`
+    /// builtin (Game of Life saga step 4) -- the whole-tensor
+    /// analog of `Metric`. Carries shape + flat values so the
+    /// client can rebuild and render the board mid-eval.
+    Frame {
+        name: String,
+        step: usize,
+        shape: Vec<usize>,
+        values: Vec<f64>,
+    },
     Done {
         value: String,
         kind: &'static str,
@@ -181,6 +191,15 @@ impl SseEvent {
             Self::Metric { name, step, value } => (
                 "metric".to_string(),
                 serde_json::json!({"name": name, "step": step, "value": value}),
+            ),
+            Self::Frame {
+                name,
+                step,
+                shape,
+                values,
+            } => (
+                "frame".to_string(),
+                serde_json::json!({"name": name, "step": step, "shape": shape, "values": values}),
             ),
             Self::Done {
                 value,

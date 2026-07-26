@@ -11,10 +11,12 @@ use mlpl_viz_core::VizError;
 
 /// Seconds each generation stays on screen.
 const FRAME_SECS: f64 = 0.35;
-/// Cell edge in SVG units.
-const CELL: f64 = 14.0;
+/// Cell edge in SVG units. Sized so a small board (7x7) renders
+/// at ~270px -- reviewer feedback: the first cut (14.0) was too
+/// small to watch.
+const CELL: f64 = 36.0;
 /// Outer margin in SVG units.
-const MARGIN: f64 = 8.0;
+const MARGIN: f64 = 12.0;
 
 /// Render the frames tensor as an SMIL-animated life grid.
 pub fn render_life(frames: &DenseArray) -> Result<String, VizError> {
@@ -57,9 +59,9 @@ fn write_frame(out: &mut String, data: &[f64], (i, t): (usize, usize), (h, w): (
     for r in 0..h {
         for c in 0..w {
             if data[(i * h + r) * w + c] > 0.5 {
-                let x = MARGIN + c as f64 * CELL + 1.0;
-                let y = MARGIN + r as f64 * CELL + 1.0;
-                let s = CELL - 2.0;
+                let x = MARGIN + c as f64 * CELL + 2.0;
+                let y = MARGIN + r as f64 * CELL + 2.0;
+                let s = CELL - 4.0;
                 out.push_str(&format!(
                     "<rect x=\"{x}\" y=\"{y}\" width=\"{s}\" height=\"{s}\" \
                      fill=\"#a6e3a1\" rx=\"2\"/>"

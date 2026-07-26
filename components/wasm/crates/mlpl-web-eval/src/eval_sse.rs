@@ -48,6 +48,20 @@ pub struct SseFeed {
     buf: Vec<u8>,
     event: Option<String>,
     data: Option<String>,
+    /// Eval generation whose `event: frame` payloads land in
+    /// `frame_trace`. 0 (the default) still stores -- native
+    /// callers that never read the store just overwrite slot 0.
+    gen_id: u32,
+}
+
+impl SseFeed {
+    /// Route this feed's `event: frame` payloads to `gen_id`'s
+    /// `frame_trace` slot (Game of Life saga step 4).
+    #[must_use]
+    pub fn with_generation(mut self, gen_id: u32) -> Self {
+        self.gen_id = gen_id;
+        self
+    }
 }
 
 impl SseFeed {
@@ -70,7 +84,7 @@ impl SseFeed {
     /// `event:` / `data:` prefixes accumulate into it.
     fn take_line(&mut self, line: &str, on_metric: &mut MetricCb) -> Option<StreamOutcome> {
         if line.is_empty() {
-            return dispatch_sse_frame(self.event.take(), self.data.take(), on_metric);
+            return dispatch_sse_frame(self.event.take(), self.data.take(), on_metric, self.gen_id);
         }
         if let Some(rest) = line.strip_prefix("event:") {
             self.event = Some(rest.trim().to_string());
@@ -109,6 +123,7 @@ fn dispatch_sse_frame(
     event: Option<String>,
     data: Option<String>,
     on_metric: &mut MetricCb,
+    gen_id: u32,
 ) -> Option<StreamOutcome> {
     let (Some(event), Some(data)) = (event, data) else {
         return None;
@@ -120,6 +135,10 @@ fn dispatch_sse_frame(
             step: v.get("step")?.as_u64()? as usize,
             value: v.get("value")?.as_f64()?,
         });
+        return None;
+    }
+    if event == "frame" {
+        crate::frame_trace::push_json(&v, gen_id);
         return None;
     }
     terminal_outcome(&event, &v)

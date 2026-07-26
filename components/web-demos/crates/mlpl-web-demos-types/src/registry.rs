@@ -34,6 +34,12 @@ pub struct Capability {
     /// demos render visible-but-not-runnable on the public live
     /// demo (which has no server).
     pub requires_connect: bool,
+    /// Game of Life saga step 4: true when the demo runs fine
+    /// locally but should route ALL its lines server-side WHEN a
+    /// server is connected -- so `emit_frame` lines stream live
+    /// tensor frames without splitting session state. Never gates
+    /// runnability.
+    pub prefers_connect: bool,
     pub device: Device,
 }
 
@@ -41,6 +47,7 @@ impl Capability {
     /// The default tier: CPU, runnable on the public live demo.
     pub const CPU_LIVE: Self = Self {
         requires_connect: false,
+        prefers_connect: false,
         device: Device::Cpu,
     };
 }

@@ -32,6 +32,15 @@ pub struct ChannelMetricSink {
 }
 
 impl MetricSink for ChannelMetricSink {
+    fn emit_frame(&self, name: &str, step: usize, shape: &[usize], values: &[f64]) {
+        let _ = self.tx.blocking_send(SseEvent::Frame {
+            name: name.to_string(),
+            step,
+            shape: shape.to_vec(),
+            values: values.to_vec(),
+        });
+    }
+
     fn emit(&self, name: &str, step: usize, value: f64) {
         let _ = self.tx.blocking_send(SseEvent::Metric {
             name: name.to_string(),
@@ -62,24 +71,43 @@ fn spawn_eval_task(
             (session, value)
         })
         .await;
-        let (mut session, value) = match join {
-            Ok(t) => t,
-            Err(_) => {
-                let _ = tx
-                    .send(SseEvent::Error {
-                        error: "eval task panicked".into(),
-                    })
-                    .await;
-                return;
-            }
-        };
-        session.env.clear_metric_sink();
-        session.env.clear_peer_dispatcher();
-        session.env.clear_interrupt();
-        let terminal = crate::viz_storage::result_to_sse(&viz, value).await;
-        let _ = tx.send(terminal).await;
-        sessions_map.write().await.insert(id, session);
+        finish_stream_session(id, join, sessions_map, viz, tx).await;
     });
+}
+
+/// After the blocking eval returns: detach the streaming plumbing,
+/// send the terminal frame (attaching any viz), and put the session
+/// back in the map. Extracted from `spawn_eval_task` for the LOC
+/// budget.
+type EvalJoin = Result<
+    (
+        crate::sessions::Session,
+        Result<mlpl_eval::Value, mlpl_eval::EvalError>,
+    ),
+    tokio::task::JoinError,
+>;
+
+async fn finish_stream_session(
+    id: Uuid,
+    join: EvalJoin,
+    sessions_map: crate::sessions::SessionMap,
+    viz: crate::viz_storage::SharedVizStore,
+    tx: mpsc::Sender<SseEvent>,
+) {
+    let Ok((mut session, value)) = join else {
+        let _ = tx
+            .send(SseEvent::Error {
+                error: "eval task panicked".into(),
+            })
+            .await;
+        return;
+    };
+    session.env.clear_metric_sink();
+    session.env.clear_peer_dispatcher();
+    session.env.clear_interrupt();
+    let terminal = crate::viz_storage::result_to_sse(&viz, value).await;
+    let _ = tx.send(terminal).await;
+    sessions_map.write().await.insert(id, session);
 }
 
 /// `POST /v1/sessions/:id/eval_stream` -- requires bearer when
