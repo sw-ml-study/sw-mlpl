@@ -533,6 +533,25 @@ lines = [
 ]
 
 [[demos]]
+category = "Classical ML"
+name = "K-Nearest Neighbors"
+intro = "Classical ML as pure array algebra: k-nearest-neighbors has NO training phase -- the distance matrix IS the model. 60 labeled points in three clusters, 24 fresh test points, and every test-to-train distance computed in ONE matmul via the |a|^2 + |b|^2 - 2ab identity (checked against the pairwise_sqdist builtin to ~1e-15). Five rounds of argmax-and-mask pick each point's five nearest neighbors, a one-hot matmul counts their votes, and the majority label wins. Runs entirely in the browser."
+takeaway = "kNN classifies the fresh points perfectly while always-guess-one-class scores 0.33 -- and the whole classifier was six array expressions with no gradient in sight. Compare K-Means (same distance trick, but unsupervised: it must DISCOVER the groups) and Logistic Regression (which LEARNS a boundary instead of memorizing the data; kNN keeps every training point forever). This is the book chapter 'K-Nearest Neighbors' as an array program."
+lines = [
+    "B = blobs(7, 20, [[0, 0], [4, 4], [0 - 4, 4]])  # 60 labeled training points, three clusters -- [[k-Nearest Neighbors]] has no training step",
+    'svg(B, "scatter")                               # the training data, colored by TRUE label',
+    "Xtr = matmul(B, [[1, 0], [0, 1], [0, 0]]) ; Ytr = take(transpose(B), 0, 2)  # features [60, 2] and labels [60]",
+    "T = blobs(8, 8, [[0, 0], [4, 4], [0 - 4, 4]]) ; Xte = matmul(T, [[1, 0], [0, 1], [0, 0]]) ; Yte = take(transpose(T), 0, 2)  # 24 FRESH points from the same clusters",
+    "tr2 = reduce_add(Xtr * Xtr, 1) ; te2 = reduce_add(Xte * Xte, 1)  # squared norms of every row",
+    "D = matmul(reshape(te2, [24, 1]), fill([1, 60], 1)) + matmul(fill([24, 1], 1), reshape(tr2, [1, 60])) - 2 * matmul(Xte, transpose(Xtr))  # |a|^2 + |b|^2 - 2ab: all 24x60 distances in one matmul",
+    "mean(abs(matmul(reshape(tr2, [60, 1]), fill([1, 60], 1)) + matmul(fill([60, 1], 1), reshape(tr2, [1, 60])) - 2 * matmul(Xtr, transpose(Xtr)) - pairwise_sqdist(Xtr)))  # our identity vs the pairwise_sqdist builtin: ~0",
+    "votes = fill([24, 3], 0) ; Dm = D ; for r in iota(5) { nn = argmax(0 - Dm, 1) ; sel = one_hot(nn, 60) ; votes = votes + matmul(sel, one_hot(Ytr, 3)) ; Dm = Dm + sel * 1000000 }  # five rounds of nearest-then-mask = each point votes its 5 neighbors",
+    "pred = argmax(votes, 1)                          # majority label among the 5 neighbors",
+    "concat(reshape(mean(eq(pred, Yte)), [1]), reshape(mean(eq(fill([24], 0), Yte)), [1]), 0)  # [kNN accuracy, always-guess-one-class baseline]",
+    'svg(concat(Xte, reshape(pred, [24, 1]), 1), "scatter")  # test points colored by PREDICTED label -- compare with the first plot',
+]
+
+[[demos]]
 category = "Classification"
 name = "Logistic Regression"
 intro = "The hello-world of supervised learning: 2D AND with hand-rolled gradient descent, final-accuracy check, a bar chart of per-point predictions, and a 1D loss sweep along the weight direction showing the minimum the optimizer found."

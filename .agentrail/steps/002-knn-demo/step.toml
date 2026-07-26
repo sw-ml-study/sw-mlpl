@@ -1,6 +1,6 @@
 number = 2
 slug = "knn-demo"
-status = "pending"
+status = "in-progress"
 description = "K-Nearest Neighbors demo per docs/future-saga-classical-ml.md step 2: blobs d..."
 role = "production"
 context_files = []

@@ -21,6 +21,12 @@ use mlpl_web_demos::DEMOS;
 const SKIP_DEMOS: &[&str] = &[
     "LLM Tool Use",
     "MLX Remote Runner",
+    // 1500-step LoRA fine-tunes of a tiny transformer LM: ~45 min on the
+    // CPU fallback of a GPU-less test host (seconds on the GPU). Heavy
+    // test covers them. (Their absence here was the quick suite's
+    // 45-minute hang, found 2026-07-25.)
+    "CUDA LoRA fine-tune",
+    "MLX LoRA fine-tune",
     // 1500-step fine-tune over the full policy dataset: ~minutes on the
     // CPU fallback (it runs in ~2s on the GPU). Heavy test covers it.
     "MLX tic-tac-toe fine-tune",
@@ -98,9 +104,17 @@ fn every_quick_web_demo_runs() {
         if SKIP_DEMOS.contains(&demo.name) {
             continue;
         }
+        // Per-demo wall clock (visible with --nocapture) so a demo that
+        // regresses into minutes is identifiable without bisection.
+        let started = std::time::Instant::now();
         if let Err(msg) = run_demo(demo.name, demo.lines) {
             failures.push(msg);
         }
+        eprintln!(
+            "  quick-demo {:>6.2?}s  {}",
+            started.elapsed().as_secs_f64(),
+            demo.name
+        );
     }
     assert!(
         failures.is_empty(),
