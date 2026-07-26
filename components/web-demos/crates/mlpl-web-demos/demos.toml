@@ -665,6 +665,28 @@ lines = [
 ]
 
 [[demos]]
+category = "Classical ML"
+name = "Naive Bayes (Gaussian)"
+intro = "A generative classifier with NO training loop: fit per-class feature means and variances with two masked matmuls, then classify by argmax over summed log-densities (Bayes' rule with the 'naive' independence assumption). Same two-moons data the Moons MLP demo trains on -- so you can see what the Gaussian assumption buys and what it costs. The probability-surface heatmap shows the smooth quadratic boundary NB draws; the accuracy line shows it scoring ~0.85 where the MLP reaches ~1.0."
+takeaway = "Generative vs discriminative on one dataset: Naive Bayes MODELS each class as a Gaussian cloud (closed-form fit, instant, stable -- train and test accuracy nearly identical because there is nothing to overfit) and gets a smooth boundary that misses the crescent tips; the Moons MLP LEARNS whatever boundary the data demands and nails them. Neither is 'better' -- one buys speed and calibration from assumptions, the other buys flexibility with gradient descent. This is the book chapter 'Naive Bayes' as six array expressions."
+lines = [
+    "M = moons(7, 100, 0.2)                          # two crescents, 100 labeled points -- the Moons MLP demo's dataset",
+    'svg(M, "scatter")                               # the training data, colored by TRUE label',
+    "X = matmul(M, [[1, 0], [0, 1], [0, 0]]) ; Y = take(transpose(M), 0, 2)  # features [100, 2] and labels [100]",
+    "mask = one_hot(Y, 2) ; counts = reduce_add(mask, 0)  # class masks -> per-class counts [50, 50]",
+    "mu = matmul(transpose(mask), X) / matmul(reshape(counts, [2, 1]), fill([1, 2], 1))  # per-class feature MEANS: one masked matmul, no loop",
+    "s2 = matmul(transpose(mask), X * X) / matmul(reshape(counts, [2, 1]), fill([1, 2], 1)) - mu * mu + 0.001  # per-class VARIANCES (E[x^2] - mu^2, floored for the log)",
+    "prior = counts / 100                             # class priors -- that is the ENTIRE fit; [[Naive Bayes]] has no training loop",
+    "def u:loglik(P, c) { n = take(shape(P), 0, 0) ; MU = matmul(fill([n, 1], 1), reshape(take(mu, 0, c), [1, 2])) ; S2 = matmul(fill([n, 1], 1), reshape(take(s2, 0, c), [1, 2])) ; reduce_add(0 - 0.5 * log(2 * 3.141592653589793 * S2) - (P - MU) * (P - MU) / (2 * S2), 1) + log(take(prior, 0, c)) }  # Gaussian log-density + log prior, vectorized over points",
+    "T = moons(8, 60, 0.2) ; Xte = matmul(T, [[1, 0], [0, 1], [0, 0]]) ; Yte = take(transpose(T), 0, 2)  # 60 FRESH points",
+    "pred = gt(u:loglik(Xte, 1), u:loglik(Xte, 0))    # Bayes' rule: pick the class with the higher posterior",
+    "concat(reshape(mean(eq(pred, Yte)), [1]), reshape(mean(eq(gt(u:loglik(X, 1), u:loglik(X, 0)), Y)), [1]), 0)  # [test accuracy, train accuracy] -- nearly equal: nothing to overfit",
+    "GX = matmul(fill([40, 1], 1), reshape(linspace(0 - 1.5, 2.5, 40), [1, 40])) ; GY = matmul(reshape(linspace(1.5, 0 - 1.0, 40), [40, 1]), fill([1, 40], 1)) ; grid = concat(reshape(GX, [1600, 1]), reshape(GY, [1600, 1]), 1)  # a 40x40 grid over the plane",
+    'svg(reshape(sigmoid(u:loglik(grid, 1) - u:loglik(grid, 0)), [40, 40]), "heatmap")  # P(class 1) over the plane -- the smooth boundary the Gaussian assumption draws',
+    'svg(concat(Xte, reshape(pred, [60, 1]), 1), "scatter")  # test points colored by PREDICTED label',
+]
+
+[[demos]]
 category = "Dim Reduction"
 name = "PCA"
 intro = "Principal Component Analysis without calling into a library: make anisotropic 2D data, center it, form the covariance matrix, run [[power iteration]] to find the top eigenvector, and project every point onto it. The top axis is the direction of maximum variance."

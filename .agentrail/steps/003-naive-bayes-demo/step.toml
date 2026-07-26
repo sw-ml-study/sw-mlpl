@@ -1,6 +1,6 @@
 number = 3
 slug = "naive-bayes-demo"
-status = "pending"
+status = "in-progress"
 description = "Gaussian Naive Bayes demo per docs/future-saga-classical-ml.md step 3: masked..."
 role = "production"
 context_files = []
