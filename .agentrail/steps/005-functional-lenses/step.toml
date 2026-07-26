@@ -1,0 +1,8 @@
+number = 5
+slug = "functional-lenses"
+status = "in-progress"
+description = "Document the functional-lens idiom (get/put pairs, take + one_hot mask update..."
+role = "production"
+context_files = []
+created_at = "2026-07-26T09:28:58"
+commits = []

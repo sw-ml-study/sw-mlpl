@@ -216,8 +216,10 @@ path to the third:
    on the server as they compute, not replayed) would add a
    `frame_trace` store fed by a tensor-frame SSE event alongside
    `metric` -- same architecture as the live loss panel, one payload
-   type bigger. Not needed for the demo (boards are browser-tier);
-   documented as the growth path.
+   type bigger. UPGRADE (user direction, 2026-07-25): the live
+   `frame_trace` finale is now IN SCOPE for the Life saga -- the demo
+   should walk the supported approaches and END on the best one shown
+   iterating LIVE, not only as an SMIL replay. See step 4 below.
 
 ## The animated grid widget: `svg(frames, "life")`
 
@@ -251,13 +253,30 @@ Building the frames tensor needs no new language features either:
    viz crates (post tech-debt split there is room); golden test on a
    2-frame blinker (frame groups + animate timing in the output);
    render fallback: T=1 behaves like heatmap.
-3. **life-demo** -- "Game of Life (APL classic)" demo, Classical ML
-   ... no: its own "Array Classics" or the existing Visualizations
-   category; glider + blinker, `rotate`-based step fn, ~24-frame
-   animation, intro tying the APL one-liner to the staging plan,
-   glossary entry [[Game of Life]] + [[Rotate]] cross-links, README
-   counts, pages rebuild. Eval test: glider translation invariant
-   (the live-verified assertion).
+3. **life-demo** -- "Game of Life (APL classic)" demo (its own
+   "Array Classics" or the existing Visualizations category), shaped
+   as a MULTI-VARIANT showcase (user direction): walk the three
+   verified engines in ascending APL2-ness -- (a) 8-neighbor
+   permutation-matmul, (b) the functional 9-neighborhood
+   `gt(eq(N,3) + G*eq(N,4), 0)` form, (c) the rank-3 `[9,n,n]`
+   shifted-stack + `reduce_add(S,0)` form -- with `disp` narration of
+   each intermediate structure (board, shifted stack, neighbor
+   counts), then crown the best one (c, the closest to the APL
+   one-liner's spirit) and run it for ~24 generations into the SMIL
+   animation. Glider + blinker seeds (seeding = the lens `put` idiom,
+   see docs/functional-lenses.md), intro tying the APL one-liner to
+   the staging plan, glossary entries [[Game of Life]] + [[Rotate]],
+   README counts, pages rebuild. Eval test: glider translation
+   invariant (the live-verified assertion).
+4. **life-live (frame_trace)** -- the finale runs CONNECT-side with
+   live iteration display: a `frame` SSE event (shape + flat values
+   per generation, mirroring `metric`), a generation-keyed
+   `frame_trace` store (the `loss_trace` pattern), and a live grid
+   panel that polls it (the `LiveLossPanel` pattern) -- APL shared
+   variables, modernized. Demo's last act: `repeat 60` on the server
+   with the grid animating as generations ARRIVE, then the SMIL
+   value persists as the final entry (same live-then-persist shape
+   as the loss curve).
 
 ## Notes
 

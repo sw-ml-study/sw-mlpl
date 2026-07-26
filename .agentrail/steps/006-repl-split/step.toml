@@ -1,7 +1,7 @@
 number = 6
-slug = "web-split"
+slug = "repl-split"
 status = "pending"
-description = "mlpl-web bin 10 modules -> extract app-shell cluster to a lib crate."
+description = "mlpl-repl 13 modules -> connect-mode cluster to a sibling crate."
 role = "production"
 context_files = []
 created_at = "2026-07-26T07:46:59"

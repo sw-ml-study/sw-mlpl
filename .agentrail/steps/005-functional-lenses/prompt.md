@@ -1,0 +1,1 @@
+Document the functional-lens idiom (get/put pairs, take + one_hot mask update) in docs/functional-lenses.md, add the lens finale act to the Structure Zoo demo (validated by the structure_zoo smoke test), and scope the put-builtin / u:-function-value follow-ups in the APL2 plan docs. Update the Game of Life saga doc for the in-scope frame_trace live finale.

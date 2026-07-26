@@ -1,7 +1,7 @@
 number = 8
-slug = "spike-wrapup"
+slug = "web-eval-split"
 status = "pending"
-description = "Final counts, retrospective, and the dedicated-saga plan for the mlpl-eval 10..."
+description = "mlpl-web-eval 19 modules -> split eval transport cluster; update the three #[..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T07:46:59"
