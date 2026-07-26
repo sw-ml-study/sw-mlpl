@@ -1,5 +1,5 @@
 name = "classical-ml"
-status = "active"
+status = "completed"
 current_step = 4
 created_at = "2026-07-25T18:52:01"
 plan_file = ".agentrail/plan.md"

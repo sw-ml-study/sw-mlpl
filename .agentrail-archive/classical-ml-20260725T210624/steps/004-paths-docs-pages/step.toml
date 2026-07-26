@@ -1,9 +1,10 @@
 number = 4
 slug = "paths-docs-pages"
-status = "in-progress"
+status = "completed"
 description = "Register both demos in the taxonomy + beginner-path stop, lang-reference note..."
 role = "validation"
 context_files = []
 created_at = "2026-07-25T18:52:01"
+completed_at = "2026-07-25T21:06:24"
 task_type = "docs"
-commits = []
+commits = ["d67541c0da495747c436d6e3924f561e4138bb52"]

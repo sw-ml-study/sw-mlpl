@@ -1,0 +1,1 @@
+Saga complete: all 4 steps shipped and deployed 2026-07-25 (6 glossary entries, kNN + Gaussian NB demos, beginner-path detour, lang-reference note).
