@@ -239,6 +239,19 @@ dependencies = [
  "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-shape",
+ "mlpl-autograd-tape",
+ "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-autograd-tape"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
  "mlpl-core",
 ]
 

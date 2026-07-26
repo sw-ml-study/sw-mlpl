@@ -6,6 +6,7 @@
 [workspace]
 members = [
     "crates/mlpl-autograd",
+    "crates/mlpl-autograd-tape",
     "crates/mlpl-trace",
 ]
 resolver = "2"

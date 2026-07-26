@@ -7,9 +7,9 @@
 
 use std::rc::Rc;
 
-use crate::ops::{BinaryOp, UnaryOp};
-use crate::tape::{NodeData, NodeKind};
 use crate::tensor::Tensor;
+use mlpl_autograd_tape::{BinaryOp, UnaryOp};
+use mlpl_autograd_tape::{NodeData, NodeKind};
 
 pub(crate) fn push_unary(t: &Tensor, op: UnaryOp) -> Tensor {
     let x = t.value();

@@ -52,16 +52,27 @@ fn flatten_rows(
                 expected_cols: cols,
             });
         }
-        for cell in row {
-            let v: f64 = cell
-                .parse()
-                .map_err(|_| LoaderHelperError::NonNumericCell {
-                    path: path.into(),
-                    row_idx,
-                    cell: cell.clone(),
-                })?;
-            data.push(v);
-        }
+        push_row(&mut data, row, row_idx, path)?;
     }
     Ok(data)
+}
+
+/// Parse one row's cells as f64s into `data`.
+fn push_row(
+    data: &mut Vec<f64>,
+    row: &[String],
+    row_idx: usize,
+    path: &str,
+) -> Result<(), LoaderHelperError> {
+    for cell in row {
+        let v: f64 = cell
+            .parse()
+            .map_err(|_| LoaderHelperError::NonNumericCell {
+                path: path.into(),
+                row_idx,
+                cell: cell.clone(),
+            })?;
+        data.push(v);
+    }
+    Ok(())
 }

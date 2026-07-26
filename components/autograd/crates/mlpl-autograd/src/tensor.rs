@@ -5,7 +5,7 @@ use std::rc::Rc;
 use mlpl_array::DenseArray;
 
 use crate::backward;
-use crate::tape::{NodeData, NodeId, NodeKind, Tape};
+use mlpl_autograd_tape::{NodeData, NodeId, NodeKind, Tape};
 
 /// A differentiable tensor: a handle into a [`Tape`] node.
 #[derive(Debug, Clone)]

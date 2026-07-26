@@ -1,11 +1,15 @@
 [package]
-name = "mlpl-autograd"
+name = "mlpl-autograd-tape"
 edition.workspace = true
 license.workspace = true
 version.workspace = true
 
+# The autograd substrate: the Tape and its node types, the elementwise
+# op kernels (UnaryOp/BinaryOp/softmax/accumulate), and the pure
+# gradient kernels for shape ops. Split from mlpl-autograd (tech-debt
+# spike step 002) so the Tensor-facing crate stays inside the module
+# budget while the substrate stays dependency-light.
 [dependencies]
-mlpl-autograd-tape = { path = "../mlpl-autograd-tape" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-array-ops-element = { path = "../../../array-element/crates/mlpl-array-ops-element" }

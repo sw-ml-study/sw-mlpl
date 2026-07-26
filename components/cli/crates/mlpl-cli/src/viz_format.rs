@@ -43,6 +43,12 @@ impl VizFormat {
         if bytes.starts_with(JSON_OPT_IN) {
             return Some(VizFormat::Json);
         }
+        Self::detect_text(bytes)
+    }
+
+    /// The text-flavored half of detection: SVG (with or without an
+    /// XML prolog) and HTML documents.
+    fn detect_text(bytes: &[u8]) -> Option<VizFormat> {
         let text = std::str::from_utf8(bytes).ok()?;
         let trimmed = text.trim_start();
         if let Some(rest) = trimmed.strip_prefix("<?xml")

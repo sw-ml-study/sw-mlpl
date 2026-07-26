@@ -4,8 +4,13 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_matmul::prelude::*;
 use mlpl_array_ops_shape::prelude::*;
 
-use crate::ops::{accumulate, softmax_backward};
-use crate::tape::{NodeId, NodeKind, Tape};
+use mlpl_autograd_tape::grad_kernels::unbroadcast;
+use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, softmax_backward};
+
+use crate::backward_shape::{
+    prop_concat, prop_cross_entropy, prop_patchify, prop_reshape, prop_stack, prop_take,
+    prop_transpose,
+};
 
 /// Run a backward pass rooted at `root`, seeding `d root / d root = 1`.
 ///
@@ -24,17 +29,6 @@ pub fn backward(tape: &Tape, root: NodeId) {
     for idx in (0..len).rev() {
         propagate(tape, NodeId(idx));
     }
-}
-
-fn unbroadcast(grad: DenseArray, target_shape: &Shape) -> DenseArray {
-    if grad.shape() == target_shape {
-        return grad;
-    }
-    if target_shape.rank() == 0 {
-        let s: f64 = grad.data().iter().sum();
-        return DenseArray::from_scalar(s);
-    }
-    grad
 }
 
 fn propagate(tape: &Tape, id: NodeId) {
@@ -92,180 +86,11 @@ fn prop_softmax(tape: &Tape, id: NodeId, parent: NodeId, axis: usize, upstream: 
     accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
 }
 
-fn prop_transpose(tape: &Tape, parent: NodeId, upstream: &DenseArray) {
-    accumulate(&mut tape.nodes_mut()[parent.0].grad, upstream.transpose());
-}
-
-fn prop_reshape(tape: &Tape, parent: NodeId, orig_shape: &Shape, upstream: &DenseArray) {
-    let grad = upstream.reshape(orig_shape.clone()).expect("reshape back");
-    accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
-}
-
-fn prop_cross_entropy(tape: &Tape, logits: NodeId, targets: &[usize], upstream: &DenseArray) {
-    let logits_val = tape.nodes()[logits.0].value.clone();
-    let g = upstream.data()[0];
-    let grad = crate::tensor_ops::cross_entropy_backward(&logits_val, targets, g);
-    accumulate(&mut tape.nodes_mut()[logits.0].grad, grad);
-}
-
-fn prop_patchify(
-    tape: &Tape,
-    parent: NodeId,
-    orig_shape: &Shape,
-    patch_size: usize,
-    upstream: &DenseArray,
-) {
-    let g = patchify_backward(upstream, orig_shape, patch_size);
-    accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
-}
-
-fn prop_concat(
-    tape: &Tape,
-    left: NodeId,
-    right: NodeId,
-    axis: usize,
-    left_size: usize,
-    upstream: &DenseArray,
-) {
-    let (ga, gb) = concat_backward(upstream, axis, left_size);
-    let mut nodes = tape.nodes_mut();
-    accumulate(&mut nodes[left.0].grad, ga);
-    accumulate(&mut nodes[right.0].grad, gb);
-}
-
-fn prop_stack(
-    tape: &Tape,
-    parents: &[NodeId],
-    axis: usize,
-    parent_size: usize,
-    upstream: &DenseArray,
-) {
-    let grads = stack_backward(upstream, parents.len(), axis, parent_size);
-    let mut nodes = tape.nodes_mut();
-    for (pid, g) in parents.iter().zip(grads) {
-        accumulate(&mut nodes[pid.0].grad, g);
-    }
-}
-
-fn prop_take(
-    tape: &Tape,
-    parent: NodeId,
-    orig_shape: &Shape,
-    axis: usize,
-    idx: usize,
-    upstream: &DenseArray,
-) {
-    let g = take_backward(upstream, orig_shape, axis, idx);
-    accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
-}
-
-fn take_backward(upstream: &DenseArray, orig_shape: &Shape, axis: usize, idx: usize) -> DenseArray {
-    let dims = orig_shape.dims();
-    let outer: usize = dims[..axis].iter().product();
-    let axis_size = dims[axis];
-    let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
-    let mut out = vec![0.0; orig_shape.elem_count()];
-    let up = upstream.data();
-    for o in 0..outer {
-        let src = o * inner;
-        let dst = (o * axis_size + idx) * inner;
-        out[dst..dst + inner].copy_from_slice(&up[src..src + inner]);
-    }
-    DenseArray::new(orig_shape.clone(), out).expect("shape")
-}
-
-fn patchify_backward(upstream: &DenseArray, orig_shape: &Shape, p: usize) -> DenseArray {
-    let dims = orig_shape.dims();
-    let (b, c, h, w) = (dims[0], dims[1], dims[2], dims[3]);
-    let (nh, nw, patch_len) = (h / p, w / p, p * p * c);
-    let up = upstream.data();
-    let mut out = vec![0.0; b * c * h * w];
-    for b_i in 0..b {
-        for i in 0..nh {
-            for j in 0..nw {
-                let n = i * nw + j;
-                for c_i in 0..c {
-                    for dy in 0..p {
-                        for dx in 0..p {
-                            let dst = ((b_i * c + c_i) * h + i * p + dy) * w + j * p + dx;
-                            let src = (b_i * nh * nw + n) * patch_len + c_i * p * p + dy * p + dx;
-                            out[dst] = up[src];
-                        }
-                    }
-                }
-            }
-        }
-    }
-    DenseArray::new(orig_shape.clone(), out).expect("shape")
-}
-
-fn stack_backward(
-    upstream: &DenseArray,
-    n: usize,
-    axis: usize,
-    parent_size: usize,
-) -> Vec<DenseArray> {
-    let dims = upstream.shape().dims();
-    let outer: usize = dims[..axis].iter().product();
-    let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
-    let parent_stride = parent_size * inner;
-    let mut parent_dims = dims.to_vec();
-    parent_dims[axis] = parent_size;
-    let parent_elems: usize = parent_dims.iter().product();
-    let up = upstream.data();
-    let mut outs: Vec<Vec<f64>> = (0..n).map(|_| Vec::with_capacity(parent_elems)).collect();
-    for o in 0..outer {
-        for (k, out) in outs.iter_mut().enumerate() {
-            let src = (o * n + k) * parent_stride;
-            out.extend_from_slice(&up[src..src + parent_stride]);
-        }
-    }
-    outs.into_iter()
-        .map(|v| DenseArray::new(Shape::new(parent_dims.clone()), v).expect("shape"))
-        .collect()
-}
-
-fn concat_backward(
-    upstream: &DenseArray,
-    axis: usize,
-    left_size: usize,
-) -> (DenseArray, DenseArray) {
-    let dims = upstream.shape().dims();
-    let right_size = dims[axis] - left_size;
-    let mut ld = dims.to_vec();
-    ld[axis] = left_size;
-    let mut rd = dims.to_vec();
-    rd[axis] = right_size;
-    // Saga 30 step 002: walk the outer dims (dims[..axis]) and,
-    // for each outer position, peel off `left_size * inner` then
-    // `right_size * inner` elements from the upstream gradient.
-    // `inner` is the product of dims after `axis` (1 for last axis).
-    // Subsumes the original axis-0 / axis-1 branches: at axis=0 the
-    // outer is 1 (empty-product) and the loop runs once on the
-    // whole upstream slab; at axis=1 the outer is dims[0] and
-    // inner is product(dims[2..]).
-    let outer: usize = dims[..axis].iter().product();
-    let inner: usize = dims[axis + 1..].iter().product::<usize>().max(1);
-    let a_chunk = left_size * inner;
-    let b_chunk = right_size * inner;
-    let up = upstream.data();
-    let mut la = Vec::with_capacity(outer * a_chunk);
-    let mut rb = Vec::with_capacity(outer * b_chunk);
-    for o in 0..outer {
-        let row = o * (a_chunk + b_chunk);
-        la.extend_from_slice(&up[row..row + a_chunk]);
-        rb.extend_from_slice(&up[row + a_chunk..row + a_chunk + b_chunk]);
-    }
-    let left = DenseArray::new(Shape::new(ld), la).expect("shape");
-    let right = DenseArray::new(Shape::new(rd), rb).expect("shape");
-    (left, right)
-}
-
 fn prop_unary(
     tape: &Tape,
     id: NodeId,
     parent: NodeId,
-    op: crate::ops::UnaryOp,
+    op: mlpl_autograd_tape::UnaryOp,
     upstream: &DenseArray,
 ) {
     let x = tape.nodes()[parent.0].value.clone();
@@ -280,7 +105,7 @@ fn prop_binary(
     tape: &Tape,
     left: NodeId,
     right: NodeId,
-    op: crate::ops::BinaryOp,
+    op: mlpl_autograd_tape::BinaryOp,
     upstream: &DenseArray,
 ) {
     let a = tape.nodes()[left.0].value.clone();

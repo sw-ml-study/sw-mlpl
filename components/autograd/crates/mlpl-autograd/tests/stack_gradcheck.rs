@@ -7,7 +7,6 @@
 //! multi-head + rank-3 attention lowering actually exercises).
 
 use mlpl_array::{DenseArray, Shape};
-use mlpl_array_ops_matmul::prelude::*;
 use mlpl_autograd::{Tape, Tensor};
 
 fn arr(dims: Vec<usize>, data: Vec<f64>) -> DenseArray {
