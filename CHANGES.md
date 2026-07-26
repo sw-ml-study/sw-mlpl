@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-25
 
+- docs: classical-ML coverage analysis + kNN/Naive Bayes demo saga seed
+- docs(changes): refresh CHANGES.md to HEAD
 - Merge feature/connect-telemetry: live training signals in the web UI
 - chore(agentrail): record connect-telemetry step 007 completion (saga done)
 - docs+pages(saga): connect-telemetry retrospective, demo copy, live-demo rebuild (step 007)
