@@ -5,7 +5,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::svg::VizError;
+use mlpl_viz_core::VizError;
 
 pub(crate) fn validate(
     grid_outputs: &DenseArray,

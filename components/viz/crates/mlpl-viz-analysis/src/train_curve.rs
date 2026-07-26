@@ -5,7 +5,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::svg::{H, PAD, VizError, bounds, scale, write_svg_close, write_svg_open};
+use mlpl_viz_core::{H, PAD, VizError, bounds, scale, write_svg_close, write_svg_open};
 
 const TRAIN_COLOR: &str = "#a6e3a1";
 const VAL_COLOR: &str = "#fab387";

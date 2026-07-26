@@ -1,0 +1,9 @@
+number = 2
+slug = "autograd-split"
+status = "pending"
+description = "Retire backward.rs 19-fn and reduction_ops.rs 11-fn FAILs: sibling mlpl-autog..."
+role = "production"
+context_files = []
+created_at = "2026-07-26T07:46:59"
+task_type = "refactor"
+commits = []

@@ -1,0 +1,12 @@
+[package]
+name = "mlpl-viz-analysis"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The analysis-flavored charts (hist/confusion/loss curves, train-val,
+# loss landscape, decision boundary, PCA loadings). Split from
+# mlpl-viz (tech-debt spike step 001).
+[dependencies]
+mlpl-viz-core = { path = "../mlpl-viz-core" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }

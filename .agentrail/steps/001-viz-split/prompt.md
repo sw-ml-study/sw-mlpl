@@ -1,0 +1,1 @@
+Split mlpl-viz (16 modules) into facade + mlpl-viz-core (error/scaffold) + mlpl-viz-marks (chart primitives) + mlpl-viz-analysis (analysis charts); facade re-exports keep mlpl_viz:: paths; gates + lock sweep.

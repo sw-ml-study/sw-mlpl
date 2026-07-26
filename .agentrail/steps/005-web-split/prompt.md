@@ -1,0 +1,1 @@
+mlpl-web bin 10 modules -> extract app-shell cluster to a lib crate.

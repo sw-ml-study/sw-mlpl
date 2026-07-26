@@ -1,0 +1,9 @@
+number = 7
+slug = "spike-wrapup"
+status = "pending"
+description = "Final counts, retrospective, and the dedicated-saga plan for the mlpl-eval 10..."
+role = "production"
+context_files = []
+created_at = "2026-07-26T07:46:59"
+task_type = "refactor"
+commits = []

@@ -21,7 +21,7 @@
 
 use mlpl_array::DenseArray;
 
-use super::{H, PAD, VizError, W, write_svg_close, write_svg_open};
+use mlpl_viz_core::{H, PAD, VizError, W, write_svg_close, write_svg_open};
 
 const LEGEND_RESERVE: f64 = 70.0;
 

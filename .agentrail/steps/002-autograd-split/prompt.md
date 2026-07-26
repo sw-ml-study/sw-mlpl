@@ -1,0 +1,1 @@
+Retire backward.rs 19-fn and reduction_ops.rs 11-fn FAILs: sibling mlpl-autograd-ops crate + responsibility module splits; tape behavior pinned by existing gradcheck tests.

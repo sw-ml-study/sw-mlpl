@@ -1,0 +1,9 @@
+number = 1
+slug = "viz-split"
+status = "in-progress"
+description = "Split mlpl-viz (16 modules) into facade + mlpl-viz-core (error/scaffold) + ml..."
+role = "production"
+context_files = []
+created_at = "2026-07-26T07:46:59"
+task_type = "refactor"
+commits = []

@@ -5,8 +5,8 @@
 //! before/after). Used by the tic-tac-toe fine-tune demo to show
 //! piles of lost games turn into wins.
 
-use super::{VizError, write_svg_close, write_svg_open_with_size};
 use mlpl_array::DenseArray;
+use mlpl_viz_core::{VizError, write_svg_close, write_svg_open_with_size};
 
 const COLS: usize = 10;
 const CELL: f64 = 16.0;

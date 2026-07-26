@@ -3,7 +3,7 @@
 
 use mlpl_array::DenseArray;
 
-use super::{H, PAD, VizError, W, write_svg_close, write_svg_open};
+use mlpl_viz_core::{H, PAD, VizError, W, write_svg_close, write_svg_open};
 
 /// Render a 2D grid of classifier outputs and overlay training points.
 ///
@@ -80,20 +80,7 @@ fn draw_legend(out: &mut String, lo: f64, hi: f64) {
     let bar_x: f64 = W - PAD - bar_w - 2.0;
     let bar_top: f64 = PAD;
     let bar_h: f64 = H - 2.0 * PAD;
-    let steps: usize = 32;
-    let step_h = bar_h / steps as f64;
-    for i in 0..steps {
-        // i=0 is top of the bar; t=1 corresponds to `hi`.
-        let t = 1.0 - (i as f64 + 0.5) / steps as f64;
-        let (red, green, blue) = ramp(t);
-        let y = bar_top + step_h * i as f64;
-        out.push_str(&format!(
-            "<rect x=\"{bar_x:.1}\" y=\"{y:.1}\" \
-             width=\"{bar_w:.1}\" height=\"{:.2}\" \
-             fill=\"rgb({red},{green},{blue})\"/>",
-            step_h + 0.5,
-        ));
-    }
+    draw_legend_bar(out, (bar_x, bar_top), (bar_w, bar_h));
     let label_x = bar_x - 3.0;
     let label = |out: &mut String, y: f64, v: f64| {
         out.push_str(&format!(
@@ -151,4 +138,22 @@ fn ramp(t: f64) -> (u8, u8, u8) {
     let g = (a.1 + (b.1 - a.1) * frac).round() as u8;
     let bl = (a.2 + (b.2 - a.2) * frac).round() as u8;
     (r, g, bl)
+}
+
+/// The stacked-rect gradient bar of the legend.
+fn draw_legend_bar(out: &mut String, (bar_x, bar_top): (f64, f64), (bar_w, bar_h): (f64, f64)) {
+    let steps: usize = 32;
+    let step_h = bar_h / steps as f64;
+    for i in 0..steps {
+        // i=0 is top of the bar; t=1 corresponds to `hi`.
+        let t = 1.0 - (i as f64 + 0.5) / steps as f64;
+        let (red, green, blue) = ramp(t);
+        let y = bar_top + step_h * i as f64;
+        out.push_str(&format!(
+            "<rect x=\"{bar_x:.1}\" y=\"{y:.1}\" \
+             width=\"{bar_w:.1}\" height=\"{:.2}\" \
+             fill=\"rgb({red},{green},{blue})\"/>",
+            step_h + 0.5,
+        ));
+    }
 }

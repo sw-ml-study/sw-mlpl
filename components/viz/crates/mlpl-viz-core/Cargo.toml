@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-viz-core"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Shared SVG scaffolding (canvas constants, scaling, open/close
+# helpers) + the VizError type. Split from mlpl-viz (tech-debt spike
+# step 001) so the mark and analysis crates share one foundation.
+[dependencies]

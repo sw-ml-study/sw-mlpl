@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-viz-marks"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The chart-mark primitives (scatter, line/bar, heatmaps, waffle).
+# Split from mlpl-viz (tech-debt spike step 001).
+[dependencies]
+mlpl-viz-core = { path = "../mlpl-viz-core" }
+mlpl-array = { path = "../../../array/crates/mlpl-array" }

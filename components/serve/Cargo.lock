@@ -2184,6 +2184,29 @@ dependencies = [
  "mlpl-array",
  "mlpl-core",
  "mlpl-trace",
+ "mlpl-viz-analysis",
+ "mlpl-viz-core",
+ "mlpl-viz-marks",
+]
+
+[[package]]
+name = "mlpl-viz-analysis"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-viz-core",
+]
+
+[[package]]
+name = "mlpl-viz-core"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-viz-marks"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-viz-core",
 ]
 
 [[package]]

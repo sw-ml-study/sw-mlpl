@@ -1,0 +1,9 @@
+number = 3
+slug = "serve-split"
+status = "pending"
+description = "mlpl-serve 17 modules -> sibling crates by responsibility (handlers/session v..."
+role = "production"
+context_files = []
+created_at = "2026-07-26T07:46:59"
+task_type = "refactor"
+commits = []

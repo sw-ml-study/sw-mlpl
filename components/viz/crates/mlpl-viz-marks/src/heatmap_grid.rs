@@ -18,7 +18,7 @@
 
 use mlpl_array::DenseArray;
 
-use super::VizError;
+use mlpl_viz_core::VizError;
 
 /// Pixel size of each per-head sub-heatmap (square cell).
 const CELL_PX: f64 = 220.0;
@@ -103,6 +103,18 @@ fn write_cell_grid(
     } else {
         hi - lo
     };
+    write_plane_rects(out, (x0, y0), plane, (rows, cols), (lo, span));
+    (lo, hi)
+}
+
+/// The colored rects for one plane of the grid.
+fn write_plane_rects(
+    out: &mut String,
+    (x0, y0): (f64, f64),
+    plane: &[f64],
+    (rows, cols): (usize, usize),
+    (lo, span): (f64, f64),
+) {
     let cell_w = CELL_PX / cols as f64;
     let cell_h = CELL_PX / rows as f64;
     for r in 0..rows {
@@ -119,7 +131,6 @@ fn write_cell_grid(
             ));
         }
     }
-    (lo, hi)
 }
 
 /// Saga 29 step 019: tiny scale strip + min/max labels under
@@ -148,16 +159,15 @@ fn write_cell_scale(out: &mut String, x0: f64, y_top: f64, lo: f64, hi: f64) {
     }
     let text_y = strip_y + strip_h + label_h - 1.0;
     out.push_str(&format!(
-        "<text x=\"{lx:.1}\" y=\"{text_y:.1}\" fill=\"#cdd6f4\" \
+        "<text x=\"{x0:.1}\" y=\"{text_y:.1}\" fill=\"#cdd6f4\" \
          font-size=\"10\" font-family=\"monospace\" \
-         text-anchor=\"start\">{lo:.2}</text>",
-        lx = x0,
+         text-anchor=\"start\">{lo:.2}</text>"
     ));
+    let rx = x0 + strip_w;
     out.push_str(&format!(
         "<text x=\"{rx:.1}\" y=\"{text_y:.1}\" fill=\"#cdd6f4\" \
          font-size=\"10\" font-family=\"monospace\" \
-         text-anchor=\"end\">{hi:.2}</text>",
-        rx = x0 + strip_w,
+         text-anchor=\"end\">{hi:.2}</text>"
     ));
 }
 

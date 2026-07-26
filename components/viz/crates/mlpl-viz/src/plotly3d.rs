@@ -17,7 +17,7 @@
 use mlpl_array::DenseArray;
 use std::fmt::Write;
 
-use crate::svg::VizError;
+use mlpl_viz_core::VizError;
 
 const MARKER: &str = "<!-- mlpl-plotly3d -->";
 const PALETTE: &[&str] = &[

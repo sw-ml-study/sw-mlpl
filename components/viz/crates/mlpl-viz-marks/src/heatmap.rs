@@ -2,7 +2,7 @@
 
 use mlpl_array::DenseArray;
 
-use super::{H, PAD, VizError, W, write_svg_close, write_svg_open};
+use mlpl_viz_core::{H, PAD, VizError, W, write_svg_close, write_svg_open};
 
 /// Width pulled from the cell area to make room for the legend
 /// strip + value labels (`hi` / `mid` / `lo`).
@@ -15,14 +15,7 @@ const LEGEND_STEPS: usize = 32;
 /// Render an MxN matrix as a colored grid with a viridis
 /// colorbar legend on the right (top = max, bottom = min).
 pub fn render_heatmap(data: &DenseArray) -> Result<String, VizError> {
-    let dims = data.shape().dims();
-    if dims.len() != 2 {
-        return Err(VizError::InvalidShape(format!(
-            "heatmap expects a 2D matrix, got {dims:?}"
-        )));
-    }
-    let rows = dims[0];
-    let cols = dims[1];
+    let (rows, cols) = check_2d(data.shape().dims())?;
     let mut out = String::new();
     write_svg_open(&mut out);
     if rows == 0 || cols == 0 {
@@ -38,20 +31,7 @@ pub fn render_heatmap(data: &DenseArray) -> Result<String, VizError> {
     };
     let plot_w = W - 2.0 * PAD - LEGEND_RESERVE;
     let plot_h = H - 2.0 * PAD;
-    let cell_w = plot_w / cols as f64;
-    let cell_h = plot_h / rows as f64;
-    for r in 0..rows {
-        for c in 0..cols {
-            let v = raw[r * cols + c];
-            let t = ((v - lo) / span).clamp(0.0, 1.0);
-            let (red, green, blue) = viridis(t);
-            let x = PAD + cell_w * c as f64;
-            let y = PAD + cell_h * r as f64;
-            out.push_str(&format!(
-                "<rect x=\"{x:.1}\" y=\"{y:.1}\" width=\"{cell_w:.1}\" height=\"{cell_h:.1}\" fill=\"rgb({red},{green},{blue})\"/>"
-            ));
-        }
-    }
+    write_cells(&mut out, raw, (rows, cols), (plot_w, plot_h), (lo, span));
     render_legend(&mut out, plot_w, plot_h, lo, hi);
     write_svg_close(&mut out);
     Ok(out)
@@ -117,4 +97,38 @@ fn viridis(t: f64) -> (u8, u8, u8) {
     let g = (a.1 + (b.1 - a.1) * frac).round() as u8;
     let bl = (a.2 + (b.2 - a.2) * frac).round() as u8;
     (r, g, bl)
+}
+
+/// The colored cell grid itself: one rect per matrix entry.
+fn write_cells(
+    out: &mut String,
+    raw: &[f64],
+    (rows, cols): (usize, usize),
+    (plot_w, plot_h): (f64, f64),
+    (lo, span): (f64, f64),
+) {
+    let cell_w = plot_w / cols as f64;
+    let cell_h = plot_h / rows as f64;
+    for r in 0..rows {
+        for c in 0..cols {
+            let v = raw[r * cols + c];
+            let t = ((v - lo) / span).clamp(0.0, 1.0);
+            let (red, green, blue) = viridis(t);
+            let x = PAD + cell_w * c as f64;
+            let y = PAD + cell_h * r as f64;
+            out.push_str(&format!(
+                "<rect x=\"{x:.1}\" y=\"{y:.1}\" width=\"{cell_w:.1}\" height=\"{cell_h:.1}\" fill=\"rgb({red},{green},{blue})\"/>"
+            ));
+        }
+    }
+}
+
+/// Heatmaps take exactly a 2D matrix; surface anything else clearly.
+fn check_2d(dims: &[usize]) -> Result<(usize, usize), VizError> {
+    if dims.len() != 2 {
+        return Err(VizError::InvalidShape(format!(
+            "heatmap expects a 2D matrix, got {dims:?}"
+        )));
+    }
+    Ok((dims[0], dims[1]))
 }

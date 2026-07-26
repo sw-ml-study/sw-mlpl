@@ -2,7 +2,7 @@
 
 use mlpl_array::DenseArray;
 
-use super::{
+use mlpl_viz_core::{
     H, PAD, VizError, W, bounds, scale, write_corner_scale_labels, write_svg_close, write_svg_open,
 };
 
@@ -21,26 +21,9 @@ pub fn render_bar(data: &DenseArray) -> Result<String, VizError> {
         write_svg_close(&mut out);
         return Ok(out);
     }
-    // Y range includes 0 so positive values draw upward from the baseline.
-    let (mut ymin, ymax) = bounds(values);
-    if ymin > 0.0 {
-        ymin = 0.0;
-    }
-    let yrange = if ymax == ymin { 1.0 } else { ymax - ymin };
+    let (ymin, ymax, yrange) = bar_y_range(values);
     let n = values.len();
-    let plot_w = W - 2.0 * PAD;
-    let plot_h = H - 2.0 * PAD;
-    let bar_slot = plot_w / n as f64;
-    let bar_w = (bar_slot * 0.8).max(1.0);
-    let baseline = H - PAD - (-ymin / yrange) * plot_h;
-    for (i, &v) in values.iter().enumerate() {
-        let x = PAD + bar_slot * i as f64 + (bar_slot - bar_w) / 2.0;
-        let bar_h = (v / yrange).abs() * plot_h;
-        let y = if v >= 0.0 { baseline - bar_h } else { baseline };
-        out.push_str(&format!(
-            "<rect x=\"{x:.1}\" y=\"{y:.1}\" width=\"{bar_w:.1}\" height=\"{bar_h:.1}\" fill=\"#a6e3a1\"/>"
-        ));
-    }
+    write_bars(&mut out, values, ymin, yrange);
     // Saga 29 step 019: scale labels. X axis carries 0..N-1
     // bar indices (formatted as the actual index range), Y
     // axis carries the value range.
@@ -73,18 +56,7 @@ pub fn render_line(data: &DenseArray) -> Result<String, VizError> {
     }
     let (xmin, xmax) = bounds(&xs);
     let (ymin, ymax) = bounds(&ys);
-    let mut points = String::new();
-    for i in 0..xs.len() {
-        let px = scale(xs[i], xmin, xmax, 0);
-        let py = scale(ys[i], ymin, ymax, 1);
-        if i > 0 {
-            points.push(' ');
-        }
-        points.push_str(&format!("{px:.1},{py:.1}"));
-    }
-    out.push_str(&format!(
-        "<polyline points=\"{points}\" fill=\"none\" stroke=\"#89b4fa\" stroke-width=\"2\"/>"
-    ));
+    out.push_str(&polyline(&xs, &ys, (xmin, xmax), (ymin, ymax)));
     // Saga 29 step 019: corner scale labels.
     write_corner_scale_labels(&mut out, xmin, xmax, ymin, ymax);
     write_svg_close(&mut out);
@@ -101,4 +73,47 @@ fn line_extract_matrix(data: &DenseArray) -> (Vec<f64>, Vec<f64>) {
     let raw = data.data();
     let n = raw.len() / 2;
     (0..n).map(|i| (raw[i * 2], raw[i * 2 + 1])).unzip()
+}
+
+/// One green rect per value, drawn from the zero baseline.
+fn write_bars(out: &mut String, values: &[f64], ymin: f64, yrange: f64) {
+    let n = values.len();
+    let plot_w = W - 2.0 * PAD;
+    let plot_h = H - 2.0 * PAD;
+    let bar_slot = plot_w / n as f64;
+    let bar_w = (bar_slot * 0.8).max(1.0);
+    let baseline = H - PAD - (-ymin / yrange) * plot_h;
+    for (i, &v) in values.iter().enumerate() {
+        let x = PAD + bar_slot * i as f64 + (bar_slot - bar_w) / 2.0;
+        let bar_h = (v / yrange).abs() * plot_h;
+        let y = if v >= 0.0 { baseline - bar_h } else { baseline };
+        out.push_str(&format!(
+            "<rect x=\"{x:.1}\" y=\"{y:.1}\" width=\"{bar_w:.1}\" height=\"{bar_h:.1}\" fill=\"#a6e3a1\"/>"
+        ));
+    }
+}
+
+/// The scaled blue polyline through the (x, y) series.
+fn polyline(xs: &[f64], ys: &[f64], (xmin, xmax): (f64, f64), (ymin, ymax): (f64, f64)) -> String {
+    let mut points = String::new();
+    for i in 0..xs.len() {
+        let px = scale(xs[i], xmin, xmax, 0);
+        let py = scale(ys[i], ymin, ymax, 1);
+        if i > 0 {
+            points.push(' ');
+        }
+        points.push_str(&format!("{px:.1},{py:.1}"));
+    }
+    format!("<polyline points=\"{points}\" fill=\"none\" stroke=\"#89b4fa\" stroke-width=\"2\"/>")
+}
+
+/// Y range for bars: always includes 0 so positive values draw upward
+/// from the baseline; degenerate ranges widen to 1.
+fn bar_y_range(values: &[f64]) -> (f64, f64, f64) {
+    let (mut ymin, ymax) = bounds(values);
+    if ymin > 0.0 {
+        ymin = 0.0;
+    }
+    let yrange = if ymax == ymin { 1.0 } else { ymax - ymin };
+    (ymin, ymax, yrange)
 }

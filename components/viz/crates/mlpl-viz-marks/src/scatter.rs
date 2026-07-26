@@ -14,7 +14,7 @@
 
 use mlpl_array::DenseArray;
 
-use super::{PAD, VizError, bounds, scale, write_svg_close, write_svg_open};
+use mlpl_viz_core::{PAD, VizError, bounds, scale, write_svg_close, write_svg_open};
 
 /// Fixed azimuth (rotation about the vertical axis) and
 /// elevation (tilt above the horizontal) for the
@@ -85,7 +85,7 @@ pub fn render_scatter(data: &DenseArray) -> Result<String, VizError> {
     }
     // Saga 29 step 019: corner scale labels so the reader
     // can map screen position back to data values.
-    super::write_corner_scale_labels(&mut out, xmin, xmax, ymin, ymax);
+    mlpl_viz_core::write_corner_scale_labels(&mut out, xmin, xmax, ymin, ymax);
     write_svg_close(&mut out);
     Ok(out)
 }
@@ -182,7 +182,7 @@ fn project_orthographic(p: (f64, f64, f64)) -> (f64, f64) {
 /// labeled with a letter at the tip. Not scaled with
 /// the data -- the gizmo indicates camera orientation.
 fn render_scatter3d_axes(out: &mut String) {
-    let (ox, oy, len) = (PAD + 20.0, super::H - PAD - 20.0, 24.0);
+    let (ox, oy, len) = (PAD + 20.0, mlpl_viz_core::H - PAD - 20.0, 24.0);
     // SVG y grows downward; the projection's y grows upward -- flip the arrow's vertical component.
     for (pt3, label, color) in [
         ((1.0_f64, 0.0, 0.0), "X", "#f38ba8"),
@@ -226,7 +226,7 @@ fn render_scatter3d_legend(out: &mut String, labels: &[usize]) {
     let mut unique: Vec<usize> = labels.to_vec();
     unique.sort_unstable();
     unique.dedup();
-    let x = super::W - PAD - 60.0;
+    let x = mlpl_viz_core::W - PAD - 60.0;
     let mut y = PAD + 10.0;
     out.push_str(&format!("<g class=\"legend\" transform=\"translate(0,0)\"><text x=\"{x:.1}\" y=\"{:.1}\" fill=\"#cdd6f4\" font-family=\"monospace\" font-size=\"10\">legend</text></g>", y - 2.0));
     for id in unique {

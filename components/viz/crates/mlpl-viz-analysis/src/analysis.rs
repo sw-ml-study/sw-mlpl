@@ -3,7 +3,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::svg::{
+use mlpl_viz_core::{
     H, PAD, VizError, W, bounds, data_range, scale, write_svg_close, write_svg_open,
     write_svg_open_with_size,
 };

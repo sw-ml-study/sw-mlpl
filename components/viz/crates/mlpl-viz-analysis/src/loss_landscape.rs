@@ -5,7 +5,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::svg::{H, PAD, VizError, W, data_range, write_svg_close, write_svg_open};
+use mlpl_viz_core::{H, PAD, VizError, W, data_range, write_svg_close, write_svg_open};
 
 /// Heatmap of a `rows x cols` loss surface (dark = low loss) overlaid with
 /// an optimizer trajectory. `path` is `[N, 2]`; each row is an (x, y) point

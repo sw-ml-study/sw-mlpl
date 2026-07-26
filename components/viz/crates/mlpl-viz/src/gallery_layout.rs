@@ -14,7 +14,7 @@
 
 use mlpl_array::DenseArray;
 
-use super::VizError;
+use mlpl_viz_core::VizError;
 
 /// `[N, 3, H, W]` validation + optional `[N]` / `[N, K<=4]`
 /// overlay shape check. Returns `(N, H, W)` on success.
