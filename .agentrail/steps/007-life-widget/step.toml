@@ -1,6 +1,6 @@
 number = 7
 slug = "life-widget"
-status = "pending"
+status = "in-progress"
 description = 'Game of Life saga step 2: svg(frames, "life") SMIL grid animation render mode...'
 role = "production"
 context_files = []

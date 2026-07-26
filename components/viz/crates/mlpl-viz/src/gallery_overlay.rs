@@ -19,12 +19,7 @@ pub fn render_attention_overlay(
     image: &DenseArray,
     attn: Option<&DenseArray>,
 ) -> Result<String, VizError> {
-    let attn = attn.ok_or_else(|| {
-        VizError::InvalidShape(
-            "attention_overlay requires a third argument (attention weights [P] or [heads, P])"
-                .into(),
-        )
-    })?;
+    let attn = attn.ok_or_else(overlay_missing_aux)?;
     let (src_h, src_w, heads, patches, side) = parse_overlay_shapes(image, attn)?;
     let mut out = String::new();
     write_svg_open(&mut out);
@@ -34,34 +29,64 @@ pub fn render_attention_overlay(
     let cell_h = (H - 2.0 * PAD) / rows as f64;
     let label_reserve = if heads > 1 { 12.0 } else { 0.0 };
     let tile = cell_w.min(cell_h - label_reserve).min(MAX_TILE);
-    let (img_data, attn_data) = (image.data(), attn.data());
-    let (thumb_h, thumb_w) = (src_h.min(tile as usize), src_w.min(tile as usize));
+    let data = (image.data(), attn.data());
+    let dims = (src_h, src_w, patches, side);
+    let geom = (cols, cell_w, cell_h, label_reserve, tile);
     for h in 0..heads {
-        let (col, row) = (h % cols, h / cols);
-        let cell_x = PAD + cell_w * col as f64 + (cell_w - tile) * 0.5;
-        let cell_y = PAD + cell_h * row as f64 + (cell_h - tile - label_reserve) * 0.5;
-        render_thumbnail(
-            &mut out,
-            img_data,
-            (src_h, src_w),
-            (thumb_h, thumb_w),
-            (cell_x, cell_y),
-            tile,
-        );
-        let slab = &attn_data[h * patches..(h + 1) * patches];
-        render_overlay_grid(&mut out, slab, side, cell_x, cell_y, tile);
-        if heads > 1 {
-            let lbl_y = cell_y + tile + 1.0;
-            render_overlay_label(&mut out, &[h as f64], 0, 1, cell_x, lbl_y, tile);
-        }
+        draw_head(&mut out, data, dims, geom, (h, heads));
     }
     write_svg_close(&mut out);
     Ok(out)
 }
 
+/// One head's cell: image thumbnail + attention overlay + (multi-
+/// head only) the "head N" label. Extracted from the render loop
+/// for the function-LOC budget.
+fn overlay_missing_aux() -> VizError {
+    VizError::InvalidShape(
+        "attention_overlay requires a third argument (attention weights [P] or [heads, P])".into(),
+    )
+}
+
+fn draw_head(
+    out: &mut String,
+    (img_data, attn_data): (&[f64], &[f64]),
+    (src_h, src_w, patches, side): (usize, usize, usize, usize),
+    (cols, cell_w, cell_h, label_reserve, tile): (usize, f64, f64, f64, f64),
+    (h, heads): (usize, usize),
+) {
+    let (col, row) = (h % cols, h / cols);
+    let cell_x = PAD + cell_w * col as f64 + (cell_w - tile) * 0.5;
+    let cell_y = PAD + cell_h * row as f64 + (cell_h - tile - label_reserve) * 0.5;
+    let slab = &attn_data[h * patches..(h + 1) * patches];
+    let thumb = (src_h.min(tile as usize), src_w.min(tile as usize));
+    render_thumbnail(out, img_data, (src_h, src_w), thumb, (cell_x, cell_y), tile);
+    render_overlay_grid(out, slab, side, cell_x, cell_y, tile);
+    if heads > 1 {
+        let lbl_y = cell_y + tile + 1.0;
+        render_overlay_label(out, &[h as f64], 0, 1, cell_x, lbl_y, tile);
+    }
+}
+
 const MAX_TILE: f64 = 110.0;
 
 /// Translucent viridis rect per patch, scaled by attention magnitude.
+/// Three-stop viridis ramp (dark purple -> teal -> yellow).
+fn viridis(t: f64) -> (u8, u8, u8) {
+    const STOPS: [(f64, f64, f64); 3] = [
+        (68.0, 1.0, 84.0),
+        (33.0, 145.0, 140.0),
+        (253.0, 231.0, 37.0),
+    ];
+    let (a, b, frac) = if t < 0.5 {
+        (STOPS[0], STOPS[1], t * 2.0)
+    } else {
+        (STOPS[1], STOPS[2], (t - 0.5) * 2.0)
+    };
+    let lerp = |x: f64, y: f64| (x + (y - x) * frac).round() as u8;
+    (lerp(a.0, b.0), lerp(a.1, b.1), lerp(a.2, b.2))
+}
+
 fn render_overlay_grid(
     out: &mut String,
     head_attn: &[f64],
@@ -70,28 +95,10 @@ fn render_overlay_grid(
     cell_y: f64,
     tile: f64,
 ) {
-    let viridis = |t: f64| -> (u8, u8, u8) {
-        const STOPS: [(f64, f64, f64); 3] = [
-            (68.0, 1.0, 84.0),
-            (33.0, 145.0, 140.0),
-            (253.0, 231.0, 37.0),
-        ];
-        let (a, b, frac) = if t < 0.5 {
-            (STOPS[0], STOPS[1], t * 2.0)
-        } else {
-            (STOPS[1], STOPS[2], (t - 0.5) * 2.0)
-        };
-        let lerp = |x: f64, y: f64| (x + (y - x) * frac).round() as u8;
-        (lerp(a.0, b.0), lerp(a.1, b.1), lerp(a.2, b.2))
-    };
     let patch = tile / side as f64;
     let lo = head_attn.iter().copied().fold(f64::INFINITY, f64::min);
     let hi = head_attn.iter().copied().fold(f64::NEG_INFINITY, f64::max);
-    let span = if (hi - lo).abs() < f64::EPSILON {
-        1.0
-    } else {
-        hi - lo
-    };
+    let span = if hi > lo { hi - lo } else { 1.0 };
     for r in 0..side {
         for c in 0..side {
             let t = ((head_attn[r * side + c] - lo) / span).clamp(0.0, 1.0);
