@@ -1,9 +1,10 @@
 number = 1
 slug = "glossary-classical-terms"
-status = "in-progress"
+status = "completed"
 description = "Add the 7 missing classical-ML glossary entries (Linear Regression, Logistic ..."
 role = "production"
 context_files = []
 created_at = "2026-07-25T18:52:01"
+completed_at = "2026-07-25T18:59:47"
 task_type = "docs"
-commits = []
+commits = ["bba0789e7aa06c5a2dc66d2c1f73406ce8d2433b"]

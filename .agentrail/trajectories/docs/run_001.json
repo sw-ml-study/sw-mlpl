@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 1,
+    "step": "glossary-classical-terms"
+  },
+  "action": "glossary H2 verification greps; house-style entries with verified [[link]] targets; term-stop path additions",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-25T18:59:47"
+}
