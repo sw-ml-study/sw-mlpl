@@ -1,0 +1,1 @@
+Gaussian Naive Bayes demo shipped: closed-form fit (masked matmul means/variances), Bayes-rule argmax, 0.85 test vs 0.5 baseline on fresh moons, P(class 1) heatmap showing the quadratic Gaussian boundary vs the MLP's learned one on identical data. 3 pinning tests; README count 57; pages rebuilt+committed in-step per the new per-commit discipline.
