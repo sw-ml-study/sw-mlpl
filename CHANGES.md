@@ -12,8 +12,16 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-26
+
+- chore(agentrail): record tech-debt-spike step 001 completion (viz split)
+- docs: Game of Life parity analysis + saga seed (functional 9-neighborhood form)
+- refactor(viz): split mlpl-viz into a 4-crate family (tech-debt spike step 001)
+
 ## 2026-07-25
 
+- chore(agentrail): record classical-ml step 004 + archive completed saga
+- docs(changes): refresh CHANGES.md to HEAD
 - docs+paths(saga): Classical ML detour, lang-reference note, retrospective (classical-ml step 004)
 - chore(agentrail): record classical-ml step 003 completion (Naive Bayes demo)
 - docs(changes): refresh CHANGES.md to HEAD
