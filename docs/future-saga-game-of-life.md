@@ -147,6 +147,78 @@ Stage 3's `outer` dissolves, since APL2 would not loop at all.
   frame!), strand `[1, G]`, `inner(:or, :and, ...)` -- the APL2
   finale, and the natural acceptance demo for Stage 6 itself.
 
+## The stencil formulation (fourth family)
+
+A reader-supplied variant (2026-07-26, glyphs approximated):
+
+```text
+lw: 2 3 member stencil(3 3) rank(inner_or_and ravel-each (4 /= iota 9)) omega
+```
+
+This is the WINDOWED family: instead of shifting the whole board,
+apply a function to each cell's 3x3 neighborhood. The pieces map to
+the staging plan almost one-to-one:
+
+| Fragment | Feature | sw-MLPL status |
+| --- | --- | --- |
+| rank operator (apply per window/subarray) | Stage 2 `cells(:f, k, x)` | planned |
+| ravel-each + inner product with a mask | Stage 2 `each` + Stage 3 `inner` | planned |
+| `4 /= iota 9` (drop the window center) | mask arithmetic | works TODAY: `1 - eq(iota(9), 4)` |
+| `2 3 member` (count in the survive set) | Stage 5 `member(x, y)` | planned |
+| the 3x3 sliding window itself | stencil / windowing | NOT in the staging plan |
+
+The missing primitive -- sliding windows -- is not an APL2 gap to
+patch separately: **a stencil IS a convolution.** Neighbor counting is
+exactly `conv2d(G, K)` with the 3x3 all-ones-except-center kernel,
+and `conv2d` is already step 2 of the parked stable-diffusion saga.
+So the stencil Life lands for free when conv2d does, and becomes the
+perfect bridge demo: "convolution is a sliding stencil; Life is its
+hello-world" -- classical arrays shaking hands with CNNs, which is
+this platform's whole voice. Recommendation: when the stable-
+diffusion saga resumes, its conv2d step should cite Life as its
+second acceptance demo (after the U-Net requirement).
+
+## disp-driven narration (per user direction)
+
+Every Life demo variant should narrate its DATA STRUCTURES with the
+Stage-1 introspection builtins as it goes:
+
+- `disp(G)` on the seeded board -- the glider as a framed grid;
+- `size(S)` / `tally(S)` / `disp` on the `[9, n, n]` shifted stack --
+  SEE the nine boards before they collapse into the count;
+- `disp(N)` on the neighbor-count board -- the rule's input made
+  visible (values 0..9, the 3s and 4s about to matter);
+- in the Stage-6 version, `disp` of the enclosed 3x3 board-of-boards
+  is the money shot: nested frames of little grids, APL2 depth made
+  visible for the first time.
+
+## Widget I/O: how sw-MLPL talks to a 2D display
+
+Traditional APL used shared variables for device I/O. sw-MLPL has
+three existing idioms, and the Life widget uses the first now with a
+path to the third:
+
+1. **Value return (pure)** -- `svg(...)` returns a string; the render
+   pipeline displays it. No channel at all: display is a VALUE. The
+   `svg(frames, "life")` SMIL widget lives here -- the whole animation
+   is one self-contained value, replayable, downloadable, and correct
+   on the static pages site. This is the functional answer and the
+   default.
+2. **Event emission** -- the 3D stage: eval emits `Stage3dEvent`s
+   through `mlpl_web_viz3d::events` to a JS hook. One-way fire-and-
+   forget; closest in spirit to an APL shared variable's write side.
+3. **Generation-keyed trace stores + streaming** -- the live-loss
+   pipeline: the eval side PUSHES into a named per-eval mailbox
+   (`loss_trace`, `telemetry_trace`), the widget POLLS it on its own
+   clock, SSE carries it across the network. This IS the shared-
+   variable pattern, modernized: a rendezvous cell both sides touch
+   without knowing each other. A future LIVE Life (watch generations
+   on the server as they compute, not replayed) would add a
+   `frame_trace` store fed by a tensor-frame SSE event alongside
+   `metric` -- same architecture as the live loss panel, one payload
+   type bigger. Not needed for the demo (boards are browser-tier);
+   documented as the growth path.
+
 ## The animated grid widget: `svg(frames, "life")`
 
 Today each generation renders as a separate `svg(G, "heatmap")` --
