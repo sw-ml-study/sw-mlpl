@@ -1,4 +1,4 @@
-number = 6
+number = 13
 slug = "repl-split"
 status = "pending"
 description = "mlpl-repl 13 modules -> connect-mode cluster to a sibling crate."

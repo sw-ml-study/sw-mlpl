@@ -193,7 +193,7 @@ pub(crate) fn try_status(
 /// Synchronously replace the trailing running-marker with a finished
 /// command entry and chain the rest of the queue. For connect commands
 /// that resolve without a fetch (the `:reset` prompt and its abort).
-fn chain_entry(
+pub(crate) fn chain_entry(
     deps: &EvalDeps,
     history: &[HistoryEntry],
     queue: &[String],
@@ -252,7 +252,7 @@ pub(crate) fn try_reset_answer(
     }
     let ans = line.trim().to_ascii_lowercase();
     if ans == "y" || ans == "yes" {
-        post_reset(deps, history, queue, idx);
+        crate::clear::post_reset(deps, history, queue, idx);
     } else {
         chain_entry(
             deps,
@@ -263,40 +263,6 @@ pub(crate) fn try_reset_answer(
         );
     }
     true
-}
-
-/// POST `/v1/reset` (confirmed): cancel all in-flight evals on the
-/// server, render the cancel count, and chain the queue.
-fn post_reset(deps: &EvalDeps, history: &[HistoryEntry], queue: &[String], idx: usize) {
-    let Some(base) = mlpl_web_eval::eval::current_connect_url_from_window() else {
-        chain_entry(
-            deps,
-            history,
-            queue,
-            idx,
-            (":reset", "error: not connected", true),
-        );
-        return;
-    };
-    let hist_handle = deps.history.clone();
-    let deps_c = deps.clone();
-    let queue_c = queue.to_vec();
-    let mut hist_c = history.to_vec();
-    mlpl_web_eval::stats_fetch::fetch_reset(
-        base,
-        Box::new(move |result: String| {
-            let is_error = result.starts_with("error:");
-            hist_c.pop();
-            hist_c.push(HistoryEntry {
-                input: ":reset".to_string(),
-                output: result,
-                is_error,
-                kind: EntryKind::Command,
-            });
-            hist_handle.set(hist_c.clone());
-            crate::submit::process_next_eval(deps_c, hist_c, queue_c, idx + 1);
-        }),
-    );
 }
 
 /// Dispatch `line` to the connected server (async) when a connect

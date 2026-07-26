@@ -1,0 +1,8 @@
+number = 12
+slug = "error-handling-demo"
+status = "pending"
+description = "Error Handling demo (user-requested, after Life): three acts per docs/option-..."
+role = "production"
+context_files = []
+created_at = "2026-07-26T10:25:44"
+commits = []

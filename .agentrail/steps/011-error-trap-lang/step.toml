@@ -1,0 +1,8 @@
+number = 11
+slug = "error-trap-lang"
+status = "pending"
+description = "Error-handling language features (design: docs/option-result-design.md 'Contr..."
+role = "production"
+context_files = []
+created_at = "2026-07-26T10:25:44"
+commits = []

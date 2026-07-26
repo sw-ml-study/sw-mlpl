@@ -53,6 +53,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),
             (
+                "rotate",
+                "rotate(x, k, axis)",
+                "cyclic shift along axis; negative k (spell it 0 - k) rotates the other way",
+            ),
+            (
                 "reduce",
                 "reduce(:op, a[, axis])",
                 "higher-order reduction: :op is :add/:+, :mul/:*, :min, :max, :and, :or",

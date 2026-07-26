@@ -142,6 +142,17 @@ pub enum NodeKind {
         /// Index along `axis` to extract.
         idx: usize,
     },
+    /// Cyclic rotate along an axis (Game of Life saga step 1).
+    /// A pure permutation: backward rotates the upstream
+    /// gradient by `-k` along the same axis.
+    Rotate {
+        /// Parent node id.
+        parent: NodeId,
+        /// Rotation amount (positive = element `k` to the front).
+        k: i64,
+        /// Axis rotated.
+        axis: usize,
+    },
 }
 
 /// Per-node storage: the forward value, an accumulated gradient, the

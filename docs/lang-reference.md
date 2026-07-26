@@ -283,6 +283,7 @@ Newlines and semicolons are both statement separators.
 | `tally(a)` | 1 | Length of the leading axis (scalar): the number of major cells (APL's monadic tally, J's `#`). A scalar tallies to `1`; a rank >= 1 array tallies to `shape[0]`. Contrast with `size`, which counts every element. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `transpose(a)` | 1 | Reverse axis order |
+| `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
 | `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |
 | `reduce(:op, a, axis)` | 3 | Same, restricted to a single axis. |
 | `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |

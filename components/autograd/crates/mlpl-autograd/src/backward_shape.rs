@@ -4,13 +4,57 @@
 use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_shape::prelude::*;
 
+use mlpl_array_ops_compose::prelude::RotateExt;
 use mlpl_autograd_tape::grad_kernels::{
     concat_backward, patchify_backward, stack_backward, take_backward,
 };
-use mlpl_autograd_tape::{NodeId, Tape, accumulate};
+use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate};
 
-pub(crate) fn prop_transpose(tape: &Tape, parent: NodeId, upstream: &DenseArray) {
-    accumulate(&mut tape.nodes_mut()[parent.0].grad, upstream.transpose());
+/// Dispatch the structural node kinds (everything that is a pure
+/// re-arrangement or the cross-entropy fused loss). The
+/// elementwise / linalg / reduction kinds stay in
+/// `backward::propagate`; it forwards every other kind here.
+pub(crate) fn propagate_shape(tape: &Tape, kind: NodeKind, upstream: &DenseArray) {
+    match kind {
+        NodeKind::Transpose { parent } => {
+            accumulate(&mut tape.nodes_mut()[parent.0].grad, upstream.transpose());
+        }
+        NodeKind::Reshape { parent, orig_shape } => {
+            prop_reshape(tape, parent, &orig_shape, upstream);
+        }
+        NodeKind::CrossEntropy { logits, targets } => {
+            prop_cross_entropy(tape, logits, &targets, upstream);
+        }
+        NodeKind::Patchify {
+            parent,
+            orig_shape,
+            patch_size,
+        } => prop_patchify(tape, parent, &orig_shape, patch_size, upstream),
+        NodeKind::Concat {
+            left,
+            right,
+            axis,
+            left_size,
+        } => prop_concat(tape, left, right, axis, left_size, upstream),
+        NodeKind::Stack {
+            parents,
+            axis,
+            parent_size_along_axis,
+        } => prop_stack(tape, &parents, axis, parent_size_along_axis, upstream),
+        NodeKind::Take {
+            parent,
+            orig_shape,
+            axis,
+            idx,
+        } => prop_take(tape, parent, &orig_shape, axis, idx, upstream),
+        NodeKind::Rotate { parent, k, axis } => {
+            let g = upstream
+                .rotate(-k, axis)
+                .expect("rotate grad: axis in range");
+            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
+        }
+        _ => unreachable!("non-structural kinds are handled in backward::propagate"),
+    }
 }
 
 pub(crate) fn prop_reshape(tape: &Tape, parent: NodeId, orig_shape: &Shape, upstream: &DenseArray) {

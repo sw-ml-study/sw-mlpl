@@ -4,6 +4,7 @@
 use std::rc::Rc;
 
 use mlpl_array::DenseArray;
+use mlpl_array_ops_compose::prelude::*;
 
 use crate::tensor::Tensor;
 use mlpl_autograd_tape::{NodeData, NodeKind, softmax_forward};
@@ -57,6 +58,27 @@ impl Tensor {
             y,
             NodeKind::Softmax {
                 parent: self.node,
+                axis,
+            },
+        )
+    }
+}
+
+impl Tensor {
+    /// Cyclic rotate along `axis` (positive `k` = element `k` to
+    /// the front). Pure permutation; backward is `rotate(-k)`.
+    /// Lives here rather than in `tensor_shape.rs` because that
+    /// module sits at the sw-checklist function-count cap; a
+    /// future rebalance can regroup the composition methods.
+    #[must_use]
+    pub fn rotate(&self, k: i64, axis: usize) -> Self {
+        let v = self.value().rotate(k, axis).expect("rotate: axis in range");
+        new_tensor(
+            self,
+            v,
+            NodeKind::Rotate {
+                parent: self.node,
+                k,
                 axis,
             },
         )

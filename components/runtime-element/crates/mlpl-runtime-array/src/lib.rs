@@ -29,6 +29,7 @@ pub const NAMES: &[&str] = &[
     "matmul",
     "patchify",
     "take",
+    "rotate",
 ];
 // Note: `concat` (3-arg axis-aware form) is dispatched here but
 // not listed in NAMES because the 2-arg legacy form is registered
@@ -53,6 +54,7 @@ pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, 
         "patchify" => Some(slice::patchify(name, args)),
         "concat" if args.len() == 3 => Some(slice::concat(name, args)),
         "take" => Some(slice::take(name, args)),
+        "rotate" => Some(transform::rotate(name, args)),
         _ => None,
     }
 }

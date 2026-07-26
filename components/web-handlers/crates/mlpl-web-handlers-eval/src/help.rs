@@ -28,7 +28,8 @@ Syntax:
 Built-in categories (see :help <topic> or :builtins for the
 full list):
   core       range (iota), shape, rank, reshape, transpose,
-             reduce, reduce_add, reduce_mul, argmax, mean
+             rotate, reduce, reduce_add, reduce_mul, argmax,
+             mean
   labels     label, relabel, reshape_labeled, labels
   linalg     dot, matmul
   math       pi, e, exp, log, sqrt, abs, sin, cos, pow,

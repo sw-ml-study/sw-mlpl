@@ -8,9 +8,9 @@ pub(crate) struct AxisWalk {
     pub(crate) result_labels: Option<Vec<Option<String>>>,
 }
 
-/// Validate `axis` and compute the result shape + traversal strides
-/// + label-removed label set. Returns an `AxisWalk` consumers pass
-/// to their inner-loop body.
+/// Validate `axis` and compute the result shape, traversal strides,
+/// and label-removed label set. Returns an `AxisWalk` consumers
+/// pass to their inner-loop body.
 pub(crate) fn axis_walk(arr: &DenseArray, axis: usize) -> Result<AxisWalk, ArrayError> {
     let dims = arr.shape().dims();
     if axis >= dims.len() {

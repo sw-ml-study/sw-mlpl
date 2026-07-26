@@ -50,6 +50,28 @@ pub(crate) fn call_take(
     Ok(x.take(axis, idx))
 }
 
+/// `rotate(x, k, axis)` on the tape. `k` may be negative (spelled
+/// `0 - 1` in MLPL) so it is extracted here as a signed integer
+/// rather than through `tape_scalar_usize`.
+pub(crate) fn call_rotate(
+    args: &[Expr],
+    env: &mut Environment,
+    tape: &std::rc::Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
+    arity_check(args, 3, "rotate")?;
+    let x = eval_tensor_expr(&args[0], env, tape, params)?;
+    let k_arr = crate::eval::eval_expr(&args[1], env, &mut None)?.into_array()?;
+    if k_arr.rank() != 0 || k_arr.data()[0].fract() != 0.0 {
+        return Err(EvalError::Unsupported(
+            "rotate: k must be an integer scalar".into(),
+        ));
+    }
+    let k = k_arr.data()[0] as i64;
+    let axis = tape_scalar_usize(&args[2], env, "rotate: axis")?;
+    Ok(x.rotate(k, axis))
+}
+
 pub(crate) fn call_reshape(
     args: &[Expr],
     env: &mut Environment,

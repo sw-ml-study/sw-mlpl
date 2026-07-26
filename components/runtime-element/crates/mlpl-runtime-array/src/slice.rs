@@ -29,7 +29,11 @@ pub(crate) fn take(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Runt
     Ok(args[0].take(axis, idx)?)
 }
 
-fn scalar_usize(name: &str, arr: &DenseArray, what: &str) -> Result<usize, RuntimeError> {
+pub(crate) fn scalar_usize(
+    name: &str,
+    arr: &DenseArray,
+    what: &str,
+) -> Result<usize, RuntimeError> {
     if arr.rank() != 0 {
         return Err(RuntimeError::InvalidArgument {
             func: name.into(),

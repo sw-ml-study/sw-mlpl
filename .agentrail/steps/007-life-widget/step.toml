@@ -1,0 +1,8 @@
+number = 7
+slug = "life-widget"
+status = "pending"
+description = 'Game of Life saga step 2: svg(frames, "life") SMIL grid animation render mode...'
+role = "production"
+context_files = []
+created_at = "2026-07-26T09:31:57"
+commits = []
