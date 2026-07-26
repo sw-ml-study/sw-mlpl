@@ -142,7 +142,17 @@ fn command_help_body(cmd: &str) -> Option<&'static str> {
         ":history" => {
             "Usage: :history\n  List the recent REPL command lines (also given to :ask as context)."
         }
-        ":clear" => "Usage: :clear\n  Reset the session: clears variables, models, and 3D state.",
+        other => return session_help_body(other),
+    })
+}
+
+/// Second half of the per-command help table: session-lifecycle and
+/// view commands. Split from `command_help_body` for the LOC budget.
+fn session_help_body(cmd: &str) -> Option<&'static str> {
+    Some(match cmd {
+        ":clear" => {
+            "Usage: :clear\n  Reset the session: clears variables, models, and 3D state.\n  Demos run in the SAME session until you reset -- so later demos and :ask can see earlier results."
+        }
         ":help" => {
             "Usage: :help [topic]\n  :help -- this command list.  :<cmd> --help -- one command's help.\n  :help <topic> -- focused help (vars, models, fns, builtins, describe, wsid)."
         }

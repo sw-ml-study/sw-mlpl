@@ -1,0 +1,1 @@
+Regression fix: running a demo must NOT reset the REPL. Demos should append to the existing transcript and reuse the same eval session so :ask grounding covers prior demos; only the manual Reset REPL button clears. Fix make_run_demo (drop session.clear, append history), verify :ask history grounding sees prior demo entries, add/adjust tests.

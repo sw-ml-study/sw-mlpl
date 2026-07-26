@@ -225,15 +225,17 @@ fn eval_one_line_with_3d(deps: &EvalDeps, line: &str) -> HistoryEntry {
                 output: info,
             });
         }
-        return HistoryEntry {
+        HistoryEntry {
             input: line.to_string(),
             output: r.display,
             is_error,
             kind: EntryKind::Command,
-        };
+        }
     }
     #[cfg(not(target_arch = "wasm32"))]
-    eval_one_line(deps, line)
+    {
+        eval_one_line(deps, line)
+    }
 }
 
 /// Evaluate one REPL line: canned command replies (`:help`,

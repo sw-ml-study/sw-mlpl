@@ -66,6 +66,39 @@ fn repl_history_context(history: &[HistoryEntry]) -> String {
     recent.join(" | ")
 }
 
+/// Ground the model in the demos run THIS session. Demos now run in
+/// the same REPL (the transcript is not cleared between them), so
+/// every "About this demo -- <name>" narration is listed oldest
+/// first, and the newest one -- the active demo -- also gets its
+/// intro body, so the model doesn't guess (e.g. Othello for
+/// tic-tac-toe) and can answer "what has been done in this REPL"
+/// across demos.
+fn demo_context(history: &[HistoryEntry]) -> String {
+    let intros: Vec<&HistoryEntry> = history
+        .iter()
+        .filter(|e| {
+            matches!(e.kind, EntryKind::Narration) && e.input.starts_with("About this demo")
+        })
+        .collect();
+    let Some(active) = intros.last() else {
+        return String::new();
+    };
+    let mut p = String::new();
+    if intros.len() > 1 {
+        let names: Vec<&str> = intros
+            .iter()
+            .map(|e| e.input.trim_start_matches("About this demo -- ").trim())
+            .collect();
+        p.push_str(&format!(
+            " Demos run this session, oldest first (earlier ones' variables and results are still in the workspace): {}.",
+            names.join(", ")
+        ));
+    }
+    let body: String = active.output.trim().chars().take(400).collect();
+    p.push_str(&format!(" Active demo -- {}: {body}.", active.input.trim()));
+    p
+}
+
 /// Build the `:ask` system message: meta preamble + recent REPL
 /// activity + the selected sculpture (if any). This goes in
 /// Ollama's `system` role (not the prompt), which weak models
@@ -74,16 +107,7 @@ fn build_ask_system(history: &[HistoryEntry]) -> String {
     let mut p = ASK_SYSTEM.to_string();
     // Compact MLPL reference (syntax + builtin signatures) -- real forms.
     p.push_str(&mlpl_reference());
-    // Ground the model in the active demo (its "About this demo -- <name>"
-    // narration names the task, e.g. tic-tac-toe) so it doesn't guess Othello.
-    if let Some(intro) = history
-        .iter()
-        .rev()
-        .find(|e| matches!(e.kind, EntryKind::Narration) && e.input.starts_with("About this demo"))
-    {
-        let body: String = intro.output.trim().chars().take(400).collect();
-        p.push_str(&format!(" Active demo -- {}: {body}.", intro.input.trim()));
-    }
+    p.push_str(&demo_context(history));
     let recent = repl_history_context(history);
     if !recent.is_empty() {
         p.push_str(&format!(" Recent REPL activity (oldest first): {recent}."));

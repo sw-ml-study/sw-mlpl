@@ -8,6 +8,25 @@ use crate::running::{push_running_marker, replace_running_with_result};
 use mlpl_web_demos::DEMOS;
 use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
+/// Run a demo IN the live REPL: the session's bindings and the
+/// transcript both survive, so after several demos `:ask` (grounded
+/// in the transcript) can answer about all of them and later demos
+/// can inspect earlier results. Only the manual "Reset REPL" button
+/// (`make_clear`) starts fresh. The 3D stage still resets per demo
+/// so sculptures from unrelated demos don't pile up.
+///
+/// The intro narration panel frames what the demo does; demo lines
+/// follow, and the takeaway narration lands after the final line in
+/// `schedule_demo_line`. A `_demo` string is bound in the session so
+/// `:describe _demo` reprints the intro + takeaway.
+///
+/// Lines evaluate asynchronously -- one `Timeout::new(0, ...)` tick
+/// each -- so the browser paints between lines (a single heavy line
+/// still blocks; see docs/worker-threads.md). The accumulated
+/// `entries` vec threads through the recursion by move because a
+/// `UseStateHandle` read inside a deferred Timeout sees the stale
+/// snapshot from closure-creation time; `history.set` is purely for
+/// the UI paint.
 pub fn make_run_demo(
     session: Rc<RefCell<WasmSession>>,
     history: UseStateHandle<Vec<HistoryEntry>>,
@@ -16,44 +35,16 @@ pub fn make_run_demo(
         let Some(demo) = DEMOS.get(idx) else {
             return;
         };
-        session.borrow().clear();
         let _ = js_sys::eval("window.__stage3d_clear && window.__stage3d_clear()");
-        // Lead with a narration panel framing what the demo does
-        // and why. Demo lines follow; the takeaway narration lands
-        // after the final line in `schedule_demo_line`. Also bind
-        // a `_demo` string in the session so `:describe _demo`
-        // prints the intro + takeaway from the REPL.
         bind_demo_metadata(&session.borrow(), demo);
-        let intro_entry = HistoryEntry {
+        let mut entries = (*history).clone();
+        entries.push(HistoryEntry {
             input: format!("About this demo -- {}", demo.name),
             output: intro_with_literate_link(demo),
             is_error: false,
             kind: EntryKind::Narration,
-        };
-        let entries = vec![intro_entry];
+        });
         history.set(entries.clone());
-        // Evaluate demo lines asynchronously: each line runs in
-        // its own `Timeout::new(0, ...)` tick so the browser can
-        // paint the preceding line's output and process input
-        // between lines. A long-running single line (e.g. `train
-        // 30 { ... }`) still blocks the event loop *during* its
-        // own eval -- fixing that needs Web Workers (see
-        // docs/worker-threads.md) -- but the cross-line yield
-        // keeps the tab from triggering the "unresponsive"
-        // dialog on multi-line demos where the total wall clock
-        // is the problem.
-        //
-        // We thread the accumulated `entries` vec through
-        // recursion explicitly rather than reading from the
-        // `UseStateHandle` inside each tick: a state handle is
-        // snapshotted at the callback's closure-creation time
-        // and does not refresh between `set()` calls, so reading
-        // via `(*history).clone()` inside a deferred Timeout
-        // reliably sees the stale initial value and each tick
-        // overwrites the previous one's write. Passing `entries`
-        // by move keeps a single authoritative Rust-side source
-        // of truth; `history.set(entries.clone())` is purely for
-        // the UI paint.
         schedule_demo_line(session.clone(), history.clone(), entries, demo, 0);
     })
 }
