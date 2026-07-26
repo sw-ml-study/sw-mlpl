@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-26
 
+- step 003-serve-split: record completion
+- chore(serve): register new core/state crates as workspace members
+- refactor(serve): split mlpl-serve into core/state/top crate trio
+- docs(life): stencil formulation, disp narration, widget I/O idioms
+- chore(agentrail): record tech-debt-spike step 002 completion (autograd split)
+- refactor(autograd): substrate crate split retires both fn-count FAILs (spike step 002)
+- docs(apl2): audit the Life one-liner's APL2-ness; rank APL2 opportunities
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record tech-debt-spike step 001 completion (viz split)
 - docs: Game of Life parity analysis + saga seed (functional 9-neighborhood form)
 - refactor(viz): split mlpl-viz into a 4-crate family (tech-debt spike step 001)
