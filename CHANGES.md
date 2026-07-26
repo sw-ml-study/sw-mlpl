@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-26
 
+- step 004-demo-session-continuity: record completion
+- chore(pages): rebuild for demo session continuity + :ask multi-demo grounding
+- fix(web): demos run in the SAME REPL session; :ask sees all of them
+- docs(changes): refresh CHANGES.md to HEAD
 - step 003-serve-split: record completion
 - chore(serve): register new core/state crates as workspace members
 - refactor(serve): split mlpl-serve into core/state/top crate trio
