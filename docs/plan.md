@@ -30,6 +30,10 @@ and is recorded retroactively in the archived saga
   category with six new glossary entries and beginner-path stops;
   `docs/future-saga-classical-ml.md` (analysis) + retrospective in
   `docs/saga.md`.
+- **Queued: Game of Life + animated grid widget** --
+  `docs/future-saga-game-of-life.md` (engine already verified live
+  with zero new builtins; rotate builtin + SMIL "life" svg mode +
+  demo).
 - **Queued: speculative decoding (MLX)** --
   `docs/plan-for-speculative-decoding.md` and
   `docs/future-sagas-multibackend-specdecode.md`.
