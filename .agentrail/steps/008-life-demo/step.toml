@@ -1,8 +1,9 @@
 number = 8
 slug = "life-demo"
-status = "in-progress"
+status = "completed"
 description = "Game of Life saga step 3: 'Game of Life (APL classic)' demo -- multi-variant ..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T09:31:57"
-commits = []
+completed_at = "2026-07-26T13:04:50"
+commits = ["ddd8443324da4cc260d6f4cdc720ebc14b42b228"]
