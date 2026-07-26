@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-25
 
+- chore(pages): rebuild for classical-ml glossary entries, path stops, kNN demo
+- chore(agentrail): record classical-ml step 002 completion (kNN demo)
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(demos): K-Nearest Neighbors -- classical ML as array algebra (classical-ml step 002)
 - chore(agentrail): record classical-ml step 001 completion (glossary + path stops)
 - docs(glossary): six classical-ML entries + path stops (classical-ml step 001)
