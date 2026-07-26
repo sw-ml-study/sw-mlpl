@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-25
 
+- chore(pages): rebuild for the Naive Bayes (Gaussian) demo
+- feat(demos): Gaussian Naive Bayes -- generative vs discriminative (classical-ml step 003)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for classical-ml glossary entries, path stops, kNN demo
 - chore(agentrail): record classical-ml step 002 completion (kNN demo)
 - docs(changes): refresh CHANGES.md to HEAD
