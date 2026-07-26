@@ -1,9 +1,10 @@
 number = 3
 slug = "serve-split"
-status = "in-progress"
+status = "completed"
 description = "mlpl-serve 17 modules -> sibling crates by responsibility (handlers/session v..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T07:46:59"
+completed_at = "2026-07-26T09:08:14"
 task_type = "refactor"
-commits = []
+commits = ["fb01a4693af428e617f0108641b53ca3f94b3db8"]

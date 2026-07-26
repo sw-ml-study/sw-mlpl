@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 3,
+    "step": "serve-split"
+  },
+  "action": "python-scripted git mv + pub-use shim strategy; iterated cargo check to zero; extracted pure helpers per docs/loose-coupling.md; scoped tests to serve workspace + web connect harnesses",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-26T09:08:14"
+}
