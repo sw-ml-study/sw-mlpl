@@ -1,9 +1,10 @@
 number = 2
 slug = "knn-demo"
-status = "in-progress"
+status = "completed"
 description = "K-Nearest Neighbors demo per docs/future-saga-classical-ml.md step 2: blobs d..."
 role = "production"
 context_files = []
 created_at = "2026-07-25T18:52:01"
+completed_at = "2026-07-25T20:25:34"
 task_type = "feature"
-commits = []
+commits = ["93e1c31b6fcfd6b7c01cad526b9e60a0ed3649fe"]
