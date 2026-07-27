@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga connect-inspect-tables: complete (2 steps)
+- feat(docs-ui): help tabs render real HTML tables (build-time md->html)
+- step 001-server-inspect-route: record completion
+- feat(connect): server inspect route -- :fns/:list work connected
+- docs(changes): refresh CHANGES.md to HEAD
 - saga naming-and-docs: complete (3 steps)
 - feat(demos): doc-strings + kept-comment listings across the demos
 - step 002-naming-and-usage-docs: record completion
