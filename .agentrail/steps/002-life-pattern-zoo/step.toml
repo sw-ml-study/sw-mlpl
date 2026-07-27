@@ -1,0 +1,9 @@
+number = 2
+slug = "life-pattern-zoo"
+status = "pending"
+description = "New Basics demo 'Life Pattern Zoo (20x20)' right after Game of Life: u:stamp(..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T08:48:17"
+task_type = "demo-content"
+commits = []

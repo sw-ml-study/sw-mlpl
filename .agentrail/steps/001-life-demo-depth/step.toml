@@ -1,0 +1,9 @@
+number = 1
+slug = "life-demo-depth"
+status = "in-progress"
+description = "Update 'Game of Life (APL classic)': emphasize the ONE-LINE u:life step funct..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T08:48:17"
+task_type = "demo-content"
+commits = []

@@ -1,17 +1,1 @@
-# Saga: tech-debt spike -- retire the remaining 8 sw-checklist FAILs
-
-Baseline 2026-07-26: 8 failed / 311 warnings. All eight are structural
-(crate-module-count or module-fn-count boxed in by a crate cap), so
-per docs/sw-checklist-paydown.md this is the dedicated-spike route:
-one crate split per step, facade re-exports so consumers never change,
-scripts/check-locks.sh --fix after every workspace membership change,
-full gates per step, no behavior change.
-
-Steps: 1) mlpl-viz (16 modules -> facade + viz-core + viz-marks +
-viz-analysis); 2) mlpl-autograd (backward.rs 19 fns + reduction_ops.rs
-11 fns, crate at module cap -> sibling ops crate + module splits);
-3) mlpl-serve (17 modules); 4) mlpl-repl (13); 5) mlpl-web (10);
-6) mlpl-web-eval (19, mind the #[path] test harnesses); 7) wrap-up:
-counts, docs, and the plan for the one out-of-scope monster --
-mlpl-eval at 100 modules, which is its own future saga (workspace
-partition scale), documented not attempted here.
+Deepen the Game of Life showcase (user direction 2026-07-27): (1) one-line u:life emphasis + builtin-reference usage (:add via reduce, the :name reference syntax) in the main demo; (2) deep/nested disp views of intermediate structures -- rank-3 neighbor stack and a rank-4 projection -- Life as the APL2 completeness testcase for complex data beyond scalars/vectors/matrices; (3) a 20x20 Life Pattern Zoo demo (spinner, still lifes, glider, r-pentomino growth, vanishing patterns) with a u:stamp bulk-put helper and the live frame_trace finale.
