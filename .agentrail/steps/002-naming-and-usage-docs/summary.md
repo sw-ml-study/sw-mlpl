@@ -1,0 +1,1 @@
+Naming trichotomy + Value Kinds sections in lang-reference; Usage Guide refreshed from its 2026-05-26 staleness (u: fns, control flow, Results, try/catch/?, connect mode, :list); glossary Name Forms entry; both help tabs are include_str so pages rebuild carries them. Gates green (help completeness + readme counts).
