@@ -1,6 +1,6 @@
 number = 3
 slug = "demo-doc-comments"
-status = "pending"
+status = "in-progress"
 description = "User request: with persistent comments live, update all relevant demos to lev..."
 role = "production"
 context_files = []

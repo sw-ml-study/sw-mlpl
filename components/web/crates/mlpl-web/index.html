@@ -763,6 +763,9 @@
         }
         .input-line {
             color: var(--text);
+            /* multi-line defs (kept-comment listings) echo with
+               their line structure intact */
+            white-space: pre-wrap;
         }
         .prompt {
             color: var(--green);

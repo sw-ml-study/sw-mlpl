@@ -15,7 +15,7 @@ fn life_demo_evals() {
     let mut env = Environment::new();
     for (i, line) in demo.lines.iter().enumerate() {
         let trimmed = line.trim();
-        if trimmed.is_empty() || trimmed.starts_with('#') {
+        if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with(':') {
             continue;
         }
         let toks = lex(line).unwrap_or_else(|e| panic!("[line {i}] lex: {e:?}"));
