@@ -1,8 +1,9 @@
 number = 3
 slug = "cors-allow-list"
-status = "in-progress"
+status = "completed"
 description = "User regression follow-up: their playground page is served from http://large1..."
 role = "production"
 context_files = []
 created_at = "2026-07-27T13:50:19"
-commits = []
+completed_at = "2026-07-27T14:02:16"
+commits = ["4cc6ec40a26c95be6cae9a0f076be0cec3ad60c3"]
