@@ -42,6 +42,9 @@ pub fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::While => "'while'".into(),
         TokenKind::Break => "'break'".into(),
         TokenKind::Continue => "'continue'".into(),
+        TokenKind::Try => "'try'".into(),
+        TokenKind::Catch => "'catch'".into(),
+        TokenKind::Question => "'?'".into(),
         TokenKind::Def => "'def'".into(),
         TokenKind::Return => "'return'".into(),
     }

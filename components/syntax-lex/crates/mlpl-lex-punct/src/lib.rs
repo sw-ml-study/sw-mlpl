@@ -58,6 +58,7 @@ pub fn single_char_token(b: u8) -> Option<TokenKind> {
         b'{' => Some(TokenKind::LBrace),
         b'}' => Some(TokenKind::RBrace),
         b'.' => Some(TokenKind::Dot),
+        b'?' => Some(TokenKind::Question),
         _ => None,
     }
 }

@@ -50,8 +50,7 @@ mlpl-rt = {{ path = "{}/crates/mlpl-rt" }}
     );
     std::fs::write(tmp.join("Cargo.toml"), cargo_toml).unwrap();
     let main_rs = format!(
-        "fn main() {{\n    let result = {};\n    println!(\"{{}}\", result.data()[0]);\n}}\n",
-        body
+        "fn main() {{\n    let result = {body};\n    println!(\"{{}}\", result.data()[0]);\n}}\n"
     );
     std::fs::write(tmp.join("src/main.rs"), main_rs).unwrap();
 

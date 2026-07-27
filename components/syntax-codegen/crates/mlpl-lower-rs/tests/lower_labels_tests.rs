@@ -64,7 +64,7 @@ fn label_with_non_string_labels_errors() {
 #[test]
 fn matmul_lowers_to_dense_matmul() {
     let s = lower_src("matmul(reshape(iota(6), [2, 3]), reshape(iota(12), [3, 4]))").unwrap();
-    assert!(s.contains(". matmul"), "{s}");
+    assert!(s.contains(":: matmul ("), "{s}");
 }
 
 // -- Static matmul contraction check --
@@ -78,7 +78,7 @@ fn matmul_matching_contraction_labels_lowers_fine() {
          matmul(a, b)",
     )
     .unwrap();
-    assert!(s.contains(". matmul"), "{s}");
+    assert!(s.contains(":: matmul ("), "{s}");
 }
 
 #[test]
@@ -111,7 +111,7 @@ fn matmul_unknown_labels_falls_through_to_runtime() {
          matmul(a, b)",
     )
     .unwrap();
-    assert!(s.contains(". matmul"), "{s}");
+    assert!(s.contains(":: matmul ("), "{s}");
 }
 
 #[test]
@@ -123,7 +123,7 @@ fn matmul_one_side_unlabeled_falls_through_to_runtime() {
          matmul(a, b)",
     )
     .unwrap();
-    assert!(s.contains(". matmul"), "{s}");
+    assert!(s.contains(":: matmul ("), "{s}");
 }
 
 #[test]
@@ -136,7 +136,7 @@ fn transpose_swaps_labels_for_static_tracking() {
          matmul(transpose(a), a)",
     )
     .unwrap();
-    assert!(s.contains(". matmul"), "{s}");
+    assert!(s.contains(":: matmul ("), "{s}");
 }
 
 #[test]

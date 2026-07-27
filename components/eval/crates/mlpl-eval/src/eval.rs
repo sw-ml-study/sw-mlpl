@@ -218,6 +218,15 @@ pub(crate) fn eval_expr(
     if let Expr::While { cond, body, .. } = expr {
         return crate::eval_loop::eval_while(cond, body, env, trace);
     }
+    if let Expr::TryCatch {
+        body,
+        binding,
+        handler,
+        ..
+    } = expr
+    {
+        return crate::result_ops::eval_try_catch(body, binding, handler, env, trace);
+    }
     if let Expr::Break { value, .. } = expr {
         let v = match value {
             Some(inner) => eval_expr(inner, env, trace)?,
@@ -353,6 +362,7 @@ pub(crate) fn eval_expr(
         | Expr::Break { .. }
         | Expr::Continue { .. }
         | Expr::FnDef { .. }
+        | Expr::TryCatch { .. }
         | Expr::Return { .. } => unreachable!(),
     };
     if let Some(t) = trace.as_mut() {

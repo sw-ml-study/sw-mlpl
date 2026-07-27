@@ -26,6 +26,8 @@ fn classify(name: &str) -> TokenKind {
         "while" => TokenKind::While,
         "break" => TokenKind::Break,
         "continue" => TokenKind::Continue,
+        "try" => TokenKind::Try,
+        "catch" => TokenKind::Catch,
         "def" => TokenKind::Def,
         "return" => TokenKind::Return,
         _ => TokenKind::Ident(name.to_owned()),

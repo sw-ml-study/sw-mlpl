@@ -7,8 +7,10 @@ mod error;
 mod error_fmt;
 mod error_from_models;
 mod error_from_tools;
+mod error_kind;
 mod value;
 
 pub use error::EvalError;
+pub use error_kind::error_kind;
 pub use mlpl_eval_core::TokenizerSpec;
 pub use value::{Value, value_kind};

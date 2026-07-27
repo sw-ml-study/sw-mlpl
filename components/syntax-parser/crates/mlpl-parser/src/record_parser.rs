@@ -86,6 +86,18 @@ impl Parser<'_> {
     /// Consume zero or more `.ident` postfix chains, wrapping
     /// `atom` in nested `FieldAccess` nodes.
     pub(crate) fn parse_postfix_chain(&mut self, mut atom: Expr) -> Result<Expr, ParseError> {
+        // `expr?` -- Result propagation sugar (spike step 011):
+        // desugars to `check(expr)` so no new AST node is needed.
+        while self.is(TokenKind::Question) {
+            let q_span = self.tokens[self.pos].span;
+            self.pos += 1;
+            let span = Span::new(atom.span().start, q_span.end);
+            atom = Expr::FnCall {
+                name: "check".into(),
+                args: vec![atom],
+                span,
+            };
+        }
         while self.is(TokenKind::Dot) {
             self.pos += 1;
             let name_tok = &self.tokens[self.pos];
@@ -106,5 +118,30 @@ impl Parser<'_> {
             };
         }
         Ok(atom)
+    }
+    /// Parse `try { body } catch <ident> { handler }`. Both
+    /// braces are required; the binding is a plain ident. Spike
+    /// step 011.
+    pub(crate) fn parse_try(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1; // skip 'try'
+        let (body, _) = self.parse_braced_body()?;
+        self.expect(&TokenKind::Catch)?;
+        let tok = &self.tokens[self.pos];
+        let TokenKind::Ident(binding) = &tok.kind else {
+            return Err(ParseError::UnexpectedToken {
+                found: mlpl_lexer::describe_kind(&tok.kind),
+                span: tok.span,
+            });
+        };
+        let binding = binding.clone();
+        self.pos += 1;
+        let (handler, end) = self.parse_braced_body()?;
+        Ok(Expr::TryCatch {
+            body,
+            binding,
+            handler,
+            span: Span::new(start.start, end.end),
+        })
     }
 }

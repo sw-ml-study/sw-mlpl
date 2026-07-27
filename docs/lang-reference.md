@@ -695,6 +695,24 @@ Loops do not introduce a new scope: assignments in the body
 persist in the surrounding environment, matching `repeat` /
 `train` / `for` semantics.
 
+### try / catch (error trap)
+
+`try { body } catch e { handler }` is an EXPRESSION: it yields the
+body's last value, or -- when the body raises a HARD error -- the
+handler's, with `e` bound to the canonical error record
+`{kind, message}` (dispatch on `e.kind`; kinds are stable kebab-case
+tags like `shape`, `arity`, `runtime`). `err(...)` VALUES are data,
+not hard errors: they flow through untouched. break/continue/return
+signals also pass through. Design: docs/error-handling.md.
+
+### `?` (Result propagation)
+
+Postfix `?` (sugar for `check(expr)`): if the expression is `Ok(v)`,
+continue with `v`; if `Err(e)`, EARLY-RETURN that whole Result from
+the enclosing `def u:` function (the railway pattern). At top level
+(no enclosing function) an `Err` is loud, like `unwrap`. Applying
+`?` to a non-Result is an error.
+
 ## Array Display
 
 Arrays are displayed in a row-major layout:

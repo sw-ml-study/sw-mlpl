@@ -91,6 +91,7 @@ impl fmt::Display for Expr {
             Self::FnDef {
                 name, params, body, ..
             } => fmt_fn_def(f, name, params, body),
+            Self::TryCatch { binding, .. } => write!(f, "try {{ ... }} catch {binding} {{ ... }}"),
             Self::Return { value: None, .. } => write!(f, "return"),
             Self::Return { value: Some(v), .. } => write!(f, "return {v}"),
         }

@@ -142,23 +142,8 @@ pub fn lower_with_config(stmts: &[Expr], cfg: &LowerConfig) -> Result<TokenStrea
     let mut final_expr: Option<TokenStream> = None;
     for (i, stmt) in stmts.iter().enumerate() {
         let is_last = i == last_idx;
-        if let Expr::Assign { name, value, .. } = stmt {
-            let val = lower_expr(&ctx, value)?;
-            if let Some(lbls) = labels_of(&ctx, value) {
-                ctx.known_labels.insert(name.clone(), lbls);
-            }
-            let id = format_ident!("{name}");
-            bindings.push(quote! { let #id = #val; });
-            if is_last {
-                final_expr = Some(quote! { #id.clone() });
-            }
-        } else {
-            let val = lower_expr(&ctx, stmt)?;
-            if is_last {
-                final_expr = Some(val);
-            } else {
-                bindings.push(quote! { let _ = #val; });
-            }
+        if let Some(fin) = lower_stmt(&mut ctx, stmt, is_last, &mut bindings)? {
+            final_expr = Some(fin);
         }
     }
     let final_value = final_expr.expect("final expr populated");
@@ -168,6 +153,31 @@ pub fn lower_with_config(stmts: &[Expr], cfg: &LowerConfig) -> Result<TokenStrea
             #final_value
         }
     })
+}
+
+/// Lower one statement into `bindings`, returning `Some(tokens)`
+/// when it is the final statement (whose value the block yields).
+fn lower_stmt(
+    ctx: &mut Ctx,
+    stmt: &Expr,
+    is_last: bool,
+    bindings: &mut Vec<TokenStream>,
+) -> Result<Option<TokenStream>, LowerError> {
+    if let Expr::Assign { name, value, .. } = stmt {
+        let val = lower_expr(ctx, value)?;
+        if let Some(lbls) = labels_of(ctx, value) {
+            ctx.known_labels.insert(name.clone(), lbls);
+        }
+        let id = format_ident!("{name}");
+        bindings.push(quote! { let #id = #val; });
+        return Ok(is_last.then(|| quote! { #id.clone() }));
+    }
+    let val = lower_expr(ctx, stmt)?;
+    if is_last {
+        return Ok(Some(val));
+    }
+    bindings.push(quote! { let _ = #val; });
+    Ok(None)
 }
 
 /// Lower a single expression. Returns a `DenseArray`-valued Rust
@@ -231,6 +241,7 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::Break { .. }
         | Expr::Continue { .. }
         | Expr::FnDef { .. }
+        | Expr::TryCatch { .. }
         | Expr::Return { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
     }
 }

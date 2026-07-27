@@ -66,6 +66,15 @@ pub(crate) fn eval_result_accessor(
         "unwrap_or" => eval_expr(&args[1], env, trace),
         "get_value" => project_option(*payload, ok, "get_value"),
         "get_error" => project_option(*payload, !ok, "get_error"),
+        // `expr?` desugars to check(expr): ok unwraps; err
+        // early-returns the WHOLE Result via the return signal
+        // (call_user_fn catches it; a stray top-level signal is
+        // mapped to loud UnwrapOnErr by run_program).
+        "check" if ok => Ok(*payload),
+        "check" => Err(EvalError::ReturnSignal(Box::new(Value::Result {
+            ok: false,
+            payload,
+        }))),
         _ => unreachable!("dispatcher guard kept us in the accessor set"),
     }
 }
@@ -105,6 +114,7 @@ fn static_name(name: &str) -> &'static str {
         "unwrap_or" => "unwrap_or",
         "get_value" => "get_value",
         "get_error" => "get_error",
+        "check" => "check",
         _ => "result-accessor",
     }
 }
@@ -165,4 +175,53 @@ pub(crate) fn eval_string_to_result(
             payload: Box::new(Value::Str(msg)),
         },
     })
+}
+
+/// `try { body } catch <binding> { handler }` (spike step 011).
+/// Runs `body`; a HARD error binds `binding` to the canonical
+/// `{kind, message}` record and yields the handler's value.
+/// Control-flow signals (break/continue/return) and `err(...)`
+/// VALUES are not errors here -- signals re-raise, values flow.
+pub(crate) fn eval_try_catch(
+    body: &[Expr],
+    binding: &str,
+    handler: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let mut last = Value::Array(DenseArray::from_scalar(0.0));
+    for stmt in body {
+        match eval_expr(stmt, env, trace) {
+            Ok(v) => last = v,
+            Err(
+                sig @ (EvalError::BreakSignal(_)
+                | EvalError::ContinueSignal
+                | EvalError::ReturnSignal(_)),
+            ) => return Err(sig),
+            Err(e) => return run_catch_handler(&e, binding, handler, env, trace),
+        }
+    }
+    Ok(last)
+}
+
+/// Bind the error record and evaluate the handler body.
+fn run_catch_handler(
+    e: &EvalError,
+    binding: &str,
+    handler: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let mut fields = std::collections::BTreeMap::new();
+    fields.insert(
+        "kind".to_string(),
+        Value::Str(mlpl_eval_types::error_kind(e).to_string()),
+    );
+    fields.insert("message".to_string(), Value::Str(format!("{e}")));
+    env.set_record(binding.to_string(), fields);
+    let mut last = Value::Array(DenseArray::from_scalar(0.0));
+    for stmt in handler {
+        last = eval_expr(stmt, env, trace)?;
+    }
+    Ok(last)
 }

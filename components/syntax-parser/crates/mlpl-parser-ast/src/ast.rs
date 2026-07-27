@@ -237,6 +237,22 @@ pub enum Expr {
         /// Span covering `def` through closing `}`.
         span: Span,
     },
+    /// `try { body } catch <binding> { handler }` -- expression
+    /// that demotes a HARD eval error in `body` into the handler
+    /// path, binding the error record ({kind, message}) to
+    /// `binding`. `err(...)` VALUES are data and flow through
+    /// untouched. Yields the body's last value, or the handler's.
+    /// Spike step 011; design: docs/option-result-design.md.
+    TryCatch {
+        /// Statements attempted first.
+        body: Vec<Expr>,
+        /// Name the handler binds the error record to.
+        binding: String,
+        /// Handler statements, run only on a hard error.
+        handler: Vec<Expr>,
+        /// Span covering `try` through the handler's `}`.
+        span: Span,
+    },
     /// `return expr` -- early exit from a UDF body. Without a
     /// value, returns scalar 0 (same as bare `break`).
     Return {
@@ -271,6 +287,7 @@ impl Expr {
             | Self::Break { span, .. }
             | Self::Continue { span }
             | Self::FnDef { span, .. }
+            | Self::TryCatch { span, .. }
             | Self::Return { span, .. } => *span,
         }
     }

@@ -21,7 +21,7 @@ The user's recent REPL activity and any selected 3D sculpture are provided below
 const MLPL_SYNTAX: &str = " MLPL quick reference -- use EXACTLY these forms. \
 Assign `name = expr`; comment `# ...`; compare with `eq(a,b)` / `gt(a,b)` / `lt(a,b)` (there is no `==`/`<`/`>`); \
 EVERY block uses braces: `device(\"mlx\") { ... }`, `experiment \"name\" { ... }`, `train N { ... }`, `repeat N { ... }`, `if c { ... } else { ... }`; \
-define a function with `def u:name(a, b) { body }` -- the `u:` prefix is REQUIRED and there is NO `return` (the block's last expression is its value) -- then call it `u:name(args)`; iterate with `for x in iota(n) { ... }` or `while cond { ... }`; index/slice a tensor with `take(x, axis, i)`. \
+define a function with `def u:name(a, b) { body }` -- the `u:` prefix is REQUIRED; the block's last expression is its value (`return expr` also works for early exit) -- then call it `u:name(args)`; iterate with `for x in iota(n) { ... }` or `while cond { ... }`; index/slice a tensor with `take(x, axis, i)`; trap a hard error with `try { ... } catch e { ... }` (e is {kind, message}); propagate a Result with postfix `?` inside a `def u:` body. \
 Statements inside a block are separated by `;`. The COMPLETE builtin set follows (call ONLY these exact signatures -- there is no filter/map/print/length/strcat/append):";
 
 /// Build the full `:ask` program: the question as the user prompt,

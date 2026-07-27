@@ -65,16 +65,25 @@ fn run_program(
     }
     let mut result = None;
     for stmt in stmts {
-        result = Some(match eval_expr(stmt, env, &mut trace) {
-            Ok(v) => v,
-            Err(EvalError::BreakSignal(_)) => {
-                return Err(EvalError::LoopControlOutsideLoop { kind: "break" });
-            }
-            Err(EvalError::ContinueSignal) => {
-                return Err(EvalError::LoopControlOutsideLoop { kind: "continue" });
-            }
-            Err(e) => return Err(e),
-        });
+        result = Some(eval_expr(stmt, env, &mut trace).map_err(map_top_level_signal)?);
     }
     result.ok_or(EvalError::EmptyInput)
+}
+
+/// Escaped control signals reaching the program top level become
+/// user-facing errors: break/continue name their misuse, and a
+/// stray `?` on an Err (no enclosing `u:` function) is loud
+/// `unwrap` per docs/option-result-design.md.
+fn map_top_level_signal(e: EvalError) -> EvalError {
+    match e {
+        EvalError::BreakSignal(_) => EvalError::LoopControlOutsideLoop { kind: "break" },
+        EvalError::ContinueSignal => EvalError::LoopControlOutsideLoop { kind: "continue" },
+        EvalError::ReturnSignal(v) => match *v {
+            Value::Result { ok: false, payload } => EvalError::UnwrapOnErr {
+                message: format!("{payload}"),
+            },
+            other => EvalError::ReturnSignal(Box::new(other)),
+        },
+        other => other,
+    }
 }

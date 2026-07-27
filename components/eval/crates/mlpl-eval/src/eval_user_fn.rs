@@ -47,14 +47,7 @@ fn run_body(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     for (param, val) in f.params.iter().zip(evaluated) {
-        match val {
-            Value::Array(a) => env.set(param.clone(), a.clone()),
-            _ => {
-                return Err(EvalError::Unsupported(format!(
-                    "{name}: argument '{param}' must be a numeric array"
-                )));
-            }
-        }
+        bind_arg(name, param, val, env)?;
     }
     eval_body(f.body_exprs(), env, trace)
 }
@@ -73,4 +66,25 @@ fn eval_body(
         }
     }
     Ok(last)
+}
+
+/// Bind one evaluated argument into the callee scope. Arrays are
+/// the historical case; spike step 011 added Results, strings,
+/// and records so error-handling pipelines (`v = r?; ...`) work
+/// on function arguments.
+fn bind_arg(name: &str, param: &str, val: &Value, env: &mut Environment) -> Result<(), EvalError> {
+    match val {
+        Value::Array(a) => env.set(param.to_string(), a.clone()),
+        Value::Result { ok, payload } => {
+            env.set_result(param.to_string(), *ok, (**payload).clone());
+        }
+        Value::Str(s) => env.set_string(param.to_string(), s.clone()),
+        Value::Record { fields } => env.set_record(param.to_string(), fields.clone()),
+        _ => {
+            return Err(EvalError::Unsupported(format!(
+                "{name}: argument '{param}' must be an array, Result, string, or record"
+            )));
+        }
+    }
+    Ok(())
 }

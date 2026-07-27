@@ -20,11 +20,15 @@ sw-MLPL separates errors into two planes:
   ordinary values; they print, bind, and flow like anything
   else. Nothing stops.
 
-Two bridges connect the planes (one shipped as values, one
-queued as syntax):
+Two bridges connect the planes (both SHIPPED, spike step 011):
 
-- `catch` (queued) DEMOTES a hard error into a value.
-- `?` (queued) PROMOTES an `err` value into an early return.
+- `catch` DEMOTES a hard error into a value:
+  `try { take(M, 0, 9) } catch e { fill([5], 0) }` -- an
+  expression yielding body-or-handler; `e` is `{kind, message}`.
+- `?` PROMOTES an `err` value into an early return:
+  `v = r?; ...` inside a `def u:` body unwraps Ok or
+  early-returns the Err (loud at top level). Spelled form:
+  `check(expr)`.
 
 ## What works today
 
@@ -90,21 +94,24 @@ Scalar payloads until Stage 6 `enclose`; non-scalar payloads
 error with a message naming that gap. The Structure Zoo demo's
 lens finale shows them against a safe deep-lens get.
 
+### try/catch and `?` (shipped, spike step 011)
+
+`try { body } catch e { handler }` catches HARD errors only,
+binding `e` to `{kind, message}` (kinds are stable kebab-case
+tags -- `shape`, `arity`, `runtime`, ... -- from
+`error_kind`). `err(...)` values and break/continue/return
+signals flow through untouched. `finally` stays deferred until
+the language has a user-visible resource to clean up.
+
+Postfix `expr?` desugars to `check(expr)`: Ok unwraps, Err
+early-returns the whole Result from the enclosing `u:` function
+via the return machinery; a stray top-level `?` on an Err is
+loud (`UnwrapOnErr`). `u:` functions now accept Result, string,
+and record arguments so pipelines compose.
+
 ## Queued (saga steps, in order)
 
-1. **`try { } catch e { }`** (step: error-trap-lang) -- an
-   EXPRESSION that yields the body's value, or the handler's;
-   catches HARD errors only, binding `e` to the canonical
-   `{kind, message}` record (Dyalog `Quad-DMX` precedent).
-   `err(...)` values flow through untouched. `finally` is
-   deferred until the language has a user-visible resource to
-   clean up; the block machinery makes it cheap to add then.
-2. **`?` propagation** (step: error-trap-lang) -- inside a
-   `def u:f(...) { }` body, `expr?` unwraps `ok` or
-   early-returns the `err` (reusing the existing `return`
-   machinery). At top level it behaves as `unwrap` (loud).
-   Interim spelled form `check(expr)` if postfix syntax slips.
-3. **Error Handling demo** (step: error-handling-demo) -- a
+1. **Error Handling demo** (step: error-handling-demo) -- a
    BASICS demo near Structure Zoo / Game of Life, four acts:
    the two planes side by side; the railway (safe gets,
    `unwrap_or`, projections); errors in USER-DEFINED functions
@@ -112,7 +119,7 @@ lens finale shows them against a safe deep-lens get.
    plus a two-stage pipeline propagating the first Err); the
    two bridges (`catch` demoting an out-of-bounds `take`, `?`
    collapsing the manual propagation).
-4. **Trap combinator** (needs first-class `u:` values) --
+2. **Trap combinator** (needs first-class `u:` values) --
    `attempt(u:risky, u:handler)`, later sugar
    `u:risky :: u:handler`: the APL-family native form (J `::`,
    BQN `CATCH`, q `@[f;x;g]`). try/catch is the near-term surface;

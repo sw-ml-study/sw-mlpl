@@ -276,6 +276,7 @@ impl<'a> Parser<'a> {
             }
             TokenKind::Device => self.parse_device(),
             TokenKind::If => self.parse_if(),
+            TokenKind::Try => self.parse_try(),
             TokenKind::While => {
                 let start = self.tokens[self.pos].span;
                 self.pos += 1;

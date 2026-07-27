@@ -23,6 +23,9 @@ Syntax:
   for row in X { }    iterate rows (binds last_rows)
   experiment \"n\" { }  capture _metric scalars + params
   device(\"t\") { }     dispatch body through device target
+  try { b } catch e { h }  demote a hard error to the
+                       handler value (e = {kind, message})
+  expr?               unwrap Ok / early-return Err (in u: fns)
   # comment            to end of line
 
 Built-in categories (see :help <topic> or :builtins for the

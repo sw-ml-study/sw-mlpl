@@ -86,6 +86,16 @@ pub enum TokenKind {
     /// `continue` keyword (Saga 31 step 005). Skips the rest of
     /// the current `while` iteration; cond is re-checked.
     Continue,
+    /// `try` keyword (spike step 011). Introduces a
+    /// `try { body } catch e { handler }` expression that demotes
+    /// a hard eval error into the handler path.
+    Try,
+    /// `catch` keyword (spike step 011). Always paired with `try`;
+    /// binds the error record to an ident.
+    Catch,
+    /// `?` postfix (spike step 011): Result propagation. Parses as
+    /// sugar for `check(expr)` -- ok unwraps, err early-returns.
+    Question,
     /// `def` keyword (Saga 46). Introduces a user-defined function.
     Def,
     /// `return` keyword (Saga 46). Early exit from a UDF body.
