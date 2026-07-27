@@ -1,8 +1,9 @@
 number = 11
 slug = "error-trap-lang"
-status = "in-progress"
+status = "completed"
 description = "Error-handling language features (design: docs/option-result-design.md 'Contr..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T10:25:44"
-commits = []
+completed_at = "2026-07-26T18:27:37"
+commits = ["67149bbd947161ffa3dd3b0cf13dc16ba4f63710"]
