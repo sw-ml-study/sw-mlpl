@@ -412,6 +412,42 @@ git push
 Then the push-triggered Pages workflow deploys the new `pages/`.
 Verify with `gh run list --workflow=pages.yml --limit 1`.
 
+## Local server rebuild/restart gate (split-brain trap)
+
+"Rebuild pages" and "rebuild the server" are SEPARATE gates. A
+running `mlpl-serve` keeps its compile-time builtin set until the
+PROCESS is restarted from a fresh binary -- `build-pages.sh` only
+refreshes what the browser runs. In connect mode
+(`?connect=host:port`, including `prefers_connect` demos, `:ask`,
+and all GPU-tier demos) evals execute on the SERVER, so a stale
+server binary produces "unknown function: <new builtin>" /
+"unknown svg type" errors even though the freshly-deployed web
+bundle (and every native test) is correct. This bit for real on
+2026-07-26: new demo text rendered fine, every routed line failed.
+
+Whenever a step adds or changes anything the connect path can hit
+(a builtin, an svg render type, an SSE event, a /v1 endpoint) AND
+a local server is in play:
+
+```bash
+cd components/serve
+CUDA_COMPUTE_CAP=120 cargo build -p mlpl-serve --features cuda --release
+# binary lands in the REPO-ROOT target/release/ (shared target dir)
+# then kill the old process and restart with its original flags, e.g.:
+./target/release/mlpl-serve --bind 0.0.0.0:6464 --auth required \
+  --static-dir dist-pages --cors-allow http://localhost:9957
+```
+
+- Check staleness first: compare `ls -la target/release/mlpl-serve`
+  against the running process start time (`ps aux | grep mlpl-serve`).
+- Keep the ORIGINAL flags (read them off the running process's
+  cmdline) -- especially `--features cuda` at build time, or the
+  CUDA demos silently grey out.
+- Smoke-test after restart: `curl http://localhost:6464/v1/devices`
+  must list the expected GPUs, and one `/eval` of the new builtin.
+- Do NOT restart a server the user is actively using without being
+  asked or without a broken-server symptom that a restart fixes.
+
 ## Disk-aware build hygiene (Saga 21+)
 
 The Mac dev host is disk-constrained; full unscoped
