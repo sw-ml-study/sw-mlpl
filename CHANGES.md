@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga demo-comments-complete: complete (1 step)
+- feat(demos): every u: function commented -- and a gate to keep it so
+- docs(changes): refresh CHANGES.md to HEAD
 - saga table-order: complete (1 step)
 - docs(order): lookup tables and listings alphabetize within groups
 - docs(changes): refresh CHANGES.md to HEAD
