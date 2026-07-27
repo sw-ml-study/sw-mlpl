@@ -1,0 +1,1 @@
+Help tabs now render real HTML: build-time md->html converter (tables/fences/headings/lists/inline-code, escaped) with inline .doc-html CSS; dialog include_str!s the generated files; md stays canonical via rerun-if-changed. 3 converter tests; pages deployed.

@@ -1,8 +1,9 @@
 number = 2
 slug = "doc-tab-tables"
-status = "in-progress"
+status = "completed"
 description = "Help tabs: segment lang-reference/usage markdown into pipe-table blocks vs pr..."
 role = "production"
 context_files = []
 created_at = "2026-07-27T11:06:37"
-commits = []
+completed_at = "2026-07-27T11:17:19"
+commits = ["1db43feb070ab32cac06a8b4f7229e1bd5212968"]
