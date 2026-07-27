@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-26
 
+- step 012-error-handling-demo: record completion
+- feat(demos): Error Handling demo -- two planes, two bridges
+- step 011-error-trap-lang: record completion
+- feat(lang): try/catch expression + ? Result propagation
+- docs(errors): demo placement (Basics) + u:-function error act
+- docs(guidelines): server rebuild/restart gate (split-brain trap)
+- docs(changes): refresh CHANGES.md to HEAD
 - step 010-lens-depth: record completion
 - feat(lens): deep composed lenses + safe gets + zilde projections
 - docs(changes): refresh CHANGES.md to HEAD
