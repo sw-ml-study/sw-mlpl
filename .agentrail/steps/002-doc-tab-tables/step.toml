@@ -1,6 +1,6 @@
 number = 2
 slug = "doc-tab-tables"
-status = "pending"
+status = "in-progress"
 description = "Help tabs: segment lang-reference/usage markdown into pipe-table blocks vs pr..."
 role = "production"
 context_files = []

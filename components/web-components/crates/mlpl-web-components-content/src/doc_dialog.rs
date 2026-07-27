@@ -3,8 +3,11 @@ use yew::prelude::*;
 use mlpl_web_eval::state::DocTab;
 use mlpl_web_glossary::view::GlossaryView;
 
-const LANG_REFERENCE: &str = include_str!("../../../../../docs/lang-reference.md");
-const USAGE_GUIDE: &str = include_str!("../../../../../docs/usage.md");
+// Build-time HTML renders of the canonical docs (build_md_html.rs):
+// real <table> markup so the reference tables line up, inline CSS
+// scoped under .doc-html. Single source of truth stays the .md.
+const LANG_REFERENCE: &str = include_str!(concat!(env!("OUT_DIR"), "/lang_reference.html"));
+const USAGE_GUIDE: &str = include_str!(concat!(env!("OUT_DIR"), "/usage.html"));
 
 #[derive(Properties, PartialEq)]
 pub struct DocDialogProps {
@@ -21,8 +24,8 @@ pub fn doc_dialog(props: &DocDialogProps) -> Html {
     }
 
     let body = match *active_tab {
-        DocTab::LangReference => html! { <pre class="doc-content">{ LANG_REFERENCE }</pre> },
-        DocTab::Usage => html! { <pre class="doc-content">{ USAGE_GUIDE }</pre> },
+        DocTab::LangReference => Html::from_html_unchecked(AttrValue::from(LANG_REFERENCE)),
+        DocTab::Usage => Html::from_html_unchecked(AttrValue::from(USAGE_GUIDE)),
         DocTab::Glossary => html! { <GlossaryView /> },
         DocTab::Diagrams => html! { <mlpl_web_paths::diagrams::DiagramsView /> },
     };
