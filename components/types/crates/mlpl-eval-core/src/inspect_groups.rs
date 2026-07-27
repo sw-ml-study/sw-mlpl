@@ -53,6 +53,16 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),
             (
+                "get_value",
+                "get_value(r)",
+                "Ok side of a Result as a 0-or-1 element vector ([] when Err); tally is is_some",
+            ),
+            (
+                "get_error",
+                "get_error(r)",
+                "Err side of a Result as a 0-or-1 element vector ([] when Ok)",
+            ),
+            (
                 "emit_frame",
                 "emit_frame(name, step, x)",
                 "stream tensor x as a live frame (connect mode); no-op locally; returns x",

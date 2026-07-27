@@ -79,32 +79,37 @@ accessor applied to a non-Result (`is_ok(5)` ->
   continues to the next line -- hard errors are per-line in the
   web REPL transcript.
 
+### The Option projections (shipped)
+
+`get_value(r)` / `get_error(r)` -- Rust's `.ok()`/`.err()` with
+the APL2 zilde flavor: each returns a 0-or-1-element vector
+(`[]` when that side is absent), so `tally` is `is_some` and
+`take(concat(get_value(r), [d], 0), 0, 0)` is `unwrap_or`.
+Derived from the tag, so the illegal pair-states cannot arise.
+Scalar payloads until Stage 6 `enclose`; non-scalar payloads
+error with a message naming that gap. The Structure Zoo demo's
+lens finale shows them against a safe deep-lens get.
+
 ## Queued (saga steps, in order)
 
-1. **`get_value` / `get_error` projections** (step: lens-depth)
-   -- Rust's `.ok()`/`.err()` with an APL2 zilde flavor: each
-   returns a 0-or-1-element array (`[]` when absent), so
-   `tally` is `is_some` and
-   `first(concat(get_value(r), [d]))` is `unwrap_or`. Derived
-   from the tag, so the illegal pair-states cannot arise.
-2. **`try { } catch e { }`** (step: error-trap-lang) -- an
+1. **`try { } catch e { }`** (step: error-trap-lang) -- an
    EXPRESSION that yields the body's value, or the handler's;
    catches HARD errors only, binding `e` to the canonical
    `{kind, message}` record (Dyalog `Quad-DMX` precedent).
    `err(...)` values flow through untouched. `finally` is
    deferred until the language has a user-visible resource to
    clean up; the block machinery makes it cheap to add then.
-3. **`?` propagation** (step: error-trap-lang) -- inside a
+2. **`?` propagation** (step: error-trap-lang) -- inside a
    `def u:f(...) { }` body, `expr?` unwraps `ok` or
    early-returns the `err` (reusing the existing `return`
    machinery). At top level it behaves as `unwrap` (loud).
    Interim spelled form `check(expr)` if postfix syntax slips.
-4. **Error Handling demo** (step: error-handling-demo) -- three
+3. **Error Handling demo** (step: error-handling-demo) -- three
    acts: the two planes side by side; the railway
    (safe gets, `unwrap_or`, projections); the two bridges
    (`catch` demoting an out-of-bounds `take`, `?` propagating
    through a `u:` pipeline).
-5. **Trap combinator** (needs first-class `u:` values) --
+4. **Trap combinator** (needs first-class `u:` values) --
    `attempt(u:risky, u:handler)`, later sugar
    `u:risky :: u:handler`: the APL-family native form (J `::`,
    BQN `CATCH`, q `@[f;x;g]`). try/catch is the near-term surface;

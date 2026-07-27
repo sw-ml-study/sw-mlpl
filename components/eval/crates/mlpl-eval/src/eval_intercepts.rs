@@ -40,9 +40,11 @@ pub(crate) fn try_intercept(
     match name.as_str() {
         "list_len" => Some(eval_list_len(args, env, trace)),
         "ok" | "err" => Some(eval_result_ctor(name, args, env, trace)),
-        "is_ok" | "is_err" | "unwrap" | "err_message" | "unwrap_or" => Some(
-            crate::result_ops::eval_result_accessor(name, args, env, trace),
-        ),
+        "is_ok" | "is_err" | "unwrap" | "err_message" | "unwrap_or" | "get_value" | "get_error" => {
+            Some(crate::result_ops::eval_result_accessor(
+                name, args, env, trace,
+            ))
+        }
         "print" | "eprint" => Some(eval_print(name, args, env, trace)),
         "to_number" | "to_int" | "env" => Some(crate::result_ops::eval_string_to_result(
             name, args, env, trace,
@@ -155,16 +157,14 @@ fn eval_list_get(
         return Err(EvalError::Unsupported(msg));
     };
     let i = parse_strlist_index(&args[1], env, trace)?;
-    let (ok, s) = items.get(i).map_or_else(
-        || {
-            let msg = format!(
-                "list_get: index {i} out of bounds (list has {} items)",
-                items.len()
-            );
-            (false, msg)
-        },
-        |s| (true, s.clone()),
-    );
+    let n = items.len();
+    let (ok, s) = match items.into_iter().nth(i) {
+        Some(s) => (true, s),
+        None => (
+            false,
+            format!("list_get: index {i} out of bounds (list has {n} items)"),
+        ),
+    };
     Ok(Value::Result {
         ok,
         payload: Box::new(Value::Str(s)),

@@ -1,6 +1,6 @@
 number = 10
 slug = "lens-depth"
-status = "pending"
+status = "in-progress"
 description = "Upgrade the lens demonstration per user feedback ('too simple -- what about l..."
 role = "production"
 context_files = []

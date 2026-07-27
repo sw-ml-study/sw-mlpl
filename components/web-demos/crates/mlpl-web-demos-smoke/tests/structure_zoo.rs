@@ -20,6 +20,11 @@ fn structure_zoo_demo_evals() {
         }
         let toks = lex(line).unwrap_or_else(|e| panic!("[line {i}] lex: {e:?}"));
         let prog = parse(&toks).unwrap_or_else(|e| panic!("[line {i}] parse: {e:?}"));
-        eval_program_value(&prog, &mut env).unwrap_or_else(|e| panic!("[line {i}] eval: {e:?}"));
+        let result = eval_program_value(&prog, &mut env);
+        if line.contains("INTENTIONAL ERROR") {
+            assert!(result.is_err(), "[line {i}] expected the teaching error");
+            continue;
+        }
+        result.unwrap_or_else(|e| panic!("[line {i}] eval: {e:?}"));
     }
 }

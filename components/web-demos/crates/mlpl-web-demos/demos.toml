@@ -125,7 +125,7 @@ lines = [
 category = "Basics"
 name = "Structure Zoo (rank / shape / depth)"
 intro = "Every value in MLPL has a STRUCTURE -- a rank (how many axes), a shape (how big each axis is), a size (how many elements in total), a tally (how many major cells along the leading axis), and a depth (how deeply nested). This demo introduces the APL-inspired introspection builtins that make that structure visible: size(a) and tally(a) count elements and leading-axis cells, depth(a) reports the nesting level, and disp(a) draws an ASCII box diagram (MLPL's answer to APL's ]display). We walk a scalar, a vector, a matrix, and a 3-tensor, then point the same tools at a real neural-net weight matrix -- so you build shape intuition before wiring up a model."
-takeaway = "rank counts axes, shape sizes them, size counts every element (numel), tally counts major cells (the leading-axis length), and depth measures nesting (0 for a scalar, 1 for any flat array today; higher once nested arrays land). disp() frames rank <= 2 as a grid and rank >= 3 as a labeled stack of leading-axis slices, with a rank/shape/depth footer -- the same tool works on a toy iota tensor and on a randn() weight matrix. The finale shows the FUNCTIONAL LENS idiom: u:get_at (take) focuses a cell, u:put_at (a one_hot mask update) returns a fresh array with only that cell changed -- no mutation, the APL2 'selective assignment' idea done with pure functions. See docs/functional-lenses.md for lens composition on nested structures."
+takeaway = "rank counts axes, shape sizes them, size counts every element (numel), tally counts major cells (the leading-axis length), and depth measures nesting (0 for a scalar, 1 for any flat array today; higher once nested arrays land). disp() frames rank <= 2 as a grid and rank >= 3 as a labeled stack of leading-axis slices, with a rank/shape/depth footer -- the same tool works on a toy iota tensor and on a randn() weight matrix. The finale shows FUNCTIONAL LENSES at depth: get composes OUTSIDE-IN (take of take of take walks plane -> row -> cell of a rank-3 tensor), put composes INSIDE-OUT (here through the RAVEL lens: flatten, put flat, fold back) -- and the original value is never mutated. Indexing errors surface BOTH ways: a raw take fails loudly (the control plane), while u:get_safe returns ok(...)/err({kind, at, size}) so err_message, unwrap_or, and the zilde projections get_value/get_error treat failure as data (the data plane). See docs/functional-lenses.md and docs/error-handling.md."
 lines = [
     "disp(5)                              # a scalar: rank 0, shape [], depth 0",
     "disp([1, 2, 3])                      # a vector: rank 1, shape [3]",
@@ -139,13 +139,24 @@ lines = [
     "size(W)                              # 12 -- rows * cols",
     "tally(W)                             # 3  -- number of rows (leading axis)",
     "depth(W)                             # introspection: 1 (flat array)",
-    "v = [10, 20, 30, 40]                 # finale: edit a structure WITHOUT mutating it",
-    "def u:get_at(x, i) { take(x, 0, i) }   # a functional LENS is a (get, put) pair; this is GET",
+    "v = [10, 20, 30, 40]                 # finale: FUNCTIONAL LENSES -- edit structures WITHOUT mutation",
+    "def u:get_at(x, i) { take(x, 0, i) }   # a lens is a (get, put) pair; this is GET",
     "def u:put_at(x, i, val) { m = reshape(one_hot([i], tally(x)), [tally(x)]); x * (1 - m) + val * m }  # PUT: a fresh array with just the focused cell replaced",
     "u:get_at(v, 2)                       # GET focuses index 2 -> 30",
-    "w = u:put_at(v, 2, 99)               # PUT builds a NEW vector",
-    "disp(v)                              # the original is untouched ...",
-    "disp(w)                              # ... the update happened functionally",
+    "disp(u:put_at(v, 2, 99))             # PUT builds a NEW vector; v is untouched",
+    "T = reshape(iota(12), [2, 2, 3])     # now COMPOSE lenses into a rank-3 structure",
+    "disp(T)                              # two stacked 2x3 planes",
+    "disp(take(T, 0, 1))                  # GET depth 1: plane 1 (get composes OUTSIDE-IN)",
+    "disp(take(take(T, 0, 1), 0, 0))      # GET depth 2: that plane's first row",
+    "take(take(take(T, 0, 1), 0, 0), 0, 2)  # GET depth 3: one cell -> 8",
+    "T2 = reshape(scatter(reshape(T, [12]), 11, 99), [2, 2, 3])  # PUT inside-out via the RAVEL lens: flatten, put flat, fold back (reshape is a lens too)",
+    "disp(take(T2, 0, 1))                 # cell (1, 1, 2) is now 99 ...",
+    "disp(take(T, 0, 1))                  # ... and the ORIGINAL tensor is untouched",
+    "take(T, 0, 5)                        # INTENTIONAL ERROR: plane 5 of 2 -- a raw lens get fails LOUDLY",
+    "def u:get_safe(x, i) { if lt(i, tally(x)) { ok(take(x, 0, i)) } else { err({kind: \"index\", at: i, size: tally(x)}) } }  # the SAFE lens returns a Result VALUE instead of exploding",
+    "err_message(u:get_safe(T, 5))        # the failure as DATA: {kind, at, size} -- an Error object",
+    "unwrap_or(u:get_safe(T, 5), fill([2, 3], 0))  # total read: fall back to a zero plane",
+    "tally(get_value(u:get_safe(T, 5)))   # 0 -- the zilde Option: absence is emptiness (docs/error-handling.md)",
 ]
 
 [[demos]]

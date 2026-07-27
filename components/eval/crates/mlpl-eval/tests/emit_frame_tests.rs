@@ -6,9 +6,12 @@ use std::sync::{Arc, Mutex};
 use mlpl_eval::{Environment, MetricSink, eval_program_value};
 use mlpl_parser::{lex, parse};
 
+/// `(name, step, shape, values)` as captured from one emission.
+type CapturedFrame = (String, usize, Vec<usize>, Vec<f64>);
+
 #[derive(Debug, Default)]
 struct CaptureSink {
-    frames: Mutex<Vec<(String, usize, Vec<usize>, Vec<f64>)>>,
+    frames: Mutex<Vec<CapturedFrame>>,
 }
 
 impl MetricSink for CaptureSink {

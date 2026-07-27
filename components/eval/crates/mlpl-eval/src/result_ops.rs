@@ -4,7 +4,7 @@
 //! `err_message`, and `unwrap_or`. Lives in its own module so
 //! eval.rs stays under the per-module function-count budget.
 
-use mlpl_array::DenseArray;
+use mlpl_array::{DenseArray, Shape};
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
@@ -64,7 +64,31 @@ pub(crate) fn eval_result_accessor(
         ))),
         "unwrap_or" if ok => Ok(*payload),
         "unwrap_or" => eval_expr(&args[1], env, trace),
+        "get_value" => project_option(*payload, ok, "get_value"),
+        "get_error" => project_option(*payload, !ok, "get_error"),
         _ => unreachable!("dispatcher guard kept us in the accessor set"),
+    }
+}
+
+/// APL2 zilde-flavored Option projection (Game of Life saga era,
+/// docs/option-result-design.md): the wanted side of a Result as a
+/// 0-or-1 element vector -- `[]` when absent, `[payload]` when
+/// present -- so `tally` is `is_some` and
+/// `take(concat(get_value(r), [d]), 0, 0)` is `unwrap_or`. Scalar
+/// payloads only until Stage 6 nested arrays bring `enclose`.
+fn project_option(payload: Value, present: bool, accessor: &str) -> Result<Value, EvalError> {
+    if !present {
+        return Ok(Value::Array(DenseArray::new(Shape::new(vec![0]), vec![])?));
+    }
+    match payload {
+        Value::Array(a) if a.rank() == 0 => Ok(Value::Array(DenseArray::new(
+            Shape::new(vec![1]),
+            vec![a.data()[0]],
+        )?)),
+        other => Err(EvalError::Unsupported(format!(
+            "{accessor}: boxing a non-scalar payload ({}) as an Option needs Stage 6 enclose; use unwrap/err_message instead",
+            mlpl_eval_types::value_kind(&other)
+        ))),
     }
 }
 
@@ -79,6 +103,8 @@ fn static_name(name: &str) -> &'static str {
         "unwrap" => "unwrap",
         "err_message" => "err_message",
         "unwrap_or" => "unwrap_or",
+        "get_value" => "get_value",
+        "get_error" => "get_error",
         _ => "result-accessor",
     }
 }

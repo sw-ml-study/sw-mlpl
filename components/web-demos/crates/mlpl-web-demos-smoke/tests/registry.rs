@@ -71,8 +71,17 @@ fn run_demo(demo_name: &str, lines: &[&str]) -> Result<(), String> {
         }
         let toks = lex(line).map_err(|e| format!("[{demo_name} line {i}] lex: {e:?}"))?;
         let prog = parse(&toks).map_err(|e| format!("[{demo_name} line {i}] parse: {e:?}"))?;
-        eval_program_value(&prog, &mut env)
-            .map_err(|e| format!("[{demo_name} line {i}] eval: {e:?}"))?;
+        let result = eval_program_value(&prog, &mut env);
+        // Demo lines whose comment declares an INTENTIONAL ERROR are
+        // error-handling teaching beats: they MUST fail (the browser
+        // prints the error entry and the demo continues).
+        if line.contains("INTENTIONAL ERROR") {
+            if result.is_ok() {
+                return Err(format!("[{demo_name} line {i}] expected an error, got Ok"));
+            }
+            continue;
+        }
+        result.map_err(|e| format!("[{demo_name} line {i}] eval: {e:?}"))?;
     }
     Ok(())
 }
