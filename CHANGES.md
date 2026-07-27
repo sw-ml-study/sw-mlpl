@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga eval-decomposition: step 003-cors-allow-list complete
+- feat(serve): --cors-allow accepts a comma-separated origin list
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 002-devices-probe-retry complete
 - fix(web): retry the /v1/devices probe so GPU demos survive a server restart
 - docs(changes): refresh CHANGES.md to HEAD
