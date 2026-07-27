@@ -1,0 +1,1 @@
+Spike wrap-up: outcome recorded (18/323 -> 1/296), split-cost lesson documented in the paydown policy, and the mlpl-eval 100-module FAIL scoped into docs/eval-decomposition-saga.md (cluster inventory + 7-step draft + carried constraints). Saga complete.
