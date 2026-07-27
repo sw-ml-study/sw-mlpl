@@ -1,8 +1,9 @@
 number = 4
 slug = "ollama-probe-gating"
-status = "in-progress"
+status = "completed"
 description = "Gate connect demos on real reachability: cpu-tier connect demos (Ask Ollama) ..."
 role = "production"
 context_files = []
 created_at = "2026-07-27T14:05:40"
-commits = []
+completed_at = "2026-07-27T14:27:50"
+commits = ["de123016c1334205113765c30f502b305698255f"]
