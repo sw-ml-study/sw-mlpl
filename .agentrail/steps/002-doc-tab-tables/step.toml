@@ -1,0 +1,8 @@
+number = 2
+slug = "doc-tab-tables"
+status = "pending"
+description = "Help tabs: segment lang-reference/usage markdown into pipe-table blocks vs pr..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T11:06:37"
+commits = []

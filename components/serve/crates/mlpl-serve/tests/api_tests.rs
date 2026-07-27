@@ -507,3 +507,42 @@ async fn auth_disabled_skips_bearer_check() {
         "with AuthMode::Disabled, missing bearer should still succeed"
     );
 }
+
+#[tokio::test]
+async fn colon_commands_inspect_the_server_session() {
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+    let eval = |program: &'static str| {
+        let id = id.clone();
+        let token = token.clone();
+        async move {
+            let resp = reqwest::Client::new()
+                .post(format!("http://{addr}/v1/sessions/{id}/eval"))
+                .bearer_auth(&token)
+                .json(&serde_json::json!({ "program": program }))
+                .send()
+                .await
+                .unwrap();
+            (
+                resp.status().as_u16(),
+                resp.json::<JsonValue>().await.unwrap(),
+            )
+        }
+    };
+    let (st, _) = eval("def u:twice(x) { \"doubles\"; x * 2 }").await;
+    assert_eq!(st, 200);
+    let (st, body) = eval(":fns").await;
+    assert_eq!(st, 200);
+    assert_eq!(body["kind"], "string");
+    let out = body["value"].as_str().unwrap();
+    assert!(
+        out.contains("u:twice(x)") && out.contains("doubles"),
+        "{out}"
+    );
+    let (st, body) = eval(":list u:twice").await;
+    assert_eq!(st, 200);
+    let out = body["value"].as_str().unwrap();
+    assert!(out.contains("def u:twice(x)"), "verbatim source: {out}");
+    let (st, body) = eval(":nonsense").await;
+    assert_eq!(st, 400, "{body}");
+}

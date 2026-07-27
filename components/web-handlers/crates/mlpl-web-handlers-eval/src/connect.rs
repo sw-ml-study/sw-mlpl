@@ -20,10 +20,34 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
     if let Some(q) = t.strip_prefix(":ask ") {
         return Some(mlpl_web_ask::prompt::ask_program(q, history));
     }
+    if is_inspect_command(t) {
+        return Some(t.to_string());
+    }
     if t.starts_with(':') {
         return None;
     }
     Some(line.to_string())
+}
+
+/// Workspace-introspection commands ride /eval to the server: in
+/// connect mode the session (vars, models, u: fns defined by
+/// prefers_connect demos) lives THERE, so :fns / :list must ask it.
+fn is_inspect_command(t: &str) -> bool {
+    const INSPECT_CMDS: &[&str] = &[
+        ":vars",
+        ":fns",
+        ":models",
+        ":tokenizers",
+        ":tags",
+        ":untag",
+        ":wsid",
+        ":experiments",
+        ":introspect",
+        ":describe",
+        ":list",
+    ];
+    let cmd = t.split_whitespace().next().unwrap_or(t);
+    INSPECT_CMDS.contains(&cmd)
 }
 
 /// Set up the telemetry trace for the eval about to run. It is `remote`

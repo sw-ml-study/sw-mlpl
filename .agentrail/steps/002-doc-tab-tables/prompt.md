@@ -1,0 +1,1 @@
+Help tabs: segment lang-reference/usage markdown into pipe-table blocks vs prose; render tables as <table class=doc-table> (header row, cells, inline code via existing renderer if cheap -- else plain text), prose stays <pre>. CSS for .doc-table (borders, padding, zebra). Native segmenter unit tests; pages rebuild.

@@ -1515,9 +1515,26 @@ dependencies = [
  "js-sys",
  "mlpl-monitor-types",
  "mlpl-wasm",
+ "mlpl-web-eval-core",
+ "mlpl-web-trace",
  "mlpl-web-viz-ir",
  "mlpl-web-viz3d",
  "reqwest",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
+name = "mlpl-web-eval-core"
+version = "0.20.0"
+dependencies = [
+ "futures",
+ "gloo 0.11.0",
+ "js-sys",
+ "mlpl-monitor-types",
  "serde",
  "serde_json",
  "wasm-bindgen",
@@ -1577,6 +1594,24 @@ dependencies = [
  "mlpl-viz-marks",
  "mlpl-web-eval",
  "yew",
+]
+
+[[package]]
+name = "mlpl-web-trace"
+version = "0.20.0"
+dependencies = [
+ "futures",
+ "gloo 0.11.0",
+ "js-sys",
+ "mlpl-monitor-types",
+ "mlpl-web-eval-core",
+ "mlpl-web-viz-ir",
+ "mlpl-web-viz3d",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]

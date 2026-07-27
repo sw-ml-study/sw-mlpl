@@ -89,6 +89,16 @@ pub(crate) async fn run_eval(
     program: String,
 ) -> Result<EvalResponse, String> {
     let join = tokio::task::spawn_blocking(move || {
+        let trimmed = program.trim();
+        if trimmed.starts_with(':') {
+            let value = match mlpl_eval::inspect(&mut session.env, trimmed) {
+                Some(out) => Ok(mlpl_eval::Value::Str(out)),
+                None => Err(mlpl_eval::EvalError::Unsupported(format!(
+                    "unknown command: {trimmed}"
+                ))),
+            };
+            return (session, value);
+        }
         session.env.set_pending_source(Some(program));
         let value = eval_program_value(&stmts, &mut session.env);
         session.env.set_pending_source(None);

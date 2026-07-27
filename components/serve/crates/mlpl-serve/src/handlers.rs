@@ -84,7 +84,7 @@ pub async fn eval_handler(
     headers: HeaderMap,
     Json(body): Json<EvalRequest>,
 ) -> Result<Json<EvalResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let stmts = parse_program(&body.program)?;
+    let stmts = parse_unless_command(&body.program)?;
     let (session, interrupt) = take_session_for_eval(&state, id, &headers).await?;
     let rx = spawn_eval(&state, id, session, stmts, body.program.clone());
     let mut guard = AbortGuard {
@@ -193,6 +193,18 @@ pub(crate) async fn install_session_interrupt(
         entry.interrupt.reset();
         session.env.set_interrupt(entry.interrupt);
     }
+}
+
+/// Colon commands (":fns", ":list u:f", ...) bypass the parser:
+/// `run_eval` hands them to `mlpl_eval::inspect` against the session
+/// env, so connect-mode workspaces are introspectable.
+fn parse_unless_command(
+    program: &str,
+) -> Result<Vec<mlpl_parser::Expr>, (StatusCode, Json<ErrorResponse>)> {
+    if program.trim_start().starts_with(':') {
+        return Ok(Vec::new());
+    }
+    parse_program(program)
 }
 
 /// Lex + parse `program`, mapping either failure to a 400 with the

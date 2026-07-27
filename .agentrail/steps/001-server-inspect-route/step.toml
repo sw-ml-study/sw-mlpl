@@ -1,0 +1,8 @@
+number = 1
+slug = "server-inspect-route"
+status = "in-progress"
+description = "Colon commands over /eval: eval_handler branches before parse for ':'-prefixe..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T11:06:37"
+commits = []
