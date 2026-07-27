@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga naming-and-docs: complete (3 steps)
+- feat(demos): doc-strings + kept-comment listings across the demos
+- step 002-naming-and-usage-docs: record completion
+- docs(reference): naming trichotomy, value kinds, Usage Guide refresh
+- step 001-fn-source-retention: record completion
+- feat(lang): def u: functions keep their source -- :list shows intent
+- docs(changes): refresh CHANGES.md to HEAD
 - saga glider-gun: complete (1 step)
 - feat(demos): Gosper Glider Gun (40x40) -- the glider generator
 - docs(changes): refresh CHANGES.md to HEAD
