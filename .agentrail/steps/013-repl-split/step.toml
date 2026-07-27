@@ -1,9 +1,10 @@
 number = 13
 slug = "repl-split"
-status = "in-progress"
+status = "completed"
 description = "mlpl-repl 13 modules -> connect-mode cluster to a sibling crate."
 role = "production"
 context_files = []
 created_at = "2026-07-26T07:46:59"
+completed_at = "2026-07-26T19:28:30"
 task_type = "refactor"
-commits = []
+commits = ["27d9d1077f5d578e95b7340ddb3de57be3c35dfe"]

@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 13,
+    "step": "repl-split"
+  },
+  "action": "git mv + import rewires; module-budget rebalancing; targeted tests only",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-26T19:28:30"
+}
