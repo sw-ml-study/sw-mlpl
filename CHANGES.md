@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-26
 
+- step 014-web-split: record completion
+- refactor(web): mlpl-web bin down to 7 modules -- FAIL retired
+- step 013-repl-split: record completion
+- refactor(repl): extract mlpl-repl-connect -- the connect-mode client
+- docs(changes): refresh CHANGES.md to HEAD
 - step 012-error-handling-demo: record completion
 - feat(demos): Error Handling demo -- two planes, two bridges
 - step 011-error-trap-lang: record completion
