@@ -1,0 +1,1 @@
+?connect= is now validated at load with specific messages (stray paren, missing port, bad scheme); a red banner surfaces invalid params immediately and unreachable servers after the retry window; the Connect button label is evidence-based (Connecting.../Connected/warn) and its panel shows per-backend availability (CUDA/MLX/Ollama) from /v1/devices. 8/8 playwright scenarios green.
