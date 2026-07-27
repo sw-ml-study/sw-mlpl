@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga glider-gun: complete (1 step)
+- feat(demos): Gosper Glider Gun (40x40) -- the glider generator
+- docs(changes): refresh CHANGES.md to HEAD
 - saga life-depth: complete (2 steps)
 - feat(demos): Life Pattern Zoo (20x20) -- five lifeforms, one rule
 - step 001-life-demo-depth: record completion
