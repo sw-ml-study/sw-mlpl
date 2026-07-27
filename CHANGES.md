@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga eval-decomposition: step 005-connect-url-validation complete
+- feat(web): validate ?connect=, loud banners, truthful Connect button
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 004-ollama-probe-gating complete
 - feat(demos): gate connect demos on live probe; Ask Ollama needs live Ollama
 - docs(changes): refresh CHANGES.md to HEAD
