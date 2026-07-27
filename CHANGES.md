@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-26
 
+- step 010-lens-depth: record completion
+- feat(lens): deep composed lenses + safe gets + zilde projections
+- docs(changes): refresh CHANGES.md to HEAD
 - step 009-life-live-frame-trace: record completion
 - feat(live): frame_trace live board -- emit_frame() streams tensors
 - docs(changes): refresh CHANGES.md to HEAD
