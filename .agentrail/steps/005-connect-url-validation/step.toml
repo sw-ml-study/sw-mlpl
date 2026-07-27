@@ -1,6 +1,6 @@
 number = 5
 slug = "connect-url-validation"
-status = "pending"
+status = "in-progress"
 description = "Validate the ?connect= URL parameter at page load and fail fast with a VISIBL..."
 role = "production"
 context_files = []

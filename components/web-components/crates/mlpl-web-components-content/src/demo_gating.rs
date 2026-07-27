@@ -92,10 +92,6 @@ pub fn disabled_hint(section: &str) -> &'static str {
     }
 }
 
-// Compat re-export: the probe hook moved to `peer_probe` (module
-// split); dropdown callers keep importing it from demo_gating.
-pub use crate::peer_probe::use_peer_devices;
-
 /// "Connected" only counts when the server is actually reachable:
 /// an https demo page cannot reach an http connect server (mixed
 /// content), so gate those connect demos as disconnected rather

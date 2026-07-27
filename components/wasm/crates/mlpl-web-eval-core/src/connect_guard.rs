@@ -28,6 +28,12 @@ itself -- http://<host>:6464/sw-mlpl -- or, on the same machine, append \
 #[must_use]
 pub fn connect_blocked_reason() -> Option<String> {
     let url = crate::eval_url::current_connect_url_from_window()?;
+    if let Err(e) = crate::eval_url::validate_connect_url(&url) {
+        return Some(format!(
+            "Invalid ?connect= value \"{url}\": {e}. Example: ?connect=http://large12:6464 \
+             (usually the same host:port that serves this page)."
+        ));
+    }
     let https = web_sys::window()?.location().protocol().ok().as_deref() == Some("https:");
     crate::eval_url::is_mixed_content_blocked(https, &url).then(|| MIXED_CONTENT_MSG.to_string())
 }

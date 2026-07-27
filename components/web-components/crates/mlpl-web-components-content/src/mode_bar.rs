@@ -1,7 +1,8 @@
 use web_sys::HtmlSelectElement;
 use yew::prelude::*;
 
-use crate::demo_gating::{disabled_hint, grouped_demos, use_peer_devices};
+use crate::demo_gating::{disabled_hint, grouped_demos};
+use crate::peer_probe::{connect_banner, use_peer_probe};
 use mlpl_web_demos::Device;
 
 #[derive(Properties, PartialEq)]
@@ -22,26 +23,26 @@ pub struct ModeBarProps {
 
 #[function_component(ModeBar)]
 pub fn mode_bar(props: &ModeBarProps) -> Html {
-    let cls = if props.tutorial_active {
-        "modebar tutorial"
+    let mode = if props.tutorial_active {
+        "tutorial"
     } else {
-        "modebar repl"
+        "repl"
     };
+    let cls = format!("modebar {mode}");
     // Probe the connected peer's real device set, so the dropdown gates
     // GPU demos by what THIS peer offers (CUDA on a Linux peer, MLX on
-    // an Apple peer) -- not a static guess.
-    let peer_devices = use_peer_devices();
+    // an Apple peer) -- not a static guess. The banner surfaces an
+    // invalid ?connect= or an unresponsive server loudly at load.
+    let probe = use_peer_probe();
+    let banner = connect_banner(&probe);
     let demo_dropdown =
-        render_demo_dropdown(props.tutorial_active, props.on_demo.clone(), &peer_devices);
-    let upload_widget = if props.tutorial_active {
-        html! {}
-    } else {
-        render_upload_widget(props)
-    };
+        render_demo_dropdown(props.tutorial_active, props.on_demo.clone(), &probe.devices);
+    let upload = (!props.tutorial_active).then(|| render_upload_widget(props));
     html! {
         <div class={cls}>
+            { banner }
             { demo_dropdown }
-            { upload_widget }
+            { upload }
         </div>
     }
 }

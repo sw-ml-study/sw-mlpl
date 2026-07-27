@@ -70,18 +70,21 @@ async fn discover(connected: Option<String>) -> Panel {
         return Panel::Note(reason);
     }
     if let Some(url) = connected {
-        let info = get_json(&format!("{}/v1/devices", url.trim_end_matches('/'))).await;
-        let field = |k: &str| info.as_ref().and_then(|b| b.get(k));
-        let host = field("hostname")
-            .and_then(serde_json::Value::as_str)
-            .map(str::to_string);
-        let devices = field("devices").and_then(|v| v.as_array()).map(|a| {
-            a.iter()
-                .filter_map(serde_json::Value::as_str)
-                .collect::<Vec<_>>()
-                .join(", ")
-        });
-        return Panel::Connected { url, host, devices };
+        let Some(body) = get_json(&format!("{}/v1/devices", url.trim_end_matches('/'))).await
+        else {
+            return Panel::Note(format!(
+                "?connect={url} is set, but that server is NOT responding. Check that \
+                 mlpl-serve is running there and the URL is right -- usually the page's \
+                 own origin (e.g. ?connect=http://large12:6464). NOTE: \"localhost\" here \
+                 means the machine running this BROWSER, not the page's server."
+            ));
+        };
+        let host = body["hostname"].as_str().map(str::to_string);
+        return Panel::Connected {
+            url,
+            host,
+            devices: Some(crate::connect_probe::backend_status(&body)),
+        };
     }
     let Some(origin) = web_sys::window().and_then(|w| w.location().origin().ok()) else {
         return Panel::Note(NO_PROXY.to_string());
@@ -108,23 +111,33 @@ async fn discover(connected: Option<String>) -> Panel {
     }
 }
 
+/// The connected-state panel: host title, url, per-backend status
+/// line, and the Disconnect action.
+fn render_connected(url: &str, host: Option<&str>, devices: Option<&str>) -> Html {
+    let title = host.unwrap_or("server").to_string();
+    let status = devices.map_or_else(
+        || html! {},
+        |d| html! { <div class="connect-sub">{ format!("devices: {d}") }</div> },
+    );
+    html! {
+        <div class="connect-panel">
+            <div class="connect-note">
+                { format!("Connected to {title}") }
+                <div class="connect-sub">{ url.to_string() }</div>
+                { status }
+            </div>
+            <button class="connect-item" onclick={Callback::from(|_: MouseEvent| set_connect(None))}>
+                { "Disconnect" }
+            </button>
+        </div>
+    }
+}
+
 fn render_panel(panel: &Panel) -> Html {
     match panel {
         Panel::Closed => html! {},
         Panel::Connected { url, host, devices } => {
-            let title = host.clone().unwrap_or_else(|| "server".to_string());
-            html! {
-                <div class="connect-panel">
-                    <div class="connect-note">
-                        { format!("Connected to {title}") }
-                        <div class="connect-sub">{ url.clone() }</div>
-                        { devices.as_ref().map_or_else(|| html!{}, |d| html!{ <div class="connect-sub">{ format!("devices: {d}") }</div> }) }
-                    </div>
-                    <button class="connect-item" onclick={Callback::from(|_: MouseEvent| set_connect(None))}>
-                        { "Disconnect" }
-                    </button>
-                </div>
-            }
+            render_connected(url, host.as_deref(), devices.as_deref())
         }
         Panel::Note(msg) => html! {
             <div class="connect-panel"><div class="connect-note">{ msg }</div></div>
@@ -159,14 +172,19 @@ pub fn connect_button() -> Html {
             });
         })
     };
-    // Only claim "Connected" when the server is actually reachable. When the
-    // connect URL is blocked (https page -> http server), keep the button on
-    // "Connect" with a warning glyph; clicking explains why.
+    // Only claim "Connected" when the server actually ANSWERED the
+    // devices probe -- a ?connect= URL pointing at a dead port must
+    // show a warning, not a lying check mark.
+    let reachable = crate::connect_probe::use_reachable();
     let blocked = mlpl_web_eval::connect_guard::connect_blocked_reason().is_some();
-    let label = if connected.is_some() && !blocked {
-        "Connected \u{2713}"
-    } else if blocked {
+    let label = if blocked {
         "Connect \u{26a0}"
+    } else if connected.is_some() {
+        match reachable {
+            None => "Connecting\u{2026}",
+            Some(true) => "Connected \u{2713}",
+            Some(false) => "Connect \u{26a0}",
+        }
     } else {
         "Connect"
     };

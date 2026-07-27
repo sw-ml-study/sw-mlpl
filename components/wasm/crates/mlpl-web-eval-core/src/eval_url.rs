@@ -86,13 +86,39 @@ fn url_decode(s: &str) -> String {
 /// `127.0.0.1` are exempt -- browsers treat them as potentially
 /// trustworthy. (URL-scheme logic, so it lives with the URL parsing;
 /// `connect_guard` wraps it with the browser lookup.)
-/// The pure mixed-content rule, testable without a browser: an https page
-/// cannot reach a plain-http, non-local connect server. `localhost` /
-/// `127.0.0.1` are exempt -- browsers treat them as potentially trustworthy.
 #[must_use]
 pub fn is_mixed_content_blocked(page_is_https: bool, connect_url: &str) -> bool {
     let local = connect_url.contains("localhost")
         || connect_url.contains("127.0.0.1")
         || connect_url.contains("[::1]");
     page_is_https && connect_url.starts_with("http://") && !local
+}
+
+/// Validate a `?connect=` value BEFORE anything probes it, so a
+/// copy-paste mistake (stray `)`, missing port, wrong scheme) fails
+/// fast with a specific message instead of a silent dead probe.
+/// Expects exactly `http(s)://host:port` with an optional trailing
+/// slash; IPv6 hosts use brackets (`http://[::1]:6464`).
+pub fn validate_connect_url(url: &str) -> Result<(), String> {
+    let rest = url
+        .strip_prefix("http://")
+        .or_else(|| url.strip_prefix("https://"))
+        .ok_or_else(|| "it must start with http:// or https://".to_string())?;
+    let authority = rest.trim_end_matches('/');
+    if authority.contains('/') {
+        return Err("it must be just scheme://host:port, with no path".to_string());
+    }
+    let (host, port) = authority
+        .rsplit_once(':')
+        .ok_or_else(|| "it is missing the :port (e.g. :6464)".to_string())?;
+    let host_ok = |c: char| c.is_ascii_alphanumeric() || matches!(c, '.' | '-' | '[' | ']' | ':');
+    if host.is_empty() || !host.chars().all(host_ok) {
+        return Err(format!(
+            "the host \"{host}\" is empty or has invalid characters"
+        ));
+    }
+    if port.is_empty() || !port.chars().all(|c| c.is_ascii_digit()) {
+        return Err(format!("the port \"{port}\" is not a number"));
+    }
+    Ok(())
 }

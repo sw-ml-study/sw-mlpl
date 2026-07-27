@@ -6,6 +6,7 @@
 //! so existing call sites stay unchanged.
 
 pub mod connect_button;
+pub mod connect_probe;
 pub mod footer;
 pub mod github_corner;
 pub mod header;
