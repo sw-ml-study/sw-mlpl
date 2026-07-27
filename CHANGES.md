@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- step 001-apl-demo-group: record completion
+- feat(demos): APL2 / General Programming group + curated dropdown order
+- docs(changes): refresh CHANGES.md to HEAD
 - saga demo-comments-complete: complete (1 step)
 - feat(demos): every u: function commented -- and a gate to keep it so
 - docs(changes): refresh CHANGES.md to HEAD
