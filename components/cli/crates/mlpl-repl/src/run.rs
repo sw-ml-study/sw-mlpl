@@ -35,7 +35,7 @@ pub(crate) fn run(config: Config) {
         Info::HelpShort => return print!("{}", crate::version::help_short()),
         Info::None => {}
     }
-    if crate::connect_repl::try_dispatch_args(&config.connect_args) {
+    if mlpl_repl_connect::connect_repl::try_dispatch_args(&config.connect_args) {
         return;
     }
     let mut session = init(&config);

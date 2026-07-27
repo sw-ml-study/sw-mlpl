@@ -166,7 +166,7 @@ fn eval_and_print(
         Err(ClientError::Cancelled {
             step,
             partial_losses,
-        }) => crate::render::render_cancellation(step, &partial_losses),
+        }) => crate::connect::render_cancellation(step, &partial_losses),
         Err(e) => eprintln!("  {program}\n  error: {e}"),
     }
 }
@@ -230,7 +230,7 @@ fn dispatch_slash(
         ":help" => Some(CONNECT_HELP.into()),
         ":vars" | ":models" | ":experiments" | ":tokenizers" | ":wsid" => {
             match inspect_remote(client, base_url, session_id, token) {
-                Ok(snap) => Some(crate::render::format_inspect(input, &snap)),
+                Ok(snap) => Some(crate::ask_model::format_inspect(input, &snap)),
                 Err(e) => Some(format!("error: {e}")),
             }
         }

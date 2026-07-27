@@ -78,15 +78,64 @@ pub fn list(host: &str) -> String {
     format!("Ollama models at {host}:\n{body}\n(select with `:connect set <name>`)")
 }
 
-#[cfg(test)]
-mod tests {
-    // `:connect set <model>` selects the model and `resolve` returns it.
-    // The session override short-circuits before `$OLLAMA_MODEL` and any
-    // network probe, so this is deterministic + offline-safe.
-    #[test]
-    fn connect_set_selects_model_for_ask() {
-        let out = super::connect_cmd("set foo:bar", "http://127.0.0.1:1");
-        assert!(out.contains("foo:bar"), "unexpected: {out}");
-        assert_eq!(super::resolve("http://127.0.0.1:1"), "foo:bar");
+// ---- Terminal rendering for connect-mode results (from the old
+// bin-side render.rs). Lives here beside the :connect command
+// formatting -- both are "turn a server response into terminal
+// text" -- and keeps every module in this crate at the
+// sw-checklist budgets. ----
+use crate::connect::InspectResponse;
+
+pub fn format_inspect(command: &str, snap: &InspectResponse) -> String {
+    let mut out = String::new();
+    let render_names = |out: &mut String, label: &str, names: &[String]| {
+        if names.is_empty() {
+            out.push_str(&format!("(no {label})"));
+        } else {
+            for n in names {
+                out.push_str(&format!("  {n}\n"));
+            }
+            out.truncate(out.trim_end().len());
+        }
+    };
+    match command {
+        ":vars" => out.push_str(&format_vars(snap)),
+        ":models" => render_names(&mut out, "models", &snap.models),
+        ":tokenizers" => render_names(&mut out, "tokenizers", &snap.tokenizers),
+        ":experiments" => render_names(&mut out, "experiments", &snap.experiments),
+        ":wsid" => {
+            out.push_str(&format_wsid(snap));
+        }
+        _ => unreachable!("dispatch_slash filters before format_inspect"),
     }
+    out
+}
+
+/// The `:vars` listing: name, shape, `[param]` tag, truncation note.
+fn format_vars(snap: &InspectResponse) -> String {
+    let mut out = String::new();
+    if snap.vars.is_empty() {
+        out.push_str("(no variables)");
+        return out;
+    }
+    for v in &snap.vars {
+        let tag = if v.is_param { " [param]" } else { "" };
+        let dims: Vec<String> = v.shape.iter().map(|d| d.to_string()).collect();
+        out.push_str(&format!("  {}: [{}]{tag}\n", v.name, dims.join(", ")));
+    }
+    if snap.more > 0 {
+        out.push_str(&format!("  ... ({} more)\n", snap.more));
+    }
+    out.truncate(out.trim_end().len());
+    out
+}
+
+/// The `:wsid` workspace summary counts.
+fn format_wsid(snap: &InspectResponse) -> String {
+    format!(
+        "workspace (remote):\n  variables: {}\n  models:    {}\n  tokenizers: {}\n  experiments: {}",
+        snap.vars.len() + snap.more,
+        snap.models.len(),
+        snap.tokenizers.len(),
+        snap.experiments.len()
+    )
 }

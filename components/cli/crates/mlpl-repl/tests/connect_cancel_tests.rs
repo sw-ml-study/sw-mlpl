@@ -14,18 +14,6 @@
 //!      losses (mirror of the SSE wire test, exercised through
 //!      the client API the REPL actually uses).
 
-#[allow(dead_code)]
-#[path = "../src/connect.rs"]
-mod connect;
-
-#[allow(dead_code)]
-#[path = "../src/connect_reattach.rs"]
-mod connect_reattach;
-
-#[allow(dead_code)]
-#[path = "../src/connect_stream.rs"]
-mod connect_stream;
-
 use std::net::SocketAddr;
 use std::time::{Duration, Instant};
 
@@ -55,7 +43,9 @@ fn blocking_client() -> reqwest::blocking::Client {
 fn first_ctrl_c_is_not_a_cancel() {
     let now = Instant::now();
     let window = Duration::from_secs(2);
-    assert!(!connect_stream::should_double_cancel(None, now, window));
+    assert!(!mlpl_repl_connect::connect_stream::should_double_cancel(
+        None, now, window
+    ));
 }
 
 /// Second Ctrl-C within the window -- cancel.
@@ -64,7 +54,7 @@ fn second_ctrl_c_within_window_is_a_cancel() {
     let now = Instant::now();
     let window = Duration::from_secs(2);
     let prev = now - Duration::from_millis(500);
-    assert!(connect_stream::should_double_cancel(
+    assert!(mlpl_repl_connect::connect_stream::should_double_cancel(
         Some(prev),
         now,
         window
@@ -79,7 +69,7 @@ fn second_ctrl_c_outside_window_is_not_a_cancel() {
     let now = Instant::now();
     let window = Duration::from_secs(2);
     let prev = now - Duration::from_secs(5);
-    assert!(!connect_stream::should_double_cancel(
+    assert!(!mlpl_repl_connect::connect_stream::should_double_cancel(
         Some(prev),
         now,
         window
@@ -93,10 +83,10 @@ async fn post_cancel_against_live_server_returns_ok() {
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
-        connect_stream::post_cancel(&client, &base, &id, &token).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
+        mlpl_repl_connect::connect_stream::post_cancel(&client, &base, &id, &token).unwrap();
         // Idempotent: a second cancel still returns Ok.
-        connect_stream::post_cancel(&client, &base, &id, &token).unwrap();
+        mlpl_repl_connect::connect_stream::post_cancel(&client, &base, &id, &token).unwrap();
     })
     .await;
     result.unwrap();
@@ -114,7 +104,7 @@ async fn streaming_train_cancel_surfaces_partial_losses_to_client() {
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
         // Spawn the cancel from a side thread shortly after eval
         // starts. The streaming call blocks until the server
@@ -125,11 +115,12 @@ async fn streaming_train_cancel_surfaces_partial_losses_to_client() {
         let client_c = client.clone();
         std::thread::spawn(move || {
             std::thread::sleep(Duration::from_millis(80));
-            let _ = connect_stream::post_cancel(&client_c, &base_c, &id_c, &token_c);
+            let _ =
+                mlpl_repl_connect::connect_stream::post_cancel(&client_c, &base_c, &id_c, &token_c);
         });
 
         let mut frames: Vec<(usize, f64)> = Vec::new();
-        let err = connect_stream::eval_remote_stream(
+        let err = mlpl_repl_connect::connect_stream::eval_remote_stream(
             &client,
             &base,
             &id,
@@ -146,7 +137,7 @@ async fn streaming_train_cancel_surfaces_partial_losses_to_client() {
         .expect_err("expected cancellation, got success");
 
         match err {
-            connect::ClientError::Cancelled {
+            mlpl_repl_connect::connect::ClientError::Cancelled {
                 step,
                 partial_losses,
             } => {

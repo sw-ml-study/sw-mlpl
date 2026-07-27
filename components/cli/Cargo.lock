@@ -2160,6 +2160,7 @@ dependencies = [
  "mlpl-eval",
  "mlpl-mlx-eval",
  "mlpl-parser",
+ "mlpl-repl-connect",
  "mlpl-runtime",
  "mlpl-serve",
  "mlpl-trace",
@@ -2168,6 +2169,19 @@ dependencies = [
  "serde_json",
  "tempfile",
  "tokio",
+]
+
+[[package]]
+name = "mlpl-repl-connect"
+version = "0.20.0"
+dependencies = [
+ "ctrlc",
+ "mlpl-cli",
+ "mlpl-eval",
+ "mlpl-runtime",
+ "reqwest",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

@@ -1,0 +1,27 @@
+[package]
+name = "mlpl-repl-connect"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Spike step 013: the REPL's connect-mode cluster (remote session
+# client, streaming eval, reattach, :ask/:connect commands, and
+# their terminal rendering), extracted from the mlpl-repl bin so
+# both crates sit inside the sw-checklist module budget. The bin
+# re-exports nothing; it calls `mlpl_repl_connect::` paths and the
+# integration tests import the lib directly (no more #[path]
+# includes of bin sources).
+
+[lib]
+name = "mlpl_repl_connect"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
+mlpl-cli = { path = "../mlpl-cli" }
+reqwest = { version = "0.12", default-features = false, features = ["json", "blocking", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Ctrl-C -> cooperative cancel of the in-flight remote eval.
+ctrlc = "3"

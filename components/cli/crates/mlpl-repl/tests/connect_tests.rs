@@ -18,9 +18,6 @@
 // the public helpers directly. The binary uses every
 // item; the test only exercises a subset, so suppress
 // dead_code in this compilation unit.
-#[allow(dead_code)]
-#[path = "../src/connect.rs"]
-mod connect;
 
 use std::net::SocketAddr;
 
@@ -51,13 +48,14 @@ async fn connect_create_and_eval() {
 
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
         assert!(!id.is_empty());
         assert!(!token.is_empty());
 
         // Eval a couple of programs against the remote
         // session; assert the values come back.
-        let r1 = connect::eval_remote(&client, &base, &id, &token, "iota(5)").unwrap();
+        let r1 = mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "iota(5)")
+            .unwrap();
         assert_eq!(r1.kind, "array");
         assert!(
             r1.value.contains('4'),
@@ -66,8 +64,8 @@ async fn connect_create_and_eval() {
         );
 
         // State persists.
-        connect::eval_remote(&client, &base, &id, &token, "x = 9").unwrap();
-        let r3 = connect::eval_remote(&client, &base, &id, &token, "x").unwrap();
+        mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "x = 9").unwrap();
+        let r3 = mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "x").unwrap();
         assert!(
             r3.value.contains('9'),
             "x should be 9 after assignment: {}",
@@ -85,12 +83,13 @@ async fn connect_eval_error_returns_server_error() {
 
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
-        let err = connect::eval_remote(&client, &base, &id, &token, "undefined_var")
-            .expect_err("expected eval error");
+        let err =
+            mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "undefined_var")
+                .expect_err("expected eval error");
         match err {
-            connect::ClientError::Server { status, message } => {
+            mlpl_repl_connect::connect::ClientError::Server { status, message } => {
                 assert_eq!(status, 400, "eval error should be 400");
                 assert!(
                     message.to_lowercase().contains("undefined")
@@ -112,14 +111,23 @@ async fn connect_inspect_returns_workspace_snapshot() {
 
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
         // Bind some state on the remote.
-        connect::eval_remote(&client, &base, &id, &token, "a = iota(3)").unwrap();
-        connect::eval_remote(&client, &base, &id, &token, "b = reshape(iota(6), [2, 3])").unwrap();
-        connect::eval_remote(&client, &base, &id, &token, "m = linear(2, 3, 0)").unwrap();
+        mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "a = iota(3)")
+            .unwrap();
+        mlpl_repl_connect::connect::eval_remote(
+            &client,
+            &base,
+            &id,
+            &token,
+            "b = reshape(iota(6), [2, 3])",
+        )
+        .unwrap();
+        mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "m = linear(2, 3, 0)")
+            .unwrap();
 
-        let snap = connect::inspect_remote(&client, &base, &id, &token).unwrap();
+        let snap = mlpl_repl_connect::connect::inspect_remote(&client, &base, &id, &token).unwrap();
         let var_names: Vec<&str> = snap.vars.iter().map(|v| v.name.as_str()).collect();
         assert!(
             var_names.contains(&"a"),
@@ -154,8 +162,12 @@ async fn connect_session_create_fails_when_server_down() {
 
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let err = connect::create_session(&client, &base).expect_err("expected network error");
-        assert!(matches!(err, connect::ClientError::Network(_)));
+        let err = mlpl_repl_connect::connect::create_session(&client, &base)
+            .expect_err("expected network error");
+        assert!(matches!(
+            err,
+            mlpl_repl_connect::connect::ClientError::Network(_)
+        ));
     })
     .await;
     result.unwrap();

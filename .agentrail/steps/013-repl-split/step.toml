@@ -1,6 +1,6 @@
 number = 13
 slug = "repl-split"
-status = "pending"
+status = "in-progress"
 description = "mlpl-repl 13 modules -> connect-mode cluster to a sibling crate."
 role = "production"
 context_files = []

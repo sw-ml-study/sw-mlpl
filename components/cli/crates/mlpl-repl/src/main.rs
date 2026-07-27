@@ -1,12 +1,5 @@
 mod args;
-mod ask;
-mod ask_model;
 mod babel_session;
-mod connect;
-mod connect_reattach;
-mod connect_repl;
-mod connect_stream;
-mod render;
 mod run;
 mod script_mode;
 mod svg_out;
@@ -87,11 +80,11 @@ fn handle_command(
 /// `handle_command` to keep it inside the LOC budget.
 fn handle_ask_connect(input: &str, env: &mut Environment) -> bool {
     if input == ":ask" || input.starts_with(":ask ") {
-        ask::dispatch(input.strip_prefix(":ask").unwrap_or("").trim(), env);
+        mlpl_repl_connect::ask::dispatch(input.strip_prefix(":ask").unwrap_or("").trim(), env);
     } else if input == ":connect" || input.starts_with(":connect ") {
         let host = std::env::var("OLLAMA_HOST").unwrap_or_else(|_| "http://localhost:11434".into());
         let arg = input.strip_prefix(":connect").unwrap_or("").trim();
-        println!("{}", ask_model::connect_cmd(arg, &host));
+        println!("{}", mlpl_repl_connect::ask_model::connect_cmd(arg, &host));
     } else {
         return false;
     }

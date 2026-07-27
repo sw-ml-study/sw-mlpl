@@ -179,7 +179,7 @@ pub fn inspect_remote(
 
 /// Map a non-2xx response to `ClientError::Server`, extracting the
 /// JSON `error` field when the body carries one.
-pub(crate) fn server_error(resp: reqwest::blocking::Response) -> ClientError {
+pub fn server_error(resp: reqwest::blocking::Response) -> ClientError {
     let status = resp.status().as_u16();
     let body = resp.text().unwrap_or_default();
     let message = serde_json::from_str::<serde_json::Value>(&body)
@@ -187,4 +187,25 @@ pub(crate) fn server_error(resp: reqwest::blocking::Response) -> ClientError {
         .and_then(|v| v.get("error").and_then(|e| e.as_str()).map(str::to_string))
         .unwrap_or(body);
     ClientError::Server { status, message }
+}
+
+pub fn render_cancellation(step: usize, partial_losses: &[f64]) {
+    eprintln!(
+        "  cancelled at step {step} ({} partial loss{} captured; see :vars last_losses)",
+        partial_losses.len(),
+        if partial_losses.len() == 1 { "" } else { "es" }
+    );
+    if !partial_losses.is_empty() {
+        let preview: Vec<String> = partial_losses
+            .iter()
+            .take(5)
+            .map(|v| format!("{v:.4}"))
+            .collect();
+        let ellipsis = if partial_losses.len() > 5 {
+            ", ..."
+        } else {
+            ""
+        };
+        eprintln!("  losses: [{}{ellipsis}]", preview.join(", "));
+    }
 }

@@ -1,5 +1,12 @@
 [workspace]
-members = ["crates/mlpl", "crates/mlpl-build", "crates/mlpl-cli", "crates/mlpl-lab", "crates/mlpl-repl"]
+members = [
+    "crates/mlpl",
+    "crates/mlpl-build",
+    "crates/mlpl-cli",
+    "crates/mlpl-lab",
+    "crates/mlpl-repl",
+    "crates/mlpl-repl-connect",
+]
 resolver = "2"
 [workspace.package]
 edition = "2024"

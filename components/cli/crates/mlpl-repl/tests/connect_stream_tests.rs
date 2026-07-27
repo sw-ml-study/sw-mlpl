@@ -11,18 +11,6 @@
 //! `#[path = "..."]` so the integration test can call
 //! the public helpers directly.
 
-#[allow(dead_code)]
-#[path = "../src/connect.rs"]
-mod connect;
-
-#[allow(dead_code)]
-#[path = "../src/connect_reattach.rs"]
-mod connect_reattach;
-
-#[allow(dead_code)]
-#[path = "../src/connect_stream.rs"]
-mod connect_stream;
-
 use std::net::SocketAddr;
 
 use mlpl_serve::auth::AuthMode;
@@ -56,19 +44,21 @@ async fn stream_and_non_stream_produce_same_final_value() {
 
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
-        let r_nonstream = connect::eval_remote(&client, &base, &id, &token, "iota(5) + 1").unwrap();
+        let r_nonstream =
+            mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "iota(5) + 1")
+                .unwrap();
 
-        let mut metrics: Vec<connect_stream::SseMetric> = Vec::new();
-        let r_stream = connect_stream::eval_remote_stream(
+        let mut metrics: Vec<mlpl_repl_connect::connect_stream::SseMetric> = Vec::new();
+        let r_stream = mlpl_repl_connect::connect_stream::eval_remote_stream(
             &client,
             &base,
             &id,
             &token,
             "iota(5) + 1",
             &mut |m| {
-                metrics.push(connect_stream::SseMetric {
+                metrics.push(mlpl_repl_connect::connect_stream::SseMetric {
                     name: m.name.clone(),
                     step: m.step,
                     value: m.value,
@@ -99,10 +89,10 @@ async fn stream_emits_one_metric_per_train_iteration() {
 
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
         let mut frames: Vec<(String, usize, f64)> = Vec::new();
-        let resp = connect_stream::eval_remote_stream(
+        let resp = mlpl_repl_connect::connect_stream::eval_remote_stream(
             &client,
             &base,
             &id,
@@ -150,9 +140,12 @@ async fn stream_emits_one_metric_per_train_iteration() {
 #[test]
 fn parse_stream_without_connect_errors() {
     let args = vec!["mlpl-repl".to_string(), "--stream".to_string()];
-    let err = connect_stream::parse_connect_args(&args, None).unwrap_err();
+    let err = mlpl_repl_connect::connect_stream::parse_connect_args(&args, None).unwrap_err();
     assert!(
-        matches!(err, connect_stream::ConnectArgsError::StreamWithoutConnect),
+        matches!(
+            err,
+            mlpl_repl_connect::connect_stream::ConnectArgsError::StreamWithoutConnect
+        ),
         "expected StreamWithoutConnect, got {err:?}"
     );
 }
@@ -163,7 +156,7 @@ fn parse_stream_without_connect_errors() {
 /// live loss.
 #[test]
 fn parse_stream_env_var_equivalent_to_flag() {
-    let with_env = connect_stream::parse_connect_args(
+    let with_env = mlpl_repl_connect::connect_stream::parse_connect_args(
         &[
             "mlpl-repl".to_string(),
             "--connect".to_string(),
@@ -172,7 +165,7 @@ fn parse_stream_env_var_equivalent_to_flag() {
         Some("1"),
     )
     .unwrap();
-    let with_flag = connect_stream::parse_connect_args(
+    let with_flag = mlpl_repl_connect::connect_stream::parse_connect_args(
         &[
             "mlpl-repl".to_string(),
             "--connect".to_string(),
@@ -185,12 +178,12 @@ fn parse_stream_env_var_equivalent_to_flag() {
 
     match (with_env, with_flag) {
         (
-            connect_stream::ConnectMode::Remote {
+            mlpl_repl_connect::connect_stream::ConnectMode::Remote {
                 url: u1,
                 stream: s1,
                 ..
             },
-            connect_stream::ConnectMode::Remote {
+            mlpl_repl_connect::connect_stream::ConnectMode::Remote {
                 url: u2,
                 stream: s2,
                 ..
@@ -211,7 +204,7 @@ fn parse_stream_env_var_equivalent_to_flag() {
 #[test]
 fn parse_stream_env_var_falsy_values_keep_streaming_off() {
     for falsy in ["0", "", "false", "FALSE", "no"] {
-        let mode = connect_stream::parse_connect_args(
+        let mode = mlpl_repl_connect::connect_stream::parse_connect_args(
             &[
                 "mlpl-repl".to_string(),
                 "--connect".to_string(),
@@ -221,7 +214,7 @@ fn parse_stream_env_var_falsy_values_keep_streaming_off() {
         )
         .unwrap();
         match mode {
-            connect_stream::ConnectMode::Remote { stream, .. } => {
+            mlpl_repl_connect::connect_stream::ConnectMode::Remote { stream, .. } => {
                 assert!(!stream, "{falsy:?} should not enable streaming");
             }
             other => panic!("expected Remote, got {other:?}"),
@@ -233,8 +226,13 @@ fn parse_stream_env_var_falsy_values_keep_streaming_off() {
 /// falls through to local mode (`Local` variant).
 #[test]
 fn parse_no_connect_no_stream_is_local() {
-    let mode = connect_stream::parse_connect_args(&["mlpl-repl".to_string()], None).unwrap();
-    assert!(matches!(mode, connect_stream::ConnectMode::Local));
+    let mode =
+        mlpl_repl_connect::connect_stream::parse_connect_args(&["mlpl-repl".to_string()], None)
+            .unwrap();
+    assert!(matches!(
+        mode,
+        mlpl_repl_connect::connect_stream::ConnectMode::Local
+    ));
 }
 
 /// A `metric` SSE frame renders as one progress line
@@ -246,12 +244,12 @@ fn parse_no_connect_no_stream_is_local() {
 #[test]
 fn render_metric_writes_one_progress_line() {
     let mut buf: Vec<u8> = Vec::new();
-    let m = connect_stream::SseMetric {
+    let m = mlpl_repl_connect::connect_stream::SseMetric {
         name: "loss_metric".into(),
         step: 3,
         value: 0.42,
     };
-    connect_stream::render_metric(&mut buf, &m).unwrap();
+    mlpl_repl_connect::connect_stream::render_metric(&mut buf, &m).unwrap();
     let rendered = String::from_utf8(buf).unwrap();
     assert!(
         rendered.contains("loss_metric"),

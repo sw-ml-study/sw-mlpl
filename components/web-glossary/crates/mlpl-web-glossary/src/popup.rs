@@ -34,7 +34,13 @@ pub fn glossary_popup_host() -> Html {
         let term = term.clone();
         Callback::from(move |_| term.set(None))
     };
-    let body = match find_by_term(&open_term) {
+    popup_card(&open_term, on_close)
+}
+
+/// The overlay + card for one open term (looked up fresh so a
+/// missing entry renders an inline notice, not a crash).
+fn popup_card(open_term: &str, on_close: Callback<MouseEvent>) -> Html {
+    let body = match find_by_term(open_term) {
         Some(entry) => render_body(&entry.body),
         None => html! {
             <p class="path-step-error">{ format!("(no glossary entry named {open_term:?})") }</p>
@@ -44,7 +50,7 @@ pub fn glossary_popup_host() -> Html {
         <div class="glossary-popup-overlay" onclick={on_close.clone()}>
             <div class="glossary-popup-card" onclick={Callback::from(|e: MouseEvent| e.stop_propagation())}>
                 <div class="glossary-popup-header">
-                    <h3 class="glossary-popup-title">{ &open_term }</h3>
+                    <h3 class="glossary-popup-title">{ open_term }</h3>
                     <button class="glossary-popup-close" onclick={on_close} title="Close (Esc)">{"\u{2715}"}</button>
                 </div>
                 <div class="glossary-popup-body">{ body }</div>

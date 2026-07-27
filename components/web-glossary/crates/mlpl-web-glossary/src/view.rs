@@ -21,13 +21,7 @@ pub use mlpl_glossary_data::find_by_term;
 pub fn glossary_view() -> Html {
     let g = doc();
     let query = use_state(String::new);
-    let on_input = {
-        let query = query.clone();
-        Callback::from(move |e: InputEvent| {
-            let target: HtmlInputElement = e.target_unchecked_into();
-            query.set(target.value());
-        })
-    };
+    let on_input = query_input_callback(&query);
     let q_for_effect = (*query).clone();
     use_effect_with(q_for_effect, move |q: &String| {
         scroll_to_match(q, &g.entries);
@@ -36,19 +30,11 @@ pub fn glossary_view() -> Html {
 
     let matched =
         mlpl_glossary_search::best_match(&query, g.entries.iter().map(|e| e.term.as_str()));
-    let entries_html = g.entries.iter().enumerate().map(|(i, e)| {
-        let class = if Some(i) == matched {
-            "glossary-entry matched"
-        } else {
-            "glossary-entry"
-        };
-        html! {
-            <div class={class} id={e.slug.clone()}>
-                <h3>{ &e.term }</h3>
-                <div class="glossary-body">{ mlpl_web_path_body::render_body(&e.body) }</div>
-            </div>
-        }
-    });
+    let entries_html = g
+        .entries
+        .iter()
+        .enumerate()
+        .map(|(i, e)| entry_html(i, e, matched));
     let placeholder = "Type to jump (e.g. M, L, P -> MLP)";
     html! {
         <div class="glossary-view">
@@ -61,6 +47,30 @@ pub fn glossary_view() -> Html {
             </div>
         </div>
     }
+}
+
+/// One glossary entry card, highlighted when it is the best match.
+fn entry_html(i: usize, e: &GlossaryEntry, matched: Option<usize>) -> Html {
+    let class = if Some(i) == matched {
+        "glossary-entry matched"
+    } else {
+        "glossary-entry"
+    };
+    html! {
+        <div class={class} id={e.slug.clone()}>
+            <h3>{ &e.term }</h3>
+            <div class="glossary-body">{ mlpl_web_path_body::render_body(&e.body) }</div>
+        </div>
+    }
+}
+
+/// Search-box input handler: mirror the box into the query state.
+fn query_input_callback(query: &UseStateHandle<String>) -> Callback<InputEvent> {
+    let query = query.clone();
+    Callback::from(move |e: InputEvent| {
+        let target: HtmlInputElement = e.target_unchecked_into();
+        query.set(target.value());
+    })
 }
 
 fn scroll_to_match(query: &str, entries: &[GlossaryEntry]) {

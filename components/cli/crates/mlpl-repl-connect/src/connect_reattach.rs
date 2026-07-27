@@ -52,7 +52,7 @@ pub struct SessionMeta {
 /// Locate `--flag <value>` in argv. Returns the value when both
 /// the flag and a following positional are present. Shared by
 /// `--session` and `--token`.
-pub(crate) fn flag_value(args: &[String], flag: &str) -> Option<String> {
+pub fn flag_value(args: &[String], flag: &str) -> Option<String> {
     args.iter()
         .position(|a| a == flag)
         .and_then(|p| args.get(p + 1))

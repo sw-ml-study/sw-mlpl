@@ -11,21 +11,9 @@
 //!   3. `fetch_session_meta` against an in-process `mlpl-serve`
 //!      returns the metadata snapshot a reattach session uses.
 
-#[allow(dead_code)]
-#[path = "../src/connect.rs"]
-mod connect;
-
-#[allow(dead_code)]
-#[path = "../src/connect_reattach.rs"]
-mod connect_reattach;
-
-#[allow(dead_code)]
-#[path = "../src/connect_stream.rs"]
-mod connect_stream;
-
 use std::net::SocketAddr;
 
-use connect_stream::{ConnectMode, parse_connect_args};
+use mlpl_repl_connect::connect_stream::{ConnectMode, parse_connect_args};
 use mlpl_serve::auth::AuthMode;
 use mlpl_serve::server::build_app;
 use tempfile::TempDir;
@@ -98,7 +86,10 @@ fn parse_session_without_token_errors() {
     ];
     let err = parse_connect_args(&args, None).unwrap_err();
     assert!(
-        matches!(err, connect_stream::ConnectArgsError::ReattachIncomplete),
+        matches!(
+            err,
+            mlpl_repl_connect::connect_stream::ConnectArgsError::ReattachIncomplete
+        ),
         "expected ReattachIncomplete, got {err:?}"
     );
 }
@@ -115,7 +106,7 @@ fn parse_token_without_session_errors() {
     let err = parse_connect_args(&args, None).unwrap_err();
     assert!(matches!(
         err,
-        connect_stream::ConnectArgsError::ReattachIncomplete
+        mlpl_repl_connect::connect_stream::ConnectArgsError::ReattachIncomplete
     ));
 }
 
@@ -125,8 +116,9 @@ fn parse_token_without_session_errors() {
 fn write_then_read_persisted_session_roundtrip() {
     let tmp = TempDir::new().unwrap();
     let path = tmp.path().join("session.json");
-    connect_reattach::write_persisted_session(&path, "session-123", "token-xyz").unwrap();
-    let (id, token) = connect_reattach::read_persisted_session(&path).unwrap();
+    mlpl_repl_connect::connect_reattach::write_persisted_session(&path, "session-123", "token-xyz")
+        .unwrap();
+    let (id, token) = mlpl_repl_connect::connect_reattach::read_persisted_session(&path).unwrap();
     assert_eq!(id, "session-123");
     assert_eq!(token, "token-xyz");
 }
@@ -135,7 +127,7 @@ fn write_then_read_persisted_session_roundtrip() {
 fn read_persisted_session_missing_file_is_none() {
     let tmp = TempDir::new().unwrap();
     let path = tmp.path().join("does-not-exist.json");
-    assert!(connect_reattach::read_persisted_session(&path).is_none());
+    assert!(mlpl_repl_connect::connect_reattach::read_persisted_session(&path).is_none());
 }
 
 #[test]
@@ -143,12 +135,12 @@ fn read_persisted_session_malformed_is_none() {
     let tmp = TempDir::new().unwrap();
     let path = tmp.path().join("malformed.json");
     std::fs::write(&path, "not json at all").unwrap();
-    assert!(connect_reattach::read_persisted_session(&path).is_none());
+    assert!(mlpl_repl_connect::connect_reattach::read_persisted_session(&path).is_none());
 }
 
 // ---- fetch_session_meta against live server ----
 
-/// `connect_reattach::fetch_session_meta` returns Ok for an
+/// `mlpl_repl_connect::connect_reattach::fetch_session_meta` returns Ok for an
 /// existing session with the right token and Err for a wrong
 /// token. Used by reattach to validate the cached credentials
 /// before printing the welcome banner.
@@ -157,21 +149,29 @@ async fn fetch_session_meta_validates_credentials() {
     let addr = start_server().await;
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
-        let client = connect::build_client();
+        let client = mlpl_repl_connect::connect::build_client();
         // Create a session via the existing helper.
-        let (id, token) = connect::create_session(&client, &base).unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
         // Right token -> Ok with metadata.
-        let meta = connect_reattach::fetch_session_meta(&client, &base, &id, &token)
-            .expect("right token should succeed");
+        let meta =
+            mlpl_repl_connect::connect_reattach::fetch_session_meta(&client, &base, &id, &token)
+                .expect("right token should succeed");
         assert_eq!(meta.session_id, id);
         assert!(meta.created_at > 0);
 
         // Wrong token -> Err.
-        let err = connect_reattach::fetch_session_meta(&client, &base, &id, "not-the-token")
-            .expect_err("wrong token should fail");
+        let err = mlpl_repl_connect::connect_reattach::fetch_session_meta(
+            &client,
+            &base,
+            &id,
+            "not-the-token",
+        )
+        .expect_err("wrong token should fail");
         match err {
-            connect::ClientError::Server { status, .. } => assert_eq!(status, 401),
+            mlpl_repl_connect::connect::ClientError::Server { status, .. } => {
+                assert_eq!(status, 401)
+            }
             other => panic!("expected Server 401, got {other:?}"),
         }
     })

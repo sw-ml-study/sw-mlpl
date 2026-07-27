@@ -63,14 +63,10 @@ fn eval_script_value(
     last_trace: &mut Option<Trace>,
     svg_out: &mut SvgOut,
 ) -> i32 {
-    let tokens = match mlpl_parser::lex(input) {
-        Ok(t) => t,
-        Err(e) => return report_script_err(input, &e),
-    };
-    let stmts = match mlpl_parser::parse(&tokens) {
+    let stmts = match parse_script(input) {
         Ok(s) if s.is_empty() => return 0,
         Ok(s) => s,
-        Err(e) => return report_script_err(input, &e),
+        Err(code) => return code,
     };
     let result = if tracing {
         let mut trace = Trace::new(input.into());
@@ -82,10 +78,17 @@ fn eval_script_value(
     } else {
         mlpl_eval::eval_program_value(&stmts, env)
     };
-    match result {
-        Ok(v) => finish_script_value(v, svg_out),
-        Err(e) => report_script_err(input, &e),
-    }
+    result.map_or_else(
+        |e| report_script_err(input, &e),
+        |v| finish_script_value(v, svg_out),
+    )
+}
+
+/// Lex + parse the script source; a syntax error is reported and
+/// returned as the process exit code (mirrors the old inline arms).
+fn parse_script(input: &str) -> Result<Vec<mlpl_parser::Expr>, i32> {
+    let tokens = mlpl_parser::lex(input).map_err(|e| report_script_err(input, &e))?;
+    mlpl_parser::parse(&tokens).map_err(|e| report_script_err(input, &e))
 }
 
 fn finish_script_value(value: Value, svg_out: &mut SvgOut) -> i32 {

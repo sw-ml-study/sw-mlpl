@@ -5,10 +5,6 @@
 //! exposes this on the parsed `EvalResponse` so the REPL can
 //! print `viz: <url>` alongside the locally-cached `viz: <path>`.
 
-#[allow(dead_code)]
-#[path = "../src/connect.rs"]
-mod connect;
-
 use std::net::SocketAddr;
 
 use mlpl_serve::auth::AuthMode;
@@ -40,8 +36,15 @@ async fn connect_eval_surfaces_viz_url_for_svg() {
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
-        let resp = connect::eval_remote(&client, &base, &id, &token, "hist(iota(10), 5)").unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
+        let resp = mlpl_repl_connect::connect::eval_remote(
+            &client,
+            &base,
+            &id,
+            &token,
+            "hist(iota(10), 5)",
+        )
+        .unwrap();
         assert_eq!(resp.kind, "string");
         let url = resp
             .viz_url
@@ -63,8 +66,10 @@ async fn connect_eval_leaves_viz_url_none_for_non_svg() {
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
         let client = blocking_client();
-        let (id, token) = connect::create_session(&client, &base).unwrap();
-        let resp = connect::eval_remote(&client, &base, &id, &token, "iota(5) + 1").unwrap();
+        let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
+        let resp =
+            mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "iota(5) + 1")
+                .unwrap();
         assert!(
             resp.viz_url.is_none(),
             "viz_url should be None for non-SVG: {:?}",
