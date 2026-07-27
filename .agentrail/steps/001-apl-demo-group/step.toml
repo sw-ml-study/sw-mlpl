@@ -1,0 +1,8 @@
+number = 1
+slug = "apl-demo-group"
+status = "in-progress"
+description = "User direction before the splits: the APL2/general-programming demos get thei..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T11:52:07"
+commits = []

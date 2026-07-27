@@ -11,6 +11,31 @@ pub type DemoOption = (usize, &'static str, bool);
 /// Dropdown sections: `(section label, options)`.
 pub type DemoGroups = Vec<(&'static str, Vec<DemoOption>)>;
 
+/// Curated dropdown section order (user direction: logical, not
+/// alphabetical, at the GROUP level -- this is an ML-oriented
+/// language, so the ML learning path leads and the APL2/general-
+/// programming group follows; gated connect tiers close the list).
+/// Within each section, demo names still sort alphabetically.
+/// Unlisted future sections land between the known CPU groups and
+/// the connect tiers, alphabetically.
+const SECTION_ORDER: &[&str] = &[
+    "Basics",
+    "Training & Learning",
+    "Classical ML",
+    "Classification",
+    "Clustering",
+    "Dim Reduction",
+    "Vision",
+    "Attention",
+    "Sequence Models",
+    "Language Models",
+    "Generative Models",
+    "APL2 / General Programming",
+    "Client-server (connect)",
+    "MLX - Apple GPU (connect)",
+    "CUDA - Linux GPU (connect)",
+];
+
 /// Group demos for the dropdown by capability tier. `cpu`/live demos
 /// keep their authored category; connect-only demos get their own
 /// device-tier sections (MLX and CUDA deliberately separate).
@@ -38,7 +63,16 @@ pub fn grouped_demos(connected: bool, peer_devices: &[Device]) -> DemoGroups {
     for items in map.values_mut() {
         items.sort_by_key(|(_, name, _)| name.to_ascii_lowercase());
     }
-    map.into_iter().collect()
+    let mut groups: DemoGroups = map.into_iter().collect();
+    groups.sort_by_key(|(section, _)| {
+        // Unknown future sections slot just before the connect tiers.
+        let rank = SECTION_ORDER
+            .iter()
+            .position(|s| s == section)
+            .unwrap_or(SECTION_ORDER.len() - 3);
+        (rank, section.to_ascii_lowercase())
+    });
+    groups
 }
 
 /// Tooltip text for a DISABLED demo option, explaining how to enable it.
@@ -87,4 +121,14 @@ pub fn use_peer_devices() -> Vec<Device> {
         });
     }
     (*peer).clone()
+}
+
+/// "Connected" only counts when the server is actually reachable:
+/// an https demo page cannot reach an http connect server (mixed
+/// content), so gate those connect demos as disconnected rather
+/// than enabling a button that will only fail.
+#[must_use]
+pub fn reachable_connected() -> bool {
+    mlpl_web_eval::eval_url::is_connected()
+        && mlpl_web_eval::connect_guard::connect_blocked_reason().is_none()
 }

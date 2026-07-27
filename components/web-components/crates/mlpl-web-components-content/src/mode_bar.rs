@@ -61,27 +61,27 @@ fn render_demo_dropdown(
             target.set_value("");
         }
     });
-    // "Connected" only counts when the server is actually reachable: an
-    // https demo page cannot reach an http connect server (mixed content),
-    // so gate those connect demos as disconnected rather than enabling a
-    // button that will only fail.
-    let connected = mlpl_web_eval::eval_url::is_connected()
-        && mlpl_web_eval::connect_guard::connect_blocked_reason().is_none();
-    let groups = grouped_demos(connected, peer_devices);
+    let groups = grouped_demos(crate::demo_gating::reachable_connected(), peer_devices);
     html! {
         <select class="demo-select" onchange={on_change} aria-label="Load demo" data-tour-target="demo-select">
             <option value="" selected=true>{"Load Demo..."}</option>
-            { for groups.iter().map(|(cat, items)| html! {
-                <optgroup label={*cat} title={(*cat).to_string()}>
-                    { for items.iter().map(|(i, name, disabled)| {
-                        let hint = disabled.then(|| AttrValue::from(disabled_hint(cat)));
-                        html! {
-                            <option value={i.to_string()} disabled={*disabled} title={hint}>{ *name }</option>
-                        }
-                    }) }
-                </optgroup>
-            }) }
+            { for groups.iter().map(|(cat, items)| demo_optgroup(cat, items)) }
         </select>
+    }
+}
+
+/// One dropdown section: the category label plus its (possibly
+/// gated) demo options, alphabetical within the group.
+fn demo_optgroup(cat: &'static str, items: &[crate::demo_gating::DemoOption]) -> Html {
+    html! {
+        <optgroup label={cat} title={cat.to_string()}>
+            { for items.iter().map(|(i, name, disabled)| {
+                let hint = disabled.then(|| AttrValue::from(disabled_hint(cat)));
+                html! {
+                    <option value={i.to_string()} disabled={*disabled} title={hint}>{ *name }</option>
+                }
+            }) }
+        </optgroup>
     }
 }
 

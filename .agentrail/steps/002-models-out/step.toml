@@ -1,0 +1,8 @@
+number = 2
+slug = "models-out"
+status = "pending"
+description = "eval decomposition step 1 per docs/eval-decomposition-saga.md: extract the 19..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T11:52:07"
+commits = []

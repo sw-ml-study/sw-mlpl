@@ -1,0 +1,1 @@
+User directive: NO demo u: function may have zero comments. Every def u: across demos.toml gets at least a doc-string summary; complex functions additionally become multi-line with interior # comments (the Life rules, u:stamp, the tic-tac-toe minimax family). Add an enforcement test so a comment-less def u: can never land in a demo again.

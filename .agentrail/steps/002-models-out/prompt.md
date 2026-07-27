@@ -1,0 +1,1 @@
+eval decomposition step 1 per docs/eval-decomposition-saga.md: extract the 19 model_* modules to sibling crate mlpl-eval-models with facade re-exports preserving mlpl_eval::X and crate::X paths; scoped tests (eval --release + cli/serve/web dependents); ratchet: expect the 100-module FAIL to shrink but likely persist until later steps -- document counts honestly.

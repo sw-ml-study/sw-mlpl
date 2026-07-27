@@ -1,0 +1,6 @@
+name = "demo-comments-complete"
+status = "completed"
+current_step = 1
+created_at = "2026-07-27T11:32:50"
+plan_file = ".agentrail/plan.md"
+retroactive = false
