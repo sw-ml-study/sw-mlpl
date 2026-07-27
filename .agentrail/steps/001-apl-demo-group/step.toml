@@ -1,8 +1,9 @@
 number = 1
 slug = "apl-demo-group"
-status = "in-progress"
+status = "completed"
 description = "User direction before the splits: the APL2/general-programming demos get thei..."
 role = "production"
 context_files = []
 created_at = "2026-07-27T11:52:07"
-commits = []
+completed_at = "2026-07-27T12:13:43"
+commits = ["f46bf0fbe92918163080f0caf9a55893112137dd"]

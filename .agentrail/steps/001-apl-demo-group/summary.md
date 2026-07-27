@@ -1,0 +1,1 @@
+APL2 / General Programming demo group shipped: 7 language demos moved with not-ML intro prefixes; curated dropdown order (ML learning path first, APL2 group after, connect tiers last; alphabetical within groups) pinned by demo_order_tests. Pages rebuilt.
