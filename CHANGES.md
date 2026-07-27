@@ -12,8 +12,16 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-27
+
+- saga tech-debt-spike: complete (16 steps)
+- docs(spike): wrap-up -- final counts + mlpl-eval decomposition plan
+- step 015-web-eval-split: record completion
+- refactor(web-eval): split into core/trace/transport crate trio
+
 ## 2026-07-26
 
+- docs(changes): refresh CHANGES.md to HEAD
 - step 014-web-split: record completion
 - refactor(web): mlpl-web bin down to 7 modules -- FAIL retired
 - step 013-repl-split: record completion
