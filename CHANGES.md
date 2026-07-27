@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga eval-decomposition: step 002-devices-probe-retry complete
+- fix(web): retry the /v1/devices probe so GPU demos survive a server restart
+- docs(changes): refresh CHANGES.md to HEAD
 - step 001-apl-demo-group: record completion
 - feat(demos): APL2 / General Programming group + curated dropdown order
 - docs(changes): refresh CHANGES.md to HEAD
