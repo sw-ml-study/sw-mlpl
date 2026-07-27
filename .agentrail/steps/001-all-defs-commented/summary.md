@@ -1,0 +1,1 @@
+All ~30 demo u: definitions now carry at least a doc-string; complex ones (Life rules x3, u:stamp x2, u:ab, u:best_move, u:play_o, u:loglik) are multi-line with interior # comments so :list prints real commented listings. def_comments_gate enforces doc-string + parse on every def forever. Smokes + Life dynamics green; pages deployed.

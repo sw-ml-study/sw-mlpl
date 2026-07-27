@@ -1,8 +1,9 @@
 number = 1
 slug = "all-defs-commented"
-status = "in-progress"
+status = "completed"
 description = "Inventory every def u: in demos.toml; ensure a leading doc-string on all; con..."
 role = "production"
 context_files = []
 created_at = "2026-07-27T11:32:50"
-commits = []
+completed_at = "2026-07-27T11:42:58"
+commits = ["f314caf0e890f9520c57227bf59ea1c21ee42666"]
