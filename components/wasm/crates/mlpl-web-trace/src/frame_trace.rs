@@ -61,7 +61,7 @@ pub fn latest(gen_id: u32) -> Option<(String, usize, Vec<usize>, Vec<f64>)> {
 /// builtin via the SSE wire) into `gen_id`'s slot. Malformed
 /// payloads are dropped silently -- a bad frame must never kill
 /// the stream that carries the eval's real result.
-pub(crate) fn push_json(v: &serde_json::Value, gen_id: u32) {
+pub fn push_json(v: &serde_json::Value, gen_id: u32) {
     let (Some(name), Some(step), Some(shape), Some(values)) = (
         v.get("name").and_then(|x| x.as_str()),
         v.get("step").and_then(serde_json::Value::as_u64),

@@ -13,26 +13,8 @@ use serde_json::Value as Json;
 /// model `viz_node` (Sankey), so a server-evaluated result renders
 /// as a 3D sculpture. `program` supplies the label and the `name =`
 /// target. No-op for a bare string / `:ask` reply (no shape, no viz).
-pub(crate) fn emit_from_response(program: &str, body: &Json) {
-    let shape: Vec<usize> = body["shape"]
-        .as_array()
-        .map(|a| {
-            a.iter()
-                .filter_map(|v| v.as_u64().map(|n| n as usize))
-                .collect()
-        })
-        .unwrap_or_default();
-    let viz_node: Option<VizNode> = body
-        .get("viz_node")
-        .and_then(|v| serde_json::from_value(v.clone()).ok());
-    let values: Option<Vec<f64>> = body["values"]
-        .as_array()
-        .map(|a| a.iter().filter_map(Json::as_f64).collect());
-    let string_list: Option<Vec<String>> = body["string_list"].as_array().map(|a| {
-        a.iter()
-            .filter_map(|v| v.as_str().map(String::from))
-            .collect()
-    });
+pub fn emit_from_response(program: &str, body: &Json) {
+    let (shape, viz_node, values, string_list) = parse_viz_fields(body);
     // No-op only for a bare string / `:ask` reply -- nothing to render.
     // A SCALAR has an empty shape but carries `values` (server sends
     // shape=null, values=[x]); emit it so connect-mode scalars render
@@ -55,4 +37,34 @@ pub(crate) fn emit_from_response(program: &str, body: &Json) {
         label: program.to_string(),
         output: info,
     });
+}
+
+/// Pull the four optional viz fields out of an eval-response body.
+type VizFields = (
+    Vec<usize>,
+    Option<VizNode>,
+    Option<Vec<f64>>,
+    Option<Vec<String>>,
+);
+fn parse_viz_fields(body: &Json) -> VizFields {
+    let shape: Vec<usize> = body["shape"]
+        .as_array()
+        .map(|a| {
+            a.iter()
+                .filter_map(|v| v.as_u64().map(|n| n as usize))
+                .collect()
+        })
+        .unwrap_or_default();
+    let viz_node: Option<VizNode> = body
+        .get("viz_node")
+        .and_then(|v| serde_json::from_value(v.clone()).ok());
+    let values: Option<Vec<f64>> = body["values"]
+        .as_array()
+        .map(|a| a.iter().filter_map(Json::as_f64).collect());
+    let string_list: Option<Vec<String>> = body["string_list"].as_array().map(|a| {
+        a.iter()
+            .filter_map(|v| v.as_str().map(String::from))
+            .collect()
+    });
+    (shape, viz_node, values, string_list)
 }

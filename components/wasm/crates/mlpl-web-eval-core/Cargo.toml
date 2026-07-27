@@ -1,0 +1,26 @@
+[package]
+name = "mlpl-web-eval-core"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Spike step 015: the dependency-free floor of the web eval stack --
+# shared state types, the eval wire types (callbacks + stream
+# outcomes), connect-URL parsing, the connect guard, device gating,
+# and the loss_trace store. Everything here is either pure std or
+# thin wasm glue; both mlpl-web-trace and mlpl-web-eval sit on top.
+
+[lib]
+name = "mlpl_web_eval_core"
+path = "src/lib.rs"
+
+[dependencies]
+mlpl-monitor-types = { path = "../../../monitoring/crates/mlpl-monitor-types" }
+gloo = { version = "0.11", features = ["net", "timers", "futures"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+futures = "0.3"
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+js-sys = "0.3"
+web-sys = { version = "0.3", features = ["Document", "Element", "Window", "console"] }

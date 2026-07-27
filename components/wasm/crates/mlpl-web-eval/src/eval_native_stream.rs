@@ -9,7 +9,6 @@ use std::cell::RefCell;
 use crate::eval::{
     MetricCb, RemoteEvaluator, RemoteSession, StreamCb, StreamOutcome, resolve_viz_url,
 };
-use crate::eval_native::native_create_session;
 
 /// Saga 21.5 step 007: cheap-to-clone Send-able handle for
 /// firing a cancel POST from a different thread (native test).
@@ -106,7 +105,7 @@ fn native_eval_stream(
     mut on_metric: MetricCb,
 ) -> StreamOutcome {
     if state.borrow().is_none() {
-        match native_create_session(base_url) {
+        match crate::eval_wasm_helpers::native_create_session(base_url) {
             Ok(s) => *state.borrow_mut() = Some(s),
             Err(e) => return StreamOutcome::Error { message: e },
         }

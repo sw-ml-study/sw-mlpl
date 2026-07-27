@@ -21,7 +21,7 @@ use mlpl_monitor_types::Snapshot;
 use mlpl_monitor_types::spark::{metric_percents, sparkline};
 
 #[cfg(target_arch = "wasm32")]
-use crate::eval::ResultCb;
+use mlpl_web_eval_core::wire::ResultCb;
 
 const WINDOW: usize = 60;
 const KEEP: u32 = 6;
@@ -115,7 +115,7 @@ pub fn watch(base_url: String, samples: u32, on_result: ResultCb) {
     wasm_bindgen_futures::spawn_local(async move {
         let url = format!("{}/v1/stats", base_url.trim_end_matches('/'));
         for _ in 0..samples {
-            let got = crate::eval_wasm_helpers::with_deadline(1500, "stats", async {
+            let got = mlpl_web_eval_core::wire::with_deadline(1500, "stats", async {
                 let resp = gloo::net::http::Request::get(&url)
                     .send()
                     .await

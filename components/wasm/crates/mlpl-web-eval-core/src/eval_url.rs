@@ -80,3 +80,19 @@ fn url_decode(s: &str) -> String {
     }
     out
 }
+
+/// The pure mixed-content rule, testable without a browser: an https page
+/// cannot reach a plain-http, non-local connect server. `localhost` /
+/// `127.0.0.1` are exempt -- browsers treat them as potentially
+/// trustworthy. (URL-scheme logic, so it lives with the URL parsing;
+/// `connect_guard` wraps it with the browser lookup.)
+/// The pure mixed-content rule, testable without a browser: an https page
+/// cannot reach a plain-http, non-local connect server. `localhost` /
+/// `127.0.0.1` are exempt -- browsers treat them as potentially trustworthy.
+#[must_use]
+pub fn is_mixed_content_blocked(page_is_https: bool, connect_url: &str) -> bool {
+    let local = connect_url.contains("localhost")
+        || connect_url.contains("127.0.0.1")
+        || connect_url.contains("[::1]");
+    page_is_https && connect_url.starts_with("http://") && !local
+}

@@ -19,10 +19,7 @@
 mod eval;
 
 #[allow(dead_code)]
-#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_native.rs"]
-mod eval_native;
-#[allow(dead_code)]
-#[path = "../../../../wasm/crates/mlpl-web-eval/src/frame_trace.rs"]
+#[path = "../../../../wasm/crates/mlpl-web-trace/src/frame_trace.rs"]
 mod frame_trace;
 
 #[allow(dead_code)]
@@ -30,11 +27,16 @@ mod frame_trace;
 mod eval_sse;
 
 #[allow(dead_code)]
+#[allow(unused_imports)]
+#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_wasm_helpers.rs"]
+mod eval_wasm_helpers;
+
+#[allow(dead_code)]
 #[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_native_stream.rs"]
 mod eval_native_stream;
 
 #[allow(dead_code)]
-#[path = "../../../../wasm/crates/mlpl-web-eval/src/eval_url.rs"]
+#[path = "../../../../wasm/crates/mlpl-web-eval-core/src/eval_url.rs"]
 mod eval_url;
 
 use std::cell::RefCell;

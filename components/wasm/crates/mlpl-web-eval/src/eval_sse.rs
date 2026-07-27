@@ -95,30 +95,6 @@ impl SseFeed {
     }
 }
 
-impl StreamOutcome {
-    /// Collapse a terminal stream outcome into the REPL's
-    /// `(display, is_error)` convention (errors as `"error: ..."`
-    /// text), so streaming call sites plug into the same history
-    /// entries the non-streaming path produces.
-    #[must_use]
-    pub fn into_display(self) -> (String, bool) {
-        match self {
-            Self::Done { value, .. } => (value, false),
-            Self::Cancelled {
-                step,
-                partial_losses,
-            } => (
-                format!(
-                    "cancelled at step {step} ({} partial loss points kept)",
-                    partial_losses.len()
-                ),
-                false,
-            ),
-            Self::Error { message } => (format!("error: {message}"), true),
-        }
-    }
-}
-
 fn dispatch_sse_frame(
     event: Option<String>,
     data: Option<String>,

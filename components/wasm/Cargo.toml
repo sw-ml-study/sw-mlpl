@@ -1,5 +1,10 @@
 [workspace]
-members = ["crates/mlpl-wasm", "crates/mlpl-web-eval"]
+members = [
+    "crates/mlpl-wasm",
+    "crates/mlpl-web-eval",
+    "crates/mlpl-web-eval-core",
+    "crates/mlpl-web-trace",
+]
 resolver = "2"
 [workspace.package]
 edition = "2024"

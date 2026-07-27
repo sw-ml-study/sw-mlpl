@@ -90,6 +90,9 @@ wasm-bindgen-futures = "0.4"
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 
 [dev-dependencies]
+# The #[path] connect-test harnesses include mlpl-web-eval source
+# files whose imports now reach the split-out core crate directly.
+mlpl-web-eval-core = { path = "../../../wasm/crates/mlpl-web-eval-core" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-serve = { path = "../../../serve/crates/mlpl-serve" }

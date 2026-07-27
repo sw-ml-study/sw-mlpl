@@ -13,6 +13,8 @@ version.workspace = true
 
 [dependencies]
 mlpl-wasm = { path = "../mlpl-wasm" }
+mlpl-web-eval-core = { path = "../mlpl-web-eval-core" }
+mlpl-web-trace = { path = "../mlpl-web-trace" }
 # Phase 1c: emit a 3D sculpture from a connect-mode eval response
 # (shape/values now ride back from mlpl-serve). No cycle: viz3d does
 # not depend on this crate.

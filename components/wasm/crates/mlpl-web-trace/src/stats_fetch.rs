@@ -13,7 +13,7 @@ use std::cell::RefCell;
 use mlpl_monitor_types::Snapshot;
 use mlpl_monitor_types::render::snapshot_lines;
 
-use crate::eval::ResultCb;
+use mlpl_web_eval_core::wire::ResultCb;
 
 thread_local! {
     // Set by `:reset` (the prompt), consumed by the next submitted

@@ -8,6 +8,10 @@
 //! and explain the block -- rather than claim "Connected" and then fail
 //! every request with a cryptic "Failed to fetch".
 
+// Compat re-export: the pure rule moved to eval_url (URL-scheme
+// logic); callers keep using connect_guard::is_mixed_content_blocked.
+pub use crate::eval_url::is_mixed_content_blocked;
+
 /// Only the wasm `connect_blocked_reason` consumes this; native builds
 /// never reach it, so gate the const to avoid a dead-code warning there.
 #[cfg(target_arch = "wasm32")]
@@ -17,17 +21,6 @@ cross-origin server also needs CORS. To use connect mode, open the playground fr
 itself -- http://<host>:6464/sw-mlpl -- or, on the same machine, append \
 ?connect=http://127.0.0.1:6464.";
 
-/// The pure mixed-content rule, testable without a browser: an https page
-/// cannot reach a plain-http, non-local connect server. `localhost` /
-/// `127.0.0.1` are exempt -- browsers treat them as potentially trustworthy.
-#[must_use]
-pub fn is_mixed_content_blocked(page_is_https: bool, connect_url: &str) -> bool {
-    let local = connect_url.contains("localhost")
-        || connect_url.contains("127.0.0.1")
-        || connect_url.contains("[::1]");
-    page_is_https && connect_url.starts_with("http://") && !local
-}
-
 /// The user-facing reason connect mode is blocked from this page, or `None`
 /// when it should work (same-scheme page/server, or a localhost URL, or no
 /// `?connect=` at all).
@@ -36,7 +29,7 @@ pub fn is_mixed_content_blocked(page_is_https: bool, connect_url: &str) -> bool 
 pub fn connect_blocked_reason() -> Option<String> {
     let url = crate::eval_url::current_connect_url_from_window()?;
     let https = web_sys::window()?.location().protocol().ok().as_deref() == Some("https:");
-    is_mixed_content_blocked(https, &url).then(|| MIXED_CONTENT_MSG.to_string())
+    crate::eval_url::is_mixed_content_blocked(https, &url).then(|| MIXED_CONTENT_MSG.to_string())
 }
 
 /// Native builds have no browser and no connect URL, so nothing is blocked.

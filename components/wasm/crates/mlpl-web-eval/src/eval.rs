@@ -22,51 +22,10 @@ pub use crate::eval_url::current_connect_url_from_window;
 #[allow(unused_imports)]
 pub use crate::eval_url::parse_connect_url;
 
-/// Callback fired with the formatted result of one eval. Matches
-/// the existing `WasmSession::eval(&str) -> String` shape: errors
-/// arrive as `"error: <msg>"` strings, not as a separate Err
-/// variant, so call sites can keep their existing
-/// `result.starts_with("error:")` test for the red-text UI.
-pub type ResultCb = Box<dyn FnOnce(String) + 'static>;
-
-/// Saga 21.5 step 007: per-iteration metric frame surfaced by
-/// `RemoteEvaluator::eval_stream`. Mirrors the server-side
-/// `SseEvent::Metric` payload.
-#[derive(Debug, Clone)]
-pub struct RemoteMetric {
-    pub name: String,
-    pub step: usize,
-    pub value: f64,
-}
-
-/// Saga 21.5 step 007: terminal SSE frame. `Done` carries the
-/// final value + kind (matching the non-streaming `/eval`);
-/// `Cancelled` carries the step + partial loss curve from a
-/// `train { }` that observed a cancel; `Error` covers both
-/// HTTP-level failures (auth, lex/parse) and runtime
-/// `EvalError`s emitted as `event: error`.
-#[derive(Debug)]
-pub enum StreamOutcome {
-    Done {
-        value: String,
-        kind: String,
-    },
-    Cancelled {
-        step: usize,
-        partial_losses: Vec<f64>,
-    },
-    Error {
-        message: String,
-    },
-}
-
-/// Callback fired once per `event: metric` SSE frame during
-/// streaming eval.
-pub type MetricCb = Box<dyn FnMut(&RemoteMetric) + 'static>;
-
-/// Callback fired exactly once with the terminal outcome of a
-/// streaming eval.
-pub type StreamCb = Box<dyn FnOnce(StreamOutcome) + 'static>;
+// Wire types (callbacks, metric frames, stream outcomes) moved to
+// mlpl-web-eval-core (spike step 015); re-exported so crate::eval::X
+// and mlpl_web_eval::eval::X paths keep working.
+pub use mlpl_web_eval_core::wire::{MetricCb, RemoteMetric, ResultCb, StreamCb, StreamOutcome};
 
 /// One-line evaluator. The WASM impl runs in-process; the REST
 /// impl POSTs to a remote `mlpl-serve`. Both invoke `on_result`

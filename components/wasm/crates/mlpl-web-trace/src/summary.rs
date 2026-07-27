@@ -4,8 +4,6 @@
 //! `f64`s so the UI can show a one-line summary (shape + stats) with the
 //! raw values hidden inside a collapsible `<details>` element.
 
-use crate::summary_stats::{max, mean, median, min, std};
-
 const LINE_THRESHOLD: usize = 8;
 const CHAR_THRESHOLD: usize = 200;
 const MIN_NUMERIC_COUNT: usize = 4;
@@ -96,4 +94,34 @@ pub fn fmt_stat(x: f64) -> String {
     } else {
         format!("{x:.4}")
     }
+}
+
+// ---- basic stats (merged from summary_stats.rs, spike step 015) ----
+pub(crate) fn min(v: &[f64]) -> f64 {
+    v.iter().copied().fold(f64::INFINITY, f64::min)
+}
+
+pub(crate) fn max(v: &[f64]) -> f64 {
+    v.iter().copied().fold(f64::NEG_INFINITY, f64::max)
+}
+
+pub(crate) fn mean(v: &[f64]) -> f64 {
+    v.iter().sum::<f64>() / v.len() as f64
+}
+
+pub(crate) fn median(v: &[f64]) -> f64 {
+    let mut sorted: Vec<f64> = v.to_vec();
+    sorted.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
+    let n = sorted.len();
+    if n.is_multiple_of(2) {
+        (sorted[n / 2 - 1] + sorted[n / 2]) / 2.0
+    } else {
+        sorted[n / 2]
+    }
+}
+
+pub(crate) fn std(v: &[f64]) -> f64 {
+    let m = mean(v);
+    let var = v.iter().map(|x| (x - m).powi(2)).sum::<f64>() / v.len() as f64;
+    var.sqrt()
 }

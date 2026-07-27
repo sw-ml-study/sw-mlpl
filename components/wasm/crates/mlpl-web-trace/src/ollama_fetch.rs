@@ -8,7 +8,7 @@
 
 #![cfg(target_arch = "wasm32")]
 
-use crate::eval::ResultCb;
+use mlpl_web_eval_core::wire::ResultCb;
 
 thread_local! {
     // (host, model) from GET /v1/ollama/config, primed once on connect.
