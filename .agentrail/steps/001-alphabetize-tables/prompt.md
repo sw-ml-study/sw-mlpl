@@ -1,0 +1,1 @@
+Sort within groups at render time (format_builtins, mlpl_reference); script-sort lang-reference builtin table rows + Value Kinds rows + usage command-table rows alphabetically by first cell; correct the stale scatter() description in lang-reference; add the ordering-policy note to lang-reference; verify help_completeness + smokes; pages rebuild.

@@ -41,7 +41,8 @@ pub fn ask_program(question: &str, history: &[HistoryEntry]) -> String {
 fn mlpl_reference() -> String {
     let mut r = MLPL_SYNTAX.to_string();
     for (group, entries) in mlpl_eval_core::inspect_groups::BUILTIN_GROUPS {
-        let sigs: Vec<&str> = entries.iter().map(|&(_, sig, _)| sig).collect();
+        let mut sigs: Vec<&str> = entries.iter().map(|&(_, sig, _)| sig).collect();
+        sigs.sort_unstable();
         r.push_str(&format!(" [{group}] {}.", sigs.join(", ")));
     }
     r

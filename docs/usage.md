@@ -47,34 +47,34 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 
 | Command | Description |
 |---------|-------------|
-| `:help` | Show built-in function list and syntax summary |
-| `:help <topic>` | Focused help: vars, models, fns, builtins, describe |
-| `:clear` | Reset all variables, models, and session state |
-| `:vars` | List bound variables with shape and tag |
-| `:models` | List bound models with layer structure |
+| `:2d` | Close 3D visualization stage |
+| `:3d` | Open 3D visualization stage (also Ctrl+3) |
+| `:3d on` / `:3d off` | Explicit 3D on/off (case-insensitive) |
+| `:ask <prompt>` | Send the prompt to the connected Ollama model (connect mode) |
 | `:builtins` | List built-in functions by category |
+| `:clear` | Reset all variables, models, and session state |
+| `:connect list` / `:connect set <m>` | List / pick the server's Ollama model for `:ask` |
 | `:describe <name>` | Describe a variable, model, tokenizer, or built-in |
-| `:introspect` | Run all no-arg inspectors at once |
-| `:tags` | List every binding's ValueTag |
-| `:untag <name>` | Clear a binding's auto-attached tag |
-| `:wsid` | Workspace summary |
 | `:experiments` | List captured experiment runs |
 | `:fns` | List your `def u:` functions (APL's `)FNS`) |
+| `:help` | Show built-in function list and syntax summary |
+| `:help <topic>` | Focused help: vars, models, fns, builtins, describe |
+| `:introspect` | Run all no-arg inspectors at once |
 | `:list <u:name>` | Print a function back -- verbatim source, `#` comments included |
-| `:version` | sw-MLPL version + target arch |
-| `:status` / `:status watch` | Connected backend(s): devices, GPUs, live CPU/RAM/GPU/VRAM |
-| `:ask <prompt>` | Send the prompt to the connected Ollama model (connect mode) |
-| `:connect list` / `:connect set <m>` | List / pick the server's Ollama model for `:ask` |
+| `:models` | List bound models with layer structure |
 | `:reset` | Cancel ALL in-flight work on the connected backend (y/N prompt) |
-| `:upload <name>` | Open file picker; bind photo as a variable (web only) |
-| `:3d` | Open 3D visualization stage (also Ctrl+3) |
-| `:2d` | Close 3D visualization stage |
-| `:3d on` / `:3d off` | Explicit 3D on/off (case-insensitive) |
-| `:trace on` | Enable execution tracing |
-| `:trace off` | Disable execution tracing |
+| `:status` / `:status watch` | Connected backend(s): devices, GPUs, live CPU/RAM/GPU/VRAM |
+| `:tags` | List every binding's ValueTag |
 | `:trace` | Show summary of last trace |
 | `:trace json` | Print last trace as JSON |
 | `:trace json <file>` | Write trace JSON to a file |
+| `:trace off` | Disable execution tracing |
+| `:trace on` | Enable execution tracing |
+| `:untag <name>` | Clear a binding's auto-attached tag |
+| `:upload <name>` | Open file picker; bind photo as a variable (web only) |
+| `:vars` | List bound variables with shape and tag |
+| `:version` | sw-MLPL version + target arch |
+| `:wsid` | Workspace summary |
 | `exit` | Quit the REPL |
 
 In the web playground the same commands work in the REPL box, and

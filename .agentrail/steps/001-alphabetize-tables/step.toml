@@ -1,0 +1,8 @@
+number = 1
+slug = "alphabetize-tables"
+status = "in-progress"
+description = "Sort within groups at render time (format_builtins, mlpl_reference); script-s..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T11:21:40"
+commits = []

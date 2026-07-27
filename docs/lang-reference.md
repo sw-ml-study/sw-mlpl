@@ -99,14 +99,14 @@ Every value the evaluator produces is one of NINE kinds (the
 | Kind | Produced by | Notes |
 | --- | --- | --- |
 | `array` | literals, iota/fill/randn, all math | The workhorse: rank-N dense f64 tensor, optional axis labels. |
-| `string` | `"..."` literals, svg()/disp() and other renderers | Separate from arrays; `x = "hi"` binds a string. |
-| `string-list` | `["a", "b"]` (all-string literals), tokenizer vocab helpers | Sibling of array for text data. |
-| `record` | `{field: expr, ...}` literals | Named fields, `r.field` access; the canonical error-object payload. |
-| `result` | `ok(v)` / `err(e)`, to_number/to_int/env, list_get | The two-state sum consumed by is_ok/unwrap/unwrap_or/get_value/get_error/`?` (docs/error-handling.md). |
-| `model` | linear/chain/attention/... model DSL | Layer tree; renders as a Sankey diagram. |
-| `tokenizer` | train_bpe | Paired with apply_tokenizer/decode. |
 | `builtin-ref` | `:name` | The quoted-builtin value above. |
 | `device-tensor` | `device("mlx"/"cuda") { ... }` results held on-device | Fetched back on demand; keeps GPU residency explicit. |
+| `model` | linear/chain/attention/... model DSL | Layer tree; renders as a Sankey diagram. |
+| `record` | `{field: expr, ...}` literals | Named fields, `r.field` access; the canonical error-object payload. |
+| `result` | `ok(v)` / `err(e)`, to_number/to_int/env, list_get | The two-state sum consumed by is_ok/unwrap/unwrap_or/get_value/get_error/`?` (docs/error-handling.md). |
+| `string` | `"..."` literals, svg()/disp() and other renderers | Separate from arrays; `x = "hi"` binds a string. |
+| `string-list` | `["a", "b"]` (all-string literals), tokenizer vocab helpers | Sibling of array for text data. |
+| `tokenizer` | train_bpe | Paired with apply_tokenizer/decode. |
 
 ## Array Literals
 
@@ -311,34 +311,42 @@ y = 2                # newline separates
 
 Newlines and semicolons are both statement separators.
 
+## Table Ordering Policy
+
+Lookup tables and listings in this reference (and in `:builtins` /
+`:vars` / `:fns` output) sort ALPHABETICALLY within their group --
+groups exist only where they aid discovery. Time-ordered logs
+(`:experiments`, CHANGES) stay chronological; short narrative
+tables (e.g. the three name forms) keep their teaching order.
+
 ## Built-in Functions
 
 ### Array Operations
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) |
-| `iota(n)` | 1 | Alias for `range(n)` (APL heritage) |
-| `shape(a)` | 1 | Dimension vector of array |
-| `rank(a)` | 1 | Number of dimensions (scalar) |
+| `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
+| `cumprod(v)` | 1 | Cumulative product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). |
 | `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any flat array. Reports higher depths once nested arrays land. APL heritage. |
 | `disp(a)` | 1 | Returns an ASCII box diagram (a `Value::Str`) that makes the rank, shape, and depth of `a` visible: rank <= 2 as a framed grid, rank >= 3 as a labeled stack of leading-axis slices, plus a `rank R  shape [..]  depth D` footer. MLPL's answer to APL's `]display`. |
-| `size(a)` | 1 | Total element count (scalar): the product of the shape (numel). A scalar has size `1`; `size(reshape(iota(6), [2, 3]))` is `6`. |
-| `tally(a)` | 1 | Length of the leading axis (scalar): the number of major cells (APL's monadic tally, J's `#`). A scalar tallies to `1`; a rank >= 1 array tallies to `shape[0]`. Contrast with `size`, which counts every element. |
-| `reshape(a, dims)` | 2 | Reshape array to new dimensions |
-| `transpose(a)` | 1 | Reverse axis order |
-| `get_value(r)` | 1 | The Ok side of a Result as a 0-or-1 element vector: `[v]` when `r` is `Ok(v)` (scalar payloads until Stage 6 `enclose`), `[]` when Err. `tally` of it is `is_some`; APL2 zilde-Option flavor (see docs/error-handling.md). |
-| `get_error(r)` | 1 | The Err side of a Result as a 0-or-1 element vector: `[e]` when Err, `[]` when Ok. Complementary to `get_value` by construction. |
 | `emit_frame(name, step, x)` | 3 | Stream tensor `x` as a live frame through the connect-mode metric sink (the whole-tensor analog of `_metric` scalars); a no-op when not connected. Returns `x`. |
-| `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
+| `get_error(r)` | 1 | The Err side of a Result as a 0-or-1 element vector: `[e]` when Err, `[]` when Ok. Complementary to `get_value` by construction. |
+| `get_value(r)` | 1 | The Ok side of a Result as a 0-or-1 element vector: `[v]` when `r` is `Ok(v)` (scalar payloads until Stage 6 `enclose`), `[]` when Err. `tally` of it is `is_some`; APL2 zilde-Option flavor (see docs/error-handling.md). |
+| `iota(n)` | 1 | Alias for `range(n)` (APL heritage) |
+| `linspace(start, stop, n)` | 3 | `n` evenly-spaced values from `start` to `stop` inclusive, as a rank-1 vector. |
+| `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) |
+| `rank(a)` | 1 | Number of dimensions (scalar) |
 | `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |
 | `reduce(:op, a, axis)` | 3 | Same, restricted to a single axis. |
 | `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |
 | `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
-| `cumprod(v)` | 1 | Cumulative product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). |
-| `linspace(start, stop, n)` | 3 | `n` evenly-spaced values from `start` to `stop` inclusive, as a rank-1 vector. |
-| `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
-| `scatter(buffer, indices, values)` | 3 | Accumulate `values` into `buffer` at positions given by `indices`. Returns a new buffer; the input is not mutated. Used inside `repeat N { ... }` loops to track per-index scores without explicit indexing. |
+| `reshape(a, dims)` | 2 | Reshape array to new dimensions |
+| `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
+| `scatter(buffer, index, value)` | 3 | A copy of rank-1 `buffer` with the single entry at `index` replaced by `value` (the input is not mutated). The bulk form is a `u:stamp`-style loop (see the Life demos); an accumulating multi-index scatter is future work. |
+| `shape(a)` | 1 | Dimension vector of array |
+| `size(a)` | 1 | Total element count (scalar): the product of the shape (numel). A scalar has size `1`; `size(reshape(iota(6), [2, 3]))` is `6`. |
+| `tally(a)` | 1 | Length of the leading axis (scalar): the number of major cells (APL's monadic tally, J's `#`). A scalar tallies to `1`; a rank >= 1 array tallies to `shape[0]`. Contrast with `size`, which counts every element. |
+| `transpose(a)` | 1 | Reverse axis order |
 
 #### Tensor terminology bridge
 
@@ -349,12 +357,12 @@ below).
 
 | MLPL builtin | Tensor concept | NumPy | PyTorch | Note |
 |--------------|----------------|-------|---------|------|
+| `depth(a)` | nesting level | -- | -- | TRAP: not the same as rank. A rank-5 *dense* tensor still has depth 1; depth only exceeds 1 for ragged / nested arrays (cf. `RaggedTensor`, `NestedTensor`), which arrive in a later stage. |
+| `disp(a)` | structural pretty-print | `repr(a)` | `print(a)` | APL's `]display`. Note MATLAB's `disp` just prints values; MLPL's draws a box diagram framing rank / shape / depth. |
 | `rank(a)` | number of axes | `.ndim` | `.dim()` | Not linear-algebra rank (column-span dimension) or LoRA rank (adapter inner dim). |
 | `shape(a)` | shape / dims | `.shape` | `.shape` | Clean match everywhere. |
 | `size(a)` | element count (numel) | `.size` | `.numel()` | TRAP: PyTorch `.size()` and MATLAB `size()` return the *shape*, not the count. MLPL follows NumPy / TensorFlow: `size` is numel. |
 | `tally(a)` | leading-axis length | `len(a)` | `.size(0)` | The count of major cells: usually the batch size `N`, sequence length, or row count. |
-| `depth(a)` | nesting level | -- | -- | TRAP: not the same as rank. A rank-5 *dense* tensor still has depth 1; depth only exceeds 1 for ragged / nested arrays (cf. `RaggedTensor`, `NestedTensor`), which arrive in a later stage. |
-| `disp(a)` | structural pretty-print | `repr(a)` | `print(a)` | APL's `]display`. Note MATLAB's `disp` just prints values; MLPL's draws a box diagram framing rank / shape / depth. |
 
 Rules of thumb: `rank` counts axes, `shape` sizes them, `size` counts
 every element, `tally` counts rows (the leading axis), and `depth`
@@ -371,20 +379,20 @@ counts levels of nesting (not axes).
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `pi()` | 0 | The constant 3.14159265358979... |
+| `abs(a)` | 1 | Element-wise absolute value |
+| `ceil(a)` | 1 | Element-wise ceiling (round toward positive infinity) |
+| `cos(a)` | 1 | Element-wise cosine (radians) |
 | `e()` | 0 | The constant 2.71828182845904... |
 | `exp(a)` | 1 | Element-wise e^x |
-| `log(a)` | 1 | Element-wise natural logarithm |
-| `sqrt(a)` | 1 | Element-wise square root |
-| `relu(a)` | 1 | Element-wise max(0, a). Standalone version of the model-DSL relu_layer(). |
-| `abs(a)` | 1 | Element-wise absolute value |
-| `sin(a)` | 1 | Element-wise sine (radians) |
-| `cos(a)` | 1 | Element-wise cosine (radians) |
 | `floor(a)` | 1 | Element-wise floor (round toward negative infinity) |
-| `ceil(a)` | 1 | Element-wise ceiling (round toward positive infinity) |
-| `round(a)` | 1 | Element-wise round to nearest integer |
-| `pow(a, b)` | 2 | Element-wise a^b |
+| `log(a)` | 1 | Element-wise natural logarithm |
 | `mod(a, b)` | 2 | Element-wise remainder (a % b). Broadcasts like other binary ops. |
+| `pi()` | 0 | The constant 3.14159265358979... |
+| `pow(a, b)` | 2 | Element-wise a^b |
+| `relu(a)` | 1 | Element-wise max(0, a). Standalone version of the model-DSL relu_layer(). |
+| `round(a)` | 1 | Element-wise round to nearest integer |
+| `sin(a)` | 1 | Element-wise sine (radians) |
+| `sqrt(a)` | 1 | Element-wise square root |
 
 ### ML Activations
 
@@ -397,42 +405,42 @@ counts levels of nesting (not axes).
 
 | Function | Args | Description |
 |----------|------|-------------|
+| `eq(a, b)` | 2 | Element-wise equality (returns 0 or 1) |
 | `gt(a, b)` | 2 | Element-wise greater-than (returns 0 or 1) |
 | `lt(a, b)` | 2 | Element-wise less-than (returns 0 or 1) |
-| `eq(a, b)` | 2 | Element-wise equality (returns 0 or 1) |
 | `mean(a)` | 1 | Arithmetic mean of all elements |
 
 ### Array Constructors
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `zeros(shape)` | 1 | Array of zeros with given shape |
-| `ones(shape)` | 1 | Array of ones with given shape |
-| `fill(shape, v)` | 2 | Array filled with value v |
-| `grid(bounds, n)` | 2 | n*n by 2 matrix of (x, y) points over [xmin,xmax] x [ymin,ymax]; bounds is [xmin, xmax, ymin, ymax] |
-| `random(seed, shape)` | 2 | Seeded uniform [0, 1) array with the given shape. `seed` is a scalar integer; `shape` is a vector of dimensions. Deterministic for a given seed. |
-| `randn(seed, shape)` | 2 | Seeded standard-normal array (mean 0, variance 1), same shape semantics as `random`. Implemented via Box-Muller on the same xorshift64 stream. |
 | `argmax(a)` | 1 | Scalar index of the maximum element over all elements of `a` (flat). |
 | `argmax(a, axis)` | 2 | Index (as f64) of the max along `axis`; output rank is one less than input. Ties go to the first occurrence. |
 | `blobs(seed, n_per_class, centers)` | 3 | Seeded 2D gaussian-blob dataset. `centers` is a Kx2 matrix (or length-2K vector) of cluster centers; returns an Nx3 matrix where each row is `[x, y, label]`, with `N = K * n_per_class` and noise sigma 0.15. |
-| `softmax(a, axis)` | 2 | Softmax along `axis`, stabilized by subtracting the per-group max before exponentiation. |
-| `one_hot(labels, k)` | 2 | Convert a length-N label vector to an `NxK` one-hot matrix. |
-| `cross_entropy(logits, targets)` | 2 | Scalar mean negative log-likelihood. `logits` is `[N, V]` or `[B, T, V]`; `targets` is `[N]` or `[B, T]` integer-valued. Fused, numerically-stable log-softmax + NLL; fully differentiable wrt `logits` via `grad(...)`. |
-| `perplexity(logits, targets)` | 2 | Convenience: `exp(cross_entropy(logits, targets))`. The canonical language-model evaluation metric (lower is better). Same arg shapes as `cross_entropy`. Forward-only -- use `cross_entropy` directly inside `grad(...)`. |
-| `sample(logits, temperature, seed)` | 3 | Categorical sample from a 1-D `[V]` logit vector. Returns a scalar integer token id. `temperature == 0.0` collapses to `argmax(logits)`; otherwise draws from `softmax(logits / temperature)` via inverse-CDF on a single seeded uniform. Same `(logits, temperature, seed)` always yields the same id. |
-| `top_k(logits, k)` | 2 | Return a `[V]` logit vector with all but the top-`k` entries replaced by `-inf`. Pure (no randomness). Compose with `sample` for top-k sampling: `sample(top_k(logits, k), temperature, seed)`. |
-| `moons(seed, n_per_class, noise)` | 3 | Seeded two-moons dataset; returns an `Nx3` matrix of `[x, y, label]` for `N = 2 * n_per_class`. |
 | `circles(seed, n_per_class, noise)` | 3 | Seeded two-concentric-circles dataset, same `Nx3` layout as `moons`. |
+| `cross_entropy(logits, targets)` | 2 | Scalar mean negative log-likelihood. `logits` is `[N, V]` or `[B, T, V]`; `targets` is `[N]` or `[B, T]` integer-valued. Fused, numerically-stable log-softmax + NLL; fully differentiable wrt `logits` via `grad(...)`. |
+| `fill(shape, v)` | 2 | Array filled with value v |
+| `grid(bounds, n)` | 2 | n*n by 2 matrix of (x, y) points over [xmin,xmax] x [ymin,ymax]; bounds is [xmin, xmax, ymin, ymax] |
+| `moons(seed, n_per_class, noise)` | 3 | Seeded two-moons dataset; returns an `Nx3` matrix of `[x, y, label]` for `N = 2 * n_per_class`. |
+| `one_hot(labels, k)` | 2 | Convert a length-N label vector to an `NxK` one-hot matrix. |
+| `ones(shape)` | 1 | Array of ones with given shape |
+| `perplexity(logits, targets)` | 2 | Convenience: `exp(cross_entropy(logits, targets))`. The canonical language-model evaluation metric (lower is better). Same arg shapes as `cross_entropy`. Forward-only -- use `cross_entropy` directly inside `grad(...)`. |
+| `randn(seed, shape)` | 2 | Seeded standard-normal array (mean 0, variance 1), same shape semantics as `random`. Implemented via Box-Muller on the same xorshift64 stream. |
+| `random(seed, shape)` | 2 | Seeded uniform [0, 1) array with the given shape. `seed` is a scalar integer; `shape` is a vector of dimensions. Deterministic for a given seed. |
+| `sample(logits, temperature, seed)` | 3 | Categorical sample from a 1-D `[V]` logit vector. Returns a scalar integer token id. `temperature == 0.0` collapses to `argmax(logits)`; otherwise draws from `softmax(logits / temperature)` via inverse-CDF on a single seeded uniform. Same `(logits, temperature, seed)` always yields the same id. |
+| `softmax(a, axis)` | 2 | Softmax along `axis`, stabilized by subtracting the per-group max before exponentiation. |
+| `top_k(logits, k)` | 2 | Return a `[V]` logit vector with all but the top-`k` entries replaced by `-inf`. Pure (no randomness). Compose with `sample` for top-k sampling: `sample(top_k(logits, k), temperature, seed)`. |
+| `zeros(shape)` | 1 | Array of zeros with given shape |
 
 ### Labeled Axes
 
 | Function | Args | Description |
 |----------|------|-------------|
 | `label(x, names)` | 2 | Attach axis labels to an array. `names` is a rank-1 string array; length must equal the rank of `x`. Use `""` for "no label" on a single axis. |
-| `relabel(x, names)` | 2 | Like `label`, but explicitly overrides any existing labels on `x`. |
-| `reshape_labeled(x, dims, names)` | 3 | Combine `reshape` and `label` in one call. New axes get the given names; plain `reshape` clears labels. |
 | `labels(x)` | 1 | Return the axis labels of `x` as a comma-joined string ("" for unlabeled axes). |
 | `map(x, "fn")` | 2 | Apply a math built-in (by string name, e.g. `"sigmoid"`, `"exp"`) element-wise while preserving labels. |
+| `relabel(x, names)` | 2 | Like `label`, but explicitly overrides any existing labels on `x`. |
+| `reshape_labeled(x, dims, names)` | 3 | Combine `reshape` and `label` in one call. New axes get the given names; plain `reshape` clears labels. |
 
 Annotation syntax on assignment attaches labels in one step:
 
@@ -458,10 +466,10 @@ renders both labeled shapes side by side.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `momentum_sgd(loss, params, lr, beta)` | 4 | One in-place momentum-SGD step on `params`. `params` is a single param name, a `[p1, p2, ...]` list, or a model identifier (walked via `params(model)`). Per-parameter state is maintained on the environment so the next call continues the trajectory. |
 | `adam(loss, params, lr, b1, b2, eps)` | 6 | One Adam step on `params`. Same `params` shape as `momentum_sgd`; per-parameter `m`/`v` state is maintained across calls. |
 | `cosine_schedule(step, total, lr_min, lr_max)` | 4 | Cosine annealing from `lr_max` at `step=0` to `lr_min` at `step=total`. Pure scalar helper usable inside `adam(..., cosine_schedule(step, 100, 1e-4, 1e-2), ...)`. |
 | `linear_warmup(step, warmup, lr)` | 3 | Ramp from 0 to `lr` over the first `warmup` steps and return `lr` after. |
+| `momentum_sgd(loss, params, lr, beta)` | 4 | One in-place momentum-SGD step on `params`. `params` is a single param name, a `[p1, p2, ...]` list, or a model identifier (walked via `params(model)`). Per-parameter state is maintained on the environment so the next call continues the trajectory. |
 | `params(model)` | 1 | Return the flat list of parameter names owned by a model; used internally by the optimizers when given a model identifier. |
 
 ### Model DSL
@@ -473,28 +481,28 @@ initialized at construction). Apply a model to an array with
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `linear(in, out, seed)` | 3 | Seeded `W : [in, out]` + `b : [out]`, `apply(m, X)` computes `X W + b`. |
-| `tanh_layer()` | 0 | Parameter-free `tanh_fn`. |
-| `relu_layer()` | 0 | Parameter-free `relu` activation (zeros negatives). |
-| `softmax_layer()` | 0 | Parameter-free `softmax(x, last_axis)`. |
-| `rms_norm(dim)` | 1 | Per-row RMS normalization: `y[i] = x[i] / sqrt(mean(x[i]^2) + 1e-8)`. |
-| `chain(a, b, ...)` | Nx | Sequential composition: `apply(chain(a, b, c), X) = apply(c, apply(b, apply(a, X)))`. |
-| `residual(block)` | 1 | Skip connection: `apply(residual(b), X) = apply(b, X) + X`. The inner block must preserve input shape. |
+| `apply(model, X)` | 2 | Forward pass. For `embed`, `X` is integer tokens; for everything else it is an `[..., d_in]` float array. Fully differentiable through the tape. |
 | `attention(d_model, heads, seed)` | 3 | Multi-head self-attention. Input `[T, d_model]` (or `[B, T, d_model]`), output same shape. Tape-lowered for `heads=1`, forward-only for `heads>1`. |
 | `causal_attention(d_model, heads, seed)` | 3 | Same as `attention` but applies a lower-triangular mask (upper-triangle scores become `-1e9` before softmax) so position `t` cannot attend to `t+k` for `k > 0`. Tape-lowered for `heads=1`. |
+| `chain(a, b, ...)` | Nx | Sequential composition: `apply(chain(a, b, c), X) = apply(c, apply(b, apply(a, X)))`. |
 | `embed(vocab_size, d_model, seed)` | 3 | Learned `[vocab, d_model]` lookup table. `apply(embed, tokens)` where `tokens` is a rank-1 `[T]` (or rank-2 `[B, T]`) integer array returns `[T, d_model]` (or `[B, T, d_model]`). Gradients accumulate on the embedding rows touched by `tokens`. |
-| `sinusoidal_encoding(seq_len, d_model)` | 2 | Deterministic `[time=seq_len, dim=d_model]` sinusoidal positional table. No parameters. Additive pattern: `apply(embed, toks) + sinusoidal_encoding(T, d)`. |
-| `apply(model, X)` | 2 | Forward pass. For `embed`, `X` is integer tokens; for everything else it is an `[..., d_in]` float array. Fully differentiable through the tape. |
+| `linear(in, out, seed)` | 3 | Seeded `W : [in, out]` + `b : [out]`, `apply(m, X)` computes `X W + b`. |
 | `predict_batch(model, X)` | 2 | Saga 29 step 011: forward pass + `argmax` over the trailing axis. Returns integer class indices. Not differentiable -- use `apply(model, X)` inside `grad()` or `adam()` instead. Convenient for evaluation: `preds = predict_batch(mdl, X); accuracy = reduce_add(eq(preds, Y)) / N`. |
+| `relu_layer()` | 0 | Parameter-free `relu` activation (zeros negatives). |
+| `residual(block)` | 1 | Skip connection: `apply(residual(b), X) = apply(b, X) + X`. The inner block must preserve input shape. |
+| `rms_norm(dim)` | 1 | Per-row RMS normalization: `y[i] = x[i] / sqrt(mean(x[i]^2) + 1e-8)`. |
+| `sinusoidal_encoding(seq_len, d_model)` | 2 | Deterministic `[time=seq_len, dim=d_model]` sinusoidal positional table. No parameters. Additive pattern: `apply(embed, toks) + sinusoidal_encoding(T, d)`. |
+| `softmax_layer()` | 0 | Parameter-free `softmax(x, last_axis)`. |
+| `tanh_layer()` | 0 | Parameter-free `tanh_fn`. |
 
 ### CNN + RNN builtins
 
 | Function | Args | Description |
 |----------|------|-------------|
 | `conv2d(input, filters, stride, padding)` | 4 | 2D convolution. `input`: `[B,C_in,H,W]`, `filters`: `[C_out,C_in,kH,kW]`. `stride` and `padding` are scalars. Returns `[B,C_out,H_out,W_out]`. |
+| `lstm_cell(input, hidden, cell, W, bias)` | 5 | One LSTM step. `W`: `[4*hd, id+hd]`, `bias`: `[4*hd, 1]`. Returns `[2*hd, 1]` = concat(new_hidden, new_cell). Split with `reshape` + `take`. |
 | `pool2d(input, size, mode)` | 3 | 2D pooling. `mode=1` max pooling, `mode=0` average pooling. `size` is the square pool window side. |
 | `rnn_cell(input, hidden, W_ih, W_hh, bias)` | 5 | One Elman RNN step: `tanh(W_ih @ input + W_hh @ hidden + bias)`. Returns updated hidden state. |
-| `lstm_cell(input, hidden, cell, W, bias)` | 5 | One LSTM step. `W`: `[4*hd, id+hd]`, `bias`: `[4*hd, 1]`. Returns `[2*hd, 1]` = concat(new_hidden, new_cell). Split with `reshape` + `take`. |
 
 ### Result type (Saga 29 step 012)
 
@@ -505,12 +513,12 @@ for error messages). Display is `Ok(<inner>)` or `Err(<inner>)`.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `ok(v)` | 1 | Wrap any value as `Ok(v)`. |
 | `err(v)` | 1 | Wrap any value as `Err(v)`. Typically `err("message string")`. |
-| `is_ok(r)` | 1 | Return scalar `1.0` if `r` is `Ok(_)`, else `0.0`. Raises `NotAResult` on a non-Result first argument. |
-| `is_err(r)` | 1 | Inverse of `is_ok`. |
-| `unwrap(r)` | 1 | Return the payload if `Ok(_)`. Raises `EvalError::UnwrapOnErr { message }` carrying the payload's display form if `Err(_)`. |
 | `err_message(r)` | 1 | Return the payload if `Err(_)`. Raises `Unsupported` on `Ok(_)` (no message to return). |
+| `is_err(r)` | 1 | Inverse of `is_ok`. |
+| `is_ok(r)` | 1 | Return scalar `1.0` if `r` is `Ok(_)`, else `0.0`. Raises `NotAResult` on a non-Result first argument. |
+| `ok(v)` | 1 | Wrap any value as `Ok(v)`. |
+| `unwrap(r)` | 1 | Return the payload if `Ok(_)`. Raises `EvalError::UnwrapOnErr { message }` carrying the payload's display form if `Err(_)`. |
 | `unwrap_or(r, default)` | 2 | Return the payload if `Ok(_)`; otherwise evaluate `default` and return that. |
 
 First in-tree consumer: the `:upload x` web-REPL command (Saga
@@ -533,11 +541,11 @@ the trained Pets demos.
 
 | Function | Args | Description |
 |----------|------|-------------|
+| `batch(x, size)` | 2 | Return a rank-(r+1) array of contiguous row batches; the last batch is zero-padded if `n_rows` is not divisible by `size`. |
+| `batch_mask(x, size)` | 2 | Return the 0/1 mask matching `batch(x, size)` (1 for real rows, 0 for padded). |
 | `load(path)` | 1 | Terminal REPL only (`--data-dir <path>` required). `"foo.csv"` returns a labeled `DenseArray` of the CSV's numeric columns; `"foo.txt"` (or any non-CSV extension) returns a whole-file `Value::Str`. Absolute and traversing paths are rejected. |
 | `load_preloaded(name)` | 1 | Returns a compiled-in corpus as a `Value::Str`. Current registry: `"tiny_corpus"` (short pangram-style text) and `"tiny_shakespeare_snippet"` (~KB of Shakespeare). Works in both REPLs. |
 | `shuffle(x, seed)` | 2 | Fisher-Yates row permutation on a rank>=1 array. Labels preserved. Deterministic for a given seed. |
-| `batch(x, size)` | 2 | Return a rank-(r+1) array of contiguous row batches; the last batch is zero-padded if `n_rows` is not divisible by `size`. |
-| `batch_mask(x, size)` | 2 | Return the 0/1 mask matching `batch(x, size)` (1 for real rows, 0 for padded). |
 | `split(x, train_frac, seed)` | 3 | Return the first `round(train_frac * n_rows)` rows after a deterministic shuffle. |
 | `val_split(x, train_frac, seed)` | 3 | Companion to `split`; returns the complementary rows with the same seed. |
 
@@ -545,39 +553,39 @@ the trained Pets demos.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `tokenize_bytes(s)` | 1 | Return a rank-1 array of byte indices (0-255) for the UTF-8 encoding of `s`. Pure, deterministic, no training. |
-| `decode_bytes(tokens)` | 1 | Inverse of `tokenize_bytes`; returns a `Value::Str`. |
-| `train_bpe(corpus, vocab_size, seed)` | 3 | Train a byte-level BPE tokenizer on a `Value::Str` (or already-byte-tokenized rank-1 array). Returns a `Value::Tokenizer`. Deterministic tie-breaking: on ties in merge count, the lexicographically smallest byte pair wins. |
 | `apply_tokenizer(tok, text)` | 2 | Encode `text` (a `Value::Str`) through a trained tokenizer; returns a rank-1 integer array. |
 | `decode(tok, tokens)` | 2 | Inverse of `apply_tokenizer`. For every byte string `s`, `decode(tok, apply_tokenizer(tok, s)) == s`. |
+| `decode_bytes(tokens)` | 1 | Inverse of `tokenize_bytes`; returns a `Value::Str`. |
+| `tokenize_bytes(s)` | 1 | Return a rank-1 array of byte indices (0-255) for the UTF-8 encoding of `s`. Pure, deterministic, no training. |
+| `train_bpe(corpus, vocab_size, seed)` | 3 | Train a byte-level BPE tokenizer on a `Value::Str` (or already-byte-tokenized rank-1 array). Returns a `Value::Tokenizer`. Deterministic tie-breaking: on ties in merge count, the lexicographically smallest byte pair wins. |
 
 ### Language Model Helpers
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `shift_pairs_x(ids, block_size)` | 2 | Build next-token-prediction input windows from a 1-D token array. Returns an `[N, block_size]` integer matrix where each row is a contiguous window of `ids`. |
-| `shift_pairs_y(ids, block_size)` | 2 | Matching target windows for `shift_pairs_x`: each row is the input window shifted right by one position. |
-| `last_row(M)` | 1 | Return the last row of a rank-2 matrix as a rank-1 vector. Used in generation loops to extract the final position's logits from an `[T, V]` model output. |
+| `attention_weights(model, X)` | 2 | Read-only forward pass that walks `model` to its first `attention` / `causal_attention` layer, transforms `X` through any preceding layers in the outer chain, and returns the softmax attention weight matrix (`[T, T]` single-head or `[heads, T, T]` multi-head). Renders well as a heatmap. |
 | `concat(a, b)` | 2 | Concatenate two rank-0 or rank-1 arrays into a 1-D vector. Used in generation loops to append a sampled token id to the growing sequence. |
 | `concat(a, b, axis)` | 3 | Axis-aware concat for any rank. Both inputs must agree on every dim except `axis` (sizes add); the forward accepts any `axis` in `[0, rank)`. Differentiable on the tape; the backward splits the upstream gradient at the seam (saga 30 steps 001-002 lifted the original `{0, 1}` restriction on both the forward and the autograd backward). |
+| `last_row(M)` | 1 | Return the last row of a rank-2 matrix as a rank-1 vector. Used in generation loops to extract the final position's logits from an `[T, V]` model output. |
 | `patchify(x, P)` | 2 | Saga 29 step 005: ViT patch embedding rearrangement. Takes a `[B, C, H, W]` image batch and a square patch size `P` that divides both `H` and `W`. Returns `[B, N, P*P*C]` where `N = (H/P)*(W/P)` and each row of the trailing axis is one patch flattened in channel-outer order. Differentiable on the tape. |
+| `shift_pairs_x(ids, block_size)` | 2 | Build next-token-prediction input windows from a 1-D token array. Returns an `[N, block_size]` integer matrix where each row is a contiguous window of `ids`. |
+| `shift_pairs_y(ids, block_size)` | 2 | Matching target windows for `shift_pairs_x`: each row is the input window shifted right by one position. |
 | `take(x, axis, idx)` | 3 | Saga 29 step 007: drop one axis at a single integer index. Result has rank `rank(x) - 1`. Per-axis labels propagate (the dropped axis's label is removed). Differentiable on the tape: backward scatters the upstream gradient into a zero-filled array of the parent's shape at `axis = idx`. Multi-index gather and slice ranges are followups. |
-| `attention_weights(model, X)` | 2 | Read-only forward pass that walks `model` to its first `attention` / `causal_attention` layer, transforms `X` through any preceding layers in the outer chain, and returns the softmax attention weight matrix (`[T, T]` single-head or `[heads, T, T]` multi-head). Renders well as a heatmap. |
 
 ### Embeddings and Manifold
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `pairwise_sqdist(X)` | 1 | Return the `[N, N]` squared Euclidean distance matrix for an `[N, D]` input. Symmetric, zero diagonal. |
 | `knn(X, k)` | 2 | Return an `[N, k]` integer matrix of the `k` nearest non-self neighbors per row of `X`, sorted by ascending distance. Ties broken by lower original index. |
 | `knn_graph(X, k)` | 2 | Return an `[N*k, 3]` edge list of the `k` nearest non-self neighbors per row of `X`. Each row is `(i, j, dist)` where `dist` is the Euclidean distance (not squared) from sample `i` to its `p`-th nearest neighbor. The explicit `i` column + distance makes this the input layer for UMAP and other graph-based dim-reduction methods. |
+| `mds(X, k, iters, seed)` | 4 | Multidimensional Scaling: project `[N, D]` to `[N, k]` by minimizing the stress `sum_{i<j} (||Y_i - Y_j|| - d_ij)^2` between low-D coordinates `Y` and the input pairwise Euclidean distances `d_ij`. SGD with linear LR decay; deterministic given `seed`. Use when you want a projection that preserves PAIRWISE DISTANCES rather than variance directions (PCA) or local neighborhoods (t-SNE / UMAP). |
+| `pairwise_sqdist(X)` | 1 | Return the `[N, N]` squared Euclidean distance matrix for an `[N, D]` input. Symmetric, zero diagonal. |
 | `pca(X, k)` | 2 | Top-`k` principal-component projection of an `[N, D]` matrix via power iteration with deflation. Returns the centered, projected data `[N, k]` (not the components themselves). |
 | `pca_components(X, k)` | 2 | Top-`k` principal-component LOADINGS of an `[N, D]` matrix. Returns `[k, D]` -- row `i` is the i-th principal-component direction in original feature space. Pairs with `svg(_, "critical_dimensions", names)` for per-feature importance heatmaps. |
 | `pca_variance_explained(X, k)` | 2 | Returns a `[k]` vector of variance-explained ratios `lambda_i / trace(Cov)`. Sums to 1.0 when `k == D`. Useful as a legend on the loadings heatmap or as a stopping criterion for picking `k`. |
+| `random_projection(X, k, seed)` | 3 | Johnson-Lindenstrauss random projection: multiply `[N, D]` by a seeded Gaussian random matrix `R [D, k]` scaled by `1/sqrt(k)`, giving `[N, k]`. For modest `k = O(log N / eps^2)` the JL lemma guarantees all pairwise distances are preserved within a `1 +- eps` factor. Useful as a sanity baseline against PCA / t-SNE / UMAP -- if a learned method does not beat random projection, the learned features are not adding value. |
 | `tsne(X, perplexity, iters, seed)` | 4 | t-SNE 2D embedding of an `[N, D]` matrix. Returns `[N, 2]`. Deterministic for a given seed. Output has rotation / reflection ambiguity; cluster shape is what is meaningful, not absolute coordinates. |
 | `umap(X, n_neighbors, min_dist, iters, seed)` | 5 | UMAP 2D embedding of an `[N, D]` matrix. Returns `[N, 2]`. Builds a k-NN graph (k = `n_neighbors`), computes the fuzzy simplicial set (per-row sigma calibration + symmetric fuzzy union), then optimizes the layout via SGD on a cross-entropy + repulsion objective with negative sampling. `min_dist` is a soft floor on attractive distances; smaller values pack clusters tighter. Deterministic given the same `seed`. Preserves both local neighborhoods (like t-SNE) AND global inter-cluster distances (unlike t-SNE) -- the recommended default for visualizing high-D embeddings. |
-| `mds(X, k, iters, seed)` | 4 | Multidimensional Scaling: project `[N, D]` to `[N, k]` by minimizing the stress `sum_{i<j} (||Y_i - Y_j|| - d_ij)^2` between low-D coordinates `Y` and the input pairwise Euclidean distances `d_ij`. SGD with linear LR decay; deterministic given `seed`. Use when you want a projection that preserves PAIRWISE DISTANCES rather than variance directions (PCA) or local neighborhoods (t-SNE / UMAP). |
-| `random_projection(X, k, seed)` | 3 | Johnson-Lindenstrauss random projection: multiply `[N, D]` by a seeded Gaussian random matrix `R [D, k]` scaled by `1/sqrt(k)`, giving `[N, k]`. For modest `k = O(log N / eps^2)` the JL lemma guarantees all pairwise distances are preserved within a `1 +- eps` factor. Useful as a sanity baseline against PCA / t-SNE / UMAP -- if a learned method does not beat random projection, the learned features are not adding value. |
 
 These primitives also carry the classical-ML story: the
 "K-Nearest Neighbors" demo builds the cross-set distance matrix
@@ -619,13 +627,13 @@ one call. Each returns an SVG string just like `svg()`.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `hist(data, bins)` | 2 | Histogram of a vector with `bins` equal-width bins, rendered as a bar chart |
-| `scatter_labeled(points, labels)` | 2 | Nx2 points colored by a length-N cluster-id vector |
-| `loss_curve(losses)` | 1 | Vector of losses rendered as a line plot with axis labels |
-| `train_val_curve(train, val)` | 2 | Two loss vectors (training green, validation peach) on shared axes; the gap between them is overfitting |
-| `loss_landscape(surface, dims, path)` | 3 | A `rows*cols` loss surface (dark = low loss) over `[rows, cols]` dims, overlaid with an optimizer trajectory `[N, 2]` of points normalized to `[0, 1]`; green dot = start, red = end |
-| `confusion_matrix(predicted, actual)` | 2 | KxK heatmap of class-id predictions vs actual labels with cell counts overlaid |
 | `boundary_2d(grid_outputs, dims, points, labels)` | 4 | Render a 2D classifier surface from a length-(rows*cols) vector and `[rows, cols]` dims, with separately-supplied training points and labels |
+| `confusion_matrix(predicted, actual)` | 2 | KxK heatmap of class-id predictions vs actual labels with cell counts overlaid |
+| `hist(data, bins)` | 2 | Histogram of a vector with `bins` equal-width bins, rendered as a bar chart |
+| `loss_curve(losses)` | 1 | Vector of losses rendered as a line plot with axis labels |
+| `loss_landscape(surface, dims, path)` | 3 | A `rows*cols` loss surface (dark = low loss) over `[rows, cols]` dims, overlaid with an optimizer trajectory `[N, 2]` of points normalized to `[0, 1]`; green dot = start, red = end |
+| `scatter_labeled(points, labels)` | 2 | Nx2 points colored by a length-N cluster-id vector |
+| `train_val_curve(train, val)` | 2 | Two loss vectors (training green, validation peach) on shared axes; the gap between them is overfitting |
 
 ## Scripting
 

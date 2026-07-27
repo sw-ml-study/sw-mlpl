@@ -13,7 +13,11 @@ pub(crate) fn format_builtins() -> String {
     for (group, fns) in BUILTIN_GROUPS {
         out.push_str(group);
         out.push('\n');
-        for (_, sig, doc) in *fns {
+        // Alphabetical within each group (table order is historical):
+        // lookup listings sort so entries are findable by eye.
+        let mut entries: Vec<_> = fns.iter().collect();
+        entries.sort_by_key(|(name, _, _)| *name);
+        for (_, sig, doc) in entries {
             out.push_str(&format!("  {sig:<40} {doc}\n"));
         }
         out.push('\n');
