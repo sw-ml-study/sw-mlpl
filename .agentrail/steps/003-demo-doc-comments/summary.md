@@ -1,0 +1,1 @@
+Doc-strings on every demo u: function (visible in :fns/:describe); u:fit rewritten as a multi-line def with interior # comments and a :list u:fit beat showing the verbatim APL2-style listing; input-line CSS pre-wrap; new :fns/:list beats in Life demos; smoke harness colon-skip fix. Pages + server both carry the feature.
