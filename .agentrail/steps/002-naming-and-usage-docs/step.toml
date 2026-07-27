@@ -1,0 +1,8 @@
+number = 2
+slug = "naming-and-usage-docs"
+status = "pending"
+description = "Document the naming trichotomy (name = builtin call; :name = quoted builtin r..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T09:28:31"
+commits = []

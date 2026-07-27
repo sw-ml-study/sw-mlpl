@@ -1,0 +1,1 @@
+def u: source retention shipped TDD: pending_source span-slice at FnDef, UserFn::source, list_fn prefers verbatim text (comments intact), eval_source_value convenience; threaded through wasm/repl/script/serve entry points. 4 new tests + 37 serve + 23 cli + 19 wasm green.
