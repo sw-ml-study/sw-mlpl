@@ -201,6 +201,39 @@ lines = [
 
 [[demos]]
 category = "Basics"
+name = "Error Handling (two planes, two bridges)"
+intro = "Things go wrong in every real program -- the question is HOW they go wrong. sw-MLPL splits errors into two planes: HARD errors stop the line loudly (a wrong index, a shape mismatch), while Result VALUES -- ok(v) / err(e) -- carry failure as ordinary data that flows, binds, and branches. This demo walks both planes, then the railway pattern (safe wrappers, unwrap_or, the zilde projections get_value/get_error), then the canonical way a USER-DEFINED function reports failure: validate first, return ok(...) or err({kind, message}) -- never explode mid-body. The finale crosses the two bridges: try/catch DEMOTES a hard error into a value your code can inspect (e is a {kind, message} record), and postfix ? PROPAGATES the first Err out of a u: pipeline, one character per stage. Full guide: docs/error-handling.md."
+takeaway = "Control plane: hard errors are loud and stop the line (you saw two, on purpose). Data plane: ok/err are values -- is_ok branches, unwrap_or gives totals, get_value/get_error project each side as a 0-or-1 element vector (tally is your is_some; absence is emptiness, the APL2 zilde flavor). u: functions report failure by GUARDING first and returning err({kind, ...}) -- the caller decides, not the callee. The bridges: try { } catch e { } turns a hard error into e = {kind, message} (dispatch on e.kind), and r? unwraps Ok or early-returns the Err from the enclosing u: function -- the railway pattern in one character. APL-family lineage: J's ::, BQN's Catch, q's protected eval (docs/option-result-design.md)."
+lines = [
+    "v = [3, 1, 4, 1, 5]                  # ACT 1 -- the two planes",
+    "r = ok(v)                            # a Result VALUE: success as data",
+    "disp(unwrap(r))                      # unwrap an Ok and the payload comes out",
+    "e = err({kind: \"index\", message: \"axis 3 out of range\"})  # failure as data: an Error OBJECT (record payload)",
+    "is_err(e)                            # 1 -- inspect it like any value; nothing stopped",
+    "err_message(e)                       # the payload: {kind, message}",
+    "take(v, 0, 9)                        # INTENTIONAL ERROR: the HARD plane -- loud, stops this line, demo continues",
+    "unwrap_or(err(\"boom\"), 7)           # ACT 2 -- the railway: total read with a fallback",
+    "get_value(err(404))                  # [] -- the Ok side, ABSENT: a 0-element vector (zilde Option)",
+    "get_error(err(404))                  # [404] -- the Err side, present: a 1-element vector",
+    "tally(get_value(err(404)))           # 0 -- tally IS is_some; absence is emptiness",
+    "def u:get_safe(x, i) { if lt(i, tally(x)) { ok(take(x, 0, i)) } else { err({kind: \"index\", at: i, size: tally(x)}) } }  # ACT 3 -- HOW A u: FUNCTION REPORTS FAILURE: guard first, then ok/err",
+    "u:get_safe(v, 2)                     # Ok(4) -- the happy rail",
+    "u:get_safe(v, 9)                     # Err({kind, at, size}) -- no explosion; the CALLER decides",
+    "if is_ok(u:get_safe(v, 9)) { 1 } else { 0 }  # 0 -- branch on the outcome",
+    "def u:mean_of(x) { if gt(tally(x), 0) { ok(reduce_add(x) / tally(x)) } else { err({kind: \"empty\", message: \"mean of zero elements\"}) } }  # a second guarded function ...",
+    "def u:zscore(x) { m = u:mean_of(x)?; d = x - fill([tally(x)], m); s = u:mean_of(d * d)?; ok(d / sqrt(s + 0.0001)) }  # ... composed into a PIPELINE: ? propagates the first Err",
+    "u:zscore(v)                          # Ok(...) -- both stages passed",
+    "u:zscore(fill([0], 0))               # Err(empty) -- stage 1's Err rode the railway out; stage 2 never ran",
+    "safe = try { take(v, 0, 9) } catch e { fill([1], 0 - 1) }  # ACT 4 -- bridge 1: CATCH demotes the hard error to a value",
+    "disp(safe)                           # the handler's fallback, not a crash",
+    "kind = try { take(v, 0, 9) } catch e { e.kind }  # e is {kind, message}: dispatch on e.kind",
+    "msg = try { matmul(v, v) } catch e { e.message }  # a different mistake, same shape of handler",
+    "err(\"boom\")?                        # INTENTIONAL ERROR: bridge 2 at TOP level -- ? on an Err with no enclosing u: fn is loud, like unwrap",
+    "ok(99)?                              # ... but ? on an Ok just unwraps: 99",
+]
+
+[[demos]]
+category = "Basics"
 name = "Analysis Helpers"
 intro = "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model."
 takeaway = "Six one-liners, six labeled plots. Every helper under 'analysis' in the docs takes arrays you already have and returns an SVG -- no separate plotting library, no config blocks."

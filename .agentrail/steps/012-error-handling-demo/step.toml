@@ -1,6 +1,6 @@
 number = 12
 slug = "error-handling-demo"
-status = "pending"
+status = "in-progress"
 description = "Error Handling demo (user-requested, after Life): three acts per docs/option-..."
 role = "production"
 context_files = []

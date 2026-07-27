@@ -896,6 +896,10 @@ beats any single member at the cost of inference time and
 memory. MLPL's "Neural Thicket" demo  runs a 16-
 member weight-perturbed ensemble end-to-end.
 
+## Error Handling
+
+sw-MLPL splits errors into two planes. HARD errors (wrong arity, shape mismatch, out-of-bounds index) stop the line loudly. [[Result]] VALUES -- `ok(v)` / `err(e)` -- carry failure as ordinary data: `is_ok` branches, `unwrap_or` gives a total read with a fallback, and `get_value`/`get_error` project each side as a 0-or-1 element vector (absence is emptiness, the APL2 zilde flavor). Two bridges cross the planes: `try { body } catch e { handler }` demotes a hard error into the record `e = {kind, message}`, and postfix `?` propagates an Err out of the enclosing `u:` function (the railway pattern). The convention for user-defined functions: validate inputs FIRST and return `err({kind, ...})` -- the caller decides, not the callee. See the "Error Handling (two planes, two bridges)" demo and docs/error-handling.md.
+
 ## Epoch
 
 One full pass through the training dataset. Distinct from
