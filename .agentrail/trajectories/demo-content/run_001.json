@@ -1,0 +1,11 @@
+{
+  "task_type": "demo-content",
+  "state": {
+    "number": 1,
+    "step": "life-demo-depth"
+  },
+  "action": "probe-first validation of rank-4/5 disp + refs; demo narration ties depth to APL2 completeness",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-27T08:50:37"
+}

@@ -1,0 +1,1 @@
+Life demo deepened: disp(S) rank-3 stack + rank-5 [2,2,2,7,7] cube projection with nested slice labels; reduction via plus = :add + higher-order reduce (builtin references explained -- :disp is the quoted reference, disp() the call); u:life framed as MLPL's one-line Life. All probe-validated; smoke green; pages deployed.
