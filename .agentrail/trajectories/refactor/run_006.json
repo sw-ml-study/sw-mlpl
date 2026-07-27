@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 15,
+    "step": "web-eval-split"
+  },
+  "action": "dependency-floor analysis before cutting; git mv + facade re-exports; stale-fingerprint VizNode mismatch resolved by cargo clean -p; targeted tests",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-27T08:43:16"
+}

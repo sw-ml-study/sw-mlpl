@@ -1,9 +1,10 @@
 number = 15
 slug = "web-eval-split"
-status = "in-progress"
+status = "completed"
 description = "mlpl-web-eval 19 modules -> split eval transport cluster; update the three #[..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T07:46:59"
+completed_at = "2026-07-27T08:43:16"
 task_type = "refactor"
-commits = []
+commits = ["25747ece5d06d395ad36e4ad64af5f35a653c732"]
