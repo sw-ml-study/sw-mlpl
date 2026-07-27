@@ -1,6 +1,6 @@
 number = 16
 slug = "spike-wrapup"
-status = "pending"
+status = "in-progress"
 description = "Final counts, retrospective, and the dedicated-saga plan for the mlpl-eval 10..."
 role = "production"
 context_files = []

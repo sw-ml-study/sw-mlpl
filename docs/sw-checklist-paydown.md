@@ -4,6 +4,23 @@
 `sw-checklist` failure baseline to zero by treating it as a
 debt that every commit pays down.
 
+## Status snapshot -- 2026-07-27 (tech-debt spike complete)
+
+The 2026-07 spike (saga tech-debt-spike, steps 001-016) took the
+counts from 18 failed / 323 warnings to **1 failed / 296
+warnings**. Retired: mlpl-viz (16 modules), autograd backward
+fn-counts, mlpl-serve (17), mlpl-repl (14), mlpl-web (10),
+mlpl-web-eval (20), plus a propagate Function-LOC FAIL and the
+four repo-metadata warnings. The remaining FAIL is mlpl-eval's
+100-module crate count -- owned by the dedicated plan in
+docs/eval-decomposition-saga.md.
+
+Recurring lesson for future ratchet work: a crate split retires
+its FAIL but the new at-cap crates add structural module-count
+warnings, and the >4 fn-count warn bar makes extraction-in-place
+self-cancelling -- plan one extra offset retirement per split
+step, or expect a documented exception.
+
 ## The rule
 
 > Each commit must hold or LOWER the failed-count from its
