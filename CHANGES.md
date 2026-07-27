@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga table-order: complete (1 step)
+- docs(order): lookup tables and listings alphabetize within groups
+- docs(changes): refresh CHANGES.md to HEAD
 - saga connect-inspect-tables: complete (2 steps)
 - feat(docs-ui): help tabs render real HTML tables (build-time md->html)
 - step 001-server-inspect-route: record completion
