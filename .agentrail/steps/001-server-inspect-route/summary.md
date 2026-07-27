@@ -1,0 +1,1 @@
+Server inspect route shipped + live-verified: /eval handles colon commands via mlpl_eval::inspect (parse skipped), client routes the 11-command inspect family server-side when connected; api test pins def -> :fns -> :list -> 400. Server rebuilt + restarted per the split-brain gate.
