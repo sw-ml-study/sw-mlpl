@@ -1,6 +1,6 @@
 number = 2
 slug = "life-pattern-zoo"
-status = "pending"
+status = "in-progress"
 description = "New Basics demo 'Life Pattern Zoo (20x20)' right after Game of Life: u:stamp(..."
 role = "production"
 context_files = []

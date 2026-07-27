@@ -204,6 +204,31 @@ lines = [
 
 [[demos]]
 category = "Basics"
+name = "Life Pattern Zoo (20x20)"
+intro = "The Game of Life demo built the engine; this one builds an ECOSYSTEM. A 20x20 torus seeded with five classic lifeforms at once: a blinker (period-2 spinner), a block (still life -- nothing ever changes), a glider (travels diagonally forever), an r-pentomino (five cells that erupt into growth), and a lone pair (starves immediately -- a disappearing pattern). Seeding uses u:stamp, a bulk functional PUT built from the lens idiom (while + scatter + take): one call stamps a whole shape. Then the one-line u:life20 rule runs 32 generations -- every lifeform evolving simultaneously under the same rule -- streamed live via emit_frame in connect mode and captured as one SMIL-animated SVG."
+takeaway = "One rule, five fates: the block never changes (still life), the blinker flips forever (oscillator), the glider walks off and wraps around the torus (spaceship), the r-pentomino boils into a spreading colony (growth), and the isolated pair dies in one step (extinction). The deep disp view stacks generation 0 over generation 1 so you can SEE the derivative of the world. u:stamp is the lens put in bulk -- pure, composable seeding of any pattern from an index list. Watch the animation loop: by generation 32 the r-pentomino's debris dominates the board while the block still sits untouched."
+lines = [
+    "def u:stamp(b, ids) { i = 0; while lt(i, tally(ids)) { b = scatter(b, take(ids, 0, i), 1); i = i + 1 }; b }  # bulk functional PUT: stamp every index in one call (the lens idiom, batched)",
+    "b = u:stamp(fill([400], 0), [42, 43, 44])            # BLINKER (oscillator): a 3-cell bar at row 2 (flat index = row*20 + col)",
+    "b = u:stamp(b, [50, 51, 70, 71])                     # BLOCK (still life): a 2x2 square -- the most boring citizen",
+    "b = u:stamp(b, [163, 184, 202, 203, 204])            # GLIDER (spaceship): walks diagonally forever",
+    "b = u:stamp(b, [174, 175, 193, 194, 214])            # R-PENTOMINO (growth): five cells, famously chaotic",
+    "b = u:stamp(b, [305, 306])                           # LONE PAIR (extinction): two neighbors starve next step",
+    "Z = reshape(b, [20, 20])                             # fold flat -> board",
+    "disp(Z)                                              # the seeded ecosystem",
+    "def u:life20(g) { a = rotate(g, 1, 0); b2 = rotate(g, 0 - 1, 0); n = a + b2 + rotate(g, 1, 1) + rotate(g, 0 - 1, 1) + rotate(a, 1, 1) + rotate(a, 0 - 1, 1) + rotate(b2, 1, 1) + rotate(b2, 0 - 1, 1); gt(eq(n, 3) + g * eq(n, 2), 0) }  # the same one-line rule -- size-independent",
+    "g1 = u:life20(Z)                                     # one generation for the WHOLE ecosystem at once",
+    "disp(reshape(concat(reshape(Z, [1, 20, 20]), reshape(g1, [1, 20, 20]), 0), [2, 20, 20]))  # DEEP view: gen 0 stacked over gen 1 -- the derivative of the world as one structure",
+    "F = reshape(Z, [1, 20, 20])                          # frames tensor, generation 0",
+    "g = Z",
+    "i = 0",
+    "while lt(i, 31) { g = u:life20(g); emit_frame(\"life\", i, g); F = concat(F, reshape(g, [1, 20, 20]), 0); i = i + 1 }  # 32 generations; live board in connect mode",
+    "shape(F)                                             # [32, 20, 20]",
+    "svg(F, \"life\")                                      # five fates, one animation",
+]
+
+[[demos]]
+category = "Basics"
 name = "Error Handling (two planes, two bridges)"
 intro = "Things go wrong in every real program -- the question is HOW they go wrong. sw-MLPL splits errors into two planes: HARD errors stop the line loudly (a wrong index, a shape mismatch), while Result VALUES -- ok(v) / err(e) -- carry failure as ordinary data that flows, binds, and branches. This demo walks both planes, then the railway pattern (safe wrappers, unwrap_or, the zilde projections get_value/get_error), then the canonical way a USER-DEFINED function reports failure: validate first, return ok(...) or err({kind, message}) -- never explode mid-body. The finale crosses the two bridges: try/catch DEMOTES a hard error into a value your code can inspect (e is a {kind, message} record), and postfix ? PROPAGATES the first Err out of a u: pipeline, one character per stage. Full guide: docs/error-handling.md."
 takeaway = "Control plane: hard errors are loud and stop the line (you saw two, on purpose). Data plane: ok/err are values -- is_ok branches, unwrap_or gives totals, get_value/get_error project each side as a 0-or-1 element vector (tally is your is_some; absence is emptiness, the APL2 zilde flavor). u: functions report failure by GUARDING first and returning err({kind, ...}) -- the caller decides, not the callee. The bridges: try { } catch e { } turns a hard error into e = {kind, message} (dispatch on e.kind), and r? unwraps Ok or early-returns the Err from the enclosing u: function -- the railway pattern in one character. APL-family lineage: J's ::, BQN's Catch, q's protected eval (docs/option-result-design.md)."
@@ -1770,6 +1795,12 @@ lines = [
 # live beside the demos themselves. build.rs generates DEMO_CAPABILITIES,
 # LITERATE_DOCS, and PROGRESS_NOTES from these.
 # ============================================================
+
+[[capabilities]]
+name = "Life Pattern Zoo (20x20)"
+requires_connect = false
+prefers_connect = true
+device = "cpu"
 
 [[capabilities]]
 # Runs fine in the browser; when a server is connected the whole
