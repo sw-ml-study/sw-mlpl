@@ -1,8 +1,9 @@
 number = 10
 slug = "lens-depth"
-status = "in-progress"
+status = "completed"
 description = "Upgrade the lens demonstration per user feedback ('too simple -- what about l..."
 role = "production"
 context_files = []
 created_at = "2026-07-26T10:26:07"
-commits = []
+completed_at = "2026-07-26T17:36:13"
+commits = ["72887583b31d363944b6e55f9c1571d1400652a1"]
