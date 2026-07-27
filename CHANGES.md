@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-27
 
+- saga life-depth: complete (2 steps)
+- feat(demos): Life Pattern Zoo (20x20) -- five lifeforms, one rule
+- step 001-life-demo-depth: record completion
+- feat(demos): Life demo depth -- one-liner, builtin refs, rank-5 disp
+- docs(changes): refresh CHANGES.md to HEAD
 - saga tech-debt-spike: complete (16 steps)
 - docs(spike): wrap-up -- final counts + mlpl-eval decomposition plan
 - step 015-web-eval-split: record completion
