@@ -229,6 +229,32 @@ lines = [
 
 [[demos]]
 category = "Basics"
+name = "Gosper Glider Gun (40x40)"
+intro = "The Pattern Zoo showed five fates; this is the famous SIXTH: a machine that MANUFACTURES life. Bill Gosper's 1970 glider gun was the first pattern proven to grow forever -- every 30 generations it fires a fresh glider off toward the corner. The canonical 36 cells are stamped from one index list with u:stamp (the bulk lens put), the same one-line rule from the other Life demos runs the world, and after each 30-step period the population grows by exactly 5. Along the way, workspace introspection: :fns lists every u: function your demos have defined this session, and :list prints one back as source -- APL's )FNS heritage."
+takeaway = "A still life holds, an oscillator cycles, a glider travels -- and a GUN creates: population 36 at generation 0, 41 after one period, 46 after two, +5 forever. That unbounded growth is why the gun mattered: it made Life Turing-complete-scale construction plausible. Everything here is the same three primitives the 7x7 demo used -- rotate for the neighborhood, one functional rule, u:stamp for seeding -- proof the engine is size- and pattern-independent. Try :list u:gen to read the rule back, and watch the animation: gliders march diagonally out of the muzzle every 30 frames."
+lines = [
+    "def u:stamp(b, ids) { i = 0; while lt(i, tally(ids)) { b = scatter(b, take(ids, 0, i), 1); i = i + 1 }; b }  # bulk functional PUT (as in the Pattern Zoo)",
+    "gun = [146, 184, 186, 214, 215, 222, 223, 236, 237, 253, 257, 262, 263, 276, 277, 282, 283, 292, 298, 302, 303, 322, 323, 332, 336, 338, 339, 344, 346, 372, 378, 386, 413, 417, 454, 455]  # Gosper's 36 cells as flat indices (row*40 + col)",
+    "G = reshape(u:stamp(fill([1600], 0), gun), [40, 40])  # one stamp call seeds the whole machine",
+    "disp(G)                                              # the gun: two blocks bracketing two 'queen bee' shuttles",
+    "def u:gen(g) { a = rotate(g, 1, 0); b2 = rotate(g, 0 - 1, 0); n = a + b2 + rotate(g, 1, 1) + rotate(g, 0 - 1, 1) + rotate(a, 1, 1) + rotate(a, 0 - 1, 1) + rotate(b2, 1, 1) + rotate(b2, 0 - 1, 1); gt(eq(n, 3) + g * eq(n, 2), 0) }  # the same ONE-LINE rule -- pattern-independent",
+    ":fns                                                 # workspace introspection: every u: function defined this session (APL's )FNS)",
+    ":list u:gen                                          # ... and any one of them printed back as source",
+    "reduce_add(reshape(G, [1600]))                       # population at generation 0: the gun's 36 cells",
+    "g = G",
+    "i = 0",
+    "while lt(i, 30) { g = u:gen(g); i = i + 1 }          # one full gun period",
+    "reduce_add(reshape(g, [1600]))                       # 41 -- the gun PLUS its first glider (+5, forever)",
+    "F = reshape(G, [1, 40, 40])                          # frames tensor, generation 0",
+    "g = G",
+    "i = 0",
+    "while lt(i, 74) { g = u:gen(g); emit_frame(\"life\", i, g); F = concat(F, reshape(g, [1, 40, 40]), 0); i = i + 1 }  # 75 generations: 2.5 periods, 2 gliders in flight",
+    "shape(F)                                             # [75, 40, 40]",
+    "svg(F, \"life\")                                      # watch the muzzle flash every 30 frames",
+]
+
+[[demos]]
+category = "Basics"
 name = "Error Handling (two planes, two bridges)"
 intro = "Things go wrong in every real program -- the question is HOW they go wrong. sw-MLPL splits errors into two planes: HARD errors stop the line loudly (a wrong index, a shape mismatch), while Result VALUES -- ok(v) / err(e) -- carry failure as ordinary data that flows, binds, and branches. This demo walks both planes, then the railway pattern (safe wrappers, unwrap_or, the zilde projections get_value/get_error), then the canonical way a USER-DEFINED function reports failure: validate first, return ok(...) or err({kind, message}) -- never explode mid-body. The finale crosses the two bridges: try/catch DEMOTES a hard error into a value your code can inspect (e is a {kind, message} record), and postfix ? PROPAGATES the first Err out of a u: pipeline, one character per stage. Full guide: docs/error-handling.md."
 takeaway = "Control plane: hard errors are loud and stop the line (you saw two, on purpose). Data plane: ok/err are values -- is_ok branches, unwrap_or gives totals, get_value/get_error project each side as a 0-or-1 element vector (tally is your is_some; absence is emptiness, the APL2 zilde flavor). u: functions report failure by GUARDING first and returning err({kind, ...}) -- the caller decides, not the callee. The bridges: try { } catch e { } turns a hard error into e = {kind, message} (dispatch on e.kind), and r? unwraps Ok or early-returns the Err from the enclosing u: function -- the railway pattern in one character. APL-family lineage: J's ::, BQN's Catch, q's protected eval (docs/option-result-design.md)."
@@ -1795,6 +1821,12 @@ lines = [
 # live beside the demos themselves. build.rs generates DEMO_CAPABILITIES,
 # LITERATE_DOCS, and PROGRESS_NOTES from these.
 # ============================================================
+
+[[capabilities]]
+name = "Gosper Glider Gun (40x40)"
+requires_connect = false
+prefers_connect = true
+device = "cpu"
 
 [[capabilities]]
 name = "Life Pattern Zoo (20x20)"

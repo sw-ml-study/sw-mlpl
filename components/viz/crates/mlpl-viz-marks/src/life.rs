@@ -11,19 +11,29 @@ use mlpl_viz_core::VizError;
 
 /// Seconds each generation stays on screen.
 const FRAME_SECS: f64 = 0.35;
-/// Cell edge in SVG units. Sized so a small board (7x7) renders
-/// at ~270px -- reviewer feedback: the first cut (14.0) was too
-/// small to watch.
-const CELL: f64 = 36.0;
+/// Largest cell edge in SVG units -- a small board (7x7) renders
+/// at ~270px (reviewer feedback: 14.0 was too small to watch).
+const MAX_CELL: f64 = 36.0;
+/// Smallest cell edge, so huge boards stay legible dots.
+const MIN_CELL: f64 = 8.0;
+/// Target edge for the whole grid; cell size adapts so a 40x40
+/// gun board is ~600px instead of 1.4k px.
+const TARGET_EDGE: f64 = 600.0;
 /// Outer margin in SVG units.
 const MARGIN: f64 = 12.0;
+
+/// Cell edge for an `h x w` board: fill `TARGET_EDGE`, clamped.
+fn cell_px(h: usize, w: usize) -> f64 {
+    (TARGET_EDGE / h.max(w).max(1) as f64).clamp(MIN_CELL, MAX_CELL)
+}
 
 /// Render the frames tensor as an SMIL-animated life grid.
 pub fn render_life(frames: &DenseArray) -> Result<String, VizError> {
     let (t, h, w) = frame_dims(frames)?;
+    let cell = cell_px(h, w);
     let (cw, ch) = (
-        w as f64 * CELL + 2.0 * MARGIN,
-        h as f64 * CELL + 2.0 * MARGIN,
+        w as f64 * cell + 2.0 * MARGIN,
+        h as f64 * cell + 2.0 * MARGIN,
     );
     let mut out = format!(
         "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {cw} {ch}\" \
@@ -31,7 +41,7 @@ pub fn render_life(frames: &DenseArray) -> Result<String, VizError> {
          <rect width=\"100%\" height=\"100%\" fill=\"#1e1e2e\" rx=\"4\"/>"
     );
     for i in 0..t {
-        write_frame(&mut out, frames.data(), (i, t), (h, w));
+        write_frame(&mut out, frames.data(), (i, t), (h, w), cell);
     }
     out.push_str("</svg>");
     Ok(out)
@@ -53,21 +63,25 @@ fn frame_dims(frames: &DenseArray) -> Result<(usize, usize, usize), VizError> {
 /// One frame group: alive cells as rects, plus (when animated)
 /// the discrete opacity schedule that makes exactly this frame
 /// visible during its 1/T slot of the loop.
-fn write_frame(out: &mut String, data: &[f64], (i, t): (usize, usize), (h, w): (usize, usize)) {
+fn write_frame(
+    out: &mut String,
+    data: &[f64],
+    (i, t): (usize, usize),
+    (h, w): (usize, usize),
+    cell: f64,
+) {
     let opacity = if i == 0 { 1 } else { 0 };
     out.push_str(&format!("<g class=\"life-frame\" opacity=\"{opacity}\">"));
-    for r in 0..h {
-        for c in 0..w {
-            if data[(i * h + r) * w + c] > 0.5 {
-                let x = MARGIN + c as f64 * CELL + 2.0;
-                let y = MARGIN + r as f64 * CELL + 2.0;
-                let s = CELL - 4.0;
-                out.push_str(&format!(
-                    "<rect x=\"{x}\" y=\"{y}\" width=\"{s}\" height=\"{s}\" \
-                     fill=\"#a6e3a1\" rx=\"2\"/>"
-                ));
-            }
-        }
+    let inset = (cell * 0.06).max(0.5);
+    let s = cell - 2.0 * inset;
+    let alive = (0..h * w).filter(|k| data[i * h * w + k] > 0.5);
+    for k in alive {
+        let x = MARGIN + (k % w) as f64 * cell + inset;
+        let y = MARGIN + (k / w) as f64 * cell + inset;
+        out.push_str(&format!(
+            "<rect x=\"{x}\" y=\"{y}\" width=\"{s}\" height=\"{s}\" \
+             fill=\"#a6e3a1\" rx=\"2\"/>"
+        ));
     }
     if t > 1 {
         out.push_str(&animate_tag(i, t));
