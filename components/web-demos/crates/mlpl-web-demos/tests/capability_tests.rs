@@ -33,10 +33,34 @@ fn unlisted_demo_defaults_to_cpu_live() {
 }
 
 #[test]
-fn contextual_ask_requires_connect_but_is_cpu() {
+fn contextual_ask_requires_connect_and_live_ollama() {
     let c = capability_for("Ask Ollama (contextual)");
     assert!(c.requires_connect, ":ask needs a connected mlpl-serve");
-    assert_eq!(c.device, Device::Cpu, "Ollama call is device-agnostic");
+    assert_eq!(
+        c.device,
+        Device::Ollama,
+        ":ask needs the server's Ollama host alive, not just a connection"
+    );
+    // URL presence alone is not enough: the probe must report ollama.
+    assert!(demo_disabled(&c, true, &[]));
+    assert!(demo_disabled(&c, true, &[Device::Cpu, Device::Cuda]));
+    assert!(!demo_disabled(&c, true, &[Device::Cpu, Device::Ollama]));
+}
+
+#[test]
+fn cpu_connect_demos_need_a_reachable_peer_not_just_a_url() {
+    // A cpu-device connect demo must wait for the /v1/devices probe:
+    // ?connect= pointing at a dead port used to light these up.
+    let cap = Capability {
+        requires_connect: true,
+        prefers_connect: false,
+        device: Device::Cpu,
+    };
+    assert!(
+        demo_disabled(&cap, true, &[]),
+        "probe not landed => disabled"
+    );
+    assert!(!demo_disabled(&cap, true, &[Device::Cpu]));
 }
 
 #[test]

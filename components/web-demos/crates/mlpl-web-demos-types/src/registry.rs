@@ -23,6 +23,10 @@ pub enum Device {
     Cpu,
     Mlx,
     Cuda,
+    /// Not a compute device: the connected server's CONFIGURED
+    /// Ollama host answered a liveness probe. Gates the `:ask`
+    /// demo tier the same way GPU entries gate GPU demos.
+    Ollama,
 }
 
 /// A demo's runtime-requirement tier. Demos absent from the generated
@@ -68,8 +72,11 @@ pub fn demo_disabled(cap: &Capability, connected: bool, peer_devices: &[Device])
     if !cap.requires_connect {
         return false;
     }
-    let peer_offers = cap.device == Device::Cpu || peer_devices.contains(&cap.device);
-    !(connected && peer_offers)
+    // The peer set comes from a LIVE `/v1/devices` probe, so an empty
+    // set means "server not (yet) reachable" -- even cpu-tier connect
+    // demos stay disabled until the probe lands. A `?connect=` URL
+    // pointing at a dead port must not light anything up.
+    !(connected && peer_devices.contains(&cap.device))
 }
 
 /// A heads-up rendered before a single long-running demo line.

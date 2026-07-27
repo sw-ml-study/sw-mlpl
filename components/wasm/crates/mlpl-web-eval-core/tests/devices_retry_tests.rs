@@ -2,7 +2,21 @@
 //! loaded while the server is restarting still lights up GPU demos
 //! once the server answers, without polling forever.
 
-use mlpl_web_eval_core::devices::retry_delay_ms;
+use mlpl_web_eval_core::devices::{parse_devices_body, retry_delay_ms};
+
+#[test]
+fn parse_devices_body_maps_devices_and_ollama_flag() {
+    let with_ollama = serde_json::json!({
+        "devices": ["cpu", "cuda"], "hostname": "large12", "ollama": true
+    });
+    assert_eq!(parse_devices_body(&with_ollama), ["cpu", "cuda", "ollama"]);
+    let without = serde_json::json!({ "devices": ["cpu"], "ollama": false });
+    assert_eq!(parse_devices_body(&without), ["cpu"]);
+    // Older servers without the field: absent means not alive.
+    let legacy = serde_json::json!({ "devices": ["cpu", "mlx"] });
+    assert_eq!(parse_devices_body(&legacy), ["cpu", "mlx"]);
+    assert!(parse_devices_body(&serde_json::json!({})).is_empty());
+}
 
 #[test]
 fn schedule_is_bounded_and_monotone() {

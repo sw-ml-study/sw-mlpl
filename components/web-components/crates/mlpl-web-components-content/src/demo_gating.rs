@@ -52,6 +52,7 @@ pub fn grouped_demos(connected: bool, peer_devices: &[Device]) -> DemoGroups {
         let section = match cap.device {
             Device::Mlx => "MLX - Apple GPU (connect)",
             Device::Cuda => "CUDA - Linux GPU (connect)",
+            Device::Ollama => "Client-server (connect)",
             Device::Cpu if cap.requires_connect => "Client-server (connect)",
             Device::Cpu => d.category,
         };
@@ -87,7 +88,7 @@ pub fn disabled_hint(section: &str) -> &'static str {
     } else if section.starts_with("MLX") {
         "Available when connected to a server on an Apple-Silicon Mac (MLX GPU). Run mlpl-serve there and connect to it."
     } else {
-        "Available when connected to an mlpl-serve instance. Append ?connect=<server-url> to this page's URL to point at a running server."
+        "Available when connected to a REACHABLE mlpl-serve instance (the Ask Ollama demo also needs Ollama running on that server's host). Append ?connect=<server-url> to this page's URL -- usually the page's own origin, e.g. ?connect=http://large12:6464 when the page is served from large12:6464."
     }
 }
 

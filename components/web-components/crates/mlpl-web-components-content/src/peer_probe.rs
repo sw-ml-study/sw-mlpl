@@ -6,7 +6,8 @@ use yew::prelude::*;
 
 use mlpl_web_demos::Device;
 
-/// Map `GET /v1/devices` name strings to [`Device`]s. Unknown dropped.
+/// Map `GET /v1/devices` name strings to [`Device`]s (including the
+/// synthetic `"ollama"` liveness entry). Unknown names dropped.
 fn devices_from_names(names: &[String]) -> Vec<Device> {
     names
         .iter()
@@ -14,6 +15,7 @@ fn devices_from_names(names: &[String]) -> Vec<Device> {
             "cpu" => Some(Device::Cpu),
             "mlx" => Some(Device::Mlx),
             "cuda" => Some(Device::Cuda),
+            "ollama" => Some(Device::Ollama),
             _ => None,
         })
         .collect()

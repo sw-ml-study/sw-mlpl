@@ -1847,9 +1847,12 @@ prefers_connect = true
 device = "cpu"
 
 [[capabilities]]
+# device "ollama": needs the connected server's CONFIGURED Ollama
+# host to answer a liveness probe (/v1/devices reports it), not just
+# a connection -- :ask against a serve with no Ollama would only fail.
 name = "Ask Ollama (contextual)"
 requires_connect = true
-device = "cpu"
+device = "ollama"
 
 [[capabilities]]
 name = "MLX LoRA fine-tune"

@@ -81,6 +81,7 @@ fn render_meta(doc: &Doc) -> String {
     let device = |d: &str| match d {
         "mlx" => "Device::Mlx",
         "cuda" => "Device::Cuda",
+        "ollama" => "Device::Ollama",
         _ => "Device::Cpu",
     };
     let caps: String = doc

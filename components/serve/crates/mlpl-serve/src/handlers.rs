@@ -224,7 +224,7 @@ pub(crate) fn v1_router(state: AppState) -> axum::Router {
         .route("/v1/health", get(health_handler))
         .route(
             "/v1/devices",
-            get(mlpl_serve_core::devices::devices_handler),
+            get(mlpl_serve_state::handlers_inspect::devices_handler),
         )
         .route("/v1/stats", get(mlpl_serve_core::devices::stats_handler))
         .route("/v1/reset", post(reset_handler))

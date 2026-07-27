@@ -22,14 +22,27 @@ pub async fn fetch_devices() -> Vec<String> {
     let Ok(body) = resp.json::<serde_json::Value>().await else {
         return Vec::new();
     };
-    body["devices"]
+    parse_devices_body(&body)
+}
+
+/// Map a `/v1/devices` body to the peer-capability name set: the
+/// `devices` array verbatim, plus a synthetic `"ollama"` entry when
+/// the server reports its configured Ollama host alive (absent field
+/// -- an older server -- means not alive). Pure for native tests.
+#[must_use]
+pub fn parse_devices_body(body: &serde_json::Value) -> Vec<String> {
+    let mut names: Vec<String> = body["devices"]
         .as_array()
         .map(|arr| {
             arr.iter()
                 .filter_map(|d| d.as_str().map(String::from))
                 .collect()
         })
-        .unwrap_or_default()
+        .unwrap_or_default();
+    if body["ollama"].as_bool() == Some(true) {
+        names.push("ollama".to_string());
+    }
+    names
 }
 
 /// Native stub: no browser, so no live probe.

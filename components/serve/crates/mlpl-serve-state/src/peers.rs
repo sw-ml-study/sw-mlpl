@@ -165,14 +165,10 @@ impl PeerSessionMap {
         })
         .join()
         .map_err(|_| EvalError::Unsupported("remote peer thread panicked".into()))??;
-        let session = PeerSession {
-            id: resp.session_id,
-            token: resp.token,
-        };
-        self.inner
-            .lock()
-            .unwrap()
-            .insert(peer.url.clone(), session.clone());
+        let (id, token) = (resp.session_id, resp.token);
+        let session = PeerSession { id, token };
+        let mut sessions = self.inner.lock().unwrap();
+        sessions.insert(peer.url.clone(), session.clone());
         Ok(session)
     }
 }

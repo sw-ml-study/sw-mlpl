@@ -15,6 +15,22 @@ pub struct DevicesResponse {
     /// `None` when the host cannot report it.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub hostname: Option<String>,
+    /// Whether the server's CONFIGURED Ollama host answered a
+    /// liveness probe just now -- the web UI gates the "Ask Ollama"
+    /// demo on this, not on mere connectivity.
+    pub ollama: bool,
+}
+
+/// Build the `GET /v1/devices` body: compiled device set + hostname,
+/// with the caller-supplied Ollama liveness verdict (the stateful
+/// probe lives with `AppState`, one crate up).
+#[must_use]
+pub fn devices_response(ollama: bool) -> DevicesResponse {
+    DevicesResponse {
+        devices: compiled_devices(),
+        hostname: mlpl_monitor::hostname(),
+        ollama,
+    }
 }
 
 /// The devices this build can dispatch: `cpu` always, plus `mlx` /
@@ -38,14 +54,6 @@ pub fn compiled_devices() -> Vec<&'static str> {
         devices.push("cuda");
     }
     devices
-}
-
-/// Report this server's in-process device set + host name.
-pub async fn devices_handler() -> impl IntoResponse {
-    Json(DevicesResponse {
-        devices: compiled_devices(),
-        hostname: mlpl_monitor::hostname(),
-    })
 }
 
 /// `GET /v1/stats` -- backend resource telemetry (CPU%, system RAM,

@@ -1,0 +1,8 @@
+number = 5
+slug = "connect-url-validation"
+status = "pending"
+description = "Validate the ?connect= URL parameter at page load and fail fast with a VISIBL..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T14:08:32"
+commits = []

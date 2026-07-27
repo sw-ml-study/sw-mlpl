@@ -128,3 +128,29 @@ pub(crate) fn snapshot_env(env: &Environment) -> InspectResponse {
         more,
     }
 }
+
+/// Whether `host` answers `GET /api/tags` within a short timeout.
+/// Any failure (refused, timeout, non-2xx) is "not alive" -- the
+/// probe must never stall the `/v1/devices` response noticeably.
+#[must_use]
+pub fn ollama_alive(host: &str) -> bool {
+    let url = format!("{}/api/tags", host.trim_end_matches('/'));
+    reqwest::blocking::Client::builder()
+        .timeout(std::time::Duration::from_millis(800))
+        .build()
+        .ok()
+        .and_then(|c| c.get(url).send().ok())
+        .is_some_and(|r| r.status().is_success())
+}
+
+/// Stateful `GET /v1/devices`: compiled devices + hostname + a LIVE
+/// Ollama liveness verdict against this server's configured host
+/// (blocking reqwest on a blocking thread, per project convention).
+/// The web UI gates the "Ask Ollama" demo on the flag.
+pub async fn devices_handler(State(state): State<AppState>) -> Json<impl Serialize> {
+    let host = state.ollama.default_host.clone();
+    let alive = tokio::task::spawn_blocking(move || ollama_alive(&host))
+        .await
+        .unwrap_or(false);
+    Json(mlpl_serve_core::devices::devices_response(alive))
+}
