@@ -10,8 +10,6 @@ use serde::{Deserialize, Serialize};
 use crate::auth::AuthMode;
 use crate::config::{RunConfig, ServeConfig};
 use crate::peers::{PeerRegistry, PeerSessionMap};
-use crate::sessions::{new_interrupt_map, new_map};
-use crate::viz_storage::new_store;
 
 /// Errors the server can fail with at startup or
 /// while serving. Translated to stderr + non-zero
@@ -197,19 +195,7 @@ pub fn build_app_with_peers_cors(
         persist_path,
         ollama,
     } = serve;
-    let sessions = new_map();
-    let interrupts = new_interrupt_map();
-    crate::persist::maybe_load(persist_path.as_deref(), &sessions, &interrupts);
-    let state = AppState {
-        sessions,
-        interrupts,
-        viz: new_store(),
-        peers,
-        peer_sessions: PeerSessionMap::default(),
-        auth_mode,
-        persist_path,
-        ollama,
-    };
+    let state = AppState::from_parts(auth_mode, peers, persist_path, ollama);
     let router = crate::handlers::v1_router(state);
     mlpl_serve_core::router_layers::apply_static_and_cors(router, static_dir, cors_origin)
 }

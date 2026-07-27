@@ -435,8 +435,17 @@ CUDA_COMPUTE_CAP=120 cargo build -p mlpl-serve --features cuda --release
 # binary lands in the REPO-ROOT target/release/ (shared target dir)
 # then kill the old process and restart with its original flags, e.g.:
 ./target/release/mlpl-serve --bind 0.0.0.0:6464 --auth required \
-  --static-dir dist-pages --cors-allow http://localhost:9957
+  --static-dir dist-pages \
+  --cors-allow "http://localhost:9957,http://large12:9957,http://localhost:6466,http://large12:6466"
 ```
+
+`--cors-allow` is a comma-separated origin allow-list; each entry
+must match the browser's `Origin` header EXACTLY (scheme + host +
+port), so `localhost` and `large12` variants are separate entries.
+The user browses the trunk dev page and static hosts via BOTH
+hostnames -- keep all four origins above (2026-07-27 regression:
+a single-origin list CORS-blocked the /v1/devices probe from
+`large12`-hostname pages, silently disabling the GPU demos).
 
 - Check staleness first: compare `ls -la target/release/mlpl-serve`
   against the running process start time (`ps aux | grep mlpl-serve`).

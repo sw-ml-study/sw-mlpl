@@ -177,7 +177,7 @@ pub(crate) fn print_usage() {
     eprintln!(
         "usage: mlpl-serve [--bind <host:port>] [--auth <required|disabled>]\n\
          \x20            [--peer <device>=<url>]... [--insecure-peers]\n\
-         \x20            [--static-dir <path>]\n\
+         \x20            [--static-dir <path>] [--cors-allow <origin>[,<origin>...]]\n\
          \x20            [--tls-cert <cert.pem> --tls-key <key.pem> | --self-signed]\n\
          \n\
          Defaults: --bind 127.0.0.1:6464  --auth required\n\

@@ -139,3 +139,32 @@ pub struct AppState {
     /// `:ask` does not have to carry the host/model in its URL.
     pub ollama: OllamaConfig,
 }
+
+impl AppState {
+    /// Build the per-process state from a [`ServeConfig`]'s
+    /// state-shaped parts: fresh session/interrupt/viz maps, then a
+    /// persistence pre-load when `persist_path` is set. The router
+    /// layers (`static_dir`, `cors_origin`) stay with the caller --
+    /// they configure the HTTP surface, not the state.
+    #[must_use]
+    pub fn from_parts(
+        auth_mode: AuthMode,
+        peers: PeerRegistry,
+        persist_path: Option<PathBuf>,
+        ollama: OllamaConfig,
+    ) -> Self {
+        let sessions = mlpl_serve_core::sessions::new_map();
+        let interrupts = mlpl_serve_core::sessions::new_interrupt_map();
+        crate::persist::maybe_load(persist_path.as_deref(), &sessions, &interrupts);
+        Self {
+            sessions,
+            interrupts,
+            viz: mlpl_serve_core::store::new_store(),
+            peers,
+            peer_sessions: PeerSessionMap::default(),
+            auth_mode,
+            persist_path,
+            ollama,
+        }
+    }
+}

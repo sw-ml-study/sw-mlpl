@@ -404,11 +404,17 @@ The split happens behind an `Evaluator` trait
   on the loss-curve chart. Fetches viz URLs via the
   CORS-enabled `/v1/viz/...` path.
 
-`mlpl-serve --cors-allow <origin>` is the server-side
-toggle that lets a non-same-origin browser hit the
-API. The default deny-by-default posture matches the
-MVP's "loopback + LAN-only" stance; pages-hosted
-demos want an explicit allow-list rather than `*`.
+`mlpl-serve --cors-allow <origin>[,<origin>...]` is the
+server-side toggle that lets a non-same-origin browser
+hit the API. The value is a comma-separated allow-list;
+each entry must match the browser's `Origin` header
+EXACTLY -- scheme, host, and port. `http://localhost:9957`
+does NOT cover `http://large12:9957`: the same page
+reached via a different hostname is a different origin,
+so list every hostname you actually browse from. The
+default deny-by-default posture matches the MVP's
+"loopback + LAN-only" stance; pages-hosted demos want an
+explicit allow-list rather than `*`.
 
 The web REPL's slash commands map to the same
 `/inspect` round-trips as the CLI client. Streaming
