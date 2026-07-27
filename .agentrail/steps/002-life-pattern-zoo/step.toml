@@ -1,9 +1,10 @@
 number = 2
 slug = "life-pattern-zoo"
-status = "in-progress"
+status = "completed"
 description = "New Basics demo 'Life Pattern Zoo (20x20)' right after Game of Life: u:stamp(..."
 role = "production"
 context_files = []
 created_at = "2026-07-27T08:48:17"
+completed_at = "2026-07-27T09:09:35"
 task_type = "demo-content"
-commits = []
+commits = ["0574af73cfe0d76687a9480f2a25bbbe4241c1e8"]

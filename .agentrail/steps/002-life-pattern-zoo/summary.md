@@ -1,0 +1,1 @@
+Life Pattern Zoo (20x20) shipped: u:stamp bulk put, five lifeforms seeded (blinker/block/glider/r-pentomino/vanishing pair), deep gen0-over-gen1 disp view, 32 emit_frame-streamed generations into svg life. Dynamics test pins blinker period-2 / block still / pair extinction. README 60 demos; pages deployed.
