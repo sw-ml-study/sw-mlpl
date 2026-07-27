@@ -1,0 +1,1 @@
+Gosper gun shipped: canonical 36 cells via one u:stamp, period-30 emission proven in-demo (36->41) and pinned by an eval test (->46 at 60), :fns/:list introspection narration, 75 streamed generations, SMIL finale. Life renderer gained adaptive cell sizing (600px target) for big boards. README 61 demos; pages deployed.
