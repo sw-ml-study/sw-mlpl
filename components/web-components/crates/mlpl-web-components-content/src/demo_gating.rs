@@ -1,8 +1,6 @@
-//! Demo-dropdown grouping + device-aware gating, and the connect-time
-//! `/v1/devices` probe hook. Split from `mode_bar` so each module stays
-//! within the function-count budget.
-
-use yew::prelude::*;
+//! Demo-dropdown grouping + device-aware gating. Split from
+//! `mode_bar` (and the probe hook out to `peer_probe`) so each
+//! module stays within the function-count budget.
 
 use mlpl_web_demos::{DEMOS, Device, capability_for, demo_disabled};
 
@@ -64,15 +62,19 @@ pub fn grouped_demos(connected: bool, peer_devices: &[Device]) -> DemoGroups {
         items.sort_by_key(|(_, name, _)| name.to_ascii_lowercase());
     }
     let mut groups: DemoGroups = map.into_iter().collect();
-    groups.sort_by_key(|(section, _)| {
-        // Unknown future sections slot just before the connect tiers.
-        let rank = SECTION_ORDER
-            .iter()
-            .position(|s| s == section)
-            .unwrap_or(SECTION_ORDER.len() - 3);
-        (rank, section.to_ascii_lowercase())
-    });
+    groups.sort_by_key(|(section, _)| section_rank(section));
     groups
+}
+
+/// Sort key for a dropdown section: its curated [`SECTION_ORDER`]
+/// position. Unknown future sections slot just before the connect
+/// tiers, alphabetically.
+fn section_rank(section: &str) -> (usize, String) {
+    let rank = SECTION_ORDER
+        .iter()
+        .position(|s| *s == section)
+        .unwrap_or(SECTION_ORDER.len() - 3);
+    (rank, section.to_ascii_lowercase())
 }
 
 /// Tooltip text for a DISABLED demo option, explaining how to enable it.
@@ -89,39 +91,9 @@ pub fn disabled_hint(section: &str) -> &'static str {
     }
 }
 
-/// Map `GET /v1/devices` name strings to [`Device`]s. Unknown dropped.
-fn devices_from_names(names: &[String]) -> Vec<Device> {
-    names
-        .iter()
-        .filter_map(|n| match n.as_str() {
-            "cpu" => Some(Device::Cpu),
-            "mlx" => Some(Device::Mlx),
-            "cuda" => Some(Device::Cuda),
-            _ => None,
-        })
-        .collect()
-}
-
-/// Probe the connected peer's device set once on mount (async
-/// `GET /v1/devices`), returning the resolved set. Empty until the
-/// probe completes (and on the public, unconnected build) -- so GPU
-/// demos start disabled and the right ones light up once the peer's
-/// capability is known.
-#[hook]
-pub fn use_peer_devices() -> Vec<Device> {
-    let peer = use_state(Vec::<Device>::new);
-    {
-        let peer = peer.clone();
-        use_effect_with((), move |()| {
-            yew::platform::spawn_local(async move {
-                let names = mlpl_web_eval::devices::fetch_devices().await;
-                peer.set(devices_from_names(&names));
-            });
-            || ()
-        });
-    }
-    (*peer).clone()
-}
+// Compat re-export: the probe hook moved to `peer_probe` (module
+// split); dropdown callers keep importing it from demo_gating.
+pub use crate::peer_probe::use_peer_devices;
 
 /// "Connected" only counts when the server is actually reachable:
 /// an https demo page cannot reach an http connect server (mixed

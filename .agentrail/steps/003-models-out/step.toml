@@ -1,6 +1,6 @@
-number = 2
+number = 3
 slug = "models-out"
-status = "pending"
+status = "in-progress"
 description = "eval decomposition step 1 per docs/eval-decomposition-saga.md: extract the 19..."
 role = "production"
 context_files = []

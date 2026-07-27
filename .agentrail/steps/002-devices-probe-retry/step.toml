@@ -1,0 +1,8 @@
+number = 2
+slug = "devices-probe-retry"
+status = "in-progress"
+description = "Regression fix: connect-mode /v1/devices probe is one-shot at ModeBar mount; ..."
+role = "production"
+context_files = []
+created_at = "2026-07-27T13:21:07"
+commits = []
