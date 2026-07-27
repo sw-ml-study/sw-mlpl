@@ -1,0 +1,1 @@
+mlpl-web 10-module FAIL retired: readme_counts -> tests/, main body files folded into cfg arms of main.rs (build.rs codegen removed), app() under LOC budget via build_labels + use_chrome_hooks bundle. Copyright footer wording fixed. 2 failed / 293 warnings -- both strictly down. Pages rebuilt.
