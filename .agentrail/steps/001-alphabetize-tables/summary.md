@@ -1,0 +1,1 @@
+Alphabetical-within-groups ordering shipped: render-time sorts in :builtins + :ask reference; 15 lang-reference builtin tables, Value Kinds, and the usage command table re-sorted; ordering policy documented; stale scatter row corrected. Pages deployed.
