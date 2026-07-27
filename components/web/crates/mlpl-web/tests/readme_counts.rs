@@ -18,7 +18,7 @@
 //! inline in `lessons.rs` to keep that file under the
 //! file-LOC budget.
 
-use crate::demos::DEMOS;
+use mlpl_web_demos::DEMOS;
 use mlpl_web_lessons::lessons::LESSONS;
 
 const README: &str = include_str!("../../../../../README.md");

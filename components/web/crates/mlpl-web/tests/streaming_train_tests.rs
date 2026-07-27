@@ -15,6 +15,7 @@
 //! loss curve comes back.
 
 #[allow(dead_code)]
+#[allow(unused_imports)]
 #[path = "../../../../wasm/crates/mlpl-web-eval/src/eval.rs"]
 mod eval;
 

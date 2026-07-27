@@ -2246,6 +2246,8 @@ name = "mlpl-web-render-live"
 version = "0.20.0"
 dependencies = [
  "gloo 0.11.0",
+ "mlpl-array",
+ "mlpl-viz-marks",
  "mlpl-web-eval",
  "yew",
 ]

@@ -69,7 +69,6 @@ pub use mlpl_web_paths::view as paths_view;
 pub use mlpl_web_paths_data as paths;
 pub use mlpl_web_render_aux::plotly_panel;
 #[cfg(test)]
-mod readme_counts;
 pub use mlpl_web_render_aux::resize_handle;
 pub use mlpl_web_render_aux::tutorial as render_tutorial;
 pub use mlpl_web_render_core::callbacks as render_callbacks;

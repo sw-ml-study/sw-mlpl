@@ -44,3 +44,27 @@ pub fn use_ask_hook(on_submit: Callback<String>) {
         || ()
     });
 }
+
+/// One-call bundle for the App component's trailing chrome hooks
+/// (scroll tracking, post-splash focus, :ask wiring, global
+/// keydown). A `#[hook]` so the rule-of-hooks holds; exists so
+/// `app()` stays inside the function-LOC budget without hiding
+/// any hook behind a condition.
+#[hook]
+pub fn use_chrome_hooks(
+    active: &mlpl_web_render_types::state::ActiveContext,
+    ui: &mlpl_web_render_types::state::UiState,
+    onboarding: &crate::app_state::OnboardingState,
+    callbacks: &mlpl_web_render_types::app_callbacks::AppCallbacks,
+) {
+    crate::app_hooks::use_scroll_effect(active.history.clone());
+    crate::app_hooks::use_focus_after_splash(onboarding.show_splash.clone());
+    use_ask_hook(callbacks.on_submit.clone());
+    crate::app_hooks::use_global_keydown(
+        ui.dialog_open.clone(),
+        ui.lesson_idx.clone(),
+        onboarding.show_tour.clone(),
+        onboarding.show_splash.clone(),
+        ui.show_3d.clone(),
+    );
+}
