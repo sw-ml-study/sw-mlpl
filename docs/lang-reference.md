@@ -64,6 +64,50 @@ The annotation form (`x : [batch] = ...`) requires a space after
 functions: when `Value::Function` lands in a future saga, `:foo`
 will lift to a function value cleanly.
 
+## The Three Kinds of Name: `name` vs `:name` vs `u:name`
+
+One naming design, three deliberate roles:
+
+| Form | What it is | Example |
+| --- | --- | --- |
+| `name(...)` | CALL a builtin. The bare name is only meaningful applied to arguments. | `disp(G)`, `rotate(x, 1, 0)` |
+| `:name` | QUOTE a builtin into a first-class VALUE (APL's quoted function). What higher-order builtins consume; typing `:disp` alone shows the reference, not a rendering. | `reduce(:add, S, 0)`, `f = :max` |
+| `u:name` | A USER-DEFINED function. The mandatory `u:` namespace prefix keeps your names from ever colliding with (or shadowing) present or FUTURE builtins -- a new builtin release can never break your workspace. | `def u:life(g) { ... }`, `u:life(G)` |
+
+Why the trichotomy: calls and values must look different (so
+`reduce(add, v)` cannot silently pass a VARIABLE named add where
+a function was meant), and user space and builtin space must
+look different (APL workspaces suffered decades of name-clash
+pain; the `u:` prefix is the cure priced at two characters).
+Symmetry to come: today only builtins have the quoted form --
+`:u:name` does not exist yet. When user functions become
+first-class values (APL2 staging plan, the same item that
+unlocks the `attempt(u:f, u:handler)` trap combinator), the
+quoting rule extends to them.
+
+Introspection follows the same split: `:builtins` lists the
+builtin space, `:fns` lists YOUR `u:` space, `:list u:name`
+prints a definition back (verbatim source, `#` comments
+included, when defined in this process), and `:describe` works
+on both.
+
+## Value Kinds
+
+Every value the evaluator produces is one of NINE kinds (the
+`kind` field connect-mode responses carry uses the same names):
+
+| Kind | Produced by | Notes |
+| --- | --- | --- |
+| `array` | literals, iota/fill/randn, all math | The workhorse: rank-N dense f64 tensor, optional axis labels. |
+| `string` | `"..."` literals, svg()/disp() and other renderers | Separate from arrays; `x = "hi"` binds a string. |
+| `string-list` | `["a", "b"]` (all-string literals), tokenizer vocab helpers | Sibling of array for text data. |
+| `record` | `{field: expr, ...}` literals | Named fields, `r.field` access; the canonical error-object payload. |
+| `result` | `ok(v)` / `err(e)`, to_number/to_int/env, list_get | The two-state sum consumed by is_ok/unwrap/unwrap_or/get_value/get_error/`?` (docs/error-handling.md). |
+| `model` | linear/chain/attention/... model DSL | Layer tree; renders as a Sankey diagram. |
+| `tokenizer` | train_bpe | Paired with apply_tokenizer/decode. |
+| `builtin-ref` | `:name` | The quoted-builtin value above. |
+| `device-tensor` | `device("mlx"/"cuda") { ... }` results held on-device | Fetched back on demand; keeps GPU residency explicit. |
+
 ## Array Literals
 
 ```

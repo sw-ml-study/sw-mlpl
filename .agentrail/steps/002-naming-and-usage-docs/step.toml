@@ -1,6 +1,6 @@
 number = 2
 slug = "naming-and-usage-docs"
-status = "pending"
+status = "in-progress"
 description = "Document the naming trichotomy (name = builtin call; :name = quoted builtin r..."
 role = "production"
 context_files = []

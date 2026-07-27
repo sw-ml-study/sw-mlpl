@@ -3535,6 +3535,10 @@ planned (see docs/future-saga-classical-ml.md). Contrast
 [[K-Means]], which clusters unlabeled data instead of voting
 with labels.
 
+## Name Forms (name / :name / u:name)
+
+sw-MLPL's three deliberate name roles: bare `name(...)` CALLS a builtin; `:name` QUOTES it into a first-class value (what `reduce(:add, x)` consumes -- typing `:disp` shows the reference, calling `disp(G)` renders); `u:name` is the mandatory namespace for YOUR functions, so user code can never collide with present or future builtins (the cure for APL's workspace name-clash history, priced at two characters). Introspect each space with `:builtins`, `:fns`, `:list u:name` (verbatim source, comments included), and `:describe`. Future symmetry: first-class `u:` values (`:u:name`) arrive with the APL2 staging plan. See "The Three Kinds of Name" in the Language Reference tab.
+
 ## Naive Bayes
 
 A generative classifier: apply Bayes' rule with the "naive"

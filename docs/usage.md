@@ -59,6 +59,13 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:untag <name>` | Clear a binding's auto-attached tag |
 | `:wsid` | Workspace summary |
 | `:experiments` | List captured experiment runs |
+| `:fns` | List your `def u:` functions (APL's `)FNS`) |
+| `:list <u:name>` | Print a function back -- verbatim source, `#` comments included |
+| `:version` | sw-MLPL version + target arch |
+| `:status` / `:status watch` | Connected backend(s): devices, GPUs, live CPU/RAM/GPU/VRAM |
+| `:ask <prompt>` | Send the prompt to the connected Ollama model (connect mode) |
+| `:connect list` / `:connect set <m>` | List / pick the server's Ollama model for `:ask` |
+| `:reset` | Cancel ALL in-flight work on the connected backend (y/N prompt) |
 | `:upload <name>` | Open file picker; bind photo as a variable (web only) |
 | `:3d` | Open 3D visualization stage (also Ctrl+3) |
 | `:2d` | Close 3D visualization stage |
@@ -69,6 +76,75 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:trace json` | Print last trace as JSON |
 | `:trace json <file>` | Write trace JSON to a file |
 | `exit` | Quit the REPL |
+
+In the web playground the same commands work in the REPL box, and
+`:<cmd> --help` prints one command's usage.
+
+## User-Defined Functions
+
+```
+def u:zscore(x) {
+    "normalize x to zero mean, unit-ish variance";   # doc-string
+    m = u:mean_of(x)?;
+    # subtract the mean, divide by the std estimate
+    d = x - fill([tally(x)], m);
+    s = u:mean_of(d * d)?;
+    ok(d / sqrt(s + 0.0001))
+}
+```
+
+- The `u:` prefix is REQUIRED (it keeps your names from ever
+  clashing with builtins -- see "The Three Kinds of Name" in the
+  Language Reference). Call with `u:zscore(v)`.
+- The body's last expression is the return value; `return expr`
+  exits early.
+- A leading string literal is the DOC-STRING: `:fns` shows it
+  beside the signature and `:describe u:zscore` prints it.
+- `#` comments inside a definition are KEPT: `:list u:zscore`
+  prints the function back exactly as you wrote it.
+- Arguments may be arrays, Results, strings, or records.
+
+## Control Flow and Error Handling
+
+```
+if gt(x, 0) { "positive" } else { "not positive" }
+while lt(i, 10) { i = i + 1 }           # break / continue supported
+r = ok(42); unwrap_or(r, 0)             # Results: ok/err/is_ok/unwrap/...
+safe = try { take(v, 0, 9) } catch e { fill([1], 0) }   # e = {kind, message}
+def u:f(r) { v = r?; ok(v + 1) }        # ? unwraps Ok / early-returns Err
+```
+
+`if`/`while` are expressions; Results carry failure as data;
+`try/catch` demotes a hard error into the handler's value; `?`
+propagates the first Err out of a `u:` function (the railway
+pattern). Full guide: `docs/error-handling.md`; the "Error
+Handling (two planes, two bridges)" demo walks all of it.
+
+## Records and Results
+
+```
+rec = {kind: "index", message: "axis 3 out of range"}
+rec.message                              # field access
+e = err(rec)                             # the canonical error object
+get_value(e)                             # [] -- zilde Option projections
+get_error(err(404))                      # [404]
+```
+
+## Connect Mode (GPU server)
+
+Start a server and open the playground FROM it so API and UI
+share one origin:
+
+```
+CUDA_COMPUTE_CAP=120 cargo build -p mlpl-serve --features cuda --release
+./target/release/mlpl-serve --bind 0.0.0.0:6464 --auth required --static-dir dist-pages
+# browse: http://<host>:6464/sw-mlpl/?connect=http://<host>:6464
+```
+
+Connected, the GPU-tier demos light up, heavy lines run
+server-side with live telemetry sparklines, train blocks stream
+a live loss curve, and Life demos stream the live board
+(`emit_frame`). `:status` self-tests the link.
 
 ## Working with Arrays
 
