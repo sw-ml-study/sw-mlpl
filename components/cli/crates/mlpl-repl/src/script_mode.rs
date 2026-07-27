@@ -68,6 +68,7 @@ fn eval_script_value(
         Ok(s) => s,
         Err(code) => return code,
     };
+    env.set_pending_source(Some(input.to_string()));
     let result = if tracing {
         let mut trace = Trace::new(input.into());
         let r = mlpl_eval::eval_program_value_traced(&stmts, env, &mut trace);
@@ -78,6 +79,7 @@ fn eval_script_value(
     } else {
         mlpl_eval::eval_program_value(&stmts, env)
     };
+    env.set_pending_source(None);
     result.map_or_else(
         |e| report_script_err(input, &e),
         |v| finish_script_value(v, svg_out),

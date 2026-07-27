@@ -86,7 +86,7 @@ pub async fn eval_handler(
 ) -> Result<Json<EvalResponse>, (StatusCode, Json<ErrorResponse>)> {
     let stmts = parse_program(&body.program)?;
     let (session, interrupt) = take_session_for_eval(&state, id, &headers).await?;
-    let rx = spawn_eval(&state, id, session, stmts);
+    let rx = spawn_eval(&state, id, session, stmts, body.program.clone());
     let mut guard = AbortGuard {
         interrupt,
         armed: true,

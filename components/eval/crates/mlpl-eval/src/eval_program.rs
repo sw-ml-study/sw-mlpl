@@ -34,6 +34,22 @@ pub fn eval_program_value(stmts: &[Expr], env: &mut Environment) -> Result<Value
     run_program(stmts, env, None)
 }
 
+/// Lex + parse + evaluate `source`, remembering the raw text for
+/// the duration so `def u:` functions capture their own span --
+/// `:list` then shows the definition AS WRITTEN, `#` comments
+/// included (naming-and-docs saga). Prefer this over manual
+/// lex/parse/`eval_program_value` at entry points that have the
+/// program text.
+pub fn eval_source_value(source: &str, env: &mut Environment) -> Result<Value, EvalError> {
+    let tokens = mlpl_parser::lex(source).map_err(|e| EvalError::Unsupported(format!("{e:?}")))?;
+    let stmts =
+        mlpl_parser::parse(&tokens).map_err(|e| EvalError::Unsupported(format!("{e:?}")))?;
+    env.pending_source = Some(source.to_string());
+    let out = run_program(&stmts, env, None);
+    env.pending_source = None;
+    out
+}
+
 /// Evaluate a program with tracing enabled. Returns the final array.
 pub fn eval_program_traced(
     stmts: &[Expr],

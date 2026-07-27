@@ -161,7 +161,10 @@ fn eval_line(
             Err(e) => report_err(&e),
         }
     } else {
-        match mlpl_eval::eval_program_value(&stmts, env) {
+        env.set_pending_source(Some(input.to_string()));
+        let evaluated = mlpl_eval::eval_program_value(&stmts, env);
+        env.set_pending_source(None);
+        match evaluated {
             Ok(value) => {
                 let formatted = format!("{value}");
                 let display =

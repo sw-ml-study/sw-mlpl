@@ -67,11 +67,12 @@ pub(crate) fn spawn_eval(
     id: Uuid,
     session: crate::sessions::Session,
     stmts: Vec<mlpl_parser::Expr>,
+    program: String,
 ) -> oneshot::Receiver<Result<EvalResponse, String>> {
     let (tx, rx) = oneshot::channel();
     let state = state.clone();
     tokio::spawn(async move {
-        let resp = run_eval(&state, id, session, stmts).await;
+        let resp = run_eval(&state, id, session, stmts, program).await;
         let _ = tx.send(resp);
     });
     rx
@@ -85,9 +86,12 @@ pub(crate) async fn run_eval(
     id: Uuid,
     mut session: crate::sessions::Session,
     stmts: Vec<mlpl_parser::Expr>,
+    program: String,
 ) -> Result<EvalResponse, String> {
     let join = tokio::task::spawn_blocking(move || {
+        session.env.set_pending_source(Some(program));
         let value = eval_program_value(&stmts, &mut session.env);
+        session.env.set_pending_source(None);
         (session, value)
     })
     .await;

@@ -238,12 +238,20 @@ pub(crate) fn eval_expr(
         return Err(EvalError::ContinueSignal);
     }
     if let Expr::FnDef {
-        name, params, body, ..
+        name,
+        params,
+        body,
+        span,
     } = expr
     {
+        let source = env
+            .pending_source
+            .as_ref()
+            .and_then(|s| s.get(span.start..span.end))
+            .map(str::to_string);
         env.define_fn(
             name.clone(),
-            crate::env_user_fns::UserFn::new(params.clone(), body.clone()),
+            crate::env_user_fns::UserFn::new(params.clone(), body.clone()).with_source(source),
         );
         return Ok(Value::Array(DenseArray::from_scalar(0.0)));
     }

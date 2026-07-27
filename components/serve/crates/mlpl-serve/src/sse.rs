@@ -60,6 +60,7 @@ fn spawn_eval_task(
     id: Uuid,
     mut session: crate::sessions::Session,
     stmts: Vec<mlpl_parser::Expr>,
+    program: String,
     sessions_map: crate::sessions::SessionMap,
     viz: crate::viz_storage::SharedVizStore,
     tx: mpsc::Sender<SseEvent>,
@@ -67,7 +68,9 @@ fn spawn_eval_task(
     tokio::spawn(async move {
         let _ = tx.send(SseEvent::Ready).await;
         let join = tokio::task::spawn_blocking(move || {
+            session.env.set_pending_source(Some(program));
             let value = eval_program_value(&stmts, &mut session.env);
+            session.env.set_pending_source(None);
             (session, value)
         })
         .await;
@@ -135,7 +138,7 @@ pub async fn eval_stream_handler(
     let session = take_stream_session(&state, &id, tx.clone()).await?;
     let sessions = state.sessions.clone();
     let viz = state.viz.clone();
-    spawn_eval_task(id, session, stmts, sessions, viz, tx);
+    spawn_eval_task(id, session, stmts, body.program.clone(), sessions, viz, tx);
     let stream = ReceiverStream::new(rx).map(|ev| Ok::<_, Infallible>(ev.to_axum_event()));
     Ok(Sse::new(stream).keep_alive(KeepAlive::default()))
 }

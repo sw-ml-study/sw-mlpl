@@ -147,6 +147,11 @@ pub struct Environment {
     pub(crate) results: HashMap<String, (bool, Value)>, // Saga 29 step 012
     pub(crate) cli_args: Vec<String>,                   // Saga 31 step 003
     pub(crate) user_fns: HashMap<String, crate::env_user_fns::UserFn>,
+    /// Raw text of the program currently being evaluated, when the
+    /// entry point provided it (naming-and-docs saga): `def` slices
+    /// its own span out of this so `:list` shows the source AS
+    /// WRITTEN, `#` comments and all -- the APL2 listing experience.
+    pub(crate) pending_source: Option<String>,
 }
 
 impl Environment {

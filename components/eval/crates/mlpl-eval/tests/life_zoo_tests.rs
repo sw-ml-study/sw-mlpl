@@ -7,7 +7,8 @@ use mlpl_eval::{Environment, eval_program_value};
 use mlpl_parser::{lex, parse};
 
 fn run(env: &mut Environment, src: &str) -> Result<mlpl_eval::Value, String> {
-    let prog = parse(&lex(src).map_err(|e| format!("lex {e:?}"))?).map_err(|e| format!("parse {e:?}"))?;
+    let prog =
+        parse(&lex(src).map_err(|e| format!("lex {e:?}"))?).map_err(|e| format!("parse {e:?}"))?;
     eval_program_value(&prog, env).map_err(|e| format!("eval {e:?}"))
 }
 
@@ -62,11 +63,19 @@ fn zoo_dynamics_hold() {
     }
     run(&mut env, "g2 = u:life20(u:life20(Z))").expect("two gens");
     // block cells still alive
-    let v = run(&mut env, "take(reshape(g2, [400]), 0, 50) + take(reshape(g2, [400]), 0, 71)").expect("block");
+    let v = run(
+        &mut env,
+        "take(reshape(g2, [400]), 0, 50) + take(reshape(g2, [400]), 0, 71)",
+    )
+    .expect("block");
     assert_eq!(format!("{v}"), "2", "block is a still life");
     // vanishing pair dead by gen 1
     run(&mut env, "g1b = u:life20(Z)").expect("one gen");
-    let v = run(&mut env, "take(reshape(g1b, [400]), 0, 305) + take(reshape(g1b, [400]), 0, 306)").expect("pair");
+    let v = run(
+        &mut env,
+        "take(reshape(g1b, [400]), 0, 305) + take(reshape(g1b, [400]), 0, 306)",
+    )
+    .expect("pair");
     assert_eq!(format!("{v}"), "0", "lone pair starves");
     // blinker back to horizontal after 2
     let v = run(&mut env, "take(reshape(g2, [400]), 0, 42) + take(reshape(g2, [400]), 0, 43) + take(reshape(g2, [400]), 0, 44)").expect("blinker");

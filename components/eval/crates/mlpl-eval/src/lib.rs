@@ -144,6 +144,7 @@ mod type_errors;
 pub use env::{Environment, PeerDispatcher, model_params};
 pub use eval_program::{
     eval_program, eval_program_traced, eval_program_value, eval_program_value_traced,
+    eval_source_value,
 };
 pub use experiment::{ExperimentRecord, ParamShape};
 pub use grad::{OptimizerState, optim_state, optim_state_mut};

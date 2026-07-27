@@ -39,7 +39,10 @@ pub(crate) fn eval_input_with_values(input: &str, env: &mut Environment) -> Eval
         Ok(s) => s,
         Err(e) => return text_result(format!("error: {e}")),
     };
-    match mlpl_eval::eval_program_value(&stmts, env) {
+    env.set_pending_source(Some(trimmed.to_string()));
+    let evaluated = mlpl_eval::eval_program_value(&stmts, env);
+    env.set_pending_source(None);
+    match evaluated {
         Ok(value) => {
             let mut result = value_to_result(value);
             // Saga D fix: `mdl = attention(...)` and other
@@ -160,7 +163,10 @@ pub(crate) fn eval_input(input: &str, env: &mut Environment) -> String {
         Err(e) => return format!("error: {e}"),
     };
 
-    match mlpl_eval::eval_program_value(&stmts, env) {
+    env.set_pending_source(Some(trimmed.to_string()));
+    let evaluated = mlpl_eval::eval_program_value(&stmts, env);
+    env.set_pending_source(None);
+    match evaluated {
         Ok(value) => format!("{value}"),
         Err(e) => format!("error: {e}"),
     }
