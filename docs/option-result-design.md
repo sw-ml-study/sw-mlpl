@@ -279,14 +279,24 @@ demote-to-value semantics.
 
 ### Error-handling demo (queued after the Life demo)
 
-Three acts: (1) the two planes -- an `err(...)` value vs a hard
+Placement (user direction 2026-07-26): category BASICS, placed
+near Structure Zoo / Game of Life -- error handling is
+foundational, not an advanced topic.
+
+Four acts: (1) the two planes -- an `err(...)` value vs a hard
 error, side by side with `disp`; (2) the railway -- safe lens
 get returning `err({kind, message})`, `is_ok` branching,
-`unwrap_or`, `get_value`/`get_error` projections; (3) the
-bridges -- `try/catch` demoting an out-of-bounds `take` into a
-handled fill value, and `?` propagating through a `u:` pipeline.
-Glossary: [[Result]], [[Error Handling]], railway-oriented
-programming.
+`unwrap_or`, `get_value`/`get_error` projections; (3) ERRORS IN
+USER-DEFINED FUNCTIONS (user direction) -- the guard-then-ok/err
+shape as THE way a `u:` function reports failure (`u:get_safe`
+is the template: validate inputs first, return
+`err({kind, ...})` instead of letting a builtin explode mid-
+body), a caller branching on the Result, and a two-stage `u:`
+pipeline propagating the first failure; (4) the bridges --
+`try/catch` demoting an out-of-bounds `take` into a handled
+fill value, and `?` collapsing act 3's manual propagation into
+one line per stage. Glossary: [[Result]], [[Error Handling]],
+railway-oriented programming.
 
 ## First consumers
 

@@ -104,11 +104,14 @@ lens finale shows them against a safe deep-lens get.
    early-returns the `err` (reusing the existing `return`
    machinery). At top level it behaves as `unwrap` (loud).
    Interim spelled form `check(expr)` if postfix syntax slips.
-3. **Error Handling demo** (step: error-handling-demo) -- three
-   acts: the two planes side by side; the railway
-   (safe gets, `unwrap_or`, projections); the two bridges
-   (`catch` demoting an out-of-bounds `take`, `?` propagating
-   through a `u:` pipeline).
+3. **Error Handling demo** (step: error-handling-demo) -- a
+   BASICS demo near Structure Zoo / Game of Life, four acts:
+   the two planes side by side; the railway (safe gets,
+   `unwrap_or`, projections); errors in USER-DEFINED functions
+   (guard-then-ok/err as the way a `u:` body reports failure,
+   plus a two-stage pipeline propagating the first Err); the
+   two bridges (`catch` demoting an out-of-bounds `take`, `?`
+   collapsing the manual propagation).
 4. **Trap combinator** (needs first-class `u:` values) --
    `attempt(u:risky, u:handler)`, later sugar
    `u:risky :: u:handler`: the APL-family native form (J `::`,
