@@ -1,0 +1,1 @@
+Unconnected :connect list now reports an empty listing, :ask errors properly, :status notes what it would show -- none leak to the parser (was 'undefined variable: list' on github.io). try_connect_only_note in running.rs ahead of the connect handlers; playwright static-host verification; pages redeployed.
