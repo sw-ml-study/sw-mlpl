@@ -1,0 +1,1 @@
+Hardened :ask against transcript-echo copying (raw-lines-only rule naming the mlpl>/=> artifacts) and added STRICT_CODE_RECAP as the system message's final words (recency placement) restating positional-only, top-level-only-models, no-echoes. 6 native pin tests; pages redeployed with the recap verified in the wasm.
