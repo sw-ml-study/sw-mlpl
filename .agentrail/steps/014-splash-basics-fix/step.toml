@@ -1,8 +1,9 @@
 number = 14
 slug = "splash-basics-fix"
-status = "in-progress"
+status = "completed"
 description = "User regression: splash 'Run the Basics demo' card ran Game of Life (hardcode..."
 role = "production"
 context_files = []
 created_at = "2026-07-28T16:00:48"
-commits = []
+completed_at = "2026-07-28T16:01:09"
+commits = ["3df5d334d69a129a92d725c0679b05d291c2fc82"]

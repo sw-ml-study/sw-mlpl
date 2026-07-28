@@ -1,0 +1,1 @@
+Splash Basics card fixed: RunDemo(7) index rot replaced by name-resolved basics_demo_index() with a native pin test; playwright verifies the card runs Basics and that post-demo typing + eval work (the reported input lockup does not reproduce on the current bundle). Pages redeployed.
