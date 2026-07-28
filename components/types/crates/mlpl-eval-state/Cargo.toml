@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-eval-state"
+description = "Leaf session-state types shared below the evaluator hub: interrupt token, optimizer buffers, experiment records, and the GPU step seam"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+serde = { version = "1", features = ["derive"] }
+
+[lints]
+workspace = true

@@ -8,8 +8,8 @@
 //! `impl GpuEnv for Environment` to the crate that owns `Environment`.
 
 use crate::env::Environment;
-use crate::gpu_env::GpuEnv;
 use mlpl_array::DenseArray;
+use mlpl_eval_state::GpuEnv;
 
 impl GpuEnv for Environment {
     fn binding(&self, name: &str) -> Option<&DenseArray> {

@@ -15,49 +15,15 @@
 //! (gradual-additivity rule). The server installs one for the
 //! duration of each eval call.
 
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, Ordering};
-
 use mlpl_array::{DenseArray, Shape};
 use mlpl_trace::TraceValue;
 
 use crate::env::Environment;
 use mlpl_eval_types::EvalError;
 
-/// Cancellation token. Cheap to `clone` (shared `Arc`). The same
-/// instance is held by the session map (cancel handler flips it)
-/// and the evaluator's `Environment` (eval reads it).
-#[derive(Debug, Clone, Default)]
-pub struct Interrupt(Arc<AtomicBool>);
-
-impl Interrupt {
-    /// Construct a fresh, not-yet-tripped token.
-    #[must_use]
-    pub fn new() -> Self {
-        Self::default()
-    }
-
-    /// Trip the token. Idempotent: a second `set()` is a no-op,
-    /// which is what makes `POST /cancel` idempotent at the server
-    /// layer too.
-    pub fn set(&self) {
-        self.0.store(true, Ordering::SeqCst);
-    }
-
-    /// Clear the token back to "not tripped". Called by the server
-    /// before each eval so a prior cancel does not contaminate the
-    /// next call on the same session.
-    pub fn reset(&self) {
-        self.0.store(false, Ordering::SeqCst);
-    }
-
-    /// Read the current state. Used by `Environment::check_interrupt`
-    /// at each loop / pre-builtin checkpoint.
-    #[must_use]
-    pub fn is_set(&self) -> bool {
-        self.0.load(Ordering::SeqCst)
-    }
-}
+// The token type moved to mlpl-eval-state (env-types-out step);
+// re-exported so `crate::interrupt::Interrupt` paths keep working.
+pub use mlpl_eval_state::Interrupt;
 
 /// Enrich a bubbled `Cancelled` (from a pre-builtin checkpoint
 /// inside a `train` body or from the loop-head check itself)

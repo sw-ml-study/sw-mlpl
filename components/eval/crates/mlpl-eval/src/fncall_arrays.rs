@@ -118,15 +118,12 @@ fn eval_load_images(args: &[Expr], env: &mut Environment) -> Result<Value, EvalE
     let Expr::ArrayLit(dims, _) = a1 else {
         return Err(err("arg 1 must be a [H, W] array literal"));
     };
-    if dims.len() != 2 {
-        return Err(err(&format!(
-            "expected [H, W], got {} elements",
-            dims.len()
-        )));
-    }
+    let [h, w] = dims.as_slice() else {
+        return Err(err("expected exactly two [H, W] entries"));
+    };
     let parse_dim = |e: &Expr| match e {
         Expr::IntLit(n, _) if *n >= 0 => Ok(*n as usize),
         _ => Err(err("[H, W] entries must be non-negative integers")),
     };
-    crate::loader::eval_load_images(env, dir, parse_dim(&dims[0])?, parse_dim(&dims[1])?)
+    crate::loader::eval_load_images(env, dir, parse_dim(h)?, parse_dim(w)?)
 }

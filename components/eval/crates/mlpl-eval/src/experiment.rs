@@ -8,38 +8,13 @@ use std::path::Path;
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 use mlpl_trace::{Trace, TraceValue};
-use serde::{Deserialize, Serialize};
 
 use crate::env::Environment;
 use mlpl_eval_types::EvalError;
 
-/// One recorded run. Written to `<exp_dir>/<name>/<ts>/run.json`
-/// by the terminal REPL; also appended to `env.experiment_log`
-/// so the web REPL can surface runs via `:experiments`.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ExperimentRecord {
-    /// Name passed to the `experiment "..."` form.
-    pub name: String,
-    /// Wall-clock `SystemTime::duration_since(UNIX_EPOCH)` in
-    /// nanoseconds at run-entry. Used to make the on-disk
-    /// timestamp subdir unique.
-    pub timestamp_ns: u128,
-    /// `_metric`-suffixed scalar values captured at run-exit.
-    pub metrics: BTreeMap<String, f64>,
-    /// Shape metadata for every bound tracked parameter at
-    /// run-exit. Keyed by param name.
-    pub params_snapshot: BTreeMap<String, ParamShape>,
-}
-
-/// Shape snapshot stored inside an `ExperimentRecord`.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct ParamShape {
-    /// Positional dims.
-    pub shape: Vec<usize>,
-    /// Per-axis labels when the array is labeled; `None` when
-    /// the array has no labels.
-    pub labels: Option<Vec<Option<String>>>,
-}
+// The record types moved to mlpl-eval-state (env-types-out step);
+// re-exported so `crate::experiment::ExperimentRecord` keeps working.
+pub use mlpl_eval_state::{ExperimentRecord, ParamShape};
 
 /// Evaluate an `experiment "name" { body }` block.
 pub(crate) fn eval_experiment(

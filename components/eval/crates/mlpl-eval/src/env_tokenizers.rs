@@ -5,7 +5,7 @@
 //! under the module-function-count warn line.
 
 use crate::env::Environment;
-use crate::tokenizer::TokenizerSpec;
+use mlpl_eval_core::TokenizerSpec;
 
 impl Environment {
     /// Bind `name` to a tokenizer value. Saga 12 step 004.

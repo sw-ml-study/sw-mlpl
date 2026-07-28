@@ -10,7 +10,7 @@ use mlpl_core::ValueTag;
 use crate::experiment::ExperimentRecord;
 use crate::grad::OptimizerState;
 use crate::interrupt::Interrupt;
-use crate::tokenizer::TokenizerSpec;
+use mlpl_eval_core::TokenizerSpec;
 use mlpl_eval_core::metric_sink::MetricSink;
 use mlpl_eval_core::model::ModelSpec;
 use mlpl_eval_types::EvalError;
@@ -101,7 +101,7 @@ pub struct Environment {
         all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
         all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
     ))]
-    pub(crate) gpu_step: Option<Arc<dyn crate::gpu_step::GpuAdamStep>>,
+    pub(crate) gpu_step: Option<Arc<dyn mlpl_eval_state::GpuAdamStep>>,
     /// Peer-resident tensor handles bound by assignment.
     pub(crate) device_tensors: HashMap<String, Value>,
     /// Saga 23 step 001: optional ValueTag attached per binding
@@ -165,7 +165,7 @@ impl Environment {
         ))]
         {
             Self {
-                gpu_step: crate::gpu_registry::installed_gpu_step(),
+                gpu_step: mlpl_eval_state::installed_gpu_step(),
                 ..Self::default()
             }
         }
@@ -184,7 +184,7 @@ impl Environment {
         all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
         all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
     ))]
-    pub(crate) fn gpu_step(&self) -> Option<Arc<dyn crate::gpu_step::GpuAdamStep>> {
+    pub(crate) fn gpu_step(&self) -> Option<Arc<dyn mlpl_eval_state::GpuAdamStep>> {
         self.gpu_step.clone()
     }
 }

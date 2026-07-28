@@ -219,22 +219,9 @@ pub(crate) fn eval_shape_dims(
 // Step 001 adds only the storage type and stub built-in dispatch.
 // Steps 002 and 003 fill in `momentum_sgd` and `adam`.
 
-/// Per-optimizer, per-parameter state buffers (e.g. momentum velocity,
-/// Adam first/second moments).
-///
-/// Step 001 exposes the storage as plain public fields keyed by
-/// `(optimizer_name, param_name, slot_name)` so steps 002 and 003 can
-/// fill in `momentum_sgd` and `adam` without dragging extra accessor
-/// helpers across the per-module function-count budget.
-#[derive(Clone, Debug, Default)]
-pub struct OptimizerState {
-    /// Buffers keyed by `(optimizer_name, param_name, slot_name)`.
-    /// `slot_name` lets a single optimizer store multiple buffers per
-    /// param (e.g. Adam needs both `m` and `v`).
-    pub buffers: HashMap<(String, String, String), DenseArray>,
-    /// Per-optimizer step counter (for Adam bias correction).
-    pub steps: HashMap<String, u64>,
-}
+// The buffer type moved to mlpl-eval-state (env-types-out step);
+// re-exported so `crate::grad::OptimizerState` paths keep working.
+pub use mlpl_eval_state::OptimizerState;
 
 /// Read-only accessor used by tests and downstream optimizer code.
 #[must_use]

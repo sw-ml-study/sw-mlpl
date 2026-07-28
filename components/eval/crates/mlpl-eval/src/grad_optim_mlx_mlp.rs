@@ -10,14 +10,10 @@ use crate::env::Environment;
 use mlpl_eval_core::ModelSpec;
 use mlpl_parser::Expr;
 
-/// The frozen-base + adapter param names of one LoRA-adapted linear.
-pub struct LoraNames {
-    pub w: String,
-    pub b: String,
-    pub a: String,
-    pub b_adapter: String,
-    pub scale: f32,
-}
+// The names type moved to mlpl-eval-state (env-types-out step);
+// re-exported so existing paths keep working. The RECOGNIZER below
+// stays here -- it reads models and is interpreter-coupled.
+pub use mlpl_eval_state::LoraNames;
 
 /// Recognize `Chain[LinearLora, Activation(Relu), LinearLora]` and
 /// return both layers' param names; `None` for any other model.

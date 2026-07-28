@@ -9,22 +9,10 @@ use mlpl_array::DenseArray;
 use mlpl_eval_core::ModelSpec;
 use mlpl_parser::Expr;
 
-/// Param names recovered from the demo model. Everything but the head
-/// adapters (`head_a`, `head_b_adapter`) is a frozen base weight.
-pub struct DemoLayout {
-    pub embed_table: String,
-    pub vocab: usize,
-    pub wq: String,
-    pub wk: String,
-    pub wv: String,
-    pub wo: String,
-    pub head_w: String,
-    pub head_b: String,
-    pub head_a: String,
-    pub head_b_adapter: String,
-    pub alpha: f64,
-    pub rank: usize,
-}
+// The layout type moved to mlpl-eval-state (env-types-out step);
+// re-exported so existing paths keep working. The RECOGNIZER below
+// stays here -- it reads models and is interpreter-coupled.
+pub use mlpl_eval_state::DemoLayout;
 
 // Attention projection names from a `Residual(Chain[RmsNorm, causal
 // single-head Attention])` block, or None if the shape differs.

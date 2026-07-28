@@ -71,25 +71,10 @@ mod grad;
 mod grad_calls_basic;
 mod grad_calls_shape;
 mod grad_optim;
-// Device-agnostic GPU optimizer-step seam: the `GpuEnv` accessor trait
-// (gpu_env) and the `GpuAdamStep` step trait + `AdamHp` (gpu_step). Only
-// exist when a GPU backend is configured, so a CPU-only build has no
-// unused GPU machinery (no clippy overrides needed).
-#[cfg(any(
-    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
-    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
-))]
-mod gpu_env;
-#[cfg(any(
-    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
-    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
-))]
-mod gpu_registry;
-#[cfg(any(
-    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
-    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
-))]
-mod gpu_step;
+// The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,
+// layouts, the step registry) moved to mlpl-eval-state
+// (env-types-out step); the cfg-gated re-exports below preserve the
+// public GPU-build surface.
 // The GPU LoRA/MLP COMPUTE moved to sibling crates -- CUDA to
 // mlpl-cuda-eval (S3), MLX to mlpl-mlx-eval (S4). Only the device-agnostic
 // architecture RECOGNIZERS stay here (they read ModelSpecs + eval the X/Y
@@ -157,16 +142,6 @@ pub use grad::{OptimizerState, optim_state, optim_state_mut};
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
-pub use gpu_registry::register_gpu_step;
-#[cfg(any(
-    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
-    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
-))]
-pub use gpu_step::{AdamHp, GpuAdamStep, GpuEnv};
-#[cfg(any(
-    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
-    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
-))]
 pub use grad_optim_mlx_demo::DemoLayout;
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
@@ -179,6 +154,16 @@ pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
 pub use mlpl_eval_core::{ActKind, MetricSink, ModelSpec};
 #[cfg(feature = "image-io")]
 pub use mlpl_eval_image::decode_and_resize_u8;
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+pub use mlpl_eval_state::register_gpu_step;
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
+pub use mlpl_eval_state::{AdamHp, GpuAdamStep, GpuEnv};
 pub use mlpl_eval_types::EvalError;
 pub use mlpl_eval_types::{Value, value_kind};
 pub use mlpl_runtime::runtime_builtin_names;

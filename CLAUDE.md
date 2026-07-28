@@ -330,6 +330,16 @@ its own top-level cargo workspace. Before a commit:
   safe" -- it wastes minutes-to-hours (the mlpl-eval suite alone
   is 900+ tests) and adds nothing for an isolated change. CI and
   dedicated release steps own the full sweep.
+- Even INSIDE a changed workspace, a single crate's full suite can
+  be too big (mlpl-eval again). For surface-scoped changes -- a
+  type move, a re-export shim, a transport tweak -- run the test
+  FILES covering the touched surfaces
+  (`cargo test -p <crate> --test <a> --test <b>`) plus clippy on
+  every feature combination the change gates on; that is the
+  release-suite-per-workspace unit. Reserve the crate's whole
+  suite for interpreter-behavior changes, release steps, or when
+  targeted files cannot bound the blast radius (user direction,
+  2026-07-28).
 - fmt / clippy follow the same rule: run them in the touched
   workspaces, not repo-wide.
 - sw-checklist and markdown-checker stay repo-wide (they are

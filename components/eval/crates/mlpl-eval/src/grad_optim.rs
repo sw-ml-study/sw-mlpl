@@ -188,7 +188,7 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
     if env.device() != "cpu"
         && let Some(step) = env.gpu_step()
     {
-        let hp = crate::gpu_step::AdamHp {
+        let hp = mlpl_eval_state::AdamHp {
             lr,
             b1,
             b2,
