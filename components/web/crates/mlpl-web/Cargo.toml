@@ -62,6 +62,8 @@ web-sys = { version = "0.3", features = [
     "ImageData",
     "DomRect",
     "KeyboardEvent",
+    "History",
+    "Location",
     "Storage",
     "Window",
     "console",

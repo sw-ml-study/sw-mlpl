@@ -2,7 +2,20 @@
 //! from copy-paste, missing port, bad scheme) must fail fast with a
 //! specific message instead of silently probing garbage.
 
-use mlpl_web_eval_core::eval_url::validate_connect_url;
+use mlpl_web_eval_core::eval_url::{effective_connect, validate_connect_url};
+
+#[test]
+fn effective_connect_filters_the_off_sentinel() {
+    // "?connect=off" is the explicit-disconnect sentinel (written by
+    // the Disconnect button so same-origin autoconnect stays off).
+    assert_eq!(effective_connect(Some("off".into())), None);
+    assert_eq!(effective_connect(Some("OFF".into())), None);
+    assert_eq!(
+        effective_connect(Some("http://large12:6464".into())).as_deref(),
+        Some("http://large12:6464")
+    );
+    assert_eq!(effective_connect(None), None);
+}
 
 #[test]
 fn accepts_the_canonical_forms() {

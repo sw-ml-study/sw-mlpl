@@ -33,7 +33,7 @@ pub fn current_connect_url_from_window() -> Option<String> {
     {
         let window = web_sys::window()?;
         let search = window.location().search().ok()?;
-        parse_connect_url(&search)
+        effective_connect(parse_connect_url(&search))
     }
     // Native builds have no browser window, hence no connect URL --
     // the `None` (same shape as `is_connected` below) lets UI crates
@@ -57,6 +57,15 @@ pub fn is_connected() -> bool {
     {
         false
     }
+}
+
+/// Filter the raw `?connect=` value down to a USABLE connect URL:
+/// the `off` sentinel (written by the Disconnect button so
+/// same-origin autoconnect stays suppressed across the reload)
+/// means "explicitly disconnected", i.e. `None`.
+#[must_use]
+pub fn effective_connect(raw: Option<String>) -> Option<String> {
+    raw.filter(|v| !v.eq_ignore_ascii_case("off"))
 }
 
 /// Minimal `%`-decoder for the `connect=` value. Web URLs use a

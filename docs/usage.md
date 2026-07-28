@@ -138,13 +138,24 @@ share one origin:
 ```
 CUDA_COMPUTE_CAP=120 cargo build -p mlpl-serve --features cuda --release
 ./target/release/mlpl-serve --bind 0.0.0.0:6464 --auth required --static-dir dist-pages
-# browse: http://<host>:6464/sw-mlpl/?connect=http://<host>:6464
+# browse: http://<host>:6464/sw-mlpl/   (auto-connects to its own origin)
 ```
+
+No `?connect=` needed in this setup: a page with no parameter
+probes its own origin and adopts it when it answers like an
+mlpl-serve. `?connect=<url>` remains the override for split
+UI/server setups (the server then needs the page's origin in its
+`--cors-allow` list), and `?connect=off` pins the page to
+browser-local eval. NOTE: `localhost` in `?connect=` means the
+machine running the BROWSER. Full design: `docs/connect-topology.md`.
 
 Connected, the GPU-tier demos light up, heavy lines run
 server-side with live telemetry sparklines, train blocks stream
 a live loss curve, and Life demos stream the live board
-(`emit_frame`). `:status` self-tests the link.
+(`emit_frame`). `:status` self-tests the link. The Connect button
+reports live per-backend status (CUDA / MLX / Ollama available or
+unavailable), and the Ask Ollama demo enables only when the
+server's configured Ollama host is actually up.
 
 ## Working with Arrays
 

@@ -27,6 +27,14 @@ pub fn use_reachable() -> Option<bool> {
     *reachable
 }
 
+/// One JSON GET, `None` on any transport or non-2xx failure --
+/// probes must degrade, never throw.
+pub(crate) async fn get_json(url: &str) -> Option<serde_json::Value> {
+    let resp = gloo::net::http::Request::get(url).send().await.ok()?;
+    resp.ok().then_some(())?;
+    resp.json().await.ok()
+}
+
 /// Per-backend availability summary for the connected panel, from
 /// the `/v1/devices` body: the raw device list plus an explicit
 /// available/unavailable verdict for CUDA, MLX, and Ollama.

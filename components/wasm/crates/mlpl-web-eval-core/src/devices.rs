@@ -15,6 +15,14 @@ pub async fn fetch_devices() -> Vec<String> {
     let Some(base) = crate::eval_url::current_connect_url_from_window() else {
         return Vec::new();
     };
+    fetch_devices_at(&base).await
+}
+
+/// Probe an EXPLICIT base URL's `/v1/devices` (same parse rules as
+/// [`fetch_devices`]). Used by same-origin autoconnect, which probes
+/// the page's own origin before any `?connect=` exists.
+#[cfg(target_arch = "wasm32")]
+pub async fn fetch_devices_at(base: &str) -> Vec<String> {
     let url = format!("{}/v1/devices", base.trim_end_matches('/'));
     let Ok(resp) = gloo::net::http::Request::get(&url).send().await else {
         return Vec::new();

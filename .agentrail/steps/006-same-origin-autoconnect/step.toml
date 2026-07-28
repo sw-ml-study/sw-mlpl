@@ -1,6 +1,6 @@
 number = 6
 slug = "same-origin-autoconnect"
-status = "pending"
+status = "in-progress"
 description = "Default connect: when the page has NO ?connect= param, probe the page's own o..."
 role = "production"
 context_files = []

@@ -6,6 +6,39 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
 
+/// Same-origin auto-connect: when the page has NO `?connect=` param
+/// at all (absent, not the `off` sentinel), probe the page's own
+/// origin for `/v1/devices`; if it answers like an mlpl-serve, adopt
+/// the origin as the connect target via `history.replaceState`
+/// BEFORE the app mounts -- the common one-server case then needs no
+/// param. Static hosts (github.io, trunk) fail the probe and stay
+/// browser-local. WASM-only; native is a no-op.
+pub async fn apply_same_origin_autoconnect() {
+    #[cfg(target_arch = "wasm32")]
+    {
+        let Some(win) = web_sys::window() else { return };
+        let search = win.location().search().unwrap_or_default();
+        // Any explicit param -- a URL or the off sentinel -- wins.
+        if mlpl_web_eval::eval_url::parse_connect_url(&search).is_some() {
+            return;
+        }
+        let Ok(origin) = win.location().origin() else {
+            return;
+        };
+        let devices = mlpl_web_eval::devices::fetch_devices_at(&origin).await;
+        if devices.is_empty() {
+            return;
+        }
+        let sep = if search.is_empty() { "?" } else { "&" };
+        let path = win.location().pathname().unwrap_or_default();
+        let url = format!("{path}{search}{sep}connect={origin}");
+        if let Ok(history) = win.history() {
+            let _ = history.replace_state_with_url(&wasm_bindgen::JsValue::NULL, "", Some(&url));
+            web_sys::console::log_1(&format!("[mlpl-web] auto-connect: {origin}").into());
+        }
+    }
+}
+
 /// Log the connect-mode URL if one is present in the page
 /// query string. WASM-only side-effect; on native this is a
 /// no-op stub so call sites stay target-agnostic.

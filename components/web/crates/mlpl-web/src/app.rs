@@ -22,8 +22,17 @@ use mlpl_web_render_types::app_callbacks::build_callbacks;
 use mlpl_web_render_types::args::RenderArgs;
 
 /// Mount the Yew application. Called from `src/main_wasm_body.rs`
-/// via `include!()` from `src/main.rs`.
+/// via `include!()` from `src/main.rs`. Same-origin autoconnect
+/// runs BEFORE the mount so every component sees the final
+/// `?connect=` state (a same-origin probe resolves in tens of ms;
+/// static hosts fail it immediately).
 pub fn start() {
+    #[cfg(target_arch = "wasm32")]
+    wasm_bindgen_futures::spawn_local(async {
+        crate::app_log::apply_same_origin_autoconnect().await;
+        yew::Renderer::<App>::new().render();
+    });
+    #[cfg(not(target_arch = "wasm32"))]
     yew::Renderer::<App>::new().render();
 }
 

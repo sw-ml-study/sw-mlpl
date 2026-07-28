@@ -17,6 +17,10 @@ const NO_PROXY: &str = "Not connected. Backend selection needs a connect proxy t
     running mlpl-serve instances -- this static demo has none. To use your own server, append \
     ?connect=<server-url> to this page's URL (e.g. ?connect=http://host:6464).";
 
+const UNREACHABLE_HINT: &str = "Check that mlpl-serve is running there and the URL is right \
+    -- usually the page's own origin (e.g. ?connect=http://large12:6464). NOTE: \"localhost\" \
+    here means the machine running this BROWSER, not the page's server.";
+
 #[derive(Clone, PartialEq)]
 struct Backend {
     name: String,
@@ -35,27 +39,21 @@ enum Panel {
     List(Vec<Backend>),
 }
 
-async fn get_json(url: &str) -> Option<serde_json::Value> {
-    let resp = gloo::net::http::Request::get(url).send().await.ok()?;
-    resp.ok().then_some(())?;
-    resp.json().await.ok()
-}
+use crate::connect_probe::get_json;
 
-/// The current `?connect=` value, if the page is in connect mode.
+/// The current `?connect=` value, if the page is in connect mode
+/// (the `off` disconnect sentinel reads as not connected).
 fn current_connect() -> Option<String> {
-    let search = web_sys::window()?.location().search().ok()?;
-    search
-        .trim_start_matches('?')
-        .split('&')
-        .find_map(|p| p.strip_prefix("connect=").map(str::to_string))
-        .filter(|s| !s.is_empty())
+    mlpl_web_eval::eval_url::current_connect_url_from_window()
 }
 
-/// Reload with (`Some` -> connect to url) or without (`None` ->
-/// disconnect) the `?connect=` query.
+/// Reload with (`Some` -> connect to url) or (`None` -> disconnect)
+/// the `?connect=` query. Disconnect writes the `off` sentinel
+/// rather than clearing the param, so same-origin autoconnect does
+/// not immediately re-connect on the reload.
 fn set_connect(url: Option<&str>) {
     if let Some(win) = web_sys::window() {
-        let q = url.map_or_else(String::new, |u| format!("connect={u}"));
+        let q = format!("connect={}", url.unwrap_or("off"));
         let _ = win.location().set_search(&q);
     }
 }
@@ -73,10 +71,7 @@ async fn discover(connected: Option<String>) -> Panel {
         let Some(body) = get_json(&format!("{}/v1/devices", url.trim_end_matches('/'))).await
         else {
             return Panel::Note(format!(
-                "?connect={url} is set, but that server is NOT responding. Check that \
-                 mlpl-serve is running there and the URL is right -- usually the page's \
-                 own origin (e.g. ?connect=http://large12:6464). NOTE: \"localhost\" here \
-                 means the machine running this BROWSER, not the page's server."
+                "?connect={url} is set, but that server is NOT responding. {UNREACHABLE_HINT}"
             ));
         };
         let host = body["hostname"].as_str().map(str::to_string);
@@ -89,25 +84,35 @@ async fn discover(connected: Option<String>) -> Panel {
     let Some(origin) = web_sys::window().and_then(|w| w.location().origin().ok()) else {
         return Panel::Note(NO_PROXY.to_string());
     };
+    discover_unconnected(&origin).await
+}
+
+/// Backend choices when NOT connected: the serving origin itself
+/// (when it answers `/v1/devices` -- the disconnect->reconnect
+/// path), plus anything a connect proxy lists at `/v1/backends`.
+async fn discover_unconnected(origin: &str) -> Panel {
+    let mut items = Vec::new();
+    let origin = origin.trim_end_matches('/');
+    if let Some(body) = get_json(&format!("{origin}/v1/devices")).await {
+        let host = body["hostname"].as_str().unwrap_or("this server");
+        let name = format!("{host} (the server hosting this page)");
+        let url = origin.to_string();
+        items.push(Backend { name, url });
+    }
     let backend = |b: &serde_json::Value| {
-        Some(Backend {
-            name: b
-                .get("name")
-                .and_then(serde_json::Value::as_str)
-                .unwrap_or("backend")
-                .to_string(),
-            url: b
-                .get("url")
-                .and_then(serde_json::Value::as_str)?
-                .to_string(),
-        })
+        let name = b["name"].as_str().unwrap_or("backend").to_string();
+        let url = b["url"].as_str()?.to_string();
+        Some(Backend { name, url })
     };
-    match get_json(&format!("{}/v1/backends", origin.trim_end_matches('/'))).await {
-        Some(b) => match b.get("backends").and_then(|v| v.as_array()) {
-            Some(arr) if !arr.is_empty() => Panel::List(arr.iter().filter_map(backend).collect()),
-            _ => Panel::Note(NO_PROXY.to_string()),
-        },
-        None => Panel::Note(NO_PROXY.to_string()),
+    if let Some(b) = get_json(&format!("{origin}/v1/backends")).await
+        && let Some(arr) = b.get("backends").and_then(|v| v.as_array())
+    {
+        items.extend(arr.iter().filter_map(backend));
+    }
+    if items.is_empty() {
+        Panel::Note(NO_PROXY.to_string())
+    } else {
+        Panel::List(items)
     }
 }
 
