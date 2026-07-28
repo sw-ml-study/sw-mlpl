@@ -31,28 +31,40 @@ Splitting it well means deciding what `Environment` IS first.
 | `gpu_*`/`device*` | 6 | Device dispatch + registry. Sibling `mlpl-eval-device`. |
 | misc (tag, experiment, result_ops, tokenizer, loader, llm, bpe, ...) | ~14 | Distribute with their consumers; result_ops/tag stay in the hub. |
 
-## Saga steps (draft)
+## Saga steps (REVISED 2026-07-28 -- see docs/eval-env-design.md)
 
-1. **models-out** -- `mlpl-eval-models` (19 modules out, one-way
-   deps, biggest single win). Facade re-exports hold paths.
-2. **fetch-out** -- `mlpl-eval-fetch` (6 modules + the 4 fetch
-   test-helper modules become that crate's tests/).
-3. **inspect-out** -- `mlpl-eval-inspect` (6).
-4. **grad-out** -- `mlpl-eval-grad` (6; watch the Tape/params
+The original order (models first, env last) proved impossible: a
+models-out attempt found that EVERY cluster takes
+`&mut Environment` and every cluster's consumers live in the hub,
+so any sibling crate cycles until the env layer moves below.
+Corrected order (full rationale + the capability-trait design in
+`docs/eval-env-design.md`):
+
+1. **env-types-out** -- six leaf state types (TokenizerSpec,
+   ExperimentRecord, GpuAdamStep/GpuEnv/registry, OptimizerState,
+   Interrupt) down to mlpl-eval-core.
+2. **env-base-out** -- `Environment` + env_* to a new
+   `mlpl-eval-env` crate as-is (transient over-budget, documented
+   exception until step 3 completes).
+3. **env-capability-peels** -- each env_* inherent-impl module
+   becomes a `trait EnvXyz` + `impl for Environment` pair in an
+   `mlpl-eval-envc-*` capability crate (the mlpl-env-traits
+   pattern; orphan rule allows impl-in-trait-crate). Call sites
+   keep method syntax via a `use crate::env_api::*;` prelude.
+4. **models-out** -- `mlpl-eval-models` (19 modules), with
+   `eval_expr` reached through the mlpl-eval-env hook.
+5. **fetch-out** -- `mlpl-eval-fetch` (6 + 4 test helpers).
+6. **inspect-out** -- `mlpl-eval-inspect` (6).
+7. **device-out** -- `mlpl-eval-device` (6; installs the
+   dispatch hook).
+8. **grad-out** -- `mlpl-eval-grad` (6; watch Tape/params
    plumbing through eval_blocks).
-5. **device-out** -- `mlpl-eval-device` (6; mlx/cuda feature
-   pass-through moves with it).
-6. **env-capabilities** -- the hard step: regroup 28 `env_*`
-   modules into <= 5 capability components owned by
-   `Environment` (composition over inherent-impl sprawl).
-   Requires its own design doc before execution.
-7. **spine-tidy + wrap** -- the hub lands at <= 7 modules
-   (lib, env, eval spine, fncall dispatch, result_ops, ...);
+9. **spine-tidy + wrap** -- the hub lands at <= 7 modules;
    full-suite release-profile run; counts recorded.
 
-Estimated: each of steps 1-5 is one session (the serve split
-took one); step 6 is two-plus. The interpreter's 900+ test
-suite runs `--release` per the disk-aware build rules.
+Estimated: steps 1 and 4-8 are one session each; steps 2-3 are
+two-plus combined. The interpreter's 900+ test suite runs
+`--release` per the disk-aware build rules.
 
 ## Constraints carried from the spike
 
