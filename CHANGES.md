@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-28
 
+- saga eval-decomposition: step 016-env-peel-bindings complete
+- refactor(eval): first capability peel -- bindings traits (envc-bindings)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 015-local-connect-cmd-notes complete
 - fix(web): unconnected :connect/:ask/:status answer sensibly, not parse errors
 - docs(changes): refresh CHANGES.md to HEAD
