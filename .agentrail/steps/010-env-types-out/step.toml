@@ -1,6 +1,6 @@
-number = 9
+number = 10
 slug = "env-types-out"
-status = "pending"
+status = "in-progress"
 description = "eval decomposition (revised order, docs/eval-env-design.md): move the six lea..."
 role = "legacy"
 context_files = []

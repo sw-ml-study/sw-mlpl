@@ -7,3 +7,4 @@
 
 pub(crate) mod context;
 pub mod prompt;
+pub mod prompt_text;
