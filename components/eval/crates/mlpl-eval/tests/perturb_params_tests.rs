@@ -16,6 +16,7 @@
 //! - Error handling for unknown families, wrong arity, non-model
 //!   arguments.
 
+use mlpl_eval::env_api::*;
 use std::collections::{HashMap, HashSet};
 
 use mlpl_array::DenseArray;

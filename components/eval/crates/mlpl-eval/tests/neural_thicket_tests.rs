@@ -13,6 +13,7 @@
 //! - The ensemble logits keep the same shape as a single variant's
 //!   forward output.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 

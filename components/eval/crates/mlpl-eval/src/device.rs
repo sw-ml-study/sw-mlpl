@@ -26,6 +26,7 @@
 //! block falls back to CPU, and `eval_device` emits a one-time
 //! warning so the user knows their code ran on the wrong device.
 
+use crate::env_api::*;
 #[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
 use mlpl_array::ArrayError;
 use mlpl_array::DenseArray;

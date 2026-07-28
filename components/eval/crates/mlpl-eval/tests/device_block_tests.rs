@@ -21,6 +21,7 @@
 //!   } }` and `device { experiment { ... } }` both compose
 //!   correctly. An inner `device(...)` overrides the outer.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{Expr, lex, parse};
 

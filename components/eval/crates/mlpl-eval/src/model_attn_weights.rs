@@ -4,6 +4,7 @@
 //! returns its softmax weights for visualization. Rank-3 [B, T,
 //! d_model] is looped per batch via `batched_attn_weights`.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_compose::prelude::*;
 

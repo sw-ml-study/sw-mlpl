@@ -8,6 +8,7 @@
 //! the script) is exercised by the integration test in
 //! apps/mlpl-repl/tests/.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, Value, eval_program_value};
 use mlpl_parser::{lex, parse};
 

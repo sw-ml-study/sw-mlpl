@@ -75,6 +75,7 @@ mlpl-bpe-core = { path = "../../../session-infra/crates/mlpl-bpe-core" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
 mlpl-eval-env = { path = "../mlpl-eval-env" }
+mlpl-eval-envc-bindings = { path = "../mlpl-eval-envc-bindings" }
 mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
 mlpl-eval-pets-tiny = { path = "../../../eval-pets-tiny/crates/mlpl-eval-pets-tiny" }
 mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }

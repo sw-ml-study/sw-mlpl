@@ -14,6 +14,7 @@
 //! - A column-selector matmul produces `[V, 3]` for the
 //!   3-D scatter input.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program, eval_program_value};
 use mlpl_parser::{lex, parse};
 

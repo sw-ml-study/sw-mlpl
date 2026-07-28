@@ -69,40 +69,29 @@ pub(crate) fn try_connect_only_note(
     line: &str,
 ) -> bool {
     let t = line.trim();
-    let is_cmd = |c: &str| t == c || t.starts_with(&format!("{c} "));
-    if mlpl_web_eval::eval::current_connect_url_from_window().is_some() {
-        return false;
-    }
-    // `:connect list` with no server is an EMPTY listing (not an
-    // error); `:ask` cannot answer at all, so it IS an error;
-    // `:status` gets a plain note. Everything else falls through.
-    let (note, is_error) = if is_cmd(":connect") {
-        (
-            "(no models: not connected to an mlpl-serve, so there is no \
-          Ollama to list. Open the playground FROM a server -- it \
-          auto-connects -- or append ?connect=<server-url>.)"
-                .to_string(),
-            false,
-        )
-    } else if is_cmd(":ask") {
-        (
-            "error: :ask needs a connected mlpl-serve with Ollama \
-          available; this page is running browser-locally. Open the \
-          playground FROM a server (it auto-connects) or append \
-          ?connect=<server-url>."
-                .to_string(),
-            true,
-        )
-    } else if is_cmd(":status") {
-        (
-            ":status reports a connected server's live devices and load; \
-          this page is running browser-locally (no server)."
-                .to_string(),
-            false,
-        )
-    } else {
+    let Some((note, is_error)) = crate::help::connect_only_note(t) else {
         return false;
     };
     crate::connect::chain_entry(deps, history, queue, idx, (t, &note, is_error));
     true
+}
+
+/// Append any progress-note narration panels registered for
+/// `(demo_name, line idx)`. Returns whether any were added.
+pub(crate) fn push_progress_notes(
+    entries: &mut Vec<HistoryEntry>,
+    demo_name: &str,
+    idx: usize,
+) -> bool {
+    let mut had = false;
+    for note in mlpl_web_demos::progress_notes_for(demo_name, idx) {
+        entries.push(HistoryEntry {
+            input: note.heading.to_string(),
+            output: note.body.to_string(),
+            is_error: false,
+            kind: EntryKind::Narration,
+        });
+        had = true;
+    }
+    had
 }

@@ -7,6 +7,7 @@
 //! which is what makes the reverse (denoising) sampling work. Sizes are
 //! small so it runs fast in the default (dev) profile.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 

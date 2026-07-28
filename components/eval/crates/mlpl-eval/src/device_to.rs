@@ -9,6 +9,7 @@
 //! values stay CPU-resident until later gradient/optimizer phases.
 //! Valid targets are `cpu`, `mlx`, and `cuda`; anything else errors.
 
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;

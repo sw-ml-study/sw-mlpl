@@ -3,6 +3,7 @@
 //! fine-tuned model be reused -- train once, save, then load to
 //! compare/serve -- instead of retraining every run.
 
+use crate::env_api::*;
 use std::fs;
 
 use mlpl_array::{DenseArray, Shape};

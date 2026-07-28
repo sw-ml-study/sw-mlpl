@@ -20,6 +20,7 @@
 //!    at most 60% of the initial loss.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program, eval_program_value};
 use mlpl_parser::{lex, parse};
 

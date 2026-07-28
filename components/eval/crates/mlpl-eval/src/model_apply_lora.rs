@@ -3,6 +3,7 @@
 //! (x @ A) @ B`, the rank-decomposed update from
 //! `lora(linear(...), rank, alpha, seed)`.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 
 use crate::env::Environment;

@@ -3,7 +3,7 @@
 # decomposition deferred to a future eval-decompose saga.
 
 [workspace]
-members = ["crates/mlpl-eval", "crates/mlpl-eval-env"]
+members = ["crates/mlpl-eval", "crates/mlpl-eval-env", "crates/mlpl-eval-envc-bindings"]
 resolver = "2"
 
 [workspace.package]

@@ -4,6 +4,7 @@
 //! forward pass exactly -- in-session and into a fresh Environment
 //! (i.e. genuine train-once / load-many persistence).
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program, model_params};
 use mlpl_parser::{lex, parse};
 

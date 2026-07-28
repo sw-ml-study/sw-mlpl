@@ -17,6 +17,7 @@
 //! accepts, so the dev-loopback reattach use case works
 //! end-to-end without a multi-saga rewrite.
 
+use mlpl_eval::env_api::*;
 use std::collections::HashMap;
 use std::path::Path;
 

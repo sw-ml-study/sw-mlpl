@@ -6,6 +6,7 @@
 //! to positions `> t`.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program, model_params};
 use mlpl_parser::{lex, parse};
 

@@ -2,6 +2,7 @@
 //! syntax. Covers lexer + parser + eval + dispatch end-to-end.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, EvalError, eval_program};
 use mlpl_parser::{lex, parse};
 

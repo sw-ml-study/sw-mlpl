@@ -17,6 +17,7 @@
 //! `Interrupt` and `Interrupt::set()` (called from a background
 //! thread or pre-eval) to simulate the server-side `/cancel` flip.
 
+use mlpl_eval::env_api::*;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;

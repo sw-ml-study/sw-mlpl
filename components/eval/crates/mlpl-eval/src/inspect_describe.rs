@@ -7,6 +7,7 @@
 //! split them into per-kind helpers so each stays under the
 //! 25-LOC function-LOC budget).
 
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_eval_core::inspect_groups::BUILTIN_GROUPS;
 use mlpl_eval_core::model::ModelSpec;

@@ -2,6 +2,7 @@
 //! (Saga 12 step 007) and the registry readers used by
 //! `:experiments` / `compare()` (Saga 12 step 008).
 
+use crate::env_api::*;
 use std::collections::BTreeMap;
 use std::path::Path;
 

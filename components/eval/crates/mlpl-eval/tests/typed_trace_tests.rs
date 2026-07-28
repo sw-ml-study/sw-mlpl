@@ -9,6 +9,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_core::{LossKind, ValueTag};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program_traced};
 use mlpl_parser::{lex, parse};
 use mlpl_trace::Trace;

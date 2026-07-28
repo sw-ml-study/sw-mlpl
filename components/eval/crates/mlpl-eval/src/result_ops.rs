@@ -4,6 +4,7 @@
 //! `err_message`, and `unwrap_or`. Lives in its own module so
 //! eval.rs stays under the per-module function-count budget.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;

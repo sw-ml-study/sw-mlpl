@@ -3,6 +3,7 @@
 //! into init (build the session) and execute (script or REPL).
 
 use mlpl_eval::Environment;
+use mlpl_eval::env_api::*;
 
 use crate::args::{Config, Info};
 use crate::run_interactive;

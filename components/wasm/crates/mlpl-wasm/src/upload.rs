@@ -8,6 +8,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_eval::Value;
+use mlpl_eval::env_api::*;
 use wasm_bindgen::JsValue;
 use wasm_bindgen::prelude::wasm_bindgen;
 

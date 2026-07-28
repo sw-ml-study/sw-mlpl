@@ -4,6 +4,7 @@
 //! program-level entry points (`eval_program*` and the
 //! `run_program` loop) live in `eval_program.rs`.
 
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_array_ops_element::prelude::*;
 use mlpl_parser::{Expr, TensorCtorKind};

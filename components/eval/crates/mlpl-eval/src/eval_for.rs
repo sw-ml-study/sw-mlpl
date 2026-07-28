@@ -3,6 +3,7 @@
 //! Kept in its own module so `eval.rs` stays under the sw-checklist
 //! function-count and file-LOC budgets.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_parser::Expr;
 use mlpl_trace::{Trace, TraceValue};

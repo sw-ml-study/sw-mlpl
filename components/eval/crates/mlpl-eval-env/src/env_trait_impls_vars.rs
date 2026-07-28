@@ -7,9 +7,9 @@ use crate::env::Environment;
 
 impl HasVars for Environment {
     fn get(&self, name: &str) -> Option<&DenseArray> {
-        Environment::get(self, name)
+        self.vars.get(name)
     }
     fn set(&mut self, name: String, value: DenseArray) {
-        Environment::set(self, name, value);
+        self.vars.insert(name, value);
     }
 }

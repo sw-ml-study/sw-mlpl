@@ -2,6 +2,7 @@
 //! a tree-walked mini-evaluator that lifts array-valued operations
 //! onto an autograd tape.
 
+use crate::env_api::*;
 use std::collections::HashMap;
 use std::rc::Rc;
 

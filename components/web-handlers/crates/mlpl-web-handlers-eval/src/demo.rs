@@ -77,18 +77,17 @@ fn bind_demo_metadata(session: &WasmSession, demo: &mlpl_web_demos::Demo) {
     let _ = session.eval(&format!("_demo = \"{escaped}\""));
 }
 
-fn push_progress_notes(entries: &mut Vec<HistoryEntry>, demo_name: &str, idx: usize) -> bool {
-    let mut had = false;
-    for note in mlpl_web_demos::progress_notes_for(demo_name, idx) {
-        entries.push(HistoryEntry {
-            input: note.heading.to_string(),
-            output: note.body.to_string(),
-            is_error: false,
-            kind: EntryKind::Narration,
-        });
-        had = true;
-    }
-    had
+/// Telemetry panel only for SERVER-side lines (browser free to sample):
+/// MLX/CUDA compute lines, or any `:ask` (LLM runs server-side). Local
+/// evals block the sampler -> no panel (see docs/worker-threads.md).
+#[cfg(target_arch = "wasm32")]
+fn begin_demo_line_telemetry(demo: &'static mlpl_web_demos::Demo, line: &str) {
+    let lt = line.trim_start();
+    let cap = mlpl_web_demos::capability_for(demo.name);
+    let server_side = mlpl_web_eval::eval_url::is_connected()
+        && (lt.starts_with(":ask")
+            || ((cap.requires_connect || cap.prefers_connect) && !lt.starts_with(':')));
+    mlpl_web_eval::telemetry_trace::begin(server_side);
 }
 
 fn schedule_demo_line(
@@ -111,22 +110,22 @@ fn schedule_demo_line(
         history.set(entries);
         return;
     }
-    push_progress_notes(&mut entries, demo.name, idx);
+    crate::running::push_progress_notes(&mut entries, demo.name, idx);
     let line = lines[idx];
-    // Telemetry panel only for SERVER-side lines (browser free to sample):
-    // MLX/CUDA compute lines, or any `:ask` (LLM runs server-side). Local
-    // evals block the sampler -> no panel (see docs/worker-threads.md).
     #[cfg(target_arch = "wasm32")]
-    {
-        let lt = line.trim_start();
-        let cap = mlpl_web_demos::capability_for(demo.name);
-        let server_side = mlpl_web_eval::eval_url::is_connected()
-            && (lt.starts_with(":ask")
-                || ((cap.requires_connect || cap.prefers_connect) && !lt.starts_with(':')));
-        mlpl_web_eval::telemetry_trace::begin(server_side);
-    }
+    begin_demo_line_telemetry(demo, line);
     push_running_marker(&mut entries, line);
     history.set(entries.clone());
+    // Unconnected connect-only lines (`:connect list`, `:ask`,
+    // `:status` in the introspection demo on the PUBLIC page) get
+    // their friendly note instead of leaking into the parser.
+    #[cfg(target_arch = "wasm32")]
+    if let Some((note, _)) = crate::help::connect_only_note(line.trim()) {
+        replace_running_with_result(&mut entries, line, note);
+        history.set(entries.clone());
+        schedule_demo_line(session, history, entries, demo, idx + 1);
+        return;
+    }
     // Connect mode: route the line through the server (so loaded
     // demos behave like typed lines -- `:connect list`, `:ask`,
     // and bare expressions hit mlpl-serve instead of the local

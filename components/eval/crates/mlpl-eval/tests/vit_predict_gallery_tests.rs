@@ -1,6 +1,7 @@
 //! `demos/vit_predict_gallery.mlpl` + predict_batch builtin
 //! integration tests. Saga 29 step 011.
 
+use mlpl_eval::env_api::*;
 use std::fs;
 use std::path::PathBuf;
 

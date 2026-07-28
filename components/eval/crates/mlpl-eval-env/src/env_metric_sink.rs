@@ -50,7 +50,8 @@ impl Environment {
             return;
         };
         let metrics: Vec<(String, f64)> = self
-            .vars_iter()
+            .vars
+            .iter()
             .filter(|(name, arr)| name.ends_with("_metric") && arr.rank() == 0)
             .map(|(name, arr)| (name.clone(), arr.data()[0]))
             .collect();

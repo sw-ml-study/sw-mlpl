@@ -29,6 +29,7 @@
 //! server-side proxy.
 
 use mlpl_eval::Environment;
+use mlpl_eval::env_api::*;
 
 const DEFAULT_HOST: &str = "http://localhost:11434";
 

@@ -4,6 +4,7 @@
 //! [B, T, d_model] by looping over the batch axis. Per-head work
 //! lives in `apply_attn_head`; column slicing in `slice_cols`.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_compose::prelude::*;
 

@@ -6,6 +6,7 @@
 //! Saga 33 step 023 split these out of `eval.rs` so that file
 //! falls below the 350-line File-LOC warning floor.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::{Expr, TensorCtorKind};

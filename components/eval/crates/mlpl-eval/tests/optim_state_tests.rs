@@ -1,6 +1,7 @@
 //! Saga 10, step 001: optimizer state scaffolding tests.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, OptimizerState, eval_program, optim_state, optim_state_mut};
 use mlpl_parser::{lex, parse};
 

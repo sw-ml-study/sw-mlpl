@@ -16,6 +16,7 @@
 //!   NaN out (loose bound; the main claim here is the frozen/
 //!   trainable isolation, not the final loss value).
 
+use mlpl_eval::env_api::*;
 use std::collections::HashMap;
 
 use mlpl_eval::{Environment, eval_program};

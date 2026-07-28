@@ -7,6 +7,7 @@
 //! losing, while an untrained one loses often.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 use mlpl_tictactoe::{Board, Outcome, Rng, encode, play_game, policy_dataset, random_move};

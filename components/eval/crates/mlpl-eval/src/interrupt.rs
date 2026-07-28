@@ -15,6 +15,7 @@
 //! (gradual-additivity rule). The server installs one for the
 //! duration of each eval call.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_trace::TraceValue;
 

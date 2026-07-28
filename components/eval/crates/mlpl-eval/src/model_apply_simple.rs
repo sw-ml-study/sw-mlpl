@@ -4,6 +4,7 @@
 //! pass through `device::dispatched_call`, and returns the
 //! output `DenseArray`.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 
 use crate::env::Environment;

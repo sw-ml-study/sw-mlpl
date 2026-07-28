@@ -14,6 +14,7 @@
 //!    seed)` produces bit-identical output.
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 

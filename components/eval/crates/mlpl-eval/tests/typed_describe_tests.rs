@@ -2,6 +2,7 @@
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_core::{ActivationKind, LossKind, ValueTag};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, inspect};
 
 fn arr(dims: Vec<usize>, data: Vec<f64>) -> DenseArray {

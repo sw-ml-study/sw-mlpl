@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-eval-envc-bindings"
+description = "Environment binding capabilities as traits: vars, strings, records, string lists, results, and per-call scope"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-eval-env = { path = "../mlpl-eval-env" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+
+[lints]
+workspace = true

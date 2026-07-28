@@ -1,3 +1,4 @@
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;

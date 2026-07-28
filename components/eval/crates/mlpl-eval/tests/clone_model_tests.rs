@@ -15,6 +15,7 @@
 //! - Every Model DSL layer variant (linear, chain, residual, embed,
 //!   rms_norm, causal_attention, activation) round-trips.
 
+use mlpl_eval::env_api::*;
 use std::collections::HashSet;
 
 use mlpl_array::{DenseArray, Shape};

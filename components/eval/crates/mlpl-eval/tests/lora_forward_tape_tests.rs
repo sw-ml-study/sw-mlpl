@@ -13,6 +13,7 @@
 
 use mlpl_array_ops_element::prelude::*;
 use mlpl_array_ops_matmul::prelude::*;
+use mlpl_eval::env_api::*;
 use std::collections::HashMap;
 
 use mlpl_array::{DenseArray, Shape};

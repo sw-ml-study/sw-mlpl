@@ -7,6 +7,7 @@
 //! per-call buffers on `Environment::optim_state`. Keeping them
 //! here keeps grad.rs focused on the autograd tape itself.
 
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_core::Span;
 use mlpl_parser::Expr;

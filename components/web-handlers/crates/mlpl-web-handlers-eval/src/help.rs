@@ -262,3 +262,44 @@ fn connect_command_text(arg: &str) -> String {
         format!("unknown :connect subcommand '{arg}' (try: list  |  set <model>)")
     }
 }
+
+/// Classify a CONNECT-ONLY command typed or demo-run on an
+/// UNCONNECTED page: `Some((note, is_error))` when the line is
+/// `:connect...` (empty listing), `:ask...` (error -- it cannot
+/// answer at all), or `:status...` (plain note); `None` when
+/// connected or for any other line.
+#[cfg(target_arch = "wasm32")]
+pub(crate) fn connect_only_note(t: &str) -> Option<(String, bool)> {
+    let is_cmd = |c: &str| t == c || t.starts_with(&format!("{c} "));
+    if mlpl_web_eval::eval::current_connect_url_from_window().is_some() {
+        return None;
+    }
+    if is_cmd(":connect") {
+        return Some((
+            "(no models: not connected to an mlpl-serve, so there is no \
+          Ollama to list. Open the playground FROM a server -- it \
+          auto-connects -- or append ?connect=<server-url>.)"
+                .into(),
+            false,
+        ));
+    }
+    if is_cmd(":ask") {
+        return Some((
+            "error: :ask needs a connected mlpl-serve with Ollama \
+          available; this page is running browser-locally. Open the \
+          playground FROM a server (it auto-connects) or append \
+          ?connect=<server-url>."
+                .into(),
+            true,
+        ));
+    }
+    if is_cmd(":status") {
+        return Some((
+            ":status reports a connected server's live devices and load; \
+          this page is running browser-locally (no server)."
+                .into(),
+            false,
+        ));
+    }
+    None
+}

@@ -2,6 +2,7 @@
 
 use mlpl_core::{ActivationKind, LossKind, ValueTag};
 use mlpl_eval::Environment;
+use mlpl_eval::env_api::*;
 
 #[test]
 fn new_environment_has_no_tags() {

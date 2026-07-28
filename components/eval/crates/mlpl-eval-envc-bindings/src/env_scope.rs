@@ -10,7 +10,7 @@ use std::collections::{BTreeMap, HashMap};
 use mlpl_array::DenseArray;
 use mlpl_eval_types::Value;
 
-use crate::env::Environment;
+use mlpl_eval_env::Environment;
 
 pub struct ScopeSnapshot {
     vars: HashMap<String, DenseArray>,
@@ -19,9 +19,15 @@ pub struct ScopeSnapshot {
     string_lists: HashMap<String, Vec<String>>,
 }
 
-impl Environment {
+/// Per-call scope snapshot/restore for `u:` function frames.
+pub trait EnvScope {
     #[must_use]
-    pub fn snapshot_scope(&self) -> ScopeSnapshot {
+    fn snapshot_scope(&self) -> ScopeSnapshot;
+    fn restore_scope(&mut self, s: ScopeSnapshot);
+}
+
+impl EnvScope for Environment {
+    fn snapshot_scope(&self) -> ScopeSnapshot {
         ScopeSnapshot {
             vars: self.vars.clone(),
             strings: self.strings.clone(),
@@ -30,7 +36,7 @@ impl Environment {
         }
     }
 
-    pub fn restore_scope(&mut self, s: ScopeSnapshot) {
+    fn restore_scope(&mut self, s: ScopeSnapshot) {
         self.vars = s.vars;
         self.strings = s.strings;
         self.records = s.records;

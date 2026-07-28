@@ -11,6 +11,7 @@ use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, Value, eval_program_value};
 use mlpl_parser::{lex, parse};
 use mlpl_serve::auth::{AuthMode, check_token, extract_bearer};

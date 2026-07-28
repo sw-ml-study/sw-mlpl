@@ -1,6 +1,7 @@
 //! Saga 76: `WasmSession` extracted from lib.rs to keep
 //! the crate root module function count under the limit.
 
+use mlpl_eval::env_api::*;
 use std::cell::RefCell;
 
 use mlpl_eval::Environment;

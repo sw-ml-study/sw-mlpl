@@ -21,6 +21,7 @@
 //!   `device("cpu") { }` within fp32 tolerance, proving the
 //!   step's end-to-end goal.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, EvalError, eval_program};
 use mlpl_parser::{lex, parse};
 

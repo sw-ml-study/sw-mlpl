@@ -15,6 +15,7 @@
 //! on a LoRA-wrapped model returns a clear "not yet
 //! supported" error until step 003 lands.
 
+use mlpl_eval::env_api::*;
 use std::collections::HashSet;
 
 use mlpl_array::{DenseArray, Shape};

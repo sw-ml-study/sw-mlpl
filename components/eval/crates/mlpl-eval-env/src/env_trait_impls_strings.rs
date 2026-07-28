@@ -6,9 +6,9 @@ use crate::env::Environment;
 
 impl HasStrings for Environment {
     fn set_string(&mut self, name: String, value: String) {
-        Environment::set_string(self, name, value);
+        self.strings.insert(name, value);
     }
     fn get_string(&self, name: &str) -> Option<&String> {
-        Environment::get_string(self, name)
+        self.strings.get(name)
     }
 }

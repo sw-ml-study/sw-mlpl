@@ -8,6 +8,7 @@
 //! `contracts/eval-contract/estimate.md`.
 
 use mlpl_array::DenseArray;
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 
