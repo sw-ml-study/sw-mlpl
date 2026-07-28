@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 11,
+    "step": "env-types-out"
+  },
+  "action": "git-mv-style type extraction with pub use shims; TokenizerSpec found already-below (saga 33 precedent); scoped test-file selection per user direction codified in CLAUDE.md",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-28T15:27:18"
+}
