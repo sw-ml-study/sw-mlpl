@@ -1,0 +1,8 @@
+number = 10
+slug = "llm-call-timeout"
+status = "in-progress"
+description = "User-reported :ask failure: llm_call to Ollama timed out reading the response..."
+role = "production"
+context_files = []
+created_at = "2026-07-28T14:42:30"
+commits = []

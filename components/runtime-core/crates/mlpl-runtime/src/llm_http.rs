@@ -8,7 +8,14 @@ use std::time::Duration;
 
 use mlpl_runtime_core::error::RuntimeError;
 
-const TIMEOUT_SECS: u64 = 120;
+/// Fail fast when Ollama is not even accepting connections.
+const CONNECT_TIMEOUT_SECS: u64 = 5;
+/// Generation is legitimately slow: a cold model (re)load alone can
+/// take a minute on a large model, and a long grounded answer streams
+/// out after that (`stream: false` means the whole reply arrives at
+/// the end). 120s of TOTAL budget produced real-user "timed out
+/// reading response" failures, so the read window is generous.
+const RESPONSE_TIMEOUT_SECS: u64 = 600;
 const BODY_PREVIEW_CHARS: usize = 200;
 
 /// Build the `/api/generate` request body, adding the optional
@@ -33,7 +40,8 @@ pub(crate) fn send_ask(
     body: serde_json::Value,
 ) -> Result<serde_json::Value, RuntimeError> {
     let agent = ureq::AgentBuilder::new()
-        .timeout(Duration::from_secs(TIMEOUT_SECS))
+        .timeout_connect(Duration::from_secs(CONNECT_TIMEOUT_SECS))
+        .timeout_read(Duration::from_secs(RESPONSE_TIMEOUT_SECS))
         .build();
     let resp = match agent
         .post(resolved)
