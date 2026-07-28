@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-28
 
+- saga eval-decomposition: step 014-splash-basics-fix complete
+- fix(onboarding): splash Basics card resolves the demo by NAME
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 013-env-base-out complete
 - refactor(eval): env-base-out -- Environment + env_* move to mlpl-eval-env
 - docs(changes): refresh CHANGES.md to HEAD
