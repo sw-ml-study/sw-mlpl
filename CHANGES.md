@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-28
 
+- saga eval-decomposition: step 010-llm-call-timeout complete
+- fix(llm): split llm_call timeouts -- 5s connect, 600s response window
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 009-ask-grounding-models complete
 - fix(ask): ground Ollama against kwargs + in-function model hallucinations
 - docs(changes): refresh CHANGES.md to HEAD
