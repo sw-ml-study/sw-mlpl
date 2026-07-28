@@ -36,6 +36,26 @@ fn reference_includes_a_canonical_training_example() {
 }
 
 #[test]
+fn reference_forbids_transcript_echo_artifacts() {
+    // Observed: the model copied "mlpl> line => <DenseArray...>"
+    // session-context echoes into its runnable example; pasting
+    // them throws UnexpectedCharacter '>'.
+    let r = mlpl_reference();
+    assert!(
+        r.contains("NEVER include the `mlpl>` prompt") && r.contains("`=>`"),
+        "must forbid transcript echoes in example code"
+    );
+}
+
+#[test]
+fn strict_recap_restates_the_three_code_rules() {
+    use mlpl_web_ask::prompt_text::STRICT_CODE_RECAP;
+    assert!(STRICT_CODE_RECAP.contains("POSITIONAL"));
+    assert!(STRICT_CODE_RECAP.contains("TOP LEVEL"));
+    assert!(STRICT_CODE_RECAP.contains("mlpl>"));
+}
+
+#[test]
 fn reference_still_carries_the_builtin_signatures() {
     let r = mlpl_reference();
     assert!(r.contains("linear(in, out, seed)"), "signatures intact");

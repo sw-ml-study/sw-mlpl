@@ -25,7 +25,17 @@ MODELS AND TRAINING ARE TOP LEVEL ONLY: build a model with `m = chain(...)` and 
 `m = chain(linear(2, 8, 0), relu_layer(), linear(8, 2, 1))` then \
 `train 20 { adam(cross_entropy(apply(m, X), Y), m, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m, X), Y) }` \
 (adam args are: loss-expr, model, lr, beta1, beta2, epsilon; the block's last expression is recorded as the per-step loss). There is no `mse` builtin -- write `mean((apply(m, X) - Y) * (apply(m, X) - Y))`. \
+When you show code for the user to run, output ONLY the raw MLPL lines: NEVER include the `mlpl>` prompt or the ` => result` echoes you see in the session context -- the `=>` output format is a display artifact of this transcript, not MLPL syntax, and pasting it causes parse errors. \
 Statements inside a block are separated by `;`. The COMPLETE builtin set follows (call ONLY these exact signatures -- there is no filter/map/print/length/strcat/append):";
+
+/// Final recap appended at the very END of the `:ask` system message
+/// (recency placement: weak local models follow the last instructions
+/// far better than rules buried mid-prompt). Restates only the three
+/// rules observed being violated in practice.
+pub const STRICT_CODE_RECAP: &str = " STRICT CODE RULES RECAP (these override anything above if in doubt): \
+(1) POSITIONAL arguments only -- never name=, in=, out=, seed=. \
+(2) Models and train blocks go at the TOP LEVEL of the session only -- never create, receive, or train a model inside a def u: body. \
+(3) Example code is raw runnable lines only -- never include `mlpl>` prompts or ` => result` echoes.";
 
 /// The compact MLPL reference for the `:ask` system prompt: the syntax
 /// cheat-sheet plus every builtin's signature, grouped, sourced from the

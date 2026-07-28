@@ -87,5 +87,8 @@ fn build_ask_system(history: &[HistoryEntry]) -> String {
     if !sel.is_empty() {
         p.push_str(&format!(" Selected 3D sculpture: {sel}."));
     }
+    // Last words win with weak local models: restate the code rules
+    // observed being violated (kwargs, in-fn models, echo artifacts).
+    p.push_str(crate::prompt_text::STRICT_CODE_RECAP);
     p
 }

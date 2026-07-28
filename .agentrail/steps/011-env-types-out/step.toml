@@ -5,6 +5,9 @@ description = "eval decomposition (revised order, docs/eval-env-design.md): move
 role = "legacy"
 context_files = []
 created_at = "2026-07-28T14:02:56"
-completed_at = "2026-07-28T15:27:18"
+completed_at = "2026-07-28T15:28:34"
 task_type = "production"
-commits = ["d810a551c422cc91750c11d7b582d37fa909ba02"]
+commits = [
+    "d810a551c422cc91750c11d7b582d37fa909ba02",
+    "33313550c6ad37bab5d84d2b7b3aac41b52d158f",
+]

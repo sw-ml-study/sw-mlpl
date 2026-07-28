@@ -30,12 +30,7 @@ pub fn handle_upload_command(deps: &EvalDeps, trimmed: &str, name: &str) -> Hist
     }
     deps.pending_upload_name.set(Some(name.to_string()));
     let Some(input) = deps.upload_input_ref.cast::<HtmlInputElement>() else {
-        return HistoryEntry {
-            input: trimmed.to_string(),
-            output: "error: upload file input not mounted (refresh and retry)".into(),
-            is_error: true,
-            kind: EntryKind::Command,
-        };
+        return not_mounted_entry(trimmed);
     };
     input.set_value("");
     input.click();
@@ -47,6 +42,17 @@ pub fn handle_upload_command(deps: &EvalDeps, trimmed: &str, name: &str) -> Hist
              the picker to bind `{name} = Err(\"cancelled\")`."
         ),
         is_error: false,
+        kind: EntryKind::Command,
+    }
+}
+
+/// The `:upload` error entry for a missing file-input node (the
+/// picker cannot be opened until the component mounts).
+fn not_mounted_entry(trimmed: &str) -> HistoryEntry {
+    HistoryEntry {
+        input: trimmed.to_string(),
+        output: "error: upload file input not mounted (refresh and retry)".into(),
+        is_error: true,
         kind: EntryKind::Command,
     }
 }
