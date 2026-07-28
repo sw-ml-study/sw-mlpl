@@ -1,8 +1,9 @@
 number = 8
 slug = "models-out"
-status = "in-progress"
+status = "completed"
 description = "eval decomposition step 1 per docs/eval-decomposition-saga.md: extract the 19..."
 role = "production"
 context_files = []
 created_at = "2026-07-27T11:52:07"
-commits = []
+completed_at = "2026-07-28T14:02:56"
+commits = ["c3d9d888d9276e653b9f52e0f20812ba99bc7cf9"]
