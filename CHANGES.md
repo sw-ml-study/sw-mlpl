@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-28
+
+- saga eval-decomposition: step 007-static-no-cache complete
+- fix(web+serve): stale-bundle no-cache + dead-connect self-healing
+
 ## 2026-07-27
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 006-same-origin-autoconnect complete
 - feat(web): same-origin auto-connect -- a serve-hosted page needs no params
 - docs(changes): refresh CHANGES.md to HEAD
