@@ -1,0 +1,26 @@
+[package]
+name = "mlpl-eval-env"
+description = "The evaluator's Environment: session state hub moved below the mlpl-eval spine (eval decomposition, env-base-out)"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+# Marker features mirroring mlpl-eval's GPU gates: they enable the
+# GpuEnv impl + the gpu_step field, nothing else (the compute deps
+# stay in mlpl-eval and the sibling GPU crates).
+default = []
+mlx = []
+cuda = []
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
+mlpl-env-traits = { path = "../../../session-infra/crates/mlpl-env-traits" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
+
+[lints]
+workspace = true

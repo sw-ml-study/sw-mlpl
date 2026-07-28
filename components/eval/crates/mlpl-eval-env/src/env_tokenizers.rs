@@ -1,6 +1,6 @@
 //! Saga 33 step 003: tokenizer-registry methods extracted from
 //! `env.rs`. The actual `TokenizerSpec` lives in
-//! `crate::tokenizer`; this module is a thin `HashMap` accessor
+//! `mlpl_eval_core::TokenizerSpec`; this module is a thin `HashMap` accessor
 //! layer kept separate from `env_models.rs` so each sibling stays
 //! under the module-function-count warn line.
 

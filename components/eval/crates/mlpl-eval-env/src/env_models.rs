@@ -16,7 +16,7 @@ impl Environment {
 
     /// Iterate over every bound `(name, ModelSpec)`. Saga 21 step
     /// 002: needed by `mlpl-serve`'s `/inspect` endpoint to list
-    /// model names without exposing the internal HashMap.
+    /// model names without exposing the internal `HashMap`.
     pub fn models_iter(&self) -> impl Iterator<Item = (&String, &ModelSpec)> {
         self.models.iter()
     }

@@ -21,6 +21,7 @@ default = []
 mlx = [
     "dep:mlpl-mlx-rt",
     "mlpl-mlx-rt/mlx",
+    "mlpl-eval-env/mlx",
 ]
 # Saga cuda-foundation step 004 + GPU workspace split S3: dispatch ops
 # inside `device("cuda") { }` blocks through the CUDA (candle) runtime
@@ -34,6 +35,7 @@ mlx = [
 # enabling this on a non-Linux/non-GPU host still compiles + falls back to
 # the CPU path.
 cuda = [
+    "mlpl-eval-env/cuda",
     "dep:mlpl-cuda-rt",
     "mlpl-cuda-rt/cuda",
     "dep:mlpl-cuda-elementwise",
@@ -72,6 +74,7 @@ image-io = [
 mlpl-bpe-core = { path = "../../../session-infra/crates/mlpl-bpe-core" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-env = { path = "../mlpl-eval-env" }
 mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
 mlpl-eval-pets-tiny = { path = "../../../eval-pets-tiny/crates/mlpl-eval-pets-tiny" }
 mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }

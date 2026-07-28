@@ -1,8 +1,8 @@
 //! Saga 33 step 002: frozen-parameter methods extracted
 //! from `env.rs`. Saga 15 step 001 added the `frozen_params`
-//! HashSet so `adam` / `momentum_sgd` skip updates for names
+//! `HashSet` so `adam` / `momentum_sgd` skip updates for names
 //! in the set -- the user-facing surface for "freeze the
-//! pretrained base, train only the LoRA adapter."
+//! pretrained base, train only the `LoRA` adapter."
 
 use crate::env::Environment;
 

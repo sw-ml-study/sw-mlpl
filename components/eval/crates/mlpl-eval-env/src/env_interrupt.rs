@@ -5,7 +5,7 @@
 //! endpoint can trip the bool from a different thread.
 
 use crate::env::Environment;
-use crate::interrupt::Interrupt;
+use mlpl_eval_state::Interrupt;
 use mlpl_eval_types::EvalError;
 
 impl Environment {
@@ -30,6 +30,8 @@ impl Environment {
     /// partial_losses: vec![] })` on trip; the enclosing loop
     /// (`eval_train`) re-wraps that error with its own iteration
     /// index + accumulated loss curve before returning.
+    /// # Errors
+    /// `EvalError::Cancelled` when the session's interrupt tripped.
     pub fn check_interrupt(&self) -> Result<(), EvalError> {
         if self.interrupt.as_ref().is_some_and(Interrupt::is_set) {
             Err(EvalError::Cancelled {

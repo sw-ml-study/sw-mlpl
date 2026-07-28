@@ -1,7 +1,7 @@
 //! Saga 33 step 002: variable-binding methods extracted from
 //! `env.rs`. Rust allows multiple `impl Environment` blocks
 //! across modules in the same crate; this file hosts the
-//! `vars` HashMap accessors. Trainable-parameter logic lives
+//! `vars` `HashMap` accessors. Trainable-parameter logic lives
 //! in `env_params.rs`.
 
 use mlpl_array::DenseArray;

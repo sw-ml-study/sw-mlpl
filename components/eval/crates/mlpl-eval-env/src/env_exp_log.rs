@@ -4,7 +4,7 @@
 //! in-memory for the inspect popup.
 
 use crate::env::Environment;
-use crate::experiment::ExperimentRecord;
+use mlpl_eval_state::ExperimentRecord;
 
 impl Environment {
     /// Append a completed experiment record to the log.

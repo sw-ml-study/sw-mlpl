@@ -76,6 +76,9 @@ fn run_program(
     env: &mut Environment,
     mut trace: Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
+    // The env layer lives below and reaches device dispatch through
+    // a hook; installing here (idempotent) covers every entry point.
+    mlpl_eval_env::install_dispatch(crate::device_dispatch::dispatched_call);
     if stmts.is_empty() {
         return Err(EvalError::EmptyInput);
     }

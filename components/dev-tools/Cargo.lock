@@ -836,6 +836,7 @@ dependencies = [
  "mlpl-core",
  "mlpl-env-traits",
  "mlpl-eval-core",
+ "mlpl-eval-env",
  "mlpl-eval-pets-tiny",
  "mlpl-eval-state",
  "mlpl-eval-types",
@@ -861,6 +862,19 @@ name = "mlpl-eval-core"
 version = "0.20.0"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "mlpl-eval-env"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-core",
+ "mlpl-env-traits",
+ "mlpl-eval-core",
+ "mlpl-eval-state",
+ "mlpl-eval-types",
+ "mlpl-parser",
 ]
 
 [[package]]

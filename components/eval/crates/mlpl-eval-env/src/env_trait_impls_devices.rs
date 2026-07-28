@@ -1,6 +1,6 @@
 //! Saga 33 step 012: `impl HasTensorDevices + HasModelIds for
-//! Environment`. The tensor-device methods delegate to env_tensor_device.rs;
-//! the model-id allocator wraps the `pub(crate) next_model_id`
+//! Environment`. The tensor-device methods delegate to `env_tensor_device.rs`;
+//! the model-id allocator wraps the `pub next_model_id`
 //! field (auto-increment).
 
 use mlpl_env_traits::{HasModelIds, HasTensorDevices};

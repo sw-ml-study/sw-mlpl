@@ -1,5 +1,5 @@
 //! Saga 33 step 002: trainable-parameter methods extracted
-//! from `env.rs`. The `params` HashSet tracks names that
+//! from `env.rs`. The `params` `HashSet` tracks names that
 //! `grad` / `adam` / `momentum_sgd` treat as gradient
 //! sources. Freezing logic (Saga 15 step 001) lives in the
 //! sibling `env_frozen.rs`.

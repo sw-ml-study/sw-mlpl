@@ -13,20 +13,6 @@ use crate::eval::eval_expr;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::{Value, value_kind};
 
-impl Environment {
-    pub fn set_result(&mut self, name: String, ok: bool, payload: Value) {
-        self.results.insert(name, (ok, payload));
-    }
-    #[must_use]
-    pub fn get_result(&self, name: &str) -> Option<&(bool, Value)> {
-        self.results.get(name)
-    }
-    /// Set trailing CLI args visible to `args()`. Saga 31 step 003.
-    pub fn set_cli_args(&mut self, args: Vec<String>) {
-        self.cli_args = args;
-    }
-}
-
 /// Dispatch one of the Result accessors. The arity check and
 /// receiver-kind check live here so the eval.rs early-return
 /// only has to recognize the function name.

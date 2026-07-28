@@ -45,7 +45,7 @@ impl Environment {
     /// emitted as the implicit `loss` metric, so every streamed
     /// train feeds the live loss panel. Explicit bindings suppress
     /// the implicit frame.
-    pub(crate) fn emit_metrics(&self, step: usize, step_loss: f64) {
+    pub fn emit_metrics(&self, step: usize, step_loss: f64) {
         let Some(sink) = self.metric_sink() else {
             return;
         };

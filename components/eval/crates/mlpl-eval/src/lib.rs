@@ -8,44 +8,15 @@
 
 mod analysis_dispatch;
 mod auto_tag;
+// The env layer lives below in mlpl-eval-env (env-base-out step);
+// re-exported as modules so every crate::env:: / crate::env_user_fns::
+// path keeps resolving, and callers outside see mlpl_eval::Environment
+// unchanged.
+pub use mlpl_eval_env::{env, env_user_fns};
 mod bpe;
 mod device;
 mod device_dispatch;
 mod device_to;
-mod env;
-mod env_builtin_refs;
-mod env_device;
-mod env_device_tensors;
-mod env_dirs;
-mod env_exp_log;
-mod env_frozen;
-// The shared `GpuEnv` accessor impl for `Environment`; only on a GPU
-// build, backend-agnostic (CUDA + MLX share it).
-#[cfg(any(
-    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
-    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
-))]
-mod env_gpu;
-mod env_interrupt;
-mod env_metric_sink;
-mod env_models;
-mod env_params;
-mod env_peer;
-mod env_records;
-mod env_scope;
-mod env_string_lists;
-mod env_strings;
-mod env_tags;
-mod env_tensor_device;
-mod env_tokenizers;
-mod env_trait_impls_devices;
-mod env_trait_impls_dispatch;
-mod env_trait_impls_models;
-mod env_trait_impls_params;
-mod env_trait_impls_strings;
-mod env_trait_impls_vars;
-mod env_user_fns;
-mod env_vars;
 mod eval;
 mod eval_blocks;
 mod eval_fncalls;

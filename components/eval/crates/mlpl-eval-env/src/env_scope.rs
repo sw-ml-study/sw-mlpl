@@ -12,7 +12,7 @@ use mlpl_eval_types::Value;
 
 use crate::env::Environment;
 
-pub(crate) struct ScopeSnapshot {
+pub struct ScopeSnapshot {
     vars: HashMap<String, DenseArray>,
     strings: HashMap<String, String>,
     records: HashMap<String, BTreeMap<String, Value>>,
@@ -20,7 +20,8 @@ pub(crate) struct ScopeSnapshot {
 }
 
 impl Environment {
-    pub(crate) fn snapshot_scope(&self) -> ScopeSnapshot {
+    #[must_use]
+    pub fn snapshot_scope(&self) -> ScopeSnapshot {
         ScopeSnapshot {
             vars: self.vars.clone(),
             strings: self.strings.clone(),
@@ -29,7 +30,7 @@ impl Environment {
         }
     }
 
-    pub(crate) fn restore_scope(&mut self, s: ScopeSnapshot) {
+    pub fn restore_scope(&mut self, s: ScopeSnapshot) {
         self.vars = s.vars;
         self.strings = s.strings;
         self.records = s.records;
