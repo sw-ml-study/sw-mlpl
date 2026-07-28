@@ -16,7 +16,7 @@ cuda = []
 [dependencies]
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-web-viz-ir = { path = "../../../web-viz-ir/crates/mlpl-web-viz-ir" }
-tower-http = { version = "0.5", features = ["fs", "trace", "cors"] }
+tower-http = { version = "0.5", features = ["fs", "trace", "cors", "set-header"] }
 axum = "0.7"
 axum-server = { version = "0.7", features = ["tls-rustls"] }
 rustls = "0.23"

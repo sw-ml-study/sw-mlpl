@@ -7,6 +7,24 @@ use std::path::PathBuf;
 
 use axum::Router;
 
+/// The `/sw-mlpl` static file service with the cache policy applied.
+/// `no-cache` = revalidate every load (NOT "don't cache"): without it
+/// browsers heuristically cache index.html and keep running a stale
+/// bundle for hours after a deploy. Assets are content-hashed, so
+/// revalidation is a cheap 304 per file.
+fn static_service(
+    dir: &std::path::Path,
+) -> tower_http::set_header::SetResponseHeader<
+    tower_http::services::ServeDir,
+    axum::http::HeaderValue,
+> {
+    tower_http::set_header::SetResponseHeader::if_not_present(
+        tower_http::services::ServeDir::new(dir),
+        axum::http::header::CACHE_CONTROL,
+        axum::http::HeaderValue::from_static("no-cache"),
+    )
+}
+
 /// Parse a `--cors-allow` value: one origin, or a comma-separated
 /// list (a server often fronts several page hosts -- a trunk dev
 /// page and a static host). Entries are trimmed; empty entries are
@@ -34,8 +52,7 @@ pub fn apply_static_and_cors(
     cors_origin: Option<String>,
 ) -> Router {
     if let Some(dir) = static_dir.as_deref() {
-        let serve = tower_http::services::ServeDir::new(dir);
-        router = router.nest_service("/sw-mlpl", serve);
+        router = router.nest_service("/sw-mlpl", static_service(dir));
     }
     if let Some(origin) = cors_origin {
         use axum::http::{Method, header};
