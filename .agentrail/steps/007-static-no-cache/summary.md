@@ -1,0 +1,1 @@
+Root-caused 'demos still disabled': server+bundle healthy, user's browser had a cached stale page with a dead ?connect=localhost param. Fixed both layers: static mount sends Cache-Control: no-cache (TDD'd), and the devices probe self-heals a dead connect target to the page's own origin in ~3s (rewrite + reload). 14/14 playwright scenarios; server restarted with header verified.
