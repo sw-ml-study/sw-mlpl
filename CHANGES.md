@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-28
 
+- saga eval-decomposition: step 008-models-out closed as replan (env-first order)
+- docs(eval): env-first replan for the decomposition saga + design doc
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 007-static-no-cache complete
 - fix(web+serve): stale-bundle no-cache + dead-connect self-healing
 
