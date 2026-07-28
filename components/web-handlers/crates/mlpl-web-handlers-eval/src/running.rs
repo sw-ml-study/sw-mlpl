@@ -51,3 +51,58 @@ pub(crate) fn replace_running_with_result(
         kind: EntryKind::Command,
     });
 }
+
+#[cfg(target_arch = "wasm32")]
+use mlpl_web_handlers_upload::eval_deps::EvalDeps;
+
+/// Take connect-only commands (`:connect`, `:ask`, `:status`) when the
+/// page is NOT connected, replacing the running marker with a friendly
+/// note instead of letting the line leak into the MLPL parser (where
+/// `:connect list` used to die as "undefined variable: list" on the
+/// public demo).
+#[cfg(target_arch = "wasm32")]
+pub(crate) fn try_connect_only_note(
+    deps: &EvalDeps,
+    history: &[HistoryEntry],
+    queue: &[String],
+    idx: usize,
+    line: &str,
+) -> bool {
+    let t = line.trim();
+    let is_cmd = |c: &str| t == c || t.starts_with(&format!("{c} "));
+    if mlpl_web_eval::eval::current_connect_url_from_window().is_some() {
+        return false;
+    }
+    // `:connect list` with no server is an EMPTY listing (not an
+    // error); `:ask` cannot answer at all, so it IS an error;
+    // `:status` gets a plain note. Everything else falls through.
+    let (note, is_error) = if is_cmd(":connect") {
+        (
+            "(no models: not connected to an mlpl-serve, so there is no \
+          Ollama to list. Open the playground FROM a server -- it \
+          auto-connects -- or append ?connect=<server-url>.)"
+                .to_string(),
+            false,
+        )
+    } else if is_cmd(":ask") {
+        (
+            "error: :ask needs a connected mlpl-serve with Ollama \
+          available; this page is running browser-locally. Open the \
+          playground FROM a server (it auto-connects) or append \
+          ?connect=<server-url>."
+                .to_string(),
+            true,
+        )
+    } else if is_cmd(":status") {
+        (
+            ":status reports a connected server's live devices and load; \
+          this page is running browser-locally (no server)."
+                .to_string(),
+            false,
+        )
+    } else {
+        return false;
+    };
+    crate::connect::chain_entry(deps, history, queue, idx, (t, &note, is_error));
+    true
+}

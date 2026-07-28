@@ -149,6 +149,10 @@ pub(crate) fn process_next_eval(
         return;
     }
     #[cfg(target_arch = "wasm32")]
+    if crate::running::try_connect_only_note(&deps, &history, &queue, idx, &line) {
+        return;
+    }
+    #[cfg(target_arch = "wasm32")]
     if crate::connect::try_ollama_models(&deps, &history, &queue, idx, &line) {
         return;
     }

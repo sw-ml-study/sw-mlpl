@@ -70,19 +70,38 @@ fn render_completion_popup(candidates: &[String], sel: usize, on_pick: &Callback
     }
 }
 
+/// The text input element itself, with its stable ids and the
+/// controlled value/handler wiring.
+fn render_input_field(props: &InputRowProps) -> Html {
+    html! {
+        <input
+            id="repl-input"
+            data-tour-target="repl-input"
+            type="text"
+            autocomplete="off"
+            spellcheck="false"
+            value={props.value.clone()}
+            oninput={props.on_input.clone()}
+            onkeydown={props.on_keydown.clone()}
+        />
+    }
+}
+
 #[function_component(InputRow)]
 pub fn input_row(props: &InputRowProps) -> Html {
-    let (label_text, label_class) = if props.in_tutorial {
-        ("(Tutorial)", "session-label tutorial")
+    let tutorial = props.in_tutorial;
+    let label_text = if tutorial { "(Tutorial)" } else { "(REPL)" };
+    let label_class = if tutorial {
+        "session-label tutorial"
     } else {
-        ("(REPL)", "session-label repl")
+        "session-label repl"
     };
     let popup = render_completion_popup(
         &props.completion_candidates,
         props.completion_selected,
         &props.on_pick_completion,
     );
-    let clear_label = if props.in_tutorial {
+    let clear_label = if tutorial {
         "Reset Tutorial"
     } else {
         "Reset REPL"
@@ -92,16 +111,7 @@ pub fn input_row(props: &InputRowProps) -> Html {
             <div class={label_class}>{ label_text }</div>
             <div class="input-row">
                 <span class="prompt">{"mlpl> "}</span>
-                <input
-                    id="repl-input"
-                    data-tour-target="repl-input"
-                    type="text"
-                    autocomplete="off"
-                    spellcheck="false"
-                    value={props.value.clone()}
-                    oninput={props.on_input.clone()}
-                    onkeydown={props.on_keydown.clone()}
-                />
+                { render_input_field(props) }
                 { render_mode_toggle(props.show_3d, &props.on_toggle_3d) }
                 <button
                     class="ctrl-btn input-row-clear"

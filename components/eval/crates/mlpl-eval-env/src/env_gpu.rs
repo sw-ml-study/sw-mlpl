@@ -13,10 +13,10 @@ use mlpl_eval_state::GpuEnv;
 
 impl GpuEnv for Environment {
     fn binding(&self, name: &str) -> Option<&DenseArray> {
-        self.get(name)
+        self.vars.get(name)
     }
     fn set_binding(&mut self, name: String, value: DenseArray) {
-        self.set(name, value);
+        self.vars.insert(name, value);
     }
     fn optim_buffer(&self, opt: &str, param: &str, suffix: &str) -> Option<&DenseArray> {
         self.optim_state
