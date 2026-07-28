@@ -1,0 +1,1 @@
+User regression: splash 'Run the Basics demo' card ran Game of Life (hardcoded RunDemo(7) index rotted as demos.toml grew); also reported post-demo typing lockup. Fix the card via name-based lookup (basics_demo_index), pin with a native test, verify both behaviors end-to-end with playwright.

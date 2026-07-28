@@ -41,7 +41,7 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
                     </p>
                 </div>
                 <div class="splash-cards">
-                    { card(&emit, SplashAction::RunDemo(7), "Run the Basics demo", "See arithmetic, arrays, and broadcasting in action.") }
+                    { card(&emit, SplashAction::RunDemo(basics_demo_index()), "Run the Basics demo", "See arithmetic, arrays, and broadcasting in action.") }
                     { card(&emit, SplashAction::TypeExpr("1 + 2"), "Try 1 + 2 in the REPL", "Type an expression and press Enter, or :help for the function list.") }
                     { card(&emit, SplashAction::OpenTutorial, "Open a tutorial lesson", "Guided lessons from scalars to attention.") }
                     { card(&emit, SplashAction::OpenPaths, "Explore learning paths", "Structured sequences of lessons and demos.") }
@@ -53,6 +53,17 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
             </div>
         </div>
     }
+}
+
+/// Index of the demo NAMED "Basics" in the registry. Resolved by
+/// name because raw indexes rot as demos.toml gains and reorders
+/// entries (a hardcoded 7 once ran Game of Life from this card).
+#[must_use]
+pub fn basics_demo_index() -> usize {
+    mlpl_web_demos::DEMOS
+        .iter()
+        .position(|d| d.name == "Basics")
+        .unwrap_or(0)
 }
 
 pub fn make_splash_action(

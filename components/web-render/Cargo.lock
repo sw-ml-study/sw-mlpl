@@ -1676,6 +1676,7 @@ name = "mlpl-web-onboarding"
 version = "0.20.0"
 dependencies = [
  "gloo 0.10.0",
+ "mlpl-web-demos",
  "wasm-bindgen",
  "web-sys",
  "yew",
