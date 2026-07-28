@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-28
 
+- saga eval-decomposition: step 012-ask-echo-hardening complete
+- fix(ask): no-echo rule + strict recap at the prompt's end
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 011-env-types-out complete
 - refactor(eval): env-types-out -- six leaf state types to mlpl-eval-state
 - docs(changes): refresh CHANGES.md to HEAD
