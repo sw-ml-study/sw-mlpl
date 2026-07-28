@@ -1,8 +1,9 @@
 number = 10
 slug = "llm-call-timeout"
-status = "in-progress"
+status = "completed"
 description = "User-reported :ask failure: llm_call to Ollama timed out reading the response..."
 role = "production"
 context_files = []
 created_at = "2026-07-28T14:42:30"
-commits = []
+completed_at = "2026-07-28T14:45:20"
+commits = ["4d7c778a800c94240c681321d6a7523136503b57"]

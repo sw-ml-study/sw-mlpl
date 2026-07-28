@@ -1,0 +1,1 @@
+llm_call transport timeouts split: 5s connect (fail fast on dead Ollama) + 600s read window (stream:false delivers the whole generation at the end; the old 120s overall budget discarded slow-but-successful answers). Server rebuilt/restarted; live llm_call round-trip verified through /v1/sessions eval.
