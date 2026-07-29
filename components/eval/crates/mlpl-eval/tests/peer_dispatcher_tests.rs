@@ -4,6 +4,7 @@
 //! explicit CPU materialization without depending on
 //! the HTTP service crate.
 
+use mlpl_eval::env_api::*;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 

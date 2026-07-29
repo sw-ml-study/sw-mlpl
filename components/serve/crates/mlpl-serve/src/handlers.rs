@@ -7,6 +7,7 @@
 //! assume a request that reaches them is already
 //! authorized (when auth is required).
 
+use mlpl_eval::env_api::*;
 use axum::Json;
 use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode};

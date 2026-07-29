@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-eval-envc-obs"
+description = "Environment observation capabilities as traits: metric sinks and emission, experiment log/dirs, builtin refs"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-env = { path = "../mlpl-eval-env" }
+mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+
+[lints]
+workspace = true

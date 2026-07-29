@@ -10,6 +10,7 @@
 //! arch); off-target the dispatcher is a stub returning `None` and
 //! the caller falls back to CPU.
 
+use crate::env_api::*;
 use mlpl_array::{ArrayError, DenseArray};
 use mlpl_array_ops_element::prelude::*;
 

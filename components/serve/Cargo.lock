@@ -1726,7 +1726,9 @@ dependencies = [
  "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-envc-bindings",
+ "mlpl-eval-envc-exec",
  "mlpl-eval-envc-ml",
+ "mlpl-eval-envc-obs",
  "mlpl-eval-envc-userfns",
  "mlpl-eval-pets-tiny",
  "mlpl-eval-state",
@@ -1778,6 +1780,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-eval-envc-exec"
+version = "0.20.0"
+dependencies = [
+ "mlpl-eval-env",
+ "mlpl-eval-state",
+ "mlpl-eval-types",
+]
+
+[[package]]
 name = "mlpl-eval-envc-ml"
 version = "0.20.0"
 dependencies = [
@@ -1785,6 +1796,16 @@ dependencies = [
  "mlpl-core",
  "mlpl-eval-core",
  "mlpl-eval-env",
+]
+
+[[package]]
+name = "mlpl-eval-envc-obs"
+version = "0.20.0"
+dependencies = [
+ "mlpl-eval-core",
+ "mlpl-eval-env",
+ "mlpl-eval-state",
+ "mlpl-eval-types",
 ]
 
 [[package]]

@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-eval-envc-exec"
+description = "Environment execution-context capabilities as traits: device stack + notices, peer tensors, tensor placement, peer dispatcher, interrupts"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-eval-env = { path = "../mlpl-eval-env" }
+mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+
+[lints]
+workspace = true

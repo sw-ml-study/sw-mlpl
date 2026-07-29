@@ -8,6 +8,7 @@
 //! (terminal REPL via `--exp-dir`), also write a `run.json`
 //! record; the web REPL leaves `exp_dir` unset.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, ExperimentRecord, eval_program};
 use mlpl_parser::{lex, parse};
 

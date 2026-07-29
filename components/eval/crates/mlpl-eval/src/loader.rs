@@ -17,6 +17,7 @@
 //! `mlpl-loader-helpers` (pure-data helpers, no env / Value
 //! dependency).
 
+use crate::env_api::*;
 #[cfg(feature = "image-io")]
 use std::path::PathBuf;
 

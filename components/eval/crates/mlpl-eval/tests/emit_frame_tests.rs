@@ -1,6 +1,7 @@
 //! `emit_frame(name, step, x)` (Game of Life saga step 4): no-op
 //! without a sink, captured with one, returns its tensor.
 
+use mlpl_eval::env_api::*;
 use std::sync::{Arc, Mutex};
 
 use mlpl_eval::{Environment, MetricSink, eval_program_value};

@@ -1,5 +1,6 @@
 //! Tests for :experiments and compare(a, b) (Saga 12 step 008).
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, Value, eval_program, eval_program_value, inspect};
 use mlpl_parser::{lex, parse};
 

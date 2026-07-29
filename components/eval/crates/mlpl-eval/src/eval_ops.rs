@@ -1,5 +1,6 @@
 //! Evaluation helpers for binops, function calls, and array literals.
 
+use crate::env_api::*;
 use mlpl_array::{ArrayError, DenseArray, Shape};
 use mlpl_core::LabeledShape;
 use mlpl_parser::{BinOpKind, Expr};

@@ -2,6 +2,7 @@
 //! and record-comparison helpers extracted from `experiment.rs`
 //! to keep the orchestrator under the sw-checklist function-count budget.
 
+use crate::env_api::*;
 use mlpl_parser::Expr;
 
 use crate::experiment::{ExperimentRecord, read_records_from_disk};

@@ -10,6 +10,7 @@
 //! For this step, CSV load produces a plain DenseArray of numeric
 //! cells with the header row stripped when it is non-numeric.
 
+use mlpl_eval::env_api::*;
 use std::path::PathBuf;
 
 use mlpl_eval::{Environment, Value, eval_program_value};

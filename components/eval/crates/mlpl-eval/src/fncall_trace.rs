@@ -5,6 +5,7 @@
 //! boilerplate out of `matmul` / `momentum_sgd` / `adam` so each
 //! caller stays under the 25-LOC function gate.
 
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 

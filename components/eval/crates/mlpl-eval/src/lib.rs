@@ -22,8 +22,14 @@ pub mod env_api {
     pub use mlpl_eval_envc_bindings::{
         EnvRecords, EnvResults, EnvScope, EnvStringLists, EnvStrings, EnvVars, ScopeSnapshot,
     };
+    pub use mlpl_eval_envc_exec::{
+        EnvDevice, EnvDeviceNotices, EnvDeviceTensors, EnvInterrupt, EnvPeer, EnvTensorDevice,
+    };
     pub use mlpl_eval_envc_ml::{
         EnvFrozen, EnvMlIters, EnvModels, EnvParams, EnvTags, EnvTokenizers,
+    };
+    pub use mlpl_eval_envc_obs::{
+        EnvBuiltinRefs, EnvDataDir, EnvExpDir, EnvExpLog, EnvMetricEmit, EnvMetricSink,
     };
     pub use mlpl_eval_envc_userfns::{EnvUserFns, EnvUserFnsRender};
 }
