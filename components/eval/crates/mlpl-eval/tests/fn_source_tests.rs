@@ -2,6 +2,7 @@
 //! lines) so `:list` prints the definition AS WRITTEN -- the
 //! APL2 function-listing experience (naming-and-docs saga).
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program_value, eval_source_value};
 use mlpl_parser::{lex, parse};
 

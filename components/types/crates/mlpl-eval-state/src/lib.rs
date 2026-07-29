@@ -19,4 +19,4 @@ pub use gpu_env::GpuEnv;
 pub use gpu_step::{
     AdamHp, DemoLayout, GpuAdamStep, LoraNames, installed_gpu_step, register_gpu_step,
 };
-pub use run_state::{ExperimentRecord, Interrupt, OptimizerState, ParamShape};
+pub use run_state::{ExperimentRecord, Interrupt, OptimizerState, ParamShape, UserFn};

@@ -1,5 +1,6 @@
 //! SSE eval streaming: `POST /v1/sessions/:id/eval_stream`.
 
+use mlpl_eval::env_api::*;
 pub use mlpl_serve_core::eval_viz::SseEvent;
 
 use std::convert::Infallible;

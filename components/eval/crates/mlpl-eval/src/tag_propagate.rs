@@ -19,6 +19,7 @@
 //! - Unary negation: preserve.
 //! - Bare identifier: copy from the side table.
 
+use crate::env_api::*;
 use mlpl_core::{LossKind, ValueTag};
 use mlpl_parser::{BinOpKind, Expr};
 

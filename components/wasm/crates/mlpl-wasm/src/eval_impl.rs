@@ -1,6 +1,7 @@
 //! Saga 76: free-function eval helpers extracted from lib.rs.
 
 use mlpl_eval::Environment;
+use mlpl_eval::env_api::*;
 use mlpl_model_viz::model_to_viz_node;
 use mlpl_web_viz_ir::VizNode;
 

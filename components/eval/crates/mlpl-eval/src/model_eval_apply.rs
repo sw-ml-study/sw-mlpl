@@ -5,6 +5,7 @@
 //! to `model_apply::apply_model` or
 //! `model_attn_weights::extract_attn_weights`.
 
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_array_ops_reduce::prelude::*;
 use mlpl_parser::Expr;

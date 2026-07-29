@@ -3,6 +3,7 @@
 //! command dispatcher stays within its per-function LOC budget.
 
 use crate::env::Environment;
+use crate::env_api::*;
 
 /// Render `:list <arg>`: the formatted function source, a not-found note,
 /// or the usage line when no name was given.

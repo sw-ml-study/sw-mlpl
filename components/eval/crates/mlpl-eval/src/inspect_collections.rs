@@ -6,6 +6,7 @@
 //! string ready to print.
 
 use crate::env::Environment;
+use crate::env_api::*;
 
 /// Shown by `:fns` and the `:introspect` `## :fns` section when the
 /// session has no user-defined functions yet.

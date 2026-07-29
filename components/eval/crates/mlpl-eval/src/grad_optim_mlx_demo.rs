@@ -5,6 +5,7 @@
 //! to the CPU tape path for every other model.
 
 use crate::env::Environment;
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_eval_core::ModelSpec;
 use mlpl_parser::Expr;

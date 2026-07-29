@@ -4,11 +4,10 @@
 
 use std::fmt::Write as _;
 
-use crate::env::Environment;
+use mlpl_eval_env::Environment;
 
-impl Environment {
-    #[must_use]
-    pub fn user_fn_signatures(&self) -> Vec<String> {
+impl EnvUserFnsRender for Environment {
+    fn user_fn_signatures(&self) -> Vec<String> {
         let mut out: Vec<_> = self
             .user_fns
             .iter()
@@ -24,8 +23,7 @@ impl Environment {
         out
     }
 
-    #[must_use]
-    pub fn describe_fn(&self, name: &str) -> Option<String> {
+    fn describe_fn(&self, name: &str) -> Option<String> {
         let f = self.user_fns.get(name)?;
         let mut out = format!("def {}({})", name, f.params.join(", "));
         if let Some(d) = &f.doc {
@@ -37,10 +35,7 @@ impl Environment {
         Some(out)
     }
 
-    /// The full `def` source for `:list <fn>`, re-indented so control flow
-    /// (`if`/`else`/`while`/`for`) reads instead of running off one flat
-    /// line. `None` if no such user function is defined.
-    pub fn list_fn(&self, name: &str) -> Option<String> {
+    fn list_fn(&self, name: &str) -> Option<String> {
         let f = self.user_fns.get(name)?;
         if let Some(src) = &f.source {
             return Some(src.clone());
@@ -54,4 +49,16 @@ impl Environment {
         );
         Some(mlpl_eval_core::indent_source(&flat))
     }
+}
+
+/// Render `u:` function listings (`:fns`, `:describe`, `:list`).
+pub trait EnvUserFnsRender {
+    /// One `name(params) -- doc` line per defined `u:` function.
+    fn user_fn_signatures(&self) -> Vec<String>;
+    /// `def` header + doc + body preview for `:describe u:<name>`.
+    fn describe_fn(&self, name: &str) -> Option<String>;
+    /// The full `def` source for `:list <fn>`, re-indented so control flow
+    /// (`if`/`else`/`while`/`for`) reads instead of running off one flat
+    /// line. `None` if no such user function is defined.
+    fn list_fn(&self, name: &str) -> Option<String>;
 }

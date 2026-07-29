@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-eval-envc-ml"
+description = "Environment ML-state capabilities as traits: models, params, frozen set, tokenizers, tags"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-env = { path = "../mlpl-eval-env" }
+
+[lints]
+workspace = true

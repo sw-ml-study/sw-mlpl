@@ -9,6 +9,6 @@ use crate::env::Environment;
 
 impl HasModels for Environment {
     fn get_model(&self, name: &str) -> Option<&ModelSpec> {
-        Environment::get_model(self, name)
+        self.models.get(name)
     }
 }

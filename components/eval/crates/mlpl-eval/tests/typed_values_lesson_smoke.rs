@@ -12,6 +12,7 @@
 
 use mlpl_array::DenseArray;
 use mlpl_core::{LossKind, ValueTag};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, EvalError, eval_program, inspect};
 use mlpl_parser::{lex, parse};
 

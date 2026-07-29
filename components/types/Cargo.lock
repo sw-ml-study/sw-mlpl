@@ -285,6 +285,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-eval-types",
+ "mlpl-parser",
  "serde",
 ]
 

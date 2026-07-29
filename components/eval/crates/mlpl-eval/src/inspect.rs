@@ -16,6 +16,7 @@
 //! `:help cmd` forms share so the two stay in lock-step.
 
 use crate::env::Environment;
+use crate::env_api::*;
 
 const HELP_DESCRIBE_MSG: &str = ":describe <name>\n  \
 print the shape and a values preview \

@@ -6,6 +6,7 @@
 //! `eval_line` (interactive REPL) so the script contract
 //! does not leak into the prompt loop.
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, Value};
 use mlpl_trace::Trace;
 

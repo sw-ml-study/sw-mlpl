@@ -5,6 +5,7 @@
 //! direct lift from the corresponding `if name == ...` branch
 //! in the original 86-LOC eval_tensor_fncall.
 
+use crate::env_api::*;
 use std::collections::HashMap;
 
 use mlpl_array::DenseArray;

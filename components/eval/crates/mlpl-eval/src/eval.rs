@@ -252,7 +252,7 @@ pub(crate) fn eval_expr(
             .map(str::to_string);
         env.define_fn(
             name.clone(),
-            crate::env_user_fns::UserFn::new(params.clone(), body.clone()).with_source(source),
+            mlpl_eval_state::UserFn::new(params.clone(), body.clone()).with_source(source),
         );
         return Ok(Value::Array(DenseArray::from_scalar(0.0)));
     }

@@ -3,6 +3,7 @@
 //! dispatch through the same builder, differing only in the
 //! `causal` flag passed to `ModelSpec::Attention`.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_core::ValueTag;
 use mlpl_parser::Expr;

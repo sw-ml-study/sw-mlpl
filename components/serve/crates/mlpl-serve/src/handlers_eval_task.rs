@@ -5,6 +5,7 @@
 
 use axum::Json;
 use axum::http::{HeaderMap, StatusCode};
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Interrupt, eval_program_value};
 use std::sync::Arc;
 use tokio::sync::oneshot;

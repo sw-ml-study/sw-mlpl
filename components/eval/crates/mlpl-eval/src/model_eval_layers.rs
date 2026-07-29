@@ -4,6 +4,7 @@
 //! into `env` under generated names, recording device placement
 //! and a `ValueTag::Weight` for traceability.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_core::ValueTag;
 use mlpl_parser::Expr;

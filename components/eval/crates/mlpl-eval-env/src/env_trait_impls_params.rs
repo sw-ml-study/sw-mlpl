@@ -9,24 +9,25 @@ use crate::env::Environment;
 
 impl HasParams for Environment {
     fn set_param(&mut self, name: String, value: DenseArray) {
-        Environment::set_param(self, name, value);
+        self.params.insert(name.clone());
+        self.vars.insert(name, value);
     }
     fn is_param(&self, name: &str) -> bool {
-        Environment::is_param(self, name)
+        self.params.contains(name)
     }
     fn mark_param(&mut self, name: &str) {
-        Environment::mark_param(self, name);
+        self.params.insert(name.to_string());
     }
 }
 
 impl HasFrozen for Environment {
     fn mark_frozen(&mut self, name: &str) {
-        Environment::mark_frozen(self, name);
+        self.frozen_params.insert(name.to_string());
     }
     fn unmark_frozen(&mut self, name: &str) {
-        Environment::unmark_frozen(self, name);
+        self.frozen_params.remove(name);
     }
     fn is_frozen(&self, name: &str) -> bool {
-        Environment::is_frozen(self, name)
+        self.frozen_params.contains(name)
     }
 }

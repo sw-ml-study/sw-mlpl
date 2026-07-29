@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-eval-envc-userfns"
+description = "Environment user-function capabilities as traits: define/look up u: functions and render their listings"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-eval-env = { path = "../mlpl-eval-env" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
+
+[lints]
+workspace = true

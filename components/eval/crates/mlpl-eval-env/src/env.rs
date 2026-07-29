@@ -148,7 +148,7 @@ pub struct Environment {
     pub string_lists: HashMap<String, Vec<String>>,
     pub results: HashMap<String, (bool, Value)>, // Saga 29 step 012
     pub cli_args: Vec<String>,                   // Saga 31 step 003
-    pub user_fns: HashMap<String, crate::env_user_fns::UserFn>,
+    pub user_fns: HashMap<String, mlpl_eval_state::UserFn>,
     /// Raw text of the program currently being evaluated, when the
     /// entry point provided it (naming-and-docs saga): `def` slices
     /// its own span out of this so `:list` shows the source AS
@@ -196,5 +196,5 @@ impl Environment {
 /// `name` and return the flat list of param identifiers it owns.
 #[must_use]
 pub fn model_params(env: &Environment, name: &str) -> Option<Vec<String>> {
-    env.get_model(name).map(ModelSpec::params)
+    env.models.get(name).map(ModelSpec::params)
 }

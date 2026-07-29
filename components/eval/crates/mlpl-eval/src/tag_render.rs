@@ -6,6 +6,7 @@
 //! should let a student understand why the tag exists and what
 //! op produced or consumes it.
 
+use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_core::{ActivationKind, LossKind, ValueTag};
 

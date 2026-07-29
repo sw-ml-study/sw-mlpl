@@ -3,6 +3,7 @@
 //! `mlpl-bpe-core`; this file keeps the env / Value /
 //! tokenizer-registry plumbing.
 
+use crate::env_api::*;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;

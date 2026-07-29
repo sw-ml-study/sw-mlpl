@@ -41,7 +41,7 @@ pub(crate) fn call_user_fn(
 /// Bind params into the (already-snapshotted) scope and evaluate the
 /// body. The caller restores the scope afterwards regardless of outcome.
 fn run_body(
-    f: &crate::env_user_fns::UserFn,
+    f: &mlpl_eval_state::UserFn,
     name: &str,
     evaluated: &[Value],
     env: &mut Environment,

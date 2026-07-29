@@ -12,7 +12,7 @@ mod auto_tag;
 // re-exported as modules so every crate::env:: / crate::env_user_fns::
 // path keeps resolving, and callers outside see mlpl_eval::Environment
 // unchanged.
-pub use mlpl_eval_env::{env, env_user_fns};
+pub use mlpl_eval_env::env;
 /// The capability-trait prelude: importing this glob gives every
 /// `Environment` method its trait (the eval decomposition converts
 /// env_* inherent impls to per-capability trait crates). External
@@ -22,6 +22,10 @@ pub mod env_api {
     pub use mlpl_eval_envc_bindings::{
         EnvRecords, EnvResults, EnvScope, EnvStringLists, EnvStrings, EnvVars, ScopeSnapshot,
     };
+    pub use mlpl_eval_envc_ml::{
+        EnvFrozen, EnvMlIters, EnvModels, EnvParams, EnvTags, EnvTokenizers,
+    };
+    pub use mlpl_eval_envc_userfns::{EnvUserFns, EnvUserFnsRender};
 }
 pub use env_api::*;
 mod bpe;

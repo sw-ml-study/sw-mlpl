@@ -9,6 +9,7 @@
 //! a user who hasn't yet adopted typed values keeps the existing
 //! shape-only behavior with no surprises.
 
+use crate::env_api::*;
 use mlpl_core::ValueTag;
 use mlpl_parser::Expr;
 

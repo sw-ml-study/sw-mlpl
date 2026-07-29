@@ -26,6 +26,7 @@
 //! gets no tag and continues to flow through the language as a
 //! plain DenseArray.
 
+use crate::env_api::*;
 use mlpl_core::{ActivationKind, LossKind, ValueTag};
 use mlpl_parser::Expr;
 

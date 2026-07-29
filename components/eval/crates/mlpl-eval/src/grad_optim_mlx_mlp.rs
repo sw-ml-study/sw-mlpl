@@ -7,6 +7,7 @@
 //! (`mlpl-mlx-eval::mlx_mlp`, `mlpl-cuda-eval::cuda_mlp`).
 
 use crate::env::Environment;
+use crate::env_api::*;
 use mlpl_eval_core::ModelSpec;
 use mlpl_parser::Expr;
 
