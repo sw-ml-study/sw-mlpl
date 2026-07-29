@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-28
 
+- saga eval-decomposition: step 018 env peels C+D + spine tidy complete
+- refactor(eval): peels C+D + spine tidy -- the env transient ENDS
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 017-env-peel-ml-userfns complete
 - refactor(eval): peel ML-state + user-fn capabilities (envc-ml, envc-userfns)
 - docs(changes): refresh CHANGES.md to HEAD
