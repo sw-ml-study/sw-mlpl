@@ -1,0 +1,1 @@
+eval decomposition steps 3c/3d + env spine tidy: exec + obs capability crates, dirs/device splits at the 3-method bound, trait-impl consolidation; ends the env transient (mlpl-eval-env at 7 modules).

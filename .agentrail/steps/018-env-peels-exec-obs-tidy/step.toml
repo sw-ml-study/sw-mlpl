@@ -1,0 +1,9 @@
+number = 18
+slug = "env-peels-exec-obs-tidy"
+status = "completed"
+description = "eval decomposition steps 3c/3d + env spine tidy: exec + obs capability crates..."
+role = "production"
+context_files = []
+created_at = "2026-07-28T17:15:20"
+completed_at = "2026-07-28T17:15:20"
+commits = ["cdfe8a8b30a68db543cb947c921f37a189cf85bc"]
