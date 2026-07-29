@@ -1,8 +1,9 @@
 number = 17
 slug = "env-peel-ml-userfns"
-status = "in-progress"
+status = "completed"
 description = "eval decomposition step 3b: peel the ML-state and user-fn capabilities from m..."
 role = "production"
 context_files = []
 created_at = "2026-07-28T16:45:32"
-commits = []
+completed_at = "2026-07-28T17:06:01"
+commits = ["f2de715f6e6767a46d896b49afb7372390edd42f"]
