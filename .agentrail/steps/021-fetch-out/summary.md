@@ -1,0 +1,1 @@
+fetch-out landed: mlpl-eval-fetch (3 modules, budget-clean) owns dataset fetch + tarball io with its test modules; hub image-io feature simplifies to one dep; 48 modules left in the hub. 30 targeted tests, tri-feature clippy, cli+serve clean.
