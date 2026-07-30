@@ -1,6 +1,6 @@
 number = 1
 slug = "scaffold-engram-core"
-status = "pending"
+status = "in-progress"
 description = "Saga E1 step 1 (docs/engram-sagas-plan.md): create components/engram/ with ml..."
 role = "production"
 context_files = []

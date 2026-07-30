@@ -1,0 +1,15 @@
+# Engram support component (docs/engram-sagas-plan.md): the
+# backend-neutral core (specs, validation, accounting, reference
+# hashing) and, in later sagas, the backend implementations.
+
+[workspace]
+members = ["crates/mlpl-engram-core"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+
+[workspace.lints.clippy]
+pedantic = "warn"

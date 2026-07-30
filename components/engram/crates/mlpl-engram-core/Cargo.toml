@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-engram-core"
+description = "Backend-neutral Engram core: spec + validation + memory accounting + the exact-arithmetic n-gram hash reference every backend must match bit-for-bit"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true
