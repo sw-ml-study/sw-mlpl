@@ -1,8 +1,9 @@
 number = 19
 slug = "models-out"
-status = "in-progress"
+status = "completed"
 description = "eval decomposition cluster peel 1 (now unblocked): extract the 19 model_* mod..."
 role = "production"
 context_files = []
 created_at = "2026-07-28T17:17:22"
-commits = []
+completed_at = "2026-07-29T19:56:39"
+commits = ["07f4aef99537e1e8d497868a5844276a59840b57"]

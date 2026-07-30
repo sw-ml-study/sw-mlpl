@@ -1,0 +1,1 @@
+models-out landed: 19 model_* modules in mlpl-eval-models; eval reached via a second OnceLock hook (install_eval/eval_or_err) beside device dispatch; hub re-exports keep every caller path; three masked 50+-line fns split under full scrutiny; 85 targeted release tests; live server smoke of the model DSL through the hooks. Hub at 50 modules.
