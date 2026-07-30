@@ -1,0 +1,8 @@
+number = 1
+slug = "scaffold-engram-core"
+status = "pending"
+description = "Saga E1 step 1 (docs/engram-sagas-plan.md): create components/engram/ with ml..."
+role = "production"
+context_files = []
+created_at = "2026-07-30T12:38:52"
+commits = []
