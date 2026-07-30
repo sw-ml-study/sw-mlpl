@@ -26,6 +26,7 @@ pub(crate) fn try_dispatch(
     crate::fncall_models::try_dispatch(name, args, env, trace)
         .or_else(|| crate::fncall_axes::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_arrays::try_dispatch(name, args, env, trace, span))
+        .or_else(|| crate::fncall_engram::try_dispatch(name, args, env, trace))
         .or_else(|| try_loaders(name, args, env, trace))
         .or_else(|| try_tools(name, args, env, trace, span))
 }

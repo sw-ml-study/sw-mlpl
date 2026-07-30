@@ -411,6 +411,21 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
             ),
         ],
     ),
+    (
+        "Engram",
+        &[
+            (
+                "ngram_hash",
+                "ngram_hash(ids, orders, heads, slots, seed)",
+                "rolling n-gram hash indices [T, order, head] (exact cross-backend contract)",
+            ),
+            (
+                "gather_rows",
+                "gather_rows(table, indices)",
+                "select rows of a rank-2 table; output shape = indices shape + [dim]",
+            ),
+        ],
+    ),
 ];
 
 /// Iterate every builtin name listed in [`BUILTIN_GROUPS`]. Used

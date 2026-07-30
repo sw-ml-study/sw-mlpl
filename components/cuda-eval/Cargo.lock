@@ -912,6 +912,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-engram-core"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-env-traits"
 version = "0.20.0"
 dependencies = [
@@ -936,6 +940,7 @@ dependencies = [
  "mlpl-cuda-elementwise",
  "mlpl-cuda-nn",
  "mlpl-cuda-rt",
+ "mlpl-engram-core",
  "mlpl-env-traits",
  "mlpl-eval-core",
  "mlpl-eval-env",

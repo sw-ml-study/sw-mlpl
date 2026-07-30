@@ -1,0 +1,8 @@
+number = 2
+slug = "ngram-hash-builtins"
+status = "in-progress"
+description = "Saga E1 step 2: surface the primitives in the language. Builtins: ngram_hash(..."
+role = "production"
+context_files = []
+created_at = "2026-07-30T12:49:21"
+commits = []

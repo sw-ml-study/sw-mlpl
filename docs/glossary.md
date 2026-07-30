@@ -2106,6 +2106,47 @@ from "low-rank" in LoRA (the small inner dimension of
 the adapter matrices A and B), and from `depth`, which
 counts levels of nesting rather than axes.
 
+## Engram
+
+A conditional-memory architecture (DeepSeek lineage): a trainable
+n-gram hash table bolted into selected Transformer residual
+blocks, so frequent local patterns are RETRIEVED from a table
+instead of recomputed by attention/MLP capacity. The pipeline is
+deterministic addressing -- normalize token ids, hash rolling
+bigrams/trigrams per independent head (`ngram_hash`), gather
+low-dimensional rows from one flattened table (`gather_rows`) --
+followed by learned use: project the retrieved vectors, gate them
+against the current hidden state, and add the result into the
+residual stream. sw-MLPL builds it as composable language
+primitives first (this glossary's `ngram_hash` / `gather_rows`),
+then as an `engram(...)` model layer; the full plan lives in
+docs/engram-sagas-plan.md.
+
+## ngram_hash (builtin)
+
+`ngram_hash(ids, orders, heads, slots, seed)` -- rolling n-gram
+hash indices for [[Engram]]-style memory lookup: for every token
+position it hashes the current token together with its n-1
+predecessors (missing history pads with id 0) once per n-gram
+order and per independent head, yielding a rank-3 `[T, order,
+head]` array of table slot indices, each `< slots`. The
+arithmetic is a FROZEN cross-backend contract (multiply mod a
+fixed prime, sum, mod slots -- every intermediate exact in f64),
+so CPU, MLX, and CUDA implementations must produce bit-identical
+indices; token ids are capped at 2^21 - 1 to guarantee it. See
+also: `gather_rows`.
+
+## gather_rows (builtin)
+
+`gather_rows(table, indices)` -- select whole rows of a rank-2
+table by index: output shape is the indices' shape with the row
+width appended, so `gather_rows(T, [[3, 0], [1, 1]])` on a
+`[rows, d]` table yields `[2, 2, d]`. Out-of-range indices are a
+loud error. The lookup half of [[Engram]] memory (hash with
+`ngram_hash`, then gather the addressed rows from one flattened
+table), and generally useful wherever embedding-style row
+addressing is needed.
+
 ## rotate (builtin)
 
 `rotate(x, k, axis)` -- cyclic shift along an axis, APL's rotate. Positive k brings element k to the front (a left/up shift); negative k -- spelled `0 - k`, MLPL has no unary minus -- rotates the other way; any magnitude wraps. A pure permutation, so it is tape-differentiable (the gradient is the inverse rotation) and shape- and label-preserving. The workhorse of stencil-style neighborhoods: all 8 [[Game of Life]] neighbor shifts are rotate calls, and a permutation MATRIX is just `rotate(one_hot(iota(n), n), k, 0)` -- a rotated identity.

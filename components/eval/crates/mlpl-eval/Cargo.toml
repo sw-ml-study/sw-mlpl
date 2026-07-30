@@ -71,6 +71,7 @@ image-io = [
 mlpl-bpe-core = { path = "../../../session-infra/crates/mlpl-bpe-core" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-engram-core = { path = "../../../engram/crates/mlpl-engram-core" }
 mlpl-eval-env = { path = "../mlpl-eval-env" }
 mlpl-eval-envc-bindings = { path = "../mlpl-eval-envc-bindings" }
 mlpl-eval-envc-ml = { path = "../mlpl-eval-envc-ml" }

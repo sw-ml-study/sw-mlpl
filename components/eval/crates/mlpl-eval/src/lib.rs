@@ -60,6 +60,7 @@ mod experiment;
 mod experiment_compare;
 mod fncall_arrays;
 mod fncall_axes;
+mod fncall_engram;
 mod fncall_models;
 mod fncall_trace;
 mod grad;
