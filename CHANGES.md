@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-30
+
+- saga eval-decomposition: step 021-fetch-out complete
+- refactor(eval): fetch-out -- dataset fetch cluster leaves the hub
+
 ## 2026-07-29
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 020-colon-expr-routing complete
 - feat(lang): `:name(args)` calls the quoted builtin; route colon-exprs right
 - docs(changes): refresh CHANGES.md to HEAD
