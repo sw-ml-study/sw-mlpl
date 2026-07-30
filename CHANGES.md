@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-30
 
+- saga engram-e1-primitives: init (plan per docs/engram-sagas-plan.md)
+- chore(agentrail): archive eval-decomposition saga
+- saga eval-decomposition: PAUSED-COMPLETE for Engram priority (plan + decisions in docs/engram-sagas-plan.md)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 021-fetch-out complete
 - refactor(eval): fetch-out -- dataset fetch cluster leaves the hub
 
