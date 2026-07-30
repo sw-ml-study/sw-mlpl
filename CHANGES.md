@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-30
 
+- saga engram-e1-primitives: step 002-ngram-hash-builtins complete
+- feat(lang): ngram_hash + gather_rows builtins (Engram primitives)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e1-primitives: step 001-scaffold-engram-core complete
 - feat(engram): mlpl-engram-core -- spec, accounting, exact hash reference
 - docs(changes): refresh CHANGES.md to HEAD
