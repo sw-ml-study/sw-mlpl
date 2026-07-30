@@ -1,0 +1,1 @@
+E2 step 2: apply_engram(e, h, ids) forward pass -- ngram_hashes + head_offset row gather, value/gate linears via dispatch hook, out = h + g*v; fresh engram exactly identity. (Landed in bfc57a2e with step 1.)

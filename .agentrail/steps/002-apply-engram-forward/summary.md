@@ -1,0 +1,1 @@
+apply_engram(e, h, ids) forward pass: hash->gather->value linear->[h|v] gate->sigmoid->residual, all matmul/add/mul via device dispatch hook; fresh engram EXACTLY identity (pinned test); engram_apply_tests 4/4; demos.toml gather_rows disp() fix. Commit bfc57a2e.

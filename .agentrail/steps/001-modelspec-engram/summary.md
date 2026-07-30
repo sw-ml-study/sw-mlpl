@@ -1,0 +1,1 @@
+ModelSpec::Engram variant + engram() constructor with near-identity init (zero memory, 0.01 randn projections, b_g=-2); exhaustiveness arms across inspect/estimate/clone/tape/lora; :describe rendering; engram_ctor_tests 4/4. Landed in bfc57a2e together with step 2.

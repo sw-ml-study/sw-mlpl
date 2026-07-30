@@ -1,8 +1,9 @@
 number = 1
 slug = "modelspec-engram"
-status = "in-progress"
+status = "completed"
 description = "E2 step 1: ModelSpec::Engram variant (mlpl-eval-core; serde/save-load compati..."
 role = "production"
 context_files = []
 created_at = "2026-07-30T16:31:37"
-commits = []
+completed_at = "2026-07-30T16:54:24"
+commits = ["bfc57a2e1414b2770a49eeb95618fea5944750b9"]

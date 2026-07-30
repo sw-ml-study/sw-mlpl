@@ -1,0 +1,1 @@
+E2 step 3: differentiate through apply_engram on the tape -- gather_rows scatter-ADD gradient with duplicate-index accumulation, apply_engram lowering in grad_calls so train/adam moves the memory table. Tests: gradcheck vs numeric on a tiny spec; only addressed rows receive gradient; duplicate indices accumulate.
