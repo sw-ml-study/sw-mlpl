@@ -1,8 +1,9 @@
 number = 1
 slug = "scaffold-engram-core"
-status = "in-progress"
+status = "completed"
 description = "Saga E1 step 1 (docs/engram-sagas-plan.md): create components/engram/ with ml..."
 role = "production"
 context_files = []
 created_at = "2026-07-30T12:38:52"
-commits = []
+completed_at = "2026-07-30T12:48:52"
+commits = ["35f928dbaadd4728def2cc817e266e8fc909f8f1"]

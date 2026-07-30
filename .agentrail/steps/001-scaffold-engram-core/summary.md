@@ -1,0 +1,1 @@
+mlpl-engram-core landed: EngramSpec validation + accounting (doc example pinned; found a 2x arithmetic slip in the source doc), and the exact-arithmetic hash reference -- HASH_PRIME frozen, splitmix64 multipliers, PAD-0 history, head offsets -- with 16 tests including a bit-level f64==u64 pipeline mirror and golden_fixture_v1 (the E5/E10 cross-backend parity contract).
