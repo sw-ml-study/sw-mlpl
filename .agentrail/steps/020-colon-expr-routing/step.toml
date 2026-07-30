@@ -1,0 +1,8 @@
+number = 20
+slug = "colon-expr-routing"
+status = "in-progress"
+description = "User report: in connect mode ':disp(g)' / ':disp g' say 'undefined variable: ..."
+role = "production"
+context_files = []
+created_at = "2026-07-29T19:57:39"
+commits = []

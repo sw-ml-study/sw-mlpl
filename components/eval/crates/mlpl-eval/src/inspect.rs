@@ -84,3 +84,36 @@ fn handle_untag(env: &mut Environment, arg: Option<&str>) -> String {
         format!("{name} had no tag")
     }
 }
+
+/// Whether a colon-prefixed line is a builtin-reference CALL
+/// expression (`:disp(g)`) rather than a REPL command: `:` + an
+/// identifier + an immediate `(`. Such lines parse and evaluate as
+/// programs -- routing them to the command handler was the bug that
+/// made `:disp(g)` "unknown" while `disp(g)` worked.
+#[must_use]
+pub fn is_colon_call_expr(line: &str) -> bool {
+    let t = line.trim_start();
+    let Some(rest) = t.strip_prefix(':') else {
+        return false;
+    };
+    let ident_len = rest
+        .chars()
+        .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
+        .count();
+    ident_len > 0 && rest[ident_len..].starts_with('(')
+}
+
+/// A tailored hint for `:name ...` lines where `name` is a documented
+/// BUILTIN (not a command): explains the quote/call trichotomy
+/// instead of a bare "unknown command".
+#[must_use]
+pub fn colon_ref_hint(line: &str) -> Option<String> {
+    let word = line.trim().strip_prefix(':')?.split_whitespace().next()?;
+    if !mlpl_eval_core::inspect_groups::documented_builtin_names().any(|n| n == word) {
+        return None;
+    }
+    Some(format!(
+        "`:{word}` is a builtin REFERENCE (the quoted, first-class form of `{word}`). \
+         To call it, write `{word}(...)` or `:{word}(...)` -- `:{word} x` is not a command."
+    ))
+}

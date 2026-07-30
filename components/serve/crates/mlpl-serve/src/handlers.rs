@@ -202,7 +202,7 @@ pub(crate) async fn install_session_interrupt(
 fn parse_unless_command(
     program: &str,
 ) -> Result<Vec<mlpl_parser::Expr>, (StatusCode, Json<ErrorResponse>)> {
-    if program.trim_start().starts_with(':') {
+    if program.trim_start().starts_with(':') && !mlpl_eval::is_colon_call_expr(program) {
         return Ok(Vec::new());
     }
     parse_program(program)

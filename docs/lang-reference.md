@@ -71,7 +71,7 @@ One naming design, three deliberate roles:
 | Form | What it is | Example |
 | --- | --- | --- |
 | `name(...)` | CALL a builtin. The bare name is only meaningful applied to arguments. | `disp(G)`, `rotate(x, 1, 0)` |
-| `:name` | QUOTE a builtin into a first-class VALUE (APL's quoted function). What higher-order builtins consume; typing `:disp` alone shows the reference, not a rendering. | `reduce(:add, S, 0)`, `f = :max` |
+| `:name` | QUOTE a builtin into a first-class VALUE (APL's quoted function). What higher-order builtins consume; typing `:disp` alone shows the reference, not a rendering. Applying the quoted form calls it: `:disp(G)` and `disp(G)` are the same call. `:disp G` (no parens) is NOT a command -- the REPL says so. | `reduce(:add, S, 0)`, `f = :max`, `:disp(G)` |
 | `u:name` | A USER-DEFINED function. The mandatory `u:` namespace prefix keeps your names from ever colliding with (or shadowing) present or FUTURE builtins -- a new builtin release can never break your workspace. | `def u:life(g) { ... }`, `u:life(G)` |
 
 Why the trichotomy: calls and values must look different (so

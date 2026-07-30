@@ -128,7 +128,7 @@ pub use grad_optim_mlx_demo::DemoLayout;
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
 pub use grad_optim_mlx_mlp::LoraNames;
-pub use inspect::inspect;
+pub use inspect::{colon_ref_hint, inspect, is_colon_call_expr};
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
 pub use mlpl_eval_core::{ActKind, MetricSink, ModelSpec};

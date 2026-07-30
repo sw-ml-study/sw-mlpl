@@ -91,12 +91,13 @@ pub(crate) async fn run_eval(
 ) -> Result<EvalResponse, String> {
     let join = tokio::task::spawn_blocking(move || {
         let trimmed = program.trim();
-        if trimmed.starts_with(':') {
+        if trimmed.starts_with(':') && !mlpl_eval::is_colon_call_expr(trimmed) {
             let value = match mlpl_eval::inspect(&mut session.env, trimmed) {
                 Some(out) => Ok(mlpl_eval::Value::Str(out)),
-                None => Err(mlpl_eval::EvalError::Unsupported(format!(
-                    "unknown command: {trimmed}"
-                ))),
+                None => Err(mlpl_eval::EvalError::Unsupported(
+                    mlpl_eval::colon_ref_hint(trimmed)
+                        .unwrap_or_else(|| format!("unknown command: {trimmed}")),
+                )),
             };
             return (session, value);
         }

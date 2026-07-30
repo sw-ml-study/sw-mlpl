@@ -20,11 +20,23 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
     if let Some(q) = t.strip_prefix(":ask ") {
         return Some(mlpl_web_ask::prompt::ask_program(q, history));
     }
-    if is_inspect_command(t) {
+    if is_inspect_command(t) || is_colon_call_expr(t) {
         return Some(t.to_string());
     }
     if t.starts_with(':') {
-        return None;
+        // Colon lines the CLIENT does not handle itself route to the
+        // server too: its inspect surface is a superset and it owns
+        // the "`:disp` is a builtin REFERENCE" hint (the user's
+        // bindings live there in connect mode).
+        const CLIENT_LOCAL: &[&str] = &[
+            ":help", ":history", ":clear", ":upload", ":2d", ":3d", ":reset", ":ask", ":connect",
+            ":status",
+        ];
+        let word = t.split_whitespace().next().unwrap_or(t);
+        if CLIENT_LOCAL.contains(&word) {
+            return None;
+        }
+        return Some(t.to_string());
     }
     Some(line.to_string())
 }
@@ -32,6 +44,20 @@ fn connect_program(line: &str, history: &[HistoryEntry]) -> Option<String> {
 /// Workspace-introspection commands ride /eval to the server: in
 /// connect mode the session (vars, models, u: fns defined by
 /// prefers_connect demos) lives THERE, so :fns / :list must ask it.
+/// `:name(...)` is a builtin-reference CALL expression, not a
+/// command -- route it to the server like any other program (the
+/// user's bindings live there in connect mode).
+fn is_colon_call_expr(t: &str) -> bool {
+    let Some(rest) = t.strip_prefix(':') else {
+        return false;
+    };
+    let n = rest
+        .chars()
+        .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
+        .count();
+    n > 0 && rest[n..].starts_with('(')
+}
+
 fn is_inspect_command(t: &str) -> bool {
     const INSPECT_CMDS: &[&str] = &[
         ":vars",

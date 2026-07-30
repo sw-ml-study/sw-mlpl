@@ -175,9 +175,17 @@ impl<'a> Parser<'a> {
                 Ok(e)
             }
             TokenKind::BuiltinRef(name) => {
-                let e = Expr::BuiltinRef(name.clone(), tok.span);
+                let name = name.clone();
+                let span = tok.span;
                 self.pos += 1;
-                Ok(e)
+                // `:name(args)` is a CALL of the referenced builtin --
+                // the quoted form applied directly, so `:disp(g)` and
+                // `disp(g)` are the same call. Bare `:name` stays the
+                // first-class reference value.
+                if self.is(TokenKind::LParen) {
+                    return self.parse_fncall_after_name(name, span);
+                }
+                Ok(Expr::BuiltinRef(name, span))
             }
             TokenKind::Ident(name) => {
                 let name = name.clone();
@@ -339,6 +347,34 @@ impl<'a> Parser<'a> {
             kind,
             shape,
             span: Span::new(start.start, close_span.end),
+        })
+    }
+
+    /// Parse `(args...)` after a known callee name (identifier or
+    /// builtin reference) into an `Expr::FnCall`. The opening paren
+    /// is NOT yet consumed.
+    fn parse_fncall_after_name(&mut self, name: String, start: Span) -> Result<Expr, ParseError> {
+        self.pos += 1; // skip '('
+        let mut args = Vec::new();
+        if !self.is(TokenKind::RParen) {
+            args.push(self.parse_expr(0)?);
+            while self.is(TokenKind::Comma) {
+                self.pos += 1;
+                args.push(self.parse_expr(0)?);
+            }
+        }
+        if !self.is(TokenKind::RParen) {
+            return Err(ParseError::UnclosedDelimiter {
+                open: "(".into(),
+                span: start,
+            });
+        }
+        let end = self.tokens[self.pos].span;
+        self.pos += 1;
+        Ok(Expr::FnCall {
+            name,
+            args,
+            span: Span::new(start.start, end.end),
         })
     }
 
