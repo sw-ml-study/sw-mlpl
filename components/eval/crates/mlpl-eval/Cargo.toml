@@ -64,10 +64,7 @@ image-io = [
     "mlpl-eval-image/image-io",
     "dep:png",
     "dep:jpeg-decoder",
-    "dep:tar",
-    "dep:flate2",
-    "dep:sha2",
-    "dep:ureq",
+    "dep:mlpl-eval-fetch",
 ]
 
 [dependencies]
@@ -81,6 +78,7 @@ mlpl-eval-envc-userfns = { path = "../mlpl-eval-envc-userfns" }
 mlpl-eval-envc-exec = { path = "../mlpl-eval-envc-exec" }
 mlpl-eval-envc-obs = { path = "../mlpl-eval-envc-obs" }
 mlpl-eval-models = { path = "../mlpl-eval-models" }
+mlpl-eval-fetch = { path = "../mlpl-eval-fetch", optional = true }
 mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
 mlpl-eval-pets-tiny = { path = "../../../eval-pets-tiny/crates/mlpl-eval-pets-tiny" }
 mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
@@ -111,10 +109,6 @@ mlpl-cuda-nn = { path = "../../../cuda-rt/crates/mlpl-cuda-nn", optional = true 
 mlpl-eval-image = { path = "../../../eval-image/crates/mlpl-eval-image", optional = true }
 png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }
-tar = { version = "0.4", optional = true }
-flate2 = { version = "1", optional = true }
-sha2 = { version = "0.10", optional = true }
-ureq = { version = "2", default-features = false, features = ["tls"], optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 

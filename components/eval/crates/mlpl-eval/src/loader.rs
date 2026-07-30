@@ -159,7 +159,7 @@ pub(crate) fn eval_load_images(
 /// fixture.
 #[cfg(feature = "image-io")]
 pub(crate) fn eval_fetch_dataset(env: &Environment, name: &str) -> Result<Value, EvalError> {
-    crate::fetch_dataset::eval(env, name)
+    mlpl_eval_fetch::eval(env, name)
 }
 
 #[cfg(not(feature = "image-io"))]

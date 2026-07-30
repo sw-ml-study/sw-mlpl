@@ -1,0 +1,20 @@
+[package]
+name = "mlpl-eval-fetch"
+description = "Dataset fetch for the evaluator: named-dataset lookup, tarball download/extract/verify (io-shaped, no tape deps)"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+flate2 = "1"
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-eval-env = { path = "../mlpl-eval-env" }
+mlpl-eval-envc-obs = { path = "../mlpl-eval-envc-obs" }
+mlpl-eval-image = { path = "../../../eval-image/crates/mlpl-eval-image", features = ["image-io"] }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types", features = ["image-io"] }
+sha2 = "0.10"
+tar = "0.4"
+ureq = { version = "2", default-features = false, features = ["tls"] }
+
+[dev-dependencies]
+png = "0.17"

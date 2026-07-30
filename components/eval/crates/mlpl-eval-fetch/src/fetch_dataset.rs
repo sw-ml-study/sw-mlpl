@@ -21,12 +21,11 @@
 //! is a single-line entry plus a test fixture; we deliberately
 //! keep the registry tiny.
 
-#![cfg(feature = "image-io")]
-
 use std::fs;
 use std::path::{Path, PathBuf};
 
-use crate::env::Environment;
+use mlpl_eval_env::Environment;
+use mlpl_eval_envc_obs::EnvDataDir;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
@@ -69,7 +68,7 @@ fn lookup(name: &str) -> Result<DatasetSpec, EvalError> {
 }
 
 /// Entry point called from `eval::eval_expr`.
-pub(crate) fn eval(env: &Environment, name: &str) -> Result<Value, EvalError> {
+pub fn eval(env: &Environment, name: &str) -> Result<Value, EvalError> {
     let spec = lookup(name)?;
     let root = resolve_data_root(env, name)?;
     let dataset_root = root.join(spec.subdir);
@@ -111,7 +110,7 @@ fn resolve_data_root(env: &Environment, name: &str) -> Result<PathBuf, EvalError
 /// Cat (uppercase prefix) -> 0, dog (lowercase prefix) -> 1.
 /// Non-alphabetic prefix surfaces as 255 so the caller can
 /// spot junk in the dataset.
-pub(crate) fn label_for(name: &str) -> u8 {
+pub fn label_for(name: &str) -> u8 {
     match name.chars().next() {
         Some(c) if c.is_ascii_uppercase() => 0,
         Some(c) if c.is_ascii_lowercase() => 1,
@@ -119,7 +118,7 @@ pub(crate) fn label_for(name: &str) -> u8 {
     }
 }
 
-pub(crate) fn io_err(path: &Path, e: std::io::Error) -> EvalError {
+pub fn io_err(path: &Path, e: std::io::Error) -> EvalError {
     EvalError::Unsupported(format!("fetch_dataset: {}: {e}", path.display()))
 }
 

@@ -6,6 +6,7 @@
 //! at `load_preloaded("pets_tiny")`.
 
 #![cfg(feature = "image-io")]
+use mlpl_eval::env_api::*;
 
 use std::collections::HashSet;
 use std::fs;

@@ -3,8 +3,6 @@
 //! Pure side-effecting helpers: download, hash verify, tar
 //! extract, image-directory decode, and DenseArray packing.
 
-#![cfg(feature = "image-io")]
-
 use std::collections::BTreeMap;
 use std::fs;
 use std::io::{Read, Write};
@@ -18,11 +16,7 @@ use mlpl_eval_types::Value;
 
 use crate::fetch_dataset::{io_err, label_for};
 
-pub(crate) fn ensure_tarball(
-    path: &Path,
-    url: &str,
-    expected_sha256: &str,
-) -> Result<(), EvalError> {
+pub fn ensure_tarball(path: &Path, url: &str, expected_sha256: &str) -> Result<(), EvalError> {
     if path.exists() {
         let got = sha256_of(path)?;
         if got == expected_sha256 {
@@ -54,7 +48,7 @@ pub(crate) fn ensure_tarball(
     Ok(())
 }
 
-pub(crate) fn sha256_of(path: &Path) -> Result<String, EvalError> {
+pub fn sha256_of(path: &Path) -> Result<String, EvalError> {
     let mut f = fs::File::open(path).map_err(|e| io_err(path, e))?;
     let mut hasher = sha2::Sha256::new();
     let mut buf = vec![0u8; 64 * 1024];
@@ -68,7 +62,7 @@ pub(crate) fn sha256_of(path: &Path) -> Result<String, EvalError> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
-pub(crate) fn extract_tarball(tar_path: &Path, dest: &Path) -> Result<(), EvalError> {
+pub fn extract_tarball(tar_path: &Path, dest: &Path) -> Result<(), EvalError> {
     let f = fs::File::open(tar_path).map_err(|e| io_err(tar_path, e))?;
     let gz = flate2::read::GzDecoder::new(f);
     let mut archive = tar::Archive::new(gz);
@@ -87,7 +81,7 @@ pub(crate) fn extract_tarball(tar_path: &Path, dest: &Path) -> Result<(), EvalEr
 /// Cat vs dog is encoded in the filename per Oxford-IIIT Pet
 /// convention: capitalized prefix = cat (label 0), lowercase
 /// prefix = dog (label 1).
-pub(crate) fn decode_directory_to_record(
+pub fn decode_directory_to_record(
     images_dir: &Path,
     h: usize,
     w: usize,
@@ -122,14 +116,14 @@ pub(crate) fn decode_directory_to_record(
     build_record(paths.len(), 3, h, w, x_data, y_data, names)
 }
 
-pub(crate) fn is_image_ext(p: &Path) -> bool {
+pub fn is_image_ext(p: &Path) -> bool {
     p.extension()
         .and_then(|e| e.to_str())
         .map(|e| matches!(e.to_ascii_lowercase().as_str(), "png" | "jpg" | "jpeg"))
         .unwrap_or(false)
 }
 
-pub(crate) fn build_record(
+pub fn build_record(
     n: usize,
     c: usize,
     h: usize,

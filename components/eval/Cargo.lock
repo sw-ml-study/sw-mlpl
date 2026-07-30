@@ -1355,7 +1355,6 @@ dependencies = [
 name = "mlpl-eval"
 version = "0.20.0"
 dependencies = [
- "flate2",
  "jpeg-decoder",
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -1377,6 +1376,7 @@ dependencies = [
  "mlpl-eval-envc-ml",
  "mlpl-eval-envc-obs",
  "mlpl-eval-envc-userfns",
+ "mlpl-eval-fetch",
  "mlpl-eval-image",
  "mlpl-eval-models",
  "mlpl-eval-pets-tiny",
@@ -1401,9 +1401,6 @@ dependencies = [
  "png",
  "serde",
  "serde_json",
- "sha2",
- "tar",
- "ureq",
 ]
 
 [[package]]
@@ -1472,6 +1469,22 @@ dependencies = [
  "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-state",
+]
+
+[[package]]
+name = "mlpl-eval-fetch"
+version = "0.20.0"
+dependencies = [
+ "flate2",
+ "mlpl-array",
+ "mlpl-eval-env",
+ "mlpl-eval-envc-obs",
+ "mlpl-eval-image",
+ "mlpl-eval-types",
+ "png",
+ "sha2",
+ "tar",
+ "ureq",
 ]
 
 [[package]]

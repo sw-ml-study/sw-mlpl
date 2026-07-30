@@ -1,0 +1,1 @@
+eval decomposition cluster peel 2: extract the fetch_* modules (dataset fetch + test helpers) from mlpl-eval into mlpl-eval-fetch (eval workspace). Per the plan they are io-shaped with no tape deps; env reached via the capability traits; scoped tests + dual clippy; hub shrinks further.

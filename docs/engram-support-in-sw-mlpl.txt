@@ -1,0 +1,1975 @@
+ChatGPT Pro
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+given softwarewrighter/engram-poc and https://software-wrighter-lab.github.io/2026/02/11/deepseek-papers-part3-engram-revisited/ and the related github repos and earlier blog posts, and https://sw-ml-study.github.io/sw-mlpl/ - how can I implement Engram cache on Apple and on NVIDIA GPUs for larger models that fit in 18G or larger Unified or Video RAM?  Could I add Engram look-ups to gemma, qwen, llama, ornith, and other models around 12B or larger (less than 24G or 64G)?
+
+Worked for 45s
+Conclusion
+Yes, you can retrofit Engram-style conditional memory into Gemma, Qwen, Llama, Ornith, and most decoder-only Transformer models in the 12B–70B range. However, it is not a transparent inference cache like a KV cache. You must:
+
+Insert one or more Engram modules into the model.
+
+Train the memory tables, projections, and gates against the frozen—or partly frozen—base model.
+
+Extend the inference runtime so it executes the lookup and fusion operations.
+
+Use the same tokenizer normalization, hashing, layer placement, and table geometry at training and inference.
+
+The most practical target for your hardware is:
+
+A frozen, quantized 12B–32B base model plus two low-dimensional Engram modules, trained with QLoRA/PEFT and deployed through MLX on Apple or PyTorch/CUDA on NVIDIA.
+
+I would not begin by wrapping every layer or storing full-width hidden vectors. Your current POC does both, and that becomes expensive very quickly.
+
+1. What your current POC proves—and what should change
+Your repository has evolved through two related but materially different ideas.
+
+Behavioral approximation
+The initial LoRA experiments taught a model to behave as though it had deterministic lookup. Your Part 2 post describes this as pattern injection plus LoRA, rather than an actual architectural lookup table. 
+
+That approach is useful for:
+
+Testing datasets and pattern categories.
+
+Learning whether predictable local mappings are useful.
+
+Comparing MLX and CUDA training workflows.
+
+Establishing evaluation tasks.
+
+It does not avoid neural computation during inference because the Transformer still generates the result conventionally.
+
+Actual hash-based memory
+Your current EnhancedEngramModule performs a real embedding-table lookup and gated residual injection. It hashes token IDs, gathers multiple embedding rows, averages or attends over them, gates the result, and projects it into the residual stream.
+
+The wrapper already recognizes Llama, Qwen2, Gemma, Mistral, Phi and several related Hugging Face layouts.
+
+That means you have much of the mechanical model-wrapping infrastructure, but the current module differs from DeepSeek’s design in important ways.
+
+Current POC limitations
+Your current hashing is essentially:
+
+hash(token_id) = token_id × prime mod table_size
+This hashes individual tokens, not contextual N-grams.
+
+More significantly, the table stores d_model values:
+
+memory_table[table_size, d_model]
+and your wrapper creates a separate table for every injected layer.
+
+For a model with hidden size 5,120:
+
+100,000 entries × 5,120 dimensions × 2 bytes
+≈ 0.95 GiB per Engram layer
+Injecting this into 40 layers would require roughly 38 GiB just for memory tables, before the base model, KV cache, temporary activations, projections, or optimizer state.
+
+The README currently says the wrapper can inject every Transformer layer, but that is only reasonable for small demonstration models.
+
+2. Use a closer-to-paper architecture
+The official demonstration is much more memory-efficient than your current POC.
+
+It uses:
+
+Normalized/compressed token IDs.
+
+Bigram and trigram keys.
+
+Multiple independent hash heads.
+
+Low-dimensional memory values.
+
+Concatenation of the retrieved head vectors.
+
+Projection into the model hidden dimension.
+
+Context-aware gating using the current hidden state.
+
+Engram injection into only selected layers.
+
+The official code retrieves 2-gram and 3-gram embeddings, flattens the multi-head results, projects them to hidden width, computes a hidden-state-dependent gate, and adds a short convolutional transformation.
+
+Recommended portable Engram block
+For Gemma/Qwen/Llama/Ornith, I recommend this simplified first production architecture:
+
+token IDs
+   │
+   ├── normalization/compression
+   │
+   ├── rolling bigram/trigram hashes
+   │
+   ├── H independent embedding lookups
+   │
+   └── concatenate or weighted sum
+                │
+             RMSNorm
+                │
+        low-rank value projection
+                │
+ hidden state ──┼── context gate
+                │
+       gated residual addition
+Use:
+
+2 injected layers
+2 N-gram orders: 2 and 3
+4 hash heads per N-gram initially
+32–64 dimensions per head
+one table region per N-gram/head
+one projected value per token
+Skip the short convolution in the first implementation. It adds architectural fidelity, but not enough value to justify complicating the first MLX and CUDA ports.
+
+3. Memory budgeting
+The important formula is:
+
+table bytes =
+  injected_layers
+× ngram_orders
+× hash_heads
+× slots_per_head
+× dimensions_per_head
+× bytes_per_value
+Projection and gate parameters are relatively small compared with the tables.
+
+Example A: Conservative 18GB Apple configuration
+Injected layers:       2
+N-gram orders:         2
+Heads per N-gram:      4
+Slots per head:        262,144
+Dimensions per head:   32
+Table type:            FP16
+Memory:
+
+2 × 2 × 4 × 262,144 × 32 × 2
+= 536,870,912 bytes
+≈ 512 MiB
+This is a realistic Engram addition to a 12B model stored at 4-bit.
+
+Example B: Strong 24GB NVIDIA configuration
+Injected layers:       2
+N-gram orders:         2
+Heads per N-gram:      8
+Slots per head:        524,288
+Dimensions per head:   32
+Table type:            BF16
+Memory:
+
+2 × 2 × 8 × 524,288 × 32 × 2
+≈ 2 GiB
+This is large enough to test meaningful capacity while still leaving room for a quantized 12B–20B backbone and a useful KV cache.
+
+Example C: 64GB Apple configuration
+Injected layers:       2
+N-gram orders:         2
+Heads per N-gram:      8
+Slots per head:        1,048,576
+Dimensions per head:   64
+Table type:            FP16
+Memory:
+
+2 × 2 × 8 × 1,048,576 × 64 × 2
+≈ 8 GiB
+This is approaching the official design’s large-memory character, but it would be a poor first experiment. Start around 1–2 GiB and scale only after controlled ablations.
+
+Official demo scale
+The official demo defaults to two N-gram orders, eight heads per order, approximately five times tokenizer vocabulary entries per head, and 64 dimensions per head.
+
+With a roughly 129K-token vocabulary, that works out to approximately:
+
+2 N-gram orders
+× 8 heads
+× ~646K slots
+× 64 dimensions
+≈ 661 million memory parameters per injected layer
+At FP16, that is around 1.23 GiB per layer, or roughly 2.5 GiB for two layers, excluding projections. This is feasible next to a 4-bit 12B–20B model on a 24GB GPU, but tight once training activations and optimizer state are included.
+
+4. Apple Silicon implementation
+Preferred stack
+Use:
+
+mlx
+
+mlx-lm
+
+An MLX-native Engram module
+
+A lightly modified model implementation for each architecture family
+
+QLoRA or frozen-base training
+
+MLX-LM currently supports model loading, quantization, LoRA/QLoRA and full fine-tuning on Apple Silicon. It lists Llama, Qwen2 and Gemma among the supported LoRA families. 
+
+Do not use PyTorch MPS as the primary implementation
+PyTorch/MPS is fine for validating semantics, but MLX is the better deployment target because:
+
+Model and Engram arrays share unified memory.
+
+You control model architecture and quantized layers directly.
+
+Gather operations remain in MLX’s lazy graph.
+
+You can later fuse hashing, offsets and gather preparation through a custom Metal kernel.
+
+MLX exposes custom Metal kernels through both Python and C++ APIs. 
+
+MLX module decomposition
+I would create:
+
+mlx_engram/
+├── config.py
+├── tokenizer_map.py
+├── hash.py
+├── table.py
+├── gate.py
+├── module.py
+├── injection.py
+└── models/
+    ├── llama.py
+    ├── qwen.py
+    ├── gemma.py
+    └── ornith.py
+EngramConfig
+@dataclass
+class EngramConfig:
+    layers: tuple[int, ...]
+    ngram_orders: tuple[int, ...] = (2, 3)
+    heads_per_ngram: int = 4
+    slots_per_head: int = 262_144
+    head_dim: int = 32
+    table_dtype: str = "float16"
+    use_token_compression: bool = True
+    use_short_conv: bool = False
+Vectorized rolling hash
+Do not use Python loops per token. Construct shifted arrays:
+
+current = ids
+previous_1 = pad_left(ids, 1)
+previous_2 = pad_left(ids, 2)
+Then compute:
+
+bigram_mix  = current*M0 XOR previous_1*M1
+trigram_mix = current*M0 XOR previous_1*M1 XOR previous_2*M2
+Each head applies a different modulus and/or mixing seed.
+
+The official implementation uses shifted token arrays, per-position multipliers, XOR mixing and different prime-sized tables.
+
+Table layout
+Use one contiguous array rather than many small embedding objects:
+
+[all bigram-head tables][all trigram-head tables]
+Precompute offsets:
+
+global_index = table_offset[ngram, head] + local_hash
+Then perform one flattened gather.
+
+That layout maps well to:
+
+mx.take
+
+PyTorch embedding
+
+CUDA gather kernels
+
+llama.cpp/GGML tensor storage later
+
+Layer integration
+Modify the architecture-specific decoder block rather than wrapping arbitrary __call__ methods.
+
+Conceptually:
+
+residual = hidden
+hidden = attention(norm(hidden), cache)
+hidden = residual + hidden
+
+if layer_index in engram_layers:
+    hidden = hidden + engram(hidden, token_ids)
+
+residual = hidden
+hidden = mlp(norm(hidden))
+hidden = residual + hidden
+For the first experiment, place Engram:
+
+After attention, before MLP; or
+
+At the start of selected blocks, matching the official high-level ordering.
+
+Do not inject after the entire original block as your current wrapper does. Your wrapper currently calls the complete original layer and then appends Engram to its output. That is convenient, but it does not reproduce the same interaction with attention and MLP.
+
+Apple memory strategy
+18GB machine
+Target:
+
+12B model at 4-bit.
+
+0.25–0.5 GiB Engram.
+
+Context around 2K–4K during training.
+
+Batch size 1.
+
+Gradient accumulation.
+
+Frozen backbone.
+
+Train Engram tables, projection and gate only.
+
+Optionally LoRA on 2–4 adjacent layers.
+
+MLX-LM recommends quantization, smaller batches, gradient accumulation, and reducing trainable layers when memory is constrained. 
+
+64GB machine
+Target:
+
+14B–32B model at 4-bit.
+
+1–4 GiB Engram.
+
+BF16/FP16 tables.
+
+LoRA on nearby attention/MLP projections.
+
+Larger mixed-domain pretraining corpus.
+
+4K–8K training context.
+
+MLX-LM notes that models large relative to total RAM may require a higher wired-memory limit on recent macOS versions. 
+
+5. NVIDIA implementation
+First implementation: PyTorch
+Begin with a clean PyTorch implementation using:
+
+torch.nn.Embedding
+
+CUDA-resident hash indices
+
+BF16 tables
+
+Hugging Face model subclasses
+
+PEFT/LoRA or Unsloth only where it does not rewrite the relevant blocks
+
+torch.compile after correctness is established
+
+Do not convert input IDs to NumPy, as the official demonstration does for clarity. The official code constructs hashes on the CPU and turns them back into a Torch tensor. That would force synchronization and transfers during every forward pass.
+
+All normalization and hashing should remain on CUDA:
+
+compressed = compression_lut[input_ids]
+hashes = cuda_ngram_hash(compressed)
+memory = F.embedding(global_indices, memory_table)
+Training configuration for 24GB
+For a 12B–14B model:
+
+Base weights:         4-bit
+Base parameters:      frozen
+Engram table:         BF16 or FP16
+Engram table size:    0.5–2.0 GiB
+Gate/projections:     BF16
+Optimizer:            8-bit AdamW or Adafactor
+Sequence length:      2K initially
+Microbatch:           1
+Gradient checkpoint:  enabled where useful
+The difficult part is not inference capacity. It is optimizer and gradient memory.
+
+A 2 GiB BF16 table generally entails approximately:
+
+2 GiB parameters
++ 2 GiB gradients
++ optimizer states
+With ordinary FP32 Adam moments, optimizer state alone can add roughly 8 GiB. Therefore:
+
+Use an 8-bit optimizer.
+
+Train only a subset of table rows when possible.
+
+Consider row-sparse updates.
+
+Or begin with a 256–512 MiB memory table.
+
+Sparse update issue
+nn.Embedding(..., sparse=True) can produce sparse gradients, but the rest of the training stack, optimizer, compilation path and distributed framework must all support them correctly. A practical progression is:
+
+Dense gradients with a small table.
+
+Row-sparse optimizer for the table.
+
+Separate optimizer groups for tables versus gates/projections.
+
+Custom fused lookup/backward only after profiling.
+
+Triton or custom CUDA kernel
+Initially, hashing and embedding gather can remain separate Torch operations.
+
+A fused kernel becomes valuable when profiling shows overhead from:
+
+Creating shifted N-gram tensors.
+
+Repeated modular arithmetic.
+
+Constructing head offsets.
+
+Materializing [batch, sequence, ngram, head] indices.
+
+Multiple embedding gathers.
+
+A fused CUDA/Triton kernel can:
+
+Read current and previous compressed token IDs.
+
+Calculate all hashes.
+
+Add table-region offsets.
+
+Gather low-dimensional values.
+
+Concatenate or sum the heads.
+
+Do not fuse the gate and value projection initially; GEMM libraries already execute those operations efficiently.
+
+6. Which model families are easiest?
+Family	Feasibility	Notes
+Llama	Excellent	Conventional decoder blocks; strongest ecosystem support.
+Qwen2/Qwen3-style dense	Excellent	Similar residual architecture; tokenizer normalization must be frozen exactly.
+Gemma/Gemma 2/related	Very good	Watch normalization placement, residual scaling and logits soft-capping variants.
+Mistral	Excellent	Architecturally close to Llama; sliding-window attention does not obstruct Engram.
+Ornith	Likely good, model-dependent	Straightforward if it exposes ordinary decoder residual states; custom attention/runtime code may require a dedicated port.
+MoE models	Good but more complex	Engram complements MoE, but training and runtime memory are tighter.
+Hybrid recurrent/SSM models	Possible	Requires deciding whether memory is fused before recurrent state update, after it, or into the residual path.
+GGUF-only models	Inference only after runtime work	You cannot merely append tensors; llama.cpp must understand the added operators.
+Hugging Face supports subclassing and registering custom configurations and model classes, so modified Engram variants can still use the normal from_pretrained/AutoClass ecosystem. 
+
+7. Can this be added without retraining the whole model?
+Yes, but not without any training.
+
+Use a staged procedure.
+
+Stage 1: Frozen base, train Engram only
+Train:
+
+Memory table.
+
+Value projection.
+
+Gate/key projection.
+
+Optional memory normalization.
+
+Freeze:
+
+Token embeddings.
+
+Attention.
+
+MLP.
+
+Output head.
+
+All base model norms.
+
+Initialize the output path near zero so the modified model initially reproduces the base model. Your current module already attempts this by biasing the gate toward zero and initializing the merge projection with small values.
+
+This is the safest first stage.
+
+Stage 2: Engram plus nearby LoRA
+Add LoRA to:
+
+Attention output projection in the injected layers.
+
+MLP down projection in the injected layers.
+
+Possibly adjacent layer norms or a small adapter.
+
+This allows the base network to learn to consume the memory without changing billions of weights.
+
+Stage 3: Partial continued pretraining
+Unfreeze:
+
+The injected blocks.
+
+One block before and after each Engram block.
+
+Engram components.
+
+This is more likely to produce the paper’s claimed effect of freeing early-layer capacity, because the surrounding layers can reorganize their responsibilities.
+
+Stage 4: Full pretraining-style experiment
+This is needed for a scientifically strong claim that an Engram-enhanced architecture outperforms an iso-parameter baseline. The DeepSeek work trained Engram as part of the architecture and reports gains across knowledge, reasoning, code, math and long-context retrieval. 
+
+A retrofit trained on a modest corpus is more properly described as:
+
+Engram-augmented continued pretraining or PEFT, not a reproduction of the complete Engram scaling result.
+
+8. Training data
+Your current exact-match experiments show that explicit structured mappings work, but arbitrary random mappings do not.
+
+For a real Engram module, do not train primarily on commands like:
+
+ACRONYM:GPU
+CAPITAL:France
+That over-specializes the router to artificial syntax.
+
+Use ordinary text and code, and let N-gram lookup learn local predictive structure:
+
+Source code.
+
+Technical documentation.
+
+Common API names and type signatures.
+
+Natural-language collocations.
+
+Entity names.
+
+Repeated domain terminology.
+
+Configuration syntax.
+
+Compiler diagnostics.
+
+Shell command patterns.
+
+Mathematical notation.
+
+Best experiment for your interests
+Use a Rust-heavy corpus:
+
+Rust standard library documentation.
+
+Cargo and rustc documentation.
+
+Public Rust source code.
+
+Clippy diagnostics.
+
+Common trait and generic bounds.
+
+Error messages and fixes.
+
+Your own architecture/design documents.
+
+Measure:
+
+Validation perplexity.
+
+Rust token prediction accuracy.
+
+cargo check success.
+
+Clippy success.
+
+Completion exact match.
+
+Long-context retrieval.
+
+Tokens per second.
+
+Engram gate distribution.
+
+Table collision rates.
+
+Hash-head disagreement.
+
+Quality stratified by N-gram frequency.
+
+9. Collision handling
+Do not assume collision-free lookup is automatically superior.
+
+The Engram-Nine study found that a collision-free high-frequency tier did not consistently improve validation loss and suggested that collisions may act as regularization; it also identified gate credit assignment as a possible larger problem than hash precision. 
+
+Therefore, evaluate at least:
+
+Single hash.
+
+Four independent heads.
+
+Eight independent heads.
+
+Exact hot tier plus hashed cold tier.
+
+Shared table versus separate per-N-gram tables.
+
+Mean, concatenate/project and learned head weighting.
+
+The most important diagnostic is not merely collision count. It is:
+
+loss by key frequency
+gate value by key frequency
+loss by collision count
+gate value by collision count
+Your conditional wrapper’s regex-based route confidence is useful for demos, but it is separate from the model’s learned, token-level context gate. The paper-style gate should decide independently at every token position.
+
+10. Host-memory offload
+Apple Silicon
+There is no discrete host/device boundary in the NVIDIA sense, but bandwidth and residency still matter. A large randomly accessed table competes with base weights and KV cache for unified-memory bandwidth.
+
+Keep the first table fully resident and measure:
+
+Gather bandwidth.
+
+Page faults.
+
+Wired memory.
+
+Decode latency.
+
+Prompt-processing latency.
+
+Because decode performs very few token lookups at each step, table capacity can be relatively large. Prompt processing creates many simultaneous random accesses and is more likely to expose bandwidth issues.
+
+NVIDIA
+The Engram paper specifically argues that deterministic addressing allows host-memory prefetch and low-overhead offload. 
+
+A realistic tiered design is:
+
+GPU hot table
+    Frequent N-grams, low latency
+
+Pinned CPU warm table
+    Less frequent rows, asynchronously prefetched
+
+Optional mapped/cold store
+    Large experimental memory, slower path
+However, PCIe random row fetches can easily dominate decode latency. Batch and prefetch all required rows for:
+
+The entire prompt during prefill.
+
+The next token position during decoding.
+
+All injected layers together when the addressing scheme permits it.
+
+The CXL Engram work reinforces that sparse, predictable accesses are amenable to lower-tier memory, but its near-DRAM results depend on specialized CXL infrastructure and SGLang integration, not ordinary PCIe paging. 
+
+For your 24GB systems, keep the first implementation entirely in VRAM.
+
+11. llama.cpp and GGUF
+You can eventually deploy an Engram-enhanced Llama/Qwen/Gemma through llama.cpp, but this is a separate engineering project.
+
+Required changes would include:
+
+Define Engram configuration metadata in GGUF.
+
+Add table tensors, offsets, hash multipliers and compression maps.
+
+Extend the model loader.
+
+Add graph operations for:
+
+Token compression.
+
+Shifted N-gram hashing.
+
+Gather.
+
+Projection.
+
+Gate.
+
+Residual addition.
+
+Implement CPU, Metal and CUDA backends.
+
+Preserve Engram state during KV-cached generation.
+
+Update quantization/conversion utilities.
+
+Add compatibility checks so an Engram checkpoint cannot load as an ordinary model.
+
+The memory table can be quantized, but I would begin with:
+
+FP16/BF16 table.
+
+Quantized base model.
+
+FP16 projection/gate.
+
+Randomly accessed low-dimensional vectors may suffer disproportionately from coarse 4-bit quantization, and table lookups are bandwidth-bound rather than GEMM-bound. Later test:
+
+FP8 table.
+
+8-bit per-row quantization.
+
+4-bit grouped table.
+
+Mixed hot FP16/cold INT8 tiers.
+
+12. Recommended implementation roadmap
+Phase 1 — Correct portable reference
+Build one shared test specification with both MLX and PyTorch implementations:
+
+Input IDs
+→ compressed IDs
+→ bigram/trigram hashes
+→ global table indices
+→ retrieved vectors
+→ projected memory
+→ gate
+→ residual output
+Use deterministic seeds and assert that MLX and PyTorch produce equivalent indices and close numerical outputs.
+
+Target model:
+
+A small Llama/Qwen model first, not 12B.
+
+This phase validates semantics, checkpoint serialization and generation behavior.
+
+Phase 2 — 12B retrofit
+Target:
+
+One Llama-family 12B–14B model.
+
+Two Engram layers.
+
+256K slots/head.
+
+Four heads.
+
+32 dimensions/head.
+
+About 512 MiB of FP16 memory.
+
+Frozen 4-bit base.
+
+Engram-only training.
+
+2K context.
+
+Run on both:
+
+M3 Pro 18GB MLX.
+
+RTX 3090 24GB CUDA.
+
+Phase 3 — Architecture comparison
+Port the same checkpoint geometry to:
+
+Llama.
+
+Qwen.
+
+Gemma.
+
+Ornith.
+
+Do not reuse learned table weights across tokenizers. The hash keys are tokenizer-dependent.
+
+Compare:
+
+base
+base + LoRA
+base + Engram
+base + Engram + LoRA
+Match trainable parameter counts where possible.
+
+Phase 4 — Scale memory
+Increase one dimension at a time:
+
+Slots.
+
+Heads.
+
+Head dimension.
+
+Injected layers.
+
+Find the U-shaped region for your model and corpus rather than assuming more memory is always better. The DeepSeek paper explicitly frames this as a compute-versus-memory sparsity-allocation problem. 
+
+Phase 5 — Runtime optimization
+Only after profiling:
+
+MLX custom Metal hash/gather kernel.
+
+Triton/CUDA fused hash/gather.
+
+Table quantization.
+
+Hot/cold tiers.
+
+llama.cpp backend.
+
+Host-memory prefetch.
+
+13. My concrete starting configurations
+M3 Pro 18GB
+base_model:
+  parameters: 12B-14B
+  quantization: 4-bit
+
+engram:
+  layers: [4, 16]
+  ngram_orders: [2, 3]
+  heads_per_ngram: 4
+  slots_per_head: 262144
+  head_dim: 32
+  table_dtype: float16
+  short_conv: false
+
+training:
+  freeze_base: true
+  lora_layers: 0
+  sequence_length: 2048
+  microbatch: 1
+  gradient_accumulation: 16
+Approximate Engram table: 512 MiB.
+
+RTX 3090 24GB
+base_model:
+  parameters: 12B-14B
+  quantization: 4-bit
+
+engram:
+  layers: [4, 16]
+  ngram_orders: [2, 3]
+  heads_per_ngram: 8
+  slots_per_head: 524288
+  head_dim: 32
+  table_dtype: bfloat16
+  short_conv: false
+
+training:
+  freeze_base: true
+  lora_layers: 4
+  sequence_length: 2048
+  microbatch: 1
+  gradient_accumulation: 16
+  optimizer:
+    table: 8-bit-adam
+    projections: adamw
+Approximate Engram table: 2 GiB. I would actually start at 512 MiB or 1 GiB for training, then scale.
+
+M1 Max 64GB
+base_model:
+  parameters: 20B-32B
+  quantization: 4-bit
+
+engram:
+  layers: [6, 22]
+  ngram_orders: [2, 3]
+  heads_per_ngram: 8
+  slots_per_head: 524288
+  head_dim: 64
+  table_dtype: float16
+
+training:
+  freeze_base: true
+  lora_layers: 4
+  sequence_length: 4096
+  microbatch: 1
+  gradient_accumulation: 8
+Approximate Engram table: 4 GiB.
+
+Bottom line
+You can add Engram to those model families, but the successful abstraction is not “an external cache bolted onto a finished model.” It is:
+
+A tokenizer-specific, trainable N-gram embedding subsystem inserted into selected residual blocks and jointly adapted to the model.
+
+Your repository already contains:
+
+Cross-platform training scaffolding.
+
+A real hash-table memory prototype.
+
+Hugging Face layer discovery and wrapping.
+
+Gate-safe initialization.
+
+Structured evaluations.
+
+The next major change should be to replace the current full-hidden-width unigram table per layer with a low-dimensional, multi-head bigram/trigram table injected into two selected layers. That one architectural correction makes the project practical for 12B–32B quantized models on both 18GB Apple Silicon and 24GB NVIDIA hardware.
+
+
+consider: sw-ml-study/sw-mlpl and note that I'd like to avoid using Python at all.  I want to add Engram support and demo(s) to my sw-MLPL language itself (this would be implemented in Rust and focus first on MLX and later on CUDA using Rust crates to perform Python-equivalent operations.
+
+Worked for 28s
+Revised goal
+You want Engram to become a first-class sw-MLPL language feature, implemented entirely in Rust:
+
+MLPL source
+  -> parser / Model DSL
+  -> device-independent Engram IR
+  -> MLX backend through mlx-rs
+  -> later CUDA backend through Rust crates
+No Python should be required for:
+
+Tokenization
+
+Hash generation
+
+Model construction
+
+Training
+
+Inference
+
+Checkpoint loading or saving
+
+Evaluation
+
+Demo execution
+
+That fits sw-MLPL’s existing direction well. The language already has arrays, autograd, optimizers, embedding layers, attention, tokenizers, a Model DSL, device scopes, an MLX runtime, and compile-to-Rust support.
+
+The major architectural correction is this:
+
+Engram should not initially be implemented as a special modification to Gemma, Qwen, or Llama. Implement it first as a composable MLPL layer with a backend-neutral operation set.
+
+Then use that layer in:
+
+A tiny MLPL-native Transformer.
+
+A larger MLPL-native Transformer.
+
+Imported pretrained model architectures.
+
+Eventually Gemma/Qwen/Llama/Ornith checkpoint adapters.
+
+1. Where Engram belongs in sw-MLPL
+sw-MLPL already describes a narrow dependency flow:
+
+core -> array/parser -> runtime -> eval -> trace -> viz/wasm/apps -> ml
+and has an MLX backend behind the same language surface used by the CPU implementation.
+
+Engram should follow this layering:
+
+mlpl-core
+    Engram configuration and validation types
+
+mlpl-parser
+    Engram Model DSL syntax
+
+mlpl-ml
+    Backend-independent Engram layer semantics
+
+mlpl-runtime
+    CPU reference implementation
+
+mlpl-eval
+    Model construction, dispatch, tracing, parameter handling
+
+mlpl-mlx
+    Native MLX implementation through mlx-rs
+
+mlpl-cuda
+    Later CUDA implementation
+
+mlpl-checkpoint
+    Safetensors/config/tokenizer loading
+I would avoid putting model-specific logic in mlpl-mlx. The MLX backend should understand operations such as:
+
+shift_tokens
+hash_ngram
+embedding_gather
+rms_norm
+linear
+sigmoid
+depthwise_conv1d
+It should not understand “Gemma Engram” or “Qwen Engram.”
+
+2. Add Engram as a Model DSL layer
+A compact first surface could be:
+
+memory = engram(
+    hidden = 256,
+    ngrams = [2, 3],
+    heads = 4,
+    slots = 65536,
+    head_dim = 16,
+    seed = 42
+)
+Then:
+
+block = chain(
+    residual(causal_attention(256, 8)),
+    residual(memory),
+    residual(ffn(256, 1024))
+)
+For a model with several blocks:
+
+model = transformer(
+    vocab = 4096,
+    hidden = 256,
+    layers = 8,
+    engram_layers = [1, 5],
+    engram = engram(
+        ngrams = [2, 3],
+        heads = 4,
+        slots = 65536,
+        head_dim = 16,
+        seed = 42
+    )
+)
+You need the input token IDs as well as the hidden-state tensor, so Engram is not quite an ordinary unary layer. There are three reasonable interfaces.
+
+Option A: Explicit two-input operation
+h = apply_engram(memory, h, token_ids)
+Pros
+
+Semantics are obvious.
+
+Easy to test.
+
+No hidden execution context.
+
+Useful for instructional demos.
+
+Cons
+
+Less elegant inside chain.
+
+Transformer builders must special-case the layer.
+
+Option B: Context-aware model layer
+h = apply(memory, h)
+The evaluator carries token IDs in a model execution context.
+
+Pros
+
+Composes naturally with existing Model DSL layers.
+
+Similar to attention accessing masks or caches.
+
+Better eventual model-import surface.
+
+Cons
+
+More evaluator machinery.
+
+Hidden dependencies can complicate debugging.
+
+Option C: Structured Transformer state
+state = {
+    hidden: h,
+    tokens: token_ids,
+    position: positions,
+    mask: mask
+}
+
+state = apply(memory, state)
+Pros
+
+Architecturally clean.
+
+Scales to KV caches, masks, rotary positions, MoE routing, and recurrent state.
+
+Avoids continually adding special arguments.
+
+Cons
+
+A larger language/runtime change.
+
+Likely beyond the first Engram demo.
+
+Recommendation
+Start with Option A, but define the internal trait so it can later accept a structured execution context:
+
+pub struct LayerContext<'a, T> {
+    pub token_ids: Option<&'a T>,
+    pub positions: Option<&'a T>,
+    pub attention_mask: Option<&'a T>,
+    pub training: bool,
+}
+The MLPL syntax remains explicit initially:
+
+h = apply_engram(e, h, ids)
+3. Define a backend-neutral Engram specification
+The most important new type should contain no MLX, CUDA, Candle, or CPU tensor types.
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct EngramSpec {
+    pub hidden_size: usize,
+    pub ngram_orders: Vec<usize>,
+    pub heads_per_ngram: usize,
+    pub slots_per_head: usize,
+    pub head_dim: usize,
+    pub seed: u64,
+    pub use_short_conv: bool,
+    pub kernel_size: usize,
+}
+Validation should reject:
+
+Empty N-gram lists
+
+N-grams below 2
+
+Zero heads
+
+Zero slots
+
+Zero dimensions
+
+Overflow in total parameter calculation
+
+Unsupported convolution combinations
+
+Hidden-size/projection mismatches
+
+Add derived methods:
+
+impl EngramSpec {
+    pub fn table_rows(&self) -> Result<usize, EngramError>;
+    pub fn retrieved_width(&self) -> Result<usize, EngramError>;
+    pub fn parameter_count(&self) -> Result<u64, EngramError>;
+    pub fn bytes_for(&self, dtype: DType) -> Result<u64, EngramError>;
+}
+That lets the REPL provide useful introspection:
+
+mlpl> :describe e
+
+e -- engram
+  ngrams: [2, 3]
+  heads/ngram: 4
+  slots/head: 65536
+  head dim: 16
+  retrieved width: 128
+  memory parameters: 8,388,608
+  fp16 memory: 16 MiB
+This is especially important before moving to 12B-plus models, where an accidental full-hidden-width table can consume tens of gigabytes.
+
+4. Engram operations required by the language
+You do not need a large new tensor-operation surface.
+
+The minimal Engram implementation requires:
+
+token normalization LUT lookup
+left shift/pad
+integer multiply
+bitwise XOR
+integer modulo
+embedding gather
+reshape/flatten
+linear projection
+RMSNorm
+elementwise multiply
+sum-reduce
+signed square-root transform
+sigmoid
+residual addition
+Optional later operation:
+
+depthwise causal conv1d
+sw-MLPL already has embedding layers, linear layers, RMS normalization, residual composition, autograd, and optimizers.
+
+The likely missing primitives are:
+
+Integer bitwise XOR
+
+Integer modulo on device tensors
+
+Efficient multi-index gather
+
+Shift-and-pad
+
+Possibly grouped/depthwise 1D convolution
+
+These are useful general MLPL operations beyond Engram, so expose them at the array/runtime layer rather than hiding them in one model implementation.
+
+5. Do not hash on the CPU for the accelerated path
+The reference DeepSeek demonstration creates N-gram hashes using NumPy and converts them into a Torch tensor afterward. That is appropriate for explanatory code but wrong for an MLPL accelerator implementation. The reference computes shifted N-grams with arrays, XORs multiplier products, applies per-head modulus, and stacks the results.
+
+For MLPL, both CPU and GPU should implement the same operation:
+
+fn ngram_hashes(
+    token_ids: &Tensor,
+    spec: &HashSpec,
+) -> Result<Tensor, BackendError>;
+Input:
+
+[B, T]
+Output:
+
+[B, T, N, H]
+where:
+
+N is the number of N-gram orders.
+
+H is the number of heads per order.
+
+The intermediate implementation can use ordinary MLX operations:
+
+shift
+multiply
+xor
+remainder
+stack
+Later, replace that group with one fused Metal kernel.
+
+6. Table layout
+Do not model each head as an independent high-level object.
+
+Use one contiguous memory parameter:
+
+memory_table:
+    [total_rows, head_dim]
+and a static offset tensor:
+
+head_offsets:
+    [ngram_count, heads_per_ngram]
+Then:
+
+local_hashes = hash(...)
+global_indices = local_hashes + head_offsets
+retrieved = gather(memory_table, global_indices)
+Result:
+
+[B, T, N, H, head_dim]
+Then flatten:
+
+[B, T, N * H * head_dim]
+The DeepSeek demo uses the same general offset strategy: separate logical tables are represented as a single embedding table plus per-head offsets.
+
+This representation has several advantages:
+
+One serialized tensor
+
+One gather operation
+
+Simple safetensors naming
+
+Easy device transfer
+
+Easier table quantization
+
+Easier Metal/CUDA kernel fusion
+
+Fewer tiny parameter objects in the MLPL model tree
+
+7. Rust-side model representation
+Extend the model layer enum with a compact Engram variant:
+
+pub enum Layer {
+    Linear(LinearLayer),
+    Embed(EmbedLayer),
+    RmsNorm(RmsNormLayer),
+    Attention(AttentionLayer),
+    Residual(Box<Layer>),
+    Chain(Vec<Layer>),
+    Engram(EngramLayer),
+}
+Where:
+
+pub struct EngramLayer {
+    pub spec: EngramSpec,
+    pub params: EngramParams,
+}
+And:
+
+pub struct EngramParams {
+    pub memory: ParameterId,
+    pub value_weight: ParameterId,
+    pub value_bias: Option<ParameterId>,
+    pub key_weight: ParameterId,
+    pub gate_norm: ParameterId,
+    pub query_norm: ParameterId,
+}
+For the first version, simplify the gate.
+
+First gate
+retrieved = project(memory_vectors)
+gate = sigmoid(linear(concat(hidden, retrieved)))
+output = hidden + gate * retrieved
+This resembles your existing POC and is easier to express using the current MLPL operation set.
+
+Paper-style gate later
+key   = RMSNorm(key_projection(memory))
+query = RMSNorm(hidden)
+score = reduce_sum(key * query) / sqrt(hidden_size)
+score = signed_sqrt(score)
+gate  = sigmoid(score)
+value = gate * value_projection(memory)
+output = hidden + value
+The demonstration implementation computes this hidden-state-conditioned gate and then applies a short convolution to the value path.
+
+I would ship both as explicit modes:
+
+engram(..., gate = "concat")
+engram(..., gate = "dot")
+The "concat" gate is the pedagogical implementation. The "dot" gate is the closer paper reproduction.
+
+8. MLX implementation strategy
+Your present MLX backend is correct but has a major performance problem: each operation copies f64 -> f32, evaluates immediately, and copies results back to CPU.
+
+That architecture cannot support useful 12B model inference.
+
+Engram therefore creates a forcing function for an MLX runtime redesign.
+
+Current model
+DenseArray
+  -> create MLX array
+  -> execute one op
+  -> eval()
+  -> copy into DenseArray
+  -> repeat
+Required model
+MLPL TensorHandle
+  ├── CPU(DenseArray)
+  └── MLX(MlxArrayHandle)
+Operations inside:
+
+device("mlx") {
+    ...
+}
+must remain as MLX arrays until:
+
+to_device(x, "cpu")
+or formatting requires materialization.
+
+Your architecture already says device-scoped tensors should stay on-device until an explicit transfer. Engram should be built only after this becomes true in-process, even if the backend-as-service refactor comes later.
+
+MLX Engram execution
+A Rust trait might be:
+
+pub trait EngramBackend {
+    type Tensor;
+
+    fn ngram_hash(
+        &self,
+        ids: &Self::Tensor,
+        spec: &HashSpec,
+    ) -> Result<Self::Tensor>;
+
+    fn gather_rows(
+        &self,
+        table: &Self::Tensor,
+        indices: &Self::Tensor,
+    ) -> Result<Self::Tensor>;
+
+    fn apply_engram(
+        &self,
+        layer: &EngramDeviceParams<Self::Tensor>,
+        hidden: &Self::Tensor,
+        ids: &Self::Tensor,
+    ) -> Result<Self::Tensor>;
+}
+The MLX backend implementation should:
+
+Keep IDs as integer MLX arrays.
+
+Build shifted views or arrays.
+
+Compute hashes lazily.
+
+Perform one flattened gather.
+
+Project and gate.
+
+Return an unevaluated MLX array.
+
+Evaluate only at a model boundary or explicit synchronization point.
+
+sw-MLPL already uses mlx-rs as its optional Rust binding.
+
+9. Rust-only tokenization and checkpoints
+Python is unnecessary here.
+
+Use Rust crates for:
+
+Need	Rust approach
+Hugging Face tokenizer	tokenizers
+Safetensors	safetensors
+JSON model config	serde / serde_json
+GGUF metadata, later	existing Rust GGUF parser or a small MLPL crate
+Hub downloads	hf-hub
+Hashing	native Rust and backend tensor ops
+Training corpus	MLPL dataset layer
+Model conversion	Rust CLI
+Candle itself demonstrates that Rust can load safetensors, run pretrained Transformer models, and use CUDA without Python. Its repository includes Rust-native model implementations, safetensors support, CUDA kernels, Metal kernels, and custom-operation support. 
+
+I would not necessarily adopt Candle as MLPL’s core backend, because you already have mlx-rs and a backend-neutral language design. But Candle is valuable as:
+
+A reference for model config parsing.
+
+A source of Rust-native architecture implementations.
+
+A reference for safetensors loading.
+
+A possible initial CUDA backend.
+
+A correctness oracle for imported models.
+
+10. CUDA choices later
+There are three main Rust-only approaches.
+
+A. Candle CUDA backend
+Best first CUDA implementation.
+
+Advantages:
+
+Tensor abstraction already exists.
+
+CUDA kernels are included.
+
+Transformer models and safetensors loading already exist.
+
+Custom operations can be added.
+
+CPU/CUDA behavior can be parity tested. 
+
+Disadvantages:
+
+MLPL must adapt its runtime to Candle tensor semantics.
+
+The MLX and CUDA implementations would use different lower-level libraries.
+
+Some duplication of backend glue.
+
+Possible design:
+
+mlpl-cuda
+  -> Candle Tensor
+  -> Candle CUDA Device
+  -> custom Engram hash/gather op when needed
+B. cudarc
+Best for direct control.
+
+Advantages:
+
+Rust-level CUDA driver and library access.
+
+Direct allocation, streams, kernels, cuBLAS, and related APIs.
+
+Suitable for a purpose-built Engram kernel.
+
+Disadvantages:
+
+You must build much more of the tensor runtime.
+
+Autograd, broadcasting, indexing, model loading, and shape handling become your responsibility.
+
+Better as a lower layer than as the initial complete backend.
+
+cudarc remains active and exposes low-level CUDA capabilities, but active feature requests around memory pools, stream capture, pinned allocations, and newer CUDA APIs illustrate that it is a low-level foundation rather than a full ML framework. 
+
+C. Burn
+Potentially useful if MLPL wants one Rust abstraction with multiple backends, but it would compete with sw-MLPL’s own backend-neutral abstraction.
+
+Recommendation
+Use:
+
+Apple: mlx-rs
+NVIDIA phase 1: Candle CUDA
+NVIDIA phase 2: custom cudarc kernel behind mlpl-cuda
+Keep both behind the same EngramBackend contract.
+
+11. Recommended Engram demos
+Demo 1: Deterministic hash lookup
+Purpose: prove the primitive.
+
+device("cpu") {
+    ids = [[10, 20, 30, 40]]
+    h = ngram_hash(ids, [2, 3], 4, 1024, 7)
+    print(h)
+}
+Then run unchanged:
+
+device("mlx") {
+    ids = [[10, 20, 30, 40]]
+    h = ngram_hash(ids, [2, 3], 4, 1024, 7)
+    print(h)
+}
+Acceptance criterion:
+
+CPU hash indices == MLX hash indices exactly
+This should be the first parity gate.
+
+Demo 2: Learnable phrase memory
+Train Engram without a Transformer.
+
+device("mlx") {
+    e = engram(
+        hidden = 32,
+        ngrams = [2, 3],
+        heads = 4,
+        slots = 4096,
+        head_dim = 8,
+        seed = 7
+    )
+
+    train 500 {
+        memory = engram_lookup(e, token_ids)
+        adam(cross_entropy(memory, targets), e, 0.001)
+    }
+}
+Dataset examples:
+
+Graphics Processing -> Unit
+Application Programming -> Interface
+central processing -> unit
+cargo check -> succeeds
+borrow checker -> error
+This proves:
+
+Hashing
+
+Gather
+
+Gradients into selected memory rows
+
+Projection
+
+Optimizer updates
+
+MLX residency
+
+Demo 3: Tiny Transformer baseline versus Engram
+Use the existing Tiny LM framework.
+
+base = tiny_transformer(...)
+augmented = tiny_transformer(
+    ...,
+    engram_layers = [1]
+)
+Report:
+
+trainable parameters
+validation loss
+exact local phrase accuracy
+tokens/second
+memory bytes
+gate mean
+gate histogram
+collision rate
+The repository already has a Tiny LM and training demos, making this the most natural first integrated demonstration.
+
+Demo 4: Rust source-code corpus
+Train a small Transformer on Rust text and compare:
+
+baseline
+larger FFN baseline
+Engram-augmented model
+Test examples:
+
+impl<T> Iterator for ...
+Result<T, E>
+#[derive(Debug, Clone)]
+cargo clippy --all-targets
+borrowed value does not live long enough
+This is a much better demonstration of Engram’s intended local-memory behavior than explicit CAPITAL:France commands.
+
+Demo 5: Pretrained small model retrofit
+Before 12B, import a 100M–1B model:
+
+m = load_transformer(
+    "model.safetensors",
+    "config.json",
+    architecture = "llama"
+)
+
+m = inject_engram(
+    m,
+    layers = [2, 8],
+    ...
+)
+
+freeze(m.base)
+train(m.engram) { ... }
+This validates checkpoint mapping and layer insertion without requiring large memory.
+
+Demo 6: 12B Apple demonstration
+Only after persistent MLX tensors and quantized checkpoint loading exist:
+
+device("mlx") {
+    m = load_hf(
+        path = "...",
+        dtype = "q4",
+        architecture = "qwen"
+    )
+
+    m = inject_engram(
+        m,
+        layers = [4, 16],
+        ngrams = [2, 3],
+        heads = 4,
+        slots = 262144,
+        head_dim = 32
+    )
+
+    generate(m, prompt, 128)
+}
+For training, begin with a much smaller table than the eventual inference table.
+
+12. Model import architecture
+Do not implement independent complete loaders for every model first.
+
+Use a normalized internal Transformer description:
+
+pub struct DecoderModelSpec {
+    pub architecture: Architecture,
+    pub vocab_size: usize,
+    pub hidden_size: usize,
+    pub intermediate_size: usize,
+    pub num_layers: usize,
+    pub num_attention_heads: usize,
+    pub num_kv_heads: usize,
+    pub norm_epsilon: f64,
+    pub rope: RopeSpec,
+    pub activation: Activation,
+    pub tied_embeddings: bool,
+}
+Architecture-specific loaders translate:
+
+Gemma config
+Qwen config
+Llama config
+Ornith config
+into that structure.
+
+Then define per-family block details only where genuinely different:
+
+pub enum DecoderBlockKind {
+    Llama,
+    Gemma,
+    Qwen,
+    Ornith,
+}
+Engram injection is based on a common residual-block hook:
+
+pub enum BlockHook {
+    BeforeAttention,
+    AfterAttention,
+    BeforeFfn,
+    AfterFfn,
+}
+Recommended default:
+
+AfterAttention
+This avoids hard-coding Engram’s placement into every architecture.
+
+13. Parameter freezing and sparse memory training
+Your current MLPL optimizer model appears oriented toward dense parameter trees. Engram tables will expose a scaling problem.
+
+A table such as:
+
+262,144 slots
+× 4 heads
+× 2 N-grams
+× 32 dimensions
+contains approximately 67 million values per injected layer.
+
+Dense Adam state can dominate memory.
+
+You need at least:
+
+pub enum ParameterUpdate {
+    Dense,
+    IndexedRows,
+    Frozen,
+}
+For Engram memory:
+
+IndexedRows
+The backward pass should return:
+
+IndexedGradient {
+    rows: Tensor,
+    values: Tensor,
+}
+rather than allocating a gradient tensor with the full table shape.
+
+This enables:
+
+Sparse SGD
+
+Sparse Adam
+
+Lower unified-memory use
+
+Larger tables
+
+Faster training
+
+Realistic 18GB operation
+
+Implement dense gradients for the tiny demo, but make sparse indexed gradients an explicit milestone before attempting 12B fine-tuning.
+
+14. Checkpoint format
+Use safetensors and a small MLPL Engram metadata file.
+
+Example:
+
+{
+  "format": "sw-mlpl-engram-v1",
+  "base_model": {
+    "architecture": "qwen",
+    "config": "config.json"
+  },
+  "engram": {
+    "layers": [4, 16],
+    "hook": "after_attention",
+    "ngram_orders": [2, 3],
+    "heads_per_ngram": 4,
+    "slots_per_head": 262144,
+    "head_dim": 32,
+    "seed": 42,
+    "token_compression": "tokenizer-normalized-v1"
+  }
+}
+Safetensors names:
+
+engram.4.memory.weight
+engram.4.value_proj.weight
+engram.4.key_proj.weight
+engram.4.query_norm.weight
+engram.4.key_norm.weight
+
+engram.16.memory.weight
+...
+Also save:
+
+token_compression.safetensors
+hash_multipliers.safetensors
+head_offsets.safetensors
+Even though multipliers and offsets can be regenerated, saving them makes checkpoints self-describing and protects against implementation drift.
+
+15. Proposed implementation sequence
+Saga E1: CPU Engram primitives
+Add:
+
+Integer tensor dtype support where missing
+
+Shift/pad
+
+XOR
+
+Modulo
+
+Gather rows
+
+N-gram hash
+
+Hash parity fixtures
+
+Deliverable:
+
+demos/engram_hash.mlpl
+Saga E2: Engram Model DSL
+Add:
+
+engram(...)
+
+apply_engram(...)
+
+Parameter accounting
+
+:describe
+
+Serialization schema
+
+CPU autograd
+
+Deliverable:
+
+demos/engram_lookup.mlpl
+Saga E3: Tiny LM integration
+Add:
+
+Engram inside selected Transformer blocks
+
+Frozen parameter support
+
+Gate statistics
+
+Collision statistics
+
+Baseline comparison
+
+Deliverable:
+
+demos/tiny_lm_engram.mlpl
+Saga E4: Persistent MLX tensor runtime
+Fix the current accelerated representation:
+
+No round-trip after every primitive
+
+No .eval() after each operation
+
+Device-resident optimizer state
+
+Device-resident gradients
+
+Explicit synchronization
+
+Graph-level dispatch
+
+This is a prerequisite for serious Engram scaling because the currently documented per-op conversion and evaluation path is slower than CPU on Tiny LM workloads.
+
+Saga E5: MLX Engram backend
+Add:
+
+Device integer hashes
+
+MLX gather
+
+Lazy Engram graph
+
+CPU/MLX parity
+
+Performance benchmark
+
+Deliverable:
+
+demos/tiny_lm_engram_mlx.mlpl
+Saga E6: Sparse row optimizer
+Add:
+
+Indexed gradients
+
+Sparse SGD
+
+Sparse Adam
+
+Row-state allocation policy
+
+Saga E7: Rust-only checkpoint import
+Add:
+
+Safetensors
+
+HF tokenizer JSON
+
+Config normalization
+
+Llama-family initial importer
+
+Quantized linear representation
+
+Saga E8: Small pretrained retrofit
+Target 100M–1B first.
+
+Saga E9: 12B MLX demonstration
+Target a quantized Llama- or Qwen-family model.
+
+Saga E10: CUDA service
+Use Candle CUDA first, then custom kernels where profiling justifies them.
+
+16. Architectural decision: service versus in-process
+Your current project architecture says the canonical future design should make device backends services rather than linked features, partly because one orchestrator should not have to link both MLX and CUDA.
+
+That remains sensible, but Engram should not wait for it.
+
+Use three layers:
+
+mlpl-engram-core
+    Specs, hashes, metadata, backend contracts
+
+mlpl-mlx
+    In-process MLX implementation
+
+mlpl-mlx-serve
+    Thin RPC wrapper around mlpl-mlx
+Later:
+
+mlpl-cuda
+mlpl-cuda-serve
+The service API should operate at a coarse grain:
+
+load model
+create Engram
+run training step
+generate
+inspect statistics
+save checkpoint
+Do not RPC individual gather or matmul operations.
+
+17. Recommended first MLPL syntax
+I would initially add only these language features:
+
+e = engram(
+    hidden = 64,
+    ngrams = [2, 3],
+    heads = 4,
+    slots = 8192,
+    head_dim = 8,
+    seed = 42
+)
+
+y = apply_engram(e, hidden, token_ids)
+
+stats = engram_stats(e, token_ids)
+Potential stats result:
+
+{
+  unique_keys: 721,
+  collisions: 43,
+  collision_rate: 0.056,
+  gate_mean: 0.213,
+  gate_min: 0.001,
+  gate_max: 0.981,
+  active_rows: 721
+}
+Later add:
+
+inject_engram(model, layers, spec)
+freeze(model)
+unfreeze(model, "engram")
+Avoid adding a large collection of specialized syntax until the primitive has been proven.
+
+18. Immediate technical priority
+The highest-priority work is not importing Gemma or Qwen.
+
+It is:
+
+Change sw-MLPL’s tensor representation so an MLX value remains an MLX value across an entire expression or model forward pass.
+
+The current backend intentionally re-materializes each operation and sends values back through CPU-resident DenseArray storage. That design is adequate for functional parity but incompatible with:
+
+Multi-billion-parameter models
+
+Large embedding tables
+
+Engram random gathers
+
+Quantized inference
+
+Efficient autograd
+
+Meaningful MLX graph fusion
+
+Once persistent device tensors exist, Engram itself is relatively modest: hashing, gather, projection, gate, and residual addition.
+
+Recommended end-state
+                           sw-MLPL source
+                                  |
+                           typed Model DSL
+                                  |
+                    backend-neutral model graph
+                       /          |          \
+                    CPU          MLX         CUDA
+                 reference     mlx-rs       Candle
+                                               |
+                                      optional cudarc kernels
+Engram becomes one graph node with a standard contract rather than a special external subsystem:
+
+EngramNode {
+    hidden,
+    token_ids,
+    memory_table,
+    hash_spec,
+    gate_params,
+    projection_params
+}
+That gives you exactly the demonstration your language is meant to support:
+
+device("mlx") {
+    model = transformer(..., engram = ...)
+    train ...
+    generate ...
+}
+The same .mlpl source can later run under:
+
+device("cuda") { ... }
+without Python and without changing the Engram model definition.
+
+

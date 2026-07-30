@@ -58,10 +58,6 @@ mod eval_script;
 mod eval_user_fn;
 mod experiment;
 mod experiment_compare;
-#[cfg(feature = "image-io")]
-mod fetch_dataset;
-#[cfg(feature = "image-io")]
-mod fetch_io;
 mod fncall_arrays;
 mod fncall_axes;
 mod fncall_models;
