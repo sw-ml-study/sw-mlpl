@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-30
 
+- saga engram-e2-dsl: steps 001-002 complete (bfc57a2e)
+- feat(engram): engram() constructor + apply_engram forward pass (E2 steps 1-2)
+- saga engram-e2-dsl: init
+- chore(agentrail): archive engram-e1-primitives saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e1-primitives: complete (3 steps)
 - feat(demos): Engram Hash demo -- deterministic memory addressing
 - docs(changes): refresh CHANGES.md to HEAD
