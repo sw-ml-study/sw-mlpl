@@ -1,0 +1,1 @@
+Close the eval-decomposition saga: user directed Engram support to take priority (docs/engram-sagas-plan.md, D1-D4 decided). Record the pause + achievements + resume pointers.
