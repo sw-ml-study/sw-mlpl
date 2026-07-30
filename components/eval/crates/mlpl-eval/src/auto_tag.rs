@@ -88,9 +88,10 @@ fn tail_tag(spec: &ModelSpec, layer: &str) -> Option<ValueTag> {
         ModelSpec::Residual(inner) => tail_tag(inner, layer),
         ModelSpec::Linear { .. } | ModelSpec::LinearLora { .. } => Some(ValueTag::Logit),
         ModelSpec::Activation(kind) => activation_tail_tag(*kind, layer),
-        ModelSpec::Embedding { .. } | ModelSpec::Attention { .. } | ModelSpec::RmsNorm { .. } => {
-            None
-        }
+        ModelSpec::Embedding { .. }
+        | ModelSpec::Attention { .. }
+        | ModelSpec::RmsNorm { .. }
+        | ModelSpec::Engram { .. } => None,
     }
 }
 

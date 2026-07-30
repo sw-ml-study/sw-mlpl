@@ -13,7 +13,9 @@
 //! `model_apply` + siblings (forward-pass implementation), and
 //! `model_attn_weights` (read-only attention-weight extraction).
 
+pub use crate::model_apply_engram::eval_apply_engram;
 pub use crate::model_eval_apply::{eval_apply, eval_attention_weights, eval_predict_batch};
 pub use crate::model_eval_attention::eval_attention;
 pub use crate::model_eval_compose::{activation_kind, eval_chain, eval_residual};
+pub use crate::model_eval_engram::eval_engram;
 pub use crate::model_eval_layers::{eval_embedding, eval_linear, eval_rms_norm};

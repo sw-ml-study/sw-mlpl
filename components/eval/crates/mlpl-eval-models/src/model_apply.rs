@@ -33,6 +33,9 @@ pub fn apply_model(
         ModelSpec::Attention { .. } => apply_attention_spec(model, x, env),
         ModelSpec::Embedding { table, vocab, .. } => apply_embedding(x, table, *vocab, env),
         ModelSpec::LinearLora { .. } => apply_lora_spec(model, x, env),
+        ModelSpec::Engram { .. } => Err(EvalError::Unsupported(
+            "engram layers need token ids: use apply_engram(e, h, ids)".into(),
+        )),
     }
 }
 

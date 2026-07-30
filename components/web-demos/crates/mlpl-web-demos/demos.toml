@@ -301,7 +301,7 @@ lines = [
     "h2 = ngram_hash([99, 20, 30, 40], [2, 3], 4, 1024, 7)          # change ONLY ids[0] ...",
     "take(take(h, 0, 3), 0, 0) - take(take(h2, 0, 3), 0, 0)         # ... bigram at t=3 unchanged (window is t-1..t): all zeros",
     "table = reshape(range(16), [8, 2])                             # a tiny 8-row memory table, 2 dims per slot",
-    "gather_rows(table, [[7, 0], [3, 3]])                           # the lookup half: rows by index, shape [2, 2, 2]",
+    "disp(gather_rows(table, [[7, 0], [3, 3]]))                     # the lookup half: rows by index, shape [2, 2, 2] (disp boxes rank-3 nicely)",
     "ngram_hash([1.5], [2], 4, 1024, 7)                             # INTENTIONAL ERROR: token ids must be integers",
 ]
 

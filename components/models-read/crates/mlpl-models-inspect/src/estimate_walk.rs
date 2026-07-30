@@ -33,6 +33,10 @@ pub(crate) fn accumulate_hidden_depth<E: HasVars>(spec: &ModelSpec, env: &E, acc
             acc.hidden = acc.hidden.max((*in_dim).max(*out_dim) as f64);
             acc.depth += 1.0;
         }
+        ModelSpec::Engram { hidden, .. } => {
+            acc.hidden = acc.hidden.max(*hidden as f64);
+            acc.depth += 1.0;
+        }
         ModelSpec::Chain(children) => children
             .iter()
             .for_each(|c| accumulate_hidden_depth(c, env, acc)),
@@ -76,6 +80,20 @@ pub(crate) fn walk_flops_per_step<E: HasVars>(
             .sum(),
         ModelSpec::Residual(inner) => walk_flops_per_step(inner, env, batch, seq),
         ModelSpec::Activation(_) | ModelSpec::RmsNorm { .. } => 0.0,
+        ModelSpec::Engram {
+            hidden,
+            ngram_orders,
+            heads,
+            head_dim,
+            ..
+        } => {
+            // value projection [retrieved -> hidden] + concat gate
+            // [2*hidden -> hidden]; the gather itself is bandwidth,
+            // not FLOPs.
+            let retrieved = (ngram_orders.len() * heads * head_dim) as f64;
+            let h = *hidden as f64;
+            (2.0 * retrieved * h + 2.0 * 2.0 * h * h) * batch * seq
+        }
     }
 }
 

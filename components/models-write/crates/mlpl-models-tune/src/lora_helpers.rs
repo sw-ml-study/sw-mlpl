@@ -44,7 +44,8 @@ where
         ModelSpec::Activation(_)
         | ModelSpec::RmsNorm { .. }
         | ModelSpec::Embedding { .. }
-        | ModelSpec::Attention { .. } => Ok(spec),
+        | ModelSpec::Attention { .. }
+        | ModelSpec::Engram { .. } => Ok(spec),
         ModelSpec::LinearLora { .. } => Err(TuneError::UnexpectedLoraInTree),
     }
 }

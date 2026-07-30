@@ -29,6 +29,9 @@ pub(crate) fn try_dispatch(
     if let Some(r) = try_activation(name, args) {
         return Some(r);
     }
+    if name == "apply_engram" {
+        return Some(crate::model_dispatch::eval_apply_engram(args, env, trace).map(Value::Array));
+    }
     if name == "to_device" {
         return Some(crate::device::eval_to_device(args, env, trace));
     }
@@ -41,6 +44,7 @@ fn try_model_ctor(
     env: &mut Environment,
 ) -> Option<Result<ModelSpec, EvalError>> {
     match name {
+        "engram" => Some(crate::model_dispatch::eval_engram(args, env)),
         "linear" => Some(crate::model_dispatch::eval_linear(args, env)),
         "embed" => Some(crate::model_dispatch::eval_embedding(args, env)),
         "chain" => Some(crate::model_dispatch::eval_chain(args, env)),

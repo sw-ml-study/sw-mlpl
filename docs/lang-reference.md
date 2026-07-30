@@ -341,6 +341,8 @@ tables (e.g. the three name forms) keep their teaching order.
 | `reduce(:op, a, axis)` | 3 | Same, restricted to a single axis. |
 | `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |
 | `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
+| `apply_engram(e, h, ids)` | 3 | Engram forward pass: hash the ids, gather the addressed memory rows, project, concat-gate against `h`, and add to the residual stream. Exact no-op on a freshly built engram. |
+| `engram(hidden, ngrams, heads, slots, head_dim, seed)` | 6 | Engram conditional-memory layer: one flattened n-gram table + value projection + concat gate, initialized near-identity (zero table, gate bias -2). Apply with `apply_engram` (next saga step). |
 | `gather_rows(table, indices)` | 2 | Select whole rows of a rank-2 table; output shape is the indices' shape + `[dim]`. Out-of-range indices error loudly. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |

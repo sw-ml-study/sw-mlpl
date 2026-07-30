@@ -77,6 +77,17 @@ pub(crate) fn render_spec(spec: &ModelSpec) -> String {
             };
             format!("{name}(d={d_model}, heads={heads})")
         }
+        ModelSpec::Engram {
+            hidden,
+            ngram_orders,
+            heads,
+            slots,
+            head_dim,
+            ..
+        } => format!(
+            "engram(hidden={hidden}, ngrams={ngram_orders:?}, heads={heads}, \
+             slots={slots}, head_dim={head_dim})"
+        ),
         ModelSpec::Embedding { vocab, d_model, .. } => {
             format!("embed[vocab={vocab}, d={d_model}]")
         }

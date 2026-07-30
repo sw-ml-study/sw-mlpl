@@ -72,5 +72,10 @@ where
         } => clone_embedding(env, table, *vocab, *d_model),
         ModelSpec::Attention { .. } => clone_attention(spec, env),
         ModelSpec::LinearLora { .. } => clone_linear_lora(spec, env),
+        ModelSpec::Engram { .. } => Err(MutateError::RuntimeMessage(
+            "clone_model: engram layers are not cloneable yet (planned with the \
+             engram training saga)"
+                .into(),
+        )),
     }
 }

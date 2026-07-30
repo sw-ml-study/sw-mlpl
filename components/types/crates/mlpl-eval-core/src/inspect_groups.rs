@@ -415,6 +415,16 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
         "Engram",
         &[
             (
+                "engram",
+                "engram(hidden, ngrams, heads, slots, head_dim, seed)",
+                "conditional n-gram memory layer: zero table + near-closed concat gate (train to use)",
+            ),
+            (
+                "apply_engram",
+                "apply_engram(e, h, ids)",
+                "engram forward: hash ids, gather memory, project, gate, add to the residual",
+            ),
+            (
                 "ngram_hash",
                 "ngram_hash(ids, orders, heads, slots, seed)",
                 "rolling n-gram hash indices [T, order, head] (exact cross-backend contract)",

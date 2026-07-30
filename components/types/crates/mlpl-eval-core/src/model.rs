@@ -123,6 +123,40 @@ pub enum ModelSpec {
         /// the scalar multiplier on the adapter delta.
         alpha: f64,
     },
+    /// `engram(hidden, ngrams, heads, slots, head_dim, seed)` --
+    /// conditional n-gram memory (Engram; docs/engram-sagas-plan.md).
+    /// One flattened memory table addressed by the FROZEN
+    /// `ngram_hash` contract, a value projection from the
+    /// concatenated retrieval to the hidden width, and a "concat"
+    /// gate (sigmoid over `[hidden | value]`) that decides, per
+    /// position and dimension, how much retrieved memory joins the
+    /// residual stream. Applied via `apply_engram(e, h, ids)` --
+    /// the layer needs the token ids alongside the hidden state.
+    Engram {
+        /// Memory-table parameter name (`[rows, head_dim]`).
+        memory: String,
+        /// Value-projection weight name (`[retrieved_width, hidden]`).
+        w_value: String,
+        /// Value-projection bias name (`[1, hidden]`).
+        b_value: String,
+        /// Gate weight name (`[2 * hidden, hidden]`).
+        w_gate: String,
+        /// Gate bias name (`[1, hidden]`, initialized negative so
+        /// the gate starts nearly closed).
+        b_gate: String,
+        /// Residual-stream width the layer injects into.
+        hidden: usize,
+        /// N-gram window sizes (e.g. `[2, 3]`).
+        ngram_orders: Vec<usize>,
+        /// Independent hash heads per order.
+        heads: usize,
+        /// Table slots per head per order.
+        slots: usize,
+        /// Dimensions stored per slot.
+        head_dim: usize,
+        /// Hash-multiplier seed (part of the addressing contract).
+        seed: u64,
+    },
 }
 
 impl ModelSpec {
@@ -150,6 +184,20 @@ impl ModelSpec {
             Self::LinearLora {
                 w, b, a, b_adapter, ..
             } => vec![w.clone(), b.clone(), a.clone(), b_adapter.clone()],
+            Self::Engram {
+                memory,
+                w_value,
+                b_value,
+                w_gate,
+                b_gate,
+                ..
+            } => vec![
+                memory.clone(),
+                w_value.clone(),
+                b_value.clone(),
+                w_gate.clone(),
+                b_gate.clone(),
+            ],
         }
     }
 }

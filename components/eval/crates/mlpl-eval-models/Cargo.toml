@@ -10,6 +10,7 @@ mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-array-ops-compose = { path = "../../../array-compose/crates/mlpl-array-ops-compose" }
 mlpl-array-ops-reduce = { path = "../../../array-compose/crates/mlpl-array-ops-reduce" }
 mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
+mlpl-engram-core = { path = "../../../engram/crates/mlpl-engram-core" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
 mlpl-eval-env = { path = "../mlpl-eval-env" }

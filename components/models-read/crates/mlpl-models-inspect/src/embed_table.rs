@@ -71,6 +71,7 @@ fn find_embedding_table<E: HasVars>(spec: &ModelSpec, env: &E) -> Option<DenseAr
         | ModelSpec::Activation(_)
         | ModelSpec::RmsNorm { .. }
         | ModelSpec::Attention { .. }
-        | ModelSpec::LinearLora { .. } => None,
+        | ModelSpec::LinearLora { .. }
+        | ModelSpec::Engram { .. } => None,
     }
 }
