@@ -2,22 +2,22 @@
 //! extracted from `model_dispatch.rs`. Threads input through
 //! the model tree, locates the first `Attention` layer, and
 //! returns its softmax weights for visualization. Rank-3 [B, T,
-//! d_model] is looped per batch via `batched_attn_weights`.
+//! `d_model`] is looped per batch via `batched_attn_weights`.
 
-use crate::env_api::*;
+use crate::env_api::EnvVars;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_compose::prelude::*;
 
-use crate::env::Environment;
 use crate::model_apply::apply_model;
 use crate::model_apply_attention::slice_cols;
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
 /// Walk the model tree, threading `x` through each layer until
 /// we hit the first `Attention` node; then return its softmax
 /// weights.
-pub(crate) fn extract_attn_weights(
+pub fn extract_attn_weights(
     m: &ModelSpec,
     x: &DenseArray,
     env: &Environment,
@@ -63,8 +63,8 @@ fn attn_head_weights(
     let (scale, causal) = cfg;
     let q_h = slice_cols(q, h * d_k, d_k)?;
     let k_h = slice_cols(k, h * d_k, d_k)?;
-    let kt = crate::device::dispatched_call(env, "transpose", vec![k_h])?;
-    let qk = crate::device::dispatched_call(env, "matmul", vec![q_h, kt])?;
+    let kt = mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "transpose", vec![k_h])?;
+    let qk = mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![q_h, kt])?;
     let scaled: Vec<f64> = qk
         .data()
         .iter()
@@ -78,7 +78,11 @@ fn attn_head_weights(
         })
         .collect();
     let scores = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
-    crate::device::dispatched_call(env, "softmax", vec![scores, DenseArray::from_scalar(1.0)])
+    mlpl_eval_env::dispatch_hook::dispatch_or_err(
+        env,
+        "softmax",
+        vec![scores, DenseArray::from_scalar(1.0)],
+    )
 }
 
 fn compute_attn_weights(
@@ -107,8 +111,16 @@ fn compute_attn_weights(
     let wk_a = env
         .get(wk)
         .ok_or_else(|| EvalError::UndefinedVariable(wk.into()))?;
-    let q = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wq_a.clone()])?;
-    let k = crate::device::dispatched_call(env, "matmul", vec![x.clone(), wk_a.clone()])?;
+    let q = mlpl_eval_env::dispatch_hook::dispatch_or_err(
+        env,
+        "matmul",
+        vec![x.clone(), wq_a.clone()],
+    )?;
+    let k = mlpl_eval_env::dispatch_hook::dispatch_or_err(
+        env,
+        "matmul",
+        vec![x.clone(), wk_a.clone()],
+    )?;
     let scale = 1.0 / (d_k as f64).sqrt();
     let mut all = Vec::with_capacity(heads * seq * seq);
     for h in 0..heads {
@@ -123,7 +135,7 @@ fn compute_attn_weights(
     Ok(DenseArray::new(Shape::new(shape), all)?)
 }
 
-/// Rank-3 [B, T, d_model] attention-weights driver.
+/// Rank-3 [B, T, `d_model`] attention-weights driver.
 fn batched_attn_weights(
     x: &DenseArray,
     wq: &str,

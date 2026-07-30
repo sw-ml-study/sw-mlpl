@@ -6,30 +6,30 @@
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 
-use crate::env::Environment;
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
 /// `freeze(m)` entry point: dispatches to the generic body in
 /// `mlpl-models-freeze::freeze_inner`, passing the eval-loop
 /// resolver closure for non-ident model args.
-pub(crate) fn eval_freeze(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
+pub fn eval_freeze(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
     mlpl_models_freeze::freeze_inner(args, env, eval_expr_resolver, "freeze")
 }
 
 /// `unfreeze(m)` entry point: mirror of `eval_freeze`.
-pub(crate) fn eval_unfreeze(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
+pub fn eval_unfreeze(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
     mlpl_models_freeze::unfreeze_inner(args, env, eval_expr_resolver, "unfreeze")
 }
 
 /// Eval-loop resolver: when the model arg is not a bare
-/// identifier, evaluate it via `crate::eval::eval_expr` and
+/// identifier, evaluate it via `mlpl_eval_env::dispatch_hook::eval_or_err` and
 /// unwrap `Value::Model`. The closure is passed into the
 /// generic `freeze_inner` / `unfreeze_inner` so they don't
 /// need to import this crate.
 fn eval_expr_resolver(expr: &Expr, env: &mut Environment) -> Result<ModelSpec, EvalError> {
-    match crate::eval::eval_expr(expr, env, &mut None)? {
+    match mlpl_eval_env::dispatch_hook::eval_or_err(expr, env, &mut None)? {
         Value::Model(m) => Ok(m),
         _ => Err(EvalError::Unsupported(
             "freeze/unfreeze: argument must evaluate to a model".into(),

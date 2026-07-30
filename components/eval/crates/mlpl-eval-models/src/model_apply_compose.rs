@@ -5,13 +5,13 @@
 
 use mlpl_array::{DenseArray, Shape};
 
-use crate::env::Environment;
 use crate::model_apply::apply_model;
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
 /// `apply(Chain([a, b, ...]), x)` = `apply(b, apply(a, x))`.
-pub(crate) fn apply_chain(
+pub fn apply_chain(
     children: &[ModelSpec],
     x: &DenseArray,
     env: &Environment,
@@ -26,7 +26,7 @@ pub(crate) fn apply_chain(
 /// `apply(Residual(inner), x)` = `x + apply(inner, x)`. The inner
 /// block must preserve input shape, or a shape-mismatch
 /// `EvalError::Unsupported` is raised.
-pub(crate) fn apply_residual(
+pub fn apply_residual(
     inner: &ModelSpec,
     x: &DenseArray,
     env: &Environment,
@@ -37,11 +37,11 @@ pub(crate) fn apply_residual(
             "residual: inner block must preserve input shape".into(),
         ));
     }
-    crate::device::dispatched_call(env, "add", vec![x.clone(), inner_out])
+    mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "add", vec![x.clone(), inner_out])
 }
 
 /// Per-row RMS normalization: `y[i, :] = x[i, :] / sqrt(mean(x[i, :]^2) + eps)`.
-pub(crate) fn apply_rms_norm(x: &DenseArray) -> Result<DenseArray, EvalError> {
+pub fn apply_rms_norm(x: &DenseArray) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
     if dims.len() != 2 {
         return Err(EvalError::Unsupported(

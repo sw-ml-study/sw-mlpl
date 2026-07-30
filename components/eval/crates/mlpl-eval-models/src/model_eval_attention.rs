@@ -3,17 +3,17 @@
 //! dispatch through the same builder, differing only in the
 //! `causal` flag passed to `ModelSpec::Attention`.
 
-use crate::env_api::*;
+use crate::env_api::{EnvDevice, EnvParams, EnvTags, EnvTensorDevice};
 use mlpl_array::{DenseArray, Shape};
 use mlpl_core::ValueTag;
 use mlpl_parser::Expr;
 
-use crate::env::Environment;
 use crate::model_dispatch_scalar::{scalar_f64, scalar_usize};
 use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
-pub(crate) fn eval_attention(
+pub fn eval_attention(
     args: &[Expr],
     env: &mut Environment,
     causal: bool,
@@ -45,9 +45,30 @@ pub(crate) fn eval_attention(
     let wv = format!("__attn_Wv_{id}");
     let wo = format!("__attn_Wo_{id}");
     let layer = format!("attention_{id}");
+    init_projection_params(env, [&wq, &wk, &wv, &wo], d_model, seed, &layer)?;
+    Ok(ModelSpec::Attention {
+        wq,
+        wk,
+        wv,
+        wo,
+        d_model,
+        heads,
+        causal,
+    })
+}
+
+/// Initialize the four projection weight matrices (`W_q`/`W_k`/`W_v`/
+/// `W_o`): scaled-randn init, param + device stamp + Weight tag.
+fn init_projection_params(
+    env: &mut Environment,
+    names: [&String; 4],
+    d_model: usize,
+    seed: f64,
+    layer: &str,
+) -> Result<(), EvalError> {
     let device = env.device().to_string();
     let proj_names = ["W_q", "W_k", "W_v", "W_o"];
-    for (i, name) in [&wq, &wk, &wv, &wo].iter().enumerate() {
+    for (i, name) in names.iter().enumerate() {
         let init = mlpl_runtime::call_builtin(
             "randn",
             vec![
@@ -62,18 +83,10 @@ pub(crate) fn eval_attention(
         env.set_tag(
             (*name).clone(),
             ValueTag::Weight {
-                layer: layer.clone(),
+                layer: layer.to_string(),
                 name: proj_names[i].into(),
             },
         );
     }
-    Ok(ModelSpec::Attention {
-        wq,
-        wk,
-        wv,
-        wo,
-        d_model,
-        heads,
-        causal,
-    })
+    Ok(())
 }

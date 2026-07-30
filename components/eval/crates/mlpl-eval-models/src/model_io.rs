@@ -3,7 +3,7 @@
 //! fine-tuned model be reused -- train once, save, then load to
 //! compare/serve -- instead of retraining every run.
 
-use crate::env_api::*;
+use crate::env_api::{EnvModels, EnvParams, EnvVars};
 use std::fs;
 
 use mlpl_array::{DenseArray, Shape};
@@ -11,7 +11,7 @@ use mlpl_eval_core::model::ModelSpec;
 use mlpl_eval_core::snapshot::{ModelSnapshot, ParamEntry};
 use mlpl_parser::Expr;
 
-use crate::env::Environment;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::{EvalError, Value};
 
 fn path_arg(expr: &Expr, func: &str) -> Result<String, EvalError> {
@@ -33,7 +33,7 @@ fn model_arg(expr: &Expr, env: &mut Environment, func: &str) -> Result<ModelSpec
     {
         return Ok(m.clone());
     }
-    match crate::eval::eval_expr(expr, env, &mut None)? {
+    match mlpl_eval_env::dispatch_hook::eval_or_err(expr, env, &mut None)? {
         Value::Model(m) => Ok(m),
         _ => Err(EvalError::Unsupported(format!(
             "{func}: first argument must be a model"
@@ -43,10 +43,7 @@ fn model_arg(expr: &Expr, env: &mut Environment, func: &str) -> Result<ModelSpec
 
 /// `save_model(model, "path")` -- write the spec + every param value to
 /// a JSON snapshot. Returns the model unchanged (pass-through).
-pub(crate) fn eval_save_model(
-    args: &[Expr],
-    env: &mut Environment,
-) -> Result<ModelSpec, EvalError> {
+pub fn eval_save_model(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
     if args.len() != 2 {
         return Err(EvalError::BadArity {
             func: "save_model".into(),
@@ -82,10 +79,7 @@ pub(crate) fn eval_save_model(
 /// `load_model("path")` -- restore a snapshot: set every param value in
 /// the environment and return the spec. Assign it to bind the model:
 /// `m = load_model("path")`.
-pub(crate) fn eval_load_model(
-    args: &[Expr],
-    env: &mut Environment,
-) -> Result<ModelSpec, EvalError> {
+pub fn eval_load_model(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
     if args.len() != 1 {
         return Err(EvalError::BadArity {
             func: "load_model".into(),

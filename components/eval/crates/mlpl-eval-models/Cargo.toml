@@ -1,0 +1,30 @@
+[package]
+name = "mlpl-eval-models"
+description = "The Model DSL cluster split from the mlpl-eval hub: constructors, forward lowering, attention, LoRA, model io/inspect"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-array-ops-compose = { path = "../../../array-compose/crates/mlpl-array-ops-compose" }
+mlpl-array-ops-reduce = { path = "../../../array-compose/crates/mlpl-array-ops-reduce" }
+mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
+mlpl-core = { path = "../../../types/crates/mlpl-core" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-env = { path = "../mlpl-eval-env" }
+mlpl-eval-envc-bindings = { path = "../mlpl-eval-envc-bindings" }
+mlpl-eval-envc-exec = { path = "../mlpl-eval-envc-exec" }
+mlpl-eval-envc-ml = { path = "../mlpl-eval-envc-ml" }
+mlpl-eval-envc-obs = { path = "../mlpl-eval-envc-obs" }
+mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
+mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+mlpl-models-feasibility = { path = "../../../models-read/crates/mlpl-models-feasibility" }
+mlpl-models-freeze = { path = "../../../models-read/crates/mlpl-models-freeze" }
+mlpl-models-inspect = { path = "../../../models-read/crates/mlpl-models-inspect" }
+mlpl-models-mutate = { path = "../../../models-write/crates/mlpl-models-mutate" }
+mlpl-models-tune = { path = "../../../models-write/crates/mlpl-models-tune" }
+mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
+mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
+
+serde_json = "1"

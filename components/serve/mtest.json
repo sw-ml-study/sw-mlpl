@@ -1,0 +1,1 @@
+{"program": "m = chain(linear(4, 8, 0), relu_layer(), linear(8, 2, 1)); predict_batch(m, randn(2, [3, 4]))"}

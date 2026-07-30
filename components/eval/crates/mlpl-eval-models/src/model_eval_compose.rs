@@ -5,17 +5,17 @@
 
 use mlpl_parser::Expr;
 
-use crate::env::Environment;
 use mlpl_eval_core::model::{ActKind, ModelSpec};
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
 /// `chain(layer_a, layer_b, ...)`. Each argument must evaluate to a
 /// `Value::Model`.
-pub(crate) fn eval_chain(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+pub fn eval_chain(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
     let mut children = Vec::with_capacity(args.len());
     for (i, arg) in args.iter().enumerate() {
-        match crate::eval::eval_expr(arg, env, &mut None)? {
+        match mlpl_eval_env::dispatch_hook::eval_or_err(arg, env, &mut None)? {
             Value::Model(m) => children.push(m),
             _ => {
                 return Err(EvalError::Unsupported(format!(
@@ -29,7 +29,7 @@ pub(crate) fn eval_chain(args: &[Expr], env: &mut Environment) -> Result<ModelSp
 
 /// `residual(inner_model)`. Wraps a single model argument in a
 /// skip-connection node.
-pub(crate) fn eval_residual(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
+pub fn eval_residual(args: &[Expr], env: &mut Environment) -> Result<ModelSpec, EvalError> {
     if args.len() != 1 {
         return Err(EvalError::BadArity {
             func: "residual".into(),
@@ -37,7 +37,7 @@ pub(crate) fn eval_residual(args: &[Expr], env: &mut Environment) -> Result<Mode
             got: args.len(),
         });
     }
-    match crate::eval::eval_expr(&args[0], env, &mut None)? {
+    match mlpl_eval_env::dispatch_hook::eval_or_err(&args[0], env, &mut None)? {
         Value::Model(m) => Ok(ModelSpec::Residual(Box::new(m))),
         _ => Err(EvalError::Unsupported(
             "residual: argument must evaluate to a model".into(),
@@ -48,7 +48,7 @@ pub(crate) fn eval_residual(args: &[Expr], env: &mut Environment) -> Result<Mode
 /// Parameter-free activation layer constructors. Returns the
 /// matching `ActKind` if `name` is recognized.
 #[must_use]
-pub(crate) fn activation_kind(name: &str) -> Option<ActKind> {
+pub fn activation_kind(name: &str) -> Option<ActKind> {
     Some(match name {
         "tanh_layer" => ActKind::Tanh,
         "relu_layer" => ActKind::Relu,

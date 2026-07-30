@@ -1,21 +1,21 @@
 //! Saga 33 step 004: multi-head attention forward pass extracted
 //! from `model_dispatch.rs`. `apply_attention` is the top-level
-//! entry that handles rank-2 [seq, d_model] directly and rank-3
-//! [B, T, d_model] by looping over the batch axis. Per-head work
+//! entry that handles rank-2 [seq, `d_model`] directly and rank-3
+//! [B, T, `d_model`] by looping over the batch axis. Per-head work
 //! lives in `apply_attn_head`; column slicing in `slice_cols`.
 
-use crate::env_api::*;
+use crate::env_api::EnvVars;
 use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_compose::prelude::*;
 
-use crate::env::Environment;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
 /// Bundle of `Attention` layer parameters threaded through
 /// `apply_attention` and its forward-pass helpers. Replaces a
 /// 9-argument signature that previously needed
 /// `#[allow(clippy::too_many_arguments)]`.
-pub(crate) struct AttentionArgs<'a> {
+pub struct AttentionArgs<'a> {
     pub wq: &'a str,
     pub wk: &'a str,
     pub wv: &'a str,
@@ -40,7 +40,7 @@ struct AttnHeadCtx<'a> {
     causal: bool,
 }
 
-pub(crate) fn apply_attention(
+pub fn apply_attention(
     x: &DenseArray,
     args: &AttentionArgs<'_>,
     env: &Environment,
@@ -78,7 +78,9 @@ fn apply_attention_rank2(
             .cloned()
             .ok_or_else(|| EvalError::UndefinedVariable(n.into()))
     };
-    let project = |w: DenseArray| crate::device::dispatched_call(env, "matmul", vec![x.clone(), w]);
+    let project = |w: DenseArray| {
+        mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![x.clone(), w])
+    };
     let q = project(lookup(args.wq)?)?;
     let k = project(lookup(args.wk)?)?;
     let v = project(lookup(args.wv)?)?;
@@ -99,7 +101,7 @@ fn apply_attention_rank2(
         apply_attn_head(&ctx, h, env, &mut concat)?;
     }
     let concat = DenseArray::new(Shape::new(vec![seq, d_model]), concat)?;
-    crate::device::dispatched_call(env, "matmul", vec![concat, wo_a])
+    mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![concat, wo_a])
 }
 
 fn apply_attn_head(
@@ -111,8 +113,8 @@ fn apply_attn_head(
     let q_h = slice_cols(ctx.q, h * ctx.d_k, ctx.d_k)?;
     let k_h = slice_cols(ctx.k, h * ctx.d_k, ctx.d_k)?;
     let v_h = slice_cols(ctx.v, h * ctx.d_k, ctx.d_k)?;
-    let kt = crate::device::dispatched_call(env, "transpose", vec![k_h])?;
-    let scores = crate::device::dispatched_call(env, "matmul", vec![q_h, kt])?;
+    let kt = mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "transpose", vec![k_h])?;
+    let scores = mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![q_h, kt])?;
     let seq = ctx.seq;
     let causal = ctx.causal;
     let scale = ctx.scale;
@@ -129,12 +131,12 @@ fn apply_attn_head(
         })
         .collect();
     let scores_scaled = DenseArray::new(Shape::new(vec![seq, seq]), scaled)?;
-    let attn = crate::device::dispatched_call(
+    let attn = mlpl_eval_env::dispatch_hook::dispatch_or_err(
         env,
         "softmax",
         vec![scores_scaled, DenseArray::from_scalar(1.0)],
     )?;
-    let head_out = crate::device::dispatched_call(env, "matmul", vec![attn, v_h])?;
+    let head_out = mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![attn, v_h])?;
     for r in 0..seq {
         for c in 0..ctx.d_k {
             concat[r * ctx.d_model + h * ctx.d_k + c] = head_out.data()[r * ctx.d_k + c];
@@ -145,11 +147,7 @@ fn apply_attn_head(
 
 /// Extract `width` consecutive columns starting at `start` from a
 /// rank-2 matrix.
-pub(crate) fn slice_cols(
-    x: &DenseArray,
-    start: usize,
-    width: usize,
-) -> Result<DenseArray, EvalError> {
+pub fn slice_cols(x: &DenseArray, start: usize, width: usize) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
     let rows = dims[0];
     let cols = dims[1];

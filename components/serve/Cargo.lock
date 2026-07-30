@@ -1730,6 +1730,7 @@ dependencies = [
  "mlpl-eval-envc-ml",
  "mlpl-eval-envc-obs",
  "mlpl-eval-envc-userfns",
+ "mlpl-eval-models",
  "mlpl-eval-pets-tiny",
  "mlpl-eval-state",
  "mlpl-eval-types",
@@ -1768,6 +1769,7 @@ dependencies = [
  "mlpl-eval-state",
  "mlpl-eval-types",
  "mlpl-parser",
+ "mlpl-trace",
 ]
 
 [[package]]
@@ -1815,6 +1817,33 @@ dependencies = [
  "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-state",
+]
+
+[[package]]
+name = "mlpl-eval-models"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-reduce",
+ "mlpl-core",
+ "mlpl-eval-core",
+ "mlpl-eval-env",
+ "mlpl-eval-envc-bindings",
+ "mlpl-eval-envc-exec",
+ "mlpl-eval-envc-ml",
+ "mlpl-eval-envc-obs",
+ "mlpl-eval-state",
+ "mlpl-eval-types",
+ "mlpl-models-feasibility",
+ "mlpl-models-freeze",
+ "mlpl-models-inspect",
+ "mlpl-models-mutate",
+ "mlpl-models-tune",
+ "mlpl-parser",
+ "mlpl-runtime",
+ "mlpl-trace",
+ "serde_json",
 ]
 
 [[package]]

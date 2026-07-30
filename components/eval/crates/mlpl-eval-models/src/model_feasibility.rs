@@ -6,30 +6,30 @@
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 
-use crate::env::Environment;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
-pub(crate) fn eval_calibrate_device(
+pub fn eval_calibrate_device(
     args: &[Expr],
     env: &mut Environment,
 ) -> Result<DenseArray, EvalError> {
     mlpl_models_feasibility::calibrate_device_inner(args, env, scalar_resolver)
 }
 
-pub(crate) fn eval_estimate_hypothetical(
+pub fn eval_estimate_hypothetical(
     args: &[Expr],
     env: &mut Environment,
 ) -> Result<DenseArray, EvalError> {
     mlpl_models_feasibility::estimate_hypothetical_inner(args, env, name_resolver, scalar_resolver)
 }
 
-pub(crate) fn eval_feasible(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
+pub fn eval_feasible(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
     mlpl_models_feasibility::feasible_inner(args, env, array_resolver)
 }
 
 fn scalar_resolver(expr: &Expr, env: &mut Environment) -> Result<f64, EvalError> {
-    let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
+    let arr = mlpl_eval_env::dispatch_hook::eval_or_err(expr, env, &mut None)?.into_array()?;
     if arr.rank() != 0 {
         return Err(EvalError::Unsupported("expected a scalar argument".into()));
     }
@@ -37,7 +37,7 @@ fn scalar_resolver(expr: &Expr, env: &mut Environment) -> Result<f64, EvalError>
 }
 
 fn name_resolver(expr: &Expr, env: &mut Environment) -> Result<String, EvalError> {
-    match crate::eval::eval_expr(expr, env, &mut None)? {
+    match mlpl_eval_env::dispatch_hook::eval_or_err(expr, env, &mut None)? {
         Value::Str(s) => Ok(s),
         _ => Err(EvalError::Unsupported(
             "estimate_hypothetical: first argument must be a model-name string".into(),
@@ -46,5 +46,5 @@ fn name_resolver(expr: &Expr, env: &mut Environment) -> Result<String, EvalError
 }
 
 fn array_resolver(expr: &Expr, env: &mut Environment) -> Result<DenseArray, EvalError> {
-    crate::eval::eval_expr(expr, env, &mut None)?.into_array()
+    mlpl_eval_env::dispatch_hook::eval_or_err(expr, env, &mut None)?.into_array()
 }

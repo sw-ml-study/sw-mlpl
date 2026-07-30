@@ -13,6 +13,13 @@ mod auto_tag;
 // path keeps resolving, and callers outside see mlpl_eval::Environment
 // unchanged.
 pub use mlpl_eval_env::env;
+// The Model DSL cluster lives in mlpl-eval-models (cluster peel 1);
+// the module re-export keeps every crate::model_dispatch:: caller
+// (fncall dispatch, auto_tag) working unchanged.
+pub(crate) use mlpl_eval_models::{
+    model_dispatch, model_feasibility, model_freeze, model_inspect, model_io, model_lora,
+    model_mutate,
+};
 /// The capability-trait prelude: importing this glob gives every
 /// `Environment` method its trait (the eval decomposition converts
 /// env_* inherent impls to per-capability trait crates). External
@@ -93,25 +100,6 @@ mod inspect_render;
 mod interrupt;
 mod llm_dispatch;
 mod loader;
-mod model_apply;
-mod model_apply_attention;
-mod model_apply_compose;
-mod model_apply_embed;
-mod model_apply_lora;
-mod model_apply_simple;
-mod model_attn_weights;
-mod model_dispatch;
-mod model_dispatch_scalar;
-mod model_eval_apply;
-mod model_eval_attention;
-mod model_eval_compose;
-mod model_eval_layers;
-mod model_feasibility;
-mod model_freeze;
-mod model_inspect;
-mod model_io;
-mod model_lora;
-mod model_mutate;
 mod result_ops;
 mod tag_propagate;
 mod tag_render;
@@ -150,6 +138,11 @@ pub use mlpl_eval_image::decode_and_resize_u8;
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
+pub use mlpl_eval_models::tokens_to_onehot;
+#[cfg(any(
+    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
+    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
+))]
 pub use mlpl_eval_state::register_gpu_step;
 #[cfg(any(
     all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
@@ -159,9 +152,4 @@ pub use mlpl_eval_state::{AdamHp, GpuAdamStep, GpuEnv};
 pub use mlpl_eval_types::EvalError;
 pub use mlpl_eval_types::{Value, value_kind};
 pub use mlpl_runtime::runtime_builtin_names;
-#[cfg(any(
-    all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
-    all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
-))]
-pub use model_apply_embed::tokens_to_onehot;
 pub use tokenizer::TokenizerSpec;

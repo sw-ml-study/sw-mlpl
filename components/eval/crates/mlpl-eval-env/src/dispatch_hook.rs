@@ -26,8 +26,12 @@ pub fn install_dispatch(f: DispatchFn) {
 
 /// Route through the installed dispatch function; a missing install
 /// is a loud error naming the seam (only reachable if a caller uses
-/// `HasDispatch` without ever entering the evaluator).
-pub(crate) fn dispatch_or_err(
+/// `HasDispatch` -- or a cluster crate -- without ever entering the
+/// evaluator).
+///
+/// # Errors
+/// The hub's dispatch errors, or the not-installed sentinel.
+pub fn dispatch_or_err(
     env: &Environment,
     op: &str,
     args: Vec<DenseArray>,
@@ -36,6 +40,40 @@ pub(crate) fn dispatch_or_err(
         Some(f) => f(env, op, args),
         None => Err(EvalError::Unsupported(
             "device dispatch hook not installed (mlpl_eval::eval_program installs it)".into(),
+        )),
+    }
+}
+
+/// The hub's expression evaluator: cluster crates (models, ...) call
+/// back into `eval_expr` through this hook, mirroring the dispatch
+/// inversion above.
+pub type EvalFn = fn(
+    &mlpl_parser::Expr,
+    &mut Environment,
+    &mut Option<&mut mlpl_trace::Trace>,
+) -> Result<mlpl_eval_types::Value, EvalError>;
+
+static EVAL: OnceLock<EvalFn> = OnceLock::new();
+
+/// Install the process's expression evaluator. Idempotent.
+pub fn install_eval(f: EvalFn) {
+    let _ = EVAL.set(f);
+}
+
+/// Route through the installed evaluator; a missing install is a
+/// loud error naming the seam.
+///
+/// # Errors
+/// The hub's eval errors, or the not-installed sentinel.
+pub fn eval_or_err(
+    expr: &mlpl_parser::Expr,
+    env: &mut Environment,
+    trace: &mut Option<&mut mlpl_trace::Trace>,
+) -> Result<mlpl_eval_types::Value, EvalError> {
+    match EVAL.get() {
+        Some(f) => f(expr, env, trace),
+        None => Err(EvalError::Unsupported(
+            "eval hook not installed (mlpl_eval::eval_program installs it)".into(),
         )),
     }
 }

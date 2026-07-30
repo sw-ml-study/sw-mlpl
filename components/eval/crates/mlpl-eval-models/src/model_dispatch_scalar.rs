@@ -5,11 +5,11 @@
 
 use mlpl_parser::Expr;
 
-use crate::env::Environment;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
-pub(crate) fn scalar_f64(expr: &Expr, env: &mut Environment, func: &str) -> Result<f64, EvalError> {
-    let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
+pub fn scalar_f64(expr: &Expr, env: &mut Environment, func: &str) -> Result<f64, EvalError> {
+    let arr = mlpl_eval_env::dispatch_hook::eval_or_err(expr, env, &mut None)?.into_array()?;
     if arr.rank() != 0 {
         return Err(EvalError::Unsupported(format!(
             "{func}: expected a scalar argument"
@@ -18,11 +18,7 @@ pub(crate) fn scalar_f64(expr: &Expr, env: &mut Environment, func: &str) -> Resu
     Ok(arr.data()[0])
 }
 
-pub(crate) fn scalar_usize(
-    expr: &Expr,
-    env: &mut Environment,
-    func: &str,
-) -> Result<usize, EvalError> {
+pub fn scalar_usize(expr: &Expr, env: &mut Environment, func: &str) -> Result<usize, EvalError> {
     let v = scalar_f64(expr, env, func)?;
     if v < 0.0 || v.fract() != 0.0 {
         return Err(EvalError::Unsupported(format!(

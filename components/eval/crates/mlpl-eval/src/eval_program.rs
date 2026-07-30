@@ -79,6 +79,7 @@ fn run_program(
     // The env layer lives below and reaches device dispatch through
     // a hook; installing here (idempotent) covers every entry point.
     mlpl_eval_env::install_dispatch(crate::device_dispatch::dispatched_call);
+    mlpl_eval_env::dispatch_hook::install_eval(crate::eval::eval_expr);
     if stmts.is_empty() {
         return Err(EvalError::EmptyInput);
     }

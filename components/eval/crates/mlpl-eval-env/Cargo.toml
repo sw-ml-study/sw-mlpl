@@ -20,6 +20,7 @@ mlpl-env-traits = { path = "../../../session-infra/crates/mlpl-env-traits" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
 mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
 mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 
 [lints]

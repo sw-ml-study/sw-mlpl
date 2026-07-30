@@ -4,16 +4,16 @@
 //! pass through `device::dispatched_call`, and returns the
 //! output `DenseArray`.
 
-use crate::env_api::*;
+use crate::env_api::EnvVars;
 use mlpl_array::{DenseArray, Shape};
 
-use crate::env::Environment;
 use crate::model_apply_embed::tokens_to_onehot;
 use mlpl_eval_core::model::ActKind;
+use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
 /// `apply(Linear{w, b}, x)` = `x @ w + bias_broadcast(b)`.
-pub(crate) fn apply_linear(
+pub fn apply_linear(
     x: &DenseArray,
     w: &str,
     b: &str,
@@ -25,17 +25,22 @@ pub(crate) fn apply_linear(
     let b_arr = env
         .get(b)
         .ok_or_else(|| EvalError::UndefinedVariable(b.into()))?;
-    let xw = crate::device::dispatched_call(env, "matmul", vec![x.clone(), w_arr.clone()])?;
+    let xw = mlpl_eval_env::dispatch_hook::dispatch_or_err(
+        env,
+        "matmul",
+        vec![x.clone(), w_arr.clone()],
+    )?;
     let n = xw.shape().dims()[0];
     let ones = DenseArray::new(Shape::new(vec![n, 1]), vec![1.0; n])?;
-    let b_broadcast = crate::device::dispatched_call(env, "matmul", vec![ones, b_arr.clone()])?;
-    crate::device::dispatched_call(env, "add", vec![xw, b_broadcast])
+    let b_broadcast =
+        mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![ones, b_arr.clone()])?;
+    mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "add", vec![xw, b_broadcast])
 }
 
 /// `apply(Activation(kind), x)` -- one of tanh / relu / softmax.
 /// Softmax is dispatched with `axis = 1` (the trailing axis); the
 /// other activations take only the input.
-pub(crate) fn apply_activation(
+pub fn apply_activation(
     kind: ActKind,
     x: &DenseArray,
     env: &Environment,
@@ -50,12 +55,12 @@ pub(crate) fn apply_activation(
     } else {
         vec![x.clone()]
     };
-    crate::device::dispatched_call(env, name, args)
+    mlpl_eval_env::dispatch_hook::dispatch_or_err(env, name, args)
 }
 
 /// `apply(Embedding{table, vocab, ..}, tokens)` -- gather rows
 /// from `table` by lowering to a one-hot matmul.
-pub(crate) fn apply_embedding(
+pub fn apply_embedding(
     x: &DenseArray,
     table: &str,
     vocab: usize,
@@ -65,5 +70,5 @@ pub(crate) fn apply_embedding(
         .get(table)
         .ok_or_else(|| EvalError::UndefinedVariable(table.into()))?;
     let onehot = tokens_to_onehot(x, vocab)?;
-    crate::device::dispatched_call(env, "matmul", vec![onehot, t.clone()])
+    mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![onehot, t.clone()])
 }
