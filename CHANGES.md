@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-30
 
+- saga engram-e1-primitives: step 001-scaffold-engram-core complete
+- feat(engram): mlpl-engram-core -- spec, accounting, exact hash reference
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e1-primitives: init (plan per docs/engram-sagas-plan.md)
 - chore(agentrail): archive eval-decomposition saga
 - saga eval-decomposition: PAUSED-COMPLETE for Engram priority (plan + decisions in docs/engram-sagas-plan.md)
