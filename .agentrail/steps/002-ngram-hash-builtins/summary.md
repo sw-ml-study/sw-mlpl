@@ -1,0 +1,1 @@
+ngram_hash + gather_rows builtins landed, dispatching to the engram-core reference (golden-fixture-pinned at the language level); Engram BUILTIN_GROUPS section; glossary 377->380 with the Engram concept entry; README pin updated; 23 targeted tests green.
