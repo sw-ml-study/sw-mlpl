@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-29
+
+- saga eval-decomposition: step 019-models-out complete
+- refactor(eval): models-out -- the 19-module Model DSL cluster leaves the hub
+
 ## 2026-07-28
 
+- saga eval-decomposition: step 018-env-peels-exec-obs-tidy recorded
+- docs(changes): refresh CHANGES.md to HEAD
 - saga eval-decomposition: step 018 env peels C+D + spine tidy complete
 - refactor(eval): peels C+D + spine tidy -- the env transient ENDS
 - docs(changes): refresh CHANGES.md to HEAD
