@@ -289,6 +289,23 @@ lines = [
 ]
 
 [[demos]]
+category = "Engram"
+name = "Engram Hash (deterministic memory addressing)"
+intro = "First taste of ENGRAM -- conditional memory for Transformers (DeepSeek lineage): instead of recomputing frequent local patterns with attention, hash each token's n-gram context to DETERMINISTIC table addresses and retrieve trained vectors from there. This demo shows the addressing half, which is a frozen cross-backend contract: ngram_hash maps a token sequence to [T, order, head] slot indices (same bits on CPU, MLX, and later CUDA), and gather_rows fetches the addressed rows from one flattened table. No training yet -- that arrives with the engram(...) layer in the next saga."
+takeaway = "Deterministic addressing is what makes Engram memory PREFETCHABLE and cheap: ngram_hash(ids, orders, heads, slots, seed) is pure arithmetic (multiply mod a fixed prime, sum, mod slots -- exact in f64, so every backend agrees bit-for-bit), and gather_rows(table, indices) is the whole lookup. Note the window semantics: bigram hashes at position t depend only on tokens t-1..t, trigrams on t-2..t, and missing history pads with id 0. Fractional or oversized token ids are rejected loudly -- the 2^21-1 cap is the exactness guarantee."
+lines = [
+    "ids = [10, 20, 30, 40]                                        # a tiny token sequence",
+    "h = ngram_hash(ids, [2, 3], 4, 1024, 7)                       # [T, order, head] slot indices: 4 positions x 2 orders x 4 heads",
+    "shape(h)                                                       # 4 2 4",
+    "take(take(h, 1, 0), 1, 0)                                      # position-wise BIGRAM indices of head row 0 -- deterministic, seed 7",
+    "h2 = ngram_hash([99, 20, 30, 40], [2, 3], 4, 1024, 7)          # change ONLY ids[0] ...",
+    "take(take(h, 0, 3), 0, 0) - take(take(h2, 0, 3), 0, 0)         # ... bigram at t=3 unchanged (window is t-1..t): all zeros",
+    "table = reshape(range(16), [8, 2])                             # a tiny 8-row memory table, 2 dims per slot",
+    "gather_rows(table, [[7, 0], [3, 3]])                           # the lookup half: rows by index, shape [2, 2, 2]",
+    "ngram_hash([1.5], [2], 4, 1024, 7)                             # INTENTIONAL ERROR: token ids must be integers",
+]
+
+[[demos]]
 category = "Basics"
 name = "Analysis Helpers"
 intro = "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model."

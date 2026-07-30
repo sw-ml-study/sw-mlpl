@@ -28,6 +28,7 @@ const SECTION_ORDER: &[&str] = &[
     "Sequence Models",
     "Language Models",
     "Generative Models",
+    "Engram",
     "APL2 / General Programming",
     "Client-server (connect)",
     "MLX - Apple GPU (connect)",

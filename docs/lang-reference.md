@@ -337,9 +337,11 @@ tables (e.g. the three name forms) keep their teaching order.
 | `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) |
 | `rank(a)` | 1 | Number of dimensions (scalar) |
 | `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |
+| `ngram_hash(ids, orders, heads, slots, seed)` | 5 | Rolling n-gram hash indices `[T, order, head]` for Engram-style memory addressing; a frozen exact cross-backend contract (ids capped at 2^21 - 1). |
 | `reduce(:op, a, axis)` | 3 | Same, restricted to a single axis. |
 | `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |
 | `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
+| `gather_rows(table, indices)` | 2 | Select whole rows of a rank-2 table; output shape is the indices' shape + `[dim]`. Out-of-range indices error loudly. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
 | `scatter(buffer, index, value)` | 3 | A copy of rank-1 `buffer` with the single entry at `index` replaced by `value` (the input is not mutated). The bulk form is a `u:stamp`-style loop (see the Life demos); an accumulating multi-index scatter is future work. |

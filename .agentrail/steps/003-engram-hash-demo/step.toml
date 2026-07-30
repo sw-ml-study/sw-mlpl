@@ -1,0 +1,8 @@
+number = 3
+slug = "engram-hash-demo"
+status = "in-progress"
+description = "Saga E1 step 3: the Engram Hash demo. New 'Engram' demos.toml category (SECTI..."
+role = "production"
+context_files = []
+created_at = "2026-07-30T13:58:33"
+commits = []
