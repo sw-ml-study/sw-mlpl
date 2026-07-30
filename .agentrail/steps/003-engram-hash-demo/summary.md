@@ -1,0 +1,1 @@
+Engram Hash demo shipped: new Engram dropdown group, demo covering determinism/window semantics/gather lookup/error beat; lang-reference + README pins updated; all-demos release smoke green; server restarted with the builtins; playwright end-to-end connected run passes. Saga E1 (primitives) deliverable complete.
