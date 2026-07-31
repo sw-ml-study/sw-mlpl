@@ -1,0 +1,1 @@
+E2 step 4: Learnable Phrase Memory demo -- train the engram table to complete known bigrams/trigrams, show before/after outputs and that unaddressed rows stay zero; demos.toml entry, docs pins, pages rebuild + server restart + deploy verification.

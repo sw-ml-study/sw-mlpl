@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 3,
+    "step": "engram-grad"
+  },
+  "action": "TDD: wrote 4 grad tests first (RED on 'not supported inside grad()'); reused embedding one-hot-matmul trick + linear_tape; fixed duplicate-test premise after discovering an 8-slot hash collision via server eval",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-31T11:17:45"
+}

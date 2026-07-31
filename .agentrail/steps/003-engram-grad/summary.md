@@ -1,0 +1,1 @@
+engram_tape lowering (one-hot selection matmul = scatter-ADD backward) + apply_engram inside grad()/adam; engram_grad_tests 4/4 incl. finite-diff gradcheck, locality, duplicate accumulation, adam-training-moves-only-addressed-rows. Commit b2877441.
