@@ -38,6 +38,10 @@ mlpl-cuda-nn = { path = "../../../cuda-rt/crates/mlpl-cuda-nn", optional = true 
 mlpl-cuda-forward = { path = "../../../cuda-model/crates/mlpl-cuda-forward", optional = true }
 mlpl-cuda-model = { path = "../../../cuda-model/crates/mlpl-cuda-model", optional = true }
 mlpl-cuda-train = { path = "../../../cuda-rt/crates/mlpl-cuda-train", optional = true }
+
+# Target-gated so non-Linux `--features cuda` builds stub cleanly
+# (cudarc needs nvcc at build time). See mlpl-cuda-rt/Cargo.toml.
+[target.'cfg(all(target_os = "linux", target_arch = "x86_64"))'.dependencies]
 candle-core = { version = "0.9", optional = true, default-features = false, features = [
   "cuda",
 ] }

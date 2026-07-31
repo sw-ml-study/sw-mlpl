@@ -240,13 +240,15 @@ pub(crate) fn materialize_tape_on_mlx(tape: &mlpl_autograd::Tape) {
             NodeKind::Patchify { .. }
             | NodeKind::Concat { .. }
             | NodeKind::Take { .. }
-            | NodeKind::Stack { .. } => {
+            | NodeKind::Stack { .. }
+            | NodeKind::Rotate { .. } => {
                 // Saga 29 step 005/007/013: patchify, concat,
-                // take, and stack are pure re-arrangements -- no
-                // fp-rounding work happens inside them. The CPU
-                // forward value is bitwise-identical to what an
-                // MLX rerun would produce, so reuse it directly
-                // without a peer round-trip.
+                // take, stack, and rotate are pure
+                // re-arrangements -- no fp-rounding work happens
+                // inside them. The CPU forward value is
+                // bitwise-identical to what an MLX rerun would
+                // produce, so reuse it directly without a peer
+                // round-trip.
                 tape.nodes()[i].value.clone()
             }
         };

@@ -13,7 +13,9 @@ version.workspace = true
 default = []
 cuda = ["dep:candle-core"]
 
-[dependencies]
+# Target-gated so non-Linux `--features cuda` builds stub cleanly
+# (cudarc needs nvcc at build time). See mlpl-cuda-rt/Cargo.toml.
+[target.'cfg(all(target_os = "linux", target_arch = "x86_64"))'.dependencies]
 candle-core = { version = "0.9", optional = true, default-features = false, features = [
   "cuda",
 ] }

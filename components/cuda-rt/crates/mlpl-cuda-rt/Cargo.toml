@@ -17,11 +17,18 @@ default = []
 cuda = ["dep:candle-core"]
 
 [dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
+
+# candle lives in a target-specific table so `--features cuda` (and
+# `--all-features`) compiles as a no-op stub on non-Linux hosts --
+# cudarc's build.rs hard-requires nvcc, which macOS cannot provide.
+# The feature's `dep:candle-core` entry activates it only where the
+# cfg matches; the source is already triple-gated to match.
+[target.'cfg(all(target_os = "linux", target_arch = "x86_64"))'.dependencies]
 candle-core = { version = "0.9", optional = true, default-features = false, features = [
   "cuda",
 ] }
-mlpl-array = { path = "../../../array/crates/mlpl-array" }
-mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
 
 [dev-dependencies]
 # Parity reference for matmul: the CPU DenseArray.matmul. Dev-only

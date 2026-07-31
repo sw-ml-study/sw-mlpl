@@ -24,6 +24,7 @@
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 
 use mlpl_array::DenseArray;
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 

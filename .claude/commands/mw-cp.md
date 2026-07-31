@@ -45,15 +45,16 @@ For each changed workspace:
 
 ## 3. Lint and format (in the changed workspaces only)
 
-Feature flags are host-dependent -- `--all-features` is NOT portable:
+`cargo clippy --all-targets --all-features -- -D warnings` works on
+BOTH hosts since the cuda-target-gating spike (2026-07-31): candle
+sits behind a linux/x86_64 target table, so on macOS the `cuda`
+feature compiles as a no-op stub (mirroring how `mlx` stubs on
+Linux). On the Linux/CUDA box, actual GPU builds still need the
+toolkit (`CUDA_COMPUTE_CAP=120` for Blackwell).
+PENDING: Linux-side verification of the target-gated manifests --
+run the cuda workspace suites there after the move back, then
+delete this note.
 
-- **macOS (Apple Silicon):** `cargo clippy --all-targets -- -D
-  warnings`, plus `--features mlx` (and any other feature the change
-  gates on). NEVER include `cuda` here: cudarc's build script
-  requires `nvcc`, which does not exist on macOS.
-- **Linux/CUDA box:** `cargo clippy --all-targets --all-features --
-  -D warnings` (cuda needs the toolkit; `CUDA_COMPUTE_CAP=120` for
-  Blackwell). The `mlx` feature compiles there as a stub.
 - Zero warnings. Fix, never `#[allow]` or suppress.
 
 Then:

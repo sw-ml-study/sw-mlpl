@@ -1,6 +1,6 @@
 number = 4
 slug = "cuda-target-gating"
-status = "pending"
+status = "in-progress"
 description = "Build-matrix spike: make the cuda feature compile as a no-op stub on non-Linu..."
 role = "production"
 context_files = []

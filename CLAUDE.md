@@ -376,10 +376,12 @@ process (pre-commit checks, docs, detailed commit, push).
 `.claude/commands/mw-cp.md`) includes:
 1. Scoped `cargo test` in the changed workspaces (per "Scope tests
    to what you changed") -- every selected test passes, no exceptions
-2. `cargo clippy --all-targets -- -D warnings` in the changed
-   workspaces, with the feature set valid on the CURRENT host --
-   ZERO warnings (`--all-features` only on the Linux/CUDA box;
-   the `cuda` feature cannot build on macOS: cudarc needs `nvcc`)
+2. `cargo clippy --all-targets --all-features -- -D warnings` in the
+   changed workspaces -- ZERO warnings. Works on both hosts: candle
+   is target-gated to linux/x86_64 (2026-07-31), so `cuda` stubs on
+   macOS just as `mlx` stubs on Linux. (Linux-side verification of
+   the target-gated manifests still pending -- see the /mw-cp
+   playbook note.)
 3. `cargo fmt --all` -- all code formatted
 4. `cargo fmt --all -- --check` -- verify no formatting changes remain
 5. `sw-markdown-checker -f "**/*.md"` -- ASCII-only markdown (if docs

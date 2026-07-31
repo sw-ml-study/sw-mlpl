@@ -1943,6 +1943,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-reduce",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-envc-bindings",
@@ -2202,6 +2203,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
 ]
 
