@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 4,
+    "step": "cuda-target-gating"
+  },
+  "action": "manifest inventory via grep across Cargo.tomls; 7 target-table edits preserving dep:-based feature entries; per-workspace --all-features clippy verification loop on macOS; repaired + ran the exposed mlx test bit-rot; docs updated",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-31T16:04:02"
+}

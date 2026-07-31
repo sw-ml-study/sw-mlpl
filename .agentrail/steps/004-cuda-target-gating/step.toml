@@ -1,9 +1,10 @@
 number = 4
 slug = "cuda-target-gating"
-status = "in-progress"
+status = "completed"
 description = "Build-matrix spike: make the cuda feature compile as a no-op stub on non-Linu..."
 role = "production"
 context_files = []
 created_at = "2026-07-31T15:35:36"
+completed_at = "2026-07-31T16:04:02"
 task_type = "rust-feature"
-commits = []
+commits = ["9d79e3667fe203f5eb6d8b4398764c5330fc28e2"]

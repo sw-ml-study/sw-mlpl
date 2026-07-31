@@ -1,0 +1,9 @@
+number = 5
+slug = "engram-stats"
+status = "pending"
+description = "E3: engram_stats(e, ids) builtin. Report for a given engram + id vector: rows..."
+role = "legacy"
+context_files = []
+created_at = "2026-07-31T16:04:02"
+task_type = "rust-feature"
+commits = []
