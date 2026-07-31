@@ -1,6 +1,6 @@
 number = 2
 slug = "engram-in-chain-grad"
-status = "pending"
+status = "in-progress"
 description = "E3 step 2: tape path for the in-chain Engram so train/adam works on a full mo..."
 role = "legacy"
 context_files = []
