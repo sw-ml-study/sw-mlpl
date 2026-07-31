@@ -11,6 +11,8 @@ use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
 /// `apply(Chain([a, b, ...]), x)` = `apply(b, apply(a, x))`.
+/// An `Engram` child additionally receives the chain's ORIGINAL
+/// input `x` as its token ids (saga E3 step 1).
 pub fn apply_chain(
     children: &[ModelSpec],
     x: &DenseArray,
@@ -18,7 +20,12 @@ pub fn apply_chain(
 ) -> Result<DenseArray, EvalError> {
     let mut cur = x.clone();
     for child in children {
-        cur = apply_model(child, &cur, env)?;
+        cur = match child {
+            ModelSpec::Engram { .. } => {
+                crate::model_apply_engram_chain::apply_engram_in_chain(child, &cur, x, env)?
+            }
+            _ => apply_model(child, &cur, env)?,
+        };
     }
     Ok(cur)
 }

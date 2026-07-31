@@ -1,6 +1,6 @@
 number = 1
 slug = "engram-in-chain-forward"
-status = "pending"
+status = "in-progress"
 description = "E3 step 1: eager in-chain Engram forward. Wire ModelSpec::Engram into apply_m..."
 role = "production"
 context_files = []

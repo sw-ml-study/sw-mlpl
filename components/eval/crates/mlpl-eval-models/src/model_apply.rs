@@ -34,7 +34,9 @@ pub fn apply_model(
         ModelSpec::Embedding { table, vocab, .. } => apply_embedding(x, table, *vocab, env),
         ModelSpec::LinearLora { .. } => apply_lora_spec(model, x, env),
         ModelSpec::Engram { .. } => Err(EvalError::Unsupported(
-            "engram layers need token ids: use apply_engram(e, h, ids)".into(),
+            "engram layers need token ids: place the engram inside a chain whose \
+             input is the id vector, or call apply_engram(e, h, ids)"
+                .into(),
         )),
     }
 }
