@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-07-31
+
+- saga engram-e2-dsl: step 003 complete (b2877441)
+- feat(engram): differentiate apply_engram on the tape (E2 step 3)
+- fix(viz): ModelSpec::Engram arm in model_to_viz_node + pages rebuild
+
 ## 2026-07-30
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e2-dsl: steps 001-002 complete (bfc57a2e)
 - feat(engram): engram() constructor + apply_engram forward pass (E2 steps 1-2)
 - saga engram-e2-dsl: init
