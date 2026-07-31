@@ -372,16 +372,22 @@ Execute it directly.
 Commit your code changes with git. Use `/mw-cp` for the checkpoint
 process (pre-commit checks, docs, detailed commit, push).
 
-**The `/mw-cp` checkpoint process includes:**
-1. `cargo test` -- ALL tests must pass, no exceptions
-2. `cargo clippy --all-targets --all-features -- -D warnings` -- ZERO warnings
+**The `/mw-cp` checkpoint process** (full playbook:
+`.claude/commands/mw-cp.md`) includes:
+1. Scoped `cargo test` in the changed workspaces (per "Scope tests
+   to what you changed") -- every selected test passes, no exceptions
+2. `cargo clippy --all-targets -- -D warnings` in the changed
+   workspaces, with the feature set valid on the CURRENT host --
+   ZERO warnings (`--all-features` only on the Linux/CUDA box;
+   the `cuda` feature cannot build on macOS: cudarc needs `nvcc`)
 3. `cargo fmt --all` -- all code formatted
 4. `cargo fmt --all -- --check` -- verify no formatting changes remain
 5. `markdown-checker -f "**/*.md"` -- ASCII-only markdown (if docs changed)
-6. `sw-checklist` -- project standards check
+6. `sw-checklist` -- project standards check + ratchet trailer
 7. Update docs if any code behavior changed
 8. Detailed commit message with task context
 9. `git push`
+10. `./scripts/gen-changes.sh` and commit the CHANGES.md refresh
 
 **Never skip quality gates. Never suppress warnings. Fix issues, do not defer them.**
 

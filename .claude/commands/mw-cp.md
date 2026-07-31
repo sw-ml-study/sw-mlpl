@@ -1,0 +1,126 @@
+---
+description: "Checkpoint: scoped quality gates, docs, commit, push, CHANGES.md refresh"
+---
+
+# /mw-cp -- checkpoint process
+
+Run the full pre-commit gate for the work in the current session,
+then commit and push it. Order matters: gates -> docs -> commit ->
+push -> CHANGES.md refresh. If this session is an agentrail step,
+`agentrail complete` comes AFTER the commit lands (the step records
+HEAD), and nothing may change after `complete`.
+
+## 1. Discover scope
+
+```bash
+git status --short
+git diff --stat
+```
+
+- List the top-level components (`components/<name>/`, `apps/`) that
+  changed. Each component is its own cargo workspace.
+- Add any component whose tests compile the changed code through a
+  path dependency (e.g. `components/web` harnesses build
+  `mlpl-serve`).
+- Everything below is scoped to THAT list. Do not widen "just to be
+  safe" -- CI and release steps own the full sweep.
+
+## 2. Tests (scoped, per CLAUDE.md "Scope tests to what you changed")
+
+For each changed workspace:
+
+- Prefer per-crate, per-test-file scoping:
+  `cargo test -p <crate> --test <file_a> --test <file_b>`
+  covering the touched surfaces, plus the crate's unit tests when
+  the change is not surface-only.
+- Run a crate's FULL suite only for interpreter-behavior changes,
+  release steps, or when targeted files cannot bound the blast
+  radius.
+- Use `--release` for demo/interpreter-loop suites (`mlpl-eval`
+  demo smokes, `mlpl-web`, repl integration); dev profile for pure
+  unit tests and TDD inner loops. Never run dev + release
+  back-to-back when disk is under ~15 GB free without a
+  `cargo clean` between (check `du -sh target/`).
+- ALL selected tests must pass. No exceptions, no skipped failures.
+
+## 3. Lint and format (in the changed workspaces only)
+
+Feature flags are host-dependent -- `--all-features` is NOT portable:
+
+- **macOS (Apple Silicon):** `cargo clippy --all-targets -- -D
+  warnings`, plus `--features mlx` (and any other feature the change
+  gates on). NEVER include `cuda` here: cudarc's build script
+  requires `nvcc`, which does not exist on macOS.
+- **Linux/CUDA box:** `cargo clippy --all-targets --all-features --
+  -D warnings` (cuda needs the toolkit; `CUDA_COMPUTE_CAP=120` for
+  Blackwell). The `mlx` feature compiles there as a stub.
+- Zero warnings. Fix, never `#[allow]` or suppress.
+
+Then:
+
+```bash
+cargo fmt --all
+cargo fmt --all -- --check
+```
+
+## 4. Repo-wide checks
+
+- `markdown-checker -f "**/*.md"` -- only if any `.md` changed.
+  Markdown is ASCII-only.
+- `sw-checklist` -- always. Apply the ratchet policy
+  (docs/sw-checklist-paydown.md): the commit should strictly lower
+  BOTH the failed and warning counts (targets: -5 fails, -15
+  warnings). If it cannot, retire what you can near the code you
+  touched, and add a `sw-checklist: exception` trailer with a
+  justification naming what was tried. Record before/after counts
+  for the commit message either way.
+
+## 5. Docs and deploy gates
+
+- Update `docs/` if code behavior changed.
+- If `apps/mlpl-web/` changed (Rust, index.html, CSS, assets,
+  demos): run `./scripts/build-pages.sh` and stage `pages/` --
+  the Pages workflow deploys only the committed `pages/` dir.
+  Skip this entirely when web source did not change (WASM tree
+  costs several GB).
+- If the change touches anything the connect path can hit (a
+  builtin, svg type, SSE event, /v1 endpoint) AND a local
+  `mlpl-serve` is in play: rebuild and restart the server per
+  CLAUDE.md "Local server rebuild/restart gate" (keep original
+  flags, all four CORS origins, smoke-test /v1/devices + one eval).
+  Do not restart a server the user is actively using unasked.
+
+## 6. Commit
+
+- Stage files by explicit path (never `git add -A`). Include
+  `.agentrail/` metadata changes with the source commit.
+- Detailed message: what + why, task/saga context, test scope and
+  the rationale for it, `sw-checklist:` trailer with the counts (or
+  the exception line), and the Co-Authored-By trailer.
+- Never `--no-verify`. If a hook fails, fix the cause.
+
+## 7. Push
+
+```bash
+git push
+```
+
+If pushing is impossible, say so explicitly in the handoff -- never
+leave commits silently stranded. Non-fast-forward on a personal
+branch: `git pull --rebase`, never force-push shared branches.
+
+## 8. CHANGES.md refresh
+
+```bash
+./scripts/gen-changes.sh
+```
+
+Commit the refreshed file as `docs(changes): refresh CHANGES.md to
+HEAD` (or fold into a following docs/chore commit), then push.
+
+## Never
+
+- NEVER run `sw-install` as part of this flow -- it would overwrite
+  the user's stable installed binaries. Only on explicit request.
+- Never run the all-components test sweep for a scoped change.
+- Never suppress warnings to get to green.

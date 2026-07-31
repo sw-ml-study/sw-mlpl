@@ -10,7 +10,10 @@
 
 # Claude Code local state: per-machine settings + runtime locks
 # (settings.local.json, scheduled_tasks.lock). Not project source.
-.claude/
+# EXCEPTION: .claude/commands/ holds shared slash commands (e.g.
+# /mw-cp) that must travel with the repo to every dev machine.
+.claude/*
+!.claude/commands/
 
 # Build artifacts -- never tracked
 *.pdf
