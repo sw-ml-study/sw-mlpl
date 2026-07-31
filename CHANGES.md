@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-31
 
+- saga engram-e3-tiny-lm: step 001 complete (8a445abf)
+- feat(engram): in-chain Engram forward -- the AfterAttention insertion (E3 step 1)
+- saga: archive engram-e2-dsl, init engram-e3-tiny-lm (step 1 queued)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e2-dsl: complete (4 steps)
 - feat(demos): Learnable Phrase Memory -- the trainable half of Engram (E2 step 4)
 - docs(changes): refresh CHANGES.md to HEAD
