@@ -1,9 +1,10 @@
 number = 3
 slug = "md-ascii-cleanup"
-status = "in-progress"
+status = "completed"
 description = "Tech-debt spike: retire the hand-fixable sw-markdown-checker failures (84 rep..."
 role = "production"
 context_files = []
 created_at = "2026-07-31T15:35:21"
+completed_at = "2026-07-31T15:51:18"
 task_type = "docs-chore"
-commits = []
+commits = ["bb790776e5770b75e3b6a92564be09df7d6f1099"]

@@ -1,0 +1,11 @@
+{
+  "task_type": "docs-chore",
+  "state": {
+    "number": 3,
+    "step": "md-ascii-cleanup"
+  },
+  "action": "per-file non-ASCII inventory via byte-scan grep; perl -CSD transliteration map + hand rewrites for APL glyph contexts; sw-markdown-checker per-file verification loop; symlink regression caught via git mode-change output and repaired",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-31T15:51:19"
+}
