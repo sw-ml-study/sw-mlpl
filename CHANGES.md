@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-31
 
+- docs(tooling): mw-cp markdown gate scoped to touched files
+- docs(tooling): versioned /mw-cp checkpoint command + reconcile CLAUDE.md gates
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e3-tiny-lm: step 001 complete (8a445abf)
 - feat(engram): in-chain Engram forward -- the AfterAttention insertion (E3 step 1)
 - saga: archive engram-e2-dsl, init engram-e3-tiny-lm (step 1 queued)
