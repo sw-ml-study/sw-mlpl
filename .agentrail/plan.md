@@ -28,27 +28,39 @@ State of the repo (verified 2026-07-31):
   optional [[capabilities]]/[[progress_notes]] tables, pinned
   counts in mlpl-web-demos/tests/metadata_codegen.rs.
 
-Steps (draft):
+Steps:
 
-1. engram-in-chain-forward -- eager path: apply_model supports
-   ModelSpec::Engram inside a Chain by threading the chain's
-   original input ids to Engram layers (embed-first chains: the
-   chain input IS the token ids). apply(chain(..., engram_e, ...),
-   ids) == manually interleaved apply_engram calls; near-identity
-   at init (base output unchanged when engram is fresh). Engram
-   outside a chain / chain without leading ids stays a clear error.
+1. engram-in-chain-forward -- DONE (commit 8a445abf). apply_model
+   supports ModelSpec::Engram inside a Chain by threading the
+   chain's original input ids; chain() args resolve bound model
+   identifiers; near-identity + manual-composition-equality +
+   error-surface tests in engram_chain_tests.rs.
 2. engram-in-chain-grad -- tape path: apply_model_tape lowers the
    in-chain Engram via engram_tape with the same ids threading, so
    train/adam works on the full model expression. Frozen-base
    test: freeze(base), train N steps -- base params bit-identical,
    engram memory rows move only where addressed; gradcheck vs
    explicit apply_engram composition.
-3. engram-stats -- engram_stats(e, ids) builtin: rows_addressed /
+3. md-ascii-cleanup -- tech-debt spike (user-queued 2026-07-31):
+   fix hand-owned non-ASCII markdown (AGENTS.md, 8 docs/ files,
+   5 books/ files), teach gen-changes.sh to transliterate old
+   commit subjects, reconcile the markdown-checker /
+   sw-markdown-checker binary-name mismatch. Out of scope:
+   .agentrail-archive, vendor/, the agentrail-managed CLAUDE.md
+   block (upstream agentrail emits em dashes -- flag it).
+4. cuda-target-gating -- build-matrix spike (user-queued
+   2026-07-31): move candle-core behind
+   [target.'cfg(linux+x86_64)'.dependencies] in the cuda crates so
+   --features cuda compiles as a stub on macOS (mirror of mlx on
+   Linux) and --all-features clippy works on both hosts. Linux
+   behavior unchanged; verify on the CUDA box after the move back
+   if not verifiable this side.
+5. engram-stats -- engram_stats(e, ids) builtin: rows_addressed /
    unique_rows / collisions (distinct n-grams sharing a slot),
    mean|max gate activation for a given h (or per-call capture),
    memory row-norm summary (nonzero rows, max norm). Rendered
    :describe-style; unit tests pin the numbers on a fixed seed.
-4. tiny-lm-engram-demo -- "Tiny LM + Engram" demo: build the Tiny
+6. tiny-lm-engram-demo -- "Tiny LM + Engram" demo: build the Tiny
    LM base, train briefly, freeze base, insert/attach engram,
    train engram-only, show baseline-vs-engram loss + engram_stats
    panel (gate activity, addressed rows, collisions); demos.toml +

@@ -1,0 +1,9 @@
+number = 4
+slug = "cuda-target-gating"
+status = "pending"
+description = "Build-matrix spike: make the cuda feature compile as a no-op stub on non-Linu..."
+role = "production"
+context_files = []
+created_at = "2026-07-31T15:35:36"
+task_type = "rust-feature"
+commits = []

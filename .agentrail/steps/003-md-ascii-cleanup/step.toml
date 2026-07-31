@@ -1,0 +1,9 @@
+number = 3
+slug = "md-ascii-cleanup"
+status = "pending"
+description = "Tech-debt spike: retire the hand-fixable sw-markdown-checker failures (84 rep..."
+role = "production"
+context_files = []
+created_at = "2026-07-31T15:35:21"
+task_type = "docs-chore"
+commits = []
