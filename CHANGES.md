@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-31
 
+- saga engram-e3-tiny-lm: step 004 complete (9d79e366)
+- build(cuda): target-gate candle so --all-features works on macOS (E3 step 4)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e3-tiny-lm: step 003 complete (a4c9e547 + bb790776)
 - docs(cleanup): restore symlinks materialized by the perl -i pass
 - docs(cleanup): ASCII-only markdown spike -- hand-owned files now pass the checker (E3 step 3)
