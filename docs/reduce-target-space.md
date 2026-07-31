@@ -15,7 +15,7 @@ ChatGPT
 
 I have a large github repo with many "components" that are each mult-create Rust workspaces.  When building the repo's main app, there are a lof of compiles producing a lot of build artifacts across many ./target dirs.  cargo clean in one causes ripple effects for others.  What is a strategy for capturing enough of the dependency binary artifacts to build other components while reducing total disk space usage?
 
-I’ll frame this as a repo/build-cache architecture problem: how Cargo chooses artifact locations, what can be safely shared, and which cleanup policies avoid breaking downstream component builds.
+I'll frame this as a repo/build-cache architecture problem: how Cargo chooses artifact locations, what can be safely shared, and which cleanup policies avoid breaking downstream component builds.
 
 Thought for 5s
 You want less disk usage without forcing expensive rebuilds across sibling Rust workspaces.
@@ -45,7 +45,7 @@ toolchain	stable/nightly/rust version changes invalidate lots
 target triple	host vs wasm vs embedded artifacts differ
 profile	debug/release/test/bench differ
 feature set	major feature combos may duplicate artifacts
-component family	prevents one app’s cleanup from nuking unrelated builds
+component family	prevents one app's cleanup from nuking unrelated builds
 Avoid a single shared target dir if people will run cargo clean, because cargo clean without options deletes the whole target directory. 
 
 2. Add sccache as the rebuild safety net
@@ -98,7 +98,7 @@ old component ./target dirs
 stale target/<triple>/debug/incremental
 The biggest win is usually deleting incremental artifacts before deleting compiled dependencies.
 
-Practical layout I’d use
+Practical layout I'd use
 At repo root:
 
 repo/
@@ -144,7 +144,7 @@ old target triples	no unless active
 old release artifacts	keep only selected
 component-local ./target dirs	migrate/delete
 Important warning
-A shared CARGO_TARGET_DIR reduces duplication, but makes cargo clean more dangerous. Cargo’s own clean command removes generated artifacts from the chosen target directory, and with no options it removes the entire target directory. 
+A shared CARGO_TARGET_DIR reduces duplication, but makes cargo clean more dangerous. Cargo's own clean command removes generated artifacts from the chosen target directory, and with no options it removes the entire target directory. 
 
 So the rule should be:
 
@@ -161,7 +161,7 @@ fewer ripple-effect rebuilds,
 
 predictable cleanup,
 
-easy reporting of “what is using disk,”
+easy reporting of "what is using disk,"
 
 and a path toward CI/local cache sharing later.
 

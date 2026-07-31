@@ -8,6 +8,6 @@
 
 # Thinking in Shapes
 
-In MLPL, you don't think in loops; you think in shapes. An array is not just a container for numbers—it is a conversation with structure. 
+In MLPL, you don't think in loops; you think in shapes. An array is not just a container for numbers--it is a conversation with structure. 
 
 Whether you're performing a simple vector addition or a complex multi-head attention mechanism, the goal is always the same: express the transformation directly.

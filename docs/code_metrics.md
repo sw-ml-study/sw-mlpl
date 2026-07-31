@@ -8,13 +8,13 @@ This section guides AI coding agents in creating loosely-coupled, functional-sty
 
 | Level | Preferred Gate |
 | --- | --- |
-| Lines per function | ≤ 25 LOC |
-| Functions per module | ≤ 5 |
-| Modules per crate | ≤ 5 |
-| Crates per component/workspace group | ≤ 5 |
-| Major subsystems per repo | ≤ 5-ish |
+| Lines per function | <= 25 LOC |
+| Functions per module | <= 5 |
+| Modules per crate | <= 5 |
+| Crates per component/workspace group | <= 5 |
+| Major subsystems per repo | <= 5-ish |
 
-**Guiding rule:** Every part should fit in human working memory. When a part grows, split by responsibility, not by accident. The 25-LOC function gate keeps a function on a single page view. The 5-per gate (mental load 5 ± 2) reserves room for future expansion.
+**Guiding rule:** Every part should fit in human working memory. When a part grows, split by responsibility, not by accident. The 25-LOC function gate keeps a function on a single page view. The 5-per gate (mental load 5 +/- 2) reserves room for future expansion.
 
 ---
 
@@ -149,11 +149,11 @@ Use consistent names so agents know where code belongs:
 | File | Purpose |
 | --- | --- |
 | `model.rs` | Data structures and domain types |
-| `parse.rs` | String/file/input → typed data |
-| `validate.rs` | Typed data → validation result |
-| `plan.rs` | Inputs/config → execution plan |
+| `parse.rs` | String/file/input -> typed data |
+| `validate.rs` | Typed data -> validation result |
+| `plan.rs` | Inputs/config -> execution plan |
 | `run.rs` | Performs effects |
-| `render.rs` | Typed data → string/output |
+| `render.rs` | Typed data -> string/output |
 | `error.rs` | Error enums and conversions |
 | `test_support.rs` | Shared test builders/helpers |
 | `fixtures.rs` | Static test data or fixture loading |
@@ -333,11 +333,11 @@ Avoid giant global error enums unless the crate is very small. Use a focused `ty
 
 When modifying code, follow this loop:
 
-1. **Measure** — function LOC, function count per module, module count per crate, crate count per component, coupling/import size, test size and placement.
-2. **Classify excess** — too many LOC? too many functions? too many responsibilities? too many effects mixed with logic? too many variants in one match? too many tests inline?
-3. **Split by responsibility** — prefer names like `parse_*`, `validate_*`, `build_*`, `plan_*`, `run_*`, `render_*`, `summarize_*`.
-4. **Preserve behavior** — run `cargo test` before refactoring, and after each small move run `cargo test` and `cargo clippy --all-targets --all-features`.
-5. **Re-measure** — the refactor is not complete until the metrics pass.
+1. **Measure** -- function LOC, function count per module, module count per crate, crate count per component, coupling/import size, test size and placement.
+2. **Classify excess** -- too many LOC? too many functions? too many responsibilities? too many effects mixed with logic? too many variants in one match? too many tests inline?
+3. **Split by responsibility** -- prefer names like `parse_*`, `validate_*`, `build_*`, `plan_*`, `run_*`, `render_*`, `summarize_*`.
+4. **Preserve behavior** -- run `cargo test` before refactoring, and after each small move run `cargo test` and `cargo clippy --all-targets --all-features`.
+5. **Re-measure** -- the refactor is not complete until the metrics pass.
 
 ---
 
@@ -796,13 +796,13 @@ This section guides AI coding agents in creating loosely-coupled, functional-sty
 
 | Level | Preferred Gate |
 | --- | --- |
-| Lines per function | ≤ 25 LOC |
-| Functions per module | ≤ 5 |
-| Modules per crate | ≤ 5 |
-| Crates per component/workspace group | ≤ 5 |
-| Major subsystems per repo | ≤ 5-ish |
+| Lines per function | <= 25 LOC |
+| Functions per module | <= 5 |
+| Modules per crate | <= 5 |
+| Crates per component/workspace group | <= 5 |
+| Major subsystems per repo | <= 5-ish |
 
-**Guiding rule:** Every part should fit in human working memory. When a part grows, split by responsibility, not by accident. The 25-LOC function gate keeps a function on a single page view. The 5-per gate (mental load 5 ± 2) reserves room for future expansion.
+**Guiding rule:** Every part should fit in human working memory. When a part grows, split by responsibility, not by accident. The 25-LOC function gate keeps a function on a single page view. The 5-per gate (mental load 5 +/- 2) reserves room for future expansion.
 
 ---
 
@@ -937,11 +937,11 @@ Use consistent names so agents know where code belongs:
 | File | Purpose |
 | --- | --- |
 | `model.rs` | Data structures and domain types |
-| `parse.rs` | String/file/input → typed data |
-| `validate.rs` | Typed data → validation result |
-| `plan.rs` | Inputs/config → execution plan |
+| `parse.rs` | String/file/input -> typed data |
+| `validate.rs` | Typed data -> validation result |
+| `plan.rs` | Inputs/config -> execution plan |
 | `run.rs` | Performs effects |
-| `render.rs` | Typed data → string/output |
+| `render.rs` | Typed data -> string/output |
 | `error.rs` | Error enums and conversions |
 | `test_support.rs` | Shared test builders/helpers |
 | `fixtures.rs` | Static test data or fixture loading |
@@ -1121,11 +1121,11 @@ Avoid giant global error enums unless the crate is very small. Use a focused `ty
 
 When modifying code, follow this loop:
 
-1. **Measure** — function LOC, function count per module, module count per crate, crate count per component, coupling/import size, test size and placement.
-2. **Classify excess** — too many LOC? too many functions? too many responsibilities? too many effects mixed with logic? too many variants in one match? too many tests inline?
-3. **Split by responsibility** — prefer names like `parse_*`, `validate_*`, `build_*`, `plan_*`, `run_*`, `render_*`, `summarize_*`.
-4. **Preserve behavior** — run `cargo test` before refactoring, and after each small move run `cargo test` and `cargo clippy --all-targets --all-features`.
-5. **Re-measure** — the refactor is not complete until the metrics pass.
+1. **Measure** -- function LOC, function count per module, module count per crate, crate count per component, coupling/import size, test size and placement.
+2. **Classify excess** -- too many LOC? too many functions? too many responsibilities? too many effects mixed with logic? too many variants in one match? too many tests inline?
+3. **Split by responsibility** -- prefer names like `parse_*`, `validate_*`, `build_*`, `plan_*`, `run_*`, `render_*`, `summarize_*`.
+4. **Preserve behavior** -- run `cargo test` before refactoring, and after each small move run `cargo test` and `cargo clippy --all-targets --all-features`.
+5. **Re-measure** -- the refactor is not complete until the metrics pass.
 
 ---
 

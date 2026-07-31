@@ -14,6 +14,7 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-31
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e3-tiny-lm: step 002 complete (9c41fa83)
 - feat(engram): tape path for the in-chain Engram -- train/adam through a full chain (E3 step 2)
 - saga engram-e3-tiny-lm: queue md-ascii-cleanup + cuda-target-gating spikes (user-requested), plan v2
@@ -575,7 +576,7 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 - saga(step 003): complete demo tiers+gating+seeding; queue MLX GPU training (004)
 - chore(pages): rebuild for device-tiered demo dropdown gating
 - feat(demos): device-tier demo dropdown gating + seed connect/MLX demos (saga Phase 1)
-- feat(demos): demo capability tiers (cpu/live, connect, mlx, cuda) — saga Phase 1 foundation
+- feat(demos): demo capability tiers (cpu/live, connect, mlx, cuda) -- saga Phase 1 foundation
 - docs(saga): demo device-tiers + the MLX-training-is-forward-only finding
 - saga(step 002): complete ollama-settings-web-wiring; queue demo-group + gating (003)
 - docs(changes): refresh CHANGES.md to HEAD
@@ -636,7 +637,7 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 - fix(viz): look up Models in env after assignment (saga D fix)
 - fix(viz): normalize heatmap colors per slice + bump BPE merges + diag log
 - feat(viz): composite Sankey for model sculptures (saga D)
-- feat(viz): BPE attention demo — labels flow into the heatmap (saga BPE-2)
+- feat(viz): BPE attention demo -- labels flow into the heatmap (saga BPE-2)
 - feat(viz): decode_each builtin + StrList plumbing (saga BPE-1)
 - fix(viz): drop duplicate var name in inspector headline
 - feat(viz): step number prefix on every sculpture's 3D label
@@ -717,7 +718,7 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 - chore(agentrail): saga 65 (eval-decompose) blocked on type cycle, pivot to arithmetic.rs split
 - chore(agentrail): saga 64 close - migration complete
 - docs: saga 64 close - migration complete
-- refactor(component): empty crates/ apps/ services/ — finalize migration (saga 64)
+- refactor(component): empty crates/ apps/ services/ -- finalize migration (saga 64)
 - chore(agentrail): saga 63 close
 - docs: saga 63 close
 - refactor(component): move serve family to components/serve/ (saga 63)
@@ -1053,7 +1054,7 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 - chore(agentrail): record saga 33 step 042a completion + kickoff step 043 (REPL tab-completion)
 - saga 33 step 042a: sync Dimensionality reduction path with MDS / RP landed
 - chore(agentrail): record saga 33 step 042 completion + kickoff step 043 (REPL tab-completion)
-- saga 33 step 042: path-resume bug fix — preserve path_state on lesson navigation
+- saga 33 step 042: path-resume bug fix -- preserve path_state on lesson navigation
 - chore(agentrail): insert step 042 (path-resume bug fix)
 - chore(agentrail): record saga 33 step 041 completion + kickoff step 042 (REPL tab-completion)
 - saga 33 step 041: mds() + random_projection() builtins + new mlpl-runtime-mds-rp crate (+4 warn, exception)
@@ -1061,13 +1062,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 - chore(agentrail): record saga 33 step 037d completion + kickoff step 041 (MDS / random_projection)
 - saga 33 step 037d: :introspect REPL command bundling every no-arg inspector
 - chore(agentrail): record saga 33 step 037c completion + kickoff step 037d (:introspect helper)
-- saga 33 step 037c: UMAP impl fix — fit a/b from min_dist, wide coord bound (+1 warn, exception)
+- saga 33 step 037c: UMAP impl fix -- fit a/b from min_dist, wide coord bound (+1 warn, exception)
 - chore(agentrail): insert UMAP impl fix (039) + :introspect helper (040)
 - chore(agentrail): record saga 33 step 037b completion + kickoff step 037c (umap impl fix)
 - saga 33 step 037b: move scatter_labeled legend outside the plot + class-id narrative
 - chore(agentrail): record saga 33 step 037 completion + kickoff step 037b (umap impl fix)
 - saga 33 step 037: scatter_labeled legend + umap_vs_pca honest-caveat (+1 warn, exception)
-- chore(agentrail): insert step 037 (scatter_labeled legend) — user request from chat
+- chore(agentrail): insert step 037 (scatter_labeled legend) -- user request from chat
 - chore(agentrail): record saga 33 step 036 completion + kickoff step 037
 - saga 33 step 036: 6 dim-reduction tutorial lessons + agentrail-sessions plan (+1 warn, exception)
 - chore(agentrail): record saga 33 step 035 completion + kickoff step 036

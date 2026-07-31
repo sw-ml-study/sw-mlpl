@@ -5,12 +5,12 @@ ChatGPT
 
 Very recent papers before May 6. 2026 (today) discuss self-play as an effective way (and efficient way) to train LLMs.  Please search for papers on this topic published recently.  Provide links and summaries.  How can I apply this locally using Rust plus MLX or CUDA to train smaller models from huggingface?
 
-I’ll look for very recent self-play / synthetic interaction training papers, then connect the ideas to a practical local training architecture using Rust orchestration with MLX or CUDA-backed training.
+I'll look for very recent self-play / synthetic interaction training papers, then connect the ideas to a practical local training architecture using Rust orchestration with MLX or CUDA-backed training.
 
 Thought for 14s
 Recent self-play LLM papers worth reading
 Paper	Date	Core idea	Why it matters
-IRIS: Interpolative Rényi Iterative Self-play for Large Language Models	Apr. 22, 2026	Unifies SPIN/SPACE/SPIF-style objectives by interpolating divergence regimes.	Good “latest before today” paper if you want the math/objective-design view. 
+IRIS: Interpolative Renyi Iterative Self-play for Large Language Models	Apr. 22, 2026	Unifies SPIN/SPACE/SPIF-style objectives by interpolating divergence regimes.	Good "latest before today" paper if you want the math/objective-design view. 
 Scaling Self-Play with Self-Guidance	Apr. 22, 2026	Three roles: Solver, Conjecturer, Guide; tries to prevent task-generator degradation.	Very relevant for local experiments: generate tasks only when they help solve current failures. 
 Improving LLM Code Reasoning via Semantic Equivalence Self-Play	May 2026	Alice generates program variants; Bob evaluates semantic equivalence; proofs/counterexamples drive rewards.	Best fit for your Rust/code-agent interests because verification can be deterministic. 
 Self-Play Only Evolves When Self-Synthetic Pipeline Ensures Learnable Information Gain	Mar. 2026	Argues self-play works only when generated data adds learnable signal.	Important warning: naive self-training can plateau or collapse. 
@@ -37,7 +37,7 @@ For your hardware, I would start with Qwen2.5-Coder 1.5B/3B, Llama-3.2-1B/3B, Sm
 Loop
 Seed set
 
-100–1,000 examples from your domain:
+100-1,000 examples from your domain:
 
 Rust coding tasks
 
@@ -160,7 +160,7 @@ Collapse: training on its own low-quality outputs reduces diversity.
 
 Verifier weakness: bad tests create bad rewards.
 
-Tiny-model ceiling: 1B–3B models can improve locally, but not magically become frontier models.
+Tiny-model ceiling: 1B-3B models can improve locally, but not magically become frontier models.
 
 Training instability: repeated self-play needs careful filtering, held-out evals, and rollback checkpoints.
 

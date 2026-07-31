@@ -29,7 +29,15 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 EOF
 
-  git log --pretty=format:'%ai%x09%s' | awk -F '\t' '
+  # Transliterate non-ASCII in historical commit subjects (em/en
+  # dashes, curly quotes, arrows, ellipsis) so the generated file
+  # passes the ASCII-only markdown gate without rewriting history.
+  git log --pretty=format:'%ai%x09%s' \
+    | perl -CSD -pe 's/\x{2014}/--/g; s/\x{2013}/-/g;
+        s/[\x{2018}\x{2019}]/\x27/g; s/[\x{201C}\x{201D}]/"/g;
+        s/\x{2192}/->/g; s/\x{2190}/<-/g; s/\x{2026}/.../g;
+        s/[^\x00-\x7F]/?/g' \
+    | awk -F '\t' '
     {
       date = substr($1, 1, 10)
       subject = $2

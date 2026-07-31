@@ -1,6 +1,6 @@
 number = 3
 slug = "md-ascii-cleanup"
-status = "pending"
+status = "in-progress"
 description = "Tech-debt spike: retire the hand-fixable sw-markdown-checker failures (84 rep..."
 role = "production"
 context_files = []

@@ -280,7 +280,7 @@ the demo true-GPU (step 009).
 
 `mlpl-mlx-forward` gains `attention.rs` (crate stays 4 modules / 0
 warnings): `causal_attention(x, wq, wk, wv, wo, mask)` =
-`softmax((Q Kᵀ)/sqrt(d_k) + mask) V` then the output projection, plus a
+`softmax((Q K^T)/sqrt(d_k) + mask) V` then the output projection, plus a
 `causal_mask(t)` builder (0 on/below the diagonal, large-negative
 above). Single-head (h=1, matching the demo's `causal_attention(d, 1,
 _)`); multi-head per-head slabs are a later extension. Parity-tested

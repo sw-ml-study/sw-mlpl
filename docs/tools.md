@@ -95,6 +95,9 @@ When proact generates documentation for a project, it creates a baseline. You sh
 
 **Repository**: https://github.com/softwarewrighter/markdown-checker
 **Version**: 0.1.0
+**Installed binary name**: `sw-markdown-checker` (newer sw-prefixed
+installs; the examples below use the upstream `markdown-checker`
+name -- substitute whichever your host has on PATH)
 
 **Purpose**: Ensures markdown files use ASCII-only characters for maximum portability
 

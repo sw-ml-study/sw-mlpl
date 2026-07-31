@@ -19,7 +19,8 @@ inner lens (cell of a row) yields a lens for the nested part.
 Composition runs `get` outside-in and `put` inside-out.
 
 This is exactly the functional-programming answer to APL2's
-*selective assignment* (`(2 3⍴⍵) ← x`): APL2 mutates through a
+*selective assignment* (`(2 3 rho w) <- x`, written in APL2 with
+the rho glyph): APL2 mutates through a
 selection; a lens returns a fresh value through the same selection.
 sw-MLPL prefers the lens (no mutation), and can later add selective
 assignment as sugar that lowers to a lens `put`.

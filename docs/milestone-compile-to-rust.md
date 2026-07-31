@@ -31,7 +31,8 @@ and CUDA via `wgpu`/`candle`.
 
 ## Key enabling fact
 
-MLPL has **no `⍎`-equivalent**. There is no `exec(string)`, no
+MLPL has **no equivalent of APL's execute (eval-string) glyph**.
+There is no `exec(string)`, no
 `eval(string)`, no string-to-code reflection primitive anywhere in
 the builtin surface (see `crates/mlpl-runtime/src/builtins.rs`).
 REPL introspection commands (`:vars`, `:describe`, `:builtins`)

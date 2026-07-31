@@ -230,7 +230,7 @@ mlpl-fold--should-fold-p(output)
 | Fold UI | `<details>` / `<summary>` HTML | Emacs overlay + text properties |
 | Expand | Click triangle | RET or mouse-1 on summary |
 | Summary | shape + min/max/mean/median/std | Same statistics |
-| Arrow indicator | `▸` / `▾` via CSS `::before` | Blue bold boxed text |
+| Arrow indicator | right/down triangle via CSS `::before` | Blue bold boxed text |
 | Hover | `color: var(--blue)` | `mouse-face: highlight` + tooltip |
 | Non-numeric | Not collapsed | Not collapsed |
 | SVG output | Inline SVG rendering | Passed through as result |

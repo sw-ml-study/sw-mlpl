@@ -310,7 +310,7 @@ cargo test -p mlpl-array                            # test one crate
 cargo clippy --all-targets --all-features -- -D warnings  # lint
 cargo fmt --all                                     # format
 cargo fmt --all -- --check                          # check format
-markdown-checker -f "**/*.md"                       # validate markdown
+sw-markdown-checker -f "**/*.md"                    # validate markdown
 sw-checklist                                        # project standards
 ```
 
@@ -342,7 +342,7 @@ its own top-level cargo workspace. Before a commit:
   2026-07-28).
 - fmt / clippy follow the same rule: run them in the touched
   workspaces, not repo-wide.
-- sw-checklist and markdown-checker stay repo-wide (they are
+- sw-checklist and sw-markdown-checker stay repo-wide (they are
   fast and their budgets are global).
 
 ## CRITICAL: AgentRail Session Protocol (MUST follow exactly)
@@ -382,7 +382,9 @@ process (pre-commit checks, docs, detailed commit, push).
    the `cuda` feature cannot build on macOS: cudarc needs `nvcc`)
 3. `cargo fmt --all` -- all code formatted
 4. `cargo fmt --all -- --check` -- verify no formatting changes remain
-5. `markdown-checker -f "**/*.md"` -- ASCII-only markdown (if docs changed)
+5. `sw-markdown-checker -f "**/*.md"` -- ASCII-only markdown (if docs
+   changed; the binary ships from the `markdown-checker` repo -- older
+   installs may use that unprefixed name)
 6. `sw-checklist` -- project standards check + ratchet trailer
 7. Update docs if any code behavior changed
 8. Detailed commit message with task context
