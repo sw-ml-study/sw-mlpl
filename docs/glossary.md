@@ -2119,8 +2119,32 @@ followed by learned use: project the retrieved vectors, gate them
 against the current hidden state, and add the result into the
 residual stream. sw-MLPL builds it as composable language
 primitives first (this glossary's `ngram_hash` / `gather_rows`),
-then as an `engram(...)` model layer; the full plan lives in
-docs/engram-sagas-plan.md.
+then as the `engram(...)` model layer applied with
+[[apply_engram]] -- differentiable end to end, so `train`/`adam`
+scatter-ADD gradients into exactly the addressed table rows. The
+full plan lives in docs/engram-sagas-plan.md.
+
+## engram (builtin)
+
+`engram(hidden, ngrams, heads, slots, head_dim, seed)` builds a
+trainable conditional-memory layer: one flattened `[rows,
+head_dim]` table plus a value projection and a concat gate,
+initialized NEAR-IDENTITY (zero table, zero value bias, gate bias
+-2), so an untrained engram is an exact no-op on the residual
+stream. Its five parameters are registered like any model's, so
+`adam(loss, e, ...)` trains them. See [[Engram]] for the
+architecture and [[apply_engram]] for the forward pass.
+
+## apply_engram (builtin)
+
+`apply_engram(e, h, ids)` runs the [[Engram]] forward pass: hash
+`ids` with the layer's frozen spec, gather the addressed memory
+rows, project them to a value vector `v`, then gate --
+`out = h + sigmoid([h|v] @ Wg + bg) * v`. Differentiable: inside
+`grad`/`train` the row gather lowers to a one-hot selection
+matmul whose backward pass is a scatter-ADD, so only addressed
+rows receive gradient and duplicate addresses accumulate. Unseen
+token streams therefore keep their table rows at exactly zero.
 
 ## ngram_hash (builtin)
 

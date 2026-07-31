@@ -306,6 +306,24 @@ lines = [
 ]
 
 [[demos]]
+category = "Engram"
+name = "Learnable Phrase Memory"
+intro = "The other half of ENGRAM: the hashed table is TRAINABLE. engram(...) builds a conditional-memory layer that starts as an EXACT identity (zero table, zero value bias, gate biased shut), and apply_engram(e, h, ids) is differentiable -- train/adam route gradients into exactly the table rows the token bigrams addressed. Here the same token (5) appears twice with different predecessors, so it hashes to two DIFFERENT rows and learns two different corrections: memory conditioned on context, not on the token alone. That is the DeepSeek Engram bet -- frequent local patterns move out of attention into cheap addressed storage."
+takeaway = "Watch the three-way contrast: before training the layer is an exact no-op (all zeros); after ~80 adam steps the two (predecessor, 5) bigrams inject their own +1 / -1 corrections while the middle position learns ~0; and UNSEEN token streams stay near-identity because their table rows were never addressed -- scatter-ADD gradients only touch the rows the training data hashed to (the tiny leak on unseen ids is the shared value/gate projections, not the memory). The live loss curve is the whole table being written."
+lines = [
+    "e = engram(4, [2], 1, 64, 4, 7)                       # tiny engram: bigram memory, 1 head, 64 slots, head_dim 4 -- five trainable params, near-identity init",
+    "h = reshape(range(12), [3, 4]) / 12                   # a 3-position hidden-state stream",
+    "ids = [5, 9, 5]                                       # token 5 appears TWICE -- with different predecessors (PAD and 9)",
+    "apply_engram(e, h, ids) - h                           # all zeros: a fresh engram is an EXACT identity on the residual stream",
+    "y = h + reshape([1, 1, 1, 1, 0, 0, 0, 0, -1, -1, -1, -1], [3, 4])  # teach phrase-specific corrections: +1 after (PAD,5), 0 after (5,9), -1 after (9,5)",
+    "experiment \"phrase_memory\" { train 80 { adam(mean((apply_engram(e, h, ids) - y) * (apply_engram(e, h, ids) - y)), e, 0.05, 0.9, 0.999, 0.00000001) } }  # write the memory: gradients scatter-ADD into ONLY the addressed rows",
+    "mean((apply_engram(e, h, ids) - y) * (apply_engram(e, h, ids) - y))  # loss after training: ~0.00006",
+    "apply_engram(e, h, ids) - h                           # the learned corrections: ~+1 / ~0 / ~-1 -- SAME token 5, DIFFERENT memory, because the CONTEXT differs",
+    "ngram_hash(ids, [2], 1, 64, 7)                        # the rows that learned it: (PAD,5)->37, (5,9)->6, (9,5)->16",
+    "apply_engram(e, h, [21, 22, 23]) - h                  # unseen phrases: near zero -- their memory rows were never addressed, so they never moved",
+]
+
+[[demos]]
 category = "Basics"
 name = "Analysis Helpers"
 intro = "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model."

@@ -2084,6 +2084,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
 ]
 

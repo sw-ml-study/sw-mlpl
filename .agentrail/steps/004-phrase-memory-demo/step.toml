@@ -1,6 +1,6 @@
 number = 4
 slug = "phrase-memory-demo"
-status = "pending"
+status = "in-progress"
 description = "E2 step 4: Learnable Phrase Memory demo -- train the engram table to complete..."
 role = "legacy"
 context_files = []
