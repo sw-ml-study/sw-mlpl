@@ -97,12 +97,26 @@ fn walk_model(spec: &ModelSpec, prev_id: &str, b: &mut SankeyBuilder, in_residua
             cur
         }
         ModelSpec::Residual(inner) => walk_model(inner, prev_id, b, true),
-        ModelSpec::Linear { .. } => b.emit_leaf("linear", "linear", prev_id, in_residual, 64.0),
-        ModelSpec::Embedding { vocab, d_model, .. } => b.emit_leaf(
+        leaf => {
+            let (op_kind, label, width) = leaf_meta(leaf);
+            b.emit_leaf(op_kind, &label, prev_id, in_residual, width)
+        }
+    }
+}
+
+/// (op_kind, label, ribbon width) for a leaf layer. `Chain` and
+/// `Residual` are composites handled by `walk_model`; the exhaustive
+/// match here is what forces a new `ModelSpec` variant to pick its
+/// Sankey appearance.
+fn leaf_meta(spec: &ModelSpec) -> (&'static str, String, f64) {
+    match spec {
+        ModelSpec::Chain(_) | ModelSpec::Residual(_) => {
+            unreachable!("composites are walked, not emitted as leaves")
+        }
+        ModelSpec::Linear { .. } => ("linear", "linear".into(), 64.0),
+        ModelSpec::Embedding { vocab, d_model, .. } => (
             "embed",
-            &format!("embed (V={vocab}, d={d_model})"),
-            prev_id,
-            in_residual,
+            format!("embed (V={vocab}, d={d_model})"),
             (*d_model as f64).max(1.0),
         ),
         ModelSpec::Attention { causal, .. } => {
@@ -111,25 +125,27 @@ fn walk_model(spec: &ModelSpec, prev_id: &str, b: &mut SankeyBuilder, in_residua
             } else {
                 "attention"
             };
-            b.emit_leaf(n, n, prev_id, in_residual, 48.0)
+            (n, n.to_string(), 48.0)
         }
-        ModelSpec::RmsNorm { dim } => b.emit_leaf(
-            "rms_norm",
-            &format!("rms_norm ({dim})"),
-            prev_id,
-            in_residual,
-            16.0,
-        ),
+        ModelSpec::RmsNorm { dim } => ("rms_norm", format!("rms_norm ({dim})"), 16.0),
         ModelSpec::Activation(kind) => {
             let label = match kind {
                 ActKind::Tanh => "tanh",
                 ActKind::Relu => "relu",
                 ActKind::Softmax => "softmax",
             };
-            b.emit_leaf("activation", label, prev_id, in_residual, 4.0)
+            ("activation", label.to_string(), 4.0)
         }
-        ModelSpec::LinearLora { .. } => {
-            b.emit_leaf("linear_lora", "linear (LoRA)", prev_id, in_residual, 64.0)
-        }
+        ModelSpec::LinearLora { .. } => ("linear_lora", "linear (LoRA)".into(), 64.0),
+        ModelSpec::Engram {
+            ngram_orders,
+            heads,
+            slots,
+            ..
+        } => (
+            "engram",
+            format!("engram ({}x{heads}x{slots})", ngram_orders.len()),
+            32.0,
+        ),
     }
 }
