@@ -1,0 +1,1 @@
+Learnable Phrase Memory demo: exact-identity start, 80 adam steps teach context-conditional +1/-1 corrections to two rows sharing token 5, unseen streams stay near-identity; glossary engram/apply_engram entries; pages rebuilt + server restarted + script e2e-verified against connect mode. Commit afaed281.
