@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 2,
+    "step": "engram-in-chain-grad"
+  },
+  "action": "TDD red/green: engram_chain_grad_tests.rs first; read apply.rs/layers.rs/grad_calls_engram.rs to mirror EngramInputs construction; single engram_arm fn added to at-budget apply.rs; scoped cargo test in eval + models-write, clippy default-features, fmt, sw-checklist with paired paydown split",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-31T15:43:39"
+}
