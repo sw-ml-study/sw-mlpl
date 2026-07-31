@@ -65,6 +65,7 @@ mod fncall_models;
 mod fncall_trace;
 mod grad;
 mod grad_calls_basic;
+mod grad_calls_engram;
 mod grad_calls_shape;
 mod grad_optim;
 // The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,

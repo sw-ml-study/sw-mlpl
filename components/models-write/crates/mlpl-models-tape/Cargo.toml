@@ -16,4 +16,5 @@ mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
+mlpl-engram-core = { path = "../../../engram/crates/mlpl-engram-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }

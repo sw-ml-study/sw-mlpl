@@ -1,15 +1,21 @@
-//! Tape lowering for the parameter-light layer ops: per-row RMS
-//! normalization and one-hot-matmul embedding lookup. Both are
-//! small enough that bundling them keeps the crate under the
-//! 7-module Crate-Module-Count budget.
+//! Tape lowering for the non-linear layer lookups: per-row RMS
+//! normalization, one-hot-matmul embedding lookup, and the Engram
+//! selection-matmul retrieval (saga E2 step 3). All three ride the
+//! same trick -- a 0/1 selection matrix matmul'd against the
+//! trainable table, whose backward pass IS the scatter-ADD
+//! gradient (duplicate addresses accumulate) with unaddressed rows
+//! untouched. Bundled here to keep the crate under the 7-module
+//! Crate-Module-Count budget.
 
 use std::collections::HashMap;
 use std::rc::Rc;
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
+use mlpl_engram_core::{HashSpec, head_offset, ngram_hashes};
 
 use crate::error::TapeError;
+use crate::linear::linear_tape;
 
 /// Per-row RMS normalization on the tape:
 /// `y[i, :] = x[i, :] / sqrt(mean(x[i, :]^2) + eps)`.
@@ -74,6 +80,113 @@ fn onehot_from_tokens(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, T
     }
     DenseArray::new(Shape::new(vec![n, vocab]), data).map_err(|e| {
         TapeError::Unsupported(format!("embed (tape): one-hot construction failed: {e}"))
+    })
+}
+
+/// Named-field inputs for [`engram_tape`]: the five parameter
+/// names of a `ModelSpec::Engram` plus its frozen hash spec.
+pub struct EngramInputs<'a> {
+    pub memory: &'a str,
+    pub w_value: &'a str,
+    pub b_value: &'a str,
+    pub w_gate: &'a str,
+    pub b_gate: &'a str,
+    pub hash: HashSpec,
+    pub head_dim: usize,
+    pub hidden: usize,
+}
+
+/// `apply_engram(e, h, ids)` on the tape. The addressed rows are
+/// gathered by a one-hot selection matmul against the memory table
+/// (backward = scatter-ADD into exactly those rows), then reshaped
+/// to `[T, retrieved]` and run through the same value/gate linears
+/// as the eager forward: `out = h + sigmoid([h|v] @ Wg + bg) * v`.
+pub fn engram_tape(
+    h: &Tensor,
+    ids: &DenseArray,
+    inputs: &EngramInputs<'_>,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, TapeError> {
+    let dims = h.value().shape().dims().to_vec();
+    if dims.len() != 2 || dims[1] != inputs.hidden {
+        return Err(TapeError::Unsupported(format!(
+            "apply_engram (tape): hidden state must be [T, {}], got shape {dims:?}",
+            inputs.hidden
+        )));
+    }
+    let id_vals = engram_ids(ids, dims[0])?;
+    let hashes =
+        ngram_hashes(&id_vals, &inputs.hash).map_err(|e| TapeError::Unsupported(e.to_string()))?;
+    let memory_t = params
+        .get(inputs.memory)
+        .cloned()
+        .ok_or_else(|| TapeError::UndefinedVariable(inputs.memory.into()))?;
+    let rows = memory_t.value().shape().dims()[0];
+    let sel = Tensor::leaf(
+        Rc::clone(tape),
+        selection_matrix(&hashes, &inputs.hash, rows)?,
+        false,
+    );
+    let width = inputs.hash.ngram_orders.len() * inputs.hash.heads_per_ngram * inputs.head_dim;
+    let retrieved = sel
+        .matmul(&memory_t)
+        .reshape(Shape::new(vec![dims[0], width]));
+    let v = linear_tape(&retrieved, inputs.w_value, inputs.b_value, tape, params)?;
+    let hv = h.concat(&v, 1);
+    let g = linear_tape(&hv, inputs.w_gate, inputs.b_gate, tape, params)?.sigmoid();
+    Ok(h.add(&g.mul(&v)))
+}
+
+/// Validate `ids` as a rank-1 `[T]` array of non-negative integers.
+fn engram_ids(ids: &DenseArray, t_len: usize) -> Result<Vec<u64>, TapeError> {
+    let dims = ids.shape().dims();
+    if dims.len() != 1 || dims[0] != t_len {
+        return Err(TapeError::Unsupported(format!(
+            "apply_engram (tape): ids must be rank-1 with the same T as the hidden \
+             state ({t_len}), got shape {dims:?}"
+        )));
+    }
+    ids.data()
+        .iter()
+        .map(|&v| {
+            if v < 0.0 || v.fract() != 0.0 {
+                Err(TapeError::Unsupported(format!(
+                    "apply_engram (tape): ids must be non-negative integers, got {v}"
+                )))
+            } else {
+                Ok(v as u64)
+            }
+        })
+        .collect()
+}
+
+/// One-hot `[T*orders*heads, rows]` selection matrix: row `r` of
+/// the output picks the global memory row addressed by the r-th
+/// (t, order, head) triple, in the same layout the eager forward's
+/// gather uses.
+fn selection_matrix(
+    hashes: &[Vec<Vec<u64>>],
+    spec: &HashSpec,
+    rows: usize,
+) -> Result<DenseArray, TapeError> {
+    let per_t = spec.ngram_orders.len() * spec.heads_per_ngram;
+    let n = hashes.len() * per_t;
+    let mut data = vec![0.0_f64; n * rows];
+    let mut r = 0;
+    for t_hashes in hashes {
+        for (oi, order_hashes) in t_hashes.iter().enumerate() {
+            for (head, &local) in order_hashes.iter().enumerate() {
+                let row = (head_offset(spec, oi, head) + local) as usize;
+                data[r * rows + row] = 1.0;
+                r += 1;
+            }
+        }
+    }
+    DenseArray::new(Shape::new(vec![n, rows]), data).map_err(|e| {
+        TapeError::Unsupported(format!(
+            "apply_engram (tape): selection matrix construction failed: {e}"
+        ))
     })
 }
 

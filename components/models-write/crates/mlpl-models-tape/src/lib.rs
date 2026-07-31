@@ -19,6 +19,7 @@ pub mod linear;
 
 pub use apply::apply_model_tape;
 pub use error::TapeError;
+pub use layers::{EngramInputs, engram_tape};
 
 use mlpl_array::DenseArray;
 use mlpl_core::LabeledShape;

@@ -50,8 +50,8 @@ pub fn apply_model_tape(
         ModelSpec::Attention { .. } => attention_arm(model, &x, tape, params),
         ModelSpec::LinearLora { .. } => lora_arm(model, &x, tape, params),
         ModelSpec::Engram { .. } => Err(TapeError::Unsupported(
-            "engram layers reach the tape via apply_engram (training lands in the \
-             engram-dsl saga's grad step)"
+            "engram layers take two inputs (hidden state + token ids); call \
+             apply_engram(e, h, ids) instead of apply(e, x)"
                 .into(),
         )),
     }

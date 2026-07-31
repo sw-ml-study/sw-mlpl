@@ -1,6 +1,6 @@
 number = 3
 slug = "engram-grad"
-status = "pending"
+status = "in-progress"
 description = "E2 step 3: differentiate through apply_engram on the tape -- gather_rows scat..."
 role = "legacy"
 context_files = []
