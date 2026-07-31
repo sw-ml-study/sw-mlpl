@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-31
 
+- saga engram-e3-tiny-lm: step 002 complete (9c41fa83)
+- feat(engram): tape path for the in-chain Engram -- train/adam through a full chain (E3 step 2)
+- saga engram-e3-tiny-lm: queue md-ascii-cleanup + cuda-target-gating spikes (user-requested), plan v2
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(tooling): mw-cp markdown gate scoped to touched files
 - docs(tooling): versioned /mw-cp checkpoint command + reconcile CLAUDE.md gates
 - docs(changes): refresh CHANGES.md to HEAD
