@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-07-31
 
+- saga engram-e2-dsl: complete (4 steps)
+- feat(demos): Learnable Phrase Memory -- the trainable half of Engram (E2 step 4)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e2-dsl: step 003 complete (b2877441)
 - feat(engram): differentiate apply_engram on the tape (E2 step 3)
 - fix(viz): ModelSpec::Engram arm in model_to_viz_node + pages rebuild
