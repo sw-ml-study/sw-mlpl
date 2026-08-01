@@ -13,18 +13,21 @@ use crate::common::{dense_to_mlx, mlx_to_dense_data};
 /// from `a`, so the MLX kernel only sees pre-validated input).
 #[must_use]
 pub fn exp(a: &DenseArray) -> DenseArray {
+    let _gpu = crate::common::mlx_op_lock();
     apply_unary(a, |x| x.exp().expect("mlx exp on validated shape"))
 }
 
 /// Natural log `ln(x)` elementwise.
 #[must_use]
 pub fn log(a: &DenseArray) -> DenseArray {
+    let _gpu = crate::common::mlx_op_lock();
     apply_unary(a, |x| x.log().expect("mlx log on validated shape"))
 }
 
 /// Hyperbolic tangent `tanh(x)` elementwise.
 #[must_use]
 pub fn tanh(a: &DenseArray) -> DenseArray {
+    let _gpu = crate::common::mlx_op_lock();
     apply_unary(a, |x| {
         mlx_rs::ops::tanh(x).expect("mlx tanh on validated shape")
     })
@@ -33,6 +36,7 @@ pub fn tanh(a: &DenseArray) -> DenseArray {
 /// Logistic sigmoid `1 / (1 + exp(-x))` elementwise.
 #[must_use]
 pub fn sigmoid(a: &DenseArray) -> DenseArray {
+    let _gpu = crate::common::mlx_op_lock();
     apply_unary(a, |x| {
         mlx_rs::ops::sigmoid(x).expect("mlx sigmoid on validated shape")
     })
@@ -41,6 +45,7 @@ pub fn sigmoid(a: &DenseArray) -> DenseArray {
 /// Rectified linear unit `max(x, 0)` elementwise.
 #[must_use]
 pub fn relu(a: &DenseArray) -> DenseArray {
+    let _gpu = crate::common::mlx_op_lock();
     apply_unary(a, |x| {
         mlx_rs::nn::relu(x).expect("mlx relu on validated shape")
     })

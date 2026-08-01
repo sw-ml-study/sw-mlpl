@@ -21,6 +21,7 @@ use crate::common::{dense_to_mlx, finalize, mlx_to_dense_data};
 /// count must match or `ArrayError::ShapeMismatch` is returned.
 /// Labels drop, matching the CPU path.
 pub fn reshape(a: &DenseArray, dims: &[usize]) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     let source = a.elem_count();
     let target: usize = dims.iter().product();
     if source != target {
@@ -49,5 +50,6 @@ pub fn reshape(a: &DenseArray, dims: &[usize]) -> Result<DenseArray, ArrayError>
 /// a flat buffer and this fallback disappears.
 #[must_use]
 pub fn transpose(a: &DenseArray) -> DenseArray {
+    let _gpu = crate::common::mlx_op_lock();
     a.transpose()
 }

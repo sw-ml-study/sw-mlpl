@@ -16,8 +16,26 @@
 //!    share a single source of truth and `mlpl-array`'s internal
 //!    helpers stay internal.
 
+use std::sync::{Mutex, MutexGuard, PoisonError};
+
 use mlpl_array::{ArrayError, DenseArray, Shape};
 use mlx_rs::Array as MlxArray;
+
+/// Serialize MLX GPU submissions process-wide. With the `metal`
+/// feature ON (saga E4 step 001) the Metal backend SIGSEGVs under
+/// concurrent submissions from multiple threads (observed with the
+/// 27-test parallel parity suite, mlx-rs 0.25.3, 2026-08-01); the
+/// old Accelerate-only build never showed this because it executed
+/// on the CPU. Every public op in this crate takes the lock for
+/// its whole upload -> op -> download span. Sibling crates that
+/// drive `mlx_rs` directly (mlpl-mlx-forward / -train / -eval)
+/// should hold it around their kernel calls too. Poisoning is
+/// ignored: a panicked holder leaves no MLX state this lock
+/// guards.
+pub fn mlx_op_lock() -> MutexGuard<'static, ()> {
+    static LOCK: Mutex<()> = Mutex::new(());
+    LOCK.lock().unwrap_or_else(PoisonError::into_inner)
+}
 
 /// Build an MLX fp32 array from an `mlpl-array` `DenseArray`.
 ///
@@ -40,6 +58,36 @@ pub fn mlx_to_dense_data(mlx: MlxArray) -> Vec<f64> {
         .expect("mlx eval on pre-validated shapes should not fail");
     let out: &[f32] = mlx.as_slice();
     out.iter().map(|&x| x as f64).collect()
+}
+
+/// Validate `targets` as `n` in-range class indices for a `[n, v]`
+/// logits matrix (integrality + bounds; the cross_entropy contract
+/// shared with the CPU path).
+pub(crate) fn validated_targets(
+    targets: &DenseArray,
+    n: usize,
+    v: usize,
+) -> Result<Vec<usize>, ArrayError> {
+    if targets.elem_count() != n {
+        return Err(ArrayError::ShapeMismatch {
+            source: n,
+            target: targets.elem_count(),
+        });
+    }
+    let mut idx = Vec::with_capacity(n);
+    for (i, &t) in targets.data().iter().enumerate() {
+        let ti = t as usize;
+        if t < 0.0 || t.fract() != 0.0 || ti >= v {
+            let index = if t >= 0.0 && t.fract() == 0.0 { ti } else { i };
+            return Err(ArrayError::IndexOutOfBounds {
+                axis: 0,
+                index,
+                size: v,
+            });
+        }
+        idx.push(ti);
+    }
+    Ok(idx)
 }
 
 /// Finalize an MLX computation: wrap `data` in a `DenseArray` of

@@ -150,6 +150,43 @@ non-MLX host skips this binary entirely.
 cargo bench -p mlpl-bench --features mlx --bench mlx_vs_cpu
 ```
 
+### Saga E4 step 001 baseline: Metal ON (Apple Silicon, 2026-08-01)
+
+E4 (mlx-persistent-tensors) turned the vendored mlx-rs `metal`
+feature ON, so MLX now executes on the GPU instead of Apple's
+Accelerate CPU BLAS. Same benchmarks, same per-op dispatch path
+as the 2026-04-21 table below -- ONLY the backend changed. The
+result is the saga's motivation in one table: with per-op
+upload + `.eval()` + download, a real GPU is 10-30x WORSE than
+Accelerate at demo scale, because kernel-launch latency (tens of
+microseconds per op, paid dozens of times per step) dwarfs the
+arithmetic at d=8-16.
+
+| Workload | CPU warm | MLX warm (Metal) | Ratio | Prior (Accelerate) |
+|---|---:|---:|---:|---:|
+| `reshape_reduce_100x100` | 69.3 us | 315.8 us | **0.22x** | 0.84x |
+| `tiny_lm_train_step` | 939.9 us | 116.6 ms | **0.008x** | 0.26x |
+| `neural_thicket_variant_loop` | 1.159 ms | 79.25 ms | **0.015x** | 0.25x |
+| `lora_finetune_step` | 235.9 us | 16.06 ms | **0.015x** | 0.15x |
+
+Cold (first-call, includes Metal shader/pipeline setup):
+reshape 129.9 us / 32.2 ms, tiny_lm 1.34 ms / 57.9 ms, thicket
+1.41 ms / 127.1 ms, lora 355 us / 19.2 ms.
+
+Reading: the four costs documented below did not change -- Metal
+just reprices cost (2) (no graph fusion) and cost (1) (per-op
+round-trips) from "function call + memcpy" to "GPU submission +
+PCIe-class latency". Fixing them (persistent device tensors, one
+graph per training step, resident optimizer state) is exactly
+saga E4 steps 2-5; this table is the honest "before".
+
+Also landed with the flip: a process-wide MLX submission lock
+(`mlpl_mlx_rt::mlx_op_lock`) -- the Metal backend SIGSEGVs under
+concurrent submissions from parallel test threads (Accelerate,
+being CPU code, never did). Every mlpl-mlx-rt op and both
+gpu_step entries hold it; sibling-crate unit tests serialize on
+per-crate `MLX_TEST_LOCK`s (the mlpl-mlx-train idiom).
+
 ### Measured numbers (Apple Silicon, 2026-04-21)
 
 Cold timings are one-shot wall-clock prints from the harness and

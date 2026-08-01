@@ -17,4 +17,5 @@ mlx = ["dep:mlx-rs"]
 [dependencies]
 mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
   "accelerate",
+  "metal",
 ] }

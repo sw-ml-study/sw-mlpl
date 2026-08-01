@@ -26,6 +26,7 @@ use crate::common::{dense_to_mlx, finalize, mlx_to_dense_data};
 
 /// Product reduction over `axis` (None = flat).
 pub fn reduce_mul(a: &DenseArray, axis: Option<usize>) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     let mlx = dense_to_mlx(a.data(), a.shape().dims());
     if let Some(ax) = axis {
         let dims = a.shape().dims();
@@ -48,6 +49,7 @@ pub fn reduce_mul(a: &DenseArray, axis: Option<usize>) -> Result<DenseArray, Arr
 
 /// Mean reduction over `axis` (None = flat).
 pub fn mean(a: &DenseArray, axis: Option<usize>) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     let mlx = dense_to_mlx(a.data(), a.shape().dims());
     if let Some(ax) = axis {
         let dims = a.shape().dims();
@@ -73,6 +75,7 @@ pub fn mean(a: &DenseArray, axis: Option<usize>) -> Result<DenseArray, ArrayErro
 /// to f32 so the f64 round trip in `mlx_to_dense_data` agrees with
 /// the CPU path's `f64` index representation.
 pub fn argmax(a: &DenseArray, axis: Option<usize>) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     if a.elem_count() == 0 && axis.is_none() {
         return Err(ArrayError::EmptyArray);
     }
@@ -104,6 +107,7 @@ pub fn argmax(a: &DenseArray, axis: Option<usize>) -> Result<DenseArray, ArrayEr
 /// `softmax(a, axis)` via MLX's stable kernel. Output shape and
 /// labels match the input.
 pub fn softmax(a: &DenseArray, axis: usize) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     let dims = a.shape().dims().to_vec();
     if axis >= dims.len() {
         return Err(ArrayError::IndexOutOfBounds {
@@ -126,6 +130,7 @@ pub fn softmax(a: &DenseArray, axis: usize) -> Result<DenseArray, ArrayError> {
 /// implemented as `x - logsumexp_axis(x, axis, true)` -- the same
 /// max-subtraction LSE form as the CPU path.
 pub fn log_softmax(a: &DenseArray, axis: usize) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     let dims = a.shape().dims().to_vec();
     if axis >= dims.len() {
         return Err(ArrayError::IndexOutOfBounds {
@@ -151,6 +156,7 @@ pub fn log_softmax(a: &DenseArray, axis: usize) -> Result<DenseArray, ArrayError
 /// gather-and-mean) so the parity tolerance accumulates a small
 /// constant factor over a single MLX op.
 pub fn cross_entropy(logits: &DenseArray, targets: &DenseArray) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     let dims = logits.shape().dims();
     let (n, v) = match dims.len() {
         2 => (dims[0], dims[1]),
@@ -162,34 +168,8 @@ pub fn cross_entropy(logits: &DenseArray, targets: &DenseArray) -> Result<DenseA
             });
         }
     };
-    if targets.elem_count() != n {
-        return Err(ArrayError::ShapeMismatch {
-            source: n,
-            target: targets.elem_count(),
-        });
-    }
-    // Validate target integrality and range up front.
-    let mut idx = Vec::with_capacity(n);
-    for (i, &t) in targets.data().iter().enumerate() {
-        if t < 0.0 || t.fract() != 0.0 {
-            return Err(ArrayError::IndexOutOfBounds {
-                axis: 0,
-                index: i,
-                size: v,
-            });
-        }
-        let ti = t as usize;
-        if ti >= v {
-            return Err(ArrayError::IndexOutOfBounds {
-                axis: 0,
-                index: ti,
-                size: v,
-            });
-        }
-        idx.push(ti);
-    }
-    // logits as [N, V] for a single MLX kernel call.
-    let mlx = dense_to_mlx(logits.data(), &[n, v]);
+    let idx = crate::common::validated_targets(targets, n, v)?;
+    let mlx = dense_to_mlx(logits.data(), &[n, v]); // logits as [N, V], one MLX kernel call
     let lse =
         mlx_rs::ops::logsumexp_axis(&mlx, 1, false).expect("mlx logsumexp_axis on [N, V] logits");
     let lse_data = mlx_to_dense_data(lse); // length N, fp32 round-tripped.

@@ -21,6 +21,7 @@
 use std::collections::HashMap;
 
 use mlpl_array::DenseArray;
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program, model_params};
 use mlpl_parser::{lex, parse};
 

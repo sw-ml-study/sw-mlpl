@@ -46,9 +46,9 @@ impl GpuAdamStep for MlxGpuAdam {
         hp: &SeamHp,
         env: &mut dyn GpuEnv,
     ) -> Result<DenseArray, EvalError> {
+        let _gpu = mlpl_mlx_rt::mlx_op_lock();
         let hp = to_mlx_hp(hp);
-        let x_oh = tokens_mlx(x, layout.vocab)?;
-        let y_oh = tokens_mlx(y, layout.vocab)?;
+        let (x_oh, y_oh) = (tokens_mlx(x, layout.vocab)?, tokens_mlx(y, layout.vocab)?);
         let w = build_weights(layout, env, x.data().len())?;
         let pull = |n: &str| {
             let d = env.binding(n).expect("adapter present");
@@ -73,6 +73,7 @@ impl GpuAdamStep for MlxGpuAdam {
         hp: &SeamHp,
         env: &mut dyn GpuEnv,
     ) -> Result<DenseArray, EvalError> {
+        let _gpu = mlpl_mlx_rt::mlx_op_lock();
         crate::mlx_mlp::run_step(l1, head, x, y, &to_mlx_hp(hp), env)
     }
 }

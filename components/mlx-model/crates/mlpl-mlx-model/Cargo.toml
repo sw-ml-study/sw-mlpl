@@ -19,4 +19,5 @@ mlpl-mlx-forward = { path = "../../../native-rt/crates/mlpl-mlx-forward" }
 mlpl-mlx-train = { path = "../../../native-rt/crates/mlpl-mlx-train" }
 mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
   "accelerate",
+  "metal",
 ] }

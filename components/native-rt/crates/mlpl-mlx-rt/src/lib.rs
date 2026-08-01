@@ -60,6 +60,12 @@ pub use shapes::{reshape, transpose};
 // crate (mlpl-eval's MLX LoRA path) can move weights in/out as
 // `mlx_rs::Array` without depending on mlx-rs directly.
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
-pub use common::{dense_to_mlx, mlx_to_dense_data};
+pub use common::{dense_to_mlx, mlx_op_lock, mlx_to_dense_data};
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 pub use mlx_rs::Array;
+// Device introspection, re-exported so tests (and later the
+// :describe surface) can assert WHERE MLX executes -- saga E4
+// step 001 turned the `metal` feature on, making the GPU the
+// default device.
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
+pub use mlx_rs::{Device, DeviceType};

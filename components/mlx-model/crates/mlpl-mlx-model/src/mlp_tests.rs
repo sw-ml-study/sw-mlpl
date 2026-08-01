@@ -38,6 +38,9 @@ fn fixtures() -> (MlpWeights, Vec<Array>, Array, Array) {
 
 #[test]
 fn mlp_policy_trains_on_mlx() {
+    let _mlx = crate::MLX_TEST_LOCK
+        .lock()
+        .unwrap_or_else(|e| e.into_inner());
     let (w, mut ad, x, y) = fixtures();
     let mut adam = MlxAdam::with_lr(0.05);
     let curve = train_steps(&mut ad, &mut adam, 200, |a| {

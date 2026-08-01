@@ -1,6 +1,6 @@
 number = 1
 slug = "metal-on"
-status = "pending"
+status = "in-progress"
 description = "E4 step 1: enable Metal. Flip mlx-rs features from [accelerate] to [accelerat..."
 role = "production"
 context_files = []

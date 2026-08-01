@@ -25,15 +25,17 @@ mlpl-core = { path = "../../../types/crates/mlpl-core" }
 # Pinned by Saga 14 plan (risk/mitigation item): upstream ABI can
 # shift between minor versions. Bump deliberately, not transitively.
 #
-# `default-features = false` drops the `metal` feature so mlx-sys
-# does not require the `metal` shader compiler (ships only with a
-# full Xcode.app, not the Command Line Tools). We keep
-# `accelerate` on -- that's Apple's CPU/SIMD BLAS, which is all
-# Saga 14 step 001 needs to prove the crate integrates. A later
-# step re-enables `metal` behind its own cfg gate once the Xcode
-# dependency is documented in the project bootstrap.
+# `default-features = false` keeps the feature set explicit (the
+# vendored mlx-rs exists to make that possible). Saga E4 step 001
+# (2026-08-01) turned `metal` ON alongside `accelerate`: MLX now
+# executes on the GPU instead of Apple's CPU BLAS. Building the
+# Metal shaders requires the full Xcode.app toolchain (`xcrun
+# --sdk macosx --find metal` must succeed); Command Line Tools
+# alone are NOT enough -- that is the dev-host bootstrap
+# requirement for any mlx-featured build.
 mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
   "accelerate",
+  "metal",
 ] }
 
 [dev-dependencies]

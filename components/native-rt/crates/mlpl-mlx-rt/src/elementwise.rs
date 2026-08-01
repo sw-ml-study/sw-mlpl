@@ -14,11 +14,13 @@ use crate::common::{dense_to_mlx, finalize, merge_labels, mlx_to_dense_data};
 
 /// Elementwise `a + b` with scalar broadcasting.
 pub fn add(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     dispatch(a, b, |x, y| x.add(y).expect("mlx add on validated shapes"))
 }
 
 /// Elementwise `a - b` with scalar broadcasting.
 pub fn sub(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     dispatch(a, b, |x, y| {
         x.subtract(y).expect("mlx subtract on validated shapes")
     })
@@ -26,6 +28,7 @@ pub fn sub(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
 
 /// Elementwise `a * b` (Hadamard product) with scalar broadcasting.
 pub fn mul(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     dispatch(a, b, |x, y| {
         x.multiply(y).expect("mlx multiply on validated shapes")
     })
@@ -33,6 +36,7 @@ pub fn mul(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
 
 /// Elementwise `a / b` with scalar broadcasting.
 pub fn div(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     dispatch(a, b, |x, y| {
         x.divide(y).expect("mlx divide on validated shapes")
     })
@@ -42,6 +46,7 @@ pub fn div(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
 /// match the input, so every intermediate is pre-validated.
 #[must_use]
 pub fn neg(a: &DenseArray) -> DenseArray {
+    let _gpu = crate::common::mlx_op_lock();
     let mlx = dense_to_mlx(a.data(), a.shape().dims());
     let result = mlx.negative().expect("mlx negative on validated shape");
     let data = mlx_to_dense_data(result);

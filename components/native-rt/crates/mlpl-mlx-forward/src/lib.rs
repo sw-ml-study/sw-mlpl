@@ -22,3 +22,10 @@ pub use forward::{cross_entropy, embed, rms_norm};
 
 #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx", test))]
 mod forward_tests;
+
+// Metal submissions from parallel test threads SIGSEGV (saga E4
+// step 001, mlx-rs 0.25.3) -- same hazard mlpl-mlx-train already
+// guards. Every test serializes on this lock (poison-tolerant so
+// one failing test cannot wedge the rest).
+#[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx", test))]
+pub(crate) static MLX_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());

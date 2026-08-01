@@ -16,6 +16,7 @@ use crate::common::{dense_to_mlx, finalize, matmul_labels, mlx_to_dense_data};
 /// - `[m, k] @ [k, n] -> [m, n]`
 /// - `[m, k] @ [k]    -> [m]`
 pub fn matmul(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
+    let _gpu = crate::common::mlx_op_lock();
     let (m, k) = match a.shape().dims() {
         [m, k] => (*m, *k),
         _ => {
