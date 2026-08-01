@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 5,
+    "step": "engram-stats"
+  },
+  "action": "TDD: engram_stats_tests.rs + hash_tests additions first; addressing_stats placed in engram-core hash.rs beside the frozen contract; (out,gate) tuple refactor avoided any new fn in at-budget modules; record return via Value::Record with BTreeMap fields; iterative sw-checklist paydown loop against rustfmt re-expansion",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-07-31T19:56:08"
+}
