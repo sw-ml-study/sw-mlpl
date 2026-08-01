@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- docs(roadmap): reprioritize per project-direction -- MTP program, agent feedback, bounded mHC
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 006 complete (b26bfddc)
 - feat(eval): resident optimizer -- one tape per step, weights + moments on-device (E4 step 6)
 - docs(changes): refresh CHANGES.md to HEAD
