@@ -1,0 +1,1055 @@
+(wrong direction redacted, replaced by following)
+
+Sorry, some of the documentation in the github repo is out-of-date.  See the errata wiki page: https://github.com/sw-ml-study/sw-mlpl/wiki/Documentation-Errata and revise your recommendations.  Also consider the CHANGES and commit history to get a better idea of the current state of the project.  Consider the agentrail files for the sagas in process and planned.
+
+Worked for 59s
+Revised understanding of sw-MLPL
+The earlier roadmap understated the project’s current maturity.
+
+The most important corrections are:
+
+Engram is no longer merely planned. E1 primitives, E2 DSL/training support, and E3 Tiny-LM integration are complete. The implementation includes deterministic n-gram addressing, trainable memory, tape differentiation, in-chain insertion after attention, frozen-base training, collision statistics, gate statistics, and end-to-end demos.
+
+MLX is not just an external service or CPU-backed experiment anymore. Metal has been enabled, a backend-neutral TensorHandle abstraction exists, lazy MLX tensors remain resident through the forward tape, and gradients now remain resident during backward for the principal operation set.
+
+The active AgentRail saga is E4, currently at step 6, not an early MLX implementation milestone. The next work is optimizer residency, parity, benchmarking, and cleanup—not creating an MLX backend from scratch.
+
+sw-MLPL already has substantial notebook/research infrastructure: datasets, tokenization, experiment tracking, autograd, optimizers, training blocks, model DSL, compilation to Rust, visualization, server sessions, SSE training telemetry, cancellation, remote MLX execution, LoRA, feasibility estimation, and LLM calls. The older docs/status.md captures many of these completed sagas, although its “next saga” section has clearly fallen behind the active E-series work.
+
+CUDA is also not completely greenfield. CUDA/Candle crates exist and are target-gated; the outstanding work is Linux validation, resident tensor integration, backend completeness, and performance—not simply introducing a CUDA feature flag.
+
+The current E4 plan confirms that the key architectural change is a device-aware autograd tape and resident optimizer state, with MLX performance—not mere functional parity—as the acceptance criterion.
+
+I could not retrieve the body of the separate GitHub wiki repository through the available GitHub connector, and the public raw/wiki fetch was unavailable. I therefore have not treated individual errata entries as authoritative. The main repository itself explicitly says the errata page contains stale and already-resolved claims and schedules a separate audit against current code and commit history.
+
+Revised strategic focus
+Your four priorities remain the correct organizing principle, but they should now be mapped onto the existing architecture:
+
+Program	What sw-MLPL already has	What should be added
+Generation speed	Tiny LM, sampling, MLX, resident tape underway	KV cache, MTP, speculative verification, generation benchmarks
+Agent quality	llm_call, server sessions, experiments, LoRA	trajectory model, ICL retrieval, ICRL, evaluators, replay
+Colab replacement	DSL, autograd, training, datasets, visualization, web REPL	import/export, sweeps, checkpointing, richer metrics, reproducible reports
+Small/old hardware	CPU reference, compile-to-Rust, CUDA crates, feasibility estimates	quantized inference, recursive models, SIMD kernels, sparse/int operations
+The revised roadmap should therefore finish the execution substrate first, then build MTP and feedback research on top of it.
+
+Recommended milestone ordering
+Milestone 1 — Finish E4 resident training
+This is the immediate priority because almost every speed-related feature depends on it.
+
+The active plan’s remaining functional work should be completed before introducing a separate MTP saga:
+
+Resident Adam and momentum state.
+
+Persistent parameters across training steps.
+
+Explicit synchronization only at observable boundaries.
+
+Tiny-LM CPU/MLX trajectory parity.
+
+End-to-end benchmarks proving MLX is faster than the CPU interpreter.
+
+Identification of every silent CPU fallback.
+
+Cleanup of superseded MLX fast paths.
+
+The original E4 acceptance criterion is specifically:
+
+Tiny-LM training on MLX must become faster than CPU.
+
+That is much better than the generic “GPU support” milestone I previously suggested.
+
+Add one change to E4
+Instrument synchronization and fallback events now:
+
+device_uploads
+device_downloads
+implicit_syncs
+cpu_fallback_ops
+resident_tensor_peak
+graph_forces
+kernel_submissions
+This instrumentation will later explain why an MTP or speculative implementation is—or is not—faster.
+
+Exit criteria
+Optimizer state remains on MLX across steps.
+
+No complete model re-upload per iteration.
+
+One scalar loss download per reporting interval, rather than arbitrary tensor materialization.
+
+Tiny-LM training ratio exceeds 1.0× versus the interpreted CPU path.
+
+Benchmark output identifies fallback and synchronization counts.
+
+Milestone 2 — Complete Engram-on-MLX, but constrain its scope
+E5 is already the logical next dependency in the Engram plan. It should be completed, but should not expand into the larger E6–E9 program immediately.
+
+E5 should provide:
+
+resident hashing or integer-compatible addressing
+
+resident gather
+
+resident memory projection and gating
+
+sparse addressed-row identification
+
+CPU/MLX parity
+
+performance comparison
+
+the existing Tiny-LM Engram demo running on MLX
+
+The existing plan already calls for a flattened MLX gather, lazy graph execution, and CPU/MLX parity.
+
+Why E5 precedes MTP
+It validates several capabilities MTP will also need:
+
+nontrivial models inside the resident tape
+
+structured auxiliary state
+
+gather-heavy operations
+
+mixed architectural components
+
+profiling of small models where dispatch overhead dominates
+
+What to defer
+Do not automatically proceed straight to:
+
+100-million-row sparse tables
+
+12B Engram retrofit
+
+headline-scale imported models
+
+Those are useful, but they are less aligned with your immediate MTP, agent-feedback, and modest-hardware objectives.
+
+Milestone 3 — Generation runtime foundation
+My previous roadmap jumped too quickly from ordinary Tiny-LM sampling to MTP. The repository first needs a reusable incremental-generation engine.
+
+3.1 Generation state
+Introduce an explicit generation-session object:
+
+struct GenerationState {
+    token_ids: TensorHandle,
+    position: usize,
+    model_state: ModelState,
+    kv_cache: Option<KvCache>,
+    rng_state: RngState,
+}
+At the MLPL level:
+
+g = begin_generate(model, prompt)
+g, logits = generation_step(g)
+g, tokens = generation_steps(g, 16)
+3.2 KV cache
+The existing Tiny-LM generation path should gain:
+
+per-layer K/V state
+
+append without recomputing the prefix
+
+cache reset and clone
+
+cache memory accounting
+
+CPU and MLX implementations
+
+cache-equivalence tests against full-prefix recomputation
+
+3.3 Batched verification
+Add a primitive that can score multiple proposed future tokens in one target invocation:
+
+scores = verify_sequence(target, state, proposed_tokens)
+This becomes the common substrate for:
+
+self-speculative MTP
+
+draft-model speculation
+
+tree proposals
+
+recursive lookahead
+
+3.4 Correct sampling semantics
+Separate:
+
+greedy acceptance
+
+exact speculative sampling
+
+approximate research modes
+
+A demo must identify which semantics it uses rather than reporting one undifferentiated speed number.
+
+Exit criteria
+Cached generation is measurably faster than full-prefix generation.
+
+Cached and uncached greedy output are identical.
+
+Sampling distributions pass statistical comparison tests.
+
+Target verification can process a proposed token block without N independent full forward calls.
+
+Milestone 4 — Multi-token prediction
+MTP should now become the highest-priority new ML feature.
+
+4.1 Training-time MTP
+Add a model-layer abstraction rather than a one-off Tiny-LM implementation:
+
+heads = multi_token_heads(
+    hidden_dim=d,
+    vocab_size=v,
+    horizons=[1, 2, 3, 4]
+)
+
+loss = multi_token_loss(
+    heads,
+    hidden,
+    targets,
+    weights=[1.0, 0.5, 0.25, 0.125]
+)
+Capabilities required:
+
+shifted target construction
+
+horizon masks near the sequence boundary
+
+shared versus separate output projection
+
+configurable horizon weights
+
+per-horizon loss and accuracy
+
+calibration of each prediction horizon
+
+parameter and memory accounting
+
+4.2 MTP experiments
+Compare at least:
+
+NTP baseline.
+
+MTP trained from initialization.
+
+NTP checkpoint adapted with MTP heads.
+
+Frozen trunk with MTP heads only.
+
+Partial trunk unfreezing.
+
+Fully joint MTP tuning.
+
+This matters because “add four output heads” and “obtain useful speculative proposals” are not equivalent.
+
+4.3 Self-speculative decoding
+Use the generation runtime from Milestone 3:
+
+hidden state
+    ↓
+MTP heads propose k tokens
+    ↓
+target verifies proposed block
+    ↓
+accept valid prefix
+    ↓
+repair first rejected token
+Track:
+
+proposed tokens per cycle
+
+accepted tokens per cycle
+
+acceptance by horizon
+
+verifier calls
+
+latency per accepted token
+
+speedup versus cached NTP
+
+memory overhead
+
+output-quality equivalence
+
+4.4 Adaptive proposal length
+Do not always generate all heads.
+
+Use head confidence or learned acceptance prediction:
+
+k = choose_mtp_depth(head_distributions, threshold=0.82)
+This may matter considerably on older hardware, where the extra head computation can cost more than it saves.
+
+4.5 MTP introspection
+This aligns with your interest in observable learning:
+
+show each head’s candidate
+
+show confidence
+
+show accepted/rejected positions
+
+display the target distribution at rejection
+
+plot acceptance by token type
+
+visualize whether farther heads learn syntax, punctuation, identifiers, or repeated phrases
+
+Featured demos
+MTP Arithmetic: controlled sequences where future-token structure is obvious.
+
+MTP Code Completion: tiny Rust corpus.
+
+MTP + Engram: repeated phrases and identifiers test whether Engram raises farther-head acceptance.
+
+MTP CPU vs MLX: determine where proposal overhead becomes worthwhile.
+
+Exit criteria
+Genuine wall-clock improvement over cached autoregressive decoding.
+
+Quality-equivalent generation under an exact verifier.
+
+At least one model small enough to run comfortably on CPU.
+
+Acceptance and cost are fully observable.
+
+Milestone 5 — Unified speculative decoding lab
+After MTP works, compare it against alternatives under the same harness.
+
+Methods
+MTP self-speculation
+
+separate draft model
+
+early-exit/self-draft model
+
+n-gram/retrieval proposals
+
+tree proposals
+
+cascaded proposals
+
+Particularly relevant topology
+CPU n-gram or tiny draft
+             ↓
+old CUDA GPU small model
+             ↓
+MLX or better CUDA target
+This maps well to your available heterogeneous hardware.
+
+Architectural requirement
+Define a common proposer interface:
+
+trait TokenProposer {
+    fn propose(
+        &mut self,
+        state: &GenerationState,
+        max_tokens: usize,
+    ) -> ProposalTree;
+}
+Possible implementations:
+
+MtpProposer
+DraftModelProposer
+NgramProposer
+RetrievalProposer
+RecursiveProposer
+HybridProposer
+That is more valuable than embedding speculative logic directly inside one model implementation.
+
+Exit criteria
+A single experiment compares all proposers using:
+
+identical prompts
+
+identical target
+
+identical sampling policy
+
+warm and cold measurements
+
+accepted tokens per second
+
+energy or utilization where available
+
+time-to-first-token
+
+total completion latency
+
+Milestone 6 — Agent trajectory and evaluator model
+The old Saga 18 entry bundles too many unrelated ideas:
+
+distillation, ICL/ICRL, Engram memory, orchestration
+
+Engram has already advanced independently, so Saga 18 should be retired or split. The old status line is no longer a useful executable plan.
+
+Replace it with several focused sagas.
+
+A1 — Agent episode substrate
+Define:
+
+AgentEpisode
+ ├─ task
+ ├─ prompt/context
+ ├─ model response
+ ├─ tool request
+ ├─ tool result
+ ├─ environment observation
+ ├─ evaluator result
+ ├─ reward components
+ ├─ critique
+ └─ terminal outcome
+Use typed records rather than opaque chat transcripts.
+
+A2 — Evaluator interface
+trait Evaluator {
+    fn evaluate(&self, episode: &AgentEpisode) -> Evaluation;
+}
+Evaluators should include:
+
+exact output
+
+unit tests
+
+compile result
+
+clippy result
+
+complexity rules
+
+file-change constraints
+
+LLM critique
+
+human annotation
+
+composite reward
+
+A3 — Replay and provenance
+An experiment must record:
+
+model and endpoint
+
+prompts
+
+tool schemas
+
+complete tool results
+
+evaluator versions
+
+repository commit
+
+random seed
+
+selected demonstrations
+
+cost and timing
+
+Why now
+sw-MLPL already has remote sessions, LLM calls, experiment tracking, server infrastructure, and training telemetry. You need a proper agent data model, not a second generic orchestration framework.
+
+Milestone 7 — ICL research
+Build ICL as an example-selection problem, not merely string concatenation.
+
+7.1 Demonstration store
+store = example_store("rust-fixes")
+add_example(store, episode)
+Store:
+
+task embedding
+
+outcome
+
+reward
+
+error class
+
+tool sequence
+
+final answer
+
+token cost
+
+model identity
+
+7.2 Selection policies
+Implement:
+
+most similar
+
+most recent
+
+highest reward
+
+diversity selection
+
+success/failure contrast pairs
+
+error-category matching
+
+learned reranking
+
+budget-aware knapsack selection
+
+7.3 Context assembly
+The selector should account for:
+
+system prompt
+tool schemas
+current task
+selected examples
+remaining generation budget
+This is the kind of practical experiment that distinguishes sw-MLPL from a simple LLM wrapper.
+
+7.4 Compression
+Provide:
+
+complete trajectories
+
+action-only traces
+
+error/correction pairs
+
+summarized lessons
+
+extracted procedural rules
+
+Featured demo
+A small LLM repairs tiny Rust crates using:
+
+zero-shot prompting
+
+random examples
+
+similarity-selected examples
+
+successful examples only
+
+success/failure contrast pairs
+
+compressed lessons
+
+Exit criteria
+Selection outperforms random demonstrations at equal context budget.
+
+Every selected example is inspectable.
+
+Context assembly is deterministic and replayable.
+
+Token budget versus task success is graphed.
+
+Milestone 8 — ICRL and feedback loops
+ICRL should sit on top of the episode and ICL systems.
+
+8.1 Basic loop
+result = feedback_loop {
+    agent model
+    task task
+    evaluator rust_evaluator
+    context_policy best_and_recent
+    max_rounds 6
+}
+Each iteration:
+
+Run the agent.
+
+Execute tools.
+
+Evaluate the outcome.
+
+Record reward components.
+
+Select prior experience.
+
+Construct the next context.
+
+Retry.
+
+8.2 Feedback forms
+Compare:
+
+previous answer only
+
+scalar reward
+
+structured reward
+
+textual critique
+
+failing-test output
+
+successful partial patch
+
+contrast with a successful episode
+
+generated procedural lesson
+
+8.3 Durable session memory
+This is where Engram can enter as an experiment, but not as a prerequisite.
+
+Compare three adaptation channels:
+
+Channel	Changed state	Persistence
+ICL	prompt context	one request
+ICRL history	episode store/context	multiple iterations
+Engram/adaptive memory	model-side learned memory	session or trained checkpoint
+LoRA	parameters	persistent
+8.4 Prevent false improvement
+Use:
+
+fixed held-out tasks
+
+independent tests
+
+maximum token budgets
+
+independent-retry baseline
+
+best-of-N baseline
+
+evaluator-hacking checks
+
+regression replay
+
+A feedback loop that spends five times the tokens and matches best-of-five independent sampling has not demonstrated learning.
+
+Exit criteria
+At equal or reported compute budget:
+
+feedback-conditioned retries outperform independent retries
+
+selected experience explains the improvement
+
+gains transfer to unseen tasks
+
+the agent does not merely memorize evaluator wording
+
+Milestone 9 — Tiny recursive reasoning framework
+TRM, HRM, and BDH should not initially become three unrelated bespoke demos. First implement common primitives.
+
+9.1 Recurrent computation graph
+state, output = recur(
+    block,
+    input,
+    initial_state,
+    max_steps=16,
+    halt=halt_head
+)
+Required support:
+
+parameter sharing across iterations
+
+explicit latent state
+
+per-step outputs
+
+truncated backpropagation
+
+full backpropagation
+
+gradient checkpointing
+
+fixed and learned halting
+
+iteration-dependent losses
+
+state visualization
+
+9.2 Test-time compute experiments
+Measure:
+
+parameters
+
+steps
+
+FLOPs
+
+wall time
+
+accuracy
+
+convergence step
+
+state stability
+
+CPU cache behavior
+
+9.3 Model ordering
+Implement in this sequence:
+
+Simple shared-weight recurrent baseline.
+
+TRM-style recursive refinement.
+
+HRM-style two-timescale recurrence.
+
+BDH-inspired adaptive local state.
+
+Why TRM precedes HRM
+TRM forces the right primitives with less architectural complexity. HRM should then be expressed as a composition of two recurrent schedules rather than a wholly separate runtime feature.
+
+Milestone 10 — BDH-style inspectable adaptation
+BDH is valuable because introspection is part of the learning mechanism.
+
+Focus on the reusable capabilities:
+
+10.1 Sparse positive activations
+nonnegative activation
+
+activation sparsity
+
+active unit count
+
+selectivity by concept
+
+activation lineage across recursive steps
+
+10.2 Dynamic edge state
+Separate:
+
+trained parameters
+episode-local adaptive state
+adaptive = init_adaptive_state(model)
+y, adaptive = apply_adaptive(model, x, adaptive)
+10.3 Local update rules
+Support:
+
+Hebbian updates
+
+decayed Hebbian state
+
+normalization
+
+top-k local competition
+
+bounded edge strength
+
+reset and snapshot
+
+10.4 Visualization and intervention
+A proper demo should allow:
+
+selecting an active unit
+
+seeing its strongest inputs and outputs
+
+observing edge changes during learning
+
+zeroing an edge
+
+replaying the input
+
+measuring the causal output change
+
+That is stronger than merely displaying a heatmap.
+
+Milestone 11 — CPU and older GPU program
+This should run in parallel with the feature milestones, but it needs explicit acceptance tests.
+
+CPU track
+Prioritize:
+
+compiled MLPL execution
+
+allocation elimination
+
+reusable scratch buffers
+
+SIMD matmul and elementwise kernels
+
+quantized matmul
+
+thread scheduling for small matrices
+
+cache-friendly recursive models
+
+memory-mapped model weights
+
+For TRM/HRM-sized models, dispatch and allocation overhead may matter more than theoretical GEMM throughput.
+
+CUDA track
+The queued roadmap already intends Engram-CUDA and mHC-CUDA after returning to the Linux system, using the new backend-neutral tensor seam.
+
+Before feature-specific CUDA work, create:
+
+mlpl-cuda-handle
+    implements DeviceArray
+    implements DeviceOps
+    owns resident Candle/CUDA tensors
+Then bring up operations in this order:
+
+matmul
+
+elementwise arithmetic
+
+activations
+
+reductions
+
+softmax/cross-entropy
+
+gather
+
+optimizer updates
+
+KV-cache append
+
+quantized linear operations
+
+Older GPU constraints
+Avoid requiring:
+
+FP8
+
+recent tensor-core instructions
+
+recent compute capabilities
+
+large batches
+
+huge fused kernels as the only path
+
+Maintain fallback implementations for:
+
+FP32
+
+FP16 where supported
+
+INT8 weight-only
+
+CPU-assisted operations
+
+Milestone 12 — Colab replacement, revised
+This is not a single late milestone. Much of it already exists. The remaining work should be driven by the research programs above.
+
+Highest-priority gaps
+Model and data interchange
+SafeTensors
+
+Hugging Face tokenizer JSON
+
+standardized model configuration
+
+checkpoint save/resume
+
+NumPy tensor import/export
+
+GGUF metadata and tensor import where practical
+
+MLX weight conversion
+
+PyTorch conversion CLI outside the core runtime if necessary
+
+The existing Engram plan already schedules SafeTensors, tokenizer JSON, config normalization, and Llama-family import in E7.
+
+Experiment sweeps
+sweep "mtp-depth" {
+    heads = [1, 2, 4, 8]
+    loss_weight = [0.1, 0.25, 0.5]
+    seeds = [1, 2, 3]
+}
+Required:
+
+Cartesian and random sweeps
+
+early stopping
+
+resumable trials
+
+best-trial selection
+
+confidence intervals
+
+hardware-normalized comparison
+
+automatic report generation
+
+Checkpointing
+Checkpoint:
+
+model parameters
+
+optimizer state
+
+device residency metadata
+
+RNG state
+
+dataset cursor
+
+experiment metadata
+
+agent episode store
+
+dynamic adaptive state where appropriate
+
+Richer visualization
+The most valuable additions are directly tied to your research:
+
+MTP acceptance timelines
+
+proposal trees
+
+KV-cache size
+
+sync/fallback events
+
+recursive-state trajectories
+
+ICL example-selection diagrams
+
+reward progression
+
+BDH edge changes
+
+CPU/GPU utilization
+
+Revised saga sequence
+I would arrange the upcoming AgentRail sagas approximately as follows.
+
+Order	Saga	Reason
+1	E4 completion	Required performance substrate
+2	E5 Engram-MLX	Validates resident complex layers
+3	generation-state-kv-cache	Required for meaningful decoding benchmarks
+4	mtp-primitives	MTP heads, losses, metrics
+5	mtp-self-speculation	First major speed demonstration
+6	speculation-lab	Draft, retrieval, tree and hybrid proposals
+7	agent-episodes-evaluators	Typed feedback foundation
+8	icl-selection	Quality improvement without weight updates
+9	icrl-feedback-loop	Repeated adaptation and objective evaluation
+10	recursive-runtime	Shared substrate for TRM and HRM
+11	trm-demo	Small reasoning model
+12	hrm-comparison	Two-timescale comparison
+13	bdh-adaptive-state	Introspectable inference-time learning
+14	trajectory-tuning	LoRA/distillation from agent experience
+15	cuda-resident-tensors	Backend-neutral resident CUDA path
+16	engram-cuda / mhc-cuda	Feature parity after substrate
+17	quantized-small-models	Better older-hardware usefulness
+Where mHC belongs
+The queued plan sensibly divides mHC into:
+
+reusable constrained tensor transforms
+
+a multi-stream residual ModelSpec
+
+CPU implementation
+
+MLX residency
+
+CUDA parity later
+
+That is the right technical decomposition.
+
+In your four-priority roadmap, however, mHC should probably sit after E5 and before or alongside the generation-runtime work, not ahead of MTP.
+
+Reasons to proceed soon:
+
+it validates the expanded model DSL
+
+it exercises resident tensor transforms
+
+it provides quality/stability experiments
+
+the CPU and MLX primitives mostly exist
+
+Reasons not to let it dominate:
+
+it does not directly provide an inference speedup
+
+it does not establish the generation state needed by MTP
+
+it does not create the agent feedback substrate
+
+its multi-stream representation may initially increase compute and memory
+
+I would implement mHC as a bounded three-saga track:
+
+mHC-P1 constrained transforms
+mHC-P2 CPU model layer + stability demo
+mHC-P3 resident MLX parity/performance
+Then return immediately to KV-cache and MTP.
+
+What should now be removed from the earlier recommendations
+Several things I previously described as missing are already present or substantially implemented:
+
+generic experiment tracking
+
+basic datasets and batching
+
+tokenization
+
+autograd
+
+Adam and training loops
+
+MLX support
+
+server-based execution
+
+SSE training telemetry
+
+LoRA
+
+Tiny-LM end-to-end
+
+LLM REST integration
+
+typed ML values
+
+model visualization
+
+Engram primitives and Tiny-LM integration
+
+These should not appear as major future milestones.
+
+The main project gaps are now more specific:
+
+resident optimizer execution
+incremental generation state
+KV caching
+multi-token losses and heads
+block verification
+agent trajectory semantics
+example selection
+feedback-conditioned retry
+recursive/shared-weight computation
+dynamic adaptive state
+model/checkpoint import
+quantized execution
+resident CUDA parity
+Recommended near-term execution plan
+Current saga
+Finish E4 steps 6–7, including the actual speed gate and fallback accounting.
+
+Next active saga
+Complete E5 Engram-MLX.
+
+Parallel small saga
+Implement mHC constrained transforms and the CPU reference, but stop before a large expansion.
+
+Then begin the speed track
+Create three separate sagas:
+
+generation-state-kv-cache
+mtp-training
+mtp-self-speculation
+Avoid putting all three into a single enormous MTP saga. Each has an independently valuable deliverable and measurable acceptance criterion.
+
+After the first MTP speed result
+Begin:
+
+agent-episodes
+icl-selection
+icrl-loop
+The MTP and agent tracks can then converge in a particularly valuable experiment:
+
+Does faster speculative generation reduce the wall-clock cost of ICRL enough that a smaller local model can perform multiple critique-and-retry rounds within the latency budget of one ordinary large-model response?
+
+That combined experiment captures the project’s identity better than a broad collection of unrelated paper implementations:
+
+sw-MLPL should make local models faster per attempt, better across attempts, practical on existing hardware, and transparent enough to understand why they improved.
+
+

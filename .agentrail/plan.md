@@ -93,3 +93,29 @@ Steps (draft; each independently green + committable):
    still truthful; docs (architecture, future-saga-gpu-training
    marked landed, saga.md entry); demo/pages refresh only if a
    demo's wording or device gating changes. --done.
+
+## Plan amendment (2026-08-01, per docs/project-direction.txt)
+
+Progress: steps 1-6 are COMPLETE (metal-on, tensor-handle-core,
+tape-forward-resident, wiki-footer-link chore, tape-backward-
+resident, optimizer-resident). Step 6 also fixed a latent CPU
+optimizer bug (sequential per-param gradient semantics) -- both
+CPU optimizers now use batched step-start gradients via
+eval_grads_batch, 1 forward per step instead of N.
+
+Step 7 (parity-and-bench-gate) is AMENDED to include the
+instrumentation that docs/project-direction.txt requires of E4:
+counters for device_uploads / device_downloads / implicit_syncs /
+cpu_fallback_ops / graph_forces (kernel_submissions if cheap),
+surfaced through the bench output and available to telemetry --
+later MTP/speculation results must be explainable in these terms.
+Exit criteria (from the direction doc): optimizer state stays on
+MLX across steps (done, keep asserted); no full model re-upload
+per iteration (done via the witness cache, keep asserted); one
+scalar download per reporting interval; tiny-LM train ratio > 1.0
+vs interpreted CPU; bench output reports fallback + sync counts.
+
+After E4: saga E5 (engram-mlx, constrained scope), then the
+reprioritized roadmap in docs/future-sagas-queue.md (mHC bounded
+track, then generation-state-kv-cache -> mtp-training ->
+mtp-self-speculation, then the agent feedback track).
