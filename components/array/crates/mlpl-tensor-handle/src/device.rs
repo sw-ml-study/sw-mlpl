@@ -44,6 +44,8 @@ pub enum UnaryKind {
     Relu,
     /// Step mask: `1.0` where `x > 0`, else `0.0` (relu backward).
     Gtz,
+    /// Elementwise square root (optimizer denominators).
+    Sqrt,
     Transpose,
 }
 

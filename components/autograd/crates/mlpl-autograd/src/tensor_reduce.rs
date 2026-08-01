@@ -7,8 +7,29 @@ use mlpl_array::DenseArray;
 use mlpl_array_ops_compose::prelude::*;
 
 use crate::tensor::Tensor;
-use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, softmax_forward, try_resident};
+use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, Tape, softmax_forward, try_resident};
 use mlpl_tensor_handle::{AxisKind, TensorHandle};
+
+/// Trainable leaf whose forward value is an EXISTING handle --
+/// resident optimizer seeding reuses last step's device weight
+/// without re-uploading (saga E4 step 006).
+#[must_use]
+pub fn param_from_handle(tape: Rc<Tape>, value: TensorHandle) -> Tensor {
+    let node = tape.push(NodeData {
+        value,
+        grad: None,
+        kind: NodeKind::Leaf,
+        requires_grad: true,
+    });
+    Tensor { node, tape }
+}
+
+/// The accumulated gradient as a HANDLE (no materialization) --
+/// the resident optimizer consumes it device-side.
+#[must_use]
+pub fn grad_handle_of(t: &Tensor) -> Option<TensorHandle> {
+    t.tape.nodes()[t.node.0].grad.clone()
+}
 
 pub(crate) fn new_tensor(t: &Tensor, value: TensorHandle, kind: NodeKind) -> Tensor {
     let node = t.tape.push(NodeData {

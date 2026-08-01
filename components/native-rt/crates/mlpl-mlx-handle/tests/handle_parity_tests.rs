@@ -57,6 +57,12 @@ fn unaries_match_host_math() {
     for (op, expected) in cases {
         assert_close(a.dev_unary(op).unwrap().to_dense().data(), &expected);
     }
+    // Sqrt on positive inputs (optimizer denominators).
+    let q = setup(vec![3], vec![0.25, 1.0, 9.0]);
+    assert_close(
+        q.dev_unary(UnaryKind::Sqrt).unwrap().to_dense().data(),
+        &[0.5, 1.0, 3.0],
+    );
     // Log on positive inputs.
     let p = setup(vec![3], vec![0.5, 1.0, 4.0]);
     let expected: Vec<f64> = [0.5f64, 1.0, 4.0].iter().map(|x| x.ln()).collect();

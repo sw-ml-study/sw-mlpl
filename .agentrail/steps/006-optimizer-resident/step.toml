@@ -1,6 +1,6 @@
 number = 6
 slug = "optimizer-resident"
-status = "pending"
+status = "in-progress"
 description = "E4 step 6: optimizer + weights stay resident across the train loop. THE step ..."
 role = "legacy"
 context_files = []

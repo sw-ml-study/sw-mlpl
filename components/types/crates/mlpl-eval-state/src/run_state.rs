@@ -9,6 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
+use mlpl_tensor_handle::TensorHandle;
 use serde::{Deserialize, Serialize};
 
 /// Cancellation token (Saga 21.5 step 003). Cheap to `clone`
@@ -60,6 +61,17 @@ pub struct OptimizerState {
     pub buffers: HashMap<(String, String, String), DenseArray>,
     /// Per-optimizer step counter (for Adam bias correction).
     pub steps: HashMap<String, u64>,
+    /// Device-resident optimizer state (saga E4 step 006): moments
+    /// and the weight cache stay on the backend across the whole
+    /// training loop, keyed like `buffers` (weights use slot "w").
+    /// The resident path OWNS a slot once it writes it; the host
+    /// `buffers` entries it supersedes are removed.
+    pub resident: HashMap<(String, String, String), TensorHandle>,
+    /// Cache witness for the "w" slots: the data pointer of the
+    /// host mirror (`env` vars) the resident weight was synced
+    /// with. Any foreign write to the var changes the pointer and
+    /// invalidates the cached handle (re-upload on next step).
+    pub resident_witness: HashMap<String, usize>,
 }
 
 /// One recorded run. Written to `<exp_dir>/<name>/<ts>/run.json`

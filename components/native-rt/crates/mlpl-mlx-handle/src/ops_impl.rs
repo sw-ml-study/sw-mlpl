@@ -47,6 +47,7 @@ impl DeviceOps for MlxOps {
             UnaryKind::Sigmoid => mlx_rs::ops::sigmoid(x),
             UnaryKind::Relu => mlx_rs::nn::relu(x),
             UnaryKind::Gtz => step_mask(x),
+            UnaryKind::Sqrt => x.sqrt(),
             UnaryKind::Transpose => x.transpose(),
         }
         .map_err(backend_err)?;

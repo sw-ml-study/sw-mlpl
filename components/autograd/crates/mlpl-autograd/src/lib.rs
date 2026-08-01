@@ -17,3 +17,4 @@ pub use mlpl_autograd_tape::ops;
 pub use mlpl_autograd_tape::{NodeData, NodeId, NodeKind, Tape, softmax_backward, softmax_forward};
 pub use ops::{BinaryOp, UnaryOp};
 pub use tensor::Tensor;
+pub use tensor_reduce::{grad_handle_of, param_from_handle};

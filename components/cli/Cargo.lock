@@ -1982,6 +1982,7 @@ dependencies = [
  "mlpl-array",
  "mlpl-eval-types",
  "mlpl-parser",
+ "mlpl-tensor-handle",
  "serde",
 ]
 

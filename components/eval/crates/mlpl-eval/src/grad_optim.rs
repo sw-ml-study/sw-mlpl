@@ -14,7 +14,6 @@ use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
-use crate::grad::eval_grad;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
@@ -71,6 +70,14 @@ pub(crate) fn eval_momentum_sgd(
     let lr = scalar_arg(&args[2], env)?;
     let beta = scalar_arg(&args[3], env)?;
 
+    // Saga E4 step 006: resident path (see eval_adam's twin hook).
+    if let Some(r) =
+        crate::grad_optim_resident::try_momentum(&loss_expr, &param_names, lr, beta, env)
+    {
+        return r;
+    }
+
+    let mut grads = crate::grad::eval_grads_batch(&loss_expr, env)?;
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(
@@ -83,11 +90,9 @@ pub(crate) fn eval_momentum_sgd(
         if env.is_frozen(name) {
             continue;
         }
-        let grad_args = [
-            loss_expr.clone(),
-            Expr::Ident(name.clone(), Span::new(0, 0)),
-        ];
-        let g = eval_grad(&grad_args, env)?;
+        let g = grads.remove(name).ok_or_else(|| {
+            EvalError::Unsupported(format!("momentum_sgd: '{name}' is not a tracked parameter"))
+        })?;
         let key = ("momentum_sgd".to_string(), name.clone(), "v".to_string());
         let v_old = env
             .optim_state
@@ -211,6 +216,26 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         }
     }
 
+    // Saga E4 step 006: the general resident path -- ONE tape per
+    // step, weights + moments resident across the loop. Applies to
+    // any model under device("mlx"); returns None on other devices
+    // or when no backend registered.
+    if let Some(r) = crate::grad_optim_resident::try_adam(
+        &loss_expr,
+        &param_names,
+        &crate::grad_optim_resident::ResidentHp {
+            lr,
+            b1,
+            b2,
+            eps,
+            bc1,
+            bc2,
+        },
+        env,
+    ) {
+        return r;
+    }
+
     // Reaching the CPU tape under a GPU device means no GPU fast path
     // matched this model (only head-only LoRA + the board-policy MLP are
     // GPU-accelerated today). Surface that to the user once per eval --
@@ -223,6 +248,7 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
              See docs/future-saga-gpu-training.md."
         ));
     }
+    let mut grads = crate::grad::eval_grads_batch(&loss_expr, env)?;
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(
@@ -235,11 +261,9 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         if env.is_frozen(name) {
             continue;
         }
-        let grad_args = [
-            loss_expr.clone(),
-            Expr::Ident(name.clone(), Span::new(0, 0)),
-        ];
-        let g = eval_grad(&grad_args, env)?;
+        let g = grads.remove(name).ok_or_else(|| {
+            EvalError::Unsupported(format!("adam: '{name}' is not a tracked parameter"))
+        })?;
         let m_key = ("adam".to_string(), name.clone(), "m".to_string());
         let v_key = ("adam".to_string(), name.clone(), "v".to_string());
         let m_old = env

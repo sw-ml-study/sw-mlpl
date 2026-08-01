@@ -58,6 +58,39 @@ pub(crate) fn eval_grad(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         .unwrap_or_else(|| DenseArray::zeros(wrt_tensor.value().shape().clone())))
 }
 
+/// One tape for the whole step: evaluate `loss` once, backward
+/// once, and return every tracked parameter's gradient (zeros for
+/// params the loss never touched). Saga E4 step 006: the optimizer
+/// steps use this so every parameter's gradient is taken at the
+/// SAME step-start weights (standard batched semantics -- the old
+/// per-param rebuild updated earlier params before later params'
+/// gradients were computed) and the forward runs once instead of
+/// once per parameter.
+pub(crate) fn eval_grads_batch(
+    loss: &Expr,
+    env: &mut Environment,
+) -> Result<HashMap<String, DenseArray>, EvalError> {
+    let tape = Tape::new();
+    if env.device() == "mlx" {
+        crate::device::enable_resident_tape(&tape);
+    }
+    let mut params: HashMap<String, Tensor> = HashMap::new();
+    for (name, value) in env.params() {
+        params.insert(name.clone(), Tensor::param(Rc::clone(&tape), value.clone()));
+    }
+    let root = eval_tensor_expr(loss, env, &tape, &params)?;
+    root.backward();
+    Ok(params
+        .into_iter()
+        .map(|(n, t)| {
+            let g = t
+                .grad()
+                .unwrap_or_else(|| DenseArray::zeros(t.value().shape().clone()));
+            (n, g)
+        })
+        .collect())
+}
+
 pub(crate) fn eval_tensor_expr(
     expr: &Expr,
     env: &mut Environment,
