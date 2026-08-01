@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- saga mlx-persistent-tensors-e4: step 002 complete (a1b9bbc1)
+- feat(runtime): TensorHandle + lazy MLX DeviceArray backend (E4 step 2)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 001 complete (4b7a79dd)
 - feat(mlx): Metal ON -- MLX now executes on the GPU (E4 step 1)
 - saga: init mlx-persistent-tensors-e4 (Approach A per docs/future-saga-gpu-training.md; step 1 metal-on queued)
