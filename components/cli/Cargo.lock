@@ -1692,6 +1692,7 @@ dependencies = [
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -1704,6 +1705,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -1851,6 +1853,7 @@ dependencies = [
  "mlpl-eval-state",
  "mlpl-eval-types",
  "mlpl-loader-helpers",
+ "mlpl-mlx-handle",
  "mlpl-mlx-rt",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
@@ -1861,6 +1864,7 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-tensor-handle",
  "mlpl-trace",
  "mlpl-viz",
  "serde",
@@ -2110,6 +2114,16 @@ dependencies = [
 name = "mlpl-mlx-forward"
 version = "0.20.0"
 dependencies = [
+ "mlx-rs",
+]
+
+[[package]]
+name = "mlpl-mlx-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-mlx-rt",
+ "mlpl-tensor-handle",
  "mlx-rs",
 ]
 
@@ -2490,6 +2504,13 @@ dependencies = [
  "sha2",
  "tokio",
  "uuid",
+]
+
+[[package]]
+name = "mlpl-tensor-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]

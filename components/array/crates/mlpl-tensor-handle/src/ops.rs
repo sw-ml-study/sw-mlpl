@@ -46,6 +46,13 @@ pub trait DeviceOps: Send + Sync {
     /// # Errors
     /// [`HandleError::Backend`] on an element-count mismatch.
     fn reshape(&self, a: &Dev, dims: &[usize]) -> Result<Dev, HandleError>;
+    /// A resident array of `dims` filled with `value` (`dims = []`
+    /// is a broadcastable scalar) -- backward passes use it for
+    /// gradient seeds and fill-style formulas.
+    ///
+    /// # Errors
+    /// [`HandleError::Backend`] on allocation failure.
+    fn full(&self, dims: &[usize], value: f64) -> Result<Dev, HandleError>;
     /// Fused cross-entropy forward: mean over rows of
     /// `logsumexp(logits[i, :]) - logits[i, targets[i]]`.
     ///

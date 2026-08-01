@@ -7,7 +7,7 @@ use mlpl_tensor_handle::{AxisKind, BinKind, Dev, DeviceOps, HandleError, UnaryKi
 use mlx_rs::Array as MlxArray;
 
 use crate::buf::MlxBuf;
-use crate::support::backend_err;
+use crate::support::{backend_err, step_mask};
 
 /// The MLX backend singleton.
 #[derive(Debug)]
@@ -46,6 +46,7 @@ impl DeviceOps for MlxOps {
             UnaryKind::Tanh => mlx_rs::ops::tanh(x),
             UnaryKind::Sigmoid => mlx_rs::ops::sigmoid(x),
             UnaryKind::Relu => mlx_rs::nn::relu(x),
+            UnaryKind::Gtz => step_mask(x),
             UnaryKind::Transpose => x.transpose(),
         }
         .map_err(backend_err)?;
@@ -86,6 +87,20 @@ impl DeviceOps for MlxOps {
             .collect::<Result<_, _>>()
             .map_err(backend_err)?;
         Ok(MlxBuf::wrap(x.reshape(&shape).map_err(backend_err)?))
+    }
+
+    fn full(&self, dims: &[usize], value: f64) -> Result<Dev, HandleError> {
+        let _gpu = mlpl_mlx_rt::mlx_op_lock();
+        let shape: Vec<i32> = dims
+            .iter()
+            .map(|&d| i32::try_from(d))
+            .collect::<Result<_, _>>()
+            .map_err(backend_err)?;
+        // The f64 -> f32 narrowing lives in dense_to_mlx -- the one
+        // place that owns the backend dtype contract.
+        let v = mlpl_mlx_rt::dense_to_mlx(&[value], &[]);
+        let arr = mlx_rs::ops::full::<f32>(&shape, &v).map_err(backend_err)?;
+        Ok(MlxBuf::wrap(arr))
     }
 
     fn cross_entropy(&self, logits: &Dev, targets: &[usize]) -> Result<Dev, HandleError> {

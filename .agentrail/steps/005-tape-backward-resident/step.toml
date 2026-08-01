@@ -1,6 +1,6 @@
 number = 5
 slug = "tape-backward-resident"
-status = "pending"
+status = "in-progress"
 description = "E4 step 4: backward stays resident. Make NodeData.grad a TensorHandle and run..."
 role = "legacy"
 context_files = []

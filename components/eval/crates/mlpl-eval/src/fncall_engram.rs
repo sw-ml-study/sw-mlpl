@@ -78,10 +78,18 @@ fn eval_gather_rows(
             table.rank()
         )));
     }
-    let (rows, dim) = (table.shape().dims()[0], table.shape().dims()[1]);
     let idx = integral_vec(&indices, "gather_rows: indices")?;
+    let out = gathered_rows(&table, &idx)?;
+    let mut dims = indices.shape().dims().to_vec();
+    dims.push(table.shape().dims()[1]);
+    Ok(Value::Array(DenseArray::new(Shape::new(dims), out)?))
+}
+
+/// Copy the addressed rows of a validated rank-2 table, flat.
+fn gathered_rows(table: &DenseArray, idx: &[u64]) -> Result<Vec<f64>, EvalError> {
+    let (rows, dim) = (table.shape().dims()[0], table.shape().dims()[1]);
     let mut out = Vec::with_capacity(idx.len() * dim);
-    for &row in &idx {
+    for &row in idx {
         let row = row as usize;
         if row >= rows {
             return Err(EvalError::Unsupported(format!(
@@ -90,7 +98,5 @@ fn eval_gather_rows(
         }
         out.extend_from_slice(&table.data()[row * dim..(row + 1) * dim]);
     }
-    let mut dims = indices.shape().dims().to_vec();
-    dims.push(dim);
-    Ok(Value::Array(DenseArray::new(Shape::new(dims), out)?))
+    Ok(out)
 }

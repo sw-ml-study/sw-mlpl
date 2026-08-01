@@ -54,10 +54,14 @@ impl Tensor {
         self.tape.nodes()[self.node.0].value.to_dense()
     }
 
-    /// Clone of the accumulated gradient, if any.
+    /// The accumulated gradient, materialized on the host. On a
+    /// resident tape this is a sync point (forces the lazy graph).
     #[must_use]
     pub fn grad(&self) -> Option<DenseArray> {
-        self.tape.nodes()[self.node.0].grad.clone()
+        self.tape.nodes()[self.node.0]
+            .grad
+            .as_ref()
+            .map(mlpl_tensor_handle::TensorHandle::to_dense)
     }
 
     /// Whether this node is a trainable leaf.

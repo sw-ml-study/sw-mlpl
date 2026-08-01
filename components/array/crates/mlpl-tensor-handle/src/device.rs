@@ -42,6 +42,8 @@ pub enum UnaryKind {
     Tanh,
     Sigmoid,
     Relu,
+    /// Step mask: `1.0` where `x > 0`, else `0.0` (relu backward).
+    Gtz,
     Transpose,
 }
 

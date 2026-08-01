@@ -135,15 +135,21 @@ fn decode_jpeg(bytes: &[u8], path: &Path) -> Result<(Vec<u8>, usize, usize), Ima
     })?;
     let h = info.height as usize;
     let w = info.width as usize;
-    let rgb = match info.pixel_format {
-        jpeg_decoder::PixelFormat::RGB24 => pixels,
-        jpeg_decoder::PixelFormat::L8 => crate::pixels::grayscale_to_rgb(&pixels),
-        other => {
-            return Err(ImageError::new(format!(
-                "load_images: unsupported JPEG pixel format {other:?} in {}",
-                path.display()
-            )));
-        }
-    };
-    Ok((rgb, h, w))
+    Ok((jpeg_to_rgb(&info, pixels, path)?, h, w))
+}
+
+/// Normalize a decoded JPEG's pixel format to RGB24 bytes.
+fn jpeg_to_rgb(
+    info: &jpeg_decoder::ImageInfo,
+    pixels: Vec<u8>,
+    path: &Path,
+) -> Result<Vec<u8>, ImageError> {
+    match info.pixel_format {
+        jpeg_decoder::PixelFormat::RGB24 => Ok(pixels),
+        jpeg_decoder::PixelFormat::L8 => Ok(crate::pixels::grayscale_to_rgb(&pixels)),
+        other => Err(ImageError::new(format!(
+            "load_images: unsupported JPEG pixel format {other:?} in {}",
+            path.display()
+        ))),
+    }
 }

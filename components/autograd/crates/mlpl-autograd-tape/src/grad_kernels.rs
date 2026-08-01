@@ -4,6 +4,20 @@
 
 use mlpl_array::{DenseArray, Shape};
 
+/// Outer product for the matrix-vector matmul backward:
+/// `out[i, j] = upstream[i] * b[j]`.
+#[must_use]
+pub fn matvec_outer(upstream: &DenseArray, b: &DenseArray) -> DenseArray {
+    let (m, k) = (upstream.shape().dims()[0], b.shape().dims()[0]);
+    let mut data = vec![0.0; m * k];
+    for i in 0..m {
+        for j in 0..k {
+            data[i * k + j] = upstream.data()[i] * b.data()[j];
+        }
+    }
+    DenseArray::new(Shape::new(vec![m, k]), data).expect("shape")
+}
+
 pub fn unbroadcast(grad: DenseArray, target_shape: &Shape) -> DenseArray {
     if grad.shape() == target_shape {
         return grad;

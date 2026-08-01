@@ -98,15 +98,55 @@ fn softmax_backward_2d(
     DenseArray::new(y.shape().clone(), out).expect("shape")
 }
 
-/// Accumulate `incoming` into `slot`: add if already present, else set.
-pub fn accumulate(slot: &mut Option<DenseArray>, incoming: DenseArray) {
+/// Accumulate `incoming` into `slot`: add if already present, else
+/// set. Handles every residency mix (saga E4 step 004): two host
+/// grads use the exact f64 add as always; when either side is
+/// device-resident the add runs on the backend (the host side
+/// uploads), falling back to the exact host add on backend errors.
+pub fn accumulate(
+    slot: &mut Option<mlpl_tensor_handle::TensorHandle>,
+    incoming: impl Into<mlpl_tensor_handle::TensorHandle>,
+) {
+    use mlpl_tensor_handle::{BinKind, TensorHandle};
+    let incoming = incoming.into();
     match slot {
         None => *slot = Some(incoming),
         Some(existing) => {
+            if (existing.is_dev() || incoming.is_dev())
+                && let Ok(sum) = existing.dev_binary(BinKind::Add, &incoming)
+            {
+                *existing = sum;
+                return;
+            }
             let sum = existing
-                .apply_binop(&incoming, |a, b| a + b)
+                .to_dense()
+                .apply_binop(&incoming.to_dense(), |a, b| a + b)
                 .expect("matching shapes during accumulation");
-            *existing = sum;
+            *existing = TensorHandle::Cpu(sum);
         }
     }
+}
+
+/// Seed `node`'s gradient with ones (saga E4: resident roots seed a
+/// device-side fill so backward stays lazy; host roots stay
+/// bit-exact f64). No-op when a gradient is already present.
+pub fn seed_ones(node: &mut crate::tape::NodeData) {
+    if node.grad.is_some() {
+        return;
+    }
+    let dims = node.value.dims();
+    node.grad = Some(if node.value.is_dev() {
+        crate::resident::fill(&dims, 1.0).unwrap_or_else(|| host_ones(&dims))
+    } else {
+        host_ones(&dims)
+    });
+}
+
+/// Host-side f64 ones of `dims`.
+fn host_ones(dims: &[usize]) -> mlpl_tensor_handle::TensorHandle {
+    let n = dims.iter().product();
+    mlpl_tensor_handle::TensorHandle::Cpu(
+        DenseArray::new(mlpl_array::Shape::new(dims.to_vec()), vec![1.0; n])
+            .expect("ones fill matches dims"),
+    )
 }

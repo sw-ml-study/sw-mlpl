@@ -163,9 +163,10 @@ pub struct NodeData {
     /// Forward value of this node: host f64 or a backend-resident
     /// handle (saga E4 step 003). `to_dense()` is the sync point.
     pub value: TensorHandle,
-    /// Accumulated gradient from backward passes, if any. Stays
-    /// host-side in this step; step 004 makes it resident too.
-    pub grad: Option<mlpl_array::DenseArray>,
+    /// Accumulated gradient from backward passes, if any: host f64
+    /// on the exact CPU path, resident on a device tape (saga E4
+    /// step 004).
+    pub grad: Option<TensorHandle>,
     /// Kind: leaf, unary, or binary.
     pub kind: NodeKind,
     /// Whether this leaf is a trainable parameter.

@@ -241,6 +241,7 @@ dependencies = [
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -253,6 +254,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -495,6 +497,13 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-tensor-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]

@@ -88,3 +88,122 @@ fn cpu_tape_stays_bit_exact_without_residency() {
     let g = a.grad().unwrap();
     assert_eq!(g.data(), &[0.25f64.exp(), 0.5f64.exp()], "bit-exact f64");
 }
+
+/// Per-op backward parity: run `build` on a CPU tape and a resident
+/// tape, compare BOTH param grads at fp32 tolerance.
+fn backward_parity(build: impl Fn(&Tensor, &Tensor) -> Tensor) {
+    let mut grads: Vec<Vec<f64>> = Vec::new();
+    for resident in [false, true] {
+        let tape = Tape::new();
+        if resident {
+            register_mlx_device_ops();
+            tape.resident.set(true);
+        }
+        let a = Tensor::param(Rc::clone(&tape), arr(vec![2, 2], vec![0.4, -0.7, 1.3, 0.2]));
+        let b = Tensor::param(Rc::clone(&tape), arr(vec![2, 2], vec![0.9, 0.1, -0.5, 1.1]));
+        build(&a, &b).backward();
+        grads.push(a.grad().expect("grad a").data().to_vec());
+        grads.push(b.grad().expect("grad b").data().to_vec());
+    }
+    for (c, m) in grads[0]
+        .iter()
+        .chain(&grads[1])
+        .zip(grads[2].iter().chain(&grads[3]))
+    {
+        assert!((c - m).abs() < FP32_TOL, "backward parity: {c} vs {m}");
+    }
+}
+
+#[test]
+fn resident_backward_matches_cpu_for_every_core_op() {
+    // Elementwise binaries + matmul.
+    backward_parity(|a, b| a.add(b).sum());
+    backward_parity(|a, b| a.sub(b).mean());
+    backward_parity(|a, b| a.mul(b).sum());
+    backward_parity(|a, b| a.div(&b.mul(b).add(b)).sum()); // keep b well away from 0
+    backward_parity(|a, b| a.matmul(b).sum());
+    // Unaries (chained off both params so both get grads).
+    backward_parity(|a, b| a.exp().mul(b).sum());
+    backward_parity(|a, b| a.tanh().mul(b).mean());
+    backward_parity(|a, b| a.sigmoid().mul(b).sum());
+    backward_parity(|a, b| a.relu().mul(b).sum());
+    backward_parity(|a, b| a.neg().mul(b).sum());
+    backward_parity(|a, b| a.mul(a).add(b).log().sum()); // log of positive-ish
+    // Softmax + transpose + reshape in one chain.
+    backward_parity(|a, b| a.matmul(b).softmax().transpose().sum());
+    backward_parity(|a, b| {
+        a.matmul(b)
+            .reshape(mlpl_array::Shape::new(vec![4]))
+            .softmax()
+            .sum()
+    });
+}
+
+#[test]
+fn resident_backward_keeps_grads_on_device() {
+    register_mlx_device_ops();
+    let tape = Tape::new();
+    tape.resident.set(true);
+    let a = Tensor::param(Rc::clone(&tape), arr(vec![2, 2], vec![0.4, -0.7, 1.3, 0.2]));
+    let b = Tensor::param(Rc::clone(&tape), arr(vec![2, 2], vec![0.9, 0.1, -0.5, 1.1]));
+    a.matmul(&b).tanh().mean().backward();
+    for id in [a.node().0, b.node().0] {
+        let node = &tape.nodes()[id];
+        assert!(
+            node.grad.as_ref().expect("grad present").is_dev(),
+            "param grad stays resident on the device"
+        );
+    }
+}
+
+#[test]
+fn tiny_lm_shaped_chain_backward_parity() {
+    // matmul -> tanh -> matmul -> cross_entropy: CE backward is the
+    // documented CPU fallback; the mixed accumulate must still
+    // deliver grads that match the all-CPU tape.
+    let mut all: Vec<Vec<f64>> = Vec::new();
+    for resident in [false, true] {
+        let tape = Tape::new();
+        if resident {
+            register_mlx_device_ops();
+            tape.resident.set(true);
+        }
+        let x = Tensor::leaf(
+            Rc::clone(&tape),
+            arr(
+                vec![3, 4],
+                (0..12).map(|i| f64::from(i) * 0.1 - 0.5).collect(),
+            ),
+            false,
+        );
+        let w1 = Tensor::param(
+            Rc::clone(&tape),
+            arr(
+                vec![4, 4],
+                (0..16).map(|i| f64::from(i) * 0.05 - 0.4).collect(),
+            ),
+        );
+        let w2 = Tensor::param(
+            Rc::clone(&tape),
+            arr(
+                vec![4, 5],
+                (0..20).map(|i| 0.3 - f64::from(i) * 0.03).collect(),
+            ),
+        );
+        let loss = x
+            .matmul(&w1)
+            .tanh()
+            .matmul(&w2)
+            .cross_entropy(vec![1, 4, 0]);
+        loss.backward();
+        all.push(w1.grad().unwrap().data().to_vec());
+        all.push(w2.grad().unwrap().data().to_vec());
+    }
+    for (c, m) in all[0]
+        .iter()
+        .chain(&all[1])
+        .zip(all[2].iter().chain(&all[3]))
+    {
+        assert!((c - m).abs() < FP32_TOL, "tiny-lm chain: {c} vs {m}");
+    }
+}

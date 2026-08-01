@@ -56,6 +56,24 @@ fn handle_of(tape: &Tape, id: NodeId) -> Option<TensorHandle> {
         .then(|| tape.nodes()[id.0].value.clone())
 }
 
+/// A device handle for `h`, uploading a host value when a backend
+/// is registered. `None` when there is no backend (or upload fails).
+#[must_use]
+pub fn as_dev(h: &TensorHandle) -> Option<TensorHandle> {
+    match h {
+        TensorHandle::Dev(_) => Some(h.clone()),
+        TensorHandle::Cpu(a) => mlpl_tensor_handle::upload(a).ok(),
+    }
+}
+
+/// A resident array of `dims` filled with `value` (gradient seeds,
+/// fill-style backward formulas). `None` without a backend.
+#[must_use]
+pub fn fill(dims: &[usize], value: f64) -> Option<TensorHandle> {
+    let ops = mlpl_tensor_handle::device_ops()?;
+    ops.full(dims, value).ok().map(TensorHandle::Dev)
+}
+
 /// Attempt `req` on the device backend. `None` = take the CPU path.
 #[must_use]
 pub fn try_resident(tape: &Tape, req: ResidentReq<'_>) -> Option<TensorHandle> {
