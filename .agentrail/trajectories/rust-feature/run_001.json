@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "metal-on"
+  },
+  "action": "feature flip across 4 manifests; GPU device test; SIGSEGV diagnosis via --test-threads=1 bisect; layered locking (library op lock + gpu_step entries + per-crate test locks per the existing mlx-train idiom); criterion bench rerun + benchmarks.md baseline table",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-01T10:02:46"
+}

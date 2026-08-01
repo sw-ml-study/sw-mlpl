@@ -1,9 +1,10 @@
 number = 1
 slug = "metal-on"
-status = "in-progress"
+status = "completed"
 description = "E4 step 1: enable Metal. Flip mlx-rs features from [accelerate] to [accelerat..."
 role = "production"
 context_files = []
 created_at = "2026-08-01T09:19:44"
+completed_at = "2026-08-01T10:02:46"
 task_type = "rust-feature"
-commits = []
+commits = ["4b7a79dd394654311f70c57e721e508e1894554d"]
