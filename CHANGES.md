@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- saga mlx-persistent-tensors-e4: step 004 wiki-footer-link complete (16b94c11)
+- feat(web): Wiki link in the live-demo footer (after YouTube)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 003 complete (9528faf1 + c8c4571e)
 - docs(roadmap): future-sagas queue -- wiki errata, mHC (MLX + CUDA), engram-cuda
 - feat(autograd): resident tape forward -- one lazy MLX graph, 2x forward deleted (E4 step 3)
