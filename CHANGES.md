@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- saga mlx-persistent-tensors-e4: step 006 complete (b26bfddc)
+- feat(eval): resident optimizer -- one tape per step, weights + moments on-device (E4 step 6)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 005 complete (d59a24b1)
 - feat(autograd): resident backward -- gradients stay on the device (E4 step 5)
 - chore: fmt import order in serve handlers + lock refreshes for mlpl-tensor-handle
