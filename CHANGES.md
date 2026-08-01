@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- saga mlx-persistent-tensors-e4: step 005 complete (d59a24b1)
+- feat(autograd): resident backward -- gradients stay on the device (E4 step 5)
+- chore: fmt import order in serve handlers + lock refreshes for mlpl-tensor-handle
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 004 wiki-footer-link complete (16b94c11)
 - feat(web): Wiki link in the live-demo footer (after YouTube)
 - docs(changes): refresh CHANGES.md to HEAD
