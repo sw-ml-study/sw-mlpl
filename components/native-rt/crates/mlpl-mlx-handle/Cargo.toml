@@ -26,3 +26,7 @@ mlx-rs = { version = "=0.25.3", optional = true, default-features = false, featu
 
 [lints]
 workspace = true
+
+[dev-dependencies]
+mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
+mlpl-autograd-tape = { path = "../../../autograd/crates/mlpl-autograd-tape" }

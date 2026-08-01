@@ -3,6 +3,7 @@
 use std::rc::Rc;
 
 use mlpl_array::DenseArray;
+use mlpl_tensor_handle::TensorHandle;
 
 use crate::backward;
 use mlpl_autograd_tape::{NodeData, NodeId, NodeKind, Tape};
@@ -18,6 +19,13 @@ impl Tensor {
     /// Construct a leaf tensor on `tape`.
     #[must_use]
     pub fn leaf(tape: Rc<Tape>, value: DenseArray, requires_grad: bool) -> Self {
+        // Resident tapes move leaves onto the device up front (saga
+        // E4 step 003); on any failure the host value stands.
+        let value = if tape.resident.get() {
+            mlpl_tensor_handle::upload(&value).unwrap_or(TensorHandle::Cpu(value))
+        } else {
+            TensorHandle::Cpu(value)
+        };
         let node = tape.push(NodeData {
             value,
             grad: None,
@@ -39,10 +47,11 @@ impl Tensor {
         self.node
     }
 
-    /// Clone of the forward value.
+    /// The forward value, materialized on the host. On a resident
+    /// node this is a sync point (forces the lazy device graph).
     #[must_use]
     pub fn value(&self) -> DenseArray {
-        self.tape.nodes()[self.node.0].value.clone()
+        self.tape.nodes()[self.node.0].value.to_dense()
     }
 
     /// Clone of the accumulated gradient, if any.

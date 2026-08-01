@@ -37,21 +37,18 @@ pub(crate) fn eval_grad(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         )));
     }
     let tape = Tape::new();
+    // Saga E4 step 003: under device("mlx") the tape keeps forward
+    // intermediates RESIDENT on the registered backend -- leaves
+    // upload once, ops build one lazy graph -- replacing the old
+    // second-forward materialize pass.
+    if env.device() == "mlx" {
+        crate::device::enable_resident_tape(&tape);
+    }
     let mut params: HashMap<String, Tensor> = HashMap::new();
     for (name, value) in env.params() {
         params.insert(name.clone(), Tensor::param(Rc::clone(&tape), value.clone()));
     }
     let root = eval_tensor_expr(&args[0], env, &tape, &params)?;
-    // Saga 14 step 006: when the grad call is inside a
-    // `device("mlx") { }` block, re-run the forward pass through
-    // `mlpl-mlx-rt` so the tape's per-node values are MLX-rounded.
-    // The CPU backward formulas in `mlpl-autograd::ops` then
-    // operate on those values, producing gradients that match the
-    // all-CPU path within fp32 tolerance. See
-    // `device::materialize_tape_on_mlx` for the design rationale.
-    if env.device() == "mlx" {
-        crate::device::materialize_tape_on_mlx(&tape);
-    }
     root.backward();
     let wrt_tensor = params
         .get(&wrt_name)

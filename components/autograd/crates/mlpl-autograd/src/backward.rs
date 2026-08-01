@@ -18,8 +18,9 @@ pub fn backward(tape: &Tape, root: NodeId) {
         let mut nodes = tape.nodes_mut();
         let node = &mut nodes[root.0];
         if node.grad.is_none() {
-            let ones = vec![1.0; node.value.data().len()];
-            node.grad = Some(DenseArray::new(node.value.shape().clone(), ones).expect("shape"));
+            let v = node.value.to_dense();
+            let ones = vec![1.0; v.data().len()];
+            node.grad = Some(DenseArray::new(v.shape().clone(), ones).expect("shape"));
         }
     }
     let len = tape.len();
@@ -52,7 +53,7 @@ fn propagate(tape: &Tape, id: NodeId) {
 }
 
 fn prop_softmax(tape: &Tape, id: NodeId, parent: NodeId, axis: usize, upstream: &DenseArray) {
-    let y = tape.nodes()[id.0].value.clone();
+    let y = tape.nodes()[id.0].value.to_dense();
     let grad = softmax_backward(&y, upstream, axis);
     accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
 }
@@ -64,10 +65,10 @@ fn prop_unary(
     op: mlpl_autograd_tape::UnaryOp,
     upstream: &DenseArray,
 ) {
-    let x = tape.nodes()[parent.0].value.clone();
-    let y = tape.nodes()[id.0].value.clone();
+    let x = tape.nodes()[parent.0].value.to_dense();
+    let y = tape.nodes()[id.0].value.to_dense();
     let grad_x = op.backward(&x, &y, upstream);
-    let target_shape = tape.nodes()[parent.0].value.shape().clone();
+    let target_shape = x.shape().clone();
     let grad_x = unbroadcast(grad_x, &target_shape);
     accumulate(&mut tape.nodes_mut()[parent.0].grad, grad_x);
 }
@@ -79,11 +80,11 @@ fn prop_binary(
     op: mlpl_autograd_tape::BinaryOp,
     upstream: &DenseArray,
 ) {
-    let a = tape.nodes()[left.0].value.clone();
-    let b = tape.nodes()[right.0].value.clone();
+    let a = tape.nodes()[left.0].value.to_dense();
+    let b = tape.nodes()[right.0].value.to_dense();
     let (ga, gb) = op.backward(&a, &b, upstream);
-    let left_shape = tape.nodes()[left.0].value.shape().clone();
-    let right_shape = tape.nodes()[right.0].value.shape().clone();
+    let left_shape = a.shape().clone();
+    let right_shape = b.shape().clone();
     let ga = unbroadcast(ga, &left_shape);
     let gb = unbroadcast(gb, &right_shape);
     let mut nodes = tape.nodes_mut();
@@ -92,7 +93,7 @@ fn prop_binary(
 }
 
 fn prop_sum_mean(tape: &Tape, parent: NodeId, upstream: &DenseArray, mean: bool) {
-    let parent_shape = tape.nodes()[parent.0].value.shape().clone();
+    let parent_shape = Shape::new(tape.nodes()[parent.0].value.dims());
     let n = parent_shape.elem_count();
     let g = if mean {
         upstream.data()[0] / n as f64
@@ -104,8 +105,8 @@ fn prop_sum_mean(tape: &Tape, parent: NodeId, upstream: &DenseArray, mean: bool)
 }
 
 fn prop_matmul(tape: &Tape, left: NodeId, right: NodeId, upstream: &DenseArray) {
-    let a = tape.nodes()[left.0].value.clone();
-    let b = tape.nodes()[right.0].value.clone();
+    let a = tape.nodes()[left.0].value.to_dense();
+    let b = tape.nodes()[right.0].value.to_dense();
     // grad_a = upstream @ b^T (or outer(upstream, b) for matrix-vector);
     // grad_b = a^T @ upstream.
     let ga = if b.shape().rank() == 1 {

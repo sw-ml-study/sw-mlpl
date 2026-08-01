@@ -7,9 +7,10 @@ use mlpl_array::DenseArray;
 use mlpl_array_ops_compose::prelude::*;
 
 use crate::tensor::Tensor;
-use mlpl_autograd_tape::{NodeData, NodeKind, softmax_forward};
+use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, softmax_forward, try_resident};
+use mlpl_tensor_handle::{AxisKind, TensorHandle};
 
-pub(crate) fn new_tensor(t: &Tensor, value: DenseArray, kind: NodeKind) -> Tensor {
+pub(crate) fn new_tensor(t: &Tensor, value: TensorHandle, kind: NodeKind) -> Tensor {
     let node = t.tape.push(NodeData {
         value,
         grad: None,
@@ -26,36 +27,47 @@ impl Tensor {
     /// Sum all elements into a scalar.
     #[must_use]
     pub fn sum(&self) -> Self {
-        let s: f64 = self.value().data().iter().sum();
-        new_tensor(
-            self,
-            DenseArray::from_scalar(s),
-            NodeKind::SumAll { parent: self.node },
+        let value = try_resident(
+            &self.tape,
+            ResidentReq::Axis(self.node, AxisKind::Sum, None, false),
         )
+        .unwrap_or_else(|| {
+            TensorHandle::Cpu(DenseArray::from_scalar(self.value().data().iter().sum()))
+        });
+        new_tensor(self, value, NodeKind::SumAll { parent: self.node })
     }
 
     /// Mean over all elements.
     #[must_use]
     pub fn mean(&self) -> Self {
-        let v = self.value();
-        let n = v.data().len() as f64;
-        let s: f64 = v.data().iter().sum();
-        new_tensor(
-            self,
-            DenseArray::from_scalar(s / n),
-            NodeKind::MeanAll { parent: self.node },
+        let value = try_resident(
+            &self.tape,
+            ResidentReq::Axis(self.node, AxisKind::Mean, None, false),
         )
+        .unwrap_or_else(|| {
+            let v = self.value();
+            let s: f64 = v.data().iter().sum();
+            TensorHandle::Cpu(DenseArray::from_scalar(s / v.data().len() as f64))
+        });
+        new_tensor(self, value, NodeKind::MeanAll { parent: self.node })
     }
 
     /// Softmax along the last axis (rank-1 or rank-2 inputs).
     #[must_use]
     pub fn softmax(&self) -> Self {
-        let v = self.value();
-        let axis = v.shape().rank().saturating_sub(1);
-        let y = softmax_forward(&v, axis);
+        let axis = self.tape.nodes()[self.node.0]
+            .value
+            .dims()
+            .len()
+            .saturating_sub(1);
+        let value = try_resident(
+            &self.tape,
+            ResidentReq::Axis(self.node, AxisKind::Softmax, Some(axis), false),
+        )
+        .unwrap_or_else(|| TensorHandle::Cpu(softmax_forward(&self.value(), axis)));
         new_tensor(
             self,
-            y,
+            value,
             NodeKind::Softmax {
                 parent: self.node,
                 axis,
@@ -72,7 +84,7 @@ impl Tensor {
     /// future rebalance can regroup the composition methods.
     #[must_use]
     pub fn rotate(&self, k: i64, axis: usize) -> Self {
-        let v = self.value().rotate(k, axis).expect("rotate: axis in range");
+        let v = TensorHandle::Cpu(self.value().rotate(k, axis).expect("rotate: axis in range"));
         new_tensor(
             self,
             v,

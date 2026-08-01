@@ -6,7 +6,8 @@ use mlpl_array_ops_shape::prelude::*;
 
 use mlpl_array::{DenseArray, Shape};
 
-use mlpl_autograd_tape::NodeKind;
+use mlpl_autograd_tape::{NodeKind, ResidentReq, try_resident};
+use mlpl_tensor_handle::{TensorHandle, UnaryKind};
 
 use crate::tensor::Tensor;
 use crate::tensor_reduce::new_tensor;
@@ -15,16 +16,25 @@ impl Tensor {
     /// Transpose: reverse axes.
     #[must_use]
     pub fn transpose(&self) -> Self {
-        let v = self.value().transpose();
+        let v = try_resident(
+            &self.tape,
+            ResidentReq::Unary(self.node, UnaryKind::Transpose),
+        )
+        .unwrap_or_else(|| TensorHandle::Cpu(self.value().transpose()));
         new_tensor(self, v, NodeKind::Transpose { parent: self.node })
     }
 
     /// Reshape to `new_shape` (must preserve element count).
     #[must_use]
     pub fn reshape(&self, new_shape: Shape) -> Self {
-        let v_orig = self.value();
-        let orig_shape = v_orig.shape().clone();
-        let v = v_orig.reshape(new_shape).expect("compatible reshape");
+        let orig_shape = Shape::new(self.tape.nodes()[self.node.0].value.dims());
+        let v = try_resident(
+            &self.tape,
+            ResidentReq::Reshape(self.node, new_shape.dims()),
+        )
+        .unwrap_or_else(|| {
+            TensorHandle::Cpu(self.value().reshape(new_shape).expect("compatible reshape"))
+        });
         new_tensor(
             self,
             v,
@@ -38,10 +48,17 @@ impl Tensor {
     /// Matrix multiplication `self @ other`.
     #[must_use]
     pub fn matmul(&self, other: &Self) -> Self {
-        let v = self
-            .value()
-            .matmul(&other.value())
-            .expect("compatible matmul shapes");
+        let v = try_resident(
+            &self.tape,
+            ResidentReq::Binary(self.node, other.node, mlpl_tensor_handle::BinKind::Matmul),
+        )
+        .unwrap_or_else(|| {
+            TensorHandle::Cpu(
+                self.value()
+                    .matmul(&other.value())
+                    .expect("compatible matmul shapes"),
+            )
+        });
         new_tensor(
             self,
             v,
@@ -59,7 +76,7 @@ impl Tensor {
     pub fn patchify(&self, p: usize) -> Self {
         let v_orig = self.value();
         let orig_shape = v_orig.shape().clone();
-        let v = v_orig.patchify(p).expect("patchify compatible shape");
+        let v = TensorHandle::Cpu(v_orig.patchify(p).expect("patchify compatible shape"));
         new_tensor(
             self,
             v,
@@ -79,7 +96,7 @@ impl Tensor {
         let a = self.value();
         let b = other.value();
         let left_size = a.shape().dims()[axis];
-        let v = a.concat(&b, axis).expect("concat compatible shapes");
+        let v = TensorHandle::Cpu(a.concat(&b, axis).expect("concat compatible shapes"));
         new_tensor(
             self,
             v,
@@ -110,7 +127,7 @@ impl Tensor {
         let parent_size_along_axis = first.value().shape().dims()[axis];
         let values: Vec<DenseArray> = parents.iter().map(Tensor::value).collect();
         let refs: Vec<&DenseArray> = values.iter().collect();
-        let value = stack(&refs, axis).expect("stack compatible shapes");
+        let value = TensorHandle::Cpu(stack(&refs, axis).expect("stack compatible shapes"));
         let parent_ids = parents.iter().map(|p| p.node).collect::<Vec<_>>();
         new_tensor(
             first,
@@ -131,7 +148,7 @@ impl Tensor {
     pub fn take(&self, axis: usize, idx: usize) -> Self {
         let v_orig = self.value();
         let orig_shape = v_orig.shape().clone();
-        let v = v_orig.take(axis, idx).expect("take compatible axis/idx");
+        let v = TensorHandle::Cpu(v_orig.take(axis, idx).expect("take compatible axis/idx"));
         new_tensor(
             self,
             v,

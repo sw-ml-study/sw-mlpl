@@ -1,9 +1,10 @@
 //! Tape storage for reverse-mode autograd.
 
-use std::cell::{Ref, RefCell, RefMut};
+use std::cell::{Cell, Ref, RefCell, RefMut};
 use std::rc::Rc;
 
-use mlpl_array::{DenseArray, Shape};
+use mlpl_array::Shape;
+use mlpl_tensor_handle::TensorHandle;
 
 use crate::ops::{BinaryOp, UnaryOp};
 
@@ -159,10 +160,12 @@ pub enum NodeKind {
 /// node kind, and whether the node contributes gradients to leaves.
 #[derive(Debug, Clone)]
 pub struct NodeData {
-    /// Forward value of this node.
-    pub value: DenseArray,
-    /// Accumulated gradient from backward passes, if any.
-    pub grad: Option<DenseArray>,
+    /// Forward value of this node: host f64 or a backend-resident
+    /// handle (saga E4 step 003). `to_dense()` is the sync point.
+    pub value: TensorHandle,
+    /// Accumulated gradient from backward passes, if any. Stays
+    /// host-side in this step; step 004 makes it resident too.
+    pub grad: Option<mlpl_array::DenseArray>,
     /// Kind: leaf, unary, or binary.
     pub kind: NodeKind,
     /// Whether this leaf is a trainable parameter.
@@ -173,15 +176,20 @@ pub struct NodeData {
 #[derive(Debug, Default)]
 pub struct Tape {
     nodes: RefCell<Vec<NodeData>>,
+    /// When set (saga E4 step 003), forward ops KEEP intermediates
+    /// on the registered device backend instead of computing on the
+    /// CPU; ops without device kernels fall back per-op. Set by the
+    /// evaluator when a device block is active and a backend is
+    /// registered; plain field so the tape API surface stays within
+    /// the function-count budget.
+    pub resident: Cell<bool>,
 }
 
 impl Tape {
     /// Create a fresh empty tape.
     #[must_use]
     pub fn new() -> Rc<Self> {
-        Rc::new(Self {
-            nodes: RefCell::new(Vec::new()),
-        })
+        Rc::new(Self::default())
     }
 
     /// Push a new node and return its id.

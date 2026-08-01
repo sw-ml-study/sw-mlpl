@@ -21,6 +21,8 @@ default = []
 mlx = [
     "dep:mlpl-mlx-rt",
     "mlpl-mlx-rt/mlx",
+    "dep:mlpl-mlx-handle",
+    "mlpl-mlx-handle/mlx",
     "mlpl-eval-env/mlx",
 ]
 # Saga cuda-foundation step 004 + GPU workspace split S3: dispatch ops
@@ -103,7 +105,9 @@ mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
+mlpl-mlx-handle = { path = "../../../native-rt/crates/mlpl-mlx-handle", optional = true }
 mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true }
+mlpl-tensor-handle = { path = "../../../array/crates/mlpl-tensor-handle" }
 mlpl-cuda-rt = { path = "../../../cuda-rt/crates/mlpl-cuda-rt", optional = true }
 mlpl-cuda-elementwise = { path = "../../../cuda-rt/crates/mlpl-cuda-elementwise", optional = true }
 mlpl-cuda-nn = { path = "../../../cuda-rt/crates/mlpl-cuda-nn", optional = true }

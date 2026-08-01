@@ -81,13 +81,9 @@ pub fn argmax(a: &DenseArray, axis: Option<usize>) -> Result<DenseArray, ArrayEr
     }
     let mlx = dense_to_mlx(a.data(), a.shape().dims());
     let raw = if let Some(ax) = axis {
-        let dims = a.shape().dims();
-        if ax >= dims.len() {
-            return Err(ArrayError::IndexOutOfBounds {
-                axis: ax,
-                index: ax,
-                size: dims.len(),
-            });
+        if ax >= a.rank() {
+            let (axis, index, size) = (ax, ax, a.rank());
+            return Err(ArrayError::IndexOutOfBounds { axis, index, size });
         }
         mlx_rs::ops::indexing::argmax_axis(&mlx, ax as i32, false)
             .expect("mlx argmax_axis on validated axis")

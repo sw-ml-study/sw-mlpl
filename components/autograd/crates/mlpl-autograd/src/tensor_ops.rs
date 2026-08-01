@@ -9,13 +9,14 @@ use std::rc::Rc;
 
 use crate::tensor::Tensor;
 use mlpl_autograd_tape::{BinaryOp, UnaryOp};
-use mlpl_autograd_tape::{NodeData, NodeKind};
+use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, map_unary, try_resident};
+use mlpl_tensor_handle::TensorHandle;
 
 pub(crate) fn push_unary(t: &Tensor, op: UnaryOp) -> Tensor {
-    let x = t.value();
-    let y = op.forward(&x);
+    let value = try_resident(&t.tape, ResidentReq::Unary(t.node, map_unary(op)))
+        .unwrap_or_else(|| TensorHandle::Cpu(op.forward(&t.value())));
     let node = t.tape.push(NodeData {
-        value: y,
+        value,
         grad: None,
         kind: NodeKind::Unary { op, parent: t.node },
         requires_grad: false,
@@ -27,11 +28,18 @@ pub(crate) fn push_unary(t: &Tensor, op: UnaryOp) -> Tensor {
 }
 
 pub(crate) fn push_binary(a: &Tensor, b: &Tensor, op: BinaryOp) -> Tensor {
-    let av = a.value();
-    let bv = b.value();
-    let v = op.forward(&av, &bv).expect("broadcastable shapes");
+    let dev = try_resident(
+        &a.tape,
+        ResidentReq::Binary(a.node, b.node, mlpl_autograd_tape::map_binary(op)),
+    );
+    let value = dev.unwrap_or_else(|| {
+        TensorHandle::Cpu(
+            op.forward(&a.value(), &b.value())
+                .expect("broadcastable shapes"),
+        )
+    });
     let node = a.tape.push(NodeData {
-        value: v,
+        value,
         grad: None,
         kind: NodeKind::Binary {
             op,
@@ -87,9 +95,13 @@ impl Tensor {
     /// the trailing axis of `self`'s logits.
     #[must_use]
     pub fn cross_entropy(&self, targets: Vec<usize>) -> Self {
-        let logits = self.value();
         let value =
-            cross_entropy_forward(&logits, &targets).expect("caller validated shapes and indices");
+            try_resident(&self.tape, ResidentReq::Ce(self.node, &targets)).unwrap_or_else(|| {
+                TensorHandle::Cpu(
+                    cross_entropy_forward(&self.value(), &targets)
+                        .expect("caller validated shapes and indices"),
+                )
+            });
         let node = self.tape.push(NodeData {
             value,
             grad: None,

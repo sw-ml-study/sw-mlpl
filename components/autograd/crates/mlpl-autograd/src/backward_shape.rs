@@ -68,7 +68,7 @@ pub(crate) fn prop_cross_entropy(
     targets: &[usize],
     upstream: &DenseArray,
 ) {
-    let logits_val = tape.nodes()[logits.0].value.clone();
+    let logits_val = tape.nodes()[logits.0].value.to_dense();
     let g = upstream.data()[0];
     let grad = crate::tensor_ops::cross_entropy_backward(&logits_val, targets, g);
     accumulate(&mut tape.nodes_mut()[logits.0].grad, grad);

@@ -1,6 +1,6 @@
 number = 3
 slug = "tape-forward-resident"
-status = "pending"
+status = "in-progress"
 description = "E4 step 3: tape forward stays resident. Generalize the autograd tape's value ..."
 role = "legacy"
 context_files = []
