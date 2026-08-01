@@ -1,9 +1,10 @@
 number = 3
 slug = "tape-forward-resident"
-status = "in-progress"
+status = "completed"
 description = "E4 step 3: tape forward stays resident. Generalize the autograd tape's value ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-01T11:49:07"
+completed_at = "2026-08-01T12:18:22"
 task_type = "rust-feature"
-commits = []
+commits = ["c8c4571e6f06afd4977f292a6907a6f058c7cee7"]
