@@ -1,9 +1,10 @@
 number = 5
 slug = "tape-backward-resident"
-status = "in-progress"
+status = "completed"
 description = "E4 step 4: backward stays resident. Make NodeData.grad a TensorHandle and run..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-01T12:18:22"
+completed_at = "2026-08-01T12:47:03"
 task_type = "rust-feature"
-commits = []
+commits = ["d59a24b1ededf8eebd987f23ef3a6d9348d458f7"]
