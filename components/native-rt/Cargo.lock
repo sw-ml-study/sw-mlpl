@@ -357,6 +357,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-mlx-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-mlx-rt",
+ "mlpl-tensor-handle",
+ "mlx-rs",
+]
+
+[[package]]
 name = "mlpl-mlx-rt"
 version = "0.20.0"
 dependencies = [
@@ -384,6 +394,13 @@ dependencies = [
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-tensor-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]

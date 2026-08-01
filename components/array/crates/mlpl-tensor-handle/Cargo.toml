@@ -1,0 +1,18 @@
+[package]
+# Saga E4 step 002: the device-resident tensor seam. TensorHandle
+# is the value the autograd tape (and later the optimizer state)
+# carries: either a host f64 DenseArray or an opaque handle to a
+# backend-resident array. The backend (MLX today, CUDA later)
+# registers a DeviceOps implementation at startup -- this crate
+# never links a GPU library, so it is dependable from every
+# wasm/Linux-reachable crate (mlpl-autograd, mlpl-eval-state, ...).
+name = "mlpl-tensor-handle"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+
+[lints]
+workspace = true

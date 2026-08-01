@@ -9,18 +9,7 @@ pub trait DotExt {
 
 impl DotExt for DenseArray {
     fn dot(&self, other: &DenseArray) -> Result<DenseArray, ArrayError> {
-        if self.rank() != 1 || other.rank() != 1 {
-            return Err(ArrayError::RankMismatch {
-                expected: 1,
-                got: self.rank().max(other.rank()),
-            });
-        }
-        if self.elem_count() != other.elem_count() {
-            return Err(ArrayError::ShapeMismatch {
-                source: self.elem_count(),
-                target: other.elem_count(),
-            });
-        }
+        check_vectors(self, other)?;
         let s: f64 = self
             .data()
             .iter()
@@ -29,4 +18,21 @@ impl DotExt for DenseArray {
             .sum();
         Ok(DenseArray::from_scalar(s))
     }
+}
+
+/// Both operands must be rank-1 vectors of equal length.
+fn check_vectors(a: &DenseArray, b: &DenseArray) -> Result<(), ArrayError> {
+    if a.rank() != 1 || b.rank() != 1 {
+        return Err(ArrayError::RankMismatch {
+            expected: 1,
+            got: a.rank().max(b.rank()),
+        });
+    }
+    if a.elem_count() != b.elem_count() {
+        return Err(ArrayError::ShapeMismatch {
+            source: a.elem_count(),
+            target: b.elem_count(),
+        });
+    }
+    Ok(())
 }

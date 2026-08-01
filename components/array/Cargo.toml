@@ -3,6 +3,7 @@
 [workspace]
 members = [
     "crates/mlpl-array",
+    "crates/mlpl-tensor-handle",
 ]
 resolver = "2"
 

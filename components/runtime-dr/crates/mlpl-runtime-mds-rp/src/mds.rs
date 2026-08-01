@@ -84,20 +84,26 @@ fn run_sgd(y: &mut [f64], dist: &[f64], n: usize, k: usize, iters: usize, seed: 
             if i == j {
                 continue;
             }
-            let mut cur_sq = 0.0_f64;
-            for c in 0..k {
-                let d_c = y[i * k + c] - y[j * k + c];
-                cur_sq += d_c * d_c;
-            }
-            let cur = cur_sq.sqrt().max(EPS);
-            let target = dist[i * n + j];
-            let g = lr * (cur - target) / cur;
-            for c in 0..k {
-                let delta = g * (y[i * k + c] - y[j * k + c]);
-                y[i * k + c] -= delta;
-                y[j * k + c] += delta;
-            }
+            sgd_pair_step(y, dist[i * n + j], (i, j), k, lr);
         }
+    }
+}
+
+/// One stress-majorization SGD update for the pair `(i, j)`: pull
+/// or push the two embedded points along their difference vector
+/// toward the target distance.
+fn sgd_pair_step(y: &mut [f64], target: f64, (i, j): (usize, usize), k: usize, lr: f64) {
+    let mut cur_sq = 0.0_f64;
+    for c in 0..k {
+        let d_c = y[i * k + c] - y[j * k + c];
+        cur_sq += d_c * d_c;
+    }
+    let cur = cur_sq.sqrt().max(EPS);
+    let g = lr * (cur - target) / cur;
+    for c in 0..k {
+        let delta = g * (y[i * k + c] - y[j * k + c]);
+        y[i * k + c] -= delta;
+        y[j * k + c] += delta;
     }
 }
 

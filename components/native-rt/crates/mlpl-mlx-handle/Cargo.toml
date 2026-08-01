@@ -1,0 +1,28 @@
+[package]
+# Saga E4 step 002: the MLX implementation of the mlpl-tensor-handle
+# backend contract. MlxBuf keeps an mlx_rs::Array LAZY -- ops build
+# the graph without .eval(); only DeviceArray::to_dense forces it.
+# Every entry point serializes on mlpl-mlx-rt's process-wide
+# mlx_op_lock (the Metal backend SIGSEGVs under concurrent
+# submissions). Apple Silicon + the `mlx` feature gate everything;
+# off-target the crate exports nothing.
+name = "mlpl-mlx-handle"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[features]
+default = []
+mlx = ["dep:mlx-rs", "mlpl-mlx-rt/mlx"]
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-mlx-rt = { path = "../mlpl-mlx-rt" }
+mlpl-tensor-handle = { path = "../../../array/crates/mlpl-tensor-handle" }
+mlx-rs = { version = "=0.25.3", optional = true, default-features = false, features = [
+  "accelerate",
+  "metal",
+] }
+
+[lints]
+workspace = true

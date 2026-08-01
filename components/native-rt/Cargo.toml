@@ -4,6 +4,7 @@
 [workspace]
 members = [
     "crates/mlpl-mlx-forward",
+    "crates/mlpl-mlx-handle",
     "crates/mlpl-mlx-rt",
     "crates/mlpl-mlx-train",
     "crates/mlpl-rt",

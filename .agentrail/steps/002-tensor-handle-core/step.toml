@@ -1,6 +1,6 @@
 number = 2
 slug = "tensor-handle-core"
-status = "pending"
+status = "in-progress"
 description = "E4 step 2: the device-resident handle. New wasm-clean crate (suggest componen..."
 role = "legacy"
 context_files = []

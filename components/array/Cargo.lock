@@ -90,6 +90,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-tensor-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "proc-macro2"
 version = "1.0.106"
 source = "registry+https://github.com/rust-lang/crates.io-index"

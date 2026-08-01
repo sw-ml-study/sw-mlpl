@@ -17,15 +17,7 @@ use crate::common::{dense_to_mlx, finalize, matmul_labels, mlx_to_dense_data};
 /// - `[m, k] @ [k]    -> [m]`
 pub fn matmul(a: &DenseArray, b: &DenseArray) -> Result<DenseArray, ArrayError> {
     let _gpu = crate::common::mlx_op_lock();
-    let (m, k) = match a.shape().dims() {
-        [m, k] => (*m, *k),
-        _ => {
-            return Err(ArrayError::RankMismatch {
-                expected: 2,
-                got: a.rank(),
-            });
-        }
-    };
+    let (m, k) = lhs_dims(a)?;
     let result_labels = matmul_labels(a, b)?;
     match b.shape().dims() {
         [k2, n] if *k2 == k => {
@@ -52,4 +44,15 @@ fn compute(a: &[f64], b: &[f64], a_dims: &[usize], b_dims: &[usize]) -> Vec<f64>
         .matmul(&b_mlx)
         .expect("mlx matmul on pre-validated shapes should not fail");
     mlx_to_dense_data(c)
+}
+
+/// The left operand must be rank-2 `[m, k]`.
+fn lhs_dims(a: &DenseArray) -> Result<(usize, usize), ArrayError> {
+    match a.shape().dims() {
+        [m, k] => Ok((*m, *k)),
+        _ => Err(ArrayError::RankMismatch {
+            expected: 2,
+            got: a.rank(),
+        }),
+    }
 }

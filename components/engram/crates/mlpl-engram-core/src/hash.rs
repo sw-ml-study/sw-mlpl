@@ -86,8 +86,7 @@ pub fn ngram_hashes(ids: &[u64], spec: &HashSpec) -> Result<Vec<Vec<Vec<u64>>>, 
                             (0..order)
                                 .map(|k| if t >= k { ids[t - k] } else { 0 })
                                 .zip(&mults[oi][head])
-                                .map(|(id, m)| (id * m) % HASH_PRIME)
-                                .sum::<u64>()
+                                .fold(0, |s, (id, m)| s + (id * m) % HASH_PRIME)
                                 % slots
                         })
                         .collect()
