@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 6,
+    "step": "tiny-lm-engram-demo"
+  },
+  "action": "demo authored against verified step-1/2/5 features; numeric verification through release mlpl-repl stdin before landing; progress-notes + pinned-count discipline; trunk installed via brew to unblock the pages gate; full release suite + clippy/fmt scoped to web-demos",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-01T09:04:20"
+}
