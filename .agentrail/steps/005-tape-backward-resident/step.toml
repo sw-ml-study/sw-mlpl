@@ -1,4 +1,4 @@
-number = 4
+number = 5
 slug = "tape-backward-resident"
 status = "pending"
 description = "E4 step 4: backward stays resident. Make NodeData.grad a TensorHandle and run..."

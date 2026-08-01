@@ -38,6 +38,8 @@ pub fn footer(props: &FooterProps) -> Html {
             <span class="footer-sep">{"\u{00b7}"}</span>
             <a href="https://www.youtube.com/@SoftwareWrighter" target="_blank" rel="noopener">{"YouTube"}</a>
             <span class="footer-sep">{"\u{00b7}"}</span>
+            <a href="https://github.com/sw-ml-study/sw-mlpl/wiki" target="_blank" rel="noopener">{"Wiki"}</a>
+            <span class="footer-sep">{"\u{00b7}"}</span>
             <span>{ &props.build_info }</span>
         </footer>
     }
