@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- saga mlx-persistent-tensors-e4: step 001 complete (4b7a79dd)
+- feat(mlx): Metal ON -- MLX now executes on the GPU (E4 step 1)
+- saga: init mlx-persistent-tensors-e4 (Approach A per docs/future-saga-gpu-training.md; step 1 metal-on queued)
+- saga: archive engram-e3-tiny-lm
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e3-tiny-lm: complete (6 steps)
 - feat(demos): Tiny LM + Engram -- the E3 finale demo with stats panel (E3 step 6)
 
