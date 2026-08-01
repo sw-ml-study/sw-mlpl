@@ -1,0 +1,1061 @@
+ChatGPT Pro
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Yesterday 11:38 AM
+mHC is an ML technique of interest to me, see my blog post (and related posts): https://software-wrighter-lab.github.io/2026/02/01/deepseek-papers-part1-mhc/ and the github repo: softwarewrighter/mHC-poc.  I also am developing my ML programming language (alternative to Python, Google Colab), sw-ml-study/sw-mlpland I want my language to support the use of mHC for appopriate models.  I want to add mHC demos.  How feasible is this?  How should I approach this?  Come up with a plan, for CUDA and for MLX (possibly for CPU-only, too).
+
+Worked for 1m 5s
+Assessment
+You want sw-MLPL to express, train, inspect, and benchmark mHC models, while preserving one model definition across:
+
+the existing CPU interpreter/native runtime,
+
+the shipped MLX backend,
+
+the planned CUDA backend,
+
+and eventually optimized compiled execution.
+
+This is highly feasible as a correctness-first feature. It is moderately difficult as a performant accelerator feature, because mHC itself is mathematically simple, but it exposes architectural weaknesses in the current backend boundary—especially MLX graph fragmentation and CPU-based autograd.
+
+The encouraging point is that your existing projects already contain nearly all the conceptual pieces:
+
+mHC-poc has equivalent MLX and PyTorch implementations, a stability benchmark, and cross-platform reference results.
+
+sw-MLPL already has model composition, residual layers, labeled tensors, autograd, optimizers, transformers, device scopes, and an MLX runtime.
+
+The core mHC projection requires only exp, reductions, maximum/clamp, division, transpose, and matrix multiplication—all operations already present or natural for your backends.
+
+DeepSeek presents mHC as a general projection of HC connectivity onto a constrained manifold, not as a CUDA-specific algorithm. 
+
+My recommendation is to treat mHC as two related language capabilities, not one monolithic built-in:
+
+General constrained tensor transformations
+
+A high-level multi-stream residual model layer
+
+That separation will make mHC a useful language feature rather than a one-off demo.
+
+1. What mHC requires
+Your POC represents hidden state as:
+
+[batch, tokens, streams, features]
+For each model layer, it performs approximately:
+
+x_pre     = mix(H_pre, x)
+merged    = mean(x_pre, stream)
+f_out     = block(merged)
+f_streams = broadcast(f_out, stream)
+f_mixed   = mix(transpose(H_post), f_streams)
+residual  = mix(H_res, x)
+x_next    = residual + f_mixed
+Here:
+
+H_pre is row-stochastic.
+
+H_post is row-stochastic.
+
+H_res is doubly stochastic.
+
+H_res is produced by exponentiating learned logits and applying repeated row/column normalization.
+
+That is precisely how your current MLX reference model is structured.
+
+The doubly stochastic projection is:
+
+X = exp(logits)
+
+repeat iterations:
+    X = X / max(sum(X, rows), epsilon)
+    X = X / max(sum(X, columns), epsilon)
+Your MLX and PyTorch implementations deliberately mirror each other.
+
+This is computationally modest because the stream matrix is normally very small—often 4 × 4. The expensive work remains the transformer block, not Sinkhorn itself.
+
+2. Feasibility by backend
+Target	Correctness feasibility	Performance feasibility	Main risk
+CPU interpreter	Very high	Adequate for demos	Deep interpreter overhead
+Compiled CPU	Very high	Good for small models	Temporary tensor allocations
+MLX current architecture	High	Initially poor/modest	Per-op conversion and forced evaluation
+MLX fused/native graph	High	Good	Requires graph-level lowering
+CUDA via Rust tensor library	High	Good	Backend/library choice
+CUDA custom kernels	Unnecessary initially	Potentially excellent	Large maintenance cost
+WASM	High for visualization/small demos	Poor for deep training	Memory and execution time
+CPU
+CPU-only mHC should be your first implementation target.
+
+The Sinkhorn matrix is tiny, and the stream mixing can be implemented using existing reshape/transpose/matmul operations. Even a 48-layer synthetic stress test should be practical at small dimensions.
+
+CPU gives you:
+
+deterministic reference behavior,
+
+straightforward finite-difference gradient checks,
+
+no device transfer complications,
+
+WASM-compatible educational demos,
+
+a reference oracle for MLX and CUDA parity tests.
+
+The main CPU optimization is not a special Sinkhorn implementation. It is avoiding repeated allocation and general-purpose tensor dispatch inside every layer.
+
+MLX
+Correctness is very feasible, but the current MLX backend is not yet shaped for efficient mHC training.
+
+Your MLX documentation identifies four existing bottlenecks:
+
+f64-to-f32 and f32-to-f64 copies on every operation,
+
+an .eval() after each primitive,
+
+CPU tape construction followed by MLX rematerialization,
+
+workloads too small to amortize accelerator overhead.
+
+mHC would magnify the first three because every layer introduces:
+
+multiple reductions,
+
+normalizations,
+
+transposes,
+
+small matrix multiplications,
+
+broadcasting,
+
+and repeated Sinkhorn iterations.
+
+A literal interpreter-level implementation of 20 Sinkhorn iterations could generate dozens of backend crossings per layer. It would be correct but probably slower than CPU.
+
+Therefore:
+
+Implement mHC on the current MLX path for parity first, but do not use its initial speed as evidence about MLX’s suitability.
+
+The real MLX target should lower the entire Sinkhorn projection—or preferably the entire mHC layer—as a lazy MLX graph before evaluation.
+
+CUDA
+CUDA is feasible through several paths, but I would avoid writing custom CUDA kernels first.
+
+The POC proves that ordinary PyTorch operations are sufficient to reproduce the MLX behavior. Your CUDA reference uses standard differentiable tensor operators rather than a specialized Sinkhorn kernel.
+
+For sw-MLPL, the practical choices are:
+
+Approach	Benefits	Risks
+candle-core CUDA backend	Rust-native, relatively lightweight	Operator/autograd coverage may require additions
+burn backend	Multi-backend architecture and training abstractions	More framework policy than MLPL may want
+tch-rs/LibTorch	Mature CUDA and autograd	Large dependency, C++ runtime, deployment complexity
+cudarc + custom runtime	Maximum control	You must build tensor ops and autograd plumbing
+External PyTorch worker	Fastest experiment	Violates the long-term no-Python deployment goal
+For the first CUDA backend, I would lean toward Candle or Burn as an execution substrate, hidden below your own backend traits. Do not let either framework’s model API leak into MLPL.
+
+3. Recommended language design
+Layer 1: General tensor primitive
+Add a general operation:
+
+H = sinkhorn(logits,
+             iterations=20,
+             epsilon=1e-12,
+             axis_rows="out_stream",
+             axis_cols="in_stream")
+A more general name might be:
+
+H = doubly_stochastic(logits, iterations=20)
+I prefer doubly_stochastic as the user-facing operation and sinkhorn as an optional lower-level primitive:
+
+H = doubly_stochastic(logits)
+H = sinkhorn(exp(logits), iterations=20)
+Semantics should state explicitly:
+
+logits are transformed to positive values first,
+
+normalization runs for a fixed number of iterations,
+
+output approximately satisfies row and column sums of one,
+
+gradients flow through every iteration,
+
+computation occurs in at least fp32 even under lower-precision training.
+
+Why expose this separately?
+It provides reusable support for:
+
+mHC,
+
+differentiable assignment,
+
+transport-like models,
+
+routing matrices,
+
+mixture balancing,
+
+permutation relaxations,
+
+attention constraints.
+
+It also makes the mHC demo educational: users can inspect the actual constrained matrix.
+
+Layer 2: Stream mixing layer
+Add:
+
+mix = stream_mix(
+    streams=4,
+    constraint="doubly_stochastic",
+    sinkhorn_iterations=20,
+    init="near_identity"
+)
+Application:
+
+y = apply(mix, x)
+With labeled dimensions:
+
+x : [batch, token, stream, feature]
+H : [out_stream, in_stream]
+y = stream_matmul(H, x, axis="stream")
+A dedicated stream_matmul operation is useful even if it lowers to transpose + matmul + transpose. It preserves intent, validates labels, and gives accelerator backends an optimization target.
+
+Layer 3: High-level mHC wrapper
+Provide a compositional model layer:
+
+block = mhc(
+    transformer_block(...),
+    streams=4,
+    sinkhorn_iterations=20
+)
+Then:
+
+model = chain(
+    embed(vocab, width),
+    repeat_layer(
+        mhc(
+            transformer_block(width, heads, ff_width),
+            streams=4
+        ),
+        depth=48
+    ),
+    collapse_streams("mean"),
+    rms_norm(width),
+    linear(width, vocab)
+)
+Alternatively, explicitly represent the stream expansion:
+
+model = chain(
+    embed(vocab, width),
+    expand_streams(4),
+    repeat_layer(mhc_block(...), 48),
+    reduce_streams("mean"),
+    rms_norm(width),
+    linear(width, vocab)
+)
+I favor the second form because the tensor topology remains visible.
+
+4. Do not hard-code mHC as “a Transformer feature”
+mHC should wrap an arbitrary model component:
+
+mhc_block(mlp(...))
+mhc_block(attention(...))
+mhc_block(conv_block(...))
+mhc_block(state_space_block(...))
+The DeepSeek paper describes mHC as a generalized connection architecture intended to restore desirable residual identity behavior while preserving richer HC connectivity. 
+
+Your internal representation should therefore resemble:
+
+pub struct MhcLayer {
+    body: ModelId,
+    streams: usize,
+    pre_mix: StreamMix,
+    post_mix: StreamMix,
+    residual_mix: StreamMix,
+    collapse: StreamCollapse,
+}
+Not:
+
+pub struct MhcTransformerLayer { ... }
+A transformer demo can be the flagship use case, but the runtime abstraction should remain model-independent.
+
+5. Backend architecture
+The important architectural decision is to stop implementing complex model operations solely as sequences of evaluator-level primitive calls.
+
+Use three lowering levels.
+
+Level A: Language AST
+MhcLayer
+DoublyStochastic
+StreamMix
+ExpandStreams
+ReduceStreams
+These retain user intent, labels, validation rules, and documentation.
+
+Level B: Backend-neutral tensor IR
+For example:
+
+Exp
+ReduceSum
+MaximumScalar
+Divide
+Transpose
+MatMul
+Broadcast
+Add
+Mean
+LoopFixed
+Initially, DoublyStochastic can lower to these primitives.
+
+Later, preserve it as a composite IR node:
+
+DoublyStochastic {
+    input,
+    iterations,
+    epsilon,
+}
+That allows backend fusion.
+
+Level C: Backend-specific execution
+CPU: optimized Rust loops or general tensor primitives.
+
+MLX: construct one lazy MLX graph and evaluate at a materialization boundary.
+
+CUDA: invoke backend tensor operations or a fused implementation.
+
+WASM: scalar/SIMD CPU implementation.
+
+This structure prevents the interpreter from becoming the execution engine for accelerators.
+
+6. Autograd design
+Initial approach
+Allow the current reverse-mode tape to record Sinkhorn as ordinary differentiable operations:
+
+exp
+sum
+maximum
+divide
+This is the easiest correctness path and should work on CPU immediately.
+
+Tests should include:
+
+finite-difference checking of logits,
+
+gradient comparison against the MLX POC,
+
+gradient comparison against the PyTorch POC,
+
+checks near the epsilon clamp boundary,
+
+tests with identity-like and random initialization.
+
+Better approach
+Add a composite tape node:
+
+TapeOp::DoublyStochastic {
+    input: NodeId,
+    iterations: u16,
+    epsilon: f32,
+}
+There are two ways to backpropagate it:
+
+Option A: Save every iteration
+Pros
+
+simplest mathematically,
+
+closely follows ordinary autograd,
+
+easy to validate.
+
+Cons
+
+memory grows with Sinkhorn iteration count,
+
+duplicates many tiny intermediate matrices.
+
+For stream count four and 20 iterations, this memory is actually negligible.
+
+Option B: Recompute iterations during backward
+Pros
+
+minimizes saved state,
+
+demonstrates checkpoint/recomputation infrastructure.
+
+Cons
+
+more implementation complexity,
+
+not materially valuable for 4 × 4 matrices.
+
+Start with Option A. Optimize only when you support much larger routing matrices.
+
+7. Numerical requirements
+This is where the feature needs more care than its code size suggests.
+
+Positivity transform
+Your POC uses:
+
+A = exp(logits)
+That is smooth and simple, but may overflow for extreme logits.
+
+Consider supporting:
+
+positive = exp(logits - max(logits))
+or:
+
+positive = softplus(logits) + epsilon
+However, do not silently diverge from the POC during parity work. First reproduce the reference exactly; then add alternative parameterizations as explicit options.
+
+doubly_stochastic(
+    logits,
+    positive="exp",
+    stabilize="subtract_max"
+)
+Precision
+Recommended policy:
+
+parameters may be bf16/fp16,
+
+Sinkhorn accumulation and division use fp32,
+
+result may be cast back to model dtype,
+
+CPU reference can use f64 for gradient checking,
+
+cross-backend parity should compare fp32 outputs.
+
+Convergence diagnostics
+Expose:
+
+row_error(H)
+column_error(H)
+stochastic_error(H)
+or a general inspection result:
+
+inspect_constraint(H, "doubly_stochastic")
+Metrics:
+
+max(abs(row_sum - 1))
+max(abs(column_sum - 1))
+min(H)
+max(H)
+spectral_norm(H)
+The exact constraint is approximate after a fixed number of iterations, so the language should not describe it as mathematically exact.
+
+8. Demo sequence
+Do not begin with the full 48-layer tiny language model. Build a progression.
+
+Demo 1: Sinkhorn projection
+L : [out_stream, in_stream] = [
+  [ 2, -1, -1, -1],
+  [-1,  2, -1, -1],
+  [-1, -1,  2, -1],
+  [-1, -1, -1,  2]
+]
+
+H = doubly_stochastic(L, iterations=20)
+
+print(H)
+print(reduce_add(H, "out_stream"))
+print(reduce_add(H, "in_stream"))
+heatmap(H)
+Purpose:
+
+show the primitive,
+
+show named-axis semantics,
+
+show convergence,
+
+run in browser/WASM.
+
+Demo 2: Stream mixing
+Construct four artificial streams and show that:
+
+unconstrained mixing can amplify,
+
+row-stochastic mixing preserves each output mixture,
+
+doubly stochastic mixing balances both incoming and outgoing flow.
+
+This should be visual, not just numerical.
+
+Demo 3: Deep linear residual stack
+Use a very small model:
+
+width = 8
+streams = 4
+depth = 12, 24, 48, 96
+Compare:
+
+residual,
+
+unconstrained HC,
+
+row-stochastic HC,
+
+mHC.
+
+This isolates the topology from attention and tokenization.
+
+Demo 4: Tiny MLP classification
+Use moons or circles, which MLPL already supports.
+
+Compare:
+
+standard residual MLP,
+
+HC MLP,
+
+mHC MLP.
+
+This demonstrates that mHC is not Transformer-specific.
+
+Demo 5: Tiny transformer stability sweep
+Port the existing incrementing-token benchmark:
+
+(start + position) mod vocabulary_size
+Your current POC intentionally uses this learnable synthetic task because it trains quickly and highlights stability rather than claiming SOTA quality.
+
+Run depths:
+
+12, 24, 48
+Track:
+
+loss,
+
+global gradient norm,
+
+NaN/Inf events,
+
+row/column stochastic error,
+
+residual gain proxy,
+
+wall-clock time,
+
+peak memory.
+
+Demo 6: Backend parity
+Run the same .mlpl program under:
+
+mlpl run demo.mlpl --device cpu
+mlpl run demo.mlpl --device mlx
+mlpl run demo.mlpl --device cuda:0
+Generate a comparison report rather than maintaining separate source programs.
+
+9. Benchmark methodology
+Your existing POC reports a strong contrast between unconstrained HC and mHC at depth, including bounded mHC gain in the tested configuration. 
+
+For the MLPL demo, separate three claims:
+
+Correctness
+row/column sums approach one,
+
+gradients match references,
+
+CPU/MLX/CUDA outputs agree within tolerance.
+
+Stability
+no NaNs/Infs,
+
+bounded gain proxy,
+
+trainability as depth increases,
+
+gradient norm distribution remains usable.
+
+Performance
+training steps/second,
+
+tokens/second,
+
+peak resident memory,
+
+backend transfer count,
+
+graph evaluations per step,
+
+kernel launches if available.
+
+Avoid combining them into a single “mHC is faster” conclusion. The paper discusses infrastructure efficiency, but a simple educational implementation may add overhead even while improving training stability. 
+
+10. CUDA plan
+Phase CUDA-0: Reference parity without MLPL CUDA
+Before Saga 17 ships, make the MLPL demo export its inputs and parameters:
+
+config.json
+tokens.bin
+targets.bin
+parameters.safetensors
+expected-step.json
+Then run the existing PyTorch reference against them.
+
+This gives you cross-platform validation before building the CUDA backend.
+
+Phase CUDA-1: Minimal backend
+Implement only the operations needed by the mHC stress test:
+
+tensor allocation,
+
+device transfer,
+
+elementwise arithmetic,
+
+exp,
+
+maximum,
+
+reductions,
+
+transpose/permutation,
+
+batched matmul,
+
+mean,
+
+embedding,
+
+linear,
+
+normalization,
+
+attention or SDPA,
+
+cross entropy,
+
+Adam.
+
+Do not begin with distributed execution. It is orthogonal to proving mHC.
+
+Phase CUDA-2: Backend-neutral model execution
+Ensure the same Model tree is lowered to CPU, MLX, and CUDA.
+
+Avoid:
+
+match device {
+    Cpu => apply_cpu_mhc(...),
+    Mlx => apply_mlx_mhc(...),
+    Cuda => apply_cuda_mhc(...),
+}
+throughout model code.
+
+Prefer:
+
+backend.doubly_stochastic(...)
+backend.stream_mix(...)
+backend.transformer_block(...)
+or IR lowering.
+
+Phase CUDA-3: Fusion
+Profile first. Likely opportunities:
+
+Fuse row normalization:
+
+reduce_sum + clamp + divide
+Fuse column normalization.
+
+Fuse stream transpose/matmul/transpose.
+
+Cache layout decisions.
+
+Use batched GEMM for stream mixing across batch/tokens/features.
+
+Because S is tiny, a custom kernel may eventually outperform general GEMM. But attention and MLP operations will dominate most realistic models, so this is low priority.
+
+Phase CUDA-4: Mixed precision
+Add:
+
+precision {
+    model = "bf16"
+    accumulate = "fp32"
+    constraints = "fp32"
+}
+Keep Sinkhorn in fp32 even if the transformer uses bf16.
+
+11. MLX plan
+Phase MLX-0: Literal implementation
+Implement doubly_stochastic through existing MLX operations.
+
+Goal:
+
+parity,
+
+not speed.
+
+Add counters for:
+
+MLX evaluations,
+
+host-to-device conversions,
+
+device-to-host conversions,
+
+temporary arrays.
+
+Phase MLX-1: Remove eager .eval()
+The current backend evaluates each primitive, preventing MLX from fusing a useful graph.
+
+Introduce a lazy backend value:
+
+enum TensorStorage {
+    Cpu(DenseArray),
+    Mlx(MlxArrayHandle),
+}
+Do not copy MLX results back into DenseArray after every operation.
+
+Materialize only for:
+
+printing,
+
+visualization,
+
+explicit to_device,
+
+scalar control-flow conditions,
+
+checkpoints,
+
+metrics requested by the host.
+
+Phase MLX-2: Native accelerator autograd
+Your shipped MLX path currently keeps the CPU tape and rematerializes forward values on MLX. That is acceptable for parity but not for a serious mHC benchmark.
+
+Longer term, lower a whole differentiable MLPL region to an MLX closure:
+
+model parameters + batch -> loss
+Then use MLX’s gradient transformation around that closure.
+
+This requires a distinction between:
+
+dynamic interpreter execution,
+
+traceable tensor computation,
+
+non-tensor side effects.
+
+A scoped form could make this explicit:
+
+compiled_graph(device="mlx") {
+    loss = ...
+}
+Eventually train can imply this automatically.
+
+Phase MLX-3: Composite mHC graph
+Preserve:
+
+DoublyStochastic
+StreamMix
+MhcLayer
+through lowering so the backend can construct the whole graph before evaluation.
+
+Phase MLX-4: Larger benchmark
+Your current Tiny-LM dimensions are too small to make MLX competitive, and the documentation already records MLX running slower than CPU at that scale.
+
+Use two benchmark classes:
+
+Educational: runs quickly in the web/REPL.
+
+Accelerator: d_model 256 or larger, enough batch/tokens to amortize dispatch.
+
+12. CPU implementation plan
+Initial generic implementation
+Implement the operation using existing array primitives to prove semantics.
+
+Optimized implementation
+Add an internal CPU routine operating directly on contiguous memory:
+
+pub fn sinkhorn_square(
+    logits: &[f32],
+    streams: usize,
+    iterations: usize,
+    epsilon: f32,
+    output: &mut [f32],
+    scratch: &mut [f32],
+)
+For stream mixing, avoid materializing transposed tensors:
+
+pub fn mix_stream_axis(
+    matrix: &[f32],
+    input: &[f32],
+    outer: usize,
+    streams: usize,
+    features: usize,
+    output: &mut [f32],
+)
+Where:
+
+outer = batch × tokens
+This can become a simple cache-friendly loop.
+
+CPU advantages
+no kernel launch overhead,
+
+excellent for S=4,
+
+deterministic,
+
+easy to inspect,
+
+suitable for WASM.
+
+CPU risks
+transformer matmuls dominate at useful dimensions,
+
+naive attention will limit depth,
+
+interpreter dispatch can obscure the low cost of mHC itself.
+
+The compiled CPU path should therefore be included in benchmarks separately from the interpreter.
+
+13. Testing matrix
+Unit tests
+Sinkhorn preserves shape and labels.
+
+Inputs remain positive after parameterization.
+
+Row/column sums converge.
+
+Identity-biased initialization remains near identity.
+
+Stream mixing operates on the named stream axis.
+
+Invalid or duplicate labels fail cleanly.
+
+Zero iterations has documented behavior.
+
+Non-square matrices are rejected initially.
+
+Gradient tests
+For small 2 × 2 and 4 × 4 matrices:
+
+analytic vs finite difference,
+
+CPU vs MLX,
+
+CPU vs PyTorch reference,
+
+multiple iteration counts,
+
+random and identity-biased logits.
+
+Model parity
+With identical stored parameters and inputs:
+
+CPU forward
+MLX forward
+CUDA forward
+PyTorch reference
+existing MLX reference
+Compare:
+
+projected matrices,
+
+layer outputs,
+
+final logits,
+
+loss,
+
+logits gradients,
+
+selected parameter gradients.
+
+Stability regression
+Store expected qualitative results, not overly precise loss values:
+
+mHC has no NaN/Inf events
+mHC stochastic error < tolerance
+HC gain exceeds threshold at selected depth
+mHC gain remains below threshold
+This makes tests robust across backend/library revisions.
+
+14. Suggested implementation milestones
+Milestone 1 — CPU mathematical primitive
+Deliver:
+
+doubly_stochastic,
+
+labeled-axis validation,
+
+fixed-iteration Sinkhorn,
+
+unit tests,
+
+heatmap demo,
+
+gradient checks.
+
+Milestone 2 — Stream topology
+Deliver:
+
+expand_streams,
+
+stream_mix,
+
+reduce_streams,
+
+row-stochastic and unconstrained modes,
+
+visual stream-mixing demo.
+
+Milestone 3 — Generic mHC model layer
+Deliver:
+
+mhc_block(body, streams, ...),
+
+MLP-based demo,
+
+model introspection output,
+
+parameter enumeration and optimizer support.
+
+Milestone 4 — POC reproduction
+Deliver:
+
+tiny transformer,
+
+baseline/HC/mHC variants,
+
+12/24/48-layer sweep,
+
+JSON metrics,
+
+plots,
+
+comparison with your existing POC.
+
+Milestone 5 — MLX correctness
+Deliver:
+
+same .mlpl source,
+
+MLX parity tests,
+
+explicit performance warning,
+
+backend crossing instrumentation.
+
+Milestone 6 — MLX graph execution
+Deliver:
+
+persistent MLX tensors,
+
+delayed evaluation,
+
+accelerator-side gradient region,
+
+larger throughput benchmark.
+
+Milestone 7 — CUDA minimum viable backend
+Deliver:
+
+one-GPU execution,
+
+parity with CPU and MLX,
+
+mixed precision,
+
+no distributed support yet.
+
+Milestone 8 — Performance work
+Deliver:
+
+backend profiling,
+
+composite/fused Sinkhorn,
+
+optimized stream-axis mixing,
+
+benchmark report,
+
+memory report.
+
+15. Recommended first MLPL syntax
+A useful initial user-facing form could be:
+
+experiment "mhc-depth-48" {
+  device("cpu") {
+    model = chain(
+      embed(64, 32),
+      expand_streams(4),
+      repeat_layer(
+        mhc_block(
+          transformer_block(32, 4, 128),
+          streams=4,
+          residual_constraint="doubly_stochastic",
+          pre_constraint="row_stochastic",
+          post_constraint="row_stochastic",
+          sinkhorn_iterations=20,
+          epsilon=0.000000000001
+        ),
+        48
+      ),
+      reduce_streams("mean"),
+      rms_norm(32),
+      linear(32, 64, 99)
+    )
+
+    train 500 {
+      adam(
+        cross_entropy(apply(model, X), Y),
+        model,
+        0.001, 0.9, 0.999, 0.00000001
+      )
+
+      loss_metric = cross_entropy(apply(model, X), Y)
+      gain_metric = residual_gain(model)
+      constraint_metric = stochastic_error(model)
+    }
+  }
+}
+And the low-level educational equivalent:
+
+logits : [out_stream, in_stream] = param([4, 4], "identity_bias")
+
+H = doubly_stochastic(
+  logits,
+  iterations=20,
+  epsilon=0.000000000001
+)
+
+x : [batch, token, in_stream, feature] = ...
+
+mixed = stream_matmul(
+  H,
+  x,
+  matrix_input_axis="in_stream",
+  tensor_axis="in_stream",
+  output_axis="out_stream"
+)
+Bottom line
+Adding meaningful mHC support is very feasible. The CPU reference and language-level implementation are relatively straightforward because your existing MLPL operation set is already sufficient. The feature also fits naturally with MLPL’s strongest differentiators: named axes, inspectable models, portable source, built-in visualization, and backend parity.
+
+The larger project is not mHC itself. It is evolving sw-MLPL from per-operation accelerator dispatch toward graph-level accelerator lowering. mHC is an excellent driver for that work because it:
+
+contains a recognizable composite mathematical operation,
+
+stresses autograd and lazy fusion,
+
+has tiny inspectable matrices,
+
+has existing MLX and CUDA/PyTorch reference implementations,
+
+and offers a clear cross-backend stability demonstration.
+
+I would make the first deliverable a CPU/WASM Sinkhorn and stream-mixing tutorial, then a generic mhc_block, then reproduce the existing depth sweep. MLX correctness should follow immediately, while MLX performance and CUDA become separate backend engineering milestones rather than blockers for shipping the language feature.
+
+

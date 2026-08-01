@@ -313,6 +313,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-array-ops-compose"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-array-ops-element"
 version = "0.20.0"
 dependencies = [
@@ -343,6 +350,33 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-autograd"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
+ "mlpl-autograd-tape",
+ "mlpl-core",
+ "mlpl-tensor-handle",
+]
+
+[[package]]
+name = "mlpl-autograd-tape"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
+ "mlpl-core",
+ "mlpl-tensor-handle",
+]
+
+[[package]]
 name = "mlpl-core"
 version = "0.20.0"
 dependencies = [
@@ -361,6 +395,8 @@ name = "mlpl-mlx-handle"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-autograd",
+ "mlpl-autograd-tape",
  "mlpl-mlx-rt",
  "mlpl-tensor-handle",
  "mlx-rs",
