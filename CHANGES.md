@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-01
+
+- saga engram-e3-tiny-lm: complete (6 steps)
+- feat(demos): Tiny LM + Engram -- the E3 finale demo with stats panel (E3 step 6)
+
 ## 2026-07-31
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-e3-tiny-lm: step 005 complete (940fa85d)
 - feat(engram): engram_stats builtin -- addressing, memory, and gate health (E3 step 5)
 - docs(changes): refresh CHANGES.md to HEAD
