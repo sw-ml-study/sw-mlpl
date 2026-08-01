@@ -1,9 +1,10 @@
 number = 2
 slug = "tensor-handle-core"
-status = "in-progress"
+status = "completed"
 description = "E4 step 2: the device-resident handle. New wasm-clean crate (suggest componen..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-01T10:02:46"
+completed_at = "2026-08-01T11:49:07"
 task_type = "rust-feature"
-commits = []
+commits = ["a1b9bbc10c00404bd4428ea41efb2fdc48840fc4"]
