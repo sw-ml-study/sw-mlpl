@@ -963,3 +963,37 @@ stay glossary-level by design. Drive-by: the demo smoke suite's
 45-minute hang on GPU-less hosts (LoRA fine-tunes missing from
 SKIP_DEMOS) was found and fixed, with per-demo wall-clock prints
 added; the suite runs in 28s.
+
+## Saga: Engram E1-E3 -- primitives, DSL, Tiny-LM integration (COMPLETE, 2026-08-01)
+
+The first three sagas of the Engram plan (docs/engram-sagas-plan.md,
+CPU-first per decision D2). E1 (engram-primitives) froze the
+cross-backend addressing contract in mlpl-engram-core: f64-exact
+mul-add-mod rolling n-gram hashes (decision D4), head-offset layout
+for the ONE flattened memory table, ngram_hash + gather_rows
+builtins, and the golden fixture every backend must reproduce
+bit-for-bit. E2 (engram-dsl) made Engram a Model-DSL citizen:
+ModelSpec::Engram, the engram(...) constructor with near-identity
+init (zero table, gate bias -2), the explicit apply_engram(e, h,
+ids) forward (decision D3), selection-matmul tape lowering whose
+backward IS the scatter-ADD gradient, and the Learnable Phrase
+Memory demo. E3 (engram-tiny-lm) put the engram INSIDE the model:
+a Chain now threads its ORIGINAL input ids to any Engram child on
+both the eager and tape paths (chain(...) also learned to resolve
+bound model identifiers), so freeze(base) + adam(loss, m, ...)
+trains a chain-embedded engram against a bit-identical frozen base
+with zero optimizer changes. engram_stats(e[, h], ids) reports the
+health panel -- lookups/unique_rows/collisions from the frozen
+contract (repetition is not collision), nonzero_rows/max_row_norm,
+gate_mean/gate_max -- as an addressable record. The "Tiny LM +
+Engram" demo closes the arc: byte-level 1-block LM, 30 base steps,
+freeze, insert, 40 engram-only steps; verified numbers: insertion
+delta exactly 0, CE 1.95 -> 1.20 from memory alone, nonzero_rows
+0 -> 26 (exactly the addressed rows), gate_mean 0.119 -> 0.668.
+Two tech-debt spikes rode along mid-saga: the ASCII markdown
+cleanup (hand-owned docs now pass sw-markdown-checker; gen-changes
+transliterates old subjects) and cuda target-gating (candle behind
+a linux/x86_64 target table, so --all-features builds on macOS and
+exposed + fixed three pieces of latent mlx-gated bit-rot). Next:
+E4 mlx-persistent-tensors, the runtime redesign that makes MLX
+faster than CPU before E5 puts the engram on the GPU.

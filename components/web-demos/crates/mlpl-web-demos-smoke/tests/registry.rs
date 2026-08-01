@@ -107,6 +107,11 @@ fn gradient_flow_demo_evals() {
 }
 
 #[test]
+fn tiny_lm_engram_demo_evals() {
+    eval_named("Tiny LM + Engram");
+}
+
+#[test]
 fn every_quick_web_demo_runs() {
     let mut failures: Vec<String> = Vec::new();
     for demo in DEMOS.iter() {

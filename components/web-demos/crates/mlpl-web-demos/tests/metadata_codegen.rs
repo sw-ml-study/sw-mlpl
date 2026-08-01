@@ -14,7 +14,7 @@ fn metadata_tables_survive_codegen() {
         "connect/GPU/prefers-connect capability overrides"
     );
     assert_eq!(LITERATE_DOCS.len(), 5, "literate walkthrough links");
-    assert_eq!(PROGRESS_NOTES.len(), 19, "long-run heads-up notes");
+    assert_eq!(PROGRESS_NOTES.len(), 21, "long-run heads-up notes");
 }
 
 #[test]

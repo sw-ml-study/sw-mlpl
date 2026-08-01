@@ -324,6 +324,39 @@ lines = [
 ]
 
 [[demos]]
+category = "Engram"
+name = "Tiny LM + Engram"
+intro = "The E3 payoff: an ENGRAM living INSIDE a real (tiny) transformer LM. Train the byte-level base model briefly, FREEZE it, then insert engram(...) after the attention block -- chain(emb, att, e, norm, head) threads the chain's own token ids to the engram, so apply/train need no extra plumbing. Forty more [[Adam]] steps write phrase corrections into ONLY the bigram-addressed memory rows while every frozen base weight stays bit-identical. engram_stats(...) is the health panel: addressing counts, collisions, rows written, and the gate opening from its sigmoid(-2) start."
+takeaway = "Three beats. (1) A fresh in-chain engram is EXACTLY transparent: the loss right after insertion equals the frozen-base loss. (2) Engram-only training drops the loss below the frozen base -- the improvement is memory, not weights, and base_loss - engram_loss prints the margin. (3) The stats panel tells the story in numbers: nonzero_rows grows from 0 to the bigram rows the corpus addressed, collisions counts distinct bigrams crowded into shared slots, and gate_mean rises from sigmoid(-2) ~ 0.119 as the model learns WHERE memory helps. This is the DeepSeek Engram bet at demo scale: frequent local patterns move out of attention into cheap addressed storage."
+lines = [
+    'corpus = "the cat sat. the dog ran. the cat sat. the dog ran. the cat sat."  # tiny byte corpus with heavily repeated phrases -- exactly what a bigram memory can capture',
+    "ids  = tokenize_bytes(corpus)                          # byte-level ids (V=256), no tokenizer training needed",
+    "X_all = shift_pairs_x(ids, 8)                          # next-token input windows of length 8",
+    "Y_all = shift_pairs_y(ids, 8)                          # matching target windows shifted by 1",
+    "X = reshape(X_all, [reduce_mul(shape(X_all))])         # flatten to 1-D",
+    "Y = reshape(Y_all, [reduce_mul(shape(Y_all))])         # flatten targets",
+    "V = 256 ; d = 8                                        # byte vocab / embed dim",
+    "emb = embed(V, d, 0) ; att = residual(chain(rms_norm(d), causal_attention(d, 1, 1)))  # named pieces so we can freeze them and rebuild the chain around the engram",
+    "norm = rms_norm(d) ; headl = linear(d, V, 4)           # final norm + unembedding head",
+    "base = chain(emb, att, norm, headl)                    # the standard 1-block tiny LM",
+    'experiment "tiny_lm_engram_base" { train 30 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001); base_metric = cross_entropy(apply(base, X), Y) } }  # 30 Adam steps of ordinary base training',
+    "base_loss = cross_entropy(apply(base, X), Y)           # the frozen-base reference loss",
+    "freeze(emb) ; freeze(att) ; freeze(norm) ; freeze(headl)  # freeze EVERY base weight -- adam will skip them from here on",
+    "e = engram(d, [2], 1, 128, 4, 7)                       # bigram memory: 1 head, 128 slots, head_dim 4, near-identity init",
+    "s0 = engram_stats(e, X)                                # the health panel BEFORE training: addressing counts + an untouched table",
+    "s0.nonzero_rows                                        # 0 -- nothing has been written to memory yet",
+    "m2 = chain(emb, att, e, norm, headl)                   # insert the engram AFTER the attention block; the chain threads its own input ids to it",
+    "cross_entropy(apply(m2, X), Y)                         # EXACTLY base_loss: a fresh engram is transparent in the chain",
+    'experiment "tiny_lm_engram_mem" { train 40 { adam(cross_entropy(apply(m2, X), Y), m2, 0.05, 0.9, 0.999, 0.00000001) } }  # engram-only training: gradients scatter-ADD into the addressed memory rows',
+    "loss_curve(last_losses)                                # the memory being written, as a loss curve",
+    "engram_loss = cross_entropy(apply(m2, X), Y)           # loss with the trained memory in the loop",
+    "base_loss - engram_loss                                # the improvement bought by MEMORY alone -- every base weight is bit-identical",
+    "s = engram_stats(e, apply(att, apply(emb, X)), X)      # the full stats panel: addressing + memory health + gate activation on the real hidden states",
+    "s.nonzero_rows                                         # rows written by training -- grew from 0 to the bigrams the corpus actually addressed",
+    "s.gate_mean                                            # rose from sigmoid(-2) ~ 0.119: the concat gate OPENED where memory helps",
+]
+
+[[demos]]
 category = "Basics"
 name = "Analysis Helpers"
 intro = "Tour of the high-level viz helpers: histogram, labeled scatter, loss curve, confusion matrix, and a 2D decision-boundary surface. Each returns an SVG that renders inline. Use these as building blocks when you want one line of code to answer one question about your data or model."
@@ -2045,3 +2078,15 @@ body = """
 Training is done. `attention_weights(attn, test_tokens)` returns a [4, 16, 16] tensor -- one [16, 16] softmax matrix per head over the 16 image patches. `svg(attn_maps, "heatmap_grid")` lays out a 2x2 grid of heatmaps with per-cell colormaps. Each cell shows what its head learned to pay attention to: row i column j is how much head h's i-th patch attends to the j-th patch.
 
 What to look for: heads are NOT identical. One typically concentrates on a single column (a 'this patch is the salient one' signal); another spreads attention evenly (an 'aggregate everything' signal); the remaining two pick intermediate patterns. Compare with the untrained 'ViT Multi-Head Attention Pattern' demo where all four heads look uniformly random -- the differences here are entirely the work of gradient descent."""
+
+[[progress_notes]]
+demo = "Tiny LM + Engram"
+line_idx = 10
+heading = "Base training: 30 Adam steps (~seconds on the CPU)"
+body = "Ordinary next-token training of the 1-block tiny LM on the byte corpus -- this is the reference model the engram will augment. Nothing engram-related has happened yet; the loss printed on the next line becomes the frozen-base yardstick every later number is compared against."
+
+[[progress_notes]]
+demo = "Tiny LM + Engram"
+line_idx = 18
+heading = "Engram-only training: 40 Adam steps against a frozen base"
+body = "Every base weight was frozen two lines ago, so Adam skips them and the ONLY thing learning here is the engram: its memory table (via scatter-ADD into the bigram-addressed rows), value projection, and gate. When the loss comes out below the frozen-base reference, that whole margin was bought by conditional memory, not by weight updates."

@@ -1,6 +1,6 @@
 number = 6
 slug = "tiny-lm-engram-demo"
-status = "pending"
+status = "in-progress"
 description = "E3 final step: the Tiny LM + Engram demo with stats panel (plan step 6). In d..."
 role = "legacy"
 context_files = []
