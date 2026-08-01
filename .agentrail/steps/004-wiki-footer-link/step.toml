@@ -1,9 +1,10 @@
 number = 4
 slug = "wiki-footer-link"
-status = "in-progress"
+status = "completed"
 description = "Short-term user request (2026-08-01): add a Wiki link to the live-demo footer..."
 role = "production"
 context_files = []
 created_at = "2026-08-01T12:19:08"
+completed_at = "2026-08-01T12:21:13"
 task_type = "rust-feature"
-commits = []
+commits = ["16b94c1119f0e7ab744fc710f4d01b0acf818f13"]
