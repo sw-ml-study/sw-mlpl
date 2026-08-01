@@ -18,6 +18,7 @@ pub mod model_dispatch;
 pub mod model_dispatch_scalar;
 pub(crate) mod model_engram_init;
 pub(crate) mod model_engram_math;
+pub mod model_engram_stats;
 pub(crate) mod model_engram_values;
 pub mod model_eval_apply;
 pub mod model_eval_attention;

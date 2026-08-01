@@ -48,12 +48,12 @@ pub fn eval_apply_engram(
     let model = resolve_engram_model(&args[0], env)?;
     let h = mlpl_eval_env::dispatch_hook::eval_or_err(&args[1], env, trace)?.into_array()?;
     let ids = mlpl_eval_env::dispatch_hook::eval_or_err(&args[2], env, trace)?.into_array()?;
-    engram_forward(&model, &h, &ids, env)
+    engram_forward(&model, &h, &ids, env).map(|(out, _gate)| out)
 }
 
 /// The first `apply_engram` argument must be an identifier naming a
 /// model bound in the environment.
-fn resolve_engram_model(arg: &Expr, env: &Environment) -> Result<ModelSpec, EvalError> {
+pub(crate) fn resolve_engram_model(arg: &Expr, env: &Environment) -> Result<ModelSpec, EvalError> {
     let Expr::Ident(name, _) = arg else {
         return Err(EvalError::Unsupported(
             "apply_engram: first argument must be an engram model identifier".into(),
@@ -64,13 +64,15 @@ fn resolve_engram_model(arg: &Expr, env: &Environment) -> Result<ModelSpec, Eval
         .ok_or_else(|| EvalError::UndefinedVariable(name.clone()))
 }
 
-/// The pure forward pass against resolved inputs.
+/// The pure forward pass against resolved inputs. Returns
+/// `(out, gate)`; most callers keep only `out`, `engram_stats`
+/// reads the gate.
 pub(crate) fn engram_forward(
     model: &ModelSpec,
     h: &DenseArray,
     ids: &DenseArray,
     env: &Environment,
-) -> Result<DenseArray, EvalError> {
+) -> Result<(DenseArray, DenseArray), EvalError> {
     let ModelSpec::Engram {
         memory,
         w_value,

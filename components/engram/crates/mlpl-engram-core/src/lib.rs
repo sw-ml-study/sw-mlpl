@@ -15,5 +15,8 @@ pub mod spec;
 pub const MAX_TOKEN_ID: u64 = (1 << 21) - 1;
 
 pub use accounting::DType;
-pub use hash::{HASH_PRIME, HashSpec, hash_multipliers, head_offset, ngram_hashes};
+pub use hash::{
+    AddressingStats, HASH_PRIME, HashSpec, addressing_stats, hash_multipliers, head_offset,
+    ngram_hashes,
+};
 pub use spec::{EngramError, EngramSpec};

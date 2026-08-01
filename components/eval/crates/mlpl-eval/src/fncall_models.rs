@@ -32,6 +32,9 @@ pub(crate) fn try_dispatch(
     if name == "apply_engram" {
         return Some(crate::model_dispatch::eval_apply_engram(args, env, trace).map(Value::Array));
     }
+    if name == "engram_stats" {
+        return Some(crate::model_dispatch::eval_engram_stats(args, env, trace));
+    }
     if name == "to_device" {
         return Some(crate::device::eval_to_device(args, env, trace));
     }

@@ -26,7 +26,9 @@ pub(crate) fn apply_engram_in_chain(
     chain_input: &DenseArray,
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
-    engram_forward(model, h, chain_input, env).map_err(engram_chain_context)
+    engram_forward(model, h, chain_input, env)
+        .map(|(out, _gate)| out)
+        .map_err(engram_chain_context)
 }
 
 /// Prefix `Unsupported` messages with the in-chain framing; other

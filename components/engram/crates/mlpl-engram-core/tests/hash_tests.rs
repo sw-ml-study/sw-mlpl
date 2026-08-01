@@ -149,3 +149,54 @@ fn insta_like_assert(actual: &[u64]) {
     ];
     assert_eq!(actual, FROZEN, "golden hash fixture v1 drifted");
 }
+
+#[test]
+fn addressing_stats_count_lookups_rows_and_collisions() {
+    use mlpl_engram_core::addressing_stats;
+    // 4 positions x 2 orders x 4 heads = 32 lookups; unique rows
+    // and collisions derived from the same frozen hashes.
+    let ids = [10u64, 20, 30, 40];
+    let s = addressing_stats(&ids, &spec()).unwrap();
+    assert_eq!(s.lookups, 32);
+    let h = ngram_hashes(&ids, &spec()).unwrap();
+    let mut rows = std::collections::BTreeSet::new();
+    for (t, per_order) in h.iter().enumerate() {
+        let _ = t;
+        for (oi, heads) in per_order.iter().enumerate() {
+            for (head, &local) in heads.iter().enumerate() {
+                rows.insert(head_offset(&spec(), oi, head) + local);
+            }
+        }
+    }
+    assert_eq!(s.unique_rows, rows.len() as u64);
+    // All 4 contexts are distinct per (order, head) and 1024 slots
+    // make actual collisions vanishingly unlikely at this size.
+    assert_eq!(s.collisions, 0);
+}
+
+#[test]
+fn addressing_stats_repetition_is_not_collision_but_crowding_is() {
+    use mlpl_engram_core::addressing_stats;
+    let tiny = HashSpec {
+        ngram_orders: vec![2],
+        heads_per_ngram: 1,
+        slots_per_head: 2,
+        seed: 11,
+    };
+    // Five distinct bigram contexts into 2 slots: collisions =
+    // contexts - distinct rows.
+    let s = addressing_stats(&[1, 2, 3, 4, 5], &tiny).unwrap();
+    assert_eq!(s.lookups, 5);
+    assert!(s.unique_rows <= 2);
+    assert_eq!(s.collisions, 5 - s.unique_rows);
+    // Repeated identical context (5,5) is repetition, not collision.
+    let wide = HashSpec {
+        ngram_orders: vec![2],
+        heads_per_ngram: 1,
+        slots_per_head: 64,
+        seed: 7,
+    };
+    let r = addressing_stats(&[5, 5, 5], &wide).unwrap();
+    assert_eq!(r.unique_rows, 2);
+    assert_eq!(r.collisions, 0);
+}

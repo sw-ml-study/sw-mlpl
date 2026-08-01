@@ -16,6 +16,8 @@
 //!
 //! Missing history at the sequence start is PAD id `0`.
 
+use std::collections::BTreeSet;
+
 use crate::spec::EngramError;
 
 /// The prime modulus every product is reduced by. FROZEN: part of
@@ -101,4 +103,50 @@ pub fn ngram_hashes(ids: &[u64], spec: &HashSpec) -> Result<Vec<Vec<Vec<u64>>>, 
 #[must_use]
 pub fn head_offset(spec: &HashSpec, order_idx: usize, head: usize) -> u64 {
     ((order_idx * spec.heads_per_ngram + head) * spec.slots_per_head) as u64
+}
+
+/// Addressing statistics for a token sequence under the frozen
+/// hash contract (saga E3: the `engram_stats` builtin's counters).
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct AddressingStats {
+    /// Total `(position, order, head)` lookups.
+    pub lookups: u64,
+    /// Distinct global memory rows addressed.
+    pub unique_rows: u64,
+    /// Distinct n-gram contexts forced to SHARE a row with a
+    /// different context, summed per `(order, head)` region. A
+    /// repeated identical context is repetition, not collision.
+    pub collisions: u64,
+}
+
+/// Compute [`AddressingStats`] for `ids`. Contexts use the same
+/// PAD-0 windowing as [`ngram_hashes`], so `collisions` is exact:
+/// per region, `distinct contexts - distinct rows`.
+///
+/// # Errors
+/// Same surface as [`ngram_hashes`] (oversized token ids).
+pub fn addressing_stats(ids: &[u64], spec: &HashSpec) -> Result<AddressingStats, EngramError> {
+    let hashes = ngram_hashes(ids, spec)?;
+    let pad = |t: usize, k: usize| if t >= k { ids[t - k] } else { 0 };
+    let (mut all_rows, mut collisions) = (BTreeSet::new(), 0u64);
+    for (oi, &order) in spec.ngram_orders.iter().enumerate() {
+        let contexts: BTreeSet<Vec<u64>> = (0..ids.len())
+            .map(|t| (0..order).map(|k| pad(t, k)).collect())
+            .collect();
+        let mut rows_per_head = vec![BTreeSet::new(); spec.heads_per_ngram];
+        for t_hashes in &hashes {
+            for (head, (&local, rows)) in t_hashes[oi].iter().zip(&mut rows_per_head).enumerate() {
+                rows.insert(head_offset(spec, oi, head) + local);
+            }
+        }
+        for rows in &rows_per_head {
+            all_rows.extend(rows.iter().copied());
+            collisions += (contexts.len() - rows.len()) as u64;
+        }
+    }
+    Ok(AddressingStats {
+        lookups: (ids.len() * spec.ngram_orders.len() * spec.heads_per_ngram) as u64,
+        unique_rows: all_rows.len() as u64,
+        collisions,
+    })
 }

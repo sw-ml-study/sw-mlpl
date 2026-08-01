@@ -14,6 +14,7 @@
 //! `model_attn_weights` (read-only attention-weight extraction).
 
 pub use crate::model_apply_engram::eval_apply_engram;
+pub use crate::model_engram_stats::eval_engram_stats;
 pub use crate::model_eval_apply::{eval_apply, eval_attention_weights, eval_predict_batch};
 pub use crate::model_eval_attention::eval_attention;
 pub use crate::model_eval_compose::{activation_kind, eval_chain, eval_residual};

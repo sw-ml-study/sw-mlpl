@@ -56,12 +56,13 @@ fn linear_via_dispatch(
 /// `v = r @ W_v + b_v`; `g = sigmoid([h|v] @ W_g + b_g)`;
 /// `out = h + g * v` -- projections and elementwise ops through the
 /// device-aware dispatch hook (the concat is a plain row splice).
+/// Returns `(out, g)`; the gate rides along for `engram_stats`.
 pub(crate) fn project_and_gate(
     h: &DenseArray,
     retrieved: &DenseArray,
     env: &Environment,
     names: (&str, &str, &str, &str),
-) -> Result<DenseArray, EvalError> {
+) -> Result<(DenseArray, DenseArray), EvalError> {
     let (w_value, b_value, w_gate, b_gate) = names;
     let dispatch = mlpl_eval_env::dispatch_hook::dispatch_or_err;
     let v = linear_via_dispatch(env, retrieved, param(env, w_value)?, param(env, b_value)?)?;
@@ -74,6 +75,7 @@ pub(crate) fn project_and_gate(
     let hv = DenseArray::new(Shape::new(vec![t_len, 2 * hidden]), hv)?;
     let pre = linear_via_dispatch(env, &hv, param(env, w_gate)?, param(env, b_gate)?)?;
     let g = mlpl_runtime::call_builtin("sigmoid", vec![pre])?;
-    let gv = dispatch(env, "mul", vec![g, v])?;
-    dispatch(env, "add", vec![h.clone(), gv])
+    let gv = dispatch(env, "mul", vec![g.clone(), v])?;
+    let out = dispatch(env, "add", vec![h.clone(), gv])?;
+    Ok((out, g))
 }

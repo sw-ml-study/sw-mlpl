@@ -425,6 +425,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "engram forward: hash ids, gather memory, project, gate, add to the residual",
             ),
             (
+                "engram_stats",
+                "engram_stats(e, ids) or engram_stats(e, h, ids)",
+                "addressing/memory/gate health record: rows_addressed, unique_rows, collisions, nonzero_rows, max_row_norm (+ gate_mean/gate_max with h)",
+            ),
+            (
                 "ngram_hash",
                 "ngram_hash(ids, orders, heads, slots, seed)",
                 "rolling n-gram hash indices [T, order, head] (exact cross-backend contract)",

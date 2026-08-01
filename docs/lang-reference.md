@@ -343,6 +343,7 @@ tables (e.g. the three name forms) keep their teaching order.
 | `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
 | `apply_engram(e, h, ids)` | 3 | Engram forward pass: hash the ids, gather the addressed memory rows, project, concat-gate against `h`, and add to the residual stream. Exact no-op on a freshly built engram; differentiable, so `grad`/`adam`/`train` move only the addressed memory rows (duplicates accumulate). |
 | `engram(hidden, ngrams, heads, slots, head_dim, seed)` | 6 | Engram conditional-memory layer: one flattened n-gram table + value projection + concat gate, initialized near-identity (zero table, gate bias -2). Apply with `apply_engram`; trainable via `adam(loss, e, ...)`. |
+| `engram_stats(e, ids)` / `engram_stats(e, h, ids)` | 2-3 | Engram health record with addressable fields: `rows_addressed` (total (t, order, head) lookups), `unique_rows`, `collisions` (distinct n-gram contexts sharing a slot under the frozen hash contract -- repetition of the same context is not a collision), `nonzero_rows`, `max_row_norm`; the 3-argument form adds `gate_mean` / `gate_max` from the eager forward's gate. Example: `s = engram_stats(e, ids); s.collisions`. |
 | `gather_rows(table, indices)` | 2 | Select whole rows of a rank-2 table; output shape is the indices' shape + `[dim]`. Out-of-range indices error loudly. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
