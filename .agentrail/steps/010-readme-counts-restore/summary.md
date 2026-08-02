@@ -1,0 +1,1 @@
+README tour counts restored as test-pinned values (66 demos / 58 lessons / 410-entry glossary; readme_counts suite green after being silently stale-then-broken); CLAUDE.md user-docs rule refined: counts allowed only when a test pins them to the source of truth.

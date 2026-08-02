@@ -1,4 +1,4 @@
-number = 10
+number = 11
 slug = "engram-bench-and-docs"
 status = "pending"
 description = "The deferred half of the perf gate: mlx_vs_cpu bench gains engram-in-chain tr..."
