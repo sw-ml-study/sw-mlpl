@@ -1,9 +1,10 @@
 number = 2
 slug = "cumprod-rename"
-status = "in-progress"
+status = "completed"
 description = "BLOCKED until the user picks the new name for cumprod (candidates: running_pr..."
 role = "production"
 context_files = []
 created_at = "2026-08-02T10:02:06"
+completed_at = "2026-08-02T10:12:06"
 task_type = "rust-feature"
-commits = []
+commits = ["5364953f956b338ae545e64648c06d5412b3b440"]
