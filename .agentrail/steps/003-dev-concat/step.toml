@@ -1,4 +1,4 @@
-number = 2
+number = 3
 slug = "dev-concat"
 status = "pending"
 description = "E5 step 2 per plan: DeviceOps grows concat(axis) + split for its backward (Ml..."
