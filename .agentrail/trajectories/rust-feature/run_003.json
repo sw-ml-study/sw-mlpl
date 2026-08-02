@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 4,
+    "step": "resident-gather-eval"
+  },
+  "action": "vendored-API audit before building; measurement-first rejection of both candidates; duplicate-address gradient parity pin",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T14:44:25"
+}
