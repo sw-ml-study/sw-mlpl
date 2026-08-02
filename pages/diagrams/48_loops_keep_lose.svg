@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 430" width="600" height="430" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:12px">
+  <text x="300" y="22" text-anchor="middle" font-size="16" font-weight="bold">Loops you lose, loops you keep</text>
+
+  <!-- DATA loop -->
+  <rect x="20" y="44" width="560" height="110" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+  <text x="30" y="64" font-weight="bold" fill="#15803d">LOOP OVER DATA: iterations independent -&gt; the loop VANISHES</text>
+  <text x="30" y="84" font-family="monospace" font-size="11">for i in [0..5] { total = total + p[i] * q[i] }</text>
+  <text x="300" y="84" font-size="14">=</text>
+  <text x="330" y="84" font-family="monospace" font-size="11">reduce_add(p * q)</text>
+  <g transform="translate(30,100)">
+    <rect x="0" y="0" width="60" height="26" fill="#ffffff" stroke="#15803d"/><text x="30" y="17" text-anchor="middle" font-size="10">i = 0</text>
+    <rect x="70" y="0" width="60" height="26" fill="#ffffff" stroke="#15803d"/><text x="100" y="17" text-anchor="middle" font-size="10">i = 1</text>
+    <rect x="140" y="0" width="60" height="26" fill="#ffffff" stroke="#15803d"/><text x="170" y="17" text-anchor="middle" font-size="10">i = 2</text>
+    <text x="230" y="17" font-size="10">... no arrows between them: any order, all at once</text>
+  </g>
+  <text x="30" y="146" font-size="10">the index only ADDRESSES data -- batch dims, attention score pairs, Life neighbor counts</text>
+
+  <!-- TIME loop -->
+  <rect x="20" y="170" width="560" height="110" fill="#fee2e2" stroke="#b91c1c" stroke-width="2"/>
+  <text x="30" y="190" font-weight="bold" fill="#b91c1c">LOOP OVER TIME: each step needs the last one -&gt; the loop SURVIVES</text>
+  <text x="30" y="210" font-family="monospace" font-size="11">repeat 10 { bal = bal * 1.05 }     train N { adam(...) }</text>
+  <g transform="translate(30,226)">
+    <rect x="0" y="0" width="70" height="26" fill="#ffffff" stroke="#b91c1c"/><text x="35" y="17" text-anchor="middle" font-size="10">state t=0</text>
+    <line x1="70" y1="13" x2="100" y2="13" stroke="#b91c1c" stroke-width="2"/>
+    <rect x="100" y="0" width="70" height="26" fill="#ffffff" stroke="#b91c1c"/><text x="135" y="17" text-anchor="middle" font-size="10">state t=1</text>
+    <line x1="170" y1="13" x2="200" y2="13" stroke="#b91c1c" stroke-width="2"/>
+    <rect x="200" y="0" width="70" height="26" fill="#ffffff" stroke="#b91c1c"/><text x="235" y="17" text-anchor="middle" font-size="10">state t=2</text>
+    <text x="290" y="17" font-size="10">arrows are the dependency: w(k+1) = f(w(k))</text>
+  </g>
+  <text x="30" y="272" font-size="10">optimizer steps, Life generations, token-by-token generation -- no notation removes these</text>
+
+  <!-- BORDERLINE -->
+  <rect x="20" y="296" width="560" height="104" fill="#fef3c7" stroke="#a16207" stroke-width="2"/>
+  <text x="30" y="316" font-weight="bold" fill="#a16207">THE BORDERLINE: an ASSOCIATIVE recurrence re-groups -&gt; a SCAN absorbs it</text>
+  <text x="30" y="336" font-family="monospace" font-size="11">running_sum(v)   running_product(v)   (general scan(:op) re-groups (a+b)+c = a+(b+c))</text>
+  <g transform="translate(120,348)">
+    <rect x="0" y="0" width="40" height="20" fill="#ffffff" stroke="#a16207"/><text x="20" y="14" text-anchor="middle" font-size="9">a+b</text>
+    <rect x="70" y="0" width="40" height="20" fill="#ffffff" stroke="#a16207"/><text x="90" y="14" text-anchor="middle" font-size="9">c+d</text>
+    <line x1="20" y1="20" x2="55" y2="38" stroke="#a16207" stroke-width="1.5"/>
+    <line x1="90" y1="20" x2="55" y2="38" stroke="#a16207" stroke-width="1.5"/>
+    <rect x="30" y="38" width="56" height="20" fill="#ffffff" stroke="#a16207"/><text x="58" y="52" text-anchor="middle" font-size="9">a+b+c+d</text>
+    <text x="230" y="30" font-size="10">the chain becomes a tree: parallel prefix scan</text>
+    <text x="230" y="48" font-size="10">(adam's update is NOT associative -- it stays in the red box)</text>
+  </g>
+  <text x="300" y="418" text-anchor="middle" font-size="11">full essay: docs/thinking-in-arrays.md -- demo: "Thinking in Arrays" (APL2 category)</text>
+</svg>

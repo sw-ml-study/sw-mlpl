@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-45de13552e51e81c.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-45de13552e51e81c_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-c3ce615cc095f9e7.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-c3ce615cc095f9e7_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -1920,7 +1920,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-45de13552e51e81c.js" crossorigin="anonymous" integrity="sha384-MP6ZFNyfG1HENpUqgjbYC8ZXJwLt1UC3zgZFlSGYUr/R1FnfnuyeNTslebdCOAqe"><link rel="preload" href="/sw-mlpl/mlpl-web-45de13552e51e81c_bg.wasm" crossorigin="anonymous" integrity="sha384-MjscQrw6uzhuP6mbJ6D9oE9OiZ0k553S3EYQELV1pU8iy5y8npLkbQxLk76N9/ei" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-c3ce615cc095f9e7.js" crossorigin="anonymous" integrity="sha384-gwS1vBKRbM++55qGwny/rvJAzvcyLYe3dL+Qk335HFCrjBkBcLbofy0ZVGPMwMNK"><link rel="preload" href="/sw-mlpl/mlpl-web-c3ce615cc095f9e7_bg.wasm" crossorigin="anonymous" integrity="sha384-Elczs1s1MTAniiGrkyRDeWzX7xYzzv41sct/oQVyUnt9YiRoLf02BJHC5OjLDSts" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
