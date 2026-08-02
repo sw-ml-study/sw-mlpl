@@ -1,6 +1,6 @@
 number = 2
 slug = "loop-avoidance-demos"
-status = "pending"
+status = "in-progress"
 description = "Loop-avoidance pedagogy (user direction 2026-08-02): (1) Life demo takeaways ..."
 role = "production"
 context_files = []

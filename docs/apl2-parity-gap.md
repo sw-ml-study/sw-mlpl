@@ -53,7 +53,11 @@ Wanted, in compact ASCII:
   :g, a, b)` -- generalized inner product (f.g). `matmul` is the
   `inner(:add, :mul, ...)` special case.
 - `scan(:op, a[, axis])` -- APL2 scan (running reduce; cumprod is
-  the one special case shipped).
+  the one special case shipped). The scan saga should also carry
+  the pedagogy: a scan is the ASSOCIATIVE-recurrence borderline
+  between data loops (which array ops absorb) and time loops
+  (which survive as `repeat`/`train`) -- the "Thinking in Arrays"
+  playground demo sets this up with cumprod and points here.
 - Prerequisite: user functions as first-class values (`:u:name`,
   already planned in the lang-reference "symmetry to come" note)
   so every HOF accepts builtins AND user functions uniformly.
