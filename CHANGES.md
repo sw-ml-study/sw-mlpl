@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga thinking-in-arrays-doc: complete (3 steps)
+- chore(pages): rebuild for running_product rename + jargon-free glossary/demos/lang-reference
+- docs: purge dev-plan/status jargon from all user-facing surfaces; codify the rule
+- saga thinking-in-arrays-doc: step 002 complete
+- feat(lang): rename cumprod -> running_product; cumprod becomes a deprecated alias
+- docs(changes): refresh CHANGES.md to HEAD
 - saga thinking-in-arrays-doc: step 001 complete
 - chore(agentrail): archive demo-pedagogy-and-queue-reorder saga
 - chore(pages): rebuild for the thinking-in-arrays doc link
