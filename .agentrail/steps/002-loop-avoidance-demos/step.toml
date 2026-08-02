@@ -1,9 +1,10 @@
 number = 2
 slug = "loop-avoidance-demos"
-status = "in-progress"
+status = "completed"
 description = "Loop-avoidance pedagogy (user direction 2026-08-02): (1) Life demo takeaways ..."
 role = "production"
 context_files = []
 created_at = "2026-08-02T09:39:38"
+completed_at = "2026-08-02T09:55:25"
 task_type = "rust-feature"
-commits = []
+commits = ["57c5af249194d6242e3cf42004b07e6aa35bfe99"]
