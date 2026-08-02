@@ -144,6 +144,25 @@ the research-tied visualizations (MTP acceptance timelines,
 proposal trees, KV-cache size, sync/fallback event panels,
 recursive-state trajectories, reward progression).
 
+## Track 7 -- APL2 parity (ML-first ordering; see docs/apl2-parity-gap.md)
+
+20. **apl2-hof-and-order** -- composition + higher-order functions
+    in compact ASCII (each, `>>` composition values, `|>` pipe,
+    bind, outer/inner, scan) + grade_up/grade_down/sort/compress:
+    serves ML (pipelines, top-k, batch ops) and the operator
+    algebra at once. Requires first-class user functions (`:u:`).
+21. **apl2-strings** -- strings as data (split/join/substring/
+    find/replace, char codes, formatted output): unlocks ML data
+    prep AND the classic report-app class.
+22. **apl2-nested-arrays** -- the big one (enclose/disclose,
+    depth > 1, each over items; ragged batches for ML); its own
+    design saga.
+23. **apl2-classic-apps** -- general-purpose completeness gate:
+    file I/O, interactive input, dates, formatted output;
+    acceptance = the five litmus apps in docs/apl2-parity-gap.md
+    actually running (ledger, inventory, menu utility, text
+    game, date utility).
+
 ## Maintenance items (unchanged from the morning version)
 
 - **wiki-errata** -- audit + fix the sw-mlpl.wiki errata page
