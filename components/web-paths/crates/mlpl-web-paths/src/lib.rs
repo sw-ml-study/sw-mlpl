@@ -1,7 +1,7 @@
 //! Learning paths surface for the web playground -- facade.
 //!
 //! - `view` -- the picker + walker (paths_view in the old layout).
-//! - `diagrams` -- the diagrams gallery + the `DIAGRAMS` static
+//! - `diagrams` -- the diagrams gallery + the diagram statics
 //!   list (diagrams_view in the old layout). Bundled with paths
 //!   because the path walker renders diagram steps inline.
 //!

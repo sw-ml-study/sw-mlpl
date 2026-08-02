@@ -12,7 +12,7 @@
 
 use yew::prelude::*;
 
-use crate::diagrams::DIAGRAMS;
+use crate::diagrams::all_diagrams;
 use mlpl_web_demos::DEMOS;
 use mlpl_web_glossary::view::find_by_term;
 use mlpl_web_lessons::lessons::LESSONS;
@@ -130,8 +130,7 @@ fn render_step(props: &PathsViewProps, step: &Step) -> Html {
         Step::Lesson { title, why } => ("Lesson", *title, Some(*why), lesson_body(props, title)),
         Step::Demo { name, why } => ("Demo", *name, Some(*why), demo_body(props, name)),
         Step::Diagram { slug, why } => {
-            let title = DIAGRAMS
-                .iter()
+            let title = all_diagrams()
                 .find(|(s, _, _)| *s == *slug)
                 .map(|(_, t, _)| *t)
                 .unwrap_or(*slug);

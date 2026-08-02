@@ -20,7 +20,7 @@ use yew::prelude::*;
 /// (classical -> NN -> attention -> transformer -> LLM
 /// extensions -> training infra -> fine-tuning / alignment
 /// -> phenomena) so the index reads as a guided tour.
-pub const DIAGRAMS: &[(&str, &str, &str)] = &[
+pub const CONCEPT_DIAGRAMS: &[(&str, &str, &str)] = &[
     (
         "01_linear_regression",
         "Linear Regression",
@@ -203,6 +203,10 @@ pub const DIAGRAMS: &[(&str, &str, &str)] = &[
         "Feature Superposition",
         "Network packs more features than dimensions.",
     ),
+];
+
+/// MLPL-specific mechanics: how THIS language/runtime does it.
+pub const MECHANICS_DIAGRAMS: &[(&str, &str, &str)] = &[
     (
         "39_patchify",
         "Patchify (ViT)",
@@ -238,47 +242,83 @@ pub const DIAGRAMS: &[(&str, &str, &str)] = &[
         ":upload x flow",
         "File picker -> Canvas decode -> Ok(Record) / Err(message).",
     ),
+    (
+        "46_engram_addressing",
+        "Engram addressing",
+        "ids -> ngram_hash -> selection gather -> gate; backward is exact scatter-ADD.",
+    ),
+    (
+        "47_resident_tensor_seam",
+        "Device-resident tensor seam",
+        "Host f64 vs lazy device handles; to_dense is THE sync point; seam counters.",
+    ),
+    (
+        "48_loops_keep_lose",
+        "Loops you keep, loops you lose",
+        "Data loops vanish into array ops; time recurrences survive; scans absorb the associative borderline.",
+    ),
 ];
+
+/// Every diagram (both sections) for slug -> title lookups.
+pub fn all_diagrams() -> impl Iterator<Item = &'static (&'static str, &'static str, &'static str)> {
+    CONCEPT_DIAGRAMS.iter().chain(MECHANICS_DIAGRAMS.iter())
+}
 
 #[function_component(DiagramsView)]
 pub fn diagrams_view() -> Html {
-    let open_idx = use_state(|| Option::<usize>::None);
+    let open = use_state(|| Option::<usize>::None);
+    let total = CONCEPT_DIAGRAMS.len() + MECHANICS_DIAGRAMS.len();
     html! {
         <div class="diagrams-index">
             <p class="diagrams-intro">
                 { format!(
-                    "{} diagrams covering ML concepts from classical regression through modern transformer training. Click any title to expand. The diagram set is an external visual reference; the matching MLPL demos / lessons / glossary entries are linked separately under the other tabs.",
-                    DIAGRAMS.len(),
+                    "{total} diagrams in two groups: an ML-concepts tour ordered classical -> transformers -> training -> alignment -> phenomena, then MLPL-specific mechanics. Click any title to expand. The diagram set is an external visual reference; the matching MLPL demos / lessons / glossary entries are linked separately under the other tabs.",
                 ) }
             </p>
-            <ol class="diagrams-list">
-                { for DIAGRAMS.iter().enumerate().map(|(i, (slug, title, blurb))| {
-                    let is_open = *open_idx == Some(i);
-                    let on_toggle = {
-                        let h = open_idx.clone();
-                        Callback::from(move |_| h.set(if is_open { None } else { Some(i) }))
-                    };
-                    let body = if is_open {
-                        let src = format!("diagrams/{slug}.svg");
-                        html! {
-                            <div class="diagram-card">
-                                <img class="diagram-svg" src={src} alt={(*title).to_string()} loading="lazy"/>
-                            </div>
-                        }
-                    } else {
-                        html! {}
-                    };
-                    html! {
-                        <li class="diagram-row">
-                            <button class={if is_open { "diagram-toggle open" } else { "diagram-toggle" }} onclick={on_toggle}>
-                                <span class="diagram-title">{ *title }</span>
-                                <span class="diagram-blurb">{ *blurb }</span>
-                            </button>
-                            { body }
-                        </li>
-                    }
-                }) }
-            </ol>
+            <h3 class="diagrams-section">{ "ML concepts (a guided tour)" }</h3>
+            { section_html(CONCEPT_DIAGRAMS, 0, &open) }
+            <h3 class="diagrams-section">{ "MLPL mechanics" }</h3>
+            { section_html(MECHANICS_DIAGRAMS, CONCEPT_DIAGRAMS.len(), &open) }
         </div>
+    }
+}
+
+/// One collapsible diagram list; `offset` keeps open-state indices
+/// unique across sections.
+fn section_html(
+    items: &'static [(&'static str, &'static str, &'static str)],
+    offset: usize,
+    open: &UseStateHandle<Option<usize>>,
+) -> Html {
+    html! {
+        <ol class="diagrams-list">
+            { for items.iter().enumerate().map(|(i, (slug, title, blurb))| {
+                let idx = offset + i;
+                let is_open = **open == Some(idx);
+                let on_toggle = {
+                    let h = open.clone();
+                    Callback::from(move |_| h.set(if is_open { None } else { Some(idx) }))
+                };
+                let body = if is_open {
+                    let src = format!("diagrams/{slug}.svg");
+                    html! {
+                        <div class="diagram-card">
+                            <img class="diagram-svg" src={src} alt={(*title).to_string()} loading="lazy"/>
+                        </div>
+                    }
+                } else {
+                    html! {}
+                };
+                html! {
+                    <li class="diagram-row">
+                        <button class={if is_open { "diagram-toggle open" } else { "diagram-toggle" }} onclick={on_toggle}>
+                            <span class="diagram-title">{ *title }</span>
+                            <span class="diagram-blurb">{ *blurb }</span>
+                        </button>
+                        { body }
+                    </li>
+                }
+            }) }
+        </ol>
     }
 }

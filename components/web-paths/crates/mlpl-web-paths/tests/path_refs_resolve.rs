@@ -36,10 +36,8 @@ fn every_demo_and_glossary_reference_resolves() {
                         dangling.push(format!("{}: demo {name:?} not in DEMOS", path.title));
                     }
                 }
-                Step::Glossary { term, .. } => {
-                    if find_by_term(term).is_none() {
-                        dangling.push(format!("{}: glossary {term:?} not found", path.title));
-                    }
+                Step::Glossary { term, .. } if find_by_term(term).is_none() => {
+                    dangling.push(format!("{}: glossary {term:?} not found", path.title));
                 }
                 _ => {}
             }
