@@ -6,6 +6,7 @@
 
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 
+use mlpl_eval::env_api::*;
 use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 
@@ -77,4 +78,47 @@ fn ten_step_engram_chain_trajectory_and_stats_match_cpu() {
     );
     // And it actually learns.
     assert!(mlx_l[9] < mlx_l[0], "resident engram training converges");
+}
+
+#[test]
+fn duplicate_address_scatter_add_matches_cpu_gradients() {
+    // ids [1, 2, 3, 1, 2] repeat the (1, 2) bigram, so two rows of
+    // the selection matrix address the same memory row. The
+    // resident backward (sel^T @ upstream) must ACCUMULATE those
+    // contributions exactly like the CPU scatter-ADD kernel.
+    let run = |mlx: bool| -> Vec<f64> {
+        let mut env = Environment::new();
+        eval(&mut env, SETUP);
+        let mem = {
+            let name = env.get_model("e").unwrap().params()[0].clone();
+            // Non-zero memory so the value/gate path is grad-sensitive.
+            let cur = env.get(&name).unwrap().clone();
+            let filled = mlpl_array::DenseArray::new(
+                cur.shape().clone(),
+                (0..cur.data().len())
+                    .map(|i| 0.03 + i as f64 * 0.01)
+                    .collect(),
+            )
+            .unwrap();
+            env.set(name.clone(), filled);
+            name
+        };
+        let g = format!("grad(cross_entropy(apply(m, ids), Y), {mem})");
+        let src = if mlx {
+            format!("device(\"mlx\") {{ {g} }}")
+        } else {
+            g
+        };
+        eval(&mut env, &src).data().to_vec()
+    };
+    let (cpu, mlx) = (run(false), run(true));
+    assert_eq!(cpu.len(), mlx.len());
+    let nonzero = cpu.iter().filter(|v| v.abs() > 1e-12).count();
+    assert!(nonzero > 0, "memory gradient must be non-trivial");
+    for (i, (c, m)) in cpu.iter().zip(&mlx).enumerate() {
+        assert!(
+            (c - m).abs() < 1e-5,
+            "scatter-add parity at {i}: cpu={c} mlx={m}"
+        );
+    }
 }

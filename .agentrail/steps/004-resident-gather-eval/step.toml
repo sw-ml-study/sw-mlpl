@@ -1,6 +1,6 @@
 number = 4
 slug = "resident-gather-eval"
-status = "pending"
+status = "in-progress"
 description = "E5 step 4 per plan: evaluate replacing the host-built selection one-hot with ..."
 role = "legacy"
 context_files = []

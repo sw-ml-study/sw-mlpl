@@ -101,6 +101,18 @@ pub struct EngramInputs<'a> {
 /// (backward = scatter-ADD into exactly those rows), then reshaped
 /// to `[T, retrieved]` and run through the same value/gate linears
 /// as the eager forward: `out = h + sigmoid([h|v] @ Wg + bg) * v`.
+///
+/// Seam decision (saga E5 step 004): the selection matmul IS the
+/// device-resident path -- `sel @ memory` gathers and
+/// `sel^T @ upstream` is an EXACT scatter-ADD (duplicate addresses
+/// accumulate), both lazy on the backend. A "real" device gather
+/// was evaluated and rejected: the vendored mlx-rs exposes only
+/// scatter-REPLACE (IndexMut), so a `take`-based forward would
+/// need a CPU backward and break residency. The dense `[n, rows]`
+/// one-hot and its per-step upload are noise at this scale
+/// (~0.3% of a 7ms step, 1 of ~350 device interactions); sparse
+/// gather/scatter for 100M-row tables is the sparse-rows saga's
+/// scope, gated on a true scatter-add kernel.
 pub fn engram_tape(
     h: &Tensor,
     ids: &DenseArray,
