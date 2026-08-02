@@ -1,0 +1,9 @@
+number = 10
+slug = "cleanup-and-surface"
+status = "pending"
+description = "E4 final step (plan step 7): retire or demote the bespoke demo_forward / gpu_..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-02T08:50:34"
+task_type = "rust-feature"
+commits = []

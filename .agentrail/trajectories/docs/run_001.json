@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 9,
+    "step": "wiki-errata-and-docs-process"
+  },
+  "action": "read errata findings, targeted python edits per doc, supersession-banner pattern for historical docs, per-file sw-markdown-checker, separate wiki repo commit+push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T08:50:34"
+}

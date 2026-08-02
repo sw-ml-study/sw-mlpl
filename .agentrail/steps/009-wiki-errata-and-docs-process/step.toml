@@ -1,9 +1,10 @@
 number = 9
 slug = "wiki-errata-and-docs-process"
-status = "in-progress"
+status = "completed"
 description = "Tech-debt (user request 2026-08-01): audit and fix ../sw-mlpl.wiki -- especia..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-01T20:27:56"
+completed_at = "2026-08-02T08:50:34"
 task_type = "docs"
-commits = []
+commits = ["7a985122b0475c29f1c2fff3e96dc18e3ed963b3"]
