@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 8,
+    "step": "parity-and-bench-gate"
+  },
+  "action": "seam metrics module + TDD pinning tests (resident_seam_tests, seam_counter_tests); counter-driven profiling loop (measure -> attribute -> fix -> re-measure); resident unbroadcast via dev_axis Sum keepdims; criterion bench additions; sw-checklist paydown via accumulate_pair/from_spec/model_and_input/arity_check extractions",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-01T20:27:56"
+}
