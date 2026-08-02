@@ -1,0 +1,1 @@
+docs/future-sagas-queue.md rewritten to the user-approved order: spine is E5 -> MTP program -> agent track; mHC-CPU parked behind MTP (Track 3), mHC MLX/CUDA + engram-cuda deferred (Tracks 3/5); E4 completion + 337/2 ledger recorded; scan pedagogy note added to the apl2-hof item; wiki errata unaffected (wiki pages do not state the old order).
