@@ -19,11 +19,11 @@ This repository ships three things together:
 
 ## Tour
 
-The web playground gives you a full REPL plus a large
-library of worked demos, tutorial lessons, and a full
-glossary -- all running entirely in your browser via
-WASM. (Counts are generated content and change with
-every release, so this page does not hard-code them.)
+The web playground gives you a full REPL plus 66 worked
+demos, 58 tutorial lessons, and a 410-entry glossary --
+all running entirely in your browser via WASM. (These
+counts are pinned by tests against the demo, lesson, and
+glossary registries, so they cannot silently drift.)
 
 ### REPL
 

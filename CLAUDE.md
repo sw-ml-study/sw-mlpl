@@ -307,7 +307,10 @@ capability boundary is a plain present-tense statement: "Not an
 MLPL builtin.", "not supported", "out of scope", "MLPL ships X;
 Y is not implemented" -- optionally naming the closest shipped
 construct. Deprecations say "DEPRECATED alias; prefer X" with
-no timeline. This applies to AGENTS.md readers too (it is a
+no timeline. Content COUNTS ("66 worked demos", "410-entry
+glossary") are allowed in user docs ONLY where a test pins them
+to the source of truth (the `readme_counts` pattern in
+mlpl-web); an unpinned count is banned -- it WILL drift. This applies to AGENTS.md readers too (it is a
 symlink to this file); never edit AGENTS.md in place with tools
 that materialize symlinks.
 
