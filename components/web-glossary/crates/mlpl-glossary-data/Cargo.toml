@@ -13,3 +13,6 @@ name = "mlpl_glossary_data"
 path = "src/lib.rs"
 
 [dependencies]
+
+[dev-dependencies]
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }

@@ -20,6 +20,94 @@ the camera. Click a sculpture to see details (shape, rank,
 elements, memory). The stage persists across tab switches;
 `:clear` / Reset REPL clears it.
 
+## argtop_k (builtin)
+
+`argtop_k(scores, k)` returns the INDICES of the k largest
+entries of a vector, descending -- the address half of a top-k:
+where `top_k` keeps the winning values, `argtop_k` tells you
+which positions won. Sampling shortlists, beam-style selection,
+and retrieval hits are one `argtop_k` away.
+
+
+## emit_frame (builtin)
+
+`emit_frame(name, step, x)` streams tensor `x` as one live
+frame on a named animation channel when a server is connected
+(the Game of Life demos stream their boards this way); with no
+connection it is a no-op. It returns `x` unchanged, so it drops
+into a pipeline without changing the math.
+
+
+## engram_stats (builtin)
+
+`engram_stats(e, ids)` (addressing + memory health) or
+`engram_stats(e, h, ids)` (adds gate activity on hidden states
+`h`) returns a record: `rows_addressed`, `unique_rows`,
+`collisions`, `nonzero_rows`, `max_row_norm`, plus `gate_mean` /
+`gate_max` in the three-argument form. The health panel for an
+[[engram (builtin)]]: which memory rows the ids address, what
+training wrote, and how far the gate opened.
+
+
+## flatten (builtin)
+
+`flatten(a)` -- ravel: every element of `a` as a rank-1 vector
+in row-major order. The shape-erasing companion to reshape:
+`reshape(flatten(a), dims)` is the general re-layout idiom. APL
+heritage (monadic comma).
+
+
+## floor / ceil / round (builtins)
+
+Elementwise integer rounding: `floor(a)` rounds every element
+down, `ceil(a)` up, `round(a)` to the nearest integer. All three
+keep the input's shape.
+
+
+## knn_graph (builtin)
+
+`knn_graph(X, k)` builds an `[N*k, 3]` edge list of
+`(i, j, dist)` rows -- each point's k nearest neighbors by
+squared distance. The input layer for [[UMAP]]-style neighbor
+embeddings, and the general starting point for any graph built
+from raw points.
+
+
+## loss_curve (builtin)
+
+`loss_curve(losses)` renders a training-loss line chart from a
+loss-per-step vector -- most often `loss_curve(last_losses)`
+immediately after a `train` block, which records one loss per
+step. See [[Loss]].
+
+
+## pi / e (builtins)
+
+`pi()` is 3.14159... and `e()` is Euler's 2.71828..., each a
+zero-argument builtin (constants are functions in MLPL -- there
+is no bare constant namespace). `sinusoidal_encoding` and the
+math functions consume them like any other scalar.
+
+
+## range (builtin)
+
+`range(n)` -- the integers 0, 1, ..., n-1 as a vector: the
+index generator most synthetic examples start from
+(`reshape(range(12), [3, 4])` is the canonical toy tensor).
+`iota` is a DEPRECATED alias from APL heritage; prefer `range`.
+
+
+## running_product (builtin)
+
+`running_product(v)` -- the running (cumulative) product along
+a rank-1 vector: `out[i]` is the product of `v[0..=i]`, same
+length as the input. The multiplicative scan: a diffusion noise
+schedule's alpha-bar is `running_product(alphas)`, and the
+"Thinking in Arrays" demo uses it to absorb an associative time
+loop into one expression. `cumprod` is the deprecated alias.
+See [[scan (higher-order)]].
+
+
 ## Script Editor (web UI)
 
 A multi-line text editor tab in the web playground for
@@ -1214,6 +1302,14 @@ is the branch value), same convention as `repeat` / `train` /
 `for` blocks. Either branch can return any `Value` type --
 strings, vectors, Records, Results -- not just scalars.
 
+## train_val_curve (builtin)
+
+`train_val_curve(train, val)` renders the training and
+validation loss curves on one chart; the gap between the two
+lines is the overfitting picture (see the "Watch a Model Learn"
+demos). Pair with `val_split` to hold out the validation set.
+
+
 ## While loop
 
 `while cond { body }` re-evaluates `body` until `cond` is
@@ -1652,6 +1748,9 @@ of saddle points, narrow valleys, and wide flat minima --
 the latter generalize better. Tools to probe the landscape
 (loss surface sharpness, Hessian eigenvalues, SAM) are
 research targets.
+MLPL renders it with `loss_landscape(surface, dims, path)`:
+a 2-weight loss surface as a heatmap with the optimizer's
+trajectory drawn on top.
 
 ## Lottery Ticket Hypothesis
 
