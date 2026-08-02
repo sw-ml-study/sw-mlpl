@@ -1,9 +1,10 @@
 number = 9
 slug = "glossary-concept-coverage"
-status = "in-progress"
+status = "completed"
 description = "User report 2026-08-02: ICRL absent from the glossary though ICL is present; ..."
 role = "production"
 context_files = []
 created_at = "2026-08-02T16:27:58"
+completed_at = "2026-08-02T16:28:48"
 task_type = "docs"
-commits = []
+commits = ["6d78da1635f71ddb20d1ddd4227dfb82add1281b"]
