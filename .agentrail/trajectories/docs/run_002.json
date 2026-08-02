@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 3,
+    "step": "user-docs-dev-jargon-sweep"
+  },
+  "action": "context-dump then tailored multi-line replacement script with per-site assertions; convention-level rewrite (deferred -> present-tense capability statements); rule codified in CLAUDE.md; single combined pages deploy",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T10:24:41"
+}

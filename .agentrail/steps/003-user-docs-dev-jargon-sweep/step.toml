@@ -1,9 +1,10 @@
 number = 3
 slug = "user-docs-dev-jargon-sweep"
-status = "in-progress"
+status = "completed"
 description = "User direction 2026-08-02: user-facing docs (glossary, lang-reference, demos...."
 role = "legacy"
 context_files = []
 created_at = "2026-08-02T10:12:06"
+completed_at = "2026-08-02T10:24:41"
 task_type = "docs"
-commits = []
+commits = ["c815a84decfa06fc8f5362f36349f220eb0af240"]
