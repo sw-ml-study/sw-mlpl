@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga engram-mlx-e5: step 008 complete
+- refactor(runtime-array): dispatch moves out of the lib.rs facade; try_call LOC warn retired
+- chore(pages): rebuild for running_sum (demo line + glossary + reference)
+- feat(lang): running_sum(v) -- the additive scan beside running_product
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-mlx-e5: step 007 complete
 - chore(pages): rebuild for the 12 new glossary builtin entries
 - docs(glossary): 12 missing builtin entries + a coverage test (user report)
