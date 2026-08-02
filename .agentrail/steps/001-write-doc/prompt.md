@@ -1,0 +1,1 @@
+Write docs/thinking-in-arrays.md per the plan; link from the Thinking in Arrays demo takeaway in demos.toml; pages rebuild + commit + push; wiki pointer + errata note; markdown/sw-checklist gates.

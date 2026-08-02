@@ -1,0 +1,9 @@
+number = 1
+slug = "write-doc"
+status = "in-progress"
+description = "Write docs/thinking-in-arrays.md per the plan; link from the Thinking in Arra..."
+role = "production"
+context_files = []
+created_at = "2026-08-02T10:02:06"
+task_type = "docs"
+commits = []
