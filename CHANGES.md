@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga engram-mlx-e5: step 009 complete
+- chore(pages): rebuild for the 16 new glossary concept entries
+- docs(glossary): 16 concept entries from the project-direction vocabulary (user report: ICRL missing)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-mlx-e5: step 008 complete
 - refactor(runtime-array): dispatch moves out of the lib.rs facade; try_call LOC warn retired
 - chore(pages): rebuild for running_sum (demo line + glossary + reference)
