@@ -1,0 +1,1 @@
+Lens+scan composition verified and pinned (take row/column focus, flatten ravel); rank>1 scan input now errors with a hint naming both lenses instead of silently scanning the ravel; lang-reference documents the idiom. Repl + local serve rebuilt/restarted (they predated running_sum -- the split-brain trap struck again mid-verification).
