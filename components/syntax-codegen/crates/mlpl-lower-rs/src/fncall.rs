@@ -18,7 +18,7 @@ pub(crate) fn lower_fncall(
 ) -> Result<TokenStream, LowerError> {
     let rt = &ctx.rt;
     match (name, args.len()) {
-        ("iota", 1) => {
+        ("iota" | "range", 1) => {
             let arg = lower_expr(ctx, &args[0])?;
             Ok(quote! { #rt::iota((#arg).data()[0] as usize) })
         }

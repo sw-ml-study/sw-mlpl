@@ -75,7 +75,7 @@ fn eval_program(base: &str, program: &str) -> (String, String, JsonValue) {
     (session_id, token, body)
 }
 
-/// `hist(iota(10), 5)` runs through the eval pipeline, which
+/// `hist(range(10), 5)` runs through the eval pipeline, which
 /// detects the SVG return value and surfaces `viz_url` on the
 /// response. `RemoteEvaluator::fetch_viz` retrieves the same
 /// bytes via `GET /v1/viz/<id>`.
@@ -84,7 +84,7 @@ async fn fetch_viz_returns_stored_svg_bytes() {
     let addr = start_server().await;
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
-        let (_id, token, body) = eval_program(&base, "hist(iota(10), 5)");
+        let (_id, token, body) = eval_program(&base, "hist(range(10), 5)");
         let viz_url = body["viz_url"]
             .as_str()
             .expect("hist() should produce viz_url")
@@ -118,7 +118,7 @@ async fn fetch_viz_unknown_url_is_error() {
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
         // Need a valid bearer (any session token works).
-        let (_id, token, _body) = eval_program(&base, "iota(3)");
+        let (_id, token, _body) = eval_program(&base, "range(3)");
         let remote = RemoteEvaluator::new(&base);
         let err = remote
             .fetch_viz("/v1/viz/deadbeefdeadbeef", &token)
@@ -142,7 +142,7 @@ async fn fetch_viz_accepts_path_or_absolute_url() {
     let addr = start_server().await;
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
-        let (_id, token, body) = eval_program(&base, "hist(iota(10), 5)");
+        let (_id, token, body) = eval_program(&base, "hist(range(10), 5)");
         let viz_path = body["viz_url"].as_str().unwrap().to_string();
         let viz_absolute = format!("{base}{viz_path}");
         let remote = RemoteEvaluator::new(&base);

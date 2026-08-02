@@ -45,7 +45,7 @@ fn binop_span() {
 #[test]
 fn fn_call_span() {
     let e = Expr::FnCall {
-        name: "iota".into(),
+        name: "range".into(),
         args: vec![Expr::IntLit(5, Span::new(5, 6))],
         span: Span::new(0, 7),
     };

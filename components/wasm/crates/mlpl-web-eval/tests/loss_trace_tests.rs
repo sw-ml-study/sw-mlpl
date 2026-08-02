@@ -87,7 +87,7 @@ fn train_programs_stream_metrics_other_programs_do_not() {
     assert!(program_streams_metrics(
         "x = 1 ; train 30 {\n  loss_metric = l\n}"
     ));
-    assert!(!program_streams_metrics("x = iota(5) + 1"));
+    assert!(!program_streams_metrics("x = range(5) + 1"));
     assert!(!program_streams_metrics(":ask how do I train?"));
     // The `:ask` shortcut becomes an llm_call program -- the word
     // "train" inside the question must not route it to the stream path.

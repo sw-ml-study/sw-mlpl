@@ -84,23 +84,23 @@ fn array_lit() {
 }
 
 #[test]
-fn iota_call() {
-    roundtrip("iota(5)");
+fn range_call() {
+    roundtrip("range(5)");
 }
 
 #[test]
 fn device_block() {
-    roundtrip("device(\"mlx\") { x = iota(3) }");
+    roundtrip("device(\"mlx\") { x = range(3) }");
 }
 
 #[test]
 fn assign_device_block() {
-    roundtrip("x = device(\"mlx\") { iota(3) }");
+    roundtrip("x = device(\"mlx\") { range(3) }");
 }
 
 #[test]
 fn device_block_multi_stmt() {
-    roundtrip("device(\"mlx\") { a = iota(3); b = a * 2 }");
+    roundtrip("device(\"mlx\") { a = range(3); b = a * 2 }");
 }
 
 #[test]

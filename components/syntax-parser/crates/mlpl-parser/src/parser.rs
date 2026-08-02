@@ -120,16 +120,13 @@ impl<'a> Parser<'a> {
     pub(crate) fn parse_expr(&mut self, min_prec: u8) -> Result<Expr, ParseError> {
         let atom = self.parse_atom()?;
         let mut lhs = self.parse_postfix_chain(atom)?;
-        loop {
-            let Some((op, prec)) = self.tokens.get(self.pos).and_then(|t| match t.kind {
-                TokenKind::Plus => Some((BinOpKind::Add, 1u8)),
-                TokenKind::Minus => Some((BinOpKind::Sub, 1)),
-                TokenKind::Star => Some((BinOpKind::Mul, 2)),
-                TokenKind::Slash => Some((BinOpKind::Div, 2)),
-                _ => None,
-            }) else {
-                break;
-            };
+        while let Some((op, prec)) = self.tokens.get(self.pos).and_then(|t| match t.kind {
+            TokenKind::Plus => Some((BinOpKind::Add, 1u8)),
+            TokenKind::Minus => Some((BinOpKind::Sub, 1)),
+            TokenKind::Star => Some((BinOpKind::Mul, 2)),
+            TokenKind::Slash => Some((BinOpKind::Div, 2)),
+            _ => None,
+        }) {
             if prec < min_prec {
                 break;
             }

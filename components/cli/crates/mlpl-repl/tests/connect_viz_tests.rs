@@ -42,7 +42,7 @@ async fn connect_eval_surfaces_viz_url_for_svg() {
             &base,
             &id,
             &token,
-            "hist(iota(10), 5)",
+            "hist(range(10), 5)",
         )
         .unwrap();
         assert_eq!(resp.kind, "string");
@@ -68,7 +68,7 @@ async fn connect_eval_leaves_viz_url_none_for_non_svg() {
         let client = blocking_client();
         let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
         let resp =
-            mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "iota(5) + 1")
+            mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "range(5) + 1")
                 .unwrap();
         assert!(
             resp.viz_url.is_none(),

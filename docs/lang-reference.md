@@ -98,7 +98,7 @@ Every value the evaluator produces is one of NINE kinds (the
 
 | Kind | Produced by | Notes |
 | --- | --- | --- |
-| `array` | literals, iota/fill/randn, all math | The workhorse: rank-N dense f64 tensor, optional axis labels. |
+| `array` | literals, range/fill/randn, all math | The workhorse: rank-N dense f64 tensor, optional axis labels. |
 | `builtin-ref` | `:name` | The quoted-builtin value above. |
 | `device-tensor` | `device("mlx"/"cuda") { ... }` results held on-device | Fetched back on demand; keeps GPU residency explicit. |
 | `model` | linear/chain/attention/... model DSL | Layer tree; renders as a Sankey diagram. |
@@ -332,9 +332,8 @@ tables (e.g. the three name forms) keep their teaching order.
 | `emit_frame(name, step, x)` | 3 | Stream tensor `x` as a live frame through the connect-mode metric sink (the whole-tensor analog of `_metric` scalars); a no-op when not connected. Returns `x`. |
 | `get_error(r)` | 1 | The Err side of a Result as a 0-or-1 element vector: `[e]` when Err, `[]` when Ok. Complementary to `get_value` by construction. |
 | `get_value(r)` | 1 | The Ok side of a Result as a 0-or-1 element vector: `[v]` when `r` is `Ok(v)` (scalar payloads until Stage 6 `enclose`), `[]` when Err. `tally` of it is `is_some`; APL2 zilde-Option flavor (see docs/error-handling.md). |
-| `iota(n)` | 1 | Alias for `range(n)` (APL heritage) |
 | `linspace(start, stop, n)` | 3 | `n` evenly-spaced values from `start` to `stop` inclusive, as a rank-1 vector. |
-| `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) |
+| `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) `iota(n)` is a DEPRECATED alias (APL heritage): it still evaluates, but is removed from all docs/examples and will be dropped in a future release. |
 | `rank(a)` | 1 | Number of dimensions (scalar) |
 | `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |
 | `ngram_hash(ids, orders, heads, slots, seed)` | 5 | Rolling n-gram hash indices `[T, order, head]` for Engram-style memory addressing; a frozen exact cross-backend contract (ids capped at 2^21 - 1). |
@@ -346,10 +345,11 @@ tables (e.g. the three name forms) keep their teaching order.
 | `engram_stats(e, ids)` / `engram_stats(e, h, ids)` | 2-3 | Engram health record with addressable fields: `rows_addressed` (total (t, order, head) lookups), `unique_rows`, `collisions` (distinct n-gram contexts sharing a slot under the frozen hash contract -- repetition of the same context is not a collision), `nonzero_rows`, `max_row_norm`; the 3-argument form adds `gate_mean` / `gate_max` from the eager forward's gate. Example: `s = engram_stats(e, ids); s.collisions`. |
 | `gather_rows(table, indices)` | 2 | Select whole rows of a rank-2 table; output shape is the indices' shape + `[dim]`. Out-of-range indices error loudly. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
+| `flatten(a)` | 1 | Ravel: all elements as a rank-1 vector in row-major order (equivalent to `reshape(a, [size(a)])`). Naming policy: meaningful names are canonical and arity-locked; APL glyph names are heritage aliases only. |
 | `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
 | `scatter(buffer, index, value)` | 3 | A copy of rank-1 `buffer` with the single entry at `index` replaced by `value` (the input is not mutated). The bulk form is a `u:stamp`-style loop (see the Life demos); an accumulating multi-index scatter is future work. |
 | `shape(a)` | 1 | Dimension vector of array |
-| `size(a)` | 1 | Total element count (scalar): the product of the shape (numel). A scalar has size `1`; `size(reshape(iota(6), [2, 3]))` is `6`. |
+| `size(a)` | 1 | Total element count (scalar): the product of the shape (numel). A scalar has size `1`; `size(reshape(range(6), [2, 3]))` is `6`. |
 | `tally(a)` | 1 | Length of the leading axis (scalar): the number of major cells (APL's monadic tally, J's `#`). A scalar tallies to `1`; a rank >= 1 array tallies to `shape[0]`. Contrast with `size`, which counts every element. |
 | `transpose(a)` | 1 | Reverse axis order |
 

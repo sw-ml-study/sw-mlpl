@@ -14,7 +14,7 @@ fn extract_prefix_on_empty_input_returns_empty() {
 
 #[test]
 fn extract_prefix_at_cursor_walks_back_to_whitespace() {
-    let s = "iota(5) + sof";
+    let s = "range(5) + sof";
     let (start, p) = extract_prefix(s, s.len());
     assert_eq!(start, 10);
     assert_eq!(p, "sof");

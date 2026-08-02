@@ -61,7 +61,7 @@ fn builds_native_binary_that_prints_reduce_add() {
     }
     let tmp = tempdir("reduce");
     let src_path = tmp.join("prog.mlpl");
-    std::fs::write(&src_path, "reduce_add(iota(10))\n").unwrap();
+    std::fs::write(&src_path, "reduce_add(range(10))\n").unwrap();
     let out_path = tmp.join("prog");
     let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
     assert!(
@@ -119,7 +119,7 @@ fn wasm_target_produces_wasm_output() {
 
     let tmp = tempdir("wasm");
     let src_path = tmp.join("prog.mlpl");
-    std::fs::write(&src_path, "reduce_add(iota(5))\n").unwrap();
+    std::fs::write(&src_path, "reduce_add(range(5))\n").unwrap();
     let out_path = tmp.join("prog.wasm");
     let result = run_mlpl_build(&[
         src_path.to_str().unwrap(),

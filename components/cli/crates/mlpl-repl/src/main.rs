@@ -190,7 +190,7 @@ Syntax:
   repeat N { }    loop N times
 
 Built-in functions:
-  iota(n)              integers 0..n
+  range(n)             integers 0..n
   shape(a)             dimension vector
   rank(a)              number of dimensions
   reshape(a, dims)     reshape array

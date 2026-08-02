@@ -25,7 +25,7 @@ fn eval_variable_persistence() {
 #[test]
 fn eval_builtin_functions() {
     let session = WasmSession::new();
-    assert_eq!(session.eval("iota(5)"), "0 1 2 3 4");
+    assert_eq!(session.eval("range(5)"), "0 1 2 3 4");
     assert_eq!(session.eval("shape([1,2,3])"), "3");
     assert_eq!(session.eval("reduce_add([1,2,3,4,5])"), "15");
 }
@@ -53,7 +53,7 @@ fn eval_parse_error() {
 #[test]
 fn eval_matrix_display() {
     let session = WasmSession::new();
-    session.eval("x = iota(6)");
+    session.eval("x = range(6)");
     let result = session.eval("reshape(x, [2, 3])");
     assert_eq!(result, "0 1 2\n3 4 5");
 }

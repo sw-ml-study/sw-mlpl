@@ -36,7 +36,7 @@ svg(reshape(pred, [4]), "bar")
 # Loss curve along the learned weight direction:
 # sweep a scale s from 0 to 1.5 and recompute the binary cross-entropy
 # proxy (mean squared error of pred vs y) at s*w, s*b.
-ss   = iota(16) / 10
+ss   = range(16) / 10
 WS2  = matmul(reshape(ss, [16, 1]), reshape(w, [1, 2]))
 bs   = ss * b
 # preds_s[i,j] = sigmoid( sum_k X[j,k] * (s_i * w[k]) + s_i*b )

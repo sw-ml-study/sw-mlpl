@@ -125,13 +125,13 @@ async fn streaming_train_cancel_surfaces_partial_losses_to_client() {
             &base,
             &id,
             &token,
-            // Beefier body (`reduce_add(iota(500))` per iter) and
+            // Beefier body (`reduce_add(range(500))` per iter) and
             // 50k iters so the train is reliably ~100ms wall-clock,
             // giving the spawned cancel POST time to land
             // mid-flight before the loop completes. Last body
             // expression is the metric assignment so `step_val`
             // matches the streamed metric value.
-            "train 50000 { reduce_add(iota(500)) ; loss_metric = step + 0.5 }",
+            "train 50000 { reduce_add(range(500)) ; loss_metric = step + 0.5 }",
             &mut |m| frames.push((m.step, m.value)),
         )
         .expect_err("expected cancellation, got success");

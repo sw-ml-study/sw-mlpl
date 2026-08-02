@@ -34,12 +34,12 @@ train 100 {
 
 # ----- evaluation -----
 # last_losses is a length-100 vector of per-step losses. Pick out the
-# first and last entries via iota/eq masks (MLPL has no array indexing)
+# first and last entries via range/eq masks (MLPL has no array indexing)
 # and stack them so the final REPL line prints [first_loss, last_loss]
 # as a 2-vector, making the decrease visible at a glance. The
 # loss_curve chart gives the full trajectory.
 shape(last_losses)
 loss_curve(last_losses)
-first_loss = reduce_add(last_losses * eq(iota(100), 0))
-last_loss  = reduce_add(last_losses * eq(iota(100), 99))
+first_loss = reduce_add(last_losses * eq(range(100), 0))
+last_loss  = reduce_add(last_losses * eq(range(100), 99))
 [first_loss, last_loss]

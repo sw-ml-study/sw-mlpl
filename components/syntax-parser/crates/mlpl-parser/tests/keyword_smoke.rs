@@ -26,7 +26,7 @@ const FRAGMENTS: &[(&str, &str)] = &[
     ("paren precedence", "(2 + 3) * 4"),
     ("unary neg", "-x"),
     // Function calls
-    ("zero-arg call", "iota(5)"),
+    ("zero-arg call", "range(5)"),
     ("multi-arg call", "matmul(a, b)"),
     ("nested call", "softmax(matmul(X, W), 1)"),
     // Constructors

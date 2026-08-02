@@ -74,12 +74,12 @@ fn eval_sync(evaluator: &dyn Evaluator, program: &str) -> String {
 }
 
 /// `WasmEvaluator` and `RemoteEvaluator` produce the same final
-/// display string for `iota(5) + 1`. The contract: both impls
+/// display string for `range(5) + 1`. The contract: both impls
 /// route through the same `mlpl_eval::eval_program_value` +
 /// `Display` formatting, so the string output matches
 /// byte-for-byte.
 #[tokio::test(flavor = "multi_thread")]
-async fn wasm_and_remote_produce_same_display_for_iota_plus_one() {
+async fn wasm_and_remote_produce_same_display_for_range_plus_one() {
     let addr = start_server().await;
     let base = format!("http://{addr}");
 
@@ -87,8 +87,8 @@ async fn wasm_and_remote_produce_same_display_for_iota_plus_one() {
         let wasm =
             WasmEvaluator::from_session(Rc::new(RefCell::new(mlpl_wasm::WasmSession::new())));
         let remote = RemoteEvaluator::new(&base);
-        let from_wasm = eval_sync(&wasm, "iota(5) + 1");
-        let from_remote = eval_sync(&remote, "iota(5) + 1");
+        let from_wasm = eval_sync(&wasm, "range(5) + 1");
+        let from_remote = eval_sync(&remote, "range(5) + 1");
         assert_eq!(
             from_wasm, from_remote,
             "WASM and REST evaluators should produce identical displays"
@@ -97,7 +97,7 @@ async fn wasm_and_remote_produce_same_display_for_iota_plus_one() {
         for digit in ['1', '2', '3', '4', '5'] {
             assert!(
                 from_wasm.contains(digit),
-                "iota(5)+1 display should contain {digit}: {from_wasm}"
+                "range(5)+1 display should contain {digit}: {from_wasm}"
             );
         }
     })
@@ -115,7 +115,7 @@ async fn remote_clear_drops_session_state() {
 
     let result = tokio::task::spawn_blocking(move || {
         let remote = RemoteEvaluator::new(&base);
-        eval_sync(&remote, "x = iota(3)");
+        eval_sync(&remote, "x = range(3)");
         let before = eval_sync(&remote, "x");
         assert!(
             !before.starts_with("error:"),

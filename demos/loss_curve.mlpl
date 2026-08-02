@@ -9,7 +9,7 @@ x = [0, 1, 2, 3, 4]
 y = [0, 2, 4, 6, 8]      # true slope = 2
 
 # Sweep w from -1 to 5 in steps of 0.25 (25 values)
-ws = iota(25) / 4 - 1
+ws = range(25) / 4 - 1
 
 # For each w, compute MSE = mean((w*x - y)^2).
 # Build an outer product: ws (25,1) * x (1,5) = preds (25,5)

@@ -128,7 +128,7 @@ async fn stream_and_eval_agree_on_final_value() {
     let base = format!("http://{addr}");
     let result = tokio::task::spawn_blocking(move || {
         let remote_stream = RemoteEvaluator::new(&base);
-        let (metrics, outcome) = drive_stream(&remote_stream, "iota(5) + 1");
+        let (metrics, outcome) = drive_stream(&remote_stream, "range(5) + 1");
         assert!(metrics.is_empty(), "non-train should have no metrics");
         let stream_value = match outcome {
             StreamOutcome::Done { value, .. } => value,
@@ -137,7 +137,7 @@ async fn stream_and_eval_agree_on_final_value() {
         let remote_eval = RemoteEvaluator::new(&base);
         let slot = Rc::new(RefCell::new(None::<String>));
         let s = slot.clone();
-        remote_eval.eval("iota(5) + 1", Box::new(move |r| *s.borrow_mut() = Some(r)));
+        remote_eval.eval("range(5) + 1", Box::new(move |r| *s.borrow_mut() = Some(r)));
         let eval_value = slot.borrow().clone().unwrap();
         assert_eq!(stream_value, eval_value);
     })
@@ -177,7 +177,7 @@ async fn cancel_mid_train_returns_partial_losses() {
 
         let (metrics, outcome) = drive_stream(
             &remote,
-            "train 50000 { reduce_add(iota(500)) ; loss_metric = step + 0.5 }",
+            "train 50000 { reduce_add(range(500)) ; loss_metric = step + 0.5 }",
         );
         assert_eq!(
             cancel_token.load(Ordering::SeqCst),

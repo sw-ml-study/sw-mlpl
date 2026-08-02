@@ -54,12 +54,12 @@ async fn connect_create_and_eval() {
 
         // Eval a couple of programs against the remote
         // session; assert the values come back.
-        let r1 = mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "iota(5)")
+        let r1 = mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "range(5)")
             .unwrap();
         assert_eq!(r1.kind, "array");
         assert!(
             r1.value.contains('4'),
-            "iota(5) should contain digit 4: {}",
+            "range(5) should contain digit 4: {}",
             r1.value
         );
 
@@ -114,14 +114,14 @@ async fn connect_inspect_returns_workspace_snapshot() {
         let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
         // Bind some state on the remote.
-        mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "a = iota(3)")
+        mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "a = range(3)")
             .unwrap();
         mlpl_repl_connect::connect::eval_remote(
             &client,
             &base,
             &id,
             &token,
-            "b = reshape(iota(6), [2, 3])",
+            "b = reshape(range(6), [2, 3])",
         )
         .unwrap();
         mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "m = linear(2, 3, 0)")

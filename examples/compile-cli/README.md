@@ -55,7 +55,7 @@ ops and constructs needed for non-training code. As of v0.8.0 it
 covers
 
 - scalar and array literals, arithmetic, broadcasting
-- `iota`, `reshape`, `transpose`, `reduce_add` / `reduce_mul` with
+- `range`, `reshape`, `transpose`, `reduce_add` / `reduce_mul` with
   *positional* axis args
 - `matmul` (with a static contraction check when both sides are
   labeled), `dot`

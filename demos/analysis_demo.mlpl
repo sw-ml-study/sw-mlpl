@@ -21,7 +21,7 @@ repeat 400 {
 
 # A loss-style curve: sweep a scale factor along the learned weights
 # and compute the mean squared error at each point.
-ss = iota(20) / 10
+ss = range(20) / 10
 WS = matmul(reshape(ss, [20, 1]), reshape(w, [1, 2]))
 zs = matmul(WS, transpose(X)) + matmul(reshape(ss * b, [20, 1]), ones([1, 4]))
 ps = sigmoid(zs)

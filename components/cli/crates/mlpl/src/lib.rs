@@ -8,7 +8,7 @@
 //! use mlpl::{mlpl, DenseArray};
 //!
 //! fn sum_of_first_n(n: usize) -> DenseArray {
-//!     mlpl! { reduce_add(iota(#n)) }  // (future: macro args)
+//!     mlpl! { reduce_add(range(#n)) }  // (future: macro args)
 //! }
 //! ```
 //!

@@ -33,7 +33,7 @@ fn blocking_client() -> reqwest::blocking::Client {
         .unwrap()
 }
 
-/// Streaming `iota(5) + 1` produces the same final value
+/// Streaming `range(5) + 1` produces the same final value
 /// as the non-streaming `/eval` path, byte-for-byte. The
 /// SSE stream emits no `metric` frames for a non-`train`
 /// program, so the callback is never invoked.
@@ -47,7 +47,7 @@ async fn stream_and_non_stream_produce_same_final_value() {
         let (id, token) = mlpl_repl_connect::connect::create_session(&client, &base).unwrap();
 
         let r_nonstream =
-            mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "iota(5) + 1")
+            mlpl_repl_connect::connect::eval_remote(&client, &base, &id, &token, "range(5) + 1")
                 .unwrap();
 
         let mut metrics: Vec<mlpl_repl_connect::connect_stream::SseMetric> = Vec::new();
@@ -56,7 +56,7 @@ async fn stream_and_non_stream_produce_same_final_value() {
             &base,
             &id,
             &token,
-            "iota(5) + 1",
+            "range(5) + 1",
             &mut |m| {
                 metrics.push(mlpl_repl_connect::connect_stream::SseMetric {
                     name: m.name.clone(),
@@ -71,7 +71,7 @@ async fn stream_and_non_stream_produce_same_final_value() {
         assert_eq!(r_stream.kind, r_nonstream.kind);
         assert!(
             metrics.is_empty(),
-            "iota(5) + 1 should emit no _metric frames, got {metrics:?}"
+            "range(5) + 1 should emit no _metric frames, got {metrics:?}"
         );
     })
     .await;

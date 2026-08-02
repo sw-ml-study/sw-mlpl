@@ -1,6 +1,6 @@
 # MLPL Matrix Operations Demo
 # Create a sequence and reshape into a matrix
-x = iota(12)
+x = range(12)
 m = reshape(x, [3, 4])
 m
 

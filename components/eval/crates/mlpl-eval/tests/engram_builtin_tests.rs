@@ -56,3 +56,18 @@ fn gather_rows_bounds_are_loud() {
     let err = eval(&mut env, "gather_rows(reshape(range(4), [2, 2]), [5])").unwrap_err();
     assert!(format!("{err}").contains("out of range"), "{err}");
 }
+
+#[test]
+fn flatten_ravels_and_deprecated_iota_still_evaluates() {
+    // flatten(a): ravel to rank-1 row-major (naming policy: the
+    // meaningful name is canonical; APL heritage names are
+    // aliases only). iota stays a DEPRECATED alias of range so
+    // existing user scripts keep working, but it appears nowhere
+    // in docs, demos, or the catalog anymore.
+    let mut env = Environment::new();
+    let flat = eval(&mut env, "flatten(reshape(range(6), [2, 3]))").unwrap();
+    assert_eq!(flat.shape().dims(), &[6]);
+    assert_eq!(flat.data(), &[0.0, 1.0, 2.0, 3.0, 4.0, 5.0]);
+    let legacy = eval(&mut env, "iota(4)").unwrap();
+    assert_eq!(legacy.data(), &[0.0, 1.0, 2.0, 3.0]);
+}

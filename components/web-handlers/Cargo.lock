@@ -1052,6 +1052,7 @@ dependencies = [
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -1064,6 +1065,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -1126,6 +1128,7 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-tensor-handle",
  "mlpl-trace",
  "mlpl-viz",
  "serde",
@@ -1208,6 +1211,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-reduce",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-envc-bindings",
@@ -1242,6 +1246,7 @@ dependencies = [
  "mlpl-array",
  "mlpl-eval-types",
  "mlpl-parser",
+ "mlpl-tensor-handle",
  "serde",
 ]
 
@@ -1392,6 +1397,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
 ]
 
@@ -1534,6 +1540,13 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-tensor-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]

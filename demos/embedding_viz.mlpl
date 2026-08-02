@@ -43,7 +43,7 @@ target = matmul(cluster_assign, centers) + randn(1, [12, 8]) * 0.1
 # evaluates the layer inside the loss AND, after
 # training, extracts the final table.
 emb = embed(V, d, 0)
-ids = iota(V)
+ids = range(V)
 experiment "embedding_viz" {
   train 50 {
     adam(mean((apply(emb, ids) - target) * (apply(emb, ids) - target)), emb, 0.1, 0.9, 0.999, 0.00000001);
@@ -51,7 +51,7 @@ experiment "embedding_viz" {
   }
 }
 
-table = apply(emb, iota(V))
+table = apply(emb, range(V))
 
 # --- Visualization ---
 

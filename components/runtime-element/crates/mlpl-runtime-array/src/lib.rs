@@ -11,7 +11,6 @@ use mlpl_array::DenseArray;
 use mlpl_runtime_core::error::RuntimeError;
 
 pub const NAMES: &[&str] = &[
-    "iota",
     "range",
     "linspace",
     "cumprod",
@@ -20,6 +19,7 @@ pub const NAMES: &[&str] = &[
     "depth",
     "size",
     "tally",
+    "flatten",
     "reshape",
     "transpose",
     "reduce_add",
@@ -37,6 +37,8 @@ pub const NAMES: &[&str] = &[
 
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
+        // "iota": DEPRECATED alias of range (APL heritage) -- evaluates
+        // but is absent from NAMES/catalog/docs; removal pending.
         "iota" | "range" => Some(compute::iota(name, args)),
         "linspace" => Some(compute::linspace(name, args)),
         "cumprod" => Some(reduce::cumprod(name, args)),
@@ -45,6 +47,7 @@ pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, 
         "depth" => Some(shape::depth(name, args)),
         "size" => Some(shape::size(name, args)),
         "tally" => Some(shape::tally(name, args)),
+        "flatten" => Some(shape::flatten(name, args)),
         "reshape" => Some(transform::reshape(name, args)),
         "transpose" => Some(transform::transpose(name, args)),
         "reduce_add" | "reduce_mul" => Some(reduce::reduce(name, args)),

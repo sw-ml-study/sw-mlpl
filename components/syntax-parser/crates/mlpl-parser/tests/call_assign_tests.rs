@@ -36,9 +36,9 @@ fn fn_call_two_args() {
 
 #[test]
 fn fn_call_int_arg() {
-    match parse_one("iota(6)") {
+    match parse_one("range(6)") {
         Expr::FnCall { name, args, .. } => {
-            assert_eq!(name, "iota");
+            assert_eq!(name, "range");
             assert_eq!(args.len(), 1);
             assert!(matches!(args[0], Expr::IntLit(6, _)));
         }
@@ -159,7 +159,7 @@ fn multi_assign() {
 
 #[test]
 fn assign_with_axis_annotation_desugars_to_label_call() {
-    match parse_one("x : [batch, dim] = reshape(iota(6), [2, 3])") {
+    match parse_one("x : [batch, dim] = reshape(range(6), [2, 3])") {
         Expr::Assign { name, value, .. } => {
             assert_eq!(name, "x");
             match *value {
@@ -187,7 +187,7 @@ fn assign_with_axis_annotation_desugars_to_label_call() {
 
 #[test]
 fn assign_with_single_axis_annotation() {
-    match parse_one("v : [seq] = iota(5)") {
+    match parse_one("v : [seq] = range(5)") {
         Expr::Assign { name, value, .. } => {
             assert_eq!(name, "v");
             match *value {

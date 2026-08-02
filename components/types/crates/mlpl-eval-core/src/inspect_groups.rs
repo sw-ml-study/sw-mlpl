@@ -26,7 +26,6 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
         "Array",
         &[
             ("range", "range(n)", "integers 0..n as a vector (preferred)"),
-            ("iota", "iota(n)", "alias for range(n) (APL heritage)"),
             ("shape", "shape(a)", "dimension vector of a"),
             (
                 "labels",
@@ -49,6 +48,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "tally",
                 "tally(a)",
                 "length of the leading axis of a (major-cell count)",
+            ),
+            (
+                "flatten",
+                "flatten(a)",
+                "ravel: all elements as a rank-1 vector in row-major order",
             ),
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),

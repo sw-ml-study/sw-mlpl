@@ -30,7 +30,7 @@ Syntax:
 
 Built-in categories (see :help <topic> or :builtins for the
 full list):
-  core       range (iota), shape, rank, reshape, transpose,
+  core       range, shape, rank, reshape, transpose,
              rotate, reduce, reduce_add, reduce_mul, argmax,
              mean
   labels     label, relabel, reshape_labeled, labels

@@ -9,5 +9,5 @@
 # axis reductions like reduce_add(x, "feat"); those stay
 # interpreter-only today (see docs/compiling-mlpl.md).
 
-v = iota(7)
+v = range(7)
 reduce_add(v)

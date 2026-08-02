@@ -33,7 +33,7 @@ repeat 10 {
   clus = argmax(-1 * dists, 1);
 
   # Build a KxN assignment mask matrix A where A[j, i] = 1 iff clus[i] == j.
-  jj = reshape(iota(3), [3, 1]);
+  jj = reshape(range(3), [3, 1]);
   ll = reshape(clus, [1, 90]);
   diff = matmul(jj, ones([1, 90])) - matmul(ones([3, 1]), ll);
   A = eq(diff, 0);

@@ -11,6 +11,16 @@ pub(crate) fn shape(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Run
     Ok(DenseArray::from_vec(dims))
 }
 
+/// `flatten(a)` -- ravel: the elements of `a` as a rank-1 vector
+/// in row-major order. Lives here beside the other shape
+/// introspection ops (transform.rs sits at its function budget).
+pub(crate) fn flatten(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 1 {
+        return Err(arity_err(name, 1, args.len()));
+    }
+    Ok(DenseArray::from_vec(args[0].data().to_vec()))
+}
+
 pub(crate) fn rank(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     if args.len() != 1 {
         return Err(arity_err(name, 1, args.len()));
