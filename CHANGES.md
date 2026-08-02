@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-02
+
+- saga mlx-persistent-tensors-e4: step 009 complete
+- docs: repair source docs per wiki errata E-001..E-012; institute wiki-errata discipline (E4 step 9)
+
 ## 2026-08-01
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 008 complete (df70e4dc)
 - feat(mlx): resident structural/broadcast backward + seam counters; E4 bench gate met at d>=128 (E4 step 8)
 - docs(changes): refresh CHANGES.md to HEAD
