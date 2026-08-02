@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga engram-mlx-e5: step 011 complete
+- chore(pages): rebuild for the sectioned Diagrams tab + 3 new diagrams
+- feat(web): Diagrams tab in two labeled sections + three new MLPL-mechanics diagrams
+- saga engram-mlx-e5: step 010 complete
+- docs(readme): restore test-pinned playground counts (66 demos / 58 lessons / 410-entry glossary)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-mlx-e5: step 009 complete
 - chore(pages): rebuild for the 16 new glossary concept entries
 - docs(glossary): 16 concept entries from the project-direction vocabulary (user report: ICRL missing)
