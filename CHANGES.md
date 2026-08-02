@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga engram-mlx-e5: step 002 (queue revision) complete
+- docs(roadmap): revision B -- elevate learning-experience infrastructure per 20260802 research
+- saga engram-mlx-e5: step 001 complete
+- fix(mlx): first resident train no longer silently runs the CPU optimizer; engram parity + seam baseline (E5 step 1)
+- chore(agentrail): archive thinking-in-arrays-doc (stray step aborted); init saga engram-mlx-e5
+- docs(changes): refresh CHANGES.md to HEAD
 - saga thinking-in-arrays-doc: complete (3 steps)
 - chore(pages): rebuild for running_product rename + jargon-free glossary/demos/lang-reference
 - docs: purge dev-plan/status jargon from all user-facing surfaces; codify the rule
