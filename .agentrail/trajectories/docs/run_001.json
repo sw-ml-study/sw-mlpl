@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 1,
+    "step": "write-doc"
+  },
+  "action": "essay authoring consistent with the shipped demo; demos.toml link; build-pages deploy; wiki pointer",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T10:04:53"
+}

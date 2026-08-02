@@ -1,9 +1,10 @@
 number = 1
 slug = "write-doc"
-status = "in-progress"
+status = "completed"
 description = "Write docs/thinking-in-arrays.md per the plan; link from the Thinking in Arra..."
 role = "production"
 context_files = []
 created_at = "2026-08-02T10:02:06"
+completed_at = "2026-08-02T10:04:53"
 task_type = "docs"
-commits = []
+commits = ["48c9c0976b1c9872673369a05083852cc313d981"]
