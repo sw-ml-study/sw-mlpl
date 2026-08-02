@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga demo-pedagogy-and-queue-reorder: complete (2 steps)
+- chore(pages): rebuild for the Thinking in Arrays demo + pedagogy text
+- feat(demos): Thinking in Arrays -- the data-loop vs time-loop pedagogy (loop avoidance)
+- docs(status): de-couple historical banner from live roadmap state (errata E-013)
+- saga demo-pedagogy-and-queue-reorder: step 001 complete
+- docs(roadmap): reorder saga queue -- MTP promoted, mHC parked behind it (user direction 2026-08-02)
+- saga demo-pedagogy-and-queue-reorder: init (2 steps) after E4 archive
+- saga mlx-persistent-tensors-e4: complete (10 steps)
+- feat(mlx): demote gpu_step below the resident path; E4 cleanup + landed docs (E4 step 10, saga close)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 009 complete
 - docs: repair source docs per wiki errata E-001..E-012; institute wiki-errata discipline (E4 step 9)
 
