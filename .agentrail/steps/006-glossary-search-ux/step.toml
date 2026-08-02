@@ -1,0 +1,9 @@
+number = 6
+slug = "glossary-search-ux"
+status = "pending"
+description = "User report 2026-08-02: glossary type-to-jump search only scrolls to the FIRS..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-02T15:11:57"
+task_type = "rust-feature"
+commits = []

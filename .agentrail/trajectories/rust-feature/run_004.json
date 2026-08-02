@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 5,
+    "step": "perf-gate-and-demo"
+  },
+  "action": "user bug report -> train-body value-recording trace -> single fix healing 4 demos + regression pin; demo authoring with repl verification; server rebuild/restart gate honored",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T15:11:57"
+}
