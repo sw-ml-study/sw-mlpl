@@ -8,7 +8,6 @@
 
 use mlpl_tensor_handle::{AxisKind, BinKind, TensorHandle, UnaryKind};
 
-use crate::ops::{BinaryOp, UnaryOp};
 use crate::tape::{NodeId, Tape};
 
 /// One resident-forward request, in device terms.
@@ -23,30 +22,6 @@ pub enum ResidentReq<'a> {
     Reshape(NodeId, &'a [usize]),
     /// Fused cross-entropy forward over class indices.
     Ce(NodeId, &'a [usize]),
-}
-
-/// The tape's `UnaryOp` in device terms.
-#[must_use]
-pub fn map_unary(op: UnaryOp) -> UnaryKind {
-    match op {
-        UnaryOp::Neg => UnaryKind::Neg,
-        UnaryOp::Exp => UnaryKind::Exp,
-        UnaryOp::Log => UnaryKind::Log,
-        UnaryOp::Relu => UnaryKind::Relu,
-        UnaryOp::Tanh => UnaryKind::Tanh,
-        UnaryOp::Sigmoid => UnaryKind::Sigmoid,
-    }
-}
-
-/// The tape's `BinaryOp` in device terms.
-#[must_use]
-pub fn map_binary(op: BinaryOp) -> BinKind {
-    match op {
-        BinaryOp::Add => BinKind::Add,
-        BinaryOp::Sub => BinKind::Sub,
-        BinaryOp::Mul => BinKind::Mul,
-        BinaryOp::Div => BinKind::Div,
-    }
 }
 
 /// A node's handle, if this tape is in resident mode.
@@ -87,4 +62,43 @@ pub fn try_resident(tape: &Tape, req: ResidentReq<'_>) -> Option<TensorHandle> {
         ResidentReq::Reshape(x, dims) => handle_of(tape, x)?.dev_reshape(dims).ok(),
         ResidentReq::Ce(x, targets) => handle_of(tape, x)?.dev_cross_entropy(targets).ok(),
     }
+}
+
+/// Transpose backward: `g = up^T`, lazily on the device.
+#[must_use]
+pub fn transpose_backward(tape: &Tape, up: &TensorHandle) -> Option<TensorHandle> {
+    if !tape.resident.get() {
+        return None;
+    }
+    as_dev(up)?.dev_unary(UnaryKind::Transpose).ok()
+}
+
+/// Reshape backward: `g = reshape(up, orig)`, lazily on the device.
+#[must_use]
+pub fn reshape_backward(tape: &Tape, up: &TensorHandle, orig: &[usize]) -> Option<TensorHandle> {
+    if !tape.resident.get() {
+        return None;
+    }
+    as_dev(up)?.dev_reshape(orig).ok()
+}
+
+/// Reduce a broadcast gradient back to `target` dims on the device:
+/// sum (keepdims) over every axis the forward broadcast expanded,
+/// then reshape. `None` (unsupported layout or backend error) means
+/// "run the exact CPU kernel".
+#[must_use]
+pub fn unbroadcast(g: &TensorHandle, target: &[usize]) -> Option<TensorHandle> {
+    let gd = g.dims();
+    if gd == target {
+        return Some(g.clone());
+    }
+    let pad = gd.len().checked_sub(target.len())?;
+    let mut out = g.clone();
+    for (i, gdim) in gd.iter().enumerate() {
+        let want = if i < pad { 1 } else { target[i - pad] };
+        if want == 1 && *gdim != 1 {
+            out = out.dev_axis(AxisKind::Sum, Some(i), true).ok()?;
+        }
+    }
+    out.dev_reshape(target).ok()
 }

@@ -34,8 +34,12 @@ const SAMPLE_POINTS: &[(u32, u32)] = &[
 /// upper-crescent class 0 dots), pink dominant in the lower
 /// portion (matches lower-crescent class 1 dots), curved
 /// transition through the middle.
+// Refreshed 2026-08-01 after the E4 step-006 optimizer fix
+// (batched step-start gradients changed the training trajectory).
+// New boundary visually inspected: blue over the upper moon, pink
+// hugging the lower crescent.
 const GOLDEN: &[&str] = &[
-    "#89b3f9", "#82aaed", "#89b3f9", "#89b3f9", "#89b3f9", "#e484a0", "#8cb2f7", "#f28ba8",
+    "#89b3f9", "#82aaed", "#89b3f9", "#89b3f9", "#89b3f9", "#e484a0", "#aca6de", "#f28ba8",
     "#f28ba8",
 ];
 

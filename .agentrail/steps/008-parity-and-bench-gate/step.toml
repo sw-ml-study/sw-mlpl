@@ -1,6 +1,6 @@
 number = 8
 slug = "parity-and-bench-gate"
-status = "pending"
+status = "in-progress"
 description = "E4 step 7: the deliverable gate. (1) Rerun cargo bench -p mlpl-bench --featur..."
 role = "legacy"
 context_files = []

@@ -93,20 +93,14 @@ fn dispatch_train_bpe(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    if args.len() != 3 {
-        return Err(EvalError::BadArity {
-            func: "train_bpe".into(),
-            expected: 3,
-            got: args.len(),
-        });
-    }
+    crate::grad::arity_check(args, 3, "train_bpe")?;
     let corpus_val = crate::eval::eval_expr(&args[0], env, trace)?;
     let corpus_bytes = crate::bpe::corpus_to_bytes(corpus_val)?;
     let vocab_arr = crate::eval::eval_expr(&args[1], env, trace)?.into_array()?;
     let seed_arr = crate::eval::eval_expr(&args[2], env, trace)?.into_array()?;
     if vocab_arr.rank() != 0 || seed_arr.rank() != 0 {
         return Err(EvalError::Unsupported(
-            "train_bpe: vocab_size and seed must be scalars".into(),
+            "train_bpe: scalar args expected".into(),
         ));
     }
     let vocab_size = vocab_arr.data()[0] as u32;

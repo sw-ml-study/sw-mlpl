@@ -10,12 +10,13 @@
 
 mod device;
 mod handle;
-mod handle_axis;
 mod handle_ops;
+pub mod metrics;
 mod ops;
 mod registry;
 
 pub use device::{AxisKind, BinKind, Dev, DeviceArray, HandleError, UnaryKind};
 pub use handle::TensorHandle;
+pub use metrics::{SeamEvent, bump, bump_if, seam_reset, seam_snapshot};
 pub use ops::DeviceOps;
 pub use registry::{device_ops, register_device_ops, upload};

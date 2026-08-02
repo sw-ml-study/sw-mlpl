@@ -5,7 +5,7 @@
 //! to `model_apply::apply_model` or
 //! `model_attn_weights::extract_attn_weights`.
 
-use crate::env_api::{EnvDevice, EnvModels, EnvTensorDevice};
+use crate::env_api::{EnvDevice, EnvTensorDevice};
 use mlpl_array::DenseArray;
 use mlpl_array_ops_reduce::prelude::*;
 use mlpl_parser::Expr;
@@ -23,26 +23,7 @@ pub fn eval_apply(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<DenseArray, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::BadArity {
-            func: "apply".into(),
-            expected: 2,
-            got: args.len(),
-        });
-    }
-    let model_name = match &args[0] {
-        Expr::Ident(n, _) => n.clone(),
-        _ => {
-            return Err(EvalError::Unsupported(
-                "apply: first argument must be a model identifier".into(),
-            ));
-        }
-    };
-    let model = env
-        .get_model(&model_name)
-        .cloned()
-        .ok_or_else(|| EvalError::UndefinedVariable(model_name.clone()))?;
-    let x = mlpl_eval_env::dispatch_hook::eval_or_err(&args[1], env, trace)?.into_array()?;
+    let (model, x) = crate::model_apply::model_and_input("apply", args, env, trace)?;
     check_device_agreement(&model, &args[1], env)?;
     apply_model(&model, &x, env)
 }
@@ -55,26 +36,7 @@ pub fn eval_predict_batch(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<DenseArray, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::BadArity {
-            func: "predict_batch".into(),
-            expected: 2,
-            got: args.len(),
-        });
-    }
-    let model_name = match &args[0] {
-        Expr::Ident(n, _) => n.clone(),
-        _ => {
-            return Err(EvalError::Unsupported(
-                "predict_batch: first argument must be a model identifier".into(),
-            ));
-        }
-    };
-    let model = env
-        .get_model(&model_name)
-        .cloned()
-        .ok_or_else(|| EvalError::UndefinedVariable(model_name.clone()))?;
-    let x = mlpl_eval_env::dispatch_hook::eval_or_err(&args[1], env, trace)?.into_array()?;
+    let (model, x) = crate::model_apply::model_and_input("predict_batch", args, env, trace)?;
     check_device_agreement(&model, &args[1], env)?;
     let logits = apply_model(&model, &x, env)?;
     let last_axis = logits.shape().dims().len().saturating_sub(1);
@@ -90,26 +52,7 @@ pub fn eval_attention_weights(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<DenseArray, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::BadArity {
-            func: "attention_weights".into(),
-            expected: 2,
-            got: args.len(),
-        });
-    }
-    let model_name = match &args[0] {
-        Expr::Ident(n, _) => n.clone(),
-        _ => {
-            return Err(EvalError::Unsupported(
-                "attention_weights: first argument must be a model identifier".into(),
-            ));
-        }
-    };
-    let model = env
-        .get_model(&model_name)
-        .cloned()
-        .ok_or_else(|| EvalError::UndefinedVariable(model_name.clone()))?;
-    let x = mlpl_eval_env::dispatch_hook::eval_or_err(&args[1], env, trace)?.into_array()?;
+    let (model, x) = crate::model_apply::model_and_input("attention_weights", args, env, trace)?;
     extract_attn_weights(&model, &x, env)
 }
 

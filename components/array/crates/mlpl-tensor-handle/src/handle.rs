@@ -36,7 +36,10 @@ impl TensorHandle {
     pub fn to_dense(&self) -> DenseArray {
         match self {
             Self::Cpu(a) => a.clone(),
-            Self::Dev(d) => d.to_dense(),
+            Self::Dev(d) => {
+                crate::metrics::bump(crate::metrics::SeamEvent::Download);
+                d.to_dense()
+            }
         }
     }
 }

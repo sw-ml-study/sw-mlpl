@@ -127,6 +127,20 @@ pub fn accumulate(
     }
 }
 
+/// Accumulate a (left, right) gradient pair -- the shared tail of
+/// every two-parent backward rule.
+pub fn accumulate_pair(
+    tape: &crate::tape::Tape,
+    left: crate::tape::NodeId,
+    right: crate::tape::NodeId,
+    ga: impl Into<mlpl_tensor_handle::TensorHandle>,
+    gb: impl Into<mlpl_tensor_handle::TensorHandle>,
+) {
+    let mut nodes = tape.nodes_mut();
+    accumulate(&mut nodes[left.0].grad, ga);
+    accumulate(&mut nodes[right.0].grad, gb);
+}
+
 /// Seed `node`'s gradient with ones (saga E4: resident roots seed a
 /// device-side fill so backward stays lazy; host roots stay
 /// bit-exact f64). No-op when a gradient is already present.

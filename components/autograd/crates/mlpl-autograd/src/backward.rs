@@ -5,8 +5,10 @@ use mlpl_array_ops_matmul::prelude::*;
 use mlpl_array_ops_shape::prelude::*;
 
 use mlpl_autograd_tape::grad_kernels::unbroadcast;
-use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, resident_backward, softmax_backward};
-use mlpl_tensor_handle::TensorHandle;
+use mlpl_autograd_tape::{
+    NodeId, NodeKind, Tape, accumulate, accumulate_pair, resident_backward, softmax_backward,
+};
+use mlpl_tensor_handle::{SeamEvent, TensorHandle, bump_if};
 
 use crate::backward_shape::propagate_shape;
 
@@ -39,12 +41,12 @@ fn propagate(tape: &Tape, id: NodeId) {
         NodeKind::MeanAll { parent } => prop_sum_mean(tape, parent, &upstream, true),
         NodeKind::Softmax { parent, axis } => prop_softmax(tape, id, parent, axis, &upstream),
         NodeKind::MatMul { left, right } => prop_matmul(tape, left, right, &upstream),
-        // Structural kinds (transpose/reshape/cross-entropy/patchify/
-        // concat/stack/take/rotate) dispatch in backward_shape.rs on
-        // the exact CPU kernels; the mixed-residency accumulate
-        // re-uploads their grads when the rest of the tape is
-        // resident.
-        other => propagate_shape(tape, other, &upstream.to_dense()),
+        // Structural kinds dispatch in backward_shape.rs: transpose
+        // and reshape grads stay lazy on a resident tape; the rest
+        // (cross-entropy/patchify/concat/stack/take/rotate) run the
+        // exact CPU kernels and the mixed-residency accumulate
+        // re-uploads their grads.
+        other => propagate_shape(tape, other, &upstream),
     }
 }
 
@@ -55,6 +57,7 @@ fn prop_softmax(tape: &Tape, id: NodeId, parent: NodeId, axis: usize, upstream: 
     {
         return accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
     }
+    bump_if(tape.resident.get(), SeamEvent::CpuFallback);
     let grad = softmax_backward(&y.to_dense(), &upstream.to_dense(), axis);
     accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
 }
@@ -76,6 +79,7 @@ fn prop_unary(
     {
         return accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
     }
+    bump_if(tape.resident.get(), SeamEvent::CpuFallback);
     let (x, up) = (xh.to_dense(), upstream.to_dense());
     let grad_x = op.backward(&x, &yh.to_dense(), &up);
     let grad_x = unbroadcast(grad_x, &x.shape().clone());
@@ -96,16 +100,13 @@ fn prop_binary(
     if tape.resident.get()
         && let Some((ga, gb)) = resident_backward::binary_backward(op, &ah, &bh, upstream)
     {
-        let mut nodes = tape.nodes_mut();
-        accumulate(&mut nodes[left.0].grad, ga);
-        return accumulate(&mut nodes[right.0].grad, gb);
+        return accumulate_pair(tape, left, right, ga, gb);
     }
+    bump_if(tape.resident.get(), SeamEvent::CpuFallback);
     let (a, b, up) = (ah.to_dense(), bh.to_dense(), upstream.to_dense());
     let (ga, gb) = op.backward(&a, &b, &up);
     let (ga, gb) = (unbroadcast(ga, a.shape()), unbroadcast(gb, b.shape()));
-    let mut nodes = tape.nodes_mut();
-    accumulate(&mut nodes[left.0].grad, ga);
-    accumulate(&mut nodes[right.0].grad, gb);
+    accumulate_pair(tape, left, right, ga, gb);
 }
 
 fn prop_sum_mean(tape: &Tape, parent: NodeId, upstream: &TensorHandle, mean: bool) {
@@ -115,6 +116,7 @@ fn prop_sum_mean(tape: &Tape, parent: NodeId, upstream: &TensorHandle, mean: boo
     {
         return accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
     }
+    bump_if(tape.resident.get(), SeamEvent::CpuFallback);
     let parent_shape = Shape::new(dims);
     let n = parent_shape.elem_count();
     let up = upstream.to_dense();
@@ -135,10 +137,9 @@ fn prop_matmul(tape: &Tape, left: NodeId, right: NodeId, upstream: &TensorHandle
     if tape.resident.get()
         && let Some((ga, gb)) = resident_backward::matmul_backward(&ah, &bh, upstream)
     {
-        let mut nodes = tape.nodes_mut();
-        accumulate(&mut nodes[left.0].grad, ga);
-        return accumulate(&mut nodes[right.0].grad, gb);
+        return accumulate_pair(tape, left, right, ga, gb);
     }
+    bump_if(tape.resident.get(), SeamEvent::CpuFallback);
     let (a, b, up) = (ah.to_dense(), bh.to_dense(), upstream.to_dense());
     // grad_a = upstream @ b^T (or outer(upstream, b) for matrix-vector);
     // grad_b = a^T @ upstream.
@@ -148,7 +149,5 @@ fn prop_matmul(tape: &Tape, left: NodeId, right: NodeId, upstream: &TensorHandle
         up.matmul(&b.transpose()).expect("matmul upstream b^T")
     };
     let gb = a.transpose().matmul(&up).expect("matmul grad_b");
-    let mut nodes = tape.nodes_mut();
-    accumulate(&mut nodes[left.0].grad, ga);
-    accumulate(&mut nodes[right.0].grad, gb);
+    accumulate_pair(tape, left, right, ga, gb);
 }

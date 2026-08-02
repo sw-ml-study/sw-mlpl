@@ -21,6 +21,33 @@ pub struct LinearLoraInputs<'a> {
     pub alpha: f64,
 }
 
+impl<'a> LinearLoraInputs<'a> {
+    /// Unpack a `LinearLora` spec; `None` for any other variant.
+    #[must_use]
+    pub fn from_spec(model: &'a mlpl_eval_core::model::ModelSpec) -> Option<Self> {
+        let mlpl_eval_core::model::ModelSpec::LinearLora {
+            w,
+            b,
+            a,
+            b_adapter,
+            rank,
+            alpha,
+            ..
+        } = model
+        else {
+            return None;
+        };
+        Some(Self {
+            w,
+            b,
+            a,
+            b_adapter,
+            rank: *rank,
+            alpha: *alpha,
+        })
+    }
+}
+
 pub fn apply_linear_lora(
     x: &DenseArray,
     inputs: &LinearLoraInputs<'_>,

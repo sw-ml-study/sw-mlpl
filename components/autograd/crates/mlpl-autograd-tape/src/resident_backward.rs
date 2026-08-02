@@ -48,8 +48,10 @@ fn smooth_backward(op: UnaryOp, y: &TensorHandle, up: &TensorHandle) -> Option<T
     base.dev_binary(BinKind::Sub, &sub).ok()
 }
 
-/// Elementwise binary backward for the EQUAL-SHAPE case (the tape's
-/// broadcasting cases keep the exact CPU unbroadcast path).
+/// Elementwise binary backward. Broadcast operands (the device
+/// broadcasts natively, so the raw grads carry the upstream shape)
+/// are reduced back to each operand's dims on the device by
+/// `resident_shape::unbroadcast`.
 #[must_use]
 pub fn binary_backward(
     op: BinaryOp,
@@ -57,19 +59,20 @@ pub fn binary_backward(
     b: &TensorHandle,
     up: &TensorHandle,
 ) -> Option<(TensorHandle, TensorHandle)> {
-    if a.dims() != up.dims() || b.dims() != up.dims() {
-        return None;
-    }
     let up = as_dev(up)?;
-    match op {
-        BinaryOp::Add => Some((up.clone(), up)),
-        BinaryOp::Sub => Some((up.clone(), up.dev_unary(UnaryKind::Neg).ok()?)),
-        BinaryOp::Mul => Some((
+    let (ga, gb) = match op {
+        BinaryOp::Add => (up.clone(), up.clone()),
+        BinaryOp::Sub => (up.clone(), up.dev_unary(UnaryKind::Neg).ok()?),
+        BinaryOp::Mul => (
             up.dev_binary(BinKind::Mul, b).ok()?,
             up.dev_binary(BinKind::Mul, a).ok()?,
-        )),
-        BinaryOp::Div => div_backward(a, b, &up),
-    }
+        ),
+        BinaryOp::Div => div_backward(a, b, &up)?,
+    };
+    Some((
+        crate::resident::unbroadcast(&ga, &a.dims())?,
+        crate::resident::unbroadcast(&gb, &b.dims())?,
+    ))
 }
 
 /// d(a/b): `ga = up / b`, `gb = -(up * a) / b^2`.

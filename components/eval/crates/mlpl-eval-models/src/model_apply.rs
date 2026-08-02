@@ -6,7 +6,10 @@
 //! `apply_model` under the 25-LOC sw-checklist gate.
 
 use mlpl_array::DenseArray;
+use mlpl_parser::Expr;
+use mlpl_trace::Trace;
 
+use crate::env_api::EnvModels;
 use crate::model_apply_attention::{AttentionArgs, apply_attention};
 use crate::model_apply_compose::{apply_chain, apply_residual, apply_rms_norm};
 use crate::model_apply_lora::{LinearLoraInputs, apply_linear_lora};
@@ -77,25 +80,34 @@ fn apply_lora_spec(
     x: &DenseArray,
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
-    let ModelSpec::LinearLora {
-        w,
-        b,
-        a,
-        b_adapter,
-        rank,
-        alpha,
-        ..
-    } = model
-    else {
-        unreachable!("caller matched LinearLora");
-    };
-    let inputs = LinearLoraInputs {
-        w,
-        b,
-        a,
-        b_adapter,
-        rank: *rank,
-        alpha: *alpha,
-    };
+    let inputs = LinearLoraInputs::from_spec(model).expect("caller matched LinearLora");
     apply_linear_lora(x, &inputs, env)
+}
+
+/// Shared builtin prologue: arity 2, model-identifier first arg,
+/// model lookup, and the evaluated input tensor.
+pub(crate) fn model_and_input(
+    func: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<(ModelSpec, DenseArray), EvalError> {
+    if args.len() != 2 {
+        return Err(EvalError::BadArity {
+            func: func.into(),
+            expected: 2,
+            got: args.len(),
+        });
+    }
+    let Expr::Ident(name, _) = &args[0] else {
+        return Err(EvalError::Unsupported(format!(
+            "{func}: first argument must be a model identifier"
+        )));
+    };
+    let model = env
+        .get_model(name)
+        .cloned()
+        .ok_or_else(|| EvalError::UndefinedVariable(name.clone()))?;
+    let x = mlpl_eval_env::dispatch_hook::eval_or_err(&args[1], env, trace)?.into_array()?;
+    Ok((model, x))
 }

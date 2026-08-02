@@ -85,7 +85,12 @@ impl Tensor {
             &self.tape,
             ResidentReq::Axis(self.node, AxisKind::Softmax, Some(axis), false),
         )
-        .unwrap_or_else(|| TensorHandle::Cpu(softmax_forward(&self.value(), axis)));
+        .unwrap_or_else(|| {
+            if self.tape.resident.get() {
+                mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+            }
+            TensorHandle::Cpu(softmax_forward(&self.value(), axis))
+        });
         new_tensor(
             self,
             value,
@@ -105,6 +110,9 @@ impl Tensor {
     /// future rebalance can regroup the composition methods.
     #[must_use]
     pub fn rotate(&self, k: i64, axis: usize) -> Self {
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
         let v = TensorHandle::Cpu(self.value().rotate(k, axis).expect("rotate: axis in range"));
         new_tensor(
             self,

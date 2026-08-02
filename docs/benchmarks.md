@@ -187,6 +187,67 @@ being CPU code, never did). Every mlpl-mlx-rt op and both
 gpu_step entries hold it; sibling-crate unit tests serialize on
 per-crate `MLX_TEST_LOCK`s (the mlpl-mlx-train idiom).
 
+### Saga E4 step 008: resident-tape AFTER (Apple Silicon, 2026-08-01)
+
+E4 steps 2-7 landed the TensorHandle seam, the resident
+forward/backward tape, the resident optimizer (one tape per step,
+weights + Adam moments stay on the device), and step 008 added
+seam instrumentation plus two backward fixes it exposed
+(transpose/reshape gradients and scalar-broadcast binary
+gradients now stay lazy on the device). Warm numbers, same
+harness:
+
+| Workload | CPU warm | MLX warm (Metal) | Ratio | Step-001 ratio |
+|---|---:|---:|---:|---:|
+| `reshape_reduce_100x100` | 69.6 us | 316.6 us | 0.22x | 0.22x |
+| `tiny_lm_train_step` (d=16) | 185.2 us | 4.76 ms | 0.039x | 0.008x |
+| `tiny_lm_train_loop30` (warm, per step) | 143 us | 4.75 ms | 0.030x | n/a |
+| `tiny_lm_train_step_d256` | 40.3 ms | 13.6 ms | **2.96x** | n/a |
+| `neural_thicket_variant_loop` | 1.11 ms | 78.6 ms | 0.014x | 0.015x |
+| `lora_finetune_step` | 140 us | 2.94 ms | 0.048x | 0.015x |
+
+Two changes moved BOTH columns: MLX went 116.6 ms -> 4.76 ms per
+tiny-LM step (24x, residency), and the CPU went 940 us -> 185 us
+(5x -- the step-006 batched-gradient fix removed the per-param
+tape rebuild for everyone).
+
+The seam counters (printed by the bench, `seam/` lines) explain
+the residual gap at tiny scale. One warm d=16 train step is now:
+
+    uploads=16 downloads=18 submits=226 cpu_fallbacks=1
+
+The single remaining fallback is cross-entropy backward (the
+documented CPU kernel). Nothing re-uploads the model; the floor
+is per-op DISPATCH: ~226 lazy op submissions through the mlx-rs
+FFI (each holding the process-wide Metal lock) plus ~18 graph
+forces per step. At d=16 the kernels are trivial, so that floor
+is the whole cost -- and no residency work can remove it.
+
+Consequently the ratio is a function of model size (50-step warm
+`train` loops via the repl, V=280):
+
+| Scale | CPU | MLX | Winner |
+|---|---:|---:|---|
+| d=32, T=32 (live-demo size) | 0.11 s | 0.29 s | CPU 2.6x |
+| d=128, T=64 | 0.39 s | 0.30 s | MLX 1.3x |
+| d=256, T=128 | 1.72 s | 0.34 s | MLX 5x |
+
+MLX wall-clock is nearly FLAT across those scales -- pure
+dispatch bound -- while the CPU grows with the arithmetic.
+
+**Acceptance verdict:** the E4 gate (tiny-LM train on MLX faster
+than interpreted CPU) is MET from roughly d>=128 upward and is
+pinned in-repo by `tiny_lm_train_step_d256` (2.96x). At the
+original d=16 bench slice the ratio is 0.039x and CANNOT cross
+1.0 without reducing submissions per step (op fusion / mlx
+compile / a batched step graph) -- that is generation-speed-track
+scope (docs/future-sagas-queue.md Track 2), not residency scope.
+Of the four costs documented below: (1) per-op round-trips are
+GONE (uploads/downloads above), (3) tape re-materialization is
+GONE (one resident tape per step), (4) optimizer re-upload is
+GONE (resident moments + witness cache); (2) no-graph-fusion
+remains, repriced as the 226-submission dispatch floor.
+
 ### Measured numbers (Apple Silicon, 2026-04-21)
 
 Cold timings are one-shot wall-clock prints from the harness and

@@ -112,3 +112,41 @@ fn frozen_base_engram_training_works_resident() {
         "trajectories comparable: {c1} vs {m1}"
     );
 }
+
+const TINY_LM_SETUP: &str = "m = chain(embed(60, 16, 0), \
+     residual(chain(rms_norm(16), causal_attention(16, 1, 1))), \
+     rms_norm(16), linear(16, 60, 2)); \
+     X = [1, 3, 5, 7, 2, 4, 6, 0]; Y = [3, 5, 7, 2, 4, 6, 0, 1]";
+
+#[test]
+fn thirty_step_tiny_lm_trajectory_stays_within_tolerance() {
+    // The step-008 gate: the bench-shaped tiny LM (V=60, d=16, T=8,
+    // 1-head causal attention) trained 30 steps resident must track
+    // the CPU loss trajectory. fp32 drift compounds over 30 steps
+    // (measured max drift ~1e-6 at this scale); 1e-3 gives wide
+    // headroom while catching any semantic divergence (a wrong
+    // gradient blows past it in 2-3 steps).
+    let step = "adam(cross_entropy(apply(m, X), Y), m, 0.001, 0.9, 0.999, 0.00000001)";
+    let run = |mlx: bool| -> Vec<f64> {
+        let mut env = Environment::new();
+        eval(&mut env, TINY_LM_SETUP);
+        let body = format!("train 30 {{ {step}; cross_entropy(apply(m, X), Y) }}");
+        let src = if mlx {
+            format!("device(\"mlx\") {{ {body} }}; last_losses")
+        } else {
+            format!("{body}; last_losses")
+        };
+        eval(&mut env, &src).data().to_vec()
+    };
+    let (cpu, mlx) = (run(false), run(true));
+    assert_eq!(cpu.len(), 30);
+    assert_eq!(mlx.len(), 30);
+    let mut max_drift = 0.0f64;
+    for (c, m) in cpu.iter().zip(&mlx) {
+        max_drift = max_drift.max((c - m).abs());
+    }
+    println!("30-step tiny-LM trajectory max drift: {max_drift:.6}");
+    assert!(max_drift < 1e-3, "trajectory drift {max_drift} over bound");
+    // And it actually trains: the loss must fall materially.
+    assert!(mlx[29] < mlx[0] * 0.8, "resident training converges");
+}

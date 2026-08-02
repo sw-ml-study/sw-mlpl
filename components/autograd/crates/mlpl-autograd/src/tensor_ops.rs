@@ -13,8 +13,13 @@ use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, map_unary, try_residen
 use mlpl_tensor_handle::TensorHandle;
 
 pub(crate) fn push_unary(t: &Tensor, op: UnaryOp) -> Tensor {
-    let value = try_resident(&t.tape, ResidentReq::Unary(t.node, map_unary(op)))
-        .unwrap_or_else(|| TensorHandle::Cpu(op.forward(&t.value())));
+    let value =
+        try_resident(&t.tape, ResidentReq::Unary(t.node, map_unary(op))).unwrap_or_else(|| {
+            if t.tape.resident.get() {
+                mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+            }
+            TensorHandle::Cpu(op.forward(&t.value()))
+        });
     let node = t.tape.push(NodeData {
         value,
         grad: None,

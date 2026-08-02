@@ -18,8 +18,12 @@ const SAMPLE_POINTS: &[(u32, u32)] = &[
     (350, 250),
 ];
 
+// Refreshed 2026-08-01 after the E4 step-006 optimizer fix (both
+// CPU optimizers now use batched step-start gradients, so the
+// 500-step training trajectory legitimately changed). New boundary
+// visually inspected: the classic two-band XOR split.
 const GOLDEN: &[&str] = &[
-    "#d47b96", "#7a9fdc", "#7a9edc", "#89a8d7", "#7a9edc", "#8ca9d7", "#7a9edc", "#8ba8d7",
+    "#d47b96", "#80a2da", "#7a9edc", "#d5bfb7", "#7a9edc", "#8eabd6", "#7a9edc", "#d5a4aa",
     "#d47b96",
 ];
 

@@ -2,6 +2,7 @@
 
 use mlpl_array::DenseArray;
 use mlpl_array_ops_element::prelude::*;
+use mlpl_tensor_handle::{BinKind, UnaryKind};
 
 /// Unary elementwise op.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -146,5 +147,30 @@ impl BinaryOp {
             DenseArray::new(shape.clone(), ga).expect("shape"),
             DenseArray::new(shape, gb).expect("shape"),
         )
+    }
+}
+
+/// The tape's `UnaryOp` in device terms (moved from resident.rs
+/// to honor the module function budget).
+#[must_use]
+pub fn map_unary(op: UnaryOp) -> UnaryKind {
+    match op {
+        UnaryOp::Neg => UnaryKind::Neg,
+        UnaryOp::Exp => UnaryKind::Exp,
+        UnaryOp::Log => UnaryKind::Log,
+        UnaryOp::Relu => UnaryKind::Relu,
+        UnaryOp::Tanh => UnaryKind::Tanh,
+        UnaryOp::Sigmoid => UnaryKind::Sigmoid,
+    }
+}
+
+/// The tape's `BinaryOp` in device terms.
+#[must_use]
+pub fn map_binary(op: BinaryOp) -> BinKind {
+    match op {
+        BinaryOp::Add => BinKind::Add,
+        BinaryOp::Sub => BinKind::Sub,
+        BinaryOp::Mul => BinKind::Mul,
+        BinaryOp::Div => BinKind::Div,
     }
 }

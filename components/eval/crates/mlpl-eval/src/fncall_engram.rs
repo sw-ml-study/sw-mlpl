@@ -63,13 +63,7 @@ fn eval_gather_rows(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::BadArity {
-            func: "gather_rows".into(),
-            expected: 2,
-            got: args.len(),
-        });
-    }
+    crate::grad::arity_check(args, 2, "gather_rows")?;
     let table = array_arg(&args[0], env, trace)?;
     let indices = array_arg(&args[1], env, trace)?;
     if table.rank() != 2 {

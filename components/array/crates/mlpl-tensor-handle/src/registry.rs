@@ -36,5 +36,7 @@ pub(crate) fn require_ops() -> Result<&'static Arc<dyn DeviceOps>, HandleError> 
 /// [`HandleError::NoBackend`] without a registration; backend
 /// upload failures pass through.
 pub fn upload(a: &DenseArray) -> Result<TensorHandle, HandleError> {
-    Ok(TensorHandle::Dev(require_ops()?.upload(a)?))
+    let dev = require_ops()?.upload(a)?;
+    crate::metrics::bump(crate::metrics::SeamEvent::Upload);
+    Ok(TensorHandle::Dev(dev))
 }

@@ -53,6 +53,9 @@ impl Tensor {
             ResidentReq::Binary(self.node, other.node, mlpl_tensor_handle::BinKind::Matmul),
         )
         .unwrap_or_else(|| {
+            if self.tape.resident.get() {
+                mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+            }
             TensorHandle::Cpu(
                 self.value()
                     .matmul(&other.value())
@@ -76,6 +79,9 @@ impl Tensor {
     pub fn patchify(&self, p: usize) -> Self {
         let v_orig = self.value();
         let orig_shape = v_orig.shape().clone();
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
         let v = TensorHandle::Cpu(v_orig.patchify(p).expect("patchify compatible shape"));
         new_tensor(
             self,
@@ -96,6 +102,9 @@ impl Tensor {
         let a = self.value();
         let b = other.value();
         let left_size = a.shape().dims()[axis];
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
         let v = TensorHandle::Cpu(a.concat(&b, axis).expect("concat compatible shapes"));
         new_tensor(
             self,
@@ -127,6 +136,9 @@ impl Tensor {
         let parent_size_along_axis = first.value().shape().dims()[axis];
         let values: Vec<DenseArray> = parents.iter().map(Tensor::value).collect();
         let refs: Vec<&DenseArray> = values.iter().collect();
+        if first.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
         let value = TensorHandle::Cpu(stack(&refs, axis).expect("stack compatible shapes"));
         let parent_ids = parents.iter().map(|p| p.node).collect::<Vec<_>>();
         new_tensor(
@@ -148,6 +160,9 @@ impl Tensor {
     pub fn take(&self, axis: usize, idx: usize) -> Self {
         let v_orig = self.value();
         let orig_shape = v_orig.shape().clone();
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
         let v = TensorHandle::Cpu(v_orig.take(axis, idx).expect("take compatible axis/idx"));
         new_tensor(
             self,
