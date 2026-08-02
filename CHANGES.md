@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- saga mlx-persistent-tensors-e4: step 008 complete (df70e4dc)
+- feat(mlx): resident structural/broadcast backward + seam counters; E4 bench gate met at d>=128 (E4 step 8)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 007 iota-deprecation-flatten complete (b2eea15b + b4d3b183 + ef9dbe04)
 - docs(roadmap): APL2 parity-gap inventory + Track 7 in the saga queue
 - chore: trim try_call under the LOC gate (fixes the step-7 count to 340) + saga metadata
