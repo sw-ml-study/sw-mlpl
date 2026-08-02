@@ -37,8 +37,7 @@ pub const NAMES: &[&str] = &[
 
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
-        // "iota": DEPRECATED alias of range (APL heritage) -- evaluates
-        // but is absent from NAMES/catalog/docs; removal pending.
+        // "iota": DEPRECATED range alias; absent from NAMES/docs.
         "iota" | "range" => Some(compute::iota(name, args)),
         "linspace" => Some(compute::linspace(name, args)),
         "cumprod" => Some(reduce::cumprod(name, args)),
