@@ -265,8 +265,8 @@ per-call scope fix, issue #6); a <code>done</code> flag prunes once alpha &gt;= 
 <pre class="src src-mlpl">def u:mx(a, b) { if gt(a, b) { a } else { b } }
 def u:mn(a, b) { if gt(a, b) { b } else { a } }
 def u:ge(a, b) { if gt(a, b) { 1 } else { eq(a, b) } }
-def u:ab(board, player, alpha, beta) { w = u:winner(board); if gt(abs(w), 0) { w } else { if eq(reduce_add(abs(board), 0), 9) { 0 } else { best = 0 - 2 * player; a = alpha; b = beta; done = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { if eq(done, 0) { nb = board + player * eq(iota(9), c); s = u:ab(nb, 0 - player, a, b); if eq(player, 1) { best = u:mx(best, s); a = u:mx(a, best) } else { best = u:mn(best, s); b = u:mn(b, best) }; if u:ge(a, b) { done = 1 } else { 0 } } else { 0 } } else { 0 } }; best } } }
-def u:best_move(board, player) { bv = 0 - 2 * player; bc = 0; seen = 0; for c in iota(9) { if eq(take(board, 0, c), 0) { nb = board + player * eq(iota(9), c); v = u:ab(nb, 0 - player, 0 - 2, 2); ti = if eq(seen, 0) { 1 } else { if eq(player, 1) { gt(v, bv) } else { gt(bv, v) } }; if ti { bv = v; bc = c; seen = 1 } else { 0 } } else { 0 } }; bc }
+def u:ab(board, player, alpha, beta) { w = u:winner(board); if gt(abs(w), 0) { w } else { if eq(reduce_add(abs(board), 0), 9) { 0 } else { best = 0 - 2 * player; a = alpha; b = beta; done = 0; for c in range(9) { if eq(take(board, 0, c), 0) { if eq(done, 0) { nb = board + player * eq(range(9), c); s = u:ab(nb, 0 - player, a, b); if eq(player, 1) { best = u:mx(best, s); a = u:mx(a, best) } else { best = u:mn(best, s); b = u:mn(b, best) }; if u:ge(a, b) { done = 1 } else { 0 } } else { 0 } } else { 0 } }; best } } }
+def u:best_move(board, player) { bv = 0 - 2 * player; bc = 0; seen = 0; for c in range(9) { if eq(take(board, 0, c), 0) { nb = board + player * eq(range(9), c); v = u:ab(nb, 0 - player, 0 - 2, 2); ti = if eq(seen, 0) { 1 } else { if eq(player, 1) { gt(v, bv) } else { gt(bv, v) } }; if ti { bv = v; bc = c; seen = 1 } else { 0 } } else { 0 } }; bc }
 [u:ab([1,1,0, 0,-1,0, 0,0,-1], 1, 0 - 2, 2), u:best_move([1,-1,0, 0,1,0, 0,0,0], -1)]
 </pre>
 </div>
@@ -292,7 +292,7 @@ loop.)
 <pre class="src src-mlpl">def u:encode(board, mover) { e = eq(board, 0); m = eq(board, mover); t = eq(board, 0 - mover); reshape(concat(concat(reshape(e, [9, 1]), reshape(m, [9, 1]), 1), reshape(t, [9, 1]), 1), [27]) }
 def u:rmove(board, s) { argmax(random(s, [9]) * eq(board, 0), 0) }
 ng = 90 ; seed = 1 ; g = 0 ; started = 0 ; dx = fill([1, 27], 0) ; dy = fill([1, 1], 0)
-while gt(ng, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, seed); seed = seed + 1 } else { bm = u:best_move(board, 0 - 1); xr = reshape(u:encode(board, 0 - 1), [1, 27]); yr = reshape(bm, [1, 1]); if eq(started, 0) { dx = xr; dy = yr; started = 1 } else { dx = concat(dx, xr, 0); dy = concat(dy, yr, 0) }; mv = bm }; board = board + player * eq(iota(9), mv); player = 0 - player }; g = g + 1 }
+while gt(ng, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, seed); seed = seed + 1 } else { bm = u:best_move(board, 0 - 1); xr = reshape(u:encode(board, 0 - 1), [1, 27]); yr = reshape(bm, [1, 1]); if eq(started, 0) { dx = xr; dy = yr; started = 1 } else { dx = concat(dx, xr, 0); dy = concat(dy, yr, 0) }; mv = bm }; board = board + player * eq(range(9), mv); player = 0 - player }; g = g + 1 }
 N = reshape(take(shape(dx), 0, 0), []) ; X = dx ; Y = reshape(dy, [N])
 shape(X)
 </pre>
@@ -316,7 +316,7 @@ after; red loss, gray tie, green win.
 
 <div class="org-src-container">
 <pre class="src src-mlpl">def u:omove(board) { logits = reshape(apply(m, reshape(u:encode(board, 0 - 1), [1, 27])), [9]); argmax(logits + (eq(board, 0) - 1) * 1000, 0) }
-def u:play_o(n) { loss = 0; tie = 0; win = 0; g = 0; s = 90000; while gt(n, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, s); s = s + 1 } else { mv = u:omove(board) }; board = board + player * eq(iota(9), mv); player = 0 - player }; w = u:winner(board); if eq(w, 1) { loss = loss + 1 } else { if eq(w, 0 - 1) { win = win + 1 } else { tie = tie + 1 } }; g = g + 1 }; reshape(concat(concat(reshape(loss, [1]), reshape(tie, [1]), 0), reshape(win, [1]), 0), [3]) }
+def u:play_o(n) { loss = 0; tie = 0; win = 0; g = 0; s = 90000; while gt(n, g) { board = fill([9], 0); player = 1; while eq(u:terminal(board), 0) { if eq(player, 1) { mv = u:rmove(board, s); s = s + 1 } else { mv = u:omove(board) }; board = board + player * eq(range(9), mv); player = 0 - player }; w = u:winner(board); if eq(w, 1) { loss = loss + 1 } else { if eq(w, 0 - 1) { win = win + 1 } else { tie = tie + 1 } }; g = g + 1 }; reshape(concat(concat(reshape(loss, [1]), reshape(tie, [1]), 0), reshape(win, [1]), 0), [3]) }
 base = chain(linear(27, 128, 0), relu_layer(), linear(128, 9, 1)) ; m = lora(base, 8, 16.0, 0)
 before = u:play_o(50)
 device("mlx") { experiment "ttt" { train 1800 { adam(cross_entropy(apply(m, X), Y), m, 0.05, 0.9, 0.999, 0.00000001) } } }
