@@ -1,0 +1,9 @@
+number = 4
+slug = "resident-gather-eval"
+status = "pending"
+description = "E5 step 4 per plan: evaluate replacing the host-built selection one-hot with ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-02T14:40:46"
+task_type = "rust-feature"
+commits = []
