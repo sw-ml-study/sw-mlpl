@@ -89,6 +89,12 @@ cargo fmt --all -- --check
 ## 5. Docs and deploy gates
 
 - Update `docs/` if code behavior changed.
+- If the step documented a new feature or changed a doc claim
+  (status flip, shipped scope, new benchmark numbers): update the
+  wiki (`../sw-mlpl.wiki`) in the same step -- fix/annotate the
+  affected pages and add or resolve the matching
+  `Documentation-Errata.md` entry, then commit+push the wiki repo
+  (CLAUDE.md "Wiki errata discipline").
 - If `apps/mlpl-web/` changed (Rust, index.html, CSS, assets,
   demos): run `./scripts/build-pages.sh` and stage `pages/` --
   the Pages workflow deploys only the committed `pages/` dir.

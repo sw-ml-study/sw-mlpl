@@ -19,9 +19,11 @@ This repository ships three things together:
 
 ## Tour
 
-The web playground gives you a full REPL plus 63 worked
-demos, 58 tutorial lessons, and a 382-entry glossary --
-all running entirely in your browser via WASM.
+The web playground gives you a full REPL plus a large
+library of worked demos, tutorial lessons, and a full
+glossary -- all running entirely in your browser via
+WASM. (Counts are generated content and change with
+every release, so this page does not hard-code them.)
 
 ### REPL
 
@@ -77,7 +79,7 @@ a tiny LM end-to-end.
 
 ![? dialog -- Glossary](images/06-glossary.png?ts=1777922058129)
 
-The third tab. 377 alphabetical entries covering every
+The third tab. Alphabetical entries covering every
 language keyword, builtin, and ML concept the demos
 touch. Type-to-jump search at the top: typing `M`,
 `L`, `P` scrolls to MLP. Each entry names the closest
@@ -105,17 +107,23 @@ User-facing guides:
   -- educational tour of how the MLPL compiler is built (lexing,
   parsing, AST, interpreter, lowerer, runtime target)
 - [`docs/benchmarks.md`](docs/benchmarks.md) -- interpreter vs
-  compiled speed, reproducible via `cargo bench -p mlpl-bench`
+  compiled speed and the MLX-vs-CPU tables, reproducible via
+  `cargo bench -p mlpl-bench` in `components/dev-tools`
 
-Backend / integration roadmap (forward-looking, not yet
-shipped):
+Backend / integration guides (MLX, an in-process CUDA
+vertical slice, and LLM-server calls have all shipped;
+each guide notes what is implemented vs still planned):
 
-- [`docs/using-mlx.md`](docs/using-mlx.md) -- Apple Silicon
-  MLX backend (Saga 14)
-- [`docs/using-cuda.md`](docs/using-cuda.md) -- CUDA backend +
-  distributed execution (Saga 17)
+- [`docs/using-mlx.md`](docs/using-mlx.md) -- Apple Silicon MLX
+  backend: shipped, now GPU-resident via the E4 persistent-tensor
+  tape (see `docs/benchmarks.md` for current numbers)
+- [`docs/using-cuda.md`](docs/using-cuda.md) -- historical design
+  doc; the shipped scope lives in `docs/saga-cuda-foundation.md`
+  and `docs/saga-cuda-demo-parity.md` (the separate CUDA peer
+  service and distributed execution remain future work)
 - [`docs/using-ollama.md`](docs/using-ollama.md) -- calling
-  Ollama / llama.cpp / OpenAI-compatible LLM servers (Saga 19)
+  Ollama / llama.cpp / OpenAI-compatible LLM servers (`llm_call`
+  and `:ask` are shipped in the native paths)
 
 Project-level:
 
@@ -130,25 +138,28 @@ Project-level:
 
 ## Quick Start
 
-```bash
-# Build
-cargo build
+The repository is a cellular monorepo: each `components/<name>/`
+is its own cargo workspace and there is no root `Cargo.toml`, so
+build commands run inside the owning component (or use
+`--manifest-path`). Binaries land in the shared repo-root
+`target/`.
 
-# Interactive REPL
-cargo run -p mlpl-repl
+```bash
+# Interactive REPL (component: cli)
+cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl
 
 # Run a demo script
-cargo run -p mlpl-repl -- -f demos/basics.mlpl
+cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl -- -f demos/basics.mlpl
 
 # Train a tiny language model (Saga 13)
-cargo run -p mlpl-repl -- -f demos/tiny_lm.mlpl
+cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl -- -f demos/tiny_lm.mlpl
 
 # Compile a .mlpl file to a native binary
-cargo run -p mlpl-build -- examples/compile-cli/hello.mlpl -o /tmp/hello
+cargo run --manifest-path components/cli/Cargo.toml -p mlpl-build -- examples/compile-cli/hello.mlpl -o /tmp/hello
 /tmp/hello                                # -> 21
 
-# Interpreter vs compiled benchmark
-cargo bench -p mlpl-bench
+# Interpreter vs compiled benchmark (component: dev-tools)
+cargo bench --manifest-path components/dev-tools/Cargo.toml -p mlpl-bench
 ```
 
 ## What MLPL Can Do
@@ -241,11 +252,15 @@ directory map.
 
 ## Development
 
+Run cargo commands inside the component workspace you changed
+(e.g. `cd components/eval`); `markdown-checker` and
+`sw-checklist` run at the repository root.
+
 ```bash
-cargo test                                          # run all tests
+cargo test                                          # tests, per component workspace
 cargo clippy --all-targets --all-features -- -D warnings
 cargo fmt --all
-cargo bench -p mlpl-bench                           # interp vs compiled
+cargo bench -p mlpl-bench                           # interp vs compiled (components/dev-tools)
 markdown-checker -f "**/*.md"                       # ASCII-only markdown
 sw-checklist                                        # project standards
 ```

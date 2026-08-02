@@ -1,5 +1,14 @@
 # Architecture
 
+> **ERRATA NOTE (2026-08-02):** diagrams/sections below that label
+> in-process CUDA as "planned/deferred (Saga 17)" are stale: an
+> in-process CUDA feature and a CUDA-enabled `mlpl-serve` vertical
+> slice are implemented (Linux/NVIDIA). The separate CUDA peer
+> service, discovery, and multi-GPU/distributed operation remain
+> future work. MLX is likewise no longer eager per-op: saga E4
+> landed the device-resident `TensorHandle` tape (see
+> `docs/benchmarks.md`).
+
 MLPL is organized as a cellular monorepo with narrow crates and matching contracts.
 
 ## Dependency flow (today)

@@ -1,5 +1,14 @@
 # MLPL Saga Status
 
+> **HISTORICAL (2026-08-02):** this scoreboard is complete only
+> through the v0.20 era and is NOT a current "what exists today"
+> answer. Since then: CUDA foundation + demo parity shipped;
+> Engram E1-E3 completed and E4 (MLX persistent tensors) is
+> active; mHC is planned-soon; the reprioritized roadmap lives in
+> `docs/future-sagas-queue.md`. For ground truth prefer
+> `CHANGES.md`, `docs/saga.md`, `docs/benchmarks.md`, and the
+> active `.agentrail/plan.md`.
+
 Snapshot of every saga, completed and planned. Forward-looking
 detail and rationale live in `docs/plan.md`; this file is the
 one-line-per-saga scoreboard.

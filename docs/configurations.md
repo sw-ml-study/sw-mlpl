@@ -1,5 +1,14 @@
 # MLPL deployment configurations
 
+> **ERRATA NOTE (2026-08-02):** sections below that describe the
+> CLI server, `mlpl-serve`, `mlpl-repl --connect`, or web origin
+> routing as "planned" are stale -- all of those shipped in Sagas
+> 21/21.5 (REST/SSE, cancellation, persistence, reattach,
+> visualization storage, connected browser). See
+> `docs/using-cli-server.md` for the shipped surface. Install paths
+> like `apps/mlpl-repl` predate the cellular monorepo; binaries now
+> live under `components/<name>/crates/*` workspaces.
+
 > Status: current through v0.18.0. Browser-only, CLI REPL,
 > CLI server, and the MLX peer-service topology all have
 > shipped slices. Desktop GUI and Emacs remain planned clients

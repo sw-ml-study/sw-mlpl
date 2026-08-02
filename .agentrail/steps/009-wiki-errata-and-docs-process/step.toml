@@ -1,6 +1,6 @@
 number = 9
 slug = "wiki-errata-and-docs-process"
-status = "pending"
+status = "in-progress"
 description = "Tech-debt (user request 2026-08-01): audit and fix ../sw-mlpl.wiki -- especia..."
 role = "legacy"
 context_files = []

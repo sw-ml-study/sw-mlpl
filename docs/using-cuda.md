@@ -1,8 +1,14 @@
 # Using MLPL with CUDA
 
-> **Status:** planned -- Saga 17 (`v0.14` target), *after* Saga
-> 14's MLX backend (`v0.11`). Not yet shipped. Treat everything
-> below as design, not reference.
+> **SUPERSEDED (2026-08-02):** this file is the pre-implementation
+> design sketch and its "planned / not yet shipped" status lines are
+> obsolete. An in-process CUDA vertical slice HAS shipped:
+> `components/cuda-rt` / `cuda-model` / `cuda-eval`, a CUDA-enabled
+> `mlpl-serve`, `demos/lora_finetune_cuda.mlpl`, and real-GPU parity
+> tests. Current shipped scope: `docs/saga-cuda-foundation.md` and
+> `docs/saga-cuda-demo-parity.md`. Still future: the separate CUDA
+> peer service, multi-GPU, and distributed execution. Kept for
+> design rationale.
 
 ## Why CUDA
 

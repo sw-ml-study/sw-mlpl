@@ -278,6 +278,28 @@ least one commit -- so refresh it explicitly:
 hand-written -- update those only at release boundaries
 or when a saga lands, not every commit.
 
+## Wiki errata discipline (whenever docs change)
+
+The GitHub wiki (sibling checkout `../sw-mlpl.wiki`, published at
+<https://github.com/sw-ml-study/sw-mlpl/wiki>) carries a
+`Documentation-Errata.md` audit of stale claims in this repo's
+docs. Keep the two sides converging:
+
+- When a step documents a NEW feature or changes what a doc
+  claims (status flips, shipped scope, renamed paths, new
+  benchmarks), update the wiki in the same step: fix or annotate
+  the affected wiki page(s) and add/resolve the matching entry on
+  `Documentation-Errata.md`.
+- When you FIX a source doc that the errata page flagged, mark
+  that finding resolved on the errata page (date + commit) rather
+  than deleting it -- the page doubles as the audit trail.
+- Prefer supersession banners over silent rewrites in historical
+  design docs (`docs/using-*.md`, `docs/status.md`): a dated
+  `> **SUPERSEDED / ERRATA NOTE**` block at the top, pointing at
+  the current source of truth.
+- The wiki is its own git repo: commit and push it separately
+  (plain `git add/commit/push` in `../sw-mlpl.wiki`).
+
 ## Git hygiene
 
 - Never amend a commit that has already been pushed to a shared branch.

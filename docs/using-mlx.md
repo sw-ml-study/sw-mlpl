@@ -3,6 +3,21 @@
 > **Status:** reference. Shipped in Saga 14 (v0.11.0). For the
 > design-sketch history that predated the shipped saga, see the
 > "Retrospective" section at the bottom of this doc.
+>
+> **ERRATA NOTE (2026-08-02):** claims below that LoRA is planned
+> (it shipped in Saga 15, `lora(...)` + `demos/lora_finetune.mlpl`)
+> or that CUDA is only a future backend (an in-process vertical
+> slice shipped -- see `docs/saga-cuda-foundation.md`) are stale.
+> `crates/mlpl-*` paths predate the cellular monorepo; today the
+> code lives under `components/<name>/crates/*` (e.g.
+> `components/eval/crates/mlpl-eval`). The eager per-op round-trip
+> performance caveat in this doc is also superseded: saga E4
+> enabled Metal and landed the device-resident `TensorHandle`
+> autograd tape (weights, gradients, and Adam moments stay on the
+> GPU across `train` steps; only cross-entropy backward falls back
+> to the CPU). Current numbers, seam-counter profiles, and the
+> size-dependent MLX/CPU crossover live in `docs/benchmarks.md`
+> ("Saga E4 step 008" section).
 
 ## Why MLX
 
@@ -137,8 +152,10 @@ bottleneck breakdown and the optimization path.
 
 ## Fine-tuning use case
 
-> **Status:** planned, not shipped. Depends on Saga 15 (LoRA /
-> QLoRA / quantization) and a checkpoint format.
+> **Status:** SHIPPED (Saga 15): `lora(base, rank, alpha, seed)`
+> with auto-frozen base params, plus `demos/lora_finetune.mlpl`
+> and the `lora_finetune_step` bench. The prose below is the
+> original design sketch.
 
 Fine-tuning a small pretrained LM with LoRA on Apple Silicon is
 the planned flagship MLX demo. Rough shape of the workflow when
