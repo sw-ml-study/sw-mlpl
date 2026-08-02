@@ -1,0 +1,1 @@
+E5 step 1 per plan: seam-profile existing engram-in-chain resident training; add parity tests (hash contract bit-exact CPU vs MLX, engram_stats parity, N-step engram-chain trajectory tolerance); record per-step seam profile identifying the concat fallback + selection-matrix upload. TDD; scoped gates; commit.

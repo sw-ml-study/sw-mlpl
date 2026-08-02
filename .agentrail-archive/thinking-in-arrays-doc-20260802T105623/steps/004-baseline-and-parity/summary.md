@@ -1,0 +1,1 @@
+BLOCKED: Step added to the wrong saga: thinking-in-arrays-doc was complete but unarchived when the E5 init collided; this step is re-created as step 1 of the new engram-mlx-e5 saga.

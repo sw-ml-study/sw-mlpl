@@ -1,6 +1,6 @@
-name = "thinking-in-arrays-doc"
-status = "completed"
-current_step = 3
-created_at = "2026-08-02T10:02:06"
+name = "engram-mlx-e5"
+status = "active"
+current_step = 1
+created_at = "2026-08-02T10:56:23"
 plan_file = ".agentrail/plan.md"
 retroactive = false
