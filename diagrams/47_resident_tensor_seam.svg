@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 420" width="600" height="420" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:12px">
+  <text x="300" y="22" text-anchor="middle" font-size="16" font-weight="bold">Device-resident tensor seam (TensorHandle)</text>
+
+  <!-- lanes -->
+  <rect x="20" y="44" width="265" height="240" fill="#f8fafc" stroke="#9ca3af"/>
+  <text x="152" y="64" text-anchor="middle" font-weight="bold">HOST (f64)</text>
+  <text x="152" y="80" text-anchor="middle" font-size="10">the bit-exact CPU reference</text>
+  <rect x="315" y="44" width="265" height="240" fill="#f8fafc" stroke="#9ca3af"/>
+  <text x="447" y="64" text-anchor="middle" font-weight="bold">DEVICE (fp32, lazy)</text>
+  <text x="447" y="80" text-anchor="middle" font-size="10">graph nodes, nothing runs until forced</text>
+
+  <!-- handles -->
+  <rect x="45" y="100" width="215" height="40" fill="#e0f2fe" stroke="#0369a1" stroke-width="2"/>
+  <text x="152" y="117" text-anchor="middle" font-family="monospace" font-size="11">TensorHandle::Cpu(DenseArray)</text>
+  <text x="152" y="132" text-anchor="middle" font-size="10">host values, exact math</text>
+  <rect x="340" y="100" width="215" height="40" fill="#dcfce7" stroke="#15803d" stroke-width="2"/>
+  <text x="447" y="117" text-anchor="middle" font-family="monospace" font-size="11">TensorHandle::Dev(handle)</text>
+  <text x="447" y="132" text-anchor="middle" font-size="10">opaque backend array (MLX today)</text>
+
+  <!-- seam arrows -->
+  <line x1="260" y1="110" x2="340" y2="110" stroke="#15803d" stroke-width="2"/>
+  <text x="300" y="104" text-anchor="middle" font-size="10" fill="#15803d">upload</text>
+  <line x1="340" y1="130" x2="260" y2="130" stroke="#b91c1c" stroke-width="2"/>
+  <text x="300" y="146" text-anchor="middle" font-size="10" fill="#b91c1c">to_dense = THE sync point</text>
+
+  <!-- resident loop -->
+  <rect x="340" y="164" width="215" height="104" fill="#ede9fe" stroke="#6d28d9" stroke-width="2"/>
+  <text x="447" y="184" text-anchor="middle" font-weight="bold">train N { adam(...) } stays here</text>
+  <text x="447" y="202" text-anchor="middle" font-size="10">forward + backward on the tape</text>
+  <text x="447" y="216" text-anchor="middle" font-size="10">weights, gradients, Adam moments</text>
+  <text x="447" y="230" text-anchor="middle" font-size="10">all resident across the whole loop</text>
+  <text x="447" y="250" text-anchor="middle" font-size="10" fill="#b91c1c">one scalar download / step: the loss</text>
+
+  <!-- host fallback -->
+  <rect x="45" y="164" width="215" height="104" fill="#fef3c7" stroke="#a16207" stroke-width="2"/>
+  <text x="152" y="184" text-anchor="middle" font-weight="bold">exact CPU kernels</text>
+  <text x="152" y="202" text-anchor="middle" font-size="10">the fallback for ops without a</text>
+  <text x="152" y="216" text-anchor="middle" font-size="10">device kernel (e.g. fused cross-</text>
+  <text x="152" y="230" text-anchor="middle" font-size="10">entropy backward); results re-join</text>
+  <text x="152" y="244" text-anchor="middle" font-size="10">the device via mixed accumulate</text>
+
+  <!-- registry -->
+  <rect x="150" y="300" width="300" height="40" fill="#ffffff" stroke="#9ca3af" stroke-width="2"/>
+  <text x="300" y="317" text-anchor="middle" font-family="monospace" font-size="11">DeviceOps registry (OnceLock)</text>
+  <text x="300" y="332" text-anchor="middle" font-size="10">backends self-register; the seam names no GPU library</text>
+
+  <!-- counters -->
+  <rect x="60" y="360" width="480" height="40" fill="#f8fafc" stroke="#9ca3af"/>
+  <text x="300" y="377" text-anchor="middle" font-size="11" font-weight="bold">seam counters make every crossing observable</text>
+  <text x="300" y="393" text-anchor="middle" font-family="monospace" font-size="10">uploads | downloads (graph forces) | submits | cpu_fallbacks</text>
+</svg>
