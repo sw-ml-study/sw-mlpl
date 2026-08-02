@@ -1,0 +1,9 @@
+number = 2
+slug = "dev-concat"
+status = "pending"
+description = "E5 step 2 per plan: DeviceOps grows concat(axis) + split for its backward (Ml..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-02T12:25:36"
+task_type = "rust-feature"
+commits = []
