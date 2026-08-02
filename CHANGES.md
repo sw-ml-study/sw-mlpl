@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-01
 
+- saga mlx-persistent-tensors-e4: step 007 iota-deprecation-flatten complete (b2eea15b + b4d3b183 + ef9dbe04)
+- docs(roadmap): APL2 parity-gap inventory + Track 7 in the saga queue
+- chore: trim try_call under the LOC gate (fixes the step-7 count to 340) + saga metadata
+- feat(lang): flatten builtin + iota deprecation -- APL names become heritage-only (E4 step 7)
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(roadmap): reprioritize per project-direction -- MTP program, agent feedback, bounded mHC
 - docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-persistent-tensors-e4: step 006 complete (b26bfddc)
