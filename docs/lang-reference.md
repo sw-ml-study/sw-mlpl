@@ -325,7 +325,7 @@ tables (e.g. the three name forms) keep their teaching order.
 |----------|------|-------------|
 | `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
 | `running_product(v)` | 1 | Running product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). `cumprod` is the deprecated alias. |
-| `running_sum(v)` | 1 | Running sum along a rank-1 vector: `out[i]` is the sum of `v[0..=i]` (prefix sums, CDFs, cumulative totals). The additive sibling of `running_product`. |
+| `running_sum(v)` | 1 | Running sum along a rank-1 vector: `out[i]` is the sum of `v[0..=i]` (prefix sums, CDFs, cumulative totals). The additive sibling of `running_product`. Rank-1 only: focus a row/column of a higher-rank value with `take(a, axis, i)`, or scan the whole array explicitly with `flatten(a)`. |
 | `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any array. APL heritage. |
 | `disp(a)` | 1 | Returns an ASCII box diagram (a `Value::Str`) that makes the rank, shape, and depth of `a` visible: rank <= 2 as a framed grid, rank >= 3 as a labeled stack of leading-axis slices, plus a `rank R  shape [..]  depth D` footer. MLPL's answer to APL's `]display`. |
 | `emit_frame(name, step, x)` | 3 | Stream tensor `x` as a live frame through the connect-mode metric sink (the whole-tensor analog of `_metric` scalars); a no-op when not connected. Returns `x`. |

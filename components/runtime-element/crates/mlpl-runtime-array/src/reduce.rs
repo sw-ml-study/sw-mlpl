@@ -45,6 +45,7 @@ pub(crate) fn running_sum(name: &str, args: Vec<DenseArray>) -> Result<DenseArra
     if args.len() != 1 {
         return Err(arity_err(name, 1, args.len()));
     }
+    rank1_guard(name, &args[0])?;
     let mut acc = 0.0;
     let data: Vec<f64> = args[0]
         .data()
@@ -68,6 +69,7 @@ pub(crate) fn running_product(
     if args.len() != 1 {
         return Err(arity_err(name, 1, args.len()));
     }
+    rank1_guard(name, &args[0])?;
     let mut acc = 1.0;
     let data: Vec<f64> = args[0]
         .data()
@@ -102,4 +104,20 @@ pub(crate) fn reduce(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, Ru
         });
     }
     Ok(args[0].reduce_axis(args[1].data()[0] as usize, identity, op)?)
+}
+
+/// Scans are rank-1 only: reject higher ranks with a hint at the
+/// two focusing lenses instead of silently scanning the ravel.
+fn rank1_guard(name: &str, a: &DenseArray) -> Result<(), RuntimeError> {
+    if a.rank() <= 1 {
+        return Ok(());
+    }
+    Err(RuntimeError::InvalidArgument {
+        func: name.into(),
+        reason: format!(
+            "input must be rank 1 (got rank {}); focus a row/column with \
+             take(a, axis, i) or scan the whole array explicitly with flatten(a)",
+            a.rank()
+        ),
+    })
 }

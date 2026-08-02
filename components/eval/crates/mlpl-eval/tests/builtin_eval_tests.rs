@@ -546,3 +546,19 @@ fn running_sum_accumulates() {
     let arr = eval("running_sum([1.0, 2.0, 3.0, 4.0])").unwrap();
     assert_eq!(arr.data(), &[1.0, 3.0, 6.0, 10.0]);
 }
+
+#[test]
+fn scans_compose_with_lenses_and_reject_higher_ranks() {
+    // GET-lens composition: focus a row or column, then scan it.
+    let row = eval("M = reshape(range(6), [2, 3]); running_sum(take(M, 0, 1))").unwrap();
+    assert_eq!(row.data(), &[3.0, 7.0, 12.0]);
+    let col = eval("M = reshape(range(6), [2, 3]); running_product(take(M, 1, 2) + 1)").unwrap();
+    assert_eq!(col.data(), &[3.0, 18.0]);
+    // The ravel lens makes the whole-array scan EXPLICIT.
+    let whole = eval("M = reshape(range(6), [2, 3]); running_sum(flatten(M))").unwrap();
+    assert_eq!(whole.data(), &[0.0, 1.0, 3.0, 6.0, 10.0, 15.0]);
+    // A bare higher-rank input is an error that names both lenses.
+    let err = eval("M = reshape(range(6), [2, 3]); running_sum(M)").unwrap_err();
+    let msg = format!("{err}");
+    assert!(msg.contains("take(") && msg.contains("flatten("), "hinting error: {msg}");
+}
