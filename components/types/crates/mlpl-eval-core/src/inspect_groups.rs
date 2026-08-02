@@ -97,6 +97,11 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "running product along a rank-1 vector",
             ),
             (
+                "running_sum",
+                "running_sum(v)",
+                "running sum along a rank-1 vector",
+            ),
+            (
                 "linspace",
                 "linspace(start, stop, n)",
                 "n evenly-spaced values from start to stop (inclusive)",

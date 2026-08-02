@@ -540,3 +540,9 @@ fn shape_mismatch_display_names_op_and_shapes() {
     assert!(msg.contains("seq"), "{msg}");
     assert!(msg.contains("batch"), "{msg}");
 }
+
+#[test]
+fn running_sum_accumulates() {
+    let arr = eval("running_sum([1.0, 2.0, 3.0, 4.0])").unwrap();
+    assert_eq!(arr.data(), &[1.0, 3.0, 6.0, 10.0]);
+}

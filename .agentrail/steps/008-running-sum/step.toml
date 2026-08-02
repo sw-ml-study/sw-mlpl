@@ -1,0 +1,9 @@
+number = 8
+slug = "running-sum"
+status = "in-progress"
+description = "User direction 2026-08-02: add running_sum(v) as the additive scan special ca..."
+role = "production"
+context_files = []
+created_at = "2026-08-02T16:07:17"
+task_type = "rust-feature"
+commits = []

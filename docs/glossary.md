@@ -104,8 +104,18 @@ a rank-1 vector: `out[i]` is the product of `v[0..=i]`, same
 length as the input. The multiplicative scan: a diffusion noise
 schedule's alpha-bar is `running_product(alphas)`, and the
 "Thinking in Arrays" demo uses it to absorb an associative time
-loop into one expression. `cumprod` is the deprecated alias.
+loop into one expression. `cumprod` is the deprecated alias;
+the additive sibling is `running_sum`.
 See [[scan (higher-order)]].
+
+## running_sum (builtin)
+
+`running_sum(v)` -- the running sum along a rank-1 vector:
+`out[i]` is the sum of `v[0..=i]`, same length as the input. The
+additive scan: prefix sums, cumulative totals, and CDFs in one
+call (`running_sum(prices * qty)` is revenue accumulated order
+by order). Pairs with [[running_product (builtin)]]; `scan(:op)`
+is the general form both specialize.
 
 
 ## Script Editor (web UI)

@@ -96,16 +96,17 @@ recurrence that stays an explicit `repeat` even in APL.
 The line between the two kinds is not quite "time is never
 vectorizable." A running product is also a recurrence --
 `p(t+1) = p(t) * x(t)` -- yet the demo computes the entire
-10-year balance trajectory in one expression with the
-running-product builtin, `running_product`. The escape hatch is
+10-year balance trajectory in one expression with
+`running_product` (and a running total is `running_sum`). The escape hatch is
 ASSOCIATIVITY: because `(a*b)*c = a*(b*c)`, the sequential
 chain can be re-grouped into a balanced tree and evaluated
 largely in parallel. The dependency was only apparent, an
 artifact of writing the chain left-to-right.
 
 APL knew this: scan (`+\`, `x\`) is a first-class operator.
-sw-MLPL ships the multiplicative case as `running_product`;
-a general `scan(:op, a)` is its natural extension. Computer
+sw-MLPL ships the additive and multiplicative cases as
+`running_sum` and `running_product`; a general `scan(:op, a)`
+is their natural extension. Computer
 science knows the idea as the prefix-sum / parallel-scan
 family (Blelloch's work-efficient scan is the standard
 construction). The test is simple:

@@ -200,6 +200,7 @@ lines = [
     "for i in [0, 1, 2, 3, 4, 5] { total = total + take(prices, 0, i) * take(qty, 0, i) }   # index i only ADDRESSES data",
     "total                                        # 83 -- six dependent-looking iterations...",
     "reduce_add(prices * qty)                     # ...but they were independent: ONE expression, same 83. The loop is gone.",
+    "disp(running_sum(prices * qty))              # the ADDITIVE scan: revenue accumulated order by order, still no loop",
     "bal = 100                                    # PART 2: a loop over TIME (you KEEP it)",
     "repeat 10 { bal = bal * 1.05 }               # bal(t+1) = bal(t) * 1.05 -- each year NEEDS last year's result",
     "bal                                          # 162.89 -- no array op can jump the chain... or can it?",
