@@ -2,6 +2,7 @@
 //! extracted from mlpl-runtime.
 
 mod compute;
+mod dispatch;
 mod reduce;
 mod shape;
 mod slice;
@@ -37,30 +38,7 @@ pub const NAMES: &[&str] = &[
 // in mlpl-runtime-math's NAMES; listing both would duplicate.
 
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
-    match name {
-        // "iota"/"cumprod": DEPRECATED aliases of range/running_product.
-        "iota" | "range" => Some(compute::iota(name, args)),
-        "linspace" => Some(compute::linspace(name, args)),
-        "cumprod" | "running_product" => Some(reduce::running_product(name, args)),
-        "running_sum" => Some(reduce::running_sum(name, args)),
-        "shape" => Some(shape::shape(name, args)),
-        "rank" => Some(shape::rank(name, args)),
-        "depth" => Some(shape::depth(name, args)),
-        "size" => Some(shape::size(name, args)),
-        "tally" => Some(shape::tally(name, args)),
-        "flatten" => Some(shape::flatten(name, args)),
-        "reshape" => Some(transform::reshape(name, args)),
-        "transpose" => Some(transform::transpose(name, args)),
-        "reduce_add" | "reduce_mul" => Some(reduce::reduce(name, args)),
-        "argmax" => Some(reduce::argmax(name, args)),
-        "dot" => Some(compute::dot(name, args)),
-        "matmul" => Some(compute::matmul(name, args)),
-        "patchify" => Some(slice::patchify(name, args)),
-        "concat" if args.len() == 3 => Some(slice::concat(name, args)),
-        "take" => Some(slice::take(name, args)),
-        "rotate" => Some(transform::rotate(name, args)),
-        _ => None,
-    }
+    dispatch::try_call(name, args)
 }
 
 pub(crate) fn arity_err(name: &str, expected: usize, got: usize) -> RuntimeError {
