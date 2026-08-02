@@ -1,0 +1,9 @@
+number = 2
+slug = "loop-avoidance-demos"
+status = "pending"
+description = "Loop-avoidance pedagogy (user direction 2026-08-02): (1) Life demo takeaways ..."
+role = "production"
+context_files = []
+created_at = "2026-08-02T09:39:38"
+task_type = "rust-feature"
+commits = []
