@@ -186,3 +186,34 @@ fn lora_demo_shape_trains_resident_not_via_gpu_step() {
         "lora demo shape must train through the resident path on MLX"
     );
 }
+
+#[test]
+fn device_train_continues_cpu_optimizer_moments() {
+    // Two CPU steps, then two resident steps must track four
+    // all-CPU steps: the resident path imports the host moment
+    // buffers instead of reseeding from zero.
+    let run = |split: bool| -> f64 {
+        let mut env = Environment::new();
+        eval(
+            &mut env,
+            "m2 = chain(embed(16, 4, 0), linear(4, 16, 4)); \
+             ids = [1, 2, 3, 1, 2]; Yv = [2, 3, 1, 2, 3]; 0",
+        );
+        let step = "adam(cross_entropy(apply(m2, ids), Yv), m2, 0.02, 0.9, 0.999, 0.00000001)";
+        if split {
+            eval(&mut env, &format!("train 2 {{ {step} }}"));
+            eval(
+                &mut env,
+                &format!("device(\"mlx\") {{ train 2 {{ {step} }} }}"),
+            );
+        } else {
+            eval(&mut env, &format!("train 4 {{ {step} }}"));
+        }
+        eval(&mut env, "cross_entropy(apply(m2, ids), Yv)").data()[0]
+    };
+    let (all_cpu, hybrid) = (run(false), run(true));
+    assert!(
+        (all_cpu - hybrid).abs() < 1e-4,
+        "moment continuity: all-cpu={all_cpu} hybrid={hybrid}"
+    );
+}

@@ -71,9 +71,15 @@ pub(crate) fn try_adam(
     hp: &ResidentHp,
     env: &mut Environment,
 ) -> Option<Result<DenseArray, EvalError>> {
-    if env.device() != "mlx" || device_ops().is_none() {
+    if env.device() != "mlx" {
         return None;
     }
+    // The gate must not race the first device-block use: register
+    // the backend (idempotent) BEFORE checking, or the process's
+    // first train step silently runs the CPU optimizer.
+    #[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
+    mlpl_mlx_handle::register_mlx_device_ops();
+    device_ops()?;
     Some(adam_steps(loss, names, hp, env))
 }
 
@@ -116,6 +122,7 @@ fn momentum_one(
         .resident
         .get(&v_key)
         .cloned()
+        .or_else(|| mlpl_tensor_handle::upload(env.optim_state.buffers.get(&v_key)?).ok())
         .or_else(|| fill_like(&w.dims()))
         .ok_or_else(backend_lost)?;
     let (v_new, w_new) = momentum_math(w, g, &v_old, lr, beta).ok_or_else(backend_lost)?;
@@ -123,8 +130,10 @@ fn momentum_one(
     Ok(())
 }
 
-/// One parameter's resident Adam update: fetch-or-init moments,
-/// compose the lazy math, commit.
+/// One parameter's resident Adam update: fetch moments (resident
+/// slot, else IMPORT the host buffer a CPU phase wrote -- the
+/// cpu->device continuity contract -- else zeros), compose the
+/// lazy math, commit.
 fn adam_one(
     env: &mut Environment,
     name: &str,
@@ -133,13 +142,19 @@ fn adam_one(
     hp: &ResidentHp,
 ) -> Result<(), EvalError> {
     let (m_key, v_key) = moment_keys(name);
-    let dims = w.dims();
-    let fetch = |st: &Environment, key| st.optim_state.resident.get(key).cloned();
-    let m_old = fetch(env, &m_key).or_else(|| fill_like(&dims));
-    let v_old = fetch(env, &v_key).or_else(|| fill_like(&dims));
-    let (Some(m_old), Some(v_old)) = (m_old, v_old) else {
-        return Err(backend_lost());
+    let fetch = |st: &Environment, key: &(String, String, String)| {
+        st.optim_state
+            .resident
+            .get(key)
+            .cloned()
+            .or_else(|| mlpl_tensor_handle::upload(st.optim_state.buffers.get(key)?).ok())
     };
+    let m_old = fetch(env, &m_key)
+        .or_else(|| fill_like(&w.dims()))
+        .ok_or_else(backend_lost)?;
+    let v_old = fetch(env, &v_key)
+        .or_else(|| fill_like(&w.dims()))
+        .ok_or_else(backend_lost)?;
     let (m_new, v_new, w_new) = adam_math(w, g, &m_old, &v_old, hp).ok_or_else(backend_lost)?;
     commit_update(env, name, &[(m_key, m_new), (v_key, v_new)], w_new);
     Ok(())
@@ -154,9 +169,13 @@ pub(crate) fn try_momentum(
     beta: f64,
     env: &mut Environment,
 ) -> Option<Result<DenseArray, EvalError>> {
-    if env.device() != "mlx" || device_ops().is_none() {
+    if env.device() != "mlx" {
         return None;
     }
+    // Same first-use registration contract as `try_adam`.
+    #[cfg(all(feature = "mlx", target_os = "macos", target_arch = "aarch64"))]
+    mlpl_mlx_handle::register_mlx_device_ops();
+    device_ops()?;
     Some(momentum_steps(loss, names, lr, beta, env))
 }
 
