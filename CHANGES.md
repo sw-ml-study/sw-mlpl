@@ -14,6 +14,20 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga engram-mlx-e5: step 007 complete
+- chore(pages): rebuild for the 12 new glossary builtin entries
+- docs(glossary): 12 missing builtin entries + a coverage test (user report)
+- saga engram-mlx-e5: step 006 complete
+- chore(pages): rebuild for the glossary filter search
+- feat(web): glossary search filters to ALL matches, best first (user report)
+- saga engram-mlx-e5: step 005 complete (part 1; bench/docs split forward)
+- chore(pages): rebuild for the MLX engram demo + the loss-curve fix in the wasm eval
+- fix(train): optimizers return the step loss -- flat loss curves healed everywhere; MLX Tiny LM + Engram demo (E5 step 5, part 1)
+- saga engram-mlx-e5: step 004 complete
+- docs(engram): resident-gather evaluation -- selection-matmul stays, decision recorded (E5 step 4)
+- saga engram-mlx-e5: step 003 complete
+- feat(mlx): concat/split on the device seam -- engram step down to one CPU fallback (E5 step 3)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-mlx-e5: step 002 (queue revision) complete
 - docs(roadmap): revision B -- elevate learning-experience infrastructure per 20260802 research
 - saga engram-mlx-e5: step 001 complete
