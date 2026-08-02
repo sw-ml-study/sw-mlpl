@@ -181,12 +181,37 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
     let bc1 = 1.0 - b1.powi(t as i32);
     let bc2 = 1.0 - b2.powi(t as i32);
 
-    // GPU fast path: under a GPU device, try this build's registered
-    // step (head-only LoRA, then the board-policy MLP). Either `None`
-    // (unrecognized model) falls through to the CPU tape below. The whole
-    // block is conditional on a GPU backend being configured -- on a
-    // CPU-only build the `gpu_step` module/field do not exist -- and it
-    // names no backend: the specifics live behind `GpuAdamStep`.
+    // Saga E4 step 006: the general resident path -- ONE tape per
+    // step, weights + moments resident across the loop. Applies to
+    // any model under device("mlx"); returns None on other devices
+    // or when no backend registered. Since step 010 this runs FIRST:
+    // it supersedes the bespoke gpu_step shapes on MLX.
+    if let Some(r) = crate::grad_optim_resident::try_adam(
+        &loss_expr,
+        &param_names,
+        &crate::grad_optim_resident::ResidentHp {
+            lr,
+            b1,
+            b2,
+            eps,
+            bc1,
+            bc2,
+        },
+        env,
+    ) {
+        return r;
+    }
+
+    // Demoted bespoke fast path (E4 step 010): with no resident
+    // backend for this device, try the registered per-shape GPU step
+    // (head-only LoRA, then the board-policy MLP). In practice this
+    // is now the CUDA route -- CUDA has no resident backend until the
+    // cuda-resident-tensors saga -- and the safety net for an MLX
+    // build whose backend failed to register. `None` (unrecognized
+    // model) falls through to the CPU tape below. Conditional on a
+    // GPU backend being configured -- on a CPU-only build the
+    // `gpu_step` module/field do not exist; the specifics live
+    // behind `GpuAdamStep`.
     #[cfg(any(
         all(target_os = "macos", target_arch = "aarch64", feature = "mlx"),
         all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
@@ -216,26 +241,6 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         }
     }
 
-    // Saga E4 step 006: the general resident path -- ONE tape per
-    // step, weights + moments resident across the loop. Applies to
-    // any model under device("mlx"); returns None on other devices
-    // or when no backend registered.
-    if let Some(r) = crate::grad_optim_resident::try_adam(
-        &loss_expr,
-        &param_names,
-        &crate::grad_optim_resident::ResidentHp {
-            lr,
-            b1,
-            b2,
-            eps,
-            bc1,
-            bc2,
-        },
-        env,
-    ) {
-        return r;
-    }
-
     // Reaching the CPU tape under a GPU device means no GPU fast path
     // matched this model (only head-only LoRA + the board-policy MLP are
     // GPU-accelerated today). Surface that to the user once per eval --
@@ -243,9 +248,10 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
     if env.device() != "cpu" {
         let dev = env.device().to_string();
         env.push_notice_once(format!(
-            "note: adam under device(\"{dev}\") ran on the CPU -- this model has no GPU \
-             fast path yet (only head-only LoRA and the board-policy MLP are GPU-accelerated). \
-             See docs/future-saga-gpu-training.md."
+            "note: adam under device(\"{dev}\") ran on the CPU tape. On MLX this means no \
+             device backend was registered in this process; on CUDA only head-only LoRA and \
+             the board-policy MLP have GPU steps until the cuda-resident-tensors saga. \
+             See docs/benchmarks.md (Saga E4)."
         ));
     }
     let mut grads = crate::grad::eval_grads_batch(&loss_expr, env)?;

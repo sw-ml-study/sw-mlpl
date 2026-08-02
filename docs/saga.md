@@ -997,3 +997,38 @@ a linux/x86_64 target table, so --all-features builds on macOS and
 exposed + fixed three pieces of latent mlx-gated bit-rot). Next:
 E4 mlx-persistent-tensors, the runtime redesign that makes MLX
 faster than CPU before E5 puts the engram on the GPU.
+
+## Saga: E4 mlx-persistent-tensors -- THE runtime redesign (COMPLETE, 2026-08-02)
+
+The redesign future-saga-gpu-training.md asked for: MLX training
+is no longer eager per-op with CPU round-trips -- it is a
+device-resident autograd tape. Ten steps: Metal ON (vendored
+mlx-rs [accelerate, metal] + a process-wide submission lock the
+backend needs); the wasm-clean TensorHandle seam (mlpl-tensor-
+handle: Cpu(DenseArray) | Dev(opaque), DeviceOps OnceLock
+registry, to_dense as THE sync point); resident forward, then
+resident backward (NodeData.value AND .grad are handles;
+transpose/reshape and scalar-broadcast binary gradients stay
+lazy; CE backward keeps the exact CPU kernel, re-joined by the
+mixed-residency accumulator); the resident optimizer (ONE tape
+per step via eval_grads_batch, Adam/momentum moments + weights
+resident across train loops with a witness cache) -- which also
+exposed and fixed a latent CPU bug (per-param sequential
+gradients; both CPU optimizers now use batched step-start
+semantics, 5x faster on CPU too); seam counters (uploads/
+downloads/submits/cpu_fallbacks) wired through the bench so every
+boundary crossing is observable; and the bespoke gpu_step demo
+shapes demoted below the general resident path (they remain the
+CUDA route until cuda-resident-tensors). Verified numbers
+(benchmarks.md): warm tiny-LM step profile 16/18/226/1, MLX step
+116.6ms -> 4.76ms, 30-step trajectory drift vs CPU ~1e-6, and the
+acceptance gate MET at scale -- tiny_lm_train_step_d256 runs
+2.96x FASTER on MLX than the CPU interpreter (crossover ~d=128;
+below that the ~226-submission dispatch floor wins, which is
+fusion work owned by the generation-speed track). Ride-alongs:
+iota deprecated in favor of range + flatten added (APL heritage
+names become works-but-undocumented), the wiki errata resolution
+pass + the update-errata-with-features process rule, and the
+reprioritized roadmap in future-sagas-queue.md. Next: E5
+engram-mlx on the seam, then the MTP program (KV cache ->
+mtp-training -> self-speculation) per project-direction.txt.

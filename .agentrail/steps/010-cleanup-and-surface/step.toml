@@ -1,6 +1,6 @@
 number = 10
 slug = "cleanup-and-surface"
-status = "pending"
+status = "in-progress"
 description = "E4 final step (plan step 7): retire or demote the bespoke demo_forward / gpu_..."
 role = "legacy"
 context_files = []

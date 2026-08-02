@@ -1,5 +1,15 @@
 # Future saga: general GPU training (remove the CPU fall-back)
 
+> **LANDED (saga E4 mlx-persistent-tensors, closed 2026-08-02).**
+> Approach A below (device-aware autograd tape) shipped as the
+> `TensorHandle` seam: general models train resident on MLX (one
+> tape per step, weights + Adam moments on-device), the bespoke
+> gpu_step shapes are demoted to the CUDA-only route, and the
+> line numbers below refer to the pre-E4 tree. Results:
+> `docs/benchmarks.md` "Saga E4 step 008" (tiny-LM MLX/CPU 2.96x
+> at d=256; dispatch-bound below ~d=128). CUDA residency is the
+> future `cuda-resident-tensors` saga. Kept for design rationale.
+
 ## Problem
 
 `device("cuda")` / `device("mlx")` do **not** accelerate arbitrary models.

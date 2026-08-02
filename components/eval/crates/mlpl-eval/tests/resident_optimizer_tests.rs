@@ -150,3 +150,39 @@ fn thirty_step_tiny_lm_trajectory_stays_within_tolerance() {
     // And it actually trains: the loss must fall materially.
     assert!(mlx[29] < mlx[0] * 0.8, "resident training converges");
 }
+
+#[test]
+fn lora_demo_shape_trains_resident_not_via_gpu_step() {
+    // E4 step 010: the bespoke gpu_step fast path (head-only LoRA /
+    // board-policy MLP) is demoted below the general resident path
+    // on MLX -- the recognized demo shape must now leave resident
+    // optimizer state like every other model. gpu_step remains the
+    // CUDA path (no resident CUDA backend until Track 5).
+    let mut env = Environment::new();
+    eval(
+        &mut env,
+        "ids = [1, 3, 5, 7, 2, 4, 6, 0, 9, 11, 13, 15, 2, 4, 6, 0]; \
+         X_all = shift_pairs_x(ids, 4); Y_all = shift_pairs_y(ids, 4); \
+         X = reshape(X_all, [reduce_mul(shape(X_all))]); \
+         Y = reshape(Y_all, [reduce_mul(shape(Y_all))]); \
+         base = chain(embed(16, 8, 0), \
+                      residual(chain(rms_norm(8), causal_attention(8, 1, 1))), \
+                      rms_norm(8), linear(8, 16, 2)); \
+         student = lora(base, 2, 4.0, 7); 0",
+    );
+    eval(
+        &mut env,
+        "device(\"mlx\") { train 2 { \
+         adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001) } }; 0",
+    );
+    // Some trainable (adapter) param must carry resident state.
+    let has_resident_adam = env
+        .optim_state
+        .resident
+        .keys()
+        .any(|(opt, _, slot)| opt == "adam" && slot == "m");
+    assert!(
+        has_resident_adam,
+        "lora demo shape must train through the resident path on MLX"
+    );
+}
