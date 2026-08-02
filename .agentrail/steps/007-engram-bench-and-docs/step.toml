@@ -1,0 +1,9 @@
+number = 7
+slug = "engram-bench-and-docs"
+status = "pending"
+description = "The deferred half of the perf gate: mlx_vs_cpu bench gains engram-in-chain tr..."
+role = "production"
+context_files = []
+created_at = "2026-08-02T15:12:00"
+task_type = "rust-feature"
+commits = []

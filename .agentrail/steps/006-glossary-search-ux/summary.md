@@ -1,0 +1,1 @@
+Glossary search is now a filtered view: all_matches() in mlpl-glossary-search (rank-ordered, best_match = head, rank.rs split), filtered rendering with match count + best-first highlight + no-match notice + scroll reset in mlpl-web-glossary; README tour text updated; pages rebuilt and deployed; local server serves the new bundle immediately (static dir re-read per request).

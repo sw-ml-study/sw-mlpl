@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 6,
+    "step": "glossary-search-ux"
+  },
+  "action": "user UX report -> filter-instead-of-jump redesign; rank-ordered all_matches API with head-consistency test; module split to hold the warn ledger",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T15:48:09"
+}
