@@ -1,13 +1,13 @@
 //! Glossary tab content for the `?` documentation dialog.
 //!
 //! Renders a search box plus a scrollable list over the parsed glossary
-//! (`mlpl-glossary-data`). Typing in the search box jumps the list to the
-//! best fuzzy match (exact / prefix / substring / plural / alias) via the
-//! `mlpl-glossary-search` crate. Educational-first: a student looking for
-//! "MLP" types M, L, P and watches the list scroll to MLP without a mouse
-//! round-trip; "k-quants" still finds "K-quant".
+//! (`mlpl-glossary-data`). Typing FILTERS the list to every matching
+//! entry, best match first (exact / prefix / substring / plural / alias
+//! via the `mlpl-glossary-search` crate); clearing the box restores the
+//! full alphabetical list. Educational-first: a student looking for
+//! attention variants types "attention" and sees ALL of them at once --
+//! no scrolling past the first hit; "k-quants" still finds "K-quant".
 
-use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -22,36 +22,63 @@ pub fn glossary_view() -> Html {
     let g = doc();
     let query = use_state(String::new);
     let on_input = query_input_callback(&query);
+    // Reset the list scroll whenever the filter changes so results
+    // are visible from the top.
     let q_for_effect = (*query).clone();
-    use_effect_with(q_for_effect, move |q: &String| {
-        scroll_to_match(q, &g.entries);
+    use_effect_with(q_for_effect, |_| {
+        if let Some(el) = web_sys::window()
+            .and_then(|w| w.document())
+            .and_then(|d| d.get_element_by_id("glossary-scroll"))
+        {
+            el.set_scroll_top(0);
+        }
         || ()
     });
 
-    let matched =
-        mlpl_glossary_search::best_match(&query, g.entries.iter().map(|e| e.term.as_str()));
-    let entries_html = g
-        .entries
-        .iter()
-        .enumerate()
-        .map(|(i, e)| entry_html(i, e, matched));
-    let placeholder = "Type to jump (e.g. M, L, P -> MLP)";
+    let body = if query.trim().is_empty() {
+        html! { <>
+            <p class="glossary-intro">{ &g.intro }</p>
+            { for g.entries.iter().map(|e| entry_html(e, false)) }
+        </> }
+    } else {
+        filtered_html(&query, &g.entries)
+    };
+    let placeholder = "Type to filter (e.g. attention)";
     html! {
         <div class="glossary-view">
             <div class="glossary-search">
                 <input type="text" placeholder={placeholder} oninput={on_input} value={(*query).clone()} aria-label="Search glossary terms" />
             </div>
             <div class="glossary-content-scroll" id="glossary-scroll">
-                <p class="glossary-intro">{ &g.intro }</p>
-                { for entries_html }
+                { body }
             </div>
         </div>
     }
 }
 
+/// The filtered view: every matching entry, best match first (and
+/// highlighted), or a no-match notice.
+fn filtered_html(query: &str, entries: &[GlossaryEntry]) -> Html {
+    let hits = mlpl_glossary_search::all_matches(query, entries.iter().map(|e| e.term.as_str()));
+    if hits.is_empty() {
+        let msg = format!("No glossary entries match \"{}\".", query.trim());
+        return html! { <p class="glossary-intro">{ msg }</p> };
+    }
+    let plural = if hits.len() == 1 { "match" } else { "matches" };
+    let count = format!("{} {plural}, best first:", hits.len());
+    let cards = hits
+        .iter()
+        .enumerate()
+        .map(|(pos, &i)| entry_html(&entries[i], pos == 0));
+    html! { <>
+        <p class="glossary-intro">{ count }</p>
+        { for cards }
+    </> }
+}
+
 /// One glossary entry card, highlighted when it is the best match.
-fn entry_html(i: usize, e: &GlossaryEntry, matched: Option<usize>) -> Html {
-    let class = if Some(i) == matched {
+fn entry_html(e: &GlossaryEntry, best: bool) -> Html {
+    let class = if best {
         "glossary-entry matched"
     } else {
         "glossary-entry"
@@ -71,28 +98,4 @@ fn query_input_callback(query: &UseStateHandle<String>) -> Callback<InputEvent> 
         let target: HtmlInputElement = e.target_unchecked_into();
         query.set(target.value());
     })
-}
-
-fn scroll_to_match(query: &str, entries: &[GlossaryEntry]) {
-    let Some(idx) =
-        mlpl_glossary_search::best_match(query, entries.iter().map(|e| e.term.as_str()))
-    else {
-        return;
-    };
-    let Some(window) = web_sys::window() else {
-        return;
-    };
-    let Some(document) = window.document() else {
-        return;
-    };
-    let Some(el) = document.get_element_by_id(&entries[idx].slug) else {
-        return;
-    };
-    if let Ok(html_el) = el.dyn_into::<web_sys::HtmlElement>() {
-        // `true` aligns the element's top with the scroll container's
-        // top. ScrollIntoViewOptions (smooth + start) needs more
-        // web-sys features than the crate's current set; the boolean
-        // form is on every browser MLPL targets and lands fine here.
-        html_el.scroll_into_view_with_bool(true);
-    }
 }

@@ -48,3 +48,29 @@ fn aliases_resolve() {
     assert_eq!(term("half precision"), Some("FP16"));
     assert_eq!(term("bpw"), Some("Bits per weight"));
 }
+
+#[test]
+fn all_matches_returns_every_match_best_first() {
+    let terms = [
+        "Attention",
+        "Cross-attention",
+        "Self-attention",
+        "Adam",
+        "Flash attention",
+    ];
+    let hits = mlpl_glossary_search::all_matches("attention", terms.iter().copied());
+    // Exact match first, then any-word prefixes in list order, then
+    // substrings -- and EVERY matching entry is present.
+    assert_eq!(hits.first(), Some(&0), "exact match leads");
+    assert_eq!(hits.len(), 4, "all attention entries match: {hits:?}");
+    assert!(!hits.contains(&3), "Adam does not match");
+    // Consistency: best_match is all_matches' head.
+    let best = mlpl_glossary_search::best_match("attention", terms.iter().copied());
+    assert_eq!(best, hits.first().copied());
+}
+
+#[test]
+fn all_matches_empty_query_is_empty() {
+    let terms = ["Adam", "Attention"];
+    assert!(mlpl_glossary_search::all_matches("  ", terms.iter().copied()).is_empty());
+}

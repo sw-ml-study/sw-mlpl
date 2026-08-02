@@ -81,8 +81,9 @@ a tiny LM end-to-end.
 
 The third tab. Alphabetical entries covering every
 language keyword, builtin, and ML concept the demos
-touch. Type-to-jump search at the top: typing `M`,
-`L`, `P` scrolls to MLP. Each entry names the closest
+touch. Type-to-filter search at the top: typing
+`attention` shows every matching entry, best match
+first. Each entry names the closest
 MLPL construct or plainly says the concept is not in
 MLPL / out of scope.
 
