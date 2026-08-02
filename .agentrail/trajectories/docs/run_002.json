@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 7,
+    "step": "glossary-builtin-coverage"
+  },
+  "action": "catalog-vs-glossary scripted audit; alphabetized entry insertion; cross-crate include_str coverage test",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T16:03:59"
+}
