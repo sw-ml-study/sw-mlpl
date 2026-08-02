@@ -60,9 +60,9 @@ reduce(f, [3, 1, 4, 1, 5, 9, 2, 6])    # 9
 ```
 
 The annotation form (`x : [batch] = ...`) requires a space after
-`:` and is unaffected. Forward-compatible with first-class
-functions: when `Value::Function` lands in a future saga, `:foo`
-will lift to a function value cleanly.
+`:` and is unaffected. The design is forward-compatible with
+first-class functions: `:foo` can lift to a function value
+cleanly.
 
 ## The Three Kinds of Name: `name` vs `:name` vs `u:name`
 
@@ -79,10 +79,8 @@ Why the trichotomy: calls and values must look different (so
 a function was meant), and user space and builtin space must
 look different (APL workspaces suffered decades of name-clash
 pain; the `u:` prefix is the cure priced at two characters).
-Symmetry to come: today only builtins have the quoted form --
-`:u:name` does not exist yet. When user functions become
-first-class values (APL2 staging plan, the same item that
-unlocks the `attempt(u:f, u:handler)` trap combinator), the
+Only builtins have the quoted form -- `:u:name` does not
+exist. If user functions become first-class values, the
 quoting rule extends to them.
 
 Introspection follows the same split: `:builtins` lists the
@@ -327,13 +325,13 @@ tables (e.g. the three name forms) keep their teaching order.
 |----------|------|-------------|
 | `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
 | `running_product(v)` | 1 | Running product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). `cumprod` is the deprecated alias. |
-| `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any flat array. Reports higher depths once nested arrays land. APL heritage. |
+| `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any array. APL heritage. |
 | `disp(a)` | 1 | Returns an ASCII box diagram (a `Value::Str`) that makes the rank, shape, and depth of `a` visible: rank <= 2 as a framed grid, rank >= 3 as a labeled stack of leading-axis slices, plus a `rank R  shape [..]  depth D` footer. MLPL's answer to APL's `]display`. |
 | `emit_frame(name, step, x)` | 3 | Stream tensor `x` as a live frame through the connect-mode metric sink (the whole-tensor analog of `_metric` scalars); a no-op when not connected. Returns `x`. |
 | `get_error(r)` | 1 | The Err side of a Result as a 0-or-1 element vector: `[e]` when Err, `[]` when Ok. Complementary to `get_value` by construction. |
-| `get_value(r)` | 1 | The Ok side of a Result as a 0-or-1 element vector: `[v]` when `r` is `Ok(v)` (scalar payloads until Stage 6 `enclose`), `[]` when Err. `tally` of it is `is_some`; APL2 zilde-Option flavor (see docs/error-handling.md). |
+| `get_value(r)` | 1 | The Ok side of a Result as a 0-or-1 element vector: `[v]` when `r` is `Ok(v)` (scalar payloads), `[]` when Err. `tally` of it is `is_some`; APL2 zilde-Option flavor (see docs/error-handling.md). |
 | `linspace(start, stop, n)` | 3 | `n` evenly-spaced values from `start` to `stop` inclusive, as a rank-1 vector. |
-| `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) `iota(n)` is a DEPRECATED alias (APL heritage): it still evaluates, but is removed from all docs/examples and will be dropped in a future release. |
+| `range(n)` | 1 | Integers 0, 1, ..., n-1 as a vector (preferred name) `iota(n)` is a DEPRECATED alias (APL heritage): it still evaluates but is absent from docs and examples; prefer `range`. |
 | `rank(a)` | 1 | Number of dimensions (scalar) |
 | `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |
 | `ngram_hash(ids, orders, heads, slots, seed)` | 5 | Rolling n-gram hash indices `[T, order, head]` for Engram-style memory addressing; a frozen exact cross-backend contract (ids capped at 2^21 - 1). |
@@ -347,7 +345,7 @@ tables (e.g. the three name forms) keep their teaching order.
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `flatten(a)` | 1 | Ravel: all elements as a rank-1 vector in row-major order (equivalent to `reshape(a, [size(a)])`). Naming policy: meaningful names are canonical and arity-locked; APL glyph names are heritage aliases only. |
 | `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
-| `scatter(buffer, index, value)` | 3 | A copy of rank-1 `buffer` with the single entry at `index` replaced by `value` (the input is not mutated). The bulk form is a `u:stamp`-style loop (see the Life demos); an accumulating multi-index scatter is future work. |
+| `scatter(buffer, index, value)` | 3 | A copy of rank-1 `buffer` with the single entry at `index` replaced by `value` (the input is not mutated). The bulk form is a `u:stamp`-style loop (see the Life demos). |
 | `shape(a)` | 1 | Dimension vector of array |
 | `size(a)` | 1 | Total element count (scalar): the product of the shape (numel). A scalar has size `1`; `size(reshape(range(6), [2, 3]))` is `6`. |
 | `tally(a)` | 1 | Length of the leading axis (scalar): the number of major cells (APL's monadic tally, J's `#`). A scalar tallies to `1`; a rank >= 1 array tallies to `shape[0]`. Contrast with `size`, which counts every element. |
@@ -492,7 +490,7 @@ initialized at construction). Apply a model to an array with
 | `chain(a, b, ...)` | Nx | Sequential composition: `apply(chain(a, b, c), X) = apply(c, apply(b, apply(a, X)))`. |
 | `embed(vocab_size, d_model, seed)` | 3 | Learned `[vocab, d_model]` lookup table. `apply(embed, tokens)` where `tokens` is a rank-1 `[T]` (or rank-2 `[B, T]`) integer array returns `[T, d_model]` (or `[B, T, d_model]`). Gradients accumulate on the embedding rows touched by `tokens`. |
 | `linear(in, out, seed)` | 3 | Seeded `W : [in, out]` + `b : [out]`, `apply(m, X)` computes `X W + b`. |
-| `predict_batch(model, X)` | 2 | Saga 29 step 011: forward pass + `argmax` over the trailing axis. Returns integer class indices. Not differentiable -- use `apply(model, X)` inside `grad()` or `adam()` instead. Convenient for evaluation: `preds = predict_batch(mdl, X); accuracy = reduce_add(eq(preds, Y)) / N`. |
+| `predict_batch(model, X)` | 2 | Forward pass + `argmax` over the trailing axis. Returns integer class indices. Not differentiable -- use `apply(model, X)` inside `grad()` or `adam()` instead. Convenient for evaluation: `preds = predict_batch(mdl, X); accuracy = reduce_add(eq(preds, Y)) / N`. |
 | `relu_layer()` | 0 | Parameter-free `relu` activation (zeros negatives). |
 | `residual(block)` | 1 | Skip connection: `apply(residual(b), X) = apply(b, X) + X`. The inner block must preserve input shape. |
 | `rms_norm(dim)` | 1 | Per-row RMS normalization: `y[i] = x[i] / sqrt(mean(x[i]^2) + 1e-8)`. |
@@ -509,7 +507,7 @@ initialized at construction). Apply a model to an array with
 | `pool2d(input, size, mode)` | 3 | 2D pooling. `mode=1` max pooling, `mode=0` average pooling. `size` is the square pool window side. |
 | `rnn_cell(input, hidden, W_ih, W_hh, bias)` | 5 | One Elman RNN step: `tanh(W_ih @ input + W_hh @ hidden + bias)`. Returns updated hidden state. |
 
-### Result type (Saga 29 step 012)
+### Result type
 
 A `Value::Result { ok, payload }` wraps success-or-failure for
 ops that can fail without crashing the REPL. The payload can be
@@ -526,8 +524,7 @@ for error messages). Display is `Ok(<inner>)` or `Err(<inner>)`.
 | `unwrap(r)` | 1 | Return the payload if `Ok(_)`. Raises `EvalError::UnwrapOnErr { message }` carrying the payload's display form if `Err(_)`. |
 | `unwrap_or(r, default)` | 2 | Return the payload if `Ok(_)`; otherwise evaluate `default` and return that. |
 
-First in-tree consumer: the `:upload x` web-REPL command (Saga
-29 step 016) binds `x = Ok({pixels: [1, 3, 64, 64], h: 64,
+First in-tree consumer: the `:upload x` web-REPL command binds `x = Ok({pixels: [1, 3, 64, 64], h: 64,
 w: 64})` on a successful file pick and `x = Err("cancelled")`
 when the user dismisses the dialog. After upload, branch on
 `is_ok(x)` to classify the photo, or use `unwrap_or` to
@@ -570,12 +567,12 @@ the trained Pets demos.
 |----------|------|-------------|
 | `attention_weights(model, X)` | 2 | Read-only forward pass that walks `model` to its first `attention` / `causal_attention` layer, transforms `X` through any preceding layers in the outer chain, and returns the softmax attention weight matrix (`[T, T]` single-head or `[heads, T, T]` multi-head). Renders well as a heatmap. |
 | `concat(a, b)` | 2 | Concatenate two rank-0 or rank-1 arrays into a 1-D vector. Used in generation loops to append a sampled token id to the growing sequence. |
-| `concat(a, b, axis)` | 3 | Axis-aware concat for any rank. Both inputs must agree on every dim except `axis` (sizes add); the forward accepts any `axis` in `[0, rank)`. Differentiable on the tape; the backward splits the upstream gradient at the seam (saga 30 steps 001-002 lifted the original `{0, 1}` restriction on both the forward and the autograd backward). |
+| `concat(a, b, axis)` | 3 | Axis-aware concat for any rank. Both inputs must agree on every dim except `axis` (sizes add); the forward accepts any `axis` in `[0, rank)`. Differentiable on the tape; the backward splits the upstream gradient at the seam. |
 | `last_row(M)` | 1 | Return the last row of a rank-2 matrix as a rank-1 vector. Used in generation loops to extract the final position's logits from an `[T, V]` model output. |
-| `patchify(x, P)` | 2 | Saga 29 step 005: ViT patch embedding rearrangement. Takes a `[B, C, H, W]` image batch and a square patch size `P` that divides both `H` and `W`. Returns `[B, N, P*P*C]` where `N = (H/P)*(W/P)` and each row of the trailing axis is one patch flattened in channel-outer order. Differentiable on the tape. |
+| `patchify(x, P)` | 2 | ViT patch embedding rearrangement. Takes a `[B, C, H, W]` image batch and a square patch size `P` that divides both `H` and `W`. Returns `[B, N, P*P*C]` where `N = (H/P)*(W/P)` and each row of the trailing axis is one patch flattened in channel-outer order. Differentiable on the tape. |
 | `shift_pairs_x(ids, block_size)` | 2 | Build next-token-prediction input windows from a 1-D token array. Returns an `[N, block_size]` integer matrix where each row is a contiguous window of `ids`. |
 | `shift_pairs_y(ids, block_size)` | 2 | Matching target windows for `shift_pairs_x`: each row is the input window shifted right by one position. |
-| `take(x, axis, idx)` | 3 | Saga 29 step 007: drop one axis at a single integer index. Result has rank `rank(x) - 1`. Per-axis labels propagate (the dropped axis's label is removed). Differentiable on the tape: backward scatters the upstream gradient into a zero-filled array of the parent's shape at `axis = idx`. Multi-index gather and slice ranges are followups. |
+| `take(x, axis, idx)` | 3 | Drop one axis at a single integer index. Result has rank `rank(x) - 1`. Per-axis labels propagate (the dropped axis's label is removed). Differentiable on the tape: backward scatters the upstream gradient into a zero-filled array of the parent's shape at `axis = idx`. Multi-index gather and slice ranges are followups. |
 
 ### Embeddings and Manifold
 
@@ -597,7 +594,7 @@ These primitives also carry the classical-ML story: the
 from the `|a|^2 + |b|^2 - 2ab` identity (and checks it against
 `pairwise_sqdist`), and "Naive Bayes (Gaussian)" fits a generative
 classifier with two masked `matmul`s -- no training loop. See the
-Classical ML demo category and `docs/future-saga-classical-ml.md`.
+Classical ML demo category.
 
 ### Experiments
 
@@ -618,7 +615,7 @@ Supported `type` values:
 - `"line"` -- a vector becomes a polyline; an Nx2 matrix becomes (x,y) points connected by lines.
 - `"bar"` -- a vector becomes a bar chart with one bar per element.
 - `"heatmap"` -- an MxN matrix rendered as a viridis-colored grid.
-- `"gallery"` -- Saga 29 step 010: an `[N, 3, H, W]` image batch rendered as an SVG grid of RGB thumbnails. Values in `[-1, 1]` normalized space (clamps out-of-range). Thumbnails are downsampled via block averaging to keep the SVG size tractable for batches like the 20-image pets_tiny slice.
+- `"gallery"` -- an `[N, 3, H, W]` image batch rendered as an SVG grid of RGB thumbnails. Values in `[-1, 1]` normalized space (clamps out-of-range). Thumbnails are downsampled via block averaging to keep the SVG size tractable for batches like the 20-image pets_tiny slice.
 - `"decision_boundary"` -- a 2D classifier-output grid rendered as a diverging-color surface, with the third argument as an Nx3 `[x, y, label]` training matrix overlaid as colored points.
 
 The browser REPL detects SVG return values and renders them inline.

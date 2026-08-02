@@ -1,6 +1,6 @@
 number = 3
 slug = "user-docs-dev-jargon-sweep"
-status = "pending"
+status = "in-progress"
 description = "User direction 2026-08-02: user-facing docs (glossary, lang-reference, demos...."
 role = "legacy"
 context_files = []

@@ -103,10 +103,10 @@ chain can be re-grouped into a balanced tree and evaluated
 largely in parallel. The dependency was only apparent, an
 artifact of writing the chain left-to-right.
 
-APL knew this: scan (`+\`, `x\`) is a first-class operator, and
-the general `scan(:op, a[, axis])` form is planned for sw-MLPL
-in the APL2-parity track (docs/apl2-parity-gap.md, gap G1).
-Computer science knows it as the prefix-sum / parallel-scan
+APL knew this: scan (`+\`, `x\`) is a first-class operator.
+sw-MLPL ships the multiplicative case as `running_product`;
+a general `scan(:op, a)` is its natural extension. Computer
+science knows the idea as the prefix-sum / parallel-scan
 family (Blelloch's work-efficient scan is the standard
 construction). The test is simple:
 
@@ -122,25 +122,23 @@ models (the Mamba family) get their speed precisely by forcing
 their recurrences into associative form so a parallel scan can
 evaluate what looks like a sequential RNN.
 
-## Why this matters for sw-MLPL's roadmap
+## Where the line shows up in ML systems
 
-The project's ML surface lives on both sides of the line:
+ML lives on both sides of it:
 
 - DATA side: batches, attention (every query/key pair scored in
   one matmul -- the double position loop never exists),
-  reductions, normalizations. Array notation already owns these.
+  reductions, normalizations. Array notation owns these.
 - TIME side: optimizer steps (`train N`) and autoregressive
   generation (each token conditions on the ones before it).
   These cannot be notation-ed away; they can only be ENGINEERED
-  faster. That is exactly the generation-speed track in
-  docs/future-sagas-queue.md: a KV cache removes redundant
-  data-side work from inside the time loop, and MTP
-  self-speculation loosens the time dependency itself by
-  guessing several steps ahead and verifying the guesses in
-  parallel -- with an exact verifier, so semantics are
-  unchanged.
-- BORDERLINE: `scan` lands with the APL2 higher-order-function
-  saga, carrying this pedagogy with it.
+  faster -- a KV cache removes redundant data-side work from
+  inside the generation loop, and speculative decoding loosens
+  the time dependency itself by guessing several steps ahead
+  and verifying the guesses in parallel against an exact
+  verifier.
+- BORDERLINE: associative reformulations turn apparent time
+  loops into scans, as in the state-space models above.
 
 ## The one-sentence version
 
@@ -154,9 +152,5 @@ avoidance" is a corollary.
 
 - The "Thinking in Arrays", "Game of Life (APL classic)", and
   attention demos in the web playground.
-- docs/apl2-parity-gap.md (gap G1: scan and the operator
-  algebra).
-- docs/future-sagas-queue.md (Track 1: the generation-speed
-  program).
-- docs/benchmarks.md (what the E4 resident tape did to the cost
-  of each time-loop step on MLX).
+- docs/lang-reference.md (`running_product`, `reduce`, `train`,
+  `repeat`).

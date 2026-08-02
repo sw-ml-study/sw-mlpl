@@ -83,8 +83,8 @@ The third tab. Alphabetical entries covering every
 language keyword, builtin, and ML concept the demos
 touch. Type-to-jump search at the top: typing `M`,
 `L`, `P` scrolls to MLP. Each entry names the closest
-MLPL construct or marks the concept as deferred / out
-of scope.
+MLPL construct or plainly says the concept is not in
+MLPL / out of scope.
 
 ## Documentation
 
@@ -115,8 +115,8 @@ vertical slice, and LLM-server calls have all shipped;
 each guide notes what is implemented vs still planned):
 
 - [`docs/using-mlx.md`](docs/using-mlx.md) -- Apple Silicon MLX
-  backend: shipped, now GPU-resident via the E4 persistent-tensor
-  tape (see `docs/benchmarks.md` for current numbers)
+  backend: shipped, with GPU-resident training via the
+  persistent-tensor tape (see `docs/benchmarks.md` for numbers)
 - [`docs/using-cuda.md`](docs/using-cuda.md) -- historical design
   doc; the shipped scope lives in `docs/saga-cuda-foundation.md`
   and `docs/saga-cuda-demo-parity.md` (the separate CUDA peer
@@ -151,7 +151,7 @@ cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl
 # Run a demo script
 cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl -- -f demos/basics.mlpl
 
-# Train a tiny language model (Saga 13)
+# Train a tiny language model
 cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl -- -f demos/tiny_lm.mlpl
 
 # Compile a .mlpl file to a native binary
@@ -196,26 +196,26 @@ mlpl> apply_tokenizer(tok, "the quick brown fox")
 - **Array language.** APL-flavored syntax, 0-origin indexing,
   element-wise arithmetic with scalar broadcasting, matmul +
   dot, reshape + transpose + axis reductions.
-- **Labeled shapes** (Saga 11.5). Annotation syntax
+- **Labeled shapes.** Annotation syntax
   `X : [batch, feat] = ...` carries axis names through every
   op; mismatches surface as a structured
   `EvalError::ShapeMismatch` that names both shapes.
-- **Autograd** (Saga 9). `param[shape]` + `grad(expr, wrt)`, a
+- **Autograd.** `param[shape]` + `grad(expr, wrt)`, a
   reverse-mode tape over the full array op set.
-- **Optimizers + training loop** (Saga 10). `adam`,
+- **Optimizers + training loop.** `adam`,
   `momentum_sgd`, schedules, and a `train N { body }` construct
   that binds `step` and captures `last_losses`.
-- **Model DSL** (Saga 11). Composable layers: `linear`,
+- **Model DSL.** Composable layers: `linear`,
   `chain`, `residual`, `rms_norm`, `attention`,
   `causal_attention`, `embed`, `sinusoidal_encoding`,
   activations, `apply`, `params`.
-- **Tokenizers + datasets** (Saga 12). `load` / `load_preloaded`
+- **Tokenizers + datasets.** `load` / `load_preloaded`
   with a `--data-dir` sandbox, `shuffle` / `batch` / `split`,
   `for row in X { ... }`, byte-level + BPE tokenizers
   (`tokenize_bytes`, `train_bpe`, `apply_tokenizer`, `decode`),
   and reproducible `experiment "name" { ... }` blocks with
   `:experiments` / `compare`.
-- **Tiny LM end-to-end** (Saga 13). `embed`,
+- **Tiny LM end-to-end.** `embed`,
   `sinusoidal_encoding`, `causal_attention`, `cross_entropy`,
   `sample` + `top_k`, `last_row`, `concat`,
   `attention_weights` -- enough to train and generate from a
@@ -293,7 +293,7 @@ cargo run -p mlpl-repl -- -f demos/circles_mlp.mlpl
 cargo run -p mlpl-repl -- -f demos/attention.mlpl
 cargo run -p mlpl-repl -- -f demos/transformer_block.mlpl
 
-# Tiny LM (Saga 13)
+# Tiny LM
 cargo run -p mlpl-repl -- -f demos/tiny_lm.mlpl
 cargo run -p mlpl-repl -- -f demos/tiny_lm_generate.mlpl
 

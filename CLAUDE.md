@@ -278,6 +278,39 @@ least one commit -- so refresh it explicitly:
 hand-written -- update those only at release boundaries
 or when a saga lands, not every commit.
 
+## User-facing docs: what and how -- never when or plans
+
+User-facing surfaces -- README tour/feature sections,
+docs/lang-reference.md, docs/glossary.md, essays such as
+docs/thinking-in-arrays.md, demo/lesson text in
+components/web-demos/.../demos.toml, and the literate pages --
+must not reference development artifacts: no saga names or
+numbers (E3, Saga 14), no step numbers, no ship dates, no
+"new"/"recently added" framing, and no pointers to planned or
+roadmap features. Say WHAT a feature is and HOW to use it;
+include WHY only when it is educational (conceptual, algebraic,
+historical), never when the why is project plans or status.
+Chronology, plans, and status live exclusively in the planning
+docs: docs/saga.md, docs/status.md, docs/plan.md,
+docs/future-sagas-queue.md, docs/benchmarks.md, CHANGES.md.
+(User direction, 2026-08-02.)
+
+Banned phrasings in user-facing text (all found and swept
+2026-08-02 -- do not reintroduce): version stamps ("a v0.19
+builtin", "in v0.19"), stage/plan pointers ("APL2 staging plan
+Stage 6", "docs/engram-sagas-plan.md", "research3.txt
+wishlist"), future-tense capability talk ("once nested arrays
+land", "deferred", "a future enhancement", "will be dropped in
+a future release", "follow-up step", "planned"), and
+"new/recently added" framing. The ALLOWED way to mark a
+capability boundary is a plain present-tense statement: "Not an
+MLPL builtin.", "not supported", "out of scope", "MLPL ships X;
+Y is not implemented" -- optionally naming the closest shipped
+construct. Deprecations say "DEPRECATED alias; prefer X" with
+no timeline. This applies to AGENTS.md readers too (it is a
+symlink to this file); never edit AGENTS.md in place with tools
+that materialize symlinks.
+
 ## Wiki errata discipline (whenever docs change)
 
 The GitHub wiki (sibling checkout `../sw-mlpl.wiki`, published at

@@ -3,8 +3,8 @@
 Short definitions for the ML terms that appear in MLPL demos
 and lessons. Alphabetical. Each entry names the closest MLPL
 construct so you can poke at the concept in the REPL. Concepts
-that MLPL does not ship today carry a `deferred` note pointing
-at the future enhancement that may add them; concepts outside MLPL's
+that MLPL does not ship say so plainly and name the closest
+shipped construct; concepts outside MLPL's
 teaching-language scope (MLOps, deployment, monitoring) carry
 an `out of scope` note.
 
@@ -79,7 +79,7 @@ that flip a model's prediction. The classic image-recognition
 example: change a few pixels and "panda" becomes "gibbon".
 MLPL ships `perturb_params(model, family, sigma, seed)` for
 weight-space perturbation ; input-space adversarial
-attacks are deferred.
+attacks are not in MLPL.
 
 ## args / list_get (builtins)
 
@@ -195,7 +195,7 @@ overlay shows where on the IMAGE each head looks.
 A network trained to reconstruct its input through a low-
 dimensional bottleneck (latent) layer. Used for compression,
 denoising, and unsupervised representation learning. See also
-`VAE`. Not a v0.19 MLPL builtin; deferred.
+`VAE`. Not an MLPL builtin.
 
 ## Autograd
 
@@ -272,7 +272,7 @@ Normalize each feature across the batch axis so its mean is
 zero and variance is one, then apply a learnable scale and
 shift. Stabilizes training of deep networks; sensitive to
 small batch sizes. MLPL ships `rms_norm` (a simpler scheme);
-batch norm is deferred.
+batch norm is not in MLPL.
 
 ## batch / batch_mask (builtins)
 
@@ -287,7 +287,7 @@ the padded positions.
 A decoding strategy that keeps the top-`k` partial sequences
 at each step instead of committing to one. MLPL's generation
 demos use greedy / multinomial sampling via `sample` + `top_k`
-rather than beam search; beam search is a deferred follow-up.
+rather than beam search; beam search is not in MLPL.
 
 ## BERT
 
@@ -295,13 +295,13 @@ A specific encoder-only transformer architecture trained with
 masked-token prediction. Pre-2020-era foundation for many
 classification/QA tasks. MLPL builds tiny LMs in the demo
 suite but does not ship pretrained model weights; loading
-external checkpoints is a future enhancement.
+external checkpoints is not supported.
 
 ## Bias
 
 The constant additive term in `y = x @ W + b`. A trainable
 1-D parameter, smaller than the weight matrix; auto-tagged
-`Bias` in v0.19.
+`Bias`.
 
 ## Bias-Variance Tradeoff
 
@@ -486,8 +486,7 @@ before perturbing each.
 A network built around convolution and pooling layers,
 designed for grid-structured data (images). MLPL does not
 ship a `conv2d` layer today -- transformer + MLP families are
-the v0.19 model surface; convolutional layers are a deferred
-follow-up.
+the model surface; convolutional layers are not in MLPL.
 
 ## Confusion matrix
 
@@ -512,8 +511,8 @@ or state-space alternatives.
 
 ## Convolution
 
-The window-and-sum operation at the core of CNNs. Not a
-v0.19 builtin in MLPL; deferred along with CNN-family demos.
+The window-and-sum operation at the core of CNNs. Not an
+MLPL builtin.
 
 ## Cosine similarity
 
@@ -528,12 +527,9 @@ on learned representations. MLPL: build from `dot`,
 ## Completion popup (REPL)
 
 Press `Ctrl+Space` in the web playground's REPL input to
-complete the token at the cursor. Saga 33 step 043 shipped
-the MVP (originally bound to `Tab`); step 045 first swapped
-to `Shift+Space` and step 046 corrected to `Ctrl+Space` --
-the IDE standard (VS Code, IntelliJ, Emacs). `Tab` is
-reserved for browser focus traversal (step 043's
-`preventDefault` was beaten by the browser default).
+complete the token at the cursor -- the IDE-standard binding
+(VS Code, IntelliJ, Emacs). `Tab` is reserved for browser
+focus traversal.
 
 Behavior: unique match -> inline insertion at the cursor;
 ambiguous match -> a row of chips appears below the input.
@@ -559,8 +555,7 @@ Candidate sources, in order: REPL slash-commands
 MLPL keywords (`train`, `repeat`, `experiment`, `for`,
 `in`, `param`), all runtime builtins (every name in
 `mlpl_runtime::runtime_builtin_names()`). Live user-bound
-variable / model names are deferred -- filed as a follow-
-up step.
+variable / model names are not included.
 
 ## Comparison ops: `gt`, `lt`, `eq` (builtins)
 
@@ -615,7 +610,7 @@ representations.
 `:describe <name>` prints a typed summary of a binding -- shape
 + tag + values preview for an array, layer tree for a model,
 vocab + merge count for a tokenizer, signature for a builtin.
-v0.19 added per-tag bodies (Probability rows show
+Per-tag bodies add detail (Probability rows show
 the verified-or-violated row-sum invariant; [[Gradient]] shows
 `wrt`, etc.).
 
@@ -633,8 +628,8 @@ strict-fault.
 
 Generating extra training samples by transforming existing
 ones (flipping images, masking tokens, paraphrasing text)
-without changing the label. Cheap regularization. Not a
-v0.19 MLPL builtin; deferred.
+without changing the label. Cheap regularization. Not an
+MLPL builtin.
 
 ## Data Leakage
 
@@ -694,9 +689,8 @@ array shape today.
 
 `depth(x)` returns the nesting level of a value (APL2 sense):
 `0` for a scalar, `1` for any flat array (vector, matrix, or
-higher-rank). MLPL's `DenseArray` is always flat today, so
-depth is `0` or `1`; once nested/boxed arrays land (APL2
-staging plan Stage 6) the same builtin reports deeper values.
+higher-rank). MLPL's `DenseArray` is flat, so depth
+is `0` for a scalar and `1` for any array.
 Pairs with `shape`, `rank`, `size`, and `tally` as the
 structural-introspection set; `disp(x)` shows all of them at
 once. APL heritage. Do NOT confuse depth with rank: a rank-5
@@ -776,8 +770,8 @@ whole sample at once rather than emitting it left to right.
 State of the art for images/video. MLPL builds the algorithm
 from existing pieces (a `linspace`/`running_product` schedule, an MLP
 denoiser, `adam`); the in-browser "Diffusion (2D points)" demo
-teaches it on tiny data, and the stable-diffusion saga scales
-it to image U-Nets and real text-to-image on a connected GPU.
+teaches it on tiny data; the same recipe scales
+to image U-Nets and real text-to-image on a connected GPU.
 See [[DDPM]].
 
 ## Distillation
@@ -785,8 +779,7 @@ See [[DDPM]].
 Training a smaller "student" model to imitate a larger
 "teacher" model's outputs (logits or probabilities) instead
 of the original labels. Compresses knowledge into faster /
-cheaper models. plans MLPL distillation pipelines;
-deferred in v0.19.
+cheaper models. MLPL has no distillation pipeline builtins.
 
 ## Distribution Shift
 
@@ -820,14 +813,13 @@ deep learning theory.
 A simpler alternative to RLHF that fits a model directly to
 human preferences without training a separate reward model
 or running reinforcement learning. Out of MLPL's current
-scope; preference-data builtins are a future enhancement.
+scope; preference-data builtins are not in MLPL.
 
 ## Dropout
 
 A regularization technique that zeros out a random fraction
 of activations during training so the network learns
-distributed representations. Not a v0.19 MLPL builtin;
-deferred.
+distributed representations. Not an MLPL builtin.
 
 ## Early Stopping
 
@@ -865,7 +857,7 @@ Canonical scripting pattern with a default fallback:
 model_path = unwrap_or(env("MODEL_PATH"), "default-model.bin")
 ```
 
-Pair with [[args (builtin)]] (saga 31 step 003) to give a
+Pair with [[args (builtin)]] to give a
 script both `--flag value` and `$ENV` configuration surfaces.
 
 ## Emergent Behavior
@@ -985,8 +977,8 @@ complex structures. MLPL: the `[B, C_out, H, W]` output of
 A re-implementation of attention that fuses the softmax with
 the matmuls and tiles to keep working memory in fast SRAM,
 reducing both wall-clock and memory cost without changing
-the math. MLPL's MLX backend uses naive attention today;
-fused / flash variants are deferred.
+the math. MLPL's MLX backend uses naive attention;
+fused / flash variants are not implemented.
 
 ## fill / zeros / ones (builtins)
 
@@ -1030,7 +1022,7 @@ weight update is suppressed. MLPL: `freeze(model)` /
 
 ## Game of Life
 
-Conway's cellular automaton and the array-language world's favorite party trick: the APL2 one-liner computes every cell's next generation simultaneously. In MLPL the same shape falls out of [[rotate (builtin)]]: shift the whole board 8 ways, sum the shifted boards into a neighbor-count matrix N, and the entire rule is `gt(eq(N, 3) + G * eq(N, 2), 0)` -- birth on 3 neighbors, survival on 2 or 3. The "Game of Life (APL classic)" demo builds it three ways and animates 24 generations with `svg(F, "life")`. See docs/future-saga-game-of-life.md for the staged road to the full APL2 one-liner.
+Conway's cellular automaton and the array-language world's favorite party trick: the APL2 one-liner computes every cell's next generation simultaneously. In MLPL the same shape falls out of [[rotate (builtin)]]: shift the whole board 8 ways, sum the shifted boards into a neighbor-count matrix N, and the entire rule is `gt(eq(N, 3) + G * eq(N, 2), 0)` -- birth on 3 neighbors, survival on 2 or 3. The "Game of Life (APL classic)" demo builds it three ways and animates 24 generations with `svg(F, "life")`. The rule, the neighbor count, and the animation are all ordinary array values.
 
 ## GAN (Generative Adversarial Network)
 
@@ -1072,7 +1064,7 @@ Compromise between multi-head attention (every head has its
 own K, V) and multi-query attention (all heads share one K,
 V). Reduces KV cache memory at little quality cost. MLPL's
 `attention(d_model, heads, seed)` is full multi-head;
-GQA / MQA are deferred.
+GQA / MQA are not in MLPL.
 
 ## Gradient
 
@@ -1116,7 +1108,7 @@ tensor and document the mapping in your demo's takeaway.
 
 Capping the L2 norm of the gradient vector before applying
 the optimizer update. Prevents explosive updates from rare
-huge-gradient batches. Not a v0.19 MLPL builtin; deferred.
+huge-gradient batches. Not an MLPL builtin.
 
 ## Gradient descent
 
@@ -1200,8 +1192,8 @@ was tried.
 
 ## If expression
 
-`if cond { then } else { else }` is MLPL's branching primitive
-(saga 31 step 004). Like Rust, it is an EXPRESSION not a
+`if cond { then } else { else }` is MLPL's branching primitive.
+Like Rust, it is an EXPRESSION not a
 statement -- it returns the value of whichever branch was
 taken, so it composes into bindings: `x = if flag { 100 }
 else { 200 }`. The `else` clause is REQUIRED; a dangling-if
@@ -1225,7 +1217,7 @@ strings, vectors, Records, Results -- not just scalars.
 ## While loop
 
 `while cond { body }` re-evaluates `body` until `cond` is
-falsy (saga 31 step 005). Truthiness matches [[If expression]]
+falsy. Truthiness matches [[If expression]]
 -- scalar non-zero or `Ok(_)`. The loop expression evaluates
 to scalar `0` on normal exit, or to the `break value` if the
 body exited via `break value`.
@@ -1244,14 +1236,14 @@ introduce a new variable scope -- assignments in the body
 persist into the surrounding environment, matching the
 `repeat` / `train` / `for` convention.
 
-This is the scripting saga's looping primitive; combine with
+This is MLPL's general looping primitive; combine with
 [[If expression]] for conditional break-out, [[Result type]]
 for fallible inputs, and [[args() builtin]] for CLI-driven
 iteration.
 
 ## Script exit codes
 
-In `mlpl-repl -f script.mlpl` mode (saga 31 step 006), the
+In `mlpl-repl -f script.mlpl` mode, the
 process exit code is determined by the script's final value:
 `Err(msg)` exits `1` and writes `msg` to stderr; everything
 else exits `0`. The `exit(code)` builtin short-circuits with
@@ -1265,8 +1257,7 @@ builtins for the input/output side.
 
 ## Stdin reading
 
-The `read_stdin()` and `read_stdin_lines()` builtins (saga 31
-step 006) consume the script's stdin to EOF. `read_stdin()`
+The `read_stdin()` and `read_stdin_lines()` builtins consume the script's stdin to EOF. `read_stdin()`
 returns the whole input as a [[Value::Str]]; `read_stdin_lines()`
 splits on `\n` and returns a [[Value::StrList]] with a trailing
 empty entry stripped. Both refuse to read from an interactive
@@ -1313,7 +1304,7 @@ weights. In MLPL, just call `apply(model, X)` outside of
 
 ## :introspect (REPL command)
 
-`:introspect` is a bundle command (saga 33 step 037d) that
+`:introspect` is a bundle command that
 concatenates the output of every no-arg inspector into one
 markdown-headered dump. Sections in fixed order:
 [[:version]], [[:wsid (REPL command)]], `:builtins`,
@@ -1335,7 +1326,7 @@ identifying attention heads, feature directions, and
 algorithms the model implements. The "Embedding exploration"
 demo is a tiny taste -- [[t-SNE]] / k-NN over a learned
 embedding table. Full circuit-level work is out of MLPL's
-v0.19 scope.
+scope.
 
 ## Johnson-Lindenstrauss Lemma
 
@@ -1394,7 +1385,7 @@ The cache of past Key and Value tensors a transformer keeps
 during autoregressive decoding so each new token only needs
 to compute its own row, not the entire `[T, T]` attention
 matrix. MLPL's "Tiny LM Generate" demo recomputes from
-scratch each step; KV cache is a deferred efficiency win.
+scratch each step; MLPL has no KV cache.
 
 ## KL divergence
 
@@ -1414,12 +1405,12 @@ roadmap.
 Replacing one-hot targets with a softer distribution (e.g.
 `0.9` for the true class, `0.1 / (K-1)` for the rest) during
 cross-entropy training. Reduces overconfidence and slightly
-regularizes. Not a v0.19 MLPL builtin; deferred.
+regularizes. Not an MLPL builtin.
 
 ## Labels
 
 Ground-truth integer class indices for a classification task.
-A `Labels { num_classes }` tag in v0.19 carries the class
+A `Labels { num_classes }` tag carries the class
 count so `confusion_matrix` and `cross_entropy` can validate
 shape compatibility.
 
@@ -1452,7 +1443,7 @@ Normalize each input row to zero mean and unit variance,
 then apply a learnable scale and shift. Distinct from batch
 norm (which normalizes across the batch axis) and RMS norm
 (which skips the mean step). MLPL ships `rms_norm(dim)`;
-LayerNorm proper is deferred.
+LayerNorm proper is not in MLPL.
 
 ## Learning rate
 
@@ -1485,8 +1476,8 @@ train a 1-layer transformer end-to-end on a small corpus.
 
 `llm_call(url, prompt, model)` POSTs to an Ollama-compatible
 `/api/generate` endpoint and returns the model's completion
-text as a `Value::Str` string. added this; CLI-only
-in v0.19 (browser CORS / proxy story is a deferred enhancement).
+text as a `Value::Str` string. CLI-only: the browser
+playground cannot fetch cross-origin URLs.
 
 ## load / load_preloaded (builtins)
 
@@ -1631,15 +1622,14 @@ appear in LM evaluation papers.
 ## Logits
 
 The unnormalized scores a classifier produces just before
-the softmax. A `Logit` tag in v0.19 -- `cross_entropy`,
+the softmax. A `Logit` tag -- `cross_entropy`,
 `sample`, and `top_k` expect them; passing `softmax`
 output instead is the canonical double-softmax bug.
 
 ## LogProbability
 
 The log of a probability. Numerically stabler than
-multiplying probabilities; `log_softmax` (deferred to a
-later step) produces them.
+multiplying probabilities; `log_softmax` produces them.
 
 ## LoRA (Low-Rank Adaptation)
 
@@ -1652,7 +1642,7 @@ MLPL: `lora(model, rank, alpha, seed)`.
 
 A scalar that summarizes how wrong a model's predictions
 are. Minimization target for `adam` / `momentum_sgd`.
-Auto-tagged `Loss(kind)` in v0.19.
+Auto-tagged `Loss(kind)`.
 
 ## Loss Landscape
 
@@ -1695,13 +1685,12 @@ sampling) term, which is what the "UMAP vs t-SNE" demo
 illustrates. The [[Swiss roll]] is the canonical test bed for
 the linear-vs-manifold contrast.
 
-## map (deferred higher-order)
+## map (higher-order)
 
 `map(:op, x)` -- elementwise apply of a unary BuiltinRef
-across every element. Not shipped in v0.19; the natural
-companion to `reduce(:op, x[, axis])` and an obvious follow-
-up. For now compose with `reduce(:add, x * x)` or named
-math primitives (`exp(x)`, `sigmoid(x)`).
+across every element. Not an MLPL builtin; compose with
+`reduce(:add, x * x)` or named math primitives (`exp(x)`,
+`sigmoid(x)`) instead.
 
 ## Mask
 
@@ -1722,8 +1711,8 @@ neural-net forward passes.
 
 Storing weights in f32 for stability while running matmuls in
 f16 / bf16 for speed and memory. Standard on modern GPUs.
-MLPL stores everything in f64 today; mixed precision is
-deferred until a dtype layer ships.
+MLPL stores everything in f64; mixed precision is
+not supported.
 
 ## mean (builtin)
 
@@ -1844,7 +1833,7 @@ gitignored `data/oxford-iiit-pet/` checkout; the
 Inputs that fall outside the distribution the model was
 trained on. Models tend to be silently overconfident on OOD,
 not flagged "I don't know". Detection is an active research
-area; deferred in MLPL.
+area; MLPL has no detection builtins.
 
 ## Online vs offline distillation
 
@@ -1921,7 +1910,7 @@ original feature space), and `pca_variance_explained(X, k)`
 returns the per-component fraction-of-variance vector
 `[k]`. The "PCA via Power Iteration" demo writes the
 projection out by hand; the loadings + variance helpers feed
-the critical-dimensions heatmap (saga 33 step 032).
+the critical-dimensions heatmap.
 
 ## perturb_params (builtin)
 
@@ -2014,7 +2003,7 @@ Gram-Schmidt deflation for the top-k.
 ## Probability
 
 A non-negative scalar that, with siblings, sums to 1.
-Auto-tagged `Probability` in v0.19; produced by `softmax`
+Auto-tagged `Probability`; produced by `softmax`
 and `sigmoid`.
 
 ## Projection (matrix)
@@ -2068,7 +2057,7 @@ today  but `quantize` does not.
 Storing weights in low-precision integer formats (int8, int4)
 for memory and speed at modest accuracy cost. Often combined
 with LoRA in [[QLoRA]] workflows. MLPL stores everything in f64;
-quantization is a deferred follow-up to .
+quantization is not in MLPL.
 
 ## Query (Q)
 
@@ -2085,7 +2074,7 @@ Fetch relevant documents from a corpus at query time, prepend
 them to the prompt, and let an LLM answer over the retrieved
 context. Reduces hallucination and lets you cite. MLPL ships
 `pairwise_sqdist` / `knn` for similarity search; full RAG
-pipelines are a deferred enhancement.
+pipelines are not in MLPL.
 
 ## randn / random (builtins)
 
@@ -2121,8 +2110,7 @@ residual stream. sw-MLPL builds it as composable language
 primitives first (this glossary's `ngram_hash` / `gather_rows`),
 then as the `engram(...)` model layer applied with
 [[apply_engram]] -- differentiable end to end, so `train`/`adam`
-scatter-ADD gradients into exactly the addressed table rows. The
-full plan lives in docs/engram-sagas-plan.md.
+scatter-ADD gradients into exactly the addressed table rows.
 
 ## engram (builtin)
 
@@ -2262,7 +2250,7 @@ or the math builtin path.
 A circular buffer of past experiences (state, action, reward,
 next state) that an off-policy RL algorithm samples from
 during training. Out of MLPL's current scope; RL builtins
-are a future enhancement.
+are not in MLPL.
 
 ## Representation Learning
 
@@ -2270,8 +2258,8 @@ The umbrella term for learning useful internal features
 without explicit feature engineering. Self-supervised
 pretraining, autoencoders, contrastive learning all fall
 under it. embedding-visualization tools poke at
-representations; full self-supervised pretraining is a
-deferred enhancement.
+representations; full self-supervised pretraining is
+not in MLPL.
 
 ## repeat block (language keyword)
 
@@ -2407,7 +2395,7 @@ A positional encoding scheme that rotates each query / key
 pair in a 2-D plane proportional to position, so attention
 naturally prefers nearby tokens and extrapolates better
 beyond training context length. MLPL ships only sinusoidal
-positional encoding today; RoPE is deferred.
+positional encoding; RoPE is not implemented.
 
 ## Sampling
 
@@ -2478,13 +2466,13 @@ the label for token t is just token t+1. MLPL: the
 setup -- no human labels touched the model. Most of modern
 LLM pretraining is self-supervised.
 
-## scan (deferred higher-order)
+## scan (higher-order)
 
 `scan(:op, x)` -- the cumulative version of `reduce`. Returns
 a same-shape array where each entry is the reduction over the
 prefix up to that point. Standard for cumulative sum / running
-max / prefix product. Not in v0.19; obvious follow-up to
-`reduce`.
+max / prefix product. Not an MLPL builtin; `running_product`
+covers the product case.
 
 ## scatter (builtin)
 
@@ -2567,9 +2555,8 @@ An iterative procedure that turns a non-negative matrix into
 a doubly-stochastic one (rows AND columns sum to 1) by
 alternating row and column scaling. The continuous relaxation
 of optimal transport / matching problems. MLPL does not ship
-`sinkhorn_normalize` as a v0.19 builtin; it is on the
-research3.txt wishlist alongside the other normalization
-families.
+`sinkhorn_normalize`; compose it from `exp`, reductions, and
+elementwise division.
 
 ## Softmax
 
@@ -2616,7 +2603,7 @@ A non-attention sequence-modeling family that runs in
 `O(seq_len)` time using a learned linear recurrence with
 selective gating. Trades all-to-all attention for linear
 scaling. MLPL ships transformer + MLP families only; SSMs
-are deferred.
+are not in MLPL.
 
 ## sqrt (builtin)
 
@@ -2668,15 +2655,14 @@ shoehorning the names into an index-keyed sub-record.
 
 Today's accessors are minimal: `list_len(xs)` returns the
 length as a scalar `DenseArray`. Indexing (`names[i]` or
-`index(names, i)`) and iteration are deferred to a follow-up
-step once a concrete demo needs them.
+`index(names, i)`) and iteration are not supported.
 
 ## Stop gradient / detach
 
 Severing the autograd tape so gradients do not flow through
 a value. Useful for target networks, EMA teachers, and
 "freeze the encoder" patterns. MLPL does not ship
-`stop_gradient` / `detach` as a builtin in v0.19;
+`stop_gradient` / `detach`;
 `freeze(model)` covers the optimizer-side equivalent for
 parameters.
 
@@ -2691,7 +2677,7 @@ learning-style decomposition.
 
 ## :tags / :untag (REPL commands)
 
-v0.19 typed-value introspection. `:tags` lists every
+Typed-value introspection. `:tags` lists every
 binding with an attached `ValueTag` sorted alphabetically,
 showing the tag's display form (e.g. `Probability`,
 `Loss(CrossEntropy)`, `Weight(layer=linear_0, name=W)`).
@@ -2836,7 +2822,7 @@ Patterns where an LLM produces structured output that
 triggers an external function (web search, calculator, code
 execution), then folds the result back into its context.
 MLPL ships `llm_call` as the language-level hook; full tool-
-calling protocols are deferred.
+calling protocols are not in MLPL.
 
 ## Top-k
 
@@ -2967,7 +2953,7 @@ Asking "how confident is the model in this prediction" --
 distinct from the softmax's calibration. Approaches: model
 ensembles, Bayesian neural nets, Monte-Carlo dropout, deep
 evidential learning. MLPL's "Neural Thicket" ensemble demo
-is a tiny taste; full uncertainty surface is deferred.
+is a tiny taste; full uncertainty tooling is not in MLPL.
 
 ## unfreeze (builtin)
 
@@ -3108,8 +3094,7 @@ MLPL: `linear_warmup(step, warmup_steps, target_lr)`.
 ## Weight
 
 The trainable matrix in a `Linear` layer (or a tile of one
-in `Attention`). Auto-tagged `Weight(layer, name)` in
-v0.19.
+in `Attention`). Auto-tagged `Weight(layer, name)`.
 
 ## :wsid (REPL command)
 
@@ -3124,7 +3109,7 @@ session and want a quick sense of state.
 A regularization technique that shrinks weights toward zero
 on each update step (L2 penalty). Often baked into the
 optimizer (`AdamW`). MLPL's `adam` uses no decay; weight
-decay is deferred.
+decay is not implemented.
 
 ## Weight Initialization
 
@@ -3133,7 +3118,7 @@ The scheme that sets parameter values before training: zeros
 (scaled by fan-in for tanh / sigmoid), He / Kaiming (scaled
 for [[ReLU]]). MLPL initializes weights via `randn(seed,
 shape)` scaled by 0.5 inside `linear`; explicit
-Xavier / He variants are deferred.
+Xavier / He variants are not in MLPL.
 
 ## Workspace
 
@@ -3595,14 +3580,13 @@ model. Deeply array-spirited: squared distances are
 |a|^2 + |b|^2 - 2ab (one matmul plus two reductions), the
 neighbor pick is top_k, the vote is one_hot + reduce_add +
 argmax. MLPL ships the [[knn (builtin)]] for neighbor indices
-(used in embedding inspection); a worked classifier demo is
-planned (see docs/future-saga-classical-ml.md). Contrast
+(used in embedding inspection). Contrast
 [[K-Means]], which clusters unlabeled data instead of voting
 with labels.
 
 ## Name Forms (name / :name / u:name)
 
-sw-MLPL's three deliberate name roles: bare `name(...)` CALLS a builtin; `:name` QUOTES it into a first-class value (what `reduce(:add, x)` consumes -- typing `:disp` shows the reference, calling `disp(G)` renders); `u:name` is the mandatory namespace for YOUR functions, so user code can never collide with present or future builtins (the cure for APL's workspace name-clash history, priced at two characters). Introspect each space with `:builtins`, `:fns`, `:list u:name` (verbatim source, comments included), and `:describe`. Future symmetry: first-class `u:` values (`:u:name`) arrive with the APL2 staging plan. See "The Three Kinds of Name" in the Language Reference tab.
+sw-MLPL's three deliberate name roles: bare `name(...)` CALLS a builtin; `:name` QUOTES it into a first-class value (what `reduce(:add, x)` consumes -- typing `:disp` shows the reference, calling `disp(G)` renders); `u:name` is the mandatory namespace for YOUR functions, so user code can never collide with present or future builtins (the cure for APL's workspace name-clash history, priced at two characters). Introspect each space with `:builtins`, `:fns`, `:list u:name` (verbatim source, comments included), and `:describe`. See "The Three Kinds of Name" in the Language Reference tab.
 
 ## Naive Bayes
 
@@ -3612,8 +3596,7 @@ Gaussian variant needs only per-class feature means and
 variances -- masked reductions in array terms -- and predicts by
 argmax over summed log-densities. Fast, surprisingly strong on
 small data, and the classic generative-vs-discriminative foil
-to [[Logistic Regression]]; a demo contrasting the two on the
-same moons data is planned (docs/future-saga-classical-ml.md).
+to [[Logistic Regression]].
 
 ## Gradient Boosting
 
