@@ -1,6 +1,6 @@
 number = 5
 slug = "perf-gate-and-demo"
-status = "pending"
+status = "in-progress"
 description = "E5 step 5 per plan: mlx_vs_cpu bench gains an engram-in-chain train-step work..."
 role = "legacy"
 context_files = []

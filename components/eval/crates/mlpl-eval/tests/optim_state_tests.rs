@@ -196,3 +196,49 @@ fn momentum_sgd_supports_param_list() {
     assert!((env.get("A").unwrap().data()[0] - 0.8).abs() < 1e-9);
     assert!((env.get("B").unwrap().data()[0] + 1.6).abs() < 1e-9);
 }
+
+fn eval(env: &mut Environment, src: &str) -> DenseArray {
+    let toks = lex(src).expect("lex");
+    let stmts = parse(&toks).expect("parse");
+    eval_program(&stmts, env).expect("eval")
+}
+
+#[test]
+fn optimizers_return_the_step_loss() {
+    // `train N { adam(...) }` records the body's final value as the
+    // per-step loss, so the optimizer builtins must RETURN the loss
+    // they just evaluated (not a placeholder scalar) -- otherwise
+    // last_losses and the live loss stream are flat.
+    let mut env = Environment::new();
+    eval(
+        &mut env,
+        "m = linear(3, 2, 0); \
+         X = [[1.0, 2.0, 3.0], [0.5, -1.0, 0.0], [2.0, 0.0, 1.0]]; \
+         Yv = [0, 1, 0]; 0",
+    );
+    let first = eval(
+        &mut env,
+        "adam(cross_entropy(apply(m, X), Yv), m, 0.05, 0.9, 0.999, 0.00000001)",
+    );
+    let metric = eval(&mut env, "cross_entropy(apply(m, X), Yv)");
+    // adam returned the PRE-update loss; the metric evaluated after
+    // the update must be lower, and both must be real losses.
+    assert!(first.data()[0] > 0.0, "adam returns the step loss");
+    assert!(
+        metric.data()[0] < first.data()[0],
+        "training moved the loss"
+    );
+    // The train form records a falling, non-constant curve.
+    eval(
+        &mut env,
+        "train 5 { momentum_sgd(cross_entropy(apply(m, X), Yv), m, 0.05, 0.9) }; 0",
+    );
+    let losses = eval(&mut env, "last_losses");
+    assert_eq!(losses.data().len(), 5);
+    assert!(losses.data()[0] > 0.0, "momentum returns the step loss");
+    assert!(
+        losses.data()[4] < losses.data()[0],
+        "recorded loss curve falls: {:?}",
+        losses.data()
+    );
+}

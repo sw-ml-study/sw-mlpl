@@ -77,7 +77,7 @@ pub(crate) fn eval_momentum_sgd(
         return r;
     }
 
-    let mut grads = crate::grad::eval_grads_batch(&loss_expr, env)?;
+    let (step_loss, mut grads) = crate::grad::eval_grads_batch(&loss_expr, env)?;
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(
@@ -130,7 +130,7 @@ pub(crate) fn eval_momentum_sgd(
         .steps
         .entry("momentum_sgd".into())
         .or_insert(0) += 1;
-    Ok(DenseArray::from_scalar(0.0))
+    Ok(DenseArray::from_scalar(step_loss))
 }
 
 /// `adam(loss_expr, params, lr, b1, b2, eps)` built-in.
@@ -254,7 +254,7 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
              See docs/benchmarks.md (Saga E4)."
         ));
     }
-    let mut grads = crate::grad::eval_grads_batch(&loss_expr, env)?;
+    let (step_loss, mut grads) = crate::grad::eval_grads_batch(&loss_expr, env)?;
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(
@@ -322,5 +322,5 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         env.optim_state.buffers.insert(v_key, v_new);
         env.set(name.clone(), w_new);
     }
-    Ok(DenseArray::from_scalar(0.0))
+    Ok(DenseArray::from_scalar(step_loss))
 }

@@ -1,0 +1,45 @@
+# Tiny LM + Engram on the Apple GPU (MLX).
+#
+# Base pre-training stays on the CPU (cheap + deterministic);
+# the engram-only training loop runs inside device("mlx") { ... }
+# with weights, gradients, and Adam moments resident on the GPU.
+# Every base weight is frozen, so the loss improvement at the end
+# is bought by MEMORY alone.
+
+corpus = "the cat sat. the dog ran. the cat sat. the dog ran. the cat sat."
+ids  = tokenize_bytes(corpus)
+X_all = shift_pairs_x(ids, 8)
+Y_all = shift_pairs_y(ids, 8)
+X = reshape(X_all, [reduce_mul(shape(X_all))])
+Y = reshape(Y_all, [reduce_mul(shape(Y_all))])
+V = 256
+d = 8
+
+emb = embed(V, d, 0)
+att = residual(chain(rms_norm(d), causal_attention(d, 1, 1)))
+norm = rms_norm(d)
+headl = linear(d, V, 4)
+base = chain(emb, att, norm, headl)
+
+# 30 CPU steps of ordinary base training.
+train 30 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001) }
+base_loss = cross_entropy(apply(base, X), Y)
+
+freeze(emb)
+freeze(att)
+freeze(norm)
+freeze(headl)
+
+e = engram(d, [2], 1, 128, 4, 7)
+m2 = chain(emb, att, e, norm, headl)
+
+# Engram-only training, resident on the Apple GPU: gradients
+# scatter-ADD into exactly the bigram-addressed memory rows.
+device("mlx") { train 40 { adam(cross_entropy(apply(m2, X), Y), m2, 0.05, 0.9, 0.999, 0.00000001) } }
+
+engram_loss = cross_entropy(apply(m2, X), Y)
+disp([base_loss, engram_loss, base_loss - engram_loss])
+
+s = engram_stats(e, apply(att, apply(emb, X)), X)
+disp([s.nonzero_rows, s.collisions])
+loss_curve(last_losses)

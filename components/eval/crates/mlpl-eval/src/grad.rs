@@ -69,7 +69,7 @@ pub(crate) fn eval_grad(args: &[Expr], env: &mut Environment) -> Result<DenseArr
 pub(crate) fn eval_grads_batch(
     loss: &Expr,
     env: &mut Environment,
-) -> Result<HashMap<String, DenseArray>, EvalError> {
+) -> Result<(f64, HashMap<String, DenseArray>), EvalError> {
     let tape = Tape::new();
     if env.device() == "mlx" {
         crate::device::enable_resident_tape(&tape);
@@ -80,7 +80,11 @@ pub(crate) fn eval_grads_batch(
     }
     let root = eval_tensor_expr(loss, env, &tape, &params)?;
     root.backward();
-    Ok(params
+    // The step loss the optimizers return (train records it as the
+    // per-step curve). On a resident tape this is the one scalar
+    // download per reporting interval the E4 sync contract allows.
+    let loss_val = root.value().data().first().copied().unwrap_or(0.0);
+    let grads = params
         .into_iter()
         .map(|(n, t)| {
             let g = t
@@ -88,7 +92,8 @@ pub(crate) fn eval_grads_batch(
                 .unwrap_or_else(|| DenseArray::zeros(t.value().shape().clone()));
             (n, g)
         })
-        .collect())
+        .collect();
+    Ok((loss_val, grads))
 }
 
 pub(crate) fn eval_tensor_expr(

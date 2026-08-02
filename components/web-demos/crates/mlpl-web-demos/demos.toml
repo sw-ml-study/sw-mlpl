@@ -78,7 +78,7 @@ lines = [
 [[demos]]
 category = "MLX (Apple GPU)"
 name = "MLX LoRA fine-tune"
-intro = """Train a tiny language model's LoRA adapters ENTIRELY on the Apple GPU via MLX -- forward, backward, AND the Adam optimizer all run on-device, no CPU round-trip. 1500 training steps run on the GPU; watch the LIVE LOSS curve grow point by point (streamed per step over SSE) while the telemetry sparklines show GPU activity and the CPU stays near idle. Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public browser demo. lora() freezes the base and trains only the low-rank adapters. NOTE: today only the LoRA adapter step is GPU-accelerated -- full base-model training still falls back to CPU -- so this demo skips a (slow, CPU-only) base-pretrain step and trains the adapters directly on the GPU. The MLX analog of 'CUDA LoRA fine-tune'; only device("mlx") differs."""
+intro = """Train a tiny language model's LoRA adapters ENTIRELY on the Apple GPU via MLX -- forward, backward, AND the Adam optimizer all run on-device, no CPU round-trip. 1500 training steps run on the GPU; watch the LIVE LOSS curve grow point by point (streamed per step over SSE) while the telemetry sparklines show GPU activity and the CPU stays near idle. Needs a connected mlpl-serve with a Mac MLX peer; not runnable on the public browser demo. lora() freezes the base and trains only the low-rank adapters, and the demo trains them directly on the GPU without a base-pretrain step so the run stays short. The MLX analog of 'CUDA LoRA fine-tune'; only device("mlx") differs."""
 takeaway = 'device("mlx") runs the whole training step on the GPU: the LOSS row and live loss chart stream the training loss in real time (each train step emits it automatically -- no extra forward pass), while the hardware sparklines show GPU activity on the same clock. The final chart persists under the result. lora() trains only the low-rank adapters, so it is cheap. Same demo as the CUDA version; only the device differs.'
 lines = [
     'corpus = load_preloaded("tiny_shakespeare_snippet")  # base corpus',
@@ -119,6 +119,35 @@ lines = [
     'device("mlx") { experiment "ttt" { train 1800 { adam(cross_entropy(apply(m, X), Y), m, 0.05, 0.9, 0.999, 0.00000001) } } }  # fine-tune on the GPU',
     "after = u:play_o(40)                                 # trained: [losses, ties, wins]",
     'svg(reshape(concat(before, after), [2, 3]), "waffle")  # before (top) vs after (bottom)',
+]
+
+[[demos]]
+category = "MLX (Apple GPU)"
+name = "MLX Tiny LM + Engram"
+intro = "The Tiny LM + Engram demo with the memory training running ENTIRELY on the Apple GPU. Base pre-training stays on the CPU (cheap and deterministic); then every base weight is frozen, an engram(...) bigram memory is inserted after the attention block, and the engram-only training loop runs inside device(\"mlx\") { ... } -- weights, gradients, and Adam moments stay resident on the GPU across the whole loop, and gradients scatter-ADD into exactly the bigram-addressed memory rows. Needs a connected mlpl-serve with a Mac MLX peer. The loss improvement at the end is bought by MEMORY alone: engram_stats(...) shows the rows written and the gate opening while every frozen base weight stays bit-identical."
+takeaway = "Same three beats as the CPU version -- a fresh engram is exactly transparent, engram-only training beats the frozen base, and the stats panel shows WHERE the memory helped -- but the training loop ran on Metal: the addressing contract is frozen across backends (same bigram rows on CPU and GPU, bit-exact), so the memory a GPU wrote reads back identically on the CPU. base_loss - engram_loss prints the margin bought by memory; nonzero_rows counts the bigram rows the corpus actually addressed."
+lines = [
+    'corpus = "the cat sat. the dog ran. the cat sat. the dog ran. the cat sat."  # heavily repeated phrases -- exactly what a bigram memory captures',
+    "ids  = tokenize_bytes(corpus)                          # byte-level ids (V=256)",
+    "X_all = shift_pairs_x(ids, 8) ; Y_all = shift_pairs_y(ids, 8)",
+    "X = reshape(X_all, [reduce_mul(shape(X_all))]) ; Y = reshape(Y_all, [reduce_mul(shape(Y_all))])",
+    "V = 256 ; d = 8",
+    "emb = embed(V, d, 0) ; att = residual(chain(rms_norm(d), causal_attention(d, 1, 1)))",
+    "norm = rms_norm(d) ; headl = linear(d, V, 4)",
+    "base = chain(emb, att, norm, headl)",
+    'experiment "mlx_engram_base" { train 30 { adam(cross_entropy(apply(base, X), Y), base, 0.01, 0.9, 0.999, 0.00000001) } }  # base training on CPU',
+    "base_loss = cross_entropy(apply(base, X), Y)",
+    "freeze(emb) ; freeze(att) ; freeze(norm) ; freeze(headl)  # freeze EVERY base weight",
+    "e = engram(d, [2], 1, 128, 4, 7)                       # bigram memory: 1 head, 128 slots, head_dim 4",
+    "m2 = chain(emb, att, e, norm, headl)                   # insert the engram after attention",
+    "cross_entropy(apply(m2, X), Y)                         # exactly base_loss: a fresh engram is transparent",
+    'device("mlx") { experiment "mlx_engram_mem" { train 40 { adam(cross_entropy(apply(m2, X), Y), m2, 0.05, 0.9, 0.999, 0.00000001) } } }  # memory training on the Apple GPU, fully resident',
+    "loss_curve(last_losses)                                # the memory being written, live from the GPU loop",
+    "engram_loss = cross_entropy(apply(m2, X), Y)",
+    "base_loss - engram_loss                                # the margin bought by MEMORY alone",
+    "s = engram_stats(e, apply(att, apply(emb, X)), X)      # health panel on the real hidden states",
+    "s.nonzero_rows                                         # bigram rows the GPU training actually wrote",
+    "s.gate_mean                                            # the concat gate opened where memory helps",
 ]
 
 [[demos]]
@@ -1952,6 +1981,11 @@ device = "mlx"
 
 [[capabilities]]
 name = "MLX tic-tac-toe fine-tune"
+requires_connect = true
+device = "mlx"
+
+[[capabilities]]
+name = "MLX Tiny LM + Engram"
 requires_connect = true
 device = "mlx"
 

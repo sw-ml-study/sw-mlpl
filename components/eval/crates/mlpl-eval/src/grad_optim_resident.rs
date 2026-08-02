@@ -39,17 +39,22 @@ fn moment_keys(name: &str) -> ((String, String, String), (String, String, String
 
 /// Build ONE resident tape for `loss`, backward it, and return each
 /// tracked parameter's `(weight, gradient)` handles.
+/// Per-param `(resident weight, resident gradient)` pair.
+type WgPair = (TensorHandle, TensorHandle);
+
 fn grads_all(
     loss: &Expr,
     env: &mut Environment,
-) -> Result<HashMap<String, (TensorHandle, TensorHandle)>, EvalError> {
+) -> Result<(f64, HashMap<String, WgPair>), EvalError> {
     let tape = mlpl_autograd::Tape::new();
     crate::device::enable_resident_tape(&tape);
     let params = seed_params(&tape, env);
     let root = crate::grad::eval_tensor_expr(loss, env, &tape, &params)?;
     root.backward();
+    // One scalar download per step: the allowed reporting sync.
+    let loss_val = root.value().data().first().copied().unwrap_or(0.0);
     let nodes = tape.nodes();
-    Ok(params
+    let grads = params
         .into_iter()
         .map(|(n, t)| {
             let node = &nodes[t.node().0];
@@ -59,7 +64,8 @@ fn grads_all(
                 .unwrap_or_else(|| TensorHandle::Cpu(DenseArray::from_scalar(0.0)));
             (n, (node.value.clone(), g))
         })
-        .collect())
+        .collect();
+    Ok((loss_val, grads))
 }
 
 /// One resident Adam step over `names`. `None` = not applicable
@@ -90,7 +96,7 @@ fn adam_steps(
     hp: &ResidentHp,
     env: &mut Environment,
 ) -> Result<DenseArray, EvalError> {
-    let mut grads = grads_all(loss, env)?;
+    let (step_loss, mut grads) = grads_all(loss, env)?;
     for name in names {
         if env.is_frozen(name) {
             continue;
@@ -100,7 +106,7 @@ fn adam_steps(
         })?;
         adam_one(env, name, &w, &g, hp)?;
     }
-    Ok(DenseArray::from_scalar(0.0))
+    Ok(DenseArray::from_scalar(step_loss))
 }
 
 /// One parameter's resident momentum update.
@@ -187,7 +193,7 @@ fn momentum_steps(
     beta: f64,
     env: &mut Environment,
 ) -> Result<DenseArray, EvalError> {
-    let mut grads = grads_all(loss, env)?;
+    let (step_loss, mut grads) = grads_all(loss, env)?;
     for name in names {
         if env.is_frozen(name) {
             continue;
@@ -197,5 +203,5 @@ fn momentum_steps(
         })?;
         momentum_one(env, name, &w, &g, lr, beta)?;
     }
-    Ok(DenseArray::from_scalar(0.0))
+    Ok(DenseArray::from_scalar(step_loss))
 }
