@@ -29,6 +29,16 @@ which positions won. Sampling shortlists, beam-style selection,
 and retrieval hits are one `argtop_k` away.
 
 
+## BDH (Dragon Hatchling)
+
+A brain-inspired architecture built around SPARSE POSITIVE
+activations plus a fast episode-local edge state updated by
+Hebbian-style local rules -- separate from the trained weights.
+The sparsity is the interpretability story: with few units
+active, individual units and edges can be watched, ablated,
+and causally tested. Not in MLPL.
+
+
 ## emit_frame (builtin)
 
 `emit_frame(name, step, x)` streams tensor `x` as one live
@@ -36,6 +46,17 @@ frame on a named animation channel when a server is connected
 (the Game of Life demos stream their boards this way); with no
 connection it is a no-op. It returns `x` unchanged, so it drops
 into a pipeline without changing the math.
+
+
+## Energy-Based Model (EBM)
+
+Learn a scalar ENERGY (compatibility) function over
+configurations, then treat low energy as "good": inference is
+search/descent toward low-energy states rather than one
+forward pass. The lineage runs [[Hopfield Network]] ->
+Boltzmann machines -> modern latent predictors like [[JEPA]];
+useful today as a ranking view -- score candidates by learned
+compatibility instead of likelihood. Not in MLPL.
 
 
 ## engram_stats (builtin)
@@ -64,6 +85,47 @@ down, `ceil(a)` up, `round(a)` to the nearest integer. All three
 keep the input's shape.
 
 
+## Hopfield Network
+
+The classic associative memory: patterns are stored as
+attractors of an energy function, and recall runs the
+dynamics from a noisy cue downhill to the nearest stored
+pattern. Content-addressed and noise-tolerant -- the
+complement of [[Engram]]'s exact hash addressing (modern
+continuous Hopfield layers are attention-like). Not in MLPL.
+
+
+## HRM (Hierarchical Reasoning Model)
+
+Two coupled recurrent schedules -- a slow high-level planner
+and a fast low-level worker iterating between plan updates --
+so reasoning happens at two timescales. Conceptually a
+composition of two [[TRM (Tiny Recursive Model)]]-style loops
+rather than a new primitive. Not in MLPL.
+
+
+## In-Context Reinforcement Learning (ICRL)
+
+Improving an agent ACROSS attempts without touching its
+weights: each try's outcome (reward, critique, failing tests)
+is fed back into the next attempt's context, so the learning
+loop lives in the prompt rather than the optimizer. The
+reinforcement sibling of [[In-Context Learning (ICL)]]: ICL
+selects good demonstrations; ICRL closes the loop with
+evaluated feedback from the agent's own attempts. Not an MLPL
+builtin; the pieces compose from experiments + evaluation.
+
+
+## JEPA (Joint-Embedding Predictive Architecture)
+
+Predict the REPRESENTATION of a future/masked observation
+rather than the observation itself: a context encoder and a
+target encoder meet in latent space, so the model learns
+predictable structure without modeling every pixel. An
+[[Energy-Based Model (EBM)]] descendant and a candidate
+substrate for [[World Model]]s. Not in MLPL.
+
+
 ## knn_graph (builtin)
 
 `knn_graph(X, k)` builds an `[N*k, 3]` edge list of
@@ -73,12 +135,53 @@ embeddings, and the general starting point for any graph built
 from raw points.
 
 
+## Knowledge Graph
+
+Entities and typed relations as a graph -- and, for small-model
+training, an ORACLE: it can generate multi-hop reasoning
+questions, verify answers by checking paths, grade difficulty
+by hop count, and split train/eval by graph region to test
+generalization instead of memorization. Not an MLPL builtin.
+
+
 ## loss_curve (builtin)
 
 `loss_curve(losses)` renders a training-loss line chart from a
 loss-per-step vector -- most often `loss_curve(last_losses)`
 immediately after a `train` block, which records one loss per
 step. See [[Loss]].
+
+
+## mHC (manifold-constrained Hyper-Connections)
+
+Hyper-Connections widen a transformer's [[Residual]] stream
+into several parallel streams with learned mixing between
+them; the manifold-constrained variant projects the mixing
+matrices onto a stable set (Sinkhorn-style normalization
+toward doubly-stochastic), trading raw freedom for training
+stability at depth. DeepSeek lineage, like [[Engram]]. Not in
+MLPL.
+
+
+## Multi-Token Prediction (MTP)
+
+Training a language model to predict SEVERAL future tokens per
+position (extra heads for t+2, t+3, ...) instead of only the
+next one. A denser training signal, and at inference the far
+heads can PROPOSE a draft that the model verifies in one
+parallel pass -- self-speculation, the same accept-or-reject
+shape as [[Speculative Decoding]] without a separate draft
+model. Not in MLPL.
+
+
+## Pareto Frontier (efficient frontier)
+
+The set of models no other model beats on EVERY axis at once
+-- quality vs latency vs memory vs size. The right mental
+model for constrained hardware: the question is never "the
+best model" but "the best model under this machine's
+constraints", and a plot of the frontier answers it at a
+glance. Not an MLPL builtin.
 
 
 ## pi / e (builtins)
@@ -95,6 +198,18 @@ math functions consume them like any other scalar.
 index generator most synthetic examples start from
 (`reshape(range(12), [3, 4])` is the canonical toy tensor).
 `iota` is a DEPRECATED alias from APL heritage; prefer `range`.
+
+
+## Rejection Sampling (best-of-N)
+
+Generate N candidates, score each with a verifier (exact
+oracle, tests, reward model), then keep only what passes --
+used three ways: pick the best answer at inference (best-of-N),
+build clean training sets from noisy generators, and keep only
+high-reward agent trajectories. The verifier's quality IS the
+method's quality: a cheap deterministic check (does it compile?
+does the graph path exist?) beats a vague score. Not an MLPL
+builtin; compose from generation + evaluation.
 
 
 ## running_product (builtin)
@@ -116,6 +231,17 @@ additive scan: prefix sums, cumulative totals, and CDFs in one
 call (`running_sum(prices * qty)` is revenue accumulated order
 by order). Pairs with [[running_product (builtin)]]; `scan(:op)`
 is the general form both specialize.
+
+
+## Scaffolded Reasoning
+
+Give the learner privileged structure DURING TRAINING --
+worked steps, graph paths, execution traces, tool-call
+transcripts -- then remove the scaffold at inference and test
+whether the procedure was internalized. Distinct from
+[[In-Context Learning (ICL)]] (scaffolds appear in training
+data, not the prompt) and from [[Distillation]] (the teacher is
+a structure, not a model). Not an MLPL builtin.
 
 
 ## Script Editor (web UI)
@@ -1312,12 +1438,45 @@ is the branch value), same convention as `repeat` / `train` /
 `for` blocks. Either branch can return any `Value` type --
 strings, vectors, Records, Results -- not just scalars.
 
+## Synthetic Data
+
+Training data GENERATED rather than collected: templates,
+grammars, graph-derived questions, teacher-model output --
+validated by an oracle before training (see [[Rejection
+Sampling (best-of-N)]]). The small-model lesson: data quality,
+structure, and ordering ([[Curriculum Learning]]) can buy back
+much of what parameter count gives up. MLPL's synthetic
+builtins (`moons`, `blobs`, `circles`, `grid`) are the
+tiny-scale version of the idea.
+
+
+## Test-Time Compute
+
+Spending more computation per query at INFERENCE time to buy
+accuracy -- longer reasoning chains, best-of-N sampling with a
+verifier, iterative refinement loops, recursive models that
+"think longer" on hard inputs. The dual of scaling parameters:
+a small model with a good test-time strategy can outperform a
+larger one-shot model on reasoning tasks. See [[Rejection
+Sampling (best-of-N)]].
+
+
 ## train_val_curve (builtin)
 
 `train_val_curve(train, val)` renders the training and
 validation loss curves on one chart; the gap between the two
 lines is the overfitting picture (see the "Watch a Model Learn"
 demos). Pair with `val_split` to hold out the validation set.
+
+
+## TRM (Tiny Recursive Model)
+
+A small network applied REPEATEDLY to its own latent state --
+parameter sharing across steps -- so depth becomes iteration
+and hard inputs can get more passes. The minimal form of
+recursion-as-reasoning: fixed or learned halting, optional
+per-step losses. A [[Test-Time Compute]] strategy in
+architecture form. Not in MLPL.
 
 
 ## While loop
@@ -3236,6 +3395,14 @@ session: vars, params, models, tokenizers, optimizer state,
 experiment log, frozen set, tag side-table, peer
 dispatcher. `:wsid` shows the counts; `:vars`, `:models`,
 `:tags`, `:experiments` list contents.
+
+## World Model
+
+A learned model of an ENVIRONMENT's dynamics -- given state
+and action, predict the next state (often in latent space, see
+[[JEPA (Joint-Embedding Predictive Architecture)]]) -- so an
+agent can plan by imagination instead of trial. Not in MLPL.
+
 
 ## XOR (not linearly separable)
 
