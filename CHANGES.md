@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-02
 
+- saga thinking-in-arrays-doc: step 001 complete
+- chore(agentrail): archive demo-pedagogy-and-queue-reorder saga
+- chore(pages): rebuild for the thinking-in-arrays doc link
+- docs: thinking-in-arrays.md -- the loop-avoidance essay, linked from the demo
+- docs(changes): refresh CHANGES.md to HEAD
 - saga demo-pedagogy-and-queue-reorder: complete (2 steps)
 - chore(pages): rebuild for the Thinking in Arrays demo + pedagogy text
 - feat(demos): Thinking in Arrays -- the data-loop vs time-loop pedagogy (loop avoidance)
