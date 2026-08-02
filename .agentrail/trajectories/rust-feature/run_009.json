@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 10,
+    "step": "cleanup-and-surface"
+  },
+  "action": "red-green pin test for resident-vs-gpu_step routing; before/after demo wall-time measurement to justify demotion; docs landed-banner pattern",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-02T09:38:45"
+}

@@ -1,9 +1,10 @@
 number = 10
 slug = "cleanup-and-surface"
-status = "in-progress"
+status = "completed"
 description = "E4 final step (plan step 7): retire or demote the bespoke demo_forward / gpu_..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-02T08:50:34"
+completed_at = "2026-08-02T09:38:45"
 task_type = "rust-feature"
-commits = []
+commits = ["df7731b5ea006dcf3d0e912c45a9bd505504bc10"]
