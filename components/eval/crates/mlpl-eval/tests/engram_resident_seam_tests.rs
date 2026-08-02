@@ -3,8 +3,9 @@
 //! process-global. The numbers this prints are the E5 optimization
 //! ledger -- the known residual seam crossings are the concat in
 //! the gate path (CPU structural fallback, forward + backward),
-//! the fused cross-entropy backward, and the per-step upload of
-//! the host-built selection one-hot.
+//! the fused cross-entropy backward and the per-step upload of
+//! the host-built selection one-hot (concat runs resident since
+//! dev-concat landed).
 
 #![cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
 
@@ -45,7 +46,8 @@ fn warm_engram_step_profile_is_bounded_and_printed() {
         per(submit),
         per(fallback)
     );
-    // Sanity bounds -- tightened as E5 lands dev-concat etc.
-    assert!(per(fallback) <= 6.0, "unexplained fallback growth");
-    assert!(per(down) <= 40.0, "unexplained download growth");
+    // dev-concat landed: the only CPU fallback left per step is
+    // fused cross-entropy backward.
+    assert!(per(fallback) <= 1.0, "unexplained fallback growth");
+    assert!(per(down) <= 30.0, "unexplained download growth");
 }

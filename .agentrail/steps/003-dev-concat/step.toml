@@ -1,6 +1,6 @@
 number = 3
 slug = "dev-concat"
-status = "pending"
+status = "in-progress"
 description = "E5 step 2 per plan: DeviceOps grows concat(axis) + split for its backward (Ml..."
 role = "legacy"
 context_files = []

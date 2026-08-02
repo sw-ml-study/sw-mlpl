@@ -12,7 +12,7 @@ use crate::registry::require_ops;
 
 impl TensorHandle {
     /// The resident arm, uploading a host value if needed.
-    fn as_dev(&self) -> Result<Dev, HandleError> {
+    pub(crate) fn as_dev(&self) -> Result<Dev, HandleError> {
         match self {
             Self::Dev(d) => Ok(d.clone()),
             Self::Cpu(a) => {

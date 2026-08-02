@@ -22,6 +22,8 @@ pub enum ResidentReq<'a> {
     Reshape(NodeId, &'a [usize]),
     /// Fused cross-entropy forward over class indices.
     Ce(NodeId, &'a [usize]),
+    /// Concat two parents along an axis.
+    Concat(NodeId, NodeId, usize),
 }
 
 /// A node's handle, if this tape is in resident mode.
@@ -59,6 +61,10 @@ pub fn try_resident(tape: &Tape, req: ResidentReq<'_>) -> Option<TensorHandle> {
             handle_of(tape, a)?.dev_binary(op, &hb).ok()
         }
         ResidentReq::Axis(x, op, axis, keep) => handle_of(tape, x)?.dev_axis(op, axis, keep).ok(),
+        ResidentReq::Concat(a, b, axis) => {
+            let hb = handle_of(tape, b)?;
+            handle_of(tape, a)?.dev_concat(&hb, axis).ok()
+        }
         ResidentReq::Reshape(x, dims) => handle_of(tape, x)?.dev_reshape(dims).ok(),
         ResidentReq::Ce(x, targets) => handle_of(tape, x)?.dev_cross_entropy(targets).ok(),
     }

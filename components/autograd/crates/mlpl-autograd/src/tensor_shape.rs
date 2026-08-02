@@ -99,13 +99,18 @@ impl Tensor {
     /// the original `{0, 1}` restriction).
     #[must_use]
     pub fn concat(&self, other: &Self, axis: usize) -> Self {
-        let a = self.value();
-        let b = other.value();
-        let left_size = a.shape().dims()[axis];
-        if self.tape.resident.get() {
-            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
-        }
-        let v = TensorHandle::Cpu(a.concat(&b, axis).expect("concat compatible shapes"));
+        let left_size = self.tape.nodes()[self.node.0].value.dims()[axis];
+        let dev = try_resident(&self.tape, ResidentReq::Concat(self.node, other.node, axis));
+        let v = dev.unwrap_or_else(|| {
+            if self.tape.resident.get() {
+                mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+            }
+            TensorHandle::Cpu(
+                self.value()
+                    .concat(&other.value(), axis)
+                    .expect("concat compatible shapes"),
+            )
+        });
         new_tensor(
             self,
             v,

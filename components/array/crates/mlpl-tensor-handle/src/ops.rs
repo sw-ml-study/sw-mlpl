@@ -4,7 +4,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::device::{AxisKind, BinKind, Dev, HandleError, UnaryKind};
+use crate::device::{AxisKind, BinKind, Dev, DeviceShapeOps, HandleError, UnaryKind};
 
 /// The registered backend: uploads host arrays and runs the tape
 /// op surface on resident handles. Implementations may be lazy --
@@ -14,7 +14,7 @@ use crate::device::{AxisKind, BinKind, Dev, HandleError, UnaryKind};
 /// # Errors
 /// Every method returns [`HandleError::Backend`] when the backend
 /// rejects the op (shape mismatch, foreign handle, kernel error).
-pub trait DeviceOps: Send + Sync {
+pub trait DeviceOps: DeviceShapeOps + Send + Sync {
     /// Move a host array onto the device (f64 -> backend dtype).
     ///
     /// # Errors

@@ -2,7 +2,7 @@
 
 use mlpl_array::DenseArray;
 
-use crate::device::Dev;
+use crate::device::{Dev, HandleError};
 
 /// Either a host f64 array (the bit-exact CPU reference) or a
 /// backend-resident array reached through the registered
@@ -41,6 +41,37 @@ impl TensorHandle {
                 d.to_dense()
             }
         }
+    }
+}
+
+impl TensorHandle {
+    /// Resident concat along `axis` (host side auto-uploads when
+    /// the other operand is resident).
+    ///
+    /// # Errors
+    /// `NotResident` when both are host; `Backend` on kernel failure.
+    pub fn dev_concat(&self, other: &Self, axis: usize) -> Result<Self, HandleError> {
+        if !(self.is_dev() || other.is_dev()) {
+            return Err(HandleError::NotResident);
+        }
+        let (a, b) = (self.as_dev()?, other.as_dev()?);
+        crate::metrics::bump(crate::metrics::SeamEvent::Submit);
+        Ok(Self::Dev(
+            crate::registry::require_ops()?.concat(&a, &b, axis)?,
+        ))
+    }
+
+    /// Split a resident handle into the two concat halves.
+    ///
+    /// # Errors
+    /// `NotResident` on a host receiver; `Backend` on kernel failure.
+    pub fn dev_split2(&self, axis: usize, left_size: usize) -> Result<(Self, Self), HandleError> {
+        let Self::Dev(d) = self else {
+            return Err(HandleError::NotResident);
+        };
+        crate::metrics::bump(crate::metrics::SeamEvent::Submit);
+        let (l, r) = crate::registry::require_ops()?.split2(d, axis, left_size)?;
+        Ok((Self::Dev(l), Self::Dev(r)))
     }
 }
 

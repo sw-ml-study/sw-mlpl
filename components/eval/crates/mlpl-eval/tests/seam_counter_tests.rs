@@ -9,6 +9,9 @@ use mlpl_eval::{Environment, eval_program};
 use mlpl_parser::{lex, parse};
 use mlpl_tensor_handle::{seam_reset, seam_snapshot};
 
+/// Counters are process-global: serialize the tests in this file.
+static SEAM_TEST_LOCK: std::sync::Mutex<()> = std::sync::Mutex::new(());
+
 fn eval(env: &mut Environment, src: &str) {
     let toks = lex(src).expect("lex");
     let stmts = parse(&toks).expect("parse");
@@ -23,6 +26,7 @@ const STEP: &str = "adam(cross_entropy(apply(m, X), Y), m, 0.001, 0.9, 0.999, 0.
 
 #[test]
 fn one_resident_step_profile_is_bounded_and_printed() {
+    let _serial = SEAM_TEST_LOCK.lock().unwrap();
     let mut env = Environment::new();
     eval(&mut env, SETUP);
     seam_reset();
@@ -36,6 +40,7 @@ fn one_resident_step_profile_is_bounded_and_printed() {
 
 #[test]
 fn thirty_step_loop_profile_shows_amortization() {
+    let _serial = SEAM_TEST_LOCK.lock().unwrap();
     let mut env = Environment::new();
     eval(&mut env, SETUP);
     // Step 1 warms the resident caches; measure steps 2..=31.

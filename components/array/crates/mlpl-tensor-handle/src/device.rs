@@ -21,6 +21,26 @@ pub trait DeviceArray: std::fmt::Debug + Send + Sync {
 /// handles; clones are cheap graph references, never copies.
 pub type Dev = Arc<dyn DeviceArray>;
 
+/// Structural ops on resident arrays (concat and its backward
+/// split), a supertrait of the core op trait so the registry
+/// object exposes them without widening that trait's budget.
+///
+/// # Errors
+/// [`HandleError::Backend`] when the backend rejects the op.
+pub trait DeviceShapeOps: Send + Sync {
+    /// Concatenate two resident arrays along `axis`.
+    ///
+    /// # Errors
+    /// [`HandleError::Backend`] on shape/kernel failure.
+    fn concat(&self, a: &Dev, b: &Dev, axis: usize) -> Result<Dev, HandleError>;
+    /// Split a resident array into `[..left_size)` and
+    /// `[left_size..)` along `axis` (concat's exact backward).
+    ///
+    /// # Errors
+    /// [`HandleError::Backend`] on a bad axis/size or kernel failure.
+    fn split2(&self, a: &Dev, axis: usize, left_size: usize) -> Result<(Dev, Dev), HandleError>;
+}
+
 /// Elementwise / contraction binaries (broadcast semantics are the
 /// backend's, which for MLX matches the CPU path's scalar+array
 /// and equal-shape cases the tape emits).

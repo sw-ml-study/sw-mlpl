@@ -8,7 +8,7 @@ use mlpl_array_ops_compose::prelude::RotateExt;
 use mlpl_autograd_tape::grad_kernels::{
     concat_backward, patchify_backward, stack_backward, take_backward,
 };
-use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, resident};
+use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, accumulate_pair, resident};
 use mlpl_tensor_handle::{SeamEvent, TensorHandle, bump_if};
 
 /// Dispatch the structural node kinds (everything that is a pure
@@ -31,6 +31,23 @@ pub(crate) fn propagate_shape(tape: &Tape, kind: NodeKind, upstream: &TensorHand
                 None => prop_reshape(tape, parent, &orig_shape, &upstream.to_dense()),
             }
         }
+        NodeKind::Concat {
+            left,
+            right,
+            axis,
+            left_size,
+        } => {
+            let dev = tape
+                .resident
+                .get()
+                .then(|| resident::as_dev(upstream))
+                .flatten()
+                .and_then(|up| up.dev_split2(axis, left_size).ok());
+            match dev {
+                Some((ga, gb)) => accumulate_pair(tape, left, right, ga, gb),
+                None => prop_concat(tape, left, right, axis, left_size, &upstream.to_dense()),
+            }
+        }
         other => propagate_dense(tape, other, &upstream.to_dense()),
     }
 }
@@ -47,12 +64,6 @@ fn propagate_dense(tape: &Tape, kind: NodeKind, upstream: &DenseArray) {
             orig_shape,
             patch_size,
         } => prop_patchify(tape, parent, &orig_shape, patch_size, upstream),
-        NodeKind::Concat {
-            left,
-            right,
-            axis,
-            left_size,
-        } => prop_concat(tape, left, right, axis, left_size, upstream),
         NodeKind::Stack {
             parents,
             axis,
