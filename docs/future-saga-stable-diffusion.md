@@ -1,7 +1,7 @@
 # Future saga: Stable Diffusion (text-to-image) in sw-MLPL
 
 **Status (2026-07-25): PARKED after step 001.** The saga kicked off in
-June (step 001 diffusion-2d-demo shipped: linspace/cumprod, the 2D
+June (step 001 diffusion-2d-demo shipped: linspace/running_product, the 2D
 diffusion demo, glossary terms); step 002 (conv2d) was never started and
 the saga is archived at `.agentrail-archive/stable-diffusion-20260725T084701/`.
 Resume from step 2 below after the connect-telemetry saga
@@ -44,7 +44,7 @@ convolution.
 2. `group_norm` (SD's U-Net norm); `silu` = `x * sigmoid(x)` (trivial);
    `sin` / `cos` (for sinusoidal timestep embeddings -- add if missing).
 3. `noise_schedule` helper (linear / cosine betas -> alphas, alpha-bar),
-   or compose from `linspace` + `cumprod`.
+   or compose from `linspace` + `running_product`.
 4. Cross-attention -- a `ModelSpec` variant (attention whose K/V come
    from text embeddings) or an `apply`-with-context form.
 5. Pretrained-weight loader (safetensors -> `DenseArray` / device

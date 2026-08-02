@@ -38,10 +38,14 @@ fn argmax_axis(name: &str, args: &[DenseArray]) -> Result<DenseArray, RuntimeErr
     Ok(args[0].argmax_axis(args[1].data()[0] as usize)?)
 }
 
-/// `cumprod(v)` -- running product along a 1-D vector: out[i] = prod of
-/// v[0..=i]. Same length as the input (a noise-schedule alpha-bar is
-/// `cumprod(alphas)`).
-pub(crate) fn cumprod(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+/// `running_product(v)` -- running product along a 1-D vector: out[i] =
+/// prod of v[0..=i]. Same length as the input (a noise-schedule
+/// alpha-bar is `running_product(alphas)`). `cumprod` is the
+/// deprecated alias.
+pub(crate) fn running_product(
+    name: &str,
+    args: Vec<DenseArray>,
+) -> Result<DenseArray, RuntimeError> {
     if args.len() != 1 {
         return Err(arity_err(name, 1, args.len()));
     }

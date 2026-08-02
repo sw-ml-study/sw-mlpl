@@ -1,7 +1,7 @@
 //! Stable-diffusion saga, step 1: the 2D diffusion denoiser learns.
 //!
 //! Forward-noise the two-moons dataset at every timestep over a
-//! linspace/cumprod schedule, train a tiny MLP to predict the added
+//! linspace/running_product schedule, train a tiny MLP to predict the added
 //! noise, and assert the noise-prediction loss falls -- i.e. the
 //! denoiser genuinely learns to undo the forward (noising) process,
 //! which is what makes the reverse (denoising) sampling work. Sizes are
@@ -15,7 +15,7 @@ const DEMO: &str = "\
 M = moons(1, 60, 0.08)\n\
 X0 = matmul(M, [[1,0],[0,1],[0,0]])\n\
 N = 60\n\
-T = 8 ; betas = linspace(0.0001, 0.08, T) ; alphas = 1 - betas ; abar = cumprod(alphas)\n\
+T = 8 ; betas = linspace(0.0001, 0.08, T) ; alphas = 1 - betas ; abar = running_product(alphas)\n\
 started = 0 ; TX = fill([1,3], 0) ; TY = fill([1,2], 0) ; t = 0\n\
 while gt(T, t) { ab = take(abar,0,t) ; eps = randn(t+7,[N,2]) ; Xt = sqrt(ab)*X0 + sqrt(1-ab)*eps ; tcol = fill([N,1], t/T) ; xin = concat(Xt, tcol, 1) ; if eq(started,0) { TX = xin ; TY = eps ; started = 1 } else { TX = concat(TX, xin, 0) ; TY = concat(TY, eps, 0) } ; t = t+1 }\n\
 m = chain(linear(3,32,0), relu_layer(), linear(32,2,1))\n\
@@ -35,9 +35,9 @@ fn diffusion_denoiser_learns_to_predict_noise() {
 }
 
 #[test]
-fn linspace_cumprod_build_a_valid_alpha_bar_schedule() {
+fn linspace_running_product_build_a_valid_alpha_bar_schedule() {
     let mut env = Environment::new();
-    let src = "T = 5 ; betas = linspace(0.0, 0.4, T) ; abar = cumprod(1 - betas) ; abar";
+    let src = "T = 5 ; betas = linspace(0.0, 0.4, T) ; abar = running_product(1 - betas) ; abar";
     let r = eval_program(&parse(&lex(src).unwrap()).unwrap(), &mut env).unwrap();
     let v = r.data();
     assert_eq!(v.len(), 5);

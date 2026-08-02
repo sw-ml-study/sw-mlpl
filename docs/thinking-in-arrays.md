@@ -97,7 +97,7 @@ The line between the two kinds is not quite "time is never
 vectorizable." A running product is also a recurrence --
 `p(t+1) = p(t) * x(t)` -- yet the demo computes the entire
 10-year balance trajectory in one expression with the
-running-product builtin (`cumprod` today). The escape hatch is
+running-product builtin, `running_product`. The escape hatch is
 ASSOCIATIVITY: because `(a*b)*c = a*(b*c)`, the sequential
 chain can be re-grouped into a balanced tree and evaluated
 largely in parallel. The dependency was only apparent, an

@@ -36,8 +36,8 @@ fn linspace_single_is_start() {
 }
 
 #[test]
-fn cumprod_running_product() {
-    let arr = eval("cumprod([1.0, 2.0, 3.0, 4.0])").unwrap();
+fn running_product_accumulates() {
+    let arr = eval("running_product([1.0, 2.0, 3.0, 4.0])").unwrap();
     assert_eq!(arr.shape(), &Shape::vector(4));
     assert_eq!(arr.data(), &[1.0, 2.0, 6.0, 24.0]);
 }

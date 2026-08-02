@@ -326,7 +326,7 @@ tables (e.g. the three name forms) keep their teaching order.
 | Function | Args | Description |
 |----------|------|-------------|
 | `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
-| `cumprod(v)` | 1 | Cumulative product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). |
+| `running_product(v)` | 1 | Running product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). `cumprod` is the deprecated alias. |
 | `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any flat array. Reports higher depths once nested arrays land. APL heritage. |
 | `disp(a)` | 1 | Returns an ASCII box diagram (a `Value::Str`) that makes the rank, shape, and depth of `a` visible: rank <= 2 as a framed grid, rank >= 3 as a labeled stack of leading-axis slices, plus a `rank R  shape [..]  depth D` footer. MLPL's answer to APL's `]display`. |
 | `emit_frame(name, step, x)` | 3 | Stream tensor `x` as a live frame through the connect-mode metric sink (the whole-tensor analog of `_metric` scalars); a no-op when not connected. Returns `x`. |

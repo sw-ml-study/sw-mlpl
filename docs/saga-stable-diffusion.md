@@ -14,7 +14,7 @@ Diffusion via candle-transformers on a connected GPU peer.
 
 1. **diffusion-2d-demo** -- the diffusion algorithm, browser-runnable,
    no conv. Add the two small pure-array builtins the noise schedule
-   needs: `linspace(start, stop, n)` and `cumprod(v)` (TDD: unit tests +
+   needs: `linspace(start, stop, n)` and `running_product(v)` (named `cumprod` at ship time; renamed 2026-08-02) (TDD: unit tests +
    gradcheck where applicable). Glossary: Diffusion model, Forward
    (noising) / Reverse (denoising) process, DDPM, Noise schedule. A
    `demos/diffusion_2d.mlpl` + web-demos registry entry: forward-noise a

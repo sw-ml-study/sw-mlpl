@@ -84,7 +84,7 @@ The enabler reused by every later demo, and the direct answer to
 - Features: `each(:f, x)` (map a function over cells);
   `cells(:f, k, x)` (the rank operator: apply f to each rank-k
   subarray); general `scan(:op, x[, axis])` (generalizes the existing
-  `cumprod`). One shared apply-over-cells helper backs all three.
+  `running_product`). One shared apply-over-cells helper backs all three.
 - Demo: `activation_zoo.mlpl` -- `each(:relu, X)` and
   `each(:sigmoid, X)` as before/after heatmaps; `cells(:softmax, 1,
   logits)` = "softmax every row"; `scan(:add, x)` = cumulative mask.

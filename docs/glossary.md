@@ -774,7 +774,7 @@ synthesize new samples. The non-autoregressive counterpart to
 next-token generation (see [[Autoregression]]) -- it refines a
 whole sample at once rather than emitting it left to right.
 State of the art for images/video. MLPL builds the algorithm
-from existing pieces (a `linspace`/`cumprod` schedule, an MLP
+from existing pieces (a `linspace`/`running_product` schedule, an MLP
 denoiser, `adam`); the in-browser "Diffusion (2D points)" demo
 teaches it on tiny data, and the stable-diffusion saga scales
 it to image U-Nets and real text-to-image on a connected GPU.
@@ -1812,10 +1812,10 @@ namespaces.
 The sequence of variances added at each step of a [[Diffusion
 Models]] forward process. A linear schedule picks betas with
 `linspace(beta_min, beta_max, T)`; the alphas are `1 - betas`
-and the cumulative product `alpha_bar = cumprod(alphas)` gives
+and the cumulative product `alpha_bar = running_product(alphas)` gives
 the one-shot noising `x_t = sqrt(alpha_bar_t) * x_0 +
 sqrt(1 - alpha_bar_t) * noise`. Cosine schedules add noise more
-gently early on. MLPL: `linspace` + `cumprod` build it directly;
+gently early on. MLPL: `linspace` + `running_product` build it directly;
 see the "Diffusion (2D points)" demo.
 
 ## One-hot encoding

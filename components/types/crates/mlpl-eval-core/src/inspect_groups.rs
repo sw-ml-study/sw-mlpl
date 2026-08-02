@@ -92,9 +92,9 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "product all or along axis (== reduce(:mul, ...))",
             ),
             (
-                "cumprod",
-                "cumprod(v)",
-                "cumulative product along a rank-1 vector",
+                "running_product",
+                "running_product(v)",
+                "running product along a rank-1 vector",
             ),
             (
                 "linspace",

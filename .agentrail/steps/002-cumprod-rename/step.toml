@@ -1,6 +1,6 @@
 number = 2
 slug = "cumprod-rename"
-status = "pending"
+status = "in-progress"
 description = "BLOCKED until the user picks the new name for cumprod (candidates: running_pr..."
 role = "production"
 context_files = []

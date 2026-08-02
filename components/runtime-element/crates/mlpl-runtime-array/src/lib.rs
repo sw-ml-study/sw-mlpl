@@ -13,7 +13,7 @@ use mlpl_runtime_core::error::RuntimeError;
 pub const NAMES: &[&str] = &[
     "range",
     "linspace",
-    "cumprod",
+    "running_product",
     "shape",
     "rank",
     "depth",
@@ -40,7 +40,8 @@ pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, 
         // "iota": DEPRECATED range alias; absent from NAMES/docs.
         "iota" | "range" => Some(compute::iota(name, args)),
         "linspace" => Some(compute::linspace(name, args)),
-        "cumprod" => Some(reduce::cumprod(name, args)),
+        // "cumprod": DEPRECATED running_product alias; absent from NAMES/docs.
+        "cumprod" | "running_product" => Some(reduce::running_product(name, args)),
         "shape" => Some(shape::shape(name, args)),
         "rank" => Some(shape::rank(name, args)),
         "depth" => Some(shape::depth(name, args)),
