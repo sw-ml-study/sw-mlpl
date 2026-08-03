@@ -35,7 +35,7 @@ u64 sidecar). This is decision D4 below.
 | E2 engram-dsl | `engram(...)` ModelSpec variant + EngramSpec validation/introspection (`:describe e` with parameter/byte accounting), `apply_engram(e, h, ids)` (per D3), gate mode "concat" first, serialization schema | Learnable Phrase Memory demo (train tables standalone) |
 | E3 engram-tiny-lm | Engram inside selected Tiny-LM blocks (AfterAttention hook), frozen-base training, gate/collision stats (`engram_stats`), baseline-vs-engram comparison | Tiny LM + Engram demo with stats panel |
 | E4 mlx-persistent-tensors | THE runtime redesign: TensorHandle {Cpu, Mlx}, device-resident values across expressions, explicit sync, device-resident grads/optimizer state | Tiny-LM train on MLX faster than CPU (currently slower) |
-| E5 engram-mlx | device-resident integer-ish hashing, one flattened MLX gather, lazy graph, CPU/MLX parity + perf gate | Tiny LM Engram on MLX demo |
+| E5 engram-mlx (COMPLETE 2026-08-03) | resident selection-matmul gather (exact scatter-ADD backward; device gather rejected -- no scatter-add in vendored mlx-rs), dev concat/split, parity suites (bit-exact hashing, 0.000000 trajectory drift), flat 19/28/332/1 seam profile, crossover ~d=128 | Tiny LM Engram on MLX demo (web + native); benchmarks.md E5 section |
 | E6 sparse-rows | IndexedRows parameter update (rows+values gradients), sparse SGD/Adam for tables | 100M-scale table training in budget |
 | E7 checkpoint-import | safetensors + HF tokenizer JSON + config normalization (DecoderModelSpec), Llama-family importer, quantized linear repr | `load_transformer(...)` |
 | E8 retrofit-small | inject_engram/freeze/unfreeze on a 100M-1B import | small retrofit demo |

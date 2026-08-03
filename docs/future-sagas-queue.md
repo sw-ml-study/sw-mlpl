@@ -26,14 +26,15 @@ Status notes: saga E4 (mlx-persistent-tensors) completed
 step 1 landed the engram parity/seam baseline and fixed the
 first-resident-train optimizer-gate bug.
 
-## Track 0 -- substrate (active)
+## Track 0 -- substrate (COMPLETE)
 
-1. **E5 engram-mlx** (ACTIVE) -- Engram on the E4 TensorHandle
-   seam, CONSTRAINED: resident addressing + gather +
-   projection/gating, CPU/MLX parity + perf via the seam
-   counters, Tiny-LM Engram demo on MLX. Remaining steps:
-   dev-concat, resident-gather evaluation, perf gate + demo,
-   close. NOT E6-E9 (100M tables, 12B retrofit).
+1. **E5 engram-mlx** (COMPLETE 2026-08-03) -- Engram trains fully
+   resident on the E4 seam (one CPU fallback per step: fused CE
+   backward); selection-matmul retained as the resident gather
+   (exact scatter-ADD backward); dev concat/split landed;
+   crossover ~d=128 like the base tiny-LM (benchmarks.md E5
+   section). E6-E9 remain deferred. NEXT SAGA: data-forge
+   (Track 1).
 
 ## Track 1 -- learning-experience infrastructure (VERY HIGH; new 20260802)
 

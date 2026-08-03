@@ -1032,3 +1032,40 @@ pass + the update-errata-with-features process rule, and the
 reprioritized roadmap in future-sagas-queue.md. Next: E5
 engram-mlx on the seam, then the MTP program (KV cache ->
 mtp-training -> self-speculation) per project-direction.txt.
+
+## Saga: E5 engram-mlx -- the memory layer on the resident seam (COMPLETE, 2026-08-03)
+
+Engram training moved onto the E4 TensorHandle seam, and the
+saga's parity work immediately paid for itself by exposing a
+latent E4 bug: the resident optimizer's backend gate raced
+first-use registration, so the FIRST train in any process
+silently ran the CPU optimizer and then reseeded the resident
+moments from zero -- an order-dependent divergence no suite had
+caught because their first device use was always another test.
+Fixed with register-before-gate plus host-moment import
+(cpu->device optimizer continuity), pinned by a single-test-
+binary first-train parity test. The engram ledger then closed
+step by step: concat/split joined the device op surface via a
+DeviceShapeOps supertrait (engram gate path and multi-head
+attention both stopped round-tripping), the device-gather
+evaluation concluded honestly (vendored mlx-rs has no
+scatter-add, and the selection matmul already IS a resident
+gather with an exact scatter-ADD backward -- pinned by a
+duplicate-address parity test), and the optimizers learned to
+return the step loss (one scalar download per step, the E4
+reporting budget), healing four demos whose loss curves had been
+silently flat. Final warm profile: 19 uploads / 28 downloads /
+332 submits / 1 CPU fallback (fused CE backward) per step, FLAT
+across model sizes -- so the engram chain inherits the base
+tiny-LM crossover exactly: 0.10x at the d=8 demo slice, 0.96x at
+d=64, an MLX win (~1.4x) from d=128 up. Shipped surface: the
+"MLX Tiny LM + Engram" demo (web + native), engram parity/seam
+suites, and the benchmarks.md E5 ledger. Ride-alongs pulled in
+by user reports mid-saga: the glossary filter search, 28 new
+glossary entries + a builtin-coverage test, test-pinned README
+counts, the two-section Diagrams tab with three new mechanics
+diagrams, running_sum + the scan rank-guard with lens-hinting
+errors, and roadmap revision B (data-forge and experiment-quality
+elevated per the 20260802 direction research). Next: the
+data-forge saga opens the learning-experience-infrastructure
+track.

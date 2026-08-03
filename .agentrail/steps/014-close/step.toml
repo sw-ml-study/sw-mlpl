@@ -1,6 +1,6 @@
 number = 14
 slug = "close"
-status = "pending"
+status = "in-progress"
 description = "E5 close: saga.md E5 retrospective entry; engram-sagas-plan.md E5 row -> comp..."
 role = "legacy"
 context_files = []
