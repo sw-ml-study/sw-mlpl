@@ -21,10 +21,10 @@ item becomes its own agentrail saga with its own plan at start.
 > until countermanded, so mHC remains parked in Track 4 below.
 
 Status notes: saga E4 (mlx-persistent-tensors) completed
-2026-08-02 (resident tape; MLX/CPU 2.96x at d=256, crossover
-~d=128 -- docs/benchmarks.md). Saga E5 (engram-mlx) is ACTIVE;
-step 1 landed the engram parity/seam baseline and fixed the
-first-resident-train optimizer-gate bug.
+2026-08-02 and saga E5 (engram-mlx) completed 2026-08-03 --
+resident tape + resident engram, crossover ~d=128, one CPU
+fallback per step (docs/benchmarks.md). The next saga is
+data-forge (Track 1).
 
 ## Track 0 -- substrate (COMPLETE)
 
