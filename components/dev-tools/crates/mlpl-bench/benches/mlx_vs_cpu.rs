@@ -112,6 +112,68 @@ fn bench_tiny_lm_train_step_d256(c: &mut Criterion) {
     group.finish();
 }
 
+// Saga E5: engram-in-chain training. The Tiny-LM-with-memory
+// shape from demos/tiny_lm_engram_mlx.mlpl at two scales: the
+// demo slice (V=256, d=8, 128-slot bigram memory) where per-op
+// dispatch dominates, and a d=64 variant where kernels start to
+// pay. The warm-loop profile prints the seam counters (the E5
+// ledger: one CPU fallback per step -- fused CE backward).
+const ENGRAM_MODEL_D8: &str = "\
+emb = embed(256, 8, 0) ; att = residual(chain(rms_norm(8), causal_attention(8, 1, 1))) ; \
+e = engram(8, [2], 1, 128, 4, 7) ; \
+m = chain(emb, att, e, rms_norm(8), linear(8, 256, 4)) ; \
+X = mod(range(24) * 11, 250) ; Y = mod(range(24) * 11 + 7, 250)";
+
+const ENGRAM_MODEL_D64: &str = "\
+emb = embed(256, 64, 0) ; att = residual(chain(rms_norm(64), causal_attention(64, 1, 1))) ; \
+e = engram(64, [2], 1, 512, 16, 7) ; \
+m = chain(emb, att, e, rms_norm(64), linear(64, 256, 4)) ; \
+X = mod(range(48) * 11, 250) ; Y = mod(range(48) * 11 + 7, 250)";
+
+const ENGRAM_STEP: &str = "adam(cross_entropy(apply(m, X), Y), m, 0.001, 0.9, 0.999, 0.00000001)";
+
+fn bench_engram_train_step(c: &mut Criterion) {
+    for (label, model) in [
+        ("engram_train_step", ENGRAM_MODEL_D8),
+        ("engram_train_step_d64", ENGRAM_MODEL_D64),
+    ] {
+        let cpu_src = format!("{model} ; {ENGRAM_STEP}");
+        let mlx_src = format!(
+            "device(\"mlx\") {{ {model} }} ; to_device(X, \"mlx\") ; \
+             device(\"mlx\") {{ {ENGRAM_STEP} }}"
+        );
+        let cpu_stmts = parse_or_die(&cpu_src, "engram cpu");
+        let mlx_stmts = parse_or_die(&mlx_src, "engram mlx");
+        println!("{label} cold timings:");
+        cold_time_once(&cpu_stmts, "cpu");
+        cold_time_once(&mlx_stmts, "mlx");
+        // Warm-loop seam profile on a persistent env.
+        let mut env = Environment::new();
+        eval_program(&parse_or_die(&mlx_src, "engram mlx warm"), &mut env).expect("warm setup");
+        let loop_stmts = parse_or_die(
+            &format!("device(\"mlx\") {{ train 10 {{ {ENGRAM_STEP} }} }}"),
+            "engram loop",
+        );
+        seam_profile_once(&mut env, &loop_stmts, &format!("{label} warm loop"), 10);
+
+        let mut group = c.benchmark_group(label);
+        group.sample_size(10);
+        group.bench_function("interp_cpu", |b| {
+            b.iter(|| {
+                let mut env = Environment::new();
+                black_box(eval_program(&cpu_stmts, &mut env).expect("cpu eval"));
+            });
+        });
+        group.bench_function("interp_mlx", |b| {
+            b.iter(|| {
+                let mut env = Environment::new();
+                black_box(eval_program(&mlx_stmts, &mut env).expect("mlx eval"));
+            });
+        });
+        group.finish();
+    }
+}
+
 // Saga 20 step 005: Neural Thickets variant loop. Each bench
 // iteration builds a fresh base model (no training), sweeps
 // 4 families x 4 seeds = 16 variants (clone_model ->
@@ -397,6 +459,7 @@ criterion_group!(
     bench_tiny_lm_train_step,
     bench_tiny_lm_train_loop,
     bench_tiny_lm_train_step_d256,
+    bench_engram_train_step,
     bench_neural_thicket_variant_loop,
     bench_lora_finetune_step,
 );

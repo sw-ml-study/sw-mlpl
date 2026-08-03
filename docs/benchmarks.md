@@ -248,6 +248,44 @@ GONE (one resident tape per step), (4) optimizer re-upload is
 GONE (resident moments + witness cache); (2) no-graph-fusion
 remains, repriced as the 226-submission dispatch floor.
 
+### Saga E5: engram-in-chain on the resident seam (Apple Silicon, 2026-08-03)
+
+E5 put the Engram layer on the E4 TensorHandle seam. The
+selection-matmul gather runs resident BOTH ways (`sel @ memory`
+gathers; `sel^T @ upstream` is an exact scatter-ADD -- a device
+gather was evaluated and rejected because the vendored mlx-rs has
+no scatter-add kernel), concat joined the device op set
+(`DeviceShapeOps`), and the parity ledger is pinned by tests:
+bit-exact hashing under device blocks, 10-step trajectory drift
+0.000000, duplicate-address accumulation exact.
+
+Warm engram-in-chain step profile (per step, `seam/` lines):
+
+| Milestone | uploads | downloads | submits | cpu_fallbacks |
+|---|---:|---:|---:|---:|
+| E5 baseline | 23 | 30 | 330 | 3 (concat fwd/bwd + CE) |
+| + dev-concat | 19 | 27 | 332 | 1 (CE backward only) |
+| + loss reporting | 19 | 28 | 332 | 1 |
+
+(The +1 download is the per-step loss scalar -- the one reporting
+sync the E4 contract budgets; it also fixed four demos whose loss
+curves were silently flat.)
+
+Bench numbers (fresh env per iteration, cold model build + upload
+included in the MLX column):
+
+| Workload | CPU warm | MLX warm | Ratio |
+|---|---:|---:|---:|
+| `engram_train_step` (d=8, 128 slots) | 885 us | 8.58 ms | 0.10x |
+| `engram_train_step_d64` (512 slots) | 9.08 ms | 9.41 ms | 0.96x |
+| repl 50-step loop, d=128 (1024 slots) | 0.59 s | 0.44 s | **~1.4x** |
+
+Same story as the base tiny-LM: the seam profile is FLAT across
+scales (19/28/332/1 at d=8 and d=64 alike -- pure dispatch
+floor), so MLX loses at toy widths and crosses over near d=128.
+The engram layer adds no extra seam crossings beyond the one CE
+fallback every model pays.
+
 ### Measured numbers (Apple Silicon, 2026-04-21)
 
 Cold timings are one-shot wall-clock prints from the harness and

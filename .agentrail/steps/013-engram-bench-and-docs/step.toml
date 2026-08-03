@@ -1,6 +1,6 @@
 number = 13
 slug = "engram-bench-and-docs"
-status = "pending"
+status = "in-progress"
 description = "The deferred half of the perf gate: mlx_vs_cpu bench gains engram-in-chain tr..."
 role = "production"
 context_files = []
