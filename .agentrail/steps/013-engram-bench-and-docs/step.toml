@@ -1,9 +1,10 @@
 number = 13
 slug = "engram-bench-and-docs"
-status = "in-progress"
+status = "completed"
 description = "The deferred half of the perf gate: mlx_vs_cpu bench gains engram-in-chain tr..."
 role = "production"
 context_files = []
 created_at = "2026-08-02T15:12:00"
+completed_at = "2026-08-03T08:41:46"
 task_type = "rust-feature"
-commits = []
+commits = ["1cb1d0ad65a98632f9122c3434f321b23348f6fa"]

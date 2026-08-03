@@ -1,0 +1,1 @@
+Engram bench workloads landed with seam printouts; measured 0.10x (d=8) / 0.96x (d=64) / ~1.4x win (d=128 repl probe); flat 19/28/332/1 profile across scales proves the engram chain adds no seam crossings beyond CE backward; benchmarks.md E5 section + wiki E-020 published.

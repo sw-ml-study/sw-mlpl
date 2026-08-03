@@ -1,0 +1,1 @@
+E5 close: saga.md E5 retrospective entry; engram-sagas-plan.md E5 row -> complete; future-sagas-queue.md Track 0 -> data-forge is next; wiki errata sync; --done, then archive.
