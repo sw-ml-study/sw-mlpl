@@ -12,8 +12,19 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-03
+
+- saga engram-mlx-e5: complete (14 steps)
+- docs(saga): close E5 engram-mlx -- retrospective, plan rows, queue advanced to data-forge
+- saga engram-mlx-e5: step 013 complete
+- bench(engram): engram-in-chain workloads + benchmarks.md E5 section (E5 step 13)
+
 ## 2026-08-02
 
+- chore(pages): rebuild for the scan rank guard + lens hint in the reference tab
+- saga engram-mlx-e5: step 012 complete
+- fix(lang): scans reject rank>1 with a lens-hinting error (was: silent ravel scan)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-mlx-e5: step 011 complete
 - chore(pages): rebuild for the sectioned Diagrams tab + 3 new diagrams
 - feat(web): Diagrams tab in two labeled sections + three new MLPL-mechanics diagrams
