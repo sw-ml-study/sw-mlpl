@@ -1,0 +1,9 @@
+number = 1
+slug = "design-surface"
+status = "in-progress"
+description = "Write docs/data-forge-design.md: the array-first data-forge surface -- genera..."
+role = "production"
+context_files = []
+created_at = "2026-08-04T14:40:03"
+task_type = "docs"
+commits = []
