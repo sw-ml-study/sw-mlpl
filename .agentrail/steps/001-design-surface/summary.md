@@ -1,0 +1,1 @@
+Design doc written, reviewed, APPROVED with resolutions: compress/kg_paths/dedupe_rows names; dedupe returns {rows,index}; kg_verify row-batched; generators/curriculum stay in-language. Nine builtins across runtime-array (G2 grade/compress), runtime-data (rand_ints/dedupe_rows), and a new forge component (kg_*).

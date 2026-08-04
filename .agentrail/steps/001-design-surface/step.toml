@@ -1,9 +1,10 @@
 number = 1
 slug = "design-surface"
-status = "in-progress"
+status = "completed"
 description = "Write docs/data-forge-design.md: the array-first data-forge surface -- genera..."
 role = "production"
 context_files = []
 created_at = "2026-08-04T14:40:03"
+completed_at = "2026-08-04T16:44:28"
 task_type = "docs"
-commits = []
+commits = ["5f5a71dc202ce89274c0dcb3b8e6c2919ca31e2f"]
