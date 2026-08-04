@@ -1,8 +1,10 @@
 # Data-Forge: design for the learning-experience surface
 
-Status: DESIGN FOR REVIEW (saga data-forge, step 1). No code has
-shipped; this document proposes the MLPL surface and asks for
-sign-off before implementation.
+Status: APPROVED 2026-08-04 (user review). Resolutions:
+`compress` / `kg_paths` / `dedupe_rows` naming stands;
+`dedupe_rows` returns a `{rows, index}` record; `kg_verify` is
+row-batched (`[n, hops+1] -> [n]` mask, rank-1 accepted as
+`n = 1`); generators and curriculum stay in-language idioms.
 
 ## The thesis
 
@@ -122,18 +124,11 @@ is the third.
   `mlpl-forge-kg` crate (its own workspace keeps the disk/test
   blast radius tiny, per the partition policy).
 
-## Open questions for review
+## Review resolutions (2026-08-04)
 
-1. Naming: `kg_paths` vs `kg_sample_paths`; `dedupe_rows` vs
-   `unique_rows`; `compress` (APL heritage) vs `keep`/`filter`
-   (plainer English -- but `filter` collides with future HOF
-   naming and `compress` matches the documented APL2 gap list).
-2. `dedupe_rows` return shape: indices only (compose with
-   gather_rows), rows only, or a `{rows, index}` record?
-3. Should `kg_verify` be row-batched (`[n, hops+1]` -> `[n]`
-   mask) instead of single-path? Batched avoids the scoring-loop
-   gap entirely for the graph demos and is barely more code --
-   current lean: YES, batched, with rank-1 accepted as `n = 1`.
-4. Scope check: is holding generators/curriculum as in-language
-   idioms (rather than builtins) acceptable for this saga, per
-   constraint 4?
+1. Names: `compress`, `kg_paths`, `dedupe_rows`.
+2. `dedupe_rows(X)` returns `{rows, index}` -- rows for direct
+   use, index so companion arrays follow via `gather_rows`.
+3. `kg_verify` is row-batched: `[n, hops+1] -> [n]` mask
+   (rank-1 input treated as one path).
+4. Generators and curriculum remain in-language idioms.
