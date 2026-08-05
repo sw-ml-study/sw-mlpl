@@ -1,0 +1,9 @@
+number = 14
+slug = "eq-demos"
+status = "pending"
+description = "Experiment Quality demo category per design: Robustness Suite (train once, fi..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T13:05:37"
+task_type = "rust-feature"
+commits = []

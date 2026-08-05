@@ -1,9 +1,10 @@
 number = 13
 slug = "experiment-bridge"
-status = "in-progress"
+status = "completed"
 description = "Per design doc: param_count(m) and experiment_metric(name) at the eval layer,..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T11:07:59"
+completed_at = "2026-08-05T13:05:37"
 task_type = "rust-feature"
-commits = []
+commits = ["00e90c77f7ae176d7d0ee8d8dbd680f74c0b772b"]

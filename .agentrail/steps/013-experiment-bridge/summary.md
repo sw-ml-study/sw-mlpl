@@ -1,0 +1,1 @@
+param_count + experiment_metric shipped per design resolutions; 4 TDD tests incl. the end-to-end frontier pipeline; docs pinned; binaries + pages current; ledger 547/2/340.
