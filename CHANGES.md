@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-04
 
+- saga data-forge: complete (9 steps)
+- docs(saga): close data-forge -- retrospective, design marked shipped, queue advanced to experiment-quality
+- saga data-forge: step 008 complete
+- chore(pages): rebuild for the Data Forge demo category
+- feat(demos): the Data Forge category -- three acceptance demos (data-forge step 8)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga data-forge: step 007 complete
 - chore(pages): rebuild for keyword field names + Records reference section
 - feat(parser): keywords are legal record field names (user question)
