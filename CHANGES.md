@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-05
+
+- saga experiment-quality: step 005 complete
+- fix(repl): colon-consistency round -- :describe covers commands, :exit works, wrapped bullets render (user report)
+
 ## 2026-08-04
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga experiment-quality: step 004 complete
 - fix(repl): colon-line UX hardening -- no more astonishing answers (user report)
 - docs(direction): commit the 20260802 research section (was uncommitted)
