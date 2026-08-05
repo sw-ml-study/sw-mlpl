@@ -1,0 +1,1 @@
+experiment-quality close: design doc marked SHIPPED with resolutions; saga.md entry; future-sagas-queue Track 1 complete -> generation-state-kv-cache next; wiki errata sync (usage/glossary claims re REPL commands, pareto surface); CHANGES refresh; --done then archive.

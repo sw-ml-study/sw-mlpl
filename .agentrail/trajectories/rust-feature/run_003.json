@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 14,
+    "step": "eq-demos"
+  },
+  "action": "renderer beside the curve renderers with mask computed by the builtin; visual inspection caught nothing this time -- first-try staircase",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T15:51:04"
+}

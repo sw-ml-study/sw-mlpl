@@ -1,0 +1,1 @@
+pareto_plot staircase renderer (user request) + three verified Experiment Quality demos; the full design pipeline (experiment -> metric -> frontier -> picture) is now user-visible. 81 demos, 443 glossary.
