@@ -14,6 +14,23 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga experiment-quality: step 010 complete
+- feat(demos): five math/Bayes/vision demos close the book-gap audit (book-gaps step 3/3)
+- fix(repl): name-command arguments parsed properly -- loud expression guard, multi-name :describe (user report)
+- refactor(eval): hoist the colon-strip of command arguments; retire the inspect LOC warning
+- saga experiment-quality: step 009 complete
+- feat(demos): four classical-ML demos -- metrics, SVM+kernel, bagging, stump (book-gaps step 2/3)
+- fix(repl): :<cmd> --help works on every surface (user report)
+- docs(usage): pin the REPL table to REPL_COMMANDS (user challenge: 'what else is missing?')
+- docs(usage): explicit :disp(expr) row between :describe and :experiments (user request)
+- docs(usage): lead the colon-call table row with the concrete :disp(M) example
+- saga experiment-quality: step 008 complete
+- docs(claude): ts-suffixed review URLs after pages deploys (user report)
+- saga experiment-quality: step 007 complete
+- docs(glossary): book-gap round 1 -- 12 entries, 4 diagrams, findability fixes (book-gaps step 1/3)
+- saga experiment-quality: step 006 complete
+- docs(audit): three-eBook completeness check + book-gap-coverage saga queued (user request)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga experiment-quality: step 005 complete
 - fix(repl): colon-consistency round -- :describe covers commands, :exit works, wrapped bullets render (user report)
 
