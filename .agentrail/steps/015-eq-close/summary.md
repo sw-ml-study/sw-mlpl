@@ -1,0 +1,1 @@
+experiment-quality closed: design marked SHIPPED with review resolutions, saga.md retrospective (4 planned steps + 11 absorbed: book-gap program and seven REPL-report rounds), queue advanced to generation-state-kv-cache, wiki synced (E-023 resolved), q-and-a updated.

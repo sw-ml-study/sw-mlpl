@@ -1,9 +1,10 @@
 number = 15
 slug = "eq-close"
-status = "in-progress"
+status = "completed"
 description = "experiment-quality close: design doc marked SHIPPED with resolutions; saga.md..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T15:51:04"
+completed_at = "2026-08-05T16:04:38"
 task_type = "docs"
-commits = []
+commits = ["c27078e49139faa07ae995440de63557e2cf76ad"]
