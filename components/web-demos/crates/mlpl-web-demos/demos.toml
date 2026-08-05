@@ -151,6 +151,71 @@ lines = [
 ]
 
 [[demos]]
+category = "Data Forge"
+name = "Rejection Sampling (best-of-N)"
+intro = "Training-data construction as an algorithm: generate candidates, VERIFY them against a deterministic oracle, keep only what passes, and record where everything came from. A noisy 'student' answers 400 addition problems (about 1 in 6 correct); exact arithmetic is the oracle; compress does the keep step; dedupe_rows curates; grade_down ranks. The same generate -> evaluate -> select shape reappears wherever candidates meet a verifier: best-of-N inference, dataset building, agent-trajectory filtering."
+takeaway = "The whole [[Rejection Sampling (best-of-N)]] loop is five array lines: a generator (rand_ints), an oracle (eq against the true sum), compress(ok, C) to keep verified rows, dedupe_rows for curation, and gather_rows(C, take(grade_down(scores), 0, 0)) for the single best candidate. The provenance record at the end is the habit that matters at scale: every kept example traces back to a generator, a seed, and a threshold. Acceptance rate prints first -- a good verifier plus a mediocre generator still yields a clean dataset."
+lines = [
+    "n = 400                                        # candidates to draw",
+    "a = rand_ints(n, 1, 50, 7) ; b = rand_ints(n, 1, 50, 8)   # 400 addition problems",
+    "noise = rand_ints(n, 0, 6, 9) - 2              # the 'student' is right ~1 time in 6",
+    "cand = a + b + noise                           # candidate answers",
+    "ok = eq(cand, a + b)                           # DETERMINISTIC ORACLE: exact arithmetic",
+    "mean(ok)                                       # acceptance rate (~0.13)",
+    "C = concat(reshape(a, [n, 1]), concat(reshape(b, [n, 1]), reshape(cand, [n, 1]), 1), 1)   # [n, 3] candidate examples",
+    "kept = compress(ok, C)                         # REJECTION: keep only verified rows",
+    "d = dedupe_rows(kept)                          # curation: unique examples + surviving indices",
+    "tally(d.rows)                                  # the dataset that survives",
+    "scores = 1 / (1 + (cand - (a + b)) * (cand - (a + b)))   # graded score (1 = exact)",
+    "gather_rows(C, take(grade_down(scores), 0, 0)) # BEST-OF-N: the single best candidate",
+    'prov = {generator: "noisy_adder", candidates: n, accepted: tally(kept), unique: tally(d.rows)}   # provenance: where this dataset came from',
+    "prov.accepted                                  # addressable, like every record",
+]
+
+[[demos]]
+category = "Data Forge"
+name = "Graph Multi-Hop Tasks (generate, verify, hold out)"
+intro = "A tiny knowledge graph as a TASK ORACLE: kg_paths GENERATES valid multi-hop questions, kg_verify CHECKS answers, and kg_split holds out whole graph regions so you can test generalization instead of memorization. The graph is plain data -- an [E, 3] array of (source, relation, destination) rows -- and the finale is the beat that matters: tasks sampled from the held-out region verify at ZERO against the seen graph, because their entities simply do not exist there."
+takeaway = "Three oracle roles from one edge array: generator (kg_paths samples [n, hops+1] valid walks -- every sampled row passes kg_verify, by construction), checker (kg_verify is the row-batched answer key), and examiner (kg_split's {seen, unseen} record is ENTITY-disjoint, so unseen tasks cannot be answered from seen edges -- the printed 0 is the memorization test). Difficulty ordering rides the same grade_up + gather_rows idiom as every curriculum. This is the knowledge-graph-guided training-data pattern from the multi-hop reasoning literature, at whiteboard scale."
+lines = [
+    "g = [[0,0,1],[1,0,2],[2,0,3],[3,0,4],[4,0,5],[5,0,6],[6,0,7],[7,0,0],[0,1,4],[1,1,5],[2,1,6],[3,1,7],[4,1,0],[5,1,1],[6,1,2],[7,1,3],[0,0,2],[3,0,6]]   # 8 entities, 2 relations, 18 edges",
+    "s = kg_split(g, 0.7, 7)                        # ENTITY-disjoint split: {seen, unseen}",
+    "tally(s.seen)                                  # edges fully inside the seen entity set",
+    "tally(s.unseen)                                # edges touching held-out entities",
+    "t2 = kg_paths(s.seen, 2, 30, 11)               # 30 two-hop tasks from the seen graph",
+    "t3 = kg_paths(s.seen, 3, 30, 12)               # 30 three-hop tasks (harder)",
+    "reduce_add(kg_verify(s.seen, t3))              # 30: every generated task verifies, by construction",
+    "diff = reshape(matmul(t3 * t3, [[1],[0],[0],[0]]), [30])   # a difficulty score per task",
+    "gather_rows(t3, grade_up(diff))                # curriculum ordering: same grade + gather idiom as everywhere",
+    "gen = kg_paths(s.unseen, 2, 20, 21)            # tasks from the HELD-OUT region",
+    "reduce_add(kg_verify(s.seen, gen))             # 0: the seen graph cannot answer them -- generalization, not memorization, is what a model must add",
+]
+
+[[demos]]
+category = "Data Forge"
+name = "Arithmetic Curriculum (and why stages accumulate)"
+intro = "Curriculum learning with the interference lesson built in. A tiny classifier learns a + b from 240 examples staged easy -> harder -> all, and the loss curve tracks the FULL set the whole time. WHAT YOU SEE: while training on the easy slice alone, full-set loss actually RISES (the network grows confidently wrong about sums it never sees -- interference at toy scale); as the stages widen to include earlier material, it recovers and ends far below where it started. That is WHY real curricula accumulate stages rather than replacing them."
+takeaway = "The mechanics are two builtins and an idiom: difficulty is just a score (here, the target sum), compress(lt(diff, cut), X) slices a stage, and stages built with WIDENING cuts (easy, then easy+mid, then all) are cumulative by construction. The three loss segments concatenate into one curve: up during the narrow stage, down as the pool widens, final full-set loss well under the untrained start. Try making the stages exclusive instead of cumulative -- the spike gets dramatically worse; that experiment is one edit away."
+lines = [
+    "N = 240",
+    "a = rand_ints(N, 0, 10, 3) ; b = rand_ints(N, 0, 10, 4)",
+    "X = concat(reshape(a, [N, 1]), reshape(b, [N, 1]), 1) / 10   # inputs: the two operands, scaled",
+    "Y = a + b                                      # 19 classes: the sum",
+    "diff = a + b                                   # difficulty = magnitude of the answer",
+    "Xe = compress(lt(diff, 7), X) ; Ye = compress(lt(diff, 7), Y)     # stage 1: easy sums",
+    "Xm = compress(lt(diff, 13), X) ; Ym = compress(lt(diff, 13), Y)   # stage 2: easy + mid (CUMULATIVE)",
+    "m = chain(linear(2, 48, 0), relu_layer(), linear(48, 19, 1))",
+    "train 60 { adam(cross_entropy(apply(m, Xe), Ye), m, 0.01, 0.9, 0.999, 0.00000001); cross_entropy(apply(m, X), Y) }   # stage 1 -- metric tracks the FULL set",
+    "l1 = last_losses",
+    "train 80 { adam(cross_entropy(apply(m, Xm), Ym), m, 0.01, 0.9, 0.999, 0.00000001); cross_entropy(apply(m, X), Y) }   # stage 2: pool widens",
+    "l2 = last_losses",
+    "train 100 { adam(cross_entropy(apply(m, X), Y), m, 0.01, 0.9, 0.999, 0.00000001); cross_entropy(apply(m, X), Y) }    # stage 3: everything",
+    "l3 = last_losses",
+    "loss_curve(concat(concat(l1, l2), l3))         # the whole story in one curve: rise, recover, converge",
+    "cross_entropy(apply(m, X), Y)                  # final full-set loss",
+]
+
+[[demos]]
 category = "APL2 / General Programming"
 name = "Structure Zoo (rank / shape / depth)"
 intro = "APL2-inspired GENERAL-PURPOSE programming, not ML: this demo teaches the language itself. Every value in MLPL has a STRUCTURE -- a rank (how many axes), a shape (how big each axis is), a size (how many elements in total), a tally (how many major cells along the leading axis), and a depth (how deeply nested). This demo introduces the APL-inspired introspection builtins that make that structure visible: size(a) and tally(a) count elements and leading-axis cells, depth(a) reports the nesting level, and disp(a) draws an ASCII box diagram (MLPL's answer to APL's ]display). We walk a scalar, a vector, a matrix, and a 3-tensor, then point the same tools at a real neural-net weight matrix -- so you build shape intuition before wiring up a model."
