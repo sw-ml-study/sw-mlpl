@@ -1,6 +1,6 @@
 number = 9
 slug = "close"
-status = "pending"
+status = "in-progress"
 description = "data-forge close: design doc marked shipped; saga.md entry; future-sagas-queu..."
 role = "legacy"
 context_files = []

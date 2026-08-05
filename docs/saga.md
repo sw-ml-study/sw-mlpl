@@ -1069,3 +1069,33 @@ errors, and roadmap revision B (data-forge and experiment-quality
 elevated per the 20260802 direction research). Next: the
 data-forge saga opens the learning-experience-infrastructure
 track.
+
+## Saga: data-forge -- learning-experience infrastructure (COMPLETE, 2026-08-04)
+
+The first Track-1 saga from the 20260802 direction research:
+training-data construction as a first-class, array-first
+algorithm. Shipped in nine small builtins plus idioms rather
+than a monolith: grade_up/grade_down and compress (the two G2
+APL2-parity items, pulled forward -- with gather_rows they carry
+selection, ranking, and curriculum ordering), rand_ints and
+dedupe_rows (generation + curation; the dedupe record
+established the {rows, index} companion-carry pattern), and the
+kg_* knowledge-graph oracle over plain [E, 3] edge arrays
+(kg_paths generates multi-hop tasks, kg_verify batch-checks
+them, kg_split's entity-disjoint {seen, unseen} record is the
+memorization test -- held-out tasks verify at zero against the
+seen graph). Generators, scoring loops, curriculum schedules,
+and provenance records stayed deliberately in-language. Three
+acceptance demos landed as the new Data Forge category, each
+repl-verified number by number; the arithmetic one earned its
+subtitle ("and why stages accumulate") when tuning surfaced
+real catastrophic interference -- exclusive easy-stage training
+spikes full-set loss before cumulative stages recover it. The
+saga also absorbed a run of user reports that became features:
+keywords as record field names (a two-position contextual
+parser fix, after kg_split's train/eval fields collided with
+the train keyword), the K-Means centroid coloring, the GAN
+demo's stabilized 6/6-seed recipe with the early-vs-trained
+presentation, and a catalog-crate split (mlpl-builtin-catalog)
+when the builtin table outgrew its file budget. Next per the
+queue: experiment-quality, then the KV-cache -> MTP program.

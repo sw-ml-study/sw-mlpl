@@ -38,11 +38,13 @@ data-forge (Track 1).
 
 ## Track 1 -- learning-experience infrastructure (VERY HIGH; new 20260802)
 
-Directly after E5. This is the layer every later track consumes:
+data-forge is COMPLETE (grade/compress, rand_ints/dedupe_rows,
+the kg_* oracle, the Data Forge demo category); NEXT SAGA:
+experiment-quality. This is the layer every later track consumes:
 MTP needs constructed training data, TRM/HRM need controlled
 reasoning datasets, ICRL needs validated task distributions.
 
-2. **data-forge** -- synthetic data as a first-class ML
+2. **data-forge** (COMPLETE 2026-08-04) -- synthetic data as a first-class ML
    algorithm: generators (template, grammar, knowledge-graph,
    teacher-model, mutation/adversarial), candidate evaluators
    (exact oracle, graph-path verifier, compiler/tests, reward

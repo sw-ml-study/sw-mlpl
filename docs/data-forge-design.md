@@ -1,6 +1,8 @@
 # Data-Forge: design for the learning-experience surface
 
-Status: APPROVED 2026-08-04 (user review). Resolutions:
+Status: SHIPPED 2026-08-04 (saga data-forge). All nine builtins
+landed with tests, docs, and the three acceptance demos (Data
+Forge category). Original review resolutions:
 `compress` / `kg_paths` / `dedupe_rows` naming stands;
 `dedupe_rows` returns a `{rows, index}` record; `kg_verify` is
 row-batched (`[n, hops+1] -> [n]` mask, rank-1 accepted as
