@@ -1,0 +1,1 @@
+Per design + review resolutions: GenerationState value kind + gen_state(model, prompt) + gen_logits(gs) + gen_append(gs, id) on CPU for the shipped LM chain surface; TDD -- the equivalence test pins cached greedy generation bit-identical to the recompute idiom over the Tiny LM chain; catalog/lang-reference/glossary rows; scoped tests + gates.

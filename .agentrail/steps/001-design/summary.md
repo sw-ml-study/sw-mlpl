@@ -1,0 +1,1 @@
+Design committed: gen_* primitives (state/logits/append/clone/reset/stats), explicit-invalidation contract, supported-layer scope, six saga steps; three open questions for review.
