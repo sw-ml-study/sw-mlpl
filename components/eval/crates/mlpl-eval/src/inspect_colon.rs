@@ -10,7 +10,7 @@
 /// `:history()`-style lines (the parenthesized form looks like a
 /// builtin call, but commands take no parentheses) and to answer
 /// `:describe <command>`.
-pub(crate) const REPL_COMMANDS: &[(&str, &str)] = &[
+pub const REPL_COMMANDS: &[(&str, &str)] = &[
     ("vars", "list bound variables with shape and tag"),
     ("variables", "alias of :vars"),
     ("models", "list bound models with layer structure"),

@@ -78,6 +78,7 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:untag <name>` | Clear a binding's auto-attached tag |
 | `:upload <name>` | Open file picker; bind photo as a variable (web only) |
 | `:vars` | List bound variables with shape and tag |
+| `:variables` / `:functions` / `:built-ins` / `:workspace` | Long-form aliases of `:vars` / `:fns` / `:builtins` / `:wsid` |
 | `:version` | sw-MLPL version + target arch |
 | `:wsid` | Workspace summary |
 | `exit` / `:exit` | Quit the terminal REPL (also `quit` / `:quit`) |
