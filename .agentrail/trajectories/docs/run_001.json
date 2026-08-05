@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 1,
+    "step": "design"
+  },
+  "action": "surveyed experiment/catalog surface, wrote design doc, markdown-checked",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-04T21:49:08"
+}

@@ -1,0 +1,1 @@
+Per design doc and review resolutions: implement pareto_front(P, dirs) in mlpl-runtime-array with TDD (mask of non-dominated rows, [k] direction vector, O(n^2)); wire NAMES; lang-reference row; scoped tests + gates.

@@ -1,0 +1,1 @@
+Design doc written and committed: two pillars (robustness suites as idioms, Pareto frontier as builtins), three proposed builtins, three acceptance demos, three open questions posed for user review.

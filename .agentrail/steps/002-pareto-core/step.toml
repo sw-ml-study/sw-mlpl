@@ -1,0 +1,9 @@
+number = 2
+slug = "pareto-core"
+status = "pending"
+description = "Per design doc and review resolutions: implement pareto_front(P, dirs) in mlp..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-04T21:49:08"
+task_type = "rust-feature"
+commits = []
