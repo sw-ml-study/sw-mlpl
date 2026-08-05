@@ -1,6 +1,6 @@
 number = 9
 slug = "book-gaps-demos-classical"
-status = "pending"
+status = "in-progress"
 description = "book-gap-coverage 2/3: classical-ML demos expressible with today's builtins -..."
 role = "production"
 context_files = []

@@ -824,6 +824,28 @@ lines = [
 ]
 
 [[demos]]
+category = "Classification"
+name = "Decision Stump (a one-question tree)"
+intro = "The smallest possible decision tree: ONE question -- is feature f bigger than threshold t? -- answered greedily. Two overlapping point clouds; for BOTH features we score EVERY candidate threshold at once (no loops: broadcasting by matmul-with-ones builds a [thresholds x points] prediction matrix), plot the two accuracy curves, and pick the peak. That greedy pick is exactly what a decision-tree node does; a full tree just repeats the question inside each half, and a Random Forest bags many such trees (see the 'Voting Ensemble' demo for bagging itself)."
+takeaway = "The accuracy-vs-threshold curves ARE the stump's whole search space, and the greedy answer is their argmax: grade_down(acc) hands back the winning threshold with no new machinery. HOW TO CHECK IT WORKED: the blue curve (feature 0, the axis the clouds are separated on) peaks visibly higher than the pink one (feature 1, mostly noise); the printed record shows the winning threshold near 0 and stump accuracy around 0.75 against feature 1's ~0.61 ceiling -- one good question beats a mediocre pair of them."
+lines = [
+    "B = blobs(9, 60, [[-0.45, 0], [0.45, 0.3]])   # two 60-point classes, deliberately overlapping",
+    "X = matmul(B, [[1, 0], [0, 1], [0, 0]]) + randn(4, [120, 2]) * 0.55   # drop the label column, add spread",
+    "y = flatten(matmul(B, [[0], [0], [1]]))        # integer labels",
+    "x0 = flatten(matmul(X, [[1], [0]])) ; x1 = flatten(matmul(X, [[0], [1]]))   # the two feature columns",
+    "k = 40 ; n = 120",
+    "ts = linspace(0 - 3, 3, k)                     # every candidate threshold",
+    "Y = matmul(ones([k, 1]), reshape(y, [1, n]))   # broadcast labels to [k, n] via matmul-with-ones",
+    "T = matmul(reshape(ts, [k, 1]), ones([1, n]))  # broadcast thresholds the other way",
+    "acc0 = 1 - reduce_add(abs(gt(matmul(ones([k, 1]), reshape(x0, [1, n])), T) - Y), 1) / n   # accuracy of EVERY feature-0 stump at once",
+    "acc1 = 1 - reduce_add(abs(gt(matmul(ones([k, 1]), reshape(x1, [1, n])), T) - Y), 1) / n   # same for feature 1",
+    "scatter_labeled(concat(reshape(concat(ts, ts), [80, 1]), reshape(concat(acc0, acc1), [80, 1]), 1), concat(zeros([k]), ones([k])))   # WHAT YOU SEE: two accuracy curves; the higher peak wins",
+    "t0 = take(ts, 0, take(grade_down(acc0), 0, 0)) # GREEDY: the argmax threshold -- this IS a tree node's split rule",
+    "stump = gt(x0, t0)",
+    "{best_threshold: t0, stump_acc: mean(eq(stump, y)), feature1_ceiling: take(acc1, 0, take(grade_down(acc1), 0, 0))}",
+]
+
+[[demos]]
 category = "Training & Learning"
 name = "How Gradient Descent Works"
 intro = "The one idea under all of ML, made visible -- and the first classical algorithm: LINEAR REGRESSION. We fit a straight line y = w*x + b to noisy data by minimizing the mean-squared error -- a function of just two numbers, the slope w and the bias b. Because there are only two, we can draw the entire loss surface as a heatmap (dark = low loss = good fit) and then watch gradient descent walk across it with [[loss_landscape]]. The white path starts at the green dot (a bad guess) and steps downhill to the red dot in the dark basin. Two more charts show the loss falling and the gradient magnitude shrinking as the path flattens out."
@@ -889,6 +911,34 @@ lines = [
     "pred = argmax(votes, 1)                          # majority label among the 5 neighbors",
     "concat(reshape(mean(eq(pred, Yte)), [1]), reshape(mean(eq(fill([24], 0), Yte)), [1]), 0)  # [kNN accuracy, always-guess-one-class baseline]",
     'svg(concat(Xte, reshape(pred, [24, 1]), 1), "scatter")  # test points colored by PREDICTED label -- compare with the first plot',
+]
+
+[[demos]]
+category = "Classification"
+name = "Linear SVM and the Kernel Trick"
+intro = "A support vector machine is a linear classifier trained on the HINGE loss -- mean(relu(1 - y * score)) -- which ignores comfortably-correct points and pushes for a wide MARGIN; the L2 term keeps the margin honest. Act one trains one on two separable blobs. Act two is the famous trick: two concentric RINGS that no line can split -- until we append one computed feature, the squared radius x*x + y*y. In that lifted space the rings ARE linearly separable, and the linear boundary maps back to a CIRCLE in the original plane. Kernels do this lift implicitly; at whiteboard scale we build the feature map explicitly with concat."
+takeaway = "Hinge loss + L2 is the whole SVM objective, and it trains with the same adam call as every other demo -- relu doubling as max(0, .) is the only trick. The kernel lesson is the payoff: linear models are only as linear as their FEATURES; one quadratic column turns a hopeless problem into an easy one. HOW TO CHECK IT WORKED: both printed accuracies land at 0.99+; the first heatmap shows a straight diagonal score ramp (the linear boundary), the second shows a radial bowl -- its dark center against the bright surround IS the circular boundary the lifted model drew."
+lines = [
+    "B = blobs(5, 40, [[-2, -2], [2, 2]])           # act one: two separable blobs",
+    "X = matmul(B, [[1, 0], [0, 1], [0, 0]])",
+    "yy = matmul(B, [[0], [0], [2]]) - 1            # labels as -1 / +1 (what hinge loss wants)",
+    "w = param[2, 1] ; b = param[1, 1] ; O = ones([80, 1])",
+    "train 200 { adam(mean(relu(1 - yy * (matmul(X, w) + matmul(O, b)))) + 0.01 * sum(w * w), [w, b], 0.05, 0.9, 0.999, 0.00000001); mean(relu(1 - yy * (matmul(X, w) + matmul(O, b)))) }   # HINGE loss: only margin violators contribute",
+    "loss_curve(last_losses)",
+    "mean(eq(gt(flatten(matmul(X, w) + matmul(O, b)), 0), gt(flatten(yy), 0)))   # linear accuracy: 1.0",
+    "g = grid([-4, 4, -4, 4], 30)",
+    'svg(reshape(flatten(matmul(g, w) + matmul(ones([900, 1]), b)), [30, 30]), "heatmap")   # WHAT YOU SEE: a straight score ramp -- the linear boundary',
+    "C = circles(1, 100, 0.05)                      # act two: concentric rings -- NO line separates these",
+    "Xc = matmul(C, [[1, 0], [0, 1], [0, 0]])",
+    "yc = matmul(C, [[0], [0], [2]]) - 1",
+    "scatter_labeled(Xc, flatten(matmul(C, [[0], [0], [1]])))   # the hopeless-for-a-line dataset",
+    "lift = concat(Xc, reshape(reduce_add(Xc * Xc, 1), [100, 1]), 1)   # THE TRICK: append the squared radius as feature 3",
+    "w3 = param[3, 1] ; b3 = param[1, 1] ; Oc = ones([100, 1])",
+    "train 250 { adam(mean(relu(1 - yc * (matmul(lift, w3) + matmul(Oc, b3)))) + 0.01 * sum(w3 * w3), [w3, b3], 0.05, 0.9, 0.999, 0.00000001); mean(relu(1 - yc * (matmul(lift, w3) + matmul(Oc, b3)))) }",
+    "mean(eq(gt(flatten(matmul(lift, w3) + matmul(Oc, b3)), 0), gt(flatten(yc), 0)))   # lifted accuracy: ~0.99",
+    "g2 = grid([-2, 2, -2, 2], 30)",
+    "gl = concat(g2, reshape(reduce_add(g2 * g2, 1), [900, 1]), 1)   # lift the probe grid the same way",
+    'svg(reshape(flatten(matmul(gl, w3) + matmul(ones([900, 1]), b3)), [30, 30]), "heatmap")   # WHAT YOU SEE: a radial bowl -- the LINEAR model drew a CIRCLE',
 ]
 
 [[demos]]
@@ -966,6 +1016,31 @@ lines = [
     "rank(m)                            # number of dimensions (2)",
     "reduce_add(m, 0)                   # column sums (length 4)",
     "reduce_add(m, 1)                   # row sums (length 3)",
+]
+
+[[demos]]
+category = "Classification"
+name = "Metrics Playground (accuracy and its friends)"
+intro = "Why accuracy alone misleads, on a dataset built to fool it: 200 examples, only ~7 percent positive. A classifier that says NO to everything scores 0.93 accuracy while catching nothing -- the accuracy trap. The cure is to look at precision (of my YES calls, how many were right?) and recall (of the real positives, how many did I catch?) ACROSS EVERY THRESHOLD at once. No loops: a matmul-with-ones broadcast builds the [thresholds x examples] prediction matrix, and one more matmul counts the true positives per threshold."
+takeaway = "The three curves tell the story accuracy hides: as the threshold rises, precision climbs, recall falls in steps (each step is one real positive lost), and accuracy barely moves off its trap value. F1 -- the harmonic mean -- picks the compromise, and grade_down(f1) IS the threshold tuner. HOW TO CHECK IT WORKED: the printed record shows the trap accuracy near 0.93, the F1-best threshold near 1.7, and best accuracy ~0.95 -- barely better than the trap, while F1 went from 0 to ~0.64. On imbalanced data, watch precision and recall, not accuracy. The confusion matrix at the chosen threshold shows exactly where the remaining mistakes live."
+lines = [
+    "n = 200",
+    "y = lt(rand_ints(n, 0, 10, 2), 1)              # ~7 percent positives: IMBALANCED on purpose",
+    "s = y * 2 + randn(3, [n]) * 0.9                # a noisy scorer: positives usually score higher",
+    "mean(eq(zeros([n]), y))                        # THE ACCURACY TRAP: always-NO scores ~0.93",
+    "k = 60",
+    "ts = linspace(0 - 1.5, 3, k)                   # every candidate decision threshold",
+    "T = matmul(reshape(ts, [k, 1]), ones([1, n])) ; S = matmul(ones([k, 1]), reshape(s, [1, n]))   # broadcast by matmul-with-ones",
+    "P = gt(S, T)                                   # [k, n]: predictions at EVERY threshold at once",
+    "tp = flatten(matmul(P, reshape(y, [n, 1])))    # true positives per threshold -- counting is a matmul",
+    "prec = tp / (reduce_add(P, 1) + 0.000001)      # precision: right among my YES calls",
+    "rec = tp / reduce_add(y)                       # recall: caught among the real positives",
+    "acc = 1 - reduce_add(abs(P - matmul(ones([k, 1]), reshape(y, [1, n]))), 1) / n",
+    "f1 = 2 * prec * rec / (prec + rec + 0.000001)  # the harmonic compromise",
+    "scatter_labeled(concat(reshape(concat(ts, concat(ts, ts)), [180, 1]), reshape(concat(prec, concat(rec, acc)), [180, 1]), 1), concat(zeros([k]), concat(ones([k]), fill([k], 2))))   # WHAT YOU SEE: precision rises, recall falls in steps, accuracy barely moves",
+    "best = take(ts, 0, take(grade_down(f1), 0, 0)) # threshold TUNING is one grade_down",
+    "confusion_matrix(gt(s, best), y)               # where the remaining mistakes live",
+    "{trap_acc: mean(eq(zeros([n]), y)), best_threshold: best, best_acc: mean(eq(gt(s, best), y)), best_f1: take(f1, 0, take(grade_down(f1), 0, 0))}",
 ]
 
 [[demos]]
@@ -1199,6 +1274,33 @@ lines = [
     "gP = softmax(gl, 1)                                                                                                                                                                                                                                                                             # per-grid-cell class probabilities",
     "p0 = reshape(matmul(gP, [[1],[0],[0]]), [900])                                                                                                                                                                                                                                                  # extract probability of class 0",
     "boundary_2d(p0, [30, 30], X, tl)                                                                                                                                                                                                                                                                # three-wedge decision surface",
+]
+
+[[demos]]
+category = "Classification"
+name = "Voting Ensemble (bagging by hand)"
+intro = "BAGGING -- bootstrap aggregating -- is Random Forest's engine, built here from parts you already have: rand_ints draws a resample-with-replacement of the training indices, gather_rows materializes each bootstrap dataset, five small MLPs train on five different resamples, and their predictions VOTE. Each member sees a different slice of the noise, so their mistakes disagree -- and majority vote cancels what they do not share. The finale probes the whole plane: the vote-count heatmap shows unanimous regions and the narrow contested band where the ensemble is genuinely unsure."
+takeaway = "Ensembles work when members are individually decent and mutually DIVERSE; bootstrap resampling manufactures that diversity from one dataset (each resample drops about a third of the points and doubles others). HOW TO CHECK IT WORKED: the printed record shows the ensemble beating the single model trained on all the data (~0.95 vs ~0.90 here), with roughly 9 in 10 points decided unanimously -- the ensemble earns its margin entirely on the contested tenth. On the vote heatmap the bright and dark plateaus are unanimous votes (5 and 0); the thin intermediate ribbon between them IS the decision boundary's uncertainty, made visible. The weight-perturbation cousin of this demo is 'Neural Thickets'."
+lines = [
+    "M = moons(7, 150, 0.22)                        # noisy interleaved half-moons",
+    "X = matmul(M, [[1, 0], [0, 1], [0, 0]]) ; y = reshape(matmul(M, [[0], [0], [1]]), [150])",
+    "m0 = chain(linear(2, 6, 0), tanh_layer(), linear(6, 2, 1))   # the baseline: ONE model, ALL the data",
+    "train 60 { adam(cross_entropy(apply(m0, X), y), m0, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m0, X), y) }",
+    "i1 = rand_ints(150, 0, 150, 11) ; X1 = gather_rows(X, i1) ; y1 = flatten(gather_rows(reshape(y, [150, 1]), i1)) ; m1 = chain(linear(2, 6, 21), tanh_layer(), linear(6, 2, 31))   # BOOTSTRAP member 1: resample WITH replacement",
+    "train 60 { adam(cross_entropy(apply(m1, X1), y1), m1, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m1, X1), y1) }",
+    "i2 = rand_ints(150, 0, 150, 12) ; X2 = gather_rows(X, i2) ; y2 = flatten(gather_rows(reshape(y, [150, 1]), i2)) ; m2 = chain(linear(2, 6, 22), tanh_layer(), linear(6, 2, 32))",
+    "train 60 { adam(cross_entropy(apply(m2, X2), y2), m2, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m2, X2), y2) }",
+    "i3 = rand_ints(150, 0, 150, 13) ; X3 = gather_rows(X, i3) ; y3 = flatten(gather_rows(reshape(y, [150, 1]), i3)) ; m3 = chain(linear(2, 6, 23), tanh_layer(), linear(6, 2, 33))",
+    "train 60 { adam(cross_entropy(apply(m3, X3), y3), m3, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m3, X3), y3) }",
+    "i4 = rand_ints(150, 0, 150, 14) ; X4 = gather_rows(X, i4) ; y4 = flatten(gather_rows(reshape(y, [150, 1]), i4)) ; m4 = chain(linear(2, 6, 24), tanh_layer(), linear(6, 2, 34))",
+    "train 60 { adam(cross_entropy(apply(m4, X4), y4), m4, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m4, X4), y4) }",
+    "i5 = rand_ints(150, 0, 150, 15) ; X5 = gather_rows(X, i5) ; y5 = flatten(gather_rows(reshape(y, [150, 1]), i5)) ; m5 = chain(linear(2, 6, 25), tanh_layer(), linear(6, 2, 35))",
+    "train 60 { adam(cross_entropy(apply(m5, X5), y5), m5, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m5, X5), y5) }",
+    "votes = predict_batch(m1, X) + predict_batch(m2, X) + predict_batch(m3, X) + predict_batch(m4, X) + predict_batch(m5, X)   # each member gets one vote per point",
+    "ens = gt(votes, 2.5)                           # MAJORITY rules",
+    "{single: mean(eq(predict_batch(m0, X), y)), ensemble: mean(eq(ens, y)), unanimous: mean(eq(mod(votes, 5), 0))}",
+    "g = grid([-2, 3, -1.5, 2], 30)",
+    'svg(reshape(predict_batch(m1, g) + predict_batch(m2, g) + predict_batch(m3, g) + predict_batch(m4, g) + predict_batch(m5, g), [30, 30]), "heatmap")   # WHAT YOU SEE: unanimous plateaus, and a thin contested ribbon -- ensemble uncertainty made visible',
 ]
 
 [[demos]]
