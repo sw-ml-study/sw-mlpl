@@ -35,16 +35,15 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
     let topic = trimmed.strip_prefix(':')?;
     let mut parts = topic.split_whitespace();
     let head = parts.next()?;
-    let arg = parts.next();
+    // Accept the colon spelling of a name argument everywhere:
+    // `:describe :disp` == `:describe disp`.
+    let arg = parts.next().map(|a| a.strip_prefix(':').unwrap_or(a));
     topic_output(env, head).or_else(|| match head {
         "version" => Some(crate::inspect_render::version_string()),
         "experiments" => Some(crate::experiment::format_registry(env)),
         "tags" => Some(crate::tag_render::format_tags(env)),
         "describe" => Some(match arg {
-            Some(name) => crate::inspect_describe::format_describe(
-                env,
-                name.strip_prefix(':').unwrap_or(name),
-            ),
+            Some(name) => crate::inspect_describe::format_describe(env, name),
             None => "usage: :describe <name>".into(),
         }),
         "list" => Some(crate::inspect_list::list_or_usage(env, arg)),
