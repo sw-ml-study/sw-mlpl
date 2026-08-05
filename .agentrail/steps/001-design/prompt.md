@@ -1,0 +1,1 @@
+Write docs/experiment-quality-design.md (three builtins: pareto_front/param_count/experiment_metric; perturbation idioms; three demos) and present open questions for user review before implementation.

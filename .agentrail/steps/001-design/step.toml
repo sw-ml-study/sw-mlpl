@@ -1,0 +1,9 @@
+number = 1
+slug = "design"
+status = "in-progress"
+description = "Write docs/experiment-quality-design.md (three builtins: pareto_front/param_c..."
+role = "production"
+context_files = []
+created_at = "2026-08-04T21:48:53"
+task_type = "docs"
+commits = []
