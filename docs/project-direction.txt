@@ -1053,3 +1053,939 @@ That combined experiment captures the project’s identity better than a broad c
 sw-MLPL should make local models faster per attempt, better across attempts, practical on existing hardware, and transparent enough to understand why they improved.
 
 
+==== 20260802 Sun
+
+
+
+Today 12:07 PM
+consider these playlists (look at descriptions, follow links):
+https://www.youtube.com/watch?v=GVLnOhmHYGc&list=PLKjvVAEaR4itXycdHV15YUt_krnsW5jd7
+https://www.youtube.com/watch?v=YhAbOvWEkzE&list=PLKjvVAEaR4itVMSjbcZ6PTS0bpnQ-NpIv
+https://www.youtube.com/watch?v=Zu3zreN8c0Q&list=PLKjvVAEaR4it0UkyUzua3eLZOKciq6Cl_
+https://www.youtube.com/watch?v=jCUomUai-9U&list=PLKjvVAEaR4ivYseJmikectA-s6uRzeUEo
+https://www.youtube.com/watch?v=O6U06cGkKc4&list=PLKjvVAEaR4it0oUvNm6VnAuquuy_JjbbN
+and look for ML (sw-MLPL) relevant topics not already in our planned scope.  Identify missing concepts or techniques that would be useful to sw-MLPL target audience, and analyze where to slot them into our direction/plan
+
+Worked for 1m 13s
+Revised gap analysis
+I could not reliably extract the playlist descriptions directly from YouTube—the watch and playlist pages were not fetchable through the available web interface. I therefore traced the associated Software Wrighter Lab series pages, their descriptions, and their linked papers and repositories. Those pages expose the major themes represented in the playlists:
+
+Small Models, Big Brains
+
+DeepSeek papers
+
+Machine Learning Frontier
+
+Multi-hop reasoning
+
+General Machine Learning, including energy-based learning and JEPA
+
+Several major playlist topics are already represented in the sw-MLPL direction:
+
+Engram
+
+mHC
+
+TRM and HRM
+
+BDH and sparse interpretability
+
+LoRA
+
+ICL and ICRL
+
+speculative decoding and MTP
+
+small-model benchmarking
+
+MLX/CUDA portability
+
+The strongest missing areas are not additional model architectures. They are the techniques that determine whether small models actually become useful: data generation, curriculum, distillation, evaluation, quantization, and causal inspection.
+
+Highest-priority additions
+1. Data-centric training and synthetic curriculum
+This is the largest gap in the current roadmap.
+
+The small-model material repeatedly points toward the conclusion that model size alone is a poor predictor of capability. TinyLlama-style overtraining and Phi-style synthetic textbook data show that data quantity, quality, structure, and curriculum can compensate substantially for fewer parameters. 
+
+The multi-hop reasoning work demonstrates an even more actionable pattern:
+
+Generate structured reasoning problems.
+
+Use a knowledge graph or other oracle to validate solutions.
+
+Reject incorrect or poorly formed examples.
+
+Train the small model with scaffolding.
+
+Remove the scaffold at inference.
+
+Test against the actual target distribution.
+
+The reported demonstration takes a 135M model from no useful multi-hop performance to much stronger task accuracy through knowledge-graph-guided training and rejection sampling. The broader lesson is that training-data construction is itself an ML algorithm. 
+
+Features to add
+Dataset generator
+    ├── template generator
+    ├── grammar-based generator
+    ├── knowledge-graph generator
+    ├── teacher-model generator
+    └── mutation/adversarial generator
+
+Candidate evaluator
+    ├── exact oracle
+    ├── graph-path verifier
+    ├── compiler/tests
+    ├── reward model
+    └── LLM judge
+
+Curation pipeline
+    ├── reject
+    ├── rank
+    ├── deduplicate
+    ├── balance
+    ├── stratify by difficulty
+    └── curriculum schedule
+Possible MLPL surface:
+
+candidates = generate_examples(generator, 10_000)
+
+accepted = rejection_sample(
+    candidates,
+    evaluator=graph_oracle,
+    threshold=0.9
+)
+
+curriculum = schedule_by(
+    accepted,
+    key="reasoning_hops",
+    stages=[1, 2, 3, 4, 5]
+)
+
+train model on curriculum
+Demonstrations
+Arithmetic curriculum: one-digit through multi-step arithmetic.
+
+Graph reasoning: one-hop through five-hop queries.
+
+Rust repair curriculum: syntax errors, type errors, failing tests, design faults.
+
+Tool-use curriculum: complete traces, partially masked traces, zero-shot tool use.
+
+Where it belongs
+Insert this after E5 Engram-MLX and before full MTP training experiments, or run it in parallel with the generation-runtime work.
+
+MTP needs suitable training data. TRM and HRM need controlled reasoning datasets. ICRL needs well-defined task distributions. A shared data-curation system benefits all three.
+
+Proposed saga
+data-forge-1
+    generators
+    validators
+    rejection sampling
+    deduplication
+    curriculum scheduling
+    dataset provenance
+This should be one of the next foundational sagas.
+
+2. Distillation as a first-class research facility
+Distillation appears indirectly in the small-model material, particularly in discussion of models such as Gemma, but it has not yet been decomposed into an executable sw-MLPL plan. 
+
+The old Saga 18 mentioned distillation, but bundled it with ICL, ICRL, Engram, and orchestration. That bundle should remain split.
+
+Distillation is particularly aligned with your objectives because it lets:
+
+a slow, capable model create training targets
+
+a small model learn the behavior
+
+CPU or older-GPU systems run the resulting student
+
+agent trajectories become reusable training material
+
+MTP heads learn from a stronger teacher
+
+tool use transfer from large models to compact local models
+
+Distillation variants worth supporting
+Logit distillation
+student loss =
+    α * hard_target_loss
+  + β * KL(student_logits, teacher_logits)
+Sequence distillation
+The teacher generates a cleaned or simplified target sequence, and the student learns that sequence.
+
+Feature distillation
+Intermediate student states are encouraged to approximate teacher representations.
+
+Policy or trajectory distillation
+The student learns:
+
+tool choices
+
+action sequences
+
+reflections
+
+corrections
+
+successful agent trajectories
+
+Self-distillation
+A model teaches:
+
+a smaller copy
+
+an earlier checkpoint
+
+its own MTP heads
+
+a draft model
+
+Distillation with rejection sampling
+Generate many teacher solutions, validate them objectively, and train only on accepted solutions.
+
+This is especially attractive for Rust tasks because compilation and tests provide cheap, deterministic verification.
+
+Proposed abstraction
+teacher = remote_model("planner")
+student = load_model("small-local")
+
+distill {
+    teacher teacher
+    student student
+    dataset tasks
+
+    target sequence
+    filter rust_tests
+    temperature 2.0
+    hard_weight 0.5
+    soft_weight 0.5
+}
+Where it belongs
+Place it after the data-forge saga and before trajectory tuning:
+
+data-forge
+    ↓
+distillation-core
+    ↓
+agent-trajectory-distillation
+It should also precede the larger imported-model demonstrations because it gives imported models a practical adaptation path.
+
+3. Rejection sampling and verifier-guided learning
+Rejection sampling deserves its own capability rather than being hidden inside the data pipeline.
+
+The multi-hop series uses structured verification to select good reasoning examples, and the broader agent roadmap needs exactly the same pattern. 
+
+General form:
+
+sample N candidates
+        ↓
+evaluate each candidate
+        ↓
+accept / rank / weight
+        ↓
+use for inference, ICL, or training
+This supports three modes.
+
+Inference-time best-of-N
+Generate several answers and choose one.
+
+Dataset generation
+Generate candidate examples, retain valid ones, and train on them.
+
+Agent self-improvement
+Store high-reward trajectories and reject misleading or reward-hacked ones.
+
+sw-MLPL primitives
+samples = sample_many(model, prompt, n=16)
+
+scored = evaluate_many(samples, verifier)
+
+best = select_best(scored)
+accepted = filter_reward(scored, min_reward=0.8)
+Needed features:
+
+parallel candidate generation
+
+deterministic evaluators
+
+multiple reward components
+
+ranking
+
+diversity penalties
+
+acceptance thresholds
+
+weighted examples
+
+provenance from candidate to checkpoint
+
+compute-budget accounting
+
+Where it belongs
+Implement the generic rejection/ranking substrate with data-forge-1, then reuse it in:
+
+MTP proposal analysis
+
+multi-hop training
+
+ICRL
+
+trajectory tuning
+
+distillation
+
+recursive-model voting
+
+This is a cross-cutting primitive, not a single demo.
+
+Hardware-efficiency gaps
+4. Quantization needs to become a program, not a deferred QLoRA item
+The playlists repeatedly frame INT4 and small-model quantization as what makes useful models practical on limited hardware. The efficient-frontier discussion specifically treats quantization as central to fitting billion-parameter models into low-memory systems. 
+
+The current roadmap mentions deferred QLoRA and quantized imports, but that is too narrow.
+
+sw-MLPL needs a coherent quantization stack.
+
+Phase Q1 — Quantization experiments
+symmetric and asymmetric quantization
+
+per-tensor versus per-channel
+
+static versus dynamic activation quantization
+
+calibration datasets
+
+error histograms
+
+layer sensitivity
+
+fake quantization
+
+dequantized reference execution
+
+q = quantize(
+    model,
+    weights="int8",
+    granularity="per_channel",
+    calibration=calib_data
+)
+Phase Q2 — Weight-only inference
+INT8
+
+INT4
+
+grouped scales
+
+packed representation
+
+quantized linear layer
+
+CPU kernels
+
+MLX kernels or compatible representation
+
+CUDA kernels/fallbacks
+
+Phase Q3 — Quantization-aware training
+fake-quant operators on the tape
+
+straight-through estimator
+
+QAT for small models
+
+post-training versus QAT comparison
+
+Phase Q4 — QLoRA
+QLoRA becomes an application of the general quantized representation rather than an isolated implementation.
+
+Why this should move earlier
+Quantization directly supports:
+
+CPU-only systems
+
+old GPUs
+
+larger imported students
+
+draft models
+
+cascaded speculative decoding
+
+mobile-sized architectures
+
+Where it belongs
+A reasonable placement is:
+
+E4 resident MLX
+E5 Engram-MLX
+generation-state / KV cache
+quantization-reference
+MTP
+quantized CPU kernels
+CUDA-resident path
+Reference quantization should arrive before large-model import. Optimized kernels can follow later.
+
+5. Mobile-oriented architecture experiments
+The small-model series includes MobileLLM as a distinct category: designing the architecture for constrained devices rather than merely shrinking a conventional model. The series recap explicitly identifies mobile optimization as one of the reasons small models remain useful. 
+
+This area is missing from the planned scope.
+
+It does not require implementing one exact MobileLLM clone. More useful would be a model-efficiency ablation lab.
+
+Techniques to expose
+deep-and-narrow versus shallow-and-wide
+
+embedding/output weight tying
+
+grouped-query attention
+
+shared KV heads
+
+reduced vocabulary
+
+factorized embeddings
+
+bottleneck FFNs
+
+grouped or low-rank linear layers
+
+parameter sharing across layers
+
+local/global attention mixtures
+
+early exit
+
+recurrent/shared-weight depth
+
+activation sparsity
+
+Example experiment
+Hold parameter count fixed:
+
+Model A: wide, shallow
+Model B: narrow, deep
+Model C: shared layers
+Model D: low-rank FFN
+Model E: recurrent depth
+Measure:
+
+quality
+
+CPU latency
+
+MLX latency
+
+memory bandwidth
+
+peak memory
+
+serialized size
+
+energy proxy
+
+tokens per joule if power telemetry is available
+
+Where it belongs
+After the first TRM/HRM runtime but before the broad 100M–1B model-import track.
+
+TRM, HRM, MTP, mHC, and MobileLLM-style design can all use the same parameter/FLOP/wall-time comparison harness.
+
+Proposed saga
+small-model-architecture-lab
+This would be more useful to newcomers than five disconnected architecture demos.
+
+Quality and reasoning gaps
+6. Scaffolded reasoning and scaffold removal
+The multi-hop work introduces a useful concept that is not identical to ICL, ICRL, RAG, or distillation:
+
+Give the learner privileged structure during training, then remove that structure at inference.
+
+The example uses a knowledge graph as training-time scaffolding and emphasizes distribution matching between generated training problems and evaluation problems. 
+
+This can generalize in sw-MLPL.
+
+Scaffold types
+knowledge graph paths
+
+program execution traces
+
+compiler diagnostics
+
+proof steps
+
+search trees
+
+teacher chain-of-thought summaries
+
+tool-call traces
+
+intermediate labels
+
+decomposition hints
+
+state-machine transitions
+
+Experiments
+Full scaffold
+Every reasoning step is supplied.
+
+Partial scaffold
+Some intermediate steps are hidden.
+
+Scaffold dropout
+Randomly remove hints during training.
+
+Curriculum removal
+Gradually reduce scaffold availability.
+
+No-scaffold evaluation
+Measure whether the student internalized the procedure.
+
+Where it belongs
+Between ICL selection and persistent trajectory tuning:
+
+agent episodes
+    ↓
+ICL selection
+    ↓
+scaffolded-training lab
+    ↓
+ICRL
+    ↓
+trajectory distillation/tuning
+It can also become the primary small-model reasoning quality demo before attempting larger imported models.
+
+7. Knowledge graphs as training and evaluation infrastructure
+RAG is currently present only as a deferred idea. The playlist material suggests a more interesting role for graphs than conventional retrieval:
+
+generate reasoning tasks
+
+provide correct multi-hop paths
+
+validate answers
+
+label task difficulty
+
+detect shortcuts
+
+supply optional training scaffolds
+
+evaluate generalization to unseen graph regions
+
+Features
+g = knowledge_graph {
+    entity("config")
+    entity("crash")
+    entity("firmware")
+
+    relation("corruption", "config", "crash")
+    relation("requires", "old_firmware", "upgrade")
+}
+Operations:
+
+neighborhood lookup
+
+shortest path
+
+constrained path enumeration
+
+path sampling
+
+negative-edge sampling
+
+graph split by entities or relations
+
+query generation
+
+answer verification
+
+graph embeddings later
+
+Why this is useful
+A small controlled knowledge graph gives sw-MLPL users a way to study:
+
+multi-hop reasoning
+
+retrieval
+
+distribution shift
+
+compositional generalization
+
+curriculum
+
+ICL selection
+
+agent planning
+
+without requiring a large external dataset.
+
+Where it belongs
+Implement a minimal graph dataset/evaluator inside the data-forge program. Full graph neural networks are unnecessary initially.
+
+Research concepts that deserve lower-priority demos
+8. Energy-based models and associative memory
+The general ML playlist’s energy-based lineage—from Hopfield networks through Boltzmann machines to JEPA—introduces an important conceptual family that is currently absent from the roadmap. The key shared idea is learning a scalar compatibility or energy function, then finding states or representations with low energy. 
+
+This is relevant to sw-MLPL in three ways.
+
+Associative memory
+Hopfield-style memory complements Engram:
+
+Engram	Hopfield-style memory
+Deterministic hash address	Content-addressed retrieval
+Exact slot lookup	Attractor convergence
+Sparse row access	Iterative state refinement
+Fast known-pattern retrieval	Noise-tolerant recall
+A compact demo could compare:
+
+hash-based Engram retrieval
+
+nearest-neighbor retrieval
+
+classic Hopfield recall
+
+modern continuous Hopfield retrieval
+
+Energy-based evaluation
+Agent outputs or candidate plans could be ranked by a learned compatibility score rather than autoregressive likelihood alone.
+
+Recursive inference
+Energy minimization is another form of test-time computation and connects naturally to TRM/HRM-style iterative refinement.
+
+Where it belongs
+After the generic recursive runtime, not before MTP or ICRL:
+
+recursive-runtime
+    ├── TRM
+    ├── HRM
+    └── energy-minimization demo
+Priority
+Medium-low, but educationally valuable.
+
+9. JEPA-style latent prediction and world models
+JEPA shifts prediction from raw observations to representation space, aiming to model useful predictable structure rather than every low-level detail. The associated blog describes it as a modern continuation of compatibility-based or energy-based learning. 
+
+This does not directly serve near-term language-model acceleration, but it would broaden sw-MLPL beyond supervised classifiers and autoregressive language models.
+
+Minimal useful implementation
+Avoid beginning with video or a large vision model.
+
+Use:
+
+simple 2-D trajectories
+
+cellular automata
+
+grid-world agent states
+
+board-game positions
+
+tower-defense map states
+
+Architecture:
+
+context encoder
+      ↓
+latent predictor + action
+      ↓
+predicted future latent
+
+target encoder
+      ↓
+actual future latent
+Loss compares latent states rather than reconstructed pixels.
+
+Why it may matter to your work
+It could eventually support:
+
+agent world models
+
+planning without textual simulation
+
+board-game state prediction
+
+compact learned environment models
+
+model-predictive control
+
+state abstractions for ICRL
+
+Where it belongs
+After the agent trajectory substrate and recursive models:
+
+agent episodes
+recursive runtime
+representation learning
+JEPA/grid-world demo
+It should not displace MTP, ICRL, quantization, or data-centric training.
+
+Interpretability gaps
+10. General causal interpretability beyond BDH
+The BDH material focuses on sparse activations making individual units easier to inspect. 
+
+The current plan includes activation displays and edge inspection, but should add intervention, not merely observation.
+
+Useful generic techniques
+activation capture
+
+activation replacement
+
+activation zeroing
+
+neuron ablation
+
+edge ablation
+
+activation patching between examples
+
+linear probes
+
+feature selectivity
+
+causal tracing
+
+gradient attribution
+
+saliency
+
+representation similarity across checkpoints
+
+Why this matters
+A neuron heatmap can be visually persuasive while causally meaningless. A stronger experiment asks:
+
+When this activation is removed or replaced, does the behavior actually change?
+
+Proposed surface
+trace = capture_activations(model, input)
+
+ablated = intervene(
+    model,
+    layer="recursive.3",
+    units=[12, 47],
+    operation="zero"
+)
+
+compare(model, ablated, dataset)
+Where it belongs
+Build the generic activation-capture seam during the recursive runtime, then use it in:
+
+BDH
+
+mHC stream inspection
+
+MTP-head analysis
+
+Engram gate inspection
+
+TRM recursion analysis
+
+distilled student/teacher comparisons
+
+This is more useful than making interpretability exclusive to BDH.
+
+Evaluation concepts missing from the plan
+11. Efficient-frontier and Pareto analysis
+The small-model playlists repeatedly compare capability, memory, speed, and model size rather than naming one universal winner. 
+
+sw-MLPL should make this a native experiment concept.
+
+frontier = pareto(
+    experiments,
+    maximize=["accuracy", "tokens_per_second"],
+    minimize=["memory_peak", "energy", "parameters"]
+)
+
+svg(frontier, "pareto")
+Axes worth supporting
+quality versus parameters
+
+quality versus serialized bytes
+
+quality versus peak RAM
+
+quality versus latency
+
+quality versus energy
+
+acceptance rate versus MTP overhead
+
+agent success versus token cost
+
+reasoning accuracy versus recursion steps
+
+Why it matters
+This directly supports your target audience. Someone with an M1 Mac, P40, 3060, or CPU-only box does not need the “best model.” They need the best model under their constraints.
+
+Where it belongs
+Extend the existing experiment and feasibility machinery early—alongside MTP benchmarking.
+
+12. Distribution-shift and prompt-format sensitivity testing
+The efficient-model comparison notes that benchmark failures can reflect prompt-format incompatibility rather than underlying inability. 
+
+The multi-hop work similarly emphasizes matching the generated training distribution to the target evaluation distribution. 
+
+This is an important missing research facility.
+
+Add experiment dimensions for
+prompt templates
+
+chat templates
+
+tokenizer differences
+
+reordered fields
+
+paraphrased tasks
+
+unseen entities
+
+longer reasoning chains
+
+noisy inputs
+
+domain shift
+
+scaffold present versus absent
+
+Example
+robustness_suite {
+    base tasks
+
+    variants {
+        paraphrase 5
+        reorder_fields
+        add_irrelevant_context
+        change_identifiers
+        extend_hops [3, 4, 5]
+    }
+}
+Where it belongs
+Add this to the experiment harness before drawing strong conclusions from MTP, ICRL, or small-model comparisons.
+
+Recommended plan insertion
+Existing near-term direction
+E4 resident MLX
+E5 Engram-MLX
+mHC constrained transforms/layer
+generation state + KV cache
+MTP
+agent episodes
+ICL/ICRL
+TRM/HRM/BDH
+CUDA
+Revised ordering with playlist-derived gaps
+1. E4 completion
+2. E5 Engram-MLX
+3. data-forge:
+      synthetic generation
+      knowledge-graph tasks
+      rejection sampling
+      curriculum
+      provenance
+
+4. experiment-quality:
+      distribution-shift suites
+      prompt-template matrices
+      Pareto/efficient-frontier analysis
+
+5. mHC CPU + MLX bounded track
+
+6. generation-state:
+      incremental decoding
+      KV cache
+      batched verification
+
+7. MTP training + self-speculation
+
+8. quantization-reference:
+      INT8/INT4 representation
+      calibration
+      error analysis
+
+9. speculative decoding lab
+
+10. agent episodes + evaluators
+
+11. ICL selection + skill libraries
+
+12. scaffolded reasoning:
+       graph guidance
+       trace masking
+       curriculum removal
+
+13. ICRL feedback loops
+
+14. distillation:
+       logit
+       sequence
+       tool-policy
+       trajectory
+
+15. recursive runtime
+
+16. TRM and HRM
+
+17. causal inspection framework
+
+18. BDH adaptive-state demo
+
+19. mobile/small-model architecture lab
+
+20. optimized quantized CPU/CUDA kernels
+
+21. energy-based associative-memory demo
+
+22. JEPA/grid-world world-model demo
+Suggested new AgentRail sagas
+Saga	Priority	Main contribution
+data-forge	Very high	Synthetic data, validation, rejection sampling
+curriculum-and-scaffolds	Very high	Difficulty schedules and scaffold removal
+experiment-robustness	Very high	Distribution shift and prompt sensitivity
+pareto-frontier	High	Quality/speed/memory comparison
+distillation-core	High	Teacher-to-small-model transfer
+quantization-reference	High	Correct quantization semantics before kernels
+knowledge-graph-reasoning	High	Multi-hop task generation and verification
+causal-inspection	Medium-high	Interventions, ablations, activation patching
+small-model-architecture-lab	Medium	Mobile/edge architecture ablations
+associative-energy-models	Medium-low	Hopfield/energy-learning experiments
+latent-world-model	Later	JEPA-style representation prediction
+What should not become standalone major tracks
+Some playlist subjects are useful primarily as demonstrations or comparative data, not as new core infrastructure:
+
+individual 1B or 3B model families
+
+one specific mobile model
+
+one exact benchmark leaderboard
+
+classic Boltzmann machines at production scale
+
+a full JEPA vision stack immediately
+
+generic RAG before the retrieval/evaluation problem is well defined
+
+They should exercise reusable capabilities rather than drive the architecture.
+
+Main conclusion
+The playlists suggest that the current roadmap is still too model-feature oriented.
+
+The most consequential missing layer is:
+
+How do we create, validate, select, sequence,
+evaluate, and reuse learning experiences?
+That layer connects all four of your priorities:
+
+Speed: MTP and draft models need properly constructed training data and meaningful Pareto evaluation.
+
+Agent quality: ICL and ICRL need validated trajectories, selection policies, curriculum, and rejection sampling.
+
+Colab replacement: serious ML experimentation requires dataset generation, sweeps, robustness testing, and reproducible reports.
+
+Small/old hardware: distillation, quantization, data quality, and architecture efficiency are what make small models practically capable.
+
+I would therefore elevate data-forge + rejection sampling + curriculum + distillation to the same strategic level as MTP and ICRL. Those are the clearest important concepts represented in the playlists that were not yet adequately covered in the sw-MLPL plan.
+
+
