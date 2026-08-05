@@ -78,6 +78,31 @@ fn describe_covers_repl_commands() {
 }
 
 #[test]
+fn dash_help_works_for_every_repl_command() {
+    let mut env = Environment::new();
+    for (name, brief) in mlpl_eval::REPL_COMMANDS {
+        for form in [format!(":{name} --help"), format!(":{name} -h")] {
+            let out =
+                inspect(&mut env, &form).unwrap_or_else(|| panic!("no --help answer for {form}"));
+            assert!(
+                out.contains(brief),
+                "{form} must answer with its brief, got {out:?}"
+            );
+        }
+    }
+}
+
+#[test]
+fn dash_help_describes_builtins() {
+    let mut env = Environment::new();
+    let out = inspect(&mut env, ":disp --help").expect("builtin help");
+    assert!(
+        out.contains("built-in"),
+        "describe body expected, got {out:?}"
+    );
+}
+
+#[test]
 fn known_help_topics_still_work() {
     let mut env = Environment::new();
     let out = inspect(&mut env, ":help vars").expect("topic output");

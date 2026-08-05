@@ -131,7 +131,9 @@ pub use grad_optim_mlx_demo::DemoLayout;
 ))]
 pub use grad_optim_mlx_mlp::LoraNames;
 pub use inspect::inspect;
-pub use inspect_colon::{REPL_COMMANDS, colon_fallthrough_error, colon_ref_hint, is_colon_call_expr};
+pub use inspect_colon::{
+    REPL_COMMANDS, colon_fallthrough_error, colon_ref_hint, is_colon_call_expr,
+};
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
 pub use mlpl_eval_core::{ActKind, MetricSink, ModelSpec};

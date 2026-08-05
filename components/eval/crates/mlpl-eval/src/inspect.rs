@@ -29,6 +29,9 @@ and one-line doc for a built-in";
 /// path (error for unknown commands, etc.).
 pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
     let trimmed = input.trim();
+    if let Some(out) = dash_help(env, trimmed) {
+        return Some(out);
+    }
     let topic = trimmed.strip_prefix(':')?;
     let mut parts = topic.split_whitespace();
     let head = parts.next()?;
@@ -49,6 +52,25 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
         "help" => arg.map(|t| help_topic(t, env).unwrap_or_else(|| help_unknown_topic(t))),
         _ => None,
     })
+}
+
+/// `:<name> --help` (or `-h`): the command's one-line brief from
+/// the shared registry, or the builtin's describe body. Lives at
+/// this layer so every surface (terminal, web local, server)
+/// answers identically -- the Usage Guide advertises the form.
+fn dash_help(env: &Environment, trimmed: &str) -> Option<String> {
+    let head = trimmed
+        .strip_suffix(" --help")
+        .or_else(|| trimmed.strip_suffix(" -h"))?
+        .trim();
+    let name = head.strip_prefix(':')?;
+    if let Some((cmd, brief)) = crate::inspect_colon::REPL_COMMANDS
+        .iter()
+        .find(|(n, _)| *n == name)
+    {
+        return Some(format!(":{cmd} -- {brief}"));
+    }
+    Some(crate::inspect_describe::format_describe(env, name))
 }
 
 /// `:help <topic>` with a topic nobody recognizes: list what IS
