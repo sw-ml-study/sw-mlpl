@@ -1,0 +1,1 @@
+:describe now serves REPL-command briefs (both name spellings), :exit/:quit/quit aliases land in the terminal, and the md->html converter keeps wrapped bullets inside their li (Usage tab renders clean). 15 tests across four files.
