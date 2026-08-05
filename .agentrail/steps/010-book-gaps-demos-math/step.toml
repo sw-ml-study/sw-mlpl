@@ -1,6 +1,6 @@
 number = 10
 slug = "book-gaps-demos-math"
-status = "pending"
+status = "in-progress"
 description = "book-gap-coverage 3/3: math/Bayes demos -- distributions + histograms, Bayes ..."
 role = "production"
 context_files = []

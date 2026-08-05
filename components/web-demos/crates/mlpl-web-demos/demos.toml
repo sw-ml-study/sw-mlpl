@@ -987,6 +987,37 @@ lines = [
 
 [[demos]]
 category = "Basics"
+name = "Distributions and the Bell Curve"
+intro = "The three distributions most ML math leans on, drawn from the generators you already use. randn samples the GAUSSIAN bell; rand_ints samples the flat UNIFORM; a comparison mask against a uniform draw is a BERNOULLI coin. The finale is the central limit theorem live: sum six flat uniform draws and the histogram turns into a bell -- nobody asked for a Gaussian, one emerged. That emergence is WHY the Gaussian is everywhere: measurement noise, initialization, diffusion -- anything that is a sum of small independent effects."
+takeaway = "hist() makes a distribution visible in one call, and the shape is the signature: randn is a bell, rand_ints is a flat comb, and the sum-of-uniforms is a bell AGAIN -- the central limit theorem in action. HOW TO CHECK IT WORKED: the first histogram is bell-shaped, the second is roughly flat, the Bernoulli mean prints near 0.3, and the final histogram of summed uniforms is unmistakably bell-shaped with its mean near 3."
+lines = [
+    "hist(randn(1, [2000]), 24)                     # GAUSSIAN: the bell, from randn",
+    "hist(rand_ints(2000, 0, 10, 2), 10)            # UNIFORM: every value equally likely -- a flat comb",
+    "b = lt(rand_ints(2000, 0, 1000, 3), 300)       # BERNOULLI: a p=0.3 coin as a comparison mask",
+    "mean(b)                                        # ~0.3: the coin's bias, recovered",
+    "clt = (rand_ints(2000, 0, 100, 11) + rand_ints(2000, 0, 100, 12) + rand_ints(2000, 0, 100, 13) + rand_ints(2000, 0, 100, 14) + rand_ints(2000, 0, 100, 15) + rand_ints(2000, 0, 100, 16)) / 100   # sum SIX flat draws",
+    "hist(clt, 24)                                  # CENTRAL LIMIT THEOREM: the flats sum to a bell",
+    "mean(clt)                                      # ~3: six times the uniform mean",
+]
+
+[[demos]]
+category = "Basics"
+name = "Bayes by Grid (a coin, two posteriors)"
+intro = "Bayesian inference with no calculus: put a GRID of 101 hypotheses on the coin's unknown heads-probability p, score every hypothesis by its LIKELIHOOD of the observed flips, multiply by the prior, renormalize -- that is the whole of Bayes' theorem, in two array lines. We do it twice: after 10 flips (7 heads) and after 100 flips (70 heads). Same evidence RATE, ten times the evidence -- watch what happens to the posterior's shape."
+takeaway = "post = prior * likelihood; post / reduce_add(post). That is the theorem. The chart is the lesson: both posteriors peak at p = 0.7, but the 100-flip posterior is a sharp spike where the 10-flip one is a broad hill -- more data does not move an honest peak, it NARROWS it. The printed MAP (the argmax hypothesis, via grade_down) and posterior mean nearly agree here; they diverge when priors are opinionated. HOW TO CHECK IT WORKED: both curves peak at 0.7; the peak-height ratio prints near 3 (the spike is ~3x taller); the posterior mean prints just under 0.7."
+lines = [
+    "k = 101",
+    "p = linspace(0, 1, k)                          # the hypothesis GRID: every candidate heads-probability",
+    "lik = pow(p, 7) * pow(1 - p, 3)                # LIKELIHOOD of 7 heads, 3 tails under each p",
+    "post = lik / reduce_add(lik)                   # uniform prior * likelihood, renormalized: BAYES' THEOREM",
+    "lik2 = pow(p, 70) * pow(1 - p, 30)             # ten times the flips, same rate",
+    "post2 = lik2 / reduce_add(lik2)",
+    "scatter_labeled(concat(reshape(concat(p, p), [202, 1]), reshape(concat(post, post2), [202, 1]), 1), concat(zeros([101]), ones([101])))   # WHAT YOU SEE: broad hill vs sharp spike, same peak",
+    "{map_10_flips: take(p, 0, take(grade_down(post), 0, 0)), map_100_flips: take(p, 0, take(grade_down(post2), 0, 0)), posterior_mean: reduce_add(p * post2)}   # MAP = the argmax hypothesis",
+]
+
+[[demos]]
+category = "Basics"
 name = "Math Functions"
 intro = "The scalar and elementwise math primitives MLPL inherits from NumPy/APL conventions: exp, log, sqrt, abs, pow, sigmoid, tanh. Works on scalars and arrays uniformly."
 takeaway = "Every primitive broadcasts over array inputs without a loop. If you know these names from NumPy you already know MLPL's math surface."
@@ -1330,6 +1361,23 @@ lines = [
     "scatter_labeled(umap_proj, labels)",
     "scatter_labeled(mds_proj, labels)",
     "scatter_labeled(rp_proj, labels)",
+]
+
+[[demos]]
+category = "Dim Reduction"
+name = "Power Iteration (finding the top eigenvector)"
+intro = "The eigenvector under PCA, found with a loop you can watch: multiply any vector by a matrix, normalize, repeat. Every multiplication turns the vector a little further toward the direction the matrix stretches most -- the top EIGENVECTOR -- because that component grows fastest. Fifteen repeats on a correlated point cloud's covariance matrix, then the check: compare against what pca_components computes. This is a loop over TIME (each step needs the last one), so repeat is the right tool -- see 'Thinking in Arrays'."
+takeaway = "matmul(A, v) = lambda * v is the definition; power iteration is the definition run as a fixed-point loop. The covariance matrix of a point cloud stretches vectors toward the cloud's long axis, so its top eigenvector IS the first principal component. HOW TO CHECK IT WORKED: the scatter shows an elongated diagonal cloud; the printed alignment -- the dot product between our converged v and pca_components' first component -- prints at 0.9999+ (sign may differ; eigenvectors are direction-only)."
+lines = [
+    "base = randn(5, [80, 2])",
+    "Xc = matmul(base, [[2, 1.2], [0, 0.6]])        # a correlated, elongated cloud",
+    "scatter_labeled(Xc, zeros([80]))               # WHAT YOU SEE: the long axis power iteration will find",
+    "A = matmul(transpose(Xc), Xc) / 80             # its covariance matrix",
+    "v = reshape([1, 0], [2, 1])                    # start ANYWHERE (almost): a unit vector",
+    "repeat 15 { v = matmul(A, v) ; v = v / sqrt(reduce_add(v * v)) }   # multiply, normalize, repeat -- a TIME loop, kept",
+    "flatten(v)                                     # the converged direction",
+    "pc = pca_components(Xc, 1)                     # what PCA says the first component is",
+    "flatten(matmul(pc, v))                         # THE CHECK: |dot| ~ 1.0 -- same direction",
 ]
 
 [[demos]]
@@ -1682,6 +1730,27 @@ lines = [
 
 [[demos]]
 category = "Training & Learning"
+name = "Data Augmentation (more data from thin air)"
+intro = "Forty training points is not many -- but forty points plus three jittered copies of each is a hundred and sixty, and the jitter encodes something TRUE about the task: a moons point nudged by a little noise keeps its label. That invariance is free training signal. Two identical networks: one trains on the 40 originals, one on the 40 plus 120 jittered copies; both are scored on 200 FRESH points neither has seen."
+takeaway = "Augmentation is a statement about invariances -- label-preserving transforms of your inputs (jitter here; crops, flips, and color shifts for images) -- and it regularizes exactly because the network can no longer memorize individual points that now appear in several slightly-different places. HOW TO CHECK IT WORKED: the printed record shows the augmented model beating the plain one on the fresh validation set (~0.96 vs ~0.92 here), and the scatter shows the thickened point clouds the augmented model actually trained on."
+lines = [
+    "M = moons(7, 40, 0.15)                         # a SMALL training set",
+    "Xs = matmul(M, [[1, 0], [0, 1], [0, 0]]) ; ys = reshape(matmul(M, [[0], [0], [1]]), [40])",
+    "V = moons(9, 200, 0.15)                        # fresh validation data -- neither model sees this in training",
+    "Xv = matmul(V, [[1, 0], [0, 1], [0, 0]]) ; yv = reshape(matmul(V, [[0], [0], [1]]), [200])",
+    "ma = chain(linear(2, 8, 0), tanh_layer(), linear(8, 2, 1))",
+    "train 120 { adam(cross_entropy(apply(ma, Xs), ys), ma, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(ma, Xs), ys) }   # baseline: the 40 originals",
+    "J1 = Xs + randn(21, [40, 2]) * 0.12 ; J2 = Xs + randn(22, [40, 2]) * 0.12 ; J3 = Xs + randn(23, [40, 2]) * 0.12   # AUGMENT: three jittered copies -- the labels still hold",
+    "Xa = transpose(concat(transpose(Xs), concat(transpose(J1), concat(transpose(J2), transpose(J3), 1), 1), 1))   # stack rows via the transpose trick",
+    "ya = concat(ys, concat(ys, concat(ys, ys)))",
+    "scatter_labeled(Xa, ya)                        # WHAT YOU SEE: the thickened clouds the augmented model trains on",
+    "mb = chain(linear(2, 8, 10), tanh_layer(), linear(8, 2, 11))",
+    "train 120 { adam(cross_entropy(apply(mb, Xa), ya), mb, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(mb, Xa), ya) }",
+    "{plain: mean(eq(predict_batch(ma, Xv), yv)), augmented: mean(eq(predict_batch(mb, Xv), yv))}   # scored on FRESH data",
+]
+
+[[demos]]
+category = "Training & Learning"
 name = "Learning Rate: too big, too small, just right"
 intro = "The learning rate is the size of each downhill step, and it is the single most important knob in training. We reuse the loss surface from 'How Gradient Descent Works' (fitting y = w*x + b) and run gradient descent from the SAME bad starting guess three times, changing only the step size. The white path on each [[loss_landscape]] shows what happens."
 takeaway = "Too small (0.003): the steps are so tiny the path barely leaves the start -- it would get there eventually, but you would wait forever and waste compute. Just right (0.15): the path walks straight down into the dark basin in a handful of steps. Too big (0.7): each step overshoots the minimum so badly that the loss grows instead of shrinking -- the path zig-zags and flies off the chart as the weights blow up (NaNs, in a real run). The usable range is wide but bounded; people find it by trying a few values an order of magnitude apart, or use a schedule that starts higher and decays. Adam (in the other demos) adapts an effective step per weight, which makes it far more forgiving than this raw gradient descent."
@@ -1796,6 +1865,26 @@ lines = [
     'svg(A, "heatmap")                                    # render the heatmap',
     "row_sums = reduce_add(A, 1)                            # sanity: every row sums to 1.0",
     "row_sums",
+]
+
+[[demos]]
+category = "Vision"
+name = "Toy Segmentation (classify every pixel)"
+intro = "Segmentation is classification asked at every pixel: the answer is not a label but a MASK the same shape as the image. A 16x16 image hides a bright square in noise; the training target is the true mask; the model is an ordinary tiny classifier applied to each pixel (256 pixels = a batch of 256 one-feature examples). Real segmentation nets (U-Net -- see the Diagrams tab) add CONTEXT so each pixel sees its neighborhood; this demo shows both why per-pixel works and why context is the next thing you want."
+takeaway = "reshape is doing the conceptual work: [16, 16] image -> [256, 1] batch, classify, [256] predictions -> [16, 16] mask. Segmentation needs no new machinery at whiteboard scale. HOW TO CHECK IT WORKED: three heatmaps -- the noisy input (square barely visible), the clean true mask, and the predicted mask showing a recognizable square with a few honest mistakes (~0.97 pixel accuracy prints); the errors are isolated pixels whose intensity alone is ambiguous, which is exactly the argument for neighborhood features."
+lines = [
+    "r = concat(zeros([4]), concat(ones([5]), zeros([7])))   # a 1-D indicator: where the square lives",
+    "mask = matmul(reshape(r, [16, 1]), reshape(r, [1, 16])) # outer product -> the 2-D TRUE mask",
+    "img = randn(1, [16, 16]) * 0.35 + mask * 1.2   # the noisy image hiding the square",
+    'svg(img, "heatmap")                            # WHAT YOU SEE: the square, barely, in noise',
+    'svg(mask, "heatmap")                           # the ground-truth mask (the training target)',
+    "X = reshape(img, [256, 1])                     # every pixel becomes a one-feature example",
+    "y = flatten(mask)                              # its label: in the square, or not",
+    "m = chain(linear(1, 4, 0), tanh_layer(), linear(4, 2, 1))",
+    "train 150 { adam(cross_entropy(apply(m, X), y), m, 0.05, 0.9, 0.999, 0.00000001); cross_entropy(apply(m, X), y) }",
+    "pred = predict_batch(m, X)",
+    'svg(reshape(pred, [16, 16]), "heatmap")        # WHAT YOU SEE: the recovered square, a few honest misses',
+    "mean(eq(pred, y))                              # pixel accuracy ~0.97",
 ]
 
 [[demos]]

@@ -1,6 +1,16 @@
 # Book coverage audit (docs/ml-topics.txt)
 
-Audit date: 2026-08-05. Source: the three eBook outlines in
+Audit date: 2026-08-05. CLOSED 2026-08-05: the glossary entries
+(12 new + 4 extensions), the four diagrams, both findability
+fixes, and nine of the ten demos shipped the same day (four
+classical-ML demos in Classification; distributions/CLT, Bayes
+grid, power iteration, augmentation, and toy segmentation across
+Basics / Dim Reduction / Training and Learning / Vision). The
+VAE demo was DESCOPED after testing: a one-dimensional-latent
+toy with a linear encoder collapses to the data mean at
+whiteboard scale (reconstruction MSE equals the data variance);
+the Autoencoder demo and the VAE glossary entry carry the
+concept. Source: the three eBook outlines in
 `docs/ml-topics.txt` (Grokking Machine Learning 2nd ed., Deep
 Learning with PyTorch 2nd ed., Math and Architectures of Deep
 Learning), checked chapter by chapter against the four coverage
