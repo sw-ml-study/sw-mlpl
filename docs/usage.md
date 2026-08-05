@@ -47,7 +47,7 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 
 | Command | Description |
 |---------|-------------|
-| `:<builtin>(args)` | Call any builtin from the prompt: `:disp(M)` is `disp(M)` (see "Colon forms" below) |
+| `:disp(M)`, `:mean(v)`, ... | Any `:builtin(args)` calls that builtin: `:disp(M)` is exactly `disp(M)` (see "Colon forms" below) |
 | `:2d` | Close 3D visualization stage |
 | `:3d` | Open 3D visualization stage (also Ctrl+3) |
 | `:3d on` / `:3d off` | Explicit 3D on/off (case-insensitive) |
