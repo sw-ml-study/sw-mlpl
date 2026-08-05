@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 4,
+    "step": "gen-support"
+  },
+  "action": "seam-appropriate placement (record-returning builtin at eval layer, array builtin in runtime-data); LOC trims under fmt pressure",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-04T18:38:51"
+}

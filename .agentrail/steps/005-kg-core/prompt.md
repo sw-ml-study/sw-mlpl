@@ -1,0 +1,1 @@
+data-forge step per design: the four kg_* builtins over [E,3] edge arrays in a NEW components/forge/ workspace (mlpl-forge-kg crate, pure fns) wired at the eval layer (kg_split returns a {train, eval} record; kg_verify row-batched [n,hops+1]->[n]; kg_neighbors optional rel filter; kg_paths seeded sampling via Xorshift64). TDD; catalog/lang-reference/glossary; scoped gates.

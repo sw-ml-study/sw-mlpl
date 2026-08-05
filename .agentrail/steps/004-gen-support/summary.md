@@ -1,0 +1,1 @@
+rand_ints (deterministic Xorshift64 uniform ints) + dedupe_rows ({rows,index} record at the eval layer, pure core split) shipped with full docs surface and TDD; ledger 340 (+1 structural, trims applied).

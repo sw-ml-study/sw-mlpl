@@ -1,9 +1,10 @@
 number = 4
 slug = "gen-support"
-status = "in-progress"
+status = "completed"
 description = "data-forge step 3 per design: rand_ints(n, lo, hi, seed) (deterministic unifo..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-04T18:15:45"
+completed_at = "2026-08-04T18:38:51"
 task_type = "rust-feature"
-commits = []
+commits = ["8a85ccd80c7f41fbfa3cc66cb6ae37846b6713c8"]
