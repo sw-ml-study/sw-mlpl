@@ -1,6 +1,14 @@
 # Experiment-Quality: design for evaluation rigor
 
-Status: DRAFT for review (saga experiment-quality, step 001).
+Status: SHIPPED 2026-08-05 (saga experiment-quality). All three
+builtins landed with tests and docs (`pareto_front`,
+`param_count`, `experiment_metric`), plus `pareto_plot` -- the
+staircase frontier renderer added on user request -- and the
+three acceptance demos (Experiment Quality category). Review
+resolutions: explicit direction vector for `pareto_front(P,
+dirs)`; `experiment_metric` skips runs that lack the metric;
+latency/RAM/energy remain externally measured (no in-language
+stopwatch -- wasm has no clock and timing breaks demo replay).
 
 ## The thesis
 

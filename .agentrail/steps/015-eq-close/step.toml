@@ -1,6 +1,6 @@
 number = 15
 slug = "eq-close"
-status = "pending"
+status = "in-progress"
 description = "experiment-quality close: design doc marked SHIPPED with resolutions; saga.md..."
 role = "legacy"
 context_files = []

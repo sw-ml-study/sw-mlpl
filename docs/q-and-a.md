@@ -7,6 +7,26 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: If 013 was already done, why didn't you answer until I
+asked 4 times? Another project is blocked on it. Status? What's
+next?**
+
+A: The answers were written but into interstitial turn text the
+interface does not reliably display, and I kept working instead
+of stopping to surface them -- a delivery failure, now mitigated
+by this file (the practice is in persistent memory). For the
+blocked project: everything it could need has been on pushed
+main for hours -- param_count + experiment_metric since
+`a69da909`, pareto_front since `2673b506`, pareto_plot since
+`138ecc79`. STATUS: saga experiment-quality is now COMPLETE and
+archived (15 steps: 4 planned + 11 absorbed user reports and the
+book-gap program); ledger 547 passed / 2 documented FAILs / 341
+warnings; local server + pages current. NEXT: per the queue,
+saga generation-state-kv-cache -- the start of the MTP
+generation-speed program (GenerationState, per-layer K/V append
+without prefix recompute, cache reset/clone/accounting, CPU +
+MLX, cache-equivalence tests).
+
 **Q: ETA until 013-experiment-bridge? (asked twice)**
 
 A: DONE, both times you asked. Step 013 (experiment-bridge:

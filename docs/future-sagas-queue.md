@@ -38,11 +38,12 @@ data-forge (Track 1).
 
 ## Track 1 -- learning-experience infrastructure (VERY HIGH; new 20260802)
 
-data-forge is COMPLETE (grade/compress, rand_ints/dedupe_rows,
-the kg_* oracle, the Data Forge demo category); NEXT SAGA:
-experiment-quality. This is the layer every later track consumes:
-MTP needs constructed training data, TRM/HRM need controlled
-reasoning datasets, ICRL needs validated task distributions.
+Track 1 is COMPLETE: data-forge (2026-08-04) and
+experiment-quality (2026-08-05) both shipped. NEXT SAGA:
+generation-state-kv-cache (Track 2). This is the layer every
+later track consumes: MTP needs constructed training data,
+TRM/HRM need controlled reasoning datasets, ICRL needs validated
+task distributions.
 
 2. **data-forge** (COMPLETE 2026-08-04) -- synthetic data as a first-class ML
    algorithm: generators (template, grammar, knowledge-graph,
@@ -58,15 +59,18 @@ reasoning datasets, ICRL needs validated task distributions.
    query generation, answer verification, graph splits) -- full
    GNNs explicitly out of scope. Demo curricula: arithmetic,
    graph multi-hop, Rust repair, tool use.
-3. **experiment-quality** -- the evaluation rigor the research
-   calls for BEFORE drawing MTP/small-model conclusions:
-   distribution-shift and prompt-format robustness suites
-   (paraphrase, field reorder, irrelevant context, identifier
-   changes, hop extension, scaffold present/absent) plus
-   Pareto/efficient-frontier analysis as a native experiment
-   concept (quality vs parameters / bytes / peak RAM / latency /
-   energy; acceptance rate vs MTP overhead), rendered via the
-   existing svg/experiment machinery.
+3. **experiment-quality** (COMPLETE 2026-08-05) -- the evaluation
+   rigor the research calls for BEFORE drawing MTP/small-model
+   conclusions. Shipped: pareto_front / param_count /
+   experiment_metric / pareto_plot, the robustness-suite and
+   scaffold-present/absent idioms, and the Experiment Quality
+   demo category (Robustness Suite, Scaffold Dependence, Pareto
+   Frontier). Latency/RAM/energy axes stay externally measured
+   until serve telemetry feeds metrics back (design resolution).
+   The saga also absorbed the book-gap-coverage program (audit +
+   16 glossary entries + 9 demos + 4 diagrams) and seven
+   user-reported REPL fixes (colon trichotomy, --help everywhere,
+   name-command parsing, usage-table pins).
 
 ## Pedagogy completeness (book-coverage; schedulable any time)
 

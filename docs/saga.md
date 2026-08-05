@@ -1099,3 +1099,31 @@ demo's stabilized 6/6-seed recipe with the early-vs-trained
 presentation, and a catalog-crate split (mlpl-builtin-catalog)
 when the builtin table outgrew its file budget. Next per the
 queue: experiment-quality, then the KV-cache -> MTP program.
+
+## Saga: experiment-quality -- evaluation rigor as a substrate (COMPLETE, 2026-08-05)
+
+Two pillars from the design review: robustness suites stayed
+in-language idioms (matmul swaps, covariate shifts, hint-column
+zeroing) and the Pareto frontier became four small primitives --
+pareto_front (explicit direction vector; the matrix stays honest
+for plotting), param_count, experiment_metric (the bridge from
+experiment blocks to arrays; skips runs that lack the metric),
+and pareto_plot (the staircase frontier renderer, added on user
+request the day the mask builtin shipped). The Experiment
+Quality demo category carries the acceptance evidence: the
+Robustness Suite bars step 0.71 -> 0.05 across five conditions
+of one trained model; Scaffold Dependence's cliff (0.97 with
+the leaked hint, 0.03 without it, 0.96 honest) makes
+scaffold-absent evaluation non-negotiable; the Pareto Frontier
+demo trains six sizes and the deliberately undertrained wide
+model lands visibly inland of the staircase. The saga also
+absorbed two large unplanned programs: book-gap-coverage (a
+three-eBook completeness audit that added 16 glossary entries,
+9 demos -- classical ML, Bayes-by-grid, power iteration,
+augmentation, toy segmentation -- and 4 diagrams, with one
+honest descope recorded for the collapsing VAE toy) and seven
+rounds of user-reported REPL fixes that converged the colon-line
+surfaces (trichotomy hints everywhere, --help on every command,
+multi-name :describe, expression guards, and registry-pinned
+usage docs). Next per the queue: generation-state-kv-cache --
+the MTP program begins.
