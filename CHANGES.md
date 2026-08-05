@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- chore(agentrail): archive experiment-quality
+- saga experiment-quality: complete (15 steps)
+- docs(saga): close experiment-quality -- design SHIPPED, retrospective, queue to generation-state-kv-cache
+- docs(q-and-a): running answers file (user request)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga experiment-quality: step 014 complete
 - feat(viz+demos): pareto_plot renderer + the Experiment Quality demo category (experiment-quality step eq-demos)
 - docs(changes): refresh CHANGES.md to HEAD
