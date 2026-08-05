@@ -1,6 +1,6 @@
 number = 3
 slug = "colon-hint-parity"
-status = "pending"
+status = "in-progress"
 description = "User report: ':disp x' in the local eval path silently prints x (bare :disp p..."
 role = "production"
 context_files = []

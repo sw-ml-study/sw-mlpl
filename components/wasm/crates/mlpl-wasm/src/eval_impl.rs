@@ -31,6 +31,9 @@ pub(crate) fn eval_input_with_values(input: &str, env: &mut Environment) -> Eval
     if let Some(out) = mlpl_eval::inspect(env, trimmed) {
         return text_result(out);
     }
+    if let Some(err) = mlpl_eval::colon_fallthrough_error(trimmed) {
+        return text_result(format!("error: {err}"));
+    }
     let tokens = match mlpl_parser::lex(trimmed) {
         Ok(t) => t,
         Err(e) => return text_result(format!("error: {e}")),
@@ -151,6 +154,9 @@ pub(crate) fn eval_input(input: &str, env: &mut Environment) -> String {
     // identically in the terminal and web REPLs.
     if let Some(out) = mlpl_eval::inspect(env, trimmed) {
         return out;
+    }
+    if let Some(err) = mlpl_eval::colon_fallthrough_error(trimmed) {
+        return format!("error: {err}");
     }
 
     let tokens = match mlpl_parser::lex(trimmed) {

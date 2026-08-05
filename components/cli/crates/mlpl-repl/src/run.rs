@@ -79,3 +79,18 @@ fn execute(config: &Config, s: &mut Session) {
     }
     run_interactive(&mut s.env, &mut s.svg_out);
 }
+
+/// `:command` fallback shared by the interactive loop: try the
+/// inspect surface, then the builtin-REFERENCE trichotomy hint,
+/// then a plain unknown-command notice.
+pub(crate) fn report_inspect(env: &mut Environment, input: &str) {
+    match mlpl_eval::inspect(env, input) {
+        Some(out) => println!("{out}"),
+        None => match mlpl_eval::colon_ref_hint(input) {
+            Some(hint) => eprintln!("{hint}"),
+            None => {
+                eprintln!("Unknown command: {input}. Type :help for available commands.");
+            }
+        },
+    }
+}

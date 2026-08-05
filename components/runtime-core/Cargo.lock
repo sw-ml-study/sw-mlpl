@@ -238,11 +238,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-forge-kg"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-runtime"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-forge-kg",
  "mlpl-runtime-array",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",

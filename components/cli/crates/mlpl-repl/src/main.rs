@@ -45,7 +45,10 @@ pub(crate) fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
             break;
         }
 
-        if trimmed.starts_with(':') && handle_command(trimmed, &mut tracing, &last_trace, env) {
+        if trimmed.starts_with(':')
+            && !mlpl_eval::is_colon_call_expr(trimmed)
+            && handle_command(trimmed, &mut tracing, &last_trace, env)
+        {
             continue;
         }
 
@@ -69,10 +72,7 @@ fn handle_command(
             *env = Environment::new();
             println!("Environment cleared.");
         }
-        _ => match mlpl_eval::inspect(env, input) {
-            Some(out) => println!("{out}"),
-            None => eprintln!("Unknown command: {input}. Type :help for available commands."),
-        },
+        _ => run::report_inspect(env, input),
     }
     true
 }

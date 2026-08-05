@@ -117,3 +117,17 @@ pub fn colon_ref_hint(line: &str) -> Option<String> {
          To call it, write `{word}(...)` or `:{word}(...)` -- `:{word} x` is not a command."
     ))
 }
+
+/// Error text for a colon line that is neither a recognized command
+/// nor a colon-call expression. Callers must not let such lines fall
+/// through to program evaluation: `:disp x` parses as a bare `:disp`
+/// reference followed by `x`, silently printing `x`. Keeps every
+/// REPL surface (terminal, web local, server) answering alike.
+#[must_use]
+pub fn colon_fallthrough_error(line: &str) -> Option<String> {
+    let t = line.trim();
+    if !t.starts_with(':') || is_colon_call_expr(t) {
+        return None;
+    }
+    Some(colon_ref_hint(t).unwrap_or_else(|| format!("unknown command: {t}")))
+}

@@ -721,6 +721,8 @@ fn keywords_are_legal_record_field_names() {
     let w = eval("{device: 7.0}.device").unwrap();
     assert_eq!(w.data(), &[7.0]);
     // Keywords still work as keywords right next to field usage.
-    let x = eval("r = {for: 2.0}; total = 0; for i in [1, 2, 3] { total = total + i * r.for }; total").unwrap();
+    let x =
+        eval("r = {for: 2.0}; total = 0; for i in [1, 2, 3] { total = total + i * r.for }; total")
+            .unwrap();
     assert_eq!(x.data(), &[12.0]);
 }
