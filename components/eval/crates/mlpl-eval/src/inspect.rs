@@ -32,24 +32,55 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
     if let Some(out) = dash_help(env, trimmed) {
         return Some(out);
     }
-    let topic = trimmed.strip_prefix(':')?;
-    let mut parts = topic.split_whitespace();
-    let head = parts.next()?;
-    // Accept the colon spelling of a name argument everywhere:
-    // `:describe :disp` == `:describe disp`.
-    let arg = parts.next().map(|a| a.strip_prefix(':').unwrap_or(a));
+    let (head, args) = parse_colon_line(trimmed)?;
+    if let Some(msg) = name_arg_guard(head, &args) {
+        return Some(msg);
+    }
+    let arg = args.first().copied();
     topic_output(env, head).or_else(|| match head {
         "version" => Some(crate::inspect_render::version_string()),
         "experiments" => Some(crate::experiment::format_registry(env)),
         "tags" => Some(crate::tag_render::format_tags(env)),
-        "describe" => Some(match arg {
-            Some(name) => crate::inspect_describe::format_describe(env, name),
-            None => "usage: :describe <name>".into(),
-        }),
+        "describe" => Some(crate::inspect_list::describe_names(env, &args)),
         "list" => Some(crate::inspect_list::list_or_usage(env, arg)),
-        "untag" => Some(handle_untag(env, arg)),
+        "untag" => Some(crate::inspect_list::handle_untag(env, arg)),
         "help" => arg.map(|t| help_topic(t, env).unwrap_or_else(|| help_unknown_topic(t))),
         _ => None,
+    })
+}
+
+/// Split `:head arg arg...`. Name arguments accept the colon
+/// spelling (`:describe :disp` == `:describe disp`) and trailing
+/// commas (`:describe x, y`).
+fn parse_colon_line(trimmed: &str) -> Option<(&str, Vec<&str>)> {
+    let mut parts = trimmed.strip_prefix(':')?.split_whitespace();
+    let head = parts.next()?;
+    let args = parts
+        .map(|a| {
+            let a = a.trim_end_matches(',');
+            a.strip_prefix(':').unwrap_or(a)
+        })
+        .filter(|a| !a.is_empty())
+        .collect();
+    Some((head, args))
+}
+
+/// The name-taking commands reject expressions LOUDLY: `:describe
+/// x + y` must not silently describe `x`, and `:describe (x + y)`
+/// must not report "'(x' is not bound". `:describe` accepts
+/// several names; `:list` / `:untag` take exactly one.
+fn name_arg_guard(head: &str, args: &[&str]) -> Option<String> {
+    if !["describe", "list", "untag"].contains(&head) {
+        return None;
+    }
+    let name_ok = |a: &&str| a.chars().all(|c| c.is_alphanumeric() || "_:.".contains(c));
+    let bad = args.iter().any(|a| !name_ok(a)) || (head != "describe" && args.len() > 1);
+    bad.then(|| {
+        format!(
+            "`:{head}` takes names, not expressions: `:{head} x`. To inspect a \
+             computed value, bind it first (`t = x + y` then `:{head} t`) or view it \
+             with `:disp(x + y)`."
+        )
     })
 }
 
@@ -105,16 +136,4 @@ fn help_topic(topic: &str, env: &Environment) -> Option<String> {
         "describe" => Some(HELP_DESCRIBE_MSG.into()),
         _ => None,
     })
-}
-
-fn handle_untag(env: &mut Environment, arg: Option<&str>) -> String {
-    let Some(name) = arg else {
-        return "usage: :untag <name>".into();
-    };
-    if env.get_tag(name).is_some() {
-        env.clear_tag(name);
-        format!("untagged {name}")
-    } else {
-        format!("{name} had no tag")
-    }
 }

@@ -93,6 +93,35 @@ fn dash_help_works_for_every_repl_command() {
 }
 
 #[test]
+fn name_commands_reject_expressions_loudly() {
+    let mut env = Environment::new();
+    for line in [
+        ":describe x + y",
+        ":describe (x + y)",
+        ":list u:f extra",
+        ":untag a+b",
+    ] {
+        let out = inspect(&mut env, line).expect("guard output");
+        assert!(
+            out.contains("not expressions"),
+            "expression guard expected for {line}, got {out:?}"
+        );
+    }
+}
+
+#[test]
+fn describe_accepts_several_names() {
+    let mut env = Environment::new();
+    for line in [":describe disp mean", ":describe disp, mean"] {
+        let out = inspect(&mut env, line).expect("describe output");
+        assert!(
+            out.contains("disp") && out.contains("mean"),
+            "both names described for {line}, got {out:?}"
+        );
+    }
+}
+
+#[test]
 fn dash_help_describes_builtins() {
     let mut env = Environment::new();
     let out = inspect(&mut env, ":disp --help").expect("builtin help");
