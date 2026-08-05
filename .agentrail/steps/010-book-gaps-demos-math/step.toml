@@ -1,8 +1,9 @@
 number = 10
 slug = "book-gaps-demos-math"
-status = "in-progress"
+status = "completed"
 description = "book-gap-coverage 3/3: math/Bayes demos -- distributions + histograms, Bayes ..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T07:28:36"
-commits = []
+completed_at = "2026-08-05T10:56:39"
+commits = ["e3c980660e72293cd46cfdbb1b356f2e40e780a9"]

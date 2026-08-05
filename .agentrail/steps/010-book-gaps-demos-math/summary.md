@@ -1,0 +1,1 @@
+Five math/Bayes/vision demos shipped with verified numbers and inspected charts; VAE descoped with recorded rationale; stale APL2 demo-count pin fixed; audit doc CLOSED; README at 78 demos.
