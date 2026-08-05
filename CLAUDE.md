@@ -490,6 +490,23 @@ git push
 Then the push-triggered Pages workflow deploys the new `pages/`.
 Verify with `gh run list --workflow=pages.yml --limit 1`.
 
+### Stale-page trap: always hand out ts-suffixed review URLs
+
+The two hosting surfaces cache differently. The local
+`mlpl-serve` sends `cache-control: no-cache` on every static
+file (pinned by `static_cache_tests`), so a plain reload of the
+localhost URL is always fresh. GitHub Pages serves
+`cache-control: max-age=600`: the browser may show a 10-minute
+stale index.html (pointing at the OLD hashed wasm bundle) with
+no revalidation, on top of the ~2-minute Actions deploy lag.
+
+After ANY pages deploy, give the user a cache-busting URL with a
+fresh timestamp appended -- `&ts=$(ep2ms)` (the user's `ep2ms`
+prints ms-since-epoch; `?ts=` when there is no query yet). Do
+this for BOTH surfaces (belt and suspenders), and prefer the
+localhost URL for immediate review. (User direction 2026-08-05
+after repeated stale-page confusion.)
+
 ## Local server rebuild/restart gate (split-brain trap)
 
 "Rebuild pages" and "rebuild the server" are SEPARATE gates. A

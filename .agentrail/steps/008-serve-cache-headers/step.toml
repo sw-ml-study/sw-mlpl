@@ -1,6 +1,6 @@
 number = 8
 slug = "serve-cache-headers"
-status = "pending"
+status = "in-progress"
 description = "User report: serious caching -- Usage Guide changes invisible across many rel..."
 role = "production"
 context_files = []
