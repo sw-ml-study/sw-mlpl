@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga experiment-quality: step 014 complete
+- feat(viz+demos): pareto_plot renderer + the Experiment Quality demo category (experiment-quality step eq-demos)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga experiment-quality: step 013 complete
 - feat(eval): param_count + experiment_metric -- the experiment-to-array bridge (experiment-quality step experiment-bridge)
 - docs(changes): refresh CHANGES.md to HEAD
