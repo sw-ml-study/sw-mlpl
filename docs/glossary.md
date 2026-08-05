@@ -20,6 +20,12 @@ the camera. Click a sculpture to see details (shape, rank,
 elements, memory). The stage persists across tab switches;
 `:clear` / Reset REPL clears it.
 
+## :2d / :3d (REPL commands)
+
+`:3d` opens the [[3D Visualization Stage]] (also Ctrl+3) and
+`:2d` closes it. `:3d on` / `:3d off` are the explicit forms;
+`:3d reset` re-centers the camera.
+
 ## argtop_k (builtin)
 
 `argtop_k(scores, k)` returns the INDICES of the k largest
@@ -386,6 +392,17 @@ epochs = unwrap(to_int(unwrap(list_get(args(), 0))))
 lr     = unwrap(to_number(unwrap(list_get(args(), 1))))
 ```
 
+## :ask / :connect (REPL commands)
+
+`:ask <question>` sends the question -- plus your recent REPL
+activity as context -- through the connected `mlpl-serve` to its
+Ollama model, so answers are about your actual session rather
+than generic trivia. `:connect list` shows the server's
+installed models with the current pick marked; `:connect set
+<model>` selects one for the session. Both need a connected
+server; with no explicit pick the server auto-uses a
+median-size installed model.
+
 ## Agent loop
 
 A control loop where an LLM repeatedly emits a tool-use
@@ -651,6 +668,12 @@ as `EvalError::ShapeMismatch` whose Display shows both
 labeled shapes side by side. See `docs/lang-reference.md`
 "Broadcasting Rules" for the full table.
 
+## :builtins (REPL command)
+
+Lists the built-in functions by category. `:describe <name>`
+prints one builtin's signature and doc line; `:help` shows the
+same list plus a syntax summary.
+
 ## BuiltinRef (`:foo` syntax)
 
 A first-class-ish reference to a builtin or operator. Written
@@ -662,13 +685,30 @@ variables, so `add = 42` does not shadow `:add`. Forward-
 compatible with first-class functions: when `Value::Function`
 lands, `:foo` lifts to a function value.
 
+## :clear (REPL command)
+
+Resets the session: variables, models, and 3D state are all
+cleared. Demos run in the SAME session until you clear it, so
+later demos (and `:ask`) can see earlier results.
+
+## Colon call (`:name(args)`)
+
+Any builtin can be called directly from the REPL prompt by
+prefixing a colon: `:disp(M)` is exactly `disp(M)`. Three colon
+forms exist: `:command` runs a REPL command (`:vars`, `:help`),
+`:name(args)` calls the builtin `name`, and a bare `:name` with
+no parentheses is a [[BuiltinRef (`:foo` syntax)]] -- a
+reference value for higher-order builtins like `reduce(:add,
+x)`. `:name arg` with a space and no parentheses is none of the
+three; the REPL answers it with a hint listing these forms.
+
 ## Calibration
 
 How well a model's reported confidence matches its actual
 accuracy. A well-calibrated classifier that says "70% sure"
 is right 70% of the time. Modern neural nets are typically
 overconfident. [[Temperature]] scaling on logits is the standard
-post-hoc fix. Deferred in MLPL.
+post-hoc fix. Not an MLPL builtin.
 
 ## Catastrophic Forgetting
 
@@ -1268,6 +1308,24 @@ zero-filled tensor of the given shape; `ones(...)` is one-
 filled; `fill(shape, value)` is the general form. Used to
 allocate accumulators (`losses = zeros([16])`), bias inits,
 mask scaffolding.
+
+## :fns / :list (REPL commands)
+
+`:fns` lists your `def u:` functions with signatures and
+doc-strings (APL's `)FNS`); `:list u:name` prints one function
+back verbatim, `#` comments included.
+
+## :help (REPL command)
+
+`:help` prints the REPL command list and a syntax summary;
+`:help <topic>` gives focused help (vars, models, fns,
+builtins, describe, wsid); `:<cmd> --help` prints one command's
+usage line.
+
+## :history (REPL command)
+
+Lists the recent REPL command lines. The same listing is handed
+to `:ask` as session context.
 
 ## for / in (language keyword)
 
@@ -2484,6 +2542,12 @@ loud error. The lookup half of [[Engram]] memory (hash with
 table), and generally useful wherever embedding-style row
 addressing is needed.
 
+## :reset (REPL command)
+
+Cancels ALL in-flight work on the connected backend (the
+recovery move for a hung or slow run), after a y/N
+confirmation. No-op in local browser mode.
+
 ## rotate (builtin)
 
 `rotate(x, k, axis)` -- cyclic shift along an axis, APL's rotate. Positive k brings element k to the front (a left/up shift); negative k -- spelled `0 - k`, MLPL has no unary minus -- rotates the other way; any magnitude wraps. A pure permutation, so it is tape-differentiable (the gradient is the inverse rotation) and shape- and label-preserving. The workhorse of stencil-style neighborhoods: all 8 [[Game of Life]] neighbor shifts are rotate calls, and a permutation MATRIX is just `rotate(one_hot(iota(n), n), k, 0)` -- a rotated identity.
@@ -3000,6 +3064,13 @@ directions in feature space. Explains why a single neuron
 rarely encodes one clean concept and motivates dictionary-
 learning-style decomposition.
 
+## :status (REPL command)
+
+Reports the connected backend(s): devices, GPUs, and live CPU /
+RAM / GPU / VRAM readings. `:status watch` keeps the report
+updating. In local browser mode it reports the WASM device and
+how to connect a server.
+
 ## :tags / :untag (REPL commands)
 
 Typed-value introspection. `:tags` lists every
@@ -3008,6 +3079,12 @@ showing the tag's display form (e.g. `Probability`,
 `Loss(CrossEntropy)`, `Weight(layer=linear_0, name=W)`).
 `:untag <name>` clears the auto-tag from a binding when the
 auto-tagger guessed wrong.
+
+## :trace (REPL command)
+
+`:trace on` / `:trace off` toggle execution tracing; a bare
+`:trace` prints a summary of the last trace; `:trace json
+[file]` prints the last trace as JSON or writes it to a file.
 
 ## tanh_layer / relu_layer / softmax_layer (builtins)
 
@@ -3354,6 +3431,11 @@ distributions ship.
 (labeled if any axes are named) and ValueTag if any.
 Trainable params are flagged `[param]`; frozen params show
 in `:wsid`'s frozen-count.
+
+## :version (REPL command)
+
+Prints the sw-MLPL version and the target architecture the REPL
+was built for.
 
 ## Validation set
 

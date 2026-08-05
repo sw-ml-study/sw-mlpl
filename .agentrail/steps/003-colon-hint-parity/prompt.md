@@ -1,0 +1,1 @@
+User report: ':disp x' in the local eval path silently prints x (bare :disp parses as a BuiltinRef, then x evaluates) while mlpl-serve answers the same line with the builtin-REFERENCE trichotomy hint (pinned by colon_expr_tests). Bring the local web path and terminal repl to parity: ':name <arg>' with a space and no parentheses gets the same hint on every surface. TDD.

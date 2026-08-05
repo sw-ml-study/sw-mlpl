@@ -50,6 +50,7 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:2d` | Close 3D visualization stage |
 | `:3d` | Open 3D visualization stage (also Ctrl+3) |
 | `:3d on` / `:3d off` | Explicit 3D on/off (case-insensitive) |
+| `:3d reset` | Re-center the 3D camera |
 | `:ask <prompt>` | Send the prompt to the connected Ollama model (connect mode) |
 | `:builtins` | List built-in functions by category |
 | `:clear` | Reset all variables, models, and session state |
@@ -59,12 +60,14 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:fns` | List your `def u:` functions (APL's `)FNS`) |
 | `:help` | Show built-in function list and syntax summary |
 | `:help <topic>` | Focused help: vars, models, fns, builtins, describe |
+| `:history` | List recent REPL command lines (also given to `:ask` as context) |
 | `:introspect` | Run all no-arg inspectors at once |
 | `:list <u:name>` | Print a function back -- verbatim source, `#` comments included |
 | `:models` | List bound models with layer structure |
 | `:reset` | Cancel ALL in-flight work on the connected backend (y/N prompt) |
 | `:status` / `:status watch` | Connected backend(s): devices, GPUs, live CPU/RAM/GPU/VRAM |
 | `:tags` | List every binding's ValueTag |
+| `:tokenizers` | List bound tokenizers |
 | `:trace` | Show summary of last trace |
 | `:trace json` | Print last trace as JSON |
 | `:trace json <file>` | Write trace JSON to a file |
@@ -79,6 +82,24 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 
 In the web playground the same commands work in the REPL box, and
 `:<cmd> --help` prints one command's usage.
+
+### Colon forms: commands, calls, references
+
+The colon prefix means three distinct things:
+
+- `:command` -- a REPL command from the table above
+  (`:vars`, `:trace on`). Add `--help` after any of them
+  (`:trace --help`) for its usage line.
+- `:name(args)` -- a direct BUILTIN CALL: `:disp(M)` is exactly
+  `disp(M)`. Any builtin works this way from the prompt.
+- `:name` bare -- a builtin REFERENCE, the value handed to
+  higher-order builtins: `reduce(:add, x)`, `scan(:mul, v)`.
+
+A bare reference is not a call, so `:disp M` (space, no
+parentheses) does not run `disp` -- the REPL answers with a hint
+pointing at these three forms. Note that builtin calls always
+need parentheses: plain `disp M` is read as a variable named
+`disp` and fails with "undefined variable".
 
 ## User-Defined Functions
 
