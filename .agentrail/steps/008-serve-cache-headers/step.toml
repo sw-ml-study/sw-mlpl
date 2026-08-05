@@ -1,8 +1,9 @@
 number = 8
 slug = "serve-cache-headers"
-status = "in-progress"
+status = "completed"
 description = "User report: serious caching -- Usage Guide changes invisible across many rel..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T07:32:14"
-commits = []
+completed_at = "2026-08-05T07:39:33"
+commits = ["0b4f85a34989ff3fc455a7600ce13758c997c7de"]

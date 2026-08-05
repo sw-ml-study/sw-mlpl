@@ -1,0 +1,1 @@
+Root-caused: local serve already no-cache (test-pinned); staleness is GitHub Pages max-age=600 + deploy lag. Codified the ts-suffixed-URL convention in CLAUDE.md and memory; no code change needed.
