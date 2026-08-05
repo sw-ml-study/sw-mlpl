@@ -1,4 +1,4 @@
-number = 5
+number = 6
 slug = "kg-core"
 status = "pending"
 description = "data-forge step per design: the four kg_* builtins over [E,3] edge arrays in ..."

@@ -1,9 +1,10 @@
 number = 5
 slug = "gan-demo-quality"
-status = "in-progress"
+status = "completed"
 description = "User report 2026-08-04: 'GAN (2D circle)' demo produces noise, not a circle. ..."
 role = "production"
 context_files = []
 created_at = "2026-08-04T18:39:11"
+completed_at = "2026-08-04T18:46:17"
 task_type = "rust-feature"
-commits = []
+commits = ["cb7396f1c9ce1beba26851c143d0ed790a109097"]
