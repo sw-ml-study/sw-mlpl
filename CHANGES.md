@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-04
 
+- chore(agentrail): archive forge-demo-visuals
+- saga forge-demo-visuals: complete (1 step)
+- fix(demos): every Data Forge demo now shows its evidence visually
+- chore(agentrail): archive data-forge
+- docs(changes): refresh CHANGES.md to HEAD
 - saga data-forge: complete (9 steps)
 - docs(saga): close data-forge -- retrospective, design marked shipped, queue advanced to experiment-quality
 - saga data-forge: step 008 complete
