@@ -643,3 +643,70 @@ fn dedupe_rows_returns_rows_and_surviving_indices() {
     // gather_rows(Y, d.index).
     assert_eq!(index.data(), &[0.0, 1.0, 3.0]);
 }
+
+#[test]
+fn kg_oracle_generates_verifies_and_walks() {
+    // Tiny 2-relation graph: 0->1->2->3 ring plus a 0->3 shortcut.
+    let setup = "g = [[0, 0, 1], [1, 0, 2], [2, 0, 3], [3, 0, 0], [0, 1, 3]]; ";
+    let nb = eval(&format!("{setup}kg_neighbors(g, 0)")).unwrap();
+    assert_eq!(nb.data(), &[1.0, 3.0], "sorted unique one-hop ids");
+    let nb_rel = eval(&format!("{setup}kg_neighbors(g, 0, 1)")).unwrap();
+    assert_eq!(nb_rel.data(), &[3.0], "relation-filtered");
+    // Batched verification: valid path, broken path, rank-1 path.
+    let ok = eval(&format!("{setup}kg_verify(g, [[0, 1, 2], [0, 2, 3]])")).unwrap();
+    assert_eq!(ok.data(), &[1.0, 0.0]);
+    let one = eval(&format!("{setup}kg_verify(g, [3, 0, 3])")).unwrap();
+    assert_eq!(
+        one.data(),
+        &[1.0],
+        "rank-1 treated as one path (3->0 ring, 0->3 shortcut)"
+    );
+    // Sampled paths are valid by construction and deterministic per seed.
+    let p1 = eval(&format!("{setup}kg_paths(g, 3, 8, 7)")).unwrap();
+    assert_eq!(p1.shape().dims(), &[8, 4]);
+    let p2 = eval(&format!("{setup}kg_paths(g, 3, 8, 7)")).unwrap();
+    assert_eq!(p1.data(), p2.data(), "seeded sampling is deterministic");
+    let all_ok = eval(&format!(
+        "{setup}reduce_add(kg_verify(g, kg_paths(g, 3, 8, 7)))"
+    ))
+    .unwrap();
+    assert_eq!(all_ok.data()[0], 8.0, "every sampled path verifies");
+}
+
+#[test]
+fn kg_split_is_entity_disjoint() {
+    let mut env = Environment::new();
+    let toks = mlpl_parser::lex(
+        "g = [[0, 0, 1], [1, 0, 2], [2, 0, 3], [3, 0, 4], [4, 0, 0], [1, 1, 3], [2, 1, 4]]; \
+         s = kg_split(g, 0.6, 7); 0",
+    )
+    .unwrap();
+    mlpl_eval::eval_program(&mlpl_parser::parse(&toks).unwrap(), &mut env).unwrap();
+    let run = |env: &mut Environment, src: &str| {
+        let toks = mlpl_parser::lex(src).unwrap();
+        mlpl_eval::eval_program(&mlpl_parser::parse(&toks).unwrap(), env).unwrap()
+    };
+    let tr = run(&mut env, "s.seen");
+    let ev = run(&mut env, "s.unseen");
+    assert_eq!(tr.shape().dims()[1], 3);
+    assert_eq!(ev.shape().dims()[1], 3);
+    assert_eq!(
+        tr.shape().dims()[0] + ev.shape().dims()[0],
+        7,
+        "every edge lands in one side"
+    );
+    // Entity-disjoint contract: every eval edge touches at least
+    // one entity that appears in NO train edge.
+    let train_ents: std::collections::HashSet<i64> = tr
+        .data()
+        .chunks_exact(3)
+        .flat_map(|r| [r[0] as i64, r[2] as i64])
+        .collect();
+    for r in ev.data().chunks_exact(3) {
+        let (s, d) = (r[0] as i64, r[2] as i64);
+        assert!(
+            !train_ents.contains(&s) || !train_ents.contains(&d),
+            "eval edge ({s},{d}) is fully inside the train entity set"
+        );
+    }
+}

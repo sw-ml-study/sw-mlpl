@@ -14,6 +14,7 @@ version.workspace = true
 # mlpl-eval-data) all depend on.
 
 [dependencies]
+mlpl-builtin-catalog = { path = "../mlpl-builtin-catalog" }
 # Saga: model save/load. Serialize ModelSpec + a weight snapshot so a
 # fine-tuned model can be persisted and reloaded (train once, compare
 # many times) instead of retrained every run.

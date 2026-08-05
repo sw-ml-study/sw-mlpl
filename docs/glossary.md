@@ -158,6 +158,21 @@ predictable structure without modeling every pixel. An
 substrate for [[World Model]]s. Not in MLPL.
 
 
+## kg_neighbors / kg_verify / kg_paths / kg_split (builtins)
+
+The [[Knowledge Graph]] task oracle over plain `[E, 3]`
+`(src, relation, dst)` edge arrays -- no graph value type needed.
+`kg_paths(edges, hops, n, seed)` GENERATES `[n, hops+1]` valid
+multi-hop paths (seeded random walks); `kg_verify(edges, paths)`
+CHECKS candidate rows (1 where every consecutive pair is an
+edge); `kg_neighbors(edges, node[, rel])` walks one hop; and
+`kg_split(edges, frac, seed)` makes the generalization split --
+`{seen, unseen}` with unseen edges touching entities the seen
+side never contains, so held-out tasks cannot be answered by
+memorization. Generate, verify, keep: pair with [[Rejection
+Sampling (best-of-N)]] and `compress`.
+
+
 ## knn_graph (builtin)
 
 `knn_graph(X, k)` builds an `[N*k, 3]` edge list of

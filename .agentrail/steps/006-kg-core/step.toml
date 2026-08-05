@@ -1,6 +1,6 @@
 number = 6
 slug = "kg-core"
-status = "pending"
+status = "in-progress"
 description = "data-forge step per design: the four kg_* builtins over [E,3] edge arrays in ..."
 role = "legacy"
 context_files = []

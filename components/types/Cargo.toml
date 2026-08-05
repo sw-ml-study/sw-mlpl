@@ -3,7 +3,7 @@
 [workspace]
 members = [
     "crates/mlpl-core",
-    "crates/mlpl-eval-core",
+    "crates/mlpl-builtin-catalog", "crates/mlpl-eval-core",
     "crates/mlpl-eval-state",
 ]
 resolver = "2"

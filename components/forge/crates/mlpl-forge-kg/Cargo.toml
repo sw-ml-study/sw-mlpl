@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-forge-kg"
+description = "Knowledge-graph task oracle over [E, 3] edge arrays: one-hop neighbors, batched path verification, seeded path sampling, and entity-disjoint train/eval splits"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-runtime-core = { path = "../../../runtime-core/crates/mlpl-runtime-core" }

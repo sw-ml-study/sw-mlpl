@@ -31,6 +31,9 @@ pub(crate) fn try_dispatch(
     if name == "dedupe_rows" {
         return Some(eval_dedupe_rows(args, env, trace));
     }
+    if name == "kg_split" {
+        return Some(eval_kg_split(args, env, trace));
+    }
     if name == "matmul" && args.len() == 2 {
         return Some(eval_matmul(args, env, trace, span));
     }
@@ -173,4 +176,26 @@ fn dedupe_core(x: &DenseArray, n: usize, l: usize) -> Result<(DenseArray, DenseA
     let rows = DenseArray::new(mlpl_array::Shape::new(vec![keep.len(), l]), rows)?;
     let index = DenseArray::from_vec(keep.into_iter().map(|i| i as f64).collect());
     Ok((rows, index))
+}
+
+/// `kg_split(edges, frac, seed)` -- entity-disjoint `{seen, unseen}`
+/// split of an `[E, 3]` edge array: `unseen` edges touch entities
+/// the `seen` side never contains (`train`/`eval` would collide
+/// with the train keyword); core in mlpl-forge-kg.
+fn eval_kg_split(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    crate::grad::arity_check(args, 3, "kg_split")?;
+    let edges = eval_expr(&args[0], env, trace)?.into_array()?;
+    let frac = eval_expr(&args[1], env, trace)?.into_array()?.data()[0];
+    let seed = eval_expr(&args[2], env, trace)?.into_array()?.data()[0] as u64;
+    let (train, evl) = mlpl_forge_kg::split_edges("kg_split", &edges, frac, seed)
+        .map_err(|e| EvalError::Unsupported(e.to_string()))?;
+    let fields = std::collections::BTreeMap::from([
+        ("seen".to_string(), Value::Array(train)),
+        ("unseen".to_string(), Value::Array(evl)),
+    ]);
+    Ok(Value::Record { fields })
 }

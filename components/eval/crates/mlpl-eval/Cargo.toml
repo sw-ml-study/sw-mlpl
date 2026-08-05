@@ -107,6 +107,7 @@ mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
 mlpl-mlx-handle = { path = "../../../native-rt/crates/mlpl-mlx-handle", optional = true }
 mlpl-mlx-rt = { path = "../../../native-rt/crates/mlpl-mlx-rt", optional = true }
+mlpl-forge-kg = { path = "../../../forge/crates/mlpl-forge-kg" }
 mlpl-tensor-handle = { path = "../../../array/crates/mlpl-tensor-handle" }
 mlpl-cuda-rt = { path = "../../../cuda-rt/crates/mlpl-cuda-rt", optional = true }
 mlpl-cuda-elementwise = { path = "../../../cuda-rt/crates/mlpl-cuda-elementwise", optional = true }

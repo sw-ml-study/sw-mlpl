@@ -28,6 +28,7 @@ fn try_external_dispatchers(
         .or_else(|| mlpl_runtime_rnn::try_call(name, args.to_vec()))
         .or_else(|| crate::random_builtins::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_data::dataset_builtins::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_forge_kg::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_ml::try_call(name, args.to_vec()))
         .or_else(|| crate::ensemble_builtins::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_data::embedding_builtins::try_call(name, args.to_vec()))

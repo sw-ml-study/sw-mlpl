@@ -5,12 +5,12 @@
 
 use mlpl_array::DenseArray;
 use mlpl_core::LabeledShape;
-use mlpl_eval_core::inspect_groups::BUILTIN_GROUPS;
+use mlpl_eval_core::inspect_groups::builtin_groups;
 use mlpl_eval_core::model::{ActKind, ModelSpec};
 
 pub(crate) fn format_builtins() -> String {
     let mut out = String::new();
-    for (group, fns) in BUILTIN_GROUPS {
+    for (group, fns) in builtin_groups() {
         out.push_str(group);
         out.push('\n');
         // Alphabetical within each group (table order is historical):

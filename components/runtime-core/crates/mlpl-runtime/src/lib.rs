@@ -30,6 +30,7 @@ pub fn runtime_builtin_names() -> impl Iterator<Item = &'static str> {
         .chain(mlpl_runtime_rnn::NAMES)
         .chain(random_builtins::NAMES)
         .chain(mlpl_runtime_data::dataset_builtins::NAMES)
+        .chain(mlpl_forge_kg::NAMES)
         .chain(mlpl_runtime_ml::NAMES)
         .chain(ensemble_builtins::NAMES)
         .chain(mlpl_runtime_data::embedding_builtins::NAMES)

@@ -39,11 +39,11 @@ pub const STRICT_CODE_RECAP: &str = " STRICT CODE RULES RECAP (these override an
 
 /// The compact MLPL reference for the `:ask` system prompt: the syntax
 /// cheat-sheet plus every builtin's signature, grouped, sourced from the
-/// curated `BUILTIN_GROUPS` table so it never drifts from the real set.
+/// curated builtin catalog so it never drifts from the real set.
 #[must_use]
 pub fn mlpl_reference() -> String {
     let mut r = MLPL_SYNTAX.to_string();
-    for (group, entries) in mlpl_eval_core::inspect_groups::BUILTIN_GROUPS {
+    for (group, entries) in mlpl_eval_core::inspect_groups::builtin_groups() {
         let mut sigs: Vec<&str> = entries.iter().map(|&(_, sig, _)| sig).collect();
         sigs.sort_unstable();
         r.push_str(&format!(" [{group}] {}.", sigs.join(", ")));

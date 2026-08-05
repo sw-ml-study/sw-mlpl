@@ -1,0 +1,13 @@
+# Data-forge component (docs/data-forge-design.md): the minimal
+# knowledge-graph task oracle -- generation, verification, and
+# generalization splits over plain [E, 3] edge arrays.
+
+[workspace]
+members = ["crates/mlpl-forge-kg"]
+resolver = "2"
+
+[workspace.package]
+edition = "2024"
+license = "MIT OR Apache-2.0"
+version = "0.20.0"
+

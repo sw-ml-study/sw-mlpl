@@ -65,7 +65,7 @@ ids, and the graph is an `[E, 3]` edge array of
 | `kg_neighbors(edges, node[, rel])` | Ids reachable from `node` in one hop (optionally along one relation). |
 | `kg_verify(edges, path)` | `1.0` iff every consecutive pair in the rank-1 `path` id sequence is an edge -- the answer checker for multi-hop tasks. |
 | `kg_paths(edges, hops, n, seed)` | `[n, hops+1]` valid paths sampled uniformly -- the multi-hop task GENERATOR (question = first id + relation sequence; answer = last id). |
-| `kg_split(edges, frac, seed)` | Record `{train, eval}` of edge arrays, split by ENTITY so eval paths visit unseen regions -- the generalization-vs-memorization split. |
+| `kg_split(edges, frac, seed)` | Record `{seen, unseen}` of edge arrays, split by ENTITY so held-out paths visit unseen regions (`train`/`eval` collide with the `train` keyword) -- the generalization-vs-memorization split. |
 
 ## What stays in-language (deliberately)
 
@@ -102,8 +102,8 @@ Graph multi-hop curriculum:
 ```text
 g = u:build_toy_graph()                 # [E, 3] edges
 split = kg_split(g, 0.8, 7)
-tasks3 = kg_paths(split.train, 3, 2000, 11)
-ok = u:verify_all(split.train, tasks3)  # kg_verify per row
+tasks3 = kg_paths(split.seen, 3, 2000, 11)
+ok = u:verify_all(split.seen, tasks3)  # kg_verify per row
 tasks = compress(ok, tasks3)
 idx = grade_up(u:difficulty(tasks))     # e.g. path length / rarity
 curriculum = gather_rows(tasks, idx)

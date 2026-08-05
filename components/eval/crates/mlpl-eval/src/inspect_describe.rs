@@ -9,7 +9,7 @@
 
 use crate::env_api::*;
 use mlpl_array::DenseArray;
-use mlpl_eval_core::inspect_groups::BUILTIN_GROUPS;
+use mlpl_eval_core::inspect_groups::builtin_groups;
 use mlpl_eval_core::model::ModelSpec;
 
 use crate::env::Environment;
@@ -35,7 +35,7 @@ pub(crate) fn format_describe(env: &Environment, name: &str) -> String {
             .join("\n");
         return format!("{name} -- string ({} chars)\n{body}", s.len());
     }
-    for (_, entries) in BUILTIN_GROUPS {
+    for (_, entries) in builtin_groups() {
         if let Some(doc) = entries.iter().find(|(n, _, _)| *n == name) {
             return format!("{} -- built-in\n  {}\n  {}", doc.0, doc.1, doc.2);
         }

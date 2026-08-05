@@ -1,0 +1,8 @@
+[package]
+name = "mlpl-builtin-catalog"
+description = "The curated builtin catalog behind :builtins / :describe and the docs-completeness tests -- static data only, split by domain"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]

@@ -12,6 +12,7 @@ mlpl-runtime-conv = { path = "../../../runtime-layers/crates/mlpl-runtime-conv" 
 mlpl-runtime-rnn = { path = "../../../runtime-layers/crates/mlpl-runtime-rnn" }
 mlpl-runtime-array = { path = "../../../runtime-element/crates/mlpl-runtime-array" }
 mlpl-runtime-ml = { path = "../../../runtime-layers/crates/mlpl-runtime-ml" }
+mlpl-forge-kg = { path = "../../../forge/crates/mlpl-forge-kg" }
 mlpl-runtime-data = { path = "../../../runtime-data/crates/mlpl-runtime-data" }
 mlpl-runtime-dim-reduction = { path = "../../../runtime-dr/crates/mlpl-runtime-dim-reduction" }
 mlpl-runtime-umap = { path = "../../../runtime-dr/crates/mlpl-runtime-umap" }
