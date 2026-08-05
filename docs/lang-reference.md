@@ -325,6 +325,9 @@ tables (e.g. the three name forms) keep their teaching order.
 |----------|------|-------------|
 | `argtop_k(scores, k)` | 2 | Indices of the top-`k` entries of a rank-1 `scores` vector, sorted by descending score (ties go to the lower index). Used to pick the strongest variants in ensemble / Neural-Thicket workflows. |
 | `running_product(v)` | 1 | Running product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). `cumprod` is the deprecated alias. |
+| `grade_up(v)` | 1 | Stable argsort, ascending: the index vector that sorts rank-1 `v` (ties keep original order). `gather_rows(X, grade_up(d))` reorders a dataset by difficulty -- the curriculum idiom. |
+| `grade_down(v)` | 1 | Stable argsort, descending. `gather_rows(C, grade_down(scores))` ranks candidates best-first; `take(grade_down(s), 0, 0)` is the best index. |
+| `compress(mask, a[, axis])` | 2-3 | Keep the slices of `a` along `axis` (default 0) where rank-1 `mask` is nonzero (APL compress). `compress(gt(scores, t), C)` keeps verified candidates; works on any rank. |
 | `running_sum(v)` | 1 | Running sum along a rank-1 vector: `out[i]` is the sum of `v[0..=i]` (prefix sums, CDFs, cumulative totals). The additive sibling of `running_product`. Rank-1 only: focus a row/column of a higher-rank value with `take(a, axis, i)`, or scan the whole array explicitly with `flatten(a)`. |
 | `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any array. APL heritage. |
 | `disp(a)` | 1 | Returns an ASCII box diagram (a `Value::Str`) that makes the rank, shape, and depth of `a` visible: rank <= 2 as a framed grid, rank >= 3 as a labeled stack of leading-axis slices, plus a `rank R  shape [..]  depth D` footer. MLPL's answer to APL's `]display`. |

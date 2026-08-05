@@ -39,6 +39,16 @@ active, individual units and edges can be watched, ablated,
 and causally tested. Not in MLPL.
 
 
+## compress (builtin)
+
+`compress(mask, a[, axis])` keeps the slices of `a` along
+`axis` (default 0: rows) where the rank-1 `mask` is nonzero --
+APL's compress. The selection half of [[Rejection Sampling
+(best-of-N)]]: `compress(gt(scores, 0.9), C)` keeps exactly the
+candidates a verifier accepted, and the companion targets follow
+with the same mask.
+
+
 ## emit_frame (builtin)
 
 `emit_frame(name, step, x)` streams tensor `x` as one live
@@ -83,6 +93,17 @@ heritage (monadic comma).
 Elementwise integer rounding: `floor(a)` rounds every element
 down, `ceil(a)` up, `round(a)` to the nearest integer. All three
 keep the input's shape.
+
+
+## grade_up / grade_down (builtins)
+
+`grade_up(v)` / `grade_down(v)` -- APL's grade: the STABLE
+argsort index vector of a rank-1 `v`, ascending / descending
+(ties keep original order). Grade returns WHERE things go rather
+than moving them, so one grade orders any number of companion
+arrays: `gather_rows(X, grade_up(difficulty))` is the
+[[Curriculum Learning]] idiom, `gather_rows(C,
+grade_down(scores))` ranks candidates best-first.
 
 
 ## Hopfield Network

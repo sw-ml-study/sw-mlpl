@@ -1,6 +1,6 @@
 number = 2
 slug = "g2-order-selection"
-status = "pending"
+status = "in-progress"
 description = "Implement grade_up/grade_down/compress per docs/data-forge-design.md in mlpl-..."
 role = "legacy"
 context_files = []

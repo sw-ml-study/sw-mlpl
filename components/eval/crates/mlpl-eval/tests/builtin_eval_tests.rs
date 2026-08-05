@@ -560,5 +560,46 @@ fn scans_compose_with_lenses_and_reject_higher_ranks() {
     // A bare higher-rank input is an error that names both lenses.
     let err = eval("M = reshape(range(6), [2, 3]); running_sum(M)").unwrap_err();
     let msg = format!("{err}");
-    assert!(msg.contains("take(") && msg.contains("flatten("), "hinting error: {msg}");
+    assert!(
+        msg.contains("take(") && msg.contains("flatten("),
+        "hinting error: {msg}"
+    );
+}
+
+#[test]
+fn grade_up_and_down_are_stable_argsorts() {
+    let up = eval("grade_up([3.0, 1.0, 2.0])").unwrap();
+    assert_eq!(up.data(), &[1.0, 2.0, 0.0]);
+    let down = eval("grade_down([3.0, 1.0, 2.0])").unwrap();
+    assert_eq!(down.data(), &[0.0, 2.0, 1.0]);
+    // Stability: ties keep original order in BOTH directions.
+    let up_t = eval("grade_up([1.0, 1.0, 0.0])").unwrap();
+    assert_eq!(up_t.data(), &[2.0, 0.0, 1.0]);
+    let down_t = eval("grade_down([1.0, 1.0, 0.0])").unwrap();
+    assert_eq!(down_t.data(), &[0.0, 1.0, 2.0]);
+    // The curriculum idiom: gather_rows(X, grade_up(d)).
+    let sorted =
+        eval("X = reshape(range(6), [3, 2]); d = [5.0, 1.0, 3.0]; gather_rows(X, grade_up(d))")
+            .unwrap();
+    assert_eq!(sorted.data(), &[2.0, 3.0, 4.0, 5.0, 0.0, 1.0]);
+}
+
+#[test]
+fn compress_keeps_masked_slices() {
+    let v = eval("compress([1, 0, 1], [10.0, 20.0, 30.0])").unwrap();
+    assert_eq!(v.data(), &[10.0, 30.0]);
+    // Rows (default axis 0) and columns (axis 1) of a matrix.
+    let rows = eval("M = reshape(range(6), [3, 2]); compress([0, 1, 1], M)").unwrap();
+    assert_eq!(rows.shape().dims(), &[2, 2]);
+    assert_eq!(rows.data(), &[2.0, 3.0, 4.0, 5.0]);
+    let cols = eval("M = reshape(range(6), [2, 3]); compress([1, 0, 1], M, 1)").unwrap();
+    assert_eq!(cols.shape().dims(), &[2, 2]);
+    assert_eq!(cols.data(), &[0.0, 2.0, 3.0, 5.0]);
+    // The rejection idiom: keep candidates over a threshold.
+    let kept =
+        eval("C = reshape(range(8), [4, 2]); s = [0.2, 0.95, 0.5, 0.99]; compress(gt(s, 0.9), C)")
+            .unwrap();
+    assert_eq!(kept.data(), &[2.0, 3.0, 6.0, 7.0]);
+    // Length mismatch is an error.
+    assert!(eval("compress([1, 0], [1.0, 2.0, 3.0])").is_err());
 }

@@ -45,6 +45,8 @@ fn structural_call(name: &str, args: Vec<DenseArray>) -> CallResult {
         "flatten" => Some(shape::flatten(name, args)),
         "reshape" => Some(transform::reshape(name, args)),
         "transpose" => Some(transform::transpose(name, args)),
+        "grade_up" | "grade_down" => Some(slice::grade(name, args)),
+        "compress" => Some(slice::compress(name, args)),
         "patchify" => Some(slice::patchify(name, args)),
         "concat" if args.len() == 3 => Some(slice::concat(name, args)),
         "take" => Some(slice::take(name, args)),

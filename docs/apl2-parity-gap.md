@@ -68,10 +68,12 @@ currying. This gap serves BOTH priorities at once.
 
 ### G2. Ordering and selection
 
-- `grade_up(a)` / `grade_down(a)` -- argsort indices; `sort(a)` as
-  the convenience. ML needs this constantly (top-k beyond argtop_k,
-  beam search, sampling without replacement, calibration curves).
-- `compress(mask, a, axis)` / boolean selection, and `expand`.
+- `grade_up(a)` / `grade_down(a)` -- SHIPPED (stable argsort
+  indices; `sort(a)` convenience still open). ML needs this
+  constantly (top-k beyond argtop_k, beam search, sampling
+  without replacement, calibration curves).
+- `compress(mask, a[, axis])` -- SHIPPED (boolean selection along
+  an axis); `expand` still open.
 - APL-style `take`/`drop` of leading cells (head/tail windows) --
   MLPL's `take(x, axis, idx)` is single-index extraction, a
   different op.

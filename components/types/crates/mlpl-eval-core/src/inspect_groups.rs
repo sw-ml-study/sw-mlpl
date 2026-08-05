@@ -102,6 +102,21 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "running sum along a rank-1 vector",
             ),
             (
+                "grade_up",
+                "grade_up(v)",
+                "stable argsort indices, ascending",
+            ),
+            (
+                "grade_down",
+                "grade_down(v)",
+                "stable argsort indices, descending",
+            ),
+            (
+                "compress",
+                "compress(mask, a[, axis])",
+                "keep slices where the rank-1 mask is nonzero (APL compress)",
+            ),
+            (
                 "linspace",
                 "linspace(start, stop, n)",
                 "n evenly-spaced values from start to stop (inclusive)",
