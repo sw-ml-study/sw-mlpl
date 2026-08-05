@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-04
 
+- saga experiment-quality: step 004 complete
+- fix(repl): colon-line UX hardening -- no more astonishing answers (user report)
+- docs(direction): commit the 20260802 research section (was uncommitted)
+- saga experiment-quality: step 003 complete
+- fix(repl): colon-forms trichotomy enforced on every surface (user report)
+- saga experiment-quality: step 002 complete
+- docs(repl): document every colon command and the colon-forms trichotomy (user report)
+- saga experiment-quality: step 001 complete
+- docs(design): experiment-quality design -- robustness suites + Pareto frontier (step 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): archive forge-demo-visuals
 - saga forge-demo-visuals: complete (1 step)
 - fix(demos): every Data Forge demo now shows its evidence visually
