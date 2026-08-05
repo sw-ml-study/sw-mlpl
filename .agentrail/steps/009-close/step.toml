@@ -1,0 +1,9 @@
+number = 9
+slug = "close"
+status = "pending"
+description = "data-forge close: design doc marked shipped; saga.md entry; future-sagas-queu..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-04T19:38:32"
+task_type = "docs"
+commits = []

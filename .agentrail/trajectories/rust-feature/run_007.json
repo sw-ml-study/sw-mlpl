@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 8,
+    "step": "forge-demos"
+  },
+  "action": "script-first authoring with repl verification of every printed number; pedagogy shaped by measured behavior (interference finding)",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-04T19:38:32"
+}

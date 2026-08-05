@@ -1,9 +1,10 @@
 number = 8
 slug = "forge-demos"
-status = "in-progress"
+status = "completed"
 description = "data-forge acceptance demos per design: (1) Rejection Sampling (best-of-N) --..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-04T19:22:55"
+completed_at = "2026-08-04T19:38:32"
 task_type = "rust-feature"
-commits = []
+commits = ["3432032cd3f3b0d07911a9184abbe23e36e28f77"]
