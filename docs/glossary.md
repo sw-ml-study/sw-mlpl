@@ -930,10 +930,12 @@ representations.
 
 `:describe <name>` prints a typed summary of a binding -- shape
 + tag + values preview for an array, layer tree for a model,
-vocab + merge count for a tokenizer, signature for a builtin.
-Per-tag bodies add detail (Probability rows show
-the verified-or-violated row-sum invariant; [[Gradient]] shows
-`wrt`, etc.).
+vocab + merge count for a tokenizer, signature for a builtin, or
+the one-line brief for a REPL command (`:describe history`).
+The name accepts the colon spelling too: `:describe :disp` and
+`:describe disp` are the same command. Per-tag bodies add detail
+(Probability rows show the verified-or-violated row-sum
+invariant; [[Gradient]] shows `wrt`, etc.).
 
 ## device block (language keyword)
 

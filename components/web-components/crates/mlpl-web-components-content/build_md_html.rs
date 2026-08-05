@@ -101,19 +101,22 @@ pub fn convert(md: &str) -> String {
             out.push_str("</table>");
         } else if let Some(item) = line.strip_prefix("- ") {
             out.push_str("<ul>");
-            out.push_str(&format!("<li>{}</li>", inline(item)));
+            let mut li = inline(item);
             while let Some(&next) = lines.peek() {
                 if let Some(it) = next.strip_prefix("- ") {
-                    out.push_str(&format!("<li>{}</li>", inline(it)));
+                    out.push_str(&format!("<li>{li}</li>"));
+                    li = inline(it);
                     lines.next();
                 } else if next.starts_with("  ") && !next.trim().is_empty() {
-                    // continuation line of the previous bullet
-                    out.push_str(&format!(" {}", inline(next.trim())));
+                    // continuation line of the current bullet
+                    li.push(' ');
+                    li.push_str(&inline(next.trim()));
                     lines.next();
                 } else {
                     break;
                 }
             }
+            out.push_str(&format!("<li>{li}</li>"));
             out.push_str("</ul>");
         } else if line.trim().is_empty() {
             // paragraph break; nothing to emit

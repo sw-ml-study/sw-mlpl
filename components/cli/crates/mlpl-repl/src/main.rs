@@ -41,7 +41,7 @@ pub(crate) fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
         if trimmed.is_empty() {
             continue;
         }
-        if trimmed == "exit" {
+        if matches!(trimmed, "exit" | "quit" | ":exit" | ":quit") {
             break;
         }
 

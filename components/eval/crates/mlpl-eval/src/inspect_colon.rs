@@ -4,40 +4,76 @@
 //! that keeps unrecognized colon lines out of program evaluation.
 //! Split from `inspect.rs` for the module function budget.
 
-/// Every REPL command word, across all surfaces (some are handled
-/// client-side in the web playground, some server-side, some in the
-/// terminal binary). Used to catch `:history()`-style lines: the
-/// parenthesized form looks like a builtin call, but the name is a
-/// command, and commands take no parentheses.
-const REPL_COMMANDS: &[&str] = &[
-    "vars",
-    "variables",
-    "models",
-    "fns",
-    "functions",
-    "builtins",
-    "built-ins",
-    "wsid",
-    "workspace",
-    "introspect",
-    "version",
-    "experiments",
-    "tags",
-    "describe",
-    "list",
-    "untag",
-    "help",
-    "history",
-    "status",
-    "clear",
-    "reset",
-    "ask",
-    "connect",
-    "upload",
-    "tokenizers",
-    "trace",
-    "2d",
-    "3d",
+/// Every REPL command word with a one-line brief, across all
+/// surfaces (some are handled client-side in the web playground,
+/// some server-side, some in the terminal binary). Used to catch
+/// `:history()`-style lines (the parenthesized form looks like a
+/// builtin call, but commands take no parentheses) and to answer
+/// `:describe <command>`.
+pub(crate) const REPL_COMMANDS: &[(&str, &str)] = &[
+    ("vars", "list bound variables with shape and tag"),
+    ("variables", "alias of :vars"),
+    ("models", "list bound models with layer structure"),
+    (
+        "fns",
+        "list your def u: functions with signatures and doc-strings",
+    ),
+    ("functions", "alias of :fns"),
+    ("builtins", "list built-in functions by category"),
+    ("built-ins", "alias of :builtins"),
+    ("wsid", "workspace summary"),
+    ("workspace", "alias of :wsid"),
+    ("introspect", "run all no-arg inspectors at once"),
+    ("version", "sw-MLPL version + target arch"),
+    ("experiments", "list captured experiment runs"),
+    ("tags", "list every binding's ValueTag"),
+    (
+        "describe",
+        "describe a variable, model, tokenizer, built-in, or REPL command: :describe <name>",
+    ),
+    ("list", "print a u: function back verbatim: :list <u:name>"),
+    (
+        "untag",
+        "clear a binding's auto-attached tag: :untag <name>",
+    ),
+    (
+        "help",
+        "command list and syntax summary; :help <topic> for focused help",
+    ),
+    (
+        "history",
+        "list recent REPL command lines (also given to :ask as context)",
+    ),
+    (
+        "status",
+        "connected backend devices + live telemetry; :status watch keeps updating",
+    ),
+    ("clear", "reset all variables, models, and session state"),
+    (
+        "reset",
+        "cancel ALL in-flight work on the connected backend (y/N prompt)",
+    ),
+    (
+        "ask",
+        "send a question to the connected Ollama model: :ask <question>",
+    ),
+    (
+        "connect",
+        "list or pick the server's Ollama model: :connect list | :connect set <m>",
+    ),
+    ("upload", "bind a photo as a variable (web): :upload <name>"),
+    ("tokenizers", "list bound tokenizers"),
+    (
+        "trace",
+        "execution tracing: :trace on | off, :trace, :trace json [file]",
+    ),
+    ("2d", "close the 3D visualization stage"),
+    (
+        "3d",
+        "open the 3D visualization stage; :3d reset re-centers the camera",
+    ),
+    ("exit", "quit the terminal REPL (also plain exit or quit)"),
+    ("quit", "alias of :exit"),
 ];
 
 /// Whether a colon-prefixed line is a builtin-reference CALL
@@ -94,7 +130,7 @@ pub fn colon_fallthrough_error(line: &str) -> Option<String> {
     // `:history()` / `:describe(x)`: the name before `(` is a REPL
     // command, so the call form cannot work. Genuine builtin calls
     // pass through to program evaluation.
-    if !REPL_COMMANDS.contains(&ident)
+    if !REPL_COMMANDS.iter().any(|(n, _)| *n == ident)
         || mlpl_eval_core::inspect_groups::documented_builtin_names().any(|n| n == ident)
     {
         return None;

@@ -62,6 +62,22 @@ fn unknown_help_topic_lists_the_topics() {
 }
 
 #[test]
+fn describe_covers_repl_commands() {
+    let mut env = Environment::new();
+    for line in [
+        ":describe :history",
+        ":describe history",
+        ":describe describe",
+    ] {
+        let out = inspect(&mut env, line).expect("describe output");
+        assert!(
+            out.contains("REPL command"),
+            "command brief expected for {line}, got {out:?}"
+        );
+    }
+}
+
+#[test]
 fn known_help_topics_still_work() {
     let mut env = Environment::new();
     let out = inspect(&mut env, ":help vars").expect("topic output");

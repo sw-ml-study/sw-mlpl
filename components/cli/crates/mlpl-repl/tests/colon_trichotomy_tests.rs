@@ -41,6 +41,17 @@ fn colon_call_evaluates_as_builtin_call() {
 }
 
 #[test]
+fn colon_exit_and_quit_aliases_leave_the_repl() {
+    for line in [":exit\n", ":quit\n", "quit\n"] {
+        let (_, stderr) = run_lines(line);
+        assert!(
+            !stderr.contains("Unknown command"),
+            "{line:?} must quit, not error: {stderr:?}"
+        );
+    }
+}
+
+#[test]
 fn command_with_parens_gets_the_no_parens_hint() {
     let (_, stderr) = run_lines(":history()\n");
     assert!(

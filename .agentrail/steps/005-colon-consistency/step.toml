@@ -1,0 +1,8 @@
+number = 5
+slug = "colon-consistency"
+status = "in-progress"
+description = "User report round 3: (a) :describe :describe / :describe :history say 'not a ..."
+role = "production"
+context_files = []
+created_at = "2026-08-04T22:31:39"
+commits = []

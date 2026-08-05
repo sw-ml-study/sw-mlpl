@@ -55,7 +55,7 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:builtins` | List built-in functions by category |
 | `:clear` | Reset all variables, models, and session state |
 | `:connect list` / `:connect set <m>` | List / pick the server's Ollama model for `:ask` |
-| `:describe <name>` | Describe a variable, model, tokenizer, or built-in |
+| `:describe <name>` | Describe a variable, model, tokenizer, built-in, or REPL command |
 | `:experiments` | List captured experiment runs |
 | `:fns` | List your `def u:` functions (APL's `)FNS`) |
 | `:help` | Show built-in function list and syntax summary |
@@ -78,7 +78,7 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:vars` | List bound variables with shape and tag |
 | `:version` | sw-MLPL version + target arch |
 | `:wsid` | Workspace summary |
-| `exit` | Quit the REPL |
+| `exit` / `:exit` | Quit the terminal REPL (also `quit` / `:quit`) |
 
 In the web playground the same commands work in the REPL box, and
 `:<cmd> --help` prints one command's usage.
@@ -100,6 +100,9 @@ parentheses) does not run `disp` -- the REPL answers with a hint
 pointing at these three forms. Note that builtin calls always
 need parentheses: plain `disp M` is read as a variable named
 `disp` and fails with "undefined variable".
+
+Commands that take a name accept both spellings of it:
+`:describe disp` and `:describe :disp` are the same command.
 
 ## User-Defined Functions
 

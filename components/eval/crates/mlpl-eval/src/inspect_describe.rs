@@ -40,7 +40,13 @@ pub(crate) fn format_describe(env: &Environment, name: &str) -> String {
             return format!("{} -- built-in\n  {}\n  {}", doc.0, doc.1, doc.2);
         }
     }
-    format!("'{name}' is not a bound variable, model, or built-in.")
+    if let Some((cmd, brief)) = crate::inspect_colon::REPL_COMMANDS
+        .iter()
+        .find(|(n, _)| *n == name)
+    {
+        return format!(":{cmd} -- REPL command\n  {brief}");
+    }
+    format!("'{name}' is not a bound variable, model, built-in, or REPL command.")
 }
 
 fn describe_model(env: &Environment, name: &str, spec: &ModelSpec) -> String {

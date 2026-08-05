@@ -41,3 +41,13 @@ fn headings_paragraphs_and_lists() {
     );
     assert!(h.contains("<ul><li>first</li><li>second</li></ul>"), "{h}");
 }
+
+#[test]
+fn wrapped_bullet_continuations_stay_inside_the_li() {
+    let md = "- first line\n  wraps here\n- second item\n  also wraps\n";
+    let h = convert(md);
+    assert!(
+        h.contains("<ul><li>first line wraps here</li><li>second item also wraps</li></ul>"),
+        "{h}"
+    );
+}
