@@ -117,6 +117,16 @@ pub const BUILTIN_GROUPS: &[FnGroup] = &[
                 "keep slices where the rank-1 mask is nonzero (APL compress)",
             ),
             (
+                "rand_ints",
+                "rand_ints(n, lo, hi, seed)",
+                "n uniform integers in [lo, hi), deterministic per seed",
+            ),
+            (
+                "dedupe_rows",
+                "dedupe_rows(X)",
+                "unique rows (first kept) as {rows, index}",
+            ),
+            (
                 "linspace",
                 "linspace(start, stop, n)",
                 "n evenly-spaced values from start to stop (inclusive)",

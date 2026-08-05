@@ -19,6 +19,7 @@ pub const NAMES: &[&str] = &[
     "val_split",
     "shift_pairs_x",
     "shift_pairs_y",
+    "rand_ints",
 ];
 
 /// Dispatch dataset builtins. Returns None if not matched.
@@ -29,6 +30,7 @@ pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, 
         "batch_mask" => Some(builtin_batch(name, args, true)),
         "split" => Some(builtin_split(name, args, true)),
         "val_split" => Some(builtin_split(name, args, false)),
+        "rand_ints" => Some(builtin_rand_ints(name, args)),
         "shift_pairs_x" => Some(builtin_shift_pairs(name, args, false)),
         "shift_pairs_y" => Some(builtin_shift_pairs(name, args, true)),
         _ => None,
@@ -193,4 +195,29 @@ fn builtin_shift_pairs(
         }
     }
     Ok(DenseArray::new(Shape::new(vec![b, bs]), data)?)
+}
+
+/// `rand_ints(n, lo, hi, seed)` -- `[n]` uniform integers in
+/// `[lo, hi)`, deterministic per seed (explicit `Xorshift64`
+/// state, same bits on every platform). The integer source the
+/// synthetic-data generators build on.
+fn builtin_rand_ints(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 4 {
+        return Err(RuntimeError::ArityMismatch {
+            func: name.into(),
+            expected: 4,
+            got: args.len(),
+        });
+    }
+    let (lo, hi) = (args[1].data()[0] as i64, args[2].data()[0] as i64);
+    if hi <= lo {
+        return Err(RuntimeError::InvalidArgument {
+            func: name.into(),
+            reason: format!("empty range [{lo}, {hi})"),
+        });
+    }
+    let mut rng = mlpl_runtime_core::Xorshift64::new(args[3].data()[0] as u64);
+    let draw = |_| (lo + (rng.next_u64() % (hi - lo) as u64) as i64) as f64;
+    let data: Vec<f64> = (0..args[0].data()[0] as usize).map(draw).collect();
+    Ok(DenseArray::from_vec(data))
 }

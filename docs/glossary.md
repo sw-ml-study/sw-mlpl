@@ -49,6 +49,17 @@ candidates a verifier accepted, and the companion targets follow
 with the same mask.
 
 
+## dedupe_rows (builtin)
+
+`dedupe_rows(X)` -- the unique rows of a rank-2 `[n, L]` array,
+first occurrence kept in original order, returned as a
+`{rows, index}` record: `d.rows` is the deduplicated dataset,
+and `gather_rows(Y, d.index)` carries any companion array
+(targets, scores, difficulty) through the same selection. The
+curation step between generation and [[Rejection Sampling
+(best-of-N)]].
+
+
 ## emit_frame (builtin)
 
 `emit_frame(name, step, x)` streams tensor `x` as one live
@@ -211,6 +222,16 @@ glance. Not an MLPL builtin.
 zero-argument builtin (constants are functions in MLPL -- there
 is no bare constant namespace). `sinusoidal_encoding` and the
 math functions consume them like any other scalar.
+
+
+## rand_ints (builtin)
+
+`rand_ints(n, lo, hi, seed)` -- `[n]` uniform integers in
+`[lo, hi)`, deterministic per seed (explicit PRNG state, so the
+same seed gives the same bits on every platform). The integer
+source for [[Synthetic Data]] generators: token ids, template
+slots, corruption positions. `randn` is its Gaussian float
+sibling.
 
 
 ## range (builtin)

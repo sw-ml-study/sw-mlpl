@@ -603,3 +603,43 @@ fn compress_keeps_masked_slices() {
     // Length mismatch is an error.
     assert!(eval("compress([1, 0], [1.0, 2.0, 3.0])").is_err());
 }
+
+#[test]
+fn rand_ints_is_deterministic_and_bounded() {
+    let a = eval("rand_ints(64, 3, 9, 7)").unwrap();
+    let b = eval("rand_ints(64, 3, 9, 7)").unwrap();
+    assert_eq!(a.data(), b.data(), "same seed, same bits");
+    assert_eq!(a.data().len(), 64);
+    assert!(
+        a.data()
+            .iter()
+            .all(|&v| (3.0..9.0).contains(&v) && v.fract() == 0.0)
+    );
+    let c = eval("rand_ints(64, 3, 9, 8)").unwrap();
+    assert_ne!(a.data(), c.data(), "different seed, different draw");
+}
+
+#[test]
+fn dedupe_rows_returns_rows_and_surviving_indices() {
+    let mut env = Environment::new();
+    let toks = mlpl_parser::lex(
+        "X = [[1.0, 2.0], [3.0, 4.0], [1.0, 2.0], [5.0, 6.0], [3.0, 4.0]]; \
+         d = dedupe_rows(X); 0",
+    )
+    .unwrap();
+    let stmts = mlpl_parser::parse(&toks).unwrap();
+    mlpl_eval::eval_program(&stmts, &mut env).unwrap();
+    let rows = {
+        let toks = mlpl_parser::lex("d.rows").unwrap();
+        mlpl_eval::eval_program(&mlpl_parser::parse(&toks).unwrap(), &mut env).unwrap()
+    };
+    assert_eq!(rows.shape().dims(), &[3, 2]);
+    assert_eq!(rows.data(), &[1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    let index = {
+        let toks = mlpl_parser::lex("d.index").unwrap();
+        mlpl_eval::eval_program(&mlpl_parser::parse(&toks).unwrap(), &mut env).unwrap()
+    };
+    // First occurrences, in original order -- companions follow via
+    // gather_rows(Y, d.index).
+    assert_eq!(index.data(), &[0.0, 1.0, 3.0]);
+}

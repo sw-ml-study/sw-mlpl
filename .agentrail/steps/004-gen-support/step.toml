@@ -1,6 +1,6 @@
 number = 4
 slug = "gen-support"
-status = "pending"
+status = "in-progress"
 description = "data-forge step 3 per design: rand_ints(n, lo, hi, seed) (deterministic unifo..."
 role = "legacy"
 context_files = []
