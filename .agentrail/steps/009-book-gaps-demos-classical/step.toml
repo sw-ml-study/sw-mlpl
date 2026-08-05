@@ -1,8 +1,9 @@
 number = 9
 slug = "book-gaps-demos-classical"
-status = "in-progress"
+status = "completed"
 description = "book-gap-coverage 2/3: classical-ML demos expressible with today's builtins -..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T07:28:36"
-commits = []
+completed_at = "2026-08-05T08:04:02"
+commits = ["1e6a7c57ff3d48ff2759f94c10c7465f56d2396b"]

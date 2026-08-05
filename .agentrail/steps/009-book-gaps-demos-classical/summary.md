@@ -1,0 +1,1 @@
+Four classical-ML demos shipped and verified (numbers + inspected visuals): metrics playground, linear SVM + kernel trick, voting ensemble with vote-map, decision stump. README 73 demos. Also this step absorbed three user-reported REPL fixes: :disp table row + pin test, REPL_COMMANDS/table drift test, shared-layer :<cmd> --help.
