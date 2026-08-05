@@ -1,0 +1,1 @@
+Keywords accepted as record field names in the two unambiguous member positions (record key, after dot) via a member_name token mapper; reserved everywhere else; pinned + documented in a new lang-reference Records section; pages deployed. kg_split keeps seen/unseen as the semantically better names.
