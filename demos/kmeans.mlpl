@@ -53,4 +53,4 @@ clus = argmax(-1 * dists, 1)
 
 # Visualize points colored by cluster, then overlay the learned centers.
 scatter_labeled(X, clus)
-svg(C, "scatter")
+scatter_labeled(C, range(3))   # centroids colored to match their clusters

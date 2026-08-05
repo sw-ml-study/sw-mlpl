@@ -1,0 +1,9 @@
+number = 3
+slug = "kmeans-centroid-colors"
+status = "in-progress"
+description = "User report 2026-08-04: K-Means demo's final centroid plot uses svg(C, 'scatt..."
+role = "production"
+context_files = []
+created_at = "2026-08-04T18:16:36"
+task_type = "docs"
+commits = []
