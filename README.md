@@ -309,6 +309,15 @@ The same demos are wired into the web REPL's demo dropdown,
 where a "Workspace Introspection" demo additionally exercises
 every `:`-prefixed command.
 
+## Related Projects
+
+- [mlplunit](https://github.com/softwarewrighter/mlplunit) --
+  xUnit-style testing framework for MLPL programs (under
+  development).
+- [demo-algorithms](https://github.com/sw-ml-study/demo-algorithms)
+  -- data-structures and algorithms demos written in MLPL:
+  general-purpose programming beyond the ML core.
+
 ## Links
 
 - Blog: [Software Wrighter Lab](https://software-wrighter-lab.github.io/)
