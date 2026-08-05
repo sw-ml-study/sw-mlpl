@@ -223,6 +223,71 @@ lines = [
 ]
 
 [[demos]]
+category = "Experiment Quality"
+name = "Pareto Frontier (which model size is worth it?)"
+intro = "The question is never 'which model is best' -- it is 'which model is best PER PARAMETER'. Six runs train the same task at widths 2 through 32 (plus one wide model deliberately stopped early); each experiment block records its final loss and its param_count. experiment_metric pulls the two columns back out of the log, pareto_front marks the non-dominated runs, and pareto_plot draws the classic efficient-frontier staircase: params across, loss down, the frontier in pink."
+takeaway = "The frontier bends: early width buys large loss drops (63 -> 195 params nearly halves it) and later width buys crumbs (371 -> 723 params saves ~0.18) -- diminishing returns as a PICTURE. The undertrained wide model is the blue dot inland from the staircase: dominated, because parameters do not buy quality without the training to use them. HOW TO CHECK IT WORKED: the printed mask is 1 1 1 1 1 0 (only the undertrained run dominated), losses fall monotonically with width for the trained five, and the staircase flattens rightward. Every piece is reusable: experiment blocks record, experiment_metric bridges, pareto_front selects, pareto_plot shows."
+lines = [
+    "N = 200",
+    "a = rand_ints(N, 0, 10, 3) ; b = rand_ints(N, 0, 10, 4)",
+    "X = concat(reshape(a, [N, 1]), reshape(b, [N, 1]), 1) / 10   # the task: learn a + b",
+    "Y = a + b",
+    'experiment "w2" { m = chain(linear(2, 2, 20), relu_layer(), linear(2, 19, 21)); train 80 { adam(cross_entropy(apply(m, X), Y), m, 0.02, 0.9, 0.999, 0.00000001); 0 }; loss_metric = cross_entropy(apply(m, X), Y); params_metric = param_count(m) }   # each run RECORDS its quality and its size',
+    'experiment "w4" { m = chain(linear(2, 4, 22), relu_layer(), linear(4, 19, 23)); train 80 { adam(cross_entropy(apply(m, X), Y), m, 0.02, 0.9, 0.999, 0.00000001); 0 }; loss_metric = cross_entropy(apply(m, X), Y); params_metric = param_count(m) }',
+    'experiment "w8" { m = chain(linear(2, 8, 24), relu_layer(), linear(8, 19, 25)); train 80 { adam(cross_entropy(apply(m, X), Y), m, 0.02, 0.9, 0.999, 0.00000001); 0 }; loss_metric = cross_entropy(apply(m, X), Y); params_metric = param_count(m) }',
+    'experiment "w16" { m = chain(linear(2, 16, 26), relu_layer(), linear(16, 19, 27)); train 80 { adam(cross_entropy(apply(m, X), Y), m, 0.02, 0.9, 0.999, 0.00000001); 0 }; loss_metric = cross_entropy(apply(m, X), Y); params_metric = param_count(m) }',
+    'experiment "w32" { m = chain(linear(2, 32, 28), relu_layer(), linear(32, 19, 29)); train 80 { adam(cross_entropy(apply(m, X), Y), m, 0.02, 0.9, 0.999, 0.00000001); 0 }; loss_metric = cross_entropy(apply(m, X), Y); params_metric = param_count(m) }',
+    'experiment "w32_undertrained" { m = chain(linear(2, 32, 30), relu_layer(), linear(32, 19, 31)); train 8 { adam(cross_entropy(apply(m, X), Y), m, 0.02, 0.9, 0.999, 0.00000001); 0 }; loss_metric = cross_entropy(apply(m, X), Y); params_metric = param_count(m) }   # wide but barely trained: watch where it lands',
+    'n = tally(experiment_metric("loss_metric"))    # the BRIDGE: experiment log -> arrays',
+    'P = concat(reshape(experiment_metric("params_metric"), [n, 1]), reshape(experiment_metric("loss_metric"), [n, 1]), 1)   # [runs, 2]: size vs quality',
+    "pareto_plot(P, [-1, -1])                       # WHAT YOU SEE: the staircase frontier; the undertrained run is the blue dot inland",
+    "pareto_front(P, [-1, -1])                      # the mask itself: 1 = on the frontier",
+]
+
+[[demos]]
+category = "Experiment Quality"
+name = "Robustness Suite (one model, five conditions)"
+intro = "A single accuracy number hides how brittle a model is. Train one classifier (predict a + b from its operands), then evaluate the SAME weights under five conditions: the training distribution, operands swapped, inputs scaled by 1.2, inputs shifted by 0.3, and inputs jittered with noise. Each perturbation encodes a question -- did it learn the SYMMETRY (addition commutes)? does it survive COVARIATE SHIFT? -- and the bar chart answers all five at once."
+takeaway = "The bars tell five different stories from one model: swap costs a little (the network only partly discovered that a + b = b + a -- it was never told), noise costs more, and scale/shift collapse it (accuracy falls toward the 1-in-19 floor) because the network memorized WHERE the data lives, not the arithmetic. HOW TO CHECK IT WORKED: baseline ~0.71, swap ~0.62, noisy ~0.53, scaled ~0.20, shifted ~0.05 -- a staircase downward across the bars. This is the shape of every robustness suite: one trained artifact, systematically varied conditions, one chart. The perturbations are one line each -- matmul for the swap, arithmetic for the shifts."
+lines = [
+    "N = 240",
+    "a = rand_ints(N, 0, 10, 3) ; b = rand_ints(N, 0, 10, 4)",
+    "X = concat(reshape(a, [N, 1]), reshape(b, [N, 1]), 1) / 10",
+    "Y = a + b",
+    "m = chain(linear(2, 48, 0), relu_layer(), linear(48, 19, 1))",
+    "train 240 { adam(cross_entropy(apply(m, X), Y), m, 0.01, 0.9, 0.999, 0.00000001); cross_entropy(apply(m, X), Y) }   # train ONCE",
+    "base = mean(eq(predict_batch(m, X), Y))        # condition 1: the training distribution",
+    "swap = mean(eq(predict_batch(m, matmul(X, [[0, 1], [1, 0]])), Y))   # condition 2: operands SWAPPED -- addition commutes; did the model learn that?",
+    "scaled = mean(eq(predict_batch(m, X * 1.2), Y))   # condition 3: covariate shift (scale)",
+    "shifted = mean(eq(predict_batch(m, X + 0.3), Y))  # condition 4: covariate shift (offset)",
+    "noisy = mean(eq(predict_batch(m, X + randn(9, [N, 2]) * 0.05), Y))  # condition 5: measurement noise",
+    'svg(concat([base], concat([swap], concat([noisy], concat([scaled], [shifted])))), "bar")   # WHAT YOU SEE: five bars stepping down -- base, swap, noisy, scaled, shifted',
+    "{base: base, swap: swap, noisy: noisy, scaled: scaled, shifted: shifted}",
+]
+
+[[demos]]
+category = "Experiment Quality"
+name = "Scaffold Dependence (train with hints, test without)"
+intro = "A SCAFFOLD is privileged information available during training but not at test time -- worked steps, traces, hints. Here the hint column literally leaks the answer (the target sum, scaled), and the scaffolded model looks superb while it is there. The measurement that matters: zero the hint column and ask again. A third model that never saw the hint is the honest reference. This present-vs-absent evaluation is mandatory before believing any scaffolded-training claim."
+takeaway = "The cliff is the lesson: with the hint the scaffolded model scores ~0.97; with the hint zeroed it collapses to ~0.03 -- below even random guessing among 19 classes would suggest, because the network leaned almost entirely on the leaked column and the zeroed input is far outside anything it saw. Meanwhile the honest model reaches ~0.96 from the operands alone -- the scaffold bought nothing that survives its removal. HOW TO CHECK IT WORKED: three bars -- tall, collapsed, tall -- and the printed record shows with_hint and honest nearly equal with no_hint near zero. Scaffolds can still help (curricula, intermediate losses) -- but only the scaffold-absent number counts."
+lines = [
+    "N = 240",
+    "a = rand_ints(N, 0, 10, 3) ; b = rand_ints(N, 0, 10, 4)",
+    "X = concat(reshape(a, [N, 1]), reshape(b, [N, 1]), 1) / 10",
+    "Y = a + b",
+    "Xs = concat(X, reshape(Y, [N, 1]) / 6, 1)      # the SCAFFOLD: a third column that leaks the answer",
+    "ms = chain(linear(3, 48, 0), relu_layer(), linear(48, 19, 1))",
+    "train 400 { adam(cross_entropy(apply(ms, Xs), Y), ms, 0.02, 0.9, 0.999, 0.00000001); cross_entropy(apply(ms, Xs), Y) }   # trained WITH the hint",
+    "with_hint = mean(eq(predict_batch(ms, Xs), Y))",
+    "no_hint = mean(eq(predict_batch(ms, matmul(Xs, [[1, 0, 0], [0, 1, 0], [0, 0, 0]])), Y))   # SAME weights, hint column zeroed",
+    "mh = chain(linear(2, 48, 10), relu_layer(), linear(48, 19, 11))",
+    "train 240 { adam(cross_entropy(apply(mh, X), Y), mh, 0.01, 0.9, 0.999, 0.00000001); cross_entropy(apply(mh, X), Y) }   # the honest reference: never saw a hint",
+    "honest = mean(eq(predict_batch(mh, X), Y))",
+    'svg(concat([with_hint], concat([no_hint], [honest])), "bar")   # WHAT YOU SEE: tall, collapsed, tall',
+    "{with_hint: with_hint, no_hint: no_hint, honest: honest}",
+]
+
+[[demos]]
 category = "APL2 / General Programming"
 name = "Structure Zoo (rank / shape / depth)"
 intro = "APL2-inspired GENERAL-PURPOSE programming, not ML: this demo teaches the language itself. Every value in MLPL has a STRUCTURE -- a rank (how many axes), a shape (how big each axis is), a size (how many elements in total), a tally (how many major cells along the leading axis), and a depth (how deeply nested). This demo introduces the APL-inspired introspection builtins that make that structure visible: size(a) and tally(a) count elements and leading-axis cells, depth(a) reports the nesting level, and disp(a) draws an ASCII box diagram (MLPL's answer to APL's ]display). We walk a scalar, a vector, a matrix, and a 3-tensor, then point the same tools at a real neural-net weight matrix -- so you build shape intuition before wiring up a model."

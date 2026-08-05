@@ -211,6 +211,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "forward pass + argmax over the trailing axis (integer class labels)",
             ),
             (
+                "pareto_plot",
+                "pareto_plot(P, dirs)",
+                "frontier scatter + staircase over an [n, k] metric matrix",
+            ),
+            (
                 "param_count",
                 "param_count(m)",
                 "total trainable parameters of a model",

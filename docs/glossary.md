@@ -254,6 +254,15 @@ run recorded yields the empty `[0]` vector. The bridge from
 `experiment` blocks to arrays: column-concat several calls into
 the `[n, k]` matrix that [[pareto_front (builtin)]] consumes.
 
+## pareto_plot (builtin)
+
+`pareto_plot(P, dirs)` renders the frontier picture: every row
+of the `[n, 2]` metric matrix as a dot -- frontier members
+highlighted and enlarged -- with the classic staircase line
+stepped through the frontier, sorted by the first column. The
+mask comes from [[pareto_front (builtin)]] internally, so the
+plot and the mask can never disagree.
+
 ## pareto_front (builtin)
 
 `pareto_front(P, dirs)` -> the `[n]` 0/1 mask of non-dominated

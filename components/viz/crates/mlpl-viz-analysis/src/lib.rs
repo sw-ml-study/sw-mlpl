@@ -16,4 +16,4 @@ pub use analysis::{
 pub use critical_dimensions::render_critical_dimensions;
 pub use decision_boundary::render_decision_boundary;
 pub use loss_landscape::analysis_loss_landscape;
-pub use train_curve::analysis_train_val_curve;
+pub use train_curve::{analysis_pareto_plot, analysis_train_val_curve};

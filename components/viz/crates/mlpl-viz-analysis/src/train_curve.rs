@@ -5,7 +5,9 @@
 
 use mlpl_array::DenseArray;
 
-use mlpl_viz_core::{H, PAD, VizError, bounds, scale, write_svg_close, write_svg_open};
+use mlpl_viz_core::{
+    H, PAD, VizError, bounds, scale, write_corner_scale_labels, write_svg_close, write_svg_open,
+};
 
 const TRAIN_COLOR: &str = "#a6e3a1";
 const VAL_COLOR: &str = "#fab387";
@@ -87,4 +89,83 @@ fn legend(ymin: f64, ymax: f64) -> String {
         lab(PAD + 4.0, ymax),
         lab(H - PAD, ymin),
     )
+}
+
+const FRONT_COLOR: &str = "#f38ba8";
+const DOMINATED_COLOR: &str = "#89b4fa";
+
+/// Pareto frontier plot: every (x, y) metric pair as a dot --
+/// dominated points blue, frontier members pink and larger --
+/// plus the staircase line through the frontier, sorted by x.
+/// `mask` is `pareto_front`'s 0/1 vector; the eval layer computes
+/// it with the builtin, so plot and mask can never disagree.
+pub fn analysis_pareto_plot(points: &DenseArray, mask: &DenseArray) -> Result<String, VizError> {
+    let (n, xs, ys) = pareto_inputs(points, mask)?;
+    let (xmin, xmax) = bounds(&xs);
+    let (ymin, ymax) = bounds(&ys);
+    let px = |i: usize| (scale(xs[i], xmin, xmax, 0), scale(ys[i], ymin, ymax, 1));
+    let mut out = String::new();
+    write_svg_open(&mut out);
+    staircase(&mut out, mask.data(), &xs, px);
+    for i in 0..n {
+        let (cx, cy) = px(i);
+        let front = mask.data()[i] != 0.0;
+        let (fill, r) = if front {
+            (FRONT_COLOR, 5)
+        } else {
+            (DOMINATED_COLOR, 4)
+        };
+        out.push_str(&format!(
+            "<circle cx=\"{cx:.1}\" cy=\"{cy:.1}\" r=\"{r}\" fill=\"{fill}\" stroke=\"#1e1e2e\" stroke-width=\"1.5\"/>"
+        ));
+    }
+    write_corner_scale_labels(&mut out, xmin, xmax, ymin, ymax);
+    write_svg_close(&mut out);
+    Ok(out)
+}
+
+/// Validate the Nx2 points + length-N mask pair and split the
+/// coordinate columns.
+#[allow(clippy::type_complexity)]
+fn pareto_inputs(
+    points: &DenseArray,
+    mask: &DenseArray,
+) -> Result<(usize, Vec<f64>, Vec<f64>), VizError> {
+    let dims = points.shape().dims();
+    if dims.len() != 2 || dims[1] != 2 {
+        return Err(VizError::InvalidShape(format!(
+            "pareto_plot expects Nx2 points, got {dims:?}"
+        )));
+    }
+    let n = dims[0];
+    if mask.rank() != 1 || mask.data().len() != n {
+        return Err(VizError::InvalidShape(format!(
+            "pareto_plot mask length {} must match {n}",
+            mask.data().len()
+        )));
+    }
+    let pts = points.data();
+    let xs: Vec<f64> = (0..n).map(|i| pts[i * 2]).collect();
+    let ys: Vec<f64> = (0..n).map(|i| pts[i * 2 + 1]).collect();
+    Ok((n, xs, ys))
+}
+
+/// The frontier staircase: frontier points sorted by x, joined by
+/// horizontal-then-vertical steps, drawn UNDER the dots.
+fn staircase(out: &mut String, mask: &[f64], xs: &[f64], px: impl Fn(usize) -> (f64, f64)) {
+    let mut front: Vec<usize> = (0..xs.len()).filter(|&i| mask[i] != 0.0).collect();
+    front.sort_by(|&a, &b| xs[a].total_cmp(&xs[b]));
+    if front.len() < 2 {
+        return;
+    }
+    let (x0, y0) = px(front[0]);
+    let mut d = format!("M {x0:.1} {y0:.1}");
+    for w in front.windows(2) {
+        let (x2, y2) = px(w[1]);
+        let (_, y1) = px(w[0]);
+        d.push_str(&format!(" L {x2:.1} {y1:.1} L {x2:.1} {y2:.1}"));
+    }
+    out.push_str(&format!(
+        "<path d=\"{d}\" fill=\"none\" stroke=\"{FRONT_COLOR}\" stroke-width=\"2\" stroke-dasharray=\"5 3\" opacity=\"0.8\"/>"
+    ));
 }

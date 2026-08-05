@@ -12,7 +12,8 @@ pub mod svg;
 
 pub use mlpl_viz_analysis::{
     analysis_boundary_2d, analysis_confusion_matrix, analysis_hist, analysis_loss_curve,
-    analysis_loss_landscape, analysis_scatter_labeled, analysis_train_val_curve,
+    analysis_loss_landscape, analysis_pareto_plot, analysis_scatter_labeled,
+    analysis_train_val_curve,
 };
 pub use plotly3d::render_plotly3d;
 pub use svg::{

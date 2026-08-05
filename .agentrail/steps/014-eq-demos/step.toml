@@ -1,6 +1,6 @@
 number = 14
 slug = "eq-demos"
-status = "pending"
+status = "in-progress"
 description = "Experiment Quality demo category per design: Robustness Suite (train once, fi..."
 role = "legacy"
 context_files = []

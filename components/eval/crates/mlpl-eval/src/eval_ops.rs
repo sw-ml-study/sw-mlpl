@@ -123,6 +123,7 @@ pub(crate) fn eval_analysis_helper(
     if !matches!(
         name,
         "hist"
+            | "pareto_plot"
             | "scatter_labeled"
             | "loss_curve"
             | "train_val_curve"

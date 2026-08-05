@@ -66,6 +66,12 @@ fn grids(name: &str, a: &[DenseArray]) -> Result<String, EvalError> {
             arity(name, a, 2)?;
             mlpl_viz::analysis_confusion_matrix(&a[0], &a[1])?
         }
+        "pareto_plot" => {
+            arity(name, a, 2)?;
+            let mask =
+                mlpl_runtime::call_builtin("pareto_front", vec![a[0].clone(), a[1].clone()])?;
+            mlpl_viz::analysis_pareto_plot(&a[0], &mask)?
+        }
         _ => {
             arity(name, a, 4)?;
             mlpl_viz::analysis_boundary_2d(&a[0], &a[1], &a[2], &a[3])?
