@@ -1,8 +1,9 @@
 number = 11
 slug = "related-projects"
-status = "in-progress"
+status = "completed"
 description = "User request: README Related Projects section -- mlplunit (xUnit-style testin..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T11:01:03"
-commits = []
+completed_at = "2026-08-05T11:01:03"
+commits = ["f8e852349387c14fc200daeceae18d8655450bd4"]
