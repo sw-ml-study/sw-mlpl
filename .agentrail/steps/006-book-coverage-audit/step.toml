@@ -1,0 +1,8 @@
+number = 6
+slug = "book-coverage-audit"
+status = "in-progress"
+description = "Completeness check of docs/ml-topics.txt (3 eBooks) against glossary/demos/di..."
+role = "production"
+context_files = []
+created_at = "2026-08-05T07:14:45"
+commits = []

@@ -68,6 +68,21 @@ reasoning datasets, ICRL needs validated task distributions.
    energy; acceptance rate vs MTP overhead), rendered via the
    existing svg/experiment machinery.
 
+## Pedagogy completeness (book-coverage; schedulable any time)
+
+**book-gap-coverage** -- close the gaps found by
+`docs/book-coverage-audit.md` (the three-eBook completeness check
+against glossary/demos/diagrams/lessons): ~16 small glossary
+entries (Bayes toolkit, eigen/SVD, Jacobian/Hessian, metrics,
+kernel/ensemble umbrellas, segmentation/detection), ~10 demos all
+expressible with today's builtins (metrics playground, linear
+SVM + kernel trick, voting ensemble, power iteration,
+distributions, Bayes grid posterior, augmentation, toy
+segmentation, VAE, decision stump), ~4 diagrams (naive Bayes,
+kernel trick, Bayes' theorem, eigenvectors), and two findability
+text fixes. Docs+demo work, no runtime changes; can interleave
+between feature sagas or run as one saga.
+
 ## Track 2 -- generation speed (the MTP program; CPU + MLX)
 
 4. **generation-state-kv-cache** -- GenerationState, per-layer

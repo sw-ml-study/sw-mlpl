@@ -1,0 +1,1 @@
+Completeness check of docs/ml-topics.txt (3 eBooks) against glossary/demos/diagrams/lessons; write docs/book-coverage-audit.md; queue the book-gap-coverage saga; add the :<builtin>(args) row to the usage table (user noted :disp absent from the table itself).
