@@ -1,0 +1,1 @@
+Usage Guide REPL table completed (:history, :tokenizers, :3d reset), colon-forms trichotomy section added, 12 glossary entries for all REPL colon commands + Colon call entry, README count 415->427, pages redeployed.
