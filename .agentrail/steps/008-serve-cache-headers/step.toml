@@ -1,0 +1,8 @@
+number = 8
+slug = "serve-cache-headers"
+status = "pending"
+description = "User report: serious caching -- Usage Guide changes invisible across many rel..."
+role = "production"
+context_files = []
+created_at = "2026-08-05T07:32:14"
+commits = []

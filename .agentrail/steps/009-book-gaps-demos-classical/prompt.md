@@ -1,0 +1,1 @@
+book-gap-coverage 2/3: classical-ML demos expressible with today's builtins -- metrics playground (accuracy/precision/recall vs threshold), linear SVM via hinge loss + explicit feature-map kernel trick, voting ensemble of small MLPs, decision stump. Repl-verify numbers AND inspect rendered SVGs; HOW-TO-CHECK takeaways; README demo count; pages deploy.

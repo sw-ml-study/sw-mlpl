@@ -1,0 +1,1 @@
+book-gap-coverage 3/3: math/Bayes demos -- distributions + histograms, Bayes grid posterior (coin flip), power iteration (top eigenvector), VAE (noise hoisted outside grad), data augmentation, toy 2D segmentation. Same verification discipline; README demo count; pages deploy; audit doc marked CLOSED for shipped items.

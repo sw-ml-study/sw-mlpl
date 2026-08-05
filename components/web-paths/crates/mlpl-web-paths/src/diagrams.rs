@@ -22,6 +22,11 @@ use yew::prelude::*;
 /// -> phenomena) so the index reads as a guided tour.
 pub const CONCEPT_DIAGRAMS: &[(&str, &str, &str)] = &[
     (
+        "52_eigenvectors",
+        "Eigenvectors & power iteration",
+        "Directions a matrix only stretches; PCA's first step.",
+    ),
+    (
         "01_linear_regression",
         "Linear Regression",
         "y = wX + b, MSE loss, gradient descent.",
@@ -30,6 +35,16 @@ pub const CONCEPT_DIAGRAMS: &[(&str, &str, &str)] = &[
         "02_logistic_regression",
         "Logistic Regression",
         "Linear layer + sigmoid + cross-entropy.",
+    ),
+    (
+        "51_bayes_theorem",
+        "Bayes' theorem",
+        "Prior * likelihood, renormalized: two array lines.",
+    ),
+    (
+        "49_naive_bayes",
+        "Naive Bayes",
+        "Independent per-feature evidence, multiplied, argmax.",
     ),
     (
         "03_decision_tree",
@@ -45,6 +60,11 @@ pub const CONCEPT_DIAGRAMS: &[(&str, &str, &str)] = &[
         "05_svm",
         "Support Vector Machine",
         "Maximum-margin hyperplane + kernel trick.",
+    ),
+    (
+        "50_kernel_trick",
+        "The kernel trick",
+        "Lift 1D points to (x, x*x): a line separates what a threshold cannot.",
     ),
     (
         "06_perceptron",

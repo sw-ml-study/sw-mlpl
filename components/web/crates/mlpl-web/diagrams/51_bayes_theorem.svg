@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:12px">
+  <text x="300" y="22" text-anchor="middle" font-size="16" font-weight="bold">Bayes' theorem: multiply, then renormalize</text>
+  <text x="300" y="44" text-anchor="middle" font-family="monospace" font-size="13">P(H | D)  =  P(D | H) * P(H)  /  P(D)</text>
+
+  <!-- prior -->
+  <g transform="translate(45,80)">
+    <text x="70" y="0" text-anchor="middle" font-weight="bold" fill="#0369a1">PRIOR P(H)</text>
+    <text x="70" y="16" text-anchor="middle" font-size="10">belief before data</text>
+    <g transform="translate(0,30)" fill="#bae6fd" stroke="#0369a1">
+      <rect x="0"   y="60" width="24" height="40"/>
+      <rect x="29"  y="50" width="24" height="50"/>
+      <rect x="58"  y="40" width="24" height="60"/>
+      <rect x="87"  y="50" width="24" height="50"/>
+      <rect x="116" y="60" width="24" height="40"/>
+    </g>
+    <text x="70" y="150" text-anchor="middle" font-size="10">hypotheses (a grid of values)</text>
+  </g>
+
+  <text x="212" y="175" font-size="20">*</text>
+
+  <!-- likelihood -->
+  <g transform="translate(235,80)">
+    <text x="70" y="0" text-anchor="middle" font-weight="bold" fill="#a16207">LIKELIHOOD P(D | H)</text>
+    <text x="70" y="16" text-anchor="middle" font-size="10">how well each H explains the data</text>
+    <g transform="translate(0,30)" fill="#fde68a" stroke="#a16207">
+      <rect x="0"   y="95" width="24" height="5"/>
+      <rect x="29"  y="80" width="24" height="20"/>
+      <rect x="58"  y="55" width="24" height="45"/>
+      <rect x="87"  y="25" width="24" height="75"/>
+      <rect x="116" y="45" width="24" height="55"/>
+    </g>
+  </g>
+
+  <text x="402" y="175" font-size="20">=</text>
+
+  <!-- posterior -->
+  <g transform="translate(425,80)">
+    <text x="70" y="0" text-anchor="middle" font-weight="bold" fill="#15803d">POSTERIOR P(H | D)</text>
+    <text x="70" y="16" text-anchor="middle" font-size="10">belief after the evidence</text>
+    <g transform="translate(0,30)" fill="#bbf7d0" stroke="#15803d">
+      <rect x="0"   y="98" width="24" height="2"/>
+      <rect x="29"  y="88" width="24" height="12"/>
+      <rect x="58"  y="60" width="24" height="40"/>
+      <rect x="87"  y="20" width="24" height="80"/>
+      <rect x="116" y="62" width="24" height="38"/>
+    </g>
+  </g>
+
+  <rect x="40" y="280" width="520" height="100" fill="#f8fafc" stroke="#9ca3af"/>
+  <text x="52" y="300">On a grid of hypotheses the whole theorem is two array lines:</text>
+  <text x="52" y="322" font-family="monospace" font-size="11">post = pr * lik           # multiply elementwise</text>
+  <text x="52" y="340" font-family="monospace" font-size="11">post = post / reduce_add(post)   # renormalize (this division IS P(D))</text>
+  <text x="52" y="364">More data: multiply again. The posterior narrows as evidence accumulates.</text>
+</svg>

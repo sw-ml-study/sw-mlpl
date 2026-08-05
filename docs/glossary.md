@@ -322,6 +322,16 @@ Content persists across tab switches.
 Elementwise absolute value: `abs(x)` returns `|x|` for each
 element. Pure scalar map; preserves shape.
 
+## Accuracy
+
+The fraction of predictions that are exactly right:
+`mean(eq(predict_batch(m, X), Y))`. The first metric to check
+and the easiest to fool -- on imbalanced data a model that
+always predicts the majority class scores high while learning
+nothing, which is why [[Precision vs Recall]], [[F1 score /
+threshold tuning]], and [[ROC / AUC]] exist. MLPL:
+`confusion_matrix(pred, Y)` shows where the misses live.
+
 ## Activation function
 
 A non-linear elementwise function applied to a layer's output
@@ -579,6 +589,17 @@ batch norm is not in MLPL.
 `size` does not divide `N`. `batch_mask(x, size)` returns the
 matching `[B, size]` `0 / 1` mask so downstream ops can ignore
 the padded positions.
+
+## Bayes' theorem
+
+`P(H | D) = P(D | H) * P(H) / P(D)`: the posterior probability
+of a hypothesis given data equals the likelihood of the data
+under the hypothesis, times the prior, normalized. The entire
+Bayesian toolkit is this one identity applied repeatedly -- see
+[[Prior / Posterior / Likelihood]] and [[Naive Bayes]] (which
+adds a feature-independence assumption). In array terms it is
+elementwise multiply-then-normalize: `post = pr * lik /
+reduce_add(pr * lik)`.
 
 ## Beam search
 
@@ -1159,6 +1180,17 @@ left-to-right and returns the first `Embedding` layer's
 shipped this so demos can inspect / project / cluster a
 learned embedding after training.
 
+## Eigenvalues / Eigenvectors
+
+Directions a matrix only stretches, never rotates:
+`matmul(A, v) = lambda * v`. The eigenvectors of a dataset's
+covariance matrix are its principal components ([[PCA
+(Principal Component Analysis)]]), and the largest one can be
+found by POWER ITERATION -- repeatedly multiply a random vector
+by the matrix and normalize: `v = matmul(A, v) / sqrt(sum(v *
+v))`. Not an MLPL builtin; the power-iteration idiom is a few
+lines of `matmul`.
+
 ## Embedding
 
 A learned `[vocab, d_model]` lookup table that maps token ids
@@ -1208,8 +1240,12 @@ decoder. See "[[Decoder / encoder]]" for the role of each side.
 Running multiple trained models on the same input and
 combining their outputs (averaging logits, voting). Often
 beats any single member at the cost of inference time and
-memory. MLPL's "Neural Thicket" demo  runs a 16-
-member weight-perturbed ensemble end-to-end.
+memory. The classical family: BAGGING trains members on
+resampled data ([[Random Forest]]), BOOSTING trains them
+sequentially on the last one's mistakes ([[Gradient
+Boosting]]), STACKING learns a combiner model over their
+outputs. MLPL's "Neural Thicket" demo runs a 16-member
+weight-perturbed ensemble end-to-end.
 
 ## Error Handling
 
@@ -1261,6 +1297,16 @@ held-out predictions and pick the argmax. MLPL: build from
 `gt(probs, threshold)` masks plus `confusion_matrix` or
 `reduce_add` over true-positive / false-positive counts; no
 dedicated builtin.
+
+## Feature engineering
+
+Constructing model inputs from raw data: scaling, encoding
+categories ([[One-hot encoding]]), crossing columns, extracting
+counts and ratios. Deep learning shifted much of this work into
+learned layers, but at small scale good features still beat
+extra parameters. MLPL: `concat` / `reshape` / comparison masks
+build feature columns; the [[Kernel method]] entry shows feature
+maps standing in for kernels.
 
 ## Feedforward (FFN)
 
@@ -1376,6 +1422,16 @@ the Generator produces data indistinguishable from real.
 MLPL: the "GAN (2D circle)" demo trains both networks with
 alternating `adam()` calls inside one `train` block. See
 also: Generator, Discriminator, Adversarial Training.
+
+## Gaussian / Bernoulli / Uniform (distributions)
+
+The three distributions most ML math leans on. GAUSSIAN
+(normal): the bell curve, closed under sums, the default noise
+model -- `randn(seed, shape)` samples it. BERNOULLI: a single
+0/1 outcome with probability p -- `lt(randn-free uniform, p)`
+masks sample it. UNIFORM: every value in a range equally likely
+-- `rand_ints(n, lo, hi, seed)` is the integer version.
+Histograms make each visible: `hist(randn(0, [1000]), 20)`.
 
 ## Generator
 
@@ -1683,6 +1739,9 @@ but cap the function class.
 Running a trained model on new inputs without updating
 weights. In MLPL, just call `apply(model, X)` outside of
 `train { ... }` -- no gradient tape, no optimizer step.
+SERVING is inference behind a network endpoint: `mlpl-serve`
+does exactly this for connect-mode sessions (the browser sends
+programs, the server evaluates and streams results back).
 
 ## :introspect (REPL command)
 
@@ -1709,6 +1768,18 @@ algorithms the model implements. The "Embedding exploration"
 demo is a tiny taste -- [[t-SNE]] / k-NN over a learned
 embedding table. Full circuit-level work is out of MLPL's
 scope.
+
+## Jacobian / Hessian
+
+The gradient generalized. The JACOBIAN of a vector-valued
+function is the matrix of every output's partial derivative
+with respect to every input -- backpropagation is repeated
+Jacobian-transpose-times-vector products, which is why reverse
+mode never materializes the full matrix. The HESSIAN is the
+matrix of second derivatives of a scalar loss; its eigenvalues
+describe curvature (sharp vs flat minima). MLPL's autograd
+computes gradients (first order); full Jacobians and Hessians
+are not built in.
 
 ## Johnson-Lindenstrauss Lemma
 
@@ -1737,6 +1808,17 @@ a jailbreak / safety-eval surface.
 `iota(n)` returns the integer sequence `[0, 1, ..., n-1]` as
 a rank-1 vector. The most basic array constructor; building
 block for indexing / shape arithmetic / one-hot scaffolding.
+
+## Kernel method
+
+Computing inner products in a high-dimensional feature space
+without ever visiting it: `K(a, b) = <phi(a), phi(b)>` for some
+feature map phi. The trick behind nonlinear [[SVM (Support
+Vector Machine)]]s. At whiteboard scale the feature map can be
+EXPLICIT instead -- append squared and product columns
+(`concat(X, X * X, 1)`) and a linear model in the widened space
+is a nonlinear model in the original one. That explicit-phi
+idiom is how MLPL demos express it.
 
 ## Key (K)
 
@@ -2052,7 +2134,11 @@ Real-world high-dimensional data (images, text, audio) lies
 near a much-lower-dimensional manifold inside the ambient
 space. Justifies dimensionality reduction (PCA, [[t-SNE]], UMAP)
 and explains why deep learning works at all -- the network
-need only be expressive on the manifold, not the cube.
+need only be expressive on the manifold, not the cube. A
+HOMEOMORPHISM is a continuous, invertible deformation
+(stretching without tearing); layers that are homeomorphisms
+can untangle a manifold but never change its topology -- which
+is one lens on why width and nonlinearity matter.
 
 ## Manifold preservation
 
@@ -2104,6 +2190,16 @@ not supported.
 `mean(x)` returns the arithmetic mean of all elements as a
 scalar. Distinct from `reduce_add(x) / shape(x)` only in
 that it ignores axis arguments today (always full reduction).
+
+## MLE vs MAP
+
+Two ways to pick parameters from data. MAXIMUM LIKELIHOOD
+(MLE) picks the parameters under which the observed data is
+most probable -- minimizing [[Cross-entropy]] IS maximum
+likelihood for classification. MAXIMUM A POSTERIORI (MAP)
+multiplies in a [[Prior / Posterior / Likelihood|prior]] first;
+an L2 penalty on weights is exactly MAP with a Gaussian prior,
+which is why [[Weight Decay]] has a Bayesian reading.
 
 ## MLP (Multi-Layer Perceptron)
 
@@ -2191,6 +2287,16 @@ the one-shot noising `x_t = sqrt(alpha_bar_t) * x_0 +
 sqrt(1 - alpha_bar_t) * noise`. Cosine schedules add noise more
 gently early on. MLPL: `linspace` + `running_product` build it directly;
 see the "Diffusion (2D points)" demo.
+
+## Object detection (IoU)
+
+Finding WHERE things are, not just what: predict a box (and
+class) per object. Scored by INTERSECTION OVER UNION -- overlap
+area divided by union area of predicted and true boxes; a
+detection counts when IoU clears a threshold. Anchor boxes,
+non-max suppression, and the YOLO/R-CNN families build on this.
+Not an MLPL capability; [[Segmentation]] is the per-pixel
+sibling.
 
 ## One-hot encoding
 
@@ -2384,6 +2490,17 @@ multiply `Cov * v` and renormalize until `v` stops changing.
 The "PCA via Power Iteration" demo writes it out by hand;
 the `pca(X, k)` builtin uses the same idea internally with
 Gram-Schmidt deflation for the top-k.
+
+## Prior / Posterior / Likelihood
+
+The three moving parts of [[Bayes' theorem]]. The PRIOR is what
+you believe before seeing data; the LIKELIHOOD scores the data
+under each hypothesis; the POSTERIOR is the renormalized
+product -- belief after the evidence. On a grid of hypotheses
+this is three arrays and two lines: `post = pr * lik;
+post / reduce_add(post)`. Fully-Bayesian estimation keeps the
+whole posterior instead of collapsing it to one number ([[MLE
+vs MAP]]).
 
 ## Probability
 
@@ -2823,6 +2940,16 @@ Hypothesis (Chinchilla scaling) is a refinement: at a fixed
 compute budget, smaller models trained on more data beat
 bigger models trained on less.
 
+## Segmentation
+
+Classifying every pixel instead of the whole image: the output
+is a mask the same shape as the input. [[U-Net]] is the
+canonical architecture (contract to see context, expand to
+localize, skip-connect to keep detail). Per-pixel
+cross-entropy or Dice loss scores the overlap. At whiteboard
+scale a segmentation task is just a classifier applied at every
+grid cell.
+
 ## Self-attention
 
 [[Attention]] where the queries, keys, and values all come from
@@ -3107,6 +3234,17 @@ MLPL: every classifier demo (Logistic Regression, Tiny
 MLP, Moons MLP, [[Softmax]] [[Classifier]]) is supervised. Cheap
 and well-understood, but bounded by the supply of
 labeled data.
+
+## SVD (Singular Value Decomposition)
+
+Any matrix factored as rotate-scale-rotate: `A = U S Vt` with
+orthogonal U, V and non-negative singular values on S's
+diagonal. Truncating to the top-k singular values gives the
+best rank-k approximation -- the theory under [[PCA (Principal
+Component Analysis)]], low-rank compression, and [[LoRA
+(Low-Rank Adaptation)]]'s premise that weight UPDATES are
+nearly low-rank. Not an MLPL builtin; PCA covers the common
+use.
 
 ## SVM (Support Vector Machine)
 
@@ -3517,8 +3655,12 @@ session and want a quick sense of state.
 
 A regularization technique that shrinks weights toward zero
 on each update step (L2 penalty). Often baked into the
-optimizer (`AdamW`). MLPL's `adam` uses no decay; weight
-decay is not implemented.
+optimizer (`AdamW`). MLPL expresses it as one extra loss term
+-- `loss + lam * sum(W * W)` -- as the "Taming Overfitting:
+Weight Decay" demo shows; optimizer-side decoupled decay
+(AdamW-style) is not an MLPL builtin. The L1 variant
+(`lam * sum(abs(W))`) prefers exact zeros -- sparsity -- where
+L2 prefers many small weights.
 
 ## Weight Initialization
 

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400" style="background-color:white;font-family:'trebuchet ms',verdana,arial,sans-serif;font-size:12px">
+  <text x="300" y="22" text-anchor="middle" font-size="16" font-weight="bold">Eigenvectors: the directions a matrix only stretches</text>
+
+  <!-- left: unit circle -->
+  <g transform="translate(130,180)">
+    <circle cx="0" cy="0" r="80" fill="none" stroke="#9ca3af" stroke-width="2"/>
+    <line x1="0" y1="0" x2="80" y2="0" stroke="#0369a1" stroke-width="2"/>
+    <line x1="0" y1="0" x2="0" y2="-80" stroke="#15803d" stroke-width="2"/>
+    <line x1="0" y1="0" x2="57" y2="-57" stroke="#9ca3af" stroke-width="1.5" stroke-dasharray="4 3"/>
+    <text x="0" y="102" text-anchor="middle">unit circle of inputs v</text>
+  </g>
+
+  <!-- arrow -->
+  <line x1="240" y1="180" x2="330" y2="180" stroke="#374151" stroke-width="2.5"/>
+  <path d="M330,180 l-10,-5 l0,10 z" fill="#374151"/>
+  <text x="285" y="166" text-anchor="middle" font-family="monospace">matmul(A, v)</text>
+
+  <!-- right: ellipse -->
+  <g transform="translate(455,180)">
+    <ellipse cx="0" cy="0" rx="110" ry="45" fill="none" stroke="#9ca3af" stroke-width="2" transform="rotate(-20)"/>
+    <line x1="0" y1="0" x2="103" y2="-38" stroke="#0369a1" stroke-width="3"/>
+    <line x1="0" y1="0" x2="15" y2="42" stroke="#15803d" stroke-width="3"/>
+    <text x="60" y="-52" fill="#0369a1" font-weight="bold">lambda1 * v1</text>
+    <text x="34" y="58" fill="#15803d" font-weight="bold">lambda2 * v2</text>
+    <text x="0" y="102" text-anchor="middle">outputs: an ellipse; the axes are the EIGENVECTORS</text>
+  </g>
+
+  <rect x="40" y="300" width="520" height="84" fill="#f8fafc" stroke="#9ca3af"/>
+  <text x="52" y="320" font-family="monospace">matmul(A, v) = lambda * v   -- only stretched (by lambda), never rotated</text>
+  <text x="52" y="340">POWER ITERATION finds the biggest one: repeat v = matmul(A, v); v = v / sqrt(sum(v*v))</text>
+  <text x="52" y="358">-- every step turns v toward the largest-lambda axis. The eigenvectors of a covariance</text>
+  <text x="52" y="376">matrix are the principal components: this picture IS PCA's first step.</text>
+</svg>

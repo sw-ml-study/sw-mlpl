@@ -1,4 +1,4 @@
-number = 7
+number = 11
 slug = "pareto-core"
 status = "pending"
 description = "Per design doc and review resolutions: implement pareto_front(P, dirs) in mlp..."
