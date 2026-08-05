@@ -1,0 +1,1 @@
+Trichotomy parity shipped: shared colon_fallthrough_error in mlpl-eval; wasm local mode errors with the hint instead of silently evaluating; terminal repl gained working colon-calls and the hint; 5 new tests across wasm+cli; pages redeployed.

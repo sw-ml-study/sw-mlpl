@@ -1,8 +1,9 @@
 number = 3
 slug = "colon-hint-parity"
-status = "in-progress"
+status = "completed"
 description = "User report: ':disp x' in the local eval path silently prints x (bare :disp p..."
 role = "production"
 context_files = []
 created_at = "2026-08-04T21:56:10"
-commits = []
+completed_at = "2026-08-04T22:13:42"
+commits = ["6c86e65cf3696123509e7af55ef5972990871395"]
