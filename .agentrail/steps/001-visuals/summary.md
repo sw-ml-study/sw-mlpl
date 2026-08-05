@@ -1,0 +1,1 @@
+Added the missing visuals to all three Data Forge demos (error-band scatter, adjacency heatmaps, verify-cliff bar, confusion matrix), added HOW-TO-CHECK guidance to takeaways, verified every rendered SVG visually, redeployed pages.
