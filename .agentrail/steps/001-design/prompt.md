@@ -1,0 +1,1 @@
+Write docs/kv-cache-design.md (gen_* six-builtin surface, exactness exit criterion, layer-set scope, six steps) and present the three open questions for user review before implementation.

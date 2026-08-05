@@ -1,0 +1,9 @@
+number = 1
+slug = "design"
+status = "in-progress"
+description = "Write docs/kv-cache-design.md (gen_* six-builtin surface, exactness exit crit..."
+role = "production"
+context_files = []
+created_at = "2026-08-05T16:18:13"
+task_type = "docs"
+commits = []
