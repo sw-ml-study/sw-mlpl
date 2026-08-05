@@ -1,0 +1,1 @@
+data-forge step 3 per design: rand_ints(n, lo, hi, seed) (deterministic uniform ints -- reuse the seeded RNG core randn uses) and dedupe_rows(X) -> {rows, index} record, in mlpl-runtime-data beside the dataset builtins (check module budgets + how dataset builtins dispatch/return records). TDD; catalog/lang-reference/glossary; scoped gates.

@@ -1,0 +1,1 @@
+grade_up/grade_down (stable argsort) + compress (APL compress, any axis) shipped across all surfaces with TDD; G2 rows flipped to SHIPPED; the selection substrate (grade + gather_rows + compress + masks) is now complete for the rejection/curriculum idioms.
