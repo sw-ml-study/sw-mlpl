@@ -1,8 +1,9 @@
 number = 6
 slug = "book-coverage-audit"
-status = "in-progress"
+status = "completed"
 description = "Completeness check of docs/ml-topics.txt (3 eBooks) against glossary/demos/di..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T07:14:45"
-commits = []
+completed_at = "2026-08-05T07:15:06"
+commits = ["ab7a00e5cb684daf4360b9fe8231bd6f416e842a"]

@@ -1,0 +1,1 @@
+Audit written: chapter-by-chapter status for all three books, gap list ordered by cheapest sufficient fix (~16 glossary entries, ~10 in-language demos, ~4 diagrams, 2 findability fixes, zero new builtins required); book-gap-coverage queued; :<builtin>(args) row added to the usage table.
