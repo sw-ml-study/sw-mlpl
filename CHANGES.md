@@ -12,8 +12,34 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-04
+
+- saga data-forge: step 007 complete
+- chore(pages): rebuild for keyword field names + Records reference section
+- feat(parser): keywords are legal record field names (user question)
+- saga data-forge: step 006 complete
+- feat(forge): the knowledge-graph task oracle -- kg_neighbors / kg_verify / kg_paths / kg_split (data-forge step 6)
+- chore(pages): rebuild for the hardened GAN recipe
+- fix(demos): GAN recipe hardened -- 6/6 seed robustness (was 4/5 with one divergence)
+- saga data-forge: step 005 complete
+- chore(pages): rebuild for the fixed GAN demo
+- fix(demos): GAN 2D circle actually lands on the circle; early-vs-trained presentation (user report)
+- saga data-forge: step 004 complete
+- feat(lang): rand_ints + dedupe_rows -- generation support (data-forge step 4)
+- saga data-forge: step 003 complete
+- chore(pages): rebuild for the K-Means centroid coloring
+- fix(demos): K-Means centroids colored to match their clusters (user report)
+- saga data-forge: step 002 complete
+- feat(lang): grade_up / grade_down / compress -- the ordering + selection substrate (data-forge step 2)
+- saga data-forge: step 001 complete
+- docs(design): data-forge review resolutions recorded (approved)
+- docs(design): data-forge surface proposal for review (saga data-forge, step 1)
+
 ## 2026-08-03
 
+- docs(roadmap): status note catches up to the E5 close
+- chore(agentrail): archive engram-mlx-e5
+- docs(changes): refresh CHANGES.md to HEAD
 - saga engram-mlx-e5: complete (14 steps)
 - docs(saga): close E5 engram-mlx -- retrospective, plan rows, queue advanced to data-forge
 - saga engram-mlx-e5: step 013 complete
