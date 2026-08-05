@@ -38,6 +38,9 @@ pub(crate) fn try_dispatch(
     if name == "to_device" {
         return Some(crate::device::eval_to_device(args, env, trace));
     }
+    if name == "param_count" {
+        return Some(crate::model_inspect::eval_param_count(args, env).map(Value::Array));
+    }
     try_array_forward(name, args, env, trace).map(|r| r.map(Value::Array))
 }
 

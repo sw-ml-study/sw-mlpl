@@ -623,6 +623,8 @@ Classical ML demo category.
 | Function | Args | Description |
 |----------|------|-------------|
 | `compare(name_a, name_b)` | 2 | Return a `Value::Str` with a side-by-side view of the most-recent runs with those names, including per-metric deltas. Merges memory-only (web REPL) and on-disk (terminal REPL, under `--exp-dir`) records. |
+| `experiment_metric("name")` | 1 | One recorded metric across the in-memory experiment log, as a `[runs]` vector in run order. Runs that did not record the metric are skipped; an unrecorded metric yields the empty `[0]` vector. Column-concat several calls into the `[n, k]` matrix `pareto_front` eats. |
+| `param_count(m)` | 1 | Total trainable parameters across the model's `param` arrays -- the size axis of a quality-vs-size frontier. Accepts a bound model name or an inline constructor. |
 
 ### Visualization
 

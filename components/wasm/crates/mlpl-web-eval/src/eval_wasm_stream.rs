@@ -104,6 +104,16 @@ async fn read_sse_stream(
         .dyn_into()
         .map_err(|_| "no stream reader".to_string())?;
     let mut feed = SseFeed::default().with_generation(crate::telemetry_trace::current_gen());
+    drive_reader(&reader, &mut feed, on_metric).await
+}
+
+/// Pump `reader` chunk by chunk through the feed until a terminal
+/// frame (or the stream ends without one).
+async fn drive_reader(
+    reader: &web_sys::ReadableStreamDefaultReader,
+    feed: &mut SseFeed,
+    on_metric: &mut MetricCb,
+) -> Result<StreamOutcome, String> {
     loop {
         let chunk = wasm_bindgen_futures::JsFuture::from(reader.read())
             .await

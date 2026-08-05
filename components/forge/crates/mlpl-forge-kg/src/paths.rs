@@ -82,13 +82,8 @@ pub fn split_edges(
     let cut = ((ents.len() as f64) * frac).round() as usize;
     let train_set: std::collections::HashSet<i64> =
         ents[..cut.min(ents.len())].iter().copied().collect();
-    let (mut tr, mut ev) = (Vec::new(), Vec::new());
-    for &(s, r, d) in &e.0 {
-        if train_set.contains(&s) && train_set.contains(&d) {
-            tr.push((s, r, d));
-        } else {
-            ev.push((s, r, d));
-        }
-    }
+    let (tr, ev): (Vec<_>, Vec<_>) =
+        e.0.iter()
+            .partition(|(s, _, d)| train_set.contains(s) && train_set.contains(d));
     Ok((crate::ops::edges_array(&tr)?, crate::ops::edges_array(&ev)?))
 }

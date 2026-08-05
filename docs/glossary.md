@@ -237,6 +237,23 @@ constraints", and a plot of the frontier answers it at a
 glance. MLPL: `pareto_front(P, dirs)` computes the frontier
 mask over a metric matrix.
 
+## param_count (builtin)
+
+`param_count(m)` -> the total number of trainable parameters
+across a model's `param` arrays, as a scalar. The size axis of
+a quality-vs-parameters [[Pareto Frontier (efficient
+frontier)]]: record it as a `*_metric` inside an `experiment`
+block and pull it back with [[experiment_metric (builtin)]].
+
+## experiment_metric (builtin)
+
+`experiment_metric("name")` -> one recorded metric across the
+in-memory experiment log, as a `[runs]` vector in run order.
+Runs that did not record the metric are skipped; a metric no
+run recorded yields the empty `[0]` vector. The bridge from
+`experiment` blocks to arrays: column-concat several calls into
+the `[n, k]` matrix that [[pareto_front (builtin)]] consumes.
+
 ## pareto_front (builtin)
 
 `pareto_front(P, dirs)` -> the `[n]` 0/1 mask of non-dominated

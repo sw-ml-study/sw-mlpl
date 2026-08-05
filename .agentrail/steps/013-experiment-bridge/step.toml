@@ -1,6 +1,6 @@
 number = 13
 slug = "experiment-bridge"
-status = "pending"
+status = "in-progress"
 description = "Per design doc: param_count(m) and experiment_metric(name) at the eval layer,..."
 role = "legacy"
 context_files = []

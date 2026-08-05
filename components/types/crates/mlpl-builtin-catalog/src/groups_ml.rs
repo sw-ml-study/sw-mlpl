@@ -210,6 +210,16 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "predict_batch(model, X)",
                 "forward pass + argmax over the trailing axis (integer class labels)",
             ),
+            (
+                "param_count",
+                "param_count(m)",
+                "total trainable parameters of a model",
+            ),
+            (
+                "experiment_metric",
+                "experiment_metric(\"name\")",
+                "one recorded metric across the experiment log, as a [runs] vector",
+            ),
         ],
     ),
     (

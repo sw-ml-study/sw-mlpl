@@ -7,6 +7,38 @@ use mlpl_parser::Expr;
 
 use crate::experiment::{ExperimentRecord, read_records_from_disk};
 
+/// `experiment_metric("name")`: one recorded metric across the
+/// in-memory experiment log as a `[runs]` vector, in run order.
+/// Runs that did not record the metric are skipped (experiment
+/// logs are heterogeneous by nature); a metric no run recorded
+/// yields the empty `[0]` vector.
+pub(crate) fn eval_experiment_metric(
+    args: &[Expr],
+    env: &crate::env::Environment,
+) -> Result<mlpl_eval_types::Value, mlpl_eval_types::EvalError> {
+    if args.len() != 1 {
+        return Err(mlpl_eval_types::EvalError::BadArity {
+            func: "experiment_metric".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    }
+    let Expr::StrLit(name, _) = &args[0] else {
+        return Err(mlpl_eval_types::EvalError::Unsupported(
+            "experiment_metric: argument must be a string literal metric name".into(),
+        ));
+    };
+    let vals: Vec<f64> = env
+        .experiment_log()
+        .iter()
+        .filter_map(|r| r.metrics.get(name).copied())
+        .collect();
+    let n = vals.len();
+    let arr = mlpl_array::DenseArray::new(mlpl_array::Shape::new(vec![n]), vals)
+        .map_err(|e| mlpl_eval_types::EvalError::Unsupported(format!("experiment_metric: {e}")))?;
+    Ok(mlpl_eval_types::Value::Array(arr))
+}
+
 /// `compare(name_a, name_b)` builtin dispatch. Returns a
 /// `Value::Str` containing a side-by-side of the most recent
 /// runs with each name. Errors if either name has no records

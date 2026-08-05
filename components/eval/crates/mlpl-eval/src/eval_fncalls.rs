@@ -95,6 +95,7 @@ fn try_tools(
         "llm_call" => Some(crate::llm_dispatch::dispatch(args, env, trace)),
         "emit_frame" => Some(crate::fncall_trace::eval_emit_frame(args, env, trace)),
         "compare" => Some(crate::experiment_compare::dispatch_compare(args, env)),
+        "experiment_metric" => Some(crate::experiment_compare::eval_experiment_metric(args, env)),
         "momentum_sgd" | "adam" => {
             Some(crate::grad_optim::eval_optim(name, args, env, trace, span))
         }
