@@ -94,6 +94,7 @@ mod grad_optim_mlx_demo;
 mod grad_optim_mlx_mlp;
 mod inspect;
 mod inspect_collections;
+mod inspect_colon;
 mod inspect_describe;
 mod inspect_introspect;
 mod inspect_list;
@@ -129,7 +130,8 @@ pub use grad_optim_mlx_demo::DemoLayout;
     all(target_os = "linux", target_arch = "x86_64", feature = "cuda")
 ))]
 pub use grad_optim_mlx_mlp::LoraNames;
-pub use inspect::{colon_fallthrough_error, colon_ref_hint, inspect, is_colon_call_expr};
+pub use inspect::inspect;
+pub use inspect_colon::{colon_fallthrough_error, colon_ref_hint, is_colon_call_expr};
 pub use interrupt::Interrupt;
 pub use mlpl_eval_core::inspect_groups::documented_builtin_names;
 pub use mlpl_eval_core::{ActKind, MetricSink, ModelSpec};

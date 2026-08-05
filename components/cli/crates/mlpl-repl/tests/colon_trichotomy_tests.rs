@@ -41,6 +41,15 @@ fn colon_call_evaluates_as_builtin_call() {
 }
 
 #[test]
+fn command_with_parens_gets_the_no_parens_hint() {
+    let (_, stderr) = run_lines(":history()\n");
+    assert!(
+        stderr.contains("no parentheses"),
+        "command-paren hint expected, got {stderr:?}"
+    );
+}
+
+#[test]
 fn colon_builtin_with_space_gets_the_trichotomy_hint() {
     let (_, stderr) = run_lines("x = [1, 2, 3]\n:disp x\n");
     assert!(

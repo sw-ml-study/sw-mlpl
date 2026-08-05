@@ -95,11 +95,15 @@ pub(crate) async fn run_eval(
             let value = match mlpl_eval::inspect(&mut session.env, trimmed) {
                 Some(out) => Ok(mlpl_eval::Value::Str(out)),
                 None => Err(mlpl_eval::EvalError::Unsupported(
-                    mlpl_eval::colon_ref_hint(trimmed)
+                    mlpl_eval::colon_fallthrough_error(trimmed)
                         .unwrap_or_else(|| format!("unknown command: {trimmed}")),
                 )),
             };
             return (session, value);
+        }
+        // `:history()`-style lines: a command name in call clothing.
+        if let Some(msg) = mlpl_eval::colon_fallthrough_error(trimmed) {
+            return (session, Err(mlpl_eval::EvalError::Unsupported(msg)));
         }
         session.env.set_pending_source(Some(program));
         let value = eval_program_value(&stmts, &mut session.env);

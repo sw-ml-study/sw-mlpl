@@ -51,6 +51,11 @@ pub(crate) fn run_interactive(env: &mut Environment, svg_out: &mut SvgOut) {
         {
             continue;
         }
+        // `:history()`-style lines: a command name in call clothing.
+        if let Some(err) = mlpl_eval::colon_fallthrough_error(trimmed) {
+            eprintln!("{err}");
+            continue;
+        }
 
         eval_line(trimmed, env, tracing, &mut last_trace, svg_out);
     }

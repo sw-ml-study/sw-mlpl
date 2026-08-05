@@ -10,8 +10,13 @@ use crate::env_api::*;
 pub(crate) fn list_or_usage(env: &Environment, arg: Option<&str>) -> String {
     match arg {
         None => "usage: :list <fn-name>".into(),
-        Some(name) => env
-            .list_fn(name)
-            .unwrap_or_else(|| format!("no user function named '{name}'")),
+        Some(name) => env.list_fn(name).unwrap_or_else(|| {
+            let bare = name.strip_prefix(':').unwrap_or(name);
+            if mlpl_eval_core::inspect_groups::documented_builtin_names().any(|n| n == bare) {
+                format!("`{bare}` is a builtin, not a `u:` function -- try `:describe {bare}`")
+            } else {
+                format!("no user function named '{name}'")
+            }
+        }),
     }
 }

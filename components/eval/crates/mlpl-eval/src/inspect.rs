@@ -38,14 +38,27 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
         "experiments" => Some(crate::experiment::format_registry(env)),
         "tags" => Some(crate::tag_render::format_tags(env)),
         "describe" => Some(match arg {
-            Some(name) => crate::inspect_describe::format_describe(env, name),
+            Some(name) => crate::inspect_describe::format_describe(
+                env,
+                name.strip_prefix(':').unwrap_or(name),
+            ),
             None => "usage: :describe <name>".into(),
         }),
         "list" => Some(crate::inspect_list::list_or_usage(env, arg)),
         "untag" => Some(handle_untag(env, arg)),
-        "help" => arg.and_then(|t| help_topic(t, env)),
+        "help" => arg.map(|t| help_topic(t, env).unwrap_or_else(|| help_unknown_topic(t))),
         _ => None,
     })
+}
+
+/// `:help <topic>` with a topic nobody recognizes: list what IS
+/// available instead of falling through to evaluation.
+fn help_unknown_topic(topic: &str) -> String {
+    format!(
+        "no help topic '{topic}'. Topics: vars, models, fns, builtins, describe, wsid, \
+         introspect. For a builtin use `:describe <name>`; for a command's usage add \
+         `--help` (e.g. `:trace --help`)."
+    )
 }
 
 /// Topic names shared between `:topic` and `:help topic` so both
@@ -83,51 +96,4 @@ fn handle_untag(env: &mut Environment, arg: Option<&str>) -> String {
     } else {
         format!("{name} had no tag")
     }
-}
-
-/// Whether a colon-prefixed line is a builtin-reference CALL
-/// expression (`:disp(g)`) rather than a REPL command: `:` + an
-/// identifier + an immediate `(`. Such lines parse and evaluate as
-/// programs -- routing them to the command handler was the bug that
-/// made `:disp(g)` "unknown" while `disp(g)` worked.
-#[must_use]
-pub fn is_colon_call_expr(line: &str) -> bool {
-    let t = line.trim_start();
-    let Some(rest) = t.strip_prefix(':') else {
-        return false;
-    };
-    let ident_len = rest
-        .chars()
-        .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
-        .count();
-    ident_len > 0 && rest[ident_len..].starts_with('(')
-}
-
-/// A tailored hint for `:name ...` lines where `name` is a documented
-/// BUILTIN (not a command): explains the quote/call trichotomy
-/// instead of a bare "unknown command".
-#[must_use]
-pub fn colon_ref_hint(line: &str) -> Option<String> {
-    let word = line.trim().strip_prefix(':')?.split_whitespace().next()?;
-    if !mlpl_eval_core::inspect_groups::documented_builtin_names().any(|n| n == word) {
-        return None;
-    }
-    Some(format!(
-        "`:{word}` is a builtin REFERENCE (the quoted, first-class form of `{word}`). \
-         To call it, write `{word}(...)` or `:{word}(...)` -- `:{word} x` is not a command."
-    ))
-}
-
-/// Error text for a colon line that is neither a recognized command
-/// nor a colon-call expression. Callers must not let such lines fall
-/// through to program evaluation: `:disp x` parses as a bare `:disp`
-/// reference followed by `x`, silently printing `x`. Keeps every
-/// REPL surface (terminal, web local, server) answering alike.
-#[must_use]
-pub fn colon_fallthrough_error(line: &str) -> Option<String> {
-    let t = line.trim();
-    if !t.starts_with(':') || is_colon_call_expr(t) {
-        return None;
-    }
-    Some(colon_ref_hint(t).unwrap_or_else(|| format!("unknown command: {t}")))
 }

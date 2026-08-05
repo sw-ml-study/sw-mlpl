@@ -31,13 +31,28 @@ fn colon_call_still_evaluates() {
 }
 
 #[test]
+fn command_with_parens_gets_the_no_parens_hint() {
+    let s = WasmSession::new();
+    let out = s.eval(":history()");
+    assert!(
+        out.contains("no parentheses"),
+        "command-paren hint expected, got {out:?}"
+    );
+}
+
+#[test]
 fn unknown_colon_line_errors_without_evaluating() {
     let s = WasmSession::new();
     s.eval("x = 5");
     let out = s.eval(":help x");
     assert!(
+        out.contains("no help topic"),
+        "help-topic guidance expected, got {out:?}"
+    );
+    assert!(!out.trim().ends_with('5'), "must not print x: {out:?}");
+    let out = s.eval(":nosuchcmd x");
+    assert!(
         out.contains("unknown command"),
         "unknown-command error expected, got {out:?}"
     );
-    assert!(!out.trim().ends_with('5'), "must not print x: {out:?}");
 }

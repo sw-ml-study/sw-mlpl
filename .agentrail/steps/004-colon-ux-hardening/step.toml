@@ -1,6 +1,6 @@
 number = 4
 slug = "colon-ux-hardening"
-status = "pending"
+status = "in-progress"
 description = "User-reported astonishments: (1) :history() errors 'unknown function: history..."
 role = "production"
 context_files = []
