@@ -1,0 +1,1 @@
+All six colon-UX astonishments fixed at the shared eval layer (command-paren hint, describe/list colon-stripping + builtin redirect, total :help topics), pinned by 10 tests across eval/wasm/terminal/serve; pages + local server redeployed.

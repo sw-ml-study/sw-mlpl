@@ -1,8 +1,9 @@
 number = 4
 slug = "colon-ux-hardening"
-status = "in-progress"
+status = "completed"
 description = "User-reported astonishments: (1) :history() errors 'unknown function: history..."
 role = "production"
 context_files = []
 created_at = "2026-08-04T21:59:10"
-commits = []
+completed_at = "2026-08-04T22:24:32"
+commits = ["0688a558d307e969b720e77fec5a8cb717f443f6"]
