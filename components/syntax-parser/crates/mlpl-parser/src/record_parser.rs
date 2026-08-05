@@ -29,6 +29,34 @@ use mlpl_core::Span;
 
 use crate::parser::Parser;
 use mlpl_lexer::TokenKind;
+
+/// The identifier text a token contributes when it appears in a
+/// MEMBER-NAME position (record-literal key or after `.`). Those
+/// two spots are grammatically unambiguous, so keywords are plain
+/// names there -- `s.train` and `{eval: 1}` are legal -- while
+/// staying reserved everywhere else.
+fn member_name(kind: &TokenKind) -> Option<String> {
+    let kw = |s: &str| Some(s.to_string());
+    match kind {
+        TokenKind::Ident(name) => Some(name.clone()),
+        TokenKind::Repeat => kw("repeat"),
+        TokenKind::Train => kw("train"),
+        TokenKind::For => kw("for"),
+        TokenKind::In => kw("in"),
+        TokenKind::Experiment => kw("experiment"),
+        TokenKind::Device => kw("device"),
+        TokenKind::If => kw("if"),
+        TokenKind::Else => kw("else"),
+        TokenKind::While => kw("while"),
+        TokenKind::Break => kw("break"),
+        TokenKind::Continue => kw("continue"),
+        TokenKind::Try => kw("try"),
+        TokenKind::Catch => kw("catch"),
+        TokenKind::Def => kw("def"),
+        TokenKind::Return => kw("return"),
+        _ => None,
+    }
+}
 use mlpl_lexer::{ParseError, describe_kind};
 use mlpl_parser_ast::Expr;
 
@@ -44,13 +72,12 @@ impl Parser<'_> {
         self.skip_sep();
         while !self.is(TokenKind::RBrace) {
             let name_tok = &self.tokens[self.pos];
-            let TokenKind::Ident(name) = &name_tok.kind else {
+            let Some(name) = member_name(&name_tok.kind) else {
                 return Err(ParseError::UnexpectedToken {
                     found: describe_kind(&name_tok.kind),
                     span: name_tok.span,
                 });
             };
-            let name = name.clone();
             if !seen.insert(name.clone()) {
                 return Err(ParseError::DuplicateRecordField {
                     name,
@@ -101,13 +128,12 @@ impl Parser<'_> {
         while self.is(TokenKind::Dot) {
             self.pos += 1;
             let name_tok = &self.tokens[self.pos];
-            let TokenKind::Ident(field) = &name_tok.kind else {
+            let Some(field) = member_name(&name_tok.kind) else {
                 return Err(ParseError::UnexpectedToken {
                     found: describe_kind(&name_tok.kind),
                     span: name_tok.span,
                 });
             };
-            let field = field.clone();
             let field_span = name_tok.span;
             self.pos += 1;
             let span = Span::new(atom.span().start, field_span.end);

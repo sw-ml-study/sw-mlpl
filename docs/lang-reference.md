@@ -517,6 +517,17 @@ initialized at construction). Apply a model to an array with
 | `pool2d(input, size, mode)` | 3 | 2D pooling. `mode=1` max pooling, `mode=0` average pooling. `size` is the square pool window side. |
 | `rnn_cell(input, hidden, W_ih, W_hh, bias)` | 5 | One Elman RNN step: `tanh(W_ih @ input + W_hh @ hidden + bias)`. Returns updated hidden state. |
 
+### Records
+
+`{name: expr, ...}` builds a record; `r.name` reads a field.
+Several builtins return records so results stay addressable
+(`engram_stats`, `dedupe_rows`, `kg_split`). Field names may be
+any identifier INCLUDING language keywords -- `s.train`,
+`{eval: 1}`, and `r.if` are legal, because the two member-name
+positions (a record-literal key and the name after `.`) are
+grammatically unambiguous. Keywords stay reserved everywhere
+else. Duplicate keys are a parse error.
+
 ### Result type
 
 A `Value::Result { ok, payload }` wraps success-or-failure for
