@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga experiment-quality: step 012 complete
+- feat(array): pareto_front(P, dirs) -- the frontier mask builtin (experiment-quality step pareto-core)
+- saga experiment-quality: step 011 complete
+- docs(readme): Related Projects -- mlplunit and demo-algorithms (user request)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga experiment-quality: step 010 complete
 - feat(demos): five math/Bayes/vision demos close the book-gap audit (book-gaps step 3/3)
 - fix(repl): name-command arguments parsed properly -- loud expression guard, multi-name :describe (user report)
