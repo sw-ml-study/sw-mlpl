@@ -154,7 +154,7 @@ lines = [
 category = "Data Forge"
 name = "Rejection Sampling (best-of-N)"
 intro = "Training-data construction as an algorithm: generate candidates, VERIFY them against a deterministic oracle, keep only what passes, and record where everything came from. A noisy 'student' answers 400 addition problems (about 1 in 6 correct); exact arithmetic is the oracle; compress does the keep step; dedupe_rows curates; grade_down ranks. The same generate -> evaluate -> select shape reappears wherever candidates meet a verifier: best-of-N inference, dataset building, agent-trajectory filtering."
-takeaway = "The whole [[Rejection Sampling (best-of-N)]] loop is five array lines: a generator (rand_ints), an oracle (eq against the true sum), compress(ok, C) to keep verified rows, dedupe_rows for curation, and gather_rows(C, take(grade_down(scores), 0, 0)) for the single best candidate. The provenance record at the end is the habit that matters at scale: every kept example traces back to a generator, a seed, and a threshold. Acceptance rate prints first -- a good verifier plus a mediocre generator still yields a clean dataset."
+takeaway = "The whole [[Rejection Sampling (best-of-N)]] loop is five array lines: a generator (rand_ints), an oracle (eq against the true sum), compress(ok, C) to keep verified rows, dedupe_rows for curation, and gather_rows(C, take(grade_down(scores), 0, 0)) for the single best candidate. The provenance record at the end is the habit that matters at scale: every kept example traces back to a generator, a seed, and a threshold. HOW TO CHECK IT WORKED: the error scatter shows flat horizontal bands (one per noise level) with the accepted class sitting exactly on the zero line; the acceptance rate prints near 0.13; and the best-of-N row's third column really is the sum of its first two. A good verifier plus a mediocre generator still yields a clean dataset."
 lines = [
     "n = 400                                        # candidates to draw",
     "a = rand_ints(n, 1, 50, 7) ; b = rand_ints(n, 1, 50, 8)   # 400 addition problems",
@@ -162,6 +162,7 @@ lines = [
     "cand = a + b + noise                           # candidate answers",
     "ok = eq(cand, a + b)                           # DETERMINISTIC ORACLE: exact arithmetic",
     "mean(ok)                                       # acceptance rate (~0.13)",
+    "scatter_labeled(concat(reshape(a + b, [n, 1]), reshape(cand - (a + b), [n, 1]), 1), ok)   # WHAT YOU SEE: candidate ERROR in horizontal bands; the band sitting ON zero is the accepted set",
     "C = concat(reshape(a, [n, 1]), concat(reshape(b, [n, 1]), reshape(cand, [n, 1]), 1), 1)   # [n, 3] candidate examples",
     "kept = compress(ok, C)                         # REJECTION: keep only verified rows",
     "d = dedupe_rows(kept)                          # curation: unique examples + surviving indices",
@@ -176,18 +177,22 @@ lines = [
 category = "Data Forge"
 name = "Graph Multi-Hop Tasks (generate, verify, hold out)"
 intro = "A tiny knowledge graph as a TASK ORACLE: kg_paths GENERATES valid multi-hop questions, kg_verify CHECKS answers, and kg_split holds out whole graph regions so you can test generalization instead of memorization. The graph is plain data -- an [E, 3] array of (source, relation, destination) rows -- and the finale is the beat that matters: tasks sampled from the held-out region verify at ZERO against the seen graph, because their entities simply do not exist there."
-takeaway = "Three oracle roles from one edge array: generator (kg_paths samples [n, hops+1] valid walks -- every sampled row passes kg_verify, by construction), checker (kg_verify is the row-batched answer key), and examiner (kg_split's {seen, unseen} record is ENTITY-disjoint, so unseen tasks cannot be answered from seen edges -- the printed 0 is the memorization test). Difficulty ordering rides the same grade_up + gather_rows idiom as every curriculum. This is the knowledge-graph-guided training-data pattern from the multi-hop reasoning literature, at whiteboard scale."
+takeaway = "Three oracle roles from one edge array: generator (kg_paths samples [n, hops+1] valid walks -- every sampled row passes kg_verify, by construction), checker (kg_verify is the row-batched answer key), and examiner (kg_split's {seen, unseen} record is ENTITY-disjoint, so unseen tasks cannot be answered from seen edges -- the printed 0 is the memorization test). Difficulty ordering rides the same grade_up + gather_rows idiom as every curriculum. HOW TO CHECK IT WORKED: the first heatmap shows all 18 edges as bright cells; the seen-graph heatmap is the same picture with the held-out entities' rows and columns gone dark; the verify bar chart is 30 full bars then a cliff of 20 empty ones; and the final printed number is 0. This is the knowledge-graph-guided training-data pattern from the multi-hop reasoning literature, at whiteboard scale."
 lines = [
     "g = [[0,0,1],[1,0,2],[2,0,3],[3,0,4],[4,0,5],[5,0,6],[6,0,7],[7,0,0],[0,1,4],[1,1,5],[2,1,6],[3,1,7],[4,1,0],[5,1,1],[6,1,2],[7,1,3],[0,0,2],[3,0,6]]   # 8 entities, 2 relations, 18 edges",
+    "adj = reshape(reduce_add(one_hot(flatten(matmul(g, [[8],[0],[1]])), 64), 0), [8, 8])   # adjacency matrix, loop-free: flat cell index = 8*src + dst",
+    'svg(adj, "heatmap")                            # WHAT YOU SEE: the whole graph -- each bright cell is one edge',
     "s = kg_split(g, 0.7, 7)                        # ENTITY-disjoint split: {seen, unseen}",
     "tally(s.seen)                                  # edges fully inside the seen entity set",
     "tally(s.unseen)                                # edges touching held-out entities",
+    "svg(reshape(reduce_add(one_hot(flatten(matmul(s.seen, [[8],[0],[1]])), 64), 0), [8, 8]), \"heatmap\")   # WHAT YOU SEE: the seen graph only -- rows and columns of held-out entities have gone dark",
     "t2 = kg_paths(s.seen, 2, 30, 11)               # 30 two-hop tasks from the seen graph",
     "t3 = kg_paths(s.seen, 3, 30, 12)               # 30 three-hop tasks (harder)",
     "reduce_add(kg_verify(s.seen, t3))              # 30: every generated task verifies, by construction",
     "diff = reshape(matmul(t3 * t3, [[1],[0],[0],[0]]), [30])   # a difficulty score per task",
     "gather_rows(t3, grade_up(diff))                # curriculum ordering: same grade + gather idiom as everywhere",
     "gen = kg_paths(s.unseen, 2, 20, 21)            # tasks from the HELD-OUT region",
+    'svg(concat(kg_verify(s.seen, t3), kg_verify(s.seen, gen)), "bar")   # WHAT YOU SEE: 30 seen-graph tasks verify at 1, then a cliff -- 20 held-out tasks at 0',
     "reduce_add(kg_verify(s.seen, gen))             # 0: the seen graph cannot answer them -- generalization, not memorization, is what a model must add",
 ]
 
@@ -195,7 +200,7 @@ lines = [
 category = "Data Forge"
 name = "Arithmetic Curriculum (and why stages accumulate)"
 intro = "Curriculum learning with the interference lesson built in. A tiny classifier learns a + b from 240 examples staged easy -> harder -> all, and the loss curve tracks the FULL set the whole time. WHAT YOU SEE: while training on the easy slice alone, full-set loss actually RISES (the network grows confidently wrong about sums it never sees -- interference at toy scale); as the stages widen to include earlier material, it recovers and ends far below where it started. That is WHY real curricula accumulate stages rather than replacing them."
-takeaway = "The mechanics are two builtins and an idiom: difficulty is just a score (here, the target sum), compress(lt(diff, cut), X) slices a stage, and stages built with WIDENING cuts (easy, then easy+mid, then all) are cumulative by construction. The three loss segments concatenate into one curve: up during the narrow stage, down as the pool widens, final full-set loss well under the untrained start. Try making the stages exclusive instead of cumulative -- the spike gets dramatically worse; that experiment is one edit away."
+takeaway = "The mechanics are two builtins and an idiom: difficulty is just a score (here, the target sum), compress(lt(diff, cut), X) slices a stage, and stages built with WIDENING cuts (easy, then easy+mid, then all) are cumulative by construction. The three loss segments concatenate into one curve: up during the narrow stage, down as the pool widens, final full-set loss well under the untrained start. HOW TO CHECK IT WORKED: the curve rises, recovers, and ends well below its start; the confusion matrix concentrates on the diagonal; and the printed accuracy lands well above the 1-in-19 chance level. Try making the stages exclusive instead of cumulative -- the spike gets dramatically worse; that experiment is one edit away."
 lines = [
     "N = 240",
     "a = rand_ints(N, 0, 10, 3) ; b = rand_ints(N, 0, 10, 4)",
@@ -213,6 +218,8 @@ lines = [
     "l3 = last_losses",
     "loss_curve(concat(concat(l1, l2), l3))         # the whole story in one curve: rise, recover, converge",
     "cross_entropy(apply(m, X), Y)                  # final full-set loss",
+    "confusion_matrix(predict_batch(m, X), Y)       # WHAT YOU SEE: mass on the diagonal -- the network really learned a + b",
+    "mean(eq(predict_batch(m, X), Y))               # accuracy on the full set",
 ]
 
 [[demos]]

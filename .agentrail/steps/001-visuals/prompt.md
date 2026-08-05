@@ -1,0 +1,1 @@
+Per plan: add charts to the Data Forge demos, verify SVGs visually, deploy.

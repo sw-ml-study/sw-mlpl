@@ -1,0 +1,9 @@
+number = 1
+slug = "visuals"
+status = "in-progress"
+description = "Per plan: add charts to the Data Forge demos, verify SVGs visually, deploy."
+role = "production"
+context_files = []
+created_at = "2026-08-04T19:45:12"
+task_type = "rust-feature"
+commits = []
