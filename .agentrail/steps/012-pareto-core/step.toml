@@ -1,9 +1,10 @@
 number = 12
 slug = "pareto-core"
-status = "in-progress"
+status = "completed"
 description = "Per design doc and review resolutions: implement pareto_front(P, dirs) in mlp..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-04T21:49:08"
+completed_at = "2026-08-05T11:07:59"
 task_type = "rust-feature"
-commits = []
+commits = ["1c9ad6023c46c7ecbd0de661171434cb29fa7f74"]

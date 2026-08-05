@@ -1,0 +1,1 @@
+pareto_front(P, dirs) shipped with explicit direction vector per design resolution: 6 TDD tests, catalog/lang-reference/glossary rows, repl + server + pages all current.

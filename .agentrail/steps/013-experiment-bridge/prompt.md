@@ -1,0 +1,1 @@
+Per design doc: param_count(m) and experiment_metric(name) at the eval layer, TDD; experiment_metric returns the [runs] vector of one recorded metric across the in-memory experiment log in run order, skipping runs that lack it (design resolution 2); catalog + lang-reference + glossary rows; scoped tests + gates.
