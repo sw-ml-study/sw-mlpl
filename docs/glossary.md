@@ -234,8 +234,20 @@ The set of models no other model beats on EVERY axis at once
 model for constrained hardware: the question is never "the
 best model" but "the best model under this machine's
 constraints", and a plot of the frontier answers it at a
-glance. Not an MLPL builtin.
+glance. MLPL: `pareto_front(P, dirs)` computes the frontier
+mask over a metric matrix.
 
+## pareto_front (builtin)
+
+`pareto_front(P, dirs)` -> the `[n]` 0/1 mask of non-dominated
+rows of the `[n, k]` metric matrix `P`. `dirs` gives one
+direction per column: `1` = maximize (quality), `-1` = minimize
+(parameters, loss). A row is dominated when some other row is
+at least as good on every column and strictly better on one;
+duplicate rows dominate neither way, so both stay. Composes
+with the selection substrate: `compress(mask, P)` keeps the
+frontier rows, `scatter_labeled(P, mask)` renders the frontier
+highlighted. See [[Pareto Frontier (efficient frontier)]].
 
 ## pi / e (builtins)
 

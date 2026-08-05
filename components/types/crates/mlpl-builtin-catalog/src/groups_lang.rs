@@ -99,6 +99,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "keep slices where the mask is nonzero",
             ),
             (
+                "pareto_front",
+                "pareto_front(P, dirs)",
+                "mask of non-dominated rows; dirs: 1 max / -1 min per column",
+            ),
+            (
                 "rand_ints",
                 "rand_ints(n, lo, hi, seed)",
                 "n uniform ints in [lo, hi), seeded",

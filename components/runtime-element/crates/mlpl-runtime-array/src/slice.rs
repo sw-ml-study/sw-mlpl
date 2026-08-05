@@ -114,3 +114,53 @@ pub(crate) fn compress(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, 
     new_dims[axis] = keep.len();
     Ok(DenseArray::new(Shape::new(new_dims), out)?)
 }
+
+/// `pareto_front(P, dirs)`: the `[n]` 0/1 mask of non-dominated
+/// rows of the `[n, k]` metric matrix `P`. `dirs` is `[k]` with
+/// `1` = maximize the column, `-1` = minimize it. Row `i` is
+/// dominated when some row is at least as good on every column
+/// and strictly better on one. Duplicates dominate neither way,
+/// so both stay. O(n^2 * k) -- experiment logs are small.
+pub(crate) fn pareto_front(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 2 {
+        return Err(arity_err(name, 2, args.len()));
+    }
+    let (p, dirs) = (&args[0], &args[1]);
+    let bad = |reason: String| RuntimeError::InvalidArgument {
+        func: name.into(),
+        reason,
+    };
+    if p.rank() != 2 {
+        return Err(bad(format!(
+            "P must be a rank-2 [n, k] metric matrix, got rank {}",
+            p.rank()
+        )));
+    }
+    let (n, k) = (p.shape().dims()[0], p.shape().dims()[1]);
+    if dirs.rank() != 1 || dirs.shape().dims()[0] != k {
+        return Err(bad(format!(
+            "dirs needs one direction per column: [{k}] expected"
+        )));
+    }
+    if !dirs.data().iter().all(|d| *d == 1.0 || *d == -1.0) {
+        return Err(bad(
+            "each dirs entry must be 1 (maximize) or -1 (minimize)".into()
+        ));
+    }
+    let adj: Vec<f64> = p
+        .data()
+        .iter()
+        .enumerate()
+        .map(|(i, v)| v * dirs.data()[i % k])
+        .collect();
+    let row = |i: usize| &adj[i * k..(i + 1) * k];
+    let dominated = |i: usize| {
+        (0..n).any(|j| {
+            j != i
+                && row(j).iter().zip(row(i)).all(|(a, b)| a >= b)
+                && row(j).iter().zip(row(i)).any(|(a, b)| a > b)
+        })
+    };
+    let mask: Vec<f64> = (0..n).map(|i| f64::from(u8::from(!dominated(i)))).collect();
+    Ok(DenseArray::new(Shape::new(vec![n]), mask)?)
+}

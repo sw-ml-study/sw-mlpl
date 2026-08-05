@@ -1,6 +1,6 @@
 number = 12
 slug = "pareto-core"
-status = "pending"
+status = "in-progress"
 description = "Per design doc and review resolutions: implement pareto_front(P, dirs) in mlp..."
 role = "legacy"
 context_files = []

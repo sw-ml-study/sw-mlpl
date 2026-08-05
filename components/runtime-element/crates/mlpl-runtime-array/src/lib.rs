@@ -25,6 +25,7 @@ pub const NAMES: &[&str] = &[
     "grade_up",
     "grade_down",
     "compress",
+    "pareto_front",
     "reshape",
     "transpose",
     "reduce_add",
