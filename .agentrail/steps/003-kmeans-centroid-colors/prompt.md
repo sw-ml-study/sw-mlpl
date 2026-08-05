@@ -1,0 +1,1 @@
+User report 2026-08-04: K-Means demo's final centroid plot uses svg(C, 'scatter') -- single color. Replace with scatter_labeled(C, range(3)) so centroid k matches its cluster's point color (same palette as the assignment plot); update takeaway; fix the native demos/kmeans.mlpl twin; smoke gates; pages rebuild + deploy.

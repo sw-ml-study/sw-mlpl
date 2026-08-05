@@ -1,0 +1,1 @@
+K-Means centroid plot now scatter_labeled(C, range(3)) -- centroid colors match cluster point colors via the shared label palette; native twin fixed; smoke green; pages deployed. Why not one combined plot: scatter_labeled lacks a marker-shape channel, so centroids would be indistinguishable from points.

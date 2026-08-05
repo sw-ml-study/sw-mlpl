@@ -1,4 +1,4 @@
-number = 3
+number = 4
 slug = "gen-support"
 status = "pending"
 description = "data-forge step 3 per design: rand_ints(n, lo, hi, seed) (deterministic unifo..."
