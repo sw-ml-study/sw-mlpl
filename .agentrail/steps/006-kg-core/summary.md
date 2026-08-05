@@ -1,0 +1,1 @@
+kg oracle shipped: forge component + 4 builtins with entity-disjoint {seen,unseen} split (train/eval field names blocked by the train keyword -- exposed a parser limitation, fix queued), runtime-chain + eval-layer wiring, full docs surface, TDD incl. sampled-paths-all-verify and disjointness pins; catalog crate split retired the File-LOC FAIL the new entries caused.

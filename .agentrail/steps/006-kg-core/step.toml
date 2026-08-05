@@ -1,9 +1,10 @@
 number = 6
 slug = "kg-core"
-status = "in-progress"
+status = "completed"
 description = "data-forge step per design: the four kg_* builtins over [E,3] edge arrays in ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-04T18:38:51"
+completed_at = "2026-08-04T19:14:07"
 task_type = "rust-feature"
-commits = []
+commits = ["43c4d1bf9fd16347a104e5d86ff5a2253e80a76a"]

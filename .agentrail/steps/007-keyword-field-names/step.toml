@@ -1,0 +1,9 @@
+number = 7
+slug = "keyword-field-names"
+status = "pending"
+description = "User question 2026-08-04: s.train failed because keywords are rejected as rec..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-04T19:14:07"
+task_type = "rust-feature"
+commits = []
