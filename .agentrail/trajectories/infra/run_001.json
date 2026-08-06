@@ -1,0 +1,11 @@
+{
+  "task_type": "infra",
+  "state": {
+    "number": 2,
+    "step": "readme-badges"
+  },
+  "action": "targeted multi-workspace CI; badge wiring",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T14:40:27"
+}

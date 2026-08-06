@@ -1,0 +1,1 @@
+CI workflow (fast representative suite) + README CI and pages-build-deployment badges; badge URL verified; runner-flakiness caveat recorded.

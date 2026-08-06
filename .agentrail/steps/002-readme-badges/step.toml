@@ -1,9 +1,10 @@
 number = 2
 slug = "readme-badges"
-status = "pending"
+status = "completed"
 description = "README badges: pages-build-deployment badge (branch-built Pages auto-workflow..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T14:38:49"
+completed_at = "2026-08-06T14:40:27"
 task_type = "infra"
-commits = []
+commits = ["e92c4bb7735a221ce2515f3ece0d532fb98fcc8c"]

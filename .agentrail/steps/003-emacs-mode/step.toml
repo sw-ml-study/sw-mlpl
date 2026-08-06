@@ -1,0 +1,9 @@
+number = 3
+slug = "emacs-mode"
+status = "pending"
+description = "editors/emacs/mlpl-mode.el per the q-and-a sketch: font-lock (keywords; the t..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T14:40:27"
+task_type = "feature"
+commits = []
