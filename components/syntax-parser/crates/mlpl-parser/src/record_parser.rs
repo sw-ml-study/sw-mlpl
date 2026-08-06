@@ -171,3 +171,34 @@ impl Parser<'_> {
         })
     }
 }
+
+impl Parser<'_> {
+    /// `Ident("include")` immediately followed by a string
+    /// literal. That token sequence is a parse error today, so
+    /// claiming it costs nothing: `include` stays a legal
+    /// variable name everywhere else (contextual, like keyword
+    /// field names above).
+    pub(crate) fn include_pattern(&self) -> bool {
+        matches!(&self.tokens[self.pos].kind, TokenKind::Ident(n) if n == "include")
+            && matches!(
+                self.tokens.get(self.pos + 1).map(|t| &t.kind),
+                Some(TokenKind::StrLit(_))
+            )
+    }
+
+    /// Consume a top-level `include "path"` declaration; `None`
+    /// when the upcoming tokens are not the include pattern.
+    pub(crate) fn parse_include_top(&mut self) -> Option<Result<Expr, ParseError>> {
+        if !self.include_pattern() {
+            return None;
+        }
+        let start = self.tokens[self.pos].span;
+        self.pos += 1;
+        let TokenKind::StrLit(path) = &self.tokens[self.pos].kind else {
+            unreachable!("include_pattern guarantees a string literal");
+        };
+        let (path, end) = (path.clone(), self.tokens[self.pos].span);
+        self.pos += 1;
+        Some(Ok(Expr::Include(path, Span::new(start.start, end.end))))
+    }
+}

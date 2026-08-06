@@ -185,6 +185,10 @@ fn lower_stmt(
 /// mismatches.
 pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerError> {
     match expr {
+        Expr::Include(path, _) => Err(LowerError::Unsupported(format!(
+            "include \"{path}\" (the compile path takes one already-resolved source; \
+             run the loader first or hand-splice)"
+        ))),
         Expr::IntLit(n, _) => {
             let rt = &ctx.rt;
             let v = *n as f64;

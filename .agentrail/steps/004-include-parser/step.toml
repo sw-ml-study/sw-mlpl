@@ -1,6 +1,6 @@
 number = 4
 slug = "include-parser"
-status = "pending"
+status = "in-progress"
 description = "Per docs/static-include-design-mlpl.md + review resolutions: the Include top-..."
 role = "legacy"
 context_files = []

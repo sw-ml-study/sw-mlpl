@@ -7,6 +7,46 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q (side): What is the monad story in sw-MLPL -- lift, bind, is
+`?` monadic, other early-return forms, would fuller support help?**
+
+A: Today sw-MLPL has ONE monad, implemented concretely rather
+than abstractly: the error monad. `Value::Result` is
+Either-shaped (`ok`/`err` + payload), `ok(x)` is `pure`, and the
+`?` postfix is the error-monad BIND specialized to the identity
+continuation -- exactly Rust's model, not Haskell's: propagation
+is a syntax form, not a first-class operator you can pass
+around. `unwrap_or` is `fromMaybe`; `err_message` and the zilde
+projections `get_value` / `get_error` are eliminators.
+
+There is also a second, very APL, encoding already half-present:
+`get_value(r)` returns a 0-or-1-element vector, and array
+operations propagate emptiness -- Maybe as DATA SHAPE (the list
+monad restricted to length <= 1). Pipelines can early-exit by
+flowing through emptiness instead of `?`: `tally(...)` is
+`is_some`, `compress`/masks give vectorized error handling over
+batches. That idiom deserves demos regardless of any new
+machinery.
+
+Can lift/map/and_then be implemented? Not yet, and the blocker
+is precise: monadic COMBINATORS are higher-order, and user
+functions are not first-class values. That is contract item 3 of
+the mlplunit-unblock program (`:u:name` + `call`), which is also
+the APL2 higher-order saga's prerequisite. Once callables land,
+`map_ok(:u:f, r)` / `and_then(:u:f, r)` / `or_else(:u:f, r)`
+become small builtins and the Result type gains real
+composition -- Rust-level monad support. Full Haskell-style
+support (user-defined monads, do-notation, typeclass
+abstraction) is out of scope: it needs a static type system the
+language deliberately does not have.
+
+Would it be useful HERE? Yes, twice over: mlplunit's fixture
+lifecycle needs a guaranteed-finally, which is the bracket
+pattern from the same family, and test bodies chaining fallible
+assertions read best as `and_then` chains or `?` pipelines.
+Recommendation recorded: revisit right after the callables step;
+the combinators ride the same saga. Full analysis: docs/monads.md.
+
 **Q: Why is K-Means the only demo in the Clustering group?**
 
 A: History, not design: K-Means was built early as THE clustering

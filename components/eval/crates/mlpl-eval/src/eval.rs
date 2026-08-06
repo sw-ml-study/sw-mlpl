@@ -23,6 +23,13 @@ pub(crate) fn eval_expr(
     if let Expr::StrLit(s, _) = expr {
         return Ok(Value::Str(s.clone()));
     }
+    if let Expr::Include(path, _) = expr {
+        return Err(EvalError::Unsupported(format!(
+            "include \"{path}\": include is a script-mode construct -- run the file \
+             under `mlpl-repl -f` (optionally with --source-dir); this surface has \
+             no source provider"
+        )));
+    }
     if let Expr::BuiltinRef(name, _) = expr {
         return Ok(Value::BuiltinRef { name: name.clone() });
     }
@@ -268,6 +275,7 @@ pub(crate) fn eval_expr(
         Expr::FloatLit(f, _) => ("literal", vec![], DenseArray::from_scalar(*f)),
         Expr::StrLit(_, _) => unreachable!(),
         Expr::BuiltinRef(_, _) => unreachable!(),
+        Expr::Include(_, _) => unreachable!(),
         Expr::Ident(name, _) => {
             let r = env
                 .get(name)

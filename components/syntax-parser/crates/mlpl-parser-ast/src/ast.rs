@@ -36,6 +36,11 @@ pub enum Expr {
     FloatLit(f64, Span),
     /// String literal.
     StrLit(String, Span),
+    /// Top-level `include "path"` declaration (static source
+    /// loading). Produced only at statement position of a source
+    /// file; the script-mode loader consumes it, and every other
+    /// surface rejects it at evaluation with a precise error.
+    Include(String, Span),
     /// Identifier reference.
     Ident(String, Span),
     /// Builtin / operator reference: `:foo`, `:+`, `:max`.
@@ -269,6 +274,7 @@ impl Expr {
     pub fn span(&self) -> Span {
         match self {
             Self::IntLit(_, s) | Self::FloatLit(_, s) | Self::StrLit(_, s) => *s,
+            Self::Include(_, s) => *s,
             Self::Ident(_, s) | Self::BuiltinRef(_, s) | Self::ArrayLit(_, s) => *s,
             Self::BinOp { span, .. }
             | Self::UnaryNeg { span, .. }

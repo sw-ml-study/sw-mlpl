@@ -11,7 +11,12 @@ pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {
     let mut stmts = Vec::new();
     p.skip_sep();
     while p.pos < p.tokens.len() && p.tokens[p.pos].kind != TokenKind::Eof {
-        stmts.push(p.parse_statement()?);
+        // `include "path"` is legal ONLY here, at the top level.
+        if let Some(inc) = p.parse_include_top() {
+            stmts.push(inc?);
+        } else {
+            stmts.push(p.parse_statement()?);
+        }
         p.skip_sep();
     }
     Ok(stmts)
@@ -48,6 +53,14 @@ pub(crate) fn can_start_expr(kind: Option<&TokenKind>) -> bool {
 impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
     pub(crate) fn parse_statement(&mut self) -> Result<Expr, ParseError> {
+        if self.include_pattern() {
+            return Err(ParseError::UnexpectedToken {
+                found: "include inside a block -- `include \"path\"` is only legal at the \
+                        top level of a source file"
+                    .into(),
+                span: self.tokens[self.pos].span,
+            });
+        }
         if self.tokens[self.pos].kind == TokenKind::Def {
             return self.parse_def();
         }

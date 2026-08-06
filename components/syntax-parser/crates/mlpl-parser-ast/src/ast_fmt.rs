@@ -5,7 +5,7 @@
 use std::fmt;
 
 use crate::ast::{BinOpKind, Expr, TensorCtorKind};
-use crate::ast_fmt_compound::{fmt_fn_def, fmt_if_expr, fmt_record_lit, fmt_scope};
+use crate::ast_fmt_compound::{fmt_fn_def, fmt_if_expr, fmt_quoted, fmt_record_lit, fmt_scope};
 
 impl fmt::Display for BinOpKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -51,7 +51,7 @@ impl fmt::Display for Expr {
             Self::IntLit(n, _) => write!(f, "{n}"),
             Self::FloatLit(x, _) if x.fract() == 0.0 && x.is_finite() => write!(f, "{x:.1}"),
             Self::FloatLit(x, _) => write!(f, "{x}"),
-            Self::StrLit(s, _) => write!(f, "\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\"")),
+            Self::StrLit(..) | Self::Include(..) => fmt_quoted(f, self),
             Self::Ident(name, _) => write!(f, "{name}"),
             Self::BuiltinRef(name, _) => write!(f, ":{name}"),
             Self::BinOp { op, lhs, rhs, .. } => write!(f, "({lhs} {op} {rhs})"),

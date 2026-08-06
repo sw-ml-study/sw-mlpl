@@ -58,3 +58,15 @@ pub(crate) fn fmt_if_expr(
     fmt_scope(f, &format_args!("if {cond}"), then_body)?;
     fmt_scope(f, &format_args!(" else"), else_body)
 }
+
+/// The two quoted-string atoms, split from the big `Display`
+/// match for the function-LOC budget.
+pub(crate) fn fmt_quoted(f: &mut fmt::Formatter<'_>, e: &Expr) -> fmt::Result {
+    match e {
+        Expr::StrLit(s, _) => {
+            write!(f, "\"{}\"", s.replace('\\', "\\\\").replace('"', "\\\""))
+        }
+        Expr::Include(p, _) => write!(f, "include \"{p}\""),
+        _ => unreachable!("fmt_quoted only receives StrLit/Include"),
+    }
+}
