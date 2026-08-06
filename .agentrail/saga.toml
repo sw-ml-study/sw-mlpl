@@ -1,5 +1,5 @@
 name = "status-badges-emacs"
-status = "active"
+status = "completed"
 current_step = 6
 created_at = "2026-08-06T14:31:19"
 plan_file = ".agentrail/plan.md"

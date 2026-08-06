@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 6,
+    "step": "splash-badge"
+  },
+  "action": "badge-state diagnosis; single-build fix; CI-caught test repair",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T15:44:06"
+}

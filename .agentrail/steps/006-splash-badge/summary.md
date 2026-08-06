@@ -1,0 +1,1 @@
+Splash badge + composition idioms landed (commit survived the interrupt); deploy script no longer double-builds (pages badge green); CI seeded -- its first run caught and we fixed a stale parser test (@ is a token now; $ is the invalid char); glyph rendering confirmed by user.
