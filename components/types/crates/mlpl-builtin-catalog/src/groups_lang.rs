@@ -99,6 +99,26 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "keep slices where the mask is nonzero",
             ),
             (
+                "call",
+                "call(f, args...)",
+                "invoke a function reference (:u:name or :name) uniformly",
+            ),
+            (
+                "map_ok",
+                "map_ok(f, r)",
+                "apply f inside ok(...); err passes through",
+            ),
+            (
+                "and_then",
+                "and_then(f, r)",
+                "chain: ok(x) -> f(x) returning a Result; err passes through",
+            ),
+            (
+                "or_else",
+                "or_else(f, r)",
+                "recover: err(e) -> f(e); ok passes through",
+            ),
+            (
                 "equal",
                 "equal(a, b)",
                 "total structural equality over any two values; never errors",

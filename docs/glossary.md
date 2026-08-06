@@ -761,6 +761,17 @@ reference value for higher-order builtins like `reduce(:add,
 x)`. `:name arg` with a space and no parentheses is none of the
 three; the REPL answers it with a hint listing these forms.
 
+## call (builtin)
+
+`call(f, args...)` invokes a function REFERENCE uniformly:
+`:u:name` runs your function, `:name` runs the builtin -- one
+calling model for both. Errors identify the REFERENT (arity
+mismatches name the function, dangling references name the
+missing definition), and `ok`/`err`/`?` behavior is exactly as
+if the function were called by name. The invocation primitive
+under test registries: store references in a record, `call`
+them through field access.
+
 ## Calibration
 
 How well a model's reported confidence matches its actual
@@ -2198,6 +2209,17 @@ that, trained from scratch with their original initialization,
 match the full network's accuracy. Drives interest in
 pruning + retraining.
 
+## map_ok / and_then / or_else (builtins)
+
+The Result combinators -- the error monad's composition
+(docs/monads.md): `map_ok(f, r)` applies `f` inside `ok(...)`
+and passes `err` through; `and_then(f, r)` chains fallible
+steps (`ok(x)` becomes `f(x)` where `f` returns a Result);
+`or_else(f, r)` recovers (`err(e)` becomes `f(e)`). Function
+first, like `reduce(:op, x)`. `f` is a [[call (builtin)]]-able
+reference; `?` remains the statement-shaped alternative for
+early return inside `u:` functions.
+
 ## Manifold Hypothesis
 
 Real-world high-dimensional data (images, text, audio) lies
@@ -3573,6 +3595,18 @@ is a tiny taste; full uncertainty tooling is not in MLPL.
 param of `m` from the env's frozen set so subsequent
 `adam` / `momentum_sgd` updates can move them again. Used
 together as the LoRA freeze / unfreeze pair.
+
+## User-function reference (`:u:name`)
+
+The quoted form of YOUR function: `:u:zscore` is a first-class
+value (kind `user-fn-ref`) that identifies the definition
+without running it. Bind it (`f = :u:zscore`), store it in
+record registries, pass and return it, invoke it with
+[[call (builtin)]] or the Result combinators. Late binding:
+the reference resolves the name at call time, so re-defining
+the function updates what existing references run. Completes
+the three-kinds-of-name story beside [[BuiltinRef (`:foo`
+syntax)]].
 
 ## Universal Approximation
 

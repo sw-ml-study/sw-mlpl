@@ -22,6 +22,9 @@ pub struct ScopeSnapshot {
     // into the caller forever (mlplunit sequencing bug,
     // 2026-08-05).
     results: HashMap<String, (bool, Value)>,
+    // Function references bind into builtin_refs (both kinds), so
+    // reference-valued params need the same frame restore.
+    builtin_refs: HashMap<String, String>,
 }
 
 /// Per-call scope snapshot/restore for `u:` function frames, plus
@@ -43,6 +46,7 @@ impl EnvScope for Environment {
             records: self.records.clone(),
             string_lists: self.string_lists.clone(),
             results: self.results.clone(),
+            builtin_refs: self.builtin_refs.clone(),
         }
     }
 
@@ -52,6 +56,7 @@ impl EnvScope for Environment {
         self.records = s.records;
         self.string_lists = s.string_lists;
         self.results = s.results;
+        self.builtin_refs = s.builtin_refs;
     }
 
     fn clear_binding(&mut self, name: &str) {

@@ -79,9 +79,15 @@ Why the trichotomy: calls and values must look different (so
 a function was meant), and user space and builtin space must
 look different (APL workspaces suffered decades of name-clash
 pain; the `u:` prefix is the cure priced at two characters).
-Only builtins have the quoted form -- `:u:name` does not
-exist. If user functions become first-class values, the
-quoting rule extends to them.
+The quoting rule covers BOTH spaces: `:name` quotes a builtin
+and `:u:name` quotes YOUR function -- a first-class reference
+you can bind, store in record fields, pass, and return. A test
+registry is a record of references. `call(f, args...)` invokes
+either kind uniformly, with errors naming the REFERENCED
+function; the Result combinators `map_ok` / `and_then` /
+`or_else` take a reference as their first argument. References
+identify definitions by NAME (late binding): re-defining
+`u:name` means existing references call the new definition.
 
 Introspection follows the same split: `:builtins` lists the
 builtin space, `:fns` lists YOUR `u:` space, `:list u:name`
@@ -345,6 +351,10 @@ tables (e.g. the three name forms) keep their teaching order.
 | `running_product(v)` | 1 | Running product along a rank-1 vector (e.g. a diffusion noise schedule's alpha-bar). `cumprod` is the deprecated alias. |
 | `grade_up(v)` | 1 | Stable argsort, ascending: the index vector that sorts rank-1 `v` (ties keep original order). `gather_rows(X, grade_up(d))` reorders a dataset by difficulty -- the curriculum idiom. |
 | `grade_down(v)` | 1 | Stable argsort, descending. `gather_rows(C, grade_down(scores))` ranks candidates best-first; `take(grade_down(s), 0, 0)` is the best index. |
+| `call(f, args...)` | 1+ | Invoke a function REFERENCE uniformly: `call(:u:double, 21)` runs your function, `call(:mean, v)` runs the builtin. Errors identify the referent (arity, unknown name), and `ok`/`err`/`?` semantics flow through unchanged. |
+| `map_ok(f, r)` | 2 | Apply `f` inside `ok(...)`: `ok(x)` becomes `ok(f(x))`; `err` passes through untouched. `f` is a function reference; builtin references need an array payload. |
+| `and_then(f, r)` | 2 | Chain fallible steps (the railway): `ok(x)` becomes `f(x)` where `f` itself returns a Result; `err` passes through. |
+| `or_else(f, r)` | 2 | Recover: `err(e)` becomes `f(e)`; `ok` passes through untouched. |
 | `equal(a, b)` | 2 | Total STRUCTURAL equality over any two values: numbers (IEEE, except NaN equals NaN), strings, arrays (shape + axis labels + elements), records (recursing), models, tokenizers, `ok`/`err` results. Mismatched kinds return 0 -- never a hard error -- so assertions stay honest. Returns scalar 1/0. |
 | `repr(v)` | 1 | Deterministic, BOUNDED rendering of any value for expected-vs-actual diagnostics: `array[2, 3] [0, 1, ...]` with labels, quoted escaped strings, `{field: ...}` records, `ok(...)`/`err(...)`. Truncates large values with an explicit marker; not a serialization format. |
 | `compress(mask, a[, axis])` | 2-3 | Keep the slices of `a` along `axis` (default 0) where rank-1 `mask` is nonzero (APL compress). `compress(gt(scores, t), C)` keeps verified candidates; works on any rank. |

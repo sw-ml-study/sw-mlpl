@@ -97,6 +97,10 @@ The colon prefix means three distinct things:
   `disp(M)`. Any builtin works this way from the prompt.
 - `:name` bare -- a builtin REFERENCE, the value handed to
   higher-order builtins: `reduce(:add, x)`, `scan(:mul, v)`.
+- `:u:name` -- a USER-FUNCTION reference: the quoted form of
+  your own `def u:name`. Bind it, store it in records, and
+  invoke it with `call(f, args...)` (which also accepts builtin
+  references -- one calling model for both).
 
 A bare reference is not a call, so `:disp M` (space, no
 parentheses) does not run `disp` -- the REPL answers with a hint
@@ -130,6 +134,12 @@ def u:zscore(x) {
 - `#` comments inside a definition are KEPT: `:list u:zscore`
   prints the function back exactly as you wrote it.
 - Arguments may be arrays, Results, strings, or records.
+- Functions are FIRST-CLASS via references: `f = :u:zscore`
+  quotes the function; `call(f, v)` invokes it; a record of
+  references is a registry (`suite = {z: :u:zscore}` then
+  `call(suite.z, v)`). The Result combinators `map_ok` /
+  `and_then` / `or_else` take a reference first:
+  `and_then(:u:validate, u:parse(x))` chains fallible steps.
 
 ## Control Flow and Error Handling
 

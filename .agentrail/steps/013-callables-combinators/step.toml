@@ -1,6 +1,6 @@
 number = 13
 slug = "callables-combinators"
-status = "pending"
+status = "in-progress"
 description = "Per design rider: map_ok(f, r) / and_then(f, r) / or_else(f, r) builtins over..."
 role = "legacy"
 context_files = []

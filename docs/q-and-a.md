@@ -7,6 +7,29 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: What can mlplunit use NOW? What else in flight does it
+need?**
+
+A (2026-08-05, night): USABLE NOW in the current release build
+-- all verified by mlplunit's own check-capabilities: (1)
+equal/repr (its catalog marks structural-equality SHIPPED);
+(2) native static include + --source-dir (marked SHIPPED);
+(3) the FULL callables surface, AVAILABLE against the
+strengthened fixture: :u:name references, record registries,
+call(f, args...) including zero-argument calls, references
+passed THROUGH u:-function arguments (the udf-argument-values
+gap closed tonight, with the reference-param frame-restore fix
+alongside), referent-named arity/unknown errors, identity
+equal, repr as :u:name, and hard errors flowing to try/catch
+unchanged; (4) beyond the contract: the Result combinators
+map_ok / and_then / or_else for railway-style test helpers.
+IN FLIGHT NEXT (the last new capability area): @test metadata +
+reflection (contract item 4) -- design pause first, then
+implementation; after that, items 5-7 (parameterized cases,
+fixture lifecycle, events) are mlplunit-side compositions over
+what has shipped, except the lifecycle's guaranteed-finally,
+which is a language-design task queued behind metadata.
+
 **UPDATE (late evening): callables are AVAILABLE; both P0s show
 SHIPPED in mlplunit's catalog.** call(f, args...) landed --
 uniform over user and builtin references, arity errors naming

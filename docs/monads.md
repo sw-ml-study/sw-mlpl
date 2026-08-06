@@ -56,7 +56,8 @@ item 3 of the mlplunit-unblock program (`:u:name` references +
 prerequisite (`each` / `scan` / `outer` wait on the same
 capability).
 
-Once callables land, the combinators are small builtins:
+SHIPPED 2026-08-05 (same day, callables saga): the combinators
+landed exactly as sketched:
 
 ```text
 map_ok(:u:f, r)      # fmap: apply f inside ok, pass err through

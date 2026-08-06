@@ -74,3 +74,48 @@ fn result_semantics_flow_through_call() {
         "Err from the callee is a VALUE, not a crash"
     );
 }
+
+#[test]
+fn references_pass_through_udf_arguments() {
+    // The strengthened mlplunit fixture shape: invoke a reference
+    // that arrived as a user-function ARGUMENT, zero-arg and
+    // one-arg, including through a record registry field.
+    let mut env = Environment::new();
+    eval_value(
+        &mut env,
+        "def u:double(x) { x * 2 }\n\
+         def u:pass_test() { ok({test: \"pass\"}) }\n\
+         def u:invoke_test(test) { call(test) }\n\
+         def u:invoke_case(test, input) { call(test, input) }",
+    )
+    .unwrap();
+    let v = eval_value(
+        &mut env,
+        "registry = {d: :u:double, p: :u:pass_test}\nu:invoke_case(registry.d, 21)",
+    )
+    .unwrap();
+    assert_eq!(scalar(&v), 42.0);
+    let v = eval_value(&mut env, "is_ok(u:invoke_test(registry.p))").unwrap();
+    assert_eq!(scalar(&v), 1.0);
+}
+
+#[test]
+fn reference_arguments_do_not_leak_out_of_the_frame() {
+    let mut env = Environment::new();
+    eval_value(
+        &mut env,
+        "def u:double(x) { x * 2 }\n\
+         def u:invoke_case(test, input) { call(test, input) }\n\
+         test = :u:double",
+    )
+    .unwrap();
+    eval_value(
+        &mut env,
+        "def u:halve(x) { x / 2 }\nu:invoke_case(:u:halve, 10)",
+    )
+    .unwrap();
+    // The caller's own `test` binding must survive the callee's
+    // shadowing parameter of the same name.
+    let v = eval_value(&mut env, "call(test, 3)").unwrap();
+    assert_eq!(scalar(&v), 6.0, "caller's reference restored");
+}

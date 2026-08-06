@@ -38,6 +38,32 @@ pub(crate) fn call_user_fn(
     result
 }
 
+/// Invoke a user function with ALREADY-EVALUATED argument values
+/// (the combinators' path: the payload is a Value, not an Expr).
+/// Same arity/scope/restore semantics as `call_user_fn`.
+pub(crate) fn invoke_user_fn_values(
+    name: &str,
+    values: &[Value],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let f = env
+        .get_fn(name)
+        .ok_or_else(|| EvalError::Unsupported(format!("undefined function: {name}")))?
+        .clone();
+    if values.len() != f.params.len() {
+        return Err(EvalError::BadArity {
+            func: name.into(),
+            expected: f.params.len(),
+            got: values.len(),
+        });
+    }
+    let snapshot = env.snapshot_scope();
+    let result = run_body(&f, name, values, env, trace);
+    env.restore_scope(snapshot);
+    result
+}
+
 /// Bind params into the (already-snapshotted) scope and evaluate the
 /// body. The caller restores the scope afterwards regardless of outcome.
 fn run_body(
@@ -82,9 +108,13 @@ fn bind_arg(name: &str, param: &str, val: &Value, env: &mut Environment) -> Resu
         }
         Value::Str(s) => env.set_string(param.to_string(), s.clone()),
         Value::Record { fields } => env.set_record(param.to_string(), fields.clone()),
+        Value::UserFnRef { name: t } | Value::BuiltinRef { name: t } => {
+            env.set_builtin_ref(param.to_string(), t.clone());
+        }
         _ => {
             return Err(EvalError::Unsupported(format!(
-                "{name}: argument '{param}' must be an array, Result, string, or record"
+                "{name}: argument '{param}' must be an array, Result, string, record, \
+                 or function reference"
             )));
         }
     }

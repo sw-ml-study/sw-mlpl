@@ -97,6 +97,9 @@ fn try_tools(
         "compare" => Some(crate::experiment_compare::dispatch_compare(args, env)),
         "equal" | "repr" => Some(eval_structural(name, args, env, trace)),
         "call" => Some(eval_call(args, env, trace, span)),
+        "map_ok" | "and_then" | "or_else" => Some(crate::fncall_combinators::eval_combinator(
+            name, args, env, trace,
+        )),
         "experiment_metric" => Some(crate::experiment_compare::eval_experiment_metric(args, env)),
         "momentum_sgd" | "adam" => {
             Some(crate::grad_optim::eval_optim(name, args, env, trace, span))
