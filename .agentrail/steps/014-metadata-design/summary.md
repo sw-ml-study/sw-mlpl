@@ -1,0 +1,1 @@
+Metadata design committed: @test + record-literal metadata, def-time registration in source order, tests()/test_info() reflection with :u: references; three open questions for review.

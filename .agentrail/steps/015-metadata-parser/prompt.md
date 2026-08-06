@@ -1,0 +1,1 @@
+Per docs/test-metadata-design.md + review resolutions: lexer claims @; parser parses '@test [record-literal]' attached to the following def u: (FnDef gains optional meta expr); structured errors for stray @words, annotation without a following def, and doubled annotations. TDD in mlpl-parser.

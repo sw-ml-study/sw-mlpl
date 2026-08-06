@@ -1,9 +1,10 @@
 number = 14
 slug = "metadata-design"
-status = "in-progress"
+status = "completed"
 description = "Contract item 4 design: @test metadata on def u: functions + reflection enume..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T21:27:42"
+completed_at = "2026-08-05T21:31:47"
 task_type = "docs"
-commits = []
+commits = ["260d050d6eb5f145bed2f3c9d0ae3b0871a209d7"]
