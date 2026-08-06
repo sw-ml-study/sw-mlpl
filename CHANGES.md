@@ -14,6 +14,19 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga mlplunit-round-2: complete (4 steps)
+- docs: close mlplunit-round-2 -- adoption notes + queue advance
+- chore: lockfile refresh (run-script)
+- saga mlplunit-round-2: step 003 complete
+- feat: run_script -- fresh-environment script execution with exit interception (run-script)
+- saga mlplunit-round-2: step 002 complete
+- feat(eval): sandboxed filesystem builtins -- fs_walk / read_text / write_text / remove_path (fs-api)
+- saga mlplunit-round-2: step 001 complete
+- feat(eval): global_set -- the explicit global-state escape hatch (global-set)
+- saga: archive status-badges-emacs; init mlplunit-round-2 (user go)
+- saga status-badges-emacs: step 007 complete (badge link tags)
+- fix(web): badge detects trunk's link-tag bundle references (badge-linktags)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga status-badges-emacs: complete (6 steps)
 - test(parser): invalid_character uses a character that IS invalid
 - saga: agentrail state for splash-badge step
