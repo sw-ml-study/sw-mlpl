@@ -1,0 +1,10 @@
+number = 6
+slug = "branch-deploy"
+status = "completed"
+description = "User ask: different builder for Pages after GitHub runner failures. Switch to..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T13:14:12"
+completed_at = "2026-08-06T13:55:37"
+task_type = "infra"
+commits = ["909998e51371582d046304e6b00c76ef7187f12f"]

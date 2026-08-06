@@ -1,0 +1,1 @@
+Pages deploys from the gh-pages branch (no Actions runner): source switched to legacy, deploy-pages.sh subtree-push + build request, workflow removed, CLAUDE.md updated; live verified serving the committed bundle. Riders: editor stays open on Run (the different-demo misclick), :help version from CARGO_PKG_VERSION.
