@@ -1,0 +1,1 @@
+Run mlplunit check-capabilities against the fresh release repl expecting the events gate AVAILABLE; update docs/q-and-a.md (capability summary + the unicode-in-comments and md-only-ASCII answers), wiki capability matrix row, queue advance. Then --done.

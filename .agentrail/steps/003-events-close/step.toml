@@ -1,0 +1,9 @@
+number = 3
+slug = "events-close"
+status = "pending"
+description = "Run mlplunit check-capabilities against the fresh release repl expecting the ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T10:15:35"
+task_type = "docs"
+commits = []

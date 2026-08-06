@@ -1,6 +1,6 @@
 name = "native-test-events"
 status = "active"
-current_step = 2
+current_step = 3
 created_at = "2026-08-06T09:59:04"
 plan_file = ".agentrail/plan.md"
 retroactive = false

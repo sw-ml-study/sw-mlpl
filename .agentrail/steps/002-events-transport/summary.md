@@ -1,0 +1,1 @@
+Host transport shipped: --test-events JSONL (script) + test_events response array (connect), deterministic JSON encoding with exact-text escaping; 5 TDD tests; both paths smoke-verified live.
