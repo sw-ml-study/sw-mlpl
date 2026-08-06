@@ -164,6 +164,26 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "explicit global write that survives the function frame (reporter state)",
             ),
             (
+                "fs_walk",
+                "fs_walk(root, opts)",
+                "sandboxed lexical directory walk; opts: recursive/kind/pattern",
+            ),
+            (
+                "read_text",
+                "read_text(path)",
+                "sandboxed exact-text file read; returns ok(text)/err",
+            ),
+            (
+                "write_text",
+                "write_text(path, s)",
+                "sandboxed exact-text file write; returns ok(1)/err",
+            ),
+            (
+                "remove_path",
+                "remove_path(path)",
+                "sandboxed file/dir removal; returns ok(1)/err",
+            ),
+            (
                 "equal",
                 "equal(a, b)",
                 "total structural equality over any two values; never errors",

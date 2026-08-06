@@ -71,6 +71,10 @@ pub struct Environment {
     pub global_writes: Vec<(String, Value)>,
     /// Current user-fn call depth (frame replay bookkeeping).
     pub call_depth: usize,
+    /// Sandbox root for the filesystem builtins (`fs_walk` /
+    /// `read_text` / `write_text` / `remove_path`). None on
+    /// surfaces without filesystem access.
+    pub fs_root: Option<std::path::PathBuf>,
     /// Sandbox root for filesystem `load("relative-path")` calls.
     /// `None` means filesystem access is disabled (the web REPL
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12

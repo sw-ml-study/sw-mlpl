@@ -53,6 +53,23 @@ fn init(config: &Config) -> Session {
     if let Some(path) = &config.test_events {
         env.test_events_out = Some(path.clone());
     }
+    // Filesystem sandbox for fs_walk/read_text/write_text/
+    // remove_path: --source-dir, else the script's directory,
+    // else (interactive) the working directory.
+    env.fs_root = config
+        .source_dir
+        .clone()
+        .or_else(|| {
+            config.script.as_ref().and_then(|s| {
+                let p = std::path::Path::new(s).parent()?;
+                Some(if p.as_os_str().is_empty() {
+                    std::path::PathBuf::from(".")
+                } else {
+                    p.to_path_buf()
+                })
+            })
+        })
+        .or_else(|| std::env::current_dir().ok());
     if let Some(dir) = &config.exp_dir {
         env.set_exp_dir(dir.clone());
     }
