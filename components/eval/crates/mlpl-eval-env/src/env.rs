@@ -55,6 +55,9 @@ pub struct Environment {
     /// Generation states (KV caches) by binding name -- the
     /// `gen_*` family (docs/kv-cache-design.md).
     pub gen_states: std::collections::HashMap<String, mlpl_eval_core::GenState>,
+    /// Registered `test_event_sink` callback (`u:` name), the
+    /// typed test-event API's delivery target.
+    pub test_event_sink: Option<String>,
     /// Sandbox root for filesystem `load("relative-path")` calls.
     /// `None` means filesystem access is disabled (the web REPL
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12
