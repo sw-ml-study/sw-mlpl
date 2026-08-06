@@ -7,6 +7,33 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: What are next steps doable now?**
+
+A (2026-08-06): Ready to execute immediately, in recommended
+order: (1) THE METADATA TRIO -- metadata-parser (@ claimed,
+annotations attach to def), metadata-registry (UserFn carries
+metadata + source/line, duplicate diagnostics), metadata-reflect
+(tests() / test_info() / annotations() + docs + capability
+check) -- design approved, prompts queued; flips test-metadata
+AVAILABLE and completes the mlplunit contract's independent
+first four. (2) mlplunit-unblock saga CLOSE (docs, queue, wiki,
+capability summary). (3) RESUME gen-state-kv-cache -- paused
+cleanly with its design committed; re-init from the archived
+plan and continue at gen-state-core (the Track 2 MTP opener the
+roadmap wants next). Schedulable any time as light interleaves:
+the clustering-demos item (GMM/EM, DBSCAN, agglomerative), the
+Result-pipelines demo (monads.md rec 4: ? vs zilde side by
+side), and the guaranteed-finally/bracket DESIGN (contract item
+6's one language prerequisite -- design can precede metadata
+implementation without conflict). External / not sw-MLPL work:
+the org-mode + elisp math extraction (user side; trivial once
+annotations() ships), mlplunit's adoption of
+callable-user-functions (their catalog still shows AVAILABLE),
+and the two upstream tool fixes (sw-checklist trait-sig
+miscount, agentrail em-dashes). Longer-horizon queued: the
+math-view program, the paydown spike (mlpl-viz-analysis
+partition first), Linux cuda-gating verification.
+
 **Q: Read docs/bqn-sw-mlpl-and-math.txt for annotation/math
 ideas (short term maybe elisp + org-mode).**
 
