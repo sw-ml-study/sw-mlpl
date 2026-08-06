@@ -14,6 +14,17 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 010 complete
+- fix(eval): binding hygiene -- results join the frame snapshot; bindings clear stale kinds (mlplunit blocker)
+- saga mlplunit-unblock: step 009 complete
+- docs(design): first-class user-function references -- :u:name + call (mlplunit-unblock step 9)
+- saga mlplunit-unblock: step 008 complete
+- fix(web): editor Run evaluates balanced statement groups, not raw lines (user report)
+- saga mlplunit-unblock: step 007 complete
+- docs(include): user docs for static include + surface verification (mlplunit-unblock step 7)
+- refactor(cli): resolve at 24 lines; ledger at 554 / 2 / 345
+- refactor(cli): trim FsProvider::resolve to budget (26 -> 25 lines)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 006 complete
 - feat(repl): --source-dir + FsProvider -- native static include works end to end (mlplunit-unblock step 6)
 - docs(changes): refresh CHANGES.md to HEAD
