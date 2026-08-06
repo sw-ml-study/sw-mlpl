@@ -199,11 +199,13 @@ fn negative_after_operator() {
 
 #[test]
 fn invalid_character() {
-    let result = lex("1 @ 2");
+    // `@` is the annotation token these days; `$` stays outside
+    // the language.
+    let result = lex("1 $ 2");
     assert!(result.is_err());
     match result.unwrap_err() {
         ParseError::UnexpectedCharacter { ch, span } => {
-            assert_eq!(ch, '@');
+            assert_eq!(ch, '$');
             assert_eq!(span, Span::new(2, 3));
         }
         other => panic!("expected UnexpectedCharacter, got {other:?}"),
