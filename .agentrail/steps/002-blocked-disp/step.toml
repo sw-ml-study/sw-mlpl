@@ -1,9 +1,10 @@
 number = 2
 slug = "blocked-disp"
-status = "pending"
+status = "completed"
 description = "disp renders rank-4 [a,b,c,d] as an a x b outer grid of boxed c x d matrices ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T00:23:05"
+completed_at = "2026-08-06T00:31:35"
 task_type = "rust-feature"
-commits = []
+commits = ["b5e4d3fcf916c5fed3d1fc89bcca6d9054947403"]

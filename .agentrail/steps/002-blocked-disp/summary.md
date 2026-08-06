@@ -1,0 +1,1 @@
+Blocked disp shipped: rank-4 outer grid of boxed matrices, rank-3 row of boxes, block-aligned cells, rank<=2 byte-identical; verified visually on iota-81; 4 TDD tests + updated rank-3 pin.

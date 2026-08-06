@@ -1,0 +1,9 @@
+number = 3
+slug = "demo-and-docs"
+status = "pending"
+description = "Step 3 per saga plan: (1) General Programming web demo NEXT TO the Life demos..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T00:31:35"
+task_type = "feature"
+commits = []
