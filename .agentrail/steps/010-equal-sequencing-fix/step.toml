@@ -1,8 +1,9 @@
 number = 10
 slug = "equal-sequencing-fix"
-status = "in-progress"
+status = "completed"
 description = "mlplunit repro: equal(ok(record), ok(record)) true in isolation but corrupts ..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T20:27:26"
-commits = []
+completed_at = "2026-08-05T20:43:08"
+commits = ["43d29f56b3b0300cc629111543b9fccd4aa696eb"]

@@ -1,0 +1,1 @@
+mlplunit blocker fixed: results-table snapshot + cross-kind clear_binding; equal exonerated by bisection; full suite green; their strengthened fixture flips AVAILABLE. Checker miscount documented + queued upstream.
