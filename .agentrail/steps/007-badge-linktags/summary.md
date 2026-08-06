@@ -1,0 +1,1 @@
+Badge unknown-everywhere fixed: link-tag scan + real-index pin test; deployed; badges verified passing server-side (README red was camo cache).

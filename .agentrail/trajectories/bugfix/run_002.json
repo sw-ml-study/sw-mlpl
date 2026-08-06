@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 7,
+    "step": "badge-linktags"
+  },
+  "action": "tag-shape root cause; real-artifact pin test",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T15:56:05"
+}

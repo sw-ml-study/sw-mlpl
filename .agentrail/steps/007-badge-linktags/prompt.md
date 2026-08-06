@@ -1,0 +1,1 @@
+Splash badge showed unknown: trunk uses link modulepreload, not script src. Scan both tag shapes; pin the REAL pages/index.html shape in tests; rebuild+deploy; out-of-band verify the badge's comparison data path (curl both origins, compare extracted bundles).
