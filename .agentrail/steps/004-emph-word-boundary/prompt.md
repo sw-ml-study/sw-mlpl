@@ -1,0 +1,1 @@
+Web renderer bug (user report): inline.rs treats any _..._ as emphasis, eating underscores in snake_case identifiers (transpose_axes, u:sudoku_candidate_safe_from) in demo intro/takeaway text. Fix with CommonMark-style word-boundary rule: _ opens emphasis only when not preceded by an alphanumeric and closes only when not followed by one. TDD; rebuild pages; push.

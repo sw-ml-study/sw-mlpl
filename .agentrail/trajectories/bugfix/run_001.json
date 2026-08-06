@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 4,
+    "step": "emph-word-boundary"
+  },
+  "action": "root-caused via renderer read; fixed tokenizer not texts; corpus-wide regression gate",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T09:57:49"
+}

@@ -1,0 +1,1 @@
+Class fix: CommonMark word-boundary rule for _ emphasis + spaced-url link guard in the inline tokenizer; registry-wide prose audit over demos+lessons+glossary pins the class to zero; pages rebuilt.
