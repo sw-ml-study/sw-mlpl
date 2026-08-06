@@ -53,6 +53,9 @@ pub(crate) fn can_start_expr(kind: Option<&TokenKind>) -> bool {
 impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
     pub(crate) fn parse_statement(&mut self) -> Result<Expr, ParseError> {
+        if self.tokens[self.pos].kind == TokenKind::At {
+            return self.parse_annotated_def();
+        }
         if self.include_pattern() {
             return Err(ParseError::UnexpectedToken {
                 found: "include inside a block -- `include \"path\"` is only legal at the \

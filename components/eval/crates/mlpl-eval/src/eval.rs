@@ -257,6 +257,7 @@ pub(crate) fn eval_expr(
         name,
         params,
         body,
+        annotations: _,
         span,
     } = expr
     {

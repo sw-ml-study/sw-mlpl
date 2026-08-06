@@ -11,6 +11,7 @@ pub fn describe_kind(kind: &TokenKind) -> String {
     match kind {
         TokenKind::Eof => "end of input".into(),
         TokenKind::Newline => "newline".into(),
+        TokenKind::At => "'@'".into(),
         TokenKind::IntLit(n) => format!("integer {n}"),
         TokenKind::FloatLit(n) => format!("float {n}"),
         TokenKind::StrLit(s) => format!("string \"{s}\""),

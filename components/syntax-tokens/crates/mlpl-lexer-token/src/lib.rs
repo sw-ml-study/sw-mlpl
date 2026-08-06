@@ -39,6 +39,8 @@ pub enum TokenKind {
     Colon,
     /// `;`
     Semicolon,
+    /// `@` -- annotation marker (`@test`, `@formula ...`).
+    At,
     /// `+`
     Plus,
     /// `-`

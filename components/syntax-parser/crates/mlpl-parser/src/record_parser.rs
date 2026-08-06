@@ -202,3 +202,70 @@ impl Parser<'_> {
         Some(Ok(Expr::Include(path, Span::new(start.start, end.end))))
     }
 }
+
+impl Parser<'_> {
+    /// Parse stacked `@word [record-literal | string-literal]`
+    /// annotations and the `def u:` they attach to. `@` is a
+    /// GENERAL annotation namespace: any word is legal; payloads
+    /// are one record or string literal. Annotations attach ONLY
+    /// to a following def.
+    pub(crate) fn parse_annotated_def(&mut self) -> Result<Expr, ParseError> {
+        let mut annotations: Vec<(String, Option<Expr>)> = Vec::new();
+        while self.tokens[self.pos].kind == TokenKind::At {
+            let at_span = self.tokens[self.pos].span;
+            self.pos += 1;
+            let TokenKind::Ident(word) = &self.tokens[self.pos].kind else {
+                return Err(ParseError::UnexpectedToken {
+                    found: "an annotation needs a word: `@test`, `@formula ...`".into(),
+                    span: at_span,
+                });
+            };
+            let word = word.clone();
+            self.pos += 1;
+            annotations.push((word, self.parse_annotation_payload()?));
+            self.skip_sep();
+        }
+        if self.tokens[self.pos].kind != TokenKind::Def {
+            return Err(ParseError::UnexpectedToken {
+                found: "annotations attach to the NEXT `def u:...` definition".into(),
+                span: self.tokens[self.pos].span,
+            });
+        }
+        let def = self.parse_def()?;
+        let Expr::FnDef {
+            name,
+            params,
+            body,
+            span,
+            ..
+        } = def
+        else {
+            unreachable!("parse_def returns FnDef");
+        };
+        Ok(Expr::FnDef {
+            name,
+            params,
+            body,
+            annotations,
+            span,
+        })
+    }
+
+    /// One optional annotation payload: a `{...}` record literal
+    /// or a string literal on the same line.
+    fn parse_annotation_payload(&mut self) -> Result<Option<Expr>, ParseError> {
+        match &self.tokens[self.pos].kind {
+            TokenKind::LBrace => {
+                let brace = self.tokens[self.pos].span;
+                self.pos += 1;
+                Ok(Some(self.parse_record_lit_after_brace(brace)?))
+            }
+            TokenKind::StrLit(s) => {
+                let e = Expr::StrLit(s.clone(), self.tokens[self.pos].span);
+                self.pos += 1;
+                Ok(Some(e))
+            }
+            _ => Ok(None),
+        }
+    }
+}

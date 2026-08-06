@@ -53,6 +53,7 @@ pub fn single_char_token(b: u8) -> Option<TokenKind> {
         b'=' => Some(TokenKind::Equals),
         b':' => Some(TokenKind::Colon),
         b';' => Some(TokenKind::Semicolon),
+        b'@' => Some(TokenKind::At),
         b'+' => Some(TokenKind::Plus),
         b'*' => Some(TokenKind::Star),
         b'/' => Some(TokenKind::Slash),

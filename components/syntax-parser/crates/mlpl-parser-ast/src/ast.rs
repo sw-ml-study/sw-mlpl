@@ -239,6 +239,10 @@ pub enum Expr {
         params: Vec<String>,
         /// Body expressions; last value is the return value.
         body: Vec<Expr>,
+        /// Stacked `@word [payload]` annotations preceding the
+        /// def, in source order. Payloads are record or string
+        /// literal expressions; `None` for a bare annotation.
+        annotations: Vec<(String, Option<Expr>)>,
         /// Span covering `def` through closing `}`.
         span: Span,
     },

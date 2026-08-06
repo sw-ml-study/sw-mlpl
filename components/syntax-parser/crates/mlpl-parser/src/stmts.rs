@@ -178,6 +178,7 @@ impl Parser<'_> {
             name,
             params,
             body,
+            annotations: Vec::new(),
             span: Span::new(start.start, end.end),
         })
     }
