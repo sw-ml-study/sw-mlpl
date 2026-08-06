@@ -87,6 +87,20 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
+**native-test-events** (added 2026-08-06; mlplunit contract
+item 7's reporting half, executable contract in their
+docs/native-test-events.md) -- `test_event_sink(:u:f)` +
+`emit_test_event(record)` with loud envelope validation, then
+a `--test-events <path>` JSONL host transport (script mode)
+and a `test_event` SSE type (connect mode). Assessment in
+docs/q-and-a.md 2026-08-06; PENDING USER GO.
+
+**nested-arrays / enclose (APL2 program)** (added 2026-08-06)
+-- true nested arrays: enclose/disclose (with axis), each,
+depth/match generalization, pervasion rules. Design-first,
+multi-saga; the flat-array stopgap (transpose_axes + rank-4
+blocked disp) ships in the apl2-blocks saga.
+
 **clustering-demos** (added 2026-08-05, user direction) -- flesh
 out the Clustering group beyond K-Means; all expressible with
 today's builtins: GMM via EM (softmax responsibilities +

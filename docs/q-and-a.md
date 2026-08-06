@@ -5,6 +5,99 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-06 (evening)
+
+**Q: mlplunit's remaining gate is typed native test events (an
+MLPL event API + a host transport separate from stdout/stderr;
+contract in their docs/native-test-events.md). Does what it
+wants make sense? Is it doable? Pros/cons?**
+
+A: It makes sense, and it is very doable -- roughly a 3-step
+saga. Their ask has two halves:
+
+1. IN-LANGUAGE: `test_event_sink(:u:f)` registers a callback,
+   `emit_test_event(record)` validates the event envelope and
+   delivers it. Every piece already exists in sw-MLPL: records,
+   function references, `invoke_user_fn_values`, and the exact
+   validate-loudly pattern `@test` field checking uses. Small.
+2. HOST TRANSPORT: the same typed events on a channel separate
+   from stdout/stderr, versioned JSONL framing, ordered, no
+   silent drops. Their doc explicitly leaves the mechanism to
+   sw-MLPL ("such as" a dedicated fd). The low-friction shape:
+   a `--test-events <path>` flag (regular file or FIFO) writing
+   one JSON object per line -- synchronous writes satisfy the
+   backpressure rule for free, and a path avoids fd-passing
+   portability games. Connect mode reuses the existing SSE
+   stream with a new `test_event` event type; the serve stack
+   already streams typed events (metrics, frames).
+
+PROS: kills text-scraping permanently; the lifecycle rules they
+specify (start-before-end, teardown-before-end, both-fail keeps
+the primary with `teardown_error`) are exactly bracket's shipped
+semantics -- the contract composes with what we just built; the
+schema is versioned and additive-tolerant; a reporter written IN
+MLPL becomes possible (pedagogically attractive); the channel
+generalizes later (experiment/training events).
+
+CONS / pushback: (a) scope-creep risk -- the evaluator must stay
+out of the test-framework business. Mitigation: sw-MLPL
+validates only the ENVELOPE (version, kind, per-kind required
+fields; unknown kinds loud); counting, TAP mapping, duration,
+and output CAPTURE stay runner-side (their `output` event
+carries text the RUNNER captured -- sw-MLPL captures nothing).
+(b) The names are test-specific for what is generic event
+infrastructure; acceptable -- the schema table is genuinely
+test-vocabulary, and generalizing later is additive. (c) It is
+reporting REFINEMENT, not a hard block: their own doc says
+per-file pass/fail works today.
+
+Proposed saga (pending your go): events-core (sink + emit +
+envelope validation, TDD), events-transport (`--test-events`
+JSONL in script mode + connect SSE type + docs), events-close
+(their gate flips AVAILABLE). Fits between kv-cache steps; the
+gen-state saga just completed a clean step boundary.
+
+**Q: APL2 parity for the Sudoku blocks --
+`DISPLAY (enclose[3 4]) 1 3 2 4 transpose 3 3 3 3 reshape B` --
+what are we missing, what is doable?**
+
+A: The APL2 expression uses three capabilities; sw-MLPL has
+one, can add the second cheaply, and the third is a major
+program:
+
+1. `3 3 3 3 rho B` -- SHIPPED (`reshape(B, [3, 3, 3, 3])`).
+2. GENERALIZED DYADIC TRANSPOSE (`1 3 2 4 transpose`) -- NOT
+   shipped (`transpose` reverses axes only). A flat-array axis
+   permutation `transpose_axes(x, perm)` is a small, pure
+   mlpl-array op with no semantic ripple. Cheap to ship.
+3. ENCLOSE-WITH-AXIS (`enclose[3 4]`) -- requires TRUE NESTED
+   ARRAYS (items that are themselves arrays). sw-MLPL is
+   deliberately flat (depth 0/1); real enclose touches the
+   semantics of every operation (pervasion, each, depth,
+   match) -- that is the APL2 nested-array program, a
+   design-first saga of its own, not a bolt-on.
+
+BUT the Sudoku DISPLAY does not need nesting: after
+`transpose_axes(reshape(B, [3,3,3,3]), [1,3,2,4])` the data IS
+block-major, and `disp` can render a rank-4 [a, b, c, d] array
+as an a x b outer grid of boxed c x d matrices -- visually
+exactly APL2's DISPLAY of the enclosed blocks, from a flat
+array. Proposed short saga "apl2-blocks": (1) transpose_axes
+(TDD: parity with transpose for reversed perms, the Sudoku
+block extraction, autograd passthrough or documented
+non-differentiability), (2) disp rank-4 block rendering +
+web/SVG variant, (3) a Sudoku-blocks demo in the backtracking
+group + docs. Queued; full nested-arrays/enclose queued
+separately as a design program. Note the capability is
+GENERAL re-ranking, not Sudoku-specific: `disp` of
+`reshape(range(81), [3, 3, 3, 3])` renders the iota-81 boxed
+grid directly (that example needs no transpose at all);
+`transpose_axes` is what turns a row-major 9x9 into the
+block-major layout. IN PROGRESS per user direction 2026-08-06
+("sw-MLPL should also be able to do this"): apl2-blocks saga
+started (kv-cache paused at its step boundary);
+native-test-events queued pending your go.
+
 ## 2026-08-06 (later)
 
 **Q: mlplunit reports fixture-lifecycle blocked solely on
