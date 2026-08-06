@@ -1,1 +1,1 @@
-BLOCKED: Preempted: mlplunit reports equal() corrupts subsequent array arithmetic inside a u: function (sequencing bug in step-002's deliverable). Fix first, then resume.
+:u:name shipped as one token + Value::UserFnRef with registry/equal/repr/hint coverage; 6 new tests; binaries + pages current. Next: call().

@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 11,
+    "step": "callables-ref"
+  },
+  "action": "single-token lexer extension keyed on the u: stem; distinct value kind per design",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T20:51:37"
+}

@@ -1,0 +1,9 @@
+number = 12
+slug = "callables-call"
+status = "pending"
+description = "Per design + resolutions: call(f, args...) invoking UserFnRef (via the u: cal..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T20:51:37"
+task_type = "rust-feature"
+commits = []
