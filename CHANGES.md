@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga apl2-idioms-expunge: complete (3 steps)
+- docs: close apl2-idioms-expunge -- Emacs mlpl-mode sketch queued, queue advanced
+- saga apl2-idioms-expunge: step 002 complete
+- docs: apl2-idioms.mlpl -- the executable APL2 Rosetta document (apl2-idioms)
+- saga apl2-idioms-expunge: step 001 complete
+- feat(eval): expunge(name) + :erase -- APL name removal (expunge)
+- saga: archive native-test-events; init apl2-idioms-expunge (user go)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga native-test-events: complete (3 steps)
 - docs: mlplunit fully unblocked (all capabilities shipped/available); queue advances to apl2-idioms + expunge
 - saga native-test-events: step 002 complete
