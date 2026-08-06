@@ -158,6 +158,13 @@ def u:zscore(x) {
   field is the `:u:` reference, so a runner invokes with
   `call(test_info(name).fn)`. `timeout_ms` is recorded for the
   runner, not enforced by the evaluator.
+- Fixture lifecycle: `bracket(:u:before, :u:test, :u:after)`
+  guarantees the teardown hook runs whenever setup succeeded --
+  after a pass, a returned `err`, or a hard error (captured as
+  the structured `{kind, message}` record). Setup failure skips
+  the other hooks; the test's failure stays primary, with a
+  simultaneous teardown failure retained under `teardown_error`
+  in the error payload.
 
 ## Control Flow and Error Handling
 

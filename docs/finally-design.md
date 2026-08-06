@@ -1,6 +1,7 @@
 # Guaranteed-finally / bracket: design
 
-Status: DRAFT for review (saga mlplunit-unblock, step 018).
+Status: APPROVED as recommended (user, 2026-08-06) and
+implemented (bracket-core + bracket-errors steps).
 Upstream contract: mlplunit's sw-MLPL-changes-needed.md item 6
 (fixture and suite lifecycle), whose eight required behaviors
 need a language/runtime guaranteed-finally mechanism -- their

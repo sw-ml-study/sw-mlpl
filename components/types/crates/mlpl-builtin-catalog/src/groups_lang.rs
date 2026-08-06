@@ -119,6 +119,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "recover: err(e) -> f(e); ok passes through",
             ),
             (
+                "bracket",
+                "bracket(setup, use, teardown)",
+                "guaranteed-finally: teardown always runs after setup succeeds",
+            ),
+            (
                 "tests",
                 "tests()",
                 "stable names of @test-annotated functions, in source order",

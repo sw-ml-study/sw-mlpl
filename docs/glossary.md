@@ -35,6 +35,23 @@ which positions won. Sampling shortlists, beam-style selection,
 and retrieval hits are one `argtop_k` away.
 
 
+## bracket (builtin)
+
+`bracket(setup, use, teardown)` -- guaranteed-finally over
+three `:u:` references, the error monad's resource-safe
+companion (docs/monads.md). `setup()` produces the fixture
+(`ok(x)` unwraps; a plain value is the fixture; a setup failure
+skips the other hooks). `use(fixture)` runs once; hard errors
+are captured as the structured `{kind, message}` record so
+`teardown(fixture)` ALWAYS runs after a successful setup --
+after a pass, a returned `err`, or a hard error. Use's failure
+stays primary; a teardown failure after success is itself the
+result (a leaked resource is a real failure); when both fail
+the teardown diagnostic is retained in the payload's
+`teardown_error` field. `bracket(...)?` early-returns AFTER
+teardown by construction. A test runner's per-case lifecycle is
+`bracket(before_each, test, after_each)` in a loop.
+
 ## BDH (Dragon Hatchling)
 
 A brain-inspired architecture built around SPARSE POSITIVE

@@ -72,11 +72,13 @@ fn use_failure_stays_primary_and_teardown_still_runs() {
     )
     .unwrap();
     assert!(matches!(&v, Value::Str(s) if s == "use failed"), "{v:?}");
-    // teardown ran: when use also fails, primary stays use's (the
-    // teardown diagnostic merge is the error step's work).
+    // teardown ran: when use also fails, primary stays use's,
+    // carried in the merged record's message field (full merge
+    // coverage: bracket_error_tests).
+    eval_value(&mut env, "def u:pluck(e) { e }").unwrap();
     let v = eval_value(
         &mut env,
-        "err_message(bracket(:u:setup_plain, :u:use_err, :u:teardown_err))",
+        "p = or_else(:u:pluck, bracket(:u:setup_plain, :u:use_err, :u:teardown_err))\np.message",
     )
     .unwrap();
     assert!(matches!(&v, Value::Str(s) if s == "use failed"), "{v:?}");

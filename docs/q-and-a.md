@@ -5,6 +5,38 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-06 (later)
+
+**Q: mlplunit reports fixture-lifecycle blocked solely on
+guaranteed-finally -- status?**
+
+A: UNBLOCKED. `bracket(setup, use, teardown)` shipped
+(docs/finally-design.md approved as recommended): teardown is
+guaranteed after a successful setup -- pass, returned err, or
+hard error (captured as the structured {kind, message} record);
+setup failure skips both other hooks; the test's failure stays
+primary with a simultaneous teardown failure retained under
+`teardown_error`; `bracket(...)?` composes. Verified over the
+connect path. Their current gate output shows test-metadata and
+parameterized-tests flipped SHIPPED on their side, leaving
+fixture-lifecycle as the only gated row -- its lifecycle_case
+fixture uses the proposed `suite({...})` shape, so per their own
+contract ("fixtures should then be updated to the accepted
+public syntax") the accepted form is one bracket per case:
+
+```text
+def u:before_each() { {resource: 42} }
+def u:after_each(f) { ok(f.resource) }
+def u:case(f) { u:assert_eq(f.resource, 42, "fixture value") }
+bracket(:u:before_each, :u:case, :u:after_each)
+```
+
+A suite runner is a loop over `tests()` + `test_info(n).fn` +
+`bracket` -- runner policy stays on their side by design. With
+that adoption, all seven contract items have their sw-MLPL
+prerequisites shipped except item 7's event/process controls,
+which their doc scopes as improvements, not gates.
+
 ## 2026-08-06
 
 **Q: Can mlplunit proceed?**

@@ -93,9 +93,13 @@ teardown.
    `and_then` / `or_else` as builtins in the same saga -- they
    are the first real exercise of `call()` and make fallible
    pipelines compose without nesting.
-3. With the fixture-lifecycle item (P2): design
-   bracket/guaranteed-finally as a language construct that
-   respects `?`.
+3. SHIPPED 2026-08-06: `bracket(setup, use, teardown)` --
+   guaranteed-finally as a builtin over function references
+   (docs/finally-design.md). Teardown always runs after a
+   successful setup, hard errors are captured at hook
+   boundaries, both-fail retains the teardown diagnostic under
+   `teardown_error`, and `bracket(...)?` early-returns after
+   teardown by construction.
 4. Demo debt worth paying regardless: a "Result pipelines" demo
    showing the control-plane (`?`) and data-plane (zilde /
    masks) side by side.
