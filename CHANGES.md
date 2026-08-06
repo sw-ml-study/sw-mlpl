@@ -14,6 +14,18 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga status-badges-emacs: complete (4 steps)
+- docs: close status-badges-emacs; mlplunit round-2 gates assessed and queued
+- saga status-badges-emacs: step 003 complete
+- feat(editors): mlpl-mode.el -- Emacs support for MLPL (emacs-mode)
+- saga status-badges-emacs: step 002 complete
+- infra: CI workflow + README build/deploy badges (readme-badges)
+- saga status-badges-emacs: step 001 complete
+- feat(web): header staleness badge -- current / update-reload / unknown (banner-badge)
+- saga: archive apl2-idioms-expunge; init status-badges-emacs (user go)
+- saga apl2-idioms-expunge: step 007 complete (narration interleaving)
+- fix(web): narration interleaves with its own result (interleave-narration)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga apl2-idioms-expunge: complete (6 steps)
 - fix(web): editor stays open on Run; help header uses the crate version
 - infra(pages): deploy from gh-pages branch -- no Actions builder (branch-deploy)
