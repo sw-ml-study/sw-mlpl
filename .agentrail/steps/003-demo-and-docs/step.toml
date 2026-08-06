@@ -1,9 +1,10 @@
 number = 3
 slug = "demo-and-docs"
-status = "pending"
+status = "completed"
 description = "Step 3 per saga plan: (1) General Programming web demo NEXT TO the Life demos..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T00:31:35"
+completed_at = "2026-08-06T00:43:45"
 task_type = "feature"
-commits = []
+commits = ["0657e848a78d6b3a8c368d2221d9f91e6f3ee578"]

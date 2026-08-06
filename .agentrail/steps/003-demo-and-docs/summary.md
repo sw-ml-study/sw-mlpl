@@ -1,0 +1,1 @@
+Sudoku blocks-view demo shipped (initial/wrong/solved via transpose_axes + blocked disp), Structure Zoo 4D finale, docs + pins (82/454), pages+serve rebuilt, connect smoke green.
