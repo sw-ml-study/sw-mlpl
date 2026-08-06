@@ -4,6 +4,7 @@
 members = [
     "crates/mlpl-parser",
     "crates/mlpl-parser-ast",
+    "crates/mlpl-source-loader",
 ]
 resolver = "2"
 

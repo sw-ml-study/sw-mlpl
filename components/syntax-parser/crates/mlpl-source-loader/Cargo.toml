@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-source-loader"
+description = "Static-include expansion: source providers, chunked programs, load-once, cycle chains, sandbox resolution"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-lexer = { path = "../../../syntax-lexer/crates/mlpl-lexer" }
+mlpl-parser = { path = "../mlpl-parser" }
+mlpl-parser-ast = { path = "../mlpl-parser-ast" }
+
+[lints]
+workspace = true

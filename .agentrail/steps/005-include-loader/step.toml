@@ -1,6 +1,6 @@
 number = 5
 slug = "include-loader"
-status = "pending"
+status = "in-progress"
 description = "Per docs/static-include-design-mlpl.md: the mlpl-source-loader crate (compone..."
 role = "legacy"
 context_files = []
