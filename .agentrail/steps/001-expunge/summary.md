@@ -1,0 +1,1 @@
+expunge builtin + :erase command shipped with quad-EX semantics (idempotent 1/0 mask, u: fn + test-registry removal); 5 TDD tests + 3 pinned suites green; full docs rows.

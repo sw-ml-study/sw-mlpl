@@ -1,9 +1,10 @@
 number = 1
 slug = "expunge"
-status = "pending"
+status = "completed"
 description = "expunge(name | [names]) builtin per q-and-a design: 1 = name free afterwards ..."
 role = "production"
 context_files = []
 created_at = "2026-08-06T10:24:34"
+completed_at = "2026-08-06T12:27:28"
 task_type = "rust-feature"
-commits = []
+commits = ["c6e4d98240f6eddde4408687b676fc932b9ec6e8"]

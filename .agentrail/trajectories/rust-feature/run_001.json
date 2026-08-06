@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "expunge"
+  },
+  "action": "TDD; clear_binding reuse; command registry + guard extension",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T12:27:28"
+}
