@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 5,
+    "step": "utf8-inline"
+  },
+  "action": "byte-as-char root cause; char_indices accumulation; percent_encode audited clean",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T15:01:23"
+}

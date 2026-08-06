@@ -1,0 +1,1 @@
+User report: APL glyphs render as mojibake in Run narration. inline.rs split() pushes bytes as chars, shattering UTF-8. Make text accumulation char-aware; TDD with glyph round-trip; audit other byte-as-char casts in the render path; rebuild + deploy.

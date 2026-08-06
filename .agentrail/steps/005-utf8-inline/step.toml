@@ -1,0 +1,10 @@
+number = 5
+slug = "utf8-inline"
+status = "completed"
+description = "User report: APL glyphs render as mojibake in Run narration. inline.rs split(..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T14:56:59"
+completed_at = "2026-08-06T15:01:23"
+task_type = "bugfix"
+commits = ["378c82ad3031fd8bc96975e248253eece2df6b2e"]

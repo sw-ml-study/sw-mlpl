@@ -1,0 +1,1 @@
+UTF-8-safe tokenizer: whole-char accumulation; glyphs render across narration/demos/lessons/glossary; unicode round-trip test; deployed.
