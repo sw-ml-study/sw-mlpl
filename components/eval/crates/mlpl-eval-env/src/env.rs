@@ -52,6 +52,9 @@ pub struct Environment {
     pub next_model_id: u64,
     /// Tokenizer bindings (Saga 12 step 004). Sibling to `models`.
     pub tokenizers: HashMap<String, TokenizerSpec>,
+    /// Generation states (KV caches) by binding name -- the
+    /// `gen_*` family (docs/kv-cache-design.md).
+    pub gen_states: std::collections::HashMap<String, mlpl_eval_core::GenState>,
     /// Sandbox root for filesystem `load("relative-path")` calls.
     /// `None` means filesystem access is disabled (the web REPL
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12

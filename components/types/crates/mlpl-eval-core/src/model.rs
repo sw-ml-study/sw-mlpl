@@ -201,3 +201,57 @@ impl ModelSpec {
         }
     }
 }
+
+/// One attention layer's cached K and V rows, row-major with
+/// `d_model` stride -- the FULL projected width; per-head
+/// slicing happens at attend time, matching the uncached path.
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct AttnKv {
+    /// Projection width (the layer's `d_model`).
+    pub d_model: usize,
+    /// Cached positions so far.
+    pub rows: usize,
+    /// K rows, `rows * d_model` values.
+    pub k: Vec<f64>,
+    /// V rows, `rows * d_model` values.
+    pub v: Vec<f64>,
+}
+
+/// The cached generation state for one model.
+#[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct GenState {
+    /// The model spec at `gen_state` time (weights read live by
+    /// parameter NAME, exactly as `apply` reads them).
+    pub model: ModelSpec,
+    /// The prompt token ids (kept for `gen_reset`).
+    pub prompt: Vec<f64>,
+    /// Total positions cached (prompt + appended).
+    pub tokens: usize,
+    /// One entry per attention layer, in model traversal order.
+    pub caches: Vec<AttnKv>,
+    /// The output row produced by the LAST fed token -- what
+    /// `gen_logits` returns (the next position's logits).
+    pub logits: Vec<f64>,
+}
+
+/// The `d_model` of every attention layer in traversal order --
+/// the cache layout for a model. Traversal order is the same
+/// deterministic walk `forward_row` performs.
+pub fn attention_dims(model: &ModelSpec) -> Vec<usize> {
+    let mut dims = Vec::new();
+    collect_attention_dims(model, &mut dims);
+    dims
+}
+
+fn collect_attention_dims(model: &ModelSpec, dims: &mut Vec<usize>) {
+    match model {
+        ModelSpec::Chain(children) => {
+            for child in children {
+                collect_attention_dims(child, dims);
+            }
+        }
+        ModelSpec::Residual(inner) => collect_attention_dims(inner, dims),
+        ModelSpec::Attention { d_model, .. } => dims.push(*d_model),
+        _ => {}
+    }
+}

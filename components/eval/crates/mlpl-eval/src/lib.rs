@@ -66,6 +66,7 @@ mod fncall_bracket;
 mod fncall_combinators;
 mod fncall_engram;
 mod fncall_engram_args;
+mod fncall_gen;
 mod fncall_models;
 mod fncall_reflect;
 mod fncall_trace;

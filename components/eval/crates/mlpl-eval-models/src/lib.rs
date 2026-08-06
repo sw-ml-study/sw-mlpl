@@ -7,6 +7,7 @@
 
 pub mod model_apply;
 pub mod model_apply_attention;
+pub mod model_apply_cached;
 pub mod model_apply_compose;
 pub mod model_apply_embed;
 pub mod model_apply_engram;

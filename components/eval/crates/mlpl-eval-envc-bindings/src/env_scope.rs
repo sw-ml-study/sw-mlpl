@@ -67,6 +67,7 @@ impl EnvScope for Environment {
         self.results.remove(name);
         self.models.remove(name);
         self.tokenizers.remove(name);
+        self.gen_states.remove(name);
         self.builtin_refs.remove(name);
         self.device_tensors.remove(name);
     }

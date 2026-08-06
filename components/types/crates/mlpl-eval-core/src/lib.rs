@@ -19,5 +19,6 @@ pub mod tokenizer;
 pub use indent::indent_source;
 pub use metric_sink::MetricSink;
 pub use model::{ActKind, ModelSpec};
+pub use model::{AttnKv, GenState, attention_dims};
 pub use snapshot::{ModelSnapshot, ParamEntry};
 pub use tokenizer::TokenizerSpec;

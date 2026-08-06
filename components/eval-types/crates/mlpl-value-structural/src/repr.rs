@@ -42,6 +42,13 @@ fn write_value(out: &mut String, v: &Value) {
             out.push(')');
         }
         Value::Tokenizer(_) => out.push_str("tokenizer(...)"),
+        Value::GenState(gs) => {
+            out.push_str("gen-state(tokens: ");
+            out.push_str(&gs.tokens.to_string());
+            out.push_str(", layers: ");
+            out.push_str(&gs.caches.len().to_string());
+            out.push(')');
+        }
         Value::BuiltinRef { name } | Value::UserFnRef { name } => {
             out.push(':');
             out.push_str(name);

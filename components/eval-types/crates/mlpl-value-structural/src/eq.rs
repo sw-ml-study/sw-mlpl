@@ -23,6 +23,7 @@ pub fn value_equal(a: &Value, b: &Value) -> bool {
         | (Value::Result { .. }, Value::Result { .. }) => compound_equal(a, b),
         (Value::Model(x), Value::Model(y)) => x == y,
         (Value::Tokenizer(x), Value::Tokenizer(y)) => x == y,
+        (Value::GenState(x), Value::GenState(y)) => x == y,
         (Value::BuiltinRef { name: x }, Value::BuiltinRef { name: y }) => x == y,
         (Value::UserFnRef { name: x }, Value::UserFnRef { name: y }) => x == y,
         _ => false,

@@ -6,6 +6,7 @@ use std::fmt;
 use mlpl_array::DenseArray;
 
 use crate::error::EvalError;
+use mlpl_eval_core::GenState;
 use mlpl_eval_core::TokenizerSpec;
 use mlpl_eval_core::model::ModelSpec;
 
@@ -23,6 +24,10 @@ pub enum Value {
     /// A tokenizer (Saga 12 step 004). Sibling to `Model` -- holds
     /// the tokenization strategy as data.
     Tokenizer(TokenizerSpec),
+    /// Generation state: the KV cache behind the `gen_*` family
+    /// (docs/kv-cache-design.md). Sibling to `Model`; boxed --
+    /// the cache grows with the sequence.
+    GenState(Box<GenState>),
     /// A reference to a builtin or operator. Produced by the
     /// `:foo` / `:+` / `:max` syntax. Higher-order builtins
     /// like `reduce` and `map` accept this in place of a
@@ -139,6 +144,7 @@ pub fn value_kind(v: &Value) -> &'static str {
         Value::Record { .. } => "record",
         Value::StrList { .. } => "string-list",
         Value::Result { .. } => "result",
+        Value::GenState(_) => "gen-state",
     }
 }
 
@@ -155,6 +161,14 @@ impl fmt::Display for Value {
             Self::Str(s) => write!(f, "{s}"),
             Self::Model(_) => write!(f, "<model>"),
             Self::Tokenizer(t) => write!(f, "<tokenizer: {}>", t.describe()),
+            Self::GenState(gs) => {
+                write!(
+                    f,
+                    "<gen-state: {} tokens, {} layers>",
+                    gs.tokens,
+                    gs.caches.len()
+                )
+            }
             Self::BuiltinRef { name } => write!(f, ":{name}"),
             Self::UserFnRef { name } => write!(f, ":{name}"),
             Self::DeviceTensor {
@@ -173,28 +187,27 @@ impl fmt::Display for Value {
                 }
                 write!(f, "}}")
             }
-            Self::StrList { items } => {
-                // Saga 29 step 009 follow-up: truncate the
-                // display when there are too many items so
-                // long pets_tiny.names (200 strings) doesn't
-                // dump several KB of text into the REPL on
-                // every print.
-                const LIMIT: usize = 8;
-                write!(f, "[")?;
-                let take = items.len().min(LIMIT);
-                for (i, item) in items.iter().take(take).enumerate() {
-                    if i > 0 {
-                        write!(f, ", ")?;
-                    }
-                    write!(f, "\"{}\"", item.replace('\\', "\\\\").replace('"', "\\\""))?;
-                }
-                if items.len() > LIMIT {
-                    write!(f, ", ... +{} more", items.len() - LIMIT)?;
-                }
-                write!(f, "]")
-            }
+            Self::StrList { items } => fmt_str_list(f, items),
             Self::Result { ok: true, payload } => write!(f, "Ok({payload})"),
             Self::Result { ok: false, payload } => write!(f, "Err({payload})"),
         }
     }
+}
+
+/// Truncated string-list display (Saga 29 step 009 follow-up):
+/// long lists (200-name datasets) must not dump KBs per print.
+fn fmt_str_list(f: &mut fmt::Formatter<'_>, items: &[String]) -> fmt::Result {
+    const LIMIT: usize = 8;
+    write!(f, "[")?;
+    let take = items.len().min(LIMIT);
+    for (i, item) in items.iter().take(take).enumerate() {
+        if i > 0 {
+            write!(f, ", ")?;
+        }
+        write!(f, "\"{}\"", item.replace('\\', "\\\\").replace('"', "\\\""))?;
+    }
+    if items.len() > LIMIT {
+        write!(f, ", ... +{} more", items.len() - LIMIT)?;
+    }
+    write!(f, "]")
 }

@@ -327,6 +327,11 @@ pub(crate) fn eval_expr(
                     let placeholder = DenseArray::from_scalar(0.0);
                     ("assign_tokenizer", vec![], placeholder)
                 }
+                Value::GenState(g) => {
+                    env.gen_states.insert(name.clone(), *g);
+                    let placeholder = DenseArray::from_scalar(0.0);
+                    ("assign_gen_state", vec![], placeholder)
+                }
                 Value::Str(s) => {
                     env.set_string(name.clone(), s);
                     ("assign_string", vec![], DenseArray::from_scalar(0.0))
