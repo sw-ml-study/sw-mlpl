@@ -61,6 +61,7 @@ mod experiment;
 mod experiment_compare;
 mod fncall_arrays;
 mod fncall_axes;
+mod fncall_bracket;
 mod fncall_combinators;
 mod fncall_engram;
 mod fncall_engram_args;

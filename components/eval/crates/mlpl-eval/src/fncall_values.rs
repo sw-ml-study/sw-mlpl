@@ -19,6 +19,7 @@ pub(crate) fn try_dispatch(
     match name {
         "equal" | "repr" => Some(eval_structural(name, args, env, trace)),
         "call" => Some(eval_call(args, env, trace, span)),
+        "bracket" => Some(crate::fncall_bracket::eval_bracket(args, env, trace)),
         "tests" | "test_info" | "annotations" => {
             Some(crate::fncall_reflect::eval_reflect(name, args, env, trace))
         }
