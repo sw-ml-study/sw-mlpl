@@ -1,0 +1,1 @@
+each + table shipped over both reference kinds, shape-preserving, loud per-index errors; 6 TDD tests.

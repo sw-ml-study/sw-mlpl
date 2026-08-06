@@ -1,0 +1,1 @@
+atop(f, g, x...) = f(g(x...)) and over(f, g, x, y) = f(g(x), g(y)) -- immediate composition builtins over references (BQN atop/over); TDD; catalog + lang-reference + glossary rows (README pin bump); apl2-idioms.mlpl gains an each/table/atop/over section beside the APL2/BQN glyph spellings (still runs clean; doc tests stay green). Gates; commit; push.
