@@ -1,0 +1,10 @@
+number = 5
+slug = "run-narration"
+status = "completed"
+description = "User report: editor Run should show comment blocks demo-style (intro narratio..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T13:04:51"
+completed_at = "2026-08-06T13:13:25"
+task_type = "feature"
+commits = ["acabe77b1650c7454817b8c9fc424e34e77682d1"]

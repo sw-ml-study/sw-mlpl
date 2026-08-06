@@ -1,0 +1,1 @@
+Run narrates demo-style: leading comment blocks render as Narration prose, code as input, trailing summary narrates without eval; idioms doc reframed (WHAT YOU ARE ABOUT TO SEE / WHAT THIS SHOWED); 8 tests green; ledger FAILs retired in follow-up.
