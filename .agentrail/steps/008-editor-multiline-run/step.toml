@@ -1,8 +1,9 @@
 number = 8
 slug = "editor-multiline-run"
-status = "in-progress"
+status = "completed"
 description = "User report: loading ../demo-algorithms/demos/deques/service-desk.mlpl into t..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T20:08:17"
-commits = []
+completed_at = "2026-08-05T20:14:21"
+commits = ["e779ae9a62d25c211aa3cb83543499333c7d81b7"]
