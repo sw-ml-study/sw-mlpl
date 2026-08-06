@@ -1,0 +1,1 @@
+Per docs/static-include-design-mlpl.md: the mlpl-source-loader crate (components/syntax-parser workspace) -- SourceProvider trait, SourceId/SourceTable, chunk expansion at include sites, load-once set, cycle chains, sandbox resolution rules; TDD entirely against an in-memory provider (expansion order, dedupe, direct+indirect cycles, absolute/traversal rejection).

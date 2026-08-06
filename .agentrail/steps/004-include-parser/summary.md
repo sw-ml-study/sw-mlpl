@@ -1,0 +1,1 @@
+Include AST node shipped: contextual recognition, top-level-only with tutoring error, literal-only contract pinned, precise provider-less rejection on eval/compile surfaces; 6 new tests; monads analysis doc landed alongside.
