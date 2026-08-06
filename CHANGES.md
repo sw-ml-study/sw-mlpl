@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 018 complete (bracket design ready for review)
+- docs(design): guaranteed-finally via bracket(setup, use, teardown) (finally-design)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 017 complete (queues finally-design)
 - feat(eval): reflection trio -- tests() / test_info() / annotations() (metadata-reflect)
 - saga mlplunit-unblock: step 016 complete
