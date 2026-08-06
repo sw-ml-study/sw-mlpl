@@ -1,0 +1,2843 @@
+ChatGPT Pro
+
+mike: consider: 
+sw-ml-study/sw-mlpl and its capabilities. How does it compare with J, K, and BQN? Specifically what can BQN do that sw-mlpl cannot and vice versa?
+
+At a high level, BQN, J, K, and sw-MLPL are trying to solve different optimization problems.
+
+Language	Primary goal
+BQN	Elegant, mathematically complete array programming
+J	Extremely powerful general-purpose array programming and symbolic computation
+K	Ultra-high-performance vector/database programming (especially finance)
+sw-MLPL	Machine learning experimentation language emphasizing explicit ML concepts, heterogeneous execution, and hardware-aware computation
+
+From our previous discussions about sw-MLPL, your direction is not "build another APL." Instead, you're building something closer to:
+
+"A systems programming language for machine learning research that happens to have array language ideas."
+
+That distinction matters.
+
+Where BQN is much stronger today
+
+BQN has decades of APL experience distilled into a modern language.
+
+1. Uniform array algebra
+
+Everything is an array.
+
+1‿2‿3 + 4‿5‿6
+
+5‿7‿9
+
+Higher rank arrays work exactly the same.
+
+2×3×4 tensor
+
+behaves naturally.
+
+sw-MLPL currently appears more like
+
+Tensor<float>
+Matrix
+Vector
+Image
+Embedding
+
+with different operations.
+
+That is easier for ML newcomers but much less mathematically uniform.
+
+2. Rank polymorphism
+
+This is perhaps BQN's biggest feature.
+
+Functions automatically operate over arbitrary dimensions.
+
+For example,
+
++/ matrix
+
+works regardless of shape.
+
+Many ML libraries today emulate this.
+
+PyTorch
+
+NumPy
+
+JAX
+
+TensorFlow
+
+all effectively reinvent rank polymorphism.
+
+3. Trains
+
+BQN inherited tacit programming.
+
+f‿g‿h
+
+can create new functions without variables.
+
+Example
+
+(+´÷≠)
+
+mean of a list.
+
+No explicit variable.
+
+sw-MLPL today is intentionally much more explicit.
+
+4. Higher-order array combinators
+
+Examples
+
+Each
+
+Fold
+
+Scan
+
+Table
+
+Under
+
+Before
+
+After
+
+Atop
+
+Forks
+
+Hooks
+
+These make extremely concise algorithms.
+
+5. Shape calculus
+
+BQN's entire language revolves around
+
+reshape
+transpose
+rotate
+partition
+take
+drop
+replicate
+grade
+sort
+group
+
+These are first-class primitives.
+
+Modern ML constantly performs
+
+reshape
+
+permute
+
+flatten
+
+broadcast
+
+transpose
+
+stack
+
+concat
+
+BQN has a very elegant model.
+
+6. Extremely compositional
+
+Almost every primitive combines naturally.
+
+There are remarkably few special cases.
+
+What sw-MLPL is aiming for that BQN doesn't have
+
+This is where I think your project becomes interesting.
+
+Instead of copying BQN, you're trying to raise the abstraction level for ML itself.
+
+1. ML concepts are first-class
+
+Instead of
+
+weights
+bias
+matmul
+relu
+
+you eventually want things like
+
+expert
+
+router
+
+engram
+
+memory
+
+MTP
+
+mHC
+
+ICL
+
+ICRL
+
+attention
+
+draft_model
+
+accept_model
+
+Those are language concepts.
+
+BQN has none of this.
+
+2. Hardware awareness
+
+You have discussed targeting
+
+MLX
+CUDA
+Vulkan
+CPUs
+FPGA
+tiny MCUs
+COR24
+heterogeneous clusters
+
+Potential syntax
+
+gpu {
+    ...
+}
+
+mlx {
+    ...
+}
+
+cpu {
+    ...
+}
+
+or
+
+@cuda
+
+etc.
+
+BQN intentionally ignores hardware.
+
+3. Explicit execution graphs
+
+Modern ML is not just arrays.
+
+It is DAGs.
+
+Pipelines.
+
+Experts.
+
+Schedulers.
+
+Dispatchers.
+
+Agent loops.
+
+sw-MLPL could naturally express
+
+Tokenizer
+      ↓
+Draft LLM
+      ↓
+Verifier
+      ↓
+Reviewer
+      ↓
+Trainer
+
+BQN has no notion of execution graphs.
+
+4. Agent programming
+
+One thing we've discussed extensively is
+
+Planner
+
+Coder
+
+Reviewer
+
+Manager
+
+QA
+
+These are higher-level computational objects.
+
+Example
+
+planner -> coder -> reviewer
+
+BQN cannot express this naturally.
+
+5. Heterogeneous memory
+
+Your roadmap includes
+
+engrams
+MTP
+long-term memory
+episodic memory
+cache
+retrieval
+
+These become language constructs.
+
+6. Explainability
+
+You repeatedly emphasized
+
+introspectable learning
+
+BQN has no learning.
+
+Only computation.
+
+7. Training constructs
+
+Imagine
+
+train
+
+fine_tune
+
+distill
+
+quantize
+
+evaluate
+
+benchmark
+
+as statements.
+
+That is much higher level.
+
+8. Native experimentation
+
+You have talked about
+
+compare
+
+ablation
+
+parameter sweep
+
+benchmark
+
+profile
+
+being built in.
+
+BQN assumes the user builds these manually.
+
+Things BQN could inspire in sw-MLPL
+
+This is where I think the most leverage exists.
+
+Rank-polymorphic operators
+
+Instead of
+
+map_rows()
+
+map_cols()
+
+map_tensor()
+
+have
+
+map
+
+work on everything.
+
+Generalized scans
+
+Scans are everywhere in ML.
+
+Examples
+
+Attention
+
+Running statistics
+
+Cumulative rewards
+
+Beam search
+
+Diffusion
+
+Sequence generation
+
+Shape algebra
+
+Instead of
+
+reshape
+
+transpose
+
+flatten
+
+broadcast
+
+being library calls,
+
+make them syntax.
+
+Array comprehensions
+
+Example
+
+for each embedding
+
+should look declarative.
+
+Functional composition
+
+Not tacit programming exactly.
+
+But
+
+normalize
+→ tokenize
+→ embed
+→ search
+→ rerank
+
+is extremely readable.
+
+Broadcasting
+
+One of the greatest ideas from APL.
+
+Never force explicit loops.
+
+Things I would not copy
+
+Personally, I would avoid importing some of the more opaque aspects of the APL family:
+
+Heavy Unicode dependence.
+Dense tacit programming as the default style.
+Single-symbol operators whose meaning is difficult to infer without a reference.
+The "code golf" culture that sometimes values brevity over maintainability.
+
+One of your stated goals is to make ML experimentation approachable for people who are not already experts in array languages. Preserving readable, explicit syntax aligns well with that goal.
+
+Feature comparison
+Capability	BQN	sw-MLPL (target)
+Elegant array algebra	Excellent	Moderate today
+Rank polymorphism	Excellent	Opportunity
+Shape calculus	Excellent	Opportunity
+Broadcasting	Excellent	Opportunity
+Tacit programming	Excellent	Probably intentionally limited
+ML operators	No	Major focus
+Neural networks	Library only	Native
+MoE	No	Planned
+MTP	No	Planned
+Engrams	No	Planned
+mHC	No	Planned
+ICL/ICRL	No	Planned
+Agent pipelines	No	Planned
+Multi-device execution	Minimal	Planned
+FPGA execution	No	Planned
+Tiny MCU targets	No	Planned
+Explainable learning	No	Planned
+Benchmarking/profiling	External	Potentially built in
+The opportunity
+
+I don't think the most valuable direction is to make sw-MLPL "BQN with ML libraries." BQN already excels as a general-purpose array language.
+
+A stronger long-term vision is to treat machine learning itself as the abstraction, with arrays as an implementation detail. In that model:
+
+BQN excels at expressing numerical transformations.
+sw-MLPL could excel at expressing complete ML systems: datasets, models, training, inference, routing, memory, agents, heterogeneous execution, benchmarking, and deployment.
+
+One idea that particularly fits your goals is to borrow BQN's semantic model rather than its syntax. Rank polymorphism, shape algebra, broadcasting, scans, and composable array combinators would give sw-MLPL many of the mathematical strengths of the APL family while keeping the explicit, readable syntax that you've consistently preferred for teaching, experimentation, and systems integration.
+
+mike: The reason I ask is to identify a few key concepts from BQN that would naturally fit in sw-MLPL (especially after function composition of u:fns is suppported (soon).   Broadcasting sounds interesting shorter-term.  Generalizing map and shape algebra might make sense later.  List comprehensions might be in-between.  What do you think?
+
+Recommendation
+
+Your ordering is mostly right, but I would adjust it to:
+
+Function composition
+General broadcasting
+Function-taking map, reduce, and scan
+A BQN-like table/outer-product combinator
+List/tensor comprehensions
+Cell/rank-based mapping
+Broader shape algebra
+
+The key architectural point is that composition plus higher-order array combinators gives more leverage than comprehensions. Comprehensions improve notation; map, reduce, scan, and table improve the language’s computational model and compiler opportunities.
+
+Also, a correction to my previous comparison: BQN does not use full NumPy-style trailing-axis broadcasting. It primarily uses scalar extension and its own leading-axis agreement rules. BQN’s Each, Table, Cells, and Rank make the intended mapping behavior explicit.
+
+sw-MLPL already has scalar broadcasting, reshape, transpose, axis reductions, named axes, loops over rows, and substantial tensor/ML machinery, so the next step should extend those existing semantics rather than introduce a separate array-programming subsystem.
+
+1. Broadcasting: the right short-term feature
+
+sw-MLPL already supports:
+
+[1, 2, 3] * 10
+
+The natural extension is compatible-shape broadcasting:
+
+X = reshape(iota(6), [2, 3])
+bias = [10, 20, 30]
+
+X + bias
+# [10, 21, 32]
+# [13, 24, 35]
+
+This is immediately useful for:
+
+bias addition;
+normalization;
+masks;
+per-feature scaling;
+batched loss calculations;
+attention score manipulation;
+activation parameters;
+dataset preprocessing.
+
+Broadcasting can avoid physically copying expanded values and can expose vectorizable computation to the backend. That is why it is central to NumPy and the Array API model.
+
+Recommended rules
+
+I would use conventional trailing-dimension broadcasting for unnamed axes:
+
+[2, 3] + [3]       -> [2, 3]
+[4, 1, 8] + [7, 8] -> [4, 7, 8]
+[2, 3] + [2]       -> error
+
+For each aligned dimension:
+
+a == b, or
+a == 1, or
+b == 1
+
+Missing leading dimensions behave as dimensions of size one.
+
+That is familiar, predictable, and compatible with ML users’ expectations.
+
+Named-axis broadcasting
+
+sw-MLPL’s named axes offer something more valuable than simply copying NumPy:
+
+X : [batch, token, feature] = ...
+bias : [feature] = ...
+
+Y = X + bias
+
+Here, feature should align by name, not merely by position.
+
+Likewise:
+
+mask : [batch, token] = ...
+scores : [batch, head, token] = ...
+
+should either align semantically or fail with a precise diagnostic. Named dimensions already propagate through operations and produce structured shape mismatch errors, so broadcasting should build on that machinery.
+
+I would use this policy:
+
+Operands	Alignment
+Neither has labels	Trailing positional broadcasting
+Both fully labeled	Match axes by label
+One labeled, one scalar	Always valid
+One labeled, one unlabeled vector/tensor	Require explicit alignment or a narrowly defined rule
+Labels conflict	Error
+
+The dangerous case is silently aligning an unlabeled [768] tensor to the wrong axis of a labeled tensor. Explicitness is preferable there:
+
+broadcast_to(bias, [feature])
+
+or perhaps:
+
+bias : [feature]
+
+before the operation.
+
+Implementation boundary
+
+Broadcasting should initially apply only to element-wise operations:
+
++ - * /
+comparisons
+min/max
+logical operations
+unary/binary element-wise math
+
+It should not initially alter:
+
+matmul
+reshape
+concat
+reductions
+indexing
+
+That keeps the semantic change local and testable.
+
+2. Generalized map: immediately after composition
+
+Once u:fn values can be composed and passed around, map stops being merely a loop convenience and becomes a central language operator.
+
+Possible surface syntax:
+
+normalize = u:center |> u:scale
+ys = map(normalize, xs)
+
+Or, depending on your composition syntax:
+
+ys = map(u:center >> u:scale, xs)
+
+The first version of generalized map should remain simple:
+
+map(u:square, [1, 2, 3])
+map(u:normalize, rows(X))
+
+The important design question is what unit is mapped.
+
+A flat map(fn, X) could mean one of three things:
+
+map over every scalar element;
+map over major cells—rows for a matrix;
+map over an explicitly named axis.
+
+Those should not be conflated.
+
+Suggested API
+map(u:fn, X)                   # scalar elements
+map_axis(u:fn, X, "batch")     # slices selected by axis
+map_rows(u:fn, X)              # convenience alias, perhaps library-level
+
+Later:
+
+map_cells(u:fn, X, rank)
+
+BQN distinguishes these operations deliberately:
+
+Each maps over elements;
+Cells maps over major cells;
+Rank generalizes mapping to cells of a chosen rank;
+Table applies a function to every pair of elements.
+
+That separation is worth adopting semantically, even without adopting BQN glyphs.
+
+3. Generalized reduce and scan may be more important than comprehensions
+
+Once functions are values, these become natural:
+
+reduce(u:add, X)
+reduce(u:max, X, "feature")
+scan(u:add, tokens)
+
+sw-MLPL already has named reductions such as:
+
+reduce_add(X, "feat")
+
+A generalized reducer could coexist initially:
+
+reduce(u:add, X, "feat")
+
+Then built-ins become optimizable specializations rather than unrelated language features:
+
+reduce_add(X, axis)
+≈ reduce(u:add, X, axis)
+Why scan matters for MLPL
+
+scan deserves early consideration because it supports:
+
+cumulative sums and products;
+running statistics;
+token positions;
+recurrence experiments;
+state-space models;
+discounted returns;
+prefix computations;
+segmented sequence processing;
+some parallel algorithms.
+
+A comprehension can express a loop, but it does not naturally express that each output depends on the previous accumulated state. scan does.
+
+I would therefore put:
+
+map → reduce → scan
+
+before comprehensions.
+
+4. BQN’s Table is a strong fit
+
+BQN’s Table applies a binary function to every combination of elements from two arrays. For vectors of lengths m and n, the result is an m × n array; for higher-rank inputs, the result shape is the concatenation of their shapes.
+
+In readable sw-MLPL form:
+
+table(u:add, [1, 2, 3], [10, 20])
+
+producing:
+
+11 21
+12 22
+13 23
+
+Or:
+
+distances = table(u:distance, points_a, points_b)
+
+This is directly useful for:
+
+pairwise distances;
+similarity matrices;
+Cartesian parameter combinations;
+kernels;
+attention experiments;
+confusion matrices;
+grid generation;
+clustering;
+exhaustive comparisons.
+
+Potential names:
+
+table(u:f, A, B)
+outer(u:f, A, B)
+cross_map(u:f, A, B)
+
+I prefer table because outer is commonly associated specifically with outer products and may misleadingly suggest multiplication. But outer will be more immediately familiar to NumPy/JAX users.
+
+This feature becomes especially elegant with composition:
+
+distance = u:subtract |> u:square |> u:reduce_add |> u:sqrt
+D = table(distance, A, B)
+
+The exact composition must accommodate binary-to-unary transitions, but conceptually this is a very natural MLPL use case.
+
+5. List comprehensions: useful, but not really the main BQN lesson
+
+List comprehensions are not especially characteristic of BQN. BQN usually handles these problems using array operations, mapping modifiers, masks, and selection rather than Python-style comprehensions. Its more distinctive contributions are the explicit distinctions among Each, Table, Cells, Rank, composition, and structural transformations.
+
+Comprehensions still fit sw-MLPL because the language already has:
+
+for row in X {
+    ...
+}
+
+A producing form would naturally extend that:
+
+squares = [x * x for x in xs]
+positives = [x for x in xs if x > 0]
+
+For tensors:
+
+normalized = [normalize(row) for row in rows(X)]
+Benefits
+Familiar to Python and Rust users.
+Easy to teach.
+Clear for filtering and irregular data production.
+Natural extension of existing for.
+Useful before a full rank/cell model exists.
+Can lower to existing loops initially.
+Risks
+It can create a second array model
+
+These two forms may appear equivalent:
+
+map(u:square, X)
+[x * x for x in X]
+
+But they may differ in:
+
+whether X iterates scalars or rows;
+output shape inference;
+autograd behavior;
+backend fusion;
+device placement;
+handling variable-shaped results.
+
+Those differences need explicit specification.
+
+It encourages scalar thinking
+
+For ML workloads, this:
+
+[x + bias for x in X]
+
+may be less optimizable and less expressive than:
+
+X + bias
+
+Comprehensions should be the escape hatch for transformations that do not fit direct array algebra, not the preferred form for every operation.
+
+Filtering changes shape dynamically
+[x for x in X if predicate(x)]
+
+cannot generally preserve a static tensor shape. It should likely produce a list or rank-1 dynamic array, not an arbitrary dense tensor.
+
+That distinction becomes important for MLX, CUDA, compilation, and autograd.
+
+Recommended staged comprehension design
+Stage 1: list-producing comprehensions
+[x * x for x in xs]
+[f(x) for x in xs if p(x)]
+
+Constraints:
+
+iterate over a rank-1 array, dataset, or explicit row iterator;
+produce a rank-1 array if all results are compatible scalars;
+otherwise produce a list value, should MLPL acquire heterogeneous lists;
+lower to ordinary loop semantics;
+CPU/interpreter first.
+Stage 2: tensor comprehensions
+
+Later, a shape-preserving form could carry stronger guarantees:
+
+tensor[f(x) for x in X]
+
+or perhaps no new syntax if shape inference can prove regularity.
+
+Tensor comprehensions can eventually become a compiler-level facility for fusion and kernel generation. There is precedent for treating mathematical tensor comprehensions as a high-level description that lowers into optimized GPU kernels, but that is a much more ambitious feature than ordinary list syntax.
+
+6. Shape algebra: later, but lay foundations now
+
+I agree that a broad shape algebra should come later. sw-MLPL already has enough shape operations for useful ML:
+
+reshape
+transpose
+concat
+named axes
+axis reductions
+
+BQN’s shape model is much more pervasive. Its reshape can flatten, reshape, truncate, cyclically repeat values, infer dimensions under several policies, and interact with other structural modifiers.
+
+Copying all of that would complicate MLPL without immediate benefit.
+
+However, several small shape primitives would prepare the language for later generalization:
+
+shape(X)
+rank(X)
+axis_size(X, "feature")
+expand_dims(X, "head")
+squeeze(X, "singleton")
+broadcast_to(X, [batch, token, feature])
+move_axis(X, "feature", 1)
+
+These are more valuable initially than turning reshape into a BQN-like universal structural primitive.
+
+Named shape expressions
+
+Eventually, MLPL could support transformations such as:
+
+X : [batch, token, head, channel]
+Y = transpose(X, [batch, head, token, channel])
+
+and perhaps:
+
+Y = reorder(X, [batch, head, token, channel])
+
+This is clearer for ML than numeric permutations like:
+
+transpose(X, [0, 2, 1, 3])
+
+That is an area where sw-MLPL can surpass BQN for its domain: shape algebra based on semantic axis names.
+
+7. One BQN concept worth adding earlier: Over
+
+After ordinary composition, BQN’s Over is worth considering.
+
+Ordinary composition means:
+
+f(g(x))
+
+For a binary operation, Over means:
+
+f(g(a), g(b))
+
+BQN distinguishes this from normal composition explicitly.
+
+Readable MLPL examples:
+
+equal_over(u:sort, a, b)
+# equal(sort(a), sort(b))
+
+distance_over(u:normalize, a, b)
+# distance(normalize(a), normalize(b))
+
+A generic syntax might be:
+
+u:equal over u:sort
+u:distance over u:normalize
+
+This is useful for:
+
+comparing normalized vectors;
+measuring distance after projection;
+comparing canonicalized shapes;
+applying the same preprocessing to two model inputs;
+comparing tokenized or embedded forms.
+
+It is compact but still understandable. I would add it only after plain unary composition is settled, because binary arity rules can otherwise become confusing.
+
+Proposed milestones
+Milestone A — Composition foundation
+
+Implement:
+
+first-class u:fns
+unary composition
+arity metadata/checking
+composed-function introspection
+interpreter/compiler parity
+
+The introspection should remain readable:
+
+u:center |> u:scale |> u:clip
+
+rather than becoming an opaque generated closure.
+
+Milestone B — Broadcasting
+
+Implement:
+
+scalar broadcasting, already present
+singleton positional broadcasting
+named-axis broadcasting
+broadcast shape inference
+zero-copy broadcast views where feasible
+autograd reduction across expanded axes
+structured mismatch diagnostics
+
+The autograd point is important. If [feature] is broadcast across [batch, feature], its gradient must reduce across batch.
+
+Milestone C — Higher-order arrays
+
+Implement:
+
+map(u:f, X)
+reduce(u:f, X)
+reduce(u:f, X, axis)
+scan(u:f, X)
+table(u:f, A, B)
+
+Initially require built-in or pure u:fn operands where necessary for compiled/backend execution.
+
+Milestone D — Comprehensions
+
+Implement:
+
+[f(x) for x in xs]
+[f(x) for x in xs if predicate(x)]
+[f(row) for row in rows(X)]
+
+Lower them to the existing loop representation. Do not initially promise GPU fusion or static tensor output for filtered comprehensions.
+
+Milestone E — Cells and shape operations
+
+Implement:
+
+map_axis(u:f, X, axis)
+map_cells(u:f, X, rank)
+expand_dims
+squeeze
+move_axis
+broadcast_to
+
+Named-axis map_axis should probably precede numeric rank because it better matches MLPL’s existing strengths.
+
+Final prioritization
+Feature	Value to MLPL	Complexity	Timing
+General broadcasting	Very high	Moderate	Immediately after composition
+Generic map	Very high	Moderate	Immediately after broadcasting
+Generic reduce	Very high	Moderate	Same milestone as map
+scan	High	Moderate	Shortly after reduce
+table/outer map	High	Low–moderate	Early
+List comprehensions	Medium–high	Moderate	Middle
+Over composition	Medium	Low–moderate	After arity semantics stabilize
+Named-axis mapping	High	Moderate–high	Middle
+Rank/cell mapping	Medium–high	High	Later
+Full shape algebra	High eventually	High	Later
+
+So I would refine your conclusion to:
+
+Broadcasting is the best near-term array feature. Generalized map/reduce/scan should follow composition and probably precede list comprehensions. Comprehensions are a useful ergonomic bridge, while named-axis mapping and shape algebra are the deeper later-stage design.
+
+The particularly distinctive sw-MLPL opportunity is not merely BQN-style rank polymorphism. It is function composition combined with named-axis polymorphism:
+
+normalize_features = u:center |> u:scale
+Y = map_axis(normalize_features, X, "feature")
+
+That remains readable, maps directly to ML concepts, and can eventually provide much of BQN’s compositional power without adopting its terse notation.
+
+mike: agreed we do not want BQN glyphs, but words much like we replaced APL symbols with words. Words like each, over, and table make sense to me. I prefer readability over terseness. I am not trying to convert Python ML users to sw-MLPL or to convert APL2 or BQN programmers either. I'm trying to build a pragmatic, complete, teaching language, that is practical, and helps me (at least, others hopefully) visualize and understand the building blocks of ML. At the risk of making a hodge-podge or Franken-language, I want to take good ideas from Lisp, Clojure, Haskell, APL/APL2, J, K, BQN, and implement them using Rust (not Python). I want the language to be usable, learnable, applicable. Not necessarily going for speed (prefer correctness and readability). Terseness should be in the form of idioms not glyphs.
+
+
+
+
+That direction is coherent
+You are not building an APL-family language, a Python replacement, or a novelty syntax experiment. You are building a readable executable notation for understanding machine learning.
+
+That gives sw-MLPL a useful design center:
+
+Express ML computations at the level where a learner can see the data, transformations, shapes, state, and composition—without requiring Python libraries, symbolic glyph fluency, or low-level Rust implementation details.
+
+The risk of a Franken-language is real, but it is manageable. The language becomes a hodge-podge only when features are imported because they are interesting. It remains coherent when every imported concept must satisfy the same semantic and pedagogical criteria.
+
+A good feature-selection test
+A feature should probably enter sw-MLPL only when it does at least three of these:
+
+Makes an ML building block easier to express.
+
+Makes data flow or shape changes easier to understand.
+
+Composes cleanly with u:fn.
+
+Removes boilerplate without hiding important behavior.
+
+Has one clear primary meaning.
+
+Can be explained with a small example.
+
+Produces useful diagnostics when misused.
+
+Can be implemented correctly in Rust without runtime magic.
+
+Works in both teaching examples and nontrivial programs.
+
+Avoids creating a second competing way to express the same idea.
+
+That last item matters most. Multiple paradigms are fine; multiple unrelated semantics for the same operation are not.
+
+The language can be multi-paradigm without being incoherent
+The source languages you listed contribute different strengths:
+
+Source	Best idea to borrow
+Lisp	Code and computation built from small composable forms
+Clojure	Sequence transformations, immutability, pipelines, readable functional style
+Haskell	Types, purity, algebraic composition, folds, explicit effects
+APL/APL2	Arrays as primary values, shape-aware operations, whole-array thinking
+J	Tacit composition concepts, ranks, trains as inspiration
+K	Small orthogonal core, dictionaries/tables, practical data manipulation
+BQN	Refined array combinators such as each, table, cells, over, and structural composition
+Rust	Explicitness, correctness, enums, ownership discipline, excellent implementation substrate
+The unifying idea is not syntax. It is:
+
+Small, explicit transformations over structured values, composed into understandable ML systems.
+
+That is strong enough to unify all of these influences.
+
+Words instead of glyphs
+Using words is not merely a cosmetic substitution.
+
+It changes the teaching model.
+
+Compare:
+
+f¨x
+with:
+
+each(u:f, x)
+The second form exposes three concepts:
+
+each is an operation;
+
+u:f is a function value;
+
+x is the data being transformed.
+
+Likewise:
+
+table(u:distance, points_a, points_b)
+is readable before the learner knows the formal term “outer product.”
+
+Words also make idioms searchable, documentable, and diagnosable:
+
+error: table expects a binary function, but u:normalize accepts one argument
+That is much harder to communicate cleanly around symbolic modifiers.
+
+Terseness through idioms
+Your distinction is important:
+
+Terseness should come from reusable idioms, not compressed notation.
+
+Good sw-MLPL terseness might look like:
+
+normalize = u:center |> u:scale
+features = each(normalize, rows(samples))
+or:
+
+pairwise_distances = table(u:distance, points, points)
+or:
+
+running_loss = scan(u:add, losses)
+These are short because the concepts are powerful, not because the spelling is cryptic.
+
+That gives you semantic compression rather than visual compression.
+
+A possible core vocabulary
+I would keep the first-class functional and array vocabulary intentionally small.
+
+Function composition
+compose(u:f, u:g)
+u:f |> u:g
+over(u:compare, u:normalize)
+Potential meanings:
+
+compose(f, g)(x) = g(f(x))
+over(f, g)(x, y) = f(g(x), g(y))
+The pipe notation is readable enough to justify as syntactic sugar. The word form should remain available in documentation and introspection.
+
+Element and collection transformation
+each(u:f, values)
+map_axis(u:f, tensor, "feature")
+table(u:f, left, right)
+I would favor each as the ordinary element-wise operation and reserve map for a more general family or perhaps omit generic map entirely.
+
+For example:
+
+each(u:square, values)
+each_row(u:normalize, matrix)
+each_axis(u:normalize, tensor, "feature")
+This is more explicit than making map change meaning by rank.
+
+Accumulation
+reduce(u:add, values)
+reduce_axis(u:add, tensor, "feature")
+scan(u:add, values)
+These reveal an important relationship:
+
+each   transforms independent items
+reduce combines items into one result
+scan   combines items while retaining intermediate results
+table  combines every item on the left with every item on the right
+That is an excellent teaching cluster.
+
+each, over, and table form a particularly good family
+These three are worth adopting because they expose distinct patterns.
+
+each
+Apply one function independently:
+
+squares = each(u:square, values)
+Conceptually:
+
+x₀ x₁ x₂
+↓  ↓  ↓
+f  f  f
+↓  ↓  ↓
+y₀ y₁ y₂
+over
+Preprocess arguments identically before a binary operation:
+
+same_distribution =
+    over(u:approximately_equal, u:normalize)
+Conceptually:
+
+left  -> normalize ┐
+                    ├-> approximately_equal
+right -> normalize ┘
+This is useful for:
+
+comparing normalized vectors;
+
+comparing sorted values;
+
+comparing projected embeddings;
+
+measuring distances after common preprocessing.
+
+table
+Apply a binary function to every pair:
+
+distances = table(u:distance, points_a, points_b)
+Conceptually:
+
+              points_b
+            b0  b1  b2
+points_a a0  f   f   f
+         a1  f   f   f
+That directly teaches similarity matrices, kernels, attention scores, and pairwise comparisons.
+
+Broadcasting should remain explicit in its model
+Broadcasting is useful, but it can also hide shape mistakes.
+
+For a teaching language, the ideal is:
+
+convenient for obvious cases;
+
+inspectable;
+
+conservative for ambiguous cases;
+
+excellent diagnostics.
+
+Example:
+
+scores : [batch, token, feature]
+bias   : [feature]
+
+adjusted = scores + bias
+The language should be able to explain:
+
+bias was broadcast across axes batch and token
+result shape: [batch, token, feature]
+Perhaps not on every execution, but through inspection:
+
+explain_shape(scores + bias)
+or:
+
+trace shapes {
+    adjusted = scores + bias
+}
+That would fit your goal better than silently mimicking NumPy.
+
+Visualization should influence language design
+Because one goal is to understand ML building blocks, operations should produce introspectable intermediate structure.
+
+For example:
+
+pipeline =
+    u:center
+    |> u:scale
+    |> u:project
+    |> u:relu
+The runtime should eventually be able to display:
+
+input
+  -> center
+  -> scale
+  -> project
+  -> relu
+  -> output
+Likewise:
+
+distances = table(u:distance, points, prototypes)
+could be visualized as a matrix or computation grid.
+
+This suggests that u:fn composition should retain metadata instead of immediately collapsing into an opaque closure.
+
+A composed function might internally preserve:
+
+enum UnaryFunction {
+    Builtin(BuiltinFn),
+    User(UserFnId),
+    Compose(Vec<UnaryFunction>),
+}
+That enables:
+
+readable diagnostics;
+
+graph visualization;
+
+simplification;
+
+tracing;
+
+teaching output;
+
+later optimization;
+
+serialization.
+
+Correctness and inspectability align here.
+
+Avoid implicit cleverness
+Several ideas from the source languages should probably remain inspiration rather than direct features.
+
+Avoid automatic tacit trains
+A BQN or J programmer may infer meaning from adjacency and arity. Most learners will not.
+
+Prefer:
+
+average = compose(
+    u:sum,
+    u:divide_by_count
+)
+or a pipeline:
+
+average = u:sum_and_count |> u:divide
+rather than deriving hooks and forks implicitly from function placement.
+
+Avoid excessive rank inference
+Instead of making the same operator silently choose elements, rows, planes, or cells, prefer readable intent:
+
+each(u:f, values)
+each_row(u:f, matrix)
+each_axis(u:f, tensor, "token")
+each_cell(u:f, tensor, rank: 2)
+Some aliases can lower to a common implementation, but the source should communicate intent.
+
+Avoid overloaded punctuation
+Punctuation is appropriate when it expresses universal structure:
+
+u:f |> u:g
+It is less appropriate when every modifier receives a distinct symbol.
+
+A coherent layered design
+I would organize sw-MLPL conceptually into four layers.
+
+Layer 1: Values and shapes
+scalar
+list
+tensor
+record
+function
+model
+dataset
+Operations:
+
+shape
+rank
+reshape
+transpose
+broadcast
+slice
+concat
+Layer 2: Functional transformations
+compose
+each
+over
+table
+reduce
+scan
+filter
+choose
+These should work outside ML as general language mechanisms.
+
+Layer 3: ML building blocks
+linear
+embedding
+attention
+normalize
+loss
+optimizer
+expert
+router
+memory
+These should be expressible using Layers 1 and 2 whenever feasible.
+
+Layer 4: Experiments and systems
+train
+evaluate
+compare
+ablate
+trace
+profile
+visualize
+export
+This is where sw-MLPL becomes more than an array language.
+
+The layering prevents the language from feeling like a random assortment of features. Each concept has a home.
+
+Recommended near-term sequence
+Given function composition is arriving soon:
+
+1. Preserve composed-function structure
+Before adding many combinators, ensure composed u:fn values retain:
+
+arity;
+
+input/output type information where known;
+
+names;
+
+source locations;
+
+component functions;
+
+purity/effect metadata eventually.
+
+2. Add broadcasting
+Start with element-wise operations and conservative shape rules.
+
+Include:
+
+broadcast_shape(a, b)
+broadcast_to(x, target_shape)
+even if most broadcasting is implicit. These explicit operations help teaching and debugging.
+
+3. Add each
+Keep its semantics narrow:
+
+each(u:f, sequence)
+Do not initially make it rank-polymorphic.
+
+4. Add reduce and scan
+These complete the core sequence-processing vocabulary.
+
+5. Add table
+It is simple, distinctive, and highly relevant to ML.
+
+6. Add over
+Do this once function arity and binary composition are well-defined.
+
+7. Add comprehensions
+Use them for cases where the operation is more readable as construction:
+
+[x * x for x in values if x > 0]
+Do not make them the main tensor-transformation mechanism.
+
+8. Add named-axis forms
+each_axis
+reduce_axis
+scan_axis
+broadcast_axis
+This is likely more valuable to sw-MLPL than general BQN-style numeric rank semantics.
+
+The main design principle
+A useful rule for sw-MLPL could be:
+
+Prefer a word when it names a reusable computational idea. Prefer an idiom when several words repeatedly form a meaningful ML pattern. Add syntax only when it clarifies structure.
+
+That gives you room to borrow widely without losing identity.
+
+sw-MLPL can plausibly become a language where someone learns:
+
+what mapping means;
+
+what reduction means;
+
+what broadcasting does;
+
+how shapes propagate;
+
+how functions compose;
+
+how pairwise computations work;
+
+how models are assembled;
+
+how training changes state;
+
+how inference differs from training.
+
+That is a clearer and more valuable target than being the shortest language, the fastest language, or the most mathematically pure language.
+
+
+An orthogonal concern is mathematical notation.  Many ML operations can be expressed as equations. Instead of requiring that for input or syntax (many users are not comfortable with mathematical notations) consider it as extractable documentation for the math inclined.  Sort of like javadoc extracts documentation from (possibly annotaed) code, there could be "views" of mlpl code that show the math, where that is helpful for learning.
+
+Yes—this fits sw-MLPL very well.
+
+The language should remain readable and operational, while mathematical notation becomes an optional derived view:
+
+MLPL is the source of truth; equations are generated documentation, not executable syntax.
+
+That avoids forcing users to write notation such as:
+
+Y
+=
+σ
+(
+X
+W
++
+b
+)
+Y=σ(XW+b)
+while still helping mathematically inclined users connect readable code to the conventional equations used in papers and textbooks.
+
+Example
+Readable MLPL:
+
+linear = u:matmul(weights)
+    |> u:add(bias)
+    |> u:relu
+
+output = linear(input)
+Generated mathematical view:
+
+Z
+=
+X
+W
++
+b
+Z=XW+b
+Y
+=
+ReLU
+⁡
+(
+Z
+)
+Y=ReLU(Z)
+Or perhaps a combined view:
+
+Y
+=
+ReLU
+⁡
+(
+X
+W
++
+b
+)
+Y=ReLU(XW+b)
+The user should be able to choose between:
+
+expanded equations;
+
+compact equations;
+
+shape-annotated equations;
+
+computation graphs;
+
+ordinary source code.
+
+Treat math as one of several views
+The underlying representation should support several projections:
+
+MLPL source
+    ↓
+typed semantic representation
+    ├── executable interpreter/backend
+    ├── mathematical notation
+    ├── computation graph
+    ├── shape-flow diagram
+    ├── narrative explanation
+    └── generated documentation
+This is better than translating directly from source text into LaTeX. The mathematical view should come from the same typed intermediate representation used for checking and execution.
+
+That ensures the generated equation reflects what the program actually means.
+
+Semantic IR
+A small expression tree might look like:
+
+enum MathExpr {
+    Variable(Symbol),
+    Constant(Value),
+    Apply {
+        function: FunctionId,
+        arguments: Vec<MathExpr>,
+    },
+    Compose(Vec<MathExpr>),
+    Reduce {
+        operation: FunctionId,
+        input: Box<MathExpr>,
+        axis: Option<Axis>,
+    },
+    Broadcast {
+        input: Box<MathExpr>,
+        target: Shape,
+    },
+}
+Each operation could carry documentation metadata:
+
+struct FunctionMetadata {
+    name: String,
+    math_name: Option<String>,
+    notation: Option<MathNotation>,
+    description: String,
+    arity: usize,
+    purity: Purity,
+}
+For example:
+
+FunctionMetadata {
+    name: "relu",
+    math_name: Some(r"\operatorname{ReLU}".into()),
+    notation: Some(MathNotation::Function),
+    description: "Replace negative values with zero.",
+    arity: 1,
+    purity: Purity::Pure,
+}
+For matrix multiplication:
+
+FunctionMetadata {
+    name: "matmul",
+    math_name: None,
+    notation: Some(MathNotation::Infix(r"\cdot")),
+    ...
+}
+The math renderer would understand the operation semantically rather than relying only on its name.
+
+Generated views
+1. Compact equation view
+MLPL:
+
+prediction = sigmoid(matmul(input, weights) + bias)
+Rendered:
+
+y
+^
+=
+σ
+(
+X
+W
++
+b
+)
+y
+^
+​
+ =σ(XW+b)
+This is familiar to someone reading ML literature.
+
+2. Expanded instructional view
+Z
+=
+X
+W
+Z=XW
+Z
+b
+=
+Z
++
+b
+Z 
+b
+​
+ =Z+b
+y
+^
+=
+σ
+(
+Z
+b
+)
+y
+^
+​
+ =σ(Z 
+b
+​
+ )
+This is often more useful for beginners because it exposes intermediate values.
+
+3. Shape-annotated view
+X
+B
+×
+F
+W
+F
+×
+O
+→
+Z
+B
+×
+O
+X 
+B×F
+​
+ W 
+F×O
+​
+ →Z 
+B×O
+​
+ 
+Z
+B
+×
+O
++
+b
+O
+→
+Z
+B
+×
+O
+′
+Z 
+B×O
+​
+ +b 
+O
+​
+ →Z 
+B×O
+′
+​
+ 
+σ
+(
+Z
+′
+)
+→
+Y
+^
+B
+×
+O
+σ(Z 
+′
+ )→ 
+Y
+^
+  
+B×O
+​
+ 
+This could be one of sw-MLPL’s strongest teaching features. Most textbook equations omit shape mechanics, even though shape mismatches are a major practical source of confusion.
+
+4. Index-notation view
+For some operations, index notation is more explanatory:
+
+Y
+i
+j
+=
+∑
+k
+X
+i
+k
+W
+k
+j
++
+b
+j
+Y 
+ij
+​
+ = 
+k
+∑
+​
+ X 
+ik
+​
+ W 
+kj
+​
+ +b 
+j
+​
+ 
+This directly explains:
+
+matrix multiplication;
+
+reduction over 
+k
+k;
+
+bias broadcasting over 
+i
+i;
+
+output dimensions 
+i
+,
+j
+i,j.
+
+This could be generated from matmul plus broadcasting metadata.
+
+5. Narrative view
+The same semantic expression could produce:
+
+For each sample and output feature:
+
+1. Multiply each input feature by its corresponding weight.
+2. Sum across the feature axis.
+3. Add the output bias.
+4. Apply the sigmoid activation.
+That provides a bridge between code and equations.
+
+Annotations should be optional
+The renderer should infer as much as possible:
+
+output = relu(matmul(input, weights) + bias)
+But annotations can improve presentation:
+
+@math_name("X")
+input
+
+@math_name("W")
+weights
+
+@math_name("b")
+bias
+
+@math_name("\\hat{Y}")
+output
+Or a less LaTeX-oriented form:
+
+@math_symbol("X")
+input
+
+@math_symbol("W")
+weights
+The annotation mechanism should not require users to know LaTeX. Named symbols could map to renderers for:
+
+Unicode;
+
+LaTeX;
+
+MathML;
+
+plain text.
+
+For example:
+
+@math_symbol("prediction")
+output
+might render by default as:
+
+prediction
+prediction
+while a more advanced user could specify:
+
+@math_symbol("y_hat")
+output
+and the formatter could render:
+
+y
+^
+y
+^
+​
+ 
+Named intermediate values matter
+Function composition can hide intermediate equations:
+
+classifier =
+    u:linear(weights, bias)
+    |> u:relu
+    |> u:linear(output_weights, output_bias)
+    |> u:softmax
+A compact renderer might show:
+
+P
+=
+softmax
+⁡
+(
+ReLU
+⁡
+(
+X
+W
+1
++
+b
+1
+)
+W
+2
++
+b
+2
+)
+P=softmax(ReLU(XW 
+1
+​
+ +b 
+1
+​
+ )W 
+2
+​
+ +b 
+2
+​
+ )
+But an instructional renderer should synthesize intermediate variables:
+
+H
+=
+X
+W
+1
++
+b
+1
+H=XW 
+1
+​
+ +b 
+1
+​
+ 
+A
+=
+ReLU
+⁡
+(
+H
+)
+A=ReLU(H)
+Z
+=
+A
+W
+2
++
+b
+2
+Z=AW 
+2
+​
+ +b 
+2
+​
+ 
+P
+=
+softmax
+⁡
+(
+Z
+)
+P=softmax(Z)
+The renderer should generate names such as H, A, and Z, while allowing explicit source-level names to override them.
+
+This makes idiomatic composition compatible with readable mathematics.
+
+each, table, reduce, and over have useful mathematical forms
+each
+squared = each(u:square, values)
+Could render as:
+
+y
+i
+=
+x
+i
+2
+y 
+i
+​
+ =x 
+i
+2
+​
+ 
+rather than showing a map operator unfamiliar to many readers.
+
+reduce
+total = reduce(u:add, values)
+Could render as:
+
+s
+=
+∑
+i
+x
+i
+s= 
+i
+∑
+​
+ x 
+i
+​
+ 
+A generic operation might render as:
+
+r
+=
+x
+1
+∘
+x
+2
+∘
+⋯
+∘
+x
+n
+r=x 
+1
+​
+ ∘x 
+2
+​
+ ∘⋯∘x 
+n
+​
+ 
+scan
+running = scan(u:add, values)
+Could render as:
+
+y
+i
+=
+∑
+j
+=
+0
+i
+x
+j
+y 
+i
+​
+ = 
+j=0
+∑
+i
+​
+ x 
+j
+​
+ 
+table
+distances = table(u:distance, points, centers)
+Could render as:
+
+D
+i
+j
+=
+d
+(
+P
+i
+,
+C
+j
+)
+D 
+ij
+​
+ =d(P 
+i
+​
+ ,C 
+j
+​
+ )
+That is much more informative than an implementation-oriented nested loop.
+
+over
+similarity = over(u:cosine_similarity, u:normalize)
+Could render as:
+
+s
+(
+x
+,
+y
+)
+=
+cosine
+⁡
+(
+x
+∥
+x
+∥
+,
+y
+∥
+y
+∥
+)
+s(x,y)=cosine( 
+∥x∥
+x
+​
+ , 
+∥y∥
+y
+​
+ )
+The renderer can expand over semantically.
+
+Broadcasting deserves explicit documentation
+Suppose:
+
+centered = samples - mean
+with:
+
+samples : [batch, feature]
+mean    : [feature]
+A compact equation:
+
+C
+=
+X
+−
+μ
+C=X−μ
+An index equation:
+
+C
+b
+f
+=
+X
+b
+f
+−
+μ
+f
+C 
+bf
+​
+ =X 
+bf
+​
+ −μ 
+f
+​
+ 
+The index notation reveals broadcasting naturally: 
+μ
+μ has no batch index.
+
+A shape explanation could add:
+
+mean[feature] is reused for every batch element.
+This is exactly the sort of operation that is obvious in code once understood, but confusing to beginners when unexplained.
+
+Math views should distinguish equivalence from approximation
+This is important for correctness.
+
+Some transformations are exact:
+
+matmul + bias → XW + b
+Some are conventional summaries:
+
+layer_norm(x) → LayerNorm(x)
+Some are approximations or conceptual explanations:
+
+attention → softmax(QKᵀ / √d)V
+A real implementation may also include:
+
+masks;
+
+dropout;
+
+batching;
+
+fused kernels;
+
+numerical stabilization;
+
+epsilon terms;
+
+causal restrictions.
+
+The generated documentation should label the view:
+
+Exact equation
+Expanded conceptual equation
+Simplified textbook equation
+Backend implementation
+For example:
+
+Attention
+⁡
+(
+Q
+,
+K
+,
+V
+)
+=
+softmax
+⁡
+(
+Q
+K
+⊤
++
+M
+d
+k
+)
+V
+Attention(Q,K,V)=softmax( 
+d 
+k
+​
+ 
+​
+ 
+QK 
+⊤
+ +M
+​
+ )V
+would be exact only if the actual MLPL operation includes that exact mask and scaling behavior.
+
+The system should not silently emit an attractive but inaccurate textbook formula.
+
+User-facing commands
+Possible CLI commands:
+
+mlpl doc model.mlpl
+mlpl math model.mlpl
+mlpl math --expanded model.mlpl
+mlpl math --shapes model.mlpl
+mlpl math --indices model.mlpl
+mlpl graph model.mlpl
+mlpl explain model.mlpl
+Or from a REPL:
+
+:math prediction
+:math expanded prediction
+:math shapes prediction
+:math indices prediction
+:explain prediction
+:graph prediction
+A generated HTML documentation page could show synchronized tabs:
+
+Source | Equation | Expanded Math | Shapes | Graph | Explanation
+Clicking an operation in one view could highlight the corresponding operation in the others.
+
+A particularly useful learning presentation
+For each expression, display four aligned forms:
+
+MLPL
+logits = matmul(input, weights) + bias
+Math
+L
+=
+X
+W
++
+b
+L=XW+b
+Shapes
+[batch, input] × [input, output] + [output]
+    → [batch, output]
+Explanation
+Each input sample is projected into output space.
+The bias is added to every sample.
+This directly serves your stated goal of helping users visualize and understand ML building blocks.
+
+Scope and limitations
+Not every MLPL construct needs a mathematical representation.
+
+Good candidates:
+
+element-wise arithmetic;
+
+matrix operations;
+
+reductions;
+
+broadcasting;
+
+activation functions;
+
+losses;
+
+normalization;
+
+convolutions;
+
+attention;
+
+probability distributions;
+
+gradient updates;
+
+tensor transformations.
+
+Poor or partial candidates:
+
+file I/O;
+
+dataset loading;
+
+logging;
+
+control flow;
+
+error handling;
+
+dynamic model routing;
+
+external calls;
+
+agent workflows;
+
+mutable state management.
+
+For those, the documentation view can retain pseudocode or graph notation rather than forcing artificial equations.
+
+A mixed document is acceptable:
+
+Load training batch
+    ↓
+X' = normalize(X)
+    ↓
+Ŷ = model(X')
+    ↓
+L = cross_entropy(Ŷ, Y)
+    ↓
+Update parameters using ∇L
+Suggested implementation phases
+Phase 1: Mathematical metadata
+Add metadata for common primitives:
+
+printable mathematical name;
+
+operator precedence;
+
+prefix, infix, or function notation;
+
+argument roles;
+
+whether the rendering is exact;
+
+optional index-expansion rule.
+
+Support plain text and LaTeX output.
+
+Phase 2: Expression extraction
+Generate equations for pure expression trees:
+
+y = relu(matmul(x, w) + b)
+Start with named variables and built-in operations.
+
+Phase 3: Shape-aware equations
+Integrate static and runtime shapes:
+
+X[B,F] W[F,O] → Y[B,O]
+Explain broadcasting and reductions.
+
+Phase 4: Composition expansion
+Render u:fn pipelines as:
+
+compact nested equations;
+
+staged intermediate equations;
+
+computation graphs.
+
+Phase 5: Higher-order operations
+Add rendering rules for:
+
+each
+reduce
+scan
+table
+over
+Prefer conventional index or summation notation rather than exposing implementation combinators unnecessarily.
+
+Phase 6: Rich generated documentation
+Generate HTML, Markdown, MathML, LaTeX, and graph output from the same semantic representation.
+
+Architectural recommendation
+Do not build a standalone “MLPL-to-LaTeX translator.”
+
+Instead, define a general documentation IR:
+
+enum DocView {
+    Source(SourceView),
+    Math(MathView),
+    Shapes(ShapeView),
+    Graph(GraphView),
+    Narrative(NarrativeView),
+}
+And a semantic expression graph from which each view is generated.
+
+That architecture also supports future capabilities such as:
+
+graphical model inspection;
+
+execution tracing;
+
+automatic tutorials;
+
+equation-to-source cross-highlighting;
+
+comparing two implementations mathematically;
+
+detecting when code and comments disagree;
+
+exporting model descriptions into papers or notebooks.
+
+Core principle
+A useful formulation for sw-MLPL would be:
+
+Code should be readable without mathematics, but mathematics should be recoverable from code whenever the computation has a meaningful mathematical interpretation.
+
+That keeps the language approachable while making mathematical depth available rather than mandatory. It also gives sw-MLPL something most existing ML systems handle poorly: a synchronized view of program, equation, shape, and explanation.
+
+
+An alternative to sw-MLPL being aware of annotation syntax is to use comments and do the work in Emacs org-mode along with the babel blocks and literate programming.  Emacs integrates with LaTeX and can produce html, pdfs, etc.  The annotation and extraction can be done in elisp vs. cluttering the sw-MLPL Rust implementation.  Maybe this could be baked-into the Rust impl later, but Emacs could do this work sooner and out-of-band, right?
+
+Yes. Org-mode plus Babel is the better near-term architecture for this.
+
+It keeps the sw-MLPL implementation focused on language semantics, execution, correctness, and diagnostics, while Emacs handles the literate-programming and publishing concerns it already does well.
+
+Recommended separation
+sw-MLPL
+  ├─ parses and executes MLPL
+  ├─ reports values, shapes, types, traces
+  └─ optionally emits machine-readable semantic data
+
+Emacs / Org mode
+  ├─ organizes prose, code, equations, diagrams, and results
+  ├─ executes MLPL Babel blocks
+  ├─ extracts math-oriented comments or metadata
+  ├─ renders LaTeX fragments
+  └─ exports HTML, PDF, Markdown, or notebooks
+That gives you useful documentation much sooner without committing the language syntax to an annotation model that may later prove awkward.
+
+Why this is a good fit
+1. It avoids language clutter
+You do not need to add things such as:
+
+@math_symbol("W")
+@equation("Y = XW + b")
+to otherwise straightforward MLPL code.
+
+Instead, an Org document can contain:
+
+#+name: linear-layer
+#+begin_src mlpl
+output = relu(matmul(input, weights) + bias)
+#+end_src
+followed by:
+
+#+begin_export latex
+\[
+Y = \operatorname{ReLU}(XW + b)
+\]
+#+end_export
+Initially, that equation can be written manually. Later, Elisp can derive or update it.
+
+2. Org already solves document composition
+An ML tutorial needs more than equations:
+
+prose;
+
+executable examples;
+
+expected output;
+
+tensor shapes;
+
+tables;
+
+diagrams;
+
+references;
+
+generated images;
+
+exported documents.
+
+Org-mode already provides the container for all of those.
+
+Trying to make the Rust compiler own that full document system would be unnecessary duplication.
+
+3. Babel provides an immediate execution model
+A basic MLPL Babel backend could support:
+
+#+begin_src mlpl :results output
+x = [1, 2, 3]
+each(u:square, x)
+#+end_src
+and insert:
+
+[1, 4, 9]
+The first useful implementation need only:
+
+write the block to a temporary .mlpl file;
+
+invoke the MLPL CLI;
+
+capture stdout and stderr;
+
+insert the result into Org.
+
+That is a small, bounded Elisp project.
+
+Comments as out-of-band documentation
+Comments can provide lightweight hints without becoming formal language syntax.
+
+For example:
+
+# math: Y = relu(X W + b)
+# symbols: input=X weights=W bias=b output=Y
+output = relu(matmul(input, weights) + bias)
+The MLPL parser can ignore these completely.
+
+An Emacs extractor can interpret them.
+
+Or use structured comment blocks:
+
+#|math
+symbols:
+  input: X
+  weights: W
+  bias: b
+  output: Y
+
+equation:
+  Y = ReLU(X W + b)
+|#
+
+output = relu(matmul(input, weights) + bias)
+This approach has several advantages:
+
+old MLPL implementations remain compatible;
+
+comments do not affect execution;
+
+annotation syntax can evolve rapidly;
+
+Elisp experiments do not force parser changes;
+
+annotations remain close to the relevant code.
+
+The main risk is creating an undocumented second language inside comments. Keep the first version deliberately small.
+
+Prefer Org properties where possible
+For literate programs, metadata may belong in Org rather than source comments:
+
+* Linear layer
+:PROPERTIES:
+:MATH_OUTPUT: Y
+:MATH_INPUT: X
+:MATH_WEIGHTS: W
+:MATH_BIAS: b
+:END:
+
+#+begin_src mlpl :name linear-layer
+output = relu(matmul(input, weights) + bias)
+#+end_src
+Or Babel header arguments:
+
+#+begin_src mlpl :math-output Y :math-input X :math-weights W :math-bias b
+output = relu(matmul(input, weights) + bias)
+#+end_src
+This keeps the .mlpl file entirely clean.
+
+I would support both models eventually:
+
+Org metadata for tutorials and literate documents.
+
+Comments for standalone .mlpl source files that should carry documentation hints with them.
+
+A staged implementation
+Stage 1: Babel execution
+Implement ob-mlpl.el with:
+
+(org-babel-execute:mlpl body params)
+Support:
+
+:results output
+:results value
+:cmdline
+:stdin
+:file
+:session none
+I would avoid persistent sessions initially. A fresh MLPL process per block is simpler and deterministic.
+
+Stage 2: Result modes
+Have the MLPL CLI emit predictable formats:
+
+mlpl run example.mlpl --output text
+mlpl run example.mlpl --output json
+JSON results would help Emacs render:
+
+arrays as Org tables;
+
+shapes as tables;
+
+scalar values inline;
+
+diagnostics in source blocks.
+
+Example:
+
+{
+  "value": [[1, 2], [3, 4]],
+  "dtype": "f32",
+  "shape": [2, 2],
+  "axes": ["batch", "feature"]
+}
+The Rust implementation does not need to know about Org or LaTeX. It only needs a stable machine-readable output option.
+
+Stage 3: Comment extraction
+Add Elisp commands such as:
+
+mlpl-org-insert-math-view
+mlpl-org-update-math-view
+mlpl-org-insert-shape-view
+mlpl-org-insert-explanation
+These can inspect the current source block and parse nearby # math: comments.
+
+Stage 4: Primitive templates
+The Elisp package could recognize simple expressions:
+
+z = matmul(x, w) + b
+y = relu(z)
+and render:
+
+Z
+=
+X
+W
++
+b
+Z=XW+b
+Y
+=
+ReLU
+⁡
+(
+Z
+)
+Y=ReLU(Z)
+This does not require a complete MLPL parser initially. A constrained recognizer can cover common teaching examples.
+
+Stage 5: Query the compiler
+Rather than duplicating the full parser in Elisp, add a compiler command later:
+
+mlpl inspect example.mlpl --format json
+Possible output:
+
+{
+  "bindings": [
+    {
+      "name": "output",
+      "expression": {
+        "kind": "call",
+        "function": "relu",
+        "arguments": [
+          {
+            "kind": "add",
+            "left": {
+              "kind": "call",
+              "function": "matmul",
+              "arguments": ["input", "weights"]
+            },
+            "right": "bias"
+          }
+        ]
+      }
+    }
+  ]
+}
+Elisp then renders that semantic structure as LaTeX, Org, SVG, or prose.
+
+This is probably the best long-term boundary:
+
+Rust exposes semantics; Emacs chooses presentation.
+
+Avoid reimplementing MLPL in Elisp
+The main architectural danger is letting ob-mlpl.el become a second parser and type checker.
+
+A little pattern recognition is fine for a prototype:
+
+matmul(a, b) → AB
+relu(x)      → ReLU(x)
+reduce(add)  → Σ
+But once you need:
+
+precedence;
+
+composed u:fn values;
+
+named axes;
+
+broadcasting;
+
+user-defined functions;
+
+aliases;
+
+macros;
+
+overloaded operations;
+
+the Rust implementation should provide an AST or semantic description.
+
+Elisp should not need to decide what the program means.
+
+A useful Rust CLI boundary
+I would plan for four commands:
+
+mlpl run file.mlpl
+mlpl check file.mlpl
+mlpl inspect file.mlpl --format json
+mlpl trace file.mlpl --format json
+Their responsibilities:
+
+Command	Purpose
+run	Execute code
+check	Parse, type-check, and validate shapes
+inspect	Return semantic structure without execution
+trace	Return runtime values, shapes, and operation flow
+Org/Babel can consume all four without MLPL knowing anything about Org.
+
+Later:
+
+mlpl math file.mlpl
+could become a native convenience command, but it would not be necessary for the first implementation.
+
+Literate teaching example
+An Org section could look like this:
+
+* Linear transformation
+
+A linear layer projects each input vector into a new feature space.
+
+#+name: linear-example
+#+begin_src mlpl :results output
+input = [[1.0, 2.0]]
+weights = [[0.5, 1.0],
+           [1.5, 2.0]]
+bias = [0.1, 0.2]
+
+output = matmul(input, weights) + bias
+print(output)
+#+end_src
+
+#+RESULTS: linear-example
+: [[3.6, 5.2]]
+
+#+begin_export latex
+\[
+Y_{bo} = \sum_f X_{bf} W_{fo} + b_o
+\]
+#+end_export
+Later, the LaTeX block could be generated from the named source block:
+
+#+call: mlpl-math("linear-example", view="indices")
+or through an interactive command.
+
+Generated views in Org
+The same block could generate several siblings:
+
+** Source
+#+begin_src mlpl
+...
+#+end_src
+
+** Result
+#+RESULTS:
+...
+
+** Equation
+\[
+Y = XW + b
+\]
+
+** Indexed equation
+\[
+Y_{bo} = \sum_f X_{bf} W_{fo} + b_o
+\]
+
+** Shapes
+| Value   | Shape             |
+|---------+-------------------|
+| input   | batch × feature   |
+| weights | feature × output  |
+| bias    | output            |
+| output  | batch × output    |
+
+** Explanation
+The matrix multiplication reduces over the feature axis.
+The bias is broadcast across the batch axis.
+Org is an excellent host for these parallel views.
+
+Testing strategy
+Treat the Emacs integration as a separate component.
+
+sw-mlpl/
+  crates/
+    mlpl-cli/
+    mlpl-parser/
+    mlpl-runtime/
+    mlpl-inspect/
+
+  editors/
+    emacs/
+      ob-mlpl.el
+      mlpl-mode.el
+      mlpl-doc.el
+      tests/
+Test the boundary using golden files.
+
+For example:
+
+testdata/
+  linear.mlpl
+  linear.inspect.json
+  linear.math.tex
+  linear.shapes.org
+Then verify:
+
+Rust emits stable semantic JSON.
+
+Elisp converts it into expected Org/LaTeX.
+
+Babel execution returns expected results.
+
+export to HTML/PDF succeeds.
+
+Benefits and risks
+Benefits
+Much faster path to usable literate tutorials.
+
+No premature language syntax commitment.
+
+Excellent HTML and PDF export.
+
+Native LaTeX support.
+
+Source, prose, results, and equations remain together.
+
+Easy experimentation in Elisp.
+
+Rust compiler remains smaller and cleaner.
+
+Generated views can evolve independently of the language.
+
+Risks
+Documentation features may initially work only in Emacs.
+
+Comment conventions could drift without a specification.
+
+Elisp may accidentally duplicate compiler semantics.
+
+Generated documents depend on CLI output stability.
+
+Maintaining both Rust and Elisp adds another integration boundary.
+
+Those risks are acceptable, especially since Emacs is already your normal environment.
+
+Best architectural decision
+I would implement the first version as:
+
+ob-mlpl.el
+    ↓ invokes
+mlpl run/check/inspect
+    ↓ returns
+text or JSON
+    ↓ rendered by
+mlpl-doc.el
+    ↓ embedded into
+Org source/results/math/shape sections
+Use manual equations and lightweight comments first. Add automatic extraction incrementally. Once the desired math and documentation conventions stabilize, move only the semantic pieces that clearly belong in the compiler into Rust.
+
+That gives you a productive prototype now without locking sw-MLPL into speculative annotation syntax.
+
+

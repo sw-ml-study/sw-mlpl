@@ -1,0 +1,108 @@
+
+eBook: From Grokking Machine Learning 2nd ed.
+
+Chapters:
+
+1 What is machine learning? It is common sense, except done by a computer
+
+2 Types of machine learning
+
+3 Drawing a line close to our points: Linear regression
+
+4 Optimizing the training process: Underfitting, overfitting, testing, and regularization
+
+5 Using lines to split our points: The perceptron algorithm
+
+6 A continuous approach to splitting points: Logistic classifiers
+
+7 How do you measure classification models? Accuracy and its friends
+
+8 Using probability to its maximum: The naive Bayes model
+
+9 Splitting data by asking questions: Decision trees
+
+10 Combining building blocks to gain more power: Neural networks
+11 Finding boundaries with style: Support vector machines and the kernel method
+12 Combining models to maximize results: Ensemble learning
+13 Putting it all in practice: A real-life example of data engineering and machine learning
+14 AI for language and image generation
+
+---
+
+eBook: Deep Learning with PyTorch, 2nd ed.
+
+Parts and Chapters:
+
+Part 1 Core PyTorch
+
+1 Introducing deep learning and the PyTorch library
+
+2 Pretrained networks
+
+3 It starts with a tensor
+
+4 Real-world data representation using tensors
+
+5 The mechanics of learning
+
+6 Using a neural network to fit the data
+
+7 Telling birds from airplanes: Learning from images
+
+8 Using convolutions to generalize
+
+Part 2 Practical deep learning applications
+
+9 How transformers work
+
+10 Diffusion models for images
+
+11 Using PyTorch to fight cancer
+
+12 Combining data sources into a unified dataset
+
+13 Training a classification model to detect suspected tumors
+
+14 Improving training with metrics and augmentation
+
+15 Using segmentation to find suspected nodules
+
+16 Training models on multiple GPUs
+
+17 Deploying to production
+
+---
+
+eBook: Math and Architectures of Deep Learning 
+
+Chapters:
+
+1 An overview of machine learning and deep learning
+
+2 Vectors, matrices, and tensors in machine learning
+
+3 Classifiers and vector calculus
+
+4 Linear algebraic tools in machine learning
+
+5 Probability distributions in machine learning
+
+6 Bayesian tools for machine learning
+
+7 Function approximation: How neural networks model the world
+
+8 Training neural networks: Forward propagation and backpropagation
+
+9 Loss, optimization, and regularization
+
+10 Convolutions in neural networks
+
+11 Neural networks for image classification and object detection
+
+12 Manifolds, homeomorphism, and neural networks
+
+13 Fully Bayes model parameter estimation
+
+14 Latent space and generative modeling, autoencoders, and variational autoencoders
+
+---
