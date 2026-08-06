@@ -1,0 +1,1 @@
+Per design: precise provider-less errors are already wired via the AST arm -- verify web local + connect surfaces render them well; docs: usage.md (include section + --source-dir), lang-reference (include statement), glossary (include entry), README mention if warranted; pages rebuild; wiki errata note; capability + q-and-a updates; then the callables design step follows.

@@ -1,0 +1,1 @@
+Include shipped end to end: --source-dir + FsProvider + chunked script eval + file-accurate diagnostics; 7 subprocess tests; adopted-runner simulation passes exit 0. Flip to AVAILABLE awaits mlplunit passing source_root as --source-dir.
