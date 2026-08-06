@@ -14,9 +14,11 @@
 pub mod gpu_env;
 pub mod gpu_step;
 pub mod run_state;
+mod user_fn;
 
 pub use gpu_env::GpuEnv;
 pub use gpu_step::{
     AdamHp, DemoLayout, GpuAdamStep, LoraNames, installed_gpu_step, register_gpu_step,
 };
-pub use run_state::{ExperimentRecord, Interrupt, OptimizerState, ParamShape, UserFn};
+pub use run_state::{ExperimentRecord, Interrupt, OptimizerState, ParamShape};
+pub use user_fn::{TestEntry, UserFn};

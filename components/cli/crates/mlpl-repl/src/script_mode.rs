@@ -182,6 +182,7 @@ pub(crate) fn run_script_path(
     }
     let mut last: Option<Value> = None;
     for chunk in &loaded.chunks {
+        env.current_source = Some(chunk.source.0.clone());
         env.set_pending_source(loaded.table.text(&chunk.source).map(String::from));
         let r = mlpl_eval::eval_program_value(&chunk.stmts, env);
         env.set_pending_source(None);

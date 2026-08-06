@@ -8,7 +8,6 @@ use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use mlpl_array::DenseArray;
-use mlpl_parser::Expr;
 use mlpl_tensor_handle::TensorHandle;
 use serde::{Deserialize, Serialize};
 
@@ -100,48 +99,4 @@ pub struct ParamShape {
     /// Per-axis labels when the array is labeled; `None` when
     /// the array has no labels.
     pub labels: Option<Vec<Option<String>>>,
-}
-
-/// A user-defined `u:` function: params, body, the doc-string
-/// convention (leading string literal), and the verbatim `def`
-/// source when the entry point supplied it (`:list` prefers it).
-#[derive(Clone, Debug)]
-pub struct UserFn {
-    pub params: Vec<String>,
-    pub body: Vec<Expr>,
-    pub doc: Option<String>,
-    /// Verbatim `def ... }` text (comments intact) when the entry
-    /// point supplied the program source; `:list` prefers this.
-    pub source: Option<String>,
-}
-
-impl UserFn {
-    #[must_use]
-    pub fn new(params: Vec<String>, body: Vec<Expr>) -> Self {
-        let doc = match body.first() {
-            Some(Expr::StrLit(s, _)) => Some(s.clone()),
-            _ => None,
-        };
-        Self {
-            params,
-            body,
-            doc,
-            source: None,
-        }
-    }
-
-    #[must_use]
-    pub fn with_source(mut self, source: Option<String>) -> Self {
-        self.source = source;
-        self
-    }
-
-    #[must_use]
-    pub fn body_exprs(&self) -> &[Expr] {
-        if self.doc.is_some() && self.body.len() > 1 {
-            &self.body[1..]
-        } else {
-            &self.body
-        }
-    }
 }

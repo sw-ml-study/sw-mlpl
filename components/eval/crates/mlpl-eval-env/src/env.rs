@@ -147,7 +147,13 @@ pub struct Environment {
     /// lands here.
     pub string_lists: HashMap<String, Vec<String>>,
     pub results: HashMap<String, (bool, Value)>, // Saga 29 step 012
-    pub cli_args: Vec<String>,                   // Saga 31 step 003
+    /// Source-ordered `@test` registry (reflection: `tests()` /
+    /// `test_info`). Registration happens at def evaluation.
+    pub tests: Vec<mlpl_eval_state::TestEntry>,
+    /// Display name of the source currently evaluating (script
+    /// chunks set this; None renders as "repl").
+    pub current_source: Option<String>,
+    pub cli_args: Vec<String>, // Saga 31 step 003
     pub user_fns: HashMap<String, mlpl_eval_state::UserFn>,
     /// Raw text of the program currently being evaluated, when the
     /// entry point provided it (naming-and-docs saga): `def` slices

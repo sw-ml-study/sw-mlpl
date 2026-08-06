@@ -257,7 +257,7 @@ pub(crate) fn eval_expr(
         name,
         params,
         body,
-        annotations: _,
+        annotations,
         span,
     } = expr
     {
@@ -268,8 +268,11 @@ pub(crate) fn eval_expr(
             .map(str::to_string);
         env.define_fn(
             name.clone(),
-            mlpl_eval_state::UserFn::new(params.clone(), body.clone()).with_source(source),
+            mlpl_eval_state::UserFn::new(params.clone(), body.clone())
+                .with_source(source)
+                .with_annotations(annotations.clone()),
         );
+        crate::def_metadata::register_def(name, annotations, span, env, trace)?;
         return Ok(Value::Array(DenseArray::from_scalar(0.0)));
     }
     if let Expr::Return { value, .. } = expr {
