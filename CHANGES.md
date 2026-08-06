@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga apl2-blocks: step 004 complete (renderer class fix)
+- fix(web): word-boundary emphasis -- stop eating snake_case in rendered prose (emph-word-boundary)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga apl2-blocks: complete (3 steps)
 - feat(demos): Sudoku Backtracking (blocks view) + Structure Zoo 4D display (demo-and-docs)
 - saga apl2-blocks: step 002 complete
