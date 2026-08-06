@@ -7,6 +7,25 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: Look at mlplunit's sw-MLPL-changes-needed.md and prioritize
+changes to unblock mlplunit.**
+
+A: Done -- full plan in docs/mlplunit-unblock-plan.md, and the
+gen-state-kv-cache saga is PAUSED (archived with its design
+committed; nothing lost) in favor of the new mlplunit-unblock
+saga. Priority order: P0-a equal(a,b) + repr(value) (smallest
+surface, immediately makes every assertion honest and
+diagnostic); P0-b static include (mlplunit's own top item --
+kills host-side concatenation; medium effort, sharp sandbox
+edges, design doc exists upstream); P1 first-class :u:name
+callables + call() (largest change, gates contract items 4-6,
+and it is ALSO the prerequisite the APL2 higher-order saga has
+been waiting on) then @test metadata/reflection; P2 items 5-7
+(parameterized cases, lifecycle, events) build on P1 and follow
+in a successor saga. After each step ships, mlplunit's
+scripts/check-capabilities is run against a fresh repl build so
+flips to AVAILABLE are reported for same-change adoption.
+
 **Q: If 013 was already done, why didn't you answer until I
 asked 4 times? Another project is blocked on it. Status? What's
 next?**
