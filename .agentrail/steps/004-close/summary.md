@@ -1,0 +1,1 @@
+Saga closed: q-and-a carries the two one-line fixture updates mlplunit needs; wiki rows; serve+pages rebuilt and deployed; queue advanced (next candidates: apl2-hof, combinator-birds, resume kv-cache).
