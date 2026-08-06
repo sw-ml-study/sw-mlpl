@@ -1,0 +1,9 @@
+number = 1
+slug = "banner-badge"
+status = "pending"
+description = "Splash/banner staleness badge: on load, fetch the page's OWN index.html (cach..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T14:31:19"
+task_type = "feature"
+commits = []
