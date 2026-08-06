@@ -41,8 +41,13 @@ pub(crate) fn split(text: &str) -> Vec<Span> {
             i += advance;
             continue;
         }
-        buf.push(c as char);
-        i += 1;
+        // Accumulate WHOLE characters: all span delimiters are
+        // ASCII, but the text between them may be any UTF-8
+        // (APL glyphs in narration) -- a byte-as-char push
+        // shatters multi-byte sequences into mojibake.
+        let ch = text[i..].chars().next().expect("in-bounds char");
+        buf.push(ch);
+        i += ch.len_utf8();
     }
     if !buf.is_empty() {
         spans.push(Span::Text(buf));

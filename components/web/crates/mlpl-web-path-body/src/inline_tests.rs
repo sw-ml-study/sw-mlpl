@@ -15,14 +15,6 @@ fn glossary_sigil_round_trips() {
 }
 
 #[test]
-fn unterminated_or_single_bracket_stays_text() {
-    // `[term]` (single) and `[[unterminated` (no closer)
-    // both render as literal text rather than crashing.
-    assert!(matches!(&split("[not a link]")[0], Span::Text(_)));
-    assert!(matches!(&split("[[unterminated")[0], Span::Text(_)));
-}
-
-#[test]
 fn markdown_link_parses() {
     // [label](url) -> Span::Link; surrounding text segments.
     let spans = split("see [the doc](literate/x.html) now");
@@ -31,8 +23,11 @@ fn markdown_link_parses() {
         matches!(&spans[1], Span::Link { text, url } if text == "the doc" && url == "literate/x.html")
     );
     assert!(matches!(&spans[2], Span::Text(t) if t == " now"));
-    // A bare [bracketed] with no (url) stays literal text.
+    // A bare [bracketed] with no (url) stays literal text, as
+    // do a single-bracket "[term]" and an unterminated "[[".
     assert!(matches!(&split("[just text]")[0], Span::Text(_)));
+    assert!(matches!(&split("[not a link]")[0], Span::Text(_)));
+    assert!(matches!(&split("[[unterminated")[0], Span::Text(_)));
 }
 
 #[test]
@@ -76,4 +71,19 @@ fn code_and_glossary_coexist() {
     let spans = split("`code` and [[Stack (tape op)]]");
     assert!(matches!(&spans[0], Span::Code(t) if t == "code"));
     assert!(matches!(&spans[2], Span::Glossary(t) if t == "Stack (tape op)"));
+}
+
+#[test]
+fn unicode_text_survives_tokenizing() {
+    // APL glyphs in narration (docs/apl2-idioms.mlpl) shattered
+    // when text accumulated BYTE by byte -- multi-byte UTF-8
+    // must round-trip exactly.
+    let text = "APL2: \u{2373}9 and 3 3\u{2374}\u{2373}9 with \u{2395}IO";
+    let spans = split(text);
+    assert_eq!(spans.len(), 1, "{spans:?}");
+    assert!(matches!(&spans[0], Span::Text(t) if t == text), "{spans:?}");
+    // Mixed with real markup, the unicode segments stay intact.
+    let spans = split("dyadic \u{2349} maps to `transpose_axes`");
+    assert!(matches!(&spans[0], Span::Text(t) if t == "dyadic \u{2349} maps to "));
+    assert!(matches!(&spans[1], Span::Code(t) if t == "transpose_axes"));
 }
