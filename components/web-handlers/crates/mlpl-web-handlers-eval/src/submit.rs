@@ -71,16 +71,12 @@ fn classify_line(
     new_cmds: &mut Vec<String>,
     eval_queue: &mut Vec<String>,
 ) {
-    let (narration, code) = mlpl_web_eval::state::split_leading_comments(&line);
-    if let Some(text) = narration {
-        crate::running::push_narration(new_history, text);
-    }
-    let Some(code) = code else { return };
-    let trimmed = code.trim();
-    if trimmed.is_empty() {
+    let Some((code, has_narration)) =
+        crate::running::split_for_classify(&line, new_history, eval_queue)
+    else {
         return;
-    }
-    let trimmed = &trimmed.to_string();
+    };
+    let trimmed = &code;
     new_cmds.push(trimmed.to_string());
     // `:<cmd> --help` is REPL command help (vs bare args = command
     // input). Intercept it here so it works in both connect + local mode
@@ -110,7 +106,11 @@ fn classify_line(
         new_history.push(handle_upload_command(deps, trimmed, &name));
         return;
     }
-    eval_queue.push(trimmed.to_string());
+    if has_narration {
+        eval_queue.push(line.trim().to_string());
+    } else {
+        eval_queue.push(trimmed.to_string());
+    }
 }
 
 fn apply_3d_command(deps: &EvalDeps, cmd: mlpl_web_viz3d::toggle::Viz3dCmd) {
@@ -136,7 +136,19 @@ pub(crate) fn process_next_eval(
         deps.history.set(history);
         return;
     }
-    let line = queue[idx].clone();
+    let item = queue[idx].clone();
+    // Split the group's narration NOW so the prose block lands
+    // immediately above its own result (user report: pushing at
+    // classify time stacked every comment before any output).
+    let (narration, code) = mlpl_web_eval::state::split_leading_comments(&item);
+    if let Some(text) = narration {
+        crate::running::push_narration(&mut history, text);
+    }
+    let Some(line) = code else {
+        deps.history.set(history.clone());
+        process_next_eval(deps, history, queue, idx + 1);
+        return;
+    };
     // Decide telemetry remoteness BEFORE the marker renders, so the live
     // panel only mounts for server-side evals (not browser-local ones).
     #[cfg(target_arch = "wasm32")]

@@ -107,3 +107,39 @@ pub(crate) fn push_narration(new_history: &mut Vec<HistoryEntry>, text: String) 
         kind: EntryKind::Narration,
     });
 }
+
+/// Narration-aware front half of Run classification. Narration
+/// is NOT pushed to history here: eval results append
+/// asynchronously, so immediate pushes would stack every
+/// comment block before the first result -- the queue carries
+/// the full group and `process_next_eval` splits at PROCESSING
+/// time, keeping story and result adjacent. A comment-only
+/// group queues whole (ordered narration, nothing to eval).
+/// Returns the trimmed code and whether narration rides along,
+/// or `None` when the group was fully handled.
+pub(crate) fn split_for_classify(
+    line: &str,
+    new_history: &mut Vec<HistoryEntry>,
+    eval_queue: &mut Vec<String>,
+) -> Option<(String, bool)> {
+    let (narration, code) = mlpl_web_eval::state::split_leading_comments(line);
+    let Some(code) = code else {
+        if narration.is_some() {
+            eval_queue.push(line.trim().to_string());
+        }
+        return None;
+    };
+    let trimmed = code.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    if let Some(text) = narration {
+        if crate::help::command_help(trimmed).is_some() {
+            // Synchronous command paths render immediately; keep
+            // their narration immediate too so order holds.
+            push_narration(new_history, text);
+        }
+        return Some((trimmed.to_string(), true));
+    }
+    Some((trimmed.to_string(), false))
+}
