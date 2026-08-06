@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "global-set"
+  },
+  "action": "TDD; framed() extraction; replay semantics design",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T16:13:43"
+}

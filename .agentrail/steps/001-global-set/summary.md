@@ -1,0 +1,1 @@
+global_set shipped: immediate kind-routed bind + outside-snapshot write log + frame replay with depth-zero clear; 6 TDD tests incl. their reporter pattern; docs + pins; combinators research committed + saga queued.
