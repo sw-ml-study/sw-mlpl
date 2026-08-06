@@ -1,9 +1,10 @@
 number = 1
 slug = "plan"
-status = "in-progress"
+status = "completed"
 description = "Prioritize the mlplunit contract (../mlplunit/docs/sw-MLPL-changes-needed.md)..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T17:20:33"
+completed_at = "2026-08-05T17:21:03"
 task_type = "docs"
-commits = []
+commits = ["adcd7423e6a29f4b93a2b8f38fd7c1c08b86d7b4"]

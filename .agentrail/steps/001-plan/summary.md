@@ -1,0 +1,1 @@
+Contract read, priorities set and recorded (P0 equal/repr + include, P1 callables + metadata, P2 rest), KV saga paused cleanly, q-and-a answered.
