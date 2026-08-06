@@ -1,0 +1,1 @@
+Contract item 4 design: @test metadata on def u: functions + reflection enumerating (identity, source name/span, metadata) in source order WITHOUT executing test code; stable names, tags, skip/expected-fail/timeout fields; duplicate/malformed diagnostics; filtering before invocation; write docs/test-metadata-design.md and pause for review.

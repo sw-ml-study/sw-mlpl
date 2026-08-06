@@ -1,0 +1,1 @@
+Combinators shipped per the monads rider; refs-as-UDF-arguments gap closed same-hour with the frame-restore fix; strengthened fixture AVAILABLE; docs rider complete (glossary 449). Next: metadata design.
