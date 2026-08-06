@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "events-core"
+  },
+  "action": "TDD; envelope validation split to its own module; runner-side scope held",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T10:02:23"
+}

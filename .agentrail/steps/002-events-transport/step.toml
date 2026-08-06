@@ -1,0 +1,9 @@
+number = 2
+slug = "events-transport"
+status = "pending"
+description = "Host transport per docs/q-and-a.md assessment: (1) mlpl-repl --test-events <p..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T10:02:23"
+task_type = "rust-feature"
+commits = []

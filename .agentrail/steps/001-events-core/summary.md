@@ -1,0 +1,1 @@
+Events core shipped: sink registration, loud v1 envelope validation (9 kinds, end-status enum), callback delivery with failure surfacing, additive tolerance; 6 TDD tests.

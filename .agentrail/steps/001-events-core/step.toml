@@ -1,9 +1,10 @@
 number = 1
 slug = "events-core"
-status = "pending"
+status = "completed"
 description = "test_event_sink(:u:f): register ONE user-fn callback (builtin refs rejected; ..."
 role = "production"
 context_files = []
 created_at = "2026-08-06T09:59:04"
+completed_at = "2026-08-06T10:02:23"
 task_type = "rust-feature"
-commits = []
+commits = ["91239181db2ff78ee925ad793d915526c92b0e8b"]
