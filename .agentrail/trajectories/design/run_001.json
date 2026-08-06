@@ -1,0 +1,11 @@
+{
+  "task_type": "design",
+  "state": {
+    "number": 18,
+    "step": "finally-design"
+  },
+  "action": "contract re-read (their lifecycle_case.mlpl + item 6); design doc; awaiting user review before bracket-core",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T22:26:54"
+}

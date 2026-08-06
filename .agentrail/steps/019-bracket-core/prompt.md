@@ -1,0 +1,1 @@
+AFTER user review of docs/finally-design.md: implement bracket(setup, use, teardown) over :u: references -- sequencing, plain-value-as-ok fixture, setup-failure skips use+teardown, teardown-always-after-setup-success. TDD (bracket_core_tests). Hard-error capture and precedence merging belong to the following bracket-errors step.

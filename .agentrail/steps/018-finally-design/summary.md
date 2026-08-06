@@ -1,0 +1,1 @@
+docs/finally-design.md: bracket(setup,use,teardown) recommended over try/finally statement and suite() builtin; all 8 contract behaviors mapped; precedence + teardown_error merge defined; 3 open questions posed for user review.
