@@ -140,6 +140,7 @@ pub async fn eval_on_device_handler(
         | Value::Tokenizer(_)
         | Value::DeviceTensor { .. }
         | Value::BuiltinRef { .. }
+        | Value::UserFnRef { .. }
         | Value::Record { .. }
         | Value::StrList { .. }
         | Value::Result { .. } => {
