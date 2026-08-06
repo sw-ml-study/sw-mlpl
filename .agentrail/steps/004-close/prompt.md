@@ -1,0 +1,1 @@
+Close: read mlplunit's new gates (their docs/sw-MLPL-changes-needed.md section 8 + in_language_reporter_case.mlpl + language_native_runner_case.mlpl), write the assessment + plan into docs/q-and-a.md and queue entries; wiki matrix rows (badge, emacs); pages deploy + live verify; --done.

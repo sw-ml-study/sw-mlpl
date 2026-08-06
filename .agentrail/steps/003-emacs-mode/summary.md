@@ -1,0 +1,1 @@
+mlpl-mode.el shipped: three-name-kind font-lock, indentation, imenu, run-buffer, run-tests with jumpable JSONL events; quickstart doc + README Tooling; byte-compile pending a host with emacs.

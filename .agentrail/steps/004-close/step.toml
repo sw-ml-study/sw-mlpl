@@ -1,0 +1,9 @@
+number = 4
+slug = "close"
+status = "pending"
+description = "Close: read mlplunit's new gates (their docs/sw-MLPL-changes-needed.md sectio..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T14:47:54"
+task_type = "docs"
+commits = []
