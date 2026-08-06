@@ -1,0 +1,1 @@
+Include design written against the upstream contract: chunked-program model (per-file spans + SourceTable, evaluator untouched), provider seam, sandbox rules, 9-test map, 4 implementation steps; 3 open questions for review. Clustering demos queued.
