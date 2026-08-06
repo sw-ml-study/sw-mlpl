@@ -1,0 +1,1 @@
+Narration now interleaves: queue carries full groups, split at processing time; comment-only groups keep global order; classify front-half extracted to running.rs; deployed via branch flow.

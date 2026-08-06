@@ -1,0 +1,1 @@
+User report: narration blocks all rendered before any eval output. Split moved from classify time to process_next_eval (queue carries full groups; comment-only groups queue for ordered narration). TDD-lite: pure splitter already covered; ledger clean.
