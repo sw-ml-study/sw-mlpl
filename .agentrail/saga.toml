@@ -1,6 +1,6 @@
-name = "mlplunit-unblock"
-status = "completed"
-current_step = 21
-created_at = "2026-08-05T17:20:33"
+name = "gen-state-kv-cache"
+status = "active"
+current_step = 0
+created_at = "2026-08-05T22:51:22"
 plan_file = ".agentrail/plan.md"
 retroactive = false
