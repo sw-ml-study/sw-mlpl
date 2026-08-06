@@ -39,6 +39,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
             ("reshape", "reshape(a, dims)", "reshape a to the given dims"),
             ("transpose", "transpose(a)", "reverse axis order"),
             (
+                "transpose_axes",
+                "transpose_axes(a, perm)",
+                "generalized dyadic transpose: result axis i = source axis perm[i] (0-based)",
+            ),
+            (
                 "get_value",
                 "get_value(r)",
                 "Ok side of a Result as a 0-or-1 element vector ([] when Err); tally is is_some",

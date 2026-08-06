@@ -26,6 +26,36 @@ pub(crate) fn transpose(name: &str, args: Vec<DenseArray>) -> Result<DenseArray,
     Ok(args[0].transpose())
 }
 
+pub(crate) fn transpose_axes(
+    name: &str,
+    args: Vec<DenseArray>,
+) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 2 {
+        return Err(arity_err(name, 2, args.len()));
+    }
+    let bad = |reason: String| RuntimeError::InvalidArgument {
+        func: name.into(),
+        reason,
+    };
+    let rank = args[0].rank();
+    let perm: Vec<usize> = args[1]
+        .data()
+        .iter()
+        .map(|&p| {
+            if p.fract() != 0.0 || p < 0.0 {
+                Err(bad(format!("perm entries must be axis numbers 0..{rank}")))
+            } else {
+                Ok(p as usize)
+            }
+        })
+        .collect::<Result<_, _>>()?;
+    args[0].transpose_axes(&perm).map_err(|e| {
+        bad(format!(
+            "perm must name each of the {rank} axes exactly once (0-based) -- {e}"
+        ))
+    })
+}
+
 pub(crate) fn rotate(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
     if args.len() != 3 {
         return Err(arity_err(name, 3, args.len()));

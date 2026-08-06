@@ -45,6 +45,7 @@ fn structural_call(name: &str, args: Vec<DenseArray>) -> CallResult {
         "flatten" => Some(shape::flatten(name, args)),
         "reshape" => Some(transform::reshape(name, args)),
         "transpose" => Some(transform::transpose(name, args)),
+        "transpose_axes" => Some(transform::transpose_axes(name, args)),
         "grade_up" | "grade_down" => Some(slice::grade(name, args)),
         "compress" => Some(slice::compress(name, args)),
         "pareto_front" => Some(slice::pareto_front(name, args)),

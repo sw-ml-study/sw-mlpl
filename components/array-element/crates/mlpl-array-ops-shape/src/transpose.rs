@@ -23,12 +23,11 @@ impl TransposeExt for DenseArray {
 }
 
 fn permute_data(src: &[f64], old_dims: &[usize], new_dims: &[usize]) -> Vec<f64> {
-    let n = src.len();
     let rank = old_dims.len();
     let old_strides = compute_strides(old_dims);
     let new_strides = compute_strides(new_dims);
-    let mut out = vec![0.0; n];
-    for flat in 0..n {
+    let mut out = vec![0.0; src.len()];
+    for (flat, &v) in src.iter().enumerate() {
         let mut remainder = flat;
         let mut new_flat = 0;
         for axis in 0..rank {
@@ -36,7 +35,7 @@ fn permute_data(src: &[f64], old_dims: &[usize], new_dims: &[usize]) -> Vec<f64>
             remainder %= old_strides[axis];
             new_flat += idx * new_strides[rank - 1 - axis];
         }
-        out[new_flat] = src[flat];
+        out[new_flat] = v;
     }
     out
 }
