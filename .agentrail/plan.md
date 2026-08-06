@@ -1,18 +1,18 @@
-# Saga: gen-state-kv-cache (resumed)
-Track 2 opener (docs/future-sagas-queue.md item 4): the KV-cache
-engine under the MTP generation-speed program. Full design:
-docs/kv-cache-design.md (approved 2026-08-05; recommendations
-stand per user direction 2026-08-06). Design step already done
-in the archived run (.agentrail-archive/gen-state-kv-cache-
-20260805T171947/); this resume starts at the core.
+# Saga: apl2-blocks
+APL2 re-ranking parity on flat arrays (user direction
+2026-08-06): generalized dyadic transpose + blocked rank-4
+disp, so `disp(reshape(range(81), [3,3,3,3]))` renders a 3x3
+grid of boxed 3x3 matrices (APL2's DISPLAY of enclose[3 4]),
+and `transpose_axes(reshape(B, [3,3,3,3]), [1,3,2,4])` makes a
+9x9 board block-major. True enclose/nested arrays are a
+separate queued design program. Analysis: docs/q-and-a.md
+2026-08-06 evening. (gen-state-kv-cache paused after step 001;
+resume at gen-controls.)
 ## Steps
-1. gen-state-core -- GenerationState value + gen_state/gen_logits/
-   gen_append (single token), CPU, TDD equivalence (bit-identical
-   greedy vs recompute over the Tiny LM chain).
-2. gen-controls -- gen_clone/gen_reset/gen_stats, multi-row
-   append (verification hook), tutoring errors, :describe.
-3. bench-and-demo -- benchmarks.md wall-clock table + the KV
-   Cache demo (ids-equal proof + attended-positions cost curve).
-4. mlx-resident-kv -- K/V as TensorHandles via dev_concat;
-   fp32-tolerance equivalence; crossover bench.
-5. close -- docs, queue advance to mtp-training, wiki errata.
+1. transpose-axes -- transpose_axes(x, perm) axis permutation
+   for any rank; TDD (parity with transpose on rank-2, Sudoku
+   block extraction, error handling).
+2. blocked-disp -- disp renders rank-3/4 arrays as an outer
+   grid of boxed inner matrices (native + web); TDD.
+3. demo-and-docs -- Sudoku-blocks / iota-81 demo, catalog +
+   lang-reference + glossary rows, pages rebuild, close.

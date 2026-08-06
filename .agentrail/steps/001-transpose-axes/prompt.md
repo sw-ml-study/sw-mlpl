@@ -1,0 +1,1 @@
+transpose_axes(x, perm): generalized dyadic transpose (axis permutation, APL2 dyadic transpose) on flat DenseArrays of any rank; perm is 1-based axis order vector. TDD: rank-2 parity with transpose, the [1,3,2,4] Sudoku block re-ranking, iota-81 3x3x3x3 case, loud errors (bad perm length, dup axes, out-of-range). Scoped gates; ratchet; commit before complete; push.
