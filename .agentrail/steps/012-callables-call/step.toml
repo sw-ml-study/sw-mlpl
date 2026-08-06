@@ -1,6 +1,6 @@
 number = 12
 slug = "callables-call"
-status = "pending"
+status = "in-progress"
 description = "Per design + resolutions: call(f, args...) invoking UserFnRef (via the u: cal..."
 role = "legacy"
 context_files = []

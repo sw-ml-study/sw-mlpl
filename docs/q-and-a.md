@@ -7,6 +7,16 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**UPDATE (late evening): callables are AVAILABLE; both P0s show
+SHIPPED in mlplunit's catalog.** call(f, args...) landed --
+uniform over user and builtin references, arity errors naming
+the referent, Ok/Err/? flowing unchanged -- and
+check-capabilities now reports AVAILABLE callable-user-functions
+(with structural-equality and native-static-include both marked
+SHIPPED, i.e. mlplunit adopted them). Remaining sw-MLPL work:
+the monad combinators + docs rider, then the @test
+metadata/reflection design.
+
 **Q: How many more mlplunit-blocking features/fixes are there?
 Status?**
 
