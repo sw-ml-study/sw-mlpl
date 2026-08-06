@@ -1,0 +1,1 @@
+mlpl-source-loader shipped: provider seam, chunk splicing, load-once, cycle chains, sandboxed MemoryProvider; 8 TDD tests all against in-memory sources.

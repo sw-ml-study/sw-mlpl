@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 5,
+    "step": "include-loader"
+  },
+  "action": "pure-loader design kept every span file-local; sandbox rules verified provider-side",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T19:45:05"
+}

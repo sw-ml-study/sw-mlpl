@@ -1,9 +1,10 @@
 number = 5
 slug = "include-loader"
-status = "in-progress"
+status = "completed"
 description = "Per docs/static-include-design-mlpl.md: the mlpl-source-loader crate (compone..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T18:37:48"
+completed_at = "2026-08-05T19:45:05"
 task_type = "rust-feature"
-commits = []
+commits = ["74a2bd38168ed241e9b30f5ab58d7e54faa4d5c5"]

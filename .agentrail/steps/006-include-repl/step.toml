@@ -1,0 +1,9 @@
+number = 6
+slug = "include-repl"
+status = "pending"
+description = "Per design: mlpl-repl integration -- --source-dir flag, FsProvider (canonical..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T19:45:05"
+task_type = "rust-feature"
+commits = []
