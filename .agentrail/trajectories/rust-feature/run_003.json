@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 3,
+    "step": "run-script"
+  },
+  "action": "host-hook architecture; ExitRequested signal; harness-level gate proof",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T16:36:09"
+}

@@ -1,0 +1,1 @@
+Close: q-and-a with the precise mlplunit adoption notes (reporter fixture: bare assignment -> global_set; runner fixture: root default 'tests' + --source-dir repo root; '..' correctly sandbox-refused), wiki matrix rows, rebuild serve+pages+deploy, queue advance (next: apl2-hof or combinator-birds or resume kv-cache), --done.

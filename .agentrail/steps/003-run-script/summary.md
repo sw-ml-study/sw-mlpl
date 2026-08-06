@@ -1,0 +1,1 @@
+run_script shipped: fresh-env chunked execution, structured ok/err/error/exit statuses, exit-intercept DI seam, sandbox-checked opts, captured events; 5 TDD tests; both mlplunit fixtures proven passing under their harness with accepted spellings.
