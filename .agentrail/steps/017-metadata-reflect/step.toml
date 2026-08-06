@@ -1,9 +1,10 @@
 number = 17
 slug = "metadata-reflect"
-status = "in-progress"
+status = "completed"
 description = "Per design: tests() (StrList of stable names, source order), test_info(name) ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T21:53:01"
+completed_at = "2026-08-05T22:24:58"
 task_type = "rust-feature"
-commits = []
+commits = ["45445b02455810b3833cbc1366edbb7a8c71a35d"]

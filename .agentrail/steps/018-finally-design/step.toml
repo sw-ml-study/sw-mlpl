@@ -1,0 +1,9 @@
+number = 18
+slug = "finally-design"
+status = "pending"
+description = "Design guaranteed-finally/bracket (mlplunit contract item 6, the SOLE remaini..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T22:24:58"
+task_type = "design"
+commits = []

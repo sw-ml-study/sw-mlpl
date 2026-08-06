@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 17,
+    "step": "metadata-reflect"
+  },
+  "action": "TDD reflect tests; fncall_values/reflect_info module splits for ratchet; adopted-gate verification against mlplunit check-capabilities",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T22:24:58"
+}

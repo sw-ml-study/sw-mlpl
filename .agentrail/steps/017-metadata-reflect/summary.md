@@ -1,0 +1,1 @@
+Reflection trio shipped: tests()/test_info()/annotations() with docs (lang-reference, glossary 452, usage, catalog, wiki matrix); server+pages rebuilt; connect-path smoke green; mlplunit gate reports test-metadata AVAILABLE, callables+combinators SHIPPED. Ledger 348 (-3).
