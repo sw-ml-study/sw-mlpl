@@ -6,7 +6,9 @@
 //! with the module re-exports below keeping every historical
 //! `mlpl_web_eval::X` (and internal `crate::X`) path valid.
 
-pub use mlpl_web_eval_core::{connect_guard, devices, eval_url, loss_trace, state, wire};
+pub use mlpl_web_eval_core::{
+    connect_guard, devices, eval_url, loss_trace, narration, state, wire,
+};
 pub use mlpl_web_trace::{frame_trace, summary, telemetry_trace};
 // The fetchers are wasm-only modules (inner #![cfg]), so their
 // re-exports carry the same gate.

@@ -26,11 +26,14 @@ fn comments_attach_to_the_following_statement() {
                \n\
                # trailing orphan comment\n";
     let g = group_statements(src);
-    assert_eq!(g.len(), 1, "{g:?}");
+    assert_eq!(g.len(), 2, "{g:?}");
     assert_eq!(
         g[0],
         "# overview: what this document is\n# APL2:  +/V\nreduce(:add, v)"
     );
+    // The trailing comment-only group survives -- it narrates
+    // as a closing summary with nothing to evaluate.
+    assert_eq!(g[1], "# trailing orphan comment");
 }
 
 #[test]

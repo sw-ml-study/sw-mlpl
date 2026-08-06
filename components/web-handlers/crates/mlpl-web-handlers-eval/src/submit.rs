@@ -71,10 +71,24 @@ fn classify_line(
     new_cmds: &mut Vec<String>,
     eval_queue: &mut Vec<String>,
 ) {
-    let trimmed = line.trim();
+    let (narration, code) = mlpl_web_eval::narration::split_leading_comments(&line);
+    if let Some(text) = narration {
+        // Demo-style prose block: a Run group's leading comments
+        // (or a closing comment-only summary) narrate the
+        // transcript instead of cluttering the prompt echo.
+        new_history.push(HistoryEntry {
+            input: String::new(),
+            output: text,
+            is_error: false,
+            kind: EntryKind::Narration,
+        });
+    }
+    let Some(code) = code else { return };
+    let trimmed = code.trim();
     if trimmed.is_empty() {
         return;
     }
+    let trimmed = &trimmed.to_string();
     new_cmds.push(trimmed.to_string());
     // `:<cmd> --help` is REPL command help (vs bare args = command
     // input). Intercept it here so it works in both connect + local mode

@@ -1,11 +1,13 @@
 # APL2 idioms in MLPL -- an executable Rosetta document.
 #
-# Each section shows an APL2 expression in a comment, then the
-# equivalent MLPL expression, runnable as-is (load this file in
-# the web editor or run: mlpl-repl docs/apl2-idioms.mlpl).
-# Idioms MLPL does not express are marked plainly at the end:
-# "Not an MLPL builtin." One index note up front: APL2 counts
-# from 1 (with default ⎕IO); MLPL counts from 0 everywhere.
+# WHAT YOU ARE ABOUT TO SEE: each section pairs an APL2
+# expression (in a comment, glyphs and all) with the equivalent
+# MLPL expression, and every MLPL line actually RUNS -- load
+# this file in the web editor and press Run, or:
+# mlpl-repl docs/apl2-idioms.mlpl. The closing sections mark
+# what MLPL does not express, plainly: "Not an MLPL builtin."
+# One index note up front: APL2 counts from 1 (with default
+# ⎕IO); MLPL counts from 0 everywhere.
 
 # ---------- iota and rho: making and shaping data ----------
 
@@ -141,3 +143,15 @@ compress(lt(range(6), 3), u)
 
 # Final value: proof the whole document ran.
 ok(size(outer) + tally(u))
+
+# WHAT THIS SHOWED: most of the APL2 daily vocabulary maps
+# one-to-one -- iota/rho to range/reshape, monadic AND dyadic
+# transpose, / and \ to reduce and the running_ scans, compress
+# and the where idiom, rotate, grade (with sort as an index
+# gather), and quad-EX/)ERASE as expunge/:erase. The
+# enclose-DISPLAY blocks view needs no nesting: a flat rank-4
+# array plus disp renders the same boxed grid. What does NOT
+# map -- each, true enclose/nested arrays, outer product,
+# dyadic iota, membership, take/drop counts, format/execute --
+# is exactly the nested-array and item-wise territory MLPL
+# leaves out of its flat-array core.
