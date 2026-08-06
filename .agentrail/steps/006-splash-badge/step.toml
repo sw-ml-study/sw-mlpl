@@ -1,0 +1,9 @@
+number = 6
+slug = "splash-badge"
+status = "in-progress"
+description = "User: the status badge must ALSO appear on the splash screen (currently heade..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T15:02:04"
+task_type = "feature"
+commits = []

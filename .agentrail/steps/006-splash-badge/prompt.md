@@ -1,0 +1,1 @@
+User: the status badge must ALSO appear on the splash screen (currently header-only). Add StatusBadge to the splash beside version_label; check crate deps; rebuild+deploy.
