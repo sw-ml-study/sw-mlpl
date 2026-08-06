@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 20,
+    "step": "bracket-errors"
+  },
+  "action": "TDD; bracket_run split for budgets; or_else as payload-access route; full doc sweep + rebuilds + adopted-gate check",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T22:45:00"
+}

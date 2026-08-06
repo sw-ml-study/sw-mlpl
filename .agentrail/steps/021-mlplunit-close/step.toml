@@ -1,0 +1,9 @@
+number = 21
+slug = "mlplunit-close"
+status = "pending"
+description = "Close the mlplunit-unblock saga: update docs/mlplunit-unblock-plan.md with fi..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T22:45:00"
+task_type = "docs"
+commits = []

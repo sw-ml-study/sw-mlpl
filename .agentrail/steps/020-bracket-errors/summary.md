@@ -1,0 +1,1 @@
+bracket error plane shipped: boundary capture as {kind,message}, teardown_error merge with primary precedence, ? composition; 11 bracket tests total; docs everywhere; connect-path verified; mlplunit gate shows guaranteed-finally satisfied and their side adopted metadata+parameterized.
