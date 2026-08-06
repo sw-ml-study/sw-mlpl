@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga native-test-events: complete (3 steps)
+- docs: mlplunit fully unblocked (all capabilities shipped/available); queue advances to apl2-idioms + expunge
+- saga native-test-events: step 002 complete
+- feat: --test-events JSONL + connect-mode test_events -- the event host transport (events-transport)
+- saga native-test-events: step 001 complete
+- feat(eval): test_event_sink + emit_test_event -- typed test events (events-core)
+- saga: archive apl2-blocks; init native-test-events (user go)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga apl2-blocks: step 004 complete (renderer class fix)
 - fix(web): word-boundary emphasis -- stop eating snake_case in rendered prose (emph-word-boundary)
 - docs(changes): refresh CHANGES.md to HEAD
