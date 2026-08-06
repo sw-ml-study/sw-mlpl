@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 002 complete
+- feat(eval): equal(a, b) + repr(v) -- structural assertions for mlplunit (mlplunit-unblock step 2)
+- saga mlplunit-unblock: step 001 complete
+- docs(plan): mlplunit-unblock prioritization -- equal/repr first, include, then callables (user direction)
+- chore(agentrail): pause + archive gen-state-kv-cache (preempted for mlplunit unblock)
+- saga gen-state-kv-cache: step 001 complete
+- docs(design): gen-state-kv-cache design -- the KV-cache engine (step 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): archive experiment-quality
 - saga experiment-quality: complete (15 steps)
 - docs(saga): close experiment-quality -- design SHIPPED, retrospective, queue to generation-state-kv-cache
