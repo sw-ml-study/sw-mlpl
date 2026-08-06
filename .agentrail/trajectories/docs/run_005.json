@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 21,
+    "step": "mlplunit-close"
+  },
+  "action": "docs-only close; errata scan found no stale mlplunit claims",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T22:46:01"
+}

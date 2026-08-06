@@ -1,0 +1,1 @@
+Saga closed: final status table (items 1-5 shipped+adopted, 6 unblocked pending their fixture update, 7 improvement-scoped); queue advanced to resume gen-state-kv-cache.
