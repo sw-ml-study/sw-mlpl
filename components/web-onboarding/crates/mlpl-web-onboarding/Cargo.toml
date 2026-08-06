@@ -9,6 +9,7 @@ name = "mlpl_web_onboarding"
 path = "src/lib.rs"
 
 [dependencies]
+mlpl-web-components-chrome = { path = "../../../web-components/crates/mlpl-web-components-chrome" }
 gloo = "0.10"
 mlpl-web-demos = { path = "../../../web-demos/crates/mlpl-web-demos" }
 wasm-bindgen = "0.2"

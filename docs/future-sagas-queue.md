@@ -87,6 +87,15 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
+**apl2-hof: each / table / over for u:fns** (added
+2026-08-07, user direction) -- now CHEAP thanks to the
+callable machinery (UserFnRef + invoke_user_fn_values):
+each(f, v) applies a reference per element; table(f, a, b)
+is the outer product over a function (BQN's table, APL2's
+jot-dot); composition combinators (over/atop) follow the
+map_ok precedent. Ships with idioms-doc + demo updates
+showing them beside the APL2/BQN spellings. PENDING GO.
+
 **mlplunit-round-2: in-language-event-reporting** (added
 2026-08-07; their section 8) -- explicit global-state escape
 hatch (proposed global_set/workspace form; binding hygiene

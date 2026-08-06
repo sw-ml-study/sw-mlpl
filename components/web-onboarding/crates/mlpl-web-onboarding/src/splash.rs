@@ -36,6 +36,7 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
                 <div class="splash-header-shim">
                     <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
                     <p class="splash-version">{&props.version_label}</p>
+                    <mlpl_web_components_chrome::status_badge::StatusBadge />
                     <p class="splash-subtitle">
                         {"An array programming language for learning machine learning, from scalars to transformers."}
                     </p>

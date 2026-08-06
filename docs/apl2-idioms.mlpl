@@ -96,6 +96,31 @@ disp(a4)
 #        (the Sudoku block view: re-rank, then look)
 disp(blocks)
 
+# ---------- composing user functions ----------
+
+# APL2 composes functions freely (f g X, f¨V); MLPL composes
+# through REFERENCES: :u:name quotes your function as a value.
+
+def u:double(x) { x * 2 }
+def u:inc(x) { x + 1 }
+
+# APL2:  INC DOUBLE 5    (right-to-left application)
+call(:u:inc, call(:u:double, 5))
+
+# A registry of functions is a record of references.
+suite = {d: :u:double, i: :u:inc}
+call(suite.d, 21)
+
+# PERVASION replaces many uses of each: an arithmetic-bodied
+# u:fn already maps over a whole array.
+# APL2:  DOUBLE¨⍳5   -- here, no each needed:
+u:double(range(5))
+
+# Railway composition over Results (map_ok / and_then / or_else
+# take a reference first):
+def u:pos(x) { if gt(x, 0) { ok(x) } else { err("not positive") } }
+unwrap(and_then(:u:pos, map_ok(:u:double, ok(4))))
+
 # ---------- quad-EX and )ERASE: freeing names ----------
 
 # APL2:  ⎕EX 'V'     (expunge a name; 1 means it is free now)
