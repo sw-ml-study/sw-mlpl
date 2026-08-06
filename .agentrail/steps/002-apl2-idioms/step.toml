@@ -1,9 +1,10 @@
 number = 2
 slug = "apl2-idioms"
-status = "pending"
+status = "completed"
 description = "Create docs/apl2-idioms.mlpl: an EXECUTABLE Rosetta document -- APL2 expressi..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T12:27:28"
+completed_at = "2026-08-06T12:34:31"
 task_type = "docs-feature"
-commits = []
+commits = ["838357f32efdde60e79740d2125bd60a13346624"]

@@ -1,0 +1,1 @@
+Executable Rosetta doc shipped: 9 themed sections mapping APL2 to MLPL, not-yet-expressible idioms plainly marked, expunge as live cleanup; runs clean natively and loads in the editor; 2 pinning tests.
