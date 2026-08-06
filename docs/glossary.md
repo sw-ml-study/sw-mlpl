@@ -1135,7 +1135,9 @@ everyday dense-tensor analog until then.
 
 `disp(x)` returns an ASCII box diagram (a string) that makes
 the rank, shape, and depth of `x` visible: rank <= 2 renders
-as a framed grid, rank >= 3 as a labeled stack of
+as a framed grid, rank 3/4 as a grid of boxed inner
+matrices (the APL2 DISPLAY-of-blocks view), rank >= 5 as a
+labeled stack of
 leading-axis slices, with a `rank R  shape [..]  depth D`
 footer. MLPL's answer to APL's `]display`. Print it in the
 REPL to see an array's structure at a glance. (Unlike MATLAB's
@@ -3521,6 +3523,18 @@ text generation. MLPL: `top_k(logits, k)`.
 (`0..256`); `decode_bytes(ids)` reverses it. The simplest
 tokenizer: byte-level, no merges, no vocabulary file. Useful
 for tiny pedagogical demos before BPE complexity.
+
+## transpose_axes (builtin)
+
+`transpose_axes(a, perm)` -- generalized dyadic transpose
+(APL2's `P transpose A`) on flat arrays: result axis `i` draws
+from source axis `perm[i]` (0-based, like every MLPL axis
+argument), with axis labels permuted alongside; `transpose` is
+the reversal special case. The APL2 block idiom is
+`transpose_axes(reshape(B, [3, 3, 3, 3]), [0, 2, 1, 3])`: a
+row-major 9x9 re-ranked to block-row, block-column, inner-row,
+inner-column, which `disp` renders as a grid of boxed blocks.
+Bad perms error loudly.
 
 ## Train (loop)
 
