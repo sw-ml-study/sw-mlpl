@@ -1,0 +1,9 @@
+number = 1
+slug = "gen-state-core"
+status = "pending"
+description = "Per docs/kv-cache-design.md (approved; recommendations stand): GenerationStat..."
+role = "production"
+context_files = []
+created_at = "2026-08-05T22:51:47"
+task_type = "rust-feature"
+commits = []
