@@ -1,0 +1,10 @@
+number = 4
+slug = "run-keeps-comments"
+status = "completed"
+description = "User report: editor Run drops full-line # comments, so documents whose narrat..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T12:44:52"
+completed_at = "2026-08-06T12:47:13"
+task_type = "bugfix"
+commits = ["2437ebe9d075058bf167b51a27e22783a5fd6b76"]
