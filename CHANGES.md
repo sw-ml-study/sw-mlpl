@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 013 complete
+- feat(eval): Result combinators + references through UDF arguments (mlplunit-unblock step callables-combinators)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 012 complete
 - feat(eval): call(f, args...) -- uniform invocation of function references (mlplunit-unblock step callables-call)
 - docs(q-and-a): mlplunit blocker tally -- P0s done awaiting adoption; callables call() next
