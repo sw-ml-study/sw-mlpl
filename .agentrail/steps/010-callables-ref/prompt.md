@@ -1,0 +1,1 @@
+Per docs/callables-design.md + review resolutions: lexer makes :u:name one reference token; parser produces the reference expr; Value::UserFnRef {name} with display :u:name, kind user-fn-ref, describe/equal/repr arms; TDD across lexer/parser/eval; existing :u misparse behavior pinned as changed intentionally.

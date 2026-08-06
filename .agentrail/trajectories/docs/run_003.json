@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 9,
+    "step": "callables-design"
+  },
+  "action": "probed today's :u:name misparse before claiming the syntax",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T20:19:44"
+}

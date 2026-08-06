@@ -1,9 +1,10 @@
 number = 9
 slug = "callables-design"
-status = "in-progress"
+status = "completed"
 description = "Contract item 3 design: first-class :u:name references + call(f, args...) -- ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T20:08:11"
+completed_at = "2026-08-05T20:19:44"
 task_type = "docs"
-commits = []
+commits = ["0f2b8ddd0dade260428d594a57e7b711a8786524"]

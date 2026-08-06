@@ -1,0 +1,9 @@
+number = 10
+slug = "callables-ref"
+status = "pending"
+description = "Per docs/callables-design.md + review resolutions: lexer makes :u:name one re..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T20:19:44"
+task_type = "rust-feature"
+commits = []

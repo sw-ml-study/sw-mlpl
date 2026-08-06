@@ -1,0 +1,1 @@
+Callables design committed: :u:name single-token quote, uniform call(), record registries, late binding, UserFnRef value kind, combinator rider; three open questions posed.
