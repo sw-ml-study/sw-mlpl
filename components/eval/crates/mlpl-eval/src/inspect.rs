@@ -43,6 +43,7 @@ pub fn inspect(env: &mut Environment, input: &str) -> Option<String> {
         "describe" => Some(crate::inspect_list::describe_names(env, &args)),
         "list" => Some(crate::inspect_list::list_or_usage(env, arg)),
         "untag" => Some(crate::inspect_list::handle_untag(env, arg)),
+        "erase" => Some(crate::expunge::erase_names(env, &args)),
         "help" => arg.map(|t| help_topic(t, env).unwrap_or_else(|| help_unknown_topic(t))),
         _ => None,
     })
@@ -69,11 +70,12 @@ fn parse_colon_line(trimmed: &str) -> Option<(&str, Vec<&str>)> {
 /// must not report "'(x' is not bound". `:describe` accepts
 /// several names; `:list` / `:untag` take exactly one.
 fn name_arg_guard(head: &str, args: &[&str]) -> Option<String> {
-    if !["describe", "list", "untag"].contains(&head) {
+    if !["describe", "list", "untag", "erase"].contains(&head) {
         return None;
     }
     let name_ok = |a: &&str| a.chars().all(|c| c.is_alphanumeric() || "_:.".contains(c));
-    let bad = args.iter().any(|a| !name_ok(a)) || (head != "describe" && args.len() > 1);
+    let multi = head == "describe" || head == "erase";
+    let bad = args.iter().any(|a| !name_ok(a)) || (!multi && args.len() > 1);
     bad.then(|| {
         format!(
             "`:{head}` takes names, not expressions: `:{head} x`. To inspect a \

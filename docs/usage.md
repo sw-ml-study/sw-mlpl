@@ -58,6 +58,7 @@ script-as-tool story (CLI args, stdin, exit codes), see the
 | `:connect list` / `:connect set <m>` | List / pick the server's Ollama model for `:ask` |
 | `:describe <name>` | Describe a variable, model, tokenizer, built-in, or REPL command |
 | `:disp(expr)` | Draw expr as an ASCII box diagram -- the `disp` builtin; any builtin works as `:name(args)` |
+| `:erase <name> ...` | Free the named bindings and `u:` functions (APL's `)ERASE`; in code use `expunge("name")`) |
 | `:experiments` | List captured experiment runs |
 | `:fns` | List your `def u:` functions (APL's `)FNS`) |
 | `:help` | Show built-in function list and syntax summary |

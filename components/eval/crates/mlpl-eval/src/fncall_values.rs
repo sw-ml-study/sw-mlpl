@@ -23,6 +23,7 @@ pub(crate) fn try_dispatch(
         "tests" | "test_info" | "annotations" => {
             Some(crate::fncall_reflect::eval_reflect(name, args, env, trace))
         }
+        "expunge" => Some(crate::expunge::eval_expunge(args, env, trace)),
         _ => None,
     }
 }

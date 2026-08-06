@@ -62,6 +62,7 @@ mod event_envelope;
 mod event_json;
 mod experiment;
 mod experiment_compare;
+mod expunge;
 mod fncall_arrays;
 mod fncall_axes;
 mod fncall_bracket;

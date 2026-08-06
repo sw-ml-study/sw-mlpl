@@ -50,6 +50,10 @@ pub const REPL_COMMANDS: &[(&str, &str)] = &[
     ),
     ("clear", "reset all variables, models, and session state"),
     (
+        "erase",
+        "free the named bindings / u: functions (APL )ERASE; expunge() in code)",
+    ),
+    (
         "reset",
         "cancel ALL in-flight work on the connected backend (y/N prompt)",
     ),

@@ -92,6 +92,20 @@ connection it is a no-op. It returns `x` unchanged, so it drops
 into a pipeline without changing the math.
 
 
+## expunge (builtin) / :erase (command)
+
+APL2's name-removal pair, mapped onto MLPL's command-vs-
+function split: `)ERASE` becomes the REPL command `:erase x y
+u:f` and quad-EX becomes the builtin `expunge("name")` /
+`expunge(["a", "b"])` -- callable from scripts, so a demo with
+unrelated sections can clean up earlier artifacts. Semantics
+follow quad-EX: the result is 1 per name that is FREE
+afterwards (expunging an unbound name is 1 -- idempotent) and
+0 for a malformed spelling; a `u:` name also leaves the
+function table and its rows in the [[tests / test_info
+(builtins)]] registry. Builtins are not bindings and cannot be
+expunged.
+
 ## Energy-Based Model (EBM)
 
 Learn a scalar ENERGY (compatibility) function over

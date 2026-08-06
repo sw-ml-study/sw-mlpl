@@ -154,6 +154,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "validate a v1 test-event record, deliver to the sink and host channel",
             ),
             (
+                "expunge",
+                "expunge(name)",
+                "free a binding or u: function (APL quad-EX); 1 = free, 0 = malformed",
+            ),
+            (
                 "equal",
                 "equal(a, b)",
                 "total structural equality over any two values; never errors",
