@@ -1,0 +1,1 @@
+@ claimed; general-namespace annotations parse and stack onto defs with ordered payload exprs; orphan diagnostics; 4 TDD tests + full suite green.

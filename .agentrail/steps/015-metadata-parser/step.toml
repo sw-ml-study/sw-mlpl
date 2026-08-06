@@ -1,9 +1,10 @@
 number = 15
 slug = "metadata-parser"
-status = "pending"
+status = "completed"
 description = "Per docs/test-metadata-design.md + review resolutions: lexer claims @; parser..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T21:31:47"
+completed_at = "2026-08-05T21:44:29"
 task_type = "rust-feature"
-commits = []
+commits = ["d304f06a83369abff1ea0c2b4807e0d7db1ddd15"]
