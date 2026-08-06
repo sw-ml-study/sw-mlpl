@@ -33,6 +33,14 @@ pub enum Value {
         /// `"add"`, `"+"`, `"max"`, `"sigmoid"`.
         name: String,
     },
+    /// First-class reference to a USER-defined function:
+    /// `:u:name`. `name` holds the full `u:`-prefixed key of the
+    /// user-fn table (late binding: the reference identifies the
+    /// definition by name; `call(f, args...)` invokes it).
+    UserFnRef {
+        /// The full `u:name` table key; displays as `:u:name`.
+        name: String,
+    },
     /// Saga R1 step 002: peer-resident tensor reference. The bytes
     /// live on the peer named by `peer`; the orchestrator only holds
     /// the handle + shape + device metadata. Touching it from a CPU
@@ -126,6 +134,7 @@ pub fn value_kind(v: &Value) -> &'static str {
         Value::Model(_) => "model",
         Value::Tokenizer(_) => "tokenizer",
         Value::BuiltinRef { .. } => "builtin-ref",
+        Value::UserFnRef { .. } => "user-fn-ref",
         Value::DeviceTensor { .. } => "device-tensor",
         Value::Record { .. } => "record",
         Value::StrList { .. } => "string-list",
@@ -147,6 +156,7 @@ impl fmt::Display for Value {
             Self::Model(_) => write!(f, "<model>"),
             Self::Tokenizer(t) => write!(f, "<tokenizer: {}>", t.describe()),
             Self::BuiltinRef { name } => write!(f, ":{name}"),
+            Self::UserFnRef { name } => write!(f, ":{name}"),
             Self::DeviceTensor {
                 peer,
                 device,

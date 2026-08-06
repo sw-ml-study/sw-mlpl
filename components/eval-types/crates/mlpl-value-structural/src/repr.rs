@@ -42,7 +42,7 @@ fn write_value(out: &mut String, v: &Value) {
             out.push(')');
         }
         Value::Tokenizer(_) => out.push_str("tokenizer(...)"),
-        Value::BuiltinRef { name } => {
+        Value::BuiltinRef { name } | Value::UserFnRef { name } => {
             out.push(':');
             out.push_str(name);
         }

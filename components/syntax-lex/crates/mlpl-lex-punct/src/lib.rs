@@ -32,6 +32,7 @@ pub fn lex_builtin_ref(bytes: &[u8], pos: usize) -> Option<(TokenKind, usize)> {
         while e < bytes.len() && (bytes[e].is_ascii_alphanumeric() || bytes[e] == b'_') {
             e += 1;
         }
+        e = extend_user_ref(bytes, s, e);
         let name = std::str::from_utf8(&bytes[s..e]).unwrap().to_owned();
         Some((TokenKind::BuiltinRef(name), e))
     } else if matches!(next, b'+' | b'*' | b'/' | b'-') {
@@ -61,4 +62,22 @@ pub fn single_char_token(b: u8) -> Option<TokenKind> {
         b'?' => Some(TokenKind::Question),
         _ => None,
     }
+}
+
+/// `:u:name` -- the quoted USER-function form: extend the token
+/// through the second identifier so the reference is ONE token
+/// (`:u` alone stays a plain builtin ref).
+fn extend_user_ref(bytes: &[u8], s: usize, mut e: usize) -> usize {
+    if &bytes[s..e] == b"u"
+        && bytes.get(e) == Some(&b':')
+        && bytes
+            .get(e + 1)
+            .is_some_and(|b| b.is_ascii_alphabetic() || *b == b'_')
+    {
+        e += 1;
+        while e < bytes.len() && (bytes[e].is_ascii_alphanumeric() || bytes[e] == b'_') {
+            e += 1;
+        }
+    }
+    e
 }

@@ -1,6 +1,6 @@
 number = 11
 slug = "callables-ref"
-status = "blocked"
+status = "in-progress"
 description = "Per docs/callables-design.md + review resolutions: lexer makes :u:name one re..."
 role = "legacy"
 context_files = []

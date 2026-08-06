@@ -122,6 +122,13 @@ fn describe_accepts_several_names() {
 }
 
 #[test]
+fn bare_user_ref_lines_get_the_reference_hint() {
+    let msg = colon_fallthrough_error(":u:double").expect("hint");
+    assert!(msg.contains("user-function REFERENCE"), "{msg}");
+    assert!(msg.contains("f = :u:double"), "{msg}");
+}
+
+#[test]
 fn dash_help_describes_builtins() {
     let mut env = Environment::new();
     let out = inspect(&mut env, ":disp --help").expect("builtin help");

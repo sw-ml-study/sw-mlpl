@@ -103,6 +103,12 @@ fn colon_call_ident(line: &str) -> Option<&str> {
 #[must_use]
 pub fn colon_ref_hint(line: &str) -> Option<String> {
     let word = line.trim().strip_prefix(':')?.split_whitespace().next()?;
+    if let Some(rest) = word.strip_prefix("u:") {
+        return Some(format!(
+            "`:u:{rest}` is a user-function REFERENCE. Bind it (`f = :u:{rest}`), \
+             store it in a record, or call the function directly: `u:{rest}(...)`."
+        ));
+    }
     if !mlpl_eval_core::inspect_groups::documented_builtin_names().any(|n| n == word) {
         return None;
     }

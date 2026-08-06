@@ -31,6 +31,9 @@ pub(crate) fn eval_expr(
         )));
     }
     if let Expr::BuiltinRef(name, _) = expr {
+        if name.starts_with("u:") {
+            return Ok(Value::UserFnRef { name: name.clone() });
+        }
         return Ok(Value::BuiltinRef { name: name.clone() });
     }
     if let Expr::RecordLit { fields, .. } = expr {
@@ -133,6 +136,11 @@ pub(crate) fn eval_expr(
     if let Expr::Ident(name, _) = expr
         && let Some(target) = env.get_builtin_ref(name)
     {
+        if target.starts_with("u:") {
+            return Ok(Value::UserFnRef {
+                name: target.clone(),
+            });
+        }
         return Ok(Value::BuiltinRef {
             name: target.clone(),
         });
@@ -319,7 +327,7 @@ pub(crate) fn eval_expr(
                     env.set_string(name.clone(), s);
                     ("assign_string", vec![], DenseArray::from_scalar(0.0))
                 }
-                Value::BuiltinRef { name: target } => {
+                Value::BuiltinRef { name: target } | Value::UserFnRef { name: target } => {
                     env.set_builtin_ref(name.clone(), target);
                     ("assign_builtin_ref", vec![], DenseArray::from_scalar(0.0))
                 }
