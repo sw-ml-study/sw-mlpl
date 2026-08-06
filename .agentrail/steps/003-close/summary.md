@@ -1,0 +1,1 @@
+Saga closed: serve+pages rebuilt, expunge verified over connect, wiki matrix row, Emacs mlpl-mode sketch + solver-ML demo queued; next up: resume gen-state-kv-cache at gen-controls.

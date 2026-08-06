@@ -1,9 +1,10 @@
 number = 3
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close: rebuild serve+pages (expunge + catalog reach the web bundle), restart ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T12:34:31"
+completed_at = "2026-08-06T12:36:58"
 task_type = "docs"
-commits = []
+commits = ["1ef12da40205d0bff6efb36a237c47c9541c6cbc"]

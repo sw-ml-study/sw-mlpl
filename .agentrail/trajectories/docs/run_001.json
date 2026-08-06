@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 3,
+    "step": "close"
+  },
+  "action": "rebuilds + connect smoke + docs sweep",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T12:36:58"
+}
