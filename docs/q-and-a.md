@@ -5,6 +5,32 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-06 (late night)
+
+**Q: We need an Emacs mode for MLPL (like rust-mode /
+js2-mode): syntax highlighting, running mlplunit tests,
+scripts, demos -- anything else?**
+
+A: Queued as its own program (an elisp deliverable, likely a
+sibling repo like the org-babel work). Sketch: (1) mlpl-mode
+with font-lock -- keywords (def/if/else/while/repeat/train/
+for/include/try/catch/return/break/continue), the three name
+kinds colored DISTINCTLY (`name(...)` call, `:name` reference,
+`u:name` user fn), `@word` annotations, strings, `#` comments,
+number literals; indentation on brace depth; ASCII-first so no
+font gymnastics. (2) Commands: run buffer/region through
+mlpl-repl into a compilation buffer (C-c C-c), run the file
+with --test-events into a parsed results buffer (C-c C-t; the
+JSONL transport exists precisely for tools like this), jump to
+test source/line from an event row, :describe-at-point against
+a --babel-session subprocess (already shipped for ob-mlpl),
+insert-demo skeleton. (3) Later: flycheck via a lex/parse-only
+repl flag (worth adding sw-MLPL-side: `--check`), imenu over
+def u: lines, eldoc from the builtin catalog (machine-readable
+catalog export would serve both this and the web ? panel).
+sw-MLPL-side enablers worth queuing with it: `--check`
+parse-only mode and a `catalog --json` dump.
+
 ## 2026-08-06 (night)
 
 **Q: Let me know when the mlplunit agent may proceed.**

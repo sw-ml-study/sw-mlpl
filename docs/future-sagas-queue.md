@@ -87,7 +87,22 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
-**apl2-idioms + expunge** (added 2026-08-06, user direction)
+**emacs-mlpl-mode** (added 2026-08-06, user direction) --
+mlpl-mode elisp package: font-lock for the three name kinds +
+annotations, run-buffer/run-tests commands consuming the
+--test-events JSONL transport, --babel-session integration,
+jump-to-test from event rows. sw-MLPL enablers to ship
+alongside: a `--check` parse-only flag and a machine-readable
+builtin-catalog export. Sketch: docs/q-and-a.md 2026-08-06
+late night.
+
+**sudoku-solver-ml-demo** (added 2026-08-06, user direction)
+-- a TRAINED model solving Sudoku as an ML demo (candidate
+architectures: BDH, HRM, TRM -- hierarchical/tiny recursive
+reasoning); builds on the blocks view + the general-programming
+backtracking demo as the classical baseline.
+
+**apl2-idioms + expunge** (added AND completed 2026-08-06, user direction)
 -- (1) docs/apl2-idioms.mlpl: an EXECUTABLE Rosetta document
 mapping APL2 expressions (Unicode comments) to equivalent MLPL
 expressions, explicitly marking idioms not yet expressible
