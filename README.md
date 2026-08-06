@@ -312,6 +312,13 @@ The same demos are wired into the web REPL's demo dropdown,
 where a "Workspace Introspection" demo additionally exercises
 every `:`-prefixed command.
 
+## Tooling
+
+- Emacs: `editors/emacs/mlpl-mode.el` -- font-lock for the
+  three name kinds, brace indentation, imenu over `def u:`,
+  run-buffer (`C-c C-c`) and run-tests-with-jumpable-events
+  (`C-c C-t`). Quickstart: `docs/emacs-mode.md`.
+
 ## Related Projects
 
 - [mlplunit](https://github.com/softwarewrighter/mlplunit) --
