@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 16,
+    "step": "metadata-registry"
+  },
+  "action": "def-time interpretation; chunk-source stamping through the include runner",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T21:53:01"
+}

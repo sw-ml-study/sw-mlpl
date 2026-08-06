@@ -1,0 +1,1 @@
+@test registration shipped: validated metadata, source-ordered registry with source/line, duplicate diagnostics, replace-in-place; 4 TDD tests; run_state FAIL cleared by module split.

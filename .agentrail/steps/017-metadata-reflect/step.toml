@@ -1,0 +1,9 @@
+number = 17
+slug = "metadata-reflect"
+status = "pending"
+description = "Per design: tests() (StrList of stable names, source order), test_info(name) ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T21:53:01"
+task_type = "rust-feature"
+commits = []
