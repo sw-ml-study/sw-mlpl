@@ -14,6 +14,18 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 017 complete (queues finally-design)
+- feat(eval): reflection trio -- tests() / test_info() / annotations() (metadata-reflect)
+- saga mlplunit-unblock: step 016 complete
+- feat(eval): @test registration -- the source-ordered test registry (metadata-registry)
+- saga mlplunit-unblock: step 015 complete
+- feat(parser): @word annotations -- the general namespace, defs first (metadata-parser)
+- docs(q-and-a): the doable-now menu (metadata trio -> close -> resume KV-cache)
+- docs(design): math-view relationship folded into the annotation design (user-provided analysis)
+- docs(design): @ is a general annotation namespace (user direction)
+- saga mlplunit-unblock: step 014 complete
+- docs(design): @test metadata + reflection (mlplunit-unblock step metadata-design)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 013 complete
 - feat(eval): Result combinators + references through UDF arguments (mlplunit-unblock step callables-combinators)
 - docs(changes): refresh CHANGES.md to HEAD
