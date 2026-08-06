@@ -1,0 +1,1 @@
+call() shipped; callable-user-functions AVAILABLE; both P0 capabilities adopted downstream (SHIPPED in their catalog). Next: combinators + docs rider.

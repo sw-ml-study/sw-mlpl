@@ -1,9 +1,10 @@
 number = 12
 slug = "callables-call"
-status = "in-progress"
+status = "completed"
 description = "Per design + resolutions: call(f, args...) invoking UserFnRef (via the u: cal..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T20:51:37"
+completed_at = "2026-08-05T21:14:58"
 task_type = "rust-feature"
-commits = []
+commits = ["791e21e02a7d519ebbb9ec0c68786d3d6d39b2e3"]

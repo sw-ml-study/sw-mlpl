@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 12,
+    "step": "callables-call"
+  },
+  "action": "synthetic-FnCall delegation keeps one calling model and referent-named errors for free",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-05T21:14:58"
+}
