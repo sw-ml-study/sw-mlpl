@@ -87,6 +87,14 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
+**combinator-birds** (added 2026-08-07, user direction) --
+"To Mock a Mockingbird"-style coverage of combinators
+(identity, kestrel, bluebird/composition, cardinal/flip,
+warbler, mockingbird...) as MLPL demos + possibly builtins
+over function references; cross-language inspiration:
+https://mlajtos.github.io/fluent/?example=combinators .
+User research incoming; natural companion to apl2-hof below.
+
 **apl2-hof: each / table / over for u:fns** (added
 2026-08-07, user direction) -- now CHEAP thanks to the
 callable machinery (UserFnRef + invoke_user_fn_values):

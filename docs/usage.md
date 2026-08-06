@@ -174,6 +174,10 @@ def u:zscore(x) {
   each event as one JSON line, on a channel separate from the
   program's own output; in connect mode the eval response
   carries the same lines in a `test_events` array.
+- A STATEFUL reporter needs one more piece: assignments inside
+  functions are frame-local by design, so counters use the
+  explicit escape hatch -- `global_set("count", count + 1)`
+  binds at the workspace level and survives the frame.
 
 ## Control Flow and Error Handling
 

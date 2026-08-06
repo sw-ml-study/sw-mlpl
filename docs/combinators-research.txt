@@ -1,0 +1,918 @@
+ChatGPT Pro
+
+
+
+
+
+
+I want to demonstrate combinators in my array-oriented ML language, 
+sw-ml-study/sw-mlpl, perhaps demonstrated in a repo like: 
+sw-ml-study/demo-algorithms (demo-combinators?), inspired by the book "To Mock a Mockingbird" and this website: https://mlajtos.github.io/fluent/?example=combinators -- is sw-mlpl full functioned enough to demonstrate all of the combinators (the birds)? If not, what language features can be added?
+
+
+
+
+
+
+
+
+
+
+Tip: Use /btw to ask a quick side question without interrupting Claude's current work
+
+
+I want to demonstrate combinators in my array-oriented ML language, sw-ml-study/sw-mlpl, perhaps demonstrated in a repo like: sw-ml-study/demo-algorithms (demo-combinators?), inspired by the book "To Mock a Mockingbird" and this website: https://mlajtos.github.io/fluent/?example=combinators -- is sw-mlpl full functioned enough to demonstrate all of the combinators (the birds)?  If not, what language features can be added?  
+
+Worked for 1m 11s
+Yes — sw-MLPL is now surprisingly close, especially because of the first-class user-function-reference work you added yesterday. But it is not yet expressive enough to demonstrate the birds faithfully as combinatory logic, as opposed to merely writing ordinary multi-argument functions that produce the same final results.
+
+The key missing idea is progressive application: applying a bird to one argument must itself produce another callable bird. You can get there without turning sw-MLPL into Lisp/Haskell or adding general anonymous lambdas and lexical closures.
+
+Where sw-MLPL stands now
+The recent callable work gives you most of the foundation:
+
+def u:double(x) { x * 2 }
+
+f = :u:double
+call(f, 21)
+User-function references can now live in variables, records, arguments, and return values, and call(f, args...) works uniformly across user and builtin references.
+
+That's a substantial part of what's needed.
+
+The important limitation is explicitly documented in the design:
+
+references identify definitions; there are no closures, and references use late binding by name.
+
+So today you can probably write something like:
+
+def u:identity(x) {
+    x
+}
+
+def u:kestrel(x, y) {
+    x
+}
+
+def u:thrush(x, y) {
+    call(y, x)
+}
+
+def u:bluebird(x, y, z) {
+    call(x, call(y, z))
+}
+
+def u:cardinal(x, y, z) {
+    call(call(x, z), y)
+}
+
+def u:mockingbird(x) {
+    call(x, x)
+}
+Conceptually those correspond directly to several of Smullyan's birds: identity I x = x, kestrel K x y = x, thrush T x y = y x, bluebird B x y z = x(yz), cardinal C x y z = x z y, and mockingbird M x = xx. The standard aviary also includes things such as the owl, Turing bird, vireo, warbler, starling, lark, jay, and various higher-order bluebirds. 
+
+And sw-MLPL already supports the crucial operation needed by M: a callable may be passed as an argument and then invoked. That's much farther along than I initially expected.
+
+But that's not quite the birds
+Consider the kestrel:
+
+Kxy=x
+The interesting combinator behavior isn't merely that:
+
+u:kestrel(5, 99)  # 5
+works.
+
+The important property is:
+
+K x
+itself produces a function:
+
+K x = something_waiting_for_y
+so that:
+
+(K x) y = x
+Likewise:
+
+Bxyz=x(yz)
+really means:
+
+B
+B x
+B x y
+B x y z
+are successive valid applications, with the first three being callable values.
+
+That is the primary missing capability.
+
+I would add Partial, not general closures
+This seems unusually well matched to MLPL's design philosophy.
+
+Add another callable value kind, conceptually:
+
+Value::Partial {
+    callable: CallableRef,
+    args: Vec<Value>,
+}
+Then change call() semantics from:
+
+exact arity -> execute
+wrong arity -> error
+to:
+
+too few arguments -> return Partial
+exact arguments   -> execute
+too many          -> apply leftovers to returned callable
+For example:
+
+k5 = call(:u:kestrel, 5)
+call(k5, 99)
+# 5
+Internally:
+
+call(:u:kestrel, 5)
+
+=> Partial {
+     callable: :u:kestrel,
+     args: [5]
+   }
+Then:
+
+call(k5, 99)
+becomes:
+
+u:kestrel(5, 99)
+Why I prefer this to lambdas
+It preserves the current language architecture.
+
+You do not need lexical environments:
+
+lambda y -> x
+You merely remember:
+
+callable = :u:kestrel
+bound_args = [x]
+So you're storing data rather than arbitrary executable closures.
+
+That fits nicely with the current explicit reference model:
+
+BuiltinRef
+UserFnRef
+Partial
+and leaves the existing late-binding semantics intact.
+
+In fact, your recent callable design almost leads directly to this representation.
+
+Then the birds become real
+With automatic partial application, an ordinary definition becomes a proper combinator.
+
+For example:
+
+def u:K(x, y) {
+    x
+}
+
+def u:I(x) {
+    x
+}
+
+def u:T(x, y) {
+    call(y, x)
+}
+
+def u:M(x) {
+    call(x, x)
+}
+
+def u:B(x, y, z) {
+    call(x, call(y, z))
+}
+
+def u:C(x, y, z) {
+    call(call(x, z), y)
+}
+
+def u:W(x, y) {
+    call(call(x, y), y)
+}
+
+def u:S(x, y, z) {
+    call(call(x, z), call(y, z))
+}
+Now this:
+
+bx = call(:u:B, :u:f)
+returns a callable.
+
+And:
+
+bxy = call(bx, :u:g)
+returns another callable.
+
+Finally:
+
+call(bxy, value)
+computes:
+
+f(g(value))
+That is genuinely the Bluebird, rather than merely a ternary function implementing the Bluebird equation.
+
+One more small feature: callable results should continue applying
+There's a subtle second requirement.
+
+Suppose:
+
+call(f, a, b, c)
+and f has arity 1, returning another callable.
+
+For combinatory logic, application is normally left-associative:
+
+fabc=((fa)b)c
+So I would define:
+
+call(f, a, b, c)
+as sugar for:
+
+call(call(call(f, a), b), c)
+when necessary.
+
+That gives you general applicative semantics.
+
+It also means these are equivalent:
+
+call(:u:B, f, g, x)
+and:
+
+b1 = call(:u:B, f)
+b2 = call(b1, g)
+call(b2, x)
+That's a very useful property to demonstrate pedagogically.
+
+I would not add lambdas yet
+It might be tempting to add:
+
+x -> x
+
+x -> y -> x
+
+f -> g -> x -> f(g(x))
+Then the birds trivially become:
+
+I = x -> x
+K = x -> y -> x
+B = f -> g -> x -> f(g(x))
+But that requires a substantially larger language mechanism:
+
+anonymous function AST nodes
+
+lexical scoping
+
+captured environments
+
+closure lifetime/ownership
+
+function-value equality questions
+
+serialization/repr questions
+
+compiler lowering
+
+WASM/runtime representation
+
+GPU/device boundary semantics
+
+And it runs somewhat counter to MLPL's existing deliberate named-function/reference model.
+
+Your documented callable design explicitly chose references-by-name and no closure capture.
+
+I wouldn't overturn that merely for this demonstration.
+
+Partial application objects give you perhaps 80–90% of what lambda closures would buy for the combinator project at a fraction of the semantic cost.
+
+What works at each stage
+I'd think of the implementation as four levels.
+
+Level	MLPL capability	Birds
+0 — current	first-class named refs + call	Can emulate many bird equations when fully saturated
+1 — partials	under-application returns callable	Real I K B C T V W S M... combinators
+2 — applicative call	excess args repeatedly apply returned callable	Natural combinatory expressions and derivations
+3 — anonymous closures	arbitrary runtime-created functions	Full lambda-calculus surface; probably unnecessary
+I would aim for Level 2.
+
+That should be enough for a very substantial To Mock a Mockingbird demonstration.
+
+There's an especially interesting consequence: the Mockingbird should already almost work
+The Mockingbird is:
+
+Mx=xx
+and Smullyan's construction uses it to get into self-reference and fixed-point territory. The book's lark is:
+
+Lxy=x(yy)
+and sage birds produce fixed points. 
+
+Once MLPL has callable partials, you can implement:
+
+def u:M(x) {
+    call(x, x)
+}
+
+def u:L(x, y) {
+    call(x, call(y, y))
+}
+And now you're no longer just teaching cute functional idioms. You're demonstrating:
+
+self-application
+
+fixed points
+
+recursion without named recursion
+
+function composition
+
+permutation of arguments
+
+duplication and elimination of arguments
+
+combinatory completeness
+
+That's an excellent stress test for the callable-value implementation.
+
+If the classic SK basis works correctly:
+
+S
+K
+plus application should be sufficient to construct everything else. That's arguably the acceptance criterion for demo-combinators.
+
+A feature I'd add specifically for readability: apply
+Because you prefer words/readability over glyph-heavy notation, I wouldn't introduce special combinator syntax.
+
+You already have call, and that's perfectly workable:
+
+call(f, x)
+But I might consider apply as an alias if you want the code to read mathematically:
+
+apply(f, x)
+apply(apply(f, x), y)
+However, I slightly prefer keeping call because MLPL already uses apply for model application. The distinction is meaningful:
+
+apply(model, tensor)
+call(function, arguments...)
+So don't muddy that existing vocabulary.
+
+Instead I'd make call applicative:
+
+call(f, x, y, z)
+with the left-application semantics above.
+
+Do arrays need to contain functions?
+No.
+
+This is another place where I'd resist generalizing MLPL unnecessarily.
+
+The callable design explicitly keeps numeric arrays numeric and uses records for function registries.
+
+That's fine.
+
+For example:
+
+aviary = {
+    identity: :u:I,
+    kestrel: :u:K,
+    mockingbird: :u:M,
+    bluebird: :u:B,
+    cardinal: :u:C,
+    starling: :u:S
+}
+is arguably clearer than an array anyway.
+
+Then:
+
+call(aviary.bluebird, f, g, x)
+works naturally.
+
+I wouldn't contaminate the f64-array representation with heterogeneous callable elements just to implement combinatory logic.
+
+The array-language angle makes this especially interesting
+There's a second, distinctly MLPL story here that the usual combinator demos don't have.
+
+You can show that combinators describe function structure, while MLPL's pervasive array operations describe data structure.
+
+For example, Bluebird composition:
+
+Bfgx=f(gx)
+doesn't care whether x is a scalar or an array:
+
+def u:square(x) { x * x }
+def u:increment(x) { x + 1 }
+
+square_after_increment =
+    call(:u:B, :u:square, :u:increment)
+
+call(square_after_increment, 4)
+# 25
+
+call(square_after_increment, [1, 2, 3, 4])
+# 4 9 16 25
+That's a very nice MLPL demonstration:
+
+Combinators compose computation; array semantics provide pervasive data parallelism.
+
+One composition works over scalar, vector, matrix, or tensor without the bird knowing anything about rank.
+
+That gives demo-combinators a reason to exist beyond recreating a Haskell/JavaScript exercise.
+
+And your current direction already intersects this
+One of today's commits specifically says the APL2 idioms document now demonstrates composing user functions through call, and that each / table / over for user functions are queued now that the callable machinery exists. That's strong evidence that the implementation architecture is already moving in exactly the right direction.
+
+I would actually keep those concerns separate:
+
+                     callable
+                        |
+             +----------+----------+
+             |                     |
+        combinators              operators
+        B C K S M...          each over table
+             |                     |
+    function structure       array structure
+Then later they intersect naturally.
+
+For example:
+
+each(square_after_increment, X)
+or whatever final word-oriented HOF syntax you choose.
+
+Proposed demo-combinators progression
+I think this deserves its own repository rather than living under demo-algorithms.
+
+demo-algorithms currently states its purpose as demonstrating general-purpose programming of data structures and algorithms in sw-MLPL.
+
+Combinatory logic is enough of a conceptual topic to warrant:
+
+sw-ml-study/demo-combinators
+I'd structure the teaching sequence roughly as:
+
+01-identity.mlpl
+02-kestrel.mlpl
+03-mockingbird.mlpl
+04-thrush.mlpl
+05-bluebird.mlpl
+06-cardinal.mlpl
+07-warblers.mlpl
+08-starling.mlpl
+09-building-birds.mlpl
+10-sk-basis.mlpl
+11-self-application.mlpl
+12-fixed-points.mlpl
+13-recursion-without-recursion.mlpl
+14-array-birds.mlpl
+15-ml-composition.mlpl
+The final two become uniquely MLPL.
+
+For instance, use Bluebird to construct an ML pipeline:
+
+normalize -> linear -> activation -> classify
+without making the demo dependent on the Model DSL.
+
+That bridges Smullyan's abstract lesson directly into why function composition matters in machine learning.
+
+My recommended language roadmap
+The minimal additions are therefore quite small:
+
+Value::Partial / callable partial application
+call(f, too_few_args...) returns a callable instead of an arity error.
+
+Generalized callable dispatch
+call() accepts BuiltinRef, UserFnRef, and Partial.
+
+Left-associative excess application
+call(f,a,b,c) behaves as (((f a) b) c) where necessary.
+
+Callable introspection
+repr, equal, :describe and perhaps arity() understand partials:
+
+:u:B                         # arity 3
+call(:u:B, f)                # partial, 1/3 bound
+call(:u:B, f, g)             # partial, 2/3 bound
+Later, not prerequisite: each, over, table operating on any callable reference/partial. Your current repository already has this direction queued.
+
+I would not make lambdas, lexical closures, heterogeneous function arrays, static types, pattern matching, or a special combinator syntax prerequisites.
+
+Bottom line
+Current sw-MLPL can demonstrate the equations for a large fraction of the birds, but not yet the central combinatory-logic idea that birds themselves are successively applicable values.
+
+Add first-class partial application to the callable machinery you just built, and I think sw-MLPL becomes sufficiently expressive to do a genuine To Mock a Mockingbird-style aviary—including M, B, C, K, S, W, T, L, self-application, derived birds, the SK basis, and eventually fixed-point/recursion demonstrations—without adding general lambdas or closures.
+
+That is also a very natural next step architecturally: yesterday's UserFnRef + call work established functions as named values; Partial would establish application as a value-producing operation. That is the missing bridge from higher-order functions to actual combinatory logic.
+
+
+how do lambdas and partials relate to APL/APL2/etc.?  
+
+This is actually a fascinating historical thread, because APL largely took a different evolutionary path than Lisp, ML, Scheme, or Haskell. Instead of becoming a lambda-calculus language, it became an array-calculus language.
+
+So lambdas and partial application exist in the APL family, but they arrived much later and often in different forms.
+
+Two different traditions
+There are really two schools of functional programming.
+
+Lambda calculus tradition
+Beginning with Church:
+
+λx.x
+λf.λg.λx.f(g(x))
+Languages:
+
+Lisp
+
+Scheme
+
+ML
+
+OCaml
+
+Haskell
+
+F#
+
+Elm
+
+Functions are the primary abstraction.
+
+Array calculus tradition
+Beginning with Iverson:
+
+A + B
++/A
+⍳10
+Languages:
+
+APL
+
+APL2
+
+J
+
+BQN
+
+K
+
+Q
+
+Arrays are the primary abstraction.
+
+The interesting thing is that both are mathematically elegant, but they emphasize different objects.
+
+Original APL
+Original APL had:
+
+functions
+
+operators
+
+arrays
+
+but not first-class functions in the modern sense.
+
+For example,
+
++/A
+means
+
+reduce + over A
+Here:
+
+/
+is an operator.
+
+It takes
+
++
+and produces a new function.
+
+Notice that + is not passed as a value.
+
+Instead the grammar understands that
+
+/
+expects a function operand.
+
+This is fundamentally different from
+
+reduce (+) xs
+Operators instead of lambdas
+APL solved many problems that Lisp solved with lambdas by inventing operators.
+
+For example,
+
++
+is a function.
+
+/
+is an operator.
+
++/
+is another function.
+
+Similarly,
+
+¨
+(each)
+
+takes a function and creates another function.
+
+So
+
+square¨
+means
+
+apply square to every element
+without ever writing a lambda.
+
+APL2
+APL2 remained largely in this tradition.
+
+You still had
+
+functions
+
+operators
+
+rather than
+
+lambda(x){...}
+APL2 emphasized
+
+nested arrays
+
+namespaces
+
+shared variables
+
+classes later
+
+rather than anonymous functions.
+
+J
+J starts moving closer.
+
+It has
+
+verbs
+
+adverbs
+
+conjunctions
+
+where
+
+verb ≈ function
+
+adverb ≈ unary higher-order operator
+
+conjunction ≈ binary higher-order operator
+
+Example
+
++/        sum
+*:        square
+*:@:+     compose
+Composition becomes a language primitive.
+
+Still no ordinary lambda syntax.
+
+BQN
+BQN moves even farther.
+
+It has explicit function values.
+
+For example
+
+•
+composition
+
+and
+
+˜
+swap
+
+etc.
+
+Functions are much more first-class.
+
+Still, it isn't trying to become Haskell.
+
+Modern Dyalog APL
+Modern Dyalog added something surprisingly lambda-like.
+
+For example
+
+{⍵+1}
+means
+
+lambda x => x+1
+where
+
+⍵
+is the right argument
+
+and
+
+⍺
+is the left argument.
+
+Example
+
+{⍵×⍵}
+square
+
+{⍺+⍵}
+addition
+
+{⍺×⍵+3}
+multiply then add.
+
+These are anonymous functions.
+
+So modern APL does have lambdas.
+
+They simply weren't part of classic APL.
+
+Partial application
+APL historically did not emphasize partial application.
+
+Instead, it had operators.
+
+Consider Haskell
+
+(+3)
+This is a partially applied function.
+
+APL would instead tend to write another function directly.
+
+For example
+
+3+
+isn't a partially applied function.
+
+It's simply the dyadic function waiting for its other argument because of APL's parsing rules.
+
+That distinction matters.
+
+APL syntax is based on evaluation context, not on creating closure objects.
+
+Trains
+APL descendants invented something arguably cooler.
+
+Instead of partial application they invented trains.
+
+J example
+
+f g h
+without arguments
+
+defines a new function.
+
+For example
+
+(+ % #)
+means
+
+average
+because
+
+sum divided by count
+The parser recognizes this pattern and synthesizes a function.
+
+No lambda.
+
+No closure.
+
+No partial.
+
+Just grammar.
+
+This idea influenced
+
+J
+
+BQN
+
+K
+
+and is one of the nicest ideas in array languages.
+
+Tacit programming
+Trains lead naturally to tacit programming.
+
+Instead of
+
+mean(x) = sum(x)/count(x)
+you write
+
++/ % #
+The argument
+
+x
+never appears.
+
+This is point-free programming.
+
+Combinatory logic is also point-free.
+
+That is one reason Smullyan's birds feel surprisingly natural in J.
+
+Where sw-MLPL fits
+I actually think sw-MLPL should avoid copying Dyalog's anonymous lambda syntax.
+
+One of your explicit design goals has been replacing symbolic notation with readable words. Your callable model is already based on named references (:u:name) and call(...), not on anonymous expressions.
+
+I'd continue in that direction.
+
+What I'd borrow from APL
+I would borrow:
+
+higher-order operators
+
+composition
+
+trains (eventually)
+
+tacit programming
+
+pervasive application over arrays
+
+These are all very "array language."
+
+What I'd borrow from functional languages
+I'd borrow only a few ideas:
+
+first-class function references (you already have these)
+
+partial application
+
+composition
+
+Notice that these don't require general closures.
+
+I would not borrow
+I would avoid making MLPL into Haskell.
+
+Things like
+
+\x -> x+1
+or
+
+\x -> \y -> x+y
+feel foreign to an array language.
+
+The interesting convergence
+Here's the really fun part.
+
+Smullyan's birds and Iverson's operators are solving similar problems.
+
+For example, the Bluebird is just composition:
+
+B f g x
+=
+f(g(x))
+APL programmers think
+
+compose(f,g)
+J programmers think
+
+f@g
+Functional programmers think
+
+f . g
+Combinatory logicians think
+
+B f g
+They're all describing the same mathematical object.
+
+My suggestion for sw-MLPL
+This is where I think sw-MLPL can be genuinely original.
+
+Instead of exposing birds as the primary abstraction, expose readable higher-order operations that happen to correspond to birds.
+
+For example:
+
+compose(f, g)
+is immediately understandable.
+
+Under the hood, it is the Bluebird.
+
+Likewise:
+
+flip(f)
+is the Cardinal.
+
+duplicate(f)
+or perhaps on_both(f) corresponds to the Warbler.
+
+constant(x)
+is the Kestrel specialized to a value.
+
+Then demo-combinators can reveal:
+
+"This operation you've been using all along is called the Bluebird in combinatory logic."
+
+That gives newcomers a practical vocabulary first and then connects it to the elegant underlying mathematics. It also meshes nicely with your long-term goal of making sw-MLPL approachable to machine-learning users who may not have a background in symbolic functional programming.
+
+

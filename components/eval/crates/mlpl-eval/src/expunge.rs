@@ -57,7 +57,7 @@ fn expunge_one(env: &mut Environment, name: &str) -> f64 {
 
 /// An identifier, optionally `u:`-prefixed -- the only spellings
 /// a binding or user function can have.
-fn well_formed(name: &str) -> bool {
+pub(crate) fn well_formed(name: &str) -> bool {
     let bare = name.strip_prefix("u:").unwrap_or(name);
     let mut chars = bare.chars();
     chars

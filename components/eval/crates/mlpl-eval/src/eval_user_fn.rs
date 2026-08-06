@@ -32,10 +32,7 @@ pub(crate) fn call_user_fn(
     // Fresh local scope per call: snapshot the variable namespaces, run
     // the body, then restore -- so locals (and rebound params) do not
     // leak into the caller or sibling/recursive frames (issue #6 / C1).
-    let snapshot = env.snapshot_scope();
-    let result = run_body(&f, name, &evaluated, env, trace);
-    env.restore_scope(snapshot);
-    result
+    framed(env, |env| run_body(&f, name, &evaluated, env, trace))
 }
 
 /// Invoke a user function with ALREADY-EVALUATED argument values
@@ -58,9 +55,30 @@ pub(crate) fn invoke_user_fn_values(
             got: values.len(),
         });
     }
+    framed(env, |env| run_body(&f, name, values, env, trace))
+}
+
+/// One user-fn frame: snapshot, run, restore -- then REPLAY the
+/// global_set writes recorded during the call (they live outside
+/// the snapshot), and clear the log once the outermost frame
+/// returns so stale writes can never clobber later rebinds.
+fn framed(
+    env: &mut Environment,
+    body: impl FnOnce(&mut Environment) -> Result<Value, EvalError>,
+) -> Result<Value, EvalError> {
+    let write_mark = env.global_writes.len();
+    env.call_depth += 1;
     let snapshot = env.snapshot_scope();
-    let result = run_body(&f, name, values, env, trace);
+    let result = body(env);
     env.restore_scope(snapshot);
+    env.call_depth -= 1;
+    let replay: Vec<(String, Value)> = env.global_writes[write_mark..].to_vec();
+    for (name, value) in replay {
+        crate::fncall_globals::bind_value(env, &name, value);
+    }
+    if env.call_depth == 0 {
+        env.global_writes.clear();
+    }
     result
 }
 

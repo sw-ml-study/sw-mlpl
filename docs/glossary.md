@@ -1529,6 +1529,19 @@ gradient still flows through during backprop; only the
 weight update is suppressed. MLPL: `freeze(model)` /
 `unfreeze(model)` from .
 
+## global_set (builtin)
+
+`global_set("name", value)` binds a name at the WORKSPACE
+level from anywhere -- including inside a `u:` function frame,
+where ordinary assignment is deliberately frame-local (see
+docs on binding hygiene). The write survives the frame restore
+and propagates outward through nested calls, so a stateful
+event-reporter sink can keep counters across
+[[test_event_sink / emit_test_event (builtins)]] deliveries.
+Explicit spelling is the point: accidental leakage stays
+impossible; deliberate state is two words. Any value kind;
+returns the value.
+
 ## Game of Life
 
 Conway's cellular automaton and the array-language world's favorite party trick: the APL2 one-liner computes every cell's next generation simultaneously. In MLPL the same shape falls out of [[rotate (builtin)]]: shift the whole board 8 ways, sum the shifted boards into a neighbor-count matrix N, and the entire rule is `gt(eq(N, 3) + G * eq(N, 2), 0)` -- birth on 3 neighbors, survival on 2 or 3. The "Game of Life (APL classic)" demo builds it three ways and animates 24 generations with `svg(F, "life")`. The rule, the neighbor count, and the animation are all ordinary array values.

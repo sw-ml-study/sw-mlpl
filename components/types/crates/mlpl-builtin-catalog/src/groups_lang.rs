@@ -159,6 +159,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "free a binding or u: function (APL quad-EX); 1 = free, 0 = malformed",
             ),
             (
+                "global_set",
+                "global_set(name, v)",
+                "explicit global write that survives the function frame (reporter state)",
+            ),
+            (
                 "equal",
                 "equal(a, b)",
                 "total structural equality over any two values; never errors",

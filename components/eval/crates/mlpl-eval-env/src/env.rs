@@ -64,6 +64,13 @@ pub struct Environment {
     /// Connect-mode host transport: buffered JSON lines the
     /// server drains per eval.
     pub test_event_lines: Option<Vec<String>>,
+    /// Explicit global writes recorded inside user-fn frames
+    /// (`global_set`); replayed after each frame restore so they
+    /// survive to the top level. Cleared when call depth
+    /// returns to zero.
+    pub global_writes: Vec<(String, Value)>,
+    /// Current user-fn call depth (frame replay bookkeeping).
+    pub call_depth: usize,
     /// Sandbox root for filesystem `load("relative-path")` calls.
     /// `None` means filesystem access is disabled (the web REPL
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12
