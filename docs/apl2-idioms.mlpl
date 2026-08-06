@@ -1,0 +1,143 @@
+# APL2 idioms in MLPL -- an executable Rosetta document.
+#
+# Each section shows an APL2 expression in a comment, then the
+# equivalent MLPL expression, runnable as-is (load this file in
+# the web editor or run: mlpl-repl docs/apl2-idioms.mlpl).
+# Idioms MLPL does not express are marked plainly at the end:
+# "Not an MLPL builtin." One index note up front: APL2 counts
+# from 1 (with default ⎕IO); MLPL counts from 0 everywhere.
+
+# ---------- iota and rho: making and shaping data ----------
+
+# APL2:  ⍳9          (the first nine integers)
+v = range(9)
+
+# APL2:  3 3⍴⍳9      (reshape into a 3-by-3 matrix)
+m = reshape(range(9), [3, 3])
+
+# APL2:  ⍴M          (the shape vector)
+shape(m)
+
+# APL2:  ⍴⍴M         (rank: the shape of the shape)
+rank(m)
+
+# APL2:  ≢M          (tally: how many major cells)
+tally(m)
+
+# ---------- transpose, monadic and dyadic ----------
+
+# APL2:  ⍉M          (reverse the axes)
+transpose(m)
+
+# APL2:  1 3 2 4⍉A   (dyadic transpose: permute axes; APL2's
+#                     1-based 1 3 2 4 is MLPL's 0-based 0 2 1 3)
+a4 = reshape(range(81), [3, 3, 3, 3])
+blocks = transpose_axes(a4, [0, 2, 1, 3])
+shape(blocks)
+
+# ---------- reduce and scan: / and \ ----------
+
+# APL2:  +/V         (sum reduction)
+reduce(:add, v)
+
+# APL2:  ×/1+⍳4      (product reduction)
+reduce(:mul, range(4) + 1)
+
+# APL2:  ⌈/V         (maximum reduction)
+reduce(:max, v)
+
+# APL2:  +\V         (running sum -- the scan)
+running_sum(v)
+
+# APL2:  ×\1+⍳4      (running product)
+running_product(range(4) + 1)
+
+# ---------- compress: boolean selection ----------
+
+# APL2:  (V>3)/V     (keep the elements greater than 3)
+compress(gt(v, 3), v)
+
+# APL2:  (V=0)/⍳⍴V   (indices where V is zero -- the where idiom)
+compress(eq(v, 0), range(tally(v)))
+
+# ---------- rotate ----------
+
+# APL2:  2⌽V         (cyclic left rotation by two)
+rotate(v, 2, 0)
+
+# APL2:  ¯1⌽V        (rotate the other way; MLPL has no unary
+#                     minus literal -- spell it 0 - 1)
+rotate(v, 0 - 1, 0)
+
+# ---------- grade: sorting without moving data ----------
+
+# APL2:  ⍋V          (grade up: the index vector that sorts)
+w = [3, 1, 4, 1, 5]
+grade_up(w)
+
+# APL2:  ⍒V          (grade down)
+grade_down(w)
+
+# APL2:  V[⍋V]       (the sort itself: index by the grade;
+#                     MLPL spells the gather through rows)
+flatten(gather_rows(reshape(w, [5, 1]), grade_up(w)))
+
+# ---------- enclose and DISPLAY: the blocks view ----------
+
+# APL2:  DISPLAY ⊂[3 4] 3 3 3 3⍴⍳81
+#        (enclose the trailing axes; DISPLAY draws a grid of
+#         boxed 3x3 matrices. MLPL keeps the array FLAT and
+#         disp renders rank-4 as the same boxed grid.)
+disp(a4)
+
+# APL2:  ⊂[3 4] 1 3 2 4⍉3 3 3 3⍴BOARD
+#        (the Sudoku block view: re-rank, then look)
+disp(blocks)
+
+# ---------- quad-EX and )ERASE: freeing names ----------
+
+# APL2:  ⎕EX 'V'     (expunge a name; 1 means it is free now)
+expunge("v")
+
+# APL2:  ⎕EX 2 3⍴'M W'  (expunge several; a mask comes back.
+#                        The interactive form is :erase m w)
+expunge(["m", "w", "a4", "blocks"])
+
+# ---------- not yet expressible in MLPL ----------
+
+# APL2:  f¨V         (each: apply f to every item)
+#   Not an MLPL builtin. Arithmetic pervades whole arrays
+#   (v * 2 needs no each); for one function over rows, use
+#   `for row in M { ... }`.
+
+# APL2:  ⊂V  and nested arrays generally
+#   Not supported: MLPL arrays are flat (depth 0 or 1). The
+#   blocks DISPLAY above is a RENDERING of a flat rank-4
+#   array, not a nested value.
+
+# APL2:  A∘.×B       (outer product)
+#   Not an MLPL builtin. The matrix case is expressible with
+#   reshape and matmul:
+outer = matmul(reshape([1, 2, 3], [3, 1]), reshape([10, 20], [1, 2]))
+shape(outer)
+
+# APL2:  V⍳X         (dyadic iota: index-of)
+#   Not an MLPL builtin. The where idiom above (compress over
+#   eq) finds ALL positions of one value.
+
+# APL2:  X∈V         (membership)
+#   Not an MLPL builtin.
+
+# APL2:  3↑V  and  3↓V   (take and drop counts)
+#   Not MLPL builtins. MLPL's take(x, axis, i) selects ONE
+#   index; a leading slice is spelled with compress over an
+#   index mask:
+u = range(6)
+compress(lt(range(6), 3), u)
+
+# APL2:  ⍕X  and  ⍎S     (format and execute)
+#   Not MLPL builtins. repr(x) is the diagnostic rendering;
+#   there is no execute.
+
+# Final value: proof the whole document ran.
+ok(size(outer) + tally(u))
