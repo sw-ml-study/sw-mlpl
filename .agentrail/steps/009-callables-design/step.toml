@@ -1,6 +1,6 @@
 number = 9
 slug = "callables-design"
-status = "pending"
+status = "in-progress"
 description = "Contract item 3 design: first-class :u:name references + call(f, args...) -- ..."
 role = "legacy"
 context_files = []
