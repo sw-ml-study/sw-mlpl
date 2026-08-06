@@ -67,6 +67,20 @@ item now sits in docs/future-sagas-queue.md beside the pedagogy
 work -- GMM via EM, DBSCAN, and agglomerative, with glossary
 entries riding along.
 
+**UPDATE 2 (same day): P0-b's sw-MLPL side is DONE.** The include
+feature works end to end in script mode: parser node, loader
+crate, --source-dir + FsProvider in mlpl-repl (default sandbox =
+the script's own directory; a root script may live OUTSIDE the
+sandbox -- the combined-temp-file shape mlplunit's runner uses --
+with its includes confined to the root). The exact
+adopted-runner invocation passes: prelude + fixture concatenated
+the way bin/mlplunit does it, run with --source-dir
+tests/native_include, prints Ok({assertions: 1, ...}) exit 0.
+The AVAILABLE flip now needs only mlplunit's own documented
+adoption: pass configured source_root as --source-dir. Until
+then check-capabilities correctly reports GATED (its runner does
+not yet pass the flag).
+
 **UPDATE (same day): P0-a is SHIPPED.** `equal(a, b)` and
 `repr(v)` landed with tests and docs; mlplunit's own
 `scripts/check-capabilities` against the fresh repl build now

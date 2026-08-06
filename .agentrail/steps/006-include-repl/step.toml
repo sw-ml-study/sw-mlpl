@@ -1,6 +1,6 @@
 number = 6
 slug = "include-repl"
-status = "pending"
+status = "in-progress"
 description = "Per design: mlpl-repl integration -- --source-dir flag, FsProvider (canonical..."
 role = "legacy"
 context_files = []

@@ -69,12 +69,14 @@ fn execute(config: &Config, s: &mut Session) {
         return;
     }
     if let Some(path) = &config.script {
-        let content = std::fs::read_to_string(path).unwrap_or_else(|e| {
-            eprintln!("error reading {path}: {e}");
-            std::process::exit(1);
-        });
-        let code =
-            script_mode::run_script(&content, &mut s.env, s.trace, s.verbose, &mut s.svg_out);
+        let code = script_mode::run_script_path(
+            std::path::Path::new(path),
+            config.source_dir.as_deref(),
+            &mut s.env,
+            s.trace,
+            s.verbose,
+            &mut s.svg_out,
+        );
         std::process::exit(code);
     }
     run_interactive(&mut s.env, &mut s.svg_out);

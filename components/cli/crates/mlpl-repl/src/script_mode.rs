@@ -118,7 +118,14 @@ fn report_script_err(input: &str, e: &dyn std::fmt::Display) -> i32 {
 /// Flags that consume the following arg as their value. A bare
 /// arg sitting right after one of these is that value, not the
 /// script path.
-const VALUE_FLAGS: &[&str] = &["-f", "--file", "--svg-out", "--data-dir", "--exp-dir"];
+const VALUE_FLAGS: &[&str] = &[
+    "-f",
+    "--file",
+    "--svg-out",
+    "--data-dir",
+    "--exp-dir",
+    "--source-dir",
+];
 
 /// Pick the script path from CLI args. Priority order: explicit
 /// `-f` / `--file` flag, then the first positional path -- the
@@ -141,4 +148,50 @@ where
         let is_value = VALUE_FLAGS.contains(&args[i - 1].as_str());
         (!a.starts_with('-') && !is_value).then(|| a.clone())
     })
+}
+
+/// `-f` entry: expand includes (sandbox root = `--source-dir` or
+/// the script's directory), then evaluate. A single-chunk script
+/// (no includes) takes the classic `run_script` path unchanged;
+/// multi-chunk programs evaluate chunk by chunk in ONE
+/// environment, and an eval error names the chunk's source file.
+/// (`--trace` output covers include-free scripts; with includes
+/// the flag is accepted but the summary is skipped.)
+pub(crate) fn run_script_path(
+    path: &std::path::Path,
+    source_dir: Option<&std::path::Path>,
+    env: &mut Environment,
+    tracing: bool,
+    verbose: bool,
+    svg_out: &mut SvgOut,
+) -> i32 {
+    let loaded = match mlpl_cli::include_script::load_script(path, source_dir) {
+        Ok(l) => l,
+        Err(msg) => {
+            eprintln!("{msg}");
+            return 1;
+        }
+    };
+    if loaded.chunks.len() <= 1 {
+        let text = loaded
+            .chunks
+            .first()
+            .and_then(|c| loaded.table.text(&c.source))
+            .unwrap_or("");
+        return run_script(text, env, tracing, verbose, svg_out);
+    }
+    let mut last: Option<Value> = None;
+    for chunk in &loaded.chunks {
+        env.set_pending_source(loaded.table.text(&chunk.source).map(String::from));
+        let r = mlpl_eval::eval_program_value(&chunk.stmts, env);
+        env.set_pending_source(None);
+        match r {
+            Ok(v) => last = Some(v),
+            Err(e) => {
+                eprintln!("  error: {e} (in {})", chunk.source.0);
+                return 1;
+            }
+        }
+    }
+    last.map_or(0, |v| finish_script_value(v, svg_out))
 }

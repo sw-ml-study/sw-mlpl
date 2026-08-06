@@ -27,6 +27,7 @@ pub(crate) struct Config {
     pub script_args: Vec<String>,
     pub svg_out: Option<PathBuf>,
     pub data_dir: Option<PathBuf>,
+    pub source_dir: Option<PathBuf>,
     pub exp_dir: Option<PathBuf>,
     pub trace: bool,
     pub verbose: bool,
@@ -43,6 +44,7 @@ pub(crate) fn parse(raw: Vec<String>) -> Config {
         script: script_mode::resolve_script_path(&args, &flag),
         svg_out: flag("--svg-out").map(PathBuf::from),
         data_dir: flag("--data-dir").map(PathBuf::from),
+        source_dir: flag("--source-dir").map(PathBuf::from),
         exp_dir: flag("--exp-dir").map(PathBuf::from),
         trace: args.iter().any(|a| a == "--trace"),
         // Quiet by default; -v/--verbose echoes each script line.
