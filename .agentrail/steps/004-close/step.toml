@@ -1,9 +1,10 @@
 number = 4
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close: read mlplunit's new gates (their docs/sw-MLPL-changes-needed.md sectio..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T14:47:54"
+completed_at = "2026-08-06T14:51:18"
 task_type = "docs"
-commits = []
+commits = ["712193b43ecf2c735ea415a27cdfc26128cf2f23"]

@@ -1,0 +1,1 @@
+Saga closed: staleness badge live, CI + README badges, mlpl-mode.el shipped; mlplunit round-2 gates (global-state escape hatch; fs API + run_script) assessed and queued pending go.
