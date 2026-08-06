@@ -7,6 +7,23 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: Loading ../demo-algorithms/.../service_desk.mlpl in the web
+editor and running it errors ("unclosed '{'", then per-line
+undefined variables). Why?**
+
+A: The editor's Run split the buffer into individual LINES and
+evaluated each alone, so any construct spanning lines (def
+bodies, if/else blocks, multi-line records) could never parse.
+FIXED: Run now groups lines into balanced statements (bracket
+depth counted outside string literals and # comments) and
+evaluates each group whole -- one transcript entry and one viz
+per statement, local and connect alike. Verified against the
+actual service_desk.mlpl: 18 balanced groups, identical result
+to script mode. Reload the playground to pick it up. (The file
+also runs unchanged under `mlpl-repl -f`, and with the new
+static include your demo-algorithms scripts can share helpers
+via `include` + `--source-dir`.)
+
 **Q (side): What is the monad story in sw-MLPL -- lift, bind, is
 `?` monadic, other early-return forms, would fuller support help?**
 

@@ -11,3 +11,4 @@
 pub mod callbacks;
 pub mod modes;
 pub mod panel;
+pub mod statement_groups;

@@ -107,14 +107,12 @@ fn make_editor_run_callback(a: &MainArgs) -> Callback<MouseEvent> {
     let ec = a.editor_content.clone();
     let eo = a.editor_open.clone();
     Callback::from(move |_: MouseEvent| {
-        let lines: Vec<String> = (*ec)
-            .lines()
-            .map(|l| l.trim().to_string())
-            .filter(|l| !l.is_empty() && !l.starts_with('#'))
-            .collect();
-        if !lines.is_empty() {
+        // Balanced statement GROUPS, not raw lines: multi-line
+        // def/if/record constructs must evaluate whole.
+        let groups = crate::statement_groups::group_statements(&ec);
+        if !groups.is_empty() {
             eo.set(false);
-            batch.emit(lines);
+            batch.emit(groups);
         }
     })
 }

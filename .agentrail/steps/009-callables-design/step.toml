@@ -1,4 +1,4 @@
-number = 8
+number = 9
 slug = "callables-design"
 status = "pending"
 description = "Contract item 3 design: first-class :u:name references + call(f, args...) -- ..."
