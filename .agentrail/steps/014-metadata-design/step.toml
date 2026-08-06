@@ -1,6 +1,6 @@
 number = 14
 slug = "metadata-design"
-status = "pending"
+status = "in-progress"
 description = "Contract item 4 design: @test metadata on def u: functions + reflection enume..."
 role = "legacy"
 context_files = []
