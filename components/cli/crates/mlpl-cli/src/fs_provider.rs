@@ -60,10 +60,10 @@ impl SourceProvider for FsProvider {
             .join(rel)
             .canonicalize()
             .map_err(|e| bad(format!("no such source file ({e})")))?;
-        if !canonical.starts_with(&self.root) {
-            return Err(bad("path escapes the source root".into()));
-        }
-        Ok(SourceId(canonical.to_string_lossy().into_owned()))
+        canonical
+            .starts_with(&self.root)
+            .then(|| SourceId(canonical.to_string_lossy().into_owned()))
+            .ok_or_else(|| bad("path escapes the source root".into()))
     }
 
     fn read(&self, id: &SourceId) -> Result<String, IncludeError> {
