@@ -13,7 +13,24 @@ fn multi_line_defs_stay_whole_and_singles_stay_single() {
     assert_eq!(g[0], "x = 1");
     assert!(g[1].starts_with("def u:f"), "{:?}", g[1]);
     assert!(g[1].ends_with('}'), "{:?}", g[1]);
-    assert_eq!(g[2], "u:f(2)");
+    // The comment RIDES with the statement that follows it, so
+    // the transcript keeps the author's narrative.
+    assert_eq!(g[2], "# comment\nu:f(2)");
+}
+
+#[test]
+fn comments_attach_to_the_following_statement() {
+    let src = "# overview: what this document is\n\
+               # APL2:  +/V\n\
+               reduce(:add, v)\n\
+               \n\
+               # trailing orphan comment\n";
+    let g = group_statements(src);
+    assert_eq!(g.len(), 1, "{g:?}");
+    assert_eq!(
+        g[0],
+        "# overview: what this document is\n# APL2:  +/V\nreduce(:add, v)"
+    );
 }
 
 #[test]
