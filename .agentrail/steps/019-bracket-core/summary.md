@@ -1,0 +1,1 @@
+bracket core shipped: setup/use/teardown sequencing, plain-value-as-ok fixture, setup-failure skip, teardown-always-after-setup, primary precedence; 5 TDD tests; clippy clean.

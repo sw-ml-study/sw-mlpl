@@ -1,9 +1,10 @@
 number = 19
 slug = "bracket-core"
-status = "pending"
+status = "completed"
 description = "AFTER user review of docs/finally-design.md: implement bracket(setup, use, te..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T22:26:54"
+completed_at = "2026-08-05T22:34:32"
 task_type = "rust-feature"
-commits = []
+commits = ["c7168b2e986def44c3337870f010e3b76c9f965a"]
