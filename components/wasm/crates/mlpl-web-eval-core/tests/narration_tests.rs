@@ -1,6 +1,6 @@
 //! Narration/code splitting for editor Run groups.
 
-use mlpl_web_eval_core::narration::split_leading_comments;
+use mlpl_web_eval_core::state::split_leading_comments;
 
 #[test]
 fn leading_comments_become_stripped_narration() {

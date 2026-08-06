@@ -6,6 +6,5 @@ pub mod connect_guard;
 pub mod devices;
 pub mod eval_url;
 pub mod loss_trace;
-pub mod narration;
 pub mod state;
 pub mod wire;

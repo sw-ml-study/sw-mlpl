@@ -95,3 +95,15 @@ pub(crate) fn push_progress_notes(
     }
     had
 }
+
+/// Demo-style prose block: a Run group's leading comments (or a
+/// closing comment-only summary) narrate the transcript instead
+/// of cluttering the prompt echo.
+pub(crate) fn push_narration(new_history: &mut Vec<HistoryEntry>, text: String) {
+    new_history.push(HistoryEntry {
+        input: String::new(),
+        output: text,
+        is_error: false,
+        kind: EntryKind::Narration,
+    });
+}
