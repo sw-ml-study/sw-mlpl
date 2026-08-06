@@ -46,9 +46,7 @@ impl SourceProvider for FsProvider {
             reason,
         };
         if Path::new(rel).is_absolute() {
-            return Err(bad(
-                "absolute paths are rejected; includes are relative".into()
-            ));
+            return Err(bad("absolute include paths are rejected".into()));
         }
         // Files under the root resolve relative to themselves; a
         // root script OUTSIDE the sandbox resolves against root.
