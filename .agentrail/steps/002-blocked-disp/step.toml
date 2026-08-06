@@ -1,0 +1,9 @@
+number = 2
+slug = "blocked-disp"
+status = "pending"
+description = "disp renders rank-4 [a,b,c,d] as an a x b outer grid of boxed c x d matrices ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T00:23:05"
+task_type = "rust-feature"
+commits = []

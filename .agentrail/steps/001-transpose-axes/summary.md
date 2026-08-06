@@ -1,0 +1,1 @@
+transpose_axes shipped: axis permutation with label carry, loud two-layer validation, catalog row; 5 TDD tests incl. Sudoku block re-ranking; pre-existing clippy lint retired.
