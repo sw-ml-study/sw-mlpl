@@ -1,0 +1,1 @@
+Include user docs shipped (usage/lang-reference/glossary 446 + wiki capability row); connect-mode precise error verified live; pages + server current.

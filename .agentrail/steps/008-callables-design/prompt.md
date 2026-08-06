@@ -1,0 +1,1 @@
+Contract item 3 design: first-class :u:name references + call(f, args...) -- Value kind, arity/identity diagnostics, interaction with BuiltinRef and the future HOF saga; include the monad combinators (map_ok/and_then/or_else per docs/monads.md) as same-saga rider; write docs/callables-design.md and pause for review.

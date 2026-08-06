@@ -1,9 +1,10 @@
 number = 7
 slug = "include-surfaces"
-status = "in-progress"
+status = "completed"
 description = "Per design: precise provider-less errors are already wired via the AST arm --..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-05T19:59:28"
+completed_at = "2026-08-05T20:08:11"
 task_type = "rust-feature"
-commits = []
+commits = ["13d2ed956b61e1d0f831f92c510f0e18505c49a6"]

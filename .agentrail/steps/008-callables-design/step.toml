@@ -1,0 +1,9 @@
+number = 8
+slug = "callables-design"
+status = "pending"
+description = "Contract item 3 design: first-class :u:name references + call(f, args...) -- ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T20:08:11"
+task_type = "docs"
+commits = []
