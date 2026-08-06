@@ -65,7 +65,9 @@ mod fncall_combinators;
 mod fncall_engram;
 mod fncall_engram_args;
 mod fncall_models;
+mod fncall_reflect;
 mod fncall_trace;
+mod fncall_values;
 mod grad;
 mod grad_calls_basic;
 mod grad_calls_engram;
@@ -73,6 +75,7 @@ mod grad_calls_shape;
 mod grad_optim;
 mod grad_optim_resident;
 mod grad_optim_resident_math;
+mod reflect_info;
 // The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,
 // layouts, the step registry) moved to mlpl-eval-state
 // (env-types-out step); the cfg-gated re-exports below preserve the

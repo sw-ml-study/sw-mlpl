@@ -1052,6 +1052,7 @@ dependencies = [
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -1064,10 +1065,15 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
 name = "mlpl-bpe-core"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-builtin-catalog"
 version = "0.20.0"
 
 [[package]]
@@ -1116,6 +1122,7 @@ dependencies = [
  "mlpl-eval-pets-tiny",
  "mlpl-eval-state",
  "mlpl-eval-types",
+ "mlpl-forge-kg",
  "mlpl-loader-helpers",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
@@ -1126,7 +1133,9 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-parser",
  "mlpl-runtime",
+ "mlpl-tensor-handle",
  "mlpl-trace",
+ "mlpl-value-structural",
  "mlpl-viz",
  "serde",
  "serde_json",
@@ -1136,6 +1145,7 @@ dependencies = [
 name = "mlpl-eval-core"
 version = "0.20.0"
 dependencies = [
+ "mlpl-builtin-catalog",
  "serde",
 ]
 
@@ -1208,6 +1218,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-reduce",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-envc-bindings",
@@ -1242,6 +1253,7 @@ dependencies = [
  "mlpl-array",
  "mlpl-eval-types",
  "mlpl-parser",
+ "mlpl-tensor-handle",
  "serde",
 ]
 
@@ -1262,6 +1274,14 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-runtime",
  "mlpl-viz",
+]
+
+[[package]]
+name = "mlpl-forge-kg"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
 ]
 
 [[package]]
@@ -1400,6 +1420,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
 ]
 
@@ -1444,6 +1465,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-forge-kg",
  "mlpl-runtime-array",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",
@@ -1545,6 +1567,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-tensor-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-trace"
 version = "0.20.0"
 dependencies = [
@@ -1552,6 +1581,15 @@ dependencies = [
  "mlpl-core",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "mlpl-value-structural"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-eval-core",
+ "mlpl-eval-types",
 ]
 
 [[package]]

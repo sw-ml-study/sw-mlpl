@@ -5,6 +5,31 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-06
+
+**Q: Can mlplunit proceed?**
+
+A: YES -- on everything in the contract's independent first
+four, right now. Their own gate confirms it: `check-capabilities`
+against the current build reports structural-equality,
+native-static-include, callable-user-functions, and
+result-combinators all SHIPPED (they adopted callables +
+combinators on their side), and test-metadata now reports
+AVAILABLE -- @test parses, registers at def evaluation, and the
+reflection trio ships: `tests()` (stable names, source order),
+`test_info(name)` (row with `fn` as the callable `:u:`
+reference), `annotations(name)` (the general @word namespace,
+e.g. @formula/@doc, bare words -> 1). Smoke-verified over the
+connect path too (server rebuilt + restarted). What mlplunit
+does next is on their side: update capabilities.tsv/adapters to
+adopt test-metadata and callables. Still GATED by design:
+parameterized-tests (unblocks the moment they adopt the two
+AVAILABLE capabilities -- no further sw-MLPL work) and
+fixture-lifecycle, whose one language prerequisite is
+guaranteed-finally/bracket (contract item 6; design queued,
+docs/monads.md rec 3). Items 5 and 7 need no sw-MLPL evaluator
+work beyond that.
+
 ## 2026-08-05
 
 **Q: What are next steps doable now?**

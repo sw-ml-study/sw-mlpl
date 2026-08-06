@@ -451,6 +451,28 @@ installed models with the current pick marked; `:connect set
 server; with no explicit pick the server auto-uses a
 median-size installed model.
 
+## Annotations (@word)
+
+`@word [record | string]` lines before a `def u:` attach
+metadata to that definition; several stack onto one def. The
+word namespace is open -- `@formula "H(p) = ..."`, `@doc
+{latex: "..."}` -- and every annotation is preserved as data
+readable via [[annotations (builtin)]]. `@test` is the one
+interpreted word: it registers the definition in the test
+registry (see [[tests / test_info (builtins)]]) with optional
+validated fields `name`, `tags`, `skip`, `expected_failure`,
+`timeout_ms`; unknown fields are a loud error.
+
+## annotations (builtin)
+
+`annotations("u:name")` returns a definition's `@word`
+annotations as a record `{word: payload, ...}` -- the payload
+is the annotation's record or string argument, and a bare
+annotation maps to scalar 1. Reflection without execution: a
+documentation or formula extractor harvests
+[[Annotations (@word)]] metadata with no further language
+support.
+
 ## Agent loop
 
 A control loop where an LLM repeatedly emits a tool-use
@@ -1689,6 +1711,18 @@ much of what parameter count gives up. MLPL's synthetic
 builtins (`moons`, `blobs`, `circles`, `grid`) are the
 tiny-scale version of the idea.
 
+
+## tests / test_info (builtins)
+
+The discovery pair over the test registry. `tests()` lists
+every `@test`-annotated function's stable name as a string
+list in registration order (definition order; `include`
+splice order across files). `test_info(name)` returns one
+row: `{name, fn, tags, skip, expected_failure, timeout_ms,
+source, line}` where `fn` is the `:u:` reference -- a runner
+does `call(test_info(n).fn)`. Discovery never invokes
+anything; evaluating the `def` statements IS registration.
+See [[Annotations (@word)]].
 
 ## Test-Time Compute
 

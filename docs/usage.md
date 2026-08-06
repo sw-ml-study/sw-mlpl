@@ -140,6 +140,24 @@ def u:zscore(x) {
   `call(suite.z, v)`). The Result combinators `map_ok` /
   `and_then` / `or_else` take a reference first:
   `and_then(:u:validate, u:parse(x))` chains fallible steps.
+- Definitions take ANNOTATIONS: `@word [record | string]` lines
+  before a `def u:` attach metadata (several stack). Any word is
+  preserved as data (`annotations("u:name")` reads them back;
+  bare words map to 1); `@test` additionally registers the
+  function as a test with optional validated fields
+  (`name`, `tags`, `skip`, `expected_failure`, `timeout_ms`):
+
+  ```
+  @test {name: "addition works", tags: ["fast"]}
+  def u:addition_works() { u:assert_eq(2 + 2, 4, "adds") }
+  ```
+
+  Discovery is separate from execution: `tests()` lists stable
+  names in definition order (across `include` files, in splice
+  order), and `test_info(name)` returns the row -- its `fn`
+  field is the `:u:` reference, so a runner invokes with
+  `call(test_info(name).fn)`. `timeout_ms` is recorded for the
+  runner, not enforced by the evaluator.
 
 ## Control Flow and Error Handling
 

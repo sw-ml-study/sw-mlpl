@@ -80,22 +80,28 @@ fn apply_fields(
         ));
     };
     for (key, value) in fields {
-        match (key.as_str(), value) {
-            ("name", Value::Str(s)) => entry.name = s,
-            ("skip", Value::Str(s)) => entry.skip = s,
-            ("tags", Value::StrList { items }) => entry.tags = items,
-            ("expected_failure", Value::Array(a)) if a.rank() == 0 => {
-                entry.expected_failure = a.data()[0];
-            }
-            ("timeout_ms", Value::Array(a)) if a.rank() == 0 => entry.timeout_ms = a.data()[0],
-            (other, v) => {
-                return Err(EvalError::Unsupported(format!(
-                    "@test: unknown or mistyped field `{other}` ({}); recognized: name \
-                     (string), tags (string list), skip (string), expected_failure \
-                     (scalar), timeout_ms (scalar)",
-                    mlpl_eval_types::value_kind(&v)
-                )));
-            }
+        fold_field(entry, &key, value)?;
+    }
+    Ok(())
+}
+
+/// One validated `@test` field; unknown or mistyped is LOUD.
+fn fold_field(entry: &mut TestEntry, key: &str, value: Value) -> Result<(), EvalError> {
+    match (key, value) {
+        ("name", Value::Str(s)) => entry.name = s,
+        ("skip", Value::Str(s)) => entry.skip = s,
+        ("tags", Value::StrList { items }) => entry.tags = items,
+        ("expected_failure", Value::Array(a)) if a.rank() == 0 => {
+            entry.expected_failure = a.data()[0];
+        }
+        ("timeout_ms", Value::Array(a)) if a.rank() == 0 => entry.timeout_ms = a.data()[0],
+        (other, v) => {
+            return Err(EvalError::Unsupported(format!(
+                "@test: unknown or mistyped field `{other}` ({}); recognized: name \
+                 (string), tags (string list), skip (string), expected_failure \
+                 (scalar), timeout_ms (scalar)",
+                mlpl_eval_types::value_kind(&v)
+            )));
         }
     }
     Ok(())

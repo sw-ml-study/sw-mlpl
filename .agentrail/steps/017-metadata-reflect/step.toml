@@ -1,6 +1,6 @@
 number = 17
 slug = "metadata-reflect"
-status = "pending"
+status = "in-progress"
 description = "Per design: tests() (StrList of stable names, source order), test_info(name) ..."
 role = "legacy"
 context_files = []

@@ -119,6 +119,21 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "recover: err(e) -> f(e); ok passes through",
             ),
             (
+                "tests",
+                "tests()",
+                "stable names of @test-annotated functions, in source order",
+            ),
+            (
+                "test_info",
+                "test_info(name)",
+                "one test's registry row: name/fn/tags/skip/expected_failure/timeout_ms/source/line",
+            ),
+            (
+                "annotations",
+                "annotations(name)",
+                "a definition's @word annotations as a record; bare words map to 1",
+            ),
+            (
                 "equal",
                 "equal(a, b)",
                 "total structural equality over any two values; never errors",

@@ -246,6 +246,42 @@ section for the rules. Surfaces without a source provider (the
 browser session, connect mode, the interactive prompt) reject
 the declaration with a precise error.
 
+## Annotations (`@word`)
+
+```text
+@test
+def u:addition_works() { u:assert_eq(2 + 2, 4, "adds") }
+
+@test {name: "beta case", tags: ["fast"], timeout_ms: 500}
+@formula "H(p) = -sum(p * log(p))"
+def u:entropy(p) { 0 - sum(p * log(p)) }
+```
+
+`@word [record-literal | string-literal]` lines annotate the
+NEXT `def u:` statement; several annotations stack onto one
+definition. An annotation followed by anything other than a
+`def` is a parse error, as is a bare `@` with no word.
+
+`@` is a general namespace: any word is legal, and every
+annotation is preserved as data readable via
+`annotations(name)` -- so documentation or formula metadata
+costs no language support. Exactly one word is INTERPRETED:
+`@test` registers the definition in the test registry at the
+moment the `def` evaluates (so include splice order is
+registration order). Its optional record payload is validated
+-- unknown or mistyped fields are an error. Recognized fields,
+all optional: `name` (stable test name; default the function
+name without `u:`), `tags` (string list), `skip` (string
+reason; presence means skip), `expected_failure` (scalar 1
+inverts pass/fail), `timeout_ms` (scalar; recorded for the
+runner, not enforced by the evaluator). Duplicate stable names
+across different functions are an error naming both
+definitions; re-defining a test function replaces its entry in
+place. Discovery is side-effect-free: `tests()` lists stable
+names in registration order and `test_info(name)` returns one
+registry row whose `fn` field is the `:u:` reference, so a
+runner invokes it with `call(test_info(n).fn)`.
+
 ## Experiment Block
 
 ```
@@ -355,6 +391,9 @@ tables (e.g. the three name forms) keep their teaching order.
 | `map_ok(f, r)` | 2 | Apply `f` inside `ok(...)`: `ok(x)` becomes `ok(f(x))`; `err` passes through untouched. `f` is a function reference; builtin references need an array payload. |
 | `and_then(f, r)` | 2 | Chain fallible steps (the railway): `ok(x)` becomes `f(x)` where `f` itself returns a Result; `err` passes through. |
 | `or_else(f, r)` | 2 | Recover: `err(e)` becomes `f(e)`; `ok` passes through untouched. |
+| `tests()` | 0 | Stable names of every `@test`-annotated function as a string list, in registration (source/include-splice) order. Discovery only -- nothing is invoked. |
+| `test_info(name)` | 1 | One test's registry row as a record: `{name, fn, tags, skip, expected_failure, timeout_ms, source, line}`. `fn` is the `:u:` reference, so `call(test_info(n).fn)` runs the test. Unknown names error, listing the registered tests. |
+| `annotations(name)` | 1 | ALL of a definition's `@word` annotations as a record `{word: payload, ...}`; bare annotations map to scalar 1. Accepts `"u:name"` or `"name"`. The reflection door for documentation/formula metadata. |
 | `equal(a, b)` | 2 | Total STRUCTURAL equality over any two values: numbers (IEEE, except NaN equals NaN), strings, arrays (shape + axis labels + elements), records (recursing), models, tokenizers, `ok`/`err` results. Mismatched kinds return 0 -- never a hard error -- so assertions stay honest. Returns scalar 1/0. |
 | `repr(v)` | 1 | Deterministic, BOUNDED rendering of any value for expected-vs-actual diagnostics: `array[2, 3] [0, 1, ...]` with labels, quoted escaped strings, `{field: ...}` records, `ok(...)`/`err(...)`. Truncates large values with an explicit marker; not a serialization format. |
 | `compress(mask, a[, axis])` | 2-3 | Keep the slices of `a` along `axis` (default 0) where rank-1 `mask` is nonzero (APL compress). `compress(gt(scores, t), C)` keeps verified candidates; works on any rank. |

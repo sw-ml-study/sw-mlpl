@@ -1465,7 +1465,9 @@ version = "0.20.0"
 dependencies = [
  "dirs",
  "mlpl-eval",
+ "mlpl-lexer",
  "mlpl-parser",
+ "mlpl-source-loader",
  "mlpl-trace",
  "sha2",
 ]
@@ -2054,6 +2056,15 @@ dependencies = [
  "sha2",
  "tokio",
  "uuid",
+]
+
+[[package]]
+name = "mlpl-source-loader"
+version = "0.20.0"
+dependencies = [
+ "mlpl-lexer",
+ "mlpl-parser",
+ "mlpl-parser-ast",
 ]
 
 [[package]]

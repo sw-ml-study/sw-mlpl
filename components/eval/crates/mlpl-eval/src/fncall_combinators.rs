@@ -58,18 +58,23 @@ fn apply_ref(
         Value::UserFnRef { name } => {
             crate::eval_user_fn::invoke_user_fn_values(name, &[payload], env, trace)
         }
-        Value::BuiltinRef { name } => match payload {
-            Value::Array(a) => Ok(Value::Array(mlpl_runtime::call_builtin(name, vec![a])?)),
-            other => Err(EvalError::Unsupported(format!(
-                "{who}: builtin reference `:{name}` needs an array payload -- got {} \
-                 (use a `u:` function for non-array payloads)",
-                value_kind(&other)
-            ))),
-        },
+        Value::BuiltinRef { name } => apply_builtin_ref(who, name, payload),
         other => Err(EvalError::Unsupported(format!(
             "{who}: first argument must be a function reference (`:u:name` or `:name`) \
              -- got {}",
             value_kind(other)
+        ))),
+    }
+}
+
+/// A builtin reference composes over ARRAY payloads only.
+fn apply_builtin_ref(who: &str, name: &str, payload: Value) -> Result<Value, EvalError> {
+    match payload {
+        Value::Array(a) => Ok(Value::Array(mlpl_runtime::call_builtin(name, vec![a])?)),
+        other => Err(EvalError::Unsupported(format!(
+            "{who}: builtin reference `:{name}` needs an array payload -- got {} \
+             (use a `u:` function for non-array payloads)",
+            value_kind(&other)
         ))),
     }
 }
