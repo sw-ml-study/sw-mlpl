@@ -1,0 +1,1 @@
+fs API shipped: Result-speaking sandboxed fs_walk/read_text/write_text/remove_path with nearest-ancestor containment, lexical order, no-symlink policy; repl sandbox wiring; 5 TDD tests.
