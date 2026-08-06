@@ -15,8 +15,15 @@ def u:addition_works() { u:assert_eq(2 + 2, 4, "adds")? ; ok(1) }
 def u:parse_case() { ... }
 ```
 
-- `@test` is an ANNOTATION line attached to the NEXT `def u:`
-  statement. The `@` character is unclaimed today (it lexes as
+- `@` is a GENERAL annotation namespace (user direction,
+  2026-08-05): `@<word> [record-literal | string-literal]`
+  attaches to the NEXT `def u:` statement, and a definition may
+  carry SEVERAL annotations. `@test` is the first consumer;
+  others -- e.g. `@formula "H(p) = -sum(p * log(p))"` or
+  `@doc {latex: "..."}` for documentation/math extraction --
+  are PRESERVED as data and exposed through reflection, so a
+  docs tool can harvest them with no further language work.
+  The `@` character is unclaimed today (it lexes as
   UnexpectedCharacter), so the syntax costs nothing existing.
 - The optional argument is one RECORD LITERAL -- reusing the
   existing record grammar, no new metadata mini-language.
@@ -33,9 +40,11 @@ def u:parse_case() { ... }
     stated plainly in docs.
   Unknown fields are a structured error (malformed metadata must
   not pass silently).
-- `@test` on anything other than a following `def u:` statement
-  is a structured parse-time error; two annotations in a row
-  likewise.
+- Any annotation on something other than a following `def u:`
+  statement is a structured parse-time error. Multiple
+  annotations stack onto the same def; only `@test`'s OWN
+  record fields are validated (unknown fields there are loud) --
+  other annotations are free-form by design.
 
 ## Reflection (discovery without execution)
 
@@ -46,6 +55,7 @@ sort by key; the contract demands SOURCE order):
 |---|---|
 | `tests()` | The stable test names as a string list, in definition (source) order -- across `include` chunks in splice order. |
 | `test_info("name")` | A record for one test: `{name, fn, tags, skip, expected_failure, timeout_ms, source, line}` -- `fn` is the `:u:name` REFERENCE (so a runner does `call(test_info(n).fn)`), `source`/`line` locate the definition. Absent optional fields default (`tags` empty list, `skip` empty string, `expected_failure` 0, `timeout_ms` 0). |
+| `annotations("u:name")` | ALL of a definition's annotations as a record `{word: payload, ...}` (payload = the record/string argument, or 1 for a bare annotation). The general-reflection door for documentation/math extraction and future consumers. |
 
 Discovery has no side effects: evaluating `def` statements
 registers tests (that is how definitions already work);
@@ -91,11 +101,11 @@ runner asks `tests()`.
 
 ## Open questions for review
 
-1. Annotation spelling: exactly `@test` (proposed, matches the
-   fixture) -- or a general `@meta` the test runner interprets?
-   Proposed: `@test` only, and reject other `@words` with a
-   structured error naming the one supported annotation;
-   generality can come when a second consumer exists.
+1. RESOLVED by user direction: `@` is a general annotation
+   namespace (documentation/formula metadata is an anticipated
+   consumer); `@test` is its first interpreter, unknown
+   annotations are preserved data reachable via
+   `annotations("u:name")`.
 2. `skip` semantics: sw-MLPL records the reason and the runner
    decides (proposed), vs `call` refusing to invoke skipped
    tests? Proposed: recording only -- the language should not
