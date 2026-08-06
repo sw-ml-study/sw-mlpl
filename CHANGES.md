@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 012 complete
+- feat(eval): call(f, args...) -- uniform invocation of function references (mlplunit-unblock step callables-call)
+- docs(q-and-a): mlplunit blocker tally -- P0s done awaiting adoption; callables call() next
+- fix(serve): user-fn-ref arm in the mlx-serve R1 payload guard
+- fix(serve): user-fn-ref kind in the response mapper (masked build failure)
+- saga mlplunit-unblock: step 011 complete
+- feat(lang): :u:name -- first-class user-function references (mlplunit-unblock step callables-ref)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 010 complete
 - fix(eval): binding hygiene -- results join the frame snapshot; bindings clear stale kinds (mlplunit blocker)
 - saga mlplunit-unblock: step 009 complete
