@@ -14,6 +14,15 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga status-badges-emacs: complete (6 steps)
+- test(parser): invalid_character uses a character that IS invalid
+- saga: agentrail state for splash-badge step
+- feat(web): splash status badge; idioms u:fn composition; single-build deploys (splash-badge)
+- feat(web): status badge on the splash screen; idioms doc gains u:fn composition (splash-badge)
+- docs: commit the BQN/math-view analysis notes and the three-eBook topic list
+- saga status-badges-emacs: step 005 complete (utf8 tokenizer)
+- fix(web): UTF-8-safe inline tokenizer -- APL glyphs render intact (utf8-inline)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga status-badges-emacs: complete (4 steps)
 - docs: close status-badges-emacs; mlplunit round-2 gates assessed and queued
 - saga status-badges-emacs: step 003 complete
