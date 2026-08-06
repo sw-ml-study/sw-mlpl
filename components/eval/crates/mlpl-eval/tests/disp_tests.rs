@@ -46,17 +46,20 @@ rank 2  shape [2, 3]  depth 1";
 }
 
 #[test]
-fn disp_rank3_stacks_slices() {
-    // A rank-3 tensor renders as a labeled stack of its leading-axis
-    // slices, each a framed 2D block, with a shape/rank/depth footer.
+fn disp_rank3_boxes_slices_side_by_side() {
+    // A rank-3 tensor renders as ONE ROW of boxed matrices inside
+    // an outer frame (the APL2 DISPLAY shape for enclosed blocks),
+    // with the shape/rank/depth footer.
     let out = disp("disp(reshape(iota(12), [2, 2, 3]))");
-    assert!(out.contains("[0]"), "slice 0 label missing:\n{out}");
-    assert!(out.contains("[1]"), "slice 1 label missing:\n{out}");
-    assert!(out.contains("| 0 1 2 |"), "first slice row missing:\n{out}");
+    assert!(out.contains("| 0 1 2 |"), "first block row missing:\n{out}");
     assert!(
-        out.contains("| 9 10 11 |"),
-        "second slice row missing:\n{out}"
+        out.contains("|  9 10 11 |"),
+        "second block row (block-aligned cells) missing:\n{out}"
     );
+    let both = out
+        .lines()
+        .any(|l| l.contains("0 1 2") && l.contains('6') && l.contains('8'));
+    assert!(both, "blocks must sit side by side:\n{out}");
     assert!(
         out.ends_with("rank 3  shape [2, 2, 3]  depth 1"),
         "footer wrong:\n{out}"
