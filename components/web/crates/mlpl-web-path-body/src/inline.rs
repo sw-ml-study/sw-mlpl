@@ -56,12 +56,14 @@ fn try_match_span(bytes: &[u8], i: usize, c: u8) -> Option<(Span, usize)> {
             .map(|(s, end)| (Span::Glossary(s), end - i));
     }
     // `[label](url)` -- a single `[` (not the `[[` glossary sigil)
-    // followed by `](`. Reuses `match_until` for both halves.
+    // followed by `](`. A "url" containing whitespace is prose
+    // ("[a, b] (note)" punctuation), not a link.
     if c == b'['
         && let Some((text, after)) = match_until(bytes, i + 1, b']')
         && after < bytes.len()
         && bytes[after] == b'('
         && let Some((url, end)) = match_until(bytes, after + 1, b')')
+        && !url.contains(char::is_whitespace)
     {
         return Some((Span::Link { text, url }, end - i));
     }
@@ -71,10 +73,28 @@ fn try_match_span(bytes: &[u8], i: usize, c: u8) -> Option<(Span, usize)> {
     if c == b'*' && i + 1 < bytes.len() && bytes[i + 1] == b'*' {
         return match_until_pair(bytes, i + 2, b'*', b'*').map(|(s, end)| (Span::Bold(s), end - i));
     }
+    // `_emph_` only at WORD BOUNDARIES (CommonMark rule): a `_`
+    // inside snake_case is literal, so identifiers in prose
+    // survive verbatim (the transpose_axes class bug).
     if c == b'_'
-        && let Some((s, end)) = match_until(bytes, i + 1, b'_')
+        && (i == 0 || !bytes[i - 1].is_ascii_alphanumeric())
+        && let Some((s, end)) = match_emph_close(bytes, i + 1)
     {
         return Some((Span::Emph(s), end - i));
+    }
+    None
+}
+
+/// Find the closing `_` of an emphasis span: the first `_` NOT
+/// followed by an alphanumeric (an intra-word `_` cannot close).
+fn match_emph_close(bytes: &[u8], start: usize) -> Option<(String, usize)> {
+    let mut j = start;
+    while j < bytes.len() {
+        if bytes[j] == b'_' && (j + 1 == bytes.len() || !bytes[j + 1].is_ascii_alphanumeric()) {
+            let s = std::str::from_utf8(&bytes[start..j]).ok()?;
+            return Some((s.to_string(), j + 1));
+        }
+        j += 1;
     }
     None
 }
@@ -101,49 +121,4 @@ fn match_until_pair(bytes: &[u8], start: usize, d1: u8, d2: u8) -> Option<(Strin
         j += 1;
     }
     None
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{Span, split};
-
-    #[test]
-    fn glossary_sigil_round_trips() {
-        // Core: [[term]] -> Span::Glossary("term"). Also
-        // covers leading text + trailing text segmenting.
-        let spans = split("see [[take (builtin)]] for more");
-        assert_eq!(spans.len(), 3);
-        assert!(matches!(&spans[0], Span::Text(t) if t == "see "));
-        assert!(matches!(&spans[1], Span::Glossary(t) if t == "take (builtin)"));
-        assert!(matches!(&spans[2], Span::Text(t) if t == " for more"));
-    }
-
-    #[test]
-    fn unterminated_or_single_bracket_stays_text() {
-        // `[term]` (single) and `[[unterminated` (no closer)
-        // both render as literal text rather than crashing.
-        assert!(matches!(&split("[not a link]")[0], Span::Text(_)));
-        assert!(matches!(&split("[[unterminated")[0], Span::Text(_)));
-    }
-
-    #[test]
-    fn markdown_link_parses() {
-        // [label](url) -> Span::Link; surrounding text segments.
-        let spans = split("see [the doc](literate/x.html) now");
-        assert!(matches!(&spans[0], Span::Text(t) if t == "see "));
-        assert!(
-            matches!(&spans[1], Span::Link { text, url } if text == "the doc" && url == "literate/x.html")
-        );
-        assert!(matches!(&spans[2], Span::Text(t) if t == " now"));
-        // A bare [bracketed] with no (url) stays literal text.
-        assert!(matches!(&split("[just text]")[0], Span::Text(_)));
-    }
-
-    #[test]
-    fn code_and_glossary_coexist() {
-        // The dispatcher must not confuse `code` with [[term]].
-        let spans = split("`code` and [[Stack (tape op)]]");
-        assert!(matches!(&spans[0], Span::Code(t) if t == "code"));
-        assert!(matches!(&spans[2], Span::Glossary(t) if t == "Stack (tape op)"));
-    }
 }

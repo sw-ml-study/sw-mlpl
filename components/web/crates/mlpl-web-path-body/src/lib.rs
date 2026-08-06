@@ -12,6 +12,8 @@ mod block_acc;
 mod blocks;
 mod inline;
 mod inline_render;
+#[cfg(test)]
+mod inline_tests;
 
 use yew::prelude::*;
 
@@ -55,4 +57,21 @@ fn render_block(block: Block) -> Html {
 pub fn render_inline(text: &str) -> Html {
     let parts = inline::split(text);
     html! { <>{ for parts.into_iter().map(inline_render::render_span) }</> }
+}
+
+/// Audit hook for prose corpora (demo intros/takeaways, lesson
+/// bodies, glossary entries): the `_emph_` spans the inline
+/// tokenizer would produce. Rendered prose in this project
+/// never uses `_` emphasis intentionally, so a registry-wide
+/// test pins this to empty -- any hit is an identifier being
+/// eaten by markup (the snake_case class bug, 2026-08-06).
+#[must_use]
+pub fn emphasis_spans(text: &str) -> Vec<String> {
+    inline::split(text)
+        .into_iter()
+        .filter_map(|s| match s {
+            inline::Span::Emph(t) => Some(t),
+            _ => None,
+        })
+        .collect()
 }
