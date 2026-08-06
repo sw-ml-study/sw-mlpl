@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga apl2-idioms-expunge: complete (6 steps)
+- fix(web): editor stays open on Run; help header uses the crate version
+- infra(pages): deploy from gh-pages branch -- no Actions builder (branch-deploy)
+- chore: remove orphaned narration.rs + lockfile refresh (run-narration stragglers)
+- saga apl2-idioms-expunge: step 005 complete (run narration)
+- refactor(web): retire run-narration ledger FAILs (splitter into state.rs, narration push into running.rs)
+- feat(web): editor Run narrates comment blocks demo-style (run-narration)
+- saga apl2-idioms-expunge: step 004 complete (run keeps comments)
+- fix(web): editor Run keeps full-line comments with their statements (run-keeps-comments)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga apl2-idioms-expunge: complete (3 steps)
 - docs: close apl2-idioms-expunge -- Emacs mlpl-mode sketch queued, queue advanced
 - saga apl2-idioms-expunge: step 002 complete
