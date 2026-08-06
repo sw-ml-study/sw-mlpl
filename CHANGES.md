@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: complete (21 steps)
+- docs: close the mlplunit-unblock program (mlplunit-close)
+- saga mlplunit-unblock: step 020 complete
+- feat(eval): bracket error plane -- capture, teardown_error merge, ? composition (bracket-errors)
+- saga mlplunit-unblock: step 019 complete
+- feat(eval): bracket(setup, use, teardown) -- guaranteed-finally core (bracket-core)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 018 complete (bracket design ready for review)
 - docs(design): guaranteed-finally via bracket(setup, use, teardown) (finally-design)
 - docs(changes): refresh CHANGES.md to HEAD
