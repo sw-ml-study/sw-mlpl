@@ -1,0 +1,1 @@
+BLOCKED: Preempted by user direction 2026-08-05: unblock mlplunit first (docs/mlplunit-unblock-plan.md). No code written; design is committed in docs/kv-cache-design.md; resume by re-initing from the archived plan.

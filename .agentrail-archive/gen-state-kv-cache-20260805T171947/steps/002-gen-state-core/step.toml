@@ -1,6 +1,6 @@
 number = 2
 slug = "gen-state-core"
-status = "pending"
+status = "blocked"
 description = "Per design + review resolutions: GenerationState value kind + gen_state(model..."
 role = "legacy"
 context_files = []
