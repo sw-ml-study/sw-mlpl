@@ -1,0 +1,1 @@
+equal + repr shipped and VERIFIED against mlplunit's gate (AVAILABLE structural-equality); new pure mlpl-value-structural crate; docs pinned; binaries + pages current. Also answered the Clustering-group question in q-and-a.

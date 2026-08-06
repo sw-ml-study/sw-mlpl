@@ -1,0 +1,9 @@
+number = 3
+slug = "include-design"
+status = "pending"
+description = "Contract item 1: read ../mlplunit/docs/static-include-design.md; design the p..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-05T17:56:13"
+task_type = "docs"
+commits = []
