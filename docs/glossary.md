@@ -1273,6 +1273,24 @@ tasks like translation. Decoder-only models (GPT-style) skip
 the encoder; encoder-only models (BERT-style) skip the
 decoder. See "[[Decoder / encoder]]" for the role of each side.
 
+## equal (builtin)
+
+`equal(a, b)` -> scalar 1/0: total STRUCTURAL equality over any
+two values -- arrays (shape, axis labels, and elements; NaN
+equals NaN), strings, records (recursing), `ok`/`err` results,
+models, tokenizers. Mismatched kinds compare unequal instead of
+raising an error, so a test assertion can never be escaped by a
+type surprise. The assertion primitive of the xUnit story; pair
+with [[repr (builtin)]] for the expected-vs-actual message.
+
+## repr (builtin)
+
+`repr(v)` -> a deterministic, BOUNDED string rendering of any
+value, built for diagnostics: `array[2, 3]` headers with labels,
+quoted escaped text, nested records and results. Large values
+truncate with an explicit marker. Deterministic for a given
+runtime version; not a serialization or snapshot format.
+
 ## Ensembling
 
 Running multiple trained models on the same input and

@@ -1760,6 +1760,7 @@ dependencies = [
  "mlpl-runtime",
  "mlpl-tensor-handle",
  "mlpl-trace",
+ "mlpl-value-structural",
  "mlpl-viz",
  "serde",
  "serde_json",
@@ -2384,6 +2385,15 @@ dependencies = [
  "mlpl-core",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "mlpl-value-structural"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-eval-core",
+ "mlpl-eval-types",
 ]
 
 [[package]]

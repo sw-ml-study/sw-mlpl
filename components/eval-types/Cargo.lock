@@ -306,6 +306,7 @@ dependencies = [
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
 
 [[package]]
@@ -318,7 +319,12 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-tensor-handle",
 ]
+
+[[package]]
+name = "mlpl-builtin-catalog"
+version = "0.20.0"
 
 [[package]]
 name = "mlpl-core"
@@ -326,6 +332,10 @@ version = "0.20.0"
 dependencies = [
  "serde",
 ]
+
+[[package]]
+name = "mlpl-engram-core"
+version = "0.20.0"
 
 [[package]]
 name = "mlpl-env-traits"
@@ -340,6 +350,7 @@ dependencies = [
 name = "mlpl-eval-core"
 version = "0.20.0"
 dependencies = [
+ "mlpl-builtin-catalog",
  "serde",
 ]
 
@@ -369,6 +380,14 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-runtime",
  "mlpl-viz",
+]
+
+[[package]]
+name = "mlpl-forge-kg"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
 ]
 
 [[package]]
@@ -491,6 +510,7 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-autograd",
  "mlpl-core",
+ "mlpl-engram-core",
  "mlpl-eval-core",
 ]
 
@@ -528,6 +548,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-forge-kg",
  "mlpl-runtime-array",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",
@@ -629,6 +650,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-tensor-handle"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-trace"
 version = "0.20.0"
 dependencies = [
@@ -636,6 +664,15 @@ dependencies = [
  "mlpl-core",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "mlpl-value-structural"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-eval-core",
+ "mlpl-eval-types",
 ]
 
 [[package]]

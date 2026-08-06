@@ -1,0 +1,14 @@
+[package]
+name = "mlpl-value-structural"
+description = "Total structural equality and bounded deterministic rendering over MLPL values (equal / repr)"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
+mlpl-eval-types = { path = "../mlpl-eval-types" }
+
+[lints]
+workspace = true

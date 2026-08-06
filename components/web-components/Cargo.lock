@@ -1073,6 +1073,10 @@ name = "mlpl-bpe-core"
 version = "0.20.0"
 
 [[package]]
+name = "mlpl-builtin-catalog"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-core"
 version = "0.20.0"
 dependencies = [
@@ -1118,6 +1122,7 @@ dependencies = [
  "mlpl-eval-pets-tiny",
  "mlpl-eval-state",
  "mlpl-eval-types",
+ "mlpl-forge-kg",
  "mlpl-loader-helpers",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
@@ -1139,6 +1144,7 @@ dependencies = [
 name = "mlpl-eval-core"
 version = "0.20.0"
 dependencies = [
+ "mlpl-builtin-catalog",
  "serde",
 ]
 
@@ -1246,6 +1252,7 @@ dependencies = [
  "mlpl-array",
  "mlpl-eval-types",
  "mlpl-parser",
+ "mlpl-tensor-handle",
  "serde",
 ]
 
@@ -1266,6 +1273,14 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-runtime",
  "mlpl-viz",
+]
+
+[[package]]
+name = "mlpl-forge-kg"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
 ]
 
 [[package]]
@@ -1449,6 +1464,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-forge-kg",
  "mlpl-runtime-array",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",

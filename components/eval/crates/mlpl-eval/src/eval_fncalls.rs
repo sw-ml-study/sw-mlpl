@@ -95,6 +95,7 @@ fn try_tools(
         "llm_call" => Some(crate::llm_dispatch::dispatch(args, env, trace)),
         "emit_frame" => Some(crate::fncall_trace::eval_emit_frame(args, env, trace)),
         "compare" => Some(crate::experiment_compare::dispatch_compare(args, env)),
+        "equal" | "repr" => Some(eval_structural(name, args, env, trace)),
         "experiment_metric" => Some(crate::experiment_compare::eval_experiment_metric(args, env)),
         "momentum_sgd" | "adam" => {
             Some(crate::grad_optim::eval_optim(name, args, env, trace, span))
@@ -103,4 +104,33 @@ fn try_tools(
             crate::eval_ops::eval_analysis_helper(name, args, env, trace).map(|r| r.map(Value::Str))
         }
     }
+}
+
+/// `equal(a, b)` / `repr(v)` -- the structural-assertion pair
+/// (total equality never hard-errors; bounded deterministic
+/// rendering). Cores live in mlpl-value-structural so every
+/// surface shares one behavior.
+fn eval_structural(
+    name: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let need = if name == "equal" { 2 } else { 1 };
+    if args.len() != need {
+        return Err(EvalError::BadArity {
+            func: name.into(),
+            expected: need,
+            got: args.len(),
+        });
+    }
+    let a = crate::eval::eval_expr(&args[0], env, trace)?;
+    if name == "repr" {
+        return Ok(Value::Str(mlpl_value_structural::value_repr(&a)));
+    }
+    let b = crate::eval::eval_expr(&args[1], env, trace)?;
+    let eq = mlpl_value_structural::value_equal(&a, &b);
+    Ok(Value::Array(mlpl_array::DenseArray::from_scalar(
+        f64::from(u8::from(eq)),
+    )))
 }

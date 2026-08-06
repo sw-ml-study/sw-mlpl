@@ -1410,6 +1410,7 @@ dependencies = [
  "mlpl-tensor-handle",
  "mlpl-tictactoe",
  "mlpl-trace",
+ "mlpl-value-structural",
  "mlpl-viz",
  "mockito",
  "png",
@@ -1904,6 +1905,15 @@ dependencies = [
  "mlpl-core",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "mlpl-value-structural"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-eval-core",
+ "mlpl-eval-types",
 ]
 
 [[package]]

@@ -7,6 +7,32 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: Why is K-Means the only demo in the Clustering group?**
+
+A: History, not design: K-Means was built early as THE clustering
+representative, and nothing since has pulled another clustering
+algorithm in -- the three-eBook coverage audit
+(docs/book-coverage-audit.md) did not flag the gap because none
+of the three books has a dedicated clustering chapter (Grokking
+only names clustering as a category of unsupervised learning,
+which the K-Means demo + lesson cover). Related demos live in
+other groups: kNN is Classification, and the density/structure
+family (PCA, t-SNE, UMAP, MDS) has its own Dim Reduction group.
+If you want the group fleshed out, the natural additions are all
+expressible with today's builtins: GMM via EM
+(softmax-responsibilities + weighted means), DBSCAN
+(pairwise_sqdist + threshold masks + a frontier loop), and
+agglomerative clustering at whiteboard scale. Say the word and
+it goes on the queue as a small demo saga.
+
+**UPDATE (same day): P0-a is SHIPPED.** `equal(a, b)` and
+`repr(v)` landed with tests and docs; mlplunit's own
+`scripts/check-capabilities` against the fresh repl build now
+reports `AVAILABLE structural-equality` -- per its
+definition-of-ready, mlplunit can adopt it and mark the
+capability shipped in the same tested change. Next up: static
+include (P0-b), design step first.
+
 **Q: Look at mlplunit's sw-MLPL-changes-needed.md and prioritize
 changes to unblock mlplunit.**
 

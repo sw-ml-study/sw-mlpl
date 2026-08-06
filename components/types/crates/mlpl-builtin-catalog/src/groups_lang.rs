@@ -99,6 +99,16 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "keep slices where the mask is nonzero",
             ),
             (
+                "equal",
+                "equal(a, b)",
+                "total structural equality over any two values; never errors",
+            ),
+            (
+                "repr",
+                "repr(v)",
+                "bounded deterministic rendering for diagnostics",
+            ),
+            (
                 "pareto_front",
                 "pareto_front(P, dirs)",
                 "mask of non-dominated rows; dirs: 1 max / -1 min per column",

@@ -85,6 +85,7 @@ mlpl-eval-fetch = { path = "../mlpl-eval-fetch", optional = true }
 mlpl-eval-state = { path = "../../../types/crates/mlpl-eval-state" }
 mlpl-eval-pets-tiny = { path = "../../../eval-pets-tiny/crates/mlpl-eval-pets-tiny" }
 mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+mlpl-value-structural = { path = "../../../eval-types/crates/mlpl-value-structural" }
 mlpl-env-traits = { path = "../../../session-infra/crates/mlpl-env-traits" }
 mlpl-loader-helpers = { path = "../../../session-infra/crates/mlpl-loader-helpers" }
 mlpl-models-feasibility = { path = "../../../models-read/crates/mlpl-models-feasibility" }
