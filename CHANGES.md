@@ -12,8 +12,24 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-06
+
+- saga apl2-blocks: complete (3 steps)
+- feat(demos): Sudoku Backtracking (blocks view) + Structure Zoo 4D display (demo-and-docs)
+- saga apl2-blocks: step 002 complete
+- feat(array): blocked box display for rank-3/4 arrays (blocked-disp)
+- saga apl2-blocks: step 001 complete
+- feat(array): transpose_axes(a, perm) -- generalized dyadic transpose (transpose-axes)
+- saga: pause gen-state-kv-cache (after step 001); init apl2-blocks
+- docs(q-and-a): native-test-events assessment; APL2 blocks plan + queue entries
+- saga gen-state-kv-cache: step 001 complete
+- feat(eval): gen_state / gen_logits / gen_append -- the KV cache core (gen-state-core)
+
 ## 2026-08-05
 
+- saga gen-state-kv-cache: seed gen-state-core step
+- saga: archive mlplunit-unblock; re-init gen-state-kv-cache (resume at gen-state-core)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: complete (21 steps)
 - docs: close the mlplunit-unblock program (mlplunit-close)
 - saga mlplunit-unblock: step 020 complete
