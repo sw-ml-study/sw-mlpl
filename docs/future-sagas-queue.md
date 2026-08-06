@@ -113,7 +113,12 @@ made trivial once annotations land.
 
 ## Track 2 -- generation speed (the MTP program; CPU + MLX)
 
-4. **generation-state-kv-cache** -- GenerationState, per-layer
+4. **generation-state-kv-cache** (NEXT UP -- paused
+   2026-08-05 for the mlplunit-unblock program, which closed
+   2026-08-06 with every sw-MLPL prerequisite shipped; design
+   preserved in docs/kv-cache-design.md, plan archived under
+   .agentrail-archive/, resume at gen-state-core) --
+   GenerationState, per-layer
    K/V append without prefix recompute, cache
    reset/clone/accounting, batched verification hooks, CPU +
    MLX, cache-equivalence tests. Exit: cached generation

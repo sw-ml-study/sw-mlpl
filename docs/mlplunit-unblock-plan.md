@@ -66,6 +66,21 @@ follow-up saga once mlplunit has adopted P0/P1.
 7. close -- capabilities re-run, queue update, wiki, handoff
    notes for mlplunit adoption.
 
+## Final status (saga closed 2026-08-06)
+
+Every sw-MLPL prerequisite in the contract is shipped; the
+remaining flips are mlplunit-side adoption.
+
+| Contract item | sw-MLPL surface | Their gate |
+|---|---|---|
+| 1 static include | `include` + `--source-dir` sandbox | SHIPPED (adopted) |
+| 2 equal/repr | `equal(a, b)`, `repr(v)` | SHIPPED (adopted) |
+| 3 callables | `:u:name`, `call`, refs as UDF args, `map_ok`/`and_then`/`or_else` | SHIPPED (adopted) |
+| 4 metadata | `@test` registration + `tests()`/`test_info()`/`annotations()` | SHIPPED (adopted) |
+| 5 parameterized | composes items 3+4; no evaluator surface | SHIPPED (adopted) |
+| 6 fixture lifecycle | `bracket(setup, use, teardown)` guaranteed-finally (docs/finally-design.md) | GATED on their fixture updating from the proposed `suite({...})` shape to the accepted bracket form (docs/q-and-a.md 2026-08-06 has the shape) |
+| 7 events/process controls | scoped by their doc as improvements, not gates | -- |
+
 ## Standing check
 
 After each shipped step: build `mlpl-repl` release and run
