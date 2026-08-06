@@ -1,6 +1,6 @@
 number = 7
 slug = "include-surfaces"
-status = "pending"
+status = "in-progress"
 description = "Per design: precise provider-less errors are already wired via the AST arm --..."
 role = "legacy"
 context_files = []

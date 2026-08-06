@@ -401,6 +401,33 @@ repeat 5 {
 total    # 15
 ```
 
+## Including Source Files (script mode)
+
+A script can reuse definitions from another local source file
+with a top-level declaration:
+
+```text
+include "vector.mlpl"
+```
+
+- The path is one literal, relative path -- never computed,
+  absolute, or conditional. `include` is only legal at the top
+  level of a source file (not inside blocks or functions), and
+  only in script mode: the browser session, connect mode, and
+  interactive prompt answer it with a precise error instead.
+- Included definitions (`u:` functions, bindings) enter the
+  program at the include site, in source order.
+- Resolution is sandboxed. `mlpl-repl --source-dir DIR -f
+  script.mlpl` roots all includes under DIR; without the flag
+  the root is the script's own directory. Escaping the root
+  (absolute paths, `..`, symlinks) is rejected with the rule
+  that was broken.
+- Nested includes resolve relative to the INCLUDING file. A
+  file loads once per program (repeats are no-ops), and an
+  include cycle errors with the complete chain.
+- Errors keep their location: a parse error inside an included
+  file names that file and its own line and column.
+
 ## Scripting in MLPL
 
 MLPL ships with a small set of builtins that turn `.mlpl` files

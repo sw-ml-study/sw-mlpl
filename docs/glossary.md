@@ -1781,6 +1781,20 @@ examples shown in the prompt, with no gradient updates. The
 core LLM superpower. Not a builtin in MLPL; use `llm_call`
 to compose few-shot prompts.
 
+## include (statement)
+
+`include "path.mlpl"` -- top-level static source loading for
+script mode: the included file's definitions splice in at the
+include site, in source order. One literal relative path,
+sandboxed under `mlpl-repl --source-dir` (default: the script's
+own directory), loaded once per program, with cycle errors that
+print the whole include chain and diagnostics that name the
+included file's own line and column. Only the
+literal-string-at-top-level form is an include; `include`
+remains an ordinary variable name elsewhere. Surfaces without a
+source provider (browser, connect, the interactive prompt)
+answer with a precise error naming script mode.
+
 ## Inductive Bias
 
 The set of assumptions a model class encodes about which

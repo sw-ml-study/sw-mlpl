@@ -222,6 +222,24 @@ for row in reshape(range(6), [3, 2]) { reduce_add(row) }
 last_rows   # [1, 5, 9]
 ```
 
+## Include Declaration
+
+```text
+include "helpers.mlpl"
+```
+
+Top-level, script-mode static source loading: the file's
+statements splice in at the include site, in source order, with
+duplicate loads ignored and cycles reported with the full
+chain. The argument must be a string literal; `include` stays a
+legal variable name everywhere else (only the
+literal-string-at-top-level form is an include). Resolution is
+sandboxed under `--source-dir` (default: the script's
+directory); see the Usage Guide's "Including Source Files"
+section for the rules. Surfaces without a source provider (the
+browser session, connect mode, the interactive prompt) reject
+the declaration with a precise error.
+
 ## Experiment Block
 
 ```
