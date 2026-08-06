@@ -1,0 +1,1 @@
+Per docs/kv-cache-design.md: gen_clone(gs), gen_reset(gs), gen_stats(gs) ({tokens, layers, kv_rows, kv_values} record), multi-row gen_append (rank-1 id vector = the batched verification hook), :describe gs support, tutoring errors polish. TDD. Scoped tests/clippy/fmt; ratchet or documented exception; commit before complete; push.

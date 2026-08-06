@@ -1,9 +1,10 @@
 number = 1
 slug = "gen-state-core"
-status = "pending"
+status = "completed"
 description = "Per docs/kv-cache-design.md (approved; recommendations stand): GenerationStat..."
 role = "production"
 context_files = []
 created_at = "2026-08-05T22:51:47"
+completed_at = "2026-08-06T00:13:02"
 task_type = "rust-feature"
-commits = []
+commits = ["562d959ad5073cdb3b2047d944b0671282f5608a"]

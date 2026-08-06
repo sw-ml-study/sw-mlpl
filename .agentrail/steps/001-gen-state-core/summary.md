@@ -1,0 +1,1 @@
+KV cache core shipped: GenState value kind + env table, incremental row forward with per-layer K/V caches, bit-identical greedy equivalence pinned by 5 TDD tests (incl. multi-attention + engram chains).
