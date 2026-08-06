@@ -95,6 +95,32 @@
             color: var(--overlay2);
             font-weight: 600;
         }
+        .status-badge {
+            display: inline-block;
+            margin-top: 2px;
+            padding: 1px 8px;
+            border-radius: 9px;
+            font-size: 0.62rem;
+            letter-spacing: 0.04em;
+            width: fit-content;
+            border: 1px solid transparent;
+        }
+        .status-badge-fresh {
+            color: #9fdfae;
+            border-color: #2f6f3f;
+            background: #16301c;
+        }
+        .status-badge-stale {
+            color: #ffd28a;
+            border-color: #8a6320;
+            background: #33260e;
+            cursor: pointer;
+        }
+        .status-badge-unknown {
+            color: #9aa4ad;
+            border-color: #45505a;
+            background: #1d242b;
+        }
         .title-subtitle {
             font-size: 11px;
             color: var(--overlay0);

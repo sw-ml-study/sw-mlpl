@@ -6,8 +6,8 @@
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-367960cb2e37d14.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-367960cb2e37d14_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-7ae9e0e2df1ff190.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-7ae9e0e2df1ff190_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -105,6 +105,32 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             font-size: 13px;
             color: var(--overlay2);
             font-weight: 600;
+        }
+        .status-badge {
+            display: inline-block;
+            margin-top: 2px;
+            padding: 1px 8px;
+            border-radius: 9px;
+            font-size: 0.62rem;
+            letter-spacing: 0.04em;
+            width: fit-content;
+            border: 1px solid transparent;
+        }
+        .status-badge-fresh {
+            color: #9fdfae;
+            border-color: #2f6f3f;
+            background: #16301c;
+        }
+        .status-badge-stale {
+            color: #ffd28a;
+            border-color: #8a6320;
+            background: #33260e;
+            cursor: pointer;
+        }
+        .status-badge-unknown {
+            color: #9aa4ad;
+            border-color: #45505a;
+            background: #1d242b;
         }
         .title-subtitle {
             font-size: 11px;
@@ -1920,7 +1946,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-367960cb2e37d14.js" crossorigin="anonymous" integrity="sha384-7Xmu+QK/486j7kK9oWGGzGVAJFuAYEmJ0keeDlbA/+sX08khAZm7jgqBOLGTw1cz"><link rel="preload" href="/sw-mlpl/mlpl-web-367960cb2e37d14_bg.wasm" crossorigin="anonymous" integrity="sha384-/ErA1aMm0KT/BgxDTkyoe+GjIRHL4RUy998rOdaZVasCH2Ll6cV8ftOWMfVBDN6c" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-7ae9e0e2df1ff190.js" crossorigin="anonymous" integrity="sha384-qFubFggru3LVhzRDtJpC29rjujHUZtJq/jSiaJgkAog9ul5XaXkF8jAyaGCid4Pq"><link rel="preload" href="/sw-mlpl/mlpl-web-7ae9e0e2df1ff190_bg.wasm" crossorigin="anonymous" integrity="sha384-Y68G0oVwTPOFWJUzO3T6XvtEKV9um0YlLqj8smyFAY1/bDtBnALeRWuCbne00LCm" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>

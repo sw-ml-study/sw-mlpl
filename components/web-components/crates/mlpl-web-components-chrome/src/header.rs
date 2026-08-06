@@ -30,6 +30,7 @@ pub fn header(props: &HeaderProps) -> Html {
             <div class="title-text">
                 <span class="title-line">{"Software Wrighter's Machine Learning Programming Language Playground"}</span>
                 <span class="title-subtitle">{"Array Programming for Machine Learning"}</span>
+                <crate::status_badge::StatusBadge />
             </div>
             <div class="header-tabs">
                 <button class={cls(HeaderMode::Repl)} onclick={props.on_select_repl.clone()} data-tour-target="tab-repl">{"REPL"}</button>

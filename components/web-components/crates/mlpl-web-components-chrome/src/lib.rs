@@ -10,3 +10,4 @@ pub mod connect_probe;
 pub mod footer;
 pub mod github_corner;
 pub mod header;
+pub mod status_badge;
