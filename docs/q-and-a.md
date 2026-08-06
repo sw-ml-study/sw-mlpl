@@ -5,6 +5,47 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (later)
+
+**Q: Are the mlplunit round-2 blocking features implemented?
+When can mlplunit continue?**
+
+A: IMPLEMENTED -- and both of their gate fixtures are PROVEN
+passing under their own bin/mlplunit harness with the accepted
+public spellings. mlplunit can continue as soon as it applies
+two one-line fixture updates (their contract's own
+placeholder-names policy):
+
+1. in_language_reporter_case.mlpl: the two bare counter
+   assignments become the accepted explicit spelling --
+   `global_set("count", count + 1)` and
+   `global_set("passed", passed + 1)`. Bare assignment inside
+   a function stays frame-local BY DESIGN (binding hygiene);
+   global_set is the deliberate escape hatch, and the write
+   propagates through nested frames to the workspace.
+2. language_native_runner_case.mlpl: the default root becomes
+   `"tests"` (walked relative to the sandbox), and the gate
+   invocation passes `--source-dir <repo root>` for this
+   fixture. The current default `"."` resolves to
+   tests/capabilities (no test_*.mlpl there), and a `".."`
+   root is CORRECTLY refused -- walking above the sandbox is
+   the contract's own containment rule.
+
+What shipped: global_set (explicit global-state escape hatch
+with frame replay), fs_walk / read_text / write_text /
+remove_path (Result-speaking, sandbox-contained, lexical
+order, no symlink following, exact text), and
+run_script(path, {source_dir, data_dir, capture}) -- fresh
+environment per file via the chunked include loader,
+structured status ok / err / error / EXIT (a child's exit(n)
+is intercepted as data through the new env-level exit seam --
+also the general dependency-injection answer: sw-MLPL injects
+through environment hooks: dispatch_hook, run_script_hook,
+the event buffers, and now exit_intercept; an IN-LANGUAGE
+intercept registry, e.g. intercept("exit", :u:f), is a
+natural future extension of the sink pattern if wanted), plus
+captured typed events as JSON lines under capture: 1.
+
 ## 2026-08-07
 
 **Q: mlplunit is blocked on two NEW gates --

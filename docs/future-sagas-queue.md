@@ -104,6 +104,11 @@ jot-dot); composition combinators (over/atop) follow the
 map_ok precedent. Ships with idioms-doc + demo updates
 showing them beside the APL2/BQN spellings. PENDING GO.
 
+**COMPLETED 2026-08-07: mlplunit-round-2 (both halves)** --
+global_set + sandboxed fs API + run_script with exit
+interception; fixtures proven under their harness (adoption
+notes: docs/q-and-a.md 2026-08-07 later). Original entries:
+
 **mlplunit-round-2: in-language-event-reporting** (added
 2026-08-07; their section 8) -- explicit global-state escape
 hatch (proposed global_set/workspace form; binding hygiene
