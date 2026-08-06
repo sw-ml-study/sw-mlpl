@@ -5,6 +5,48 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07
+
+**Q: mlplunit is blocked on two NEW gates --
+in-language-event-reporting and language-native-runner (their
+docs/sw-MLPL-changes-needed.md section 8). Assessment?**
+
+A: Both are real sw-MLPL work; both are buildable; the second
+is larger. Queued as the next two sagas, pending your go.
+
+1. IN-LANGUAGE EVENT REPORTING. Their fixture's sink does
+   `count = count + 1` against a TOP-LEVEL variable from inside
+   a user function -- which MLPL's binding hygiene deliberately
+   prevents (function frames restore on exit; that rule is what
+   fixed the equal() corruption bug). The honest fix is an
+   EXPLICIT global escape hatch rather than weakening scoping:
+   proposed `global_set("name", value)` + reading the name as
+   usual (or a `workspace name = ...` form). Explicit spelling
+   keeps accidental leakage impossible while making a stateful
+   reporter (counters, per-suite tallies) expressible. Small
+   saga: design decision + one builtin pair + tests. Their
+   fixture also uses variadic print(a, b, c) -- to verify
+   against the shipped print surface in the same step.
+
+2. LANGUAGE-NATIVE RUNNER. Two halves, both mapping onto
+   machinery that exists: (a) a sandboxed filesystem API --
+   fs_walk/read_text/write_text/remove_path, Result-based,
+   lexical order, sandbox-contained; the include work already
+   built the canonicalized-root sandbox (FsProvider), this
+   generalizes it to a runtime surface. (b) run_script(path,
+   opts): evaluate a file in a FRESH Environment (definitions
+   and test metadata cannot leak), preserving include behavior
+   and source spans -- the chunked include runner already does
+   exactly this per-file; run_script wraps it and returns
+   structured status plus the captured typed test events
+   (env.test_event_lines is already the buffer the connect
+   transport drains -- capture: 1 reuses it verbatim).
+   Medium saga: fs API step, run_script step, gate-close step.
+
+Order recommendation: reporting first (small, and their
+runner fixture depends on event capture), then the runner
+saga, then back to gen-state-kv-cache.
+
 ## 2026-08-06 (late night)
 
 **Q: We need an Emacs mode for MLPL (like rust-mode /

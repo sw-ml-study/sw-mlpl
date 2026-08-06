@@ -87,7 +87,23 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
-**emacs-mlpl-mode** (added 2026-08-06, user direction) --
+**mlplunit-round-2: in-language-event-reporting** (added
+2026-08-07; their section 8) -- explicit global-state escape
+hatch (proposed global_set/workspace form; binding hygiene
+stays default) so a stateful MLPL reporter sink can count
+events; verify variadic print. Assessment: docs/q-and-a.md
+2026-08-07. PENDING GO.
+
+**mlplunit-round-2: language-native-runner** (added
+2026-08-07; their section 8) -- sandboxed fs API (fs_walk /
+read_text / write_text / remove_path, Result-based, lexical
+order) generalizing the include FsProvider sandbox, plus
+run_script(path, {source_dir, data_dir, capture}) evaluating
+a file in a FRESH environment via the chunked include runner
+and returning structured status + captured typed test events.
+PENDING GO.
+
+**COMPLETED 2026-08-06: emacs-mlpl-mode** (user direction) --
 mlpl-mode elisp package: font-lock for the three name kinds +
 annotations, run-buffer/run-tests commands consuming the
 --test-events JSONL transport, --babel-session integration,
