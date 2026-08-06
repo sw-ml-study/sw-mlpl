@@ -1,16 +1,18 @@
-# Saga: mlplunit-round-2
-Their section 8: (1) in-language-event-reporting -- a stateful
-MLPL reporter sink needs persistent state across calls;
-explicit global_set(name, value) escape hatch (binding hygiene
-stays default; writes recorded outside the frame snapshot and
-replayed outward). (2) language-native-runner -- sandboxed fs
-API (fs_walk/read_text/write_text/remove_path) + run_script
-(fresh env, include-preserving, structured status + captured
-typed events). Assessment: docs/q-and-a.md 2026-08-07.
+# Saga: apl2-hof
+User direction 2026-08-07 (order: this, then combinator-birds).
+Higher-order builtins over function references, now cheap on
+the callable machinery: each (APL f-umlaut / BQN modifier),
+table (APL jot-dot / BQN table), atop and over (BQN
+composition, immediate application). No function VALUES are
+produced -- that is combinator-birds' Partial (see
+docs/combinators-research.txt).
 ## Steps
-1. global-set -- the escape hatch + frame replay; their
-   reporter fixture pattern as TDD.
-2. fs-api -- sandboxed fs builtins over the FsProvider seam.
-3. run-script -- fresh-env script execution with structured
-   result + captured events.
-4. close -- docs, gate run expecting both AVAILABLE, q-and-a.
+1. each-table -- each(f, v): elementwise ref application, shape
+   preserved, scalar in/out (v1); table(f, a, b): [m]x[n] ->
+   [m, n] outer product over f. u: and builtin refs. TDD.
+2. atop-over -- atop(f, g, x...) = f(g(x...)); over(f, g, x, y)
+   = f(g(x), g(y)); docs rows + idioms-doc section + catalog;
+   glossary + README pin.
+3. close -- demos touch-up, rebuild repl/serve/pages + deploy,
+   wiki row, mlplunit-adjacent none; queue advance to
+   combinator-birds; --done.
