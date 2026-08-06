@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 006 complete
+- feat(repl): --source-dir + FsProvider -- native static include works end to end (mlplunit-unblock step 6)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 005 complete
 - feat(loader): mlpl-source-loader -- chunked include expansion behind the provider seam (mlplunit-unblock step 5)
 - saga mlplunit-unblock: step 004 complete
