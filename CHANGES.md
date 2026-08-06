@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-05
 
+- saga mlplunit-unblock: step 005 complete
+- feat(loader): mlpl-source-loader -- chunked include expansion behind the provider seam (mlplunit-unblock step 5)
+- saga mlplunit-unblock: step 004 complete
+- feat(parser): the include AST node -- contextual, literal-only, top-level-only (mlplunit-unblock step 4)
+- saga mlplunit-unblock: step 003 complete
+- docs(design): static-include loader design + clustering-demos queued (mlplunit-unblock step 3)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-unblock: step 002 complete
 - feat(eval): equal(a, b) + repr(v) -- structural assertions for mlplunit (mlplunit-unblock step 2)
 - saga mlplunit-unblock: step 001 complete
