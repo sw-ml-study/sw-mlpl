@@ -1,0 +1,9 @@
+number = 1
+slug = "expunge"
+status = "pending"
+description = "expunge(name | [names]) builtin per q-and-a design: 1 = name free afterwards ..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T10:24:34"
+task_type = "rust-feature"
+commits = []
