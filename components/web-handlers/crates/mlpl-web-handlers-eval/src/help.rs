@@ -2,7 +2,10 @@
 /// data; the only reason this lives in a function is to
 /// satisfy the existing `output: String` signature in
 /// `handlers.rs`.
-const HELP_TEXT: &str = "sw-MLPL v0.19.0 -- Software Wrighter's Machine Learning
+const HELP_TEXT: &str = concat!(
+    "sw-MLPL v",
+    env!("CARGO_PKG_VERSION"),
+    " -- Software Wrighter's Machine Learning
 Programming Language
 
 Syntax:
@@ -94,7 +97,7 @@ Commands (APL-inspired workspace introspection):
   :fns                 list user-defined functions (APL )FNS)
   :builtins            list built-in functions by category
   :describe <name>     describe a variable, model, tokenizer,
-                       or built-in (with v0.19 typed header)
+                       or built-in (with a typed header)
   :tags                list every binding's ValueTag
   :untag <name>        clear a binding's auto-attached tag
   :wsid                workspace summary (APL )WSID)
@@ -115,7 +118,8 @@ Commands (APL-inspired workspace introspection):
   :3d                  open 3D visualization stage (Ctrl+3)
   :2d                  close 3D visualization stage
   :3d reset            reset 3D camera to default position
-  :clear               reset session (vars + models + state)";
+  :clear               reset session (vars + models + state)"
+);
 
 pub fn help_text() -> String {
     HELP_TEXT.to_string()
