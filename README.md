@@ -1,5 +1,8 @@
 # <img src="docs/mlpl-badge.png" alt="sw-MLPL" width="128" align="left" style="margin-right:12px"> sw-MLPL
 
+[![CI](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/ci.yml/badge.svg)](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/ci.yml)
+[![pages-build-deployment](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/pages/pages-build-deployment)
+
 Software Wrighter's Machine Learning Programming Language --
 a Rust-first array and tensor language for machine learning,
 visualization, and experimentation. Inspired by APL, APL2, J,
