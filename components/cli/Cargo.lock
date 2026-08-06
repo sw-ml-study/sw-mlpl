@@ -1735,6 +1735,7 @@ dependencies = [
  "mlpl-parser",
  "mlpl-source-loader",
  "mlpl-trace",
+ "mlpl-value-structural",
  "sha2",
  "tempfile",
 ]
