@@ -19,6 +19,8 @@ FLAGS:
       --svg-out DIR   Write SVG visualization output to DIR
       --data-dir DIR  Set the dataset directory
       --exp-dir DIR   Set the experiment directory
+      --source-dir D  Sandbox root for include resolution (default: script dir)
+      --test-events F Append each emitted test event to F as one JSON line
 
 EXIT CODES (script mode):
   0   success: final value is Ok(...) or a non-Result, or exit(0)

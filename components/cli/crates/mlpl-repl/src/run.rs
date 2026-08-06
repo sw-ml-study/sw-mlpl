@@ -50,6 +50,9 @@ fn init(config: &Config) -> Session {
     if let Some(dir) = &config.data_dir {
         env.set_data_dir(dir.clone());
     }
+    if let Some(path) = &config.test_events {
+        env.test_events_out = Some(path.clone());
+    }
     if let Some(dir) = &config.exp_dir {
         env.set_exp_dir(dir.clone());
     }

@@ -125,6 +125,7 @@ const VALUE_FLAGS: &[&str] = &[
     "--data-dir",
     "--exp-dir",
     "--source-dir",
+    "--test-events",
 ];
 
 /// Pick the script path from CLI args. Priority order: explicit

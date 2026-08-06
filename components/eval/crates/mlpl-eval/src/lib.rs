@@ -59,6 +59,7 @@ mod eval_reduce;
 mod eval_script;
 mod eval_user_fn;
 mod event_envelope;
+mod event_json;
 mod experiment;
 mod experiment_compare;
 mod fncall_arrays;

@@ -127,9 +127,11 @@ pub(crate) async fn run_eval(
                 formatted = format!("{}\n{formatted}", notices.join("\n"));
             }
             let attached = crate::viz_storage::attach_viz(&state.viz, &formatted, kind).await;
-            Ok(crate::eval_viz::build_eval_response(
-                &v, kind, formatted, attached,
-            ))
+            let mut resp = crate::eval_viz::build_eval_response(&v, kind, formatted, attached);
+            if let Some(buf) = &mut session.env.test_event_lines {
+                resp.test_events = std::mem::take(buf);
+            }
+            Ok(resp)
         }
         Err(e) => Err(format!("{e}")),
     };

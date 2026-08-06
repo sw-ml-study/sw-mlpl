@@ -144,6 +144,16 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "a definition's @word annotations as a record; bare words map to 1",
             ),
             (
+                "test_event_sink",
+                "test_event_sink(f)",
+                "register the :u: callback that receives emitted test events",
+            ),
+            (
+                "emit_test_event",
+                "emit_test_event(e)",
+                "validate a v1 test-event record, deliver to the sink and host channel",
+            ),
+            (
                 "equal",
                 "equal(a, b)",
                 "total structural equality over any two values; never errors",

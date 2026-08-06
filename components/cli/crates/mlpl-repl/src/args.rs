@@ -29,6 +29,9 @@ pub(crate) struct Config {
     pub data_dir: Option<PathBuf>,
     pub source_dir: Option<PathBuf>,
     pub exp_dir: Option<PathBuf>,
+    /// `--test-events <path>`: append each emitted test event
+    /// as one JSON line (the typed host transport).
+    pub test_events: Option<PathBuf>,
     pub trace: bool,
     pub verbose: bool,
     /// `--babel-session`: persistent stdin block loop for ob-mlpl.
@@ -46,6 +49,7 @@ pub(crate) fn parse(raw: Vec<String>) -> Config {
         data_dir: flag("--data-dir").map(PathBuf::from),
         source_dir: flag("--source-dir").map(PathBuf::from),
         exp_dir: flag("--exp-dir").map(PathBuf::from),
+        test_events: flag("--test-events").map(PathBuf::from),
         trace: args.iter().any(|a| a == "--trace"),
         // Quiet by default; -v/--verbose echoes each script line.
         verbose: args.iter().any(|a| a == "-v" || a == "--verbose"),

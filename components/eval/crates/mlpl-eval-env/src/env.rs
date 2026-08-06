@@ -58,6 +58,12 @@ pub struct Environment {
     /// Registered `test_event_sink` callback (`u:` name), the
     /// typed test-event API's delivery target.
     pub test_event_sink: Option<String>,
+    /// Script-mode host transport: append each validated test
+    /// event as one JSON line to this path.
+    pub test_events_out: Option<std::path::PathBuf>,
+    /// Connect-mode host transport: buffered JSON lines the
+    /// server drains per eval.
+    pub test_event_lines: Option<Vec<String>>,
     /// Sandbox root for filesystem `load("relative-path")` calls.
     /// `None` means filesystem access is disabled (the web REPL
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12

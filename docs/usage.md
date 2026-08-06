@@ -165,6 +165,14 @@ def u:zscore(x) {
   the other hooks; the test's failure stays primary, with a
   simultaneous teardown failure retained under `teardown_error`
   in the error payload.
+- Typed test events: `test_event_sink(:u:report)` registers a
+  callback and `emit_test_event({version: 1, kind: "test_end",
+  suite: "s", name: "n", status: "passed"})` validates and
+  delivers the record. Run a suite with
+  `mlpl-repl --test-events events.jsonl suite.mlpl` to also get
+  each event as one JSON line, on a channel separate from the
+  program's own output; in connect mode the eval response
+  carries the same lines in a `test_events` array.
 
 ## Control Flow and Error Handling
 

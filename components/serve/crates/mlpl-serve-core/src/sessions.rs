@@ -98,6 +98,15 @@ pub fn new_interrupt_map() -> InterruptMap {
     Arc::new(RwLock::new(HashMap::new()))
 }
 
+/// A session Environment with the connect-mode test-event
+/// buffer enabled (emit_test_event buffers JSON lines; the
+/// eval handler drains them into the response).
+fn fresh_session_env() -> Environment {
+    let mut env = Environment::new();
+    env.test_event_lines = Some(Vec::new());
+    env
+}
+
 /// Create a new session, insert it into both maps,
 /// and return the id + token. Caller is responsible
 /// for surfacing both back to the client.
@@ -106,7 +115,7 @@ pub async fn create_session(sessions: &SessionMap, interrupts: &InterruptMap) ->
     let token = generate_token();
     let session = Session {
         token: token.clone(),
-        env: Environment::new(),
+        env: fresh_session_env(),
         created_at: now_unix_seconds(),
         last_eval_at: None,
     };

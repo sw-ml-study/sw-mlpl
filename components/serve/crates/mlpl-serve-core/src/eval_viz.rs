@@ -60,6 +60,7 @@ pub fn build_eval_response(
         shape,
         values,
         string_list,
+        test_events: Vec::new(),
         viz_node,
     }
 }
@@ -97,6 +98,11 @@ pub struct EvalResponse {
     pub values: Option<Vec<f64>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub string_list: Option<Vec<String>>,
+    /// Typed test events emitted DURING this eval (one JSON
+    /// line each, in order) -- the connect-mode half of the
+    /// native-test-events host transport. Omitted when empty.
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub test_events: Vec<String>,
     /// Phase 1c part 2: a model's Sankey decomposition, so a model
     /// evaluated in connect mode renders its diagram. `None` for
     /// non-model results.

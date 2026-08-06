@@ -1731,6 +1731,23 @@ builtins (`moons`, `blobs`, `circles`, `grid`) are the
 tiny-scale version of the idea.
 
 
+## test_event_sink / emit_test_event (builtins)
+
+The typed test-event channel: `test_event_sink(:u:f)` registers
+one user-function callback, and `emit_test_event(record)`
+validates the event ENVELOPE loudly (schema version 1: nine
+known kinds, required suite/name strings, the end-status enum)
+before delivering the record to the sink -- a sink failure
+becomes emit's `err`, and unknown additive fields pass through
+untouched. The HOST transport carries the same events outside
+the program, separate from stdout/stderr: in script mode
+`mlpl-repl --test-events <path>` appends one JSON line per
+event (synchronous, ordered, exact text); in connect mode each
+eval response carries a `test_events` array of the JSON lines
+emitted during that eval. A test runner turns these into
+per-test human or TAP records without parsing interpreter
+prose.
+
 ## tests / test_info (builtins)
 
 The discovery pair over the test registry. `tests()` lists

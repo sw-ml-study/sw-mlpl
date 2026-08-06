@@ -88,6 +88,7 @@ fn eval_emit(
         )));
     };
     crate::event_envelope::validate(fields)?;
+    deliver_host(fields, env)?;
     let Some(sink) = env.test_event_sink.clone() else {
         return Ok(ok_one());
     };
@@ -95,6 +96,42 @@ fn eval_emit(
         failed @ Value::Result { ok: false, .. } => Ok(failed),
         _ => Ok(ok_one()),
     }
+}
+
+/// The host transport: one JSON line per event, appended
+/// synchronously (ordered, no buffering loss) to the
+/// `--test-events` file and/or the connect-mode buffer.
+fn deliver_host(
+    fields: &std::collections::BTreeMap<String, Value>,
+    env: &mut Environment,
+) -> Result<(), EvalError> {
+    if env.test_events_out.is_none() && env.test_event_lines.is_none() {
+        return Ok(());
+    }
+    let line = crate::event_json::event_line(fields);
+    if let Some(path) = &env.test_events_out {
+        append_line(path, &line)?;
+    }
+    if let Some(buf) = &mut env.test_event_lines {
+        buf.push(line);
+    }
+    Ok(())
+}
+
+/// Synchronous append: ordered, no buffering to lose.
+fn append_line(path: &std::path::Path, line: &str) -> Result<(), EvalError> {
+    use std::io::Write;
+    std::fs::OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(path)
+        .and_then(|mut f| writeln!(f, "{line}"))
+        .map_err(|e| {
+            EvalError::Unsupported(format!(
+                "emit_test_event: cannot write --test-events file {}: {e}",
+                path.display()
+            ))
+        })
 }
 
 fn ok_one() -> Value {
