@@ -1,0 +1,9 @@
+number = 1
+slug = "global-set"
+status = "pending"
+description = "global_set(name, value): validate name (expunge's well_formed), bind NOW (kin..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T15:57:58"
+task_type = "rust-feature"
+commits = []
