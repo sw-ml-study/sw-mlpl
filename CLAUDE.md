@@ -472,23 +472,28 @@ If you see more work to do, it belongs in the NEXT step, not this session.
 
 ## Live Demo (GitHub Pages) Deploy
 
-The `.github/workflows/pages.yml` workflow ONLY uploads the committed
-`./pages/` directory -- it does NOT build from source. Source-only
-commits to `apps/mlpl-web/` will never reach the live demo at
-<https://sw-ml-study.github.io/sw-mlpl/>.
+The live site deploys from the `gh-pages` BRANCH (Pages
+build_type "legacy" since 2026-08-06, after GitHub Actions
+runner failures left the site stale for hours): GitHub's
+internal pages service publishes whatever `gh-pages` holds --
+no Actions runner, no workflow. Nothing builds from source on
+GitHub's side.
 
-Whenever you change `apps/mlpl-web/` (Rust, `index.html`, CSS, assets,
-or the `demos.rs` list), you MUST rebuild and commit `pages/`:
+Whenever you change the web sources (Rust, `index.html`, CSS,
+assets, demos.toml), you MUST rebuild, commit, AND deploy:
 
 ```bash
 ./scripts/build-pages.sh    # trunk build --release into pages/
 git add pages/
 git commit -m "chore(pages): rebuild for <what changed>"
 git push
+./scripts/deploy-pages.sh   # subtree-push pages/ -> gh-pages
 ```
 
-Then the push-triggered Pages workflow deploys the new `pages/`.
-Verify with `gh run list --workflow=pages.yml --limit 1`.
+`deploy-pages.sh` force-pushes the generated artifact branch;
+that force-push is expected and correct (gh-pages is never
+edited by hand). Verify by fetching the live index and
+comparing its hashed bundle name against `pages/index.html`.
 
 ### Stale-page trap: always hand out ts-suffixed review URLs
 
