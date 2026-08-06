@@ -1,0 +1,9 @@
+number = 2
+slug = "readme-badges"
+status = "pending"
+description = "README badges: pages-build-deployment badge (branch-built Pages auto-workflow..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T14:38:49"
+task_type = "infra"
+commits = []

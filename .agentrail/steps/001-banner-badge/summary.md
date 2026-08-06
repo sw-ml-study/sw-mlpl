@@ -1,0 +1,1 @@
+Header staleness badge shipped: same-origin bundle comparison, current/stale-reload/unknown-offline-default states; 3 TDD tests; deployed.

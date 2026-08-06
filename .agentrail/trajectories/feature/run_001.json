@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "banner-badge"
+  },
+  "action": "self-contained yew component with mount-time probe; pure logic TDD",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T14:38:49"
+}

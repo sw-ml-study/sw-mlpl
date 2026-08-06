@@ -1,0 +1,1 @@
+README badges: pages-build-deployment badge (branch-built Pages auto-workflow) + a NEW fast ci.yml (fmt check + clippy + fast representative tests: mlpl-array, mlpl-parser, targeted mlpl-eval test files -- keep under ~10 min) with its badge. Badges at README top. Verify badge URLs render. Note runner flakiness caveat in commit message.
