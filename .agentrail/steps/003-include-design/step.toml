@@ -1,6 +1,6 @@
 number = 3
 slug = "include-design"
-status = "pending"
+status = "in-progress"
 description = "Contract item 1: read ../mlplunit/docs/static-include-design.md; design the p..."
 role = "legacy"
 context_files = []

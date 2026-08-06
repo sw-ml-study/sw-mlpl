@@ -87,6 +87,15 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
+**clustering-demos** (added 2026-08-05, user direction) -- flesh
+out the Clustering group beyond K-Means; all expressible with
+today's builtins: GMM via EM (softmax responsibilities +
+weighted means, with the ellipse-overlay visual), DBSCAN
+(pairwise_sqdist + threshold masks + a frontier loop; finds the
+moons K-Means cannot), agglomerative at whiteboard scale
+(merge-matrix heatmap). Glossary entries ride along (GMM, EM,
+DBSCAN, dendrogram).
+
 ## Track 2 -- generation speed (the MTP program; CPU + MLX)
 
 4. **generation-state-kv-cache** -- GenerationState, per-layer

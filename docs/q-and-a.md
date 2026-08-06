@@ -22,8 +22,10 @@ If you want the group fleshed out, the natural additions are all
 expressible with today's builtins: GMM via EM
 (softmax-responsibilities + weighted means), DBSCAN
 (pairwise_sqdist + threshold masks + a frontier loop), and
-agglomerative clustering at whiteboard scale. Say the word and
-it goes on the queue as a small demo saga.
+agglomerative clustering at whiteboard scale. QUEUED 2026-08-05 (user direction): the clustering-demos
+item now sits in docs/future-sagas-queue.md beside the pedagogy
+work -- GMM via EM, DBSCAN, and agglomerative, with glossary
+entries riding along.
 
 **UPDATE (same day): P0-a is SHIPPED.** `equal(a, b)` and
 `repr(v)` landed with tests and docs; mlplunit's own
