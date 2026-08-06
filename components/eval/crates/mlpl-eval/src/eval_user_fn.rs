@@ -74,6 +74,7 @@ fn eval_body(
 /// and records so error-handling pipelines (`v = r?; ...`) work
 /// on function arguments.
 fn bind_arg(name: &str, param: &str, val: &Value, env: &mut Environment) -> Result<(), EvalError> {
+    env.clear_binding(param);
     match val {
         Value::Array(a) => env.set(param.to_string(), a.clone()),
         Value::Result { ok, payload } => {

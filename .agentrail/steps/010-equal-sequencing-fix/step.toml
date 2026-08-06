@@ -1,0 +1,8 @@
+number = 10
+slug = "equal-sequencing-fix"
+status = "in-progress"
+description = "mlplunit repro: equal(ok(record), ok(record)) true in isolation but corrupts ..."
+role = "production"
+context_files = []
+created_at = "2026-08-05T20:27:26"
+commits = []

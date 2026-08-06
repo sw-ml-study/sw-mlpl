@@ -301,6 +301,9 @@ pub(crate) fn eval_expr(
                 }
             );
             let v = eval_expr(value, env, trace)?;
+            // Cross-kind shadowing: a fresh binding must clear the
+            // name from every value table (stale-kind bug, 2026-08-05).
+            env.clear_binding(name);
             match v {
                 Value::Model(m) => {
                     env.models.insert(name.clone(), m);

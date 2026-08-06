@@ -1,0 +1,1 @@
+mlplunit repro: equal(ok(record), ok(record)) true in isolation but corrupts later array arithmetic in the SAME u: function execution ('expected an array value, got a string'). Reproduce (their strengthened structural_equality fixture), root-cause, fix, pin with a regression test, rebuild binaries, re-run their check-capabilities.

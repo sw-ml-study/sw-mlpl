@@ -250,6 +250,10 @@ in data-forge come first).
 - **Wiki errata upkeep** -- standing rule in CLAUDE.md.
 - **Upstream agentrail fix** -- `agentrail instructions apply`
   emits em dashes; the repo markdown gate needs ASCII.
+- **Upstream sw-checklist fix** -- bodiless trait `fn` signatures
+  are counted as spanning the FOLLOWING impl block, producing
+  phantom Function-LOC warnings (observed on EnvScope,
+  2026-08-05: an 11-line impl reported as 36-39 lines).
 
 ## Explicitly deprioritized / retired
 

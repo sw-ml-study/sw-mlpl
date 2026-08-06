@@ -7,6 +7,28 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q (mlplunit agent): equal(ok(record), ok(record)) is true in
+isolation but corrupts subsequent array arithmetic in the same
+u: function ("expected an array value, got a string").**
+
+A: Confirmed, root-caused, FIXED -- and `equal` was innocent.
+Bisection showed the corruption occurs with `equal` replaced by
+a constant: the bug was in u:-function ARGUMENT BINDING, two
+layers deep and older than `equal`. (1) The per-call scope
+snapshot restored vars/strings/records/string-lists but NOT the
+results table, so `ok(...)` arguments leaked their parameter
+bindings into the caller forever. (2) Binding a name never
+cleared its OLD kind from sibling tables, and lookup order
+prefers strings -- even top-level `x = "hi"; x = [1, 2]; x + 1`
+failed. Fixes: results joined the frame snapshot, and every
+binding (assignment and argument alike) now clears the name
+from all nine value tables first. Pinned by
+binding_hygiene_tests (including your exact fixture shape and a
+caller-restoration case); the full 152-binary eval suite is
+green; your strengthened structural_equality fixture now
+reports AVAILABLE through check-capabilities against the
+rebuilt binary. Re-adoption is good to go.
+
 **Q: Loading ../demo-algorithms/.../service_desk.mlpl in the web
 editor and running it errors ("unclosed '{'", then per-line
 undefined variables). Why?**

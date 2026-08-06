@@ -17,13 +17,22 @@ pub struct ScopeSnapshot {
     strings: HashMap<String, String>,
     records: HashMap<String, BTreeMap<String, Value>>,
     string_lists: HashMap<String, Vec<String>>,
+    // Results were MISSING from the frame snapshot: a u: call
+    // taking `ok(...)` arguments leaked its parameter bindings
+    // into the caller forever (mlplunit sequencing bug,
+    // 2026-08-05).
+    results: HashMap<String, (bool, Value)>,
 }
 
-/// Per-call scope snapshot/restore for `u:` function frames.
+/// Per-call scope snapshot/restore for `u:` function frames, plus
+/// `clear_binding`: removing a name from EVERY value table so a
+/// fresh binding shadows the old KIND everywhere (lookup order
+/// must never resurrect a stale binding).
 pub trait EnvScope {
     #[must_use]
     fn snapshot_scope(&self) -> ScopeSnapshot;
     fn restore_scope(&mut self, s: ScopeSnapshot);
+    fn clear_binding(&mut self, name: &str);
 }
 
 impl EnvScope for Environment {
@@ -33,6 +42,7 @@ impl EnvScope for Environment {
             strings: self.strings.clone(),
             records: self.records.clone(),
             string_lists: self.string_lists.clone(),
+            results: self.results.clone(),
         }
     }
 
@@ -41,5 +51,18 @@ impl EnvScope for Environment {
         self.strings = s.strings;
         self.records = s.records;
         self.string_lists = s.string_lists;
+        self.results = s.results;
+    }
+
+    fn clear_binding(&mut self, name: &str) {
+        self.vars.remove(name);
+        self.strings.remove(name);
+        self.records.remove(name);
+        self.string_lists.remove(name);
+        self.results.remove(name);
+        self.models.remove(name);
+        self.tokenizers.remove(name);
+        self.builtin_refs.remove(name);
+        self.device_tensors.remove(name);
     }
 }
