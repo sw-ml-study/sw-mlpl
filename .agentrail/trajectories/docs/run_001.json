@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 3,
+    "step": "events-close"
+  },
+  "action": "gate run against fresh release build; docs sweep",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T10:19:15"
+}

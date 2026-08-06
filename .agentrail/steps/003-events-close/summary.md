@@ -1,0 +1,1 @@
+Saga closed: mlplunit gate reports ALL capabilities SHIPPED and structured-test-events AVAILABLE; q-and-a announcement + unicode answers; wiki matrix row; queue advanced to apl2-idioms+expunge.
