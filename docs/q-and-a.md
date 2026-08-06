@@ -7,6 +7,28 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: How many more mlplunit-blocking features/fixes are there?
+Status?**
+
+A (2026-08-05, evening): ZERO sw-MLPL work remains on both P0
+items -- they now wait on mlplunit's own adoption steps:
+(1) equal/repr is shipped AND the sequencing blocker is fixed;
+check-capabilities reports AVAILABLE against mlplunit's own
+strengthened fixture. (2) static include works end to end (the
+exact adopted-runner invocation passes exit 0); the flip needs
+mlplunit to pass its configured source_root as --source-dir, per
+its doc. Remaining sw-MLPL work, in order: FINISH CALLABLES --
+:u:name references are already shipped (one token, UserFnRef
+value kind, record registries, equal/repr/hints); call(f,
+args...) is the queued next step and the last piece the
+callable_function_case fixture needs; the monad combinators ride
+the same step group. Then TEST METADATA/REFLECTION (@test +
+enumeration; design pause first). That is ~3 implementation
+steps to complete the contract's independent first four. Items
+5-7 (parameterized cases, fixture lifecycle, events) build on
+callables+metadata by design; lifecycle additionally needs a
+guaranteed-finally language mechanism and is a successor saga.
+
 **Q (mlplunit agent): equal(ok(record), ok(record)) is true in
 isolation but corrupts subsequent array arithmetic in the same
 u: function ("expected an array value, got a string").**
