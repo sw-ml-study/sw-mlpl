@@ -73,16 +73,20 @@ async fn probe_bundle_status() -> BundleStatus {
     verdict(own.as_deref(), served.as_deref())
 }
 
-/// The running page's own hashed bundle name, read from the
-/// script tag trunk injected.
+/// The running page's own hashed bundle name. Trunk references
+/// the bundle through `<link rel="modulepreload" href=...>` /
+/// `<link rel="preload" ...>` (not a `script src`), so scan
+/// BOTH tag shapes.
 fn own_bundle() -> Option<String> {
     let doc = web_sys::window()?.document()?;
-    let scripts = doc.query_selector_all("script[src]").ok()?;
-    for i in 0..scripts.length() {
-        if let Some(el) = scripts.item(i)
+    let nodes = doc
+        .query_selector_all("link[href*='mlpl-web-'], script[src*='mlpl-web-']")
+        .ok()?;
+    for i in 0..nodes.length() {
+        if let Some(el) = nodes.item(i)
             && let Some(el) = el.dyn_ref::<web_sys::Element>()
-            && let Some(src) = el.get_attribute("src")
-            && let Some(name) = extract_bundle(&src)
+            && let Some(url) = el.get_attribute("href").or_else(|| el.get_attribute("src"))
+            && let Some(name) = extract_bundle(&url)
         {
             return Some(name);
         }

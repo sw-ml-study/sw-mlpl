@@ -38,3 +38,17 @@ fn verdict_compares_bundles() {
     assert_eq!(verdict(a, a), BundleStatus::Fresh);
     assert_eq!(verdict(a, b), BundleStatus::Stale);
 }
+
+#[test]
+fn the_real_deployed_index_parses() {
+    // Pin against the ACTUAL generated index.html shape (trunk's
+    // modulepreload links): if trunk changes its tag layout, this
+    // fails here instead of silently degrading the badge to
+    // Unknown in production.
+    let index = include_str!("../../../../../pages/index.html");
+    let name = extract_bundle(index);
+    assert!(
+        name.as_deref().is_some_and(|n| n.starts_with("mlpl-web-")),
+        "real index.html must yield a bundle name: {name:?}"
+    );
+}
