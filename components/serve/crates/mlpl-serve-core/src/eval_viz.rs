@@ -173,6 +173,7 @@ pub fn value_kind(value: &Value) -> &'static str {
         Value::Tokenizer(_) => "tokenizer",
         Value::DeviceTensor { .. } => "device-tensor",
         Value::BuiltinRef { .. } => "builtin-ref",
+        Value::UserFnRef { .. } => "user-fn-ref",
         Value::Record { .. } => "record",
         Value::StrList { .. } => "string-list",
         Value::Result { .. } => "result",
