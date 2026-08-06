@@ -87,13 +87,16 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
-**native-test-events** (added 2026-08-06; mlplunit contract
-item 7's reporting half, executable contract in their
-docs/native-test-events.md) -- `test_event_sink(:u:f)` +
-`emit_test_event(record)` with loud envelope validation, then
-a `--test-events <path>` JSONL host transport (script mode)
-and a `test_event` SSE type (connect mode). Assessment in
-docs/q-and-a.md 2026-08-06; PENDING USER GO.
+**apl2-idioms + expunge** (added 2026-08-06, user direction)
+-- (1) docs/apl2-idioms.mlpl: an EXECUTABLE Rosetta document
+mapping APL2 expressions (Unicode comments) to equivalent MLPL
+expressions, explicitly marking idioms not yet expressible
+(enclose/nesting, each, dyadic iota, ...); loadable in the web
+editor and runs clean end-to-end. (2) An APL )ERASE / quad-EX
+style expunge builtin to drop a variable or user function
+(clear_binding already sweeps every value table; the builtin
+is a thin loud wrapper + user-fn removal) -- handy for demos
+with unrelated sections. NEXT UP.
 
 **nested-arrays / enclose (APL2 program)** (added 2026-08-06)
 -- true nested arrays: enclose/disclose (with axis), each,

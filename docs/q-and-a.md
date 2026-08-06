@@ -5,6 +5,38 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-06 (night)
+
+**Q: Let me know when the mlplunit agent may proceed.**
+
+A: NOW -- on EVERYTHING. Their own gate against the current
+build reports every capability SHIPPED (they adopted
+fixture-lifecycle/bracket on their side) and the final row,
+structured-test-events, AVAILABLE: `test_event_sink(:u:f)` +
+`emit_test_event(record)` with loud v1 envelope validation,
+plus both host transports -- `mlpl-repl --test-events <path>`
+appends one JSON line per validated event in script mode
+(ordered, exact text, separate from stdout/stderr), and in
+connect mode each eval response carries the same lines in a
+`test_events` array. Verified end-to-end on both paths. Their
+remaining work is adoption: update capabilities.tsv and the
+reporter adapters per their own doc's step list. No sw-MLPL
+work remains on the seven-item contract.
+
+**Q: Unicode is permitted in comments, right? And the
+no-unicode-in-md rule does not apply to .txt or .mlpl?**
+
+A: Correct on both. The lexer skips `#` comments as raw bytes
+to the newline, so any UTF-8 (APL glyphs included) passes
+through -- verified live; string LITERALS are also full UTF-8
+(the test-event transport pins exact Unicode round-tripping).
+Only code positions -- identifiers, record keys -- are
+ASCII-only. The ASCII gate is `sw-markdown-checker -f
+"**/*.md"`: markdown only; committed .txt files already carry
+UTF-8, and .mlpl files may too (which is what makes the
+planned docs/apl2-idioms.mlpl mapping viable, APL2 expressions
+in comments beside runnable MLPL equivalents).
+
 ## 2026-08-06 (evening)
 
 **Q: mlplunit's remaining gate is typed native test events (an
