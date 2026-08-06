@@ -29,6 +29,7 @@ pub fn error_kind(e: &EvalError) -> &'static str {
         EvalError::FieldNotFound { .. } | EvalError::FieldOnNonRecord { .. } => "field",
         EvalError::MixedArrayLitElements { .. } => "type",
         EvalError::UnwrapOnErr { .. } => "unwrap-on-err",
+        EvalError::ExitRequested(_) => "exit",
         EvalError::NotAResult { .. } => "not-a-result",
         EvalError::BreakSignal(_)
         | EvalError::ContinueSignal

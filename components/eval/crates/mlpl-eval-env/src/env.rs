@@ -75,6 +75,13 @@ pub struct Environment {
     /// `read_text` / `write_text` / `remove_path`). None on
     /// surfaces without filesystem access.
     pub fs_root: Option<std::path::PathBuf>,
+    /// Host hook for `run_script` (registered by surfaces that
+    /// own a source loader; absent elsewhere).
+    pub run_script_hook: Option<RunScriptHook>,
+    /// When set (`run_script` / tests), `exit(code)` raises the
+    /// `ExitRequested` signal instead of terminating the
+    /// process -- the dependency-injection seam for exit.
+    pub exit_intercept: bool,
     /// Sandbox root for filesystem `load("relative-path")` calls.
     /// `None` means filesystem access is disabled (the web REPL
     /// surface, where `std::fs` doesn't exist under WASM). Saga 12
@@ -227,3 +234,18 @@ impl Environment {
 pub fn model_params(env: &Environment, name: &str) -> Option<Vec<String>> {
     env.models.get(name).map(ModelSpec::params)
 }
+
+/// Options for the `run_script` builtin, resolved by the
+/// evaluator (paths already sandbox-checked and absolute).
+#[derive(Clone, Debug, Default)]
+pub struct RunScriptOpts {
+    /// Include/sandbox root for the child script.
+    pub source_dir: Option<std::path::PathBuf>,
+    /// Dataset directory for the child script.
+    pub data_dir: Option<std::path::PathBuf>,
+    /// Buffer typed test events and return them in the result.
+    pub capture: bool,
+}
+
+/// The host-side implementation `run_script` dispatches to.
+pub type RunScriptHook = fn(&std::path::Path, &RunScriptOpts) -> Value;

@@ -70,6 +70,9 @@ fn init(config: &Config) -> Session {
             })
         })
         .or_else(|| std::env::current_dir().ok());
+    // Host hook: run_script executes child scripts through the
+    // chunked include loader in a fresh environment.
+    env.run_script_hook = Some(mlpl_cli::script_exec::run_script_value);
     if let Some(dir) = &config.exp_dir {
         env.set_exp_dir(dir.clone());
     }

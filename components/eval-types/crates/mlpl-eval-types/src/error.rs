@@ -166,6 +166,11 @@ pub enum EvalError {
     ContinueSignal,
     /// Saga 46: internal `return` signal from a UDF body.
     ReturnSignal(Box<crate::value::Value>),
+    /// `exit(code)` under an intercept (run_script / tests):
+    /// unwinds like a signal, NOT catchable by try/catch, and
+    /// surfaces as structured exit status instead of killing
+    /// the process.
+    ExitRequested(u8),
     /// Saga 31 step 005: `break` or `continue` evaluated
     /// without an enclosing `while` loop to catch the signal.
     /// `kind` is `"break"` or `"continue"`.

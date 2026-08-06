@@ -29,6 +29,9 @@ pub(crate) fn fmt_simple(
         EvalError::VizError(e) => write!(f, "{e}"),
         EvalError::Cancelled { step, .. } => write!(f, "cancelled at step {step}"),
         EvalError::UnwrapOnErr { message } => write!(f, "unwrap on an Err value: {message}"),
+        EvalError::ExitRequested(code) => {
+            return Some(write!(f, "exit({code})"));
+        }
         EvalError::BreakSignal(_) | EvalError::ContinueSignal | EvalError::ReturnSignal(_) => {
             write!(f, "internal: control-flow signal escaped (bug)")
         }

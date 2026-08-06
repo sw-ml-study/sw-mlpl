@@ -75,6 +75,7 @@ mod fncall_gen;
 mod fncall_globals;
 mod fncall_models;
 mod fncall_reflect;
+mod fncall_run;
 mod fncall_trace;
 mod fncall_values;
 mod fs_ops;
@@ -124,7 +125,7 @@ mod tag_render;
 mod tokenizer;
 mod type_errors;
 
-pub use env::{Environment, PeerDispatcher, model_params};
+pub use env::{Environment, PeerDispatcher, RunScriptHook, RunScriptOpts, model_params};
 pub use eval_program::{
     eval_program, eval_program_traced, eval_program_value, eval_program_value_traced,
     eval_source_value,

@@ -183,7 +183,8 @@ pub(crate) fn eval_try_catch(
             Err(
                 sig @ (EvalError::BreakSignal(_)
                 | EvalError::ContinueSignal
-                | EvalError::ReturnSignal(_)),
+                | EvalError::ReturnSignal(_)
+                | EvalError::ExitRequested(_)),
             ) => return Err(sig),
             Err(e) => return run_catch_handler(&e, binding, handler, env, trace),
         }

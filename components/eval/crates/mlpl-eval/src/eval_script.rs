@@ -77,6 +77,10 @@ pub(crate) fn eval_exit(
             "exit: code must be an integer in 0..=255, got {v}"
         )));
     }
+    if env.exit_intercept {
+        #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
+        return Err(EvalError::ExitRequested(v as u8));
+    }
     // Flush stdout first: `process::exit` skips destructors, and any
     // buffered output (e.g. the script-mode source echo when stdout is
     // a pipe) would otherwise be lost.

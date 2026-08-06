@@ -1529,6 +1529,23 @@ gradient still flows through during backprop; only the
 weight update is suppressed. MLPL: `freeze(model)` /
 `unfreeze(model)` from .
 
+## fs_walk / read_text / write_text / remove_path / run_script (builtins)
+
+The language-native test-runner surface: a SANDBOXED
+filesystem API (walk in lexical order with a `*` pattern,
+exact-text read/write, removal -- all Result-speaking, all
+contained by the `--source-dir` sandbox, symlinks never
+followed) plus `run_script(path, {source_dir, data_dir,
+capture})`, which executes a file in a FRESH environment (no
+definition or registry leakage), preserves `include`
+semantics, and returns the outcome as data: status
+ok/err/error/exit (a child's `exit(n)` is intercepted -- the
+dependency-injection seam for exit), the final value's repr,
+and, with `capture: 1`, the child's typed test events as JSON
+lines. Together with [[global_set (builtin)]] and
+[[test_event_sink / emit_test_event (builtins)]], a complete
+test runner is expressible in MLPL itself.
+
 ## global_set (builtin)
 
 `global_set("name", value)` binds a name at the WORKSPACE

@@ -27,7 +27,8 @@ pub(crate) fn invoke(
         Err(
             sig @ (EvalError::BreakSignal(_)
             | EvalError::ContinueSignal
-            | EvalError::ReturnSignal(_)),
+            | EvalError::ReturnSignal(_)
+            | EvalError::ExitRequested(_)),
         ) => Err(sig),
         Err(e) => {
             let fields = BTreeMap::from([

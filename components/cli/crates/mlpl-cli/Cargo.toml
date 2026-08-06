@@ -12,6 +12,7 @@ mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-source-loader = { path = "../../../syntax-parser/crates/mlpl-source-loader" }
 mlpl-lexer = { path = "../../../syntax-lexer/crates/mlpl-lexer" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-value-structural = { path = "../../../eval-types/crates/mlpl-value-structural" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 # Saga 21 step 003: CLI viz cache strategy. Content-
 # addressed SVG paths under $MLPL_CACHE_DIR (default

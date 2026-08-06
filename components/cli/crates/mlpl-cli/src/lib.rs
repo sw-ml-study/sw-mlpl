@@ -14,3 +14,4 @@ pub fn crate_name() -> &'static str {
 }
 pub mod fs_provider;
 pub mod include_script;
+pub mod script_exec;

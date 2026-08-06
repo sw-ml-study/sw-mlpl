@@ -184,6 +184,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "sandboxed file/dir removal; returns ok(1)/err",
             ),
             (
+                "run_script",
+                "run_script(path, opts)",
+                "execute a script in a FRESH environment; structured status + captured events",
+            ),
+            (
                 "equal",
                 "equal(a, b)",
                 "total structural equality over any two values; never errors",
