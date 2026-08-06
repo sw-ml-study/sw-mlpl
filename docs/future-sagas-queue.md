@@ -96,6 +96,21 @@ moons K-Means cannot), agglomerative at whiteboard scale
 (merge-matrix heatmap). Glossary entries ride along (GMM, EM,
 DBSCAN, dendrogram).
 
+**math-view** (added 2026-08-05; source analysis in
+docs/bqn-sw-mlpl-and-math.txt) -- equations as a DERIVED VIEW of
+MLPL programs: math metadata on primitives (printable name,
+precedence, notation form, index-expansion rule), expression
+extraction from the typed representation, shape-annotated
+equations (the teaching feature textbooks omit), composition
+expansion, HOF rendering via summation/index notation, and a
+DocView IR emitting text/LaTeX/MathML/HTML -- never
+source-text-to-LaTeX translation. The @word annotation
+namespace (shipped with test metadata) carries the presentation
+hints (@math_name / @formula / @doc), harvestable via
+annotations(...). SHORT-TERM EXTERNAL PATH, no language work:
+org-mode + elisp literate extraction over mlpl source blocks,
+made trivial once annotations land.
+
 ## Track 2 -- generation speed (the MTP program; CPU + MLX)
 
 4. **generation-state-kv-cache** -- GenerationState, per-layer

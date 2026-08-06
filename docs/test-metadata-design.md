@@ -46,6 +46,27 @@ def u:parse_case() { ... }
   record fields are validated (unknown fields there are loud) --
   other annotations are free-form by design.
 
+## Relationship to the math-view program
+
+docs/bqn-sw-mlpl-and-math.txt sketches equations as a DERIVED
+VIEW: MLPL source stays the truth, and mathematical notation is
+generated from the typed semantic representation (never by
+translating source text to LaTeX). Annotations there are
+optional PRESENTATION HINTS -- `@math_name("X")` on a binding
+names the symbol; the renderer infers the rest and maps symbols
+per output (Unicode / LaTeX / MathML / plain). Two consequences
+for THIS design:
+
+- The general `@word` namespace is the right foundation:
+  `@formula` / `@math_name` / `@doc` become data the future
+  math-view (or a short-term org-mode/elisp extractor) harvests
+  via `annotations(...)` with zero further language work.
+- Attachment eventually widens beyond `def u:` to BINDINGS
+  (`@math_name("X")` before `input = ...`). This saga implements
+  def attachment only (the mlplunit contract's need); the
+  grammar and storage are designed so binding attachment is an
+  extension, not a rework.
+
 ## Reflection (discovery without execution)
 
 Two builtins, sidestepping the ordered-collection gap (records

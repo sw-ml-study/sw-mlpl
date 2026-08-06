@@ -7,6 +7,24 @@ log of this file shows when it was written.)
 
 ## 2026-08-05
 
+**Q: Read docs/bqn-sw-mlpl-and-math.txt for annotation/math
+ideas (short term maybe elisp + org-mode).**
+
+A: Read; three ideas now load-bearing. (1) Math is a DERIVED
+VIEW: source stays truth, equations generate from the typed
+semantic representation -- so the annotation system must carry
+presentation HINTS (@math_name, @formula), not the math itself.
+(2) The general @word namespace just designed is exactly the
+right substrate; the design doc now records that attachment
+will widen from def u: to BINDINGS for @math_name, and the
+math-view program is queued (docs/future-sagas-queue.md) with
+the file's six phases: primitive math metadata -> expression
+extraction -> shape-aware equations -> composition expansion ->
+HOF/summation rendering -> DocView IR (text/LaTeX/MathML/HTML).
+(3) Short-term external path recorded in the queue item:
+org-mode + elisp extraction over mlpl blocks needs no language
+work and becomes trivial harvesting once annotations ship.
+
 **Q: What can mlplunit use NOW? What else in flight does it
 need?**
 
