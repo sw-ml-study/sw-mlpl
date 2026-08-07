@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga companion-docs-enrich: complete
+- docs: enrich companion docs from the direction brief (enrich)
+- saga: init companion-docs-enrich (direction-file input)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga companion-repos-docs: complete
 - docs: first-pass companion-repo ecosystem planning docs
 - saga: init companion-repos-docs (user go)
