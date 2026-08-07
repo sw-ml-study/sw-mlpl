@@ -1,9 +1,10 @@
 number = 3
 slug = "birds-demo"
-status = "pending"
+status = "completed"
 description = "Step 3 per plan: 'Combinators (the birds)' web demo in APL2 / General Program..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T20:59:03"
+completed_at = "2026-08-06T21:05:55"
 task_type = "feature"
-commits = []
+commits = ["73ef13c6c9a82122d07ac29630c9fa6edbe3d3d0"]

@@ -1,0 +1,1 @@
+Close combinator-birds: wiki matrix row (Partial/applicative call), q-and-a note, queue advance (candidates: gen-state-kv-cache resume, paydown spike, word-wrappers compose/flip/constant follow-up, demo-combinators sibling repo seed), --done.

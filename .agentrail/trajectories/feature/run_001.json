@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "birds-demo"
+  },
+  "action": "demo authorship against release binary; connect smoke",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T21:05:55"
+}

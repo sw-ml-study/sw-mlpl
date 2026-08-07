@@ -1,0 +1,1 @@
+Birds demo shipped (staging, SK basis, mockingbird, pervasion finale), idioms + docs + pins, all smokes green, deployed.
