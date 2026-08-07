@@ -113,7 +113,11 @@ fn apply_scalar(
         }
         Value::BuiltinRef { name } => {
             let arrs: Vec<DenseArray> = xs.iter().map(|&x| DenseArray::from_scalar(x)).collect();
-            Value::Array(mlpl_runtime::call_builtin(name, arrs)?)
+            // Env dispatch, not bare call_builtin: elementwise
+            // ops like `add` live behind the hook.
+            Value::Array(mlpl_eval_env::dispatch_hook::dispatch_or_err(
+                env, name, arrs,
+            )?)
         }
         _ => unreachable!("checked in fn_and_args"),
     };

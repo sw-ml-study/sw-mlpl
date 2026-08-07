@@ -43,6 +43,9 @@ fn each_accepts_builtin_references_too() {
 #[test]
 fn table_is_the_outer_product_over_f() {
     let mut env = Environment::new();
+    // Builtin refs route through the env dispatch: :add works.
+    let t = arr(&mut env, "table(:add, [1, 2], [10, 20])");
+    assert_eq!(t.data(), &[11.0, 21.0, 12.0, 22.0]);
     eval_value(&mut env, "def u:times(a, b) { a * b }").unwrap();
     // APL2:  A ∘.× B   /  BQN:  a ×⌜ b
     let a = arr(&mut env, "table(:u:times, [1, 2, 3], [10, 20])");

@@ -87,7 +87,7 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
-**combinator-birds** (added 2026-08-07, user direction) --
+**combinator-birds** (NEXT UP after mlplunit round-3 -- apl2-hof completed 2026-08-07; the design step implements Partial per docs/combinators-research.txt) --
 "To Mock a Mockingbird"-style coverage of combinators
 (identity, kestrel, bluebird/composition, cardinal/flip,
 warbler, mockingbird...) as MLPL demos + possibly builtins

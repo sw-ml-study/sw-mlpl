@@ -74,7 +74,9 @@ fn apply_ref(
                 .iter()
                 .map(|v| v.clone().into_array())
                 .collect::<Result<Vec<_>, _>>()?;
-            Ok(Value::Array(mlpl_runtime::call_builtin(name, arrs)?))
+            Ok(Value::Array(mlpl_eval_env::dispatch_hook::dispatch_or_err(
+                env, name, arrs,
+            )?))
         }
         _ => unreachable!("checked by reference()"),
     }
