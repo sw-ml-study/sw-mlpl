@@ -129,10 +129,18 @@ fn bind_arg(name: &str, param: &str, val: &Value, env: &mut Environment) -> Resu
         Value::UserFnRef { name: t } | Value::BuiltinRef { name: t } => {
             env.set_builtin_ref(param.to_string(), t.clone());
         }
+        Value::Partial {
+            name: t,
+            arity,
+            bound,
+        } => {
+            env.partials
+                .insert(param.to_string(), (t.clone(), *arity, bound.clone()));
+        }
         _ => {
             return Err(EvalError::Unsupported(format!(
                 "{name}: argument '{param}' must be an array, Result, string, record, \
-                 or function reference"
+                 function reference, or partial"
             )));
         }
     }

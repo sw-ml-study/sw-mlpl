@@ -144,7 +144,8 @@ pub async fn eval_on_device_handler(
         | Value::Record { .. }
         | Value::StrList { .. }
         | Value::Result { .. }
-        | Value::GenState(_) => {
+        | Value::GenState(_)
+        | Value::Partial { .. } => {
             return Err(bad(
                 "eval-on-device blocks must return a tensor or string in R1 \
                  (got model / tokenizer / device-tensor / builtin-ref / record / string-list / result)"

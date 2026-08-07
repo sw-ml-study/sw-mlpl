@@ -46,7 +46,10 @@ fn reference(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     let v = crate::eval::eval_expr(arg, env, trace)?;
-    if matches!(v, Value::UserFnRef { .. } | Value::BuiltinRef { .. }) {
+    if matches!(
+        v,
+        Value::UserFnRef { .. } | Value::BuiltinRef { .. } | Value::Partial { .. }
+    ) {
         Ok(v)
     } else {
         Err(EvalError::Unsupported(format!(
@@ -65,19 +68,5 @@ fn apply_ref(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    match f {
-        Value::UserFnRef { name } => {
-            crate::eval_user_fn::invoke_user_fn_values(name, vals, env, trace)
-        }
-        Value::BuiltinRef { name } => {
-            let arrs = vals
-                .iter()
-                .map(|v| v.clone().into_array())
-                .collect::<Result<Vec<_>, _>>()?;
-            Ok(Value::Array(mlpl_eval_env::dispatch_hook::dispatch_or_err(
-                env, name, arrs,
-            )?))
-        }
-        _ => unreachable!("checked by reference()"),
-    }
+    crate::callable_apply::apply_callable(f, vals, env, trace)
 }

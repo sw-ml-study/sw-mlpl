@@ -146,6 +146,15 @@ pub(crate) fn eval_expr(
         });
     }
     if let Expr::Ident(name, _) = expr
+        && let Some((target, arity, bound)) = env.partials.get(name)
+    {
+        return Ok(Value::Partial {
+            name: target.clone(),
+            arity: *arity,
+            bound: bound.clone(),
+        });
+    }
+    if let Expr::Ident(name, _) = expr
         && let Some(v) = env.get_device_tensor(name)
     {
         return Ok(v.clone());
@@ -339,6 +348,14 @@ pub(crate) fn eval_expr(
                 Value::BuiltinRef { name: target } | Value::UserFnRef { name: target } => {
                     env.set_builtin_ref(name.clone(), target);
                     ("assign_builtin_ref", vec![], DenseArray::from_scalar(0.0))
+                }
+                Value::Partial {
+                    name: target,
+                    arity,
+                    bound,
+                } => {
+                    env.partials.insert(name.clone(), (target, arity, bound));
+                    ("assign_partial", vec![], DenseArray::from_scalar(0.0))
                 }
                 Value::Array(val) => {
                     env.set(name.clone(), val.clone());

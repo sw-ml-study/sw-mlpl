@@ -184,6 +184,7 @@ pub fn value_kind(value: &Value) -> &'static str {
         Value::StrList { .. } => "string-list",
         Value::Result { .. } => "result",
         Value::GenState(_) => "gen-state",
+        Value::Partial { .. } => "partial",
     }
 }
 

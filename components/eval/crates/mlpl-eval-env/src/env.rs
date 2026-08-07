@@ -55,6 +55,8 @@ pub struct Environment {
     /// Generation states (KV caches) by binding name -- the
     /// `gen_*` family (docs/kv-cache-design.md).
     pub gen_states: std::collections::HashMap<String, mlpl_eval_core::GenState>,
+    /// Partial applications by binding name (name, arity, bound).
+    pub partials: std::collections::HashMap<String, (String, usize, Vec<Value>)>,
     /// Registered `test_event_sink` callback (`u:` name), the
     /// typed test-event API's delivery target.
     pub test_event_sink: Option<String>,

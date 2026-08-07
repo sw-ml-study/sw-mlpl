@@ -71,6 +71,14 @@ pub(crate) fn bind_value(env: &mut Environment, name: &str, value: Value) {
         Value::BuiltinRef { name: target } | Value::UserFnRef { name: target } => {
             env.set_builtin_ref(name.to_string(), target);
         }
+        Value::Partial {
+            name: target,
+            arity,
+            bound,
+        } => {
+            env.partials
+                .insert(name.to_string(), (target, arity, bound));
+        }
         Value::Model(m) => {
             env.models.insert(name.to_string(), m);
         }

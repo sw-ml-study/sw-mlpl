@@ -38,6 +38,18 @@ pub enum Value {
         /// `"add"`, `"+"`, `"max"`, `"sigmoid"`.
         name: String,
     },
+    /// Partial application (docs/combinators-design.md): a
+    /// callable that remembers WHICH user function and which
+    /// arguments are bound so far -- data, not a closure.
+    /// Formed by under-applying `call`; saturating it executes.
+    Partial {
+        /// The full `u:`-prefixed function-table key.
+        name: String,
+        /// The arity the partial was formed against.
+        arity: usize,
+        /// Arguments bound so far (fewer than `arity`).
+        bound: Vec<Value>,
+    },
     /// First-class reference to a USER-defined function:
     /// `:u:name`. `name` holds the full `u:`-prefixed key of the
     /// user-fn table (late binding: the reference identifies the
@@ -145,6 +157,7 @@ pub fn value_kind(v: &Value) -> &'static str {
         Value::StrList { .. } => "string-list",
         Value::Result { .. } => "result",
         Value::GenState(_) => "gen-state",
+        Value::Partial { .. } => "partial",
     }
 }
 
@@ -171,6 +184,9 @@ impl fmt::Display for Value {
             }
             Self::BuiltinRef { name } => write!(f, ":{name}"),
             Self::UserFnRef { name } => write!(f, ":{name}"),
+            Self::Partial { name, arity, bound } => {
+                write!(f, "<partial :{name}, {} of {arity} bound>", bound.len())
+            }
             Self::DeviceTensor {
                 peer,
                 device,

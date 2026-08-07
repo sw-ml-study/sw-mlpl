@@ -43,6 +43,7 @@ pub mod env_api {
 pub use env_api::*;
 mod bpe;
 mod bracket_run;
+mod callable_apply;
 mod def_metadata;
 mod device;
 mod device_dispatch;

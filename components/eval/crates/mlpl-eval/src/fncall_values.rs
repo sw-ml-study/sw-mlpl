@@ -73,16 +73,22 @@ fn eval_call(
         got: 0,
     })?;
     let fv = crate::eval::eval_expr(f_expr, env, trace)?;
-    let (Value::UserFnRef { name } | Value::BuiltinRef { name }) = fv else {
-        let kind = mlpl_eval_types::value_kind(&fv);
-        return Err(EvalError::Unsupported(format!(
-            "call: first argument must be a function reference (`:u:name` or `:name`) -- got {kind}"
-        )));
-    };
-    let call = Expr::FnCall {
-        name,
-        args: rest.to_vec(),
-        span: *span,
-    };
-    crate::eval::eval_expr(&call, env, trace)
+    // Builtins keep the expression path (family dispatch handles
+    // their flexible arities); user refs and partials take the
+    // APPLICATIVE path (docs/combinators-design.md).
+    if let Value::BuiltinRef { name } = &fv
+        && !rest.is_empty()
+    {
+        let call = Expr::FnCall {
+            name: name.clone(),
+            args: rest.to_vec(),
+            span: *span,
+        };
+        return crate::eval::eval_expr(&call, env, trace);
+    }
+    let vals = rest
+        .iter()
+        .map(|a| crate::eval::eval_expr(a, env, trace))
+        .collect::<Result<Vec<_>, _>>()?;
+    crate::callable_apply::apply_callable(&fv, &vals, env, trace)
 }

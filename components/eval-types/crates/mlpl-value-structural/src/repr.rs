@@ -49,6 +49,15 @@ fn write_value(out: &mut String, v: &Value) {
             out.push_str(&gs.caches.len().to_string());
             out.push(')');
         }
+        Value::Partial { name, arity, bound } => {
+            out.push_str("partial(:");
+            out.push_str(name);
+            out.push_str(", ");
+            out.push_str(&bound.len().to_string());
+            out.push_str(" of ");
+            out.push_str(&arity.to_string());
+            out.push_str(" bound)");
+        }
         Value::BuiltinRef { name } | Value::UserFnRef { name } => {
             out.push(':');
             out.push_str(name);

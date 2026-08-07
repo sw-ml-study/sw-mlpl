@@ -81,7 +81,10 @@ fn fn_and_args(
         });
     }
     let f = crate::eval::eval_expr(&args[0], env, trace)?;
-    if !matches!(f, Value::UserFnRef { .. } | Value::BuiltinRef { .. }) {
+    if !matches!(
+        f,
+        Value::UserFnRef { .. } | Value::BuiltinRef { .. } | Value::Partial { .. }
+    ) {
         return Err(EvalError::Unsupported(format!(
             "{who}: the first argument must be a function reference (`:u:name` or `:name`) -- got {}",
             mlpl_eval_types::value_kind(&f)
@@ -103,24 +106,11 @@ fn apply_scalar(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<f64, EvalError> {
-    let result = match f {
-        Value::UserFnRef { name } => {
-            let vals: Vec<Value> = xs
-                .iter()
-                .map(|&x| Value::Array(DenseArray::from_scalar(x)))
-                .collect();
-            crate::eval_user_fn::invoke_user_fn_values(name, &vals, env, trace)?
-        }
-        Value::BuiltinRef { name } => {
-            let arrs: Vec<DenseArray> = xs.iter().map(|&x| DenseArray::from_scalar(x)).collect();
-            // Env dispatch, not bare call_builtin: elementwise
-            // ops like `add` live behind the hook.
-            Value::Array(mlpl_eval_env::dispatch_hook::dispatch_or_err(
-                env, name, arrs,
-            )?)
-        }
-        _ => unreachable!("checked in fn_and_args"),
-    };
+    let vals: Vec<Value> = xs
+        .iter()
+        .map(|&x| Value::Array(DenseArray::from_scalar(x)))
+        .collect();
+    let result = crate::callable_apply::apply_callable(f, &vals, env, trace)?;
     match result {
         Value::Array(a) if a.rank() == 0 => Ok(a.data()[0]),
         other => Err(EvalError::Unsupported(format!(

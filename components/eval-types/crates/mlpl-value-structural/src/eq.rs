@@ -24,6 +24,18 @@ pub fn value_equal(a: &Value, b: &Value) -> bool {
         (Value::Model(x), Value::Model(y)) => x == y,
         (Value::Tokenizer(x), Value::Tokenizer(y)) => x == y,
         (Value::GenState(x), Value::GenState(y)) => x == y,
+        (
+            Value::Partial {
+                name: na,
+                bound: ba,
+                ..
+            },
+            Value::Partial {
+                name: nb,
+                bound: bb,
+                ..
+            },
+        ) => na == nb && ba.len() == bb.len() && ba.iter().zip(bb).all(|(x, y)| value_equal(x, y)),
         (Value::BuiltinRef { name: x }, Value::BuiltinRef { name: y }) => x == y,
         (Value::UserFnRef { name: x }, Value::UserFnRef { name: y }) => x == y,
         _ => false,

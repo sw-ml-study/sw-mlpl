@@ -48,10 +48,13 @@ fn direct_refs_registries_and_builtins_all_call() {
 fn errors_identify_the_referent_not_call() {
     let mut env = Environment::new();
     eval_value(&mut env, "def u:double(x) { x * 2 }").unwrap();
-    let e = eval_value(&mut env, "call(:u:double)").unwrap_err();
+    // Under-application is no longer an error: it forms a
+    // PARTIAL (docs/combinators-design.md). call(:u:double)
+    // with nothing supplied returns the callable, 0 of 1 bound.
+    let v = eval_value(&mut env, "call(:u:double)").unwrap();
     assert!(
-        e.contains("u:double"),
-        "arity error names the referent: {e}"
+        matches!(&v, Value::Partial { name, bound, .. } if name == "u:double" && bound.is_empty()),
+        "{v:?}"
     );
     let e = eval_value(&mut env, "call(:u:gone, 1)").unwrap_err();
     assert!(e.contains("u:gone"), "dangling reference names it: {e}");

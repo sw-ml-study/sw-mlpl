@@ -25,6 +25,7 @@ pub struct ScopeSnapshot {
     // Function references bind into builtin_refs (both kinds), so
     // reference-valued params need the same frame restore.
     builtin_refs: HashMap<String, String>,
+    partials: HashMap<String, (String, usize, Vec<Value>)>,
 }
 
 /// Per-call scope snapshot/restore for `u:` function frames, plus
@@ -47,6 +48,7 @@ impl EnvScope for Environment {
             string_lists: self.string_lists.clone(),
             results: self.results.clone(),
             builtin_refs: self.builtin_refs.clone(),
+            partials: self.partials.clone(),
         }
     }
 
@@ -57,6 +59,7 @@ impl EnvScope for Environment {
         self.string_lists = s.string_lists;
         self.results = s.results;
         self.builtin_refs = s.builtin_refs;
+        self.partials = s.partials;
     }
 
     fn clear_binding(&mut self, name: &str) {
@@ -68,6 +71,7 @@ impl EnvScope for Environment {
         self.models.remove(name);
         self.tokenizers.remove(name);
         self.gen_states.remove(name);
+        self.partials.remove(name);
         self.builtin_refs.remove(name);
         self.device_tensors.remove(name);
     }
