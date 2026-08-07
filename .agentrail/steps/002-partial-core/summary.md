@@ -1,0 +1,1 @@
+Partial shipped: applicative call (under/exact/left-assoc-excess), full binding + acceptance ripple, serve arms; SK basis derives I; 8 TDD tests + broad regressions; one old arity-error pin updated to the new semantics.

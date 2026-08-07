@@ -1,0 +1,9 @@
+number = 3
+slug = "birds-demo"
+status = "pending"
+description = "Step 3 per plan: 'Combinators (the birds)' web demo in APL2 / General Program..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T20:59:03"
+task_type = "feature"
+commits = []
