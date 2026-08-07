@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga companion-repos-docs: complete
+- docs: first-pass companion-repo ecosystem planning docs
+- saga: init companion-repos-docs (user go)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga partial-hof-adoption: complete
 - fix(eval): Result combinators + bracket hooks accept partials (adopt)
 - saga: init partial-hof-adoption (demo-combinators agent report)
