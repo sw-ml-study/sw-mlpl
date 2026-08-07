@@ -12,8 +12,21 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-07
+
+- saga combinator-birds: complete (4 steps)
+- docs: close combinator-birds; follow-ups queued
+
 ## 2026-08-06
 
+- saga combinator-birds: step 003 complete
+- feat(demos): Combinators (the birds) -- staged application, SK basis, pervasion finale (birds-demo)
+- saga combinator-birds: step 002 complete
+- feat(eval): Partial -- application becomes a value (partial-core)
+- saga combinator-birds: step 001 complete
+- docs(design): partial application + the combinator birds (partial-design)
+- saga: init combinator-birds (user go; research-driven)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga pages-deploy-v2: complete (3 steps)
 - docs: close pages-deploy-v2 (CLAUDE.md provenance notes; clippy closure fix)
 - saga pages-deploy-v2: step 002 complete
