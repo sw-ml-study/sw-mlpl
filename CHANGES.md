@@ -14,6 +14,15 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga pages-deploy-v2: complete (3 steps)
+- docs: close pages-deploy-v2 (CLAUDE.md provenance notes; clippy closure fix)
+- saga pages-deploy-v2: step 002 complete
+- feat(web): provenance badge v2 -- current / reload / deploy-pending / unknown (splash-badge-v2)
+- fix(pages): valid build-info.json -- pipefail made the fallback fire alongside the summary
+- saga pages-deploy-v2: step 001 complete
+- infra: no rust builds on GitHub -- provenance-stamped pages + shields badges (no-rust-on-github)
+- saga: archive mlplunit-round-3; init pages-deploy-v2 (user directive)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-round-3: complete (2 steps)
 - docs: close mlplunit-round-3 (adoption note: repo-root --source-dir for fs fixtures)
 - refactor(parser): token-stream shaping into its own module (ledger)
