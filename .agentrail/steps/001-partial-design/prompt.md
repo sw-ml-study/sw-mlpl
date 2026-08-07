@@ -1,0 +1,1 @@
+Write docs/combinators-design.md per the saga plan: Partial value semantics, applicative call table (under/exact/over), v1 user-fns-only rationale, storage + surface ripple list, introspection forms, HOF acceptance, what is deliberately NOT added (lambdas/closures/trains for now), demo shape. Commit.

@@ -1,0 +1,9 @@
+number = 1
+slug = "partial-design"
+status = "pending"
+description = "Write docs/combinators-design.md per the saga plan: Partial value semantics, ..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T20:45:19"
+task_type = "design"
+commits = []
