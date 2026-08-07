@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga y-combinator: complete (2 steps)
+- docs: close y-combinator saga (q-and-a note)
+- saga y-combinator: step 001 complete
+- feat(demos): The Y Combinator (fixed points) -- recursion without a name (y-examples)
+- saga: init y-combinator (user go; fix via partials verified)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga combinator-birds: complete (4 steps)
 - docs: close combinator-birds; follow-ups queued
 
