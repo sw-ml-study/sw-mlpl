@@ -332,6 +332,13 @@ every `:`-prefixed command.
 - [demo-algorithms](https://github.com/sw-ml-study/demo-algorithms)
   -- data-structures and algorithms demos written in MLPL:
   general-purpose programming beyond the ML core.
+- [demo-combinators](https://github.com/sw-ml-study/demo-combinators)
+  -- combinatory-logic ("To Mock a Mockingbird") demos.
+
+The surrounding repository ecosystem -- existing and planned
+companions (a libraries collection, memory-organization demos,
+an LSP, an MCP server) -- is mapped in
+[docs/companion-repos.md](docs/companion-repos.md).
 
 ## Links
 
