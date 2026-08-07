@@ -1,0 +1,1 @@
+ci.yml deleted; build-info.json + meta stamp in every pages build; README badges read the live site's provenance; deployed.

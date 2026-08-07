@@ -1,0 +1,9 @@
+number = 2
+slug = "splash-badge-v2"
+status = "pending"
+description = "Splash/header badge v2 per plan: RUNNING page identity from its own mlpl-buil..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-06T20:05:32"
+task_type = "feature"
+commits = []

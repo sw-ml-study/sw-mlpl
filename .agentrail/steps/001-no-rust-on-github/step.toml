@@ -1,9 +1,10 @@
 number = 1
 slug = "no-rust-on-github"
-status = "pending"
+status = "completed"
 description = "Per plan step 1: delete .github/workflows/ci.yml (no rustup on GitHub); build..."
 role = "production"
 context_files = []
 created_at = "2026-08-06T20:00:19"
+completed_at = "2026-08-06T20:05:32"
 task_type = "infra"
-commits = []
+commits = ["1581112f3b35999b86cbb0ff3cc4d7121b45535e"]

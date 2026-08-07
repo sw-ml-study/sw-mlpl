@@ -1,0 +1,11 @@
+{
+  "task_type": "infra",
+  "state": {
+    "number": 1,
+    "step": "no-rust-on-github"
+  },
+  "action": "provenance design; shields dynamic badges; ANSI-clean ledger",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T20:05:32"
+}
