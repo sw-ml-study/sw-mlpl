@@ -1,0 +1,9 @@
+number = 1
+slug = "y-examples"
+status = "pending"
+description = "Extend the Combinators (the birds) demo with a fixed-point / Y-combinator sec..."
+role = "production"
+context_files = []
+created_at = "2026-08-07T09:25:52"
+task_type = "feature"
+commits = []

@@ -1,24 +1,18 @@
-# Saga: combinator-birds
-User direction; design brief: docs/combinators-research.txt
-(target = its Level 2). Partial application as a VALUE --
-Value::Partial {callable, bound args} -- with applicative
-call(): under-application returns a Partial, exact arity
-executes, excess arguments apply left-associatively to the
-returned callable. No lambdas, no closures: references stay
-named, partials store data. v1 scope: partials over USER
-functions (fixed arity); builtin references keep exact arity
-(their arity is not fixed -- wrap in a u: fn). Introspection:
-repr "partial(:u:B, 1 of 3 bound)", equal structural,
-:describe. HOF quartet + combinators accept partials.
+# Saga: y-combinator
+User direction 2026-08-07: relate the Y COMBINATOR (as in the
+brand casual users have heard of) to the birds demo, with
+worked examples. Key finding (verified in the repl): MLPL
+needs NO new language feature -- partials already supply the
+delay a strict-language fixed-point combinator requires. Two
+levels: (1) self-application recursion (the mockingbird move,
+step takes self); (2) def u:fix(f, v) { call(f, call(:u:fix,
+f), v) } -- a clean step + fix ties the knot; the partial
+call(:u:fix, f) is the delayed recursive reference. Both
+verified: fact 5 = 120, fib 10 = 55.
 ## Steps
-1. partial-design -- docs/combinators-design.md distilling the
-   research into the committed semantics.
-2. partial-core -- the value kind (12th), env table + binding
-   ripple (assign/clear/snapshot/serve arms), applicative call,
-   invoke path, TDD: staged K/B application, left-assoc
-   equivalence, mockingbird self-application, SK-basis
-   construction (the research's acceptance criterion).
-3. birds-demo -- Combinators web demo (aviary record, staged
-   application, SK basis, the pervasive-array composition
-   finale) + idioms section + docs rows.
-4. close -- rebuilds/deploy, wiki, queue advance.
+1. y-examples -- extend the Combinators demo with a
+   fixed-point section (self-application -> fix -> factorial /
+   fibonacci -> "Y Combinator the brand is named after this");
+   idioms doc + glossary entry; a Rust test pinning fix();
+   verify demo runs + smoke.
+2. close -- rebuild/deploy, wiki, q-and-a, README pins.
