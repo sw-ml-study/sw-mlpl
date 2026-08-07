@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 3,
+    "step": "close"
+  },
+  "action": "live verification of the full provenance chain",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-06T20:40:36"
+}

@@ -1,0 +1,1 @@
+pages-deploy-v2 closed: no rust on GitHub (ci.yml gone), provenance-stamped builds, shields badges render the LIVE commit (verified: live build-info == disk, shields title correct), badge v2 live; CLAUDE.md + memory + wiki updated.

@@ -1,9 +1,10 @@
 number = 3
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close pages-deploy-v2: CLAUDE.md deploy section notes build-info provenance +..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T20:13:41"
+completed_at = "2026-08-06T20:40:36"
 task_type = "docs"
-commits = []
+commits = ["c948c1378013ca39a180e905f891901e121d051e"]
