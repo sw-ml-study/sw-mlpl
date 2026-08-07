@@ -64,3 +64,18 @@ fi
 echo "=== Done ==="
 echo "Pages built in: $PROJECT_DIR/pages/"
 echo "To deploy: git add pages/ && git commit && git push"
+
+# Build provenance: a machine-readable stamp served beside the
+# site (badges + the splash staleness check read it) and a meta
+# tag baked into the page itself (the RUNNING page's identity).
+COMMIT=$(git rev-parse --short HEAD)
+BUILT_AT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+BUNDLE=$(ls "$PROJECT_DIR"/pages/mlpl-web-*_bg.wasm | head -1 | sed 's/.*\(mlpl-web-[0-9a-f]*\)_bg.wasm/\1/')
+LEDGER=$(cd "$PROJECT_DIR" && { sw-checklist 2>/dev/null || true; } | perl -pe 's/\e\[[0-9;]*m//g' | grep -o 'Summary: .*' | head -1 | sed 's/Summary: //')
+LEDGER=${LEDGER:-unknown}
+cat > "$PROJECT_DIR/pages/build-info.json" <<INFO
+{"commit":"$COMMIT","built_at":"$BUILT_AT","bundle":"$BUNDLE","gates":"local pre-commit (tests + clippy + fmt + sw-checklist)","ledger":"$LEDGER"}
+INFO
+# Stamp the page: perl -pi keeps the file's encoding intact.
+perl -pi -e "s|<head>|<head><meta name=\"mlpl-build\" content=\"$COMMIT $BUILT_AT\">|" "$PROJECT_DIR/pages/index.html"
+echo "build-info: $COMMIT @ $BUILT_AT"
