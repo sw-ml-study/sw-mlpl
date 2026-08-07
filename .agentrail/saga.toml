@@ -1,6 +1,6 @@
-name = "companion-docs-enrich"
-status = "completed"
+name = "maturation-plan"
+status = "active"
 current_step = 1
-created_at = "2026-08-07T15:59:46"
+created_at = "2026-08-07T16:02:27"
 plan_file = ".agentrail/plan.md"
 retroactive = false
