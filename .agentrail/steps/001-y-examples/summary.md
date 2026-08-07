@@ -1,0 +1,1 @@
+Y Combinator demo shipped: self-application + u:fix fixed-point combinator (factorial/fibonacci), framed to the brand; no new feature (partials supply the delay); 3 TDD tests, release smoke + connect smoke green; deployed.

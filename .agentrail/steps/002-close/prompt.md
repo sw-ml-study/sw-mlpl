@@ -1,0 +1,1 @@
+Close y-combinator: wiki matrix row (fixed-point combinator via partials), q-and-a note relating Y to the birds, verify live, --done.

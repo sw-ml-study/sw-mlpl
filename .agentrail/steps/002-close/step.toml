@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close y-combinator: wiki matrix row (fixed-point combinator via partials), q-..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T14:52:45"
+task_type = "docs"
+commits = []

@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "y-examples"
+  },
+  "action": "verified fix() in repl first; demo + idioms + glossary; TDD pin",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T14:52:45"
+}
