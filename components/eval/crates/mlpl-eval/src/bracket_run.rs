@@ -17,12 +17,12 @@ use mlpl_eval_types::{EvalError, Value};
 /// message})`. Control signals (`break`/`continue`/`return`)
 /// pass through untouched.
 pub(crate) fn invoke(
-    name: &str,
+    callable: &Value,
     fixture: &[Value],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    match crate::eval_user_fn::invoke_user_fn_values(name, fixture, env, trace) {
+    match crate::callable_apply::apply_callable(callable, fixture, env, trace) {
         Ok(v) => Ok(v),
         Err(
             sig @ (EvalError::BreakSignal(_)

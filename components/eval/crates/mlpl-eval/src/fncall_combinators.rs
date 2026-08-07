@@ -55,8 +55,8 @@ fn apply_ref(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     match f {
-        Value::UserFnRef { name } => {
-            crate::eval_user_fn::invoke_user_fn_values(name, &[payload], env, trace)
+        Value::UserFnRef { .. } | Value::Partial { .. } => {
+            crate::callable_apply::apply_callable(f, &[payload], env, trace)
         }
         Value::BuiltinRef { name } => apply_builtin_ref(who, name, payload),
         other => Err(EvalError::Unsupported(format!(

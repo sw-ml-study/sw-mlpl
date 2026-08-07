@@ -21,9 +21,9 @@ pub(crate) fn eval_bracket(
             got: args.len(),
         });
     };
-    let setup = hook_name("setup", setup, env, trace)?;
-    let used = hook_name("use", used, env, trace)?;
-    let teardown = hook_name("teardown", teardown, env, trace)?;
+    let setup = hook("setup", setup, false, env, trace)?;
+    let used = hook("use", used, true, env, trace)?;
+    let teardown = hook("teardown", teardown, true, env, trace)?;
     let fixture = match crate::bracket_run::invoke(&setup, &[], env, trace)? {
         Value::Result { ok: false, payload } => {
             return Ok(Value::Result { ok: false, payload });
@@ -36,19 +36,26 @@ pub(crate) fn eval_bracket(
     Ok(crate::bracket_run::merge(primary, cleanup))
 }
 
-/// Each hook must be a `:u:` reference -- lifecycle hooks are
-/// user code, so builtin references are rejected by design.
-fn hook_name(
+/// Hooks are lifecycle USER code, so builtin references are
+/// rejected. `use`/`teardown` also accept a partial (a bound
+/// `u:` function); `setup` stays a raw zero-argument reference.
+fn hook(
     role: &str,
     arg: &Expr,
+    allow_partial: bool,
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
-) -> Result<String, EvalError> {
-    match crate::eval::eval_expr(arg, env, trace)? {
-        Value::UserFnRef { name } => Ok(name),
-        other => Err(EvalError::Unsupported(format!(
-            "bracket: {role} must be a `:u:name` user-function reference -- got {}",
-            mlpl_eval_types::value_kind(&other)
-        ))),
+) -> Result<Value, EvalError> {
+    let v = crate::eval::eval_expr(arg, env, trace)?;
+    let ok = matches!(v, Value::UserFnRef { .. })
+        || (allow_partial && matches!(v, Value::Partial { .. }));
+    if ok {
+        Ok(v)
+    } else {
+        Err(EvalError::Unsupported(format!(
+            "bracket: {role} must be a `:u:name` user-function reference{} -- got {}",
+            if allow_partial { " or a partial" } else { "" },
+            mlpl_eval_types::value_kind(&v)
+        )))
     }
 }
