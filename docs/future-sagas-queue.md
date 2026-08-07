@@ -87,6 +87,29 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
+**error-messages** (added 2026-08-07; docs/maturation-plan.md
+section 1) -- context-aware, fix-suggesting EvalErrors:
+did-you-mean for unknown names (edit distance over catalog +
+u: space), shape-mismatch errors that print both shapes and
+the conflicting axis, name-kind confusion hints, arity errors
+that show the signature, and an optional structured
+`suggestion` field both humans and tools read. High-leverage
+before wider feedback; heavily TDD-able. PRE-FEEDBACK PRIORITY.
+
+**semantic-tooling + --check + catalog-export** (added
+2026-08-07; docs/maturation-plan.md section 2) -- the shared
+enablers for sw-mlpl-lsp / sw-mlpl-mcp / swml-explain: a
+`--check` parse-only flag, a machine-readable catalog export,
+and structured access to ASTs / shapes / purity / dependency
+graphs / tensor provenance / traces (expose semantics, not
+source text). Unblocks the AI-agent-integration program.
+
+**backend-independent-ir** (added 2026-08-07;
+docs/maturation-plan.md section 5) -- an IR between MLPL and
+its targets; the architectural enabler everything semantic
+(explain/optimize/find-optimization) and multi-backend depends
+on. Large, foundational, sequence deliberately.
+
 **birds-follow-ups** (added 2026-08-07) -- readable word
 wrappers (compose/flip/constant as partial-producing
 builtins); the demo-combinators sibling-repo teaching

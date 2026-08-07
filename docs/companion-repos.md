@@ -98,6 +98,15 @@ compiler artifacts) is the same one.
 - **sw-mlpl-book** -- a long-form tutorial/textbook drawing on
   the web playground's demo and lesson corpus.
 
+## Maturation before wider feedback
+
+The hardening work that should precede a larger community's
+criticism -- context-aware error messages that suggest fixes,
+AI-agent integration via LSP/MCP/semantic tooling, prepared
+answers to the criticisms worth wanting, layered marketing,
+and the backend-independent IR -- is planned in
+[maturation-plan.md](maturation-plan.md).
+
 ## Where these docs live
 
 Companion-repo planning docs are `docs/companion-*.md`. They
