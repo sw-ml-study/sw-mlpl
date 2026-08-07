@@ -1,0 +1,1 @@
+Close round-3: q-and-a adoption note (their check-capabilities should pass --source-dir repo root for fs-using fixtures -- covers runner + consumption cases), wiki row, rebuild serve/pages+deploy, --done. THEN the user's deploy/badges redesign directive follows as its own saga (reference: /Users/mike/github/sw-embed/web-sw-cor24-apl).

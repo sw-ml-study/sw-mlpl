@@ -1,0 +1,1 @@
+parse_json shipped (decoder + docs) AND newline continuation inside parens/brackets (their fixture's formatting is now legal); fixture passes under their harness with repo-root --source-dir; broad regressions green.
