@@ -80,8 +80,8 @@ async fn probe_status() -> BundleStatus {
     let repo = fetch_text(&format!("{RAW_BUILD_INFO}?ts={ts}")).await;
     verdict(
         running.as_deref(),
-        served.as_deref().and_then(|t| extract_commit(t)).as_deref(),
-        repo.as_deref().and_then(|t| extract_commit(t)).as_deref(),
+        served.as_deref().and_then(extract_commit).as_deref(),
+        repo.as_deref().and_then(extract_commit).as_deref(),
     )
 }
 

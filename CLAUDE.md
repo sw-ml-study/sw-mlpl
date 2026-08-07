@@ -495,6 +495,15 @@ that force-push is expected and correct (gh-pages is never
 edited by hand). Verify by fetching the live index and
 comparing its hashed bundle name against `pages/index.html`.
 
+Provenance: every pages build writes `pages/build-info.json`
+(commit, built_at, bundle, ledger) and stamps a `mlpl-build`
+meta tag into index.html. The README badges read the LIVE
+site's build-info.json via shields dynamic-JSON (no builders
+run on GitHub -- quality gates are local, per the sw-checklist
+policy above), and the web UI's status badge compares the
+running page, the serving origin, and the repo's committed
+pages state (current / reload / deploy-pending / unknown).
+
 ### Stale-page trap: always hand out ts-suffixed review URLs
 
 The two hosting surfaces cache differently. The local
