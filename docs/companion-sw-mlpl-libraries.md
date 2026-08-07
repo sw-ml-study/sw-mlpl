@@ -11,6 +11,41 @@ statistics helper, or a combinator aviary either re-defines it
 inline or copies a file; a libraries repo turns those into
 named, tested, includable modules.
 
+## Two layers, two kinds of learning
+
+The design brief
+(`docs/sw-mlpl-direction-proactive-response-to-criticisms.txt`)
+draws a distinction worth building the collection around:
+
+```text
+sw-MLPL
+    language
+        |
+    standard library          (general-purpose modules)
+        |
+    agent-experimentation library
+```
+
+It maps onto TWO KINDS OF LEARNING the platform supports:
+
+- **Machine learning** -- learning by gradient descent (train
+  a network). The traditional reading; the ML core already
+  serves it.
+- **Agent learning** -- learning by EXPERIENCE: reflection,
+  retry, tool use, memory, retrieval, planning, self-critique,
+  skill acquisition, workflow optimization. Increasingly
+  central to modern systems, and the brief argues it deserves
+  first-class treatment -- but as LIBRARIES, not language
+  keywords, so the core stays small and the ideas stay
+  experimental and swappable.
+
+The standard library is the stable, general-purpose layer; the
+agent-experimentation library is where memory / ICL / ICRL /
+reflection loops live as composable modules. Keeping the
+second a library (not built-in syntax) is deliberate: these
+are experiments ABOUT improving agents, and experiments should
+not calcify into keywords.
+
 ## Why this is possible now
 
 The core capabilities a library ecosystem needs already ship:
@@ -59,10 +94,38 @@ does `include "std/stats.mlpl"` and calls `u:zscore(v)`.
    `sw-mlpl` version via a capability probe rather than a
    version string.
 
+## A proposed library set
+
+The direction brief sketches a concrete set (its `swml-*`
+names; whether they become one repo of modules or several
+repos is the distribution question above):
+
+| Priority | Library | Role |
+|---|---|---|
+| High | swml-core | the language itself (this repo) |
+| High | swml-lsp | semantic language server (`companion-sw-mlpl-lsp.md`) |
+| High | swml-mcp | AI tool interface (`companion-sw-mlpl-mcp.md`) |
+| High | swml-visualize | graphs / diagrams as a library surface |
+| High | swml-explain | compiler explanations (errors, suggestions) |
+| High | swml-trace | runtime inspection |
+| Medium | swml-ai | adapter layer to external AI coding agents |
+| Medium | swml-rust | generated-Rust inspection |
+| Later | swml-agents | reflection / memory / ICL / ICRL -- the agent-experimentation layer above |
+
+The "high" tier is mostly SEMANTIC TOOLING rather than
+algorithm code -- which is the strategic bet spelled out in
+`companion-repos.md` and the LSP/MCP docs: expose the
+compiler's understanding (ASTs, shapes, purity, traces,
+generated Rust) so any coding agent works better, rather than
+building an AI into the language.
+
 ## Relationship to sw-mlpl
 
 Pure consumer of public surfaces -- no core changes required
 for the MVP. The namespacing question (1) is the one likely
 source of an upstream request, and it should follow the
 mlplunit model: state the executable need, let the core grow
-the minimal surface.
+the minimal surface. The semantic-tooling libraries
+(swml-lsp / swml-mcp / swml-explain / swml-trace) share one
+upstream need: structured access to compiler artifacts, tracked
+in their own docs.

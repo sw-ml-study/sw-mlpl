@@ -52,6 +52,19 @@ already noted in the queue as editor-tooling enablers:
 - a machine-readable builtin-catalog export (`catalog --json`
   or equivalent), which serves both this and the web panel.
 
+## The bigger bet: semantics, not source text
+
+Diagnostics and completion are table stakes. The strategic
+opportunity (see `companion-repos.md` and the direction brief)
+is to serve not just human editors but AI coding agents the
+compiler's OWN understanding -- ASTs, shapes, purity,
+dependency graphs, tensor provenance, execution traces,
+generated Rust -- over the LSP wire, so an agent reasons about
+an MLPL program structurally rather than by scraping text. The
+LSP is the human-facing half of that surface; sw-mlpl-mcp is
+the agent-facing half, and they should expose the same
+artifacts.
+
 ## Relationship to sw-mlpl
 
 Consumer plus two enabler requests. It shares its needs with

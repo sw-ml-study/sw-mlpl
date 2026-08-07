@@ -57,6 +57,30 @@ Each links to its own planning doc:
   Protocol server exposing MLPL evaluation, introspection, and
   test discovery to AI agents as typed tools.
 
+## The strategic thread: a language legible to AI
+
+Several of the planned companions (sw-mlpl-lsp, sw-mlpl-mcp,
+and the `swml-explain` / `swml-trace` / `swml-visualize`
+libraries) share one bet, drawn from the direction brief
+(`docs/sw-mlpl-direction-proactive-response-to-criticisms.txt`):
+the project's largest long-term contribution may not be "an AI
+built into the language" but **a language designed to be
+understood by both humans and AI systems through rich semantic
+tooling rather than source text alone.**
+
+Most coding agents today read source text. sw-MLPL is
+positioned to expose compiler SEMANTICS instead -- ASTs, typed
+intermediate representations, shape information, purity,
+dependency graphs, tensor provenance, generated Rust,
+optimization opportunities, execution traces -- through clean
+LSP and MCP interfaces. Any capable agent (Claude, ChatGPT,
+JetBrains AI, Copilot, a local model) then becomes far more
+effective without first mastering MLPL syntax. The goal is the
+best semantic INTERFACE for AI assistants, not a bespoke
+assistant. Both sw-mlpl-lsp and sw-mlpl-mcp are instances of
+this thread; their upstream request (structured access to
+compiler artifacts) is the same one.
+
 ## Other candidates (not yet documented)
 
 - **Editor integrations beyond LSP** -- `mlpl-mode.el` ships in

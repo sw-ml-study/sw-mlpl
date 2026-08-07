@@ -61,6 +61,20 @@ run_tests(path)          -> per-test typed results
   may be absent in headless/cron contexts, so the server
   should degrade to eval-only cleanly.
 
+## The bigger bet: expose compiler semantics as tools
+
+Beyond eval and test-running, the direction brief's central
+thesis (`companion-repos.md`) is that MLPL should hand an
+agent the compiler's understanding as typed tools -- ASTs,
+typed IRs, shape information, purity, dependency graphs,
+tensor provenance, generated Rust, optimization opportunities,
+execution traces -- so "the best semantic interface for AI
+assistants" is the deliverable, not an AI built into the
+language. Those artifacts are the same ones sw-mlpl-lsp
+surfaces to editors; MCP is their agent-facing projection, and
+the two share the upstream request for structured access to
+compiler internals.
+
 ## Relationship to sw-mlpl
 
 Almost entirely a consumer of the existing server + reflection
