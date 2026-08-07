@@ -1,0 +1,1 @@
+{"commit":"fa578a7e","built_at":"2026-08-07T03:07:13Z","bundle":"mlpl-web-41338323b7888605","gates":"local pre-commit (tests + clippy + fmt + sw-checklist)","ledger":"549 passed, 2 failed, 374 warnings, 0 info"}
