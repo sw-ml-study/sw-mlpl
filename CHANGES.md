@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga partial-hof-adoption: complete
+- fix(eval): Result combinators + bracket hooks accept partials (adopt)
+- saga: init partial-hof-adoption (demo-combinators agent report)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga y-combinator: complete (2 steps)
 - docs: close y-combinator saga (q-and-a note)
 - saga y-combinator: step 001 complete
