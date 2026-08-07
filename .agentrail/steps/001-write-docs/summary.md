@@ -1,0 +1,1 @@
+Companion-repo ecosystem docs: index + 4 per-repo planning docs (sw-mlpl-libraries, demo-memory, sw-mlpl-lsp, sw-mlpl-mcp) each with dependency contract + upstream-request notes; README pointer; markdown clean.
