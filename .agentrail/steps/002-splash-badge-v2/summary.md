@@ -1,0 +1,1 @@
+Badge v2 shipped: three-source provenance comparison with deploy-pending state and offline default; real-artifact pins; deployed.

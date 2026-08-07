@@ -1,9 +1,10 @@
 number = 2
 slug = "splash-badge-v2"
-status = "pending"
+status = "completed"
 description = "Splash/header badge v2 per plan: RUNNING page identity from its own mlpl-buil..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-06T20:05:32"
+completed_at = "2026-08-06T20:13:41"
 task_type = "feature"
-commits = []
+commits = ["f2725205ccde4be5cc74107dcbd07231754812b3"]

@@ -1,0 +1,1 @@
+Close pages-deploy-v2: CLAUDE.md deploy section notes build-info provenance + badge meaning; update the pages memory file; wiki row; verify live badges (README shields render, site badge states); --done.
