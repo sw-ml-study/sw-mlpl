@@ -1,0 +1,9 @@
+number = 1
+slug = "no-rust-on-github"
+status = "pending"
+description = "Per plan step 1: delete .github/workflows/ci.yml (no rustup on GitHub); build..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T20:00:19"
+task_type = "infra"
+commits = []
