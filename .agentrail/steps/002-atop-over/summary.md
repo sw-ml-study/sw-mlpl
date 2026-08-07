@@ -1,0 +1,1 @@
+atop/over shipped; quartet docs everywhere; idioms doc extended and still executable; 8/8 hof tests.

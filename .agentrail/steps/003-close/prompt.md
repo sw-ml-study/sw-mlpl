@@ -1,0 +1,1 @@
+Close apl2-hof: rebuild serve+pages, deploy, wiki matrix row, queue advance (combinator-birds NEXT UP -- design step will implement Partial per docs/combinators-research.txt), --done. Note: mlplunit round-3 parse_json gate arrived mid-saga; it follows immediately after close.
