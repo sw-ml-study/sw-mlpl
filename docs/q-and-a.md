@@ -5,6 +5,27 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (round 3)
+
+**Q: mlplunit's structured-event-consumption gate?**
+
+A: SHIPPED, and their fixture passes under bin/mlplunit --
+with one harness note that covers all the fs-using fixtures at
+once. parse_json(s) decodes JSON text to typed values (objects
+-> records, strings exact incl. escapes/surrogates, numbers ->
+scalars, homogeneous arrays -> vectors/string lists, true/false
+-> 1/0, null -> the empty vector), Result-speaking with byte
+positions, and round-trips the event encoding. Their fixture
+also exposed a real language gap, now fixed: newlines inside an
+open ( or [ CONTINUE the statement, so a long equal() call may
+span lines (braces stay block delimiters). ADOPTION NOTE: the
+fixtures that touch files (language_native_runner_case,
+structured_event_consumption_case) resolve paths against the
+sandbox root, and bin/mlplunit defaults --source-dir to the
+FIXTURE's directory -- check-capabilities should pass
+--source-dir at the repo root for those rows (proven passing
+that way); a ".." escape stays refused by contract.
+
 ## 2026-08-07 (later)
 
 **Q: Are the mlplunit round-2 blocking features implemented?
