@@ -1,0 +1,1 @@
+Design committed: Partial value + applicative call semantics, v1 user-fns scope, ripple list, SK acceptance.

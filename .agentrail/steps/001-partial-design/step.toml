@@ -1,9 +1,10 @@
 number = 1
 slug = "partial-design"
-status = "pending"
+status = "completed"
 description = "Write docs/combinators-design.md per the saga plan: Partial value semantics, ..."
 role = "production"
 context_files = []
 created_at = "2026-08-06T20:45:19"
+completed_at = "2026-08-06T20:46:22"
 task_type = "design"
-commits = []
+commits = ["ebb17e1ffabb0ad1925d4807faa5784521f9d114"]
