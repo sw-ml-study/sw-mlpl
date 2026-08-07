@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close y-combinator: wiki matrix row (fixed-point combinator via partials), q-..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T14:52:45"
+completed_at = "2026-08-07T15:03:00"
 task_type = "docs"
-commits = []
+commits = ["523c2d86feccd2c96e40dc7e6842a273cbad4f37"]

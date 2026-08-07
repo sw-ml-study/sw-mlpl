@@ -1,0 +1,1 @@
+Saga closed: Y-combinator demo live, wiki row, q-and-a relates Y to the birds; verified over connect.
