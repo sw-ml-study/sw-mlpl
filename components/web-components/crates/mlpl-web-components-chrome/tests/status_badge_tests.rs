@@ -1,54 +1,40 @@
-//! Pure logic behind the header staleness badge.
+//! Provenance-badge logic: commit extraction from both stamp
+//! shapes and the three-way verdict with honest degradation.
 
-use mlpl_web_components_chrome::status_badge::{BundleStatus, extract_bundle, verdict};
+use mlpl_web_components_chrome::status_badge::{BundleStatus, extract_commit, verdict};
 
 #[test]
-fn bundle_name_extracts_from_index_and_script_urls() {
-    let html = r#"<script type="module">import init from '/sw-mlpl/mlpl-web-5732a6778cd461f8.js';"#;
+fn commit_extracts_from_json_and_meta_shapes() {
     assert_eq!(
-        extract_bundle(html).as_deref(),
-        Some("mlpl-web-5732a6778cd461f8")
+        extract_commit(r#"{"commit":"fa578a7e","built_at":"2026-08-07T03:07:13Z"}"#).as_deref(),
+        Some("fa578a7e")
     );
     assert_eq!(
-        extract_bundle("https://host/sw-mlpl/mlpl-web-abcdef0123456789_bg.wasm").as_deref(),
-        Some("mlpl-web-abcdef0123456789")
+        extract_commit("fa578a7e 2026-08-07T03:07:13Z").as_deref(),
+        Some("fa578a7e")
     );
-    // Too-short hex (a stray mention) is not a bundle name.
-    assert!(extract_bundle("mlpl-web-page is nice").is_none());
-    assert!(extract_bundle("no bundle here").is_none());
+    assert!(extract_commit("not a stamp").is_none());
 }
 
 #[test]
-fn verdict_is_unknown_by_default_and_honest_offline() {
-    assert_eq!(verdict(None, None), BundleStatus::Unknown);
-    assert_eq!(
-        verdict(Some("mlpl-web-aa11aa11"), None),
-        BundleStatus::Unknown
-    );
-    assert_eq!(
-        verdict(None, Some("mlpl-web-aa11aa11")),
-        BundleStatus::Unknown
-    );
+fn the_real_build_info_parses() {
+    // Pin against the actual generated artifact.
+    let info = include_str!("../../../../../pages/build-info.json");
+    assert!(extract_commit(info).is_some(), "{info}");
 }
 
 #[test]
-fn verdict_compares_bundles() {
-    let a = Some("mlpl-web-aa11aa11");
-    let b = Some("mlpl-web-bb22bb22");
-    assert_eq!(verdict(a, a), BundleStatus::Fresh);
-    assert_eq!(verdict(a, b), BundleStatus::Stale);
-}
-
-#[test]
-fn the_real_deployed_index_parses() {
-    // Pin against the ACTUAL generated index.html shape (trunk's
-    // modulepreload links): if trunk changes its tag layout, this
-    // fails here instead of silently degrading the badge to
-    // Unknown in production.
-    let index = include_str!("../../../../../pages/index.html");
-    let name = extract_bundle(index);
-    assert!(
-        name.as_deref().is_some_and(|n| n.starts_with("mlpl-web-")),
-        "real index.html must yield a bundle name: {name:?}"
-    );
+fn verdicts_cover_all_stales_and_default_unknown() {
+    let (a, b, c) = (Some("aaaaaaa1"), Some("bbbbbbb2"), Some("ccccccc3"));
+    // Page behind origin: reload fixes it.
+    assert_eq!(verdict(a, b, None), BundleStatus::Stale);
+    // Origin behind repo: deploy pending.
+    assert_eq!(verdict(a, a, c), BundleStatus::DeployPending);
+    // All agree (or repo unknown): current.
+    assert_eq!(verdict(a, a, a), BundleStatus::Fresh);
+    assert_eq!(verdict(a, a, None), BundleStatus::Fresh);
+    // Honest defaults.
+    assert_eq!(verdict(None, a, a), BundleStatus::Unknown);
+    assert_eq!(verdict(a, None, a), BundleStatus::Unknown);
+    assert_eq!(verdict(None, None, None), BundleStatus::Unknown);
 }
