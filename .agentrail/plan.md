@@ -1,8 +1,10 @@
-# Saga: partial-hof-adoption
-demo-combinators agent found two consumers that never adopted
-the shared apply_callable path (the combinator-birds design
-CLAIMED they did): the Result combinators (map_ok/and_then/
-or_else) and bracket's use/teardown hooks both rejected
-Value::Partial. Fix: route UserFnRef|Partial through
-callable_apply::apply_callable; keep builtin restrictions;
-setup stays a raw zero-arg reference. One step + close.
+# Saga: companion-repos-docs
+User direction 2026-08-07: first-pass documentation of planned
+COMPANION REPOS in docs/*.md -- sw-mlpl-libraries, demo-memory
+(brief: docs/sw-mlpl-demo-memory.txt), sw-mlpl-lsp,
+sw-mlpl-mcp, and others. These are forward-looking ECOSYSTEM
+planning docs (may name planned work freely, unlike the
+user-facing surfaces). One overview index + one doc per repo.
+## Steps
+1. write-docs -- docs/companion-repos.md (index) + per-repo
+   docs; README Related-Projects pointer; markdown gate.

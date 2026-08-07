@@ -1,0 +1,9 @@
+number = 1
+slug = "write-docs"
+status = "pending"
+description = "Write docs/companion-repos.md (ecosystem index: existing mlplunit + demo-algo..."
+role = "production"
+context_files = []
+created_at = "2026-08-07T15:56:02"
+task_type = "docs"
+commits = []
