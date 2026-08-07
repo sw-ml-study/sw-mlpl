@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 1,
+    "step": "adopt"
+  },
+  "action": "shared-dispatch routing; regression sweep; release-binary acceptance check",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T15:43:24"
+}

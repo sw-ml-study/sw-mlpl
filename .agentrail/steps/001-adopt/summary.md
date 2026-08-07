@@ -1,0 +1,1 @@
+Combinators + bracket hooks adopt partials via apply_callable; 4 TDD tests; both demo-combinators acceptance shapes verified against the fresh release binary (map_ok 8, bracket 15). Fixes the design-promise gap.
