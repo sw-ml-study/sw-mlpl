@@ -5,6 +5,25 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (Y combinator)
+
+**Q: Casual users know Y Combinator as the brand. Relate it to
+the birds with worked examples.**
+
+A: Done -- a new demo, "The Y Combinator (fixed points)". The
+accelerator borrowed the name from the FIXED-POINT combinator,
+the deep end of the Mockingbird demo. MLPL reaches it with NO
+new language feature -- partials already supply the delay a
+strict-language fixed point needs. Two moves: (1)
+self-application -- a step taking self, call(self, self, ...),
+recurses with no name; (2) fix(f, v) = call(f, call(:u:fix,
+f), v), which ties the knot once so the actual step (factorial
+/ fibonacci body) never names itself. The partial call(:u:fix,
+f) is a value that has-not-run, and that pause is why it works
+eagerly where the textbook lazy Y would diverge (the
+applicative-order Z combinator). Verified: fact 5 = 120, fib
+10 = 55, live over connect.
+
 ## 2026-08-07 (birds)
 
 **Q: Go on combinator-birds -- status?**
