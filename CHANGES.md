@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga maturation-plan: complete
+- docs: maturation plan -- hardening before wider feedback
+- saga: init maturation-plan (direction-file hardening)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga companion-docs-enrich: complete
 - docs: enrich companion docs from the direction brief (enrich)
 - saga: init companion-docs-enrich (direction-file input)
