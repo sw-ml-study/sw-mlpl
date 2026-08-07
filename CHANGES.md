@@ -14,6 +14,20 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-06
 
+- saga mlplunit-round-3: complete (2 steps)
+- docs: close mlplunit-round-3 (adoption note: repo-root --source-dir for fs fixtures)
+- refactor(parser): token-stream shaping into its own module (ledger)
+- saga mlplunit-round-3: step 001 complete
+- feat: parse_json + multi-line argument lists (parse-json)
+- saga: archive apl2-hof; init mlplunit-round-3 (parse_json gate)
+- saga apl2-hof: complete (3 steps)
+- fix(eval): hof builtin refs route through env dispatch; close apl2-hof
+- saga apl2-hof: step 002 complete
+- feat(eval): atop + over composition builtins; hof docs + idioms section (atop-over)
+- saga apl2-hof: step 001 complete
+- feat(eval): each + table -- the first APL2/BQN higher-order builtins (each-table)
+- saga: archive mlplunit-round-2; init apl2-hof (user order: hof then birds)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlplunit-round-2: complete (4 steps)
 - docs: close mlplunit-round-2 -- adoption notes + queue advance
 - chore: lockfile refresh (run-script)
