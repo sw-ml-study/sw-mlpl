@@ -1,0 +1,1 @@
+Route the Result combinators and bracket use/teardown hooks through callable_apply::apply_callable so partials work there (the combinator-birds design already claimed this); builtins still restricted; setup raw zero-arg. TDD partial_hof_adoption_tests. Gates; commit; push.

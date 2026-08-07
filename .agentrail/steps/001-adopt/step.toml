@@ -1,0 +1,9 @@
+number = 1
+slug = "adopt"
+status = "pending"
+description = "Route the Result combinators and bracket use/teardown hooks through callable_..."
+role = "production"
+context_files = []
+created_at = "2026-08-07T15:40:52"
+task_type = "bugfix"
+commits = []
