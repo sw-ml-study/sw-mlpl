@@ -5,6 +5,28 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (birds)
+
+**Q: Go on combinator-birds -- status?**
+
+A: SHIPPED end to end, to the research brief's Level 2.
+Application is now a VALUE: under-applying call() on a u:
+function returns a Partial (function + bound arguments as
+plain data -- no closures, names stay late-bound), saturating
+executes, and excess arguments apply left-associatively
+(call(f, a, b, c) is (((f a) b) c)). Partials bind, pass,
+return, live in records, and are accepted by each/table/atop/
+over; repr says partial(:u:B, 1 of 3 bound); builtin refs
+keep exact arity with a wrap-it tutoring error. The SK-basis
+test derives identity from S and K -- the brief's acceptance
+criterion -- and the mockingbird self-applies. The web demo
+"Combinators (the birds)" walks staging, the left-assoc law,
+S-K-K, M, and the pervasion finale (one Bluebird composition
+over scalar/vector/matrix). One deliberate semantic change:
+too-few-argument call() no longer errors -- it IS the
+partial. Follow-ups queued: readable word wrappers
+(compose/flip/constant) and a demo-combinators sibling repo.
+
 ## 2026-08-07 (round 3)
 
 **Q: mlplunit's structured-event-consumption gate?**
