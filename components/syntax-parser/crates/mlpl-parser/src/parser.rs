@@ -7,7 +7,7 @@ use mlpl_parser_ast::{BinOpKind, Expr, TensorCtorKind};
 
 /// Parse a token stream into a list of expression statements.
 pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {
-    let tokens = continue_in_brackets(tokens);
+    let tokens = crate::token_stream::continue_in_brackets(tokens);
     let mut p = Parser {
         tokens: &tokens,
         pos: 0,
@@ -24,25 +24,6 @@ pub fn parse(tokens: &[Token]) -> Result<Vec<Expr>, ParseError> {
         p.skip_sep();
     }
     Ok(stmts)
-}
-
-/// Newlines are statement separators -- EXCEPT inside an open
-/// `(` or `[`, where a statement plainly continues (an argument
-/// list or vector literal spanning lines). Braces stay opaque:
-/// `{` delimits blocks, where newlines separate statements.
-fn continue_in_brackets(tokens: &[Token]) -> Vec<Token> {
-    let mut depth = 0i64;
-    let mut out = Vec::with_capacity(tokens.len());
-    for t in tokens {
-        match t.kind {
-            TokenKind::LParen | TokenKind::LBracket => depth += 1,
-            TokenKind::RParen | TokenKind::RBracket => depth = (depth - 1).max(0),
-            TokenKind::Newline if depth > 0 => continue,
-            _ => {}
-        }
-        out.push(t.clone());
-    }
-    out
 }
 
 pub(crate) struct Parser<'a> {

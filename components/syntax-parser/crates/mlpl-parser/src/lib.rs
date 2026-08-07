@@ -7,6 +7,7 @@
 mod parser;
 mod record_parser;
 mod stmts;
+mod token_stream;
 
 pub use mlpl_lexer::{ParseError, Token, TokenKind, lex};
 pub use mlpl_parser_ast::{BinOpKind, Expr, TensorCtorKind};
