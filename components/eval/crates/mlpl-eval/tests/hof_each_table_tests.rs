@@ -80,3 +80,31 @@ fn misuse_is_structured() {
     let e = eval_value(&mut env, "table(:add, 1, [1, 2])").unwrap_err();
     assert!(e.contains("table") && e.contains("rank-1"), "{e}");
 }
+
+#[test]
+fn atop_and_over_compose_immediately() {
+    let mut env = Environment::new();
+    eval_value(&mut env, "def u:sq(x) { x * x }").unwrap();
+    eval_value(&mut env, "def u:add2(a, b) { a + b }").unwrap();
+    // BQN:  (f atop g) x  =  f(g(x))
+    let a = arr(&mut env, "atop(:u:sq, :sqrt, 16)");
+    assert_eq!(a.data(), &[16.0]);
+    // Two-argument atop: f(g(x, y)).
+    let a = arr(&mut env, "atop(:u:sq, :u:add2, 2, 3)");
+    assert_eq!(a.data(), &[25.0]);
+    // BQN:  x (f over g) y  =  f(g(x), g(y))
+    let a = arr(&mut env, "over(:u:add2, :u:sq, 3, 4)");
+    assert_eq!(a.data(), &[25.0]);
+    // Whole-array flow: results are ordinary values.
+    let a = arr(&mut env, "atop(:u:sq, :mean, [1, 2, 3])");
+    assert_eq!(a.data(), &[4.0]);
+}
+
+#[test]
+fn atop_over_misuse_is_structured() {
+    let mut env = Environment::new();
+    let e = eval_value(&mut env, "atop(1, :sqrt, 4)").unwrap_err();
+    assert!(e.contains("atop") && e.contains("reference"), "{e}");
+    let e = eval_value(&mut env, "over(:add, :sqrt, 4)").unwrap_err();
+    assert!(e.contains("over"), "exactly two data args: {e}");
+}

@@ -121,6 +121,25 @@ u:double(range(5))
 def u:pos(x) { if gt(x, 0) { ok(x) } else { err("not positive") } }
 unwrap(and_then(:u:pos, map_ok(:u:double, ok(4))))
 
+# ---------- each, table, and composition ----------
+
+# APL2:  F¨V          (each: for when the per-element work is
+#                      a FUNCTION -- arithmetic pervades anyway)
+def u:halve_or_zero(x) { if gt(x, 4) { x / 2 } else { 0 } }
+each(:u:halve_or_zero, [2, 6, 10])
+
+# APL2:  A ∘.× B      (outer product -- BQN: a ×⌜ b)
+def u:times(a, b) { a * b }
+table(:u:times, [1, 2, 3], [10, 20])
+
+# BQN:  x (+ ○ sq) y  (over: preprocess both sides, combine)
+def u:add2(a, b) { a + b }
+def u:sq(x) { x * x }
+over(:u:add2, :u:sq, 3, 4)
+
+# BQN:  (sq ∘ mean) x (atop: compose, then apply)
+atop(:u:sq, :mean, [1, 2, 3])
+
 # ---------- quad-EX and )ERASE: freeing names ----------
 
 # APL2:  ⎕EX 'V'     (expunge a name; 1 means it is free now)

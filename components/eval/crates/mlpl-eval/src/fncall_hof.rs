@@ -20,6 +20,7 @@ pub(crate) fn try_dispatch(
     match name {
         "each" => Some(eval_each(args, env, trace)),
         "table" => Some(eval_table(args, env, trace)),
+        "atop" | "over" => Some(crate::hof_compose::eval_compose(name, args, env, trace)),
         _ => None,
     }
 }

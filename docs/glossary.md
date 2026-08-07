@@ -92,6 +92,19 @@ connection it is a no-op. It returns `x` unchanged, so it drops
 into a pipeline without changing the math.
 
 
+## each / table / atop / over (builtins)
+
+The APL2/BQN higher-order quartet over function references,
+applied IMMEDIATELY (no function values are produced):
+`each(f, v)` maps a reference per element with shape
+preserved -- and note that arithmetic PERVADES whole arrays
+already, so each earns its keep only when the per-element
+work is a function; `table(f, a, b)` is the outer product
+over `f` ([m] x [n] -> [m, n]); `atop(f, g, x...)` is
+`f(g(x...))` and `over(f, g, x, y)` is `f(g(x), g(y))`.
+References may be `:u:` functions or builtins. See
+[[call (builtin)]].
+
 ## expunge (builtin) / :erase (command)
 
 APL2's name-removal pair, mapped onto MLPL's command-vs-

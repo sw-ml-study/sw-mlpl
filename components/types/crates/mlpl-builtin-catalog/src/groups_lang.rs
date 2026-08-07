@@ -184,6 +184,26 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "sandboxed file/dir removal; returns ok(1)/err",
             ),
             (
+                "each",
+                "each(f, v)",
+                "apply a function reference per element; shape preserved (APL2 each)",
+            ),
+            (
+                "table",
+                "table(f, a, b)",
+                "outer product over f: [m] x [n] -> [m, n] (APL2 jot-dot, BQN table)",
+            ),
+            (
+                "atop",
+                "atop(f, g, x...)",
+                "composition: f(g(x...)) (BQN atop)",
+            ),
+            (
+                "over",
+                "over(f, g, x, y)",
+                "composition: f(g(x), g(y)) (BQN over)",
+            ),
+            (
                 "run_script",
                 "run_script(path, opts)",
                 "execute a script in a FRESH environment; structured status + captured events",

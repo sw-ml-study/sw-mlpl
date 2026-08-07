@@ -74,6 +74,7 @@ mod fncall_fs;
 mod fncall_gen;
 mod fncall_globals;
 mod fncall_hof;
+mod hof_compose;
 mod fncall_models;
 mod fncall_reflect;
 mod fncall_run;
