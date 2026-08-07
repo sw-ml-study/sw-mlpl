@@ -1,10 +1,1 @@
-# Saga: companion-repos-docs
-User direction 2026-08-07: first-pass documentation of planned
-COMPANION REPOS in docs/*.md -- sw-mlpl-libraries, demo-memory
-(brief: docs/sw-mlpl-demo-memory.txt), sw-mlpl-lsp,
-sw-mlpl-mcp, and others. These are forward-looking ECOSYSTEM
-planning docs (may name planned work freely, unlike the
-user-facing surfaces). One overview index + one doc per repo.
-## Steps
-1. write-docs -- docs/companion-repos.md (index) + per-repo
-   docs; README Related-Projects pointer; markdown gate.
+Enrich the companion-repo docs with docs/sw-mlpl-direction-proactive-response-to-criticisms.txt: the standard-library vs agent-experimentation-library split + two-kinds-of-learning framing in the libraries doc; the proposed swml-* set; the semantic-interface-for-AI thesis (expose ASTs/IRs/shape/purity/traces via LSP+MCP, not build an AI in the language) shared across the LSP/MCP/index docs.

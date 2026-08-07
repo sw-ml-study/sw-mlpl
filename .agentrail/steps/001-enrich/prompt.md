@@ -1,0 +1,1 @@
+Update companion-sw-mlpl-libraries.md (two-layer split std vs agent-experimentation; two kinds of learning; the swml-* proposed set), companion-repos.md (others + semantic-interface thesis), companion-sw-mlpl-lsp.md + companion-sw-mlpl-mcp.md (the 'best semantic interface for AI assistants' thesis: expose compiler semantics not source text). Markdown gate; commit; push.
