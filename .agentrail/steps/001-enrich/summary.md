@@ -1,0 +1,1 @@
+Companion docs enriched: two-layer library split + two-kinds-of-learning + swml-* set; the semantic-interface-for-AI thesis threaded through index/LSP/MCP.
