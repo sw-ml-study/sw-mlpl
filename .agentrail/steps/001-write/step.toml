@@ -1,9 +1,10 @@
 number = 1
 slug = "write"
-status = "pending"
+status = "completed"
 description = "docs/maturation-plan.md: sections for (1) better error messages -- context-aw..."
 role = "production"
 context_files = []
 created_at = "2026-08-07T16:02:27"
+completed_at = "2026-08-07T16:06:41"
 task_type = "docs"
-commits = []
+commits = ["8eee14bae990219a9bd5ad8bc5915c282ce0a42e"]

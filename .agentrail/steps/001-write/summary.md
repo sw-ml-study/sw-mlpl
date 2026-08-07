@@ -1,0 +1,1 @@
+docs/maturation-plan.md written (error messages, AI integration, criticism answers, layered marketing, backend IR, readiness checklist); 3 queue entries added incl. error-messages as pre-feedback priority; index cross-linked.
