@@ -1,0 +1,1 @@
+apl2-hof closed: quartet live everywhere (env-dispatch routing fixed and pinned via :add), wiki row done earlier, deployed; birds next after round-3.
