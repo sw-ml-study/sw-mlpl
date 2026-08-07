@@ -449,6 +449,39 @@ lines = [
 
 [[demos]]
 category = "APL2 / General Programming"
+name = "Combinators (the birds)"
+intro = "APL2-inspired GENERAL-PURPOSE programming, not ML: Raymond Smullyan's To Mock a Mockingbird teaches combinatory logic as an aviary of birds -- tiny functions that only call their arguments. MLPL can now keep them as REAL birds, because application itself produces a value: call with too few arguments returns a PARTIAL (the function plus what is bound so far), calling the partial continues, and extra arguments keep applying left to right. The aviary is a record of ordinary u: definitions -- identity, kestrel, thrush, mockingbird, bluebird, cardinal, warbler, starling -- and the demo walks the classic moves: staging (K 5 is a THING you call later), the left-associative law, deriving identity from the S-K basis (combinatory completeness in one line), and the mockingbird's self-application. The finale is uniquely MLPL: one Bluebird composition applied unchanged to a scalar, a vector, and a matrix -- combinators compose COMPUTATION while pervasion supplies the data parallelism."
+takeaway = "The one idea: application is a value. call(:u:K, 5) does not error for the missing argument -- it returns partial(:u:K, 1 of 2 bound), a callable that remembers its bindings as plain data (no closures: references stay named and late-bound). Saturating executes; excess arguments continue left-associatively, so call(:u:B, f, g, x) IS (((B f) g) x). That single rule makes the birds real: the kestrel stages a constant, the bluebird composes, the cardinal flips, S-K-K derives identity (S and K alone can build EVERYTHING -- combinatory completeness), and the mockingbird applies a bird to itself. The array finale shows why an ML language cares: square_after_inc = call(:u:B, :u:sq, :u:inc) is ONE composition, and because arithmetic pervades arrays, the same partial maps a scalar, a vector, and a matrix without knowing rank. Combinators describe function structure; arrays describe data structure; MLPL gives you both vocabularies at once."
+lines = [
+    "def u:I(x) { x }                       # identity -- the simplest bird",
+    "def u:K(x, y) { x }                    # kestrel: constancy",
+    "def u:T(x, y) { call(y, x) }           # thrush: hold x, await a function",
+    "def u:M(x) { call(x, x) }              # mockingbird: self-application",
+    "def u:B(x, y, z) { call(x, call(y, z)) }   # bluebird: composition",
+    "def u:C(x, y, z) { call(call(x, z), y) }   # cardinal: flip",
+    "def u:W(x, y) { call(call(x, y), y) }      # warbler: duplication",
+    "def u:S(x, y, z) { call(call(x, z), call(y, z)) }  # starling: the S of S-K",
+    "aviary = {identity: :u:I, kestrel: :u:K, bluebird: :u:B, starling: :u:S}   # a record IS the aviary",
+    "k5 = call(:u:K, 5)                     # STAGING: K 5 is a partial -- a thing, not an error",
+    "k5                                     # partial(:u:K, 1 of 2 bound)",
+    "call(k5, 99)                           # ...and saturating it yields the held 5",
+    "call(k5, 123)                          # reusable: same 5, any second argument",
+    "def u:sq(x) { x * x }",
+    "def u:inc(x) { x + 1 }",
+    "call(call(call(:u:B, :u:sq), :u:inc), 4)   # staged bluebird: sq(inc(4)) = 25",
+    "call(:u:B, :u:sq, :u:inc, 4)           # THE LAW: same thing, left-associative",
+    "skk = call(:u:S, :u:K, :u:K)           # S K K -- deriving a bird from the basis",
+    "call(skk, 42)                          # ...IS the identity: combinatory completeness",
+    "call(:u:M, :u:I)                       # the mockingbird sings: M I = I I = I",
+    "square_after_inc = call(:u:B, :u:sq, :u:inc)   # FINALE: one composition ...",
+    "call(square_after_inc, 4)              # ... on a scalar: 25",
+    "call(square_after_inc, [1, 2, 3])      # ... on a vector: pervasion does the mapping",
+    "call(square_after_inc, reshape(range(4), [2, 2]))   # ... on a matrix: same bird, any rank",
+]
+
+
+[[demos]]
+category = "APL2 / General Programming"
 name = "Sudoku Backtracking (blocks view)"
 intro = "APL2-inspired GENERAL-PURPOSE programming, not ML: constraint solving by depth-first backtracking, with the board seen the APL2 way. A 9x9 Sudoku is secretly a [3, 3, 3, 3] structure -- block-row, inner-row, block-column, inner-column -- and APL2's famous idiom (reshape, dyadic transpose, enclose the trailing axes, DISPLAY) renders it as a 3x3 grid of boxed 3x3 blocks. MLPL does the same from flat arrays: transpose_axes(reshape(B, [3,3,3,3]), [0,2,1,3]) re-ranks the board block-major and disp draws the boxed grid. The solver is pure functional recursion: validate the givens, find the first blank, try digits ascending, check every peer (row, column, block) -- and scatter builds each candidate board WITHOUT mutating the last one, so backtracking is just returning to the previous value. We show the puzzle (zeros are blanks), catch a WRONG candidate in the act, then solve and re-display -- initial, conflicted, final."
 takeaway = "The blocks view is a RE-RANKING, not a copy of data into cells: reshape sees the 9x9 as [block-row, inner-row, block-col, inner-col], transpose_axes swaps the middle axes to [block-row, block-col, inner-row, inner-col] (APL2's 1 3 2 4 transpose, 0-based here), and disp renders rank-4 as a grid of boxed matrices -- APL2's DISPLAY of enclose[3 4], from a flat array. The solver's core is u:sudoku_candidate_safe_from: candidate 3 at the top-left blank FAILS (a 3 already sits in that row -- verdict 0) while 5 passes, and the search simply recurses on the accepted board. Immutability makes backtracking trivial: scatter returns a NEW board per candidate, so abandoning a branch costs nothing. Compare the Life demos next door: same category of program (general array programming), opposite loop story -- Life's cell loops vanish into whole-board arithmetic, while backtracking's search loop is irreducible control flow that recursion expresses cleanly."

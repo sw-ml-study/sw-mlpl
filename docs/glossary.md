@@ -298,6 +298,22 @@ run recorded yields the empty `[0]` vector. The bridge from
 `experiment` blocks to arrays: column-concat several calls into
 the `[n, k]` matrix that [[pareto_front (builtin)]] consumes.
 
+## Partial (value kind) / applicative call
+
+Application as a VALUE (the combinator-birds foundation;
+design in the project docs): calling a `u:` function with too
+few arguments returns a `partial` -- the function reference
+plus the arguments bound so far, stored as plain data (no
+closures; names stay late-bound). Calling the partial
+continues; reaching full arity executes; EXTRA arguments apply
+left-associatively, so `call(f, a, b, c)` is `(((f a) b) c)`.
+Partials bind, pass, return, and sit in records like any
+value, and every function-consuming builtin (`each`, `table`,
+`atop`, `over`, the Result combinators, `bracket`) accepts
+them. Builtin references keep exact arity -- their arity is
+not a fixed fact -- so wrap a builtin in a `u:` definition to
+stage it. `repr` shows `partial(:u:B, 1 of 3 bound)`.
+
 ## parse_json (builtin)
 
 `parse_json(s)` turns JSON text into a typed MLPL value: an

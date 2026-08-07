@@ -1,7 +1,12 @@
 # <img src="docs/mlpl-badge.png" alt="sw-MLPL" width="128" align="left" style="margin-right:12px"> sw-MLPL
 
-[![CI](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/ci.yml/badge.svg)](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/ci.yml)
 [![pages-build-deployment](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/pages/pages-build-deployment/badge.svg)](https://github.com/sw-ml-study/sw-mlpl/actions/workflows/pages/pages-build-deployment)
+[![live build](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsw-ml-study.github.io%2Fsw-mlpl%2Fbuild-info.json&query=%24.commit&label=live%20build&color=blue)](https://sw-ml-study.github.io/sw-mlpl/)
+[![built at](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsw-ml-study.github.io%2Fsw-mlpl%2Fbuild-info.json&query=%24.built_at&label=built&color=informational)](https://sw-ml-study.github.io/sw-mlpl/build-info.json)
+
+Quality gates (tests, clippy, fmt, project standards) run
+LOCALLY before every commit; the badges above read the live
+site's own build stamp -- no builders run on GitHub.
 
 Software Wrighter's Machine Learning Programming Language --
 a Rust-first array and tensor language for machine learning,
@@ -22,8 +27,8 @@ This repository ships three things together:
 
 ## Tour
 
-The web playground gives you a full REPL plus 82 worked
-demos, 58 tutorial lessons, and a 460-entry glossary --
+The web playground gives you a full REPL plus 83 worked
+demos, 58 tutorial lessons, and a 461-entry glossary --
 all running entirely in your browser via WASM. (These
 counts are pinned by tests against the demo, lesson, and
 glossary registries, so they cannot silently drift.)
