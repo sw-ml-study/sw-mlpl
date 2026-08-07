@@ -298,6 +298,19 @@ run recorded yields the empty `[0]` vector. The bridge from
 `experiment` blocks to arrays: column-concat several calls into
 the `[n, k]` matrix that [[pareto_front (builtin)]] consumes.
 
+## parse_json (builtin)
+
+`parse_json(s)` turns JSON text into a typed MLPL value: an
+object becomes a record, a string stays a string (Unicode and
+escapes exact), a number a scalar, a homogeneous array a
+vector or string list (mixed or nested arrays err -- MLPL
+arrays are flat), `true`/`false` become 1/0, and `null`
+becomes the empty vector (absence as data, the zilde idiom).
+Result-speaking -- `event = parse_json(line)?` -- and the
+inverse of the [[test_event_sink / emit_test_event
+(builtins)]] encoding, so an MLPL reporter can consume the
+event lines `run_script(..., {capture: 1})` returns.
+
 ## pareto_plot (builtin)
 
 `pareto_plot(P, dirs)` renders the frontier picture: every row

@@ -74,7 +74,7 @@ mod fncall_fs;
 mod fncall_gen;
 mod fncall_globals;
 mod fncall_hof;
-mod hof_compose;
+mod fncall_json;
 mod fncall_models;
 mod fncall_reflect;
 mod fncall_run;
@@ -89,6 +89,9 @@ mod grad_calls_shape;
 mod grad_optim;
 mod grad_optim_resident;
 mod grad_optim_resident_math;
+mod hof_compose;
+mod json_decode;
+mod json_scalar;
 mod reflect_info;
 // The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,
 // layouts, the step registry) moved to mlpl-eval-state

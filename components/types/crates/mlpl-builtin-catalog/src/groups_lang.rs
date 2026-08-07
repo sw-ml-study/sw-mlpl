@@ -204,6 +204,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "composition: f(g(x), g(y)) (BQN over)",
             ),
             (
+                "parse_json",
+                "parse_json(s)",
+                "JSON text -> typed value: objects to records, arrays to vectors/lists",
+            ),
+            (
                 "run_script",
                 "run_script(path, opts)",
                 "execute a script in a FRESH environment; structured status + captured events",

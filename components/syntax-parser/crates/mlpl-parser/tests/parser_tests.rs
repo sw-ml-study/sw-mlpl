@@ -132,3 +132,25 @@ fn parse_unclosed_bracket() {
     let tokens = lex("[1, 2").unwrap();
     assert!(parse(&tokens).is_err());
 }
+
+#[test]
+fn newlines_inside_paren_and_bracket_args_continue_the_statement() {
+    // A call's argument list may span lines (their reporter
+    // fixtures format long equal() calls this way); newlines
+    // stay statement separators everywhere else.
+    let src = "x = equal({a: 1},\n          {a: 1})\nx";
+    let tokens = mlpl_lexer_facade_lex(src);
+    let stmts = mlpl_parser::parse(&tokens).expect("multi-line args parse");
+    assert_eq!(stmts.len(), 2);
+    // Bracket literals spanning lines inside a call also work.
+    let src2 = "reduce(:add, [1,\n 2,\n 3])";
+    let t2 = mlpl_lexer_facade_lex(src2);
+    assert_eq!(
+        mlpl_parser::parse(&t2).expect("bracket continuation").len(),
+        1
+    );
+}
+
+fn mlpl_lexer_facade_lex(src: &str) -> Vec<mlpl_parser::Token> {
+    mlpl_parser::lex(src).expect("lex")
+}
