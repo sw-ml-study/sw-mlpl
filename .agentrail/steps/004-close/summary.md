@@ -1,0 +1,1 @@
+Saga closed: Partial + applicative call + birds demo live everywhere; wiki row; follow-ups queued.
