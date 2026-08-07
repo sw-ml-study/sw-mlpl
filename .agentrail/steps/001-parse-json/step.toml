@@ -1,0 +1,9 @@
+number = 1
+slug = "parse-json"
+status = "pending"
+description = "parse_json(s) per plan: hand-rolled recursive-descent JSON decoder (no serde_..."
+role = "production"
+context_files = []
+created_at = "2026-08-06T17:18:22"
+task_type = "rust-feature"
+commits = []
