@@ -156,6 +156,14 @@ call(k5, 99)
 def u:double(x) { x * 2 }
 call(:u:B, :u:double, :u:inc, 4)
 
+# The Y / FIXED-POINT combinator (recursion without a name):
+# the partial call(:u:fix, f) is a delayed self-reference, so
+# a strict language can tie the knot. "Y Combinator" the brand
+# is named after this.
+def u:fix(f, v) { call(f, call(:u:fix, f), v) }
+def u:fact_body(rec, n) { if gt(n, 1) { n * call(rec, n - 1) } else { 1 } }
+call(call(:u:fix, :u:fact_body), 5)
+
 # ---------- quad-EX and )ERASE: freeing names ----------
 
 # APL2:  ⎕EX 'V'     (expunge a name; 1 means it is free now)

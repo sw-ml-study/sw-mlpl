@@ -479,6 +479,35 @@ lines = [
     "call(square_after_inc, reshape(range(4), [2, 2]))   # ... on a matrix: same bird, any rank",
 ]
 
+[[demos]]
+category = "APL2 / General Programming"
+name = "The Y Combinator (fixed points)"
+intro = "APL2-inspired GENERAL-PURPOSE programming, not ML: you have heard the name Y Combinator -- the startup accelerator borrowed it from computer science, where the Y combinator is the FIXED-POINT combinator: the trick that lets a function recur without ever naming itself. It is the deep end of the Mockingbird demo next door, and MLPL reaches it with NO new language feature -- partial application already supplies the one ingredient a fixed point needs. We build it in two moves. First, self-application: a step function that takes ITSELF as an argument (the mockingbird's call(x, x)) can recur without a name. Second, we package that knot once, as u:fix, so the actual step function stays clean -- an ordinary factorial or fibonacci body that never mentions its own name. The subtle part is why it runs at all: MLPL evaluates eagerly, and the classic textbook Y loops forever in an eager language; here the partial call(:u:fix, f) is a value that has NOT run yet, and that delay is exactly what tames it."
+takeaway = "A fixed point of a step function is the recursive function it describes. u:fix(f, v) = call(f, call(:u:fix, f), v): it hands the step f a delayed reference to the whole recursion (the partial call(:u:fix, f), which is data, not a running call) plus the current argument. So u:fact_body(rec, n) and u:fib_body(rec, n) never name themselves -- fix ties the knot, and call(call(:u:fix, :u:fact_body), 5) is 120. This is genuinely the applicative-order fixed-point combinator (the Z combinator): in a lazy language Y is written without the extra delay, but MLPL is strict, so a partial provides the pause that stops it diverging. Two lessons for the price of one: recursion is not primitive -- it is CONSTRUCTED from self-application (that is what 'the Y combinator' names), and partial application is not just for currying -- delaying a call is a form of control. The startup accelerator's name is a small joke about bootstrapping: a fixed point is a thing that makes itself."
+lines = [
+    "# 1) SELF-APPLICATION: recursion with no name. The step",
+    "#    takes `self` and calls call(self, self, ...) -- the",
+    "#    mockingbird move M x = x x, put to work.",
+    "def u:fact_step(self, n) { if gt(n, 1) { n * call(self, self, n - 1) } else { 1 } }",
+    "call(:u:fact_step, :u:fact_step, 5)   # 120 -- fact_step never names fact_step",
+    "# 2) THE Y / FIXED-POINT COMBINATOR: tie the knot ONCE so",
+    "#    the step function can be clean. call(:u:fix, f) is a",
+    "#    PARTIAL -- a delayed reference to the whole recursion.",
+    "def u:fix(f, v) { call(f, call(:u:fix, f), v) }",
+    "# Now the bodies never mention their own names -- `rec` is",
+    "# handed to them by fix:",
+    "def u:fact_body(rec, n) { if gt(n, 1) { n * call(rec, n - 1) } else { 1 } }",
+    "def u:fib_body(rec, n) { if lt(n, 2) { n } else { call(rec, n - 1) + call(rec, n - 2) } }",
+    "fact = call(:u:fix, :u:fact_body)     # the fixed point IS a value",
+    "call(fact, 5)                         # 120",
+    "call(fact, 6)                         # 720 -- reuse the tied knot",
+    "call(call(:u:fix, :u:fib_body), 10)   # 55 -- fibonacci, same fix",
+    "# Why it runs eagerly: the partial delays. A strict textbook",
+    "# Y (no delay) would loop forever; the partial is the pause.",
+    "{fact5: call(fact, 5), fib10: call(call(:u:fix, :u:fib_body), 10)}",
+]
+
+
 
 [[demos]]
 category = "APL2 / General Programming"

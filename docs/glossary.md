@@ -4050,6 +4050,22 @@ For symmetric per-tensor quant, `scale = max(abs(W)) / qmax`
 (e.g. `qmax = 127` for signed 8-bit). The single number that
 makes integer [[Quantization]] reversible. See [[Zero-point]].
 
+## Y combinator / fixed point (idiom)
+
+The fixed-point combinator -- the trick behind recursion that
+the startup accelerator borrowed its name from. A fixed point
+of a step function is the recursive function it describes.
+MLPL needs no new feature: `def u:fix(f, v) { call(f,
+call(:u:fix, f), v) }` hands the step a DELAYED self-reference
+-- the partial `call(:u:fix, f)`, a value that has not run --
+so a clean step (`u:fact_body(rec, n)` that never names
+itself) recurses via `call(call(:u:fix, :u:fact_body), 5)`.
+The delay matters: MLPL is strict, and the textbook lazy Y
+would diverge here; the [[Partial (value kind) / applicative
+call]] provides the pause, making this the applicative-order
+(Z) combinator. Built from self-application -- the
+[[Combinators (the birds)]] mockingbird `M x = call(x, x)`.
+
 ## Zero-point
 
 An integer offset added to scaled values so the representable
