@@ -5,6 +5,40 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (decode-limits)
+
+**Q: start the decode-limits saga.**
+
+A: Shipped decode budgets for parse_json / parse_toml via an
+optional options record:
+
+    parse_json(text, {max_depth: 32, max_bytes: 100000})
+    parse_toml(text, {max_depth: 32, max_bytes: 100000})
+
+max_depth (default 128, matching serde_json, ALWAYS enforced)
+bounds object/array nesting so the recursive-descent decoder
+cannot stack-overflow on adversarial input like
+{"a":{"a":{"a":...}}}; max_bytes rejects oversized input before
+parsing. One-arg calls keep prior behavior. A malformed options
+argument (non-record, or a negative/non-integer field) is a hard
+error -- misuse of the call, distinct from bad input data (an
+err Result). Shared decode_limits.rs handles both parsers.
+
+demo-algorithms serialization status: decode budgets DONE.
+Against the latest list, remaining:
+- typed native formats -- a typed binary/native object codec.
+- streaming codecs -- incremental parse/encode for large input.
+- higher-rank text round-trips -- to_json/to_toml encode rank>=2
+  by nesting, but the flat-array parsers do not rebuild them;
+  round-trippable set stays scalars / rank-1 / strings / string
+  lists / records of those.
+- semantic Result reconstruction -- to_json encodes ok/err as
+  {ok, value|error}, but parse_json reads that back as a plain
+  record, not a Result; a mode to reconstruct Results on decode
+  is the open item.
+
+These are design/net-new; none block the config or JSON demos.
+
 ## 2026-08-08 (toml-codec)
 
 **Q: start the toml-codec saga.**
