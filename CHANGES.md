@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga atomic-writes: complete (2 steps)
+- docs: close atomic-writes; demo-algorithms 4/7 serialization blockers cleared
+- saga atomic-writes: step atomic-writes complete
+- feat(eval): write_atomic -- crash-safe sandboxed write (atomic-writes)
+- saga atomic-writes: bootstrap step 001-atomic-writes
+- saga atomic-writes: init
+- chore(agentrail): archive byte-io saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga byte-io: complete (2 steps)
 - docs(q-and-a): fix count -- 3 of 7 serialization blockers cleared, not 4
 - docs: close byte-io; demo-algorithms 4/7 serialization blockers cleared
