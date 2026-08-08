@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga record-keys: complete (2 steps)
+- docs: close record-keys; demo-ml-utils step 004 unblocked
+- saga record-keys: step record-keys complete
+- feat(eval): record_keys + parse_json duplicate-key rejection (record-keys)
+- saga record-keys: bootstrap step 001
+- saga record-keys: init
+- chore(agentrail): archive max-elements saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga max-elements: complete (2 steps)
 - docs: close max-elements; decode-budget trio complete
 - saga max-elements: step max-elements complete
