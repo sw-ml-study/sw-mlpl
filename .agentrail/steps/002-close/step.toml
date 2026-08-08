@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close decode-limits: rebuild serve+pages+repl, deploy, connect smoke, wiki ro..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T00:22:06"
+completed_at = "2026-08-08T00:26:40"
 task_type = "docs"
-commits = []
+commits = ["3e3fdc096fe581e9b1441a82f5388066ec44eafd"]

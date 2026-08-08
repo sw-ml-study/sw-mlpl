@@ -1,0 +1,1 @@
+Saga closed: decode limits live and verified over connect (depth cap, byte cap, defaults); wiki row; q-and-a records decode budgets done + remaining serialization items. Deployed; repl rebuilt to HEAD.
