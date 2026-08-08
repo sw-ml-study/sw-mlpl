@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga birds-def-docstrings: complete (2 steps)
+- chore(pages): rebuild for birds def doc-strings
+- saga birds-def-docstrings: step docstrings complete
+- demo(apl2): add leading doc-strings to Combinator / Y-Combinator defs
+- saga birds-def-docstrings: bootstrap step 001
+- saga birds-def-docstrings: init
+- chore(agentrail): archive moving-average-demo saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga moving-average-demo: complete (2 steps)
 - chore(pages): rebuild for J-inspired Moving Average demo
 - saga moving-average-demo: step add-demo complete
