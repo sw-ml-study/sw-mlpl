@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close birds-def-docstrings: rebuild pages, deploy, --done."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T14:04:24"
+completed_at = "2026-08-08T14:07:09"
 task_type = "docs"
-commits = []
+commits = ["6fd4209db1746623fcb5133ff54be13c66c24eca"]

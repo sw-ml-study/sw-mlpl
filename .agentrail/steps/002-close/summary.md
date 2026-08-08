@@ -1,0 +1,1 @@
+Saga closed: bird/Y-combinator defs now carry leading doc-strings; def_comments_gate green; pages rebuilt + deployed.
