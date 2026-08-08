@@ -5,6 +5,32 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (tagged-envelope)
+
+**Q: start the tagged-envelope saga.**
+
+A: Shipped the reserved $mlpl tagged envelope from
+docs/serialization-variant-encoding.md. to_json(v, {tagged: 1})
+emits {"$mlpl":{...}} envelopes for the kinds plain JSON cannot
+represent losslessly -- a rank->=2 array as {shape, data}, a
+Result as {variant, value|error}, and a record literally holding
+a $mlpl key escaped as {fields}. parse_json reconstructs these
+UNCONDITIONALLY (the reserved key is never application data, so
+no opt-in is needed). So to_json(v, {tagged:1}) <-> parse_json
+now round-trips ANY data value losslessly.
+
+One mechanism closed three open serialization items at once:
+higher-rank text round-trips, the shape/type envelope, and the
+text projection of typed-native serialization. The compact
+{ok,value|error} + {results:1} form stays as the plain-JSON
+interop convention. Encode is a pure envelope::wrap transform
+reusing the sorted-key encoder; decode is envelope_decode's
+walker. TOML tagged mode is deferred (JSON first); general
+user-defined variants wait for that language type.
+
+Remaining serialization items: typed-native BINARY format,
+streaming/incremental codec. Both net-new.
+
 ## 2026-08-08 (record-keys -- demo-ml-utils step 004)
 
 **Q: demo-ml-utils step 004 blocked -- record_keys + parse_json
