@@ -1,0 +1,9 @@
+number = 1
+slug = "envelope-encode"
+status = "pending"
+description = "envelope.rs wrap(v) transform + to_json {tagged:1} option; catalog+lang-ref+g..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T12:53:12"
+task_type = "rust-feature"
+commits = []
