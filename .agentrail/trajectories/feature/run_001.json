@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "bench-and-demo"
+  },
+  "action": "native clock_ms bench; browser-safe deterministic cost curve; demo authorship",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T19:58:14"
+}

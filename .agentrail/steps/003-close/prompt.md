@@ -1,0 +1,1 @@
+Close gen-state-kv-cache: q-and-a note (KV cache shipped: core+controls+bench+demo; mlx-resident-kv deferred as its own step/saga), wiki matrix row, queue advance to mtp-training, --done. Note the paused mlx-resident-kv step (design step 5) can be a follow-up.

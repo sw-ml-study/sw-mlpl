@@ -1,0 +1,1 @@
+bench-and-demo shipped: KV Cache web demo (bit-identical ids proof + linear-vs-quadratic cost curve + clone/reset) and a measured benchmarks.md table (5x@32, 28x@128); 85 demos, release smoke green, deployed. Queued safe-record-lookup per demo-functional-pipelines.

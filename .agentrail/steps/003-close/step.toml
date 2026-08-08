@@ -1,0 +1,9 @@
+number = 3
+slug = "close"
+status = "pending"
+description = "Close gen-state-kv-cache: q-and-a note (KV cache shipped: core+controls+bench..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T19:58:14"
+task_type = "docs"
+commits = []
