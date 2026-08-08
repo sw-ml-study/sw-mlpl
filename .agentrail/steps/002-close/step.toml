@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close demo-memory-clock: rebuild serve (clock over connect), smoke clock_ms v..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T17:15:36"
+completed_at = "2026-08-07T17:28:21"
 task_type = "docs"
-commits = []
+commits = ["e24ce5edc387cdcf43711e9c0cccc0a4d58719f7"]
