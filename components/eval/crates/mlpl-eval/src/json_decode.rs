@@ -76,7 +76,12 @@ fn object(text: &str, bytes: &[u8], pos: &mut usize, depth: usize) -> Result<Val
         }
         *pos += 1;
         crate::json_scalar::skip_ws(bytes, pos);
-        fields.insert(key, value(text, bytes, pos, depth - 1)?);
+        if fields
+            .insert(key, value(text, bytes, pos, depth - 1)?)
+            .is_some()
+        {
+            return Err(format!("duplicate key at byte {}", *pos));
+        }
         crate::json_scalar::skip_ws(bytes, pos);
         match bytes.get(*pos) {
             Some(b',') => *pos += 1,

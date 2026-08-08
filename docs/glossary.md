@@ -363,6 +363,15 @@ assignments are outside the subset. It accepts the same optional
 `{max_depth, max_bytes}` options record as [[parse_json
 (builtin)]] to cap decoding depth and input size.
 
+## record_keys (builtin)
+
+`record_keys(record)` returns the record's keys as a string-list
+in DETERMINISTIC sorted order (records are sorted-map-backed).
+It lets a program discover a parsed record's field names --
+e.g. the tensor names in a safetensors JSON header -- and then
+drive [[has_field / record_get (builtins)]] over them. A
+non-record argument is a hard error.
+
 ## to_toml (builtin)
 
 `to_toml(record)` is the encode half of the TOML codec, for
@@ -419,6 +428,9 @@ object becomes a record, a string stays a string (Unicode and
 escapes exact), a number a scalar, a homogeneous array a
 vector or string list (mixed or nested arrays err -- MLPL
 arrays are flat), `true`/`false` become 1/0, and `null`
+becomes the empty vector. A DUPLICATE object key is an
+`err(...)` -- last-wins overwrite would silently drop evidence
+(e.g. a repeated safetensors tensor name). The `null`
 becomes the empty vector (absence as data, the zilde idiom).
 Result-speaking -- `event = parse_json(line)?` -- and the
 inverse of the [[test_event_sink / emit_test_event

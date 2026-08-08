@@ -264,6 +264,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "stable kind string of any value (array/string/record/result/...); total, never errors",
             ),
             (
+                "record_keys",
+                "record_keys(record)",
+                "string-list of a record's keys in sorted order; non-record is a hard error",
+            ),
+            (
                 "pareto_front",
                 "pareto_front(P, dirs)",
                 "mask of non-dominated rows; dirs: 1 max / -1 min per column",
