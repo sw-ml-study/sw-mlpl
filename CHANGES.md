@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga gen-state-kv-cache: complete (CPU program)
+- docs: close gen-state-kv-cache CPU program (bench+demo done); mtp-training next
+- saga gen-state-kv-cache: bench-and-demo complete
+- docs(queue): add safe-record-lookup saga (demo-functional-pipelines request)
+- feat(demos): KV Cache demo + benchmark section (bench-and-demo)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga gen-state-kv-cache: step gen-controls complete
 - feat(eval): gen_clone / gen_reset / gen_stats + multi-row gen_append (gen-controls)
 - saga: resume gen-state-kv-cache at gen-controls
