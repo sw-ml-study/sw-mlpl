@@ -1,0 +1,1 @@
+Retire the near-FAIL Function-LOC warnings in mlpl-runtime by extracting cohesive helpers: synthetic_2d (50), builtin_top_k (47) in random_builtins.rs; builtin_scatter (48), builtin_argtop_k (46) in ensemble_builtins.rs. Behavior identical; scoped tests + clippy green; ratchet trailer.
