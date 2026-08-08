@@ -1,9 +1,10 @@
 number = 1
 slug = "to-json-result"
-status = "pending"
+status = "completed"
 description = "to_json returns ok/err Result; non-finite -> err (inline finite guard, no new..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T23:24:04"
+completed_at = "2026-08-07T23:34:13"
 task_type = "rust-feature"
-commits = []
+commits = ["976f10da247a95cef4aff1e4fba7b67d574831e3"]

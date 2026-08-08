@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "to-json-result"
+  },
+  "action": "wrapped encoder in Result like parse_json; upfront non-finite scan; arity_check",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T23:34:13"
+}

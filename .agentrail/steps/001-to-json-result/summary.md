@@ -1,0 +1,1 @@
+to_json now Result-based (ok/err); non-finite numbers and non-data kinds -> err instead of invalid JSON / hard error. Fixes to_json emitting inf/NaN. json_encode single upfront finite-scan; compose sites unwrap. 7 reworked TDD tests.

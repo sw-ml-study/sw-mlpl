@@ -1,0 +1,1 @@
+write_bytes + write_atomic input validation (range + wrong-type) -> err Result instead of hard error. Update fs_bytes.rs, fs_atomic.rs, their tests, lang-ref, glossary. TDD.
