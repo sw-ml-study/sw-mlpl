@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 2,
+    "step": "byte-write-result"
+  },
+  "action": "moved byte extraction into write_bytes; caught value_to_bytes err in write_atomic",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T23:40:09"
+}

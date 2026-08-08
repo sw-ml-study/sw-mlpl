@@ -1,0 +1,1 @@
+write_bytes + write_atomic invalid input (wrong-type + out-of-range byte) now returns err Result instead of hard error; whole fs API is catchable data. array_to_bytes keeps hard-error internally, callers catch it. Tests reworked to assert err Results.

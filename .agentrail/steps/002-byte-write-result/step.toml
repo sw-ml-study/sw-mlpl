@@ -1,9 +1,10 @@
 number = 2
 slug = "byte-write-result"
-status = "pending"
+status = "completed"
 description = "write_bytes + write_atomic input validation (range + wrong-type) -> err Resul..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T23:34:13"
+completed_at = "2026-08-07T23:40:09"
 task_type = "rust-feature"
-commits = []
+commits = ["e51d87a61886f85da1328dc4f45df172b834b996"]

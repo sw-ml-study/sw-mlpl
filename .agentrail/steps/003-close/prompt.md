@@ -1,0 +1,1 @@
+Close serialization-results: rebuild serve+pages+repl, deploy, connect smoke, wiki row, q-and-a (Result contract; what demo-algorithms can treat as unblocked vs change), --done.
