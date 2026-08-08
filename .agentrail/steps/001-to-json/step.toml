@@ -1,9 +1,10 @@
 number = 1
 slug = "to-json"
-status = "pending"
+status = "completed"
 description = "to_json(value) -> Str: general deterministic JSON encoder (json_encode.rs), t..."
 role = "production"
 context_files = []
 created_at = "2026-08-07T20:53:32"
+completed_at = "2026-08-07T20:59:18"
 task_type = "rust-feature"
-commits = []
+commits = ["d3b384cb2ab4e1350563e5650f112b06c2f7415e"]

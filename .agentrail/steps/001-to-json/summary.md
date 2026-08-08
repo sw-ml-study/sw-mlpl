@@ -1,0 +1,1 @@
+to_json shipped: general deterministic encoder sharing helpers with event_json; round-trips with parse_json; 6 TDD tests; docs. One of demo-algorithms' serialization blockers cleared.

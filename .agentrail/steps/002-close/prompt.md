@@ -1,0 +1,1 @@
+Close to-json: rebuild pages+deploy, connect smoke of to_json, wiki row, q-and-a note (JSON round-trip complete; demo-algorithms remaining blockers: type detection, byte I/O, TOML/native codecs, atomic writes, decode limits, streaming), --done.

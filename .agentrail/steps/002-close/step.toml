@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close to-json: rebuild pages+deploy, connect smoke of to_json, wiki row, q-an..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T20:59:18"
+task_type = "docs"
+commits = []
