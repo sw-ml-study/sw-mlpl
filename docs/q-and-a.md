@@ -5,6 +5,37 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (type_of / demo-algorithms type detection)
+
+**Q: continue -- next unblock for demo-algorithms.**
+
+A: Shipped type_of(value), clearing the "non-record root type
+detection" blocker. It exposes the internal value_kind
+classifier as a total builtin (never errors) returning a stable
+kind string -- array, string, record, result, string-list,
+model, tokenizer, gen-state, partial, builtin-ref, user-fn-ref,
+device-tensor -- so a program branches on a root value's kind
+before calling kind-specific accessors (has_field/record_get on
+records, to_json on data). No new value kind, no library
+composition possible (there was no way to read a value's kind
+without hard-erroring on the wrong accessor).
+
+Updated demo-algorithms serialization blocker status:
+
+- JSON encoding -- DONE (to_json).
+- non-record root type detection -- DONE (type_of).
+- raw bytes / I/O -- OPEN; read_bytes/write_bytes (core fs).
+- TOML + native codecs -- OPEN; parse_toml/to_toml pair.
+- atomic writes -- OPEN; write-temp-then-rename fs option.
+- decode limits -- OPEN; size/depth caps on parsers.
+- streaming serialization -- OPEN; incremental large-input parse.
+
+Two of seven cleared. The remaining five are all core fs /
+codec primitives; none block demo-algorithms' near-complete
+algorithm demos (they gate the serialization-demo class).
+Recommended next if pursued: byte I/O (also feeds demo-memory
+packed-layouts), then the TOML codec pair (same shape as JSON).
+
 ## 2026-08-07 (to_json / demo-algorithms serialization)
 
 **Q: Is demo-algorithms unblocked? (needs: non-record root
