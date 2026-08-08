@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "decode-limits"
+  },
+  "action": "threaded depth budget through json_decode; shared text_and_limits arg handling",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T00:22:06"
+}

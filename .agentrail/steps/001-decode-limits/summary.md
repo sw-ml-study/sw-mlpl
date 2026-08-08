@@ -1,0 +1,1 @@
+Decode limits shipped: parse_json/parse_toml take optional {max_depth, max_bytes} options; default depth 128 always enforced against stack overflow; byte cap rejects oversized input; malformed options hard-error. Shared decode_limits.rs. 6 TDD tests; warnings -1 (383).

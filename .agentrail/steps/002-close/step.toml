@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close decode-limits: rebuild serve+pages+repl, deploy, connect smoke, wiki ro..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T00:22:06"
+task_type = "docs"
+commits = []

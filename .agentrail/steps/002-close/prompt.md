@@ -1,0 +1,1 @@
+Close decode-limits: rebuild serve+pages+repl, deploy, connect smoke, wiki row, q-and-a (decode budgets done; remaining: typed native formats, streaming, higher-rank text round-trips, semantic Result reconstruction), --done.

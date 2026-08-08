@@ -1,9 +1,10 @@
 number = 1
 slug = "decode-limits"
-status = "pending"
+status = "completed"
 description = "decode_limits.rs (Limits + options); thread depth through json_decode; byte c..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T00:12:51"
+completed_at = "2026-08-08T00:22:06"
 task_type = "rust-feature"
-commits = []
+commits = ["58bdfdc1f896ba3b1b517b0653b9a90e4ddf300f"]
