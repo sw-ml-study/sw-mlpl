@@ -1,6 +1,6 @@
 name = "decode-limits"
 status = "active"
-current_step = 0
+current_step = 1
 created_at = "2026-08-08T00:12:51"
 plan_file = ".agentrail/plan.md"
 retroactive = false

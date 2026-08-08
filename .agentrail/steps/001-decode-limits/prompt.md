@@ -1,0 +1,1 @@
+decode_limits.rs (Limits + options); thread depth through json_decode; byte cap; parse_value(max_depth); eval_parse_json/eval_parse_toml read optional options record; catalog+lang-ref+glossary; TDD.

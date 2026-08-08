@@ -1,0 +1,9 @@
+number = 1
+slug = "decode-limits"
+status = "pending"
+description = "decode_limits.rs (Limits + options); thread depth through json_decode; byte c..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T00:12:51"
+task_type = "rust-feature"
+commits = []
