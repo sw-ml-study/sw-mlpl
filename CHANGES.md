@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga decode-limits: complete (2 steps)
+- docs: close decode-limits; demo-algorithms decode budgets cleared
+- saga decode-limits: step decode-limits complete
+- feat(eval): decode limits (max_depth / max_bytes) for parse_json / parse_toml (decode-limits)
+- saga decode-limits: bootstrap step 001-decode-limits
+- saga decode-limits: init
+- chore(agentrail): archive toml-codec saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga toml-codec: complete (3 steps)
 - docs: close toml-codec; demo-algorithms 5/7 serialization blockers cleared
 - saga toml-codec: step parse-toml complete
