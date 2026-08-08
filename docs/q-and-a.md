@@ -5,6 +5,25 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (safe record lookup)
+
+**Q: Does has_field/record_get belong in the language or a
+library (per the plan)?**
+
+A: The LANGUAGE core -- and the plan agrees. Libraries are for
+what is composable from existing primitives; the core grows a
+primitive only when nothing can express it (the mlplunit
+model). has_field/record_get cannot be written as MLPL library
+functions: r.name HARD-ERRORS on a missing field and there is
+no key-enumeration builtin, so there is no existing way to test
+presence without triggering the error the request exists to
+avoid. They are structural-introspection primitives in the
+same category as is_ok / tally / depth. Shipped: has_field ->
+1/0, record_get -> ok(value) | err({kind: "missing_field",
+field, message, available}); demo-functional-pipelines can now
+replace its exception-driven schema validation and turn its
+blocker fixture into positive tests.
+
 ## 2026-08-07 (KV cache)
 
 **Q: (resumed) gen-state-kv-cache status?**
