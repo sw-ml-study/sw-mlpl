@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga demo-memory-clock: complete (2 steps)
+- saga demo-memory-clock: step 001 complete
+- feat(runtime): clock_ms() -- monotonic clock for benchmarking (clock)
+- saga: init demo-memory-clock (agent request #1)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga maturation-plan: complete
 - docs: maturation plan -- hardening before wider feedback
 - saga: init maturation-plan (direction-file hardening)
