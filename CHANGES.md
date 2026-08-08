@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga type-detection: complete (2 steps)
+- docs: close type-detection; demo-algorithms type detection done
+- saga type-detection: step type-of complete
+- feat(eval): type_of -- root value-kind detection (type-detection)
+- saga type-detection: bootstrap step 001-type-of
+- saga type-detection: init
+- chore(agentrail): archive to-json saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga to-json: complete (2 steps)
 - docs: close to-json; demo-algorithms serialization status
 - saga to-json: step to-json complete
