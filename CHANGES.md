@@ -12,8 +12,21 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-08
+
+- saga toml-codec: complete (3 steps)
+- docs: close toml-codec; demo-algorithms 5/7 serialization blockers cleared
+- saga toml-codec: step parse-toml complete
+- feat(eval): parse_toml -- decode the TOML config subset (parse-toml)
+
 ## 2026-08-07
 
+- saga toml-codec: step to-toml complete
+- feat(eval): to_toml -- deterministic TOML encoder (to-toml)
+- saga toml-codec: bootstrap step 001-to-toml
+- saga toml-codec: init
+- chore(agentrail): archive serialization-results saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga serialization-results: complete (3 steps)
 - docs: close serialization-results; demo-algorithms unblocked/change-approach guidance
 - saga serialization-results: step byte-write-result complete
