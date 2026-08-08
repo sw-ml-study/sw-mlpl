@@ -260,6 +260,27 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "number of set bits in each element",
             ),
             (
+                "shl",
+                "shl(x, k, width)",
+                "fixed-width left shift: (x << k) masked to width bits",
+            ),
+            ("shr", "shr(x, k)", "logical right shift by k bits"),
+            (
+                "bmask",
+                "bmask(x, width)",
+                "keep the low width bits (truncate / width conversion)",
+            ),
+            (
+                "bits",
+                "bits(x, width)",
+                "scalar to a [width] 0/1 vector, LSB-first",
+            ),
+            (
+                "from_bits",
+                "from_bits(v)",
+                "pack a 0/1 vector to an integer (inverse of bits)",
+            ),
+            (
                 "dedupe_rows",
                 "dedupe_rows(X)",
                 "unique rows as {rows, index}",

@@ -426,6 +426,11 @@ tables (e.g. the three name forms) keep their teaching order.
 | `bxor(a, b)` | 2 | Bitwise XOR. Hamming distance between two codes is `popcount(bxor(a, b))`. |
 | `bnot(x, width)` | 2 | Bitwise complement within `width` bits (`~x & mask(width)`), `width` in `1..=53`. |
 | `popcount(x)` | 1 | Count of set bits in each element. |
+| `shl(x, k, width)` | 3 | Fixed-width left shift: `(x << k)` masked to `width` bits (so a `u8` shift stays a `u8`; avoids `f64` exactness loss). |
+| `shr(x, k)` | 2 | Logical right shift by `k` bits. |
+| `bmask(x, width)` | 2 | Keep the low `width` bits -- explicit truncation / width conversion. |
+| `bits(x, width)` | 2 | Expand a scalar integer to a `[width]` 0/1 vector, LSB-first (index `i` = bit `i`). |
+| `from_bits(v)` | 1 | Pack a rank-1 0/1 vector back to an integer scalar (the inverse of `bits`). |
 | `dedupe_rows(X)` | 1 | Unique rows of a rank-2 `[n, L]` array (first occurrence kept, original order) as a `{rows, index}` record: `d.rows` for direct use, `gather_rows(Y, d.index)` to carry companion arrays along. |
 | `running_sum(v)` | 1 | Running sum along a rank-1 vector: `out[i]` is the sum of `v[0..=i]` (prefix sums, CDFs, cumulative totals). The additive sibling of `running_product`. Rank-1 only: focus a row/column of a higher-rank value with `take(a, axis, i)`, or scan the whole array explicitly with `flatten(a)`. |
 | `depth(a)` | 1 | Nesting depth (scalar): `0` for a scalar, `1` for any array. APL heritage. |
