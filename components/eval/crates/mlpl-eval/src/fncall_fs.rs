@@ -23,6 +23,9 @@ pub(crate) fn try_dispatch(
     if matches!(name, "read_bytes" | "write_bytes") {
         return Some(crate::fs_bytes::eval_fs_bytes(name, args, env, trace));
     }
+    if name == "write_atomic" {
+        return Some(crate::fs_atomic::eval_write_atomic(args, env, trace));
+    }
     if !matches!(name, "fs_walk" | "read_text" | "write_text" | "remove_path") {
         return None;
     }

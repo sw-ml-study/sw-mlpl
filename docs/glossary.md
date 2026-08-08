@@ -1672,6 +1672,22 @@ so text and encoded data round-trip without a new codec: store
 JSON as raw bytes with `write_bytes(p, tokenize_bytes(to_json(v)))`
 and recover it with `parse_json(decode_bytes(unwrap(read_bytes(p))))`.
 
+## write_atomic (builtin)
+
+`write_atomic(path, value)` is the crash-safe member of the
+sandboxed filesystem API. `value` is a string (its UTF-8 bytes)
+or a byte array (as in [[read_bytes / write_bytes (builtins)]]).
+The bytes are written to a hidden temp file in the SAME
+directory, which is then renamed over the target -- atomic on a
+POSIX same-filesystem `rename`, so a concurrent reader sees
+either the old file or the whole new one, never a half-written
+(torn) file; the temp is removed if either step fails. Where
+`write_text` / `write_bytes` can leave a partial file if the
+process dies mid-write, `write_atomic` cannot. Returns
+`ok(1)` / `err(...)`, resolves against the same `--source-dir`
+sandbox root, and refuses traversal outside it. Durable persist
+composes with the codecs: `write_atomic(p, to_json(v))`.
+
 ## global_set (builtin)
 
 `global_set("name", value)` binds a name at the WORKSPACE

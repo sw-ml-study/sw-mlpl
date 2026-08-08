@@ -189,6 +189,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "sandboxed raw-byte file write; bytes a rank-<=1 array of integers 0..=255; returns ok(1)/err",
             ),
             (
+                "write_atomic",
+                "write_atomic(path, value)",
+                "sandboxed crash-safe write (temp file + rename); value a string or byte array; returns ok(1)/err",
+            ),
+            (
                 "remove_path",
                 "remove_path(path)",
                 "sandboxed file/dir removal; returns ok(1)/err",
