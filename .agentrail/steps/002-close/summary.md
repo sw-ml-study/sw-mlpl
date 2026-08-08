@@ -1,0 +1,1 @@
+Saga closed: read_bytes/write_bytes live; type_of/to_json verified current on the connect server; wiki Capability-Matrix row; q-and-a records 3 of 7 demo-algorithms serialization blockers cleared + installed-binary staleness note. Deployed.
