@@ -5,6 +5,19 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (max-elements)
+
+**Q: return to scheduled work -- the max_elements decode cap.**
+
+A: Shipped. parse_json / parse_toml accept {max_elements: N} in
+the options record, capping the cumulative collection size
+(record fields + array cells + string-list items, recursively).
+Default unbounded; enforced after decode by element_count.rs
+(the pre-parse allocation guard stays max_bytes); a malformed
+max_elements is a hard error. Completes the decode-budget trio
+(max_depth / max_bytes / max_elements) for demo-algorithms and
+demo-ml-utils.
+
 ## 2026-08-08 (range-read -- demo-ml-utils)
 
 **Q: go -- bounded range/seek I/O for large-file (safetensors)
