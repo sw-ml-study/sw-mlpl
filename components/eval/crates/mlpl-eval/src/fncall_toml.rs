@@ -26,11 +26,16 @@ fn eval_parse_toml(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    let (text, limits) = crate::decode_limits::text_and_limits("parse_toml", args, env, trace)?;
+    let (text, limits, reconstruct) =
+        crate::decode_limits::text_and_options("parse_toml", args, env, trace)?;
     Ok(match crate::toml_decode::decode(&text, &limits) {
         Ok(v) => Value::Result {
             ok: true,
-            payload: Box::new(v),
+            payload: Box::new(if reconstruct {
+                crate::result_reconstruct::reconstruct(v)
+            } else {
+                v
+            }),
         },
         Err(msg) => Value::Result {
             ok: false,

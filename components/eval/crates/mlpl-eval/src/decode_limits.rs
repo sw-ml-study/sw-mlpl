@@ -36,12 +36,12 @@ impl Limits {
 /// text, non-record or bad-field options) is a hard error --
 /// misuse of the call, distinct from bad input data (an err
 /// Result).
-pub(crate) fn text_and_limits(
+pub(crate) fn text_and_options(
     who: &str,
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
-) -> Result<(String, Limits), EvalError> {
+) -> Result<(String, Limits, bool), EvalError> {
     if args.is_empty() || args.len() > 2 {
         return Err(EvalError::BadArity {
             func: who.into(),
@@ -58,13 +58,14 @@ pub(crate) fn text_and_limits(
         Some(a) => Some(crate::eval::eval_expr(a, env, trace)?),
         None => None,
     };
-    Ok((text, from_option(who, opt.as_ref())?))
+    let (limits, reconstruct) = from_option(who, opt.as_ref())?;
+    Ok((text, limits, reconstruct))
 }
 
-fn from_option(who: &str, opt: Option<&Value>) -> Result<Limits, EvalError> {
+fn from_option(who: &str, opt: Option<&Value>) -> Result<(Limits, bool), EvalError> {
     let mut limits = Limits::defaults();
     let Some(v) = opt else {
-        return Ok(limits);
+        return Ok((limits, false));
     };
     let Value::Record { fields } = v else {
         return Err(EvalError::Unsupported(format!(
@@ -77,7 +78,8 @@ fn from_option(who: &str, opt: Option<&Value>) -> Result<Limits, EvalError> {
     if let Some(b) = usize_field(who, fields, "max_bytes")? {
         limits.max_bytes = b;
     }
-    Ok(limits)
+    let reconstruct = usize_field(who, fields, "results")?.is_some_and(|n| n != 0);
+    Ok((limits, reconstruct))
 }
 
 fn usize_field(

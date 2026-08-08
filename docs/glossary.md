@@ -425,10 +425,16 @@ second argument, an options record, caps decoding for untrusted
 input: `max_depth` (default 128) bounds object/array nesting so
 the recursive decoder cannot stack-overflow on adversarial input
 like `{"a":{"a":{"a":...}}}`, and `max_bytes` rejects oversized
-input before parsing. `parse_toml` takes the same options. A
-malformed options argument (non-record, or a negative or
-non-integer field) is a hard error, distinct from bad input data
-(an err Result).
+input before parsing. `results` (opt-in, off by default) rebuilds
+the Result-shaped records [[to_json (builtin)]] emits --
+`{ok, value}`/`{ok, error}` -- back into `ok(...)`/`err(...)`
+recursively, so a serialized Result survives the round trip:
+`unwrap(parse_json(unwrap(to_json(ok(5))), {results: 1}))` is
+`ok(5)`. It is opt-in because the shape is an ordinary record; a
+genuine `{ok: 1, value: x}` data record also rebuilds under the
+flag. `parse_toml` takes the same options. A malformed options
+argument (non-record, or a negative or non-integer field) is a
+hard error, distinct from bad input data (an err Result).
 
 ## pareto_plot (builtin)
 

@@ -136,6 +136,7 @@ mod interrupt;
 mod llm_dispatch;
 mod loader;
 mod result_ops;
+mod result_reconstruct;
 mod tag_propagate;
 mod tag_render;
 mod tokenizer;
