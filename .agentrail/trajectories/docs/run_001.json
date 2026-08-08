@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 3,
+    "step": "close"
+  },
+  "action": "wiki + q-and-a + queue",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T20:00:14"
+}

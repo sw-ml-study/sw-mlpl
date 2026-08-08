@@ -1,0 +1,1 @@
+Saga closed: CPU KV cache complete (core+controls+bench+demo), documented + live incl. connect, wiki row; mlx-resident-kv deferred; queue advanced to mtp-training.
