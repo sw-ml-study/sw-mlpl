@@ -1,0 +1,1 @@
+Close safe-record-lookup: rebuild pages+deploy (eval-layer builtins reach the browser), verify record_get over connect, wiki matrix row, q-and-a note (downstream can replace exception-driven validation), --done.

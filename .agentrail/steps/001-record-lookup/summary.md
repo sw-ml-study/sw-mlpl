@@ -1,0 +1,1 @@
+has_field/record_get shipped (core primitives, not library -- not composable from existing surface); 4 TDD tests; docs; REPL-verified. Confirmed placement per the companion-repos plan.
