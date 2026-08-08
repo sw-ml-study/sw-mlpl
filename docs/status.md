@@ -17,6 +17,52 @@ one-line-per-saga scoreboard.
 
 Legend: [x] complete  [~] in progress  [ ] planned  [-] deferred
 
+## Current maturity (what exists today, 2026-08-08)
+
+The saga scoreboard below is historical (per the banner). This
+section is the current "what exists today" answer, classified by
+maturity. It mirrors the README "Maturity" section; ground truth
+for specifics is `CHANGES.md`.
+
+**BUILT (production-usable, tested, documented).** Interpreter /
+evaluator, parser, dense arrays + named axes, reverse-mode
+autograd, Model DSL, optimizers + `train`, tokenizers / BPE /
+datasets / experiment tracking, tiny-LM train+generate (incl.
+KV-cache generation state), typed ML values + typed traces,
+inline SVG visualization, terminal + browser REPLs, the WASM
+playground, and the serialization + sandboxed filesystem surface:
+`parse_json`/`to_json`, `parse_toml`/`to_toml`, `read_bytes`/
+`write_bytes` (+ bounded `read_bytes(path, offset, length)` and
+`file_size`), `write_atomic`, `record_keys`, decode limits
+(`max_depth`/`max_bytes`/`max_elements`), duplicate-key
+rejection, and the reserved `$mlpl` tagged envelope for lossless
+higher-rank / Result JSON round trips.
+
+**PARTIAL (usable with limits).**
+
+- MLX (Apple GPU) backend -- production-usable at real model
+  sizes with GPU-resident training; overhead-bound below the
+  ~d=128 crossover (`docs/benchmarks.md`). One CPU fallback
+  remains (fused cross-entropy backward).
+- Connect / server mode (`mlpl-serve`) -- REST sessions/eval/
+  inspect/health + SSE streaming eval + cancellation + viz
+  storage + on-disk persistence + reattach. Deferred: server-side
+  LLM proxy, WebSocket, model+optimizer persistence.
+- LLM integration (`llm_call`, `:ask`) -- native/CLI paths only;
+  no streaming, tools, or browser path.
+
+**POC (experimental, do not rely on).**
+
+- CUDA (NVIDIA GPU) backend -- single-GPU, in-process vertical
+  slice (LoRA fast path, one demo end-to-end); not a general
+  backend. A standalone CUDA peer service, multi-GPU, and broad
+  operator coverage are out of scope today.
+- Compile-to-Rust (`mlpl!` / `mlpl build`) -- lowers a
+  numerical-expression subset (array/number expressions +
+  `range`/`shape`/`rank`/`reshape`/`transpose`/`reduce_add`/
+  `matmul`/labeling). The Model DSL, `train`, autograd, and the
+  file/process/bit builtins are interpreter-only (not lowered).
+
 ## Completed
 
 | # | Saga | Version | Status |

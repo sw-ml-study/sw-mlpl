@@ -229,10 +229,15 @@ mlpl> apply_tokenizer(tok, "the quick brown fox")
   `sample` + `top_k`, `last_row`, `concat`,
   `attention_weights` -- enough to train and generate from a
   tiny transformer LM on CPU.
-- **Compile to Rust / native** (v0.8.0). `mlpl!` proc macro
-  for embedding in a Rust program; `mlpl build foo.mlpl -o bin`
-  for native binaries; cross-compile via `--target <triple>`.
-  No parser or interpreter in the compiled output.
+- **Compile to Rust / native** (a numerical-expression subset).
+  `mlpl!` proc macro for embedding in a Rust program;
+  `mlpl build foo.mlpl -o bin` for native binaries;
+  cross-compile via `--target <triple>`; no parser or interpreter
+  in the compiled output. The lowering covers array/number
+  expressions and a handful of builtins (`range`, `shape`, `rank`,
+  `reshape`, `transpose`, `reduce_add`, `matmul`, labeling); the
+  Model DSL, `train`, autograd, and I/O builtins run in the
+  interpreter, not the compiler. See the maturity note below.
 - **Two REPLs** with shared evaluator: terminal
   (`cargo run -p mlpl-repl`, tracing, `--data-dir`, `--exp-dir`)
   and browser (`apps/mlpl-web`, tutorial lessons, demo
@@ -247,6 +252,49 @@ mlpl> apply_tokenizer(tok, "the quick brown fox")
   scatter/line/bar/heatmap/decision_boundary, plus
   `hist` / `scatter_labeled` / `loss_curve` /
   `confusion_matrix` / `boundary_2d` high-level helpers.
+
+## Maturity: what's production-usable vs a proof of concept
+
+This is a research project, and its surfaces are at different
+maturity levels. To set expectations honestly:
+
+**Production-usable (built, tested, documented).** The language
+core and its tooling: the interpreter/evaluator, parser, dense
+arrays with named axes, reverse-mode autograd, the Model DSL,
+optimizers and the `train` loop, tokenizers / BPE / datasets /
+experiment tracking, the tiny-LM training-and-generation path,
+typed ML values and typed traces, the serialization + sandboxed
+filesystem surface (JSON and TOML codecs, raw and bounded byte
+I/O, atomic writes, `record_keys`, decode limits, the reserved
+`$mlpl` tagged envelope), inline SVG visualization, both REPLs
+(terminal and browser), and the WASM web playground. These run
+the same evaluator and are exercised by the test suite.
+
+**Works, with limits (partial).**
+
+- **MLX (Apple Silicon GPU) backend** -- production-usable for
+  non-toy models, with training staying GPU-resident; below the
+  CPU/GPU crossover (roughly `d < 128`) it is overhead-bound and
+  a CPU run is faster. Numbers: `docs/benchmarks.md`.
+- **Connect / server mode** (`mlpl-serve`, `--connect`) -- a
+  working multi-client REST surface with SSE streaming eval,
+  cancellation, viz storage, and on-disk session persistence.
+  Not present: a server-side LLM proxy and a WebSocket transport.
+- **LLM integration** (`llm_call`, `:ask`) -- works from the
+  native/CLI paths; there is no streaming, tool-calling, or
+  browser path.
+
+**Proof of concept (experimental -- do not rely on).**
+
+- **CUDA (NVIDIA GPU) backend** -- a single-GPU, in-process
+  vertical slice proven end-to-end on one demo (a LoRA fast
+  path). It is not a general backend: a standalone CUDA peer
+  service, multi-GPU, and broad operator coverage are out of
+  scope today.
+- **Compile-to-Rust path** (`mlpl!` / `mlpl build`) -- handles a
+  numerical-expression subset only (see the Features bullet). The
+  Model DSL, `train`, autograd, and the file/process/bit builtins
+  are interpreter-only and are not lowered to Rust.
 
 ## Architecture
 
