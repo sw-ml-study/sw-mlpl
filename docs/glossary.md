@@ -450,6 +450,9 @@ genuine `{ok: 1, value: x}` data record also rebuilds under the
 flag. `parse_toml` takes the same options. A malformed options
 argument (non-record, or a negative or non-integer field) is a
 hard error, distinct from bad input data (an err Result).
+Reserved `$mlpl` tagged envelopes (from `to_json(v, {tagged:
+1})`) are reconstructed UNCONDITIONALLY, so a rank-`>=2` array
+or a Result round-trips losslessly.
 
 ## pareto_plot (builtin)
 

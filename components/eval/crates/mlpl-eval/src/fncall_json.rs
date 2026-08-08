@@ -33,20 +33,19 @@ fn eval_parse_json(
 ) -> Result<Value, EvalError> {
     let (text, limits, reconstruct) =
         crate::decode_limits::text_and_options("parse_json", args, env, trace)?;
-    Ok(match crate::json_decode::decode(&text, &limits) {
-        Ok(v) => Value::Result {
-            ok: true,
-            payload: Box::new(if reconstruct {
+    // $mlpl envelopes rebuild unconditionally; the compact
+    // {ok,value} form only with the {results: 1} opt-in.
+    let decoded = crate::json_decode::decode(&text, &limits)
+        .map(|v| {
+            let v = crate::envelope_decode::unwrap_envelopes(v);
+            if reconstruct {
                 crate::result_reconstruct::reconstruct(v)
             } else {
                 v
-            }),
-        },
-        Err(msg) => Value::Result {
-            ok: false,
-            payload: Box::new(Value::Str(format!("parse_json: {msg}"))),
-        },
-    })
+            }
+        })
+        .map_err(|m| format!("parse_json: {m}"));
+    Ok(crate::result_str::ok_or_err(decoded))
 }
 
 fn eval_to_json(
