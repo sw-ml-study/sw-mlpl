@@ -1,1 +1,16 @@
-Tech-debt paydown spike: retire Function-LOC warnings sitting AT/NEAR the 50-line FAIL threshold (genuine risk -- one edit from FAIL), starting with the four clustered in mlpl-runtime (synthetic_2d, builtin_top_k, builtin_scatter, builtin_argtop_k). Extract cohesive helpers; keep tests green. Honest note: the bulk of the 382 warnings are artifacts of the >4-fn/module threshold, not debt -- this spike targets real near-FAIL risk, not a blanket halving.
+# Saga: gen-state-kv-cache (resumed at gen-controls)
+Track 2 KV-cache program (docs/kv-cache-design.md). gen-state-
+core shipped: Value::GenState, gen_state/gen_logits/gen_append
+(single token), bit-identical greedy equivalence. Resuming at
+gen-controls; new controls go in a SIBLING module
+(fncall_gen_controls.rs) since fncall_gen.rs is at the module-
+function ceiling (docs/sw-checklist-paydown.md).
+## Steps
+1. gen-controls -- gen_clone(gs), gen_reset(gs), gen_stats(gs)
+   ({tokens, layers, kv_rows, kv_values}), multi-row
+   gen_append (rank-1 id vector = batched verification hook);
+   catalog + docs; TDD.
+2. bench-and-demo -- benchmarks.md wall-clock (cached vs
+   recompute, now that clock_ms exists) + a KV Cache web demo
+   (ids-equal proof + attended-positions cost curve).
+3. close -- docs, queue advance to mtp-training, wiki.
