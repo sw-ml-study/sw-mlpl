@@ -1,9 +1,10 @@
 number = 1
 slug = "docstrings"
-status = "pending"
+status = "completed"
 description = "Add leading doc-strings to the 14 bird/Y-combinator defs; def_comments_gate g..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T14:00:10"
+completed_at = "2026-08-08T14:04:24"
 task_type = "demo"
-commits = []
+commits = ["7ddcf13b4f505e52e5b2bb0738830cb34bb7211c"]

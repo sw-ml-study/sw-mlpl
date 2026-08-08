@@ -1,0 +1,1 @@
+Added leading doc-strings to the 14 Combinator/Y-Combinator demo defs; def_comments_gate now green (was pre-existing red); demos still execute unchanged.

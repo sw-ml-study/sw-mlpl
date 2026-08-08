@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 1,
+    "step": "docstrings"
+  },
+  "action": "promoted trailing comments to leading doc-strings",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T14:04:24"
+}
