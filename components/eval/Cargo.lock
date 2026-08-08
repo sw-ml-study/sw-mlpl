@@ -1787,6 +1787,7 @@ dependencies = [
  "mlpl-core",
  "mlpl-forge-kg",
  "mlpl-runtime-array",
+ "mlpl-runtime-bits",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",
  "mlpl-runtime-data",
@@ -1809,6 +1810,14 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-bits"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
  "mlpl-runtime-core",
 ]
 

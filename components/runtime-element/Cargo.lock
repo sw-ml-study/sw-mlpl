@@ -97,6 +97,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-runtime-bits"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-runtime-core"
 version = "0.20.0"
 dependencies = [

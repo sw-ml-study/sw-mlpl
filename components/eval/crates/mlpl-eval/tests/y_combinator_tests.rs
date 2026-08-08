@@ -28,7 +28,10 @@ fn self_application_recurses_without_named_recursion() {
         "def u:fact_step(self, n) { if gt(n, 1) { n * call(self, self, n - 1) } else { 1 } }",
     )
     .unwrap();
-    assert_eq!(scalar(&mut env, "call(:u:fact_step, :u:fact_step, 5)"), 120.0);
+    assert_eq!(
+        scalar(&mut env, "call(:u:fact_step, :u:fact_step, 5)"),
+        120.0
+    );
 }
 
 const FIX: &str = "

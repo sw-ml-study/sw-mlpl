@@ -80,6 +80,41 @@ target, these are quick wins:
 The full list lives in `sw-checklist -v` output. Pick whichever
 is closest to the commit's main work to keep the diff cohesive.
 
+## Warning-paydown reality (measured 2026-08-07)
+
+A blanket "halve the warnings" spike is NOT worth pursuing and
+can make things WORSE. Measured state at 382 warnings / 2 FAILs
+(both documented transients):
+
+- Function LOC: 165, Module Function Count: 157, Crate Module
+  Count: 55, File LOC: 5.
+- **78 modules sit at exactly 7 functions** (the FAIL ceiling),
+  50 at 6, 29 at 5. Extracting a LOC helper into any 7-function
+  module turns a Function-LOC WARNING into a Module-Function-
+  Count FAIL. (Confirmed live: extracting a helper in
+  random_builtins.rs, already at 7 fns, created a FAIL.)
+
+The thresholds (warn at >4 fns/module, >4 modules/crate) are
+below the natural size of almost every real module and crate,
+so the warning total is closer to a structural EQUILIBRIUM than
+to debt. The genuine floor is the FAIL line (>50 LOC/fn, >7
+fns/module, >7 modules/crate), and only the 2 documented
+transients sit there.
+
+Therefore:
+
+- **Do NOT** do blanket warning-reduction refactors. Every
+  extraction in a saturated module trades one budget for
+  another and risks creating FAILs.
+- **DO** keep the per-commit ratchet on NEW code (land features
+  under the gates so the total does not climb), and retire a
+  warning only when it is one edit from crossing into a FAIL.
+- A real reduction requires ARCHITECTURE work: splitting a
+  genuinely-overloaded crate into sibling crates (each with its
+  own module/fn budget), as `mlpl-runtime-bits` was carved from
+  the runtime. Treat that as a scoped design decision per crate,
+  not warning-golf.
+
 ## At zero
 
 When the count hits 0, flip `sw-checklist` from advisory to
