@@ -1,0 +1,1 @@
+Thread an elements budget through json_decode + toml value parsing; read max_elements option; catalog+lang-ref+glossary; TDD.

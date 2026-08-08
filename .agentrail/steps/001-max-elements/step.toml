@@ -1,0 +1,9 @@
+number = 1
+slug = "max-elements"
+status = "pending"
+description = "Thread an elements budget through json_decode + toml value parsing; read max_..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T11:36:11"
+task_type = "rust-feature"
+commits = []
