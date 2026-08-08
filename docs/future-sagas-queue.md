@@ -236,7 +236,7 @@ made trivial once annotations land.
 
 ## Track 2 -- generation speed (the MTP program; CPU + MLX)
 
-4. **generation-state-kv-cache** (NEXT UP -- paused
+4. **generation-state-kv-cache** (CPU cache COMPLETE 2026-08-07: core+controls+bench+demo; mlx-resident-kv deferred as a follow-up).  (NEXT UP -- paused
    2026-08-05 for the mlplunit-unblock program, which closed
    2026-08-06 with every sw-MLPL prerequisite shipped; design
    preserved in docs/kv-cache-design.md, plan archived under

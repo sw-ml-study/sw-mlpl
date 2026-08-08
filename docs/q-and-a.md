@@ -5,6 +5,25 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (KV cache)
+
+**Q: (resumed) gen-state-kv-cache status?**
+
+A: The CPU KV cache is COMPLETE end to end. gen_state /
+gen_logits / gen_append (single + multi-row) shipped in
+gen-state-core with bit-identical greedy equivalence; the
+controls gen_clone / gen_reset / gen_stats landed in
+gen-controls; and bench-and-demo added a measured
+benchmarks.md table (~5x at 32 tokens, ~28x at 128, widening
+with length) plus a "KV Cache" web demo proving ids-identical
+with a linear-vs-quadratic attended-positions cost curve. The
+whole gen_* family is documented (it had shipped undocumented)
+and live on every surface incl. connect. Remaining (deferred
+as its own follow-up, not a blocker): mlx-resident-kv (K/V as
+device tensors on the E4 seam, fp32-tolerance equivalence) --
+design step 5 of docs/kv-cache-design.md. The saga's Track 2
+successor is mtp-training.
+
 ## 2026-08-07 (Y combinator)
 
 **Q: Casual users know Y Combinator as the brand. Relate it to
