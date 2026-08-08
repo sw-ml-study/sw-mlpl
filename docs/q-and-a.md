@@ -5,6 +5,25 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (range-read -- demo-ml-utils)
+
+**Q: go -- bounded range/seek I/O for large-file (safetensors)
+analysis.**
+
+A: Shipped. read_bytes(path, offset, length) is a 3-arg overload
+that seeks to offset and reads at most length bytes (clamped at
+EOF) WITHOUT materializing the rest; file_size(path) reports the
+byte count from metadata (no read). The 1-arg read_bytes is
+unchanged. Both sandboxed and Result-based. This unblocks
+demo-ml-utils large-file analysis: read 0..8 -> LE header length
+N; read 8..8+N -> JSON header -> parse_json -> tensor metadata;
+seek to tensor ranges on demand -- no whole-file load.
+
+The speculative "first-class typed byte arrays" item is NOT
+needed for range reads (bytes stay f64 0..256) and is correctly
+deferred by demo-ml-utils pending executable evidence; if
+pursued it belongs with demo-memory packed-layouts, not here.
+
 ## 2026-08-08 (variant JSON encoding -- design direction)
 
 **Q: what about variants for JSON encoding, e.g.
