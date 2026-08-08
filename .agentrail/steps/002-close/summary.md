@@ -1,0 +1,1 @@
+Saga closed: write_atomic live; real atomic write verified via repl (temp+rename, no temp left), routing confirmed on connect; repl binary rebuilt to 2c7806a4 for demo-algorithms; wiki row; q-and-a records 4 of 7 serialization blockers cleared. Deployed.
