@@ -1,0 +1,1 @@
+Saga closed: to_json live incl. connect; wiki row; demo-algorithms serialization status recorded (JSON encoding done; 6 blockers remain, all core, none blocking the near-complete algorithm demos). Deployed.

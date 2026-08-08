@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close to-json: rebuild pages+deploy, connect smoke of to_json, wiki row, q-an..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T20:59:18"
+completed_at = "2026-08-07T21:02:55"
 task_type = "docs"
-commits = []
+commits = ["c0b724201833d08121cc77604aec58e0705a1cb5"]
