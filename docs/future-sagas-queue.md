@@ -397,6 +397,12 @@ in data-forge come first).
   are counted as spanning the FOLLOWING impl block, producing
   phantom Function-LOC warnings (observed on EnvScope,
   2026-08-05: an 11-line impl reported as 36-39 lines).
+- **Assessment -> plan reconciliation** (queued 2026-08-08, user
+  direction) -- read `docs/sw-mlpl-assessment.txt`, translate its
+  recommendations into concrete `docs/plan.md` edits and a set of
+  proposed sagas. Do NOT use the `gh` CLI to edit/close issues;
+  surface any issue changes to the user to do manually, one at a
+  time.
 
 ## Explicitly deprioritized / retired
 
