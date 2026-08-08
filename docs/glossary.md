@@ -1629,6 +1629,22 @@ Explicit spelling is the point: accidental leakage stays
 impossible; deliberate state is two words. Any value kind;
 returns the value.
 
+## Generation state (gen_state / gen_logits / gen_append / gen_clone / gen_reset / gen_stats)
+
+The KV-cache generation surface (docs/kv-cache-design.md).
+`gen_state(model, prompt)` caches every causal-attention
+layer's K/V rows; `gen_logits(gs)` reads the next-position
+logits without recomputing the prefix; `gen_append(gs, ids)`
+feeds accepted token id(s) -- a scalar for one, a rank-1
+vector for the batched verification hook. Cached greedy
+decoding is BIT-IDENTICAL to full recompute on CPU. The
+controls: `gen_clone` (independent copy for speculation
+branches), `gen_reset` (drop cached rows back to the prompt --
+the idiom after training, since the cache is not
+auto-invalidated), and `gen_stats` ({tokens, layers, kv_rows,
+kv_values}). The generation loop stays visible; only its body
+gets one complexity class faster.
+
 ## Game of Life
 
 Conway's cellular automaton and the array-language world's favorite party trick: the APL2 one-liner computes every cell's next generation simultaneously. In MLPL the same shape falls out of [[rotate (builtin)]]: shift the whole board 8 ways, sum the shifted boards into a neighbor-count matrix N, and the entire rule is `gt(eq(N, 3) + G * eq(N, 2), 0)` -- birth on 3 neighbors, survival on 2 or 3. The "Game of Life (APL classic)" demo builds it three ways and animates 24 generations with `svg(F, "life")`. The rule, the neighbor count, and the animation are all ordinary array values.

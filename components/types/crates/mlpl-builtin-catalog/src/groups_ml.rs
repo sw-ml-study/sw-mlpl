@@ -211,6 +211,36 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "forward pass + argmax over the trailing axis (integer class labels)",
             ),
             (
+                "gen_state",
+                "gen_state(model, prompt)",
+                "build a KV-cache generation state from a prompt (causal chains)",
+            ),
+            (
+                "gen_logits",
+                "gen_logits(gs)",
+                "next-position logits from the cache, no recompute",
+            ),
+            (
+                "gen_append",
+                "gen_append(gs, ids)",
+                "feed accepted token id(s); scalar or rank-1 vector (verification hook)",
+            ),
+            (
+                "gen_clone",
+                "gen_clone(gs)",
+                "an independent copy of a generation state (speculation branches)",
+            ),
+            (
+                "gen_reset",
+                "gen_reset(gs)",
+                "drop cached rows back to the prompt",
+            ),
+            (
+                "gen_stats",
+                "gen_stats(gs)",
+                "cache accounting: {tokens, layers, kv_rows, kv_values}",
+            ),
+            (
                 "pareto_plot",
                 "pareto_plot(P, dirs)",
                 "frontier scatter + staircase over an [n, k] metric matrix",

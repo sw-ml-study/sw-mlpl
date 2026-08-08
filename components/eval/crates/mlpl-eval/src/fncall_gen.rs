@@ -86,9 +86,11 @@ fn eval_gen_logits(args: &[Expr], env: &mut Environment) -> Result<Value, EvalEr
     Ok(Value::Array(DenseArray::from_vec(gs.logits.clone())))
 }
 
-/// `gen_append(gs, id)` -- feed ONE accepted token id: project its
-/// rows, append to every attention layer's cache, refresh the
-/// pending logits. Returns the state's new token count.
+/// `gen_append(gs, ids)` -- feed accepted token id(s): project
+/// each row, append to every attention layer's cache, refresh
+/// the pending logits. A scalar feeds one token; a rank-1
+/// vector feeds several in order (the batched verification
+/// hook). Returns the state's new token count.
 fn eval_gen_append(
     args: &[Expr],
     env: &mut Environment,
@@ -97,12 +99,12 @@ fn eval_gen_append(
     let [state_arg, id_arg] = args else {
         return Err(bad_arity("gen_append", 2, args.len()));
     };
-    let id = crate::eval::eval_expr(id_arg, env, trace)?.into_array()?;
-    if id.data().len() != 1 {
-        return Err(EvalError::Unsupported(format!(
-            "gen_append: the token id must be a single scalar -- got {} values",
-            id.data().len()
-        )));
+    let ids = crate::eval::eval_expr(id_arg, env, trace)?.into_array()?;
+    if ids.shape().dims().len() > 1 || ids.data().is_empty() {
+        return Err(EvalError::Unsupported(
+            "gen_append: the token id(s) must be a scalar or a non-empty rank-1 vector              (a vector is the batched verification hook)"
+                .into(),
+        ));
     }
     let name = state_ident("gen_append", state_arg)?;
     // Take the state out of the table so the forward pass can
@@ -111,7 +113,13 @@ fn eval_gen_append(
         .gen_states
         .remove(&name)
         .ok_or_else(|| unknown_state(&name))?;
-    let fed = mlpl_eval_models::model_apply_cached::feed_state_row(&mut gs, id.data()[0], env);
+    let mut fed = Ok(());
+    for &id in ids.data() {
+        fed = mlpl_eval_models::model_apply_cached::feed_state_row(&mut gs, id, env);
+        if fed.is_err() {
+            break;
+        }
+    }
     let tokens = gs.tokens;
     env.gen_states.insert(name, gs);
     fed?;
@@ -127,13 +135,13 @@ fn bad_arity(func: &str, expected: usize, got: usize) -> EvalError {
     }
 }
 
-fn unknown_state(name: &str) -> EvalError {
+pub(crate) fn unknown_state(name: &str) -> EvalError {
     EvalError::Unsupported(format!(
         "unknown generation state `{name}` -- bind one first: gs = gen_state(model, prompt)"
     ))
 }
 
-fn state_ident(who: &str, arg: &Expr) -> Result<String, EvalError> {
+pub(crate) fn state_ident(who: &str, arg: &Expr) -> Result<String, EvalError> {
     match arg {
         Expr::Ident(name, _) => Ok(name.clone()),
         _ => Err(EvalError::Unsupported(format!(

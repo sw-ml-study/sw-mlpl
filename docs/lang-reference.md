@@ -615,6 +615,23 @@ initialized at construction). Apply a model to an array with
 | `pool2d(input, size, mode)` | 3 | 2D pooling. `mode=1` max pooling, `mode=0` average pooling. `size` is the square pool window side. |
 | `rnn_cell(input, hidden, W_ih, W_hh, bias)` | 5 | One Elman RNN step: `tanh(W_ih @ input + W_hh @ hidden + bias)`. Returns updated hidden state. |
 
+### Generation (KV cache)
+
+Cached autoregressive generation over a causal LM chain: build
+the state once, then read logits and append tokens without
+recomputing the prefix (bit-identical to full recompute on CPU;
+docs/kv-cache-design.md). The loop stays visible -- only its
+body gets faster.
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `gen_state(model, prompt)` | 2 | Build a generation state: run `prompt` once through the incremental path, caching every causal-attention layer's K/V rows. `model` and `prompt` are bound names. Non-causal `attention` in the chain is a tutoring error (its output depends on future positions, so caching cannot be exact). |
+| `gen_logits(gs)` | 1 | The next-position logits row from the cache, with no recompute -- what `last_row(apply(model, seq))` would give. |
+| `gen_append(gs, ids)` | 2 | Feed accepted token id(s) into the state (project their rows, append to every layer's cache, refresh the logits). A scalar feeds one token; a rank-1 vector feeds several in order -- the batched verification hook. Returns the new token count. |
+| `gen_clone(gs)` | 1 | An independent copy: `gs2 = gen_clone(gs)` then the two diverge (speculation branches, compare-two-continuations). |
+| `gen_reset(gs)` | 1 | Drop every cached row and re-run the prompt, returning the state to just-after-`gen_state`. Returns the prompt length. The documented idiom after an optimizer step (cached rows are not auto-invalidated). |
+| `gen_stats(gs)` | 1 | Cache accounting as a record: `{tokens, layers, kv_rows, kv_values}`. |
+
 ### Records
 
 `{name: expr, ...}` builds a record; `r.name` reads a field.

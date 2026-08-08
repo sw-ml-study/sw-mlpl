@@ -73,6 +73,7 @@ mod fncall_engram_args;
 mod fncall_events;
 mod fncall_fs;
 mod fncall_gen;
+mod fncall_gen_controls;
 mod fncall_globals;
 mod fncall_hof;
 mod fncall_json;
