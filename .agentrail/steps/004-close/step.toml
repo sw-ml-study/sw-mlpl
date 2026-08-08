@@ -1,0 +1,9 @@
+number = 4
+slug = "close"
+status = "pending"
+description = "Close fixed-width-ints-bitops: mark request #2 SHIPPED in docs/demo-memory-up..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T18:02:29"
+task_type = "docs"
+commits = []

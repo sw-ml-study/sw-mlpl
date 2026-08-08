@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 3,
+    "step": "bit-shift-views"
+  },
+  "action": "shift module in the bits crate; validating map helper",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T18:02:29"
+}

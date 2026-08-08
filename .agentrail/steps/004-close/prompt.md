@@ -1,0 +1,1 @@
+Close fixed-width-ints-bitops: mark request #2 SHIPPED in docs/demo-memory-upstream.md, wiki matrix row, rebuild pages+deploy (pure builtins reach the browser), verify a bit op over connect, --done.

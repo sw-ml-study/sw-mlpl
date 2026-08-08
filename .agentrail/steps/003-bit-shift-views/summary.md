@@ -1,0 +1,1 @@
+Shift + views shipped: shl(width-aware)/shr/bmask/bits/from_bits with LSB-first round-trip; 8 bit tests total; catalog+docs; REPL-verified. The bit-op surface is complete.
