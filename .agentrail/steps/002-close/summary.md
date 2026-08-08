@@ -1,0 +1,1 @@
+Saga closed: J-inspired Moving Average demo live in the APL2 group; pages rebuilt + deployed. Executes to [20,30,40,50].

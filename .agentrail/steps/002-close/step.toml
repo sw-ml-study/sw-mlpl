@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close moving-average-demo: rebuild pages, deploy, verify live, --done."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T13:54:28"
+completed_at = "2026-08-08T13:57:35"
 task_type = "docs"
-commits = []
+commits = ["a541a6deb597f7ce0439516f9d65b2115fbb759a"]
