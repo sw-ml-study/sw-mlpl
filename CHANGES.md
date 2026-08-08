@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga safe-record-lookup: complete (2 steps)
+- docs: close safe-record-lookup (placement rationale; pages rebuilt)
+- saga safe-record-lookup: step record-lookup complete
+- feat(eval): has_field / record_get -- exception-free record access (record-lookup)
+- saga: init safe-record-lookup (demo-functional-pipelines request)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga gen-state-kv-cache: complete (CPU program)
 - docs: close gen-state-kv-cache CPU program (bench+demo done); mtp-training next
 - saga gen-state-kv-cache: bench-and-demo complete
