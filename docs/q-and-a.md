@@ -5,6 +5,47 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (byte-io / demo-algorithms raw bytes)
+
+**Q: start the byte-io saga.**
+
+A: Shipped read_bytes(path) / write_bytes(path, bytes),
+clearing the "raw bytes / I/O" blocker. Sandboxed (same
+--source-dir root and Result-speaking contract as read_text),
+a byte an f64 in 0..256 -- the tokenize_bytes / bit-ops
+convention -- so binary formats round-trip WITHOUT a new codec:
+
+    write_bytes(p, tokenize_bytes(to_json(v)))       # encode + store
+    parse_json(decode_bytes(unwrap(read_bytes(p))))  # load + decode
+
+write_bytes validates each cell is an integer 0..=255 (LOUD
+error naming the culprit); a non-array byte arg is a hard
+error. Lives in fs_bytes.rs; the array->bytes validator is
+shared with decode_bytes.
+
+Updated demo-algorithms serialization blocker status (4 of 7
+cleared):
+
+- JSON encoding -- DONE (to_json).
+- non-record root type detection -- DONE (type_of).
+- raw bytes / I/O -- DONE (read_bytes / write_bytes).
+- TOML + native codecs -- OPEN; parse_toml/to_toml pair (same
+  shape as the JSON codec).
+- atomic writes -- OPEN; write-temp-then-rename fs option.
+- decode limits -- OPEN; size/depth caps on parsers.
+- streaming serialization -- OPEN; incremental large-input parse.
+
+**Operational note (installed binary staleness):** the
+demo-algorithms repo runs the INSTALLED mlpl-repl
+(~/.local/softwarewrighter/bin/), not this session's
+target/release build. After to_json/type_of/byte-io landed, the
+installed binary is stale (build 0904bfcf: type_of unknown,
+to_json old), so downstream cannot honestly run these demos
+until it is rebuilt via sw-install. Per policy sw-install is
+never run without an explicit request; surfaced to the user for
+a decision. The connect server and gh-pages web bundle are
+already current.
+
 ## 2026-08-07 (type_of / demo-algorithms type detection)
 
 **Q: continue -- next unblock for demo-algorithms.**
