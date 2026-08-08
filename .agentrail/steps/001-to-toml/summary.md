@@ -1,0 +1,1 @@
+to_toml shipped: deterministic Result-based TOML encoder (record->table, sorted, nested [sections], bare keys, JSON escaping reused). 3 small modules beside the JSON codec. 7 TDD tests; catalog+lang-ref+glossary(471).

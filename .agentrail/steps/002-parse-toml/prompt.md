@@ -1,0 +1,1 @@
+toml_decode.rs (+ toml_scalar helpers): parse the TOML subset (comments, key=value, [tables]/dotted, integer/float/bool/basic-string/array) -> record; wire eval_parse_toml; TDD incl. round trip with to_toml + malformed->err with line.

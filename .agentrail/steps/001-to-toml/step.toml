@@ -1,9 +1,10 @@
 number = 1
 slug = "to-toml"
-status = "pending"
+status = "completed"
 description = "toml_encode.rs (record->TOML text, sorted, sections) + fncall_toml.rs eval_to..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T23:49:47"
+completed_at = "2026-08-07T23:58:34"
 task_type = "rust-feature"
-commits = []
+commits = ["5da2050ab92943ce4b8ef061508ffe95beaf5db9"]
