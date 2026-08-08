@@ -1,9 +1,10 @@
 number = 2
 slug = "parse-toml"
-status = "pending"
+status = "completed"
 description = "toml_decode.rs (+ toml_scalar helpers): parse the TOML subset (comments, key=..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T23:58:34"
+completed_at = "2026-08-08T00:05:06"
 task_type = "rust-feature"
-commits = []
+commits = ["78eed5767f7c8da3d883d2a0e0f69f2857f4c86a"]

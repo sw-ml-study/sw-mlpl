@@ -1,0 +1,1 @@
+parse_toml shipped: TOML config subset -> record, Result-based, reusing json_decode::value for RHS values so only the line/header/table layer is TOML-specific. Round-trips with to_toml. 8 TDD tests; catalog+lang-ref+glossary(472).

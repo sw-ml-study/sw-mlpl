@@ -1,0 +1,1 @@
+Close toml-codec: rebuild serve+pages+repl, deploy, connect smoke of to_toml/parse_toml round trip, wiki row, q-and-a (TOML done; remaining: decode limits, typed native, streaming, higher-rank JSON), --done.
