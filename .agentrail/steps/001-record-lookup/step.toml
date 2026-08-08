@@ -1,0 +1,9 @@
+number = 1
+slug = "record-lookup"
+status = "pending"
+description = "has_field(record, name) -> scalar 1/0 and record_get(record, name) -> ok(valu..."
+role = "production"
+context_files = []
+created_at = "2026-08-07T20:02:38"
+task_type = "rust-feature"
+commits = []
