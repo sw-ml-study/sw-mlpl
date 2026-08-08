@@ -1,0 +1,9 @@
+number = 1
+slug = "atomic-writes"
+status = "pending"
+description = "fs_atomic.rs: write_atomic(path, value) string|byte-array, temp+rename, clean..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T23:05:05"
+task_type = "rust-feature"
+commits = []

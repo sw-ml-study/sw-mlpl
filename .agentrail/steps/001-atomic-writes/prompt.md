@@ -1,0 +1,1 @@
+fs_atomic.rs: write_atomic(path, value) string|byte-array, temp+rename, cleanup on error; wire into fncall_fs; catalog+lang-ref+glossary; TDD.
