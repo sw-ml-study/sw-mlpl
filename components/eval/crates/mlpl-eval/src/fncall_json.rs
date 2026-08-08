@@ -54,18 +54,43 @@ fn eval_to_json(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    crate::grad::arity_check(args, 1, "to_json")?;
+    if !(1..=2).contains(&args.len()) {
+        return Err(EvalError::BadArity {
+            func: "to_json".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    }
     let v = crate::eval::eval_expr(&args[0], env, trace)?;
-    // Result-based like parse_json: ok(json) on success, err(msg)
-    // for a non-data kind or a non-finite number.
-    Ok(match crate::json_encode::to_json(&v) {
-        Ok(s) => Value::Result {
-            ok: true,
-            payload: Box::new(Value::Str(s)),
-        },
-        Err(e) => Value::Result {
-            ok: false,
-            payload: Box::new(Value::Str(format!("{e}"))),
-        },
-    })
+    // {tagged: 1} -> reserved $mlpl envelope (lossless rank->=2 / Results).
+    let value = if wants_tagged(args.get(1), env, trace)? {
+        crate::envelope::wrap(&v)
+    } else {
+        v
+    };
+    let encoded = crate::json_encode::to_json(&value)
+        .map(Value::Str)
+        .map_err(|e| format!("{e}"));
+    Ok(crate::result_str::ok_or_err(encoded))
+}
+
+/// Read the optional `{tagged: 1}` option of `to_json`. A missing
+/// arg is false; a non-record option is a hard error.
+fn wants_tagged(
+    opt: Option<&Expr>,
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<bool, EvalError> {
+    let Some(a) = opt else {
+        return Ok(false);
+    };
+    match crate::eval::eval_expr(a, env, trace)? {
+        Value::Record { fields } => Ok(matches!(
+            fields.get("tagged"),
+            Some(Value::Array(t)) if t.rank() == 0 && t.data()[0] != 0.0
+        )),
+        _ => Err(EvalError::Unsupported(
+            "to_json: options must be a record".into(),
+        )),
+    }
 }

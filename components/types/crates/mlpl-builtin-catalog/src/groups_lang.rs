@@ -240,8 +240,8 @@ pub(crate) const GROUPS: &[FnGroup] = &[
             ),
             (
                 "to_json",
-                "to_json(v)",
-                "value -> deterministic JSON string (encode half of parse_json)",
+                "to_json(v[, opts])",
+                "value -> deterministic JSON (ok/err); {tagged:1} emits the $mlpl envelope for lossless rank>=2 / Results",
             ),
             (
                 "run_script",
