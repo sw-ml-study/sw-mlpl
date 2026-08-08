@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga serialization-results: complete (3 steps)
+- docs: close serialization-results; demo-algorithms unblocked/change-approach guidance
+- saga serialization-results: step byte-write-result complete
+- feat(eval)!: write_bytes / write_atomic invalid input is an err Result (byte-write-result)
+- saga serialization-results: step to-json-result complete
+- feat(eval)!: to_json is Result-based; err on non-finite (to-json-result)
+- saga serialization-results: bootstrap step 001-to-json-result
+- saga serialization-results: init
+- chore(agentrail): archive atomic-writes saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga atomic-writes: complete (2 steps)
 - docs: close atomic-writes; demo-algorithms 4/7 serialization blockers cleared
 - saga atomic-writes: step atomic-writes complete
