@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga gen-state-kv-cache: step gen-controls complete
+- feat(eval): gen_clone / gen_reset / gen_stats + multi-row gen_append (gen-controls)
+- saga: resume gen-state-kv-cache at gen-controls
+- docs(changes): refresh CHANGES.md to HEAD
 - saga paydown-near-fails: complete (assessment + guidance)
 - chore: commit bits-crate lockfile + fmt stragglers; record paydown reality
 - saga: init paydown-near-fails (ratchet spike)
