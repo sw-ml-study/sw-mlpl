@@ -3,7 +3,10 @@
 Status: design discussion (2026-07-26). The Result layer is
 SHIPPED and validated; the Option layer is a Stage 6 (nested
 arrays) story. Companion: `docs/functional-lenses.md` (safe lens
-gets are the first consumer).
+gets are the first consumer). For how tagged sums SERIALIZE (the
+JSON/TOML wire format for Result and future variants -- the
+reserved `$mlpl` tagged-envelope direction), see
+`docs/serialization-variant-encoding.md`.
 
 ## What is already in the language (validated by live eval)
 

@@ -5,6 +5,51 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (variant JSON encoding -- design direction)
+
+**Q: what about variants for JSON encoding, e.g.
+{"$mlpl":{"type":"option","variant":"some","value":42}}? The
+current {ok,value|error} format is serviceable as a small opt-in
+convention but should not become the universal variant encoding.**
+
+A: Agreed. Recorded the direction in
+`docs/serialization-variant-encoding.md` (planning doc; no code
+yet). Decision: the long-term canonical encoding is a RESERVED
+TAGGED ENVELOPE -- {"$mlpl":{"v":1,"type":...,"variant":...}}.
+The decisive reason is disambiguation, not verbosity: a reserved
+top-key is never application data, so a decoder reconstructs
+UNCONDITIONALLY -- removing the reason the current {results:1}
+reconstruction has to be opt-in (the compact {ok,value} shape
+collides with a real record). The envelope is versioned (v),
+uniform over result/option/future variants, and the same shape a
+typed-native format would use. The compact {ok,value|error} form
+stays as a documented opt-in plain-JSON interop convention, NOT
+promoted to universal.
+
+One mechanism, several open items: the same envelope with a
+`{type:"array", shape, data}` entry also solves the higher-rank
+text round-trip (a shape/type envelope), and is the text
+projection of typed-native serialization.
+
+Mapping the latest demo-algorithms blocker list:
+1. max_elements / cumulative collection limit -- small extension
+   of decode-limits (add an element-count cap beside max_depth /
+   max_bytes). Ready to build.
+2. shape/type envelope for higher-rank -- the tagged envelope
+   above (array type with shape). Design recorded.
+3. typed native value encoding -- converges with the envelope
+   (text) plus a binary form. Net-new.
+4. incremental codec state / scoped streaming I/O -- streaming.
+   Net-new.
+5. general nested-array support -- a LANGUAGE (value-model)
+   decision, not a codec one: if MLPL gains nested arrays,
+   higher-rank data decodes without an envelope. Separate from
+   the serialization thread (see option-result-design.md, Stage
+   6).
+
+Of these, only (1) is a near-term codec increment; (2) has a
+recorded design; (3)-(5) are net-new / language-level.
+
 ## 2026-08-08 (semantic-result-reconstruction)
 
 **Q: start the semantic-result-reconstruction saga.**
