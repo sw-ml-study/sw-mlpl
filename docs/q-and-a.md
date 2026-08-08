@@ -5,6 +5,37 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (toml-codec)
+
+**Q: start the toml-codec saga.**
+
+A: Shipped a TOML codec pair for config-style data, mirroring
+the JSON codec and Result-based:
+
+- to_toml(record) -> ok(toml_text) / err. Root must be a record
+  (a TOML document is a table). Sorted output: scalar / string /
+  array fields as key = value first, then nested records as
+  [section] / [section.sub] tables. Bare keys only. Non-finite
+  number, rank->=2 array, or a value with no TOML form -> err.
+- parse_toml(text) -> ok(record) / err(message with line).
+  Config subset: # comments, blank lines, [table] and dotted
+  headers, key = value, integer / float / boolean (true/false ->
+  1/0) / basic string / homogeneous arrays. Trailing # comments
+  allowed. Round-trips with to_toml for the supported forms.
+
+Hand-rolled (no serde/toml crate); RHS value parsing reuses the
+JSON value parser, so only the line/header/table layer is
+TOML-specific. NOT in the subset (err or absent): inline tables,
+arrays of tables, literal/multiline strings, datetimes,
+dotted-key assignments.
+
+demo-algorithms serialization status -- 5 of 7 cleared:
+JSON encoding, type detection, raw byte I/O, atomic writes, and
+now TOML codec. Remaining: decode limits (size/depth caps),
+typed native formats, streaming APIs -- plus the documented
+higher-rank/Result JSON round-trip boundary. The config
+round-trip demo can proceed now (binary at HEAD c3eca9d7).
+
 ## 2026-08-07 (serialization Result contract -- demo-algorithms guidance)
 
 **Q: what can demo-algorithms treat as unblocked, and where must
