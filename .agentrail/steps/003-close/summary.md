@@ -1,0 +1,1 @@
+Saga closed: TOML codec (to_toml/parse_toml) live and round-tripping; verified via repl + connect; repl rebuilt; wiki row; q-and-a records 5 of 7 serialization blockers cleared. Deployed.

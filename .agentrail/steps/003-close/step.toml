@@ -1,9 +1,10 @@
 number = 3
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close toml-codec: rebuild serve+pages+repl, deploy, connect smoke of to_toml/..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T00:05:06"
+completed_at = "2026-08-08T00:09:44"
 task_type = "docs"
-commits = []
+commits = ["213c4eab4724753bd74a3f563b41cdf194194a25"]
