@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga moving-average-demo: complete (2 steps)
+- chore(pages): rebuild for J-inspired Moving Average demo
+- saga moving-average-demo: step add-demo complete
+- demo(apl2): J-inspired Moving Average
+- saga moving-average-demo: bootstrap step 001
+- saga moving-average-demo: init
+- chore(agentrail): archive tagged-envelope saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga tagged-envelope: complete (3 steps)
 - docs: close tagged-envelope; lossless rank>=2 + Result JSON round trip
 - saga tagged-envelope: step envelope-decode complete
