@@ -1,0 +1,1 @@
+Saga closed: max_elements cap live and verified via repl; wiki row; q-and-a records decode-budget trio complete. Deployed; repl rebuilt.
