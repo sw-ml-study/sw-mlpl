@@ -5,6 +5,41 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (semantic-result-reconstruction)
+
+**Q: start the semantic-result-reconstruction saga.**
+
+A: Closed the Result round trip for BOTH codecs.
+
+- parse_json / parse_toml take an opt-in {results: 1} option
+  that rebuilds the {ok, value|error} shape back into ok(...) /
+  err(...), recursively (nested Results too). Off by default --
+  the shape is an ordinary record, so blanket conversion would
+  mangle data; the caller opts in when they serialized Results.
+- to_toml now ENCODES a Result field as a {ok, value|error}
+  sub-table (it used to err), symmetric with to_json, so
+  Results survive a TOML round trip.
+
+So: unwrap(parse_json(unwrap(to_json(ok(5))), {results:1})) is
+ok(5); the same holds for to_toml/parse_toml. A Result at a TOML
+document ROOT still errs (a TOML document is a table).
+
+demo-algorithms serialization status -- semantic Result
+reconstruction AND TOML Result encoding DONE. Remaining
+serialization items:
+- higher-rank text round-trips -- to_json/to_toml encode rank>=2
+  by nesting, but the flat-array parsers do not rebuild them;
+  needs a shape-preserving envelope (MLPL arrays are flat, no
+  nested-array value kind). Design item.
+- typed native value format -- a typed binary codec. Net-new.
+- streaming / incremental codec API. Net-new.
+- collection / reference-count decode limits -- element-count
+  caps beyond depth/bytes. Small extension of decode-limits.
+
+Broader (non-serialization) language gates demo-algorithms also
+tracks -- modules, general-value collection combinators, runtime
+structural sharing -- are separate from the codec thread.
+
 ## 2026-08-08 (decode-limits)
 
 **Q: start the decode-limits saga.**
