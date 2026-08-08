@@ -22,55 +22,28 @@ pub(crate) fn to_toml(value: &Value) -> Result<String, String> {
     Ok(out)
 }
 
-/// Non-record fields first (as `key = value`), then each nested
-/// record as its own `[prefix.key]` table -- TOML requires a
-/// table's own keys to precede its sub-table headers.
-fn encode_table(
+/// Scalar/string/array fields first (as `key = value`), then the
+/// section-valued fields (records and Results) via
+/// `toml_sections` -- TOML requires a table's own keys to precede
+/// its sub-table headers.
+pub(crate) fn encode_table(
     fields: &BTreeMap<String, Value>,
     prefix: &str,
     out: &mut String,
 ) -> Result<(), String> {
-    for (k, v) in fields
-        .iter()
-        .filter(|(_, v)| !matches!(v, Value::Record { .. }))
-    {
+    let is_section = |v: &Value| matches!(v, Value::Record { .. } | Value::Result { .. });
+    for (k, v) in fields.iter().filter(|(_, v)| !is_section(v)) {
         out.push_str(crate::toml_scalar::bare_key(k)?);
         out.push_str(" = ");
         encode_value(v, out)?;
         out.push('\n');
     }
-    for (k, v) in fields {
-        if let Value::Record { fields: sub } = v {
-            encode_section(k, sub, prefix, out)?;
-        }
-    }
-    Ok(())
+    crate::toml_sections::encode_sections(fields, prefix, out)
 }
 
-/// Emit one nested record as a `[prefix.key]` table (blank line
-/// before it unless it opens the document), then its own fields.
-fn encode_section(
-    k: &str,
-    sub: &BTreeMap<String, Value>,
-    prefix: &str,
-    out: &mut String,
-) -> Result<(), String> {
-    let key = crate::toml_scalar::bare_key(k)?;
-    let path = if prefix.is_empty() {
-        key.to_string()
-    } else {
-        format!("{prefix}.{key}")
-    };
-    if !out.is_empty() {
-        out.push('\n');
-    }
-    out.push_str(&format!("[{path}]\n"));
-    encode_table(sub, &path, out)
-}
-
-/// A scalar / string / array field value (never a record -- those
-/// are handled as sub-tables by `encode_table`).
-fn encode_value(v: &Value, out: &mut String) -> Result<(), String> {
+/// A scalar / string / array field value (never a record or
+/// Result -- those are handled as sub-tables by `toml_sections`).
+pub(crate) fn encode_value(v: &Value, out: &mut String) -> Result<(), String> {
     match v {
         Value::Str(s) => {
             crate::json_encode::push_str_json(out, s);

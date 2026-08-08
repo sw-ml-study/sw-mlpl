@@ -104,6 +104,7 @@ mod reflect_info;
 mod toml_decode;
 mod toml_encode;
 mod toml_scalar;
+mod toml_sections;
 // The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,
 // layouts, the step registry) moved to mlpl-eval-state
 // (env-types-out step); the cfg-gated re-exports below preserve the

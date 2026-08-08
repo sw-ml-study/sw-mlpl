@@ -93,8 +93,9 @@ fn non_record_root_is_err() {
 fn non_finite_and_non_representable_fields_are_err() {
     let mut env = Environment::new();
     assert_eq!(is_ok(&mut env, "is_ok(to_toml({x: 1 / 0}))"), 0.0);
-    // a Result field has no TOML representation
-    assert_eq!(is_ok(&mut env, "is_ok(to_toml({r: ok(1)}))"), 0.0);
+    // a Result field IS representable now -- as a {ok, value|error}
+    // sub-table (see toml_result_roundtrip_tests)
+    assert_eq!(is_ok(&mut env, "is_ok(to_toml({r: ok(1)}))"), 1.0);
     // rank>=2 array field is not a TOML value here
     assert_eq!(
         is_ok(&mut env, "is_ok(to_toml({m: [[1, 2], [3, 4]]}))"),

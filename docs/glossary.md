@@ -372,10 +372,13 @@ the root must be a record; a non-record root is an `err`. Fields
 emit DETERMINISTICALLY (sorted): scalar / string / rank-1-array
 / string-list fields as `key = value` first, then nested records
 as `[section]` and dotted `[section.sub]` tables (TOML requires a
-table's own keys before its sub-table headers). Keys must be bare
+table's own keys before its sub-table headers). An `ok(x)` /
+`err(e)` Result field is encoded as a `{ok, value|error}`
+sub-table, so it round-trips with `parse_toml(..., {results: 1})`
+-- symmetric with the JSON codec. Keys must be bare
 (`A-Za-z0-9_-`). It returns `err(...)` for a non-finite number, a
-rank-`>=2` array, or a value with no TOML form (a result, model,
-...). Supported values: integer, float, basic string, and
+rank-`>=2` array, or a value with no TOML form (a model,
+tokenizer, ...). Supported values: integer, float, basic string, and
 homogeneous arrays of numbers or strings. Inline tables, arrays
 of tables, literal/multiline strings, datetimes, and dotted-key
 assignments are not part of this subset.
