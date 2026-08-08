@@ -1,0 +1,1 @@
+parse_json reconstructs $mlpl envelopes unconditionally (envelope_decode.rs): rank>=2 arrays, Results, and escaped records rebuild losslessly. to_json{tagged:1}<->parse_json round-trips any data value. 5 TDD tests.

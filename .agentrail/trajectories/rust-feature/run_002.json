@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 2,
+    "step": "envelope-decode"
+  },
+  "action": "post-decode walker; let-chain; shared result wrapper",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T13:15:41"
+}

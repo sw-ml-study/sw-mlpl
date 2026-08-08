@@ -1,9 +1,10 @@
 number = 2
 slug = "envelope-decode"
-status = "pending"
+status = "completed"
 description = "envelope::unwrap_envelopes walker; parse_json reconstructs $mlpl envelopes un..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T13:07:29"
+completed_at = "2026-08-08T13:15:41"
 task_type = "rust-feature"
-commits = []
+commits = ["f33cf2fba15e367c24c8e7dfdcbe017d6d14b87f"]
