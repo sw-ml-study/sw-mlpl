@@ -1,0 +1,9 @@
+number = 1
+slug = "bit-design"
+status = "pending"
+description = "Write docs/bit-ops-design.md: the fixed-width-integer bit-op surface for MLPL..."
+role = "production"
+context_files = []
+created_at = "2026-08-07T17:41:06"
+task_type = "design"
+commits = []
