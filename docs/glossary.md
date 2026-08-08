@@ -184,6 +184,19 @@ arrays: `gather_rows(X, grade_up(difficulty))` is the
 grade_down(scores))` ranks candidates best-first.
 
 
+## has_field / record_get (builtins)
+
+Exception-free record access (demo-functional-pipelines
+request): `has_field(record, name)` returns 1/0 for field
+presence, and `record_get(record, name)` returns `ok(value)`
+or `err({kind: "missing_field", field, message, available})`.
+They exist because `r.name` HARD-ERRORS on a missing field, so
+schema validation could not be expressed as data without them
+-- new structural-introspection primitives (like `is_ok` /
+`tally` / `depth`), not something a library could compose from
+the existing surface. Downstream schema-validation libraries
+build on them.
+
 ## Hopfield Network
 
 The classic associative memory: patterns are stored as

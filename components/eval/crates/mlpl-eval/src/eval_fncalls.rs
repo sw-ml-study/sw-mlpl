@@ -29,6 +29,7 @@ pub(crate) fn try_dispatch(
         .or_else(|| crate::fncall_engram::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_gen::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_gen_controls::try_dispatch(name, args, env, trace))
+        .or_else(|| crate::fncall_record::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_events::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_globals::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_fs::try_dispatch(name, args, env, trace))

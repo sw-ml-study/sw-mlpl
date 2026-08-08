@@ -643,6 +643,19 @@ positions (a record-literal key and the name after `.`) are
 grammatically unambiguous. Keywords stay reserved everywhere
 else. Duplicate keys are a parse error.
 
+Two builtins make record access EXCEPTION-FREE (since `r.name`
+hard-errors on a missing field, schema validation needs these
+to be data, not a caught error):
+
+- `has_field(record, name)` -- `1` if the record has the named
+  field, else `0`. `name` is a string.
+- `record_get(record, name)` -- `ok(value)` if present, else
+  `err({kind: "missing_field", field, message, available})`;
+  composes with `?` and `or_else`.
+
+Both take a record and a string; a non-record or non-string
+argument is a loud error.
+
 ### Result type
 
 A `Value::Result { ok, payload }` wraps success-or-failure for
