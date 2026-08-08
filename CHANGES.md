@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga to-json: complete (2 steps)
+- docs: close to-json; demo-algorithms serialization status
+- saga to-json: step to-json complete
+- feat(eval): to_json -- deterministic JSON encoder (to-json)
+- saga: init to-json (demo-algorithms serialization)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga safe-record-lookup: complete (2 steps)
 - docs: close safe-record-lookup (placement rationale; pages rebuilt)
 - saga safe-record-lookup: step record-lookup complete
