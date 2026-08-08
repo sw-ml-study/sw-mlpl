@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "range-read"
+  },
+  "action": "File::seek + take; metadata size; new sibling module",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T11:30:04"
+}

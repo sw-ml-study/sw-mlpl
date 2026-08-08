@@ -1,9 +1,10 @@
 number = 1
 slug = "range-read"
-status = "pending"
+status = "completed"
 description = "read_bytes(path, offset, length) seek-based bounded read + file_size(path) in..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T11:11:34"
+completed_at = "2026-08-08T11:30:04"
 task_type = "rust-feature"
-commits = []
+commits = ["dc6403cb0df129c12e4d465e0ade67b97003097b"]

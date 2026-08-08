@@ -1,0 +1,1 @@
+Bounded seek reads shipped: read_bytes(path, offset, length) reads a slice without materializing the whole file; file_size(path) reports byte count from metadata. New fs_range.rs; 7 TDD tests. Unblocks demo-ml-utils large-file (safetensors) analysis.

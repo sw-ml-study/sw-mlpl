@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close range-read: rebuild serve+pages+repl, deploy, connect smoke of read_byt..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T11:30:04"
+task_type = "docs"
+commits = []
