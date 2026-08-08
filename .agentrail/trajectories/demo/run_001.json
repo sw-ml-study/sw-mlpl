@@ -1,0 +1,11 @@
+{
+  "task_type": "demo",
+  "state": {
+    "number": 1,
+    "step": "add-demo"
+  },
+  "action": "demos.toml entry with doc-string'd defs; stale-count test fix",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T13:54:28"
+}

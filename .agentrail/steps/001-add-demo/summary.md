@@ -1,0 +1,1 @@
+Added J-inspired Moving Average demo to the APL2 group with detailed comments (prefix-sum identity vs J windowed adverb; running_sum/compress/concat/whole-array arithmetic). Executes to [20,30,40,50]. Fixed stale APL2 count test (8->12) + README 85->86. Flagged pre-existing birds def-comments-gate failure.

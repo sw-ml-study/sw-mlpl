@@ -1,0 +1,1 @@
+Close moving-average-demo: rebuild pages, deploy, verify live, --done.
