@@ -1,0 +1,1 @@
+toml_encode.rs (record->TOML text, sorted, sections) + fncall_toml.rs eval_to_toml wrapping ok/err; wire into eval_fncalls; catalog+lang-ref+glossary; TDD.

@@ -1,0 +1,9 @@
+number = 1
+slug = "to-toml"
+status = "pending"
+description = "toml_encode.rs (record->TOML text, sorted, sections) + fncall_toml.rs eval_to..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T23:49:47"
+task_type = "rust-feature"
+commits = []
