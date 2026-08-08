@@ -23,7 +23,7 @@ pub(crate) fn to_json(value: &Value) -> Result<String, EvalError> {
 fn encode(value: &Value, out: &mut String) -> Result<(), EvalError> {
     match value {
         Value::Str(s) => push_str_json(out, s),
-        Value::Array(a) => encode_array(a, out),
+        Value::Array(a) => return encode_array(a, out),
         Value::StrList { items } => {
             out.push('[');
             for (i, s) in items.iter().enumerate() {
@@ -74,14 +74,22 @@ pub(crate) fn encode_object(
 }
 
 /// rank-0 -> number; rank-1 -> flat list; rank>=2 -> nested by
-/// shape (round-trips through parse_json only up to rank 1).
-fn encode_array(a: &DenseArray, out: &mut String) {
+/// shape (round-trips through parse_json only up to rank 1). A
+/// non-finite cell (NaN / +-Inf) is an error -- JSON has no such
+/// token, so emitting one would produce output no parser accepts.
+fn encode_array(a: &DenseArray, out: &mut String) -> Result<(), EvalError> {
+    if let Some(n) = a.data().iter().copied().find(|n| !n.is_finite()) {
+        return Err(EvalError::Unsupported(format!(
+            "to_json: cannot serialize the non-finite number {n} (JSON has no NaN or infinity)"
+        )));
+    }
     let dims = a.shape().dims();
     if dims.is_empty() {
         push_number(out, a.data()[0]);
     } else {
         encode_nd(a.data(), dims, out);
     }
+    Ok(())
 }
 
 fn encode_nd(data: &[f64], dims: &[usize], out: &mut String) {

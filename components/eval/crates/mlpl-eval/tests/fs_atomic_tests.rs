@@ -136,7 +136,11 @@ fn atomic_json_persist_composes() {
     let dir = sandbox("json");
     let mut env = env_with(&dir);
     // durable JSON persist: encode + atomic write, then read + parse.
-    eval_value(&mut env, "write_atomic(\"r.json\", to_json({a: 1, b: 2}))").unwrap();
+    eval_value(
+        &mut env,
+        "write_atomic(\"r.json\", unwrap(to_json({a: 1, b: 2})))",
+    )
+    .unwrap();
     assert_eq!(
         scalar(
             &mut env,

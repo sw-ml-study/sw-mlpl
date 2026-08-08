@@ -347,14 +347,18 @@ stage it. `repr` shows `partial(:u:B, 1 of 3 bound)`.
 ## to_json (builtin)
 
 `to_json(value)` is the deterministic encode half of
-[[parse_json (builtin)]]: a value to a JSON string, with
-records as objects (SORTED keys), rank-1 arrays as flat lists,
-strings escaped with exact Unicode, integers bare, and
-`ok(x)`/`err(e)` as `{ok, value|error}`. Non-data kinds
-(models, tokenizers, generation state, partials, references)
-error loudly. Scalars, vectors, strings, string lists, and
-records of those round-trip through `parse_json`. Shares its
-encoder with the typed test-event transport.
+[[parse_json (builtin)]], and RESULT-based like it:
+`ok(json_string)` / `err(message)`. Records become objects
+(SORTED keys), rank-1 arrays flat lists, strings escaped with
+exact Unicode, integers bare, and `ok(x)`/`err(e)` as
+`{ok, value|error}`. It returns `err(...)` -- never a hard
+error, never invalid output -- for a non-data kind (models,
+tokenizers, generation state, partials, references) or a
+NON-FINITE number: `NaN` and `+-Inf` have no JSON token, so
+emitting them would produce text no parser accepts. Scalars,
+vectors, strings, string lists, and records of those round-trip
+through `parse_json` (unwrap each: `parse_json(unwrap(to_json(v)))`).
+Shares its encoder with the typed test-event transport.
 
 ## type_of (builtin)
 
@@ -1669,7 +1673,7 @@ write_text / remove_path / run_script (builtins)]] and answer
 an f64 in `0..256`, the same convention as
 [[tokenize_bytes / decode_bytes (builtins)]] and the bit ops,
 so text and encoded data round-trip without a new codec: store
-JSON as raw bytes with `write_bytes(p, tokenize_bytes(to_json(v)))`
+JSON as raw bytes with `write_bytes(p, tokenize_bytes(unwrap(to_json(v))))`
 and recover it with `parse_json(decode_bytes(unwrap(read_bytes(p))))`.
 
 ## write_atomic (builtin)
@@ -1686,7 +1690,7 @@ either the old file or the whole new one, never a half-written
 process dies mid-write, `write_atomic` cannot. Returns
 `ok(1)` / `err(...)`, resolves against the same `--source-dir`
 sandbox root, and refuses traversal outside it. Durable persist
-composes with the codecs: `write_atomic(p, to_json(v))`.
+composes with the codecs: `write_atomic(p, unwrap(to_json(v)))`.
 
 ## global_set (builtin)
 

@@ -60,13 +60,18 @@ fn eval_to_json(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    let [arg] = args else {
-        return Err(EvalError::BadArity {
-            func: "to_json".into(),
-            expected: 1,
-            got: args.len(),
-        });
-    };
-    let v = crate::eval::eval_expr(arg, env, trace)?;
-    Ok(Value::Str(crate::json_encode::to_json(&v)?))
+    crate::grad::arity_check(args, 1, "to_json")?;
+    let v = crate::eval::eval_expr(&args[0], env, trace)?;
+    // Result-based like parse_json: ok(json) on success, err(msg)
+    // for a non-data kind or a non-finite number.
+    Ok(match crate::json_encode::to_json(&v) {
+        Ok(s) => Value::Result {
+            ok: true,
+            payload: Box::new(Value::Str(s)),
+        },
+        Err(e) => Value::Result {
+            ok: false,
+            payload: Box::new(Value::Str(format!("{e}"))),
+        },
+    })
 }

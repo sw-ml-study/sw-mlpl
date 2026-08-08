@@ -112,14 +112,14 @@ fn binary_json_round_trip_composes() {
     // encode a record to JSON, store as raw bytes, read back, decode, re-parse.
     eval_value(
         &mut env,
-        "write_bytes(\"r.json\", tokenize_bytes(to_json({a: 1, b: 2})))",
+        "write_bytes(\"r.json\", tokenize_bytes(unwrap(to_json({a: 1, b: 2}))))",
     )
     .unwrap();
     // the bytes on disk decode back to the exact JSON text...
     assert_eq!(
         scalar(
             &mut env,
-            "equal(to_json({a: 1, b: 2}), decode_bytes(unwrap(read_bytes(\"r.json\"))))"
+            "equal(unwrap(to_json({a: 1, b: 2})), decode_bytes(unwrap(read_bytes(\"r.json\"))))"
         ),
         1.0
     );
