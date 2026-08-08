@@ -1,9 +1,10 @@
 number = 1
 slug = "byte-io"
-status = "pending"
+status = "completed"
 description = "fs_bytes.rs: read_bytes/write_bytes sharing array_to_bytes with decode_bytes;..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T22:35:39"
+completed_at = "2026-08-07T22:44:31"
 task_type = "rust-feature"
-commits = []
+commits = ["2cf7488bed96076284e3958e2a8ff68b2ac4738a"]

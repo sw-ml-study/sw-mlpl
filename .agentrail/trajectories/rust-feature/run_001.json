@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "byte-io"
+  },
+  "action": "mirrored fs_ops Result/sandbox pattern; extracted shared array_to_bytes",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T22:44:31"
+}

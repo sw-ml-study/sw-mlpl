@@ -1,0 +1,1 @@
+read_bytes/write_bytes shipped: sandboxed raw-byte fs endpoints in new fs_bytes.rs; byte=f64 0..256; validator shared with decode_bytes (also shrinks it under budget); full binary to_json/parse_json round trip composes. 8 TDD tests; catalog+lang-ref+glossary(469).

@@ -1,0 +1,1 @@
+Close byte-io: rebuild serve+pages, deploy, connect smoke of read_bytes/write_bytes round trip, wiki Capability-Matrix row, q-and-a note (byte I/O done; demo-algorithms remaining: TOML/native codecs, atomic writes, decode limits, streaming), --done.
