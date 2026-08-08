@@ -1,0 +1,1 @@
+fs_bytes.rs: read_bytes/write_bytes sharing array_to_bytes with decode_bytes; wire into fncall_fs; catalog+lang-ref+glossary; TDD.
