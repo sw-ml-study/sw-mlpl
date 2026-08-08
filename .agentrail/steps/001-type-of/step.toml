@@ -1,0 +1,9 @@
+number = 1
+slug = "type-of"
+status = "pending"
+description = "Add eval_type_of to fncall_values.rs routing through mlpl_eval_types::value_k..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T21:42:16"
+task_type = "rust-feature"
+commits = []

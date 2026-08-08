@@ -1,0 +1,1 @@
+Add eval_type_of to fncall_values.rs routing through mlpl_eval_types::value_kind; return Value::Str of the kind. Catalog + lang-ref + glossary. TDD: one assertion per kind + totality (never errors).
