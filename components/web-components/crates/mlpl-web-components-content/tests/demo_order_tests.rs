@@ -38,11 +38,11 @@ fn names_alphabetical_within_groups() {
 }
 
 #[test]
-fn apl2_group_has_the_eight_language_demos() {
+fn apl2_group_has_the_language_demos() {
     let groups = grouped_demos(false, &[]);
     let (_, items) = groups
         .iter()
         .find(|(l, _)| *l == "APL2 / General Programming")
         .expect("APL2 group present");
-    assert_eq!(items.len(), 8, "{items:?}");
+    assert_eq!(items.len(), 12, "{items:?}");
 }
