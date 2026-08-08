@@ -1,0 +1,1 @@
+read_bytes(path, offset, length) seek-based bounded read + file_size(path) in fs_bytes.rs; dispatch; catalog+lang-ref+glossary; TDD.
