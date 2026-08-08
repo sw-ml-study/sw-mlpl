@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "envelope-encode"
+  },
+  "action": "value-transform to enveloped form; shared result wrapper",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T13:07:29"
+}

@@ -1,0 +1,1 @@
+envelope::unwrap_envelopes walker; parse_json reconstructs $mlpl envelopes unconditionally; TDD round-trip rank>=2 + Result + nested + escape; close.

@@ -1,0 +1,1 @@
+to_json {tagged:1} shipped: emits reserved $mlpl envelopes for rank>=2 arrays and Results via a pure envelope::wrap transform reusing the sorted-key encoder. result_str::ok_or_err shared wrapper. 5 TDD tests.
