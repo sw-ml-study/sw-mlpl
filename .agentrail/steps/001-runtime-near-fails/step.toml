@@ -1,9 +1,10 @@
 number = 1
 slug = "runtime-near-fails"
-status = "pending"
+status = "completed"
 description = "Retire the near-FAIL Function-LOC warnings in mlpl-runtime by extracting cohe..."
 role = "production"
 context_files = []
 created_at = "2026-08-07T18:16:10"
+completed_at = "2026-08-07T19:05:40"
 task_type = "refactor"
-commits = []
+commits = ["e494f974f6bfc443d43b823f5bdfd8a2aabfb737"]
