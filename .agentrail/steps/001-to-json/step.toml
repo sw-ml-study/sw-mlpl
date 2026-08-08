@@ -1,0 +1,9 @@
+number = 1
+slug = "to-json"
+status = "pending"
+description = "to_json(value) -> Str: general deterministic JSON encoder (json_encode.rs), t..."
+role = "production"
+context_files = []
+created_at = "2026-08-07T20:53:32"
+task_type = "rust-feature"
+commits = []
