@@ -1,0 +1,1 @@
+Bit logic shipped in new mlpl-runtime-bits crate: band/bor/bxor/bnot/popcount, f64-integer domain with loud errors, broadcast, Hamming idiom; 4 TDD tests; catalog+docs; REPL-verified.

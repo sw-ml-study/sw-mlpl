@@ -1,9 +1,10 @@
 number = 2
 slug = "bit-logic"
-status = "pending"
+status = "completed"
 description = "Implement band/bor/bxor/bnot/popcount in a new mlpl-runtime-array module (bit..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T17:41:52"
+completed_at = "2026-08-07T17:58:59"
 task_type = "rust-feature"
-commits = []
+commits = ["6c60867e3e92b8846b5ba36323e5b7a6a734ad72"]

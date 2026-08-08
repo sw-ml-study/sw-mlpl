@@ -1,0 +1,9 @@
+number = 3
+slug = "bit-shift-views"
+status = "pending"
+description = "Add shl(x,k,width)/shr(x,k)/bmask(x,width)/bits(x,width)/from_bits(v) to mlpl..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T17:58:59"
+task_type = "rust-feature"
+commits = []
