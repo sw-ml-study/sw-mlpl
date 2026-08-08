@@ -87,6 +87,24 @@ kernel trick, Bayes' theorem, eigenvectors), and two findability
 text fixes. Docs+demo work, no runtime changes; can interleave
 between feature sagas or run as one saga.
 
+**fixed-width-ints-bitops** (added 2026-08-07; demo-memory
+request #2, docs/demo-memory-upstream.md) -- fixed-width
+unsigned integer views + masks/shifts/popcount/conversions;
+unlocks Swiss control bytes, compact Bloom filters, Hamming
+indexes, binary sparse retrieval. Largest classical-structures
+unlock.
+
+**packed-layouts** (added 2026-08-07; demo-memory request #3)
+-- packed/aligned array layouts + observable storage size for
+credible bytes-per-key and cache-locality claims. Design-first
+(touches the memory model); logical tiny-pointer demos work
+before it.
+
+**rng-streams** (added 2026-08-07; demo-memory request #4) --
+first-class seeded RNG STATE for composable randomized hashing/
+shuffling/workload generation and reproducible substreams.
+Non-blocking (seeded randn/sample already deterministic).
+
 **error-messages** (added 2026-08-07; docs/maturation-plan.md
 section 1) -- context-aware, fix-suggesting EvalErrors:
 did-you-mean for unknown names (edit distance over catalog +

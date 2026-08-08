@@ -234,6 +234,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "n uniform ints in [lo, hi), seeded",
             ),
             (
+                "clock_ms",
+                "clock_ms()",
+                "monotonic elapsed milliseconds for benchmarking (native/connect only)",
+            ),
+            (
                 "dedupe_rows",
                 "dedupe_rows(X)",
                 "unique rows as {rows, index}",

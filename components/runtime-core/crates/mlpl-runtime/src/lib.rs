@@ -10,6 +10,7 @@ mod ensemble_builtins;
 mod llm_builtins;
 mod llm_http;
 mod random_builtins;
+mod time_builtins;
 
 pub use builtins::call_builtin;
 pub use llm_builtins::{call_ollama, call_ollama_with_system};
@@ -29,6 +30,7 @@ pub fn runtime_builtin_names() -> impl Iterator<Item = &'static str> {
         .chain(mlpl_runtime_conv::NAMES)
         .chain(mlpl_runtime_rnn::NAMES)
         .chain(random_builtins::NAMES)
+        .chain(time_builtins::NAMES)
         .chain(mlpl_runtime_data::dataset_builtins::NAMES)
         .chain(mlpl_forge_kg::NAMES)
         .chain(mlpl_runtime_ml::NAMES)

@@ -845,6 +845,17 @@ Resets the session: variables, models, and 3D state are all
 cleared. Demos run in the SAME session until you clear it, so
 later demos (and `:ask`) can see earlier results.
 
+## clock_ms (builtin)
+
+`clock_ms()` returns a high-resolution MONOTONIC time in
+milliseconds, measured from a process-start epoch -- only the
+DIFFERENCE between two readings is meaningful, so the idiom is
+`t0 = clock_ms(); ...work...; dt = clock_ms() - t0`. It exists
+for benchmarking (inserts/sec, lookups/sec, latency
+percentiles). A native and connect-mode builtin -- like
+`load` and `llm_call` it is not part of the pure browser
+playground.
+
 ## Colon call (`:name(args)`)
 
 Any builtin can be called directly from the REPL prompt by
