@@ -1,0 +1,1 @@
+Saga closed: opt-in {results:1} reconstruction + to_toml Result encoding -- Results round-trip through BOTH JSON and TOML; verified via repl + connect; wiki row; q-and-a records status. Deployed; repl rebuilt to HEAD.
