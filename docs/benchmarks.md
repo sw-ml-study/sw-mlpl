@@ -473,6 +473,44 @@ of materializing on every `eval()`) is the biggest remaining
 win. Both are perf optimizations; neither changes numerical
 behaviour, so the parity tests will carry forward unchanged.
 
+## KV cache: cached vs recompute generation
+
+Cached autoregressive generation (`gen_state` / `gen_logits` /
+`gen_append`) vs the naive recompute loop (`apply` over the
+whole growing sequence each step). Same tiny causal LM chain
+(embed 64x16, one 2-head causal-attention residual block,
+rms_norm, linear head), greedy decode, release build. Times
+are single-shot wall-clock from `clock_ms()` on the Mac dev
+host -- representative, not statistically rigorous.
+
+| Tokens generated | Recompute (ms) | Cached (ms) | Speedup |
+|---|---|---|---|
+| 32 | ~3.6 | ~0.7 | ~5x |
+| 128 | ~94 | ~3.4 | ~28x |
+
+The speedup GROWS with sequence length because recompute
+re-attends over the whole prefix every step (about `O(T^3)`
+attention work over a `T`-token generation) while the cache
+projects one row and attends one query against the stored K/V
+(about `O(T^2)`). Correctness is not traded for speed: cached
+greedy decoding is BIT-IDENTICAL to recompute on CPU, pinned
+by `mlpl-eval`'s `gen_state_core_tests` (the per-step logits
+match exactly). Reproduce with a script like:
+
+```text
+def u:cached(n) {
+  gs = gen_state(m, [0, 1, 2, 3]);
+  repeat n { gen_append(gs, argmax(gen_logits(gs), 0)) };
+  gen_stats(gs).tokens
+}
+t0 = clock_ms(); u:cached(128); clock_ms() - t0
+```
+
+`clock_ms()` is native/connect only, so this measurement runs
+from the CLI or a connected server, not the browser demo (the
+web "KV Cache" demo shows the deterministic
+attended-positions cost curve instead).
+
 ## Related
 
 - `crates/mlpl-parity-tests/tests/parity_tests.rs` --

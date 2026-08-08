@@ -1605,6 +1605,33 @@ lines = [
 
 [[demos]]
 category = "Language Models"
+name = "KV Cache (cached generation)"
+intro = "Autoregressive generation, sped up the way every serving stack does it -- and proven correct. The naive loop re-runs the whole model over the entire sequence every step, re-attending the full prefix each time (about O(T^3) work over a T-token run). A KV CACHE stores each attention layer's key/value rows so a new token only projects ONE row and attends one query against the cache (about O(T^2)). MLPL exposes this as a first-class value: gen_state builds the cache from a prompt, gen_logits reads the next-position logits without recompute, and gen_append feeds an accepted token. The demo generates the SAME tokens both ways and checks they are identical, shows the cache growing, and plots the per-step work of each approach. The loop stays visible -- only its body gets a complexity class faster."
+takeaway = "Two results matter. CORRECTNESS: cached greedy decoding is BIT-IDENTICAL to full recompute (ids_match is 1) -- the cache changes speed, not the math, because per-row attention is the same dot products in the same order. COST: the attended-positions curves show why it matters -- cached work grows LINEARLY with the sequence (one query against L cached keys) while recompute grows QUADRATICALLY (re-attending every position each step). On the CLI the wall-clock speedup is ~5x at 32 tokens and ~28x at 128, widening with length (docs/benchmarks.md). The state is a real value: gen_clone forks it for speculative branches, gen_reset drops it back to the prompt (the idiom after training, since the cache is not auto-invalidated), and gen_stats reports {tokens, layers, kv_rows, kv_values}. This is the KV-cache foundation the generation-speed roadmap builds on."
+lines = [
+    "m = chain(embed(32, 8, 0), residual(chain(rms_norm(8), causal_attention(8, 2, 1))), rms_norm(8), linear(8, 32, 4))   # a tiny causal LM chain",
+    "prompt = [0, 1, 2, 3]                                  # a 4-token prompt",
+    "gs = gen_state(m, prompt)                              # build the KV cache: run the prompt once, store every layer's K/V",
+    "gen_stats(gs)                                          # {tokens: 4, layers: 1, kv_rows: 4, kv_values: 64}",
+    "gen_logits(gs)                                         # next-position logits, straight from the cache -- no recompute",
+    "cached_seq = prompt                                    # greedily decode 6 tokens THROUGH THE CACHE ...",
+    "repeat 6 { nxt = argmax(gen_logits(gs), 0); gen_append(gs, nxt); cached_seq = concat(cached_seq, reshape(nxt, [1])) }",
+    "recompute_seq = prompt                                 # ... and again the NAIVE way (re-apply over the whole sequence)",
+    "repeat 6 { recompute_seq = concat(recompute_seq, reshape(argmax(last_row(apply(m, recompute_seq)), 0), [1])) }",
+    "equal(cached_seq, recompute_seq)                       # 1 -- BIT-IDENTICAL: the cache changed speed, not the math",
+    "lens = range(6) + tally(prompt)                        # sequence length at each of the 6 steps: 4..9",
+    "cached_cost = lens                                     # cached work per step: L keys for ONE query -- LINEAR",
+    "recompute_cost = lens * lens                           # recompute work per step: re-attend every position -- QUADRATIC",
+    'svg(recompute_cost, "line")                            # the quadratic cost curve the cache flattens',
+    "gs2 = gen_clone(gs)                                    # fork the state (speculative branches diverge freely)",
+    "gen_append(gs2, 7)                                     # advance only the clone ...",
+    "{original: gen_stats(gs).tokens, forked: gen_stats(gs2).tokens}   # ... the original is untouched",
+    "gen_reset(gs)                                          # drop cached rows back to the prompt (the idiom after training)",
+    "gen_stats(gs).tokens                                   # 4 -- back to the prompt length",
+]
+
+[[demos]]
+category = "Language Models"
 name = "Tiny LM"
 intro = "Training-only variant of the Tiny LM: same model shape ([[Embedding]] + [[Attention]] (causal) + RMS norm + linear head, V=260, d=16, block=8), wrapped in [[experiment block (language keyword)]] so the final metric is logged, then plot the loss curve across 30 [[Adam]] steps. No generation -- just a clean 'does the loss go down' demo."
 takeaway = "Loss curve trends downward over 30 steps; the [[experiment block (language keyword)]] registry records the run's final loss metric. For generation + attention visualization, see 'Tiny LM Generate'. For a serious run with V=280 and 200 steps, use the CLI: `mlpl-repl -f demos/tiny_lm.mlpl`."
