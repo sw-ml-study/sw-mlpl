@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga max-elements: complete (2 steps)
+- docs: close max-elements; decode-budget trio complete
+- saga max-elements: step max-elements complete
+- feat(eval): max_elements decode cap for parse_json / parse_toml (max-elements)
+- saga max-elements: bootstrap step 001
+- saga max-elements: init
+- chore(agentrail): archive range-read saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga range-read: complete (2 steps)
 - docs: close range-read; demo-ml-utils bounded I/O unblocked
 - saga range-read: step range-read complete
