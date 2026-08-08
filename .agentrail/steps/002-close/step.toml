@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close max-elements: rebuild serve+pages+repl, deploy, connect smoke, wiki row..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T11:58:59"
+task_type = "docs"
+commits = []

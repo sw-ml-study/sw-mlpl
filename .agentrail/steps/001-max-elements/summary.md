@@ -1,0 +1,1 @@
+max_elements cap shipped for parse_json/parse_toml: cumulative record fields + array cells + string-list items, checked after decode by element_count.rs; default unbounded; malformed option hard-errors. 6 TDD tests.

@@ -1,9 +1,10 @@
 number = 1
 slug = "max-elements"
-status = "pending"
+status = "completed"
 description = "Thread an elements budget through json_decode + toml value parsing; read max_..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T11:36:11"
+completed_at = "2026-08-08T11:58:59"
 task_type = "rust-feature"
-commits = []
+commits = ["b1278d7543456f82d8213bf27398ef77e9a41016"]
