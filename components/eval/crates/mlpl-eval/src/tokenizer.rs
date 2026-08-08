@@ -127,21 +127,7 @@ pub(crate) fn eval_tokenize_bytes(s: &str) -> Result<Value, EvalError> {
 /// DenseArray of byte indices 0..=255; non-integer or out-of-range
 /// cells error.
 pub(crate) fn eval_decode_bytes(arr: &DenseArray) -> Result<Value, EvalError> {
-    if arr.rank() > 1 {
-        return Err(EvalError::Unsupported(format!(
-            "decode_bytes: expected rank <= 1, got rank {}",
-            arr.rank()
-        )));
-    }
-    let mut bytes = Vec::with_capacity(arr.data().len());
-    for (i, &v) in arr.data().iter().enumerate() {
-        if !(0.0..=255.0).contains(&v) || v.fract() != 0.0 {
-            return Err(EvalError::Unsupported(format!(
-                "decode_bytes: cell {i} = {v} is not an integer in 0..=255"
-            )));
-        }
-        bytes.push(v as u8);
-    }
+    let bytes = crate::fs_bytes::array_to_bytes("decode_bytes", arr)?;
     // Byte sequences from `tokenize_bytes` are valid UTF-8 by
     // construction; arbitrary user-constructed arrays may not be,
     // so do a lossless round-trip that preserves the bytes even if

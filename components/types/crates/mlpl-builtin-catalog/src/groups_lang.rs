@@ -179,6 +179,16 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "sandboxed exact-text file write; returns ok(1)/err",
             ),
             (
+                "read_bytes",
+                "read_bytes(path)",
+                "sandboxed raw-byte file read; returns ok(rank-1 array 0..256)/err",
+            ),
+            (
+                "write_bytes",
+                "write_bytes(path, bytes)",
+                "sandboxed raw-byte file write; bytes a rank-<=1 array of integers 0..=255; returns ok(1)/err",
+            ),
+            (
                 "remove_path",
                 "remove_path(path)",
                 "sandboxed file/dir removal; returns ok(1)/err",

@@ -1654,6 +1654,24 @@ lines. Together with [[global_set (builtin)]] and
 [[test_event_sink / emit_test_event (builtins)]], a complete
 test runner is expressible in MLPL itself.
 
+## read_bytes / write_bytes (builtins)
+
+The raw-byte half of the sandboxed filesystem API, for binary
+formats that are not exact text. `read_bytes(path)` returns
+`ok(bytes)` -- a rank-1 array of byte values (`0..256`) -- or
+`err(...)`; `write_bytes(path, bytes)` writes a rank-`<=1`
+array whose cells are integers `0..=255` (an out-of-range or
+non-integer cell is a LOUD error naming it) and returns
+`ok(1)` / `err(...)`. Both resolve against the same
+`--source-dir` sandbox root as [[fs_walk / read_text /
+write_text / remove_path / run_script (builtins)]] and answer
+`err(...)` for I/O failures or traversal outside it. A byte is
+an f64 in `0..256`, the same convention as
+[[tokenize_bytes / decode_bytes (builtins)]] and the bit ops,
+so text and encoded data round-trip without a new codec: store
+JSON as raw bytes with `write_bytes(p, tokenize_bytes(to_json(v)))`
+and recover it with `parse_json(decode_bytes(unwrap(read_bytes(p))))`.
+
 ## global_set (builtin)
 
 `global_set("name", value)` binds a name at the WORKSPACE

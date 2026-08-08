@@ -20,6 +20,9 @@ pub(crate) fn try_dispatch(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Option<Result<Value, EvalError>> {
+    if matches!(name, "read_bytes" | "write_bytes") {
+        return Some(crate::fs_bytes::eval_fs_bytes(name, args, env, trace));
+    }
     if !matches!(name, "fs_walk" | "read_text" | "write_text" | "remove_path") {
         return None;
     }

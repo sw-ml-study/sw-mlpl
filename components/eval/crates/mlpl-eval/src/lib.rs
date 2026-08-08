@@ -83,6 +83,7 @@ mod fncall_reflect;
 mod fncall_run;
 mod fncall_trace;
 mod fncall_values;
+mod fs_bytes;
 mod fs_ops;
 mod fs_walk_impl;
 mod grad;
