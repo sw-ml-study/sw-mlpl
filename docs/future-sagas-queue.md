@@ -105,6 +105,13 @@ first-class seeded RNG STATE for composable randomized hashing/
 shuffling/workload generation and reproducible substreams.
 Non-blocking (seeded randn/sample already deterministic).
 
+**safe-record-lookup** (added 2026-08-07; demo-functional-
+pipelines request) -- has_field(record, name) -> 0|1 and
+record_get(record, name) -> ok(value)|err(...), so schema
+validation stops being exception-driven. Small eval-layer
+saga; downstream replaces its blocker fixture with positive
+tests. PENDING GO.
+
 **error-messages** (added 2026-08-07; docs/maturation-plan.md
 section 1) -- context-aware, fix-suggesting EvalErrors:
 did-you-mean for unknown names (edit distance over catalog +
