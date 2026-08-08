@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- docs: variant JSON encoding direction -- reserved tagged envelope
+- docs(changes): refresh CHANGES.md to HEAD
 - saga semantic-result-reconstruction: complete (3 steps)
 - docs: close semantic-result-reconstruction; Result round trip complete both codecs
 - saga semantic-result-reconstruction: step toml-encode-results complete
