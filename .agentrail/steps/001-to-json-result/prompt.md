@@ -1,0 +1,1 @@
+to_json returns ok/err Result; non-finite -> err (inline finite guard, no new fn); non-data kind -> err. Update fncall_json, to_json_tests, fs_bytes/fs_atomic compose sites, lang-ref, glossary. TDD.
