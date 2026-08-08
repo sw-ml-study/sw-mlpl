@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga fixed-width-ints-bitops: complete (4 steps)
+- docs: close fixed-width-ints-bitops (request #2 SHIPPED); pages rebuilt
+- saga fixed-width-ints-bitops: step 003 complete
+- feat(runtime): shl/shr/bmask/bits/from_bits -- shifts + bit-vector views (bit-shift-views)
+- saga fixed-width-ints-bitops: step 002 complete
+- feat(runtime): band/bor/bxor/bnot/popcount bit ops in a new mlpl-runtime-bits crate (bit-logic)
+- saga fixed-width-ints-bitops: step 001 complete
+- docs(design): fixed-width integer bit operations (bit-design)
+- saga: init fixed-width-ints-bitops (demo-memory request #2)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga demo-memory-clock: complete (2 steps)
 - saga demo-memory-clock: step 001 complete
 - feat(runtime): clock_ms() -- monotonic clock for benchmarking (clock)
