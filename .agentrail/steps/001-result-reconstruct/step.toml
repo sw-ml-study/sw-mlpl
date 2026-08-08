@@ -1,0 +1,9 @@
+number = 1
+slug = "result-reconstruct"
+status = "pending"
+description = "result_reconstruct.rs walker; thread results flag through parse options; appl..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T00:31:10"
+task_type = "rust-feature"
+commits = []
