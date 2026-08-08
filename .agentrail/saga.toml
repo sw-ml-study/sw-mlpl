@@ -1,5 +1,5 @@
 name = "type-detection"
-status = "active"
+status = "completed"
 current_step = 2
 created_at = "2026-08-07T21:42:03"
 plan_file = ".agentrail/plan.md"

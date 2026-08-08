@@ -1,0 +1,1 @@
+Saga closed: type_of live incl. connect (record/array verified); wiki Capability-Matrix row; q-and-a records demo-algorithms status (2 of 7 serialization blockers cleared: JSON encoding + type detection). Deployed.
