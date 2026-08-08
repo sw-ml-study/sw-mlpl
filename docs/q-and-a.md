@@ -23,7 +23,7 @@ error naming the culprit); a non-array byte arg is a hard
 error. Lives in fs_bytes.rs; the array->bytes validator is
 shared with decode_bytes.
 
-Updated demo-algorithms serialization blocker status (4 of 7
+Updated demo-algorithms serialization blocker status (3 of 7
 cleared):
 
 - JSON encoding -- DONE (to_json).
