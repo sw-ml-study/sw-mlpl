@@ -1,0 +1,1 @@
+Saga closed: serialization is Result-based (to_json ok/err incl. non-finite; write_bytes/write_atomic invalid input -> err). Verified via repl + connect; repl rebuilt to d92e0c64 for demo-algorithms; q-and-a records what it can treat unblocked vs must change (unwrap to_json; no distinct byte type). Deployed.
