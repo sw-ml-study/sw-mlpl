@@ -5,6 +5,39 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (to_json / demo-algorithms serialization)
+
+**Q: Is demo-algorithms unblocked? (needs: non-record root
+type detection, JSON encoding, raw bytes/I/O, TOML and native
+codecs, atomic writes, decode limits, streaming
+serialization.)**
+
+A: Its CORE algorithm demos are unblocked and near-complete --
+these gate a SERIALIZATION demo class, not the existing work.
+Progress this round: JSON ENCODING is now SHIPPED (to_json),
+completing the parse_json <-> to_json deterministic round trip
+(sorted-key objects, exact-Unicode strings, ok/err shape;
+non-data kinds error). Remaining blockers, with placement:
+
+- non-record root type detection -- a type/kind predicate
+  (e.g. type_of(v) or is_record/is_array); small CORE gap
+  (value_kind exists internally, just not exposed).
+- raw bytes / I/O -- read_bytes/write_bytes; CORE fs (text I/O
+  is UTF-8 only today). Adjacent to demo-memory packed-layouts.
+- TOML + native codecs -- parse_toml/to_toml pair, same shape
+  as the JSON codec; medium CORE work.
+- atomic writes -- write-temp-then-rename option on the fs
+  writers; small CORE.
+- decode limits -- size/depth caps on parse_json/parse_toml;
+  small CORE.
+- streaming serialization -- large-input incremental parse;
+  larger CORE.
+
+None block the near-complete algorithm demos. Recommended next
+if pursued: type-detection (smallest, unblocks the root-type
+check) then byte I/O. All are core primitives (not
+library-composable): they need new runtime surface.
+
 ## 2026-08-07 (safe record lookup)
 
 **Q: Does has_field/record_get belong in the language or a
