@@ -1,0 +1,1 @@
+gen-controls shipped: gen_clone/gen_reset/gen_stats + multi-row gen_append in a sibling module; the whole gen_* family now documented (was undocumented since core); 5 TDD tests incl. reset-bit-identical + vector==singles; REPL-verified.
