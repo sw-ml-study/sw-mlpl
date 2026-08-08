@@ -14,6 +14,15 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga byte-io: complete (2 steps)
+- docs(q-and-a): fix count -- 3 of 7 serialization blockers cleared, not 4
+- docs: close byte-io; demo-algorithms 4/7 serialization blockers cleared
+- saga byte-io: step byte-io complete
+- feat(eval): read_bytes / write_bytes -- sandboxed raw-byte I/O (byte-io)
+- saga byte-io: bootstrap step 001-byte-io
+- saga byte-io: init
+- chore(agentrail): archive type-detection saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga type-detection: complete (2 steps)
 - docs: close type-detection; demo-algorithms type detection done
 - saga type-detection: step type-of complete
