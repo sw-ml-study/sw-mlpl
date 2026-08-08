@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "atomic-writes"
+  },
+  "action": "temp+rename via std::fs::rename; mirrored fs Result/sandbox contract",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T23:12:32"
+}

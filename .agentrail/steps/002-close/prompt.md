@@ -1,0 +1,1 @@
+Close atomic-writes: rebuild serve+pages AND target/release/mlpl-repl (demo-algorithms reads it), deploy, connect smoke, wiki row, q-and-a note (atomic writes done; remaining: TOML/native codecs, decode limits, streaming), --done.

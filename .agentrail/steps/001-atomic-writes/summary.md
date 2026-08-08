@@ -1,0 +1,1 @@
+write_atomic shipped: crash-safe sandboxed write (temp+rename) accepting string or byte array in new fs_atomic.rs; reuses array_to_bytes; durable to_json persist composes. 9 TDD tests (incl. no-temp-left-behind, atomicity); catalog+lang-ref+glossary(470).
