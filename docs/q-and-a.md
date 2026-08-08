@@ -5,6 +5,52 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (serialization Result contract -- demo-algorithms guidance)
+
+**Q: what can demo-algorithms treat as unblocked, and where must
+it change its approach?** (After the refined 8-item blocker list:
+distinct byte buffers, Result-based invalid-byte errors,
+higher-rank & Result JSON semantics, non-finite policy, decode
+limits, TOML, typed native formats, streaming.)
+
+Two decisions (user, 2026-08-07): serialization goes
+Result-based; a distinct byte-buffer type is deferred to
+demo-memory packed-layouts.
+
+FIRST: rebuild the binary demo-algorithms invokes
+(../sw-mlpl/target/release/mlpl-repl) -- it is now at d92e0c64.
+
+UNBLOCKED (usable now):
+- JSON encode/decode round trip (to_json / parse_json), root
+  type detection (type_of), raw byte I/O (read_bytes /
+  write_bytes), atomic writes (write_atomic).
+- Result-based invalid-byte errors -- DONE: write_bytes /
+  write_atomic now return err(...) (not a hard error) for an
+  out-of-range/non-integer byte or a wrong-typed value.
+- non-finite policy -- DONE: to_json returns err(...) for NaN /
+  +-Inf instead of emitting invalid JSON.
+
+MUST CHANGE APPROACH:
+- to_json is now RESULT-BASED. It returns ok(json_string) /
+  err(message), NOT a bare string. Every call site must unwrap:
+  parse_json(unwrap(to_json(v))),
+  write_atomic(p, unwrap(to_json(v))),
+  write_bytes(p, tokenize_bytes(unwrap(to_json(v)))). This is a
+  breaking change to a just-shipped builtin; adopt it now.
+- Do NOT expect a distinct byte-buffer type. A byte is an f64 in
+  0..256 (the tokenize_bytes / bit-ops convention); byte arrays
+  are ordinary rank-1 arrays. Observable per-byte storage size is
+  the demo-memory packed-layouts saga, not a serialization type.
+
+STILL OPEN (design / net-new, none blocking the core demos):
+- higher-rank & Result JSON semantics -- to_json encodes rank>=2
+  by nesting and Result as {ok, value|error}, but parse_json is
+  flat-array only, so those do NOT round-trip. Treat to_json as
+  round-trippable for scalars, rank-1 arrays, strings, string
+  lists, and records of those; higher-rank is encode-only.
+- decode limits (size/depth caps), TOML codec, typed native
+  formats, streaming APIs -- future sagas.
+
 ## 2026-08-07 (atomic-writes / demo-algorithms durability)
 
 **Q: what's the next serialization blocker? (demo-algorithms
