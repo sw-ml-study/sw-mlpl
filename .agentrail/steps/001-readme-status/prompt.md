@@ -1,0 +1,1 @@
+README maturity section (built/partial/PoC, present-tense) + fix compile bullet + drop version stamp; docs/status.md current what-exists-today section.

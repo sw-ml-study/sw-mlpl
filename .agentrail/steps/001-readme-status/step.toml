@@ -1,0 +1,9 @@
+number = 1
+slug = "readme-status"
+status = "pending"
+description = "README maturity section (built/partial/PoC, present-tense) + fix compile bull..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T14:10:49"
+task_type = "docs"
+commits = []
