@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "record-keys"
+  },
+  "action": "BTreeMap keys(); insert().is_some() dup check; new module",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T12:20:44"
+}

@@ -1,0 +1,1 @@
+record_keys(record) -> sorted string-list of keys (new fncall_record_keys.rs) + parse_json duplicate-key rejection. Unblocks demo-ml-utils step 004 (tensor-name discovery + duplicate validation). 5 TDD tests; catalog+lang-ref+glossary(474).

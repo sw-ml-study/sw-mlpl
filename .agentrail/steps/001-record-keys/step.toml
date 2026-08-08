@@ -1,9 +1,10 @@
 number = 1
 slug = "record-keys"
-status = "pending"
+status = "completed"
 description = "record_keys builtin (new module) + duplicate-key rejection in json_decode::ob..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T12:12:01"
+completed_at = "2026-08-08T12:20:44"
 task_type = "rust-feature"
-commits = []
+commits = ["03be4ea3b043404fdaef1aa24c94469011f1af83"]
