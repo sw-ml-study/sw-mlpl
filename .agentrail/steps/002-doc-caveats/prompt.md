@@ -1,0 +1,1 @@
+Caveat/refresh stale docs the survey flagged: using-mlx.md (superseded slow numbers), using-cuda.md (PoC), serialization-variant-encoding.md (now shipped, undersells), compile milestone subset.

@@ -1,0 +1,9 @@
+number = 2
+slug = "doc-caveats"
+status = "pending"
+description = "Caveat/refresh stale docs the survey flagged: using-mlx.md (superseded slow n..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T14:40:34"
+task_type = "docs"
+commits = []

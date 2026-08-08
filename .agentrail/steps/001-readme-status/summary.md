@@ -1,0 +1,1 @@
+README Maturity section + status.md current what-exists-today section: BUILT/PARTIAL/POC classification of every subsystem; fixed the overselling compile bullet + dropped a banned version stamp. Present-tense per docs policy.
