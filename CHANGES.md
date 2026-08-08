@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga semantic-result-reconstruction: complete (3 steps)
+- docs: close semantic-result-reconstruction; Result round trip complete both codecs
+- saga semantic-result-reconstruction: step toml-encode-results complete
+- feat(eval): to_toml encodes Result fields as sub-tables (toml-encode-results)
+- saga semantic-result-reconstruction: step result-reconstruct complete
+- feat(eval): opt-in Result reconstruction on parse_json / parse_toml (result-reconstruct)
+- saga semantic-result-reconstruction: bootstrap step 001
+- saga semantic-result-reconstruction: init
+- chore(agentrail): archive decode-limits saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga decode-limits: complete (2 steps)
 - docs: close decode-limits; demo-algorithms decode budgets cleared
 - saga decode-limits: step decode-limits complete
