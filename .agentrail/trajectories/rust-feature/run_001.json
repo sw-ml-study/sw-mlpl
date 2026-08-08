@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "type-of"
+  },
+  "action": "reused mlpl_eval_types::value_kind; one match arm + helper in fncall_values",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T22:27:08"
+}

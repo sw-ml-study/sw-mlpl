@@ -1,0 +1,1 @@
+Close type-detection: rebuild pages+deploy, connect smoke of type_of, wiki Capability-Matrix row, q-and-a note (type detection done; demo-algorithms remaining: byte I/O, TOML/native codecs, atomic writes, decode limits, streaming), --done.

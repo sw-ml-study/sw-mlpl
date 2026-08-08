@@ -1,0 +1,1 @@
+type_of(v) shipped: exposes the internal value_kind classifier as a total builtin (never errors) returning array/string/record/result/... so programs branch on a root value's kind. fncall_values.rs; 7 TDD tests; catalog+lang-ref+glossary(468).

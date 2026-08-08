@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close type-detection: rebuild pages+deploy, connect smoke of type_of, wiki Ca..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-07T22:27:08"
+task_type = "docs"
+commits = []
