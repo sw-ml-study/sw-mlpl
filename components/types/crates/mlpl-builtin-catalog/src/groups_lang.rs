@@ -229,6 +229,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "bounded deterministic rendering for diagnostics",
             ),
             (
+                "type_of",
+                "type_of(v)",
+                "stable kind string of any value (array/string/record/result/...); total, never errors",
+            ),
+            (
                 "pareto_front",
                 "pareto_front(P, dirs)",
                 "mask of non-dominated rows; dirs: 1 max / -1 min per column",

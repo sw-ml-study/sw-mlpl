@@ -356,6 +356,19 @@ error loudly. Scalars, vectors, strings, string lists, and
 records of those round-trip through `parse_json`. Shares its
 encoder with the typed test-event transport.
 
+## type_of (builtin)
+
+`type_of(value)` returns the stable kind string of any value:
+`array`, `string`, `record`, `result`, `string-list`, `model`,
+`tokenizer`, `gen-state`, `partial`, `builtin-ref`,
+`user-fn-ref`, or `device-tensor`. It is TOTAL -- it inspects
+the already-evaluated value and never errors -- so a program
+can branch on a root value's kind before calling kind-specific
+accessors: [[has_field / record_get (builtins)]] on records,
+[[to_json (builtin)]] on data. The same classifier names the
+kind in error messages and the connect visualization layer, so
+the strings are stable across surfaces.
+
 ## parse_json (builtin)
 
 `parse_json(s)` turns JSON text into a typed MLPL value: an

@@ -18,6 +18,7 @@ pub(crate) fn try_dispatch(
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "equal" | "repr" => Some(eval_structural(name, args, env, trace)),
+        "type_of" => Some(eval_type_of(args, env, trace)),
         "call" => Some(eval_call(args, env, trace, span)),
         "bracket" => Some(crate::fncall_bracket::eval_bracket(args, env, trace)),
         "tests" | "test_info" | "annotations" => {
@@ -55,6 +56,30 @@ fn eval_structural(
     Ok(Value::Array(mlpl_array::DenseArray::from_scalar(
         f64::from(u8::from(eq)),
     )))
+}
+
+/// `type_of(v)` -- the stable kind string of any value ("array",
+/// "string", "record", "result", "string-list", "model",
+/// "tokenizer", "gen-state", "partial", "builtin-ref",
+/// "user-fn-ref", "device-tensor"). Total: it inspects the
+/// already-evaluated value and never errors, so a program can
+/// branch on a root value's kind before calling kind-specific
+/// accessors. Shares the one classifier with error messages and
+/// the connect viz layer (`mlpl_eval_types::value_kind`).
+fn eval_type_of(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let [arg] = args else {
+        return Err(EvalError::BadArity {
+            func: "type_of".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    };
+    let v = crate::eval::eval_expr(arg, env, trace)?;
+    Ok(Value::Str(mlpl_eval_types::value_kind(&v).to_string()))
 }
 
 /// `call(f, args...)` -- uniform invocation of a reference value
