@@ -52,6 +52,21 @@ the teardown diagnostic is retained in the payload's
 teardown by construction. A test runner's per-case lifecycle is
 `bracket(before_each, test, after_each)` in a loop.
 
+## Bitwise operations (band / bor / bxor / bnot / popcount)
+
+Fixed-width unsigned bit operations over non-negative integers
+held as exact `f64` (design: `docs/bit-ops-design.md`): `band`
+/ `bor` / `bxor` are element-wise with scalar broadcast,
+`bnot(x, width)` complements within `width` bits, and
+`popcount(x)` counts set bits. The domain is `0..2^53`
+(negatives, non-integers, and out-of-range values error
+loudly). No new value kind -- a byte is just an `f64` in
+`0..256`. These unlock Swiss-table control bytes, compact
+Bloom filters, and Hamming-distance indexes
+(`popcount(bxor(a, b))`); the shift/mask/bit-vector companions
+(`shl` / `shr` / `bmask` / `bits` / `from_bits`) round out the
+surface.
+
 ## BDH (Dragon Hatchling)
 
 A brain-inspired architecture built around SPARSE POSITIVE

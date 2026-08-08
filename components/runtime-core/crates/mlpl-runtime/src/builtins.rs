@@ -24,6 +24,7 @@ fn try_external_dispatchers(
 ) -> Option<Result<DenseArray, RuntimeError>> {
     mlpl_runtime_math::try_call(name, args.to_vec())
         .or_else(|| mlpl_runtime_array::try_call(name, args.to_vec()))
+        .or_else(|| mlpl_runtime_bits::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_conv::try_call(name, args.to_vec()))
         .or_else(|| mlpl_runtime_rnn::try_call(name, args.to_vec()))
         .or_else(|| crate::random_builtins::try_call(name, args.to_vec()))

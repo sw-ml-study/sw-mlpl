@@ -239,6 +239,27 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "monotonic elapsed milliseconds for benchmarking (native/connect only)",
             ),
             (
+                "band",
+                "band(a, b)",
+                "bitwise AND over non-negative integers (element-wise, broadcast)",
+            ),
+            ("bor", "bor(a, b)", "bitwise OR"),
+            (
+                "bxor",
+                "bxor(a, b)",
+                "bitwise XOR (Hamming distance = popcount(bxor(a, b)))",
+            ),
+            (
+                "bnot",
+                "bnot(x, width)",
+                "bitwise complement within width bits",
+            ),
+            (
+                "popcount",
+                "popcount(x)",
+                "number of set bits in each element",
+            ),
+            (
                 "dedupe_rows",
                 "dedupe_rows(X)",
                 "unique rows as {rows, index}",

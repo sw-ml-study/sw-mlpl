@@ -4,6 +4,7 @@
 members = [
     "crates/mlpl-runtime-array",
     "crates/mlpl-runtime-math",
+    "crates/mlpl-runtime-bits",
 ]
 resolver = "2"
 

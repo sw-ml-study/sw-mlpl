@@ -1,0 +1,13 @@
+[package]
+name = "mlpl-runtime-bits"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Fixed-width unsigned bit operations over exact-f64 integers
+# (docs/bit-ops-design.md). Pure; depends only on mlpl-array +
+# mlpl-runtime-core, keeping the dep graph a DAG.
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-runtime-core = { path = "../../../runtime-core/crates/mlpl-runtime-core" }
