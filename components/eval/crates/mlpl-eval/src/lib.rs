@@ -100,6 +100,7 @@ mod json_decode;
 mod json_encode;
 mod json_scalar;
 mod reflect_info;
+mod toml_decode;
 mod toml_encode;
 mod toml_scalar;
 // The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,

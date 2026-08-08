@@ -229,6 +229,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "record -> deterministic TOML text (sorted keys, nested records as [sections]); ok(text)/err",
             ),
             (
+                "parse_toml",
+                "parse_toml(text)",
+                "TOML config subset -> record ([tables], key=value, scalars/strings/arrays); ok(record)/err",
+            ),
+            (
                 "to_json",
                 "to_json(v)",
                 "value -> deterministic JSON string (encode half of parse_json)",

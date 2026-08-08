@@ -5,6 +5,28 @@
 //! JSON's escape set).
 
 use mlpl_array::DenseArray;
+use mlpl_eval_types::Value;
+
+/// Parse one TOML value (the text after `=`, or an array element)
+/// by delegating to the JSON value parser -- TOML basic strings,
+/// numbers, booleans (`true`/`false` -> 1/0), and arrays are a
+/// subset of JSON values. A trailing `# comment` is allowed.
+pub(crate) fn parse_value(s: &str) -> Result<Value, String> {
+    if s.is_empty() {
+        return Err("parse_toml: empty value".to_string());
+    }
+    let bytes = s.as_bytes();
+    let mut pos = 0;
+    let v = crate::json_decode::value(s, bytes, &mut pos)?;
+    crate::json_scalar::skip_ws(bytes, &mut pos);
+    if pos < bytes.len() && bytes[pos] != b'#' {
+        return Err(format!(
+            "parse_toml: unexpected text after value: {:?}",
+            &s[pos..]
+        ));
+    }
+    Ok(v)
+}
 
 /// A bare TOML key is non-empty ASCII `[A-Za-z0-9_-]`. Quoted and
 /// dotted keys are out of this subset -- a loud error names the

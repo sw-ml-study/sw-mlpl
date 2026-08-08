@@ -16,8 +16,32 @@ pub(crate) fn try_dispatch(
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "to_toml" => Some(eval_to_toml(args, env, trace)),
+        "parse_toml" => Some(eval_parse_toml(args, env, trace)),
         _ => None,
     }
+}
+
+fn eval_parse_toml(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    crate::grad::arity_check(args, 1, "parse_toml")?;
+    let Value::Str(text) = crate::eval::eval_expr(&args[0], env, trace)? else {
+        return Err(EvalError::Unsupported(
+            "parse_toml: the argument is TOML text (a string)".into(),
+        ));
+    };
+    Ok(match crate::toml_decode::decode(&text) {
+        Ok(v) => Value::Result {
+            ok: true,
+            payload: Box::new(v),
+        },
+        Err(msg) => Value::Result {
+            ok: false,
+            payload: Box::new(Value::Str(msg)),
+        },
+    })
 }
 
 fn eval_to_toml(

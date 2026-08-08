@@ -344,6 +344,23 @@ them. Builtin references keep exact arity -- their arity is
 not a fixed fact -- so wrap a builtin in a `u:` definition to
 stage it. `repr` shows `partial(:u:B, 1 of 3 bound)`.
 
+## parse_toml (builtin)
+
+`parse_toml(text)` is the decode half of the TOML codec, the
+inverse of [[to_toml (builtin)]], and RESULT-based:
+`ok(record)` / `err(message with line number)`. A TOML document
+is a table, so the result is always a record. It is
+line-oriented: `#` comments and blank lines are skipped,
+`[table]` and dotted `[table.sub]` headers nest records, and
+`key = value` lines assign into the current table. Values reuse
+the JSON value parser -- integer, float, `true`/`false` (to
+1/0), basic string, and homogeneous arrays of numbers or
+strings -- and a trailing `# comment` after a value is allowed.
+It round-trips with `to_toml` for the supported forms:
+`parse_toml(unwrap(to_toml(record)))`. Inline tables, arrays of
+tables, literal/multiline strings, datetimes, and dotted-key
+assignments are outside the subset.
+
 ## to_toml (builtin)
 
 `to_toml(record)` is the encode half of the TOML codec, for
