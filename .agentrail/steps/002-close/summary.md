@@ -1,0 +1,1 @@
+Saga closed: has_field/record_get live incl. connect; wiki row; q-and-a records the core-vs-library rationale; demo-functional-pipelines unblocked. Pages deployed.

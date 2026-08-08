@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close safe-record-lookup: rebuild pages+deploy (eval-layer builtins reach the..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-07T20:09:19"
+completed_at = "2026-08-07T20:38:14"
 task_type = "docs"
-commits = []
+commits = ["e8c403c7288af1ff4abfabd18324327673604ef4"]
