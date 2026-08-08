@@ -1,0 +1,6 @@
+name = "type-detection"
+status = "active"
+current_step = 0
+created_at = "2026-08-07T21:42:03"
+plan_file = ".agentrail/plan.md"
+retroactive = false
