@@ -5,6 +5,47 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-07 (atomic-writes / demo-algorithms durability)
+
+**Q: what's the next serialization blocker? (demo-algorithms
+proceeding.)**
+
+A: Shipped write_atomic(path, value), clearing the "atomic
+writes" blocker. value is a string (UTF-8 bytes) or a byte
+array; the bytes go to a hidden sibling temp file which is then
+renamed over the target -- atomic on a POSIX same-fs rename, so
+a reader sees the old file or the whole new one, never a torn
+write; the temp is cleaned up on failure. Where write_text /
+write_bytes can leave a partial file on a mid-write crash,
+write_atomic cannot. Reuses fs_bytes::array_to_bytes and the
+string-vs-array distinction from type_of; durable persist
+composes: write_atomic(p, to_json(v)).
+
+Updated demo-algorithms serialization blocker status (4 of 7
+cleared):
+
+- JSON encoding -- DONE (to_json).
+- non-record root type detection -- DONE (type_of).
+- raw bytes / I/O -- DONE (read_bytes / write_bytes).
+- atomic writes -- DONE (write_atomic).
+- TOML + native codecs -- OPEN; parse_toml/to_toml pair (same
+  shape as the JSON codec).
+- decode limits -- OPEN; size/depth caps on parsers.
+- streaming serialization -- OPEN; incremental large-input parse.
+
+Chosen over TOML/limits/streaming because it is the smallest,
+highest value-per-effort increment and directly completes the
+I/O just shipped -- persistence goes from "works" to "safe".
+The remaining three are a codec (TOML, medium), hardening
+(decode limits, small), and a large item (streaming); none
+block demo-algorithms' near-complete demos.
+
+**Build-freshness reminder:** demo-algorithms invokes
+../sw-mlpl/target/release/mlpl-repl directly (its README), which
+is only as fresh as the last manual cargo build. The close step
+of each fs/builtin saga now rebuilds that binary so downstream
+stays current; this saga's close rebuilt it to 2c7806a4.
+
 ## 2026-08-07 (byte-io / demo-algorithms raw bytes)
 
 **Q: start the byte-io saga.**
