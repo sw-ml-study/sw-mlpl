@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga tagged-envelope: complete (3 steps)
+- docs: close tagged-envelope; lossless rank>=2 + Result JSON round trip
+- saga tagged-envelope: step envelope-decode complete
+- feat(eval): parse_json reconstructs $mlpl envelopes unconditionally (envelope-decode)
+- saga tagged-envelope: step envelope-encode complete
+- feat(eval): to_json {tagged: 1} -- reserved $mlpl envelope encode (envelope-encode)
+- saga tagged-envelope: bootstrap step 001
+- saga tagged-envelope: init
+- chore(agentrail): archive record-keys saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga record-keys: complete (2 steps)
 - docs: close record-keys; demo-ml-utils step 004 unblocked
 - saga record-keys: step record-keys complete
