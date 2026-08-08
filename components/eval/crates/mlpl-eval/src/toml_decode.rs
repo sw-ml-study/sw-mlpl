@@ -9,7 +9,14 @@ use std::collections::BTreeMap;
 use mlpl_eval_types::Value;
 
 /// Decode the TOML config subset into a record value.
-pub(crate) fn decode(text: &str) -> Result<Value, String> {
+pub(crate) fn decode(text: &str, limits: &crate::decode_limits::Limits) -> Result<Value, String> {
+    if text.len() > limits.max_bytes {
+        return Err(format!(
+            "input of {} bytes exceeds max_bytes {}",
+            text.len(),
+            limits.max_bytes
+        ));
+    }
     let mut root: BTreeMap<String, Value> = BTreeMap::new();
     let mut path: Vec<String> = Vec::new();
     for (i, raw) in text.lines().enumerate() {
@@ -22,7 +29,7 @@ pub(crate) fn decode(text: &str) -> Result<Value, String> {
             path = parse_header(line).map_err(at)?;
             table_at(&mut root, &path).map_err(at)?;
         } else {
-            let (k, v) = parse_kv(line).map_err(at)?;
+            let (k, v) = parse_kv(line, limits.max_depth).map_err(at)?;
             table_at(&mut root, &path).map_err(at)?.insert(k, v);
         }
     }
@@ -49,13 +56,13 @@ fn parse_header(line: &str) -> Result<Vec<String>, String> {
 }
 
 /// `key = value` split at the first `=` (bare keys hold no `=`).
-fn parse_kv(line: &str) -> Result<(String, Value), String> {
+fn parse_kv(line: &str, max_depth: usize) -> Result<(String, Value), String> {
     let eq = line
         .find('=')
         .ok_or_else(|| format!("parse_toml: expected key = value, got {line:?}"))?;
     let key = line[..eq].trim();
     crate::toml_scalar::bare_key(key).map_err(|_| format!("parse_toml: bad key {key:?}"))?;
-    let value = crate::toml_scalar::parse_value(line[eq + 1..].trim())?;
+    let value = crate::toml_scalar::parse_value(line[eq + 1..].trim(), max_depth)?;
     Ok((key.to_string(), value))
 }
 

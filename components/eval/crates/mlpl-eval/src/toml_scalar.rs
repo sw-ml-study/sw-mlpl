@@ -11,13 +11,13 @@ use mlpl_eval_types::Value;
 /// by delegating to the JSON value parser -- TOML basic strings,
 /// numbers, booleans (`true`/`false` -> 1/0), and arrays are a
 /// subset of JSON values. A trailing `# comment` is allowed.
-pub(crate) fn parse_value(s: &str) -> Result<Value, String> {
+pub(crate) fn parse_value(s: &str, max_depth: usize) -> Result<Value, String> {
     if s.is_empty() {
         return Err("parse_toml: empty value".to_string());
     }
     let bytes = s.as_bytes();
     let mut pos = 0;
-    let v = crate::json_decode::value(s, bytes, &mut pos)?;
+    let v = crate::json_decode::value(s, bytes, &mut pos, max_depth)?;
     crate::json_scalar::skip_ws(bytes, &mut pos);
     if pos < bytes.len() && bytes[pos] != b'#' {
         return Err(format!(

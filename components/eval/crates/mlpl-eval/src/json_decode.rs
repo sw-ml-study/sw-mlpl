@@ -7,11 +7,18 @@ use std::collections::BTreeMap;
 use mlpl_array::DenseArray;
 use mlpl_eval_types::Value;
 
-pub(crate) fn decode(text: &str) -> Result<Value, String> {
+pub(crate) fn decode(text: &str, limits: &crate::decode_limits::Limits) -> Result<Value, String> {
+    if text.len() > limits.max_bytes {
+        return Err(format!(
+            "input of {} bytes exceeds max_bytes {}",
+            text.len(),
+            limits.max_bytes
+        ));
+    }
     let bytes = text.as_bytes();
     let mut pos = 0;
     crate::json_scalar::skip_ws(bytes, &mut pos);
-    let v = value(text, bytes, &mut pos)?;
+    let v = value(text, bytes, &mut pos, limits.max_depth)?;
     crate::json_scalar::skip_ws(bytes, &mut pos);
     if pos != bytes.len() {
         return Err(format!("trailing input at byte {pos}"));
@@ -19,10 +26,17 @@ pub(crate) fn decode(text: &str) -> Result<Value, String> {
     Ok(v)
 }
 
-pub(crate) fn value(text: &str, bytes: &[u8], pos: &mut usize) -> Result<Value, String> {
+/// `depth` is the remaining container-nesting budget; a container
+/// opened at depth 0 exceeds the limit.
+pub(crate) fn value(
+    text: &str,
+    bytes: &[u8],
+    pos: &mut usize,
+    depth: usize,
+) -> Result<Value, String> {
     match bytes.get(*pos) {
-        Some(b'{') => object(text, bytes, pos),
-        Some(b'[') => array(text, bytes, pos),
+        Some(b'{') => object(text, bytes, pos, depth),
+        Some(b'[') => array(text, bytes, pos, depth),
         Some(b'"') => Ok(Value::Str(crate::json_scalar::string(text, bytes, pos)?)),
         Some(b't') if text[*pos..].starts_with("true") => {
             *pos += 4;
@@ -41,7 +55,10 @@ pub(crate) fn value(text: &str, bytes: &[u8], pos: &mut usize) -> Result<Value, 
     }
 }
 
-fn object(text: &str, bytes: &[u8], pos: &mut usize) -> Result<Value, String> {
+fn object(text: &str, bytes: &[u8], pos: &mut usize, depth: usize) -> Result<Value, String> {
+    if depth == 0 {
+        return Err(format!("maximum nesting depth exceeded at byte {}", *pos));
+    }
     *pos += 1;
     let mut fields = BTreeMap::new();
     crate::json_scalar::skip_ws(bytes, pos);
@@ -58,7 +75,7 @@ fn object(text: &str, bytes: &[u8], pos: &mut usize) -> Result<Value, String> {
         }
         *pos += 1;
         crate::json_scalar::skip_ws(bytes, pos);
-        fields.insert(key, value(text, bytes, pos)?);
+        fields.insert(key, value(text, bytes, pos, depth - 1)?);
         crate::json_scalar::skip_ws(bytes, pos);
         match bytes.get(*pos) {
             Some(b',') => *pos += 1,
@@ -73,7 +90,10 @@ fn object(text: &str, bytes: &[u8], pos: &mut usize) -> Result<Value, String> {
 
 /// Homogeneous arrays only: all numbers (vector) or all
 /// strings (string list); an empty array is the empty vector.
-fn array(text: &str, bytes: &[u8], pos: &mut usize) -> Result<Value, String> {
+fn array(text: &str, bytes: &[u8], pos: &mut usize, depth: usize) -> Result<Value, String> {
+    if depth == 0 {
+        return Err(format!("maximum nesting depth exceeded at byte {}", *pos));
+    }
     *pos += 1;
     let mut nums: Vec<f64> = Vec::new();
     let mut strs: Vec<String> = Vec::new();
@@ -84,7 +104,7 @@ fn array(text: &str, bytes: &[u8], pos: &mut usize) -> Result<Value, String> {
     }
     loop {
         crate::json_scalar::skip_ws(bytes, pos);
-        match value(text, bytes, pos)? {
+        match value(text, bytes, pos, depth - 1)? {
             Value::Array(a) if a.rank() == 0 && strs.is_empty() => nums.push(a.data()[0]),
             Value::Str(s) if nums.is_empty() => strs.push(s),
             _ => return Err(format!("mixed or nested array near byte {}", *pos)),

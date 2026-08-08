@@ -359,7 +359,9 @@ strings -- and a trailing `# comment` after a value is allowed.
 It round-trips with `to_toml` for the supported forms:
 `parse_toml(unwrap(to_toml(record)))`. Inline tables, arrays of
 tables, literal/multiline strings, datetimes, and dotted-key
-assignments are outside the subset.
+assignments are outside the subset. It accepts the same optional
+`{max_depth, max_bytes}` options record as [[parse_json
+(builtin)]] to cap decoding depth and input size.
 
 ## to_toml (builtin)
 
@@ -418,7 +420,15 @@ becomes the empty vector (absence as data, the zilde idiom).
 Result-speaking -- `event = parse_json(line)?` -- and the
 inverse of the [[test_event_sink / emit_test_event
 (builtins)]] encoding, so an MLPL reporter can consume the
-event lines `run_script(..., {capture: 1})` returns.
+event lines `run_script(..., {capture: 1})` returns. An optional
+second argument, an options record, caps decoding for untrusted
+input: `max_depth` (default 128) bounds object/array nesting so
+the recursive decoder cannot stack-overflow on adversarial input
+like `{"a":{"a":{"a":...}}}`, and `max_bytes` rejects oversized
+input before parsing. `parse_toml` takes the same options. A
+malformed options argument (non-record, or a negative or
+non-integer field) is a hard error, distinct from bad input data
+(an err Result).
 
 ## pareto_plot (builtin)
 

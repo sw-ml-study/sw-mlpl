@@ -26,13 +26,8 @@ fn eval_parse_toml(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    crate::grad::arity_check(args, 1, "parse_toml")?;
-    let Value::Str(text) = crate::eval::eval_expr(&args[0], env, trace)? else {
-        return Err(EvalError::Unsupported(
-            "parse_toml: the argument is TOML text (a string)".into(),
-        ));
-    };
-    Ok(match crate::toml_decode::decode(&text) {
+    let (text, limits) = crate::decode_limits::text_and_limits("parse_toml", args, env, trace)?;
+    Ok(match crate::toml_decode::decode(&text, &limits) {
         Ok(v) => Value::Result {
             ok: true,
             payload: Box::new(v),

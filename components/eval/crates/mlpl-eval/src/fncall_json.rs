@@ -31,19 +31,8 @@ fn eval_parse_json(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    let [arg] = args else {
-        return Err(EvalError::BadArity {
-            func: "parse_json".into(),
-            expected: 1,
-            got: args.len(),
-        });
-    };
-    let Value::Str(text) = crate::eval::eval_expr(arg, env, trace)? else {
-        return Err(EvalError::Unsupported(
-            "parse_json: the argument is JSON text (a string)".into(),
-        ));
-    };
-    Ok(match crate::json_decode::decode(&text) {
+    let (text, limits) = crate::decode_limits::text_and_limits("parse_json", args, env, trace)?;
+    Ok(match crate::json_decode::decode(&text, &limits) {
         Ok(v) => Value::Result {
             ok: true,
             payload: Box::new(v),

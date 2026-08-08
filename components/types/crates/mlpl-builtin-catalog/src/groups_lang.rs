@@ -220,8 +220,8 @@ pub(crate) const GROUPS: &[FnGroup] = &[
             ),
             (
                 "parse_json",
-                "parse_json(s)",
-                "JSON text -> typed value: objects to records, arrays to vectors/lists",
+                "parse_json(s[, opts])",
+                "JSON text -> typed value; opts {max_depth, max_bytes} cap nesting/size",
             ),
             (
                 "to_toml",
@@ -230,8 +230,8 @@ pub(crate) const GROUPS: &[FnGroup] = &[
             ),
             (
                 "parse_toml",
-                "parse_toml(text)",
-                "TOML config subset -> record ([tables], key=value, scalars/strings/arrays); ok(record)/err",
+                "parse_toml(text[, opts])",
+                "TOML config subset -> record; opts {max_depth, max_bytes} cap nesting/size; ok(record)/err",
             ),
             (
                 "to_json",
