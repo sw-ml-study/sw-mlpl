@@ -1664,9 +1664,11 @@ The raw-byte half of the sandboxed filesystem API, for binary
 formats that are not exact text. `read_bytes(path)` returns
 `ok(bytes)` -- a rank-1 array of byte values (`0..256`) -- or
 `err(...)`; `write_bytes(path, bytes)` writes a rank-`<=1`
-array whose cells are integers `0..=255` (an out-of-range or
-non-integer cell is a LOUD error naming it) and returns
-`ok(1)` / `err(...)`. Both resolve against the same
+array whose cells are integers `0..=255` and returns
+`ok(1)` / `err(...)`. It is Result-based for every outcome: a
+wrong-typed value or an out-of-range/non-integer cell is an
+`err(...)` naming the culprit, not a hard error. Both resolve
+against the same
 `--source-dir` sandbox root as [[fs_walk / read_text /
 write_text / remove_path / run_script (builtins)]] and answer
 `err(...)` for I/O failures or traversal outside it. A byte is
@@ -1687,9 +1689,10 @@ POSIX same-filesystem `rename`, so a concurrent reader sees
 either the old file or the whole new one, never a half-written
 (torn) file; the temp is removed if either step fails. Where
 `write_text` / `write_bytes` can leave a partial file if the
-process dies mid-write, `write_atomic` cannot. Returns
-`ok(1)` / `err(...)`, resolves against the same `--source-dir`
-sandbox root, and refuses traversal outside it. Durable persist
+process dies mid-write, `write_atomic` cannot. Result-based for
+every outcome: a wrong-typed value or an out-of-range byte is an
+`err(...)`, success is `ok(1)`. Resolves against the same
+`--source-dir` sandbox root and refuses traversal outside it. Durable persist
 composes with the codecs: `write_atomic(p, unwrap(to_json(v)))`.
 
 ## global_set (builtin)

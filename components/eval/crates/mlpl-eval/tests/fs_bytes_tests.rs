@@ -3,7 +3,8 @@
 //! contained by the environment's sandbox root, a byte an f64 in
 //! 0..256 (the tokenize_bytes / bit-ops convention). Domain
 //! violations (out-of-range or non-integer cells, a non-array
-//! byte arg) are LOUD hard errors naming the culprit.
+//! byte arg) are err(...) Results naming the culprit, like the
+//! rest of the fs API.
 
 use mlpl_eval::{Environment, Value};
 
@@ -17,6 +18,17 @@ fn scalar(env: &mut Environment, src: &str) -> f64 {
     match eval_value(env, src).unwrap_or_else(|e| panic!("{src}: {e}")) {
         Value::Array(a) => a.data()[0],
         other => panic!("expected scalar from {src}, got {other:?}"),
+    }
+}
+
+/// Pull the message out of an err(...) Result.
+fn err_payload(env: &mut Environment, src: &str) -> String {
+    match eval_value(env, src).unwrap_or_else(|e| panic!("{src}: {e}")) {
+        Value::Result { ok: false, payload } => match *payload {
+            Value::Str(s) => s,
+            other => panic!("expected err(string) from {src}, got err({other:?})"),
+        },
+        other => panic!("expected err(...) result from {src}, got {other:?}"),
     }
 }
 
@@ -69,21 +81,31 @@ fn read_bytes_missing_file_is_err_result() {
 }
 
 #[test]
-fn out_of_range_byte_is_a_hard_error() {
+fn out_of_range_byte_is_an_err_result() {
     let dir = sandbox("range");
     let mut env = env_with(&dir);
-    let e = eval_value(&mut env, "write_bytes(\"a.bin\", [1, 256])").unwrap_err();
-    assert!(e.contains("256"), "error should name the culprit: {e}");
-    assert!(eval_value(&mut env, "write_bytes(\"b.bin\", [1, -1])").is_err());
-    assert!(eval_value(&mut env, "write_bytes(\"c.bin\", [1, 3.5])").is_err());
+    // catchable err VALUE naming the culprit, not a hard error.
+    let msg = err_payload(&mut env, "write_bytes(\"a.bin\", [1, 256])");
+    assert!(msg.contains("256"), "err should name the culprit: {msg}");
+    assert_eq!(
+        scalar(&mut env, "is_ok(write_bytes(\"b.bin\", [1, -1]))"),
+        0.0
+    );
+    assert_eq!(
+        scalar(&mut env, "is_ok(write_bytes(\"c.bin\", [1, 3.5]))"),
+        0.0
+    );
     std::fs::remove_dir_all(&dir).ok();
 }
 
 #[test]
-fn non_array_byte_arg_is_a_hard_error() {
+fn non_array_byte_arg_is_an_err_result() {
     let dir = sandbox("nonarr");
     let mut env = env_with(&dir);
-    assert!(eval_value(&mut env, "write_bytes(\"s.bin\", \"hi\")").is_err());
+    assert_eq!(
+        scalar(&mut env, "is_ok(write_bytes(\"s.bin\", \"hi\"))"),
+        0.0
+    );
     std::fs::remove_dir_all(&dir).ok();
 }
 

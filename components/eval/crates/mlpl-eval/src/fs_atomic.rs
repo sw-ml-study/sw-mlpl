@@ -36,7 +36,6 @@ pub(crate) fn eval_write_atomic(
         )));
     };
     let value = crate::eval::eval_expr(value_arg, env, trace)?;
-    let bytes = value_to_bytes(value)?;
     let Some(root) = env.fs_root.clone() else {
         return Ok(fs_err(
             "write_atomic: no filesystem sandbox on this surface (script mode sets \
@@ -44,12 +43,16 @@ pub(crate) fn eval_write_atomic(
                 .into(),
         ));
     };
-    Ok(write_atomic(&root, &rel, &bytes))
+    // Invalid input is an err Result, not a hard error.
+    Ok(match value_to_bytes(value) {
+        Ok(bytes) => write_atomic(&root, &rel, &bytes),
+        Err(e) => fs_err(format!("{e}")),
+    })
 }
 
 /// A string contributes its UTF-8 bytes; a byte array is
 /// validated through the shared `array_to_bytes`; anything else
-/// is a LOUD hard error.
+/// is an err (surfaced as a Result by the caller).
 fn value_to_bytes(value: Value) -> Result<Vec<u8>, EvalError> {
     match value {
         Value::Str(s) => Ok(s.into_bytes()),

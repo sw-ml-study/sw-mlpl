@@ -19,6 +19,17 @@ fn scalar(env: &mut Environment, src: &str) -> f64 {
     }
 }
 
+/// Pull the message out of an err(...) Result.
+fn err_payload(env: &mut Environment, src: &str) -> String {
+    match eval_value(env, src).unwrap_or_else(|e| panic!("{src}: {e}")) {
+        Value::Result { ok: false, payload } => match *payload {
+            Value::Str(s) => s,
+            other => panic!("expected err(string) from {src}, got err({other:?})"),
+        },
+        other => panic!("expected err(...) result from {src}, got {other:?}"),
+    }
+}
+
 fn sandbox(tag: &str) -> std::path::PathBuf {
     let dir = std::env::temp_dir().join(format!("mlpl-atomic-{}-{tag}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);
@@ -94,20 +105,23 @@ fn leaves_no_temp_file_behind() {
 }
 
 #[test]
-fn out_of_range_byte_is_a_hard_error() {
+fn out_of_range_byte_is_an_err_result() {
     let dir = sandbox("range");
     let mut env = env_with(&dir);
-    let e = eval_value(&mut env, "write_atomic(\"a.bin\", [1, 300])").unwrap_err();
-    assert!(e.contains("300"), "error should name the culprit: {e}");
+    let msg = err_payload(&mut env, "write_atomic(\"a.bin\", [1, 300])");
+    assert!(msg.contains("300"), "err should name the culprit: {msg}");
     std::fs::remove_dir_all(&dir).ok();
 }
 
 #[test]
-fn non_string_non_array_value_is_a_hard_error() {
+fn non_string_non_array_value_is_an_err_result() {
     let dir = sandbox("badval");
     let mut env = env_with(&dir);
     // a record is neither a string nor a byte array.
-    assert!(eval_value(&mut env, "write_atomic(\"a.bin\", {x: 1})").is_err());
+    assert_eq!(
+        scalar(&mut env, "is_ok(write_atomic(\"a.bin\", {x: 1}))"),
+        0.0
+    );
     std::fs::remove_dir_all(&dir).ok();
 }
 

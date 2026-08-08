@@ -48,12 +48,8 @@ pub(crate) fn eval_fs_bytes(
     if name == "read_bytes" {
         return Ok(read_bytes(&root, &rel));
     }
-    let arr = crate::eval::eval_expr(&args[1], env, trace)?.into_array()?;
-    Ok(write_bytes(
-        &root,
-        &rel,
-        array_to_bytes("write_bytes", &arr)?,
-    ))
+    let value = crate::eval::eval_expr(&args[1], env, trace)?;
+    Ok(write_bytes(&root, &rel, &value))
 }
 
 /// Validate a rank-<=1 array as raw bytes: every cell an integer
@@ -96,9 +92,23 @@ fn read_bytes(root: &std::path::Path, rel: &str) -> Value {
     }
 }
 
-/// `write_bytes(path, bytes)` -> `ok(1)` / `err`. Bytes already
-/// validated to `Vec<u8>` by the caller via `array_to_bytes`.
-fn write_bytes(root: &std::path::Path, rel: &str, bytes: Vec<u8>) -> Value {
+/// `write_bytes(path, bytes)` -> `ok(1)` / `err`. Invalid input
+/// -- a wrong-typed value or an out-of-range/non-integer cell --
+/// is an `err` Result (the whole fs API speaks Results), not a
+/// hard error.
+fn write_bytes(root: &std::path::Path, rel: &str, value: &Value) -> Value {
+    let bytes = match value {
+        Value::Array(a) => match array_to_bytes("write_bytes", a) {
+            Ok(b) => b,
+            Err(e) => return fs_err(format!("{e}")),
+        },
+        other => {
+            return fs_err(format!(
+                "write_bytes: bytes must be an array -- got {}",
+                mlpl_eval_types::value_kind(other)
+            ));
+        }
+    };
     match contained(root, rel).and_then(|p| std::fs::write(p, bytes).map_err(|e| e.to_string())) {
         Ok(()) => fs_ok(one()),
         Err(e) => fs_err(format!("write_bytes: {e}")),
