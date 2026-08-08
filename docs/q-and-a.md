@@ -5,6 +5,22 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-08 (record-keys -- demo-ml-utils step 004)
+
+**Q: demo-ml-utils step 004 blocked -- record_keys + parse_json
+duplicate-key rejection.**
+
+A: Both shipped. record_keys(record) returns the keys as a
+string-list in deterministic sorted order (records are
+BTreeMap-backed); a non-record is a hard error. parse_json now
+rejects a duplicate object key with err(...) (byte position)
+instead of last-wins overwrite -- preserving the evidence needed
+to flag a repeated safetensors tensor name. Together they let
+demo-ml-utils enumerate tensor names and validate uniqueness
+purely in MLPL (no hard-coding, no moving parsing into Rust).
+record_keys lives in fncall_record_keys.rs; dup rejection is in
+json_decode::object.
+
 ## 2026-08-08 (max-elements)
 
 **Q: return to scheduled work -- the max_elements decode cap.**
