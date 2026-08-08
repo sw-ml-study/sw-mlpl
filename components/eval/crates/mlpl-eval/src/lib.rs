@@ -88,6 +88,7 @@ mod fncall_values;
 mod fs_atomic;
 mod fs_bytes;
 mod fs_ops;
+mod fs_range;
 mod fs_walk_impl;
 mod grad;
 mod grad_calls_basic;

@@ -180,8 +180,13 @@ pub(crate) const GROUPS: &[FnGroup] = &[
             ),
             (
                 "read_bytes",
-                "read_bytes(path)",
-                "sandboxed raw-byte file read; returns ok(rank-1 array 0..256)/err",
+                "read_bytes(path[, offset, length])",
+                "sandboxed raw-byte read; 3-arg form seeks a bounded slice; ok(rank-1 array 0..256)/err",
+            ),
+            (
+                "file_size",
+                "file_size(path)",
+                "sandboxed byte count from metadata (no read); ok(count)/err",
             ),
             (
                 "write_bytes",

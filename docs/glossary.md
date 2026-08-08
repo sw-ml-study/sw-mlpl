@@ -1711,12 +1711,26 @@ lines. Together with [[global_set (builtin)]] and
 [[test_event_sink / emit_test_event (builtins)]], a complete
 test runner is expressible in MLPL itself.
 
+## file_size (builtin)
+
+`file_size(path)` returns `ok(byte_count)` / `err(...)` from the
+file's metadata WITHOUT reading its contents -- sandboxed against
+the same `--source-dir` root as the rest of the filesystem API.
+It pairs with the 3-arg [[read_bytes / write_bytes (builtins)]]
+seek form to bound and validate offsets when scanning a large
+file (for example, reading a safetensors 8-byte header-length
+prefix, then the header JSON, without loading the tensor data).
+
 ## read_bytes / write_bytes (builtins)
 
 The raw-byte half of the sandboxed filesystem API, for binary
 formats that are not exact text. `read_bytes(path)` returns
 `ok(bytes)` -- a rank-1 array of byte values (`0..256`) -- or
-`err(...)`; `write_bytes(path, bytes)` writes a rank-`<=1`
+`err(...)`. A 3-arg form, `read_bytes(path, offset, length)`,
+SEEKS to `offset` and reads at most `length` bytes (clamped at
+EOF) without materializing the rest -- bounded large-file
+analysis; pair it with [[file_size (builtin)]] to bound offsets.
+`write_bytes(path, bytes)` writes a rank-`<=1`
 array whose cells are integers `0..=255` and returns
 `ok(1)` / `err(...)`. It is Result-based for every outcome: a
 wrong-typed value or an out-of-range/non-integer cell is an
