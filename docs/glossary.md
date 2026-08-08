@@ -344,6 +344,18 @@ them. Builtin references keep exact arity -- their arity is
 not a fixed fact -- so wrap a builtin in a `u:` definition to
 stage it. `repr` shows `partial(:u:B, 1 of 3 bound)`.
 
+## to_json (builtin)
+
+`to_json(value)` is the deterministic encode half of
+[[parse_json (builtin)]]: a value to a JSON string, with
+records as objects (SORTED keys), rank-1 arrays as flat lists,
+strings escaped with exact Unicode, integers bare, and
+`ok(x)`/`err(e)` as `{ok, value|error}`. Non-data kinds
+(models, tokenizers, generation state, partials, references)
+error loudly. Scalars, vectors, strings, string lists, and
+records of those round-trip through `parse_json`. Shares its
+encoder with the typed test-event transport.
+
 ## parse_json (builtin)
 
 `parse_json(s)` turns JSON text into a typed MLPL value: an

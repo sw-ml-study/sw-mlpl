@@ -19,7 +19,11 @@ pub(crate) fn try_dispatch(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Option<Result<Value, EvalError>> {
-    (name == "parse_json").then(|| eval_parse_json(args, env, trace))
+    match name {
+        "parse_json" => Some(eval_parse_json(args, env, trace)),
+        "to_json" => Some(eval_to_json(args, env, trace)),
+        _ => None,
+    }
 }
 
 fn eval_parse_json(
@@ -49,4 +53,20 @@ fn eval_parse_json(
             payload: Box::new(Value::Str(format!("parse_json: {msg}"))),
         },
     })
+}
+
+fn eval_to_json(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let [arg] = args else {
+        return Err(EvalError::BadArity {
+            func: "to_json".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    };
+    let v = crate::eval::eval_expr(arg, env, trace)?;
+    Ok(Value::Str(crate::json_encode::to_json(&v)?))
 }

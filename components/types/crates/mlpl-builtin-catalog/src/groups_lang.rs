@@ -209,6 +209,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "JSON text -> typed value: objects to records, arrays to vectors/lists",
             ),
             (
+                "to_json",
+                "to_json(v)",
+                "value -> deterministic JSON string (encode half of parse_json)",
+            ),
+            (
                 "run_script",
                 "run_script(path, opts)",
                 "execute a script in a FRESH environment; structured status + captured events",

@@ -94,6 +94,7 @@ mod grad_optim_resident;
 mod grad_optim_resident_math;
 mod hof_compose;
 mod json_decode;
+mod json_encode;
 mod json_scalar;
 mod reflect_info;
 // The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,
