@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-07
 
+- saga paydown-near-fails: complete (assessment + guidance)
+- chore: commit bits-crate lockfile + fmt stragglers; record paydown reality
+- saga: init paydown-near-fails (ratchet spike)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga fixed-width-ints-bitops: complete (4 steps)
 - docs: close fixed-width-ints-bitops (request #2 SHIPPED); pages rebuilt
 - saga fixed-width-ints-bitops: step 003 complete
