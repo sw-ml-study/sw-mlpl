@@ -1,0 +1,1 @@
+to_toml now encodes Result fields as {ok, value|error} sub-tables (was err), completing TOML Result round trip with parse_toml {results:1}; symmetric with JSON. Section logic split to toml_sections.rs. 5 TDD tests.

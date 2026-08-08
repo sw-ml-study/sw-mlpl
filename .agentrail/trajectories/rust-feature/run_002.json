@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 2,
+    "step": "toml-encode-results"
+  },
+  "action": "synthetic {ok,value} table per Result; sibling-module split to hold budgets",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T10:01:39"
+}

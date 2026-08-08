@@ -1,0 +1,9 @@
+number = 3
+slug = "close"
+status = "pending"
+description = "Close semantic-result-reconstruction: rebuild serve+pages+repl, deploy, conne..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T10:01:39"
+task_type = "docs"
+commits = []

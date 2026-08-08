@@ -1,0 +1,1 @@
+Close semantic-result-reconstruction: rebuild serve+pages+repl, deploy, connect smoke of ok/err JSON + TOML round trips, wiki row, q-and-a (Result reconstruction + TOML Result encoding done; remaining: higher-rank round-trips, typed native, streaming, collection-count limits), --done.
