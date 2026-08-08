@@ -428,7 +428,7 @@ second argument, an options record, caps decoding for untrusted
 input: `max_depth` (default 128) bounds object/array nesting so
 the recursive decoder cannot stack-overflow on adversarial input
 like `{"a":{"a":{"a":...}}}`, and `max_bytes` rejects oversized
-input before parsing. `results` (opt-in, off by default) rebuilds
+input before parsing; `max_elements` caps the cumulative collection size (record fields + array cells + string-list items) checked after decoding. `results` (opt-in, off by default) rebuilds
 the Result-shaped records [[to_json (builtin)]] emits --
 `{ok, value}`/`{ok, error}` -- back into `ok(...)`/`err(...)`
 recursively, so a serialized Result survives the round trip:

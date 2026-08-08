@@ -23,6 +23,7 @@ pub(crate) fn decode(text: &str, limits: &crate::decode_limits::Limits) -> Resul
     if pos != bytes.len() {
         return Err(format!("trailing input at byte {pos}"));
     }
+    crate::element_count::check(&v, limits.max_elements)?;
     Ok(v)
 }
 

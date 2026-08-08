@@ -49,6 +49,7 @@ mod def_metadata;
 mod device;
 mod device_dispatch;
 mod device_to;
+mod element_count;
 mod eval;
 mod eval_blocks;
 mod eval_fncalls;

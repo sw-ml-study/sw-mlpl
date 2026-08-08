@@ -33,7 +33,9 @@ pub(crate) fn decode(text: &str, limits: &crate::decode_limits::Limits) -> Resul
             table_at(&mut root, &path).map_err(at)?.insert(k, v);
         }
     }
-    Ok(Value::Record { fields: root })
+    let record = Value::Record { fields: root };
+    crate::element_count::check(&record, limits.max_elements)?;
+    Ok(record)
 }
 
 /// `[a.b.c]` -> `["a", "b", "c"]`; only `#` may follow the `]`.

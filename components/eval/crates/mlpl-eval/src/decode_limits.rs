@@ -19,6 +19,7 @@ pub(crate) const DEFAULT_MAX_DEPTH: usize = 128;
 pub(crate) struct Limits {
     pub(crate) max_depth: usize,
     pub(crate) max_bytes: usize,
+    pub(crate) max_elements: usize,
 }
 
 impl Limits {
@@ -26,6 +27,7 @@ impl Limits {
         Limits {
             max_depth: DEFAULT_MAX_DEPTH,
             max_bytes: usize::MAX,
+            max_elements: usize::MAX,
         }
     }
 }
@@ -77,6 +79,9 @@ fn from_option(who: &str, opt: Option<&Value>) -> Result<(Limits, bool), EvalErr
     }
     if let Some(b) = usize_field(who, fields, "max_bytes")? {
         limits.max_bytes = b;
+    }
+    if let Some(e) = usize_field(who, fields, "max_elements")? {
+        limits.max_elements = e;
     }
     let reconstruct = usize_field(who, fields, "results")?.is_some_and(|n| n != 0);
     Ok((limits, reconstruct))
