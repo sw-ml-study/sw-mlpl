@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga range-read: complete (2 steps)
+- docs: close range-read; demo-ml-utils bounded I/O unblocked
+- saga range-read: step range-read complete
+- feat(eval): bounded read_bytes(path, offset, length) + file_size (range-read)
+- saga range-read: bootstrap step 001
+- saga range-read: init
+- chore(agentrail): archive semantic-result-reconstruction saga
+- docs(changes): refresh CHANGES.md to HEAD
 - docs: variant JSON encoding direction -- reserved tagged envelope
 - docs(changes): refresh CHANGES.md to HEAD
 - saga semantic-result-reconstruction: complete (3 steps)
