@@ -344,6 +344,23 @@ them. Builtin references keep exact arity -- their arity is
 not a fixed fact -- so wrap a builtin in a `u:` definition to
 stage it. `repr` shows `partial(:u:B, 1 of 3 bound)`.
 
+## to_toml (builtin)
+
+`to_toml(record)` is the encode half of the TOML codec, for
+config-style data, and RESULT-based like [[to_json (builtin)]]:
+`ok(toml_text)` / `err(message)`. A TOML document is a table, so
+the root must be a record; a non-record root is an `err`. Fields
+emit DETERMINISTICALLY (sorted): scalar / string / rank-1-array
+/ string-list fields as `key = value` first, then nested records
+as `[section]` and dotted `[section.sub]` tables (TOML requires a
+table's own keys before its sub-table headers). Keys must be bare
+(`A-Za-z0-9_-`). It returns `err(...)` for a non-finite number, a
+rank-`>=2` array, or a value with no TOML form (a result, model,
+...). Supported values: integer, float, basic string, and
+homogeneous arrays of numbers or strings. Inline tables, arrays
+of tables, literal/multiline strings, datetimes, and dotted-key
+assignments are not part of this subset.
+
 ## to_json (builtin)
 
 `to_json(value)` is the deterministic encode half of

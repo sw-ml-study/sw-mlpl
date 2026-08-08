@@ -81,6 +81,7 @@ mod fncall_models;
 mod fncall_record;
 mod fncall_reflect;
 mod fncall_run;
+mod fncall_toml;
 mod fncall_trace;
 mod fncall_values;
 mod fs_atomic;
@@ -99,6 +100,8 @@ mod json_decode;
 mod json_encode;
 mod json_scalar;
 mod reflect_info;
+mod toml_encode;
+mod toml_scalar;
 // The GPU optimizer-step seam types (GpuEnv, GpuAdamStep, AdamHp,
 // layouts, the step registry) moved to mlpl-eval-state
 // (env-types-out step); the cfg-gated re-exports below preserve the

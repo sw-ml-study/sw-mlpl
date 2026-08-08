@@ -224,6 +224,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "JSON text -> typed value: objects to records, arrays to vectors/lists",
             ),
             (
+                "to_toml",
+                "to_toml(record)",
+                "record -> deterministic TOML text (sorted keys, nested records as [sections]); ok(text)/err",
+            ),
+            (
                 "to_json",
                 "to_json(v)",
                 "value -> deterministic JSON string (encode half of parse_json)",

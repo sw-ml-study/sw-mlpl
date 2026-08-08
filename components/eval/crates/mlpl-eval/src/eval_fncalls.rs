@@ -36,6 +36,7 @@ pub(crate) fn try_dispatch(
         .or_else(|| crate::fncall_run::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_hof::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_json::try_dispatch(name, args, env, trace))
+        .or_else(|| crate::fncall_toml::try_dispatch(name, args, env, trace))
         .or_else(|| crate::fncall_values::try_dispatch(name, args, env, trace, span))
         .or_else(|| try_loaders(name, args, env, trace))
         .or_else(|| try_tools(name, args, env, trace, span))
