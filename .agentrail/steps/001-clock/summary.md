@@ -1,0 +1,1 @@
+clock_ms() shipped (native/connect monotonic ms), 4 TDD tests, catalog+docs, completeness green; verified in REPL; all 5 demo-memory requests tracked in docs/demo-memory-upstream.md with 3 new queue entries.

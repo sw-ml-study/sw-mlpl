@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "clock"
+  },
+  "action": "native-runtime placement per the wasm-split evidence; process-epoch clock; upstream tracking doc",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-07T17:15:36"
+}

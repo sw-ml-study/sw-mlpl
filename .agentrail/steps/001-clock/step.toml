@@ -1,9 +1,10 @@
 number = 1
 slug = "clock"
-status = "pending"
+status = "completed"
 description = "clock_ms() native builtin in mlpl-runtime: monotonic elapsed milliseconds fro..."
 role = "production"
 context_files = []
 created_at = "2026-08-07T16:45:01"
+completed_at = "2026-08-07T17:15:36"
 task_type = "rust-feature"
-commits = []
+commits = ["1fb25d5c0a997761dac4a1fae3208ec00860f81b"]
