@@ -1,0 +1,1 @@
+Add J-inspired moving-average demo to APL2 group in demos.toml; README count 85->86; smoke; gates.
