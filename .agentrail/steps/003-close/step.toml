@@ -1,9 +1,10 @@
 number = 3
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close tagged-envelope: rebuild serve+pages+repl, deploy, connect smoke of tag..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T13:15:41"
+completed_at = "2026-08-08T13:21:38"
 task_type = "docs"
-commits = []
+commits = ["3157bb88e33880703b55d018e5b83b2bf8409da2"]

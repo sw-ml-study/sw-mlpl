@@ -1,0 +1,1 @@
+Saga closed: tagged  envelope live -- to_json{tagged:1}<->parse_json losslessly round-trips rank>=2 arrays and Results; verified via repl; wiki row; q-and-a. Deployed; repl rebuilt.
