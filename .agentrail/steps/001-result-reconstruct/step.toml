@@ -1,9 +1,10 @@
 number = 1
 slug = "result-reconstruct"
-status = "pending"
+status = "completed"
 description = "result_reconstruct.rs walker; thread results flag through parse options; appl..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T00:31:10"
+completed_at = "2026-08-08T09:41:08"
 task_type = "rust-feature"
-commits = []
+commits = ["0e0ce98e2a67c01ab766a0e903bb1317dab290d1"]

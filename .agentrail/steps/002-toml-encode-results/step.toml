@@ -1,0 +1,9 @@
+number = 2
+slug = "toml-encode-results"
+status = "pending"
+description = "Make to_toml ENCODE a Result field as a {ok, value|error} sub-table (currentl..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T09:41:08"
+task_type = "rust-feature"
+commits = []

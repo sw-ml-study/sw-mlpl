@@ -1,0 +1,1 @@
+Make to_toml ENCODE a Result field as a {ok, value|error} sub-table (currently errs), completing the TOML Result round trip with parse_toml {results:1}. Update toml_encode, tests, docs. TDD.

@@ -1,0 +1,1 @@
+Opt-in {results: 1} reconstruction shipped for parse_json/parse_toml: rebuilds to_json/to_toml's {ok, value|error} shape into ok/err recursively; off by default. result_reconstruct.rs walker; flag threaded through parse options. 6 TDD tests.

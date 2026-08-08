@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "result-reconstruct"
+  },
+  "action": "pure value walker; flag via shared options record",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T09:41:08"
+}
