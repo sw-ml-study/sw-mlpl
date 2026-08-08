@@ -1,9 +1,10 @@
 number = 1
 slug = "bit-design"
-status = "pending"
+status = "completed"
 description = "Write docs/bit-ops-design.md: the fixed-width-integer bit-op surface for MLPL..."
 role = "production"
 context_files = []
 created_at = "2026-08-07T17:41:06"
+completed_at = "2026-08-07T17:41:52"
 task_type = "design"
-commits = []
+commits = ["4f18758990569c4b2bacd21362c6137888a7fdb2"]

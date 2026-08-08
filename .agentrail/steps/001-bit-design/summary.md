@@ -1,0 +1,1 @@
+Bit-op design committed: f64-integer domain, LSB-first, width-aware shl, 10-op set, runtime-array placement; Hamming/pack/test idioms.
