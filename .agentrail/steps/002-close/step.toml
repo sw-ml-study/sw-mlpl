@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close byte-stream-contract: rebuild serve+pages+repl, deploy, connect smoke o..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T20:10:18"
+task_type = "docs"
+commits = []

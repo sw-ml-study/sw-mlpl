@@ -1,0 +1,1 @@
+append_bytes shipped: bounded incremental byte sink (append chunk -> ok(count)); completes the ByteSource/ByteSink contract (read_bytes range + file_size + append_bytes) without mutable handles. New fs_append.rs. 5 TDD tests incl. bounded read->transform->append copy.
