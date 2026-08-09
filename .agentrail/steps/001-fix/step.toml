@@ -1,0 +1,9 @@
+number = 1
+slug = "fix"
+status = "pending"
+description = "Re-export ApplyBinopExt from mlpl-rt; UFCS apply_binop in lower-rs; fix stale..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T19:05:04"
+task_type = "rust-fix"
+commits = []
