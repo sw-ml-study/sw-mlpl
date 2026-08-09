@@ -1,9 +1,10 @@
 number = 5
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close: register hello provider in repl+serve binaries; acceptance (script+REP..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T10:43:18"
+completed_at = "2026-08-09T10:48:47"
 task_type = "docs"
-commits = []
+commits = ["c3a6939bed5fb50a6702f74e83082680cd5c0d92"]

@@ -1,0 +1,1 @@
+First slice complete: hello provider registered in repl+serve; hello:answer()->42 verified in the shipped binary; docs (companion status SHIPPED, queue follow-ups, q-and-a, wiki). Registry/invoke/help/panic-containment live in interpreter+REPL+connect.

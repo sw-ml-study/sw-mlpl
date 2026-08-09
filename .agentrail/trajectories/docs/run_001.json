@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 5,
+    "step": "close"
+  },
+  "action": "binary startup registration; acceptance smoke; status docs",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T10:48:47"
+}
