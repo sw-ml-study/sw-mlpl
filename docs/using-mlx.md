@@ -4,6 +4,13 @@
 > design-sketch history that predated the shipped saga, see the
 > "Retrospective" section at the bottom of this doc.
 >
+> **PERFORMANCE ERRATA (2026-08-08):** any table below showing MLX
+> SLOWER than CPU (e.g. the ~0.26x Tiny-LM figure) is SUPERSEDED.
+> After the device-resident tape work, MLX wins at real model
+> sizes (~1.3x at d=128, ~5x at d=256) and only loses below the
+> ~d=128 crossover. Current numbers: `docs/benchmarks.md`;
+> maturity summary: the "Maturity" section of `README.md`.
+>
 > **ERRATA NOTE (2026-08-02):** claims below that LoRA is planned
 > (it shipped in Saga 15, `lora(...)` + `demos/lora_finetune.mlpl`)
 > or that CUDA is only a future backend (an in-process vertical

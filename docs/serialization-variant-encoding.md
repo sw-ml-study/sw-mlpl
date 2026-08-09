@@ -1,8 +1,15 @@
 # Serialization: variant / tagged-value encoding -- design note
 
-Status: design decision (2026-08-08), FORWARD-LOOKING (planning
-doc). No code yet -- it records the direction the JSON/TOML
-codecs should take when lossless variant serialization is built.
+Status: design decision (2026-08-08). The JSON side has since
+SHIPPED: `to_json(v, {tagged: 1})` emits the reserved `$mlpl`
+envelope for rank-`>=2` arrays and Results, and `parse_json`
+reconstructs `$mlpl` envelopes UNCONDITIONALLY, so any data value
+round-trips losslessly (see `envelope.rs`, `envelope_decode.rs`).
+Still forward-looking: general user-defined `variant` types (no
+such language type yet -- Option is zilde, Result is the shipped
+tagged sum) and TOML tagged mode (JSON first). The compact
+`{ok,value|error}` + `{results:1}` form remains the opt-in
+plain-JSON interop convention.
 Companions: `docs/option-result-design.md` (the VALUE model --
 Result is a tagged sum, Option is zilde), and the "typed native
 formats" serialization item tracked for demo-algorithms
@@ -95,18 +102,18 @@ heuristic.
   Option is zilde (`docs/option-result-design.md`). The envelope
   is a WIRE format, not a new value kind.
 
-## Sequencing (a future saga, not now)
+## Sequencing
 
-1. Depends on the language's variant story. Result can adopt the
-   envelope immediately (as a `to_json(v, {tagged: 1})` mode +
-   unconditional `$mlpl` reconstruction on decode). `option`/
-   `some`/`none` envelopes only make sense once a distinct
-   general variant type exists -- today "Option" is zilde, which
-   serializes as an array, and a general sum type is a separate
-   language-design decision.
-2. Introduce the versioned envelope schema + reserve `$mlpl`
-   + the escape policy.
-3. Extend uniformly to each variant type as it lands.
+1. DONE (JSON): the versioned envelope schema, the reserved
+   `$mlpl` key + escape policy, `to_json(v, {tagged: 1})`, and
+   unconditional `$mlpl` reconstruction on decode -- covering
+   rank-`>=2` arrays and Results (`array` / `result` / `record`
+   envelope types).
+2. Forward-looking: `option` / `some` / `none` (and other
+   user-defined variant) envelopes wait on a distinct general
+   variant type -- today Option is zilde and Result is the
+   shipped tagged sum, so there is no general sum type to tag.
+3. Forward-looking: TOML tagged mode (JSON shipped first).
 
-Until then, the compact opt-in convention is the shipped answer,
-and this note is the contract the envelope work will honor.
+The compact `{ok,value|error}` + `{results: 1}` form stays as the
+plain-JSON interop convention alongside the envelope.
