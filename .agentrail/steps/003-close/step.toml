@@ -1,0 +1,9 @@
+number = 3
+slug = "close"
+status = "pending"
+description = "Close capabilities-docs: markdown gate, wiki errata note if applicable, --done."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T18:30:36"
+task_type = "docs"
+commits = []

@@ -1,0 +1,1 @@
+Reconciled stale maturity docs: serialization-variant-encoding flipped to SHIPPED (was underselling), using-mlx got a performance-errata note (superseded slow numbers); using-cuda banner already adequate.

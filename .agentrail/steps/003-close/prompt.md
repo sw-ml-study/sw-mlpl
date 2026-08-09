@@ -1,0 +1,1 @@
+Close capabilities-docs: markdown gate, wiki errata note if applicable, --done.

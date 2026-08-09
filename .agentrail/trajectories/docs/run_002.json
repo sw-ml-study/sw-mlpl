@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 2,
+    "step": "doc-caveats"
+  },
+  "action": "status flips + errata notes pointing to benchmarks/README",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T18:30:36"
+}
