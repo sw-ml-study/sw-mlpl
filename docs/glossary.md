@@ -1736,6 +1736,18 @@ seek form to bound and validate offsets when scanning a large
 file (for example, reading a safetensors 8-byte header-length
 prefix, then the header JSON, without loading the tensor data).
 
+## write_stdout (builtin)
+
+`write_stdout(bytes)` writes a rank-`<=1` byte array (integers
+`0..=255`) to process stdout and flushes, returning `ok(count)`
+/ `err(...)`. It is the NON-SEEKABLE binary sink -- the `ByteSink`
+counterpart to [[Stdin reading]] (the non-seekable source) --
+for pipes and stdout, distinct from the
+sandboxed file sinks (`write_bytes` / `append_bytes`). Not
+sandboxed (stdout is the process's own); text goes through
+`tokenize_bytes`. A compiled or `-f` CLI streams binary output
+chunk-by-chunk: `write_stdout(unwrap(read_bytes(p, off, len)))`.
+
 ## read_bytes / write_bytes (builtins)
 
 The raw-byte half of the sandboxed filesystem API, for binary

@@ -199,6 +199,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "sandboxed incremental byte-array append (bounded sink); returns ok(count)/err",
             ),
             (
+                "write_stdout",
+                "write_stdout(bytes)",
+                "write a byte array to process stdout (non-seekable sink); returns ok(count)/err",
+            ),
+            (
                 "write_atomic",
                 "write_atomic(path, value)",
                 "sandboxed crash-safe write (temp file + rename); value a string or byte array; returns ok(1)/err",

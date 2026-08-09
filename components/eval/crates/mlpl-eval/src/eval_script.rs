@@ -17,7 +17,7 @@
 //! near the function-count budget (docs/code_metrics.md
 //! file-naming convention: behavior in named files).
 
-use std::io::{IsTerminal, Read};
+use std::io::{IsTerminal, Read, Write};
 
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
@@ -26,6 +26,45 @@ use crate::env::Environment;
 use crate::eval::eval_expr;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
+
+/// `write_stdout(bytes)` -- the non-seekable binary SINK (the
+/// ByteSink counterpart to `read_stdin`). Writes a rank-<=1 byte
+/// array (`0..=255`) to process stdout and flushes, returning
+/// `ok(count)` / `err(...)`. Not sandboxed (stdout is the
+/// process's own); text goes through `tokenize_bytes`.
+pub(crate) fn eval_write_stdout(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let [arg] = args else {
+        return Err(EvalError::BadArity {
+            func: "write_stdout".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    };
+    let v = eval_expr(arg, env, trace)?;
+    let bytes = match &v {
+        Value::Array(a) => {
+            crate::fs_bytes::array_to_bytes("write_stdout", a).map_err(|e| format!("{e}"))
+        }
+        other => Err(format!(
+            "write_stdout: bytes must be an array -- got {}",
+            mlpl_eval_types::value_kind(other)
+        )),
+    };
+    Ok(crate::result_str::ok_or_err(bytes.and_then(|b| {
+        let count = b.len();
+        let mut out = std::io::stdout();
+        out.write_all(&b)
+            .and_then(|()| out.flush())
+            .map_err(|e| format!("write_stdout: {e}"))?;
+        Ok(Value::Array(mlpl_array::DenseArray::from_scalar(
+            count as f64,
+        )))
+    })))
+}
 
 /// `read_stdin()` -- block until EOF, return all bytes as a
 /// `Value::Str`. Refuses to read from a TTY.

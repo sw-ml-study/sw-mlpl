@@ -50,6 +50,7 @@ pub(crate) fn try_intercept(
         )),
         "args" => Some(eval_args(args, env)),
         "list_get" => Some(eval_list_get(args, env, trace)),
+        "write_stdout" => Some(crate::eval_script::eval_write_stdout(args, env, trace)),
         "read_stdin" => Some(crate::eval_script::eval_read_stdin(args)),
         "read_stdin_lines" => Some(crate::eval_script::eval_read_stdin_lines(args)),
         "exit" => Some(crate::eval_script::eval_exit(args, env, trace)),
