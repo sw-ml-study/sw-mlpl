@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "abi"
+  },
+  "action": "new leaf crate; catch_unwind boundary",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T09:51:46"
+}

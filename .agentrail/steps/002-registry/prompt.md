@@ -1,0 +1,1 @@
+mlpl-extension-registry crate: OnceLock<RwLock<Registry>> global, register/lookup/signatures, fail-closed dup, host-owned copies; TDD.

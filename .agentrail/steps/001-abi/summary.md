@@ -1,0 +1,1 @@
+mlpl-extension-abi crate shipped: ExtValue V1 scalar boundary, ExtError (domain/contained-panic), ExtFn/ExtFnDesc/ExtensionDescriptorV1, call_contained (catch_unwind). 4 TDD tests; panic containment proven.

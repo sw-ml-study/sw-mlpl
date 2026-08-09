@@ -1,9 +1,10 @@
 number = 1
 slug = "abi"
-status = "pending"
+status = "completed"
 description = "mlpl-extension-abi crate: ExtValue/ExtError/ExtFn/ExtFnDesc/ExtensionDescript..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T09:48:55"
+completed_at = "2026-08-09T09:51:46"
 task_type = "rust-feature"
-commits = []
+commits = ["4e9b15ebe327e1364133e1c91f6f68c680338963"]
