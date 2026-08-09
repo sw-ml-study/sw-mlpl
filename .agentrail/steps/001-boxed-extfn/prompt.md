@@ -1,0 +1,1 @@
+Change ExtFn to Arc<dyn Fn>; update call_contained/ExtFnDesc/registry/hello/fncall_ext; keep extension tests green.
