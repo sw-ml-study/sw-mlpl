@@ -12,8 +12,19 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-09
+
+- saga byte-stream-contract: complete (2 steps)
+- docs: close byte-stream-contract; incremental sink shipped
+
 ## 2026-08-08
 
+- saga byte-stream-contract: step append-bytes complete
+- feat(eval): append_bytes -- bounded incremental byte sink (byte-stream-contract)
+- saga byte-stream-contract: bootstrap step 001
+- saga byte-stream-contract: init
+- chore(agentrail): archive assessment-plan saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga assessment-plan: complete (2 steps)
 - saga assessment-plan: step plan-edits complete
 - docs(plan): assessment-driven roadmap + queued sagas + issue reconciliation
