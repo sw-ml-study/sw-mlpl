@@ -1,0 +1,1 @@
+Close compiler-apply-binop: note compile-path arithmetic/matmul works; refresh CHANGES; --done.

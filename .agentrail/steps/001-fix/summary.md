@@ -1,0 +1,1 @@
+Fixed compile-to-Rust arithmetic + matmul: mlpl-rt re-exports ApplyBinopExt/MatmulExt, lowering uses UFCS through the facade; un-rotted the two gated compile tests (stale monorepo paths). Gated suites now 5/5 + 4/4 green.

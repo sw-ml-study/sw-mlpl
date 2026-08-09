@@ -1,9 +1,10 @@
 number = 1
 slug = "fix"
-status = "pending"
+status = "completed"
 description = "Re-export ApplyBinopExt from mlpl-rt; UFCS apply_binop in lower-rs; fix stale..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T19:05:04"
+completed_at = "2026-08-08T19:28:37"
 task_type = "rust-fix"
-commits = []
+commits = ["4e64b44d118f375a4779c204e1505e9e334b45bf"]
