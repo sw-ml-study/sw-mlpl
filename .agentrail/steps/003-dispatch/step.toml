@@ -1,9 +1,10 @@
 number = 3
 slug = "dispatch"
-status = "pending"
+status = "completed"
 description = "mlpl-ext-hello-static provider crate; fncall_ext.rs Value-tier dispatcher wir..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T09:59:45"
+completed_at = "2026-08-09T10:17:11"
 task_type = "rust-feature"
-commits = []
+commits = ["412211546dee91936deb7f589436b6b597058871"]

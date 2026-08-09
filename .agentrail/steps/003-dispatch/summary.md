@@ -1,0 +1,1 @@
+Extension invocation shipped: static hello provider + fncall_ext/ext_marshal Value-tier dispatch wired into eval.rs colon branch; hello:answer()->42, domain failure->err Result, panic contained as EvalError::ExtensionError. 4 TDD tests; 383 held.

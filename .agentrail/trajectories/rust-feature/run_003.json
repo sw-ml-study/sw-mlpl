@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 3,
+    "step": "dispatch"
+  },
+  "action": "registry-first colon dispatch; call_contained; err/panic model",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T10:17:11"
+}

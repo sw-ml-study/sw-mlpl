@@ -1,0 +1,1 @@
+Surface registered extension signatures through :describe/help from the registry; TDD. Then close: register provider in repl+serve, acceptance, deploy, queue compiler follow-up + saga-2.
