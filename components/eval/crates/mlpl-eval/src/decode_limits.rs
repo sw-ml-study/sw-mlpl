@@ -64,6 +64,13 @@ pub(crate) fn text_and_options(
     Ok((text, limits, reconstruct))
 }
 
+/// Resolve just the decode `Limits` from an already-evaluated
+/// optional options record (for codecs whose first argument is not
+/// a string, e.g. `parse_native`).
+pub(crate) fn limits_only(who: &str, opt: Option<&Value>) -> Result<Limits, EvalError> {
+    Ok(from_option(who, opt)?.0)
+}
+
 fn from_option(who: &str, opt: Option<&Value>) -> Result<(Limits, bool), EvalError> {
     let mut limits = Limits::defaults();
     let Some(v) = opt else {

@@ -244,6 +244,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "value -> versioned self-describing binary bytes (round-trips with parse_native); ok(bytes)/err",
             ),
             (
+                "parse_native",
+                "parse_native(bytes[, limits])",
+                "native binary bytes -> value; limits {max_depth,max_bytes,max_elements}; ok(value)/err",
+            ),
+            (
                 "to_toml",
                 "to_toml(record)",
                 "record -> deterministic TOML text (sorted keys, nested records as [sections]); ok(text)/err",
