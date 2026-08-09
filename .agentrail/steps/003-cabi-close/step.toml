@@ -1,0 +1,9 @@
+number = 3
+slug = "cabi-close"
+status = "pending"
+description = "Close extensions-c-abi-adapter: document the C-ABI adapter (companion-demo-ex..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T14:53:10"
+task_type = "docs-close"
+commits = []
