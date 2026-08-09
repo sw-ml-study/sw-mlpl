@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-extension-registry"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The public host registration + lookup registry for native
+# extensions (demo-extensions upstream contract A1). A single
+# process-global (OnceLock) shared by the interpreter, the static
+# providers, and the binaries -- so every surface resolves against
+# one registry. Registration is fail-closed and copies all
+# metadata into host-owned memory.
+
+[dependencies]
+mlpl-extension-abi = { path = "../mlpl-extension-abi" }

@@ -242,6 +242,13 @@ name = "mlpl-extension-abi"
 version = "0.20.0"
 
 [[package]]
+name = "mlpl-extension-registry"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+]
+
+[[package]]
 name = "mlpl-forge-kg"
 version = "0.20.0"
 dependencies = [
