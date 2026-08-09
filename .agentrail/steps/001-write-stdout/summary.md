@@ -1,0 +1,1 @@
+write_stdout(bytes) -> ok(count) shipped: non-seekable binary sink to process stdout, the ByteSink counterpart to read_stdin; -f/compiled CLIs stream binary output. In eval_script.rs; 3 TDD tests + -f smoke (emits raw 'Hi'). Closes demo-file-processing's non-seekable-sink gap.

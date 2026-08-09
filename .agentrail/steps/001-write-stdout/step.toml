@@ -1,9 +1,10 @@
 number = 1
 slug = "write-stdout"
-status = "pending"
+status = "completed"
 description = "eval_write_stdout in eval_script.rs (byte array -> stdout, ok(count)); interc..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T09:01:57"
+completed_at = "2026-08-09T09:08:06"
 task_type = "rust-feature"
-commits = []
+commits = ["e9fdcb49dab269e7e50c0f6152075cded076af7c"]

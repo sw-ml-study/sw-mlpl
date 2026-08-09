@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "write-stdout"
+  },
+  "action": "std::io::stdout write_all+flush; shared byte validator; intercept dispatch",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T09:08:06"
+}
