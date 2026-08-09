@@ -235,9 +235,11 @@ mlpl> apply_tokenizer(tok, "the quick brown fox")
   cross-compile via `--target <triple>`; no parser or interpreter
   in the compiled output. The lowering covers array/number
   expressions and a handful of builtins (`range`, `shape`, `rank`,
-  `reshape`, `transpose`, `reduce_add`, `matmul`, labeling); the
-  Model DSL, `train`, autograd, and I/O builtins run in the
-  interpreter, not the compiler. See the maturity note below.
+  `reshape`, `transpose`, `reduce_add`, `matmul`, labeling), plus
+  strings and stdout/args I/O (`write_stdout`, `args`, `arg`) -- so
+  a compiled binary can print and read CLI arguments; the Model
+  DSL, `train`, autograd, control flow, functions, and file I/O
+  are still interpreter-only. See the maturity note below.
 - **Two REPLs** with shared evaluator: terminal
   (`cargo run -p mlpl-repl`, tracing, `--data-dir`, `--exp-dir`)
   and browser (`apps/mlpl-web`, tutorial lessons, demo
@@ -291,10 +293,12 @@ the same evaluator and are exercised by the test suite.
   path). It is not a general backend: a standalone CUDA peer
   service, multi-GPU, and broad operator coverage are out of
   scope today.
-- **Compile-to-Rust path** (`mlpl!` / `mlpl build`) -- handles a
-  numerical-expression subset only (see the Features bullet). The
-  Model DSL, `train`, autograd, and the file/process/bit builtins
-  are interpreter-only and are not lowered to Rust.
+- **Compile-to-Rust path** (`mlpl!` / `mlpl build`) -- handles the
+  numerical-expression subset plus strings and stdout/args I/O
+  (see the Features bullet); a compiled binary can print and read
+  CLI arguments. Still interpreter-only (a phased expansion is
+  underway): file I/O (`read_bytes` etc.), control flow, user
+  functions, the Model DSL, `train`, and autograd.
 
 ## Architecture
 

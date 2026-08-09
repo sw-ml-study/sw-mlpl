@@ -489,6 +489,33 @@ help are live (interpreter/REPL/serve). Remaining follow-ups:
 - **extensions-arrays-handles** -- array marshaling + NativeHandle
   values (A3); the demo-extensions "zero-copy/array-lifetime"
   ask lands here.
+- **extensions-c-abi-adapter** (demo-extensions request 2026-08-09)
+  -- the shipped static registry takes a SAFE-Rust
+  `ExtensionDescriptorV1`, but demo-extensions' provider exports a
+  `#[repr(C)]` C descriptor (the `sw_mlpl_extension_v1` entry).
+  Add a host adapter that converts their C descriptor into the
+  registry's descriptor + registers it, so a real (statically
+  linked) provider registers via its own C ABI -- distinct from
+  dynamic loading (this is about descriptor SHAPE, not dlopen).
+  Do before/with extensions-dynamic-load.
+
+**compiler-io-parity phased program** (Saga A shipped 2026-08-09:
+compiled value model `CVal` + strings + `write_stdout`/`args`/
+`arg` -- first compiled binary that does I/O). Remaining rungs, in
+order:
+
+- **compiler-read-bytes** (Saga B) -- lower `read_bytes` (whole +
+  `offset,length`) + `file_size` to Rust (returning `CVal::Arr`
+  byte arrays), so a compiled binary reads files. Needs a
+  compiled fs surface in `mlpl-rt-value`/`mlpl-rt`.
+- **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`
+  (a bounded hexdump loops over chunks). Requires string/CVal
+  VARIABLES (bindings that hold CVal, not just DenseArray).
+- **compiler-functions** (Saga D) -- lower `def u:` user
+  functions.
+- **compiler-bit-ops** (Saga E) -- lower band/bor/bxor/shl/shr/
+  etc. Then a standalone compiled hexdump / WAV CLI is
+  expressible (the demo-file-processing capstone).
 
 ## GitHub issue reconciliation (manual -- maintainer action)
 

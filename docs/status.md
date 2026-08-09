@@ -57,11 +57,15 @@ higher-rank / Result JSON round trips.
   slice (LoRA fast path, one demo end-to-end); not a general
   backend. A standalone CUDA peer service, multi-GPU, and broad
   operator coverage are out of scope today.
-- Compile-to-Rust (`mlpl!` / `mlpl build`) -- lowers a
+- Compile-to-Rust (`mlpl!` / `mlpl build`) -- lowers the
   numerical-expression subset (array/number expressions +
   `range`/`shape`/`rank`/`reshape`/`transpose`/`reduce_add`/
-  `matmul`/labeling). The Model DSL, `train`, autograd, and the
-  file/process/bit builtins are interpreter-only (not lowered).
+  `matmul`/labeling) PLUS strings and stdout/args I/O
+  (`write_stdout`/`args`/`arg`, via the compiled `CVal` value
+  model) -- a compiled binary can print and read CLI arguments. A
+  phased expansion is underway; still interpreter-only: file I/O
+  (`read_bytes` etc.), control flow, user functions, the Model
+  DSL, `train`, autograd.
 
 ## Completed
 
