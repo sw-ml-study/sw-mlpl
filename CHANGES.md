@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga compiler-apply-binop: complete (2 steps)
+- saga compiler-apply-binop: step fix complete
+- fix(compiler): route apply_binop + matmul through the runtime facade (compiler-apply-binop)
+- saga compiler-apply-binop: bootstrap step 001
+- saga compiler-apply-binop: init
+- chore(agentrail): archive capabilities-docs saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga capabilities-docs: complete (3 steps)
 - saga capabilities-docs: step doc-caveats complete
 - docs: reconcile stale maturity claims (variant-encoding shipped, MLX perf)
