@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga stdout-sink: complete (2 steps)
+- docs: close stdout-sink; ByteSink complete (file + stdout)
+- saga stdout-sink: step write-stdout complete
+- feat(eval): write_stdout -- non-seekable binary sink (stdout-sink)
+- saga stdout-sink: bootstrap step 001
+- saga stdout-sink: init
+- chore(agentrail): archive byte-stream-contract saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga byte-stream-contract: complete (2 steps)
 - docs: close byte-stream-contract; incremental sink shipped
 
