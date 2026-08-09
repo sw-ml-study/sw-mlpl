@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga extensions-contract-doc: complete (2 steps)
+- saga extensions-contract-doc: step write-doc complete
+- docs: record demo-extensions upstream contract + first-slice saga
+- saga extensions-contract-doc: bootstrap step 001
+- saga extensions-contract-doc: init
+- chore(agentrail): archive stdout-sink saga
+- docs(queue): backlog demo-extensions upstream contract
+- docs(changes): refresh CHANGES.md to HEAD
 - saga stdout-sink: complete (2 steps)
 - docs: close stdout-sink; ByteSink complete (file + stdout)
 - saga stdout-sink: step write-stdout complete
