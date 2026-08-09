@@ -85,6 +85,80 @@ fn build_and_run_with_macro_body(body: &str) -> String {
     String::from_utf8(run.stdout).expect("utf8")
 }
 
+/// Build a mlpl!-using program that PRODUCES ITS OWN OUTPUT (the
+/// program writes to stdout via write_stdout; the harness does not
+/// print the result), run it with `argv`, and return raw stdout.
+fn build_and_run_raw(body: &str, argv: &[&str]) -> String {
+    let ws = workspace_root();
+    let tmp = tempdir("raw");
+    std::fs::create_dir_all(tmp.join("src")).unwrap();
+    let cargo_toml = format!(
+        "[package]\n\
+         name = \"mlpl_macro_raw\"\n\
+         edition = \"2024\"\n\
+         version = \"0.0.0\"\n\
+         \n\
+         [dependencies]\n\
+         mlpl = {{ path = \"{}/components/cli/crates/mlpl\" }}\n",
+        ws.display()
+    );
+    std::fs::write(tmp.join("Cargo.toml"), cargo_toml).unwrap();
+    let main_rs = format!(
+        "use mlpl::mlpl;\n\
+         fn main() {{\n\
+             let _ = mlpl! {{ {body} }};\n\
+         }}\n"
+    );
+    std::fs::write(tmp.join("src/main.rs"), main_rs).unwrap();
+    let build = Command::new("cargo")
+        .args(["build", "--release", "--quiet"])
+        .current_dir(&tmp)
+        .output()
+        .expect("cargo build");
+    assert!(
+        build.status.success(),
+        "cargo build failed:\n{}",
+        String::from_utf8_lossy(&build.stderr)
+    );
+    let run = Command::new(tmp.join("target/release/mlpl_macro_raw"))
+        .args(argv)
+        .output()
+        .expect("run binary");
+    assert!(run.status.success(), "binary exited non-zero");
+    String::from_utf8(run.stdout).expect("utf8")
+}
+
+#[test]
+fn compiled_program_writes_a_string_to_stdout() {
+    if !should_run() {
+        eprintln!("skipping end-to-end macro test; set MLPL_MACRO_COMPILE_TESTS=1 to run");
+        return;
+    }
+    let out = build_and_run_raw("write_stdout(\"Hello, compiled world!\")", &[]);
+    assert_eq!(out, "Hello, compiled world!");
+}
+
+#[test]
+fn compiled_program_writes_a_byte_array_to_stdout() {
+    if !should_run() {
+        eprintln!("skipping end-to-end macro test; set MLPL_MACRO_COMPILE_TESTS=1 to run");
+        return;
+    }
+    // bytes [72, 105] == "Hi"
+    let out = build_and_run_raw("write_stdout([72, 105])", &[]);
+    assert_eq!(out, "Hi");
+}
+
+#[test]
+fn compiled_program_echoes_a_cli_arg() {
+    if !should_run() {
+        eprintln!("skipping end-to-end macro test; set MLPL_MACRO_COMPILE_TESTS=1 to run");
+        return;
+    }
+    let out = build_and_run_raw("write_stdout(arg(0))", &["echoed-argument"]);
+    assert_eq!(out, "echoed-argument");
+}
+
 /// Compile a small mlpl!-using program and capture cargo's stderr,
 /// expecting failure. Used for error-surfacing tests.
 fn build_expecting_failure(body: &str) -> String {
