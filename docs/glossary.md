@@ -1759,6 +1759,11 @@ an f64 in `0..256`, the same convention as
 so text and encoded data round-trip without a new codec: store
 JSON as raw bytes with `write_bytes(p, tokenize_bytes(unwrap(to_json(v))))`
 and recover it with `parse_json(decode_bytes(unwrap(read_bytes(p))))`.
+`append_bytes(path, bytes)` is the incremental SINK: it appends a
+byte-array chunk (creating the file if absent) and returns
+`ok(count)`, so output streams chunk-by-chunk (position =
+`file_size`, flush implicit per append) -- read a slice, transform
+it, append it, without holding the whole result in memory.
 
 ## write_atomic (builtin)
 

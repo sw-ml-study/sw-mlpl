@@ -26,6 +26,9 @@ pub(crate) fn try_dispatch(
     if name == "file_size" {
         return Some(crate::fs_range::eval_file_size(args, env, trace));
     }
+    if name == "append_bytes" {
+        return Some(crate::fs_append::eval_append_bytes(args, env, trace));
+    }
     if matches!(name, "read_bytes" | "write_bytes") {
         return Some(crate::fs_bytes::eval_fs_bytes(name, args, env, trace));
     }

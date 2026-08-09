@@ -89,6 +89,7 @@ mod fncall_run;
 mod fncall_toml;
 mod fncall_trace;
 mod fncall_values;
+mod fs_append;
 mod fs_atomic;
 mod fs_bytes;
 mod fs_ops;
