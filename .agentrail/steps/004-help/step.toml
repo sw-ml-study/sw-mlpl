@@ -1,9 +1,10 @@
 number = 4
 slug = "help"
-status = "pending"
+status = "completed"
 description = "Surface registered extension signatures through :describe/help from the regis..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T10:17:11"
+completed_at = "2026-08-09T10:43:18"
 task_type = "rust-feature"
-commits = []
+commits = ["d1ead40314b97634d6c2d84fb53c0ddc964ce3d1"]

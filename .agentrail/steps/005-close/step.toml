@@ -1,0 +1,9 @@
+number = 5
+slug = "close"
+status = "pending"
+description = "Close: register hello provider in repl+serve binaries; acceptance (script+REP..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T10:43:18"
+task_type = "docs"
+commits = []

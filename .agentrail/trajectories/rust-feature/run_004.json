@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 4,
+    "step": "help"
+  },
+  "action": "registry signatures -> describe; sibling module for fn budget",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T10:43:18"
+}

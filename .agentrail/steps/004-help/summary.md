@@ -1,0 +1,1 @@
+Extension signatures surfaced through :describe/help from the registry (ext_describe), reusing the builtin catalog render shape; format_describe gains one probe. 5 TDD tests.

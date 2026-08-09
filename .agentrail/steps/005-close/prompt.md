@@ -1,0 +1,1 @@
+Close: register hello provider in repl+serve binaries; acceptance (script+REPL); rebuild+deploy; wiki row; q-and-a; queue compiler follow-up contract + saga-2 (use/dotted with modules-namespaces); --done.
