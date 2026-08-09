@@ -21,12 +21,13 @@ fn should_run() -> bool {
 }
 
 fn workspace_root() -> PathBuf {
+    // This crate is at <root>/components/syntax-codegen/crates/mlpl-macro,
+    // so the repo root is four ancestors up (cellular monorepo).
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     manifest_dir
-        .parent()
-        .expect("crate parent")
-        .parent()
-        .expect("workspace root")
+        .ancestors()
+        .nth(4)
+        .expect("repo root (four levels above the crate)")
         .to_path_buf()
 }
 
@@ -54,7 +55,7 @@ fn build_and_run_with_macro_body(body: &str) -> String {
          version = \"0.0.0\"\n\
          \n\
          [dependencies]\n\
-         mlpl = {{ path = \"{}/crates/mlpl\" }}\n",
+         mlpl = {{ path = \"{}/components/cli/crates/mlpl\" }}\n",
         ws.display()
     );
     std::fs::write(tmp.join("Cargo.toml"), cargo_toml).unwrap();
@@ -97,7 +98,7 @@ fn build_expecting_failure(body: &str) -> String {
          version = \"0.0.0\"\n\
          \n\
          [dependencies]\n\
-         mlpl = {{ path = \"{}/crates/mlpl\" }}\n",
+         mlpl = {{ path = \"{}/components/cli/crates/mlpl\" }}\n",
         ws.display()
     );
     std::fs::write(tmp.join("Cargo.toml"), cargo_toml).unwrap();

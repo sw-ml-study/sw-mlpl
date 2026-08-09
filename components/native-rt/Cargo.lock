@@ -427,6 +427,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",

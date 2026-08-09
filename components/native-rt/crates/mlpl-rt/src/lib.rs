@@ -30,6 +30,12 @@ pub use activations::{exp, log, relu, sigmoid, tanh};
 pub use array_lit::array_lit;
 pub use elementwise::{add, div, mul, neg, sub};
 pub use mlpl_array::{ArrayError, DenseArray, Shape};
+// The binop / matmul extension traits are re-exported so lowered
+// code can call them via UFCS -- `<rt>::ApplyBinopExt::apply_binop(...)`
+// / `<rt>::MatmulExt::matmul(...)` -- with no `use` at the generated
+// call site.
+pub use mlpl_array_ops_element::ApplyBinopExt;
+pub use mlpl_array_ops_matmul::MatmulExt;
 pub use mlpl_core::LabeledShape;
 pub use reductions::{argmax, cross_entropy, log_softmax, mean, reduce_mul, softmax};
 pub use transforms::{reduce_add, reduce_add_axis, reshape, transpose};

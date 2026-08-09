@@ -22,14 +22,15 @@ fn compile_and_run(src: &str) -> f64 {
     let stmts = parse(&tokens).expect("parse ok");
     let body = lower(&stmts).expect("lower ok").to_string();
 
-    // Resolve the workspace root so the temp program can point its
-    // `mlpl-rt` path dependency at the in-tree crate.
+    // Resolve the repo root so the temp program can point its
+    // `mlpl-rt` path dependency at the in-tree crate. This crate is
+    // at <root>/components/syntax-codegen/crates/mlpl-lower-rs, so
+    // the repo root is four ancestors up (cellular monorepo).
     let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let workspace = manifest_dir
-        .parent()
-        .expect("crate parent")
-        .parent()
-        .expect("workspace root")
+        .ancestors()
+        .nth(4)
+        .expect("repo root (four levels above the crate)")
         .to_path_buf();
 
     // Build a tiny Rust program in a fresh temp dir. Using a crate
@@ -44,7 +45,7 @@ edition = "2024"
 version = "0.0.0"
 
 [dependencies]
-mlpl-rt = {{ path = "{}/crates/mlpl-rt" }}
+mlpl-rt = {{ path = "{}/components/native-rt/crates/mlpl-rt" }}
 "#,
         workspace.display()
     );

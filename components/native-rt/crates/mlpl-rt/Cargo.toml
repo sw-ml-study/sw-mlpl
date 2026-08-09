@@ -9,4 +9,5 @@ mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-array-ops-element = { path = "../../../array-element/crates/mlpl-array-ops-element" }
 mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
 mlpl-array-ops-reduce = { path = "../../../array-compose/crates/mlpl-array-ops-reduce" }
+mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }

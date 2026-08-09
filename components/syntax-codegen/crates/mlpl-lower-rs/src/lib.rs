@@ -212,7 +212,10 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
                 BinOpKind::Mul => quote! { |__a, __b| __a * __b },
                 BinOpKind::Div => quote! { |__a, __b| __a / __b },
             };
-            Ok(quote! { (#l).apply_binop(&(#r), #closure).unwrap() })
+            let rt = &ctx.rt;
+            // UFCS through the runtime facade's re-exported trait, so
+            // the generated call site needs no `use ApplyBinopExt`.
+            Ok(quote! { #rt::ApplyBinopExt::apply_binop(&(#l), &(#r), #closure).unwrap() })
         }
         Expr::Ident(name, _) => {
             let id = format_ident!("{name}");
