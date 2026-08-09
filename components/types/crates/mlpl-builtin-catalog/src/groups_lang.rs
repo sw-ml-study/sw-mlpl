@@ -239,6 +239,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "JSON text -> typed value; opts {max_depth, max_bytes, max_elements, results}",
             ),
             (
+                "to_native",
+                "to_native(v)",
+                "value -> versioned self-describing binary bytes (round-trips with parse_native); ok(bytes)/err",
+            ),
+            (
                 "to_toml",
                 "to_toml(record)",
                 "record -> deterministic TOML text (sorted keys, nested records as [sections]); ok(text)/err",

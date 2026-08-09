@@ -1800,6 +1800,14 @@ dependencies = [
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-rt-value",
+]
+
+[[package]]
+name = "mlpl-rt-value"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]
