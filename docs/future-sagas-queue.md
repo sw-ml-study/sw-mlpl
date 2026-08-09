@@ -489,33 +489,69 @@ help are live (interpreter/REPL/serve). Remaining follow-ups:
 - **extensions-arrays-handles** -- array marshaling + NativeHandle
   values (A3); the demo-extensions "zero-copy/array-lifetime"
   ask lands here.
-- **extensions-c-abi-adapter** (demo-extensions request 2026-08-09)
-  -- the shipped static registry takes a SAFE-Rust
-  `ExtensionDescriptorV1`, but demo-extensions' provider exports a
-  `#[repr(C)]` C descriptor (the `sw_mlpl_extension_v1` entry).
-  Add a host adapter that converts their C descriptor into the
-  registry's descriptor + registers it, so a real (statically
-  linked) provider registers via its own C ABI -- distinct from
-  dynamic loading (this is about descriptor SHAPE, not dlopen).
-  Do before/with extensions-dynamic-load.
+- **extensions-c-abi-adapter** SHIPPED 2026-08-09 --
+  `mlpl-extension-cabi` publishes the canonical `#[repr(C)]` V1
+  boundary + `register_c_extension(*const ExtensionDescriptorV1)`,
+  which validates a provider's C descriptor, wraps each C invoke
+  trampoline in a boxed closure marshaling the scalar set, and
+  registers into the safe registry. A statically linked provider's
+  descriptor pointer reinterprets byte-for-byte. Scalar values
+  only; arrays/handles -> `extensions-arrays-handles`; dynamic
+  load -> `extensions-dynamic-load`. (Enabling change: ExtFn is now
+  `Arc<dyn Fn>` so a provider can capture its C trampoline.)
 
 **compiler-io-parity phased program** (Saga A shipped 2026-08-09:
 compiled value model `CVal` + strings + `write_stdout`/`args`/
 `arg` -- first compiled binary that does I/O). Remaining rungs, in
 order:
 
-- **compiler-read-bytes** (Saga B) -- lower `read_bytes` (whole +
-  `offset,length`) + `file_size` to Rust (returning `CVal::Arr`
-  byte arrays), so a compiled binary reads files. Needs a
-  compiled fs surface in `mlpl-rt-value`/`mlpl-rt`.
+- **compiler-source-loading** (Saga B0) -- resolve `include`
+  directives during lowering. Per the demo-file-processing
+  contract (see `docs/companion-demo-file-processing.md`) this is
+  the EARLIEST gate: every real hexdump/histogram/WAV/Ogg program
+  fails here before any byte/format lowering is reached.
+- **compiler-functions** (Saga B1) -- lower `def u:` user
+  functions (`FnDef`), plus Results and records. The second gate
+  the file-processing programs hit (after `include`).
 - **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`
   (a bounded hexdump loops over chunks). Requires string/CVal
   VARIABLES (bindings that hold CVal, not just DenseArray).
-- **compiler-functions** (Saga D) -- lower `def u:` user
-  functions.
+- **compiler-read-bytes** (Saga D) -- lower `read_bytes` (whole +
+  `offset,length`) + `file_size` + `write_bytes` to Rust
+  (returning/consuming `CVal::Arr` byte arrays). MUST share
+  validation + error semantics with the interpreter: compiled
+  invalid bytes must be REJECTED not coerced, and runtime write
+  errors must propagate not be discarded (a lowered call name
+  alone is not acceptance).
+- **compiler-process-semantics** (Saga D2) -- lower `print` /
+  `eprint` / `exit` / `read_stdin` with clean entry/status
+  semantics, and fix the `write_stdout` wrapper appending a
+  spurious textual result line after binary stdout.
 - **compiler-bit-ops** (Saga E) -- lower band/bor/bxor/shl/shr/
   etc. Then a standalone compiled hexdump / WAV CLI is
-  expressible (the demo-file-processing capstone).
+  expressible (the demo-file-processing capstone; positive
+  byte + format artifact parity + a source-free audit).
+
+**codec follow-ups** (../demo-algorithms secondary asks, noted
+2026-08-09; the PRIMARY typed-native codec -- `to_native` /
+`parse_native`, MLPB header + tag set -- shipped in the
+native-codec saga and unblocked that repo). These are the
+remaining, lower-priority items:
+
+- **codec-streaming** -- an incremental (chunked) encoder/decoder
+  so a large value need not be fully materialized in memory.
+- **codec-reference-tables** -- shared-reference / cycle policy
+  (dedup repeated sub-values; detect and reject or encode cycles).
+- **codec-toml-tagged** -- TOML tagged mode mirroring the JSON
+  `$mlpl` tagged-envelope so TOML round-trips non-data value kinds
+  (see `docs/serialization-variant-encoding.md`).
+- **codec-mlpb-integrity** -- a stronger MLPB integrity check
+  (checksum / length-and-tag cross-validation) beyond the current
+  magic + version + payload-len header.
+- **codec-migration-hooks** -- version-migration hooks with
+  path-aware errors (which field/index failed to decode).
+- **codec-numeric-types** -- additional numeric element types at
+  the boundary (beyond `f64`), e.g. integer / f32 element arrays.
 
 ## GitHub issue reconciliation (manual -- maintainer action)
 

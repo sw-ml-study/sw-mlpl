@@ -5,6 +5,42 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-09 (downstream unblock status)
+
+**Q: (mid-work notes) demo-extensions blocked on the C
+descriptor adapter; demo-algorithms waiting on codec follow-ups;
+demo-file-processing upstream-contract details what is needed.**
+
+A: Status after the extensions-c-abi-adapter saga:
+
+- **demo-extensions -- PRIMARY blocker RESOLVED.** The new
+  `mlpl-extension-cabi` crate publishes the canonical `#[repr(C)]`
+  V1 boundary and `register_c_extension(*const
+  ExtensionDescriptorV1)`. Their statically linked C provider now
+  registers via its own C ABI and dispatches through the
+  interpreter (`namespace:function`), scalars marshaled, panics
+  contained. Still upstream (as they list): the `use`/facade
+  language surface, compiler parity (link-time register hook),
+  dynamic (`dlopen`) loading, and host arrays/handles -- all
+  queued (see docs/companion-demo-extensions.md +
+  docs/future-sagas-queue.md).
+
+- **demo-algorithms -- PRIMARY codec shipped (native-codec saga),
+  repo unblocked.** The listed items (streaming encoder/decoder,
+  reference tables + cycle policy, TOML tagged mode, stronger MLPB
+  integrity/checksum, migration hooks with path-aware errors,
+  additional numeric element types) are SECONDARY follow-ups, now
+  queued as the `codec-*` block in docs/future-sagas-queue.md.
+
+- **demo-file-processing -- bounded reads already delivered;
+  central blocker is compiled-application parity.** Recorded the
+  contract in docs/companion-demo-file-processing.md. The compiler
+  (`mlpl-build`) must lower `include`, `FnDef` + control flow +
+  Results/records, byte/bit/process ops WITH shared
+  interpreter-vs-compiled semantics. That is the phased compiler
+  expansion track (Saga A shipped: strings + stdout/args); the
+  ordered rungs are the `compiler-*` sagas in the queue.
+
 ## 2026-08-08 (tagged-envelope)
 
 **Q: start the tagged-envelope saga.**

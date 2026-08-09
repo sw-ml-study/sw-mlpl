@@ -184,6 +184,32 @@ connect server:
   `EvalError::ExtensionError`.
 - `:describe hello:answer` shows the registered signature (A5).
 
+**C-ABI descriptor adapter SHIPPED (2026-08-09).** The registry
+above takes a safe-Rust descriptor; a provider that exports a
+`#[repr(C)]` descriptor (`sw_mlpl_extension_v1 -> *const
+ExtensionDescriptorV1`) is now accepted directly:
+
+- `mlpl-extension-cabi` publishes the canonical `#[repr(C)]` V1
+  boundary (`model`) -- byte-for-byte identical to the
+  demo-extensions provider ABI, so a real, statically linked
+  descriptor pointer reinterprets without copying. sw-mlpl owns
+  registration, so it publishes the layout.
+- `register_c_extension(descriptor: *const ExtensionDescriptorV1)
+  -> Result<(), String>` (`unsafe`) validates `struct_size` /
+  `abi_version` / bounds / UTF-8 / reserved-zero / duplicate name
+  / null invoke, wraps each C invoke trampoline in a boxed closure
+  that marshals the scalar set (nil/bool/i64/f64/utf8/bytes),
+  maps a non-zero `ErrorCode` to `ExtError` (a `Panic` status is a
+  hard error), and registers into the same process registry. The
+  host still wraps every call in `catch_unwind`.
+- After registration the provider is called with the SAME colon
+  spelling (`namespace:function`) as a safe static provider.
+
+Scope of this adapter slice: SCALAR values only. Dense arrays and
+native handles at the boundary error (arrays-handles follow-up),
+and loading is STATIC only -- `dlopen` dynamic loading is a
+separate saga.
+
 Deferred (deliberately):
 
 - **saga-2 language surface** -- the `use hello` construct + the

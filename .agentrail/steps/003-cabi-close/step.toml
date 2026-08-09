@@ -1,6 +1,6 @@
 number = 3
 slug = "cabi-close"
-status = "pending"
+status = "in-progress"
 description = "Close extensions-c-abi-adapter: document the C-ABI adapter (companion-demo-ex..."
 role = "legacy"
 context_files = []
