@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga capabilities-docs: complete (3 steps)
+- saga capabilities-docs: step doc-caveats complete
+- docs: reconcile stale maturity claims (variant-encoding shipped, MLX perf)
+- saga capabilities-docs: step readme-status complete
+- docs: honest capabilities/maturity in README + current status.md
+- saga capabilities-docs: bootstrap step 001
+- saga capabilities-docs: init
+- chore(agentrail): archive birds-def-docstrings saga
+- docs(queue): backlog the assessment -> plan reconciliation task
+- docs(changes): refresh CHANGES.md to HEAD
 - saga birds-def-docstrings: complete (2 steps)
 - chore(pages): rebuild for birds def doc-strings
 - saga birds-def-docstrings: step docstrings complete
