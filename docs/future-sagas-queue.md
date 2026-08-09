@@ -404,6 +404,76 @@ in data-forge come first).
   surface any issue changes to the user to do manually, one at a
   time.
 
+## Assessment-driven track (2026-08-08)
+
+From `docs/sw-mlpl-assessment.txt` (see the roadmap section in
+`docs/plan.md`). Ordered; each is its own saga at start.
+
+1. **acceptance-slices** -- finish the two in-flight vertical
+   slices: sparse-Safetensors peak-memory measurement
+   (demo-ml-utils) and WAV inspect / canonical-copy
+   (demo-file-processing). Mostly downstream; upstream only as
+   probes surface concrete gaps. Converts "bounded algorithm"
+   into MEASURED evidence.
+2. **byte-stream-contract** -- a generic `ByteSource` / `ByteSink`
+   contract (size / read(offset,count) / write / flush /
+   position) for bounded INCREMENTAL I/O, the output/streaming
+   half beyond the shipped bounded range reads. Interpreter +
+   compiler parity is an acceptance criterion. Biggest
+   cross-cutting gap; unblocks GGUF/Safetensors, WAV/MP3/Ogg,
+   protocols.
+3. **packed-bytes** -- typed `u8` (packed) storage so binary
+   workloads make honest bounded-memory claims (bytes are exact
+   `f64` today). Pairs with demo-memory `packed-layouts` and the
+   stream contract.
+4. **compiler-io-parity** -- lower `read_bytes` / `args` / bit
+   ops + the byte-stream contract to Rust so standalone CLIs
+   compile (hexdump / WAV inspector as standalone binaries). The
+   arithmetic + matmul lowering defects are already fixed
+   (saga `compiler-apply-binop`).
+5. **modules-namespaces** -- qualified names, exports, private
+   helpers; fix binding/name-collision hazards in recursive code.
+6. **capability-matrix** -- `docs/capabilities.md`: a
+   mechanically-checked capability x surface matrix with CAP-*
+   ids, seeded from the wiki `Capability-Matrix.md`; downstream
+   suites emit machine-readable conformance records a central
+   script aggregates.
+
+Later (assessment ranks 5-12, already reflected in the plan
+roadmap): GGUF slice, file-processing containers (MP3/ID3/Ogg),
+structural sharing / views / builders, UDF fold/scan/unfold,
+MLX/CUDA service refactor, speculative decoding, targeted
+interpreter perf, web UX polish.
+
+## GitHub issue reconciliation (manual -- maintainer action)
+
+Per user direction, the agent does NOT edit/close issues via the
+`gh` CLI. The assessment's triage of the open issues, for the
+maintainer to apply case by case:
+
+- **#7 (interpreter / minimax perf)** -> CLOSE as completed
+  (all-MLPL alpha-beta ~20x faster; Rust ttt builtins removed).
+  Optionally split narrow follow-ups: oversized host recursion
+  stack; reduce temporary DenseArray allocations; first-class
+  map/dict if a future demo needs it. Its `#6` dependency is
+  stale (`#6` completed 2026-06-02).
+- **#8 (connect 3D drops scalars)** -> CLOSE as completed
+  (fixed client-side + deployed). Optional smoke: `x = 2 + 3; x`
+  reaches the 3D stage.
+- **#9 (connect :models/:vars use local state)** -> smoke-test
+  HEAD (`:models` / `:vars` / `:wsid` reflect the SERVER
+  workspace, per commit ff9ab95 routing fix), then CLOSE.
+- **#10 (speculative-decoding demo)** -> CLOSE as superseded by
+  the planning docs, or label `research-demo, future,
+  non-blocking`.
+- **#11 (:ask quoting / modal UX)** -> keep low-priority or move
+  the multiline-Ask-dialog feature to web future-work; fold the
+  cheap quoting-consistency fix into the next `:ask` touch.
+
+Adopt going forward: saga completion reconciles every referenced
+issue, and each issue is one of bug / capability blocker /
+forcing-function request / future experiment.
+
 ## Explicitly deprioritized / retired
 
 - Engram E6-E9 wait behind Tracks 1-3.

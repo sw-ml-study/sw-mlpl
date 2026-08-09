@@ -8,6 +8,110 @@ built-ins, and six end-to-end demos, but every demo still carries
 its own hand-written gradients. Everything downstream of autograd
 depends on removing that limitation.
 
+## Assessment-driven roadmap (2026-08-08)
+
+External assessment (`docs/sw-mlpl-assessment.txt`) reframes the
+project: it is now in a **platform-integration-and-hardening**
+phase, not a "prove the idea" phase. The forcing-function loop
+(downstream demo states an executable need -> smallest upstream
+capability -> regression test -> downstream adoption -> next
+harder demo) is working and should be PRESERVED, not replaced
+with a speculative feature roadmap. What the platform needs next
+is CLOSURE of vertical slices, not more breadth.
+
+### Revised ranked order
+
+1. Finish the two in-flight acceptance slices: sparse
+   Safetensors peak-memory measurement (demo-ml-utils) and WAV
+   inspect / canonical-copy (demo-file-processing). Proves
+   current claims before adding infrastructure.
+2. Generic bounded incremental I/O -- a `ByteSource` / `ByteSink`
+   source/sink contract (size / read(offset,count) / write /
+   flush / position) + packed byte (typed `u8`) storage. The
+   biggest cross-cutting runtime gap; unblocks GGUF/Safetensors,
+   WAV/MP3/Ogg, protocols. (Bounded RANGE reads already shipped;
+   this is the OUTPUT / streaming / packed-storage half.)
+3. Compile-to-Rust APPLICATION parity -- lower `read_bytes` /
+   `args` / bit ops and the I/O contract so standalone CLIs
+   compile. Interpreter/compiler parity is an ACCEPTANCE
+   CRITERION for every new generic capability, not a follow-up.
+   (The arithmetic + matmul lowering defects are now fixed.)
+4. Modules / namespaces / library boundaries -- qualified names,
+   exports, private helpers; fix binding/name-collision hazards.
+   Applications are now large enough that `include` + global-ish
+   naming hurts.
+5. GGUF vertical slice (demo-ml-utils) -- typed binary + large
+   files + quant formats + visualization.
+6. File-processing bounded transforms -> MP3 / ID3 -> Ogg;
+   defer codec extensions until containers work.
+7. Structural sharing / views / builders / typed storage, driven
+   by MEASURED downstream pressure (persistent structures cannot
+   claim O(log n) physical allocation without it).
+8. General HOF iteration primitives (UDF-capable fold / scan /
+   unfold) where demos prove the need.
+9. MLX / CUDA service architecture (mlpl-mlx-serve first) -- the
+   right direction, but after application contracts stabilize.
+10. Speculative decoding + advanced ML research (differentiators,
+    not completeness blockers).
+11. Interpreter micro-performance -- ONLY when a forcing function
+    shows a specific cost (issue #7's minimax is already ~20x
+    faster via all-MLPL alpha-beta; generic "make it fast" is
+    no longer a priority).
+12. Web UX polish (`:ask` modal, connect parity) -- continuous
+    maintenance, not a roadmap driver.
+
+### Architectural rules (making the emerging boundaries formal)
+
+- **MLPL owns computation; Rust owns generic mechanisms.** A
+  codec/runtime extension decodes/encodes chunks in Rust while
+  MLPL orchestrates and does the visible array transforms (the
+  MP3->Ogg goal needs no MLPL-native codec).
+- **ONE semantic runtime contract** shared by the interpreter and
+  generated Rust. Treat the shared runtime as a first-class
+  architectural component; do not grow a second interpreter-only
+  I/O subsystem (hence the parity acceptance criterion in item 3).
+- **Resource limits are first-class semantics.** A program should
+  express not just what to compute but the RESOURCE ENVELOPE
+  within which external data may be consumed (decode budgets,
+  bounded reads, sandbox, sparse-artifact tests are the seed).
+- **Hardware backends are services**, not compiled-in backends
+  (item 9).
+
+### Process (roadmap -> capability matrix -> saga -> commits)
+
+- **Capability matrix** (the "add immediately" recommendation):
+  a mechanically-checked cross-surface matrix -- capability x
+  {interpreter, native compiler, WASM, server, MLX service} +
+  which demo exercises it, with stable CAP-* ids. A start already
+  exists as the wiki `Capability-Matrix.md`; the assessment wants
+  it in-repo (`docs/capabilities.md`) and machine-checkable, with
+  downstream suites emitting conformance records a central script
+  aggregates. This is what lets an agent answer "can sw-MLPL do
+  X?" accurately and shows which one upstream feature unlocks the
+  most downstream work.
+- **Sagas are an execution ledger, not the roadmap.** Roadmap ->
+  capability matrix -> saga -> commits.
+- **Saga completion reconciles every referenced GitHub issue**:
+  close it, narrow its scope, or state why it stays open.
+- **Classify each issue into exactly one bucket**: bug /
+  capability blocker / forcing-function request / future
+  experiment.
+
+### Portfolio split
+
+Run ~**60 / 25 / 15**: platform closure (runtime contracts,
+compiler parity, packed data, streaming, modules, performance) /
+forcing-function demos (ML artifacts + file processing surface
+the most useful gaps) / exploratory research.
+
+### Queued sagas + issue reconciliation
+
+Concrete sagas for items 2-4 + the capability matrix are queued
+in `docs/future-sagas-queue.md` (Assessment-driven track). The
+GitHub issue reconciliation (#7-#11) is a MANUAL action list for
+the maintainer -- see that file's "GitHub issue reconciliation"
+note; the agent does not edit issues via the `gh` CLI.
+
 ## Active and queued sagas (as of 2026-07-25)
 
 The June-July 2026 work (GPU workspace split, macOS telemetry, :ask
