@@ -1,0 +1,1 @@
+Saga closed: write_stdout non-seekable byte sink live; ByteSource/ByteSink contract complete (append_bytes file sink + write_stdout stdout sink); wiki row; q-and-a. Deployed; repl rebuilt to HEAD.

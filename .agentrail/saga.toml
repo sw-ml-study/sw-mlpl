@@ -1,5 +1,5 @@
 name = "stdout-sink"
-status = "active"
+status = "completed"
 current_step = 2
 created_at = "2026-08-09T09:01:57"
 plan_file = ".agentrail/plan.md"
