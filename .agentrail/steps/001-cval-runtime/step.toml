@@ -1,0 +1,9 @@
+number = 1
+slug = "cval-runtime"
+status = "pending"
+description = "mlpl-rt CVal enum (Arr/Str/StrList) + Display + arr() + write_stdout + cli_ar..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T12:17:08"
+task_type = "rust-feature"
+commits = []
