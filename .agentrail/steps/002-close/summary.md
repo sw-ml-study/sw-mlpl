@@ -1,0 +1,1 @@
+Saga closed: append_bytes incremental sink live and verified via repl (append twice -> read back, size grows); wiki row; q-and-a records the ByteSource/ByteSink contract complete over paths. Deployed; repl rebuilt.
