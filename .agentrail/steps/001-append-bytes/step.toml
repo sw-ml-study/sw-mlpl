@@ -1,0 +1,9 @@
+number = 1
+slug = "append-bytes"
+status = "pending"
+description = "fs_append.rs append_bytes(path, bytes) incremental sink + dispatch; catalog+l..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T19:55:56"
+task_type = "rust-feature"
+commits = []

@@ -1,0 +1,1 @@
+fs_append.rs append_bytes(path, bytes) incremental sink + dispatch; catalog+lang-ref+glossary; TDD.
