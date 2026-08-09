@@ -1,0 +1,1 @@
+docs/companion-demo-extensions.md capturing the contract + first slice; refine queue entry.
