@@ -1,0 +1,1 @@
+Saga closed: assessment translated into a plan.md roadmap section + 6 queued sagas + a manual #7-#11 issue-reconciliation list. Issue actions surfaced to the maintainer (no gh CLI).
