@@ -1,0 +1,13 @@
+[package]
+name = "mlpl-extension-abi"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The host-side value/error boundary for native extensions
+# (demo-extensions upstream contract A2). A safe Rust boundary for
+# the static-provider slice; the #[repr(C)] wire layout for
+# DYNAMIC loading is a follow-up (this crate stays the shared
+# shape both paths marshal through). Leaf crate: no deps.
+
+[dependencies]

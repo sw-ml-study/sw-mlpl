@@ -238,6 +238,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-extension-abi"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-forge-kg"
 version = "0.20.0"
 dependencies = [
