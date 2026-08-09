@@ -392,6 +392,28 @@ homogeneous arrays of numbers or strings. Inline tables, arrays
 of tables, literal/multiline strings, datetimes, and dotted-key
 assignments are not part of this subset.
 
+## to_native / parse_native (builtins)
+
+`to_native(value)` and `parse_native(bytes[, limits])` are a
+typed-native BINARY value codec -- a versioned, self-describing
+byte format that losslessly round-trips every MLPL data value,
+Result-based like the JSON/TOML codecs (`ok(...)` / `err(...)`).
+`to_native` emits a rank-1 `0..256` byte array (header `MLPB` +
+version + payload length, then tagged values: scalars, arrays of
+any rank with EXACT shape, strings, string lists, records with
+sorted keys, and `ok`/`err` Results); it is canonical
+little-endian and deterministic (equal value -> equal bytes), all
+numbers `f64`, and non-data kinds (models, tokenizers, ...) are a
+loud `err`. `parse_native` validates the header/version/length and
+rebuilds the value, enforcing an optional `limits` record
+(`max_depth`/`max_bytes`/`max_elements`, as [[parse_json
+(builtin)]]) BEFORE allocation; malformed / truncated /
+over-budget input is an `err`. The bytes feed straight into
+[[read_bytes / write_bytes (builtins)]] and `write_atomic`, so a
+value persists to disk and reloads exactly:
+`parse_native(unwrap(read_bytes(p)))` inverts
+`write_atomic(p, unwrap(to_native(v)))`.
+
 ## to_json (builtin)
 
 `to_json(value)` is the deterministic encode half of

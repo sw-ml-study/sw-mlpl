@@ -60,6 +60,41 @@ max_elements is a hard error. Completes the decode-budget trio
 (max_depth / max_bytes / max_elements) for demo-algorithms and
 demo-ml-utils.
 
+## 2026-08-09 (native-codec -- demo-algorithms typed-native serialization)
+
+**Q: demo-algorithms is blocked (docs/sw-mlpl-blocker.md); fix it
+and say when it can proceed.**
+
+A: Shipped the typed-native binary codec it asked for:
+to_native(value) -> ok(bytes)/err and parse_native(bytes[,
+limits]) -> ok(value)/err. A versioned, self-describing wire
+format (MLPB magic + version + payload length, canonical
+little-endian) that losslessly round-trips every MLPL data value:
+scalars, arrays of ANY rank with EXACT shape, strings, string
+lists, records (sorted keys -> deterministic), and ok/err
+Results, arbitrarily nested. Non-data kinds (models, tokenizers,
+gen-state, partials, refs, device tensors) are a loud err, never
+partial. Result-based like JSON/TOML. Decoder validates
+header/version/length and enforces max_depth/max_bytes/
+max_elements BEFORE allocation; malformed/truncated/over-budget
+-> err. Bytes are a rank-1 0..256 array so they compose directly:
+write_atomic(p, unwrap(to_native(v))) <-> parse_native(unwrap(
+read_bytes(p))).
+
+demo-algorithms CAN PROCEED once it rebuilds
+../sw-mlpl/target/release/mlpl-repl to the current HEAD. The
+minimum composable contract from the blocker doc (to_native /
+parse_native, both Result-returning, resource-bounded, header +
+lossless tags + budget enforcement) is met. Its listed SECONDARY
+blockers remain follow-ups and were explicitly out of the minimal
+codec: TOML tagged mode, general user variants, stable numeric-
+type descriptors (all numbers are f64 -- documented loss policy),
+shared-reference tables / max_references / cycles (v1 has no
+shared identity; nested data is a tree), and streaming codecs.
+A stronger checksum (v1 integrity = payload-length validation)
+is also a follow-up. It should now run the downstream adoption
+saga from the blocker doc (golden fixtures, conformance tests).
+
 ## 2026-08-09 (extension-registry -- demo-extensions first slice)
 
 **Q: take extension-registry-static-provider first (demo-ml-utils
