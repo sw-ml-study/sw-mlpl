@@ -1,0 +1,1 @@
+parse_native decoder shipped: validates MLPB header/version/length, budget-bounded recursive decode, lossless round trip with to_native across all data kinds incl. exact higher-rank shape + nested Results; corrupt/truncated/over-budget -> err. 5 TDD tests incl. file round trip. Native codec complete.

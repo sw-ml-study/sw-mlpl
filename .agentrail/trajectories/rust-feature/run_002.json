@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 2,
+    "step": "native-decode"
+  },
+  "action": "bounds-checked cursor; depth/element budgets; limits_only helper",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T13:22:53"
+}
