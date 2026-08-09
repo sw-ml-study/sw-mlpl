@@ -35,6 +35,9 @@ pub(crate) fn format_describe(env: &Environment, name: &str) -> String {
             .join("\n");
         return format!("{name} -- string ({} chars)\n{body}", s.len());
     }
+    if let Some(desc) = crate::ext_describe::describe(name) {
+        return desc;
+    }
     for (_, entries) in builtin_groups() {
         if let Some(doc) = entries.iter().find(|(n, _, _)| *n == name) {
             return format!("{} -- built-in\n  {}\n  {}", doc.0, doc.1, doc.2);

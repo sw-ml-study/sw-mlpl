@@ -68,6 +68,7 @@ mod event_json;
 mod experiment;
 mod experiment_compare;
 mod expunge;
+mod ext_describe;
 mod ext_marshal;
 mod fncall_arrays;
 mod fncall_axes;

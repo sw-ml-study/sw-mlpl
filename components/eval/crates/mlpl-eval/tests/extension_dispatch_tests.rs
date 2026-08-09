@@ -55,3 +55,14 @@ fn unregistered_colon_name_still_routes_to_user_fns() {
     // fall through to user-fn routing (here: an undefined user fn).
     assert!(eval_value(&mut env, "nosuch:thing()").is_err());
 }
+
+#[test]
+fn describe_shows_the_registered_signature() {
+    mlpl_ext_hello_static::register();
+    let mut env = Environment::new();
+    let d = mlpl_eval::inspect(&mut env, ":describe hello:answer").expect("describe output");
+    assert!(
+        d.contains("hello:answer") && d.contains("i64") && d.contains("canonical extension answer"),
+        "expected extension signature in describe output, got: {d}"
+    );
+}
