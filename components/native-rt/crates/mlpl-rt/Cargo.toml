@@ -6,6 +6,7 @@ version.workspace = true
 
 [dependencies]
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-rt-value = { path = "../mlpl-rt-value" }
 mlpl-array-ops-element = { path = "../../../array-element/crates/mlpl-array-ops-element" }
 mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
 mlpl-array-ops-reduce = { path = "../../../array-compose/crates/mlpl-array-ops-reduce" }

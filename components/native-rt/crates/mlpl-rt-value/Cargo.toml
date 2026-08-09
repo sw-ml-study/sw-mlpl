@@ -1,0 +1,13 @@
+[package]
+name = "mlpl-rt-value"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The compiled value model (CVal) + string/stdout/args helpers for
+# the compile-to-Rust path. Re-exported by mlpl-rt so generated
+# code reaches it as `<rt>::CVal` / `<rt>::write_stdout` with no
+# `use`. Its own crate so mlpl-rt stays within the module budget.
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }

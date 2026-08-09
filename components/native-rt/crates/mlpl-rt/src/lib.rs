@@ -28,6 +28,10 @@ mod transforms;
 
 pub use activations::{exp, log, relu, sigmoid, tanh};
 pub use array_lit::array_lit;
+// The compiled value model lives in its own crate so this facade
+// stays within the module budget; re-exported so generated code
+// reaches it as `<rt>::CVal` / `<rt>::write_stdout` with no `use`.
+pub use mlpl_rt_value::{CVal, arg, cli_args, write_stdout};
 pub use elementwise::{add, div, mul, neg, sub};
 pub use mlpl_array::{ArrayError, DenseArray, Shape};
 // The binop / matmul extension traits are re-exported so lowered
