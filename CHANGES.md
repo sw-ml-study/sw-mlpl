@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga extensions-c-abi-adapter: complete (3 steps)
+- docs(ext): close extensions-c-abi-adapter; record downstream status (step 3)
+- saga extensions-c-abi-adapter: step cabi-crate complete
+- feat(ext): C-ABI adapter registers #[repr(C)] providers (extensions-c-abi-adapter step 2)
+- saga extensions-c-abi-adapter: step boxed-extfn complete
+- refactor(ext): ExtFn is a boxed closure (extensions-c-abi-adapter step 1)
+- saga extensions-c-abi-adapter: bootstrap step 001
+- saga extensions-c-abi-adapter: init
+- chore(agentrail): archive native-codec saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga native-codec: complete (3 steps)
 - docs: close native-codec; glossary + demo-algorithms can proceed
 - saga native-codec: step native-decode complete
