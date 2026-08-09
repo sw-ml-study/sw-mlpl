@@ -6,6 +6,7 @@ members = [
     "crates/mlpl-runtime-core",
     "crates/mlpl-extension-abi",
     "crates/mlpl-extension-registry",
+    "crates/mlpl-extension-cabi",
     "crates/mlpl-ext-hello-static",
 ]
 resolver = "2"

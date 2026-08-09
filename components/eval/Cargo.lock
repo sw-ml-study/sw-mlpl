@@ -1395,6 +1395,7 @@ dependencies = [
  "mlpl-eval-types",
  "mlpl-ext-hello-static",
  "mlpl-extension-abi",
+ "mlpl-extension-cabi",
  "mlpl-extension-registry",
  "mlpl-forge-kg",
  "mlpl-loader-helpers",
@@ -1592,6 +1593,14 @@ dependencies = [
 [[package]]
 name = "mlpl-extension-abi"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-extension-cabi"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
+]
 
 [[package]]
 name = "mlpl-extension-registry"

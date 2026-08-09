@@ -1,0 +1,17 @@
+[package]
+name = "mlpl-extension-cabi"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The canonical C-ABI V1 boundary for native extensions + the host
+# adapter (register_c_extension) that accepts a provider's
+# #[repr(C)] descriptor and registers it into the safe extension
+# registry. Layout-identical to the demo-extensions ABI so a real
+# statically-linked provider registers unchanged. Scalar values
+# only in this slice (nil/bool/i64/f64/utf8/bytes); dense arrays
+# and native handles are a follow-up.
+
+[dependencies]
+mlpl-extension-abi = { path = "../mlpl-extension-abi" }
+mlpl-extension-registry = { path = "../mlpl-extension-registry" }

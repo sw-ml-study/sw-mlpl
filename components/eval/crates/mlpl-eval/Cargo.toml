@@ -125,6 +125,8 @@ serde_json = "1"
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
 # In-repo static extension provider: proves the registry/invoke path.
 mlpl-ext-hello-static = { path = "../../../runtime-core/crates/mlpl-ext-hello-static" }
+# C-ABI adapter: proves a #[repr(C)] provider dispatches through the interpreter.
+mlpl-extension-cabi = { path = "../../../runtime-core/crates/mlpl-extension-cabi" }
 # Tic-tac-toe engine: used only by the win-rate tests
 # (classifier_winrate, tictactoe_winrate). No longer a runtime dep --
 # the demo's game logic is now MLPL (examples/tictactoe-demo.mlpl).

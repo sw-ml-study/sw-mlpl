@@ -250,6 +250,14 @@ name = "mlpl-extension-abi"
 version = "0.20.0"
 
 [[package]]
+name = "mlpl-extension-cabi"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
+]
+
+[[package]]
 name = "mlpl-extension-registry"
 version = "0.20.0"
 dependencies = [

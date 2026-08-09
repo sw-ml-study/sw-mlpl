@@ -1,6 +1,6 @@
 number = 2
 slug = "cabi-crate"
-status = "pending"
+status = "in-progress"
 description = "New mlpl-extension-cabi crate: #[repr(C)] V1 structs matching demo-extensions..."
 role = "legacy"
 context_files = []
