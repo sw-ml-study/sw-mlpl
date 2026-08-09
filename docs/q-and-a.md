@@ -60,6 +60,29 @@ max_elements is a hard error. Completes the decode-budget trio
 (max_depth / max_bytes / max_elements) for demo-algorithms and
 demo-ml-utils.
 
+## 2026-08-09 (byte-stream-contract -- incremental sink)
+
+**Q: byte-stream contract (assessment rank 2) -- bounded
+incremental output.**
+
+A: Shipped append_bytes(path, bytes) -> ok(count) / err, the
+OUTPUT half of the ByteSource/ByteSink contract. MLPL has no
+mutable handles, so the contract is expressed over paths: the
+source half already existed (read_bytes(p, offset, length) =
+read, file_size(p) = size/position), and append_bytes is the
+incremental sink -- append a byte-array chunk (creating the file
+if absent), position = file_size, flush implicit per append. A
+program now streams output chunk-by-chunk without holding the
+whole result: read a slice, transform, append. Sandboxed,
+Result-based, byte validator shared with write_bytes.
+
+This unblocks bounded read->transform->append pipelines
+(demo-file-processing WAV copy/transform; demo-ml-utils
+chunked/mergeable stats). Remaining in the byte-stream track:
+packed u8 storage (honest bounded-memory claims) and
+compile-to-Rust I/O parity so these compile into standalone
+CLIs -- both separately queued.
+
 ## 2026-08-08 (range-read -- demo-ml-utils)
 
 **Q: go -- bounded range/seek I/O for large-file (safetensors)
