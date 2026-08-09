@@ -1,0 +1,1 @@
+Compiled string/byte/args I/O proven end-to-end: gated build_and_run_raw tests compile+run a standalone binary that prints a string, writes a byte array (Hi), and echoes a CLI arg. First compiled binary that does I/O.

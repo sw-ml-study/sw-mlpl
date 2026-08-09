@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 3,
+    "step": "cval-e2e"
+  },
+  "action": "raw-run harness; 3 gated compile e2e tests",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T13:01:24"
+}

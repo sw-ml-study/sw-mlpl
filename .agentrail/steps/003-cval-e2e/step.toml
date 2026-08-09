@@ -1,9 +1,10 @@
 number = 3
 slug = "cval-e2e"
-status = "pending"
+status = "completed"
 description = "Gated compile test: a compiled binary that prints a string, echoes an arg, an..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T12:51:53"
+completed_at = "2026-08-09T13:01:24"
 task_type = "rust-feature"
-commits = []
+commits = ["9a9ae201c667c90119d6cae9d3850a26fe82807f"]
