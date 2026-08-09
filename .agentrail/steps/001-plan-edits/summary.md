@@ -1,0 +1,1 @@
+plan.md assessment-driven roadmap (revised ranked order + architectural rules + capability-matrix/issue-reconciliation process + 60/25/15 split); future-sagas-queue gains 6 concrete queued sagas + a manual #7-#11 issue-reconciliation list (no gh CLI).
