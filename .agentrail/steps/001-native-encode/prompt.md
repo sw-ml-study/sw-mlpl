@@ -1,0 +1,1 @@
+native_encode.rs to_native(value[,opts]) binary encoder (header + tagged values) + fncall_native; TDD.
