@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-08
 
+- saga assessment-plan: complete (2 steps)
+- saga assessment-plan: step plan-edits complete
+- docs(plan): assessment-driven roadmap + queued sagas + issue reconciliation
+- saga assessment-plan: bootstrap step 001
+- saga assessment-plan: init
+- chore(agentrail): archive compiler-apply-binop saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga compiler-apply-binop: complete (2 steps)
 - saga compiler-apply-binop: step fix complete
 - fix(compiler): route apply_binop + matmul through the runtime facade (compiler-apply-binop)
