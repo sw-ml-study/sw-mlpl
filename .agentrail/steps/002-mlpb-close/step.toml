@@ -1,6 +1,6 @@
 number = 2
 slug = "mlpb-close"
-status = "pending"
+status = "in-progress"
 description = "Close codec-mlpb-integrity: docs (Capability Matrix MLPB row, wiki errata, q-..."
 role = "legacy"
 context_files = []

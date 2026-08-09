@@ -5,6 +5,29 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-08-09 (MLPB v2 integrity -- demo-algorithms next task)
+
+**Q: demo-algorithms is idle until a sw-mlpl codec-* follow-up
+ships. (Chose: MLPB integrity/checksum.)**
+
+A: Shipped MLPB **v2**: `to_native` now appends a CRC32 (u32 LE)
+over the payload, and `parse_native` verifies it -- a corrupted
+payload that would otherwise decode as a valid-but-wrong value is
+now rejected. Backward compatible on READ: a v1 buffer (no
+checksum) still decodes, so already-written data stays readable;
+only new writes carry integrity. Implemented as a version-gated
+trailer (`native_integrity.rs`: read_header accepting v1/v2,
+verify_checksum, bitwise CRC32 -- no new dependency).
+
+**demo-algorithms can proceed**: adopt MLPB v2 -- new `to_native`
+output carries the checksum; update any test that asserts the
+version byte is 1 (it is now 2) and any that asserts a byte-exact
+v1 layout for freshly-encoded values. Their v1 fixtures that
+DECODE a v1 buffer keep working unchanged. The remaining codec-*
+asks (streaming, reference tables/cycles, TOML tagged mode,
+migration hooks, extra numeric types) stay queued in
+docs/future-sagas-queue.md.
+
 ## 2026-08-09 (downstream unblock status)
 
 **Q: (mid-work notes) demo-extensions blocked on the C

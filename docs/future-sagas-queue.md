@@ -545,9 +545,11 @@ remaining, lower-priority items:
 - **codec-toml-tagged** -- TOML tagged mode mirroring the JSON
   `$mlpl` tagged-envelope so TOML round-trips non-data value kinds
   (see `docs/serialization-variant-encoding.md`).
-- **codec-mlpb-integrity** -- a stronger MLPB integrity check
-  (checksum / length-and-tag cross-validation) beyond the current
-  magic + version + payload-len header.
+- **codec-mlpb-integrity** SHIPPED 2026-08-09 -- MLPB v2 appends a
+  CRC32 (u32 LE) over the payload; `to_native` emits v2 and
+  `parse_native` verifies it (a corrupted payload that still
+  decodes as valid is rejected). Backward compatible on read: v1
+  buffers (no checksum) still decode. (`native_integrity.rs`.)
 - **codec-migration-hooks** -- version-migration hooks with
   path-aware errors (which field/index failed to decode).
 - **codec-numeric-types** -- additional numeric element types at
