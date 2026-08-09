@@ -14,6 +14,20 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga extension-registry-static-provider: complete (5 steps)
+- feat(ext): register the hello provider in repl + serve; close first slice (extension-registry step 5)
+- saga extension-registry-static-provider: step help complete
+- feat(ext): extension signatures in :describe / help (extension-registry step 4)
+- saga extension-registry-static-provider: step dispatch complete
+- feat(ext): invoke registered extensions via the interpreter (extension-registry step 3)
+- saga extension-registry-static-provider: step registry complete
+- feat(ext): mlpl-extension-registry -- process-global registration + lookup (extension-registry step 2)
+- saga extension-registry-static-provider: step abi complete
+- feat(ext): mlpl-extension-abi -- host value/error boundary + panic containment (extension-registry step 1)
+- saga extension-registry-static-provider: bootstrap step 001
+- saga extension-registry-static-provider: init
+- chore(agentrail): archive extensions-contract-doc saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga extensions-contract-doc: complete (2 steps)
 - saga extensions-contract-doc: step write-doc complete
 - docs: record demo-extensions upstream contract + first-slice saga
