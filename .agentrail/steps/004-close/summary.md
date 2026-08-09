@@ -1,0 +1,1 @@
+Saga A closed: compile-to-Rust now handles strings + stdout/args (CVal value model); first compiled I/O binary. Maturity docs updated; remaining compiler rungs (read_bytes/control-flow/functions/bit-ops) + the ext C-ABI adapter queued.

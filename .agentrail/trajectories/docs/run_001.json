@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 4,
+    "step": "close"
+  },
+  "action": "maturity docs; backlog rungs + adapter",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T13:05:17"
+}
