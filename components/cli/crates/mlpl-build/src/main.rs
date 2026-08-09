@@ -148,7 +148,7 @@ fn write_main_rs(tmp: &Path, src: &str) -> Result<(), String> {
         "use mlpl::mlpl;\n\
          fn main() {{\n\
              let result = mlpl! {{ {macro_body} }};\n\
-             println!(\"{{}}\", result.data()[0]);\n\
+             println!(\"{{}}\", result.arr().data()[0]);\n\
          }}\n"
     );
     std::fs::write(tmp.join("src/main.rs"), main_rs)

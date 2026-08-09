@@ -35,7 +35,10 @@ use mlpl_parser::{BinOpKind, Expr};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
+mod cval_lower;
 mod fncall;
+
+pub(crate) use cval_lower::lower_cval;
 
 use fncall::{labels_of, lower_fncall};
 
@@ -170,12 +173,13 @@ fn lower_stmt(
         }
         let id = format_ident!("{name}");
         bindings.push(quote! { let #id = #val; });
-        return Ok(is_last.then(|| quote! { #id.clone() }));
+        let rt = &ctx.rt;
+        return Ok(is_last.then(|| quote! { #rt::CVal::Arr(#id.clone()) }));
+    }
+    if is_last {
+        return Ok(Some(lower_cval(ctx, stmt)?));
     }
     let val = lower_expr(ctx, stmt)?;
-    if is_last {
-        return Ok(Some(val));
-    }
     bindings.push(quote! { let _ = #val; });
     Ok(None)
 }
@@ -233,8 +237,11 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         Expr::Assign { .. } => Err(LowerError::Unsupported(
             "nested assignment (assignment as subexpression)".into(),
         )),
-        Expr::StrLit(_, _)
-        | Expr::BuiltinRef(_, _)
+        Expr::StrLit(s, _) => {
+            let rt = &ctx.rt;
+            Ok(quote! { #rt::CVal::Str(#s.to_string()) })
+        }
+        Expr::BuiltinRef(_, _)
         | Expr::TensorCtor { .. }
         | Expr::Repeat { .. }
         | Expr::Train { .. }

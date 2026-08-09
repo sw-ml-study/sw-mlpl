@@ -63,7 +63,7 @@ fn build_and_run_with_macro_body(body: &str) -> String {
         "use mlpl::mlpl;\n\
          fn main() {{\n\
              let result = mlpl! {{ {body} }};\n\
-             println!(\"{{}}\", result.data()[0]);\n\
+             println!(\"{{}}\", result.arr().data()[0]);\n\
          }}\n"
     );
     std::fs::write(tmp.join("src/main.rs"), main_rs).unwrap();

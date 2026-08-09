@@ -54,6 +54,15 @@ pub(crate) fn lower_fncall(
         }
         ("label" | "relabel", 2) | ("reshape_labeled", 3) => lower_label_attach(ctx, name, args),
         ("matmul", 2) => lower_matmul(ctx, args),
+        ("write_stdout", 1) => {
+            let a = crate::lower_cval(ctx, &args[0])?;
+            Ok(quote! { #rt::write_stdout(&(#a)) })
+        }
+        ("args", 0) => Ok(quote! { #rt::cli_args() }),
+        ("arg", 1) => {
+            let a = crate::lower_cval(ctx, &args[0])?;
+            Ok(quote! { #rt::arg(&(#a)) })
+        }
         _ => Err(LowerError::Unsupported(format!(
             "fncall {name}/{}",
             args.len()

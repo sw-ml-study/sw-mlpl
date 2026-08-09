@@ -51,7 +51,7 @@ mlpl-rt = {{ path = "{}/components/native-rt/crates/mlpl-rt" }}
     );
     std::fs::write(tmp.join("Cargo.toml"), cargo_toml).unwrap();
     let main_rs = format!(
-        "fn main() {{\n    let result = {body};\n    println!(\"{{}}\", result.data()[0]);\n}}\n"
+        "fn main() {{\n    let result = {body};\n    println!(\"{{}}\", result.arr().data()[0]);\n}}\n"
     );
     std::fs::write(tmp.join("src/main.rs"), main_rs).unwrap();
 
