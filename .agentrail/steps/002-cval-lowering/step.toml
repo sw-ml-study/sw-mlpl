@@ -1,9 +1,10 @@
 number = 2
 slug = "cval-lowering"
-status = "pending"
+status = "completed"
 description = "lower_cval + StrLit/write_stdout/args lowering; lower() returns CVal; update ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T12:31:02"
+completed_at = "2026-08-09T12:51:53"
 task_type = "rust-feature"
-commits = []
+commits = ["634b8d5ab09e649de72d8bda7727fb1c52061714"]

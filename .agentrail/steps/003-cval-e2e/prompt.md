@@ -1,0 +1,1 @@
+Gated compile test: a compiled binary that prints a string, echoes an arg, and writes a byte array to stdout (MLPL_LOWER_RS/MACRO_COMPILE_TESTS).

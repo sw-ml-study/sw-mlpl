@@ -1,0 +1,1 @@
+Lowering produces CVal: StrLit->Str, write_stdout/args/arg -> runtime calls, numeric result wrapped CVal::Arr via lower_cval; lower() always yields CVal; templates read result.arr(). 5 token tests + numerical e2e (4) still pass.
