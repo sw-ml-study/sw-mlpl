@@ -1,0 +1,1 @@
+Saga closed: compile-to-Rust arithmetic + matmul now compile end-to-end (facade re-exports + UFCS lowering); the two gated compile suites un-rotted and green (5/5, 4/4). The README/status maturity 'numerical subset' claim is now accurate rather than aspirational.

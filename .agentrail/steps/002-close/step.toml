@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close compiler-apply-binop: note compile-path arithmetic/matmul works; refres..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-08T19:28:37"
+completed_at = "2026-08-08T19:29:04"
 task_type = "docs"
-commits = []
+commits = ["d52c8009b32d0389a3749b7f26da4c1a7dc4e0e4"]
