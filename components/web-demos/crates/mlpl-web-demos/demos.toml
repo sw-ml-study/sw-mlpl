@@ -2610,3 +2610,140 @@ demo = "Tiny LM + Engram"
 line_idx = 18
 heading = "Engram-only training: 40 Adam steps against a frozen base"
 body = "Every base weight was frozen two lines ago, so Adam skips them and the ONLY thing learning here is the engram: its memory table (via scatter-ADD into the bigram-addressed rows), value projection, and gate. When the loss comes out below the frozen-base reference, that whole margin was bought by conditional memory, not by weight updates."
+
+[[demos]]
+category = "Non-Browser (companion CLIs)"
+name = "Algorithms and Data Structures (CLI)"
+intro = "COMPANION CLI, not a browser demo: demo-algorithms shows an ML/array language expressing ordinary data structures and algorithms with few or no explicit loops. Runs in the terminal against a built mlpl-repl."
+takeaway = "Clone demo-algorithms beside sw-mlpl; `just demos` / `just tests`. ~95 named mini-apps + all 23 Gang-of-Four patterns."
+lines = [
+    "# demo-algorithms -- general-purpose data structures & algorithms in MLPL",
+    "#   https://github.com/sw-ml-study/demo-algorithms",
+    "# Structures: stacks/queues/deques, persistent lists, hash maps (open",
+    "#   addressing + chaining), LRU, BST/AVL, interval/segment/Fenwick trees,",
+    "#   tries, B-tree, skip list, sparse CSR.",
+    "# Graphs: BFS/DFS, toposort, SCC, union-find, Dijkstra/Bellman-Ford,",
+    "#   Floyd-Warshall, Kruskal, A*, max-flow, bipartite/Hungarian matching.",
+    "# Classic: knapsack/coin DP, LCS, N-queens, subset-sum, Sudoku, sieve.",
+    "# App demos: campaign_goal, browser_back_history, incident_priority_queue,",
+    "#   live_leaderboard_rank, route_shortest_paths, traveling_salesman.",
+    "# Run: git clone beside sw-mlpl, then `just demos` (mlplunit).",
+    "\"Algorithms: not a browser demo -- see https://github.com/sw-ml-study/demo-algorithms (95+ CLI mini-apps + all 23 GoF patterns)\"",
+]
+
+[[demos]]
+category = "Non-Browser (companion CLIs)"
+name = "Combinators and Higher-Order (CLI)"
+intro = "COMPANION CLI, not a browser demo: demo-combinators implements Smullyan's bird combinators in MLPL to show it is a general-purpose higher-order language. Terminal / script-mode."
+takeaway = "Clone demo-combinators beside sw-mlpl; `just demos` / `just problems` / `just lessons`."
+lines = [
+    "# demo-combinators -- To Mock a Mockingbird combinators in MLPL",
+    "#   https://github.com/sw-ml-study/demo-combinators",
+    "# Core birds: I, K, T, B (compose), C (flip), V, W (dup), S, M (self-apply).",
+    "# Aviary: Blackbird, Bunting, Dove, Eagle, Psi, Phoenix, Lark, Owl, Robin,",
+    "#   Finch, Goldfinch, plus higher-arity birds.",
+    "# Partial application + SK derivations (I = S K K); Boolean logic via K/KI.",
+    "# Fixed points: Y = B M L and applicative-order Z; loop-free factorial/fib.",
+    "# HOF interop: each, table, atop, over, Result combinators, bracket.",
+    "# App demos: order-quote pricing, sensor calibration, worker/job matrix,",
+    "#   validation railway, managed session under bracket.",
+    "\"Combinators: not a browser demo -- see https://github.com/sw-ml-study/demo-combinators (bird combinators, SK/Y, HOF problem corpus)\"",
+]
+
+[[demos]]
+category = "Non-Browser (companion CLIs)"
+name = "Extensions / Native SDK (CLI)"
+intro = "COMPANION CLI, not a browser demo: demo-extensions builds independently-compiled Rust libraries that add native capabilities to MLPL through a versioned C-ABI extension boundary. Native / terminal only."
+takeaway = "Clone demo-extensions beside sw-mlpl; `cargo build --workspace` then `just check` / `just tests`. The host registry first slice is shipped upstream (call hello:answer() in the terminal REPL)."
+lines = [
+    "# demo-extensions -- native Rust extensions for MLPL (dynamic C ABI)",
+    "#   https://github.com/sw-ml-study/demo-extensions",
+    "# Versioned ABI V1: fixed-layout values/errors/descriptors, version",
+    "#   negotiation, fail-closed metadata, host-owned copies.",
+    "# Dynamic loader/registry: real .dylib/.so loading, path confinement,",
+    "#   manifest/target selection, duplicate/mismatch rejection.",
+    "# Namespaced calls with typed success, extension failure, and CONTAINED",
+    "#   panics; typed signature metadata rendered in help.",
+    "# Bounded dense-array views (dtype/rank/shape/strides); native 3D is the",
+    "#   motivating future goal.",
+    "# Upstream: the static-provider registry seam is live -- hello:answer() -> 42",
+    "#   in the terminal REPL; use hello / dynamic loading are follow-ups.",
+    "\"Extensions: not a browser demo -- see https://github.com/sw-ml-study/demo-extensions (native C-ABI SDK; hello extension)\"",
+]
+
+[[demos]]
+category = "Non-Browser (companion CLIs)"
+name = "File Processing (CLI)"
+intro = "COMPANION CLI, not a browser demo: demo-file-processing does byte-oriented file inspection, transformation, and bounded streaming (hexdump, MP3/Ogg/WAV) in MLPL. Needs real files + a terminal."
+takeaway = "Clone demo-file-processing beside sw-mlpl; `just hexdump`, `just mp3-scan`, `just wav-inspect-copy`, etc. Bounded (O(chunk)) copy/transform via read_bytes range + append_bytes / write_stdout."
+lines = [
+    "# demo-file-processing -- byte-oriented file inspection & bounded streaming",
+    "#   https://github.com/sw-ml-study/demo-file-processing",
+    "# Byte foundations: hexdump, 256-bin byte histogram, bounded range reader.",
+    "# Bounded I/O: chunked histogram merge, byte-identical bounded copy",
+    "#   (O(chunk) state, SHA-256 evidence), sandboxed incremental writes.",
+    "# Codecs: little/big-endian fields, MSB-first bitfields across bytes.",
+    "# MP3/MPEG: header decode, VBR frame scan + resync, ID3v2 inspector,",
+    "#   bounded MP3 output (tag strip). Ogg: pages, packets, CRC, bounded copy.",
+    "# WAV/RIFF: chunk inspect, canonical round trip, bounded 8-bit copy/invert.",
+    "# App demos (just): hexdump, histogram, bounded-copy, mp3-scan, id3-inspect,",
+    "#   ogg-pages, ogg-crc, wav-inspect-copy, wav-bounded-output.",
+    "\"File Processing: not a browser demo -- see https://github.com/sw-ml-study/demo-file-processing (hexdump, MP3/Ogg/WAV, bounded streaming)\"",
+]
+
+[[demos]]
+category = "Non-Browser (companion CLIs)"
+name = "Functional Pipelines (CLI)"
+intro = "COMPANION CLI, not a browser demo: demo-funtional-pipelines shows readable Ramda-style functional pipelines (map/filter/reduce, composition) in MLPL. Terminal / script-mode."
+takeaway = "Clone demo-funtional-pipelines beside sw-mlpl; `just classifier-evaluation` (headline app), `just demos` / `just tests`."
+lines = [
+    "# demo-funtional-pipelines -- readable functional pipelines in MLPL",
+    "#   https://github.com/sw-ml-study/demo-funtional-pipelines",
+    "# Map/filter/reduce eager transform + selection.",
+    "# Branching pipelines that partition data through a bound predicate.",
+    "# Fallible JSON record pipelines: parse/validate + exception-free lookup.",
+    "# Composition comparison: nesting vs named stages vs atop vs over.",
+    "# App demo: binary-classifier evaluation -- parse JSON logits/labels,",
+    "#   compute tp/fp/tn/fn, accuracy/precision/recall, edge cases.",
+    "\"Functional Pipelines: not a browser demo -- see https://github.com/sw-ml-study/demo-funtional-pipelines (classifier-evaluation app, composition styles)\"",
+]
+
+[[demos]]
+category = "Non-Browser (companion CLIs)"
+name = "Memory and Retrieval (CLI)"
+intro = "COMPANION CLI, not a browser demo: demo-memory studies how a system finds the small part of memory that matters -- hash probes, caches, Bloom filters, retrieval, sparse attention. Uses native timing; terminal only."
+takeaway = "Clone demo-memory beside sw-mlpl; `just demo` (guided), then per-topic recipes. ~40 named `just` recipes with honest clock_ms() timing."
+lines = [
+    "# demo-memory -- hashing -> caches -> retrieval -> sparse memory in MLPL",
+    "#   https://github.com/sw-ml-study/demo-memory",
+    "# Hash tables: linear probing vs Robin Hood; probe histograms, p50/p95.",
+    "# Eviction: LRU/KV bridge over uniform/hot-set/scan/bursty traces; FIFO vs LRU.",
+    "# Bloom filters: logical, counting (deletion), packed-word (bit-op equiv).",
+    "# Retrieval: Hamming shortlist, prefix-width recall, multi-probe, sparse agg.",
+    "# Learned projections: projected binary codes, distribution shift, adaptive",
+    "#   rebuild, retrieval-budget selection, ensemble scheduling.",
+    "# App demos (just): probe_tradeoffs (headline), bloom-benchmark,",
+    "#   binary-retrieval, distribution-shift, retrieval-budget-selector.",
+    "\"Memory: not a browser demo -- see https://github.com/sw-ml-study/demo-memory (hash/cache/Bloom/retrieval, native timing)\"",
+]
+
+[[demos]]
+category = "Non-Browser (companion CLIs)"
+name = "ML Artifact Utils (CLI)"
+intro = "COMPANION CLI, not a browser demo: demo-ml-utils inspects, validates, converts, and quantizes ML artifacts (Safetensors, GGUF, checkpoints) with bounded memory in MLPL. Needs real model files + a terminal."
+takeaway = "Clone demo-ml-utils beside sw-mlpl; `just check`, per-format recipes; opt-in sparse-artifact peak-RSS. Uses bounded read_bytes range + file_size + record_keys."
+lines = [
+    "# demo-ml-utils -- bounded ML-artifact inspection / conversion in MLPL",
+    "#   https://github.com/sw-ml-study/demo-ml-utils",
+    "# Safetensors: bounded header/range reads (file_size), metadata catalog",
+    "#   (record_keys + duplicate rejection), selective int tensor decode,",
+    "#   fixed-chunk mergeable statistics.",
+    "# GGUF v3: metadata + tensor-descriptor catalog, selective I8/I16 decode,",
+    "#   Q8_0 block decoder (ggml dequant parity).",
+    "# Quantization: saturating-byte goldens, symmetric INT8 round trip, Q4 layout.",
+    "# Conversion: self-validating Safetensors-to-GGUF writer with read-back.",
+    "# Checkpoint safety: passive ZIP/pickle inventory, inert restricted machine.",
+    "# App demos: safetensors catalog/slice/statistics, gguf catalog/slice,",
+    "#   Q8_0 decoder, safetensors-to-gguf, tensor-city, quantization-error-tiles.",
+    "\"ML Artifact Utils: not a browser demo -- see https://github.com/sw-ml-study/demo-ml-utils (Safetensors/GGUF inspect, quantize, convert)\"",
+]

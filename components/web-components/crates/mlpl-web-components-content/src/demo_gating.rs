@@ -30,6 +30,7 @@ const SECTION_ORDER: &[&str] = &[
     "Generative Models",
     "Engram",
     "APL2 / General Programming",
+    "Non-Browser (companion CLIs)",
     "Client-server (connect)",
     "MLX - Apple GPU (connect)",
     "CUDA - Linux GPU (connect)",
