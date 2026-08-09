@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "boxed-extfn"
+  },
+  "action": "boxed-closure ExtFn; Arc coercion; const-hoisted sigs",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T13:55:29"
+}
