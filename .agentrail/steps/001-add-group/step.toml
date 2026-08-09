@@ -1,0 +1,9 @@
+number = 1
+slug = "add-group"
+status = "pending"
+description = "Add Non-Browser demo category with one pointer-demo per companion repo; READM..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T10:58:33"
+task_type = "demo"
+commits = []

@@ -1,0 +1,1 @@
+Add Non-Browser demo category with one pointer-demo per companion repo; README count; demo_order/registry tests.
