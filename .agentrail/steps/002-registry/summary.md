@@ -1,0 +1,1 @@
+mlpl-extension-registry crate shipped: process-global OnceLock registry, register (fail-closed, host-owned copies) / lookup / signatures, functions keyed namespace:function. 4 TDD tests.

@@ -1,0 +1,1 @@
+mlpl-ext-hello-static provider crate; fncall_ext.rs Value-tier dispatcher wired into eval_fncalls; Value<->ExtValue marshal; EvalError::ExtensionError; TDD hello:answer()->42, failing->err, panic contained.

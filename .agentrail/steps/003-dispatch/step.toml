@@ -1,0 +1,9 @@
+number = 3
+slug = "dispatch"
+status = "pending"
+description = "mlpl-ext-hello-static provider crate; fncall_ext.rs Value-tier dispatcher wir..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T09:59:45"
+task_type = "rust-feature"
+commits = []

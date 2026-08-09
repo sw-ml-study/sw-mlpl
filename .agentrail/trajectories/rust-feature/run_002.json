@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 2,
+    "step": "registry"
+  },
+  "action": "OnceLock<RwLock> global mirroring dispatch_hook; qualified-name keying",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T09:59:45"
+}
