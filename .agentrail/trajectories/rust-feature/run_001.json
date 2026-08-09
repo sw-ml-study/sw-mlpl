@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "cval-runtime"
+  },
+  "action": "new crate + re-export pattern; io sibling module for fn budget",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T12:31:02"
+}

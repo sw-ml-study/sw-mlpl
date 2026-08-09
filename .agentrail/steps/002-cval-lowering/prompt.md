@@ -1,0 +1,1 @@
+lower_cval + StrLit/write_stdout/args lowering; lower() returns CVal; update mlpl-build main template + macro test call sites (result.arr()); token TDD.

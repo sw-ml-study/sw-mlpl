@@ -1,0 +1,9 @@
+number = 2
+slug = "cval-lowering"
+status = "pending"
+description = "lower_cval + StrLit/write_stdout/args lowering; lower() returns CVal; update ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T12:31:02"
+task_type = "rust-feature"
+commits = []
