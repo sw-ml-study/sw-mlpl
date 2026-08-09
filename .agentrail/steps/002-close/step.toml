@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close extensions-contract-doc: --done."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T09:20:09"
+completed_at = "2026-08-09T09:20:16"
 task_type = "docs"
-commits = []
+commits = ["9262aab9acb7ddc23005d8a45435b4dd417d924e"]

@@ -1,0 +1,1 @@
+Saga closed: demo-extensions contract + first-slice saga recorded in planning docs; no code (research/recommendation deliverable).
