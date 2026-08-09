@@ -56,6 +56,11 @@ Each links to its own planning doc:
 - [sw-mlpl-mcp](companion-sw-mlpl-mcp.md) -- a Model Context
   Protocol server exposing MLPL evaluation, introspection, and
   test discovery to AI agents as typed tools.
+- [demo-extensions](companion-demo-extensions.md) -- a native /
+  dynamic Rust extension ecosystem (ABI + SDK + loader + package
+  format) plugging in as MLPL modules; its upstream asks (a public
+  registry, `use` import, and compiler/static-provider hooks) and
+  the recommended minimal first slice are recorded there.
 
 ## The strategic thread: a language legible to AI
 

@@ -445,16 +445,30 @@ structural sharing / views / builders, UDF fold/scan/unfold,
 MLX/CUDA service refactor, speculative decoding, targeted
 interpreter perf, web UX polish.
 
-**demo-extensions upstream contract** (new 2026-08-09) --
-demo-extensions (native/dynamic extension SDK) needs upstream
-hooks: a public builtin/extension REGISTRY, an IMPORT mechanism,
-and COMPILER hooks. Its contract lives in
-`../demo-extensions/docs/upstream-contract.md` + `abi-v1.md`.
-Overlaps the queued `modules-namespaces` work and the existing
-builtin catalog / `include` / compile-to-Rust path -- reconcile
-before building (do not build twice). A concrete first-slice
-saga is being scoped from those docs; sequence it against
-`modules-namespaces`.
+**extension-registry-static-provider** (demo-extensions upstream
+contract, new 2026-08-09) -- the recommended FIRST slice of the
+demo-extensions native-extension contract, fully scoped in
+`docs/companion-demo-extensions.md`. A public host registration +
+import path proven via a STATICALLY LINKED provider (sidesteps
+dynamic loading, arrays, handles, event loop): (1) a public V1
+scalar value/error boundary with contained panics; (2) a public
+registration API taking an already-validated descriptor, wired as
+a lookup the existing `builtins.rs` chain defers to (NOT a second
+dispatch); (3) static-provider registration; (4) a minimal `use`
+import loading the `module.mlpl` facade after registration; (5)
+help/signature metadata through the existing `mlpl-builtin-catalog`
+surface. Acceptance: from a script + REPL, `use hello` then a
+call returns typed `i64` 42, a failure is a typed MLPL error, a
+panic is contained, `help` shows the signature -- provider
+statically linked. Dynamic load / arrays / native handles / event
+loop / compiled `--embed-extension` are follow-ups.
+
+Build ONCE with `modules-namespaces` (the public/private `hello`
+vs `_hello` split IS qualified-names + private-helpers) and
+rationalize the existing static `builtins.rs` dispatch + builtin
+catalog rather than duplicating them. `include` (source-text
+splicing) stays separate but the `use` keyword must reconcile
+with it. Large, architectural -- sequence deliberately.
 
 ## GitHub issue reconciliation (manual -- maintainer action)
 
