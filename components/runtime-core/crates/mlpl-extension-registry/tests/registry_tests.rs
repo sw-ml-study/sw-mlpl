@@ -18,7 +18,7 @@ fn desc(ns: &str) -> ExtensionDescriptorV1 {
             name: "answer".to_string(),
             arity: 0,
             signature_toml: "returns = \"i64\"".to_string(),
-            func: answer,
+            func: std::sync::Arc::new(answer),
         }],
     }
 }

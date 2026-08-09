@@ -22,27 +22,28 @@ fn boom(_: &[ExtValue]) -> Result<ExtValue, ExtError> {
     panic!("hello.boom intentional panic");
 }
 
+const SIG_ANSWER: &str =
+    "returns = \"i64\"\ndocumentation = \"Return the canonical extension answer.\"";
+const SIG_PLAIN: &str = "returns = \"i64\"";
+
 /// Register the `hello` extension. Idempotent: a duplicate
 /// registration (already registered) is treated as success.
 pub fn register() {
-    let f = |name: &str, sig: &str, func| ExtFnDesc {
-        name: name.to_string(),
-        arity: 0,
-        signature_toml: sig.to_string(),
-        func,
-    };
+    let f =
+        |name: &str, sig: &str, func: fn(&[ExtValue]) -> Result<ExtValue, ExtError>| ExtFnDesc {
+            name: name.to_string(),
+            arity: 0,
+            signature_toml: sig.to_string(),
+            func: std::sync::Arc::new(func),
+        };
     let descriptor = ExtensionDescriptorV1 {
         name: "hello".to_string(),
         private_namespace: "_hello".to_string(),
         facade_mlpl: String::new(),
         functions: vec![
-            f(
-                "answer",
-                "returns = \"i64\"\ndocumentation = \"Return the canonical extension answer.\"",
-                answer,
-            ),
-            f("fail", "returns = \"i64\"", fail),
-            f("boom", "returns = \"i64\"", boom),
+            f("answer", SIG_ANSWER, answer),
+            f("fail", SIG_PLAIN, fail),
+            f("boom", SIG_PLAIN, boom),
         ],
     };
     match registry_register(&descriptor) {

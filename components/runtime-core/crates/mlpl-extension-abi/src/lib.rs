@@ -42,14 +42,16 @@ impl ExtError {
     }
 }
 
-/// A statically-linked extension function: scalars in, one scalar
-/// or an `ExtError` out.
-pub type ExtFn = fn(&[ExtValue]) -> Result<ExtValue, ExtError>;
+/// An extension function: scalars in, one scalar or an `ExtError`
+/// out. A boxed closure (not a bare `fn`) so a provider can
+/// CAPTURE state -- e.g. the C-ABI adapter wraps each C invoke
+/// trampoline. A plain `fn` coerces into it via `Arc::new`.
+pub type ExtFn = std::sync::Arc<dyn Fn(&[ExtValue]) -> Result<ExtValue, ExtError> + Send + Sync>;
 
 /// One exported function's descriptor: its name within the
 /// namespace, arity, a bounded TOML signature doc (for `help`),
-/// and the function pointer.
-#[derive(Clone, Debug)]
+/// and the function.
+#[derive(Clone)]
 pub struct ExtFnDesc {
     pub name: String,
     pub arity: usize,
@@ -60,7 +62,7 @@ pub struct ExtFnDesc {
 /// A validated V1 extension: its public namespace (`hello`), the
 /// private native namespace (`_hello`), the `module.mlpl` facade
 /// text (unused until the `use`/facade saga), and its functions.
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct ExtensionDescriptorV1 {
     pub name: String,
     pub private_namespace: String,
@@ -71,7 +73,7 @@ pub struct ExtensionDescriptorV1 {
 /// Invoke `f` with panics CONTAINED: a panic becomes an
 /// `ExtError { panicked: true }` instead of unwinding into the
 /// host. `Ok`/`Err` domain results pass through unchanged.
-pub fn call_contained(f: ExtFn, args: &[ExtValue]) -> Result<ExtValue, ExtError> {
+pub fn call_contained(f: &ExtFn, args: &[ExtValue]) -> Result<ExtValue, ExtError> {
     match catch_unwind(AssertUnwindSafe(|| f(args))) {
         Ok(result) => result,
         Err(_) => Err(ExtError {
