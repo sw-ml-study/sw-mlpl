@@ -445,6 +445,17 @@ structural sharing / views / builders, UDF fold/scan/unfold,
 MLX/CUDA service refactor, speculative decoding, targeted
 interpreter perf, web UX polish.
 
+**demo-extensions upstream contract** (new 2026-08-09) --
+demo-extensions (native/dynamic extension SDK) needs upstream
+hooks: a public builtin/extension REGISTRY, an IMPORT mechanism,
+and COMPILER hooks. Its contract lives in
+`../demo-extensions/docs/upstream-contract.md` + `abi-v1.md`.
+Overlaps the queued `modules-namespaces` work and the existing
+builtin catalog / `include` / compile-to-Rust path -- reconcile
+before building (do not build twice). A concrete first-slice
+saga is being scoped from those docs; sequence it against
+`modules-namespaces`.
+
 ## GitHub issue reconciliation (manual -- maintainer action)
 
 Per user direction, the agent does NOT edit/close issues via the
