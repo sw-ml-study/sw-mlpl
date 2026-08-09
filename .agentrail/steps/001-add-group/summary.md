@@ -1,0 +1,1 @@
+Non-Browser companion-CLI demo group added: 7 pointer demos (one per ../demo-* repo) with capabilities + app demos + GitHub links, each evaluating to a not-in-browser pointer message. SECTION_ORDER slot after APL2; README 86->93. Gates green.

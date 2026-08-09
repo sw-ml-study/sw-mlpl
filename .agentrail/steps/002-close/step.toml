@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close non-browser-demos: rebuild pages, deploy, verify live, --done."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T11:33:04"
+task_type = "docs"
+commits = []
