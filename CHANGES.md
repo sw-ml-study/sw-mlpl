@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga native-codec: complete (3 steps)
+- docs: close native-codec; glossary + demo-algorithms can proceed
+- saga native-codec: step native-decode complete
+- feat(eval): parse_native -- typed-native binary decoder (native-codec step 2)
+- saga native-codec: step native-encode complete
+- feat(eval): to_native -- typed-native binary encoder (native-codec step 1)
+- saga native-codec: bootstrap step 001
+- saga native-codec: init
+- chore(agentrail): archive compiled-value-model-strings saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga compiled-value-model-strings: complete (4 steps)
 - docs: close compiled-value-model-strings; queue compiler rungs + ext C-ABI adapter
 - saga compiled-value-model-strings: step cval-e2e complete
