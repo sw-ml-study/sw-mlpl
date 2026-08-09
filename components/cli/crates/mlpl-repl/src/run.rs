@@ -30,6 +30,9 @@ pub(crate) fn run(config: Config) {
     mlpl_eval::register_gpu_step(mlpl_cuda_eval::gpu_step());
     #[cfg(all(target_os = "macos", target_arch = "aarch64", feature = "mlx"))]
     mlpl_eval::register_gpu_step(mlpl_mlx_eval::gpu_step());
+    // Register the in-repo static `hello` extension (the first-slice
+    // proof of the native-extension registry). Idempotent; global.
+    mlpl_ext_hello_static::register();
     match config.info {
         Info::Version => return crate::version::print(),
         Info::HelpLong => return print!("{}", crate::version::help_long()),

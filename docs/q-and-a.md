@@ -60,6 +60,32 @@ max_elements is a hard error. Completes the decode-budget trio
 (max_depth / max_bytes / max_elements) for demo-algorithms and
 demo-ml-utils.
 
+## 2026-08-09 (extension-registry -- demo-extensions first slice)
+
+**Q: take extension-registry-static-provider first (demo-ml-utils
++ demo-extensions request).**
+
+A: Shipped the REGISTRY-FIRST slice (user decision): the hard
+architectural core, no new parser syntax. Three new crates --
+mlpl-extension-abi (ExtValue scalar boundary + ExtError +
+call_contained panic containment), mlpl-extension-registry
+(process-global OnceLock register/lookup/signatures, fail-closed),
+mlpl-ext-hello-static (in-repo static hello provider). The eval
+colon branch checks the registry first, so hello:answer() -> 42,
+a domain failure -> err Result, a panic -> contained
+EvalError::ExtensionError; :describe hello:answer shows the
+signature. Registered at repl + serve startup. Verified in the
+shipped repl binary.
+
+What this unblocks for demo-extensions: "actual MLPL invocation"
+through the host registry is now real (interpreter + REPL +
+connect). Deferred (queued): the use hello / dotted hello.answer()
+language surface (saga-2, with modules-namespaces -- use the colon
+spelling for now); compiler parity (follow-up contract, after
+compiler-io-parity); dynamic loading + manifest resolver; and
+arrays/native handles (the "zero-copy / array-lifetime" ask). Not
+in the browser (wasm) this slice.
+
 ## 2026-08-09 (stdout-sink -- non-seekable output)
 
 **Q: go, stdout sink next -- demo-file-processing needs binary

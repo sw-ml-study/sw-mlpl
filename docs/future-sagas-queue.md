@@ -470,6 +470,26 @@ catalog rather than duplicating them. `include` (source-text
 splicing) stays separate but the `use` keyword must reconcile
 with it. Large, architectural -- sequence deliberately.
 
+FIRST SLICE SHIPPED 2026-08-09 (registry-first): the abi +
+registry + static `hello` provider + colon-spelling invocation +
+help are live (interpreter/REPL/serve). Remaining follow-ups:
+
+- **extensions-use-facade** (with `modules-namespaces`) -- the
+  `use hello` construct + dotted `hello.answer()` grammar +
+  `module.mlpl` facade (public/private publish). Until this, call
+  extensions with the colon spelling `hello:answer()`.
+- **extensions-compiler-parity** (after `compiler-io-parity`) --
+  a link-time static-provider hook in `mlpl-lower-rs` calling the
+  SAME `mlpl_extension_registry::register` at generated-`main`
+  startup, so compiled binaries resolve extensions against the
+  identical registry with no runtime parser. This is the
+  "explicit follow-up contract" the downstream repo requested.
+- **extensions-dynamic-load** -- `cdylib`/`dlopen` + ABI-version
+  negotiation + the manifest/search-path/trust resolver (A4/A7).
+- **extensions-arrays-handles** -- array marshaling + NativeHandle
+  values (A3); the demo-extensions "zero-copy/array-lifetime"
+  ask lands here.
+
 ## GitHub issue reconciliation (manual -- maintainer action)
 
 Per user direction, the agent does NOT edit/close issues via the

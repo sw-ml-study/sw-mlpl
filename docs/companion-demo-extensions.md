@@ -168,8 +168,39 @@ compiled `--embed-extension` path are out of this first slice.
 
 ## Status
 
-Contract recorded; the first-slice saga is queued in
-`future-sagas-queue.md`. Not yet started -- it is a substantial
-architectural item (a runtime registry that rationalizes the
-existing static dispatch) and should be sequenced deliberately
-with `modules-namespaces`, not bolted on.
+**First slice SHIPPED (2026-08-09), registry-first.** The host
+registry + invocation seam is live in the interpreter, REPL, and
+connect server:
+
+- `mlpl-extension-abi` (A2): `ExtValue` scalar boundary,
+  `ExtError`, `call_contained` (panic containment).
+- `mlpl-extension-registry` (A1): process-global OnceLock
+  registry, `register`/`lookup`/`signatures`, fail-closed.
+- `mlpl-ext-hello-static`: the in-repo static `hello` provider,
+  registered at repl + serve startup.
+- Eval dispatch: a registered `namespace:function` (colon
+  spelling) invokes the extension; `hello:answer()` -> 42, a
+  domain failure -> `err(...)`, a panic -> contained
+  `EvalError::ExtensionError`.
+- `:describe hello:answer` shows the registered signature (A5).
+
+Deferred (deliberately):
+
+- **saga-2 language surface** -- the `use hello` construct + the
+  dotted `hello.answer()` grammar + the `module.mlpl` facade
+  (public/private namespace publish). Built jointly with
+  `modules-namespaces` so the module system is built once. Until
+  then, extension functions are called with the colon spelling
+  and the public namespace is exposed directly (no facade).
+- **A6 compiler integration -- follow-up contract.** A later
+  saga (after `compiler-io-parity`) adds a link-time
+  static-provider hook in `mlpl-lower-rs` that calls the SAME
+  `mlpl_extension_registry::register` at generated-`main`
+  startup, so a compiled binary's extension calls resolve
+  against the identical registry with no runtime parser and no
+  interpreter -- MLPL source unchanged across REPL/script/
+  compiled. Nothing to implement until the io-parity groundwork
+  lands.
+- **A3 arrays/native handles**, **A4/A7 dynamic loading +
+  manifest/trust resolver**, **A8 event loop** -- later sagas as
+  before.

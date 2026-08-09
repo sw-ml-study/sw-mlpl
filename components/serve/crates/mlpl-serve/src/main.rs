@@ -105,6 +105,7 @@ fn register_gpu_step() {
 /// every error to stderr.
 fn run_main(args: Args) -> Result<(), String> {
     register_gpu_step();
+    mlpl_ext_hello_static::register();
     reserve_cores_for_serving();
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .enable_all()

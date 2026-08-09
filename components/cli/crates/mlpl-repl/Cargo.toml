@@ -20,6 +20,7 @@ cuda = ["mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cuda-eval/cuda"]
 mlpl-repl-connect = { path = "../mlpl-repl-connect" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-ext-hello-static = { path = "../../../runtime-core/crates/mlpl-ext-hello-static" }
 mlpl-cuda-eval = { path = "../../../cuda-eval/crates/mlpl-cuda-eval", optional = true }
 mlpl-mlx-eval = { path = "../../../mlx-eval/crates/mlpl-mlx-eval", optional = true }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }

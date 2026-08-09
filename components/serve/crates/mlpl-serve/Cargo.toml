@@ -35,6 +35,7 @@ mlpl-serve-core = { path = "../mlpl-serve-core" }
 mlpl-serve-state = { path = "../mlpl-serve-state" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
+mlpl-ext-hello-static = { path = "../../../runtime-core/crates/mlpl-ext-hello-static" }
 # `median_model` -- the shared `:ask` default-model policy (skip embedding
 # + sub-viable models, then median-by-size). resolve_model delegates to it
 # so the server and the CLI repl pick the same way (no drift).

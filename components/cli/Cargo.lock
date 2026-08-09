@@ -1859,6 +1859,8 @@ dependencies = [
  "mlpl-eval-pets-tiny",
  "mlpl-eval-state",
  "mlpl-eval-types",
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
  "mlpl-forge-kg",
  "mlpl-loader-helpers",
  "mlpl-mlx-handle",
@@ -2013,6 +2015,25 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-runtime",
  "mlpl-viz",
+]
+
+[[package]]
+name = "mlpl-ext-hello-static"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
+]
+
+[[package]]
+name = "mlpl-extension-abi"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-extension-registry"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
 ]
 
 [[package]]
@@ -2304,6 +2325,7 @@ dependencies = [
  "mlpl-cli",
  "mlpl-cuda-eval",
  "mlpl-eval",
+ "mlpl-ext-hello-static",
  "mlpl-mlx-eval",
  "mlpl-parser",
  "mlpl-repl-connect",
@@ -2336,6 +2358,7 @@ version = "0.20.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
@@ -2468,6 +2491,7 @@ dependencies = [
  "mlpl-array",
  "mlpl-cli",
  "mlpl-eval",
+ "mlpl-ext-hello-static",
  "mlpl-model-viz",
  "mlpl-monitor",
  "mlpl-parser",
