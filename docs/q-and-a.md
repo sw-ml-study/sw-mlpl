@@ -60,6 +60,32 @@ max_elements is a hard error. Completes the decode-budget trio
 (max_depth / max_bytes / max_elements) for demo-algorithms and
 demo-ml-utils.
 
+## 2026-08-09 (stdout-sink -- non-seekable output)
+
+**Q: go, stdout sink next -- demo-file-processing needs binary
+stdout / non-seekable sinks.**
+
+A: Shipped write_stdout(bytes) -> ok(count) / err: writes a
+rank-<=1 byte array (0..=255) to process stdout and flushes --
+the ByteSink counterpart to the existing read_stdin (the
+non-seekable source). A -f or compiled CLI now streams binary
+output chunk-by-chunk: write_stdout(unwrap(read_bytes(p, off,
+len))). Not sandboxed (stdout is the process's own); text via
+tokenize_bytes; Result-based. Lives in eval_script.rs alongside
+read_stdin/exit.
+
+With append_bytes (file sink) + write_stdout (stdout sink), the
+ByteSource/ByteSink contract is complete for BOTH seekable-file
+and non-seekable-pipe outputs. demo-file-processing's
+bounded-output blocker is fully cleared for the INTERPRETER.
+
+Remaining in this area: packed u8 storage (density, not a
+bounded-memory correctness blocker) and compile-to-Rust I/O
+parity (so these compile into standalone CLIs) -- both queued.
+Surface note: write_stdout is a process effect; in the browser
+there is no stdout, and in connect mode bytes go to the SERVER's
+stdout (the eval runs where it runs).
+
 ## 2026-08-09 (byte-stream-contract -- incremental sink)
 
 **Q: byte-stream contract (assessment rank 2) -- bounded
