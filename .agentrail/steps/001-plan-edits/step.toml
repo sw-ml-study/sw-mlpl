@@ -1,0 +1,9 @@
+number = 1
+slug = "plan-edits"
+status = "pending"
+description = "plan.md assessment-driven roadmap section + queued sagas + issue-reconciliati..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-08T19:46:52"
+task_type = "docs"
+commits = []
