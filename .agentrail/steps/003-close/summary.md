@@ -1,0 +1,1 @@
+Saga closed: typed-native binary codec (to_native/parse_native) live and round-tripping (repl + connect); glossary(476); wiki row; q-and-a records demo-algorithms can proceed. Deployed; repl rebuilt.

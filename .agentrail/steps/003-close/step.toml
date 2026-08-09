@@ -1,9 +1,10 @@
 number = 3
 slug = "close"
-status = "pending"
+status = "completed"
 description = "Close native-codec: rebuild serve+pages+repl, deploy, connect smoke of to_nat..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T13:22:53"
+completed_at = "2026-08-09T13:37:30"
 task_type = "docs"
-commits = []
+commits = ["0e881427e97f532ff0465cbe3e0fd5ed215ba85e"]
