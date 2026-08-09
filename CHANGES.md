@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga non-browser-demos: complete (2 steps)
+- chore(pages): rebuild for Non-Browser companion-CLI demo group
+- saga non-browser-demos: step add-group complete
+- demo(non-browser): companion-CLI pointer group in the playground
+- saga non-browser-demos: bootstrap step 001
+- saga non-browser-demos: init
+- chore(agentrail): archive extension-registry-static-provider saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga extension-registry-static-provider: complete (5 steps)
 - feat(ext): register the hello provider in repl + serve; close first slice (extension-registry step 5)
 - saga extension-registry-static-provider: step help complete
