@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-ext-hello-static"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# In-repo STATICALLY LINKED native extension used to prove the
+# host registry/invoke path (demo-extensions upstream contract,
+# first slice). Mirrors demo-extensions' `hello` provider: a
+# `hello` namespace with `answer` (-> 42), plus `boom` (panics)
+# and `fail` (domain error) for containment/error-model tests.
+
+[dependencies]
+mlpl-extension-abi = { path = "../mlpl-extension-abi" }
+mlpl-extension-registry = { path = "../mlpl-extension-registry" }

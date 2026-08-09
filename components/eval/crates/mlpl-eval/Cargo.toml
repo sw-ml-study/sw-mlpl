@@ -104,6 +104,8 @@ mlpl-array-ops-reduce = { path = "../../../array-compose/crates/mlpl-array-ops-r
 mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
+mlpl-extension-abi = { path = "../../../runtime-core/crates/mlpl-extension-abi" }
+mlpl-extension-registry = { path = "../../../runtime-core/crates/mlpl-extension-registry" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
 mlpl-mlx-handle = { path = "../../../native-rt/crates/mlpl-mlx-handle", optional = true }
@@ -121,6 +123,8 @@ serde_json = "1"
 
 [dev-dependencies]
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
+# In-repo static extension provider: proves the registry/invoke path.
+mlpl-ext-hello-static = { path = "../../../runtime-core/crates/mlpl-ext-hello-static" }
 # Tic-tac-toe engine: used only by the win-rate tests
 # (classifier_winrate, tictactoe_winrate). No longer a runtime dep --
 # the demo's game logic is now MLPL (examples/tictactoe-demo.mlpl).

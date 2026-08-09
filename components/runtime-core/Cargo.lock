@@ -238,6 +238,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-ext-hello-static"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
+]
+
+[[package]]
 name = "mlpl-extension-abi"
 version = "0.20.0"
 

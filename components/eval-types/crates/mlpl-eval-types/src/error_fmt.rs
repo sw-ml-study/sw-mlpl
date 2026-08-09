@@ -22,6 +22,9 @@ pub(crate) fn fmt_simple(
             write!(f, "shape dimension must be a non-negative scalar integer")
         }
         EvalError::Unsupported(msg) => write!(f, "unsupported: {msg}"),
+        EvalError::ExtensionError { function, message } => {
+            write!(f, "extension error in {function}: {message}")
+        }
         EvalError::ArrayError(e) => write!(f, "array error: {e}"),
         EvalError::RuntimeError(e) => write!(f, "{e}"),
         EvalError::ExpectedArray => write!(f, "expected an array value, got a string"),

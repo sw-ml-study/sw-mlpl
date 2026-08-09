@@ -11,6 +11,11 @@ pub enum EvalError {
     UndefinedVariable(String),
     /// Feature not yet implemented.
     Unsupported(String),
+    /// A native extension violated the boundary contract: a
+    /// contained panic, or a bad-arity / unsupported-argument
+    /// call. (A recoverable domain failure is an `err(...)`
+    /// Result, not this.)
+    ExtensionError { function: String, message: String },
     /// Error from array operations.
     ArrayError(mlpl_array::ArrayError),
     /// Repeat count must be a scalar.

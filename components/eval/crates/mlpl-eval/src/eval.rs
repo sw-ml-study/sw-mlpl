@@ -207,6 +207,11 @@ pub(crate) fn eval_expr(
     if let Expr::FnCall { name, args, .. } = expr
         && name.contains(':')
     {
+        // A registered native extension (namespace:function) wins;
+        // otherwise fall through to user-fn routing.
+        if let Some(r) = crate::fncall_ext::try_dispatch(name, args, env, trace) {
+            return r;
+        }
         return crate::eval_user_fn::call_user_fn(name, args, env, trace);
     }
     if let Some(r) = crate::eval_fncalls::try_dispatch(expr, env, trace) {

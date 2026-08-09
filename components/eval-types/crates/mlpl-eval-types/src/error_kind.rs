@@ -16,18 +16,19 @@ pub fn error_kind(e: &EvalError) -> &'static str {
         EvalError::EmptyInput => "empty-input",
         EvalError::UndefinedVariable(_) => "undefined-variable",
         EvalError::Unsupported(_) => "unsupported",
+        EvalError::ExtensionError { .. } => "extension",
         EvalError::ArrayError(_) | EvalError::ShapeMismatch { .. } => "shape",
         EvalError::InvalidRepeatCount | EvalError::InvalidShapeDim => "invalid-argument",
         EvalError::RuntimeError(_) => "runtime",
-        EvalError::ExpectedArray | EvalError::ExpectedString | EvalError::TypeMismatch { .. } => {
-            "type"
-        }
+        EvalError::ExpectedArray
+        | EvalError::ExpectedString
+        | EvalError::TypeMismatch { .. }
+        | EvalError::MixedArrayLitElements { .. } => "type",
         EvalError::DeviceTensorFault { .. } | EvalError::DeviceMismatch { .. } => "device",
         EvalError::BadArity { .. } => "arity",
         EvalError::VizError(_) => "viz",
         EvalError::Cancelled { .. } => "cancelled",
         EvalError::FieldNotFound { .. } | EvalError::FieldOnNonRecord { .. } => "field",
-        EvalError::MixedArrayLitElements { .. } => "type",
         EvalError::UnwrapOnErr { .. } => "unwrap-on-err",
         EvalError::ExitRequested(_) => "exit",
         EvalError::NotAResult { .. } => "not-a-result",
