@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga codec-mlpb-integrity: complete (2 steps)
+- docs(codec): close codec-mlpb-integrity; report demo-algorithms v2 adoption (step 2)
+- saga codec-mlpb-integrity: step mlpb-checksum complete
+- feat(codec): MLPB v2 CRC32 integrity trailer (codec-mlpb-integrity step 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga extensions-c-abi-adapter: complete (3 steps)
 - docs(ext): close extensions-c-abi-adapter; record downstream status (step 3)
 - saga extensions-c-abi-adapter: step cabi-crate complete
