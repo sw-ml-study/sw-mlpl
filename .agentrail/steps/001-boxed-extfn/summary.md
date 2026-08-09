@@ -1,1 +1,0 @@
-ExtFn changed from a bare fn to Arc<dyn Fn> boxed closure so a provider can capture per-function state (the C invoke trampoline). call_contained takes &ExtFn; hello wraps via Arc::new. Regression-clean (abi/registry/dispatch green).

@@ -1,42 +1,32 @@
-# Saga: extensions-c-abi-adapter
+# Saga: codec-mlpb-integrity
 
-demo-extensions request: their provider exports a #[repr(C)] C
-descriptor (sw_mlpl_extension_v1 -> *const ExtensionDescriptorV1),
-but the shipped static registry takes a SAFE-Rust
-ExtensionDescriptorV1. Add a host adapter that accepts their C
-descriptor and registers it -- distinct from dynamic loading
-(this is descriptor SHAPE, not dlopen). Match their exact C
-layout (demo-extensions/crates/mlpl-extension-abi/src/model.rs)
-byte-for-byte so a real (statically linked) provider registers
-unchanged; sw-mlpl publishes the canonical layout (it owns
-registration).
+../demo-algorithms adopted the MLPB v1 typed-native codec and
+asked (secondary) for a "stronger MLPB integrity/checksum" beyond
+the current magic + version + payload_len header. Add a CRC32
+trailer over the payload as MLPB v2, backward-compatible on read.
 
-Enabling change: the registry's ExtFn is a bare `fn` pointer,
-which cannot capture a per-function C trampoline. Change it to a
-boxed closure (Arc<dyn Fn(&[ExtValue]) -> Result<ExtValue,
-ExtError> + Send + Sync>) so both the existing safe static
-providers AND the C adapter (capturing the C invoke ptr) register
-through one path.
+Format:
+- v1 (existing): `MLPB`(4) + version=1 + payload_len(u32 LE) + payload
+- v2 (new):      `MLPB`(4) + version=2 + payload_len(u32 LE) + payload + crc32(u32 LE over payload)
 
-Scope: SCALAR V1 values only (nil/bool/i64/f64/utf8/bytes -- the
-ExtValue set); DenseArray + NativeHandle AbiValue variants are the
-deferred arrays-handles saga (err on them for now). Static
-linking only (no dlopen).
+`to_native` emits v2 (integrity by default). `parse_native` /
+decode accepts BOTH: v1 decodes with no checksum (already-adopted
+data stays readable); v2 verifies the CRC32 and errors on
+mismatch. All failures stay err Results (never panic).
+
+Isolate the concern in a new `native_integrity.rs`
+(crc32 + read_header + verify_checksum) so `to_native`/`decode`
+stay small and every native_* module keeps <=4 fns. crc32 is
+bitwise IEEE (poly 0xEDB88320), no table, no new dependency.
 
 ## Steps
-1. boxed-extfn -- ExtFn -> Arc<dyn Fn..>; update call_contained,
-   ExtFnDesc (drop Debug derive / manual), registry, hello
-   provider, fncall_ext/ext_marshal; keep all extension tests
-   green (regression).
-2. cabi-crate -- new mlpl-extension-cabi: #[repr(C)] V1 structs
-   (AbiSlice/ValueTag/AbiValue/ValuePayload/FunctionDescriptorV1/
-   ExtensionDescriptorV1/AbiErrorV1/InvokeFnV1) matching
-   demo-extensions; register_c_extension(*const descriptor)
-   validates (struct_size/abi_version/bounds/utf8/dup) + wraps
-   each C invoke in a closure marshaling ExtValue<->AbiValue with
-   catch_unwind + AbiErrorV1 -> registers. TDD: an in-test C
-   provider (extern "C" invoke) registers via register_c_extension
-   and hello:answer() -> 42 through the interpreter.
-3. close -- expose register_c_extension for downstream; docs
-   (companion-demo-extensions: C adapter shipped), wiki, q-and-a
-   (demo-extensions can register its C provider), --done.
+1. mlpb-checksum -- add native_integrity.rs; bump VERSION to 2;
+   to_native appends the CRC32 trailer; decode reads the header via
+   read_header (accepting v1/v2) and calls verify_checksum. Update
+   the version-byte assertion to v2. TDD: v2 round-trips; a
+   corrupted payload byte -> err (checksum mismatch); a synthetic
+   v1 buffer still decodes; a truncated/missing checksum -> err.
+   Update encode/decode module docs.
+2. mlpb-close -- docs (companion-demo-algorithms if present,
+   Capability Matrix row, wiki errata, q-and-a), report that
+   demo-algorithms can adopt MLPB v2 integrity; --done.

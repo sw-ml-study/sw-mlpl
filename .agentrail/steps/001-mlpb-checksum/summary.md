@@ -1,0 +1,1 @@
+MLPB v2 CRC32 integrity trailer. New native_integrity.rs (read_header accepting v1/v2, verify_checksum, bitwise crc32). to_native emits v2 with a payload CRC32; parse_native verifies it and still reads v1 (backward-compatible). 12 native tests green incl. silent-corruption detection + v1-compat.

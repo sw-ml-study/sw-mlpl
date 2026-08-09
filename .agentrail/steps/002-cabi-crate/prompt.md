@@ -1,1 +1,0 @@
-New mlpl-extension-cabi crate: #[repr(C)] V1 structs matching demo-extensions + register_c_extension (validate + wrap C invoke in closure marshaling scalar ExtValue<->AbiValue with catch_unwind); TDD with an in-test C provider -> hello:answer()->42.

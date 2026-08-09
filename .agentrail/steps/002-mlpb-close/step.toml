@@ -1,0 +1,9 @@
+number = 2
+slug = "mlpb-close"
+status = "pending"
+description = "Close codec-mlpb-integrity: docs (Capability Matrix MLPB row, wiki errata, q-..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T16:56:21"
+task_type = "docs-close"
+commits = []

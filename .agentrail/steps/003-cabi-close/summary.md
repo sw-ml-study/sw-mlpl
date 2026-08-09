@@ -1,1 +1,0 @@
-Closed the extensions-c-abi-adapter saga: documented register_c_extension + scope in companion-demo-extensions.md, recorded the demo-file-processing compiler-parity contract (new companion doc) and demo-algorithms codec follow-ups + expanded compiler-* rungs in the queue, answered the mid-work downstream notes in q-and-a.md, and updated the wiki Capability Matrix + errata E-024.
