@@ -1,0 +1,1 @@
+native_decode.rs parse_native(bytes[, limits]): header/version validate, budget-bounded recursive decode, round trip + corrupt/truncated/bad-magic/over-budget err + golden; catalog+lang-ref+glossary.

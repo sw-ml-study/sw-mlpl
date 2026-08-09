@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "native-encode"
+  },
+  "action": "hand-rolled LE binary encoder mirroring json codec; parts module for budget",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T13:14:27"
+}

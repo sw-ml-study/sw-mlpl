@@ -1,0 +1,1 @@
+to_native binary encoder shipped: versioned self-describing wire format (MLPB header + tagged scalar/array/string/strlist/record/result), deterministic, non-data -> err, bytes compose with write_bytes. 5 TDD tests. Decode (parse_native) is step 2.
