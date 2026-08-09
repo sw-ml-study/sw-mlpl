@@ -1,17 +1,18 @@
 //! Typed-native binary decoder (`parse_native`): validate the
-//! MLPB header + version + payload length, then recursively decode
-//! tagged values, enforcing the decode budget BEFORE unbounded
-//! recursion. Malformed / truncated / oversized / too-deep /
-//! unknown-tag input is an err (never a panic). Container decoders
-//! live in `native_decode_parts`.
+//! MLPB header (via `native_integrity`), recursively decode tagged
+//! values enforcing the decode budget BEFORE unbounded recursion,
+//! then verify the v2 CRC32 integrity trailer. Reads both v1 (no
+//! checksum) and v2 buffers. Malformed / truncated / oversized /
+//! too-deep / unknown-tag / checksum-mismatch input is an err
+//! (never a panic). Container decoders live in
+//! `native_decode_parts`.
 
 use mlpl_array::DenseArray;
 
 use crate::decode_limits::Limits;
-use crate::native_cursor::{read_f64, read_str, read_u8, read_u32};
+use crate::native_cursor::{read_f64, read_str, read_u8};
 use crate::native_encode::{
-    MAGIC, TAG_ARRAY, TAG_RECORD, TAG_RESULT_ERR, TAG_RESULT_OK, TAG_SCALAR, TAG_STR, TAG_STRLIST,
-    VERSION,
+    TAG_ARRAY, TAG_RECORD, TAG_RESULT_ERR, TAG_RESULT_OK, TAG_SCALAR, TAG_STR, TAG_STRLIST,
 };
 use mlpl_eval_types::Value;
 
@@ -24,28 +25,13 @@ pub(crate) fn decode(bytes: &[u8], limits: &Limits) -> Result<Value, String> {
             limits.max_bytes
         ));
     }
-    let magic = bytes.get(0..4).ok_or("truncated: missing MLPB header")?;
-    if magic != MAGIC {
-        return Err("bad magic: not a native (MLPB) buffer".to_string());
-    }
-    let mut pos = 4;
-    let version = read_u8(bytes, &mut pos)?;
-    if version != VERSION {
-        return Err(format!(
-            "unsupported native version {version} (this build reads {VERSION})"
-        ));
-    }
-    let payload_len = read_u32(bytes, &mut pos)? as usize;
-    if bytes.len() - pos != payload_len {
-        return Err(format!(
-            "payload length mismatch: header says {payload_len}, {} bytes remain",
-            bytes.len() - pos
-        ));
-    }
+    let (version, payload_start, payload_len) = crate::native_integrity::read_header(bytes)?;
+    let mut pos = payload_start;
     let v = decode_value(bytes, &mut pos, limits.max_depth)?;
-    if pos != bytes.len() {
+    if pos != payload_start + payload_len {
         return Err(format!("trailing bytes after value at {pos}"));
     }
+    crate::native_integrity::verify_checksum(bytes, version, payload_start, payload_len)?;
     crate::element_count::check(&v, limits.max_elements)?;
     Ok(v)
 }

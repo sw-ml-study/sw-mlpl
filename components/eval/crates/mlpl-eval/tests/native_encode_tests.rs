@@ -21,12 +21,12 @@ fn scalar(env: &mut Environment, src: &str) -> f64 {
 fn encodes_with_the_mlpb_header() {
     let mut env = Environment::new();
     eval_value(&mut env, "b = unwrap(to_native(42))").unwrap();
-    // magic "MLPB" = 77 76 80 66, then version 1
+    // magic "MLPB" = 77 76 80 66, then version 2 (CRC32 integrity)
     assert_eq!(scalar(&mut env, "take(b, 0, 0)"), 77.0);
     assert_eq!(scalar(&mut env, "take(b, 0, 1)"), 76.0);
     assert_eq!(scalar(&mut env, "take(b, 0, 2)"), 80.0);
     assert_eq!(scalar(&mut env, "take(b, 0, 3)"), 66.0);
-    assert_eq!(scalar(&mut env, "take(b, 0, 4)"), 1.0);
+    assert_eq!(scalar(&mut env, "take(b, 0, 4)"), 2.0);
 }
 
 #[test]

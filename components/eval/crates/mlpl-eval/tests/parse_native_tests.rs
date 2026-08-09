@@ -100,6 +100,38 @@ fn over_budget_input_is_err() {
 }
 
 #[test]
+fn corrupted_payload_byte_fails_the_v2_checksum() {
+    let mut env = Environment::new();
+    // to_native(42) is v2: MAGIC(4) ver(1) len(4) payload(9) crc(4).
+    // Byte 10 is inside the f64 payload; +1 leaves a VALID scalar
+    // (v1 would silently accept the wrong value), so only the CRC32
+    // integrity trailer catches the corruption.
+    eval_value(&mut env, "b = unwrap(to_native(42))").unwrap();
+    eval_value(&mut env, "bad = b + eq(range(tally(b)), 10)").unwrap();
+    assert_eq!(scalar(&mut env, "is_ok(parse_native(bad))"), 0.0);
+    // the intact buffer still round-trips
+    assert_eq!(scalar(&mut env, "equal(unwrap(parse_native(b)), 42)"), 1.0);
+}
+
+#[test]
+fn v1_buffer_without_checksum_still_decodes() {
+    let mut env = Environment::new();
+    // Synthesize a v1 buffer from the v2 one: set the version byte
+    // (index 4) back to 1 and drop the 4-byte CRC trailer. The
+    // decoder must still read it (backward compatibility) with no
+    // checksum verification.
+    eval_value(&mut env, "b = unwrap(to_native(42))").unwrap();
+    eval_value(&mut env, "v1 = b - eq(range(tally(b)), 4)").unwrap();
+    eval_value(
+        &mut env,
+        "v1 = compress(lt(range(tally(v1)), tally(v1) - 4), v1)",
+    )
+    .unwrap();
+    assert_eq!(scalar(&mut env, "is_ok(parse_native(v1))"), 1.0);
+    assert_eq!(scalar(&mut env, "equal(unwrap(parse_native(v1)), 42)"), 1.0);
+}
+
+#[test]
 fn file_round_trip_composes_with_byte_io() {
     let dir = std::env::temp_dir().join(format!("mlpl-native-rt-{}", std::process::id()));
     let _ = std::fs::remove_dir_all(&dir);

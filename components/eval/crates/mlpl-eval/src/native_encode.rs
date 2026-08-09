@@ -1,17 +1,21 @@
 //! Typed-native binary encoder (`to_native`): a versioned,
 //! self-describing byte format that losslessly encodes every MLPL
 //! data value. Canonical little-endian. Header: magic `MLPB` +
-//! version 1 + payload length (u32 LE); then one tagged value.
-//! Non-data kinds are a loud error (never partial). Deterministic:
-//! records encode BTreeMap-sorted, all numbers as f64 (one numeric
-//! element type). Container encoders live in `native_encode_parts`
-//! to keep each module within budget.
+//! version 2 + payload length (u32 LE); then one tagged value;
+//! then a CRC32 (u32 LE) over the payload for integrity. Non-data
+//! kinds are a loud error (never partial). Deterministic: records
+//! encode BTreeMap-sorted, all numbers as f64 (one numeric element
+//! type). Container encoders live in `native_encode_parts`, and
+//! the header/checksum live in `native_integrity`, to keep each
+//! module within budget.
 
 use mlpl_eval_types::{EvalError, Value};
 
-/// Format magic + version. The payload length follows as u32 LE.
+/// Format magic + current write version. The payload length
+/// follows as u32 LE; v2 appends a CRC32 (u32 LE) over the
+/// payload. The decoder still reads v1 (checksum-free) buffers.
 pub(crate) const MAGIC: [u8; 4] = *b"MLPB";
-pub(crate) const VERSION: u8 = 1;
+pub(crate) const VERSION: u8 = 2;
 
 /// Value tags (the first byte of each encoded value).
 pub(crate) const TAG_SCALAR: u8 = 0;
@@ -27,11 +31,12 @@ pub(crate) const TAG_RESULT_ERR: u8 = 6;
 pub(crate) fn to_native(value: &Value) -> Result<Vec<u8>, EvalError> {
     let mut payload = Vec::new();
     encode_value(value, &mut payload)?;
-    let mut out = Vec::with_capacity(payload.len() + 9);
+    let mut out = Vec::with_capacity(payload.len() + 13);
     out.extend_from_slice(&MAGIC);
     out.push(VERSION);
     out.extend_from_slice(&(payload.len() as u32).to_le_bytes());
     out.extend_from_slice(&payload);
+    out.extend_from_slice(&crate::native_integrity::crc32(&payload).to_le_bytes());
     Ok(out)
 }
 

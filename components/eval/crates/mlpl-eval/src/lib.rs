@@ -115,6 +115,7 @@ mod native_decode;
 mod native_decode_parts;
 mod native_encode;
 mod native_encode_parts;
+mod native_integrity;
 mod reflect_info;
 mod toml_decode;
 mod toml_encode;
