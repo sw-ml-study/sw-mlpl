@@ -1,0 +1,1 @@
+Saga closed: README Maturity section + status.md current what-exists-today (BUILT/PARTIAL/POC); overselling compile bullet + banned version stamp fixed; stale docs reconciled (variant-encoding flipped to SHIPPED, MLX perf errata). Full markdown gate clean; wiki errata already converged.

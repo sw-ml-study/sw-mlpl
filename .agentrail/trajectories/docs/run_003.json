@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 3,
+    "step": "close"
+  },
+  "action": "survey-driven maturity docs; policy-compliant present tense; stale-doc reconciliation",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-08T18:31:40"
+}
