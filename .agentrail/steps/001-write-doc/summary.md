@@ -1,0 +1,1 @@
+Recorded demo-extensions upstream contract as docs/companion-demo-extensions.md (asks A1-A8, sequencing, do-not-build-twice overlaps, recommended first slice extension-registry-static-provider); refined queue entry + companion index.

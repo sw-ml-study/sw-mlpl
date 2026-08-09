@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close extensions-contract-doc: --done."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T09:20:09"
+task_type = "docs"
+commits = []

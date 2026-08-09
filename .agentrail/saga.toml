@@ -1,6 +1,6 @@
 name = "extensions-contract-doc"
 status = "active"
-current_step = 1
+current_step = 2
 created_at = "2026-08-09T09:18:13"
 plan_file = ".agentrail/plan.md"
 retroactive = false

@@ -1,9 +1,10 @@
 number = 1
 slug = "write-doc"
-status = "pending"
+status = "completed"
 description = "docs/companion-demo-extensions.md capturing the contract + first slice; refin..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T09:18:13"
+completed_at = "2026-08-09T09:20:08"
 task_type = "docs"
-commits = []
+commits = ["9a8392af53d29a610b97ceed61cb484295743911"]
