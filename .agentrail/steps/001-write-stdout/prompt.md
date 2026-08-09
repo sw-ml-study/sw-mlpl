@@ -1,0 +1,1 @@
+eval_write_stdout in eval_script.rs (byte array -> stdout, ok(count)); intercept dispatch; catalog+lang-ref+glossary; TDD.
