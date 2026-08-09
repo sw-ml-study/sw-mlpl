@@ -14,6 +14,18 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga compiled-value-model-strings: complete (4 steps)
+- docs: close compiled-value-model-strings; queue compiler rungs + ext C-ABI adapter
+- saga compiled-value-model-strings: step cval-e2e complete
+- test(compiler): compiled string/byte/args I/O e2e (compiled-value-model-strings step 3)
+- saga compiled-value-model-strings: step cval-lowering complete
+- feat(compiler): lower strings + write_stdout/args to CVal (compiled-value-model-strings step 2)
+- saga compiled-value-model-strings: step cval-runtime complete
+- feat(compiler): compiled value model CVal + stdout/args runtime (compiled-value-model-strings step 1)
+- saga compiled-value-model-strings: bootstrap step 001
+- saga compiled-value-model-strings: init
+- chore(agentrail): archive non-browser-demos saga
+- docs(changes): refresh CHANGES.md to HEAD
 - saga non-browser-demos: complete (2 steps)
 - chore(pages): rebuild for Non-Browser companion-CLI demo group
 - saga non-browser-demos: step add-group complete
