@@ -19,6 +19,7 @@ pub type DemoGroups = Vec<(&'static str, Vec<DemoOption>)>;
 const SECTION_ORDER: &[&str] = &[
     "Basics",
     "Training & Learning",
+    "Experiment Quality",
     "Classical ML",
     "Classification",
     "Clustering",

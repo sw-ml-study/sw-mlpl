@@ -1,0 +1,9 @@
+number = 1
+slug = "rolling-retrain-demo"
+status = "in-progress"
+description = "Add the Rolling Retrain (LEFTS-inspired) demo to demos.toml (Experiment Quali..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T17:19:49"
+task_type = "web-content"
+commits = []

@@ -14,6 +14,14 @@ fn ml_first_apl2_later_connect_last() {
         pos("APL2 / General Programming") > pos("Training & Learning"),
         "{labels:?}"
     );
+    // Experiment Quality sits between Training & Learning and the
+    // connect tiers (curated placement, not the alphabetical
+    // fallback bucket).
+    assert!(
+        pos("Experiment Quality") > pos("Training & Learning")
+            && pos("Experiment Quality") < pos("CUDA - Linux GPU (connect)"),
+        "{labels:?}"
+    );
     assert!(
         pos("APL2 / General Programming") > pos("Generative Models"),
         "{labels:?}"
