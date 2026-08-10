@@ -106,13 +106,17 @@ fn render_panel(
                     let tip = GROUP_TOOLTIPS.iter().find(|(name, _)| name == cat).map_or("Related MLPL demonstrations grouped by subject.", |(_, tip)| *tip);
                     html! {
                         <div class="demo-group">
-                            <div class="demo-group-label" title={tip} aria-label={format!("{}: {}", cat, tip)}>{ *cat }</div>
+                            <div class="demo-group-label demo-tooltip-target" tabindex="0" data-tooltip={tip} aria-label={format!("{}: {}", cat, tip)}>{ *cat }</div>
                             { for items.iter().map(|(i, name, disabled)| {
                                 let idx = *i;
                                 let pick = pick.clone();
                                 let onclick = Callback::from(move |_: MouseEvent| pick.emit(idx));
                                 let title = AttrValue::from(demo_tooltip(idx, cat, *disabled));
-                                html! { <button class="demo-item" role="option" disabled={*disabled} title={title.clone()} aria-label={title} onclick={onclick}>{ name.to_string() }</button> }
+                                html! {
+                                    <span class="demo-tooltip-target" tabindex={if *disabled { "0" } else { "-1" }} data-tooltip={title.clone()}>
+                                        <button class="demo-item" role="option" disabled={*disabled} aria-label={title} onclick={onclick}>{ name.to_string() }</button>
+                                    </span>
+                                }
                             }) }
                         </div>
                     }

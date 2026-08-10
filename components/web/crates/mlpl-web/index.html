@@ -294,6 +294,42 @@
             opacity: 0.55;
             cursor: not-allowed;
         }
+        /* Immediate, consistent picker explanations. Native `title`
+           popups have a long browser-controlled delay and often do
+           not appear for disabled buttons. The wrapper remains
+           hoverable and keyboard-focusable while the button keeps
+           its real disabled semantics. */
+        .demo-tooltip-target {
+            display: block;
+            position: relative;
+            outline: none;
+        }
+        .demo-tooltip-target::after {
+            content: attr(data-tooltip);
+            display: none;
+            margin: 3px 8px 6px;
+            padding: 7px 9px;
+            color: var(--text);
+            background: var(--surface0);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            font-family: var(--sans);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.35;
+            white-space: normal;
+            pointer-events: none;
+        }
+        .demo-group-label.demo-tooltip-target::after {
+            margin-left: 22px;
+            font-size: 15px;
+            transform: translate(10px, -5px);
+        }
+        .demo-tooltip-target:hover::after,
+        .demo-tooltip-target:focus::after,
+        .demo-tooltip-target:focus-within::after {
+            display: block;
+        }
         .ctrl-btn {
             background: var(--surface0);
             color: var(--text);
