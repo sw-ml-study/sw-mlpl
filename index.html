@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta name="mlpl-build" content="61b1df80 2026-08-10T02:56:43Z">
+<head><meta name="mlpl-build" content="9070f8ec 2026-08-10T03:02:10Z">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-e05c1d6401024e55.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-e05c1d6401024e55_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-d1f7ba13dcc25afb.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-d1f7ba13dcc25afb_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -267,7 +267,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             top: calc(100% + 4px);
             left: 0;
             z-index: 41;
-            min-width: 260px;
+            width: min(640px, calc(100vw - 24px));
             max-height: 70vh;
             overflow-y: auto;
             background: var(--base);
@@ -275,6 +275,9 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             border-radius: 6px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             padding: 4px;
+        }
+        .demo-group {
+            width: 260px;
         }
         .demo-group-label {
             font-family: var(--mono);
@@ -317,29 +320,40 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
         .demo-tooltip-target::after {
             content: attr(data-tooltip);
-            display: none;
-            margin: 3px 8px 6px;
+            display: block;
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 0;
+            z-index: 2;
+            width: 320px;
             padding: 7px 9px;
             color: var(--text);
-            background: var(--surface0);
+            background: var(--crust);
             border: 1px solid var(--surface1);
+            border-color: var(--peach);
             border-radius: 4px;
+            box-shadow: 0 5px 16px rgba(0, 0, 0, 0.55);
             font-family: var(--sans);
             font-size: 14px;
             font-weight: 400;
             line-height: 1.35;
             white-space: normal;
             pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 100ms ease;
+            transition-delay: 0ms;
         }
         .demo-group-label.demo-tooltip-target::after {
-            margin-left: 22px;
             font-size: 15px;
             transform: translate(10px, -5px);
         }
         .demo-tooltip-target:hover::after,
         .demo-tooltip-target:focus::after,
         .demo-tooltip-target:focus-within::after {
-            display: block;
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 250ms;
         }
         .ctrl-btn {
             background: var(--surface0);
@@ -2047,7 +2061,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-e05c1d6401024e55.js" crossorigin="anonymous" integrity="sha384-DK+nROO2ep6HITNydNMplSpATrg9zP9lpwq7k9MrY9e9godWlAodKlKuuGpAiVU7"><link rel="preload" href="/sw-mlpl/mlpl-web-e05c1d6401024e55_bg.wasm" crossorigin="anonymous" integrity="sha384-C9m+33UWIeTRAOyFrXyodNepzTJqVdSvW2GswNwj9EtqFMgT/rvygsv4zHON8yFA" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-d1f7ba13dcc25afb.js" crossorigin="anonymous" integrity="sha384-DK+nROO2ep6HITNydNMplSpATrg9zP9lpwq7k9MrY9e9godWlAodKlKuuGpAiVU7"><link rel="preload" href="/sw-mlpl/mlpl-web-d1f7ba13dcc25afb_bg.wasm" crossorigin="anonymous" integrity="sha384-Q9+1xXUGV7yrbJhnyT3sLR3mjWk+yLdjL6FWklF066Yj697W1FdQCI46Fy7M9BEF" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
