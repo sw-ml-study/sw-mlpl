@@ -1,0 +1,11 @@
+{
+  "task_type": "web-ui",
+  "state": {
+    "number": 3,
+    "step": "demo-picker-tooltips"
+  },
+  "action": "Used TDD in demo_order_tests; added static group tooltip data and registry-derived demo tooltip formatting; wired title and aria-label attributes in the custom picker; ran scoped Cargo tests/clippy/fmt and sw-checklist; rebuilt pages with NO_COLOR=true and restarted serve-mlx.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T19:46:40"
+}
