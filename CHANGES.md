@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-10
 
+- saga footer-repo-dialog: complete (2 steps)
+- chore(pages): rebuild for footer repos dialog
+- saga footer-repo-dialog: step repo-dialog complete
+- feat(web): footer GitHub link opens a project-repos dialog (footer-repo-dialog step 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-live-telemetry-regression: complete (5 steps)
 - chore(pages): rebuild + deploy for web model-binding fix (deploy-web-model-fix)
 - saga mlx-live-telemetry-regression: step fns-over-connect complete
