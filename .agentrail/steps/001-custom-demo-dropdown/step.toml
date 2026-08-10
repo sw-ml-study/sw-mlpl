@@ -1,9 +1,10 @@
 number = 1
 slug = "custom-demo-dropdown"
-status = "in-progress"
+status = "completed"
 description = "Replace the native <select><optgroup> demo picker with a custom stylable Demo..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T17:58:01"
+completed_at = "2026-08-09T19:22:26"
 task_type = "web-component"
-commits = []
+commits = ["2c64f46772f9c78f1850a5786b550772f9ec56bd"]

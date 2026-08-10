@@ -1,1 +1,0 @@
-Rebuilt pages (trunk release -- validates the index.html optgroup CSS + demos.toml codegen) and deployed to gh-pages. Rolling Retrain demo + demo-group name contrast fix are live. No wiki/docs claim changes needed (no pinned wiki demo count).

@@ -1,1 +1,0 @@
-Add .demo-select optgroup CSS in components/web/crates/mlpl-web/index.html: larger, bolder, bright accent color so demo-group names are legible (Catppuccin Mocha dark theme only).

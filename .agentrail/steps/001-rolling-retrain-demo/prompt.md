@@ -1,1 +1,0 @@
-Add the Rolling Retrain (LEFTS-inspired) demo to demos.toml (Experiment Quality): adapt lines from demo-ml-utils lefts_page_web.mlpl, substantial intro+takeaway, keep def-u doc strings, trim prints; add Experiment Quality to SECTION_ORDER + update demo_order_tests; pass the web demo smoke gate.

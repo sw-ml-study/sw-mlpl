@@ -1,32 +1,33 @@
-# Saga: web-demo-and-contrast
+# Saga: web-demo-picker-splash
 
-Two web-UI updates that share one pages rebuild + deploy:
+Two web-UI changes sharing one pages rebuild + deploy:
 
-1. Add a public-browser demo **Rolling Retrain (LEFTS-inspired)**
-   to the Experiment Quality group, adapted from
-   ../demo-ml-utils/demos/experiments/lefts_page_web.mlpl (a
-   leakage-safe expanding-window monthly Ridge "Lift" over a Ridge
-   "Leaf"). Browser-CPU, self-contained, deterministic; no new
-   builtins/syntax/types; keep def-u doc strings; trim tutorial
-   prints to a few visible result lines. Add "Experiment Quality"
-   to SECTION_ORDER (after Training & Learning, before Classical
-   ML) + update demo_order_tests. Pass the web demo smoke gate.
+1. Replace the native <select><optgroup> demo picker with a
+   CUSTOM, fully-stylable dropdown so demo-group NAMES are legible
+   in every browser (Safari ignores <optgroup> styling; Chrome
+   ignores its font-size -- the native element cannot be styled
+   reliably). New DemoDropdown Yew component: a toggle button + a
+   panel of styled group headers (14px, 700, --lavender) and demo
+   rows. MUST preserve: capability gating (disabled + hint via
+   demo_gating), alphabetical order within groups + SECTION_ORDER,
+   the "Load Demo..." placeholder, aria-label, the tour target
+   (data-tour-target="demo-select"), tutorial_active hiding, and
+   the on_demo(usize) callback. Live/CPU demos ungated.
 
-2. Fix low-contrast demo-group NAMES in the web UI: the demo
-   dropdown's <optgroup> labels render in the browser-default muted
-   gray. Add a `.demo-select optgroup` rule (larger, bolder,
-   bright accent color) so group names are legible. Theme is
-   Catppuccin Mocha (dark only) -- no light theme to handle.
+2. Show the build's UTC Zulu timestamp on the splash so a viewer
+   can identify the build regardless of local timezone. The value
+   already exists: mlpl-web build_env.rs emits BUILD_TIMESTAMP via
+   `date -u +%Y-%m-%dT%H:%M:%SZ`. Thread it into SplashOverlay (new
+   build_time prop) and render it under the version label.
 
-3. Rebuild pages + deploy (gh-pages); the demo is CPU/live so no
-   serve rebuild. Report + --done.
+3. Rebuild pages + deploy (CPU/live demo, no serve rebuild). Close.
 
 ## Steps
-1. rolling-retrain-demo -- demos.toml [[demos]] record (intro,
-   takeaway, adapted lines) + SECTION_ORDER + demo_order_tests;
-   pass `scripts/gate.sh components/web-demos mlpl-web-demos
-   mlpl-web-demos-smoke`.
-2. demo-group-contrast -- `.demo-select optgroup` CSS in
-   components/web/crates/mlpl-web/index.html.
+1. custom-demo-dropdown -- new demo_dropdown.rs (DemoDropdown) in
+   mlpl-web-components-content; mode_bar wires it in place of the
+   <select>; CSS for .demo-dropdown / panel / group label / item in
+   index.html. Keep demo_order_tests green; clippy/fmt.
+2. splash-build-timestamp -- BUILD_TIMESTAMP -> SplashProps
+   build_time -> rendered line; splash CSS; splash test if present.
 3. rebuild-deploy -- build-pages.sh, commit pages/, deploy-pages.sh,
-   ts-suffixed review URLs, docs/wiki if needed, --done.
+   ts-suffixed review URL, --done.

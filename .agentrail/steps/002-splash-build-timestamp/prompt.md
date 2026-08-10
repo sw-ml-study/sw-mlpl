@@ -1,0 +1,1 @@
+Surface BUILD_TIMESTAMP (UTC Z) on the splash: add build_time prop to SplashProps, pass env!(BUILD_TIMESTAMP) from app.rs build_labels, render a line under the version; splash CSS + test if present.

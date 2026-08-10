@@ -1,0 +1,9 @@
+number = 2
+slug = "splash-build-timestamp"
+status = "pending"
+description = "Surface BUILD_TIMESTAMP (UTC Z) on the splash: add build_time prop to SplashP..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T19:22:26"
+task_type = "web-component"
+commits = []

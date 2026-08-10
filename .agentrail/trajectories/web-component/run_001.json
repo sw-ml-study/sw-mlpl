@@ -1,0 +1,11 @@
+{
+  "task_type": "web-component",
+  "state": {
+    "number": 1,
+    "step": "custom-demo-dropdown"
+  },
+  "action": "custom Yew dropdown; index.html CSS; preserved grouped_demos gating",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T19:22:26"
+}

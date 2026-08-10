@@ -1,1 +1,1 @@
-saga init: web-demo-and-contrast plan recorded
+saga init: web-demo-picker-splash plan recorded

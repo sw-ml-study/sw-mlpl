@@ -1,1 +1,0 @@
-Rebuild pages (build-pages.sh), commit pages/, deploy (deploy-pages.sh), hand out ts-suffixed review URLs, update wiki/docs if needed, --done.

@@ -1,1 +1,0 @@
-Demo-group names in the dropdown were the browser-default muted grey (low contrast). Added .demo-select optgroup CSS (14px, 700, --lavender on --mantle) + .demo-select option full-contrast text. Dark theme only.

@@ -1,0 +1,1 @@
+Replace the native <select><optgroup> demo picker with a custom stylable DemoDropdown component (styled group headers + demo rows), preserving gating/order/sort/tour-target/aria; add CSS to index.html; keep demo_order_tests green.

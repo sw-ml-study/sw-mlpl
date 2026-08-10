@@ -1,0 +1,1 @@
+Replaced the native <select>/<optgroup> demo picker with a custom DemoDropdown (mode_bar.rs): toggle button + styled panel (group-label 14px/700/lavender, demo-item rows), backdrop close, index emit. Gating/order/tour-target/aria preserved. 4 fns, no new warning; order tests + clippy/fmt green.
