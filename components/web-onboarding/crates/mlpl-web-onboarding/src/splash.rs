@@ -1,3 +1,4 @@
+use mlpl_web_components_chrome::connect_probe::ServerBuild;
 use yew::prelude::*;
 
 #[derive(Clone, PartialEq)]
@@ -34,26 +35,9 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
     let dismiss = emit(SplashAction::Dismiss);
     let stop = Callback::from(|e: MouseEvent| e.stop_propagation());
     // When connected, show the SERVER's build beside the UI build and
-    // flag a skew -- a stale server (or stale page) is the usual cause
-    // of "demo behaves wrong but the page looks current".
+    // flag a skew (rendering split out to keep this fn under budget).
     let server_build = mlpl_web_components_chrome::connect_probe::use_server_build();
-    let server_line = server_build.map(|sb| {
-        // Only warn on a LARGE gap: the UI and server are built
-        // minutes apart in a normal deploy, so a small difference is
-        // expected -- a stale build is hours off.
-        let skew = build_skew(&props.build_time, &sb.built_at);
-        let cls = if skew {
-            "splash-buildtime splash-build-skew"
-        } else {
-            "splash-buildtime"
-        };
-        let note = if skew {
-            " (stale build? rebuild/restart)"
-        } else {
-            ""
-        };
-        html! { <p class={cls}>{"server built "}{sb.built_at}{note}</p> }
-    });
+    let server_line = render_server_line(server_build.as_ref(), &props.build_time);
     html! {
         <div class="splash-backdrop" role="dialog" aria-label="Welcome" onclick={dismiss.clone()}>
             <div class="splash-panel" onclick={stop}>
@@ -150,4 +134,24 @@ pub fn build_skew(ui_ts: &str, server_ts: &str) -> bool {
         (Some(a), Some(b)) => (a - b).abs() > 1_800,
         _ => false,
     }
+}
+
+/// Render the "server built ..." splash line (connect mode only),
+/// flagging a build skew vs the UI build. Empty when not connected.
+fn render_server_line(build: Option<&ServerBuild>, ui_time: &str) -> Html {
+    let Some(sb) = build else {
+        return html! {};
+    };
+    let skew = build_skew(ui_time, &sb.built_at);
+    let cls = if skew {
+        "splash-buildtime splash-build-skew"
+    } else {
+        "splash-buildtime"
+    };
+    let note = if skew {
+        " (stale build? rebuild/restart)"
+    } else {
+        ""
+    };
+    html! { <p class={cls}>{"server built "}{&sb.built_at}{note}</p> }
 }
