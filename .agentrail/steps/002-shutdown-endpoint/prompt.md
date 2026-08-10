@@ -1,0 +1,1 @@
+Add an auth-required POST /v1/admin/shutdown that triggers a graceful axum shutdown, so restarts are scriptable (curl shutdown + relaunch) with no kill-by-PID. Bearer required; reject when auth disabled? (allow on loopback). Add a test; rebuild + restart the local server.

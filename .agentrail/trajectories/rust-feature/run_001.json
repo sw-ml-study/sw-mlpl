@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 2,
+    "step": "shutdown-endpoint"
+  },
+  "action": "axum route + process-exit handler; module-budget placement; live curl verification; server rebuild+restart",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T21:46:30"
+}

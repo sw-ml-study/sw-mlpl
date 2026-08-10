@@ -1,4 +1,4 @@
-number = 2
+number = 4
 slug = "deploy-web-model-fix"
 status = "pending"
 description = "The model-binding fix also affects the WASM browser eval (non-connect demos):..."
