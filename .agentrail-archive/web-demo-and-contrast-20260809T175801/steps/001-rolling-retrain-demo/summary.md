@@ -1,0 +1,1 @@
+Added Rolling Retrain (LEFTS-inspired) demo to Experiment Quality: demos.toml record adapted from demo-ml-utils lefts_page_web.mlpl (expanding-window monthly Ridge Lift, leakage-safe, routed+coalesced), SECTION_ORDER + order-test placement, README 93->94. Smoke/codegen/order/readme gates green.

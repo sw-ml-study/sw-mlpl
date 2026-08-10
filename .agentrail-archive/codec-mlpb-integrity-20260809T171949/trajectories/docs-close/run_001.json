@@ -1,0 +1,11 @@
+{
+  "task_type": "docs-close",
+  "state": {
+    "number": 2,
+    "step": "mlpb-close"
+  },
+  "action": "docs + wiki errata + q-and-a",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T16:57:46"
+}

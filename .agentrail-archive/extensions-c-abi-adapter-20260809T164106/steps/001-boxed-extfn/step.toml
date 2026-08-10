@@ -1,0 +1,10 @@
+number = 1
+slug = "boxed-extfn"
+status = "completed"
+description = "Change ExtFn to Arc<dyn Fn>; update call_contained/ExtFnDesc/registry/hello/f..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T13:46:51"
+completed_at = "2026-08-09T13:55:29"
+task_type = "rust-feature"
+commits = ["b58ccc77aec17cb7f4f9759bb28718f23fc20925"]

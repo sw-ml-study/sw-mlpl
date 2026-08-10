@@ -1,0 +1,10 @@
+number = 2
+slug = "demo-group-contrast"
+status = "completed"
+description = "Add .demo-select optgroup CSS in components/web/crates/mlpl-web/index.html: l..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T17:35:47"
+completed_at = "2026-08-09T17:36:31"
+task_type = "web-css"
+commits = ["e2f5d20468cfd9efde56e3d5af86d34756322748"]

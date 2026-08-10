@@ -1,0 +1,9 @@
+number = 2
+slug = "deploy-web-model-fix"
+status = "pending"
+description = "The model-binding fix also affects the WASM browser eval (non-connect demos):..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-09T21:25:52"
+task_type = "deploy"
+commits = []

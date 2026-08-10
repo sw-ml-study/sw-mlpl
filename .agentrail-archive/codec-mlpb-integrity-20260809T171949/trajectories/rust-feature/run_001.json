@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "mlpb-checksum"
+  },
+  "action": "bitwise CRC32; version-gated trailer; by-responsibility module split; TDD corruption + v1-compat",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T16:56:21"
+}

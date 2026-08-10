@@ -1,0 +1,9 @@
+number = 1
+slug = "reproduce-and-test"
+status = "completed"
+description = "Reproduce stats polling during an in-flight MLX-style evaluation and add a fa..."
+role = "production"
+context_files = []
+created_at = "2026-08-09T20:12:52"
+completed_at = "2026-08-09T21:25:52"
+commits = ["9b0479f25018abc4fc45c1006718e764cfe91611"]

@@ -1,0 +1,1 @@
+Close codec-mlpb-integrity: docs (Capability Matrix MLPB row, wiki errata, q-and-a, companion-demo-algorithms if present), report demo-algorithms can adopt MLPB v2 integrity, refresh CHANGES.md; --done.

@@ -1,0 +1,1 @@
+Close extensions-c-abi-adapter: document the C-ABI adapter (companion-demo-extensions.md status + register_c_extension usage), update wiki errata + q-and-a, note demo-extensions primary C-descriptor blocker resolved, and --done.
