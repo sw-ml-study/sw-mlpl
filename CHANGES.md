@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- docs(contract): record demo-file-processing binary-source/handle + codec-extension gates
+- docs(changes): refresh CHANGES.md to HEAD
 - saga codec-mlpb-integrity: complete (2 steps)
 - docs(codec): close codec-mlpb-integrity; report demo-algorithms v2 adoption (step 2)
 - saga codec-mlpb-integrity: step mlpb-checksum complete
