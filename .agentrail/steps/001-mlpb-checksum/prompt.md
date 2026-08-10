@@ -1,1 +1,0 @@
-Add native_integrity.rs (bitwise CRC32 + read_header accepting v1/v2 + verify_checksum); bump native VERSION to 2; to_native appends the CRC32 payload trailer; decode delegates to read_header + verify_checksum. TDD: v2 round-trips, corrupted payload byte -> err, synthetic v1 buffer still decodes, truncated checksum -> err. Update version-byte test + module docs.

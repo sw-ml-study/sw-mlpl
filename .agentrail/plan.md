@@ -1,32 +1,32 @@
-# Saga: codec-mlpb-integrity
+# Saga: web-demo-and-contrast
 
-../demo-algorithms adopted the MLPB v1 typed-native codec and
-asked (secondary) for a "stronger MLPB integrity/checksum" beyond
-the current magic + version + payload_len header. Add a CRC32
-trailer over the payload as MLPB v2, backward-compatible on read.
+Two web-UI updates that share one pages rebuild + deploy:
 
-Format:
-- v1 (existing): `MLPB`(4) + version=1 + payload_len(u32 LE) + payload
-- v2 (new):      `MLPB`(4) + version=2 + payload_len(u32 LE) + payload + crc32(u32 LE over payload)
+1. Add a public-browser demo **Rolling Retrain (LEFTS-inspired)**
+   to the Experiment Quality group, adapted from
+   ../demo-ml-utils/demos/experiments/lefts_page_web.mlpl (a
+   leakage-safe expanding-window monthly Ridge "Lift" over a Ridge
+   "Leaf"). Browser-CPU, self-contained, deterministic; no new
+   builtins/syntax/types; keep def-u doc strings; trim tutorial
+   prints to a few visible result lines. Add "Experiment Quality"
+   to SECTION_ORDER (after Training & Learning, before Classical
+   ML) + update demo_order_tests. Pass the web demo smoke gate.
 
-`to_native` emits v2 (integrity by default). `parse_native` /
-decode accepts BOTH: v1 decodes with no checksum (already-adopted
-data stays readable); v2 verifies the CRC32 and errors on
-mismatch. All failures stay err Results (never panic).
+2. Fix low-contrast demo-group NAMES in the web UI: the demo
+   dropdown's <optgroup> labels render in the browser-default muted
+   gray. Add a `.demo-select optgroup` rule (larger, bolder,
+   bright accent color) so group names are legible. Theme is
+   Catppuccin Mocha (dark only) -- no light theme to handle.
 
-Isolate the concern in a new `native_integrity.rs`
-(crc32 + read_header + verify_checksum) so `to_native`/`decode`
-stay small and every native_* module keeps <=4 fns. crc32 is
-bitwise IEEE (poly 0xEDB88320), no table, no new dependency.
+3. Rebuild pages + deploy (gh-pages); the demo is CPU/live so no
+   serve rebuild. Report + --done.
 
 ## Steps
-1. mlpb-checksum -- add native_integrity.rs; bump VERSION to 2;
-   to_native appends the CRC32 trailer; decode reads the header via
-   read_header (accepting v1/v2) and calls verify_checksum. Update
-   the version-byte assertion to v2. TDD: v2 round-trips; a
-   corrupted payload byte -> err (checksum mismatch); a synthetic
-   v1 buffer still decodes; a truncated/missing checksum -> err.
-   Update encode/decode module docs.
-2. mlpb-close -- docs (companion-demo-algorithms if present,
-   Capability Matrix row, wiki errata, q-and-a), report that
-   demo-algorithms can adopt MLPB v2 integrity; --done.
+1. rolling-retrain-demo -- demos.toml [[demos]] record (intro,
+   takeaway, adapted lines) + SECTION_ORDER + demo_order_tests;
+   pass `scripts/gate.sh components/web-demos mlpl-web-demos
+   mlpl-web-demos-smoke`.
+2. demo-group-contrast -- `.demo-select optgroup` CSS in
+   components/web/crates/mlpl-web/index.html.
+3. rebuild-deploy -- build-pages.sh, commit pages/, deploy-pages.sh,
+   ts-suffixed review URLs, docs/wiki if needed, --done.

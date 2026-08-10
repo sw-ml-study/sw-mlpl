@@ -1,1 +1,0 @@
-Closed codec-mlpb-integrity: queue marked SHIPPED, q-and-a reports demo-algorithms can adopt MLPB v2 (version byte now 2, v1 decode preserved), wiki Capability Matrix + errata E-025 updated.
