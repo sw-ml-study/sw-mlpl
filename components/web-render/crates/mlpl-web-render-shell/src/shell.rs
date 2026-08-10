@@ -36,7 +36,7 @@ pub fn render_shell(a: RenderArgs, inputs: InputCallbacks, modes: Modes) -> Html
     );
     let main_args = build_main_args(&a, &cb, &inputs, &modes);
     let chrome = render_shell_chrome(&a, &inputs, &modes, &cb);
-    let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog, a.build_info.clone());
+    let footer = render_shell_footer(*a.ui.dialog_open, inputs.close_dialog, a.build.info.clone());
     let overlays = render_overlays(&a);
     html! { <> { chrome } { render_main(main_args) } { footer } { overlays } </> }
 }

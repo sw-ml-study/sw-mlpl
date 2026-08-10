@@ -22,19 +22,25 @@ pub struct RenderArgs {
     pub upload: UploadState,
     pub active: ActiveContext,
     pub onboarding: OnboardingState,
-    /// Pre-formatted build-info chip ("vX.Y.Z.<commits> ·
-    /// <host> · <sha> · <timestamp>") for the footer; passed
-    /// in from mlpl-web because only mlpl-web's build.rs
-    /// emits the BUILD_* env vars.
-    pub build_info: AttrValue,
-    /// Pre-formatted version label ("vX.Y.Z.<commits>") for
-    /// the splash overlay, also sourced from mlpl-web's
-    /// build env vars.
-    pub version_label: AttrValue,
+    /// Build-stamp labels (footer chip, splash version, splash
+    /// UTC-Z build time), sourced from mlpl-web because only its
+    /// build.rs emits the BUILD_* env vars.
+    pub build: BuildLabels,
+}
+
+/// The pre-formatted build-stamp strings threaded from mlpl-web.
+pub struct BuildLabels {
+    /// Footer chip: "vX.Y.Z.<commits> · <host> · <sha> · <time>".
+    pub info: AttrValue,
+    /// Splash version label: "vX.Y.Z.<commits>".
+    pub version: AttrValue,
+    /// Splash build time in UTC Zulu ("YYYY-MM-DDTHH:MM:SSZ") so a
+    /// viewer can identify the build regardless of local timezone.
+    pub time: AttrValue,
 }
 
 impl RenderArgs {
-    /// Pack the four sub-structures into one render input.
+    /// Pack the sub-structures into one render input.
     #[must_use]
     pub fn from_parts(
         callbacks: AppCallbacks,
@@ -42,8 +48,7 @@ impl RenderArgs {
         upload: UploadState,
         active: ActiveContext,
         onboarding: OnboardingState,
-        build_info: AttrValue,
-        version_label: AttrValue,
+        build: BuildLabels,
     ) -> Self {
         Self {
             callbacks,
@@ -51,8 +56,7 @@ impl RenderArgs {
             upload,
             active,
             onboarding,
-            build_info,
-            version_label,
+            build,
         }
     }
 }

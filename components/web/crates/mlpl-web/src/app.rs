@@ -19,7 +19,7 @@ use crate::app_hooks::{use_onboarding_state, use_sessions, use_ui_state, use_upl
 use crate::app_log::{log_connect_mode, use_chrome_hooks};
 use mlpl_web_render_shell::shell::render;
 use mlpl_web_render_types::app_callbacks::build_callbacks;
-use mlpl_web_render_types::args::RenderArgs;
+use mlpl_web_render_types::args::{BuildLabels, RenderArgs};
 
 /// Mount the Yew application. Called from `src/main_wasm_body.rs`
 /// via `include!()` from `src/main.rs`. Same-origin autoconnect
@@ -46,23 +46,21 @@ fn app() -> Html {
     let active = active_context(&sessions, &ui);
     let callbacks = build_callbacks(&active, &upload, &ui);
     use_chrome_hooks(&active, &ui, &onboarding, &callbacks);
-    let (build_info, version_label) = build_labels();
     render(RenderArgs::from_parts(
         callbacks,
         ui,
         upload,
         active,
         onboarding,
-        build_info.into(),
-        version_label.into(),
+        build_labels(),
     ))
 }
 
 /// Format the build-stamp labels from the BUILD_* env vars that
 /// only this crate's build.rs emits (Saga 82); threaded down via
 /// RenderArgs.
-fn build_labels() -> (String, String) {
-    let build_info = format!(
+fn build_labels() -> BuildLabels {
+    let info = format!(
         "v{}.{} \u{00b7} {} \u{00b7} {} \u{00b7} {}",
         env!("CARGO_PKG_VERSION"),
         env!("BUILD_COMMIT_COUNT"),
@@ -70,10 +68,14 @@ fn build_labels() -> (String, String) {
         env!("BUILD_SHA"),
         env!("BUILD_TIMESTAMP"),
     );
-    let version_label = format!(
+    let version = format!(
         "v{}.{}",
         env!("CARGO_PKG_VERSION"),
-        env!("BUILD_COMMIT_COUNT"),
+        env!("BUILD_COMMIT_COUNT")
     );
-    (build_info, version_label)
+    BuildLabels {
+        info: info.into(),
+        version: version.into(),
+        time: AttrValue::from(env!("BUILD_TIMESTAMP")),
+    }
 }

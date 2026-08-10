@@ -19,6 +19,10 @@ pub struct SplashProps {
     /// formats the string with its own `env!()` macros and
     /// hands it in.
     pub version_label: AttrValue,
+    /// Build time in UTC Zulu ("YYYY-MM-DDTHH:MM:SSZ"). Shown so a
+    /// viewer can identify which build they are running regardless
+    /// of local timezone (the commit hash is not on the splash).
+    pub build_time: AttrValue,
 }
 
 #[function_component(SplashOverlay)]
@@ -36,6 +40,7 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
                 <div class="splash-header-shim">
                     <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
                     <p class="splash-version">{&props.version_label}</p>
+                    <p class="splash-buildtime">{"built "}{&props.build_time}</p>
                     <mlpl_web_components_chrome::status_badge::StatusBadge />
                     <p class="splash-subtitle">
                         {"An array programming language for learning machine learning, from scalars to transformers."}

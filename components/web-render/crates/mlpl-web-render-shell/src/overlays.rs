@@ -39,7 +39,8 @@ fn render_splash(a: &RenderArgs) -> Html {
             a.ui.lesson_idx.clone(),
             a.ui.path_state.clone(),
         )}
-        version_label={a.version_label.clone()}
+        version_label={a.build.version.clone()}
+        build_time={a.build.time.clone()}
     /> }
 }
 
