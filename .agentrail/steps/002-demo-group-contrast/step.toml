@@ -1,6 +1,6 @@
 number = 2
 slug = "demo-group-contrast"
-status = "pending"
+status = "in-progress"
 description = "Add .demo-select optgroup CSS in components/web/crates/mlpl-web/index.html: l..."
 role = "legacy"
 context_files = []

@@ -237,6 +237,23 @@
         .demo-select:hover {
             border-color: var(--blue);
         }
+        /* Demo-group NAMES in the dropdown: browsers render an
+           <optgroup> label in a muted grey by default (low
+           contrast, hard to read). Make the group names larger,
+           bolder, and a bright accent colour; keep the options
+           themselves normal-weight, full-contrast text. */
+        .demo-select optgroup {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--lavender);
+            background: var(--mantle);
+        }
+        .demo-select option {
+            font-size: 13px;
+            font-weight: 400;
+            color: var(--text);
+            background: var(--surface0);
+        }
         .ctrl-btn {
             background: var(--surface0);
             color: var(--text);
