@@ -1,1 +1,0 @@
-Added POST /v1/admin/shutdown (unauthenticated, LAN-wide) for scriptable dev restarts: replies 'shutting down' then process::exit, no PID hunting. Placed in handlers_eval_task.rs (handlers.rs at fn-count budget; new module would breach crate module cap); exit cfg(test)-gated. Verified live: 200 then clean exit; relaunched. sw-checklist 575/2/386 held.

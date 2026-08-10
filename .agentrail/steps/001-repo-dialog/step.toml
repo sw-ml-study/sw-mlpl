@@ -1,9 +1,10 @@
 number = 1
 slug = "repo-dialog"
-status = "in-progress"
+status = "completed"
 description = "Add a RepoLinks component in chrome footer.rs: the footer GitHub link opens a..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-10T11:43:44"
+completed_at = "2026-08-10T11:46:36"
 task_type = "web-component"
-commits = []
+commits = ["5b73364898c8ef93bb885b835b02d13c7ddafc87"]

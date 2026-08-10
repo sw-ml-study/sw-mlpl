@@ -1,0 +1,1 @@
+Footer GitHub link now opens a RepoLinks dialog listing sw-mlpl + all sw-ml-study/demo* repos (baked-in org names + descriptions), reusing the .modal shell; self-contained component in chrome footer.rs (chrome at 7 modules, can't add one); dropped unused url prop/REPO_URL. clippy/fmt green, warning-neutral (387).
