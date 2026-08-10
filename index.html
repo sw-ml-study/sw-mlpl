@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta name="mlpl-build" content="225491f1 2026-08-10T02:29:04Z">
+<head><meta name="mlpl-build" content="61b1df80 2026-08-10T02:56:43Z">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-71319a3e62f08d4d.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-71319a3e62f08d4d_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-e05c1d6401024e55.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-e05c1d6401024e55_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -304,6 +304,42 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: var(--subtext0);
             opacity: 0.55;
             cursor: not-allowed;
+        }
+        /* Immediate, consistent picker explanations. Native `title`
+           popups have a long browser-controlled delay and often do
+           not appear for disabled buttons. The wrapper remains
+           hoverable and keyboard-focusable while the button keeps
+           its real disabled semantics. */
+        .demo-tooltip-target {
+            display: block;
+            position: relative;
+            outline: none;
+        }
+        .demo-tooltip-target::after {
+            content: attr(data-tooltip);
+            display: none;
+            margin: 3px 8px 6px;
+            padding: 7px 9px;
+            color: var(--text);
+            background: var(--surface0);
+            border: 1px solid var(--surface1);
+            border-radius: 4px;
+            font-family: var(--sans);
+            font-size: 14px;
+            font-weight: 400;
+            line-height: 1.35;
+            white-space: normal;
+            pointer-events: none;
+        }
+        .demo-group-label.demo-tooltip-target::after {
+            margin-left: 22px;
+            font-size: 15px;
+            transform: translate(10px, -5px);
+        }
+        .demo-tooltip-target:hover::after,
+        .demo-tooltip-target:focus::after,
+        .demo-tooltip-target:focus-within::after {
+            display: block;
         }
         .ctrl-btn {
             background: var(--surface0);
@@ -2011,7 +2047,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-71319a3e62f08d4d.js" crossorigin="anonymous" integrity="sha384-gruGC+OqMmCz+dztDUdIR3j4wJqVz89LNY6g/dWl2G8ZEW5HTVPxcrabzkVSC2zA"><link rel="preload" href="/sw-mlpl/mlpl-web-71319a3e62f08d4d_bg.wasm" crossorigin="anonymous" integrity="sha384-4UEPnzj6cH25LYf0a+4FSAsyYNzmsNEF5kFJCeVWl0HRdc+esXThfvhAZ9i2CTXC" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-e05c1d6401024e55.js" crossorigin="anonymous" integrity="sha384-DK+nROO2ep6HITNydNMplSpATrg9zP9lpwq7k9MrY9e9godWlAodKlKuuGpAiVU7"><link rel="preload" href="/sw-mlpl/mlpl-web-e05c1d6401024e55_bg.wasm" crossorigin="anonymous" integrity="sha384-C9m+33UWIeTRAOyFrXyodNepzTJqVdSvW2GswNwj9EtqFMgT/rvygsv4zHON8yFA" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
