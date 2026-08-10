@@ -139,3 +139,32 @@ pub(crate) async fn run_eval(
     crate::persist::maybe_flush(state).await;
     out
 }
+
+#[derive(serde::Serialize)]
+struct ShutdownResponse {
+    status: &'static str,
+}
+
+/// `POST /v1/admin/shutdown` -- stop the server so a restart is
+/// scriptable (`curl -X POST http://<host>:<port>/v1/admin/shutdown`,
+/// then relaunch) instead of hunting the PID. Works LAN-wide (the dev
+/// server binds `0.0.0.0`). Deliberately UNAUTHENTICATED for now, like
+/// `/v1/reset`: the dev threat model is a trusted LAN; a proper auth
+/// model (log in to the local server) is deferred to a later
+/// production phase. Responds first, then exits so the reply flushes.
+/// (Lives here, beside the eval-task handlers, because `handlers.rs`
+/// is at its module function-count budget.) The exit is compiled out
+/// under `cfg(test)` so it never kills a test runner.
+pub async fn admin_shutdown_handler() -> impl axum::response::IntoResponse {
+    #[cfg(not(test))]
+    tokio::spawn(async {
+        tokio::time::sleep(std::time::Duration::from_millis(150)).await;
+        std::process::exit(0);
+    });
+    (
+        StatusCode::OK,
+        Json(ShutdownResponse {
+            status: "shutting down",
+        }),
+    )
+}

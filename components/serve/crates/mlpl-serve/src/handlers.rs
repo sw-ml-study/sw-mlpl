@@ -229,6 +229,10 @@ pub(crate) fn v1_router(state: AppState) -> axum::Router {
         )
         .route("/v1/stats", get(mlpl_serve_core::devices::stats_handler))
         .route("/v1/reset", post(reset_handler))
+        .route(
+            "/v1/admin/shutdown",
+            post(crate::handlers_eval_task::admin_shutdown_handler),
+        )
         .route("/v1/sessions", post(create_session_handler))
         .route("/v1/sessions/:id", get(session_meta_handler))
         .route("/v1/sessions/:id/eval", post(eval_handler))
