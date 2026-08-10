@@ -1,6 +1,6 @@
-number = 3
+number = 4
 slug = "fns-over-connect"
-status = "pending"
+status = "in-progress"
 description = "In connect mode, route the :fns (and :describe/:list) introspection slash-com..."
 role = "production"
 context_files = []

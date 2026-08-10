@@ -1,0 +1,1 @@
+Show UI build date AND connected-server build date on the splash, warn on mismatch: server emits build time+commit (build.rs) exposed on /v1/health; web UI fetches it on connect and the splash shows both + a mismatch warning. Rebuild+deploy pages; rebuild+restart server.
