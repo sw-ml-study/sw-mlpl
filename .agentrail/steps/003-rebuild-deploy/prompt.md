@@ -1,0 +1,1 @@
+Rebuild pages (build-pages.sh), commit pages/, deploy (deploy-pages.sh), verify live bundle + trigger a fresh Pages build if it stalls, hand out ts-suffixed URL, --done.

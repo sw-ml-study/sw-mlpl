@@ -1,0 +1,1 @@
+Splash now shows the UTC-Z build time. Collapsed build_info+version_label into a BuildLabels{info,version,time} struct (drops from_parts to 6 args, avoids too_many_arguments); build_labels sets time=env BUILD_TIMESTAMP; splash renders 'built <UTC-Z>' with .splash-buildtime CSS. clippy/fmt/splash test green, no new warning.
