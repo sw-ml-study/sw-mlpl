@@ -1,9 +1,10 @@
 number = 5
 slug = "deploy-web-model-fix"
-status = "pending"
+status = "completed"
 description = "The model-binding fix also affects the WASM browser eval (non-connect demos):..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-09T21:25:52"
+completed_at = "2026-08-10T11:26:11"
 task_type = "deploy"
-commits = []
+commits = ["fff9823ff62b52a03a4d266931763cd32250444b"]
