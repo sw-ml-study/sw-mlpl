@@ -1,9 +1,10 @@
 number = 2
 slug = "close"
-status = "in-progress"
+status = "completed"
 description = "Close compiler-source-loading: mark SHIPPED in companion-demo-file-processing..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-10T12:55:23"
+completed_at = "2026-08-10T12:59:27"
 task_type = "docs-close"
-commits = []
+commits = ["dc984a7179d725bacacc7c788e93b5f7f628d28f"]
