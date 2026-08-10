@@ -9,6 +9,7 @@ version.workspace = true
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-eval-env = { path = "../mlpl-eval-env" }
 mlpl-eval-types = { path = "../../../eval-types/crates/mlpl-eval-types" }
+mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
 
 [lints]
 workspace = true

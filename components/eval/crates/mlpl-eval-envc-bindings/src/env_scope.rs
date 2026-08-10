@@ -8,6 +8,8 @@
 use std::collections::{BTreeMap, HashMap};
 
 use mlpl_array::DenseArray;
+use mlpl_eval_core::model::ModelSpec;
+use mlpl_eval_core::{GenState, TokenizerSpec};
 use mlpl_eval_types::Value;
 
 use mlpl_eval_env::Environment;
@@ -26,6 +28,17 @@ pub struct ScopeSnapshot {
     // reference-valued params need the same frame restore.
     builtin_refs: HashMap<String, String>,
     partials: HashMap<String, (String, usize, Vec<Value>)>,
+    // models / tokenizers / gen_states / device_tensors were ALSO
+    // missing: `clear_binding` wipes them, so a user fn whose LOCAL
+    // variable shadows a global model name (e.g. `u:encode` doing
+    // `m = eq(...)` while a global model `m` exists) destroyed the
+    // global -- the model vanished after the call (connect MLX
+    // tic-tac-toe: `undefined variable: m`). Snapshot every table
+    // `clear_binding` touches so a frame fully rolls back.
+    models: HashMap<String, ModelSpec>,
+    tokenizers: HashMap<String, TokenizerSpec>,
+    gen_states: HashMap<String, GenState>,
+    device_tensors: HashMap<String, Value>,
 }
 
 /// Per-call scope snapshot/restore for `u:` function frames, plus
@@ -49,6 +62,10 @@ impl EnvScope for Environment {
             results: self.results.clone(),
             builtin_refs: self.builtin_refs.clone(),
             partials: self.partials.clone(),
+            models: self.models.clone(),
+            tokenizers: self.tokenizers.clone(),
+            gen_states: self.gen_states.clone(),
+            device_tensors: self.device_tensors.clone(),
         }
     }
 
@@ -60,6 +77,10 @@ impl EnvScope for Environment {
         self.results = s.results;
         self.builtin_refs = s.builtin_refs;
         self.partials = s.partials;
+        self.models = s.models;
+        self.tokenizers = s.tokenizers;
+        self.gen_states = s.gen_states;
+        self.device_tensors = s.device_tensors;
     }
 
     fn clear_binding(&mut self, name: &str) {

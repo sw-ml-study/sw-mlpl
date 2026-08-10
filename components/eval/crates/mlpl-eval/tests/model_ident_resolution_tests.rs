@@ -59,6 +59,34 @@ fn apply_by_name_still_works() {
 }
 
 #[test]
+fn user_fn_local_shadow_does_not_destroy_global_model() {
+    // The tic-tac-toe breaker: `u:encode` binds a LOCAL `m`
+    // (`m = eq(board, mover)`) while a global model `m` exists.
+    // A per-call frame that failed to snapshot the `models` table
+    // let that local assignment's `clear_binding` wipe the global
+    // model, so the model vanished after the call (`undefined
+    // variable: m`). The global must survive an identically-named
+    // local.
+    let mut env = Environment::new();
+    eval(&mut env, BUILD_M).unwrap();
+    eval(
+        &mut env,
+        "def u:clob(v) { \"local m shadows the global model\"; m = eq(v, 0); reduce_add(m, 0) }",
+    )
+    .unwrap();
+    eval(&mut env, "u:clob([0, 1, 0])").expect("call with a local `m`");
+    let v = eval(&mut env, "m").expect("global model must survive a user fn's local `m`");
+    assert!(
+        matches!(v, Value::Model(_)),
+        "global `m` should still be a model, got {v:?}"
+    );
+    assert!(matches!(
+        eval(&mut env, "apply(m, zeros([1, 3]))").unwrap(),
+        Value::Array(_)
+    ));
+}
+
+#[test]
 fn user_fn_reading_a_global_model_resolves_it() {
     // Mirrors the tic-tac-toe demo: a user fn references the global
     // model `m` (here through `apply`), which requires the name to
