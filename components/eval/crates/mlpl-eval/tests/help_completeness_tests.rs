@@ -99,3 +99,25 @@ fn builtin_groups_has_no_duplicate_names() {
         "BUILTIN_GROUPS has duplicate names (would shadow in :describe lookup): {dups:?}"
     );
 }
+
+/// `:help <name>` must resolve EVERY documented builtin to its
+/// describe body (with the topics-vs-names note), never the
+/// "no topic" / "not a name" fallbacks. Keeps `:help <builtin>`
+/// complete as builtins land -- the bug that `:help take` used to
+/// hit "no help topic 'take'".
+#[test]
+fn help_of_every_builtin_shows_its_describe() {
+    let mut env = mlpl_eval::Environment::new();
+    let mut broken: Vec<String> = Vec::new();
+    for name in mlpl_eval::documented_builtin_names() {
+        let out = mlpl_eval::inspect(&mut env, &format!(":help {name}")).unwrap_or_default();
+        if out.is_empty() || out.contains("is neither a") || out.contains("is not a bound") {
+            broken.push(format!("{name}: {out}"));
+        }
+    }
+    assert!(
+        broken.is_empty(),
+        ":help did not resolve these builtins to a describe body:\n{}",
+        broken.join("\n")
+    );
+}

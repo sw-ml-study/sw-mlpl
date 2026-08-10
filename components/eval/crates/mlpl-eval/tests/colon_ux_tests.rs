@@ -50,15 +50,24 @@ fn list_of_a_builtin_points_at_describe() {
 }
 
 #[test]
-fn unknown_help_topic_lists_the_topics() {
+fn help_of_a_name_describes_it_else_points_to_describe() {
     let mut env = Environment::new();
-    for line in [":help :disp", ":help disp", ":help nosuchtopic"] {
+    // A builtin NAME (not a topic) -> its `:describe` body, with the
+    // topics-vs-names note (fixes the old "no help topic 'disp'").
+    for line in [":help :disp", ":help disp"] {
         let out = inspect(&mut env, line).expect("help output");
         assert!(
-            out.contains("vars") && out.contains(":describe"),
-            "topic list expected for {line}, got {out:?}"
+            out.contains("disp -- built-in") && out.contains(":describe disp"),
+            "expected disp's describe for {line}, got {out:?}"
         );
     }
+    // A genuinely unknown name -> the topics-vs-names fallback that
+    // distinguishes `:help` (topics) from `:describe` (names).
+    let out = inspect(&mut env, ":help nosuchtopic").expect("help output");
+    assert!(
+        out.contains(":describe") && out.contains("is neither"),
+        "expected the topics-vs-names fallback, got {out:?}"
+    );
 }
 
 #[test]

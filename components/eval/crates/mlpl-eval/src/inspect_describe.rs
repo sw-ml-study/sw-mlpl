@@ -49,7 +49,13 @@ pub(crate) fn format_describe(env: &Environment, name: &str) -> String {
     {
         return format!(":{cmd} -- REPL command\n  {brief}");
     }
-    format!("'{name}' is not a bound variable, model, built-in, or REPL command.")
+    format!(
+        "'{name}' is not a bound variable, model, tokenizer, built-in, or user function.\n  \
+         `:describe <name>` inspects a NAME -- a var, model, tokenizer, built-in \
+         function, or `u:` user function.\n  \
+         `:help [topic]` covers TOPICS -- syntax/keywords and builtin categories; \
+         try `:help {name}` if you meant a topic."
+    )
 }
 
 fn describe_model(env: &Environment, name: &str, spec: &ModelSpec) -> String {

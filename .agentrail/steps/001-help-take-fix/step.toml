@@ -1,0 +1,9 @@
+number = 1
+slug = "help-take-fix"
+status = "in-progress"
+description = "Extend help_topic to fall back to format_describe for non-topic names (so :he..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-10T13:03:36"
+task_type = "rust-fix"
+commits = []

@@ -108,9 +108,11 @@ fn dash_help(env: &Environment, trimmed: &str) -> Option<String> {
 /// available instead of falling through to evaluation.
 fn help_unknown_topic(topic: &str) -> String {
     format!(
-        "no help topic '{topic}'. Topics: vars, models, fns, builtins, describe, wsid, \
-         introspect. For a builtin use `:describe <name>`; for a command's usage add \
-         `--help` (e.g. `:trace --help`)."
+        "'{topic}' is neither a `:help` topic nor a bound name.\n  \
+         `:help [topic]`    -- TOPICS: syntax/keywords, builtin categories \
+         (core, math, ml, ...), command usage (e.g. `:trace --help`)\n  \
+         `:describe <name>` -- a NAME: a variable, model, tokenizer, built-in \
+         function, or `u:` user-defined function"
     )
 }
 
@@ -133,8 +135,21 @@ fn topic_output(env: &Environment, topic: &str) -> Option<String> {
 /// then adds the `describe` help string that's specific to the
 /// `:help` surface (`:describe` itself needs an argument).
 fn help_topic(topic: &str, env: &Environment) -> Option<String> {
-    topic_output(env, topic).or_else(|| match topic {
-        "describe" => Some(HELP_DESCRIBE_MSG.into()),
-        _ => None,
-    })
+    if let Some(t) = topic_output(env, topic) {
+        return Some(t);
+    }
+    if topic == "describe" {
+        return Some(HELP_DESCRIBE_MSG.into());
+    }
+    // Not a topic: fall back to `:describe`, which resolves NAMES
+    // (vars / models / builtins / user fns). It returns a "'x' is
+    // not a bound variable..." sentinel when it can't -- only then
+    // is there genuinely no help (caller shows the topic list).
+    let desc = crate::inspect_describe::format_describe(env, topic);
+    if desc.starts_with(&format!("'{topic}' is not")) {
+        return None;
+    }
+    Some(format!(
+        "`:help` covers TOPICS; `:describe` inspects NAMES. Here is `:describe {topic}`:\n\n{desc}"
+    ))
 }
