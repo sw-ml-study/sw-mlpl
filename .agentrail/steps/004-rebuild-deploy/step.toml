@@ -1,6 +1,6 @@
-number = 3
+number = 4
 slug = "rebuild-deploy"
-status = "pending"
+status = "in-progress"
 description = "Rebuild pages (build-pages.sh), commit pages/, deploy (deploy-pages.sh), veri..."
 role = "legacy"
 context_files = []

@@ -2,12 +2,94 @@
 //! `mode_bar` (and the probe hook out to `peer_probe`) so each
 //! module stays within the function-count budget.
 
+use std::collections::BTreeMap;
+
 use mlpl_web_demos::{DEMOS, Device, capability_for, demo_disabled};
 
 /// One dropdown option: `(demo index, name, disabled)`.
 pub type DemoOption = (usize, &'static str, bool);
 /// Dropdown sections: `(section label, options)`.
 pub type DemoGroups = Vec<(&'static str, Vec<DemoOption>)>;
+
+/// Category explanations for the custom picker group labels.
+pub const GROUP_TOOLTIPS: &[(&str, &str)] = &[
+    (
+        "Basics",
+        "Core MLPL syntax, arrays, functions, and first programs.",
+    ),
+    (
+        "Training & Learning",
+        "How models learn: objectives, gradients, optimization, and adaptation.",
+    ),
+    (
+        "Experiment Quality",
+        "Ways to make experiments inspectable, comparable, robust, and leakage-safe.",
+    ),
+    (
+        "Classical ML",
+        "Established statistical learning methods for tabular and numeric data.",
+    ),
+    (
+        "Classification",
+        "Predict discrete classes and inspect how classification decisions behave.",
+    ),
+    (
+        "Clustering",
+        "Discover groups and structure in unlabeled data.",
+    ),
+    (
+        "Data Forge",
+        "Create, reshape, label, and inspect datasets for repeatable experiments.",
+    ),
+    (
+        "Dim Reduction",
+        "Project high-dimensional data into smaller, interpretable representations.",
+    ),
+    (
+        "Vision",
+        "Image representation, convolution, recognition, and visual inspection.",
+    ),
+    (
+        "Attention",
+        "Attention mechanisms and the dataflow behind transformer-style models.",
+    ),
+    (
+        "Sequence Models",
+        "Models for ordered observations, recurrence, and temporal context.",
+    ),
+    (
+        "Language Models",
+        "Token models, generation, adaptation, and language-model internals.",
+    ),
+    (
+        "Generative Models",
+        "Models that learn a distribution and generate new samples.",
+    ),
+    (
+        "Engram",
+        "Explicit learned memory and retrieval inside neural models.",
+    ),
+    (
+        "APL2 / General Programming",
+        "Array-language techniques useful beyond machine learning.",
+    ),
+    (
+        "Non-Browser (companion CLIs)",
+        "Examples that require a native companion command instead of browser execution.",
+    ),
+    (
+        "Client-server (connect)",
+        "Examples that run through a connected mlpl-serve backend.",
+    ),
+    (
+        "MLX - Apple GPU (connect)",
+        "GPU examples requiring a connected Apple-Silicon MLX backend.",
+    ),
+    (
+        "CUDA - Linux GPU (connect)",
+        "GPU examples requiring a connected NVIDIA CUDA backend.",
+    ),
+];
 
 /// Curated dropdown section order (user direction: logical, not
 /// alphabetical, at the GROUP level -- this is an ML-oriented
@@ -48,8 +130,7 @@ const SECTION_ORDER: &[&str] = &[
 /// peer but stays disabled against an MLX-only peer (and vice versa).
 #[must_use]
 pub fn grouped_demos(connected: bool, peer_devices: &[Device]) -> DemoGroups {
-    let mut map: std::collections::BTreeMap<&str, Vec<DemoOption>> =
-        std::collections::BTreeMap::new();
+    let mut map = BTreeMap::<&str, Vec<DemoOption>>::new();
     for (i, d) in DEMOS.iter().enumerate() {
         let cap = capability_for(d.name);
         let section = match cap.device {
@@ -62,23 +143,17 @@ pub fn grouped_demos(connected: bool, peer_devices: &[Device]) -> DemoGroups {
         let disabled = demo_disabled(&cap, connected, peer_devices);
         map.entry(section).or_default().push((i, d.name, disabled));
     }
-    for items in map.values_mut() {
-        items.sort_by_key(|(_, name, _)| name.to_ascii_lowercase());
-    }
+    map.values_mut()
+        .for_each(|items| items.sort_by_key(|(_, name, _)| name.to_ascii_lowercase()));
     let mut groups: DemoGroups = map.into_iter().collect();
-    groups.sort_by_key(|(section, _)| section_rank(section));
+    groups.sort_by_key(|(section, _)| {
+        let rank = SECTION_ORDER
+            .iter()
+            .position(|s| *s == *section)
+            .unwrap_or(SECTION_ORDER.len() - 3);
+        (rank, section.to_ascii_lowercase())
+    });
     groups
-}
-
-/// Sort key for a dropdown section: its curated [`SECTION_ORDER`]
-/// position. Unknown future sections slot just before the connect
-/// tiers, alphabetically.
-fn section_rank(section: &str) -> (usize, String) {
-    let rank = SECTION_ORDER
-        .iter()
-        .position(|s| *s == section)
-        .unwrap_or(SECTION_ORDER.len() - 3);
-    (rank, section.to_ascii_lowercase())
 }
 
 /// Tooltip text for a DISABLED demo option, explaining how to enable it.
@@ -92,6 +167,25 @@ pub fn disabled_hint(section: &str) -> &'static str {
         "Available when connected to a server on an Apple-Silicon Mac (MLX GPU). Run mlpl-serve there and connect to it."
     } else {
         "Available when connected to a REACHABLE mlpl-serve instance (the Ask Ollama demo also needs Ollama running on that server's host). Append ?connect=<server-url> to this page's URL -- usually the page's own origin, e.g. ?connect=http://large12:6464 when the page is served from large12:6464."
+    }
+}
+
+/// Demo summary plus an enablement explanation when capability gating disables it.
+#[must_use]
+pub fn demo_tooltip(index: usize, section: &str, disabled: bool) -> String {
+    let demo = &DEMOS[index];
+    let summary = demo
+        .intro
+        .split_once(". ")
+        .map_or(demo.intro, |(first, _)| first);
+    if disabled {
+        format!(
+            "{}: {summary}. Unavailable: {}",
+            demo.name,
+            disabled_hint(section)
+        )
+    } else {
+        format!("{}: {summary}.", demo.name)
     }
 }
 

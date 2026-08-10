@@ -1,6 +1,8 @@
 use yew::prelude::*;
 
-use crate::demo_gating::{DemoGroups, disabled_hint, grouped_demos, reachable_connected};
+use crate::demo_gating::{
+    DemoGroups, GROUP_TOOLTIPS, demo_tooltip, grouped_demos, reachable_connected,
+};
 use crate::peer_probe::{connect_banner, use_peer_probe};
 use mlpl_web_demos::Device;
 
@@ -100,17 +102,20 @@ fn render_panel(
         <>
             <div class="demo-dropdown-backdrop" onclick={toggle.clone()} />
             <div class="demo-dropdown-panel" role="listbox" aria-label="Demos">
-                { for groups.iter().map(|(cat, items)| html! {
-                    <div class="demo-group">
-                        <div class="demo-group-label">{ *cat }</div>
-                        { for items.iter().map(|(i, name, disabled)| {
-                            let idx = *i;
-                            let pick = pick.clone();
-                            let onclick = Callback::from(move |_: MouseEvent| pick.emit(idx));
-                            let title = disabled.then(|| AttrValue::from(disabled_hint(cat)));
-                            html! { <button class="demo-item" role="option" disabled={*disabled} title={title} onclick={onclick}>{ name.to_string() }</button> }
-                        }) }
-                    </div>
+                { for groups.iter().map(|(cat, items)| {
+                    let tip = GROUP_TOOLTIPS.iter().find(|(name, _)| name == cat).map_or("Related MLPL demonstrations grouped by subject.", |(_, tip)| *tip);
+                    html! {
+                        <div class="demo-group">
+                            <div class="demo-group-label" title={tip} aria-label={format!("{}: {}", cat, tip)}>{ *cat }</div>
+                            { for items.iter().map(|(i, name, disabled)| {
+                                let idx = *i;
+                                let pick = pick.clone();
+                                let onclick = Callback::from(move |_: MouseEvent| pick.emit(idx));
+                                let title = AttrValue::from(demo_tooltip(idx, cat, *disabled));
+                                html! { <button class="demo-item" role="option" disabled={*disabled} title={title.clone()} aria-label={title} onclick={onclick}>{ name.to_string() }</button> }
+                            }) }
+                        </div>
+                    }
                 }) }
             </div>
         </>
