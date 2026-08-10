@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta name="mlpl-build" content="ffb38941 2026-08-10T00:37:28Z">
+<head><meta name="mlpl-build" content="225491f1 2026-08-10T02:29:04Z">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-3be425008459fe5b.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-3be425008459fe5b_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-71319a3e62f08d4d.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-71319a3e62f08d4d_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -248,22 +248,62 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         .demo-select:hover {
             border-color: var(--blue);
         }
-        /* Demo-group NAMES in the dropdown: browsers render an
-           <optgroup> label in a muted grey by default (low
-           contrast, hard to read). Make the group names larger,
-           bolder, and a bright accent colour; keep the options
-           themselves normal-weight, full-contrast text. */
-        .demo-select optgroup {
+        /* Custom (non-native) demo picker. The native <select> /
+           <optgroup> cannot be styled reliably (Safari ignores
+           optgroup styling; Chrome ignores its font-size), so the
+           demo-GROUP names rendered as low-contrast muted text.
+           These are ordinary styled elements, legible everywhere. */
+        .demo-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .demo-dropdown-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+        }
+        .demo-dropdown-panel {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            z-index: 41;
+            min-width: 260px;
+            max-height: 70vh;
+            overflow-y: auto;
+            background: var(--base);
+            border: 1px solid var(--surface1);
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            padding: 4px;
+        }
+        .demo-group-label {
+            font-family: var(--mono);
             font-size: 14px;
             font-weight: 700;
             color: var(--lavender);
-            background: var(--mantle);
+            padding: 6px 10px 2px;
+            letter-spacing: 0.02em;
         }
-        .demo-select option {
-            font-size: 13px;
-            font-weight: 400;
+        .demo-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
             color: var(--text);
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px 5px 20px;
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .demo-item:hover:not(:disabled) {
             background: var(--surface0);
+        }
+        .demo-item:disabled {
+            color: var(--subtext0);
+            opacity: 0.55;
+            cursor: not-allowed;
         }
         .ctrl-btn {
             background: var(--surface0);
@@ -1148,6 +1188,14 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             color: #bac2de;
             font-family: var(--mono);
             font-size: 14px;
+            margin: 0 0 2px;
+        }
+        /* UTC Zulu build time so a viewer can identify the build
+           regardless of local timezone (no commit hash on splash). */
+        .splash-buildtime {
+            color: var(--subtext0);
+            font-family: var(--mono);
+            font-size: 12px;
             margin: 0 0 10px;
         }
         .splash-subtitle {
@@ -1963,7 +2011,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-3be425008459fe5b.js" crossorigin="anonymous" integrity="sha384-ZIKq1LfoyAATZKEzMjhFaIM8Cz2swbAg/h7XF/Gsfncjf0zOnVWJVDEg4M3mcggm"><link rel="preload" href="/sw-mlpl/mlpl-web-3be425008459fe5b_bg.wasm" crossorigin="anonymous" integrity="sha384-6KFCGmHbvhrFYmuKA2AQuC1YfWQrBHUOQRkqdtirpMUbBtnzc/4OIrN82cHb0RjW" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-71319a3e62f08d4d.js" crossorigin="anonymous" integrity="sha384-gruGC+OqMmCz+dztDUdIR3j4wJqVz89LNY6g/dWl2G8ZEW5HTVPxcrabzkVSC2zA"><link rel="preload" href="/sw-mlpl/mlpl-web-71319a3e62f08d4d_bg.wasm" crossorigin="anonymous" integrity="sha384-4UEPnzj6cH25LYf0a+4FSAsyYNzmsNEF5kFJCeVWl0HRdc+esXThfvhAZ9i2CTXC" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
