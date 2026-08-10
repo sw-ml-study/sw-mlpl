@@ -1,1 +1,1 @@
-saga init: repl-help-and-demo-guidance plan recorded
+saga init

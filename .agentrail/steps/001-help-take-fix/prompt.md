@@ -1,1 +1,0 @@
-Extend help_topic to fall back to format_describe for non-topic names (so :help take shows take's help); make help_unknown_topic suggest a concrete :describe <name>; add a completeness test over every documented builtin.

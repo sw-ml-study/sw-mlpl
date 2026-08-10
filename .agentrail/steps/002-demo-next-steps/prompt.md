@@ -1,1 +1,0 @@
-Add a 'Next Steps?' epilogue after a demo runs (suggest :help, :vars, :fns, :list, experiment), rendered once in the demo run path (not per-demo in demos.toml); test.

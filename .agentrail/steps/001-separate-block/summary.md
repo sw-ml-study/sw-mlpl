@@ -1,0 +1,1 @@
+Next-Steps epilogue now renders as a separate narration panel (via running::push_narration) after the takeaway, for every demo. Single shared NEXT_STEPS const applied by the runner -- no per-demo duplication. No new fn; schedule_demo_line 50 LOC; total held.

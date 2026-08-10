@@ -1,30 +1,19 @@
-# Saga: repl-help-and-demo-guidance
+# Saga: demo-next-steps-block
 
-Two user-requested REPL/demo UX fixes that share one pages deploy
-(both are web-visible: the web REPL runs the same eval `inspect()`,
-and demos render in the browser).
+Follow-up: the "Next Steps?" epilogue currently renders INSIDE the
+"What just happened" (takeaway) narration panel. The user wants it
+as a SEPARATE narration block, for every demo.
 
-1. `:help <name>` bug: `:help take` (any builtin) errors with "no
-   help topic 'take'" because `help_topic` only matches category
-   TOPICS (vars/models/fns/builtins/...), never builtins. Fix:
-   `help_topic` falls back to `inspect_describe::format_describe`
-   for a non-topic name, returning Some(describe) when the name
-   resolves (builtin / var / model / fn / REPL command) and None
-   (-> topic list) only for the "'x' is not ..." sentinel. No new
-   function (inspect.rs is at its 7-fn max) -- extend help_topic.
-   Add a completeness test: for EVERY documented builtin name,
-   `:help <name>` returns real help (no "no help topic" / "is not
-   a bound" sentinel), so :help stays complete as builtins land.
-
-2. Demos "Next Steps?" epilogue: after a demo runs, show a short
-   note suggesting `:help`, `:vars`, `:fns`, `:list`, and
-   `experiment`. Render it ONCE in the demo runner (not per-demo in
-   demos.toml).
+Fix: in demo.rs schedule_demo_line's end-of-demo block, keep the
+takeaway as its own panel (input "What just happened") and add a
+SEPARATE Next-Steps narration panel via the existing
+running::push_narration (NEXT_STEPS text, its first line is the
+"Next steps?" header). No new function (demo.rs + running.rs are
+both at their 7-fn max); push_narration already renders a
+standalone narration entry.
 
 ## Steps
-1. help-take-fix -- extend help_topic + completeness test; scoped
-   mlpl-eval tests (inspect/help) green; clippy/fmt.
-2. demo-next-steps -- append a "Next Steps?" epilogue in the demo
-   render path; test; clippy/fmt.
-3. deploy -- build-pages.sh, commit pages/, deploy-pages.sh, verify
-   live + fresh Pages build if stalled, --done.
+1. separate-block -- revert the takeaway output to demo.takeaway;
+   add push_narration(NEXT_STEPS) as a second panel; keep
+   schedule_demo_line <= 50 LOC; clippy/fmt.
+2. deploy -- build-pages, commit pages/, deploy, verify, --done.
