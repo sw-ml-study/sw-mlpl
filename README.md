@@ -386,6 +386,17 @@ every `:`-prefixed command.
   general-purpose programming beyond the ML core.
 - [demo-combinators](https://github.com/sw-ml-study/demo-combinators)
   -- combinatory-logic ("To Mock a Mockingbird") demos.
+- [demo-extensions](https://github.com/sw-ml-study/demo-extensions)
+  -- authoring native MLPL language extensions in Rust.
+- [demo-file-processing](https://github.com/sw-ml-study/demo-file-processing)
+  -- bounded byte and file processing: hexdump, WAV, MP3/ID3, and
+  Ogg inspection.
+- [demo-functional-pipelines](https://github.com/sw-ml-study/demo-functional-pipelines)
+  -- a functional pipeline library for MLPL.
+- [demo-memory](https://github.com/sw-ml-study/demo-memory)
+  -- companion demos for hashmaps, memory, and retrieval.
+- [demo-ml-utils](https://github.com/sw-ml-study/demo-ml-utils)
+  -- machine-learning utility demos built with MLPL.
 
 The surrounding repository ecosystem -- existing and planned
 companions (a libraries collection, memory-organization demos,
