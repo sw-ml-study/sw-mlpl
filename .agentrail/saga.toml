@@ -1,5 +1,5 @@
 name = "web-demo-picker-splash"
-status = "active"
+status = "completed"
 current_step = 6
 created_at = "2026-08-09T17:58:01"
 plan_file = ".agentrail/plan.md"
