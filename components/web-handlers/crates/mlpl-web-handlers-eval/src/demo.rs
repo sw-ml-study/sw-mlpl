@@ -110,14 +110,15 @@ fn schedule_demo_line(
 ) {
     let lines = demo.lines;
     if idx >= lines.len() {
-        // Last line ran -- append the takeaway narration panel (with
-        // the Next-Steps epilogue) and paint the final history state.
+        // Last line ran -- the takeaway panel, then a SEPARATE
+        // Next-Steps panel (one shared epilogue for every demo).
         entries.push(HistoryEntry {
             input: "What just happened".to_string(),
-            output: format!("{}\n\n{NEXT_STEPS}", demo.takeaway),
+            output: demo.takeaway.to_string(),
             is_error: false,
             kind: EntryKind::Narration,
         });
+        crate::running::push_narration(&mut entries, NEXT_STEPS.to_string());
         history.set(entries);
         return;
     }
