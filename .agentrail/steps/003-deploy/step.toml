@@ -1,0 +1,9 @@
+number = 3
+slug = "deploy"
+status = "pending"
+description = "Rebuild pages (build-pages.sh), commit pages/, deploy (deploy-pages.sh), veri..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-10T13:12:52"
+task_type = "deploy-close"
+commits = []
