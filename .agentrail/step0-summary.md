@@ -1,1 +1,1 @@
-saga init: footer-repo-dialog plan recorded
+saga init: compiler-source-loading plan recorded

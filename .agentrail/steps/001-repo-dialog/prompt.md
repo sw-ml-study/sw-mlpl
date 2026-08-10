@@ -1,1 +1,0 @@
-Add a RepoLinks component in chrome footer.rs: the footer GitHub link opens a modal listing sw-mlpl + all sw-ml-study/demo* repos (org names + descriptions), reusing .modal CSS; drop unused url prop/REPO_URL; clippy/fmt/tests green.

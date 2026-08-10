@@ -1,28 +1,40 @@
-# Saga: footer-repo-dialog
+# Saga: compiler-source-loading
 
-The footer "GitHub" link navigates straight to sw-mlpl. Change it
-to open a DIALOG listing sw-mlpl PLUS every sw-ml-study/demo* repo,
-each linking to its GitHub page. Authoritative repo names + one-line
-descriptions come from the org (baked in as a const, since the WASM
-page cannot query GitHub at runtime; the local `demo-funtional-*`
-dir is a typo -- use the org name `demo-functional-pipelines`).
+demo-file-processing's compiled programs fail because `mlpl-build`
+does not resolve `include` (the compiler rejects `Expr::Include`).
+This is the earliest compiler-parity gate (also blocks
+demo-extensions' compiler work). Make the compiler resolve
+includes with the SAME semantics as the interpreter's script mode.
 
-Repos (org names): sw-mlpl, demo-algorithms, demo-combinators,
-demo-extensions, demo-file-processing, demo-functional-pipelines,
-demo-memory, demo-ml-utils.
+Approach (AST-level, matches the interpreter): the interpreter's
+script mode resolves includes via `mlpl-source-loader::expand()`
+over a filesystem `SourceProvider` (sandbox: canonicalized root
+containment, absolute-path + escape rejection, load-once,
+cycle-chain errors), producing flattened statement chunks. Wire the
+SAME `expand()` into `mlpl-build`'s front-end, flatten the chunks
+to `Vec<Expr>`, and lower them directly with
+`lower_with_config(rt_path = ::mlpl::__rt)` (the path the `mlpl!`
+macro already uses), emitting the lowered block into the temp
+project's main.rs. This bypasses the text->macro path (which cannot
+take resolved statements) and is the foundation the later rungs
+(FnDef, control-flow, byte/bit IO) lower from too.
 
-Implementation: a self-contained RepoLinks component (own
-use_state open/close) placed IN footer.rs (chrome crate is at 7
-modules -- a new module would hit the crate-module-count FAIL).
-Reuse the existing .modal / .modal-backdrop / .modal-header /
-.close-btn / .modal-body CSS (as DocDialog does) + a compact
-variant and repo-row styling. The footer "GitHub" link becomes the
-dialog trigger (keeps an href to sw-mlpl as a no-JS fallback);
-drop the now-unused FooterProps.url + REPO_URL.
+- New mlpl-build module (source_load.rs): a minimal FsProvider
+  (replicated from mlpl-cli's, sandbox identical) + load_stmts(
+  input, source_dir) -> Vec<Expr> via expand()+flatten.
+- run(): read+expand -> lower once (validation + codegen) ->
+  write_main_rs(lowered tokens). Add --source-dir (optional),
+  mirroring script mode; default sandbox root is the input's dir.
+- Keep template/Cargo.toml deps (temp project already deps the
+  `mlpl` facade; lowered `::mlpl::__rt::...` resolves).
+
+Non-web (native compiler), so NO pages deploy.
 
 ## Steps
-1. repo-dialog -- RepoLinks in footer.rs (trigger + modal + repo
-   rows, const REPO list), footer wiring, index.html CSS; drop
-   url prop/REPO_URL; clippy/fmt/tests green.
-2. deploy -- build-pages.sh, commit pages/, deploy-pages.sh, verify
-   live + trigger fresh Pages build if stalled, --done.
+1. include-expand -- source_load.rs (FsProvider + load_stmts),
+   run()/write_main_rs switch to expand+lower, --source-dir arg;
+   keep template_tests green; e2e build test with an include
+   (MLPL_BUILD_TESTS=1) + a unit test on load_stmts.
+2. close -- update companion-demo-file-processing.md + queue
+   (compiler-source-loading SHIPPED; next rung compiler-functions),
+   wiki/q-and-a if warranted; --done.

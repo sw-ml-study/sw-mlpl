@@ -1,1 +1,0 @@
-Rebuild pages (build-pages.sh), commit pages/, deploy (deploy-pages.sh), verify live + trigger fresh Pages build if stalled, hand out ts URL, --done.
