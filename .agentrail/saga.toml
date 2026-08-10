@@ -1,5 +1,5 @@
 name = "web-demo-and-contrast"
-status = "active"
+status = "completed"
 current_step = 3
 created_at = "2026-08-09T17:19:49"
 plan_file = ".agentrail/plan.md"
