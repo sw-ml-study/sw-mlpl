@@ -8,6 +8,17 @@ use crate::running::{push_running_marker, replace_running_with_result};
 use mlpl_web_demos::DEMOS;
 use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 
+/// Post-demo epilogue appended under the takeaway panel. A demo
+/// runs IN the live REPL (bindings persist), so it points the new
+/// user at the introspection + experiment commands to keep going.
+const NEXT_STEPS: &str = "Next steps? This ran in the live REPL -- your bindings persist, so build on them:\n  \
+     :vars       -- variables this demo defined\n  \
+     :fns        -- user-defined (u:) functions in play\n  \
+     :list       -- everything in the workspace at once\n  \
+     :help       -- language + builtin overview (`:help <name>` for one)\n  \
+     :describe <name>  -- inspect any variable, model, or builtin\n  \
+     experiment \"trial\" { ... }  -- capture _metric scalars to compare runs";
+
 /// Run a demo IN the live REPL: the session's bindings and the
 /// transcript both survive, so after several demos `:ask` (grounded
 /// in the transcript) can answer about all of them and later demos
@@ -99,11 +110,11 @@ fn schedule_demo_line(
 ) {
     let lines = demo.lines;
     if idx >= lines.len() {
-        // Last line ran -- append the takeaway narration panel
-        // and paint the final history state.
+        // Last line ran -- append the takeaway narration panel (with
+        // the Next-Steps epilogue) and paint the final history state.
         entries.push(HistoryEntry {
             input: "What just happened".to_string(),
-            output: demo.takeaway.to_string(),
+            output: format!("{}\n\n{NEXT_STEPS}", demo.takeaway),
             is_error: false,
             kind: EntryKind::Narration,
         });

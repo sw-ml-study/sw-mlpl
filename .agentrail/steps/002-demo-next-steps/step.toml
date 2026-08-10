@@ -1,6 +1,6 @@
 number = 2
 slug = "demo-next-steps"
-status = "pending"
+status = "in-progress"
 description = "Add a 'Next Steps?' epilogue after a demo runs (suggest :help, :vars, :fns, :..."
 role = "legacy"
 context_files = []
