@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-10
 
+- saga compiler-source-loading: complete (2 steps)
+- docs(compiler): close compiler-source-loading; include gate cleared (step 2)
+- saga compiler-source-loading: step include-expand complete
+- feat(compiler): mlpl-build resolves `include` (compiler-source-loading step 1)
+- docs(readme): link all sw-ml-study/demo* companion repos
+- docs(changes): refresh CHANGES.md to HEAD
 - saga footer-repo-dialog: complete (2 steps)
 - chore(pages): rebuild for footer repos dialog
 - saga footer-repo-dialog: step repo-dialog complete
