@@ -1,0 +1,11 @@
+{
+  "task_type": "web-ui",
+  "state": {
+    "number": 4,
+    "step": "visible-demo-picker-tooltips"
+  },
+  "action": "Added failing source-contract tests first; wired data-tooltip wrappers and keyboard focus; added inline tooltip CSS; tuned group and general typography; ran scoped gates and rebuilt pages with Trunk.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T19:55:32"
+}

@@ -1,9 +1,10 @@
 number = 4
 slug = "visible-demo-picker-tooltips"
-status = "in-progress"
+status = "completed"
 description = "Replace native-title-only demo picker hints with visibly rendered hover/focus..."
 role = "production"
 context_files = []
 created_at = "2026-08-09T19:50:31"
+completed_at = "2026-08-09T19:55:32"
 task_type = "web-ui"
-commits = []
+commits = ["0acecb4d94441a3d6781a38c43fb128d6d326cd9"]
