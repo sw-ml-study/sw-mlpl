@@ -6,7 +6,7 @@
 //! Each module's deps:
 //! - `doc_dialog` -- yew, mlpl-web-glossary, mlpl-web-eval.
 //! - `input_row` -- yew, web-sys KeyboardEvent.
-//! - `mode_bar` -- yew, mlpl-web-demos, web-sys HtmlSelectElement.
+//! - `mode_bar` -- yew, mlpl-web-demos (custom DemoDropdown).
 //! - `welcome` -- yew.
 
 pub mod demo_gating;

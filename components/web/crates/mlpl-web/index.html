@@ -237,22 +237,62 @@
         .demo-select:hover {
             border-color: var(--blue);
         }
-        /* Demo-group NAMES in the dropdown: browsers render an
-           <optgroup> label in a muted grey by default (low
-           contrast, hard to read). Make the group names larger,
-           bolder, and a bright accent colour; keep the options
-           themselves normal-weight, full-contrast text. */
-        .demo-select optgroup {
+        /* Custom (non-native) demo picker. The native <select> /
+           <optgroup> cannot be styled reliably (Safari ignores
+           optgroup styling; Chrome ignores its font-size), so the
+           demo-GROUP names rendered as low-contrast muted text.
+           These are ordinary styled elements, legible everywhere. */
+        .demo-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .demo-dropdown-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 40;
+        }
+        .demo-dropdown-panel {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            z-index: 41;
+            min-width: 260px;
+            max-height: 70vh;
+            overflow-y: auto;
+            background: var(--base);
+            border: 1px solid var(--surface1);
+            border-radius: 6px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            padding: 4px;
+        }
+        .demo-group-label {
+            font-family: var(--mono);
             font-size: 14px;
             font-weight: 700;
             color: var(--lavender);
-            background: var(--mantle);
+            padding: 6px 10px 2px;
+            letter-spacing: 0.02em;
         }
-        .demo-select option {
-            font-size: 13px;
-            font-weight: 400;
+        .demo-item {
+            display: block;
+            width: 100%;
+            text-align: left;
+            background: transparent;
             color: var(--text);
+            border: none;
+            border-radius: 4px;
+            padding: 5px 10px 5px 20px;
+            font-family: var(--mono);
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .demo-item:hover:not(:disabled) {
             background: var(--surface0);
+        }
+        .demo-item:disabled {
+            color: var(--subtext0);
+            opacity: 0.55;
+            cursor: not-allowed;
         }
         .ctrl-btn {
             background: var(--surface0);
