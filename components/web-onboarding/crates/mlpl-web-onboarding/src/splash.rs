@@ -38,13 +38,20 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
     // of "demo behaves wrong but the page looks current".
     let server_build = mlpl_web_components_chrome::connect_probe::use_server_build();
     let server_line = server_build.map(|sb| {
-        let skew = sb.built_at.as_str() != &*props.build_time;
+        // Only warn on a LARGE gap: the UI and server are built
+        // minutes apart in a normal deploy, so a small difference is
+        // expected -- a stale build is hours off.
+        let skew = build_skew(&props.build_time, &sb.built_at);
         let cls = if skew {
             "splash-buildtime splash-build-skew"
         } else {
             "splash-buildtime"
         };
-        let note = if skew { " (differs from UI build!)" } else { "" };
+        let note = if skew {
+            " (stale build? rebuild/restart)"
+        } else {
+            ""
+        };
         html! { <p class={cls}>{"server built "}{sb.built_at}{note}</p> }
     });
     html! {
@@ -119,5 +126,28 @@ fn card(
             <strong>{ title }</strong>
             { body }
         </div>
+    }
+}
+
+/// True when the UI and server build times are far enough apart to
+/// signal a STALE build rather than the normal minutes between
+/// building the server and the UI in one deploy. Both are
+/// `YYYY-MM-DDTHH:MM:SSZ` (UTC); an unparseable value -> not skewed
+/// (never a false alarm). Threshold: 30 minutes.
+#[must_use]
+pub fn build_skew(ui_ts: &str, server_ts: &str) -> bool {
+    let epoch = |s: &str| -> Option<i64> {
+        let n = |r: std::ops::Range<usize>| s.get(r)?.parse::<i64>().ok();
+        let (y, mo, d) = (n(0..4)?, n(5..7)?, n(8..10)?);
+        let (h, mi, se) = (n(11..13)?, n(14..16)?, n(17..19)?);
+        let a = (14 - mo) / 12;
+        let yy = y + 4800 - a;
+        let mm = mo + 12 * a - 3;
+        let jdn = d + (153 * mm + 2) / 5 + 365 * yy + yy / 4 - yy / 100 + yy / 400 - 32045;
+        Some((jdn - 2_440_588) * 86_400 + h * 3_600 + mi * 60 + se)
+    };
+    match (epoch(ui_ts), epoch(server_ts)) {
+        (Some(a), Some(b)) => (a - b).abs() > 1_800,
+        _ => false,
     }
 }
