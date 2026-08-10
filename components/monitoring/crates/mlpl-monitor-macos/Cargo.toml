@@ -12,8 +12,7 @@ version.workspace = true
 # thin IO that feeds it. The Apple analog of mlpl-monitor-linux.
 
 [dependencies]
-# No external deps: CPU via `top`, RAM via `vm_stat`/`sysctl`, GPU via
-# `ioreg` -- all parsed from subprocess output, all without sudo.
+libc = "0.2"
 
 [lints]
 workspace = true

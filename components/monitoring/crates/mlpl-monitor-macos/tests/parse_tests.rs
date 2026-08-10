@@ -1,7 +1,7 @@
 //! Unit tests for the pure macOS parsers (`vm_stat` + `ioreg`), exercised
 //! on fixed fixtures so they need no live host.
 
-use mlpl_monitor_macos::cpu::parse_cpu_percent;
+use mlpl_monitor_macos::cpu::{cpu_percent_between, parse_cpu_percent};
 use mlpl_monitor_macos::gpu::parse_ioreg;
 use mlpl_monitor_macos::mem::parse_used_bytes;
 
@@ -22,6 +22,41 @@ fn top_without_a_cpu_line_is_none() {
     assert_eq!(parse_cpu_percent("Processes: 500 total\n"), None);
 }
 
+#[test]
+fn mach_tick_delta_reports_busy_percent() {
+    // user + system + nice advance by 60 ticks; idle advances by 40.
+    let before = [100, 200, 300, 10];
+    let after = [130, 220, 340, 20];
+    assert_eq!(cpu_percent_between(before, after), Some(60.0));
+}
+
+#[test]
+fn mach_tick_delta_rejects_empty_or_wrapped_windows() {
+    assert_eq!(cpu_percent_between([1; 4], [1; 4]), None);
+    assert_eq!(cpu_percent_between([2; 4], [1; 4]), None);
+}
+
+// Live host check (macOS only): the Mach tick reader must return real,
+// advancing counters -- the regression read them via host_statistics64,
+// which left them zeroed so `percent()` was always None (flat
+// sparklines). Retries absorb the timing jitter of a short window (Mach
+// may hand back an identical cached snapshot); the regression makes
+// EVERY attempt fail, so the retry loop still catches it.
+#[cfg(target_os = "macos")]
+#[test]
+fn mach_ticks_are_live_and_percent_is_some() {
+    use mlpl_monitor_macos::cpu::{percent, ticks};
+    let advances = (0..5).any(|_| {
+        let a = ticks().expect("host_statistics HOST_CPU_LOAD_INFO should succeed on macOS");
+        std::thread::sleep(std::time::Duration::from_millis(150));
+        ticks().expect("second ticks read") != a
+    });
+    assert!(advances, "CPU tick counters never advanced across reads");
+    let sampled = (0..5).find_map(|_| percent());
+    let p = sampled.expect("percent() must return a live sample within a few tries");
+    assert!((0.0..=100.0).contains(&p), "cpu percent out of range: {p}");
+}
+
 const VM_STAT: &str = "Mach Virtual Memory Statistics: (page size of 16384 bytes)\n\
 Pages free:                               35457.\n\
 Pages active:                            452290.\n\
@@ -33,7 +68,7 @@ Pages occupied by compressor:             50000.\n";
 #[test]
 fn vm_stat_used_is_active_plus_wired_plus_compressed_times_page() {
     // (452290 + 100000 + 50000) pages * 16384 bytes.
-    let want = (452290u64 + 100000 + 50000) * 16384;
+    let want = (452_290u64 + 100_000 + 50_000) * 16_384;
     assert_eq!(parse_used_bytes(VM_STAT), Some(want));
 }
 
