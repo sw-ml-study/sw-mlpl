@@ -14,6 +14,32 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga mlx-live-telemetry-regression: build-skew-display step complete
+- docs(web): note BuildLabels.time is compared with a tolerance; refresh web locks
+- chore(pages): rebuild for build-skew splash + custom dropdown + model fix
+- fix(web): build-skew warning uses a time tolerance, not exact match
+- feat(web): splash shows UI + server build dates, flags skew (build-skew-display)
+- fix(eval): user-fn frame must snapshot models/tokenizers/gen-states (mlx-ttt)
+- saga mlx-live-telemetry-regression: shutdown-endpoint step complete
+- feat(serve): POST /v1/admin/shutdown for scriptable dev restarts
+- saga mlx-live-telemetry-regression: reproduce-and-test step (telemetry + model-binding fixes)
+- fix(eval): resolve a bound model as a bare identifier (mlx-live-telemetry-regression)
+- fix(monitor): live macOS CPU telemetry via Mach ticks, not `top` (mlx-live-telemetry-regression)
+- saga: close demo picker deployment
+- chore(pages): rebuild for offset demo tooltips
+- saga: record offset tooltip correction
+- fix(web): offset and delay demo picker tooltips
+- chore(pages): rebuild for visible demo picker tooltips
+- saga: record visible picker tooltip correction
+- fix(web): render immediate demo picker tooltips
+- saga: record demo picker tooltip completion
+- feat(web): explain demo picker groups and availability
+- chore(pages): rebuild for custom demo dropdown + splash build time
+- saga web-demo-picker-splash: step splash-build-timestamp complete
+- feat(web): show UTC-Z build time on the splash (web-demo-picker-splash step 2)
+- saga web-demo-picker-splash: step custom-demo-dropdown complete
+- feat(web): custom stylable demo picker (web-demo-picker-splash step 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga web-demo-and-contrast: complete (3 steps)
 - chore(pages): rebuild for Rolling Retrain demo + demo-group name contrast
 - saga web-demo-and-contrast: step demo-group-contrast complete
