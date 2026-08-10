@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-10
 
+- saga repl-help-and-demo-guidance: complete (3 steps)
+- chore(pages): rebuild for :help fix + demos Next Steps epilogue
+- saga repl-help-and-demo-guidance: step demo-next-steps complete
+- feat(web): demos show a "Next Steps?" epilogue (repl-help step 2)
+- saga repl-help-and-demo-guidance: step help-take-fix complete
+- fix(repl): :help <name> resolves builtins; :help/:describe cross-refer (repl-help step 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga compiler-source-loading: complete (2 steps)
 - docs(compiler): close compiler-source-loading; include gate cleared (step 2)
 - saga compiler-source-loading: step include-expand complete
