@@ -12,8 +12,18 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-10
+
+- saga mlx-live-telemetry-regression: complete (5 steps)
+- chore(pages): rebuild + deploy for web model-binding fix (deploy-web-model-fix)
+- saga mlx-live-telemetry-regression: step fns-over-connect complete
+- chore(pages): rebuild for :fns local+server merge
+
 ## 2026-08-09
 
+- refactor(web): extract render_server_line to keep splash_overlay in budget
+- feat(connect): :fns/:vars/etc merge local + server workspace (fns-over-connect)
+- docs(changes): refresh CHANGES.md to HEAD
 - saga mlx-live-telemetry-regression: build-skew-display step complete
 - docs(web): note BuildLabels.time is compared with a tolerance; refresh web locks
 - chore(pages): rebuild for build-skew splash + custom dropdown + model fix
