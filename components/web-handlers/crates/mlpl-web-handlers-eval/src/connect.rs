@@ -330,6 +330,13 @@ pub(crate) fn try_connect_eval(
     let Some(program) = connect_program(line, history) else {
         return false;
     };
+    // Workspace introspection is SPLIT in connect mode: CPU/browser
+    // demos define fns/vars locally (to keep 3D viz) while other work
+    // runs server-side. So for an inspect command, capture the LOCAL
+    // env's answer now and merge it (labelled) with the server's, so
+    // `:fns` shows both a browser-defined `u:life20` and server fns.
+    let local_inspect =
+        is_inspect_command(line.trim_start()).then(|| deps.session.borrow().eval(line.trim()));
     let hist_handle = deps.history.clone();
     let deps_c = deps.clone();
     let queue_c = queue.to_vec();
@@ -343,19 +350,28 @@ pub(crate) fn try_connect_eval(
         &program,
         Box::new(move |result: String| {
             let is_error = result.starts_with("error:");
-            // Persist the backend-load sparkline collected by the live
-            // panel so the trace (incl. a brief GPU blip) survives the
-            // marker being replaced. Only when samples were collected.
-            let output = match (is_error, mlpl_web_eval::telemetry_trace::summary(gen_id)) {
-                (false, Some(tel)) => format!("{result}\n{tel}"),
-                _ => result,
-            };
-            // Persist the streamed live-loss curve: the final chart +
-            // one-line record under the result once the panel unmounts
-            // (chart first, matching the during-training layout).
-            let output = match (is_error, mlpl_web_render_live::embed::final_report(gen_id)) {
-                (false, Some(report)) => format!("{output}{report}"),
-                _ => output,
+            let output = if let Some(local) = &local_inspect {
+                // Merge, each side labelled. (No telemetry for inspect.)
+                format!(
+                    "[this browser]\n{}\n\n[connected server]\n{}",
+                    local.trim(),
+                    result.trim()
+                )
+            } else {
+                // Persist the backend-load sparkline collected by the live
+                // panel so the trace (incl. a brief GPU blip) survives the
+                // marker being replaced. Only when samples were collected.
+                let o = match (is_error, mlpl_web_eval::telemetry_trace::summary(gen_id)) {
+                    (false, Some(tel)) => format!("{result}\n{tel}"),
+                    _ => result,
+                };
+                // Persist the streamed live-loss curve: the final chart +
+                // one-line record under the result once the panel unmounts
+                // (chart first, matching the during-training layout).
+                match (is_error, mlpl_web_render_live::embed::final_report(gen_id)) {
+                    (false, Some(report)) => format!("{o}{report}"),
+                    _ => o,
+                }
             };
             hist_c.pop();
             hist_c.push(HistoryEntry {
