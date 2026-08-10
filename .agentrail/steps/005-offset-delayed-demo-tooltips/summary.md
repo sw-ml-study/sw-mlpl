@@ -1,0 +1,1 @@
+Moved demo picker tooltips into a reserved right-side floating callout column so they no longer cover or resemble menu rows. Added a crust background, peach border, stronger shadow, and a 250ms hover/focus reveal delay. Preserved disabled-wrapper accessibility, added CSS contract tests for position/color/delay, passed scoped gates, and rebuilt the local review bundle.

@@ -1,0 +1,11 @@
+{
+  "task_type": "web-ui",
+  "state": {
+    "number": 5,
+    "step": "offset-delayed-demo-tooltips"
+  },
+  "action": "Added a failing presentation contract test; changed tooltip CSS to absolute right-side callouts with opacity/visibility transition; widened the panel to reserve tooltip space; ran scoped tests/clippy/fmt and sw-checklist; rebuilt Pages for local review.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-09T20:00:47"
+}
