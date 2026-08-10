@@ -256,7 +256,7 @@
             top: calc(100% + 4px);
             left: 0;
             z-index: 41;
-            min-width: 260px;
+            width: min(640px, calc(100vw - 24px));
             max-height: 70vh;
             overflow-y: auto;
             background: var(--base);
@@ -264,6 +264,9 @@
             border-radius: 6px;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             padding: 4px;
+        }
+        .demo-group {
+            width: 260px;
         }
         .demo-group-label {
             font-family: var(--mono);
@@ -306,29 +309,40 @@
         }
         .demo-tooltip-target::after {
             content: attr(data-tooltip);
-            display: none;
-            margin: 3px 8px 6px;
+            display: block;
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 0;
+            z-index: 2;
+            width: 320px;
             padding: 7px 9px;
             color: var(--text);
-            background: var(--surface0);
+            background: var(--crust);
             border: 1px solid var(--surface1);
+            border-color: var(--peach);
             border-radius: 4px;
+            box-shadow: 0 5px 16px rgba(0, 0, 0, 0.55);
             font-family: var(--sans);
             font-size: 14px;
             font-weight: 400;
             line-height: 1.35;
             white-space: normal;
             pointer-events: none;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 100ms ease;
+            transition-delay: 0ms;
         }
         .demo-group-label.demo-tooltip-target::after {
-            margin-left: 22px;
             font-size: 15px;
             transform: translate(10px, -5px);
         }
         .demo-tooltip-target:hover::after,
         .demo-tooltip-target:focus::after,
         .demo-tooltip-target:focus-within::after {
-            display: block;
+            opacity: 1;
+            visibility: visible;
+            transition-delay: 250ms;
         }
         .ctrl-btn {
             background: var(--surface0);

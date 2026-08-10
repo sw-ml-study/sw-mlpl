@@ -18,3 +18,11 @@ fn tooltip_css_supports_hover_and_keyboard_focus() {
     assert!(WEB_HTML.contains(".demo-tooltip-target:focus::after"));
     assert!(WEB_HTML.contains("pointer-events: none"));
 }
+
+#[test]
+fn tooltip_is_offset_distinct_and_deliberately_delayed() {
+    assert!(WEB_HTML.contains("left: calc(100% + 12px)"));
+    assert!(WEB_HTML.contains("background: var(--crust)"));
+    assert!(WEB_HTML.contains("border-color: var(--peach)"));
+    assert!(WEB_HTML.contains("transition-delay: 250ms"));
+}

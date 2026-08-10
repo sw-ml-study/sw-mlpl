@@ -1,4 +1,4 @@
-number = 5
+number = 6
 slug = "rebuild-deploy"
 status = "in-progress"
 description = "Rebuild pages (build-pages.sh), commit pages/, deploy (deploy-pages.sh), veri..."
