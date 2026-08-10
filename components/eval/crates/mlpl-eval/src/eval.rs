@@ -133,6 +133,18 @@ pub(crate) fn eval_expr(
     {
         return Ok(Value::Str(s.clone()));
     }
+    // A model bound by `m = chain(...)` / `lora(...)` lives in the
+    // sibling `models` table; resolve a bare `m` (and thus
+    // `is_model(m)`, arithmetic, and a user fn that references `m`)
+    // to its `Value::Model`, not just `apply(m, x)`. Regression:
+    // the env-table split dropped this case, so a bare model name
+    // read as `undefined variable` even though `apply` still found
+    // it. Covered by model_ident_resolution_tests.
+    if let Expr::Ident(name, _) = expr
+        && let Some(m) = env.get_model(name)
+    {
+        return Ok(Value::Model(m.clone()));
+    }
     if let Expr::Ident(name, _) = expr
         && let Some(target) = env.get_builtin_ref(name)
     {
