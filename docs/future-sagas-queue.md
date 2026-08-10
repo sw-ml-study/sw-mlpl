@@ -505,12 +505,15 @@ compiled value model `CVal` + strings + `write_stdout`/`args`/
 `arg` -- first compiled binary that does I/O). Remaining rungs, in
 order:
 
-- **compiler-source-loading** (Saga B0) -- resolve `include`
-  directives during lowering. Per the demo-file-processing
-  contract (see `docs/companion-demo-file-processing.md`) this is
-  the EARLIEST gate: every real hexdump/histogram/WAV/Ogg program
-  fails here before any byte/format lowering is reached.
-- **compiler-functions** (Saga B1) -- lower `def u:` user
+- **compiler-source-loading** (Saga B0) SHIPPED 2026-08-10 --
+  `mlpl-build` resolves `include` by running the interpreter's
+  `mlpl-source-loader::expand()` (load-once, cycles, sandbox) over
+  a filesystem provider, then lowering the flattened AST directly
+  (`rt = ::mlpl::__rt`), replacing the raw-text->`mlpl!`-macro
+  path. Added `--source-dir`. This is the AST-level front-end the
+  later rungs lower from. The EARLIEST demo-file-processing gate is
+  cleared; `FnDef` is now the next wall.
+- **compiler-functions** (Saga B1, NEXT) -- lower `def u:` user
   functions (`FnDef`), plus Results and records. The second gate
   the file-processing programs hit (after `include`).
 - **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`

@@ -25,11 +25,14 @@ that already runs in the interpreter, then fails in `mlpl-build`
 lowering. No new codec builtin is requested -- the generic compiler
 surface is the gate. The reports order the missing rungs:
 
-1. **Source loading** -- `include` directives are unresolved by the
-   compiler (earliest gate; the real hexdump/histogram/WAV/Ogg
-   programs all fail here first).
+1. **Source loading** -- RESOLVED (compiler-source-loading, shipped
+   2026-08-10): `mlpl-build` now resolves `include` via the
+   interpreter's `expand()` + a filesystem sandbox and lowers the
+   flattened AST directly, with `--source-dir`. The real
+   hexdump/histogram/WAV/Ogg programs now get PAST the include gate
+   to the next wall (`FnDef`).
 2. **User functions + control flow** -- `FnDef` is unsupported in
-   lowering; also Results and records.
+   lowering; also Results and records. NOW THE EARLIEST GATE.
 3. **Shared byte validation + error propagation** -- compiled
    invalid bytes are coerced rather than rejected; runtime write
    errors are discarded. Interpreter and compiled paths must share

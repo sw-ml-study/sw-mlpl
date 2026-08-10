@@ -1,6 +1,6 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "in-progress"
 description = "Close compiler-source-loading: mark SHIPPED in companion-demo-file-processing..."
 role = "legacy"
 context_files = []
