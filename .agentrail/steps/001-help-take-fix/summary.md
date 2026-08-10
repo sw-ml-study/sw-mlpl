@@ -1,0 +1,1 @@
+:help <name> falls back to :describe for builtins/vars/fns (fixes ':help take' -> 'no help topic'); help + describe redirects now teach the topics-vs-names split (keywords/topics vs vars/models/builtins/UDFs). Completeness test over every builtin. inspect/help/colon tests green; no new warning.

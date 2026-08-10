@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-fix",
+  "state": {
+    "number": 1,
+    "step": "help-take-fix"
+  },
+  "action": "help_topic describe fallback; educational redirects both ways; completeness test",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-10T13:10:07"
+}

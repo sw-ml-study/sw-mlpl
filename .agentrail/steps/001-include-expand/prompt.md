@@ -1,1 +1,0 @@
-mlpl-build resolves includes via mlpl-source-loader::expand() + a replicated FsProvider, flattens to stmts, lowers directly (rt=::mlpl::__rt); add --source-dir; keep template tests green; e2e include build test + load_stmts unit test.

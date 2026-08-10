@@ -1,6 +1,6 @@
-name = "compiler-source-loading"
-status = "completed"
+name = "repl-help-and-demo-guidance"
+status = "active"
 current_step = 2
-created_at = "2026-08-10T12:09:12"
+created_at = "2026-08-10T13:03:36"
 plan_file = ".agentrail/plan.md"
 retroactive = false

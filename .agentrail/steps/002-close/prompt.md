@@ -1,1 +1,0 @@
-Close compiler-source-loading: mark SHIPPED in companion-demo-file-processing.md + future-sagas-queue.md (next rung compiler-functions), note demo-file-processing/demo-extensions progress, wiki/q-and-a if warranted; --done.
