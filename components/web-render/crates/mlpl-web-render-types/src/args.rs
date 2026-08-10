@@ -35,7 +35,9 @@ pub struct BuildLabels {
     /// Splash version label: "vX.Y.Z.<commits>".
     pub version: AttrValue,
     /// Splash build time in UTC Zulu ("YYYY-MM-DDTHH:MM:SSZ") so a
-    /// viewer can identify the build regardless of local timezone.
+    /// viewer can identify the build regardless of local timezone,
+    /// and can be compared (with a tolerance) against the connected
+    /// server's build time to flag a stale-build skew.
     pub time: AttrValue,
 }
 

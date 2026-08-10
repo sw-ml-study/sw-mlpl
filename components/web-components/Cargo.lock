@@ -1170,6 +1170,7 @@ name = "mlpl-eval-envc-bindings"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-types",
 ]

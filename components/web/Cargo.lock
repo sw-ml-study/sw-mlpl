@@ -1519,6 +1519,8 @@ dependencies = [
  "mlpl-eval-pets-tiny",
  "mlpl-eval-state",
  "mlpl-eval-types",
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
  "mlpl-forge-kg",
  "mlpl-loader-helpers",
  "mlpl-models-feasibility",
@@ -1565,6 +1567,7 @@ name = "mlpl-eval-envc-bindings"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-types",
 ]
@@ -1671,6 +1674,25 @@ dependencies = [
  "mlpl-models-tune",
  "mlpl-runtime",
  "mlpl-viz",
+]
+
+[[package]]
+name = "mlpl-ext-hello-static"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
+]
+
+[[package]]
+name = "mlpl-extension-abi"
+version = "0.20.0"
+
+[[package]]
+name = "mlpl-extension-registry"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
 ]
 
 [[package]]
@@ -1850,6 +1872,9 @@ version = "0.20.0"
 [[package]]
 name = "mlpl-monitor-macos"
 version = "0.20.0"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "mlpl-monitor-types"
@@ -2001,6 +2026,7 @@ dependencies = [
  "mlpl-array",
  "mlpl-cli",
  "mlpl-eval",
+ "mlpl-ext-hello-static",
  "mlpl-model-viz",
  "mlpl-monitor",
  "mlpl-parser",
