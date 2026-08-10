@@ -532,6 +532,27 @@ order:
   expressible (the demo-file-processing capstone; positive
   byte + format artifact parity + a source-free audit).
 
+**runtime stream handles** (../demo-file-processing second gate,
+noted 2026-08-09; see docs/companion-demo-file-processing.md).
+Distinct from the compiler track and from in-memory codec
+chunking -- a COMPOSITIONAL effects surface:
+
+- **runtime-sink-handle** -- a consumable sink handle: bounded
+  writes, partial-write handling, flush/close lifecycle,
+  sandboxing, offsets beyond f64 integer ambiguity, and a memory
+  high-water invariant (resident memory ~ chunk + writer state,
+  not total output). (Path-based `append_bytes` / `write_stdout`
+  already ship; this is the persistent-handle generalization.)
+- **runtime-source-handle** -- binary stdin + a sequential source
+  handle with explicit EOF + backpressure + matching
+  error/lifecycle semantics; must reproduce the range-reader
+  results across split fields. Enables true stdin-driven
+  streaming.
+
+Authorized codec extensions (their third gate) ride the
+`extensions-*` track (trust/authorization resolver + dynamic
+load); no format-specific builtins upstream.
+
 **codec follow-ups** (../demo-algorithms secondary asks, noted
 2026-08-09; the PRIMARY typed-native codec -- `to_native` /
 `parse_native`, MLPB header + tag set -- shipped in the

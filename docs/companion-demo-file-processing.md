@@ -54,6 +54,51 @@ parser/REPL/evaluator dependency, so the blocker is application
 COVERAGE + SEMANTICS in the compiler, not the artifact-launch
 mechanism.
 
+## Second gate: binary source + persistent handles
+
+Distinct from the compiler track and from in-memory codec
+chunking. The runtime does not yet provide binary stdin, explicit
+backpressure, or consumable source/sink HANDLES. Transcoding from
+seekable files can proceed once codec extensions exist, but true
+stdin-driven streaming needs these effects. The ask is
+COMPOSITIONAL, not codec-specific:
+
+- A sink handle: bounded writes, partial-write handling,
+  flush/close cleanup, sandboxing, offsets beyond f64 integer
+  ambiguity, and a memory high-water invariant (resident memory
+  proportional to chunk + writer state, not total output).
+- A later sequential SOURCE handle: explicit EOF, backpressure,
+  and matching error/lifecycle semantics; must reproduce the
+  accepted range-reader results across split fields.
+
+Already delivered on the sandboxed file-PATH subset (no handle):
+`append_bytes(path, bytes) -> ok(count)` (bounded per-call
+append, implicit close/flush) and `write_stdout(bytes) ->
+ok(count)` (ordered per-call-flushed binary stdout). These cover
+interpreter-side seekable-input-to-file-or-stdout; they do NOT
+satisfy binary stdin, persistent handles, or explicit
+backpressure. Sink acceptance: byte-identical output at chunk
+sizes 1/7/64/65536, injected partial/failed writes, output above
+the memory budget, resident memory bounded by chunk + writer
+state.
+
+## Third gate: authorized codec extensions
+
+Seekable-file transcoding is gated on codec extensions existing --
+a codec provided as an AUTHORIZED extension. This rides the
+extension track (the registry + C-ABI adapter have shipped; a
+trust/authorization resolver and dynamic load remain -- see the
+`extensions-*` queue entries), not a set of format-specific
+builtins. Explicitly: do NOT add MP3/Ogg/WAV builtins upstream.
+
+## Deferred (their call, not a blocker)
+
+Packed bytes / typed `u8` arrays: reads currently allocate one
+f64 per byte. Inefficient but not blocking (fixed chunking already
+bounds file-copy RSS). They will request a packed representation
+when density/throughput is a concrete target. Maps to the
+`codec-numeric-types` queue item.
+
 ## Mapping to sw-mlpl work
 
 This is exactly the **phased compiler expansion** track (the
