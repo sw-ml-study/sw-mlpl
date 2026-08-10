@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-09
 
+- saga web-demo-and-contrast: complete (3 steps)
+- chore(pages): rebuild for Rolling Retrain demo + demo-group name contrast
+- saga web-demo-and-contrast: step demo-group-contrast complete
+- fix(web): legible demo-group names in the dropdown (web-demo-and-contrast step 2)
+- saga web-demo-and-contrast: step rolling-retrain-demo complete
+- feat(demos): Rolling Retrain (LEFTS-inspired) web demo (web-demo-and-contrast step 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(contract): record demo-file-processing binary-source/handle + codec-extension gates
 - docs(changes): refresh CHANGES.md to HEAD
 - saga codec-mlpb-integrity: complete (2 steps)
