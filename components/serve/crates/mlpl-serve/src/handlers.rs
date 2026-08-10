@@ -53,6 +53,11 @@ pub struct ResetResponse {
 pub struct HealthResponse {
     pub status: &'static str,
     pub version: &'static str,
+    /// Short git commit the server was built from (build.rs).
+    pub commit: &'static str,
+    /// UTC-Zulu build time, so the web UI can flag a UI-vs-server
+    /// build skew on the splash.
+    pub built_at: &'static str,
 }
 
 /// `POST /v1/sessions` -- no auth. Creates a fresh
@@ -176,6 +181,8 @@ pub async fn health_handler() -> impl IntoResponse {
     Json(HealthResponse {
         status: "ok",
         version: env!("CARGO_PKG_VERSION"),
+        commit: env!("SERVE_BUILD_SHA"),
+        built_at: env!("SERVE_BUILD_TIMESTAMP"),
     })
 }
 

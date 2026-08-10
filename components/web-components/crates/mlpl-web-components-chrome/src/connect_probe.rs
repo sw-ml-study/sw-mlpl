@@ -53,3 +53,41 @@ pub fn backend_status(body: &serde_json::Value) -> String {
         avail(body["ollama"].as_bool() == Some(true)),
     )
 }
+
+/// The connected server's build stamp from `GET /v1/health`
+/// (`commit` + `built_at`), so the splash can show it beside the UI
+/// build and flag a UI-vs-server skew.
+#[derive(Clone, PartialEq)]
+pub struct ServerBuild {
+    pub commit: String,
+    pub built_at: String,
+}
+
+/// Fetch the connected server's `/v1/health` build stamp once on
+/// mount. `None` when not connected or until it answers (so the UI
+/// simply omits the server line rather than lying).
+#[hook]
+pub fn use_server_build() -> Option<ServerBuild> {
+    let build = use_state(|| None::<ServerBuild>);
+    {
+        let build = build.clone();
+        use_effect_with((), move |()| {
+            wasm_bindgen_futures::spawn_local(async move {
+                if let Some(base) = mlpl_web_eval::eval_url::current_connect_url_from_window() {
+                    let url = format!("{}/v1/health", base.trim_end_matches('/'));
+                    if let Some(body) = get_json(&url).await
+                        && let (Some(commit), Some(built_at)) =
+                            (body["commit"].as_str(), body["built_at"].as_str())
+                    {
+                        build.set(Some(ServerBuild {
+                            commit: commit.to_string(),
+                            built_at: built_at.to_string(),
+                        }));
+                    }
+                }
+            });
+            || ()
+        });
+    }
+    (*build).clone()
+}

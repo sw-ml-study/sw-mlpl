@@ -1235,7 +1235,14 @@
             color: var(--subtext0);
             font-family: var(--mono);
             font-size: 12px;
-            margin: 0 0 10px;
+            margin: 0 0 2px;
+        }
+        /* UI-vs-server build skew: a stale server (or stale page) is
+           the usual cause of a demo misbehaving while the page looks
+           current. Flag it loudly. */
+        .splash-build-skew {
+            color: #f38ba8;
+            font-weight: 700;
         }
         .splash-subtitle {
             color: #cdd6f4;

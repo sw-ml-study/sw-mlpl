@@ -33,6 +33,20 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
     };
     let dismiss = emit(SplashAction::Dismiss);
     let stop = Callback::from(|e: MouseEvent| e.stop_propagation());
+    // When connected, show the SERVER's build beside the UI build and
+    // flag a skew -- a stale server (or stale page) is the usual cause
+    // of "demo behaves wrong but the page looks current".
+    let server_build = mlpl_web_components_chrome::connect_probe::use_server_build();
+    let server_line = server_build.map(|sb| {
+        let skew = sb.built_at.as_str() != &*props.build_time;
+        let cls = if skew {
+            "splash-buildtime splash-build-skew"
+        } else {
+            "splash-buildtime"
+        };
+        let note = if skew { " (differs from UI build!)" } else { "" };
+        html! { <p class={cls}>{"server built "}{sb.built_at}{note}</p> }
+    });
     html! {
         <div class="splash-backdrop" role="dialog" aria-label="Welcome" onclick={dismiss.clone()}>
             <div class="splash-panel" onclick={stop}>
@@ -40,7 +54,8 @@ pub fn splash_overlay(props: &SplashProps) -> Html {
                 <div class="splash-header-shim">
                     <h2><img src="mlpl-badge.webp" alt="" />{"sw-MLPL"}</h2>
                     <p class="splash-version">{&props.version_label}</p>
-                    <p class="splash-buildtime">{"built "}{&props.build_time}</p>
+                    <p class="splash-buildtime">{"UI built "}{&props.build_time}</p>
+                    { server_line }
                     <mlpl_web_components_chrome::status_badge::StatusBadge />
                     <p class="splash-subtitle">
                         {"An array programming language for learning machine learning, from scalars to transformers."}
