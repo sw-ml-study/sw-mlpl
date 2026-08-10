@@ -1719,6 +1719,9 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-lower-rs",
  "mlpl-parser",
+ "mlpl-parser-ast",
+ "mlpl-source-loader",
+ "quote",
 ]
 
 [[package]]
@@ -1909,6 +1912,7 @@ name = "mlpl-eval-envc-bindings"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-eval-core",
  "mlpl-eval-env",
  "mlpl-eval-types",
 ]
@@ -2290,6 +2294,9 @@ version = "0.20.0"
 [[package]]
 name = "mlpl-monitor-macos"
 version = "0.20.0"
+dependencies = [
+ "libc",
+]
 
 [[package]]
 name = "mlpl-monitor-types"
@@ -2362,6 +2369,14 @@ dependencies = [
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-rt-value",
+]
+
+[[package]]
+name = "mlpl-rt-value"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]

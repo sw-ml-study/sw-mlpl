@@ -78,6 +78,36 @@ fn builds_native_binary_that_prints_reduce_add() {
 }
 
 #[test]
+fn include_is_resolved_and_compiled() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("include");
+    // The whole program value comes from the included file, so a
+    // correct 45 proves the include was resolved and lowered.
+    std::fs::write(tmp.join("answer.mlpl"), "reduce_add(range(10))\n").unwrap();
+    std::fs::write(tmp.join("prog.mlpl"), "include \"answer.mlpl\"\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[
+        tmp.join("prog.mlpl").to_str().unwrap(),
+        "-o",
+        out_path.to_str().unwrap(),
+    ]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n--- stdout ---\n{}\n--- stderr ---\n{}",
+        String::from_utf8_lossy(&result.stdout),
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path)
+        .output()
+        .expect("run produced binary");
+    assert!(run.status.success(), "produced binary exited non-zero");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "45");
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

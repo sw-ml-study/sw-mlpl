@@ -23,7 +23,11 @@ use std::path::{Path, PathBuf};
 use std::process::{Command, ExitCode};
 
 use args::{Args, USAGE};
+use mlpl_lower_rs::LowerConfig;
+use mlpl_parser_ast::Expr;
+use quote::quote;
 
+mod source_load;
 mod template;
 
 fn main() -> ExitCode {
@@ -45,17 +49,20 @@ fn main() -> ExitCode {
 }
 
 fn run(args: &Args) -> Result<(), String> {
-    let src = std::fs::read_to_string(&args.input)
-        .map_err(|e| format!("reading {}: {e}", args.input.display()))?;
-    eager_parse_check(&src, &args.input)?;
+    // Resolve `include`s the same way the interpreter's script mode
+    // does (source_load::load_stmts), then lower the flattened AST.
+    let stmts = source_load::load_stmts(&args.input, args.source_dir.as_deref())?;
+    let lowered = lower_program(&stmts)?;
+    let tmp = make_temp_project(&workspace_root())?;
+    write_main_rs(&tmp, &lowered)?;
+    build_and_emit(&tmp, args)
+}
 
-    let workspace = workspace_root();
-    let tmp = make_temp_project(&workspace)?;
-    write_main_rs(&tmp, &src)?;
-
+/// Compile the generated temp project with cargo and copy the
+/// produced binary to the requested output path.
+fn build_and_emit(tmp: &Path, args: &Args) -> Result<(), String> {
     let mut cmd = Command::new("cargo");
-    cmd.args(["build", "--release", "--quiet"])
-        .current_dir(&tmp);
+    cmd.args(["build", "--release", "--quiet"]).current_dir(tmp);
     if let Some(triple) = &args.target {
         cmd.args(["--target", triple]);
     }
@@ -95,16 +102,19 @@ fn run(args: &Args) -> Result<(), String> {
     Ok(())
 }
 
-fn eager_parse_check(src: &str, input: &Path) -> Result<(), String> {
-    let tokens =
-        mlpl_parser::lex(src).map_err(|e| format!("lex error in {}: {e}", input.display()))?;
-    let stmts = mlpl_parser::parse(&tokens)
-        .map_err(|e| format!("parse error in {}: {e}", input.display()))?;
-    // Lowering eagerly surfaces static label mismatches with a
-    // stable "mlpl-build: ..." prefix instead of cascading into a
-    // confusing rustc error inside the temp cargo project.
-    mlpl_lower_rs::lower(&stmts).map_err(|e| format!("lower error in {}: {e}", input.display()))?;
-    Ok(())
+/// Lower the (include-expanded) program to a Rust block. Paths are
+/// emitted through the `mlpl` facade's hidden `__rt` runtime alias
+/// (the same path the `mlpl!` macro uses), so the generated temp
+/// project needs only `mlpl` as a dependency. Lowering here surfaces
+/// unsupported-construct / static-label errors with a stable
+/// "mlpl-build: ..." prefix before we spin up cargo.
+fn lower_program(stmts: &[Expr]) -> Result<String, String> {
+    let cfg = LowerConfig {
+        rt_path: quote! { ::mlpl::__rt },
+    };
+    let lowered =
+        mlpl_lower_rs::lower_with_config(stmts, &cfg).map_err(|e| format!("lower error: {e}"))?;
+    Ok(lowered.to_string())
 }
 
 fn workspace_root() -> PathBuf {
@@ -133,21 +143,12 @@ fn make_temp_project(workspace: &Path) -> Result<PathBuf, String> {
     Ok(tmp)
 }
 
-fn write_main_rs(tmp: &Path, src: &str) -> Result<(), String> {
-    // MLPL source with newlines goes inside the `mlpl!` macro; the
-    // macro rewrites newlines to spaces (see mlpl-macro/src/lib.rs),
-    // but statement separation in the macro requires `;`, so swap
-    // REPL-style newlines for semicolons here.
-    let macro_body: String = src
-        .lines()
-        .map(str::trim)
-        .filter(|line| !line.is_empty() && !line.starts_with('#'))
-        .collect::<Vec<_>>()
-        .join("; ");
+fn write_main_rs(tmp: &Path, lowered: &str) -> Result<(), String> {
+    // `lowered` is already a Rust block expression (`{ ...; value }`)
+    // emitted by mlpl-lower-rs, referencing `::mlpl::__rt::...`.
     let main_rs = format!(
-        "use mlpl::mlpl;\n\
-         fn main() {{\n\
-             let result = mlpl! {{ {macro_body} }};\n\
+        "fn main() {{\n\
+             let result = {lowered};\n\
              println!(\"{{}}\", result.arr().data()[0]);\n\
          }}\n"
     );

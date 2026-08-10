@@ -12,3 +12,6 @@ path = "src/main.rs"
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }
 mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
+mlpl-parser-ast = { path = "../../../syntax-parser/crates/mlpl-parser-ast" }
+mlpl-source-loader = { path = "../../../syntax-parser/crates/mlpl-source-loader" }
+quote = "1"

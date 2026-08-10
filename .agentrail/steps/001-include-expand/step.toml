@@ -1,0 +1,9 @@
+number = 1
+slug = "include-expand"
+status = "in-progress"
+description = "mlpl-build resolves includes via mlpl-source-loader::expand() + a replicated ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-10T12:09:13"
+task_type = "rust-feature"
+commits = []
