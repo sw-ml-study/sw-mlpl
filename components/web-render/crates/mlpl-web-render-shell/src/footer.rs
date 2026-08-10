@@ -9,8 +9,6 @@ use yew::prelude::*;
 use mlpl_web_components_chrome::footer::Footer;
 use mlpl_web_components_content::doc_dialog::DocDialog;
 
-const REPO_URL: &str = "https://github.com/sw-ml-study/sw-mlpl";
-
 pub fn render_shell_footer(
     dialog_open: bool,
     on_close: Callback<MouseEvent>,
@@ -18,7 +16,7 @@ pub fn render_shell_footer(
 ) -> Html {
     html! {
         <>
-            <Footer url={REPO_URL} build_info={build_info} />
+            <Footer build_info={build_info} />
             <DocDialog open={dialog_open} {on_close} />
         </>
     }

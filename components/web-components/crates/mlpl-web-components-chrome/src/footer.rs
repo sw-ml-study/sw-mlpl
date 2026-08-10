@@ -5,13 +5,15 @@
 //! mlpl-web's build.rs, so the host crate formats the
 //! `build_info` string with its own `env!()` macros and
 //! hands it in via FooterProps.
+//!
+//! The "GitHub" link opens a `RepoLinks` dialog listing this
+//! project plus its companion demo repositories, rather than
+//! navigating straight to one repo.
 
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct FooterProps {
-    /// URL the GitHub link points to.
-    pub url: &'static str,
     /// Pre-formatted build-info chip rendered at the right
     /// edge: version + host + sha + timestamp, joined with
     /// the same middot separator the rest of the footer uses.
@@ -26,7 +28,7 @@ pub fn footer(props: &FooterProps) -> Html {
             <span class="footer-sep">{"\u{00b7}"}</span>
             <span>{"\u{00a9} 2026 Michael A Wright"}</span>
             <span class="footer-sep">{"\u{00b7}"}</span>
-            <a href={props.url} target="_blank" rel="noopener">{"GitHub"}</a>
+            <RepoLinks />
             <span class="footer-sep">{"\u{00b7}"}</span>
             <a href="https://github.com/sw-ml-study/sw-mlpl/blob/main/CHANGES.md" target="_blank" rel="noopener">{"Changes"}</a>
             <span class="footer-sep">{"\u{00b7}"}</span>
@@ -42,5 +44,95 @@ pub fn footer(props: &FooterProps) -> Html {
             <span class="footer-sep">{"\u{00b7}"}</span>
             <span>{ &props.build_info }</span>
         </footer>
+    }
+}
+
+/// This project plus its companion demo repositories
+/// (github.com/sw-ml-study/<name>), shown in the footer's GitHub
+/// dialog. The WASM page cannot query GitHub at runtime, so the set
+/// is baked in -- keep it in sync with the org's `sw-mlpl` +
+/// `demo*` repositories (names are the GitHub repo names).
+const REPOS: &[(&str, &str)] = &[
+    (
+        "sw-mlpl",
+        "The MLPL language, browser playground, and native tools.",
+    ),
+    (
+        "demo-algorithms",
+        "General-purpose data structures and algorithms in MLPL.",
+    ),
+    (
+        "demo-combinators",
+        "\"To Mock a Mockingbird\" combinator birds, in MLPL.",
+    ),
+    (
+        "demo-extensions",
+        "Authoring native MLPL language extensions in Rust.",
+    ),
+    (
+        "demo-file-processing",
+        "Bounded byte and file processing (hexdump, WAV, MP3/ID3, Ogg).",
+    ),
+    (
+        "demo-functional-pipelines",
+        "A functional pipeline library for MLPL.",
+    ),
+    (
+        "demo-memory",
+        "Companion demos for hashmaps, memory, and retrieval.",
+    ),
+    (
+        "demo-ml-utils",
+        "Machine-learning utility demos built with MLPL.",
+    ),
+];
+
+/// The footer "GitHub" link. Opens a dialog of the project +
+/// companion repos instead of navigating straight to one repo
+/// (the href is kept as a no-JavaScript fallback).
+#[function_component(RepoLinks)]
+pub fn repo_links() -> Html {
+    let open = use_state(|| false);
+    let show = {
+        let open = open.clone();
+        Callback::from(move |e: MouseEvent| {
+            e.prevent_default();
+            open.set(true);
+        })
+    };
+    let close = {
+        let open = open.clone();
+        Callback::from(move |_: MouseEvent| open.set(false))
+    };
+    html! {
+        <>
+            <a href="https://github.com/sw-ml-study/sw-mlpl" onclick={show} aria-haspopup="dialog">{"GitHub"}</a>
+            { (*open).then(|| repo_dialog(&close)) }
+        </>
+    }
+}
+
+/// The modal listing every project repository. Clicking the
+/// backdrop or the close button dismisses it; each row opens that
+/// repo on GitHub in a new tab.
+fn repo_dialog(close: &Callback<MouseEvent>) -> Html {
+    let stop = Callback::from(|e: MouseEvent| e.stop_propagation());
+    html! {
+        <div class="modal-backdrop" onclick={close.clone()}>
+            <div class="modal compact" onclick={stop} role="dialog" aria-label="Project repositories">
+                <div class="modal-header">
+                    <span class="repo-modal-title">{"sw-ml-study repositories"}</span>
+                    <button class="close-btn" onclick={close.clone()} aria-label="Close">{"\u{00d7}"}</button>
+                </div>
+                <div class="modal-body">
+                    { for REPOS.iter().map(|(name, desc)| html! {
+                        <a class="repo-row" href={format!("https://github.com/sw-ml-study/{name}")} target="_blank" rel="noopener">
+                            <span class="repo-name">{ *name }</span>
+                            <span class="repo-desc">{ *desc }</span>
+                        </a>
+                    }) }
+                </div>
+            </div>
+        </div>
     }
 }

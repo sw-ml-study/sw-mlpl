@@ -1466,6 +1466,45 @@
             overflow-y: auto;
             padding: 20px;
         }
+        /* Footer "GitHub" repo dialog: a compact modal listing this
+           project + its companion demo repos. Reuses .modal shell. */
+        .modal.compact {
+            height: auto;
+            max-height: 80vh;
+            width: min(560px, 92vw);
+        }
+        .repo-modal-title {
+            flex: 1;
+            font-family: var(--mono);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text);
+            padding: 14px 4px 14px 14px;
+        }
+        .repo-row {
+            display: block;
+            text-decoration: none;
+            padding: 9px 12px;
+            border-radius: 6px;
+            border: 1px solid transparent;
+        }
+        .repo-row:hover {
+            background: var(--surface0);
+            border-color: var(--surface1);
+        }
+        .repo-name {
+            display: block;
+            font-family: var(--mono);
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--blue);
+        }
+        .repo-desc {
+            display: block;
+            font-size: 13px;
+            color: var(--subtext0);
+            margin-top: 2px;
+        }
         .doc-content {
             font-family: var(--mono);
             font-size: 13px;
