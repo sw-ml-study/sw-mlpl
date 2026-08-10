@@ -1,9 +1,10 @@
 number = 4
 slug = "fns-over-connect"
-status = "in-progress"
+status = "completed"
 description = "In connect mode, route the :fns (and :describe/:list) introspection slash-com..."
 role = "production"
 context_files = []
 created_at = "2026-08-09T21:28:20"
+completed_at = "2026-08-10T11:15:32"
 task_type = "web-fix"
-commits = []
+commits = ["f4786592d29e32bb852e034f5c425f53510e7285"]
