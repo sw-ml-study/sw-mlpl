@@ -14,6 +14,16 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-11
 
+- chore(agentrail): record 003-records-results complete; create 004-check-propagation-cval-returns
+- feat(compiler): lower record literals, field access, and ok/err Results
+- saga compiler-control-flow: step while-for-mut complete
+- feat(compiler): while loops + mutable variables (compiler-control-flow step 2)
+- docs(plan): cross-repo downstream-unblock saga checklist
+- saga compiler-control-flow: step if-real-return complete
+- refactor(compiler): mlpl-lower-rs lib.rs is now a pure facade
+- feat(compiler): lower if/else + real returns (compiler-control-flow step 1)
+- docs(readme): add positioning paragraph + Python-ML-vs-sw-MLPL comparison table
+- docs(changes): refresh CHANGES.md to HEAD
 - saga compiler-functions: complete (2 steps)
 - docs(compiler): close compiler-functions param-only slice
 - saga compiler-functions: step fndef-lower complete
