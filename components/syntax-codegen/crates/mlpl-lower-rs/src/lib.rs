@@ -37,6 +37,7 @@ use quote::{format_ident, quote};
 
 mod cval_lower;
 mod fncall;
+mod fndef_lower;
 
 pub(crate) use cval_lower::lower_cval;
 
@@ -167,14 +168,16 @@ fn lower_stmt(
     bindings: &mut Vec<TokenStream>,
 ) -> Result<Option<TokenStream>, LowerError> {
     if let Expr::Assign { name, value, .. } = stmt {
-        let val = lower_expr(ctx, value)?;
-        if let Some(lbls) = labels_of(ctx, value) {
-            ctx.known_labels.insert(name.clone(), lbls);
-        }
-        let id = format_ident!("{name}");
-        bindings.push(quote! { let #id = #val; });
-        let rt = &ctx.rt;
-        return Ok(is_last.then(|| quote! { #rt::CVal::Arr(#id.clone()) }));
+        return lower_assign(ctx, name, value, is_last, bindings);
+    }
+    if let Expr::FnDef {
+        name, params, body, ..
+    } = stmt
+    {
+        // A `def u:` lowers to a nested Rust fn item (hoisted, so
+        // call order is free) and yields no program value.
+        bindings.push(fndef_lower::lower_user_fn(ctx, name, params, body)?);
+        return Ok(None);
     }
     if is_last {
         return Ok(Some(lower_cval(ctx, stmt)?));
@@ -182,6 +185,26 @@ fn lower_stmt(
     let val = lower_expr(ctx, stmt)?;
     bindings.push(quote! { let _ = #val; });
     Ok(None)
+}
+
+/// Lower `name = value` into a `let` binding (recording any static
+/// labels), yielding `CVal::Arr(name)` when it is the program's
+/// final statement.
+fn lower_assign(
+    ctx: &mut Ctx,
+    name: &str,
+    value: &Expr,
+    is_last: bool,
+    bindings: &mut Vec<TokenStream>,
+) -> Result<Option<TokenStream>, LowerError> {
+    let val = lower_expr(ctx, value)?;
+    if let Some(lbls) = labels_of(ctx, value) {
+        ctx.known_labels.insert(name.to_string(), lbls);
+    }
+    let id = format_ident!("{name}");
+    bindings.push(quote! { let #id = #val; });
+    let rt = &ctx.rt;
+    Ok(is_last.then(|| quote! { #rt::CVal::Arr(#id.clone()) }))
 }
 
 /// Lower a single expression. Returns a `DenseArray`-valued Rust

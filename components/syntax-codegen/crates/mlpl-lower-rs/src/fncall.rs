@@ -6,16 +6,26 @@
 
 use mlpl_parser::Expr;
 use proc_macro2::TokenStream;
-use quote::quote;
+use quote::{format_ident, quote};
 
 use crate::{Ctx, LowerError, lower_expr};
 
-/// Lower a call to one of the supported builtins.
+/// Lower a call to one of the supported builtins, or to a user
+/// function (`u:name` -> the nested `user_name` fn from
+/// `fndef_lower`).
 pub(crate) fn lower_fncall(
     ctx: &Ctx,
     name: &str,
     args: &[Expr],
 ) -> Result<TokenStream, LowerError> {
+    if let Some(bare) = name.strip_prefix("u:") {
+        let id = format_ident!("user_{bare}");
+        let lowered: Vec<TokenStream> = args
+            .iter()
+            .map(|a| lower_expr(ctx, a))
+            .collect::<Result<_, _>>()?;
+        return Ok(quote! { #id(#(#lowered),*) });
+    }
     let rt = &ctx.rt;
     match (name, args.len()) {
         ("iota" | "range", 1) => {
