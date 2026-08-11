@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "check-propagation-cval-returns"
+  },
+  "action": "Pre-pass AST scan for cval markers; Ctx cval_returning set + in_cval_fn Cell; fndef_lower CVal-aware signatures + wrap_tail; fncall lower_check match; produces_cval consults ctx; TDD 5 unit + 1 gated e2e; held sw-checklist by relocating the pre-pass to control_lower + compacting the scan.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-11T13:49:28"
+}
