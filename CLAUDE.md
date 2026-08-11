@@ -65,10 +65,21 @@ When using agentrail, changes to `.agentrail/` files are first-class project
 changes — the same as application source code. They must be committed, and
 should be pushed before you hand off.
 
+**EXCEPTION — session transcripts are gitignored (do NOT commit them):**
+`.agentrail/sessions/*.jsonl` and `.agentrail-archive/*/sessions/*.jsonl`
+are raw Claude Code event logs (tens of MB, append-only). They are NOT the
+durable handoff — `agentrail next/begin/complete` read `steps/`,
+`trajectories/`, `plan.md`, `saga.toml`, never `sessions/`. They are
+`.gitignore`d on purpose (committing them 100+ times bloated `.git` to
+2.2 GB and tripped GitHub's large-file block; history was rewritten to
+purge them — see `docs/git-history-rewrite-notice.md`). Keep them local;
+never `git add -f` them. Everything else under `.agentrail/` stays tracked.
+
 Before running `agentrail complete`:
 
-1. `git status` — confirm `.agentrail/` files are tracked, not just present.
-   Untracked files in `.agentrail/` mean the next session will not see them.
+1. `git status` — confirm `.agentrail/` files (except the gitignored
+   `sessions/` logs) are tracked, not just present. Untracked non-session
+   files in `.agentrail/` mean the next session will not see them.
 2. Stage and commit source changes and `.agentrail/` metadata together. The
    commit recorded into the step's `commits` field comes from `HEAD` at the
    moment of `agentrail complete`, so the commit must happen *first*.
