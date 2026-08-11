@@ -1,0 +1,737 @@
+ChatGPT Pro
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+there was a very recent improvement to hashing announced.  Can you find and explain it?
+
+If you mean the announcement from the last few days, I think you're referring to BinaryPC, a new hashing-based attention mechanism for LLMs rather than a new cryptographic hash function. It was published on arXiv on August 5, 2026. 
+
+For someone interested in LLM inference and sw-MLPL, this is actually much more interesting than it sounds.
+
+The problem it addresses
+Long-context LLM inference spends an enormous amount of time searching the KV cache.
+
+For every new generated token:
+
+new query
+     │
+     ▼
+compare against
+K1 K2 K3 K4 ... K500000
+Even with FlashAttention, you're still performing attention over a huge number of keys.
+
+The observation is:
+
+Most keys are irrelevant.
+
+If you could quickly find only the few hundred keys likely to matter, inference becomes dramatically faster.
+
+Existing approaches
+Several approaches already exist:
+
+Sliding-window attention
+
+Block-sparse attention
+
+Locality Sensitive Hashing (LSH)
+
+Learned sparse attention
+
+Retrieval-based attention
+
+Each has drawbacks:
+
+loses accuracy
+
+requires retraining
+
+expensive hashing
+
+random projections don't match the actual data
+
+BinaryPC's idea
+Instead of random hashes, it computes binary principal components of the KV vectors.
+
+Conceptually:
+
+original vectors
+
+      ●
+   ●      ●
+
+ ●            ●
+
+ ↓ PCA
+
+principal directions
+
+ ↓
+
+convert sign bits
+
+10110101
+11110100
+00011110
+...
+Vectors with similar meaning produce similar binary codes.
+
+Then lookup becomes
+
+hash(query)
+
+↓
+
+bucket 57
+
+↓
+
+compare against only
+200 vectors
+
+instead of
+
+500,000 vectors
+The authors describe it as training-free because the hash functions are derived directly from the data rather than learned through gradient descent. 
+
+Why this matters
+According to the paper:
+
+no model retraining
+
+preserves long-context accuracy much better than previous sparse attention methods
+
+approximately 3.56× decoding throughput compared with FlashAttention in their reported GPU experiments. 
+
+That is a substantial claim if it generalizes.
+
+Why I think this is especially relevant to your interests
+You've been exploring:
+
+CPU inference
+
+older GPUs
+
+speculative decoding
+
+MTP
+
+edge devices
+
+FPGA inference
+
+hierarchical reasoning
+
+This fits extremely well.
+
+Memory bandwidth—not arithmetic—is often the bottleneck during decoding.
+
+BinaryPC attempts to reduce memory traffic, not just FLOPs.
+
+That means:
+
+Old GPU
+
+less VRAM traffic
+↓
+
+higher effective throughput
+
+↓
+
+better tokens/sec
+Even CPUs may benefit because cache locality improves.
+
+Relation to speculative decoding
+These are complementary.
+
+You could imagine:
+
+draft model
+        │
+        ▼
+BinaryPC sparse attention
+        │
+        ▼
+target model
+Speculative decoding reduces the number of expensive forward passes.
+
+BinaryPC reduces the cost of each forward pass.
+
+Together, the speedups could multiply rather than merely add.
+
+Relation to your FPGA ideas
+One thing that struck me while reading the abstract is that BinaryPC converts high-dimensional vectors into compact binary codes.
+
+Binary operations map very naturally onto FPGA hardware.
+
+A possible pipeline would be:
+
+Query vector
+
+↓
+
+binary projection
+
+↓
+
+hash lookup
+
+↓
+
+small SRAM bucket
+
+↓
+
+attention
+instead of streaming an enormous KV cache through memory.
+
+This is conceptually much closer to hardware associative memories than traditional dense attention.
+
+Relation to Engram / mHC concepts
+You've been discussing:
+
+Engrams
+
+mHC
+
+hierarchical memories
+
+BinaryPC is effectively creating an index over memory rather than scanning all memory.
+
+That is philosophically similar to biological recall:
+
+cue
+
+↓
+
+memory index
+
+↓
+
+candidate memories
+
+↓
+
+detailed comparison
+instead of
+
+cue
+
+↓
+
+compare with every stored memory
+I suspect there is fertile ground combining these ideas.
+
+Should sw-MLPL support this?
+I think yes.
+
+Rather than exposing "BinaryPC" specifically, I'd expose the abstraction:
+
+attention sparse binarypc
+attention sparse lsh
+attention sparse block
+attention dense
+Then the runtime chooses the implementation.
+
+That would let people experiment with different sparse attention algorithms without changing model code.
+
+I'd recommend reading it carefully
+This is one of the more interesting inference papers I've seen recently because it:
+
+doesn't require retraining,
+
+targets the real bottleneck (KV-cache lookup),
+
+reports significant throughput improvements,
+
+appears implementable in multiple runtimes (CUDA, MLX, CPU, FPGA),
+
+aligns well with your interest in making smaller hardware much more capable. 
+
+I'd be happy to go beyond the abstract and walk through the actual algorithm, including the math behind the binary principal components, the indexing data structures, and how one could implement a Rust/MLX or Rust/CUDA version suitable for integration into sw-MLPL.
+
+
+This is helpful, but even more recent than I was thinking of.  I think there was an announcement this year of a breakthrough new hashing algorithm (or new hash-map implementation).  I wish I could remember more about it, maybe it used randomness somehow?  Maybe it had a bunch of pointers (like up, down, left, right) vaguely recall a diagram with arrows.
+
+I think I know exactly what you're remembering.
+
+The clues:
+
+this year (2025)
+
+major breakthrough
+
+hash tables rather than cryptographic hashes
+
+randomness plays a central role
+
+diagram full of arrows/pointers
+
+lots of discussion in the algorithms community
+
+strongly suggest it was the new hash table result by William Kuszmaul and collaborators, which overturned a long-standing theoretical assumption. It was covered by Quanta Magazine under the headline "Undergraduate Upends a 40-Year-Old Data Science Conjecture." 
+
+The picture with many arrows/pointers that you remember is probably this one:
+
+Tiny pointers connecting elements into miniature pointer structures inside the hash table.
+
+Quanta even describes the illustration as:
+
+"Tiny pointers ... inspired the creation of a new kind of faster hash table." 
+
+The breakthrough
+For roughly 40 years, researchers believed there was a fundamental tradeoff:
+
+very fast lookup
+
+high load factor
+
+little memory overhead
+
+You could pick at most two.
+
+The new work shows that this tradeoff was not actually fundamental.
+
+Instead, by organizing entries with very small randomized pointer structures, they obtain much stronger guarantees simultaneously. 
+
+Why randomness matters
+Traditional hash tables use randomness only here:
+
+key
+  ↓
+hash function
+  ↓
+bucket
+After that, collisions are handled mechanically.
+
+The newer ideas use randomness inside the table organization itself.
+
+Instead of
+
+bucket
+
+A
+B
+C
+they build tiny randomized navigation structures.
+
+Conceptually:
+
+      A
+     ↙ ↘
+    B   C
+   ↘   ↙
+      D
+The actual structures are much more sophisticated, but the important idea is that a lookup follows only a handful of tiny pointer hops.
+
+Tiny pointers
+The really clever observation is:
+
+A pointer doesn't have to be 64 bits.
+
+If everything it points to is nearby, perhaps it only needs
+
+6 bits
+
+7 bits
+
+8 bits
+
+or another very small encoding.
+
+Instead of
+
+64-bit pointer
+they store
+
+8-bit offset
+or similarly compact metadata.
+
+That saves enormous amounts of memory while improving cache locality. 
+
+Then came TPHT
+The theoretical work has already inspired practical implementations.
+
+Just last week there was a paper called Tiny Pointer Hash Tables (TPHT).
+
+It introduces two implementations:
+
+Chained-TPHT
+
+Flattened-TPHT
+
+using compressed pointers to achieve both higher throughput and dramatically lower memory usage. The authors report up to 89% higher throughput than strong baselines while remaining extremely space efficient. 
+
+So there's a progression:
+
+2025
+↓
+
+new theory
+(tiny pointers)
+
+↓
+
+2026
+
+practical TPHT implementation
+Could it instead have been Iceberg Hashing?
+Another possibility is Iceberg Hashing, announced toward the end of 2025.
+
+It also attracted a lot of attention because it simultaneously achieved
+
+high load factors
+
+strong theoretical guarantees
+
+fast operations
+
+and is intended as a production-quality hash table. 
+
+Or Adaptive Hashing?
+There was also Adaptive Hashing this year.
+
+Instead of fixing the hash function forever, the table changes the hash function online to match the observed key distribution.
+
+That's another example where randomness is actively used rather than being a one-time decision. 
+
+My guess
+Based on your recollection of:
+
+arrows,
+
+lots of little pointers,
+
+randomness,
+
+"major breakthrough",
+
+I'd rank them:
+
+The 2025 tiny-pointer hash table breakthrough (very likely) 
+
+Tiny Pointer Hash Tables (TPHT) practical implementation (also likely if you saw a recent conference paper) 
+
+Iceberg Hashing 
+
+Adaptive Hashing 
+
+One thing caught my eye: you mentioned "up, down, left, right" arrows. That sounds less like a conventional hash table diagram and more like a skip list, treap, or another randomized pointer structure. Those data structures are built from coin flips and multiple pointer levels, and the new tiny-pointer work borrows some of that flavor by representing relationships with compact pointer metadata. If you remember the diagram looking almost like a miniature graph rather than buckets in an array, that further points toward the tiny-pointer work rather than a new hash function itself.
+
+If you're interested, I can also explain why this result is exciting from a systems perspective—in particular why it could plausibly influence future implementations of Rust's HashMap, hashbrown, Abseil's Swiss Table, and even LLM KV-cache indexing.
+
+
+Yes "Undergraduate Upends a 40-Year-Old Data Science Conjecture" is what I was looking for but the others you mentioned are also intersting.  Note that your "this year" is 2025, but my "this year" is 2026, but your first result is what I want.  So how do all of these fit into helping sw-MLPL show completeness as a general-purpose language?  Which of these make for interesting demos in sw-mlpl?  Does sw-mlpl need enhancements in order to implement any of these?  Would these be worth adding to demo-algorithms (vs. demo-combinators or demo-functional-pipelines)?
+
+I think these are excellent candidates for sw-MLPL, but not primarily because they're "better hash tables."
+
+They're excellent because they demonstrate that sw-MLPL is a systems language capable of expressing cutting-edge algorithms, not merely an ML DSL.
+
+One thing I'd change in your project organization is how you classify them.
+
+I would create a fourth demo category
+Instead of putting these under demo-algorithms, I'd consider something like:
+
+demo-functional-pipelines/
+demo-combinators/
+demo-algorithms/
+demo-systems/
+where demo-systems showcases data structures and algorithms that production runtimes depend on.
+
+Examples:
+
+SwissTable
+
+Robin Hood hashing
+
+Cuckoo hashing
+
+Iceberg hashing
+
+Tiny Pointer hash tables
+
+Skip lists
+
+B-trees
+
+Radix trees
+
+Lock-free queues
+
+Arena allocators
+
+Slab allocators
+
+Rope strings
+
+Bloom filters
+
+HyperLogLog
+
+This tells people:
+
+"Yes, sw-MLPL is an ML language—but it's also a serious programming language."
+
+I think these demos fit together surprisingly well
+I'd build a progression.
+
+Level 1 — Classical
+Linear probing
+Quadratic probing
+Separate chaining
+Robin Hood
+Cuckoo
+Hopscotch
+These are familiar to most CS graduates.
+
+Level 2 — Modern production
+SwissTable
+hashbrown
+Abseil
+F14
+Now you're demonstrating techniques used in real compilers and runtimes.
+
+Level 3 — Current research
+Iceberg
+Tiny Pointer
+TPHT
+Adaptive Hashing
+Now sw-MLPL starts looking like a research platform.
+
+Why this is valuable
+Suppose someone asks
+
+"Can sw-MLPL express modern systems algorithms?"
+
+Instead of saying yes...
+
+...you point them to
+
+demo-systems/hash/
+with 12 implementations.
+
+That is extremely persuasive.
+
+These are especially interesting because...
+They use ideas that appear elsewhere.
+
+For example...
+
+Tiny Pointer Hash Tables involve
+
+compact encodings
+
+graph traversal
+
+pointer compression
+
+cache locality
+
+probabilistic analysis
+
+Those are useful concepts outside hash tables.
+
+Which language features are required?
+Surprisingly few.
+
+I think your existing language already has almost everything.
+
+You'll mainly want:
+
+1. Packed structs
+For example
+
+struct Node {
+    byte pointer
+    byte metadata
+    int key
+}
+rather than wasting alignment.
+
+Rust has
+
+#[repr(packed)]
+sw-MLPL should probably expose something similar.
+
+2. Bit fields
+These papers constantly manipulate
+
+00010110
+rather than
+
+int
+I'd want syntax like
+
+bits8
+bits16
+bits32
+and extraction operators.
+
+3. Cache-aware arrays
+Instead of
+
+list<Node>
+I'd like
+
+packed<Node>
+or
+
+cacheline<Node>
+This becomes useful later for ML kernels too.
+
+4. Small integers
+These papers love
+
+u8
+u12
+u14
+because every byte matters.
+
+5. Explicit randomness
+Adaptive hashing and many randomized structures become much nicer if randomness is a first-class concept.
+
+Something like
+
+sample
+shuffle
+seed
+rng
+rather than calling external libraries.
+
+One thing I would not add
+I would not add pointer arithmetic.
+
+Instead I'd expose
+
+offset
+index
+handle
+Objects.
+
+That fits your higher-level philosophy much better.
+
+A more interesting opportunity
+I think these algorithms reveal a gap in most languages.
+
+Most languages have
+
+Map
+Set
+Vector
+but don't expose why one implementation differs from another.
+
+Imagine instead
+
+map robinhood
+map cuckoo
+map swiss
+map iceberg
+map tinypointer
+or
+
+Map<
+    hashing = TinyPointer,
+    load = 0.97
+>
+The implementation becomes a parameter.
+
+That would be a neat sw-MLPL feature.
+
+Even better...
+I think the demos should measure themselves.
+
+Every demo should report
+
+Insert/sec
+Lookup/sec
+Delete/sec
+Memory
+Bytes/key
+Cache misses
+Load factor
+Collisions
+Probe lengths
+Latency histogram
+Then users can compare
+
+Swiss
+
+vs
+
+Robin Hood
+
+vs
+
+Tiny Pointer
+
+vs
+
+Iceberg
+on the same workload.
+
+That becomes a benchmark suite, not merely sample code.
+
+This connects directly to your ML goals
+This is the part I find most exciting.
+
+You've been thinking about:
+
+Engrams
+
+mHC
+
+associative memory
+
+MTP
+
+sparse attention
+
+KV caches
+
+FPGA implementations
+
+All of these are fundamentally memory organization problems.
+
+The same questions arise:
+
+How do I find the right item quickly?
+
+How much metadata do I need?
+
+How can I improve cache locality?
+
+How can I compress pointers or indices?
+
+How much randomness should I use?
+
+How close to full can the structure get before performance collapses?
+
+The new hash-table work is about answering those questions for key-value stores, while recent sparse-attention work like BinaryPC answers similar questions for neural memory by indexing instead of exhaustively scanning. 
+
+Because of that, I'd actually prioritize a demo-memory/ collection over demo-systems/, with sections like:
+
+demo-memory/
+    hash/
+    cache/
+    bloom/
+    lru/
+    kv/
+    attention/
+    retrieval/
+That framing creates a bridge between classical computer science and modern machine learning. Someone exploring sw-MLPL could start with a Robin Hood hash table, progress to Tiny Pointer Hash Tables, and eventually arrive at sparse-attention indexes and KV-cache acceleration, all while using the same language and runtime concepts. For the audience you're targeting, that's a much stronger story than presenting them as isolated algorithms. 
+
+

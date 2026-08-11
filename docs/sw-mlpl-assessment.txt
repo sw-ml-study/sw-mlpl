@@ -1,0 +1,554 @@
+ChatGPT Pro
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+can you survey the recent repos under https://github.com/orgs/sw-ml-study/repositoriesand summarize the overall project status. Consider recent commit history, agentrail sagas, ./docs/plan.md and future md docs. I need a big picture view of current capabilities and demos, future/pending work, blockers or architectural directions.  Please come up with a ranked/prioritized order of remaining work so I can drive continued development. Identify gaps. Suggest improvements.
+
+Worked for 5m 50s
+Big-picture assessment
+The sw-MLPL project has moved beyond “interesting experimental language” into an early general-purpose language/platform with a rapidly growing conformance and demonstration ecosystem. The most important change over the last few days is not the number of demos; it is that the demos are now systematically discovering, minimizing, and then driving fixes for missing language/runtime capabilities.
+
+The active portfolio is essentially seven first-party projects:
+
+Repository	Role	Current maturity
+sw-mlpl	Language, evaluator, compiler, web/REPL, ML runtime	Broad platform; still hardening
+demo-algorithms	General-purpose algorithms/data structures/patterns	Very broad, mature forcing function
+demo-combinators	Higher-order functions/combinatory logic	Strong HOF/composition proof
+demo-functional-pipelines	Readable functional application composition	Foundation complete; application expansion next
+demo-memory	Hashing → caches → retrieval → sparse memory	Surprisingly deep research-demo corpus
+demo-ml-utils	ML artifact inspection/transformation	New, moving quickly; Safetensors vertical slice works
+demo-file-processing	Generic binary/file/application processing	Newest; byte/bit foundations already working
+The remaining org repos such as Engram, Vision-Transformer-ViT, JEPA, Diffusion, bertviz, etc. look much more like research/reference inputs than active members of this delivery architecture. The org metadata also shows how recent this expansion is: demo-algorithms was created August 5, demo-combinators August 7, and memory/functional-pipelines/ML-utils/file-processing mostly August 7–8.
+
+My overall status label would be:
+
+sw-MLPL is now in the “platform integration and hardening” phase, not the “add enough features to prove the idea” phase.
+
+That distinction should strongly influence what you do next.
+
+What the platform can actually do now
+The core sw-mlpl plan shows a much more substantial implementation than the older “v0.x experiment” framing might imply. It records completed dense arrays, parser/evaluator, REPL, tracing, SVG visualization, ML primitives, autograd, optimizers and training loops, named axes, a model DSL, tokenizers/datasets/experiments, compile-to-Rust, and an MLX backend. The compiler has demonstrated about a 9× speedup on one numeric workload, although compilation coverage is still incomplete.
+
+The MLX backend is also an instructive status indicator. Functionally, it exists: tensor operations, Model DSL dispatch, autograd rematerialization, optimizers and training all work with CPU parity. Performance, however, was measured at only 0.84x CPU on reshape/reduce and 0.26x on a tiny-LM training step. The plan correctly treats that as an architectural/performance problem rather than pretending “GPU backend exists” means “GPU acceleration achieved.”
+
+There are now three particularly important general-purpose capabilities being demonstrated downstream.
+
+First, ordinary programming. demo-algorithms has 92 demos, 85 registered test files, and 178 individual native mlplunit tests/cases. It covers sequences, stacks/queues, persistent lists, searching, sorting, heaps, hash maps, LRU, trees, AVL/rank/interval/segment/Fenwick structures, graphs, patterns and persistent structures. Many implementations have been deliberately driven to zero explicit loops using recursion and array operations.
+
+Second, higher-order programming. demo-combinators now demonstrates function values, call, progressive partial application, over-application, higher-arity combinators, callable values flowing through arrays/records/functions, SK derivations, encoded Boolean logic, and applicative-order fixed points. It also exercises each, table, atop, over, Result combinators and lifecycle hooks.
+
+Third, real data and effects. Recent work has added bounded file reads, file sizing, JSON/TOML decode budgets, semantic Result handling, deterministic record-key discovery, duplicate-key rejection, persistence, bit manipulation and binary parsing. These are precisely the capabilities that distinguish a “math DSL” from something that can plausibly become a general-purpose language.
+
+That third area is where I would concentrate now.
+
+The most encouraging development: demos are working as intended
+The August 8 commit sequence is probably the strongest evidence that your development methodology is working.
+
+demo-ml-utils needed bounded Safetensors processing. That pushed sw-mlpl toward:
+
+bounded read_bytes(path, offset, length)
+
+file_size
+
+JSON byte/depth/element budgets
+
+deterministic record_keys
+
+duplicate-key rejection
+
+well-defined EOF/error semantics
+
+The downstream repo then immediately consumed those capabilities to produce arbitrary-name Safetensors catalogs, selective U8/I8/U16/I16 decoding, and fixed-chunk mergeable statistics. Its next step is no longer “please invent streaming”; it is the much more concrete prove peak memory on a sparse artifact larger than the configured memory budget.
+
+Likewise demo-file-processing measured the language rather than assuming capabilities, found bounded reads already existed, identified the actual remaining gaps, and then proceeded with hexdump, histogram, endian codecs, bit fields and MPEG-header parsing. Its plan says WAV inspection/copy is now the next unblocked step.
+
+This is exactly the feedback loop I would preserve:
+
+demo requirement → executable capability probe → minimal upstream change → regression test → downstream adoption → next harder demo.
+
+Do not replace that with a long speculative language-feature roadmap.
+
+Architectural direction I see emerging
+There are several architectural decisions that are becoming consistent across repositories.
+
+MLPL owns computation; Rust owns generic mechanisms
+Both new binary-oriented demos explicitly distinguish MLPL algorithms from generic runtime facilities and from specialized native extensions. That is a good boundary.
+
+For file processing, the intended stack is essentially:
+
+path / stdin
+     ↓
+bounded source
+     ↓
+MLPL parse / transform / reduce
+     ↓
+generic runtime or codec extension
+     ↓
+bounded sink / stdout
+     ↓
+interpreter OR compiled application
+The MP3→Ogg goal therefore does not require reimplementing MP3/Vorbis codecs in MLPL. A Rust codec extension can decode/encode chunks while MLPL orchestrates them and performs visible array transformations.
+
+That same pattern should become a formal architectural rule for the whole platform.
+
+Hardware backends are moving toward services
+The old “compile MLX and CUDA into sw-MLPL” model has effectively been superseded in the main plan. The proposed architecture is now mlpl-mlx-serve and mlpl-cuda-serve, with the orchestrator routing device(...) work to peers, followed later by distributed execution and discovery. The reasons are legitimate: platform incompatibility, hardware coupling and enormous Rust target trees.
+
+I think this is the right direction, although I would not make it the immediate development focus yet.
+
+Resource limits are becoming first-class semantics
+The recent decode budgets, bounded reads, sandbox behavior, sparse-artifact tests and explicit distinction between logical and physical memory usage are excellent developments.
+
+This should grow into an explicit sw-MLPL philosophy:
+
+A program should be able to express not just what to compute, but the resource envelope within which external data may be consumed.
+
+That fits ML workloads, large files, agents, servers and edge computing unusually well.
+
+Interpreter and compiler need one semantic runtime contract
+This is probably the largest architectural gap.
+
+The compile-to-Rust capability exists, but demo-file-processing found that the native build surface is still narrow: an arithmetic code-generation case fails, byte/bit/application operations are not broadly lowered, and useful application facilities such as binary I/O and arguments are not yet compiler-parity features.
+
+Long-term, I would regard the shared runtime used by interpreter and generated Rust as a critical architectural component rather than an implementation detail.
+
+Important gaps and blockers
+Some gaps are more consequential than their apparent size.
+
+Binary storage is still logical rather than physical. Byte values are exact f64-backed values today. That is fine for getting semantics right, but it prevents honest high-performance/bounded-memory claims for serious binary workloads. Packed u8/typed arrays eventually matter.
+
+There is bounded input but not yet a complete incremental I/O model. Bounded range reads solve a large part of the problem, but incremental output, source/sink abstractions and stream/fold semantics remain incomplete. That is the largest immediate cross-demo capability gap.
+
+Compiler coverage lags interpreter coverage. The compiled language can prove native code generation, but it cannot yet compile the sort of useful CLI that the newer demos are building. This is a strategic blocker because standalone applications are one of the strongest possible demonstrations that sw-MLPL is a language rather than an embedded REPL.
+
+Physical persistence is not yet efficient persistence. demo-algorithms repeatedly proves immutable semantics but also documents full-array and nested-record copying. Persistent AVL/BST/etc. implementations are logically good but cannot claim O(log n) physical allocation until immutable structural sharing/reference management exists.
+
+Modules/namespaces are still missing. Static include helps code sharing, but the algorithms plan explicitly still wants qualified namespaces, exports and private helpers. There is also evidence of surprising symbol-binding/name collisions in recursive code. This becomes increasingly serious as applications get larger.
+
+Interpreter performance remains a real general-purpose-language gap. Open issue #7 measures empty-board minimax at ~10.8 seconds and attributes it to AST walking, per-operation allocations, recomputation and lack of memoization. It suggests a dict/hashmap primitive, alpha-beta pruning, where/nonzero, vectorized DP and allocation/scalar fast paths.
+
+One good piece of news here: issue #7 still says it depends on recursion correctness issue #6, but #6 was completed back on June 2. So #7 is now genuinely unblocked and its dependency text is stale.
+
+Web/server parity still has rough edges. Current open issues include remote introspection (:models, :vars, etc.) erroneously reading browser-local state, connect-mode 3D inconsistencies that appear fixed but await deployment, and :ask UX/parity cleanup. Those aren't architectural blockers, but they matter before wider exposure.
+
+Roadmap truth is fragmented. There is valuable information in docs/plan.md, numerous future-saga-* documents, AgentRail archives, open issues and downstream upstream-contract documents. But reconstructing “what actually works now?” currently requires the survey I just performed.
+
+That itself is a product-engineering gap.
+
+AgentRail assessment
+AgentRail appears to be helping considerably with small, independently reviewable work and explicit handoffs. Today's histories show repeated:
+
+implement capability
+→ commit
+→ verify
+→ record AgentRail completion
+→ identify next unblocked step
+That is useful discipline for agent-driven development.
+
+But AgentRail should be treated as an execution ledger, not the authoritative product roadmap.
+
+There are now many archived sagas covering Engram/tiny-LM, KV-cache state, classical ML, ViT, LoRA, CUDA foundations, embedding visualization, LLM REST, neural-thicket research and assorted off-rail work. Meanwhile the main plan has also evolved enough to supersede some of those architectural assumptions.
+
+Even demo-functional-pipelines documents an AgentRail bookkeeping limitation: post-completion metadata commits appear as audit orphans because the CLI cannot associate them with already-completed steps.
+
+So I would adopt:
+
+Roadmap → capability matrix → saga → commits, not sagas = roadmap.
+
+Ranked development order
+Here is the order I would use now. This deliberately prioritizes capabilities that unlock multiple demos.
+
+Rank	Work	Why now	What it unlocks
+1	Finish the two currently unblocked acceptance slices: sparse Safetensors high-water measurement + WAV inspect/copy	Fast feedback; proves current claims before adding infrastructure	Reliable baseline for streaming/binary work
+2	Design and implement generic incremental binary source/sink + packed byte representation	Biggest cross-cutting runtime gap exposed by both new repos	large GGUF/Safetensors, WAV, MP3, Ogg, networking/protocols
+3	Expand compile-to-Rust into application parity	Standalone binaries are a major platform milestone	compiled hexdump/WAV tools, eventually MP3→Ogg and ML utilities
+4	Stabilize larger-program language structure: modules/namespaces + eliminate binding/name hazards	Applications are now big enough that textual include and global-ish naming hurt	libraries, reusable components, safer agent-generated code
+5	Attack general interpreter/runtime performance	Correctness is fixed; performance now blocks legitimate algorithms	minimax, larger graph/data structures, agent experiments
+6	Add the few general primitives justified by evidence: dict/map, where/nonzero, UDF-capable fold/scan/unfold, views/builders where demonstrated	Removes recurring downstream workarounds without keyword inflation	algorithms, memory, functional pipelines, parsers
+7	Advance demo-ml-utils: GGUF → renderer-neutral hierarchical scene IR → 3D LOD browser	Excellent integration proof of binary I/O + arrays + ML + visualization	practical large-model analysis
+8	Advance file processing through bounded WAV → MP3/ID3 → Ogg; defer codec extension until containers work	Exercises generic binary infrastructure before codec complexity	compelling standalone MP3→Ogg capstone
+9	Execute backend service refactor: MLX service first, then CUDA service	Correct architecture, but little reason to accelerate immature application contracts first	heterogeneous machines and distributed execution
+10	Resume higher-level ML research demos: speculative decoding, GPU training, LoRA/QLoRA, Stable Diffusion, Engram/ICL/ICRL	Valuable, but platform breadth is no longer the bottleneck	research identity and ML differentiation
+11	Polish connect-mode web parity and :ask UX continuously	Important credibility work, mostly independent	better public/live-demo experience
+12	Continue broadening combinator/pipeline/algorithm catalogs only when they expose a new platform gap	Existing proof is already overwhelmingly sufficient	avoids demo-count-for-demo-count's-sake
+I would not prioritize adding another dozen ordinary algorithms right now. demo-algorithms has already proved that point.
+
+Likewise, I would not prioritize additional combinators unless a particular bird exposes a missing HOF semantic. The combinator repo has already shown higher-order generality convincingly.
+
+What I would do literally next
+For the next several development sessions, I would drive one vertical sequence:
+
+1. Close the sparse-Safetensors memory measurement. It is explicitly the next step in demo-ml-utils, is unblocked, and converts “bounded algorithm” into measured evidence.
+
+2. Complete WAV inspect/canonical-copy in demo-file-processing. Do it with current bounded reads and document exactly where output buffering becomes the limitation. The current saga already identifies this as the next unblocked step.
+
+3. From those two experiments, write one upstream contract for binary streams. I would resist separate read_mp3_chunk, read_tensor_chunk, etc. The abstraction should be generic source/sink/range storage.
+
+Something roughly conceptually like:
+
+ByteSource
+  size?
+  read(offset, count) -> Result<bytes>
+
+ByteSink
+  write(bytes) -> Result<count>
+  flush() -> Result
+  position() -> integer
+Then MLPL libraries can build framing, stream folds, buffering, parsers and codecs above that.
+
+4. Immediately extend compile-to-Rust for that same contract. Do not let a second interpreter-only I/O subsystem develop. Every generic capability added here should have interpreter/compiler parity as part of its acceptance criterion.
+
+5. Compile the hexdump or WAV inspector as a standalone binary.
+
+That would be a major milestone because it ties together:
+
+arrays + binary I/O + error handling + CLI arguments + libraries + compiler + runtime
+
+in one easily understood artifact.
+
+I would consider that more strategically important right now than another ML feature.
+
+One architectural improvement I would add immediately
+Create a single cross-repository capability matrix in sw-mlpl, perhaps docs/capabilities.md, generated or at least mechanically checked.
+
+Rows might look like:
+
+Capability	Interpreter	Native compiler	WASM	Server	MLX service	Exercised by
+read_bytes whole	stable	?	sandboxed	stable	n/a	algorithms/file
+bounded byte read	stable	no	…	stable	n/a	ml-utils/file
+packed u8	no	no	no	no	…	BLOCKS binary
+Result serialization	stable	…	…	stable	…	algorithms
+UDF partials	stable	…	…	…	…	combinators
+record_keys	stable	…	…	stable	…	Safetensors
+module namespaces	planned	—	—	—	—	algorithms
+structural sharing	planned	—	—	—	—	algorithms
+incremental sink	missing	—	—	—	—	file-processing
+Then give every downstream requirement an identifier such as CAP-BYTE-SINK-001.
+
+That accomplishes several things simultaneously:
+
+prevents future docs from going stale invisibly;
+
+distinguishes implemented, tested, compiled, accelerated, and merely planned;
+
+lets an AI agent answer “can sw-MLPL do X?” accurately;
+
+makes demo forcing-function pressure obvious;
+
+tells you which one upstream feature unlocks the most downstream work;
+
+gives you a much better public “language completeness” story than counting builtins.
+
+I would go farther and have downstream just check suites emit a small machine-readable conformance record which a central script can aggregate.
+
+Portfolio strategy
+I would now run development approximately 60/25/15:
+
+60% platform closure: runtime contracts, compiler parity, packed data, streaming, modules, performance.
+
+25% forcing-function demos: especially ML artifacts and file processing, because those are currently exposing the most useful gaps.
+
+15% exploratory/research work: speculative decoding, memory research, APL2 concepts, Stable Diffusion, GPU services, Engram/ICRL, etc.
+
+The project has plenty of breadth. What it needs next is closure of vertical slices.
+
+The three strongest vertical proofs would be:
+
+General-purpose: sophisticated algorithm/data structure written entirely in MLPL, acceptably fast.
+
+Systems/application: binary CLI reads a large file in bounded memory and compiles to a standalone executable.
+
+ML: inspect a multi-GB GGUF/Safetensors artifact, compute sampled/streamed statistics, and interactively visualize it without loading the artifact into browser or RAM.
+
+Once those three are solid, the claim that sw-MLPL is a readable array-oriented general-purpose language for ML work, rather than an educational interpreter with many builtins, becomes substantially harder to dismiss.
+
+And importantly, the current repo history suggests you are quite close to having the pieces—the remaining work is increasingly about making the pieces share durable contracts rather than inventing more pieces.
+
+
+also consider these (older, possibly closeable) issues: https://github.com/sw-ml-study/sw-mlpl/issues
+
+Worked for 47s
+Yes. Looking at the five currently open sw-mlpl issues (#7–#11) against the much newer commit history materially changes my assessment. The issue tracker is lagging the project: at least two look closeable now, one has largely achieved its original goal, and two are better treated as backlog/features rather than platform blockers.
+
+Issue triage
+Issue	Current assessment	Action I’d take	Roadmap impact
+#7 Interpreter/minimax performance	Original blocker largely solved	Close or rewrite narrowly	Downgrade substantially
+#8 Connect 3D drops scalars	Fixed + subsequently rebuilt/deployed	Close	None
+#9 Connect :models/:vars/... uses local state	Very likely superseded/fixed	Verify one smoke test, then close	None
+#10 Speculative-decoding demo	Valid idea, but roadmap/research feature, not defect	Keep as backlog or close in favor of planning docs	Low near-term
+#11 :ask quoting/modal UX	Still partly valid, but UI polish	Keep low priority or split/close into roadmap	Low
+That means the open-issue count significantly overstates the amount of unresolved core engineering.
+
+#7 — this is much less of a blocker than the issue says
+The issue still says:
+
+interpreted minimax ~10.8 s, blocking a usable all-MLPL tic-tac-toe engine
+
+and proposes alpha-beta, memoization, vectorized DP, allocation reduction, etc.
+
+But subsequent commits did the most important work.
+
+The recursion correctness prerequisite was fixed first: user-function calls now have per-call local scope. That eliminated the silent recursion corruption from #6.
+
+Then commit 0013699 implemented alpha-beta minimax completely in MLPL, taking the empty-board case from roughly 10.8 seconds to ~0.46 seconds, around a 20× improvement. It also established correct perfect-play results.
+
+More importantly, later commits went beyond the benchmark:
+
+the complete tic-tac-toe engine was implemented in MLPL;
+
+winner became a matrix operation;
+
+best_move, encoding and self-play were MLPL;
+
+the domain-specific Rust ttt_* builtins were removed;
+
+the MLPL version became the actual MLX/CUDA demo engine;
+
+the complete CPU demo was measured around ~7 seconds at its chosen scale;
+
+later self-play was reduced to about 4 seconds for interactive GPU demos.
+
+So #7's primary forcing-function objective has actually succeeded:
+
+“Can a substantial recursive search/game engine be written and used in sw-MLPL rather than hiding it in Rust?” → Yes.
+
+There is still useful performance work. One commit notes that deep interpreter recursion requires a 64 MB Rust thread stack, and the original ideas around memo tables, scalar/array allocation reduction and vectorized DP remain interesting. But those are no longer blocking tic-tac-toe or proving general-purpose programmability.
+
+Recommendation for #7
+I would close #7 as completed, with a summary pointing to the ~20× alpha-beta improvement and all-MLPL engine.
+
+If you want to preserve the remaining work, create much narrower issues only when a forcing function needs them, for example:
+
+interpreter recursion should not require oversized host stacks;
+
+measure/reduce temporary DenseArray allocations;
+
+first-class associative map/dict if another application demonstrates need.
+
+I would not carry forward “make minimax fast” as an active platform priority.
+
+This changes my earlier ranking: generic interpreter performance should move below compiler/application parity, streams, modules and packed storage.
+
+#8 — close it
+The issue itself says the root cause was identified and fixed client-side; the only remaining action was:
+
+“Needs a pages rebuild to deploy.”
+
+Since then there have been numerous explicit pages/ rebuilds and deployments, including connect-mode fixes, demo rebuilds, :ask changes, telemetry changes and current August work.
+
+There is no reasonable reason for #8 to remain open unless the bug can still be reproduced.
+
+Recommendation
+Run one connected scalar smoke test if you want belt-and-suspenders verification:
+
+x = 2 + 3
+x
+and confirm the scalar reaches the 3D stage.
+
+Then close #8 as completed.
+
+No roadmap work should depend on it.
+
+#9 — probably closeable too
+This one is more interesting because the issue describes an architectural routing mistake:
+
+connect-mode colon commands that the browser doesn't specially understand fall back into the empty browser-local workspace rather than the server workspace.
+
+That was exactly the wrong architecture.
+
+But the July 29 commit ff9ab95 subsequently changed the general rule:
+
+client connect mode: colon lines the client does not handle itself now route to the SERVER … instead of falling into the browser-local evaluator
+
+and explicitly explains why:
+
+the server's session owns the bindings.
+
+That is substantially broader than the narrow fix proposed in #9 and looks like the correct architectural repair.
+
+Later commits also hardened colon-command parity across browser, server and terminal and verified several cases through connected end-to-end tests.
+
+So the old root-cause description in #9 no longer appears to describe HEAD.
+
+Recommendation
+Do one small connected regression test:
+
+mdl = chain(linear(2, 4, 11), relu_layer(), linear(4, 2, 12))
+:models
+:vars
+:wsid
+If those reflect the server workspace, close #9.
+
+I would also check :experiments and :tokenizers because the issue explicitly named them, but this is verification—not a development saga.
+
+This is also evidence for an architectural rule worth making explicit:
+
+In connect mode, anything involving MLPL workspace state belongs to the server unless deliberately documented as browser-local UI state.
+
+That is much cleaner than command-by-command exceptions.
+
+#10 — speculative decoding belongs in the roadmap, not the critical issue queue
+This remains a good demo idea. The issue is unusually well thought through: it separates synthetic speculative sampling, tiny-LM speculative decoding, losslessness verification and honest performance metrics.
+
+But there is now already a substantial docs/plan-for-speculative-decoding.md, and the main multi-saga plan explicitly lists speculative decoding as queued work.
+
+There are actually two related experiments now:
+
+MLPL-native algorithm demo — the #10 Tier 1/Tier 2 idea.
+
+Real useful inference speed experiment — external mlx-lm, real Qwen/Llama models, measured tok/s and acceptance.
+
+Those aren't identical. I would preserve that distinction.
+
+The MLPL version teaches the algorithm and stresses:
+
+batched gather;
+
+row slicing;
+
+sampling;
+
+model generation state;
+
+array-oriented control.
+
+The external MLX experiment demonstrates actual hardware speedup.
+
+But neither is a current blocker.
+
+Recommendation
+If GitHub Issues are meant to represent actionable defects/current engineering work, I would close #10 and point it to the speculative-decoding planning docs.
+
+If Issues also serve as a feature backlog, keep it open but label it something like:
+
+research-demo, future, non-blocking.
+
+Either way, it belongs well below the binary/application/compiler work right now.
+
+#11 — useful polish, but don't let it masquerade as architecture
+This issue actually contains two quite different things:
+
+normalize optional quoting behavior for :ask;
+
+make bare :ask launch a multiline web dialog.
+
+The first is small consistency/documentation debt.
+
+The second is a UI feature.
+
+There has been substantial subsequent :ask work—Ollama availability detection, prompt grounding, no-echo rules, timeouts, multi-demo context, public-page behavior, glossary/documentation—so :ask itself is clearly much more mature than when the issue was written. But I did not find evidence that the bare-:ask textarea dialog was implemented.
+
+Therefore #11 isn't obsolete in the same sense as #8/#9.
+
+Still, it is nowhere near a platform blocker.
+
+What I would do
+Either implement the cheap consistency portion when touching :ask next, or close the issue and put “multiline Ask dialog” into web UX future work.
+
+I would avoid spending a dedicated development cycle on it now.
+
+Revised interpretation of the project
+This issue review makes the project look healthier than my previous assessment.
+
+The old issues imply several outstanding problems:
+
+recursion correctness
+    ↓
+recursive algorithms too slow
+    ↓
+tic-tac-toe can't really be MLPL
+    ↓
+connect UI state is broken
+    ↓
+3D connect rendering is inconsistent
+But the current history says:
+
+recursion correctness       ✅
+        ↓
+alpha-beta MLPL search      ✅ ~20x improvement
+        ↓
+complete MLPL game engine   ✅
+        ↓
+Rust domain builtins removed ✅
+
+connect command routing     apparently ✅
+3D scalar propagation       ✅
+That's a significant change.
+
+In other words, the oldest open issues mostly document problems that the forcing-function process already solved.
+
+Revised priorities
+Accounting for this issue cleanup, I'd change my previous order to:
+
+Rank	Priority	Reason
+1	Finish current demo-ml-utils sparse/peak-memory acceptance and demo-file-processing WAV slice	Complete the work already in flight
+2	Generic packed binary representation + bounded source/sink architecture	Largest genuinely missing cross-cutting capability
+3	Compile-to-Rust application parity	Biggest gap between “language interpreter” and “general-purpose application language”
+4	Modules/namespaces/library boundaries	Current demos have become large enough to need them
+5	GGUF vertical slice in demo-ml-utils	Drives typed binary, large files, quant formats and visualization
+6	File-processing bounded transformations → MP3/ID3 → Ogg	Drives generic stream/container infrastructure
+7	Structural sharing/views/builders/typed storage based on measured downstream pressure	Tackles the biggest remaining semantic-vs-physical-efficiency discrepancy
+8	General HOF iteration primitives such as UDF-capable fold/scan/unfold where demos prove the need	Removes recurring recursive workarounds
+9	MLX/CUDA service architecture	Important heterogeneous-compute direction after application contracts stabilize
+10	Speculative decoding and other advanced ML experiments	Valuable differentiators, but no longer completeness blockers
+11	Interpreter micro-performance beyond demonstrated needs	#7 shows it is adequate enough for substantial programs now
+12	Web UX polish (:ask modal etc.)	Continuous maintenance rather than roadmap driver
+The particularly important change is #11 above: I would no longer launch a generic “make the interpreter faster” saga just because #7 is open.
+
+Measure another real application. Optimize only when the next forcing function shows what is actually expensive.
+
+One tracker/process change I'd make
+I would periodically classify every issue into exactly one of four buckets:
+
+Bug / Capability blocker / Forcing-function request / Future experiment.
+
+Right now #7–#11 mix all four concepts together.
+
+And I would make an issue automatically suspicious when a later commit says things such as:
+
+Refs #7
+Fixes the root cause...
+pages rebuilt...
+verified over connect...
+but the issue remains open for months.
+
+The AgentRail workflow is actually moving faster than the GitHub issue lifecycle.
+
+A useful rule would be:
+
+Saga completion must reconcile every referenced GitHub issue: close it, update its remaining scope, or explicitly state why it remains open.
+
+That would prevent precisely what we're seeing here.
+
+My proposed cleanup now
+I would expect the tracker to end up roughly like this:
+
+#7 → close completed, optionally extract the recursion-stack concern later.
+
+#8 → close completed.
+
+#9 → smoke-test HEAD, almost certainly close completed.
+
+#10 → either close as superseded by roadmap docs, or explicitly label future/research.
+
+#11 → keep only if you actually want the textarea feature; otherwise move it to web future-work and close.
+
+So it is quite plausible that the correct open core-bug count is effectively zero, with #10/#11 being feature backlog rather than defects.
+
+That reinforces the larger conclusion: the highest-value work now isn't fixing old correctness holes. It is closing the remaining architectural gaps between the capable interpreter you already have and a coherent general-purpose application platform: typed/packed data, bounded streams, libraries/modules, compiler parity, and standalone executables.
+
+

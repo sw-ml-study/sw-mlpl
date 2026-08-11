@@ -1,0 +1,1978 @@
+ChatGPT Pro
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Today 9:32 AM
+At some point I will be seeking feedback on: sw-ml-study/sw-mlpl and related demo repos: sw-ml-study/demo-algorithms, sw-ml-study/demo-combinators, and a planned demo-funtional-pipelines (inspired by https://ramdajs.com/).  Say I post this on reddit in one or more places or even on y-combinator.  The internet trolls will "bark at what they don't understand."  How can I anticipate the criticisms and attacks and provide reasonable responses (or know which to ignore).  Playing devil's advocate, what are valid (and less-valid, yet expected) criticisms of this work?
+
+This is actually a good exercise.
+
+The strongest projects don't survive because nobody criticizes them—they survive because the author can distinguish between:
+
+valid technical criticism (gold)
+
+differences in philosophy (interesting)
+
+misunderstandings (improve documentation)
+
+status-quo tribalism (ignore)
+
+Your project (sw-MLPL) touches several communities simultaneously:
+
+Rust
+
+Functional programming
+
+APL/BQN/J
+
+Machine Learning
+
+Data science
+
+Programming language design
+
+DSL enthusiasts
+
+Compiler people
+
+Each community has different expectations, and some are almost guaranteed to criticize from their worldview.
+
+Category 1: The criticisms you WANT
+These are worth spending hours thinking about.
+
+"What real problem does this solve?"
+Probably the single most important question.
+
+Expect:
+
+Why not just use Python?
+
+or
+
+Why not NumPy?
+
+or
+
+Why not JAX?
+
+or
+
+Why not Mojo?
+
+or
+
+Why not BQN?
+
+These are excellent questions.
+
+Your answer needs to be crystal clear.
+
+For example:
+
+Python is an excellent research language.
+
+sw-MLPL is exploring a language that is:
+
+easier to optimize
+
+easier to compile
+
+easier to parallelize
+
+easier to reason about
+
+more suitable for production Rust integration
+
+educational
+
+Notice that this is not
+
+"Python sucks."
+
+because that immediately loses half your audience.
+
+"What makes this different?"
+People will ask:
+
+Isn't this just APL?
+
+or
+
+Isn't this just J?
+
+or
+
+Isn't this just BQN?
+
+or
+
+Isn't this just Ramda?
+
+or
+
+Isn't this just TensorFlow?
+
+If the answer is
+
+yes
+
+then the project isn't interesting.
+
+You need a concise statement.
+
+For example:
+
+sw-MLPL borrows ideas from APL, BQN, Ramda, MLX, NumPy, and Rust, but is designed around readability, compiler optimization, and ML experimentation rather than terseness or mathematical notation.
+
+That's a much stronger answer.
+
+"Show me something impossible elsewhere."
+This is huge.
+
+People love demos.
+
+If your README only says
+
+A new ML language...
+
+people stop reading.
+
+If it says
+
+Here is attention implemented in 18 readable lines.
+
+people keep reading.
+
+"Performance?"
+You'll hear
+
+Can it beat NumPy?
+
+Good answer:
+
+Not yet.
+
+Bad answer:
+
+Eventually.
+
+Better:
+
+The goal is to enable compiler optimizations that are difficult in Python while keeping code readable.
+
+That sets expectations correctly.
+
+Category 2: Philosophy disagreements
+These are not really technical.
+
+"Languages don't need another DSL."
+You'll hear this.
+
+Response:
+
+Fair point. This project exists to explore whether ML-specific abstractions can improve readability and optimization simultaneously.
+
+Short.
+
+Calm.
+
+"Rust already exists."
+Yes.
+
+Rust is a systems language.
+
+sw-MLPL is not trying to replace Rust.
+
+It is trying to generate or interoperate with Rust.
+
+Very different.
+
+"Just use Python."
+Don't fight this.
+
+Python dominates.
+
+Instead say
+
+Python is the current standard. sw-MLPL is exploring an alternative design space.
+
+People respect that much more.
+
+Category 3: Readability attacks
+Ironically these may become compliments.
+
+People will say
+
+This syntax is weird.
+
+Of course.
+
+Every language is weird until it isn't.
+
+Instead ask:
+
+Was the code understandable after five minutes?
+
+That's a much better metric.
+
+"It isn't concise."
+Excellent.
+
+Your stated goal isn't maximum terseness.
+
+It's readable functional ML.
+
+Don't apologize.
+
+"Too many words."
+APL people will say this.
+
+Python people will probably say
+
+thank goodness.
+
+You aren't trying to satisfy APL purists.
+
+Category 4: ML criticism
+These will come from ML practitioners.
+
+"Where is autodiff?"
+Valid.
+
+"Where are tensors?"
+Valid.
+
+"GPU?"
+Valid.
+
+"Distributed?"
+Valid.
+
+"Training?"
+Valid.
+
+"Mixed precision?"
+Valid.
+
+"Checkpointing?"
+Valid.
+
+These become roadmap items.
+
+Category 5: PL researchers
+These people ask different questions.
+
+"Is the language pure?"
+Can expressions have side effects?
+
+"Static typing?"
+"Type inference?"
+"Lazy?"
+"Eager?"
+"Referential transparency?"
+"Pattern matching?"
+"Higher-order functions?"
+"Formal semantics?"
+These are good questions.
+
+Even if your answer is
+
+not yet
+
+that's okay.
+
+Category 6: Compiler people
+They'll ask
+
+Why can your compiler optimize this?
+
+This is where Rust helps.
+
+If every pipeline is explicit...
+
+If shapes are known...
+
+If operators compose...
+
+If purity exists...
+
+Compiler optimizations become easier.
+
+Lean into that.
+
+Category 7: Expected internet trolling
+These aren't technical.
+
+"Nobody asked for another language."
+Ignore.
+
+People said this about:
+
+Rust
+
+Zig
+
+Go
+
+Swift
+
+Kotlin
+
+TypeScript
+
+"Dead project."
+Ignore unless they're pointing to lack of commits.
+
+"Use Python."
+Already answered.
+
+"This will never replace NumPy."
+Correct.
+
+Don't claim it will.
+
+"Reinventing the wheel."
+One of my favorites.
+
+Response:
+
+Most programming language research is, in some sense, reinventing the wheel. The interesting question is whether the new wheel rolls better in a particular domain.
+
+"Looks like homework."
+Ignore.
+
+"Nobody will learn this."
+Every language starts there.
+
+Category 8: APL community
+Ironically this community may appreciate parts of it while disagreeing strongly elsewhere.
+
+Expect:
+
+Why remove glyphs?
+
+Good answer:
+
+Because the target audience is ML practitioners who are already comfortable reading words rather than symbolic notation.
+
+Words are slower.
+
+Answer:
+
+The parser doesn't care.
+
+You lost the beauty.
+
+That's philosophy.
+
+Not worth debating.
+
+Category 9: Rust community
+Expect:
+
+Why not just build a Rust library?
+
+Good answer:
+
+Because languages encode abstractions differently.
+
+Rust excels as a systems language.
+
+sw-MLPL explores a domain-specific language that can later target efficient Rust implementations.
+
+Category 10: Functional programming community
+These are often productive discussions.
+
+Questions include:
+
+Why not Haskell?
+
+Why not F#?
+
+Why not OCaml?
+
+Why not Elm?
+
+Have comparisons ready.
+
+The criticism I would make
+If I were reviewing the project for a programming languages workshop, my biggest questions would be:
+
+1. What is the core innovation?
+Not "it's another syntax."
+
+What new capability does the language enable?
+
+2. Who is the primary audience?
+There are several plausible audiences:
+
+ML researchers
+
+Rust developers
+
+educators
+
+compiler researchers
+
+hobbyists
+
+students
+
+Trying to optimize for all of them simultaneously is difficult.
+
+3. What is the smallest compelling example?
+Can someone understand the value in under five minutes?
+
+A single attention kernel, a convolution, or a tokenizer pipeline written more clearly than the equivalent Python or BQN would be far more persuasive than a long feature list.
+
+4. What should users stop writing?
+A language isn't defined by what it adds.
+
+It's defined by what it eliminates.
+
+If the answer is
+
+"Users should no longer have to write explicit loops over tensors."
+
+that's concrete.
+
+5. Can the compiler exploit the abstractions?
+If the compiler has richer semantic knowledge than a general-purpose compiler—for example, purity, tensor shapes, pipeline composition, or algebraic identities—that is a compelling technical direction.
+
+One strategic suggestion
+From our previous conversations, I think the project's strongest differentiator is not "a better syntax for tensors." It's the combination of:
+
+readable functional pipelines inspired by Ramda rather than symbolic APL,
+
+a language designed specifically for learning and experimenting with modern ML techniques (multi-token prediction, speculative decoding, engrams, mHC, hierarchical reasoning, etc.),
+
+seamless integration with Rust so experiments can evolve into production-quality implementations,
+
+and an emphasis on compiler-visible semantics that can enable optimizations difficult to achieve in dynamic Python code.
+
+That narrative is unusual. It positions sw-MLPL as a language for understanding and building ML systems, rather than as "yet another NumPy replacement."
+
+If you consistently frame the project that way, many of the inevitable "Why not Python?" comments become easier to answer: Python remains the dominant ecosystem, while sw-MLPL explores a different point in the design space focused on readability, experimentation, compilation, and systems integration.
+
+
+I actually think this is the missing piece that unifies many of your recent conversations.
+
+What you've described over the last few weeks isn't just an ML language. It's evolving into a language and runtime for AI-assisted software development and AI experimentation.
+
+I'd be careful, however, not to let the messaging become "everything AI." Instead, I think there are three concentric circles.
+
+Circle 1 — The language
+This is sw-MLPL itself.
+
+Its job is to provide:
+
+array programming
+
+functional composition
+
+ML abstractions
+
+readable syntax
+
+experimentation
+
+compilation
+
+visualization
+
+This should remain relatively stable.
+
+Circle 2 — AI-assisted programming
+This is where the embedded agent belongs.
+
+Rather than saying
+
+AI built into the language
+
+I'd describe it as
+
+AI-native development environment.
+
+Think about what Google Colab did.
+
+People don't think of Gemini as a Python language feature.
+
+They think of it as part of the programming environment.
+
+The language remains the language.
+
+The IDE/runtime becomes AI-native.
+
+That distinction matters architecturally.
+
+For example:
+
+Editor
+     │
+ AI Assistant
+     │
+ sw-MLPL compiler
+     │
+ runtime
+instead of
+
+language
+    │
+AI magic
+This is actually a very natural consequence
+Suppose someone writes
+
+attention ...
+The assistant should know:
+
+explain attention
+
+show equation
+
+show visualization
+
+estimate FLOPs
+
+estimate memory
+
+optimize backend
+
+suggest quantization
+
+convert to Rust
+
+debug shape mismatch
+
+explain gradients
+
+That isn't an LLM replacing the programmer.
+
+That's an intelligent language environment.
+
+Circle 3 — AI agent experimentation
+This is where your interests in:
+
+ICL
+
+ICRL
+
+XSkills
+
+Engrams
+
+mHC
+
+multi-token prediction
+
+speculative decoding
+
+HRM
+
+TRM
+
+Baby Dragon
+
+agent loops
+
+all fit.
+
+Notice something.
+
+These are not primarily language features.
+
+They're experiments about improving AI agents.
+
+So I would treat them as:
+
+sw-MLPL
+
+    language
+         │
+    standard library
+         │
+ agent experimentation library
+rather than making them keywords.
+
+This is an important distinction
+The project is increasingly about two kinds of learning.
+
+Machine learning
+Train neural networks.
+
+This is the traditional interpretation.
+
+Agent learning
+Improve an agent over time.
+
+Examples:
+
+reflection
+
+retry
+
+tool use
+
+memory
+
+retrieval
+
+planning
+
+self-critique
+
+skill acquisition
+
+workflow optimization
+
+These are becoming just as important.
+
+I think this deserves first-class treatment.
+
+I would broaden "ML" slightly
+Today people tend to hear
+
+Machine Learning
+
+and immediately think
+
+PyTorch.
+
+But many modern systems look like:
+
+LLM
+  ↓
+planner
+  ↓
+tool use
+  ↓
+reflection
+  ↓
+memory
+  ↓
+retry
+  ↓
+evaluation
+There may not be any gradient descent happening during execution.
+
+Yet the system clearly improves.
+
+That is a fascinating design space.
+
+I would therefore introduce a new term
+Not replacing ML.
+
+Adding another pillar.
+
+Maybe:
+
+Computational Learning
+
+or
+
+Adaptive Computation
+
+or
+
+Learning Systems
+
+because your interests are broader than SGD.
+
+You're interested in systems that improve.
+
+Sometimes that happens through
+
+training.
+
+Sometimes through
+
+experience.
+
+Sometimes through
+
+memory.
+
+Sometimes through
+
+workflow optimization.
+
+Sometimes through
+
+human feedback.
+
+Those are different mechanisms.
+
+AI coding agents become first-class users
+This is actually an excellent observation.
+
+One of your motivations for avoiding APL glyphs is no longer just humans.
+
+It's LLMs.
+
+Today's coding models are trained overwhelmingly on:
+
+Python
+
+JavaScript
+
+C++
+
+Java
+
+Rust
+
+APL-family languages are extremely underrepresented.
+
+Therefore
+
++/⍳10
+is a much harder token sequence than
+
+sum(range(10))
+or
+
+over(add, range(10))
+The latter gives the model far more semantic anchors.
+
+I would be careful how this is presented.
+
+Don't claim
+
+LLMs can't learn APL.
+
+Instead say
+
+Current coding models have comparatively little exposure to APL-family languages. Readable keyword-oriented syntax may therefore make AI-assisted development more effective.
+
+That is both plausible and modest.
+
+This suggests another design principle
+Ask:
+
+Can an LLM explain this code?
+
+rather than merely
+
+Can a human read this code?
+
+That's a genuinely modern language-design question.
+
+Imagine comparing:
+
+each(square)
+versus
+
+¨
+The keyword version carries much richer statistical information for today's models.
+
+The embedded agent could become extraordinary
+Suppose every AST node carried metadata.
+
+The agent could answer:
+
+Why is this slow?
+
+Show the generated Rust.
+
+Explain the gradient.
+
+Show equivalent equation.
+
+Visualize the tensor.
+
+Replace with fused operation.
+
+Show memory traffic.
+
+Compile for FPGA.
+
+Explain this as if I'm learning ML.
+
+That is a language-aware assistant.
+
+Not merely an autocomplete.
+
+Agent improvement becomes another compiler target
+Here's the interesting thought.
+
+Today your compiler targets:
+
+CPU
+GPU
+MLX
+CUDA
+Eventually
+
+FPGA
+MCU
+But there could also be
+
+Agent
+Suppose the compiler knows:
+
+purity
+
+dependencies
+
+shapes
+
+types
+
+semantics
+
+The agent can reason over that.
+
+Now imagine:
+
+MLPL
+    ↓
+semantic IR
+    ↓
+compiler
+
+and
+
+semantic IR
+    ↓
+agent reasoning
+Both consume the same representation.
+
+That's powerful.
+
+XSkills and ICRL fit nicely
+I wouldn't put these into the language.
+
+I'd make them an agent runtime.
+
+For example
+
+Agent
+
+planner
+memory
+skills
+reflection
+evaluation
+ICL
+ICRL
+XSkills
+The MLPL runtime could expose APIs like:
+
+remember(...)
+reflect(...)
+evaluate(...)
+improve(...)
+while the underlying implementation evolves.
+
+The language stays stable.
+
+The agent framework changes rapidly.
+
+This also explains your demo repositories
+Suddenly they aren't random.
+
+demo-algorithms
+
+→ tests language expressiveness
+
+demo-combinators
+
+→ tests functional abstraction
+
+demo-functional-pipelines
+
+→ tests compositional workflows
+
+future demo-agents
+
+→ tests adaptive systems
+
+future demo-backends
+
+→ tests hardware mapping
+
+Each becomes an executable requirements corpus for a different subsystem.
+
+I think there is one caution
+The project is becoming ambitious enough that it risks appearing unfocused.
+
+I would explicitly separate:
+
+Stable core
+Language.
+
+Compiler.
+
+Runtime.
+
+Experimental libraries
+ML.
+
+Agent learning.
+
+Hardware.
+
+Visualization.
+
+Research directions
+Distributed FPGA.
+
+MCU mesh.
+
+Alternative parameter representations.
+
+Self-improving agents.
+
+Because then someone can adopt only the first layer.
+
+If I were writing the project's one-sentence vision today
+I think it has evolved into something like:
+
+sw-MLPL is an APL-inspired, Rust-native language and experimentation platform for machine learning, AI agents, and alternative compute architectures, designed to make learning systems easier to understand, optimize, and deploy across conventional and unconventional hardware.
+
+That statement naturally accommodates:
+
+your desire to move beyond Python/Colab,
+
+your preference for Rust,
+
+your interest in APL-family semantics,
+
+educational visualization,
+
+AI-native development with an integrated assistant,
+
+optimization of AI coding agents,
+
+experimentation with agent-learning techniques such as ICL, ICRL, and XSkills,
+
+and exploration of CPUs, GPUs, NPUs, FPGAs, and distributed architectures.
+
+One final suggestion: I would explicitly distinguish learning by gradient descent from learning by experience in your documentation. A section titled "Two Kinds of Learning" could explain that sw-MLPL supports both traditional machine learning workflows and experimentation with adaptive agent systems that improve through memory, reflection, retrieval, and iterative refinement. That distinction is increasingly important as agentic systems become a major focus of AI research, and it cleanly explains why your roadmap extends beyond neural network training alone.
+
+
+So how would you market the existing language?  What would you prioritize adding to the existing language before asking for feedback from a larger community (communities)?
+
+Worked for 8s
+I think I'd actually separate marketing from research vision.
+
+Right now, I think sw-MLPL has a tendency to try to explain everything it may eventually become. That's exciting for someone like me who's followed our conversations, but it's overwhelming for a new visitor.
+
+I would market the project in layers.
+
+Layer 1: What is it today?
+This needs to be answerable in about 15 seconds.
+
+Something like:
+
+sw-MLPL is an experimental, Rust-native array programming language for machine learning, inspired by the APL family but designed with readable keyword-based syntax, interactive experimentation, visualization, and native compilation.
+
+That statement doesn't overclaim.
+
+Everything in it is demonstrable today.
+
+Layer 2: Why should I care?
+Then immediately answer:
+
+Why would I use this instead of Python?
+
+Not because it's "better."
+
+Because it's different.
+
+I think there are five strong value propositions.
+
+1. Learn ML
+Not just run ML.
+
+See:
+
+arrays
+
+shapes
+
+attention
+
+gradients
+
+models
+
+pipelines
+
+rather than opaque framework calls.
+
+2. Experiment
+You don't want people afraid to change things.
+
+Every tutorial should invite:
+
+Modify this.
+
+Run it again.
+
+Observe what changed.
+
+3. Understand
+This is one of your biggest strengths.
+
+Tracing.
+
+Visualization.
+
+Generated equations.
+
+Backend comparison.
+
+Shape inspection.
+
+Compiler IR.
+
+Generated Rust.
+
+Those are educational tools.
+
+4. Compile
+Instead of
+
+Python
+↓
+
+Jupyter
+
+↓
+
+runtime magic
+
+you have
+
+MLPL
+
+↓
+
+semantic compiler
+
+↓
+
+Rust
+
+↓
+
+native executable
+
+↓
+
+future accelerators.
+
+5. Explore
+This is where you distinguish yourself.
+
+Not
+
+"Here's another framework."
+
+Instead
+
+"Here's a place to investigate new ideas."
+
+Then the roadmap
+After someone understands today's language, then show:
+
+AI-native IDE
+
+agent workflows
+
+alternative backends
+
+FPGA
+
+MCU mesh
+
+etc.
+
+Those become exciting rather than confusing.
+
+What would I prioritize before a public launch?
+This is actually a different question than
+
+"What language features should I add?"
+
+I think the biggest improvements are not syntax.
+
+They're evidence.
+
+Priority 1
+Demonstrate the philosophy
+One killer demo.
+
+I'd spend more effort on this than adding another language feature.
+
+For example
+
+Attention in MLPL
+
+showing
+
+equation
+
+↓
+
+MLPL
+
+↓
+
+visualization
+
+↓
+
+generated Rust
+
+↓
+
+execution
+
+↓
+
+inspection
+
+↓
+
+modification.
+
+That's your flagship.
+
+Priority 2
+Errors
+Before Reddit.
+
+Before Hacker News.
+
+Before PL people.
+
+Errors.
+
+Examples:
+
+Expected axis "batch"
+
+Found axis "sequence"
+
+Hint:
+
+Did you transpose the tensor?
+instead of
+
+Shape mismatch.
+Priority 3
+Explain the design
+I'd create one document:
+
+Why MLPL Exists
+Nothing else.
+
+No implementation.
+
+No roadmap.
+
+Just
+
+Why?
+
+Priority 4
+Shape semantics
+I'd want these nailed down.
+
+Exactly:
+
+broadcasting
+
+reductions
+
+scalars
+
+empty arrays
+
+rank
+
+named axes
+
+transpose
+
+reshape
+
+No ambiguity.
+
+Priority 5
+Stable functional vocabulary
+This is one area where I would resist adding features.
+
+I'd rather have
+
+each
+over
+scan
+table
+compose
+pipe
+filter
+map
+zip
+reduce
+become rock solid.
+
+Don't keep renaming them.
+
+Priority 6
+Functional pipelines
+I actually think your planned demo-functional-pipelines is strategically more important than another dozen ML examples.
+
+Why?
+
+Because it demonstrates that MLPL isn't only about tensors.
+
+A pipeline like
+
+CSV
+
+↓
+
+filter
+
+↓
+
+group
+
+↓
+
+normalize
+
+↓
+
+aggregate
+should feel exactly like
+
+dataset
+
+↓
+
+tokenize
+
+↓
+
+batch
+
+↓
+
+model
+
+↓
+
+loss
+
+↓
+
+optimizer
+That consistency is valuable.
+
+Priority 7
+Agent APIs
+Notice I said APIs.
+
+Not syntax.
+
+For example
+
+reflect(...)
+remember(...)
+plan(...)
+evaluate(...)
+These can initially just be library functions.
+
+Don't make them keywords.
+
+Priority 8
+AI-assisted environment
+This would actually move quite high on my list.
+
+Imagine the browser version.
+
+Instead of
+
+Run
+it has
+
+Run
+
+Explain
+
+Visualize
+
+Optimize
+
+Ask AI
+That immediately distinguishes MLPL from a REPL.
+
+Priority 9
+Backend-independent IR
+This is the most important architectural work.
+
+Not because users see it.
+
+Because everything later depends on it.
+
+Today
+
+MLPL
+
+↓
+
+Rust
+Tomorrow
+
+MLPL
+
+↓
+
+semantic IR
+
+↓
+
+Rust
+MLX
+CUDA
+FPGA
+MCU
+future backend
+That IR is the real product.
+
+Priority 10
+Agent optimization
+Notice something interesting.
+
+This is different from
+
+"embedded AI."
+
+You have two users.
+
+Human.
+
+Agent.
+
+I'd start treating agents explicitly as users.
+
+For example.
+
+Instead of asking
+
+Can humans read this?
+
+also ask
+
+Can an LLM understand this?
+
+Can it modify it?
+
+Can it explain it?
+
+Can it generate it?
+
+Can it debug it?
+
+I would even add a design principle
+Every syntax proposal should answer:
+
+Does this improve reasoning by both humans and AI coding agents?
+
+That's a very modern criterion.
+
+Things I would deliberately postpone
+This may surprise you.
+
+I would not rush to add:
+
+dozens of ML algorithms
+
+every optimizer
+
+distributed training
+
+TPU backend
+
+NPU backend
+
+FPGA backend
+
+MCU runtime
+
+every agent-learning technique
+
+language macros
+
+sophisticated type systems
+
+Those are all interesting.
+
+But they don't yet answer:
+
+Why is MLPL worth paying attention to?
+
+Instead I'd define Version 1's identity
+If I had to summarize Version 1 in one sentence:
+
+MLPL is the most understandable way to express, experiment with, visualize, compile, and eventually optimize machine-learning computations using a readable array language inspired by APL and implemented in Rust.
+
+Everything else—
+
+AI-native development,
+
+agent optimization,
+
+speculative decoding,
+
+ICL/ICRL,
+
+XSkills,
+
+FPGA compilation,
+
+distributed MCU execution,
+
+alternative parameter representations—
+
+fits naturally into Version 2 and beyond because they all build on the same semantic foundation.
+
+One final strategic observation: your project has evolved into three distinct but reinforcing research programs:
+
+A better language for expressing learning systems.
+
+A better environment for understanding and building learning systems.
+
+A better compiler/runtime for executing learning systems on unconventional hardware and improving AI agents themselves.
+
+The first is already tangible today. The second is within reach with focused tooling and documentation. The third is ambitious research that gives the project a compelling long-term vision without needing to be "finished" before inviting the broader programming language, Rust, ML, and AI-agent communities to evaluate the language itself.
+
+
+So, I should focus on some libraries, not keywords. better explanations (better errors, better AI coder integration, the ability to explain and suggest things; however it is hard to do this in the github.io hosted live browser demo since there is no affordable way to provide the AI agent part.  Early users will have to install sw-mlpl in a way where an AI agent is integratible to get the full "helpful" language/IDE experience.   Maybe I could somehow integrate sw-MLPL with JetBrains Rust IDE and its AI coding agent (but each user would have to have those tools/subscriptions; I cannot pay for random users using an LLM I provide) 
+
+I think you're converging on something important, and it actually changes what I would recommend not building.
+
+The key realization is this:
+
+sw-MLPL does not need to ship an LLM. It needs to be an excellent client of whatever LLM the user already has.
+
+That is a much more sustainable goal.
+
+Think of AI as a plugin, not infrastructure
+Google can afford to bundle Gemini into Colab because they own:
+
+the cloud
+
+the model
+
+the billing
+
+the authentication
+
+An open-source project generally cannot.
+
+Instead, think about how editors work.
+
+Users already have:
+
+ChatGPT
+
+Claude
+
+GitHub Copilot
+
+JetBrains AI
+
+Cursor
+
+Continue
+
+Cline
+
+Roo Code
+
+OpenCode
+
+local llama.cpp
+
+Ollama
+
+MLX
+
+LiteLLM
+
+vLLM
+
+sw-MLPL shouldn't compete with those.
+
+It should integrate with them.
+
+I actually think the architecture becomes simpler
+Instead of
+
+MLPL
+
+↓
+
+embedded LLM
+I'd think
+
+          ChatGPT
+             │
+ Claude ─────┤
+             │
+ JetBrains AI│
+             │
+ local LLM   │
+             │
+        AI Adapter
+             │
+         sw-MLPL
+The language shouldn't care which model answers.
+
+Your compiler knows things the LLM doesn't
+This is where MLPL becomes valuable.
+
+Suppose an LLM asks:
+
+Explain this program.
+
+The compiler already knows:
+
+AST
+
+types
+
+shapes
+
+symbol table
+
+call graph
+
+tensor dimensions
+
+generated Rust
+
+optimization opportunities
+
+warnings
+
+The LLM shouldn't rediscover those.
+
+The compiler should expose them.
+
+Think Language Server
+I actually think your AI integration should resemble an LSP.
+
+Instead of
+
+LLM
+↓
+
+text
+you get
+
+LLM
+
+↓
+
+MLPL semantic server
+
+↓
+
+compiler
+
+↓
+
+AST
+IR
+types
+shapes
+warnings
+documentation
+Now the LLM reasons over semantic objects.
+
+Not raw text.
+
+This is a huge opportunity
+Suppose ChatGPT asks
+
+Why won't this compile?
+
+Instead of reading text,
+
+it receives
+
+{
+  "node":"Reduce",
+  "input_shape":"batch,time",
+  "expected":"batch",
+  "actual":"batch,time"
+}
+Now every model becomes dramatically better.
+
+This is also future-proof
+Today
+
+JetBrains AI.
+
+Tomorrow
+
+Claude.
+
+Next year
+
+OpenAI.
+
+Five years
+
+something else.
+
+The MLPL semantic interface stays the same.
+
+I would actually prioritize an LSP
+Even before embedded AI.
+
+Because then you get:
+
+JetBrains
+
+VS Code
+
+Emacs
+
+Neovim
+
+Zed
+
+all benefiting.
+
+Then AI tools inherit those capabilities.
+
+The browser demo
+I wouldn't worry very much.
+
+The browser demo should answer:
+
+Can I learn MLPL?
+
+Not
+
+Can I build production software?
+
+Those are different.
+
+The browser should probably include:
+
+examples
+
+visualization
+
+tracing
+
+generated Rust
+
+explain shapes
+
+equations
+
+without requiring AI.
+
+Then the desktop version
+Desktop becomes
+
+Editor
+
+↓
+
+LSP
+
+↓
+
+MLPL compiler
+
+↓
+
+AI adapter
+
+↓
+
+user's preferred model
+The AI adapter
+I think this is one of the most important libraries you could write.
+
+Maybe
+
+swml-ai
+Its job:
+
+trait Assistant {
+    fn explain(...)
+
+    fn optimize(...)
+
+    fn debug(...)
+
+    fn document(...)
+
+    fn visualize(...)
+
+    fn suggest(...)
+}
+Implementations:
+
+OpenAI
+
+Anthropic
+
+Ollama
+
+llama.cpp
+
+LiteLLM
+
+OpenRouter
+
+GitHub Models
+
+etc.
+
+Notice what's nice
+The compiler never knows.
+
+The language never knows.
+
+Only the adapter changes.
+
+Then build semantic tools
+This is where I think your effort should go.
+
+Not prompt engineering.
+
+Semantic tools.
+
+For example:
+
+Explain AST
+returns
+
+structured tree.
+
+Explain tensor
+returns
+
+shape
+
+dtype
+
+axes
+
+producer
+
+consumer
+
+Explain pipeline
+returns
+
+graph
+
+Find optimization
+returns
+
+candidate transformations.
+
+The LLM becomes the narrator.
+
+The compiler provides facts.
+
+This also helps coding agents
+You mentioned AI coding agents struggling with APL.
+
+Exactly.
+
+Imagine instead they ask
+
+Describe this function.
+Compiler returns
+
+{
+  "kind":"map",
+
+  "axes":["batch"],
+
+  "pure":true,
+
+  "complexity":"O(n)"
+}
+Now the LLM doesn't have to infer semantics.
+
+JetBrains
+I actually think JetBrains is worth considering.
+
+Not because it's the only IDE.
+
+Because their AI is becoming increasingly tool-oriented.
+
+But I would not make JetBrains your primary integration target.
+
+I'd target:
+
+LSP
+plus
+
+MCP
+MCP is particularly interesting
+Think about this.
+
+Suppose Claude Desktop asks
+
+Explain foo.mlpl
+Instead of reading source,
+
+it calls
+
+mlpl.explain_ast
+
+mlpl.explain_shapes
+
+mlpl.find_symbols
+
+mlpl.show_ir
+
+mlpl.generate_rust
+
+mlpl.run_tests
+Now every MCP-capable assistant suddenly becomes an MLPL expert.
+
+Without retraining.
+
+That is much more scalable than trying to teach every frontier model MLPL through prompting alone.
+
+This also fits your educational goals
+Imagine asking
+
+Explain attention.
+
+The LLM doesn't generate everything.
+
+It asks
+
+show_attention_graph
+
+show_equation
+
+show_shapes
+
+show_runtime
+
+show_gradient
+Then explains those.
+
+That is vastly more reliable.
+
+What libraries would I build?
+I think these.
+
+High priority
+swml-core
+language.
+
+swml-lsp
+semantic language server.
+
+swml-mcp
+AI tool interface.
+
+swml-visualize
+graphs.
+
+swml-explain
+compiler explanations.
+
+swml-trace
+runtime inspection.
+
+Medium
+swml-ai
+adapter layer.
+
+swml-rust
+generated Rust inspection.
+
+Later
+swml-agents
+reflection
+
+memory
+
+ICL
+
+ICRL
+
+etc.
+
+One thing I would avoid
+I would avoid trying to build
+
+the
+
+AI assistant.
+
+Instead build
+
+the best semantic interface for AI assistants.
+
+That is a much more achievable and arguably more valuable goal.
+
+One final thought
+I think there is an opportunity that may actually be larger than the language itself.
+
+Today, most AI coding agents work by reading source text.
+
+You are in a position to expose compiler semantics instead.
+
+If sw-MLPL provides:
+
+ASTs
+
+typed intermediate representations
+
+shape information
+
+purity
+
+dependency graphs
+
+tensor provenance
+
+generated Rust
+
+optimization opportunities
+
+execution traces
+
+through a clean LSP/MCP interface, then any capable coding agent—whether it's ChatGPT, Claude, JetBrains AI, Copilot, or a local model—can become dramatically more effective without needing to become an expert in MLPL syntax first.
+
+In other words, one of the project's most compelling long-term contributions may not be "an AI built into the language," but a language designed from the outset to be understandable by both humans and AI systems through rich semantic tooling rather than source text alone. That is a direction very few programming languages have explored systematically, and it fits remarkably well with your goals of education, experimentation, and AI-assisted development.
+
+<
+
+

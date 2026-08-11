@@ -1,0 +1,7 @@
+demo-algorithms
+demo-combinators
+demo-functional-pipelines
+demo-memory
+mlpl-lsp
+mlpl-mcp
+...
