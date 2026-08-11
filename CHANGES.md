@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-11
 
+- docs(claude): carve out gitignored .agentrail sessions/ from the commit-all rule
+- docs(changes): refresh CHANGES.md to HEAD (incl. history-rewrite flag)
 - chore(git): FLAG history rewrite + force-push (2026-08-11) -- re-clone required
 - chore(agentrail): stop tracking raw session transcripts
 - docs(changes): refresh CHANGES.md to HEAD
