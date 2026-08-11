@@ -8,7 +8,8 @@ use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
 use crate::{
-    Ctx, LowerConfig, LowerError, control_lower, fndef_lower, labels_of, lower_cval, lower_fncall,
+    Ctx, LowerConfig, LowerError, control_lower, fndef_lower, labels_of, lower_cval, lower_field,
+    lower_fncall, lower_record,
 };
 
 /// Lower an MLPL AST using the default configuration
@@ -162,6 +163,10 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
             ..
         } => control_lower::lower_if(ctx, cond, then_body, else_body),
         Expr::While { cond, body, .. } => control_lower::lower_while(ctx, cond, body),
+        Expr::RecordLit { fields, .. } => lower_record(ctx, fields),
+        Expr::FieldAccess {
+            receiver, field, ..
+        } => lower_field(ctx, receiver, field),
         Expr::BuiltinRef(_, _)
         | Expr::TensorCtor { .. }
         | Expr::Repeat { .. }
@@ -169,8 +174,6 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::For { .. }
         | Expr::Experiment { .. }
         | Expr::Device { .. }
-        | Expr::RecordLit { .. }
-        | Expr::FieldAccess { .. }
         | Expr::Break { .. }
         | Expr::Continue { .. }
         | Expr::FnDef { .. }

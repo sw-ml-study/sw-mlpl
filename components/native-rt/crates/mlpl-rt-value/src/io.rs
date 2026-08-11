@@ -20,6 +20,7 @@ pub fn write_stdout(v: &CVal) -> CVal {
         CVal::Str(s) => s.clone().into_bytes(),
         CVal::StrList(items) => items.join("\n").into_bytes(),
         CVal::Arr(a) => a.data().iter().map(|&x| x as u8).collect(),
+        other => panic!("cannot write {other:?} to stdout as bytes"),
     };
     let count = bytes.len();
     let mut out = std::io::stdout();

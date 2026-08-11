@@ -188,6 +188,29 @@ fn while_loop_compiles_and_runs() {
 }
 
 #[test]
+fn record_field_access_compiles_and_runs() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("record");
+    let src_path = tmp.join("prog.mlpl");
+    // Build a record, read a numeric field back: {X: 42, Y: 7}.X -> 42.
+    std::fs::write(&src_path, "r = {X: 42, Y: 7}\nr.X\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path)
+        .output()
+        .expect("run produced binary");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "42");
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

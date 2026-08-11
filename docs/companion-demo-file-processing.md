@@ -31,14 +31,18 @@ surface is the gate. The reports order the missing rungs:
    flattened AST directly, with `--source-dir`. The real
    hexdump/histogram/WAV/Ogg programs now get PAST the include gate
    to the next wall (`FnDef`).
-2. **User functions** -- PARTLY RESOLVED (compiler-functions
-   param-only, shipped 2026-08-11): `def u:` lowers to a nested
-   Rust fn over its parameters (calls, trailing `return`,
-   body-locals). Functions that read a global, use control flow in
-   the body, or return Results/records are still rejected -- the
-   remaining gate is now **control flow + Results/records**
-   (compiler-control-flow), which is where the real
-   hexdump/WAV/Ogg programs go next.
+2. **User functions + control flow + records** -- PARTLY RESOLVED
+   (compiler-functions param-only + compiler-control-flow, shipped
+   2026-08-11): `def u:` lowers to a nested Rust fn over its
+   parameters; `if/else` lowers to a Rust if-expression and `while`
+   to a Rust `while` over mutable bindings (first `=` -> `let mut`,
+   rebind -> reassign). Record literals `{a: 1, b: 2}` lower to
+   `CVal::Record`, `r.a` field access unwraps a numeric field, and
+   `ok(x)`/`err(x)` build `CVal::Result`. Still rejected: the `?`
+   propagation operator (needs function-returns-`CVal`), `for`,
+   record-of-record / string-leaf field chains, and functions that
+   read a global. The remaining value-model gate is **`?` /
+   `check` + function-returns-`CVal`**, then byte/bit lowering.
 3. **Shared byte validation + error propagation** -- compiled
    invalid bytes are coerced rather than rejected; runtime write
    errors are discarded. Interpreter and compiled paths must share

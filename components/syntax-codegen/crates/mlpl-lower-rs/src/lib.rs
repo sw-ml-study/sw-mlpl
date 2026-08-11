@@ -29,7 +29,7 @@ mod model;
 pub use lower::{lower, lower_with_config};
 pub use model::{LowerConfig, LowerError};
 
-pub(crate) use cval_lower::lower_cval;
+pub(crate) use cval_lower::{lower_cval, lower_field, lower_record};
 pub(crate) use fncall::{labels_of, lower_fncall};
 pub(crate) use lower::lower_expr;
 pub(crate) use model::Ctx;

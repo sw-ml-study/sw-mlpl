@@ -68,6 +68,11 @@ pub(crate) fn lower_fncall(
             let a = crate::lower_cval(ctx, &args[0])?;
             Ok(quote! { #rt::write_stdout(&(#a)) })
         }
+        ("ok" | "err", 1) => {
+            let payload = crate::lower_cval(ctx, &args[0])?;
+            let ok = name == "ok";
+            Ok(quote! { #rt::CVal::result(#ok, #payload) })
+        }
         ("args", 0) => Ok(quote! { #rt::cli_args() }),
         ("arg", 1) => {
             let a = crate::lower_cval(ctx, &args[0])?;
