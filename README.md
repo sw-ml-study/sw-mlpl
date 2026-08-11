@@ -13,6 +13,44 @@ a Rust-first array and tensor language for machine learning,
 visualization, and experimentation. Inspired by APL, APL2, J,
 and BQN.
 
+sw-MLPL is a Rust-implemented, array-oriented, functional-first
+machine-learning language with higher-order functions, explicit
+imperative constructs, native autograd/model facilities, WASM
+execution, and Rust-native accelerator backends using MLX/mlx-rs
+on Apple Silicon and Candle/cudarc/CUDA on NVIDIA.
+
+At a glance, versus a mainstream Python ML stack:
+
+| Category              | Mainstream Python ML           | sw-MLPL                                       |
+| --------------------- | ------------------------------ | --------------------------------------------- |
+| User language         | Python                         | sw-MLPL                                       |
+| Language style        | multiparadigm / OO-heavy       | array-oriented, functional-first; + imperative bindings/control |
+| Object model          | classes / objects / methods    | no conventional OO model                      |
+| Functions             | first-class functions/closures | UDFs + first-class function references        |
+| Higher-order funcs    | yes                            | yes                                           |
+| Partial application   | supported idiomatically        | explicit Partial runtime value                |
+| Arrays                | NumPy / framework tensors      | native language value                         |
+| Broadcasting          | NumPy / framework              | built into array semantics                    |
+| Implementation        | CPython C + native frameworks  | Rust                                          |
+| Memory management     | refcount + cyclic GC           | Rust ownership/RAII; Box/Arc where needed; no tracing GC |
+| CPU arrays            | NumPy / PyTorch / etc.         | Rust DenseArray reference implementation      |
+| **Apple Silicon**     |                                |                                               |
+| Apple framework       | PyTorch MPS / MLX / etc.       | MLX                                           |
+| Apple Rust stack      | N/A for a normal Python user   | mlx-rs                                        |
+| Apple acceleration    | Metal / Accelerate             | MLX + Metal + Accelerate                      |
+| Apple residency       | framework-managed              | TensorHandle device-resident tape             |
+| **NVIDIA**            |                                |                                               |
+| NVIDIA framework      | PyTorch / JAX / TensorFlow     | sw-MLPL CUDA backend                          |
+| NVIDIA Rust stack     | hidden behind Python framework | Candle                                        |
+| CUDA interface        | native framework CUDA code     | Candle -> cudarc -> CUDA                       |
+| CUDA maturity         | mature                         | experimental vertical slice                   |
+| **Ecosystem**         |                                |                                               |
+| Autograd              | PyTorch / JAX / TensorFlow     | built-in reverse-mode tape                    |
+| Model abstraction     | torch.nn / Keras / etc.        | built-in Model DSL                            |
+| Literate programming  | Jupyter / Colab                | Emacs org-mode + Babel                        |
+| Browser execution     | Jupyter / Colab / Pyodide      | Rust -> WASM playground                        |
+| Native compilation    | packaging / native extensions  | compile-to-Rust subset                        |
+
 This repository ships three things together:
 
 - the **language** itself (interpreter, parser, autograd,
