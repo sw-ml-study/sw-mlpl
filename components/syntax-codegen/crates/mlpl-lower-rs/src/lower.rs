@@ -87,7 +87,13 @@ fn lower_assign(
         ctx.known_labels.insert(name.to_string(), lbls);
     }
     let id = format_ident!("{name}");
-    bindings.push(quote! { let #id = #val; });
+    // First assignment in scope -> `let mut` (so a later rebind can
+    // reassign, e.g. a loop accumulator); a rebind -> reassignment.
+    bindings.push(if ctx.first_binding(name) {
+        quote! { let mut #id = #val; }
+    } else {
+        quote! { #id = #val; }
+    });
     let rt = &ctx.rt;
     Ok(is_last.then(|| quote! { #rt::CVal::Arr(#id.clone()) }))
 }
@@ -155,6 +161,7 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
             else_body,
             ..
         } => control_lower::lower_if(ctx, cond, then_body, else_body),
+        Expr::While { cond, body, .. } => control_lower::lower_while(ctx, cond, body),
         Expr::BuiltinRef(_, _)
         | Expr::TensorCtor { .. }
         | Expr::Repeat { .. }
@@ -164,7 +171,6 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::Device { .. }
         | Expr::RecordLit { .. }
         | Expr::FieldAccess { .. }
-        | Expr::While { .. }
         | Expr::Break { .. }
         | Expr::Continue { .. }
         | Expr::FnDef { .. }

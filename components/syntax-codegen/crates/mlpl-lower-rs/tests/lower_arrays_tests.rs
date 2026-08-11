@@ -29,7 +29,7 @@ fn nested_array_literal() {
 #[test]
 fn assign_emits_let_binding() {
     let s = lower_src("x = 5").unwrap();
-    assert!(s.contains("let x ="), "{s}");
+    assert!(s.contains("let mut x ="), "{s}");
     // Final yield returns the bound value.
     assert!(s.contains("x . clone"), "{s}");
 }
@@ -37,8 +37,8 @@ fn assign_emits_let_binding() {
 #[test]
 fn ident_reference_emits_clone() {
     let s = lower_src("x = 5\ny = x").unwrap();
-    assert!(s.contains("let x ="), "{s}");
-    assert!(s.contains("let y ="), "{s}");
+    assert!(s.contains("let mut x ="), "{s}");
+    assert!(s.contains("let mut y ="), "{s}");
     assert!(s.contains("x . clone"), "{s}");
 }
 
@@ -47,7 +47,7 @@ fn multi_stmt_program_yields_last() {
     // Two statements, last is not an Assign: its expression is the
     // block's yielded value (no trailing clone).
     let s = lower_src("x = 3\nx + 1").unwrap();
-    assert!(s.contains("let x ="), "{s}");
+    assert!(s.contains("let mut x ="), "{s}");
     assert!(s.contains("apply_binop"), "{s}");
 }
 

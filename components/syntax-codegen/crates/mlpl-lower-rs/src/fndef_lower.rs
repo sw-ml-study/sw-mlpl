@@ -26,9 +26,13 @@ pub(crate) fn lower_user_fn(
     let fn_id = format_ident!("user_{}", name.strip_prefix("u:").unwrap_or(name));
     let param_ids: Vec<_> = params.iter().map(|p| format_ident!("{p}")).collect();
     let rt = &ctx.rt;
-    let block = lower_body(ctx, body)?;
+    // A fresh declared-scope pre-seeded with the params (so body
+    // locals never alias the enclosing program's variables). Params
+    // are `mut` so a body may rebind one (harmless unused_mut in the
+    // generated code otherwise).
+    let block = ctx.with_scope(params, || lower_body(ctx, body))?;
     Ok(quote! {
-        fn #fn_id(#(#param_ids: #rt::DenseArray),*) -> #rt::DenseArray #block
+        fn #fn_id(#(mut #param_ids: #rt::DenseArray),*) -> #rt::DenseArray #block
     })
 }
 
@@ -43,7 +47,11 @@ pub(crate) fn lower_body(ctx: &Ctx, body: &[Expr]) -> Result<TokenStream, LowerE
         match stmt {
             Expr::Assign { name, value, .. } => {
                 let (id, val) = (format_ident!("{name}"), lower_expr(ctx, value)?);
-                binds.push(quote! { let #id = #val; });
+                binds.push(if ctx.first_binding(name) {
+                    quote! { let mut #id = #val; }
+                } else {
+                    quote! { #id = #val; }
+                });
             }
             // Real Rust `return` so an early return inside a branch
             // exits the enclosing fn (a diverging branch unifies with

@@ -2,7 +2,8 @@
 //! the per-run lowering context. (lib.rs is a facade; behaviour
 //! lives in the named modules.)
 
-use std::collections::HashMap;
+use std::cell::RefCell;
+use std::collections::{HashMap, HashSet};
 
 use proc_macro2::TokenStream;
 use quote::quote;
@@ -75,10 +76,16 @@ impl Default for LowerConfig {
 /// Per-run lowering context: compile-time knowledge of a binding's
 /// axis labels (built up as top-level statements are walked; a
 /// missing name skips the static check, the runtime still
-/// validates) plus the configured runtime path.
+/// validates), the configured runtime path, and the set of
+/// variables already `let`-declared in the CURRENT scope. The
+/// `declared` set drives mutable bindings (first assign -> `let
+/// mut`, a rebind -> reassignment, so loop accumulators mutate); it
+/// is swapped for a fresh set inside a user-function body
+/// (`with_scope`) and shared into `if`/`while`/`for` bodies.
 pub(crate) struct Ctx {
     pub(crate) known_labels: HashMap<String, Vec<Option<String>>>,
     pub(crate) rt: TokenStream,
+    pub(crate) declared: RefCell<HashSet<String>>,
 }
 
 impl Ctx {
@@ -86,6 +93,25 @@ impl Ctx {
         Self {
             known_labels: HashMap::new(),
             rt: cfg.rt_path.clone(),
+            declared: RefCell::new(HashSet::new()),
         }
+    }
+
+    /// Run `f` with a FRESH declared-scope pre-seeded with `names`
+    /// (a function's parameters), restoring the caller's scope
+    /// afterwards -- so a function body's locals never leak to, or
+    /// alias, the enclosing program's variables.
+    pub(crate) fn with_scope<T>(&self, names: &[String], f: impl FnOnce() -> T) -> T {
+        let fresh: HashSet<String> = names.iter().cloned().collect();
+        let saved = self.declared.replace(fresh);
+        let out = f();
+        self.declared.replace(saved);
+        out
+    }
+
+    /// True the FIRST time `name` is assigned in the current scope
+    /// (needs `let mut`); false on a later rebind (reassignment).
+    pub(crate) fn first_binding(&self, name: &str) -> bool {
+        self.declared.borrow_mut().insert(name.to_string())
     }
 }

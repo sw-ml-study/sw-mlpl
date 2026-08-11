@@ -1,6 +1,6 @@
 number = 2
 slug = "while-for-mut"
-status = "pending"
+status = "in-progress"
 description = "Lower while/for with mutable variables (first Assign -> let mut, rebind -> re..."
 role = "legacy"
 context_files = []

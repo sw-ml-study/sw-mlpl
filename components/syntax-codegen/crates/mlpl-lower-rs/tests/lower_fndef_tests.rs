@@ -47,6 +47,19 @@ fn if_else_lowers_to_a_rust_if_expression() {
 }
 
 #[test]
+fn while_loop_with_a_mutable_accumulator_lowers() {
+    // A first assignment is `let mut`; a rebind in the loop body
+    // reassigns (mutation), so the accumulator survives iterations.
+    let s = lowered(
+        "def u:sumdown(n) { acc = 0; while n { acc = acc + n; n = n - 1 } acc }\nu:sumdown(5)",
+    );
+    assert!(s.contains("while ("), "no while: {s}");
+    assert!(s.contains("let mut acc"), "acc not `let mut`: {s}");
+    // exactly one `let mut acc` -- the loop-body assignment reassigns
+    assert_eq!(s.matches("let mut acc").count(), 1, "acc re-declared: {s}");
+}
+
+#[test]
 fn an_early_return_inside_a_branch_lowers_to_a_real_return() {
     // A `return` inside an `if` branch must exit the enclosing fn --
     // it lowers to a real Rust `return`.

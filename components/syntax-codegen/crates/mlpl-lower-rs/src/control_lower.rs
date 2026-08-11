@@ -23,3 +23,27 @@ pub(crate) fn lower_if(
     let e = fndef_lower::lower_body(ctx, else_body)?;
     Ok(quote! { if (#c).data()[0] != 0.0 { #t } else { #e } })
 }
+
+/// Lower `while cond { body }`. The condition is re-evaluated each
+/// iteration (its lowered form sits inline in the Rust `while`);
+/// body assignments to variables declared before the loop reassign
+/// them (mutation), so accumulators work. A `while` yields no value
+/// -- the enclosing block yields a dummy scalar (discarded by the
+/// statement position).
+pub(crate) fn lower_while(
+    ctx: &Ctx,
+    cond: &Expr,
+    body: &[Expr],
+) -> Result<TokenStream, LowerError> {
+    let c = lower_expr(ctx, cond)?;
+    let b = fndef_lower::lower_body(ctx, body)?;
+    let rt = &ctx.rt;
+    Ok(quote! {
+        {
+            while (#c).data()[0] != 0.0 {
+                let _ = #b;
+            }
+            #rt::DenseArray::from_scalar(0.0)
+        }
+    })
+}

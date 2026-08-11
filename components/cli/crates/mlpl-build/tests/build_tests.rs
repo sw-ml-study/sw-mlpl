@@ -127,7 +127,9 @@ fn user_function_compiles_and_runs() {
         "mlpl-build failed:\n--- stderr ---\n{}",
         String::from_utf8_lossy(&result.stderr)
     );
-    let run = Command::new(&out_path).output().expect("run produced binary");
+    let run = Command::new(&out_path)
+        .output()
+        .expect("run produced binary");
     assert!(run.status.success(), "produced binary exited non-zero");
     assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "45");
 }
@@ -140,7 +142,11 @@ fn if_expression_compiles_and_runs() {
     }
     let tmp = tempdir("ifexpr");
     let src_path = tmp.join("prog.mlpl");
-    std::fs::write(&src_path, "def u:pick(c) { if c { 42 } else { 7 } }\nu:pick(1)\n").unwrap();
+    std::fs::write(
+        &src_path,
+        "def u:pick(c) { if c { 42 } else { 7 } }\nu:pick(1)\n",
+    )
+    .unwrap();
     let out_path = tmp.join("prog");
     let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
     assert!(
@@ -148,8 +154,37 @@ fn if_expression_compiles_and_runs() {
         "mlpl-build failed:\n{}",
         String::from_utf8_lossy(&result.stderr)
     );
-    let run = Command::new(&out_path).output().expect("run produced binary");
+    let run = Command::new(&out_path)
+        .output()
+        .expect("run produced binary");
     assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "42");
+}
+
+#[test]
+fn while_loop_compiles_and_runs() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("while");
+    let src_path = tmp.join("prog.mlpl");
+    // Countdown accumulator: 5+4+3+2+1 = 15. Mutable acc + param n.
+    std::fs::write(
+        &src_path,
+        "def u:sumdown(n) { acc = 0; while n { acc = acc + n; n = n - 1 } acc }\nu:sumdown(5)\n",
+    )
+    .unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path)
+        .output()
+        .expect("run produced binary");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "15");
 }
 
 #[test]

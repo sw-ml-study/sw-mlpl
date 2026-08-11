@@ -44,7 +44,7 @@ fn reshape_labeled_builtin_chains_reshape_and_labels() {
 fn annotation_syntax_desugars_through_parser_to_label() {
     // Parser desugars `x : [seq] = expr` -> Assign(x, FnCall("label", [expr, ArrayLit([StrLit(seq)])]))
     let s = lower_src("x : [seq] = iota(5)").unwrap();
-    assert!(s.contains("let x ="), "{s}");
+    assert!(s.contains("let mut x ="), "{s}");
     assert!(s.contains(". with_labels"), "{s}");
     assert!(s.contains("\"seq\""), "{s}");
 }
