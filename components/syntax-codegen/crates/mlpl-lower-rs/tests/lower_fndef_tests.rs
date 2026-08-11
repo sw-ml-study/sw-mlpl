@@ -34,14 +34,24 @@ fn user_fn_with_a_doc_string_and_trailing_return_lowers() {
 }
 
 #[test]
-fn an_early_return_is_rejected() {
-    // A `return` that is not the final statement (would need control
-    // flow) is rejected by lower_expr's catch-all.
-    let e = lower_err("def u:f(x) { return x; x + 1 }\nu:f(1)");
+fn if_else_lowers_to_a_rust_if_expression() {
+    // `if` is truthy on a non-zero scalar; branches lower via the
+    // shared body lowering. Works at top level and in a function.
+    let top = lowered("if 1 { 42 } else { 0 }");
+    assert!(top.contains("if (") && top.contains("!= 0"), "{top}");
+    let inner = lowered("def u:pick(c) { if c { 10 } else { 20 } }\nu:pick(1)");
     assert!(
-        matches!(e, LowerError::Unsupported(ref m) if m.contains("Return")),
-        "expected an Unsupported(Return...) error, got {e:?}"
+        inner.contains("fn user_pick") && inner.contains("if ("),
+        "{inner}"
     );
+}
+
+#[test]
+fn an_early_return_inside_a_branch_lowers_to_a_real_return() {
+    // A `return` inside an `if` branch must exit the enclosing fn --
+    // it lowers to a real Rust `return`.
+    let s = lowered("def u:f(x) { if x { return x } else { 0 } }\nu:f(1)");
+    assert!(s.contains("return"), "no real return: {s}");
 }
 
 #[test]

@@ -1,0 +1,9 @@
+number = 1
+slug = "if-real-return"
+status = "in-progress"
+description = "lower_body emits real returns; lower if/else as a Rust if-expression (DenseAr..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-11T11:30:56"
+task_type = "rust-feature"
+commits = []

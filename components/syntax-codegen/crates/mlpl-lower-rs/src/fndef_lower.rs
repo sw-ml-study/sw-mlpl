@@ -32,9 +32,10 @@ pub(crate) fn lower_user_fn(
     })
 }
 
-/// Lower a function body into a `{ ...; tail }` block whose tail
-/// expression (or a `return`) is the DenseArray return value.
-fn lower_body(ctx: &Ctx, body: &[Expr]) -> Result<TokenStream, LowerError> {
+/// Lower a statement block (a function body or an `if` branch) into
+/// a `{ ...; tail }` block whose tail expression is its DenseArray
+/// value; `return` statements emit real Rust returns.
+pub(crate) fn lower_body(ctx: &Ctx, body: &[Expr]) -> Result<TokenStream, LowerError> {
     let mut binds: Vec<TokenStream> = Vec::new();
     let last = body.len().saturating_sub(1);
     let mut tail: Option<TokenStream> = None;
@@ -44,10 +45,13 @@ fn lower_body(ctx: &Ctx, body: &[Expr]) -> Result<TokenStream, LowerError> {
                 let (id, val) = (format_ident!("{name}"), lower_expr(ctx, value)?);
                 binds.push(quote! { let #id = #val; });
             }
-            // A trailing `return x` IS the body's value; a mid-body
-            // `return` falls through and `lower_expr` rejects it
-            // (early return needs control flow, a later rung).
-            Expr::Return { value: Some(v), .. } if i == last => tail = Some(lower_expr(ctx, v)?),
+            // Real Rust `return` so an early return inside a branch
+            // exits the enclosing fn (a diverging branch unifies with
+            // the other branch's type). Bare `return` -> lower_expr err.
+            Expr::Return { value: Some(v), .. } => {
+                let ts = lower_expr(ctx, v)?;
+                binds.push(quote! { return #ts; });
+            }
             _ if i == last => tail = Some(lower_expr(ctx, stmt)?),
             _ => {
                 let v = lower_expr(ctx, stmt)?;

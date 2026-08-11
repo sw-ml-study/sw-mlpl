@@ -133,6 +133,26 @@ fn user_function_compiles_and_runs() {
 }
 
 #[test]
+fn if_expression_compiles_and_runs() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("ifexpr");
+    let src_path = tmp.join("prog.mlpl");
+    std::fs::write(&src_path, "def u:pick(c) { if c { 42 } else { 7 } }\nu:pick(1)\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path).output().expect("run produced binary");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "42");
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

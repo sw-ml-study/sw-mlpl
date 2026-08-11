@@ -35,6 +35,7 @@ use mlpl_parser::{BinOpKind, Expr};
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
+mod control_lower;
 mod cval_lower;
 mod fncall;
 mod fndef_lower;
@@ -264,6 +265,12 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
             let rt = &ctx.rt;
             Ok(quote! { #rt::CVal::Str(#s.to_string()) })
         }
+        Expr::If {
+            cond,
+            then_body,
+            else_body,
+            ..
+        } => control_lower::lower_if(ctx, cond, then_body, else_body),
         Expr::BuiltinRef(_, _)
         | Expr::TensorCtor { .. }
         | Expr::Repeat { .. }
@@ -273,7 +280,6 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::Device { .. }
         | Expr::RecordLit { .. }
         | Expr::FieldAccess { .. }
-        | Expr::If { .. }
         | Expr::While { .. }
         | Expr::Break { .. }
         | Expr::Continue { .. }
