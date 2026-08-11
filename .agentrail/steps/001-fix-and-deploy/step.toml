@@ -1,0 +1,9 @@
+number = 1
+slug = "fix-and-deploy"
+status = "in-progress"
+description = "Correct the :list description in NEXT_STEPS (prints a user fn's definition, t..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-10T18:17:02"
+task_type = "web-fix"
+commits = []

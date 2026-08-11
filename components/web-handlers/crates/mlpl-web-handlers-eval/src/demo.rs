@@ -12,11 +12,11 @@ use mlpl_web_eval::state::{EntryKind, HistoryEntry};
 /// runs IN the live REPL (bindings persist), so it points the new
 /// user at the introspection + experiment commands to keep going.
 const NEXT_STEPS: &str = "Next steps? This ran in the live REPL -- your bindings persist, so build on them:\n  \
-     :vars       -- variables this demo defined\n  \
-     :fns        -- user-defined (u:) functions in play\n  \
-     :list       -- everything in the workspace at once\n  \
-     :help       -- language + builtin overview (`:help <name>` for one)\n  \
+     :vars             -- list the variables this demo defined\n  \
+     :fns              -- list the user-defined (u:) functions in play\n  \
+     :list <fn>        -- print one user function's definition\n  \
      :describe <name>  -- inspect any variable, model, or builtin\n  \
+     :help             -- language + builtin overview (`:help <name>` for one)\n  \
      experiment \"trial\" { ... }  -- capture _metric scalars to compare runs";
 
 /// Run a demo IN the live REPL: the session's bindings and the
