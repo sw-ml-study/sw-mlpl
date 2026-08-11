@@ -38,11 +38,17 @@ surface is the gate. The reports order the missing rungs:
    to a Rust `while` over mutable bindings (first `=` -> `let mut`,
    rebind -> reassign). Record literals `{a: 1, b: 2}` lower to
    `CVal::Record`, `r.a` field access unwraps a numeric field, and
-   `ok(x)`/`err(x)` build `CVal::Result`. Still rejected: the `?`
-   propagation operator (needs function-returns-`CVal`), `for`,
-   record-of-record / string-leaf field chains, and functions that
-   read a global. The remaining value-model gate is **`?` /
-   `check` + function-returns-`CVal`**, then byte/bit lowering.
+   `ok(x)`/`err(x)` build `CVal::Result`. A function whose body
+   produces `ok`/`err`/a record (or uses `?`) now lowers to
+   `-> CVal`; `?` (`check`) unwraps an `ok` payload or early-`return`s
+   the `err`. The full demo pattern compiles and runs:
+   `def u:run(n) { f = u:fit(n)?; f.slope }` where `u:fit` returns
+   `ok({...})`. Still rejected: `for`; record-of-record /
+   string-leaf field chains; arithmetic directly on a `?`-unwrapped
+   value (unwrap-then-field-access is the supported shape);
+   top-level `?` (outside a `def u:`); and functions that read a
+   global. The value-model gate is CLEARED -- the remaining compiler
+   gates are byte/bit lowering and process semantics.
 3. **Shared byte validation + error propagation** -- compiled
    invalid bytes are coerced rather than rejected; runtime write
    errors are discarded. Interpreter and compiled paths must share

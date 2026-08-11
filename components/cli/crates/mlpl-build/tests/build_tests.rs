@@ -211,6 +211,37 @@ fn record_field_access_compiles_and_runs() {
 }
 
 #[test]
+fn result_propagation_and_field_access_compiles_and_runs() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("result");
+    let src_path = tmp.join("prog.mlpl");
+    // u:fit returns ok(record); u:run unwraps with `?` then reads a
+    // field. fit(5) = ok({slope: 6, ...}); run unwraps -> {slope: 6};
+    // f.slope = 6.
+    std::fs::write(
+        &src_path,
+        "def u:fit(n) { ok({slope: n + 1, intercept: n - 1}) }\n\
+         def u:run(n) { f = u:fit(n)?; f.slope }\n\
+         u:run(5)\n",
+    )
+    .unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path)
+        .output()
+        .expect("run produced binary");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "6");
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

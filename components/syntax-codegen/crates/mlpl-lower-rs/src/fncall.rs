@@ -73,6 +73,7 @@ pub(crate) fn lower_fncall(
             let ok = name == "ok";
             Ok(quote! { #rt::CVal::result(#ok, #payload) })
         }
+        ("check", 1) => lower_check(ctx, &args[0]),
         ("args", 0) => Ok(quote! { #rt::cli_args() }),
         ("arg", 1) => {
             let a = crate::lower_cval(ctx, &args[0])?;
@@ -83,6 +84,29 @@ pub(crate) fn lower_fncall(
             args.len()
         ))),
     }
+}
+
+/// Lower `check(expr)` -- the `?` operator. Valid only inside a
+/// `CVal`-returning function: on `ok` it yields the unwrapped payload
+/// (a `CVal`); on `err` it early-`return`s the whole Result from the
+/// enclosing function. Outside such a function `?` has nowhere to
+/// propagate, so it is `Unsupported`.
+fn lower_check(ctx: &Ctx, arg: &Expr) -> Result<TokenStream, LowerError> {
+    if !ctx.in_cval_fn.get() {
+        return Err(LowerError::Unsupported(
+            "check (the `?` operator) outside a Result-returning function \
+             (define the caller with `def u:` and have it return ok/err)"
+                .into(),
+        ));
+    }
+    let rt = &ctx.rt;
+    let call = lower_expr(ctx, arg)?;
+    Ok(quote! {
+        match #call {
+            #rt::CVal::Result { ok: true, payload } => *payload,
+            __err => return __err,
+        }
+    })
 }
 
 /// Extract a list of string literals from an `ArrayLit` -- used

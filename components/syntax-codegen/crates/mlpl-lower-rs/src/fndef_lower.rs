@@ -13,7 +13,7 @@ use mlpl_parser::Expr;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-use crate::{Ctx, LowerError, lower_expr};
+use crate::{Ctx, LowerError, lower_cval, lower_expr};
 
 /// Lower `def u:name(params) { body }` into a nested Rust fn item.
 pub(crate) fn lower_user_fn(
@@ -23,23 +23,51 @@ pub(crate) fn lower_user_fn(
     body: &[Expr],
 ) -> Result<TokenStream, LowerError> {
     check_no_free_vars(params, body)?;
-    let fn_id = format_ident!("user_{}", name.strip_prefix("u:").unwrap_or(name));
+    let bare = name.strip_prefix("u:").unwrap_or(name);
+    let fn_id = format_ident!("user_{bare}");
     let param_ids: Vec<_> = params.iter().map(|p| format_ident!("{p}")).collect();
     let rt = &ctx.rt;
+    // A fn whose body produces a CVal (records / ok / err / `?`)
+    // returns `CVal`; otherwise it stays on the `DenseArray` fast
+    // path. Params are always `DenseArray`.
+    let is_cval = ctx.cval_returning.contains(bare);
+    let ret = if is_cval {
+        quote! { #rt::CVal }
+    } else {
+        quote! { #rt::DenseArray }
+    };
     // A fresh declared-scope pre-seeded with the params (so body
     // locals never alias the enclosing program's variables). Params
     // are `mut` so a body may rebind one (harmless unused_mut in the
     // generated code otherwise).
-    let block = ctx.with_scope(params, || lower_body(ctx, body))?;
+    let block = ctx.with_scope(params, is_cval, || lower_body(ctx, body, is_cval))?;
     Ok(quote! {
-        fn #fn_id(#(mut #param_ids: #rt::DenseArray),*) -> #rt::DenseArray #block
+        fn #fn_id(#(mut #param_ids: #rt::DenseArray),*) -> #ret #block
     })
 }
 
-/// Lower a statement block (a function body or an `if` branch) into
-/// a `{ ...; tail }` block whose tail expression is its DenseArray
-/// value; `return` statements emit real Rust returns.
-pub(crate) fn lower_body(ctx: &Ctx, body: &[Expr]) -> Result<TokenStream, LowerError> {
+/// Lower a statement block (a function body or an `if`/`while`
+/// branch) into a `{ ...; tail }` block. In a `CVal`-returning
+/// function (`ctx.in_cval_fn`), `return` values wrap into `CVal`;
+/// the function's own tail wraps too (`wrap_tail`), but a nested
+/// branch body passes `wrap_tail = false` so its tail stays
+/// `DenseArray` for the if-expression's two arms to unify.
+pub(crate) fn lower_body(
+    ctx: &Ctx,
+    body: &[Expr],
+    wrap_tail: bool,
+) -> Result<TokenStream, LowerError> {
+    // Wrap a value into `CVal` iff `w` and we're in a CVal-returning
+    // fn: `return`s always wrap (`w = true`); the fn's own tail wraps
+    // (`w = wrap_tail`), but a branch tail (`wrap_tail = false`) stays
+    // `DenseArray` so the two `if` arms unify.
+    let valued = |e: &Expr, w: bool| {
+        if w && ctx.in_cval_fn.get() {
+            lower_cval(ctx, e)
+        } else {
+            lower_expr(ctx, e)
+        }
+    };
     let mut binds: Vec<TokenStream> = Vec::new();
     let last = body.len().saturating_sub(1);
     let mut tail: Option<TokenStream> = None;
@@ -53,14 +81,11 @@ pub(crate) fn lower_body(ctx: &Ctx, body: &[Expr]) -> Result<TokenStream, LowerE
                     quote! { #id = #val; }
                 });
             }
-            // Real Rust `return` so an early return inside a branch
-            // exits the enclosing fn (a diverging branch unifies with
-            // the other branch's type). Bare `return` -> lower_expr err.
             Expr::Return { value: Some(v), .. } => {
-                let ts = lower_expr(ctx, v)?;
+                let ts = valued(v, true)?;
                 binds.push(quote! { return #ts; });
             }
-            _ if i == last => tail = Some(lower_expr(ctx, stmt)?),
+            _ if i == last => tail = Some(valued(stmt, wrap_tail)?),
             _ => {
                 let v = lower_expr(ctx, stmt)?;
                 binds.push(quote! { let _ = #v; });
@@ -106,6 +131,10 @@ fn collect_free(expr: &Expr, bound: &HashSet<&str>, out: &mut Vec<String>) {
         }
         Expr::FnCall { args, .. } => args.iter().for_each(|a| collect_free(a, bound, out)),
         Expr::ArrayLit(elems, _) => elems.iter().for_each(|e| collect_free(e, bound, out)),
+        Expr::RecordLit { fields, .. } => {
+            fields.iter().for_each(|(_, v)| collect_free(v, bound, out));
+        }
+        Expr::FieldAccess { receiver, .. } => collect_free(receiver, bound, out),
         Expr::Assign { value, .. } => collect_free(value, bound, out),
         Expr::Return { value: Some(v), .. } => collect_free(v, bound, out),
         _ => {}

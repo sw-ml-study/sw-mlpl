@@ -23,12 +23,14 @@ MLPL the interpreter already runs; the compiler surface is the gate.
 - [x] **compiler-control-flow (while + mutable vars)** -- first
       `Assign` -> `let mut`, rebind -> reassign; `while` -> Rust
       `while`. (`for` still deferred -- needs row-extraction / `take`.)
-- [~] **compiler-records-results** -- `RecordLit` + `FieldAccess` +
-      `ok`/`err` SHIPPED (records lower to `CVal::Record`, numeric
-      field access unwraps, `ok`/`err` -> `CVal::Result`). REMAINING:
-      the `?`/`check` propagation operator + unifying function
-      returns on `CVal` (step 004; many real functions return
-      `ok(record)` and callers use `u:f()? .field`).
+- [x] **compiler-records-results** -- `RecordLit` + `FieldAccess` +
+      `ok`/`err` + `?`/`check`. Records lower to `CVal::Record`,
+      field access unwraps, `ok`/`err` -> `CVal::Result`. A body that
+      produces `ok`/`err`/a record (or uses `?`) lowers to `-> CVal`;
+      `?` unwraps an `ok` payload or early-returns the `err`. The real
+      pattern compiles + runs: `f = u:fit(n)?; f.slope` where `u:fit`
+      returns `ok({...})`. (Deferred: `for`, nested-record field
+      chains, arithmetic on a `?`-unwrapped value, top-level `?`.)
 - [ ] **compiler-byte-io** -- lower `read_bytes` (whole + range),
       `file_size`, `append_bytes`/`write_bytes` + the array/bit/text
       ops the demos use. MUST share validation + error semantics

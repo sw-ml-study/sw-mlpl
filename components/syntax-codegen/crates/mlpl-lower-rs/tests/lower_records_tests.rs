@@ -5,10 +5,10 @@
 //! lower to `CVal::result`. (The `?`/`check` propagation operator,
 //! which needs function-returns-CVal, is a separate rung.)
 
-use mlpl_lower_rs::{LowerError, lower};
+use mlpl_lower_rs::lower;
 use mlpl_parser::{lex, parse};
 
-fn lower_src(src: &str) -> Result<String, LowerError> {
+fn lower_src(src: &str) -> Result<String, mlpl_lower_rs::LowerError> {
     let tokens = lex(src).expect("lex ok");
     let stmts = parse(&tokens).expect("parse ok");
     lower(&stmts).map(|ts| ts.to_string())
@@ -75,15 +75,5 @@ fn err_builtin_lowers_to_result_false() {
     assert!(s.contains("false"), "{s}");
 }
 
-// -- The ? / check propagation operator is not lowered yet --
-
-#[test]
-fn check_operator_is_unsupported_for_now() {
-    // `expr?` desugars to `check(expr)`; propagation needs
-    // function-returns-CVal, which this rung does not add.
-    let err = lower_src("ok(5)?").unwrap_err();
-    assert!(
-        matches!(err, LowerError::Unsupported(ref m) if m.contains("check")),
-        "got {err:?}"
-    );
-}
+// (The `?`/`check` propagation operator + CVal function returns are
+// covered in lower_results_tests.rs.)

@@ -2,7 +2,7 @@
 //! the per-run lowering context. (lib.rs is a facade; behaviour
 //! lives in the named modules.)
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, HashSet};
 
 use proc_macro2::TokenStream;
@@ -86,6 +86,16 @@ pub(crate) struct Ctx {
     pub(crate) known_labels: HashMap<String, Vec<Option<String>>>,
     pub(crate) rt: TokenStream,
     pub(crate) declared: RefCell<HashSet<String>>,
+    /// Bare names (no `u:` prefix) of user functions whose body
+    /// produces a `CVal` (uses `ok`/`err`/`?` or returns a record),
+    /// so their lowered signature is `-> CVal` and their call sites
+    /// are treated as `CVal`-valued. Filled by a pre-pass before any
+    /// body is lowered, so call-before-def resolves correctly.
+    pub(crate) cval_returning: HashSet<String>,
+    /// True while lowering the body of a `CVal`-returning function:
+    /// `check` may `return` the propagated err, and the body's tail /
+    /// `return` values wrap into `CVal`. Set by `with_scope`.
+    pub(crate) in_cval_fn: Cell<bool>,
 }
 
 impl Ctx {
@@ -94,18 +104,29 @@ impl Ctx {
             known_labels: HashMap::new(),
             rt: cfg.rt_path.clone(),
             declared: RefCell::new(HashSet::new()),
+            cval_returning: HashSet::new(),
+            in_cval_fn: Cell::new(false),
         }
     }
 
     /// Run `f` with a FRESH declared-scope pre-seeded with `names`
-    /// (a function's parameters), restoring the caller's scope
-    /// afterwards -- so a function body's locals never leak to, or
-    /// alias, the enclosing program's variables.
-    pub(crate) fn with_scope<T>(&self, names: &[String], f: impl FnOnce() -> T) -> T {
+    /// (a function's parameters) and the given `CVal`-return mode,
+    /// restoring the caller's scope + mode afterwards -- so a function
+    /// body's locals never leak to, or alias, the enclosing program's
+    /// variables, and `check`/tail-wrapping only fire inside a
+    /// `CVal`-returning body.
+    pub(crate) fn with_scope<T>(
+        &self,
+        names: &[String],
+        returns_cval: bool,
+        f: impl FnOnce() -> T,
+    ) -> T {
         let fresh: HashSet<String> = names.iter().cloned().collect();
         let saved = self.declared.replace(fresh);
+        let saved_mode = self.in_cval_fn.replace(returns_cval);
         let out = f();
         self.declared.replace(saved);
+        self.in_cval_fn.set(saved_mode);
         out
     }
 

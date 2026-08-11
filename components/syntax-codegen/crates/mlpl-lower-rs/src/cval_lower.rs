@@ -14,7 +14,7 @@ use crate::{Ctx, LowerError, lower_expr};
 /// expressions already produce a `CVal`; a numeric expression is
 /// wrapped as `CVal::Arr`.
 pub(crate) fn lower_cval(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerError> {
-    if produces_cval(expr) {
+    if produces_cval(ctx, expr) {
         lower_expr(ctx, expr)
     } else {
         let rt = &ctx.rt;
@@ -24,17 +24,19 @@ pub(crate) fn lower_cval(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
 }
 
 /// Does this expression already lower to a `CVal` (rather than a
-/// `DenseArray`)? String literals, record literals, and the string /
-/// IO / Result builtins do.
-fn produces_cval(expr: &Expr) -> bool {
+/// `DenseArray`)? String / record literals, the string / IO / Result
+/// builtins (`ok`/`err`/`check`), and calls to user functions whose
+/// body produces a `CVal` all do.
+fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {
     match expr {
         Expr::StrLit(..) | Expr::RecordLit { .. } => true,
-        Expr::FnCall { name, .. } => {
-            matches!(
+        Expr::FnCall { name, .. } => match name.strip_prefix("u:") {
+            Some(bare) => ctx.cval_returning.contains(bare),
+            None => matches!(
                 name.as_str(),
-                "write_stdout" | "args" | "arg" | "ok" | "err"
-            )
-        }
+                "write_stdout" | "args" | "arg" | "ok" | "err" | "check"
+            ),
+        },
         _ => false,
     }
 }

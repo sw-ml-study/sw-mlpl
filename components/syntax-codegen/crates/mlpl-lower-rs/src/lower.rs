@@ -27,6 +27,7 @@ pub fn lower_with_config(stmts: &[Expr], cfg: &LowerConfig) -> Result<TokenStrea
         return Err(LowerError::EmptyProgram);
     }
     let mut ctx = Ctx::new(cfg);
+    ctx.cval_returning = control_lower::collect_cval_returning(stmts);
     let mut bindings: Vec<TokenStream> = Vec::new();
     let last_idx = stmts.len() - 1;
     let mut final_expr: Option<TokenStream> = None;
