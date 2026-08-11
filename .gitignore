@@ -39,3 +39,10 @@ books/*/book/
 
 # Generated HTML from literate Org examples (regenerate with publish.sh)
 examples/literate/*.html
+
+# agentrail raw session transcripts: huge append-only Claude Code
+# event logs (tens of MB, grow every commit) -- NOT part of the
+# durable saga handoff (steps/, trajectories/, plan.md, saga.toml,
+# which stay tracked). Kept locally for replay, never committed.
+.agentrail/sessions/
+.agentrail-archive/*/sessions/
