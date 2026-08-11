@@ -31,8 +31,14 @@ surface is the gate. The reports order the missing rungs:
    flattened AST directly, with `--source-dir`. The real
    hexdump/histogram/WAV/Ogg programs now get PAST the include gate
    to the next wall (`FnDef`).
-2. **User functions + control flow** -- `FnDef` is unsupported in
-   lowering; also Results and records. NOW THE EARLIEST GATE.
+2. **User functions** -- PARTLY RESOLVED (compiler-functions
+   param-only, shipped 2026-08-11): `def u:` lowers to a nested
+   Rust fn over its parameters (calls, trailing `return`,
+   body-locals). Functions that read a global, use control flow in
+   the body, or return Results/records are still rejected -- the
+   remaining gate is now **control flow + Results/records**
+   (compiler-control-flow), which is where the real
+   hexdump/WAV/Ogg programs go next.
 3. **Shared byte validation + error propagation** -- compiled
    invalid bytes are coerced rather than rejected; runtime write
    errors are discarded. Interpreter and compiled paths must share

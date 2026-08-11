@@ -513,9 +513,15 @@ order:
   path. Added `--source-dir`. This is the AST-level front-end the
   later rungs lower from. The EARLIEST demo-file-processing gate is
   cleared; `FnDef` is now the next wall.
-- **compiler-functions** (Saga B1, NEXT) -- lower `def u:` user
-  functions (`FnDef`), plus Results and records. The second gate
-  the file-processing programs hit (after `include`).
+- **compiler-functions** (Saga B1) PARAM-ONLY SHIPPED 2026-08-11 --
+  `def u:name(params) { body }` lowers to a nested Rust `fn` over
+  its parameters (`u:name(args)` routes to it); trailing `return`,
+  body-local bindings, and doc-string discard are handled; a
+  free/global read is a clear Unsupported error. STILL DEFERRED to
+  later rungs: user fns that read globals, control-flow-in-body,
+  and Results/records (so functions returning `ok(...)`/records --
+  e.g. the rolling-Ridge fit -- are not yet lowerable). Records +
+  Results lowering rides with `compiler-control-flow` next.
 - **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`
   (a bounded hexdump loops over chunks). Requires string/CVal
   VARIABLES (bindings that hold CVal, not just DenseArray).

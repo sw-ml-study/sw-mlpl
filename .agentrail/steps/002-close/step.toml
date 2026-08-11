@@ -1,6 +1,6 @@
 number = 2
 slug = "close"
-status = "pending"
+status = "in-progress"
 description = "Close compiler-functions param-only: queue + companion-demo-file-processing m..."
 role = "legacy"
 context_files = []
