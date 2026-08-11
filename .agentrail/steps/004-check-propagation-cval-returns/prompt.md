@@ -1,0 +1,1 @@
+Lower the ? / check propagation operator and unify function returns on CVal. def u:f() returning ok(record) must lower to a fn -> CVal; check(expr) unwraps ok payload or early-returns the err. This is the value-model unification that unblocks demo-file-processing's fitted = u:...()? + fitted.weights pattern.

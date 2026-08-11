@@ -1,9 +1,10 @@
 number = 3
 slug = "records-results"
-status = "in-progress"
+status = "completed"
 description = "Lower RecordLit + FieldAccess + Results (ok/err/?) in the compiled value mode..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-11T12:37:39"
+completed_at = "2026-08-11T13:13:36"
 task_type = "rust-feature"
-commits = []
+commits = ["b161f5ea1bb0391ac3854650cf81cf2675e28d16"]

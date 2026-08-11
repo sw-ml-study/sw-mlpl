@@ -1,0 +1,9 @@
+number = 4
+slug = "check-propagation-cval-returns"
+status = "pending"
+description = "Lower the ? / check propagation operator and unify function returns on CVal. ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-11T13:13:36"
+task_type = "feature"
+commits = []

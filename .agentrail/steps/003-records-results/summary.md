@@ -1,0 +1,1 @@
+Lowered record literals (CVal::Record), numeric field access, and ok/err (CVal::Result) in the compile-to-rust value model. Split rt-value into a facade + value/ctor/io modules to hold the sw-checklist baseline. 9 lower unit tests + 1 gated e2e (record round-trip prints 42). The ?/check propagation operator stays Unsupported (needs function-returns-CVal) with a pinning test.
