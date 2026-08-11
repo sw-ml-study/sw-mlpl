@@ -1,1 +1,0 @@
-Corrected the demo Next-Steps epilogue: :list <fn> now accurately described (prints one user function's definition) and added :introspect (the full-snapshot command) for the 'show everything' role. Rebuilt + deployed; live-verified at 283c609e.

@@ -1,0 +1,1 @@
+Lower def u: user functions (param-only): fndef_lower.rs -> nested Rust fn (trailing return = tail, body-locals, doc-string discard, free/global read rejected); u:name(args) call routing; lower_assign extracted. e2e compiles def u:add3 -> 45; lower unit tests green. 574/2/388 held.

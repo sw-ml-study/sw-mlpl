@@ -1,0 +1,9 @@
+number = 2
+slug = "close"
+status = "pending"
+description = "Close compiler-functions param-only: queue + companion-demo-file-processing m..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-11T11:10:10"
+task_type = "docs-close"
+commits = []
