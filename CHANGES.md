@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-10
 
+- saga fix-next-steps-list-desc: complete
+- chore(pages): rebuild for corrected :list + added :introspect in demo epilogue
+- feat(web): add :introspect to the demo Next-Steps epilogue
+- fix(web): correct :list description in demo Next-Steps epilogue
+- docs(changes): refresh CHANGES.md to HEAD
 - saga demo-next-steps-block: complete (2 steps)
 - chore(pages): rebuild for separate Next-Steps demo panel
 - saga demo-next-steps-block: step separate-block complete
