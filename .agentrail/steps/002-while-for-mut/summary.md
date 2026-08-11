@@ -1,0 +1,1 @@
+while loops + mutable variables. Ctx.declared (RefCell) per-scope: first Assign -> let mut, rebind -> reassign; with_scope for fresh fn scopes (mut params). lower_while (DenseArray truthiness, cond re-eval). mlpl-build project.rs split (clears a main.rs fn-count FAIL). e2e: sumdown(5)->15. for deferred (needs row extraction). 574/2/386 held.

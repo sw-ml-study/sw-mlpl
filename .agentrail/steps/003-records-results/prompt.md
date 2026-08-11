@@ -1,0 +1,1 @@
+Lower RecordLit + FieldAccess + Results (ok/err/?) in the compiled value model. Then for + array-ops (take, comparisons) rung.

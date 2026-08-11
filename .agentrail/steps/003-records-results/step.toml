@@ -1,0 +1,9 @@
+number = 3
+slug = "records-results"
+status = "pending"
+description = "Lower RecordLit + FieldAccess + Results (ok/err/?) in the compiled value mode..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-11T12:37:39"
+task_type = "rust-feature"
+commits = []

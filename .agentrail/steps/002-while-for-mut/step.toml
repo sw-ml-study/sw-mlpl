@@ -1,9 +1,10 @@
 number = 2
 slug = "while-for-mut"
-status = "in-progress"
+status = "completed"
 description = "Lower while/for with mutable variables (first Assign -> let mut, rebind -> re..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-11T12:07:43"
+completed_at = "2026-08-11T12:37:39"
 task_type = "rust-feature"
-commits = []
+commits = ["3d385eb5f3c73e8458645c99420f50083da431e7"]
