@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-11
 
+- chore(agentrail): complete 004-check-propagation-cval-returns; close compiler-control-flow saga
+- feat(compiler): lower ?/check + unify function returns on CVal
+- docs(plan): mark while/records-field-access/ok-err shipped; ?/check remains
+- chore(deps): sync Cargo.lock for serve/web-handlers/web-render
+- docs: add sw-MLPL assessment/direction notes, uber-plan list, and moving-average example
+- chore(agentrail): commit 7 completed archived sagas from prior sessions
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): record 003-records-results complete; create 004-check-propagation-cval-returns
 - feat(compiler): lower record literals, field access, and ok/err Results
 - saga compiler-control-flow: step while-for-mut complete
