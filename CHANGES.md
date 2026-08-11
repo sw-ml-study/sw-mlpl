@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-11
 
+- chore(git): FLAG history rewrite + force-push (2026-08-11) -- re-clone required
+- chore(agentrail): stop tracking raw session transcripts
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-check-propagation-cval-returns; close compiler-control-flow saga
 - feat(compiler): lower ?/check + unify function returns on CVal
 - docs(plan): mark while/records-field-access/ok-err shipped; ?/check remains
