@@ -1,0 +1,1 @@
+if/else lowering (control_lower.rs, DenseArray truthiness, branches via shared lower_body) + real Rust returns (required for return-in-branch). Then refactored mlpl-lower-rs so lib.rs is a pure facade: model.rs (types+impls) + lower.rs (program/stmt/expr fns), pragmatic grouping to stay <=7 modules. e2e: if program -> 42. 574/2/388 held; lib.rs 7-fn warning retired.

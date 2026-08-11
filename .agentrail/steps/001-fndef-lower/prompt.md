@@ -1,1 +1,0 @@
-Lower def u: to a nested Rust fn (param-only): fndef_lower.rs + lower_stmt FnDef handling + u: call routing in fncall.rs; free-var rejection; e2e + unit tests.

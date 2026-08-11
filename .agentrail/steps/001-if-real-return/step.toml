@@ -1,9 +1,10 @@
 number = 1
 slug = "if-real-return"
-status = "in-progress"
+status = "completed"
 description = "lower_body emits real returns; lower if/else as a Rust if-expression (DenseAr..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-11T11:30:56"
+completed_at = "2026-08-11T12:07:42"
 task_type = "rust-feature"
-commits = []
+commits = ["83039b7004f6f60ed9210d15ec982c6947920bc8"]

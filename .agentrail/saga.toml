@@ -1,6 +1,6 @@
-name = "compiler-functions"
-status = "completed"
+name = "compiler-control-flow"
+status = "active"
 current_step = 2
-created_at = "2026-08-11T10:57:58"
+created_at = "2026-08-11T11:30:56"
 plan_file = ".agentrail/plan.md"
 retroactive = false

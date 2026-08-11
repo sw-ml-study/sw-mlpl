@@ -1,0 +1,9 @@
+number = 2
+slug = "while-for-mut"
+status = "pending"
+description = "Lower while/for with mutable variables (first Assign -> let mut, rebind -> re..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-11T12:07:43"
+task_type = "rust-feature"
+commits = []

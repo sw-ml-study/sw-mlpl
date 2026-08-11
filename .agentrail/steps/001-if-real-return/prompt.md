@@ -1,0 +1,1 @@
+lower_body emits real returns; lower if/else as a Rust if-expression (DenseArray truthiness, branches via lower_body); update compiler-functions return tests; e2e if program compiles+runs.
