@@ -1,0 +1,9 @@
+number = 1
+slug = "bit-ops"
+status = "pending"
+description = "Lower the pure bit-op family (band, bor, bxor, bnot, popcount, shl, shr, bmas..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-11T16:21:03"
+task_type = "feature"
+commits = []
