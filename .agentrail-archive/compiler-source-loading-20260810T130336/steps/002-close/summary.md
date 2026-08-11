@@ -1,0 +1,1 @@
+Closed compiler-source-loading: queue + demo-file-processing companion doc mark the include gate SHIPPED; next rung is compiler-functions (FnDef).

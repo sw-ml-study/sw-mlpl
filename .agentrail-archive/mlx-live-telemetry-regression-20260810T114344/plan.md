@@ -1,0 +1,1 @@
+Reproduce the connected MLX telemetry stall; add an automated concurrency/live-update regression test; fix the responsible server or web polling path; run focused and repository checks; rebuild, deploy, and verify the web artifact.

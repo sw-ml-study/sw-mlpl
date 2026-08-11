@@ -1,0 +1,11 @@
+{
+  "task_type": "deploy-close",
+  "state": {
+    "number": 3,
+    "step": "deploy"
+  },
+  "action": "build-pages.sh; deploy-pages.sh; POST /pages/builds; live verify",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-10T16:23:37"
+}

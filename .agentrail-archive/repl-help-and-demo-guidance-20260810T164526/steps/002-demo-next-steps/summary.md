@@ -1,0 +1,1 @@
+Demos now show a Next Steps? epilogue under the takeaway (:vars, :fns, :list, :help, :describe, experiment), folded into the takeaway narration entry via a NEXT_STEPS const (demo.rs at 7-fn max; net-zero LOC). sw-checklist held.

@@ -1,0 +1,10 @@
+number = 1
+slug = "fndef-lower"
+status = "completed"
+description = "Lower def u: to a nested Rust fn (param-only): fndef_lower.rs + lower_stmt Fn..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-11T10:57:58"
+completed_at = "2026-08-11T11:10:10"
+task_type = "rust-feature"
+commits = ["ca649969a66b58de1686f70b2be419e7bc8d2161"]

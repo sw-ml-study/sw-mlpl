@@ -1,0 +1,1 @@
+In connect mode, route the :fns (and :describe/:list) introspection slash-commands to the connected server session so they list the server-side user functions, instead of the empty client-side env. Web-UI + possibly a server endpoint; test; rebuild/deploy web if needed.

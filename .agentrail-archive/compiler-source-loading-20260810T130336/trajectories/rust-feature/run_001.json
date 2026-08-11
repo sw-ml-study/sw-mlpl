@@ -1,0 +1,11 @@
+{
+  "task_type": "rust-feature",
+  "state": {
+    "number": 1,
+    "step": "include-expand"
+  },
+  "action": "expand() front-end; FsProvider sandbox; direct AST lower bypassing mlpl! macro; --source-dir; e2e include test",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-10T12:55:23"
+}

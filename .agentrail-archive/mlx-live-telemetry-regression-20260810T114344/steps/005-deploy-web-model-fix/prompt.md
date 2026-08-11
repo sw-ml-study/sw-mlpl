@@ -1,0 +1,1 @@
+The model-binding fix also affects the WASM browser eval (non-connect demos): rebuild pages + deploy so the live site resolves bare model identifiers. Telemetry fix is server-only (no web deploy needed).

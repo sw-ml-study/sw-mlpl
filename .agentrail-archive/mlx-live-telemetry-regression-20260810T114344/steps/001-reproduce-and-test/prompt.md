@@ -1,0 +1,1 @@
+Reproduce stats polling during an in-flight MLX-style evaluation and add a failing automated regression test that requires multiple samples before eval completion.
