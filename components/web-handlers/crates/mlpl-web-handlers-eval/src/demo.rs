@@ -16,6 +16,7 @@ const NEXT_STEPS: &str = "Next steps? This ran in the live REPL -- your bindings
      :fns              -- list the user-defined (u:) functions in play\n  \
      :list <fn>        -- print one user function's definition\n  \
      :describe <name>  -- inspect any variable, model, or builtin\n  \
+     :introspect       -- a full snapshot (vars, fns, models, builtins, experiments, ...)\n  \
      :help             -- language + builtin overview (`:help <name>` for one)\n  \
      experiment \"trial\" { ... }  -- capture _metric scalars to compare runs";
 
