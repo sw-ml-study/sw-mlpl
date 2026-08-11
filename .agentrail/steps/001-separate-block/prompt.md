@@ -1,1 +1,0 @@
-Render the Next Steps epilogue as a separate narration panel via running::push_narration; keep schedule_demo_line <=50.

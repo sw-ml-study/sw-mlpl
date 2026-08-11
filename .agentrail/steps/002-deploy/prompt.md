@@ -1,1 +1,0 @@
-Rebuild pages, commit pages/, deploy, verify live + fresh build if stalled, ts URL, --done.
