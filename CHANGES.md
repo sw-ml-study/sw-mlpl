@@ -12,8 +12,16 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-11
+
+- saga compiler-functions: complete (2 steps)
+- docs(compiler): close compiler-functions param-only slice
+- saga compiler-functions: step fndef-lower complete
+- feat(compiler): lower user functions (compiler-functions step 1, param-only)
+
 ## 2026-08-10
 
+- docs(changes): refresh CHANGES.md to HEAD
 - saga fix-next-steps-list-desc: complete
 - chore(pages): rebuild for corrected :list + added :introspect in demo epilogue
 - feat(web): add :introspect to the demo Next-Steps epilogue
