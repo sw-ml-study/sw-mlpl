@@ -26,6 +26,7 @@ mod fndef_lower;
 mod lower;
 mod model;
 
+pub use fncall::supported_builtin_names;
 pub use lower::{lower, lower_with_config};
 pub use model::{LowerConfig, LowerError};
 

@@ -1,8 +1,12 @@
-//! FnCall lowering + static label inference (compile-to-rust step 004).
-//!
-//! Keeps the builtin match arms and the related helpers
-//! (`extract_label_list`, `labels_of`) out of `lib.rs` so the top-
-//! level module stays under the sw-checklist function-count budget.
+//! FnCall lowering: a builtin registry + dispatcher (chain of
+//! responsibility). `REGISTRY` DESCRIBES each builtin (names, arity,
+//! and an `Emit` tag for its lowering shape); `lower_fncall`
+//! DISPATCHES a name+arity to the first matching spec; `emit`
+//! interprets the tag -- inlining the simple shapes and delegating
+//! the few complex ones (`bit`/`check`/`label`/`matmul`). Adding a
+//! builtin is adding a `Spec` row (plus an `Emit` variant only if its
+//! shape is genuinely new) -- no growing dispatch match. Static label
+//! inference (`labels_of`, `extract_label_list`) lives here too.
 
 use mlpl_parser::Expr;
 use proc_macro2::TokenStream;
@@ -10,9 +14,137 @@ use quote::{format_ident, quote};
 
 use crate::{Ctx, LowerError, lower_expr};
 
-/// Lower a call to one of the supported builtins, or to a user
-/// function (`u:name` -> the nested `user_name` fn from
-/// `fndef_lower`).
+/// How many arguments a spec accepts. `Any` defers the arity check to
+/// the runtime (the bit ops validate arity inside their dispatch).
+enum Arity {
+    Exactly(usize),
+    Any,
+}
+
+/// The lowering shape of a builtin -- the "config" the dispatcher
+/// interprets. Simple shapes are emitted inline by `emit`; the last
+/// four delegate to a dedicated handler.
+enum Emit {
+    /// `rt::<name>(&a0)` -- the runtime fn shares the builtin's name.
+    UnaryRt,
+    /// `rt::iota((a0).data()[0] as usize)`.
+    Iota,
+    /// `reshape(a0, dims)` with a runtime dim vector.
+    Reshape,
+    /// `reduce_add(a0, axis)` -- the per-axis reduce primitive.
+    ReduceAxis,
+    /// `rt::<name>(&<cval a0>)` -- a CVal-position arg (write_stdout/arg).
+    CvalIo,
+    /// `rt::cli_args()`.
+    Args,
+    /// `ok`/`err` -> `CVal::result(name == "ok", <cval a0>)`.
+    Result,
+    Label,
+    Matmul,
+    Check,
+    Bit,
+}
+
+/// One registry row: which builtin names at which arity lower with
+/// which emission shape.
+struct Spec {
+    names: &'static [&'static str],
+    arity: Arity,
+    emit: Emit,
+}
+
+/// The builtin registry -- the single source of truth for what the
+/// compiler lowers. Ordered; the dispatcher takes the first match.
+const REGISTRY: &[Spec] = &[
+    Spec {
+        names: &["shape", "rank", "transpose", "reduce_add"],
+        arity: Arity::Exactly(1),
+        emit: Emit::UnaryRt,
+    },
+    Spec {
+        names: &["iota", "range"],
+        arity: Arity::Exactly(1),
+        emit: Emit::Iota,
+    },
+    Spec {
+        names: &["reshape"],
+        arity: Arity::Exactly(2),
+        emit: Emit::Reshape,
+    },
+    Spec {
+        names: &["reduce_add"],
+        arity: Arity::Exactly(2),
+        emit: Emit::ReduceAxis,
+    },
+    Spec {
+        names: &["label", "relabel"],
+        arity: Arity::Exactly(2),
+        emit: Emit::Label,
+    },
+    Spec {
+        names: &["reshape_labeled"],
+        arity: Arity::Exactly(3),
+        emit: Emit::Label,
+    },
+    Spec {
+        names: &["matmul"],
+        arity: Arity::Exactly(2),
+        emit: Emit::Matmul,
+    },
+    Spec {
+        names: &["write_stdout", "arg"],
+        arity: Arity::Exactly(1),
+        emit: Emit::CvalIo,
+    },
+    Spec {
+        names: &["args"],
+        arity: Arity::Exactly(0),
+        emit: Emit::Args,
+    },
+    Spec {
+        names: &["ok", "err"],
+        arity: Arity::Exactly(1),
+        emit: Emit::Result,
+    },
+    Spec {
+        names: &["check"],
+        arity: Arity::Exactly(1),
+        emit: Emit::Check,
+    },
+    Spec {
+        names: &[
+            "band",
+            "bor",
+            "bxor",
+            "bnot",
+            "popcount",
+            "shl",
+            "shr",
+            "bmask",
+            "bits",
+            "from_bits",
+        ],
+        arity: Arity::Any,
+        emit: Emit::Bit,
+    },
+];
+
+/// The builtin names the compiler lowers -- the registry's name set,
+/// sorted + deduplicated. Exposed so tooling (and the dispatch
+/// coverage tests) can see the supported surface without reaching
+/// into the private registry.
+pub fn supported_builtin_names() -> Vec<&'static str> {
+    let mut names: Vec<&'static str> = REGISTRY
+        .iter()
+        .flat_map(|s| s.names.iter().copied())
+        .collect();
+    names.sort_unstable();
+    names.dedup();
+    names
+}
+
+/// Lower a call to a user function (`u:name` -> `user_name(args)`) or
+/// to a registered builtin. Unknown name/arity is `Unsupported`.
 pub(crate) fn lower_fncall(
     ctx: &Ctx,
     name: &str,
@@ -26,25 +158,30 @@ pub(crate) fn lower_fncall(
             .collect::<Result<_, _>>()?;
         return Ok(quote! { #id(#(#lowered),*) });
     }
+    let arity = args.len();
+    let spec = REGISTRY.iter().find(|s| {
+        let arity_ok = match s.arity {
+            Arity::Exactly(n) => n == arity,
+            Arity::Any => true,
+        };
+        arity_ok && s.names.contains(&name)
+    });
+    let Some(spec) = spec else {
+        return Err(LowerError::Unsupported(format!("fncall {name}/{arity}")));
+    };
+    // The emission match lives in this dispatcher (not a private
+    // helper): simple shapes inline, the four complex ones delegate.
     let rt = &ctx.rt;
-    match (name, args.len()) {
-        ("iota" | "range", 1) => {
-            let arg = lower_expr(ctx, &args[0])?;
-            Ok(quote! { #rt::iota((#arg).data()[0] as usize) })
+    match &spec.emit {
+        Emit::UnaryRt => {
+            let (a, f) = (lower_expr(ctx, &args[0])?, format_ident!("{name}"));
+            Ok(quote! { #rt::#f(&(#a)) })
         }
-        ("shape", 1) => {
+        Emit::Iota => {
             let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { #rt::shape(&(#a)) })
+            Ok(quote! { #rt::iota((#a).data()[0] as usize) })
         }
-        ("rank", 1) => {
-            let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { #rt::rank(&(#a)) })
-        }
-        ("transpose", 1) => {
-            let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { #rt::transpose(&(#a)) })
-        }
-        ("reshape", 2) => {
+        Emit::Reshape => {
             let a = lower_expr(ctx, &args[0])?;
             let shape = lower_expr(ctx, &args[1])?;
             Ok(quote! {{
@@ -53,50 +190,50 @@ pub(crate) fn lower_fncall(
                 #rt::reshape(&(#a), &__dims).unwrap()
             }})
         }
-        ("reduce_add", 1) => {
-            let a = lower_expr(ctx, &args[0])?;
-            Ok(quote! { #rt::reduce_add(&(#a)) })
-        }
-        ("reduce_add", 2) => {
+        Emit::ReduceAxis => {
             let a = lower_expr(ctx, &args[0])?;
             let axis = lower_expr(ctx, &args[1])?;
             Ok(quote! { #rt::reduce_add_axis(&(#a), (#axis).data()[0] as usize).unwrap() })
         }
-        ("label" | "relabel", 2) | ("reshape_labeled", 3) => lower_label_attach(ctx, name, args),
-        ("matmul", 2) => lower_matmul(ctx, args),
-        ("write_stdout", 1) => {
-            let a = crate::lower_cval(ctx, &args[0])?;
-            Ok(quote! { #rt::write_stdout(&(#a)) })
+        Emit::CvalIo => {
+            let (a, f) = (crate::lower_cval(ctx, &args[0])?, format_ident!("{name}"));
+            Ok(quote! { #rt::#f(&(#a)) })
         }
-        ("ok" | "err", 1) => {
-            let payload = crate::lower_cval(ctx, &args[0])?;
-            let ok = name == "ok";
+        Emit::Args => Ok(quote! { #rt::cli_args() }),
+        Emit::Result => {
+            let (payload, ok) = (crate::lower_cval(ctx, &args[0])?, name == "ok");
             Ok(quote! { #rt::CVal::result(#ok, #payload) })
         }
-        ("check", 1) => lower_check(ctx, &args[0]),
-        (
-            "band" | "bor" | "bxor" | "bnot" | "popcount" | "shl" | "shr" | "bmask" | "bits"
-            | "from_bits",
-            _,
-        ) => lower_bit_op(ctx, name, args),
-        ("args", 0) => Ok(quote! { #rt::cli_args() }),
-        ("arg", 1) => {
-            let a = crate::lower_cval(ctx, &args[0])?;
-            Ok(quote! { #rt::arg(&(#a)) })
+        Emit::Label => lower_label_attach(ctx, name, args),
+        Emit::Matmul => lower_matmul(ctx, args),
+        // `check(expr)` -- the `?` operator. Valid only inside a
+        // CVal-returning function: on `ok` yield the payload, on
+        // `err` early-return the whole Result. Top-level `?` has
+        // nowhere to propagate, so it is Unsupported.
+        Emit::Check if !ctx.in_cval_fn.get() => Err(LowerError::Unsupported(
+            "check (the `?` operator) outside a Result-returning function \
+             (define the caller with `def u:` and have it return ok/err)"
+                .into(),
+        )),
+        Emit::Check => {
+            let call = lower_expr(ctx, &args[0])?;
+            Ok(quote! {
+                match #call {
+                    #rt::CVal::Result { ok: true, payload } => *payload,
+                    __err => return __err,
+                }
+            })
         }
-        _ => Err(LowerError::Unsupported(format!(
-            "fncall {name}/{}",
-            args.len()
-        ))),
+        Emit::Bit => lower_bit_op(ctx, name, args),
     }
 }
 
-/// Lower a bit-op call (`band`, `shl`, `from_bits`, ...) to the
-/// runtime's single name/args dispatch. Arity is validated inside the
-/// dispatch, so every op routes here regardless of arg count; the
-/// two unwraps turn an unknown name (impossible here) and a
-/// domain error into a hard panic -- matching the interpreter's
-/// `RuntimeError` (bit-op domain errors are not `err` Results).
+// -- Complex handlers (multi-line / stateful emission) --
+
+/// Lower a bit-op call to the runtime's name/args dispatch. Arity is
+/// validated inside the dispatch; a domain error (non-integer /
+/// negative / >= 2^53) panics -- interpreter `RuntimeError` parity
+/// (bit-op domain errors are not `err` Results).
 fn lower_bit_op(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStream, LowerError> {
     let rt = &ctx.rt;
     let lowered: Vec<TokenStream> = args
@@ -108,71 +245,8 @@ fn lower_bit_op(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStream, Low
     })
 }
 
-/// Lower `check(expr)` -- the `?` operator. Valid only inside a
-/// `CVal`-returning function: on `ok` it yields the unwrapped payload
-/// (a `CVal`); on `err` it early-`return`s the whole Result from the
-/// enclosing function. Outside such a function `?` has nowhere to
-/// propagate, so it is `Unsupported`.
-fn lower_check(ctx: &Ctx, arg: &Expr) -> Result<TokenStream, LowerError> {
-    if !ctx.in_cval_fn.get() {
-        return Err(LowerError::Unsupported(
-            "check (the `?` operator) outside a Result-returning function \
-             (define the caller with `def u:` and have it return ok/err)"
-                .into(),
-        ));
-    }
-    let rt = &ctx.rt;
-    let call = lower_expr(ctx, arg)?;
-    Ok(quote! {
-        match #call {
-            #rt::CVal::Result { ok: true, payload } => *payload,
-            __err => return __err,
-        }
-    })
-}
-
-/// Extract a list of string literals from an `ArrayLit` -- used
-/// for the label-attaching builtins. Returns `None` if the AST
-/// node is not an all-StrLit ArrayLit.
-pub(crate) fn extract_label_list(expr: &Expr) -> Option<Vec<String>> {
-    let Expr::ArrayLit(elems, _) = expr else {
-        return None;
-    };
-    let mut out = Vec::with_capacity(elems.len());
-    for e in elems {
-        let Expr::StrLit(s, _) = e else {
-            return None;
-        };
-        out.push(s.clone());
-    }
-    Some(out)
-}
-
-/// Statically infer the labels of an expression where possible.
-/// Returns `None` when the labels cannot be determined without
-/// running the program. Used for compile-time contraction checks.
-pub(crate) fn labels_of(ctx: &Ctx, expr: &Expr) -> Option<Vec<Option<String>>> {
-    match expr {
-        Expr::Ident(name, _) => ctx.known_labels.get(name).cloned(),
-        Expr::FnCall { name, args, .. } => match (name.as_str(), args.len()) {
-            ("label" | "relabel", 2) => {
-                extract_label_list(&args[1]).map(|v| v.into_iter().map(Some).collect())
-            }
-            ("reshape_labeled", 3) => {
-                extract_label_list(&args[2]).map(|v| v.into_iter().map(Some).collect())
-            }
-            ("transpose", 1) => labels_of(ctx, &args[0]).map(|mut v| {
-                v.reverse();
-                v
-            }),
-            _ => None,
-        },
-        _ => None,
-    }
-}
-
-/// Lower `label`, `relabel`, and `reshape_labeled` -- the three
-/// builtins that attach axis labels to an array at runtime.
+/// Lower `label`, `relabel`, and `reshape_labeled` -- the builtins
+/// that attach axis labels to an array at runtime.
 fn lower_label_attach(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStream, LowerError> {
     let rt = &ctx.rt;
     let labels_arg_idx = if name == "reshape_labeled" { 2 } else { 1 };
@@ -195,10 +269,9 @@ fn lower_label_attach(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStrea
     }
 }
 
-/// Lower `matmul`, performing the static contraction-axis check
-/// when both operands' labels are known at lower time. A
-/// disagreement raises `LowerError::StaticShapeMismatch`; step 005
-/// will map that to `compile_error!` in proc-macro context.
+/// Lower `matmul`, performing the static contraction-axis check when
+/// both operands' labels are known at lower time. A disagreement
+/// raises `LowerError::StaticShapeMismatch`.
 fn lower_matmul(ctx: &Ctx, args: &[Expr]) -> Result<TokenStream, LowerError> {
     let a_labels = labels_of(ctx, &args[0]);
     let b_labels = labels_of(ctx, &args[1]);
@@ -218,4 +291,42 @@ fn lower_matmul(ctx: &Ctx, args: &[Expr]) -> Result<TokenStream, LowerError> {
     let b = lower_expr(ctx, &args[1])?;
     let rt = &ctx.rt;
     Ok(quote! { #rt::MatmulExt::matmul(&(#a), &(#b)).unwrap() })
+}
+
+/// Extract a list of string literals from an `ArrayLit` -- used for
+/// the label-attaching builtins. `None` if not an all-StrLit ArrayLit.
+pub(crate) fn extract_label_list(expr: &Expr) -> Option<Vec<String>> {
+    let Expr::ArrayLit(elems, _) = expr else {
+        return None;
+    };
+    let mut out = Vec::with_capacity(elems.len());
+    for e in elems {
+        let Expr::StrLit(s, _) = e else {
+            return None;
+        };
+        out.push(s.clone());
+    }
+    Some(out)
+}
+
+/// Statically infer the labels of an expression where possible.
+/// `None` when they cannot be known without running the program.
+pub(crate) fn labels_of(ctx: &Ctx, expr: &Expr) -> Option<Vec<Option<String>>> {
+    match expr {
+        Expr::Ident(name, _) => ctx.known_labels.get(name).cloned(),
+        Expr::FnCall { name, args, .. } => match (name.as_str(), args.len()) {
+            ("label" | "relabel", 2) => {
+                extract_label_list(&args[1]).map(|v| v.into_iter().map(Some).collect())
+            }
+            ("reshape_labeled", 3) => {
+                extract_label_list(&args[2]).map(|v| v.into_iter().map(Some).collect())
+            }
+            ("transpose", 1) => labels_of(ctx, &args[0]).map(|mut v| {
+                v.reverse();
+                v
+            }),
+            _ => None,
+        },
+        _ => None,
+    }
 }

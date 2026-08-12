@@ -1,6 +1,6 @@
 number = 2
 slug = "fncall-dispatch-refactor"
-status = "pending"
+status = "in-progress"
 description = "Refactor lower_fncall's growing dispatch match into a chain-of-responsibility..."
 role = "legacy"
 context_files = []

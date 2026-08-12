@@ -119,6 +119,7 @@ name = "mlpl-lower-rs"
 version = "0.20.0"
 dependencies = [
  "mlpl-parser",
+ "mlpl-runtime-bits",
  "proc-macro2",
  "quote",
 ]
@@ -148,6 +149,21 @@ name = "mlpl-parser-ast"
 version = "0.20.0"
 dependencies = [
  "mlpl-core",
+]
+
+[[package]]
+name = "mlpl-runtime-bits"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-core"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
 ]
 
 [[package]]
