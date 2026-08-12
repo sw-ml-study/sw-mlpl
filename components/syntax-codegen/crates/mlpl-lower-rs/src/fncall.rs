@@ -53,81 +53,37 @@ struct Spec {
     emit: Emit,
 }
 
+/// Build the registry from compact `[names] @ arity => Emit` rows.
+/// One line per builtin; `@ any` is `Arity::Any`, `@ N` is
+/// `Arity::Exactly(N)`. Keeps the config dense as the surface grows.
+macro_rules! builtins {
+    ( $( [ $($n:literal),+ ] @ $arity:tt => $emit:ident );+ $(;)? ) => {
+        &[ $( Spec {
+            names: &[$($n),+],
+            arity: builtins!(@arity $arity),
+            emit: Emit::$emit,
+        } ),+ ]
+    };
+    (@arity any) => { Arity::Any };
+    (@arity $n:literal) => { Arity::Exactly($n) };
+}
+
 /// The builtin registry -- the single source of truth for what the
 /// compiler lowers. Ordered; the dispatcher takes the first match.
-const REGISTRY: &[Spec] = &[
-    Spec {
-        names: &["shape", "rank", "transpose", "reduce_add"],
-        arity: Arity::Exactly(1),
-        emit: Emit::UnaryRt,
-    },
-    Spec {
-        names: &["iota", "range"],
-        arity: Arity::Exactly(1),
-        emit: Emit::Iota,
-    },
-    Spec {
-        names: &["reshape"],
-        arity: Arity::Exactly(2),
-        emit: Emit::Reshape,
-    },
-    Spec {
-        names: &["reduce_add"],
-        arity: Arity::Exactly(2),
-        emit: Emit::ReduceAxis,
-    },
-    Spec {
-        names: &["label", "relabel"],
-        arity: Arity::Exactly(2),
-        emit: Emit::Label,
-    },
-    Spec {
-        names: &["reshape_labeled"],
-        arity: Arity::Exactly(3),
-        emit: Emit::Label,
-    },
-    Spec {
-        names: &["matmul"],
-        arity: Arity::Exactly(2),
-        emit: Emit::Matmul,
-    },
-    Spec {
-        names: &["write_stdout", "arg"],
-        arity: Arity::Exactly(1),
-        emit: Emit::CvalIo,
-    },
-    Spec {
-        names: &["args"],
-        arity: Arity::Exactly(0),
-        emit: Emit::Args,
-    },
-    Spec {
-        names: &["ok", "err"],
-        arity: Arity::Exactly(1),
-        emit: Emit::Result,
-    },
-    Spec {
-        names: &["check"],
-        arity: Arity::Exactly(1),
-        emit: Emit::Check,
-    },
-    Spec {
-        names: &[
-            "band",
-            "bor",
-            "bxor",
-            "bnot",
-            "popcount",
-            "shl",
-            "shr",
-            "bmask",
-            "bits",
-            "from_bits",
-        ],
-        arity: Arity::Any,
-        emit: Emit::Bit,
-    },
-];
+const REGISTRY: &[Spec] = builtins! {
+    ["shape", "rank", "transpose", "reduce_add"] @ 1 => UnaryRt;
+    ["iota", "range"] @ 1 => Iota;
+    ["reshape"] @ 2 => Reshape;
+    ["reduce_add"] @ 2 => ReduceAxis;
+    ["label", "relabel"] @ 2 => Label;
+    ["reshape_labeled"] @ 3 => Label;
+    ["matmul"] @ 2 => Matmul;
+    ["write_stdout", "arg"] @ 1 => CvalIo;
+    ["args"] @ 0 => Args;
+    ["ok", "err"] @ 1 => Result;
+    ["check"] @ 1 => Check;
+    ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => Bit;
+};
 
 /// The builtin names the compiler lowers -- the registry's name set,
 /// sorted + deduplicated. Exposed so tooling (and the dispatch
