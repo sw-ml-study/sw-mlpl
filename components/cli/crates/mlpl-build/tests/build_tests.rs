@@ -277,6 +277,62 @@ fn bit_ops_compile_and_match_golden_values() {
 }
 
 #[test]
+fn write_stdout_writes_valid_bytes_and_returns_ok() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("wstdout-ok");
+    let src_path = tmp.join("prog.mlpl");
+    // bytes 72,105 = "Hi"; write_stdout writes them and returns ok(2).
+    // main prints the result (ok(2)) after the bytes -> "Hiok(2)".
+    std::fs::write(&src_path, "write_stdout([72, 105])\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path).output().expect("run binary");
+    let out = String::from_utf8_lossy(&run.stdout);
+    assert!(out.contains("Hi"), "expected written bytes 'Hi' in {out:?}");
+    assert!(out.contains("ok("), "expected ok Result in {out:?}");
+}
+
+#[test]
+fn write_stdout_rejects_out_of_range_byte_no_truncation() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("wstdout-reject");
+    let src_path = tmp.join("prog.mlpl");
+    // 256 is out of 0..=255: the compiled writer REJECTS (interpreter
+    // parity) instead of truncating to byte 0, and returns err.
+    std::fs::write(&src_path, "write_stdout([256])\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path).output().expect("run binary");
+    let out = String::from_utf8_lossy(&run.stdout);
+    assert!(out.starts_with("err("), "expected err Result, got {out:?}");
+    assert!(
+        out.contains("256") && out.contains("0..=255"),
+        "expected descriptive reject message, got {out:?}"
+    );
+    // No truncated byte should precede the err message.
+    assert!(
+        !run.stdout.contains(&0u8),
+        "no null byte should be written: {out:?}"
+    );
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

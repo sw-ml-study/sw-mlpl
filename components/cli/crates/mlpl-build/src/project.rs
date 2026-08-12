@@ -39,8 +39,11 @@ pub(crate) fn make_temp_project(workspace: &Path) -> Result<PathBuf, String> {
 }
 
 /// Write the temp project's `main.rs`: the lowered program block as
-/// the result, printed as its scalar value. Every binding lowers to
-/// `let mut` (so loop accumulators can rebind), which makes
+/// the result, printed via the `CVal` `Display` (a scalar array shows
+/// its value, a Result shows `ok(..)` / `err(..)`, matching the
+/// interpreter) -- not `.arr()`, which would panic on a Result-valued
+/// program (e.g. one ending in `write_stdout`). Every binding lowers
+/// to `let mut` (so loop accumulators can rebind), which makes
 /// single-assignment bindings `unused_mut` -- expected and harmless
 /// in generated code, so the file allows it.
 pub(crate) fn write_main_rs(tmp: &Path, lowered: &str) -> Result<(), String> {
@@ -48,7 +51,7 @@ pub(crate) fn write_main_rs(tmp: &Path, lowered: &str) -> Result<(), String> {
         "#![allow(unused_mut)]\n\
          fn main() {{\n\
              let result = {lowered};\n\
-             println!(\"{{}}\", result.arr().data()[0]);\n\
+             println!(\"{{}}\", result);\n\
          }}\n"
     );
     std::fs::write(tmp.join("src/main.rs"), main_rs).map_err(|e| format!("writing main.rs: {e}"))

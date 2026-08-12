@@ -1,6 +1,6 @@
 number = 3
 slug = "byte-validator-stdout-parity"
-status = "pending"
+status = "in-progress"
 description = "Add a loud-reject array->bytes validator to the compiler runtime (mirror mlpl..."
 role = "legacy"
 context_files = []

@@ -20,12 +20,41 @@ fn display_renders_each_variant() {
 }
 
 #[test]
-fn write_stdout_returns_byte_count() {
-    // string -> its UTF-8 byte count
-    assert_eq!(write_stdout(&CVal::Str("hi".into())).arr().data(), &[2.0]);
-    // array -> cell count (each cell a byte)
+fn write_stdout_ok_returns_byte_count() {
+    // string -> ok(UTF-8 byte count)
+    let r = write_stdout(&CVal::Str("hi".into()));
+    assert_eq!(
+        r,
+        CVal::result(true, CVal::Arr(DenseArray::from_scalar(2.0)))
+    );
+    // array of valid bytes -> ok(cell count)
     let bytes = CVal::Arr(DenseArray::from_vec(vec![72.0, 105.0, 33.0]));
-    assert_eq!(write_stdout(&bytes).arr().data(), &[3.0]);
+    assert_eq!(
+        write_stdout(&bytes),
+        CVal::result(true, CVal::Arr(DenseArray::from_scalar(3.0)))
+    );
+}
+
+#[test]
+fn write_stdout_rejects_invalid_bytes_with_err() {
+    // out-of-range 256 -> err (rejected, NOT truncated to 0), with a
+    // descriptive interpreter-parity message.
+    let over = CVal::Arr(DenseArray::from_vec(vec![256.0]));
+    match write_stdout(&over) {
+        CVal::Result { ok: false, payload } => {
+            let msg = format!("{payload}");
+            assert!(msg.contains("256") && msg.contains("0..=255"), "{msg}");
+        }
+        other => panic!("expected err Result, got {other:?}"),
+    }
+    // non-integer and negative are likewise rejected.
+    let frac = CVal::Arr(DenseArray::from_vec(vec![1.5]));
+    assert!(matches!(
+        write_stdout(&frac),
+        CVal::Result { ok: false, .. }
+    ));
+    let neg = CVal::Arr(DenseArray::from_vec(vec![-1.0]));
+    assert!(matches!(write_stdout(&neg), CVal::Result { ok: false, .. }));
 }
 
 #[test]

@@ -49,13 +49,20 @@ surface is the gate. The reports order the missing rungs:
    top-level `?` (outside a `def u:`); and functions that read a
    global. The value-model gate is CLEARED -- the remaining compiler
    gates are byte/bit lowering and process semantics.
-3. **Shared byte validation + error propagation** -- compiled
-   invalid bytes are coerced rather than rejected; runtime write
-   errors are discarded. Interpreter and compiled paths must share
-   semantics, not just share a call name.
-4. **Byte / bit / text lowering** -- `read_bytes/1`,
-   `read_bytes/3`, `write_bytes`, `band/2` (and the bit ops) are
-   rejected during lowering.
+3. **Shared byte validation + error propagation** -- PARTLY
+   RESOLVED (byte-validator-stdout-parity): the compiler runtime now
+   has a loud-reject `array_to_bytes` (rank <= 1, each cell an
+   integer in `0..=255` else a descriptive error, mirroring
+   mlpl-eval `fs_bytes.rs`), and compiled `write_stdout` validates
+   (rejects, never `as u8` truncation) and returns `ok(count)` /
+   `err(msg)`, propagating write/flush failures instead of discarding
+   them. `write_bytes` / `append_bytes` will reuse the same
+   validator. Interpreter and compiled `write_stdout` now share
+   semantics.
+4. **Byte / bit / text lowering** -- the bit ops (`band` etc.) now
+   lower; `read_bytes/1`, `read_bytes/3`, `write_bytes`,
+   `append_bytes`, and the byte/text conversions are the remaining
+   rungs.
 5. **Process entry / status semantics** -- `read_stdin`, `print`,
    `eprint`, `exit` are not lowered; the current `write_stdout`
    wrapper also appends a spurious textual result line after binary
