@@ -1,9 +1,10 @@
 number = 1
 slug = "cli-bare-filename"
-status = "in-progress"
+status = "completed"
 description = "A1: fix mlpl-repl <bare-filename.mlpl> exiting 1. In components/cli/crates/ml..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-12T14:37:20"
+completed_at = "2026-08-12T15:04:37"
 task_type = "bug"
-commits = []
+commits = ["c6d48d3d4a7d08c2cf3a3f650ab0886b553ead8b"]

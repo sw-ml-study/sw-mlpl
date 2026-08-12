@@ -1,0 +1,9 @@
+number = 2
+slug = "str-concat-join"
+status = "pending"
+description = "B1: add str_concat(a, b) -> string and str_join(parts, separator) -> string i..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T15:04:37"
+task_type = "feature"
+commits = []

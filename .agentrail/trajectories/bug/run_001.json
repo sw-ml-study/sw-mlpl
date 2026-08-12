@@ -1,0 +1,11 @@
+{
+  "task_type": "bug",
+  "state": {
+    "number": 1,
+    "step": "cli-bare-filename"
+  },
+  "action": "Traced the real path (run.rs -> script_mode::run_script_path -> load_script); extracted+fixed resolve_root_dir; inline unit tests; rebuilt mlpl-repl bin + ran acceptance; scoped mlpl-cli tests/clippy/fmt.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T15:04:37"
+}
