@@ -1,0 +1,9 @@
+number = 4
+slug = "to-string"
+status = "pending"
+description = "B2: add to_string(x) -> string interpreter builtin in mlpl-eval (the honest i..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T15:53:32"
+task_type = "feature"
+commits = []

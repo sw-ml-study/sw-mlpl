@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 3,
+    "step": "interpreter-dispatch-registry"
+  },
+  "action": "Uniform Dispatcher signature; added ignored _span to 16 fncall_* families + try_loaders; const DISPATCHERS slice + find_map; full release suite regression + clippy/fmt.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T15:53:32"
+}
