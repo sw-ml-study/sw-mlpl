@@ -31,11 +31,15 @@ MLPL the interpreter already runs; the compiler surface is the gate.
       pattern compiles + runs: `f = u:fit(n)?; f.slope` where `u:fit`
       returns `ok({...})`. (Deferred: `for`, nested-record field
       chains, arithmetic on a `?`-unwrapped value, top-level `?`.)
-- [ ] **compiler-byte-io** -- lower `read_bytes` (whole + range),
-      `file_size`, `append_bytes`/`write_bytes` + the array/bit/text
-      ops the demos use. MUST share validation + error semantics
-      with the interpreter (reject invalid bytes, don't coerce;
-      propagate sink write/flush errors, don't discard).
+- [~] **compiler-byte-io** -- IN PROGRESS. Shipped: the bit ops
+      (`band`/`shr`/`bmask`/...), a loud-reject `array_to_bytes`
+      validator + `write_stdout` parity (rejects, returns
+      `ok(count)`/`err`, propagates I/O errors), and `read_bytes`
+      (whole + range, EOF-clamped) + `file_size` returning Results,
+      sandboxed to `MLPL_FS_ROOT`/cwd via the interpreter's
+      `contained` check. Remaining rungs: `write_bytes`/`append_bytes`
+      and the text conversions (`tokenize_bytes`/`decode_bytes`/
+      `to_int`).
 - [ ] **compiler-process-semantics** -- drop the auto-printed
       numeric result trailer (pristine binary stdout); lower
       `print`/`eprint`/`exit`/`read_stdin`; useful exit status.
