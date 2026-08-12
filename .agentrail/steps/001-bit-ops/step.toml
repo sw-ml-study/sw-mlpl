@@ -1,6 +1,6 @@
 number = 1
 slug = "bit-ops"
-status = "pending"
+status = "in-progress"
 description = "Lower the pure bit-op family (band, bor, bxor, bnot, popcount, shl, shr, bmas..."
 role = "legacy"
 context_files = []

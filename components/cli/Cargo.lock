@@ -2370,6 +2370,7 @@ dependencies = [
  "mlpl-array-ops-shape",
  "mlpl-core",
  "mlpl-rt-value",
+ "mlpl-runtime-bits",
 ]
 
 [[package]]

@@ -242,6 +242,41 @@ fn result_propagation_and_field_access_compiles_and_runs() {
 }
 
 #[test]
+fn bit_ops_compile_and_match_golden_values() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    // One compiled program per golden case (interpreter parity):
+    // band(12,10)=8, and the from_bits(bits(...)) round-trip = 165.
+    for (src, expected) in [
+        ("band(12, 10)\n", "8"),
+        ("from_bits(bits(165, 8))\n", "165"),
+        ("shl(15, 4, 8)\n", "240"),
+    ] {
+        let tmp = tempdir("bits");
+        let src_path = tmp.join("prog.mlpl");
+        std::fs::write(&src_path, src).unwrap();
+        let out_path = tmp.join("prog");
+        let result =
+            run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+        assert!(
+            result.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&result.stderr)
+        );
+        let run = Command::new(&out_path)
+            .output()
+            .expect("run produced binary");
+        assert_eq!(
+            String::from_utf8_lossy(&run.stdout).trim(),
+            expected,
+            "wrong result for {src:?}"
+        );
+    }
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

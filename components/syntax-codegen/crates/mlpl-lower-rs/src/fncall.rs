@@ -74,6 +74,11 @@ pub(crate) fn lower_fncall(
             Ok(quote! { #rt::CVal::result(#ok, #payload) })
         }
         ("check", 1) => lower_check(ctx, &args[0]),
+        (
+            "band" | "bor" | "bxor" | "bnot" | "popcount" | "shl" | "shr" | "bmask" | "bits"
+            | "from_bits",
+            _,
+        ) => lower_bit_op(ctx, name, args),
         ("args", 0) => Ok(quote! { #rt::cli_args() }),
         ("arg", 1) => {
             let a = crate::lower_cval(ctx, &args[0])?;
@@ -84,6 +89,23 @@ pub(crate) fn lower_fncall(
             args.len()
         ))),
     }
+}
+
+/// Lower a bit-op call (`band`, `shl`, `from_bits`, ...) to the
+/// runtime's single name/args dispatch. Arity is validated inside the
+/// dispatch, so every op routes here regardless of arg count; the
+/// two unwraps turn an unknown name (impossible here) and a
+/// domain error into a hard panic -- matching the interpreter's
+/// `RuntimeError` (bit-op domain errors are not `err` Results).
+fn lower_bit_op(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStream, LowerError> {
+    let rt = &ctx.rt;
+    let lowered: Vec<TokenStream> = args
+        .iter()
+        .map(|a| lower_expr(ctx, a))
+        .collect::<Result<_, _>>()?;
+    Ok(quote! {
+        #rt::bit_try_call(#name, vec![#(#lowered),*]).expect("bit builtin").unwrap()
+    })
 }
 
 /// Lower `check(expr)` -- the `?` operator. Valid only inside a

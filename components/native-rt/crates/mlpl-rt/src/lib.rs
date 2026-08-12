@@ -41,6 +41,11 @@ pub use mlpl_rt_value::{CVal, arg, cli_args, write_stdout};
 pub use mlpl_array_ops_element::ApplyBinopExt;
 pub use mlpl_array_ops_matmul::MatmulExt;
 pub use mlpl_core::LabeledShape;
+// The pure bit-op family, re-exported as a single name/args dispatch
+// so generated code reaches every op as `<rt>::bit_try_call("band",
+// vec![..])`. Domain errors surface as `Err(RuntimeError)`, which the
+// codegen unwraps into a hard panic (interpreter parity).
+pub use mlpl_runtime_bits::try_call as bit_try_call;
 pub use reductions::{argmax, cross_entropy, log_softmax, mean, reduce_mul, softmax};
 pub use transforms::{reduce_add, reduce_add_axis, reshape, transpose};
 

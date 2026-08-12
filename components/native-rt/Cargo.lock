@@ -432,10 +432,26 @@ dependencies = [
  "mlpl-array-ops-shape",
  "mlpl-core",
  "mlpl-rt-value",
+ "mlpl-runtime-bits",
 ]
 
 [[package]]
 name = "mlpl-rt-value"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-runtime-bits"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-core"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",

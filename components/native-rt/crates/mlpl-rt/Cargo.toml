@@ -12,3 +12,7 @@ mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-sh
 mlpl-array-ops-reduce = { path = "../../../array-compose/crates/mlpl-array-ops-reduce" }
 mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-matmul" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
+# Pure bit-op family (band/bor/bxor/bnot/popcount/shl/shr/bmask/bits/
+# from_bits). DenseArray->DenseArray, no interpreter/parser -- keeps
+# the "compiled binaries link no interpreter" invariant.
+mlpl-runtime-bits = { path = "../../../runtime-element/crates/mlpl-runtime-bits" }
