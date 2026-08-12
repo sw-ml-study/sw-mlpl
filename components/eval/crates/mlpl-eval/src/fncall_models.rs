@@ -22,6 +22,7 @@ pub(crate) fn try_dispatch(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
+    _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
     if let Some(r) = try_model_ctor(name, args, env) {
         return Some(r.map(Value::Model));

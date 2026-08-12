@@ -17,6 +17,7 @@ pub(crate) fn try_dispatch(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
+    _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "to_native" => Some(eval_to_native(args, env, trace)),

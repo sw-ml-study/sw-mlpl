@@ -18,6 +18,7 @@ pub(crate) fn try_dispatch(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
+    _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "parse_json" => Some(eval_parse_json(args, env, trace)),

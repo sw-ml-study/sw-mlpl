@@ -31,6 +31,7 @@ pub(crate) fn try_dispatch(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
+    _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "test_event_sink" => Some(eval_sink(args, env, trace)),

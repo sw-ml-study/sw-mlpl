@@ -1,6 +1,6 @@
 number = 3
 slug = "interpreter-dispatch-registry"
-status = "pending"
+status = "in-progress"
 description = "Refactor eval_fncalls.rs's builtin dispatch from the hand-written .or_else ch..."
 role = "legacy"
 context_files = []

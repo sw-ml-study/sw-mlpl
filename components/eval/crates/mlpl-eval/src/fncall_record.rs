@@ -18,6 +18,7 @@ pub(crate) fn try_dispatch(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
+    _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "has_field" => Some(has_field(args, env, trace)),

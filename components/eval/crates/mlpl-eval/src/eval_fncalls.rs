@@ -1,12 +1,13 @@
 //! Top-level FnCall dispatch for `eval::eval_expr`.
 //!
-//! Saga 33 step 023 split the FnCall name-driven block out of
-//! `eval::eval_expr` to retire that file's File-LOC FAIL.
-//! `try_dispatch` walks the family modules in order
-//! (`fncall_models`, `fncall_axes`, `fncall_arrays`) and then
-//! falls through to the loader / tools cluster handled inline
-//! here. Each family returns `Option<Result<Value, EvalError>>`
-//! so the caller chains them with `Option::or_else`.
+//! `try_dispatch` forwards a call down the `DISPATCHERS` registry --
+//! an ordered list of builtin-family dispatchers -- with `find_map`,
+//! stopping at the first family that handles the name (returns
+//! `Some`). Every family conforms to one uniform `Dispatcher`
+//! signature `(name, args, env, trace, span)`, so the registry is
+//! data: adding a family is one row, not a link in a hand-written
+//! `or_else` chain. Config (the list) / dispatch (the loop) / handlers
+//! (the family fns) are separated. First-match order is preserved.
 
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
@@ -14,6 +15,46 @@ use mlpl_trace::Trace;
 use crate::env::Environment;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
+
+/// A builtin-family dispatcher: given a call's `name`/`args` (plus the
+/// eval context and the call `span`), returns `Some(result)` if this
+/// family handles the name, else `None`. Every family conforms to this
+/// one signature -- a uniform handler contract -- so the registry can
+/// hold them all; families that do not need `span` ignore it.
+type Dispatcher = fn(
+    &str,
+    &[Expr],
+    &mut Environment,
+    &mut Option<&mut Trace>,
+    &mlpl_core::Span,
+) -> Option<Result<Value, EvalError>>;
+
+/// The dispatch REGISTRY: the ordered list of builtin families. The
+/// call is forwarded down the list until a family handles it (returns
+/// `Some`) -- first match wins. Adding a family is one row here, not a
+/// new link in a hand-written `or_else` chain.
+const DISPATCHERS: &[Dispatcher] = &[
+    crate::fncall_models::try_dispatch,
+    crate::fncall_axes::try_dispatch,
+    crate::fncall_arrays::try_dispatch,
+    crate::fncall_engram::try_dispatch,
+    crate::fncall_gen::try_dispatch,
+    crate::fncall_gen_controls::try_dispatch,
+    crate::fncall_record::try_dispatch,
+    crate::fncall_record_keys::try_dispatch,
+    crate::fncall_events::try_dispatch,
+    crate::fncall_globals::try_dispatch,
+    crate::fncall_fs::try_dispatch,
+    crate::fncall_run::try_dispatch,
+    crate::fncall_hof::try_dispatch,
+    crate::fncall_json::try_dispatch,
+    crate::fncall_toml::try_dispatch,
+    crate::fncall_native::try_dispatch,
+    crate::fncall_string::try_dispatch,
+    crate::fncall_values::try_dispatch,
+    try_loaders,
+    try_tools,
+];
 
 pub(crate) fn try_dispatch(
     expr: &Expr,
@@ -23,26 +64,9 @@ pub(crate) fn try_dispatch(
     let Expr::FnCall { name, args, span } = expr else {
         return None;
     };
-    crate::fncall_models::try_dispatch(name, args, env, trace)
-        .or_else(|| crate::fncall_axes::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_arrays::try_dispatch(name, args, env, trace, span))
-        .or_else(|| crate::fncall_engram::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_gen::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_gen_controls::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_record::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_record_keys::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_events::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_globals::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_fs::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_run::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_hof::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_json::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_toml::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_native::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_string::try_dispatch(name, args, env, trace))
-        .or_else(|| crate::fncall_values::try_dispatch(name, args, env, trace, span))
-        .or_else(|| try_loaders(name, args, env, trace))
-        .or_else(|| try_tools(name, args, env, trace, span))
+    DISPATCHERS
+        .iter()
+        .find_map(|dispatch| dispatch(name, args, env, trace, span))
 }
 
 fn try_loaders(
@@ -50,6 +74,7 @@ fn try_loaders(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
+    _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "load" | "load_preloaded" => Some(eval_load_call(name, args, env)),

@@ -19,6 +19,7 @@ pub(crate) fn try_dispatch(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
+    _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
     if name == "read_bytes" && args.len() == 3 {
         return Some(crate::fs_range::eval_read_range(args, env, trace));
