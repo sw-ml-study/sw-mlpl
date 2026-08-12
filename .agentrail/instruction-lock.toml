@@ -1,0 +1,7 @@
+profile = "default"
+content_hash = "f3f09c2f37be48a3"
+updated_at = "2026-08-12T09:43:21"
+targets = [
+    "CLAUDE.md",
+    "AGENTS.md",
+]
