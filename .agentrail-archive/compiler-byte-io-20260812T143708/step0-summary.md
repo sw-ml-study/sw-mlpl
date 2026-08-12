@@ -1,0 +1,1 @@
+saga bootstrap: compiler-byte-io plan (6 steps: bit-ops, byte-validator+stdout-parity, read-bytes+file-size, write+append-bytes, text-ops, close)

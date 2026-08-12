@@ -1,1 +1,1 @@
-saga bootstrap: compiler-byte-io plan (6 steps: bit-ops, byte-validator+stdout-parity, read-bytes+file-size, write+append-bytes, text-ops, close)
+saga bootstrap: algebra-text-surface plan (6 steps) from demo-abstract-algebra's sw-mlpl-work-order.md -- A1 CLI bare-filename, B1 str_concat/str_join, B2 to_string, B5 string-list u:arg, A4 svg-type docs, close

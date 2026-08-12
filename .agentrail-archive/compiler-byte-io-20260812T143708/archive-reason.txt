@@ -1,0 +1,1 @@
+compiler-byte-io complete (bit-ops, dispatch-refactor, byte-validator, read/write/append bytes, file_size, text conversions all lower); pivoting to demo-abstract-algebra work order
