@@ -33,7 +33,9 @@ pub use array_lit::array_lit;
 // reaches it as `<rt>::CVal` / `<rt>::write_stdout` with no `use`.
 pub use elementwise::{add, div, mul, neg, sub};
 pub use mlpl_array::{ArrayError, DenseArray, Shape};
-pub use mlpl_rt_value::{CVal, arg, cli_args, write_stdout};
+pub use mlpl_rt_value::{
+    CVal, arg, cli_args, file_size, read_bytes, read_bytes_range, write_stdout,
+};
 // The binop / matmul extension traits are re-exported so lowered
 // code can call them via UFCS -- `<rt>::ApplyBinopExt::apply_binop(...)`
 // / `<rt>::MatmulExt::matmul(...)` -- with no `use` at the generated

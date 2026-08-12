@@ -55,6 +55,9 @@ enum Builtin {
     Bmask,
     Bits,
     FromBits,
+    ReadBytes,
+    ReadBytesRange,
+    FileSize,
 }
 
 const ALL: &[Builtin] = &[
@@ -86,6 +89,9 @@ const ALL: &[Builtin] = &[
     Builtin::Bmask,
     Builtin::Bits,
     Builtin::FromBits,
+    Builtin::ReadBytes,
+    Builtin::ReadBytesRange,
+    Builtin::FileSize,
 ];
 
 impl Builtin {
@@ -122,6 +128,9 @@ impl Builtin {
             Builtin::Bmask => "bmask(1, 4)",
             Builtin::Bits => "bits(1, 8)",
             Builtin::FromBits => "from_bits([1, 0])",
+            Builtin::ReadBytes => "read_bytes(\"f\")",
+            Builtin::ReadBytesRange => "read_bytes(\"f\", 0, 4)",
+            Builtin::FileSize => "file_size(\"f\")",
         }
     }
 
@@ -155,6 +164,8 @@ impl Builtin {
             Builtin::Bmask => "bmask",
             Builtin::Bits => "bits",
             Builtin::FromBits => "from_bits",
+            Builtin::ReadBytes | Builtin::ReadBytesRange => "read_bytes",
+            Builtin::FileSize => "file_size",
         }
     }
 }

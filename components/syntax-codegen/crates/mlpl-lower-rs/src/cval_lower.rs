@@ -34,7 +34,14 @@ fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {
             Some(bare) => ctx.cval_returning.contains(bare),
             None => matches!(
                 name.as_str(),
-                "write_stdout" | "args" | "arg" | "ok" | "err" | "check"
+                "write_stdout"
+                    | "args"
+                    | "arg"
+                    | "ok"
+                    | "err"
+                    | "check"
+                    | "read_bytes"
+                    | "file_size"
             ),
         },
         _ => false,

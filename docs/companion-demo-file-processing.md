@@ -59,10 +59,14 @@ surface is the gate. The reports order the missing rungs:
    them. `write_bytes` / `append_bytes` will reuse the same
    validator. Interpreter and compiled `write_stdout` now share
    semantics.
-4. **Byte / bit / text lowering** -- the bit ops (`band` etc.) now
-   lower; `read_bytes/1`, `read_bytes/3`, `write_bytes`,
-   `append_bytes`, and the byte/text conversions are the remaining
-   rungs.
+4. **Byte / bit / text lowering** -- the bit ops (`band` etc.),
+   `read_bytes/1` (whole file), `read_bytes/3` (offset, length;
+   EOF-clamped), and `file_size/1` now lower, returning
+   `ok(..)`/`err(..)` Results. A compiled binary has no `Environment`,
+   so the read sandbox root is `MLPL_FS_ROOT` (else the cwd) with the
+   same `contained` containment check as the interpreter. Remaining:
+   `write_bytes`, `append_bytes`, and the byte/text conversions
+   (`tokenize_bytes` / `decode_bytes` / `to_int`).
 5. **Process entry / status semantics** -- `read_stdin`, `print`,
    `eprint`, `exit` are not lowered; the current `write_stdout`
    wrapper also appends a spurious textual result line after binary

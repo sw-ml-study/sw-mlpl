@@ -39,6 +39,9 @@ enum Emit {
     Args,
     /// `ok`/`err` -> `CVal::result(name == "ok", <cval a0>)`.
     Result,
+    /// `read_bytes(path, offset, length)` -- path in CVal position,
+    /// offset + length as `DenseArray` scalars.
+    ReadRange,
     Label,
     Matmul,
     Check,
@@ -78,7 +81,8 @@ const REGISTRY: &[Spec] = builtins! {
     ["label", "relabel"] @ 2 => Label;
     ["reshape_labeled"] @ 3 => Label;
     ["matmul"] @ 2 => Matmul;
-    ["write_stdout", "arg"] @ 1 => CvalIo;
+    ["write_stdout", "arg", "read_bytes", "file_size"] @ 1 => CvalIo;
+    ["read_bytes"] @ 3 => ReadRange;
     ["args"] @ 0 => Args;
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
@@ -159,6 +163,12 @@ pub(crate) fn lower_fncall(
         Emit::Result => {
             let (payload, ok) = (crate::lower_cval(ctx, &args[0])?, name == "ok");
             Ok(quote! { #rt::CVal::result(#ok, #payload) })
+        }
+        Emit::ReadRange => {
+            let p = crate::lower_cval(ctx, &args[0])?;
+            let off = lower_expr(ctx, &args[1])?;
+            let len = lower_expr(ctx, &args[2])?;
+            Ok(quote! { #rt::read_bytes_range(&(#p), &(#off), &(#len)) })
         }
         Emit::Label => lower_label_attach(ctx, name, args),
         Emit::Matmul => lower_matmul(ctx, args),

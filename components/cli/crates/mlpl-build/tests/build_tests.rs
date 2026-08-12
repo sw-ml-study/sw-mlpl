@@ -333,6 +333,68 @@ fn write_stdout_rejects_out_of_range_byte_no_truncation() {
 }
 
 #[test]
+fn file_size_compiles_and_reads_metadata() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("filesize");
+    std::fs::write(tmp.join("data.bin"), [65u8, 66, 67]).unwrap();
+    let src_path = tmp.join("prog.mlpl");
+    std::fs::write(&src_path, "file_size(\"data.bin\")\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    // Run with cwd = the temp dir, which is the compiled sandbox root.
+    let run = Command::new(&out_path)
+        .current_dir(&tmp)
+        .output()
+        .expect("run binary");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "ok(3)");
+}
+
+#[test]
+fn read_bytes_whole_and_range_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("readbytes");
+    std::fs::write(tmp.join("data.bin"), [65u8, 66, 67]).unwrap();
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        let run = Command::new(&op).current_dir(&tmp).output().expect("run");
+        String::from_utf8_lossy(&run.stdout).trim().to_string()
+    };
+    // Whole file -> ok([65, 66, 67]).
+    let whole = build_run("read_bytes(\"data.bin\")\n", "whole");
+    assert!(whole.starts_with("ok("), "{whole}");
+    assert!(
+        whole.contains("65") && whole.contains("66") && whole.contains("67"),
+        "{whole}"
+    );
+    // offset 1, length 5 -> EOF-clamped to [66, 67] (no byte 65).
+    let range = build_run("read_bytes(\"data.bin\", 1, 5)\n", "range");
+    assert!(range.starts_with("ok("), "{range}");
+    assert!(
+        range.contains("66") && range.contains("67") && !range.contains("65"),
+        "{range}"
+    );
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
