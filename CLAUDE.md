@@ -159,16 +159,6 @@ a safety net for what is not yet committed.
 
 ## sw-checklist ratchet-down (every commit)
 
-**Baseline recalibrated 2026-08-12:** a `sw-checklist` detector fix
-(build 31b5ded) closed a parsing gap that had hidden every
-restricted-visibility function (`pub(crate) fn`, `pub(super) fn`,
-...) from the Function-LOC and Module-Function-Count checks. The
-true baseline is now **49 failed / 521 warnings** (was a
-mis-measured 2 / 386). This is pre-existing debt made visible, not
-new regressions -- pay it down gradually (details + self-audit in
-`docs/sw-checklist-paydown.md`). Never structure code to a checker's
-blind spot.
-
 Every commit must **strictly lower** BOTH the `sw-checklist`
 failed count AND the warnings count from its parent. HOLD is
 not enough. Per-commit targets: **>= 5 failures retired AND
