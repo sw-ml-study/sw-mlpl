@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 006-text-ops; close compiler-byte-io saga (byte/bit/text lowering done)
+- feat(compiler): lower tokenize_bytes / decode_bytes / to_int
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 005-write-append-bytes; queue text-ops
 - feat(compiler): lower write_bytes + append_bytes; carve out mlpl-rt-fsio
 - docs(plan): mark compiler-byte-io in progress (bit-ops/write_stdout/read_bytes/file_size shipped)
