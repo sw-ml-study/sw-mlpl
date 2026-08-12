@@ -84,7 +84,8 @@ const REGISTRY: &[Spec] = builtins! {
     ["label", "relabel"] @ 2 => Label;
     ["reshape_labeled"] @ 3 => Label;
     ["matmul"] @ 2 => Matmul;
-    ["write_stdout", "arg", "read_bytes", "file_size"] @ 1 => CvalIo;
+    ["write_stdout", "arg", "read_bytes", "file_size",
+     "tokenize_bytes", "decode_bytes", "to_int"] @ 1 => CvalIo;
     ["read_bytes"] @ 3 => ReadRange;
     ["write_bytes", "append_bytes"] @ 2 => WriteBytes;
     ["args"] @ 0 => Args;

@@ -6,10 +6,13 @@
 //! - `ctor`  -- the `record` / `result` compound constructors.
 //! - `io`    -- `write_stdout` / `args` / `arg` + `array_to_bytes`
 //!   (the byte validator, shared with the `mlpl-rt-fsio` crate).
+//! - `text`  -- `tokenize_bytes` / `decode_bytes` / `to_int`.
 
 mod ctor;
 mod io;
+mod text;
 mod value;
 
 pub use io::{arg, array_to_bytes, cli_args, write_stdout};
+pub use text::{decode_bytes, to_int, tokenize_bytes};
 pub use value::CVal;

@@ -36,7 +36,7 @@ pub use mlpl_array::{ArrayError, DenseArray, Shape};
 // Sandboxed file I/O lives in its own crate (own module budget);
 // re-exported so generated code reaches it as `<rt>::read_bytes` etc.
 pub use mlpl_rt_fsio::{append_bytes, file_size, read_bytes, read_bytes_range, write_bytes};
-pub use mlpl_rt_value::{CVal, arg, cli_args, write_stdout};
+pub use mlpl_rt_value::{CVal, arg, cli_args, decode_bytes, to_int, tokenize_bytes, write_stdout};
 // The binop / matmul extension traits are re-exported so lowered
 // code can call them via UFCS -- `<rt>::ApplyBinopExt::apply_binop(...)`
 // / `<rt>::MatmulExt::matmul(...)` -- with no `use` at the generated

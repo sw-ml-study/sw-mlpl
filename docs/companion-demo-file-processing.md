@@ -67,8 +67,11 @@ surface is the gate. The reports order the missing rungs:
    validator. A compiled binary has no `Environment`, so the sandbox
    root is `MLPL_FS_ROOT` (else the cwd) with the same `contained`
    containment check as the interpreter (all in the dedicated
-   `mlpl-rt-fsio` crate). Remaining: the byte/text conversions
-   (`tokenize_bytes` / `decode_bytes` / `to_int`).
+   `mlpl-rt-fsio` crate). The byte/text conversions now lower too:
+   `tokenize_bytes/1` (str -> byte array), `decode_bytes/1` (byte
+   array -> str), `to_int/1` (str -> `ok(int)`/`err`). Byte / bit /
+   text lowering is COMPLETE; the remaining compiler gate is process
+   semantics (item 5).
 5. **Process entry / status semantics** -- `read_stdin`, `print`,
    `eprint`, `exit` are not lowered; the current `write_stdout`
    wrapper also appends a spurious textual result line after binary

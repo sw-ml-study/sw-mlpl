@@ -464,6 +464,36 @@ fn write_bytes_rejects_out_of_range_and_writes_nothing() {
 }
 
 #[test]
+fn text_conversions_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("textops");
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        String::from_utf8_lossy(&Command::new(&op).output().expect("run").stdout)
+            .trim()
+            .to_string()
+    };
+    // str -> bytes -> str round-trip.
+    assert_eq!(
+        build_run("decode_bytes(tokenize_bytes(\"Hi\"))\n", "rt"),
+        "Hi"
+    );
+    // to_int parse success -> ok(42).
+    assert_eq!(build_run("to_int(\"42\")\n", "toi"), "ok(42)");
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

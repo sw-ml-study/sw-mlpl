@@ -1,7 +1,29 @@
 //! The compiled value model (CVal) + string/args helpers.
 
 use mlpl_array::DenseArray;
-use mlpl_rt_value::{CVal, arg, cli_args, write_stdout};
+use mlpl_rt_value::{CVal, arg, cli_args, decode_bytes, to_int, tokenize_bytes, write_stdout};
+
+#[test]
+fn tokenize_and_decode_bytes_round_trip() {
+    // "Hi" -> [72, 105] (a plain DenseArray) -> "Hi".
+    let bytes = tokenize_bytes(&CVal::Str("Hi".into()));
+    assert_eq!(bytes.data(), &[72.0, 105.0]);
+    assert_eq!(decode_bytes(&CVal::Arr(bytes)), CVal::Str("Hi".into()));
+}
+
+#[test]
+fn to_int_parses_or_errs() {
+    assert_eq!(
+        to_int(&CVal::Str(" 42 ".into())),
+        CVal::result(true, CVal::Arr(DenseArray::from_scalar(42.0)))
+    );
+    match to_int(&CVal::Str("nope".into())) {
+        CVal::Result { ok: false, payload } => {
+            assert!(format!("{payload}").contains("nope"));
+        }
+        other => panic!("expected err, got {other:?}"),
+    }
+}
 
 #[test]
 fn arr_accessor_and_from() {

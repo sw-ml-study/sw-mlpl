@@ -60,6 +60,9 @@ enum Builtin {
     FileSize,
     WriteBytes,
     AppendBytes,
+    TokenizeBytes,
+    DecodeBytes,
+    ToInt,
 }
 
 const ALL: &[Builtin] = &[
@@ -96,6 +99,9 @@ const ALL: &[Builtin] = &[
     Builtin::FileSize,
     Builtin::WriteBytes,
     Builtin::AppendBytes,
+    Builtin::TokenizeBytes,
+    Builtin::DecodeBytes,
+    Builtin::ToInt,
 ];
 
 impl Builtin {
@@ -137,6 +143,9 @@ impl Builtin {
             Builtin::FileSize => "file_size(\"f\")",
             Builtin::WriteBytes => "write_bytes(\"f\", [65, 66])",
             Builtin::AppendBytes => "append_bytes(\"f\", [67])",
+            Builtin::TokenizeBytes => "tokenize_bytes(\"hi\")",
+            Builtin::DecodeBytes => "decode_bytes([72, 105])",
+            Builtin::ToInt => "to_int(\"42\")",
         }
     }
 
@@ -174,6 +183,9 @@ impl Builtin {
             Builtin::FileSize => "file_size",
             Builtin::WriteBytes => "write_bytes",
             Builtin::AppendBytes => "append_bytes",
+            Builtin::TokenizeBytes => "tokenize_bytes",
+            Builtin::DecodeBytes => "decode_bytes",
+            Builtin::ToInt => "to_int",
         }
     }
 }

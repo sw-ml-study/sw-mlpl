@@ -1,6 +1,6 @@
 number = 6
 slug = "text-ops"
-status = "pending"
+status = "in-progress"
 description = "Lower the byte/text conversions: tokenize_bytes/1 (str -> rank-1 byte array),..."
 role = "legacy"
 context_files = []
