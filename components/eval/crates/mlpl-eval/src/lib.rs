@@ -90,6 +90,7 @@ mod fncall_record;
 mod fncall_record_keys;
 mod fncall_reflect;
 mod fncall_run;
+mod fncall_string;
 mod fncall_toml;
 mod fncall_trace;
 mod fncall_values;

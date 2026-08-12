@@ -1,6 +1,6 @@
 number = 2
 slug = "str-concat-join"
-status = "pending"
+status = "in-progress"
 description = "B1: add str_concat(a, b) -> string and str_join(parts, separator) -> string i..."
 role = "legacy"
 context_files = []

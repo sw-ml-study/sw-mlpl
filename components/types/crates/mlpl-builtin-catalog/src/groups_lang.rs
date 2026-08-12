@@ -279,6 +279,16 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "bounded deterministic rendering for diagnostics",
             ),
             (
+                "str_concat",
+                "str_concat(a, b)",
+                "join two strings; exact, Unicode-preserving, no coercion",
+            ),
+            (
+                "str_join",
+                "str_join(parts, separator)",
+                "join a string list with a separator; O(total) linear fold",
+            ),
+            (
                 "type_of",
                 "type_of(v)",
                 "stable kind string of any value (array/string/record/result/...); total, never errors",
