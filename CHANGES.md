@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 001-cli-bare-filename (A1); queue str-concat-join (B1)
+- fix(cli): mlpl-repl <bare-filename.mlpl> resolves the sandbox root (A1)
+- chore(agentrail): archive compiler-byte-io; init algebra-text-surface saga (demo-abstract-algebra work order)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 006-text-ops; close compiler-byte-io saga (byte/bit/text lowering done)
 - feat(compiler): lower tokenize_bytes / decode_bytes / to_int
 - docs(changes): refresh CHANGES.md to HEAD
