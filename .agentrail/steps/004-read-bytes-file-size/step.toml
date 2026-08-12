@@ -1,0 +1,9 @@
+number = 4
+slug = "read-bytes-file-size"
+status = "pending"
+description = "Add read_bytes/1 (whole file), read_bytes/3 (offset,length; non-negative inte..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T10:01:49"
+task_type = "feature"
+commits = []

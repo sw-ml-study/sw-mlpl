@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "byte-validator-stdout-parity"
+  },
+  "action": "array_to_bytes mirroring fs_bytes.rs in io.rs (kept at 4 fns, no new module); write_stdout -> CVal::Result; project.rs main -> Display; updated cval_tests + companion doc; scoped test/clippy/fmt + gated e2e.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T10:01:49"
+}
