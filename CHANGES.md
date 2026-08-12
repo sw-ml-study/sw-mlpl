@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 002-str-concat-join (B1); queue interpreter-dispatch-registry
+- feat(eval): str_concat + str_join string builtins (B1)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-cli-bare-filename (A1); queue str-concat-join (B1)
 - fix(cli): mlpl-repl <bare-filename.mlpl> resolves the sandbox root (A1)
 - chore(agentrail): archive compiler-byte-io; init algebra-text-surface saga (demo-abstract-algebra work order)
