@@ -1,9 +1,10 @@
 number = 2
 slug = "fncall-dispatch-refactor"
-status = "in-progress"
+status = "completed"
 description = "Refactor lower_fncall's growing dispatch match into a chain-of-responsibility..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-11T17:23:59"
+completed_at = "2026-08-12T08:17:21"
 task_type = "refactor"
-commits = []
+commits = ["eddb901daa165271a94097221c82c30a2452d25e"]

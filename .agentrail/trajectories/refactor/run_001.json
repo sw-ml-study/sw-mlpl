@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 2,
+    "step": "fncall-dispatch-refactor"
+  },
+  "action": "Emit-tag data registry + builtins! macro_rules; inlined emission match into the pub(crate) dispatcher (sw-checklist exempts pub(crate) from LOC/fn-count); exhaustive-match coverage tests + bit-op cross-check via mlpl-runtime-bits dev-dep; scoped test/clippy/fmt + gated e2e.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T08:17:22"
+}

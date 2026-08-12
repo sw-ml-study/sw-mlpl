@@ -1,0 +1,9 @@
+number = 3
+slug = "byte-validator-stdout-parity"
+status = "pending"
+description = "Add a loud-reject array->bytes validator to the compiler runtime (mirror mlpl..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T08:17:22"
+task_type = "feature"
+commits = []
