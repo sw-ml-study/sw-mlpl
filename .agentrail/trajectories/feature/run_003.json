@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "read-bytes-file-size"
+  },
+  "action": "fsio.rs (contained/read_bytes/read_bytes_range/file_size/bytes_result/nonneg) mirroring interpreter; mlpl-rt re-export; fncall ReadRange emit + registry rows; cval_lower produces_cval; exhaustive Builtin coverage; gated e2e with cwd sandbox root.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T11:20:56"
+}

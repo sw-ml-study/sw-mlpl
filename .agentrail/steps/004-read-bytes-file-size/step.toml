@@ -1,9 +1,10 @@
 number = 4
 slug = "read-bytes-file-size"
-status = "in-progress"
+status = "completed"
 description = "Add read_bytes/1 (whole file), read_bytes/3 (offset,length; non-negative inte..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-12T10:01:49"
+completed_at = "2026-08-12T11:20:56"
 task_type = "feature"
-commits = []
+commits = ["96320f3148115d52fef629082a1ed96e3627c269"]
