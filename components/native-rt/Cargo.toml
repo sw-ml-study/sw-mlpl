@@ -8,6 +8,7 @@ members = [
     "crates/mlpl-mlx-rt",
     "crates/mlpl-mlx-train",
     "crates/mlpl-rt",
+    "crates/mlpl-rt-fsio",
     "crates/mlpl-rt-value",
 ]
 resolver = "2"

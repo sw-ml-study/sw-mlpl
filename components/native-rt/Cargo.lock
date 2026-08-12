@@ -431,8 +431,17 @@ dependencies = [
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-rt-fsio",
  "mlpl-rt-value",
  "mlpl-runtime-bits",
+]
+
+[[package]]
+name = "mlpl-rt-fsio"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-rt-value",
 ]
 
 [[package]]

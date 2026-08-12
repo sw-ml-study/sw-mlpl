@@ -395,6 +395,75 @@ fn read_bytes_whole_and_range_compile_and_run() {
 }
 
 #[test]
+fn write_append_read_bytes_roundtrip_compiles_and_runs() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("writebytes");
+    let src_path = tmp.join("prog.mlpl");
+    // write [65], append [66,67], read back -> ok([65, 66, 67]).
+    std::fs::write(
+        &src_path,
+        "def u:rt(x) { write_bytes(\"out.bin\", [65])?; \
+         append_bytes(\"out.bin\", [66, 67])?; read_bytes(\"out.bin\") }\nu:rt(0)\n",
+    )
+    .unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path)
+        .current_dir(&tmp)
+        .output()
+        .expect("run binary");
+    let s = String::from_utf8_lossy(&run.stdout);
+    assert!(s.starts_with("ok("), "{s}");
+    assert!(
+        s.contains("65") && s.contains("66") && s.contains("67"),
+        "{s}"
+    );
+    // The file really holds the written + appended bytes.
+    assert_eq!(
+        std::fs::read(tmp.join("out.bin")).unwrap(),
+        vec![65u8, 66, 67]
+    );
+}
+
+#[test]
+fn write_bytes_rejects_out_of_range_and_writes_nothing() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("writebytes-reject");
+    let src_path = tmp.join("prog.mlpl");
+    std::fs::write(&src_path, "write_bytes(\"out.bin\", [256])\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path)
+        .current_dir(&tmp)
+        .output()
+        .expect("run binary");
+    let s = String::from_utf8_lossy(&run.stdout);
+    assert!(s.starts_with("err("), "{s}");
+    assert!(s.contains("256"), "{s}");
+    // Validation fails before any write, so no file is created.
+    assert!(
+        !tmp.join("out.bin").exists(),
+        "reject must not create the file"
+    );
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

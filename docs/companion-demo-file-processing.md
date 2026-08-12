@@ -61,11 +61,13 @@ surface is the gate. The reports order the missing rungs:
    semantics.
 4. **Byte / bit / text lowering** -- the bit ops (`band` etc.),
    `read_bytes/1` (whole file), `read_bytes/3` (offset, length;
-   EOF-clamped), and `file_size/1` now lower, returning
-   `ok(..)`/`err(..)` Results. A compiled binary has no `Environment`,
-   so the read sandbox root is `MLPL_FS_ROOT` (else the cwd) with the
-   same `contained` containment check as the interpreter. Remaining:
-   `write_bytes`, `append_bytes`, and the byte/text conversions
+   EOF-clamped), `file_size/1`, `write_bytes/2` (truncate), and
+   `append_bytes/2` (create-or-append) now lower, returning
+   `ok(..)`/`err(..)` Results with the loud-reject `array_to_bytes`
+   validator. A compiled binary has no `Environment`, so the sandbox
+   root is `MLPL_FS_ROOT` (else the cwd) with the same `contained`
+   containment check as the interpreter (all in the dedicated
+   `mlpl-rt-fsio` crate). Remaining: the byte/text conversions
    (`tokenize_bytes` / `decode_bytes` / `to_int`).
 5. **Process entry / status semantics** -- `read_stdin`, `print`,
    `eprint`, `exit` are not lowered; the current `write_stdout`

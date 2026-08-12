@@ -4,14 +4,12 @@
 //! the named modules:
 //! - `value` -- the `CVal` enum, `arr`/`field` accessors, `From`, `Display`.
 //! - `ctor`  -- the `record` / `result` compound constructors.
-//! - `io`    -- `write_stdout` / `args` / `arg` + the bytes validator.
-//! - `fsio`  -- sandboxed file reads (`read_bytes` / `file_size`).
+//! - `io`    -- `write_stdout` / `args` / `arg` + `array_to_bytes`
+//!   (the byte validator, shared with the `mlpl-rt-fsio` crate).
 
 mod ctor;
-mod fsio;
 mod io;
 mod value;
 
-pub use fsio::{file_size, read_bytes, read_bytes_range};
-pub use io::{arg, cli_args, write_stdout};
+pub use io::{arg, array_to_bytes, cli_args, write_stdout};
 pub use value::CVal;

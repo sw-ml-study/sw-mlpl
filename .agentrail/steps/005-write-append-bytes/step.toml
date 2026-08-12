@@ -1,6 +1,6 @@
 number = 5
 slug = "write-append-bytes"
-status = "pending"
+status = "in-progress"
 description = "Lower write_bytes/2 and append_bytes/2. Add them to the compiler runtime reus..."
 role = "legacy"
 context_files = []

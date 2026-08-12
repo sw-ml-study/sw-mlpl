@@ -1,52 +1,11 @@
-//! Compiled-program filesystem READS, sandboxed to a root: the
-//! `MLPL_FS_ROOT` environment variable, else the process's current
-//! working directory. A compiled binary has no interpreter
-//! `Environment`, so the root comes from the process instead of
-//! `--source-dir`; otherwise this mirrors mlpl-eval's `read_bytes` /
-//! `read_range` / `file_size` + the `contained` sandbox check, and
-//! returns the same `ok(..)` / `err(..)` Results.
+//! Sandboxed file reads: `read_bytes` (whole + range) and `file_size`.
 
 use std::io::{Read, Seek, SeekFrom};
-use std::path::PathBuf;
 
 use mlpl_array::{DenseArray, Shape};
+use mlpl_rt_value::CVal;
 
-use crate::CVal;
-
-/// Resolve `rel` inside the sandbox root (`MLPL_FS_ROOT` or the cwd)
-/// and reject escapes, mirroring the interpreter's `contained`:
-/// canonicalize the longest existing prefix, re-append the missing
-/// tail, and require the result to stay under the canonical root.
-pub(crate) fn contained(rel: &str) -> Result<PathBuf, String> {
-    let root = match std::env::var_os("MLPL_FS_ROOT") {
-        Some(r) => PathBuf::from(r),
-        None => std::env::current_dir().map_err(|e| format!("cwd: {e}"))?,
-    };
-    let canon_root = root
-        .canonicalize()
-        .map_err(|e| format!("sandbox root {}: {e}", root.display()))?;
-    let mut probe = root.join(rel);
-    let mut popped = Vec::new();
-    let canon = loop {
-        match probe.canonicalize() {
-            Ok(c) => break c,
-            Err(_) => match (probe.parent(), probe.file_name()) {
-                (Some(parent), Some(name)) => {
-                    popped.push(name.to_owned());
-                    probe = parent.to_path_buf();
-                }
-                _ => return Err(format!("{rel}: outside the sandbox")),
-            },
-        }
-    };
-    let mut resolved = canon;
-    resolved.extend(popped.iter().rev());
-    if resolved.starts_with(&canon_root) {
-        Ok(resolved)
-    } else {
-        Err(format!("{rel}: outside the sandbox"))
-    }
-}
+use crate::sandbox::{contained, nonneg};
 
 /// Wrap a read result: bytes -> `ok(rank-1 array)`, error -> `err`.
 fn bytes_result(read: Result<Vec<u8>, String>) -> CVal {
@@ -73,8 +32,7 @@ pub fn read_bytes(path: &CVal) -> CVal {
 
 /// `read_bytes(path, offset, length)` -- seek to `offset` and read up
 /// to `length` bytes (clamped at EOF). Non-negative integer args are
-/// enforced (a hard panic on violation, matching the interpreter's
-/// hard error).
+/// enforced (a hard panic on violation, matching the interpreter).
 #[must_use]
 pub fn read_bytes_range(path: &CVal, offset: &DenseArray, length: &DenseArray) -> CVal {
     let CVal::Str(rel) = path else {
@@ -91,17 +49,6 @@ pub fn read_bytes_range(path: &CVal, offset: &DenseArray, length: &DenseArray) -
         })()
         .map_err(|e| e.to_string())
     }))
-}
-
-/// A scalar non-negative integer, or a hard panic (interpreter
-/// parity: an invalid offset/length is a hard error, not an `err`).
-fn nonneg(a: &DenseArray, who: &str) -> u64 {
-    let x = a.data()[0];
-    assert!(
-        a.rank() == 0 && x >= 0.0 && x.fract() == 0.0,
-        "read_bytes: {who} must be a non-negative integer"
-    );
-    x as u64
 }
 
 /// `file_size(path)` -- the file's byte length as `ok(scalar)` / `err`.

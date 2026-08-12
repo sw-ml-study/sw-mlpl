@@ -42,6 +42,9 @@ enum Emit {
     /// `read_bytes(path, offset, length)` -- path in CVal position,
     /// offset + length as `DenseArray` scalars.
     ReadRange,
+    /// `write_bytes`/`append_bytes` -- `rt::<name>(&cval path, &cval
+    /// bytes)`, both args in CVal position.
+    WriteBytes,
     Label,
     Matmul,
     Check,
@@ -83,6 +86,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["matmul"] @ 2 => Matmul;
     ["write_stdout", "arg", "read_bytes", "file_size"] @ 1 => CvalIo;
     ["read_bytes"] @ 3 => ReadRange;
+    ["write_bytes", "append_bytes"] @ 2 => WriteBytes;
     ["args"] @ 0 => Args;
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
@@ -169,6 +173,14 @@ pub(crate) fn lower_fncall(
             let off = lower_expr(ctx, &args[1])?;
             let len = lower_expr(ctx, &args[2])?;
             Ok(quote! { #rt::read_bytes_range(&(#p), &(#off), &(#len)) })
+        }
+        Emit::WriteBytes => {
+            let (p, b) = (
+                crate::lower_cval(ctx, &args[0])?,
+                crate::lower_cval(ctx, &args[1])?,
+            );
+            let f = format_ident!("{name}");
+            Ok(quote! { #rt::#f(&(#p), &(#b)) })
         }
         Emit::Label => lower_label_attach(ctx, name, args),
         Emit::Matmul => lower_matmul(ctx, args),

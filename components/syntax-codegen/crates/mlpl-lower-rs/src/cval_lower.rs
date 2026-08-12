@@ -42,6 +42,8 @@ fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {
                     | "check"
                     | "read_bytes"
                     | "file_size"
+                    | "write_bytes"
+                    | "append_bytes"
             ),
         },
         _ => false,

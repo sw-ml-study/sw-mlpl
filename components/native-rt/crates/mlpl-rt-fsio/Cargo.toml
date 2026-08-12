@@ -1,0 +1,15 @@
+[package]
+name = "mlpl-rt-fsio"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Sandboxed filesystem reads + writes for the compile-to-Rust path
+# (read_bytes / read_bytes_range / file_size / write_bytes /
+# append_bytes). Its own crate so mlpl-rt-value and mlpl-rt stay
+# within the module budget. Depends on mlpl-rt-value for the CVal
+# value model + the array_to_bytes byte validator.
+
+[dependencies]
+mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-rt-value = { path = "../mlpl-rt-value" }

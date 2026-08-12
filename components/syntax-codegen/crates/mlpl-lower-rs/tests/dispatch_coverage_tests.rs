@@ -58,6 +58,8 @@ enum Builtin {
     ReadBytes,
     ReadBytesRange,
     FileSize,
+    WriteBytes,
+    AppendBytes,
 }
 
 const ALL: &[Builtin] = &[
@@ -92,6 +94,8 @@ const ALL: &[Builtin] = &[
     Builtin::ReadBytes,
     Builtin::ReadBytesRange,
     Builtin::FileSize,
+    Builtin::WriteBytes,
+    Builtin::AppendBytes,
 ];
 
 impl Builtin {
@@ -131,6 +135,8 @@ impl Builtin {
             Builtin::ReadBytes => "read_bytes(\"f\")",
             Builtin::ReadBytesRange => "read_bytes(\"f\", 0, 4)",
             Builtin::FileSize => "file_size(\"f\")",
+            Builtin::WriteBytes => "write_bytes(\"f\", [65, 66])",
+            Builtin::AppendBytes => "append_bytes(\"f\", [67])",
         }
     }
 
@@ -166,6 +172,8 @@ impl Builtin {
             Builtin::FromBits => "from_bits",
             Builtin::ReadBytes | Builtin::ReadBytesRange => "read_bytes",
             Builtin::FileSize => "file_size",
+            Builtin::WriteBytes => "write_bytes",
+            Builtin::AppendBytes => "append_bytes",
         }
     }
 }

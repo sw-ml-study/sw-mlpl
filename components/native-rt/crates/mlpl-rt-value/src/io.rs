@@ -15,7 +15,7 @@ use crate::CVal;
 /// (mlpl-eval `fs_bytes.rs`) so compiled and interpreted byte writers
 /// share semantics. `who` names the builtin in the error. Shared by
 /// `write_stdout` (and, later, `write_bytes` / `append_bytes`).
-pub(crate) fn array_to_bytes(who: &str, arr: &DenseArray) -> Result<Vec<u8>, String> {
+pub fn array_to_bytes(who: &str, arr: &DenseArray) -> Result<Vec<u8>, String> {
     if arr.rank() > 1 {
         return Err(format!(
             "{who}: expected rank <= 1, got rank {}",
