@@ -15,16 +15,17 @@ use mlpl_eval::{Environment, RunScriptOpts, Value};
 
 /// The hook `mlpl-repl` registers into every Environment.
 pub fn run_script_value(path: &Path, opts: &RunScriptOpts) -> Value {
-    let source_dir = opts
-        .source_dir
-        .clone()
-        .or_else(|| path.parent().map(std::path::Path::to_path_buf));
-    let loaded = match crate::include_script::load_script(path, source_dir.as_deref()) {
+    // The sandbox root: `--source-dir`, else the script's own
+    // directory, else `.`. A bare filename resolves to `.` (not the
+    // empty path a bare `parent()` would give), so both loading and
+    // the fs sandbox work for `mlpl-repl mini.mlpl`.
+    let root = crate::include_script::resolve_root_dir(path, opts.source_dir.as_deref());
+    let loaded = match crate::include_script::load_script(path, Some(root.as_path())) {
         Ok(l) => l,
         Err(msg) => return err_value(msg),
     };
     let mut env = Environment::new();
-    env.fs_root = source_dir.clone();
+    env.fs_root = Some(root);
     if let Some(dir) = &opts.data_dir {
         env.set_data_dir(dir.clone());
     }

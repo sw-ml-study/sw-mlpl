@@ -1,6 +1,6 @@
 number = 1
 slug = "cli-bare-filename"
-status = "pending"
+status = "in-progress"
 description = "A1: fix mlpl-repl <bare-filename.mlpl> exiting 1. In components/cli/crates/ml..."
 role = "legacy"
 context_files = []
