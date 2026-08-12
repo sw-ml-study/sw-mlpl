@@ -1,9 +1,10 @@
 number = 1
 slug = "bit-ops"
-status = "in-progress"
+status = "completed"
 description = "Lower the pure bit-op family (band, bor, bxor, bnot, popcount, shl, shr, bmas..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-11T16:21:03"
+completed_at = "2026-08-11T17:23:59"
 task_type = "feature"
-commits = []
+commits = ["2491d6eb93f6a934995cc74e9e14ebf8236a0bf2"]
