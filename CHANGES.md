@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-11
 
+- chore(agentrail): complete 001-bit-ops; queue fncall-dispatch-refactor
+- feat(compiler): lower the bit-op family (band/shl/from_bits/...)
+- chore(agentrail): archive compiler-control-flow; init compiler-byte-io saga (6 steps)
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(claude): carve out gitignored .agentrail sessions/ from the commit-all rule
 - docs(changes): refresh CHANGES.md to HEAD (incl. history-rewrite flag)
 - chore(git): FLAG history rewrite + force-push (2026-08-11) -- re-clone required
