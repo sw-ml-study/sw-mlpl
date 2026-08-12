@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 003-byte-validator-stdout-parity; queue read-bytes-file-size
+- feat(compiler): loud-reject byte validator + write_stdout parity
+- docs(claude): relocate sw-mlpl policy outside the agentrail block, then apply
+- revert(claude): drop ratchet note from CLAUDE.md; it lives in docs/sw-checklist-paydown.md
+- docs(ratchet): recalibrate sw-checklist baseline after detector fix
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-fncall-dispatch-refactor; queue byte-validator-stdout-parity
 - refactor(compiler): compact the builtin registry with a builtins! macro
 - refactor(compiler): fncall dispatch as a data-driven registry
