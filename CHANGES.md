@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 003-interpreter-dispatch-registry; queue to-string (B2)
+- refactor(eval): builtin dispatch as a data-driven registry
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-str-concat-join (B1); queue interpreter-dispatch-registry
 - feat(eval): str_concat + str_join string builtins (B1)
 - docs(changes): refresh CHANGES.md to HEAD
