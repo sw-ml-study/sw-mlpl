@@ -1,9 +1,10 @@
 number = 6
 slug = "text-ops"
-status = "in-progress"
+status = "completed"
 description = "Lower the byte/text conversions: tokenize_bytes/1 (str -> rank-1 byte array),..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-12T12:28:47"
+completed_at = "2026-08-12T14:32:10"
 task_type = "feature"
-commits = []
+commits = ["a7d1a3c33232b58a06b126a230b8ac4c4af0f353"]

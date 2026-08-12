@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 6,
+    "step": "text-ops"
+  },
+  "action": "text.rs (tokenize_bytes/decode_bytes/to_int) reusing array_to_bytes; mlpl-rt re-export; CvalIo registry rows; produces_cval; exhaustive coverage variants; unit + gated e2e.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T14:32:10"
+}
