@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-12
+
+- chore(agentrail): complete 002-fncall-dispatch-refactor; queue byte-validator-stdout-parity
+- refactor(compiler): compact the builtin registry with a builtins! macro
+- refactor(compiler): fncall dispatch as a data-driven registry
+
 ## 2026-08-11
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-bit-ops; queue fncall-dispatch-refactor
 - feat(compiler): lower the bit-op family (band/shl/from_bits/...)
 - chore(agentrail): archive compiler-control-flow; init compiler-byte-io saga (6 steps)
