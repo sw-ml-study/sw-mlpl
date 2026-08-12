@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 005-write-append-bytes; queue text-ops
+- feat(compiler): lower write_bytes + append_bytes; carve out mlpl-rt-fsio
+- docs(plan): mark compiler-byte-io in progress (bit-ops/write_stdout/read_bytes/file_size shipped)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-read-bytes-file-size; queue write-append-bytes
 - feat(compiler): lower read_bytes (whole + range) and file_size
 - docs(changes): refresh CHANGES.md to HEAD
