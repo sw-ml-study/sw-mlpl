@@ -1,0 +1,9 @@
+number = 6
+slug = "text-ops"
+status = "pending"
+description = "Lower the byte/text conversions: tokenize_bytes/1 (str -> rank-1 byte array),..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T12:28:47"
+task_type = "feature"
+commits = []

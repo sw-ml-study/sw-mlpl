@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 5,
+    "step": "write-append-bytes"
+  },
+  "action": "New mlpl-rt-fsio crate (Cargo.toml + lib facade + sandbox/read/write); array_to_bytes made pub; mlpl-rt re-export; fncall WriteBytes emit + registry; produces_cval; exhaustive coverage; gated e2e with cwd sandbox root; workspace member + Cargo.lock.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T12:28:47"
+}
