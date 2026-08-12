@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 004-read-bytes-file-size; queue write-append-bytes
+- feat(compiler): lower read_bytes (whole + range) and file_size
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 003-byte-validator-stdout-parity; queue read-bytes-file-size
 - feat(compiler): loud-reject byte validator + write_stdout parity
 - docs(claude): relocate sw-mlpl policy outside the agentrail block, then apply
