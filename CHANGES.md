@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-13
 
+- chore(agentrail): complete 004-reinterpret; queue typed-readers-le
+- feat(eval): reinterpret(bytes, "dtype") bit-level re-view (typed-packed-bytes 004)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 003-tech-debt-spike (installment 1); queue reinterpret
 - refactor(eval): tech-debt spike installment 1 -- module splits (47->44 fail)
 - docs(changes): refresh CHANGES.md to HEAD
