@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-13
 
+- chore(agentrail): complete 002-size-bytes; queue tech-debt-spike
+- feat(eval): size_bytes() packed-footprint builtin (typed-packed-bytes 002)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-bytes-value-and-pack; queue size-bytes
 - feat(eval): typed packed byte-buffer value + pack() builtin (typed-packed-bytes 001)
 
