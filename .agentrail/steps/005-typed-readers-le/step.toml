@@ -1,9 +1,10 @@
 number = 5
 slug = "typed-readers-le"
-status = "pending"
+status = "completed"
 description = "Add the little-endian typed reader family: read_u8/read_u16_le/read_u32_le/re..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-13T15:35:43"
+completed_at = "2026-08-13T16:54:43"
 task_type = "feature"
-commits = []
+commits = ["876da79f2ad166597c6ac7ff0c266726fc9ae371"]

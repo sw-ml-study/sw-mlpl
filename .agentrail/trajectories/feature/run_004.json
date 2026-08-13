@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 5,
+    "step": "typed-readers-le"
+  },
+  "action": "TDD RED->GREEN (8 reader tests); pure read_le with from_le_bytes macro + scoped cast allow; reader_dtype/expect_offset in bytes_args; scoped clippy/fmt both workspaces; repo-wide sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-13T16:54:43"
+}
