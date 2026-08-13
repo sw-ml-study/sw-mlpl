@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta name="mlpl-build" content="283c609e 2026-08-11T01:18:34Z">
+<head><meta name="mlpl-build" content="ac7c15d8 2026-08-13T22:59:39Z">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-7b36421c62f00810.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-7b36421c62f00810_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-8bba265350b25bb0.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-8bba265350b25bb0_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -216,6 +216,27 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             background: var(--surface1);
             color: var(--blue);
             border-color: var(--blue);
+        }
+        /* REPL/Editor are one segmented toggle: a joined pair whose
+           active segment is filled (not just outlined) so the current
+           workspace view -- interactive REPL vs script Editor -- reads
+           at a glance and stays visually distinct from Tutorial/Paths. */
+        .view-toggle {
+            display: inline-flex;
+            border: 1px solid var(--blue);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .header-tabs .view-toggle .tab {
+            border: none;
+            border-radius: 0;
+        }
+        .header-tabs .view-toggle .tab + .tab {
+            border-left: 1px solid var(--surface1);
+        }
+        .header-tabs .view-toggle .tab.active {
+            background: var(--blue);
+            color: var(--crust);
         }
         header > .help-btn {
             margin-right: 60px;
@@ -464,12 +485,46 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             flex-direction: column;
             flex: 1;
             min-height: 0;
+            /* Editing-mode accent: a coloured top rule frames the whole
+               script pane so it is unmistakably a different mode. */
+            border-top: 3px solid var(--yellow);
         }
         .editor-toolbar {
             display: flex;
             gap: 8px;
             padding: 8px 16px;
             border-bottom: 1px solid var(--surface1);
+            align-items: center;
+            background: var(--mantle);
+        }
+        /* "Editing" indicator: a pulsing dot + label on the left of the
+           toolbar, so the mode is obvious even before you read a button. */
+        .editor-mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-right: auto;
+            color: var(--yellow);
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .editor-mode-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--yellow);
+            box-shadow: 0 0 6px var(--yellow);
+            animation: editing-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes editing-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .editor-mode-dot { animation: none; }
         }
         .editor-btn {
             background: var(--surface0);
@@ -2107,7 +2162,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-7b36421c62f00810.js" crossorigin="anonymous" integrity="sha384-psNkDCao9pfBYrOWCjEFavhJMciwgex6X5WHmnbeFzbJvuvw3U3ZvT8+89XcVpS3"><link rel="preload" href="/sw-mlpl/mlpl-web-7b36421c62f00810_bg.wasm" crossorigin="anonymous" integrity="sha384-UBgN/IQXGsCaqMd1Caykl1HjkDvtMlorli9c8Xz5Nl+h7BcokCLwb0z+iq6nzW8Y" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-8bba265350b25bb0.js" crossorigin="anonymous" integrity="sha384-U2CrTDS32V9HXw4T3GvHwoi0o1ExUu7miTpFs2oocSW0kp81pwH/BkeKRF03vxs6"><link rel="preload" href="/sw-mlpl/mlpl-web-8bba265350b25bb0_bg.wasm" crossorigin="anonymous" integrity="sha384-0/nqb9n6dC4+IpUQQYBsIrKNDXOk+mO5Ic29r/m2FzXmgJZBW+BOXGGEPy7x6WfM" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
