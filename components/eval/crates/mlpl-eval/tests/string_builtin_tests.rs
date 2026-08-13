@@ -82,6 +82,17 @@ fn to_string_is_the_shortest_round_trip_of_to_number() {
 }
 
 #[test]
+fn string_list_is_accepted_as_a_user_fn_argument() {
+    // B5: a string list ([...] of strings -> StrList) passed to a
+    // `def u:` function was rejected by the arg-domain check.
+    assert_eq!(
+        bytes("def u:f(xs) { list_len(xs) }\nu:f([\"a\", \"b\", \"c\"])"),
+        vec![3.0]
+    );
+    assert_eq!(bytes("def u:f(xs) { list_len(xs) }\nu:f([])"), vec![0.0]);
+}
+
+#[test]
 fn no_coercion_number_argument_is_an_error() {
     assert!(matches!(
         err("str_concat(\"a\", 1)"),

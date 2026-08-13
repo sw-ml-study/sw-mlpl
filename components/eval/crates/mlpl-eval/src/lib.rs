@@ -151,6 +151,7 @@ mod inspect_introspect;
 mod inspect_list;
 mod inspect_render;
 mod interrupt;
+mod list_ops;
 mod llm_dispatch;
 mod loader;
 mod result_ops;

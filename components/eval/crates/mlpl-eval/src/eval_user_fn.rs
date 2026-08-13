@@ -125,7 +125,26 @@ fn bind_arg(name: &str, param: &str, val: &Value, env: &mut Environment) -> Resu
             env.set_result(param.to_string(), *ok, (**payload).clone());
         }
         Value::Str(s) => env.set_string(param.to_string(), s.clone()),
+        Value::StrList { items } => env.set_string_list(param.to_string(), items.clone()),
         Value::Record { fields } => env.set_record(param.to_string(), fields.clone()),
+        Value::UserFnRef { .. } | Value::BuiltinRef { .. } | Value::Partial { .. } => {
+            bind_fn_like(param, val, env);
+        }
+        _ => {
+            return Err(EvalError::Unsupported(format!(
+                "{name}: argument '{param}' must be an array, Result, string, string list, \
+                 record, function reference, or partial"
+            )));
+        }
+    }
+    Ok(())
+}
+
+/// Bind a callable-valued argument (function reference or partial
+/// application) into the callee scope. The caller guarantees `val`
+/// is one of these variants.
+fn bind_fn_like(param: &str, val: &Value, env: &mut Environment) {
+    match val {
         Value::UserFnRef { name: t } | Value::BuiltinRef { name: t } => {
             env.set_builtin_ref(param.to_string(), t.clone());
         }
@@ -137,12 +156,6 @@ fn bind_arg(name: &str, param: &str, val: &Value, env: &mut Environment) -> Resu
             env.partials
                 .insert(param.to_string(), (t.clone(), *arity, bound.clone()));
         }
-        _ => {
-            return Err(EvalError::Unsupported(format!(
-                "{name}: argument '{param}' must be an array, Result, string, record, \
-                 function reference, or partial"
-            )));
-        }
+        _ => {}
     }
-    Ok(())
 }

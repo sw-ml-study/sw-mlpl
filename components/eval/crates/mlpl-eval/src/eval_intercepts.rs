@@ -24,7 +24,7 @@ use mlpl_trace::Trace;
 use crate::env::Environment;
 use crate::eval::eval_expr;
 use mlpl_eval_types::EvalError;
-use mlpl_eval_types::{Value, value_kind};
+use mlpl_eval_types::Value;
 
 /// Try matching `expr` against one of the FnCall intercepts in
 /// this module. Returns `Some(result)` when matched, `None` if
@@ -38,7 +38,7 @@ pub(crate) fn try_intercept(
         return None;
     };
     match name.as_str() {
-        "list_len" => Some(eval_list_len(args, env, trace)),
+        "list_len" => Some(crate::list_ops::eval_list_len(args, env, trace)),
         "ok" | "err" => Some(eval_result_ctor(name, args, env, trace)),
         "is_ok" | "is_err" | "unwrap" | "err_message" | "unwrap_or" | "get_value" | "get_error"
         | "check" => Some(crate::result_ops::eval_result_accessor(
@@ -49,36 +49,12 @@ pub(crate) fn try_intercept(
             name, args, env, trace,
         )),
         "args" => Some(eval_args(args, env)),
-        "list_get" => Some(eval_list_get(args, env, trace)),
+        "list_get" => Some(crate::list_ops::eval_list_get(args, env, trace)),
         "write_stdout" => Some(crate::eval_script::eval_write_stdout(args, env, trace)),
         "read_stdin" => Some(crate::eval_script::eval_read_stdin(args)),
         "read_stdin_lines" => Some(crate::eval_script::eval_read_stdin_lines(args)),
         "exit" => Some(crate::eval_script::eval_exit(args, env, trace)),
         _ => None,
-    }
-}
-
-fn eval_list_len(
-    args: &[Expr],
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<Value, EvalError> {
-    if args.len() != 1 {
-        return Err(EvalError::BadArity {
-            func: "list_len".into(),
-            expected: 1,
-            got: args.len(),
-        });
-    }
-    let v = eval_expr(&args[0], env, trace)?;
-    match v {
-        Value::StrList { items } => Ok(Value::Array(mlpl_array::DenseArray::from_scalar(
-            items.len() as f64,
-        ))),
-        other => Err(EvalError::Unsupported(format!(
-            "list_len: expected a string-list, got {}",
-            value_kind(&other)
-        ))),
     }
 }
 
@@ -143,63 +119,4 @@ fn eval_args(args: &[Expr], env: &Environment) -> Result<Value, EvalError> {
     Ok(Value::StrList {
         items: env.cli_args.clone(),
     })
-}
-
-fn eval_list_get(
-    args: &[Expr],
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<Value, EvalError> {
-    check_arity("list_get", args.len(), 2)?;
-    let xs = eval_expr(&args[0], env, trace)?;
-    let Value::StrList { items } = xs else {
-        let msg = format!("list_get: expected a string-list, got {}", value_kind(&xs));
-        return Err(EvalError::Unsupported(msg));
-    };
-    let i = parse_strlist_index(&args[1], env, trace)?;
-    let n = items.len();
-    let (ok, s) = match items.into_iter().nth(i) {
-        Some(s) => (true, s),
-        None => (
-            false,
-            format!("list_get: index {i} out of bounds (list has {n} items)"),
-        ),
-    };
-    Ok(Value::Result {
-        ok,
-        payload: Box::new(Value::Str(s)),
-    })
-}
-
-fn check_arity(name: &str, got: usize, expected: usize) -> Result<(), EvalError> {
-    if got == expected {
-        Ok(())
-    } else {
-        Err(EvalError::BadArity {
-            func: name.into(),
-            expected,
-            got,
-        })
-    }
-}
-
-fn parse_strlist_index(
-    arg: &Expr,
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<usize, EvalError> {
-    let idx = eval_expr(arg, env, trace)?.into_array()?;
-    if idx.rank() != 0 {
-        return Err(EvalError::Unsupported(format!(
-            "list_get: index must be a scalar, got rank {}",
-            idx.rank()
-        )));
-    }
-    let v = idx.data()[0];
-    if v < 0.0 || v.fract() != 0.0 {
-        return Err(EvalError::Unsupported(format!(
-            "list_get: index must be a non-negative integer, got {v}"
-        )));
-    }
-    Ok(v as usize)
 }
