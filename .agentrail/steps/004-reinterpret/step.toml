@@ -1,0 +1,9 @@
+number = 4
+slug = "reinterpret"
+status = "pending"
+description = 'Resume the typed-packed-bytes byte-io features: add reinterpret(bytes, "dtype...'
+role = "legacy"
+context_files = []
+created_at = "2026-08-13T15:23:52"
+task_type = "feature"
+commits = []
