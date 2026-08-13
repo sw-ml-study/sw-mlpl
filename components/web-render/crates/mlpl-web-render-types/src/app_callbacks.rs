@@ -34,7 +34,7 @@ pub fn build_callbacks(active: &ActiveContext, upload: &UploadState, ui: &UiStat
         on_submit: make_submit(deps.clone()),
         on_run_batch: make_submit_batch(deps),
         on_clear: make_clear(active.session.clone(), active.history.clone()),
-        on_demo: make_run_demo(active.session.clone(), active.history.clone()),
+        on_demo: make_demo_callback(active, ui),
         on_upload: upload::make_upload_image(
             active.session.clone(),
             active.history.clone(),
@@ -46,6 +46,20 @@ pub fn build_callbacks(active: &ActiveContext, upload: &UploadState, ui: &UiStat
             upload.pending_name.clone(),
         ),
     }
+}
+
+/// The demo-load callback: run the demo (which populates the REPL),
+/// then leave the editor so the demo isn't hidden behind a split
+/// editor-over-REPL pane. Loading a demo is a REPL action, so it
+/// switches the view to the REPL -- consistent with Run (user report
+/// 2026-08-13). The editor CONTENT is preserved for a toggle-back.
+fn make_demo_callback(active: &ActiveContext, ui: &UiState) -> Callback<usize> {
+    let run = make_run_demo(active.session.clone(), active.history.clone());
+    let editor_open = ui.editor_open.clone();
+    Callback::from(move |idx: usize| {
+        run.emit(idx);
+        editor_open.set(false);
+    })
 }
 
 /// Compose the `EvalDeps` struct passed to `make_submit` /
