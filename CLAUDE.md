@@ -214,7 +214,7 @@ git restore --source=<ref> -- .agentrail .agentrail-archive
 ```
 
 Run a snapshot before risky agent operations or after creating files
-you haven't yet staged. It does NOT replace normal git tracking — it is
+you haven't yet staged. It does NOT replace normal git tracking -- it is
 a safety net for what is not yet committed.
 
 ## Git hygiene
