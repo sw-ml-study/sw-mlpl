@@ -49,6 +49,46 @@ fn size_bytes_rejects_an_opaque_value() {
 }
 
 #[test]
+fn reinterpret_reviews_the_same_bytes_under_a_new_dtype() {
+    // 4 u8 bytes [1,0,0,0] viewed as one little-endian u32 -- same bytes.
+    match eval("reinterpret(pack([1, 0, 0, 0], \"u8\"), \"u32\")").unwrap() {
+        Value::Bytes { dtype, data } => {
+            assert_eq!(format!("{dtype}"), "u32");
+            assert_eq!(data, vec![1, 0, 0, 0]);
+        }
+        other => panic!("expected Value::Bytes, got {other:?}"),
+    }
+}
+
+#[test]
+fn reinterpret_keeps_the_byte_length_and_reports_new_element_count() {
+    // 8 u8 bytes as f64 -> one element; size unchanged.
+    let v = eval("reinterpret(pack([0, 0, 0, 0, 0, 0, 0, 0], \"u8\"), \"f64\")").unwrap();
+    assert_eq!(format!("{v}"), "<bytes: f64[1]>");
+    assert_eq!(
+        scalar("size_bytes(reinterpret(pack([1, 2, 3, 4], \"u8\"), \"u16\"))"),
+        4.0
+    );
+}
+
+#[test]
+fn reinterpret_rejects_an_indivisible_byte_length() {
+    // 3 bytes are not a whole number of u32 (width 4) values.
+    assert!(matches!(
+        eval("reinterpret(pack([1, 2, 3], \"u8\"), \"u32\")"),
+        Err(EvalError::Unsupported(_))
+    ));
+}
+
+#[test]
+fn reinterpret_rejects_a_non_buffer_first_argument() {
+    assert!(matches!(
+        eval("reinterpret([1, 2, 3], \"u8\")"),
+        Err(EvalError::Unsupported(_))
+    ));
+}
+
+#[test]
 fn pack_u8_packs_one_byte_per_element() {
     match eval("pack([1, 2, 255], \"u8\")").unwrap() {
         Value::Bytes { dtype, data } => {

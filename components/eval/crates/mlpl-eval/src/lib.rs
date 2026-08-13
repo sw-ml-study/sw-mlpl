@@ -43,6 +43,7 @@ pub mod env_api {
 pub use env_api::*;
 mod bpe;
 mod bracket_run;
+mod bytes_args;
 mod bytes_size;
 mod callable_apply;
 mod decode_limits;

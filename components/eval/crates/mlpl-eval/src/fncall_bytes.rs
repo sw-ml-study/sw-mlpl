@@ -7,9 +7,10 @@ use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
+use crate::bytes_args::parse_dtype;
 use crate::env::Environment;
 use crate::eval::eval_expr;
-use mlpl_eval_types::{ByteDtype, EvalError, Value, pack_f64s, value_kind};
+use mlpl_eval_types::{EvalError, Value, pack_f64s, value_kind};
 
 pub(crate) fn try_dispatch(
     name: &str,
@@ -21,6 +22,7 @@ pub(crate) fn try_dispatch(
     match name {
         "pack" => Some(eval_pack(args, env, trace)),
         "size_bytes" => Some(eval_size_bytes(args, env, trace)),
+        "reinterpret" => Some(eval_reinterpret(args, env, trace)),
         _ => None,
     }
 }
@@ -67,21 +69,28 @@ fn eval_pack(
     Ok(Value::Bytes { dtype, data })
 }
 
-/// Evaluate a dtype-name argument to a `ByteDtype`, erroring on a
-/// non-string or an unknown dtype name.
-fn parse_dtype(
-    func: &str,
-    arg: &Expr,
+/// `reinterpret(bytes, "dtype")` -> the SAME bytes re-viewed under a
+/// new element dtype (no numeric conversion). The byte length must be
+/// a whole number of the new dtype's elements.
+fn eval_reinterpret(
+    args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
-) -> Result<ByteDtype, EvalError> {
-    let name = match eval_expr(arg, env, trace)? {
-        Value::Str(s) => s,
-        other => {
-            let msg = format!("{func}: dtype must be a string, got {}", value_kind(&other));
-            return Err(EvalError::Unsupported(msg));
-        }
+) -> Result<Value, EvalError> {
+    let [buf_arg, dtype_arg] = args else {
+        return Err(EvalError::BadArity {
+            func: "reinterpret".into(),
+            expected: 2,
+            got: args.len(),
+        });
     };
-    ByteDtype::parse(&name)
-        .ok_or_else(|| EvalError::Unsupported(format!("{func}: unknown dtype '{name}'")))
+    let data = crate::bytes_args::expect_bytes("reinterpret", buf_arg, env, trace)?;
+    let dtype = parse_dtype("reinterpret", dtype_arg, env, trace)?;
+    if data.len() % dtype.width() != 0 {
+        return Err(EvalError::Unsupported(format!(
+            "reinterpret: {} bytes is not a whole number of {dtype} values",
+            data.len()
+        )));
+    }
+    Ok(Value::Bytes { dtype, data })
 }
