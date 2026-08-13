@@ -614,6 +614,78 @@ Adopt going forward: saga completion reconciles every referenced
 issue, and each issue is one of bug / capability blocker /
 forcing-function request / future experiment.
 
+## Downstream companion asks -- algebra text/viz surface
+
+Source: `demo-abstract-algebra/docs/sw-mlpl-work-order.md` (the
+downstream repo's ranked upstream asks). Five items shipped and
+were adopted downstream: **A1** (bare-filename CLI), **B1**
+(`str_concat` / `str_join`), **B2** (`to_string`), **B5**
+(string-list as a `u:` argument), and **A4** (the six previously
+undocumented `svg()` types are now in `docs/lang-reference.md`).
+The saga `algebra-text-surface` closed on those. What remains is
+queued below, cheapest first (the downstream doc has the full
+symptom / acceptance for each). None is a downstream blocker --
+each has an honest workaround in use now.
+
+- **narration-comment-grouping** (D1, feature, one condition) --
+  a blank line cannot separate a comment block: `group_statements`
+  (`statement_groups.rs`) discards blank lines before flush, so a
+  comment block always rides with the following statement. Flush a
+  pending comment-only buffer when a blank line is seen. Behavior
+  change (splits one group into two) and it makes A3 much less
+  reachable. Downstream workaround: a bare `;` after the block.
+- **comment-span-render-fix** (A3, bug, small) -- a full-line
+  comment in a statement GROUP renders its code inside the italic
+  comment span: `split_inline_comment`
+  (`components/web-tutorial/crates/mlpl-web-tutorial/src/comment.rs`)
+  is fed a whole group and splits at index 0, so `code` is empty
+  and later lines vanish into the comment. Split per line, not per
+  group. Largely subsumed by D1.
+- **viz-table-and-labelled-life** (C1, feature, medium) -- a
+  labelled, categorically-coloured grid. Add a `"table"` svg type
+  (`svg(t, "table", {row_labels, col_labels, cell_text,
+  highlight_rows, highlight_cols})`) plus a categorical /
+  labelled / pace-adjustable `life` variant (value selects a
+  palette entry, per-frame caption, frame duration as an
+  argument). Deletes most of a ~500-line hand-written SVG library
+  downstream (Cayley tables). Reference shape: `u:frames_svg` in
+  `demo-abstract-algebra/lib/render.mlpl`.
+- **recursion-depth-cap** (A2, bug, medium) -- deep `u:` recursion
+  aborts the process (stack overflow) instead of a catchable MLPL
+  error. Add a recursion-depth cap that raises a normal
+  `EvalError` (e.g. "recursion limit (N frames) exceeded in
+  u:count"). Robustness.
+- **string-ops-len-slice-find-split** (B3, missing, medium) --
+  strings have no length / index / search. Add `str_len(s)` ->
+  scalar (CHARACTERS, not bytes), `str_slice(s, start, len)` ->
+  string (character-indexed), `str_find(s, needle)` -> scalar
+  (first index, -1 if absent), `str_split(s, sep)` -> string-list.
+  `str_len` counting characters is the load-bearing half.
+- **string-list-builders** (B4, missing) -- string lists can only
+  arrive as a literal or from `record_keys` / `parse_json` / a
+  tokenizer vocab; a program cannot append to one, which also
+  makes `str_join` hard to feed. Add `list_append(xs, s)` /
+  `list_concat(xs, ys)`, or (smaller) make `concat` accept string
+  lists.
+- **life-small-board-sizing** (C2, tiny) -- `life` renders small
+  boards tiny: `MAX_CELL` (36) binds before the target edge for
+  orders 2-8, so a 3x3 board is ~132px. Raise `MAX_CELL` (~80) or
+  add an optional size argument
+  (`components/viz/crates/mlpl-viz-marks/src/life.rs`). One
+  constant.
+- **viz-digraph-type** (C3, feature) -- no node-link diagram type.
+  Add a `"digraph"` type taking an `[N, N]` adjacency matrix with
+  node labels via `aux`, laying nodes on a circle. Also gives
+  `knn_graph` a renderer.
+- **block-comment-syntax** (D2, feature) -- no block comment form;
+  narration is runs of `#` lines. Add `#* ... *#` (fits the
+  existing `#` lexeme, unambiguous with the line form).
+- **source-narration-kind** (D3, feature) -- a pasted / uploaded
+  file cannot declare `EntryKind::Narration` (intro / takeaway
+  prose with no prompt); only the catalog runner / upload / status
+  paths create one. Promote a leading comment block to the intro
+  and a trailing block to the takeaway.
+
 ## Explicitly deprioritized / retired
 
 - Engram E6-E9 wait behind Tracks 1-3.
