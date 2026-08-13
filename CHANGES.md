@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-13
+
+- chore(agentrail): complete 001-bytes-value-and-pack; queue size-bytes
+- feat(eval): typed packed byte-buffer value + pack() builtin (typed-packed-bytes 001)
+
 ## 2026-08-12
 
+- chore(agentrail): archive algebra-text-surface; init typed-packed-bytes saga
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 007-close-work-order; close algebra-text-surface saga (--done)
 - docs(queue): queue remaining demo-abstract-algebra work-order items (close A-T-S)
 - docs(changes): refresh CHANGES.md to HEAD
