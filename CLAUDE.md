@@ -573,13 +573,24 @@ assets, demos.toml), you MUST rebuild, commit, AND deploy:
 git add pages/
 git commit -m "chore(pages): rebuild for <what changed>"
 git push
-./scripts/deploy-pages.sh   # subtree-push pages/ -> gh-pages
+./scripts/deploy-pages.sh   # copy pages/ into the gh-pages checkout, add/commit/push
 ```
 
-`deploy-pages.sh` force-pushes the generated artifact branch;
-that force-push is expected and correct (gh-pages is never
-edited by hand). Verify by fetching the live index and
-comparing its hashed bundle name against `pages/index.html`.
+`gh-pages` holds the site at its ROOT while `main` holds it under
+`pages/`, so it gets its own sibling checkout -- exactly like the
+wiki (`../sw-mlpl.wiki`). `deploy-pages.sh` mirrors the built
+`pages/` into `../sw-mlpl.pages` and does a plain `git add -A /
+commit / push` there -- NO subtree, NO force-push, NO per-deploy
+worktree (the sole developer means every deploy is a fast-forward).
+One-time setup if `../sw-mlpl.pages` is missing:
+
+```bash
+git fetch origin gh-pages
+git worktree add -b gh-pages ../sw-mlpl.pages origin/gh-pages
+```
+
+Verify by fetching the live index and comparing its hashed bundle
+name against `pages/index.html`.
 
 Provenance: every pages build writes `pages/build-info.json`
 (commit, built_at, bundle, ledger) and stamps a `mlpl-build`

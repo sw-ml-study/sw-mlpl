@@ -1,46 +1,38 @@
 #!/usr/bin/env bash
-# Deploy the committed ./pages/ directory to the live site by
-# publishing it to the gh-pages branch (GitHub Pages build_type
-# "legacy": GitHub's internal pages service publishes the branch --
-# no Actions runner involved).
+# Deploy the built ./pages/ to the live site (GitHub Pages, build_type
+# "legacy": GitHub publishes the gh-pages branch directly, no Actions
+# runner).
 #
-# NO FORCE-PUSH: this builds a new commit ON TOP of the CURRENT
-# remote gh-pages tip (via a detached worktree at origin/gh-pages)
-# and pushes it as an ordinary fast-forward. If gh-pages moved
-# underneath us the push is rejected rather than clobbering it --
-# which is the point. gh-pages is still a generated artifact branch
-# (never hand-edited), so each deploy is just one more commit that
-# replaces the published tree.
+# gh-pages holds the SITE at its root, while main holds it under
+# pages/, so gh-pages gets its own checkout -- exactly like the wiki
+# (../sw-mlpl.wiki). Deploying is then just plain git: mirror the built
+# files in, then add / commit / push. No subtree, no force, no
+# per-deploy worktree churn.
+#
+# One-time setup (already done; recreate only if ../sw-mlpl.pages is
+# missing):
+#   git fetch origin gh-pages
+#   git worktree add -b gh-pages ../sw-mlpl.pages origin/gh-pages
 #
 # Usage: ./scripts/build-pages.sh && git add pages/ && git commit
 #        && ./scripts/deploy-pages.sh
 set -euo pipefail
 cd "$(git rev-parse --show-toplevel)"
-ROOT=$(pwd)
+DEPLOY="../sw-mlpl.pages"
 
-git fetch origin gh-pages
-WT=$(mktemp -d)
-# Detached worktree at the current remote gh-pages tip -- no local
-# gh-pages branch to collide with a previous deploy's worktree.
-git worktree add --detach "$WT" origin/gh-pages
-(
-  cd "$WT"
-  # Swap in the freshly built pages/: drop the old tracked tree,
-  # copy the new one (dotfiles included). The worktree's own .git
-  # link is untracked, so `git rm` leaves it alone.
-  git rm -rqf . >/dev/null 2>&1 || true
-  cp -a "$ROOT/pages/." .
-  git add -A
-  if git diff --cached --quiet; then
-    echo "gh-pages already current; nothing to deploy."
-  else
-    git commit -q -m "deploy pages @ $(git -C "$ROOT" rev-parse --short HEAD)"
-    # Parent IS the current remote tip, so this is a fast-forward.
-    git push origin HEAD:gh-pages
-    echo "pages/ deployed to gh-pages (fast-forward); GitHub publishes within ~1 minute."
-  fi
-)
-git worktree remove --force "$WT"
-# NOTE: no explicit build request here -- the branch push triggers
-# the pages build by itself, and issuing a second request races it
-# (the losing twin errors and reddens the README badge; 2026-08-06).
+if [ ! -d "$DEPLOY/.git" ] && [ ! -f "$DEPLOY/.git" ]; then
+  echo "error: $DEPLOY is not a gh-pages checkout. One-time setup:" >&2
+  echo "  git fetch origin gh-pages" >&2
+  echo "  git worktree add -b gh-pages ../sw-mlpl.pages origin/gh-pages" >&2
+  exit 1
+fi
+
+# Mirror the freshly built site into the gh-pages checkout (a plain
+# file copy that also drops stale hashed bundles; not a git command).
+rsync -a --delete --exclude='.git' pages/ "$DEPLOY/"
+
+git -C "$DEPLOY" add -A
+git -C "$DEPLOY" commit -m "deploy pages @ $(git rev-parse --short HEAD)" \
+  || { echo "gh-pages already current; nothing to deploy."; exit 0; }
+git -C "$DEPLOY" push
+echo "deployed to gh-pages; GitHub publishes within ~1 minute."
