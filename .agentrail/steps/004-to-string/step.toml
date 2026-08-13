@@ -1,9 +1,10 @@
 number = 4
 slug = "to-string"
-status = "in-progress"
+status = "completed"
 description = "B2: add to_string(x) -> string interpreter builtin in mlpl-eval (the honest i..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-12T15:53:32"
+completed_at = "2026-08-12T17:21:40"
 task_type = "feature"
-commits = []
+commits = ["bc2a1b583dd9c17408a0266804bb69641f68939d"]

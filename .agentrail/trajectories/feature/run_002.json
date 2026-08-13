@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "to-string"
+  },
+  "action": "eval_to_string reusing json_encode::push_number; fncall_string dispatch arm; acceptance tests via tokenize_bytes; lang-reference + catalog entries.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T17:21:40"
+}
