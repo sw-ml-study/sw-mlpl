@@ -11,6 +11,43 @@ fn eval(src: &str) -> Result<Value, EvalError> {
     eval_program_value(&stmts, &mut env)
 }
 
+fn scalar(src: &str) -> f64 {
+    match eval(src).unwrap() {
+        Value::Array(a) => {
+            assert_eq!(a.data().len(), 1, "expected a scalar from {src}");
+            a.data()[0]
+        }
+        other => panic!("expected a scalar array, got {other:?}"),
+    }
+}
+
+#[test]
+fn size_bytes_reports_the_packed_footprint() {
+    // Packed buffers: exactly the byte length.
+    assert_eq!(scalar("size_bytes(pack([1, 2, 3], \"u8\"))"), 3.0);
+    assert_eq!(scalar("size_bytes(pack([1], \"u32\"))"), 4.0);
+    assert_eq!(scalar("size_bytes(pack([1, 2], \"f64\"))"), 16.0);
+    // A numeric array is f64-backed: 8 bytes per element.
+    assert_eq!(scalar("size_bytes([1, 2, 3])"), 24.0);
+    // A string list: sum of UTF-8 byte lengths ("ab" + "c" = 3).
+    assert_eq!(scalar("size_bytes([\"ab\", \"c\"])"), 3.0);
+}
+
+#[test]
+fn size_bytes_sums_a_record_including_keys() {
+    // record {a: [1,2]} -> key "a" (1 byte) + 2 f64 (16 bytes) = 17.
+    assert_eq!(scalar("size_bytes({a: [1, 2]})"), 17.0);
+}
+
+#[test]
+fn size_bytes_rejects_an_opaque_value() {
+    // A builtin reference has no defined byte footprint.
+    assert!(matches!(
+        eval("size_bytes(:add)"),
+        Err(EvalError::Unsupported(_))
+    ));
+}
+
 #[test]
 fn pack_u8_packs_one_byte_per_element() {
     match eval("pack([1, 2, 255], \"u8\")").unwrap() {

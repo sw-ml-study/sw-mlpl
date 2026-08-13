@@ -3,6 +3,7 @@
 //! the named element dtype (u8..f64). The separate systems-data path:
 //! bounded, index/offset-only, Result-valued on domain errors.
 
+use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
@@ -19,8 +20,32 @@ pub(crate) fn try_dispatch(
 ) -> Option<Result<Value, EvalError>> {
     match name {
         "pack" => Some(eval_pack(args, env, trace)),
+        "size_bytes" => Some(eval_size_bytes(args, env, trace)),
         _ => None,
     }
+}
+
+/// `size_bytes(x)` -> the packed storage footprint of `x`, in bytes.
+fn eval_size_bytes(
+    args: &[Expr],
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<Value, EvalError> {
+    let [x] = args else {
+        return Err(EvalError::BadArity {
+            func: "size_bytes".into(),
+            expected: 1,
+            got: args.len(),
+        });
+    };
+    let v = eval_expr(x, env, trace)?;
+    let n = crate::bytes_size::packed_size(&v).ok_or_else(|| {
+        EvalError::Unsupported(format!(
+            "size_bytes: no defined footprint for {}",
+            value_kind(&v)
+        ))
+    })?;
+    Ok(Value::Array(DenseArray::from_scalar(n as f64)))
 }
 
 /// `pack(array, "dtype")` -> a little-endian packed byte buffer.
