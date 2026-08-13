@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 006-doc-svg-types (A4); queue close-work-order
+- docs(lang-reference): document 6 svg() types; fix broken + concat example (A4)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 005-string-list-u-arg (B5); queue doc-svg-types (A4)
 - feat(eval): accept string-list as a def u: argument (B5)
 - docs(changes): refresh CHANGES.md to HEAD
