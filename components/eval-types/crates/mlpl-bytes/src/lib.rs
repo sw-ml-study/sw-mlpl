@@ -5,6 +5,8 @@
 
 mod dtype;
 mod pack;
+mod read;
 
 pub use dtype::ByteDtype;
 pub use pack::pack_f64s;
+pub use read::read_le;

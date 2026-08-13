@@ -23,7 +23,8 @@ pub(crate) fn try_dispatch(
         "pack" => Some(eval_pack(args, env, trace)),
         "size_bytes" => Some(eval_size_bytes(args, env, trace)),
         "reinterpret" => Some(eval_reinterpret(args, env, trace)),
-        _ => None,
+        _ => crate::bytes_args::reader_dtype(name)
+            .map(|dtype| crate::bytes_read::eval_read_typed(dtype, name, args, env, trace)),
     }
 }
 

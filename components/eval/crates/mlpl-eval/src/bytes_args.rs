@@ -45,3 +45,29 @@ pub(crate) fn expect_bytes(
         ))),
     }
 }
+
+/// The dtype a typed-reader builtin decodes, from its name:
+/// `read_u32_le` -> u32, `read_u8` -> u8, `read_f64_le` -> f64.
+/// `None` for any non-reader name (so `read_bytes` / `read_stdin`
+/// fall through to their own dispatchers).
+pub(crate) fn reader_dtype(name: &str) -> Option<ByteDtype> {
+    let token = name.strip_prefix("read_")?;
+    ByteDtype::parse(token.strip_suffix("_le").unwrap_or(token))
+}
+
+/// Evaluate `arg` to a non-negative integer byte offset.
+pub(crate) fn expect_offset(
+    func: &str,
+    arg: &Expr,
+    env: &mut Environment,
+    trace: &mut Option<&mut Trace>,
+) -> Result<usize, EvalError> {
+    let arr = eval_expr(arg, env, trace)?.into_array()?;
+    let n = arr.data().first().copied().unwrap_or(f64::NAN);
+    if arr.rank() != 0 || n < 0.0 || n.fract() != 0.0 {
+        return Err(EvalError::Unsupported(format!(
+            "{func}: offset must be a non-negative integer, got {n}"
+        )));
+    }
+    Ok(n as usize)
+}

@@ -89,6 +89,59 @@ fn reinterpret_rejects_a_non_buffer_first_argument() {
 }
 
 #[test]
+fn read_u32_le_decodes_little_endian() {
+    assert_eq!(scalar("read_u32_le(pack([1, 0, 0, 0], \"u8\"), 0)"), 1.0);
+    assert_eq!(scalar("read_u32_le(pack([0, 1, 0, 0], \"u8\"), 0)"), 256.0);
+}
+
+#[test]
+fn read_u16_le_reads_at_an_offset() {
+    // bytes [255, 255, 2, 1] -> u16 at offset 2 = 2 + 1*256 = 258.
+    assert_eq!(
+        scalar("read_u16_le(pack([255, 255, 2, 1], \"u8\"), 2)"),
+        258.0
+    );
+}
+
+#[test]
+fn read_i8_reads_a_signed_byte() {
+    // 255 as a signed byte is -1.
+    assert_eq!(scalar("read_i8(pack([255], \"u8\"), 0)"), -1.0);
+}
+
+#[test]
+fn read_f32_le_round_trips_a_float() {
+    assert_eq!(scalar("read_f32_le(pack([1.5], \"f32\"), 0)"), 1.5);
+}
+
+#[test]
+fn read_f64_le_round_trips_a_double() {
+    assert_eq!(scalar("read_f64_le(pack([3.25], \"f64\"), 0)"), 3.25);
+}
+
+#[test]
+fn typed_read_rejects_an_out_of_bounds_read() {
+    // 3-byte buffer, u32 needs 4.
+    assert!(matches!(
+        eval("read_u32_le(pack([1, 2, 3], \"u8\"), 0)"),
+        Err(EvalError::Unsupported(_))
+    ));
+    // offset past the end.
+    assert!(matches!(
+        eval("read_u8(pack([1, 2], \"u8\"), 5)"),
+        Err(EvalError::Unsupported(_))
+    ));
+}
+
+#[test]
+fn typed_read_rejects_a_non_buffer_first_argument() {
+    assert!(matches!(
+        eval("read_u8([1, 2, 3], 0)"),
+        Err(EvalError::Unsupported(_))
+    ));
+}
+
+#[test]
 fn pack_u8_packs_one_byte_per_element() {
     match eval("pack([1, 2, 255], \"u8\")").unwrap() {
         Value::Bytes { dtype, data } => {
