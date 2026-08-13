@@ -1,0 +1,9 @@
+number = 6
+slug = "doc-svg-types"
+status = "pending"
+description = "A4 (docs-only): document the six undocumented svg() render types in docs/lang..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T18:03:00"
+task_type = "docs"
+commits = []
