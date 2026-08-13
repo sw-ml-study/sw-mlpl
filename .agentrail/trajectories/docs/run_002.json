@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 7,
+    "step": "close-work-order"
+  },
+  "action": "Re-read downstream work-order recommended-order table + remaining item sections (C1/C2/C3/D1/D2/D3/B3/B4/A2/A3); appended a queued-saga section to docs/future-sagas-queue.md with the downstream source; sw-markdown-checker (ASCII clean); repo-wide sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T18:24:52"
+}
