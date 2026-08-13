@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-12
 
+- chore(agentrail): complete 007-close-work-order; close algebra-text-surface saga (--done)
+- docs(queue): queue remaining demo-abstract-algebra work-order items (close A-T-S)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 006-doc-svg-types (A4); queue close-work-order
 - docs(lang-reference): document 6 svg() types; fix broken + concat example (A4)
 - docs(changes): refresh CHANGES.md to HEAD
