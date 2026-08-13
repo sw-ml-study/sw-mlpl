@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 6,
+    "step": "doc-svg-types"
+  },
+  "action": "Read svg.rs dispatch + each renderer doc-comment for shapes; edited docs/lang-reference.md (6 type bullets + aux row + concat fix); sw-markdown-checker (ASCII clean); repo-wide sw-checklist; wiki Documentation-Errata.md E-023 entry",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-12T18:22:17"
+}

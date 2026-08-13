@@ -1,0 +1,9 @@
+number = 7
+slug = "close-work-order"
+status = "pending"
+description = "Close the algebra-text-surface saga: queue the remaining demo-abstract-algebr..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T18:22:17"
+task_type = "docs"
+commits = []
