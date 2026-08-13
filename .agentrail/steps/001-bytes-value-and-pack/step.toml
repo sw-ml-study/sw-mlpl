@@ -1,0 +1,9 @@
+number = 1
+slug = "bytes-value-and-pack"
+status = "pending"
+description = "Add a Value::Bytes { dtype: ByteDtype, data: Vec<u8> } variant to mlpl-eval-t..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-12T18:56:07"
+task_type = "feature"
+commits = []

@@ -1,47 +1,61 @@
-# Saga: algebra-text-surface
+# Saga: typed-packed-bytes
 
-Fix the sw-MLPL friction the demo-abstract-algebra dogfooding repo
-found (its `docs/sw-mlpl-work-order.md`, verified against
-`mlpl-repl 0.20.0`, build d373584c). Every item has a runnable repro +
-acceptance tests in that file. These gaps are the INTERPRETER / CLI /
-docs surface (NOT the compile-to-Rust path): strings cannot be joined
-or built from numbers, and the documented bare-filename CLI
-invocation fails. Order below is value-per-effort ("if you only do
-three: A1, B1, B2").
+A typed, packed byte-buffer value for sw-MLPL: real element dtypes,
+observable storage footprint, bit-level reinterpretation, and typed
+little-/big-endian readers. Unblocks two downstream repos:
 
-Interpreter builtins live in `components/eval` (mlpl-eval, `fncall_*`
-dispatch); the CLI is `components/cli` (mlpl-cli); docs are
-`docs/lang-reference.md`. TDD + the acceptance cases from the work
-order. Hold sw-checklist.
+- **demo-memory** (HARD blocker "packed layout with observable size"):
+  needs `size_bytes(x)` on packed storage to make bytes-per-key /
+  locality claims measurable (Bloom/counting filters, tiny-pointer
+  navigation, LRU/KV eviction).
+- **demo-ml-utils** (#2, P0 "typed byte arrays / reinterpret"): needs
+  real dtypes (u8..f64), `reinterpret(bytes, dtype)` without numeric
+  conversion, and typed readers (`read_u32_le`, ...) for Safetensors /
+  GGUF / quantization headers.
 
-## Steps (recommended order)
+## Design
 
-1. cli-bare-filename -- A1: `mlpl-repl mini.mlpl` exits 1 because
-   `Path::parent()` returns `Some("")` for a bare filename, so the FS
-   sandbox root is the empty path and `FsProvider::new("")` fails.
-   One-line fix in `mlpl-cli/src/include_script.rs` (treat an empty
-   parent as absent, falling through to `.`) + a regression test.
-   Acceptance: `mlpl-repl mini.mlpl` -> Ok, exit 0; ./ and sub/ forms
-   unchanged.
-2. str-concat-join -- B1: add `str_concat(a, b)` and
-   `str_join(parts, sep)` interpreter builtins. Exact byte join,
-   Unicode preserved, NO coercion (a number arg is an error, not a
-   silent to_string); `str_join` is the linear-time fold (O(total),
-   not O(n^2)). Deletes the downstream tokenize/decode bridge.
-3. to-string -- B2: add `to_string(x)` -- number -> string, shortest
-   round-trip (integral values bare: `to_string(8/2)` == "4", not
-   "4.0"); the honest inverse of `to_number`. Removes the downstream
-   dependency on `to_json`'s incidental scalar formatting.
-4. string-list-u-arg -- B5: fix the domain check that rejects a
-   string-list passed as a `u:` function argument (an oversight in
-   one check; ~one line per the work order).
-5. doc-svg-types -- A4: document all twelve `svg()` types in
-   `docs/lang-reference.md` (add life / heatmap_grid / waffle /
-   scatter3d / plotly3d / attention_overlay with their shapes) and
-   correct or remove the `"hello " + name` `+`-concatenation example
-   that does not run (it contradicts the no-string-`+` rule). Update
-   the wiki errata if it tracks this.
-6. close -- queue the remaining work-order items (B3
-   str_len/str_slice/str_find/str_split, C1 labelled grid renderer,
-   A2 recursion-depth cap, A3 + D1 comment-block rendering, the minor
-   items) into `docs/future-sagas-queue.md`; --done.
+Introduce a NEW value kind `Value::Bytes { dtype, data: Vec<u8> }` (a
+packed byte buffer tagged with an element dtype) instead of retrofitting
+the f64-backed `DenseArray`. This keeps the tensor / autograd / viz path
+(all f64) untouched and adds a separate systems-data path. Little-endian
+is the canonical packing; big-endian is an explicit reader family.
+Bounded, index/offset-only (no pointer arithmetic), Result-valued on
+out-of-range access.
+
+Follow code_metrics.md: new packed-bytes logic lives in named files
+(model / pack / read / etc.), facade lib.rs, pure free functions, define
+the typed reader family once via a macro/table (loose-coupling
+"define once, invoke many").
+
+## Steps
+
+1. **bytes-value-and-pack** -- add `Value::Bytes { dtype, data }` with a
+   `ByteDtype` enum (u8,i8,u16,i16,u32,i32,u64,i64,f32,f64), value_kind +
+   Display (`<bytes: u8[N]>`), wire the exhaustive Value matches, and a
+   `pack(array, "dtype") -> bytes` builtin (canonical little-endian).
+   TDD.
+2. **size-bytes** -- `size_bytes(x) -> scalar` packed footprint in bytes
+   (Bytes = data.len(); f64 Array = elem_count*8; record/strlist = sum).
+   demo-memory's hard-blocker probe. TDD.
+3. **reinterpret** -- `reinterpret(bytes, "dtype") -> bytes` re-views the
+   same bytes under a new dtype (byte length must divide the new width;
+   no numeric conversion). demo-ml-utils. TDD.
+4. **typed-readers-le** -- `read_{u,i}{8,16,32,64}_le` + `read_f{32,64}_le`
+   `(bytes, offset) -> scalar`, bounds-checked (Err on OOB). Define the
+   family once via a macro/table. TDD.
+5. **typed-readers-be-and-unpack** -- big-endian `_be` reader family +
+   `unpack(bytes, "dtype") -> array` (numeric widening to f64, inverse of
+   pack). TDD.
+6. **docs-catalog-close** -- lang-reference "Typed byte buffers" section,
+   glossary + mlpl-builtin-catalog entries, wiki errata, downstream
+   acceptance notes, rebuild target/release/mlpl-repl, queue follow-ons
+   (f16/bf16, endian writers, streams), --done.
+
+## Non-goals (queued follow-ons)
+
+- f16 / bf16 dtypes (need a half-float codec).
+- Mutating typed writers (`write_u32_le` at offset into a buffer).
+- The stream/fold abstraction (demo-ml-utils #3) -- separate saga.
+- Compiler (`mlpl build`) lowering of the bytes family -- compiler-parity
+  track.

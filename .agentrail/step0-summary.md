@@ -1,1 +1,1 @@
-saga bootstrap: algebra-text-surface plan (6 steps) from demo-abstract-algebra's sw-mlpl-work-order.md -- A1 CLI bare-filename, B1 str_concat/str_join, B2 to_string, B5 string-list u:arg, A4 svg-type docs, close
+Saga bootstrap: typed-packed-bytes plan seeded from downstream cross-repo survey (demo-memory packed-layout HARD blocker + demo-ml-utils #2 typed bytes/reinterpret). Design: new Value::Bytes{dtype,data} packed-buffer kind, separate from the f64 DenseArray path.
