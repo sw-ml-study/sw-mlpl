@@ -35,6 +35,7 @@ type Dispatcher = fn(
 /// new link in a hand-written `or_else` chain.
 const DISPATCHERS: &[Dispatcher] = &[
     crate::fncall_models::try_dispatch,
+    crate::fncall_bytes::try_dispatch,
     crate::fncall_axes::try_dispatch,
     crate::fncall_arrays::try_dispatch,
     crate::fncall_engram::try_dispatch,

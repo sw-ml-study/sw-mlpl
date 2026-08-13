@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-bytes"
+description = "Typed packed byte-buffer element dtypes and little-endian packing for MLPL"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true

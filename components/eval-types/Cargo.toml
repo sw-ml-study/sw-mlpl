@@ -2,7 +2,11 @@
 # Houses Value, EvalError, TokenizerSpec + their cross-crate From impls.
 
 [workspace]
-members = ["crates/mlpl-eval-types", "crates/mlpl-value-structural"]
+members = [
+    "crates/mlpl-bytes",
+    "crates/mlpl-eval-types",
+    "crates/mlpl-value-structural",
+]
 resolver = "2"
 
 [workspace.package]

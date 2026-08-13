@@ -6,6 +6,7 @@ use std::fmt;
 use mlpl_array::DenseArray;
 
 use crate::error::EvalError;
+use mlpl_bytes::ByteDtype;
 use mlpl_eval_core::GenState;
 use mlpl_eval_core::TokenizerSpec;
 use mlpl_eval_core::model::ModelSpec;
@@ -106,6 +107,18 @@ pub enum Value {
         /// Wrapped value.
         payload: Box<Value>,
     },
+    /// Saga typed-packed-bytes: a typed, packed byte buffer. Sibling
+    /// to `Array` (the f64 DenseArray path) -- a separate
+    /// systems-data path holding one contiguous little-endian buffer
+    /// tagged with its element dtype. Produced by `pack(array,
+    /// "dtype")` and consumed by `size_bytes`, `reinterpret`, and the
+    /// typed reader family.
+    Bytes {
+        /// The element type of the buffer.
+        dtype: ByteDtype,
+        /// The packed little-endian bytes.
+        data: Vec<u8>,
+    },
 }
 
 impl Value {
@@ -158,6 +171,7 @@ pub fn value_kind(v: &Value) -> &'static str {
         Value::Result { .. } => "result",
         Value::GenState(_) => "gen-state",
         Value::Partial { .. } => "partial",
+        Value::Bytes { .. } => "bytes",
     }
 }
 
@@ -206,6 +220,9 @@ impl fmt::Display for Value {
             Self::StrList { items } => fmt_str_list(f, items),
             Self::Result { ok: true, payload } => write!(f, "Ok({payload})"),
             Self::Result { ok: false, payload } => write!(f, "Err({payload})"),
+            Self::Bytes { dtype, data } => {
+                write!(f, "<bytes: {dtype}[{}]>", data.len() / dtype.width())
+            }
         }
     }
 }

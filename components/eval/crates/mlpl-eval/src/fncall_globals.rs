@@ -88,5 +88,8 @@ pub(crate) fn bind_value(env: &mut Environment, name: &str, value: Value) {
             env.gen_states.insert(name.to_string(), *g);
         }
         v @ Value::DeviceTensor { .. } => env.set_device_tensor(name.to_string(), v),
+        v @ Value::Bytes { .. } => {
+            env.bytes.insert(name.to_string(), v);
+        }
     }
 }

@@ -1312,6 +1312,10 @@ name = "mlpl-builtin-catalog"
 version = "0.20.0"
 
 [[package]]
+name = "mlpl-bytes"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-core"
 version = "0.20.0"
 dependencies = [
@@ -1568,6 +1572,7 @@ name = "mlpl-eval-types"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-bytes",
  "mlpl-core",
  "mlpl-eval-core",
  "mlpl-eval-image",

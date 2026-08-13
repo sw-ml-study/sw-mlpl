@@ -138,6 +138,10 @@ pub struct Environment {
     pub gpu_step: Option<Arc<dyn mlpl_eval_state::GpuAdamStep>>,
     /// Peer-resident tensor handles bound by assignment.
     pub device_tensors: HashMap<String, Value>,
+    /// Saga typed-packed-bytes: `Value::Bytes` packed buffers bound by
+    /// assignment. Sibling to `device_tensors` -- a full-`Value` store
+    /// keyed by name, distinct from the f64 array/string tables.
+    pub bytes: HashMap<String, Value>,
     /// Saga 23 step 001: optional `ValueTag` attached per binding
     /// name. Auto-tagged by producer ops in steps 002+; consumed
     /// by predicate-checked consumers, `:describe` / `:vars` /

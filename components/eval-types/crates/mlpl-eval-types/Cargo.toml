@@ -11,6 +11,7 @@ version.workspace = true
 
 [dependencies]
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-bytes = { path = "../mlpl-bytes" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-eval-core = { path = "../../../types/crates/mlpl-eval-core" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }

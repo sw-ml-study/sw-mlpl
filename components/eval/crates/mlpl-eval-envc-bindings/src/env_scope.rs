@@ -14,6 +14,7 @@ use mlpl_eval_types::Value;
 
 use mlpl_eval_env::Environment;
 
+#[derive(Default)]
 pub struct ScopeSnapshot {
     vars: HashMap<String, DenseArray>,
     strings: HashMap<String, String>,
@@ -39,6 +40,7 @@ pub struct ScopeSnapshot {
     tokenizers: HashMap<String, TokenizerSpec>,
     gen_states: HashMap<String, GenState>,
     device_tensors: HashMap<String, Value>,
+    bytes: HashMap<String, Value>,
 }
 
 /// Per-call scope snapshot/restore for `u:` function frames, plus
@@ -52,48 +54,54 @@ pub trait EnvScope {
     fn clear_binding(&mut self, name: &str);
 }
 
+/// The scope tables a `u:` frame must snapshot / restore, and that
+/// `clear_binding` wipes. Listed ONCE here and expanded by all three
+/// methods so they can never drift out of lockstep (define once,
+/// invoke many).
+macro_rules! for_each_scope_table {
+    ($m:ident) => {
+        $m!(vars);
+        $m!(strings);
+        $m!(records);
+        $m!(string_lists);
+        $m!(results);
+        $m!(builtin_refs);
+        $m!(partials);
+        $m!(models);
+        $m!(tokenizers);
+        $m!(gen_states);
+        $m!(device_tensors);
+        $m!(bytes);
+    };
+}
+
 impl EnvScope for Environment {
     fn snapshot_scope(&self) -> ScopeSnapshot {
-        ScopeSnapshot {
-            vars: self.vars.clone(),
-            strings: self.strings.clone(),
-            records: self.records.clone(),
-            string_lists: self.string_lists.clone(),
-            results: self.results.clone(),
-            builtin_refs: self.builtin_refs.clone(),
-            partials: self.partials.clone(),
-            models: self.models.clone(),
-            tokenizers: self.tokenizers.clone(),
-            gen_states: self.gen_states.clone(),
-            device_tensors: self.device_tensors.clone(),
+        let mut s = ScopeSnapshot::default();
+        macro_rules! snap {
+            ($f:ident) => {
+                s.$f = self.$f.clone()
+            };
         }
+        for_each_scope_table!(snap);
+        s
     }
 
     fn restore_scope(&mut self, s: ScopeSnapshot) {
-        self.vars = s.vars;
-        self.strings = s.strings;
-        self.records = s.records;
-        self.string_lists = s.string_lists;
-        self.results = s.results;
-        self.builtin_refs = s.builtin_refs;
-        self.partials = s.partials;
-        self.models = s.models;
-        self.tokenizers = s.tokenizers;
-        self.gen_states = s.gen_states;
-        self.device_tensors = s.device_tensors;
+        macro_rules! restore {
+            ($f:ident) => {
+                self.$f = s.$f
+            };
+        }
+        for_each_scope_table!(restore);
     }
 
     fn clear_binding(&mut self, name: &str) {
-        self.vars.remove(name);
-        self.strings.remove(name);
-        self.records.remove(name);
-        self.string_lists.remove(name);
-        self.results.remove(name);
-        self.models.remove(name);
-        self.tokenizers.remove(name);
-        self.gen_states.remove(name);
-        self.partials.remove(name);
-        self.builtin_refs.remove(name);
-        self.device_tensors.remove(name);
+        macro_rules! clear {
+            ($f:ident) => {
+                self.$f.remove(name)
+            };
+        }
+        for_each_scope_table!(clear);
     }
 }

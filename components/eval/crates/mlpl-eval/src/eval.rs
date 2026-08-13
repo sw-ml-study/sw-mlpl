@@ -172,6 +172,11 @@ pub(crate) fn eval_expr(
         return Ok(v.clone());
     }
     if let Expr::Ident(name, _) = expr
+        && let Some(v) = env.bytes.get(name)
+    {
+        return Ok(v.clone());
+    }
+    if let Expr::Ident(name, _) = expr
         && let Some(fields) = env.get_record(name)
     {
         return Ok(Value::Record {
@@ -388,6 +393,10 @@ pub(crate) fn eval_expr(
                 }
                 Value::DeviceTensor { .. } => {
                     env.set_device_tensor(name.clone(), v.clone());
+                    return Ok(v);
+                }
+                Value::Bytes { .. } => {
+                    env.bytes.insert(name.clone(), v.clone());
                     return Ok(v);
                 }
                 Value::Record { fields } => {

@@ -45,7 +45,7 @@ pub(crate) fn try_intercept(
             name, args, env, trace,
         )),
         "print" | "eprint" => Some(eval_print(name, args, env, trace)),
-        "to_number" | "to_int" | "env" => Some(crate::result_ops::eval_string_to_result(
+        "to_number" | "to_int" | "env" => Some(crate::string_convert::eval_string_to_result(
             name, args, env, trace,
         )),
         "args" => Some(eval_args(args, env)),

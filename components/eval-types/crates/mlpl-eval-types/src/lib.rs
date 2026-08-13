@@ -11,6 +11,7 @@ mod error_kind;
 mod value;
 
 pub use error::EvalError;
+pub use mlpl_bytes::{ByteDtype, pack_f64s};
 pub use error_kind::error_kind;
 pub use mlpl_eval_core::TokenizerSpec;
 pub use value::{Value, value_kind};
