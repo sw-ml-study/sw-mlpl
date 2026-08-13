@@ -62,20 +62,27 @@ pub fn render_main(a: MainArgs) -> Html {
         a.cur_path.is_some(),
     );
     let paths_pane = render_paths_pane(a.cur_path, a.cb);
-    let repl_pane = render_repl_pane(ReplPaneArgs {
-        history: a.history,
-        input_value: a.input_value,
-        on_input: a.on_input,
-        on_keydown: a.on_keydown,
-        on_clear: a.on_clear,
-        tutorial_active: a.tutorial_active,
-        paths_active: a.paths_active,
-        completion_candidates: a.completion_candidates,
-        on_pick_completion: a.on_pick_completion,
-        completion_selected: a.completion_selected,
-        show_3d: a.show_3d,
-        on_toggle_3d: a.on_toggle_3d,
-    });
+    // Editor mode is editor-ONLY: suppress the REPL pane so the screen
+    // isn't split editor-over-REPL. The REPL still holds the full
+    // history; Run (or the REPL toggle) brings it back with results.
+    let repl_pane = if a.editor_active {
+        html! {}
+    } else {
+        render_repl_pane(ReplPaneArgs {
+            history: a.history,
+            input_value: a.input_value,
+            on_input: a.on_input,
+            on_keydown: a.on_keydown,
+            on_clear: a.on_clear,
+            tutorial_active: a.tutorial_active,
+            paths_active: a.paths_active,
+            completion_candidates: a.completion_candidates,
+            on_pick_completion: a.on_pick_completion,
+            completion_selected: a.completion_selected,
+            show_3d: a.show_3d,
+            on_toggle_3d: a.on_toggle_3d,
+        })
+    };
     render_main_shell(
         a.tutorial_active,
         a.show_3d,
