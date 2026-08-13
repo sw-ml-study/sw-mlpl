@@ -5,11 +5,10 @@
 //! sensible default; both are overridable via an optional options
 //! record passed as the codec's second argument.
 
-use std::collections::BTreeMap;
-
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
+use crate::decode_limits_parse::from_option;
 use crate::env::Environment;
 use mlpl_eval_types::{EvalError, Value};
 
@@ -23,7 +22,7 @@ pub(crate) struct Limits {
 }
 
 impl Limits {
-    fn defaults() -> Self {
+    pub(crate) fn defaults() -> Self {
         Limits {
             max_depth: DEFAULT_MAX_DEPTH,
             max_bytes: usize::MAX,
@@ -69,45 +68,4 @@ pub(crate) fn text_and_options(
 /// a string, e.g. `parse_native`).
 pub(crate) fn limits_only(who: &str, opt: Option<&Value>) -> Result<Limits, EvalError> {
     Ok(from_option(who, opt)?.0)
-}
-
-fn from_option(who: &str, opt: Option<&Value>) -> Result<(Limits, bool), EvalError> {
-    let mut limits = Limits::defaults();
-    let Some(v) = opt else {
-        return Ok((limits, false));
-    };
-    let Value::Record { fields } = v else {
-        return Err(EvalError::Unsupported(format!(
-            "{who}: the options argument must be a record"
-        )));
-    };
-    if let Some(d) = usize_field(who, fields, "max_depth")? {
-        limits.max_depth = d;
-    }
-    if let Some(b) = usize_field(who, fields, "max_bytes")? {
-        limits.max_bytes = b;
-    }
-    if let Some(e) = usize_field(who, fields, "max_elements")? {
-        limits.max_elements = e;
-    }
-    let reconstruct = usize_field(who, fields, "results")?.is_some_and(|n| n != 0);
-    Ok((limits, reconstruct))
-}
-
-fn usize_field(
-    who: &str,
-    fields: &BTreeMap<String, Value>,
-    key: &str,
-) -> Result<Option<usize>, EvalError> {
-    match fields.get(key) {
-        None => Ok(None),
-        Some(Value::Array(a))
-            if a.rank() == 0 && a.data()[0] >= 0.0 && a.data()[0].fract() == 0.0 =>
-        {
-            Ok(Some(a.data()[0] as usize))
-        }
-        Some(_) => Err(EvalError::Unsupported(format!(
-            "{who}: {key} must be a non-negative integer"
-        ))),
-    }
 }

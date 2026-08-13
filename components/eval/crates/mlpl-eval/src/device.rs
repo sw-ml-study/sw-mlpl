@@ -46,8 +46,8 @@ pub(crate) fn eval_device(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     if let Some(dispatcher) = env.peer_dispatcher() {
-        let source = block_source(body);
-        let bindings = collect_array_bindings(env, &source);
+        let source = crate::device_block::block_source(body);
+        let bindings = crate::device_block::collect_array_bindings(env, &source);
         if let Some(result) = dispatcher.dispatch_block(target, &source, bindings) {
             return result;
         }
@@ -67,48 +67,13 @@ pub(crate) fn eval_device(
     Ok(last)
 }
 
-fn block_source(body: &[Expr]) -> String {
-    body.iter()
-        .map(std::string::ToString::to_string)
-        .collect::<Vec<_>>()
-        .join("\n")
-}
-
-fn collect_array_bindings(
-    env: &Environment,
-    source: &str,
-) -> std::collections::HashMap<String, DenseArray> {
-    env.vars_iter()
-        .filter(|(name, _)| source.contains(name.as_str()))
-        .map(|(name, arr)| (name.clone(), arr.clone()))
-        .collect()
-}
-
-/// Whether the running build can dispatch through MLX (Apple) or
-/// CUDA (Linux): each `const fn` combines its Cargo feature gate with
-/// its target OS/arch gate.
-const fn mlx_available() -> bool {
-    cfg!(all(
-        feature = "mlx",
-        target_os = "macos",
-        target_arch = "aarch64"
-    ))
-}
-const fn cuda_available() -> bool {
-    cfg!(all(
-        feature = "cuda",
-        target_os = "linux",
-        target_arch = "x86_64"
-    ))
-}
-
 /// Whether `target`'s GPU backend can actually dispatch in this build
 /// (`cpu`/anything else always "runs", on CPU). Drives the one-time
 /// CPU-fallback warning in `eval_device` / `eval_to_device`.
 pub(crate) fn device_available(target: &str) -> bool {
     match target {
-        "mlx" => mlx_available(),
-        "cuda" => cuda_available(),
+        "mlx" => crate::device_block::mlx_available(),
+        "cuda" => crate::device_block::cuda_available(),
         _ => true,
     }
 }

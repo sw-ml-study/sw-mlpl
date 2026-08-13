@@ -26,38 +26,17 @@ use mlpl_eval_types::Value;
 
 type BinOp = fn(f64, f64) -> f64;
 
-fn add_op(a: f64, b: f64) -> f64 {
-    a + b
-}
-
-fn mul_op(a: f64, b: f64) -> f64 {
-    a * b
-}
-
-fn min_op(a: f64, b: f64) -> f64 {
-    if b < a { b } else { a }
-}
-
-fn max_op(a: f64, b: f64) -> f64 {
-    if b > a { b } else { a }
-}
-
-fn and_op(a: f64, b: f64) -> f64 {
-    if a != 0.0 && b != 0.0 { 1.0 } else { 0.0 }
-}
-
-fn or_op(a: f64, b: f64) -> f64 {
-    if a != 0.0 || b != 0.0 { 1.0 } else { 0.0 }
-}
-
+/// Map an operator name to its `(identity, binary op)`. The ops are
+/// non-capturing closures (they coerce to `BinOp` fn pointers), so the
+/// whole reduce-operator table lives in one place.
 fn dispatch(op_name: &str) -> Option<(f64, BinOp)> {
     match op_name {
-        "add" | "+" => Some((0.0, add_op)),
-        "mul" | "*" => Some((1.0, mul_op)),
-        "min" => Some((f64::INFINITY, min_op)),
-        "max" => Some((f64::NEG_INFINITY, max_op)),
-        "and" => Some((1.0, and_op)),
-        "or" => Some((0.0, or_op)),
+        "add" | "+" => Some((0.0, |a, b| a + b)),
+        "mul" | "*" => Some((1.0, |a, b| a * b)),
+        "min" => Some((f64::INFINITY, |a, b| if b < a { b } else { a })),
+        "max" => Some((f64::NEG_INFINITY, |a, b| if b > a { b } else { a })),
+        "and" => Some((1.0, |a, b| if a != 0.0 && b != 0.0 { 1.0 } else { 0.0 })),
+        "or" => Some((0.0, |a, b| if a != 0.0 || b != 0.0 { 1.0 } else { 0.0 })),
         _ => None,
     }
 }
