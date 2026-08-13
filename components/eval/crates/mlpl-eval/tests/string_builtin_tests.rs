@@ -65,6 +65,23 @@ fn str_join_folds_a_string_list() {
 }
 
 #[test]
+fn to_string_is_the_shortest_round_trip_of_to_number() {
+    // Integral values print bare; the byte forms confirm the text.
+    assert_eq!(bytes("tokenize_bytes(to_string(0))"), vec![48.0]); // "0"
+    assert_eq!(bytes("tokenize_bytes(to_string(12))"), vec![49.0, 50.0]); // "12"
+    assert_eq!(bytes("tokenize_bytes(to_string(0 - 3))"), vec![45.0, 51.0]); // "-3"
+    assert_eq!(bytes("tokenize_bytes(to_string(8 / 2))"), vec![52.0]); // "4", not "4.0"
+    assert_eq!(
+        bytes("tokenize_bytes(to_string(1.5))"),
+        vec![49.0, 46.0, 53.0]
+    ); // "1.5"
+    // Round-trip: to_number(to_string(sqrt(2))) recovers the value.
+    let rt = bytes("unwrap(to_number(to_string(sqrt(2))))");
+    assert_eq!(rt.len(), 1);
+    assert!((rt[0] - 2.0_f64.sqrt()).abs() < 1e-15, "{rt:?}");
+}
+
+#[test]
 fn no_coercion_number_argument_is_an_error() {
     assert!(matches!(
         err("str_concat(\"a\", 1)"),

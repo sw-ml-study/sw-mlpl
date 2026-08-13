@@ -1,6 +1,6 @@
 number = 4
 slug = "to-string"
-status = "pending"
+status = "in-progress"
 description = "B2: add to_string(x) -> string interpreter builtin in mlpl-eval (the honest i..."
 role = "legacy"
 context_files = []

@@ -289,6 +289,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "join a string list with a separator; O(total) linear fold",
             ),
             (
+                "to_string",
+                "to_string(x)",
+                "scalar number -> shortest round-trip string (bare integers); inverse of to_number",
+            ),
+            (
                 "type_of",
                 "type_of(v)",
                 "stable kind string of any value (array/string/record/result/...); total, never errors",
