@@ -686,6 +686,61 @@ each has an honest workaround in use now.
   paths create one. Promote a leading comment block to the intro
   and a trailing block to the takeaway.
 
+## Workspace persistence (APL `)SAVE` / `)LOAD`) -- LOW priority
+
+Save/restore the REPL's EXECUTION STATE (bound variables, user
+functions, tags, optionally models) -- distinct from saving a
+`.mlpl` script, which is only source. The classic APL workspace.
+User-requested 2026-08-13; parked LOW behind typed-bytes ->
+extensions. Much of the substrate exists: MLPB (`to_native` /
+`parse_native`, v2 + CRC32 + `max_bytes`/`max_depth`/
+`max_elements` budgets + v1 read-compat) already serializes
+Values; the new work is function-source capture + a versioned
+container + the commands + bounded load.
+
+Command set (APL-mapped):
+
+- `:save <name>` / `:load <name>` -- core save/restore.
+- `:wsname <name>` (set/rename) + `:wsid` shows the name
+  (`:wsid` already exists as an id).
+- `:libs` / `:ws` -- list saved workspaces WITH sizes;
+  `:wsinfo <name>` shows the header (size, version, object count).
+- `:drop <name>` (`)DROP`), `:erase <obj>` (`)ERASE`).
+- `:copy <name> [obj...]` (`)COPY`, overwrite) + `:pcopy`
+  (`)PCOPY`, skip name clashes).
+- `:wsclear` (`)CLEAR`; note current `:clear` clears HISTORY,
+  so a distinct name is needed). `:fns` to list user functions.
+
+Container / contract / resources:
+
+- Header `{magic, ws_format_version, runtime_version,
+  builtin_fingerprint}` + a size MANIFEST (total bytes, object
+  count, largest array shape) so `:libs` warns BEFORE a load.
+- BOUNDED load (reuse the `parse_native` budgets): an over-budget
+  workspace fails loudly instead of OOMing -- one system can save
+  a ws another cannot afford to load.
+- Capability contract on load: a ws referencing a builtin / model
+  arch this binary lacks fails naming what is missing.
+- EXCLUDE `gen_states` (KV cache) and `device_tensors`
+  (peer-resident) -- transient / not ours to serialize; report on
+  save.
+- Migration: a `mlpl ws migrate <old> <new>` subcommand built on
+  the queued **codec-migration-hooks**, rewriting an old container
+  to the current format and reporting the unmigratable.
+
+Decomposition -- MVP (steps 1-4, ~5-6 steps) then full parity:
+
+1. ws-name + `:wsname` + `:wsid` shows it (easy).
+2. Container format + save/load of variables + user-fns + tags
+   (MLPB + def-source capture) (medium).
+3. `:save`/`:load`/`:wsinfo` + sandbox ws dir + bounded load
+   (medium).
+4. `:libs`/`:drop`/`:erase` (small).
+5. `:copy`/`:pcopy` (medium).
+6. Models/tokenizers best-effort -- OPT-IN, since model size is
+   where the resource limits bite (medium-hard; may defer).
+7. Version header + migration hooks + `mlpl ws migrate` (medium).
+
 ## Explicitly deprioritized / retired
 
 - Engram E6-E9 wait behind Tracks 1-3.
