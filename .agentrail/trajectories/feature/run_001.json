@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "bytes-value-and-pack"
+  },
+  "action": "TDD RED->GREEN (bytes_tests); new crate mlpl-bytes; edited value.rs/lib.rs/repr.rs/env.rs/env_scope.rs/eval.rs/fncall_globals.rs/eval_fncalls.rs + new fncall_bytes.rs; ratchet refactors (scope-table macro, string_convert split); scoped clippy/fmt/tests both workspaces; repo-wide sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-13T11:04:24"
+}
