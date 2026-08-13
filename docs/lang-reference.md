@@ -773,15 +773,21 @@ Classical ML demo category.
 | Function | Args | Description |
 |----------|------|-------------|
 | `svg(data, type)` | 2 | Render `data` as an SVG diagram of the given type and return the SVG string |
-| `svg(data, type, aux)` | 3 | Same, with an auxiliary array (used by `decision_boundary`) |
+| `svg(data, type, aux)` | 3 | Same, with an auxiliary array. The 3-argument types read it: `decision_boundary` (training points), `attention_overlay` (the attention map), and `plotly3d` (optional point labels). |
 
 Supported `type` values:
 
 - `"scatter"` -- expects an Nx2 matrix; one circle per row.
+- `"scatter3d"` -- an `[N, 3]` (x, y, z) or `[N, 4]` (x, y, z, category) matrix rendered as a 3-D scatter via orthographic projection. A 4th column colors points by integer category and adds a legend.
+- `"plotly3d"` -- an `[N, 3]` point matrix rendered as an INTERACTIVE Plotly 3-D scatter. It returns a self-contained HTML fragment (a `<div>` plus an inline script), not an SVG string. An optional third argument -- a length-N integer or string label array -- splits the points into one color-coded trace per unique label. In the browser REPL, clicking a point reports its original sample index back to the REPL.
 - `"line"` -- a vector becomes a polyline; an Nx2 matrix becomes (x,y) points connected by lines.
 - `"bar"` -- a vector becomes a bar chart with one bar per element.
 - `"heatmap"` -- an MxN matrix rendered as a viridis-colored grid.
+- `"heatmap_grid"` -- a rank-3 `[N, R, C]` tensor rendered as a grid of N heatmaps (grid layout `cols = ceil(sqrt(N))`). Each panel carries its own min/max color scale, so a sharply-peaked panel and a flat one both show structure rather than one washing out the other.
+- `"life"` -- a rank-3 `[T, H, W]` frames tensor (or a rank-2 `[H, W]` single frame) rendered as a Game-of-Life grid that animates through the T frames via SMIL. The animation needs no script, so it still plays in a downloaded SVG file; `T = 1` renders a static grid.
+- `"waffle"` -- a vector of category counts, taken in order as `[losses, ties, wins]`, rendered as a grid of unit blocks colored red / gray / green. An `[R, K]` matrix draws R stacked grids (e.g. a before/after pair).
 - `"gallery"` -- an `[N, 3, H, W]` image batch rendered as an SVG grid of RGB thumbnails. Values in `[-1, 1]` normalized space (clamps out-of-range). Thumbnails are downsampled via block averaging to keep the SVG size tractable for batches like the 20-image pets_tiny slice.
+- `"attention_overlay"` -- a `[3, H, W]` image with an attention map overlaid as a translucent viridis heat grid, the map supplied as the third argument. The map is `[P]` for a single head or `[heads, P]` for several; `P` must be a perfect square and both `H` and `W` divisible by `sqrt(P)`. Multi-head input renders one labeled tile per head.
 - `"decision_boundary"` -- a 2D classifier-output grid rendered as a diverging-color surface, with the third argument as an Nx3 `[x, y, label]` training matrix overlaid as colored points.
 
 The browser REPL detects SVG return values and renders them inline.
@@ -871,7 +877,7 @@ x = if flag { 100 } else { 200 }    # x = 100
 
 # Result-as-condition: branches on the Ok / Err discriminant.
 name = unwrap_or(env("USER"), "guest")
-greeting = if env("USER") { "hello " + name } else { "no user" }
+greeting = if env("USER") { str_concat("hello ", name) } else { "no user" }
 
 # Nested:
 sign = if x { if x > 0 { 1 } else { -1 } } else { 0 }
