@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-13
 
+- chore(pages): rebuild for demo-load view switch
+- chore(deploy): gh-pages deploy via fast-forward worktree, no force-push
+- fix(web): loading a demo switches Editor -> REPL view
+- chore(pages): rebuild for REPL/Editor toggle + Editing-mode UI
+- feat(web): REPL/Editor view toggle, Run switches to REPL, clearer Editing mode
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-reinterpret; queue typed-readers-le
 - feat(eval): reinterpret(bytes, "dtype") bit-level re-view (typed-packed-bytes 004)
 - docs(changes): refresh CHANGES.md to HEAD
