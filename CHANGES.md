@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-13
 
+- chore(pages): rebuild for editor-only Editor mode
+- fix(web): Editor mode is editor-only (no split editor-over-REPL)
+- docs(claude): fix pre-existing non-ASCII em-dash in git-hygiene note
+- chore(deploy): gh-pages via a sibling checkout + plain add/commit/push
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for demo-load view switch
 - chore(deploy): gh-pages deploy via fast-forward worktree, no force-push
 - fix(web): loading a demo switches Editor -> REPL view
