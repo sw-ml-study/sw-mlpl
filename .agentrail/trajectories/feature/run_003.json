@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "reinterpret"
+  },
+  "action": "TDD RED->GREEN (4 reinterpret tests); new bytes_args module (parse_dtype+expect_bytes); eval_reinterpret in fncall_bytes; scoped clippy/fmt/tests mlpl-eval; repo-wide sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-13T15:35:43"
+}

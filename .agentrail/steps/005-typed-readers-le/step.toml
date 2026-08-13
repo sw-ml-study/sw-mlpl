@@ -1,0 +1,9 @@
+number = 5
+slug = "typed-readers-le"
+status = "pending"
+description = "Add the little-endian typed reader family: read_u8/read_u16_le/read_u32_le/re..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-13T15:35:43"
+task_type = "feature"
+commits = []
