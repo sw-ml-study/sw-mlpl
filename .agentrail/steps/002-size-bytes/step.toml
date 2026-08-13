@@ -1,9 +1,10 @@
 number = 2
 slug = "size-bytes"
-status = "pending"
+status = "completed"
 description = "Add a size_bytes(x) -> scalar interpreter builtin returning the PACKED storag..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-13T11:04:24"
+completed_at = "2026-08-13T11:22:03"
 task_type = "feature"
-commits = []
+commits = ["200b7703bce37a2e5de5c3d51345443ba341ab76"]
