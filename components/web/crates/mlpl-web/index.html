@@ -206,6 +206,27 @@
             color: var(--blue);
             border-color: var(--blue);
         }
+        /* REPL/Editor are one segmented toggle: a joined pair whose
+           active segment is filled (not just outlined) so the current
+           workspace view -- interactive REPL vs script Editor -- reads
+           at a glance and stays visually distinct from Tutorial/Paths. */
+        .view-toggle {
+            display: inline-flex;
+            border: 1px solid var(--blue);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .header-tabs .view-toggle .tab {
+            border: none;
+            border-radius: 0;
+        }
+        .header-tabs .view-toggle .tab + .tab {
+            border-left: 1px solid var(--surface1);
+        }
+        .header-tabs .view-toggle .tab.active {
+            background: var(--blue);
+            color: var(--crust);
+        }
         header > .help-btn {
             margin-right: 60px;
         }
@@ -453,12 +474,46 @@
             flex-direction: column;
             flex: 1;
             min-height: 0;
+            /* Editing-mode accent: a coloured top rule frames the whole
+               script pane so it is unmistakably a different mode. */
+            border-top: 3px solid var(--yellow);
         }
         .editor-toolbar {
             display: flex;
             gap: 8px;
             padding: 8px 16px;
             border-bottom: 1px solid var(--surface1);
+            align-items: center;
+            background: var(--mantle);
+        }
+        /* "Editing" indicator: a pulsing dot + label on the left of the
+           toolbar, so the mode is obvious even before you read a button. */
+        .editor-mode-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            margin-right: auto;
+            color: var(--yellow);
+            font-family: var(--mono);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .editor-mode-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--yellow);
+            box-shadow: 0 0 6px var(--yellow);
+            animation: editing-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes editing-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .editor-mode-dot { animation: none; }
         }
         .editor-btn {
             background: var(--surface0);

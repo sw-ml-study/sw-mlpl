@@ -21,9 +21,6 @@ pub struct HeaderProps {
 
 #[function_component(Header)]
 pub fn header(props: &HeaderProps) -> Html {
-    let cls = |m: HeaderMode| {
-        if props.mode == m { "tab active" } else { "tab" }
-    };
     html! {
         <header>
             <h1><img src="mlpl-badge.webp" alt="" class="title-badge" />{"sw-MLPL"}</h1>
@@ -32,15 +29,28 @@ pub fn header(props: &HeaderProps) -> Html {
                 <span class="title-subtitle">{"Array Programming for Machine Learning"}</span>
                 <crate::status_badge::StatusBadge />
             </div>
-            <div class="header-tabs">
-                <button class={cls(HeaderMode::Repl)} onclick={props.on_select_repl.clone()} data-tour-target="tab-repl">{"REPL"}</button>
-                <button class={cls(HeaderMode::Tutorial)} onclick={props.on_select_tutorial.clone()} data-tour-target="tab-tutorial">{"Tutorial"}</button>
-                <button class={cls(HeaderMode::Paths)} onclick={props.on_select_paths.clone()} data-tour-target="tab-paths">{"Paths"}</button>
-                <button class={cls(HeaderMode::Editor)} onclick={props.on_select_editor.clone()} data-tour-target="tab-editor">{"Editor"}</button>
-            </div>
+            { header_tabs(props) }
             <crate::connect_button::ConnectButton />
             <button class="tour-btn-header" onclick={props.on_tour.clone()} aria-label="Guided tour" title="Guided tour" data-tour-target="tour-btn">{"Tour"}</button>
             <button class="help-btn" onclick={props.on_help.clone()} aria-label="Show documentation" title="Documentation" data-tour-target="help-btn">{"?"}</button>
         </header>
+    }
+}
+
+/// The mode tabs. REPL and Editor are grouped as one segmented toggle
+/// (the two views of the main workspace); Tutorial and Paths follow.
+fn header_tabs(props: &HeaderProps) -> Html {
+    let cls = |m: HeaderMode| {
+        if props.mode == m { "tab active" } else { "tab" }
+    };
+    html! {
+        <div class="header-tabs">
+            <div class="view-toggle" role="group" aria-label="Workspace view">
+                <button class={cls(HeaderMode::Repl)} onclick={props.on_select_repl.clone()} data-tour-target="tab-repl">{"REPL"}</button>
+                <button class={cls(HeaderMode::Editor)} onclick={props.on_select_editor.clone()} data-tour-target="tab-editor">{"Editor"}</button>
+            </div>
+            <button class={cls(HeaderMode::Tutorial)} onclick={props.on_select_tutorial.clone()} data-tour-target="tab-tutorial">{"Tutorial"}</button>
+            <button class={cls(HeaderMode::Paths)} onclick={props.on_select_paths.clone()} data-tour-target="tab-paths">{"Paths"}</button>
+        </div>
     }
 }

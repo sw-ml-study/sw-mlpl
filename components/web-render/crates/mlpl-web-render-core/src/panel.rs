@@ -105,15 +105,19 @@ fn render_editor_pane(a: &MainArgs) -> Html {
 fn make_editor_run_callback(a: &MainArgs) -> Callback<MouseEvent> {
     let batch = a.on_run_batch.clone();
     let ec = a.editor_content.clone();
+    let editor_open = a.editor_open.clone();
     Callback::from(move |_: MouseEvent| {
         // Balanced statement GROUPS, not raw lines: multi-line
-        // def/if/record constructs must evaluate whole. The
-        // editor STAYS OPEN: results land in the REPL pane
-        // below, and closing here made the next "Run" click
-        // land on a demo card instead (user report, 2026-08-06).
+        // def/if/record constructs must evaluate whole.
         let groups = crate::statement_groups::group_statements(&ec);
         if !groups.is_empty() {
             batch.emit(groups);
+            // Run switches the view from Editor to REPL so the results
+            // are front-and-centre. The editor CONTENT is preserved in
+            // `editor_content`, so toggling back to Editor resumes
+            // editing (user direction 2026-08-13, superseding the
+            // stays-open behaviour of 2026-08-06).
+            editor_open.set(false);
         }
     })
 }

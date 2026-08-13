@@ -39,7 +39,10 @@ fn toolbar(props: &EditorProps, file_ref: &NodeRef) -> Html {
     let on_file_change = make_file_change_handler(props.on_change.clone());
     html! {
         <div class="editor-toolbar">
-            <button class="editor-btn editor-btn-run" onclick={props.on_run.clone()}>{"Run"}</button>
+            <span class="editor-mode-badge" aria-label="Editing mode">
+                <span class="editor-mode-dot" aria-hidden="true" />{"Editing"}
+            </span>
+            <button class="editor-btn editor-btn-run" onclick={props.on_run.clone()} title="Run the script and switch to the REPL view (Ctrl+Enter)">{"Run \u{25B6}"}</button>
             <button class="editor-btn" onclick={on_load_click}>{"Load"}</button>
             <input ref={file_ref.clone()} type="file" accept=".mlpl,.txt" style="display:none" onchange={on_file_change} />
             <button class="editor-btn" onclick={props.on_save.clone()}>{"Save"}</button>
