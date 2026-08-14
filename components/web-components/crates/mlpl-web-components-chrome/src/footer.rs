@@ -68,23 +68,6 @@ const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
         )],
     ),
     (
-        "Mathematics",
-        &[
-            (
-                "demo-abstract-algebra",
-                "Groups, rings, and fields explored and visualized in MLPL.",
-            ),
-            (
-                "demo-category-theory",
-                "Category-theory constructions (functors, products, ...) in MLPL.",
-            ),
-            (
-                "demo-combinators",
-                "\"To Mock a Mockingbird\" combinator birds, in MLPL.",
-            ),
-        ],
-    ),
-    (
         "Programming",
         &[
             (
@@ -106,6 +89,23 @@ const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
             (
                 "demo-memory",
                 "Companion demos for hashmaps, memory, and retrieval.",
+            ),
+        ],
+    ),
+    (
+        "Mathematics",
+        &[
+            (
+                "demo-abstract-algebra",
+                "Groups, rings, and fields explored and visualized in MLPL.",
+            ),
+            (
+                "demo-category-theory",
+                "Category-theory constructions (functors, products, ...) in MLPL.",
+            ),
+            (
+                "demo-combinators",
+                "\"To Mock a Mockingbird\" combinator birds, in MLPL.",
             ),
         ],
     ),
