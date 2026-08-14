@@ -289,6 +289,26 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "join a string list with a separator; O(total) linear fold",
             ),
             (
+                "str_len",
+                "str_len(s)",
+                "number of characters (not bytes) in a string",
+            ),
+            (
+                "str_slice",
+                "str_slice(s, start, len)",
+                "character-indexed substring: len chars from char index start (clamped)",
+            ),
+            (
+                "str_find",
+                "str_find(s, needle)",
+                "first character index of needle in s, or -1 if absent",
+            ),
+            (
+                "str_split",
+                "str_split(s, sep)",
+                "split s on substring sep into a string list; empty sep -> chars",
+            ),
+            (
                 "to_string",
                 "to_string(x)",
                 "scalar number -> shortest round-trip string (bare integers); inverse of to_number",

@@ -1731,13 +1731,30 @@ gradient still flows through during backprop; only the
 weight update is suppressed. MLPL: `freeze(model)` /
 `unfreeze(model)` from .
 
+## String operations (builtins)
+
+Strings are a first-class value kind, built and taken apart with
+dedicated builtins (there is no `s[i]` indexing syntax). `str_concat(a, b)`
+joins two strings and `str_join(parts, sep)` joins a string list
+with a separator (the O(total) linear fold). `to_string(x)` renders a
+scalar number as its shortest round-trip decimal (the inverse of
+`to_number`). Taking a string apart is CHARACTER-based, not byte-based:
+`str_len(s)` counts characters, not bytes (a multi-byte UTF-8
+character counts once);
+`str_slice(s, start, len)` returns a character-indexed substring;
+`str_find(s, needle)` returns the first character index of `needle`
+(or -1); and `str_split(s, sep)` splits into a string list (an empty
+separator splits into individual characters). For string LISTS,
+`list_get(xs, i)` / `list_len(xs)` index and measure.
+
 ## fs_walk / read_text / write_text / remove_path / run_script (builtins)
 
 The language-native test-runner surface: a SANDBOXED
-filesystem API (walk in lexical order with a `*` pattern,
-exact-text read/write, removal -- all Result-speaking, all
-contained by the `--source-dir` sandbox, symlinks never
-followed) plus `run_script(path, {source_dir, data_dir,
+filesystem API -- `fs_walk(dir, pattern)` (walk in lexical order
+with a `*` pattern), `read_text(path)` / `write_text(path, text)`
+(exact-text read/write), and `remove_path(path)` (removal) -- all
+Result-speaking, all contained by the `--source-dir` sandbox,
+symlinks never followed, plus `run_script(path, {source_dir, data_dir,
 capture})`, which executes a file in a FRESH environment (no
 definition or registry leakage), preserves `include`
 semantics, and returns the outcome as data: status

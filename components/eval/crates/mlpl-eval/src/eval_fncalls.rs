@@ -52,6 +52,7 @@ const DISPATCHERS: &[Dispatcher] = &[
     crate::fncall_toml::try_dispatch,
     crate::fncall_native::try_dispatch,
     crate::fncall_string::try_dispatch,
+    crate::fncall_string_ops::try_dispatch,
     crate::fncall_values::try_dispatch,
     try_loaders,
     try_tools,
