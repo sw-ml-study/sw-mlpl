@@ -12,8 +12,31 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-14
+
+- chore(agentrail): complete 002-array-results-out; queue 003-native-handles
+- feat(extensions): marshal provider-returned dense arrays back to MLPL
+- chore(pages): rebuild for demo-linear-algebra footer entry
+- feat(web): add demo-linear-algebra to the footer Mathematics section
+- chore(agentrail): complete 001-array-args-in; queue array-results-out
+- feat(ext): dense-array ARGUMENTS across the C boundary (extension-arrays-handles 001)
+- chore(agentrail): archive typed-packed-bytes; init extension-arrays-handles saga
+- docs(queue): defer typed-packed-bytes BE-readers/unpack tail (extensions took priority)
+- chore(pages): rebuild for nested demo menu + footer restyle
+- docs(queue): queue split of mlpl-web-components-content crate
+- feat(web): nested demo menu (super-groups) + footer reorder/restyle
+- chore(pages): rebuild for grouped footer repo dialog
+- feat(web): footer repo dialog grouped by subject + newest demos added
+- docs(queue): mark B3 string ops shipped
+- feat(eval): character-based string ops str_len/str_slice/str_find/str_split (B3)
+
 ## 2026-08-13
 
+- fix(eval): string assignment echoes the value; disp accepts any value
+- docs(queue): queue workspace-persistence saga (APL )SAVE/)LOAD; low priority)
+- chore(agentrail): complete 005-typed-readers-le; queue typed-readers-be-and-unpack
+- feat(eval): little-endian typed reader family (typed-packed-bytes 005)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for editor-only Editor mode
 - fix(web): Editor mode is editor-only (no split editor-over-REPL)
 - docs(claude): fix pre-existing non-ASCII em-dash in git-hygiene note
