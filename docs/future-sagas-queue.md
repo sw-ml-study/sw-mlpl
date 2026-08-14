@@ -390,6 +390,13 @@ in data-forge come first).
 - **sw-checklist paydown spike** -- dedicated spike + crate
   partitions own the fn-count class (2026-08-02 ledger: 2
   documented FAILs, 337 warnings).
+- **typed-packed-bytes tail** -- big-endian typed readers
+  (`read_u16_be` .. `read_f64_be`, mirroring the LE family with
+  `from_be_bytes`) and `unpack(bytes, dtype) -> array` (the
+  numeric inverse of `pack`). Non-critical completeness: the
+  little-endian readers + `reinterpret` already cover the
+  Safetensors/GGUF (little-endian) case demo-ml-utils #2 needs.
+  Deferred when the extension-ABI work took priority.
 - **Split `mlpl-web-components-content`** -- the crate is AT its
   7-module ceiling, so new UI (e.g. the nested demo menu) has to
   be crammed into existing modules (mode_bar.rs is now at 7 fns)
