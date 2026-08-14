@@ -390,6 +390,12 @@ in data-forge come first).
 - **sw-checklist paydown spike** -- dedicated spike + crate
   partitions own the fn-count class (2026-08-02 ledger: 2
   documented FAILs, 337 warnings).
+- **Split `mlpl-web-components-content`** -- the crate is AT its
+  7-module ceiling, so new UI (e.g. the nested demo menu) has to
+  be crammed into existing modules (mode_bar.rs is now at 7 fns)
+  instead of clean sibling modules. Split it (a `demo-menu`
+  sub-crate: demo_gating + demo_supergroups + demo_panel) to
+  restore headroom and retire the resulting warnings.
 - **Wiki errata upkeep** -- standing rule in CLAUDE.md.
 - **Upstream agentrail fix** -- `agentrail instructions apply`
   emits em dashes; the repo markdown gate needs ASCII.
