@@ -12,7 +12,13 @@
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
 
-/// The V1 scalar value set crossed at the extension boundary.
+mod dtype;
+pub use dtype::ExtDtype;
+
+/// The V1 value set crossed at the extension boundary: the scalars
+/// plus a dense, row-major, contiguous numeric array (rank 1..=8).
+/// The host carries array elements as `f64` (its numeric type); the
+/// C-ABI adapter narrows/widens to `dtype` on the wire.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ExtValue {
     Nil,
@@ -21,6 +27,11 @@ pub enum ExtValue {
     F64(f64),
     Str(String),
     Bytes(Vec<u8>),
+    Array {
+        dtype: ExtDtype,
+        shape: Vec<usize>,
+        data: Vec<f64>,
+    },
 }
 
 /// A recoverable extension failure, or a contained panic

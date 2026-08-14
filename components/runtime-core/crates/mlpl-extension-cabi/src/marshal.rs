@@ -64,6 +64,8 @@ pub(crate) fn ext_to_abi(value: &ExtValue) -> AbiValue {
                 },
             },
         ),
+        // Arrays go through `marshal_array::marshal_args`; unreachable.
+        ExtValue::Array { .. } => (ValueTag::Nil, ValuePayload { integer: 0 }),
     };
     AbiValue {
         tag: tag as u32,

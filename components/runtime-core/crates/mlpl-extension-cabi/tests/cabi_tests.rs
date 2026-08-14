@@ -182,3 +182,15 @@ fn duplicate_function_name_is_rejected() {
     let e = unsafe { register_c_extension(&d) }.unwrap_err();
     assert!(e.contains("duplicate"), "{e}");
 }
+
+/// The safe `ExtDtype::wire_tag` must mirror the C `DTypeTag` codes;
+/// they live in separate crates and would silently drift otherwise.
+#[test]
+fn wire_tag_mirrors_the_dtype_tag_codes() {
+    use mlpl_extension_abi::ExtDtype;
+    use mlpl_extension_cabi::DTypeTag;
+    assert_eq!(ExtDtype::U8.wire_tag(), DTypeTag::U8 as u32);
+    assert_eq!(ExtDtype::I64.wire_tag(), DTypeTag::I64 as u32);
+    assert_eq!(ExtDtype::F32.wire_tag(), DTypeTag::F32 as u32);
+    assert_eq!(ExtDtype::F64.wire_tag(), DTypeTag::F64 as u32);
+}

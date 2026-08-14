@@ -7,7 +7,6 @@
 
 use std::collections::BTreeSet;
 use std::mem::size_of;
-use std::ptr;
 
 use mlpl_extension_abi::{ExtError, ExtFn, ExtFnDesc, ExtValue};
 
@@ -82,13 +81,14 @@ fn build_functions(d: &ExtensionDescriptorV1) -> Result<Vec<ExtFnDesc>, String> 
 /// (Host-side `call_contained` also wraps this in `catch_unwind`.)
 fn invoke_closure(invoke: InvokeFnV1) -> ExtFn {
     std::sync::Arc::new(move |args: &[ExtValue]| -> Result<ExtValue, ExtError> {
-        let abi_args: Vec<AbiValue> = args.iter().map(marshal::ext_to_abi).collect();
+        // Owns the array backing buffers for the duration of the call.
+        let abi_args = crate::marshal_array::marshal_args(args).map_err(ExtError::new)?;
         let mut output = AbiValue::nil();
         let mut error = AbiErrorV1::none();
-        let (args_ptr, count) = if abi_args.is_empty() {
-            (ptr::null(), 0)
+        let (args_ptr, count) = if abi_args.values.is_empty() {
+            (std::ptr::null(), 0)
         } else {
-            (abi_args.as_ptr(), abi_args.len())
+            (abi_args.values.as_ptr(), abi_args.values.len())
         };
         let status = unsafe { invoke(args_ptr, count, &mut output, &mut error) };
         if status == ErrorCode::Ok as u32 {

@@ -3,12 +3,14 @@
 //! back into an MLPL value (domain failure -> `err(...)`,
 //! contained panic -> hard `EvalError`).
 
-use mlpl_array::DenseArray;
-use mlpl_extension_abi::{ExtError, ExtValue};
+use mlpl_array::{DenseArray, Shape};
+use mlpl_extension_abi::{ExtDtype, ExtError, ExtValue};
 
 use mlpl_eval_types::{EvalError, Value};
 
-/// Marshal an MLPL value into the V1 scalar boundary set.
+/// Marshal an MLPL value into the V1 boundary set. Rank-0 arrays are
+/// scalars (int/float); a rank>=1 array crosses as a dense `f64`
+/// array (the extension narrows to its wire dtype).
 pub(crate) fn to_ext(name: &str, v: Value) -> Result<ExtValue, EvalError> {
     match v {
         Value::Array(a) if a.rank() == 0 => {
@@ -19,6 +21,11 @@ pub(crate) fn to_ext(name: &str, v: Value) -> Result<ExtValue, EvalError> {
                 Ok(ExtValue::F64(n))
             }
         }
+        Value::Array(a) => Ok(ExtValue::Array {
+            dtype: ExtDtype::F64,
+            shape: a.shape().dims().to_vec(),
+            data: a.data().to_vec(),
+        }),
         Value::Str(s) => Ok(ExtValue::Str(s)),
         other => Err(EvalError::ExtensionError {
             function: name.to_string(),
@@ -58,5 +65,9 @@ fn from_ext(v: ExtValue) -> Value {
         ExtValue::Bytes(b) => Value::Array(DenseArray::from_vec(
             b.iter().map(|&x| f64::from(x)).collect(),
         )),
+        ExtValue::Array { shape, data, .. } => Value::Array(
+            DenseArray::new(Shape::new(shape), data.clone())
+                .unwrap_or_else(|_| DenseArray::from_vec(data)),
+        ),
     }
 }

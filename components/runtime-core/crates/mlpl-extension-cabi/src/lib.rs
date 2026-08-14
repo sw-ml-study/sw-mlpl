@@ -14,6 +14,7 @@
 //! `marshal`, and the adapter in `register`.
 
 mod marshal;
+mod marshal_array;
 mod model;
 mod register;
 mod validate;
