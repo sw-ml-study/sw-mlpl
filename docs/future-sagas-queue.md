@@ -655,12 +655,13 @@ each has an honest workaround in use now.
   error. Add a recursion-depth cap that raises a normal
   `EvalError` (e.g. "recursion limit (N frames) exceeded in
   u:count"). Robustness.
-- **string-ops-len-slice-find-split** (B3, missing, medium) --
-  strings have no length / index / search. Add `str_len(s)` ->
-  scalar (CHARACTERS, not bytes), `str_slice(s, start, len)` ->
-  string (character-indexed), `str_find(s, needle)` -> scalar
-  (first index, -1 if absent), `str_split(s, sep)` -> string-list.
-  `str_len` counting characters is the load-bearing half.
+- **string-ops-len-slice-find-split** (B3) -- SHIPPED 2026-08-14.
+  `str_len(s)` (CHARACTERS, not bytes), `str_slice(s, start, len)`
+  (character-indexed), `str_find(s, needle)` (first char index, -1
+  if absent), `str_split(s, sep)` (-> string-list). Plus the two
+  string-UX bug fixes: string assignment echoes the value, and
+  `disp` accepts any value. `x[i]` subscript syntax was declined
+  (functions only) per user direction.
 - **string-list-builders** (B4, missing) -- string lists can only
   arrive as a literal or from `record_keys` / `parse_json` / a
   tokenizer vocab; a program cannot append to one, which also
