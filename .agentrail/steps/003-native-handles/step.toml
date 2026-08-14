@@ -1,0 +1,9 @@
+number = 3
+slug = "native-handles"
+status = "pending"
+description = "Third step of extension-arrays-handles (B5, the spine root). Add opaque nativ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-14T13:24:48"
+task_type = "feature"
+commits = []

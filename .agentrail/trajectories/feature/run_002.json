@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "array-results-out"
+  },
+  "action": "TDD return-direction tests (make_range/make_bad providers, Box::leak view); dtype identity/codec split; send/receive marshal facade split; scoped build+clippy+fmt on runtime-core ext crates + mlpl-eval; repo sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-14T13:24:48"
+}
