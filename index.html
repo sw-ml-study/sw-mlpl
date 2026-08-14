@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta name="mlpl-build" content="a212a54e 2026-08-14T16:02:59Z">
+<head><meta name="mlpl-build" content="5207120e 2026-08-14T16:27:22Z">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-773d2c55682ea12d.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-773d2c55682ea12d_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-d3fb50a7717f4a5b.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-d3fb50a7717f4a5b_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -288,7 +288,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             top: calc(100% + 4px);
             left: 0;
             z-index: 41;
-            width: min(640px, calc(100vw - 24px));
+            width: min(420px, calc(100vw - 24px));
             max-height: 70vh;
             overflow-y: auto;
             background: var(--base);
@@ -297,8 +297,49 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             padding: 4px;
         }
+        /* Nested demo menu: collapsible super-groups (top level), each
+           expanding to its category sections + demo rows. */
+        .demo-super:not(:last-child) {
+            border-bottom: 1px solid var(--surface0);
+        }
+        .demo-super-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-radius: 4px;
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 9px 12px;
+            cursor: pointer;
+            text-align: left;
+        }
+        .demo-super-header:hover {
+            background: var(--surface0);
+        }
+        .demo-super-caret {
+            color: var(--blue);
+            font-size: 11px;
+            width: 12px;
+            flex: none;
+        }
+        .demo-super-label {
+            flex: 1;
+        }
+        .demo-super-count {
+            color: var(--subtext0);
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .demo-super-body {
+            padding: 2px 0 8px 10px;
+        }
         .demo-group {
-            width: 260px;
+            width: auto;
         }
         .demo-group-label {
             font-family: var(--mono);
@@ -1552,19 +1593,19 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
         }
         .repo-section-label {
             font-family: var(--mono);
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 12px;
+            font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
             color: var(--blue);
-            padding: 4px 12px;
-            border-bottom: 1px solid var(--surface1);
-            margin-bottom: 4px;
+            /* Outdented: the heading sits left of the indented rows. */
+            padding: 6px 4px 3px 2px;
         }
         .repo-row {
             display: block;
             text-decoration: none;
-            padding: 9px 12px;
+            /* Indented under the outdented section heading. */
+            padding: 8px 12px 8px 22px;
             border-radius: 6px;
             border: 1px solid transparent;
         }
@@ -1577,7 +1618,8 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             font-family: var(--mono);
             font-size: 14px;
             font-weight: 700;
-            color: var(--blue);
+            /* Neutral, distinct from the blue section heading. */
+            color: var(--text);
         }
         .repo-desc {
             display: block;
@@ -2176,7 +2218,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-773d2c55682ea12d.js" crossorigin="anonymous" integrity="sha384-ciaUSXMVm5cEmr1dPVcmItIWDgyoEMSGbXPdxCXmDp9emnFtsbA26bBngprYZrT8"><link rel="preload" href="/sw-mlpl/mlpl-web-773d2c55682ea12d_bg.wasm" crossorigin="anonymous" integrity="sha384-94poWFotNvLE966JFcSAPQD8b7XHic67qPoOOifPGYf7X9s3isVuRDyxDgplPN1c" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-d3fb50a7717f4a5b.js" crossorigin="anonymous" integrity="sha384-mzRK+vD+bYmbE3THbOIBfdVE3zkUQpcWXxsUiP7AJGswL8WXg8ys9vATfECbDJj1"><link rel="preload" href="/sw-mlpl/mlpl-web-d3fb50a7717f4a5b_bg.wasm" crossorigin="anonymous" integrity="sha384-FF4AAmWdwMpAjidOQezbbOgnxOO/a56Gm+1LX0MMK51el2q5xfgc0q0ItS9JdhGF" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
