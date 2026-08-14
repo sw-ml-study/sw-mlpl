@@ -107,6 +107,10 @@ const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
                 "demo-combinators",
                 "\"To Mock a Mockingbird\" combinator birds, in MLPL.",
             ),
+            (
+                "demo-linear-algebra",
+                "Vectors, matrices, and linear-algebra operations in MLPL.",
+            ),
         ],
     ),
 ];
