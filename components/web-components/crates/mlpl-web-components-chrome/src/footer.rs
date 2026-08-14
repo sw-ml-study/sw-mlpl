@@ -49,41 +49,65 @@ pub fn footer(props: &FooterProps) -> Html {
 
 /// This project plus its companion demo repositories
 /// (github.com/sw-ml-study/<name>), shown in the footer's GitHub
-/// dialog. The WASM page cannot query GitHub at runtime, so the set
-/// is baked in -- keep it in sync with the org's `sw-mlpl` +
-/// `demo*` repositories (names are the GitHub repo names).
-const REPOS: &[(&str, &str)] = &[
+/// dialog, grouped by subject. The WASM page cannot query GitHub at
+/// runtime, so the set is baked in -- keep it in sync with the org's
+/// `sw-mlpl` + `demo*` repositories (names are the GitHub repo names).
+const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
     (
-        "sw-mlpl",
-        "The MLPL language, browser playground, and native tools.",
+        "Core",
+        &[(
+            "sw-mlpl",
+            "The MLPL language, browser playground, and native tools.",
+        )],
     ),
     (
-        "demo-algorithms",
-        "General-purpose data structures and algorithms in MLPL.",
+        "Machine learning",
+        &[(
+            "demo-ml-utils",
+            "Machine-learning utility demos built with MLPL.",
+        )],
     ),
     (
-        "demo-combinators",
-        "\"To Mock a Mockingbird\" combinator birds, in MLPL.",
+        "Mathematics",
+        &[
+            (
+                "demo-abstract-algebra",
+                "Groups, rings, and fields explored and visualized in MLPL.",
+            ),
+            (
+                "demo-category-theory",
+                "Category-theory constructions (functors, products, ...) in MLPL.",
+            ),
+            (
+                "demo-combinators",
+                "\"To Mock a Mockingbird\" combinator birds, in MLPL.",
+            ),
+        ],
     ),
     (
-        "demo-extensions",
-        "Authoring native MLPL language extensions in Rust.",
-    ),
-    (
-        "demo-file-processing",
-        "Bounded byte and file processing (hexdump, WAV, MP3/ID3, Ogg).",
-    ),
-    (
-        "demo-functional-pipelines",
-        "A functional pipeline library for MLPL.",
-    ),
-    (
-        "demo-memory",
-        "Companion demos for hashmaps, memory, and retrieval.",
-    ),
-    (
-        "demo-ml-utils",
-        "Machine-learning utility demos built with MLPL.",
+        "Programming",
+        &[
+            (
+                "demo-algorithms",
+                "General-purpose data structures and algorithms in MLPL.",
+            ),
+            (
+                "demo-extensions",
+                "Authoring native MLPL language extensions in Rust.",
+            ),
+            (
+                "demo-file-processing",
+                "Bounded byte and file processing (hexdump, WAV, MP3/ID3, Ogg).",
+            ),
+            (
+                "demo-functional-pipelines",
+                "A functional pipeline library for MLPL.",
+            ),
+            (
+                "demo-memory",
+                "Companion demos for hashmaps, memory, and retrieval.",
+            ),
+        ],
     ),
 ];
 
@@ -125,14 +149,25 @@ fn repo_dialog(close: &Callback<MouseEvent>) -> Html {
                     <button class="close-btn" onclick={close.clone()} aria-label="Close">{"\u{00d7}"}</button>
                 </div>
                 <div class="modal-body">
-                    { for REPOS.iter().map(|(name, desc)| html! {
-                        <a class="repo-row" href={format!("https://github.com/sw-ml-study/{name}")} target="_blank" rel="noopener">
-                            <span class="repo-name">{ *name }</span>
-                            <span class="repo-desc">{ *desc }</span>
-                        </a>
-                    }) }
+                    { for REPO_SECTIONS.iter().map(|(label, repos)| repo_section(label, repos)) }
                 </div>
             </div>
+        </div>
+    }
+}
+
+/// One subject section of the repo dialog: a heading plus its repo
+/// rows (each opens that repo on GitHub in a new tab).
+fn repo_section(label: &str, repos: &[(&str, &str)]) -> Html {
+    html! {
+        <div class="repo-section">
+            <div class="repo-section-label">{ label.to_string() }</div>
+            { for repos.iter().map(|(name, desc)| html! {
+                <a class="repo-row" href={format!("https://github.com/sw-ml-study/{name}")} target="_blank" rel="noopener">
+                    <span class="repo-name">{ *name }</span>
+                    <span class="repo-desc">{ *desc }</span>
+                </a>
+            }) }
         </div>
     }
 }
