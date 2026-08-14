@@ -1,0 +1,9 @@
+number = 1
+slug = "array-args-in"
+status = "pending"
+description = "Open the extension boundary to ARRAY ARGUMENTS (B4 send direction, for native..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-14T10:18:04"
+task_type = "feature"
+commits = []

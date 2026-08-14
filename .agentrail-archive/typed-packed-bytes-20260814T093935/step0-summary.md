@@ -1,0 +1,1 @@
+Saga bootstrap: typed-packed-bytes plan seeded from downstream cross-repo survey (demo-memory packed-layout HARD blocker + demo-ml-utils #2 typed bytes/reinterpret). Design: new Value::Bytes{dtype,data} packed-buffer kind, separate from the f64 DenseArray path.
