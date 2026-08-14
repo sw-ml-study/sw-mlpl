@@ -397,6 +397,14 @@ in data-forge come first).
   little-endian readers + `reinterpret` already cover the
   Safetensors/GGUF (little-endian) case demo-ml-utils #2 needs.
   Deferred when the extension-ABI work took priority.
+- **Split `mlpl-extension-cabi`** -- the crate is AT its 7-module
+  ceiling (marshal / marshal_array / marshal_array_out / model /
+  register / validate / lib), so the boundary marshaling (which is
+  growing as arrays/handles land) has no room for the extra small
+  functions clean dispatch wants; `abi_to_ext` / `ext_to_abi` sit 1
+  line over the LOC gate with nowhere to extract to. Split the wire
+  ABI (model) and the send/receive marshaling into sub-crates to
+  restore headroom and retire the warnings genuinely.
 - **Split `mlpl-web-components-content`** -- the crate is AT its
   7-module ceiling, so new UI (e.g. the nested demo menu) has to
   be crammed into existing modules (mode_bar.rs is now at 7 fns)

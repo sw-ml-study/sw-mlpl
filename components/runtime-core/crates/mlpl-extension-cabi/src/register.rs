@@ -13,7 +13,7 @@ use mlpl_extension_abi::{ExtError, ExtFn, ExtFnDesc, ExtValue};
 use crate::model::{
     ABI_VERSION_V1, AbiErrorV1, AbiValue, ErrorCode, ExtensionDescriptorV1, InvokeFnV1,
 };
-use crate::{marshal, validate};
+use crate::validate;
 
 /// Largest function table the adapter will accept.
 const MAX_FUNCTIONS: usize = 1024;
@@ -92,9 +92,9 @@ fn invoke_closure(invoke: InvokeFnV1) -> ExtFn {
         };
         let status = unsafe { invoke(args_ptr, count, &mut output, &mut error) };
         if status == ErrorCode::Ok as u32 {
-            marshal::abi_to_ext(&output)
+            crate::marshal_array_out::abi_to_ext(&output)
         } else {
-            Err(marshal::abi_error_to_ext(&error, status))
+            Err(crate::marshal_array_out::abi_error_to_ext(&error, status))
         }
     })
 }

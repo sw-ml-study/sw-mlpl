@@ -13,6 +13,7 @@
 use std::panic::{AssertUnwindSafe, catch_unwind};
 
 mod dtype;
+mod dtype_codec;
 pub use dtype::ExtDtype;
 
 /// The V1 value set crossed at the extension boundary: the scalars

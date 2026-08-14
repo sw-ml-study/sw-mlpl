@@ -1,7 +1,7 @@
-//! The dense-array element dtype crossed at the extension boundary,
-//! and its wire encoding: f64 elements to little-endian dtype bytes,
-//! row-major byte strides, and the V1 wire tag. The four dtypes of the
-//! V1 ABI (`dense-array-views.md`): u8, i64, f32, f64.
+//! The dense-array element dtype crossed at the extension boundary:
+//! its identity (width, V1 wire code). The four dtypes of the V1 ABI
+//! (`dense-array-views.md`): u8, i64, f32, f64. Wire encode/decode +
+//! strides live in `dtype_codec`.
 
 /// Element type of a dense array at the boundary.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -25,7 +25,7 @@ impl ExtDtype {
 
     /// The V1 wire dtype code. MUST mirror `mlpl_extension_cabi`'s
     /// `DTypeTag` (U8=1, I64=2, F32=3, F64=4); a mismatch is pinned by
-    /// `wire_tag_matches_dtype_tag` in the cabi tests.
+    /// `wire_tag_mirrors_the_dtype_tag_codes` in the cabi tests.
     #[must_use]
     pub fn wire_tag(self) -> u32 {
         match self {
@@ -36,32 +36,15 @@ impl ExtDtype {
         }
     }
 
-    /// Encode f64 elements as little-endian bytes of this dtype.
+    /// The dtype for a V1 wire code, or `None` if unrecognized.
     #[must_use]
-    #[allow(clippy::cast_possible_truncation, clippy::cast_sign_loss)]
-    pub fn encode_le(self, data: &[f64]) -> Vec<u8> {
-        let mut out = Vec::with_capacity(data.len() * self.width());
-        for &x in data {
-            match self {
-                Self::U8 => out.push(x as u8),
-                Self::I64 => out.extend_from_slice(&(x as i64).to_le_bytes()),
-                Self::F32 => out.extend_from_slice(&(x as f32).to_le_bytes()),
-                Self::F64 => out.extend_from_slice(&x.to_le_bytes()),
-            }
+    pub fn from_wire_tag(tag: u32) -> Option<Self> {
+        match tag {
+            1 => Some(Self::U8),
+            2 => Some(Self::I64),
+            3 => Some(Self::F32),
+            4 => Some(Self::F64),
+            _ => None,
         }
-        out
-    }
-
-    /// Row-major (C-order) BYTE strides for `shape`.
-    #[must_use]
-    #[allow(clippy::cast_possible_wrap)]
-    pub fn byte_strides(self, shape: &[usize]) -> Vec<isize> {
-        let mut strides = vec![0isize; shape.len()];
-        let mut acc = self.width();
-        for i in (0..shape.len()).rev() {
-            strides[i] = acc as isize;
-            acc *= shape[i];
-        }
-        strides
     }
 }

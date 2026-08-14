@@ -15,6 +15,7 @@
 
 mod marshal;
 mod marshal_array;
+mod marshal_array_out;
 mod model;
 mod register;
 mod validate;
