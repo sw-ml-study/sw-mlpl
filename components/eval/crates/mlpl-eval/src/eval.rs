@@ -364,8 +364,11 @@ pub(crate) fn eval_expr(
                     ("assign_gen_state", vec![], placeholder)
                 }
                 Value::Str(s) => {
-                    env.set_string(name.clone(), s);
-                    ("assign_string", vec![], DenseArray::from_scalar(0.0))
+                    // Echo the assigned string, like array/record/list
+                    // assignment -- not a placeholder 0 (user report
+                    // 2026-08-13).
+                    env.set_string(name.clone(), s.clone());
+                    return Ok(Value::Str(s));
                 }
                 Value::BuiltinRef { name: target } | Value::UserFnRef { name: target } => {
                     env.set_builtin_ref(name.clone(), target);

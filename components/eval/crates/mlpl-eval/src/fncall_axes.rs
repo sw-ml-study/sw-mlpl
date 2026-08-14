@@ -50,8 +50,13 @@ fn eval_disp(
             got: args.len(),
         });
     }
-    let arr = eval_expr(&args[0], env, trace)?.into_array()?;
-    Ok(Value::Str(mlpl_array::box_display(&arr)))
+    // Arrays render boxed; strings, lists, records, Results, etc. render
+    // via their own Display so `disp` never rejects a non-array value
+    // (user report 2026-08-13).
+    match eval_expr(&args[0], env, trace)? {
+        Value::Array(a) => Ok(Value::Str(mlpl_array::box_display(&a))),
+        other => Ok(Value::Str(format!("{other}"))),
+    }
 }
 
 fn eval_reshape_labeled(
