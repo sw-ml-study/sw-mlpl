@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "array-args-in"
+  },
+  "action": "New ExtDtype module w/ pure wire methods; ExtValue::Array; ext_marshal to_ext/from_ext arrays; marshal_array holder mechanism (self-referential Box AbiArrayView); register uses AbiArgs; TDD sum_array repr(C) provider + wire_tag pin test; scoped clippy/fmt/tests runtime-core + mlpl-eval; repo sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-14T12:41:09"
+}

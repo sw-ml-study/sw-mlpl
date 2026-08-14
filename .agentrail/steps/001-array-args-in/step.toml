@@ -1,9 +1,10 @@
 number = 1
 slug = "array-args-in"
-status = "pending"
+status = "completed"
 description = "Open the extension boundary to ARRAY ARGUMENTS (B4 send direction, for native..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-14T10:18:04"
+completed_at = "2026-08-14T12:41:09"
 task_type = "feature"
-commits = []
+commits = ["5c695fe12fbead39489f86d931b0775d4131ae4f"]

@@ -1,0 +1,9 @@
+number = 2
+slug = "array-results-out"
+status = "pending"
+description = "Open the RETURN direction (B4 receive): a provider that RETURNS a dense array..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-14T12:41:09"
+task_type = "feature"
+commits = []
