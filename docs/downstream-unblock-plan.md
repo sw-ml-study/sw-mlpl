@@ -62,9 +62,12 @@ MLPL the interpreter already runs; the compiler surface is the gate.
 - [ ] **extensions-use-facade (B1)** -- `use hello` + dotted
       `hello.answer()` public facade; private `_hello:*` hidden.
       Built with the modules/namespaces language surface.
-- [ ] **extensions-arrays-handles (B4/B5)** -- dense-array marshaling
-      at the C boundary (call-lifetime rooting) + native handle
-      values (ownership + finalization).
+- [x] **extensions-arrays-handles (B4/B5)** -- dense-array marshaling
+      at the C boundary (call-lifetime rooting, both directions) +
+      opaque native-handle values (mint-on-return, provider-validated)
+      + structured record returns (named fields, nested). The data
+      boundary for the interpreted interactive native-3D demo; only
+      the event loop (B6) remains for the live loop.
 - [ ] **extensions-dynamic-load (B3)** -- `dlopen` a provider,
       resolve `sw_mlpl_extension_v1`, validate + register; residency
       + atomic-load + quiescence-for-unload policy.

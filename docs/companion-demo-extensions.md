@@ -57,11 +57,13 @@ explicitly "never evidence".
   Extension errors -> a host error; panics contained (never
   unwind through the host). `#[repr(C)]`, fixed-width tags,
   reserved-must-be-zero, ABI-version + struct-size negotiation.
-- **A3 -- native-handle value** (MEDIUM, DEFERRED): an MLPL value
-  carrying `NativeHandle { extension_id, type_id, object_id }`
-  (generational id) with deterministic finalization; no raw
-  pointer is ever an MLPL value. Later saga (with arrays), not
-  the first slice.
+- **A3 -- native-handle value** (SHIPPED): an MLPL value carrying
+  an opaque handle `{ extension_id, type_id, slot, generation }`;
+  no raw pointer is ever an MLPL value. Minted only by a provider
+  return, so numeric code cannot forge one; the provider validates
+  it on use (a stale / foreign / wrong-type handle is a clean
+  `err`, not a crash). Ships alongside dense arrays (both
+  directions) and structured record returns.
 
 ### Import
 
@@ -205,10 +207,14 @@ ExtensionDescriptorV1`) is now accepted directly:
 - After registration the provider is called with the SAME colon
   spelling (`namespace:function`) as a safe static provider.
 
-Scope of this adapter slice: SCALAR values only. Dense arrays and
-native handles at the boundary error (arrays-handles follow-up),
-and loading is STATIC only -- `dlopen` dynamic loading is a
-separate saga.
+Boundary value set: the V1 scalars (nil / bool / i64 / f64 / UTF-8
+string / bytes); dense row-major `f64` arrays (rank 1..=8), crossing
+in BOTH directions; opaque native handles -- a provider-issued
+resource reference (extension / type / slot / generation) passed by
+value, which the host never inspects and MLPL cannot forge; and
+structured RECORD returns -- named fields, nesting freely, so a
+record of records is a returned row batch (an event batch). Loading
+is STATIC only -- `dlopen` dynamic loading is a separate saga.
 
 Deferred (deliberately):
 
@@ -227,6 +233,8 @@ Deferred (deliberately):
   interpreter -- MLPL source unchanged across REPL/script/
   compiled. Nothing to implement until the io-parity groundwork
   lands.
-- **A3 arrays/native handles**, **A4/A7 dynamic loading +
-  manifest/trust resolver**, **A8 event loop** -- later sagas as
-  before.
+- **A3 arrays / native handles / record returns** -- SHIPPED (dense
+  `f64` arrays both directions, opaque handles, structured record
+  returns). **A4/A7 dynamic loading + manifest/trust resolver** and
+  **A8 event loop** (native-window / event-delivery policy on top of
+  handles) remain later sagas.

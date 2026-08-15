@@ -1,6 +1,6 @@
 number = 5
 slug = "docs-catalog-close"
-status = "pending"
+status = "in-progress"
 description = "Final step of extension-arrays-handles. Document what shipped and close the s..."
 role = "legacy"
 context_files = []

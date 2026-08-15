@@ -507,9 +507,16 @@ help are live (interpreter/REPL/serve). Remaining follow-ups:
   "explicit follow-up contract" the downstream repo requested.
 - **extensions-dynamic-load** -- `cdylib`/`dlopen` + ABI-version
   negotiation + the manifest/search-path/trust resolver (A4/A7).
-- **extensions-arrays-handles** -- array marshaling + NativeHandle
-  values (A3); the demo-extensions "zero-copy/array-lifetime"
-  ask lands here.
+- **extensions-arrays-handles** SHIPPED -- dense `f64` array
+  marshaling BOTH directions (call-lifetime rooting) + opaque
+  native-handle values (mint-on-return, provider-validated,
+  non-forgeable) + structured record returns (named fields, nested).
+  The data boundary for the interpreted interactive native-3D demo.
+- **extensions-event-loop (B6)** -- host policy for native windows /
+  event delivery (`poll_events`), main-thread ownership, and
+  reentrancy, built on handles + record returns. The remaining gate
+  for the LIVE interactive native-3D demo; every data primitive it
+  builds on is shipped, so this is the clean next extensions saga.
 - **extensions-c-abi-adapter** SHIPPED 2026-08-09 --
   `mlpl-extension-cabi` publishes the canonical `#[repr(C)]` V1
   boundary + `register_c_extension(*const ExtensionDescriptorV1)`,
