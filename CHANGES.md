@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-14
 
+- chore(pages): rebuild for demo-picker tooltip fix
+- fix(web): restore demo-picker tooltips clipped by the panel + add super-group tips
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 003-native-handles; queue 004-structured-returns
 - feat(extensions): opaque native handles across the C boundary (B5)
 - docs(changes): refresh CHANGES.md to HEAD
