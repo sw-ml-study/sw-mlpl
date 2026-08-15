@@ -44,6 +44,7 @@ const DISPATCHERS: &[Dispatcher] = &[
     crate::fncall_record::try_dispatch,
     crate::fncall_record_keys::try_dispatch,
     crate::fncall_ports::try_dispatch,
+    crate::fncall_dispatch::try_dispatch,
     crate::fncall_events::try_dispatch,
     crate::fncall_globals::try_dispatch,
     crate::fncall_fs::try_dispatch,

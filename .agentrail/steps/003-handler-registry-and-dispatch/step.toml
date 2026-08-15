@@ -1,6 +1,6 @@
 number = 3
 slug = "handler-registry-and-dispatch"
-status = "pending"
+status = "in-progress"
 description = "Third step of extensions-event-loop. Build the event-dispatch loop + handler ..."
 role = "legacy"
 context_files = []

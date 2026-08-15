@@ -175,6 +175,11 @@ pub struct Environment {
     pub ports: HashMap<u32, PortEndpoints>,
     /// Next port slot to mint (monotonic per interpreter).
     pub next_port_slot: u32,
+    /// Event handlers registered per port: `(port slot, event kind)` ->
+    /// the `u:`-prefixed user-fn key the dispatch loop invokes. The JS
+    /// applet model -- `on`/`off` mutate this; `run` folds events
+    /// through it. Single-threaded on the worker, so no locking.
+    pub port_handlers: HashMap<(u32, String), String>,
     /// Saga 23 step 001: optional `ValueTag` attached per binding
     /// name. Auto-tagged by producer ops in steps 002+; consumed
     /// by predicate-checked consumers, `:describe` / `:vars` /
