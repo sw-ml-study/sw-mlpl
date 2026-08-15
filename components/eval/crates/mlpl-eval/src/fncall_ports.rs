@@ -14,6 +14,7 @@ use mlpl_trace::Trace;
 
 use crate::env::Environment;
 use crate::eval::eval_expr;
+use crate::port_util::arity_err;
 use mlpl_eval_types::{EvalError, Value};
 
 pub(crate) fn try_dispatch(
@@ -39,11 +40,7 @@ fn eval_send(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     if args.len() != 2 {
-        return Err(EvalError::BadArity {
-            func: "port_send".into(),
-            expected: 2,
-            got: args.len(),
-        });
+        return Err(arity_err("port_send", 2, args.len()));
     }
     let handle = eval_expr(&args[0], env, trace)?;
     let command = eval_expr(&args[1], env, trace)?;
@@ -64,15 +61,12 @@ fn eval_recv(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     if args.len() != 1 {
-        return Err(EvalError::BadArity {
-            func: "port_recv".into(),
-            expected: 1,
-            got: args.len(),
-        });
+        return Err(arity_err("port_recv", 1, args.len()));
     }
     let handle = eval_expr(&args[0], env, trace)?;
     let port = env.resolve_port(&handle)?;
-    port.events.recv().map_err(|_| EvalError::ExtensionError {
+    let rx = port.events.lock().expect("port receiver lock");
+    rx.recv().map_err(|_| EvalError::ExtensionError {
         function: "port_recv".into(),
         message: "the far end is gone".into(),
     })
@@ -87,21 +81,21 @@ fn eval_poll(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     if args.len() != 1 {
-        return Err(EvalError::BadArity {
-            func: "port_poll".into(),
-            expected: 1,
-            got: args.len(),
-        });
+        return Err(arity_err("port_poll", 1, args.len()));
     }
     let handle = eval_expr(&args[0], env, trace)?;
     let port = env.resolve_port(&handle)?;
+    let rx = port.events.lock().expect("port receiver lock");
     let mut items = BTreeMap::new();
-    while let Ok(event) = port.events.try_recv() {
+    while let Ok(event) = rx.try_recv() {
         items.insert(format!("{:06}", items.len()), event);
     }
-    let count = Value::Array(DenseArray::from_scalar(items.len() as f64));
+    let n = items.len() as f64;
     let fields = BTreeMap::from([
-        ("count".to_string(), count),
+        (
+            "count".to_string(),
+            Value::Array(DenseArray::from_scalar(n)),
+        ),
         ("items".to_string(), Value::Record { fields: items }),
     ]);
     Ok(Value::Record { fields })

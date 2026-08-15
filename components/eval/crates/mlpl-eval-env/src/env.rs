@@ -2,8 +2,8 @@
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::PathBuf;
-use std::sync::Arc;
 use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{Arc, Mutex};
 
 use mlpl_array::DenseArray;
 use mlpl_core::ValueTag;
@@ -21,11 +21,21 @@ pub const PORT_TYPE_ID: u64 = 1;
 
 /// One port's channel endpoints, owned by the interpreter: the command
 /// side (MLPL -> far end) is a `Sender`, the event side (far end ->
-/// MLPL) a `Receiver`. Share-nothing -- only owned `Value`s cross.
-#[derive(Debug)]
+/// MLPL) a `Receiver`. Share-nothing -- only owned `Value`s cross the
+/// channels.
+///
+/// The receiver is wrapped in `Arc<Mutex<..>>` SOLELY so `Environment`
+/// can keep deriving `Clone` (downstream consumers depend on it) and
+/// stay `Send` for the worker thread -- a `Receiver` is neither `Clone`
+/// nor `Sync`. It is not a shared-state mechanism: the cross-thread
+/// path is still the channels, and only the single interpreter thread
+/// ever locks this receiver (uncontended). A cloned `Environment`
+/// shares the receiver, which is harmless -- cloning happens at setup,
+/// before ports are opened.
+#[derive(Clone, Debug)]
 pub struct PortEndpoints {
     pub commands: Sender<Value>,
-    pub events: Receiver<Value>,
+    pub events: Arc<Mutex<Receiver<Value>>>,
 }
 use mlpl_eval_state::ExperimentRecord;
 use mlpl_eval_state::Interrupt;
@@ -56,12 +66,7 @@ pub trait PeerDispatcher: Send + Sync + std::fmt::Debug {
 }
 
 /// Variable bindings for evaluation.
-///
-/// Not `Clone`: an `Environment` can own port `Receiver`s (see
-/// `ports`), which cannot be cloned -- and cloning a live event queue
-/// would be meaningless anyway. Per-frame scope isolation clones
-/// individual tables (`env_scope`), never the whole environment.
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Environment {
     pub vars: HashMap<String, DenseArray>,
     pub params: HashSet<String>,
@@ -267,7 +272,13 @@ impl Environment {
     pub fn register_port(&mut self, commands: Sender<Value>, events: Receiver<Value>) -> Value {
         let slot = self.next_port_slot;
         self.next_port_slot = slot.wrapping_add(1);
-        self.ports.insert(slot, PortEndpoints { commands, events });
+        self.ports.insert(
+            slot,
+            PortEndpoints {
+                commands,
+                events: Arc::new(Mutex::new(events)),
+            },
+        );
         Value::ExtHandle {
             extension_id: PORT_EXTENSION_ID,
             type_id: PORT_TYPE_ID,

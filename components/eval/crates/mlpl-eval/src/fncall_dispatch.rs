@@ -14,7 +14,7 @@ use mlpl_trace::Trace;
 use crate::env::Environment;
 use crate::eval::eval_expr;
 use crate::eval_user_fn::invoke_user_fn_values;
-use crate::port_util::{arity_err, event_kind, kind_err, port_slot};
+use crate::port_util::{arity_err, event_kind, kind_err, next_event, port_slot};
 use mlpl_eval_types::{EvalError, Value};
 
 pub(crate) fn try_dispatch(
@@ -74,8 +74,8 @@ fn eval_run(
     let handle = eval_expr(&args[0], env, trace)?;
     let slot = port_slot(&handle)?;
     let mut state = eval_expr(&args[1], env, trace)?;
-    // A dropped far end (no close sent) ends the while-let naturally.
-    while let Ok(event) = env.resolve_port(&handle)?.events.recv() {
+    // Ends when the handler signals stop or the far end hangs up.
+    while let Some(event) = next_event(env, &handle)? {
         let (keep_going, next) = dispatch_one(env, slot, event, state, trace)?;
         state = next;
         if !keep_going {

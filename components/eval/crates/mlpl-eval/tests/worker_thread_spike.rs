@@ -6,11 +6,17 @@
 use mlpl_eval::{Environment, Value};
 
 fn assert_send<T: Send>() {}
+fn assert_clone<T: Clone>() {}
 
 #[test]
 fn environment_and_value_are_send() {
     assert_send::<Environment>();
     assert_send::<Value>();
+    // Environment must stay Clone: downstream consumers (the demo-*
+    // extension repos) depend on it. A port Receiver is not Clone, so
+    // it is held behind Arc<Mutex> for exactly this reason.
+    assert_clone::<Environment>();
+    assert_clone::<Value>();
 }
 
 #[test]

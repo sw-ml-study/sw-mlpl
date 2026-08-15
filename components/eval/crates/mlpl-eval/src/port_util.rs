@@ -3,8 +3,19 @@
 //! and build the two error kinds. Kept separate from `fncall_dispatch`
 //! so each module stays within its function budget.
 
+use crate::env::Environment;
 use mlpl_eval_env::PORT_EXTENSION_ID;
 use mlpl_eval_types::{EvalError, Value};
+
+/// Block for the next event on a port, or `None` if the far end has
+/// hung up. The receiver lock is taken and released within this call
+/// (only the interpreter thread ever locks it, so it is uncontended),
+/// so the caller's env borrow is free by the time it returns.
+pub(crate) fn next_event(env: &Environment, handle: &Value) -> Result<Option<Value>, EvalError> {
+    let port = env.resolve_port(handle)?;
+    let rx = port.events.lock().expect("port receiver lock");
+    Ok(rx.recv().ok())
+}
 
 /// The port slot from a port handle, or a boundary error if the value
 /// is not a port handle.
