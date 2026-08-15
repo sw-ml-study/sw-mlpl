@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-15
 
+- feat(compiler): lower disp; fix bare-filename source-dir in mlpl-build
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(examples): add a string hello-world; rename hello.mlpl -> sum-range.mlpl
 - docs(changes): refresh CHANGES.md to HEAD
 - feat(examples): scripts to list/compile/run .mlpl + gitignored bin/
