@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "structured-returns"
+  },
+  "action": "TDD repr(C) events provider returning {kind,x,y} + record-of-records via Box::leak AbiRecordView; recursive receive marshaling; abi_error_to_ext cohesion move; scoped build+clippy+fmt+extension tests; repo sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-15T10:08:24"
+}

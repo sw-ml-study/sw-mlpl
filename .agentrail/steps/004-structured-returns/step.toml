@@ -1,9 +1,10 @@
 number = 4
 slug = "structured-returns"
-status = "in-progress"
+status = "completed"
 description = "Fourth step of extension-arrays-handles. A provider returns a RECORD (or list..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-14T17:26:51"
+completed_at = "2026-08-15T10:08:24"
 task_type = "feature"
-commits = []
+commits = ["f85858464095b0293aaf88dbaf09faf106dba35d"]
