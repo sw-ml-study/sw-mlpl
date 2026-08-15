@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-15
 
+- chore(agentrail): complete 001-worker-thread-gate; queue 002-port-and-channels
+- test(extensions): lock the worker-thread gate for B6 (interpreter is Send)
+- chore(agentrail): bootstrap step 001-worker-thread-gate (B6)
+- chore(agentrail): archive extension-arrays-handles; init extensions-event-loop (B6)
+- docs(extensions): B6 event-loop design -- the browser model
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 005-docs-catalog-close; close extension-arrays-handles saga
 - docs(extensions): document the full boundary value set; close arrays-handles saga
 - docs(changes): refresh CHANGES.md to HEAD
