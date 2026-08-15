@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-15
+
+- chore(agentrail): complete 004-structured-returns; queue 005-docs-catalog-close
+- feat(extensions): structured record returns across the C boundary
+
 ## 2026-08-14
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for demo-picker tooltip fix
 - fix(web): restore demo-picker tooltips clipped by the panel + add super-group tips
 - docs(changes): refresh CHANGES.md to HEAD
