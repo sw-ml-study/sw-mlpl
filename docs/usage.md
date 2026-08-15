@@ -926,13 +926,13 @@ program has no interpreter, no parser, and no runtime dispatch --
 startup is just the OS loading an executable.
 
 ```bash
-cargo run -p mlpl-build -- examples/compile-cli/hello.mlpl -o hello
-./hello
-# -> 42
+cargo run -p mlpl-build -- examples/compile-cli/sum-range.mlpl -o sum-range
+./sum-range
+# -> 21
 
 # Cross-compile the same source to WASM
-cargo run -p mlpl-build -- examples/compile-cli/hello.mlpl \
-    --target wasm32-unknown-unknown -o hello.wasm
+cargo run -p mlpl-build -- examples/compile-cli/sum-range.mlpl \
+    --target wasm32-unknown-unknown -o sum-range.wasm
 ```
 
 See `examples/compile-cli/README.md` for a complete walkthrough,

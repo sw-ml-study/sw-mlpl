@@ -202,8 +202,8 @@ cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl -- -f demos/bas
 cargo run --manifest-path components/cli/Cargo.toml -p mlpl-repl -- -f demos/tiny_lm.mlpl
 
 # Compile a .mlpl file to a native binary
-cargo run --manifest-path components/cli/Cargo.toml -p mlpl-build -- examples/compile-cli/hello.mlpl -o /tmp/hello
-/tmp/hello                                # -> 21
+cargo run --manifest-path components/cli/Cargo.toml -p mlpl-build -- examples/compile-cli/sum-range.mlpl -o /tmp/sum-range
+/tmp/sum-range                            # -> 21
 
 # Interpreter vs compiled benchmark (component: dev-tools)
 cargo bench --manifest-path components/dev-tools/Cargo.toml -p mlpl-bench

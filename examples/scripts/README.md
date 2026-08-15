@@ -15,8 +15,8 @@ release tools (`mlpl-repl`, `mlpl-build`) on first use.
 
 ```bash
 examples/scripts/list.sh
-examples/scripts/run.sh examples/compile-cli/hello.mlpl            # interpret
-examples/scripts/run.sh --native examples/compile-cli/hello.mlpl  # compile + run
+examples/scripts/run.sh examples/hello-world.mlpl                    # interpret (prints text)
+examples/scripts/run.sh --native examples/compile-cli/sum-range.mlpl # compile + run -> 21
 examples/scripts/compile.sh --all
 ```
 
@@ -56,8 +56,8 @@ a WASI target and a WASI runtime instead:
 
 ```bash
 rustup target add wasm32-wasip1
-mlpl-build examples/compile-cli/hello.mlpl --target wasm32-wasip1 -o /tmp/hello.wasm
-wasmtime /tmp/hello.wasm
+mlpl-build examples/compile-cli/sum-range.mlpl --target wasm32-wasip1 -o /tmp/sum-range.wasm
+wasmtime /tmp/sum-range.wasm
 ```
 
 That path is not provisioned in this checkout by default (no WASI target

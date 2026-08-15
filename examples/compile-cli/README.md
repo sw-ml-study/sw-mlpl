@@ -11,15 +11,15 @@ The quickest way to build and run any example is the wrapper scripts
 in `examples/scripts/` (see `examples/scripts/README.md`):
 
 ```bash
-examples/scripts/run.sh --native examples/compile-cli/hello.mlpl   # -> 21
+examples/scripts/run.sh --native examples/compile-cli/sum-range.mlpl   # -> 21
 ```
 
 The raw steps below show what that wrapper does.
 
 ## Files
 
-- `hello.mlpl` -- a seven-line MLPL program: build a vector,
-  reduce-sum it, print the scalar result.
+- `sum-range.mlpl` -- a short MLPL program: build a range,
+  reduce-sum it, print the scalar result (`range(7)` sums to 21).
 
 ## Build and run natively
 
@@ -32,10 +32,10 @@ still writes the binary to the repo-root `target/`):
 cargo build --release -p mlpl-build --manifest-path components/cli/Cargo.toml
 
 # Compile the .mlpl file to a native binary (host target)
-./target/release/mlpl-build examples/compile-cli/hello.mlpl -o /tmp/hello
+./target/release/mlpl-build examples/compile-cli/sum-range.mlpl -o /tmp/sum-range
 
 # Run it
-/tmp/hello
+/tmp/sum-range
 # -> 21
 ```
 
@@ -51,10 +51,10 @@ source can be built for any target your Rust toolchain supports:
 ```bash
 rustup target add wasm32-unknown-unknown
 ./target/release/mlpl-build \
-    examples/compile-cli/hello.mlpl \
+    examples/compile-cli/sum-range.mlpl \
     --target wasm32-unknown-unknown \
-    -o /tmp/hello.wasm
-file /tmp/hello.wasm
+    -o /tmp/sum-range.wasm
+file /tmp/sum-range.wasm
 # -> WebAssembly (wasm) binary module ...
 ```
 
@@ -62,7 +62,7 @@ file /tmp/hello.wasm
 
 `wasm32-unknown-unknown` produces a **browser/embedding module**, not a
 command-line program: it has no WASI, so there is no `_start` and no
-stdout, and `wasmtime /tmp/hello.wasm` will not run it. It is meant to
+stdout, and `wasmtime /tmp/sum-range.wasm` will not run it. It is meant to
 be driven by a JavaScript host (the same way the web playground loads
 its wasm bundle).
 
@@ -71,9 +71,9 @@ WASI and use a WASI runtime instead:
 
 ```bash
 rustup target add wasm32-wasip1
-./target/release/mlpl-build examples/compile-cli/hello.mlpl \
-    --target wasm32-wasip1 -o /tmp/hello.wasm
-wasmtime /tmp/hello.wasm
+./target/release/mlpl-build examples/compile-cli/sum-range.mlpl \
+    --target wasm32-wasip1 -o /tmp/sum-range.wasm
+wasmtime /tmp/sum-range.wasm
 # -> 21
 ```
 

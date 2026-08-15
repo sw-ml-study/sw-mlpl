@@ -67,14 +67,14 @@ A `.mlpl` script becomes a native binary:
 cargo build --release -p mlpl-build     # build the tool itself
 
 # Compile a script
-cargo run --release -p mlpl-build -- examples/compile-cli/hello.mlpl -o /tmp/hello
-/tmp/hello
+cargo run --release -p mlpl-build -- examples/compile-cli/sum-range.mlpl -o /tmp/sum-range
+/tmp/sum-range
 # -> 21
 
 # Cross-compile for WASM
 rustup target add wasm32-unknown-unknown
-cargo run --release -p mlpl-build -- examples/compile-cli/hello.mlpl \
-    --target wasm32-unknown-unknown -o /tmp/hello.wasm
+cargo run --release -p mlpl-build -- examples/compile-cli/sum-range.mlpl \
+    --target wasm32-unknown-unknown -o /tmp/sum-range.wasm
 ```
 
 What happens under the hood:
@@ -101,7 +101,7 @@ closed surface makes this natural.
 ## What the compile path lowers today
 
 **Lowered** (`cargo bench -p mlpl-bench` runs the full set; see
-also `examples/compile-cli/hello.mlpl` and the curated corpus in
+also `examples/compile-cli/sum-range.mlpl` and the curated corpus in
 `crates/mlpl-parity-tests/tests/parity_tests.rs::PARITY_CASES`):
 
 - scalar and array literals; `+`, `-`, `*`, `/`, unary `-`;

@@ -1,7 +1,8 @@
-# Simplest possible compile-to-binary example.
+# Sum of a range -- the simplest compile-to-binary example.
 #
-# `mlpl build hello.mlpl -o hello` produces a native binary that
-# evaluates the MLPL program and prints its final scalar result.
+# `mlpl build sum-range.mlpl -o sum-range` produces a native binary
+# that evaluates the MLPL program and prints its final scalar result
+# (range(7) summed is 21).
 #
 # The lowering path covers scalar + array ops, labels, matmul,
 # reshape, and positional-axis reductions. It does not yet cover

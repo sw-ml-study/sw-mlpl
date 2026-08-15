@@ -1,0 +1,12 @@
+# The classic hello world: display a greeting string.
+#
+# `disp` prints any value; given a string it prints the text as-is.
+# (The APL-style one-liner is just the bare expression `"Hello, world!"`,
+# whose result the REPL prints -- `disp` makes the intent explicit.)
+#
+# Strings are an interpreter feature, so run this with mlpl-repl, not
+# the native compiler (which covers the numeric/array subset only):
+#
+#   examples/scripts/run.sh examples/hello-world.mlpl
+
+disp("Hello, world!")
