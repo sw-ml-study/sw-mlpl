@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-15
 
+- feat(examples): scripts to list/compile/run .mlpl + gitignored bin/
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-structured-returns; queue 005-docs-catalog-close
 - feat(extensions): structured record returns across the C boundary
 
