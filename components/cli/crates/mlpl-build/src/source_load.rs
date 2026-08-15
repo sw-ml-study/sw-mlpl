@@ -15,10 +15,7 @@ use mlpl_source_loader::{IncludeError, SourceId, SourceProvider, expand};
 /// flat statement list, in source order. The include sandbox root
 /// is `source_dir` when given, else the input file's own directory.
 pub fn load_stmts(input: &Path, source_dir: Option<&Path>) -> Result<Vec<Expr>, String> {
-    let root_dir = source_dir
-        .map(Path::to_path_buf)
-        .or_else(|| input.parent().map(Path::to_path_buf))
-        .unwrap_or_else(|| PathBuf::from("."));
+    let root_dir = crate::project::resolve_root_dir(input, source_dir);
     let provider = FsProvider::new(&root_dir)?;
     // Canonical id for the root script (it may live outside the
     // sandbox; only its includes are confined to root).

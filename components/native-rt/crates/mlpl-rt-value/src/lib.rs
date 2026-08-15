@@ -14,5 +14,5 @@ mod text;
 mod value;
 
 pub use io::{arg, array_to_bytes, cli_args, write_stdout};
-pub use text::{decode_bytes, to_int, tokenize_bytes};
+pub use text::{decode_bytes, disp, to_int, tokenize_bytes};
 pub use value::CVal;

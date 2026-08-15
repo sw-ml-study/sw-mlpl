@@ -63,6 +63,7 @@ enum Builtin {
     TokenizeBytes,
     DecodeBytes,
     ToInt,
+    Disp,
 }
 
 const ALL: &[Builtin] = &[
@@ -102,6 +103,7 @@ const ALL: &[Builtin] = &[
     Builtin::TokenizeBytes,
     Builtin::DecodeBytes,
     Builtin::ToInt,
+    Builtin::Disp,
 ];
 
 impl Builtin {
@@ -146,6 +148,7 @@ impl Builtin {
             Builtin::TokenizeBytes => "tokenize_bytes(\"hi\")",
             Builtin::DecodeBytes => "decode_bytes([72, 105])",
             Builtin::ToInt => "to_int(\"42\")",
+            Builtin::Disp => "disp(\"hi\")",
         }
     }
 
@@ -186,6 +189,7 @@ impl Builtin {
             Builtin::TokenizeBytes => "tokenize_bytes",
             Builtin::DecodeBytes => "decode_bytes",
             Builtin::ToInt => "to_int",
+            Builtin::Disp => "disp",
         }
     }
 }

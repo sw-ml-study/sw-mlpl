@@ -26,6 +26,20 @@ fn write_stdout_lowers_to_runtime_call() {
 }
 
 #[test]
+fn disp_lowers_to_a_cval_returning_call_not_rewrapped() {
+    // disp returns a CVal (interpreter parity: it formats a value to a
+    // string), so in program-result position it must be the CVal result
+    // directly, NOT re-wrapped as CVal::Arr(disp(..)) -- that mis-wrap is
+    // a type error (disp yields CVal, CVal::Arr wants a DenseArray).
+    let s = lowered("disp(\"hi\")").replace(' ', "");
+    assert!(s.contains("disp"), "{s}");
+    assert!(
+        !s.contains("CVal::Arr(::mlpl::__rt::disp"),
+        "disp must not be wrapped as CVal::Arr: {s}"
+    );
+}
+
+#[test]
 fn args_and_arg_lower_to_runtime_calls() {
     assert!(
         lowered("args()").contains("cli_args"),

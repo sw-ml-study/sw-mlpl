@@ -4,9 +4,11 @@
 # (The APL-style one-liner is just the bare expression `"Hello, world!"`,
 # whose result the REPL prints -- `disp` makes the intent explicit.)
 #
-# Strings are an interpreter feature, so run this with mlpl-repl, not
-# the native compiler (which covers the numeric/array subset only):
+# Runs both interpreted and compiled to a native binary -- `disp` and
+# strings are supported on the compile path, so both print the same
+# text:
 #
-#   examples/scripts/run.sh examples/hello-world.mlpl
+#   examples/scripts/run.sh examples/hello-world.mlpl            # interpret
+#   examples/scripts/run.sh --native examples/hello-world.mlpl  # compile + run
 
 disp("Hello, world!")

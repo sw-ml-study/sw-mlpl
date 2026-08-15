@@ -20,6 +20,18 @@ pub(crate) fn workspace_root() -> PathBuf {
         .to_path_buf()
 }
 
+/// The include sandbox root: `source_dir` if given, else the input's
+/// parent directory. A bare input path (`hello.mlpl`) has an EMPTY
+/// parent (`Some("")`, not `None`), which is not a canonicalizable
+/// directory, so it is dropped and the root falls through to ".".
+pub(crate) fn resolve_root_dir(input: &Path, source_dir: Option<&Path>) -> PathBuf {
+    let parent = input.parent().filter(|p| !p.as_os_str().is_empty());
+    source_dir
+        .or(parent)
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| PathBuf::from("."))
+}
+
 /// Scaffold a temp cargo project (`Cargo.toml` + `src/`) that
 /// path-depends on the workspace `mlpl` facade crate.
 pub(crate) fn make_temp_project(workspace: &Path) -> Result<PathBuf, String> {

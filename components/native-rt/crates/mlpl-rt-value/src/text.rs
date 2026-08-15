@@ -37,6 +37,19 @@ pub fn decode_bytes(v: &CVal) -> CVal {
     CVal::Str(String::from_utf8_lossy(&bytes).into_owned())
 }
 
+/// `disp(v)` -- format a value to its display string, mirroring the
+/// interpreter: an array renders boxed, everything else via its
+/// `Display`. Returns a `CVal::Str` (not a side-effecting print) --
+/// the program prints the final expression, so `disp(x)` as the last
+/// statement shows `x`, exactly as in the interpreter.
+#[must_use]
+pub fn disp(v: &CVal) -> CVal {
+    match v {
+        CVal::Arr(a) => CVal::Str(mlpl_array::box_display(a)),
+        other => CVal::Str(format!("{other}")),
+    }
+}
+
 /// `to_int(s)` -- parse a string as an integer -> `ok(int)` / `err`.
 ///
 /// # Panics
