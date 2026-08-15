@@ -1,6 +1,6 @@
 number = 2
 slug = "port-and-channels"
-status = "pending"
+status = "in-progress"
 description = "Second step of extensions-event-loop. Build the general Port primitive: a nat..."
 role = "legacy"
 context_files = []

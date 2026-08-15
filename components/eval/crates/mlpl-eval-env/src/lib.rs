@@ -20,4 +20,4 @@ pub mod trait_impls_exec;
 pub mod trait_impls_params;
 
 pub use dispatch_hook::install_dispatch;
-pub use env::Environment;
+pub use env::{Environment, PORT_EXTENSION_ID, PORT_TYPE_ID, PortEndpoints};

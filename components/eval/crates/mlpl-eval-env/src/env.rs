@@ -3,6 +3,7 @@
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::PathBuf;
 use std::sync::Arc;
+use std::sync::mpsc::{Receiver, Sender};
 
 use mlpl_array::DenseArray;
 use mlpl_core::ValueTag;
@@ -10,6 +11,22 @@ use mlpl_core::ValueTag;
 use mlpl_eval_core::TokenizerSpec;
 use mlpl_eval_core::metric_sink::MetricSink;
 use mlpl_eval_core::model::ModelSpec;
+
+/// Reserved `extension_id` marking a `Value::ExtHandle` as a native
+/// PORT (vs a real extension handle). Ports are minted on open, so
+/// MLPL cannot forge one.
+pub const PORT_EXTENSION_ID: u64 = u64::MAX;
+/// The port resource kind (`type_id`).
+pub const PORT_TYPE_ID: u64 = 1;
+
+/// One port's channel endpoints, owned by the interpreter: the command
+/// side (MLPL -> far end) is a `Sender`, the event side (far end ->
+/// MLPL) a `Receiver`. Share-nothing -- only owned `Value`s cross.
+#[derive(Debug)]
+pub struct PortEndpoints {
+    pub commands: Sender<Value>,
+    pub events: Receiver<Value>,
+}
 use mlpl_eval_state::ExperimentRecord;
 use mlpl_eval_state::Interrupt;
 use mlpl_eval_state::OptimizerState;
@@ -39,7 +56,12 @@ pub trait PeerDispatcher: Send + Sync + std::fmt::Debug {
 }
 
 /// Variable bindings for evaluation.
-#[derive(Clone, Debug, Default)]
+///
+/// Not `Clone`: an `Environment` can own port `Receiver`s (see
+/// `ports`), which cannot be cloned -- and cloning a live event queue
+/// would be meaningless anyway. Per-frame scope isolation clones
+/// individual tables (`env_scope`), never the whole environment.
+#[derive(Debug, Default)]
 pub struct Environment {
     pub vars: HashMap<String, DenseArray>,
     pub params: HashSet<String>,
@@ -146,6 +168,13 @@ pub struct Environment {
     /// `device_tensors` / `bytes` -- a full-`Value` store keyed by
     /// name, holding a `Value::ExtHandle` a provider returned.
     pub ext_handles: HashMap<String, Value>,
+    /// Native-port channel endpoints keyed by handle slot (Saga
+    /// extensions-event-loop). Share-nothing: only owned `Value`s cross
+    /// the channels, so the interpreter and a far-end thread cannot
+    /// race. The far end is a provider UI thread or a test echo worker.
+    pub ports: HashMap<u32, PortEndpoints>,
+    /// Next port slot to mint (monotonic per interpreter).
+    pub next_port_slot: u32,
     /// Saga 23 step 001: optional `ValueTag` attached per binding
     /// name. Auto-tagged by producer ops in steps 002+; consumed
     /// by predicate-checked consumers, `:describe` / `:vars` /
@@ -223,6 +252,49 @@ impl Environment {
         )))]
         {
             Self::default()
+        }
+    }
+
+    /// Register a port's channel endpoints and return its opaque handle
+    /// (a `Value::ExtHandle`). Mint-on-open: MLPL has no constructor for
+    /// a port, so one cannot be forged from numbers. The far end holds
+    /// the matching `Receiver` / `Sender`.
+    pub fn register_port(&mut self, commands: Sender<Value>, events: Receiver<Value>) -> Value {
+        let slot = self.next_port_slot;
+        self.next_port_slot = slot.wrapping_add(1);
+        self.ports.insert(slot, PortEndpoints { commands, events });
+        Value::ExtHandle {
+            extension_id: PORT_EXTENSION_ID,
+            type_id: PORT_TYPE_ID,
+            slot,
+            generation: 1,
+        }
+    }
+
+    /// Resolve a port handle to its live endpoints.
+    ///
+    /// # Errors
+    /// Returns `ExtensionError` for a non-port value or an
+    /// unregistered / closed slot.
+    pub fn resolve_port(
+        &self,
+        handle: &Value,
+    ) -> Result<&PortEndpoints, mlpl_eval_types::EvalError> {
+        let err = |message: String| mlpl_eval_types::EvalError::ExtensionError {
+            function: "port".into(),
+            message,
+        };
+        match handle {
+            Value::ExtHandle {
+                extension_id, slot, ..
+            } if *extension_id == PORT_EXTENSION_ID => self
+                .ports
+                .get(slot)
+                .ok_or_else(|| err("unknown or closed port".into())),
+            other => Err(err(format!(
+                "expected a port handle, got {}",
+                mlpl_eval_types::value_kind(other)
+            ))),
         }
     }
 
