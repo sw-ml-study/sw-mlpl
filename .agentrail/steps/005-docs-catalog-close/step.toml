@@ -1,9 +1,10 @@
 number = 5
 slug = "docs-catalog-close"
-status = "in-progress"
+status = "completed"
 description = "Final step of extension-arrays-handles. Document what shipped and close the s..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-15T10:08:24"
+completed_at = "2026-08-15T13:27:04"
 task_type = "docs"
-commits = []
+commits = ["3cbfe5eaa6bc6bab07f957ca3e5cf9a7150b9cf1"]
