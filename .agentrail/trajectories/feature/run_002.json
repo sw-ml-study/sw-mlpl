@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "port-and-channels"
+  },
+  "action": "Reused ExtHandle as Port; env ports table + 2 methods in env.rs (module-fn budget); fncall_ports 4-fn module + dispatch-chain entry; dropped Environment Clone (repo-wide-verified unused); echo-worker + inject TDD; scoped build/clippy/fmt/tests + cli build + sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-15T14:31:55"
+}

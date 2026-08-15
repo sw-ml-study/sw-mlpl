@@ -1,9 +1,10 @@
 number = 2
 slug = "port-and-channels"
-status = "in-progress"
+status = "completed"
 description = "Second step of extensions-event-loop. Build the general Port primitive: a nat..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-15T13:58:32"
+completed_at = "2026-08-15T14:31:55"
 task_type = "feature"
-commits = []
+commits = ["dca23b3011e1a783376cecdd84e20e56771c0a40"]
