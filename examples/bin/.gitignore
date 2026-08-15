@@ -1,0 +1,5 @@
+# Compiled example binaries (native host output from examples/scripts/
+# compile.sh / run.sh --native). Rebuilt locally per machine, so the
+# contents are never committed -- only this .gitignore keeps the dir.
+*
+!.gitignore

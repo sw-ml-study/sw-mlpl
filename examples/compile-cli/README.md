@@ -7,6 +7,15 @@ only against `mlpl-rt` (no parser, no interpreter at run time).
 For the full three-way comparison of the interpreter, the `mlpl!`
 proc macro, and `mlpl build`, see `docs/compiling-mlpl.md`.
 
+The quickest way to build and run any example is the wrapper scripts
+in `examples/scripts/` (see `examples/scripts/README.md`):
+
+```bash
+examples/scripts/run.sh --native examples/compile-cli/hello.mlpl   # -> 21
+```
+
+The raw steps below show what that wrapper does.
+
 ## Files
 
 - `hello.mlpl` -- a seven-line MLPL program: build a vector,
@@ -14,15 +23,16 @@ proc macro, and `mlpl build`, see `docs/compiling-mlpl.md`.
 
 ## Build and run natively
 
-From the repository root:
+This is a multi-workspace monorepo with no root `Cargo.toml`, so run
+cargo from the `components/cli` workspace (the shared `.cargo/config.toml`
+still writes the binary to the repo-root `target/`):
 
 ```bash
 # Build the mlpl-build tool (first time only)
-cargo build --release -p mlpl-build
+cargo build --release -p mlpl-build --manifest-path components/cli/Cargo.toml
 
-# Compile the .mlpl file to a native binary
-cargo run --release -p mlpl-build -- \
-    examples/compile-cli/hello.mlpl -o /tmp/hello
+# Compile the .mlpl file to a native binary (host target)
+./target/release/mlpl-build examples/compile-cli/hello.mlpl -o /tmp/hello
 
 # Run it
 /tmp/hello
@@ -40,13 +50,35 @@ source can be built for any target your Rust toolchain supports:
 
 ```bash
 rustup target add wasm32-unknown-unknown
-cargo run --release -p mlpl-build -- \
+./target/release/mlpl-build \
     examples/compile-cli/hello.mlpl \
     --target wasm32-unknown-unknown \
     -o /tmp/hello.wasm
 file /tmp/hello.wasm
 # -> WebAssembly (wasm) binary module ...
 ```
+
+### Running the wasm output
+
+`wasm32-unknown-unknown` produces a **browser/embedding module**, not a
+command-line program: it has no WASI, so there is no `_start` and no
+stdout, and `wasmtime /tmp/hello.wasm` will not run it. It is meant to
+be driven by a JavaScript host (the same way the web playground loads
+its wasm bundle).
+
+To run compiled MLPL as a standalone command-line wasm program, target
+WASI and use a WASI runtime instead:
+
+```bash
+rustup target add wasm32-wasip1
+./target/release/mlpl-build examples/compile-cli/hello.mlpl \
+    --target wasm32-wasip1 -o /tmp/hello.wasm
+wasmtime /tmp/hello.wasm
+# -> 21
+```
+
+For native binaries (the common case) prefer
+`examples/scripts/run.sh --native <file.mlpl>`.
 
 ## What the lowering supports
 
