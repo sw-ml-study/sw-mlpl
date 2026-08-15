@@ -1616,6 +1616,10 @@ name = "mlpl-builtin-catalog"
 version = "0.20.0"
 
 [[package]]
+name = "mlpl-bytes"
+version = "0.20.0"
+
+[[package]]
 name = "mlpl-cli"
 version = "0.20.0"
 dependencies = [
@@ -1893,6 +1897,7 @@ name = "mlpl-eval-types"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+ "mlpl-bytes",
  "mlpl-core",
  "mlpl-eval-core",
  "mlpl-loader-helpers",
@@ -2209,6 +2214,16 @@ dependencies = [
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-rt-fsio",
+ "mlpl-rt-value",
+ "mlpl-runtime-bits",
+]
+
+[[package]]
+name = "mlpl-rt-fsio"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
  "mlpl-rt-value",
 ]
 

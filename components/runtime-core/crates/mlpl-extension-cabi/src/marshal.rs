@@ -10,7 +10,7 @@
 
 use mlpl_extension_abi::ExtValue;
 
-use crate::model::{AbiSlice, AbiValue, ValuePayload, ValueTag};
+use crate::model::{AbiHandle, AbiSlice, AbiValue, ValuePayload, ValueTag};
 
 /// Largest byte span the host will read from a boundary slice.
 const MAX_SLICE_BYTES: usize = 16 * 1024 * 1024;
@@ -31,10 +31,25 @@ pub(crate) fn read_abi_slice(label: &str, slice: AbiSlice) -> Result<Vec<u8>, St
     Ok(unsafe { std::slice::from_raw_parts(slice.data, slice.len) }.to_vec())
 }
 
-/// Marshal one host argument into an `AbiValue`. `Str`/`Bytes`
-/// produce a slice borrowing the argument (valid for the call).
+/// Marshal one host argument into an `AbiValue`. Fixed-size kinds
+/// go through `scalar_payload`, borrowed spans through
+/// `slice_payload`; `Array` routes through `marshal_array` instead,
+/// so an unmatched value falls back to `Nil` defensively.
 pub(crate) fn ext_to_abi(value: &ExtValue) -> AbiValue {
-    let (tag, payload) = match value {
+    let (tag, payload) = scalar_payload(value)
+        .or_else(|| slice_payload(value))
+        .unwrap_or((ValueTag::Nil, ValuePayload { integer: 0 }));
+    AbiValue {
+        tag: tag as u32,
+        reserved: 0,
+        payload,
+    }
+}
+
+/// The fixed-size (non-pointer) payloads -- scalars and the native
+/// handle -- or `None` for the borrowed-span / array kinds.
+fn scalar_payload(value: &ExtValue) -> Option<(ValueTag, ValuePayload)> {
+    Some(match value {
         ExtValue::Nil => (ValueTag::Nil, ValuePayload { integer: 0 }),
         ExtValue::Bool(b) => (
             ValueTag::Bool,
@@ -44,32 +59,39 @@ pub(crate) fn ext_to_abi(value: &ExtValue) -> AbiValue {
         ),
         ExtValue::I64(i) => (ValueTag::I64, ValuePayload { integer: *i }),
         ExtValue::F64(f) => (ValueTag::F64, ValuePayload { float: *f }),
-        ExtValue::Str(s) => (
-            ValueTag::Utf8,
+        ExtValue::Handle(h) => (
+            ValueTag::NativeHandle,
             ValuePayload {
-                slice: AbiSlice {
-                    data: s.as_ptr(),
-                    len: s.len(),
+                handle: AbiHandle {
+                    extension_id: h.extension_id,
+                    type_id: h.type_id,
+                    slot: h.slot,
+                    generation: h.generation,
                 },
             },
         ),
-        ExtValue::Bytes(b) => (
-            ValueTag::Bytes,
-            ValuePayload {
-                slice: AbiSlice {
-                    data: b.as_ptr(),
-                    len: b.len(),
-                },
-            },
-        ),
-        // Arrays go through `marshal_array::marshal_args`; unreachable.
-        ExtValue::Array { .. } => (ValueTag::Nil, ValuePayload { integer: 0 }),
+        _ => return None,
+    })
+}
+
+/// The borrowed-span payloads (`Str`/`Bytes`): a slice pointing
+/// into the host-owned argument, valid for the invoke call. `None`
+/// for the fixed-size and array kinds handled elsewhere.
+fn slice_payload(value: &ExtValue) -> Option<(ValueTag, ValuePayload)> {
+    let (tag, bytes): (ValueTag, &[u8]) = match value {
+        ExtValue::Str(s) => (ValueTag::Utf8, s.as_bytes()),
+        ExtValue::Bytes(b) => (ValueTag::Bytes, b.as_slice()),
+        _ => return None,
     };
-    AbiValue {
-        tag: tag as u32,
-        reserved: 0,
-        payload,
-    }
+    Some((
+        tag,
+        ValuePayload {
+            slice: AbiSlice {
+                data: bytes.as_ptr(),
+                len: bytes.len(),
+            },
+        },
+    ))
 }
 
 // The RECEIVE direction (provider output -> `ExtValue`) and the

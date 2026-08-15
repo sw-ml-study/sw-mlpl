@@ -41,6 +41,7 @@ pub struct ScopeSnapshot {
     gen_states: HashMap<String, GenState>,
     device_tensors: HashMap<String, Value>,
     bytes: HashMap<String, Value>,
+    ext_handles: HashMap<String, Value>,
 }
 
 /// Per-call scope snapshot/restore for `u:` function frames, plus
@@ -72,6 +73,7 @@ macro_rules! for_each_scope_table {
         $m!(gen_states);
         $m!(device_tensors);
         $m!(bytes);
+        $m!(ext_handles);
     };
 }
 

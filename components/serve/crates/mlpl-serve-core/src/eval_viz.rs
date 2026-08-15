@@ -185,6 +185,8 @@ pub fn value_kind(value: &Value) -> &'static str {
         Value::Result { .. } => "result",
         Value::GenState(_) => "gen-state",
         Value::Partial { .. } => "partial",
+        Value::Bytes { .. } => "bytes",
+        Value::ExtHandle { .. } => "ext-handle",
     }
 }
 

@@ -177,6 +177,11 @@ pub(crate) fn eval_expr(
         return Ok(v.clone());
     }
     if let Expr::Ident(name, _) = expr
+        && let Some(v) = env.ext_handles.get(name)
+    {
+        return Ok(v.clone());
+    }
+    if let Expr::Ident(name, _) = expr
         && let Some(fields) = env.get_record(name)
     {
         return Ok(Value::Record {
@@ -400,6 +405,10 @@ pub(crate) fn eval_expr(
                 }
                 Value::Bytes { .. } => {
                     env.bytes.insert(name.clone(), v.clone());
+                    return Ok(v);
+                }
+                Value::ExtHandle { .. } => {
+                    env.ext_handles.insert(name.clone(), v.clone());
                     return Ok(v);
                 }
                 Value::Record { fields } => {

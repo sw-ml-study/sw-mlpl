@@ -14,7 +14,9 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 
 mod dtype;
 mod dtype_codec;
+mod handle;
 pub use dtype::ExtDtype;
+pub use handle::ExtHandle;
 
 /// The V1 value set crossed at the extension boundary: the scalars
 /// plus a dense, row-major, contiguous numeric array (rank 1..=8).
@@ -33,6 +35,10 @@ pub enum ExtValue {
         shape: Vec<usize>,
         data: Vec<f64>,
     },
+    /// An opaque provider-issued native handle (a persistent
+    /// resource reference, e.g. a viewer object). Carried by
+    /// value; only a provider return mints one.
+    Handle(ExtHandle),
 }
 
 /// A recoverable extension failure, or a contained panic

@@ -1,10 +1,11 @@
 //! The RECEIVE direction: a provider-returned `AbiValue` -> `ExtValue`
-//! (scalars + dense arrays), and the invoke-error decode. A returned
-//! array's shape/data are provider-owned, so they are COPIED here
-//! immediately (the borrowed-span contract) and validated against
-//! dtype / rank / element count. Handles are the next step.
+//! (scalars, native handle, and dense arrays), and the invoke-error
+//! decode. A returned array's shape/data are provider-owned, so they
+//! are COPIED here immediately (the borrowed-span contract) and
+//! validated against dtype / rank / element count. A native handle is
+//! a fixed-size payload read inline by `scalar_from_abi`.
 
-use mlpl_extension_abi::{ExtDtype, ExtError, ExtValue};
+use mlpl_extension_abi::{ExtDtype, ExtError, ExtHandle, ExtValue};
 
 use crate::marshal::read_abi_slice;
 use crate::model::{AbiArrayView, AbiErrorV1, AbiValue, ErrorCode, ValueTag};
@@ -40,14 +41,23 @@ pub(crate) fn abi_to_ext(out: &AbiValue) -> Result<ExtValue, ExtError> {
     Ok(value)
 }
 
-/// The fixed-size scalar outputs (nil/bool/i64/f64), or `None` for the
-/// variable-length tags handled by `abi_to_ext`.
+/// The fixed-size outputs (nil/bool/i64/f64 + native handle), or
+/// `None` for the variable-length tags handled by `abi_to_ext`.
 fn scalar_from_abi(out: &AbiValue) -> Option<ExtValue> {
     Some(match out.tag {
         t if t == ValueTag::Nil as u32 => ExtValue::Nil,
         t if t == ValueTag::Bool as u32 => ExtValue::Bool(unsafe { out.payload.boolean } != 0),
         t if t == ValueTag::I64 as u32 => ExtValue::I64(unsafe { out.payload.integer }),
         t if t == ValueTag::F64 as u32 => ExtValue::F64(unsafe { out.payload.float }),
+        t if t == ValueTag::NativeHandle as u32 => {
+            let h = unsafe { out.payload.handle };
+            ExtValue::Handle(ExtHandle {
+                extension_id: h.extension_id,
+                type_id: h.type_id,
+                slot: h.slot,
+                generation: h.generation,
+            })
+        }
         _ => return None,
     })
 }

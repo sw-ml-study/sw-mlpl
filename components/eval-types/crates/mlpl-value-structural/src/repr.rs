@@ -63,6 +63,7 @@ fn write_value(out: &mut String, v: &Value) {
             out.push_str(name);
         }
         Value::DeviceTensor { .. } => out.push_str("device-tensor(...)"),
+        Value::ExtHandle { .. } => out.push_str("handle(...)"),
         Value::Bytes { dtype, data } => {
             out.push_str("bytes(");
             out.push_str(dtype.name());

@@ -24,11 +24,10 @@ unsafe extern "C" fn inv_sum_array(
     err: *mut AbiErrorV1,
 ) -> u32 {
     unsafe {
-        let ok_array =
-            n == 1 && (*a).tag == ValueTag::DenseArray as u32 && {
-                let view = &*(*a).payload.array;
-                view.dtype == DTypeTag::F64 as u32
-            };
+        let ok_array = n == 1 && (*a).tag == ValueTag::DenseArray as u32 && {
+            let view = &*(*a).payload.array;
+            view.dtype == DTypeTag::F64 as u32
+        };
         if !ok_array {
             *err = AbiErrorV1 {
                 code: ErrorCode::ExtensionFailure as u32,
@@ -102,7 +101,10 @@ fn scalar(env: &mut Environment, src: &str) -> f64 {
 fn a_rank1_array_argument_crosses_the_boundary() {
     register_c_provider();
     let mut env = Environment::new();
-    assert_eq!(scalar(&mut env, "cabi_arr:sum_array([1, 2, 3, 4, 5, 6])"), 21.0);
+    assert_eq!(
+        scalar(&mut env, "cabi_arr:sum_array([1, 2, 3, 4, 5, 6])"),
+        21.0
+    );
 }
 
 #[test]

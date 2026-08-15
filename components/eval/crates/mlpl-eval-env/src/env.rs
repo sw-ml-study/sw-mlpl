@@ -142,6 +142,10 @@ pub struct Environment {
     /// assignment. Sibling to `device_tensors` -- a full-`Value` store
     /// keyed by name, distinct from the f64 array/string tables.
     pub bytes: HashMap<String, Value>,
+    /// Native-extension handles bound by assignment. Sibling to
+    /// `device_tensors` / `bytes` -- a full-`Value` store keyed by
+    /// name, holding a `Value::ExtHandle` a provider returned.
+    pub ext_handles: HashMap<String, Value>,
     /// Saga 23 step 001: optional `ValueTag` attached per binding
     /// name. Auto-tagged by producer ops in steps 002+; consumed
     /// by predicate-checked consumers, `:describe` / `:vars` /

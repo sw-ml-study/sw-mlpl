@@ -59,6 +59,21 @@ pub enum Value {
         /// The full `u:name` table key; displays as `:u:name`.
         name: String,
     },
+    /// An opaque native-extension handle: a provider-issued
+    /// resource reference (extension/type/slot/generation) MLPL
+    /// stores and passes back by value without inspecting. Minted
+    /// only by an extension return -- numeric code cannot forge
+    /// one -- and validated by the provider on use.
+    ExtHandle {
+        /// The extension that minted the handle.
+        extension_id: u64,
+        /// The resource kind within that extension.
+        type_id: u64,
+        /// Provider slot-table coordinates.
+        slot: u32,
+        /// Provider generation counter (bumped on recycle).
+        generation: u32,
+    },
     /// Saga R1 step 002: peer-resident tensor reference. The bytes
     /// live on the peer named by `peer`; the orchestrator only holds
     /// the handle + shape + device metadata. Touching it from a CPU
@@ -172,6 +187,7 @@ pub fn value_kind(v: &Value) -> &'static str {
         Value::GenState(_) => "gen-state",
         Value::Partial { .. } => "partial",
         Value::Bytes { .. } => "bytes",
+        Value::ExtHandle { .. } => "ext-handle",
     }
 }
 
@@ -223,6 +239,12 @@ impl fmt::Display for Value {
             Self::Bytes { dtype, data } => {
                 write!(f, "<bytes: {dtype}[{}]>", data.len() / dtype.width())
             }
+            Self::ExtHandle {
+                type_id,
+                slot,
+                generation,
+                ..
+            } => write!(f, "<handle: type {type_id} slot {slot}.{generation}>"),
         }
     }
 }

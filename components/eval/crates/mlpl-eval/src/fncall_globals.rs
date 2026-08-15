@@ -69,6 +69,23 @@ pub(crate) fn bind_value(env: &mut Environment, name: &str, value: Value) {
         Value::Record { fields } => env.set_record(name.to_string(), fields),
         Value::StrList { items } => env.set_string_list(name.to_string(), items),
         Value::Result { ok, payload } => env.set_result(name.to_string(), ok, *payload),
+        v @ Value::DeviceTensor { .. } => env.set_device_tensor(name.to_string(), v),
+        v @ Value::Bytes { .. } => {
+            env.bytes.insert(name.to_string(), v);
+        }
+        v @ Value::ExtHandle { .. } => {
+            env.ext_handles.insert(name.to_string(), v);
+        }
+        callable => bind_callable(env, name, callable),
+    }
+}
+
+/// Bind the callable / model-family kinds (builtin & user-fn
+/// references, partials, models, tokenizers, gen-states) into their
+/// sibling tables. Only ever reached with those kinds -- the data
+/// kinds are dispatched by `bind_value`.
+fn bind_callable(env: &mut Environment, name: &str, value: Value) {
+    match value {
         Value::BuiltinRef { name: target } | Value::UserFnRef { name: target } => {
             env.set_builtin_ref(name.to_string(), target);
         }
@@ -87,9 +104,6 @@ pub(crate) fn bind_value(env: &mut Environment, name: &str, value: Value) {
         Value::GenState(g) => {
             env.gen_states.insert(name.to_string(), *g);
         }
-        v @ Value::DeviceTensor { .. } => env.set_device_tensor(name.to_string(), v),
-        v @ Value::Bytes { .. } => {
-            env.bytes.insert(name.to_string(), v);
-        }
+        _ => unreachable!("bind_callable receives only callable/model kinds"),
     }
 }

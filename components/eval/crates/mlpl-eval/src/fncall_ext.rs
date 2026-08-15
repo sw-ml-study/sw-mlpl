@@ -42,7 +42,10 @@ fn invoke(
     }
     let mut ext_args = Vec::with_capacity(args.len());
     for a in args {
-        ext_args.push(crate::ext_marshal::to_ext(name, eval_expr(a, env, trace)?)?);
+        ext_args.push(crate::ext_marshal_send::to_ext(
+            name,
+            eval_expr(a, env, trace)?,
+        )?);
     }
-    crate::ext_marshal::finish(name, call_contained(&desc.func, &ext_args))
+    crate::ext_marshal_recv::finish(name, call_contained(&desc.func, &ext_args))
 }

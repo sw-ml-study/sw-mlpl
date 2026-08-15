@@ -1,6 +1,6 @@
 number = 3
 slug = "native-handles"
-status = "pending"
+status = "in-progress"
 description = "Third step of extension-arrays-handles (B5, the spine root). Add opaque nativ..."
 role = "legacy"
 context_files = []

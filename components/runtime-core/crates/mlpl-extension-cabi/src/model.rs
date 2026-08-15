@@ -22,9 +22,9 @@ pub struct AbiSlice {
     pub len: usize,
 }
 
-/// Discriminant for `AbiValue::tag`. Scalars 0..=5 marshal in
-/// this slice; `DenseArray` / `NativeHandle` are a follow-up and
-/// currently produce a boundary error.
+/// Discriminant for `AbiValue::tag`. Scalars 0..=5, `DenseArray`,
+/// and `NativeHandle` all marshal across the boundary in both
+/// directions.
 #[repr(u32)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum ValueTag {
@@ -38,7 +38,9 @@ pub enum ValueTag {
     NativeHandle = 7,
 }
 
-/// Opaque cross-boundary handle (arrays-handles follow-up).
+/// Opaque cross-boundary handle: a provider-issued resource
+/// reference marshaled by value (tag `NativeHandle`). The host
+/// treats all fields as opaque bits.
 #[repr(C)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub struct AbiHandle {
