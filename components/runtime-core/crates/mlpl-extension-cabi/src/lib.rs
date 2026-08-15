@@ -21,8 +21,8 @@ mod register;
 mod validate;
 
 pub use model::{
-    ABI_VERSION_V1, AbiArrayView, AbiErrorV1, AbiHandle, AbiSlice, AbiValue, DTypeTag, ErrorCode,
-    ExtensionDescriptorV1, ExtensionEntryV1, FunctionDescriptorV1, InvokeFnV1, ValuePayload,
-    ValueTag,
+    ABI_VERSION_V1, AbiArrayView, AbiErrorV1, AbiField, AbiHandle, AbiRecordView, AbiSlice,
+    AbiValue, DTypeTag, ErrorCode, ExtensionDescriptorV1, ExtensionEntryV1, FunctionDescriptorV1,
+    InvokeFnV1, ValuePayload, ValueTag,
 };
 pub use register::register_c_extension;

@@ -10,6 +10,7 @@ use std::mem::size_of;
 
 use mlpl_extension_abi::{ExtError, ExtFn, ExtFnDesc, ExtValue};
 
+use crate::marshal::read_abi_slice;
 use crate::model::{
     ABI_VERSION_V1, AbiErrorV1, AbiValue, ErrorCode, ExtensionDescriptorV1, InvokeFnV1,
 };
@@ -94,7 +95,27 @@ fn invoke_closure(invoke: InvokeFnV1) -> ExtFn {
         if status == ErrorCode::Ok as u32 {
             crate::marshal_array_out::abi_to_ext(&output)
         } else {
-            Err(crate::marshal_array_out::abi_error_to_ext(&error, status))
+            Err(abi_error_to_ext(&error, status))
         }
     })
+}
+
+/// Map a non-zero invoke status + filled `AbiErrorV1` into an
+/// `ExtError`. A `Panic` code sets `panicked` so the host raises a hard
+/// error rather than an `err(...)` Result. Lives with the invoke path
+/// (its only caller) rather than the value-marshaling module.
+fn abi_error_to_ext(err: &AbiErrorV1, status: u32) -> ExtError {
+    let message = match read_abi_slice("error message", err.message) {
+        Ok(bytes) => String::from_utf8_lossy(&bytes).into_owned(),
+        Err(e) => e,
+    };
+    let message = if message.is_empty() {
+        format!("extension failed with status {status}")
+    } else {
+        message
+    };
+    ExtError {
+        message,
+        panicked: err.code == ErrorCode::Panic as u32,
+    }
 }

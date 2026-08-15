@@ -5,6 +5,8 @@
 //! The SEND direction (argument marshaling) lives in
 //! `ext_marshal_send`.
 
+use std::collections::BTreeMap;
+
 use mlpl_array::{DenseArray, Shape};
 use mlpl_extension_abi::{ExtError, ExtValue};
 
@@ -48,5 +50,17 @@ fn from_ext(v: ExtValue) -> Value {
             slot: h.slot,
             generation: h.generation,
         },
+        ExtValue::Record(fields) => Value::Record {
+            fields: record_map(fields),
+        },
     }
+}
+
+/// Convert boundary record fields into an MLPL record's sorted field
+/// map, recursing each field value through `from_ext`.
+fn record_map(fields: Vec<(String, ExtValue)>) -> BTreeMap<String, Value> {
+    fields
+        .into_iter()
+        .map(|(name, value)| (name, from_ext(value)))
+        .collect()
 }

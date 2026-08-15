@@ -36,6 +36,7 @@ pub enum ValueTag {
     Bytes = 5,
     DenseArray = 6,
     NativeHandle = 7,
+    Record = 8,
 }
 
 /// Opaque cross-boundary handle: a provider-issued resource
@@ -72,6 +73,25 @@ pub struct AbiArrayView {
     pub strides: *const isize,
 }
 
+/// One named field of a record view (`name`, `value`). The value is
+/// itself an `AbiValue`, so records nest.
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct AbiField {
+    pub name: AbiSlice,
+    pub value: AbiValue,
+}
+
+/// A structured record across the boundary: a borrowed array of
+/// `field_count` named fields. Provider-owned; the host copies it
+/// during the call (the borrowed-span contract).
+#[repr(C)]
+#[derive(Clone, Copy)]
+pub struct AbiRecordView {
+    pub fields: *const AbiField,
+    pub field_count: usize,
+}
+
 /// The payload union selected by `AbiValue::tag`.
 #[repr(C)]
 #[derive(Clone, Copy)]
@@ -82,6 +102,7 @@ pub union ValuePayload {
     pub slice: AbiSlice,
     pub array: *const AbiArrayView,
     pub handle: AbiHandle,
+    pub record: *const AbiRecordView,
 }
 
 /// A tagged value crossing the boundary in either direction.

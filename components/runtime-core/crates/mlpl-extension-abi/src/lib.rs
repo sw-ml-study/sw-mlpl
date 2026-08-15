@@ -39,6 +39,11 @@ pub enum ExtValue {
     /// resource reference, e.g. a viewer object). Carried by
     /// value; only a provider return mints one.
     Handle(ExtHandle),
+    /// A structured record: named fields in provider order, each
+    /// itself an `ExtValue` (so records nest -- a record of records
+    /// is the "list of rows" an event batch returns). Recursive via
+    /// the `Vec` indirection, so `ExtValue` stays sized.
+    Record(Vec<(String, ExtValue)>),
 }
 
 /// A recoverable extension failure, or a contained panic

@@ -1,17 +1,21 @@
 //! The RECEIVE direction: a provider-returned `AbiValue` -> `ExtValue`
-//! (scalars, native handle, and dense arrays), and the invoke-error
-//! decode. A returned array's shape/data are provider-owned, so they
-//! are COPIED here immediately (the borrowed-span contract) and
-//! validated against dtype / rank / element count. A native handle is
-//! a fixed-size payload read inline by `scalar_from_abi`.
+//! (scalars, native handle, dense arrays, and records), and the
+//! invoke-error decode. A returned array's shape/data and a record's
+//! fields are provider-owned, so they are COPIED here immediately (the
+//! borrowed-span contract); arrays are validated against dtype / rank /
+//! element count, records recurse field-by-field. A native handle is a
+//! fixed-size payload read inline by `scalar_from_abi`.
 
 use mlpl_extension_abi::{ExtDtype, ExtError, ExtHandle, ExtValue};
 
 use crate::marshal::read_abi_slice;
-use crate::model::{AbiArrayView, AbiErrorV1, AbiValue, ErrorCode, ValueTag};
+use crate::model::{AbiArrayView, AbiRecordView, AbiValue, ValueTag};
 
 /// Highest supported rank (mirrors the send path).
 const MAX_RANK: usize = 8;
+
+/// Largest field count the host will read from a returned record.
+const MAX_FIELDS: usize = 1024;
 
 /// Marshal a provider-returned value back into an `ExtValue`.
 pub(crate) fn abi_to_ext(out: &AbiValue) -> Result<ExtValue, ExtError> {
@@ -32,13 +36,46 @@ pub(crate) fn abi_to_ext(out: &AbiValue) -> Result<ExtValue, ExtError> {
         t if t == ValueTag::DenseArray as u32 => {
             unsafe { read_array_view(out.payload.array) }.map_err(ExtError::new)?
         }
+        t if t == ValueTag::Record as u32 => unsafe { read_record_view(out.payload.record) }?,
         other => {
             return Err(ExtError::new(format!(
-                "unsupported output value tag {other} (handles are not yet marshaled)"
+                "unsupported output value tag {other}"
             )));
         }
     };
     Ok(value)
+}
+
+/// Copy a provider-returned `AbiRecordView` (named fields) into an
+/// `ExtValue::Record`, recursing into each field value.
+///
+/// # Safety
+/// `view` must be null or a valid `AbiRecordView` whose `fields`
+/// array (`field_count` entries) is live for this call.
+pub(crate) unsafe fn read_record_view(view: *const AbiRecordView) -> Result<ExtValue, ExtError> {
+    if view.is_null() {
+        return Err(ExtError::new("returned record view is null"));
+    }
+    let view = unsafe { &*view };
+    if view.field_count > MAX_FIELDS {
+        return Err(ExtError::new(format!(
+            "returned record has {} fields (max {MAX_FIELDS})",
+            view.field_count
+        )));
+    }
+    let raw = if view.field_count == 0 {
+        &[][..]
+    } else {
+        unsafe { std::slice::from_raw_parts(view.fields, view.field_count) }
+    };
+    let mut fields = Vec::with_capacity(raw.len());
+    for f in raw {
+        let raw_name = read_abi_slice("record field name", f.name).map_err(ExtError::new)?;
+        let name = String::from_utf8(raw_name)
+            .map_err(|_| ExtError::new("record field name is not UTF-8"))?;
+        fields.push((name, abi_to_ext(&f.value)?));
+    }
+    Ok(ExtValue::Record(fields))
 }
 
 /// The fixed-size outputs (nil/bool/i64/f64 + native handle), or
@@ -92,23 +129,4 @@ pub(crate) unsafe fn read_array_view(view: *const AbiArrayView) -> Result<ExtVal
     }
     let data = dtype.decode_le(&bytes);
     Ok(ExtValue::Array { dtype, shape, data })
-}
-
-/// Map a non-zero invoke status + filled `AbiErrorV1` into an
-/// `ExtError`. A `Panic` code sets `panicked` so the host raises a hard
-/// error rather than an `err(...)` Result.
-pub(crate) fn abi_error_to_ext(err: &AbiErrorV1, status: u32) -> ExtError {
-    let message = match read_abi_slice("error message", err.message) {
-        Ok(bytes) => String::from_utf8_lossy(&bytes).into_owned(),
-        Err(e) => e,
-    };
-    let message = if message.is_empty() {
-        format!("extension failed with status {status}")
-    } else {
-        message
-    };
-    ExtError {
-        message,
-        panicked: err.code == ErrorCode::Panic as u32,
-    }
 }

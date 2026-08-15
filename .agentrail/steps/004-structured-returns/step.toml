@@ -1,6 +1,6 @@
 number = 4
 slug = "structured-returns"
-status = "pending"
+status = "in-progress"
 description = "Fourth step of extension-arrays-handles. A provider returns a RECORD (or list..."
 role = "legacy"
 context_files = []
