@@ -1,0 +1,9 @@
+number = 1
+slug = "worker-thread-gate"
+status = "pending"
+description = "First step of extensions-event-loop. Land the worker-thread-gate as a kept re..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-15T13:54:18"
+task_type = "feature"
+commits = []
