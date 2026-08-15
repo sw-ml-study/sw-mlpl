@@ -1,0 +1,9 @@
+number = 2
+slug = "port-and-channels"
+status = "pending"
+description = "Second step of extensions-event-loop. Build the general Port primitive: a nat..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-15T13:58:32"
+task_type = "feature"
+commits = []

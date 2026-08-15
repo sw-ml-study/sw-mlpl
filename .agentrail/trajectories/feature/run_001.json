@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "worker-thread-gate"
+  },
+  "action": "Wrote 3-test spike (assert_send + spawned-eval + move-into-worker); scoped clippy/fmt/test on mlpl-eval; repo sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-15T13:58:32"
+}
