@@ -119,16 +119,18 @@ fn render_upload_widget(props: &ModeBarProps) -> Html {
 // (rather than sibling modules) because the crate is at its module
 // budget; the crate wants splitting (queued tech debt).
 
-/// Nested menu: `(super-group label, its category sections)`.
-type SuperGrouped = Vec<(&'static str, DemoGroups)>;
+/// Nested menu: `(super-group label, subject tooltip, category sections)`.
+type SuperGrouped = Vec<(&'static str, &'static str, DemoGroups)>;
 
-/// Each super-group and the category sections it collects, in menu
-/// order. A super-group with no present categories is dropped (e.g.
-/// Mathematics, until the abstract-algebra / category-theory demos
-/// land). Unlisted categories fall into a trailing "Other".
-const SUPER_GROUPS: &[(&str, &[&str])] = &[
+/// Each super-group -- its label, a subject-level tooltip, and the
+/// category names it collects -- in menu order. A super-group with no
+/// present categories is dropped (e.g. Mathematics, until the
+/// abstract-algebra / category-theory demos land). Unlisted categories
+/// fall into a trailing "Other".
+const SUPER_GROUPS: &[(&str, &str, &[&str])] = &[
     (
         "Machine Learning",
+        "Neural networks and classical ML: training, models, evaluation, and generative methods.",
         &[
             "Training & Learning",
             "Experiment Quality",
@@ -144,10 +146,19 @@ const SUPER_GROUPS: &[(&str, &[&str])] = &[
             "Engram",
         ],
     ),
-    ("Mathematics", &["Abstract Algebra", "Category Theory"]),
-    ("Array / APL", &["Basics", "APL2 / General Programming"]),
+    (
+        "Mathematics",
+        "Algebraic structures and category theory expressed as array programs.",
+        &["Abstract Algebra", "Category Theory"],
+    ),
+    (
+        "Array / APL",
+        "Core array-language idioms and general-purpose programming in MLPL.",
+        &["Basics", "APL2 / General Programming"],
+    ),
     (
         "Systems & Tooling",
+        "Data pipelines, companion CLIs, and connect / GPU-backed demonstrations.",
         &[
             "Data Forge",
             "Non-Browser (companion CLIs)",
@@ -163,7 +174,7 @@ const SUPER_GROUPS: &[(&str, &[&str])] = &[
 /// become a trailing "Other"; empty super-groups vanish).
 fn super_grouped(mut groups: DemoGroups) -> SuperGrouped {
     let mut out: SuperGrouped = Vec::new();
-    for (label, cats) in SUPER_GROUPS.iter() {
+    for (label, tip, cats) in SUPER_GROUPS.iter() {
         let mut section: DemoGroups = Vec::new();
         for cat in cats.iter() {
             if let Some(pos) = groups.iter().position(|(c, _)| c == cat) {
@@ -171,11 +182,11 @@ fn super_grouped(mut groups: DemoGroups) -> SuperGrouped {
             }
         }
         if !section.is_empty() {
-            out.push((*label, section));
+            out.push((*label, *tip, section));
         }
     }
     if !groups.is_empty() {
-        out.push(("Other", groups));
+        out.push(("Other", "Additional demonstrations.", groups));
     }
     out
 }
@@ -192,8 +203,8 @@ fn render_super_panel(
         <>
             <div class="demo-dropdown-backdrop" onclick={toggle.clone()} />
             <div class="demo-dropdown-panel" role="menu" aria-label="Demos">
-                { for supers.iter().enumerate().map(|(i, (label, cats))| {
-                    render_super_group(i, label, cats, expanded, pick)
+                { for supers.iter().enumerate().map(|(i, (label, tip, cats))| {
+                    render_super_group(i, label, tip, cats, expanded, pick)
                 }) }
             </div>
         </>
@@ -205,6 +216,7 @@ fn render_super_panel(
 fn render_super_group(
     idx: usize,
     label: &str,
+    tip: &str,
     cats: &DemoGroups,
     expanded: &UseStateHandle<Option<usize>>,
     pick: &Callback<usize>,
@@ -226,11 +238,13 @@ fn render_super_group(
     });
     html! {
         <div class="demo-super">
-            <button class="demo-super-header" onclick={on_click} aria-expanded={is_open.to_string()}>
-                <span class="demo-super-caret" aria-hidden="true">{ if is_open { "\u{25be}" } else { "\u{25b8}" } }</span>
-                <span class="demo-super-label">{ label.to_string() }</span>
-                <span class="demo-super-count">{ count.to_string() }</span>
-            </button>
+            <span class="demo-super-headwrap demo-tooltip-target" tabindex="0" data-tooltip={tip.to_string()} aria-label={format!("{label}: {tip}")}>
+                <button class="demo-super-header" onclick={on_click} aria-expanded={is_open.to_string()}>
+                    <span class="demo-super-caret" aria-hidden="true">{ if is_open { "\u{25be}" } else { "\u{25b8}" } }</span>
+                    <span class="demo-super-label">{ label.to_string() }</span>
+                    <span class="demo-super-count">{ count.to_string() }</span>
+                </button>
+            </span>
             { body }
         </div>
     }

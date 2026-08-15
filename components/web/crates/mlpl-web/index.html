@@ -278,8 +278,12 @@
             left: 0;
             z-index: 41;
             width: min(420px, calc(100vw - 24px));
-            max-height: 70vh;
-            overflow-y: auto;
+            /* overflow must stay VISIBLE: the demo tooltips render to the
+               right of each row (left: calc(100% + 12px)), and any
+               `overflow-y: auto` here would coerce overflow-x to clip and
+               cut them off. The accordion (one super-group open at a time)
+               keeps the panel height bounded instead of an inner scroll. */
+            overflow: visible;
             background: var(--base);
             border: 1px solid var(--surface1);
             border-radius: 6px;
