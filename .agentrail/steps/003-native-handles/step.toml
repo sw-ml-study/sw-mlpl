@@ -1,9 +1,10 @@
 number = 3
 slug = "native-handles"
-status = "in-progress"
+status = "completed"
 description = "Third step of extension-arrays-handles (B5, the spine root). Add opaque nativ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-14T13:24:48"
+completed_at = "2026-08-14T17:26:51"
 task_type = "feature"
-commits = []
+commits = ["797d910ff0aa9435660ec5f9a71c210612cf29c3"]

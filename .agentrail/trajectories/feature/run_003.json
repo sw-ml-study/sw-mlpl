@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "native-handles"
+  },
+  "action": "TDD repr(C) viewers/others providers returning handles; new first-class Value variant across 6 exhaustive-match sites + env table + scope macro; send/receive marshal facade splits; scoped build+clippy+fmt+binding/scope test net; repo sw-checklist genuine -1",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-14T17:26:51"
+}
