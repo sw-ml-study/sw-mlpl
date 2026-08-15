@@ -1,6 +1,6 @@
 number = 1
 slug = "worker-thread-gate"
-status = "pending"
+status = "in-progress"
 description = "First step of extensions-event-loop. Land the worker-thread-gate as a kept re..."
 role = "legacy"
 context_files = []
