@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "handler-registry-and-dispatch"
+  },
+  "action": "env port_handlers field; fncall_dispatch (try_dispatch/eval_on_off/eval_run/dispatch_one) + port_util helpers; reused invoke_user_fn_values for in-process callbacks (no shared mutable state, state threaded as value); while-let loop for clippy; headless scripted-event TDD; scoped build/clippy/fmt/tests + sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-15T16:01:48"
+}

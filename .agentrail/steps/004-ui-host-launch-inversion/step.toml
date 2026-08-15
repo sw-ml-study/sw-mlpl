@@ -1,0 +1,9 @@
+number = 4
+slug = "ui-host-launch-inversion"
+status = "pending"
+description = "Fourth step of extensions-event-loop. Build the 'parked main' UI-host launch ..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-15T16:01:48"
+task_type = "feature"
+commits = []

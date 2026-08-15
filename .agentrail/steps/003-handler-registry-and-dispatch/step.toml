@@ -1,9 +1,10 @@
 number = 3
 slug = "handler-registry-and-dispatch"
-status = "in-progress"
+status = "completed"
 description = "Third step of extensions-event-loop. Build the event-dispatch loop + handler ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-15T14:31:55"
+completed_at = "2026-08-15T16:01:48"
 task_type = "feature"
-commits = []
+commits = ["d78446267e935b0b44be2c771e65fea95ac080ff"]
