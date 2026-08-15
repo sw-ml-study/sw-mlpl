@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-14
 
+- chore(agentrail): complete 003-native-handles; queue 004-structured-returns
+- feat(extensions): opaque native handles across the C boundary (B5)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-array-results-out; queue 003-native-handles
 - feat(extensions): marshal provider-returned dense arrays back to MLPL
 - chore(pages): rebuild for demo-linear-algebra footer entry
