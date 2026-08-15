@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta name="mlpl-build" content="8c3e1e46 2026-08-14T19:43:38Z">
+<head><meta name="mlpl-build" content="9d356b01 2026-08-15T00:37:43Z">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-b1db5fa3181fd172.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-b1db5fa3181fd172_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-f701f7d51f6255fe.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-f701f7d51f6255fe_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -289,8 +289,12 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             left: 0;
             z-index: 41;
             width: min(420px, calc(100vw - 24px));
-            max-height: 70vh;
-            overflow-y: auto;
+            /* overflow must stay VISIBLE: the demo tooltips render to the
+               right of each row (left: calc(100% + 12px)), and any
+               `overflow-y: auto` here would coerce overflow-x to clip and
+               cut them off. The accordion (one super-group open at a time)
+               keeps the panel height bounded instead of an inner scroll. */
+            overflow: visible;
             background: var(--base);
             border: 1px solid var(--surface1);
             border-radius: 6px;
@@ -2218,7 +2222,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-b1db5fa3181fd172.js" crossorigin="anonymous" integrity="sha384-zeag8mMehL4u8QQ0f96UhcponZZSAoYZmtUerMRkNoXOCLUI3p1S/6i8FXjBxmT4"><link rel="preload" href="/sw-mlpl/mlpl-web-b1db5fa3181fd172_bg.wasm" crossorigin="anonymous" integrity="sha384-UXbxBpYiMiekGeLAeveWmei7EFKZoSpRP91sDQJznJVxDjdpyGowkkrS1t3fcKou" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-f701f7d51f6255fe.js" crossorigin="anonymous" integrity="sha384-mzRK+vD+bYmbE3THbOIBfdVE3zkUQpcWXxsUiP7AJGswL8WXg8ys9vATfECbDJj1"><link rel="preload" href="/sw-mlpl/mlpl-web-f701f7d51f6255fe_bg.wasm" crossorigin="anonymous" integrity="sha384-xiXqowAFUedKTgXYeBVgF9r5N6nxuQQyi33qG+BXRzvZPYjx7B2P/seV+f10+r/p" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
