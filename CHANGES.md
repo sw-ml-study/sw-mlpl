@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-15
 
+- chore(agentrail): complete 002-port-and-channels; queue 003-handler-registry-and-dispatch
+- feat(extensions): general Port primitive -- share-nothing channels (B6)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-worker-thread-gate; queue 002-port-and-channels
 - test(extensions): lock the worker-thread gate for B6 (interpreter is Send)
 - chore(agentrail): bootstrap step 001-worker-thread-gate (B6)
