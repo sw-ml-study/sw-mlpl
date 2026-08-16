@@ -1,0 +1,18 @@
+[package]
+name = "mlpl-extension-loader"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The DYNAMIC extension loader (B3): dlopen a provider cdylib, resolve
+# its `sw_mlpl_extension_v1` entry, validate + register its descriptor
+# through the same C ABI the static path uses, and hold the library
+# mapped for the process. libloading is confined to this crate.
+
+[dependencies]
+libloading = "0.8"
+mlpl-extension-cabi = { path = "../mlpl-extension-cabi" }
+
+[dev-dependencies]
+mlpl-extension-abi = { path = "../mlpl-extension-abi" }
+mlpl-extension-registry = { path = "../mlpl-extension-registry" }

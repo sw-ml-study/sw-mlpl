@@ -284,6 +284,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-extension-loader"
+version = "0.20.0"
+dependencies = [
+ "libloading",
+ "mlpl-extension-abi",
+ "mlpl-extension-cabi",
+ "mlpl-extension-registry",
+]
+
+[[package]]
 name = "mlpl-extension-registry"
 version = "0.20.0"
 dependencies = [

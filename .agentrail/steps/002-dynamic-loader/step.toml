@@ -1,6 +1,6 @@
 number = 2
 slug = "dynamic-loader"
-status = "pending"
+status = "in-progress"
 description = "Second step of extensions-dynamic-load. Extract the dlopen-and-register logic..."
 role = "legacy"
 context_files = []

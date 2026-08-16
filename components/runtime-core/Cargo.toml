@@ -9,6 +9,7 @@ members = [
     "crates/mlpl-extension-cabi",
     "crates/mlpl-ext-hello-static",
     "crates/mlpl-ext-testdylib",
+    "crates/mlpl-extension-loader",
 ]
 resolver = "2"
 
