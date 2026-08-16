@@ -497,6 +497,13 @@ fn text_conversions_compile_and_run() {
     );
     // to_int parse success -> ok(42).
     assert_eq!(build_run("to_int(\"42\")\n", "toi"), "ok(42)");
+    // to_int parse failure -> an err( Result the program can branch on
+    // (NOT a panic -- to_int returns a CVal::Result).
+    let bad = build_run("to_int(\"xyz\")\n", "toierr");
+    assert!(
+        bad.starts_with("err(") && bad.contains("xyz"),
+        "to_int err branch: {bad}"
+    );
 }
 
 #[test]
