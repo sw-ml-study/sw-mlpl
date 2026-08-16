@@ -117,6 +117,20 @@ sizes 1/7/64/65536, injected partial/failed writes, output above
 the memory budget, resident memory bounded by chunk + writer
 state.
 
+## File metadata: last-modified timestamp
+
+A separate upstream ask (raised by ../demo-extensions' model picker,
+noted 2026-08-16; also blocks date-scanning demos here): a confined
+`file_metadata` / `file_modified_ms` primitive returning a file's
+last-modified time as an exact UTC Unix-millisecond value, with an
+EXPLICIT `err` Result when the timestamp is unavailable (never a
+silent 0 / sentinel) and the SAME sandbox + symlink protections as
+`read_bytes` / `file_size`. Ownership split: sw-mlpl provides the
+primitive; this repo demonstrates + tests date scanning, sorting,
+formatting, unavailable-timestamp handling, and platform parity once
+it ships; ../demo-extensions consumes it. Queued as
+`file-metadata-timestamp` in docs/future-sagas-queue.md.
+
 ## Third gate: authorized codec extensions
 
 Seekable-file transcoding is gated on codec extensions existing --

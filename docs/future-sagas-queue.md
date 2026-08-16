@@ -603,20 +603,34 @@ order:
 - **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`
   (a bounded hexdump loops over chunks). Requires string/CVal
   VARIABLES (bindings that hold CVal, not just DenseArray).
-- **compiler-read-bytes** (Saga D) -- lower `read_bytes` (whole +
-  `offset,length`) + `file_size` + `write_bytes` to Rust
-  (returning/consuming `CVal::Arr` byte arrays). MUST share
-  validation + error semantics with the interpreter: compiled
-  invalid bytes must be REJECTED not coerced, and runtime write
-  errors must propagate not be discarded (a lowered call name
-  alone is not acceptance).
-- **compiler-process-semantics** (Saga D2) -- lower `print` /
+- **compiler-read-bytes** (Saga D) SHIPPED -- lowered `read_bytes`
+  (whole + `offset,length`) + `file_size` + `write_bytes` +
+  `append_bytes` to Rust (returning/consuming `CVal::Arr` byte
+  arrays), sharing the interpreter's validation + error semantics: a
+  compiled out-of-range / non-integer byte is REJECTED loudly (the
+  runtime `array_to_bytes` validator), and write errors propagate as
+  `err` Results, never discarded. Gated compiled e2e in
+  `mlpl-build/tests/build_tests.rs`.
+- **compiler-bit-ops** (Saga E) SHIPPED -- lowered band / bor / bxor /
+  bnot / popcount / shl / shr / bmask / bits / from_bits via the pure
+  `mlpl-runtime-bits` crate re-exported from `mlpl-rt`; domain errors
+  are hard (interpreter `RuntimeError` parity).
+- **compiler-text-conversions** SHIPPED -- lowered `tokenize_bytes`
+  (str -> rank-1 byte array), `decode_bytes` (byte array -> str,
+  reusing the loud-reject validator; a bad cell aborts the binary,
+  parity with the interpreter `EvalError`), and `to_int` (str -> int,
+  a recoverable `ok`/`err` Result). Compiled e2e covers the raw byte
+  cells, the loud-reject, and the err branch. The last text rung
+  before process semantics.
+- **compiler-process-semantics** (Saga D2) NEXT -- lower `print` /
   `eprint` / `exit` / `read_stdin` with clean entry/status
   semantics, and fix the `write_stdout` wrapper appending a
   spurious textual result line after binary stdout.
-- **compiler-bit-ops** (Saga E) -- lower band/bor/bxor/shl/shr/
-  etc. Then a standalone compiled hexdump / WAV CLI is
-  expressible (the demo-file-processing capstone; positive
+- **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`
+  (a bounded hexdump loops over chunks); requires string/CVal
+  VARIABLES (bindings that hold CVal, not just DenseArray). With
+  process semantics done, a standalone compiled hexdump / WAV CLI
+  becomes expressible (the demo-file-processing capstone; positive
   byte + format artifact parity + a source-free audit).
 
 **runtime stream handles** (../demo-file-processing second gate,
@@ -635,6 +649,22 @@ chunking -- a COMPOSITIONAL effects surface:
   error/lifecycle semantics; must reproduce the range-reader
   results across split fields. Enables true stdin-driven
   streaming.
+- **file-metadata-timestamp** (BLOCKS ../demo-extensions +
+  ../demo-file-processing, noted 2026-08-16) -- a confined
+  `file_metadata` / `file_modified_ms` primitive returning a file's
+  last-modified time as an exact UTC Unix-millisecond value, with an
+  EXPLICIT `err` Result when the timestamp is unavailable (never a
+  silent 0 / sentinel), and UNCHANGED sandbox + symlink protections
+  (same confinement as `read_bytes` / `file_size`). Ownership split
+  from the downstream docs (demo-extensions/docs/sw-mlpl-blockers.md,
+  upstream-contract.md, model-atlas-real-files.md): THIS repo provides
+  the primitive; ../demo-file-processing demonstrates + tests date
+  scanning / sorting / formatting / unavailable-timestamp / platform
+  parity; ../demo-extensions consumes it for its model picker. Small,
+  well-scoped, and an ACTIVE downstream blocker -- a candidate to
+  sequence ahead of compiler-process-semantics. Mirror the interpreter
+  `file_size` dispatch (fncall_fs.rs) + sandbox root; the compiled path
+  can follow in a later compiler rung.
 
 Authorized codec extensions (their third gate) ride the
 `extensions-*` track (trust/authorization resolver + dynamic
