@@ -1,0 +1,9 @@
+number = 6
+slug = "docs-demo-close"
+status = "pending"
+description = "Final step of extensions-event-loop. Document what shipped and close the saga..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-15T20:06:03"
+task_type = "docs"
+commits = []

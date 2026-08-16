@@ -1,9 +1,10 @@
 number = 5
 slug = "provider-abi-and-contract"
-status = "in-progress"
+status = "completed"
 description = "Fifth step of extensions-event-loop. Define the C-ABI + contract a native pro..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-15T19:35:32"
+completed_at = "2026-08-15T20:06:03"
 task_type = "feature"
-commits = []
+commits = ["e9930cfb7efbf8752b4c8e9d0bf3273d96536ed6"]
