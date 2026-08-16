@@ -14,6 +14,19 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-16
 
+- chore(agentrail): complete 004-docs-close; close compiler-text-ops saga
+- docs(compiler): close compiler-text-ops; mark io-parity rungs + queue file-metadata
+- chore(agentrail): complete 003-to-int; queue 004-docs-close
+- test(compiler): assert to_int err-branch in the compiled e2e
+- chore(agentrail): complete 002-decode-bytes; queue 003-to-int
+- test(compiler): assert decode_bytes loud-rejects a bad cell (compiled)
+- chore(agentrail): complete 001-tokenize-bytes; queue 002-decode-bytes
+- test(compiler): assert tokenize_bytes raw cells in the compiled e2e
+- chore(pages): rebuild for demo-design-patterns footer link
+- feat(web): add demo-design-patterns to the footer repo dialog
+- chore(agentrail): init compiler-text-ops saga; queue 001-tokenize-bytes
+- chore(agentrail): archive completed extensions-dynamic-load saga
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 005-docs-close; close extensions-dynamic-load saga
 - docs(extensions): close extensions-dynamic-load; user + contract + queue docs
 - chore(pages): rebuild for footer demo-data-structures link + native-only load_extension
