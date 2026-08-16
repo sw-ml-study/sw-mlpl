@@ -1,6 +1,6 @@
 number = 4
 slug = "cdylib-packaging-and-contract"
-status = "pending"
+status = "in-progress"
 description = "Fourth step of extensions-dynamic-load. Document the provider cdylib packagin..."
 role = "legacy"
 context_files = []

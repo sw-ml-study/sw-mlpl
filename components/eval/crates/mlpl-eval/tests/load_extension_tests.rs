@@ -42,6 +42,12 @@ fn load_extension_discovers_by_name_and_invokes() {
         Value::Array(a) => assert_eq!(a.data()[0], 42.0),
         other => panic!("expected 42, got {other:?}"),
     }
+    // A non-scalar value crosses the dlopen edge: an array goes IN.
+    // sum([10, 20, 30, 40]) = 100.
+    match eval(&mut env, "testext:sum([10, 20, 30, 40])").unwrap() {
+        Value::Array(a) => assert_eq!(a.data()[0], 100.0),
+        other => panic!("expected 100, got {other:?}"),
+    }
     // A name with no matching library is a clean err Result (no crash,
     // no registration).
     match eval(&mut env, "load_extension(\"does_not_exist\")").unwrap() {

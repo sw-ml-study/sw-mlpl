@@ -1,47 +1,38 @@
 //! A cdylib native-extension fixture for dynamic loading (B3). It
-//! exports the V1 entry point `sw_mlpl_extension_v1`, which returns a
-//! descriptor with one arity-0 function, `answer` (-> 42.0). A loader
-//! `dlopen`s this library, resolves the entry, registers the
-//! descriptor through the same C ABI the static path uses, and invokes
-//! `testext:answer`.
+//! exports the V1 entry point `sw_mlpl_extension_v1`, returning a
+//! descriptor for namespace `testext` with `answer` (-> 42.0) and
+//! `stats(array)` (-> a `{sum, count}` record). A loader `dlopen`s this
+//! library, resolves the entry, registers the descriptor through the
+//! same C ABI the static path uses, and dispatches its functions.
+//!
+//! The exported functions and helpers live in `provider`; `lib.rs` is
+//! the entry-point facade.
+
+mod provider;
 
 use std::mem::size_of;
 
 use mlpl_extension_cabi::{
-    ABI_VERSION_V1, AbiErrorV1, AbiSlice, AbiValue, ErrorCode, ExtensionDescriptorV1,
-    FunctionDescriptorV1, ValuePayload, ValueTag,
+    ABI_VERSION_V1, AbiSlice, ExtensionDescriptorV1, FunctionDescriptorV1, InvokeFnV1,
 };
 
+use provider::{inv_answer, inv_sum, slice};
+
 /// The value `testext:answer` returns -- the single source of truth
-/// the dlopen test asserts against.
+/// the dlopen tests assert against.
 pub const ANSWER: f64 = 42.0;
 
 static NAME: &[u8] = b"testext";
 static VER: &[u8] = b"0.1.0";
-static FNAME: &[u8] = b"answer";
 
-/// A borrowed span over a `'static` byte string.
-fn slice(bytes: &'static [u8]) -> AbiSlice {
-    AbiSlice {
-        data: bytes.as_ptr(),
-        len: bytes.len(),
+/// One exported function's descriptor.
+fn func(name: &'static [u8], arity: u32, invoke: InvokeFnV1) -> FunctionDescriptorV1 {
+    FunctionDescriptorV1 {
+        name: slice(name),
+        arity,
+        reserved: 0,
+        invoke: Some(invoke),
     }
-}
-
-unsafe extern "C" fn inv_answer(
-    _a: *const AbiValue,
-    _n: usize,
-    out: *mut AbiValue,
-    _e: *mut AbiErrorV1,
-) -> u32 {
-    unsafe {
-        *out = AbiValue {
-            tag: ValueTag::F64 as u32,
-            reserved: 0,
-            payload: ValuePayload { float: ANSWER },
-        };
-    }
-    ErrorCode::Ok as u32
 }
 
 /// The V1 C entry point (`sw_mlpl_extension_v1`) a provider exports.
@@ -49,12 +40,10 @@ unsafe extern "C" fn inv_answer(
 /// host copies it into host-owned memory at register time.
 #[unsafe(no_mangle)]
 pub extern "C" fn sw_mlpl_extension_v1() -> *const ExtensionDescriptorV1 {
-    let functions = Box::leak(Box::new([FunctionDescriptorV1 {
-        name: slice(FNAME),
-        arity: 0,
-        reserved: 0,
-        invoke: Some(inv_answer),
-    }]));
+    let functions = Box::leak(Box::new([
+        func(b"answer", 0, inv_answer),
+        func(b"sum", 1, inv_sum),
+    ]));
     Box::leak(Box::new(ExtensionDescriptorV1 {
         struct_size: size_of::<ExtensionDescriptorV1>() as u32,
         abi_version: ABI_VERSION_V1,

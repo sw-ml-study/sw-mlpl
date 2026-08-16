@@ -64,6 +64,33 @@ unchanged; the missing piece is only the loader + discovery + trigger.
   work to lower `load_extension` + extension/Port calls is the
   immediate FOLLOW-ON saga, not this one.
 
+## Packaging a provider as a cdylib
+
+A provider ships as a shared library the loader can discover and open:
+
+- **Crate type.** Set `crate-type = ["cdylib"]` (add `"lib"` too if the
+  crate's own tests import its Rust items). Cargo produces
+  `libNAME.dylib` / `libNAME.so` / `NAME.dll`.
+- **Entry point.** Export
+  `#[unsafe(no_mangle)] pub extern "C" fn sw_mlpl_extension_v1() ->
+  *const ExtensionDescriptorV1` returning a leaked descriptor (it lives
+  for the process; the host copies it at register time). The descriptor
+  and its function table are the SAME `mlpl-extension-cabi` shapes the
+  static path uses -- scalars, dense arrays, records, and handles all
+  cross unchanged.
+- **Naming for discovery.** Name the library so its logical name matches
+  the extension: a library `libnative3d.dylib` is loaded by
+  `load_extension("native3d")` when its directory is on
+  `MLPL_EXTENSION_PATH`. (A library may also be loaded by explicit
+  path.)
+- **Loading from MLPL.** `load_extension("native3d")` returns the
+  registered namespace on success, or an `err(...)` Result; then
+  `native3d:*` calls dispatch as usual. A `justfile` / run script sets
+  `MLPL_EXTENSION_PATH` to the directory holding the built libraries.
+
+The interpreter and (later) compiled binaries share this one loader, so
+a provider is packaged once and works on both paths.
+
 ## Division of labor
 
 - **sw-mlpl** provides the loader, `MLPL_EXTENSION_PATH` discovery, the
