@@ -484,6 +484,12 @@ fn text_conversions_compile_and_run() {
             .trim()
             .to_string()
     };
+    // tokenize_bytes exposes the raw UTF-8 byte cells: "Hi" -> [72, 105].
+    let cells = build_run("tokenize_bytes(\"Hi\")\n", "cells");
+    assert!(
+        cells.contains("72") && cells.contains("105"),
+        "tokenize_bytes cells: {cells}"
+    );
     // str -> bytes -> str round-trip.
     assert_eq!(
         build_run("decode_bytes(tokenize_bytes(\"Hi\"))\n", "rt"),
