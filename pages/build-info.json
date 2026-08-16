@@ -1,1 +1,1 @@
-{"commit":"fd15189d","built_at":"2026-08-16T19:13:27Z","bundle":"mlpl-web-f13e61ce8acde0b5","gates":"local pre-commit (tests + clippy + fmt + sw-checklist)","ledger":"571 passed, 44 failed, 523 warnings, 0 info"}
+{"commit":"cb9fb082","built_at":"2026-08-16T22:02:27Z","bundle":"mlpl-web-22ea06ba88e190cc","gates":"local pre-commit (tests + clippy + fmt + sw-checklist)","ledger":"571 passed, 44 failed, 523 warnings, 0 info"}
