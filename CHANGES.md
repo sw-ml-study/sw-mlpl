@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-16
 
+- chore(agentrail): complete 005-docs-close; close extensions-dynamic-load saga
+- docs(extensions): close extensions-dynamic-load; user + contract + queue docs
+- chore(pages): rebuild for footer demo-data-structures link + native-only load_extension
+- fix(eval): gate load_extension to non-wasm (unbreak the wasm build)
+- feat(web): footer -- add demo-data-structures (split from demo-algorithms)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-cdylib-packaging-and-contract; queue 005-docs-close
 - feat(extensions): cdylib packaging convention + array-across-dlopen (B3)
 - docs(changes): refresh CHANGES.md to HEAD
