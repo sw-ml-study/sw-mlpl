@@ -1,6 +1,6 @@
 number = 4
 slug = "ui-host-launch-inversion"
-status = "pending"
+status = "in-progress"
 description = "Fourth step of extensions-event-loop. Build the 'parked main' UI-host launch ..."
 role = "legacy"
 context_files = []

@@ -7,6 +7,7 @@
 //! downstream `use mlpl_eval::ModelSpec` etc. is unchanged.
 
 mod analysis_dispatch;
+mod applet;
 mod auto_tag;
 // The env layer lives below in mlpl-eval-env (env-base-out step);
 // re-exported as modules so every crate::env:: / crate::env_user_fns::
@@ -176,6 +177,7 @@ mod tag_render;
 mod tokenizer;
 mod type_errors;
 
+pub use applet::{require_ui_host_thread, run_applet_with_host};
 pub use env::{Environment, PeerDispatcher, RunScriptHook, RunScriptOpts, model_params};
 pub use eval_program::{
     eval_program, eval_program_traced, eval_program_value, eval_program_value_traced,

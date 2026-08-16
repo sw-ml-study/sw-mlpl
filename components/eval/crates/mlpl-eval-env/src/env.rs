@@ -19,19 +19,13 @@ pub const PORT_EXTENSION_ID: u64 = u64::MAX;
 /// The port resource kind (`type_id`).
 pub const PORT_TYPE_ID: u64 = 1;
 
-/// One port's channel endpoints, owned by the interpreter: the command
-/// side (MLPL -> far end) is a `Sender`, the event side (far end ->
-/// MLPL) a `Receiver`. Share-nothing -- only owned `Value`s cross the
-/// channels.
-///
-/// The receiver is wrapped in `Arc<Mutex<..>>` SOLELY so `Environment`
-/// can keep deriving `Clone` (downstream consumers depend on it) and
-/// stay `Send` for the worker thread -- a `Receiver` is neither `Clone`
-/// nor `Sync`. It is not a shared-state mechanism: the cross-thread
-/// path is still the channels, and only the single interpreter thread
-/// ever locks this receiver (uncontended). A cloned `Environment`
-/// shares the receiver, which is harmless -- cloning happens at setup,
-/// before ports are opened.
+/// One port's channel endpoints, owned by the interpreter. Share-
+/// nothing: only owned `Value`s cross the channels. The receiver is
+/// behind `Arc<Mutex<..>>` SOLELY so `Environment` keeps deriving
+/// `Clone` (downstream depends on it) and stays `Send` -- a `Receiver`
+/// is neither. It is not shared state: only the single interpreter
+/// thread locks it (uncontended); the channels remain the cross-thread
+/// path.
 #[derive(Clone, Debug)]
 pub struct PortEndpoints {
     pub commands: Sender<Value>,
@@ -185,6 +179,11 @@ pub struct Environment {
     /// applet model -- `on`/`off` mutate this; `run` folds events
     /// through it. Single-threaded on the worker, so no locking.
     pub port_handlers: HashMap<(u32, String), String>,
+    /// True only on the local main-thread UI-host launch path (set by
+    /// the applet launcher). Opening a native window requires this;
+    /// connect/serve evals run on a worker with it `false`, so a native
+    /// UI request there is a clear error rather than a silent hang.
+    pub ui_host_thread: bool,
     /// Saga 23 step 001: optional `ValueTag` attached per binding
     /// name. Auto-tagged by producer ops in steps 002+; consumed
     /// by predicate-checked consumers, `:describe` / `:vars` /
