@@ -1,9 +1,10 @@
 number = 4
 slug = "docs-close"
-status = "pending"
+status = "completed"
 description = "Close the compiler-text-ops saga. Document the three compiled text conversion..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T15:28:27"
+completed_at = "2026-08-16T15:37:50"
 task_type = "docs"
-commits = []
+commits = ["0210f31fb8c995253265a29176d23fdb49ec6b03"]

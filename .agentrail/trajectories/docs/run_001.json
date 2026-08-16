@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 4,
+    "step": "docs-close"
+  },
+  "action": "git-archaeology (found a7d1a3c3); ran gated MLPL_BUILD_TESTS=1 build e2e; added cell/reject/err assertions; updated queue + companion docs; markdown + checklist gates; committed per step.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-16T15:37:50"
+}
