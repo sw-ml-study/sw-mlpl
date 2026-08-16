@@ -76,6 +76,10 @@ const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
                 "General-purpose data structures in MLPL.",
             ),
             (
+                "demo-design-patterns",
+                "General-purpose design patterns in MLPL.",
+            ),
+            (
                 "demo-extensions",
                 "Authoring native MLPL language extensions in Rust.",
             ),
