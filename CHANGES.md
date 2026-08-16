@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-15
 
+- fix(eval): restore Environment: Clone (unblocks demo-* extension repos)
+- chore(agentrail): complete 003-handler-registry-and-dispatch; queue 004-ui-host-launch-inversion
+- feat(extensions): event-dispatch loop + handler registry (B6, JS applet)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-port-and-channels; queue 003-handler-registry-and-dispatch
 - feat(extensions): general Port primitive -- share-nothing channels (B6)
 - docs(changes): refresh CHANGES.md to HEAD
