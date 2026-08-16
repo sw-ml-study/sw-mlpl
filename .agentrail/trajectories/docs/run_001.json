@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 6,
+    "step": "docs-demo-close"
+  },
+  "action": "user-facing ports/applets doc + worked example; blocker-plan/contract/queue/wiki updates marking B6 shipped + queuing B2 compiler-parity (8 reqs); sw-markdown-checker + sw-checklist; repo + wiki committed separately",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-15T20:55:05"
+}

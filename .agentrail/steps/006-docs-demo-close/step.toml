@@ -1,9 +1,10 @@
 number = 6
 slug = "docs-demo-close"
-status = "in-progress"
+status = "completed"
 description = "Final step of extensions-event-loop. Document what shipped and close the saga..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-15T20:06:03"
+completed_at = "2026-08-15T20:55:04"
 task_type = "docs"
-commits = []
+commits = ["a312eefc2e09c6c38a6e496682ee65ba6562825e"]
