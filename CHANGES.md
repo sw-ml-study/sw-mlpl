@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-16
 
+- chore(agentrail): complete 002-dynamic-loader; queue 003-discovery-and-builtin
+- feat(extensions): reusable dynamic extension loader (B3)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-loader-gate; queue 002-dynamic-loader
 - test(extensions): dynamic-loading gate -- dlopen a cdylib extension (B3)
 - docs(changes): refresh CHANGES.md to HEAD
