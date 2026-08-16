@@ -111,6 +111,7 @@ mod fncall_values;
 mod fs_append;
 mod fs_atomic;
 mod fs_bytes;
+mod fs_meta;
 mod fs_ops;
 mod fs_range;
 mod fs_walk_impl;
