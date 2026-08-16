@@ -1,0 +1,1 @@
+Initialized file-metadata-timestamp saga: add a confined file_metadata(path) primitive returning ok({kind,size,modified_unix_ms})/err with exact UTC Unix-ms, err-when-unavailable, and the same sandbox/symlink rules as file_size. Unblocks demo-extensions' model picker + demo-file-processing date demos.
