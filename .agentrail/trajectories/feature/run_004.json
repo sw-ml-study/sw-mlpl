@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "ui-host-launch-inversion"
+  },
+  "action": "applet.rs launcher (worker interpreter + main-thread host + result channel) + require_ui_host_thread guard; env ui_host_thread flag; headless scripted-host TDD (fold + command drain + close); scoped build/clippy/fmt/tests + sw-checklist; env.rs file-LOC trim",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-15T19:35:32"
+}

@@ -1,9 +1,10 @@
 number = 4
 slug = "ui-host-launch-inversion"
-status = "in-progress"
+status = "completed"
 description = "Fourth step of extensions-event-loop. Build the 'parked main' UI-host launch ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-15T16:01:48"
+completed_at = "2026-08-15T19:35:32"
 task_type = "feature"
-commits = []
+commits = ["b266784301713c3c93c3aed4d6e233fc1a71c798"]
