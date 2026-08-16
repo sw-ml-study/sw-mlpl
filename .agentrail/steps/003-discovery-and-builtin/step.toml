@@ -1,0 +1,9 @@
+number = 3
+slug = "discovery-and-builtin"
+status = "pending"
+description = "Third step of extensions-dynamic-load. Wire dynamic loading into the interpre..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T09:19:37"
+task_type = "feature"
+commits = []

@@ -1,9 +1,10 @@
 number = 2
 slug = "dynamic-loader"
-status = "in-progress"
+status = "completed"
 description = "Second step of extensions-dynamic-load. Extract the dlopen-and-register logic..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T08:50:14"
+completed_at = "2026-08-16T09:19:37"
 task_type = "feature"
-commits = []
+commits = ["1c2a63c48ae46ce3d657b5e3b056ae0636c9b819"]
