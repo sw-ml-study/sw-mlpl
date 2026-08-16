@@ -1,9 +1,10 @@
 number = 1
 slug = "loader-gate"
-status = "in-progress"
+status = "completed"
 description = "First step of extensions-dynamic-load. Land a KEPT regression of the B3 spike..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T08:35:07"
+completed_at = "2026-08-16T08:50:14"
 task_type = "feature"
-commits = []
+commits = ["31404d5f749c21b7e90cd36d09d0e723a473b42e"]

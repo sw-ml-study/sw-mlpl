@@ -1,0 +1,9 @@
+number = 2
+slug = "dynamic-loader"
+status = "pending"
+description = "Second step of extensions-dynamic-load. Extract the dlopen-and-register logic..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T08:50:14"
+task_type = "feature"
+commits = []

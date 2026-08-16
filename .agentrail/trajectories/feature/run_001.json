@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "loader-gate"
+  },
+  "action": "cdylib fixture crate + dlopen/register/invoke test (self-builds artifact, platform-aware path); scoped build/clippy/fmt/test + sw-checklist; slice helper to hold LOC budget",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-16T08:50:14"
+}
