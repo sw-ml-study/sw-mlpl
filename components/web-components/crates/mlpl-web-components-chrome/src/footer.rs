@@ -70,9 +70,10 @@ const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
     (
         "Programming",
         &[
+            ("demo-algorithms", "General-purpose algorithms in MLPL."),
             (
-                "demo-algorithms",
-                "General-purpose data structures and algorithms in MLPL.",
+                "demo-data-structures",
+                "General-purpose data structures in MLPL.",
             ),
             (
                 "demo-extensions",
