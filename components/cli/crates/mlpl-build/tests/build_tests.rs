@@ -500,6 +500,42 @@ fn text_conversions_compile_and_run() {
 }
 
 #[test]
+fn decode_bytes_loud_rejects_out_of_range_cell() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("decodebytes-reject");
+    let src_path = tmp.join("prog.mlpl");
+    // 256 is out of 0..=255. decode_bytes returns a String (not a
+    // Result), so this is a HARD error -- the compiled binary must
+    // FAIL loudly (non-zero exit), never truncate 256 to a byte.
+    // Interpreter parity: mlpl-eval decode_bytes -> array_to_bytes
+    // raises EvalError, aborting the program.
+    std::fs::write(&src_path, "decode_bytes([256])\n").unwrap();
+    let out_path = tmp.join("prog");
+    let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
+    assert!(
+        result.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&result.stderr)
+    );
+    let run = Command::new(&out_path)
+        .current_dir(&tmp)
+        .output()
+        .expect("run binary");
+    assert!(
+        !run.status.success(),
+        "decode_bytes([256]) must abort, not exit 0"
+    );
+    let err = String::from_utf8_lossy(&run.stderr);
+    assert!(
+        err.contains("decode_bytes") && err.contains("256"),
+        "expected a loud decode_bytes reject naming 256, got: {err}"
+    );
+}
+
+#[test]
 fn parse_error_reports_source_location_not_rustc_cascade() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
