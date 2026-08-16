@@ -1,9 +1,10 @@
 number = 1
 slug = "interpreter-primitive"
-status = "pending"
+status = "completed"
 description = "Implement file_metadata(path) in the interpreter. New module fs_meta.rs with ..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T15:44:26"
+completed_at = "2026-08-16T16:11:39"
 task_type = "feature"
-commits = []
+commits = ["0f4d0e322bf84c613043fa4ec3b406e86a7f6167"]
