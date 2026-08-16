@@ -1,9 +1,10 @@
 number = 3
 slug = "to-int"
-status = "pending"
+status = "completed"
 description = "Harden the to_int acceptance in the compiled path. The lowering shipped in a7..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T15:27:18"
+completed_at = "2026-08-16T15:28:27"
 task_type = "feature"
-commits = []
+commits = ["84caa07fcbc2c8dac812c88d5d998d651802cf82"]

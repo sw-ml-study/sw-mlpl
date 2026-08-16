@@ -1,0 +1,1 @@
+Hardened step-003 acceptance for to_int: added a compiled e2e asserting to_int("xyz") prints a recoverable err( Result naming the bad input (not a panic -- to_int returns CVal::Result), alongside the existing to_int("42") -> ok(42) happy path. Lowering pre-shipped in a7d1a3c3.
