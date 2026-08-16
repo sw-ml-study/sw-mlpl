@@ -1,0 +1,9 @@
+number = 1
+slug = "loader-gate"
+status = "pending"
+description = "First step of extensions-dynamic-load. Land a KEPT regression of the B3 spike..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T08:35:07"
+task_type = "feature"
+commits = []
