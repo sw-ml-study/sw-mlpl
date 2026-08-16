@@ -1,0 +1,1 @@
+Hardened step-002 acceptance for decode_bytes: added a compiled e2e proving loud-reject parity -- decode_bytes([256]) aborts the binary non-zero with a message naming 256 (never truncates), matching the interpreter's array_to_bytes EvalError. Kept the round-trip assertion. Lowering pre-shipped in a7d1a3c3.
