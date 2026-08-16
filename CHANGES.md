@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-16
 
+- chore(agentrail): complete 002-docs-close; close file-metadata-timestamp saga
+- docs(fs): close file-metadata-timestamp; catalog + glossary + lang-reference
+- chore(agentrail): complete 001-interpreter-primitive; queue 002-docs-close
+- feat(eval): add confined file_metadata(path) primitive
+- chore(agentrail): init file-metadata-timestamp saga; queue 001-interpreter-primitive
+- chore(agentrail): archive completed compiler-text-ops saga
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-docs-close; close compiler-text-ops saga
 - docs(compiler): close compiler-text-ops; mark io-parity rungs + queue file-metadata
 - chore(agentrail): complete 003-to-int; queue 004-docs-close
