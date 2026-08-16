@@ -1,0 +1,1 @@
+Initialized compiler-process-semantics saga: lower print/eprint/exit/read_stdin to the compile-to-Rust path and fix the generated main's spurious trailing Display line after binary stdout. Last compiler rung before the standalone hexdump/WAV CLI capstone.

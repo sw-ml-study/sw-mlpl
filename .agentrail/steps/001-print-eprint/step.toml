@@ -1,0 +1,9 @@
+number = 1
+slug = "print-eprint"
+status = "pending"
+description = "Lower print/1 and eprint/1 in the compile-to-Rust path. Add runtime functions..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T16:24:54"
+task_type = "feature"
+commits = []
