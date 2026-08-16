@@ -30,14 +30,14 @@ unchanged; the missing piece is only the loader + discovery + trigger.
 
 ```
   bin/app  (small: app + mlpl-rt + compiled MLPL library)
-    │  load_extension("native3d")  -- an MLPL builtin
-    ▼
+    |  load_extension("native3d")  -- an MLPL builtin
+    v
   loader (mlpl-rt / mlpl-extension-loader)
-    │  resolve name -> path via MLPL_EXTENSION_PATH
-    │  dlopen(path) [libloading]  ->  resolve sw_mlpl_extension_v1
-    │  validate abi_version + struct_size, register_c_extension(desc)
-    │  KEEP the library handle alive for the process (no dlclose in v1)
-    ▼
+    |  resolve name -> path via MLPL_EXTENSION_PATH
+    |  dlopen(path) [libloading]  ->  resolve sw_mlpl_extension_v1
+    |  validate abi_version + struct_size, register_c_extension(desc)
+    |  KEEP the library handle alive for the process (no dlclose in v1)
+    v
   native3d:*  and the Port / UI-host contract resolve as usual
 ```
 
