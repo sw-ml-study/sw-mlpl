@@ -67,5 +67,15 @@ fn poll_drains_queued_events_then_empties() {
     assert_eq!(scalar(&mut env, "port_poll(p).count"), 2.0);
     // the drain consumed them
     assert_eq!(scalar(&mut env, "port_poll(p).count"), 0.0);
+
+    // bounded delivery: poll(p, limit) returns at most `limit`.
+    for _ in 0..5 {
+        ev_tx
+            .send(Value::Array(DenseArray::from_scalar(1.0)))
+            .unwrap();
+    }
+    assert_eq!(scalar(&mut env, "port_poll(p, 2).count"), 2.0); // capped
+    assert_eq!(scalar(&mut env, "port_poll(p, 2).count"), 2.0);
+    assert_eq!(scalar(&mut env, "port_poll(p).count"), 1.0); // remainder, unbounded
     let _keep = ev_tx;
 }

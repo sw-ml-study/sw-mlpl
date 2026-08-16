@@ -124,6 +124,38 @@ an env built on the main thread MOVES into a worker and evals there.
   event to start; a subscriber list is a later refinement.
 - Dynamic loading (B3), compiler parity (B2), `use`-facade (B1).
 
+## Provider contract
+
+A native provider (e.g. demo-extensions, wgpu/winit) plugs in as the UI
+host -- the `FnOnce(cmd_rx, ev_tx)` that `run_applet_with_host` runs on
+the main thread. The contract:
+
+- **Own the main thread and the loop.** The provider creates its
+  `winit` `EventLoop` on the main thread and runs it there; it pumps
+  non-blocking so it can also service the port.
+- **Forward events (UI -> applet).** Each input/window event is sent
+  into `ev_tx` as a record with a string `kind` field
+  (`"key"`, `"pointer"`, `"resize"`, `"close"`, ...) plus event-specific
+  fields. `"close"` is the terminal event: it makes the applet's
+  `run(port, ...)` return.
+- **Apply commands (applet -> UI).** The provider drains `cmd_rx` and
+  applies each command to its scene. The command vocabulary is
+  provider-defined (e.g. a record `{op: "set_lines", ...}` or a packed
+  array); sw-mlpl treats commands as opaque owned `Value`s.
+- **Bounded delivery.** The applet consumes events either by
+  registering handlers and calling `run(port, state)` (push), or by
+  calling `port_poll(port, limit)` in its own loop (pull) -- which
+  returns at most `limit` events per call so a burst cannot starve a
+  frame.
+- **Lifecycle.** Native-UI ports require the local main-thread launch
+  path (`require_ui_host_thread`); a connect/serve worker eval is a
+  clear error. On `"close"`, `run` returns, the applet ends, and the
+  host returns so the process exits deterministically.
+
+Only owned `Value`s cross the channels (arrays, records, handles from
+the shipped boundary), so the provider and the interpreter never share
+mutable state.
+
 ## The hard parts the saga must land
 
 1. **Launch inversion** -- process entry keeps the main thread free and

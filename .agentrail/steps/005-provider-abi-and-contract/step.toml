@@ -1,6 +1,6 @@
 number = 5
 slug = "provider-abi-and-contract"
-status = "pending"
+status = "in-progress"
 description = "Fifth step of extensions-event-loop. Define the C-ABI + contract a native pro..."
 role = "legacy"
 context_files = []

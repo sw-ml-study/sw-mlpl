@@ -3,9 +3,40 @@
 //! and build the two error kinds. Kept separate from `fncall_dispatch`
 //! so each module stays within its function budget.
 
+use std::collections::BTreeMap;
+use std::sync::mpsc::Receiver;
+
+use mlpl_array::DenseArray;
+
 use crate::env::Environment;
 use mlpl_eval_env::PORT_EXTENSION_ID;
 use mlpl_eval_types::{EvalError, Value};
+
+/// Drain up to `limit` queued events into a batch record
+/// `{count: N, items: {000000: ev, ...}}` -- bounded delivery. An empty
+/// queue yields `{count: 0, items: {}}`; the drain stops at `limit`
+/// even if more are queued (they stay for the next poll).
+pub(crate) fn event_batch(rx: &Receiver<Value>, limit: usize) -> Value {
+    let mut items = BTreeMap::new();
+    while items.len() < limit {
+        match rx.try_recv() {
+            Ok(event) => {
+                items.insert(format!("{:06}", items.len()), event);
+            }
+            Err(_) => break,
+        }
+    }
+    let n = items.len() as f64;
+    Value::Record {
+        fields: BTreeMap::from([
+            (
+                "count".to_string(),
+                Value::Array(DenseArray::from_scalar(n)),
+            ),
+            ("items".to_string(), Value::Record { fields: items }),
+        ]),
+    }
+}
 
 /// Block for the next event on a port, or `None` if the far end has
 /// hung up. The receiver lock is taken and released within this call

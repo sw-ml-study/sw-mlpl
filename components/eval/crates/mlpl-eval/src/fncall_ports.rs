@@ -6,15 +6,13 @@
 //! command; `port_recv` blocks for one event; `port_poll` non-blocking
 //! drains the queued events into a batch record `{count, items}`.
 
-use std::collections::BTreeMap;
-
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
 use mlpl_trace::Trace;
 
 use crate::env::Environment;
 use crate::eval::eval_expr;
-use crate::port_util::arity_err;
+use crate::port_util::{arity_err, event_batch};
 use mlpl_eval_types::{EvalError, Value};
 
 pub(crate) fn try_dispatch(
@@ -72,31 +70,24 @@ fn eval_recv(
     })
 }
 
-/// `port_poll(port)` -- non-blocking drain of every queued event into a
-/// batch record `{count: N, items: {000000: ev, ...}}`; an empty queue
-/// yields `{count: 0, items: {}}`.
+/// `port_poll(port [, limit])` -- non-blocking drain into a batch
+/// record `{count, items}`. With `limit` it returns at most that many
+/// events (bounded delivery); without, it drains all queued events. An
+/// empty queue yields `{count: 0, items: {}}`.
 fn eval_poll(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    if args.len() != 1 {
+    if args.is_empty() || args.len() > 2 {
         return Err(arity_err("port_poll", 1, args.len()));
     }
     let handle = eval_expr(&args[0], env, trace)?;
+    let limit = match args.get(1) {
+        Some(a) => eval_expr(a, env, trace)?.as_array()?.data()[0].max(0.0) as usize,
+        None => usize::MAX,
+    };
     let port = env.resolve_port(&handle)?;
     let rx = port.events.lock().expect("port receiver lock");
-    let mut items = BTreeMap::new();
-    while let Ok(event) = rx.try_recv() {
-        items.insert(format!("{:06}", items.len()), event);
-    }
-    let n = items.len() as f64;
-    let fields = BTreeMap::from([
-        (
-            "count".to_string(),
-            Value::Array(DenseArray::from_scalar(n)),
-        ),
-        ("items".to_string(), Value::Record { fields: items }),
-    ]);
-    Ok(Value::Record { fields })
+    Ok(event_batch(&rx, limit))
 }
