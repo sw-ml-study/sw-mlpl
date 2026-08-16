@@ -1,0 +1,1 @@
+Hardened step-001 acceptance for tokenize_bytes: added a compiled e2e assertion that tokenize_bytes("Hi") emits the raw byte cells 72 and 105 (not just the reversible round-trip). Confirmed the lowering (shipped in a7d1a3c3: runtime text.rs + CvalIo registry rows + facade) passes end-to-end under MLPL_BUILD_TESTS=1.
