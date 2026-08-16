@@ -1,0 +1,9 @@
+number = 1
+slug = "tokenize-bytes"
+status = "pending"
+description = "Lower tokenize_bytes/1 (str -> rank-1 byte array) in the compile-to-Rust path..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T14:28:52"
+task_type = "feature"
+commits = []
