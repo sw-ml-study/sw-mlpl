@@ -1,6 +1,6 @@
 number = 1
 slug = "loader-gate"
-status = "pending"
+status = "in-progress"
 description = "First step of extensions-dynamic-load. Land a KEPT regression of the B3 spike..."
 role = "legacy"
 context_files = []

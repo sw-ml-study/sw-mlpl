@@ -1,0 +1,23 @@
+[package]
+name = "mlpl-ext-testdylib"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# A cdylib native-extension FIXTURE for the dynamic loader (B3). It
+# exports `sw_mlpl_extension_v1` so a `dlopen`-based loader can resolve
+# the entry, register the C descriptor, and invoke `testext:answer`
+# (-> 42.0) -- the same C descriptor ABI the static path uses, proven
+# across the dlopen edge in CI. `lib` + `cdylib` so the test crate can
+# import ANSWER while cargo also produces the shared library.
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+mlpl-extension-cabi = { path = "../mlpl-extension-cabi" }
+
+[dev-dependencies]
+libloading = "0.8"
+mlpl-extension-abi = { path = "../mlpl-extension-abi" }
+mlpl-extension-registry = { path = "../mlpl-extension-registry" }
