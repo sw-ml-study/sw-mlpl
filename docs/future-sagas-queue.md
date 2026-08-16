@@ -521,8 +521,28 @@ help are live (interpreter/REPL/serve). Remaining follow-ups:
   live handles). First cut may use static provider linkage; dynamic
   loading is not a prerequisite. This is the LARGE next extensions
   saga.
-- **extensions-dynamic-load** -- `cdylib`/`dlopen` + ABI-version
-  negotiation + the manifest/search-path/trust resolver (A4/A7).
+- **extensions-dynamic-load (B3)** SHIPPED -- a provider ships as a
+  `cdylib` exporting `sw_mlpl_extension_v1`; the loader
+  (`mlpl-extension-loader`) `dlopen`s it via `libloading`, resolves +
+  validates the entry (`abi_version` / `struct_size`), registers it
+  through the existing C descriptor ABI, and holds the `Library` handle
+  for the process. `MLPL_EXTENSION_PATH` (colon-separated dirs) resolves
+  a logical name to `lib<name>.dylib`/`.so`; a `load_extension(
+  name_or_path)` builtin triggers it from MLPL; the full value boundary
+  (arrays/records/strings/errors/handles) crosses `dlopen` unchanged.
+  Interpreter-only and native-only (`libloading` has no wasm backend, so
+  the browser playground omits the builtin). A headless provider-shaped
+  test cdylib (`mlpl-ext-testdylib`) pins the round-trip. See
+  `docs/extensions-dynamic-load-design.md`. Follow-ons below (compiler
+  parity, dlclose, manifest/A7, use-facade).
+- **extensions-dynamic-load follow-ons** (after B3) -- (a) **dlclose /
+  unload / hot-reload** -- v1 never unloads (the handle is held for the
+  process); a later saga adds refcounted unload + reload, which needs a
+  registry that can retract a namespace safely. (b) **manifest / trust
+  resolver (A7)** -- today discovery is a bare `MLPL_EXTENSION_PATH`
+  directory search with no signing or version pinning; add a manifest
+  (declared exports + ABI range + checksum/signature) and a trust policy
+  before loading. These are orthogonal to the compiler-parity work.
 - **extensions-arrays-handles** SHIPPED -- dense `f64` array
   marshaling BOTH directions (call-lifetime rooting) + opaque
   native-handle values (mint-on-return, provider-validated,

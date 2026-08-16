@@ -68,11 +68,30 @@ MLPL the interpreter already runs; the compiler surface is the gate.
       + structured record returns (named fields, nested). The data
       boundary for the interpreted interactive native-3D demo; only
       the event loop (B6) remains for the live loop.
-- [ ] **extensions-dynamic-load (B3)** -- `dlopen` a provider,
-      resolve `sw_mlpl_extension_v1`, validate + register; residency
-      + atomic-load + quiescence-for-unload policy.
+- [x] **extensions-dynamic-load (B3)** -- SHIPPED (interpreted). A
+      provider builds as a `cdylib` exporting `sw_mlpl_extension_v1`; the
+      loader (`mlpl-extension-loader`) `dlopen`s it via `libloading`,
+      resolves + validates the entry (`abi_version` / `struct_size`),
+      registers it through the same C descriptor ABI as a static
+      provider, and holds the `Library` handle for the process (v1 never
+      unloads). `MLPL_EXTENSION_PATH` (colon-separated dirs) resolves a
+      logical name to `lib<name>.dylib`/`.so`; the `load_extension(
+      name_or_path)` builtin triggers it from MLPL and returns the
+      namespace; the full value boundary (arrays / records / strings /
+      errors / handles) crosses `dlopen` unchanged. Native-only
+      (`libloading` has no wasm backend; the browser playground omits the
+      builtin). So a small app can `dlopen` a large native3d provider
+      instead of linking one giant binary -- the small COMPILED app that
+      does so still needs the compiler to lower `load_extension` +
+      extension/Port calls (extensions-compiler-parity, B2). Pinned by a
+      headless provider-shaped test cdylib (`mlpl-ext-testdylib`). See
+      docs/extensions-dynamic-load-design.md.
 - [ ] **extensions-package-trust (B7)** -- manifest + search-path +
-      trust resolver (needs B3).
+      trust resolver (needs B3, now shipped). Today discovery is a bare
+      `MLPL_EXTENSION_PATH` directory search with no signing or version
+      pinning; add a manifest (declared exports + ABI range + checksum /
+      signature) and a trust policy. `dlclose` / unload / hot-reload is a
+      separate follow-on (v1 holds the handle for the process).
 - [x] **extensions-event-loop (B6)** -- SHIPPED. The Port primitive
       (share-nothing command/event channels), `on`/`off`/`run` handler
       dispatch, bounded `port_poll(port, limit)`, the parked-main launch

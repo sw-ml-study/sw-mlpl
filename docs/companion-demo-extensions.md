@@ -242,5 +242,23 @@ Deferred (deliberately):
   (docs/ports-and-applets.md); the interpreted interactive native-3D app
   runs on these. Compiling such an applet to a native binary is the
   separate **extensions-compiler-parity (B2)** saga.
-- **A4/A7 dynamic loading + manifest/trust resolver** remain later
-  sagas.
+- **A4 dynamic loading** -- SHIPPED (interpreted). A provider builds as
+  a `cdylib` exporting `sw_mlpl_extension_v1`; the loader
+  (`mlpl-extension-loader`) `dlopen`s it, validates the entry
+  (`abi_version` / `struct_size`), registers it through the same C
+  descriptor ABI as a static provider, and holds the `Library` handle
+  for the process (no unload in v1). `MLPL_EXTENSION_PATH`
+  (colon-separated dirs) resolves a logical name to
+  `lib<name>.dylib`/`.so`; the `load_extension(name_or_path)` builtin
+  triggers it from MLPL and returns the namespace; the full value
+  boundary (arrays/records/strings/errors/handles) crosses `dlopen`
+  unchanged. So a small compiled/interpreted app can `dlopen` a large
+  native3d provider instead of linking one giant binary. Native-only
+  (no wasm backend for `libloading`); interpreter-only so far -- the
+  small **compiled** app that dlopens the extension still needs the
+  compiler to lower `load_extension` + extension/Port calls, which is
+  the **extensions-compiler-parity (B2)** saga. See
+  `docs/extensions-dynamic-load-design.md`.
+- **A7 manifest/trust resolver** remains a later saga (today discovery
+  is a bare `MLPL_EXTENSION_PATH` search with no signing or version
+  pinning).

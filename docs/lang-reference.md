@@ -813,6 +813,39 @@ one call. Each returns an SVG string just like `svg()`.
 | `scatter_labeled(points, labels)` | 2 | Nx2 points colored by a length-N cluster-id vector |
 | `train_val_curve(train, val)` | 2 | Two loss vectors (training green, validation peach) on shared axes; the gap between them is overfitting |
 
+## Native Extensions
+
+A native extension is a Rust shared library (`.dylib` on macOS,
+`.so` on Linux) that publishes extra builtin functions under its own
+namespace. MLPL loads one at run time and then calls its functions with
+the `namespace:function(args)` colon spelling.
+
+| Function | Args | Description |
+|----------|------|-------------|
+| `load_extension(name_or_path)` | 1 | Load a native extension shared library and register its functions. Returns the extension's namespace as a `Value::Str` on success, or an err `Value::Result` if the library is missing or invalid. |
+
+Loading by **name** searches `MLPL_EXTENSION_PATH` -- a
+colon-separated list of directories -- for the platform library file
+matching that logical name (`lib<name>.dylib` / `lib<name>.so`).
+Loading by **path** (any string containing a path separator, or ending
+in a shared-library suffix) opens that file directly and ignores the
+search path.
+
+```
+# The run script points MLPL_EXTENSION_PATH at the built libraries, e.g.
+#   MLPL_EXTENSION_PATH=./bin
+ns = load_extension("native3d")   # -> "n3d", the extension's namespace
+n3d:lines(points)                 # call a function the extension registered
+```
+
+Values cross the load boundary with their MLPL shapes intact: numeric
+arrays, records, strings, errors, and opaque native handles pass in and
+out of extension calls the same way they do for built-in functions.
+Once loaded, an extension stays registered for the life of the process
+(there is no unload). For the provider side -- how to build a crate as
+a loadable extension and what it must export -- see
+`docs/extensions-dynamic-load-design.md`.
+
 ## Scripting
 
 Output primitives + Result-returning string conversions for
