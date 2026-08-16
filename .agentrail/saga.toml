@@ -1,6 +1,6 @@
 name = "extensions-dynamic-load"
 status = "active"
-current_step = 3
+current_step = 4
 created_at = "2026-08-16T08:31:52"
 plan_file = ".agentrail/plan.md"
 retroactive = false

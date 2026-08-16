@@ -1,0 +1,9 @@
+number = 4
+slug = "cdylib-packaging-and-contract"
+status = "pending"
+description = "Fourth step of extensions-dynamic-load. Document the provider cdylib packagin..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T10:04:43"
+task_type = "feature"
+commits = []
