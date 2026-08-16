@@ -105,6 +105,7 @@ mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-m
 mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-extension-abi = { path = "../../../runtime-core/crates/mlpl-extension-abi" }
+mlpl-extension-loader = { path = "../../../runtime-core/crates/mlpl-extension-loader" }
 mlpl-extension-registry = { path = "../../../runtime-core/crates/mlpl-extension-registry" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }

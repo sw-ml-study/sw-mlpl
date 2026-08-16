@@ -1,6 +1,6 @@
 number = 3
 slug = "discovery-and-builtin"
-status = "pending"
+status = "in-progress"
 description = "Third step of extensions-dynamic-load. Wire dynamic loading into the interpre..."
 role = "legacy"
 context_files = []

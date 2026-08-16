@@ -87,6 +87,7 @@ mod fncall_engram;
 mod fncall_engram_args;
 mod fncall_events;
 mod fncall_ext;
+mod fncall_extload;
 mod fncall_fs;
 mod fncall_gen;
 mod fncall_gen_controls;

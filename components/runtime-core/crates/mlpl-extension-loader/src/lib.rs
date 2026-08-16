@@ -6,7 +6,7 @@
 //! for the process (no `dlclose` in v1), since the descriptor's
 //! function pointers live inside it. `libloading` stays confined here.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
 use libloading::{Library, Symbol};
@@ -18,6 +18,38 @@ static LIBS: OnceLock<Mutex<Vec<Library>>> = OnceLock::new();
 
 fn libs() -> &'static Mutex<Vec<Library>> {
     LIBS.get_or_init(|| Mutex::new(Vec::new()))
+}
+
+/// Resolve a logical extension name to a shared-library path by
+/// searching `MLPL_EXTENSION_PATH` (colon-separated directories) for
+/// the platform filename (`libNAME.dylib` on macOS, `libNAME.so` on
+/// Linux, `NAME.dll` on Windows). This is the path a `justfile` / run
+/// script points at the built extensions.
+///
+/// # Errors
+/// Returns a message naming the file and the directories searched if no
+/// matching library is found.
+pub fn resolve_extension_path(name: &str) -> Result<PathBuf, String> {
+    let file = format!(
+        "{}{name}.{}",
+        std::env::consts::DLL_PREFIX,
+        std::env::consts::DLL_EXTENSION
+    );
+    let raw = std::env::var("MLPL_EXTENSION_PATH").unwrap_or_default();
+    let dirs: Vec<PathBuf> = raw
+        .split(':')
+        .filter(|s| !s.is_empty())
+        .map(PathBuf::from)
+        .collect();
+    for dir in &dirs {
+        let candidate = dir.join(&file);
+        if candidate.exists() {
+            return Ok(candidate);
+        }
+    }
+    Err(format!(
+        "extension '{name}' ({file}) not found in MLPL_EXTENSION_PATH {dirs:?}"
+    ))
 }
 
 /// Load a provider cdylib at `path`, register its extension, and return
