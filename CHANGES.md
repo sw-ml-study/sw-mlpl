@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-15
 
+- chore(agentrail): complete 006-docs-demo-close; close extensions-event-loop saga
+- docs(extensions): document ports/applets; close event-loop saga; queue B2
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 005-provider-abi-and-contract; queue 006-docs-demo-close
 - feat(extensions): bounded event delivery + provider contract (B6)
 - docs(changes): refresh CHANGES.md to HEAD
