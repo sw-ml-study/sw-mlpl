@@ -499,12 +499,28 @@ help are live (interpreter/REPL/serve). Remaining follow-ups:
   `use hello` construct + dotted `hello.answer()` grammar +
   `module.mlpl` facade (public/private publish). Until this, call
   extensions with the colon spelling `hello:answer()`.
-- **extensions-compiler-parity** (after `compiler-io-parity`) --
-  a link-time static-provider hook in `mlpl-lower-rs` calling the
-  SAME `mlpl_extension_registry::register` at generated-`main`
-  startup, so compiled binaries resolve extensions against the
-  identical registry with no runtime parser. This is the
-  "explicit follow-up contract" the downstream repo requested.
+- **extensions-compiler-parity (B2)** (after `compiler-io-parity`) --
+  compile an extension + event-loop applet to a self-contained native
+  binary, with the same behavior as the interpreter. The interpreted
+  interactive native-3D app already works; this makes the SAME source
+  emit a native executable. Scoped from
+  demo-extensions/docs/compile-3d-app-blocked.md, the requirements are:
+  (1) compiled provider registration -- a generated-`main` startup hook
+  calling the SAME `mlpl_extension_registry::register` (no runtime
+  parser); (2) parked-main launch inversion in generated code (winit on
+  main, compiled MLPL on a worker) as a compiler/runtime contract, not
+  app-specific Rust; (3) compiled Port + `on`/`off`/`run` + bounded
+  poll + shutdown parity; (4) value-boundary parity (arrays, records,
+  strings, errors, generational handles across compiled provider calls
+  with the same shape/ownership/lifetime); (5) module/include packaging
+  (resolve + embed the app and its MLPL library without source-tree
+  paths at runtime); (6) native artifact linkage (MLPL runtime +
+  provider + winit/wgpu + platform libs, no unstable ABI); (7)
+  target-aware macOS/Linux packaging (same source, target-selected
+  backend); (8) deterministic failure/teardown (no leaked threads or
+  live handles). First cut may use static provider linkage; dynamic
+  loading is not a prerequisite. This is the LARGE next extensions
+  saga.
 - **extensions-dynamic-load** -- `cdylib`/`dlopen` + ABI-version
   negotiation + the manifest/search-path/trust resolver (A4/A7).
 - **extensions-arrays-handles** SHIPPED -- dense `f64` array
@@ -512,11 +528,25 @@ help are live (interpreter/REPL/serve). Remaining follow-ups:
   native-handle values (mint-on-return, provider-validated,
   non-forgeable) + structured record returns (named fields, nested).
   The data boundary for the interpreted interactive native-3D demo.
-- **extensions-event-loop (B6)** -- host policy for native windows /
-  event delivery (`poll_events`), main-thread ownership, and
-  reentrancy, built on handles + record returns. The remaining gate
-  for the LIVE interactive native-3D demo; every data primitive it
-  builds on is shipped, so this is the clean next extensions saga.
+- **extensions-event-loop (B6)** SHIPPED -- the Port primitive
+  (share-nothing command/event channels), `on`/`off`/`run` handler
+  dispatch, bounded `port_poll(port, limit)`, the parked-main launch
+  inversion (interpreter on a worker, UI host on main), and the
+  provider-as-Rust-UI-host contract. The INTERPRETED interactive
+  native-3D app runs on these (docs/ports-and-applets.md,
+  docs/extensions-event-loop-design.md).
+- **event-loop follow-ons** (small, after B6) -- (a) responsive-worker
+  escalation: move the interpreter off the main thread's critical path
+  so a heavy handler cannot delay the render thread (channel + snapshot
+  handoff; only needed if a demo shows jank); (b) pub/sub topics /
+  multiple handlers per event (today one handler per kind); (c)
+  connect-mode main-thread handoff so native-UI ports work over
+  serve/connect (today local-only). None block the compiled-app work.
+- **split `mlpl-eval-env`** -- the crate is AT its 7-module ceiling, so
+  the port table + `register_port`/`resolve_port` + the `ui_host_thread`
+  flag had to live in `env.rs` (now near its file-LOC budget). Peel the
+  port/handler state into a sibling crate to restore headroom; pairs
+  with the queued `mlpl-extension-cabi` split.
 - **extensions-c-abi-adapter** SHIPPED 2026-08-09 --
   `mlpl-extension-cabi` publishes the canonical `#[repr(C)]` V1
   boundary + `register_c_extension(*const ExtensionDescriptorV1)`,

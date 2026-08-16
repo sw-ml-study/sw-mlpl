@@ -235,6 +235,12 @@ Deferred (deliberately):
   lands.
 - **A3 arrays / native handles / record returns** -- SHIPPED (dense
   `f64` arrays both directions, opaque handles, structured record
-  returns). **A4/A7 dynamic loading + manifest/trust resolver** and
-  **A8 event loop** (native-window / event-delivery policy on top of
-  handles) remain later sagas.
+  returns).
+- **A8 event loop** -- SHIPPED (interpreted). The Port primitive,
+  `on`/`off`/`run` handler dispatch, bounded `port_poll(port, limit)`,
+  the parked-main launch inversion, and the provider-as-UI-host contract
+  (docs/ports-and-applets.md); the interpreted interactive native-3D app
+  runs on these. Compiling such an applet to a native binary is the
+  separate **extensions-compiler-parity (B2)** saga.
+- **A4/A7 dynamic loading + manifest/trust resolver** remain later
+  sagas.

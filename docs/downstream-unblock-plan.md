@@ -73,8 +73,25 @@ MLPL the interpreter already runs; the compiler surface is the gate.
       + atomic-load + quiescence-for-unload policy.
 - [ ] **extensions-package-trust (B7)** -- manifest + search-path +
       trust resolver (needs B3).
-- [ ] **extensions-event-loop (B6)** -- host policy for native
-      windows / event delivery (needs B5 + main-thread/reentrancy).
+- [x] **extensions-event-loop (B6)** -- SHIPPED. The Port primitive
+      (share-nothing command/event channels), `on`/`off`/`run` handler
+      dispatch, bounded `port_poll(port, limit)`, the parked-main launch
+      inversion (interpreter on a worker, UI host on the main thread),
+      and the provider contract (the provider plugs in as the Rust
+      UI-host closure). The INTERPRETED interactive native-3D app works
+      end to end on these primitives. See docs/ports-and-applets.md and
+      docs/extensions-event-loop-design.md.
+- [ ] **extensions-compiler-parity (B2)** -- compile an extension +
+      event-loop applet to a self-contained native binary. Needs
+      compiler/runtime parity with the interpreted host path: compiled
+      provider registration, parked-main launch inversion in generated
+      code, compiled Port + handler parity, value-boundary parity
+      (arrays / records / errors / handles across compiled provider
+      calls), module/include packaging, native provider+winit/wgpu
+      linkage (no unstable ABI), target-aware macOS/Linux packaging, and
+      deterministic teardown. Scoped from
+      demo-extensions/docs/compile-3d-app-blocked.md; queued in
+      docs/future-sagas-queue.md.
 
 ## Track C -- Codec (unblocks demo-algorithms)
 

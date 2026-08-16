@@ -1,6 +1,6 @@
 number = 6
 slug = "docs-demo-close"
-status = "pending"
+status = "in-progress"
 description = "Final step of extensions-event-loop. Document what shipped and close the saga..."
 role = "legacy"
 context_files = []
