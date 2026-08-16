@@ -87,6 +87,8 @@ mod fncall_engram;
 mod fncall_engram_args;
 mod fncall_events;
 mod fncall_ext;
+// Dynamic extension loading (dlopen) is native-only -- no wasm backend.
+#[cfg(not(target_arch = "wasm32"))]
 mod fncall_extload;
 mod fncall_fs;
 mod fncall_gen;

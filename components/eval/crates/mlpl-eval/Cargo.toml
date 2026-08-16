@@ -105,7 +105,6 @@ mlpl-array-ops-matmul = { path = "../../../array-compose/crates/mlpl-array-ops-m
 mlpl-autograd = { path = "../../../autograd/crates/mlpl-autograd" }
 mlpl-runtime = { path = "../../../runtime-core/crates/mlpl-runtime" }
 mlpl-extension-abi = { path = "../../../runtime-core/crates/mlpl-extension-abi" }
-mlpl-extension-loader = { path = "../../../runtime-core/crates/mlpl-extension-loader" }
 mlpl-extension-registry = { path = "../../../runtime-core/crates/mlpl-extension-registry" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }
 mlpl-viz = { path = "../../../viz/crates/mlpl-viz" }
@@ -121,6 +120,12 @@ png = { version = "0.17", optional = true }
 jpeg-decoder = { version = "0.3", optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+
+# Dynamic extension loading (dlopen) is native-only -- libloading has no
+# wasm32 backend, and the browser playground cannot load shared
+# libraries. The `load_extension` builtin is gated to non-wasm targets.
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+mlpl-extension-loader = { path = "../../../runtime-core/crates/mlpl-extension-loader" }
 
 [dev-dependencies]
 mlpl-lower-rs = { path = "../../../syntax-codegen/crates/mlpl-lower-rs" }

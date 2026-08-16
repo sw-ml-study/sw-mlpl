@@ -45,6 +45,8 @@ const DISPATCHERS: &[Dispatcher] = &[
     crate::fncall_record_keys::try_dispatch,
     crate::fncall_ports::try_dispatch,
     crate::fncall_dispatch::try_dispatch,
+    // load_extension is native-only (dlopen has no wasm backend).
+    #[cfg(not(target_arch = "wasm32"))]
     crate::fncall_extload::try_dispatch,
     crate::fncall_events::try_dispatch,
     crate::fncall_globals::try_dispatch,
