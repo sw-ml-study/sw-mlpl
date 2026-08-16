@@ -1775,6 +1775,20 @@ seek form to bound and validate offsets when scanning a large
 file (for example, reading a safetensors 8-byte header-length
 prefix, then the header JSON, without loading the tensor data).
 
+## file_metadata (builtin)
+
+`file_metadata(path)` returns `ok({kind, size, modified_unix_ms})`
+/ `err(...)` for a file inside the sandbox -- the same
+`--source-dir` root and symlink-escape rules as [[file_size
+(builtin)]]. `kind` is `"file"`, `"dir"`, or `"other"`; `size` is
+the byte length; `modified_unix_ms` is the file's last-MODIFIED
+time as an exact UTC Unix-millisecond integer. It reports the
+modification time only -- never access time, creation/birth time,
+local time, or the current clock -- and a platform with no
+modification time is an `err`, never a silent `0`. Formatting,
+timezone, and sorting are application concerns: MLPL hands back
+the raw epoch value.
+
 ## write_stdout (builtin)
 
 `write_stdout(bytes)` writes a rank-`<=1` byte array (integers

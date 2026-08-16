@@ -262,3 +262,13 @@ Deferred (deliberately):
 - **A7 manifest/trust resolver** remains a later saga (today discovery
   is a bare `MLPL_EXTENSION_PATH` search with no signing or version
   pinning).
+- **Confined file modification time** -- SHIPPED (interpreter). The
+  real-file Model Atlas picker can now show + sort by date:
+  `file_metadata(path) -> ok({kind, size, modified_unix_ms}) / err`
+  returns the last-MODIFIED time as an exact UTC Unix-millisecond
+  integer (never access/creation/local time or the current clock; an
+  unavailable timestamp is an `err`, not a silent 0), under the same
+  `env.fs_root` + symlink-escape confinement as `file_size`. sw-mlpl
+  owns the primitive; ../demo-file-processing teaches/tests it; the
+  compile-to-Rust lowering is a queued follow-on
+  (`file-metadata-compiler-parity`).

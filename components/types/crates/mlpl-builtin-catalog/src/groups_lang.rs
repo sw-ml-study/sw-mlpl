@@ -189,6 +189,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "sandboxed byte count from metadata (no read); ok(count)/err",
             ),
             (
+                "file_metadata",
+                "file_metadata(path)",
+                "sandboxed metadata record ok({kind, size, modified_unix_ms})/err; modified_unix_ms is the exact UTC Unix-ms modification time (err when unavailable)",
+            ),
+            (
                 "write_bytes",
                 "write_bytes(path, bytes)",
                 "sandboxed raw-byte file write; bytes a rank-<=1 array of integers 0..=255; returns ok(1)/err",

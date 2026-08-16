@@ -119,17 +119,22 @@ state.
 
 ## File metadata: last-modified timestamp
 
-A separate upstream ask (raised by ../demo-extensions' model picker,
-noted 2026-08-16; also blocks date-scanning demos here): a confined
-`file_metadata` / `file_modified_ms` primitive returning a file's
-last-modified time as an exact UTC Unix-millisecond value, with an
-EXPLICIT `err` Result when the timestamp is unavailable (never a
-silent 0 / sentinel) and the SAME sandbox + symlink protections as
-`read_bytes` / `file_size`. Ownership split: sw-mlpl provides the
-primitive; this repo demonstrates + tests date scanning, sorting,
-formatting, unavailable-timestamp handling, and platform parity once
-it ships; ../demo-extensions consumes it. Queued as
-`file-metadata-timestamp` in docs/future-sagas-queue.md.
+SHIPPED (interpreter). `file_metadata(path) -> ok({kind, size,
+modified_unix_ms}) / err` exposes a file's last-MODIFIED time as an
+exact UTC Unix-millisecond integer, with an EXPLICIT `err` when the
+timestamp is unavailable (never a silent 0 / sentinel) and the SAME
+sandbox + symlink protections as `read_bytes` / `file_size`. It is the
+modification time only -- never access/creation/local time or the
+current clock. `kind` is "file"/"dir"/"other"; `size` is the byte
+length. Formatting, timezone, and sort order are application concerns:
+MLPL returns the raw epoch value.
+
+Downstream split: sw-mlpl owns the primitive; THIS repo demonstrates +
+tests bounded metadata scans, date sorting/formatting,
+unavailable-timestamp handling, and macOS/Linux fixtures; the picker in
+../demo-extensions consumes the same API. `demo-file-processing` should
+not add a competing native filesystem API. The compile-to-Rust lowering
+is a queued follow-on (`file-metadata-compiler-parity`).
 
 ## Third gate: authorized codec extensions
 

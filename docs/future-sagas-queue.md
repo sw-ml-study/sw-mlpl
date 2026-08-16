@@ -649,22 +649,25 @@ chunking -- a COMPOSITIONAL effects surface:
   error/lifecycle semantics; must reproduce the range-reader
   results across split fields. Enables true stdin-driven
   streaming.
-- **file-metadata-timestamp** (BLOCKS ../demo-extensions +
-  ../demo-file-processing, noted 2026-08-16) -- a confined
-  `file_metadata` / `file_modified_ms` primitive returning a file's
-  last-modified time as an exact UTC Unix-millisecond value, with an
+- **file-metadata-timestamp** SHIPPED (interpreter) -- `file_metadata(
+  path) -> ok({kind, size, modified_unix_ms}) / err`: a file's
+  last-MODIFIED time as an exact UTC Unix-millisecond integer, with an
   EXPLICIT `err` Result when the timestamp is unavailable (never a
-  silent 0 / sentinel), and UNCHANGED sandbox + symlink protections
-  (same confinement as `read_bytes` / `file_size`). Ownership split
-  from the downstream docs (demo-extensions/docs/sw-mlpl-blockers.md,
-  upstream-contract.md, model-atlas-real-files.md): THIS repo provides
-  the primitive; ../demo-file-processing demonstrates + tests date
-  scanning / sorting / formatting / unavailable-timestamp / platform
-  parity; ../demo-extensions consumes it for its model picker. Small,
-  well-scoped, and an ACTIVE downstream blocker -- a candidate to
-  sequence ahead of compiler-process-semantics. Mirror the interpreter
-  `file_size` dispatch (fncall_fs.rs) + sandbox root; the compiled path
-  can follow in a later compiler rung.
+  silent 0 / sentinel), and the SAME sandbox + symlink protections as
+  `file_size` (`env.fs_root` + `contained`). Reports the modification
+  time only -- never access/creation/local time or the current clock.
+  `kind` is "file"/"dir"/"other"; `size` is the byte length. New
+  `fs_meta.rs` mirrors `fs_range.rs` file_size; catalogued + in the
+  glossary + lang-reference. Pinned by `file_metadata_tests.rs`
+  (wall-clock-independent exact-mtime assertion, dir kind, missing-file
+  err, no-sandbox err, unix symlink-escape refusal). This unblocked
+  ../demo-extensions' model picker and ../demo-file-processing's date
+  demos (they consume + demonstrate it).
+- **file-metadata-compiler-parity** (follow-on) -- lower
+  `file_metadata` to the compile-to-Rust path (a `CVal` record return
+  from `mlpl-rt-fsio`, sharing the sandbox root + err semantics), so a
+  compiled binary can read modification times too. Rides the
+  compiler-io-parity track after process semantics.
 
 Authorized codec extensions (their third gate) ride the
 `extensions-*` track (trust/authorization resolver + dynamic
