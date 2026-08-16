@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-16
 
+- chore(agentrail): complete 004-cdylib-packaging-and-contract; queue 005-docs-close
+- feat(extensions): cdylib packaging convention + array-across-dlopen (B3)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 003-discovery-and-builtin; queue 004-cdylib-packaging-and-contract
 - feat(extensions): load_extension builtin + MLPL_EXTENSION_PATH discovery (B3)
 - docs(changes): refresh CHANGES.md to HEAD
