@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "cdylib-packaging-and-contract"
+  },
+  "action": "fixture split (lib facade + provider module) + func/slice helpers; inv_sum array reader; packaging-convention doc section; load_extension_tests array assertion; scoped build/clippy/fmt/test + markdown + sw-checklist",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-16T10:47:12"
+}

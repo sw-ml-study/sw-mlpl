@@ -1,9 +1,10 @@
 number = 4
 slug = "cdylib-packaging-and-contract"
-status = "in-progress"
+status = "completed"
 description = "Fourth step of extensions-dynamic-load. Document the provider cdylib packagin..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T10:04:43"
+completed_at = "2026-08-16T10:47:12"
 task_type = "feature"
-commits = []
+commits = ["6ae5cec5cabef2b77aa12f520ba210edf032e585"]
