@@ -672,6 +672,22 @@ order:
   arg-driven paths / top-level unwrap / chunked stdin ride the streaming
   saga).
 
+**scan-length-prefixed streaming primitive** (BLOCKS ../demo-ml-utils
+GGUF array streaming, noted 2026-08-17) -- a native `scan_length_prefixed`
+runtime builtin (or the equivalent native extension) that walks a
+length-prefixed binary array from a bounded byte window WITHOUT the
+interpreter's per-element allocation. The downstream already cut latency
+~100s -> 5.14s and eliminated the 16 MiB stack overflow with a pure-MLPL
+loop, and correctly recovers all 272 SmolLM2 Q8_0 tensors, but peak RSS
+stays ~505 MB (per-element MLPL allocations), missing the 128 MiB /
+30s / 16 MiB-stack acceptance. The primitive must scan + reduce in Rust
+(fold over length-prefixed records, emitting only aggregates) so
+resident memory stays ~window-sized. Contract:
+`../demo-ml-utils/docs/upstream-contract.md`; an opt-in
+`just gguf-real-array-acceptance` enforces the limits and is
+intentionally red on RSS today. Interpreter/runtime concern (not the
+compiler track); sits with the runtime stream handles below.
+
 **runtime stream handles** (../demo-file-processing second gate,
 noted 2026-08-09; see docs/companion-demo-file-processing.md).
 Distinct from the compiler track and from in-memory codec
