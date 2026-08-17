@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 5,
+    "step": "docs-close"
+  },
+  "action": "lang-reference + queue + companion + wiki edits; markdown + checklist gates; committed main repo + wiki separately.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-16T19:56:20"
+}
