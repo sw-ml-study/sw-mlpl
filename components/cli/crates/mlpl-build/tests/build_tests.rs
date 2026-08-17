@@ -639,6 +639,40 @@ fn compiled_stdout_is_pristine_and_err_sets_exit_code() {
 }
 
 #[test]
+fn comparisons_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("cmp");
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        String::from_utf8_lossy(&Command::new(&op).output().expect("run").stdout)
+            .trim()
+            .to_string()
+    };
+    // Scalar comparisons -> 1.0 / 0.0 (interpreter parity).
+    assert_eq!(build_run("gt(5, 3)\n", "gt"), "1");
+    assert_eq!(build_run("lt(5, 3)\n", "lt"), "0");
+    assert_eq!(build_run("eq(4, 4)\n", "eqt"), "1");
+    assert_eq!(build_run("eq(4, 5)\n", "eqf"), "0");
+    // Elementwise with scalar broadcasting.
+    assert_eq!(build_run("eq([1, 2, 3], [1, 0, 3])\n", "eqv"), "1 0 1");
+    assert_eq!(build_run("gt([1, 5, 3], 2)\n", "gtv"), "0 1 1");
+    // gt/lt/eq + arithmetic compose the rest of 0/1 logic:
+    // not(x) = eq(x, 0); ge(a,b) = eq(lt(a,b), 0); and = mul.
+    assert_eq!(build_run("eq(lt(5, 3), 0)\n", "ge"), "1"); // 5 >= 3
+}
+
+#[test]
 fn read_stdin_echoes_piped_input() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

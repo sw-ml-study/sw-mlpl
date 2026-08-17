@@ -54,6 +54,10 @@ enum Emit {
     Matmul,
     Check,
     Bit,
+    /// `gt`/`lt`/`eq` -- elementwise comparison, `rt::ApplyBinopExt::
+    /// apply_binop(&a0, &a1, |x, y| ...)` yielding a `DenseArray` of
+    /// 1.0/0.0, mirroring the arithmetic binop lowering.
+    Cmp,
 }
 
 /// One registry row: which builtin names at which arity lower with
@@ -99,6 +103,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["exit"] @ 1 => Exit;
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
+    ["gt", "lt", "eq"] @ 2 => Cmp;
     ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => Bit;
 };
 
@@ -217,6 +222,22 @@ pub(crate) fn lower_fncall(
             })
         }
         Emit::Bit => lower_bit_op(ctx, name, args),
+        // gt/lt/eq -- elementwise comparison to 1.0/0.0 with scalar
+        // broadcasting, mirroring the arithmetic binop lowering. `eq`
+        // compares within `f64::EPSILON` (mlpl-runtime-math parity).
+        // Inlined (not a helper fn) to keep fncall.rs at its module
+        // function-count ceiling; see the queued fncall-split debt.
+        Emit::Cmp => {
+            let (l, r) = (lower_expr(ctx, &args[0])?, lower_expr(ctx, &args[1])?);
+            let closure = match name {
+                "gt" => quote! { |__a, __b| if __a > __b { 1.0 } else { 0.0 } },
+                "lt" => quote! { |__a, __b| if __a < __b { 1.0 } else { 0.0 } },
+                _ => quote! {
+                    |__a: f64, __b: f64| if (__a - __b).abs() < f64::EPSILON { 1.0 } else { 0.0 }
+                },
+            };
+            Ok(quote! { #rt::ApplyBinopExt::apply_binop(&(#l), &(#r), #closure).unwrap() })
+        }
     }
 }
 
