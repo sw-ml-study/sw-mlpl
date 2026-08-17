@@ -14,6 +14,19 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-16
 
+- chore(agentrail): complete 005-docs-close; close compiler-process-semantics saga
+- docs(compiler): close compiler-process-semantics
+- chore(agentrail): complete 004-pristine-stdout; queue 005-docs-close
+- feat(compiler): pristine compiled stdout + err exit status
+- chore(agentrail): complete 003-read-stdin; queue 004-pristine-stdout
+- feat(compiler): lower read_stdin() to the compile-to-Rust path
+- chore(agentrail): complete 002-exit; queue 003-read-stdin
+- feat(compiler): lower exit(code) to the compile-to-Rust path
+- chore(agentrail): complete 001-print-eprint; queue 002-exit
+- feat(compiler): lower print/eprint to the compile-to-Rust path
+- chore(agentrail): init compiler-process-semantics; queue 001-print-eprint
+- chore(agentrail): archive completed file-metadata-timestamp saga
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-docs-close; close file-metadata-timestamp saga
 - docs(fs): close file-metadata-timestamp; catalog + glossary + lang-reference
 - chore(agentrail): complete 001-interpreter-primitive; queue 002-docs-close
