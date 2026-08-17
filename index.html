@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head><meta name="mlpl-build" content="cb9fb082 2026-08-16T22:02:27Z">
+<head><meta name="mlpl-build" content="ce625a29 2026-08-17T19:43:25Z">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MLPL — Array Programming Language for ML</title>
     
 <script type="module">
-import init, * as bindings from '/sw-mlpl/mlpl-web-22ea06ba88e190cc.js';
-const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-22ea06ba88e190cc_bg.wasm' });
+import init, * as bindings from '/sw-mlpl/mlpl-web-96f060ef8ebabc34.js';
+const wasm = await init({ module_or_path: '/sw-mlpl/mlpl-web-96f060ef8ebabc34_bg.wasm' });
 
 
 window.wasmBindings = bindings;
@@ -289,12 +289,16 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
             left: 0;
             z-index: 41;
             width: min(420px, calc(100vw - 24px));
-            /* overflow must stay VISIBLE: the demo tooltips render to the
-               right of each row (left: calc(100% + 12px)), and any
-               `overflow-y: auto` here would coerce overflow-x to clip and
-               cut them off. The accordion (one super-group open at a time)
-               keeps the panel height bounded instead of an inner scroll. */
-            overflow: visible;
+            /* Cap to the viewport and scroll vertically: a single expanded
+               super-group (e.g. Machine learning) can be taller than the
+               screen, and the accordion alone no longer bounds it, so the
+               bottom rows were unreachable. `overflow-y: auto` coerces
+               overflow-x to a clip, so the side tooltips (rendered at
+               left: 100% + 12px) can be trimmed at the panel's right edge
+               while scrolling -- an accepted trade for reaching every demo;
+               a portal-rendered tooltip is the longer-term fix. */
+            max-height: min(72vh, calc(100vh - 96px));
+            overflow-y: auto;
             background: var(--base);
             border: 1px solid var(--surface1);
             border-radius: 6px;
@@ -2222,7 +2226,7 @@ dispatchEvent(new CustomEvent("TrunkApplicationStarted", {detail: {wasm}}));
          locally (`openssl dgst -sha384 -binary plotly-2.35.2.min.js
          | base64`) and add an integrity attribute. -->
     <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" crossorigin="anonymous"></script>
-<link rel="modulepreload" href="/sw-mlpl/mlpl-web-22ea06ba88e190cc.js" crossorigin="anonymous" integrity="sha384-E5Jv12+TK8bLIpUvRSchfcIoYIyHxbhysu8IXhcdmVlwT5976Mdi7B2A7QUA4cNh"><link rel="preload" href="/sw-mlpl/mlpl-web-22ea06ba88e190cc_bg.wasm" crossorigin="anonymous" integrity="sha384-OsHfff8LU7OoV43jJRF1Yyl9aaKXT96AJMTD3HTkUFChDMu1wsDUL6KA5Ob0XJOo" as="fetch" type="application/wasm"></head>
+<link rel="modulepreload" href="/sw-mlpl/mlpl-web-96f060ef8ebabc34.js" crossorigin="anonymous" integrity="sha384-LVHm8U+moul9Th8LsLsJxP/sErj3/uuiCGT/OHaA4wU2xZznEQMQ93/D2QiBAeED"><link rel="preload" href="/sw-mlpl/mlpl-web-96f060ef8ebabc34_bg.wasm" crossorigin="anonymous" integrity="sha384-CFhqLQUjXYclHSQLdai/6MYI4gHKJuFqdgH2q+iogYzsD7GLhXhd1jj9B4pEXUFa" as="fetch" type="application/wasm"></head>
 <body>
     <div id="app"></div>
     <script>
