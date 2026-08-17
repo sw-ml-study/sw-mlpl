@@ -51,19 +51,20 @@ pub(crate) fn make_temp_project(workspace: &Path) -> Result<PathBuf, String> {
 }
 
 /// Write the temp project's `main.rs`: the lowered program block as
-/// the result, printed via the `CVal` `Display` (a scalar array shows
-/// its value, a Result shows `ok(..)` / `err(..)`, matching the
-/// interpreter) -- not `.arr()`, which would panic on a Result-valued
-/// program (e.g. one ending in `write_stdout`). Every binding lowers
-/// to `let mut` (so loop accumulators can rebind), which makes
-/// single-assignment bindings `unused_mut` -- expected and harmless
-/// in generated code, so the file allows it.
+/// the result, handed to the runtime's `finish_program`, which renders
+/// the process output + exit status. A standalone binary's stdout is
+/// PRISTINE -- `finish_program` echoes only a plain (non-`Result`)
+/// final value, so binary `write_stdout` output is not followed by an
+/// `ok(N)` line; a final `err(...)` goes to stderr and exits 1. Every
+/// binding lowers to `let mut` (so loop accumulators can rebind), which
+/// makes single-assignment bindings `unused_mut` -- expected and
+/// harmless in generated code, so the file allows it.
 pub(crate) fn write_main_rs(tmp: &Path, lowered: &str) -> Result<(), String> {
     let main_rs = format!(
         "#![allow(unused_mut)]\n\
          fn main() {{\n\
              let result = {lowered};\n\
-             println!(\"{{}}\", result);\n\
+             ::mlpl::__rt::finish_program(&result);\n\
          }}\n"
     );
     std::fs::write(tmp.join("src/main.rs"), main_rs).map_err(|e| format!("writing main.rs: {e}"))

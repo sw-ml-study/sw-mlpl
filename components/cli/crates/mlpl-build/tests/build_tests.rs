@@ -285,7 +285,8 @@ fn write_stdout_writes_valid_bytes_and_returns_ok() {
     let tmp = tempdir("wstdout-ok");
     let src_path = tmp.join("prog.mlpl");
     // bytes 72,105 = "Hi"; write_stdout writes them and returns ok(2).
-    // main prints the result (ok(2)) after the bytes -> "Hiok(2)".
+    // stdout is PRISTINE: exactly the bytes, no trailing ok(2) line (the
+    // wrapper suppresses the ok Result -- the write already happened).
     std::fs::write(&src_path, "write_stdout([72, 105])\n").unwrap();
     let out_path = tmp.join("prog");
     let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
@@ -295,9 +296,8 @@ fn write_stdout_writes_valid_bytes_and_returns_ok() {
         String::from_utf8_lossy(&result.stderr)
     );
     let run = Command::new(&out_path).output().expect("run binary");
-    let out = String::from_utf8_lossy(&run.stdout);
-    assert!(out.contains("Hi"), "expected written bytes 'Hi' in {out:?}");
-    assert!(out.contains("ok("), "expected ok Result in {out:?}");
+    assert_eq!(run.stdout, b"Hi", "stdout not pristine: {:?}", run.stdout);
+    assert_eq!(run.status.code(), Some(0));
 }
 
 #[test]
@@ -319,16 +319,18 @@ fn write_stdout_rejects_out_of_range_byte_no_truncation() {
         String::from_utf8_lossy(&result.stderr)
     );
     let run = Command::new(&out_path).output().expect("run binary");
-    let out = String::from_utf8_lossy(&run.stdout);
-    assert!(out.starts_with("err("), "expected err Result, got {out:?}");
+    // The reject is a final err: message to stderr, exit 1, stdout empty
+    // (no truncated byte written).
     assert!(
-        out.contains("256") && out.contains("0..=255"),
-        "expected descriptive reject message, got {out:?}"
+        run.stdout.is_empty(),
+        "stdout must be empty: {:?}",
+        run.stdout
     );
-    // No truncated byte should precede the err message.
+    assert_eq!(run.status.code(), Some(1));
+    let err = String::from_utf8_lossy(&run.stderr);
     assert!(
-        !run.stdout.contains(&0u8),
-        "no null byte should be written: {out:?}"
+        err.contains("256") && err.contains("0..=255"),
+        "expected descriptive reject message on stderr, got {err:?}"
     );
 }
 
@@ -341,7 +343,8 @@ fn file_size_compiles_and_reads_metadata() {
     let tmp = tempdir("filesize");
     std::fs::write(tmp.join("data.bin"), [65u8, 66, 67]).unwrap();
     let src_path = tmp.join("prog.mlpl");
-    std::fs::write(&src_path, "file_size(\"data.bin\")\n").unwrap();
+    // disp renders the ok Result to stdout (a bare Result is suppressed).
+    std::fs::write(&src_path, "disp(file_size(\"data.bin\"))\n").unwrap();
     let out_path = tmp.join("prog");
     let result = run_mlpl_build(&[src_path.to_str().unwrap(), "-o", out_path.to_str().unwrap()]);
     assert!(
@@ -378,15 +381,15 @@ fn read_bytes_whole_and_range_compile_and_run() {
         let run = Command::new(&op).current_dir(&tmp).output().expect("run");
         String::from_utf8_lossy(&run.stdout).trim().to_string()
     };
-    // Whole file -> ok([65, 66, 67]).
-    let whole = build_run("read_bytes(\"data.bin\")\n", "whole");
+    // Whole file -> ok([65, 66, 67]). disp renders the Result to stdout.
+    let whole = build_run("disp(read_bytes(\"data.bin\"))\n", "whole");
     assert!(whole.starts_with("ok("), "{whole}");
     assert!(
         whole.contains("65") && whole.contains("66") && whole.contains("67"),
         "{whole}"
     );
     // offset 1, length 5 -> EOF-clamped to [66, 67] (no byte 65).
-    let range = build_run("read_bytes(\"data.bin\", 1, 5)\n", "range");
+    let range = build_run("disp(read_bytes(\"data.bin\", 1, 5))\n", "range");
     assert!(range.starts_with("ok("), "{range}");
     assert!(
         range.contains("66") && range.contains("67") && !range.contains("65"),
@@ -406,7 +409,7 @@ fn write_append_read_bytes_roundtrip_compiles_and_runs() {
     std::fs::write(
         &src_path,
         "def u:rt(x) { write_bytes(\"out.bin\", [65])?; \
-         append_bytes(\"out.bin\", [66, 67])?; read_bytes(\"out.bin\") }\nu:rt(0)\n",
+         append_bytes(\"out.bin\", [66, 67])?; read_bytes(\"out.bin\") }\ndisp(u:rt(0))\n",
     )
     .unwrap();
     let out_path = tmp.join("prog");
@@ -453,9 +456,15 @@ fn write_bytes_rejects_out_of_range_and_writes_nothing() {
         .current_dir(&tmp)
         .output()
         .expect("run binary");
-    let s = String::from_utf8_lossy(&run.stdout);
-    assert!(s.starts_with("err("), "{s}");
-    assert!(s.contains("256"), "{s}");
+    // The reject is a final err: message to stderr, exit 1, empty stdout.
+    assert!(
+        run.stdout.is_empty(),
+        "stdout must be empty: {:?}",
+        run.stdout
+    );
+    assert_eq!(run.status.code(), Some(1));
+    let s = String::from_utf8_lossy(&run.stderr);
+    assert!(s.contains("256"), "stderr: {s}");
     // Validation fails before any write, so no file is created.
     assert!(
         !tmp.join("out.bin").exists(),
@@ -495,11 +504,12 @@ fn text_conversions_compile_and_run() {
         build_run("decode_bytes(tokenize_bytes(\"Hi\"))\n", "rt"),
         "Hi"
     );
-    // to_int parse success -> ok(42).
-    assert_eq!(build_run("to_int(\"42\")\n", "toi"), "ok(42)");
+    // to_int parse success -> ok(42). disp renders the Result to stdout
+    // (a bare ok Result is suppressed by the pristine-stdout wrapper).
+    assert_eq!(build_run("disp(to_int(\"42\"))\n", "toi"), "ok(42)");
     // to_int parse failure -> an err( Result the program can branch on
-    // (NOT a panic -- to_int returns a CVal::Result).
-    let bad = build_run("to_int(\"xyz\")\n", "toierr");
+    // (NOT a panic -- to_int returns a CVal::Result). disp renders it.
+    let bad = build_run("disp(to_int(\"xyz\"))\n", "toierr");
     assert!(
         bad.starts_with("err(") && bad.contains("xyz"),
         "to_int err branch: {bad}"
@@ -574,6 +584,58 @@ fn exit_sets_process_status_code() {
     assert_eq!(exit_code("exit(3)\n", "e3"), Some(3));
     // A normal program exits 0.
     assert_eq!(exit_code("iota(3)\n", "ok0"), Some(0));
+}
+
+#[test]
+fn compiled_stdout_is_pristine_and_err_sets_exit_code() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("pristine");
+    // Compile `src`, run it, return (stdout bytes, stderr string, exit code).
+    let run = |src: &str, tag: &str| -> (Vec<u8>, String, Option<i32>) {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        let out = Command::new(&op).output().expect("run");
+        (
+            out.stdout,
+            String::from_utf8_lossy(&out.stderr).to_string(),
+            out.status.code(),
+        )
+    };
+    // write_stdout emits EXACTLY the bytes -- no trailing ok(N) text.
+    let (out, err, code) = run("write_stdout([65, 66, 67])\n", "ws");
+    assert_eq!(
+        out,
+        b"ABC",
+        "stdout not pristine: {:?}",
+        String::from_utf8_lossy(&out)
+    );
+    assert!(err.is_empty(), "stderr: {err}");
+    assert_eq!(code, Some(0));
+    // A plain (non-Result) value program still shows its result.
+    let (out, _, code) = run("iota(3)\n", "val");
+    assert_eq!(String::from_utf8_lossy(&out).trim(), "0 1 2");
+    assert_eq!(code, Some(0));
+    // A final err(...) prints its message to STDERR and exits 1 -- not
+    // to stdout.
+    let (out, err, code) = run("err(\"boom\")\n", "er");
+    assert!(out.is_empty(), "err must not reach stdout: {:?}", out);
+    assert!(err.contains("boom"), "stderr: {err}");
+    assert_eq!(code, Some(1));
+    // A final ok(value) is suppressed (pristine); wrap in disp to show it.
+    let (out, _, _) = run("to_int(\"42\")\n", "okq");
+    assert!(out.is_empty(), "ok Result must be suppressed: {:?}", out);
+    let (out, _, _) = run("disp(to_int(\"42\"))\n", "okd");
+    assert_eq!(String::from_utf8_lossy(&out).trim(), "ok(42)");
 }
 
 #[test]
