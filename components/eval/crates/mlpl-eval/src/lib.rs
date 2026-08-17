@@ -114,6 +114,7 @@ mod fs_bytes;
 mod fs_meta;
 mod fs_ops;
 mod fs_range;
+mod fs_scan;
 mod fs_walk_impl;
 mod grad;
 mod grad_calls_basic;

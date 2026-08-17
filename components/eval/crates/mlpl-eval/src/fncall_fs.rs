@@ -30,6 +30,9 @@ pub(crate) fn try_dispatch(
     if name == "file_metadata" {
         return Some(crate::fs_meta::eval_file_metadata(args, env, trace));
     }
+    if name == "scan_length_prefixed" {
+        return Some(crate::fs_scan::eval_scan(args, env, trace));
+    }
     if name == "append_bytes" {
         return Some(crate::fs_append::eval_append_bytes(args, env, trace));
     }
