@@ -50,6 +50,9 @@ const CVAL_BUILTINS: &[&str] = &[
     "eprint",
     "read_stdin",
     "type_of",
+    "str_concat",
+    "str_slice",
+    "str_split",
 ];
 
 pub(crate) fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {

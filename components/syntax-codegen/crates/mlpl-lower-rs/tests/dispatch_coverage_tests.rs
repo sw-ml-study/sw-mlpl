@@ -76,6 +76,11 @@ enum Builtin {
     Eq,
     TypeOf,
     Equal,
+    StrLen,
+    StrConcat,
+    StrFind,
+    StrSlice,
+    StrSplit,
 }
 
 const ALL: &[Builtin] = &[
@@ -128,6 +133,11 @@ const ALL: &[Builtin] = &[
     Builtin::Eq,
     Builtin::TypeOf,
     Builtin::Equal,
+    Builtin::StrLen,
+    Builtin::StrConcat,
+    Builtin::StrFind,
+    Builtin::StrSlice,
+    Builtin::StrSplit,
 ];
 
 impl Builtin {
@@ -185,6 +195,11 @@ impl Builtin {
             Builtin::Eq => "eq(4, 4)",
             Builtin::TypeOf => "type_of([1, 2])",
             Builtin::Equal => "equal([1, 2], [1, 2])",
+            Builtin::StrLen => "str_len(\"hi\")",
+            Builtin::StrConcat => "str_concat(\"a\", \"b\")",
+            Builtin::StrFind => "str_find(\"hi\", \"i\")",
+            Builtin::StrSlice => "str_slice(\"hi\", 0, 1)",
+            Builtin::StrSplit => "str_split(\"a,b\", \",\")",
         }
     }
 
@@ -238,6 +253,11 @@ impl Builtin {
             Builtin::Eq => "eq",
             Builtin::TypeOf => "type_of",
             Builtin::Equal => "equal",
+            Builtin::StrLen => "str_len",
+            Builtin::StrConcat => "str_concat",
+            Builtin::StrFind => "str_find",
+            Builtin::StrSlice => "str_slice",
+            Builtin::StrSplit => "str_split",
         }
     }
 }

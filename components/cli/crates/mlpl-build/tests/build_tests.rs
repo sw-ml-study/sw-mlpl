@@ -687,6 +687,39 @@ fn read_bytes_unwrapped_flows_into_array_ops() {
 }
 
 #[test]
+fn string_ops_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("strops");
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        String::from_utf8_lossy(&Command::new(&op).output().expect("run").stdout)
+            .trim()
+            .to_string()
+    };
+    assert_eq!(build_run("str_len(\"hello\")\n", "sl"), "5");
+    assert_eq!(build_run("str_concat(\"ab\", \"cd\")\n", "sc"), "abcd");
+    // str_find returns a CHAR index, or -1.
+    assert_eq!(build_run("str_find(\"hello\", \"ll\")\n", "sf"), "2");
+    assert_eq!(build_run("str_find(\"hello\", \"z\")\n", "sfn"), "-1");
+    // str_slice(s, start, len): len chars from char index start.
+    assert_eq!(build_run("str_slice(\"hello\", 1, 3)\n", "ss"), "ell");
+    // str_split -> StrList (displays as newline-joined). Empty sep -> chars.
+    assert_eq!(build_run("str_split(\"a,b,c\", \",\")\n", "sp"), "a\nb\nc");
+    assert_eq!(build_run("str_split(\"xyz\", \"\")\n", "spc"), "x\ny\nz");
+}
+
+#[test]
 fn type_of_and_equal_compile_and_run() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

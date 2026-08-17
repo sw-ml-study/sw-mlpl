@@ -38,6 +38,18 @@ impl CVal {
         }
     }
 
+    /// The string payload, for the `str_*` builtins.
+    ///
+    /// # Panics
+    /// Panics if the value is not a string.
+    #[must_use]
+    pub fn str(&self) -> &str {
+        match self {
+            CVal::Str(s) => s,
+            other => panic!("expected a string, got {other:?}"),
+        }
+    }
+
     /// A record field by name.
     ///
     /// # Panics

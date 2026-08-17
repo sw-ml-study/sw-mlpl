@@ -67,6 +67,9 @@ enum Emit {
     /// scalar `DenseArray` 1.0/0.0 (CVal derives `PartialEq`).
     TypeOf,
     Equal,
+    /// The `str_*` family on `CVal::Str` (`str_len`/`str_concat`/
+    /// `str_find`/`str_slice`/`str_split`), dispatched by name.
+    StrOp,
 }
 
 /// One registry row: which builtin names at which arity lower with
@@ -117,6 +120,9 @@ const REGISTRY: &[Spec] = builtins! {
     ["gt", "lt", "eq"] @ 2 => Cmp;
     ["type_of"] @ 1 => TypeOf;
     ["equal"] @ 2 => Equal;
+    ["str_len"] @ 1 => StrOp;
+    ["str_concat", "str_find", "str_split"] @ 2 => StrOp;
+    ["str_slice"] @ 3 => StrOp;
     ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => BitCall;
 };
 
@@ -276,6 +282,55 @@ pub(crate) fn lower_fncall(
                 crate::lower_cval(ctx, &args[1])?,
             );
             Ok(quote! { #rt::DenseArray::from_scalar(if (#a) == (#b) { 1.0 } else { 0.0 }) })
+        }
+        // The str_* family on CVal::Str (interpreter parity). `.str()`
+        // pulls the &str; char-based indexing matches the interpreter.
+        Emit::StrOp => {
+            let s = crate::lower_cval(ctx, &args[0])?;
+            match name {
+                "str_len" => Ok(quote! {
+                    #rt::DenseArray::from_scalar((#s).str().chars().count() as f64)
+                }),
+                "str_concat" => {
+                    let b = crate::lower_cval(ctx, &args[1])?;
+                    Ok(quote! { #rt::CVal::Str(format!("{}{}", (#s).str(), (#b).str())) })
+                }
+                "str_find" => {
+                    let n = crate::lower_cval(ctx, &args[1])?;
+                    Ok(quote! { #rt::DenseArray::from_scalar({
+                        let (__sv, __nv) = (#s, #n);
+                        let (__s, __n) = (__sv.str(), __nv.str());
+                        match __s.find(__n) {
+                            Some(__b) => __s[..__b].chars().count() as f64,
+                            None => -1.0,
+                        }
+                    }) })
+                }
+                "str_slice" => {
+                    let (start, len) = (
+                        crate::lower_darr(ctx, &args[1])?,
+                        crate::lower_darr(ctx, &args[2])?,
+                    );
+                    Ok(quote! { #rt::CVal::Str(
+                        (#s).str().chars()
+                            .skip((#start).data()[0] as usize)
+                            .take((#len).data()[0] as usize)
+                            .collect::<String>()
+                    ) })
+                }
+                _ => {
+                    let sep = crate::lower_cval(ctx, &args[1])?;
+                    Ok(quote! { #rt::CVal::StrList({
+                        let (__sv, __sepv) = (#s, #sep);
+                        let (__s, __sep) = (__sv.str(), __sepv.str());
+                        if __sep.is_empty() {
+                            __s.chars().map(|__c| __c.to_string()).collect()
+                        } else {
+                            __s.split(__sep).map(|__x| __x.to_string()).collect()
+                        }
+                    }) })
+                }
+            }
         }
     }
 }
