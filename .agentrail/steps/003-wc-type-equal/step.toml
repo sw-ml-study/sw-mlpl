@@ -1,9 +1,10 @@
 number = 3
 slug = "wc-type-equal"
-status = "pending"
+status = "completed"
 description = "Lower type_of/1 and equal/2 to the compile-to-Rust path (wc's remaining pair;..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-17T11:36:36"
+completed_at = "2026-08-17T11:56:36"
 task_type = "feature"
-commits = []
+commits = ["c2e150644c1e581f95ee04dcb6f7ce86334af672"]

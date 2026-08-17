@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "wc-type-equal"
+  },
+  "action": "Code-map confirmed CVal:PartialEq; inline emits avoid rt fns/module ceilings; TDD red->green (fixed type_of CVAL_BUILTINS double-wrap); full-suite regression.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-17T11:56:36"
+}

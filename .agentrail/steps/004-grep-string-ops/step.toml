@@ -1,0 +1,9 @@
+number = 4
+slug = "grep-string-ops"
+status = "pending"
+description = "Lower the grep string family: str_concat/2, str_find/2, str_len/1, str_slice/..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-17T11:56:36"
+task_type = "feature"
+commits = []

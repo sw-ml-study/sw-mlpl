@@ -1,0 +1,1 @@
+Lowered type_of/1 and equal/2 (clears the downstream equal/2 blocker; wc's full builtin set now compiles). Both inline emits (CVal derives PartialEq): type_of -> CVal::Str via a match on the variant (value_kind parity), added to CVAL_BUILTINS; equal -> scalar DenseArray from CVal == CVal (value_equal parity). Zero new warnings. All 27 build e2es pass. Refreshed binaries.
