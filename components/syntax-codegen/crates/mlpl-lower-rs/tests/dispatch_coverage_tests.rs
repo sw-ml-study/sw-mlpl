@@ -29,6 +29,7 @@ fn lowers_ok(src: &str) -> bool {
 enum Builtin {
     Shape,
     Rank,
+    Tally,
     Transpose,
     ReduceAdd,
     ReduceAddAxis,
@@ -76,6 +77,7 @@ enum Builtin {
 const ALL: &[Builtin] = &[
     Builtin::Shape,
     Builtin::Rank,
+    Builtin::Tally,
     Builtin::Transpose,
     Builtin::ReduceAdd,
     Builtin::ReduceAddAxis,
@@ -127,6 +129,7 @@ impl Builtin {
         match self {
             Builtin::Shape => "shape(iota(3))",
             Builtin::Rank => "rank(iota(3))",
+            Builtin::Tally => "tally(iota(3))",
             Builtin::Transpose => "transpose(iota(3))",
             Builtin::ReduceAdd => "reduce_add(iota(3))",
             Builtin::ReduceAddAxis => "reduce_add(reshape(iota(6), [2, 3]), 0)",
@@ -178,6 +181,7 @@ impl Builtin {
         match self {
             Builtin::Shape => "shape",
             Builtin::Rank => "rank",
+            Builtin::Tally => "tally",
             Builtin::Transpose => "transpose",
             Builtin::ReduceAdd | Builtin::ReduceAddAxis => "reduce_add",
             Builtin::Iota => "iota",

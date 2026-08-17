@@ -74,3 +74,12 @@ pub fn shape(a: &DenseArray) -> DenseArray {
 pub fn rank(a: &DenseArray) -> DenseArray {
     DenseArray::from_scalar(a.rank() as f64)
 }
+
+/// `tally(a)` -- the length of the leading axis (major-cell count,
+/// APL's monadic `#`/`≢`) as a scalar: `shape[0]`, or `1` for a
+/// scalar. Interpreter parity (`mlpl-runtime-array` `tally`).
+#[must_use]
+pub fn tally(a: &DenseArray) -> DenseArray {
+    let n = a.shape().dims().first().copied().unwrap_or(1);
+    DenseArray::from_scalar(n as f64)
+}

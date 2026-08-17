@@ -687,6 +687,47 @@ fn read_bytes_unwrapped_flows_into_array_ops() {
 }
 
 #[test]
+fn tally_compiles_and_counts_major_cells() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("tally");
+    std::fs::write(tmp.join("data.bin"), [65u8, 66, 67, 68, 69]).unwrap();
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        String::from_utf8_lossy(
+            &Command::new(&op)
+                .current_dir(&tmp)
+                .output()
+                .expect("run")
+                .stdout,
+        )
+        .trim()
+        .to_string()
+    };
+    // tally = leading-axis length (major cells), as a scalar.
+    assert_eq!(build_run("tally(iota(4))\n", "iv"), "4");
+    assert_eq!(build_run("tally([10, 20, 30])\n", "lit"), "3");
+    // tally over a ?-unwrapped read: number of bytes read (5).
+    assert_eq!(
+        build_run(
+            "def u:n() { tally(read_bytes(\"data.bin\")?) }\nu:n()\n",
+            "rd"
+        ),
+        "5"
+    );
+}
+
+#[test]
 fn comparisons_compile_and_run() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

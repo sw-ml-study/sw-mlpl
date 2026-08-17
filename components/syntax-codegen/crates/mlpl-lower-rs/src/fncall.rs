@@ -86,7 +86,7 @@ macro_rules! builtins {
 /// The builtin registry -- the single source of truth for what the
 /// compiler lowers. Ordered; the dispatcher takes the first match.
 const REGISTRY: &[Spec] = builtins! {
-    ["shape", "rank", "transpose", "reduce_add"] @ 1 => UnaryRt;
+    ["shape", "rank", "transpose", "reduce_add", "tally"] @ 1 => UnaryRt;
     ["iota", "range"] @ 1 => Iota;
     ["reshape"] @ 2 => Reshape;
     ["reduce_add"] @ 2 => ReduceAxis;
