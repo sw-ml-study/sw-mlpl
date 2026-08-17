@@ -83,7 +83,15 @@ surface is the gate. The reports order the missing rungs:
    divergence from the interpreter's `-f` script echo. The remaining
    compiler gate for the hexdump/WAV capstone is `for`-loop control
    flow (`if`/`while` already lower).
-6. Then: positive byte + format artifact parity, plus a repeated
+6. **Compiled builtin surface for wc/grep/du** -- IN PROGRESS. The
+   elementwise comparisons `gt`/`lt`/`eq`, `read_bytes(...)?` flowing
+   into array ops, and `tally` now lower. The wc/grep/du closures need
+   ~12 more builtins lowered (tracked as `compiler-file-processing-
+   builtins`, wc->grep->du order): wc wants `take`/`type_of`/`equal`/
+   `floor`; grep adds the `str_*` family; du adds `fs_walk`/`list_get`/
+   `list_len`/`concat`. Until those land, `mlpl-build` stops each tool
+   at the first unlowered builtin.
+7. Then: positive byte + format artifact parity, plus a repeated
    clean-environment (source-free) audit.
 
 Minimum acceptance (interpreter and compiled using identical

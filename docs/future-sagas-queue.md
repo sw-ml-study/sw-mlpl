@@ -648,6 +648,29 @@ order:
   hexdump / WAV CLI becomes expressible (the demo-file-processing
   capstone; positive byte + format artifact parity + a source-free
   audit).
+- **compiler-comparisons-and-read-unwrap** SHIPPED -- lowered the
+  elementwise comparisons `gt`/`lt`/`eq` (interpreter parity;
+  `ne`/`le`/`ge`/`not`/`and`/`or` are NOT builtins -- compose via
+  `gt`/`lt`/`eq` + arithmetic), fixed `read_bytes(...)?` (and any
+  `?`-unwrapped Result / CVal-typed binding) flowing into DenseArray
+  ops via a `lower_darr` CVal->DenseArray bridge + Ctx `cval_bindings`
+  tracking, and lowered `tally` (leading-axis length). Unblocked the
+  first wave of demo-file-processing's compiled wc/grep/du.
+- **compiler-file-processing-builtins** (NEXT, wc->grep->du order) --
+  the demo-file-processing wc/grep/du closures need ~12 more builtins
+  lowered that the compiler does not yet support. By tool:
+  **wc**: `take` (bounded slice), `type_of` (value kind -> string),
+  `equal` (structural equality -> 0/1), `floor` (math);
+  **grep** adds: `str_concat`, `str_find`, `str_len`, `str_slice`,
+  `str_split`;
+  **du** adds: `fs_walk` (dir -> StrList), `list_get`, `list_len`, and
+  `concat` (array concat). Each lowered to interpreter parity with a
+  gated compiled e2e. Some are pure DenseArray/math (take/concat/floor);
+  the rest touch the CVal/StrList surface (type_of/equal/str_*/list_*/
+  fs_walk). This is the remaining compiler gate for the three CLI
+  clones (their dedicated `mlpl-wc`/`mlpl-grep`/`mlpl-du` entry points +
+  arg-driven paths / top-level unwrap / chunked stdin ride the streaming
+  saga).
 
 **runtime stream handles** (../demo-file-processing second gate,
 noted 2026-08-09; see docs/companion-demo-file-processing.md).
