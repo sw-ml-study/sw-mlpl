@@ -891,6 +891,29 @@ mlpl-repl -f maybe-fail.mlpl || echo "failed: $?"
 echo "1 2 3" | mlpl-repl -f sum-stdin.mlpl
 ```
 
+### Compiled programs and stdout
+
+`mlpl-build` compiles a program to a native binary. The process
+builtins `print`, `eprint`, `exit`, and `read_stdin` all work in a
+compiled binary (single-argument `print`/`eprint`; the variadic
+space-joined form is interpreter-only). `read_stdin` in a compiled
+binary reads whatever is piped, blocking for EOF like `cat` -- it does
+not refuse a terminal the way the REPL does.
+
+A compiled binary's stdout is PRISTINE, which differs from the `-f`
+script echo above: the program's own `print` / `write_stdout` output is
+all that appears. The final value is handled as:
+
+- a plain (non-`Result`) value -> rendered to stdout, exit `0` (so
+  `iota(3)` prints `0 1 2`);
+- `ok(...)` -> suppressed (the effect, if any, already wrote its
+  output), so `write_stdout(bytes)` emits exactly the bytes with no
+  trailing `ok(N)` line -- render a Result with `disp(...)` to show it;
+- `err(msg)` -> `msg` to stderr, exit `1`.
+
+So the same source can echo an extra `ok(...)` line under `mlpl-repl
+-f` but not as a compiled binary; wrap a final Result in `disp(...)`
+when you want it shown in both.
 
 ### if / else expression
 

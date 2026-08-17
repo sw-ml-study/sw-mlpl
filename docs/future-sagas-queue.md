@@ -600,9 +600,6 @@ order:
   and Results/records (so functions returning `ok(...)`/records --
   e.g. the rolling-Ridge fit -- are not yet lowerable). Records +
   Results lowering rides with `compiler-control-flow` next.
-- **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`
-  (a bounded hexdump loops over chunks). Requires string/CVal
-  VARIABLES (bindings that hold CVal, not just DenseArray).
 - **compiler-read-bytes** (Saga D) SHIPPED -- lowered `read_bytes`
   (whole + `offset,length`) + `file_size` + `write_bytes` +
   `append_bytes` to Rust (returning/consuming `CVal::Arr` byte
@@ -622,16 +619,35 @@ order:
   a recoverable `ok`/`err` Result). Compiled e2e covers the raw byte
   cells, the loud-reject, and the err branch. The last text rung
   before process semantics.
-- **compiler-process-semantics** (Saga D2) NEXT -- lower `print` /
-  `eprint` / `exit` / `read_stdin` with clean entry/status
-  semantics, and fix the `write_stdout` wrapper appending a
-  spurious textual result line after binary stdout.
-- **compiler-control-flow** (Saga C) -- lower `if`/`while`/`for`
-  (a bounded hexdump loops over chunks); requires string/CVal
-  VARIABLES (bindings that hold CVal, not just DenseArray). With
-  process semantics done, a standalone compiled hexdump / WAV CLI
-  becomes expressible (the demo-file-processing capstone; positive
-  byte + format artifact parity + a source-free audit).
+- **compiler-process-semantics** (Saga D2) SHIPPED -- lowered `print`
+  / `eprint` (write Display to stdout/stderr, return the value),
+  `exit` (rank-0 int 0..=255, flush, process::exit), and `read_stdin`
+  (all of stdin -> `CVal::Str`; a compiled CLI reads piped input rather
+  than refusing a terminal like the REPL). Also made compiled stdout
+  PRISTINE: the generated `main` no longer echoes the final value
+  unconditionally -- a runtime `finish_program` prints only a plain
+  (non-Result) final value, so `write_stdout` output has no trailing
+  `ok(N)` line; a final `err(...)` goes to stderr and exits 1; a final
+  `ok(...)` is suppressed (render with `disp` to show it). Deliberate,
+  documented divergence from the interpreter's script echo; cross-mode
+  parity is the optional follow-on below. Gated compiled e2es in
+  `mlpl-build/tests/build_tests.rs`.
+- **compiler-stdout-parity** (optional follow-on) -- make the
+  INTERPRETER's `-f` script echo pristine too (a "silent success" value
+  for `write_stdout`/`print` that neither runner echoes), so an
+  interpreter-run script and its compiled build produce identical
+  stdout. Touches the `Value`/`CVal` model + `finish_script_value` +
+  the widely-tested interpreter output path, so it is its own saga, not
+  a within-rung change. Only worth doing if the interpreter/compiled
+  mismatch bites a demo.
+- **compiler-control-flow** (Saga C) -- `if`/`while` ALREADY lower
+  (compiled e2es cover both); the remaining control-flow surface is
+  `for`-row iteration, `repeat`, and `break`/`continue` (all currently
+  Unsupported in `lower_expr`). A bounded hexdump loops over chunks, so
+  `for` closes the last gap: with it done, a standalone compiled
+  hexdump / WAV CLI becomes expressible (the demo-file-processing
+  capstone; positive byte + format artifact parity + a source-free
+  audit).
 
 **runtime stream handles** (../demo-file-processing second gate,
 noted 2026-08-09; see docs/companion-demo-file-processing.md).

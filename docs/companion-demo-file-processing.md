@@ -72,10 +72,17 @@ surface is the gate. The reports order the missing rungs:
    array -> str), `to_int/1` (str -> `ok(int)`/`err`). Byte / bit /
    text lowering is COMPLETE; the remaining compiler gate is process
    semantics (item 5).
-5. **Process entry / status semantics** -- `read_stdin`, `print`,
-   `eprint`, `exit` are not lowered; the current `write_stdout`
-   wrapper also appends a spurious textual result line after binary
-   stdout.
+5. **Process entry / status semantics** -- CLEARED. `print`, `eprint`,
+   `exit`, and `read_stdin` now lower (single-arg `print`/`eprint`;
+   `read_stdin` reads piped input, blocking for EOF like `cat`). The
+   generated `main` no longer appends a spurious result line after
+   binary stdout: a compiled binary's stdout is PRISTINE (a runtime
+   `finish_program` echoes only a plain non-Result final value), a
+   final `err` goes to stderr and exits 1, and a final `ok` is
+   suppressed (render with `disp` to show it). This is a documented
+   divergence from the interpreter's `-f` script echo. The remaining
+   compiler gate for the hexdump/WAV capstone is `for`-loop control
+   flow (`if`/`while` already lower).
 6. Then: positive byte + format artifact parity, plus a repeated
    clean-environment (source-free) audit.
 
