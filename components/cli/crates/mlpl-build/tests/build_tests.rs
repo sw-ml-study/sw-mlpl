@@ -507,6 +507,50 @@ fn text_conversions_compile_and_run() {
 }
 
 #[test]
+fn print_and_eprint_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("procprint");
+    // Compile `src`, run the binary, and return (stdout, stderr).
+    let build_run = |src: &str, tag: &str| -> (String, String) {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        let out = Command::new(&op).output().expect("run");
+        (
+            String::from_utf8_lossy(&out.stdout).to_string(),
+            String::from_utf8_lossy(&out.stderr).to_string(),
+        )
+    };
+    // print writes to stdout AND returns its argument: the program's
+    // result is print's return value, which the generated main echoes.
+    // So "kept" appears twice -- once from print's side effect, once
+    // from main printing the returned value. That proves both.
+    let (out, err) = build_run("print(\"kept\")\n", "p");
+    assert_eq!(
+        out.trim().lines().collect::<Vec<_>>(),
+        vec!["kept", "kept"],
+        "print writes then returns its argument: {out}"
+    );
+    assert!(err.is_empty(), "print must not touch stderr: {err}");
+    // eprint writes to STDERR; the distinct final result goes to stdout.
+    let (out, err) = build_run("eprint(\"to-stderr\")\ndisp(\"to-stdout\")\n", "e");
+    assert!(err.contains("to-stderr"), "stderr: {err}");
+    assert!(
+        out.contains("to-stdout") && !out.contains("to-stderr"),
+        "eprint must not reach stdout; stdout: {out}"
+    );
+}
+
+#[test]
 fn decode_bytes_loud_rejects_out_of_range_cell() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

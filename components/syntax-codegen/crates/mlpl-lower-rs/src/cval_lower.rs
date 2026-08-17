@@ -27,27 +27,35 @@ pub(crate) fn lower_cval(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
 /// `DenseArray`)? String / record literals, the string / IO / Result
 /// builtins (`ok`/`err`/`check`), and calls to user functions whose
 /// body produces a `CVal` all do.
+/// Builtins whose lowering yields a `CVal` (not a `DenseArray`), so
+/// `lower_cval` uses their value directly instead of wrapping it in
+/// `CVal::Arr`. The single source of truth for that classification --
+/// adding a CVal-returning builtin is one entry here. (`tokenize_bytes`
+/// is deliberately absent: it returns a `DenseArray`.)
+const CVAL_BUILTINS: &[&str] = &[
+    "write_stdout",
+    "args",
+    "arg",
+    "ok",
+    "err",
+    "check",
+    "read_bytes",
+    "file_size",
+    "write_bytes",
+    "append_bytes",
+    "decode_bytes",
+    "to_int",
+    "disp",
+    "print",
+    "eprint",
+];
+
 fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {
     match expr {
         Expr::StrLit(..) | Expr::RecordLit { .. } => true,
         Expr::FnCall { name, .. } => match name.strip_prefix("u:") {
             Some(bare) => ctx.cval_returning.contains(bare),
-            None => matches!(
-                name.as_str(),
-                "write_stdout"
-                    | "args"
-                    | "arg"
-                    | "ok"
-                    | "err"
-                    | "check"
-                    | "read_bytes"
-                    | "file_size"
-                    | "write_bytes"
-                    | "append_bytes"
-                    | "decode_bytes"
-                    | "to_int"
-                    | "disp"
-            ),
+            None => CVAL_BUILTINS.contains(&name.as_str()),
         },
         _ => false,
     }

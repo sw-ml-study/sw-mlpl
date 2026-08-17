@@ -64,6 +64,8 @@ enum Builtin {
     DecodeBytes,
     ToInt,
     Disp,
+    Print,
+    Eprint,
 }
 
 const ALL: &[Builtin] = &[
@@ -104,6 +106,8 @@ const ALL: &[Builtin] = &[
     Builtin::DecodeBytes,
     Builtin::ToInt,
     Builtin::Disp,
+    Builtin::Print,
+    Builtin::Eprint,
 ];
 
 impl Builtin {
@@ -149,6 +153,8 @@ impl Builtin {
             Builtin::DecodeBytes => "decode_bytes([72, 105])",
             Builtin::ToInt => "to_int(\"42\")",
             Builtin::Disp => "disp(\"hi\")",
+            Builtin::Print => "print(\"hi\")",
+            Builtin::Eprint => "eprint(\"hi\")",
         }
     }
 
@@ -190,6 +196,8 @@ impl Builtin {
             Builtin::DecodeBytes => "decode_bytes",
             Builtin::ToInt => "to_int",
             Builtin::Disp => "disp",
+            Builtin::Print => "print",
+            Builtin::Eprint => "eprint",
         }
     }
 }
