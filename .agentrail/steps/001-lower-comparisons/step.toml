@@ -1,0 +1,9 @@
+number = 1
+slug = "lower-comparisons"
+status = "pending"
+description = "Lower the elementwise comparison + logic builtins in the compile-to-Rust path..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T20:00:46"
+task_type = "feature"
+commits = []

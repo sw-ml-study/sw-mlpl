@@ -1,0 +1,1 @@
+Initialized compiler-comparisons-and-read-unwrap saga: lower the comparison/logic builtins (eq/ne/lt/le/gt/ge/and/or/not/equal) and fix read_bytes(...)? array-unwrap lowering -- the two upstream rungs blocking compiled GNU-clone tools (wc/grep/etc.) in ../demo-file-processing. Streaming/bounded-memory I/O + for-loops are a separate follow-on.
