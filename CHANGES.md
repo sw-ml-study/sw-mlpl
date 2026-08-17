@@ -12,8 +12,23 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-17
+
+- chore(agentrail): complete 004-docs-close; close compiler-comparisons-and-read-unwrap
+- docs(compiler): close compiler-comparisons-and-read-unwrap; queue file-processing builtins
+- chore(agentrail): complete 003-lower-tally; docs-close is next (004)
+- feat(compiler): lower tally/1 to the compile-to-Rust path
+- chore(agentrail): insert 003-lower-tally (downstream blocker) before docs-close
+- chore(agentrail): complete 002-read-unwrap-array; queue 003-docs-close
+- feat(compiler): flow ?-unwrapped reads into array ops (CVal->DenseArray bridge)
+
 ## 2026-08-16
 
+- chore(agentrail): complete 001-lower-comparisons; queue 002-read-unwrap-array
+- feat(compiler): lower gt/lt/eq comparisons to the compile-to-Rust path
+- chore(agentrail): init compiler-comparisons-and-read-unwrap; queue 001-lower-comparisons
+- chore(agentrail): archive completed compiler-process-semantics saga
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 005-docs-close; close compiler-process-semantics saga
 - docs(compiler): close compiler-process-semantics
 - chore(agentrail): complete 004-pristine-stdout; queue 005-docs-close
