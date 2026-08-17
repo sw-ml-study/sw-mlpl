@@ -1,9 +1,10 @@
 number = 4
 slug = "pristine-stdout"
-status = "pending"
+status = "completed"
 description = "Fix the generated main so a process-effect program does NOT get a spurious tr..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T18:19:53"
+completed_at = "2026-08-16T19:15:58"
 task_type = "feature"
-commits = []
+commits = ["1d866a77d7ffbf1396620aa5567b86c102ef64f8"]
