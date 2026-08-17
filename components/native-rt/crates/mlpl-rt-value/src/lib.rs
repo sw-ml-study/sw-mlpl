@@ -15,6 +15,6 @@ mod text;
 mod value;
 
 pub use io::{arg, array_to_bytes, cli_args, write_stdout};
-pub use proc::{eprint, exit, print};
+pub use proc::{eprint, exit, print, read_stdin};
 pub use text::{decode_bytes, disp, to_int, tokenize_bytes};
 pub use value::CVal;

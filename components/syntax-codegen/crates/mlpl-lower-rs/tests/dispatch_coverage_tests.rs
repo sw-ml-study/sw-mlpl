@@ -67,6 +67,7 @@ enum Builtin {
     Disp,
     Print,
     Eprint,
+    ReadStdin,
 }
 
 const ALL: &[Builtin] = &[
@@ -110,6 +111,7 @@ const ALL: &[Builtin] = &[
     Builtin::Disp,
     Builtin::Print,
     Builtin::Eprint,
+    Builtin::ReadStdin,
 ];
 
 impl Builtin {
@@ -158,6 +160,7 @@ impl Builtin {
             Builtin::Disp => "disp(\"hi\")",
             Builtin::Print => "print(\"hi\")",
             Builtin::Eprint => "eprint(\"hi\")",
+            Builtin::ReadStdin => "read_stdin()",
         }
     }
 
@@ -202,6 +205,7 @@ impl Builtin {
             Builtin::Disp => "disp",
             Builtin::Print => "print",
             Builtin::Eprint => "eprint",
+            Builtin::ReadStdin => "read_stdin",
         }
     }
 }

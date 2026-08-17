@@ -48,6 +48,7 @@ const CVAL_BUILTINS: &[&str] = &[
     "disp",
     "print",
     "eprint",
+    "read_stdin",
 ];
 
 fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {

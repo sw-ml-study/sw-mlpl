@@ -37,6 +37,8 @@ enum Emit {
     CvalIo,
     /// `rt::cli_args()`.
     Args,
+    /// `rt::read_stdin()` -- reads all of stdin to a `CVal::Str`.
+    ReadStdin,
     /// `rt::exit(&<cval a0>)` -- ends the process (returns `!`); the
     /// arg is a scalar exit code in CVal position.
     Exit,
@@ -93,6 +95,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["read_bytes"] @ 3 => ReadRange;
     ["write_bytes", "append_bytes"] @ 2 => WriteBytes;
     ["args"] @ 0 => Args;
+    ["read_stdin"] @ 0 => ReadStdin;
     ["exit"] @ 1 => Exit;
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
@@ -170,6 +173,7 @@ pub(crate) fn lower_fncall(
             Ok(quote! { #rt::#f(&(#a)) })
         }
         Emit::Args => Ok(quote! { #rt::cli_args() }),
+        Emit::ReadStdin => Ok(quote! { #rt::read_stdin() }),
         Emit::Exit => {
             let a = crate::lower_cval(ctx, &args[0])?;
             Ok(quote! { #rt::exit(&(#a)) })

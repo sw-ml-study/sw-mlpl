@@ -577,6 +577,41 @@ fn exit_sets_process_status_code() {
 }
 
 #[test]
+fn read_stdin_echoes_piped_input() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    use std::io::Write;
+    use std::process::Stdio;
+    let tmp = tempdir("procstdin");
+    // A compiled program that echoes all of stdin back out.
+    let sp = tmp.join("echo.mlpl");
+    std::fs::write(&sp, "disp(read_stdin())\n").unwrap();
+    let op = tmp.join("echo");
+    let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+    assert!(
+        r.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&r.stderr)
+    );
+    let mut child = Command::new(&op)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("spawn");
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(b"piped input line\n")
+        .unwrap();
+    let out = child.wait_with_output().expect("wait");
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(stdout.contains("piped input line"), "stdout: {stdout}");
+}
+
+#[test]
 fn decode_bytes_loud_rejects_out_of_range_cell() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

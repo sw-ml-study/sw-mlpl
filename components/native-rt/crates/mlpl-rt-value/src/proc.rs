@@ -26,19 +26,11 @@ pub fn eprint(v: &CVal) -> CVal {
     v.clone()
 }
 
-/// `exit(code)` -- end the process with `code` (a scalar integer in
-/// `0..=255`). Flushes stdout first (`process::exit` skips destructors,
-/// so buffered output would otherwise be lost), matching the
-/// interpreter's `eval_exit`. Never returns.
+/// `exit(code)` -- end the process with `code` (a rank-0 integer in
+/// `0..=255`, else a hard error -- interpreter `eval_exit` parity).
+/// Flushes stdout first (`process::exit` skips destructors, so buffered
+/// output would otherwise be lost). Never returns.
 pub fn exit(v: &CVal) -> ! {
-    let code = exit_code(v);
-    let _ = std::io::Write::flush(&mut std::io::stdout());
-    std::process::exit(code);
-}
-
-/// Read + validate the exit status from a `CVal`: a rank-0 integer in
-/// `0..=255`, else a hard error (interpreter parity).
-fn exit_code(v: &CVal) -> i32 {
     let CVal::Arr(a) = v else {
         panic!("exit: code must be a scalar integer, got {v:?}");
     };
@@ -47,5 +39,18 @@ fn exit_code(v: &CVal) -> i32 {
         a.rank() == 0 && n.is_finite() && n.fract() == 0.0 && (0.0..=255.0).contains(&n),
         "exit: code must be an integer in 0..=255, got {n}"
     );
-    n as i32
+    let _ = std::io::Write::flush(&mut std::io::stdout());
+    std::process::exit(n as i32);
+}
+
+/// `read_stdin()` -- read all of stdin into a `CVal::Str` (empty on
+/// immediate EOF). Unlike the interpreter (which refuses a terminal
+/// stdin to avoid hanging the REPL), a compiled CLI reads whatever is
+/// on stdin, blocking for EOF exactly like `cat` / `wc` -- piped input
+/// is the normal case for a standalone binary.
+#[must_use]
+pub fn read_stdin() -> CVal {
+    let mut s = String::new();
+    let _ = std::io::Read::read_to_string(&mut std::io::stdin(), &mut s);
+    CVal::Str(s)
 }
