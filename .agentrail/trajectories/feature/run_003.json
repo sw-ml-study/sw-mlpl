@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "read-stdin"
+  },
+  "action": "Mirrored interpreter read_stdin_to_string with a documented CLI divergence; TDD red->green with a stdin-pipe harness; dispatch coverage + fmt/clippy/checklist.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-16T18:19:53"
+}
