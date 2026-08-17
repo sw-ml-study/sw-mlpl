@@ -37,6 +37,9 @@ enum Emit {
     CvalIo,
     /// `rt::cli_args()`.
     Args,
+    /// `rt::exit(&<cval a0>)` -- ends the process (returns `!`); the
+    /// arg is a scalar exit code in CVal position.
+    Exit,
     /// `ok`/`err` -> `CVal::result(name == "ok", <cval a0>)`.
     Result,
     /// `read_bytes(path, offset, length)` -- path in CVal position,
@@ -90,6 +93,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["read_bytes"] @ 3 => ReadRange;
     ["write_bytes", "append_bytes"] @ 2 => WriteBytes;
     ["args"] @ 0 => Args;
+    ["exit"] @ 1 => Exit;
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
     ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => Bit;
@@ -166,6 +170,10 @@ pub(crate) fn lower_fncall(
             Ok(quote! { #rt::#f(&(#a)) })
         }
         Emit::Args => Ok(quote! { #rt::cli_args() }),
+        Emit::Exit => {
+            let a = crate::lower_cval(ctx, &args[0])?;
+            Ok(quote! { #rt::exit(&(#a)) })
+        }
         Emit::Result => {
             let (payload, ok) = (crate::lower_cval(ctx, &args[0])?, name == "ok");
             Ok(quote! { #rt::CVal::result(#ok, #payload) })

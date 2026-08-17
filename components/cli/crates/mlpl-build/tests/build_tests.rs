@@ -551,6 +551,32 @@ fn print_and_eprint_compile_and_run() {
 }
 
 #[test]
+fn exit_sets_process_status_code() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("procexit");
+    // Compile `src`, run the binary, and return its process exit code.
+    let exit_code = |src: &str, tag: &str| -> Option<i32> {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        Command::new(&op).status().expect("run").code()
+    };
+    // exit(code) ends the process with that status.
+    assert_eq!(exit_code("exit(3)\n", "e3"), Some(3));
+    // A normal program exits 0.
+    assert_eq!(exit_code("iota(3)\n", "ok0"), Some(0));
+}
+
+#[test]
 fn decode_bytes_loud_rejects_out_of_range_cell() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

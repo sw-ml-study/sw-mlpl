@@ -25,3 +25,27 @@ pub fn eprint(v: &CVal) -> CVal {
     eprintln!("{v}");
     v.clone()
 }
+
+/// `exit(code)` -- end the process with `code` (a scalar integer in
+/// `0..=255`). Flushes stdout first (`process::exit` skips destructors,
+/// so buffered output would otherwise be lost), matching the
+/// interpreter's `eval_exit`. Never returns.
+pub fn exit(v: &CVal) -> ! {
+    let code = exit_code(v);
+    let _ = std::io::Write::flush(&mut std::io::stdout());
+    std::process::exit(code);
+}
+
+/// Read + validate the exit status from a `CVal`: a rank-0 integer in
+/// `0..=255`, else a hard error (interpreter parity).
+fn exit_code(v: &CVal) -> i32 {
+    let CVal::Arr(a) = v else {
+        panic!("exit: code must be a scalar integer, got {v:?}");
+    };
+    let n = a.data().first().copied().unwrap_or(f64::NAN);
+    assert!(
+        a.rank() == 0 && n.is_finite() && n.fract() == 0.0 && (0.0..=255.0).contains(&n),
+        "exit: code must be an integer in 0..=255, got {n}"
+    );
+    n as i32
+}
