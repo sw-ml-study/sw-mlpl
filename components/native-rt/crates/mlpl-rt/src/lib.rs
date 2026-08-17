@@ -83,3 +83,24 @@ pub fn tally(a: &DenseArray) -> DenseArray {
     let n = a.shape().dims().first().copied().unwrap_or(1);
     DenseArray::from_scalar(n as f64)
 }
+
+/// `floor(a)` -- elementwise floor. Interpreter parity
+/// (`mlpl-runtime-math` elementwise floor).
+#[must_use]
+pub fn floor(a: &DenseArray) -> DenseArray {
+    a.map(f64::floor)
+}
+
+/// `take(a, axis, idx)` -- drop `axis` at the single index `idx` (the
+/// interpreter's rank-reducing `take`: `take(v, 0, i)` selects element
+/// `i` of a vector). `axis`/`idx` are non-negative scalar integers; an
+/// out-of-bounds index is a hard error (interpreter `RuntimeError`
+/// parity).
+///
+/// # Panics
+/// Panics on an out-of-bounds axis or index.
+#[must_use]
+pub fn take(a: &DenseArray, axis: &DenseArray, idx: &DenseArray) -> DenseArray {
+    let (ax, ix) = (axis.data()[0] as usize, idx.data()[0] as usize);
+    mlpl_array_ops_compose::TakeExt::take(a, ax, ix).expect("take: index out of bounds")
+}

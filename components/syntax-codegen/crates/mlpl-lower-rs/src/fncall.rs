@@ -54,6 +54,9 @@ enum Emit {
     Matmul,
     Check,
     Bit,
+    /// `take(a, axis, idx)` -- `rt::take(&a, &axis, &idx)`; drop `axis`
+    /// at index `idx` (rank-reducing selection), all three DenseArray.
+    Take,
     /// `gt`/`lt`/`eq` -- elementwise comparison, `rt::ApplyBinopExt::
     /// apply_binop(&a0, &a1, |x, y| ...)` yielding a `DenseArray` of
     /// 1.0/0.0, mirroring the arithmetic binop lowering.
@@ -86,7 +89,7 @@ macro_rules! builtins {
 /// The builtin registry -- the single source of truth for what the
 /// compiler lowers. Ordered; the dispatcher takes the first match.
 const REGISTRY: &[Spec] = builtins! {
-    ["shape", "rank", "transpose", "reduce_add", "tally"] @ 1 => UnaryRt;
+    ["shape", "rank", "transpose", "reduce_add", "tally", "floor"] @ 1 => UnaryRt;
     ["iota", "range"] @ 1 => Iota;
     ["reshape"] @ 2 => Reshape;
     ["reduce_add"] @ 2 => ReduceAxis;
@@ -103,6 +106,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["exit"] @ 1 => Exit;
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
+    ["take"] @ 3 => Take;
     ["gt", "lt", "eq"] @ 2 => Cmp;
     ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => Bit;
 };
@@ -222,6 +226,14 @@ pub(crate) fn lower_fncall(
             })
         }
         Emit::Bit => lower_bit_op(ctx, name, args),
+        // take(a, axis, idx) -- rank-reducing selection; array via
+        // lower_darr (so a read result works), axis/idx as scalars.
+        Emit::Take => {
+            let a = crate::lower_darr(ctx, &args[0])?;
+            let axis = crate::lower_darr(ctx, &args[1])?;
+            let idx = crate::lower_darr(ctx, &args[2])?;
+            Ok(quote! { #rt::take(&(#a), &(#axis), &(#idx)) })
+        }
         // gt/lt/eq -- elementwise comparison to 1.0/0.0 with scalar
         // broadcasting, mirroring the arithmetic binop lowering. `eq`
         // compares within `f64::EPSILON` (mlpl-runtime-math parity).

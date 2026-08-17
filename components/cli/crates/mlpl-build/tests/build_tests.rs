@@ -687,6 +687,34 @@ fn read_bytes_unwrapped_flows_into_array_ops() {
 }
 
 #[test]
+fn take_and_floor_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("takefloor");
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        String::from_utf8_lossy(&Command::new(&op).output().expect("run").stdout)
+            .trim()
+            .to_string()
+    };
+    // take(a, axis, idx): drop `axis` at index `idx` (interpreter parity)
+    // -- take(iota(10), 0, 3) selects the element at index 3 -> 3.
+    assert_eq!(build_run("take(iota(10), 0, 3)\n", "tk"), "3");
+    // floor: elementwise. iota(5)/2 = [0,0.5,1,1.5,2] -> [0,0,1,1,2].
+    assert_eq!(build_run("floor(iota(5) / 2)\n", "fl"), "0 0 1 1 2");
+}
+
+#[test]
 fn tally_compiles_and_counts_major_cells() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
