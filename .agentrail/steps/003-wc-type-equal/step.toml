@@ -1,0 +1,9 @@
+number = 3
+slug = "wc-type-equal"
+status = "pending"
+description = "Lower type_of/1 and equal/2 to the compile-to-Rust path (wc's remaining pair;..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-17T11:36:36"
+task_type = "feature"
+commits = []
