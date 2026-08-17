@@ -1,0 +1,9 @@
+number = 2
+slug = "exit"
+status = "pending"
+description = "Lower exit to the compile-to-Rust path. Interpreter parity (eval_script.rs ev..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T18:01:30"
+task_type = "feature"
+commits = []
