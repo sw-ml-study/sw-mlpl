@@ -52,6 +52,11 @@ pub use mlpl_core::LabeledShape;
 // vec![..])`. Domain errors surface as `Err(RuntimeError)`, which the
 // codegen unwraps into a hard panic (interpreter parity).
 pub use mlpl_runtime_bits::try_call as bit_try_call;
+// Pure array/math name/args dispatchers, same shape as bit_try_call.
+// The compile path reaches `take` via `array_try_call`, and `floor` /
+// (later) `concat` via these -- so no per-builtin local `mlpl-rt` fn.
+pub use mlpl_runtime_array::try_call as array_try_call;
+pub use mlpl_runtime_math::try_call as math_try_call;
 pub use reductions::{argmax, cross_entropy, log_softmax, mean, reduce_mul, softmax};
 pub use transforms::{reduce_add, reduce_add_axis, reshape, transpose};
 
@@ -82,25 +87,4 @@ pub fn rank(a: &DenseArray) -> DenseArray {
 pub fn tally(a: &DenseArray) -> DenseArray {
     let n = a.shape().dims().first().copied().unwrap_or(1);
     DenseArray::from_scalar(n as f64)
-}
-
-/// `floor(a)` -- elementwise floor. Interpreter parity
-/// (`mlpl-runtime-math` elementwise floor).
-#[must_use]
-pub fn floor(a: &DenseArray) -> DenseArray {
-    a.map(f64::floor)
-}
-
-/// `take(a, axis, idx)` -- drop `axis` at the single index `idx` (the
-/// interpreter's rank-reducing `take`: `take(v, 0, i)` selects element
-/// `i` of a vector). `axis`/`idx` are non-negative scalar integers; an
-/// out-of-bounds index is a hard error (interpreter `RuntimeError`
-/// parity).
-///
-/// # Panics
-/// Panics on an out-of-bounds axis or index.
-#[must_use]
-pub fn take(a: &DenseArray, axis: &DenseArray, idx: &DenseArray) -> DenseArray {
-    let (ax, ix) = (axis.data()[0] as usize, idx.data()[0] as usize);
-    mlpl_array_ops_compose::TakeExt::take(a, ax, ix).expect("take: index out of bounds")
 }

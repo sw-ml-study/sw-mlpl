@@ -53,10 +53,11 @@ enum Emit {
     Label,
     Matmul,
     Check,
-    Bit,
-    /// `take(a, axis, idx)` -- `rt::take(&a, &axis, &idx)`; drop `axis`
-    /// at index `idx` (rank-reducing selection), all three DenseArray.
-    Take,
+    /// Pure name/args runtime dispatch to `rt::<disp>_try_call`: bit
+    /// ops / `take` / `floor` (all `DenseArray -> DenseArray`).
+    BitCall,
+    ArrayCall,
+    MathCall,
     /// `gt`/`lt`/`eq` -- elementwise comparison, `rt::ApplyBinopExt::
     /// apply_binop(&a0, &a1, |x, y| ...)` yielding a `DenseArray` of
     /// 1.0/0.0, mirroring the arithmetic binop lowering.
@@ -89,7 +90,8 @@ macro_rules! builtins {
 /// The builtin registry -- the single source of truth for what the
 /// compiler lowers. Ordered; the dispatcher takes the first match.
 const REGISTRY: &[Spec] = builtins! {
-    ["shape", "rank", "transpose", "reduce_add", "tally", "floor"] @ 1 => UnaryRt;
+    ["shape", "rank", "transpose", "reduce_add", "tally"] @ 1 => UnaryRt;
+    ["floor"] @ 1 => MathCall;
     ["iota", "range"] @ 1 => Iota;
     ["reshape"] @ 2 => Reshape;
     ["reduce_add"] @ 2 => ReduceAxis;
@@ -106,9 +108,9 @@ const REGISTRY: &[Spec] = builtins! {
     ["exit"] @ 1 => Exit;
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
-    ["take"] @ 3 => Take;
+    ["take"] @ 3 => ArrayCall;
     ["gt", "lt", "eq"] @ 2 => Cmp;
-    ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => Bit;
+    ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => BitCall;
 };
 
 /// The builtin names the compiler lowers -- the registry's name set,
@@ -225,15 +227,9 @@ pub(crate) fn lower_fncall(
                 }
             })
         }
-        Emit::Bit => lower_bit_op(ctx, name, args),
-        // take(a, axis, idx) -- rank-reducing selection; array via
-        // lower_darr (so a read result works), axis/idx as scalars.
-        Emit::Take => {
-            let a = crate::lower_darr(ctx, &args[0])?;
-            let axis = crate::lower_darr(ctx, &args[1])?;
-            let idx = crate::lower_darr(ctx, &args[2])?;
-            Ok(quote! { #rt::take(&(#a), &(#axis), &(#idx)) })
-        }
+        Emit::BitCall => lower_rt_call(ctx, "bit", name, args),
+        Emit::ArrayCall => lower_rt_call(ctx, "array", name, args),
+        Emit::MathCall => lower_rt_call(ctx, "math", name, args),
         // gt/lt/eq -- elementwise comparison to 1.0/0.0 with scalar
         // broadcasting, mirroring the arithmetic binop lowering. `eq`
         // compares within `f64::EPSILON` (mlpl-runtime-math parity).
@@ -258,18 +254,25 @@ pub(crate) fn lower_fncall(
 
 // -- Complex handlers (multi-line / stateful emission) --
 
-/// Lower a bit-op call to the runtime's name/args dispatch. Arity is
-/// validated inside the dispatch; a domain error (non-integer /
-/// negative / >= 2^53) panics -- interpreter `RuntimeError` parity
-/// (bit-op domain errors are not `err` Results).
-fn lower_bit_op(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStream, LowerError> {
+/// Lower a pure name/args runtime-dispatch call to
+/// `rt::<disp>_try_call(name, vec![args])` -- one shape for every pure
+/// `DenseArray -> DenseArray` builtin. Args lower via `lower_darr`;
+/// arity/domain errors are validated inside the dispatch (a domain
+/// violation panics -- interpreter `RuntimeError` parity).
+fn lower_rt_call(
+    ctx: &Ctx,
+    disp: &str,
+    name: &str,
+    args: &[Expr],
+) -> Result<TokenStream, LowerError> {
     let rt = &ctx.rt;
+    let call = format_ident!("{disp}_try_call");
     let lowered: Vec<TokenStream> = args
         .iter()
         .map(|a| crate::lower_darr(ctx, a))
         .collect::<Result<_, _>>()?;
     Ok(quote! {
-        #rt::bit_try_call(#name, vec![#(#lowered),*]).expect("bit builtin").unwrap()
+        #rt::#call(#name, vec![#(#lowered),*]).expect("builtin").unwrap()
     })
 }
 
