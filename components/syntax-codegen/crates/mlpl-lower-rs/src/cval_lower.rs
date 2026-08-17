@@ -51,9 +51,12 @@ const CVAL_BUILTINS: &[&str] = &[
     "read_stdin",
 ];
 
-fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {
+pub(crate) fn produces_cval(ctx: &Ctx, expr: &Expr) -> bool {
     match expr {
         Expr::StrLit(..) | Expr::RecordLit { .. } => true,
+        // A binding whose value produced a CVal (e.g. `b =
+        // read_bytes(p)?` or `s = "text"`) carries that type forward.
+        Expr::Ident(name, _) => ctx.cval_bindings.borrow().contains(name),
         Expr::FnCall { name, .. } => match name.strip_prefix("u:") {
             Some(bare) => ctx.cval_returning.contains(bare),
             None => CVAL_BUILTINS.contains(&name.as_str()),

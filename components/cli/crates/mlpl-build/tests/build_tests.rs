@@ -639,6 +639,54 @@ fn compiled_stdout_is_pristine_and_err_sets_exit_code() {
 }
 
 #[test]
+fn read_bytes_unwrapped_flows_into_array_ops() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("readunwrap");
+    // 5 bytes incl two newlines (10): "H\ni\n!" -> [72, 10, 105, 10, 33].
+    std::fs::write(tmp.join("data.bin"), [72u8, 10, 105, 10, 33]).unwrap();
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        // cwd = tmp is the compiled sandbox root for read_bytes.
+        String::from_utf8_lossy(
+            &Command::new(&op)
+                .current_dir(&tmp)
+                .output()
+                .expect("run")
+                .stdout,
+        )
+        .trim()
+        .to_string()
+    };
+    // Via a CVal binding: b = read_bytes(...)? then compare + reduce.
+    // A wc-newline-count shape: count bytes equal to 10 -> 2. (`?` is
+    // valid only inside a Result-returning fn; the path is inline
+    // because a compiled user-fn parameter is DenseArray-typed -- a
+    // string/CVal parameter is a separate rung.)
+    let count = build_run(
+        "def u:nl() { b = read_bytes(\"data.bin\")? ; reduce_add(eq(b, 10)) }\nu:nl()\n",
+        "nl",
+    );
+    assert_eq!(count, "2", "newline count");
+    // Directly: reduce_add over the unwrapped read -> byte sum 230.
+    let sum = build_run(
+        "def u:sum() { reduce_add(read_bytes(\"data.bin\")?) }\nu:sum()\n",
+        "sum",
+    );
+    assert_eq!(sum, "230", "byte sum");
+}
+
+#[test]
 fn comparisons_compile_and_run() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

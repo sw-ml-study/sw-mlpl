@@ -152,16 +152,16 @@ pub(crate) fn lower_fncall(
     let rt = &ctx.rt;
     match &spec.emit {
         Emit::UnaryRt => {
-            let (a, f) = (lower_expr(ctx, &args[0])?, format_ident!("{name}"));
+            let (a, f) = (crate::lower_darr(ctx, &args[0])?, format_ident!("{name}"));
             Ok(quote! { #rt::#f(&(#a)) })
         }
         Emit::Iota => {
-            let a = lower_expr(ctx, &args[0])?;
+            let a = crate::lower_darr(ctx, &args[0])?;
             Ok(quote! { #rt::iota((#a).data()[0] as usize) })
         }
         Emit::Reshape => {
-            let a = lower_expr(ctx, &args[0])?;
-            let shape = lower_expr(ctx, &args[1])?;
+            let a = crate::lower_darr(ctx, &args[0])?;
+            let shape = crate::lower_darr(ctx, &args[1])?;
             Ok(quote! {{
                 let __shape = #shape;
                 let __dims: Vec<usize> = __shape.data().iter().map(|&d| d as usize).collect();
@@ -169,8 +169,8 @@ pub(crate) fn lower_fncall(
             }})
         }
         Emit::ReduceAxis => {
-            let a = lower_expr(ctx, &args[0])?;
-            let axis = lower_expr(ctx, &args[1])?;
+            let a = crate::lower_darr(ctx, &args[0])?;
+            let axis = crate::lower_darr(ctx, &args[1])?;
             Ok(quote! { #rt::reduce_add_axis(&(#a), (#axis).data()[0] as usize).unwrap() })
         }
         Emit::CvalIo => {
@@ -189,8 +189,8 @@ pub(crate) fn lower_fncall(
         }
         Emit::ReadRange => {
             let p = crate::lower_cval(ctx, &args[0])?;
-            let off = lower_expr(ctx, &args[1])?;
-            let len = lower_expr(ctx, &args[2])?;
+            let off = crate::lower_darr(ctx, &args[1])?;
+            let len = crate::lower_darr(ctx, &args[2])?;
             Ok(quote! { #rt::read_bytes_range(&(#p), &(#off), &(#len)) })
         }
         Emit::WriteBytes => {
@@ -228,7 +228,10 @@ pub(crate) fn lower_fncall(
         // Inlined (not a helper fn) to keep fncall.rs at its module
         // function-count ceiling; see the queued fncall-split debt.
         Emit::Cmp => {
-            let (l, r) = (lower_expr(ctx, &args[0])?, lower_expr(ctx, &args[1])?);
+            let (l, r) = (
+                crate::lower_darr(ctx, &args[0])?,
+                crate::lower_darr(ctx, &args[1])?,
+            );
             let closure = match name {
                 "gt" => quote! { |__a, __b| if __a > __b { 1.0 } else { 0.0 } },
                 "lt" => quote! { |__a, __b| if __a < __b { 1.0 } else { 0.0 } },
@@ -251,7 +254,7 @@ fn lower_bit_op(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStream, Low
     let rt = &ctx.rt;
     let lowered: Vec<TokenStream> = args
         .iter()
-        .map(|a| lower_expr(ctx, a))
+        .map(|a| crate::lower_darr(ctx, a))
         .collect::<Result<_, _>>()?;
     Ok(quote! {
         #rt::bit_try_call(#name, vec![#(#lowered),*]).expect("bit builtin").unwrap()
@@ -269,9 +272,9 @@ fn lower_label_attach(ctx: &Ctx, name: &str, args: &[Expr]) -> Result<TokenStrea
         .into_iter()
         .map(|s| quote! { Some(#s.into()) })
         .collect();
-    let a = lower_expr(ctx, &args[0])?;
+    let a = crate::lower_darr(ctx, &args[0])?;
     if name == "reshape_labeled" {
-        let shape = lower_expr(ctx, &args[1])?;
+        let shape = crate::lower_darr(ctx, &args[1])?;
         Ok(quote! {{
             let __shape = #shape;
             let __dims: Vec<usize> = __shape.data().iter().map(|&d| d as usize).collect();
@@ -300,8 +303,8 @@ fn lower_matmul(ctx: &Ctx, args: &[Expr]) -> Result<TokenStream, LowerError> {
             actual: bl.clone(),
         });
     }
-    let a = lower_expr(ctx, &args[0])?;
-    let b = lower_expr(ctx, &args[1])?;
+    let a = crate::lower_darr(ctx, &args[0])?;
+    let b = crate::lower_darr(ctx, &args[1])?;
     let rt = &ctx.rt;
     Ok(quote! { #rt::MatmulExt::matmul(&(#a), &(#b)).unwrap() })
 }

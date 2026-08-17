@@ -96,6 +96,13 @@ pub(crate) struct Ctx {
     /// `check` may `return` the propagated err, and the body's tail /
     /// `return` values wrap into `CVal`. Set by `with_scope`.
     pub(crate) in_cval_fn: Cell<bool>,
+    /// Names (current scope) whose `let` binding holds a `CVal` rather
+    /// than a `DenseArray` -- e.g. `b = read_bytes(p)?` or `s =
+    /// "text"`. Lets a DenseArray-position use of the name insert the
+    /// `CVal -> &DenseArray` bridge (`lower_darr`), and a CVal-typed
+    /// final binding yield itself rather than a double `CVal::Arr`.
+    /// Scope-swapped alongside `declared` in `with_scope`.
+    pub(crate) cval_bindings: RefCell<HashSet<String>>,
 }
 
 impl Ctx {
@@ -106,6 +113,7 @@ impl Ctx {
             declared: RefCell::new(HashSet::new()),
             cval_returning: HashSet::new(),
             in_cval_fn: Cell::new(false),
+            cval_bindings: RefCell::new(HashSet::new()),
         }
     }
 
@@ -124,9 +132,13 @@ impl Ctx {
         let fresh: HashSet<String> = names.iter().cloned().collect();
         let saved = self.declared.replace(fresh);
         let saved_mode = self.in_cval_fn.replace(returns_cval);
+        // A fresh CVal-binding scope: parameters are DenseArray-valued,
+        // so none start as CVal. Restored with the caller's scope.
+        let saved_cval = self.cval_bindings.replace(HashSet::new());
         let out = f();
         self.declared.replace(saved);
         self.in_cval_fn.set(saved_mode);
+        self.cval_bindings.replace(saved_cval);
         out
     }
 
@@ -134,5 +146,17 @@ impl Ctx {
     /// (needs `let mut`); false on a later rebind (reassignment).
     pub(crate) fn first_binding(&self, name: &str) -> bool {
         self.declared.borrow_mut().insert(name.to_string())
+    }
+
+    /// Record whether `name`'s binding holds a `CVal` (vs a
+    /// `DenseArray`), so a later use bridges/yields it correctly. A
+    /// rebind to a non-CVal value clears the flag.
+    pub(crate) fn set_cval_binding(&self, name: &str, is_cval: bool) {
+        let mut bindings = self.cval_bindings.borrow_mut();
+        if is_cval {
+            bindings.insert(name.to_string());
+        } else {
+            bindings.remove(name);
+        }
     }
 }

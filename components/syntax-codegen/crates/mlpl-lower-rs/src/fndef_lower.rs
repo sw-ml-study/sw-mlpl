@@ -13,7 +13,7 @@ use mlpl_parser::Expr;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote};
 
-use crate::{Ctx, LowerError, lower_cval, lower_expr};
+use crate::{Ctx, LowerError, lower_cval, lower_expr, produces_cval};
 
 /// Lower `def u:name(params) { body }` into a nested Rust fn item.
 pub(crate) fn lower_user_fn(
@@ -75,6 +75,8 @@ pub(crate) fn lower_body(
         match stmt {
             Expr::Assign { name, value, .. } => {
                 let (id, val) = (format_ident!("{name}"), lower_expr(ctx, value)?);
+                // Track a CVal-typed local (e.g. `b = read_bytes(p)?`).
+                ctx.set_cval_binding(name, produces_cval(ctx, value));
                 binds.push(if ctx.first_binding(name) {
                     quote! { let mut #id = #val; }
                 } else {

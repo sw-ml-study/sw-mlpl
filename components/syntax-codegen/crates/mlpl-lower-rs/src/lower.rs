@@ -4,13 +4,29 @@
 //! builtin calls in `fncall`; lib.rs is a facade.
 
 use mlpl_parser::{BinOpKind, Expr};
-use proc_macro2::TokenStream;
+use proc_macro2::{Ident, TokenStream};
 use quote::{format_ident, quote};
 
 use crate::{
     Ctx, LowerConfig, LowerError, control_lower, fndef_lower, labels_of, lower_cval, lower_field,
-    lower_fncall, lower_record,
+    lower_fncall, lower_record, produces_cval,
 };
+
+/// Lower an expression in a `DenseArray` position (an arithmetic /
+/// comparison operand, an array-op argument). The reverse of
+/// `lower_cval`: an expression that already produces a `CVal` -- a
+/// `?`-unwrapped read, a CVal-typed binding, a string -- is bridged
+/// back to a `DenseArray` via `CVal::arr()` (`.arr().clone()`); a
+/// numeric expression lowers unchanged. This is what lets a
+/// `read_bytes(p)?` result flow into `reduce_add` / `eq` / arithmetic.
+pub(crate) fn lower_darr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerError> {
+    let inner = lower_expr(ctx, expr)?;
+    if produces_cval(ctx, expr) {
+        Ok(quote! { (#inner).arr().clone() })
+    } else {
+        Ok(inner)
+    }
+}
 
 /// Lower an MLPL AST using the default configuration
 /// (`::mlpl_rt::...` paths). Shorthand for
@@ -85,19 +101,31 @@ fn lower_assign(
     bindings: &mut Vec<TokenStream>,
 ) -> Result<Option<TokenStream>, LowerError> {
     let val = lower_expr(ctx, value)?;
+    let is_cval = produces_cval(ctx, value);
     if let Some(lbls) = labels_of(ctx, value) {
         ctx.known_labels.insert(name.to_string(), lbls);
     }
+    // A CVal-typed binding (e.g. `b = read_bytes(p)?`) is tracked so a
+    // later use bridges it and a CVal-typed final binding yields itself.
+    ctx.set_cval_binding(name, is_cval);
     let id = format_ident!("{name}");
-    // First assignment in scope -> `let mut` (so a later rebind can
-    // reassign, e.g. a loop accumulator); a rebind -> reassignment.
+    // First assign in scope -> `let mut` (a later rebind reassigns).
     bindings.push(if ctx.first_binding(name) {
         quote! { let mut #id = #val; }
     } else {
         quote! { #id = #val; }
     });
-    let rt = &ctx.rt;
-    Ok(is_last.then(|| quote! { #rt::CVal::Arr(#id.clone()) }))
+    Ok(is_last.then(|| assign_yield(&ctx.rt, &id, is_cval)))
+}
+
+/// The value a final assignment yields: a CVal-typed binding as-is,
+/// else the DenseArray wrapped as `CVal::Arr`.
+fn assign_yield(rt: &TokenStream, id: &Ident, is_cval: bool) -> TokenStream {
+    if is_cval {
+        quote! { #id.clone() }
+    } else {
+        quote! { #rt::CVal::Arr(#id.clone()) }
+    }
 }
 
 /// Lower a single expression. Returns a `DenseArray`-valued Rust
@@ -120,12 +148,12 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
             Ok(quote! { #rt::DenseArray::from_scalar(#v) })
         }
         Expr::UnaryNeg { operand, .. } => {
-            let inner = lower_expr(ctx, operand)?;
+            let inner = lower_darr(ctx, operand)?;
             Ok(quote! { (#inner).map(|__v| -__v) })
         }
         Expr::BinOp { op, lhs, rhs, .. } => {
-            let l = lower_expr(ctx, lhs)?;
-            let r = lower_expr(ctx, rhs)?;
+            let l = lower_darr(ctx, lhs)?;
+            let r = lower_darr(ctx, rhs)?;
             let closure = match op {
                 BinOpKind::Add => quote! { |__a, __b| __a + __b },
                 BinOpKind::Sub => quote! { |__a, __b| __a - __b },
@@ -145,7 +173,7 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
             let rt = &ctx.rt;
             let lowered: Vec<TokenStream> = elems
                 .iter()
-                .map(|e| lower_expr(ctx, e))
+                .map(|e| lower_darr(ctx, e))
                 .collect::<Result<_, _>>()?;
             Ok(quote! { #rt::array_lit(vec![#(#lowered),*]).unwrap() })
         }
