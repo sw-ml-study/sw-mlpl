@@ -14,6 +14,17 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-17
 
+- fix(web): scroll the demo dropdown when a super-group exceeds the viewport
+- docs(examples): add compiled bytestats stdin demo
+- chore(agentrail): complete 003-wc-type-equal (wc unblocked); queue 004-grep-string-ops
+- feat(compiler): lower type_of/1 and equal/2 (wc's remaining pair)
+- chore(agentrail): complete 002-techdebt-split spike (partial); queue 003-wc-type-equal
+- refactor(compiler): route pure builtins through try_call re-exports
+- chore(agentrail): complete 001-wc-take-floor; insert techdebt-split spike next
+- feat(compiler): lower take/3 and floor to the compile-to-Rust path
+- chore(agentrail): init compiler-file-processing-builtins; queue 001-wc-take-floor
+- chore(agentrail): archive completed compiler-comparisons-and-read-unwrap saga
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-docs-close; close compiler-comparisons-and-read-unwrap
 - docs(compiler): close compiler-comparisons-and-read-unwrap; queue file-processing builtins
 - chore(agentrail): complete 003-lower-tally; docs-close is next (004)
