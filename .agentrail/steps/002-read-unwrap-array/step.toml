@@ -1,0 +1,9 @@
+number = 2
+slug = "read-unwrap-array"
+status = "pending"
+description = "Fix the read_bytes(...)? (and any ?-unwrapped Result whose payload is an arra..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T20:24:24"
+task_type = "feature"
+commits = []

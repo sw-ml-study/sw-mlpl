@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "lower-comparisons"
+  },
+  "action": "Mapped interpreter comparison builtins (code-map agent); mirrored BinOp lowering; TDD red->green; held module-fn count by inlining; dispatch coverage + e2e + fmt/clippy/checklist.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-16T20:24:24"
+}
