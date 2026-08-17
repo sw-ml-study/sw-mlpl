@@ -1,0 +1,9 @@
+number = 3
+slug = "read-stdin"
+status = "pending"
+description = "Lower read_stdin/0 to the compile-to-Rust path. Interpreter parity (eval_scri..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-16T18:05:42"
+task_type = "feature"
+commits = []

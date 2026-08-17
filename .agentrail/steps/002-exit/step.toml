@@ -1,9 +1,10 @@
 number = 2
 slug = "exit"
-status = "pending"
+status = "completed"
 description = "Lower exit to the compile-to-Rust path. Interpreter parity (eval_script.rs ev..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-16T18:01:30"
+completed_at = "2026-08-16T18:05:42"
 task_type = "feature"
-commits = []
+commits = ["3feb634b5687b9df62aa3f96d8483721c55bbc27"]

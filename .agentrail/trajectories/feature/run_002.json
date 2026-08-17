@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "exit"
+  },
+  "action": "Mirrored interpreter eval_exit (validation + stdout flush); TDD red->green; dispatch-coverage Exit variant; build e2e + fmt/clippy/checklist.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-16T18:05:42"
+}

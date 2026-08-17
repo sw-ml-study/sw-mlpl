@@ -1,0 +1,1 @@
+Lowered exit/1 to the compile-to-Rust path: mlpl-rt-value proc.rs exit(&CVal)->! validates a rank-0 int 0..=255, flushes stdout, then process::exit; a dedicated Emit::Exit lowering (produces_cval omits exit since it yields no value). Gated e2e proves exit(3)->code 3 and a normal program->0. Net-zero sw-checklist.
