@@ -1,0 +1,31 @@
+# bytestats -- a compiled "wc-lite" that reads all of STDIN and reports
+# byte statistics. It exists to demonstrate the compile-to-Rust subset:
+# every builtin below lowers to native code, so `mlpl-build` turns this
+# file into a self-contained binary with no interpreter or parser.
+#
+# Builtins exercised (all compile natively):
+#   read_stdin, tokenize_bytes  -- pull bytes in from a pipe
+#   tally, reduce_add           -- count
+#   eq, gt                      -- compare (byte == 10 is a newline)
+#   if / else, take             -- control flow + element selection
+#   print                       -- labeled output to stdout
+#
+# Build + run (redirected stdin):
+#   examples/scripts/compile.sh examples/bytestats.mlpl
+#   printf 'hello world\nsecond line\n' | ./examples/bin/bytestats
+#   examples/bin/bytestats < some-file.txt
+# Or in one step via the interpreter-or-native runner:
+#   printf 'hi\n' | examples/scripts/run.sh --native examples/bytestats.mlpl
+
+bytes = tokenize_bytes(read_stdin())
+
+print("bytes:")
+print(tally(bytes))
+print("lines:")
+print(reduce_add(eq(bytes, 10)))
+print("spaces:")
+print(reduce_add(eq(bytes, 32)))
+
+# First byte value, guarded so empty input does not select out of range.
+print("first byte (0 if empty):")
+if gt(tally(bytes), 0) { take(bytes, 0, 0) } else { 0 }

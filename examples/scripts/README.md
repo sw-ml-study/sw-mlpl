@@ -33,6 +33,26 @@ examples/scripts/compile.sh --all
   function may not read globals). Programs that do not lower are
   reported and skipped by `compile.sh --all`; run those interpreted.
 
+## Native demo: reading stdin
+
+`examples/bytestats.mlpl` is a compiled "wc-lite": it reads all of
+STDIN and prints byte, line, and space counts, plus the first byte. It
+uses only compile-to-Rust builtins (`read_stdin`, `tokenize_bytes`,
+`tally`, `reduce_add`, `eq`, `gt`, `if`/`else`, `take`, `print`), so it
+becomes a self-contained native binary with no interpreter.
+
+```bash
+examples/scripts/compile.sh examples/bytestats.mlpl
+printf 'hello world\nsecond line\n' | ./examples/bin/bytestats
+#   bytes: 24 / lines: 2 / spaces: 2 / first byte: 104
+examples/bin/bytestats < some-file.txt          # redirect a file in
+```
+
+`mlpl-build` compiles for the host target, so the binary reads stdin and
+writes stdout like any Unix filter -- pipe into it or redirect a file.
+(Reading a file *by path argument* from a compiled program is a separate
+in-progress compiler rung; for now feed bytes in via stdin.)
+
 ## The `bin/` directory
 
 Compiled output lands in `examples/bin/`, which is gitignored
