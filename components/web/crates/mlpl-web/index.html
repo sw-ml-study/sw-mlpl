@@ -278,12 +278,16 @@
             left: 0;
             z-index: 41;
             width: min(420px, calc(100vw - 24px));
-            /* overflow must stay VISIBLE: the demo tooltips render to the
-               right of each row (left: calc(100% + 12px)), and any
-               `overflow-y: auto` here would coerce overflow-x to clip and
-               cut them off. The accordion (one super-group open at a time)
-               keeps the panel height bounded instead of an inner scroll. */
-            overflow: visible;
+            /* Cap to the viewport and scroll vertically: a single expanded
+               super-group (e.g. Machine learning) can be taller than the
+               screen, and the accordion alone no longer bounds it, so the
+               bottom rows were unreachable. `overflow-y: auto` coerces
+               overflow-x to a clip, so the side tooltips (rendered at
+               left: 100% + 12px) can be trimmed at the panel's right edge
+               while scrolling -- an accepted trade for reaching every demo;
+               a portal-rendered tooltip is the longer-term fix. */
+            max-height: min(72vh, calc(100vh - 96px));
+            overflow-y: auto;
             background: var(--base);
             border: 1px solid var(--surface1);
             border-radius: 6px;
