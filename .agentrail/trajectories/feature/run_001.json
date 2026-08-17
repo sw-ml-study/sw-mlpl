@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "wc-take-floor"
+  },
+  "action": "Code-map agent mapped all 12 builtins; confirmed take is (a,axis,idx) not offset/length; TDD red->green; hit the crate ceiling -> spike queued next.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-17T10:14:23"
+}

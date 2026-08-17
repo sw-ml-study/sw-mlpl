@@ -1,9 +1,10 @@
 number = 1
 slug = "wc-take-floor"
-status = "pending"
+status = "completed"
 description = "Lower take and floor to the compile-to-Rust path (wc's first two of four). Co..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-17T09:37:20"
+completed_at = "2026-08-17T10:14:23"
 task_type = "feature"
-commits = []
+commits = ["cac50c29881c879e94238ed891200e3594cdeba4"]

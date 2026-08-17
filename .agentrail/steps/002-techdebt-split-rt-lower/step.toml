@@ -1,0 +1,9 @@
+number = 2
+slug = "techdebt-split-rt-lower"
+status = "pending"
+description = "Tech-debt spike (CLAUDE.md 'dedicated tech-debt reduction spike between featu..."
+role = "legacy"
+context_files = []
+created_at = "2026-08-17T10:14:23"
+task_type = "refactor"
+commits = []
