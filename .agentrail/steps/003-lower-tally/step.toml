@@ -1,0 +1,8 @@
+number = 3
+slug = "lower-tally"
+status = "pending"
+description = "Lower tally/1 to the compile-to-Rust path (the downstream reports 'unsupporte..."
+role = "production"
+context_files = []
+created_at = "2026-08-17T09:12:37"
+commits = []
