@@ -74,6 +74,8 @@ enum Builtin {
     Gt,
     Lt,
     Eq,
+    TypeOf,
+    Equal,
 }
 
 const ALL: &[Builtin] = &[
@@ -124,6 +126,8 @@ const ALL: &[Builtin] = &[
     Builtin::Gt,
     Builtin::Lt,
     Builtin::Eq,
+    Builtin::TypeOf,
+    Builtin::Equal,
 ];
 
 impl Builtin {
@@ -179,6 +183,8 @@ impl Builtin {
             Builtin::Gt => "gt(5, 3)",
             Builtin::Lt => "lt(5, 3)",
             Builtin::Eq => "eq(4, 4)",
+            Builtin::TypeOf => "type_of([1, 2])",
+            Builtin::Equal => "equal([1, 2], [1, 2])",
         }
     }
 
@@ -230,6 +236,8 @@ impl Builtin {
             Builtin::Gt => "gt",
             Builtin::Lt => "lt",
             Builtin::Eq => "eq",
+            Builtin::TypeOf => "type_of",
+            Builtin::Equal => "equal",
         }
     }
 }

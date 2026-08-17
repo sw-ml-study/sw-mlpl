@@ -62,6 +62,11 @@ enum Emit {
     /// apply_binop(&a0, &a1, |x, y| ...)` yielding a `DenseArray` of
     /// 1.0/0.0, mirroring the arithmetic binop lowering.
     Cmp,
+    /// `type_of(v)` -- the value's kind as a `CVal::Str` (value_kind
+    /// parity), and `equal(a, b)` -- structural CVal equality as a
+    /// scalar `DenseArray` 1.0/0.0 (CVal derives `PartialEq`).
+    TypeOf,
+    Equal,
 }
 
 /// One registry row: which builtin names at which arity lower with
@@ -110,6 +115,8 @@ const REGISTRY: &[Spec] = builtins! {
     ["check"] @ 1 => Check;
     ["take"] @ 3 => ArrayCall;
     ["gt", "lt", "eq"] @ 2 => Cmp;
+    ["type_of"] @ 1 => TypeOf;
+    ["equal"] @ 2 => Equal;
     ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => BitCall;
 };
 
@@ -248,6 +255,27 @@ pub(crate) fn lower_fncall(
                 },
             };
             Ok(quote! { #rt::ApplyBinopExt::apply_binop(&(#l), &(#r), #closure).unwrap() })
+        }
+        // type_of(v) -- value kind as a CVal::Str (value_kind parity).
+        Emit::TypeOf => {
+            let v = crate::lower_cval(ctx, &args[0])?;
+            Ok(quote! {
+                #rt::CVal::Str(match &(#v) {
+                    #rt::CVal::Arr(_) => "array",
+                    #rt::CVal::Str(_) => "string",
+                    #rt::CVal::StrList(_) => "string-list",
+                    #rt::CVal::Record(_) => "record",
+                    #rt::CVal::Result { .. } => "result",
+                }.to_string())
+            })
+        }
+        // equal(a, b) -- structural CVal equality -> scalar 1.0/0.0.
+        Emit::Equal => {
+            let (a, b) = (
+                crate::lower_cval(ctx, &args[0])?,
+                crate::lower_cval(ctx, &args[1])?,
+            );
+            Ok(quote! { #rt::DenseArray::from_scalar(if (#a) == (#b) { 1.0 } else { 0.0 }) })
         }
     }
 }

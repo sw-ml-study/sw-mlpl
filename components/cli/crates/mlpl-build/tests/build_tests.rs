@@ -687,6 +687,38 @@ fn read_bytes_unwrapped_flows_into_array_ops() {
 }
 
 #[test]
+fn type_of_and_equal_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("typeeq");
+    let build_run = |src: &str, tag: &str| -> String {
+        let sp = tmp.join(format!("{tag}.mlpl"));
+        std::fs::write(&sp, src).unwrap();
+        let op = tmp.join(tag);
+        let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+        assert!(
+            r.status.success(),
+            "mlpl-build failed for {src:?}:\n{}",
+            String::from_utf8_lossy(&r.stderr)
+        );
+        String::from_utf8_lossy(&Command::new(&op).output().expect("run").stdout)
+            .trim()
+            .to_string()
+    };
+    // type_of: value kind as a string (interpreter value_kind parity).
+    assert_eq!(build_run("type_of([1, 2])\n", "toa"), "array");
+    assert_eq!(build_run("type_of(\"hi\")\n", "tos"), "string");
+    // equal: structural equality -> scalar 1/0.
+    assert_eq!(build_run("equal([1, 2, 3], [1, 2, 3])\n", "eqt"), "1");
+    assert_eq!(build_run("equal([1, 2], [1, 3])\n", "eqf"), "0");
+    assert_eq!(build_run("equal(\"a\", \"a\")\n", "eqs"), "1");
+    // The range-reader idiom: equal(type_of(v), "array").
+    assert_eq!(build_run("equal(type_of([1, 2]), \"array\")\n", "combo"), "1");
+}
+
+#[test]
 fn take_and_floor_compile_and_run() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
