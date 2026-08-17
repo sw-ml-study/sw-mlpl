@@ -1,9 +1,10 @@
 number = 4
 slug = "grep-string-ops"
-status = "pending"
+status = "completed"
 description = "Lower the grep string family: str_concat/2, str_find/2, str_len/1, str_slice/..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-17T11:56:36"
+completed_at = "2026-08-17T16:15:57"
 task_type = "feature"
-commits = []
+commits = ["2ebf9b6b8a2e3e72b34f83349a2f0993372332f1"]

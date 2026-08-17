@@ -1,0 +1,1 @@
+Lowered the str_* family (grep's string ops): str_len/str_concat/str_find/str_slice/str_split to interpreter parity on CVal::Str, via one Emit::StrOp inline arm + a new CVal::str() accessor. str_concat/slice/split join CVAL_BUILTINS. Gated e2e all pass; grep's builtins now fully lower. +1 warning (CVal::str() accessor, rt-value at module ceiling).

@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "grep-string-ops"
+  },
+  "action": "Confirmed str_find char-index + str_split semantics; one StrOp dispatch arm; fixed a temp-drop borrow (bind CVal before .str()); dispatch coverage + refreshed binaries.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-17T16:15:57"
+}
