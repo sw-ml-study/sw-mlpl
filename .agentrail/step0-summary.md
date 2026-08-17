@@ -1,0 +1,1 @@
+Initialized compiler-file-processing-builtins saga: lower the ~12 builtins wc/grep/du need (take/floor/type_of/equal + str_* + fs_walk/list_*/concat) in wc->grep->du order, each to interpreter parity with a gated compiled e2e.
