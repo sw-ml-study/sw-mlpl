@@ -1,0 +1,1 @@
+Closed compiler-comparisons-and-read-unwrap (4 steps: gt/lt/eq comparisons, read_bytes(...)?->array flow via lower_darr + cval_bindings, tally, docs-close). Queued compiler-file-processing-builtins (the ~12 builtins wc/grep/du still need: take/type_of/equal/floor + str_* + fs_walk/list_*/concat) in wc->grep->du order, per user direction to batch all ~12.
