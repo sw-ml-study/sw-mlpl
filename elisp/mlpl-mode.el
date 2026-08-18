@@ -121,56 +121,57 @@
     (define-key map (kbd "C-c C-r") #'mlpl-send-region)
     (define-key map (kbd "C-c C-b") #'mlpl-send-buffer)
     (define-key map (kbd "C-c C-l") #'mlpl-load-file)
+    (define-key map (kbd "C-c C-f") #'mlpl-format-buffer)
     (define-key map (kbd "C-c m") #'mlpl-menu)
     map)
   "Keymap for MLPL mode.")
 
-(defvar mlpl--previously-detected-indent nil)
-
-(defun mlpl--detect-indent ()
-  "Detect indentation from surrounding context."
+(defun mlpl-format-buffer ()
+  "Reindent the whole buffer by MLPL brace depth and strip trailing
+whitespace -- the in-Emacs equivalent of `scripts/mlpl-fmt.sh'.
+Bound to \\[mlpl-format-buffer].  For a single line use TAB; for a
+selected region use \\[indent-region] (`indent-region').  Note
+`indent-rigidly' is NOT the right command -- it shifts a region by a
+fixed amount rather than computing each line's correct indent."
+  (interactive)
   (save-excursion
-    (let ((prev-indent 0))
-      (when (not (bobp))
-        (forward-line -1)
-        (back-to-indentation)
-        (setq prev-indent (current-column)))
-      prev-indent)))
+    (indent-region (point-min) (point-max))
+    (delete-trailing-whitespace))
+  (message "mlpl: formatted buffer"))
 
-(defun mlpl--indent-line ()
-  "Indent the current line for MLPL."
-  (let* ((indent (mlpl--detect-indent))
-         (prev-line-end
-          (save-excursion
-            (when (not (bobp))
-              (forward-line -1)
-              (line-end-position))))
-         (open-braces 0)
-         (close-braces 0))
-    (save-excursion
-      (when prev-line-end
-        (goto-char (line-beginning-position))
-        (while (< (point) prev-line-end)
-          (cond
-           ((memq (char-after) '(?\( ?\[ ?\{))
-            (setq open-braces (1+ open-braces)))
-           ((memq (char-after) '(?\) ?\] ?\}))
-            (setq close-braces (1+ close-braces))))
-          (forward-char))))
-    (let ((target-indent (+ indent (* mlpl-indent-level
-                                       (- open-braces close-braces)))))
-      (when (< target-indent 0)
-        (setq target-indent 0))
-      (let ((cur-indent (save-excursion
-                          (back-to-indentation)
-                          (current-column))))
-        (if (not (= cur-indent target-indent))
-            (indent-line-to target-indent)
-          (back-to-indentation))))))
+(defun mlpl--calculate-indent ()
+  "Return the column the current line should be indented to.
+Indentation follows paren/bracket/brace nesting depth: MLPL's
+`if`/`else`/`while`/`repeat`/`def` blocks are all brace-delimited
+(`while n { ... }`, `if c { ... } else { ... }`), so a line's
+indent is its `{`/`(`/`[' depth times `mlpl-indent-level'.  A line
+that begins by CLOSING its block dedents one level so the closing
+delimiter lines up with the construct that opened it.
+
+The result is absolute (computed from `syntax-ppss', which ignores
+delimiters inside strings and `#` comments) and therefore
+idempotent -- re-indenting an already-formatted line is a no-op --
+which is what makes `indent-region' and batch formatting
+(`scripts/mlpl-fmt.sh') safe.  Returns nil for a line inside a
+multi-line string, so string bodies are left untouched."
+  (let* ((ppss (syntax-ppss (line-beginning-position)))
+         (depth (car ppss)))
+    (unless (nth 3 ppss)                ; non-nil only inside a string
+      (save-excursion
+        (back-to-indentation)
+        (when (looking-at-p "\\s)")     ; a close-delimiter starts the line
+          (setq depth (1- depth))))
+      (* mlpl-indent-level (max 0 depth)))))
 
 (defun mlpl-indent-line-function ()
-  "Indent function for MLPL mode."
-  (mlpl--indent-line))
+  "Indent the current line by MLPL brace depth.
+Keeps point in place when it is already past the indentation, so
+TAB on a mid-line point does not jump the cursor to the margin."
+  (let ((target (mlpl--calculate-indent)))
+    (when target
+      (if (<= (current-column) (current-indentation))
+          (indent-line-to target)
+        (save-excursion (indent-line-to target))))))
 
 (defun mlpl--beginning-of-defun ()
   "Move to the beginning of the previous MLPL statement block."
