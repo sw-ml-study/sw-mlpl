@@ -562,6 +562,16 @@ help are live (interpreter/REPL/serve). Remaining follow-ups:
   multiple handlers per event (today one handler per kind); (c)
   connect-mode main-thread handoff so native-UI ports work over
   serve/connect (today local-only). None block the compiled-app work.
+- **worker-supervision** (requested by ../demo-extensions) -- a
+  first-class supervisor/restart primitive for MLPL workers: detect a
+  crashed/exited worker (a Port whose backing interpreter thread
+  died), surface it to the parent, and restart it with a fresh
+  share-nothing state. demo-extensions worked around the gap by
+  implementing its OWN downstream supervisor, so this no longer blocks
+  its interpreted demos -- but a built-in supervision contract (health
+  signal + restart policy on the Port abstraction) would let providers
+  drop the bespoke wrapper. Pairs with the `event-loop follow-ons`
+  responsive-worker escalation above.
 - **split `mlpl-eval-env`** -- the crate is AT its 7-module ceiling, so
   the port table + `register_port`/`resolve_port` + the `ui_host_thread`
   flag had to live in `env.rs` (now near its file-LOC budget). Peel the
@@ -632,6 +642,18 @@ order:
   documented divergence from the interpreter's script echo; cross-mode
   parity is the optional follow-on below. Gated compiled e2es in
   `mlpl-build/tests/build_tests.rs`.
+- **bounded-stdin-chunk** SHIPPED -- `read_stdin_chunk(max_bytes)`, a
+  bounded, incremental raw-byte stdin source with explicit EOF, on
+  BOTH surfaces with identical byte / EOF / validation / error
+  semantics (the ../demo-file-processing bounded-stdin pipeline). One
+  call reads up to `max_bytes` bytes -> `ok({bytes, eof})`; `eof` is
+  `1` only on the terminal empty read; `max_bytes` is validated
+  (positive integer) before any byte is consumed. Interpreter in
+  `mlpl-eval` `stdin_chunk.rs` (refuses a TTY like `read_stdin`);
+  compiler in `mlpl-rt-value` `stdin_chunk.rs` lowered via the
+  `CvalIo` shape. Gated compiled e2e proves exact byte counts over
+  piped stdin, immediate EOF on empty input, and budget rejection
+  without consuming stdin.
 - **compiler-stdout-parity** (optional follow-on) -- make the
   INTERPRETER's `-f` script echo pristine too (a "silent success" value
   for `write_stdout`/`print` that neither runner echoes), so an

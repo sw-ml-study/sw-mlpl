@@ -2239,6 +2239,19 @@ TTY -- they return `Err("...stdin is a terminal; pipe input or
 use args() instead")` so the REPL doesn't hang on a stray
 `read_stdin()`.
 
+For bounded-memory streaming there is `read_stdin_chunk(max_bytes)`:
+one call reads up to `max_bytes` bytes and returns
+`ok({bytes, eof})`, where `bytes` is a rank-1 array of the byte
+values read and `eof` is `1` only on the terminal empty read (and
+`0` for any non-empty chunk). Short non-empty chunks are normal;
+repeated calls after EOF keep returning `{bytes: [], eof: 1}`.
+`max_bytes` must be a positive integer, validated before any byte
+is consumed, so a bad budget is a clean `err`. Loop it to process a
+stream in constant memory: `chunk = read_stdin_chunk(65536)?` then
+fold `chunk.bytes` until `chunk.eof` is `1`. Unlike `read_stdin()`,
+`read_stdin_chunk` is also available in compiled binaries (the
+compile-to-Rust path shares its byte / EOF / validation semantics).
+
 The intended shape is shell pipes: `cat data.txt | mlpl-repl -f
 filter.mlpl`. Combine with [[Script exit codes]] for
 `set -e`-style chained scripts.

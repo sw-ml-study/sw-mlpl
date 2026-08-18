@@ -871,6 +871,7 @@ explicitly on failure via `is_ok` / `unwrap_or` / `err_message`.
 | `list_get(xs, i)` | 2 | Index into a `StrList` and return the `i`-th string wrapped in `Result`. `Ok(string)` when `i < len(xs)`; `Err("list_get: index N out of bounds (list has M items)")` when out of range. Pair with `unwrap_or(list_get(args(), 0), "default")` for a missing-arg fallback. |
 | `read_stdin()` | 0 | Block until EOF and return all stdin bytes as a `Value::Str`. Refuses to read from an interactive terminal: `Err("read_stdin: stdin is a terminal; pipe input or use args() instead")` when stdin is a TTY. Pair with `print(read_stdin())` in shell pipes like `echo "hello" \| mlpl-repl -f greet.mlpl`. |
 | `read_stdin_lines()` | 0 | Same EOF read as `read_stdin()` but split on `\n` and return a `StrList`. A trailing newline is stripped so `"a\nb\n"` and `"a\nb"` both yield `["a", "b"]`. Combine with `list_get`/`list_len` for line-oriented input processing. |
+| `read_stdin_chunk(max_bytes)` | 1 | Bounded, incremental raw-byte stdin source. Reads up to `max_bytes` bytes in one call and returns `ok({bytes, eof})`: `bytes` is a rank-1 array of the byte values read (`0..=255`), `eof` is `1` only on the terminal empty read and `0` for any non-empty chunk. Short non-empty chunks are normal; calls after EOF stay `{bytes: [], eof: 1}`. `max_bytes` must be a positive integer, validated before any byte is consumed (a bad budget is a clean `err`). Loop it to fold a stream in constant memory. Also available in compiled binaries -- the compile-to-Rust path shares the same byte / EOF / validation / error semantics. |
 | `exit(code)` | 1 | Terminate the script with the given integer exit code. `code` must be in 0..=255; out-of-range or non-integer codes raise an eval error before the exit fires. `exit(0)` is clean; `exit(1)` is the usual "something went wrong" code. Never returns. |
 
 ### Script exit codes
@@ -897,11 +898,16 @@ echo "1 2 3" | mlpl-repl -f sum-stdin.mlpl
 ### Compiled programs and stdout
 
 `mlpl-build` compiles a program to a native binary. The process
-builtins `print`, `eprint`, `exit`, and `read_stdin` all work in a
-compiled binary (single-argument `print`/`eprint`; the variadic
-space-joined form is interpreter-only). `read_stdin` in a compiled
-binary reads whatever is piped, blocking for EOF like `cat` -- it does
-not refuse a terminal the way the REPL does.
+builtins `print`, `eprint`, `exit`, `read_stdin`, and
+`read_stdin_chunk` all work in a compiled binary (single-argument
+`print`/`eprint`; the variadic space-joined form is interpreter-only).
+`read_stdin` in a compiled binary reads whatever is piped, blocking
+for EOF like `cat` -- it does not refuse a terminal the way the REPL
+does. `read_stdin_chunk(max_bytes)` gives a compiled filter a
+bounded, incremental byte source with explicit EOF -- loop
+`chunk = read_stdin_chunk(n)?` and fold `chunk.bytes` until
+`chunk.eof` is `1` to process an arbitrarily large stream in constant
+memory.
 
 A compiled binary's stdout is PRISTINE, which differs from the `-f`
 script echo above: the program's own `print` / `write_stdout` output is
