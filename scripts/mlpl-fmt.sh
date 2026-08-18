@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
-# mlpl-fmt -- format .mlpl source by MLPL major-mode indentation,
-# using batch Emacs. The MLPL analogue of `cargo fmt`: it reindents
-# every line to its brace/bracket/paren depth (MLPL's if/else/while/
-# repeat/def blocks are brace-delimited) and strips trailing
-# whitespace. Because mlpl-mode's indenter is absolute and idempotent
-# (docs: elisp/mlpl-mode.el `mlpl--calculate-indent'), running this on
-# already-formatted code is a no-op.
+# mlpl-fmt -- format .mlpl source with MLPL major-mode, using batch
+# Emacs. The MLPL analogue of `cargo fmt`: it runs `mlpl-format-buffer',
+# which EXPLODES one-line blocks/statements onto their own lines
+# (newline after a block `{', before its `}', and after each `;';
+# record literals `{k: v}', strings, and `#' comments stay inline), then
+# reindents by brace/bracket/paren depth and strips trailing whitespace.
+# Idempotent (docs: elisp/mlpl-mode.el `mlpl--reflow-buffer' +
+# `mlpl--calculate-indent'), so re-running on formatted code is a no-op.
 #
 # Usage:
 #   scripts/mlpl-fmt.sh [--check] [FILE|DIR ...]
@@ -94,8 +95,7 @@ format_into() { # $1 = file to format in place
     --visit "$1" \
     --eval '(progn
               (mlpl-mode)
-              (indent-region (point-min) (point-max))
-              (delete-trailing-whitespace)
+              (mlpl-format-buffer)
               (save-buffer))' \
     >/dev/null 2>&1
 }

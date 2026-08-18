@@ -126,15 +126,72 @@
     map)
   "Keymap for MLPL mode.")
 
+(defun mlpl--record-brace-p ()
+  "Non-nil if the `{' at point opens a record literal, not a code block.
+A record starts `{ key: value , ...}' (a bare identifier then a single
+`:'), or is empty `{}'.  A code block starts with a statement (`x =',
+`if', `while', a call, an expression), so it never matches."
+  (save-excursion
+    (forward-char 1)                    ; step past the {
+    (skip-chars-forward " \t\n")
+    (or (eq (char-after) ?\})            ; empty {} -> keep inline
+        ;; identifier ':' but not '::' or ':=' (a genuine record key)
+        (looking-at "[A-Za-z_][A-Za-z0-9_]*[ \t]*:[^:=]"))))
+
+(defun mlpl--reflow-buffer ()
+  "Explode single-line MLPL code onto multiple lines (no indenting).
+Inserts a newline after a block-opening `{', before its matching `}',
+and after each statement `;'.  Record literals `{k: v, ...}', string
+literals, and `#' comments are left inline.  Idempotent: an
+already-exploded buffer gains no new breaks, so it is safe to re-run
+and to pair with `indent-region'."
+  (goto-char (point-min))
+  (let ((stack '()))                    ; brace kinds: `block' / `record'
+    (while (< (point) (point-max))
+      (let ((ch (char-after)))
+        (cond
+         ;; Skip a whole string / comment: braces and `;' inside are data.
+         ((eq ch ?\")
+          (condition-case nil (forward-sexp 1) (error (forward-char 1))))
+         ((eq ch ?#) (end-of-line))
+         ((eq ch ?\{)
+          (let ((record (mlpl--record-brace-p)))
+            (push (if record 'record 'block) stack)
+            (forward-char 1)
+            (when (and (not record) (not (looking-at-p "[ \t]*$")))
+              (delete-horizontal-space)
+              (insert "\n"))))
+         ((eq ch ?\})
+          (let ((kind (if stack (pop stack) 'block))
+                (brace (point)))
+            (when (eq kind 'block)
+              (skip-chars-backward " \t")
+              (unless (bolp)
+                (delete-region (point) brace)
+                (insert "\n")))
+            (forward-char 1)))          ; step past the }
+         ((eq ch ?\;)
+          (forward-char 1)
+          (when (and (not (eq (car stack) 'record))
+                     (not (looking-at-p "[ \t]*$")))
+            (delete-horizontal-space)
+            (insert "\n")))
+         (t (forward-char 1)))))))
+
 (defun mlpl-format-buffer ()
-  "Reindent the whole buffer by MLPL brace depth and strip trailing
-whitespace -- the in-Emacs equivalent of `scripts/mlpl-fmt.sh'.
-Bound to \\[mlpl-format-buffer].  For a single line use TAB; for a
-selected region use \\[indent-region] (`indent-region').  Note
-`indent-rigidly' is NOT the right command -- it shifts a region by a
-fixed amount rather than computing each line's correct indent."
+  "Format the whole buffer: explode one-line blocks/statements onto
+their own lines (`mlpl--reflow-buffer'), reindent by brace depth, and
+strip trailing whitespace -- the in-Emacs equivalent of
+`scripts/mlpl-fmt.sh'.  Bound to \\[mlpl-format-buffer].
+
+Record literals `{k: v, ...}', strings, and comments are kept inline;
+operator spacing is left as-is (only structure is changed).  To indent
+without reflowing, use TAB on a line or \\[indent-region] on a region.
+`indent-rigidly' is NOT the right command -- it shifts rigidly rather
+than computing each line's indent."
   (interactive)
   (save-excursion
+    (mlpl--reflow-buffer)
     (indent-region (point-min) (point-max))
     (delete-trailing-whitespace))
   (message "mlpl: formatted buffer"))
