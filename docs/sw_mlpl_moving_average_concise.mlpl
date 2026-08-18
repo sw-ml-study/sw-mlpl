@@ -8,24 +8,29 @@
 #   so the moving-average definition stays compact and readable.
 
 def u:first(n, x) {
-    compress(lt(range(tally(x)), n), x)
+  "The first n elements of x (a leading slice via a compress mask)."
+  compress(lt(range(tally(x)), n), x)
 }
 
 def u:skip(n, x) {
-    compress(gt(range(tally(x)), n - 1), x)
+  "x with its first n elements dropped (a trailing slice via a compress mask)."
+  compress(gt(range(tally(x)), n - 1), x)
 }
 
 def u:prefix_sums(x) {
-    concat(0, running_sum(x))
+  "Prefix (running) sums of x with a leading 0, so element i is the sum of the first i values."
+  concat(0, running_sum(x))
 }
 
 def u:window_sums(w, x) {
-    p = u:prefix_sums(x)
-    u:skip(w, p) - u:first(tally(p) - w, p)
+  "The sum of each contiguous length-w window of x, computed in one shot as the difference of shifted prefix sums."
+  p = u:prefix_sums(x)
+  u:skip(w, p) - u:first(tally(p) - w, p)
 }
 
 def u:moving_average(w, x) {
-    u:window_sums(w, x) / w
+  "The moving average of x over a sliding window of width w (each window sum divided by w)."
+  u:window_sums(w, x) / w
 }
 
 values = [10, 20, 30, 40, 50, 60]

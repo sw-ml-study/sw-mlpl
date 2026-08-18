@@ -17,6 +17,7 @@ lines_m = reshape([
     1,0,0,1,0,0,1,0,0,  0,1,0,0,1,0,0,1,0,  0,0,1,0,0,1,0,0,1,
     1,0,0,0,1,0,0,0,1,  0,0,1,0,1,0,1,0,0], [8, 9])
 def u:winner(board) {
+  "Winner of `board`: +1 if X owns a line (line-sum 3), -1 if O owns one (sum -3), else 0. One matmul against the line-incidence matrix yields all eight line-sums."
   sums = reshape(matmul(lines_m, reshape(board, [9, 1])), [8]);
   if gt(reduce_add(eq(sums, 3), 0), 0) {
     1
@@ -29,6 +30,7 @@ def u:winner(board) {
   }
 }
 def u:terminal(board) {
+  "1 if `board` is terminal -- someone has won, or all nine cells are filled (a draw) -- else 0."
   if gt(abs(u:winner(board)), 0) {
     1
   } else {
@@ -36,6 +38,7 @@ def u:terminal(board) {
   }
 }
 def u:mx(a, b) {
+  "The larger of `a` and `b`."
   if gt(a, b) {
     a
   } else {
@@ -43,6 +46,7 @@ def u:mx(a, b) {
   }
 }
 def u:mn(a, b) {
+  "The smaller of `a` and `b`."
   if gt(a, b) {
     b
   } else {
@@ -50,6 +54,7 @@ def u:mn(a, b) {
   }
 }
 def u:ge(a, b) {
+  "1 if `a` is greater than or equal to `b`, else 0."
   if gt(a, b) {
     1
   } else {
@@ -58,6 +63,7 @@ def u:ge(a, b) {
 }
 # alpha-beta minimax value, X's perspective (+1 X / -1 O / 0 draw).
 def u:ab(board, player, alpha, beta) {
+  "Alpha-beta minimax value of `board` with `player` (+1/-1) to move, scored from X's perspective (+1 X wins, -1 O wins, 0 draw under perfect play). `alpha`/`beta` are the search window; the scan prunes the remaining recursion once a cutoff (alpha >= beta) is reached."
   w = u:winner(board);
   if gt(abs(w), 0) {
     w
@@ -99,6 +105,7 @@ def u:ab(board, player, alpha, beta) {
 }
 # optimal move for `player` (the training label oracle).
 def u:best_move(board, player) {
+  "The optimal cell index for `player` on `board`: evaluate each legal move with a full-window alpha-beta search and keep the best (max for X, min for O). The perfect-play oracle that labels the training set."
   bv = 0 - 2 * player;
   bc = 0;
   seen = 0;
@@ -130,21 +137,25 @@ def u:best_move(board, player) {
 }
 # board -> 27 one-hot features [empty, mine, theirs], side-agnostic.
 def u:encode(board, mover) {
+  "Encode `board` from `mover`'s perspective as 27 one-hot features -- each cell maps to [empty, mine, theirs]. Side-agnostic, so one policy plays either side."
   e = eq(board, 0);
   m = eq(board, mover);
   t = eq(board, 0 - mover);
   reshape(concat(concat(reshape(e, [9, 1]), reshape(m, [9, 1]), 1), reshape(t, [9, 1]), 1), [27])
 }
 def u:rmove(board, s) {
+  "A random legal move on `board`: argmax of per-cell random scores (seeded by `s`) masked to the empty cells."
   argmax(random(s, [9]) * eq(board, 0), 0)
 }
 # the trained model's move (plays O): highest-scoring LEGAL cell.
 def u:omove(board) {
+  "The trained model's move (playing O): score `board` through the global model `m` and pick the highest-scoring LEGAL cell (illegal cells are pushed down by a large penalty)."
   logits = reshape(apply(m, reshape(u:encode(board, 0 - 1), [1, 27])), [9]);
   argmax(logits + (eq(board, 0) - 1) * 1000, 0)
 }
 # play `n` games, model (global `m`) as O vs random X; tally [loss,tie,win].
 def u:play_o(n) {
+  "Play `n` games with the model (global `m`) as O against a random X, returning the [loss, tie, win] tally from O's point of view."
   loss = 0;
   tie = 0;
   win = 0;

@@ -101,8 +101,14 @@ disp(blocks)
 # APL2 composes functions freely (f g X, f¨V); MLPL composes
 # through REFERENCES: :u:name quotes your function as a value.
 
-def u:double(x) { x * 2 }
-def u:inc(x) { x + 1 }
+def u:double(x) {
+  "Double x.";
+  x * 2
+}
+def u:inc(x) {
+  "Increment x by one.";
+  x + 1
+}
 
 # APL2:  INC DOUBLE 5    (right-to-left application)
 call(:u:inc, call(:u:double, 5))
@@ -118,23 +124,46 @@ u:double(range(5))
 
 # Railway composition over Results (map_ok / and_then / or_else
 # take a reference first):
-def u:pos(x) { if gt(x, 0) { ok(x) } else { err("not positive") } }
+def u:pos(x) {
+  "ok(x) when x is positive, else err -- a Result-returning guard for the railway examples.";
+  if gt(x, 0) {
+    ok(x)
+  } else {
+    err("not positive")
+  }
+}
 unwrap(and_then(:u:pos, map_ok(:u:double, ok(4))))
 
 # ---------- each, table, and composition ----------
 
 # APL2:  F¨V          (each: for when the per-element work is
 #                      a FUNCTION -- arithmetic pervades anyway)
-def u:halve_or_zero(x) { if gt(x, 4) { x / 2 } else { 0 } }
+def u:halve_or_zero(x) {
+  "Half of x when x is greater than 4, else 0.";
+  if gt(x, 4) {
+    x / 2
+  } else {
+    0
+  }
+}
 each(:u:halve_or_zero, [2, 6, 10])
 
 # APL2:  A ∘.× B      (outer product -- BQN: a ×⌜ b)
-def u:times(a, b) { a * b }
+def u:times(a, b) {
+  "The product a * b -- the body of the outer-product example.";
+  a * b
+}
 table(:u:times, [1, 2, 3], [10, 20])
 
 # BQN:  x (+ ○ sq) y  (over: preprocess both sides, combine)
-def u:add2(a, b) { a + b }
-def u:sq(x) { x * x }
+def u:add2(a, b) {
+  "The sum a + b.";
+  a + b
+}
+def u:sq(x) {
+  "The square of x.";
+  x * x
+}
 over(:u:add2, :u:sq, 3, 4)
 
 # BQN:  (sq ∘ mean) x (atop: compose, then apply)
@@ -145,23 +174,42 @@ atop(:u:sq, :mean, [1, 2, 3])
 # Combinatory logic (Smullyan's birds): application itself is
 # a value. Under-applying call() returns a PARTIAL; saturating
 # executes; extra arguments continue left to right.
-def u:K(x, y) { x }
-def u:B(x, y, z) { call(x, call(y, z)) }
+def u:K(x, y) {
+  "The K combinator: return x and ignore y (a constant function).";
+  x
+}
+def u:B(x, y, z) {
+  "The B combinator (composition): apply x after y to z -- x(y(z)).";
+  call(x, call(y, z))
+}
 
 # BQN-ish:  5⊸⊣    (bind: a constant awaiting its excuse)
 k5 = call(:u:K, 5)
 call(k5, 99)
 
 # Haskell:  (f . g) x   /  bird:  B f g x
-def u:double(x) { x * 2 }
+def u:double(x) {
+  "Double x.";
+  x * 2
+}
 call(:u:B, :u:double, :u:inc, 4)
 
 # The Y / FIXED-POINT combinator (recursion without a name):
 # the partial call(:u:fix, f) is a delayed self-reference, so
 # a strict language can tie the knot. "Y Combinator" the brand
 # is named after this.
-def u:fix(f, v) { call(f, call(:u:fix, f), v) }
-def u:fact_body(rec, n) { if gt(n, 1) { n * call(rec, n - 1) } else { 1 } }
+def u:fix(f, v) {
+  "The Y/fixed-point combinator: tie the recursive knot for body f at argument v, recursion without a name.";
+  call(f, call(:u:fix, f), v)
+}
+def u:fact_body(rec, n) {
+  "Factorial body for the fix combinator: n * rec(n - 1), or 1 when n <= 1.";
+  if gt(n, 1) {
+    n * call(rec, n - 1)
+  } else {
+    1
+  }
+}
 call(call(:u:fix, :u:fact_body), 5)
 
 # ---------- quad-EX and )ERASE: freeing names ----------

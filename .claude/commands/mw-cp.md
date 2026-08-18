@@ -78,6 +78,14 @@ cargo fmt --all -- --check
   its symlink alias). NOTE: AGENTS.md and the three
   `books/*/src/preface.md` files are SYMLINKS -- never run an
   in-place editor (`perl -i`, `sed -i`) on them; edit the target.
+- `scripts/mlpl-fmt.sh --check` -- only if any `.mlpl` changed. Every
+  `.mlpl` file must be formatted (reflowed + brace-depth indented) AND
+  every `def u:` must open with a leading string-literal docstring (see
+  CLAUDE.md ".mlpl file discipline"). Fix offenders with
+  `scripts/mlpl-fmt.sh` (formatting) and by adding docstrings; the
+  formatter is whitespace-only and docstrings are discarded, so neither
+  changes program output (confirm with the file's run or its pinned
+  test).
 - `sw-checklist` -- always. Apply the ratchet policy
   (docs/sw-checklist-paydown.md): the commit should strictly lower
   BOTH the failed and warning counts (targets: -5 fails, -15

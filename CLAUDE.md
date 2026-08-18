@@ -351,6 +351,47 @@ Top directives:
   function or module. First extract responsibilities into named
   pure helpers, then add.
 
+## .mlpl file discipline (docstrings + formatting, every commit)
+
+Every `.mlpl` file committed or pushed MUST satisfy BOTH of these,
+every time -- no exceptions, no "fix it next commit":
+
+1. **Every user-defined function has a docstring.** Each `def u:name(...)`
+   MUST open its body with a leading string-literal docstring -- the
+   first statement after `{` is a `"..."` string describing what the
+   function does. It is evaluated and discarded at runtime (the block's
+   value is still its last expression), so it never changes behavior.
+   Example:
+   ```
+   def u:winner(board) {
+     "Winner of `board`: +1 if X owns a line, -1 if O, else 0."
+     ...
+   }
+   ```
+   For the web-playground demos this is already enforced by
+   `components/web-demos/.../tests/def_comments_gate.rs`; the SAME rule
+   applies to every other `.mlpl` file (examples/, docs/, demos/,
+   demos/scripts/, and any new ones).
+
+2. **Every `.mlpl` file is formatted.** Run the formatter before
+   committing:
+   ```bash
+   scripts/mlpl-fmt.sh            # format all tracked *.mlpl in place
+   scripts/mlpl-fmt.sh --check    # verify (exit 1 + names offenders)
+   ```
+   `mlpl-fmt.sh` runs `mlpl-format-buffer` (batch Emacs, auto-located):
+   it explodes one-line blocks/statements onto their own lines and
+   reindents by brace depth. It is whitespace-only and idempotent, so
+   re-running is a no-op. When any `.mlpl` file changed, run
+   `scripts/mlpl-fmt.sh --check` as part of the pre-commit gate and
+   fix any offender before committing.
+
+Adding a docstring is content, not whitespace -- but because the
+docstring is discarded, formatting + docstrings never change a
+program's output. Verify with the file's own run (or its pinned test,
+e.g. `tictactoe_minimax`) after editing. This is part of the /mw-cp
+gate whenever a commit touches `.mlpl` files.
+
 ## CHANGES.md discipline (every commit)
 
 `CHANGES.md` is the reverse-chronological log of every
