@@ -1,0 +1,1 @@
+Add a discoverable built-in easy-menu 'MLPL' menu-bar pulldown to elisp/mlpl-mode.el listing the mode commands (send-line/region/buffer, load-file, switch-to-repl, format-buffer, indent-region, svg menu), with fboundp :active guards so sibling-file commands grey out gracefully when only the mode is loaded.
