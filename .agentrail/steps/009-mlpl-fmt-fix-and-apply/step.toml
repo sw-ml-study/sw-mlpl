@@ -1,0 +1,10 @@
+number = 9
+slug = "mlpl-fmt-fix-and-apply"
+status = "completed"
+description = "Fix the reflow infinite-loop on '}' left alone on a line (restore point to th..."
+role = "production"
+context_files = []
+created_at = "2026-08-18T09:06:35"
+completed_at = "2026-08-18T09:06:51"
+task_type = "tooling"
+commits = ["2e6344de5659a434a03b32d40aec66f254c2a49e"]

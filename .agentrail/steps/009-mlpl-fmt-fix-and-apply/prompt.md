@@ -1,0 +1,1 @@
+Fix the reflow infinite-loop on '}' left alone on a line (restore point to the brace when bolp, else it re-processes forever), and apply mlpl-fmt to the genuinely-dense hand-authored files (examples/tictactoe-demo.mlpl, examples/tictactoe-minimax.mlpl). Verify whitespace-only + the include_str! minimax value test.
