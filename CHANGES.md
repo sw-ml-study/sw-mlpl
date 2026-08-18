@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-18
+
+- chore(agentrail): complete 005-bounded-stdin-chunk; queue du-list-fs
+- docs(stdin): document read_stdin_chunk + queue worker-supervision
+- feat(stdin): read_stdin_chunk bounded incremental stdin (interp + compiler parity)
+
 ## 2026-08-17
 
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(catalog): keep groups_lang.rs under the 500-line file ceiling
 - docs(changes): refresh CHANGES.md to HEAD
 - docs(fs): document read_bytes_packed + scan_length_prefixed_offsets
