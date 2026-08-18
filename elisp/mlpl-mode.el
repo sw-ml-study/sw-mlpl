@@ -166,7 +166,11 @@ and to pair with `indent-region'."
                 (brace (point)))
             (when (eq kind 'block)
               (skip-chars-backward " \t")
-              (unless (bolp)
+              (if (bolp)
+                  ;; `}' already alone on its line -- restore point to it
+                  ;; (skipping this would leave point in the leading
+                  ;; whitespace and re-process the same `}' forever).
+                  (goto-char brace)
                 (delete-region (point) brace)
                 (insert "\n")))
             (forward-char 1)))          ; step past the }
