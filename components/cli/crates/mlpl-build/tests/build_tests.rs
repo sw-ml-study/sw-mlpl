@@ -748,7 +748,10 @@ fn type_of_and_equal_compile_and_run() {
     assert_eq!(build_run("equal([1, 2], [1, 3])\n", "eqf"), "0");
     assert_eq!(build_run("equal(\"a\", \"a\")\n", "eqs"), "1");
     // The range-reader idiom: equal(type_of(v), "array").
-    assert_eq!(build_run("equal(type_of([1, 2]), \"array\")\n", "combo"), "1");
+    assert_eq!(
+        build_run("equal(type_of([1, 2]), \"array\")\n", "combo"),
+        "1"
+    );
 }
 
 #[test]
@@ -887,6 +890,136 @@ fn read_stdin_echoes_piped_input() {
     let out = child.wait_with_output().expect("wait");
     let stdout = String::from_utf8_lossy(&out.stdout);
     assert!(stdout.contains("piped input line"), "stdout: {stdout}");
+}
+
+#[test]
+fn read_stdin_chunk_counts_bytes_incrementally() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    use std::io::Write;
+    use std::process::Stdio;
+    let tmp = tempdir("stdinchunk");
+    // A bounded-memory byte counter: loop `read_stdin_chunk(4)` (a
+    // 4-byte budget that FORCES short reads over a 14-byte input),
+    // accumulate `tally(chunk.bytes)`, and stop when `chunk.eof` flips
+    // to 1 on the terminal empty read. Proves incremental reads, the
+    // EOF terminator, record field access, and `?`-unwrapped Results
+    // all compose in compiled code.
+    let sp = tmp.join("count.mlpl");
+    std::fs::write(
+        &sp,
+        "def u:count() { total = 0; more = 1; \
+         while more { chunk = read_stdin_chunk(4)?; \
+         total = total + tally(chunk.bytes); more = 1 - chunk.eof } \
+         total }\nu:count()\n",
+    )
+    .unwrap();
+    let op = tmp.join("count");
+    let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+    assert!(
+        r.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&r.stderr)
+    );
+    // 14-byte payload; with a 4-byte budget the loop reads several
+    // short chunks then the empty EOF chunk. The count must be exact.
+    let mut child = Command::new(&op)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("spawn");
+    child
+        .stdin
+        .take()
+        .unwrap()
+        .write_all(b"hello, stdin!\n")
+        .unwrap();
+    let out = child.wait_with_output().expect("wait");
+    assert!(out.status.success(), "counter must exit 0");
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert_eq!(stdout.trim(), "14", "byte count (stdout: {stdout:?})");
+}
+
+#[test]
+fn read_stdin_chunk_empty_input_is_immediate_eof() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    use std::process::Stdio;
+    let tmp = tempdir("stdinchunk-eof");
+    // Empty stdin: the very first `read_stdin_chunk` returns
+    // `{bytes: [], eof: 1}`, so the loop body never accumulates and
+    // the count is 0.
+    let sp = tmp.join("empty.mlpl");
+    std::fs::write(
+        &sp,
+        "def u:count() { total = 0; more = 1; \
+         while more { chunk = read_stdin_chunk(8)?; \
+         total = total + tally(chunk.bytes); more = 1 - chunk.eof } \
+         total }\nu:count()\n",
+    )
+    .unwrap();
+    let op = tmp.join("empty");
+    let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+    assert!(
+        r.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&r.stderr)
+    );
+    let out = Command::new(&op)
+        .stdin(Stdio::null())
+        .output()
+        .expect("run");
+    assert!(out.status.success(), "empty-input counter must exit 0");
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert_eq!(stdout.trim(), "0", "empty stdin -> 0 (stdout: {stdout:?})");
+}
+
+#[test]
+fn read_stdin_chunk_rejects_bad_budget_without_consuming() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    use std::io::Write;
+    use std::process::Stdio;
+    let tmp = tempdir("stdinchunk-badbudget");
+    // `read_stdin_chunk(0)` is an invalid budget: the `?` propagates
+    // the err, so the program aborts with a non-zero exit and never
+    // consumes stdin.
+    let sp = tmp.join("bad.mlpl");
+    std::fs::write(
+        &sp,
+        "def u:go() { chunk = read_stdin_chunk(0)?; print(tally(chunk.bytes)) }\nu:go()\n",
+    )
+    .unwrap();
+    let op = tmp.join("bad");
+    let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+    assert!(
+        r.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&r.stderr)
+    );
+    let mut child = Command::new(&op)
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .spawn()
+        .expect("spawn");
+    let _ = child.stdin.take().unwrap().write_all(b"unconsumed");
+    let out = child.wait_with_output().expect("wait");
+    assert!(
+        !out.status.success(),
+        "bad budget must abort (non-zero exit)"
+    );
+    let err = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        err.contains("read_stdin_chunk") && err.contains("positive integer"),
+        "expected a budget-rejection message, got: {err}"
+    );
 }
 
 #[test]

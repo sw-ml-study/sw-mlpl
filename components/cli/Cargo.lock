@@ -1867,6 +1867,7 @@ dependencies = [
  "mlpl-eval-state",
  "mlpl-eval-types",
  "mlpl-extension-abi",
+ "mlpl-extension-loader",
  "mlpl-extension-registry",
  "mlpl-forge-kg",
  "mlpl-loader-helpers",
@@ -2037,6 +2038,22 @@ dependencies = [
 [[package]]
 name = "mlpl-extension-abi"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-extension-cabi"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
+]
+
+[[package]]
+name = "mlpl-extension-loader"
+version = "0.20.0"
+dependencies = [
+ "libloading 0.8.9",
+ "mlpl-extension-cabi",
+]
 
 [[package]]
 name = "mlpl-extension-registry"
@@ -2376,7 +2393,9 @@ dependencies = [
  "mlpl-core",
  "mlpl-rt-fsio",
  "mlpl-rt-value",
+ "mlpl-runtime-array",
  "mlpl-runtime-bits",
+ "mlpl-runtime-math",
 ]
 
 [[package]]

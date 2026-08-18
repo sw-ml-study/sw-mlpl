@@ -52,6 +52,7 @@ pub(crate) fn try_intercept(
         "list_get" => Some(crate::list_ops::eval_list_get(args, env, trace)),
         "write_stdout" => Some(crate::eval_script::eval_write_stdout(args, env, trace)),
         "read_stdin" => Some(crate::eval_script::eval_read_stdin(args)),
+        "read_stdin_chunk" => Some(crate::stdin_chunk::eval_read_stdin_chunk(args, env, trace)),
         "read_stdin_lines" => Some(crate::eval_script::eval_read_stdin_lines(args)),
         "exit" => Some(crate::eval_script::eval_exit(args, env, trace)),
         _ => None,

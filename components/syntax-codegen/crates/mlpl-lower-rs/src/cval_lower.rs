@@ -49,6 +49,7 @@ const CVAL_BUILTINS: &[&str] = &[
     "print",
     "eprint",
     "read_stdin",
+    "read_stdin_chunk",
     "type_of",
     "str_concat",
     "str_slice",

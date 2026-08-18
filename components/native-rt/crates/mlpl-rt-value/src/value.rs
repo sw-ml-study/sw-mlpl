@@ -3,9 +3,8 @@
 //! strings, string lists, records, and Results, so compiled programs
 //! can do string / stdout / args / record / result work. Numerical
 //! subexpressions stay `DenseArray` and are wrapped with `CVal::Arr`
-//! only where a value crosses into a non-numeric position.
-//!
-//! Constructors (`record`, `result`) live in `ctor`.
+//! only where a value crosses into a non-numeric position. The
+//! compound constructors (`record`, `result`) live here too.
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -61,6 +60,21 @@ impl CVal {
                 .get(name)
                 .unwrap_or_else(|| panic!("record has no field `{name}`")),
             other => panic!("expected a record, got {other:?}"),
+        }
+    }
+
+    /// Build a record from `(name, value)` pairs (sorted by name).
+    #[must_use]
+    pub fn record(fields: Vec<(String, CVal)>) -> CVal {
+        CVal::Record(fields.into_iter().collect::<BTreeMap<_, _>>())
+    }
+
+    /// Build an `ok`/`err` Result around a payload.
+    #[must_use]
+    pub fn result(ok: bool, payload: CVal) -> CVal {
+        CVal::Result {
+            ok,
+            payload: Box::new(payload),
         }
     }
 }

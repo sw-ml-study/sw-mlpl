@@ -1826,7 +1826,9 @@ dependencies = [
  "mlpl-core",
  "mlpl-rt-fsio",
  "mlpl-rt-value",
+ "mlpl-runtime-array",
  "mlpl-runtime-bits",
+ "mlpl-runtime-math",
 ]
 
 [[package]]

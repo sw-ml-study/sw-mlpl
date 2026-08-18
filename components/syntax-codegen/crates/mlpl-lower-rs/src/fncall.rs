@@ -108,7 +108,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["matmul"] @ 2 => Matmul;
     ["write_stdout", "arg", "read_bytes", "file_size",
      "tokenize_bytes", "decode_bytes", "to_int", "disp",
-     "print", "eprint"] @ 1 => CvalIo;
+     "print", "eprint", "read_stdin_chunk"] @ 1 => CvalIo;
     ["read_bytes"] @ 3 => ReadRange;
     ["write_bytes", "append_bytes"] @ 2 => WriteBytes;
     ["args"] @ 0 => Args;

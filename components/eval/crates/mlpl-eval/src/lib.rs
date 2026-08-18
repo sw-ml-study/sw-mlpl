@@ -175,6 +175,7 @@ mod loader;
 mod result_ops;
 mod result_reconstruct;
 mod result_str;
+mod stdin_chunk;
 mod string_convert;
 mod string_search;
 mod tag_arith;

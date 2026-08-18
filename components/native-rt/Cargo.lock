@@ -433,7 +433,9 @@ dependencies = [
  "mlpl-core",
  "mlpl-rt-fsio",
  "mlpl-rt-value",
+ "mlpl-runtime-array",
  "mlpl-runtime-bits",
+ "mlpl-runtime-math",
 ]
 
 [[package]]
@@ -452,6 +454,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-runtime-array"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-runtime-bits"
 version = "0.20.0"
 dependencies = [
@@ -464,6 +478,15 @@ name = "mlpl-runtime-core"
 version = "0.20.0"
 dependencies = [
  "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-runtime-math"
+version = "0.20.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-element",
+ "mlpl-runtime-core",
 ]
 
 [[package]]
