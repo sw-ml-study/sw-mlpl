@@ -139,6 +139,36 @@ fixed amount rather than computing each line's correct indent."
     (delete-trailing-whitespace))
   (message "mlpl: formatted buffer"))
 
+(require 'easymenu)
+
+;; A discoverable menu-bar "MLPL" pulldown (built-in `easy-menu', no
+;; external deps). The REPL / SVG-menu commands live in sibling files
+;; (`mlpl-repl.el', `mlpl-menu.el'); each item is `:active'-guarded on
+;; `fboundp' so the menu greys those out (rather than erroring) when
+;; only `mlpl-mode.el' is loaded on its own.
+(easy-menu-define mlpl-mode-menu mlpl-mode-map
+  "Menu for `mlpl-mode'."
+  '("MLPL"
+    ["Send Line to REPL"    mlpl-send-line   :active (fboundp 'mlpl-send-line)
+     :help "Send the current line to the running MLPL REPL"]
+    ["Send Region to REPL"  mlpl-send-region :active (and mark-active (fboundp 'mlpl-send-region))
+     :help "Send the selected region to the MLPL REPL"]
+    ["Send Buffer to REPL"  mlpl-send-buffer :active (fboundp 'mlpl-send-buffer)
+     :help "Send the whole buffer to the MLPL REPL"]
+    ["Load File in REPL"    mlpl-load-file   :active (fboundp 'mlpl-load-file)
+     :help "Load this file into the MLPL REPL"]
+    "--"
+    ["Start / Switch to REPL" mlpl-switch-to-repl :active (fboundp 'mlpl-switch-to-repl)
+     :help "Start or switch to the MLPL REPL buffer"]
+    "--"
+    ["Format Buffer"        mlpl-format-buffer
+     :help "Reindent the whole buffer and strip trailing whitespace"]
+    ["Indent Region"        indent-region :active mark-active
+     :help "Reindent the selected region by brace depth"]
+    "--"
+    ["SVG Menu / Tutorials" mlpl-menu :active (fboundp 'mlpl-menu)
+     :help "Open the graphical MLPL menu and tutorials"]))
+
 (defun mlpl--calculate-indent ()
   "Return the column the current line should be indented to.
 Indentation follows paren/bracket/brace nesting depth: MLPL's
