@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-17
 
+- docs(fs): document read_bytes_packed + scan_length_prefixed_offsets
+- feat(eval): read_bytes_packed + scan_length_prefixed_offsets memory levers
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(scan): document scan_length_prefixed builtin
 - feat(eval): add scan_length_prefixed bounded-memory streaming builtin
 - docs(queue): record demo-ml-utils scan_length_prefixed streaming blocker
