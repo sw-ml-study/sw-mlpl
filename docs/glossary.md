@@ -1805,6 +1805,28 @@ program traverse a huge length-prefixed array (e.g. GGUF tokenizer
 metadata) and compute aggregates without one interpreter value per
 element.
 
+## scan_length_prefixed_offsets (builtin)
+
+`scan_length_prefixed_offsets(...)` takes the same arguments as
+[[scan_length_prefixed (builtin)]] and returns the same aggregate
+record PLUS two arrays: `offsets` (each record's payload start offset)
+and `lengths` (each record's byte length), built in Rust in one call.
+A caller can store the offsets/lengths and decode individual items
+lazily -- with [[read_bytes_packed (builtin)]] -- instead of growing an
+MLPL array element by element.
+
+## read_bytes_packed (builtin)
+
+`read_bytes_packed(path)` / `read_bytes_packed(path, offset, length)`
+reads file bytes into a u8-PACKED `Bytes` buffer (one byte per byte),
+`ok(bytes)` / `err(...)`, sandboxed against the same `--source-dir`
+root as [[file_size (builtin)]]. Unlike `read_bytes`, which returns an
+f64 array (eight bytes of storage per file byte), the packed form keeps
+retained byte tables at their natural size -- useful when a program
+holds many byte rows (names, headers). Consume it with `size_bytes` /
+`reinterpret`, or decode a slice to text with `decode_bytes` after
+`reinterpret`.
+
 ## write_stdout (builtin)
 
 `write_stdout(bytes)` writes a rank-`<=1` byte array (integers

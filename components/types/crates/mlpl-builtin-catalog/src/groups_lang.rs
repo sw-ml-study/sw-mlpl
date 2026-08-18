@@ -199,6 +199,16 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "bounded-memory fold over count little-endian length-prefixed records: reads each prefix, seeks over the payload (retains none), ok({next_offset, item_count, payload_bytes, bytes_read, max_item_seen})/err on bound violation or truncation",
             ),
             (
+                "scan_length_prefixed_offsets",
+                "scan_length_prefixed_offsets(path, offset, count, length_width, max_item_bytes, max_total_bytes, chunk_bytes)",
+                "same bounded fold plus offsets + lengths arrays (per-record payload start offset + byte length), built in Rust so a caller can store offsets/lengths and lazy-decode without an MLPL per-element loop",
+            ),
+            (
+                "read_bytes_packed",
+                "read_bytes_packed(path[, offset, length])",
+                "sandboxed read returning a u8-packed Bytes buffer (1x memory) instead of read_bytes's f64 array (8x); whole-file or bounded range; ok(Bytes)/err",
+            ),
+            (
                 "write_bytes",
                 "write_bytes(path, bytes)",
                 "sandboxed raw-byte file write; bytes a rank-<=1 array of integers 0..=255; returns ok(1)/err",
