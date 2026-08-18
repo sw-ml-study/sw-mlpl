@@ -1,0 +1,1 @@
+Add reflow to mlpl-format-buffer / scripts/mlpl-fmt.sh: explode one-line MLPL defs/blocks/statements onto their own lines (newline after block-{, before block-}, after ;), keeping record literals/strings/comments inline, then indent. Whitespace-only (parse-preserving). Point the script at mlpl-format-buffer.

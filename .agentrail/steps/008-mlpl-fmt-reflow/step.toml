@@ -1,0 +1,10 @@
+number = 8
+slug = "mlpl-fmt-reflow"
+status = "completed"
+description = "Add reflow to mlpl-format-buffer / scripts/mlpl-fmt.sh: explode one-line MLPL..."
+role = "production"
+context_files = []
+created_at = "2026-08-18T08:52:13"
+completed_at = "2026-08-18T08:52:26"
+task_type = "tooling"
+commits = ["f138e01e7f35f9f9bebe6c628afcc711ca6c84cb"]
