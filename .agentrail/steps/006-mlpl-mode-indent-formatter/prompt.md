@@ -1,0 +1,1 @@
+Fix elisp/mlpl-mode.el indentation (brace-depth, idempotent, dedents closing braces) so if/else/while/repeat/def blocks indent like other languages, and add a batch Emacs formatter scripts/mlpl-fmt.sh (cargo-fmt analogue with --check). Add an in-Emacs mlpl-format-buffer command bound to C-c C-f.
