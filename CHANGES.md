@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-17
 
+- fix(catalog): keep groups_lang.rs under the 500-line file ceiling
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(fs): document read_bytes_packed + scan_length_prefixed_offsets
 - feat(eval): read_bytes_packed + scan_length_prefixed_offsets memory levers
 - docs(changes): refresh CHANGES.md to HEAD
