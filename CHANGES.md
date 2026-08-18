@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-18
 
+- chore(agentrail): complete 007-mlpl-mode-menu-bar (menu + init file); queue du-list-fs
+- feat(emacs): add mlpl-init-example.el one-file setup (fixes stale-keymap)
+- feat(emacs): add built-in easy-menu MLPL menu-bar to mlpl-mode
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 006-mlpl-mode-indent-formatter; queue du-list-fs
 - feat(emacs): brace-depth indentation + batch formatter for mlpl-mode
 - docs(changes): refresh CHANGES.md to HEAD
