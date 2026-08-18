@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-18
 
+- chore(agentrail): complete 011-web-demos-docstrings; queue du-list-fs
+- feat(web-demos): Rust generator emits doc headers into extracted .mlpl
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 010-mlpl-def-docstrings; queue web-demos-docstrings
 - docs(mlpl): docstrings on all user functions + require it going forward
 - docs(changes): refresh CHANGES.md to HEAD
