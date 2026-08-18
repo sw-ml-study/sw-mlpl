@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-17
 
+- docs(scan): document scan_length_prefixed builtin
+- feat(eval): add scan_length_prefixed bounded-memory streaming builtin
+- docs(queue): record demo-ml-utils scan_length_prefixed streaming blocker
+- chore(agentrail): complete 004-grep-string-ops (grep unblocked); queue 005-du-list-fs
+- feat(compiler): lower the str_* family (grep's string ops)
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(web): scroll the demo dropdown when a super-group exceeds the viewport
 - docs(examples): add compiled bytestats stdin demo
 - chore(agentrail): complete 003-wc-type-equal (wc unblocked); queue 004-grep-string-ops
