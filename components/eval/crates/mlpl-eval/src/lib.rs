@@ -113,6 +113,7 @@ mod fs_atomic;
 mod fs_bytes;
 mod fs_meta;
 mod fs_ops;
+mod fs_packed;
 mod fs_range;
 mod fs_scan;
 mod fs_walk_impl;

@@ -33,6 +33,12 @@ pub(crate) fn try_dispatch(
     if name == "scan_length_prefixed" {
         return Some(crate::fs_scan::eval_scan(args, env, trace));
     }
+    if name == "scan_length_prefixed_offsets" {
+        return Some(crate::fs_scan::eval_scan_offsets(args, env, trace));
+    }
+    if name == "read_bytes_packed" {
+        return Some(crate::fs_packed::eval_read_packed(args, env, trace));
+    }
     if name == "append_bytes" {
         return Some(crate::fs_append::eval_append_bytes(args, env, trace));
     }
