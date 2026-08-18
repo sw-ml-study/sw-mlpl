@@ -1789,6 +1789,22 @@ modification time is an `err`, never a silent `0`. Formatting,
 timezone, and sorting are application concerns: MLPL hands back
 the raw epoch value.
 
+## scan_length_prefixed (builtin)
+
+`scan_length_prefixed(path, offset, count, length_width,
+max_item_bytes, max_total_bytes, chunk_bytes)` folds `count`
+little-endian length-prefixed records with CONSTANT memory: it reads
+each `length_width`-byte prefix and seeks over the payload, retaining
+no payload bytes (an `O(chunk_bytes)` buffer). It returns
+`ok({next_offset, item_count, payload_bytes, bytes_read,
+max_item_seen})`, or an `err(...)` if an item exceeds `max_item_bytes`,
+the running payload exceeds `max_total_bytes`, the file is truncated
+mid-record, or the surface has no filesystem sandbox. Sandboxed against
+the same `--source-dir` root as [[file_size (builtin)]]. It lets a
+program traverse a huge length-prefixed array (e.g. GGUF tokenizer
+metadata) and compute aggregates without one interpreter value per
+element.
+
 ## write_stdout (builtin)
 
 `write_stdout(bytes)` writes a rank-`<=1` byte array (integers

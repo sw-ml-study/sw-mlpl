@@ -672,9 +672,17 @@ order:
   arg-driven paths / top-level unwrap / chunked stdin ride the streaming
   saga).
 
-**scan-length-prefixed streaming primitive** (BLOCKS ../demo-ml-utils
-GGUF array streaming, noted 2026-08-17) -- a native `scan_length_prefixed`
-runtime builtin (or the equivalent native extension) that walks a
+**scan-length-prefixed streaming primitive** SHIPPED (interpreter,
+2026-08-17) -- `scan_length_prefixed(path, offset, count, length_width,
+max_item_bytes, max_total_bytes, chunk_bytes) -> ok({next_offset,
+item_count, payload_bytes, bytes_read, max_item_seen}) / err` (mlpl-eval
+fs_scan.rs): reads each little-endian prefix and SEEKS over the payload
+(BufReader capped at chunk_bytes, no payload retained -> O(chunk) memory,
+constant native stack), enforcing max_item/max_total/truncation/sandbox
+checks. Unblocks ../demo-ml-utils GGUF array streaming (the ~505 MB RSS
+from per-element interpreter values). Interpreter-only for now; the
+compile-to-Rust lowering (record return + sandbox) is a queued
+follow-on. Original ask, for reference: a native primitive that walks a
 length-prefixed binary array from a bounded byte window WITHOUT the
 interpreter's per-element allocation. The downstream already cut latency
 ~100s -> 5.14s and eliminated the 16 MiB stack overflow with a pure-MLPL

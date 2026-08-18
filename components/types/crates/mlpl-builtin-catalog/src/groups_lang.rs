@@ -194,6 +194,11 @@ pub(crate) const GROUPS: &[FnGroup] = &[
                 "sandboxed metadata record ok({kind, size, modified_unix_ms})/err; modified_unix_ms is the exact UTC Unix-ms modification time (err when unavailable)",
             ),
             (
+                "scan_length_prefixed",
+                "scan_length_prefixed(path, offset, count, length_width, max_item_bytes, max_total_bytes, chunk_bytes)",
+                "bounded-memory fold over count little-endian length-prefixed records: reads each prefix, seeks over the payload (retains none), ok({next_offset, item_count, payload_bytes, bytes_read, max_item_seen})/err on bound violation or truncation",
+            ),
+            (
                 "write_bytes",
                 "write_bytes(path, bytes)",
                 "sandboxed raw-byte file write; bytes a rank-<=1 array of integers 0..=255; returns ok(1)/err",
