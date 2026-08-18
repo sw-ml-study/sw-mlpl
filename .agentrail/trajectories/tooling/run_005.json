@@ -1,0 +1,11 @@
+{
+  "task_type": "tooling",
+  "state": {
+    "number": 11,
+    "step": "web-demos-docstrings"
+  },
+  "action": "traced demos.rs->demos.toml/DEMOS move; small Rust generator (slug sanitize + capability_for CPU filter + header); temp-dir verification; clippy clean; sw-checklist exception for +1 warning",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-18T11:24:57"
+}

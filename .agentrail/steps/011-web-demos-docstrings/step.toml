@@ -1,0 +1,10 @@
+number = 11
+slug = "web-demos-docstrings"
+status = "completed"
+description = "Make generated web-demo .mlpl files carry file-level doc headers that survive..."
+role = "production"
+context_files = []
+created_at = "2026-08-18T10:06:27"
+completed_at = "2026-08-18T11:24:57"
+task_type = "tooling"
+commits = ["fa75d05eba1a472787e1ee9f869baa2457a53e6a"]
