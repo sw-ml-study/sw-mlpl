@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-18
 
+- chore(agentrail): complete 009-mlpl-fmt-fix-and-apply; queue web-demos-docstrings
+- fix(emacs): reflow no longer loops on a lone `}`; format tictactoe demos
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 008-mlpl-fmt-reflow; queue du-list-fs
 - feat(emacs): reflow one-line MLPL into indented multi-line (format-buffer + script)
 - docs(changes): refresh CHANGES.md to HEAD
