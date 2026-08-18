@@ -9,6 +9,12 @@ build = "build.rs"
 name = "mlpl_web_demos"
 path = "src/lib.rs"
 
+# Regenerates work/reg-rs/web-demos/*.mlpl (with doc headers) from the
+# DEMOS registry. Invoked by scripts/gen-web-demos.sh.
+[[bin]]
+name = "gen-web-demos"
+path = "src/bin/gen_web_demos.rs"
+
 [dependencies]
 mlpl-web-demos-types = { path = "../mlpl-web-demos-types" }
 
