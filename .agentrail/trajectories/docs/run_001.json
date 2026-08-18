@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 10,
+    "step": "mlpl-def-docstrings"
+  },
+  "action": "per-def string-literal docstrings via Edit; mlpl-fmt.sh reflow; verified runs + include_str! value test; CLAUDE.md policy below agentrail markers; mw-cp gate step; markdown ASCII check",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-18T10:03:29"
+}

@@ -1,0 +1,1 @@
+Add a leading string-literal docstring to every def u: (36 across examples/tictactoe-demo.mlpl, examples/tictactoe-minimax.mlpl, docs/apl2-idioms.mlpl, docs/sw_mlpl_moving_average_concise.mlpl, demos/scripts/zscore.mlpl), and format any still-dense ones. Docstrings are discarded at runtime so values are unchanged; verify the tictactoe_minimax value test still passes.
