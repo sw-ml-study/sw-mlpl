@@ -117,7 +117,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
     ["take"] @ 3 => ArrayCall;
-    ["gt", "lt", "eq"] @ 2 => Cmp;
+    ["gt", "lt", "eq", "ge", "le", "ne"] @ 2 => Cmp;
     ["type_of"] @ 1 => TypeOf;
     ["equal"] @ 2 => Equal;
     ["str_len"] @ 1 => StrOp;
@@ -256,6 +256,11 @@ pub(crate) fn lower_fncall(
             let closure = match name {
                 "gt" => quote! { |__a, __b| if __a > __b { 1.0 } else { 0.0 } },
                 "lt" => quote! { |__a, __b| if __a < __b { 1.0 } else { 0.0 } },
+                "ge" => quote! { |__a, __b| if __a >= __b { 1.0 } else { 0.0 } },
+                "le" => quote! { |__a, __b| if __a <= __b { 1.0 } else { 0.0 } },
+                "ne" => quote! {
+                    |__a: f64, __b: f64| if (__a - __b).abs() >= f64::EPSILON { 1.0 } else { 0.0 }
+                },
                 _ => quote! {
                     |__a: f64, __b: f64| if (__a - __b).abs() < f64::EPSILON { 1.0 } else { 0.0 }
                 },

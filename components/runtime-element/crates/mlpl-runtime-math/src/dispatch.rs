@@ -21,6 +21,9 @@ pub const NAMES: &[&str] = &[
     "gt",
     "lt",
     "eq",
+    "ge",
+    "le",
+    "ne",
     "mean",
     "zeros",
     "ones",
@@ -30,6 +33,34 @@ pub const NAMES: &[&str] = &[
     "concat",
     "last_row",
 ];
+
+/// The six elementwise comparison builtins (`gt`/`lt`/`eq`/`ge`/`le`/
+/// `ne`), each folding two arrays into a 0.0/1.0 mask. `eq`/`ne` use an
+/// epsilon tolerance; the ordered ones compare directly. Kept out of
+/// `try_call` so that dispatcher stays under the function-LOC budget.
+fn comparison(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    use crate::elementwise as ew;
+    match name {
+        "gt" => ew::binary_cmp(name, args, |a, b| if a > b { 1.0 } else { 0.0 }),
+        "lt" => ew::binary_cmp(name, args, |a, b| if a < b { 1.0 } else { 0.0 }),
+        "ge" => ew::binary_cmp(name, args, |a, b| if a >= b { 1.0 } else { 0.0 }),
+        "le" => ew::binary_cmp(name, args, |a, b| if a <= b { 1.0 } else { 0.0 }),
+        "ne" => ew::binary_cmp(name, args, |a, b| {
+            if (a - b).abs() >= f64::EPSILON {
+                1.0
+            } else {
+                0.0
+            }
+        }),
+        _ => ew::binary_cmp(name, args, |a, b| {
+            if (a - b).abs() < f64::EPSILON {
+                1.0
+            } else {
+                0.0
+            }
+        }),
+    }
+}
 
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     use crate::array_ops as ao;
@@ -51,27 +82,7 @@ pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, 
         "round" => Some(ew::unary(name, args, f64::round)),
         "pow" => Some(ew::binary_pow(name, args)),
         "mod" => Some(ew::binary_cmp(name, args, |a, b| a % b)),
-        "gt" => Some(ew::binary_cmp(
-            name,
-            args,
-            |a, b| {
-                if a > b { 1.0 } else { 0.0 }
-            },
-        )),
-        "lt" => Some(ew::binary_cmp(
-            name,
-            args,
-            |a, b| {
-                if a < b { 1.0 } else { 0.0 }
-            },
-        )),
-        "eq" => Some(ew::binary_cmp(name, args, |a, b| {
-            if (a - b).abs() < f64::EPSILON {
-                1.0
-            } else {
-                0.0
-            }
-        })),
+        "gt" | "lt" | "eq" | "ge" | "le" | "ne" => Some(comparison(name, args)),
         "mean" => Some(builtin_mean(name, args)),
         "zeros" | "ones" | "fill" => Some(ao::constructor(name, args)),
         "cosine_schedule" | "linear_warmup" => Some(ao::schedule(name, args)),

@@ -96,6 +96,28 @@ pub(crate) fn eval_grads_batch(
     Ok((loss_val, grads))
 }
 
+/// Combine two tape tensors under a binary operator. The four
+/// arithmetic ops record a differentiable node; the six comparison
+/// ops produce a 0/1 mask with zero gradient almost everywhere, so
+/// inside `grad(...)` they are rejected as non-differentiable rather
+/// than silently returning a zero-gradient constant.
+fn tensor_binop(op: &BinOpKind, l: &Tensor, r: &Tensor) -> Result<Tensor, EvalError> {
+    match op {
+        BinOpKind::Add => Ok(l.add(r)),
+        BinOpKind::Sub => Ok(l.sub(r)),
+        BinOpKind::Mul => Ok(l.mul(r)),
+        BinOpKind::Div => Ok(l.div(r)),
+        BinOpKind::Lt
+        | BinOpKind::Gt
+        | BinOpKind::Le
+        | BinOpKind::Ge
+        | BinOpKind::Eq
+        | BinOpKind::Ne => Err(EvalError::Unsupported(format!(
+            "grad: comparison operator `{op}` is not differentiable"
+        ))),
+    }
+}
+
 pub(crate) fn eval_tensor_expr(
     expr: &Expr,
     env: &mut Environment,
@@ -124,12 +146,7 @@ pub(crate) fn eval_tensor_expr(
         Expr::BinOp { op, lhs, rhs, .. } => {
             let l = eval_tensor_expr(lhs, env, tape, params)?;
             let r = eval_tensor_expr(rhs, env, tape, params)?;
-            Ok(match op {
-                BinOpKind::Add => l.add(&r),
-                BinOpKind::Sub => l.sub(&r),
-                BinOpKind::Mul => l.mul(&r),
-                BinOpKind::Div => l.div(&r),
-            })
+            tensor_binop(op, &l, &r)
         }
         Expr::FnCall { name, args, .. } => eval_tensor_fncall(name, args, env, tape, params),
         Expr::TensorCtor { shape, .. } => {

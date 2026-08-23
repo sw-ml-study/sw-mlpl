@@ -25,6 +25,12 @@ pub(crate) fn eval_binop(
         BinOpKind::Sub => "sub",
         BinOpKind::Mul => "mul",
         BinOpKind::Div => "div",
+        BinOpKind::Lt => "lt",
+        BinOpKind::Gt => "gt",
+        BinOpKind::Le => "le",
+        BinOpKind::Ge => "ge",
+        BinOpKind::Eq => "eq",
+        BinOpKind::Ne => "ne",
     };
     let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
     // Saga 14 step 004/005: route the binop through the active

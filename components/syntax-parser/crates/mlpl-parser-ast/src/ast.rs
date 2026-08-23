@@ -16,6 +16,18 @@ pub enum BinOpKind {
     Mul,
     /// `/`
     Div,
+    /// `<` -- elementwise less-than (yields 1.0 / 0.0).
+    Lt,
+    /// `>` -- elementwise greater-than.
+    Gt,
+    /// `<=` -- elementwise less-than-or-equal.
+    Le,
+    /// `>=` -- elementwise greater-than-or-equal.
+    Ge,
+    /// `==` -- elementwise equality.
+    Eq,
+    /// `!=` -- elementwise inequality.
+    Ne,
 }
 
 /// Kind of tensor constructor: trainable parameter or non-trainable tensor.

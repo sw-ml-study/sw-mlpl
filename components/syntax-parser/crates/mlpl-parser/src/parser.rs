@@ -54,6 +54,26 @@ pub(crate) fn can_start_expr(kind: Option<&TokenKind>) -> bool {
     )
 }
 
+/// The binary operator (and its binding power) a token introduces, or
+/// `None` if the token is not an infix operator. Comparisons bind
+/// LOOSER than arithmetic (`a + b > c` is `(a + b) > c`), so they sit
+/// at precedence 0; `+ -` at 1; `* /` at 2.
+fn binop_for_token(kind: &TokenKind) -> Option<(BinOpKind, u8)> {
+    match kind {
+        TokenKind::Lt => Some((BinOpKind::Lt, 0)),
+        TokenKind::Gt => Some((BinOpKind::Gt, 0)),
+        TokenKind::Le => Some((BinOpKind::Le, 0)),
+        TokenKind::Ge => Some((BinOpKind::Ge, 0)),
+        TokenKind::EqEq => Some((BinOpKind::Eq, 0)),
+        TokenKind::Ne => Some((BinOpKind::Ne, 0)),
+        TokenKind::Plus => Some((BinOpKind::Add, 1)),
+        TokenKind::Minus => Some((BinOpKind::Sub, 1)),
+        TokenKind::Star => Some((BinOpKind::Mul, 2)),
+        TokenKind::Slash => Some((BinOpKind::Div, 2)),
+        _ => None,
+    }
+}
+
 impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
     pub(crate) fn parse_statement(&mut self) -> Result<Expr, ParseError> {
@@ -140,13 +160,11 @@ impl<'a> Parser<'a> {
     pub(crate) fn parse_expr(&mut self, min_prec: u8) -> Result<Expr, ParseError> {
         let atom = self.parse_atom()?;
         let mut lhs = self.parse_postfix_chain(atom)?;
-        while let Some((op, prec)) = self.tokens.get(self.pos).and_then(|t| match t.kind {
-            TokenKind::Plus => Some((BinOpKind::Add, 1u8)),
-            TokenKind::Minus => Some((BinOpKind::Sub, 1)),
-            TokenKind::Star => Some((BinOpKind::Mul, 2)),
-            TokenKind::Slash => Some((BinOpKind::Div, 2)),
-            _ => None,
-        }) {
+        while let Some((op, prec)) = self
+            .tokens
+            .get(self.pos)
+            .and_then(|t| binop_for_token(&t.kind))
+        {
             if prec < min_prec {
                 break;
             }
@@ -393,42 +411,6 @@ impl<'a> Parser<'a> {
             args,
             span: Span::new(start.start, end.end),
         })
-    }
-
-    fn parse_array_lit(&mut self) -> Result<Expr, ParseError> {
-        let open_span = self.tokens[self.pos].span;
-        self.pos += 1;
-        let elems = self.parse_array_elems()?;
-        if !self.is(TokenKind::RBracket) {
-            return Err(ParseError::UnclosedDelimiter {
-                open: "[".into(),
-                span: open_span,
-            });
-        }
-        let close_span = self.tokens[self.pos].span;
-        self.pos += 1;
-        Ok(Expr::ArrayLit(
-            elems,
-            Span::new(open_span.start, close_span.end),
-        ))
-    }
-
-    /// Parse the comma-separated elements of an array literal. Newlines
-    /// are insignificant (commas separate), so a matrix can span lines.
-    fn parse_array_elems(&mut self) -> Result<Vec<Expr>, ParseError> {
-        let mut elems = Vec::new();
-        self.skip_newlines();
-        if !self.is(TokenKind::RBracket) {
-            elems.push(self.parse_expr(0)?);
-            self.skip_newlines();
-            while self.is(TokenKind::Comma) {
-                self.pos += 1;
-                self.skip_newlines();
-                elems.push(self.parse_expr(0)?);
-                self.skip_newlines();
-            }
-        }
-        Ok(elems)
     }
 
     /// Parse `if cond { then } else { else }`. The `else`

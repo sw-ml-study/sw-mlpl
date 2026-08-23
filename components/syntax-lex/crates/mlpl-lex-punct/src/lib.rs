@@ -42,7 +42,28 @@ pub fn lex_builtin_ref(bytes: &[u8], pos: usize) -> Option<(TokenKind, usize)> {
     }
 }
 
-/// Match a single-char punctuation/operator token (except minus).
+/// Match a comparison/assignment operator, longest-match first, so the
+/// two-char forms (`<=`, `>=`, `==`, `!=`) win over the one-char forms
+/// (`<`, `>`, `=`). `!` alone is not an operator yet (unary `not` is a
+/// later rung), so it falls through to an unexpected-character error.
+/// Runs BEFORE `single_char_token` so `==` never lexes as two `=`.
+pub fn lex_operator(bytes: &[u8], pos: usize) -> Option<(TokenKind, usize)> {
+    let b = *bytes.get(pos)?;
+    let next = bytes.get(pos + 1).copied();
+    match (b, next) {
+        (b'<', Some(b'=')) => Some((TokenKind::Le, pos + 2)),
+        (b'>', Some(b'=')) => Some((TokenKind::Ge, pos + 2)),
+        (b'=', Some(b'=')) => Some((TokenKind::EqEq, pos + 2)),
+        (b'!', Some(b'=')) => Some((TokenKind::Ne, pos + 2)),
+        (b'<', _) => Some((TokenKind::Lt, pos + 1)),
+        (b'>', _) => Some((TokenKind::Gt, pos + 1)),
+        (b'=', _) => Some((TokenKind::Equals, pos + 1)),
+        _ => None,
+    }
+}
+
+/// Match a single-char punctuation/operator token (except minus and
+/// the comparison/assignment operators handled by `lex_operator`).
 pub fn single_char_token(b: u8) -> Option<TokenKind> {
     match b {
         b'(' => Some(TokenKind::LParen),
@@ -50,7 +71,6 @@ pub fn single_char_token(b: u8) -> Option<TokenKind> {
         b'[' => Some(TokenKind::LBracket),
         b']' => Some(TokenKind::RBracket),
         b',' => Some(TokenKind::Comma),
-        b'=' => Some(TokenKind::Equals),
         b':' => Some(TokenKind::Colon),
         b';' => Some(TokenKind::Semicolon),
         b'@' => Some(TokenKind::At),

@@ -159,6 +159,16 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
                 BinOpKind::Sub => quote! { |__a, __b| __a - __b },
                 BinOpKind::Mul => quote! { |__a, __b| __a * __b },
                 BinOpKind::Div => quote! { |__a, __b| __a / __b },
+                BinOpKind::Lt => quote! { |__a, __b| if __a < __b { 1.0 } else { 0.0 } },
+                BinOpKind::Gt => quote! { |__a, __b| if __a > __b { 1.0 } else { 0.0 } },
+                BinOpKind::Le => quote! { |__a, __b| if __a <= __b { 1.0 } else { 0.0 } },
+                BinOpKind::Ge => quote! { |__a, __b| if __a >= __b { 1.0 } else { 0.0 } },
+                BinOpKind::Eq => quote! {
+                    |__a: f64, __b: f64| if (__a - __b).abs() < f64::EPSILON { 1.0 } else { 0.0 }
+                },
+                BinOpKind::Ne => quote! {
+                    |__a: f64, __b: f64| if (__a - __b).abs() >= f64::EPSILON { 1.0 } else { 0.0 }
+                },
             };
             let rt = &ctx.rt;
             // UFCS through the runtime facade's re-exported trait, so

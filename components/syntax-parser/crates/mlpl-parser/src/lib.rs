@@ -4,6 +4,7 @@
 //! point, with statement and record-literal parsing delegated to
 //! sibling modules.
 
+mod array_parser;
 mod parser;
 mod record_parser;
 mod stmts;

@@ -4,7 +4,7 @@
 use mlpl_core::Span;
 use mlpl_lex_ident::lex_ident;
 use mlpl_lex_number::lex_number;
-use mlpl_lex_punct::{lex_builtin_ref, single_char_token, skip_whitespace};
+use mlpl_lex_punct::{lex_builtin_ref, lex_operator, single_char_token, skip_whitespace};
 use mlpl_lex_string::lex_string;
 use mlpl_lexer_error::ParseError;
 use mlpl_lexer_token::{Token, TokenKind};
@@ -59,6 +59,9 @@ impl<'a> Lexer<'a> {
         }
         if let Some((kind, end)) = lex_builtin_ref(self.bytes, self.pos) {
             return Ok(self.make_tok(kind, end, true));
+        }
+        if let Some((kind, end)) = lex_operator(self.bytes, self.pos) {
+            return Ok(self.make_tok(kind, end, false));
         }
         if let Some(kind) = single_char_token(b) {
             let is_val = matches!(kind, TokenKind::RParen | TokenKind::RBracket);

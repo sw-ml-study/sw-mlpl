@@ -49,6 +49,18 @@ pub enum TokenKind {
     Star,
     /// `/`
     Slash,
+    /// `<` (less-than comparison).
+    Lt,
+    /// `>` (greater-than comparison).
+    Gt,
+    /// `<=` (less-than-or-equal comparison).
+    Le,
+    /// `>=` (greater-than-or-equal comparison).
+    Ge,
+    /// `==` (equality comparison; distinct from `=` assignment).
+    EqEq,
+    /// `!=` (inequality comparison).
+    Ne,
     /// `{`
     LBrace,
     /// `}`

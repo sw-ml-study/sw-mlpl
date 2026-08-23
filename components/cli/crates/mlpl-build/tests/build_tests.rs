@@ -893,6 +893,36 @@ fn read_stdin_echoes_piped_input() {
 }
 
 #[test]
+fn infix_comparison_operators_compile_and_run() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("infixcmp");
+    let sp = tmp.join("cmp.mlpl");
+    // Count how many of 5..8 satisfy each comparison against 6, summing
+    // the six masks: reduce_add(iota(9) applied) -- but keep it scalar:
+    // 5>6=0, 5<6=1, 6>=6=1, 6<=6=1, 6==6=1, 5!=6=1 -> 0+1+1+1+1+1 = 5.
+    // Precedence check folded in: `2 + 3 > 4` is (2+3)>4 = 1, added -> 6.
+    std::fs::write(
+        &sp,
+        "def u:score() { \"Sum of six comparison masks plus a precedence check.\" \
+         (5 > 6) + (5 < 6) + (6 >= 6) + (6 <= 6) + (6 == 6) + (5 != 6) + (2 + 3 > 4) }\n\
+         u:score()\n",
+    )
+    .unwrap();
+    let op = tmp.join("cmp");
+    let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+    assert!(
+        r.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&r.stderr)
+    );
+    let run = Command::new(&op).output().expect("run binary");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "6");
+}
+
+#[test]
 fn read_stdin_chunk_counts_bytes_incrementally() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

@@ -14,6 +14,12 @@ impl fmt::Display for BinOpKind {
             Self::Sub => "-",
             Self::Mul => "*",
             Self::Div => "/",
+            Self::Lt => "<",
+            Self::Gt => ">",
+            Self::Le => "<=",
+            Self::Ge => ">=",
+            Self::Eq => "==",
+            Self::Ne => "!=",
         };
         write!(f, "{s}")
     }
