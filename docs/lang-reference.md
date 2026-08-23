@@ -135,13 +135,23 @@ Binary infix operators for element-wise arithmetic:
 | `*` | Multiply |
 | `/` | Divide |
 | `-x` | Unary negation |
+| `<` `>` `<=` `>=` | Ordered comparison -- each yields a `1.0`/`0.0` mask elementwise |
+| `==` `!=` | Equality / inequality (epsilon-tolerant), also a `1.0`/`0.0` mask |
+
+Comparisons are the infix spelling of the `gt` / `lt` / `ge` / `le` /
+`eq` / `ne` builtins, so `sums == 3` is `eq(sums, 3)` and `n > 3` is
+`gt(n, 3)`. Because they produce masks, they compose with `reduce_add`
+for counting (`reduce_add(v > 3, 0)`) and with `*` / `+` for AND / OR
+of conditions.
 
 Precedence (high to low):
 
 1. Unary `-` (prefix negation)
 2. `*`, `/` (left-associative)
 3. `+`, `-` (left-associative)
-4. `=` (assignment, right-associative)
+4. `<` `>` `<=` `>=` `==` `!=` (comparisons -- looser than arithmetic,
+   so `a + b > c` is `(a + b) > c`)
+5. `=` (assignment, right-associative)
 
 Parentheses override precedence: `(x + y) * z`
 
