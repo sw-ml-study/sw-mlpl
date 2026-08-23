@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-23
+
+- chore(agentrail): complete 012-syntax-infix-comparison; queue du-list-fs
+- docs(lang-ref): document infix comparison operators
+- feat(syntax): infix comparison operators < > <= >= == != (Tier-1 compactness)
+
 ## 2026-08-18
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 011-web-demos-docstrings; queue du-list-fs
 - feat(web-demos): Rust generator emits doc headers into extracted .mlpl
 - docs(changes): refresh CHANGES.md to HEAD
