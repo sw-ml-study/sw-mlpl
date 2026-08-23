@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 12,
+    "step": "syntax-infix-comparison"
+  },
+  "action": "full-stack lexer/parser/interp/compiler TDD; longest-match lex_operator; precedence-0 binop table; runtime ge/le/ne; 3 refactor-extractions to hold the fail ratchet; gated e2e",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-23T13:37:24"
+}
