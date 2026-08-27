@@ -95,6 +95,10 @@ const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
                 "demo-memory",
                 "Companion demos for hashmaps, memory, and retrieval.",
             ),
+            (
+                "demo-mlpl-libraries",
+                "Reusable libraries written in MLPL -- the shared package collection.",
+            ),
         ],
     ),
     (
