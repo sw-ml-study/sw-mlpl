@@ -1,0 +1,1 @@
+Add demo-mlpl-libraries (new reusable-MLPL-libraries repo) to the web footer GitHub-dialog RepoLinks (footer.rs REPO_SECTIONS, Programming section). demo-functional-pipelines footer entry is already correct (only the local clone dir is misspelled). Rebuild + deploy pages.

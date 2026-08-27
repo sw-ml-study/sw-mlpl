@@ -1,0 +1,1 @@
+Added demo-mlpl-libraries (new reusable-MLPL-libraries repo) to the web footer GitHub-dialog RepoLinks (Programming section). Confirmed demo-functional-pipelines footer entry already correct (typo is only in the local clone dir path, not the org repo/footer URL). Rebuilt pages + deployed to gh-pages.

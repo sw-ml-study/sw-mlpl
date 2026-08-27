@@ -1,0 +1,10 @@
+number = 13
+slug = "footer-add-mlpl-libraries"
+status = "completed"
+description = "Add demo-mlpl-libraries (new reusable-MLPL-libraries repo) to the web footer ..."
+role = "production"
+context_files = []
+created_at = "2026-08-27T10:12:30"
+completed_at = "2026-08-27T10:14:06"
+task_type = "tooling"
+commits = ["21665cb89828fa31e20329423951995f8fb5187f"]
