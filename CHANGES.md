@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-28
+
+- chore(agentrail): complete 014-namespace-qualified-refs; queue namespace-compiled-lowering
+- feat(eval): generalize first-class refs from :u:name to :namespace:name
+
 ## 2026-08-27
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 013-footer-add-mlpl-libraries; queue du-list-fs
 - chore(pages): rebuild for footer demo-mlpl-libraries link
 - feat(web): add demo-mlpl-libraries to the footer repo dialog
