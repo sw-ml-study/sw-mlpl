@@ -85,12 +85,15 @@ pub fn single_char_token(b: u8) -> Option<TokenKind> {
     }
 }
 
-/// `:u:name` -- the quoted USER-function form: extend the token
-/// through the second identifier so the reference is ONE token
-/// (`:u` alone stays a plain builtin ref).
-fn extend_user_ref(bytes: &[u8], s: usize, mut e: usize) -> usize {
-    if &bytes[s..e] == b"u"
-        && bytes.get(e) == Some(&b':')
+/// `:namespace:name` -- a quoted QUALIFIED reference (user function
+/// `:u:area`, library `:result:zip`, extension `:native3d:camera`):
+/// extend the token through the second identifier so the reference is
+/// ONE `BuiltinRef` token holding `"namespace:name"`. A bare `:name`
+/// (no second colon) stays a plain single-segment ref (a builtin like
+/// `:max` or `:+`). Any namespace segment is accepted -- `u:` is no
+/// longer special.
+fn extend_user_ref(bytes: &[u8], _s: usize, mut e: usize) -> usize {
+    if bytes.get(e) == Some(&b':')
         && bytes
             .get(e + 1)
             .is_some_and(|b| b.is_ascii_alphabetic() || *b == b'_')

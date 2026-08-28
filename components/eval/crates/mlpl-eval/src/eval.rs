@@ -31,7 +31,11 @@ pub(crate) fn eval_expr(
         )));
     }
     if let Expr::BuiltinRef(name, _) = expr {
-        if name.starts_with("u:") {
+        // A QUALIFIED reference (`namespace:name` -- user `:u:area`,
+        // library `:result:zip`, extension `:native3d:camera`) carries
+        // an inner colon and resolves as a user-function reference; a
+        // bare `:name` (`:max`, `:+`) is a builtin operator reference.
+        if name.contains(':') {
             return Ok(Value::UserFnRef { name: name.clone() });
         }
         return Ok(Value::BuiltinRef { name: name.clone() });
