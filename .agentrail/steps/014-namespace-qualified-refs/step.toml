@@ -1,0 +1,10 @@
+number = 14
+slug = "namespace-qualified-refs"
+status = "completed"
+description = "Phase 1a of general namespacing: generalize first-class references from :u:na..."
+role = "production"
+context_files = []
+created_at = "2026-08-28T11:25:04"
+completed_at = "2026-08-28T11:25:24"
+task_type = "feature"
+commits = ["1b7c555fb50ebfbf8ad22fb99e4512b2b99f1c49"]

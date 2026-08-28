@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 14,
+    "step": "namespace-qualified-refs"
+  },
+  "action": "grounded the downstream analysis against lexer/eval/fncall; two-surface generalization (lexer extend_user_ref + eval BuiltinRef); regression tests; verified call/each/reduce/u: parity",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-28T11:25:24"
+}

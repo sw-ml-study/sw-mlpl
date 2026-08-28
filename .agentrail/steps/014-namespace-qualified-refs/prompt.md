@@ -1,0 +1,1 @@
+Phase 1a of general namespacing: generalize first-class references from :u:name-only to any :namespace:name (:result:zip, :math:double) in the interpreter, so library/provider namespaces participate in call/each/partial-application/callbacks. Lexer extend_user_ref + eval BuiltinRef->UserFnRef on inner-colon. Bare :name stays a builtin ref.
