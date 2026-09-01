@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 16,
+    "step": "at-indexing-builtin"
+  },
+  "action": "at == take(v,0,i) delegation in dispatch (avoids slice.rs 8-fn ceiling); ArrayCall registry row reuses array_try_call for both surfaces; interp + compiled e2e + dispatch-coverage + docs",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-31T18:53:45"
+}

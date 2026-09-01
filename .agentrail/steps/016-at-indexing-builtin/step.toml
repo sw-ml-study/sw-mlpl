@@ -1,9 +1,10 @@
 number = 16
 slug = "at-indexing-builtin"
-status = "in-progress"
+status = "completed"
 description = "Add at(v, i) vector-indexing builtin (../emufpga ask 3): element i of a rank-..."
 role = "production"
 context_files = []
 created_at = "2026-08-31T18:53:21"
+completed_at = "2026-08-31T18:53:45"
 task_type = "feature"
-commits = []
+commits = ["7a43e14e26fc06d77ae518439090d8429ce2f5b7"]
