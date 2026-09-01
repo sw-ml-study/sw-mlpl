@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-01
 
+- chore(agentrail): complete 025-dataflow-proportionate-arrows-boxes; queue du-list-fs
+- fix(viz): dataflow constant-size arrowheads + label-fitted node boxes
+- chore(pages): rebuild for dataflow label legibility fix; refresh CHANGES.md
 - chore(agentrail): complete 024-dataflow-label-legibility; queue du-list-fs
 - fix(viz): dataflow edge labels never obscured by thick or crossing edges
 - chore(pages): rebuild for dataflow dashed back-edges; refresh CHANGES.md
