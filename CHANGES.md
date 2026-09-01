@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-31
 
+- chore(agentrail): complete 020-compiler-coverage-gate; queue dataflow-phase-2
+- feat(compiler): coverage gate + docs/compiler-coverage.md
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 019-catalog-buildrs-data; queue compiler-coverage-gate
 - refactor(catalog): generate :help data from TOML via build.rs; add 5 builtins
 - chore(agentrail): complete 018-dataflow-svg-renderer (Phase 1); begin catalog refactor
