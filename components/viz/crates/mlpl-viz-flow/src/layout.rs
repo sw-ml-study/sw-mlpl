@@ -6,7 +6,8 @@
 //! later phase).
 
 use crate::model::{
-    BACK_LANE, BOX_PAD, CHAR_W, COL_GAP, Graph, NODE_H, NODE_W, PAD, Positioned, ROW_GAP,
+    BACK_LANE, BOX_PAD, CHAR_W, COL_GAP, Graph, LABEL_CHAR_W, LABEL_PAD, NODE_H, NODE_W, PAD,
+    Positioned, ROW_GAP,
 };
 
 /// Lay a validated graph out into pixel positions + canvas size.
@@ -42,14 +43,18 @@ fn rank(graph: &Graph, back: &[bool]) -> Vec<usize> {
 /// rewind route.
 fn place(graph: Graph, ranks: &[usize], back: Vec<bool>) -> Positioned {
     let max_rank = ranks.iter().copied().max().unwrap_or(0);
-    let node_w: Vec<i32> = graph.labels.iter().map(|l| box_width(l)).collect();
+    // Fit each box to its label (monospace estimate), never below NODE_W.
+    let node_w: Vec<i32> = (graph.labels.iter())
+        .map(|l| (l.chars().count() as i32 * CHAR_W + 2 * BOX_PAD).max(NODE_W))
+        .collect();
     let mut col_w = vec![NODE_W; max_rank + 1];
     for (id, &c) in ranks.iter().enumerate() {
         col_w[c] = col_w[c].max(node_w[id]);
     }
+    let gaps = column_gaps(&graph, ranks, max_rank);
     let mut col_x = vec![PAD; max_rank + 1];
     for c in 1..=max_rank {
-        col_x[c] = col_x[c - 1] + col_w[c - 1] + COL_GAP;
+        col_x[c] = col_x[c - 1] + col_w[c - 1] + gaps[c - 1];
     }
     let mut next_row = vec![0i32; max_rank + 1];
     let mut pos = vec![(0i32, 0i32); graph.labels.len()];
@@ -59,7 +64,7 @@ fn place(graph: Graph, ranks: &[usize], back: Vec<bool>) -> Positioned {
         *slot = (x, PAD + next_row[c] * (NODE_H + ROW_GAP));
         next_row[c] += 1;
     }
-    let (width, height) = canvas(&col_w, &next_row, back.iter().any(|&b| b));
+    let (width, height) = canvas(&col_w, &gaps, &next_row, back.iter().any(|&b| b));
     Positioned {
         graph,
         pos,
@@ -70,18 +75,28 @@ fn place(graph: Graph, ranks: &[usize], back: Vec<bool>) -> Positioned {
     }
 }
 
-/// A node box wide enough for its label (monospace estimate), never
-/// narrower than `NODE_W`.
-fn box_width(label: &str) -> i32 {
-    (label.chars().count() as i32 * CHAR_W + 2 * BOX_PAD).max(NODE_W)
+/// Width of each inter-column gap: at least `COL_GAP`, widened to fit
+/// the widest adjacent-edge label plate that sits in it (so a long edge
+/// label lands between the columns, not on top of the node boxes). Gap
+/// `c` sits between columns `c` and `c + 1`; a skip edge's label is left
+/// to its plate, not sized here.
+fn column_gaps(graph: &Graph, ranks: &[usize], max_rank: usize) -> Vec<i32> {
+    let mut gaps = vec![COL_GAP; max_rank];
+    for (i, &(u, v)) in graph.edges.iter().enumerate() {
+        let label = graph.edge_labels.get(i).filter(|l| !l.is_empty());
+        if let (Some(l), true) = (label, ranks[v] == ranks[u] + 1) {
+            let plate = l.chars().count() as i32 * LABEL_CHAR_W + LABEL_PAD;
+            gaps[ranks[u]] = gaps[ranks[u]].max(plate + 16);
+        }
+    }
+    gaps
 }
 
-/// Canvas `(width, height)` for the placed columns/rows, plus the
-/// back-edge lane when one is present.
-fn canvas(col_w: &[i32], next_row: &[i32], has_back: bool) -> (i32, i32) {
-    let cols = col_w.len() as i32;
+/// Canvas `(width, height)` for the placed columns/rows and gaps, plus
+/// the back-edge lane when one is present.
+fn canvas(col_w: &[i32], gaps: &[i32], next_row: &[i32], has_back: bool) -> (i32, i32) {
     let rows = next_row.iter().copied().max().unwrap_or(1);
-    let width = PAD * 2 + col_w.iter().sum::<i32>() + (cols - 1).max(0) * COL_GAP;
+    let width = PAD * 2 + col_w.iter().sum::<i32>() + gaps.iter().sum::<i32>();
     let height = PAD * 2
         + rows * NODE_H
         + (rows - 1).max(0) * ROW_GAP

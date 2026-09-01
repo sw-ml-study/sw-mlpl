@@ -8,7 +8,7 @@
 use std::fmt::Write;
 
 use crate::groups::group_bands;
-use crate::model::{BACK_LANE, NODE_H, Positioned};
+use crate::model::{BACK_LANE, LABEL_CHAR_W, LABEL_PAD, NODE_H, Positioned};
 use crate::widths::{W_DEFAULT, stroke_widths};
 
 const BG: &str = "#1e1e2e";
@@ -117,7 +117,7 @@ fn edge(
 /// A midpoint edge label sitting above the line, on a small rounded
 /// background plate so a thick or crossing edge can never obscure it.
 fn edge_label(s: &mut String, label: &str, x: i32, y: i32) {
-    let w = label.chars().count() as i32 * 7 + 8;
+    let w = label.chars().count() as i32 * LABEL_CHAR_W + LABEL_PAD;
     let _ = write!(
         s,
         "<rect x=\"{rx}\" y=\"{ry}\" width=\"{w}\" height=\"15\" rx=\"3\" \

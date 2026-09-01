@@ -53,6 +53,25 @@ fn a_long_label_widens_its_node_box() {
 }
 
 #[test]
+fn a_long_edge_label_widens_its_column_gap() {
+    let labels = lbls(&["a", "b"]);
+    // 27-char label -> plate 27*7 + 8 = 197, gap = 197 + 16 = 213 (> the
+    // 96 default). Canvas width = 24*2 + 128 + 128 + 213 = 517.
+    let edge_labels = lbls(&["a very long edge label here"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0],
+        to: &[1],
+        edge_labels: &edge_labels,
+        ..Default::default()
+    })
+    .unwrap();
+    assert!(svg.contains("width=\"517\"")); // canvas widened for the label
+    // A short label would have left the canvas at 24*2+128+128+96 = 400.
+    assert!(!svg.contains("width=\"400\""));
+}
+
+#[test]
 fn a_residual_skip_edge_spans_two_layers() {
     let labels = lbls(&["a", "b", "c"]);
     let svg = render_dataflow(&Dataflow {

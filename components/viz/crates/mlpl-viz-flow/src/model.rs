@@ -54,9 +54,14 @@ pub const CHAR_W: i32 = 8;
 pub const BOX_PAD: i32 = 14;
 /// Node box height in pixels.
 pub const NODE_H: i32 = 40;
-/// Horizontal gap between layer columns (wide enough for a midpoint
-/// edge label to sit clear of both node boxes).
+/// Minimum horizontal gap between layer columns; a gap widens beyond
+/// this to fit the widest adjacent edge label that sits in it.
 pub const COL_GAP: i32 = 96;
+/// Approximate glyph advance for an edge label (font-size 11), used to
+/// size both the label's backing plate and the column gap that holds it.
+pub const LABEL_CHAR_W: i32 = 7;
+/// Horizontal padding on an edge-label plate (total, both sides).
+pub const LABEL_PAD: i32 = 8;
 /// Vertical gap between node rows within a column.
 pub const ROW_GAP: i32 = 36;
 /// Canvas padding.
