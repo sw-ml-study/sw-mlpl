@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-31
 
+- chore(agentrail): complete 016-at-indexing-builtin; queue dataflow-svg-renderer
+- feat(array): at(v, i) vector-indexing builtin (interp + compiler)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 015-emufpga-broadcast-and-disp-docs; queue at-indexing-builtin
 - feat(array): length-1 arrays broadcast like scalars; clarify disp docs
 
