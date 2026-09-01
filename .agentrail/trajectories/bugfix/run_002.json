@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 25,
+    "step": "dataflow-proportionate-arrows-boxes"
+  },
+  "action": "render.rs marker markerUnits=userSpaceOnUse; model.rs CHAR_W/BOX_PAD + Positioned.node_w; layout.rs box_width + variable-width centered columns in place/canvas + inlined adjacency; groups.rs bbox per-node width; render node_box/edge_path per-node width; render_tests markerUnits + long-label-box tests; e2e verify on emufpga residency graph.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-01T10:11:25"
+}

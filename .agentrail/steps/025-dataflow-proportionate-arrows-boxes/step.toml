@@ -1,9 +1,10 @@
 number = 25
 slug = "dataflow-proportionate-arrows-boxes"
-status = "in-progress"
+status = "completed"
 description = "Fix two dataflow rendering defects the ../emufpga playground lessons exposed:..."
 role = "production"
 context_files = []
 created_at = "2026-09-01T10:10:57"
+completed_at = "2026-09-01T10:11:25"
 task_type = "bugfix"
-commits = []
+commits = ["6cb06e3321c61d8ddf66097bf0828242b1bec012"]
