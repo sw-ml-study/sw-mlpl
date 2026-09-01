@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 15,
+    "step": "emufpga-broadcast-and-disp-docs"
+  },
+  "action": "grounded each ask against binop.rs/eval_disp; audited disp usage across demo repos (230 files, mlplunit baselines) -> chose doc-only fix; elem_count()==1 broadcast (one change, both surfaces via apply_binop); breakage-checked shape tests; regression test",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-31T18:26:43"
+}
