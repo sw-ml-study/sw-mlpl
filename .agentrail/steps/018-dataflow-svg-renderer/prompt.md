@@ -1,0 +1,1 @@
+Build the dataflow(nodes, edges) structural SVG renderer per docs/dataflow-renderer-design.md: new mlpl-viz-flow crate (model/parse/layout/render), mlpl-eval dataflow builtin, Phase 1 (labels + from/to, longest-path layering, boxes+arrows+edge labels) then groups/widths/highlight. Interpreter/web-only like svg. Proof demo (SPM pipeline).

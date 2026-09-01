@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-viz-flow"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# The structural dataflow renderer: dataflow(nodes, edges) -> SVG
+# (boxes, directed edges, edge labels). A layered-DAG diagram, sibling
+# to the quantitative chart marks. See docs/dataflow-renderer-design.md.
+[dependencies]
+mlpl-viz-core = { path = "../mlpl-viz-core" }

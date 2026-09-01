@@ -82,6 +82,7 @@ mod fncall_axes;
 mod fncall_bracket;
 mod fncall_bytes;
 mod fncall_combinators;
+mod fncall_dataflow;
 mod fncall_dispatch;
 mod fncall_engram;
 mod fncall_engram_args;

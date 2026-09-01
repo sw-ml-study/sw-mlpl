@@ -1,0 +1,9 @@
+number = 18
+slug = "dataflow-svg-renderer"
+status = "in-progress"
+description = "Build the dataflow(nodes, edges) structural SVG renderer per docs/dataflow-re..."
+role = "production"
+context_files = []
+created_at = "2026-08-31T19:17:33"
+task_type = "feature"
+commits = []

@@ -212,6 +212,11 @@ pub(crate) fn eval_expr(
     {
         return eval_svg(args, env, trace).map(Value::Str);
     }
+    if let Expr::FnCall { name, args, .. } = expr
+        && name == "dataflow"
+    {
+        return crate::fncall_dataflow::eval_dataflow(args, env, trace).map(Value::Str);
+    }
     if let Expr::FnCall { name, args, span } = expr
         && name == "grad"
     {
