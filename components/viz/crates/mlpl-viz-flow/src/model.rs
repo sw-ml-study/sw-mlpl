@@ -34,6 +34,8 @@ pub struct Positioned {
     pub graph: Graph,
     /// Top-left `(x, y)` of each node box, indexed by node id.
     pub pos: Vec<(i32, i32)>,
+    /// Box width per node, fitted to the label (>= `NODE_W`).
+    pub node_w: Vec<i32>,
     /// Per-edge back-edge flag (a recurrence): drawn dashed through the
     /// bottom lane and excluded from layering.
     pub back: Vec<bool>,
@@ -43,8 +45,13 @@ pub struct Positioned {
     pub height: i32,
 }
 
-/// Node box width in pixels.
+/// Minimum node box width in pixels (a longer label widens its box).
 pub const NODE_W: i32 = 128;
+/// Approximate monospace glyph advance at the node font size, for
+/// fitting a box to its label.
+pub const CHAR_W: i32 = 8;
+/// Horizontal padding inside a node box, each side.
+pub const BOX_PAD: i32 = 14;
 /// Node box height in pixels.
 pub const NODE_H: i32 = 40;
 /// Horizontal gap between layer columns (wide enough for a midpoint

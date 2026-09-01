@@ -5,7 +5,9 @@
 //! layer. Phase 1 uses input order (barycenter crossing reduction is a
 //! later phase).
 
-use crate::model::{BACK_LANE, COL_GAP, Graph, NODE_H, NODE_W, PAD, Positioned, ROW_GAP};
+use crate::model::{
+    BACK_LANE, BOX_PAD, CHAR_W, COL_GAP, Graph, NODE_H, NODE_W, PAD, Positioned, ROW_GAP,
+};
 
 /// Lay a validated graph out into pixel positions + canvas size.
 pub fn layout(graph: Graph) -> Positioned {
@@ -34,37 +36,52 @@ fn rank(graph: &Graph, back: &[bool]) -> Vec<usize> {
     r
 }
 
-/// Column x by layer, row y by in-column order; derive the canvas size,
-/// reserving a bottom lane when any back-edge needs a rewind route.
+/// Place nodes into variable-width columns (each column as wide as its
+/// widest label-fitted box), centered within the column, and derive the
+/// canvas size -- reserving a bottom lane when a back-edge needs a
+/// rewind route.
 fn place(graph: Graph, ranks: &[usize], back: Vec<bool>) -> Positioned {
     let max_rank = ranks.iter().copied().max().unwrap_or(0);
+    let node_w: Vec<i32> = graph.labels.iter().map(|l| box_width(l)).collect();
+    let mut col_w = vec![NODE_W; max_rank + 1];
+    for (id, &c) in ranks.iter().enumerate() {
+        col_w[c] = col_w[c].max(node_w[id]);
+    }
+    let mut col_x = vec![PAD; max_rank + 1];
+    for c in 1..=max_rank {
+        col_x[c] = col_x[c - 1] + col_w[c - 1] + COL_GAP;
+    }
     let mut next_row = vec![0i32; max_rank + 1];
     let mut pos = vec![(0i32, 0i32); graph.labels.len()];
     for (id, slot) in pos.iter_mut().enumerate() {
-        let col = ranks[id];
-        let row = next_row[col];
-        next_row[col] += 1;
-        *slot = (
-            PAD + col as i32 * (NODE_W + COL_GAP),
-            PAD + row * (NODE_H + ROW_GAP),
-        );
+        let c = ranks[id];
+        let x = col_x[c] + (col_w[c] - node_w[id]) / 2;
+        *slot = (x, PAD + next_row[c] * (NODE_H + ROW_GAP));
+        next_row[c] += 1;
     }
-    let (width, height) = canvas(max_rank, &next_row, back.iter().any(|&b| b));
+    let (width, height) = canvas(&col_w, &next_row, back.iter().any(|&b| b));
     Positioned {
         graph,
         pos,
+        node_w,
         back,
         width,
         height,
     }
 }
 
+/// A node box wide enough for its label (monospace estimate), never
+/// narrower than `NODE_W`.
+fn box_width(label: &str) -> i32 {
+    (label.chars().count() as i32 * CHAR_W + 2 * BOX_PAD).max(NODE_W)
+}
+
 /// Canvas `(width, height)` for the placed columns/rows, plus the
 /// back-edge lane when one is present.
-fn canvas(max_rank: usize, next_row: &[i32], has_back: bool) -> (i32, i32) {
-    let cols = max_rank as i32 + 1;
+fn canvas(col_w: &[i32], next_row: &[i32], has_back: bool) -> (i32, i32) {
+    let cols = col_w.len() as i32;
     let rows = next_row.iter().copied().max().unwrap_or(1);
-    let width = PAD * 2 + cols * NODE_W + (cols - 1).max(0) * COL_GAP;
+    let width = PAD * 2 + col_w.iter().sum::<i32>() + (cols - 1).max(0) * COL_GAP;
     let height = PAD * 2
         + rows * NODE_H
         + (rows - 1).max(0) * ROW_GAP
@@ -78,7 +95,10 @@ fn canvas(max_rank: usize, next_row: &[i32], has_back: bool) -> (i32, i32) {
 /// recursive DFS is fine.
 fn back_edges(graph: &Graph) -> Vec<bool> {
     let n = graph.labels.len();
-    let adj = adjacency(graph, n);
+    let mut adj = vec![Vec::new(); n];
+    for (i, &(u, v)) in graph.edges.iter().enumerate() {
+        adj[u].push((i, v));
+    }
     let mut color = vec![0u8; n]; // 0 = white, 1 = gray (on stack), 2 = black
     let mut back = vec![false; graph.edges.len()];
     for s in 0..n {
@@ -87,15 +107,6 @@ fn back_edges(graph: &Graph) -> Vec<bool> {
         }
     }
     back
-}
-
-/// Outgoing `(edge_index, target)` per node.
-fn adjacency(graph: &Graph, n: usize) -> Vec<Vec<(usize, usize)>> {
-    let mut adj = vec![Vec::new(); n];
-    for (i, &(u, v)) in graph.edges.iter().enumerate() {
-        adj[u].push((i, v));
-    }
-    adj
 }
 
 /// DFS from `u`, marking every edge into a gray (on-stack) node as back.

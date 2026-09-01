@@ -31,6 +31,25 @@ fn renders_a_chain_with_boxes_edges_labels_and_a_sized_svg() {
     // Each edge label sits on a backing plate so a thick/crossing edge
     // can't obscure it.
     assert_eq!(svg.matches("fill-opacity=\"0.85\"").count(), 2);
+    // Arrowheads are a fixed size, not scaled by stroke width, so a wide
+    // edge never grows a monstrous triangle.
+    assert!(svg.contains("markerUnits=\"userSpaceOnUse\""));
+}
+
+#[test]
+fn a_long_label_widens_its_node_box() {
+    let labels = lbls(&["x", "sequential store: 269 MB"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0],
+        to: &[1],
+        ..Default::default()
+    })
+    .unwrap();
+    // The short label keeps the minimum box width; the 24-char label
+    // widens its box to 24*8 + 2*14 = 220.
+    assert!(svg.contains("width=\"128\""));
+    assert!(svg.contains("width=\"220\""));
 }
 
 #[test]

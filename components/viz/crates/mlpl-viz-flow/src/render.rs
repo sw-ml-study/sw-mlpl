@@ -8,7 +8,7 @@
 use std::fmt::Write;
 
 use crate::groups::group_bands;
-use crate::model::{BACK_LANE, NODE_H, NODE_W, Positioned};
+use crate::model::{BACK_LANE, NODE_H, Positioned};
 use crate::widths::{W_DEFAULT, stroke_widths};
 
 const BG: &str = "#1e1e2e";
@@ -42,6 +42,7 @@ pub fn render(p: &Positioned) -> String {
         node_box(
             &mut s,
             p.pos[id],
+            p.node_w[id],
             label,
             *p.graph.node_highlight.get(id).unwrap_or(&false),
         );
@@ -58,10 +59,12 @@ fn open(s: &mut String, p: &Positioned) {
         "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {w} {h}\" width=\"{w}\" \
          height=\"{h}\" font-family=\"ui-monospace, monospace\" font-size=\"13\">\
          <rect width=\"{w}\" height=\"{h}\" fill=\"{BG}\"/>\
-         <defs><marker id=\"aw\" markerWidth=\"9\" markerHeight=\"9\" refX=\"8\" refY=\"3\" \
-         orient=\"auto\"><path d=\"M0,0 L8,3 L0,6 Z\" fill=\"{EDGE}\"/></marker>\
-         <marker id=\"awh\" markerWidth=\"9\" markerHeight=\"9\" refX=\"8\" refY=\"3\" \
-         orient=\"auto\"><path d=\"M0,0 L8,3 L0,6 Z\" fill=\"{HL}\"/></marker></defs>",
+         <defs><marker id=\"aw\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" \
+         markerHeight=\"12\" refX=\"10\" refY=\"5\" orient=\"auto\">\
+         <path d=\"M0,0 L10,5 L0,10 Z\" fill=\"{EDGE}\"/></marker>\
+         <marker id=\"awh\" markerUnits=\"userSpaceOnUse\" markerWidth=\"12\" \
+         markerHeight=\"12\" refX=\"10\" refY=\"5\" orient=\"auto\">\
+         <path d=\"M0,0 L10,5 L0,10 Z\" fill=\"{HL}\"/></marker></defs>",
         w = p.width,
         h = p.height
     );
@@ -69,12 +72,12 @@ fn open(s: &mut String, p: &Positioned) {
 
 /// One node box with a centered label; highlighted nodes get the accent
 /// stroke + a bolder fill.
-fn node_box(s: &mut String, (x, y): (i32, i32), label: &str, hl: bool) {
-    let (cx, cy) = (x + NODE_W / 2, y + NODE_H / 2 + 4);
+fn node_box(s: &mut String, (x, y): (i32, i32), w: i32, label: &str, hl: bool) {
+    let (cx, cy) = (x + w / 2, y + NODE_H / 2 + 4);
     let (stroke, sw) = if hl { (HL, 2) } else { (EDGE, 1) };
     let _ = write!(
         s,
-        "<rect x=\"{x}\" y=\"{y}\" width=\"{NODE_W}\" height=\"{NODE_H}\" rx=\"6\" \
+        "<rect x=\"{x}\" y=\"{y}\" width=\"{w}\" height=\"{NODE_H}\" rx=\"6\" \
          fill=\"{SURFACE}\" stroke=\"{stroke}\" stroke-width=\"{sw}\"/>\
          <text x=\"{cx}\" y=\"{cy}\" text-anchor=\"middle\" fill=\"{TEXT}\">{}</text>",
         escape(label)
@@ -133,13 +136,13 @@ fn edge_label(s: &mut String, label: &str, x: i32, y: i32) {
 /// bottom so the arrow reads as a rewind.
 fn edge_path(p: &Positioned, (u, v): (usize, usize), back: bool) -> (String, (i32, i32)) {
     if back {
-        let (sx, tx) = (p.pos[u].0 + NODE_W / 2, p.pos[v].0 + NODE_W / 2);
+        let (sx, tx) = (p.pos[u].0 + p.node_w[u] / 2, p.pos[v].0 + p.node_w[v] / 2);
         let (sy, ty) = (p.pos[u].1 + NODE_H, p.pos[v].1 + NODE_H);
         let lane = p.height - BACK_LANE / 2;
         let pts = format!("{sx},{sy} {sx},{lane} {tx},{lane} {tx},{ty}");
         (pts, ((sx + tx) / 2, lane - 10))
     } else {
-        let (sx, sy) = (p.pos[u].0 + NODE_W, p.pos[u].1 + NODE_H / 2);
+        let (sx, sy) = (p.pos[u].0 + p.node_w[u], p.pos[u].1 + NODE_H / 2);
         let (tx, ty) = (p.pos[v].0, p.pos[v].1 + NODE_H / 2);
         let mx = (sx + tx) / 2;
         let pts = format!("{sx},{sy} {mx},{sy} {mx},{ty} {tx},{ty}");

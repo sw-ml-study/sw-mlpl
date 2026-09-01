@@ -4,7 +4,7 @@
 
 use std::fmt::Write;
 
-use crate::model::{NODE_H, NODE_W, Positioned};
+use crate::model::{NODE_H, Positioned};
 
 /// Distinct band colors, cycled by group id.
 const BAND: &[&str] = &[
@@ -29,15 +29,15 @@ pub fn group_bands(s: &mut String, p: &Positioned) {
 /// The `(x, y, w, h)` bounding box (padded) of the nodes in group `g`,
 /// or `None` when the group has no members.
 fn bbox(p: &Positioned, g: usize) -> Option<(i32, i32, i32, i32)> {
-    let mut members = (0..p.graph.groups.len())
-        .filter(|&i| p.graph.groups[i] == g)
-        .map(|i| p.pos[i]);
-    let (fx, fy) = members.next()?;
-    let (mut x0, mut y0, mut x1, mut y1) = (fx, fy, fx + NODE_W, fy + NODE_H);
-    for (x, y) in members {
+    let mut members = (0..p.graph.groups.len()).filter(|&i| p.graph.groups[i] == g);
+    let first = members.next()?;
+    let (fx, fy) = p.pos[first];
+    let (mut x0, mut y0, mut x1, mut y1) = (fx, fy, fx + p.node_w[first], fy + NODE_H);
+    for i in members {
+        let (x, y) = p.pos[i];
         x0 = x0.min(x);
         y0 = y0.min(y);
-        x1 = x1.max(x + NODE_W);
+        x1 = x1.max(x + p.node_w[i]);
         y1 = y1.max(y + NODE_H);
     }
     Some((

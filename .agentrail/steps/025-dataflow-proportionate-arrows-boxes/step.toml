@@ -1,0 +1,9 @@
+number = 25
+slug = "dataflow-proportionate-arrows-boxes"
+status = "in-progress"
+description = "Fix two dataflow rendering defects the ../emufpga playground lessons exposed:..."
+role = "production"
+context_files = []
+created_at = "2026-09-01T10:10:57"
+task_type = "bugfix"
+commits = []
