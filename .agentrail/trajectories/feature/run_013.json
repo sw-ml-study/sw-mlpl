@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 23,
+    "step": "dataflow-back-edge"
+  },
+  "action": "Added back_edges DFS (white/gray/black coloring) + adjacency + visit to layout.rs; forward-only rank; canvas() reserving BACK_LANE; Positioned.back; render.rs edge_path forward/rewind branch + stroke-dasharray; TDD via render_tests back-edge + self-loop; deleted the initial cycles.rs module to stay <=7 crate modules; e2e verify with rebuilt binary.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-01T09:17:55"
+}

@@ -1,9 +1,10 @@
 number = 23
 slug = "dataflow-back-edge"
-status = "in-progress"
+status = "completed"
 description = "Dataflow renderer dashed back-edge (../emufpga recursion-as-rotation ask): a ..."
 role = "production"
 context_files = []
 created_at = "2026-09-01T09:17:29"
+completed_at = "2026-09-01T09:17:55"
 task_type = "feature"
-commits = []
+commits = ["0ab93fcc1bc4791c0f04dd58eca5e814d8e9184a"]
