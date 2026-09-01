@@ -1,6 +1,6 @@
 number = 19
 slug = "catalog-buildrs-data"
-status = "pending"
+status = "in-progress"
 description = "Move the :help builtin catalog data out of Rust source into catalog_lang.toml..."
 role = "production"
 context_files = []
