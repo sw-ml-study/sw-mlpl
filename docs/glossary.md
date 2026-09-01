@@ -4020,7 +4020,10 @@ case is per-image extraction in the ViT trained demo:
 `take(load_preloaded("pets_tiny").X, 0, i)` returns one
 image's `[3, 64, 64]` from the 200-image batch; `take(seq, 1,
 0)` pulls the CLS row out of a `[B, 17, 128]` post-attention
-activation.
+activation. The 2-argument `at(v, idx)` is the vector-indexing
+convenience for `take(v, 0, idx)` -- `at(order, i)` reads one
+element as a scalar without spelling the axis; paired with
+length-1 broadcast, that scalar meets a vector directly.
 
 Differentiable on the autograd tape. The backward scatters
 the upstream gradient into a zero-filled array of the
