@@ -1,0 +1,9 @@
+number = 15
+slug = "emufpga-broadcast-and-disp-docs"
+status = "in-progress"
+description = "Two ../emufpga upstream asks (safe subset): (1) length-1 array broadcasts lik..."
+role = "production"
+context_files = []
+created_at = "2026-08-31T18:25:49"
+task_type = "feature"
+commits = []

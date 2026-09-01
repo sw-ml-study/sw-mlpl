@@ -1,11 +1,14 @@
-# The classic hello world: display a greeting string.
+# The classic hello world: the program's final value is a greeting.
 #
-# `disp` prints any value; given a string it prints the text as-is.
-# (The APL-style one-liner is just the bare expression `"Hello, world!"`,
-# whose result the REPL prints -- `disp` makes the intent explicit.)
+# A script echoes its FINAL value, so this shows "Hello, world!".
+# `disp(v)` RETURNS a display form of `v` (for a string, the text
+# as-is; for an array, a box diagram of its rank / shape / structure) --
+# it does not itself write to stdout, so the greeting shows here only
+# because it is the script's last value. For output from a NON-final
+# line, use `print(v)`, which writes to stdout directly.
 #
 # Runs both interpreted and compiled to a native binary -- `disp` and
-# strings are supported on the compile path, so both print the same
+# strings are supported on the compile path, so both show the same
 # text:
 #
 #   examples/scripts/run.sh examples/hello-world.mlpl            # interpret

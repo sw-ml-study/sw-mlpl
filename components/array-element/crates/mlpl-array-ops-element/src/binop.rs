@@ -4,8 +4,14 @@ use crate::merge_labels::merge_labels;
 
 /// Apply-binop extension for `DenseArray`.
 pub trait ApplyBinopExt {
-    /// Apply a binary op element-wise with scalar broadcasting.
-    /// Labels propagate per Saga 11.5 Phase 3 semantics.
+    /// Apply a binary op element-wise with single-element broadcasting:
+    /// if one operand holds exactly one value (a rank-0 scalar OR a
+    /// length-1 array like `[2]` / `[[2]]`), that value broadcasts
+    /// against the other operand's shape, matching NumPy / APL. This
+    /// means `[2] * [1,2,3]` is `[2,4,6]`, and an indexing primitive
+    /// that returns a length-1 slice meets a vector without an explicit
+    /// `reshape(..., [])` collapse. Labels propagate per Saga 11.5
+    /// Phase 3 semantics.
     fn apply_binop(
         &self,
         other: &DenseArray,
@@ -25,13 +31,15 @@ impl ApplyBinopExt for DenseArray {
                 zip_with(self.data(), other.data(), op),
                 self.shape().clone(),
             )
-        } else if self.rank() == 0 {
+        } else if self.elem_count() == 1 {
+            // A single-element operand (rank-0 scalar OR a length-1
+            // array) broadcasts its one value against the other shape.
             let s = self.data()[0];
             (
                 other.data().iter().map(|b| op(s, *b)).collect(),
                 other.shape().clone(),
             )
-        } else if other.rank() == 0 {
+        } else if other.elem_count() == 1 {
             let s = other.data()[0];
             (
                 self.data().iter().map(|a| op(*a, s)).collect(),

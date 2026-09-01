@@ -1355,8 +1355,10 @@ as a framed grid, rank 3/4 as a grid of boxed inner
 matrices (the APL2 DISPLAY-of-blocks view), rank >= 5 as a
 labeled stack of
 leading-axis slices, with a `rank R  shape [..]  depth D`
-footer. MLPL's answer to APL's `]display`. Print it in the
-REPL to see an array's structure at a glance. (Unlike MATLAB's
+footer. MLPL's answer to APL's `]display`. `disp` RETURNS that
+string; it does not write to stdout, so in a script wrap it as
+`print(disp(x))` to emit it from a non-final line (the REPL
+echoes every value, and a script echoes only its last). (Unlike MATLAB's
 `disp`, which just prints values, MLPL's `disp` draws the box
 frame around rank / shape / depth -- closer to NumPy `repr` or
 PyTorch `print` but structure-first.)

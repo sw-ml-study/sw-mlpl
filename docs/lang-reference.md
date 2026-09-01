@@ -156,12 +156,19 @@ Precedence (high to low):
 Parentheses override precedence: `(x + y) * z`
 
 Operators apply element-wise on arrays of the same shape, or
-broadcast a scalar to match the other operand's shape:
+broadcast a SINGLE-ELEMENT operand -- a rank-0 scalar OR a length-1
+array like `[2]` -- against the other operand's shape (matching
+NumPy / APL):
 
 ```
 [1, 2, 3] + [4, 5, 6]    # [5, 7, 9]
-[1, 2, 3] * 10            # [10, 20, 30]
+[1, 2, 3] * 10            # [10, 20, 30]   (scalar broadcast)
+[2] * [1, 2, 3]          # [2, 4, 6]       (length-1 broadcast)
 ```
+
+Because a length-1 array broadcasts like a scalar, an indexing result
+that comes back as a length-1 slice can meet a vector directly, without
+an explicit `reshape(..., [])` collapse first.
 
 ## Assignment
 

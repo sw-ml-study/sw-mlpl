@@ -88,6 +88,20 @@ fn broadcast_scalar_add_vector() {
 // -- Shape mismatch --
 
 #[test]
+fn length_one_array_broadcasts_like_a_scalar() {
+    // NumPy / APL semantics: a length-1 operand broadcasts against the
+    // other shape (../emufpga request), so an indexing result that
+    // comes back as `[x]` meets a vector without a reshape collapse.
+    assert_eq!(eval("[2] * [1, 2, 3]").unwrap().data(), &[2.0, 4.0, 6.0]);
+    assert_eq!(
+        eval("[1, 2, 3] + [10]").unwrap().data(),
+        &[11.0, 12.0, 13.0]
+    );
+    // A genuine multi-element shape mismatch is still an error.
+    assert!(eval("[1, 2] + [1, 2, 3]").is_err());
+}
+
+#[test]
 fn shape_mismatch() {
     let result = eval("[1, 2] + [1, 2, 3]");
     assert!(
