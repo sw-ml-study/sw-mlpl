@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 26,
+    "step": "dataflow-gap-fits-label"
+  },
+  "action": "layout.rs column_gaps + per-gap place/canvas; model.rs LABEL_CHAR_W/LABEL_PAD; render.rs plate uses consts; inlined box_width; render_tests gap-widen test; diagnosed the giant-arrowhead report as a stale live bundle (no mlpl-serve running, live build-info=2e552ebb pre-fix).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-01T15:05:29"
+}
