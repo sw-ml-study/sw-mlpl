@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 24,
+    "step": "dataflow-label-legibility"
+  },
+  "action": "render.rs edge_label helper (bg plate + text) + lifted label anchors in edge_path; model.rs gap constants; render_tests plate assertions + updated coords; e2e verify against the demo dataflow spec.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-01T09:31:06"
+}
