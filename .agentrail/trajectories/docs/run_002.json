@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 17,
+    "step": "docs-freshness-and-compact-demo"
+  },
+  "action": "grep-scanned docs for stale claims; targeted glossary/apl2 edits (no new H2); self-contained no-def demo; readme_counts fix; demo-smoke verify; build-pages + deploy",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-31T19:12:58"
+}
