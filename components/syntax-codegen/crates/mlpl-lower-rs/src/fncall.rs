@@ -117,6 +117,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["ok", "err"] @ 1 => Result;
     ["check"] @ 1 => Check;
     ["take"] @ 3 => ArrayCall;
+    ["at"] @ 2 => ArrayCall;
     ["gt", "lt", "eq", "ge", "le", "ne"] @ 2 => Cmp;
     ["type_of"] @ 1 => TypeOf;
     ["equal"] @ 2 => Equal;

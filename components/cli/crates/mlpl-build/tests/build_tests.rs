@@ -893,6 +893,28 @@ fn read_stdin_echoes_piped_input() {
 }
 
 #[test]
+fn at_indexing_compiles_and_runs() {
+    if !should_run() {
+        eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");
+        return;
+    }
+    let tmp = tempdir("atindex");
+    let sp = tmp.join("at.mlpl");
+    // `at(v, i)` reads element i of a vector as a scalar (== take(v,0,i)).
+    // order[0] + order[2] = 3 + 4 = 7.
+    std::fs::write(&sp, "order = [3, 1, 4, 1]\nat(order, 0) + at(order, 2)\n").unwrap();
+    let op = tmp.join("at");
+    let r = run_mlpl_build(&[sp.to_str().unwrap(), "-o", op.to_str().unwrap()]);
+    assert!(
+        r.status.success(),
+        "mlpl-build failed:\n{}",
+        String::from_utf8_lossy(&r.stderr)
+    );
+    let run = Command::new(&op).output().expect("run binary");
+    assert_eq!(String::from_utf8_lossy(&run.stdout).trim(), "7");
+}
+
+#[test]
 fn infix_comparison_operators_compile_and_run() {
     if !should_run() {
         eprintln!("skipping mlpl-build e2e test; set MLPL_BUILD_TESTS=1 to run");

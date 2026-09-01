@@ -1,0 +1,1 @@
+Add at(v, i) vector-indexing builtin (../emufpga ask 3): element i of a rank-1 array as a scalar (== take(v, 0, i)), interpreter + compiler, so order[i]'s workaround collapses.

@@ -762,6 +762,7 @@ the trained Pets demos.
 | `shift_pairs_x(ids, block_size)` | 2 | Build next-token-prediction input windows from a 1-D token array. Returns an `[N, block_size]` integer matrix where each row is a contiguous window of `ids`. |
 | `shift_pairs_y(ids, block_size)` | 2 | Matching target windows for `shift_pairs_x`: each row is the input window shifted right by one position. |
 | `take(x, axis, idx)` | 3 | Drop one axis at a single integer index. Result has rank `rank(x) - 1`. Per-axis labels propagate (the dropped axis's label is removed). Differentiable on the tape: backward scatters the upstream gradient into a zero-filled array of the parent's shape at `axis = idx`. Multi-index gather and slice ranges are followups. |
+| `at(v, idx)` | 2 | Read element `idx` of a rank-1 vector as a scalar -- the 2-argument convenience for `take(v, 0, idx)`, so `at(order, i)` reads one element without spelling the axis. On a higher-rank value it selects slice `idx` along axis 0. Pairs with length-1 broadcast: the scalar it returns meets a vector directly. |
 
 ### Embeddings and Manifold
 

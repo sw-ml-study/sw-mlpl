@@ -52,7 +52,22 @@ fn structural_call(name: &str, args: Vec<DenseArray>) -> CallResult {
         "patchify" => Some(slice::patchify(name, args)),
         "concat" if args.len() == 3 => Some(slice::concat(name, args)),
         "take" => Some(slice::take(name, args)),
+        "at" => Some(at(name, args)),
         "rotate" => Some(transform::rotate(name, args)),
         _ => None,
     }
+}
+
+/// `at(v, i)` -- element `i` of a rank-1 array (or slice `i` along axis
+/// 0 of a higher-rank array): the 2-arg convenience for `take(v, 0, i)`,
+/// so reading one element of a vector no longer needs the explicit
+/// axis. The scalar it returns meets a vector directly under length-1
+/// broadcast.
+fn at(name: &str, mut args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 2 {
+        return Err(crate::arity_err(name, 2, args.len()));
+    }
+    let idx = args.pop().unwrap();
+    let v = args.pop().unwrap();
+    slice::take(name, vec![v, DenseArray::from_scalar(0.0), idx])
 }

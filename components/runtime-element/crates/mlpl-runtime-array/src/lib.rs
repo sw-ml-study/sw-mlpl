@@ -35,6 +35,7 @@ pub const NAMES: &[&str] = &[
     "matmul",
     "patchify",
     "take",
+    "at",
     "rotate",
 ];
 // Note: `concat` (3-arg axis-aware form) is dispatched here but
