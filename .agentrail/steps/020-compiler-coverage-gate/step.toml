@@ -1,9 +1,10 @@
 number = 20
 slug = "compiler-coverage-gate"
-status = "in-progress"
+status = "completed"
 description = "Add docs/compiler-coverage.md + a gate test in mlpl-lower-rs asserting a pinn..."
 role = "production"
 context_files = []
 created_at = "2026-08-31T20:06:42"
+completed_at = "2026-08-31T20:08:33"
 task_type = "feature"
-commits = []
+commits = ["d9b35ebe120ac6e5bce2ce607f442aaf2c3145c2"]
