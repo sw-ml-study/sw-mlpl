@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-31
 
+- chore(agentrail): complete 019-catalog-buildrs-data; queue compiler-coverage-gate
+- refactor(catalog): generate :help data from TOML via build.rs; add 5 builtins
+- chore(agentrail): complete 018-dataflow-svg-renderer (Phase 1); begin catalog refactor
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(glossary): document at(v, idx) in the take entry
 - chore(pages): rebuild for dataflow renderer + demo
 - feat(demos): add a Dataflow Diagram demo (SPM pipeline) + README count 96
