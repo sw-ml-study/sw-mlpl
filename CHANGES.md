@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-01
+
+- chore(agentrail): complete 022-dataflow-log-widths; queue du-list-fs
+- feat(viz): dataflow honest log-width channel for extreme edge ratios
+
 ## 2026-08-31
 
+- chore(pages): rebuild for dataflow Phase 2 (bands/widths/highlight + inline-size fix); refresh CHANGES.md
 - chore(agentrail): complete 021-dataflow-phase-2; queue du-list-fs
 - feat(viz): dataflow renderer Phase 2 -- group bands, edge widths, highlight + inline-size fix
 - docs(changes): refresh CHANGES.md to HEAD
