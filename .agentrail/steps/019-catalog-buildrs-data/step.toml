@@ -1,9 +1,10 @@
 number = 19
 slug = "catalog-buildrs-data"
-status = "in-progress"
+status = "completed"
 description = "Move the :help builtin catalog data out of Rust source into catalog_lang.toml..."
 role = "production"
 context_files = []
 created_at = "2026-08-31T20:05:14"
+completed_at = "2026-08-31T20:06:09"
 task_type = "refactor"
-commits = []
+commits = ["87ed05328b90a48498ac82b5ac3414f245b04c79"]
