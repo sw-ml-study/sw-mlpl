@@ -20,6 +20,7 @@ pub fn build(d: &Dataflow) -> Result<Graph, VizError> {
         node_highlight: d.node_highlight.to_vec(),
         edge_widths: d.edge_widths.to_vec(),
         edge_highlight: d.edge_highlight.to_vec(),
+        width_log: d.width_log,
     })
 }
 

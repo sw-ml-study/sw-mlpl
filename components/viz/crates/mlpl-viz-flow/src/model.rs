@@ -22,6 +22,9 @@ pub struct Graph {
     pub edge_widths: Vec<f64>,
     /// Per-edge highlight flag, or empty.
     pub edge_highlight: Vec<bool>,
+    /// Interpret `edge_widths` on a log scale (honest for extreme
+    /// ratios) instead of clamped-linear.
+    pub width_log: bool,
 }
 
 /// A graph with a pixel position assigned to every node, plus the

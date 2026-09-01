@@ -9,6 +9,7 @@ use std::fmt::Write;
 
 use crate::groups::group_bands;
 use crate::model::{NODE_H, NODE_W, Positioned};
+use crate::widths::{W_DEFAULT, stroke_widths};
 
 const BG: &str = "#1e1e2e";
 const SURFACE: &str = "#313244";
@@ -23,8 +24,9 @@ pub fn render(p: &Positioned) -> String {
     let mut s = String::new();
     open(&mut s, p);
     group_bands(&mut s, p);
+    let sw = stroke_widths(&p.graph);
     for (i, &(u, v)) in p.graph.edges.iter().enumerate() {
-        let width = p.graph.edge_widths.get(i).copied().unwrap_or(1.5);
+        let width = sw.get(i).copied().unwrap_or(W_DEFAULT);
         let hl = *p.graph.edge_highlight.get(i).unwrap_or(&false);
         edge(
             &mut s,

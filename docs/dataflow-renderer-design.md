@@ -21,6 +21,12 @@ generality is why it belongs in sw-mlpl, not in one demo repo.
   teaching diagrams above.
 - **Not quantitative.** Node size encodes nothing by default; edge
   width is an OPTIONAL channel the caller drives, not an axis.
+  `width_scale: "linear"` (default) treats the values as visual widths
+  and clamps them into a display band so a raw quantity can never
+  become a monstrous stroke; `width_scale: "log"` normalizes them by
+  natural log, so an extreme ratio (269 MB vs 4 KiB, 65,000:1) reads as
+  an honest orders-of-magnitude contrast on one picture instead of one
+  edge blowing out the canvas and the other vanishing.
 - **No cycles in v1.** A back-edge is drawn (dashed) but does not
   change layering. Recurrence is a later concern.
 
@@ -56,6 +62,7 @@ produces):
 | `to` | `Array` (int) | yes | target node id per edge |
 | `labels` | `StrList` | no | edge label per edge (drawn at midpoint) |
 | `widths` | `Array` (num) | no | stroke width per edge (default 1) |
+| `width_scale` | `Str` | no | `"linear"` (default, clamped) or `"log"` (normalize extreme ratios) |
 | `highlight` | `Array` (0/1) | no | 1 = draw the edge in the highlight style |
 
 `from` / `to` / and every optional edge array must share the edge

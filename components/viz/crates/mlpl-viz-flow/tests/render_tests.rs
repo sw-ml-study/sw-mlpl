@@ -64,6 +64,30 @@ fn groups_widths_and_highlight_render() {
 }
 
 #[test]
+fn log_width_scale_tames_extreme_ratios() {
+    let labels = lbls(&["dram", "fifo", "sram"]);
+    // A 65,000:1 raw ratio (269 MB vs 4 KiB). Linear clamps BOTH to the
+    // band max -- indistinguishable; log spreads them across the band.
+    let mk = |log| {
+        render_dataflow(&Dataflow {
+            labels: &labels,
+            from: &[0, 1],
+            to: &[1, 2],
+            edge_widths: &[269_000_000.0, 4096.0],
+            width_log: log,
+            ..Default::default()
+        })
+        .unwrap()
+    };
+    let log = mk(true);
+    assert!(log.contains("stroke-width=\"9\"")); // the big edge -> band max
+    assert!(log.contains("stroke-width=\"1\"")); // the small edge -> band min
+    let lin = mk(false);
+    assert!(!lin.contains("269000000")); // never the raw quantity as a stroke
+    assert_eq!(lin.matches("stroke-width=\"9\"").count(), 2); // both clamp to max
+}
+
+#[test]
 fn errors_are_clean_not_panics() {
     let two = lbls(&["a", "b"]);
     assert!(render_dataflow(&Dataflow::default()).is_err()); // no nodes

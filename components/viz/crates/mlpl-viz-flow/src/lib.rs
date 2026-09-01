@@ -10,6 +10,7 @@ mod groups;
 mod layout;
 mod model;
 mod render;
+mod widths;
 
 pub use mlpl_viz_core::VizError;
 
@@ -35,6 +36,9 @@ pub struct Dataflow<'a> {
     pub edge_widths: &'a [f64],
     /// Per-edge highlight flag, or empty.
     pub edge_highlight: &'a [bool],
+    /// Interpret `edge_widths` on a log scale so extreme ratios read as
+    /// an orders-of-magnitude contrast; default is clamped-linear.
+    pub width_log: bool,
 }
 
 /// Render a [`Dataflow`] to an SVG string. Errors (never panics) on an

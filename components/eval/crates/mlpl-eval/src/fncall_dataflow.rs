@@ -42,6 +42,7 @@ pub(crate) fn eval_dataflow(
     let edge_labels = str_list("dataflow: edges.labels", e.get("labels"))?;
     let widths = float_array("dataflow: edges.widths", e.get("widths"))?;
     let edge_hl = bool_array("dataflow: edges.highlight", e.get("highlight"))?;
+    let width_log = width_scale("dataflow: edges.width_scale", e.get("width_scale"))?;
     mlpl_viz::render_dataflow(&mlpl_viz::Dataflow {
         labels: &labels,
         from: &from,
@@ -51,6 +52,7 @@ pub(crate) fn eval_dataflow(
         node_highlight: &node_hl,
         edge_widths: &widths,
         edge_highlight: &edge_hl,
+        width_log,
     })
     .map_err(|err| EvalError::Unsupported(format!("dataflow: {err}")))
 }
@@ -104,4 +106,20 @@ fn float_array(what: &str, v: Option<&Value>) -> Result<Vec<f64>, EvalError> {
 /// An optional 0/1 array field -> per-element flags (nonzero = true).
 fn bool_array(what: &str, v: Option<&Value>) -> Result<Vec<bool>, EvalError> {
     Ok(float_array(what, v)?.iter().map(|&x| x != 0.0).collect())
+}
+
+/// The optional `width_scale` string: absent / "linear" -> false,
+/// "log" -> true, anything else -> a clean error.
+fn width_scale(what: &str, v: Option<&Value>) -> Result<bool, EvalError> {
+    match v {
+        None => Ok(false),
+        Some(Value::Str(s)) => match s.as_str() {
+            "linear" => Ok(false),
+            "log" => Ok(true),
+            other => Err(EvalError::Unsupported(format!(
+                "{what}: {other:?} must be \"linear\" or \"log\""
+            ))),
+        },
+        _ => Err(EvalError::Unsupported(format!("{what} must be a string"))),
+    }
 }

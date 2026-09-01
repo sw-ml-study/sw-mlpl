@@ -1468,6 +1468,10 @@ version = "0.20.0"
 [[package]]
 name = "mlpl-builtin-catalog"
 version = "0.20.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "mlpl-bytes"
