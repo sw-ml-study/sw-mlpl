@@ -34,6 +34,9 @@ pub struct Positioned {
     pub graph: Graph,
     /// Top-left `(x, y)` of each node box, indexed by node id.
     pub pos: Vec<(i32, i32)>,
+    /// Per-edge back-edge flag (a recurrence): drawn dashed through the
+    /// bottom lane and excluded from layering.
+    pub back: Vec<bool>,
     /// Canvas width / height in pixels.
     pub width: i32,
     /// Canvas height.
@@ -50,3 +53,6 @@ pub const COL_GAP: i32 = 72;
 pub const ROW_GAP: i32 = 28;
 /// Canvas padding.
 pub const PAD: i32 = 24;
+/// Extra height reserved below the nodes for back-edge "rewind" routing
+/// (only added when the graph has at least one back-edge).
+pub const BACK_LANE: i32 = 44;

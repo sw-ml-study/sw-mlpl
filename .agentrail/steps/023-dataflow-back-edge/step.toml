@@ -1,0 +1,9 @@
+number = 23
+slug = "dataflow-back-edge"
+status = "in-progress"
+description = "Dataflow renderer dashed back-edge (../emufpga recursion-as-rotation ask): a ..."
+role = "production"
+context_files = []
+created_at = "2026-09-01T09:17:29"
+task_type = "feature"
+commits = []

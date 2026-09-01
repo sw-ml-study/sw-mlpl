@@ -27,8 +27,12 @@ generality is why it belongs in sw-mlpl, not in one demo repo.
   natural log, so an extreme ratio (269 MB vs 4 KiB, 65,000:1) reads as
   an honest orders-of-magnitude contrast on one picture instead of one
   edge blowing out the canvas and the other vanishing.
-- **No cycles in v1.** A back-edge is drawn (dashed) but does not
-  change layering. Recurrence is a later concern.
+- **Recurrence via back-edges.** A DFS marks any edge into an ancestor
+  (a recurrence, e.g. a rotating parameter store) as a back-edge. The
+  ranking pass ignores back-edges so layering stays a strict DAG, and
+  they render dashed, routed through a reserved bottom lane as a
+  "rewind" (drop out of the source, run back, rise into the target) so
+  the loop reads as going backward. A self-loop counts as a back-edge.
 
 ## Surface
 
@@ -180,8 +184,8 @@ All via `VizError` (surfaced as an `EvalError` at the boundary, like
 - **Phase 2**: `groups` bands, `widths`, `highlight` -- the SPM
   occupancy + memory-hierarchy contrasts and the monotonic-traversal
   highlight.
-- **Phase 3**: barycenter crossing reduction, `direction` option,
-  dashed back-edges for the recurrence case.
+- **Phase 3**: dashed back-edges for the recurrence case (shipped);
+  barycenter crossing reduction and a `direction` option remain.
 - **Future**: fold under the Viz IR (research2 section 11) so a model
   graph, an autograd tape, and a compiler pass all lower to the SAME
   `dataflow` node/edge IR rather than each hand-building the records.

@@ -88,6 +88,39 @@ fn log_width_scale_tames_extreme_ratios() {
 }
 
 #[test]
+fn a_back_edge_is_dashed_and_does_not_distort_layering() {
+    let labels = lbls(&["a", "b", "c"]);
+    // a -> b -> c forward, plus c -> a: the recurrence (a back-edge).
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0, 1, 2],
+        to: &[1, 2, 0],
+        ..Default::default()
+    })
+    .unwrap();
+    assert_eq!(svg.matches("<polyline").count(), 3); // all three edges drawn
+    assert_eq!(svg.matches("stroke-dasharray").count(), 1); // only the back-edge
+    // Layering ignores c -> a: a stays in column 0 (x = PAD = 24) and c
+    // in column 2 (x = 24 + 2*(128+72) = 424). If the back-edge were
+    // ranked, a would be pushed right and x="24" would not be a node.
+    assert!(svg.contains("x=\"24\"")); // node a, column 0
+    assert!(svg.contains("x=\"424\"")); // node c, column 2
+}
+
+#[test]
+fn a_self_loop_is_a_back_edge() {
+    let labels = lbls(&["s"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0],
+        to: &[0],
+        ..Default::default()
+    })
+    .unwrap();
+    assert_eq!(svg.matches("stroke-dasharray").count(), 1);
+}
+
+#[test]
 fn errors_are_clean_not_panics() {
     let two = lbls(&["a", "b"]);
     assert!(render_dataflow(&Dataflow::default()).is_err()); // no nodes

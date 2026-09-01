@@ -8,7 +8,7 @@
 use std::fmt::Write;
 
 use crate::groups::group_bands;
-use crate::model::{NODE_H, NODE_W, Positioned};
+use crate::model::{BACK_LANE, NODE_H, NODE_W, Positioned};
 use crate::widths::{W_DEFAULT, stroke_widths};
 
 const BG: &str = "#1e1e2e";
@@ -35,6 +35,7 @@ pub fn render(p: &Positioned) -> String {
             p.graph.edge_labels.get(i).map(String::as_str),
             width,
             hl,
+            *p.back.get(i).unwrap_or(&false),
         );
     }
     for (id, label) in p.graph.labels.iter().enumerate() {
@@ -80,9 +81,10 @@ fn node_box(s: &mut String, (x, y): (i32, i32), label: &str, hl: bool) {
     );
 }
 
-/// A directed elbow edge from the source's right side to the target's
-/// left side, with an arrowhead, an optional midpoint label, a stroke
-/// width, and an optional highlight color.
+/// A directed edge: a forward elbow (source's right side to target's
+/// left), or a dashed "rewind" that loops through the bottom lane for a
+/// back-edge. Carries the arrowhead, stroke width, optional highlight
+/// color, and an optional label at the path's midpoint.
 fn edge(
     s: &mut String,
     p: &Positioned,
@@ -90,24 +92,47 @@ fn edge(
     label: Option<&str>,
     w: f64,
     hl: bool,
+    back: bool,
 ) {
-    let (sx, sy) = (p.pos[u].0 + NODE_W, p.pos[u].1 + NODE_H / 2);
-    let (tx, ty) = (p.pos[v].0, p.pos[v].1 + NODE_H / 2);
-    let mx = (sx + tx) / 2;
     let (stroke, marker) = if hl { (HL, "awh") } else { (EDGE, "aw") };
+    let dash = if back {
+        " stroke-dasharray=\"6 4\""
+    } else {
+        ""
+    };
+    let (points, (lx, ly)) = edge_path(p, (u, v), back);
     let _ = write!(
         s,
-        "<polyline points=\"{sx},{sy} {mx},{sy} {mx},{ty} {tx},{ty}\" fill=\"none\" \
-         stroke=\"{stroke}\" stroke-width=\"{w}\" marker-end=\"url(#{marker})\"/>"
+        "<polyline points=\"{points}\" fill=\"none\" stroke=\"{stroke}\" \
+         stroke-width=\"{w}\" marker-end=\"url(#{marker})\"{dash}/>"
     );
     if let Some(l) = label.filter(|l| !l.is_empty()) {
-        let ly = (sy + ty) / 2 - 4;
         let _ = write!(
             s,
-            "<text x=\"{mx}\" y=\"{ly}\" text-anchor=\"middle\" fill=\"{SUB}\" \
+            "<text x=\"{lx}\" y=\"{ly}\" text-anchor=\"middle\" fill=\"{SUB}\" \
              font-size=\"11\">{}</text>",
             escape(l)
         );
+    }
+}
+
+/// Polyline points + label anchor for an edge. Forward edges elbow
+/// across the column gap; back-edges drop out of the source's bottom,
+/// run left through the reserved lane, and rise into the target's
+/// bottom so the arrow reads as a rewind.
+fn edge_path(p: &Positioned, (u, v): (usize, usize), back: bool) -> (String, (i32, i32)) {
+    if back {
+        let (sx, tx) = (p.pos[u].0 + NODE_W / 2, p.pos[v].0 + NODE_W / 2);
+        let (sy, ty) = (p.pos[u].1 + NODE_H, p.pos[v].1 + NODE_H);
+        let lane = p.height - BACK_LANE / 2;
+        let pts = format!("{sx},{sy} {sx},{lane} {tx},{lane} {tx},{ty}");
+        (pts, ((sx + tx) / 2, lane - 6))
+    } else {
+        let (sx, sy) = (p.pos[u].0 + NODE_W, p.pos[u].1 + NODE_H / 2);
+        let (tx, ty) = (p.pos[v].0, p.pos[v].1 + NODE_H / 2);
+        let mx = (sx + tx) / 2;
+        let pts = format!("{sx},{sy} {mx},{sy} {mx},{ty} {tx},{ty}");
+        (pts, (mx, (sy + ty) / 2 - 4))
     }
 }
 
