@@ -107,13 +107,24 @@ fn edge(
          stroke-width=\"{w}\" marker-end=\"url(#{marker})\"{dash}/>"
     );
     if let Some(l) = label.filter(|l| !l.is_empty()) {
-        let _ = write!(
-            s,
-            "<text x=\"{lx}\" y=\"{ly}\" text-anchor=\"middle\" fill=\"{SUB}\" \
-             font-size=\"11\">{}</text>",
-            escape(l)
-        );
+        edge_label(s, l, lx, ly);
     }
+}
+
+/// A midpoint edge label sitting above the line, on a small rounded
+/// background plate so a thick or crossing edge can never obscure it.
+fn edge_label(s: &mut String, label: &str, x: i32, y: i32) {
+    let w = label.chars().count() as i32 * 7 + 8;
+    let _ = write!(
+        s,
+        "<rect x=\"{rx}\" y=\"{ry}\" width=\"{w}\" height=\"15\" rx=\"3\" \
+         fill=\"{BG}\" fill-opacity=\"0.85\"/>\
+         <text x=\"{x}\" y=\"{y}\" text-anchor=\"middle\" fill=\"{SUB}\" \
+         font-size=\"11\">{}</text>",
+        escape(label),
+        rx = x - w / 2,
+        ry = y - 12,
+    );
 }
 
 /// Polyline points + label anchor for an edge. Forward edges elbow
@@ -126,13 +137,13 @@ fn edge_path(p: &Positioned, (u, v): (usize, usize), back: bool) -> (String, (i3
         let (sy, ty) = (p.pos[u].1 + NODE_H, p.pos[v].1 + NODE_H);
         let lane = p.height - BACK_LANE / 2;
         let pts = format!("{sx},{sy} {sx},{lane} {tx},{lane} {tx},{ty}");
-        (pts, ((sx + tx) / 2, lane - 6))
+        (pts, ((sx + tx) / 2, lane - 10))
     } else {
         let (sx, sy) = (p.pos[u].0 + NODE_W, p.pos[u].1 + NODE_H / 2);
         let (tx, ty) = (p.pos[v].0, p.pos[v].1 + NODE_H / 2);
         let mx = (sx + tx) / 2;
         let pts = format!("{sx},{sy} {mx},{sy} {mx},{ty} {tx},{ty}");
-        (pts, (mx, (sy + ty) / 2 - 4))
+        (pts, (mx, (sy + ty) / 2 - 13))
     }
 }
 

@@ -1,0 +1,1 @@
+Fix dataflow edge labels being obscured by thick/crossing edges (user report: the thick highlighted 'stream' arrow ran through its label). Lift the midpoint label clear of the (possibly thick) stroke and draw it on a small rounded background plate (BG fill, 0.85 opacity) so no edge can obscure it; widen COL_GAP/ROW_GAP so the diagram is less compact and labels have room. TDD.

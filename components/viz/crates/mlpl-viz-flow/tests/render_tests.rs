@@ -23,10 +23,14 @@ fn renders_a_chain_with_boxes_edges_labels_and_a_sized_svg() {
     assert!(svg.starts_with("<svg") && svg.ends_with("</svg>"));
     // The bug fix: an explicit width/height so the inline SVG is sized.
     assert!(svg.contains("width=\"") && svg.contains("height=\""));
-    assert_eq!(svg.matches("<rect").count(), 1 + 3); // background + 3 nodes
+    // background + 3 nodes + 2 edge-label backing plates.
+    assert_eq!(svg.matches("<rect").count(), 1 + 3 + 2);
     assert_eq!(svg.matches("<polyline").count(), 2); // 2 edges
     assert!(svg.contains("storage") && svg.contains("stream"));
     assert!(svg.contains("marker-end=\"url(#aw)\""));
+    // Each edge label sits on a backing plate so a thick/crossing edge
+    // can't obscure it.
+    assert_eq!(svg.matches("fill-opacity=\"0.85\"").count(), 2);
 }
 
 #[test]
@@ -101,10 +105,10 @@ fn a_back_edge_is_dashed_and_does_not_distort_layering() {
     assert_eq!(svg.matches("<polyline").count(), 3); // all three edges drawn
     assert_eq!(svg.matches("stroke-dasharray").count(), 1); // only the back-edge
     // Layering ignores c -> a: a stays in column 0 (x = PAD = 24) and c
-    // in column 2 (x = 24 + 2*(128+72) = 424). If the back-edge were
+    // in column 2 (x = 24 + 2*(128+96) = 472). If the back-edge were
     // ranked, a would be pushed right and x="24" would not be a node.
     assert!(svg.contains("x=\"24\"")); // node a, column 0
-    assert!(svg.contains("x=\"424\"")); // node c, column 2
+    assert!(svg.contains("x=\"472\"")); // node c, column 2
 }
 
 #[test]

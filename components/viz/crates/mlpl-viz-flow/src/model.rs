@@ -47,10 +47,11 @@ pub struct Positioned {
 pub const NODE_W: i32 = 128;
 /// Node box height in pixels.
 pub const NODE_H: i32 = 40;
-/// Horizontal gap between layer columns.
-pub const COL_GAP: i32 = 72;
+/// Horizontal gap between layer columns (wide enough for a midpoint
+/// edge label to sit clear of both node boxes).
+pub const COL_GAP: i32 = 96;
 /// Vertical gap between node rows within a column.
-pub const ROW_GAP: i32 = 28;
+pub const ROW_GAP: i32 = 36;
 /// Canvas padding.
 pub const PAD: i32 = 24;
 /// Extra height reserved below the nodes for back-edge "rewind" routing
