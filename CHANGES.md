@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-01
 
+- chore(agentrail): complete 023-dataflow-back-edge; queue du-list-fs
+- feat(viz): dataflow dashed back-edges for the recurrence case
+- chore(pages): rebuild for dataflow log-width channel; refresh CHANGES.md
 - chore(agentrail): complete 022-dataflow-log-widths; queue du-list-fs
 - feat(viz): dataflow honest log-width channel for extreme edge ratios
 
