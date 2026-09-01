@@ -1,9 +1,10 @@
 number = 21
 slug = "dataflow-phase-2"
-status = "in-progress"
+status = "completed"
 description = "Dataflow renderer Phase 2 per docs/dataflow-renderer-design.md: add optional ..."
 role = "production"
 context_files = []
 created_at = "2026-08-31T20:22:13"
+completed_at = "2026-08-31T20:28:13"
 task_type = "feature"
-commits = []
+commits = ["23d05b6b173e1cd345cffe59d772f720942b1055"]

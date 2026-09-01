@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 21,
+    "step": "dataflow-phase-2"
+  },
+  "action": "Extended mlpl-viz-flow (model/build/render/groups/lib), fncall_dataflow.rs extraction helpers, mlpl-viz re-exports, demos.toml. TDD via render_tests. Verified cached SVG from fresh binary.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-08-31T20:28:13"
+}
