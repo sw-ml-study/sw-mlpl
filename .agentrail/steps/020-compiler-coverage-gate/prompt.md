@@ -1,0 +1,1 @@
+Add docs/compiler-coverage.md + a gate test in mlpl-lower-rs asserting a pinned INTERPRETER_ONLY builtin set is disjoint from supported_builtin_names(), making the compile-vs-interpreter boundary visible and tested.
