@@ -1,10 +1,12 @@
 //! `dataflow(nodes, edges)` -- the structural SVG renderer builtin.
-//! `nodes` is a record with a `labels` string-list; `edges` is a
-//! record with `from` / `to` integer index arrays and an optional
-//! `labels` string-list. Extracts those record fields into plain
-//! slices and hands them to `mlpl_viz::render_dataflow`, returning the
-//! SVG string. Interpreter / web / `-f` only (a visualization surface,
-//! like `svg`); it does not lower on the compile-to-Rust path.
+//! `nodes` is a record with a `labels` string-list (plus optional
+//! `groups` id array and `highlight` 0/1 array); `edges` is a record
+//! with `from` / `to` integer index arrays (plus optional `labels`
+//! string-list, `widths` array, and `highlight` 0/1 array). Extracts
+//! those record fields into plain slices and hands them to
+//! `mlpl_viz::render_dataflow`, returning the SVG string. Interpreter /
+//! web / `-f` only (a visualization surface, like `svg`); it does not
+//! lower on the compile-to-Rust path.
 
 use std::collections::BTreeMap;
 
@@ -30,17 +32,27 @@ pub(crate) fn eval_dataflow(
     }
     let nodes_val = eval_expr(&args[0], env, trace)?;
     let edges_val = eval_expr(&args[1], env, trace)?;
-    let nodes = record_fields("dataflow: nodes", &nodes_val)?;
-    let edges = record_fields("dataflow: edges", &edges_val)?;
-    let labels = str_list("dataflow: nodes.labels", nodes.get("labels"))?;
-    let from = index_array("dataflow: edges.from", edges.get("from"))?;
-    let to = index_array("dataflow: edges.to", edges.get("to"))?;
-    let edge_labels = match edges.get("labels") {
-        Some(_) => str_list("dataflow: edges.labels", edges.get("labels"))?,
-        None => Vec::new(),
-    };
-    mlpl_viz::render_dataflow(&labels, &from, &to, &edge_labels)
-        .map_err(|e| EvalError::Unsupported(format!("dataflow: {e}")))
+    let n = record_fields("dataflow: nodes", &nodes_val)?;
+    let e = record_fields("dataflow: edges", &edges_val)?;
+    let labels = str_list("dataflow: nodes.labels", n.get("labels"))?;
+    let groups = index_array("dataflow: nodes.groups", n.get("groups"))?;
+    let node_hl = bool_array("dataflow: nodes.highlight", n.get("highlight"))?;
+    let from = index_array("dataflow: edges.from", e.get("from"))?;
+    let to = index_array("dataflow: edges.to", e.get("to"))?;
+    let edge_labels = str_list("dataflow: edges.labels", e.get("labels"))?;
+    let widths = float_array("dataflow: edges.widths", e.get("widths"))?;
+    let edge_hl = bool_array("dataflow: edges.highlight", e.get("highlight"))?;
+    mlpl_viz::render_dataflow(&mlpl_viz::Dataflow {
+        labels: &labels,
+        from: &from,
+        to: &to,
+        edge_labels: &edge_labels,
+        groups: &groups,
+        node_highlight: &node_hl,
+        edge_widths: &widths,
+        edge_highlight: &edge_hl,
+    })
+    .map_err(|err| EvalError::Unsupported(format!("dataflow: {err}")))
 }
 
 /// A record value's fields, or a clear error.
@@ -51,9 +63,10 @@ fn record_fields<'a>(what: &str, v: &'a Value) -> Result<&'a BTreeMap<String, Va
     }
 }
 
-/// A record field that must be a `StrList`, cloned to a `Vec<String>`.
+/// An optional `StrList` field: absent -> empty, present -> its items.
 fn str_list(what: &str, v: Option<&Value>) -> Result<Vec<String>, EvalError> {
     match v {
+        None => Ok(Vec::new()),
         Some(Value::StrList { items }) => Ok(items.clone()),
         _ => Err(EvalError::Unsupported(format!(
             "{what} must be a string list"
@@ -61,25 +74,34 @@ fn str_list(what: &str, v: Option<&Value>) -> Result<Vec<String>, EvalError> {
     }
 }
 
-/// A record field that must be a numeric array of non-negative
-/// integers, converted to `Vec<usize>` node ids.
+/// An optional numeric array field of non-negative integers -> indices.
 fn index_array(what: &str, v: Option<&Value>) -> Result<Vec<usize>, EvalError> {
+    let nums = float_array(what, v)?;
+    nums.iter()
+        .map(|&x| {
+            if x >= 0.0 && x.fract() == 0.0 {
+                Ok(x as usize)
+            } else {
+                Err(EvalError::Unsupported(format!(
+                    "{what}: {x} is not a non-negative integer"
+                )))
+            }
+        })
+        .collect()
+}
+
+/// An optional numeric array field -> its values (absent -> empty).
+fn float_array(what: &str, v: Option<&Value>) -> Result<Vec<f64>, EvalError> {
     match v {
-        Some(Value::Array(a)) => a
-            .data()
-            .iter()
-            .map(|&x| {
-                if x >= 0.0 && x.fract() == 0.0 {
-                    Ok(x as usize)
-                } else {
-                    Err(EvalError::Unsupported(format!(
-                        "{what}: {x} is not a non-negative integer"
-                    )))
-                }
-            })
-            .collect(),
+        None => Ok(Vec::new()),
+        Some(Value::Array(a)) => Ok(a.data().to_vec()),
         _ => Err(EvalError::Unsupported(format!(
-            "{what} must be an integer array"
+            "{what} must be a numeric array"
         ))),
     }
+}
+
+/// An optional 0/1 array field -> per-element flags (nonzero = true).
+fn bool_array(what: &str, v: Option<&Value>) -> Result<Vec<bool>, EvalError> {
+    Ok(float_array(what, v)?.iter().map(|&x| x != 0.0).collect())
 }

@@ -7,7 +7,7 @@ pub use crate::gallery::render_gallery;
 pub use crate::gallery_overlay::render_attention_overlay;
 pub use mlpl_viz_analysis::{render_critical_dimensions, render_decision_boundary};
 pub use mlpl_viz_core::VizError;
-pub use mlpl_viz_flow::render_dataflow;
+pub use mlpl_viz_flow::{Dataflow, render_dataflow};
 pub use mlpl_viz_marks::{
     render_bar, render_heatmap, render_heatmap_grid, render_life, render_line, render_scatter,
     render_scatter3d, render_waffle,

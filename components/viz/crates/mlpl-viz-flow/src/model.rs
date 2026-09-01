@@ -1,11 +1,12 @@
 //! Typed model for the dataflow renderer: a validated graph and its
-//! laid-out positions. Phase 1 carries node labels + directed edges
-//! (with optional per-edge labels); groups / widths / highlight are
-//! later phases (docs/dataflow-renderer-design.md).
+//! laid-out positions. Node labels + directed edges (optional per-edge
+//! labels), plus the Phase 2 channels -- node groups, per-node and
+//! per-edge highlight, and per-edge width (docs/dataflow-renderer-design.md).
 
 /// A validated dataflow graph. Node ids are indices into `labels`;
-/// every edge endpoint is in range and `edge_labels` is either empty
-/// or one-per-edge (guaranteed by `build`).
+/// every edge endpoint is in range, and each optional channel is either
+/// empty (unused) or exactly one-per-node / one-per-edge (guaranteed by
+/// `build`).
 pub struct Graph {
     /// One box label per node; index = node id.
     pub labels: Vec<String>,
@@ -13,6 +14,14 @@ pub struct Graph {
     pub edges: Vec<(usize, usize)>,
     /// Per-edge label, or empty for none.
     pub edge_labels: Vec<String>,
+    /// Group id per node (same id -> banded together), or empty.
+    pub groups: Vec<usize>,
+    /// Per-node highlight flag, or empty.
+    pub node_highlight: Vec<bool>,
+    /// Per-edge stroke width, or empty for the default.
+    pub edge_widths: Vec<f64>,
+    /// Per-edge highlight flag, or empty.
+    pub edge_highlight: Vec<bool>,
 }
 
 /// A graph with a pixel position assigned to every node, plus the

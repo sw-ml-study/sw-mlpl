@@ -887,12 +887,13 @@ lines = [
 [[demos]]
 category = "Basics"
 name = "Dataflow Diagram"
-intro = "dataflow(nodes, edges) draws STRUCTURE, not quantity: labelled boxes and directed edges for a layered pipeline -- the memory / pipeline diagram a line chart cannot show. Here, an SPM stream: storage -> FIFO -> lanes -> accumulators."
-takeaway = "nodes is a record with a labels list; edges is a record with from/to index arrays plus optional edge labels. dataflow lays the graph out left-to-right by longest path and emits an SVG. The same facility draws transformer blocks, autograd graphs, and compiler passes."
+intro = "dataflow(nodes, edges) draws STRUCTURE, not quantity: labelled boxes and directed edges for a layered pipeline -- the memory / pipeline diagram a line chart cannot show. Here, an SPM stream: storage -> FIFO -> lanes -> accumulators, with the memory and result stages GROUPED, edge WIDTHS telling the occupancy story, and the final stage HIGHLIGHTED."
+takeaway = "nodes is a record with a labels list (plus optional groups + highlight); edges is a record with from/to index arrays (plus optional labels, widths, highlight). dataflow lays the graph out left-to-right by longest path and emits an SVG. The same facility draws transformer blocks, autograd graphs, and compiler passes."
 lines = [
-    "nodes = {labels: [\"storage\", \"FIFO\", \"lanes\", \"accumulators\"]}",
-    "edges = {from: [0, 1, 2], to: [1, 2, 3], labels: [\"stream\", \"issue\", \"reduce\"]}",
-    "dataflow(nodes, edges)      # -> an SVG diagram of the pipeline",
+    "labels = [\"storage\", \"FIFO\", \"lanes\", \"accumulators\"]",
+    "nodes = {labels: labels, groups: [0, 1, 1, 2], highlight: [0, 0, 0, 1]}   # group the memory + result stages; highlight the sink",
+    "edges = {from: [0, 1, 2], to: [1, 2, 3], labels: [\"stream\", \"issue\", \"reduce\"], widths: [4, 2, 1], highlight: [1, 0, 0]}",
+    "dataflow(nodes, edges)      # -> an SVG: bands, arrow widths, a highlighted node + edge",
 ]
 
 [[demos]]

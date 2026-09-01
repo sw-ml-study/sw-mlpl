@@ -1,61 +1,68 @@
-//! Validate plain slices into a typed [`Graph`]. The MLPL-record
-//! extraction (record fields -> these slices) lives one layer up in
+//! Validate a [`Dataflow`] spec into a typed [`Graph`]. The MLPL-record
+//! extraction (record fields -> the spec slices) lives one layer up in
 //! `mlpl-eval`; this crate stays free of the interpreter value model.
 
 use mlpl_viz_core::VizError;
 
+use crate::Dataflow;
 use crate::model::Graph;
 
-/// Build a validated graph from node labels, edge endpoints, and
-/// optional per-edge labels. Errors (never panics) on an empty graph,
-/// a `from`/`to`/`edge_labels` length mismatch, or an out-of-range
-/// endpoint.
-pub fn build(
-    labels: &[String],
-    from: &[usize],
-    to: &[usize],
-    edge_labels: &[String],
-) -> Result<Graph, VizError> {
-    validate(labels, from, to, edge_labels)?;
+/// Build a validated graph, or a clean `VizError` (never a panic) on an
+/// empty graph, a length mismatch, or an out-of-range endpoint.
+pub fn build(d: &Dataflow) -> Result<Graph, VizError> {
+    validate_edges(d)?;
+    validate_channels(d)?;
     Ok(Graph {
-        labels: labels.to_vec(),
-        edges: from.iter().copied().zip(to.iter().copied()).collect(),
-        edge_labels: edge_labels.to_vec(),
+        labels: d.labels.to_vec(),
+        edges: d.from.iter().copied().zip(d.to.iter().copied()).collect(),
+        edge_labels: d.edge_labels.to_vec(),
+        groups: d.groups.to_vec(),
+        node_highlight: d.node_highlight.to_vec(),
+        edge_widths: d.edge_widths.to_vec(),
+        edge_highlight: d.edge_highlight.to_vec(),
     })
 }
 
-/// The four validity checks: at least one node, matching `from`/`to`
-/// lengths, an edge-label count that is 0 or one-per-edge, and every
-/// endpoint in range.
-fn validate(
-    labels: &[String],
-    from: &[usize],
-    to: &[usize],
-    edge_labels: &[String],
-) -> Result<(), VizError> {
-    let bad = |m: String| Err(VizError::InvalidShape(m));
-    if labels.is_empty() {
+fn bad<T>(m: String) -> Result<T, VizError> {
+    Err(VizError::InvalidShape(m))
+}
+
+/// A non-empty node set, matching `from`/`to` lengths, a `0`-or-per-edge
+/// label count, and every endpoint in range.
+fn validate_edges(d: &Dataflow) -> Result<(), VizError> {
+    if d.labels.is_empty() {
         return bad("dataflow needs at least one node".into());
     }
-    if from.len() != to.len() {
+    if d.from.len() != d.to.len() {
         return bad(format!(
             "dataflow edges: from has {} entries, to has {}",
-            from.len(),
-            to.len()
+            d.from.len(),
+            d.to.len()
         ));
     }
-    if !edge_labels.is_empty() && edge_labels.len() != from.len() {
-        return bad(format!(
-            "dataflow edge labels: {} labels for {} edges",
-            edge_labels.len(),
-            from.len()
-        ));
-    }
-    if let Some(id) = from.iter().chain(to).find(|&&id| id >= labels.len()) {
+    check_len("edge labels", d.edge_labels.len(), d.from.len())?;
+    if let Some(id) = d.from.iter().chain(d.to).find(|&&id| id >= d.labels.len()) {
         return bad(format!(
             "dataflow edge endpoint {id} is out of range (only {} nodes)",
-            labels.len()
+            d.labels.len()
         ));
     }
     Ok(())
+}
+
+/// Each optional channel is empty or exactly one-per-node / one-per-edge.
+fn validate_channels(d: &Dataflow) -> Result<(), VizError> {
+    check_len("groups", d.groups.len(), d.labels.len())?;
+    check_len("node highlight", d.node_highlight.len(), d.labels.len())?;
+    check_len("edge widths", d.edge_widths.len(), d.from.len())?;
+    check_len("edge highlight", d.edge_highlight.len(), d.from.len())
+}
+
+/// An optional channel is valid when empty or exactly `expected` long.
+fn check_len(what: &str, got: usize, expected: usize) -> Result<(), VizError> {
+    if got == 0 || got == expected {
+        Ok(())
+    } else {
+        bad(format!("dataflow {what}: {got} entries for {expected}"))
+    }
 }

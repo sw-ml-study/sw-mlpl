@@ -1,22 +1,28 @@
 //! `render_dataflow` end to end: layout + SVG structure for a chain, a
-//! residual skip, and the error shapes (docs/dataflow-renderer-design.md).
+//! residual skip, the Phase-2 channels (groups / widths / highlight),
+//! and the error shapes (docs/dataflow-renderer-design.md).
 
-use mlpl_viz_flow::render_dataflow;
+use mlpl_viz_flow::{Dataflow, render_dataflow};
 
 fn lbls(xs: &[&str]) -> Vec<String> {
     xs.iter().map(|s| (*s).to_string()).collect()
 }
 
 #[test]
-fn renders_a_chain_with_boxes_edges_and_labels() {
-    let svg = render_dataflow(
-        &lbls(&["storage", "FIFO", "lanes"]),
-        &[0, 1],
-        &[1, 2],
-        &lbls(&["stream", "issue"]),
-    )
+fn renders_a_chain_with_boxes_edges_labels_and_a_sized_svg() {
+    let labels = lbls(&["storage", "FIFO", "lanes"]);
+    let edge_labels = lbls(&["stream", "issue"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0, 1],
+        to: &[1, 2],
+        edge_labels: &edge_labels,
+        ..Default::default()
+    })
     .unwrap();
     assert!(svg.starts_with("<svg") && svg.ends_with("</svg>"));
+    // The bug fix: an explicit width/height so the inline SVG is sized.
+    assert!(svg.contains("width=\"") && svg.contains("height=\""));
     assert_eq!(svg.matches("<rect").count(), 1 + 3); // background + 3 nodes
     assert_eq!(svg.matches("<polyline").count(), 2); // 2 edges
     assert!(svg.contains("storage") && svg.contains("stream"));
@@ -25,16 +31,68 @@ fn renders_a_chain_with_boxes_edges_and_labels() {
 
 #[test]
 fn a_residual_skip_edge_spans_two_layers() {
-    // 0->1->2 plus a skip 0->2: node 2 lands in layer 2 (longest path),
-    // so the skip edge is a long forward arrow.
-    let svg = render_dataflow(&lbls(&["a", "b", "c"]), &[0, 1, 0], &[1, 2, 2], &[]).unwrap();
+    let labels = lbls(&["a", "b", "c"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0, 1, 0],
+        to: &[1, 2, 2],
+        ..Default::default()
+    })
+    .unwrap();
     assert_eq!(svg.matches("<polyline").count(), 3);
 }
 
 #[test]
+fn groups_widths_and_highlight_render() {
+    let labels = lbls(&["a", "b", "c"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0, 1],
+        to: &[1, 2],
+        groups: &[0, 1, 1],
+        node_highlight: &[false, false, true],
+        edge_widths: &[3.0, 1.0],
+        edge_highlight: &[true, false],
+        ..Default::default()
+    })
+    .unwrap();
+    // Two distinct group ids -> two band rects (plus bg + 3 nodes = 5).
+    assert_eq!(svg.matches("<rect").count(), 2 + 1 + 3);
+    assert!(svg.contains("fill-opacity=\"0.10\"")); // a band
+    assert!(svg.contains("stroke-width=\"3\"")); // the wide edge
+    assert!(svg.contains("url(#awh)")); // the highlighted edge marker
+}
+
+#[test]
 fn errors_are_clean_not_panics() {
-    assert!(render_dataflow(&[], &[], &[], &[]).is_err()); // no nodes
-    assert!(render_dataflow(&lbls(&["a", "b"]), &[0], &[0, 1], &[]).is_err()); // from/to mismatch
-    assert!(render_dataflow(&lbls(&["a"]), &[0], &[5], &[]).is_err()); // endpoint out of range
-    assert!(render_dataflow(&lbls(&["a", "b"]), &[0], &[1], &lbls(&["x", "y"])).is_err()); // labels
+    let two = lbls(&["a", "b"]);
+    assert!(render_dataflow(&Dataflow::default()).is_err()); // no nodes
+    assert!(
+        render_dataflow(&Dataflow {
+            labels: &two,
+            from: &[0],
+            to: &[0, 1],
+            ..Default::default()
+        })
+        .is_err()
+    );
+    let one = lbls(&["a"]);
+    assert!(
+        render_dataflow(&Dataflow {
+            labels: &one,
+            from: &[0],
+            to: &[5],
+            ..Default::default()
+        })
+        .is_err()
+    );
+    // A channel length mismatch is a clean error too.
+    assert!(
+        render_dataflow(&Dataflow {
+            labels: &two,
+            groups: &[0],
+            ..Default::default()
+        })
+        .is_err()
+    );
 }
