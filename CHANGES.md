@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-31
 
+- chore(agentrail): complete 017-docs-freshness-and-compact-demo; queue dataflow-svg-renderer
+- chore(pages): rebuild for Compact Idioms demo + doc updates
+- docs(freshness): infix/unary-minus/at/qualified-ref docs + Compact Idioms demo
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 016-at-indexing-builtin; queue dataflow-svg-renderer
 - feat(array): at(v, i) vector-indexing builtin (interp + compiler)
 - docs(changes): refresh CHANGES.md to HEAD
