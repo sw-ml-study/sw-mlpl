@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-08-31
+
+- chore(agentrail): complete 015-emufpga-broadcast-and-disp-docs; queue at-indexing-builtin
+- feat(array): length-1 arrays broadcast like scalars; clarify disp docs
+
 ## 2026-08-28
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 014-namespace-qualified-refs; queue namespace-compiled-lowering
 - feat(eval): generalize first-class refs from :u:name to :namespace:name
 
