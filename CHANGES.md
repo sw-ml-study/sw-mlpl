@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-31
 
+- docs(glossary): document at(v, idx) in the take entry
+- chore(pages): rebuild for dataflow renderer + demo
+- feat(demos): add a Dataflow Diagram demo (SPM pipeline) + README count 96
+- feat(viz): dataflow(nodes, edges) structural SVG renderer (Phase 1)
+- docs(viz): design the dataflow(nodes, edges) structural SVG renderer
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 017-docs-freshness-and-compact-demo; queue dataflow-svg-renderer
 - chore(pages): rebuild for Compact Idioms demo + doc updates
 - docs(freshness): infix/unary-minus/at/qualified-ref docs + Compact Idioms demo
