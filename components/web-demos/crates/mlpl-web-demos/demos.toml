@@ -885,6 +885,17 @@ lines = [
 ]
 
 [[demos]]
+category = "Basics"
+name = "Dataflow Diagram"
+intro = "dataflow(nodes, edges) draws STRUCTURE, not quantity: labelled boxes and directed edges for a layered pipeline -- the memory / pipeline diagram a line chart cannot show. Here, an SPM stream: storage -> FIFO -> lanes -> accumulators."
+takeaway = "nodes is a record with a labels list; edges is a record with from/to index arrays plus optional edge labels. dataflow lays the graph out left-to-right by longest path and emits an SVG. The same facility draws transformer blocks, autograd graphs, and compiler passes."
+lines = [
+    "nodes = {labels: [\"storage\", \"FIFO\", \"lanes\", \"accumulators\"]}",
+    "edges = {from: [0, 1, 2], to: [1, 2, 3], labels: [\"stream\", \"issue\", \"reduce\"]}",
+    "dataflow(nodes, edges)      # -> an SVG diagram of the pipeline",
+]
+
+[[demos]]
 category = "Vision"
 name = "CNN (simple)"
 intro = "A convolutional neural network pipeline on a tiny 8x8 synthetic image. Shows how conv2d shrinks the spatial dimensions while relu clips negatives and pool2d downsamples. The shapes are the story: [1,1,8,8] -> conv2d -> [1,2,6,6] -> relu -> pool2d -> [1,2,3,3] -> conv2d -> [1,4,1,1] -> reshape -> [4]."
