@@ -1,4 +1,4 @@
-number = 19
+number = 20
 slug = "du-list-fs"
 status = "pending"
 description = "Lower du's builtins: list_len/1, list_get/2 (StrList ops), fs_walk (sandboxed..."

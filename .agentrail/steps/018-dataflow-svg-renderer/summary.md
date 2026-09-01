@@ -1,0 +1,1 @@
+dataflow(nodes, edges) structural SVG renderer Phase 1 shipped + demo'd live: new mlpl-viz-flow crate (model/build/layout/render), longest-path layered layout, boxes+directed edges+edge labels, interpreter builtin (viz surface, not compiled), clean VizErrors. Dataflow Diagram web demo (SPM pipeline) added + deployed. Phase 2 (groups/widths/highlight) queued.
