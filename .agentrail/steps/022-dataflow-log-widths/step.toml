@@ -1,9 +1,10 @@
 number = 22
 slug = "dataflow-log-widths"
-status = "in-progress"
+status = "completed"
 description = "Dataflow renderer log-width channel (../emufpga ask): add opt-in width_scale ..."
 role = "production"
 context_files = []
 created_at = "2026-09-01T09:00:37"
+completed_at = "2026-09-01T09:06:45"
 task_type = "feature"
-commits = []
+commits = ["7b9b800deb551235aa6ccbd9b73b7d8ce21a23df"]
