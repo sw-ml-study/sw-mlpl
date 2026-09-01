@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-08-31
 
+- chore(agentrail): complete 021-dataflow-phase-2; queue du-list-fs
+- feat(viz): dataflow renderer Phase 2 -- group bands, edge widths, highlight + inline-size fix
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 020-compiler-coverage-gate; queue dataflow-phase-2
 - feat(compiler): coverage gate + docs/compiler-coverage.md
 - docs(changes): refresh CHANGES.md to HEAD
