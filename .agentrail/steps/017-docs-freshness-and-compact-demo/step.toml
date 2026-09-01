@@ -1,0 +1,9 @@
+number = 17
+slug = "docs-freshness-and-compact-demo"
+status = "in-progress"
+description = "Doc-freshness sweep for recent changes: fix stale 'no unary minus' claim (apl..."
+role = "production"
+context_files = []
+created_at = "2026-08-31T19:11:56"
+task_type = "docs"
+commits = []

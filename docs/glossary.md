@@ -1203,10 +1203,14 @@ MLPL keywords (`train`, `repeat`, `experiment`, `for`,
 `mlpl_runtime::runtime_builtin_names()`). Live user-bound
 variable / model names are not included.
 
-## Comparison ops: `gt`, `lt`, `eq` (builtins)
+## Comparison ops: `gt`, `lt`, `eq`, `ge`, `le`, `ne` (builtins)
 
-Elementwise predicates returning `0.0` / `1.0`. `gt(a, b)`,
-`lt(a, b)`, `eq(a, b)`. MLPL has no boolean type -- the
+Elementwise predicates returning `0.0` / `1.0`: `gt(a, b)`,
+`lt(a, b)`, `eq(a, b)`, and their partners `ge` (>=), `le`
+(<=), `ne` (!=). Each also has an INFIX spelling -- `a > b`,
+`a < b`, `a == b`, `a >= b`, `a <= b`, `a != b` -- which binds
+looser than arithmetic, so `sums == 3` is `eq(sums, 3)` and
+`a + b > c` is `(a + b) > c`. MLPL has no boolean type -- the
 `0 / 1` floats double as masks (multiply to filter) and
 counts (`reduce_add` to sum a "how many true" tally).
 
@@ -4094,15 +4098,19 @@ together as the LoRA freeze / unfreeze pair.
 
 ## User-function reference (`:u:name`)
 
-The quoted form of YOUR function: `:u:zscore` is a first-class
-value (kind `user-fn-ref`) that identifies the definition
-without running it. Bind it (`f = :u:zscore`), store it in
-record registries, pass and return it, invoke it with
-[[call (builtin)]] or the Result combinators. Late binding:
-the reference resolves the name at call time, so re-defining
-the function updates what existing references run. Completes
-the three-kinds-of-name story beside [[BuiltinRef (`:foo`
-syntax)]].
+The quoted form of a QUALIFIED (`namespace:name`) function:
+`:u:zscore` is a first-class value (kind `user-fn-ref`) that
+identifies the definition without running it. The namespace is
+not limited to `u:` -- any qualified reference works, so a
+library or provider function is `:result:zip` or
+`:math:double` (bare-application functions live under `u:`, and
+`:name` with no inner colon is a builtin reference). Bind it
+(`f = :u:zscore`), store it in record registries, pass and
+return it, invoke it with [[call (builtin)]] or the Result
+combinators. Late binding: the reference resolves the name at
+call time, so re-defining the function updates what existing
+references run. Completes the three-kinds-of-name story beside
+[[BuiltinRef (`:foo` syntax)]].
 
 ## Universal Approximation
 

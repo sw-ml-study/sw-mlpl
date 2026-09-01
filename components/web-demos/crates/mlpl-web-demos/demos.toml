@@ -870,6 +870,21 @@ lines = [
 ]
 
 [[demos]]
+category = "Basics"
+name = "Compact Idioms"
+intro = "The infix, indexing, and broadcasting shorthands that keep MLPL terse without APL's glyphs: comparison operators as 0/1 masks, at() to read one element, and length-1 broadcasting so an indexed value meets a vector directly. Descriptive names stay for the array operations; the universal ones read conventionally."
+takeaway = "Comparisons are infix and yield masks (reduce_add to count, multiply to filter); at(v, i) reads element i as a scalar (== take(v, 0, i)); a single-element array broadcasts like a scalar. That is the whole compactness story -- conventional notation for the universal operations, names for the special ones."
+lines = [
+    "v = [3, 1, 4, 1, 5]         # a vector to poke at",
+    "v > 3                       # infix comparison -> the 0/1 mask [0, 0, 1, 0, 1]",
+    "reduce_add(v > 3, 0)        # count how many exceed 3 -> 2",
+    "v * (v >= 4)                # multiply by a mask to keep only the >= 4 entries",
+    "at(v, 2)                    # element 2 as a scalar (== take(v, 0, 2)) -> 4",
+    "at(v, 0) * v                # at returns a scalar-like value; it broadcasts across v",
+    "-v                          # unary minus negates every element",
+]
+
+[[demos]]
 category = "Vision"
 name = "CNN (simple)"
 intro = "A convolutional neural network pipeline on a tiny 8x8 synthetic image. Shows how conv2d shrinks the spatial dimensions while relu clips negatives and pool2d downsamples. The shapes are the story: [1,1,8,8] -> conv2d -> [1,2,6,6] -> relu -> pool2d -> [1,2,3,3] -> conv2d -> [1,4,1,1] -> reshape -> [4]."

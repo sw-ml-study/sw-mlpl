@@ -1,0 +1,1 @@
+Doc-freshness sweep for recent changes: fix stale 'no unary minus' claim (apl2-idioms), update glossary comparison-ops (infix + ge/le/ne) and qualified-reference (:ns:name) sections, add a Compact Idioms Basics demo (infix comparison masks, at(), length-1 broadcast), bump README demo count 94->95.

@@ -67,9 +67,9 @@ compress(eq(v, 0), range(tally(v)))
 # APL2:  2⌽V         (cyclic left rotation by two)
 rotate(v, 2, 0)
 
-# APL2:  ¯1⌽V        (rotate the other way; MLPL has no unary
-#                     minus literal -- spell it 0 - 1)
-rotate(v, 0 - 1, 0)
+# APL2:  ¯1⌽V        (rotate the other way; MLPL's unary minus
+#                     writes the negative literal directly)
+rotate(v, -1, 0)
 
 # ---------- grade: sorting without moving data ----------
 
