@@ -5,7 +5,8 @@
 use crate::env_api::*;
 use mlpl_parser::Expr;
 
-use crate::experiment::{ExperimentRecord, read_records_from_disk};
+use crate::experiment::ExperimentRecord;
+use crate::experiment_store::read_records_from_disk;
 
 /// `experiment_metric("name")`: one recorded metric across the
 /// in-memory experiment log as a `[runs]` vector, in run order.

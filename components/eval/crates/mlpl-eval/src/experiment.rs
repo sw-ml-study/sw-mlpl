@@ -3,8 +3,6 @@
 //! `:experiments` / `compare()` (Saga 12 step 008).
 
 use crate::env_api::*;
-use std::collections::BTreeMap;
-use std::path::Path;
 
 use mlpl_array::DenseArray;
 use mlpl_parser::Expr;
@@ -29,8 +27,8 @@ pub(crate) fn eval_experiment(
     for stmt in body {
         last = crate::eval::eval_expr(stmt, env, trace)?.into_array()?;
     }
-    let metrics = collect_metrics(env);
-    let params_snapshot = collect_param_shapes(env);
+    let metrics = crate::experiment_store::collect_metrics(env);
+    let params_snapshot = crate::experiment_store::collect_param_shapes(env);
     let record = ExperimentRecord {
         name: name.to_string(),
         timestamp_ns,
@@ -38,7 +36,7 @@ pub(crate) fn eval_experiment(
         params_snapshot,
     };
     if let Some(dir) = env.exp_dir().cloned() {
-        write_record_to_disk(&dir, &record)
+        crate::experiment_store::write_record_to_disk(&dir, &record)
             .map_err(|e| EvalError::Unsupported(format!("experiment: {e}")))?;
     }
     env.push_experiment_log(record);
@@ -66,64 +64,6 @@ fn experiment_timestamp_ns() -> u128 {
     COUNTER.fetch_add(1, Ordering::Relaxed) as u128
 }
 
-fn collect_metrics(env: &Environment) -> BTreeMap<String, f64> {
-    let mut out = BTreeMap::new();
-    for (name, arr) in env.vars_iter() {
-        if name.ends_with("_metric") && arr.rank() == 0 {
-            out.insert(name.clone(), arr.data()[0]);
-        }
-    }
-    out
-}
-
-fn collect_param_shapes(env: &Environment) -> BTreeMap<String, ParamShape> {
-    let mut out = BTreeMap::new();
-    for (name, arr) in env.params() {
-        out.insert(
-            name.clone(),
-            ParamShape {
-                shape: arr.shape().dims().to_vec(),
-                labels: arr.labels().map(<[_]>::to_vec),
-            },
-        );
-    }
-    out
-}
-
-fn write_record_to_disk(dir: &Path, rec: &ExperimentRecord) -> Result<(), String> {
-    let run_dir = dir.join(&rec.name).join(rec.timestamp_ns.to_string());
-    std::fs::create_dir_all(&run_dir)
-        .map_err(|e| format!("creating {}: {e}", run_dir.display()))?;
-    let json = serde_json::to_string_pretty(rec).map_err(|e| format!("serializing record: {e}"))?;
-    std::fs::write(run_dir.join("run.json"), json).map_err(|e| format!("writing run.json: {e}"))?;
-    Ok(())
-}
-
-/// Walk `<exp_dir>/*/*/run.json` and return every record that
-/// deserializes cleanly. Malformed `run.json` files are skipped
-/// silently -- a future step can wire up a warning channel.
-pub(crate) fn read_records_from_disk(dir: &Path) -> Vec<ExperimentRecord> {
-    let mut out = Vec::new();
-    let Ok(name_dirs) = std::fs::read_dir(dir) else {
-        return out;
-    };
-    for name_entry in name_dirs.flatten() {
-        let Ok(ts_dirs) = std::fs::read_dir(name_entry.path()) else {
-            continue;
-        };
-        for ts_entry in ts_dirs.flatten() {
-            let run_json = ts_entry.path().join("run.json");
-            let Ok(body) = std::fs::read_to_string(&run_json) else {
-                continue;
-            };
-            if let Ok(rec) = serde_json::from_str::<ExperimentRecord>(&body) {
-                out.push(rec);
-            }
-        }
-    }
-    out
-}
-
 /// Produce the `:experiments` REPL output: merges
 /// `env.experiment_log` (memory) with any on-disk records under
 /// `env.exp_dir`, sorts by `timestamp_ns`, and prints one line per
@@ -131,7 +71,7 @@ pub(crate) fn read_records_from_disk(dir: &Path) -> Vec<ExperimentRecord> {
 pub fn format_registry(env: &crate::env::Environment) -> String {
     let mut all: Vec<ExperimentRecord> = env.experiment_log().to_vec();
     if let Some(dir) = env.exp_dir() {
-        all.extend(read_records_from_disk(dir));
+        all.extend(crate::experiment_store::read_records_from_disk(dir));
     }
     if all.is_empty() {
         return "(no experiments recorded)".into();
