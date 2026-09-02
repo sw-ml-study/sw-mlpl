@@ -1,0 +1,10 @@
+number = 29
+slug = "checklist-paydown-2-eval-module-splits"
+status = "completed"
+description = "Checklist paydown batch 2: split mlpl-eval modules to <=4 functions with head..."
+role = "production"
+context_files = []
+created_at = "2026-09-02T14:41:08"
+completed_at = "2026-09-02T15:34:32"
+task_type = "refactor"
+commits = ["9fa65d3a545176b8cdb28feb76a3380c6d548f9d"]

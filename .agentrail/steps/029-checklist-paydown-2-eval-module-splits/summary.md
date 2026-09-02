@@ -1,0 +1,1 @@
+No-op deferral: next auto-selected this du-list-fs step; active work is the checklist-paydown series. No du-list-fs work done here.

@@ -1,0 +1,9 @@
+number = 31
+slug = "du-list-fs"
+status = "pending"
+description = "Lower du builtins to compile-to-Rust: list_len/1, list_get/2 (StrList ops), f..."
+role = "production"
+context_files = []
+created_at = "2026-09-02T15:34:14"
+task_type = "feature"
+commits = []

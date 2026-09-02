@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 30,
+    "step": "du-list-fs"
+  },
+  "action": "Split grad_optim_resident into _adam/_momentum siblings (pub(crate) backend_lost/grads_all); split experiment into experiment_store; rewired experiment_compare import; mod decls in lib.rs; cargo build+clippy clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-02T16:36:33"
+}

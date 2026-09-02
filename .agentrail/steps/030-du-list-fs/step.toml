@@ -1,9 +1,10 @@
-number = 29
+number = 30
 slug = "du-list-fs"
-status = "pending"
+status = "completed"
 description = "Lower du's builtins: list_len/1, list_get/2 (StrList ops), fs_walk (sandboxed..."
 role = "legacy"
 context_files = []
 created_at = "2026-08-17T16:15:57"
+completed_at = "2026-09-02T16:36:33"
 task_type = "feature"
-commits = []
+commits = ["401098e96277c24f40dda676b97e7c96a465ee05"]
