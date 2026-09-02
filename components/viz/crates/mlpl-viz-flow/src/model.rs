@@ -25,6 +25,10 @@ pub struct Graph {
     /// Interpret `edge_widths` on a log scale (honest for extreme
     /// ratios) instead of clamped-linear.
     pub width_log: bool,
+    /// Caller override for the minimum column gap (0 = use `COL_GAP`).
+    pub col_gap: i32,
+    /// Caller override for the row gap (0 = use `ROW_GAP`).
+    pub row_gap: i32,
 }
 
 /// A graph with a pixel position assigned to every node, plus the
@@ -36,6 +40,9 @@ pub struct Positioned {
     pub pos: Vec<(i32, i32)>,
     /// Box width per node, fitted to the label (>= `NODE_W`).
     pub node_w: Vec<i32>,
+    /// Per-edge label anchor `(x, y)`; forward-edge labels sit in the
+    /// first column gap after the source (always clear of boxes).
+    pub label_at: Vec<(i32, i32)>,
     /// Per-edge back-edge flag (a recurrence): drawn dashed through the
     /// bottom lane and excluded from layering.
     pub back: Vec<bool>,

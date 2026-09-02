@@ -43,6 +43,11 @@ pub(crate) fn eval_dataflow(
     let widths = float_array("dataflow: edges.widths", e.get("widths"))?;
     let edge_hl = bool_array("dataflow: edges.highlight", e.get("highlight"))?;
     let width_log = width_scale("dataflow: edges.width_scale", e.get("width_scale"))?;
+    let scalar = |what, v| {
+        Ok::<i32, EvalError>(float_array(what, v)?.first().copied().unwrap_or(0.0) as i32)
+    };
+    let col_gap = scalar("dataflow: nodes.col_gap", n.get("col_gap"))?;
+    let row_gap = scalar("dataflow: nodes.row_gap", n.get("row_gap"))?;
     mlpl_viz::render_dataflow(&mlpl_viz::Dataflow {
         labels: &labels,
         from: &from,
@@ -53,6 +58,8 @@ pub(crate) fn eval_dataflow(
         edge_widths: &widths,
         edge_highlight: &edge_hl,
         width_log,
+        col_gap,
+        row_gap,
     })
     .map_err(|err| EvalError::Unsupported(format!("dataflow: {err}")))
 }

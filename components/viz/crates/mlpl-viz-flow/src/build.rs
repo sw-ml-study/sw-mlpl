@@ -21,6 +21,8 @@ pub fn build(d: &Dataflow) -> Result<Graph, VizError> {
         edge_widths: d.edge_widths.to_vec(),
         edge_highlight: d.edge_highlight.to_vec(),
         width_log: d.width_log,
+        col_gap: d.col_gap,
+        row_gap: d.row_gap,
     })
 }
 

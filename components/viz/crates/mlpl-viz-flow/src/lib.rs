@@ -39,6 +39,11 @@ pub struct Dataflow<'a> {
     /// Interpret `edge_widths` on a log scale so extreme ratios read as
     /// an orders-of-magnitude contrast; default is clamped-linear.
     pub width_log: bool,
+    /// Override the minimum column gap in px (0 = default). Auto-widening
+    /// to fit long edge labels still applies as a floor.
+    pub col_gap: i32,
+    /// Override the row gap in px (0 = default).
+    pub row_gap: i32,
 }
 
 /// Render a [`Dataflow`] to an SVG string. Errors (never panics) on an

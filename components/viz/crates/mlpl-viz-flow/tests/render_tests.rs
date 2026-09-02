@@ -72,6 +72,41 @@ fn a_long_edge_label_widens_its_column_gap() {
 }
 
 #[test]
+fn col_gap_override_widens_the_canvas() {
+    let labels = lbls(&["a", "b"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0],
+        to: &[1],
+        col_gap: 200,
+        ..Default::default()
+    })
+    .unwrap();
+    // Canvas = 24*2 + 128 + 128 + 200 = 504 (default would be 400).
+    assert!(svg.contains("width=\"504\""));
+}
+
+#[test]
+fn a_skip_edge_label_lands_in_the_gap_not_on_the_passed_box() {
+    let labels = lbls(&["a", "b", "c"]);
+    // a->b, b->c, and a->c (skips column 1, where box b sits).
+    let edge_labels = lbls(&["", "", "skip"]);
+    let svg = render_dataflow(&Dataflow {
+        labels: &labels,
+        from: &[0, 1, 0],
+        to: &[1, 2, 2],
+        edge_labels: &edge_labels,
+        ..Default::default()
+    })
+    .unwrap();
+    // The label sits at the center of the first gap (x = 24 + 128 + 96/2
+    // = 200), NOT at the a->c geometric midpoint (312), which is inside
+    // box b (248..376).
+    assert!(svg.contains(">skip</text>"));
+    assert!(svg.contains("x=\"200\" y=\"31\"")); // the skip label anchor
+}
+
+#[test]
 fn a_residual_skip_edge_spans_two_layers() {
     let labels = lbls(&["a", "b", "c"]);
     let svg = render_dataflow(&Dataflow {

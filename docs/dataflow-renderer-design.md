@@ -56,6 +56,8 @@ produces):
 | `labels` | `StrList` | yes | one box label per node; index = node id |
 | `groups` | `Array` (int) | no | group id per node (same id -> boxed together) |
 | `highlight` | `Array` (0/1) | no | 1 = draw the node in the highlight style |
+| `col_gap` | number | no | override the minimum column gap in px (auto-widening for long labels still applies as a floor) |
+| `row_gap` | number | no | override the row gap in px |
 | `ranks` | `Array` (int) | no | explicit layer override (else computed) |
 
 ### `edges`
@@ -128,11 +130,15 @@ palette `svg()` marks use), emitted as a string:
   Drawn first (under the nodes).
 - **Directed edge**: a polyline from the source box's right edge to the
   target box's left edge (elbow through the mid-x), ending in an
-  arrowhead via one shared `<marker>` def. `stroke-width` = the edge's
-  `widths` entry; highlighted edges swap the stroke token; back-edges
-  are dashed.
-- **Edge label**: `<text>` at the polyline midpoint with a small
-  background rect so it stays legible over other edges.
+  arrowhead via one shared fixed-size `<marker>` def (`markerUnits`
+  `userSpaceOnUse`, so a wide edge thickens the line, not the
+  arrowhead). `stroke-width` = the edge's `widths` entry; highlighted
+  edges swap the stroke token; back-edges are dashed.
+- **Edge label**: `<text>` on a small background plate, anchored at the
+  center of the first column gap after the source -- always clear of the
+  node boxes, so even a skip-edge label (whose edge routes past an
+  intermediate column) never lands on a box. The gap widens to fit the
+  widest label it holds.
 
 All geometry is integer-friendly and pre-computed in layout, so the
 render step is a straight data -> string map (no measurement round

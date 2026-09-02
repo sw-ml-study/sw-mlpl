@@ -26,17 +26,13 @@ pub fn render(p: &Positioned) -> String {
     group_bands(&mut s, p);
     let sw = stroke_widths(&p.graph);
     for (i, &(u, v)) in p.graph.edges.iter().enumerate() {
-        let width = sw.get(i).copied().unwrap_or(W_DEFAULT);
-        let hl = *p.graph.edge_highlight.get(i).unwrap_or(&false);
-        edge(
-            &mut s,
-            p,
-            (u, v),
-            p.graph.edge_labels.get(i).map(String::as_str),
-            width,
-            hl,
-            *p.back.get(i).unwrap_or(&false),
-        );
+        let style = EdgeStyle {
+            width: sw.get(i).copied().unwrap_or(W_DEFAULT),
+            highlight: *p.graph.edge_highlight.get(i).unwrap_or(&false),
+            back: *p.back.get(i).unwrap_or(&false),
+        };
+        let label = p.graph.edge_labels.get(i).map(String::as_str);
+        edge(&mut s, p, (u, v), label, style, p.label_at[i]);
     }
     for (id, label) in p.graph.labels.iter().enumerate() {
         node_box(
@@ -84,33 +80,45 @@ fn node_box(s: &mut String, (x, y): (i32, i32), w: i32, label: &str, hl: bool) {
     );
 }
 
+/// How one edge is stroked: width, highlight, and whether it is a
+/// back-edge (dashed rewind).
+struct EdgeStyle {
+    width: f64,
+    highlight: bool,
+    back: bool,
+}
+
 /// A directed edge: a forward elbow (source's right side to target's
 /// left), or a dashed "rewind" that loops through the bottom lane for a
 /// back-edge. Carries the arrowhead, stroke width, optional highlight
-/// color, and an optional label at the path's midpoint.
+/// color, and an optional label drawn at the precomputed `at` anchor.
 fn edge(
     s: &mut String,
     p: &Positioned,
     (u, v): (usize, usize),
     label: Option<&str>,
-    w: f64,
-    hl: bool,
-    back: bool,
+    style: EdgeStyle,
+    at: (i32, i32),
 ) {
-    let (stroke, marker) = if hl { (HL, "awh") } else { (EDGE, "aw") };
-    let dash = if back {
+    let (stroke, marker) = if style.highlight {
+        (HL, "awh")
+    } else {
+        (EDGE, "aw")
+    };
+    let dash = if style.back {
         " stroke-dasharray=\"6 4\""
     } else {
         ""
     };
-    let (points, (lx, ly)) = edge_path(p, (u, v), back);
+    let points = edge_path(p, (u, v), style.back);
+    let w = style.width;
     let _ = write!(
         s,
         "<polyline points=\"{points}\" fill=\"none\" stroke=\"{stroke}\" \
          stroke-width=\"{w}\" marker-end=\"url(#{marker})\"{dash}/>"
     );
     if let Some(l) = label.filter(|l| !l.is_empty()) {
-        edge_label(s, l, lx, ly);
+        edge_label(s, l, at.0, at.1);
     }
 }
 
@@ -130,23 +138,21 @@ fn edge_label(s: &mut String, label: &str, x: i32, y: i32) {
     );
 }
 
-/// Polyline points + label anchor for an edge. Forward edges elbow
-/// across the column gap; back-edges drop out of the source's bottom,
-/// run left through the reserved lane, and rise into the target's
-/// bottom so the arrow reads as a rewind.
-fn edge_path(p: &Positioned, (u, v): (usize, usize), back: bool) -> (String, (i32, i32)) {
+/// Polyline points for an edge. Forward edges elbow across the column
+/// gap; back-edges drop out of the source's bottom, run left through the
+/// reserved lane, and rise into the target's bottom so the arrow reads
+/// as a rewind. (The label anchor is precomputed in layout.)
+fn edge_path(p: &Positioned, (u, v): (usize, usize), back: bool) -> String {
     if back {
         let (sx, tx) = (p.pos[u].0 + p.node_w[u] / 2, p.pos[v].0 + p.node_w[v] / 2);
         let (sy, ty) = (p.pos[u].1 + NODE_H, p.pos[v].1 + NODE_H);
         let lane = p.height - BACK_LANE / 2;
-        let pts = format!("{sx},{sy} {sx},{lane} {tx},{lane} {tx},{ty}");
-        (pts, ((sx + tx) / 2, lane - 10))
+        format!("{sx},{sy} {sx},{lane} {tx},{lane} {tx},{ty}")
     } else {
         let (sx, sy) = (p.pos[u].0 + p.node_w[u], p.pos[u].1 + NODE_H / 2);
         let (tx, ty) = (p.pos[v].0, p.pos[v].1 + NODE_H / 2);
         let mx = (sx + tx) / 2;
-        let pts = format!("{sx},{sy} {mx},{sy} {mx},{ty} {tx},{ty}");
-        (pts, (mx, (sy + ty) / 2 - 13))
+        format!("{sx},{sy} {mx},{sy} {mx},{ty} {tx},{ty}")
     }
 }
 
