@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 32,
+    "step": "release-hosting-stable-channel"
+  },
+  "action": "Wrote release-stable.sh (parameterized root-base build mirroring build-pages.sh pipeline) + docs/release-hosting.md; ran the script; verified ../mlpl-live root paths + CNAME + commit.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-02T16:56:43"
+}

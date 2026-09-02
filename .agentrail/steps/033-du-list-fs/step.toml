@@ -1,4 +1,4 @@
-number = 32
+number = 33
 slug = "du-list-fs"
 status = "pending"
 description = "Lower du builtins to compile-to-Rust: list_len/1, list_get/2 (StrList ops), f..."
