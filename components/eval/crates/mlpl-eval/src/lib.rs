@@ -78,6 +78,7 @@ mod ext_describe;
 mod ext_marshal_recv;
 mod ext_marshal_send;
 mod fncall_arrays;
+mod fncall_arrays_data;
 mod fncall_axes;
 mod fncall_bracket;
 mod fncall_bytes;

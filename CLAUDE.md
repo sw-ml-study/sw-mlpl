@@ -257,6 +257,43 @@ saga steps, do a dedicated "tech-debt reduction spike" commit
 that aims to *halve* both counts in one focused session. Queue
 the spike between feature steps.
 
+### Prevention: measure first, design the split BEFORE you need it
+
+Do NOT discover a new FAIL at commit time and then fight the
+ceiling by inlining functions or reusing helpers just to squeeze
+a change in (the reactive churn that bloats a diff and degrades
+readability). Instead, budget the metrics as part of *designing*
+the change:
+
+1. **Measure before you touch code.** Before adding to a module
+   or crate, check what you're about to grow:
+   - Function count of the target module (`rg -c '^\s*(pub(\(crate\))? )?fn ' file.rs`).
+   - Module count of the target crate (count `mod` decls).
+   - LOC of the function you're about to extend.
+   Know the baseline `sw-checklist` failed/warnings count too.
+2. **Leave breathing space -- never fill to the FAIL line.** The
+   FAIL thresholds are 7 functions/module, 7 modules/crate, 50
+   LOC/function. Design NEW structure to the *gate* (<=4 fns/module,
+   <=4 modules/crate, <=25 LOC/fn), so the next feature has room.
+   A module you leave at exactly 7 functions is a FAIL waiting for
+   the next one-line change.
+3. **Split proactively, as part of the feature.** If the module
+   you must extend is already at 5+ functions (or the crate at 5+
+   modules), create the sibling module / responsibility file FIRST,
+   then add the new code there -- do not add to the full module and
+   plan to split "later". The split is part of THIS change's design,
+   not a follow-up.
+4. **When a whole crate is at the ceiling, note it and split the
+   crate before the next feature that touches it.** A crate at 7
+   modules (e.g. a focused renderer) cannot absorb a new concern
+   without a Crate-Module FAIL; recognize that in the plan and do
+   the split first, rather than folding unrelated logic into an
+   existing module to dodge the count.
+
+The rule of thumb: a metric FAIL you hit while adding a feature is
+a design smell you should have seen when you read the file, not a
+surprise at `sw-checklist` time.
+
 The full policy lives in `docs/sw-checklist-paydown.md`; the
 short version:
 

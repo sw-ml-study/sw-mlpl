@@ -339,6 +339,36 @@ When modifying code, follow this loop:
 4. **Preserve behavior** -- run `cargo test` before refactoring, and after each small move run `cargo test` and `cargo clippy --all-targets --all-features`.
 5. **Re-measure** -- the refactor is not complete until the metrics pass.
 
+#### 10a. Measure BEFORE the change, and design with headroom
+
+The loop above is also the design step for adding a *feature*, not
+only for cleaning up after one. Reactively fighting a ceiling at
+commit time -- inlining a helper, bundling args, or folding an
+unrelated concern into an existing module just to avoid a new FAIL --
+bloats the diff and degrades readability. Prevent it:
+
+- **Read the metrics of the file you are about to grow, first.**
+  How many functions does the target module already have? How many
+  modules the crate? How long is the function you will extend? This
+  is part of understanding the code, before the first edit.
+- **Design NEW structure to the gate, not the FAIL line.** Aim for
+  <=4 functions/module and <=4 modules/crate when you create a file,
+  so the next change has room. The FAIL thresholds (7/7/50) are a
+  floor you should never design up against -- a module left at
+  exactly 7 functions is a FAIL waiting for the next one-line edit.
+- **If the target is already near a ceiling, split it FIRST.** A
+  module at 5+ functions, or a crate at 5+ modules, gets its sibling
+  / responsibility file created *before* the new code goes in. The
+  split is part of this change, not a deferred follow-up.
+- **A crate at the module ceiling cannot absorb a new concern.**
+  When a focused crate is already at 7 modules, recognize in the
+  plan that the next feature needs the crate split first -- do not
+  cram the concern into an existing module to dodge the count.
+
+A metric FAIL discovered while adding a feature is a design smell
+that was visible when you read the file, not a surprise at
+`sw-checklist` time.
+
 ---
 
 ### 11. Concrete Agent Rules
@@ -1126,6 +1156,36 @@ When modifying code, follow this loop:
 3. **Split by responsibility** -- prefer names like `parse_*`, `validate_*`, `build_*`, `plan_*`, `run_*`, `render_*`, `summarize_*`.
 4. **Preserve behavior** -- run `cargo test` before refactoring, and after each small move run `cargo test` and `cargo clippy --all-targets --all-features`.
 5. **Re-measure** -- the refactor is not complete until the metrics pass.
+
+#### 10a. Measure BEFORE the change, and design with headroom
+
+The loop above is also the design step for adding a *feature*, not
+only for cleaning up after one. Reactively fighting a ceiling at
+commit time -- inlining a helper, bundling args, or folding an
+unrelated concern into an existing module just to avoid a new FAIL --
+bloats the diff and degrades readability. Prevent it:
+
+- **Read the metrics of the file you are about to grow, first.**
+  How many functions does the target module already have? How many
+  modules the crate? How long is the function you will extend? This
+  is part of understanding the code, before the first edit.
+- **Design NEW structure to the gate, not the FAIL line.** Aim for
+  <=4 functions/module and <=4 modules/crate when you create a file,
+  so the next change has room. The FAIL thresholds (7/7/50) are a
+  floor you should never design up against -- a module left at
+  exactly 7 functions is a FAIL waiting for the next one-line edit.
+- **If the target is already near a ceiling, split it FIRST.** A
+  module at 5+ functions, or a crate at 5+ modules, gets its sibling
+  / responsibility file created *before* the new code goes in. The
+  split is part of this change, not a deferred follow-up.
+- **A crate at the module ceiling cannot absorb a new concern.**
+  When a focused crate is already at 7 modules, recognize in the
+  plan that the next feature needs the crate split first -- do not
+  cram the concern into an existing module to dodge the count.
+
+A metric FAIL discovered while adding a feature is a design smell
+that was visible when you read the file, not a surprise at
+`sw-checklist` time.
 
 ---
 
