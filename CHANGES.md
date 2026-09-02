@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-02
 
+- feat(web): add demo-ml-microscope to the footer repo-links dialog
+- chore(agentrail): paydown batch 2 recorded (step-slug desync documented); queue paydown-3
+- refactor(eval): checklist paydown batch 2 -- split two Module-Fn FAILs with headroom
+- chore(agentrail): complete 028-checklist-paydown-1-docs-and-eval-split; queue paydown-2
+- refactor(eval): checklist paydown kickoff -- prevention docs + fncall_arrays split
+- chore(pages): rebuild for dataflow spacing control + skip-edge labels; refresh CHANGES.md
 - chore(agentrail): complete 027-dataflow-spacing-and-skip-labels; queue du-list-fs
 - feat(viz): dataflow caller spacing control + skip-edge labels clear of boxes
 
