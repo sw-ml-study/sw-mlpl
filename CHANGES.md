@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-02
+
+- chore(agentrail): complete 027-dataflow-spacing-and-skip-labels; queue du-list-fs
+- feat(viz): dataflow caller spacing control + skip-edge labels clear of boxes
+
 ## 2026-09-01
 
+- chore(pages): rebuild for dataflow gap-fits-label (+ arrowhead/box fixes now live); refresh CHANGES.md
 - chore(agentrail): complete 026-dataflow-gap-fits-label; queue du-list-fs
 - fix(viz): size each dataflow column gap to fit its edge labels
 - chore(pages): rebuild for dataflow arrowhead + fitted-box fix; refresh CHANGES.md
