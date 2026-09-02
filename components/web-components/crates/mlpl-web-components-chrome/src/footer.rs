@@ -62,10 +62,16 @@ const REPO_SECTIONS: &[(&str, &[(&str, &str)])] = &[
     ),
     (
         "Machine learning",
-        &[(
-            "demo-ml-utils",
-            "Machine-learning utility demos built with MLPL.",
-        )],
+        &[
+            (
+                "demo-ml-microscope",
+                "An ML microscope: watch arrays, parameters, gradients, and metrics evolve through a lesson.",
+            ),
+            (
+                "demo-ml-utils",
+                "Machine-learning utility demos built with MLPL.",
+            ),
+        ],
     ),
     (
         "Programming",
