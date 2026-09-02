@@ -1,9 +1,10 @@
 number = 27
 slug = "dataflow-spacing-and-skip-labels"
-status = "in-progress"
+status = "completed"
 description = "Two ../emufpga UPSTREAM.md asks. Ask 6: caller spacing control -- optional co..."
 role = "production"
 context_files = []
 created_at = "2026-09-02T12:53:01"
+completed_at = "2026-09-02T12:53:32"
 task_type = "feature"
-commits = []
+commits = ["4d27b541c05070ced54e49c206f8448aef8ab25b"]

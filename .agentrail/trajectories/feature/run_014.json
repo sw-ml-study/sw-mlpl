@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 27,
+    "step": "dataflow-spacing-and-skip-labels"
+  },
+  "action": "model/lib/build col_gap+row_gap + Positioned.label_at; layout inline-rank + label_anchors + Geo + column_gaps skip handling + per-gap canvas; render EdgeStyle + points-only edge_path + label_at; fncall_dataflow scalar extraction via float_array; render_tests col_gap + skip-label; design doc; e2e verify.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-02T12:53:32"
+}
