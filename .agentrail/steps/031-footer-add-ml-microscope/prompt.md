@@ -1,0 +1,1 @@
+Add the new ../demo-ml-microscope repo to the footer GitHub repo-links dialog (footer.rs REPO_SECTIONS), in the Machine learning section alongside demo-ml-utils. It was the only sibling demo-* repo missing (demo-funtional-pipelines local dir is a known clone typo; footer correctly uses demo-functional-pipelines). Rebuild + deploy pages.

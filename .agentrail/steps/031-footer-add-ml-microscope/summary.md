@@ -1,0 +1,1 @@
+Added demo-ml-microscope to the footer GitHub repo-links dialog (footer.rs REPO_SECTIONS, Machine learning section). It was the only sibling demo-* repo missing (demo-funtional-pipelines local dir is a known clone typo; footer correctly uses demo-functional-pipelines). Data-only, no sw-checklist impact (41/540 unchanged); chrome crate builds clean. Pages rebuilt + deployed.

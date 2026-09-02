@@ -1,0 +1,10 @@
+number = 31
+slug = "footer-add-ml-microscope"
+status = "completed"
+description = "Add the new ../demo-ml-microscope repo to the footer GitHub repo-links dialog..."
+role = "production"
+context_files = []
+created_at = "2026-09-02T16:40:57"
+completed_at = "2026-09-02T16:41:34"
+task_type = "feature"
+commits = ["240397e8d404d334277d319abb6a668b5a66a334"]

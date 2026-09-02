@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 31,
+    "step": "footer-add-ml-microscope"
+  },
+  "action": "Compared 14 sibling demo-* dirs vs REPO_SECTIONS; confirmed canonical name via git remote + README; added entry; cargo build clean; build-pages + deploy-pages.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-02T16:41:34"
+}
