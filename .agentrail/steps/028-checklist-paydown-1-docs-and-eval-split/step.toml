@@ -1,9 +1,10 @@
 number = 28
 slug = "checklist-paydown-1-docs-and-eval-split"
-status = "in-progress"
+status = "completed"
 description = "Checklist paydown series (FAILs-to-zero). This batch: (1) bake prevention int..."
 role = "production"
 context_files = []
 created_at = "2026-09-02T13:09:53"
+completed_at = "2026-09-02T13:23:17"
 task_type = "refactor"
-commits = []
+commits = ["a926ba7f7f04ad4963106157728074d5939e0825"]
