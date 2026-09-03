@@ -1085,6 +1085,10 @@ version = "0.20.0"
 [[package]]
 name = "mlpl-builtin-catalog"
 version = "0.20.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "mlpl-bytes"
@@ -1656,6 +1660,7 @@ dependencies = [
  "mlpl-trace",
  "mlpl-viz-analysis",
  "mlpl-viz-core",
+ "mlpl-viz-flow",
  "mlpl-viz-marks",
 ]
 
@@ -1670,6 +1675,13 @@ dependencies = [
 [[package]]
 name = "mlpl-viz-core"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-viz-flow"
+version = "0.20.0"
+dependencies = [
+ "mlpl-viz-core",
+]
 
 [[package]]
 name = "mlpl-viz-marks"
