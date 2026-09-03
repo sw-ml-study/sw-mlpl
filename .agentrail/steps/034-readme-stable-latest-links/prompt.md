@@ -1,0 +1,1 @@
+Update the sw-mlpl README live-demo call-to-action to offer two clearly-labeled links: Stable (https://mlpl.softwarewrighter.com/, release-pinned) and Latest (https://sw-ml-study.github.io/sw-mlpl/, rolling dev). Docs-only.

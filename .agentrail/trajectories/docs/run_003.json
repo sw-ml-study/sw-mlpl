@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 34,
+    "step": "readme-stable-latest-links"
+  },
+  "action": "Edited README.md CTA into a two-item list (Stable/Latest); markdown-checked; committed.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-02T17:19:00"
+}

@@ -1,0 +1,10 @@
+number = 34
+slug = "readme-stable-latest-links"
+status = "completed"
+description = "Update the sw-mlpl README live-demo call-to-action to offer two clearly-label..."
+role = "production"
+context_files = []
+created_at = "2026-09-02T17:18:49"
+completed_at = "2026-09-02T17:19:00"
+task_type = "docs"
+commits = ["e13ebb7c1d73a788c2ac22985d551a390c8c190e"]
