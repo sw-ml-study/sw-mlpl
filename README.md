@@ -60,8 +60,12 @@ This repository ships three things together:
 - a browser **playground** that runs both via WASM with no
   install.
 
-**[Try the playground in your browser](https://sw-ml-study.github.io/sw-mlpl/?ts=1777922058129)**
--- no install required.
+**Try the playground in your browser** -- no install required:
+
+- **[Stable](https://mlpl.softwarewrighter.com/)** -- the recommended,
+  release-pinned build (moves only when a release is cut).
+- **[Latest](https://sw-ml-study.github.io/sw-mlpl/?ts=1777922058129)** --
+  the rolling development build (updates on every push).
 
 ## Tour
 
