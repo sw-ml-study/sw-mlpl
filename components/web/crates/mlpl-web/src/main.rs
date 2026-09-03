@@ -19,7 +19,9 @@ fn main() {
              To rebuild the deployed pages/ bundle:\n\
                ./scripts/build-pages.sh\n\
              \n\
-             Or visit the live demo: https://sw-ml-study.github.io/sw-mlpl/"
+             Or visit the live demo:\n\
+               Stable:  https://mlpl.softwarewrighter.com/\n\
+               Latest:  https://sw-ml-study.github.io/sw-mlpl/"
         );
         std::process::exit(1);
     }
