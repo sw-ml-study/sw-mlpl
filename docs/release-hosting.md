@@ -55,3 +55,6 @@ git -C ../mlpl-live push        # publish (after first-time setup below)
   behind it, and CORS). The default in-browser playground demos all work.
 - The stable page's `build-info.json` carries `"channel":"stable"` and the
   source commit it was cut from.
+- The `mlpl-live` repo carries its own `README.md`, `LICENSE`, and
+  `COPYRIGHT` (MIT, matching `sw-mlpl`). `release-stable.sh` excludes them
+  from the `rsync --delete`, so a rebuild never wipes them.

@@ -34,10 +34,12 @@ cd "$WEB_DIR"
 "$SCRIPT_DIR/serial.sh" trunk build --release --public-url / --dist "$REL_DIST"
 
 mkdir -p "$MIRROR"
-# Mirror the built site; preserve the repo's own .git and the files this
-# script (re)writes below across rebuilds.
+# Mirror the built site; preserve the repo's own .git, the files this
+# script (re)writes below, and the repo's own docs/legal (README /
+# LICENSE / COPYRIGHT) that are NOT part of the built dist.
 rsync -a --delete \
     --exclude='.git/' --exclude='CNAME' --exclude='.nojekyll' --exclude='literate/' \
+    --exclude='README.md' --exclude='LICENSE' --exclude='COPYRIGHT' \
     "$REL_DIST/" "$MIRROR/"
 
 touch "$MIRROR/.nojekyll"
