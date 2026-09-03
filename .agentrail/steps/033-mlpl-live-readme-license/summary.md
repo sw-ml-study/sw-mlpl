@@ -1,0 +1,1 @@
+mlpl-live release repo now has README.md (stable-demo overview + https://mlpl.softwarewrighter.com/ + source link), MIT LICENSE + COPYRIGHT (copied from sw-mlpl) -- committed in ../mlpl-live (25a79f7). release-stable.sh excludes README.md/LICENSE/COPYRIGHT from rsync --delete so rebuilds preserve them; noted in docs/release-hosting.md. sw-checklist 41/540 unchanged.

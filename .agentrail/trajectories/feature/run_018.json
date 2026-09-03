@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 33,
+    "step": "mlpl-live-readme-license"
+  },
+  "action": "cp LICENSE/COPYRIGHT into ../mlpl-live; wrote mlpl-live README; committed in mlpl-live; added rsync excludes in release-stable.sh; doc note.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-02T17:10:16"
+}
