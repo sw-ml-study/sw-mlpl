@@ -1,0 +1,1 @@
+mlpl-web native CLI help now shows two live-demo links: Stable (mlpl.softwarewrighter.com) + Latest (github.io), matching the README. Left mlpl-serve cors_allow doc comment as github.io (connect-origin example, not a live-demo CTA). Compiles clean, sw-checklist 41/540 unchanged.
