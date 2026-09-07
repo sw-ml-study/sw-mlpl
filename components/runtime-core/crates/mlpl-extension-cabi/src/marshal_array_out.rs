@@ -24,9 +24,9 @@ pub(crate) fn abi_to_ext(out: &AbiValue) -> Result<ExtValue, ExtError> {
     }
     let value = match out.tag {
         t if t == ValueTag::Utf8 as u32 => {
-            let raw = read_abi_slice("output string", unsafe { out.payload.slice });
+            let raw = unsafe { out.payload.slice };
             ExtValue::Str(
-                String::from_utf8(raw.map_err(ExtError::new)?)
+                String::from_utf8(read_abi_slice("output string", raw).map_err(ExtError::new)?)
                     .map_err(|_| ExtError::new("output string is not valid UTF-8"))?,
             )
         }

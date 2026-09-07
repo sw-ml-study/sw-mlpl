@@ -861,8 +861,11 @@ n3d:lines(points)                 # call a function the extension registered
 ```
 
 Values cross the load boundary with their MLPL shapes intact: numeric
-arrays, records, strings, errors, and opaque native handles pass in and
-out of extension calls the same way they do for built-in functions.
+arrays, nested records, strings, packed byte buffers, and opaque native
+handles pass into extension calls; providers can return the same wire
+types. Outbound records are capped at 1,024 fields per level and 64
+levels of nesting. Unsupported runtime-only values fail before provider
+invocation.
 Once loaded, an extension stays registered for the life of the process
 (there is no unload). For the provider side -- how to build a crate as
 a loadable extension and what it must export -- see

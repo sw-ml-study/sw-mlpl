@@ -124,6 +124,15 @@ impl AbiValue {
             payload: ValuePayload { integer: 0 },
         }
     }
+
+    /// A borrowed record view used for one provider invocation.
+    pub(crate) fn record(view: *const AbiRecordView) -> Self {
+        Self {
+            tag: ValueTag::Record as u32,
+            reserved: 0,
+            payload: ValuePayload { record: view },
+        }
+    }
 }
 
 /// Error status codes an `InvokeFnV1` may report.

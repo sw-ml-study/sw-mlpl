@@ -9,8 +9,8 @@ use std::ptr;
 
 use mlpl_extension_abi::ExtValue;
 use mlpl_extension_cabi::{
-    ABI_VERSION_V1, AbiErrorV1, AbiSlice, AbiValue, ErrorCode, ExtensionDescriptorV1,
-    FunctionDescriptorV1, ValuePayload, ValueTag, register_c_extension,
+    ABI_VERSION_V1, AbiErrorV1, AbiRecordView, AbiSlice, AbiValue, ErrorCode,
+    ExtensionDescriptorV1, FunctionDescriptorV1, ValuePayload, ValueTag, register_c_extension,
 };
 use mlpl_extension_registry::lookup;
 
@@ -67,6 +67,50 @@ unsafe extern "C" fn inv_incr(
             payload: ValuePayload { integer: x + 1 },
         };
     }
+    ErrorCode::Ok as u32
+}
+
+unsafe extern "C" fn inv_check_record(
+    args: *const AbiValue,
+    n: usize,
+    output: *mut AbiValue,
+    _err: *mut AbiErrorV1,
+) -> u32 {
+    assert_eq!(n, 1);
+    let root = unsafe { &*args };
+    assert_eq!(root.tag, ValueTag::Record as u32);
+    let root_view: &AbiRecordView = unsafe { &*root.payload.record };
+    assert_eq!(root_view.field_count, 2);
+    let fields = unsafe { std::slice::from_raw_parts(root_view.fields, root_view.field_count) };
+    assert_eq!(
+        unsafe { std::slice::from_raw_parts(fields[0].name.data, fields[0].name.len) },
+        b"body"
+    );
+    assert_eq!(fields[0].value.tag, ValueTag::Bytes as u32);
+    let body = unsafe { fields[0].value.payload.slice };
+    assert_eq!(
+        unsafe { std::slice::from_raw_parts(body.data, body.len) },
+        b"abc"
+    );
+    assert_eq!(
+        unsafe { std::slice::from_raw_parts(fields[1].name.data, fields[1].name.len) },
+        b"meta"
+    );
+    assert_eq!(fields[1].value.tag, ValueTag::Record as u32);
+    let meta = unsafe { &*fields[1].value.payload.record };
+    let nested = unsafe { &*meta.fields };
+    assert_eq!(
+        unsafe { std::slice::from_raw_parts(nested.name.data, nested.name.len) },
+        b"status"
+    );
+    assert_eq!(unsafe { nested.value.payload.integer }, 201);
+    unsafe {
+        *output = AbiValue {
+            tag: ValueTag::Bool as u32,
+            reserved: 0,
+            payload: ValuePayload { boolean: 1 },
+        }
+    };
     ErrorCode::Ok as u32
 }
 
@@ -133,6 +177,55 @@ fn c_provider_receives_marshaled_arguments() {
     unsafe { register_c_extension(&d) }.expect("register");
     let f = lookup("ctest_incr:incr").expect("registered");
     assert_eq!((f.func)(&[ExtValue::I64(41)]), Ok(ExtValue::I64(42)));
+}
+
+#[test]
+fn c_provider_receives_nested_record_and_bytes_with_live_backing() {
+    let functions = [func(b"check", 1, inv_check_record)];
+    let d = desc(b"ctest_record_in", &functions);
+    unsafe { register_c_extension(&d) }.expect("register");
+    let f = lookup("ctest_record_in:check").expect("registered");
+    let input = ExtValue::Record(vec![
+        ("body".into(), ExtValue::Bytes(b"abc".to_vec())),
+        (
+            "meta".into(),
+            ExtValue::Record(vec![("status".into(), ExtValue::I64(201))]),
+        ),
+    ]);
+    assert_eq!((f.func)(&[input]), Ok(ExtValue::Bool(true)));
+}
+
+#[test]
+fn oversized_outbound_record_is_rejected_before_provider_invocation() {
+    let functions = [func(b"check", 1, inv_check_record)];
+    let d = desc(b"ctest_record_cap", &functions);
+    unsafe { register_c_extension(&d) }.expect("register");
+    let f = lookup("ctest_record_cap:check").expect("registered");
+    let fields = (0..1025)
+        .map(|i| (format!("f{i}"), ExtValue::Nil))
+        .collect();
+    let error = (f.func)(&[ExtValue::Record(fields)]).unwrap_err();
+    assert!(
+        error.message.contains("1025 fields (max 1024)"),
+        "{error:?}"
+    );
+}
+
+#[test]
+fn excessive_outbound_record_nesting_is_rejected() {
+    let functions = [func(b"check", 1, inv_check_record)];
+    let d = desc(b"ctest_record_depth", &functions);
+    unsafe { register_c_extension(&d) }.expect("register");
+    let f = lookup("ctest_record_depth:check").expect("registered");
+    let mut value = ExtValue::Nil;
+    for _ in 0..65 {
+        value = ExtValue::Record(vec![("next".into(), value)]);
+    }
+    let error = (f.func)(&[value]).unwrap_err();
+    assert!(
+        error.message.contains("nesting exceeds boundary cap 64"),
+        "{error:?}"
+    );
 }
 
 #[test]

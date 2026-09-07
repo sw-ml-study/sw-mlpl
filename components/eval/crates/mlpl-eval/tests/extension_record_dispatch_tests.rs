@@ -9,6 +9,7 @@ use std::mem::size_of;
 use std::ptr;
 
 use mlpl_eval::{Environment, Value};
+use mlpl_extension_abi::{ExtFnDesc, ExtValue, ExtensionDescriptorV1 as SafeExtensionDescriptorV1};
 use mlpl_extension_cabi::{
     ABI_VERSION_V1, AbiErrorV1, AbiField, AbiRecordView, AbiSlice, AbiValue, ErrorCode,
     ExtensionDescriptorV1, FunctionDescriptorV1, ValuePayload, ValueTag, register_c_extension,
@@ -124,6 +125,34 @@ fn register_provider() {
     let _ = unsafe { register_c_extension(&d) };
 }
 
+fn register_argument_probe() {
+    let descriptor = SafeExtensionDescriptorV1 {
+        name: "argument_probe".into(),
+        private_namespace: "argument_probe".into(),
+        facade_mlpl: String::new(),
+        functions: vec![ExtFnDesc {
+            name: "accept".into(),
+            arity: 1,
+            signature_toml: String::new(),
+            func: std::sync::Arc::new(|args| {
+                let ExtValue::Record(fields) = &args[0] else {
+                    panic!("expected record, got {:?}", args[0]);
+                };
+                assert_eq!(fields[0], ("body".into(), ExtValue::Bytes(b"abc".to_vec())));
+                assert_eq!(
+                    fields[1],
+                    (
+                        "meta".into(),
+                        ExtValue::Record(vec![("status".into(), ExtValue::I64(201))])
+                    )
+                );
+                Ok(ExtValue::Bool(true))
+            }),
+        }],
+    };
+    let _ = mlpl_extension_registry::register(&descriptor);
+}
+
 fn eval_value(env: &mut Environment, src: &str) -> Result<Value, String> {
     let tokens = mlpl_parser::lex(src).map_err(|e| e.to_string())?;
     let stmts = mlpl_parser::parse(&tokens).map_err(|e| e.to_string())?;
@@ -165,4 +194,12 @@ fn a_list_of_records_reads_by_nested_field_access() {
     // Record-of-records: b.e0 and b.e1 are each an event record.
     let src = "b = events:poll_batch()\nb.e0.x + b.e1.x";
     assert_eq!(scalar(&mut env, src), 12.0);
+}
+
+#[test]
+fn mlpl_sends_nested_records_and_packed_bytes_to_extensions() {
+    register_argument_probe();
+    let mut env = Environment::new();
+    let src = "argument_probe:accept({body: pack([97, 98, 99], \"u8\"), meta: {status: 201}})";
+    assert_eq!(scalar(&mut env, src), 1.0);
 }

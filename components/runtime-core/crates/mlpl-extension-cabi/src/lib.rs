@@ -6,9 +6,9 @@
 //! call (`namespace:function`) dispatches into the provider's C
 //! code with scalars marshaled and panics contained.
 //!
-//! Scope: SCALAR values only (nil / bool / i64 / f64 / utf8 /
-//! bytes). Dense arrays and native handles are a follow-up. Static
-//! linking only -- dynamic (`dlopen`) loading is a separate saga.
+//! Values include scalars, borrowed UTF-8/byte spans, dense arrays,
+//! nested records, and native handles. Static linking and dynamic
+//! loading use this same adapter.
 //!
 //! `lib.rs` is a facade: types live in `model`, marshaling in
 //! `marshal`, and the adapter in `register`.
