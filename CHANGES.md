@@ -12,8 +12,24 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-07
+
+- chore(agentrail): complete outbound extension values step
+- feat(extensions): send records and packed bytes to providers
+
 ## 2026-09-02
 
+- chore(web-components): sync Cargo.lock after chrome-crate build
+- chore(agentrail): complete 035-cli-stable-latest-links
+- docs(cli): mlpl-web help shows Stable + Latest live-demo links
+- chore(agentrail): complete 034-readme-stable-latest-links
+- docs(readme): two live-demo links -- Stable (custom domain) + Latest (github.io)
+- chore(agentrail): complete 033-mlpl-live-readme-license
+- chore(release): preserve README/LICENSE/COPYRIGHT in mlpl-live across rebuilds
+- chore(agentrail): complete 032-release-hosting-stable-channel
+- feat(release): stable public release channel (mlpl.softwarewrighter.com)
+- chore(agentrail): complete 031-footer-add-ml-microscope; queue paydown-3
+- chore(pages): rebuild for footer demo-ml-microscope link; refresh CHANGES.md
 - feat(web): add demo-ml-microscope to the footer repo-links dialog
 - chore(agentrail): paydown batch 2 recorded (step-slug desync documented); queue paydown-3
 - refactor(eval): checklist paydown batch 2 -- split two Module-Fn FAILs with headroom
