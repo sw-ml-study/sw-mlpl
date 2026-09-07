@@ -1,0 +1,11 @@
+{
+  "task_type": "upstream-extension-bridge",
+  "state": {
+    "number": 36,
+    "step": "extension-outbound-records-bytes"
+  },
+  "action": "Added focused red/green C-ABI and interpreter tests; extended MLPL-to-ExtValue conversion; built recursive owned C-ABI views; ran scoped cargo tests, clippy, fmt, markdown, and sw-checklist; committed wiki correction",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-07T15:43:32"
+}
