@@ -1,7 +1,9 @@
 //! Provenance-badge logic: commit extraction from both stamp
 //! shapes and the three-way verdict with honest degradation.
 
-use mlpl_web_components_chrome::status_badge::{BundleStatus, extract_commit, verdict};
+use mlpl_web_components_chrome::status_badge::{
+    BundleStatus, extract_commit, repo_build_info_url, verdict,
+};
 
 #[test]
 fn commit_extracts_from_json_and_meta_shapes() {
@@ -21,6 +23,19 @@ fn the_real_build_info_parses() {
     // Pin against the actual generated artifact.
     let info = include_str!("../../../../../pages/build-info.json");
     assert!(extract_commit(info).is_some(), "{info}");
+}
+
+#[test]
+fn repo_url_follows_the_served_channel() {
+    // The stable site is published from mlpl-live; without this the badge
+    // compares stable against the dev stamp and shows DeployPending forever.
+    let stable = r#"{"commit":"7f589dc2","channel":"stable"}"#;
+    assert!(repo_build_info_url(Some(stable)).contains("mlpl-live"));
+    // The rolling dev build-info has no channel stamp -> dev pages repo.
+    let dev = r#"{"commit":"c081e1bd","built_at":"2026-09-02T23:41:17Z"}"#;
+    assert!(repo_build_info_url(Some(dev)).contains("sw-mlpl/main/pages"));
+    // A missing served body degrades to the dev repo.
+    assert!(repo_build_info_url(None).contains("sw-mlpl/main/pages"));
 }
 
 #[test]

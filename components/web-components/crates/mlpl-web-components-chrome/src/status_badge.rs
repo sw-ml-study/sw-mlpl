@@ -12,8 +12,14 @@
 
 use yew::prelude::*;
 
-const RAW_BUILD_INFO: &str =
+/// The rolling dev site is published from `sw-mlpl`'s committed
+/// `pages/build-info.json`.
+const RAW_BUILD_INFO_DEV: &str =
     "https://raw.githubusercontent.com/sw-ml-study/sw-mlpl/main/pages/build-info.json";
+/// The stable site (`mlpl.softwarewrighter.com`) is published from the
+/// `mlpl-live` repo's root, NOT from `sw-mlpl/pages`.
+const RAW_BUILD_INFO_STABLE: &str =
+    "https://raw.githubusercontent.com/sw-ml-study/mlpl-live/main/build-info.json";
 
 /// The comparison verdict behind the badge.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -42,6 +48,20 @@ pub fn extract_commit(text: &str) -> Option<String> {
     // Meta form: "<commit> <built_at>".
     let first = text.split_whitespace().next()?;
     (first.len() >= 7 && first.chars().all(|c| c.is_ascii_hexdigit())).then(|| first.to_string())
+}
+
+/// The repo whose committed `build-info.json` says what the SERVING
+/// origin is supposed to publish, chosen by the served body's `channel`
+/// stamp: the stable site is published from `mlpl-live`, the rolling dev
+/// site from `sw-mlpl/pages`. Comparing the stable site against the dev
+/// stamp pins the badge at `DeployPending` forever, since `main` always
+/// runs ahead of the last cut release. Absent/other channel = dev.
+#[must_use]
+pub fn repo_build_info_url(served: Option<&str>) -> &'static str {
+    match served {
+        Some(body) if body.contains("\"channel\":\"stable\"") => RAW_BUILD_INFO_STABLE,
+        _ => RAW_BUILD_INFO_DEV,
+    }
 }
 
 /// Three-way verdict; every missing side degrades honestly.
@@ -74,10 +94,18 @@ pub fn use_bundle_status() -> BundleStatus {
 }
 
 async fn probe_status() -> BundleStatus {
-    let running = running_commit();
+    // The RUNNING page's commit, from the meta tag build-pages.sh /
+    // release-stable.sh stamped into index.html.
+    let running = web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.query_selector("meta[name='mlpl-build']").ok().flatten())
+        .and_then(|m| m.get_attribute("content"))
+        .and_then(|c| extract_commit(&c));
     let ts = js_sys::Date::now() as u64;
     let served = fetch_text(&format!("build-info.json?ts={ts}")).await;
-    let repo = fetch_text(&format!("{RAW_BUILD_INFO}?ts={ts}")).await;
+    // Compare against the repo that actually publishes THIS channel.
+    let repo_url = repo_build_info_url(served.as_deref());
+    let repo = fetch_text(&format!("{repo_url}?ts={ts}")).await;
     verdict(
         running.as_deref(),
         served.as_deref().and_then(extract_commit).as_deref(),
@@ -90,15 +118,6 @@ async fn fetch_text(url: &str) -> Option<String> {
         Ok(resp) if resp.ok() => resp.text().await.ok(),
         _ => None,
     }
-}
-
-/// The RUNNING page's commit, from the meta tag build-pages.sh
-/// stamped into index.html.
-fn running_commit() -> Option<String> {
-    let doc = web_sys::window()?.document()?;
-    let meta = doc.query_selector("meta[name='mlpl-build']").ok()??;
-    let content = meta.get_attribute("content")?;
-    extract_commit(&content)
 }
 
 /// The badge: green current, amber reload, blue deploy-pending,
