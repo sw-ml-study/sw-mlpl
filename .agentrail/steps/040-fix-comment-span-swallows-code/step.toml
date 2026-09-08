@@ -1,0 +1,10 @@
+number = 40
+slug = "fix-comment-span-swallows-code"
+status = "completed"
+description = "Fix upstream-asks #16: a multi-line playground entry renders its code inside ..."
+role = "production"
+context_files = []
+created_at = "2026-09-08T08:53:32"
+completed_at = "2026-09-08T08:53:50"
+task_type = "bugfix"
+commits = ["5c27403d6971f568e9fc637691bcf83b6ed76e08"]
