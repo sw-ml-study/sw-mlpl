@@ -1,0 +1,10 @@
+number = 39
+slug = "add-str-eq-string-equality"
+status = "completed"
+description = "Add str_eq(a, b) -> 1|0 whole-string equality (demo-abstract-algebra upstream..."
+role = "production"
+context_files = []
+created_at = "2026-09-08T08:40:11"
+completed_at = "2026-09-08T08:41:03"
+task_type = "feature"
+commits = ["d15c20a877d8b5d770585e50aab546f4e95c70d8"]

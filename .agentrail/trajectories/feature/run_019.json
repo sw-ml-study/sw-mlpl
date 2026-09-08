@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 39,
+    "step": "add-str-eq-string-equality"
+  },
+  "action": "eval_str_eq in fncall_string_ops; compiler StrOp lowering + doc; catalog_lang.toml + lang-reference + glossary rows; dispatch_coverage StrEq variant (enum/list/expr/name); string_ops_tests; rebuilt binaries; build+deploy dev pages.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-08T08:41:03"
+}
