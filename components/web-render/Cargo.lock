@@ -963,6 +963,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
+name = "libloading"
+version = "0.8.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d7c4b02199fee7c5d21a5ae7d8cfa79a6ef5bb2fc834d6e9058e89c825efdc55"
+dependencies = [
+ "cfg-if",
+ "windows-link",
+]
+
+[[package]]
 name = "litemap"
 version = "0.8.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1075,6 +1085,10 @@ version = "0.20.0"
 [[package]]
 name = "mlpl-builtin-catalog"
 version = "0.20.0"
+dependencies = [
+ "serde",
+ "toml",
+]
 
 [[package]]
 name = "mlpl-bytes"
@@ -1127,6 +1141,7 @@ dependencies = [
  "mlpl-eval-state",
  "mlpl-eval-types",
  "mlpl-extension-abi",
+ "mlpl-extension-loader",
  "mlpl-extension-registry",
  "mlpl-forge-kg",
  "mlpl-loader-helpers",
@@ -1287,6 +1302,22 @@ dependencies = [
 [[package]]
 name = "mlpl-extension-abi"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-extension-cabi"
+version = "0.20.0"
+dependencies = [
+ "mlpl-extension-abi",
+ "mlpl-extension-registry",
+]
+
+[[package]]
+name = "mlpl-extension-loader"
+version = "0.20.0"
+dependencies = [
+ "libloading",
+ "mlpl-extension-cabi",
+]
 
 [[package]]
 name = "mlpl-extension-registry"
@@ -1629,6 +1660,7 @@ dependencies = [
  "mlpl-trace",
  "mlpl-viz-analysis",
  "mlpl-viz-core",
+ "mlpl-viz-flow",
  "mlpl-viz-marks",
 ]
 
@@ -1643,6 +1675,13 @@ dependencies = [
 [[package]]
 name = "mlpl-viz-core"
 version = "0.20.0"
+
+[[package]]
+name = "mlpl-viz-flow"
+version = "0.20.0"
+dependencies = [
+ "mlpl-viz-core",
+]
 
 [[package]]
 name = "mlpl-viz-marks"
