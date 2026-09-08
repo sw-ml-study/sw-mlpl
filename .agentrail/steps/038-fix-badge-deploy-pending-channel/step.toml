@@ -1,0 +1,10 @@
+number = 38
+slug = "fix-badge-deploy-pending-channel"
+status = "completed"
+description = "Fix status badge stuck on 'Deploy Pending' on the stable site: status_badge.r..."
+role = "production"
+context_files = []
+created_at = "2026-09-07T19:38:38"
+completed_at = "2026-09-07T19:53:43"
+task_type = "bugfix"
+commits = ["7b4545f28a37c33d0b2b8a7d97df71649acda3d2"]
