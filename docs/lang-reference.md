@@ -299,6 +299,14 @@ names in registration order and `test_info(name)` returns one
 registry row whose `fn` field is the `:u:` reference, so a
 runner invokes it with `call(test_info(n).fn)`.
 
+**Recursion depth.** User-function calls are capped at a fixed depth
+(1000 in the native interpreter; lower in the browser, which has a
+smaller stack). Exceeding it raises an ordinary, catchable MLPL error
+naming the function -- NOT a process/session crash -- so a missing base
+case fails gracefully. A real base case stays far under the cap; for
+genuinely deep work prefer an iterative or array formulation (`reduce`,
+`rotate` + element-wise ops) over deep recursion.
+
 ## Experiment Block
 
 ```

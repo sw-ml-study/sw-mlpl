@@ -8,6 +8,20 @@ use crate::eval::eval_expr;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
 
+/// Max user-function call depth before a catchable MLPL error, instead
+/// of a stack overflow that ABORTS the whole process / browser session
+/// (upstream-asks #8, mlpl-blockers B6). Set well below the platform
+/// stack: an optimized native frame is ~2-4 KB, so 1000 frames sit safely
+/// inside the 8 MB main stack (this recursion overflows it around 2-4k).
+/// The browser runs on the default ~1 MB WASM stack, so its cap is much
+/// lower. Conservative on purpose -- a real base case stays far under it;
+/// only unbounded recursion hits it. (The browser cap can be raised in
+/// step with a larger WASM `-z stack-size` if a lesson needs the depth.)
+#[cfg(not(target_arch = "wasm32"))]
+const MAX_CALL_DEPTH: usize = 1000;
+#[cfg(target_arch = "wasm32")]
+const MAX_CALL_DEPTH: usize = 250;
+
 pub(crate) fn call_user_fn(
     name: &str,
     args: &[Expr],
@@ -91,6 +105,17 @@ fn run_body(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
+    // Guard recursion depth so runaway/unbounded recursion raises a
+    // catchable error instead of overflowing the stack and aborting the
+    // process/session (upstream-asks #8). `framed` already incremented
+    // call_depth and will restore the scope + decrement when this errors.
+    if env.call_depth > MAX_CALL_DEPTH {
+        return Err(EvalError::Unsupported(format!(
+            "recursion too deep in '{name}': call depth exceeded the limit \
+             of {MAX_CALL_DEPTH} (a missing base case, or deeper recursion \
+             than the interpreter supports -- try an iterative/array formulation)"
+        )));
+    }
     for (param, val) in f.params.iter().zip(evaluated) {
         bind_arg(name, param, val, env)?;
     }
