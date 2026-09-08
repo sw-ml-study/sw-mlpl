@@ -57,9 +57,11 @@ pub fn run_script_value(path: &Path, opts: &RunScriptOpts) -> Value {
     ok_value(outcome_record(last, error, &mut env))
 }
 
-/// `{status, value, error, events_kind, events}` -- the child's
-/// outcome as data. status: "ok" (final value Ok or plain),
-/// "err" (final Result is Err), "error" (hard eval error).
+/// `{status, value, value_raw, error, events_kind, events}` -- the
+/// child's outcome as data. status: "ok" (final value Ok or plain),
+/// "err" (final Result is Err), "error" (hard eval error). `value` is a
+/// lossy display rendering; `value_raw` is the child's actual final value
+/// unmodified (use it to recover a string / record / number).
 fn outcome_record(
     last: Option<Value>,
     error: Option<String>,
@@ -80,10 +82,21 @@ fn outcome_record(
         (None, Some(v)) => ("ok", mlpl_value_structural::value_repr(v), String::new()),
         (None, None) => ("ok", String::new(), String::new()),
     };
+    // `value` is a lossy display RENDERING (a string child comes back
+    // quoted/escaped and cannot be recovered from it); `value_raw` carries
+    // the child's actual final value UNMODIFIED, so a caller gets the real
+    // string / record / number back (upstream-asks #10). For an err result
+    // it is the payload; for a hard error or exit there is no value.
+    let value_raw = match (&error, &last) {
+        (None, Some(Value::Result { ok: false, payload })) => (**payload).clone(),
+        (None, Some(v)) => v.clone(),
+        _ => Value::Str(String::new()),
+    };
     let events = env.test_event_lines.take().unwrap_or_default();
     BTreeMap::from([
         ("status".to_string(), Value::Str(status.to_string())),
         ("value".to_string(), Value::Str(value)),
+        ("value_raw".to_string(), value_raw),
         ("error".to_string(), Value::Str(err_text)),
         (
             "events_kind".to_string(),

@@ -121,3 +121,20 @@ fn missing_script_is_an_err_value() {
     assert!(matches!(&v, Value::Result { ok: false, .. }), "{v:?}");
     std::fs::remove_dir_all(&dir).ok();
 }
+
+#[test]
+fn value_raw_carries_the_childs_actual_value_not_its_rendering() {
+    // upstream-asks #10: `value` is a lossy rendering (a string child
+    // comes back quoted); `value_raw` is the actual value, recoverable.
+    let dir = sandbox("raw");
+    std::fs::write(dir.join("str.mlpl"), "\"hello from child\"\n").unwrap();
+    std::fs::write(dir.join("rec.mlpl"), "{pass: 1}\n").unwrap();
+    let v = run_script_value(&dir.join("str.mlpl"), &opts(false));
+    // The rendering is quoted; the raw value is the bare string.
+    assert!(matches!(field(&v, "value"), Value::Str(s) if s.starts_with('"')));
+    assert!(matches!(field(&v, "value_raw"), Value::Str(s) if s == "hello from child"));
+    // A record child round-trips as a record, not a rendered string.
+    let v = run_script_value(&dir.join("rec.mlpl"), &opts(false));
+    assert!(matches!(field(&v, "value_raw"), Value::Record { .. }));
+    std::fs::remove_dir_all(&dir).ok();
+}
