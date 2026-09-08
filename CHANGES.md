@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-08
 
+- chore(agentrail): complete 041-fix-run-script-value-raw
+- fix(cli): run_script exposes value_raw -- the child's actual value (#10)
+- chore(agentrail): complete 040-fix-comment-span-swallows-code
+- fix(web): render multi-line entries per line, not per group (comment-span bug)
+- chore(agentrail): complete 039-add-str-eq-string-equality
+- chore(pages): rebuild for str_eq builtin; refresh CHANGES.md
 - feat(lang): str_eq -- whole-string equality (upstream-asks #23, blocking)
 
 ## 2026-09-07
