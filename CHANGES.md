@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-08
 
+- chore(agentrail): complete 042-fix-recursion-depth-cap
+- fix(eval): recursion-depth cap -- catchable error, not a stack-overflow abort (BUG 3)
+- chore(web-render): sync Cargo.lock
+- chore(pages): rebuild for comment-span fix (#16) + str_eq; refresh CHANGES.md
 - chore(agentrail): complete 041-fix-run-script-value-raw
 - fix(cli): run_script exposes value_raw -- the child's actual value (#10)
 - chore(agentrail): complete 040-fix-comment-span-swallows-code
