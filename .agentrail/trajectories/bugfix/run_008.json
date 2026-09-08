@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 42,
+    "step": "fix-recursion-depth-cap"
+  },
+  "action": "MAX_CALL_DEPTH const (cfg native/wasm); depth check in run_body; recursion_depth_tests on a big-stack thread; lang-reference note; rebuilt binaries; e2e verify.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-08T11:57:30"
+}

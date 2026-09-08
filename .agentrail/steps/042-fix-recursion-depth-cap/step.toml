@@ -1,0 +1,10 @@
+number = 42
+slug = "fix-recursion-depth-cap"
+status = "completed"
+description = "Fix BUG 3 / upstream-asks #8 / mlpl-blockers B6: deep user-function recursion..."
+role = "production"
+context_files = []
+created_at = "2026-09-08T11:57:10"
+completed_at = "2026-09-08T11:57:30"
+task_type = "bugfix"
+commits = ["40ce0216d4a1ec83e3c4ec9c976e319686709c56"]
