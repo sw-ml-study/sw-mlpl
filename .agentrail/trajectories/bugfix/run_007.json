@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 41,
+    "step": "fix-run-script-value-raw"
+  },
+  "action": "value_raw field in outcome_record; doc comment + lang-reference; value_raw regression test; rebuilt release binary; e2e verify.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-08T09:06:57"
+}

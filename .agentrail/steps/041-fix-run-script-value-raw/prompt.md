@@ -1,0 +1,1 @@
+upstream-asks #10: run_script's value is a lossy display rendering (a string child comes back quoted, unrecoverable). Add value_raw carrying the child's actual final value unmodified (additive, backward-compatible -- value stays for existing callers). For err, value_raw is the payload; for error/exit, empty. TDD + doc.

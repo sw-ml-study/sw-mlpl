@@ -1,0 +1,10 @@
+number = 41
+slug = "fix-run-script-value-raw"
+status = "completed"
+description = "upstream-asks #10: run_script's value is a lossy display rendering (a string ..."
+role = "production"
+context_files = []
+created_at = "2026-09-08T09:06:35"
+completed_at = "2026-09-08T09:06:57"
+task_type = "bugfix"
+commits = ["3328678101f97603c1a9601ef064d216629f1579"]
