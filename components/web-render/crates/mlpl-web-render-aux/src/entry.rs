@@ -27,26 +27,32 @@ fn percent_encode(s: &str) -> String {
 /// comments; this is purely for the UI to render the
 /// commentary as an annotation alongside the code.
 fn render_input_line(input: &str) -> Html {
-    let (code, comment) = mlpl_web_tutorial::split_inline_comment(input);
-    // Saga 29 step 025: route the comment text through the markdown-ish renderer so
-    // `[[term]]` inside an MLPL `# comment` becomes a clickable glossary link. Code (the
-    // part before `#`) stays a plain string -- the lexer parses MLPL source there and
-    // [[ would be ambiguous with array literals.
-    let comment_html = match comment {
-        Some(c) => html! {
-            <span class="line-comment">
-                {" # "}
-                { mlpl_web_path_body::render_inline(c) }
-            </span>
-        },
-        None => html! {},
-    };
+    // An entry is a statement GROUP; split PER LINE (upstream-asks #16),
+    // else a leading full-line `# comment` swallows the code after it into
+    // the italic comment span. The first line carries the `mlpl>` prompt.
+    // Saga 29 step 025: comment text routes through the markdown-ish
+    // renderer so `[[term]]` becomes a clickable glossary link; code stays
+    // a plain string (the lexer parses MLPL there and `[[` is ambiguous).
     html! {
-        <div class="input-line">
-            <span class="prompt">{"mlpl> "}</span>
-            { code }
-            { comment_html }
-        </div>
+        <>
+        { for mlpl_web_tutorial::split_group_lines(input).into_iter().enumerate().map(
+            |(i, (code, comment))| {
+                let comment_html = match comment {
+                    Some(c) => html! {
+                        <span class="line-comment">{" # "}{ mlpl_web_path_body::render_inline(c) }</span>
+                    },
+                    None => html! {},
+                };
+                html! {
+                    <div class="input-line">
+                        <span class="prompt">{ if i == 0 { "mlpl> " } else { "" } }</span>
+                        { code }
+                        { comment_html }
+                    </div>
+                }
+            },
+        ) }
+        </>
     }
 }
 

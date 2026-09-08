@@ -12,7 +12,7 @@
 pub mod comment;
 pub mod view;
 
-pub use comment::split_inline_comment;
+pub use comment::{split_group_lines, split_inline_comment};
 pub use view::{
     LESSONS, TutorialPanel, TutorialPanelProps, TutorialView, jump_lesson, run_example, step_lesson,
 };
