@@ -746,6 +746,7 @@ the trained Pets demos.
 | `str_len(s)` | 1 | The number of CHARACTERS (Unicode scalar values) in `s`, not bytes -- a multi-byte UTF-8 character counts once. |
 | `str_slice(s, start, len)` | 3 | The `len`-character substring of `s` starting at character index `start` (both non-negative integers). Character-indexed, not byte-indexed; a `len` past the end clamps. |
 | `str_find(s, needle)` | 2 | The first CHARACTER index of `needle` in `s`, or `-1` if absent. An empty `needle` matches at 0. |
+| `str_eq(a, b)` | 2 | `1` if the two strings are exactly equal, else `0`. WHOLE-string equality, not substring -- use this to compare strings, since `eq` is an array op and rejects strings, and `str_find` is a substring test (`str_find("semigroup", "group")` is `4`, not `-1`). |
 | `str_split(s, sep)` | 2 | Split `s` on the substring `sep`, returning a string list. An absent separator yields the whole string as one element; an empty separator splits into individual characters. |
 | `tokenize_bytes(s)` | 1 | Return a rank-1 array of byte indices (0-255) for the UTF-8 encoding of `s`. Pure, deterministic, no training. |
 | `train_bpe(corpus, vocab_size, seed)` | 3 | Train a byte-level BPE tokenizer on a `Value::Str` (or already-byte-tokenized rank-1 array). Returns a `Value::Tokenizer`. Deterministic tie-breaking: on ties in merge count, the lexicographically smallest byte pair wins. |

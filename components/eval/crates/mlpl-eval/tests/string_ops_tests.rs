@@ -71,3 +71,23 @@ fn str_ops_reject_a_non_string() {
         Err(EvalError::Unsupported(_))
     ));
 }
+
+// -- str_eq: whole-string equality (upstream-asks #23). NOT substring;
+//    the demo repo's str_find workaround wrongly matched "semigroup" as
+//    "group". eq rejects strings, so this is how strings are compared.
+
+#[test]
+fn str_eq_is_whole_string_equality() {
+    assert_eq!(scalar(r#"str_eq("a", "a")"#), 1.0);
+    assert_eq!(scalar(r#"str_eq("a", "b")"#), 0.0);
+    assert_eq!(scalar(r#"str_eq("group", "group")"#), 1.0);
+    // The trap str_eq avoids: a substring test would say these are equal.
+    assert_eq!(scalar(r#"str_eq("semigroup", "group")"#), 0.0);
+    assert_eq!(scalar(r#"str_eq("", "")"#), 1.0);
+}
+
+#[test]
+fn str_eq_rejects_non_strings_and_bad_arity() {
+    assert!(eval(r#"str_eq("a", 1)"#).is_err()); // no coercion
+    assert!(eval(r#"str_eq("a")"#).is_err()); // arity
+}

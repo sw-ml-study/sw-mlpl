@@ -1750,7 +1750,11 @@ character counts once);
 `str_slice(s, start, len)` returns a character-indexed substring;
 `str_find(s, needle)` returns the first character index of `needle`
 (or -1); and `str_split(s, sep)` splits into a string list (an empty
-separator splits into individual characters). For string LISTS,
+separator splits into individual characters). To COMPARE two strings,
+`str_eq(a, b)` returns 1 when they are exactly equal, else 0 -- whole-
+string, not substring: `eq` is an array op and rejects strings, and
+`str_find` matches substrings (`str_find("semigroup", "group")` is 4,
+not -1). For string LISTS,
 `list_get(xs, i)` / `list_len(xs)` index and measure.
 
 ## fs_walk / read_text / write_text / remove_path / run_script (builtins)

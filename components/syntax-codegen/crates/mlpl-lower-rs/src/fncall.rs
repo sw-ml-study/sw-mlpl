@@ -68,7 +68,7 @@ enum Emit {
     TypeOf,
     Equal,
     /// The `str_*` family on `CVal::Str` (`str_len`/`str_concat`/
-    /// `str_find`/`str_slice`/`str_split`), dispatched by name.
+    /// `str_find`/`str_slice`/`str_split`/`str_eq`), dispatched by name.
     StrOp,
 }
 
@@ -122,7 +122,7 @@ const REGISTRY: &[Spec] = builtins! {
     ["type_of"] @ 1 => TypeOf;
     ["equal"] @ 2 => Equal;
     ["str_len"] @ 1 => StrOp;
-    ["str_concat", "str_find", "str_split"] @ 2 => StrOp;
+    ["str_concat", "str_find", "str_split", "str_eq"] @ 2 => StrOp;
     ["str_slice"] @ 3 => StrOp;
     ["band", "bor", "bxor", "bnot", "popcount", "shl", "shr", "bmask", "bits", "from_bits"] @ any => BitCall;
 };
@@ -300,6 +300,13 @@ pub(crate) fn lower_fncall(
                 "str_concat" => {
                     let b = crate::lower_cval(ctx, &args[1])?;
                     Ok(quote! { #rt::CVal::Str(format!("{}{}", (#s).str(), (#b).str())) })
+                }
+                "str_eq" => {
+                    let b = crate::lower_cval(ctx, &args[1])?;
+                    Ok(quote! { #rt::DenseArray::from_scalar({
+                        let (__av, __bv) = (#s, #b);
+                        if __av.str() == __bv.str() { 1.0 } else { 0.0 }
+                    }) })
                 }
                 "str_find" => {
                     let n = crate::lower_cval(ctx, &args[1])?;

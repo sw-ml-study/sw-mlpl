@@ -86,6 +86,7 @@ enum Builtin {
     StrFind,
     StrSlice,
     StrSplit,
+    StrEq,
 }
 
 const ALL: &[Builtin] = &[
@@ -148,6 +149,7 @@ const ALL: &[Builtin] = &[
     Builtin::StrFind,
     Builtin::StrSlice,
     Builtin::StrSplit,
+    Builtin::StrEq,
 ];
 
 impl Builtin {
@@ -215,6 +217,7 @@ impl Builtin {
             Builtin::StrFind => "str_find(\"hi\", \"i\")",
             Builtin::StrSlice => "str_slice(\"hi\", 0, 1)",
             Builtin::StrSplit => "str_split(\"a,b\", \",\")",
+            Builtin::StrEq => "str_eq(\"a\", \"a\")",
         }
     }
 
@@ -278,6 +281,7 @@ impl Builtin {
             Builtin::StrFind => "str_find",
             Builtin::StrSlice => "str_slice",
             Builtin::StrSplit => "str_split",
+            Builtin::StrEq => "str_eq",
         }
     }
 }
