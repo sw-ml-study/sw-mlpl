@@ -128,3 +128,28 @@ fn div_by_zero_inf() {
     let arr = eval("1 / 0").unwrap();
     assert!(arr.data()[0].is_infinite());
 }
+
+// -- Regression: all-unit shapes survive scalar broadcast (BUG 1,
+//    demo-abstract-algebra sw-mlpl-bug-report.md). A rank-0 scalar
+//    broadcast against an array whose every axis has extent 1 used to
+//    collapse the result to rank 0 ([[0]] * 1 -> [] instead of [1, 1]).
+
+#[test]
+fn scalar_broadcast_preserves_all_unit_rank() {
+    assert_eq!(eval("[0] * 1").unwrap().shape(), &Shape::new(vec![1]));
+    assert_eq!(eval("[[0]] * 1").unwrap().shape(), &Shape::new(vec![1, 1]));
+    assert_eq!(
+        eval("[[[0]]] * 1").unwrap().shape(),
+        &Shape::new(vec![1, 1, 1])
+    );
+    // eq() broadcasting a scalar hits the same path.
+    assert_eq!(
+        eval("eq([[0]], 0)").unwrap().shape(),
+        &Shape::new(vec![1, 1])
+    );
+    // A unit axis mixed with an extent > 1 axis was always fine.
+    assert_eq!(
+        eval("[[0, 1]] * 1").unwrap().shape(),
+        &Shape::new(vec![1, 2])
+    );
+}

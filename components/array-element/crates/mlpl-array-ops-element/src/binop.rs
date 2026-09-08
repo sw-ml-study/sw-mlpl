@@ -1,4 +1,4 @@
-use mlpl_array::{ArrayError, DenseArray};
+use mlpl_array::{ArrayError, DenseArray, Shape};
 
 use crate::merge_labels::merge_labels;
 
@@ -26,36 +26,55 @@ impl ApplyBinopExt for DenseArray {
         op: fn(f64, f64) -> f64,
     ) -> Result<DenseArray, ArrayError> {
         let labels = merge_labels(self, other)?;
-        let (data, shape) = if self.shape() == other.shape() {
-            (
-                zip_with(self.data(), other.data(), op),
-                self.shape().clone(),
-            )
-        } else if self.elem_count() == 1 {
-            // A single-element operand (rank-0 scalar OR a length-1
-            // array) broadcasts its one value against the other shape.
-            let s = self.data()[0];
-            (
-                other.data().iter().map(|b| op(s, *b)).collect(),
-                other.shape().clone(),
-            )
-        } else if other.elem_count() == 1 {
-            let s = other.data()[0];
-            (
-                self.data().iter().map(|a| op(*a, s)).collect(),
-                self.shape().clone(),
-            )
-        } else {
-            return Err(ArrayError::ShapeMismatch {
-                source: self.elem_count(),
-                target: other.elem_count(),
-            });
-        };
+        let (data, shape) = broadcast_apply(self, other, op)?;
         let arr = DenseArray::new(shape, data)?;
         match labels {
             Some(l) => arr.with_labels(l),
             None => Ok(arr),
         }
+    }
+}
+
+/// Element-wise apply with single-element broadcasting -> `(data, shape)`
+/// (labels are handled by the caller). Broadcasting PRESERVES the array
+/// operand's rank: a single-element operand (rank-0 scalar OR length-1
+/// array) broadcasts against the other's shape, and when BOTH are
+/// single-element the higher-rank shape wins -- so an all-unit shape
+/// survives scalar broadcast (`[[0]] * 1` is `[1, 1]`, not `[]`;
+/// regression fix, demo-abstract-algebra BUG 1). Ranks can only differ
+/// in that both-single case, since equal-rank single-element operands
+/// share a shape and take the equal-shape branch.
+fn broadcast_apply(
+    a: &DenseArray,
+    b: &DenseArray,
+    op: fn(f64, f64) -> f64,
+) -> Result<(Vec<f64>, Shape), ArrayError> {
+    if a.shape() == b.shape() {
+        Ok((zip_with(a.data(), b.data(), op), a.shape().clone()))
+    } else if a.elem_count() == 1 && b.elem_count() == 1 {
+        let shape = if a.rank() >= b.rank() {
+            a.shape().clone()
+        } else {
+            b.shape().clone()
+        };
+        Ok((vec![op(a.data()[0], b.data()[0])], shape))
+    } else if a.elem_count() == 1 {
+        let s = a.data()[0];
+        Ok((
+            b.data().iter().map(|x| op(s, *x)).collect(),
+            b.shape().clone(),
+        ))
+    } else if b.elem_count() == 1 {
+        let s = b.data()[0];
+        Ok((
+            a.data().iter().map(|x| op(*x, s)).collect(),
+            a.shape().clone(),
+        ))
+    } else {
+        Err(ArrayError::ShapeMismatch {
+            source: a.elem_count(),
+            target: b.elem_count(),
+        })
     }
 }
 
