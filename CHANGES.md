@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-07
 
+- fix(web): status badge picks the reference repo by served channel
+- chore(agentrail): complete 037-fix-scalar-broadcast-unit-shape; queue badge fix
+- fix(array): scalar broadcast preserves all-unit shapes (BUG 1)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete outbound extension values step
 - feat(extensions): send records and packed bytes to providers
 
