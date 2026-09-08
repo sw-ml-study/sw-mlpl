@@ -1,0 +1,10 @@
+number = 37
+slug = "fix-scalar-broadcast-unit-shape"
+status = "completed"
+description = "Fix demo-abstract-algebra BUG 1: an all-unit shape collapsed to rank 0 under ..."
+role = "production"
+context_files = []
+created_at = "2026-09-07T19:30:57"
+completed_at = "2026-09-07T19:31:15"
+task_type = "bugfix"
+commits = ["3d3e0c000b8fa82d6f70b46559c6a864b396f6b0"]

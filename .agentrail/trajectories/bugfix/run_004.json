@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 37,
+    "step": "fix-scalar-broadcast-unit-shape"
+  },
+  "action": "Reproduced via mlpl-repl -f; root-caused in binop.rs; added both-single-element higher-rank branch; extracted broadcast_apply; crate + eval regression tests; rebuilt binaries; verified acceptance.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-07T19:31:15"
+}
