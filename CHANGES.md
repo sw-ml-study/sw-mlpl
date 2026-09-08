@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-08
+
+- feat(lang): str_eq -- whole-string equality (upstream-asks #23, blocking)
+
 ## 2026-09-07
 
+- chore(agentrail): complete 038-fix-badge-deploy-pending-channel
+- chore(pages): rebuild for badge channel fix + scalar-broadcast fix; refresh CHANGES.md
 - fix(web): status badge picks the reference repo by served channel
 - chore(agentrail): complete 037-fix-scalar-broadcast-unit-shape; queue badge fix
 - fix(array): scalar broadcast preserves all-unit shapes (BUG 1)
