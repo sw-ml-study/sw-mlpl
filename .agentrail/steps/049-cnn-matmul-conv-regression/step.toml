@@ -1,0 +1,10 @@
+number = 49
+slug = "cnn-matmul-conv-regression"
+status = "completed"
+description = "Pin the weighted-convolution capability that works TODAY (no C2). Add a regre..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T16:34:00"
+completed_at = "2026-09-09T16:46:38"
+task_type = "production"
+commits = ["b915341f1bf257fe1a9ea4a6e9da002fef23425c"]

@@ -1,1 +1,0 @@
-BLOCKED: Deferred behind release-0-22-0: du-list-fs (compiler lowering) is not urgent, but the 0.22.0 release IS -- demo-ml-utils is waiting on windows()'s settled axis order + C5 to pin a version. Auto-selected here by 'next'; reopen after the release ships.

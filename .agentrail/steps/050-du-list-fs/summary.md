@@ -1,0 +1,1 @@
+BLOCKED: Deferred behind CNN work (kept blocked; cursor-parking during reorder).

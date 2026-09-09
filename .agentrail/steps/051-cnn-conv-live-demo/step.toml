@@ -1,0 +1,9 @@
+number = 51
+slug = "cnn-conv-live-demo"
+status = "pending"
+description = "Ship the convolution-from-the-equation live demo (was 'Phase 6'), now UNBLOCK..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T16:34:00"
+task_type = "production"
+commits = []

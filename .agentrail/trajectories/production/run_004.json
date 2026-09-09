@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 49,
+    "step": "cnn-matmul-conv-regression"
+  },
+  "action": "empirical probing on the release binary (matmul/dot exist; apply_binop is exact-shape-or-scalar only, no per-axis length-1 broadcast); hand-verified conv values; wrote conv_eval_tests.rs; cargo test/fmt/clippy scoped to mlpl-eval; sw-checklist; git commit+push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T16:46:38"
+}

@@ -1,0 +1,1 @@
+CNN ergonomics (demo-ml-utils C3+C4), NOT a demo blocker: (C3) multi-axis reduce reduce(:add, a, [2,3]); (C4) named-axis reduce reduce(:add, M, "channel") + vector of names. Lets the conv reduce over ["channel","kernel_y","kernel_x"] by name. TDD; docs; rebuild; redeploy DEV/nightly only.
