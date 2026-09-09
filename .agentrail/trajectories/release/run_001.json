@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 43,
+    "step": "release-0-21-0-version-bump"
+  },
+  "action": "sed bump Cargo.toml; revert cargo-update lock churn; perl -i surgical mlpl-* lock bump; --locked validation build; rebuild binaries; build-pages+deploy-pages; release-stable.sh + push mlpl-live.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T13:31:17"
+}

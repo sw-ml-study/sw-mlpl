@@ -1,0 +1,1 @@
+Lower du builtins to compile-to-Rust: list_len/1, list_get/2 (StrList ops), fs_walk (sandboxed dir -> StrList), concat (array concat). May need a CVal StrList variant. TDD + gated MLPL_BUILD_TESTS e2e.
