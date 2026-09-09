@@ -592,7 +592,7 @@ checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "mlpl-web-demos"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-web-demos-types",
  "serde",
@@ -601,11 +601,11 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-demos-types"
-version = "0.22.0"
+version = "0.21.0"
 
 [[package]]
 name = "mlpl-web-lessons"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "serde",
  "toml",
@@ -614,7 +614,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-mode"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-web-demos",
  "mlpl-web-tutorial",
@@ -623,7 +623,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-tutorial"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-web-lessons",
  "web-sys",

@@ -621,7 +621,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-cuda-forward"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "candle-core",
  "candle-nn",
@@ -629,7 +629,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-cuda-model"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "candle-core",
  "candle-nn",

@@ -16,21 +16,21 @@ checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
 
 [[package]]
 name = "mlpl-array"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-core"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-trace"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -40,7 +40,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-viz"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -53,7 +53,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-viz-analysis"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-viz-core",
@@ -61,18 +61,18 @@ dependencies = [
 
 [[package]]
 name = "mlpl-viz-core"
-version = "0.22.0"
+version = "0.21.0"
 
 [[package]]
 name = "mlpl-viz-flow"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-viz-core",
 ]
 
 [[package]]
 name = "mlpl-viz-marks"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-viz-core",

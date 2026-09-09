@@ -593,15 +593,15 @@ checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
 
 [[package]]
 name = "mlpl-glossary-data"
-version = "0.22.0"
+version = "0.21.0"
 
 [[package]]
 name = "mlpl-glossary-search"
-version = "0.22.0"
+version = "0.21.0"
 
 [[package]]
 name = "mlpl-web-demos"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-web-demos-types",
  "serde",
@@ -610,11 +610,11 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-demos-types"
-version = "0.22.0"
+version = "0.21.0"
 
 [[package]]
 name = "mlpl-web-glossary"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-glossary-data",
  "mlpl-glossary-search",
@@ -626,7 +626,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-lessons"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "serde",
  "toml",
@@ -635,7 +635,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-path-body"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "wasm-bindgen",
  "web-sys",
@@ -644,7 +644,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-paths"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-web-demos",
  "mlpl-web-glossary",
@@ -656,7 +656,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-web-paths-data"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "serde",
  "toml",

@@ -307,28 +307,28 @@ checksum = "68354c5c6bd36d73ff3feceb05efa59b6acb7626617f4962be322a825e61f79a"
 
 [[package]]
 name = "mlpl-array"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-array-ops-compose"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-element"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-matmul"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -337,21 +337,21 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-reduce"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-shape"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-autograd"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -365,7 +365,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-autograd-tape"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -378,21 +378,21 @@ dependencies = [
 
 [[package]]
 name = "mlpl-core"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-mlx-forward"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlx-rs",
 ]
 
 [[package]]
 name = "mlpl-mlx-handle"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-autograd",
@@ -404,7 +404,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-mlx-rt"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-matmul",
@@ -416,14 +416,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-mlx-train"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlx-rs",
 ]
 
 [[package]]
 name = "mlpl-rt"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
@@ -440,7 +440,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-rt-fsio"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-rt-value",
@@ -448,14 +448,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-rt-value"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-runtime-array"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -467,7 +467,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-bits"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -475,14 +475,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-core"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-runtime-math"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
@@ -491,7 +491,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-tensor-handle"
-version = "0.22.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
