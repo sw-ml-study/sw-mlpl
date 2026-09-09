@@ -1,0 +1,10 @@
+number = 46
+slug = "cnn-phase2b-windows-axis-order-and-demos"
+status = "completed"
+description = "CNN Phase 2b (demo-ml-utils feedback on C1): change windows() output axis ord..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T14:57:32"
+completed_at = "2026-09-09T15:04:46"
+task_type = "production"
+commits = ["62afdde6a7510eb3dfe3f154a2a9dc18980626d6"]

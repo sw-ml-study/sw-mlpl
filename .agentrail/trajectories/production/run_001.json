@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 46,
+    "step": "cnn-phase2b-windows-axis-order-and-demos"
+  },
+  "action": "Edit windows.rs out_dims/gather/labels + module doc; updated tests + docs + demos.toml; cargo test/clippy/fmt scoped to array-compose+eval; sw-checklist (41/545 hold, exception trailer); rebuilt mlpl-repl/mlpl-build release+debug; git commit+push",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T15:04:46"
+}
