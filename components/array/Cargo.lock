@@ -35,7 +35,7 @@ checksum = "91622ff5e7162018101f2fea40d6ebf4a78bbe5a49736a2020649edf9693679e"
 
 [[package]]
 name = "mlpl-array"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-element",
@@ -47,21 +47,21 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-compose"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-element"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-matmul"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -70,28 +70,28 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-reduce"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-shape"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-core"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-tensor-handle"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]

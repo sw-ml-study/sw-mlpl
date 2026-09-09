@@ -35,14 +35,14 @@ checksum = "9e5e8f6c15a24b9a3ee5efec809ccd006d3b30e8b3bb63c39af737c7f87daa1d"
 
 [[package]]
 name = "mlpl-array"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-array-ops-matmul"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -51,35 +51,35 @@ dependencies = [
 
 [[package]]
 name = "mlpl-core"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-lex-ident"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-number"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-punct"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-string"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-error",
@@ -88,7 +88,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lex-ident",
@@ -101,7 +101,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-error"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-token",
@@ -109,14 +109,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-token"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-lower-rs"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-parser",
  "mlpl-runtime-bits",
@@ -126,7 +126,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-macro"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-lower-rs",
@@ -137,7 +137,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-parser"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer",
@@ -146,14 +146,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-parser-ast"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-runtime-bits"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -161,7 +161,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-core"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]

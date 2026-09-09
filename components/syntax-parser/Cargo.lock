@@ -4,35 +4,35 @@ version = 4
 
 [[package]]
 name = "mlpl-core"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-lex-ident"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-number"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-punct"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-string"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-error",
@@ -41,7 +41,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lex-ident",
@@ -54,7 +54,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-error"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-token",
@@ -62,14 +62,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-token"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-parser"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer",
@@ -78,14 +78,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-parser-ast"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-source-loader"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-lexer",
  "mlpl-parser",

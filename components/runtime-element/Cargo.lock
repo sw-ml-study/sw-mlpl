@@ -35,28 +35,28 @@ checksum = "91622ff5e7162018101f2fea40d6ebf4a78bbe5a49736a2020649edf9693679e"
 
 [[package]]
 name = "mlpl-array"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-array-ops-compose"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-element"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-matmul"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -65,28 +65,28 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-reduce"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-shape"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-core"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-runtime-array"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -98,7 +98,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-bits"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -106,14 +106,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-core"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-runtime-math"
-version = "0.20.0"
+version = "0.21.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
