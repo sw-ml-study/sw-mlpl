@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(pages): rebuild nightly at 0.21.0 (windows WIP; version bump reverted)
+- Revert "release: bump component-workspace versions 0.21.0 -> 0.22.0"
+- chore(agentrail): complete 047-release-0-22-0; du-list-fs deferred to 048 (blocked); queue cnn-phase3
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for 0.22.0 (windows positions-leading layout + moving-average direct-form demo)
 - release: bump component-workspace versions 0.21.0 -> 0.22.0
 - docs(changes): refresh CHANGES.md to HEAD
