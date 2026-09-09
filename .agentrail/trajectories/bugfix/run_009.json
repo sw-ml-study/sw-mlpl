@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 44,
+    "step": "cnn-phase1-compress-labels"
+  },
+  "action": "propagate labels in compress; builtin_eval_tests C5 test; rebuild binaries; e2e verify.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T14:32:02"
+}

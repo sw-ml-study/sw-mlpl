@@ -1,0 +1,10 @@
+number = 44
+slug = "cnn-phase1-compress-labels"
+status = "completed"
+description = "CNN-from-equations Phase 1 (demo-ml-utils C5): compress drops axis labels -- ..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T14:29:10"
+completed_at = "2026-09-09T14:32:02"
+task_type = "bugfix"
+commits = ["274c91338faeaf5b46fbd90560162618973a509e"]
