@@ -1,6 +1,6 @@
-number = 47
+number = 48
 slug = "du-list-fs"
-status = "pending"
+status = "blocked"
 description = "Lower du builtins to compile-to-Rust: list_len/1, list_get/2 (StrList ops), f..."
 role = "production"
 context_files = []

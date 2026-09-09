@@ -1,0 +1,10 @@
+number = 47
+slug = "release-0-22-0"
+status = "completed"
+description = "Cut the 0.22.0 release carrying C5 (compress label propagation) + C1 (windows..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T15:08:40"
+completed_at = "2026-09-09T15:26:17"
+task_type = "production"
+commits = ["5009491143d229e1c954e8eac12db55b83201d36"]

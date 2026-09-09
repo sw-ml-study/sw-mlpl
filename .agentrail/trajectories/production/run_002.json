@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 47,
+    "step": "release-0-22-0"
+  },
+  "action": "perl surgical bump over Cargo.toml + multi-line guarded bump over Cargo.lock (mlpl-name-anchored); cargo metadata --locked sweep to detect drift; cargo build --locked release+debug (cli) + --locked (changed workspaces); build-pages.sh + deploy-pages.sh (dev); release-stable.sh + git push mlpl-live (stable); gen-changes.sh; curl live-verify",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T15:26:17"
+}
