@@ -14,6 +14,14 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 046-cnn-phase2b-windows-axis-order; queue release-0-22-0
+- feat(windows): positions-leading axis order for transpose-free conv
+- chore(agentrail): complete 045-cnn-phase2-windows-forward
+- feat(lang): windows(x, sizes[, strides]) -- general sliding windows (C1)
+- chore(agentrail): complete 044-cnn-phase1-compress-labels
+- fix(runtime): compress preserves axis labels (demo-ml-utils C5)
+- chore(agentrail): complete 043-release-0-21-0-version-bump
+- chore(pages): rebuild for 0.21.0 (str_eq, value_raw, broadcast/comment/recursion fixes)
 - chore(release): bump 0.20.0 -> 0.21.0
 
 ## 2026-09-08
