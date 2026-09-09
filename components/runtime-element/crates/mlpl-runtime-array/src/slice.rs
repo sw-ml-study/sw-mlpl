@@ -112,7 +112,14 @@ pub(crate) fn compress(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, 
     }
     let mut new_dims = dims;
     new_dims[axis] = keep.len();
-    Ok(DenseArray::new(Shape::new(new_dims), out)?)
+    let result = DenseArray::new(Shape::new(new_dims), out)?;
+    // compress removes SLICES along one axis; it changes no axis's
+    // identity or count (rank is unchanged), so labels survive exactly
+    // as they do through `rotate`/`take` (demo-ml-utils C5 defect).
+    match a.labels() {
+        Some(lbls) => Ok(result.with_labels(lbls.to_vec())?),
+        None => Ok(result),
+    }
 }
 
 /// `pareto_front(P, dirs)`: the `[n]` 0/1 mask of non-dominated

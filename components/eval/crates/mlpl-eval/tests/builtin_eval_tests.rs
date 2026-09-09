@@ -605,6 +605,16 @@ fn compress_keeps_masked_slices() {
 }
 
 #[test]
+fn compress_preserves_axis_labels() {
+    // C5 (demo-ml-utils): compress removes SLICES along one axis and
+    // changes no axis identity, so labels survive -- as they do through
+    // rotate/take. Before the fix labels(...) returned "," (dropped).
+    let src = "M = reshape_labeled(iota(6), [3, 2], [\"image_y\", \"image_x\"])\n\
+               labels(compress([0, 1, 1], M))";
+    assert_eq!(eval_value(src).unwrap(), Value::Str("image_y,image_x".into()));
+}
+
+#[test]
 fn rand_ints_is_deterministic_and_bounded() {
     let a = eval("rand_ints(64, 3, 9, 7)").unwrap();
     let b = eval("rand_ints(64, 3, 9, 7)").unwrap();
