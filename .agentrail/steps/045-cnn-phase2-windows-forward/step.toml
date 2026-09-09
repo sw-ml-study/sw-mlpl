@@ -1,0 +1,10 @@
+number = 45
+slug = "cnn-phase2-windows-forward"
+status = "completed"
+description = "CNN Phase 2 (demo-ml-utils C1): windows(x, sizes[, strides]) -- general overl..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T14:44:23"
+completed_at = "2026-09-09T14:45:48"
+task_type = "feature"
+commits = ["3cdce85d9d8a6030cae8e1fd215d440e5a48377b"]

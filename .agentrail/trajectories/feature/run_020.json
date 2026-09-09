@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 45,
+    "step": "cnn-phase2-windows-forward"
+  },
+  "action": "windows.rs forward op + strides; transform::windows wrapper; dispatch+NAMES; catalog/docs/glossary; coverage gate; compose+eval tests; rebuild binaries; e2e verify.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T14:45:48"
+}
