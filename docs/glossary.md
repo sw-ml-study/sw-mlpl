@@ -2560,12 +2560,17 @@ windows over the last `len(sizes)` axes -- the general
 sliding-window rearrangement of which [[patchify (builtin)]]
 (non-overlapping tiles) is a special case. `sizes` and the
 optional `strides` (default all 1) are rank-1 non-negative
-integer vectors. The output axis order is `[unwindowed-leading
-..., output-position..., window...]`: `windows(reshape(range(16),
+integer vectors. The output axis order is `[output-position...,
+unwindowed..., window...]` -- positions lead, the non-windowed
+axes follow, the window sizes trail: `windows(reshape(range(16),
 [4, 4]), [3, 3])` is `[2, 2, 3, 3]`, and a `[C, H, W]` image
-windowed by `[kh, kw]` is `[C, out_y, out_x, kh, kw]`, where an
-output-position axis has extent `(d - w)/stride + 1`. Leading and
-position axes keep the input's labels; the window axes are
+windowed by `[kh, kw]` is `[out_y, out_x, C, kh, kw]`, where an
+output-position axis has extent `(d - w)/stride + 1`. Placing the
+non-windowed axes beside the window axes makes the trailing block
+`[C, kh, kw]` align with a kernel `[C, kh, kw]` by trailing
+position (NumPy-style rank broadcasting), so the convolution
+needs no transpose. Position axes inherit the windowed axes'
+labels and the non-windowed axes keep theirs; the window axes are
 unlabeled. A window larger than its axis is an error, not an
 empty result, and the result is a copy.
 

@@ -611,7 +611,10 @@ fn compress_preserves_axis_labels() {
     // rotate/take. Before the fix labels(...) returned "," (dropped).
     let src = "M = reshape_labeled(iota(6), [3, 2], [\"image_y\", \"image_x\"])\n\
                labels(compress([0, 1, 1], M))";
-    assert_eq!(eval_value(src).unwrap(), Value::Str("image_y,image_x".into()));
+    assert_eq!(
+        eval_value(src).unwrap(),
+        Value::Str("image_y,image_x".into())
+    );
 }
 
 #[test]

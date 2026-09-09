@@ -30,13 +30,30 @@ fn two_d_windows_are_convolution_patches() {
 }
 
 #[test]
-fn leading_axes_are_preserved() {
-    // [C=2, W=4] windows of 3 over the last axis -> [2, 2, 3].
+fn positions_lead_and_non_windowed_axes_trail_next_to_the_window() {
+    // [C=2, W=4] windows of 3 over the last axis -> [out=2, C=2, win=3].
+    // Positions lead; the non-windowed C sits with the window axis, so
+    // the layout at each position is [ch0 window, ch1 window].
     let x = arr(&[2, 4], &[0.0, 1.0, 2.0, 3.0, 10.0, 11.0, 12.0, 13.0]);
     let w = x.windows(&[3], &[1]).unwrap();
     assert_eq!(w.shape().dims(), &[2, 2, 3]);
-    assert_eq!(&w.data()[0..6], &[0.0, 1.0, 2.0, 1.0, 2.0, 3.0]);
-    assert_eq!(&w.data()[6..12], &[10.0, 11.0, 12.0, 11.0, 12.0, 13.0]);
+    // position 0: ch0 [0,1,2], ch1 [10,11,12]
+    assert_eq!(&w.data()[0..6], &[0.0, 1.0, 2.0, 10.0, 11.0, 12.0]);
+    // position 1: ch0 [1,2,3], ch1 [11,12,13]
+    assert_eq!(&w.data()[6..12], &[1.0, 2.0, 3.0, 11.0, 12.0, 13.0]);
+}
+
+#[test]
+fn multi_channel_2d_lays_out_for_kernel_alignment() {
+    // The load-bearing convolution ordering (demo-ml-utils reference):
+    // [C, H, W].windows([kh, kw]) -> [out_y, out_x, C, kh, kw], so a
+    // kernel [C, kh, kw] aligns by trailing position with no transpose.
+    let x = arr(&[2, 3, 3], &(0..18).map(|i| i as f64).collect::<Vec<_>>());
+    let w = x.windows(&[2, 2], &[1, 1]).unwrap();
+    assert_eq!(w.shape().dims(), &[2, 2, 2, 2, 2]);
+    // At output position (0,0): channel 0's 2x2 patch, then channel 1's.
+    assert_eq!(&w.data()[0..4], &[0.0, 1.0, 3.0, 4.0]); // ch0 patch (0,0)
+    assert_eq!(&w.data()[4..8], &[9.0, 10.0, 12.0, 13.0]); // ch1 patch (0,0)
 }
 
 #[test]
