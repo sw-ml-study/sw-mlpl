@@ -1,4 +1,4 @@
-number = 50
+number = 51
 slug = "cnn-conv-live-demo"
 status = "pending"
 description = "Ship the convolution-from-the-equation live demo (was 'Phase 6'), now UNBLOCK..."

@@ -1,0 +1,9 @@
+number = 50
+slug = "svg-equation-renderer"
+status = "in-progress"
+description = "Build Tier 1 math rendering: a self-contained, offline, high-contrast equatio..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T16:51:17"
+task_type = "production"
+commits = []

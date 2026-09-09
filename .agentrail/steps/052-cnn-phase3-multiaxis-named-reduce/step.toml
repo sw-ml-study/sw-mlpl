@@ -1,9 +1,0 @@
-number = 52
-slug = "cnn-phase3-multiaxis-named-reduce"
-status = "pending"
-description = "CNN ergonomics (demo-ml-utils C3+C4), NOT a demo blocker: (C3) multi-axis red..."
-role = "production"
-context_files = []
-created_at = "2026-09-09T16:34:00"
-task_type = "production"
-commits = []

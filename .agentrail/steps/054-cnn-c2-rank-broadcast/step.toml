@@ -1,0 +1,9 @@
+number = 54
+slug = "cnn-c2-rank-broadcast"
+status = "pending"
+description = "CNN ergonomics (demo-ml-utils C2), DEMOTED from blocker to nice-to-have (the ..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T16:34:00"
+task_type = "production"
+commits = []
