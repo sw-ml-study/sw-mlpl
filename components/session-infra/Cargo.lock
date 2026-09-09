@@ -4,25 +4,25 @@ version = 4
 
 [[package]]
 name = "mlpl-array"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-bpe-core"
-version = "0.21.0"
+version = "0.22.0"
 
 [[package]]
 name = "mlpl-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-env-traits"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -31,14 +31,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-eval-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-loader-helpers"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]

@@ -100,7 +100,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-eval-image"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "jpeg-decoder",
  "png",
