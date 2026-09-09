@@ -37,6 +37,7 @@ pub const NAMES: &[&str] = &[
     "take",
     "at",
     "rotate",
+    "windows",
 ];
 // Note: `concat` (3-arg axis-aware form) is dispatched here but
 // not listed in NAMES because the 2-arg legacy form is registered

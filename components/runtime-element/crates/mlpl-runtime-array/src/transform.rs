@@ -76,3 +76,31 @@ fn scalar_i64(name: &str, arr: &DenseArray, what: &str) -> Result<i64, RuntimeEr
     }
     Ok(arr.data()[0] as i64)
 }
+
+/// `windows(x, sizes[, strides])`: sliding windows over the trailing
+/// `len(sizes)` axes. `sizes` and the optional `strides` are rank-1
+/// non-negative-integer vectors; `strides` defaults to all 1s.
+pub(crate) fn windows(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeError> {
+    if args.len() != 2 && args.len() != 3 {
+        return Err(arity_err(name, 2, args.len()));
+    }
+    let as_usizes = |a: &DenseArray, what: &str| -> Result<Vec<usize>, RuntimeError> {
+        a.data()
+            .iter()
+            .map(|&v| {
+                (v >= 0.0 && v.fract() == 0.0)
+                    .then_some(v as usize)
+                    .ok_or_else(|| RuntimeError::InvalidArgument {
+                        func: name.into(),
+                        reason: format!("{what} must be non-negative integers, got {v}"),
+                    })
+            })
+            .collect()
+    };
+    let sizes = as_usizes(&args[1], "sizes")?;
+    let strides = match args.get(2) {
+        Some(s) => as_usizes(s, "strides")?,
+        None => vec![1; sizes.len()],
+    };
+    Ok(args[0].windows(&sizes, &strides)?)
+}

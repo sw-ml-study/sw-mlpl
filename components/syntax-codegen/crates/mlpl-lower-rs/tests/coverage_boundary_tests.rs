@@ -35,6 +35,7 @@ const INTERPRETER_ONLY: &[&str] = &[
     "grade_up",
     "grade_down",
     "rotate",
+    "windows",
     "concat",
     "flatten",
     // StrList / du -- queued.

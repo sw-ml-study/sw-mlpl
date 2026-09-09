@@ -6,12 +6,14 @@ mod concat;
 mod patchify;
 mod stack;
 mod take;
+mod windows;
 
 pub use concat::ConcatExt;
 pub use patchify::PatchifyExt;
 pub use stack::{RotateExt, stack};
 pub use take::TakeExt;
+pub use windows::WindowsExt;
 
 pub mod prelude {
-    pub use super::{ConcatExt, PatchifyExt, RotateExt, TakeExt, stack};
+    pub use super::{ConcatExt, PatchifyExt, RotateExt, TakeExt, WindowsExt, stack};
 }

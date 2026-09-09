@@ -99,6 +99,7 @@ entries = [
   ["concat", "concat(a, b[, axis])", "concat rank-0/1 (2-arg) or axis-aware concat for tape (3-arg)"],
   ["last_row", "last_row(M)", "final row of a rank-2 matrix as a vector"],
   ["patchify", "patchify(x, P)", "[B,C,H,W] image batch into [B,N,P*P*C] patches"],
+  ["windows", "windows(x, sizes[, strides])", "sliding windows over the trailing axes -> [lead.., positions.., sizes..]; the primitive under moving averages and convolution patches"],
   ["take", "take(x, axis, idx)", "drop one axis at a single integer index (tape-differentiable)"],
   ["at", "at(v, idx)", "element idx of a rank-1 vector as a scalar; the 2-arg convenience for take(v, 0, idx)"],
   ["argtop_k", "argtop_k(scores, k)", "indices of top-k entries (descending)"],

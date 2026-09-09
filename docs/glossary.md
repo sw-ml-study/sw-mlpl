@@ -2553,6 +2553,30 @@ step pays no network cost. The WASM REPL gets a clean error
 pointing at the preloaded fixture; image decoders are
 deliberately not in the WASM dependency tree.
 
+## windows (builtin)
+
+`windows(x, sizes[, strides])` extracts OVERLAPPING sliding
+windows over the last `len(sizes)` axes -- the general
+sliding-window rearrangement of which [[patchify (builtin)]]
+(non-overlapping tiles) is a special case. `sizes` and the
+optional `strides` (default all 1) are rank-1 non-negative
+integer vectors. The output axis order is `[unwindowed-leading
+..., output-position..., window...]`: `windows(reshape(range(16),
+[4, 4]), [3, 3])` is `[2, 2, 3, 3]`, and a `[C, H, W]` image
+windowed by `[kh, kw]` is `[C, out_y, out_x, kh, kw]`, where an
+output-position axis has extent `(d - w)/stride + 1`. Leading and
+position axes keep the input's labels; the window axes are
+unlabeled. A window larger than its axis is an error, not an
+empty result, and the result is a copy.
+
+It is the primitive under a moving average -- `reduce(:add,
+windows(x, [w]), <win axis>) / w`, the direct form of J's
+windowed adverb -- and a convolution patch stack, where the
+paper's `x_{x+u, y+v}` subscript becomes an array so a 2-D
+convolution is `reduce(:add, kernel * windows(img, [kh, kw]))`.
+The same abstraction serves cellular automata, finite-difference
+stencils, and signal processing.
+
 ## patchify (builtin)
 
 `patchify(x, P)` rearranges a `[B, C, H, W]` image batch into

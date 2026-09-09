@@ -54,6 +54,7 @@ fn structural_call(name: &str, args: Vec<DenseArray>) -> CallResult {
         "take" => Some(slice::take(name, args)),
         "at" => Some(at(name, args)),
         "rotate" => Some(transform::rotate(name, args)),
+        "windows" => Some(transform::windows(name, args)),
         _ => None,
     }
 }
