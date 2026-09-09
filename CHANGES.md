@@ -12,8 +12,13 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-09
+
+- chore(release): bump 0.20.0 -> 0.21.0
+
 ## 2026-09-08
 
+- chore(pages): rebuild for recursion-depth cap (browser session no longer aborts); refresh CHANGES.md
 - chore(agentrail): complete 042-fix-recursion-depth-cap
 - fix(eval): recursion-depth cap -- catchable error, not a stack-overflow abort (BUG 3)
 - chore(web-render): sync Cargo.lock
