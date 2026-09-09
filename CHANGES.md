@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(pages): rebuild for 0.22.0 (windows positions-leading layout + moving-average direct-form demo)
+- release: bump component-workspace versions 0.21.0 -> 0.22.0
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 046-cnn-phase2b-windows-axis-order; queue release-0-22-0
 - feat(windows): positions-leading axis order for transpose-free conv
 - chore(agentrail): complete 045-cnn-phase2-windows-forward
