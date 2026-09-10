@@ -2,6 +2,7 @@
 //! Body extracted from mlpl-array in saga 53.
 
 mod binop;
+mod broadcast;
 mod merge_labels;
 
 pub use binop::ApplyBinopExt;

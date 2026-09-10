@@ -155,20 +155,29 @@ Precedence (high to low):
 
 Parentheses override precedence: `(x + y) * z`
 
-Operators apply element-wise on arrays of the same shape, or
-broadcast a SINGLE-ELEMENT operand -- a rank-0 scalar OR a length-1
-array like `[2]` -- against the other operand's shape (matching
-NumPy / APL):
+Operators apply element-wise with NumPy / APL trailing-axis
+broadcasting: shapes are compared from the RIGHT, and any axis that is
+missing on one operand or has extent 1 stretches to meet the other. A
+rank-0 scalar and a length-1 array are the simplest cases (they stretch
+to any shape); a lower-rank operand aligns to the trailing axes of a
+higher-rank one:
 
 ```
 [1, 2, 3] + [4, 5, 6]    # [5, 7, 9]
 [1, 2, 3] * 10            # [10, 20, 30]   (scalar broadcast)
 [2] * [1, 2, 3]          # [2, 4, 6]       (length-1 broadcast)
+reshape([10,20,30],[3,1]) + reshape([1,2,3,4],[1,4])   # [3,4] outer sum
 ```
 
-Because a length-1 array broadcasts like a scalar, an indexing result
-that comes back as a length-1 slice can meet a vector directly, without
-an explicit `reshape(..., [])` collapse first.
+Two axes are compatible when they are equal or one is 1; otherwise the
+op errors. A lower-rank kernel therefore meets a higher-rank stack on
+its trailing axes directly -- e.g. a `[C, kh, kw]` kernel multiplies
+`[out_y, out_x, C, kh, kw]` convolution patches with no reshape. Labels
+align from the right too: the surviving axes of a labeled operand carry
+through, and shared trailing labels must agree. Because a length-1 array
+broadcasts like a scalar, an indexing result that comes back as a
+length-1 slice can meet a vector directly, without an explicit
+`reshape(..., [])` collapse first.
 
 ## Assignment
 

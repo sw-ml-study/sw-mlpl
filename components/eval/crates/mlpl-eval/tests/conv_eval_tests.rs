@@ -52,12 +52,16 @@ fn box_filter_conv_is_reduce_over_the_receptive_field() {
 }
 
 #[test]
-fn the_elementwise_kernel_spelling_still_needs_c2() {
-    // Documents the CURRENT boundary (not a wish): a rank-3 kernel does NOT
-    // broadcast against rank-5 patches -- apply_binop requires exact-shape
-    // operands or a whole-array scalar. When C2 lands, delete this test.
+fn the_elementwise_kernel_spelling_matches_the_matmul_conv() {
+    // C2 (rank broadcasting) landed: a rank-3 kernel [C,kh,kw] now
+    // broadcasts against rank-5 patches [oy,ox,C,kh,kw], so the
+    // elementwise spelling computes the SAME convolution as the im2col
+    // matmul form above -- pinning the requirement (equal results), not
+    // merely that the multiply no longer errors.
     let src = "img = reshape(range(18), [2, 3, 3])\n\
                k = reshape(range(8), [2, 2, 2])\n\
-               windows(img, [2, 2]) * k";
-    assert!(eval(src).is_err());
+               reduce(:add, windows(img, [2, 2]) * k, [2, 3, 4])";
+    let y = eval(src).unwrap();
+    assert_eq!(y.shape(), &Shape::new(vec![2, 2]));
+    assert_eq!(y.data(), &[268.0, 296.0, 352.0, 380.0]);
 }

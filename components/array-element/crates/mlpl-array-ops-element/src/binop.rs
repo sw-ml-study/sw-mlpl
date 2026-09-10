@@ -1,17 +1,18 @@
-use mlpl_array::{ArrayError, DenseArray, Shape};
+use mlpl_array::{ArrayError, DenseArray};
 
+use crate::broadcast::broadcast_apply;
 use crate::merge_labels::merge_labels;
 
 /// Apply-binop extension for `DenseArray`.
 pub trait ApplyBinopExt {
-    /// Apply a binary op element-wise with single-element broadcasting:
-    /// if one operand holds exactly one value (a rank-0 scalar OR a
-    /// length-1 array like `[2]` / `[[2]]`), that value broadcasts
-    /// against the other operand's shape, matching NumPy / APL. This
-    /// means `[2] * [1,2,3]` is `[2,4,6]`, and an indexing primitive
-    /// that returns a length-1 slice meets a vector without an explicit
-    /// `reshape(..., [])` collapse. Labels propagate per Saga 11.5
-    /// Phase 3 semantics.
+    /// Apply a binary op element-wise with NumPy / APL trailing-axis
+    /// broadcasting: shapes align from the RIGHT, and any axis that is
+    /// missing on one operand or has extent 1 broadcasts against the
+    /// other. So `[2] * [1,2,3]` is `[2,4,6]` (single-element broadcast),
+    /// and a rank-3 kernel `[C,kh,kw]` multiplies rank-5 patches
+    /// `[oy,ox,C,kh,kw]` directly -- no reshape. Labels align from the
+    /// right too (Saga 11.5 Phase 3 semantics), so the surviving axes of
+    /// a labeled operand carry through.
     fn apply_binop(
         &self,
         other: &DenseArray,
@@ -33,51 +34,4 @@ impl ApplyBinopExt for DenseArray {
             None => Ok(arr),
         }
     }
-}
-
-/// Element-wise apply with single-element broadcasting -> `(data, shape)`
-/// (labels are handled by the caller). Broadcasting PRESERVES the array
-/// operand's rank: a single-element operand (rank-0 scalar OR length-1
-/// array) broadcasts against the other's shape, and when BOTH are
-/// single-element the higher-rank shape wins -- so an all-unit shape
-/// survives scalar broadcast (`[[0]] * 1` is `[1, 1]`, not `[]`;
-/// regression fix, demo-abstract-algebra BUG 1). Ranks can only differ
-/// in that both-single case, since equal-rank single-element operands
-/// share a shape and take the equal-shape branch.
-fn broadcast_apply(
-    a: &DenseArray,
-    b: &DenseArray,
-    op: fn(f64, f64) -> f64,
-) -> Result<(Vec<f64>, Shape), ArrayError> {
-    if a.shape() == b.shape() {
-        Ok((zip_with(a.data(), b.data(), op), a.shape().clone()))
-    } else if a.elem_count() == 1 && b.elem_count() == 1 {
-        let shape = if a.rank() >= b.rank() {
-            a.shape().clone()
-        } else {
-            b.shape().clone()
-        };
-        Ok((vec![op(a.data()[0], b.data()[0])], shape))
-    } else if a.elem_count() == 1 {
-        let s = a.data()[0];
-        Ok((
-            b.data().iter().map(|x| op(s, *x)).collect(),
-            b.shape().clone(),
-        ))
-    } else if b.elem_count() == 1 {
-        let s = b.data()[0];
-        Ok((
-            a.data().iter().map(|x| op(*x, s)).collect(),
-            a.shape().clone(),
-        ))
-    } else {
-        Err(ArrayError::ShapeMismatch {
-            source: a.elem_count(),
-            target: b.elem_count(),
-        })
-    }
-}
-
-fn zip_with(a: &[f64], b: &[f64], op: fn(f64, f64) -> f64) -> Vec<f64> {
-    a.iter().zip(b.iter()).map(|(x, y)| op(*x, *y)).collect()
 }
