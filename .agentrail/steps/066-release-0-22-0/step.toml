@@ -1,9 +1,10 @@
 number = 66
 slug = "release-0-22-0"
-status = "in-progress"
+status = "completed"
 description = "Cut the 0.22.0 release (maintainer-authorized 2026-09-10). (1) Commit pending..."
 role = "production"
 context_files = []
 created_at = "2026-09-10T14:41:09"
+completed_at = "2026-09-10T15:22:33"
 task_type = "release"
-commits = []
+commits = ["4ca2a6ba077660b8e8f3bff03e7232fb81a6951a"]

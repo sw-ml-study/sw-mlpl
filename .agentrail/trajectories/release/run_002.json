@@ -1,0 +1,11 @@
+{
+  "task_type": "release",
+  "state": {
+    "number": 66,
+    "step": "release-0-22-0"
+  },
+  "action": "git cherry-pick -n of the reviewed 0.21->0.22 bump for clean toml hunks; cargo update -w --offline across 52 workspaces to sync mlpl-* lock entries (incl. post-bump crates viz-math/array-ops-reduce); Emacs.app batch publish for literate; build-pages.sh + deploy-pages.sh (nightly) + release-stable.sh (stable); two-commit split (content vs version bump) after an initial over-capture was reset --mixed and re-split; scoped tests (web-demos, eval fn_source_tests) + clippy/fmt on touched workspaces; sw-checklist exception for the version-only bump.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-10T15:22:33"
+}
