@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-10
 
+- chore(agentrail): complete 064-flatten-in-grad; queue autograd-crate-split-refactor
+- feat(autograd): flatten differentiable in grad()
+- chore(agentrail): begin 064-flatten-in-grad
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 063-cnn-training-demo (+completed C6); queue flatten-in-grad
 - chore(pages): rebuild for Train-a-Convolution-Filter demo
 - feat(demos): "Train a Convolution Filter" -- a learnable conv
