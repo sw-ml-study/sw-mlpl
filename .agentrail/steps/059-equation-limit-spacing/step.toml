@@ -1,9 +1,10 @@
 number = 59
 slug = "equation-limit-spacing"
-status = "in-progress"
+status = "completed"
 description = "Fix squished/clipped upper limits in the svg('equation') stacked-limit render..."
 role = "production"
 context_files = []
 created_at = "2026-09-09T21:05:12"
+completed_at = "2026-09-09T21:08:44"
 task_type = "production"
-commits = []
+commits = ["17e3b14c4e72cd93e5d69a24b45245f6eb425136"]

@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 59,
+    "step": "equation-limit-spacing"
+  },
+  "action": "raised SUP_RISE/LINE_H + LIM_CAP padding in render.rs/equation.rs; verified sup y=32 unclipped via fresh render; re-published literate; rebuilt binaries; build-pages+deploy-pages dev",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T21:08:44"
+}
