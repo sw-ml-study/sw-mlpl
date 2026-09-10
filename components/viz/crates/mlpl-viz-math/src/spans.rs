@@ -51,7 +51,7 @@ pub(crate) fn spans(line: &str) -> Vec<Span> {
 }
 
 /// Read a script argument: a `{...}` group or a single following char.
-fn take_script(chars: &mut Peekable<Chars>) -> String {
+pub(crate) fn take_script(chars: &mut Peekable<Chars>) -> String {
     if chars.peek() == Some(&'{') {
         chars.next();
         return chars.by_ref().take_while(|&c| c != '}').collect();

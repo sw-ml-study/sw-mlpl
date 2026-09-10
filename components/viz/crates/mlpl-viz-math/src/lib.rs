@@ -5,7 +5,9 @@
 //! it renders identically in the web playground and the native REPL's
 //! cached-SVG output.
 
+mod atoms;
 mod equation;
+mod render;
 mod spans;
 
 pub use equation::render_equation;

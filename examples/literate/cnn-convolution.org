@@ -15,23 +15,28 @@ shared ~:session cnn~.
 * The equation
 
 Zhao, Wang, Wang & Liu (2018), section 2.1, define an output pixel of a
-convolution as a weighted sum over the input channels and the kernel
-window. Rendered from MLPL:
+convolution as a weighted sum over the ~Q~ input channels and the
+~Mw x Nw~ kernel window, for each of ~R~ output filters. Rendered from
+MLPL, with the paper's bounds intact:
 
 #+begin_src mlpl :results html :exports both
-svg("y[r,x,y] = ∑_q ∑_u ∑_v W[r,q,u,v] · X[q, x+u, y+v]", "equation")
+svg("y[r,x,y] = ∑_{q=1}^{Q} ∑_{u=1}^{Mw} ∑_{v=1}^{Nw} W[r,q,u,v] · X[q, x+u, y+v]", "equation")
 #+end_src
 
 #+RESULTS:
 #+begin_export html
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 582 62" width="582" height="62"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="16" y="38" fill="#cdd6f4" font-size="20" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y[r,x,y] = ∑</tspan><tspan baseline-shift="sub" font-size="0.7em">q</tspan><tspan> ∑</tspan><tspan baseline-shift="sub" font-size="0.7em">u</tspan><tspan> ∑</tspan><tspan baseline-shift="sub" font-size="0.7em">v</tspan><tspan> W[r,q,u,v] · X[q, x+u, y+v]</tspan></text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 603 85" width="603" height="85"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y[r,x,y] = </tspan></text><text x="162.5" y="47.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="162.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Q</text><text x="162.5" y="67.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">q=1</text><text x="175" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> </tspan></text><text x="199.5" y="47.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="199.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Mw</text><text x="199.5" y="67.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">u=1</text><text x="212" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> </tspan></text><text x="236.5" y="47.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="236.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Nw</text><text x="236.5" y="67.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">v=1</text><text x="249" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> W[r,q,u,v] · X[q, x+u, y+v]</tspan></text></svg>
 #+end_export
 
 Read it as: for output filter ~r~ at position ~(x, y)~, sum over every
-input channel ~q~ and every kernel offset ~(u, v)~ the weight
-~W[r,q,u,v]~ times the shifted input ~X[q, x+u, y+v]~. The whole of a
-convolution is that triple sum. The rest of this page is a way to write
-it with no explicit loops.
+input channel ~q = 1..Q~ and every kernel offset ~u = 1..Mw~,
+~v = 1..Nw~ the weight ~W[r,q,u,v]~ times the shifted input
+~X[q, x+u, y+v]~. Every sum is finite and every bound is a dimension of
+one of the two arrays -- the first hint that this loop notation is really
+an array operation. One caveat when transcribing it into code: the paper
+counts from 1 and the array language from 0, so ~q = 1..Q~ becomes
+channels ~0..Q-1~, and the reduction axis numbers below are 0-based too.
+The rest of this page writes the triple sum with no explicit loops.
 
 * Receptive fields: =windows=
 
@@ -67,7 +72,7 @@ svg("cols[i, :] = flatten( field_i ),   i over the out_y·out_x pixels", "equati
 
 #+RESULTS:
 #+begin_export html
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 736 62" width="736" height="62"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="16" y="38" fill="#cdd6f4" font-size="20" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>cols[i, :] = flatten( field</tspan><tspan baseline-shift="sub" font-size="0.7em">i</tspan><tspan> ),   i over the out</tspan><tspan baseline-shift="sub" font-size="0.7em">y</tspan><tspan>·out</tspan><tspan baseline-shift="sub" font-size="0.7em">x</tspan><tspan> pixels</tspan></text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 85" width="768" height="85"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>cols[i, :] = flatten( field</tspan><tspan baseline-shift="sub" font-size="0.7em">i</tspan><tspan> ),   i over the out</tspan><tspan baseline-shift="sub" font-size="0.7em">y</tspan><tspan>·out</tspan><tspan baseline-shift="sub" font-size="0.7em">x</tspan><tspan> pixels</tspan></text></svg>
 #+end_export
 
 #+begin_src mlpl
@@ -92,7 +97,7 @@ svg("y = cols · flatten(W)          (one matmul contracts every receptive field
 
 #+RESULTS:
 #+begin_export html
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 857 62" width="857" height="62"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="16" y="38" fill="#cdd6f4" font-size="20" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y = cols · flatten(W)          (one matmul contracts every receptive field)</tspan></text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 936 85" width="936" height="85"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y = cols · flatten(W)          (one matmul contracts every receptive field)</tspan></text></svg>
 #+end_export
 
 Putting it together as a reusable function:

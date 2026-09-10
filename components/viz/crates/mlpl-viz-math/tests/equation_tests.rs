@@ -42,3 +42,15 @@ fn empty_input_is_still_a_valid_svg() {
     assert!(svg.starts_with("<svg"));
     assert!(svg.ends_with("</svg>"));
 }
+
+#[test]
+fn big_operator_limits_stack_above_and_below() {
+    // A sum with limits renders the operator AND its bounds centered
+    // (text-anchor middle), with the bounds as their own elements -- the
+    // stacked/display convention, not inline to the right.
+    let svg = render_equation("y = \u{2211}_{q=1}^{Q} x[q]");
+    assert!(svg.contains("text-anchor=\"middle\""), "{svg}");
+    assert!(svg.contains(">Q<"), "upper limit present: {svg}");
+    assert!(svg.contains(">q=1<"), "lower limit present: {svg}");
+    assert!(svg.contains('\u{2211}'), "the sum sign survives: {svg}");
+}
