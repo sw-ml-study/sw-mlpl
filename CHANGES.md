@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-10
 
+- docs: clarify multi-axis named reduce is a comma-string, not a string array
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 065-lang-ref-differentiable-notes (full doc-accuracy sweep)
 - chore(pages): rebuild for capability-sync docs + :help catalog
 - docs: pre-release capability-sync accuracy pass
