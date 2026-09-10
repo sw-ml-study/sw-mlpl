@@ -1,9 +1,10 @@
 number = 57
 slug = "cnn-c2-rank-broadcast"
-status = "in-progress"
+status = "completed"
 description = "CNN ergonomics (demo-ml-utils C2), DEMOTED from blocker to nice-to-have (the ..."
 role = "production"
 context_files = []
 created_at = "2026-09-09T16:34:00"
+completed_at = "2026-09-09T20:17:45"
 task_type = "production"
-commits = []
+commits = ["a490680dfe867e47eaaeccbdb509357cb783f321"]
