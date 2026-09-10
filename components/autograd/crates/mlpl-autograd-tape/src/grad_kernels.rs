@@ -148,3 +148,52 @@ fn split_chunks(
     }
     (la, rb)
 }
+
+/// Scatter-add backward of `windows`: mirror the forward gather (map each
+/// output flat index to its source input index) but ACCUMULATE the
+/// upstream gradient there, since overlapping windows read a position
+/// more than once. Writes into a zero-filled `orig_shape` buffer.
+///
+/// TEMPORARY PLACEMENT: this belongs with the other scatter kernels, but
+/// grad_kernels is at its module budget; the autograd-crate-split refactor
+/// saga will rehome it. Kept here (over scattering to an unrelated module)
+/// so the gather math stays with its siblings.
+pub fn windows_backward(
+    upstream: &DenseArray,
+    orig_shape: &Shape,
+    sizes: &[usize],
+    strides: &[usize],
+) -> DenseArray {
+    let dims = orig_shape.dims();
+    let out_dims = upstream.shape().dims();
+    let (r, k) = (dims.len(), sizes.len());
+    let stride_of = |d: &[usize]| {
+        let mut s = vec![1usize; d.len()];
+        for j in (0..d.len().saturating_sub(1)).rev() {
+            s[j] = s[j + 1] * d[j + 1];
+        }
+        s
+    };
+    let (in_stride, out_stride) = (stride_of(dims), stride_of(out_dims));
+    let mut out = vec![0.0; orig_shape.elem_count()];
+    for (o, &g) in upstream.data().iter().enumerate() {
+        let mut rem = o;
+        let oidx: Vec<usize> = out_stride
+            .iter()
+            .map(|&s| {
+                let idx = rem / s;
+                rem %= s;
+                idx
+            })
+            .collect();
+        let mut in_flat = 0;
+        for (j, s) in in_stride.iter().enumerate().take(r - k) {
+            in_flat += oidx[k + j] * s;
+        }
+        for i in 0..k {
+            in_flat += (oidx[i] * strides[i] + oidx[r + i]) * in_stride[r - k + i];
+        }
+        out[in_flat] += g;
+    }
+    DenseArray::new(orig_shape.clone(), out).expect("shape")
+}

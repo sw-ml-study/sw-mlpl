@@ -217,3 +217,17 @@ fn grad_accepts_tanh_fn_alias_inside_grad() {
     assert_eq!(via_tanh.shape(), &Shape::vector(2));
     assert_eq!(via_tanh.data(), via_tanh_fn.data());
 }
+
+#[test]
+fn grad_through_windows_accumulates_on_overlap() {
+    // windows(x,[3]) over [x0..x4] = [[x0,x1,x2],[x1,x2,x3],[x2,x3,x4]];
+    // sum reads x0 once, x1 twice, x2 thrice, x3 twice, x4 once, so the
+    // gradient is the overlap count [1,2,3,2,1] -- the scatter-ADD backward.
+    let mut env = Environment::new();
+    env.set_param(
+        "x".into(),
+        DenseArray::from_vec(vec![1.0, 2.0, 3.0, 4.0, 5.0]),
+    );
+    let g = run("grad(sum(windows(x, [3])), x)", &mut env);
+    assert_eq!(g.data(), &[1.0, 2.0, 3.0, 2.0, 1.0]);
+}

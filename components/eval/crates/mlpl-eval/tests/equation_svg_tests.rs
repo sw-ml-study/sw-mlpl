@@ -15,12 +15,15 @@ fn run_string(src: &str) -> String {
 
 #[test]
 fn equation_type_renders_a_unicode_math_svg() {
-    // (I * K)[y,x] = SUM_c  with a real summation sign and a subscript.
+    // (I * K)[y,x] = SUM_c : a real summation sign whose lower limit `c`
+    // renders as a STACKED (centered) limit below the operator, not an
+    // inline subscript (the display convention added with stacked limits).
     let svg = run_string("svg(\"(I \u{2217} K)[y,x] = \u{2211}_c\", \"equation\")");
     assert!(svg.starts_with("<svg"));
     assert!(svg.contains("fill=\"#1e1e2e\"")); // dark, high-contrast canvas
     assert!(svg.contains('\u{2211}')); // the summation sign survives lex->render
-    assert!(svg.contains("baseline-shift=\"sub\"")); // the _c subscript
+    assert!(svg.contains("text-anchor=\"middle\"")); // operator + limit are centered
+    assert!(svg.contains(">c<")); // the stacked lower limit `c`
 }
 
 #[test]

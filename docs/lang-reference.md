@@ -622,7 +622,7 @@ renders both labeled shapes side by side.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `grad(expr, wrt)` | 2 | Lift `expr` onto the reverse-mode tape and return the gradient wrt the named parameter or tensor. Shape equals the shape of `wrt`. Supported ops: `+`, `-`, `*`, `/`, unary `-`, `exp`, `log`, `sigmoid`, `tanh_fn`, `relu` (via `relu_layer`), `softmax`, `sum` / `reduce_add`, `mean`, `transpose`, `reshape`, `matmul`, `cross_entropy`. Use with `param[shape]` / `tensor[shape]` leaves. |
+| `grad(expr, wrt)` | 2 | Lift `expr` onto the reverse-mode tape and return the gradient wrt the named parameter or tensor. Shape equals the shape of `wrt`. Supported ops: `+`, `-`, `*`, `/`, unary `-`, `exp`, `log`, `sigmoid`, `tanh_fn`, `relu` (via `relu_layer`), `softmax`, `sum`, `mean`, `transpose`, `reshape`, `matmul`, `rotate`, `take`, `patchify`, `concat`, `windows` (sliding-window gather; backward is scatter-add, so the im2col convolution `matmul(reshape(windows(x,[kh,kw]),...), flatten(k))` is differentiable), `cross_entropy`. Use with `param[shape]` / `tensor[shape]` leaves. |
 
 ### Optimizers and Schedules
 

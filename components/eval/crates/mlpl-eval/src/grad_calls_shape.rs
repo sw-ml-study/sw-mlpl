@@ -72,6 +72,39 @@ pub(crate) fn call_rotate(
     Ok(x.rotate(k, axis))
 }
 
+/// `windows(x, sizes[, strides])` on the tape. `sizes` and the optional
+/// `strides` are `[int, ...]` literals (extracted like `reshape`'s dims);
+/// strides default to all-1s.
+pub(crate) fn call_windows(
+    args: &[Expr],
+    env: &mut Environment,
+    tape: &std::rc::Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
+    if args.len() != 2 && args.len() != 3 {
+        return Err(EvalError::Unsupported(
+            "grad: windows takes (x, sizes[, strides])".into(),
+        ));
+    }
+    let x = eval_tensor_expr(&args[0], env, tape, params)?;
+    let Expr::ArrayLit(size_elems, _) = &args[1] else {
+        return Err(EvalError::Unsupported(
+            "grad: windows sizes must be an [int, ...] literal".into(),
+        ));
+    };
+    let sizes = eval_shape_dims(size_elems, env)?;
+    let strides = match args.get(2) {
+        Some(Expr::ArrayLit(stride_elems, _)) => eval_shape_dims(stride_elems, env)?,
+        Some(_) => {
+            return Err(EvalError::Unsupported(
+                "grad: windows strides must be an [int, ...] literal".into(),
+            ));
+        }
+        None => vec![1; sizes.len()],
+    };
+    Ok(x.windows(&sizes, &strides))
+}
+
 pub(crate) fn call_reshape(
     args: &[Expr],
     env: &mut Environment,

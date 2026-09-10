@@ -154,6 +154,21 @@ pub enum NodeKind {
         /// Axis rotated.
         axis: usize,
     },
+    /// CNN Phase 5: overlapping sliding-window gather. Backward is
+    /// scatter-ADD -- each output gradient accumulates into every input
+    /// position the window covered, into a zero-filled `orig_shape`
+    /// buffer -- because overlapping windows read a position more than
+    /// once.
+    Windows {
+        /// Parent node id.
+        parent: NodeId,
+        /// Parent's original shape (the gradient's target shape).
+        orig_shape: Shape,
+        /// Window sizes over the trailing axes.
+        sizes: Vec<usize>,
+        /// Strides, one per windowed axis.
+        strides: Vec<usize>,
+    },
 }
 
 /// Per-node storage: the forward value, an accumulated gradient, the

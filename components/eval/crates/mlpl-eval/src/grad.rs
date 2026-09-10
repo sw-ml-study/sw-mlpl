@@ -182,6 +182,7 @@ fn eval_tensor_fncall(
         "take" => crate::grad_calls_shape::call_take(args, env, tape, params),
         "rotate" => crate::grad_calls_shape::call_rotate(args, env, tape, params),
         "reshape" => crate::grad_calls_shape::call_reshape(args, env, tape, params),
+        "windows" => crate::grad_calls_shape::call_windows(args, env, tape, params),
         _ => Err(EvalError::Unsupported(format!(
             "grad: function '{name}' not supported inside grad()"
         ))),

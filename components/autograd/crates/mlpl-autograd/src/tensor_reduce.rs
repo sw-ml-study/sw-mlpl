@@ -124,4 +124,30 @@ impl Tensor {
             },
         )
     }
+
+    /// Overlapping sliding-window gather over the trailing axes (CNN
+    /// Phase 5). Records the parent shape + window params so the backward
+    /// can scatter-add the gradient. See `windows` in the array crate.
+    pub fn windows(&self, sizes: &[usize], strides: &[usize]) -> Self {
+        let v_orig = self.value();
+        let orig_shape = v_orig.shape().clone();
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
+        let v = TensorHandle::Cpu(
+            v_orig
+                .windows(sizes, strides)
+                .expect("windows: valid params"),
+        );
+        new_tensor(
+            self,
+            v,
+            NodeKind::Windows {
+                parent: self.node,
+                orig_shape,
+                sizes: sizes.to_vec(),
+                strides: strides.to_vec(),
+            },
+        )
+    }
 }
