@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 52,
+    "step": "org-cnn-literate-math"
+  },
+  "action": "read publish.el/publish.sh/ob-mlpl.el (found viz-path SVG inlining); authored org doc; published via Emacs batch; discovered examples/literate/index.html is the tracked source (build-pages overwrites pages/ copy); fixed :exports for parity; build-pages+deploy-pages dev",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T17:49:54"
+}

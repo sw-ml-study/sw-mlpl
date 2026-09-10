@@ -1,9 +1,10 @@
 number = 52
 slug = "org-cnn-literate-math"
-status = "in-progress"
+status = "completed"
 description = "Add an emacs-org literate CNN doc (examples/literate/cnn-convolution.org) der..."
 role = "production"
 context_files = []
 created_at = "2026-09-09T17:33:22"
+completed_at = "2026-09-09T17:49:54"
 task_type = "production"
-commits = []
+commits = ["98234c5166783c0cce53a6761bd38f9c62d6339a"]
