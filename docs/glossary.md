@@ -3302,8 +3302,9 @@ along `axis`), starting from the op's identity. Curated set:
 `:add` (== `:+`), `:mul` (== `:*`), `:min`, `:max`, `:and`,
 `:or`. The `axis` argument selects what collapses: a scalar
 position (`1`), a vector of positions (`[2, 3]`), or a string
-naming labeled axes -- one (`"channel"`) or a comma-separated
-list (`"channel,kernel_y,kernel_x"`). Several axes collapse
+naming labeled axes -- one (`"channel"`) or several as ONE
+comma-separated string (`"channel,kernel_y,kernel_x"`, not a
+list of strings `["channel","kernel_y"]`). Several axes collapse
 high-index first and the surviving axes keep their labels, so
 named reductions chain (contract `channel`, then the kernel
 axes). Examples: `reduce(:max, v)`, `reduce(:add, M, 1)`,
