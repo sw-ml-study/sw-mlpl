@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-10
 
+- chore(agentrail): complete 065-lang-ref-differentiable-notes (full doc-accuracy sweep)
+- chore(pages): rebuild for capability-sync docs + :help catalog
+- docs: pre-release capability-sync accuracy pass
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 064-flatten-in-grad; queue autograd-crate-split-refactor
 - feat(autograd): flatten differentiable in grad()
 - chore(agentrail): begin 064-flatten-in-grad
