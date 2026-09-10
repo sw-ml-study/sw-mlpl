@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-09-09 Wed 21:07 -->
+<!-- 2026-09-10 Thu 14:42 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Convolution from the Equation &#x2013; a Literate Derivation</title>
@@ -204,13 +204,13 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org2cdd0bf">1. The equation</a></li>
-<li><a href="#org171fc3e">2. Receptive fields: <code>windows</code></a></li>
-<li><a href="#org98fb227">3. im2col: flatten the fields into columns</a></li>
-<li><a href="#org0437d7a">4. The contraction: one <code>matmul</code></a></li>
-<li><a href="#org03b8180">5. A worked example: a vertical-edge filter</a></li>
-<li><a href="#org655facc">6. Multiple input channels</a></li>
-<li><a href="#org369ac03">7. How this was run</a></li>
+<li><a href="#org9c92725">1. The equation</a></li>
+<li><a href="#org95b6a8a">2. Receptive fields: <code>windows</code></a></li>
+<li><a href="#org94bd48b">3. im2col: flatten the fields into columns</a></li>
+<li><a href="#orgbcdd3f3">4. The contraction: one <code>matmul</code></a></li>
+<li><a href="#org9f6a254">5. A worked example: a vertical-edge filter</a></li>
+<li><a href="#orgf492ff2">6. Multiple input channels</a></li>
+<li><a href="#orgc9cfbe1">7. How this was run</a></li>
 </ul>
 </div>
 </div>
@@ -223,8 +223,8 @@ inline in this page &#x2013; no LaTeX toolchain, no MathJax, no network. Every
 code block is a live MLPL source block, evaluated top-to-bottom in one
 shared <code>:session cnn</code>.
 </p>
-<div id="outline-container-org2cdd0bf" class="outline-2">
-<h2 id="org2cdd0bf"><span class="section-number-2">1.</span> The equation</h2>
+<div id="outline-container-org9c92725" class="outline-2">
+<h2 id="org9c92725"><span class="section-number-2">1.</span> The equation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Zhao, Wang, Wang &amp; Liu (2018), section 2.1, define an output pixel of a
@@ -253,8 +253,8 @@ The rest of this page writes the triple sum with no explicit loops.
 </p>
 </div>
 </div>
-<div id="outline-container-org171fc3e" class="outline-2">
-<h2 id="org171fc3e"><span class="section-number-2">2.</span> Receptive fields: <code>windows</code></h2>
+<div id="outline-container-org95b6a8a" class="outline-2">
+<h2 id="org95b6a8a"><span class="section-number-2">2.</span> Receptive fields: <code>windows</code></h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The inner object is the <b>receptive field</b> &#x2013; the little patch of the
@@ -284,8 +284,8 @@ position, with no transpose.
 </p>
 </div>
 </div>
-<div id="outline-container-org98fb227" class="outline-2">
-<h2 id="org98fb227"><span class="section-number-2">3.</span> im2col: flatten the fields into columns</h2>
+<div id="outline-container-org94bd48b" class="outline-2">
+<h2 id="org94bd48b"><span class="section-number-2">3.</span> im2col: flatten the fields into columns</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Stack the output grid into rows and flatten each receptive field into a
@@ -313,8 +313,8 @@ shape(cols)                                  # [out_y*out_x, channel*kernel_y*ke
 </pre>
 </div>
 </div>
-<div id="outline-container-org0437d7a" class="outline-2">
-<h2 id="org0437d7a"><span class="section-number-2">4.</span> The contraction: one <code>matmul</code></h2>
+<div id="outline-container-orgbcdd3f3" class="outline-2">
+<h2 id="orgbcdd3f3"><span class="section-number-2">4.</span> The contraction: one <code>matmul</code></h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Now the triple sum <code>∑_q ∑_u ∑_v</code> is just a dot product between each
@@ -350,8 +350,8 @@ Putting it together as a reusable function:
 </div>
 </div>
 </div>
-<div id="outline-container-org03b8180" class="outline-2">
-<h2 id="org03b8180"><span class="section-number-2">5.</span> A worked example: a vertical-edge filter</h2>
+<div id="outline-container-org9f6a254" class="outline-2">
+<h2 id="org9f6a254"><span class="section-number-2">5.</span> A worked example: a vertical-edge filter</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Convolve the 4x4 ramp with a vertical-edge kernel. The ramp's horizontal
@@ -386,8 +386,8 @@ the im2col result matches it exactly:
 </pre>
 </div>
 </div>
-<div id="outline-container-org655facc" class="outline-2">
-<h2 id="org655facc"><span class="section-number-2">6.</span> Multiple input channels</h2>
+<div id="outline-container-orgf492ff2" class="outline-2">
+<h2 id="orgf492ff2"><span class="section-number-2">6.</span> Multiple input channels</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 The channel sum <code>∑_q</code> is not special: <code>flatten(kernel)</code> spans all
@@ -414,10 +414,22 @@ The equation and the code now say the same thing: a convolution is a
 weighted sum over each receptive field, and MLPL writes that sum as
 <code>windows</code> then <code>reshape</code> then one <code>matmul</code>.
 </p>
+
+<p>
+And it is not just runnable but LEARNABLE. Every op in the forward pass
+has a tape backward &#x2013; <code>windows</code> scatter-adds each output gradient onto
+the input positions its window covered, the reduce broadcasts its
+gradient back, and the kernel multiply broadcasts (and un-broadcasts on
+the way back). So <code>grad(loss, kernel)</code> is exact and a kernel can be
+learned by gradient descent: give the kernel a target and minimise the
+squared error, and <code>adam</code> recovers it to machine precision. A
+convolution here is a full trainable layer, built from array primitives
+with no conv-specific autograd.
+</p>
 </div>
 </div>
-<div id="outline-container-org369ac03" class="outline-2">
-<h2 id="org369ac03"><span class="section-number-2">7.</span> How this was run</h2>
+<div id="outline-container-orgc9cfbe1" class="outline-2">
+<h2 id="orgc9cfbe1"><span class="section-number-2">7.</span> How this was run</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 This document is published with <code>emacs -Q --batch</code>, which evaluates every
@@ -437,7 +449,7 @@ external dependency:
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: MLPL</p>
-<p class="date">Created: 2026-09-09 Wed 21:07</p>
+<p class="date">Created: 2026-09-10 Thu 14:42</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
