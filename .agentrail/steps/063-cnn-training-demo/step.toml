@@ -1,0 +1,9 @@
+number = 63
+slug = "cnn-training-demo"
+status = "in-progress"
+description = "Ship a CNN/conv TRAINING demo (windows+reduce+broadcast backward all differen..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T12:49:17"
+task_type = "production"
+commits = []

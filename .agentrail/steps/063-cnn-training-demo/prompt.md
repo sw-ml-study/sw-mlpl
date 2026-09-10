@@ -1,0 +1,1 @@
+Ship a CNN/conv TRAINING demo (windows+reduce+broadcast backward all differentiable now). demos.toml demo that learns a small conv kernel via grad/adam over a scalar loss; elementwise spelling reduce(:add, kernel*windows(x,[kh,kw]), axes) or im2col with reshape; show loss falling. docstrings+fmt+smoke; rebuild+redeploy DEV only.
