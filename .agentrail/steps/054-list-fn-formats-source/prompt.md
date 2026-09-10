@@ -1,0 +1,1 @@
+Fix :list not pretty-printing one-line defs. env_user_fns_render::list_fn returns f.source verbatim when present; run mlpl_eval_core::indent_source on it (matching the reconstruct-fallback and the trait's documented 're-indented' contract). TDD; rebuild mlpl-repl/mlpl-build release+debug.

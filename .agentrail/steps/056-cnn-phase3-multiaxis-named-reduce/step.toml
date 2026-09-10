@@ -1,4 +1,4 @@
-number = 55
+number = 56
 slug = "cnn-phase3-multiaxis-named-reduce"
 status = "pending"
 description = "CNN ergonomics (demo-ml-utils C3+C4), NOT a demo blocker: (C3) multi-axis red..."

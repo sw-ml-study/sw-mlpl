@@ -1,0 +1,10 @@
+number = 54
+slug = "list-fn-formats-source"
+status = "completed"
+description = "Fix :list not pretty-printing one-line defs. env_user_fns_render::list_fn ret..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T17:57:52"
+completed_at = "2026-09-09T18:02:30"
+task_type = "production"
+commits = ["85720e53c14dcf7d7b7915dac99ec45912b0423d"]
