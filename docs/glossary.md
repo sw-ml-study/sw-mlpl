@@ -3290,7 +3290,14 @@ Higher-order reduction: `reduce(:op, x[, axis])` applies the
 binop named by a `BuiltinRef` to every element of `x` (or
 along `axis`), starting from the op's identity. Curated set:
 `:add` (== `:+`), `:mul` (== `:*`), `:min`, `:max`, `:and`,
-`:or`. Examples: `reduce(:max, v)`, `reduce(:add, M, 1)`,
+`:or`. The `axis` argument selects what collapses: a scalar
+position (`1`), a vector of positions (`[2, 3]`), or a string
+naming labeled axes -- one (`"channel"`) or a comma-separated
+list (`"channel,kernel_y,kernel_x"`). Several axes collapse
+high-index first and the surviving axes keep their labels, so
+named reductions chain (contract `channel`, then the kernel
+axes). Examples: `reduce(:max, v)`, `reduce(:add, M, 1)`,
+`reduce(:add, patches, [2, 3])`, `reduce(:add, T, "channel")`,
 `f = :max; reduce(f, v)`. Subsumes the older fixed-name
 `reduce_add` / `reduce_mul`. See also: `dot product`, `mean`,
 `argmax`.
