@@ -38,7 +38,15 @@ impl EnvUserFnsRender for Environment {
     fn list_fn(&self, name: &str) -> Option<String> {
         let f = self.user_fns.get(name)?;
         if let Some(src) = &f.source {
-            return Some(src.clone());
+            // Multi-line source is shown as written (preserving comments and
+            // the author's layout); a flat one-liner (e.g. a demo paste) is
+            // re-indented by brace depth so it reads instead of running off
+            // one line -- the contract this trait documents.
+            return Some(if src.contains('\n') {
+                src.clone()
+            } else {
+                mlpl_eval_core::indent_source(src)
+            });
         }
         let body: Vec<String> = f.body.iter().map(ToString::to_string).collect();
         let flat = format!(

@@ -26,6 +26,22 @@ fn list_shows_source_with_comments() {
 }
 
 #[test]
+fn one_line_def_is_pretty_printed_on_list() {
+    // A def entered as a SINGLE line (e.g. pasted from a demo) reads
+    // poorly as one flat line; :list should explode it by brace depth.
+    // Already-multi-line defs stay verbatim (see the comments test above).
+    let mut env = Environment::new();
+    eval_source_value("def u:cube(x) { \"x cubed\"; y = x * x; y * x }", &mut env).unwrap();
+    let listed = env.list_fn("u:cube").expect("listed");
+    assert!(listed.contains('\n'), "one-line def should explode: {listed}");
+    assert!(listed.contains("y = x * x;"), "statements on their own lines: {listed}");
+    assert!(
+        listed.lines().count() >= 4,
+        "header + doc + two stmts, each on a line: {listed}"
+    );
+}
+
+#[test]
 fn reconstruction_fallback_without_source() {
     // Direct AST eval (no source attached) keeps the old behavior.
     let mut env = Environment::new();
