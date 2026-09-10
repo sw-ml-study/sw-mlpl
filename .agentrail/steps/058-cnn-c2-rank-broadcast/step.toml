@@ -1,4 +1,4 @@
-number = 57
+number = 58
 slug = "cnn-c2-rank-broadcast"
 status = "pending"
 description = "CNN ergonomics (demo-ml-utils C2), DEMOTED from blocker to nice-to-have (the ..."
