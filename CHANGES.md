@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-10
 
+- chore(pages): rebuild for 0.22.0 (differentiable CNN; trainable convolution)
+- release: bump component-workspace versions 0.21.0 -> 0.22.0
+- docs(cnn): cross-link the trainable-convolution result; fix stale literate-count pin
+- docs(changes): refresh CHANGES.md to HEAD
 - docs: clarify multi-axis named reduce is a comma-string, not a string array
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 065-lang-ref-differentiable-notes (full doc-accuracy sweep)
