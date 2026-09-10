@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 052-org-cnn-literate-math; queue cnn-phase3
+- feat(literate): CNN convolution org doc with MLPL-rendered inline math
+- chore(agentrail): begin 052-org-cnn-literate-math
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 051-cnn-conv-live-demo; queue org-cnn-literate-math
 - chore(pages): rebuild for Convolution-from-the-equation demo
 - feat(demos): "Convolution from the equation" live demo
