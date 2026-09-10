@@ -1,4 +1,4 @@
-number = 60
+number = 61
 slug = "cnn-autograd-windows"
 status = "blocked"
 description = "CNN Phase 5: autograd through windows. Backward of the sliding-window gather ..."

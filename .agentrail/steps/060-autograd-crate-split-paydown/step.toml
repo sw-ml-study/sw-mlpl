@@ -1,0 +1,9 @@
+number = 60
+slug = "autograd-crate-split-paydown"
+status = "in-progress"
+description = "Tech-debt spike: split the saturated autograd crates so windows-autograd (and..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T08:58:19"
+task_type = "production"
+commits = []
