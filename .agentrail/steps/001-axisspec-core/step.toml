@@ -1,9 +1,10 @@
 number = 1
 slug = "axisspec-core"
-status = "in-progress"
+status = "completed"
 description = "Add shared pure AxisSpec (Names|Indices) + AxisNames types and one resolve(&D..."
 role = "production"
 context_files = []
 created_at = "2026-09-10T16:00:43"
+completed_at = "2026-09-10T16:46:37"
 task_type = "feature"
-commits = []
+commits = ["09ee77369788d0c3333ee473abffb47b07d17105"]
