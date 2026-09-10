@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 057-cnn-c2-rank-broadcast; queue cnn-autograd-windows
+- chore(pages): rebuild for general trailing-axis broadcasting (C2)
+- feat(array): general trailing-axis broadcasting in apply_binop (CNN C2)
+- chore(agentrail): begin 057-cnn-c2-rank-broadcast
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 056-language-demos-new-primitives; queue cnn-c2
 - chore(pages): rebuild for language-demo primitives (windows/reduce/str_eq)
 - feat(demos): show windows, named/multi-axis reduce, str_eq in language demos
