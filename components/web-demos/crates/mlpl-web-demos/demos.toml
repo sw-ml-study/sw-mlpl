@@ -417,6 +417,24 @@ lines = [
 ]
 
 [[demos]]
+category = "Vision"
+name = "Train a Convolution Filter"
+intro = "A convolution is not just runnable but TRAINABLE: this demo LEARNS a conv kernel by gradient descent. It sets up a teacher filter (a vertical edge detector [[1,0],[0,-1]]), applies it to a random image to make a target, then trains a randomly-initialised student kernel to reproduce that target -- recovering the teacher from nothing but its outputs. The forward pass is the elementwise convolution reduce(:add, kernel * windows(image, [2,2]), [2,3,4]); the loss is the mean squared error to the target; and grad flows all the way back to the kernel through the multi-axis reduce, the sliding-window gather (backward = scatter-add), and the rank-broadcast multiply (a rank-3 kernel against rank-5 patches). adam takes the steps. Because MSE over a linear conv is convex, the student converges to the teacher to machine precision."
+takeaway = "windows made a convolution expressible; autograd makes it LEARNABLE. Every op in the loss is differentiable -- the multi-axis reduce broadcasts its gradient back, windows scatter-adds each output gradient onto the input positions its window covered, and the rank-3-kernel-times-rank-5-patches multiply broadcasts (and un-broadcasts on the way back). So grad(loss, kernel) is exact and adam drives the student kernel to the teacher's [1,0,0,-1], with the loss curve falling to ~0. The same recipe -- windows, a reduce, a broadcast multiply, grad, adam -- is a full trainable convolution layer, built from array primitives with no conv-specific autograd."
+lines = [
+    "svg(\"L(k) = (1/N) ∑_{i,j} ( conv(k)[i,j] - target[i,j] )^{2}\", \"equation\")   # the training objective: MSE between the student conv and the teacher's output",
+    "image = randn(1, [1, 5, 5])                  # a random single-channel 5x5 image",
+    "teacher = reshape([1, 0, 0, 0 - 1], [1, 2, 2])   # the filter to recover: a vertical edge",
+    "target = reduce(:add, teacher * windows(image, [2, 2]), [2, 3, 4])   # what the teacher produces (the supervision signal)",
+    "student = param[1, 2, 2]                     # the trainable kernel (declares it a parameter)",
+    "student = randn(3, [1, 2, 2]) * 0.5          # random initialization -- knows nothing of the teacher",
+    "train 300 { adam(mean((reduce(:add, student * windows(image, [2, 2]), [2, 3, 4]) - target) * (reduce(:add, student * windows(image, [2, 2]), [2, 3, 4]) - target)), [student], 0.05, 0.9, 0.999, 0.00000001); mean((reduce(:add, student * windows(image, [2, 2]), [2, 3, 4]) - target) * (reduce(:add, student * windows(image, [2, 2]), [2, 3, 4]) - target)) }   # 300 Adam steps of MSE -- grad flows through reduce, windows, and the broadcast multiply",
+    "loss_curve(last_losses)                      # the loss falls to ~0 as the student matches the teacher",
+    "student                                      # recovered ~ [1, 0, 0, -1]",
+    "teacher                                      # the target filter -- the student found it from outputs alone",
+]
+
+[[demos]]
 category = "APL2 / General Programming"
 name = "Game of Life (APL classic)"
 intro = "APL2-inspired GENERAL-PURPOSE programming, not ML: Life is the array-language completeness testcase. Conway's Game of Life is THE classic array-language program: the famous APL2 one-liner computes every cell's next state at once, with no loops over cells. This demo builds it three ways, in ascending APL2-ness, on a 7x7 torus: seed a glider with composed scatter calls (functional puts -- see the lens finale in Structure Zoo), count all 8 neighbors with rotate (APL's cyclic shift), then apply the rule as pure array arithmetic. Variant A is the readable functional rule; variant B stacks the 8 shifted boards into a rank-3 tensor and reduces down the stack (closest to the APL one-liner's shape); variant C shows what rotate replaced -- a permutation-matrix matmul, where the permutation matrix is just a rotated identity. Along the way the DEEP views: disp treats the 8 shifted boards as one rank-3 structure and even a rank-5 2x2x2 cube of boards -- the neighborhood is a first-class structure, not 8 loose variables -- and the reduction uses a builtin REFERENCE (:add as a value) with higher-order reduce, the same first-class-function spirit as the APL one-liner's +/. The finale is MLPL's ONE-LINE u:life def, run 24 generations into svg(F, \"life\"), an SMIL-animated grid: the whole animation is one self-contained SVG value."
