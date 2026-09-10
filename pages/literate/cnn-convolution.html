@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-09-09 Wed 20:40 -->
+<!-- 2026-09-09 Wed 21:07 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Convolution from the Equation &#x2013; a Literate Derivation</title>
@@ -204,13 +204,13 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org49bb0ff">1. The equation</a></li>
-<li><a href="#org81c5661">2. Receptive fields: <code>windows</code></a></li>
-<li><a href="#org23edcba">3. im2col: flatten the fields into columns</a></li>
-<li><a href="#org7100d7d">4. The contraction: one <code>matmul</code></a></li>
-<li><a href="#org93b8b47">5. A worked example: a vertical-edge filter</a></li>
-<li><a href="#org39246e6">6. Multiple input channels</a></li>
-<li><a href="#orga8b91f0">7. How this was run</a></li>
+<li><a href="#org2cdd0bf">1. The equation</a></li>
+<li><a href="#org171fc3e">2. Receptive fields: <code>windows</code></a></li>
+<li><a href="#org98fb227">3. im2col: flatten the fields into columns</a></li>
+<li><a href="#org0437d7a">4. The contraction: one <code>matmul</code></a></li>
+<li><a href="#org03b8180">5. A worked example: a vertical-edge filter</a></li>
+<li><a href="#org655facc">6. Multiple input channels</a></li>
+<li><a href="#org369ac03">7. How this was run</a></li>
 </ul>
 </div>
 </div>
@@ -223,8 +223,8 @@ inline in this page &#x2013; no LaTeX toolchain, no MathJax, no network. Every
 code block is a live MLPL source block, evaluated top-to-bottom in one
 shared <code>:session cnn</code>.
 </p>
-<div id="outline-container-org49bb0ff" class="outline-2">
-<h2 id="org49bb0ff"><span class="section-number-2">1.</span> The equation</h2>
+<div id="outline-container-org2cdd0bf" class="outline-2">
+<h2 id="org2cdd0bf"><span class="section-number-2">1.</span> The equation</h2>
 <div class="outline-text-2" id="text-1">
 <p>
 Zhao, Wang, Wang &amp; Liu (2018), section 2.1, define an output pixel of a
@@ -238,7 +238,7 @@ MLPL, with the paper's bounds intact:
 </pre>
 </div>
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 603 85" width="603" height="85"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y[r,x,y] = </tspan></text><text x="162.5" y="47.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="162.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Q</text><text x="162.5" y="67.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">q=1</text><text x="175" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> </tspan></text><text x="199.5" y="47.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="199.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Mw</text><text x="199.5" y="67.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">u=1</text><text x="212" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> </tspan></text><text x="236.5" y="47.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="236.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Nw</text><text x="236.5" y="67.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">v=1</text><text x="249" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> W[r,q,u,v] · X[q, x+u, y+v]</tspan></text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 603 111" width="603" height="111"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="58" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y[r,x,y] = </tspan></text><text x="162.5" y="58.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="162.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Q</text><text x="162.5" y="79.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">q=1</text><text x="175" y="58" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> </tspan></text><text x="199.5" y="58.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="199.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Mw</text><text x="199.5" y="79.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">u=1</text><text x="212" y="58" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> </tspan></text><text x="236.5" y="58.0" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">∑</text><text x="236.5" y="32.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">Nw</text><text x="236.5" y="79.0" fill="#cdd6f4" font-size="12" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif" text-anchor="middle">v=1</text><text x="249" y="58" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan> W[r,q,u,v] · X[q, x+u, y+v]</tspan></text></svg>
 
 <p>
 Read it as: for output filter <code>r</code> at position <code>(x, y)</code>, sum over every
@@ -253,8 +253,8 @@ The rest of this page writes the triple sum with no explicit loops.
 </p>
 </div>
 </div>
-<div id="outline-container-org81c5661" class="outline-2">
-<h2 id="org81c5661"><span class="section-number-2">2.</span> Receptive fields: <code>windows</code></h2>
+<div id="outline-container-org171fc3e" class="outline-2">
+<h2 id="org171fc3e"><span class="section-number-2">2.</span> Receptive fields: <code>windows</code></h2>
 <div class="outline-text-2" id="text-2">
 <p>
 The inner object is the <b>receptive field</b> &#x2013; the little patch of the
@@ -284,8 +284,8 @@ position, with no transpose.
 </p>
 </div>
 </div>
-<div id="outline-container-org23edcba" class="outline-2">
-<h2 id="org23edcba"><span class="section-number-2">3.</span> im2col: flatten the fields into columns</h2>
+<div id="outline-container-org98fb227" class="outline-2">
+<h2 id="org98fb227"><span class="section-number-2">3.</span> im2col: flatten the fields into columns</h2>
 <div class="outline-text-2" id="text-3">
 <p>
 Stack the output grid into rows and flatten each receptive field into a
@@ -298,7 +298,7 @@ pixel, one column entry per (channel, kernel<sub>y</sub>, kernel<sub>x</sub>):
 </pre>
 </div>
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 85" width="768" height="85"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>cols[i, :] = flatten( field</tspan><tspan baseline-shift="sub" font-size="0.7em">i</tspan><tspan> ),   i over the out</tspan><tspan baseline-shift="sub" font-size="0.7em">y</tspan><tspan>·out</tspan><tspan baseline-shift="sub" font-size="0.7em">x</tspan><tspan> pixels</tspan></text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 768 111" width="768" height="111"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="58" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>cols[i, :] = flatten( field</tspan><tspan baseline-shift="sub" font-size="0.7em">i</tspan><tspan> ),   i over the out</tspan><tspan baseline-shift="sub" font-size="0.7em">y</tspan><tspan>·out</tspan><tspan baseline-shift="sub" font-size="0.7em">x</tspan><tspan> pixels</tspan></text></svg>
 
 <div class="org-src-container">
 <pre class="src src-mlpl">patches = windows(image, [3, 3])
@@ -313,8 +313,8 @@ shape(cols)                                  # [out_y*out_x, channel*kernel_y*ke
 </pre>
 </div>
 </div>
-<div id="outline-container-org7100d7d" class="outline-2">
-<h2 id="org7100d7d"><span class="section-number-2">4.</span> The contraction: one <code>matmul</code></h2>
+<div id="outline-container-org0437d7a" class="outline-2">
+<h2 id="org0437d7a"><span class="section-number-2">4.</span> The contraction: one <code>matmul</code></h2>
 <div class="outline-text-2" id="text-4">
 <p>
 Now the triple sum <code>∑_q ∑_u ∑_v</code> is just a dot product between each
@@ -327,7 +327,7 @@ single matrix multiply:
 </pre>
 </div>
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 936 85" width="936" height="85"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="47" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y = cols · flatten(W)          (one matmul contracts every receptive field)</tspan></text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 936 111" width="936" height="111"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="18" y="58" fill="#cdd6f4" font-size="22" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y = cols · flatten(W)          (one matmul contracts every receptive field)</tspan></text></svg>
 
 <p>
 Putting it together as a reusable function:
@@ -350,8 +350,8 @@ Putting it together as a reusable function:
 </div>
 </div>
 </div>
-<div id="outline-container-org93b8b47" class="outline-2">
-<h2 id="org93b8b47"><span class="section-number-2">5.</span> A worked example: a vertical-edge filter</h2>
+<div id="outline-container-org03b8180" class="outline-2">
+<h2 id="org03b8180"><span class="section-number-2">5.</span> A worked example: a vertical-edge filter</h2>
 <div class="outline-text-2" id="text-5">
 <p>
 Convolve the 4x4 ramp with a vertical-edge kernel. The ramp's horizontal
@@ -386,8 +386,8 @@ the im2col result matches it exactly:
 </pre>
 </div>
 </div>
-<div id="outline-container-org39246e6" class="outline-2">
-<h2 id="org39246e6"><span class="section-number-2">6.</span> Multiple input channels</h2>
+<div id="outline-container-org655facc" class="outline-2">
+<h2 id="org655facc"><span class="section-number-2">6.</span> Multiple input channels</h2>
 <div class="outline-text-2" id="text-6">
 <p>
 The channel sum <code>∑_q</code> is not special: <code>flatten(kernel)</code> spans all
@@ -416,8 +416,8 @@ weighted sum over each receptive field, and MLPL writes that sum as
 </p>
 </div>
 </div>
-<div id="outline-container-orga8b91f0" class="outline-2">
-<h2 id="orga8b91f0"><span class="section-number-2">7.</span> How this was run</h2>
+<div id="outline-container-org369ac03" class="outline-2">
+<h2 id="org369ac03"><span class="section-number-2">7.</span> How this was run</h2>
 <div class="outline-text-2" id="text-7">
 <p>
 This document is published with <code>emacs -Q --batch</code>, which evaluates every
@@ -437,7 +437,7 @@ external dependency:
 </div>
 <div id="postamble" class="status">
 <p class="author">Author: MLPL</p>
-<p class="date">Created: 2026-09-09 Wed 20:40</p>
+<p class="date">Created: 2026-09-09 Wed 21:07</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>

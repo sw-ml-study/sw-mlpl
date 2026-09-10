@@ -4,7 +4,7 @@
 //! the last for lower limits.
 
 use crate::atoms::atoms;
-use crate::render::{BG, LINE_H, PAD, SUB_DROP, SUP_RISE, push_atom};
+use crate::render::{BG, LIM_CAP, LINE_H, PAD, SUB_DROP, SUP_RISE, push_atom};
 
 /// Render `text` (Unicode math, newline-separated) as a self-contained,
 /// high-contrast SVG document. Big operators (sum, product, integral)
@@ -12,7 +12,7 @@ use crate::render::{BG, LINE_H, PAD, SUB_DROP, SUP_RISE, push_atom};
 /// below; ordinary `_x`/`^x` stay inline.
 pub fn render_equation(text: &str) -> String {
     let lines: Vec<&str> = text.lines().collect();
-    let base0 = PAD + SUP_RISE + 14.0;
+    let base0 = PAD + SUP_RISE + LIM_CAP;
     let mut body = String::new();
     let mut max_w = 0.0f64;
     for (i, line) in lines.iter().enumerate() {
@@ -24,7 +24,7 @@ pub fn render_equation(text: &str) -> String {
         max_w = max_w.max(x);
     }
     let w = max_w + PAD;
-    let h = base0 + LINE_H * (lines.len().max(1) as f64 - 1.0) + SUB_DROP + PAD;
+    let h = base0 + LINE_H * (lines.len().max(1) as f64 - 1.0) + SUB_DROP + LIM_CAP + PAD;
     format!("{}{body}</svg>", open(w, h))
 }
 

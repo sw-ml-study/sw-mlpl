@@ -13,10 +13,13 @@ pub(crate) const FS: f64 = 22.0; // main glyph + operator size (px)
 const LIM_FS: f64 = 12.0; // limit (bound) size
 const CHAR_W: f64 = 12.0; // main advance estimate
 const LIM_CW: f64 = 7.0; // limit advance estimate
-pub(crate) const SUP_RISE: f64 = 15.0; // upper-limit baseline, above main
-pub(crate) const SUB_DROP: f64 = 20.0; // lower-limit baseline, below main
+// The operator's cap reaches ~0.7*FS above the baseline, so the upper
+// limit must clear that plus a gap to stay readable and unclipped.
+pub(crate) const SUP_RISE: f64 = 26.0; // upper-limit baseline, above main
+pub(crate) const SUB_DROP: f64 = 21.0; // lower-limit baseline, below main
+pub(crate) const LIM_CAP: f64 = 14.0; // room a limit line needs (cap + gap)
 pub(crate) const PAD: f64 = 18.0;
-pub(crate) const LINE_H: f64 = 52.0; // line advance (fits stacked limits)
+pub(crate) const LINE_H: f64 = 64.0; // line advance (fits stacked limits)
 
 const FONT: &str = "'Latin Modern Math','Cambria Math','STIX Two Math',serif";
 
