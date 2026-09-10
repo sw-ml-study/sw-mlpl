@@ -29,6 +29,15 @@ run top-to-bottom and its real output baked in. The 1:1 companions to the playgr
 demos &mdash; especially the connect-only ones the public browser demo can't run.</p>
 <ul>
   <li>
+    <a class="title" href="cnn-convolution.html">Convolution from the equation</a>
+    <span class="tag cpu">CPU &middot; runs anywhere</span>
+    <p class="desc">A 2-D convolution derived straight from the paper's sum, with every
+    equation rendered inline by MLPL's own <code>svg(text, "equation")</code> &mdash; no LaTeX,
+    no MathJax. The math becomes code: <code>windows</code> extracts the receptive fields,
+    <code>reshape</code> flattens them (im2col), and one <code>matmul</code> is the whole
+    convolution, checked against the native <code>conv2d</code> oracle.</p>
+  </li>
+  <li>
     <a class="title" href="cuda-tictactoe.html">Tic-Tac-Toe, end to end, in MLPL</a>
     <span class="tag cuda">CUDA &middot; NVIDIA GPU</span>
     <p class="desc">The whole game in the array language &mdash; winner as a matmul,
