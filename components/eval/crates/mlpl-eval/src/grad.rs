@@ -186,6 +186,15 @@ fn eval_tensor_fncall(
         "reduce" | "reduce_add" => {
             crate::grad_calls_shape::call_reduce_grad(name, args, env, tape, params)
         }
+        // flatten is reshape-to-1D; reuse the tape's Reshape backward.
+        // Inlined here (not a call_* helper) because grad_calls_shape is
+        // at its sw-checklist function-count ceiling.
+        "flatten" => {
+            arity_check(args, 1, "flatten")?;
+            let x = eval_tensor_expr(&args[0], env, tape, params)?;
+            let total = x.value().shape().elem_count();
+            Ok(x.reshape(mlpl_array::Shape::new(vec![total])))
+        }
         _ => Err(EvalError::Unsupported(format!(
             "grad: function '{name}' not supported inside grad()"
         ))),
