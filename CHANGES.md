@@ -12,8 +12,18 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-10
+
+- chore(agentrail): complete 061-cnn-autograd-windows; queue reduce-backward-multiaxis
+- feat(autograd): differentiable windows (scatter-add backward, CNN Phase 5)
+- chore(agentrail): defer autograd-crate-split to its own saga; reopen cnn-autograd-windows
+- chore(agentrail): begin 060-autograd-crate-split-paydown
+- chore(agentrail): defer 060-cnn-autograd-windows (autograd crates saturated)
+- chore(agentrail): begin 060-cnn-autograd-windows
+
 ## 2026-09-09
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 059-equation-limit-spacing
 - chore(pages): rebuild for equation limit spacing
 - fix(viz): give stacked equation limits room to breathe
