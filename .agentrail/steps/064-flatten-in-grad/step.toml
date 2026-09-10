@@ -1,0 +1,9 @@
+number = 64
+slug = "flatten-in-grad"
+status = "in-progress"
+description = "Make flatten differentiable in grad() (downstream note). flatten(x)=reshape(x..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T13:35:05"
+task_type = "production"
+commits = []

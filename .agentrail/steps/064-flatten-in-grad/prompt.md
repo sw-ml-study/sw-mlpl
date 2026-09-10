@@ -1,0 +1,1 @@
+Make flatten differentiable in grad() (downstream note). flatten(x)=reshape(x,[tally(x)]); the tape Reshape node already handles the backward. Add a grad dispatch arm; place to avoid a new sw-checklist FAIL (grad_calls_shape is at 7 fns). Restore flatten to the grad() doc list. TDD. Then autograd-crate-split saga, then 0.22.
