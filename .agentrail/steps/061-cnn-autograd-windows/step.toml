@@ -1,9 +1,10 @@
 number = 61
 slug = "cnn-autograd-windows"
-status = "in-progress"
+status = "completed"
 description = "CNN Phase 5: autograd through windows. Backward of the sliding-window gather ..."
 role = "production"
 context_files = []
 created_at = "2026-09-10T07:57:02"
+completed_at = "2026-09-10T10:38:18"
 task_type = "production"
-commits = []
+commits = ["4458ebd0c94faf19bb68e8af59954e0bf1e12651"]
