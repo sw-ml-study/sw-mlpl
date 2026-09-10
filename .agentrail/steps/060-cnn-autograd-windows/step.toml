@@ -1,0 +1,9 @@
+number = 60
+slug = "cnn-autograd-windows"
+status = "in-progress"
+description = "CNN Phase 5: autograd through windows. Backward of the sliding-window gather ..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T07:57:02"
+task_type = "production"
+commits = []
