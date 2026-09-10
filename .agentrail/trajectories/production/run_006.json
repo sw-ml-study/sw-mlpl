@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 51,
+    "step": "cnn-conv-live-demo"
+  },
+  "action": "read demo-ml-utils convolution-reference.mlpl (im2col spelling + conv2d oracle); validated single+multi-channel parity on the binary; authored demos.toml demo with svg equation + conv2d parity check; README count + glossary drift fix; demo-smoke/def/readme_counts gates; build-pages+deploy-pages dev",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T17:26:47"
+}
