@@ -51,6 +51,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9e5e8f6c15a24b9a3ee5efec809ccd006d3b30e8b3bb63c39af737c7f87daa1d"
 
 [[package]]
+name = "equivalent"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "877a4ace8713b0bcf2a4e7eec82529c029f1d0619886d18145fea96c3ffe5c0f"
+
+[[package]]
 name = "form_urlencoded"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -58,6 +64,12 @@ checksum = "cb4cb245038516f5f85277875cdaa4f7d2c9a0fa0468de06ed190163b1581fcf"
 dependencies = [
  "percent-encoding",
 ]
+
+[[package]]
+name = "hashbrown"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ed5909b6e89a2db4456e54cd5f673791d7eca6732202bbf2a9cc504fe2f9b84a"
 
 [[package]]
 name = "icu_collections"
@@ -163,6 +175,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "indexmap"
+version = "2.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "07aa2048142242915a31d35844fb311e0e53fcca590c3a0a40dcf1b841fa09eb"
+dependencies = [
+ "equivalent",
+ "hashbrown",
+]
+
+[[package]]
 name = "itoa"
 version = "1.0.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -188,28 +210,28 @@ checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
 
 [[package]]
 name = "mlpl-array"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-array-ops-compose"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-element"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-matmul"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -218,26 +240,27 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-reduce"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-shape"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-autograd"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
  "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",
@@ -246,7 +269,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-autograd-tape"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -258,19 +281,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-builtin-catalog"
+version = "0.22.0"
+dependencies = [
+ "serde",
+ "toml",
+]
+
+[[package]]
 name = "mlpl-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-engram-core"
-version = "0.21.0"
+version = "0.22.0"
 
 [[package]]
 name = "mlpl-env-traits"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -279,35 +310,44 @@ dependencies = [
 
 [[package]]
 name = "mlpl-eval-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
+ "mlpl-builtin-catalog",
  "serde",
 ]
 
 [[package]]
+name = "mlpl-forge-kg"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-lex-ident"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-number"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-punct"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-string"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-error",
@@ -316,7 +356,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lex-ident",
@@ -329,7 +369,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-error"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-token",
@@ -337,14 +377,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-token"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-models-mutate"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-env-traits",
@@ -355,7 +395,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-models-tape"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-matmul",
@@ -367,7 +407,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-models-tune"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-env-traits",
@@ -379,7 +419,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-parser"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer",
@@ -388,18 +428,20 @@ dependencies = [
 
 [[package]]
 name = "mlpl-parser-ast"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-runtime"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-forge-kg",
  "mlpl-runtime-array",
+ "mlpl-runtime-bits",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",
  "mlpl-runtime-data",
@@ -415,7 +457,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-array"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -426,8 +468,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-runtime-bits"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-runtime-conv"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -435,14 +485,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-runtime-data"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -450,7 +500,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-dim-reduction"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -458,7 +508,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-math"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
@@ -467,7 +517,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-mds-rp"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -475,7 +525,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-ml"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -483,7 +533,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-rnn"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
@@ -493,7 +543,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-umap"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -501,7 +551,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-tensor-handle"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
@@ -609,6 +659,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_spanned"
+version = "0.6.9"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf41e0cfaf7226dca15e8197172c295a782857fcb97fad1808a166870dee75a3"
+dependencies = [
+ "serde",
+]
+
+[[package]]
 name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -653,6 +712,47 @@ dependencies = [
 ]
 
 [[package]]
+name = "toml"
+version = "0.8.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dc1beb996b9d83529a9e75c17a1686767d148d70663143c7854d8b4a09ced362"
+dependencies = [
+ "serde",
+ "serde_spanned",
+ "toml_datetime",
+ "toml_edit",
+]
+
+[[package]]
+name = "toml_datetime"
+version = "0.6.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22cddaf88f4fbc13c51aebbf5f8eceb5c7c5a9da2ac40a13519eb5b0a0e8f11c"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "toml_edit"
+version = "0.22.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "41fe8c660ae4257887cf66394862d21dbca4a6ddd26f04a3560410406a2f819a"
+dependencies = [
+ "indexmap",
+ "serde",
+ "serde_spanned",
+ "toml_datetime",
+ "toml_write",
+ "winnow",
+]
+
+[[package]]
+name = "toml_write"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d99f8c9a7727884afe522e9bd5edbfc91a3312b36a77b5fb8926e4c31a41801"
+
+[[package]]
 name = "unicode-ident"
 version = "1.0.24"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -689,6 +789,15 @@ name = "utf8_iter"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b6c140620e7ffbb22c2dee59cafe6084a59b5ffc27a8859a5f0d494b5d52b6be"
+
+[[package]]
+name = "winnow"
+version = "0.7.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "df79d97927682d2fd8adb29682d1140b343be4ac0f08fd68b7765d9c059d3945"
+dependencies = [
+ "memchr",
+]
 
 [[package]]
 name = "writeable"

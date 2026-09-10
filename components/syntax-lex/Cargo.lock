@@ -4,35 +4,35 @@ version = 4
 
 [[package]]
 name = "mlpl-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-lex-ident"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-number"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-punct"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-lexer-token",
 ]
 
 [[package]]
 name = "mlpl-lex-string"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-error",
@@ -41,7 +41,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-error"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
  "mlpl-lexer-token",
@@ -49,7 +49,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-lexer-token"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]

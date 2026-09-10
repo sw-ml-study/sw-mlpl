@@ -4,28 +4,28 @@ version = 4
 
 [[package]]
 name = "mlpl-array"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-runtime-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-runtime-data"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",

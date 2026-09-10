@@ -1,0 +1,9 @@
+number = 66
+slug = "release-0-22-0"
+status = "in-progress"
+description = "Cut the 0.22.0 release (maintainer-authorized 2026-09-10). (1) Commit pending..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T14:41:09"
+task_type = "release"
+commits = []

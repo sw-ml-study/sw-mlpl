@@ -621,21 +621,28 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
+name = "mlpl-array-ops-compose"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-array-ops-element"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-matmul"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -644,28 +651,28 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-reduce"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-shape"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "mlpl-cuda-elementwise"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "candle-core",
  "candle-nn",
@@ -676,7 +683,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-cuda-nn"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "candle-core",
  "candle-nn",
@@ -687,7 +694,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-cuda-rt"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "candle-core",
  "mlpl-array",
@@ -697,20 +704,77 @@ dependencies = [
 
 [[package]]
 name = "mlpl-cuda-train"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "candle-core",
 ]
 
 [[package]]
 name = "mlpl-rt"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
+ "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-core",
+ "mlpl-rt-fsio",
+ "mlpl-rt-value",
+ "mlpl-runtime-array",
+ "mlpl-runtime-bits",
+ "mlpl-runtime-math",
+]
+
+[[package]]
+name = "mlpl-rt-fsio"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-rt-value",
+]
+
+[[package]]
+name = "mlpl-rt-value"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-runtime-array"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
+ "mlpl-array-ops-shape",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-bits"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
+name = "mlpl-runtime-core"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
+name = "mlpl-runtime-math"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-element",
+ "mlpl-runtime-core",
 ]
 
 [[package]]

@@ -188,28 +188,28 @@ checksum = "6b947ae49db0d222b1dbc6b113ce7248a3fc3a6ca21b696717bfc000ba4484d8"
 
 [[package]]
 name = "mlpl-array"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-core",
 ]
 
 [[package]]
 name = "mlpl-array-ops-compose"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-element"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-matmul"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
@@ -218,28 +218,36 @@ dependencies = [
 
 [[package]]
 name = "mlpl-array-ops-reduce"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-array-ops-shape"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "serde",
 ]
 
 [[package]]
+name = "mlpl-forge-kg"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-ml"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime",
@@ -247,11 +255,13 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-core",
+ "mlpl-forge-kg",
  "mlpl-runtime-array",
+ "mlpl-runtime-bits",
  "mlpl-runtime-conv",
  "mlpl-runtime-core",
  "mlpl-runtime-data",
@@ -267,7 +277,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-array"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-compose",
@@ -278,8 +288,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-runtime-bits"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-runtime-core",
+]
+
+[[package]]
 name = "mlpl-runtime-conv"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -287,14 +305,14 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
 ]
 
 [[package]]
 name = "mlpl-runtime-data"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -302,7 +320,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-dim-reduction"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -310,7 +328,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-math"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
@@ -319,7 +337,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-mds-rp"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -327,7 +345,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-ml"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
@@ -335,7 +353,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-rnn"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-array-ops-element",
@@ -345,7 +363,7 @@ dependencies = [
 
 [[package]]
 name = "mlpl-runtime-umap"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
