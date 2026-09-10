@@ -386,6 +386,7 @@ lines = [
     "def u:window_sums(w, x) { \"length-w window sums via the prefix-sum identity: window i = P[i+w] - P[i]\"; p = u:prefix_sums(x); u:skip(w, p) - u:first(tally(p) - w, p) }   # two aligned slices subtracted WHOLE-ARRAY -- O(n), no loop",
     "def u:moving_average(w, x) { \"the window sums divided by the width w (whole-array scalar division)\"; u:window_sums(w, x) / w }",
     "def u:moving_average_direct(w, x) { \"the DIRECT windowing form: windows(x, [w]) stacks each length-w window as a row; reduce the window axis (1) and divide by w\"; reduce_add(windows(x, [w]), 1) / w }",
+    "svg(\"MA_w[i] = (1/w) ∑_{j=0}^{w-1} x[i+j]\", \"equation\")   # the definition itself, shown as high-contrast math -- svg(text, 'equation')",
     "values = [10, 20, 30, 40, 50, 60]   # the input series",
     "u:prefix_sums(values)                # [0, 10, 30, 60, 100, 150, 210] -- the scan the identity is built on",
     "u:moving_average(3, values)          # [20, 30, 40, 50] -- width-3 average via the O(n) prefix-sum identity",

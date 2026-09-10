@@ -1,0 +1,10 @@
+[package]
+name = "mlpl-viz-math"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+# Equation rendering: a Unicode math string -> high-contrast SVG, for
+# showing the math a demo derives its code from (convolution, moving
+# average). Self-contained -- no external fonts, scripts, or crates.
+[dependencies]

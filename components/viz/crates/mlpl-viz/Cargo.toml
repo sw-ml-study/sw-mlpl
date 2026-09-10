@@ -9,6 +9,7 @@ mlpl-viz-core = { path = "../mlpl-viz-core" }
 mlpl-viz-marks = { path = "../mlpl-viz-marks" }
 mlpl-viz-analysis = { path = "../mlpl-viz-analysis" }
 mlpl-viz-flow = { path = "../mlpl-viz-flow" }
+mlpl-viz-math = { path = "../mlpl-viz-math" }
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
 mlpl-core = { path = "../../../types/crates/mlpl-core" }
 mlpl-trace = { path = "../../../autograd/crates/mlpl-trace" }

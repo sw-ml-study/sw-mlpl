@@ -105,11 +105,22 @@ pub(crate) fn eval_svg(
             got: args.len(),
         });
     }
-    let data = eval_expr(&args[0], env, trace)?.into_array()?;
+    // Evaluate arg0 as a value first (preserving arg0-before-arg1 order),
+    // then the type. The "equation" render takes a STRING (a Unicode math
+    // expression) rather than a data array, so it branches before the
+    // array coercion every other diagram type needs.
+    let arg0 = eval_expr(&args[0], env, trace)?;
     let type_name = match eval_expr(&args[1], env, trace)? {
         Value::Str(s) => s,
         _ => return Err(EvalError::ExpectedString),
     };
+    if type_name == "equation" {
+        return match arg0 {
+            Value::Str(text) => Ok(mlpl_viz::render_equation(&text)),
+            _ => Err(EvalError::ExpectedString),
+        };
+    }
+    let data = arg0.into_array()?;
     let aux = if args.len() == 3 {
         Some(eval_expr(&args[2], env, trace)?.into_array()?)
     } else {

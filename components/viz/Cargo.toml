@@ -8,6 +8,7 @@ members = [
     "crates/mlpl-viz-core",
     "crates/mlpl-viz-flow",
     "crates/mlpl-viz-marks",
+    "crates/mlpl-viz-math",
 ]
 resolver = "2"
 

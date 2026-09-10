@@ -49,6 +49,7 @@ dependencies = [
  "mlpl-viz-core",
  "mlpl-viz-flow",
  "mlpl-viz-marks",
+ "mlpl-viz-math",
 ]
 
 [[package]]
@@ -77,6 +78,10 @@ dependencies = [
  "mlpl-array",
  "mlpl-viz-core",
 ]
+
+[[package]]
+name = "mlpl-viz-math"
+version = "0.21.0"
 
 [[package]]
 name = "proc-macro2"
