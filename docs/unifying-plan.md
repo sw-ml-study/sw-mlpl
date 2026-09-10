@@ -301,7 +301,50 @@ today notes "the two spellings differ" would become stale once the
 unification ships. Such text is correct for the current release and only
 needs a small update when stage 1 lands -- normal doc lifecycle.
 
-## 10. Non-goals
+## 10. Downstream demo guidance (../demo-ml-utils)
+
+Once stage 1 (interpreter unification) ships, the downstream
+`../demo-ml-utils` repo can show off the unified named-axis form. The
+relevant files and the exact edits:
+
+- **`probes/named-axis-reduce.mlpl`** already pins the target line
+  `reduce(:add, patches, ["channel", "kernel_y", "kernel_x"])`, which
+  FAILS today by design. Stage 1 flips it to PASS with no edit -- it is
+  the capability gate. After it goes green, update its comment (which
+  currently says the bracketed combination "is not" accepted) to describe
+  the shipped behavior.
+- **`demos/cnn/06_learned_kernel.mlpl`** contracts with opaque integer
+  axes: `reduce(:add, ramp_patches * kr, [2, 3, 4])`. Label the patches
+  once (they inherit spatial names through `windows`; only the kernel
+  axes need naming) and switch the reductions to
+  `reduce(:add, ..., ["channel", "kernel_y", "kernel_x"])`. The source
+  then reads "sum over channel, kernel_y, kernel_x" instead of positions
+  2, 3, 4 -- the headline "show off" of the new code.
+- **`src/cnn/convolution.mlpl`** (the `u:conv_layer` used by
+  `demos/cnn/05_convolution_layer.mlpl`) carries the two-spelling
+  awkwardness the blog post flagged: `label(..., ["channel", ...])` next
+  to `reduce(:add, ..., "channel,kernel_y,kernel_x")`. Unify both to the
+  bracketed-name form so the layer reads consistently, and drop any
+  "the two spellings differ today" caveat text.
+- **New capability to showcase:** `label` now accepts a COMPUTED name
+  vector, not only a literal. A small demo or probe that builds the axis
+  names as a value (e.g. from a variable) and passes it to both `label`
+  and `reduce` demonstrates that names are first-class data, reinforcing
+  the "the mathematics travels with the function" argument.
+- Keep at least one comma-string example (still valid) if the demo wants
+  to show both spellings are accepted; the point is that they are now
+  interchangeable, not that one replaced the other.
+
+Related probes to re-verify after stage 1 (they should stay green):
+`multi-axis-reduce.mlpl`, `compress-label-preservation.mlpl`,
+`sliding-windows.mlpl`, `convolution-reference.mlpl`.
+
+Sequencing: these are DOWNSTREAM edits gated on the upstream stage-1
+release. Do them only after this repo ships the unified `reduce`/`label`;
+until then `../demo-ml-utils` should keep the current forms (the probe
+that pins the target stays red as the tracking signal).
+
+## 11. Non-goals
 
 - Not changing how labels are stored (`Option<Vec<Option<String>>>` on
   `DenseArray` stays).

@@ -26,6 +26,23 @@ resident tape + resident engram, crossover ~d=128, one CPU
 fallback per step (docs/benchmarks.md). The next saga is
 data-forge (Track 1).
 
+## Active saga (2026-09-10, maintainer-prioritized)
+
+- **axis-naming-unification** -- ACTIVE. Plan: `docs/unifying-plan.md`.
+  Make `label`, `reduce`, `reshape_labeled` and the other axis-selecting
+  builtins accept the same axis-selector forms (bracketed name list,
+  comma-string, integer indices) across the interpreter and the
+  compile-to-Rust path, via one shared `AxisSpec`/`AxisNames` type and a
+  single resolver. Backward-compatible; stage 1 (interpreter) fixes the
+  `label`-vs-`reduce` inconsistency the CNN blog post surfaced. Downstream
+  `../demo-ml-utils` demo edits are documented in the plan (section 10);
+  its `probes/named-axis-reduce.mlpl` is the tracking gate (red until
+  stage 1 ships).
+
+  Prior saga **compiler-file-processing-builtins** was completed and
+  archived on 2026-09-10 (see `.agentrail-archive/`); its final unshipped
+  item, `du-list-fs`, is deferred below.
+
 ## Track 0 -- substrate (COMPLETE)
 
 1. **E5 engram-mlx** (COMPLETE 2026-08-03) -- Engram trains fully
@@ -411,6 +428,13 @@ in data-forge come first).
   instead of clean sibling modules. Split it (a `demo-menu`
   sub-crate: demo_gating + demo_supergroups + demo_panel) to
   restore headroom and retire the resulting warnings.
+- **du-list-fs (compiler)** -- deferred from the completed
+  compiler-file-processing-builtins saga (2026-09-10). Lower the du
+  builtins to the compile-to-Rust path: `list_len/1`, `list_get/2`
+  (StrList ops), `fs_walk` (sandboxed dir -> StrList), and `concat`
+  (array concat), each to exact interpreter parity with a gated
+  `MLPL_BUILD_TESTS=1` compiled e2e. After it, `du.mlpl` compiles. Pick
+  up as its own small saga after the axis-naming-unification work.
 - **Wiki errata upkeep** -- standing rule in CLAUDE.md.
 - **Upstream agentrail fix** -- `agentrail instructions apply`
   emits em dashes; the repo markdown gate needs ASCII.
