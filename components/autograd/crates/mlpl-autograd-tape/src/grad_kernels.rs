@@ -22,11 +22,34 @@ pub fn unbroadcast(grad: DenseArray, target_shape: &Shape) -> DenseArray {
     if grad.shape() == target_shape {
         return grad;
     }
-    if target_shape.rank() == 0 {
-        let s: f64 = grad.data().iter().sum();
-        return DenseArray::from_scalar(s);
+    // Sum over every broadcast axis: leading axes absent from the target
+    // (prepended 1s) and axes the target holds at extent 1. This is the
+    // backward of NumPy/APL broadcasting; without it a broadcast operand
+    // keeps the larger output shape (subsumes the rank-0 sum-all case).
+    let (g_dims, t_dims) = (grad.shape().dims(), target_shape.dims());
+    let off = g_dims.len() - t_dims.len();
+    let stride_of = |d: &[usize]| {
+        let mut s = vec![1usize; d.len()];
+        for j in (0..d.len().saturating_sub(1)).rev() {
+            s[j] = s[j + 1] * d[j + 1];
+        }
+        s
+    };
+    let (g_stride, t_stride) = (stride_of(g_dims), stride_of(t_dims));
+    let mut out = vec![0.0; target_shape.elem_count()];
+    for (gi, &g) in grad.data().iter().enumerate() {
+        let mut rem = gi;
+        let mut tflat = 0;
+        for (a, &gs) in g_stride.iter().enumerate() {
+            let gidx = rem / gs;
+            rem %= gs;
+            if a >= off && t_dims[a - off] != 1 {
+                tflat += gidx * t_stride[a - off];
+            }
+        }
+        out[tflat] += g;
     }
-    grad
+    DenseArray::new(target_shape.clone(), out).expect("shape")
 }
 
 pub fn take_backward(
