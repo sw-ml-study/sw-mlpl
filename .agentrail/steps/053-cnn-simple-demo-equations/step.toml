@@ -1,0 +1,10 @@
+number = 53
+slug = "cnn-simple-demo-equations"
+status = "completed"
+description = "Add rendered math equations (svg(text,'equation')) to the pre-existing 'CNN (..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T17:52:48"
+completed_at = "2026-09-09T17:57:35"
+task_type = "production"
+commits = ["e9abb3de12bb7ed7048a779bf503d17fc83501bf"]
