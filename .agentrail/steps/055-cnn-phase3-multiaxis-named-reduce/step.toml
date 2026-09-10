@@ -1,6 +1,6 @@
-number = 56
+number = 55
 slug = "cnn-phase3-multiaxis-named-reduce"
-status = "pending"
+status = "in-progress"
 description = "CNN ergonomics (demo-ml-utils C3+C4), NOT a demo blocker: (C3) multi-axis red..."
 role = "production"
 context_files = []
