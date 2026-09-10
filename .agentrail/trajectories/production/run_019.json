@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 65,
+    "step": "lang-ref-differentiable-notes"
+  },
+  "action": "delegated read-only doc audit; fixed 12 findings across lang-reference/glossary/catalog/README/usage; updated wiki + errata (committed/pushed separately); pool2d + reduce/grad downstream fixes; rebuilt binaries; build-pages+deploy-pages",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-10T14:12:18"
+}

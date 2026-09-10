@@ -1,0 +1,1 @@
+Doc accuracy (blog-agent pre-publish note): the windows and flatten builtin TABLE ROWS in lang-reference.md lacked the 'Differentiable on the tape' note that patchify/take carry, though the tests prove they are. Add it to both rows.

@@ -1,0 +1,10 @@
+number = 65
+slug = "lang-ref-differentiable-notes"
+status = "completed"
+description = "Doc accuracy (blog-agent pre-publish note): the windows and flatten builtin T..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T13:53:24"
+completed_at = "2026-09-10T14:12:18"
+task_type = "production"
+commits = ["db57660b07c12241a36c2d8568e57871bd32e452"]
