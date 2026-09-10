@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 67,
+    "step": "docs-axis-naming-unifying-plan"
+  },
+  "action": "Two parallel Explore subagents to map the interpreter Value/label/reduce/StrList types and the compiler CVal/registry/known_labels types with file:line refs; grep sweep of demos/docs/examples + curl of the local blog to confirm additive/non-breaking; sw-markdown-checker ASCII gate; two commits (plan + impact section).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-10T15:33:42"
+}

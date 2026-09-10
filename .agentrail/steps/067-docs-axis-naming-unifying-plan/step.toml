@@ -1,9 +1,10 @@
 number = 67
 slug = "docs-axis-naming-unifying-plan"
-status = "in-progress"
+status = "completed"
 description = "Write docs/unifying-plan.md: a type-safe, staged plan to unify axis-naming (a..."
 role = "production"
 context_files = []
 created_at = "2026-09-10T15:29:55"
+completed_at = "2026-09-10T15:33:42"
 task_type = "docs"
-commits = []
+commits = ["c2e71d19ad525a9cf0a19530ebbf9ec6a11db21c"]
