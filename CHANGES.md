@@ -14,6 +14,15 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 050-svg-equation-renderer; queue conv-live-demo
+- chore(pages): rebuild for svg(text,"equation") renderer + moving-average math showcase
+- feat(viz): svg(text, "equation") -- high-contrast math renderer
+- chore(agentrail): begin 050-svg-equation-renderer
+- chore(agentrail): park deferred du-list-fs; cursor on conv-live-demo
+- chore(agentrail): complete 049-cnn-matmul-conv-regression; queue conv-live-demo
+- test(eval): pin weighted-conv-via-matmul capability (demo-ml-utils)
+- chore(agentrail): record 048-revert-premature-0-22-0 walkback
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild nightly at 0.21.0 (windows WIP; version bump reverted)
 - Revert "release: bump component-workspace versions 0.21.0 -> 0.22.0"
 - chore(agentrail): complete 047-release-0-22-0; du-list-fs deferred to 048 (blocked); queue cnn-phase3
