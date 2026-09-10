@@ -357,6 +357,16 @@ A scalar is broadcast to match the array shape:
 5 * [1, 2, 3]       # 5 10 15
 ```
 
+Broadcasting is the full NumPy / APL trailing-axis rule, not just
+scalars: shapes align from the right, and any axis missing on one
+operand or of extent 1 stretches to meet the other. So a lower-rank
+operand meets the trailing axes of a higher-rank one, and a `[3, 1]`
+column plus a `[1, 4]` row is a `[3, 4]` grid:
+
+```
+reshape([10, 20, 30], [3, 1]) + reshape([1, 2, 3, 4], [1, 4])   # 3x4 outer sum
+```
+
 ## Linear Algebra
 
 ### Dot Product

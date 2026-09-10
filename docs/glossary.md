@@ -162,8 +162,9 @@ training wrote, and how far the gate opened.
 
 `flatten(a)` -- ravel: every element of `a` as a rank-1 vector
 in row-major order. The shape-erasing companion to reshape:
-`reshape(flatten(a), dims)` is the general re-layout idiom. APL
-heritage (monadic comma).
+`reshape(flatten(a), dims)` is the general re-layout idiom.
+Differentiable on the autograd tape (reshape-to-1D; backward
+restores the original shape). APL heritage (monadic comma).
 
 
 ## floor / ceil / round (builtins)
@@ -1130,9 +1131,15 @@ before perturbing each.
 ## CNN (Convolutional Neural Network)
 
 A network built around convolution and pooling layers,
-designed for grid-structured data (images). MLPL does not
-ship a `conv2d` layer today -- transformer + MLP families are
-the model surface; convolutional layers are not in MLPL.
+designed for grid-structured data (images). MLPL ships a
+`conv2d` builtin (usable directly or as an oracle), and a
+convolution is also expressible from array primitives --
+`windows` + `reshape` + `matmul` (im2col), or the elementwise
+`reduce(:add, kernel * windows(img, [kh, kw]), <axes>)`. Both
+are differentiable end to end (`windows`, the reduce, and the
+broadcast multiply all have tape backward), so a convolution
+layer is trainable with `grad` + `adam`, built from array
+primitives with no conv-specific autograd.
 
 ## Confusion matrix
 
@@ -2538,7 +2545,7 @@ decoder.
 
 `fetch_dataset(name)` (step 004, native-only via the
 `image-io` Cargo feature) is the live counterpart to
-`load_preloaded`. The v0.21 registry recognizes one name --
+`load_preloaded`. The registry recognizes one name --
 `"oxford_iiit_pet"` -- which downloads the upstream
 ~792 MB tarball to `$MLPL_DATA_DIR/oxford-iiit-pet/` on first
 use, sha256-verifies against a pinned hash, untars to
@@ -2580,7 +2587,10 @@ windowed adverb -- and a convolution patch stack, where the
 paper's `x_{x+u, y+v}` subscript becomes an array so a 2-D
 convolution is `reduce(:add, kernel * windows(img, [kh, kw]))`.
 The same abstraction serves cellular automata, finite-difference
-stencils, and signal processing.
+stencils, and signal processing. Differentiable on the autograd
+tape: backward is scatter-add (each output gradient accumulates
+onto the input positions its window covered), so a convolution
+built on `windows` is trainable.
 
 ## patchify (builtin)
 
@@ -3299,14 +3309,19 @@ named reductions chain (contract `channel`, then the kernel
 axes). Examples: `reduce(:max, v)`, `reduce(:add, M, 1)`,
 `reduce(:add, patches, [2, 3])`, `reduce(:add, T, "channel")`,
 `f = :max; reduce(f, v)`. Subsumes the older fixed-name
-`reduce_add` / `reduce_mul`. See also: `dot product`, `mean`,
-`argmax`.
+`reduce_add` / `reduce_mul`. `:add` reductions are
+differentiable on the autograd tape -- full, single-axis, and
+multi-axis -- with the gradient broadcast back over the
+collapsed axes; the other ops are not differentiable. See also:
+`dot product`, `mean`, `argmax`.
 
 ## reduce_add / reduce_mul (builtins)
 
 `reduce_add(x[, axis])` is sum reduction; `reduce_mul` is
 product reduction. Equivalent to `reduce(:add, x[, axis])`
 and `reduce(:mul, x[, axis])`; kept as direct shorthands.
+`reduce_add` is differentiable in `grad()` (like `sum`, across
+full / single-axis / multi-axis); `reduce_mul` is not.
 
 ## Random Forest
 
@@ -4121,7 +4136,8 @@ from the encoder are concatenated into the decoder. The
 "U" comes from drawing the architecture diagram in the
 shape of the letter. Originally for biomedical image
 segmentation; now the standard backbone for diffusion
-models. **Deferred** in MLPL: needs `conv2d` plus
+models. Partially in MLPL: `conv2d` (and a windows-based
+trainable convolution) exists; the missing piece is
 upsampling primitives.
 
 ## Uncertainty Estimation

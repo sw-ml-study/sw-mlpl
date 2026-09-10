@@ -502,7 +502,7 @@ tables (e.g. the three name forms) keep their teaching order.
 | `engram_stats(e, ids)` / `engram_stats(e, h, ids)` | 2-3 | Engram health record with addressable fields: `rows_addressed` (total (t, order, head) lookups), `unique_rows`, `collisions` (distinct n-gram contexts sharing a slot under the frozen hash contract -- repetition of the same context is not a collision), `nonzero_rows`, `max_row_norm`; the 3-argument form adds `gate_mean` / `gate_max` from the eager forward's gate. Example: `s = engram_stats(e, ids); s.collisions`. |
 | `gather_rows(table, indices)` | 2 | Select whole rows of a rank-2 table; output shape is the indices' shape + `[dim]`. Out-of-range indices error loudly. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
-| `flatten(a)` | 1 | Ravel: all elements as a rank-1 vector in row-major order (equivalent to `reshape(a, [size(a)])`). Naming policy: meaningful names are canonical and arity-locked; APL glyph names are heritage aliases only. |
+| `flatten(a)` | 1 | Ravel: all elements as a rank-1 vector in row-major order (equivalent to `reshape(a, [size(a)])`). Differentiable on the tape (reshape-to-1D; backward restores the original shape). Naming policy: meaningful names are canonical and arity-locked; APL glyph names are heritage aliases only. |
 | `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
 | `scatter(buffer, index, value)` | 3 | A copy of rank-1 `buffer` with the single entry at `index` replaced by `value` (the input is not mutated). The bulk form is a `u:stamp`-style loop (see the Life demos). |
 | `shape(a)` | 1 | Dimension vector of array |
@@ -663,7 +663,7 @@ initialized at construction). Apply a model to an array with
 |----------|------|-------------|
 | `conv2d(input, filters, stride, padding)` | 4 | 2D convolution. `input`: `[B,C_in,H,W]`, `filters`: `[C_out,C_in,kH,kW]`. `stride` and `padding` are scalars. Returns `[B,C_out,H_out,W_out]`. |
 | `lstm_cell(input, hidden, cell, W, bias)` | 5 | One LSTM step. `W`: `[4*hd, id+hd]`, `bias`: `[4*hd, 1]`. Returns `[2*hd, 1]` = concat(new_hidden, new_cell). Split with `reshape` + `take`. |
-| `pool2d(input, size, mode)` | 3 | 2D pooling. `mode=1` max pooling, `mode=0` average pooling. `size` is the square pool window side. |
+| `pool2d(input, window, mode)` | 3 | 2D pooling. `mode=1` max pooling, `mode=0` average pooling. `window` is a `[kh, kw]` rank-1 vector (e.g. `pool2d(x, [2, 2], 1)`), not a scalar. |
 | `rnn_cell(input, hidden, W_ih, W_hh, bias)` | 5 | One Elman RNN step: `tanh(W_ih @ input + W_hh @ hidden + bias)`. Returns updated hidden state. |
 
 ### Generation (KV cache)
@@ -777,7 +777,7 @@ the trained Pets demos.
 | `concat(a, b, axis)` | 3 | Axis-aware concat for any rank. Both inputs must agree on every dim except `axis` (sizes add); the forward accepts any `axis` in `[0, rank)`. Differentiable on the tape; the backward splits the upstream gradient at the seam. |
 | `last_row(M)` | 1 | Return the last row of a rank-2 matrix as a rank-1 vector. Used in generation loops to extract the final position's logits from an `[T, V]` model output. |
 | `patchify(x, P)` | 2 | ViT patch embedding rearrangement. Takes a `[B, C, H, W]` image batch and a square patch size `P` that divides both `H` and `W`. Returns `[B, N, P*P*C]` where `N = (H/P)*(W/P)` and each row of the trailing axis is one patch flattened in channel-outer order. Differentiable on the tape. |
-| `windows(x, sizes[, strides])` | 2-3 | OVERLAPPING sliding windows over the last `len(sizes)` axes (unlike `patchify`, which tiles non-overlapping). `sizes` (and optional `strides`, default all 1) are rank-1 non-negative-integer vectors. Output axis order is `[output-position..., unwindowed..., window...]` -- positions lead, the non-windowed axes follow, the window sizes trail: `windows(reshape(range(16),[4,4]), [3,3])` is `[2,2,3,3]`, and `[C,H,W]` windowed by `[kh,kw]` is `[out_y, out_x, C, kh, kw]`. Placing the non-windowed axes next to the window axes makes the trailing block `[C, kh, kw]` line up with a kernel `[C, kh, kw]` by trailing position (NumPy-style rank broadcasting), so the convolution needs no transpose. Position axes inherit the windowed axes' labels and the non-windowed axes keep theirs; the window axes are unlabeled. A window larger than its axis is an error, not an empty result. This is the primitive under a moving average (`reduce(:add, windows(x,[w]), <win>)/w`) and a convolution patch stack (`reduce(:add, kernel * windows(img,[kh,kw]))`). Result is a copy. |
+| `windows(x, sizes[, strides])` | 2-3 | OVERLAPPING sliding windows over the last `len(sizes)` axes (unlike `patchify`, which tiles non-overlapping). `sizes` (and optional `strides`, default all 1) are rank-1 non-negative-integer vectors. Output axis order is `[output-position..., unwindowed..., window...]` -- positions lead, the non-windowed axes follow, the window sizes trail: `windows(reshape(range(16),[4,4]), [3,3])` is `[2,2,3,3]`, and `[C,H,W]` windowed by `[kh,kw]` is `[out_y, out_x, C, kh, kw]`. Placing the non-windowed axes next to the window axes makes the trailing block `[C, kh, kw]` line up with a kernel `[C, kh, kw]` by trailing position (NumPy-style rank broadcasting), so the convolution needs no transpose. Position axes inherit the windowed axes' labels and the non-windowed axes keep theirs; the window axes are unlabeled. A window larger than its axis is an error, not an empty result. This is the primitive under a moving average (`reduce(:add, windows(x,[w]), <win>)/w`) and a convolution patch stack (`reduce(:add, kernel * windows(img,[kh,kw]))`). Result is a copy. Differentiable on the tape: backward is scatter-add (each output gradient accumulates onto the input positions its window covered), so a convolution built on `windows` is trainable. |
 | `shift_pairs_x(ids, block_size)` | 2 | Build next-token-prediction input windows from a 1-D token array. Returns an `[N, block_size]` integer matrix where each row is a contiguous window of `ids`. |
 | `shift_pairs_y(ids, block_size)` | 2 | Matching target windows for `shift_pairs_x`: each row is the input window shifted right by one position. |
 | `take(x, axis, idx)` | 3 | Drop one axis at a single integer index. Result has rank `rank(x) - 1`. Per-axis labels propagate (the dropped axis's label is removed). Differentiable on the tape: backward scatters the upstream gradient into a zero-filled array of the parent's shape at `axis = idx`. Multi-index gather and slice ranges are followups. |
@@ -1070,15 +1070,26 @@ one line. Matrices print one row per line.
 
 ## Broadcasting Rules
 
-When an operator combines a scalar with an array, the scalar is
-broadcast to match the array's shape:
+Element-wise operators broadcast with NumPy / APL trailing-axis rules:
+the two shapes are compared from the RIGHT, and any axis that is missing
+on one operand (a shorter rank) or has extent 1 stretches to meet the
+other. Two axes are compatible when they are equal or one is 1;
+otherwise the op errors. A scalar is the simplest case -- it stretches
+to any shape:
 
 ```
-[1, 2, 3] + 10     # [11, 12, 13]
+[1, 2, 3] + 10     # [11, 12, 13]   (scalar broadcast)
 5 * [1, 2, 3]       # [5, 10, 15]
+[2] * [1, 2, 3]     # [2, 4, 6]       (length-1 broadcast)
+reshape([10,20,30],[3,1]) + reshape([1,2,3,4],[1,4])   # [3,4] outer sum
 ```
 
-When both operands are arrays, they must have the same shape.
+A lower-rank operand aligns to the trailing axes of a higher-rank one,
+so a `[C, kh, kw]` kernel multiplies `[out_y, out_x, C, kh, kw]`
+convolution patches with no reshape. Broadcasting applies on the
+backward pass too (a broadcast operand's gradient is summed back over
+the axes it was stretched along), so a broadcast multiply is
+differentiable.
 
 ## Error Handling
 

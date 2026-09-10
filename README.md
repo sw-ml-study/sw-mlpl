@@ -245,7 +245,7 @@ mlpl> apply_tokenizer(tok, "the quick brown fox")
 ## Features
 
 - **Array language.** APL-flavored syntax, 0-origin indexing,
-  element-wise arithmetic with scalar broadcasting, matmul +
+  element-wise arithmetic with NumPy-style (trailing-axis) broadcasting, matmul +
   dot, reshape + transpose + axis reductions.
 - **Labeled shapes.** Annotation syntax
   `X : [batch, feat] = ...` carries axis names through every
