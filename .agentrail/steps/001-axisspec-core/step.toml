@@ -1,6 +1,6 @@
 number = 1
 slug = "axisspec-core"
-status = "pending"
+status = "in-progress"
 description = "Add shared pure AxisSpec (Names|Indices) + AxisNames types and one resolve(&D..."
 role = "production"
 context_files = []

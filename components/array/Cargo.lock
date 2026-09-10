@@ -83,6 +83,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-axes"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-core"
 version = "0.22.0"
 dependencies = [

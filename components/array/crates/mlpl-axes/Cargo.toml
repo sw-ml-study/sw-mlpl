@@ -1,0 +1,18 @@
+[package]
+# axis-naming-unification saga, step 1: the shared axis-selection types.
+# AxisSpec / AxisNames let `label`, `reduce`, `reshape_labeled` and the
+# other axis-selecting builtins accept the same axis forms; the resolution
+# semantics live here ONCE so the interpreter and the compile-to-Rust path
+# cannot drift. A narrow crate (mlpl-array is at its module ceiling and is
+# a shared foundational crate) reachable from both the eval layer and the
+# compiler.
+name = "mlpl-axes"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+mlpl-array = { path = "../mlpl-array" }
+
+[lints]
+workspace = true
