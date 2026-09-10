@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 56,
+    "step": "language-demos-new-primitives"
+  },
+  "action": "audited demos.toml coverage of recent builtins; verified windows+named/multi-axis reduce + str_eq on binary; edited Thinking-in-Arrays + Compact-Idioms; demo-smoke; build-pages+deploy-pages dev",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T19:14:21"
+}

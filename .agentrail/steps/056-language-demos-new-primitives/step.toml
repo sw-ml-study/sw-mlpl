@@ -1,9 +1,10 @@
 number = 56
 slug = "language-demos-new-primitives"
-status = "in-progress"
+status = "completed"
 description = "Add recently-shipped language primitives to the LANGUAGE-tour demos so learne..."
 role = "production"
 context_files = []
 created_at = "2026-09-09T19:10:06"
+completed_at = "2026-09-09T19:14:21"
 task_type = "production"
-commits = []
+commits = ["b49bec35e966d3c8bc8eed0ac245df0f74d2e057"]
