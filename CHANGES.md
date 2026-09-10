@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 054-list-fn-formats-source; queue cnn-phase3
+- chore(pages): rebuild for :list one-line-def pretty-printing
+- fix(repl): :list pretty-prints flat one-line defs
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 053-cnn-simple-demo-equations; queue list-fn-formats-source
 - chore(pages): rebuild for CNN (simple) demo equations
 - feat(demos): show the math in the "CNN (simple)" demo
