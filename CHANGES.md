@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-10
 
+- chore(agentrail): complete 062-reduce-backward-multiaxis (+C6 fix); queue cnn-training-demo
+- feat(autograd): reduce/reduce_add backward + broadcast-mul backward (C6)
+- chore(agentrail): begin 062-reduce-backward-multiaxis
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 061-cnn-autograd-windows; queue reduce-backward-multiaxis
 - feat(autograd): differentiable windows (scatter-add backward, CNN Phase 5)
 - chore(agentrail): defer autograd-crate-split to its own saga; reopen cnn-autograd-windows
