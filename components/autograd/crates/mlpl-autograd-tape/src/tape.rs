@@ -169,6 +169,18 @@ pub enum NodeKind {
         /// Strides, one per windowed axis.
         strides: Vec<usize>,
     },
+    /// Sum over one or more axes (the differentiable `reduce(:add, x,
+    /// axes)` / `reduce_add(x, axis)`). Backward BROADCASTS the upstream
+    /// gradient back over the reduced axes into `orig_shape` -- every
+    /// input that fed one output gets that output's gradient.
+    ReduceSum {
+        /// Parent node id.
+        parent: NodeId,
+        /// Parent's original shape (the gradient's target shape).
+        orig_shape: Shape,
+        /// Axes summed away.
+        axes: Vec<usize>,
+    },
 }
 
 /// Per-node storage: the forward value, an accumulated gradient, the

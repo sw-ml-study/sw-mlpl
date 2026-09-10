@@ -1284,6 +1284,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",

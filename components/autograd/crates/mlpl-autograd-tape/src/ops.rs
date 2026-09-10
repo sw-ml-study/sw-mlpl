@@ -107,40 +107,32 @@ impl BinaryOp {
         b_val: &DenseArray,
         upstream: &DenseArray,
     ) -> (DenseArray, DenseArray) {
+        // Broadcast each operand up to the output (upstream) shape so
+        // per-element indexing is valid under FULL rank/axis broadcasting
+        // (not just scalars); the caller then un-broadcasts each grad back
+        // to its parent shape.
+        let up_to_out = |v: &DenseArray| {
+            if v.shape() == upstream.shape() {
+                v.clone()
+            } else {
+                v.apply_binop(upstream, |x, _| x)
+                    .expect("broadcast operand to output shape")
+            }
+        };
+        let (a_b, b_b) = (up_to_out(a_val), up_to_out(b_val));
         let n = upstream.data().len();
         let mut ga = Vec::with_capacity(n);
         let mut gb = Vec::with_capacity(n);
         for i in 0..n {
-            let g = upstream.data()[i];
-            // Index parents by broadcast: scalars reuse index 0.
-            let ai = if a_val.data().len() == 1 {
-                a_val.data()[0]
-            } else {
-                a_val.data()[i]
+            let (g, ai, bi) = (upstream.data()[i], a_b.data()[i], b_b.data()[i]);
+            let (da, db) = match self {
+                Self::Add => (g, g),
+                Self::Sub => (g, -g),
+                Self::Mul => (g * bi, g * ai),
+                Self::Div => (g / bi, -g * ai / (bi * bi)),
             };
-            let bi = if b_val.data().len() == 1 {
-                b_val.data()[0]
-            } else {
-                b_val.data()[i]
-            };
-            match self {
-                Self::Add => {
-                    ga.push(g);
-                    gb.push(g);
-                }
-                Self::Sub => {
-                    ga.push(g);
-                    gb.push(-g);
-                }
-                Self::Mul => {
-                    ga.push(g * bi);
-                    gb.push(g * ai);
-                }
-                Self::Div => {
-                    ga.push(g / bi);
-                    gb.push(-g * ai / (bi * bi));
-                }
-            }
+            ga.push(da);
+            gb.push(db);
         }
         let shape = upstream.shape().clone();
         (

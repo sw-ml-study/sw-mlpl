@@ -5,6 +5,7 @@ use std::rc::Rc;
 
 use mlpl_array::DenseArray;
 use mlpl_array_ops_compose::prelude::*;
+use mlpl_array_ops_reduce::prelude::*;
 
 use crate::tensor::Tensor;
 use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, Tape, softmax_forward, try_resident};
@@ -147,6 +148,33 @@ impl Tensor {
                 orig_shape,
                 sizes: sizes.to_vec(),
                 strides: strides.to_vec(),
+            },
+        )
+    }
+
+    /// Sum over one or more `axes` (the differentiable core of
+    /// `reduce(:add, x, axes)`). Backward broadcasts the gradient back
+    /// over the reduced axes. Axes collapse high-index first so earlier
+    /// removals do not shift the rest.
+    pub fn reduce_sum(&self, axes: &[usize]) -> Self {
+        let v_orig = self.value();
+        let orig_shape = v_orig.shape().clone();
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
+        let mut sorted = axes.to_vec();
+        sorted.sort_unstable();
+        let reduced = sorted.iter().rev().fold(v_orig, |acc, &ax| {
+            acc.reduce_axis(ax, 0.0, |a, b| a + b)
+                .expect("reduce_sum: axis in range")
+        });
+        new_tensor(
+            self,
+            TensorHandle::Cpu(reduced),
+            NodeKind::ReduceSum {
+                parent: self.node,
+                orig_shape,
+                axes: sorted,
             },
         )
     }

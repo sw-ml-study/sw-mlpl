@@ -105,6 +105,38 @@ pub(crate) fn call_windows(
     Ok(x.windows(&sizes, &strides))
 }
 
+/// `reduce(:add, x[, axes])` / `reduce_add(x[, axis])` on the tape. Only
+/// `:add` is differentiable; a full reduce maps to `sum()`, an
+/// axis/multi-axis reduce to `reduce_sum(axes)`. `axes` is a scalar or an
+/// `[int, ...]` literal.
+pub(crate) fn call_reduce_grad(
+    name: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    tape: &std::rc::Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
+    let axis_idx = if name == "reduce" {
+        match crate::eval::eval_expr(&args[0], env, &mut None)? {
+            mlpl_eval_types::Value::BuiltinRef { name: op } if op == "add" || op == "+" => {}
+            _ => {
+                return Err(EvalError::Unsupported(
+                    "grad: only reduce(:add, ...) is differentiable".into(),
+                ));
+            }
+        }
+        2
+    } else {
+        1
+    };
+    let x = eval_tensor_expr(&args[axis_idx - 1], env, tape, params)?;
+    match args.get(axis_idx) {
+        None => Ok(x.sum()),
+        Some(Expr::ArrayLit(elems, _)) => Ok(x.reduce_sum(&eval_shape_dims(elems, env)?)),
+        Some(_) => Ok(x.reduce_sum(&[tape_scalar_usize(&args[axis_idx], env, "reduce: axis")?])),
+    }
+}
+
 pub(crate) fn call_reshape(
     args: &[Expr],
     env: &mut Environment,

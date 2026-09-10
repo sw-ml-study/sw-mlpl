@@ -76,6 +76,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-array-ops-reduce"
+version = "0.21.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-array-ops-shape"
 version = "0.21.0"
 dependencies = [
@@ -90,6 +97,7 @@ dependencies = [
  "mlpl-array-ops-compose",
  "mlpl-array-ops-element",
  "mlpl-array-ops-matmul",
+ "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-autograd-tape",
  "mlpl-core",

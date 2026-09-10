@@ -197,3 +197,48 @@ pub fn windows_backward(
     }
     DenseArray::new(orig_shape.clone(), out).expect("shape")
 }
+
+/// Backward of a sum over `axes`: BROADCAST the upstream gradient (shaped
+/// like the reduced array) back to `orig_shape`. Every input element that
+/// summed into one output receives that output's gradient. (Same
+/// TEMPORARY-placement note as `windows_backward`.)
+pub fn reduce_sum_backward(
+    upstream: &DenseArray,
+    orig_shape: &Shape,
+    axes: &[usize],
+) -> DenseArray {
+    let dims = orig_shape.dims();
+    let mut reduced = axes.to_vec();
+    reduced.sort_unstable();
+    let reduced_dims: Vec<usize> = dims
+        .iter()
+        .enumerate()
+        .filter(|(i, _)| !reduced.contains(i))
+        .map(|(_, &d)| d)
+        .collect();
+    let stride_of = |d: &[usize]| {
+        let mut s = vec![1usize; d.len()];
+        for j in (0..d.len().saturating_sub(1)).rev() {
+            s[j] = s[j + 1] * d[j + 1];
+        }
+        s
+    };
+    let (orig_stride, red_stride) = (stride_of(dims), stride_of(&reduced_dims));
+    let up = upstream.data();
+    let mut out = vec![0.0; orig_shape.elem_count()];
+    for (o, slot) in out.iter_mut().enumerate() {
+        let mut rem = o;
+        let mut ridx = 0;
+        let mut rk = 0;
+        for (i, &s) in orig_stride.iter().enumerate() {
+            let idx = rem / s;
+            rem %= s;
+            if !reduced.contains(&i) {
+                ridx += idx * red_stride[rk];
+                rk += 1;
+            }
+        }
+        *slot = up[ridx];
+    }
+    DenseArray::new(orig_shape.clone(), out).expect("shape")
+}

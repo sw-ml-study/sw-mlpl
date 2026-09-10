@@ -231,3 +231,58 @@ fn grad_through_windows_accumulates_on_overlap() {
     let g = run("grad(sum(windows(x, [3])), x)", &mut env);
     assert_eq!(g.data(), &[1.0, 2.0, 3.0, 2.0, 1.0]);
 }
+
+#[test]
+fn grad_through_reduce_add_and_reduce_full() {
+    // The downstream-flagged case: reduce_add / reduce(:add) are now
+    // differentiable inside grad() (a full reduce == sum, gradient ones).
+    let mut env = Environment::new();
+    env.set_param("x".into(), DenseArray::from_vec(vec![1.0, 2.0, 3.0]));
+    assert_eq!(
+        run("grad(reduce_add(x), x)", &mut env).data(),
+        &[1.0, 1.0, 1.0]
+    );
+    assert_eq!(
+        run("grad(reduce(:add, x), x)", &mut env).data(),
+        &[1.0, 1.0, 1.0]
+    );
+}
+
+#[test]
+fn grad_through_multiaxis_reduce() {
+    // reduce over axis 1 of [2,3] -> [2], then sum -> scalar; d/dM = ones.
+    let mut env = Environment::new();
+    env.set_param(
+        "M".into(),
+        DenseArray::new(Shape::new(vec![2, 3]), (0..6).map(|i| i as f64).collect()).unwrap(),
+    );
+    let g = run("grad(sum(reduce(:add, M, [1])), M)", &mut env);
+    assert_eq!(g.data(), &[1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
+}
+
+#[test]
+fn grad_rejects_non_add_reduce() {
+    let mut env = Environment::new();
+    env.set_param("x".into(), DenseArray::from_vec(vec![1.0, 2.0, 3.0]));
+    let stmts = parse(&lex("grad(reduce(:max, x), x)").unwrap()).unwrap();
+    assert!(eval_program(&stmts, &mut env).is_err());
+}
+
+#[test]
+fn grad_through_elementwise_conv_composes_windows_reduce_broadcast() {
+    // The elementwise convolution loss, differentiated end to end:
+    // reduce(:add, k * windows(x,[2,2]), [2,3,4]) composes windows-backward
+    // (scatter-add), the reduce-backward (broadcast), and the rank-3-kernel
+    // broadcast (C2). grad wrt x returns an x-shaped gradient.
+    let mut env = Environment::new();
+    env.set_param(
+        "x".into(),
+        DenseArray::new(Shape::new(vec![2, 3, 3]), (0..18).map(|i| i as f64).collect()).unwrap(),
+    );
+    let g = run(
+        "k = reshape(range(8), [2, 2, 2])\n\
+         grad(sum(reduce(:add, k * windows(x, [2, 2]), [2, 3, 4])), x)",
+        &mut env,
+    );
+    assert_eq!(g.shape().dims(), &[2, 3, 3]);
+}

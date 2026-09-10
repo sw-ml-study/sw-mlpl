@@ -6,7 +6,8 @@ use mlpl_array_ops_shape::prelude::*;
 
 use mlpl_array_ops_compose::prelude::RotateExt;
 use mlpl_autograd_tape::grad_kernels::{
-    concat_backward, patchify_backward, stack_backward, take_backward, windows_backward,
+    concat_backward, patchify_backward, reduce_sum_backward, stack_backward, take_backward,
+    windows_backward,
 };
 use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, accumulate_pair, resident};
 use mlpl_tensor_handle::{SeamEvent, TensorHandle, bump_if};
@@ -88,6 +89,14 @@ fn propagate_dense(tape: &Tape, kind: NodeKind, upstream: &DenseArray) {
             strides,
         } => {
             let g = windows_backward(upstream, &orig_shape, &sizes, &strides);
+            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
+        }
+        NodeKind::ReduceSum {
+            parent,
+            orig_shape,
+            axes,
+        } => {
+            let g = reduce_sum_backward(upstream, &orig_shape, &axes);
             accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
         }
         _ => unreachable!("non-structural kinds are handled in backward::propagate"),
