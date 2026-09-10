@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 58,
+    "step": "equation-stacked-limits"
+  },
+  "action": "atom-based renderer rewrite (atoms.rs/render.rs, equation.rs layout, take_script pub); stacked-limit TDD; bounded equations in demos.toml + org; re-published literate via Emacs batch; rebuilt binaries; build-pages+deploy-pages dev",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-09T20:47:24"
+}

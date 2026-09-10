@@ -1,9 +1,10 @@
 number = 58
 slug = "equation-stacked-limits"
-status = "in-progress"
+status = "completed"
 description = "Make the svg('equation') renderer and the CNN/conv demo equations mathematica..."
 role = "production"
 context_files = []
 created_at = "2026-09-09T20:27:44"
+completed_at = "2026-09-09T20:47:24"
 task_type = "production"
-commits = []
+commits = ["8715811757acebd059ee5dac6042a524a68e7764"]
