@@ -1,0 +1,1 @@
+Add axis_names_of(&Value); make label/relabel/reshape_labeled EVALUATE their name arg and accept StrList or comma-Str, preserving literal-case behavior. Add the table-driven PARITY test (axis builtins accept the same forms). TDD. See docs/unifying-plan.md sections 5, 7.

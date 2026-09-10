@@ -1,0 +1,9 @@
+number = 4
+slug = "errors-and-docs"
+status = "pending"
+description = "Replace ad-hoc per-builtin axis errors with one AxisError message naming all ..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T16:00:44"
+task_type = "docs"
+commits = []

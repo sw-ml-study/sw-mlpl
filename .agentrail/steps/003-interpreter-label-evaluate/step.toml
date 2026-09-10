@@ -1,0 +1,9 @@
+number = 3
+slug = "interpreter-label-evaluate"
+status = "pending"
+description = "Add axis_names_of(&Value); make label/relabel/reshape_labeled EVALUATE their ..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T16:00:44"
+task_type = "feature"
+commits = []

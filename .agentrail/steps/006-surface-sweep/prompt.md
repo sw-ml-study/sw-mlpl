@@ -1,0 +1,1 @@
+Route compress, drop, and any other axis-selecting builtin through the shared AxisSpec path; enumerate candidates from the eval dispatch table + supported_builtin_names() and log any deliberately left out.

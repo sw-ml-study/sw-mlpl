@@ -1,64 +1,58 @@
-# Saga: compiler-file-processing-builtins
+# Saga: axis-naming-unification
 
-Lower the ~12 builtins the ../demo-file-processing compiled wc / grep /
-du tools need but the compile-to-Rust path does not yet support, in
-wc -> grep -> du priority order. Traced from the wc/grep/du include
-closures; each stops `mlpl-build` at the first unlowered builtin
-(`take/3` is the current wall). Everything else those tools use
-(`gt`/`lt`/`eq`, `rank`, `tally`, `read_bytes`, `file_size`, `ok`/`err`/
-`?`, records, `if`/`while`, user fns) already lowers.
+Make `label`, `reduce`, `reshape_labeled`, and the other axis-selecting
+builtins accept the same axis-selector forms (bracketed name list,
+comma-string, integer indices) across the interpreter and the
+compile-to-Rust path, via one shared `AxisSpec` / `AxisNames` type and a
+single resolver. Full design, type map, phase rules, non-breaking impact
+analysis, and downstream demo guidance: `docs/unifying-plan.md`.
 
-Each builtin is lowered to EXACT interpreter parity, with a gated
-`MLPL_BUILD_TESTS=1` compiled-binary e2e. Add each to the fncall
-REGISTRY (new Emit shape only if genuinely new) and the
-dispatch_coverage_tests Builtin enum. Hold or lower sw-checklist per
-step; after each push, refresh target/{release,debug} mlpl-repl AND
-mlpl-build (keep-release-debug-binaries-fresh).
-
-The missing set by tool:
-- **wc**: `take` (bounded slice), `floor` (math), `type_of` (value kind
-  -> string), `equal` (structural equality -> 0/1).
-- **grep** adds: `str_concat`, `str_find`, `str_len`, `str_slice`,
-  `str_split`.
-- **du** adds: `fs_walk` (dir -> StrList), `list_get`, `list_len`,
-  `concat` (array concat).
-
-RISK / dependency to confirm from the interpreter map: the string /
-list / fs builtins may need a `CVal` StrList variant if `mlpl-rt-value`
-`CVal` only has Str/Arr/Record/Result today. If so, the grep/du steps
-add that variant first. `type_of`/`equal`/`str_*`/`list_*`/`fs_walk`
-are eval-layer (Value) in the interpreter; the compiler must reproduce
-their semantics on `CVal` (pure, no interpreter/parser).
+Backward-compatible throughout: every form valid today stays valid; the
+comma-string is kept as accepted sugar. Stage 1 alone fixes the
+`label`-vs-`reduce` inconsistency the CNN blog post surfaced. TDD
+(Red/Green/Refactor) on every step.
 
 ## Steps
 
-1. wc-take-floor -- lower `take` (confirm 2-arg and/or 3-arg slice
-   semantics from the interpreter; the downstream uses `take/3` =
-   `take(a, offset, length)`) and `floor/1` (elementwise math). Both
-   pure DenseArray/math (reuse a runtime primitive or mirror it in
-   mlpl-rt). TDD + gated e2e.
+1. axisspec-core -- Add the shared pure `AxisSpec` (Names | Indices) and
+   `AxisNames` types plus one `resolve(&DenseArray) -> Vec<usize>` to
+   `mlpl-array` (or a small focused sibling module `axis_spec.rs`),
+   splitting parse / validate / resolve to stay under the metric gates.
+   RED first: unit tests for missing name, no-labels, out-of-rank,
+   duplicate, empty. No builtin wired yet.
 
-2. wc-type-equal -- lower `type_of/1` (value kind -> a `CVal::Str`,
-   exact interpreter strings) and `equal/2` (structural equality of two
-   values -> scalar 0/1, mlpl-value-structural parity). Operate on
-   `CVal`. TDD + gated e2e. After this, wc.mlpl should compile.
+2. interpreter-reduce-strlist -- Add the eval-side `axis_spec_of(&Value)`
+   adapter (exhaustive match: StrList -> Names, Str -> Names via
+   comma-split sugar, Array -> Indices) and make `reduce` / `reduce_add`
+   resolve through it, so `reduce(:add, x, ["a","b"])` works. Keep the
+   comma-string and integer-index forms. TDD.
 
-3. grep-string-ops -- lower `str_concat`, `str_find`, `str_len`,
-   `str_slice`, `str_split` on `CVal::Str` (exact interpreter
-   semantics + return types: Str / scalar / StrList / Result). Add a
-   `CVal` StrList variant if needed for `str_split`. TDD + gated e2e.
-   After this, grep.mlpl should compile.
+3. interpreter-label-evaluate -- Add `axis_names_of(&Value)` and make
+   `label` / `relabel` / `reshape_labeled` EVALUATE their name argument
+   and accept a `StrList` or comma-`Str`, preserving identical behavior
+   for the literal case. Add the table-driven PARITY test asserting the
+   axis builtins accept the same set of forms. TDD.
 
-4. du-list-fs -- lower `list_get/2` + `list_len/1` (StrList ops) and
-   `fs_walk` (sandboxed dir -> StrList, via the compiled fs sandbox
-   root) and `concat` (array concat). TDD + gated e2e. After this,
-   du.mlpl should compile.
+4. errors-and-docs -- Replace the ad-hoc per-builtin errors with one
+   `AxisError`-derived message that names all accepted forms (retire
+   "expected an array value, got a string"). Update
+   `docs/lang-reference.md` + `docs/glossary.md` (WHAT/HOW only) and the
+   wiki errata to document the canonical bracketed-name form.
 
-5. docs-close -- document the newly compile-capable builtins
-   (lang-reference / compiler capability doc, WHAT/HOW only), mark the
-   saga SHIPPED in docs/future-sagas-queue.md (the remaining GNU-clone
-   gates are the dedicated CLI entry points + arg-driven paths /
-   top-level unwrap / chunked-stdin streaming), refresh
-   docs/companion-demo-file-processing.md, update the wiki errata if a
-   compiled-capability claim flips, and queue the fncall.rs
-   handler/dispatch split tech-debt. `--done`.
+5. compiler-parity -- Lower a named `reduce_add(x, names)` by resolving
+   names -> indices at lower time via `Ctx.known_labels` (LowerError when
+   not statically known); extend label lowering (`extract_label_list`) to
+   accept a constant-foldable `StrList`. Register in `REGISTRY`, add the
+   `dispatch_coverage_tests` Builtin variant, update `CVAL_BUILTINS` if a
+   new CVal shape appears, and add the gated `MLPL_BUILD_TESTS=1` e2e.
+
+6. surface-sweep -- Route `compress`, `drop`, and any other
+   axis-selecting builtin through the shared `AxisSpec` path; enumerate
+   candidates from the eval dispatch table + `supported_builtin_names()`
+   and `log` any deliberately left out.
+
+7. downstream-relay-and-close -- Confirm `../demo-ml-utils`
+   `probes/named-axis-reduce.mlpl` flips green; relay the section-10 demo
+   edits (demos/cnn/06 named axes, src/cnn conv_layer unification, the
+   computed-name-vector demo). Refresh CHANGES.md, mark the saga shipped
+   in `docs/future-sagas-queue.md`, update `docs/saga.md`. `--done`.

@@ -1,0 +1,1 @@
+Replace ad-hoc per-builtin axis errors with one AxisError message naming all accepted forms (retire "expected an array value, got a string"). Update docs/lang-reference.md + docs/glossary.md (WHAT/HOW only) and the wiki errata for the canonical bracketed-name form.

@@ -1,0 +1,1 @@
+Add eval-side axis_spec_of(&Value) (exhaustive: StrList->Names, Str->Names comma-split sugar, Array->Indices); make reduce/reduce_add resolve through it so reduce(:add, x, ["a","b"]) works. Keep comma-string + integer-index forms. TDD. See docs/unifying-plan.md sections 3.3, 4.

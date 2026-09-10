@@ -1,0 +1,1 @@
+Add shared pure AxisSpec (Names|Indices) + AxisNames types and one resolve(&DenseArray)->Vec<usize> to mlpl-array (focused sibling module axis_spec.rs; split parse/validate/resolve under the metric gates). RED first: unit tests for missing name, no-labels, out-of-rank, duplicate, empty. No builtin wired yet. See docs/unifying-plan.md sections 3, 8.

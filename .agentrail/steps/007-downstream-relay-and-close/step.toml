@@ -1,0 +1,9 @@
+number = 7
+slug = "downstream-relay-and-close"
+status = "pending"
+description = "Confirm ../demo-ml-utils probes/named-axis-reduce.mlpl flips green; relay the..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T16:00:44"
+task_type = "docs"
+commits = []

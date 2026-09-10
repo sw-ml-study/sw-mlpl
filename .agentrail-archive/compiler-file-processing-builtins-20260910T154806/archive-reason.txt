@@ -1,0 +1,1 @@
+Completed on maintainer direction (2026-09-10) to prioritize the axis-naming-unification saga. All compiler-file-processing builtins for wc/grep shipped; the final du-list-fs item is deferred and re-queued in docs/future-sagas-queue.md.

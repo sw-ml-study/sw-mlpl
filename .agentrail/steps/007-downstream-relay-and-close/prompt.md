@@ -1,0 +1,1 @@
+Confirm ../demo-ml-utils probes/named-axis-reduce.mlpl flips green; relay the section-10 demo edits (demos/cnn/06 named axes, src/cnn conv_layer unification, computed-name-vector demo). Refresh CHANGES.md, mark saga shipped in docs/future-sagas-queue.md, update docs/saga.md. Final step: --done.
