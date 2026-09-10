@@ -1,0 +1,1 @@
+BLOCKED: Blocked on autograd-crate saturation: windows-autograd needs +3-4 functions but grad_kernels(7)/tensor_shape(7)/backward_shape(8,FAIL)/tape-crate(7 modules) are all at the sw-checklist ceiling. Doing the autograd-crate-split paydown FIRST (per CLAUDE.md 'split the crate before the feature'), then reopen this.
