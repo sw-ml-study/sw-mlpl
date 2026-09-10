@@ -1,4 +1,4 @@
-number = 52
+number = 53
 slug = "du-list-fs"
 status = "blocked"
 description = "Lower du builtins to compile-to-Rust: list_len/1, list_get/2 (StrList ops), f..."
