@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 056-language-demos-new-primitives; queue cnn-c2
+- chore(pages): rebuild for language-demo primitives (windows/reduce/str_eq)
+- feat(demos): show windows, named/multi-axis reduce, str_eq in language demos
+- chore(agentrail): begin 056-language-demos-new-primitives
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 055-cnn-phase3-multiaxis-named-reduce; queue cnn-c2
 - chore(pages): rebuild for multi-axis/named reduce
 - feat(reduce): multi-axis and named-axis reduction (CNN C3+C4)
