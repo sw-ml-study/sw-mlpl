@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 058-equation-stacked-limits; queue cnn-autograd-windows
+- chore(pages): rebuild for stacked-limit equations (complete conv math)
+- feat(viz): stacked limits for big operators + complete demo equations
+- chore(agentrail): begin 058-equation-stacked-limits
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 057-cnn-c2-rank-broadcast; queue cnn-autograd-windows
 - chore(pages): rebuild for general trailing-axis broadcasting (C2)
 - feat(array): general trailing-axis broadcasting in apply_binop (CNN C2)
