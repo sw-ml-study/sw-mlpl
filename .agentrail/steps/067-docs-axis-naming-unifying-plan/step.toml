@@ -1,0 +1,9 @@
+number = 67
+slug = "docs-axis-naming-unifying-plan"
+status = "in-progress"
+description = "Write docs/unifying-plan.md: a type-safe, staged plan to unify axis-naming (a..."
+role = "production"
+context_files = []
+created_at = "2026-09-10T15:29:55"
+task_type = "docs"
+commits = []
