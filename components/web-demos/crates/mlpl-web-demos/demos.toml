@@ -2553,6 +2553,10 @@ html = "cuda-lora-finetune.html"
 name = "CUDA tic-tac-toe fine-tune"
 html = "cuda-tictactoe.html"
 
+[[literate]]
+name = "Convolution from the equation"
+html = "cnn-convolution.html"
+
 [[progress_notes]]
 demo = "Watch a Model Learn (overfitting)"
 line_idx = 9

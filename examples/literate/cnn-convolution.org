@@ -1,0 +1,175 @@
+#+TITLE: Convolution from the Equation -- a Literate Derivation
+#+SUBTITLE: a 2-D convolution built in MLPL straight from the paper's sum, with the math rendered inline
+#+AUTHOR: MLPL
+#+OPTIONS: toc:2 num:t
+#+PROPERTY: header-args:mlpl :session cnn :results output :exports both
+
+This document derives a 2-D convolution the way a paper states it, and
+then writes it in MLPL so the code reads like the equation. Every math
+line below is rendered *by MLPL itself*: the ~svg(text, "equation")~
+builtin turns a line of Unicode math into a self-contained SVG, embedded
+inline in this page -- no LaTeX toolchain, no MathJax, no network. Every
+code block is a live MLPL source block, evaluated top-to-bottom in one
+shared ~:session cnn~.
+
+* The equation
+
+Zhao, Wang, Wang & Liu (2018), section 2.1, define an output pixel of a
+convolution as a weighted sum over the input channels and the kernel
+window. Rendered from MLPL:
+
+#+begin_src mlpl :results html :exports both
+svg("y[r,x,y] = ∑_q ∑_u ∑_v W[r,q,u,v] · X[q, x+u, y+v]", "equation")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 582 62" width="582" height="62"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="16" y="38" fill="#cdd6f4" font-size="20" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y[r,x,y] = ∑</tspan><tspan baseline-shift="sub" font-size="0.7em">q</tspan><tspan> ∑</tspan><tspan baseline-shift="sub" font-size="0.7em">u</tspan><tspan> ∑</tspan><tspan baseline-shift="sub" font-size="0.7em">v</tspan><tspan> W[r,q,u,v] · X[q, x+u, y+v]</tspan></text></svg>
+#+end_export
+
+Read it as: for output filter ~r~ at position ~(x, y)~, sum over every
+input channel ~q~ and every kernel offset ~(u, v)~ the weight
+~W[r,q,u,v]~ times the shifted input ~X[q, x+u, y+v]~. The whole of a
+convolution is that triple sum. The rest of this page is a way to write
+it with no explicit loops.
+
+* Receptive fields: =windows=
+
+The inner object is the *receptive field* -- the little patch of the
+input that one output pixel sees. ~windows~ extracts every receptive
+field at once. For a ~[channel, height, width]~ input and a
+~[kernel_y, kernel_x]~ window, it returns a
+~[out_y, out_x, channel, kernel_y, kernel_x]~ tensor: the leading axes
+index the output grid, and the trailing ~[channel, kernel_y, kernel_x]~
+block is exactly the receptive field at that position.
+
+#+begin_src mlpl
+image = reshape(range(16) + 1, [1, 4, 4])   # one channel, a 4x4 ramp
+shape(windows(image, [3, 3]))                # [out_y, out_x, channel, kernel_y, kernel_x]
+#+end_src
+
+#+RESULTS:
+: 2 2 1 3 3
+
+That axis order is the load-bearing choice: the receptive field sits in
+the *trailing* axes, so a flattened kernel will line up with it by
+position, with no transpose.
+
+* im2col: flatten the fields into columns
+
+Stack the output grid into rows and flatten each receptive field into a
+column. That is the classic *im2col* rearrangement -- one row per output
+pixel, one column entry per (channel, kernel_y, kernel_x):
+
+#+begin_src mlpl :results html :exports both
+svg("cols[i, :] = flatten( field_i ),   i over the out_y·out_x pixels", "equation")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 736 62" width="736" height="62"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="16" y="38" fill="#cdd6f4" font-size="20" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>cols[i, :] = flatten( field</tspan><tspan baseline-shift="sub" font-size="0.7em">i</tspan><tspan> ),   i over the out</tspan><tspan baseline-shift="sub" font-size="0.7em">y</tspan><tspan>·out</tspan><tspan baseline-shift="sub" font-size="0.7em">x</tspan><tspan> pixels</tspan></text></svg>
+#+end_export
+
+#+begin_src mlpl
+patches = windows(image, [3, 3])
+ps = shape(patches)
+cols = reshape(patches, [take(ps, 0, 0) * take(ps, 0, 1), 1 * 3 * 3])
+shape(cols)                                  # [out_y*out_x, channel*kernel_y*kernel_x]
+#+end_src
+
+#+RESULTS:
+: 4 9
+
+* The contraction: one =matmul=
+
+Now the triple sum ~∑_q ∑_u ∑_v~ is just a dot product between each
+column and the flattened kernel -- and doing all pixels at once is a
+single matrix multiply:
+
+#+begin_src mlpl :results html :exports both
+svg("y = cols · flatten(W)          (one matmul contracts every receptive field)", "equation")
+#+end_src
+
+#+RESULTS:
+#+begin_export html
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 857 62" width="857" height="62"><rect width="100%" height="100%" fill="#1e1e2e"/><text x="16" y="38" fill="#cdd6f4" font-size="20" font-family="'Latin Modern Math','Cambria Math','STIX Two Math',serif"><tspan>y = cols · flatten(W)          (one matmul contracts every receptive field)</tspan></text></svg>
+#+end_export
+
+Putting it together as a reusable function:
+
+#+begin_src mlpl :exports code
+def u:conv_im2col(x, kernel) {
+  "im2col convolution: windows stacks each receptive field, reshape flattens them into columns, and one matmul contracts every column against the flattened kernel -- the whole convolution as a single matrix multiply, no loops and no rank broadcasting"
+  ks = shape(kernel)
+  kh = take(ks, 0, 1)
+  kw = take(ks, 0, 2)
+  patches = windows(x, [kh, kw])
+  ps = shape(patches)
+  out_h = take(ps, 0, 0)
+  out_w = take(ps, 0, 1)
+  cols = reshape(patches, [out_h * out_w, tally(flatten(kernel))])
+  reshape(matmul(cols, flatten(kernel)), [out_h, out_w])
+}
+#+end_src
+
+#+RESULTS:
+: 0
+
+* A worked example: a vertical-edge filter
+
+Convolve the 4x4 ramp with a vertical-edge kernel. The ramp's horizontal
+gradient is constant, so every valid output position is the same value:
+
+#+begin_src mlpl
+edge = reshape([1, 0, -1, 1, 0, -1, 1, 0, -1], [1, 3, 3])   # a vertical-edge filter
+u:conv_im2col(image, edge)                                   # -6 everywhere
+#+end_src
+
+#+RESULTS:
+: -6 -6
+: -6 -6
+
+MLPL ships a native ~conv2d~; use it purely as an independent oracle --
+the im2col result matches it exactly:
+
+#+begin_src mlpl
+reshape(conv2d(reshape(image, [1, 1, 4, 4]), reshape(edge, [1, 1, 3, 3]), 1, 0), [2, 2])
+#+end_src
+
+#+RESULTS:
+: -6 -6
+: -6 -6
+
+* Multiple input channels
+
+The channel sum ~∑_q~ is not special: ~flatten(kernel)~ spans all
+channels, so the same one-line ~matmul~ contracts across them. Two input
+channels, one filter, checked against the oracle to the last bit:
+
+#+begin_src mlpl
+x2 = reshape(range(50) + 1, [2, 5, 5])                       # two channels, 5x5
+k2 = reshape(range(8), [2, 2, 2])                            # one filter over both channels
+mine = u:conv_im2col(x2, k2)
+oracle = reshape(conv2d(reshape(x2, [1, 2, 5, 5]), reshape(k2, [1, 2, 2, 2]), 1, 0), [4, 4])
+reduce(:max, abs(mine - oracle))                             # 0 -- exact parity
+#+end_src
+
+#+RESULTS:
+: 0
+
+The equation and the code now say the same thing: a convolution is a
+weighted sum over each receptive field, and MLPL writes that sum as
+=windows= then =reshape= then one =matmul=.
+
+* How this was run
+
+This document is published with =emacs -Q --batch=, which evaluates every
+MLPL block in order against one persistent session and bakes the results
+in, then exports to HTML. Each ~svg(..., "equation")~ result is inlined
+as a self-contained ~<svg>~, so the math shows as an image with no
+external dependency:
+
+#+begin_src sh :exports code :eval no
+MLPL_REPL_CMD=./target/release/mlpl-repl \
+  ./examples/literate/publish.sh examples/literate/cnn-convolution.org
+#+end_src
