@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-10
 
+- chore(agentrail): complete 063-cnn-training-demo (+completed C6); queue flatten-in-grad
+- chore(pages): rebuild for Train-a-Convolution-Filter demo
+- feat(demos): "Train a Convolution Filter" -- a learnable conv
+- fix(autograd): unbroadcast sums over broadcast axes (completes C6)
+- chore(agentrail): begin 063-cnn-training-demo
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 062-reduce-backward-multiaxis (+C6 fix); queue cnn-training-demo
 - feat(autograd): reduce/reduce_add backward + broadcast-mul backward (C6)
 - chore(agentrail): begin 062-reduce-backward-multiaxis
