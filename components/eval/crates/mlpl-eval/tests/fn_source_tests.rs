@@ -33,8 +33,14 @@ fn one_line_def_is_pretty_printed_on_list() {
     let mut env = Environment::new();
     eval_source_value("def u:cube(x) { \"x cubed\"; y = x * x; y * x }", &mut env).unwrap();
     let listed = env.list_fn("u:cube").expect("listed");
-    assert!(listed.contains('\n'), "one-line def should explode: {listed}");
-    assert!(listed.contains("y = x * x;"), "statements on their own lines: {listed}");
+    assert!(
+        listed.contains('\n'),
+        "one-line def should explode: {listed}"
+    );
+    assert!(
+        listed.contains("y = x * x;"),
+        "statements on their own lines: {listed}"
+    );
     assert!(
         listed.lines().count() >= 4,
         "header + doc + two stmts, each on a line: {listed}"

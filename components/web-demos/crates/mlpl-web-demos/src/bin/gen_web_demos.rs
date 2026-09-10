@@ -14,7 +14,7 @@
 use std::fs;
 use std::path::Path;
 
-use mlpl_web_demos::{capability_for, Demo, Device, DEMOS};
+use mlpl_web_demos::{DEMOS, Demo, Device, capability_for};
 
 fn main() {
     let out_dir = std::env::args()

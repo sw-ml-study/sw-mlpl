@@ -166,6 +166,16 @@ The equation and the code now say the same thing: a convolution is a
 weighted sum over each receptive field, and MLPL writes that sum as
 =windows= then =reshape= then one =matmul=.
 
+And it is not just runnable but LEARNABLE. Every op in the forward pass
+has a tape backward -- =windows= scatter-adds each output gradient onto
+the input positions its window covered, the reduce broadcasts its
+gradient back, and the kernel multiply broadcasts (and un-broadcasts on
+the way back). So ~grad(loss, kernel)~ is exact and a kernel can be
+learned by gradient descent: give the kernel a target and minimise the
+squared error, and =adam= recovers it to machine precision. A
+convolution here is a full trainable layer, built from array primitives
+with no conv-specific autograd.
+
 * How this was run
 
 This document is published with =emacs -Q --batch=, which evaluates every
