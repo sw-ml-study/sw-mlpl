@@ -1,6 +1,6 @@
 number = 61
 slug = "cnn-autograd-windows"
-status = "blocked"
+status = "in-progress"
 description = "CNN Phase 5: autograd through windows. Backward of the sliding-window gather ..."
 role = "production"
 context_files = []

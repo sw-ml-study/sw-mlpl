@@ -1,0 +1,1 @@
+BLOCKED: Per maintainer choice (B): the clean split is a component-wide restructuring (new crate + ~15 files + cross_entropy cross-crate untangling), disproportionate to bolt onto a feature. Deferred to a DEDICATED autograd-crate-split refactor saga. windows/reduce backward land now with a documented sw-checklist exception.
