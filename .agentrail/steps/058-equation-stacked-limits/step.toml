@@ -1,0 +1,9 @@
+number = 58
+slug = "equation-stacked-limits"
+status = "in-progress"
+description = "Make the svg('equation') renderer and the CNN/conv demo equations mathematica..."
+role = "production"
+context_files = []
+created_at = "2026-09-09T20:27:44"
+task_type = "production"
+commits = []
