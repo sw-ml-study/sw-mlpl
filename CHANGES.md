@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-09
 
+- chore(agentrail): complete 059-equation-limit-spacing
+- chore(pages): rebuild for equation limit spacing
+- fix(viz): give stacked equation limits room to breathe
+- chore(agentrail): begin 059-equation-limit-spacing
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 058-equation-stacked-limits; queue cnn-autograd-windows
 - chore(pages): rebuild for stacked-limit equations (complete conv math)
 - feat(viz): stacked limits for big operators + complete demo equations
