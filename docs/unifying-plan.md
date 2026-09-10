@@ -273,7 +273,35 @@ guard that a future edit cannot silently re-introduce divergence.
 - **`StrList` printing / round-trip.** Unchanged; we only add consumers,
   not new producers.
 
-## 9. Non-goals
+## 9. Impact on existing docs, demos, and the blog (non-breaking)
+
+The plan is purely additive: every form valid today stays valid, and the
+comma-string is kept as accepted sugar (Section 10 non-goals). Verified
+against the current content:
+
+- Every axis form used by shipped demos, examples, and the CNN blog post
+  is an EXISTING valid form -- `reduce(:add, x, "channel")`,
+  `reduce(:add, x, [2,3,4])`, `label(windows(...), [...])`,
+  `reduce(:add, w*p, "channel,kernel_y,kernel_x")`. All keep working
+  unchanged.
+- The currently-erroring bracketed `reduce(:add, x, ["a","b"])` form
+  appears nowhere runnable -- only in this plan (as the ERROR example) and
+  in `docs/research4.txt` (a review doc). No demo, example, or test uses
+  it, so stage 1 flips no red/green expectation.
+- No test pins the current rejection of the bracketed form, and no test
+  pins the "expected an array value, got a string" wording, so stages 1-2
+  do not break a test.
+- Making `label` evaluate its argument is behavior-preserving for the
+  literal case (`["a","b"]` evaluates to a `StrList`, which the new parser
+  accepts and resolves identically); it only ADDS the ability to pass a
+  computed value.
+
+The one downstream follow-up is editorial, not a break: a blog/doc that
+today notes "the two spellings differ" would become stale once the
+unification ships. Such text is correct for the current release and only
+needs a small update when stage 1 lands -- normal doc lifecycle.
+
+## 10. Non-goals
 
 - Not changing how labels are stored (`Option<Vec<Option<String>>>` on
   `DenseArray` stays).
