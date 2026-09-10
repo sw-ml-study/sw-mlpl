@@ -1,6 +1,6 @@
-number = 58
+number = 57
 slug = "cnn-c2-rank-broadcast"
-status = "pending"
+status = "in-progress"
 description = "CNN ergonomics (demo-ml-utils C2), DEMOTED from blocker to nice-to-have (the ..."
 role = "production"
 context_files = []
