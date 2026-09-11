@@ -7,23 +7,26 @@ may name phases and cross-repo plans). Source vision:
 ## The demo, in one line
 
 An interactive 3D view of a system's storage/memory layout drawn as stacks
-of classified blocks (the FlashViz metaphor, specialized to the SWTOS
-two-stage storage/runtime architecture): stored image -> provider ->
-validated C24IMG -> allocated process -> reclaimed memory.
+of classified blocks (the FlashViz metaphor). The first producer is the
+SWTOS two-stage storage/runtime architecture (stored image -> provider ->
+validated C24IMG -> allocated process -> reclaimed memory); MLOS
+(`../../sw-ml-study/sw-os-ml`) is a second producer of the SAME contract, so
+the visualizer is deliberately system-agnostic -- any OS that emits the
+columnar layout below can be shown.
 
-## Architecture and the three repos
+## Architecture and the repos
 
 ```
-sw-tos                 storage semantics   (../../sw-embed/sw-tos agent)
-  | emits
+sw-tos / sw-os-ml (MLOS)   storage semantics   (each OS's own agent)
+  | emit
   v
-storage-layout.json    the data contract   (COLUMNAR; see below)
+storage-layout.json        the data contract   (COLUMNAR; see below)
   |
   v
-MLPL viz script        visualization        (sw-mlpl -- THIS repo)
+MLPL viz script            visualization        (sw-mlpl -- THIS repo)
   | array-programming: layout math, classify, assemble geometry
   v
-native3d extension     graphics             (../demo-extensions agent)
+native3d extension         graphics             (../demo-extensions agent)
   |
   v
 3D viewer
@@ -31,13 +34,17 @@ native3d extension     graphics             (../demo-extensions agent)
 
 Boundary (kept deliberately narrow so each piece stays reusable):
 
-- SWTOS knows storage semantics -- it emits the layout, nothing about pixels.
+- The OS (SWTOS or MLOS) knows storage semantics -- it emits the layout,
+  nothing about pixels.
 - MLPL knows visualization semantics -- it turns the layout into geometry.
 - native3d knows graphics -- it draws bulk boxes/labels and does picking.
 
-sw-mlpl's part is the array-programming MIDDLE. It does NOT understand SWTOS
-and it does NOT draw; it consumes a structured layout and produces geometry
-arrays.
+sw-mlpl's part is the array-programming MIDDLE. It does NOT understand any
+particular OS and it does NOT draw; it consumes a structured layout and
+produces geometry arrays. Nothing in the contract or the MLPL viz code is
+SWTOS-specific -- region kinds/owners are data from the JSON, and the color
+palette (a visualization concern MLPL owns) covers the union of the
+vocabularies the producers emit (or is chosen per producer).
 
 ## The data contract: COLUMNAR (struct-of-arrays)
 
@@ -165,6 +172,11 @@ same columnar model -- useful as a web-playground demo while native3d lands.
 - `../../sw-embed/sw-tos`: `storage-layout.py` (and later a runtime emitter)
   producing `storage-layout.json` in THIS columnar contract, from the build
   artifacts.
+- `../../sw-ml-study/sw-os-ml` (MLOS): a second producer of the SAME columnar
+  contract for its own storage/memory layout, when its agent emits that data.
+  The visualizer treats it identically; only the region-kind/owner vocabulary
+  (and hence the palette coverage) may differ.
 - sw-mlpl (this repo): the reference viz library (`examples/viz/`), the one
-  classification primitive, and the 2D orthographic SVG fallback demo.
+  classification primitive, and the 2D orthographic SVG fallback demo. Kept
+  system-agnostic so both SWTOS and MLOS layouts render through the same code.
 - `../demo-extensions`: native3d filled boxes + picking + labels + camera.
