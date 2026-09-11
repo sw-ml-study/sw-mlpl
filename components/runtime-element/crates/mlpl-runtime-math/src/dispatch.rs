@@ -63,8 +63,10 @@ fn comparison(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, RuntimeEr
 }
 
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
-    use crate::array_ops as ao;
+    use crate::array_util as au;
+    use crate::constructors as ct;
     use crate::elementwise as ew;
+    use crate::schedule as sc;
     match name {
         "pi" => Some(ew::zero_arg(name, args, std::f64::consts::PI)),
         "e" => Some(ew::zero_arg(name, args, std::f64::consts::E)),
@@ -84,10 +86,10 @@ pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, 
         "mod" => Some(ew::binary_cmp(name, args, |a, b| a % b)),
         "gt" | "lt" | "eq" | "ge" | "le" | "ne" => Some(comparison(name, args)),
         "mean" => Some(builtin_mean(name, args)),
-        "zeros" | "ones" | "fill" => Some(ao::constructor(name, args)),
-        "cosine_schedule" | "linear_warmup" => Some(ao::schedule(name, args)),
-        "concat" if args.len() != 3 => Some(ao::array_util(name, args)),
-        "last_row" => Some(ao::array_util(name, args)),
+        "zeros" | "ones" | "fill" => Some(ct::constructor(name, args)),
+        "cosine_schedule" | "linear_warmup" => Some(sc::schedule(name, args)),
+        "concat" if args.len() != 3 => Some(au::array_util(name, args)),
+        "last_row" => Some(au::array_util(name, args)),
         _ => None,
     }
 }

@@ -1,9 +1,13 @@
 //! Fixed-width unsigned bit operations over exact-f64 integers
-//! (docs/bit-ops-design.md): band/bor/bxor/bnot/popcount (logic)
-//! plus shl/shr/bmask/bits/from_bits (shift + views). Pure and
-//! universal; the domain is non-negative integers in 0..2^53.
+//! (docs/bit-ops-design.md): band/bor/bxor/bnot/popcount (logic) plus
+//! shl/shr (shift) and bmask/bits/from_bits (bit views). Pure and
+//! universal; the domain is non-negative integers in 0..2^53. The shared
+//! value-domain helpers live in `bit_domain`.
 
+mod bit_domain;
+mod bit_views;
 mod logic;
+mod logic_binary;
 mod shift;
 
 use mlpl_array::DenseArray;
@@ -25,7 +29,8 @@ pub const NAMES: &[&str] = &[
 pub fn try_call(name: &str, args: Vec<DenseArray>) -> Option<Result<DenseArray, RuntimeError>> {
     match name {
         "band" | "bor" | "bxor" | "bnot" | "popcount" => logic::try_call(name, args),
-        "shl" | "shr" | "bmask" | "bits" | "from_bits" => shift::try_call(name, args),
+        "shl" | "shr" => shift::try_call(name, args),
+        "bmask" | "bits" | "from_bits" => bit_views::try_call(name, args),
         _ => None,
     }
 }

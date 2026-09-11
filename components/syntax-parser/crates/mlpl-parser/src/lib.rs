@@ -5,6 +5,7 @@
 //! sibling modules.
 
 mod array_parser;
+mod decl_parser;
 mod parser;
 mod record_parser;
 mod stmts;

@@ -1,0 +1,9 @@
+number = 2
+slug = "checklist-paydown-spike"
+status = "in-progress"
+description = "Tech-debt spike (maintainer directive: prioritize fixing sw-checklist fails)...."
+role = "production"
+context_files = []
+created_at = "2026-09-10T16:46:50"
+task_type = "refactor"
+commits = []

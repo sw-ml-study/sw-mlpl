@@ -1,4 +1,4 @@
-number = 7
+number = 8
 slug = "downstream-relay-and-close"
 status = "pending"
 description = "Confirm ../demo-ml-utils probes/named-axis-reduce.mlpl flips green; relay the..."

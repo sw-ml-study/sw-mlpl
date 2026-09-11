@@ -1,4 +1,4 @@
-number = 2
+number = 3
 slug = "interpreter-reduce-strlist"
 status = "pending"
 description = "Add eval-side axis_spec_of(&Value) (exhaustive: StrList->Names, Str->Names co..."

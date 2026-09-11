@@ -17,7 +17,9 @@
 //! `mlpl-runtime-core`; nothing depends back upward, so the dep
 //! graph stays a DAG.
 
+mod umap_ab_fit;
 pub mod umap_builtin;
+mod umap_forces;
 pub mod umap_graph;
 mod umap_layout;
 mod umap_simplicial;

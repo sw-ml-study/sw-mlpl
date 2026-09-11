@@ -1,4 +1,4 @@
-number = 3
+number = 4
 slug = "interpreter-label-evaluate"
 status = "pending"
 description = "Add axis_names_of(&Value); make label/relabel/reshape_labeled EVALUATE their ..."

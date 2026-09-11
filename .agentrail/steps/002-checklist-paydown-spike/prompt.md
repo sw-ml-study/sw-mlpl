@@ -1,0 +1,1 @@
+Tech-debt spike (maintainer directive: prioritize fixing sw-checklist fails). Retire >=5 Module-Function-Count fails via mechanical sibling-module splits in self-contained runtime primitive crates, split by responsibility to <=4 fns/module, no behavior change, tests+clippy+fmt green.
