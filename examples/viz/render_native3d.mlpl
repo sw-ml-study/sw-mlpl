@@ -1,0 +1,63 @@
+"3D block-map reference script (storage-layout-viz saga).
+
+The end-to-end sw-mlpl pipeline: read a columnar storage-layout.json, build
+geometry with the layout library, and drive the native3d extension. Run from
+the examples/viz directory so `include` and `read_text` resolve there:
+
+  mlpl-repl -f render_native3d.mlpl           # geometry only (no native3d)
+  mlpl-repl -f render_native3d.mlpl -- push   # also push to native3d
+
+native3d is a NATIVE (wgpu/winit) extension provided by the companion
+../demo-extensions repo; it is not built in sw-mlpl. Without an argument this
+script only assembles + reports the geometry, so the array side is verifiable
+independently. The set_boxes / set_labels / render primitives are the generic,
+reusable API proposed in ../demo-extensions/docs/research.txt (not
+SWTOS-specific); the demo-extensions agent implements them. The palette and
+per-space offsets are visualization data, owned here in MLPL, and cover the
+union of producer vocabularies (SWTOS / MLOS / MesaOS)."
+
+include "layout.mlpl";
+
+def u:push_to_native3d(centers, sizes, colors, ids, names) {
+  "Push assembled geometry to a native3d viewer via the reusable primitives from ../demo-extensions. Requires native3d on MLPL_EXTENSION_PATH."
+  n3d = load_extension("native3d")?;
+  viewer = n3d:new_viewer()?;
+  n3d:set_boxes(viewer, centers, sizes, colors, ids)?;
+  n3d:set_labels(viewer, centers, names, ids)?;
+  n3d:render(viewer)?
+}
+
+palette = {
+  header: [0.55, 0.55, 0.60, 1.0],
+  catalog: [0.20, 0.60, 1.00, 1.0],
+  image: [1.00, 0.45, 0.20, 1.0],
+  free: [0.12, 0.12, 0.14, 0.35],
+  text: [0.30, 0.85, 0.40, 1.0],
+  data: [0.30, 0.70, 0.85, 1.0],
+  bss: [0.55, 0.45, 0.85, 1.0],
+  state: [0.90, 0.85, 0.25, 1.0],
+  stack: [0.90, 0.25, 0.25, 1.0],
+  kernel: [0.60, 0.60, 0.65, 1.0],
+};
+space_offset = {
+  flash: [0.0, 0.0, 0.0],
+  ebr: [20.0, 0.0, 0.0],
+  sysram: [40.0, 0.0, 0.0],
+};
+
+layout = parse_json(read_text("storage-layout.json")?)?;
+block = at(record_get(layout, "space_block")?, 0);
+geom = u:region_geometry(layout, palette, space_offset, block);
+centers = record_get(geom, "centers")?;
+sizes = record_get(geom, "sizes")?;
+colors = record_get(geom, "colors")?;
+ids = record_get(geom, "ids")?;
+names = record_get(layout, "region_name")?;
+
+print("built geometry for", tally(ids), "regions; centers", shape(centers), "colors", shape(colors));
+
+if gt(list_len(args()), 0) {
+  u:push_to_native3d(centers, sizes, colors, ids, names)
+} else {
+  print("native3d push skipped (pass an arg to enable, with native3d on MLPL_EXTENSION_PATH)")
+}

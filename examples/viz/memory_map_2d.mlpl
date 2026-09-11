@@ -1,0 +1,40 @@
+"2D orthographic memory-map (storage-layout-viz saga).
+
+A self-contained view that needs no native extension: it renders one space's
+block layout as a heatmap grid -- each block colored by the index of the
+region that contains it, laid out COLS wide (the FlashViz 2D block view).
+Uses only the shipped `svg(_, \"heatmap\")` renderer and array ops, so it runs
+in the web playground as-is. Regions are contiguous and start-sorted within
+the space (the columnar contract guarantees index-aligned region columns; the
+caller passes one space's block starts). The 3D view (see render_native3d.mlpl)
+uses the true RGBA palette; this 2D view uses the heatmap colormap keyed by
+region index, which is enough to read the layout at a glance."
+
+def u:block_region(start_blocks, total) {
+  "Region index per block for blocks 0..total-1: the count of start_blocks that are <= the block index, minus one. Vectorized via a broadcast comparison and a row reduction (no loop)."
+  b = range(total);
+  n = tally(start_blocks);
+  reduce_add(reshape(b, [total, 1]) >= reshape(start_blocks, [1, n]), 1) - 1
+}
+
+def u:pad_to(v, cols) {
+  "Pad vector `v` with -1 up to the next multiple of `cols`, so it reshapes into whole rows. Trailing -1 cells read as empty space."
+  m = tally(v);
+  pad = mod(cols - mod(m, cols), cols);
+  if gt(pad, 0) {
+    concat(v, fill([pad], 0 - 1), 0)
+  } else {
+    v
+  }
+}
+
+def u:memory_heatmap(start_blocks, total, cols) {
+  "Build the [rows, cols] grid of per-block region indices for one space, ready for svg(_, \"heatmap\"). `total` is the space's block count; trailing padding cells are -1."
+  padded = u:pad_to(u:block_region(start_blocks, total), cols);
+  reshape(padded, [tally(padded) / cols, cols])
+}
+
+"Demo: the flash space of examples/viz/storage-layout.json -- header (block 0),
+catalog (1), embedded-hello image (16), padding/free (21), 26 blocks total,
+laid out 16 wide."
+svg(u:memory_heatmap([0, 1, 16, 21], 26, 16), "heatmap")
