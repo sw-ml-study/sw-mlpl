@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "classify-primitive"
+  },
+  "action": "Assessed the while-loop form with the release binary (verbose + take can't row-select) before adding the builtin; TDD RED->GREEN; refactored to keep every fn small after fmt pushed eval_select_rows to a 54-line LOC FAIL (extracted build_matrix); catalog entry + dispatcher registration; eval clippy (7m37s) + fmt + sw-checklist.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-11T10:27:00"
+}

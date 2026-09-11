@@ -1,9 +1,10 @@
 number = 2
 slug = "classify-primitive"
-status = "in-progress"
+status = "completed"
 description = "Add the SMALLEST general primitive to map a StrList of region kinds to RGBA r..."
 role = "production"
 context_files = []
 created_at = "2026-09-11T09:32:08"
+completed_at = "2026-09-11T10:27:00"
 task_type = "feature"
-commits = []
+commits = ["bdf7f899f94c7515742e9bd29b6ddd44e6bc4920"]
