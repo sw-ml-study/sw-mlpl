@@ -208,19 +208,26 @@ sw-mlpl's part of the pipeline is built, tested, and on `main`:
   relationship edge table) -- this section and the JSON above are canonical.
 - `select_rows(table, keys)` builtin shipped (the classification primitive).
 - Geometry library `examples/viz/layout.mlpl` (block layout math, per-region
-  boxes, palette classification, stable ids) with tests.
+  boxes, palette classification, stable ids) with tests. `u:default_palette()`
+  covers the closed region-kind vocabulary (header/catalog/image/free/padding/
+  text/data/bss/state/stack/kernel); `select_rows` is strict, so a new kind
+  needs a palette row (a test pins the vocabulary).
 - Two runnable surfaces: `examples/viz/memory_map_2d.mlpl` (self-contained 2D
   heatmap, no native extension) and `examples/viz/render_native3d.mlpl` (the
   3D reference driving native3d).
 - Conforming sample artifact `examples/viz/storage-layout.json`, sha256
-  `b5a328a623fd7b8378bf47b7014318525334495a9911354539a007f0fbfa657b` -- build
-  native3d and producers against this until the real artifacts land.
+  `b5a328a623fd7b8378bf47b7014318525334495a9911354539a007f0fbfa657b` (a
+  hand-written sample; SWTOS now emits the real artifact, so build against
+  that when present).
 
-Still owned by other repos:
+Producer status:
 
-- `sw-tos`, `sw-os-ml` (MLOS), `MesaOS`: emit `storage-layout.json` in the
-  locked columnar contract (schema/provenance/region_id/relationships), each
-  from its own build artifacts, and report the commit + generated checksum.
+- `sw-tos`: SHIPPED the emitter (sw-tos commit `5c4a24e`) and a real artifact
+  (sha256 `58d29496c75efaa95567d0208ead48dc4c83797c86f2a6952dfc78d1ce748a84`,
+  artifact commit `a08d886`) carrying all four contract additions. Its real
+  data exercises the `padding` kind, which is now in `u:default_palette()`.
+- `sw-os-ml` (MLOS), `MesaOS`: emit `storage-layout.json` in the locked
+  columnar contract from their own build artifacts; report commit + checksum.
 - `demo-extensions`: implement the generic native3d primitives
   (`set_boxes` / `set_labels` / `pick` / `camera` / `set_visibility` /
   `set_highlight`); the reference script targets exactly these.

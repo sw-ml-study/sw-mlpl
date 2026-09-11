@@ -27,18 +27,7 @@ def u:push_to_native3d(centers, sizes, colors, ids, names) {
   n3d:render(viewer)?
 }
 
-palette = {
-  header: [0.55, 0.55, 0.60, 1.0],
-  catalog: [0.20, 0.60, 1.00, 1.0],
-  image: [1.00, 0.45, 0.20, 1.0],
-  free: [0.12, 0.12, 0.14, 0.35],
-  text: [0.30, 0.85, 0.40, 1.0],
-  data: [0.30, 0.70, 0.85, 1.0],
-  bss: [0.55, 0.45, 0.85, 1.0],
-  state: [0.90, 0.85, 0.25, 1.0],
-  stack: [0.90, 0.25, 0.25, 1.0],
-  kernel: [0.60, 0.60, 0.65, 1.0],
-};
+palette = u:default_palette();
 space_offset = {
   flash: [0.0, 0.0, 0.0],
   ebr: [20.0, 0.0, 0.0],

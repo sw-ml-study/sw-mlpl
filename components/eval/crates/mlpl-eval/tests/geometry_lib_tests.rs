@@ -81,6 +81,30 @@ fn region_geometry_colors_and_ids() {
 }
 
 #[test]
+fn default_palette_covers_the_closed_kind_vocabulary() {
+    // select_rows is strict, so the palette must have a row for every kind a
+    // producer can emit; this pins the vocabulary so a missing kind (the
+    // "padding" bug on real sw-tos data) cannot recur silently.
+    let kinds = "[\"header\", \"catalog\", \"image\", \"free\", \"padding\", \
+                 \"text\", \"data\", \"bss\", \"state\", \"stack\", \"kernel\"]";
+    let colors = run(&format!("select_rows(u:default_palette(), {kinds})")).unwrap();
+    assert_eq!(colors.shape().dims(), &[11, 4]);
+}
+
+#[test]
+fn region_geometry_handles_a_padding_region() {
+    // A layout with a "padding" kind (present in real sw-tos output) must not
+    // hard-error through the default palette.
+    let scene = "L = {region_space: [\"flash\", \"flash\"], \
+         region_kind: [\"image\", \"padding\"], \
+         region_start: [0, 45], region_length: [45, 3], region_id: [3, 99]}; \
+       off = {flash: [0.0, 0.0, 0.0]}; \
+       record_get(u:region_geometry(L, u:default_palette(), off, 8), \"colors\")?";
+    let colors = run(scene).unwrap();
+    assert_eq!(colors.shape().dims(), &[2, 4]);
+}
+
+#[test]
 fn region_geometry_uses_explicit_region_id_when_present() {
     // The producer's stable region_id column is used verbatim for picking.
     let scene = "L = {region_space: [\"flash\", \"flash\", \"ebr\"], \
