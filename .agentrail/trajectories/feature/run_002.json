@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "geometry-lib"
+  },
+  "action": "Probed array-assembly ops before writing; TDD via include_str! of examples/viz/layout.mlpl + known-value assertions; wired region_id (downstream ask) into region_geometry with a has_field fallback; extended fixture+doc with schema/provenance/region_id/relationships and verified parse_json handles them; mlpl-fmt --check (my file clean; 24 pre-existing work/ offenders left out of scope).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-11T11:16:21"
+}
