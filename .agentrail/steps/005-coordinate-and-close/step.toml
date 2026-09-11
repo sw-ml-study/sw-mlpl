@@ -1,9 +1,10 @@
 number = 5
 slug = "coordinate-and-close"
-status = "in-progress"
+status = "completed"
 description = "Relay the columnar contract to the sw-tos and demo-extensions agents (what ea..."
 role = "production"
 context_files = []
 created_at = "2026-09-11T09:32:08"
+completed_at = "2026-09-11T12:06:19"
 task_type = "docs"
-commits = []
+commits = ["0166b61055f8a9a0073f255aac5b927de05ea6c9"]
