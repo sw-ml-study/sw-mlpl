@@ -1,9 +1,10 @@
 number = 4
 slug = "render-and-drive"
-status = "in-progress"
+status = "completed"
 description = "(a) self-contained sw-mlpl runnable surface: a 2D orthographic memory-map via..."
 role = "production"
 context_files = []
 created_at = "2026-09-11T09:32:08"
+completed_at = "2026-09-11T11:54:04"
 task_type = "feature"
-commits = []
+commits = ["5813e66542f3e203d355d0396f94d4ecf91aa202"]
