@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "interpreter-label-evaluate"
+  },
+  "action": "TDD RED (comma/variable/reshape_labeled forms error) -> GREEN; reused the step-3 axis_adapter, adding axis_names_of; scoped tests + eval clippy (3m37s) + fmt.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-11T09:14:49"
+}
