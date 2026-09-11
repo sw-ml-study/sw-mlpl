@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "spaces": ["flash", "ebr", "sysram"],
+  "space_name": ["W25Q32 storage", "runtime EBR", "system RAM"],
+  "space_block": [8, 8, 8],
+  "space_capacity": [4194304, 262144, 65536],
+
+  "region_space": ["flash", "flash", "flash", "flash", "ebr", "ebr", "ebr", "sysram"],
+  "region_kind": ["header", "catalog", "image", "free", "text", "state", "stack", "kernel"],
+  "region_name": ["storage header", "catalog records", "embedded-hello", "padding", "hello text", "process state", "hello stack", "kernel image"],
+  "region_owner": ["kernel", "kernel", "hello", "kernel", "hello", "hello", "hello", "kernel"],
+  "region_start": [0, 8, 128, 172, 0, 512, 4096, 0],
+  "region_length": [8, 120, 48, 40, 48, 64, 1024, 16384],
+
+  "region_text_words": [0, 0, 6, 0, 6, 0, 0, 0],
+  "region_data_words": [0, 0, 0, 0, 0, 0, 0, 0],
+  "region_bss_words": [0, 0, 0, 0, 0, 0, 0, 0]
+}
