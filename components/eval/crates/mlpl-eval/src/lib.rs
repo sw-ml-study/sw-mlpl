@@ -107,6 +107,7 @@ mod fncall_record;
 mod fncall_record_keys;
 mod fncall_reflect;
 mod fncall_run;
+mod fncall_select_rows;
 mod fncall_string;
 mod fncall_string_ops;
 mod fncall_toml;

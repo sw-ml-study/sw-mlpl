@@ -25,6 +25,7 @@ entries = [
   ["grade_up", "grade_up(v)", "stable argsort indices, ascending"],
   ["grade_down", "grade_down(v)", "stable argsort indices, descending"],
   ["compress", "compress(mask, a[, axis])", "keep slices where the mask is nonzero"],
+  ["select_rows", "select_rows(table, keys)", "gather rows of a keyed record (key -> row) into an [N,C] matrix, one row per key; e.g. a kind list -> [N,4] RGBA"],
   ["call", "call(f, args...)", "invoke a function reference (:u:name or :name) uniformly"],
   ["map_ok", "map_ok(f, r)", "apply f inside ok(...); err passes through"],
   ["and_then", "and_then(f, r)", "chain: ok(x) -> f(x) returning a Result; err passes through"],

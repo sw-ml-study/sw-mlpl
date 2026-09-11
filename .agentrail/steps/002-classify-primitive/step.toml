@@ -1,6 +1,6 @@
 number = 2
 slug = "classify-primitive"
-status = "pending"
+status = "in-progress"
 description = "Add the SMALLEST general primitive to map a StrList of region kinds to RGBA r..."
 role = "production"
 context_files = []
