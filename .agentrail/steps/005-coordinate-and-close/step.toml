@@ -1,6 +1,6 @@
 number = 5
 slug = "coordinate-and-close"
-status = "pending"
+status = "in-progress"
 description = "Relay the columnar contract to the sw-tos and demo-extensions agents (what ea..."
 role = "production"
 context_files = []

@@ -154,15 +154,13 @@ SHIPPED and sufficient:
   invoke, and C-ABI array marshaling for rank 1..8 in BOTH directions --
   `[N,3]` centers and `[N,4]` colors cross to native3d and results come back.
 
-The one GAP:
+The one gap (now RESOLVED):
 
-- Vectorized string classification: mapping a `region_kind` string list to
-  RGBA rows (and joining `region_space` to space metadata) has no idiomatic
-  primitive today -- `each`/`table` are numeric-only. It is expressible with
-  a manual `while` + `list_get` + `str_eq` loop, but that is verbose. The
-  `classify-primitive` step adds the smallest general primitive (a
-  string-list -> category-index map and/or gather-rows-by-index), not a
-  demo-specific builtin.
+- Vectorized string classification -- mapping a `region_kind` string list to
+  RGBA rows -- had no idiomatic primitive (`each`/`table` are numeric-only,
+  and `take` cannot row-select). Shipped as `select_rows(table, keys)`: a
+  record of `key -> row` plus a string list of keys yields the `[N,C]` matrix
+  of looked-up rows. `colors = select_rows(palette, region_kind)`.
 
 ## native3d invocation surface
 
@@ -201,3 +199,28 @@ same columnar model -- useful as a web-playground demo while native3d lands.
   classification primitive, and the 2D orthographic SVG fallback demo. Kept
   system-agnostic so both SWTOS and MLOS layouts render through the same code.
 - `../demo-extensions`: native3d filled boxes + picking + labels + camera.
+
+## Handoff status (2026-09-11)
+
+sw-mlpl's part of the pipeline is built, tested, and on `main`:
+
+- Contract locked (columnar; `schema` / `provenance` / `region_id` /
+  relationship edge table) -- this section and the JSON above are canonical.
+- `select_rows(table, keys)` builtin shipped (the classification primitive).
+- Geometry library `examples/viz/layout.mlpl` (block layout math, per-region
+  boxes, palette classification, stable ids) with tests.
+- Two runnable surfaces: `examples/viz/memory_map_2d.mlpl` (self-contained 2D
+  heatmap, no native extension) and `examples/viz/render_native3d.mlpl` (the
+  3D reference driving native3d).
+- Conforming sample artifact `examples/viz/storage-layout.json`, sha256
+  `b5a328a623fd7b8378bf47b7014318525334495a9911354539a007f0fbfa657b` -- build
+  native3d and producers against this until the real artifacts land.
+
+Still owned by other repos:
+
+- `sw-tos`, `sw-os-ml` (MLOS), `MesaOS`: emit `storage-layout.json` in the
+  locked columnar contract (schema/provenance/region_id/relationships), each
+  from its own build artifacts, and report the commit + generated checksum.
+- `demo-extensions`: implement the generic native3d primitives
+  (`set_boxes` / `set_labels` / `pick` / `camera` / `set_visibility` /
+  `set_highlight`); the reference script targets exactly these.

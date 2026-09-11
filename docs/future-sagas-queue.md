@@ -26,22 +26,27 @@ resident tape + resident engram, crossover ~d=128, one CPU
 fallback per step (docs/benchmarks.md). The next saga is
 data-forge (Track 1).
 
-## Active saga (2026-09-11, maintainer-prioritized)
+## Recently shipped
 
-- **storage-layout-viz** -- ACTIVE. sw-mlpl's part of a three-repo
-  coordinated demo (see `../demo-extensions/docs/research.txt`): an
-  interactive 3D view of a system's storage/memory layout in the metaphor
-  of stacked blocks. Architecture:
-  `sw-tos -> storage-layout.json -> MLPL viz script -> native3d extension -> 3D viewer`.
-  Boundary: SWTOS knows storage semantics; MLPL knows visualization
-  semantics; native3d knows graphics. sw-mlpl's part is the array-
-  programming that consumes a COLUMNAR (struct-of-arrays) layout JSON
-  (maintainer decision 2026-09-11: parse_json already handles homogeneous-
-  array fields), does the block->(x,y,z) layout math, classifies regions
-  to RGBA, assembles geometry ([N,3] centers/sizes, [N,4] colors, [N] ids),
-  and drives native3d via the shipped extension array-marshaling surface.
-  Parallel: the `../demo-extensions` agent extends native3d (filled boxes +
-  picking); the `../../sw-embed/sw-tos` agent emits the columnar JSON.
+- **storage-layout-viz** -- SHIPPED 2026-09-11 (sw-mlpl's part). See
+  `docs/storage-layout-viz.md`. sw-mlpl's array-programming middle of the
+  multi-repo storage/memory 3D demo is complete: the COLUMNAR contract
+  (schema / provenance / stable region_id / relationship edges) is locked;
+  `select_rows` (keyed row lookup) shipped as the classification primitive;
+  `examples/viz/layout.mlpl` builds geometry ([N,3] centers/sizes, [N,4]
+  colors, [N] ids); two runnable surfaces exist -- `memory_map_2d.mlpl`
+  (self-contained 2D svg heatmap) and `render_native3d.mlpl` (the 3D
+  reference driving native3d). System-agnostic: SWTOS, MLOS
+  (`../../sw-ml-study/sw-os-ml`), and MesaOS (`../../softwarewrighter/MesaOS`)
+  all emit the same contract. Remaining work is OTHER repos': the producers
+  emit `storage-layout.json`; `../demo-extensions` implements the native3d
+  box/label/pick primitives. Sample artifact sha256 `b5a328a6...` is the
+  interim unblock.
+
+## Active saga (2026-09-11)
+
+- None. The next candidate is resuming **axis-naming-unification** (paused
+  below) or a new maintainer-prioritized saga.
 
 ### Paused sagas
 
