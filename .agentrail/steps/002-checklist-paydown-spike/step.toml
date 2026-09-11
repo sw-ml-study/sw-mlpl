@@ -1,9 +1,10 @@
 number = 2
 slug = "checklist-paydown-spike"
-status = "in-progress"
+status = "completed"
 description = "Tech-debt spike (maintainer directive: prioritize fixing sw-checklist fails)...."
 role = "production"
 context_files = []
 created_at = "2026-09-10T16:46:50"
+completed_at = "2026-09-10T22:28:18"
 task_type = "refactor"
-commits = []
+commits = ["b9f62f5ef535d6b5f87e1e4f0cf2cdbd15c19c90"]
