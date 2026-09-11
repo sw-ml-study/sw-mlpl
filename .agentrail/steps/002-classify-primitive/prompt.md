@@ -1,0 +1,1 @@
+Add the SMALLEST general primitive to map a StrList of region kinds to RGBA rows (gather-rows-by-index and/or StrList->category-index), not a demo-specific builtin, and only if the existing while-loop form is too verbose. TDD; anticipate sw-checklist.

@@ -1,0 +1,1 @@
+Relay the columnar contract to the sw-tos and demo-extensions agents (what each provides/consumes), update wiki + docs, refresh CHANGES.md, mark shipped in docs/future-sagas-queue.md. --done.

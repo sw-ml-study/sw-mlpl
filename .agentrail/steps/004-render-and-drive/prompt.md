@@ -1,0 +1,1 @@
+(a) self-contained sw-mlpl runnable surface: a 2D orthographic memory-map via the shipped SVG renderer (web-playground demo now); (b) native3d reference script calling box/label primitives with the assembled arrays, documented + gated (native3d built downstream). Docs.

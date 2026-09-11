@@ -1,0 +1,9 @@
+number = 5
+slug = "coordinate-and-close"
+status = "pending"
+description = "Relay the columnar contract to the sw-tos and demo-extensions agents (what ea..."
+role = "production"
+context_files = []
+created_at = "2026-09-11T09:32:08"
+task_type = "docs"
+commits = []

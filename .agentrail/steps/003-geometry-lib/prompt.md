@@ -1,0 +1,1 @@
+examples/viz/layout.mlpl (+ helpers): pure MLPL turning the columnar layout into geometry -- block->[x,y,z] layers (x=b%16, z=(b/16)%16, y=b/256), per-region centers/sizes [N,3], kinds->[N,4] RGBA, ids [N]. Docstrings on every def; formatted. TDD against the fixture (shapes + spot values, pinned).

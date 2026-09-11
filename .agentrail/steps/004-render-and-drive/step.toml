@@ -1,0 +1,9 @@
+number = 4
+slug = "render-and-drive"
+status = "pending"
+description = "(a) self-contained sw-mlpl runnable surface: a 2D orthographic memory-map via..."
+role = "production"
+context_files = []
+created_at = "2026-09-11T09:32:08"
+task_type = "feature"
+commits = []

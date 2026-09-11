@@ -1,0 +1,1 @@
+Paused at 4/7 on maintainer pivot to storage-layout-viz (2026-09-11). Core goal DONE: label/reduce/reshape_labeled accept bracketed names, comma-string, or computed values interchangeably via mlpl_axes::AxisSpec -- the label-vs-reduce inconsistency is resolved. Steps 5-7 (errors-and-docs, compiler-parity, surface-sweep) re-queued in docs/future-sagas-queue.md.

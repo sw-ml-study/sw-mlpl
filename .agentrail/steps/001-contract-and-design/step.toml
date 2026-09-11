@@ -1,0 +1,9 @@
+number = 1
+slug = "contract-and-design"
+status = "pending"
+description = "Write docs/storage-layout-viz.md: the COLUMNAR storage-layout.json contract (..."
+role = "production"
+context_files = []
+created_at = "2026-09-11T09:32:08"
+task_type = "docs"
+commits = []
