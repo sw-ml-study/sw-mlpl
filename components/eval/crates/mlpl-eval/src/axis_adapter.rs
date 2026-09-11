@@ -7,7 +7,7 @@
 //! - `[2, 3]`                  -> a `Value::Array`   -> axes by POSITION
 
 use mlpl_array::DenseArray;
-use mlpl_axes::{AxisError, AxisSpec};
+use mlpl_axes::{AxisError, AxisNames, AxisSpec};
 use mlpl_eval_types::{EvalError, Value, value_kind};
 
 /// Turn an evaluated axis argument into an [`AxisSpec`]. Exhaustive over the
@@ -38,6 +38,24 @@ pub(crate) fn resolve_axes(
     axis_spec_of(v, func)?
         .resolve(arr)
         .map_err(|e| map_axis_error(&e, func))
+}
+
+/// Turn an evaluated name argument into the axis names to ATTACH
+/// (`label` / `relabel` / `reshape_labeled`): a bracketed list of names
+/// (`Value::StrList`) or an equivalent comma-string (`Value::Str`). Every
+/// axis is named (no positional gaps), matching the previous literal form.
+pub(crate) fn axis_names_of(v: &Value, func: &str) -> Result<AxisNames, EvalError> {
+    let names: Vec<String> = match v {
+        Value::StrList { items } => items.clone(),
+        Value::Str(s) => s.split(',').map(|n| n.trim().to_string()).collect(),
+        other => {
+            return Err(EvalError::Unsupported(format!(
+                "{func}: axis names must be a list [\"a\",\"b\"] or a comma-string \"a,b\", got a {}",
+                value_kind(other)
+            )));
+        }
+    };
+    Ok(AxisNames(names.into_iter().map(Some).collect()))
 }
 
 fn map_axis_error(e: &AxisError, func: &str) -> EvalError {

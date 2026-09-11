@@ -1,13 +1,13 @@
 //! FnCall dispatch family: axis-aware ops.
 //!
 //! `reshape_labeled(x, dims, labels)`, `label(x, labels)` /
-//! `relabel(x, labels)`, and `labels(x)` -- all walk axis labels
-//! from a bracketed string-literal list. Lifted out of
-//! `eval::eval_expr` for saga 33 step 023.
+//! `relabel(x, labels)`, and `labels(x)` -- axis-label constructors.
+//! Lifted out of `eval::eval_expr` for saga 33 step 023.
 //!
-//! `parse_axis_names` is the shared helper used by the labelling
-//! constructors; lifting it here keeps the two call sites from
-//! duplicating the per-element type check.
+//! The name argument is EVALUATED and resolved through the shared
+//! `crate::axis_adapter::axis_names_of`, so a bracketed list of names
+//! (`["a", "b"]`), an equivalent comma-string (`"a,b"`), or a variable
+//! holding either are all accepted -- the same forms `reduce` takes.
 
 use mlpl_array::Shape;
 use mlpl_array_ops_shape::prelude::*;
@@ -71,17 +71,13 @@ fn eval_reshape_labeled(
             got: args.len(),
         });
     }
-    let Expr::ArrayLit(label_elems, _) = &args[2] else {
-        return Err(EvalError::Unsupported(
-            "reshape_labeled: third argument must be a bracketed list of string literals".into(),
-        ));
-    };
-    let labels = parse_axis_names(label_elems, "reshape_labeled")?;
     let source = eval_expr(&args[0], env, trace)?.into_array()?;
     let shape_arr = eval_expr(&args[1], env, trace)?.into_array()?;
+    let names =
+        crate::axis_adapter::axis_names_of(&eval_expr(&args[2], env, trace)?, "reshape_labeled")?;
     let dims: Vec<usize> = shape_arr.data().iter().map(|&d| d as usize).collect();
     let reshaped = source.reshape(Shape::new(dims))?;
-    Ok(Value::Array(reshaped.with_labels(labels)?))
+    Ok(Value::Array(reshaped.with_labels(names.0)?))
 }
 
 fn eval_label_relabel(
@@ -97,14 +93,9 @@ fn eval_label_relabel(
             got: args.len(),
         });
     }
-    let Expr::ArrayLit(label_elems, _) = &args[1] else {
-        return Err(EvalError::Unsupported(format!(
-            "{name}: second argument must be a bracketed list of string literals"
-        )));
-    };
-    let labels = parse_axis_names(label_elems, name)?;
     let arr = eval_expr(&args[0], env, trace)?.into_array()?;
-    Ok(Value::Array(arr.with_labels(labels)?))
+    let names = crate::axis_adapter::axis_names_of(&eval_expr(&args[1], env, trace)?, name)?;
+    Ok(Value::Array(arr.with_labels(names.0)?))
 }
 
 fn eval_labels(
@@ -125,17 +116,4 @@ fn eval_labels(
         None => (0..arr.rank()).map(|_| String::new()).collect(),
     };
     Ok(Value::Str(parts.join(",")))
-}
-
-fn parse_axis_names(elems: &[Expr], func: &str) -> Result<Vec<Option<String>>, EvalError> {
-    let mut labels = Vec::with_capacity(elems.len());
-    for e in elems {
-        let Expr::StrLit(s, _) = e else {
-            return Err(EvalError::Unsupported(format!(
-                "{func}: axis names must be string literals"
-            )));
-        };
-        labels.push(Some(s.clone()));
-    }
-    Ok(labels)
 }
