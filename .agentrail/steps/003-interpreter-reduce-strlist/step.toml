@@ -1,9 +1,10 @@
 number = 3
 slug = "interpreter-reduce-strlist"
-status = "in-progress"
+status = "completed"
 description = "Add eval-side axis_spec_of(&Value) (exhaustive: StrList->Names, Str->Names co..."
 role = "production"
 context_files = []
 created_at = "2026-09-10T16:00:43"
+completed_at = "2026-09-11T07:00:03"
 task_type = "feature"
-commits = []
+commits = ["c37f1760e78760c21ed2eda281f3e3ef23d8df68"]
