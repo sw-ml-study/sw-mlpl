@@ -1,6 +1,6 @@
 number = 3
 slug = "geometry-lib"
-status = "pending"
+status = "in-progress"
 description = "examples/viz/layout.mlpl (+ helpers): pure MLPL turning the columnar layout i..."
 role = "production"
 context_files = []

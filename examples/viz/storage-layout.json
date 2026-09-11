@@ -1,10 +1,18 @@
 {
+  "schema": "sw-ml-study.system-layout",
   "version": 1,
+  "provenance": {
+    "producer": "sw-tos",
+    "revision": "c48a479",
+    "note": "sample fixture; real artifacts are emitted by the producer's storage-layout script"
+  },
+
   "spaces": ["flash", "ebr", "sysram"],
   "space_name": ["W25Q32 storage", "runtime EBR", "system RAM"],
   "space_block": [8, 8, 8],
   "space_capacity": [4194304, 262144, 65536],
 
+  "region_id": [1, 2, 3, 4, 5, 6, 7, 8],
   "region_space": ["flash", "flash", "flash", "flash", "ebr", "ebr", "ebr", "sysram"],
   "region_kind": ["header", "catalog", "image", "free", "text", "state", "stack", "kernel"],
   "region_name": ["storage header", "catalog records", "embedded-hello", "padding", "hello text", "process state", "hello stack", "kernel image"],
@@ -14,5 +22,9 @@
 
   "region_text_words": [0, 0, 6, 0, 6, 0, 0, 0],
   "region_data_words": [0, 0, 0, 0, 0, 0, 0, 0],
-  "region_bss_words": [0, 0, 0, 0, 0, 0, 0, 0]
+  "region_bss_words": [0, 0, 0, 0, 0, 0, 0, 0],
+
+  "rel_kind": ["describes", "loads-to"],
+  "rel_from": [2, 3],
+  "rel_to": [3, 5]
 }

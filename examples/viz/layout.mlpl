@@ -1,0 +1,60 @@
+"Storage-layout geometry library (storage-layout-viz saga).
+
+Pure MLPL that turns a COLUMNAR storage-layout record (see
+docs/storage-layout-viz.md and examples/viz/storage-layout.json) into
+geometry arrays for a 3D block-map viewer: per-region box centers and sizes
+([N,3]), RGBA colors ([N,4]), and stable ids ([N]). System-agnostic: it
+reads only the region_* / space_* columns, so SWTOS and MLOS layouts render
+through the same code. The palette and per-space offsets are visualization
+data passed in by the caller."
+
+def u:columns3(a, b, c) {
+  "Stack three length-M vectors as the columns of an [M,3] matrix: row i is [a_i, b_i, c_i]."
+  m = tally(a);
+  transpose(reshape(concat(concat(a, b, 0), c, 0), [3, m]))
+}
+
+def u:block_xyz(b) {
+  "Lay a block-index vector [M] out in 16x16 layers -- x = b%16, z = (b/16)%16, y = b/256 -- and return the [M,3] cell positions (one row per block). This is the FlashViz-style detailed cell layout."
+  u:columns3(mod(b, 16), floor(b / 256), mod(floor(b / 16), 16))
+}
+
+def u:first_blocks(starts, block) {
+  "Block index of each region's start byte: floor(start / block)."
+  floor(starts / block)
+}
+
+def u:block_counts(lengths, block) {
+  "Number of whole blocks each region occupies: ceil(length / block)."
+  ceil(lengths / block)
+}
+
+def u:region_geometry(layout, palette, space_offset, block) {
+  "Assemble the overview (tower) geometry from a columnar layout record. Each region is a box in its space's tower, stacked by block address with height = block count. `palette` maps region_kind -> [r,g,b,a]; `space_offset` maps region_space -> [x,y,z] tower base; `block` is the block size in bytes. Returns {centers:[N,3], sizes:[N,3], colors:[N,4], ids:[N]}."
+  starts = record_get(layout, "region_start")?;
+  lengths = record_get(layout, "region_length")?;
+  spaces = record_get(layout, "region_space")?;
+  kinds = record_get(layout, "region_kind")?;
+  fb = u:first_blocks(starts, block);
+  bc = u:block_counts(lengths, block);
+  n = tally(starts);
+  base = select_rows(space_offset, spaces);
+  centers = base + u:columns3(zeros([n]), fb + (bc / 2), zeros([n]));
+  sizes = u:columns3(ones([n]), bc, ones([n]));
+  colors = select_rows(palette, kinds);
+  {
+    centers: centers,
+    sizes: sizes,
+    colors: colors,
+    ids: u:region_ids(layout, n),
+  }
+}
+
+def u:region_ids(layout, n) {
+  "Stable per-region ids for picking / cross-highlighting: the producer's explicit `region_id` column when present, else the positional fallback range(n)."
+  if has_field(layout, "region_id") {
+    record_get(layout, "region_id")?
+  } else {
+    range(n)
+  }
+}

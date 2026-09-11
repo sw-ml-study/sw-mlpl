@@ -9,10 +9,11 @@ may name phases and cross-repo plans). Source vision:
 An interactive 3D view of a system's storage/memory layout drawn as stacks
 of classified blocks (the FlashViz metaphor). The first producer is the
 SWTOS two-stage storage/runtime architecture (stored image -> provider ->
-validated C24IMG -> allocated process -> reclaimed memory); MLOS
-(`../../sw-ml-study/sw-os-ml`) is a second producer of the SAME contract, so
-the visualizer is deliberately system-agnostic -- any OS that emits the
-columnar layout below can be shown.
+validated C24IMG -> allocated process -> reclaimed memory). Additional
+producers of the SAME contract: MLOS (`../../sw-ml-study/sw-os-ml`) and
+MesaOS (`../../softwarewrighter/MesaOS`). The visualizer is deliberately
+system-agnostic -- any OS that emits the columnar layout below can be shown
+through identical MLPL code.
 
 ## Architecture and the repos
 
@@ -62,12 +63,16 @@ column joins each region to the `spaces` metadata by name.
 
 ```json
 {
+  "schema": "sw-ml-study.system-layout",
   "version": 1,
+  "provenance": { "producer": "sw-tos", "revision": "c48a479" },
+
   "spaces":          ["flash", "ebr", "sysram"],
   "space_name":      ["W25Q32 storage", "runtime EBR", "system RAM"],
   "space_block":     [8, 8, 8],
   "space_capacity":  [4194304, 262144, 65536],
 
+  "region_id":       [1, 2, 3, 4, 5],
   "region_space":    ["flash", "flash", "flash", "ebr", "ebr"],
   "region_kind":     ["header", "catalog", "image", "text", "stack"],
   "region_name":     ["storage header", "catalog records",
@@ -78,19 +83,34 @@ column joins each region to the `spaces` metadata by name.
 
   "region_text_words": [0, 0, 6, 0, 0],
   "region_data_words": [0, 0, 0, 0, 0],
-  "region_bss_words":  [0, 0, 0, 0, 0]
+  "region_bss_words":  [0, 0, 0, 0, 0],
+
+  "rel_kind":        ["describes", "loads-to"],
+  "rel_from":        [2, 3],
+  "rel_to":          [3, 5]
 }
 ```
 
 Rules:
 
-- All `region_*` arrays are length N and index-aligned.
+- `schema` is the constant `"sw-ml-study.system-layout"`; `version` is the
+  contract version; `provenance` is a small object carrying at least the
+  `producer` and its source `revision` (so a rendered snapshot is traceable).
+  These are the identifying header the consumers requested.
+- All `region_*` arrays are length N and index-aligned. `region_id` is an
+  explicit, STABLE integer id per region (assigned by the producer, stable
+  across snapshots) -- it is what native3d uses for picking and
+  cross-highlighting, so it must not be a positional afterthought.
 - All `space_*` arrays are length S and index-aligned; `spaces[i]` is the key.
 - `region_space[j]` is one of `spaces`. `region_kind` / `region_owner` are
   from small closed vocabularies (see color modes below).
 - Offsets and lengths are in bytes. `space_block` is the block size in bytes
   (8 for SWTOS). Image word-counts are 24-bit words (0 for non-image kinds).
-- Emit from the SAME build artifacts SWTOS already uses (avoid drift).
+- Relationships are an EDGE table of length E (independent of N):
+  `rel_kind` (e.g. `describes`, `loads-to`), `rel_from` and `rel_to`
+  (`region_id` values). They may be empty initially; the "explain selected
+  program" view (catalog -> extent -> C24IMG -> allocation) consumes them.
+- Emit from the SAME build artifacts the producer already uses (avoid drift).
 
 A worked sample lives at `examples/viz/storage-layout.json`.
 
@@ -172,10 +192,11 @@ same columnar model -- useful as a web-playground demo while native3d lands.
 - `../../sw-embed/sw-tos`: `storage-layout.py` (and later a runtime emitter)
   producing `storage-layout.json` in THIS columnar contract, from the build
   artifacts.
-- `../../sw-ml-study/sw-os-ml` (MLOS): a second producer of the SAME columnar
-  contract for its own storage/memory layout, when its agent emits that data.
-  The visualizer treats it identically; only the region-kind/owner vocabulary
-  (and hence the palette coverage) may differ.
+- `../../sw-ml-study/sw-os-ml` (MLOS) and `../../softwarewrighter/MesaOS`
+  (MesaOS): additional producers of the SAME columnar contract for their own
+  storage/memory layouts, when their agents emit that data. The visualizer
+  treats them identically; only the region-kind/owner vocabulary (and hence
+  the palette coverage) may differ.
 - sw-mlpl (this repo): the reference viz library (`examples/viz/`), the one
   classification primitive, and the 2D orthographic SVG fallback demo. Kept
   system-agnostic so both SWTOS and MLOS layouts render through the same code.
