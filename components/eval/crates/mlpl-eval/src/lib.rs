@@ -9,6 +9,7 @@
 mod analysis_dispatch;
 mod applet;
 mod auto_tag;
+mod axis_adapter;
 // The env layer lives below in mlpl-eval-env (env-base-out step);
 // re-exported as modules so every crate::env:: / crate::env_user_fns::
 // path keeps resolving, and callers outside see mlpl_eval::Environment

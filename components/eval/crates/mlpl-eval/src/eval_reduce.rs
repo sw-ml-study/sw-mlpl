@@ -6,14 +6,15 @@
 //! `reduce_add` and `reduce_mul` continue to exist as
 //! direct shorthands.
 //!
-//! The optional third argument selects which axes collapse:
-//! a scalar (`2`) or numeric vector (`[2, 3]`) names axis
-//! POSITIONS, and a string names axis LABELS -- one, or
-//! several comma-separated (`"channel"`,
-//! `"channel,kernel_y,kernel_x"`). Multiple axes are removed
-//! high-index first, so a convolution can contract its whole
-//! receptive field in one call. With no third argument the
-//! array reduces to a scalar.
+//! The optional third argument selects which axes collapse,
+//! resolved through the shared `mlpl_axes::AxisSpec` so the
+//! three forms are interchangeable: a scalar (`2`) or numeric
+//! vector (`[2, 3]`) names axis POSITIONS; a bracketed list of
+//! names (`["channel", "kernel_y"]`) or an equivalent
+//! comma-string (`"channel,kernel_y"`) names axis LABELS.
+//! Multiple axes are removed high-index first, so a convolution
+//! can contract its whole receptive field in one call. With no
+//! third argument the array reduces to a scalar.
 //!
 //! Why `:op` instead of a string or bare-name reference?
 //! MLPL has no first-class functions in v0.19; the colon-
@@ -77,44 +78,13 @@ pub(crate) fn eval_reduce(
     })?;
     let arr = eval_expr(&args[1], env, trace)?.into_array()?;
     let result = if args.len() == 3 {
-        let axes = resolve_axes(eval_expr(&args[2], env, trace)?, &arr)?;
+        let axis_val = eval_expr(&args[2], env, trace)?;
+        let axes = crate::axis_adapter::resolve_axes(&axis_val, &arr, "reduce")?;
         reduce_over(arr, axes, identity, op)?
     } else {
         DenseArray::from_scalar(arr.data().iter().copied().fold(identity, op))
     };
     Ok(Value::Array(result))
-}
-
-/// Resolve the axis argument to positional axes. A numeric scalar or
-/// vector is a list of positions directly (`2`, `[2, 3]`); a string is
-/// one or more comma-separated axis LABELS (`"channel"`,
-/// `"channel,kernel_y"`), each looked up in the array's labels.
-fn resolve_axes(axis: Value, arr: &DenseArray) -> Result<Vec<usize>, EvalError> {
-    let s = match axis {
-        Value::Str(s) => s,
-        other => {
-            return Ok(other
-                .into_array()?
-                .data()
-                .iter()
-                .map(|&v| v as usize)
-                .collect());
-        }
-    };
-    let labels = arr.labels().ok_or_else(|| {
-        EvalError::Unsupported("reduce: named axis but the array has no labels".into())
-    })?;
-    s.split(',')
-        .map(|raw| {
-            let name = raw.trim();
-            labels
-                .iter()
-                .position(|l| l.as_deref() == Some(name))
-                .ok_or_else(|| {
-                    EvalError::Unsupported(format!("reduce: no axis labeled \"{name}\""))
-                })
-        })
-        .collect()
 }
 
 /// Reduce `arr` over every axis in `axes`, removing them high-index

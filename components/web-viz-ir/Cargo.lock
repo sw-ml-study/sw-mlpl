@@ -297,6 +297,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-axes"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+]
+
+[[package]]
 name = "mlpl-bpe-core"
 version = "0.22.0"
 
@@ -343,6 +350,7 @@ dependencies = [
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
  "mlpl-autograd",
+ "mlpl-axes",
  "mlpl-bpe-core",
  "mlpl-core",
  "mlpl-engram-core",

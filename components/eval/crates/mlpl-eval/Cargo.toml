@@ -97,6 +97,7 @@ mlpl-models-tape = { path = "../../../models-write/crates/mlpl-models-tape" }
 mlpl-models-tune = { path = "../../../models-write/crates/mlpl-models-tune" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
 mlpl-array = { path = "../../../array/crates/mlpl-array" }
+mlpl-axes = { path = "../../../array/crates/mlpl-axes" }
 mlpl-array-ops-element = { path = "../../../array-element/crates/mlpl-array-ops-element" }
 mlpl-array-ops-shape = { path = "../../../array-element/crates/mlpl-array-ops-shape" }
 mlpl-array-ops-compose = { path = "../../../array-compose/crates/mlpl-array-ops-compose" }
