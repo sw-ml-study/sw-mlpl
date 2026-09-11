@@ -12,8 +12,39 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-11
+
+- chore(agentrail): complete + close storage-layout-viz (--done)
+- docs(viz): storage-layout-viz handoff + mark saga shipped (saga step 5)
+- chore(agentrail): complete 004-render-and-drive (storage-layout-viz)
+- feat(viz): 2D memory-map + native3d reference script (saga step 4)
+- chore(agentrail): complete 003-geometry-lib (storage-layout-viz)
+- feat(viz): geometry library examples/viz/layout.mlpl (saga step 3) + contract additions
+- chore(agentrail): complete 002-classify-primitive (storage-layout-viz)
+- feat(eval): select_rows(table, keys) -- vectorized keyed row lookup (viz step 2)
+- docs(viz): MLOS (sw-os-ml) is a second producer of the columnar contract
+- chore(agentrail): complete 001-contract-and-design (storage-layout-viz)
+- docs(viz): storage-layout 3D demo contract + sample fixture (saga step 1)
+- chore(agentrail): pause axis-naming-unification (4/7); start storage-layout-viz
+- docs(queue): pause axis-naming-unification (4/7, core done); activate storage-layout-viz
+- chore(agentrail): complete 004-interpreter-label-evaluate
+- feat(eval): label/relabel/reshape_labeled evaluate their name arg (unification step)
+- chore(agentrail): complete 003-interpreter-reduce-strlist
+- feat(eval): reduce accepts a bracketed list of axis names (unification step)
+
 ## 2026-09-10
 
+- chore(agentrail): complete 002-checklist-paydown-spike
+- refactor(checklist): retire 5 Module-Function-Count fails via responsibility splits
+- chore(agentrail): complete 001-axisspec-core
+- feat(axes): shared AxisSpec/AxisNames + resolver (axis-naming-unification step 1)
+- chore(agentrail): archive compiler-file-processing-builtins; start axis-naming-unification
+- docs(plan): downstream demo guidance + queue axis-naming-unification as active saga
+- chore(agentrail): complete 067-docs-axis-naming-unifying-plan
+- docs(plan): note the axis-naming unification is non-breaking (impact section)
+- docs(plan): type-safe axis-naming unification plan (docs/unifying-plan.md)
+- chore(agentrail): complete 066-release-0-22-0; advance to 067-du-list-fs
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(pages): rebuild for 0.22.0 (differentiable CNN; trainable convolution)
 - release: bump component-workspace versions 0.21.0 -> 0.22.0
 - docs(cnn): cross-link the trainable-convolution result; fix stale literate-count pin
