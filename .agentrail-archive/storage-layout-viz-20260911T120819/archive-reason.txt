@@ -1,0 +1,1 @@
+storage-layout-viz shipped 2026-09-11; archiving to resume axis-naming-unification (steps 5-8) per maintainer.

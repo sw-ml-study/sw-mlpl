@@ -45,8 +45,11 @@ data-forge (Track 1).
 
 ## Active saga (2026-09-11)
 
-- None. The next candidate is resuming **axis-naming-unification** (paused
-  below) or a new maintainer-prioritized saga.
+- **axis-naming-unification (resumed)** -- ACTIVE. Steps 1-4 shipped
+  (label/reduce/reshape_labeled accept bracketed names / comma-string /
+  computed values via `mlpl_axes::AxisSpec`); resuming the remaining:
+  errors-and-docs -> compiler-parity -> surface-sweep ->
+  downstream-relay-and-close. Plan: `docs/unifying-plan.md`.
 
 ### Paused sagas
 

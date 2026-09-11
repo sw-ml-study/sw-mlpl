@@ -1,0 +1,1 @@
+Confirm ../demo-ml-utils probes/named-axis-reduce.mlpl flips green with the shipped reduce-StrList; relay the demo edits (docs/unifying-plan.md section 10); refresh CHANGES; update docs/glossary + wiki; mark the resumed saga shipped in docs/future-sagas-queue.md. --done.

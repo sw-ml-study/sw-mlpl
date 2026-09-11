@@ -1,0 +1,9 @@
+number = 2
+slug = "compiler-parity"
+status = "pending"
+description = "Lower named reduce_add(x, names) via static Ctx.known_labels (LowerError when..."
+role = "production"
+context_files = []
+created_at = "2026-09-11T12:08:19"
+task_type = "feature"
+commits = []

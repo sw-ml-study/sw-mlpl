@@ -1,6 +1,6 @@
-name = "storage-layout-viz"
-status = "completed"
-current_step = 5
-created_at = "2026-09-11T09:31:53"
+name = "axis-naming-unification"
+status = "active"
+current_step = 1
+created_at = "2026-09-11T12:08:19"
 plan_file = ".agentrail/plan.md"
 retroactive = false

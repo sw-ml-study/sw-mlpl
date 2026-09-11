@@ -1,0 +1,1 @@
+Unify the ad-hoc axis errors behind one AxisError-derived message naming all accepted forms (bracketed names / comma-string / indices); document the canonical bracketed-name form in docs/lang-reference.md + docs/glossary.md (WHAT/HOW only) and the wiki errata. TDD where messages/behavior are pinned. See docs/unifying-plan.md.
