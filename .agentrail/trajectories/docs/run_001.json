@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 1,
+    "step": "errors-and-docs"
+  },
+  "action": "Swept docs for stale bracketed-rejected/comma-string-only claims (glossary reduce entry, lang-reference reduce + label table rows + Labeled Axes prose); fixed all; updated wiki errata (pushed separately); markdown-checked.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-11T12:29:52"
+}
