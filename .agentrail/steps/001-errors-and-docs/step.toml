@@ -1,6 +1,6 @@
 number = 1
 slug = "errors-and-docs"
-status = "pending"
+status = "in-progress"
 description = "Unify the ad-hoc axis errors behind one AxisError-derived message naming all ..."
 role = "production"
 context_files = []

@@ -363,12 +363,19 @@ label drops), and `map()`.
 ```
 M : [batch, feat] = reshape(range(6), [2, 3])
 labels(M)                         # "batch,feat"
-reduce_add(M, "feat")             # reduce by axis name
+reduce(:add, M, ["feat"])         # reduce by axis name (bracketed list)
+reduce(:add, M, "feat")           # ... or the equivalent comma-string
 labels(transpose(M))              # swaps labels alongside dims
 ```
 
-See `label(x, [...])`, `relabel(x, [...])`, and
-`reshape_labeled(x, dims, labels)` in the built-ins table.
+Axes are named the same way everywhere. `label(x, names)`,
+`relabel(x, names)`, `reshape_labeled(x, dims, names)`, and the axis
+argument of `reduce`/`reduce_add` all accept a bracketed list of names
+(`["batch", "feat"]`) or an equivalent comma-string (`"batch,feat"`)
+interchangeably; `reduce` additionally accepts integer positions
+(`1`, `[2, 3]`). The name argument is a value, so a variable holding the
+names works too. See `label`, `relabel`, and `reshape_labeled` in the
+built-ins table.
 
 ## Parameters and Autograd
 
@@ -494,7 +501,7 @@ tables (e.g. the three name forms) keep their teaching order.
 | `rank(a)` | 1 | Number of dimensions (scalar) |
 | `reduce(:op, a)` | 2 | Higher-order reduction: `:op` is one of `:add`/`:+`, `:mul`/`:*`, `:min`, `:max`, `:and`, `:or`. Examples: `reduce(:max, v)`, `reduce(:and, mask)`. The first argument is a `BuiltinRef` (`:foo` syntax); user variables can hold one too: `f = :max; reduce(f, v)`. |
 | `ngram_hash(ids, orders, heads, slots, seed)` | 5 | Rolling n-gram hash indices `[T, order, head]` for Engram-style memory addressing; a frozen exact cross-backend contract (ids capped at 2^21 - 1). |
-| `reduce(:op, a, axis)` | 3 | Same, restricted to one or more axes. `axis` is a scalar position (`2`), a vector of positions (`[2, 3]`), or a string naming labeled axes -- one (`"channel"`) or several as ONE comma-separated string (`"channel,kernel_y,kernel_x"`, not a list of strings like `["channel","kernel_y"]`, which is not a value MLPL has). Multiple axes collapse high-index first, and the surviving axes keep their labels, so named reductions chain. `reduce(:add, T, "channel")` needs `T` to carry axis labels (see `label`). |
+| `reduce(:op, a, axis)` | 3 | Same, restricted to one or more axes. `axis` is a scalar position (`2`), a vector of positions (`[2, 3]`), a bracketed list of axis names (`["channel", "kernel_y"]`), or an equivalent comma-string (`"channel"`, `"channel,kernel_y,kernel_x"`) -- the name forms are interchangeable. Multiple axes collapse high-index first, and the surviving axes keep their labels, so named reductions chain. Named reductions need `a` to carry axis labels (see `label`). |
 | `reduce_add(a[, axis])` | 1-2 | Sum all elements (or along axis). Equivalent to `reduce(:add, a[, axis])`; kept as a direct shorthand. |
 | `reduce_mul(a[, axis])` | 1-2 | Product. Equivalent to `reduce(:mul, a[, axis])`. |
 | `apply_engram(e, h, ids)` | 3 | Engram forward pass: hash the ids, gather the addressed memory rows, project, concat-gate against `h`, and add to the residual stream. Exact no-op on a freshly built engram; differentiable, so `grad`/`adam`/`train` move only the addressed memory rows (duplicates accumulate). |
@@ -598,7 +605,7 @@ counts levels of nesting (not axes).
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `label(x, names)` | 2 | Attach axis labels to an array. `names` is a rank-1 string array; length must equal the rank of `x`. Use `""` for "no label" on a single axis. |
+| `label(x, names)` | 2 | Attach axis labels to an array. `names` is an evaluated value -- a bracketed list of names (`["batch", "feat"]`) or an equivalent comma-string (`"batch,feat"`), so a variable holding the names works; its length must equal the rank of `x`. Use `""` for "no label" on a single axis. |
 | `labels(x)` | 1 | Return the axis labels of `x` as a comma-joined string ("" for unlabeled axes). |
 | `map(x, "fn")` | 2 | Apply a math built-in (by string name, e.g. `"sigmoid"`, `"exp"`) element-wise while preserving labels. |
 | `relabel(x, names)` | 2 | Like `label`, but explicitly overrides any existing labels on `x`. |

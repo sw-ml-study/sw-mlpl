@@ -3300,16 +3300,17 @@ Higher-order reduction: `reduce(:op, x[, axis])` applies the
 binop named by a `BuiltinRef` to every element of `x` (or
 along `axis`), starting from the op's identity. Curated set:
 `:add` (== `:+`), `:mul` (== `:*`), `:min`, `:max`, `:and`,
-`:or`. The `axis` argument selects what collapses: a scalar
-position (`1`), a vector of positions (`[2, 3]`), or a string
-naming labeled axes -- one (`"channel"`) or several as ONE
-comma-separated string (`"channel,kernel_y,kernel_x"`, not a
-list of strings `["channel","kernel_y"]`). Several axes collapse
+`:or`. The `axis` argument selects what collapses, resolved
+through the shared axis-selector so the forms are interchangeable:
+a scalar position (`1`), a vector of positions (`[2, 3]`), a
+bracketed list of axis NAMES (`["channel", "kernel_y"]`), or an
+equivalent comma-string (`"channel"`,
+`"channel,kernel_y,kernel_x"`). Several axes collapse
 high-index first and the surviving axes keep their labels, so
 named reductions chain (contract `channel`, then the kernel
 axes). Examples: `reduce(:max, v)`, `reduce(:add, M, 1)`,
 `reduce(:add, patches, [2, 3])`, `reduce(:add, T, "channel")`,
-`f = :max; reduce(f, v)`. Subsumes the older fixed-name
+`reduce(:add, T, ["channel", "kernel_y"])`, `f = :max; reduce(f, v)`. Subsumes the older fixed-name
 `reduce_add` / `reduce_mul`. `:add` reductions are
 differentiable on the autograd tape -- full, single-axis, and
 multi-axis -- with the gradient broadcast back over the
