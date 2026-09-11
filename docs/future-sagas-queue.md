@@ -26,18 +26,37 @@ resident tape + resident engram, crossover ~d=128, one CPU
 fallback per step (docs/benchmarks.md). The next saga is
 data-forge (Track 1).
 
-## Active saga (2026-09-10, maintainer-prioritized)
+## Active saga (2026-09-11, maintainer-prioritized)
 
-- **axis-naming-unification** -- ACTIVE. Plan: `docs/unifying-plan.md`.
-  Make `label`, `reduce`, `reshape_labeled` and the other axis-selecting
-  builtins accept the same axis-selector forms (bracketed name list,
-  comma-string, integer indices) across the interpreter and the
-  compile-to-Rust path, via one shared `AxisSpec`/`AxisNames` type and a
-  single resolver. Backward-compatible; stage 1 (interpreter) fixes the
-  `label`-vs-`reduce` inconsistency the CNN blog post surfaced. Downstream
-  `../demo-ml-utils` demo edits are documented in the plan (section 10);
-  its `probes/named-axis-reduce.mlpl` is the tracking gate (red until
-  stage 1 ships).
+- **storage-layout-viz** -- ACTIVE. sw-mlpl's part of a three-repo
+  coordinated demo (see `../demo-extensions/docs/research.txt`): an
+  interactive 3D view of a system's storage/memory layout in the metaphor
+  of stacked blocks. Architecture:
+  `sw-tos -> storage-layout.json -> MLPL viz script -> native3d extension -> 3D viewer`.
+  Boundary: SWTOS knows storage semantics; MLPL knows visualization
+  semantics; native3d knows graphics. sw-mlpl's part is the array-
+  programming that consumes a COLUMNAR (struct-of-arrays) layout JSON
+  (maintainer decision 2026-09-11: parse_json already handles homogeneous-
+  array fields), does the block->(x,y,z) layout math, classifies regions
+  to RGBA, assembles geometry ([N,3] centers/sizes, [N,4] colors, [N] ids),
+  and drives native3d via the shipped extension array-marshaling surface.
+  Parallel: the `../demo-extensions` agent extends native3d (filled boxes +
+  picking); the `../../sw-embed/sw-tos` agent emits the columnar JSON.
+
+### Paused sagas
+
+- **axis-naming-unification** -- PAUSED 2026-09-11 at 4/7 steps (plan:
+  `docs/unifying-plan.md`). Steps 1-4 shipped and the core goal is DONE:
+  `label`, `reduce`, `reshape_labeled` now accept a bracketed name list, a
+  comma-string, or a computed value interchangeably via the shared
+  `mlpl_axes::AxisSpec`/`axis_names_of` -- the `label`-vs-`reduce`
+  inconsistency the CNN blog post surfaced is resolved in the interpreter.
+  Remaining (re-queue when resumed): (5) errors-and-docs -- one
+  AxisError-derived message + lang-reference/glossary/wiki; (6)
+  compiler-parity -- named `reduce_add` via static `known_labels` + label
+  lowering accepts a constant-fold StrList; (7) surface-sweep -- route
+  `compress`/`drop`/`reduce_add` through the shared path. The step-1
+  archive is under `.agentrail-archive/` after this pivot.
 
   Prior saga **compiler-file-processing-builtins** was completed and
   archived on 2026-09-10 (see `.agentrail-archive/`); its final unshipped
