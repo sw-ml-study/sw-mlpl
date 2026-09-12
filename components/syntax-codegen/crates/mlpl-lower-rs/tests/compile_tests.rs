@@ -137,3 +137,19 @@ reduce_add(matmul(a, b))";
     let got = compile_and_run(src);
     assert!((got - 30.0).abs() < 1e-9, "expected 30.0, got {got}");
 }
+
+#[test]
+fn named_reduce_add_compiles_and_evaluates() {
+    if !should_run() {
+        eprintln!("skipping end-to-end compile test; set MLPL_LOWER_RS_COMPILE_TESTS=1 to run");
+        return;
+    }
+    // M : [r, c] = [[0,1,2],[3,4,5]]; reduce_add over the named "c" axis
+    // (resolved to position 1 via known labels) -> row sums [3, 12];
+    // reduce_add of that -> 15.
+    let src = "\
+M : [r, c] = reshape(iota(6), [2, 3])
+reduce_add(reduce_add(M, \"c\"))";
+    let got = compile_and_run(src);
+    assert!((got - 15.0).abs() < 1e-9, "expected 15.0, got {got}");
+}

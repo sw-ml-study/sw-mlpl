@@ -189,9 +189,22 @@ pub(crate) fn lower_fncall(
             }})
         }
         Emit::ReduceAxis => {
+            // A single string-literal axis is a NAME, resolved to a position
+            // against the operand's statically-known labels (the compile-time
+            // side of the shared axis-selector); else a numeric position.
             let a = crate::lower_darr(ctx, &args[0])?;
-            let axis = crate::lower_darr(ctx, &args[1])?;
-            Ok(quote! { #rt::reduce_add_axis(&(#a), (#axis).data()[0] as usize).unwrap() })
+            if let Expr::StrLit(nm, _) = &args[1] {
+                let labels = labels_of(ctx, &args[0])
+                    .ok_or_else(|| LowerError::NamedAxisNotStatic(nm.clone()))?;
+                let idx = labels
+                    .iter()
+                    .position(|l| l.as_deref() == Some(nm.as_str()))
+                    .ok_or_else(|| LowerError::NoAxisNamed(nm.clone()))?;
+                Ok(quote! { #rt::reduce_add_axis(&(#a), #idx).unwrap() })
+            } else {
+                let axis = crate::lower_darr(ctx, &args[1])?;
+                Ok(quote! { #rt::reduce_add_axis(&(#a), (#axis).data()[0] as usize).unwrap() })
+            }
         }
         Emit::CvalIo => {
             let (a, f) = (crate::lower_cval(ctx, &args[0])?, format_ident!("{name}"));
@@ -420,20 +433,25 @@ fn lower_matmul(ctx: &Ctx, args: &[Expr]) -> Result<TokenStream, LowerError> {
     Ok(quote! { #rt::MatmulExt::matmul(&(#a), &(#b)).unwrap() })
 }
 
-/// Extract a list of string literals from an `ArrayLit` -- used for
-/// the label-attaching builtins. `None` if not an all-StrLit ArrayLit.
+/// Extract a list of axis names from a `label`-style argument: a bracketed
+/// all-StrLit `ArrayLit` (`["a", "b"]`) or a single comma-string literal
+/// (`"a,b"`). `None` if it is neither (i.e. not statically knowable). The
+/// interpreter also accepts a computed value; the compiler needs it static.
 pub(crate) fn extract_label_list(expr: &Expr) -> Option<Vec<String>> {
-    let Expr::ArrayLit(elems, _) = expr else {
-        return None;
-    };
-    let mut out = Vec::with_capacity(elems.len());
-    for e in elems {
-        let Expr::StrLit(s, _) = e else {
-            return None;
-        };
-        out.push(s.clone());
+    match expr {
+        Expr::ArrayLit(elems, _) => {
+            let mut out = Vec::with_capacity(elems.len());
+            for e in elems {
+                let Expr::StrLit(s, _) = e else {
+                    return None;
+                };
+                out.push(s.clone());
+            }
+            Some(out)
+        }
+        Expr::StrLit(s, _) => Some(s.split(',').map(|p| p.trim().to_string()).collect()),
+        _ => None,
     }
-    Some(out)
 }
 
 /// Statically infer the labels of an expression where possible.

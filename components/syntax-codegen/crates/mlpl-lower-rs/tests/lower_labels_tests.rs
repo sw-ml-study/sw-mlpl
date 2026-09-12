@@ -166,3 +166,31 @@ fn labels_builtin_is_unsupported_in_compile_path() {
         "got {err:?}"
     );
 }
+
+// -- Compiler parity: named reduce_add + comma-string labels (axis-naming) --
+
+#[test]
+fn reduce_add_lowers_a_named_axis_via_known_labels() {
+    // reduce_add(x, "c") resolves "c" against x's statically-known labels ("c" = axis 1).
+    let s = lower_src("reduce_add(label(iota(6), [\"r\", \"c\"]), \"c\")").unwrap();
+    assert!(s.contains("reduce_add_axis"), "{s}");
+    assert!(s.contains("1usize"), "{s}");
+}
+
+#[test]
+fn label_accepts_a_comma_string_literal() {
+    let s = lower_src("label(iota(6), \"r,c\")").unwrap();
+    assert!(s.contains(". with_labels"), "{s}");
+    assert!(s.contains("\"r\"") && s.contains("\"c\""), "{s}");
+}
+
+#[test]
+fn reduce_add_named_axis_without_static_labels_errors() {
+    // No statically-known labels on the operand -> the compiler cannot resolve the name.
+    let _ = lower_err("reduce_add(iota(6), \"c\")");
+}
+
+#[test]
+fn reduce_add_unknown_named_axis_errors() {
+    let _ = lower_err("reduce_add(label(iota(6), [\"r\", \"c\"]), \"zzz\")");
+}

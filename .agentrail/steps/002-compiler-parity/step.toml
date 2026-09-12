@@ -1,6 +1,6 @@
 number = 2
 slug = "compiler-parity"
-status = "pending"
+status = "in-progress"
 description = "Lower named reduce_add(x, names) via static Ctx.known_labels (LowerError when..."
 role = "production"
 context_files = []

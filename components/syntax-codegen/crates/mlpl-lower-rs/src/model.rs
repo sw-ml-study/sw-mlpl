@@ -29,8 +29,16 @@ pub enum LowerError {
     },
     /// A label-attaching builtin (`label`, `relabel`,
     /// `reshape_labeled`) was called with a label list that is not
-    /// a bracketed list of string literals.
+    /// a bracketed list of string literals (or a comma-string).
     LabelsMustBeStringLiterals(String),
+    /// A named-axis reduction (`reduce_add(x, "name")`) whose operand's
+    /// labels are not statically known at lower time; the compiler cannot
+    /// resolve the name to a position (the interpreter resolves it at run
+    /// time -- this is the deliberate compile-time-vs-runtime phase split).
+    NamedAxisNotStatic(String),
+    /// A named-axis reduction whose name is absent from the operand's
+    /// statically-known labels.
+    NoAxisNamed(String),
 }
 
 impl std::fmt::Display for LowerError {
@@ -50,6 +58,11 @@ impl std::fmt::Display for LowerError {
                 f,
                 "lower: {fn_name}: label list must be [\"name1\", \"name2\", ...]"
             ),
+            Self::NamedAxisNotStatic(n) => write!(
+                f,
+                "lower: reduce_add axis \"{n}\" needs static operand labels"
+            ),
+            Self::NoAxisNamed(n) => write!(f, "lower: reduce_add: no static axis labeled \"{n}\""),
         }
     }
 }
