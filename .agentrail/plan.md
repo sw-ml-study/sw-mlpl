@@ -1,24 +1,25 @@
-# moe-microscope-followups-2
+# moe-microscope-followups-3
 
-Address the second downstream dogfooding batch (F9-F15) from ../moe-microscope
-(see docs/sw-mlpl-findings.md "Follow-up batch 2"). Lead with F10 -- a Rust
-panic in the autograd tape, the only correctness/safety issue in the batch.
+Address the eval_stream server-surface gaps from ../moe-microscope's host-handoff
+step (docs/sw-mlpl-findings.md "Follow-up batch 3"): F16 (include, filesystem
+sandbox, args) and the remainder of S1. Lead with include -- it unblocks
+submitting a module-split lesson without a client-side bundler.
 
-## Steps (priority order)
+## Steps
 
-1. F10 (BUG) -- a labeled sinusoidal_encoding in a residual block panics the
-   autograd tape. Turn the panic into a clean MLPL error at minimum; support
-   it on the tape if tractable. TDD: the reproducer errors cleanly (no panic).
-2. F14 -- constant constructors (fill, zeros, ones, ...) rejected inside grad;
-   treat as constant leaves on the tape (like literals). TDD gradcheck.
-3. F9 -- embed rejects batched [B, T] token input; accept it (or document).
-4. F15 -- repeat count bound to a function parameter fails inside a traced fn;
-   resolve the count against the traced local scope (F6 edge). TDD.
-5. F12 -- shape-derived size arithmetic rejected inside grad; support or
-   document.
-6. F11 -- F2 inliner drops a param used only in index arithmetic; fix or
-   document the boundary.
-7. F13 (low) -- attention_weights cannot see inside residual(chain(...));
-   document (the downstream keeps the hand-written residual regardless).
-8. relay-and-close -- mark F9-F15 resolved/documented, refresh CHANGES + wiki,
-   mark the saga shipped, rebuild binaries. --done.
+1. f16a-include-over-wire -- accept an optional `includes` map (virtual path ->
+   source text) on the eval request; when present (or the program uses
+   `include`), resolve the include tree server-side with the existing
+   mlpl_source_loader MemoryProvider + expand (which already enforces the
+   no-absolute / no-escape sandbox), and evaluate the expanded chunks in the
+   session environment. Backward-compatible: no `includes` -> current behavior.
+   TDD: a program that `include`s a module submitted with its map evaluates.
+
+2. f16b-fs-sandbox -- give server-run programs a filesystem sandbox root for the
+   fs builtins (read_bytes/write_bytes/...), configured on the server; reads and
+   writes outside the root are refused. TDD.
+
+3. f16c-args -- let the eval request pass `args` visible to the program. TDD.
+
+4. relay-and-close -- mark F16/S1 resolved/documented, refresh CHANGES + wiki,
+   mark the saga shipped, rebuild binaries (incl mlpl-serve). --done.

@@ -1,0 +1,1 @@
+F16a: accept an optional includes map (virtual path -> source text) on the eval request; when present, resolve the include tree server-side via mlpl_source_loader MemoryProvider + expand (sandbox rules built in) and evaluate the expanded chunks in the session env. Backward-compatible (no includes -> current path). TDD. See docs/sw-mlpl-findings.md F16.

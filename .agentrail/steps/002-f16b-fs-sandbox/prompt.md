@@ -1,0 +1,1 @@
+F16b: give server-run programs a filesystem sandbox root for the fs builtins (read_bytes/write_bytes/etc.), configured on the server; ops outside the root are refused. TDD. See docs/sw-mlpl-findings.md F16.

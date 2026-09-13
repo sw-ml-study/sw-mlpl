@@ -1,0 +1,1 @@
+Mark F16/S1 resolved/documented in docs/sw-mlpl-findings.md, refresh CHANGES + wiki errata, mark moe-microscope-followups-3 shipped, rebuild binaries incl mlpl-serve. --done.
