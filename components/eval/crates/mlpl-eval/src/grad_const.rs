@@ -12,8 +12,30 @@ use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
+use crate::env_api::*;
 use crate::grad::eval_tensor_expr;
 use mlpl_eval_types::EvalError;
+
+/// Evaluate a non-differentiable index expression (e.g. a `gather_rows` index)
+/// eagerly, in a scope overlaid with the current grad bindings, so index
+/// arithmetic over a nested user function's arguments resolves (finding F11):
+/// `start + range(count)` where `start`/`count` are function parameters living
+/// in the traced scope, not the global env. The overlay is snapshotted and
+/// restored so it does not leak.
+pub(crate) fn eval_index_expr(
+    idx: &Expr,
+    env: &mut Environment,
+    params: &HashMap<String, Tensor>,
+) -> Result<DenseArray, EvalError> {
+    let snap = env.snapshot_scope();
+    for (name, t) in params {
+        env.set(name.clone(), t.value());
+    }
+    let out =
+        crate::eval::eval_expr(idx, env, &mut None).and_then(mlpl_eval_types::Value::into_array);
+    env.restore_scope(snap);
+    out
+}
 
 /// Dispatch a `FnCall` inside `grad`: run it on the tape, and if the tape
 /// cannot handle it, fall back to constant-folding when the whole call is

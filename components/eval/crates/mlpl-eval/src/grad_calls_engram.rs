@@ -89,7 +89,7 @@ pub(crate) fn call_gather_rows(
 ) -> Result<Tensor, EvalError> {
     crate::grad::arity_check(args, 2, "gather_rows")?;
     let table = crate::grad::eval_tensor_expr(&args[0], env, tape, params)?;
-    let idx = crate::eval::eval_expr(&args[1], env, &mut None)?.into_array()?;
+    let idx = crate::grad_const::eval_index_expr(&args[1], env, params)?;
     let dims = table.value().shape().dims().to_vec();
     if dims.len() != 2 {
         return Err(EvalError::Unsupported(format!(

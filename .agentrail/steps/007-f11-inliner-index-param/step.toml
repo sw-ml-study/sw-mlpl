@@ -1,6 +1,6 @@
 number = 7
 slug = "f11-inliner-index-param"
-status = "pending"
+status = "in-progress"
 description = "F11: the F2 user-function inliner drops a parameter used only in index arithm..."
 role = "production"
 context_files = []

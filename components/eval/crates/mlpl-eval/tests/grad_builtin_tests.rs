@@ -547,3 +547,29 @@ fn grad_still_rejects_non_diff_reduction_over_a_param() {
         "reduce_mul(param) still errors"
     );
 }
+
+// -- moe-microscope follow-up F11: index arithmetic over nested-fn arguments --
+// gather_rows' index, computed from a nested user function's arguments
+// (start + range(count)), must resolve those arguments (they live in the
+// traced scope, not the global env).
+
+#[test]
+fn grad_through_nested_user_fn_index_arithmetic() {
+    let mut env = Environment::new();
+    let w = DenseArray::new(Shape::new(vec![4, 3]), (0..12).map(|n| n as f64).collect()).unwrap();
+    env.set_param("W".into(), w);
+    let src = "\
+        def u:rows(M, start, count) {\n\
+          \"Contiguous row slice.\"\n\
+          gather_rows(M, start + range(count))\n\
+        }\n\
+        def u:second_pair(M) {\n\
+          \"Rows one and two via the nested helper.\"\n\
+          u:rows(M, 1, 2)\n\
+        }\n\
+        grad(reduce_add(u:second_pair(W)), W)";
+    let g = run(src, &mut env);
+    assert_eq!(g.shape().dims(), &[4, 3]);
+    // Rows 1 and 2 are gathered -> gradient 1 there, 0 on rows 0 and 3.
+    assert_eq!(g.data(), &[0., 0., 0., 1., 1., 1., 1., 1., 1., 0., 0., 0.]);
+}
