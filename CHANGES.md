@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- feat(grad): constant constructors (fill/zeros/ones) as leaves in grad (F14)
+- chore(agentrail): complete 001-f10-sinusoidal-tape-panic; advance to 002-f14-const-ctors-in-grad
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(array): unify partial axis labels per-axis, fixing an autograd panic (F10)
 - chore(agentrail): archive moe-microscope-followups; init followups-2 (F9-F15)
 - chore(agentrail): complete 004-followups-relay-and-close; moe-microscope-followups saga done
