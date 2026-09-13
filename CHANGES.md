@@ -12,8 +12,22 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-12
+
+- fix(eval): reduce_add/reduce_mul accept a VECTOR of axis names (multi-axis)
+- chore(agentrail): complete 003-surface-sweep (axis-naming resumed)
+- feat(eval): reduce_add family accepts a bracketed single axis name (unification step 7, surface-sweep)
+- docs(findings): capture ../moe-microscope dogfooding findings as an upstream work order
+- chore(agentrail): complete 002-compiler-parity (axis-naming resumed)
+- feat(lower): named reduce_add + comma-string labels in the compiler (unification step 6)
+
 ## 2026-09-11
 
+- fix(viz): complete region-kind palette (padding) so real sw-tos data renders
+- chore(agentrail): complete 001-errors-and-docs (axis-naming resumed)
+- docs(axes): document unified axis-naming forms; retire stale "no string-array" claims (unification step 5)
+- chore(agentrail): archive storage-layout-viz; resume axis-naming-unification (steps 5-8)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete + close storage-layout-viz (--done)
 - docs(viz): storage-layout-viz handoff + mark saga shipped (saga step 5)
 - chore(agentrail): complete 004-render-and-drive (storage-layout-viz)
