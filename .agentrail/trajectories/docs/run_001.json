@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 4,
+    "step": "followups-relay-and-close"
+  },
+  "action": "Flipped batch-1 findings to resolved with commits; verified F14/F15 reproducers on release binary; recorded batch-2 F9-F15 with priorities; wiki errata (separate repo); gen-changes; markdown clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-12T21:32:35"
+}

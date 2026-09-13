@@ -1,5 +1,5 @@
 name = "moe-microscope-followups"
-status = "active"
+status = "completed"
 current_step = 4
 created_at = "2026-09-12T20:23:53"
 plan_file = ".agentrail/plan.md"
