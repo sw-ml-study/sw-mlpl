@@ -80,7 +80,7 @@ fn trace_body(
             // body's assignments thread through `local` across iterations, so
             // bounded recurrence depth trains without hand-nested apply calls.
             Expr::Repeat { count, body, .. } => {
-                let n = repeat_count(count, env)?;
+                let n = repeat_count(count, env, tape, local)?;
                 for _ in 0..n {
                     result = Some(trace_body(body, env, tape, local)?);
                 }
@@ -93,10 +93,18 @@ fn trace_body(
     })
 }
 
-/// Evaluate a `repeat` count to a non-negative integer. The count is a plain
-/// scalar (not differentiable), so it is evaluated eagerly like normal `repeat`.
-fn repeat_count(count: &Expr, env: &mut Environment) -> Result<usize, EvalError> {
-    let n = crate::eval::eval_expr(count, env, &mut None)?.into_array()?;
+/// Evaluate a `repeat` count to a non-negative integer scalar. Resolved through
+/// the traced scope (`eval_tensor_expr` checks the function's `local` bindings
+/// before the global env), so a count bound to a FUNCTION PARAMETER works
+/// (finding F15), as does a global or a literal. The count is not
+/// differentiable -- only its scalar value is read.
+fn repeat_count(
+    count: &Expr,
+    env: &mut Environment,
+    tape: &Rc<Tape>,
+    local: &HashMap<String, Tensor>,
+) -> Result<usize, EvalError> {
+    let n = eval_tensor_expr(count, env, tape, local)?.value();
     if n.rank() != 0 {
         return Err(EvalError::InvalidRepeatCount);
     }

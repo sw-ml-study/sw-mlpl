@@ -1,6 +1,6 @@
 number = 4
 slug = "f15-repeat-param-count"
-status = "pending"
+status = "in-progress"
 description = "F15: repeat count bound to a function parameter fails inside a traced functio..."
 role = "production"
 context_files = []

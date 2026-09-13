@@ -465,3 +465,26 @@ fn grad_through_ones_and_zeros_constructors() {
     let g_add = run("grad(sum(W + zeros([2])), W)", &mut env);
     assert_eq!(g_add.data(), &[1.0, 1.0]);
 }
+
+// -- moe-microscope follow-up F15: repeat count bound to a function parameter -
+// The F6 unroll resolved the repeat count via the eager env only, so a count
+// passed as a function argument (in the traced local scope) failed with
+// "undefined variable". The count now resolves against the traced scope too.
+
+#[test]
+fn grad_through_repeat_with_parameter_bound_count() {
+    // u:recur(h, r) doubles h r times; with r = 2, h -> 4h; grad(sum) = [4, 4].
+    let mut env = Environment::new();
+    env.set_param("W".into(), DenseArray::from_vec(vec![1.0, 2.0]));
+    let src = "\
+        def u:recur(h, r) {\n\
+          \"Double h r times.\"\n\
+          repeat r {\n\
+            h = h + h\n\
+          }\n\
+          h\n\
+        }\n\
+        grad(sum(u:recur(W, 2)), W)";
+    let g = run(src, &mut env);
+    assert_eq!(g.data(), &[4.0, 4.0]);
+}
