@@ -1,9 +1,10 @@
 number = 3
 slug = "surface-sweep"
-status = "in-progress"
+status = "completed"
 description = "Route compress, drop, reduce_add and any other axis-selecting builtin through..."
 role = "production"
 context_files = []
 created_at = "2026-09-11T12:08:19"
+completed_at = "2026-09-12T17:37:00"
 task_type = "feature"
-commits = []
+commits = ["e32f00f53c58d24395f8591274f2ac345b844ff1"]

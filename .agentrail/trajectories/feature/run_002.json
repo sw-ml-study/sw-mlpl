@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "surface-sweep"
+  },
+  "action": "Enumerated axis builtins; found only the labeled-reduce family had an eval-level named path to unify; TDD RED->GREEN; folded name-check + extraction into one axis_name_of helper to keep eval_reduce_labeled short (minimizing to +1 warning).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-12T17:37:01"
+}
