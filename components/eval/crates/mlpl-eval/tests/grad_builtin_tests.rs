@@ -340,3 +340,32 @@ fn grad_user_function_arity_mismatch_errors() {
     let stmts = parse(&lex("def u:f(a, b) { \"two\"; a } \n grad(u:f(w), w)").unwrap()).unwrap();
     assert!(eval_program(&stmts, &mut env).is_err());
 }
+
+// -- moe-microscope finding F4: gather_rows differentiable (scatter-add) ------
+
+#[test]
+fn grad_through_gather_rows_scatter_adds_into_addressed_rows() {
+    // gather_rows(M, [0, 0, 2]); loss = sum of gathered rows. The backward is
+    // a scatter-ADD into the addressed rows: row 0 (addressed twice) gets 2,
+    // row 2 gets 1, row 1 (never addressed) gets 0 -- exactly like windows'
+    // overlap accumulation. This is what lets a from-scratch addressing /
+    // embedding table train.
+    let mut env = Environment::new();
+    let m = DenseArray::new(Shape::new(vec![3, 2]), vec![1., 2., 3., 4., 5., 6.]).unwrap();
+    env.set_param("M".into(), m);
+    let g = run("grad(sum(gather_rows(M, [0, 0, 2])), M)", &mut env);
+    assert_eq!(g.shape(), &Shape::new(vec![3, 2]));
+    assert_eq!(g.data(), &[2., 2., 0., 0., 1., 1.]);
+}
+
+#[test]
+fn grad_through_gather_rows_forward_matches_eager() {
+    // The tape forward must equal the eager gather (F1-style consistency):
+    // a weighted sum over gathered rows differentiates to the row's weights.
+    let mut env = Environment::new();
+    let m = DenseArray::new(Shape::new(vec![2, 3]), vec![1., 2., 3., 4., 5., 6.]).unwrap();
+    env.set_param("M".into(), m);
+    // loss = sum(gather_rows(M, [1])) = 4+5+6 = 15; grad on row 1 = ones.
+    let g = run("grad(sum(gather_rows(M, [1])), M)", &mut env);
+    assert_eq!(g.data(), &[0., 0., 0., 1., 1., 1.]);
+}

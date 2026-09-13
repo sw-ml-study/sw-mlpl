@@ -176,6 +176,7 @@ fn eval_tensor_fncall(
         "matmul" => crate::grad_calls_basic::call_matmul(args, env, tape, params),
         "apply" => crate::grad_calls_basic::call_apply(args, env, tape, params),
         "apply_engram" => crate::grad_calls_engram::call_apply_engram(args, env, tape, params),
+        "gather_rows" => crate::grad_calls_engram::call_gather_rows(args, env, tape, params),
         "cross_entropy" => crate::grad_calls_basic::call_cross_entropy(args, env, tape, params),
         "patchify" => crate::grad_calls_shape::call_patchify(args, env, tape, params),
         "concat" => crate::grad_calls_shape::call_concat(args, env, tape, params),

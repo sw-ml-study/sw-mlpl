@@ -2448,11 +2448,22 @@ diverges from another: `KL(P || Q) = sum(P * (log(P) -
 log(Q)))`, zero iff `P == Q`, larger when Q gives low
 probability to events P deems likely. The natural
 distillation loss: a high-temperature student softmax
-trained to match a teacher's softened logits via KL.
-**Deferred** in MLPL: build by hand from `softmax`,
-`log`, `reduce_add`; a `kl_div(p_logits, q_logits,
-temperature)` builtin is on the Module 11 distillation
-roadmap.
+trained to match a teacher's softened logits via KL. Not a
+dedicated MLPL builtin -- it is a direct composition of
+shipped builtins that works eagerly AND differentiates
+through `grad`:
+
+```
+# P is a fixed target distribution; Q = softmax(student_logits)
+kl = reduce_add(P * (log(P) - log(Q)))
+grad(kl, W)     # trains the student wrt its params
+```
+
+`reduce_add(P * (log(P) - log(Q)))` evaluates to the scalar
+divergence and its gradient wrt the params behind `Q` is
+`-P / Q` (the standard distillation gradient). `P` must be
+strictly positive where it is weighted (the `0 * log 0 = 0`
+convention is not applied by the composition).
 
 ## Label Smoothing
 

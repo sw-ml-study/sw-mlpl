@@ -1,6 +1,6 @@
 number = 4
 slug = "gather-rows-backward-and-kl"
-status = "pending"
+status = "in-progress"
 description = "Make gather_rows differentiable on the tape (scatter-add backward, like windo..."
 role = "production"
 context_files = []

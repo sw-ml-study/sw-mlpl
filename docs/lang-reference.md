@@ -522,7 +522,7 @@ tables (e.g. the three name forms) keep their teaching order.
 | `apply_engram(e, h, ids)` | 3 | Engram forward pass: hash the ids, gather the addressed memory rows, project, concat-gate against `h`, and add to the residual stream. Exact no-op on a freshly built engram; differentiable, so `grad`/`adam`/`train` move only the addressed memory rows (duplicates accumulate). |
 | `engram(hidden, ngrams, heads, slots, head_dim, seed)` | 6 | Engram conditional-memory layer: one flattened n-gram table + value projection + concat gate, initialized near-identity (zero table, gate bias -2). Apply with `apply_engram`; trainable via `adam(loss, e, ...)`. |
 | `engram_stats(e, ids)` / `engram_stats(e, h, ids)` | 2-3 | Engram health record with addressable fields: `rows_addressed` (total (t, order, head) lookups), `unique_rows`, `collisions` (distinct n-gram contexts sharing a slot under the frozen hash contract -- repetition of the same context is not a collision), `nonzero_rows`, `max_row_norm`; the 3-argument form adds `gate_mean` / `gate_max` from the eager forward's gate. Example: `s = engram_stats(e, ids); s.collisions`. |
-| `gather_rows(table, indices)` | 2 | Select whole rows of a rank-2 table; output shape is the indices' shape + `[dim]`. Out-of-range indices error loudly. |
+| `gather_rows(table, indices)` | 2 | Select whole rows of a rank-2 table; output shape is the indices' shape + `[dim]`. Out-of-range indices error loudly. Differentiable wrt `table` inside `grad(...)`: the backward is a scatter-ADD into the addressed rows (rows addressed more than once accumulate; unaddressed rows get zero), so a from-scratch embedding / addressing table trains. `indices` are constants -- no gradient flows through them. |
 | `reshape(a, dims)` | 2 | Reshape array to new dimensions |
 | `flatten(a)` | 1 | Ravel: all elements as a rank-1 vector in row-major order (equivalent to `reshape(a, [size(a)])`). Differentiable on the tape (reshape-to-1D; backward restores the original shape). Naming policy: meaningful names are canonical and arity-locked; APL glyph names are heritage aliases only. |
 | `rotate(x, k, axis)` | 3 | Cyclic shift along axis; negative k (spell it `0 - k`) rotates the other way |
@@ -644,7 +644,12 @@ renders both labeled shapes side by side.
 
 | Function | Args | Description |
 |----------|------|-------------|
-| `grad(expr, wrt)` | 2 | Lift `expr` onto the reverse-mode tape and return the gradient wrt the named parameter or tensor. Shape equals the shape of `wrt`. Supported ops: `+`, `-`, `*`, `/`, unary `-`, `exp`, `log`, `sigmoid`, `tanh_fn`, `relu` (via `relu_layer`), `softmax`, `sum`, `mean`, `reduce_add` / `reduce(:add, x[, axes])` (full, single-axis, or multi-axis -- only `:add` is differentiable), `transpose`, `reshape`, `flatten`, `matmul`, `rotate`, `take`, `patchify`, `concat`, `windows` (sliding-window gather; backward is scatter-add), `cross_entropy`. With both `windows` and the `reduce` family differentiable, a convolution is trainable in either spelling -- the im2col `matmul(reshape(windows(x,[kh,kw]),...), flatten(k))` or the elementwise `reduce(:add, kernel * windows(x,[kh,kw]), [2,3,4])`. Use with `param[shape]` / `tensor[shape]` leaves. |
+| `grad(expr, wrt)` | 2 | Lift `expr` onto the reverse-mode tape and return the gradient wrt the named parameter or tensor. Shape equals the shape of `wrt`. Supported ops: `+`, `-`, `*`, `/`, unary `-`, `exp`, `log`, `sigmoid`, `tanh_fn`, `relu` (via `relu_layer`), `softmax`, `sum`, `mean`, `reduce_add` / `reduce(:add, x[, axes])` (full, single-axis, or multi-axis -- only `:add` is differentiable), `transpose`, `reshape`, `flatten`, `matmul`, `rotate`, `take`, `patchify`, `concat`, `windows` (sliding-window gather; backward is scatter-add), `gather_rows` (row gather; backward is scatter-add into the addressed rows), `cross_entropy`, and any user function called by name (its body is inlined onto the tape). With both `windows` and the `reduce` family differentiable, a convolution is trainable in either spelling -- the im2col `matmul(reshape(windows(x,[kh,kw]),...), flatten(k))` or the elementwise `reduce(:add, kernel * windows(x,[kh,kw]), [2,3,4])`. Use with `param[shape]` / `tensor[shape]` leaves. |
+
+Losses that are compositions of the above need no dedicated
+builtin and differentiate directly. KL divergence is
+`reduce_add(P * (log(P) - log(Q)))` (the distillation loss);
+its gradient wrt the params behind `Q` is `-P / Q`.
 
 ### Optimizers and Schedules
 
