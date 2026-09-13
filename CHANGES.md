@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-13
 
+- fix(models): attention_weights finds a layer inside residual(chain(...)) (F13)
+- chore(agentrail): complete 007-f11-inliner-index-param; advance to 008-f13-attention-weights-residual
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): resolve gather index arithmetic in the traced scope (F11)
 - chore(agentrail): complete 006-f12-shape-arith-in-grad; advance to 007-f11-inliner-index-param
 - docs(changes): refresh CHANGES.md to HEAD
