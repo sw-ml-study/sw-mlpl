@@ -1,0 +1,9 @@
+number = 6
+slug = "f11-inliner-index-param"
+status = "pending"
+description = "F11: the F2 user-function inliner drops a parameter used only in index arithm..."
+role = "production"
+context_files = []
+created_at = "2026-09-12T21:34:08"
+task_type = "production"
+commits = []

@@ -1,0 +1,1 @@
+F10 (BUG): a labeled sinusoidal_encoding in a residual block panics the autograd tape (Rust panic, not an MLPL error). Turn the panic into a clean MLPL error at minimum; support on the tape if tractable. TDD: the reproducer errors cleanly (no panic). See docs/sw-mlpl-findings.md F10.

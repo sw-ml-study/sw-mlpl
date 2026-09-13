@@ -1,0 +1,1 @@
+F14: constant constructors (fill, zeros, ones, ...) rejected inside grad; treat as constant leaves on the tape like literals. TDD gradcheck: grad(sum(W * fill([n], c)), W). See docs/sw-mlpl-findings.md F14.

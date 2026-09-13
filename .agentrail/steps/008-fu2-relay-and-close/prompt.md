@@ -1,0 +1,1 @@
+Mark F9-F15 resolved/documented in docs/sw-mlpl-findings.md, refresh CHANGES + wiki errata, mark moe-microscope-followups-2 shipped in docs/future-sagas-queue.md, rebuild binaries. --done.

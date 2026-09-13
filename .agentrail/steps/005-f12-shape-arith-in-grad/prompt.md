@@ -1,0 +1,1 @@
+F12: shape-derived size arithmetic rejected inside grad; support or document. TDD. See docs/sw-mlpl-findings.md F12.

@@ -1,0 +1,1 @@
+F13 (low): attention_weights cannot see inside residual(chain(...)). Document (downstream keeps the hand-written residual regardless); fix only if cheap. See docs/sw-mlpl-findings.md F13.

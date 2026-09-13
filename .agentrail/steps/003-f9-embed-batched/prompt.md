@@ -1,0 +1,1 @@
+F9: embed rejects batched [B, T] token input; accept it (or document clearly). TDD. See docs/sw-mlpl-findings.md F9.

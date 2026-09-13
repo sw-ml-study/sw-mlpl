@@ -1,0 +1,1 @@
+F15: repeat count bound to a function parameter fails inside a traced function (undefined variable). Resolve the count against the traced local scope (F6 edge in grad_user::repeat_count). TDD. See docs/sw-mlpl-findings.md F15.

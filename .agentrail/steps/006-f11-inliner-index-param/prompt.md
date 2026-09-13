@@ -1,0 +1,1 @@
+F11: the F2 user-function inliner drops a parameter used only in index arithmetic inside grad. Fix or document the boundary. TDD. See docs/sw-mlpl-findings.md F11.
