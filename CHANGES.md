@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-13
 
+- feat(grad): constant-fold param-value-independent subexprs (F12)
+- chore(agentrail): complete 005-f18-shape-mismatch-panic; advance to 006-f12-shape-arith-in-grad
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): shape mismatch is a clean error, not a process panic (F18)
 - chore(agentrail): complete 004-f15-repeat-param-count
 - docs(changes): refresh CHANGES.md to HEAD
