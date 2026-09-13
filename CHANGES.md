@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- docs(findings): close moe-microscope F1-F4; queue F5/F6/D1 follow-ups (relay)
+- chore(agentrail): complete 004-gather-rows-backward-and-kl; advance to 005-relay-and-close
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(grad): differentiable gather_rows (scatter-add); document KL (F4)
 - chore(agentrail): complete 003-chain-doc-or-fix; advance to 004-gather-rows-backward-and-kl
 - docs(changes): refresh CHANGES.md to HEAD
