@@ -1,9 +1,10 @@
 number = 5
 slug = "relay-and-close"
-status = "in-progress"
+status = "completed"
 description = "Update docs/sw-mlpl-findings.md marking each finding resolved/documented; rel..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T17:54:58"
+completed_at = "2026-09-12T20:20:04"
 task_type = "docs"
-commits = []
+commits = ["0a131eec5ae1ab73a2185393a8c07a59828543bc"]
