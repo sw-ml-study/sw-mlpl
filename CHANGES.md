@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-13
 
+- fix(grad): resolve gather index arithmetic in the traced scope (F11)
+- chore(agentrail): complete 006-f12-shape-arith-in-grad; advance to 007-f11-inliner-index-param
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(grad): constant-fold param-value-independent subexprs (F12)
 - chore(agentrail): complete 005-f18-shape-mismatch-panic; advance to 006-f12-shape-arith-in-grad
 - docs(changes): refresh CHANGES.md to HEAD
