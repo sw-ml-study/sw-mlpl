@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- fix(array): unify partial axis labels per-axis, fixing an autograd panic (F10)
+- chore(agentrail): archive moe-microscope-followups; init followups-2 (F9-F15)
+- chore(agentrail): complete 004-followups-relay-and-close; moe-microscope-followups saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): close follow-ups F5/F6/D1; queue F9-F15 (relay)
 - chore(agentrail): complete 003-d1-loud-untracked-grad; advance to 004-followups-relay-and-close
 - docs(changes): refresh CHANGES.md to HEAD
