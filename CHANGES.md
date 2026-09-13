@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- fix(grad): fail loudly when the loss does not depend on wrt (D1)
+- chore(agentrail): complete 002-f6-repeat-in-grad; advance to 003-d1-loud-untracked-grad
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(grad): unroll repeat inside a traced user function (F6)
 - chore(agentrail): complete 001-f5-index-mask-tape; advance to 002-f6-repeat-in-grad
 - docs(changes): refresh CHANGES.md to HEAD
