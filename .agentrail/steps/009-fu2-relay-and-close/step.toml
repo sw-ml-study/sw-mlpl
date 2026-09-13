@@ -1,9 +1,10 @@
 number = 9
 slug = "fu2-relay-and-close"
-status = "in-progress"
+status = "completed"
 description = "Mark F9-F15 resolved/documented in docs/sw-mlpl-findings.md, refresh CHANGES ..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T21:34:08"
+completed_at = "2026-09-13T14:59:40"
 task_type = "docs"
-commits = []
+commits = ["8311b561f5e58b781a3be3ea9bba5a4d05ce1c46"]

@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 9,
+    "step": "fu2-relay-and-close"
+  },
+  "action": "Resolution table with commit hashes; batch-3 capture; wiki errata (separate repo); gen-changes; markdown clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-13T14:59:40"
+}
