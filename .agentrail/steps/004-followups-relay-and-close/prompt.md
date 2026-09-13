@@ -1,0 +1,1 @@
+Update docs/sw-mlpl-findings.md marking F5/F6/D1 resolved/documented, refresh CHANGES + wiki errata, mark moe-microscope-followups shipped in docs/future-sagas-queue.md, rebuild release+debug binaries. --done.

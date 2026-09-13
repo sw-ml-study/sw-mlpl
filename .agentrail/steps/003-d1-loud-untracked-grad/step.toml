@@ -1,0 +1,9 @@
+number = 3
+slug = "d1-loud-untracked-grad"
+status = "pending"
+description = "D1: make grad wrt an untracked tape constant fail loudly instead of returning..."
+role = "production"
+context_files = []
+created_at = "2026-09-12T20:23:53"
+task_type = "production"
+commits = []

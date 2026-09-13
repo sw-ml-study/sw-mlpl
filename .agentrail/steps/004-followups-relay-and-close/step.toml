@@ -1,0 +1,9 @@
+number = 4
+slug = "followups-relay-and-close"
+status = "pending"
+description = "Update docs/sw-mlpl-findings.md marking F5/F6/D1 resolved/documented, refresh..."
+role = "production"
+context_files = []
+created_at = "2026-09-12T20:23:53"
+task_type = "docs"
+commits = []

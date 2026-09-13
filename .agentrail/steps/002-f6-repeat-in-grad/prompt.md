@@ -1,0 +1,1 @@
+F6: repeat inside a traced function. Either make a bounded repeat expression tape-expressible (unroll onto the tape) OR document nested apply / per-depth user functions as the recurrence spelling with a loud specific error instead of a parse/unsupported error. TDD/doc as chosen. See docs/sw-mlpl-findings.md F6.

@@ -1,0 +1,9 @@
+number = 2
+slug = "f6-repeat-in-grad"
+status = "pending"
+description = "F6: repeat inside a traced function. Either make a bounded repeat expression ..."
+role = "production"
+context_files = []
+created_at = "2026-09-12T20:23:53"
+task_type = "production"
+commits = []

@@ -1,0 +1,1 @@
+D1: make grad wrt an untracked tape constant fail loudly instead of returning silent zeros. When the wrt leaf is not a param/tensor leaf, error clearly. TDD: grad over a constant errors loudly with a helpful message. See docs/sw-mlpl-findings.md D1.

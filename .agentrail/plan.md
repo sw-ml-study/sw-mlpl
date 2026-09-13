@@ -1,37 +1,29 @@
-# Saga: moe-microscope-findings
+# moe-microscope-followups
 
-Address the dogfooding findings the ../moe-microscope agent surfaced against
-0.22.0 while building the MoE educational visualization demo (dogfooding
-sw-mlpl + demo-extensions). Full work order with reproducers + triage:
-`docs/sw-mlpl-findings.md`. Ordered by impact; F1 and F2 first.
+Address the three follow-up findings from the ../moe-microscope dogfooding
+rerun (see docs/sw-mlpl-findings.md "Open follow-ups"). All have clean
+workarounds downstream; none is a blocker. Lead with F5 (highest value).
 
 ## Steps
 
-1. softmax-arity -- unify `softmax` so `softmax(x)` and `softmax(x, axis)`
-   mean the same thing in BOTH eager evaluation and the grad/adam tape
-   (default the last axis when omitted). Today eager requires the axis and
-   the tape takes one arg, so a loss cannot be written once. TDD: the same
-   `softmax(...)` expression evaluates AND trains; keep the explicit-axis
-   form working.
+1. F5 -- index/mask builtins on the tape (one_hot, argmax). Let a top-1 router
+   mask be computed inside a traced loss by treating index/mask builtins as
+   stop-gradient (constant) nodes on the tape: the forward value is the eager
+   result, no gradient flows through the indices, gradient flows through the
+   selected values where applicable. TDD: grad(sum(one_hot(argmax(W), k) * W), W)
+   succeeds and matches the eager mask; verify one_hot/argmax are constant wrt
+   their own input. Keep backward-compatible (additive tape arms).
 
-2. userfns-in-grad -- support user-defined function calls (`u:name(...)`)
-   inside `grad`/`adam` by tracing through the function body onto the tape,
-   so a loss written as `def u:loss(...)` trains. The most important finding
-   for "models as auditable source". TDD: `grad(u:loss(w), w)` matches the
-   inline expansion; a gradcheck on a small user-fn loss.
+2. F6 -- repeat inside a traced function. Decide and implement: either make a
+   bounded repeat expression tape-expressible (unroll onto the tape) OR
+   document nested apply / per-depth user functions as the recurrence spelling
+   with a loud, specific error. TDD/doc as chosen.
 
-3. chain-doc-or-fix -- confirm `chain(blk, blk, blk)` does not share weights
-   (param_count triple-counts; adam "not a tracked parameter") and that
-   nested `apply` is the intended weight-sharing/recurrence spelling. Fix the
-   docs (glossary/lang-reference) to say so; only implement shared-weight
-   `chain` if wanted. TDD/doc as appropriate.
+3. D1 -- loud failure for grad wrt an untracked tape constant. When the wrt
+   leaf is a constant (not a param/tensor leaf), grad currently can return
+   silent zeros; make it a clear error (or a documented, tested boundary).
+   TDD: grad(<const>, <const>) errors loudly.
 
-4. gather-rows-backward-and-kl -- make `gather_rows` differentiable on the
-   tape (scatter-add backward, like `windows`) so from-scratch addressing
-   lessons can train; add a `kl_divergence` builtin (or document the
-   softmax+log composition). TDD + gradcheck.
-
-5. relay-and-close -- update `docs/sw-mlpl-findings.md` marking each finding
-   resolved (or documented), relay to the moe-microscope agent, refresh
-   CHANGES + wiki, mark the saga shipped in `docs/future-sagas-queue.md`.
-   `--done`.
+4. relay-and-close -- update docs/sw-mlpl-findings.md marking F5/F6/D1
+   resolved/documented, refresh CHANGES + wiki, mark the saga shipped in
+   docs/future-sagas-queue.md, rebuild binaries. --done.
