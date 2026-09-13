@@ -1,9 +1,10 @@
 number = 4
 slug = "gather-rows-backward-and-kl"
-status = "in-progress"
+status = "completed"
 description = "Make gather_rows differentiable on the tape (scatter-add backward, like windo..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T17:54:58"
+completed_at = "2026-09-12T20:13:22"
 task_type = "feature"
-commits = []
+commits = ["280e5ffa2b653c0552e86a0fea2722cadac1c402"]

@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "gather-rows-backward-and-kl"
+  },
+  "action": "Reused engram one-hot-matmul gather seam for scatter-add backward; TDD red->green; verified KL composition already differentiable before deciding docs-over-builtin; kept helpers within 4-fn module gate to avoid new-module warning; smoke-tested release binary; gen-changes; rebuilt binaries.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-12T20:13:22"
+}
