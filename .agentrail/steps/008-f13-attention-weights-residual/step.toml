@@ -1,6 +1,6 @@
 number = 8
 slug = "f13-attention-weights-residual"
-status = "pending"
+status = "in-progress"
 description = "F13 (low): attention_weights cannot see inside residual(chain(...)). Document..."
 role = "production"
 context_files = []

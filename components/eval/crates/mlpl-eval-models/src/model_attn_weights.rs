@@ -36,7 +36,11 @@ pub fn extract_attn_weights(
         ModelSpec::Chain(children) => {
             let mut cur = x.clone();
             for child in children {
-                if matches!(child, ModelSpec::Attention { .. }) {
+                // A child that contains an Attention layer -- directly, or
+                // nested inside a Residual/Chain -- is where the weights live;
+                // recurse into it (finding F13). Other layers just advance the
+                // activation the attention will see.
+                if contains_attention(child) {
                     return extract_attn_weights(child, &cur, env);
                 }
                 cur = apply_model(child, &cur, env)?;
@@ -45,6 +49,18 @@ pub fn extract_attn_weights(
         }
         ModelSpec::Residual(inner) => extract_attn_weights(inner, x, env),
         _ => Err(not_found()),
+    }
+}
+
+/// Whether a model subtree contains an `Attention` layer anywhere (directly or
+/// nested through `Residual`/`Chain`). Lets `extract_attn_weights` recurse into
+/// a wrapped attention layer instead of stepping past it (finding F13).
+fn contains_attention(m: &ModelSpec) -> bool {
+    match m {
+        ModelSpec::Attention { .. } => true,
+        ModelSpec::Residual(inner) => contains_attention(inner),
+        ModelSpec::Chain(children) => children.iter().any(contains_attention),
+        _ => false,
     }
 }
 
