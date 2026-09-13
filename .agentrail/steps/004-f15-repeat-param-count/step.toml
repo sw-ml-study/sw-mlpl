@@ -1,9 +1,10 @@
 number = 4
 slug = "f15-repeat-param-count"
-status = "in-progress"
+status = "completed"
 description = "F15: repeat count bound to a function parameter fails inside a traced functio..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T21:34:08"
+completed_at = "2026-09-13T08:13:29"
 task_type = "production"
-commits = []
+commits = ["8abc1199b5dd26662c81a2c812f8ab60923534e0"]
