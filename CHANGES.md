@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- feat(grad): trace user functions (u:name) inside grad/adam (F2)
+- chore(agentrail): complete 001-softmax-arity (moe-microscope-findings)
+- fix(eval): softmax(x) defaults to the last axis eager, matching the tape (moe finding F1)
+- chore(agentrail): archive axis-naming-unification; start moe-microscope-findings
+- chore(agentrail): complete + close axis-naming-unification (--done)
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(eval): reduce_add/reduce_mul accept a VECTOR of axis names (multi-axis)
 - chore(agentrail): complete 003-surface-sweep (axis-naming resumed)
 - feat(eval): reduce_add family accepts a bracketed single axis name (unification step 7, surface-sweep)
