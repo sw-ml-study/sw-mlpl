@@ -195,6 +195,11 @@ fn eval_tensor_fncall(
             let total = x.value().shape().elem_count();
             Ok(x.reshape(mlpl_array::Shape::new(vec![total])))
         }
+        // User-defined functions: inline the body onto the tape (F2), so a
+        // loss written as `def u:loss(...)` differentiates.
+        _ if name.starts_with("u:") => {
+            crate::grad_user::call_user_fn_grad(name, args, env, tape, params)
+        }
         _ => Err(EvalError::Unsupported(format!(
             "grad: function '{name}' not supported inside grad()"
         ))),

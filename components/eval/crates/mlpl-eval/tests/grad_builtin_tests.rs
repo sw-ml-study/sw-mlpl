@@ -303,3 +303,40 @@ fn grad_through_flatten() {
     assert_eq!(g.shape().dims(), &[2, 3]);
     assert_eq!(g.data(), &[1.0, 1.0, 1.0, 1.0, 1.0, 1.0]);
 }
+
+// -- moe finding F2: user-defined functions inside grad() --
+
+#[test]
+fn grad_through_user_function_matches_inline() {
+    // A loss written as a user function differentiates like the inline form.
+    let mut env = Environment::new();
+    env.set_param("w".into(), DenseArray::from_vec(vec![3.0, 4.0]));
+    let via_fn = run(
+        "def u:loss(v) { \"sum of squares\"; s = v * v; sum(s) }\ngrad(u:loss(w), w)",
+        &mut env,
+    );
+    // d/dw sum(w^2) = 2w
+    assert_eq!(via_fn.data(), &[6.0, 8.0]);
+}
+
+#[test]
+fn grad_user_function_keeps_global_params_differentiable() {
+    // A u:fn referencing a global param k keeps k differentiable.
+    let mut env = Environment::new();
+    env.set_param("x".into(), DenseArray::from_vec(vec![1.0, 2.0]));
+    env.set_param("k".into(), DenseArray::from_vec(vec![5.0, 7.0]));
+    // loss = sum(x * k); d/dk = x
+    let g = run(
+        "def u:l(v) { \"dot\"; sum(v * k) }\ngrad(u:l(x), k)",
+        &mut env,
+    );
+    assert_eq!(g.data(), &[1.0, 2.0]);
+}
+
+#[test]
+fn grad_user_function_arity_mismatch_errors() {
+    let mut env = Environment::new();
+    env.set_param("w".into(), DenseArray::from_vec(vec![1.0]));
+    let stmts = parse(&lex("def u:f(a, b) { \"two\"; a } \n grad(u:f(w), w)").unwrap()).unwrap();
+    assert!(eval_program(&stmts, &mut env).is_err());
+}

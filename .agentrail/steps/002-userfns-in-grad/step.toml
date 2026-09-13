@@ -1,6 +1,6 @@
 number = 2
 slug = "userfns-in-grad"
-status = "pending"
+status = "in-progress"
 description = "Support user-defined function calls (u:name(...)) inside grad/adam by tracing..."
 role = "production"
 context_files = []

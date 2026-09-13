@@ -391,6 +391,21 @@ grad(loss_expr, W)     # gradient of a scalar wrt a param
 lifts an array expression onto the reverse-mode tape and returns
 the gradient with the same shape as the `wrt` operand.
 
+A user-defined function called inside `grad` (or `adam`/`train`) is
+inlined onto the same tape, so a loss factored into a helper
+differentiates exactly as if written inline:
+
+```
+def u:loss(w) {
+  "Squared error of w against a fixed target."
+  sum((w - [1.0, 2.0]) * (w - [1.0, 2.0]))
+}
+grad(u:loss(W), W)     # same gradient as the inlined expression
+```
+
+The function's parameters bind to the traced arguments, and any
+global param the body references stays differentiable.
+
 ## Comments
 
 ```

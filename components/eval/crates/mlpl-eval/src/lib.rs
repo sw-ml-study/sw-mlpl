@@ -131,6 +131,7 @@ mod grad_optim_resident;
 mod grad_optim_resident_adam;
 mod grad_optim_resident_math;
 mod grad_optim_resident_momentum;
+mod grad_user;
 mod hof_compose;
 mod json_decode;
 mod json_encode;

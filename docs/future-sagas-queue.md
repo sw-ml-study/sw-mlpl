@@ -43,13 +43,25 @@ data-forge (Track 1).
   box/label/pick primitives. Sample artifact sha256 `b5a328a6...` is the
   interim unblock.
 
-## Active saga (2026-09-11)
+- **axis-naming-unification** -- SHIPPED 2026-09-12. Plan:
+  `docs/unifying-plan.md`. `label`/`relabel`/`reshape_labeled` and the axis
+  argument of `reduce`/`reduce_add`/`reduce_mul`/`argmax`/`softmax` accept a
+  bracketed name list, a comma-string, or a computed value interchangeably
+  (`reduce` also integer positions), via the shared `mlpl_axes::AxisSpec` /
+  `axis_adapter`; the compile-to-Rust path resolves named `reduce_add` via
+  static labels (compile-time-vs-runtime phase split). The label-vs-reduce
+  inconsistency the CNN blog post surfaced is fully resolved. Docs + wiki
+  errata updated. (Included the checklist-paydown-spike: -5 fails via module
+  splits.)
 
-- **axis-naming-unification (resumed)** -- ACTIVE. Steps 1-4 shipped
-  (label/reduce/reshape_labeled accept bracketed names / comma-string /
-  computed values via `mlpl_axes::AxisSpec`); resuming the remaining:
-  errors-and-docs -> compiler-parity -> surface-sweep ->
-  downstream-relay-and-close. Plan: `docs/unifying-plan.md`.
+## Active saga (2026-09-12, maintainer-prioritized)
+
+- **moe-microscope-findings** -- ACTIVE. Address the downstream dogfooding
+  findings from ../moe-microscope (see `docs/sw-mlpl-findings.md`): F1 softmax
+  arity split (eager vs tape), F2 user-defined functions inside grad/adam, F3
+  chain weight-sharing (doc-or-fix), F4 gather_rows backward + kl_divergence.
+  F1 + F2 first (they block writing a model as reusable source). Plan mirrors
+  the work order.
 
 ### Paused sagas
 
@@ -462,15 +474,6 @@ in data-forge come first).
   (array concat), each to exact interpreter parity with a gated
   `MLPL_BUILD_TESTS=1` compiled e2e. After it, `du.mlpl` compiles. Pick
   up as its own small saga after the axis-naming-unification work.
-- **moe-microscope dogfooding findings** -- queued saga (candidate;
-  see `docs/sw-mlpl-findings.md`). From the ../moe-microscope agent probing
-  0.22.0 while building the MoE educational viz demo. F1 softmax arity split
-  (eager needs an axis, tape takes one arg -- a loss can't be written once);
-  F2 user-defined functions rejected inside grad/adam (loss must be inline --
-  the most important for "models as auditable source"); F3 chain() doesn't
-  share weights (nested apply is the spelling -- likely a doc fix); F4
-  gather_rows not differentiable + no kl_divergence (convenience). F1+F2 are
-  the strong candidates for a dedicated authorized change.
 - **Wiki errata upkeep** -- standing rule in CLAUDE.md.
 - **Upstream agentrail fix** -- `agentrail instructions apply`
   emits em dashes; the repo markdown gate needs ASCII.
