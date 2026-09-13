@@ -54,14 +54,27 @@ data-forge (Track 1).
   errata updated. (Included the checklist-paydown-spike: -5 fails via module
   splits.)
 
-## Active saga (2026-09-12, maintainer-prioritized)
+- **moe-microscope-findings** -- SHIPPED 2026-09-12. Addressed all four
+  downstream dogfooding findings from ../moe-microscope (see
+  `docs/sw-mlpl-findings.md`, now a resolved audit trail): F1 softmax arity
+  unified (`ae7ec747`), F2 user-defined functions inline onto the grad tape
+  (`41faf626`), F3 chain-copies-blocks documented + weight-sharing spelling
+  pinned (`b28fdf45`), F4 `gather_rows` differentiable via scatter-add and KL
+  documented as a composition (`e1d693af`). All fixes verified in the rebuilt
+  release binary; sw-checklist held flat across the feature commits. Relayed
+  to the moe-microscope agent.
 
-- **moe-microscope-findings** -- ACTIVE. Address the downstream dogfooding
-  findings from ../moe-microscope (see `docs/sw-mlpl-findings.md`): F1 softmax
-  arity split (eager vs tape), F2 user-defined functions inside grad/adam, F3
-  chain weight-sharing (doc-or-fix), F4 gather_rows backward + kl_divergence.
-  F1 + F2 first (they block writing a model as reusable source). Plan mirrors
-  the work order.
+- **moe-microscope-followups** -- QUEUED (2026-09-12). The downstream rerun
+  re-verified F1-F4 and surfaced two more edges + one UX note (see the "Open
+  follow-ups" section of `docs/sw-mlpl-findings.md`), all with clean
+  workarounds (none a blocker): F5 index/mask builtins (`one_hot`, `argmax`)
+  rejected inside a traced function -- wants a stop-gradient treatment on the
+  tape so a top-1 router mask can be computed in the loss; F6 `repeat` not
+  tape-expressible inside `grad` -- recurrence must be nested `apply` / a
+  per-depth user function; D1 `grad` returning silent all-zero gradients when
+  the `wrt` leaf is an untracked tape constant -- wants a loud error. F5 is the
+  highest-value (it removes the eager-mask-passing workaround for Switch-style
+  gating); D1 is a cheap loud-failure guard.
 
 ### Paused sagas
 
