@@ -1,6 +1,6 @@
 number = 3
 slug = "chain-doc-or-fix"
-status = "pending"
+status = "in-progress"
 description = "Confirm chain(blk,blk,blk) does not share weights (param_count triple-counts;..."
 role = "production"
 context_files = []

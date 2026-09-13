@@ -9,6 +9,10 @@ fn arr(dims: Vec<usize>, data: Vec<f64>) -> DenseArray {
     DenseArray::new(Shape::new(dims), data).unwrap()
 }
 
+fn run(src: &str, env: &mut Environment) -> DenseArray {
+    eval_program(&parse(&lex(src).unwrap()).unwrap(), env).unwrap()
+}
+
 #[test]
 fn linear_creates_model_with_correct_param_shapes() {
     let mut env = Environment::new();
@@ -257,4 +261,38 @@ fn linear_with_same_seed_produces_same_initial_weights() {
         env_a.get(&na[0]).unwrap().data(),
         env_b.get(&nb[0]).unwrap().data()
     );
+}
+
+// -- moe-microscope finding F3: chain does NOT share weights -----------------
+// `chain(a, b, c)` composes DISTINCT blocks; passing the same block three
+// times COPIES it, so `param_count` is the sum, never a shared set. Weight
+// sharing / recurrence is spelled by REUSING one block (nested `apply`, or a
+// user function that applies it repeatedly -- differentiable via the tape),
+// where the gradient accumulates across every use of the shared leaf.
+
+#[test]
+fn chain_copies_blocks_and_does_not_share_weights() {
+    let mut env = Environment::new();
+    let stmts = parse(&lex("blk = linear(4, 4, 7)\nparam_count(blk)").unwrap()).unwrap();
+    let single = eval_program(&stmts, &mut env).unwrap();
+    let stmts2 = parse(&lex("param_count(chain(blk, blk, blk))").unwrap()).unwrap();
+    let triple = eval_program(&stmts2, &mut env).unwrap();
+    assert_eq!(single.data()[0], 20.0, "linear(4,4) has 4*4 + 4 params");
+    assert_eq!(
+        triple.data()[0],
+        3.0 * single.data()[0],
+        "chain(blk,blk,blk) sums three independent copies -- no sharing"
+    );
+}
+
+#[test]
+fn shared_param_gradient_accumulates_across_repeated_use() {
+    // The weight-sharing spelling: reuse ONE leaf and the tape sums its
+    // gradient across every use. sum(w + w + w) => grad 3, not 1.
+    let mut env = Environment::new();
+    env.set_param("w".into(), DenseArray::from_vec(vec![3.0, 5.0]));
+    let g = run("grad(sum(w + w + w), w)", &mut env);
+    assert_eq!(g.data(), &[3.0, 3.0]);
+    let g1 = run("grad(sum(w), w)", &mut env);
+    assert_eq!(g1.data(), &[1.0, 1.0], "single use => grad 1");
 }

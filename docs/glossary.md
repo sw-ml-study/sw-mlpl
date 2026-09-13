@@ -1054,7 +1054,17 @@ seed)`.
 ## Chain (Model DSL)
 
 Sequential composition of layers. `chain(linear(2, 8, 0),
-tanh_layer(), linear(8, 2, 1))` is a 2-layer MLP.
+tanh_layer(), linear(8, 2, 1))` is a 2-layer MLP. Each
+argument is an independent block with its own parameters:
+`chain` does NOT share weights, so passing the same block
+several times copies it and `param_count` sums the arguments
+(`param_count(chain(blk, blk, blk))` is three times
+`param_count(blk)`). Weight sharing and recurrence are
+spelled by reusing ONE block -- nested `apply(blk, apply(blk,
+apply(blk, X)))`, or a user function that applies it
+repeatedly -- where [[Autograd]] accumulates the gradient
+across every use of the shared parameters. See also Chain
+rule, [[Backpropagation]].
 
 ## Chain rule
 
