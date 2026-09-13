@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-13
+
+- fix(grad): resolve repeat count via the traced scope (F15)
+
 ## 2026-09-12
 
+- chore(agentrail): complete 003-f9-embed-batched; advance to 004-f15-repeat-param-count
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(embed): accept batched [B, T] token input (F9)
 - chore(agentrail): complete 002-f14-const-ctors-in-grad; advance to 003-f9-embed-batched
 - docs(changes): refresh CHANGES.md to HEAD
