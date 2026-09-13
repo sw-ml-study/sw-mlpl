@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- feat(grad): index/mask builtins as stop-gradient constants in grad (F5)
+- chore(agentrail): archive moe-microscope-findings; init moe-microscope-followups (F5/F6/D1)
+- chore(agentrail): complete 005-relay-and-close; moe-microscope-findings saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): close moe-microscope F1-F4; queue F5/F6/D1 follow-ups (relay)
 - chore(agentrail): complete 004-gather-rows-backward-and-kl; advance to 005-relay-and-close
 - docs(changes): refresh CHANGES.md to HEAD
