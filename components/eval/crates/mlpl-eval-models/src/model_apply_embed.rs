@@ -8,16 +8,14 @@ use mlpl_array::{DenseArray, Shape};
 
 use mlpl_eval_types::EvalError;
 
-/// Convert an integer-valued token id array (1-D `[N]`) into a
-/// `[N, vocab]` one-hot matrix. Token ids must be non-negative
-/// integers in `[0, vocab)`.
+/// Convert an integer-valued token id array of ANY rank into a
+/// `[N, vocab]` one-hot matrix, where `N` is the flattened element
+/// count. A rank-1 `[T]` input gives `[T, vocab]`; a batched rank-2
+/// `[B, T]` gives `[B*T, vocab]` (the caller reshapes the lookup back
+/// to `tokens.shape + [d_model]`, finding F9). Token ids must be
+/// non-negative integers in `[0, vocab)`.
 pub fn tokens_to_onehot(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, EvalError> {
-    let dims = tokens.shape().dims();
-    if dims.len() != 1 {
-        let msg = format!("embed: tokens must be a 1-D [N] array, got shape {dims:?}");
-        return Err(EvalError::Unsupported(msg));
-    }
-    let n = dims[0];
+    let n = tokens.shape().elem_count();
     let mut data = vec![0.0_f64; n * vocab];
     for (row, &id_f) in tokens.data().iter().enumerate() {
         let id = validate_token_id(row, id_f, vocab)?;

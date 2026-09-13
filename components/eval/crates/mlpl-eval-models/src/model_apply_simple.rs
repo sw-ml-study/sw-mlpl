@@ -70,5 +70,13 @@ pub fn apply_embedding(
         .get(table)
         .ok_or_else(|| EvalError::UndefinedVariable(table.into()))?;
     let onehot = tokens_to_onehot(x, vocab)?;
-    mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![onehot, t.clone()])
+    let flat =
+        mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![onehot, t.clone()])?;
+    // The lookup is [N, d] over flattened tokens; restore the token shape so a
+    // batched [B, T] input returns [B, T, d] (finding F9). Rank-1 is a no-op.
+    let d = flat.shape().dims()[1];
+    let mut out_dims = x.shape().dims().to_vec();
+    out_dims.push(d);
+    DenseArray::new(Shape::new(out_dims), flat.data().to_vec())
+        .map_err(|e| EvalError::Unsupported(format!("embed: reshape to token shape failed: {e}")))
 }

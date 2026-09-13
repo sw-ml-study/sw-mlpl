@@ -209,3 +209,33 @@ fn describe_embed_renders_vocab_and_d() {
         ":describe E should include 'embed[vocab=7, d=4]', got:\n{desc}"
     );
 }
+
+// -- moe-microscope follow-up F9: batched [B, T] embedding lookup ------------
+// The reference documents apply(embed, tokens) for a rank-2 [B, T] input
+// returning [B, T, d_model]; it previously rejected anything but rank-1.
+
+#[test]
+fn apply_embed_accepts_batched_bt_tokens() {
+    let mut env = Environment::new();
+    run("e = embed(8, 4, 0)", &mut env);
+    // [B=2, T=3] token ids -> [2, 3, 4] embeddings.
+    let out = run("apply(e, reshape([1, 2, 3, 4, 5, 6], [2, 3]))", &mut env);
+    assert_eq!(out.shape().dims(), &[2, 3, 4]);
+    // Batched result must equal the flat [6] lookup reshaped to [2, 3, 4].
+    let flat = run("apply(e, [1, 2, 3, 4, 5, 6])", &mut env);
+    assert_eq!(out.data(), flat.data());
+}
+
+#[test]
+fn grad_through_batched_embed_trains_table() {
+    // A loss over a batched embedding lookup must differentiate into the table.
+    let mut env = Environment::new();
+    run("e = embed(8, 4, 0)", &mut env);
+    let names = model_params(&env, "e").unwrap();
+    let g = run(
+        &format!("grad(sum(apply(e, reshape([1,2,3,4,5,6], [2,3]))), {})", names[0]),
+        &mut env,
+    );
+    assert_eq!(g.shape().dims(), &[8, 4]);
+    assert!(g.data().iter().any(|v| v.abs() > 1e-9), "table gets gradient");
+}

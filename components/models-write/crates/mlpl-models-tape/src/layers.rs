@@ -61,18 +61,21 @@ pub fn embedding_tape(
         .ok_or_else(|| TapeError::UndefinedVariable(table.into()))?;
     let tokens_arr = x.value().clone();
     let onehot_arr = onehot_from_tokens(&tokens_arr, vocab)?;
+    let d = table_t.value().shape().dims()[1];
     let onehot_t = Tensor::leaf(Rc::clone(tape), onehot_arr, false);
-    Ok(onehot_t.matmul(&table_t))
+    let flat = onehot_t.matmul(&table_t);
+    // Restore the token shape so a batched [B, T] lookup is [B, T, d] on the
+    // tape too (finding F9); rank-1 [T] stays [T, d] (a no-op reshape).
+    let mut out_dims = tokens_arr.shape().dims().to_vec();
+    out_dims.push(d);
+    Ok(flat.reshape(Shape::new(out_dims)))
 }
 
-/// One-hot encode a 1-D token id array `[N]` into `[N, vocab]`.
+/// One-hot encode a token id array of ANY rank into `[N, vocab]`, where `N` is
+/// the flattened element count (a batched `[B, T]` input gives `[B*T, vocab]`;
+/// the caller reshapes the lookup back to `tokens.shape + [d]`).
 fn onehot_from_tokens(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, TapeError> {
-    let dims = tokens.shape().dims();
-    if dims.len() != 1 {
-        let msg = format!("embed (tape): tokens must be a 1-D [N] array, got shape {dims:?}");
-        return Err(TapeError::Unsupported(msg));
-    }
-    let n = dims[0];
+    let n = tokens.shape().elem_count();
     let mut data = vec![0.0_f64; n * vocab];
     for (row, &id_f) in tokens.data().iter().enumerate() {
         let id = validate_token_id(row, id_f, vocab)?;

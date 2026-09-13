@@ -1,6 +1,6 @@
 number = 3
 slug = "f9-embed-batched"
-status = "pending"
+status = "in-progress"
 description = "F9: embed rejects batched [B, T] token input; accept it (or document clearly)..."
 role = "production"
 context_files = []
