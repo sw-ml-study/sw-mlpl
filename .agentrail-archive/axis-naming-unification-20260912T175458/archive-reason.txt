@@ -1,0 +1,1 @@
+axis-naming-unification shipped 2026-09-12; archiving to start moe-microscope-findings per maintainer (next priority).

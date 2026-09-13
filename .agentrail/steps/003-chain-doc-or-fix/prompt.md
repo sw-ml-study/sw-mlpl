@@ -1,0 +1,1 @@
+Confirm chain(blk,blk,blk) does not share weights (param_count triple-counts; adam not-a-tracked-parameter) and that nested apply is the weight-sharing/recurrence spelling. Fix docs (glossary/lang-reference) to say so; implement shared-weight chain only if wanted. See docs/sw-mlpl-findings.md F3.

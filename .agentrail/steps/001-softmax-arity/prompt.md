@@ -1,0 +1,1 @@
+Unify softmax so softmax(x) and softmax(x, axis) mean the same in BOTH eager evaluation and the grad/adam tape (default the last axis when omitted). Today eager requires the axis and the tape takes one arg, so a loss cannot be written once. TDD: the same softmax(...) expression evaluates AND trains; keep the explicit-axis form. See docs/sw-mlpl-findings.md F1.

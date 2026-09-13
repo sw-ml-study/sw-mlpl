@@ -1,0 +1,1 @@
+Make gather_rows differentiable on the tape (scatter-add backward, like windows) so from-scratch addressing lessons train; add a kl_divergence builtin (or document the softmax+log composition). TDD + gradcheck. See docs/sw-mlpl-findings.md F4.

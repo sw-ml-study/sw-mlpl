@@ -1,0 +1,1 @@
+Support user-defined function calls (u:name(...)) inside grad/adam by tracing through the function body onto the tape, so a loss written as def u:loss(...) trains. Most important finding for "models as auditable source". TDD: grad(u:loss(w), w) matches inline expansion + a gradcheck. See docs/sw-mlpl-findings.md F2.

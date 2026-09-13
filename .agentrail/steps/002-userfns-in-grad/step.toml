@@ -1,0 +1,9 @@
+number = 2
+slug = "userfns-in-grad"
+status = "pending"
+description = "Support user-defined function calls (u:name(...)) inside grad/adam by tracing..."
+role = "production"
+context_files = []
+created_at = "2026-09-12T17:54:58"
+task_type = "feature"
+commits = []

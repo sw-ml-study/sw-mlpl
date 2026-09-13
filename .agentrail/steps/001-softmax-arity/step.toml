@@ -1,0 +1,9 @@
+number = 1
+slug = "softmax-arity"
+status = "pending"
+description = "Unify softmax so softmax(x) and softmax(x, axis) mean the same in BOTH eager ..."
+role = "production"
+context_files = []
+created_at = "2026-09-12T17:54:58"
+task_type = "feature"
+commits = []

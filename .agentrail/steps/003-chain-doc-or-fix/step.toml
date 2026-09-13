@@ -1,0 +1,9 @@
+number = 3
+slug = "chain-doc-or-fix"
+status = "pending"
+description = "Confirm chain(blk,blk,blk) does not share weights (param_count triple-counts;..."
+role = "production"
+context_files = []
+created_at = "2026-09-12T17:54:58"
+task_type = "docs"
+commits = []
