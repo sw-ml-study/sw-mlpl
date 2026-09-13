@@ -1,9 +1,10 @@
 number = 3
 slug = "d1-loud-untracked-grad"
-status = "in-progress"
+status = "completed"
 description = "D1: make grad wrt an untracked tape constant fail loudly instead of returning..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T20:23:53"
+completed_at = "2026-09-12T21:29:38"
 task_type = "production"
-commits = []
+commits = ["25aa41aa8a80f1ecdbbc5b2c6615c821e0a10f84"]
