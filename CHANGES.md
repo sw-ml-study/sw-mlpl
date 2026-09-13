@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- feat(grad): unroll repeat inside a traced user function (F6)
+- chore(agentrail): complete 001-f5-index-mask-tape; advance to 002-f6-repeat-in-grad
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(grad): index/mask builtins as stop-gradient constants in grad (F5)
 - chore(agentrail): archive moe-microscope-findings; init moe-microscope-followups (F5/F6/D1)
 - chore(agentrail): complete 005-relay-and-close; moe-microscope-findings saga done
