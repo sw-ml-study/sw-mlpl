@@ -179,7 +179,7 @@ fn eval_tensor_fncall(
     if let Some(op) = unary_tensor_op(name) {
         return crate::grad_calls_basic::call_unary(op, args, env, tape, params, name);
     }
-    if is_stop_gradient_builtin(name) {
+    if is_stop_gradient_builtin(name) || is_const_ctor_builtin(name) {
         return eval_stop_gradient(name, args, env, tape, params);
     }
     match name {
@@ -225,6 +225,15 @@ fn eval_tensor_fncall(
 /// differentiable ops, never through the mask.
 fn is_stop_gradient_builtin(name: &str) -> bool {
     matches!(name, "argmax" | "one_hot" | "eq" | "gt" | "lt" | "argtop_k")
+}
+
+/// Constant constructors (finding F14): `fill`, `zeros`, `ones` build an array
+/// from shape/value arguments and depend on no parameter, so inside `grad` they
+/// are constant leaves on the tape (the same eager-then-leaf treatment as the
+/// stop-gradient builtins) -- a loss may scale by a constant mask or add a
+/// constant bias built inline.
+fn is_const_ctor_builtin(name: &str) -> bool {
+    matches!(name, "fill" | "zeros" | "ones")
 }
 
 /// Evaluate a stop-gradient builtin from the CURRENT forward values of its

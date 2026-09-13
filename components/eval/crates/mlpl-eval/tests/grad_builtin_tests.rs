@@ -440,3 +440,28 @@ fn grad_wrt_param_not_in_loss_errors_loudly() {
         "expected a loud disconnected-grad error, got: {msg}"
     );
 }
+
+// -- moe-microscope follow-up F14: constant constructors inside grad ---------
+// fill / zeros / ones are constant constructors; inside grad they are constant
+// leaves on the tape (like literals), so a loss may scale by a constant mask
+// or add a constant bias built inline.
+
+#[test]
+fn grad_through_fill_constant_constructor() {
+    // loss = sum(W * fill([2], 3.0)); grad wrt W == the constant [3, 3].
+    let mut env = Environment::new();
+    env.set_param("W".into(), DenseArray::from_vec(vec![1.0, 2.0]));
+    let g = run("grad(sum(W * fill([2], 3.0)), W)", &mut env);
+    assert_eq!(g.data(), &[3.0, 3.0]);
+}
+
+#[test]
+fn grad_through_ones_and_zeros_constructors() {
+    // W * ones == W (grad ones); W + zeros == W (grad ones).
+    let mut env = Environment::new();
+    env.set_param("W".into(), DenseArray::from_vec(vec![5.0, 7.0]));
+    let g_mul = run("grad(sum(W * ones([2])), W)", &mut env);
+    assert_eq!(g_mul.data(), &[1.0, 1.0]);
+    let g_add = run("grad(sum(W + zeros([2])), W)", &mut env);
+    assert_eq!(g_add.data(), &[1.0, 1.0]);
+}

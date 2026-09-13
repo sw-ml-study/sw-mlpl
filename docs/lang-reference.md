@@ -671,7 +671,9 @@ the current values of their arguments and held fixed on the tape.
 This lets a top-1 router mask be built inside the loss, e.g.
 `sum(one_hot(argmax(R, 1), E) * R)`, with the gradient flowing to
 the selected logits (`R`) through the surrounding ops, never
-through the mask.
+through the mask. Constant constructors (`fill`, `zeros`, `ones`)
+are likewise constant leaves inside `grad`, so a loss may scale by
+a constant mask or add a constant bias built inline.
 
 ### Optimizers and Schedules
 
