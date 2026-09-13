@@ -1,9 +1,10 @@
 number = 1
 slug = "softmax-arity"
-status = "in-progress"
+status = "completed"
 description = "Unify softmax so softmax(x) and softmax(x, axis) mean the same in BOTH eager ..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T17:54:58"
+completed_at = "2026-09-12T18:11:59"
 task_type = "feature"
-commits = []
+commits = ["ae7ec7470fb023b7928a7a677651f18b938a876f"]
