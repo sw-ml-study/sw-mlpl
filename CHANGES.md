@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-13
 
+- docs(findings): close follow-ups-2 (F9-F15, F18); queue F16/S1 (relay)
+- chore(agentrail): complete 008-f13-attention-weights-residual; advance to 009-fu2-relay-and-close
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(models): attention_weights finds a layer inside residual(chain(...)) (F13)
 - chore(agentrail): complete 007-f11-inliner-index-param; advance to 008-f13-attention-weights-residual
 - docs(changes): refresh CHANGES.md to HEAD
