@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 3,
+    "step": "f9-embed-batched"
+  },
+  "action": "Read F9 probe; flattened token onehot in eager + tape paths; reshape lookup to token shape; TDD red->green; scoped fmt/clippy on both changed crates; sw-checklist flat; rebuilt binaries.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-12T22:36:28"
+}

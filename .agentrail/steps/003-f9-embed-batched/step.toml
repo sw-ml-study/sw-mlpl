@@ -1,9 +1,10 @@
 number = 3
 slug = "f9-embed-batched"
-status = "in-progress"
+status = "completed"
 description = "F9: embed rejects batched [B, T] token input; accept it (or document clearly)..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T21:34:08"
+completed_at = "2026-09-12T22:36:28"
 task_type = "production"
-commits = []
+commits = ["d1bcefd23f3bba2601f131d681f93c743fc3c158"]
