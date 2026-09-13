@@ -1,9 +1,10 @@
 number = 1
 slug = "f5-index-mask-tape"
-status = "in-progress"
+status = "completed"
 description = "F5: let index/mask builtins (one_hot, argmax) be used inside a traced loss by..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T20:23:53"
+completed_at = "2026-09-12T20:47:48"
 task_type = "production"
-commits = []
+commits = ["3311af01225fd4bb672344504be74f250d4d9593"]
