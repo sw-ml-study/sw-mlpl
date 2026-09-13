@@ -87,3 +87,25 @@ fn reduce_add_axis_with_reshape() {
     assert_eq!(arr.shape(), &Shape::vector(4));
     assert_eq!(arr.data(), &[12.0, 15.0, 18.0, 21.0]);
 }
+
+// -- surface-sweep: reduce_add accepts a bracketed single axis name --
+
+#[test]
+fn reduce_add_accepts_a_bracketed_single_name() {
+    // reduce_add over the "b" axis (=1) of [[0,1,2],[3,4,5]] -> row sums [3,12].
+    let bracketed =
+        eval("reduce_add(label(reshape(range(6), [2, 3]), [\"a\", \"b\"]), [\"b\"])").unwrap();
+    let comma =
+        eval("reduce_add(label(reshape(range(6), [2, 3]), [\"a\", \"b\"]), \"b\")").unwrap();
+    assert_eq!(bracketed.data(), &[3.0, 12.0]);
+    assert_eq!(bracketed.data(), comma.data());
+}
+
+#[test]
+fn reduce_add_rejects_multiple_names_as_single_axis() {
+    // reduce_add is single-axis; multiple names should error (use reduce(:add,...)).
+    assert!(
+        eval("reduce_add(label(reshape(range(6), [2, 3]), [\"a\", \"b\"]), [\"a\", \"b\"])")
+            .is_err()
+    );
+}

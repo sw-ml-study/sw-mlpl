@@ -1,6 +1,6 @@
 number = 3
 slug = "surface-sweep"
-status = "pending"
+status = "in-progress"
 description = "Route compress, drop, reduce_add and any other axis-selecting builtin through..."
 role = "production"
 context_files = []

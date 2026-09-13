@@ -41,7 +41,7 @@ pub(crate) fn try_dispatch(
     }
     if matches!(name, "reduce_add" | "reduce_mul" | "argmax" | "softmax")
         && args.len() == 2
-        && matches!(&args[1], Expr::StrLit(_, _))
+        && axis_name_of(name, &args[1]).is_some()
     {
         return Some(eval_reduce_labeled(name, args, env, trace));
     }
@@ -87,15 +87,40 @@ fn eval_matmul(
     Ok(Value::Array(result))
 }
 
+/// The single axis NAME in a labeled-reduce argument: `Some(Ok(name))` for a
+/// string literal (`"c"`) or a one-element bracketed list (`["c"]`),
+/// `Some(Err(..))` for a multi-name list (these builtins are single-axis),
+/// and `None` if it is not a name literal at all (a numeric `ArrayLit` like
+/// `[1]` takes the positional path). The bracketed spelling matches `reduce`.
+fn axis_name_of(func: &str, arg: &Expr) -> Option<Result<String, EvalError>> {
+    let mut names: Vec<String> = match arg {
+        Expr::StrLit(s, _) => vec![s.clone()],
+        Expr::ArrayLit(elems, _) if !elems.is_empty() => {
+            let mut out = Vec::with_capacity(elems.len());
+            for e in elems {
+                let Expr::StrLit(s, _) = e else { return None };
+                out.push(s.clone());
+            }
+            out
+        }
+        _ => return None,
+    };
+    Some(if names.len() == 1 {
+        Ok(names.swap_remove(0))
+    } else {
+        Err(EvalError::Unsupported(format!(
+            "{func}: takes a single axis name; use reduce(:add, x, [...]) for multiple axes"
+        )))
+    })
+}
+
 fn eval_reduce_labeled(
     name: &str,
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    let Expr::StrLit(axis_name, _) = &args[1] else {
-        unreachable!("try_dispatch matched StrLit");
-    };
+    let axis_name = axis_name_of(name, &args[1]).expect("gate matched an axis-name literal")?;
     let err =
         |reason| EvalError::Unsupported(format!("{name}: axis name \"{axis_name}\" {reason}"));
     let arr = eval_expr(&args[0], env, trace)?.into_array()?;
