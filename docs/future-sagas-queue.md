@@ -462,6 +462,15 @@ in data-forge come first).
   (array concat), each to exact interpreter parity with a gated
   `MLPL_BUILD_TESTS=1` compiled e2e. After it, `du.mlpl` compiles. Pick
   up as its own small saga after the axis-naming-unification work.
+- **moe-microscope dogfooding findings** -- queued saga (candidate;
+  see `docs/sw-mlpl-findings.md`). From the ../moe-microscope agent probing
+  0.22.0 while building the MoE educational viz demo. F1 softmax arity split
+  (eager needs an axis, tape takes one arg -- a loss can't be written once);
+  F2 user-defined functions rejected inside grad/adam (loss must be inline --
+  the most important for "models as auditable source"); F3 chain() doesn't
+  share weights (nested apply is the spelling -- likely a doc fix); F4
+  gather_rows not differentiable + no kl_divergence (convenience). F1+F2 are
+  the strong candidates for a dedicated authorized change.
 - **Wiki errata upkeep** -- standing rule in CLAUDE.md.
 - **Upstream agentrail fix** -- `agentrail instructions apply`
   emits em dashes; the repo markdown gate needs ASCII.
