@@ -1,6 +1,6 @@
 number = 1
 slug = "f10-sinusoidal-tape-panic"
-status = "pending"
+status = "in-progress"
 description = "F10 (BUG): a labeled sinusoidal_encoding in a residual block panics the autog..."
 role = "production"
 context_files = []

@@ -3,10 +3,15 @@ use mlpl_array::{ArrayError, DenseArray};
 /// Compute the label list for an element-wise op result.
 ///
 /// Scalars contribute no labels (the non-scalar side wins). Same-rank
-/// pairs combine: two unlabeled stay unlabeled, one labeled carries
-/// through, two labeled must agree or `LabelMismatch`. Saga 11.5
-/// Phase 3 semantics, preserved verbatim from the original mlpl-array
-/// implementation.
+/// pairs combine PER AXIS: two unlabeled stay unlabeled, one labeled
+/// carries through, and a `None` (unlabeled) axis unifies with the
+/// other operand's label as a wildcard -- only two DIFFERENT explicit
+/// labels on the same axis are a `LabelMismatch`. This matches the
+/// different-rank broadcast path (`merge_broadcast_labels`), so e.g. a
+/// labeled `[time, dim]` table adds to a partially-labeled `[time, _]`
+/// tensor (a positional encoding onto an embedding on the autograd
+/// tape) instead of panicking. Saga 11.5 Phase 3 semantics, relaxed
+/// from whole-vector equality to per-axis unification.
 pub(crate) fn merge_labels(
     a: &DenseArray,
     b: &DenseArray,
@@ -23,12 +28,35 @@ pub(crate) fn merge_labels(
     match (a.labels(), b.labels()) {
         (None, None) => Ok(None),
         (Some(l), None) | (None, Some(l)) => Ok(Some(l.to_vec())),
-        (Some(la), Some(lb)) if la == lb => Ok(Some(la.to_vec())),
-        (Some(la), Some(lb)) => Err(ArrayError::LabelMismatch {
-            expected: la.to_vec(),
-            actual: lb.to_vec(),
-        }),
+        (Some(la), Some(lb)) => unify_axis_labels(la, lb),
     }
+}
+
+/// Unify two same-length per-axis label lists: a `None` axis takes the
+/// other's label; two explicit labels must agree or it is a
+/// `LabelMismatch`.
+fn unify_axis_labels(
+    la: &[Option<String>],
+    lb: &[Option<String>],
+) -> Result<Option<Vec<Option<String>>>, ArrayError> {
+    let mut out = Vec::with_capacity(la.len());
+    let mut any = false;
+    for (x, y) in la.iter().zip(lb) {
+        out.push(match (x, y) {
+            (Some(x), Some(y)) if x != y => {
+                return Err(ArrayError::LabelMismatch {
+                    expected: la.to_vec(),
+                    actual: lb.to_vec(),
+                });
+            }
+            (Some(v), _) | (_, Some(v)) => {
+                any = true;
+                Some(v.clone())
+            }
+            (None, None) => None,
+        });
+    }
+    Ok(any.then_some(out))
 }
 
 /// Labels for a broadcast between DIFFERENT non-zero ranks: axes align
