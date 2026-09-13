@@ -1,9 +1,10 @@
 number = 2
 slug = "f14-const-ctors-in-grad"
-status = "in-progress"
+status = "completed"
 description = "F14: constant constructors (fill, zeros, ones, ...) rejected inside grad; tre..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T21:34:08"
+completed_at = "2026-09-12T22:10:59"
 task_type = "production"
-commits = []
+commits = ["e4271583a45e1c06e84a7c624f36d7c8d4ba6135"]
