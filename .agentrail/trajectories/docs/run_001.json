@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 3,
+    "step": "chain-doc-or-fix"
+  },
+  "action": "Empirical reproduction via release mlpl-repl (param_count + grad); appended pinning tests to existing model_dsl_tests.rs; edited lang-reference + glossary; sw-markdown-checker; sw-checklist unchanged (38/562); no ratchet impact (docs + test-in-existing-file).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-12T19:39:00"
+}
