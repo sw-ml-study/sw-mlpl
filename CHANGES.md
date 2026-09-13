@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- docs(findings): close follow-ups F5/F6/D1; queue F9-F15 (relay)
+- chore(agentrail): complete 003-d1-loud-untracked-grad; advance to 004-followups-relay-and-close
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): fail loudly when the loss does not depend on wrt (D1)
 - chore(agentrail): complete 002-f6-repeat-in-grad; advance to 003-d1-loud-untracked-grad
 - docs(changes): refresh CHANGES.md to HEAD
