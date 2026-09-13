@@ -651,6 +651,15 @@ builtin and differentiate directly. KL divergence is
 `reduce_add(P * (log(P) - log(Q)))` (the distillation loss);
 its gradient wrt the params behind `Q` is `-P / Q`.
 
+Index / mask builtins (`argmax`, `one_hot`, `eq`, `gt`, `lt`,
+`argtop_k`) may be used inside `grad`: they are non-differentiable
+by nature, so they act as stop-gradient constants -- computed from
+the current values of their arguments and held fixed on the tape.
+This lets a top-1 router mask be built inside the loss, e.g.
+`sum(one_hot(argmax(R, 1), E) * R)`, with the gradient flowing to
+the selected logits (`R`) through the surrounding ops, never
+through the mask.
+
 ### Optimizers and Schedules
 
 | Function | Args | Description |

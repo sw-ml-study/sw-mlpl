@@ -1,6 +1,6 @@
 number = 1
 slug = "f5-index-mask-tape"
-status = "pending"
+status = "in-progress"
 description = "F5: let index/mask builtins (one_hot, argmax) be used inside a traced loss by..."
 role = "production"
 context_files = []

@@ -172,6 +172,9 @@ fn eval_tensor_fncall(
     if let Some(op) = unary_tensor_op(name) {
         return crate::grad_calls_basic::call_unary(op, args, env, tape, params, name);
     }
+    if is_stop_gradient_builtin(name) {
+        return eval_stop_gradient(name, args, env, tape, params);
+    }
     match name {
         "matmul" => crate::grad_calls_basic::call_matmul(args, env, tape, params),
         "apply" => crate::grad_calls_basic::call_apply(args, env, tape, params),
@@ -205,6 +208,35 @@ fn eval_tensor_fncall(
             "grad: function '{name}' not supported inside grad()"
         ))),
     }
+}
+
+/// Index / mask builtins that are non-differentiable by nature (they return
+/// integer positions or `{0,1}` masks). Inside `grad` they are treated as
+/// stop-gradient constants (finding F5), so a top-1 router mask -- e.g.
+/// `one_hot(argmax(R, 1), E)` or a `gt`/`eq`/`lt` comparison -- can be computed
+/// inside the loss while the gradient flows through the surrounding
+/// differentiable ops, never through the mask.
+fn is_stop_gradient_builtin(name: &str) -> bool {
+    matches!(name, "argmax" | "one_hot" | "eq" | "gt" | "lt" | "argtop_k")
+}
+
+/// Evaluate a stop-gradient builtin from the CURRENT forward values of its
+/// arguments (so it tracks the params as they train) and insert the result as
+/// a non-tracked constant leaf on the tape.
+fn eval_stop_gradient(
+    name: &str,
+    args: &[Expr],
+    env: &mut Environment,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
+    let vals = args
+        .iter()
+        .map(|a| eval_tensor_expr(a, env, tape, params).map(|t| t.value()))
+        .collect::<Result<Vec<DenseArray>, _>>()?;
+    let out = mlpl_runtime::call_builtin(name, vals)
+        .map_err(|e| EvalError::Unsupported(format!("grad: {name}: {e}")))?;
+    Ok(Tensor::leaf(Rc::clone(tape), out, false))
 }
 
 /// Arity check shared by the per-branch helpers. Lifted out

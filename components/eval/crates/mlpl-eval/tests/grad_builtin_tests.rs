@@ -369,3 +369,30 @@ fn grad_through_gather_rows_forward_matches_eager() {
     let g = run("grad(sum(gather_rows(M, [1])), M)", &mut env);
     assert_eq!(g.data(), &[0., 0., 0., 1., 1., 1.]);
 }
+
+// -- moe-microscope follow-up F5: index/mask builtins as stop-gradient --------
+// Inside grad, non-differentiable index/mask builtins (argmax, one_hot, eq,
+// gt, lt, argtop_k) are computed from the current forward values and inserted
+// as constant leaves, so a top-1 router mask can be built inside the loss.
+// Gradient flows through the surrounding differentiable ops, never the mask.
+
+#[test]
+fn grad_through_top1_router_mask_flows_to_selected_experts() {
+    // R: [2 tokens, 3 experts]; mask = one_hot(argmax(R, 1), 3) selects the
+    // top expert per token. loss = sum(mask * R); d loss/d R == mask.
+    let mut env = Environment::new();
+    let r = DenseArray::new(Shape::new(vec![2, 3]), vec![0.1, 0.9, 0.2, 0.7, 0.1, 0.1]).unwrap();
+    env.set_param("R".into(), r);
+    let g = run("grad(sum(one_hot(argmax(R, 1), 3) * R), R)", &mut env);
+    assert_eq!(g.shape(), &Shape::new(vec![2, 3]));
+    assert_eq!(g.data(), &[0., 1., 0., 1., 0., 0.]);
+}
+
+#[test]
+fn grad_through_comparison_mask_is_stop_gradient() {
+    // gt(W, 0) is a constant {0,1} mask; loss = sum(gt-mask * W); grad == mask.
+    let mut env = Environment::new();
+    env.set_param("W".into(), DenseArray::from_vec(vec![-1.0, 2.0, -3.0, 4.0]));
+    let g = run("grad(sum(gt(W, 0.0) * W), W)", &mut env);
+    assert_eq!(g.data(), &[0., 1., 0., 1.]);
+}
