@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- fix(embed): accept batched [B, T] token input (F9)
+- chore(agentrail): complete 002-f14-const-ctors-in-grad; advance to 003-f9-embed-batched
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(grad): constant constructors (fill/zeros/ones) as leaves in grad (F14)
 - chore(agentrail): complete 001-f10-sinusoidal-tape-panic; advance to 002-f14-const-ctors-in-grad
 - docs(changes): refresh CHANGES.md to HEAD
