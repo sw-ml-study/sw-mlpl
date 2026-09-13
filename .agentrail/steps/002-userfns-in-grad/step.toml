@@ -1,9 +1,10 @@
 number = 2
 slug = "userfns-in-grad"
-status = "in-progress"
+status = "completed"
 description = "Support user-defined function calls (u:name(...)) inside grad/adam by tracing..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T17:54:58"
+completed_at = "2026-09-12T19:21:44"
 task_type = "feature"
-commits = []
+commits = ["03109a157ee9c3137ffc805c4fd5f0dad4fd4fec"]

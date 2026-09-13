@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "userfns-in-grad"
+  },
+  "action": "Traced user_fns keying (full u: prefix) via eval.rs FnDef/call_user_fn; TDD red->green; scoped cargo test/clippy/fmt on mlpl-eval; sw-checklist (38 failed unchanged, +2 warnings -- exception trailer: new-module cost in already-over-ceiling crate, both fns within 25-LOC gate); gen-changes; rebuilt binaries from components/cli workspace.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-12T19:21:44"
+}
