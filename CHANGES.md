@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-12
 
+- feat(grad): differentiable gather_rows (scatter-add); document KL (F4)
+- chore(agentrail): complete 003-chain-doc-or-fix; advance to 004-gather-rows-backward-and-kl
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(chain): document that chain copies blocks, does not share weights (F3)
 - chore(agentrail): complete 002-userfns-in-grad; advance to 003-chain-doc-or-fix
 - docs(changes): refresh CHANGES.md to HEAD
