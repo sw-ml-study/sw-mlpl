@@ -16,23 +16,25 @@ pub(crate) fn softmax(name: &str, args: Vec<DenseArray>) -> Result<DenseArray, R
     Ok(DenseArray::new(Shape::new(p.dims), out)?)
 }
 
+/// The 1-arg form defaults to the LAST axis, matching the autograd tape's
+/// softmax, so a `softmax(x)` loss evaluates AND trains (finding F1).
 fn validate_softmax_args(name: &str, args: &[DenseArray]) -> Result<SoftmaxParams, RuntimeError> {
-    if args.len() != 2 {
-        return Err(arity_err(name, 2, args.len()));
-    }
-    if args[1].rank() != 0 {
-        return Err(RuntimeError::InvalidArgument {
-            func: name.into(),
-            reason: format!("axis must be scalar, got rank {}", args[1].rank()),
-        });
-    }
-    let axis = args[1].data()[0] as usize;
-    let dims = args[0].shape().dims().to_vec();
+    let bad = |reason| RuntimeError::InvalidArgument {
+        func: name.into(),
+        reason,
+    };
+    let (input, axis) = match args {
+        [x] => (x, x.rank().saturating_sub(1)),
+        [x, ax] if ax.rank() == 0 => (x, ax.data()[0] as usize),
+        [_, ax] => return Err(bad(format!("axis must be scalar, got rank {}", ax.rank()))),
+        _ => return Err(arity_err(name, 2, args.len())),
+    };
+    let dims = input.shape().dims().to_vec();
     if axis >= dims.len() {
-        return Err(RuntimeError::InvalidArgument {
-            func: name.into(),
-            reason: format!("axis {axis} out of range for rank {}", dims.len()),
-        });
+        return Err(bad(format!(
+            "axis {axis} out of range for rank {}",
+            dims.len()
+        )));
     }
     Ok(SoftmaxParams {
         axis_size: dims[axis],

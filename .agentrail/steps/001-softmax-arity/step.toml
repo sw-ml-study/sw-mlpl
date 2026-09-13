@@ -1,6 +1,6 @@
 number = 1
 slug = "softmax-arity"
-status = "pending"
+status = "in-progress"
 description = "Unify softmax so softmax(x) and softmax(x, axis) mean the same in BOTH eager ..."
 role = "production"
 context_files = []

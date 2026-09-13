@@ -41,6 +41,9 @@ macro_rules! op_dispatch {
                 let dims: Vec<usize> = args[1].data().iter().map(|&d| d as usize).collect();
                 b::reshape(&args[0], &dims)
             }
+            // softmax(x) defaults to the LAST axis, matching the tape
+            // (Tensor::softmax), so a softmax(x) loss evaluates AND trains.
+            ("softmax", 1) => b::softmax(&args[0], args[0].rank().saturating_sub(1)),
             ("softmax", 2) => b::softmax(&args[0], args[1].data()[0] as usize),
             ("log_softmax", 2) => b::log_softmax(&args[0], args[1].data()[0] as usize),
             ("cross_entropy", 2) => b::cross_entropy(&args[0], &args[1]),
