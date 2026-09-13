@@ -69,18 +69,23 @@ data-forge (Track 1).
   onto the tape inside a traced function (`a9ae2a79`), D1 loud error when a
   `grad` loss does not depend on `wrt` (`e505784c`). All re-verified downstream.
 
-- **moe-microscope-followups-2** -- QUEUED (2026-09-12). A deeper downstream
-  pass (from-scratch TinyMoE lesson) surfaced seven more findings (see "Follow-
-  up batch 2" in `docs/sw-mlpl-findings.md`). Priority order: **F10** first --
-  a labeled `sinusoidal_encoding` in a residual block PANICS the autograd tape
-  (a Rust panic; must become a clean error at minimum). Then F14 (constant
-  constructors like `fill` should be constant leaves inside `grad` -- small,
-  like F5), F9 (`embed` batched `[B,T]` input), F15 (`repeat` count bound to a
-  function parameter -- resolve against the traced local scope, an F6 edge),
-  F12 (shape-derived size arithmetic inside `grad`), F11 (F2 inliner drops a
-  param used only in index arithmetic), F13 (`attention_weights` cannot see
-  inside `residual(chain(...))`; the downstream keeps the hand-written residual
-  regardless, so this is low).
+- **moe-microscope-followups-2** -- SHIPPED 2026-09-12. All seven batch-2
+  findings plus F18 (a second autograd panic reported mid-saga): F10
+  sinusoidal-tape panic (`9cd62367`), F18 shape-mismatch panic (`9e699317`) --
+  both now clean errors / training; F9 batched embed (`042d2d79`), F14 constant
+  constructors (`61da67ae`), F15 repeat param-count (`369cfeb1`), F12
+  shape-derived fold (`82e55a6a`), F11 nested-fn index arith (`813526d6`), F13
+  attention_weights in residual (`8282cd6a`). All verified in the rebuilt
+  binary; `mlpl-serve` rebuilt too. sw-checklist fails held at 38 throughout.
+
+- **moe-microscope-followups-3** -- QUEUED (2026-09-12). From the host-handoff
+  step (see "Follow-up batch 3" in `docs/sw-mlpl-findings.md`): **F16** -- the
+  `eval_stream` server surface has no `include`, filesystem sandbox, or `args`,
+  so a module-split lesson cannot be submitted as written (downstream bundles
+  the include tree). A real server feature (over-the-wire include resolution +
+  sandbox policy + args). **S1** is partly done -- `mlpl-serve` is rebuilt and
+  the rebuild-on-evaluator-change discipline adopted; the remaining scripted
+  current-server build rides with F16.
 
 ### Paused sagas
 

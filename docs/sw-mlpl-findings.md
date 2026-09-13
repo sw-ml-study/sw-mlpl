@@ -180,13 +180,24 @@ gradient reaches `wrt` (the loss does not depend on it) instead of returning
 silent zeros, with a message naming the likely causes. The optimizer path
 keeps returning zeros for untouched params (correct batched semantics).
 
-## Follow-up batch 2 (2026-09-12 second rerun by ../moe-microscope) -- OPEN
+## Follow-up batch 2 (2026-09-12 second rerun by ../moe-microscope) -- RESOLVED
 
 A deeper dogfooding pass (the from-scratch TinyMoE "this domain" lesson: a
 3,812-param block over a 120-example fixture) surfaced seven more findings,
-each with a reproducer in the downstream `probes/`. F10 is a genuine bug (a
-Rust panic); the rest are grad-surface gaps with workarounds. Queued as
-`moe-microscope-followups-2`.
+each with a reproducer in the downstream `probes/`. All were addressed in the
+`moe-microscope-followups-2` saga (F18, a second panic reported mid-saga, was
+folded in). Both panics (F10, F18) now produce clean MLPL errors or train.
+
+| Finding | Severity | Resolution | Commit |
+|---------|----------|------------|--------|
+| F9 batched `[B,T]` embed | med | eager + tape flatten-lookup-reshape | `042d2d79` |
+| F10 sinusoidal tape panic | BUG | per-axis label unification (no panic; trains) | `9cd62367` |
+| F11 nested-fn index arith | low | gather index resolves in the traced scope | `813526d6` |
+| F12 shape-derived size | low | constant-fold value-independent subexprs | `82e55a6a` |
+| F13 attention_weights in residual | low | recurse into wrapped Attention layers | `8282cd6a` |
+| F14 constant constructors in grad | low | `fill`/`zeros`/`ones` as constant leaves | `61da67ae` |
+| F15 repeat param-bound count | low | count resolves in the traced scope | `369cfeb1` |
+| F18 shape mismatch panic | BUG | pre-validate broadcast/label -> clean error | `9e699317` |
 
 - **F9** -- `embed` rejects the batched `[B, T]` token input the reference
   documents (only `[T]` is accepted). Blocks batched embedding lookups.
@@ -210,3 +221,22 @@ Rust panic); the rest are grad-surface gaps with workarounds. Queued as
   traced function (`repeat r { ... }` where `r` is an arg -> "undefined
   variable: r"). The F6 unroll resolves the count via the eager env, not the
   traced local scope. Verified against the release binary.
+
+## Follow-up batch 3 (2026-09-12 host-handoff step by ../moe-microscope) -- OPEN
+
+Recording the DN01 baseline over a live `mlpl-serve` SSE session surfaced a
+server-surface gap and a build-hygiene gap.
+
+- **F16** -- the `eval_stream` server surface has no `include`, no filesystem
+  sandbox, and no `args`, so a lesson split into library modules cannot be
+  submitted as written; the downstream bundles the include tree inline as a
+  workaround. This is sw-mlpl's server surface, so it belongs here -- a real
+  feature (include resolution over the wire + a sandbox policy + args passing),
+  queued as `moe-microscope-followups-3`.
+- **S1** -- the adjacent `mlpl-serve` release binary was stale (it predated the
+  user-function-loss support) because only `mlpl-repl`/`mlpl-build` were being
+  rebuilt on evaluator changes. PARTLY ADDRESSED: `target/release/mlpl-serve`
+  has been rebuilt from current source, and "rebuild `mlpl-serve` whenever the
+  evaluator changes" is now part of the checkpoint discipline (it embeds
+  `mlpl-eval`). The remaining ask -- a documented/scripted current-server build
+  so a fresh clone has a correct server -- rides with F16's saga.
