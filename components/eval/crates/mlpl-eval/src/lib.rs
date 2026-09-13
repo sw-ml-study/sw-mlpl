@@ -126,6 +126,7 @@ mod grad;
 mod grad_calls_basic;
 mod grad_calls_engram;
 mod grad_calls_shape;
+mod grad_const;
 mod grad_optim;
 mod grad_optim_resident;
 mod grad_optim_resident_adam;

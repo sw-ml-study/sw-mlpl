@@ -1,6 +1,6 @@
 number = 6
 slug = "f12-shape-arith-in-grad"
-status = "pending"
+status = "in-progress"
 description = "F12: shape-derived size arithmetic rejected inside grad; support or document...."
 role = "production"
 context_files = []

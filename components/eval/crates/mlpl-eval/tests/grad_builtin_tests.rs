@@ -509,3 +509,41 @@ fn grad_shape_mismatch_errors_cleanly_not_panic() {
         "expected a clean shape error, got: {msg}"
     );
 }
+
+// -- moe-microscope follow-up F12: shape-derived constant arithmetic in grad --
+// A subexpression that is value-independent of every parameter (a param appears
+// only inside shape metadata) is folded to a constant leaf, so a loss can scale
+// by a shape-derived size like reduce_mul(shape(...)) inside grad.
+
+#[test]
+fn grad_folds_shape_derived_constant() {
+    // width = reduce_mul(shape(take(W,0,0))) = 3 (a row of a [4,3] matrix).
+    // loss = reduce_add(W) * 3; grad wrt W is all 3s.
+    let mut env = Environment::new();
+    let w = DenseArray::new(Shape::new(vec![4, 3]), (0..12).map(|n| n as f64).collect()).unwrap();
+    env.set_param("W".into(), w);
+    let g = run(
+        "grad(reduce_add(W) * reduce_mul(shape(take(W, 0, 0))), W)",
+        &mut env,
+    );
+    assert_eq!(g.shape().dims(), &[4, 3]);
+    assert!(
+        g.data().iter().all(|&v| (v - 3.0).abs() < 1e-9),
+        "all 3s: {:?}",
+        g.data()
+    );
+}
+
+#[test]
+fn grad_still_rejects_non_diff_reduction_over_a_param() {
+    // reduce_mul OVER A PARAM is genuinely non-differentiable and must still
+    // error (not silently fold to a constant -- that would drop the gradient).
+    let mut env = Environment::new();
+    env.set_param("W".into(), DenseArray::from_vec(vec![1.0, 2.0, 3.0]));
+    let tokens = lex("grad(reduce_mul(W), W)").unwrap();
+    let stmts = parse(&tokens).unwrap();
+    assert!(
+        eval_program(&stmts, &mut env).is_err(),
+        "reduce_mul(param) still errors"
+    );
+}

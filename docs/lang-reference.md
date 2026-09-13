@@ -673,7 +673,12 @@ This lets a top-1 router mask be built inside the loss, e.g.
 the selected logits (`R`) through the surrounding ops, never
 through the mask. Constant constructors (`fill`, `zeros`, `ones`)
 are likewise constant leaves inside `grad`, so a loss may scale by
-a constant mask or add a constant bias built inline.
+a constant mask or add a constant bias built inline. More
+generally, any subexpression that does not depend on a
+parameter's VALUE -- including a size derived from a shape, e.g.
+`reduce_mul(shape(x))` -- is folded to a constant, so it can be
+used inside the loss even when the builtins involved are not
+themselves differentiable.
 
 ### Optimizers and Schedules
 
