@@ -396,3 +396,26 @@ fn grad_through_comparison_mask_is_stop_gradient() {
     let g = run("grad(sum(gt(W, 0.0) * W), W)", &mut env);
     assert_eq!(g.data(), &[0., 1., 0., 1.]);
 }
+
+// -- moe-microscope follow-up F6: repeat unrolls onto the tape ---------------
+// A `repeat N { ... }` inside a traced user function (F2) is unrolled onto the
+// tape: the body's assignments thread across iterations, so bounded recurrence
+// depth can be spelled with `repeat` instead of hand-nested apply calls.
+
+#[test]
+fn grad_through_repeat_in_user_function_unrolls() {
+    // u:recur doubles h twice: h -> 2h -> 4h. loss = sum(4*W); grad = [4, 4].
+    let mut env = Environment::new();
+    env.set_param("W".into(), DenseArray::from_vec(vec![1.0, 2.0]));
+    let src = "\
+        def u:recur(h) {\n\
+          \"Double h twice via repeat.\"\n\
+          repeat 2 {\n\
+            h = h + h\n\
+          }\n\
+          h\n\
+        }\n\
+        grad(sum(u:recur(W)), W)";
+    let g = run(src, &mut env);
+    assert_eq!(g.data(), &[4.0, 4.0]);
+}

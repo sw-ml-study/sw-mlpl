@@ -404,7 +404,20 @@ grad(u:loss(W), W)     # same gradient as the inlined expression
 ```
 
 The function's parameters bind to the traced arguments, and any
-global param the body references stays differentiable.
+global param the body references stays differentiable. A
+`repeat N { ... }` inside such a traced function is unrolled onto
+the tape -- the body's assignments thread across iterations -- so
+a bounded recurrence trains:
+
+```
+def u:recur(h) {
+  "Apply the shared step R times."
+  repeat R {
+    h = apply(block, h)
+  }
+  h
+}
+```
 
 ## Comments
 

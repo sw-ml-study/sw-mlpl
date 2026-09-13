@@ -76,10 +76,29 @@ fn trace_body(
                 local.insert(name.clone(), t.clone());
                 result = Some(t);
             }
+            // A `repeat N { .. }` is unrolled onto the tape (finding F6): the
+            // body's assignments thread through `local` across iterations, so
+            // bounded recurrence depth trains without hand-nested apply calls.
+            Expr::Repeat { count, body, .. } => {
+                let n = repeat_count(count, env)?;
+                for _ in 0..n {
+                    result = Some(trace_body(body, env, tape, local)?);
+                }
+            }
             other => result = Some(eval_tensor_expr(other, env, tape, local)?),
         }
     }
     result.ok_or_else(|| {
         EvalError::Unsupported("grad: user function body has no result expression".into())
     })
+}
+
+/// Evaluate a `repeat` count to a non-negative integer. The count is a plain
+/// scalar (not differentiable), so it is evaluated eagerly like normal `repeat`.
+fn repeat_count(count: &Expr, env: &mut Environment) -> Result<usize, EvalError> {
+    let n = crate::eval::eval_expr(count, env, &mut None)?.into_array()?;
+    if n.rank() != 0 {
+        return Err(EvalError::InvalidRepeatCount);
+    }
+    Ok(n.data()[0] as usize)
 }
