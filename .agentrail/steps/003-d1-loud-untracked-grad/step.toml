@@ -1,6 +1,6 @@
 number = 3
 slug = "d1-loud-untracked-grad"
-status = "pending"
+status = "in-progress"
 description = "D1: make grad wrt an untracked tape constant fail loudly instead of returning..."
 role = "production"
 context_files = []

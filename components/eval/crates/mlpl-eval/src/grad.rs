@@ -53,9 +53,16 @@ pub(crate) fn eval_grad(args: &[Expr], env: &mut Environment) -> Result<DenseArr
     let wrt_tensor = params
         .get(&wrt_name)
         .expect("wrt param present in params map");
-    Ok(wrt_tensor
-        .grad()
-        .unwrap_or_else(|| DenseArray::zeros(wrt_tensor.value().shape().clone())))
+    // A `None` gradient means the loss subgraph never reached this parameter
+    // -- the loss does not depend on `wrt` (finding D1). Returning zeros here
+    // reads as a broken training step, so fail loudly instead of silently.
+    wrt_tensor.grad().ok_or_else(|| {
+        EvalError::Unsupported(format!(
+            "grad: the loss does not depend on '{wrt_name}' (no gradient flows \
+             to it) -- was the loss computed eagerly before grad, or is this \
+             the wrong parameter?"
+        ))
+    })
 }
 
 /// One tape for the whole step: evaluate `loss` once, backward

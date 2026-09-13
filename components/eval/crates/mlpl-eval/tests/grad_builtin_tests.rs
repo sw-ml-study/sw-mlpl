@@ -419,3 +419,24 @@ fn grad_through_repeat_in_user_function_unrolls() {
     let g = run(src, &mut env);
     assert_eq!(g.data(), &[4.0, 4.0]);
 }
+
+// -- moe-microscope follow-up D1: loud failure on a disconnected grad --------
+// grad(loss, W) where the loss does not depend on W (e.g. the loss was
+// computed eagerly, or the wrong variable was passed) previously returned an
+// all-zero gradient silently, which reads as a broken training step. It now
+// errors loudly.
+
+#[test]
+fn grad_wrt_param_not_in_loss_errors_loudly() {
+    let mut env = Environment::new();
+    env.set_param("W".into(), DenseArray::from_vec(vec![1.0, 2.0]));
+    // loss is a constant array -- it does not depend on W at all.
+    let tokens = lex("grad(sum([3.0, 4.0]), W)").unwrap();
+    let stmts = parse(&tokens).unwrap();
+    let err = eval_program(&stmts, &mut env).unwrap_err();
+    let msg = format!("{err}");
+    assert!(
+        msg.contains("does not depend") || msg.contains("no gradient"),
+        "expected a loud disconnected-grad error, got: {msg}"
+    );
+}
