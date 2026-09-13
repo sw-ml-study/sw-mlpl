@@ -1,6 +1,6 @@
 number = 4
 slug = "followups-relay-and-close"
-status = "pending"
+status = "in-progress"
 description = "Update docs/sw-mlpl-findings.md marking F5/F6/D1 resolved/documented, refresh..."
 role = "production"
 context_files = []

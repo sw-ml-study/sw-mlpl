@@ -64,17 +64,23 @@ data-forge (Track 1).
   release binary; sw-checklist held flat across the feature commits. Relayed
   to the moe-microscope agent.
 
-- **moe-microscope-followups** -- QUEUED (2026-09-12). The downstream rerun
-  re-verified F1-F4 and surfaced two more edges + one UX note (see the "Open
-  follow-ups" section of `docs/sw-mlpl-findings.md`), all with clean
-  workarounds (none a blocker): F5 index/mask builtins (`one_hot`, `argmax`)
-  rejected inside a traced function -- wants a stop-gradient treatment on the
-  tape so a top-1 router mask can be computed in the loss; F6 `repeat` not
-  tape-expressible inside `grad` -- recurrence must be nested `apply` / a
-  per-depth user function; D1 `grad` returning silent all-zero gradients when
-  the `wrt` leaf is an untracked tape constant -- wants a loud error. F5 is the
-  highest-value (it removes the eager-mask-passing workaround for Switch-style
-  gating); D1 is a cheap loud-failure guard.
+- **moe-microscope-followups** -- SHIPPED 2026-09-12. F5 index/mask builtins
+  as stop-gradient constants inside `grad` (`54ad5849`), F6 `repeat` unrolled
+  onto the tape inside a traced function (`a9ae2a79`), D1 loud error when a
+  `grad` loss does not depend on `wrt` (`e505784c`). All re-verified downstream.
+
+- **moe-microscope-followups-2** -- QUEUED (2026-09-12). A deeper downstream
+  pass (from-scratch TinyMoE lesson) surfaced seven more findings (see "Follow-
+  up batch 2" in `docs/sw-mlpl-findings.md`). Priority order: **F10** first --
+  a labeled `sinusoidal_encoding` in a residual block PANICS the autograd tape
+  (a Rust panic; must become a clean error at minimum). Then F14 (constant
+  constructors like `fill` should be constant leaves inside `grad` -- small,
+  like F5), F9 (`embed` batched `[B,T]` input), F15 (`repeat` count bound to a
+  function parameter -- resolve against the traced local scope, an F6 edge),
+  F12 (shape-derived size arithmetic inside `grad`), F11 (F2 inliner drops a
+  param used only in index arithmetic), F13 (`attention_weights` cannot see
+  inside `residual(chain(...))`; the downstream keeps the hand-written residual
+  regardless, so this is low).
 
 ### Paused sagas
 

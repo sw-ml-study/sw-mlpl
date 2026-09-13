@@ -112,11 +112,17 @@ lang-reference (Autograd) and the glossary KL entry.
 None blocked the moe-microscope Saga 1 or 2; each was a ledger entry with a
 reproducer, now closed.
 
-## Open follow-ups (2026-09-12 rerun by ../moe-microscope)
+## Follow-up batch 1 (2026-09-12 rerun by ../moe-microscope) -- RESOLVED
 
 The downstream agent re-verified F1-F4 against the rebuilt release binary
-(all confirmed) and surfaced two new edges plus one UX note. Each has a clean
-workaround (none is a blocker); queued as a follow-up saga.
+(all confirmed) and surfaced two new edges plus one UX note. All three were
+addressed in the `moe-microscope-followups` saga and re-verified downstream.
+
+| Finding | Resolution | Commit |
+|---------|------------|--------|
+| F5 index/mask builtins in grad | stop-gradient constants on the tape | `54ad5849` |
+| F6 `repeat` in a traced function | unrolled onto the tape | `a9ae2a79` |
+| D1 silent-zero grad | loud error when the loss does not depend on `wrt` | `e505784c` |
 
 ### F5 -- index/mask builtins rejected inside a traced function (LOW; workaround)
 
@@ -134,6 +140,12 @@ would be a stop-gradient treatment of the index/mask builtins on the tape
 (they are non-differentiable by nature; the gradient should flow through the
 selected values, not the indices).
 
+RESOLVED (`54ad5849`): `argmax`, `one_hot`, `eq`, `gt`, `lt`, `argtop_k` are
+now stop-gradient constants inside `grad` -- computed from the current forward
+values and inserted as non-tracked leaves. A top-1 router mask
+`sum(one_hot(argmax(R, 1), E) * R)` trains, gradient flowing to the selected
+logits, never the mask.
+
 ### F6 -- `repeat` not usable inside a traced function (LOW; workaround)
 
 Recurrence depth cannot be spelled with `repeat` inside `grad`; `repeat` is a
@@ -147,6 +159,11 @@ Workaround: spell recurrence as nested `apply` (or, per F2, a user function
 that applies a block repeatedly) -- so depth `R` is a source-level choice.
 One small user function per depth covers a lesson's `R` range.
 
+RESOLVED (`a9ae2a79`): a `repeat N { ... }` inside a traced user function is
+unrolled onto the tape -- the body's assignments thread through the local
+scope across iterations -- so bounded recurrence trains. (A count bound to a
+FUNCTION PARAMETER rather than a global is still unresolved; see F15.)
+
 ### D1 -- grad wrt a tape constant returns zeros silently (UX note)
 
 When the `wrt` operand is a constant on the tape (e.g. the loss or the
@@ -157,3 +174,39 @@ training bug. In the adjacent probes the common shapes error loudly
 error (or a prominent reference note) when the `wrt` leaf is untracked would
 save a learner the debugging hour. Aligns with the "capability tests pin the
 requirement" and loud-failure conventions.
+
+RESOLVED (`e505784c`): the user-facing `grad(expr, wrt)` now errors when no
+gradient reaches `wrt` (the loss does not depend on it) instead of returning
+silent zeros, with a message naming the likely causes. The optimizer path
+keeps returning zeros for untouched params (correct batched semantics).
+
+## Follow-up batch 2 (2026-09-12 second rerun by ../moe-microscope) -- OPEN
+
+A deeper dogfooding pass (the from-scratch TinyMoE "this domain" lesson: a
+3,812-param block over a 120-example fixture) surfaced seven more findings,
+each with a reproducer in the downstream `probes/`. F10 is a genuine bug (a
+Rust panic); the rest are grad-surface gaps with workarounds. Queued as
+`moe-microscope-followups-2`.
+
+- **F9** -- `embed` rejects the batched `[B, T]` token input the reference
+  documents (only `[T]` is accepted). Blocks batched embedding lookups.
+- **F10** (BUG, highest priority) -- a labeled `sinusoidal_encoding` table
+  PANICS the autograd tape inside a residual block (a Rust panic, not an MLPL
+  error). A panic is never acceptable; must become a clean error at minimum,
+  ideally supported.
+- **F11** -- a nested user-function call inside `grad` loses a parameter used
+  in index arithmetic (an F2 inliner edge: a param referenced only through an
+  index computation is dropped).
+- **F12** -- shape-derived size arithmetic is rejected inside `grad` (deriving
+  a size from a tensor's shape to feed a reshape/constructor in the loss).
+- **F13** -- `attention_weights` cannot see inside `residual(chain(...))`, so
+  the lesson writes the residual by hand (`h1 = h0 + att(h0)`). (The hand form
+  is clearer for the microscope and will stay even after a fix.)
+- **F14** -- `fill` and similar constant constructors are rejected inside
+  `grad` (`grad(sum(W * fill([3], 2.0)), W)` errors). They should be constant
+  leaves on the tape (same treatment as literals). Verified against the
+  release binary.
+- **F15** -- `repeat` with a count bound to a FUNCTION PARAMETER fails inside a
+  traced function (`repeat r { ... }` where `r` is an arg -> "undefined
+  variable: r"). The F6 unroll resolves the count via the eager env, not the
+  traced local scope. Verified against the release binary.
