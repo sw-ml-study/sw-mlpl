@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-13
 
+- fix(grad): shape mismatch is a clean error, not a process panic (F18)
+- chore(agentrail): complete 004-f15-repeat-param-count
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): resolve repeat count via the traced scope (F15)
 
 ## 2026-09-12
