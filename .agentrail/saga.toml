@@ -1,5 +1,5 @@
 name = "axis-naming-unification"
-status = "active"
+status = "completed"
 current_step = 4
 created_at = "2026-09-11T12:08:19"
 plan_file = ".agentrail/plan.md"

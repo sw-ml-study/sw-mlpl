@@ -1,9 +1,10 @@
 number = 4
 slug = "downstream-relay-and-close"
-status = "pending"
+status = "completed"
 description = "Confirm ../demo-ml-utils probes/named-axis-reduce.mlpl flips green with the s..."
 role = "production"
 context_files = []
 created_at = "2026-09-11T12:08:19"
+completed_at = "2026-09-12T17:54:37"
 task_type = "docs"
-commits = []
+commits = ["146c8f5f62f86436e2ffb0567ed0c28b23d47a5b"]
