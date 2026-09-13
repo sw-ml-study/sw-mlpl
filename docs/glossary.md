@@ -3321,9 +3321,14 @@ collapsed axes; the other ops are not differentiable. See also:
 
 `reduce_add(x[, axis])` is sum reduction; `reduce_mul` is
 product reduction. Equivalent to `reduce(:add, x[, axis])`
-and `reduce(:mul, x[, axis])`; kept as direct shorthands.
+and `reduce(:mul, x[, axis])`; kept as direct shorthands. The
+`axis` accepts the same forms as `reduce`: a position, a vector
+of positions, a bracketed list of axis names, or a comma-string
+(`reduce_add(x, ["channel", "kernel_y"])` == the integer form).
 `reduce_add` is differentiable in `grad()` (like `sum`, across
 full / single-axis / multi-axis); `reduce_mul` is not.
+(`argmax` / `softmax` take the named form too, but a single axis
+only.)
 
 ## Random Forest
 

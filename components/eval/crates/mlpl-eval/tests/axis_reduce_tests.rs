@@ -102,10 +102,21 @@ fn reduce_add_accepts_a_bracketed_single_name() {
 }
 
 #[test]
-fn reduce_add_rejects_multiple_names_as_single_axis() {
-    // reduce_add is single-axis; multiple names should error (use reduce(:add,...)).
+fn reduce_add_accepts_multiple_names_matching_the_integer_form() {
+    // The downstream requirement (demo-ml-utils named-axis-reduce probe):
+    // reduce_add over a vector of names == the integer-position form.
+    let names = eval(
+        "reduce_add(label(reshape(range(24), [2, 3, 4]), [\"a\", \"b\", \"c\"]), [\"b\", \"c\"])",
+    )
+    .unwrap();
+    let ints = eval("reduce(:add, reshape(range(24), [2, 3, 4]), [1, 2])").unwrap();
+    assert_eq!(names.data(), ints.data());
+}
+
+#[test]
+fn argmax_still_requires_a_single_axis() {
+    // argmax is inherently single-axis; multiple names error.
     assert!(
-        eval("reduce_add(label(reshape(range(6), [2, 3]), [\"a\", \"b\"]), [\"a\", \"b\"])")
-            .is_err()
+        eval("argmax(label(reshape(range(6), [2, 3]), [\"a\", \"b\"]), [\"a\", \"b\"])").is_err()
     );
 }

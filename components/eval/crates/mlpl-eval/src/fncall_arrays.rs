@@ -41,7 +41,7 @@ pub(crate) fn try_dispatch(
     }
     if matches!(name, "reduce_add" | "reduce_mul" | "argmax" | "softmax")
         && args.len() == 2
-        && axis_name_of(name, &args[1]).is_some()
+        && axis_name_list(&args[1]).is_some()
     {
         return Some(eval_reduce_labeled(name, args, env, trace));
     }
@@ -87,31 +87,43 @@ fn eval_matmul(
     Ok(Value::Array(result))
 }
 
-/// The single axis NAME in a labeled-reduce argument: `Some(Ok(name))` for a
-/// string literal (`"c"`) or a one-element bracketed list (`["c"]`),
-/// `Some(Err(..))` for a multi-name list (these builtins are single-axis),
-/// and `None` if it is not a name literal at all (a numeric `ArrayLit` like
-/// `[1]` takes the positional path). The bracketed spelling matches `reduce`.
-fn axis_name_of(func: &str, arg: &Expr) -> Option<Result<String, EvalError>> {
-    let mut names: Vec<String> = match arg {
-        Expr::StrLit(s, _) => vec![s.clone()],
+/// The axis NAME(s) in a labeled-reduce argument: a bracketed list of string
+/// literals (`["c", "ky"]`) or a comma-string (`"c"`, `"c,ky"`), split into
+/// names. `None` if it is not a name literal at all (a numeric `ArrayLit` like
+/// `[1]` takes the positional path). The name spellings match `reduce`.
+fn axis_name_list(arg: &Expr) -> Option<Vec<String>> {
+    match arg {
+        Expr::StrLit(s, _) => Some(s.split(',').map(|p| p.trim().to_string()).collect()),
         Expr::ArrayLit(elems, _) if !elems.is_empty() => {
             let mut out = Vec::with_capacity(elems.len());
             for e in elems {
                 let Expr::StrLit(s, _) = e else { return None };
                 out.push(s.clone());
             }
-            out
+            Some(out)
         }
-        _ => return None,
-    };
-    Some(if names.len() == 1 {
-        Ok(names.swap_remove(0))
-    } else {
-        Err(EvalError::Unsupported(format!(
-            "{func}: takes a single axis name; use reduce(:add, x, [...]) for multiple axes"
-        )))
-    })
+        _ => None,
+    }
+}
+
+/// Resolve axis names to positions against the array's labels.
+fn resolve_named_axes(
+    name: &str,
+    names: &[String],
+    arr: &DenseArray,
+) -> Result<Vec<usize>, EvalError> {
+    let labels = arr.labels().ok_or_else(|| {
+        EvalError::Unsupported(format!("{name}: named axes require a labeled array"))
+    })?;
+    names
+        .iter()
+        .map(|n| {
+            labels
+                .iter()
+                .position(|l| l.as_deref() == Some(n.as_str()))
+                .ok_or_else(|| EvalError::Unsupported(format!("{name}: no axis labeled \"{n}\"")))
+        })
+        .collect()
 }
 
 fn eval_reduce_labeled(
@@ -120,18 +132,28 @@ fn eval_reduce_labeled(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    let axis_name = axis_name_of(name, &args[1]).expect("gate matched an axis-name literal")?;
-    let err =
-        |reason| EvalError::Unsupported(format!("{name}: axis name \"{axis_name}\" {reason}"));
+    // argmax/softmax operate on ONE axis; reduce_add/reduce_mul reduce over
+    // every named axis (high-index first), matching reduce(:add/:mul, ...).
+    let names = axis_name_list(&args[1]).expect("gate matched an axis-name literal");
     let arr = eval_expr(&args[0], env, trace)?.into_array()?;
-    let labels = arr
-        .labels()
-        .ok_or_else(|| err("requires a labeled array"))?;
-    let axis = labels
-        .iter()
-        .position(|l| l.as_deref() == Some(axis_name.as_str()))
-        .ok_or_else(|| err("not found in labels"))?;
-    let axis_arr = DenseArray::from_scalar(axis as f64);
-    let result = mlpl_runtime::call_builtin(name, vec![arr, axis_arr])?;
-    Ok(Value::Array(result))
+    let mut axes = resolve_named_axes(name, &names, &arr)?;
+    let scalar = |a: usize| DenseArray::from_scalar(a as f64);
+    if matches!(name, "argmax" | "softmax") {
+        let [ax] = axes[..] else {
+            let n = axes.len();
+            return Err(EvalError::Unsupported(format!(
+                "{name}: takes a single axis, got {n}"
+            )));
+        };
+        return Ok(Value::Array(mlpl_runtime::call_builtin(
+            name,
+            vec![arr, scalar(ax)],
+        )?));
+    }
+    axes.sort_unstable();
+    axes.dedup();
+    let out = axes.into_iter().rev().try_fold(arr, |acc, ax| {
+        mlpl_runtime::call_builtin(name, vec![acc, scalar(ax)])
+    })?;
+    Ok(Value::Array(out))
 }
