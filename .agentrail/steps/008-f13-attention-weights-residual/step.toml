@@ -1,4 +1,4 @@
-number = 7
+number = 8
 slug = "f13-attention-weights-residual"
 status = "pending"
 description = "F13 (low): attention_weights cannot see inside residual(chain(...)). Document..."

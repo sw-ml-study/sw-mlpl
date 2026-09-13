@@ -1,0 +1,1 @@
+F18 (BUG): a shape mismatch inside grad panics the process with a Rust panic; eager evaluation reports a clean error. Pre-validate broadcast/label compatibility in the tape binop path (tensor_binop) so an incompatible shape errors cleanly. See docs/sw-mlpl-findings.md F18.
