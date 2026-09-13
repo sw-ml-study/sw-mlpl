@@ -33,7 +33,7 @@ pub(crate) fn broadcast_apply(
 
 /// The broadcast output shape (per-axis max, right-aligned), or
 /// `ShapeMismatch` when two axes differ and neither is 1.
-fn broadcast_shape(a: &[usize], b: &[usize]) -> Result<Vec<usize>, ArrayError> {
+pub(crate) fn broadcast_shape(a: &[usize], b: &[usize]) -> Result<Vec<usize>, ArrayError> {
     let r = a.len().max(b.len());
     let dim = |d: &[usize], i: usize| {
         let off = r - d.len();

@@ -488,3 +488,24 @@ fn grad_through_repeat_with_parameter_bound_count() {
     let g = run(src, &mut env);
     assert_eq!(g.data(), &[4.0, 4.0]);
 }
+
+// -- moe-microscope follow-up F18: shape mismatch is a clean error, not a panic
+// An incompatible broadcast inside grad (here [3,4] / [3]) previously aborted
+// the PROCESS with a Rust panic in the tape's binary op; eager evaluation
+// reports it cleanly. grad now errors cleanly too.
+
+#[test]
+fn grad_shape_mismatch_errors_cleanly_not_panic() {
+    let mut env = Environment::new();
+    let w = DenseArray::new(Shape::new(vec![3, 4]), (1..=12).map(|n| n as f64).collect()).unwrap();
+    env.set_param("W".into(), w);
+    // reduce_add(W, 1) is [3]; W / [3] is not broadcastable ([3,4] vs [3]).
+    let tokens = lex("grad(reduce_add(W / reduce_add(W, 1)), W)").unwrap();
+    let stmts = parse(&tokens).unwrap();
+    let err = eval_program(&stmts, &mut env).unwrap_err();
+    let msg = format!("{err}");
+    assert!(
+        msg.contains("shape mismatch") || msg.contains("array error"),
+        "expected a clean shape error, got: {msg}"
+    );
+}

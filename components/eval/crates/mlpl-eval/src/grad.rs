@@ -110,10 +110,9 @@ pub(crate) fn eval_grads_batch(
 /// than silently returning a zero-gradient constant.
 fn tensor_binop(op: &BinOpKind, l: &Tensor, r: &Tensor) -> Result<Tensor, EvalError> {
     match op {
-        BinOpKind::Add => Ok(l.add(r)),
-        BinOpKind::Sub => Ok(l.sub(r)),
-        BinOpKind::Mul => Ok(l.mul(r)),
-        BinOpKind::Div => Ok(l.div(r)),
+        BinOpKind::Add | BinOpKind::Sub | BinOpKind::Mul | BinOpKind::Div => {
+            checked_arith(op, l, r)
+        }
         BinOpKind::Lt
         | BinOpKind::Gt
         | BinOpKind::Le
@@ -123,6 +122,22 @@ fn tensor_binop(op: &BinOpKind, l: &Tensor, r: &Tensor) -> Result<Tensor, EvalEr
             "grad: comparison operator `{op}` is not differentiable"
         ))),
     }
+}
+
+/// Build a differentiable arithmetic node after validating broadcast/label
+/// compatibility on the forward values -- so an incompatible shape or label is
+/// a clean error, not a panic in the tape's `push_binary` (finding F18; F10
+/// covers the label half). Eager evaluation already errors here; this keeps the
+/// tape consistent.
+fn checked_arith(op: &BinOpKind, l: &Tensor, r: &Tensor) -> Result<Tensor, EvalError> {
+    mlpl_array_ops_element::check_binop_compat(&l.value(), &r.value())
+        .map_err(EvalError::ArrayError)?;
+    Ok(match op {
+        BinOpKind::Add => l.add(r),
+        BinOpKind::Sub => l.sub(r),
+        BinOpKind::Mul => l.mul(r),
+        _ => l.div(r),
+    })
 }
 
 pub(crate) fn eval_tensor_expr(

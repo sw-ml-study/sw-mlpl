@@ -1,7 +1,20 @@
 use mlpl_array::{ArrayError, DenseArray};
 
-use crate::broadcast::broadcast_apply;
+use crate::broadcast::{broadcast_apply, broadcast_shape};
 use crate::merge_labels::merge_labels;
+
+/// Validate that two arrays are compatible for an element-wise binary op --
+/// broadcastable shapes AND unifiable labels -- WITHOUT computing the result.
+/// Callers that build an op on a value graph rather than eagerly (the autograd
+/// tape) use this to turn an incompatible shape or label into a clean error
+/// instead of a panic (findings F10 / F18).
+pub fn check_binop_compat(a: &DenseArray, b: &DenseArray) -> Result<(), ArrayError> {
+    merge_labels(a, b)?;
+    if a.rank() != 0 && b.rank() != 0 {
+        broadcast_shape(a.shape().dims(), b.shape().dims())?;
+    }
+    Ok(())
+}
 
 /// Apply-binop extension for `DenseArray`.
 pub trait ApplyBinopExt {
