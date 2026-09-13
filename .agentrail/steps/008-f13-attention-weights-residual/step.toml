@@ -1,9 +1,10 @@
 number = 8
 slug = "f13-attention-weights-residual"
-status = "in-progress"
+status = "completed"
 description = "F13 (low): attention_weights cannot see inside residual(chain(...)). Document..."
 role = "production"
 context_files = []
 created_at = "2026-09-12T21:34:08"
+completed_at = "2026-09-13T14:38:48"
 task_type = "docs"
-commits = []
+commits = ["356d10f5a1a594c367d3b62818ded5cb2cc65aaf"]

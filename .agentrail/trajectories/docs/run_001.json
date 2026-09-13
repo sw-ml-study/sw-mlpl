@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 8,
+    "step": "f13-attention-weights-residual"
+  },
+  "action": "Diagnosed Chain-arm only recursing into direct Attention; added contains_attention recursion through Residual/Chain; TDD; attention regression; sw-checklist fails held; rebuilt binaries.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-13T14:38:48"
+}
