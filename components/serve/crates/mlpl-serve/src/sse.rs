@@ -134,7 +134,8 @@ pub async fn eval_stream_handler(
             .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
         mlpl_serve_core::sessions::require_bearer(state.auth_mode, &session.token, &headers)?;
     }
-    let stmts = crate::handlers::parse_program(&body.program)?;
+    // expand_program falls back to a plain parse when the include map is empty.
+    let stmts = crate::handlers::expand_program(&body.program, &body.includes)?;
     let (tx, rx) = mpsc::channel::<SseEvent>(64);
     let session = take_stream_session(&state, &id, tx.clone()).await?;
     let sessions = state.sessions.clone();

@@ -90,7 +90,7 @@ pub async fn eval_handler(
     headers: HeaderMap,
     Json(body): Json<EvalRequest>,
 ) -> Result<Json<EvalResponse>, (StatusCode, Json<ErrorResponse>)> {
-    let stmts = parse_unless_command(&body.program)?;
+    let stmts = parse_or_expand(&body.program, &body.includes)?;
     let (session, interrupt) = take_session_for_eval(&state, id, &headers).await?;
     let rx = spawn_eval(&state, id, session, stmts, body.program.clone());
     let mut guard = AbortGuard {
@@ -222,6 +222,42 @@ pub(crate) fn parse_program(
 ) -> Result<Vec<mlpl_parser::Expr>, (StatusCode, Json<ErrorResponse>)> {
     let tokens = lex(program).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))?;
     parse(&tokens).map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e:?}"))))
+}
+
+/// Statements for the `/eval` handler: with no includes, the plain
+/// command-aware parse (so `:commands` still work); with an include map, the
+/// expanded module tree.
+pub(crate) fn parse_or_expand(
+    program: &str,
+    includes: &std::collections::BTreeMap<String, String>,
+) -> Result<Vec<mlpl_parser::Expr>, (StatusCode, Json<ErrorResponse>)> {
+    if includes.is_empty() {
+        parse_unless_command(program)
+    } else {
+        expand_program(program, includes)
+    }
+}
+
+/// Resolve a module-split program against an `includes` map (moe-microscope
+/// F16): register the root program and each include as virtual sources in an
+/// in-memory provider, expand the include tree (which enforces the relative-
+/// only / no-escape sandbox), and flatten the resulting chunks into one
+/// statement list. An empty map takes the plain `parse_program` path.
+pub(crate) fn expand_program(
+    program: &str,
+    includes: &std::collections::BTreeMap<String, String>,
+) -> Result<Vec<mlpl_parser::Expr>, (StatusCode, Json<ErrorResponse>)> {
+    if includes.is_empty() {
+        return parse_program(program);
+    }
+    use mlpl_source_loader::{MemoryProvider, SourceId, expand};
+    let mut provider = MemoryProvider::default().with("main.mlpl", program);
+    for (path, text) in includes {
+        provider = provider.with(path, text);
+    }
+    let (chunks, _) = expand(&SourceId("main.mlpl".into()), &provider)
+        .map_err(|e| (StatusCode::BAD_REQUEST, json_err(format!("{e}"))))?;
+    Ok(chunks.into_iter().flat_map(|c| c.stmts).collect())
 }
 
 /// The full `/v1` route table over a ready `AppState`. Extracted

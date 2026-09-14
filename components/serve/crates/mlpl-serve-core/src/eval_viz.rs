@@ -70,6 +70,14 @@ pub fn build_eval_response(
 #[derive(Deserialize)]
 pub struct EvalRequest {
     pub program: String,
+    /// Optional include map (virtual path -> source text) for a
+    /// module-split program (moe-microscope F16). When non-empty, the
+    /// server resolves `include "..."` directives against this map
+    /// (sandboxed: relative paths only, no escape above the root)
+    /// instead of the filesystem. Empty (the default) keeps the plain
+    /// single-program path.
+    #[serde(default)]
+    pub includes: std::collections::BTreeMap<String, String>,
 }
 
 #[derive(Serialize)]

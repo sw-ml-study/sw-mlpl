@@ -34,6 +34,7 @@ cuda = ["mlpl-serve-core/cuda", "mlpl-eval/cuda", "dep:mlpl-cuda-eval", "mlpl-cu
 mlpl-serve-core = { path = "../mlpl-serve-core" }
 mlpl-serve-state = { path = "../mlpl-serve-state" }
 mlpl-parser = { path = "../../../syntax-parser/crates/mlpl-parser" }
+mlpl-source-loader = { path = "../../../syntax-parser/crates/mlpl-source-loader" }
 mlpl-eval = { path = "../../../eval/crates/mlpl-eval" }
 mlpl-ext-hello-static = { path = "../../../runtime-core/crates/mlpl-ext-hello-static" }
 # `median_model` -- the shared `:ask` default-model policy (skip embedding

@@ -546,3 +546,29 @@ async fn colon_commands_inspect_the_server_session() {
     let (st, body) = eval(":nonsense").await;
     assert_eq!(st, 400, "{body}");
 }
+
+#[tokio::test]
+async fn eval_resolves_includes_from_the_request_map() {
+    // moe-microscope F16: a program that `include`s a module can be submitted
+    // with the module's source in an `includes` map, resolved server-side.
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+
+    let resp = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/sessions/{id}/eval"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({
+            "program": "include \"lib.mlpl\"\nu:double(21)",
+            "includes": { "lib.mlpl": "def u:double(x) { \"Twice x.\" x + x }" }
+        }))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200, "include-resolved eval should be 200");
+    let body: JsonValue = resp.json().await.unwrap();
+    let value = body["value"].as_str().unwrap();
+    assert!(
+        value.contains("42"),
+        "u:double(21) via include should be 42, got {value:?}"
+    );
+}
