@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-14
+
+- feat(serve): --fs-root filesystem sandbox for server-run programs (F16b)
+
 ## 2026-09-13
 
+- chore(agentrail): complete 001-f16a-include-over-wire; advance to 002-f16b-fs-sandbox
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(serve): resolve include over the wire via an includes map (F16a)
 - chore(agentrail): archive followups-2; init followups-3 (F16 eval_stream include/sandbox/args)
 - chore(agentrail): complete 009-fu2-relay-and-close; moe-microscope-followups-2 saga done
