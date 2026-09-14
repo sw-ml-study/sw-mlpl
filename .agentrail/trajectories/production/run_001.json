@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 1,
+    "step": "f16a-include-over-wire"
+  },
+  "action": "Reused MemoryProvider+expand for over-the-wire include resolution; serde-default includes field (backward-compat); parse_or_expand keeps :commands; extracted helpers to hold the LOC gate; TDD integration test; colon regression; rebuilt serve.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-13T20:29:22"
+}
