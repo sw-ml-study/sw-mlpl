@@ -572,3 +572,49 @@ async fn eval_resolves_includes_from_the_request_map() {
         "u:double(21) via include should be 42, got {value:?}"
     );
 }
+
+async fn start_server_fs_root(root: std::path::PathBuf) -> SocketAddr {
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+    let addr = listener.local_addr().unwrap();
+    let serve = ServeConfig {
+        fs_root: Some(root),
+        ..ServeConfig::default()
+    };
+    let app = build_app_with_peers_cors(
+        AuthMode::Required,
+        mlpl_serve::peers::empty_registry(),
+        serve,
+    );
+    tokio::spawn(async move {
+        axum::serve(listener, app).await.unwrap();
+    });
+    addr
+}
+
+#[tokio::test]
+async fn eval_fs_builtins_are_sandboxed_to_the_configured_root() {
+    // moe-microscope F16: with --fs-root set, a server-run program can write
+    // and stat a file, confined to the sandbox root.
+    let root = std::env::temp_dir().join(format!("mlpl-fs-root-{}", std::process::id()));
+    std::fs::create_dir_all(&root).unwrap();
+    let addr = start_server_fs_root(root.clone()).await;
+    let (id, token) = create_session(addr).await;
+
+    let resp = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/sessions/{id}/eval"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({
+            "program": "write_bytes(\"probe.bin\", [104, 105])\nunwrap(file_size(\"probe.bin\"))"
+        }))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200);
+    let body: JsonValue = resp.json().await.unwrap();
+    let value = body["value"].as_str().unwrap();
+    assert!(
+        value.contains('2'),
+        "file_size after writing 2 bytes should be 2, got {value:?}"
+    );
+    let _ = std::fs::remove_dir_all(&root);
+}

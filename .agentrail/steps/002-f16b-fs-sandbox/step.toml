@@ -1,6 +1,6 @@
 number = 2
 slug = "f16b-fs-sandbox"
-status = "pending"
+status = "in-progress"
 description = "F16b: give server-run programs a filesystem sandbox root for the fs builtins ..."
 role = "production"
 context_files = []

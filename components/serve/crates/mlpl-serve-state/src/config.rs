@@ -92,6 +92,11 @@ pub struct ServeConfig {
     pub cors_origin: Option<String>,
     pub persist_path: Option<PathBuf>,
     pub ollama: OllamaConfig,
+    /// Filesystem sandbox root for server-run programs (moe-microscope
+    /// F16). When `Some`, each session's environment gets this as its
+    /// `fs_root` so the fs builtins (`read_bytes`/`write_bytes`/...) work
+    /// but are confined to it; `None` (the default) leaves fs ops refused.
+    pub fs_root: Option<PathBuf>,
 }
 
 /// Everything `run()` needs: bind address, auth mode, peer
@@ -138,6 +143,9 @@ pub struct AppState {
     /// allow-list, read by the `/v1/ollama/*` endpoints so the web
     /// `:ask` does not have to carry the host/model in its URL.
     pub ollama: OllamaConfig,
+    /// Filesystem sandbox root applied to each session's environment
+    /// (moe-microscope F16); `None` leaves fs builtins refused.
+    pub fs_root: Option<std::path::PathBuf>,
 }
 
 impl AppState {
@@ -152,6 +160,7 @@ impl AppState {
         peers: PeerRegistry,
         persist_path: Option<PathBuf>,
         ollama: OllamaConfig,
+        fs_root: Option<PathBuf>,
     ) -> Self {
         let sessions = mlpl_serve_core::sessions::new_map();
         let interrupts = mlpl_serve_core::sessions::new_interrupt_map();
@@ -165,6 +174,7 @@ impl AppState {
             auth_mode,
             persist_path,
             ollama,
+            fs_root,
         }
     }
 }

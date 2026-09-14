@@ -194,8 +194,9 @@ pub fn build_app_with_peers_cors(
         cors_origin,
         persist_path,
         ollama,
+        fs_root,
     } = serve;
-    let state = AppState::from_parts(auth_mode, peers, persist_path, ollama);
+    let state = AppState::from_parts(auth_mode, peers, persist_path, ollama, fs_root);
     let router = crate::handlers::v1_router(state);
     mlpl_serve_core::router_layers::apply_static_and_cors(router, static_dir, cors_origin)
 }

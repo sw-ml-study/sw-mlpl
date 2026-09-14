@@ -161,6 +161,8 @@ async fn take_stream_session(
         .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
     let sink: Arc<dyn MetricSink> = Arc::new(ChannelMetricSink { tx });
     session.env.set_metric_sink(sink);
+    // Apply the server's filesystem sandbox root (moe-microscope F16).
+    session.env.fs_root = state.fs_root.clone();
     crate::handlers::install_session_interrupt(state, id, &mut session).await;
     session
         .env

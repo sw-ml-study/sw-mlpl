@@ -12,6 +12,7 @@ pub(crate) fn parse_args<I: IntoIterator<Item = String>>(iter: I) -> Result<Args
         peer_pairs: Vec::new(),
         insecure_peers: false,
         static_dir: None,
+        fs_root: None,
         tls_cert: None,
         tls_key: None,
         self_signed: false,
@@ -66,6 +67,7 @@ fn apply_extra_arg<I: Iterator<Item = String>>(
     match arg {
         "--insecure-peers" => acc.insecure_peers = true,
         "--static-dir" => acc.static_dir = Some(parse_static_dir(need(it, "--static-dir")?)?),
+        "--fs-root" => acc.fs_root = Some(parse_static_dir(need(it, "--fs-root")?)?),
         "--tls-cert" => acc.tls_cert = Some(PathBuf::from(need(it, "--tls-cert")?)),
         "--tls-key" => acc.tls_key = Some(PathBuf::from(need(it, "--tls-key")?)),
         "--self-signed" => acc.self_signed = true,

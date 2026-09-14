@@ -23,6 +23,10 @@ pub(crate) struct Args {
     pub(crate) peer_pairs: Vec<(String, String)>,
     pub(crate) insecure_peers: bool,
     pub(crate) static_dir: Option<PathBuf>,
+    /// moe-microscope F16: filesystem sandbox root for server-run
+    /// programs. When set, the fs builtins work but are confined to
+    /// this directory; unset leaves fs ops refused (the safe default).
+    pub(crate) fs_root: Option<PathBuf>,
     pub(crate) tls_cert: Option<PathBuf>,
     pub(crate) tls_key: Option<PathBuf>,
     self_signed: bool,
@@ -179,6 +183,7 @@ pub(crate) fn print_usage() {
         "usage: mlpl-serve [--bind <host:port>] [--auth <required|disabled>]\n\
          \x20            [--peer <device>=<url>]... [--insecure-peers]\n\
          \x20            [--static-dir <path>] [--cors-allow <origin>[,<origin>...]]\n\
+         \x20            [--fs-root <path>]\n\
          \x20            [--tls-cert <cert.pem> --tls-key <key.pem> | --self-signed]\n\
          \n\
          Defaults: --bind 127.0.0.1:6464  --auth required\n\
@@ -192,6 +197,10 @@ pub(crate) fn print_usage() {
          <scheme>://<bind>/sw-mlpl/ serves the web REPL on the same\n\
          origin as the /v1 API -- no CORS plumbing required for the\n\
          WASM client to call back.\n\
+         \n\
+         --fs-root <path> confines the filesystem builtins (read_bytes,\n\
+         write_bytes, ...) of server-run programs to <path>. Without it,\n\
+         fs ops are refused (the safe default).\n\
          \n\
          TLS modes (mutually exclusive):\n\
          \x20 --tls-cert <cert.pem> --tls-key <key.pem>\n\
@@ -227,6 +236,7 @@ fn serve_config(args: Args) -> (std::net::SocketAddr, AuthMode, ServeConfig) {
         ollama_host,
         ollama_model,
         ollama_allow,
+        fs_root,
         ..
     } = args;
     let ollama = resolve_ollama(ollama_host, env_host, ollama_model, ollama_allow);
@@ -235,6 +245,7 @@ fn serve_config(args: Args) -> (std::net::SocketAddr, AuthMode, ServeConfig) {
         cors_origin: cors_allow,
         persist_path: persist,
         ollama,
+        fs_root,
     };
     (bind, auth, serve)
 }

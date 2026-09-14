@@ -51,6 +51,9 @@ pub(crate) async fn take_session_for_eval(
         .remove(&id)
         .ok_or((StatusCode::NOT_FOUND, json_err("unknown session")))?;
     session.env.set_interrupt(entry.interrupt.clone());
+    // Apply the server's filesystem sandbox root (moe-microscope F16); `None`
+    // leaves fs builtins refused, the safe default.
+    session.env.fs_root = state.fs_root.clone();
     session
         .env
         .set_peer_dispatcher(Arc::new(crate::server::RemoteMlxDispatcher::new(
