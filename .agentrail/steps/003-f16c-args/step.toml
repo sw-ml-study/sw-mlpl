@@ -1,6 +1,6 @@
 number = 3
 slug = "f16c-args"
-status = "pending"
+status = "in-progress"
 description = "F16c: let the eval request pass args visible to the program. TDD. See docs/sw..."
 role = "production"
 context_files = []

@@ -78,6 +78,11 @@ pub struct EvalRequest {
     /// single-program path.
     #[serde(default)]
     pub includes: std::collections::BTreeMap<String, String>,
+    /// Optional args exposed to the program via the `args()` builtin
+    /// (moe-microscope F16) -- the over-the-wire analogue of
+    /// `mlpl-repl -f script.mlpl -- arg1 arg2`. Empty by default.
+    #[serde(default)]
+    pub args: Vec<String>,
 }
 
 #[derive(Serialize)]

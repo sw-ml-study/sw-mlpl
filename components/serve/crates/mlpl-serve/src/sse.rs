@@ -137,7 +137,9 @@ pub async fn eval_stream_handler(
     // expand_program falls back to a plain parse when the include map is empty.
     let stmts = crate::handlers::expand_program(&body.program, &body.includes)?;
     let (tx, rx) = mpsc::channel::<SseEvent>(64);
-    let session = take_stream_session(&state, &id, tx.clone()).await?;
+    let mut session = take_stream_session(&state, &id, tx.clone()).await?;
+    // Expose the request's args to the program's args() builtin (F16).
+    session.env.cli_args = body.args.clone();
     let sessions = state.sessions.clone();
     let viz = state.viz.clone();
     spawn_eval_task(id, session, stmts, body.program.clone(), sessions, viz, tx);

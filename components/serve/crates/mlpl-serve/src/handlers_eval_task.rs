@@ -23,6 +23,7 @@ pub(crate) async fn take_session_for_eval(
     state: &AppState,
     id: Uuid,
     headers: &HeaderMap,
+    args: &[String],
 ) -> Result<(crate::sessions::Session, Interrupt), (StatusCode, Json<ErrorResponse>)> {
     let unauthorized = || {
         (
@@ -54,6 +55,8 @@ pub(crate) async fn take_session_for_eval(
     // Apply the server's filesystem sandbox root (moe-microscope F16); `None`
     // leaves fs builtins refused, the safe default.
     session.env.fs_root = state.fs_root.clone();
+    // Expose the request's args to the program's args() builtin (F16).
+    session.env.cli_args = args.to_vec();
     session
         .env
         .set_peer_dispatcher(Arc::new(crate::server::RemoteMlxDispatcher::new(

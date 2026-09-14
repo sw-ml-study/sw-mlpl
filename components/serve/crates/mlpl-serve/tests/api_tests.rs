@@ -618,3 +618,29 @@ async fn eval_fs_builtins_are_sandboxed_to_the_configured_root() {
     );
     let _ = std::fs::remove_dir_all(&root);
 }
+
+#[tokio::test]
+async fn eval_exposes_request_args_to_the_program() {
+    // moe-microscope F16: the eval request can carry `args` visible to the
+    // program via the args() builtin.
+    let addr = start_server(AuthMode::Required).await;
+    let (id, token) = create_session(addr).await;
+
+    let resp = reqwest::Client::new()
+        .post(format!("http://{addr}/v1/sessions/{id}/eval"))
+        .bearer_auth(&token)
+        .json(&serde_json::json!({
+            "program": "args()",
+            "args": ["alpha", "beta"]
+        }))
+        .send()
+        .await
+        .unwrap();
+    assert_eq!(resp.status(), 200);
+    let body: JsonValue = resp.json().await.unwrap();
+    let value = body["value"].as_str().unwrap();
+    assert!(
+        value.contains("alpha") && value.contains("beta"),
+        "args() should expose the request args, got {value:?}"
+    );
+}
