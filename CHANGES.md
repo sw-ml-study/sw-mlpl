@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-14
 
+- feat(serve): expose request args to the program via args() (F16c)
+- chore(agentrail): complete 002-f16b-fs-sandbox; advance to 003-f16c-args
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(serve): --fs-root filesystem sandbox for server-run programs (F16b)
 
 ## 2026-09-13
