@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-13
 
+- feat(serve): resolve include over the wire via an includes map (F16a)
+- chore(agentrail): archive followups-2; init followups-3 (F16 eval_stream include/sandbox/args)
+- chore(agentrail): complete 009-fu2-relay-and-close; moe-microscope-followups-2 saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): close follow-ups-2 (F9-F15, F18); queue F16/S1 (relay)
 - chore(agentrail): complete 008-f13-attention-weights-residual; advance to 009-fu2-relay-and-close
 - docs(changes): refresh CHANGES.md to HEAD
