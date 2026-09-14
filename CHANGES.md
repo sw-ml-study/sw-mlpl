@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-14
 
+- docs(findings): close follow-ups-3 (F16/S1); queue F19-F22 (relay)
+- chore(agentrail): complete 003-f16c-args; advance to 004-fu3-relay-and-close
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(serve): expose request args to the program via args() (F16c)
 - chore(agentrail): complete 002-f16b-fs-sandbox; advance to 003-f16c-args
 - docs(changes): refresh CHANGES.md to HEAD
