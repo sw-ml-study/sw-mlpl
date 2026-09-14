@@ -78,14 +78,23 @@ data-forge (Track 1).
   attention_weights in residual (`8282cd6a`). All verified in the rebuilt
   binary; `mlpl-serve` rebuilt too. sw-checklist fails held at 38 throughout.
 
-- **moe-microscope-followups-3** -- QUEUED (2026-09-12). From the host-handoff
-  step (see "Follow-up batch 3" in `docs/sw-mlpl-findings.md`): **F16** -- the
-  `eval_stream` server surface has no `include`, filesystem sandbox, or `args`,
-  so a module-split lesson cannot be submitted as written (downstream bundles
-  the include tree). A real server feature (over-the-wire include resolution +
-  sandbox policy + args). **S1** is partly done -- `mlpl-serve` is rebuilt and
-  the rebuild-on-evaluator-change discipline adopted; the remaining scripted
-  current-server build rides with F16.
+- **moe-microscope-followups-3** -- SHIPPED 2026-09-13. F16 in three parts:
+  include over the wire via an `includes` map (`902f14e2`), `--fs-root`
+  filesystem sandbox (`855fb551`), and request `args` -> `args()` (`f85cc657`);
+  plus S1's serve rebuild + discipline. A module-split lesson can now be
+  submitted with its module map instead of a client-side bundler. api_tests
+  22/22; sw-checklist fails held at 38.
+
+- **moe-microscope-followups-4** -- QUEUED (2026-09-13). Optimizer-state audit +
+  RM-prep probing (see "Follow-up batch 4" in `docs/sw-mlpl-findings.md`).
+  Priority: **F19** (matmul inner-dim mismatch panics in grad -- extend F18's
+  structured error to the matmul tape op) and **F20** (take's index param
+  unbound inside an inlined user fn + out-of-range panic -- F11/F15-class scope
+  fix plus a clean error) FIRST, both process panics; then **F22** (adam
+  per-param state survives rebinding a name to a new model -- clear on rebind +
+  a `reset_optimizer()` builtin; the important correctness footgun) and **F21**
+  (adam inside a user function trains local copies, no persistence/error --
+  resolve params against the caller or error loudly).
 
 ### Paused sagas
 

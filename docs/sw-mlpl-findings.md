@@ -222,10 +222,18 @@ folded in). Both panics (F10, F18) now produce clean MLPL errors or train.
   variable: r"). The F6 unroll resolves the count via the eager env, not the
   traced local scope. Verified against the release binary.
 
-## Follow-up batch 3 (2026-09-12 host-handoff step by ../moe-microscope) -- OPEN
+## Follow-up batch 3 (2026-09-12 host-handoff step by ../moe-microscope) -- RESOLVED
 
 Recording the DN01 baseline over a live `mlpl-serve` SSE session surfaced a
-server-surface gap and a build-hygiene gap.
+server-surface gap and a build-hygiene gap. Addressed in the
+`moe-microscope-followups-3` saga.
+
+| Finding | Resolution | Commit |
+|---------|------------|--------|
+| F16a include over the wire | eval request `includes` map -> MemoryProvider + expand | `902f14e2` |
+| F16b filesystem sandbox | `--fs-root` sets each session's `env.fs_root` | `855fb551` |
+| F16c args | eval request `args` -> `args()` builtin | `f85cc657` |
+| S1 stale serve / rebuild hygiene | serve rebuilt + rebuild-on-evaluator-change discipline | (process) |
 
 - **F16** -- the `eval_stream` server surface has no `include`, no filesystem
   sandbox, and no `args`, so a lesson split into library modules cannot be
@@ -240,3 +248,41 @@ server-surface gap and a build-hygiene gap.
   evaluator changes" is now part of the checkpoint discipline (it embeds
   `mlpl-eval`). The remaining ask -- a documented/scripted current-server build
   so a fresh clone has a correct server -- rides with F16's saga.
+
+RESOLVED (`902f14e2`, `855fb551`, `f85cc657`): F16 shipped in three parts --
+the eval request accepts an `includes` map (resolved via the in-memory source
+provider under the same relative-only/no-escape sandbox), a `--fs-root` flag
+gives server-run programs a filesystem sandbox root for the fs builtins, and an
+`args` field feeds the `args()` builtin. S1's serve rebuild is done and the
+rebuild-on-evaluator-change discipline is adopted.
+
+## Follow-up batch 4 (2026-09-13 audit + RM prep by ../moe-microscope) -- OPEN
+
+An optimizer-state audit (one training run per process is now the downstream
+rule) plus more grad-surface probing surfaced four findings, each with a
+reproducer in the downstream `probes/`. F19 and F20 are process panics (highest
+priority, like F10/F18); F21 and F22 are silent-wrong-training footguns. Queued
+as `moe-microscope-followups-4`.
+
+- **F19** (BUG) -- a matmul inner-dimension mismatch inside `grad` PANICS the
+  process ("compatible matmul shapes") instead of the structured shape error
+  F18 gave elementwise ops. The F18 pre-validation covers the elementwise
+  binary ops; the matmul tape op needs the same guard. Probe:
+  `probes/f19_matmul_shape_panics_in_grad.mlpl`.
+- **F20** (BUG) -- inside an inlined user function on the tape, `take`'s index
+  parameter is not bound ("undefined variable"); worse, when a same-named
+  global exists it silently resolves to THAT instead, and an out-of-range index
+  then panics. Two problems: the F11/F15-class scope resolution (the index
+  should resolve against the traced local scope) AND a panic on out-of-range
+  that should be a clean error. Probe: `probes/f20_take_param_index_in_grad.mlpl`.
+- **F21** -- `adam` called inside a user function trains function-LOCAL copies;
+  the global models/params are unchanged afterward, with no error, so the loop's
+  own evaluations look fine but nothing persists. Fix: resolve the optimizer's
+  parameter list against the caller's bindings, or document the copy semantics
+  loudly (error/warn). Probe: `probes/f21_adam_in_user_function.mlpl`.
+- **F22** (important) -- `adam` keeps per-parameter state keyed by NAME, and
+  that state survives rebinding the name to a new model, with no way to reset:
+  training two variants in sequence under the same names silently trains the
+  second with the first's moments. Fix: clear optimizer state when a name is
+  rebound to a new model, and add a `reset_optimizer()` builtin. Probe:
+  `probes/f22_adam_state_by_name.mlpl`.

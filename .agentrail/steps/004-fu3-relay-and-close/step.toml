@@ -1,6 +1,6 @@
 number = 4
 slug = "fu3-relay-and-close"
-status = "pending"
+status = "in-progress"
 description = "Mark F16/S1 resolved/documented in docs/sw-mlpl-findings.md, refresh CHANGES ..."
 role = "production"
 context_files = []
