@@ -1,0 +1,1 @@
+F21: adam inside a user function trains function-local copies with no persistence/error. Resolve the optimizer param list against the caller's bindings, or error/document loudly. TDD. See docs/sw-mlpl-findings.md F21.

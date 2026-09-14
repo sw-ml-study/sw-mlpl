@@ -1,0 +1,1 @@
+F20 (BUG): take's index parameter is unbound inside an inlined user function (silently resolves to a same-named global), and out-of-range panics. Resolve the index against the traced scope (F11/F15-class) and make out-of-range a clean error. TDD. See docs/sw-mlpl-findings.md F20.

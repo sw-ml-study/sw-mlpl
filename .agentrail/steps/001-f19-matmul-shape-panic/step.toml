@@ -1,0 +1,9 @@
+number = 1
+slug = "f19-matmul-shape-panic"
+status = "pending"
+description = "F19 (BUG): a matmul inner-dim mismatch inside grad panics ('compatible matmul..."
+role = "production"
+context_files = []
+created_at = "2026-09-14T16:40:58"
+task_type = "production"
+commits = []

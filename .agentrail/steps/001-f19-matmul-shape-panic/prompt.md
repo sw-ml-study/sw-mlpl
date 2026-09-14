@@ -1,0 +1,1 @@
+F19 (BUG): a matmul inner-dim mismatch inside grad panics ('compatible matmul shapes') instead of the structured shape error F18 gave elementwise ops. Pre-validate matmul shapes in the grad tape path so it errors cleanly. TDD. See docs/sw-mlpl-findings.md F19.

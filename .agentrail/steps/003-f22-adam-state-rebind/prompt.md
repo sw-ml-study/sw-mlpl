@@ -1,0 +1,1 @@
+F22: adam per-parameter state keyed by name survives rebinding the name to a new model. Clear optimizer state when a name is rebound to a new model; add a reset_optimizer() builtin. TDD. See docs/sw-mlpl-findings.md F22.

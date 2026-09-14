@@ -1,0 +1,9 @@
+number = 3
+slug = "f22-adam-state-rebind"
+status = "pending"
+description = "F22: adam per-parameter state keyed by name survives rebinding the name to a ..."
+role = "production"
+context_files = []
+created_at = "2026-09-14T16:40:58"
+task_type = "production"
+commits = []

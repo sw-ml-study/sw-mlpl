@@ -1,0 +1,9 @@
+number = 2
+slug = "f20-take-index-in-grad"
+status = "pending"
+description = "F20 (BUG): take's index parameter is unbound inside an inlined user function ..."
+role = "production"
+context_files = []
+created_at = "2026-09-14T16:40:58"
+task_type = "production"
+commits = []
