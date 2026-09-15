@@ -1,9 +1,10 @@
 number = 1
 slug = "ca2-unknown-function-diagnostic"
-status = "in-progress"
+status = "completed"
 description = "CA2: calling an undefined function reports the array diagnostic ('expected an..."
 role = "production"
 context_files = []
 created_at = "2026-09-15T12:13:02"
+completed_at = "2026-09-15T13:15:08"
 task_type = "production"
-commits = []
+commits = ["4d27c5836daf32486c5352906aa9c32ad25968c2"]
