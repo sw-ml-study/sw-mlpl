@@ -32,6 +32,9 @@ pub fn linear_tape(
     };
     let w_t = fetch(w)?;
     let b_t = fetch(b)?;
+    // Clean shape error instead of a tape panic when the activation's width
+    // does not match the layer's input dimension (finding F19).
+    mlpl_array_ops_matmul::check_matmul_compat(&x.value(), &w_t.value())?;
     let xw = x.matmul(&w_t);
     let bias = bias_broadcast(&xw, &b_t, tape)?;
     Ok(xw.add(&bias))

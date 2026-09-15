@@ -573,3 +573,26 @@ fn grad_through_nested_user_fn_index_arithmetic() {
     // Rows 1 and 2 are gathered -> gradient 1 there, 0 on rows 0 and 3.
     assert_eq!(g.data(), &[0., 0., 0., 1., 1., 1., 1., 1., 1., 0., 0., 0.]);
 }
+
+// -- moe-microscope follow-up F19: matmul shape mismatch is a clean error -----
+// A matmul inner-dimension mismatch inside grad (here a [1,8] activation fed to
+// a linear(16,5)) previously PANICKED the process; it now errors cleanly, like
+// the elementwise case F18 fixed.
+
+#[test]
+fn grad_matmul_shape_mismatch_errors_cleanly_not_panic() {
+    let mut env = Environment::new();
+    let w = DenseArray::new(Shape::new(vec![8, 8]), (0..64).map(|n| n as f64).collect()).unwrap();
+    env.set_param("W".into(), w);
+    let src = "\
+        x = reshape(range(8), [1, 8])\n\
+        h = linear(16, 5, 1)\n\
+        grad(reduce_add(apply(h, matmul(x, W))), W)";
+    let stmts = parse(&lex(src).unwrap()).unwrap();
+    let err = eval_program(&stmts, &mut env).unwrap_err();
+    let msg = format!("{err}");
+    assert!(
+        msg.contains("shape") || msg.contains("matmul") || msg.contains("array error"),
+        "expected a clean matmul shape error, got: {msg}"
+    );
+}

@@ -37,6 +37,9 @@ pub(crate) fn call_matmul(
     arity_check(args, 2, "matmul")?;
     let a = eval_tensor_expr(&args[0], env, tape, params)?;
     let b = eval_tensor_expr(&args[1], env, tape, params)?;
+    // Clean shape error instead of a tape panic on an inner-dim mismatch (F19).
+    mlpl_array_ops_matmul::check_matmul_compat(&a.value(), &b.value())
+        .map_err(EvalError::ArrayError)?;
     Ok(a.matmul(&b))
 }
 

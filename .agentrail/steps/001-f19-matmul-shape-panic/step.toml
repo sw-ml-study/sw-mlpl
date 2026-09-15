@@ -1,6 +1,6 @@
 number = 1
 slug = "f19-matmul-shape-panic"
-status = "pending"
+status = "in-progress"
 description = "F19 (BUG): a matmul inner-dim mismatch inside grad panics ('compatible matmul..."
 role = "production"
 context_files = []

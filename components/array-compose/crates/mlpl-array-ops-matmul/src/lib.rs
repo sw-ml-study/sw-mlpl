@@ -6,7 +6,7 @@ mod labels;
 mod matmul;
 
 pub use dot::DotExt;
-pub use matmul::MatmulExt;
+pub use matmul::{MatmulExt, check_matmul_compat};
 
 pub mod prelude {
     pub use super::{DotExt, MatmulExt};

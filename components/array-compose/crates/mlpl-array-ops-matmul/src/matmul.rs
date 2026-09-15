@@ -18,6 +18,30 @@ pub trait MatmulExt {
     fn matmul(&self, other: &DenseArray) -> Result<DenseArray, ArrayError>;
 }
 
+/// Validate that `self @ other` has compatible shapes WITHOUT computing the
+/// product: `self` must be rank-2 `[m, k]` and `other` `[k, n]` or `[k]`. Used
+/// by callers that build a matmul on a value graph (the autograd tape) to turn
+/// an incompatible shape into a clean error instead of a panic (finding F19,
+/// the matmul analogue of F18).
+pub fn check_matmul_compat(a: &DenseArray, b: &DenseArray) -> Result<(), ArrayError> {
+    let k = match a.shape().dims() {
+        [_, k] => *k,
+        _ => {
+            return Err(ArrayError::RankMismatch {
+                expected: 2,
+                got: a.rank(),
+            });
+        }
+    };
+    match b.shape().dims() {
+        [k2, _] | [k2] if *k2 == k => Ok(()),
+        dims => Err(ArrayError::ShapeMismatch {
+            source: k,
+            target: dims.first().copied().unwrap_or(0),
+        }),
+    }
+}
+
 impl MatmulExt for DenseArray {
     fn matmul(&self, other: &DenseArray) -> Result<DenseArray, ArrayError> {
         let (m, k) = match self.shape().dims() {
