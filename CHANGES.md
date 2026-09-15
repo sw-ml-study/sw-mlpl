@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- feat(eval): polymorphic len over string lists and arrays (CA5)
+- chore(agentrail): complete 001-ca2-unknown-function-diagnostic; advance to 002-ca5-len-string-lists
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(eval): unknown function names say so, not "expected an array" (CA2)
 - chore(agentrail): archive followups-4; init demo-coding-agent-findings (CA1-CA5)
 - chore(agentrail): complete 005-fu4-relay-and-close; moe-microscope-followups-4 saga done
