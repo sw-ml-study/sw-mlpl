@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- feat(eval): + concatenates two strings (CA1)
+- chore(agentrail): complete 002-ca5-len-string-lists; advance to 003-ca1-string-plus
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(eval): polymorphic len over string lists and arrays (CA5)
 - chore(agentrail): complete 001-ca2-unknown-function-diagnostic; advance to 002-ca5-len-string-lists
 - docs(changes): refresh CHANGES.md to HEAD
