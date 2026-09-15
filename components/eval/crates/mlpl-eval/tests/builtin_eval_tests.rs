@@ -739,3 +739,30 @@ fn keywords_are_legal_record_field_names() {
             .unwrap();
     assert_eq!(x.data(), &[12.0]);
 }
+
+// -- demo-coding-agent CA2: undefined function -> "unknown function" ----------
+// An unrecognized function name previously reported the array diagnostic
+// ("expected an array value, got a string") because args were coerced to
+// arrays before the name was checked. It now names the real problem.
+
+#[test]
+fn undefined_function_with_string_args_says_unknown_function() {
+    let err = eval_value("str_starts_with(\"hello\", \"he\")").unwrap_err();
+    let msg = format!("{err}");
+    assert!(
+        msg.contains("unknown function") && msg.contains("str_starts_with"),
+        "expected an unknown-function error, got: {msg}"
+    );
+}
+
+#[test]
+fn known_builtin_with_bad_arg_still_reports_the_arg_error() {
+    // A real builtin given a string still gets the type error, not
+    // "unknown function".
+    let err = eval_value("reshape(\"nope\", [1])").unwrap_err();
+    let msg = format!("{err}");
+    assert!(
+        !msg.contains("unknown function"),
+        "known builtin keeps its arg error: {msg}"
+    );
+}

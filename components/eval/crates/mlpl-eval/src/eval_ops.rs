@@ -81,10 +81,28 @@ pub(crate) fn eval_fncall(
     {
         crate::type_errors::check_logit_consumer(name, first, env)?;
     }
-    let evaluated: Vec<DenseArray> = args
+    let evaluated: Vec<DenseArray> = match args
         .iter()
         .map(|a| eval_expr(a, env, trace).and_then(Value::into_array))
-        .collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<Vec<_>, _>>()
+    {
+        Ok(v) => v,
+        // If coercing an argument to an array failed, an UNKNOWN function name
+        // is the more useful diagnostic than "expected an array value" -- the
+        // array error otherwise masks a mistyped/nonexistent builtin (CA2). The
+        // known set is the local arithmetic/activation names plus every runtime
+        // builtin (checked only here, on the rare error path).
+        Err(e) => {
+            let known = matches!(
+                name,
+                "add" | "sub" | "mul" | "div" | "neg" | "tanh" | "relu"
+            ) || mlpl_runtime::runtime_builtin_names().any(|n| n == name);
+            if known {
+                return Err(e);
+            }
+            return Err(EvalError::Unsupported(format!("unknown function: {name}")));
+        }
+    };
     let inputs: Vec<TraceValue> = evaluated.iter().map(TraceValue::from_array).collect();
     // Saga 14 steps 004/005: one routing helper decides CPU vs
     // MLX, so a Model DSL `apply(...)` forward and a raw user

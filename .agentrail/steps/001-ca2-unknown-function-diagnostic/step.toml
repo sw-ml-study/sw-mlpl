@@ -1,6 +1,6 @@
 number = 1
 slug = "ca2-unknown-function-diagnostic"
-status = "pending"
+status = "in-progress"
 description = "CA2: calling an undefined function reports the array diagnostic ('expected an..."
 role = "production"
 context_files = []
