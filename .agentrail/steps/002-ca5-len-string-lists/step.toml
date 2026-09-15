@@ -1,9 +1,10 @@
 number = 2
 slug = "ca5-len-string-lists"
-status = "in-progress"
+status = "completed"
 description = "CA5: len rejects string lists. Make len accept a StrList (item count), keep l..."
 role = "production"
 context_files = []
 created_at = "2026-09-15T12:13:02"
+completed_at = "2026-09-15T13:43:25"
 task_type = "production"
-commits = []
+commits = ["2fd43bd5a90e233fd828f55adbe7551fea8db160"]
