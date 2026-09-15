@@ -794,3 +794,22 @@ fn len_of_a_bare_string_errors_clearly() {
         "clear len error for a string: {msg}"
     );
 }
+
+// -- demo-coding-agent CA1: string + string concatenates -----------------------
+
+#[test]
+fn string_plus_string_concatenates() {
+    assert_eq!(
+        eval_value("\"a\" + \"b\"").unwrap(),
+        Value::Str("ab".into())
+    );
+    assert_eq!(
+        eval_value("\"foo\" + \"bar\" + \"baz\"").unwrap(),
+        Value::Str("foobarbaz".into())
+    );
+}
+
+#[test]
+fn numeric_plus_still_adds_arrays() {
+    assert_eq!(eval("[1, 2] + [3, 4]").unwrap().data(), &[4.0, 6.0]);
+}

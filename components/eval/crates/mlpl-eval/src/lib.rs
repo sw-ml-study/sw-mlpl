@@ -60,6 +60,7 @@ mod element_count;
 mod envelope;
 mod envelope_decode;
 mod eval;
+mod eval_binop;
 mod eval_blocks;
 mod eval_fncalls;
 mod eval_for;

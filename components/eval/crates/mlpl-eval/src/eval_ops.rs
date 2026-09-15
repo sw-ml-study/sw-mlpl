@@ -1,58 +1,15 @@
 //! Evaluation helpers for binops, function calls, and array literals.
 
 use crate::env_api::*;
-use mlpl_array::{ArrayError, DenseArray, Shape};
+use mlpl_array::{DenseArray, Shape};
 use mlpl_core::LabeledShape;
-use mlpl_parser::{BinOpKind, Expr};
+use mlpl_parser::Expr;
 use mlpl_trace::{Trace, TraceValue};
 
 use crate::env::Environment;
 use crate::eval::eval_expr;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::Value;
-
-pub(crate) fn eval_binop(
-    op: &BinOpKind,
-    lhs: &Expr,
-    rhs: &Expr,
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<(&'static str, Vec<TraceValue>, DenseArray), EvalError> {
-    let l = eval_expr(lhs, env, trace)?.into_array()?;
-    let r = eval_expr(rhs, env, trace)?.into_array()?;
-    let name: &str = match op {
-        BinOpKind::Add => "add",
-        BinOpKind::Sub => "sub",
-        BinOpKind::Mul => "mul",
-        BinOpKind::Div => "div",
-        BinOpKind::Lt => "lt",
-        BinOpKind::Gt => "gt",
-        BinOpKind::Le => "le",
-        BinOpKind::Ge => "ge",
-        BinOpKind::Eq => "eq",
-        BinOpKind::Ne => "ne",
-    };
-    let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
-    // Saga 14 step 004/005: route the binop through the active
-    // device. `dispatched_call` falls back to the CPU path for
-    // everything outside a `device("mlx")` block and for ops that
-    // `mlpl-mlx-rt` does not implement. Shape/label mismatches get
-    // lifted into the Saga 11.5 `EvalError::ShapeMismatch` shape.
-    let result = match crate::device::dispatched_call(env, name, vec![l.clone(), r.clone()]) {
-        Ok(a) => a,
-        Err(EvalError::ArrayError(
-            ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. },
-        )) => {
-            return Err(EvalError::ShapeMismatch {
-                op: name.into(),
-                expected: labeled_shape_of(&l),
-                actual: labeled_shape_of(&r),
-            });
-        }
-        Err(e) => return Err(e),
-    };
-    Ok((name, inputs, result))
-}
 
 /// Snapshot an array's dims + label list as a `LabeledShape`. Unlabeled
 /// arrays get `None` at every axis. Saga 11.5 Phase 4: used when

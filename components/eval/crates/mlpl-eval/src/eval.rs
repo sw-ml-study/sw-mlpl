@@ -11,7 +11,7 @@ use mlpl_parser::{Expr, TensorCtorKind};
 use mlpl_trace::{Trace, TraceEvent, TraceValue};
 
 use crate::env::Environment;
-use crate::eval_ops::{eval_binop, eval_fncall, eval_svg, flatten_evaluated_arrays};
+use crate::eval_ops::{eval_fncall, eval_svg, flatten_evaluated_arrays};
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::{Value, value_kind};
 
@@ -444,7 +444,9 @@ pub(crate) fn eval_expr(
                 }
             }
         }
-        Expr::BinOp { op, lhs, rhs, .. } => eval_binop(op, lhs, rhs, env, trace)?,
+        Expr::BinOp { op, lhs, rhs, .. } => {
+            return crate::eval_binop::eval_binop(expr, op, lhs, rhs, env, trace);
+        }
         Expr::FnCall { name, args, .. } => eval_fncall(name, args, env, trace)?,
         Expr::TensorCtor { kind, shape, .. } => {
             crate::eval_blocks::eval_tensor_ctor(*kind, shape, env, trace)?

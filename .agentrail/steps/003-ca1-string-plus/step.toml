@@ -1,6 +1,6 @@
 number = 3
 slug = "ca1-string-plus"
-status = "pending"
+status = "in-progress"
 description = "CA1: 'a' + 'b' fails with the array diagnostic. Either make + concatenate two..."
 role = "production"
 context_files = []
