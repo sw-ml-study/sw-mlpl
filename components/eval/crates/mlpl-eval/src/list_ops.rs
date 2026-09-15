@@ -11,23 +11,39 @@ use crate::eval::eval_expr;
 use mlpl_eval_types::EvalError;
 use mlpl_eval_types::{Value, value_kind};
 
-/// `list_len(xs)` -> element count of a string list. An empty list
-/// literal `[]` is an empty (numeric) array, so it reads as length 0.
+/// `list_len(xs)` / `len(xs)` -> item count. `list_len` is string-list only
+/// (an empty `[]` reads as 0); the polymorphic `len` (demo-coding-agent CA5)
+/// also counts an array's leading axis (like `tally`, `.size(0)`), so `len` is
+/// the natural name for "how many top-level items" over both lists and arrays.
+/// A bare string has no list length (byte vs code-point is ambiguous), so
+/// `len("...")` errors and points elsewhere.
 pub(crate) fn eval_list_len(
+    name: &str,
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    check_arity("list_len", args.len(), 1)?;
+    check_arity(name, args.len(), 1)?;
+    let is_len = name == "len";
     let n = match eval_expr(&args[0], env, trace)? {
         Value::StrList { items } => items.len() as f64,
         Value::Array(a) if a.elem_count() == 0 => 0.0,
+        Value::Array(a) if is_len => match a.shape().dims().first() {
+            Some(rows) => *rows as f64,
+            None => return Err(EvalError::Unsupported("len: a scalar has no length".into())),
+        },
+        Value::Str(_) if is_len => {
+            return Err(EvalError::Unsupported(
+                "len: a string has no list length -- use list builtins, or a \
+                 dedicated string-length builtin for bytes/characters"
+                    .into(),
+            ));
+        }
         other => {
-            let msg = format!(
-                "list_len: expected a string-list, got {}",
+            return Err(EvalError::Unsupported(format!(
+                "{name}: expected a string-list, got {}",
                 value_kind(&other)
-            );
-            return Err(EvalError::Unsupported(msg));
+            )));
         }
     };
     Ok(Value::Array(mlpl_array::DenseArray::from_scalar(n)))

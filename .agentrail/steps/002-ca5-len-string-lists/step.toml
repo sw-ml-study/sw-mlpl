@@ -1,6 +1,6 @@
 number = 2
 slug = "ca5-len-string-lists"
-status = "pending"
+status = "in-progress"
 description = "CA5: len rejects string lists. Make len accept a StrList (item count), keep l..."
 role = "production"
 context_files = []

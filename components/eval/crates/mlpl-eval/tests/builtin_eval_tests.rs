@@ -766,3 +766,31 @@ fn known_builtin_with_bad_arg_still_reports_the_arg_error() {
         "known builtin keeps its arg error: {msg}"
     );
 }
+
+// -- demo-coding-agent CA5: polymorphic len (arrays + string lists) ----------
+
+#[test]
+fn len_counts_string_list_items() {
+    let v = eval_value("len([\"a\", \"b\", \"c\"])").unwrap();
+    assert_eq!(v, Value::Array(mlpl_array::DenseArray::from_scalar(3.0)));
+}
+
+#[test]
+fn len_of_array_is_leading_axis_length() {
+    // rank-1 [1,2,3] -> 3; rank-2 [2,3] -> 2 (rows).
+    assert_eq!(eval("len([1, 2, 3])").unwrap().data(), &[3.0]);
+    assert_eq!(
+        eval("len(reshape(range(6), [2, 3]))").unwrap().data(),
+        &[2.0]
+    );
+}
+
+#[test]
+fn len_of_a_bare_string_errors_clearly() {
+    let err = eval_value("len(\"hello\")").unwrap_err();
+    let msg = format!("{err}");
+    assert!(
+        msg.to_lowercase().contains("len"),
+        "clear len error for a string: {msg}"
+    );
+}
