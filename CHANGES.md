@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- docs(findings): close follow-ups-4 (F19-F22); queue demo-coding-agent CA1-CA5
+- chore(agentrail): complete 004-f21-adam-in-user-fn; advance to 005-fu4-relay-and-close
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(optim): adam inside a user function updates the global params (F21)
 - chore(agentrail): complete 003-f22-adam-state-rebind; advance to 004-f21-adam-in-user-fn
 - docs(changes): refresh CHANGES.md to HEAD
