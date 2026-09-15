@@ -1,9 +1,10 @@
 number = 3
 slug = "f22-adam-state-rebind"
-status = "in-progress"
+status = "completed"
 description = "F22: adam per-parameter state keyed by name survives rebinding the name to a ..."
 role = "production"
 context_files = []
 created_at = "2026-09-14T16:40:58"
+completed_at = "2026-09-15T11:46:04"
 task_type = "production"
-commits = []
+commits = ["fa0d9a72f9814db5a7609151e4a253867f1b595c"]
