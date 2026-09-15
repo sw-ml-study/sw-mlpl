@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-15
+
+- fix(grad): take's axis/index resolve in the traced scope; clean OOB (F20)
+
 ## 2026-09-14
 
+- chore(agentrail): complete 001-f19-matmul-shape-panic; advance to 002-f20-take-index-in-grad
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): matmul shape mismatch is a clean error, not a panic (F19)
 - chore(agentrail): archive followups-3; init followups-4 (F19-F22)
 - chore(agentrail): complete 004-fu3-relay-and-close; moe-microscope-followups-3 saga done
