@@ -1,9 +1,10 @@
 number = 5
 slug = "fu4-relay-and-close"
-status = "in-progress"
+status = "completed"
 description = "Mark F19-F22 resolved/documented, refresh CHANGES + wiki errata, mark moe-mic..."
 role = "production"
 context_files = []
 created_at = "2026-09-14T16:40:58"
+completed_at = "2026-09-15T12:11:14"
 task_type = "docs"
-commits = []
+commits = ["a712e503a90146013dea139365236cde43bbf44f"]

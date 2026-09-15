@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 5,
+    "step": "fu4-relay-and-close"
+  },
+  "action": "Resolution table with commits; demo-coding-agent CA1-CA5 capture; wiki errata; gen-changes; markdown clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-15T12:11:14"
+}
