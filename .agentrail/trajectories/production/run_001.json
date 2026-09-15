@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 1,
+    "step": "f19-matmul-shape-panic"
+  },
+  "action": "Added no-compute check_matmul_compat mirroring the eager matmul rule; pre-validated in call_matmul + linear_tape; TDD; grad+attention regression; release smoke; rebuilt binaries.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-14T18:33:23"
+}
