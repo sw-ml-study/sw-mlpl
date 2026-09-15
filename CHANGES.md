@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- feat(optim): reset_optimizer() + clear moments on model rebind (F22)
+- chore(agentrail): complete 002-f20-take-index-in-grad; advance to 003-f22-adam-state-rebind
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): take's axis/index resolve in the traced scope; clean OOB (F20)
 
 ## 2026-09-14
