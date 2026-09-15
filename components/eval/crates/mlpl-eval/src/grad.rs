@@ -253,9 +253,14 @@ pub(crate) fn arity_check(args: &[Expr], expected: usize, func: &str) -> Result<
 pub(crate) fn tape_scalar_usize(
     arg: &Expr,
     env: &mut Environment,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
     what: &str,
 ) -> Result<usize, EvalError> {
-    let arr = crate::eval::eval_expr(arg, env, &mut None)?.into_array()?;
+    // Resolve through the traced scope (eval_tensor_expr checks the function's
+    // local bindings before the global env), so an axis/index bound to a
+    // function argument works inside an inlined user function (finding F20).
+    let arr = eval_tensor_expr(arg, env, tape, params)?.value();
     if arr.rank() != 0 {
         return Err(EvalError::Unsupported(format!(
             "{what} must be a scalar, got rank {}",

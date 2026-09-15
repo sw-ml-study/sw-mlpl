@@ -1,6 +1,6 @@
 number = 2
 slug = "f20-take-index-in-grad"
-status = "pending"
+status = "in-progress"
 description = "F20 (BUG): take's index parameter is unbound inside an inlined user function ..."
 role = "production"
 context_files = []

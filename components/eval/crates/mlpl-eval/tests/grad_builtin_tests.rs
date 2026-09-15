@@ -596,3 +596,39 @@ fn grad_matmul_shape_mismatch_errors_cleanly_not_panic() {
         "expected a clean matmul shape error, got: {msg}"
     );
 }
+
+// -- moe-microscope follow-up F20: take's index inside a traced user fn -------
+// take's axis/index resolve against the traced scope (a function argument),
+// not the global env; an out-of-range index is a clean error, not a panic.
+
+#[test]
+fn grad_through_take_index_from_user_fn_arg() {
+    // u:col(g, e) = column e of g; grad(reduce_add(u:col(W,1) * W), W) must
+    // resolve `e` (the arg = 1) in scope and produce a [4,4] gradient.
+    let mut env = Environment::new();
+    let w = DenseArray::new(Shape::new(vec![4, 4]), (0..16).map(|n| n as f64).collect()).unwrap();
+    env.set_param("W".into(), w);
+    let src = "\
+        def u:col(g, e) {\n\
+          \"Column e of g as a [4,1] factor.\"\n\
+          reshape(take(g, 1, e), [4, 1])\n\
+        }\n\
+        grad(reduce_add(u:col(W, 1) * W), W)";
+    let g = run(src, &mut env);
+    assert_eq!(g.shape().dims(), &[4, 4]);
+}
+
+#[test]
+fn grad_take_out_of_range_index_errors_cleanly_not_panic() {
+    let mut env = Environment::new();
+    let w = DenseArray::new(Shape::new(vec![4, 4]), (0..16).map(|n| n as f64).collect()).unwrap();
+    env.set_param("W".into(), w);
+    let src = "grad(reduce_add(take(W, 1, 9)), W)";
+    let stmts = parse(&lex(src).unwrap()).unwrap();
+    let err = eval_program(&stmts, &mut env).unwrap_err();
+    let msg = format!("{err}");
+    assert!(
+        msg.contains("range") || msg.contains("take") || msg.contains("out of"),
+        "expected a clean out-of-range error, got: {msg}"
+    );
+}

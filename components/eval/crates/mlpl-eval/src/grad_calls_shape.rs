@@ -20,7 +20,7 @@ pub(crate) fn call_patchify(
 ) -> Result<Tensor, EvalError> {
     arity_check(args, 2, "patchify")?;
     let x = eval_tensor_expr(&args[0], env, tape, params)?;
-    let p = tape_scalar_usize(&args[1], env, "patchify: patch_size")?;
+    let p = tape_scalar_usize(&args[1], env, tape, params, "patchify: patch_size")?;
     Ok(x.patchify(p))
 }
 
@@ -33,7 +33,7 @@ pub(crate) fn call_concat(
     arity_check(args, 3, "concat")?;
     let a = eval_tensor_expr(&args[0], env, tape, params)?;
     let b = eval_tensor_expr(&args[1], env, tape, params)?;
-    let axis = tape_scalar_usize(&args[2], env, "concat: axis")?;
+    let axis = tape_scalar_usize(&args[2], env, tape, params, "concat: axis")?;
     Ok(a.concat(&b, axis))
 }
 
@@ -45,8 +45,16 @@ pub(crate) fn call_take(
 ) -> Result<Tensor, EvalError> {
     arity_check(args, 3, "take")?;
     let x = eval_tensor_expr(&args[0], env, tape, params)?;
-    let axis = tape_scalar_usize(&args[1], env, "take: axis")?;
-    let idx = tape_scalar_usize(&args[2], env, "take: idx")?;
+    let axis = tape_scalar_usize(&args[1], env, tape, params, "take: axis")?;
+    let idx = tape_scalar_usize(&args[2], env, tape, params, "take: idx")?;
+    // Clean error instead of a tape panic when the index is out of range (F20).
+    let dims = x.value().shape().dims().to_vec();
+    let extent = dims.get(axis).copied().unwrap_or(0);
+    if axis >= dims.len() || idx >= extent {
+        return Err(EvalError::Unsupported(format!(
+            "take: index {idx} out of range for axis {axis} of extent {extent}"
+        )));
+    }
     Ok(x.take(axis, idx))
 }
 
@@ -68,7 +76,7 @@ pub(crate) fn call_rotate(
         ));
     }
     let k = k_arr.data()[0] as i64;
-    let axis = tape_scalar_usize(&args[2], env, "rotate: axis")?;
+    let axis = tape_scalar_usize(&args[2], env, tape, params, "rotate: axis")?;
     Ok(x.rotate(k, axis))
 }
 
@@ -133,7 +141,13 @@ pub(crate) fn call_reduce_grad(
     match args.get(axis_idx) {
         None => Ok(x.sum()),
         Some(Expr::ArrayLit(elems, _)) => Ok(x.reduce_sum(&eval_shape_dims(elems, env)?)),
-        Some(_) => Ok(x.reduce_sum(&[tape_scalar_usize(&args[axis_idx], env, "reduce: axis")?])),
+        Some(_) => Ok(x.reduce_sum(&[tape_scalar_usize(
+            &args[axis_idx],
+            env,
+            tape,
+            params,
+            "reduce: axis",
+        )?])),
     }
 }
 
