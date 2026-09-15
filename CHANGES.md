@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- fix(eval): unknown function names say so, not "expected an array" (CA2)
+- chore(agentrail): archive followups-4; init demo-coding-agent-findings (CA1-CA5)
+- chore(agentrail): complete 005-fu4-relay-and-close; moe-microscope-followups-4 saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): close follow-ups-4 (F19-F22); queue demo-coding-agent CA1-CA5
 - chore(agentrail): complete 004-f21-adam-in-user-fn; advance to 005-fu4-relay-and-close
 - docs(changes): refresh CHANGES.md to HEAD
