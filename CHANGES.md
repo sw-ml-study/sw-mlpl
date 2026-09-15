@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-14
 
+- fix(grad): matmul shape mismatch is a clean error, not a panic (F19)
+- chore(agentrail): archive followups-3; init followups-4 (F19-F22)
+- chore(agentrail): complete 004-fu3-relay-and-close; moe-microscope-followups-3 saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): close follow-ups-3 (F16/S1); queue F19-F22 (relay)
 - chore(agentrail): complete 003-f16c-args; advance to 004-fu3-relay-and-close
 - docs(changes): refresh CHANGES.md to HEAD
