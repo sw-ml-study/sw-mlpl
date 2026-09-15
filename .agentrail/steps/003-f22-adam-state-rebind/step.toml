@@ -1,6 +1,6 @@
 number = 3
 slug = "f22-adam-state-rebind"
-status = "pending"
+status = "in-progress"
 description = "F22: adam per-parameter state keyed by name survives rebinding the name to a ..."
 role = "production"
 context_files = []

@@ -689,6 +689,7 @@ themselves differentiable.
 | `linear_warmup(step, warmup, lr)` | 3 | Ramp from 0 to `lr` over the first `warmup` steps and return `lr` after. |
 | `momentum_sgd(loss, params, lr, beta)` | 4 | One in-place momentum-SGD step on `params`. `params` is a single param name, a `[p1, p2, ...]` list, or a model identifier (walked via `params(model)`). Per-parameter state is maintained on the environment so the next call continues the trajectory. |
 | `params(model)` | 1 | Return the flat list of parameter names owned by a model; used internally by the optimizers when given a model identifier. |
+| `reset_optimizer()` | 0 | Drop all optimizer state (Adam/momentum moment buffers and step counters) so a fresh training run starts from a clean slate in the same process. Optimizer state is kept per parameter by NAME across calls; without a reset, training a second variant under the same names would inherit the first's moments. Rebinding a name to a NEW model also drops that model's stale per-parameter moments automatically; `reset_optimizer()` is the explicit full reset. Returns 0. |
 
 ### Model DSL
 

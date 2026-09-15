@@ -330,6 +330,24 @@ pub(crate) fn eval_shape_dims(
 // re-exported so `crate::grad::OptimizerState` paths keep working.
 pub use mlpl_eval_state::OptimizerState;
 
+/// `reset_optimizer()` -- drop all optimizer moment buffers and step counters
+/// so a script can train another variant from a clean slate in one process
+/// (moe-microscope F22). Returns 0.
+pub(crate) fn eval_reset_optimizer(
+    args: &[Expr],
+    env: &mut Environment,
+) -> Result<mlpl_eval_types::Value, EvalError> {
+    if !args.is_empty() {
+        return Err(EvalError::BadArity {
+            func: "reset_optimizer".into(),
+            expected: 0,
+            got: args.len(),
+        });
+    }
+    env.optim_state.clear();
+    Ok(mlpl_eval_types::Value::Array(DenseArray::from_scalar(0.0)))
+}
+
 /// Read-only accessor used by tests and downstream optimizer code.
 #[must_use]
 pub fn optim_state(env: &Environment) -> &OptimizerState {

@@ -242,3 +242,66 @@ fn optimizers_return_the_step_loss() {
         losses.data()
     );
 }
+
+// -- moe-microscope follow-up F22: optimizer state reset / rebind ------------
+
+fn train_h(env: &mut Environment) {
+    let src = "\
+        x = reshape([1, 2], [1, 2])\n\
+        h = linear(2, 1, 3)\n\
+        k = 0\n\
+        while lt(k, 5) {\n\
+          adam(reduce_add(apply(h, x) * apply(h, x)), h, 0.1, 0.9, 0.999, 0.00000001)\n\
+          k = k + 1\n\
+        }";
+    eval_program(&parse(&lex(src).unwrap()).unwrap(), env).unwrap();
+}
+
+#[test]
+fn reset_optimizer_clears_all_state() {
+    let mut env = Environment::new();
+    train_h(&mut env);
+    assert!(
+        !optim_state(&env).buffers.is_empty(),
+        "training accumulates buffers"
+    );
+    eval_program(
+        &parse(&lex("reset_optimizer()").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    assert!(
+        optim_state(&env).buffers.is_empty(),
+        "reset_optimizer clears buffers"
+    );
+    assert!(
+        optim_state(&env).steps.is_empty(),
+        "reset_optimizer clears step counters"
+    );
+}
+
+#[test]
+fn rebinding_a_model_clears_its_stale_moments() {
+    let mut env = Environment::new();
+    train_h(&mut env);
+    let params = mlpl_eval::model_params(&env, "h").expect("h is a model");
+    assert!(
+        params
+            .iter()
+            .any(|p| optim_state(&env).buffers.keys().any(|(_, pp, _)| pp == p)),
+        "h's params have optimizer buffers after training"
+    );
+    // Rebind h to a fresh model under the same name.
+    eval_program(
+        &parse(&lex("h = linear(2, 1, 3)").unwrap()).unwrap(),
+        &mut env,
+    )
+    .unwrap();
+    let params2 = mlpl_eval::model_params(&env, "h").expect("h is a model");
+    for p in &params2 {
+        assert!(
+            !optim_state(&env).buffers.keys().any(|(_, pp, _)| pp == p),
+            "rebound model param {p} must have no leftover moments"
+        );
+    }
+}

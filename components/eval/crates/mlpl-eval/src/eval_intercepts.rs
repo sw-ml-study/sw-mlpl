@@ -49,6 +49,7 @@ pub(crate) fn try_intercept(
             name, args, env, trace,
         )),
         "args" => Some(eval_args(args, env)),
+        "reset_optimizer" => Some(crate::grad::eval_reset_optimizer(args, env)),
         "list_get" => Some(crate::list_ops::eval_list_get(args, env, trace)),
         "write_stdout" => Some(crate::eval_script::eval_write_stdout(args, env, trace)),
         "read_stdin" => Some(crate::eval_script::eval_read_stdin(args)),

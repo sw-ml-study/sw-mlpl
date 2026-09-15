@@ -363,6 +363,16 @@ pub(crate) fn eval_expr(
             env.clear_binding(name);
             match v {
                 Value::Model(m) => {
+                    // Rebinding a name to a new model drops the previous
+                    // model's per-parameter optimizer moments, so the fresh
+                    // model does not silently train with stale state
+                    // (moe-microscope F22). Cleared before the insert while the
+                    // old binding's param names are still resolvable.
+                    if let Some(old) = crate::env::model_params(env, name) {
+                        for p in old {
+                            env.optim_state.clear_param(&p);
+                        }
+                    }
                     env.models.insert(name.clone(), m);
                     let placeholder = DenseArray::from_scalar(0.0);
                     ("assign_model", vec![], placeholder)

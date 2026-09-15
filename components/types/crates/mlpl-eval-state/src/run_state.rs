@@ -73,6 +73,30 @@ pub struct OptimizerState {
     pub resident_witness: HashMap<String, usize>,
 }
 
+impl OptimizerState {
+    /// Drop ALL optimizer state -- moment buffers, step counters, and the
+    /// resident caches. The `reset_optimizer()` builtin calls this so a script
+    /// can train a second variant from a clean slate in one process
+    /// (moe-microscope F22).
+    pub fn clear(&mut self) {
+        self.buffers.clear();
+        self.steps.clear();
+        self.resident.clear();
+        self.resident_witness.clear();
+    }
+
+    /// Drop the per-parameter optimizer state for `param` (across every
+    /// optimizer and slot): its moment buffers and resident caches. Used when a
+    /// name is rebound to a new model so the fresh model does not inherit the
+    /// previous one's moments (F22). Step counters are per-optimizer (shared)
+    /// and are left untouched -- use `clear` for a full reset.
+    pub fn clear_param(&mut self, param: &str) {
+        self.buffers.retain(|(_, p, _), _| p != param);
+        self.resident.retain(|(_, p, _), _| p != param);
+        self.resident_witness.remove(param);
+    }
+}
+
 /// One recorded run. Written to `<exp_dir>/<name>/<ts>/run.json`
 /// by the terminal REPL; also appended to `env.experiment_log`
 /// so the web REPL can surface runs via `:experiments`.
