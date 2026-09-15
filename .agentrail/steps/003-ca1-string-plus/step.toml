@@ -1,9 +1,10 @@
 number = 3
 slug = "ca1-string-plus"
-status = "in-progress"
+status = "completed"
 description = "CA1: 'a' + 'b' fails with the array diagnostic. Either make + concatenate two..."
 role = "production"
 context_files = []
 created_at = "2026-09-15T12:13:02"
+completed_at = "2026-09-15T15:54:55"
 task_type = "production"
-commits = []
+commits = ["b3ae603b006a626fd5f9fe3bfd4bf6ae6a8a7292"]
