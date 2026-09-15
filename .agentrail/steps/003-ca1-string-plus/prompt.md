@@ -1,0 +1,1 @@
+CA1: 'a' + 'b' fails with the array diagnostic. Either make + concatenate two strings, or give a clear 'use str_concat' error. TDD. See docs/sw-mlpl-findings.md CA1.

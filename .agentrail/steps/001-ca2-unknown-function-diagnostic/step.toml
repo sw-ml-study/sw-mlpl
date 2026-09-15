@@ -1,0 +1,9 @@
+number = 1
+slug = "ca2-unknown-function-diagnostic"
+status = "pending"
+description = "CA2: calling an undefined function reports the array diagnostic ('expected an..."
+role = "production"
+context_files = []
+created_at = "2026-09-15T12:13:02"
+task_type = "production"
+commits = []

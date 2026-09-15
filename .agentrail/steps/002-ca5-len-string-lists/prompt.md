@@ -1,0 +1,1 @@
+CA5: len rejects string lists. Make len accept a StrList (item count), keep list_len as an alias; a single-string len errors clearly. TDD. See docs/sw-mlpl-findings.md CA5.

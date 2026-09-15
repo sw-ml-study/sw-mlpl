@@ -1,0 +1,1 @@
+CA2: calling an undefined function reports the array diagnostic ('expected an array value, got a string') instead of 'unknown function: NAME'. Fix the fncall dispatch error path so an unrecognized function name errors clearly. TDD. See docs/sw-mlpl-findings.md CA2.

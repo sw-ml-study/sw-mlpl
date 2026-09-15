@@ -1,0 +1,9 @@
+number = 3
+slug = "ca1-string-plus"
+status = "pending"
+description = "CA1: 'a' + 'b' fails with the array diagnostic. Either make + concatenate two..."
+role = "production"
+context_files = []
+created_at = "2026-09-15T12:13:02"
+task_type = "production"
+commits = []

@@ -1,0 +1,9 @@
+number = 6
+slug = "dca-relay-and-close"
+status = "pending"
+description = "Mark CA1-CA5 resolved/documented, refresh CHANGES + wiki errata, mark demo-co..."
+role = "production"
+context_files = []
+created_at = "2026-09-15T12:13:02"
+task_type = "docs"
+commits = []

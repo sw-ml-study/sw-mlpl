@@ -1,0 +1,1 @@
+CA4: write_text does not create parent directories. Add a sandboxed make_dir builtin (like the other fs builtins) or have write_text create parents. TDD. See docs/sw-mlpl-findings.md CA4.

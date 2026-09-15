@@ -1,0 +1,1 @@
+Mark CA1-CA5 resolved/documented, refresh CHANGES + wiki errata, mark demo-coding-agent-findings shipped, rebuild binaries. --done.

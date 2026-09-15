@@ -1,0 +1,9 @@
+number = 5
+slug = "ca3-symlink-wording"
+status = "pending"
+description = "CA3 (doc-only): a symlink whose target is inside the sandbox reads fine, but ..."
+role = "production"
+context_files = []
+created_at = "2026-09-15T12:13:02"
+task_type = "docs"
+commits = []

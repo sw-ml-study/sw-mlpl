@@ -1,0 +1,1 @@
+CA3 (doc-only): a symlink whose target is inside the sandbox reads fine, but the docs say symlinks are never followed. Fix the wording. See docs/sw-mlpl-findings.md CA3.
