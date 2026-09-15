@@ -256,13 +256,23 @@ gives server-run programs a filesystem sandbox root for the fs builtins, and an
 `args` field feeds the `args()` builtin. S1's serve rebuild is done and the
 rebuild-on-evaluator-change discipline is adopted.
 
-## Follow-up batch 4 (2026-09-13 audit + RM prep by ../moe-microscope) -- OPEN
+## Follow-up batch 4 (2026-09-13 audit + RM prep by ../moe-microscope) -- RESOLVED
 
 An optimizer-state audit (one training run per process is now the downstream
 rule) plus more grad-surface probing surfaced four findings, each with a
-reproducer in the downstream `probes/`. F19 and F20 are process panics (highest
-priority, like F10/F18); F21 and F22 are silent-wrong-training footguns. Queued
-as `moe-microscope-followups-4`.
+reproducer in the downstream `probes/`. F19 and F20 were process panics; F21 and
+F22 silent-wrong-training footguns. All shipped in `moe-microscope-followups-4`.
+
+| Finding | Severity | Resolution | Commit |
+|---------|----------|------------|--------|
+| F19 matmul shape panic in grad | BUG | pre-validate matmul shapes -> clean error (matmul analogue of F18) | `bbcf59dc` |
+| F20 take index in grad | BUG | index resolves in the traced scope; out-of-range is a clean error | `e6070964` |
+| F22 adam state survives rebind | important | `reset_optimizer()` builtin + clear moments on model rebind | `7d89e953` |
+| F21 adam in a user function | med | optimizer writes persist across the frame (train the real params) | `9d69cd04` |
+
+Note (F22): Adam's step counter is per-optimizer (shared across params), so
+`reset_optimizer()` is the full between-runs reset; rebinding a model clears
+that model's moments.
 
 - **F19** (BUG) -- a matmul inner-dimension mismatch inside `grad` PANICS the
   process ("compatible matmul shapes") instead of the structured shape error
@@ -286,3 +296,37 @@ as `moe-microscope-followups-4`.
   second with the first's moments. Fix: clear optimizer state when a name is
   rebound to a new model, and add a `reset_optimizer()` builtin. Probe:
   `probes/f22_adam_state_by_name.mlpl`.
+
+## demo-coding-agent findings (2026-09-14, from ../demo-coding-agent) -- OPEN
+
+A different downstream repo (a coding agent authoring/running MLPL) reported
+five findings. Numbered CA1-CA5 here to avoid colliding with the moe-microscope
+F1-F5 above; that repo files them as its own F1-F5. Queued as
+`demo-coding-agent-findings`. Shared root: the array-centric error message
+misleads every guess at a natural builtin name -- so CA2 is highest value (the
+meta-fix that surfaces the others).
+
+- **CA2** (fix first) -- calling an undefined function reports the array
+  diagnostic ("expected an array value, got a string") instead of "unknown
+  function: NAME". This hid that `str_starts_with`/`str_trim` do not exist and
+  misleads every wrong builtin-name guess. Fix: an undefined `name(...)` call
+  errors with a clear unknown-function message.
+- **CA1** -- `"a" + "b"` fails with the array diagnostic; string concatenation
+  is `str_concat`/`str_join`. Fix or document: either make `+` on two strings
+  concatenate, or give a clear "use str_concat" error. (Agents currently use
+  str_concat/str_join.)
+- **CA5** -- `len` rejects string lists; `list_len` is required. Fix:
+  make `len` accept a StrList (item count), keeping `list_len` as an alias. See
+  the design note on string length below.
+- **CA4** -- `write_text` does not create parent directories, so an agent adding
+  a module in a new directory is stuck. Fix: add a `make_dir` builtin (sandboxed
+  like the other fs builtins), or have write_text create parents.
+- **CA3** (doc-only) -- a symlink whose target is inside the sandbox reads fine,
+  but the docs say symlinks are never followed. Behavior is good; fix the
+  wording.
+
+Design note (string length, CA5-adjacent): three notions exist -- bytes
+(Rust `str::len`), code points (Python `len`, Rust `chars().count()`), and
+grapheme clusters (neither counts by default). Recommendation: `len(StrList)` =
+item count; a single-string `len` errors clearly and directs to `len_bytes`
+(UTF-8 bytes) and `len_chars` (code points; document "not grapheme clusters").

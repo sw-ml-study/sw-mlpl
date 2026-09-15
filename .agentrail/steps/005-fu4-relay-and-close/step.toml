@@ -1,6 +1,6 @@
 number = 5
 slug = "fu4-relay-and-close"
-status = "pending"
+status = "in-progress"
 description = "Mark F19-F22 resolved/documented, refresh CHANGES + wiki errata, mark moe-mic..."
 role = "production"
 context_files = []

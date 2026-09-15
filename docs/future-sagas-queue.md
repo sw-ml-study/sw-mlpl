@@ -85,16 +85,22 @@ data-forge (Track 1).
   submitted with its module map instead of a client-side bundler. api_tests
   22/22; sw-checklist fails held at 38.
 
-- **moe-microscope-followups-4** -- QUEUED (2026-09-13). Optimizer-state audit +
-  RM-prep probing (see "Follow-up batch 4" in `docs/sw-mlpl-findings.md`).
-  Priority: **F19** (matmul inner-dim mismatch panics in grad -- extend F18's
-  structured error to the matmul tape op) and **F20** (take's index param
-  unbound inside an inlined user fn + out-of-range panic -- F11/F15-class scope
-  fix plus a clean error) FIRST, both process panics; then **F22** (adam
-  per-param state survives rebinding a name to a new model -- clear on rebind +
-  a `reset_optimizer()` builtin; the important correctness footgun) and **F21**
-  (adam inside a user function trains local copies, no persistence/error --
-  resolve params against the caller or error loudly).
+- **moe-microscope-followups-4** -- SHIPPED 2026-09-13. F19 matmul shape panic
+  -> clean error (`bbcf59dc`), F20 take index in grad: traced-scope resolution +
+  clean out-of-range (`e6070964`), F22 `reset_optimizer()` + clear moments on
+  model rebind (`7d89e953`), F21 adam-in-user-fn trains the real params
+  (`9d69cd04`). Both panics eliminated; optimizer footguns fixed. Verified;
+  repl/build/serve rebuilt; sw-checklist fails held at 38.
+
+- **demo-coding-agent-findings** -- QUEUED (2026-09-14). Five findings from
+  ../demo-coding-agent (numbered CA1-CA5 in `docs/sw-mlpl-findings.md` to avoid
+  colliding with moe's F1-F5). Priority: **CA2** first -- an undefined-function
+  call reports the array diagnostic instead of "unknown function", which
+  misleads every wrong builtin-name guess (the meta-fix). Then **CA5** (`len`
+  accepts string lists; `list_len` alias), **CA1** (`"a"+"b"`: concat or a clear
+  "use str_concat" error), **CA4** (`make_dir` builtin / write_text creates
+  parents), **CA3** (doc-only: symlink-follow wording). Shared root: the
+  array-centric error message misleads natural-name guesses.
 
 ### Paused sagas
 
