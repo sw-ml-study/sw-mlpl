@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "f21-adam-in-user-fn"
+  },
+  "action": "Traced fn-local training to framed() scope restore; set_trained_param records global_writes across frames; applied to all optimizer write sites; TDD; regression; release probe smoke; rebuilt binaries incl serve.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-15T12:08:27"
+}
