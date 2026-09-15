@@ -305,3 +305,30 @@ fn rebinding_a_model_clears_its_stale_moments() {
         );
     }
 }
+
+// -- moe-microscope follow-up F21: adam inside a user function updates globals
+
+#[test]
+fn adam_inside_user_function_updates_global_param() {
+    // An adam step in a user function must move the GLOBAL param, not a
+    // frame-local copy that vanishes when the function returns.
+    let mut env = Environment::new();
+    let src = "\
+        W = param[2, 1]\n\
+        W = reshape([1, 1], [2, 1])\n\
+        h = linear(1, 1, 3)\n\
+        x = reshape([1, 2], [1, 2])\n\
+        def u:step() {\n\
+          \"One adam step over the global param and model.\"\n\
+          adam(reduce_add(apply(h, matmul(x, W)) * apply(h, matmul(x, W))), [W, h], 0.1, 0.9, 0.999, 0.00000001)\n\
+        }\n\
+        before = reduce_add(W)\n\
+        r = u:step()\n\
+        reduce_add(W) - before";
+    let d = eval_program(&parse(&lex(src).unwrap()).unwrap(), &mut env).unwrap();
+    assert!(
+        d.data()[0].abs() > 1e-9,
+        "adam inside a user fn must move the global param W, moved by {}",
+        d.data()[0]
+    );
+}

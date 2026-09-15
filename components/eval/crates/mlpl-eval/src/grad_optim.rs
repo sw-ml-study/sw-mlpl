@@ -124,7 +124,7 @@ pub(crate) fn eval_momentum_sgd(
             .collect();
         let w_new =
             DenseArray::new(w.shape().clone(), w_data).expect("weight shape matches velocity");
-        env.set(name.clone(), w_new);
+        crate::grad::set_trained_param(env, name, w_new);
     }
     *env.optim_state
         .steps
@@ -320,7 +320,7 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
 
         env.optim_state.buffers.insert(m_key, m_new);
         env.optim_state.buffers.insert(v_key, v_new);
-        env.set(name.clone(), w_new);
+        crate::grad::set_trained_param(env, name, w_new);
     }
     Ok(DenseArray::from_scalar(step_loss))
 }

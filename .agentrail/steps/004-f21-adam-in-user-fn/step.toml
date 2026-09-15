@@ -1,6 +1,6 @@
 number = 4
 slug = "f21-adam-in-user-fn"
-status = "pending"
+status = "in-progress"
 description = "F21: adam inside a user function trains function-local copies with no persist..."
 role = "production"
 context_files = []

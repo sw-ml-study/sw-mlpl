@@ -120,7 +120,7 @@ pub(crate) fn commit_update(
 ) {
     let host = w_new.to_dense();
     let witness = host.data().as_ptr() as usize;
-    env.set(name.to_string(), host);
+    crate::grad::set_trained_param(env, name, host);
     let st = &mut env.optim_state;
     for (key, handle) in moments {
         st.resident.insert(key.clone(), handle.clone());

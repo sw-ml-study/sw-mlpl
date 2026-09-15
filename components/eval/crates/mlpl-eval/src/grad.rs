@@ -330,6 +330,21 @@ pub(crate) fn eval_shape_dims(
 // re-exported so `crate::grad::OptimizerState` paths keep working.
 pub use mlpl_eval_state::OptimizerState;
 
+/// Write an optimizer-updated parameter value, persisting it across a
+/// user-function frame (finding F21): the optimizer's effect on a named global
+/// parameter must survive the frame restore, like an explicit global write, so
+/// `adam(...)` inside a `def u:step()` trains the real params, not frame-local
+/// copies.
+pub(crate) fn set_trained_param(env: &mut Environment, name: &str, value: DenseArray) {
+    if env.call_depth > 0 {
+        env.global_writes.push((
+            name.to_string(),
+            mlpl_eval_types::Value::Array(value.clone()),
+        ));
+    }
+    env.set(name.to_string(), value);
+}
+
 /// `reset_optimizer()` -- drop all optimizer moment buffers and step counters
 /// so a script can train another variant from a clean slate in one process
 /// (moe-microscope F22). Returns 0.
