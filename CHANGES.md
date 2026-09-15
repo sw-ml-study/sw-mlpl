@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- fix(optim): adam inside a user function updates the global params (F21)
+- chore(agentrail): complete 003-f22-adam-state-rebind; advance to 004-f21-adam-in-user-fn
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(optim): reset_optimizer() + clear moments on model rebind (F22)
 - chore(agentrail): complete 002-f20-take-index-in-grad; advance to 003-f22-adam-state-rebind
 - docs(changes): refresh CHANGES.md to HEAD
