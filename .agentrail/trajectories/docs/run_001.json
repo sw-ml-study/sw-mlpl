@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 5,
+    "step": "ca3-symlink-wording"
+  },
+  "action": "Verified fs_walk skips symlinks (cycle-safe) vs reads follow-and-confine via contained(); corrected glossary + lang-reference wording; markdown clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-15T18:59:34"
+}
