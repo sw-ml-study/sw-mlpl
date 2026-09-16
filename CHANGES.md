@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- docs(fs): correct the symlink wording (CA3)
+- chore(agentrail): complete 004-ca4-make-dir; advance to 005-ca3-symlink-wording
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(fs): make_dir builtin for sandboxed directory creation (CA4)
 - chore(agentrail): complete 003-ca1-string-plus; advance to 004-ca4-make-dir
 - docs(changes): refresh CHANGES.md to HEAD
