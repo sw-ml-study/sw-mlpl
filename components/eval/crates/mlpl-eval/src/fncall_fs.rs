@@ -48,6 +48,9 @@ pub(crate) fn try_dispatch(
     if name == "write_atomic" {
         return Some(crate::fs_atomic::eval_write_atomic(args, env, trace));
     }
+    if name == "make_dir" {
+        return Some(crate::fs_mkdir::eval_make_dir(args, env, trace));
+    }
     if !matches!(name, "fs_walk" | "read_text" | "write_text" | "remove_path") {
         return None;
     }

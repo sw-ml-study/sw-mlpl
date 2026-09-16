@@ -118,6 +118,7 @@ mod fs_append;
 mod fs_atomic;
 mod fs_bytes;
 mod fs_meta;
+mod fs_mkdir;
 mod fs_ops;
 mod fs_packed;
 mod fs_range;

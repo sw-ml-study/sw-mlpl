@@ -1,6 +1,6 @@
 number = 4
 slug = "ca4-make-dir"
-status = "pending"
+status = "in-progress"
 description = "CA4: write_text does not create parent directories. Add a sandboxed make_dir ..."
 role = "production"
 context_files = []

@@ -115,3 +115,38 @@ fn walk_results_feed_read_text_directly() {
     assert!(matches!(&v, Value::Str(s) if s == "1 + 1\n"), "{v:?}");
     std::fs::remove_dir_all(&dir).ok();
 }
+
+// -- demo-coding-agent CA4: make_dir creates directories (incl. parents) ------
+
+#[test]
+fn make_dir_creates_nested_directories_and_write_text_then_works() {
+    let dir = sandbox("mkdir");
+    let mut env = env_with(&dir);
+    // write_text into a not-yet-existing directory fails; make_dir fixes it.
+    let mk = eval_value(&mut env, "make_dir(\"newpkg/sub\")").unwrap();
+    assert!(
+        matches!(mk, Value::Result { ok: true, .. }),
+        "make_dir ok: {mk:?}"
+    );
+    assert!(dir.join("newpkg/sub").is_dir(), "the nested dir exists");
+    let w = eval_value(&mut env, "write_text(\"newpkg/sub/mod.mlpl\", \"1\")").unwrap();
+    assert!(
+        matches!(w, Value::Result { ok: true, .. }),
+        "write into new dir ok: {w:?}"
+    );
+}
+
+#[test]
+fn make_dir_refuses_outside_the_sandbox() {
+    let dir = sandbox("mkdir_escape");
+    let mut env = env_with(&dir);
+    let esc = eval_value(&mut env, "make_dir(\"../escapee\")").unwrap();
+    assert!(
+        matches!(esc, Value::Result { ok: false, .. }),
+        "escape refused: {esc:?}"
+    );
+    assert!(
+        !dir.parent().unwrap().join("escapee").exists(),
+        "no dir created outside root"
+    );
+}
