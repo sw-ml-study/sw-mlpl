@@ -94,6 +94,11 @@ impl OptimizerState {
         self.buffers.retain(|(_, p, _), _| p != param);
         self.resident.retain(|(_, p, _), _| p != param);
         self.resident_witness.remove(param);
+        // Per-parameter step counters are keyed "<optimizer>:<param>" (F22
+        // redo): drop this param's so a rebound model's bias correction
+        // restarts at step 1.
+        self.steps
+            .retain(|k, _| k.rsplit_once(':').map_or(true, |(_, p)| p != param));
     }
 }
 

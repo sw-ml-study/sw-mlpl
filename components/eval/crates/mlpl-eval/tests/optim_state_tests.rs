@@ -332,3 +332,33 @@ fn adam_inside_user_function_updates_global_param() {
         d.data()[0]
     );
 }
+
+// -- moe-microscope F22 (redo): per-parameter Adam step counter --------------
+// Rebinding a model to a fresh instance under the same name resets its Adam
+// bias-correction step, so a variant trained after another (or the same name
+// re-created) starts from step 1 -- no cross-contamination via a shared counter.
+
+#[test]
+fn rebound_model_first_adam_step_matches_a_fresh_model() {
+    let mut env = Environment::new();
+    let src = "\
+        x = reshape([1, 2], [1, 2])\n\
+        h = linear(2, 1, 3)\n\
+        k = 0\n\
+        while lt(k, 30) { adam(reduce_add(apply(h, x) * apply(h, x)), h, 0.1, 0.9, 0.999, 0.00000001); k = k + 1 }\n\
+        h = linear(2, 1, 3)\n\
+        before = reduce_add(apply(h, x))\n\
+        adam(reduce_add(apply(h, x) * apply(h, x)), h, 0.1, 0.9, 0.999, 0.00000001)\n\
+        reused = reduce_add(apply(h, x)) - before\n\
+        g = linear(2, 1, 3)\n\
+        before_g = reduce_add(apply(g, x))\n\
+        adam(reduce_add(apply(g, x) * apply(g, x)), g, 0.1, 0.9, 0.999, 0.00000001)\n\
+        fresh = reduce_add(apply(g, x)) - before_g\n\
+        eq(round(reused * 1000000000), round(fresh * 1000000000))";
+    let same = eval_program(&parse(&lex(src).unwrap()).unwrap(), &mut env).unwrap();
+    assert_eq!(
+        same.data(),
+        &[1.0],
+        "rebound-name first step must match a fresh name's"
+    );
+}

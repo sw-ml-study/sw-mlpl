@@ -1,6 +1,6 @@
 number = 1
 slug = "f22-redo-per-param-step"
-status = "pending"
+status = "in-progress"
 description = "F22 REDO: reset_optimizer + rebind-clearing were not sufficient because Adam'..."
 role = "production"
 context_files = []

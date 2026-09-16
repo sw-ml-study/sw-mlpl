@@ -136,9 +136,10 @@ pub(crate) fn eval_momentum_sgd(
 /// `adam(loss_expr, params, lr, b1, b2, eps)` built-in.
 ///
 /// Standard Adam with bias correction. Per-param first/second moment
-/// buffers `m`, `v` and a per-optimizer step counter `t` live in
-/// `OptimizerState`. At each call (with `t` post-incremented to start
-/// at 1):
+/// buffers `m`, `v` and a PER-PARAMETER step counter `t` (keyed
+/// "adam:<param>", so a fresh or rebound model's bias correction starts
+/// at step 1 -- moe-microscope F22) live in `OptimizerState`. At each
+/// call (with each param's `t` post-incremented to start at 1):
 ///
 /// ```text
 ///     g     = grad(loss_expr, w)
@@ -272,6 +273,22 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
         })?;
         let m_key = ("adam".to_string(), name.clone(), "m".to_string());
         let v_key = ("adam".to_string(), name.clone(), "v".to_string());
+        // Per-PARAMETER step counter for bias correction (moe-microscope F22
+        // redo): keying by name (not the shared optimizer name) means a fresh
+        // model trained after another -- or the same name re-created (its step
+        // cleared on rebind) -- starts at step 1, so sequential variants do not
+        // cross-contaminate. Shadows the shared bc1/bc2 for the CPU path.
+        let t = {
+            let e = env
+                .optim_state
+                .steps
+                .entry(format!("adam:{name}"))
+                .or_insert(0);
+            *e += 1;
+            *e
+        };
+        let bc1 = 1.0 - b1.powi(t as i32);
+        let bc2 = 1.0 - b2.powi(t as i32);
         let m_old = env
             .optim_state
             .buffers
