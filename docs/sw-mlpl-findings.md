@@ -297,14 +297,25 @@ that model's moments.
   rebound to a new model, and add a `reset_optimizer()` builtin. Probe:
   `probes/f22_adam_state_by_name.mlpl`.
 
-## demo-coding-agent findings (2026-09-14, from ../demo-coding-agent) -- OPEN
+## demo-coding-agent findings (2026-09-14, from ../demo-coding-agent) -- RESOLVED
 
 A different downstream repo (a coding agent authoring/running MLPL) reported
 five findings. Numbered CA1-CA5 here to avoid colliding with the moe-microscope
-F1-F5 above; that repo files them as its own F1-F5. Queued as
-`demo-coding-agent-findings`. Shared root: the array-centric error message
-misleads every guess at a natural builtin name -- so CA2 is highest value (the
-meta-fix that surfaces the others).
+F1-F5 above; that repo files them as its own F1-F5. All shipped in the
+`demo-coding-agent-findings` saga. Shared root: the array-centric error message
+misled every guess at a natural builtin name -- CA2 (the meta-fix) surfaced the
+rest.
+
+| Finding | Resolution | Commit |
+|---------|------------|--------|
+| CA2 unknown-function diagnostic | undefined calls say "unknown function: NAME" | `c236f3dd` |
+| CA5 `len` on string lists | polymorphic `len` (lists + arrays); `list_len` alias kept | `c66c24cd` |
+| CA1 `"a" + "b"` | `+` concatenates two strings | `4eaa6b60` |
+| CA4 `make_dir` | sandboxed directory creation (incl. parents) | `5dfc6d42` |
+| CA3 symlink wording | docs corrected (behavior was already right) | `d92778db` |
+
+Not yet built (design note only): `len_bytes`/`len_chars` for single-string
+length -- `len("...")` currently errors and points at them.
 
 - **CA2** (fix first) -- calling an undefined function reports the array
   diagnostic ("expected an array value, got a string") instead of "unknown

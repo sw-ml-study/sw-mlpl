@@ -1,6 +1,6 @@
 number = 6
 slug = "dca-relay-and-close"
-status = "pending"
+status = "in-progress"
 description = "Mark CA1-CA5 resolved/documented, refresh CHANGES + wiki errata, mark demo-co..."
 role = "production"
 context_files = []

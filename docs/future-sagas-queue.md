@@ -92,15 +92,22 @@ data-forge (Track 1).
   (`9d69cd04`). Both panics eliminated; optimizer footguns fixed. Verified;
   repl/build/serve rebuilt; sw-checklist fails held at 38.
 
-- **demo-coding-agent-findings** -- QUEUED (2026-09-14). Five findings from
-  ../demo-coding-agent (numbered CA1-CA5 in `docs/sw-mlpl-findings.md` to avoid
-  colliding with moe's F1-F5). Priority: **CA2** first -- an undefined-function
-  call reports the array diagnostic instead of "unknown function", which
-  misleads every wrong builtin-name guess (the meta-fix). Then **CA5** (`len`
-  accepts string lists; `list_len` alias), **CA1** (`"a"+"b"`: concat or a clear
-  "use str_concat" error), **CA4** (`make_dir` builtin / write_text creates
-  parents), **CA3** (doc-only: symlink-follow wording). Shared root: the
-  array-centric error message misleads natural-name guesses.
+- **demo-coding-agent-findings** -- SHIPPED 2026-09-14. CA2 unknown-function
+  diagnostic (`c236f3dd`), CA5 polymorphic `len` (`c66c24cd`), CA1 string `+`
+  concatenation (`4eaa6b60`), CA4 `make_dir` (`5dfc6d42`), CA3 symlink-wording
+  doc fix (`d92778db`). All verified; repl/build/serve rebuilt; sw-checklist
+  fails held at 38.
+
+- **moe-microscope-followups-5** -- QUEUED (2026-09-14). From the moe-microscope
+  rerun after followups-4: **F22 REDO** -- reset_optimizer + rebind-clearing
+  were necessary but not sufficient; Adam's step counter is keyed per-optimizer
+  ("adam"), shared across models, so two variants trained in sequence still
+  cross-contaminate via bias correction. Fix: per-parameter (or per-param-set)
+  step counter. Then **F23** (reshape dims bound to function parameters drop the
+  gradient silently) and **F24** (apply_engram with ids bound to a function
+  parameter is not seen inside grad -- F11/F15-class scope). Probes:
+  ../moe-microscope/probes/{f23b_param_bound_reshape_in_grad,
+  f24_apply_engram_ids_param_in_grad}.mlpl.
 
 ### Paused sagas
 
