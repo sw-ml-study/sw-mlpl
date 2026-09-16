@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-16
 
+- docs(findings): mark F22-redo/F23/F24 resolved; ship moe-microscope-followups-5
+- chore(agentrail): complete 003-f24-apply-engram-ids-fn-param; advance to 004-fu5-relay-and-close
+- fix(grad): resolve apply_engram ids through traced scope (F24)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-f23-reshape-dims-fn-param; advance to 003-f24-apply-engram-ids-fn-param
 - fix(grad): resolve reshape/windows/reduce dims through traced scope (F23)
 
