@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- docs(findings): close demo-coding-agent CA1-CA5; queue moe followups-5
+- chore(agentrail): complete 005-ca3-symlink-wording; advance to 006-dca-relay-and-close
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(fs): correct the symlink wording (CA3)
 - chore(agentrail): complete 004-ca4-make-dir; advance to 005-ca3-symlink-wording
 - docs(changes): refresh CHANGES.md to HEAD
