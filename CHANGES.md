@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-16
+
+- chore(agentrail): complete 002-f23-reshape-dims-fn-param; advance to 003-f24-apply-engram-ids-fn-param
+- fix(grad): resolve reshape/windows/reduce dims through traced scope (F23)
+
 ## 2026-09-15
 
+- chore(agentrail): complete 001-f22-redo-per-param-step; advance to 002-f23-reshape-dims-fn-param
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(optim): per-parameter Adam step counter (F22 redo)
 - chore(agentrail): archive demo-coding-agent-findings; init followups-5 (F22-redo/F23/F24)
 - chore(agentrail): complete 006-dca-relay-and-close; demo-coding-agent-findings saga done
