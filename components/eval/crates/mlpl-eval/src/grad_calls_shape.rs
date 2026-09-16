@@ -100,9 +100,9 @@ pub(crate) fn call_windows(
             "grad: windows sizes must be an [int, ...] literal".into(),
         ));
     };
-    let sizes = eval_shape_dims(size_elems, env)?;
+    let sizes = eval_shape_dims(size_elems, env, tape, params)?;
     let strides = match args.get(2) {
-        Some(Expr::ArrayLit(stride_elems, _)) => eval_shape_dims(stride_elems, env)?,
+        Some(Expr::ArrayLit(stride_elems, _)) => eval_shape_dims(stride_elems, env, tape, params)?,
         Some(_) => {
             return Err(EvalError::Unsupported(
                 "grad: windows strides must be an [int, ...] literal".into(),
@@ -140,7 +140,9 @@ pub(crate) fn call_reduce_grad(
     let x = eval_tensor_expr(&args[axis_idx - 1], env, tape, params)?;
     match args.get(axis_idx) {
         None => Ok(x.sum()),
-        Some(Expr::ArrayLit(elems, _)) => Ok(x.reduce_sum(&eval_shape_dims(elems, env)?)),
+        Some(Expr::ArrayLit(elems, _)) => {
+            Ok(x.reduce_sum(&eval_shape_dims(elems, env, tape, params)?))
+        }
         Some(_) => Ok(x.reduce_sum(&[tape_scalar_usize(
             &args[axis_idx],
             env,
@@ -164,6 +166,6 @@ pub(crate) fn call_reshape(
             "grad: reshape's second argument must be an [int, ...] literal".into(),
         ));
     };
-    let dims = eval_shape_dims(elems, env)?;
+    let dims = eval_shape_dims(elems, env, tape, params)?;
     Ok(x.reshape(mlpl_array::Shape::new(dims)))
 }

@@ -632,3 +632,45 @@ fn grad_take_out_of_range_index_errors_cleanly_not_panic() {
         "expected a clean out-of-range error, got: {msg}"
     );
 }
+
+// -- moe-microscope F23: reshape dims bound to function parameters ------------
+// reshape dims that are function arguments (not literals/globals) must resolve
+// in the traced scope so the gradient flows, matching the literal-dims form.
+
+#[test]
+fn grad_through_reshape_with_param_bound_dims_matches_literal() {
+    let mut env = Environment::new();
+    let w = DenseArray::new(
+        Shape::new(vec![8, 4]),
+        (0..32).map(|n| n as f64 * 0.01).collect(),
+    )
+    .unwrap();
+    env.set_param("W".into(), w);
+    let src = "\
+        rows = [1, 3, 3, 5]\n\
+        def u:lit(x) {\n\
+          \"literal dims\"\n\
+          reshape(gather_rows(W, rows), [4, 4]) * x\n\
+        }\n\
+        def u:par(x, n, w) {\n\
+          \"parameter-bound dims\"\n\
+          reshape(gather_rows(W, rows), [n, w]) * x\n\
+        }\n\
+        x = reshape(range(16), [4, 4]) * 0.1\n";
+    eval_program(&parse(&lex(src).unwrap()).unwrap(), &mut env).unwrap();
+    let lit = run(
+        "reduce_add(abs(grad(reduce_add(u:lit(x) * u:lit(x)), W)))",
+        &mut env,
+    );
+    let par = run(
+        "reduce_add(abs(grad(reduce_add(u:par(x, 4, 4) * u:par(x, 4, 4)), W)))",
+        &mut env,
+    );
+    assert!(lit.data()[0] > 1e-9, "literal-dims grad is non-trivial");
+    assert!(
+        (lit.data()[0] - par.data()[0]).abs() < 1e-9,
+        "param-dims grad {} == literal {}",
+        par.data()[0],
+        lit.data()[0]
+    );
+}

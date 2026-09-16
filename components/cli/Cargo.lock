@@ -2560,6 +2560,7 @@ dependencies = [
  "mlpl-runtime",
  "mlpl-serve-core",
  "mlpl-serve-state",
+ "mlpl-source-loader",
  "mlpl-web-viz-ir",
  "rand 0.8.6",
  "rayon",

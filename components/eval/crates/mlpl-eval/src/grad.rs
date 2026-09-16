@@ -174,7 +174,7 @@ pub(crate) fn eval_tensor_expr(
             crate::grad_const::fncall_or_fold(expr, name, args, env, tape, params)
         }
         Expr::TensorCtor { shape, .. } => {
-            let dims = eval_shape_dims(shape, env)?;
+            let dims = eval_shape_dims(shape, env, tape, params)?;
             Ok(leaf(DenseArray::zeros(Shape::new(dims))))
         }
         // Scoped forms and string literals never have a tensor
@@ -297,10 +297,16 @@ pub(crate) fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
 pub(crate) fn eval_shape_dims(
     shape: &[Expr],
     env: &mut Environment,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
 ) -> Result<Vec<usize>, EvalError> {
     let mut dims = Vec::with_capacity(shape.len());
     for dim_expr in shape {
-        let arr = crate::eval::eval_expr(dim_expr, env, &mut None)?.into_array()?;
+        // Resolve each dim through the traced scope (eval_tensor_expr checks the
+        // function's local bindings before the global env), so a reshape/windows
+        // dimension bound to a function argument resolves and the gradient flows
+        // through the reshaped value (finding F23).
+        let arr = eval_tensor_expr(dim_expr, env, tape, params)?.value();
         if arr.rank() != 0 {
             return Err(EvalError::InvalidShapeDim);
         }

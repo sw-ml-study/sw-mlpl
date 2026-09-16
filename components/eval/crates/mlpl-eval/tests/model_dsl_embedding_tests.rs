@@ -233,9 +233,15 @@ fn grad_through_batched_embed_trains_table() {
     run("e = embed(8, 4, 0)", &mut env);
     let names = model_params(&env, "e").unwrap();
     let g = run(
-        &format!("grad(sum(apply(e, reshape([1,2,3,4,5,6], [2,3]))), {})", names[0]),
+        &format!(
+            "grad(sum(apply(e, reshape([1,2,3,4,5,6], [2,3]))), {})",
+            names[0]
+        ),
         &mut env,
     );
     assert_eq!(g.shape().dims(), &[8, 4]);
-    assert!(g.data().iter().any(|v| v.abs() > 1e-9), "table gets gradient");
+    assert!(
+        g.data().iter().any(|v| v.abs() > 1e-9),
+        "table gets gradient"
+    );
 }
