@@ -1,23 +1,22 @@
-# demo-coding-agent-findings
+# moe-microscope-followups-5
 
-Address the five findings from ../demo-coding-agent (CA1-CA5 in
-docs/sw-mlpl-findings.md; that repo files them as its own F1-F5). Lead with CA2,
-the meta-fix: an undefined-function call must say "unknown function", not the
-array diagnostic that misleads every wrong builtin-name guess.
+The moe-microscope rerun after followups-4 found F22 not fully fixed and two new
+grad-surface findings (docs/sw-mlpl-findings.md). Lead with the F22 redo.
 
-## Steps (priority order)
+## Steps
 
-1. CA2 -- calling an undefined function reports the array diagnostic instead of
-   "unknown function: NAME". Fix the fncall dispatch error path to name the
-   real problem. TDD.
-2. CA5 -- len rejects string lists. Make len accept a StrList (item count),
-   keeping list_len as an alias; a single-string len errors clearly (directing
-   to len_bytes/len_chars). TDD.
-3. CA1 -- "a" + "b" fails with the array diagnostic. Either concatenate two
-   strings with +, or give a clear "use str_concat" error. TDD.
-4. CA4 -- write_text does not create parent dirs. Add a sandboxed make_dir
-   builtin (like the other fs builtins) or have write_text create parents. TDD.
-5. CA3 -- doc-only: a symlink whose target is inside the sandbox reads fine, but
-   the docs say symlinks are never followed. Fix the wording.
-6. relay-and-close -- mark CA1-CA5 resolved/documented, refresh CHANGES + wiki,
-   mark the saga shipped, rebuild binaries. --done.
+1. f22-redo-per-param-step -- reset_optimizer + rebind-clearing were necessary
+   but not sufficient: Adam's step counter is keyed per-optimizer ("adam"),
+   shared across models, so two variants trained in sequence cross-contaminate
+   via bias correction. Key the step counter per parameter (or per-param-set)
+   so each model's bias correction is independent; clear it on rebind/reset.
+   TDD: reused-name and fresh-name first steps match without a shared-counter
+   artifact.
+2. f23-reshape-dims-from-fn-params -- reshape dims bound to function parameters
+   drop the gradient silently inside grad. Resolve/handle so the gradient
+   flows (or errors loudly). TDD.
+3. f24-apply-engram-ids-from-fn-param -- apply_engram with ids bound to a
+   function parameter is not seen inside grad (F11/F15-class scope). Resolve
+   ids against the traced scope. TDD.
+4. relay-and-close -- mark F22/F23/F24 resolved, refresh CHANGES + wiki, mark
+   the saga shipped, rebuild binaries. --done.

@@ -1,0 +1,1 @@
+F22 REDO: reset_optimizer + rebind-clearing were not sufficient because Adam's step counter is keyed per-optimizer name ('adam'), shared across models, so sequential variants cross-contaminate via bias correction. Key the step counter per parameter (or per-param-set); clear on rebind/reset. TDD: reused-name and fresh-name first steps match. See docs/sw-mlpl-findings.md F22.

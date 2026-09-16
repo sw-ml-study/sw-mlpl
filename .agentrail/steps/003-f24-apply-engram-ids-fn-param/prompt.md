@@ -1,0 +1,1 @@
+F24: apply_engram with ids bound to a function parameter is not seen inside grad (F11/F15-class scope). Reproduce from probes/f24_apply_engram_ids_param_in_grad.mlpl; resolve ids against the traced scope. TDD. See docs/sw-mlpl-findings.md F24.

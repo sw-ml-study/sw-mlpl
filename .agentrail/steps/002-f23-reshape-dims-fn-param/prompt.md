@@ -1,0 +1,1 @@
+F23: reshape dims bound to function parameters drop the gradient silently inside grad. Reproduce from probes/f23b_param_bound_reshape_in_grad.mlpl; make the gradient flow (or error loudly). TDD. See docs/sw-mlpl-findings.md F23.
