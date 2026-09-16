@@ -181,3 +181,42 @@ fn adam_training_moves_only_addressed_memory_and_reduces_loss() {
     }
     assert!(moved > 0, "at least one addressed row must move");
 }
+
+// -- moe-microscope F24: apply_engram ids bound to a function parameter --------
+// When the ids/index argument is a user-function parameter (not a literal or a
+// global), it must resolve in the traced scope so the gradient reaches the
+// memory table -- matching the same call with ids in a global.
+
+#[test]
+fn grad_through_apply_engram_with_param_bound_ids_matches_global() {
+    let mut env = Environment::new();
+    let mem_name = tiny_engram(&mut env);
+    eval(&mut env, "ids = [1, 2, 3]").unwrap();
+    eval(
+        &mut env,
+        "def u:with_global(h) {\n  \"ids from a global\"\n  reduce_add(apply_engram(e, h, ids) * apply_engram(e, h, ids))\n}",
+    )
+    .unwrap();
+    eval(
+        &mut env,
+        "def u:with_param(h, ids2) {\n  \"ids from a parameter\"\n  reduce_add(apply_engram(e, h, ids2) * apply_engram(e, h, ids2))\n}",
+    )
+    .unwrap();
+    let g = eval(
+        &mut env,
+        &format!("reduce_add(abs(grad(u:with_global(h), {mem_name})))"),
+    )
+    .unwrap();
+    let p = eval(
+        &mut env,
+        &format!("reduce_add(abs(grad(u:with_param(h, ids), {mem_name})))"),
+    )
+    .unwrap();
+    assert!(g.data()[0] > 1e-9, "global-ids grad is non-trivial");
+    assert!(
+        (g.data()[0] - p.data()[0]).abs() < 1e-9,
+        "param-ids grad {} == global {}",
+        p.data()[0],
+        g.data()[0]
+    );
+}

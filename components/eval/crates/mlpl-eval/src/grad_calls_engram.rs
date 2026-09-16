@@ -56,7 +56,10 @@ pub(crate) fn call_apply_engram(
         ));
     };
     let h = crate::grad::eval_tensor_expr(&args[1], env, tape, params)?;
-    let ids = crate::eval::eval_expr(&args[2], env, &mut None)?.into_array()?;
+    // Resolve ids through the traced scope so an index bound to a user-function
+    // argument (not a literal or global) is seen and the gradient reaches the
+    // memory table -- same scope-resolution fix as gather_rows / F23 (F24).
+    let ids = crate::grad_const::eval_index_expr(&args[2], env, params)?;
     let inputs = EngramInputs {
         memory: &memory,
         w_value: &w_value,
