@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- fix(optim): per-parameter Adam step counter (F22 redo)
+- chore(agentrail): archive demo-coding-agent-findings; init followups-5 (F22-redo/F23/F24)
+- chore(agentrail): complete 006-dca-relay-and-close; demo-coding-agent-findings saga done
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): close demo-coding-agent CA1-CA5; queue moe followups-5
 - chore(agentrail): complete 005-ca3-symlink-wording; advance to 006-dca-relay-and-close
 - docs(changes): refresh CHANGES.md to HEAD
