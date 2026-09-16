@@ -1,9 +1,10 @@
 number = 6
 slug = "dca-relay-and-close"
-status = "in-progress"
+status = "completed"
 description = "Mark CA1-CA5 resolved/documented, refresh CHANGES + wiki errata, mark demo-co..."
 role = "production"
 context_files = []
 created_at = "2026-09-15T12:13:02"
+completed_at = "2026-09-15T19:01:11"
 task_type = "docs"
-commits = []
+commits = ["fbfceccbe7752f65ba7fccb6938cba1b2b5ef159"]

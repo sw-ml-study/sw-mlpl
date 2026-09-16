@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 6,
+    "step": "dca-relay-and-close"
+  },
+  "action": "CA1-CA5 resolution table with commits; queued followups-5 (F22-redo/F23/F24); wiki errata; gen-changes; markdown clean.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-15T19:01:11"
+}
