@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-15
 
+- feat(fs): make_dir builtin for sandboxed directory creation (CA4)
+- chore(agentrail): complete 003-ca1-string-plus; advance to 004-ca4-make-dir
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(eval): + concatenates two strings (CA1)
 - chore(agentrail): complete 002-ca5-len-string-lists; advance to 003-ca1-string-plus
 - docs(changes): refresh CHANGES.md to HEAD
