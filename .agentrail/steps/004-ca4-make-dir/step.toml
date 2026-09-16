@@ -1,9 +1,10 @@
 number = 4
 slug = "ca4-make-dir"
-status = "in-progress"
+status = "completed"
 description = "CA4: write_text does not create parent directories. Add a sandboxed make_dir ..."
 role = "production"
 context_files = []
 created_at = "2026-09-15T12:13:02"
+completed_at = "2026-09-15T18:56:12"
 task_type = "production"
-commits = []
+commits = ["6a0e86c134eefddbe5f75ac9436ca0a4759b3c18"]

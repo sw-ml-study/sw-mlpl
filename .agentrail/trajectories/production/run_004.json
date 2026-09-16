@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 4,
+    "step": "ca4-make-dir"
+  },
+  "action": "New make_dir builtin in fs_mkdir module; create_dir_all with contained() sandbox; TDD (create + escape-refused); doc; rebuilt binaries incl serve.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-15T18:56:12"
+}
