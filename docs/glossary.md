@@ -1780,8 +1780,11 @@ The language-native test-runner surface: a SANDBOXED
 filesystem API -- `fs_walk(dir, pattern)` (walk in lexical order
 with a `*` pattern), `read_text(path)` / `write_text(path, text)`
 (exact-text read/write), and `remove_path(path)` (removal) -- all
-Result-speaking, all contained by the `--source-dir` sandbox,
-symlinks never followed, plus `run_script(path, {source_dir, data_dir,
+Result-speaking, all contained by the `--source-dir` sandbox
+(paths are canonicalized and a symlink whose target escapes the root
+is refused; a symlink resolving inside the sandbox is followed
+normally, and `fs_walk` does not descend into symlinked directories,
+by a cycle-safe policy), plus `run_script(path, {source_dir, data_dir,
 capture})`, which executes a file in a FRESH environment (no
 definition or registry leakage), preserves `include`
 semantics, and returns the outcome as data: status

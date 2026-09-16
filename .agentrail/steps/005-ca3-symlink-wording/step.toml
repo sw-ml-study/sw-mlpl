@@ -1,6 +1,6 @@
 number = 5
 slug = "ca3-symlink-wording"
-status = "pending"
+status = "in-progress"
 description = "CA3 (doc-only): a symlink whose target is inside the sandbox reads fine, but ..."
 role = "production"
 context_files = []
