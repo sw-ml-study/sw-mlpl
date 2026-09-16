@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 1,
+    "step": "f22-redo-per-param-step"
+  },
+  "action": "Per-param step key in the CPU adam loop (shadowing shared bc); clear_param drops per-param steps; TDD (probe equality) + training regression (single-model convergence preserved); rebuilt binaries incl serve.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-15T20:10:41"
+}
