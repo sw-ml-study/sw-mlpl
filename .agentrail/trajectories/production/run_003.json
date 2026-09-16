@@ -1,0 +1,11 @@
+{
+  "task_type": "production",
+  "state": {
+    "number": 3,
+    "step": "f24-apply-engram-ids-fn-param"
+  },
+  "action": "Read call_apply_engram + eval_index_expr; RED test in engram_grad_tests; one-line switch of ids resolution to eval_index_expr; scoped cargo test (engram_grad/engram_chain/grad_builtin), clippy -D warnings, fmt, sw-checklist; rebuilt repl/build/serve; probe smoke-test.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-16T12:27:14"
+}
