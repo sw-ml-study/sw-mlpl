@@ -341,3 +341,36 @@ Design note (string length, CA5-adjacent): three notions exist -- bytes
 grapheme clusters (neither counts by default). Recommendation: `len(StrList)` =
 item count; a single-string `len` errors clearly and directs to `len_bytes`
 (UTF-8 bytes) and `len_chars` (code points; document "not grapheme clusters").
+
+## Follow-up batch 5 (2026-09-15 rerun by ../moe-microscope) -- RESOLVED
+
+The rerun after `moe-microscope-followups-4` found F22 necessary-but-not-
+sufficient and two more grad-surface scope findings. All shipped in
+`moe-microscope-followups-5`.
+
+| Finding | Severity | Resolution | Commit |
+|---------|----------|------------|--------|
+| F22 (redo) shared Adam step counter | important | step counter keyed per parameter (`adam:<param>`); `clear_param`/`reset_optimizer` drop it | `3ffd7266` |
+| F23 reshape dims from fn params | BUG | reshape/windows/reduce/TensorCtor dims resolve through the traced scope; gradient flows | `fca6043c` |
+| F24 apply_engram ids from fn param | BUG | ids resolve through the traced scope (same fix as gather_rows/F23); gradient reaches the memory table | `1b4d29e5` |
+
+- **F22 (redo)** (important) -- `reset_optimizer()` plus rebind-clearing (batch
+  4) were necessary but not sufficient: Adam's step counter was keyed
+  per-optimizer (`"adam"`), shared across params, so two variants trained in
+  sequence cross-contaminated through bias correction. Fix: key the step counter
+  per parameter (`"adam:<param>"`) so each model's bias correction is
+  independent; `clear_param`/`clear` drop it on rebind/reset. Probe:
+  `probes/f22b_shared_step_counter.mlpl`.
+- **F23** (BUG) -- a `reshape` whose dims are bound to a user function's
+  arguments (not literals or globals) dropped the gradient inside `grad`: the
+  dims were resolved with the eager global env, blind to the traced function-arg
+  scope. Fix: thread the traced scope through `eval_shape_dims` (reshape dims,
+  windows sizes/strides, reduce axes, TensorCtor shape) so a dim bound to a
+  function argument resolves and the gradient flows. Probe:
+  `probes/f23b_param_bound_reshape_in_grad.mlpl`.
+- **F24** (BUG) -- `apply_engram`'s ids argument bound to a user-function
+  parameter was resolved with the eager global env, so the gradient never
+  reached the memory table (the same call with ids in a global traced fine).
+  Fix: resolve ids through the traced scope (`eval_index_expr`), the identical
+  fix already used by `gather_rows` and F23. Probe:
+  `probes/f24_apply_engram_ids_param_in_grad.mlpl`.

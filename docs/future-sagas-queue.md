@@ -98,16 +98,16 @@ data-forge (Track 1).
   doc fix (`d92778db`). All verified; repl/build/serve rebuilt; sw-checklist
   fails held at 38.
 
-- **moe-microscope-followups-5** -- QUEUED (2026-09-14). From the moe-microscope
+- **moe-microscope-followups-5** -- SHIPPED 2026-09-16. From the moe-microscope
   rerun after followups-4: **F22 REDO** -- reset_optimizer + rebind-clearing
-  were necessary but not sufficient; Adam's step counter is keyed per-optimizer
+  were necessary but not sufficient; Adam's step counter was keyed per-optimizer
   ("adam"), shared across models, so two variants trained in sequence still
-  cross-contaminate via bias correction. Fix: per-parameter (or per-param-set)
-  step counter. Then **F23** (reshape dims bound to function parameters drop the
-  gradient silently) and **F24** (apply_engram with ids bound to a function
-  parameter is not seen inside grad -- F11/F15-class scope). Probes:
-  ../moe-microscope/probes/{f23b_param_bound_reshape_in_grad,
-  f24_apply_engram_ids_param_in_grad}.mlpl.
+  cross-contaminated via bias correction -- now keyed per parameter
+  ("adam:<param>") and dropped by clear_param/reset. Then **F23** (reshape dims
+  bound to function parameters dropped the gradient) and **F24** (apply_engram
+  ids bound to a function parameter not seen inside grad) -- both F11/F15-class
+  scope fixes: dims/ids now resolve through the traced scope. See
+  `docs/sw-mlpl-findings.md` Follow-up batch 5.
 
 ### Paused sagas
 
