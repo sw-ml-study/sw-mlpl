@@ -122,6 +122,26 @@ data-forge (Track 1).
   HTTP RS12) belong in `../demo-extensions`, not this repo. MLX-not-compiled /
   CPU perf is a distribution call, tracked separately.
 
+- **autograd-partition** -- QUEUED (2026-09-17), prerequisite for the harder
+  reasoning-from-scratch-numerics grad work (softmax-axis RS2 general form,
+  transpose_axes RS3, pow-general/PowConst). The whole autograd component is at
+  the module ceiling: both `mlpl-autograd` and `mlpl-autograd-tape` have 7
+  modules (warn/max), and `mlpl-autograd` has three modules already FAILING
+  function-count -- tensor_ops.rs (8), tensor_reduce.rs (9), backward_shape.rs
+  (8). No intra-crate split is possible without adding a Crate-Module-Count
+  FAIL, so a NodeKind/method/backward arm cannot be added cleanly. The backward
+  pass is nearly tape-only (backward.rs depends only on mlpl-autograd-tape;
+  backward_shape.rs additionally calls tensor_ops::cross_entropy_backward, a
+  pure DenseArray kernel that should move down to the tape crate's kernels).
+  Plan: extract a `mlpl-autograd-backward` crate (backward.rs + backward_shape.rs,
+  each split under 5 fns), move the cross_entropy kernels into the tape crate's
+  kernel modules, and split tensor_ops/tensor_reduce by responsibility -- target
+  retiring the 3 module-fn FAILs while keeping every crate under the module
+  ceiling. Pure refactor; the full autograd + eval grad suites stay green.
+  Interim: remaining RS grad items can be added to the already-FAILING modules
+  (checklist-neutral -- no NEW fail) if the partition is deferred, at the cost of
+  worse module hygiene.
+
 ### Paused sagas
 
 - **axis-naming-unification** -- PAUSED 2026-09-11 at 4/7 steps (plan:
