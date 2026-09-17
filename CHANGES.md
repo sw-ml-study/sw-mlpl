@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-16
 
+- chore(agentrail): complete 001-unary-diff-sqrt-sin-cos-pow; advance to 002-sci-notation-literals
+- feat(grad): differentiable sqrt, sin, cos (RS1)
+- docs(findings): triage ../reasoning-from-scratch batch; queue reasoning-from-scratch-numerics
+- chore(agentrail): complete 004-fu5-relay-and-close; moe-microscope-followups-5 shipped
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): mark F22-redo/F23/F24 resolved; ship moe-microscope-followups-5
 - chore(agentrail): complete 003-f24-apply-engram-ids-fn-param; advance to 004-fu5-relay-and-close
 - fix(grad): resolve apply_engram ids through traced scope (F24)
