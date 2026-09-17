@@ -39,7 +39,7 @@ fn scientific_literal_in_expression() {
 #[test]
 fn plain_numbers_unchanged() {
     assert!((eval("42").unwrap().data()[0] - 42.0).abs() < 1e-12);
-    assert!((eval("3.14").unwrap().data()[0] - 3.14).abs() < 1e-12);
+    assert!((eval("3.5").unwrap().data()[0] - 3.5).abs() < 1e-12);
     // range(n) (the array constructor) is unaffected by exponent lexing.
     assert_eq!(eval("range(3)").unwrap().data().len(), 3);
 }

@@ -82,7 +82,7 @@ pub(crate) fn fold_const_expr(
 /// A parameter that appears only inside shape-metadata builtins (`shape`,
 /// `rank`, `len`, `labels`) does not count -- those read structure, not values
 /// -- so a shape-derived size is value-independent and safe to constant-fold.
-fn differentiably_uses_param(expr: &Expr, params: &HashMap<String, Tensor>) -> bool {
+pub(crate) fn differentiably_uses_param(expr: &Expr, params: &HashMap<String, Tensor>) -> bool {
     match expr {
         Expr::Ident(name, _) => params.contains_key(name),
         Expr::FnCall { name, args, .. } => {

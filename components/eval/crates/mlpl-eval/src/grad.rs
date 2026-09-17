@@ -202,6 +202,7 @@ pub(crate) fn eval_tensor_fncall(
         return crate::grad_const::eval_stop_gradient(name, args, env, tape, params);
     }
     match name {
+        "pow" => crate::grad_calls_pow::call_pow(args, env, tape, params),
         "matmul" => crate::grad_calls_basic::call_matmul(args, env, tape, params),
         "apply" => crate::grad_calls_basic::call_apply(args, env, tape, params),
         "apply_engram" => crate::grad_calls_engram::call_apply_engram(args, env, tape, params),

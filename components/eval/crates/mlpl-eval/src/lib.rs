@@ -127,6 +127,7 @@ mod fs_walk_impl;
 mod grad;
 mod grad_calls_basic;
 mod grad_calls_engram;
+mod grad_calls_pow;
 mod grad_calls_shape;
 mod grad_const;
 mod grad_optim;
