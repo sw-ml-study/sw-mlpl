@@ -1,0 +1,9 @@
+number = 5
+slug = "matmul-rank3-clean-error"
+status = "pending"
+description = "RS4: matmul is 2-D only and rank-3 input PANICS with a misleading error insid..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-16T23:11:46"
+task_type = "bugfix"
+commits = []

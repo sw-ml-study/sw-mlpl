@@ -1,9 +1,10 @@
 number = 4
 slug = "lenient-string-escapes"
-status = "pending"
+status = "completed"
 description = "RS-escape (../reasoning-from-scratch): MLPL string literals hard-error on unk..."
 role = "production"
 context_files = []
 created_at = "2026-09-16T22:15:27"
+completed_at = "2026-09-16T23:11:46"
 task_type = "bugfix"
-commits = []
+commits = ["3250cea96c6c7dd283c2bd42a74122b252969f9d"]
