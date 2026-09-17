@@ -1,0 +1,9 @@
+number = 3
+slug = "pow-const-exponent-grad"
+status = "pending"
+description = "RS1-pow: pow(base, exponent) is a binary elementwise builtin and is not diffe..."
+role = "production"
+context_files = []
+created_at = "2026-09-16T20:02:49"
+task_type = "feature"
+commits = []

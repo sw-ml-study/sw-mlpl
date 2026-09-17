@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 2,
+    "step": "sci-notation-literals"
+  },
+  "action": "Located mlpl-lex-number crate; RED token + eval tests; added scan_exponent + wired into lex_number; scoped tests (lex-number, sci_notation, mlpl-lexer, mlpl-parser), clippy -D warnings, fmt, sw-checklist; grep for source collisions; rebuilt binaries; smoke-test.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-16T20:34:22"
+}
