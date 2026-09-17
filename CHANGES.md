@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-16
 
+- chore(agentrail): complete 002-sci-notation-literals; advance to 003-pow-const-exponent-grad
+- feat(lexer): scientific-notation numeric literals (RS5)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-unary-diff-sqrt-sin-cos-pow; advance to 002-sci-notation-literals
 - feat(grad): differentiable sqrt, sin, cos (RS1)
 - docs(findings): triage ../reasoning-from-scratch batch; queue reasoning-from-scratch-numerics
