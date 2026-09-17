@@ -37,6 +37,10 @@ pub(crate) fn call_matmul(
     arity_check(args, 2, "matmul")?;
     let a = eval_tensor_expr(&args[0], env, tape, params)?;
     let b = eval_tensor_expr(&args[1], env, tape, params)?;
+    // matmul is 2-D only; reject rank-3+ (batched) operands with an actionable
+    // message before the tape op indexes badly (RS4). Batched matmul is out of
+    // scope.
+    crate::fncall_arrays::matmul_2d_guard(a.value().rank(), b.value().rank())?;
     // Clean shape error instead of a tape panic on an inner-dim mismatch (F19).
     mlpl_array_ops_matmul::check_matmul_compat(&a.value(), &b.value())
         .map_err(EvalError::ArrayError)?;

@@ -64,6 +64,21 @@ fn eval_cross_entropy(
     Ok(Value::Array(result))
 }
 
+/// matmul is 2-D only: `[m,k] @ [k,n]` or matrix-vector `[m,k] @ [k]`. Reject
+/// rank-3+ (batched) operands with an actionable message instead of a deeper
+/// index error (RS4). Batched matmul is out of scope. Shared by the eager and
+/// grad (tape) matmul paths.
+pub(crate) fn matmul_2d_guard(l_rank: usize, r_rank: usize) -> Result<(), EvalError> {
+    if l_rank != 2 || (r_rank != 2 && r_rank != 1) {
+        return Err(EvalError::Unsupported(format!(
+            "matmul: operands must be rank-2 ([m,k] @ [k,n]) or matrix-vector \
+             ([m,k] @ [k]); got rank {l_rank} and rank {r_rank}. Batched \
+             (rank-3+) matmul is not supported."
+        )));
+    }
+    Ok(())
+}
+
 fn eval_matmul(
     args: &[Expr],
     env: &mut Environment,
@@ -72,6 +87,7 @@ fn eval_matmul(
 ) -> Result<Value, EvalError> {
     let l = eval_expr(&args[0], env, trace)?.into_array()?;
     let r = eval_expr(&args[1], env, trace)?.into_array()?;
+    matmul_2d_guard(l.rank(), r.rank())?;
     let result = l.matmul(&r).map_err(|e| match e {
         ArrayError::ShapeMismatch { .. } | ArrayError::LabelMismatch { .. } => {
             EvalError::ShapeMismatch {
