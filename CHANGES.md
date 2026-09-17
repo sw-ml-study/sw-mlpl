@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-16
 
+- chore(agentrail): complete 003-pow-const-exponent-grad; advance to 004-lenient-string-escapes
+- feat(grad): differentiable pow(x, k) for constant integer exponents (RS1-pow)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-sci-notation-literals; advance to 003-pow-const-exponent-grad
 - feat(lexer): scientific-notation numeric literals (RS5)
 - docs(changes): refresh CHANGES.md to HEAD
