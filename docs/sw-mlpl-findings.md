@@ -374,3 +374,41 @@ sufficient and two more grad-surface scope findings. All shipped in
   Fix: resolve ids through the traced scope (`eval_index_expr`), the identical
   fix already used by `gather_rows` and F23. Probe:
   `probes/f24_apply_engram_ids_param_in_grad.mlpl`.
+
+## reasoning-from-scratch findings (2026-09-16, from ../reasoning-from-scratch)
+
+A new downstream (a from-scratch reasoning-model build on the CPU interpreter,
+mlpl-repl 0.22.0 @ `1b4d29e5`) reported a batch spanning autodiff coverage,
+tensor primitives, dtypes, and general plumbing. Numbered RS1-RS12 here.
+Triaged against the project's rule: CORE only for what a library/extension
+cannot provide (new autodiff rules, tensor primitives, dtypes, lexer syntax,
+backend perf); LIBRARY for anything composable from existing differentiable
+primitives (even if ML); EXTENSION (`../demo-extensions`) for native/system
+access that is not core numerics. The code shows the autodiff cluster is
+cheaper and more half-built than the flat "not differentiable" phrasing
+implies: exp/log/sigmoid already have tape backward rules; softmax and
+transpose are already differentiable but only in a restricted form.
+
+| # | Finding | Verdict | Note |
+|---|---------|---------|------|
+| RS1 | `sqrt`/`sin`/`cos`/`pow` not differentiable | **CORE** | Missing unary backward rules; ~1 line each (exp/log/sigmoid already present) |
+| RS2 | `softmax(a, axis)` not differentiable | **CORE** | Tape softmax exists but last-axis/rank<=2 only; thread the axis (F23-style) + rank-3 |
+| RS3 | `transpose_axes` not differentiable | **CORE** | Tape transpose is "reverse axes" only; needs general-permutation backward |
+| RS4 | matmul 2-D only; rank-3 misleading error | **CORE** | Backward `.expect()`s on rank-3; clean error now, batched matmul is the real fix |
+| RS5 | no scientific-notation literals (`1e-4`) | **CORE** | Lexer; cannot be a library. High-value ergonomics |
+| RS6 | no bf16/f16 dtype in `reinterpret` | **CORE** | Needed for real model weights; medium priority (tiny models first) |
+| RS7 | no gradient clipping | **LIBRARY** | Pure array math (`min(1, maxnorm/norm(g))`); `.mlpl` stdlib |
+| RS8 | no weight decay | **CORE-small / LIBRARY** | Cleanest as an `adam` flag (optimizers are core); basic L2 is a `.mlpl` one-liner |
+| RS9 | no `str_replace`/`trim`/`starts_with` | **LIBRARY** | Small `.mlpl` string helpers (precedent: CA batch `len`/`+`) |
+| RS10 | no regex | **EXTENSION** | General-purpose, hard in MLPL; not baked into the language |
+| RS11 | no tokenizer.json import | **EXTENSION** | BPE/byte-level: format + perf -> native |
+| RS12 | no HTTP | **EXTENSION** / out of scope | Network + sandbox; often better to fetch outside MLPL and `read_bytes` in |
+| -- | `parse_json` rejects arrays-of-objects | **BY-DESIGN** | MLPL arrays are homogeneous-numeric; heterogeneous records do not map. JSONL is idiomatic -- document, do not "fix" |
+| -- | MLX not compiled / CPU perf | **DISTRIBUTION** | Not a feature: a build/release call. Ship an MLX-enabled repl for the Mac path; "tiny-first, real runs bounded/opt-in/measured" is the right mitigation |
+
+Sequencing (cheap-core-first, shipped as `reasoning-from-scratch-numerics`):
+RS1 + RS5 + RS4-clean-error lead (cheap, biggest ML unblock per unit effort),
+then RS2 + RS3 (finish existing machinery), then RS6. LIBRARY/EXTENSION rows
+are downstream-startable now and do not gate core. RS8 weight-decay lands with
+the optimizer surface. RS10/RS11/RS12 are extension work in `../demo-extensions`,
+not this repo.

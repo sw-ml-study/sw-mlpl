@@ -109,6 +109,19 @@ data-forge (Track 1).
   scope fixes: dims/ids now resolve through the traced scope. See
   `docs/sw-mlpl-findings.md` Follow-up batch 5.
 
+- **reasoning-from-scratch-numerics** -- QUEUED (2026-09-16). From
+  ../reasoning-from-scratch (RS1-RS12 in `docs/sw-mlpl-findings.md`). Cheap-core-
+  first ordering: (1) unary backward rules for `sqrt`/`sin`/`cos`/`pow` (RS1;
+  exp/log/sigmoid already exist), (2) scientific-notation literals `1e-4` in the
+  lexer (RS5), (3) matmul rank-3 clean error (RS4; batched matmul is a later
+  step), (4) `softmax(a, axis)` in grad -- thread the axis into the existing tape
+  softmax + rank-3 (RS2), (5) `transpose_axes` general-permutation backward
+  (RS3), (6) bf16/f16 `reinterpret` decode (RS6), (7) relay-and-close. LIBRARY
+  rows (grad clipping RS7, weight decay RS8, string helpers RS9) are
+  downstream-startable now; EXTENSION rows (regex RS10, tokenizer.json RS11,
+  HTTP RS12) belong in `../demo-extensions`, not this repo. MLX-not-compiled /
+  CPU perf is a distribution call, tracked separately.
+
 ### Paused sagas
 
 - **axis-naming-unification** -- PAUSED 2026-09-11 at 4/7 steps (plan:

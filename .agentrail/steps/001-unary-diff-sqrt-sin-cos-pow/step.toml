@@ -1,0 +1,9 @@
+number = 1
+slug = "unary-diff-sqrt-sin-cos-pow"
+status = "pending"
+description = "RS1: add tape backward rules for sqrt, sin, cos, pow (exp/log/sigmoid already..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-16T17:43:49"
+task_type = "bugfix"
+commits = []
