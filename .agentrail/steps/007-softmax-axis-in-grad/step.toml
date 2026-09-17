@@ -1,0 +1,9 @@
+number = 7
+slug = "softmax-axis-in-grad"
+status = "pending"
+description = "RS2: softmax(a, axis) differentiable in grad + rank-3. The tape softmax machi..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-17T10:29:00"
+task_type = "feature"
+commits = []

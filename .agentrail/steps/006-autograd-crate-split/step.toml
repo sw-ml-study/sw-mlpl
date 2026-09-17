@@ -1,9 +1,10 @@
 number = 6
 slug = "autograd-crate-split"
-status = "pending"
+status = "completed"
 description = "Refactor spike (b): split the mlpl-autograd crate to clear its ceilings befor..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-17T10:24:54"
+completed_at = "2026-09-17T10:29:00"
 task_type = "refactor"
-commits = []
+commits = ["aad1367b4877e8b095fa90f965998705d835a09d"]
