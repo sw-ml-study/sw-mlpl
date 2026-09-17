@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-17
+
+- chore(agentrail): complete 005-matmul-rank3-clean-error; advance to 006-autograd-crate-split
+- fix(matmul): actionable error for rank-3 operands instead of index error (RS4)
+
 ## 2026-09-16
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 004-lenient-string-escapes; advance to 005-matmul-rank3-clean-error
 - fix(lexer): lenient unknown string escapes for LaTeX/math text (RS-escape)
 - docs(changes): refresh CHANGES.md to HEAD
