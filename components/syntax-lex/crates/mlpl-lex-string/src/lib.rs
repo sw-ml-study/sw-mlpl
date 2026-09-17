@@ -38,22 +38,31 @@ fn handle_escape(
     if pos >= bytes.len() {
         return Err(unclosed(start));
     }
-    value.push(escape_char(bytes[pos], pos)?);
-    Ok(pos + 1)
+    match escape_char(bytes[pos]) {
+        Some(c) => {
+            value.push(c);
+            Ok(pos + 1)
+        }
+        // Unknown escape (e.g. LaTeX \frac, \in, or \;): keep the
+        // backslash literally and re-process the following byte through
+        // the normal UTF-8 path (so a multibyte char is not mangled).
+        None => {
+            value.push('\\');
+            Ok(pos)
+        }
+    }
 }
 
-/// Map one escape byte (the char after `\\`) to its literal.
-fn escape_char(byte: u8, pos: usize) -> Result<char, ParseError> {
+/// Map one escape byte (the char after `\\`) to its literal, or `None`
+/// when the escape is not recognized (handled leniently by the caller).
+fn escape_char(byte: u8) -> Option<char> {
     match byte {
-        b'"' => Ok('"'),
-        b'\\' => Ok('\\'),
-        b'n' => Ok('\n'),
-        b't' => Ok('\t'),
-        b'r' => Ok('\r'),
-        other => Err(ParseError::UnexpectedCharacter {
-            ch: other as char,
-            span: Span::new(pos - 1, pos + 1),
-        }),
+        b'"' => Some('"'),
+        b'\\' => Some('\\'),
+        b'n' => Some('\n'),
+        b't' => Some('\t'),
+        b'r' => Some('\r'),
+        _ => None,
     }
 }
 
