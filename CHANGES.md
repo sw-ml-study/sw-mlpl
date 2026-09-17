@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-17
 
+- chore(agentrail): complete 006-autograd-crate-split (spike); advance to 007-softmax-axis-in-grad
+- docs(queue): queue autograd-partition saga (crate-split spike finding)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 005-matmul-rank3-clean-error; advance to 006-autograd-crate-split
 - fix(matmul): actionable error for rank-3 operands instead of index error (RS4)
 
