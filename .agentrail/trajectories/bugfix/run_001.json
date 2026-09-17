@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 1,
+    "step": "unary-diff-sqrt-sin-cos-pow"
+  },
+  "action": "Traced UnaryOp/UnaryKind/push_unary/prop_unary wiring; RED unary_diff_tests; edits to ops.rs (variants+forward+deriv+backward+map_unary Option), tensor_ops.rs (push_unary+methods), resident_backward.rs (None arm), grad.rs (unary_tensor_op); scoped tests, clippy -D warnings, fmt, sw-checklist; rebuilt binaries; probe smoke-test.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-16T20:02:03"
+}
