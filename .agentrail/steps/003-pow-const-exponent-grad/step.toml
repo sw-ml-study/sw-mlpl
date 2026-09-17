@@ -1,9 +1,10 @@
 number = 3
 slug = "pow-const-exponent-grad"
-status = "pending"
+status = "completed"
 description = "RS1-pow: pow(base, exponent) is a binary elementwise builtin and is not diffe..."
 role = "production"
 context_files = []
 created_at = "2026-09-16T20:02:49"
+completed_at = "2026-09-16T22:15:38"
 task_type = "feature"
-commits = []
+commits = ["8a1fe24a5215df165e155cdc9ed4ce769417142c"]

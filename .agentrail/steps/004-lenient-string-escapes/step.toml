@@ -1,0 +1,9 @@
+number = 4
+slug = "lenient-string-escapes"
+status = "pending"
+description = "RS-escape (../reasoning-from-scratch): MLPL string literals hard-error on unk..."
+role = "production"
+context_files = []
+created_at = "2026-09-16T22:15:27"
+task_type = "bugfix"
+commits = []

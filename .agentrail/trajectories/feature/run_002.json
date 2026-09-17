@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 3,
+    "step": "pow-const-exponent-grad"
+  },
+  "action": "Measured autograd + eval-grad budgets via sw-checklist -v (found autograd maxed); scoped pow to eval-path integer rewrite in a new module; RED tests; guard split to hold LOC gate; scoped tests, clippy --all-targets, fmt, sw-checklist; rebuilt binaries; smoke-test. Inserted lenient-string-escapes step (downstream confirmed the \\; friction).",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-16T22:15:38"
+}
