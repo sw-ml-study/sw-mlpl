@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 5,
+    "step": "matmul-rank3-clean-error"
+  },
+  "action": "Reproduced probe; traced eager vs grad matmul paths; RED tests; added shared matmul_2d_guard used by eval_matmul + call_matmul; scoped tests, clippy --all-targets, fmt, sw-checklist; rebuilt binaries; smoke-test.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-17T10:24:54"
+}

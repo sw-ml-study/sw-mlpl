@@ -1,9 +1,10 @@
 number = 5
 slug = "matmul-rank3-clean-error"
-status = "pending"
+status = "completed"
 description = "RS4: matmul is 2-D only and rank-3 input PANICS with a misleading error insid..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-16T23:11:46"
+completed_at = "2026-09-17T10:24:54"
 task_type = "bugfix"
-commits = []
+commits = ["fdb5e6756b6a0c514b2303a4efba40d732ce4922"]
