@@ -282,6 +282,9 @@ pub(crate) fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
         "mean" => Tensor::mean,
         "exp" => Tensor::exp,
         "log" => Tensor::log,
+        "sqrt" => Tensor::sqrt,
+        "sin" => Tensor::sin,
+        "cos" => Tensor::cos,
         "relu" => Tensor::relu,
         // `tanh_fn` is the surface-MLPL spelling (`tanh` itself
         // is reserved by the `tanh_layer()` model layer); both

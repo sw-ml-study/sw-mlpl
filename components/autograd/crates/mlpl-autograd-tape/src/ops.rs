@@ -19,6 +19,12 @@ pub enum UnaryOp {
     Tanh,
     /// 1 / (1 + exp(-x))
     Sigmoid,
+    /// sqrt(x)
+    Sqrt,
+    /// sin(x)
+    Sin,
+    /// cos(x)
+    Cos,
 }
 
 /// Binary elementwise op.
@@ -45,8 +51,35 @@ impl UnaryOp {
             Self::Relu => |v| v.max(0.0),
             Self::Tanh => f64::tanh,
             Self::Sigmoid => |v| 1.0 / (1.0 + (-v).exp()),
+            Self::Sqrt => f64::sqrt,
+            Self::Sin => f64::sin,
+            Self::Cos => f64::cos,
         };
         x.map(f)
+    }
+
+    /// Per-element local derivative `d y_i / d x_i` for input `xi` and
+    /// cached forward output `yi`.
+    #[must_use]
+    fn deriv(self, xi: f64, yi: f64) -> f64 {
+        match self {
+            Self::Neg => -1.0,
+            Self::Exp => yi,
+            Self::Log => 1.0 / xi,
+            Self::Relu => {
+                if xi > 0.0 {
+                    1.0
+                } else {
+                    0.0
+                }
+            }
+            Self::Tanh => 1.0 - yi * yi,
+            Self::Sigmoid => yi * (1.0 - yi),
+            // d/dx sqrt(x) = 1 / (2 sqrt(x)) = 0.5 / y
+            Self::Sqrt => 0.5 / yi,
+            Self::Sin => xi.cos(),
+            Self::Cos => -xi.sin(),
+        }
     }
 
     /// Compute local gradient wrt input x given upstream gradient.
@@ -57,24 +90,7 @@ impl UnaryOp {
         let n = upstream.data().len();
         let mut out = Vec::with_capacity(n);
         for i in 0..n {
-            let xi = x.data()[i];
-            let yi = y.data()[i];
-            let g = upstream.data()[i];
-            let local = match self {
-                Self::Neg => -1.0,
-                Self::Exp => yi,
-                Self::Log => 1.0 / xi,
-                Self::Relu => {
-                    if xi > 0.0 {
-                        1.0
-                    } else {
-                        0.0
-                    }
-                }
-                Self::Tanh => 1.0 - yi * yi,
-                Self::Sigmoid => yi * (1.0 - yi),
-            };
-            out.push(g * local);
+            out.push(upstream.data()[i] * self.deriv(x.data()[i], y.data()[i]));
         }
         DenseArray::new(upstream.shape().clone(), out).expect("shape preserved")
     }
@@ -143,17 +159,20 @@ impl BinaryOp {
 }
 
 /// The tape's `UnaryOp` in device terms (moved from resident.rs
-/// to honor the module function budget).
+/// to honor the module function budget). `None` means the op has no
+/// device kernel and runs on the host `DenseArray` path (sin/cos).
 #[must_use]
-pub fn map_unary(op: UnaryOp) -> UnaryKind {
-    match op {
+pub fn map_unary(op: UnaryOp) -> Option<UnaryKind> {
+    Some(match op {
         UnaryOp::Neg => UnaryKind::Neg,
         UnaryOp::Exp => UnaryKind::Exp,
         UnaryOp::Log => UnaryKind::Log,
         UnaryOp::Relu => UnaryKind::Relu,
         UnaryOp::Tanh => UnaryKind::Tanh,
         UnaryOp::Sigmoid => UnaryKind::Sigmoid,
-    }
+        UnaryOp::Sqrt => UnaryKind::Sqrt,
+        UnaryOp::Sin | UnaryOp::Cos => return None,
+    })
 }
 
 /// The tape's `BinaryOp` in device terms.

@@ -29,6 +29,9 @@ pub fn unary_backward(
             up.dev_binary(BinKind::Mul, &mask).ok()
         }
         UnaryOp::Tanh | UnaryOp::Sigmoid => smooth_backward(op, y, &up),
+        // sqrt/sin/cos have no device backward kernel; the caller
+        // (prop_unary) falls back to the host DenseArray path.
+        UnaryOp::Sqrt | UnaryOp::Sin | UnaryOp::Cos => None,
     }
 }
 

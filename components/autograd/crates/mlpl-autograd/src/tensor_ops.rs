@@ -13,13 +13,14 @@ use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, map_unary, try_residen
 use mlpl_tensor_handle::TensorHandle;
 
 pub(crate) fn push_unary(t: &Tensor, op: UnaryOp) -> Tensor {
-    let value =
-        try_resident(&t.tape, ResidentReq::Unary(t.node, map_unary(op))).unwrap_or_else(|| {
-            if t.tape.resident.get() {
-                mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
-            }
-            TensorHandle::Cpu(op.forward(&t.value()))
-        });
+    // Ops without a device kernel (e.g. sin/cos) run on the host path.
+    let dev = map_unary(op).and_then(|k| try_resident(&t.tape, ResidentReq::Unary(t.node, k)));
+    let value = dev.unwrap_or_else(|| {
+        if t.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
+        TensorHandle::Cpu(op.forward(&t.value()))
+    });
     let node = t.tape.push(NodeData {
         value,
         grad: None,
@@ -91,6 +92,9 @@ impl Tensor {
     unary_method!(relu, Relu, "Elementwise ReLU.");
     unary_method!(tanh, Tanh, "Elementwise tanh.");
     unary_method!(sigmoid, Sigmoid, "Elementwise sigmoid.");
+    unary_method!(sqrt, Sqrt, "Elementwise square root.");
+    unary_method!(sin, Sin, "Elementwise sine.");
+    unary_method!(cos, Cos, "Elementwise cosine.");
 
     /// Fused cross-entropy loss (Saga 13 step 004).
     ///
