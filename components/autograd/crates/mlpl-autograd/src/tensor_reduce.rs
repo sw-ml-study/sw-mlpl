@@ -82,6 +82,13 @@ impl Tensor {
             .dims()
             .len()
             .saturating_sub(1);
+        self.softmax_axis(axis)
+    }
+
+    /// Softmax along an explicit `axis` (any rank; RS2). `softmax()` is the
+    /// last-axis special case.
+    #[must_use]
+    pub fn softmax_axis(&self, axis: usize) -> Self {
         let value = try_resident(
             &self.tape,
             ResidentReq::Axis(self.node, AxisKind::Softmax, Some(axis), false),

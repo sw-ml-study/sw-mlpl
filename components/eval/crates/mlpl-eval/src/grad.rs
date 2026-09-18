@@ -202,6 +202,7 @@ pub(crate) fn eval_tensor_fncall(
         return crate::grad_const::eval_stop_gradient(name, args, env, tape, params);
     }
     match name {
+        "softmax" => crate::grad_calls_softmax::call_softmax(args, env, tape, params),
         "pow" => crate::grad_calls_pow::call_pow(args, env, tape, params),
         "matmul" => crate::grad_calls_basic::call_matmul(args, env, tape, params),
         "apply" => crate::grad_calls_basic::call_apply(args, env, tape, params),
@@ -217,15 +218,7 @@ pub(crate) fn eval_tensor_fncall(
         "reduce" | "reduce_add" => {
             crate::grad_calls_shape::call_reduce_grad(name, args, env, tape, params)
         }
-        // flatten is reshape-to-1D; reuse the tape's Reshape backward.
-        // Inlined here (not a call_* helper) because grad_calls_shape is
-        // at its sw-checklist function-count ceiling.
-        "flatten" => {
-            arity_check(args, 1, "flatten")?;
-            let x = eval_tensor_expr(&args[0], env, tape, params)?;
-            let total = x.value().shape().elem_count();
-            Ok(x.reshape(mlpl_array::Shape::new(vec![total])))
-        }
+        "flatten" => call_flatten(args, env, tape, params),
         // User-defined functions: inline the body onto the tape (F2), so a
         // loss written as `def u:loss(...)` differentiates.
         _ if name.starts_with("u:") => {
@@ -292,10 +285,22 @@ pub(crate) fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
         // names map to the same tape op.
         "tanh" | "tanh_fn" => Tensor::tanh,
         "sigmoid" => Tensor::sigmoid,
-        "softmax" => Tensor::softmax,
         "transpose" => Tensor::transpose,
         _ => return None,
     })
+}
+
+/// `flatten(x)` on the tape: reshape to 1-D, reusing the Reshape backward.
+fn call_flatten(
+    args: &[Expr],
+    env: &mut Environment,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
+    arity_check(args, 1, "flatten")?;
+    let x = eval_tensor_expr(&args[0], env, tape, params)?;
+    let total = x.value().shape().elem_count();
+    Ok(x.reshape(mlpl_array::Shape::new(vec![total])))
 }
 
 pub(crate) fn eval_shape_dims(
