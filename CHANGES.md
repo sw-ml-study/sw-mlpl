@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- chore(agentrail): complete 010-empty-array-broadcast-panic; advance to 011-rsn-relay-and-close
+- fix(array): empty-array broadcast no longer aborts the process (S4)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 009-bf16-f16-reinterpret; advance to 010-empty-array-broadcast-panic
 - feat(bytes): bf16 and f16 dtypes for reinterpret + read (RS6)
 
