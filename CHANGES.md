@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-17
 
+- chore(agentrail): complete 007-softmax-axis-in-grad; advance to 008-transpose-axes-backward
+- feat(grad): axis-aware, rank-general softmax in grad (RS2)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 006-autograd-crate-split (spike); advance to 007-softmax-axis-in-grad
 - docs(queue): queue autograd-partition saga (crate-split spike finding)
 - docs(changes): refresh CHANGES.md to HEAD
