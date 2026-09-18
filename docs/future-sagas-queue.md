@@ -109,6 +109,15 @@ data-forge (Track 1).
   scope fixes: dims/ids now resolve through the traced scope. See
   `docs/sw-mlpl-findings.md` Follow-up batch 5.
 
+- **reasoning-from-scratch-numerics** -- SHIPPED 2026-09-18. Delivered RS1
+  (sqrt/sin/cos) + RS1-pow (integer exponents) + RS5 (`1e-4` literals) + RS4
+  (matmul rank-3 clean error) + RS2 (softmax axis, rank-general) + RS3
+  (transpose_axes) + RS6 (bf16/f16 decode), plus two mid-saga findings:
+  RS-escape (lenient LaTeX string escapes) and S4 (empty-array broadcast no
+  longer aborts the process). See `docs/sw-mlpl-findings.md` "Resolved --
+  reasoning-from-scratch-numerics". Deferred behind autograd-partition: the
+  general constant-exponent pow (PowConst node). RS7/RS8/RS9 -> library,
+  RS10/RS11/RS12 -> extensions. Original queue note below (historical):
 - **reasoning-from-scratch-numerics** -- QUEUED (2026-09-16). From
   ../reasoning-from-scratch (RS1-RS12 in `docs/sw-mlpl-findings.md`). Cheap-core-
   first ordering: (1) unary backward rules for `sqrt`/`sin`/`cos`/`pow` (RS1;

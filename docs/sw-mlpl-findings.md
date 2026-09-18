@@ -412,3 +412,28 @@ then RS2 + RS3 (finish existing machinery), then RS6. LIBRARY/EXTENSION rows
 are downstream-startable now and do not gate core. RS8 weight-decay lands with
 the optimizer surface. RS10/RS11/RS12 are extension work in `../demo-extensions`,
 not this repo.
+
+### Resolved -- `reasoning-from-scratch-numerics` (2026-09-18) -- SHIPPED
+
+The core rows shipped, plus two findings surfaced mid-saga: RS-escape (from
+../reasoning-from-scratch, LaTeX/math text in string literals) and S4 (from
+../demo-mlpl-libraries, an uncatchable empty-array crash).
+
+| Finding | Resolution | Commit |
+|---------|------------|--------|
+| RS1 sqrt/sin/cos | differentiable unary ops (tape UnaryOp + rules) | `0dfa3eae` |
+| RS5 sci-notation | lexer accepts `1e-4`/`6.02e23` | `2a774891` |
+| RS1-pow | `pow(x, int)` differentiates (repeated product); loud error otherwise | `8a1fe24a` |
+| RS-escape | unknown string escapes are lenient (LaTeX `\frac`/`\in` round-trip) | `3250cea9` |
+| RS4 matmul rank-3 | actionable "batched matmul not supported" error, both paths | `fdb5e675` |
+| RS2 softmax(a, axis) | axis-aware + rank-general softmax in grad | `363391a6` |
+| RS3 transpose_axes | general-permutation transpose differentiates (inverse-perm backward) | `1abe8f10` |
+| RS6 bf16/f16 | decode dtypes for reinterpret + read (decode-only) | `a34cc230` |
+| S4 empty-array crash | scalar op empty array returns empty, no process abort | `1ce43dc2` |
+
+Still queued (not blockers): **autograd-partition** (crate at the module
+ceiling -- prerequisite for a clean `PowConst` general-exponent node and
+future grad-surface work) and the general constant-exponent **pow** case
+behind it. See `docs/future-sagas-queue.md`. RS7/RS8/RS9 are library work
+(../demo-mlpl-libraries); RS10/RS11/RS12 are extensions (../demo-extensions);
+MLX-not-compiled is a distribution call.
