@@ -5,12 +5,11 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_shape::prelude::*;
 
 use mlpl_array_ops_compose::prelude::RotateExt;
-use mlpl_autograd_tape::grad_kernels::{
-    concat_backward, patchify_backward, reduce_sum_backward, stack_backward, take_backward,
-    windows_backward,
-};
+use mlpl_autograd_tape::grad_kernels::{reduce_sum_backward, windows_backward};
 use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, accumulate_pair, resident};
 use mlpl_tensor_handle::{SeamEvent, TensorHandle, bump_if};
+
+use crate::backward_shape_kernels::{prop_concat, prop_patchify, prop_stack, prop_take};
 
 /// Dispatch the structural node kinds (everything that is a pure
 /// re-arrangement or the cross-entropy fused loss). The
@@ -131,57 +130,6 @@ pub(crate) fn prop_cross_entropy(
 ) {
     let logits_val = tape.nodes()[logits.0].value.to_dense();
     let g = upstream.data()[0];
-    let grad = crate::tensor_ops::cross_entropy_backward(&logits_val, targets, g);
+    let grad = crate::cross_entropy::cross_entropy_backward(&logits_val, targets, g);
     accumulate(&mut tape.nodes_mut()[logits.0].grad, grad);
-}
-
-pub(crate) fn prop_patchify(
-    tape: &Tape,
-    parent: NodeId,
-    orig_shape: &Shape,
-    patch_size: usize,
-    upstream: &DenseArray,
-) {
-    let g = patchify_backward(upstream, orig_shape, patch_size);
-    accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
-}
-
-pub(crate) fn prop_concat(
-    tape: &Tape,
-    left: NodeId,
-    right: NodeId,
-    axis: usize,
-    left_size: usize,
-    upstream: &DenseArray,
-) {
-    let (ga, gb) = concat_backward(upstream, axis, left_size);
-    let mut nodes = tape.nodes_mut();
-    accumulate(&mut nodes[left.0].grad, ga);
-    accumulate(&mut nodes[right.0].grad, gb);
-}
-
-pub(crate) fn prop_stack(
-    tape: &Tape,
-    parents: &[NodeId],
-    axis: usize,
-    parent_size: usize,
-    upstream: &DenseArray,
-) {
-    let grads = stack_backward(upstream, parents.len(), axis, parent_size);
-    let mut nodes = tape.nodes_mut();
-    for (pid, g) in parents.iter().zip(grads) {
-        accumulate(&mut nodes[pid.0].grad, g);
-    }
-}
-
-pub(crate) fn prop_take(
-    tape: &Tape,
-    parent: NodeId,
-    orig_shape: &Shape,
-    axis: usize,
-    idx: usize,
-    upstream: &DenseArray,
-) {
-    let g = take_backward(upstream, orig_shape, axis, idx);
-    accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
 }

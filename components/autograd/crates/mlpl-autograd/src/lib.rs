@@ -6,13 +6,12 @@
 //! `mlpl-autograd-tape` and is re-exported here so callers keep the
 //! `mlpl_autograd::` paths.
 
-pub mod backward;
-mod backward_shape;
 mod tensor;
 mod tensor_ops;
 mod tensor_reduce;
 mod tensor_shape;
 
+pub use mlpl_autograd_backward::backward;
 pub use mlpl_autograd_tape::ops;
 pub use mlpl_autograd_tape::{NodeData, NodeId, NodeKind, Tape, softmax_backward, softmax_forward};
 pub use ops::{BinaryOp, UnaryOp};
