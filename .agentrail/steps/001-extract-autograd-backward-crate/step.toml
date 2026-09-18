@@ -1,9 +1,10 @@
 number = 1
 slug = "extract-autograd-backward-crate"
-status = "pending"
+status = "completed"
 description = "Step 1: create the mlpl-autograd-backward crate. Move backward.rs + backward_..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-18T12:26:19"
+completed_at = "2026-09-18T14:28:21"
 task_type = "refactor"
-commits = []
+commits = ["75eb6240ca0c82aa3c4f30a5745e64265f7e5f1f"]
