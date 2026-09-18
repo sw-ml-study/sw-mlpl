@@ -181,3 +181,44 @@ fn labels_align_from_the_right_under_rank_broadcast() {
         ]
     );
 }
+
+// S4 (../demo-mlpl-libraries): a scalar broadcast against an EMPTY array
+// (a 0-extent axis) aborted the process -- broadcast_gather forced one
+// iteration and indexed data()[0] on the empty operand. An empty broadcast
+// must yield an empty array, not panic.
+
+#[test]
+fn scalar_plus_empty_array_is_empty_not_panic() {
+    let empty = arr(&[0], &[]); // shape [0], no data
+    let scalar = DenseArray::from_scalar(1.0);
+    let r = empty.apply_binop(&scalar, add).unwrap();
+    assert_eq!(shape_of(&r), vec![0]);
+    assert_eq!(r.data().len(), 0);
+    // Symmetric: scalar on the left.
+    let r2 = scalar.apply_binop(&empty, add).unwrap();
+    assert_eq!(r2.data().len(), 0);
+}
+
+#[test]
+fn empty_broadcasts_across_shapes_without_panic() {
+    let empty = arr(&[0], &[]);
+    // empty * empty
+    assert_eq!(
+        empty
+            .apply_binop(&arr(&[0], &[]), mul)
+            .unwrap()
+            .data()
+            .len(),
+        0
+    );
+    // a length-1 axis broadcasts to 0 -> empty
+    let unit = arr(&[1], &[5.0]);
+    assert_eq!(empty.apply_binop(&unit, add).unwrap().data().len(), 0);
+    // a rank-2 empty [0, 3] against a scalar stays empty
+    let empty2d = arr(&[0, 3], &[]);
+    let r = empty2d
+        .apply_binop(&DenseArray::from_scalar(2.0), mul)
+        .unwrap();
+    assert_eq!(shape_of(&r), vec![0, 3]);
+    assert_eq!(r.data().len(), 0);
+}

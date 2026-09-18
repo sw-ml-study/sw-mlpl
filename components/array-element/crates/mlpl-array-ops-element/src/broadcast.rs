@@ -85,7 +85,11 @@ fn broadcast_gather(
     for k in (0..out.len().saturating_sub(1)).rev() {
         out_str[k] = out_str[k + 1] * out[k + 1];
     }
-    let total: usize = out.iter().product::<usize>().max(1);
+    // Empty product (rank-0 scalar) is already 1, so a scalar op still runs
+    // once; a genuinely empty output (any 0-extent axis) has total 0 and
+    // yields an empty result. Do NOT force `.max(1)` here -- that made an
+    // empty operand index data()[0] and abort the process (finding S4).
+    let total: usize = out.iter().product();
     (0..total)
         .map(|o| {
             let (mut ai, mut bi, mut rem) = (0usize, 0usize, o);
