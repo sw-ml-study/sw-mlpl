@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-17
 
+- chore(agentrail): complete 008-transpose-axes-backward; advance to 009-bf16-f16-reinterpret
+- feat(grad): differentiable transpose_axes (general permutation) (RS3)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 007-softmax-axis-in-grad; advance to 008-transpose-axes-backward
 - feat(grad): axis-aware, rank-general softmax in grad (RS2)
 - docs(changes): refresh CHANGES.md to HEAD
