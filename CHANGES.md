@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- chore(agentrail): complete 001-extract-autograd-backward-crate; advance to 002-move-grad-kernels-to-backward
+- refactor(autograd): extract mlpl-autograd-backward crate (partition 1/4)
+- docs(findings): correct RS7/RS8/RS9 routing -- library-shaped, not assigned work
+- chore(agentrail): archive reasoning-from-scratch-numerics; init autograd-partition; seed step 1
+- chore(agentrail): complete 011-rsn-relay-and-close; reasoning-from-scratch-numerics shipped
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(findings): mark reasoning-from-scratch-numerics shipped (RS1-RS6, RS-escape, S4)
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 010-empty-array-broadcast-panic; advance to 011-rsn-relay-and-close
