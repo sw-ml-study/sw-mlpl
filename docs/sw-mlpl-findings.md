@@ -434,6 +434,28 @@ The core rows shipped, plus two findings surfaced mid-saga: RS-escape (from
 Still queued (not blockers): **autograd-partition** (crate at the module
 ceiling -- prerequisite for a clean `PowConst` general-exponent node and
 future grad-surface work) and the general constant-exponent **pow** case
-behind it. See `docs/future-sagas-queue.md`. RS7/RS8/RS9 are library work
-(../demo-mlpl-libraries); RS10/RS11/RS12 are extensions (../demo-extensions);
-MLX-not-compiled is a distribution call.
+behind it. See `docs/future-sagas-queue.md`.
+
+RS7/RS8/RS9 are **library-SHAPED**, not tasks assigned to any repo. A
+core/library/extension verdict classifies a finding's *shape*; it does not
+route work to a specific downstream. Per the "keep it local until a second
+unrelated consumer exists" rule (which ../demo-mlpl-libraries applies
+correctly), the consuming repo implements these locally until a real shared
+consumer appears:
+
+- **RS7 gradient clipping** -- composable from `grad` + norm + scale;
+  ../reasoning-from-scratch already implements it in its hand-written Adam
+  (its `sw-mlpl-blockers.md`, Saga 5). No sw-mlpl or ../demo-mlpl-libraries
+  action; promote to a shared library only on a second consumer's request.
+- **RS8 weight decay** -- two independent forms: the *library* form is a
+  one-line change in a hand-written training loop (already local in
+  ../reasoning-from-scratch); the *core* form is an OPTIONAL `adam`
+  weight-decay flag (request R8 in ../reasoning-from-scratch/docs/
+  sw-mlpl-requests.md), which can only be a builtin change here. That flag is
+  the only genuinely sw-mlpl-owned item and is the maintainer's call -- a small
+  new saga if wanted; the consumer has a local workaround so it does not block.
+- **RS9 string helpers** -- small `.mlpl` helpers, local to the consumer or a
+  future shared string library; not a core builtin need.
+
+RS10/RS11/RS12 are extensions (../demo-extensions); MLX-not-compiled is a
+distribution call.
