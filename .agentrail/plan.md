@@ -1,31 +1,29 @@
-# reasoning-from-scratch-numerics
+# autograd-partition
 
-Cheap-core-first fixes for the ../reasoning-from-scratch findings
-(RS1-RS12 in docs/sw-mlpl-findings.md). CORE = things a library/extension
-cannot provide (autodiff rules, tensor primitives, dtypes, lexer syntax,
-backend perf). LIBRARY/EXTENSION rows are handed to downstream and do not
-gate these steps. Every step is TDD (RED gradcheck/lex test first) and
-holds sw-checklist at or below baseline.
+Split the autograd component to clear its module ceilings so future grad ops
+add cleanly. Retire the 4 module-fn FAILs: tensor_ops(8), tensor_reduce(11),
+backward_shape(8) [mlpl-autograd]; grad_kernels(9) [mlpl-autograd-tape]. Both
+crates are at 7 modules (ceiling). Target: a new mlpl-autograd-backward crate
++ intra-crate splits, keeping every crate <=7 modules and acyclic
+(array < tape < backward < autograd). Pure refactor: NO behavior change; the
+full autograd + eval grad suites stay green after every step. Measure
+sw-checklist before/after; target a net FAIL reduction.
 
 ## Steps
 
-1. unary-diff-sqrt-sin-cos-pow -- add tape UnaryKind backward rules for
-   sqrt, sin, cos, pow (exp/log/sigmoid already present). RS1. TDD:
-   finite-difference gradcheck per op; verify eager values unchanged.
-2. sci-notation-literals -- lexer accepts 1e-4, 1.5e3, 2E-10, 6.02e23.
-   RS5. TDD: lexer + eval tests; no regression on existing number/range
-   forms.
-3. matmul-rank3-clean-error -- replace the rank-3 matmul .expect() panic
-   with a structured shape error (matmul analogue of F19); document 2-D
-   scope. RS4. TDD: rank-3 input errors cleanly in and out of grad.
-4. softmax-axis-in-grad -- thread the axis argument into the existing tape
-   softmax and support rank-3; softmax(a, axis) differentiates. RS2. TDD:
-   axis-param grad matches a manual reference; last-axis default unchanged.
-5. transpose-axes-backward -- general-permutation transpose_axes on the
-   tape (current tape transpose is reverse-axes only). RS3. TDD: gradcheck
-   through a non-trivial permutation.
-6. bf16-f16-reinterpret -- bf16/f16 decode in reinterpret for real model
-   weights. RS6. TDD: known bit patterns decode to expected f64.
-7. relay-and-close -- mark RS1-RS6 resolved in docs/sw-mlpl-findings.md,
-   refresh CHANGES + wiki errata, mark the saga shipped, rebuild binaries
-   (repl/build release+debug, serve release). --done.
+1. extract-autograd-backward-crate -- create mlpl-autograd-backward; move
+   backward.rs + backward_shape.rs (split backward_shape to <=7 fns) and the
+   cross_entropy kernels (forward/backward/ce_split, from tensor_ops.rs) into
+   it. backward crate depends on tape + array-ops only (acyclic); autograd's
+   Tensor::backward and Tensor::cross_entropy call into it. Frees autograd
+   7->5 modules; retires backward_shape + tensor_ops FAILs. grad_kernels stays
+   in tape for now (backward crate imports it). Full grad suites green.
+2. move-grad-kernels-to-backward -- move grad_kernels.rs from mlpl-autograd-tape
+   into mlpl-autograd-backward and split it to <=7 fns per module; update
+   imports. tape 7->6 modules; retires grad_kernels FAIL. Green.
+3. split-tensor-reduce -- split tensor_reduce.rs (11 fns) within mlpl-autograd
+   (now has room) by responsibility (reductions vs derived-node constructor vs
+   the mis-placed transpose_axes -> tensor_shape). Retires tensor_reduce FAIL.
+   Green.
+4. partition-relay-close -- confirm all 4 FAILs retired (target 34), no new
+   crate/module FAIL, docs + wiki + CHANGES updated, binaries rebuilt. --done.

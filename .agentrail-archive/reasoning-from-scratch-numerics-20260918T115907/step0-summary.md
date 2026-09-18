@@ -1,0 +1,1 @@
+Saga init: queued reasoning-from-scratch-numerics (RS1-RS12 triage in docs/sw-mlpl-findings.md), cheap-core-first ordering.

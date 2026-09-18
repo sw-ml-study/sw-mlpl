@@ -1,0 +1,9 @@
+number = 1
+slug = "extract-autograd-backward-crate"
+status = "pending"
+description = "Step 1: create the mlpl-autograd-backward crate. Move backward.rs + backward_..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-18T12:26:19"
+task_type = "refactor"
+commits = []
