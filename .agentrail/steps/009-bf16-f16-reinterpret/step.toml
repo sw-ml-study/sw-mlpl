@@ -1,9 +1,10 @@
 number = 9
 slug = "bf16-f16-reinterpret"
-status = "pending"
+status = "completed"
 description = "RS6: bf16/f16 dtype decode in reinterpret, for loading real model weights. Fi..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-17T22:27:26"
+completed_at = "2026-09-18T10:59:01"
 task_type = "feature"
-commits = []
+commits = ["a34cc230c5f2fbb21e4b4803704c7895959926e5"]

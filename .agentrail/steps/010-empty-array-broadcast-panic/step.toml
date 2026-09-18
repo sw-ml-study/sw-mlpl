@@ -1,0 +1,9 @@
+number = 10
+slug = "empty-array-broadcast-panic"
+status = "pending"
+description = "S4 (../demo-mlpl-libraries): scalar + empty array aborts the process with an ..."
+role = "production"
+context_files = []
+created_at = "2026-09-18T10:59:01"
+task_type = "bugfix"
+commits = []
