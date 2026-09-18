@@ -19,6 +19,11 @@ pub enum ByteDtype {
     I64,
     F32,
     F64,
+    /// bfloat16: 1 sign, 8 exponent, 7 mantissa (top 16 bits of an f32).
+    /// Decode-only -- for reading model weights.
+    Bf16,
+    /// IEEE-754 half: 1 sign, 5 exponent, 10 mantissa. Decode-only.
+    F16,
 }
 
 impl ByteDtype {
@@ -27,7 +32,7 @@ impl ByteDtype {
     pub fn width(self) -> usize {
         match self {
             Self::U8 | Self::I8 => 1,
-            Self::U16 | Self::I16 => 2,
+            Self::U16 | Self::I16 | Self::Bf16 | Self::F16 => 2,
             Self::U32 | Self::I32 | Self::F32 => 4,
             Self::U64 | Self::I64 | Self::F64 => 8,
         }
@@ -47,6 +52,8 @@ impl ByteDtype {
             "i64" => Self::I64,
             "f32" => Self::F32,
             "f64" => Self::F64,
+            "bf16" => Self::Bf16,
+            "f16" => Self::F16,
             _ => return None,
         })
     }
@@ -65,6 +72,8 @@ impl ByteDtype {
             Self::I64 => "i64",
             Self::F32 => "f32",
             Self::F64 => "f64",
+            Self::Bf16 => "bf16",
+            Self::F16 => "f16",
         }
     }
 }

@@ -53,8 +53,27 @@ fn push_le(out: &mut Vec<u8>, v: f64, dtype: ByteDtype) -> Result<(), String> {
         ByteDtype::I32 => int!(i32),
         ByteDtype::U64 => int!(u64),
         ByteDtype::I64 => int!(i64),
+        ByteDtype::F32 | ByteDtype::F64 | ByteDtype::Bf16 | ByteDtype::F16 => {
+            return push_float_le(out, v, dtype);
+        }
+    }
+    Ok(())
+}
+
+/// Append a float value: `f32` narrows, `f64` copies. The half formats
+/// (`bf16`/`f16`) are decode-only -- model weights arrive as those bytes from
+/// a file and are reinterpreted + read, never packed here.
+#[allow(clippy::cast_possible_truncation)]
+fn push_float_le(out: &mut Vec<u8>, v: f64, dtype: ByteDtype) -> Result<(), String> {
+    match dtype {
         ByteDtype::F32 => out.extend_from_slice(&(v as f32).to_le_bytes()),
         ByteDtype::F64 => out.extend_from_slice(&v.to_le_bytes()),
+        _ => {
+            return Err(format!(
+                "pack: {dtype} is decode-only (reinterpret model-weight bytes and read); \
+                 packing to it is not supported"
+            ));
+        }
     }
     Ok(())
 }
