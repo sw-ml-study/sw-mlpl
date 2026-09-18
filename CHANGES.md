@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- docs(findings): mark reasoning-from-scratch-numerics shipped (RS1-RS6, RS-escape, S4)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 010-empty-array-broadcast-panic; advance to 011-rsn-relay-and-close
 - fix(array): empty-array broadcast no longer aborts the process (S4)
 - docs(changes): refresh CHANGES.md to HEAD
