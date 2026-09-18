@@ -1,9 +1,10 @@
 number = 11
 slug = "rsn-relay-and-close"
-status = "pending"
+status = "completed"
 description = "Relay-and-close reasoning-from-scratch-numerics: record RS1/RS5/RS1-pow/RS-es..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-18T11:33:42"
+completed_at = "2026-09-18T11:40:40"
 task_type = "docs"
-commits = []
+commits = ["fc7d7f98f88611ebeec1e71aa98de3e5b3fd423a"]
