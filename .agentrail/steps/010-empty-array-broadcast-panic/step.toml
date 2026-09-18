@@ -1,9 +1,10 @@
 number = 10
 slug = "empty-array-broadcast-panic"
-status = "pending"
+status = "completed"
 description = "S4 (../demo-mlpl-libraries): scalar + empty array aborts the process with an ..."
 role = "production"
 context_files = []
 created_at = "2026-09-18T10:59:01"
+completed_at = "2026-09-18T11:33:42"
 task_type = "bugfix"
-commits = []
+commits = ["1ce43dc2bf2c33a6fea6f8dee717be4708567182"]

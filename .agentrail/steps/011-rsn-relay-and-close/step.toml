@@ -1,0 +1,9 @@
+number = 11
+slug = "rsn-relay-and-close"
+status = "pending"
+description = "Relay-and-close reasoning-from-scratch-numerics: record RS1/RS5/RS1-pow/RS-es..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-18T11:33:42"
+task_type = "docs"
+commits = []
