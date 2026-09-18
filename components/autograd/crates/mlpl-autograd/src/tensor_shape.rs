@@ -21,7 +21,14 @@ impl Tensor {
             ResidentReq::Unary(self.node, UnaryKind::Transpose),
         )
         .unwrap_or_else(|| TensorHandle::Cpu(self.value().transpose()));
-        new_tensor(self, v, NodeKind::Transpose { parent: self.node })
+        new_tensor(
+            self,
+            v,
+            NodeKind::Transpose {
+                parent: self.node,
+                perm: None,
+            },
+        )
     }
 
     /// Reshape to `new_shape` (must preserve element count).

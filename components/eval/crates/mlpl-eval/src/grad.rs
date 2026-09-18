@@ -203,6 +203,9 @@ pub(crate) fn eval_tensor_fncall(
     }
     match name {
         "softmax" => crate::grad_calls_softmax::call_softmax(args, env, tape, params),
+        "transpose_axes" => {
+            crate::grad_calls_transpose::call_transpose_axes(args, env, tape, params)
+        }
         "pow" => crate::grad_calls_pow::call_pow(args, env, tape, params),
         "matmul" => crate::grad_calls_basic::call_matmul(args, env, tape, params),
         "apply" => crate::grad_calls_basic::call_apply(args, env, tape, params),

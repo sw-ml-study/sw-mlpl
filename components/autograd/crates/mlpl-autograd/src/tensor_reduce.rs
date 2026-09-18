@@ -6,6 +6,7 @@ use std::rc::Rc;
 use mlpl_array::DenseArray;
 use mlpl_array_ops_compose::prelude::*;
 use mlpl_array_ops_reduce::prelude::*;
+use mlpl_array_ops_shape::prelude::*;
 
 use crate::tensor::Tensor;
 use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, Tape, softmax_forward, try_resident};
@@ -83,6 +84,32 @@ impl Tensor {
             .len()
             .saturating_sub(1);
         self.softmax_axis(axis)
+    }
+
+    /// General axis-permutation transpose (RS3): output axis `i` is input
+    /// axis `perm[i]`. Backward permutes the gradient by the inverse of
+    /// `perm`. Caller (the grad dispatch) validates `perm`. Placed in this
+    /// module because the autograd crate is at its module ceiling pending the
+    /// autograd-partition refactor; the reverse-axes `transpose` stays in
+    /// tensor_shape.
+    #[must_use]
+    pub fn transpose_axes(&self, perm: Vec<usize>) -> Self {
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
+        let v = TensorHandle::Cpu(
+            self.value()
+                .transpose_axes(&perm)
+                .expect("caller validated the axis permutation"),
+        );
+        new_tensor(
+            self,
+            v,
+            NodeKind::Transpose {
+                parent: self.node,
+                perm: Some(perm),
+            },
+        )
     }
 
     /// Softmax along an explicit `axis` (any rank; RS2). `softmax()` is the

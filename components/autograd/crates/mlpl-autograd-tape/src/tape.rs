@@ -50,10 +50,13 @@ pub enum NodeKind {
         /// Axis along which softmax is computed.
         axis: usize,
     },
-    /// Transpose (reverse axes).
+    /// Transpose: `perm = None` reverses all axes; `perm = Some(p)` applies
+    /// the general axis permutation `p` (output axis `i` is input axis `p[i]`).
     Transpose {
         /// Parent node id.
         parent: NodeId,
+        /// Axis permutation, or `None` for a full reverse.
+        perm: Option<Vec<usize>>,
     },
     /// Reshape to a new shape; `orig_shape` is the parent's original shape.
     Reshape {

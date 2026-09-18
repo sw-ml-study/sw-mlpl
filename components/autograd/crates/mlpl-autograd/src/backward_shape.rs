@@ -21,9 +21,24 @@ use mlpl_tensor_handle::{SeamEvent, TensorHandle, bump_if};
 /// kernels (counted as fallbacks when the tape is resident).
 pub(crate) fn propagate_shape(tape: &Tape, kind: NodeKind, upstream: &TensorHandle) {
     match kind {
-        NodeKind::Transpose { parent } => {
-            let g = resident::transpose_backward(tape, upstream)
-                .unwrap_or_else(|| upstream.to_dense().transpose().into());
+        NodeKind::Transpose { parent, perm } => {
+            let g = match &perm {
+                None => resident::transpose_backward(tape, upstream)
+                    .unwrap_or_else(|| upstream.to_dense().transpose().into()),
+                Some(p) => {
+                    // Backward of a permutation is the permutation by its
+                    // inverse: inv[p[i]] = i.
+                    let mut inv = vec![0usize; p.len()];
+                    for (i, &pi) in p.iter().enumerate() {
+                        inv[pi] = i;
+                    }
+                    upstream
+                        .to_dense()
+                        .transpose_axes(&inv)
+                        .expect("inverse of a valid permutation")
+                        .into()
+                }
+            };
             accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
         }
         NodeKind::Reshape { parent, orig_shape } => {

@@ -130,6 +130,7 @@ mod grad_calls_engram;
 mod grad_calls_pow;
 mod grad_calls_shape;
 mod grad_calls_softmax;
+mod grad_calls_transpose;
 mod grad_const;
 mod grad_optim;
 mod grad_optim_resident;
