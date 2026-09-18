@@ -1,9 +1,10 @@
 number = 8
 slug = "transpose-axes-backward"
-status = "pending"
+status = "completed"
 description = "RS3: transpose_axes(x, perm) general-permutation is not differentiable in gra..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-17T18:37:35"
+completed_at = "2026-09-17T22:27:26"
 task_type = "feature"
-commits = []
+commits = ["1abe8f10fed5bc18a6f11d758b74ea1c82d0fad3"]

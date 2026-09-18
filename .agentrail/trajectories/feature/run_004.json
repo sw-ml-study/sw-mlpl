@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 8,
+    "step": "transpose-axes-backward"
+  },
+  "action": "Surveyed transpose machinery (reverse-only); RED FD test; generalized Transpose NodeKind + transpose_axes method + inverse-perm backward; new grad dispatch module with perm validation; fixed eager-sum test bug (reduce_add); scoped tests, clippy --all-targets both workspaces, fmt, sw-checklist; rebuilt binaries; smoke-test.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-17T22:27:26"
+}
