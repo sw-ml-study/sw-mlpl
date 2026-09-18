@@ -1,0 +1,9 @@
+number = 8
+slug = "transpose-axes-backward"
+status = "pending"
+description = "RS3: transpose_axes(x, perm) general-permutation is not differentiable in gra..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-17T18:37:35"
+task_type = "feature"
+commits = []
