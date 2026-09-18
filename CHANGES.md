@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-18
+
+- chore(agentrail): complete 009-bf16-f16-reinterpret; advance to 010-empty-array-broadcast-panic
+- feat(bytes): bf16 and f16 dtypes for reinterpret + read (RS6)
+
 ## 2026-09-17
 
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 008-transpose-axes-backward; advance to 009-bf16-f16-reinterpret
 - feat(grad): differentiable transpose_axes (general permutation) (RS3)
 - docs(changes): refresh CHANGES.md to HEAD
