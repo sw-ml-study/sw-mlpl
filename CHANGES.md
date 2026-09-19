@@ -14,6 +14,12 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- chore(agentrail): complete 001-powconst-node; advance to 002-powconst-relay-close
+- feat(grad): general constant-exponent pow via PowConst node (RS1-pow)
+- docs(q-and-a): answer demo-decision-model Q1-Q3 (freeze, 2-arg scorer grad, experiment+train in a user fn)
+- chore(agentrail): archive autograd-partition; init pow-const-grad; seed step 1
+- chore(agentrail): complete 004-partition-relay-close; autograd-partition shipped
+- docs(changes): refresh CHANGES.md to HEAD
 - docs(queue): mark autograd-partition SHIPPED
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 003-split-tensor-reduce; advance to 004-partition-relay-close
