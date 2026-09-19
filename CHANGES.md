@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- docs: pow-const-grad shipped -- pow differentiates for any constant exponent (PowConst)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-powconst-node; advance to 002-powconst-relay-close
 - feat(grad): general constant-exponent pow via PowConst node (RS1-pow)
 - docs(q-and-a): answer demo-decision-model Q1-Q3 (freeze, 2-arg scorer grad, experiment+train in a user fn)
