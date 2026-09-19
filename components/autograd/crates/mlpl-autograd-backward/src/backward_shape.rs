@@ -122,6 +122,21 @@ fn prop_reshape(tape: &Tape, parent: NodeId, orig_shape: &Shape, upstream: &Dens
     accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
 }
 
+/// Backward of `x^exp` (elementwise): `grad = upstream * exp * x^(exp-1)`,
+/// read against the parent's forward value `x`.
+pub(crate) fn prop_pow_const(tape: &Tape, parent: NodeId, exp: f64, upstream: &TensorHandle) {
+    let x = tape.nodes()[parent.0].value.to_dense();
+    let up = upstream.to_dense();
+    let grad: Vec<f64> = x
+        .data()
+        .iter()
+        .zip(up.data())
+        .map(|(&xi, &g)| g * exp * xi.powf(exp - 1.0))
+        .collect();
+    let grad = DenseArray::new(x.shape().clone(), grad).expect("shape preserved");
+    accumulate(&mut tape.nodes_mut()[parent.0].grad, grad);
+}
+
 pub(crate) fn prop_cross_entropy(
     tape: &Tape,
     logits: NodeId,

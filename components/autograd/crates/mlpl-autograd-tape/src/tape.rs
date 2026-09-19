@@ -24,6 +24,14 @@ pub enum NodeKind {
         /// Parent node id.
         parent: NodeId,
     },
+    /// `parent ^ exp` for a constant real exponent (elementwise). Backward is
+    /// `upstream * exp * parent^(exp - 1)`.
+    PowConst {
+        /// Parent node id.
+        parent: NodeId,
+        /// Constant exponent.
+        exp: f64,
+    },
     /// Result of a binary op applied to `left` and `right`.
     Binary {
         /// Operation.

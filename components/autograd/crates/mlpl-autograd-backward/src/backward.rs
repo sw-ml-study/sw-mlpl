@@ -36,6 +36,9 @@ fn propagate(tape: &Tape, id: NodeId) {
     match kind {
         NodeKind::Leaf => {}
         NodeKind::Unary { op, parent } => prop_unary(tape, id, parent, op, &upstream),
+        NodeKind::PowConst { parent, exp } => {
+            crate::backward_shape::prop_pow_const(tape, parent, exp, &upstream);
+        }
         NodeKind::Binary { op, left, right } => prop_binary(tape, left, right, op, &upstream),
         NodeKind::SumAll { parent } => prop_sum_mean(tape, parent, &upstream, false),
         NodeKind::MeanAll { parent } => prop_sum_mean(tape, parent, &upstream, true),

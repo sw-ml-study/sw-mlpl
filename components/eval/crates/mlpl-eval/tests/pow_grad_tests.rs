@@ -1,6 +1,6 @@
-//! RS1-pow (../reasoning-from-scratch): pow(x, k) with a constant positive
-//! integer exponent differentiates (exact repeated-product rule); other
-//! exponents error loudly.
+//! RS1-pow (../reasoning-from-scratch): pow(x, k) with ANY constant exponent
+//! differentiates via the PowConst tape node (d/dx x^k = k*x^(k-1)); a
+//! differentiable (param-dependent) exponent is rejected.
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_eval::env_api::*;
@@ -53,13 +53,51 @@ fn pow_square_matches_finite_differences() {
 }
 
 #[test]
-fn fractional_exponent_errors_loudly() {
+fn grad_of_pow_half_is_finite_diff() {
+    // d/dx x^0.5 = 0.5 * x^-0.5.
+    let base = [0.25f64, 1.0, 4.0];
+    let mut env = param_env(base.to_vec());
+    let g = run("grad(sum(pow(x, 0.5)), x)", &mut env);
+    for (i, xi) in base.iter().enumerate() {
+        assert!(
+            (g.data()[i] - 0.5 * xi.powf(-0.5)).abs() < 1e-9,
+            "d x^0.5 at {xi}"
+        );
+    }
+}
+
+#[test]
+fn grad_of_pow_negative_and_fractional_match_finite_diff() {
+    let base = [0.7f64, 2.5, 3.3];
+    for (expo, src) in [
+        (-1.0, "grad(sum(pow(x, 0 - 1)), x)"),
+        (2.5, "grad(sum(pow(x, 2.5)), x)"),
+    ] {
+        let mut env = param_env(base.to_vec());
+        let g = run(src, &mut env);
+        let eps = 1e-6;
+        for (i, xi) in base.iter().enumerate() {
+            let fd = ((xi + eps).powf(expo) - (xi - eps).powf(expo)) / (2.0 * eps);
+            assert!(
+                (g.data()[i] - fd).abs() < 1e-3,
+                "fd x^{expo} at {xi}: {} vs {fd}",
+                g.data()[i]
+            );
+        }
+    }
+}
+
+#[test]
+fn differentiable_exponent_is_rejected() {
     let mut env = param_env(vec![4.0]);
-    let toks = lex("grad(sum(pow(x, 0.5)), x)").unwrap();
+    env.set_param("k".into(), DenseArray::from_scalar(2.0));
+    let toks = lex("grad(sum(pow(x, k)), x)").unwrap();
     let stmts = parse(&toks).unwrap();
     let err = eval_program(&stmts, &mut env).unwrap_err();
-    let msg = format!("{err}");
-    assert!(msg.contains("sqrt"), "error should point to sqrt: {msg}");
+    assert!(
+        format!("{err}").contains("exponent"),
+        "rejects a differentiable exponent"
+    );
 }
 
 #[test]

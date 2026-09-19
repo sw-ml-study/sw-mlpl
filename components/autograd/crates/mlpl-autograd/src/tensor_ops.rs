@@ -96,6 +96,29 @@ impl Tensor {
     unary_method!(sin, Sin, "Elementwise sine.");
     unary_method!(cos, Cos, "Elementwise cosine.");
 
+    /// Elementwise power by a constant real exponent: `self ^ exp`.
+    /// Host-only (no device kernel for an arbitrary exponent); backward is
+    /// `upstream * exp * self^(exp - 1)`.
+    #[must_use]
+    pub fn pow_const(&self, exp: f64) -> Self {
+        if self.tape.resident.get() {
+            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
+        }
+        let src = self.value();
+        let data: Vec<f64> = src.data().iter().map(|&v| v.powf(exp)).collect();
+        let value = TensorHandle::Cpu(
+            mlpl_array::DenseArray::new(src.shape().clone(), data).expect("shape preserved"),
+        );
+        crate::tensor_reduce::new_tensor(
+            self,
+            value,
+            NodeKind::PowConst {
+                parent: self.node,
+                exp,
+            },
+        )
+    }
+
     /// Fused cross-entropy loss (Saga 13 step 004).
     ///
     /// `targets` is consumed and stored verbatim on the tape node: it
