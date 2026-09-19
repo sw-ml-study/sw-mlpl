@@ -1300,3 +1300,54 @@ lives in the shared inspect layer -- every command answers
 answers with the describe body -- and the test is exhaustive
 over the whole registry (both flag forms), so a future command
 cannot ship without working --help.
+
+## demo-decision-model Q1-Q3 (2026-09-18): freeze, 2-arg scorer grad, experiment+train in a user fn
+
+All three verified against the built 0.22.0 repl; reproducers below.
+
+**Q1. Is `freeze` available? YES.** It is a builtin (`freeze(model_ident)`) that
+freezes a model's parameters IN PLACE -- call it as a statement and keep using
+the SAME identifier. It does NOT return a new bindable model: `fe = freeze(e)`
+then `apply(fe, ...)` fails ("apply: first argument must be a model
+identifier"). Verified it actually holds params fixed under training:
+
+```
+e = embed(4, 2, 0);
+before = reduce_add(abs(apply(e, [0, 1, 2, 3])));
+freeze(e);
+train 5 { adam(mean(apply(e,[0,1,2,3]) * apply(e,[0,1,2,3])), e, 0.1, 0.9, 0.999, 0.00000001) };
+after = reduce_add(abs(apply(e, [0, 1, 2, 3])));
+print("delta", before - after);   // 0  -- frozen params did not move
+```
+
+The "post-hoc map over a frozen encoder" pattern works: `freeze(encoder)`,
+then train a separate head; the encoder stays put.
+
+**Q2. Does a gradient flow through a two-argument scorer `f(h_state, h_choice)`
+inside grad? YES.** The user-function inliner handles multi-argument user
+functions in grad (same machinery as the F23/F24 fixes). Exact:
+
+```
+w = param[3]; w = [0.1, 0.2, 0.3];
+def u:score(hs, hc) { "scorer" reduce_add(hs * hc * w) }
+grad(u:score([1,2,3], [0.5,1,2]), w)   // [0.5, 2, 6] = hs*hc  (exact)
+```
+
+PR05's dynamic-choice-set primitive will differentiate.
+
+**Q3. Do `experiment` blocks compose with `train` inside a user function? YES.**
+
+```
+def u:sweep(n) {
+  "experiment + train inside a user fn"
+  m = embed(4, 2, 0);
+  experiment "sweep_run" {
+    train n { adam(mean(apply(m,[0,1,2,3]) * apply(m,[0,1,2,3])), m, 0.01, 0.9, 0.999, 0.00000001) };
+    reduce_add(abs(apply(m, [0, 1, 2, 3])))
+  }
+}
+print(u:sweep(3));   // runs; returns the block's last value
+```
+
+The calibration-lambda / encoder-ladder sweeps can be wrapped in user
+functions. Note the 6-arg optimizer form: `adam(loss, model, lr, b1, b2, eps)`.
