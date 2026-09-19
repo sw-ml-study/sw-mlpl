@@ -14,6 +14,8 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- docs(queue): mark autograd-partition SHIPPED
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 003-split-tensor-reduce; advance to 004-partition-relay-close
 - refactor(autograd): split tensor_reduce (partition 3/4)
 - docs(changes): refresh CHANGES.md to HEAD
