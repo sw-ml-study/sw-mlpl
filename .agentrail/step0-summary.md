@@ -1,1 +1,1 @@
-Saga init: autograd-partition planned (4 steps) to retire the 4 module-fn FAILs via a new mlpl-autograd-backward crate + intra-crate splits, acyclic array<tape<backward<autograd.
+Saga init: pow-const-grad (2 steps) -- general constant-exponent pow via a PowConst tape node, now unblocked by autograd-partition.

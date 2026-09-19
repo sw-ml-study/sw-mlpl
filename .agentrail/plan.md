@@ -1,29 +1,20 @@
-# autograd-partition
+# pow-const-grad
 
-Split the autograd component to clear its module ceilings so future grad ops
-add cleanly. Retire the 4 module-fn FAILs: tensor_ops(8), tensor_reduce(11),
-backward_shape(8) [mlpl-autograd]; grad_kernels(9) [mlpl-autograd-tape]. Both
-crates are at 7 modules (ceiling). Target: a new mlpl-autograd-backward crate
-+ intra-crate splits, keeping every crate <=7 modules and acyclic
-(array < tape < backward < autograd). Pure refactor: NO behavior change; the
-full autograd + eval grad suites stay green after every step. Measure
-sw-checklist before/after; target a net FAIL reduction.
+Make pow(x, k) differentiable inside grad for ANY constant exponent k
+(fractional, negative, large), not just small positive integers. The
+autograd-partition cleared the module ceilings, so a dedicated PowConst tape
+node can now be added cleanly. d/dx x^k = k * x^(k-1).
 
 ## Steps
 
-1. extract-autograd-backward-crate -- create mlpl-autograd-backward; move
-   backward.rs + backward_shape.rs (split backward_shape to <=7 fns) and the
-   cross_entropy kernels (forward/backward/ce_split, from tensor_ops.rs) into
-   it. backward crate depends on tape + array-ops only (acyclic); autograd's
-   Tensor::backward and Tensor::cross_entropy call into it. Frees autograd
-   7->5 modules; retires backward_shape + tensor_ops FAILs. grad_kernels stays
-   in tape for now (backward crate imports it). Full grad suites green.
-2. move-grad-kernels-to-backward -- move grad_kernels.rs from mlpl-autograd-tape
-   into mlpl-autograd-backward and split it to <=7 fns per module; update
-   imports. tape 7->6 modules; retires grad_kernels FAIL. Green.
-3. split-tensor-reduce -- split tensor_reduce.rs (11 fns) within mlpl-autograd
-   (now has room) by responsibility (reductions vs derived-node constructor vs
-   the mis-placed transpose_axes -> tensor_shape). Retires tensor_reduce FAIL.
-   Green.
-4. partition-relay-close -- confirm all 4 FAILs retired (target 34), no new
-   crate/module FAIL, docs + wiki + CHANGES updated, binaries rebuilt. --done.
+1. powconst-node -- add NodeKind::PowConst { parent, exp: f64 } to
+   mlpl-autograd-tape; add Tensor::pow_const(k) forward (host x.powf(k), no
+   device kernel) in mlpl-autograd; add the backward (prop_pow_const in
+   mlpl-autograd-backward, elementwise upstream * k * x^(k-1)) wired via a
+   propagate() arm; rewire grad_calls_pow::call_pow to build PowConst for any
+   constant exponent (keep the differentiable-exponent guard). Drop the
+   integer-only restriction and repeated-mul. TDD: gradcheck pow(x,0.5),
+   pow(x,-1), pow(x,2.5), pow(x,3) vs finite differences; x^2 still exact;
+   eager pow unchanged. Rebuild repl/build release+debug + serve.
+2. relay-close -- update docs/sw-mlpl-findings.md (RS1-pow now general) +
+   docs/future-sagas-queue.md; refresh CHANGES; wiki note if needed. --done.
