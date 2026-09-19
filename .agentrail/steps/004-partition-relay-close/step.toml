@@ -1,9 +1,10 @@
 number = 4
 slug = "partition-relay-close"
-status = "pending"
+status = "completed"
 description = "Partition 4/4 relay-close: confirm all 4 autograd module-fn FAILs retired (sw..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-18T17:49:17"
+completed_at = "2026-09-18T17:55:32"
 task_type = "docs"
-commits = []
+commits = ["4c42e6fa305f855a9ce72065d0bf53d45dbc8147"]
