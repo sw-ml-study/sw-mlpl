@@ -1,15 +1,14 @@
-//! Reduction methods on [`Tensor`] (sum / mean / softmax) plus the
-//! shared derived-node constructor.
+//! Reduction methods on [`Tensor`] (sum / mean / reduce_sum) plus the shared
+//! derived-node constructors. The axis/shape-transforming ops (softmax,
+//! transpose_axes, rotate, windows) live in `tensor_transform`.
 
 use std::rc::Rc;
 
 use mlpl_array::DenseArray;
-use mlpl_array_ops_compose::prelude::*;
 use mlpl_array_ops_reduce::prelude::*;
-use mlpl_array_ops_shape::prelude::*;
 
 use crate::tensor::Tensor;
-use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, Tape, softmax_forward, try_resident};
+use mlpl_autograd_tape::{NodeData, NodeKind, ResidentReq, Tape, try_resident};
 use mlpl_tensor_handle::{AxisKind, TensorHandle};
 
 /// Trainable leaf whose forward value is an EXISTING handle --
@@ -73,117 +72,6 @@ impl Tensor {
             TensorHandle::Cpu(DenseArray::from_scalar(s / v.data().len() as f64))
         });
         new_tensor(self, value, NodeKind::MeanAll { parent: self.node })
-    }
-
-    /// Softmax along the last axis (rank-1 or rank-2 inputs).
-    #[must_use]
-    pub fn softmax(&self) -> Self {
-        let axis = self.tape.nodes()[self.node.0]
-            .value
-            .dims()
-            .len()
-            .saturating_sub(1);
-        self.softmax_axis(axis)
-    }
-
-    /// General axis-permutation transpose (RS3): output axis `i` is input
-    /// axis `perm[i]`. Backward permutes the gradient by the inverse of
-    /// `perm`. Caller (the grad dispatch) validates `perm`. Placed in this
-    /// module because the autograd crate is at its module ceiling pending the
-    /// autograd-partition refactor; the reverse-axes `transpose` stays in
-    /// tensor_shape.
-    #[must_use]
-    pub fn transpose_axes(&self, perm: Vec<usize>) -> Self {
-        if self.tape.resident.get() {
-            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
-        }
-        let v = TensorHandle::Cpu(
-            self.value()
-                .transpose_axes(&perm)
-                .expect("caller validated the axis permutation"),
-        );
-        new_tensor(
-            self,
-            v,
-            NodeKind::Transpose {
-                parent: self.node,
-                perm: Some(perm),
-            },
-        )
-    }
-
-    /// Softmax along an explicit `axis` (any rank; RS2). `softmax()` is the
-    /// last-axis special case.
-    #[must_use]
-    pub fn softmax_axis(&self, axis: usize) -> Self {
-        let value = try_resident(
-            &self.tape,
-            ResidentReq::Axis(self.node, AxisKind::Softmax, Some(axis), false),
-        )
-        .unwrap_or_else(|| {
-            if self.tape.resident.get() {
-                mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
-            }
-            TensorHandle::Cpu(softmax_forward(&self.value(), axis))
-        });
-        new_tensor(
-            self,
-            value,
-            NodeKind::Softmax {
-                parent: self.node,
-                axis,
-            },
-        )
-    }
-}
-
-impl Tensor {
-    /// Cyclic rotate along `axis` (positive `k` = element `k` to
-    /// the front). Pure permutation; backward is `rotate(-k)`.
-    /// Lives here rather than in `tensor_shape.rs` because that
-    /// module sits at the sw-checklist function-count cap; a
-    /// future rebalance can regroup the composition methods.
-    #[must_use]
-    pub fn rotate(&self, k: i64, axis: usize) -> Self {
-        if self.tape.resident.get() {
-            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
-        }
-        let v = TensorHandle::Cpu(self.value().rotate(k, axis).expect("rotate: axis in range"));
-        new_tensor(
-            self,
-            v,
-            NodeKind::Rotate {
-                parent: self.node,
-                k,
-                axis,
-            },
-        )
-    }
-
-    /// Overlapping sliding-window gather over the trailing axes (CNN
-    /// Phase 5). Records the parent shape + window params so the backward
-    /// can scatter-add the gradient. See `windows` in the array crate.
-    pub fn windows(&self, sizes: &[usize], strides: &[usize]) -> Self {
-        let v_orig = self.value();
-        let orig_shape = v_orig.shape().clone();
-        if self.tape.resident.get() {
-            mlpl_tensor_handle::bump(mlpl_tensor_handle::SeamEvent::CpuFallback);
-        }
-        let v = TensorHandle::Cpu(
-            v_orig
-                .windows(sizes, strides)
-                .expect("windows: valid params"),
-        );
-        new_tensor(
-            self,
-            v,
-            NodeKind::Windows {
-                parent: self.node,
-                orig_shape,
-                sizes: sizes.to_vec(),
-                strides: strides.to_vec(),
-            },
-        )
     }
 
     /// Sum over one or more `axes` (the differentiable core of

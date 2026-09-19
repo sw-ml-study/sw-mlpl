@@ -10,6 +10,7 @@ mod tensor;
 mod tensor_ops;
 mod tensor_reduce;
 mod tensor_shape;
+mod tensor_transform;
 
 pub use mlpl_autograd_backward::backward;
 pub use mlpl_autograd_tape::ops;
