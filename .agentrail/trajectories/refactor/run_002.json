@@ -1,0 +1,11 @@
+{
+  "task_type": "refactor",
+  "state": {
+    "number": 2,
+    "step": "move-grad-kernels-to-backward"
+  },
+  "action": "git mv grad_kernels to backward crate; split into 2 modules by responsibility; removed tape mod decl; updated imports in backward/backward_shape/backward_shape_kernels + lib facades; scoped autograd+eval grad tests, clippy -D warnings, fmt, sw-checklist; amended lockfiles; rebuilt binaries; smoke-test.",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-18T17:31:14"
+}

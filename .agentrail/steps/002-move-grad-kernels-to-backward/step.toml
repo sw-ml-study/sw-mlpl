@@ -1,9 +1,10 @@
 number = 2
 slug = "move-grad-kernels-to-backward"
-status = "pending"
+status = "completed"
 description = "Partition 2/4: move grad_kernels.rs (9 fns, FAIL) from mlpl-autograd-tape int..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-18T14:28:21"
+completed_at = "2026-09-18T17:31:14"
 task_type = "refactor"
-commits = []
+commits = ["77ff8c5ea59456b24b6b5fc8c1e1f56fa6bc09b2"]

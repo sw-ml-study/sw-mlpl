@@ -1,0 +1,9 @@
+number = 3
+slug = "split-tensor-reduce"
+status = "pending"
+description = "Partition 3/4: split tensor_reduce.rs (11 fns, the last FAIL) within mlpl-aut..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-18T17:31:14"
+task_type = "refactor"
+commits = []
