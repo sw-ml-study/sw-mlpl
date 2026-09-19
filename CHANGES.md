@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- chore(agentrail): complete 003-split-tensor-reduce; advance to 004-partition-relay-close
+- refactor(autograd): split tensor_reduce (partition 3/4)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 002-move-grad-kernels-to-backward; advance to 003-split-tensor-reduce
 - refactor(autograd): move grad_kernels into the backward crate (partition 2/4)
 - docs(changes): refresh CHANGES.md to HEAD
