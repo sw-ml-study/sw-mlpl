@@ -423,7 +423,7 @@ The core rows shipped, plus two findings surfaced mid-saga: RS-escape (from
 |---------|------------|--------|
 | RS1 sqrt/sin/cos | differentiable unary ops (tape UnaryOp + rules) | `0dfa3eae` |
 | RS5 sci-notation | lexer accepts `1e-4`/`6.02e23` | `2a774891` |
-| RS1-pow | `pow(x, int)` differentiates (repeated product); loud error otherwise | `8a1fe24a` |
+| RS1-pow | `pow(x, k)` differentiates for ANY constant exponent (PowConst node, `d/dx x^k = k*x^(k-1)`); param-dependent exponent rejected | `8a1fe24a`, `1c8ce456` |
 | RS-escape | unknown string escapes are lenient (LaTeX `\frac`/`\in` round-trip) | `3250cea9` |
 | RS4 matmul rank-3 | actionable "batched matmul not supported" error, both paths | `fdb5e675` |
 | RS2 softmax(a, axis) | axis-aware + rank-general softmax in grad | `363391a6` |
@@ -431,10 +431,10 @@ The core rows shipped, plus two findings surfaced mid-saga: RS-escape (from
 | RS6 bf16/f16 | decode dtypes for reinterpret + read (decode-only) | `a34cc230` |
 | S4 empty-array crash | scalar op empty array returns empty, no process abort | `1ce43dc2` |
 
-Still queued (not blockers): **autograd-partition** (crate at the module
-ceiling -- prerequisite for a clean `PowConst` general-exponent node and
-future grad-surface work) and the general constant-exponent **pow** case
-behind it. See `docs/future-sagas-queue.md`.
+Shipped since: **autograd-partition** (cleared the module ceilings) and, on top
+of it, **pow-const-grad** -- `pow(x, k)` now differentiates for any constant
+exponent via a `PowConst` tape node (`8a1fe24a`, `1c8ce456`). No grad-surface
+items from this batch remain deferred.
 
 RS7/RS8/RS9 are **library-SHAPED**, not tasks assigned to any repo. A
 core/library/extension verdict classifies a finding's *shape*; it does not

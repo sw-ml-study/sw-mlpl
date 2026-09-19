@@ -145,6 +145,14 @@ data-forge (Track 1).
   now be added cleanly) and future grad-surface ops. See
   `docs/sw-mlpl-findings.md`.
 
+- **pow-const-grad** -- SHIPPED 2026-09-18. On top of the partition: `pow(x, k)`
+  now differentiates for ANY constant exponent (fractional, negative, large)
+  via a new `PowConst` tape node (`d/dx x^k = k*x^(k-1)`), replacing the
+  integer-only repeated-product workaround; a param-dependent exponent is
+  rejected. Closes the last deferred RS1-pow item from
+  reasoning-from-scratch-numerics and confirms the partition made adding a grad
+  op clean. See `docs/sw-mlpl-findings.md`.
+
 ### Paused sagas
 
 - **axis-naming-unification** -- PAUSED 2026-09-11 at 4/7 steps (plan:
