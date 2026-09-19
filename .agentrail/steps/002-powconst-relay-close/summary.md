@@ -1,0 +1,1 @@
+Relay-close pow-const-grad: updated docs/sw-mlpl-findings.md (RS1-pow now covers ALL constant exponents via PowConst, deferred note removed), marked pow-const-grad SHIPPED in docs/future-sagas-queue.md, added wiki errata capability-sync, refreshed CHANGES. Binaries rebuilt during step 1. Saga complete.
