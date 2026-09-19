@@ -1,0 +1,9 @@
+number = 2
+slug = "powconst-relay-close"
+status = "pending"
+description = "Relay-close pow-const-grad: update docs/sw-mlpl-findings.md (RS1-pow now cove..."
+role = "legacy"
+context_files = []
+created_at = "2026-09-18T19:11:49"
+task_type = "docs"
+commits = []

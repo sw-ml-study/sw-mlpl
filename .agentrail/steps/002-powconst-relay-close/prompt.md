@@ -1,0 +1,1 @@
+Relay-close pow-const-grad: update docs/sw-mlpl-findings.md (RS1-pow now covers ALL constant exponents via PowConst, not just integers; remove the 'deferred behind autograd-partition' note); mark pow-const-grad SHIPPED in docs/future-sagas-queue.md; refresh CHANGES; add a wiki errata capability-sync line if warranted. Confirm binaries rebuilt. --done.

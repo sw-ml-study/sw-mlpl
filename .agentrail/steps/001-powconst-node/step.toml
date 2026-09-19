@@ -1,9 +1,10 @@
 number = 1
 slug = "powconst-node"
-status = "pending"
+status = "completed"
 description = "Add NodeKind::PowConst { parent, exp: f64 } to mlpl-autograd-tape/src/tape.rs..."
 role = "legacy"
 context_files = []
 created_at = "2026-09-18T18:13:20"
+completed_at = "2026-09-18T19:11:49"
 task_type = "feature"
-commits = []
+commits = ["1c8ce456008b832555b66f59a34f5eed195d0cb0"]
