@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-18
 
+- chore(agentrail): complete 002-move-grad-kernels-to-backward; advance to 003-split-tensor-reduce
+- refactor(autograd): move grad_kernels into the backward crate (partition 2/4)
+- docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-extract-autograd-backward-crate; advance to 002-move-grad-kernels-to-backward
 - refactor(autograd): extract mlpl-autograd-backward crate (partition 1/4)
 - docs(findings): correct RS7/RS8/RS9 routing -- library-shaped, not assigned work
