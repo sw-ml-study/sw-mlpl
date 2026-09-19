@@ -4,7 +4,7 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_matmul::prelude::*;
 use mlpl_array_ops_shape::prelude::*;
 
-use mlpl_autograd_tape::grad_kernels::unbroadcast;
+use crate::grad_kernels::unbroadcast;
 use mlpl_autograd_tape::{
     NodeId, NodeKind, Tape, accumulate, accumulate_pair, resident_backward, softmax_backward,
 };
@@ -144,7 +144,7 @@ fn prop_matmul(tape: &Tape, left: NodeId, right: NodeId, upstream: &TensorHandle
     // grad_a = upstream @ b^T (or outer(upstream, b) for matrix-vector);
     // grad_b = a^T @ upstream.
     let ga = if b.shape().rank() == 1 {
-        mlpl_autograd_tape::grad_kernels::matvec_outer(&up, &b)
+        crate::grad_kernels::matvec_outer(&up, &b)
     } else {
         up.matmul(&b.transpose()).expect("matmul upstream b^T")
     };

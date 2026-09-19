@@ -1,11 +1,11 @@
 //! Tape-touching backward wrappers for the shape ops; the pure
-//! kernels they call live in `mlpl_autograd_tape::grad_kernels`.
+//! kernels they call live in `crate::grad_kernels` / `crate::grad_kernels_shape`.
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_shape::prelude::*;
 
+use crate::grad_kernels::{reduce_sum_backward, windows_backward};
 use mlpl_array_ops_compose::prelude::RotateExt;
-use mlpl_autograd_tape::grad_kernels::{reduce_sum_backward, windows_backward};
 use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, accumulate_pair, resident};
 use mlpl_tensor_handle::{SeamEvent, TensorHandle, bump_if};
 

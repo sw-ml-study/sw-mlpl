@@ -8,6 +8,8 @@ pub mod cross_entropy;
 
 pub(crate) mod backward_shape;
 mod backward_shape_kernels;
+pub(crate) mod grad_kernels;
+pub(crate) mod grad_kernels_shape;
 
 pub use backward::backward;
 pub use cross_entropy::{cross_entropy_backward, cross_entropy_forward};

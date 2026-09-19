@@ -1,8 +1,7 @@
 //! Autograd substrate: the [`Tape`] recording structure, its node
-//! types, the elementwise op kernels, and the pure gradient kernels
-//! shared by the backward pass.
+//! types, and the elementwise op kernels. The pure gradient kernels for
+//! the backward pass live in the `mlpl-autograd-backward` crate.
 
-pub mod grad_kernels;
 pub mod kernels_softmax;
 pub mod ops;
 pub mod resident;

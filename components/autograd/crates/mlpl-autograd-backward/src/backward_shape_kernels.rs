@@ -1,11 +1,11 @@
 //! Leaf backward wrappers for the structural ops (patchify / concat / stack /
 //! take): each forces the upstream to a dense array, runs the exact CPU
-//! kernel from `mlpl_autograd_tape::grad_kernels`, and accumulates into the
+//! kernel from `crate::grad_kernels_shape`, and accumulates into the
 //! parent(s). Split from `backward_shape.rs` for the module function budget.
 
 use mlpl_array::{DenseArray, Shape};
 
-use mlpl_autograd_tape::grad_kernels::{
+use crate::grad_kernels_shape::{
     concat_backward, patchify_backward, stack_backward, take_backward,
 };
 use mlpl_autograd_tape::{NodeId, Tape, accumulate};
