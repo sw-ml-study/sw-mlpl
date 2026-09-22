@@ -1,0 +1,1 @@
+shape/rank/len inside grad (plan.md step 2): evaluate the traced argument's forward value and return a constant leaf, so shape(a) on a u: function parameter works (fold_const_expr currently evaluates without the local overlay). TDD: def u:g(a){ reduce_add(a) * take(shape(a),0,0) }; grad(u:g(W), W) is exact.

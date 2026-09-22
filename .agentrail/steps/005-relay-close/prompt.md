@@ -1,0 +1,1 @@
+Relay-close grad-soundness-records (plan.md step 5): lang-reference grad section, docs/sw-mlpl-findings.md, answer demo-decision-model in docs/q-and-a.md (record args + shape now work; their 12-positional-arg workaround can go; gather_rows is sparse), future-sagas-queue, CHANGES, wiki errata if claims changed. Rebuild mlpl-repl release+debug. Complete with --done.
