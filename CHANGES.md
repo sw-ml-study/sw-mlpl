@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-22
+
+- fix(grad): never constant-fold a u: call whose body reads a param
+- chore(agentrail): archive pow-const-grad; init grad-soundness-records (5 steps)
+
 ## 2026-09-18
 
+- chore(agentrail): complete 002-powconst-relay-close; pow-const-grad shipped
+- docs(changes): refresh CHANGES.md to HEAD
 - docs: pow-const-grad shipped -- pow differentiates for any constant exponent (PowConst)
 - docs(changes): refresh CHANGES.md to HEAD
 - chore(agentrail): complete 001-powconst-node; advance to 002-powconst-relay-close
