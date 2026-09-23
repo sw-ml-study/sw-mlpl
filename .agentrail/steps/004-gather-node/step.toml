@@ -1,4 +1,4 @@
-number = 3
+number = 4
 slug = "gather-node"
 status = "pending"
 description = "Native GatherRows autograd node (plan.md step 3): forward copies rows, backwa..."
