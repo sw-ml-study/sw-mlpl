@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-22
 
+- fix(grad): shape/rank/len of a u: function parameter inside grad
+- chore(agentrail): insert 003-traced-scope-args (microgpt-mlpl asks)
+- chore(agentrail): complete 001-fold-soundness
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): never constant-fold a u: call whose body reads a param
 - chore(agentrail): archive pow-const-grad; init grad-soundness-records (5 steps)
 
