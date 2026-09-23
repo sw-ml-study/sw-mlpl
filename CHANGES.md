@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-23
+
+- fix(eval): string-valued statements inside repeat/train/for bodies (microgpt-mlpl j)
+
 ## 2026-09-22
 
+- chore(agentrail): insert 006-layer-weights-api (params(), get/set_param, rms_norm eps, bias-free linear)
+- chore(agentrail): complete 004-bulk-unpack-and-result-predicates
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(bytes,result): bulk unpack(bytes, dtype); is_result(); get_error message
 - chore(agentrail): insert 005-loop-body-string-stmts (microgpt-mlpl bug j)
 - chore(agentrail): insert 004-bulk-unpack-and-result-predicates (R11, R1, R2)
