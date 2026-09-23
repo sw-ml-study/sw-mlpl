@@ -69,9 +69,23 @@ fn body_uses(name: &str, sc: &Scope, seen: &mut HashSet<String>) -> bool {
 /// computed inside the loss while the gradient flows through the surrounding
 /// ops. Constant constructors `fill` / `zeros` / `ones` (finding F14) build
 /// arrays from shape/value arguments, so a loss may scale by an inline mask.
+/// Shape metadata (`shape` / `rank` / `len`) reads structure, not values, so
+/// it is a constant of its argument's traced forward value -- which resolves a
+/// user function's parameter through the traced scope.
 pub(crate) fn is_constant_leaf_builtin(name: &str) -> bool {
     matches!(
         name,
-        "argmax" | "one_hot" | "eq" | "gt" | "lt" | "argtop_k" | "fill" | "zeros" | "ones"
+        "argmax"
+            | "one_hot"
+            | "eq"
+            | "gt"
+            | "lt"
+            | "argtop_k"
+            | "fill"
+            | "zeros"
+            | "ones"
+            | "shape"
+            | "rank"
+            | "len"
     )
 }

@@ -1,6 +1,6 @@
 number = 2
 slug = "shape-metadata"
-status = "pending"
+status = "in-progress"
 description = "shape/rank/len inside grad (plan.md step 2): evaluate the traced argument's f..."
 role = "production"
 context_files = []

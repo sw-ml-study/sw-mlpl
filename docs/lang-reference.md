@@ -679,7 +679,10 @@ generally, any subexpression that does not depend on a
 parameter's VALUE -- including a size derived from a shape, e.g.
 `reduce_mul(shape(x))` -- is folded to a constant, so it can be
 used inside the loss even when the builtins involved are not
-themselves differentiable. A user function counts as depending on
+themselves differentiable. Shape metadata (`shape`, `rank`, `len`)
+is a constant inside `grad`, including on a user function's own
+parameter, e.g. `def u:g(a) { reduce_add(a) / reduce_mul(shape(a)) }`.
+A user function counts as depending on
 a parameter when its arguments OR its body read one, so a helper
 that reads a global param is never folded away: if its body uses
 an unsupported builtin, `grad` reports that builtin rather than

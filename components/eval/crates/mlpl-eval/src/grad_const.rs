@@ -64,7 +64,8 @@ pub(crate) fn fncall_or_fold(
 /// Fold a param-value-independent expression to a constant `DenseArray` by
 /// evaluating it eagerly (finding F12). Returns `None` if the expression
 /// differentiably uses a parameter (so it must stay on the tape) or if the
-/// eager evaluation fails.
+/// eager evaluation fails. Evaluated over the traced-scope overlay, so a
+/// shape-derived size of a user function's parameter resolves.
 pub(crate) fn fold_const_expr(
     expr: &Expr,
     env: &mut Environment,
@@ -73,9 +74,7 @@ pub(crate) fn fold_const_expr(
     if crate::grad_purity::differentiably_uses_param(expr, params, env) {
         return None;
     }
-    crate::eval::eval_expr(expr, env, &mut None)
-        .and_then(mlpl_eval_types::Value::into_array)
-        .ok()
+    eval_index_expr(expr, env, params).ok()
 }
 
 /// Evaluate a stop-gradient builtin from the CURRENT forward values of its
