@@ -1,0 +1,11 @@
+{
+  "task_type": "bugfix",
+  "state": {
+    "number": 1,
+    "step": "fold-soundness"
+  },
+  "action": "TDD (6 RED tests in grad_fold_soundness_tests), responsibility split of grad.rs/grad_const.rs, full mlpl-eval + mlpl-repl release suites, clippy all-features, mlx-feature tests, sw-checklist diff, gh/fetch check for parallel large12 work (none; ff push)",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-22T19:17:11"
+}

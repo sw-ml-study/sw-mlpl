@@ -1,9 +1,10 @@
 number = 1
 slug = "fold-soundness"
-status = "in-progress"
+status = "completed"
 description = "Fix the grad constant-fold soundness bug (see plan.md step 1). grad_const::di..."
 role = "production"
 context_files = []
 created_at = "2026-09-22T12:45:01"
+completed_at = "2026-09-22T19:17:11"
 task_type = "bugfix"
-commits = []
+commits = ["482955d15f79c57c4a3192ad215fac4d82eb0087"]
