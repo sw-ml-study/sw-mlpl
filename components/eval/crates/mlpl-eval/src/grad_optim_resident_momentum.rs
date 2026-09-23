@@ -21,7 +21,7 @@ pub(crate) fn momentum_steps(
     beta: f64,
     env: &mut Environment,
 ) -> Result<DenseArray, EvalError> {
-    let (step_loss, mut grads) = grads_all(loss, env)?;
+    let (step_loss, mut grads) = grads_all(loss, names, env)?;
     for name in names {
         if env.is_frozen(name) {
             continue;

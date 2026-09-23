@@ -1,144 +1,27 @@
 //! The `grad(expr, wrt)` built-in: reverse-mode autograd over
 //! a tree-walked mini-evaluator that lifts array-valued operations
-//! onto an autograd tape.
+//! onto an autograd tape. This module holds the tracer itself;
+//! entry points, arithmetic, argument resolution, and optimizer
+//! state live in the `grad_*` siblings and are re-exported here.
 
-use crate::env_api::*;
 use std::collections::HashMap;
 use std::rc::Rc;
 
 use mlpl_array::{DenseArray, Shape};
 use mlpl_autograd::{Tape, Tensor};
-use mlpl_parser::{BinOpKind, Expr};
+use mlpl_parser::Expr;
 
 use crate::env::Environment;
+use crate::env_api::*;
 use mlpl_eval_types::EvalError;
 
-/// Evaluate a `grad(expr, wrt)` call and return the gradient array of
-/// the scalar expression `expr` with respect to the parameter `wrt`.
-pub(crate) fn eval_grad(args: &[Expr], env: &mut Environment) -> Result<DenseArray, EvalError> {
-    if args.len() != 2 {
-        return Err(EvalError::BadArity {
-            func: "grad".into(),
-            expected: 2,
-            got: args.len(),
-        });
-    }
-    let wrt_name = match &args[1] {
-        Expr::Ident(n, _) => n.clone(),
-        _ => {
-            return Err(EvalError::Unsupported(
-                "grad: second argument must be a parameter identifier".into(),
-            ));
-        }
-    };
-    if !env.is_param(&wrt_name) {
-        return Err(EvalError::Unsupported(format!(
-            "grad: '{wrt_name}' is not a tracked parameter"
-        )));
-    }
-    let tape = Tape::new();
-    // Saga E4 step 003: under device("mlx") the tape keeps forward
-    // intermediates RESIDENT on the registered backend -- leaves
-    // upload once, ops build one lazy graph -- replacing the old
-    // second-forward materialize pass.
-    if env.device() == "mlx" {
-        crate::device::enable_resident_tape(&tape);
-    }
-    let mut params: HashMap<String, Tensor> = HashMap::new();
-    for (name, value) in env.params() {
-        params.insert(name.clone(), Tensor::param(Rc::clone(&tape), value.clone()));
-    }
-    let root = eval_tensor_expr(&args[0], env, &tape, &params)?;
-    root.backward();
-    let wrt_tensor = params
-        .get(&wrt_name)
-        .expect("wrt param present in params map");
-    // A `None` gradient means the loss subgraph never reached this parameter
-    // -- the loss does not depend on `wrt` (finding D1). Returning zeros here
-    // reads as a broken training step, so fail loudly instead of silently.
-    wrt_tensor.grad().ok_or_else(|| {
-        EvalError::Unsupported(format!(
-            "grad: the loss does not depend on '{wrt_name}' (no gradient flows \
-             to it) -- was the loss computed eagerly before grad, or is this \
-             the wrong parameter?"
-        ))
-    })
-}
-
-/// One tape for the whole step: evaluate `loss` once, backward
-/// once, and return every tracked parameter's gradient (zeros for
-/// params the loss never touched). Saga E4 step 006: the optimizer
-/// steps use this so every parameter's gradient is taken at the
-/// SAME step-start weights (standard batched semantics -- the old
-/// per-param rebuild updated earlier params before later params'
-/// gradients were computed) and the forward runs once instead of
-/// once per parameter.
-pub(crate) fn eval_grads_batch(
-    loss: &Expr,
-    env: &mut Environment,
-) -> Result<(f64, HashMap<String, DenseArray>), EvalError> {
-    let tape = Tape::new();
-    if env.device() == "mlx" {
-        crate::device::enable_resident_tape(&tape);
-    }
-    let mut params: HashMap<String, Tensor> = HashMap::new();
-    for (name, value) in env.params() {
-        params.insert(name.clone(), Tensor::param(Rc::clone(&tape), value.clone()));
-    }
-    let root = eval_tensor_expr(loss, env, &tape, &params)?;
-    root.backward();
-    // The step loss the optimizers return (train records it as the
-    // per-step curve). On a resident tape this is the one scalar
-    // download per reporting interval the E4 sync contract allows.
-    let loss_val = root.value().data().first().copied().unwrap_or(0.0);
-    let grads = params
-        .into_iter()
-        .map(|(n, t)| {
-            let g = t
-                .grad()
-                .unwrap_or_else(|| DenseArray::zeros(t.value().shape().clone()));
-            (n, g)
-        })
-        .collect();
-    Ok((loss_val, grads))
-}
-
-/// Combine two tape tensors under a binary operator. The four
-/// arithmetic ops record a differentiable node; the six comparison
-/// ops produce a 0/1 mask with zero gradient almost everywhere, so
-/// inside `grad(...)` they are rejected as non-differentiable rather
-/// than silently returning a zero-gradient constant.
-fn tensor_binop(op: &BinOpKind, l: &Tensor, r: &Tensor) -> Result<Tensor, EvalError> {
-    match op {
-        BinOpKind::Add | BinOpKind::Sub | BinOpKind::Mul | BinOpKind::Div => {
-            checked_arith(op, l, r)
-        }
-        BinOpKind::Lt
-        | BinOpKind::Gt
-        | BinOpKind::Le
-        | BinOpKind::Ge
-        | BinOpKind::Eq
-        | BinOpKind::Ne => Err(EvalError::Unsupported(format!(
-            "grad: comparison operator `{op}` is not differentiable"
-        ))),
-    }
-}
-
-/// Build a differentiable arithmetic node after validating broadcast/label
-/// compatibility on the forward values -- so an incompatible shape or label is
-/// a clean error, not a panic in the tape's `push_binary` (finding F18; F10
-/// covers the label half). Eager evaluation already errors here; this keeps the
-/// tape consistent.
-fn checked_arith(op: &BinOpKind, l: &Tensor, r: &Tensor) -> Result<Tensor, EvalError> {
-    mlpl_array_ops_element::check_binop_compat(&l.value(), &r.value())
-        .map_err(EvalError::ArrayError)?;
-    Ok(match op {
-        BinOpKind::Add => l.add(r),
-        BinOpKind::Sub => l.sub(r),
-        BinOpKind::Mul => l.mul(r),
-        _ => l.div(r),
-    })
-}
+pub(crate) use crate::grad_arith::unary_tensor_op;
+use crate::grad_arith::{call_flatten, tensor_binop};
+pub(crate) use crate::grad_entry::{eval_grad, eval_grads_batch};
+pub(crate) use crate::grad_optim_state::eval_reset_optimizer;
+pub use crate::grad_optim_state::{OptimizerState, optim_state, optim_state_mut};
+pub(crate) use crate::grad_params::{collect_params, set_trained_param};
+pub(crate) use crate::grad_scalars::{arity_check, eval_shape_dims, tape_scalar_usize};
 
 pub(crate) fn eval_tensor_expr(
     expr: &Expr,
@@ -154,11 +37,10 @@ pub(crate) fn eval_tensor_expr(
             if let Some(t) = params.get(name) {
                 return Ok(t.clone());
             }
-            let arr = env
-                .get(name)
-                .cloned()
-                .ok_or_else(|| EvalError::UndefinedVariable(name.clone()))?;
-            Ok(leaf(arr))
+            let arr = env.get(name).cloned();
+            Ok(leaf(arr.ok_or_else(|| {
+                crate::grad_errors::unbound_ident(name, env)
+            })?))
         }
         Expr::ArrayLit(elems, _) => {
             let arr = crate::eval_ops::eval_array_lit(elems, env, &mut None)?;
@@ -177,12 +59,10 @@ pub(crate) fn eval_tensor_expr(
             let dims = eval_shape_dims(shape, env, tape, params)?;
             Ok(leaf(DenseArray::zeros(Shape::new(dims))))
         }
-        // Scoped forms and string literals never have a tensor
+        // Scoped forms, records, and string literals never have a tensor
         // analogue inside `grad(expr, wrt)` -- the differentiable
         // surface is array-valued ops only.
-        _ => Err(EvalError::Unsupported(
-            "grad: expression form not supported inside grad()".into(),
-        )),
+        _ => Err(crate::grad_errors::unsupported_form(expr)),
     }
 }
 
@@ -196,9 +76,7 @@ pub(crate) fn eval_tensor_fncall(
     if let Some(op) = unary_tensor_op(name) {
         return crate::grad_calls_basic::call_unary(op, args, env, tape, params, name);
     }
-    if crate::grad_const::is_stop_gradient_builtin(name)
-        || crate::grad_const::is_const_ctor_builtin(name)
-    {
+    if crate::grad_purity::is_constant_leaf_builtin(name) {
         return crate::grad_const::eval_stop_gradient(name, args, env, tape, params);
     }
     match name {
@@ -229,218 +107,6 @@ pub(crate) fn eval_tensor_fncall(
         }
         _ => Err(EvalError::Unsupported(format!(
             "grad: function '{name}' not supported inside grad()"
-        ))),
-    }
-}
-
-/// Arity check shared by the per-branch helpers. Lifted out
-/// of the original eval_tensor_fncall's local closure so
-/// callers in grad_calls_basic / grad_calls_shape can use it.
-pub(crate) fn arity_check(args: &[Expr], expected: usize, func: &str) -> Result<(), EvalError> {
-    if args.len() == expected {
-        return Ok(());
-    }
-    Err(EvalError::BadArity {
-        func: func.into(),
-        expected,
-        got: args.len(),
-    })
-}
-
-pub(crate) fn tape_scalar_usize(
-    arg: &Expr,
-    env: &mut Environment,
-    tape: &Rc<Tape>,
-    params: &HashMap<String, Tensor>,
-    what: &str,
-) -> Result<usize, EvalError> {
-    // Resolve through the traced scope (eval_tensor_expr checks the function's
-    // local bindings before the global env), so an axis/index bound to a
-    // function argument works inside an inlined user function (finding F20).
-    let arr = eval_tensor_expr(arg, env, tape, params)?.value();
-    if arr.rank() != 0 {
-        return Err(EvalError::Unsupported(format!(
-            "{what} must be a scalar, got rank {}",
-            arr.rank()
-        )));
-    }
-    let v = arr.data()[0];
-    if v < 0.0 || v.fract() != 0.0 {
-        return Err(EvalError::Unsupported(format!(
-            "{what} must be a non-negative integer, got {v}"
-        )));
-    }
-    Ok(v as usize)
-}
-
-pub(crate) fn unary_tensor_op(name: &str) -> Option<fn(&Tensor) -> Tensor> {
-    Some(match name {
-        "sum" => Tensor::sum,
-        "mean" => Tensor::mean,
-        "exp" => Tensor::exp,
-        "log" => Tensor::log,
-        "sqrt" => Tensor::sqrt,
-        "sin" => Tensor::sin,
-        "cos" => Tensor::cos,
-        "relu" => Tensor::relu,
-        // `tanh_fn` is the surface-MLPL spelling (`tanh` itself
-        // is reserved by the `tanh_layer()` model layer); both
-        // names map to the same tape op.
-        "tanh" | "tanh_fn" => Tensor::tanh,
-        "sigmoid" => Tensor::sigmoid,
-        "transpose" => Tensor::transpose,
-        _ => return None,
-    })
-}
-
-/// `flatten(x)` on the tape: reshape to 1-D, reusing the Reshape backward.
-fn call_flatten(
-    args: &[Expr],
-    env: &mut Environment,
-    tape: &Rc<Tape>,
-    params: &HashMap<String, Tensor>,
-) -> Result<Tensor, EvalError> {
-    arity_check(args, 1, "flatten")?;
-    let x = eval_tensor_expr(&args[0], env, tape, params)?;
-    let total = x.value().shape().elem_count();
-    Ok(x.reshape(mlpl_array::Shape::new(vec![total])))
-}
-
-pub(crate) fn eval_shape_dims(
-    shape: &[Expr],
-    env: &mut Environment,
-    tape: &Rc<Tape>,
-    params: &HashMap<String, Tensor>,
-) -> Result<Vec<usize>, EvalError> {
-    let mut dims = Vec::with_capacity(shape.len());
-    for dim_expr in shape {
-        // Resolve each dim through the traced scope (eval_tensor_expr checks the
-        // function's local bindings before the global env), so a reshape/windows
-        // dimension bound to a function argument resolves and the gradient flows
-        // through the reshaped value (finding F23).
-        let arr = eval_tensor_expr(dim_expr, env, tape, params)?.value();
-        if arr.rank() != 0 {
-            return Err(EvalError::InvalidShapeDim);
-        }
-        let v = arr.data()[0];
-        if v < 0.0 || v.fract() != 0.0 {
-            return Err(EvalError::InvalidShapeDim);
-        }
-        dims.push(v as usize);
-    }
-    Ok(dims)
-}
-// ----- optimizer state and built-in dispatch (Saga 10) -----
-//
-// Saga 10 design choice: optimizer state lives on `Environment` as a
-// map keyed by `(optimizer_name, param_name, slot_name)` instead of
-// in a new crate. The `mlpl-autograd` substrate already lives in its
-// own crate, and Adam / momentum-SGD are thin wrappers around `grad`
-// plus per-param buffers, so a fresh crate would just trampoline
-// through `mlpl-eval` to reach `Environment`. Folding the state and
-// dispatch hooks into `grad.rs` keeps the wiring local and respects
-// the project's per-module function-count budget.
-//
-// Step 001 adds only the storage type and stub built-in dispatch.
-// Steps 002 and 003 fill in `momentum_sgd` and `adam`.
-
-// The buffer type moved to mlpl-eval-state (env-types-out step);
-// re-exported so `crate::grad::OptimizerState` paths keep working.
-pub use mlpl_eval_state::OptimizerState;
-
-/// Write an optimizer-updated parameter value, persisting it across a
-/// user-function frame (finding F21): the optimizer's effect on a named global
-/// parameter must survive the frame restore, like an explicit global write, so
-/// `adam(...)` inside a `def u:step()` trains the real params, not frame-local
-/// copies.
-pub(crate) fn set_trained_param(env: &mut Environment, name: &str, value: DenseArray) {
-    if env.call_depth > 0 {
-        env.global_writes.push((
-            name.to_string(),
-            mlpl_eval_types::Value::Array(value.clone()),
-        ));
-    }
-    env.set(name.to_string(), value);
-}
-
-/// `reset_optimizer()` -- drop all optimizer moment buffers and step counters
-/// so a script can train another variant from a clean slate in one process
-/// (moe-microscope F22). Returns 0.
-pub(crate) fn eval_reset_optimizer(
-    args: &[Expr],
-    env: &mut Environment,
-) -> Result<mlpl_eval_types::Value, EvalError> {
-    if !args.is_empty() {
-        return Err(EvalError::BadArity {
-            func: "reset_optimizer".into(),
-            expected: 0,
-            got: args.len(),
-        });
-    }
-    env.optim_state.clear();
-    Ok(mlpl_eval_types::Value::Array(DenseArray::from_scalar(0.0)))
-}
-
-/// Read-only accessor used by tests and downstream optimizer code.
-#[must_use]
-pub fn optim_state(env: &Environment) -> &OptimizerState {
-    &env.optim_state
-}
-
-/// Mutable accessor used by tests and downstream optimizer code.
-pub fn optim_state_mut(env: &mut Environment) -> &mut OptimizerState {
-    &mut env.optim_state
-}
-
-/// Resolve the optimizer's `params` argument into a flat list of
-/// parameter identifiers. Accepts:
-///
-/// - a single param identifier: `adam(loss, W, ...)`
-/// - an array literal of param identifiers: `adam(loss, [W, b], ...)`
-/// - a model identifier registered via the Saga 11 model DSL:
-///   `adam(loss, M, ...)` walks `ModelSpec::params()` and returns its
-///   flat, order-stable parameter list.
-pub(crate) fn collect_params(
-    arg: &Expr,
-    env: &Environment,
-    func: &str,
-) -> Result<Vec<String>, EvalError> {
-    match arg {
-        Expr::Ident(n, _) => {
-            if let Some(model) = env.get_model(n) {
-                Ok(model.params())
-            } else {
-                Ok(vec![n.clone()])
-            }
-        }
-        Expr::ArrayLit(elems, _) => {
-            let mut v = Vec::with_capacity(elems.len());
-            for e in elems {
-                match e {
-                    // Saga 29 step 009: walk model params when the
-                    // ArrayLit element resolves to a registered model,
-                    // matching the lone-Ident path's behavior. This
-                    // is what lets the trained ViT demo write
-                    // `adam(loss, [linear_p, attn, classifier], ...)`
-                    // and have every model's param list flattened in.
-                    Expr::Ident(n, _) => {
-                        if let Some(model) = env.get_model(n) {
-                            v.extend(model.params());
-                        } else {
-                            v.push(n.clone());
-                        }
-                    }
-                    _ => {
-                        return Err(EvalError::Unsupported(format!(
-                            "{func}: params list must contain only identifiers"
-                        )));
-                    }
-                }
-            }
-            Ok(v)
-        }
-        _ => Err(EvalError::Unsupported(format!(
-            "{func}: second argument must be a param identifier, model identifier, or list"
         ))),
     }
 }

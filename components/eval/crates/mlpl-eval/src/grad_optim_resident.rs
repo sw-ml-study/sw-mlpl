@@ -29,13 +29,15 @@ pub(crate) fn backend_lost() -> EvalError {
     EvalError::Unsupported("resident optimizer: device backend unavailable mid-step".into())
 }
 
-/// Build ONE resident tape for `loss`, backward it, and return each
-/// tracked parameter's `(weight, gradient)` handles.
 /// Per-param `(resident weight, resident gradient)` pair.
 type WgPair = (TensorHandle, TensorHandle);
 
+/// Build ONE resident tape for `loss`, backward it, and return each
+/// tracked parameter's `(weight, gradient)` handles. A param in `train`
+/// that got no gradient is an error (see `grad_errors::require_reached`).
 pub(crate) fn grads_all(
     loss: &Expr,
+    train: &[String],
     env: &mut Environment,
 ) -> Result<(f64, HashMap<String, WgPair>), EvalError> {
     let tape = mlpl_autograd::Tape::new();
@@ -43,21 +45,24 @@ pub(crate) fn grads_all(
     let params = seed_params(&tape, env);
     let root = crate::grad::eval_tensor_expr(loss, env, &tape, &params)?;
     root.backward();
-    // One scalar download per step: the allowed reporting sync.
-    let loss_val = root.value().data().first().copied().unwrap_or(0.0);
     let nodes = tape.nodes();
-    let grads = params
+    let raw: HashMap<String, (TensorHandle, Option<TensorHandle>)> = params
         .into_iter()
         .map(|(n, t)| {
             let node = &nodes[t.node().0];
-            let g = node
-                .grad
-                .clone()
-                .unwrap_or_else(|| TensorHandle::Cpu(DenseArray::from_scalar(0.0)));
-            (n, (node.value.clone(), g))
+            (n, (node.value.clone(), node.grad.clone()))
         })
         .collect();
-    Ok((loss_val, grads))
+    crate::grad_errors::require_reached(train, env, |n| {
+        raw.get(n).is_none_or(|(_, g)| g.is_some())
+    })?;
+    let zero = || TensorHandle::Cpu(DenseArray::from_scalar(0.0));
+    let grads = raw
+        .into_iter()
+        .map(|(n, (w, g))| (n, (w, g.unwrap_or_else(zero))));
+    // One scalar download per step: the allowed reporting sync.
+    let loss_val = root.value().data().first().copied().unwrap_or(0.0);
+    Ok((loss_val, grads.collect()))
 }
 
 /// One resident Adam step over `names`. `None` = not applicable

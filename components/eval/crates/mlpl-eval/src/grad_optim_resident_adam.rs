@@ -28,7 +28,7 @@ pub(crate) fn adam_steps(
     hp: &ResidentHp,
     env: &mut Environment,
 ) -> Result<DenseArray, EvalError> {
-    let (step_loss, mut grads) = grads_all(loss, env)?;
+    let (step_loss, mut grads) = grads_all(loss, names, env)?;
     for name in names {
         if env.is_frozen(name) {
             continue;

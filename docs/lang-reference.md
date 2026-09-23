@@ -679,7 +679,14 @@ generally, any subexpression that does not depend on a
 parameter's VALUE -- including a size derived from a shape, e.g.
 `reduce_mul(shape(x))` -- is folded to a constant, so it can be
 used inside the loss even when the builtins involved are not
-themselves differentiable.
+themselves differentiable. A user function counts as depending on
+a parameter when its arguments OR its body read one, so a helper
+that reads a global param is never folded away: if its body uses
+an unsupported builtin, `grad` reports that builtin rather than
+returning a gradient with the helper's term missing. Unsupported
+forms are named in the error (e.g. "record field access `r.ids`
+is not supported inside grad()"); records are data, not
+differentiable values, so pass their fields as plain arrays.
 
 ### Optimizers and Schedules
 
@@ -688,7 +695,7 @@ themselves differentiable.
 | `adam(loss, params, lr, b1, b2, eps)` | 6 | One Adam step on `params`. Same `params` shape as `momentum_sgd`; per-parameter `m`/`v` state is maintained across calls. |
 | `cosine_schedule(step, total, lr_min, lr_max)` | 4 | Cosine annealing from `lr_max` at `step=0` to `lr_min` at `step=total`. Pure scalar helper usable inside `adam(..., cosine_schedule(step, 100, 1e-4, 1e-2), ...)`. |
 | `linear_warmup(step, warmup, lr)` | 3 | Ramp from 0 to `lr` over the first `warmup` steps and return `lr` after. |
-| `momentum_sgd(loss, params, lr, beta)` | 4 | One in-place momentum-SGD step on `params`. `params` is a single param name, a `[p1, p2, ...]` list, or a model identifier (walked via `params(model)`). Per-parameter state is maintained on the environment so the next call continues the trajectory. |
+| `momentum_sgd(loss, params, lr, beta)` | 4 | One in-place momentum-SGD step on `params`. `params` is a single param name, a `[p1, p2, ...]` list, or a model identifier (walked via `params(model)`). Per-parameter state is maintained on the environment so the next call continues the trajectory. Both optimizers error if a listed, non-frozen param gets no gradient from `loss` (the step would otherwise silently leave it unchanged); drop it from `params` or `freeze()` its model. |
 | `params(model)` | 1 | Return the flat list of parameter names owned by a model; used internally by the optimizers when given a model identifier. |
 | `reset_optimizer()` | 0 | Drop all optimizer state (Adam/momentum moment buffers and step counters) so a fresh training run starts from a clean slate in the same process. Optimizer state is kept per parameter by NAME across calls; without a reset, training a second variant under the same names would inherit the first's moments. Rebinding a name to a NEW model also drops that model's stale per-parameter moments automatically; `reset_optimizer()` is the explicit full reset. Returns 0. |
 

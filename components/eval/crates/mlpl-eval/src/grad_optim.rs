@@ -77,7 +77,7 @@ pub(crate) fn eval_momentum_sgd(
         return r;
     }
 
-    let (step_loss, mut grads) = crate::grad::eval_grads_batch(&loss_expr, env)?;
+    let (step_loss, mut grads) = crate::grad::eval_grads_batch(&loss_expr, &param_names, env)?;
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(
@@ -255,7 +255,7 @@ pub(crate) fn eval_adam(args: &[Expr], env: &mut Environment) -> Result<DenseArr
              See docs/benchmarks.md (Saga E4)."
         ));
     }
-    let (step_loss, mut grads) = crate::grad::eval_grads_batch(&loss_expr, env)?;
+    let (step_loss, mut grads) = crate::grad::eval_grads_batch(&loss_expr, &param_names, env)?;
     for name in &param_names {
         if !env.is_param(name) {
             return Err(EvalError::Unsupported(format!(

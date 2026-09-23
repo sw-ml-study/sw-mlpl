@@ -1,6 +1,6 @@
 number = 1
 slug = "fold-soundness"
-status = "pending"
+status = "in-progress"
 description = "Fix the grad constant-fold soundness bug (see plan.md step 1). grad_const::di..."
 role = "production"
 context_files = []

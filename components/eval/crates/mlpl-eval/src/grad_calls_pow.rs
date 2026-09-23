@@ -19,7 +19,7 @@ pub(crate) fn call_pow(
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, EvalError> {
     crate::grad::arity_check(args, 2, "pow")?;
-    if crate::grad_const::differentiably_uses_param(&args[1], params) {
+    if crate::grad_purity::differentiably_uses_param(&args[1], params, env) {
         return Err(EvalError::Unsupported(
             "grad: pow with a differentiable exponent is not supported; \
              the exponent must be a constant"
