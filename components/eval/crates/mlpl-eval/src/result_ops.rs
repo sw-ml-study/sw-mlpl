@@ -70,8 +70,10 @@ pub(crate) fn eval_result_accessor(
 /// docs/option-result-design.md): the wanted side of a Result as a
 /// 0-or-1 element vector -- `[]` when absent, `[payload]` when
 /// present -- so `tally` is `is_some` and
-/// `take(concat(get_value(r), [d]), 0, 0)` is `unwrap_or`. Scalar
-/// payloads only until Stage 6 nested arrays bring `enclose`.
+/// `take(concat(get_value(r), [d]), 0, 0)` is `unwrap_or`. The
+/// Option form holds scalar payloads only (no nested arrays); a
+/// string or array payload is read directly with `unwrap(r)` /
+/// `err_message(r)`, which the error names.
 fn project_option(payload: Value, present: bool, accessor: &str) -> Result<Value, EvalError> {
     if !present {
         return Ok(Value::Array(DenseArray::new(Shape::new(vec![0]), vec![])?));
@@ -81,10 +83,18 @@ fn project_option(payload: Value, present: bool, accessor: &str) -> Result<Value
             Shape::new(vec![1]),
             vec![a.data()[0]],
         )?)),
-        other => Err(EvalError::Unsupported(format!(
-            "{accessor}: boxing a non-scalar payload ({}) as an Option needs Stage 6 enclose; use unwrap/err_message instead",
-            mlpl_eval_types::value_kind(&other)
-        ))),
+        other => {
+            let direct = if accessor == "get_error" {
+                "err_message"
+            } else {
+                "unwrap"
+            };
+            Err(EvalError::Unsupported(format!(
+                "{accessor}: the Option form holds scalar payloads only; this payload is a {}. \
+                 Read it directly with {direct}(r)",
+                mlpl_eval_types::value_kind(&other)
+            )))
+        }
     }
 }
 

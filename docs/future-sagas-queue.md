@@ -546,11 +546,21 @@ in data-forge come first).
   documented FAILs, 337 warnings).
 - **typed-packed-bytes tail** -- big-endian typed readers
   (`read_u16_be` .. `read_f64_be`, mirroring the LE family with
-  `from_be_bytes`) and `unpack(bytes, dtype) -> array` (the
-  numeric inverse of `pack`). Non-critical completeness: the
-  little-endian readers + `reinterpret` already cover the
-  Safetensors/GGUF (little-endian) case demo-ml-utils #2 needs.
-  Deferred when the extension-ABI work took priority.
+  `from_be_bytes`). Non-critical completeness: the little-endian
+  readers + `reinterpret` + bulk `unpack` cover the
+  Safetensors/GGUF (little-endian) case. (`unpack(bytes, dtype)`
+  SHIPPED 2026-09-22 in grad-soundness-records step 004 -- it had
+  become blocking for reasoning-from-scratch R11.) Follow-up worth
+  considering: an f32-backed or lazily-materialized unpack, since
+  the f64 array doubles a bf16 tensor's footprint 4x (a 596M-value
+  model is ~4.8 GB as f64).
+- **Stage 6 enclose / nested Options** -- `get_value` / `get_error`
+  hold scalar payloads only; a string or array payload errors and
+  points at `unwrap` / `err_message` (demo-extensions R2, resolved
+  as a documented boundary 2026-09-22). A symmetric-Result
+  extension ABI (wrap every extension success in `ok(_)`) was
+  considered for demo-extensions R1 and set aside as breaking;
+  `is_result(x)` shipped instead.
 - **Split `mlpl-extension-cabi`** -- the crate is AT its 7-module
   ceiling (marshal / marshal_array / marshal_array_out / model /
   register / validate / lib), so the boundary marshaling (which is

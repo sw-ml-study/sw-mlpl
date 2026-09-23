@@ -40,6 +40,7 @@ pub(crate) fn try_intercept(
     match name.as_str() {
         "list_len" | "len" => Some(crate::list_ops::eval_list_len(name, args, env, trace)),
         "ok" | "err" => Some(eval_result_ctor(name, args, env, trace)),
+        "is_result" => Some(crate::result_predicates::eval_is_result(args, env, trace)),
         "is_ok" | "is_err" | "unwrap" | "err_message" | "unwrap_or" | "get_value" | "get_error"
         | "check" => Some(crate::result_ops::eval_result_accessor(
             name, args, env, trace,

@@ -57,7 +57,12 @@ fn unwrap_or_is_derivable_from_the_projection() {
 }
 
 #[test]
-fn non_scalar_payload_names_the_stage6_gap() {
-    let msg = eval("get_value(ok([1, 2, 3]))").expect_err("needs enclose");
-    assert!(msg.contains("enclose"), "{msg}");
+fn non_scalar_payload_names_the_direct_reader() {
+    // The Option form holds scalars only; the error points at the accessor
+    // that reads a non-scalar payload directly.
+    let msg = eval("get_value(ok([1, 2, 3]))").expect_err("scalar-only Option");
+    assert!(
+        msg.contains("scalar payloads only") && msg.contains("unwrap(r)"),
+        "{msg}"
+    );
 }

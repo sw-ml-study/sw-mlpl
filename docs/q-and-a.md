@@ -5,6 +5,43 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-22 (reasoning-from-scratch R11 + demo-extensions R1/R2)
+
+**R11 (reasoning-from-scratch; demo-extensions E3 depends on it):
+bulk `unpack(bytes, dtype)` -- SHIPPED.** The inverse of `pack` for
+every dtype `reinterpret` accepts (`u8`..`f64`, `bf16`, `f16`),
+decoded in one native pass to a flat 1-D array. Subnormals,
+infinities and NaN are preserved; a ragged byte length is an error
+naming the length and dtype. `unpack` decodes by its dtype argument,
+so a u8 buffer from `read_bytes_packed` needs no `reinterpret`:
+
+```
+W = reshape(unpack(unwrap(read_bytes_packed(p, off, n)), "bf16"), [rows, cols])
+```
+
+Acceptance: the bf16 bit patterns of `[1, -1, 2, 0.5, 0, 50]` unpack
+exactly (`bytes_unpack_tests::unpack_bf16_is_exact`); throughput is
+one native loop (2M values in 0.4 s on a DEBUG build). Memory note:
+MLPL arrays are f64, so a tensor costs 8 bytes per value after
+unpack -- the 155M-value embedding is ~1.2 GB, the whole 596M-value
+model ~4.8 GB. Load tensor-by-tensor with bounded
+`read_bytes_packed(p, off, n)` reads. The native `sten:read_tensor`
+fallback is not needed.
+
+**R1 (demo-extensions): `is_result(x)` -- SHIPPED.** A total
+predicate: `1` for `ok(_)` / `err(_)`, `0` for anything else, never
+raising. Extension calls still return the bare value on success
+(changing that would break every existing consumer), so branch with
+`if is_result(r) { err_message(r) } else { r.path }` instead of
+`type_of` + `str_eq`. `is_ok` / `is_err` keep requiring a Result
+(returning `0` for a bare success would read as a failure).
+
+**R2 (demo-extensions): `get_error` on a string -- documented
+boundary.** The Option form (`get_value` / `get_error`) holds scalar
+payloads only; the error now says so and names `err_message(r)`
+(and `unwrap(r)` for `get_value`). `err_message` is the supported
+way to read a string error.
+
 ## 2026-09-22 (microgpt-mlpl -- four grad asks)
 
 Downstream `../../softwarewrighter/microgpt-mlpl` reported one bug

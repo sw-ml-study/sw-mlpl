@@ -36,6 +36,21 @@ pub fn read_le(data: &[u8], offset: usize, dtype: ByteDtype) -> Option<f64> {
     })
 }
 
+/// Decode the whole buffer as consecutive little-endian `dtype` values -- the
+/// bulk inverse of `pack_f64s`, one native pass. `None` if `data.len()` is not
+/// a whole number of `dtype` values.
+#[must_use]
+pub fn unpack_le(data: &[u8], dtype: ByteDtype) -> Option<Vec<f64>> {
+    let w = dtype.width();
+    if !data.len().is_multiple_of(w) {
+        return None;
+    }
+    (0..data.len())
+        .step_by(w)
+        .map(|off| read_le(data, off, dtype))
+        .collect()
+}
+
 /// bfloat16 -> f64. bf16 is the top 16 bits of an f32, so widening the bits
 /// back into an f32 is exact.
 #[must_use]

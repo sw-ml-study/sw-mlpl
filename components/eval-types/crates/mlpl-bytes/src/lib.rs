@@ -9,4 +9,4 @@ mod read;
 
 pub use dtype::ByteDtype;
 pub use pack::pack_f64s;
-pub use read::read_le;
+pub use read::{read_le, unpack_le};
