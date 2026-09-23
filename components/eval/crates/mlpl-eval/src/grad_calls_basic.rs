@@ -8,7 +8,6 @@
 use crate::env_api::*;
 use std::collections::HashMap;
 
-use mlpl_array::DenseArray;
 use mlpl_autograd::{Tape, Tensor};
 use mlpl_parser::Expr;
 
@@ -75,7 +74,7 @@ pub(crate) fn call_cross_entropy(
 ) -> Result<Tensor, EvalError> {
     arity_check(args, 2, "cross_entropy")?;
     let l = eval_tensor_expr(&args[0], env, tape, params)?;
-    let t: DenseArray = crate::eval::eval_expr(&args[1], env, &mut None)?.into_array()?;
+    let t = crate::grad_const::eval_const_arg(&args[1], env, params)?;
     let idx = mlpl_models_tape::validate_cross_entropy_targets(&l.value(), &t)?;
     Ok(l.cross_entropy(idx))
 }

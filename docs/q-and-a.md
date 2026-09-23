@@ -5,6 +5,47 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-22 (microgpt-mlpl -- four grad asks)
+
+Downstream `../../softwarewrighter/microgpt-mlpl` reported one bug
+and three gaps. Status against `target/release/mlpl-repl` at the
+commit that adds this entry:
+
+**1. `u:ce(x, y)` -> "undefined variable: y" -- FIXED.** grad's
+`cross_entropy` read its targets from the global env only. Targets
+(and `rotate`'s shift, `pow`'s exponent, `transpose_axes`'
+permutation) now resolve through grad's traced scope, so a user
+function's parameter works:
+
+```
+def u:ce(x, y) { "loss" cross_entropy(matmul(x, W), y) }
+grad(u:ce(X, [0, 2]), W)   // == grad(cross_entropy(matmul(X, W), [0, 2]), W)
+```
+
+The global-tokens / no-argument-loss workaround can go; pass
+tokens, targets and mask as arguments.
+
+**2. "causal_attention trains only with 1 head" -- not a gap.**
+Multi-head attention (causal or not) is differentiable for any
+`heads` dividing `d_model`: `causal_attention(16, 4, 7)` + `adam`
+takes the loss 119.7 -> 2.6 in 30 steps (pinned by
+`grad_traced_args_tests::multi_head_causal_attention_trains`). The
+lang-reference row that said "Tape-lowered for heads=1" was stale
+and is fixed. The attention layer has no biases (only `W_q`,
+`W_k`, `W_v`, `W_o`). Hand-writing the forward to hit exactly 4,192
+params is still a fine choice.
+
+**3. Cached generation only with built-in layers -- real, queued.**
+`gen_state` caches K/V per built-in causal-attention layer; a
+hand-written `u:` forward has no layer structure to cache. Queued
+in docs/future-sagas-queue.md. Recomputing over the 16-token
+prefix is the right answer meanwhile.
+
+**4. "comparisons can't be differentiated" -- FIXED.** Comparison
+operators inside grad are now stop-gradient 0/1 masks, exactly like
+the `lt` / `gt` / `eq` builtins (which already worked), so the
+causal mask can be built inside the loss: `W * (c < r + 1)`.
+
 ## 2026-08-09 (MLPB v2 integrity -- demo-algorithms next task)
 
 **Q: demo-algorithms is idle until a sw-mlpl codec-* follow-up

@@ -16,13 +16,14 @@ use crate::env_api::*;
 use crate::grad::eval_tensor_expr;
 use mlpl_eval_types::EvalError;
 
-/// Evaluate a non-differentiable index expression (e.g. a `gather_rows` index)
-/// eagerly, in a scope overlaid with the current grad bindings, so index
-/// arithmetic over a nested user function's arguments resolves (finding F11):
-/// `start + range(count)` where `start`/`count` are function parameters living
+/// Evaluate a non-differentiable argument eagerly -- a `gather_rows` index, a
+/// `cross_entropy` target, `rotate`'s shift, `pow`'s exponent, a
+/// `transpose_axes` permutation, a constant fold -- in a scope overlaid with
+/// the current grad bindings, so a user function's parameters resolve
+/// (findings F11, microgpt-mlpl): `start + range(count)` or targets `y` living
 /// in the traced scope, not the global env. The overlay is snapshotted and
 /// restored so it does not leak.
-pub(crate) fn eval_index_expr(
+pub(crate) fn eval_const_arg(
     idx: &Expr,
     env: &mut Environment,
     params: &HashMap<String, Tensor>,
@@ -54,7 +55,7 @@ pub(crate) fn fncall_or_fold(
 ) -> Result<Tensor, EvalError> {
     match crate::grad::eval_tensor_fncall(name, args, env, tape, params) {
         Ok(t) => Ok(t),
-        Err(e) => match fold_const_expr(expr, env, params) {
+        Err(e) => match fold_const_expr(expr, env, tape, params) {
             Some(v) => Ok(Tensor::leaf(Rc::clone(tape), v, false)),
             None => Err(e),
         },
@@ -69,12 +70,13 @@ pub(crate) fn fncall_or_fold(
 pub(crate) fn fold_const_expr(
     expr: &Expr,
     env: &mut Environment,
+    tape: &Rc<Tape>,
     params: &HashMap<String, Tensor>,
 ) -> Option<DenseArray> {
-    if crate::grad_purity::differentiably_uses_param(expr, params, env) {
+    if crate::grad_purity::differentiably_uses_param(expr, params, env, tape) {
         return None;
     }
-    eval_index_expr(expr, env, params).ok()
+    eval_const_arg(expr, env, params).ok()
 }
 
 /// Evaluate a stop-gradient builtin from the CURRENT forward values of its

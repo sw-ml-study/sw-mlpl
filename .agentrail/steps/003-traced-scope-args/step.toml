@@ -1,6 +1,6 @@
 number = 3
 slug = "traced-scope-args"
-status = "pending"
+status = "in-progress"
 description = "Traced-scope argument resolution + microgpt-mlpl asks (downstream ../../softw..."
 role = "production"
 context_files = []

@@ -12,24 +12,32 @@ use crate::grad::{arity_check, eval_tensor_expr};
 use mlpl_eval_types::EvalError;
 
 /// Combine two tape tensors under a binary operator. The four
-/// arithmetic ops record a differentiable node; the six comparison
-/// ops produce a 0/1 mask with zero gradient almost everywhere, so
-/// inside `grad(...)` they are rejected as non-differentiable rather
-/// than silently returning a zero-gradient constant.
-pub(crate) fn tensor_binop(op: &BinOpKind, l: &Tensor, r: &Tensor) -> Result<Tensor, EvalError> {
-    match op {
+/// arithmetic ops record a differentiable node. The six comparison
+/// ops are stop-gradient 0/1 masks, exactly like the `lt` / `gt` /
+/// `eq` builtins (finding F5): computed from the operands' current
+/// forward values and inserted as a constant leaf, so a causal mask
+/// `c < r + 1` can be built inside the loss while the gradient flows
+/// through the surrounding ops, never through the mask.
+pub(crate) fn tensor_binop(
+    op: &BinOpKind,
+    l: &Tensor,
+    r: &Tensor,
+    tape: &Rc<Tape>,
+) -> Result<Tensor, EvalError> {
+    let mask = match op {
         BinOpKind::Add | BinOpKind::Sub | BinOpKind::Mul | BinOpKind::Div => {
-            checked_arith(op, l, r)
+            return checked_arith(op, l, r);
         }
-        BinOpKind::Lt
-        | BinOpKind::Gt
-        | BinOpKind::Le
-        | BinOpKind::Ge
-        | BinOpKind::Eq
-        | BinOpKind::Ne => Err(EvalError::Unsupported(format!(
-            "grad: comparison operator `{op}` is not differentiable"
-        ))),
-    }
+        BinOpKind::Lt => "lt",
+        BinOpKind::Gt => "gt",
+        BinOpKind::Le => "le",
+        BinOpKind::Ge => "ge",
+        BinOpKind::Eq => "eq",
+        BinOpKind::Ne => "ne",
+    };
+    let out = mlpl_runtime::call_builtin(mask, vec![l.value(), r.value()])
+        .map_err(|e| EvalError::Unsupported(format!("grad: comparison `{op}`: {e}")))?;
+    Ok(Tensor::leaf(Rc::clone(tape), out, false))
 }
 
 /// Build a differentiable arithmetic node after validating broadcast/label

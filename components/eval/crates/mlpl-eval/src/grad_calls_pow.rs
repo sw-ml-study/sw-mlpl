@@ -19,7 +19,7 @@ pub(crate) fn call_pow(
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, EvalError> {
     crate::grad::arity_check(args, 2, "pow")?;
-    if crate::grad_purity::differentiably_uses_param(&args[1], params, env) {
+    if crate::grad_purity::differentiably_uses_param(&args[1], params, env, tape) {
         return Err(EvalError::Unsupported(
             "grad: pow with a differentiable exponent is not supported; \
              the exponent must be a constant"
@@ -27,13 +27,18 @@ pub(crate) fn call_pow(
         ));
     }
     let base = crate::grad::eval_tensor_expr(&args[0], env, tape, params)?;
-    let exp = const_exponent(&args[1], env)?;
+    let exp = const_exponent(&args[1], env, params)?;
     Ok(base.pow_const(exp))
 }
 
-/// Resolve the exponent to a constant scalar (any real value).
-fn const_exponent(expr: &Expr, env: &mut Environment) -> Result<f64, EvalError> {
-    let arr = crate::eval::eval_expr(expr, env, &mut None)?.into_array()?;
+/// Resolve the exponent to a constant scalar (any real value), through the
+/// traced scope so a user function's parameter works.
+fn const_exponent(
+    expr: &Expr,
+    env: &mut Environment,
+    params: &HashMap<String, Tensor>,
+) -> Result<f64, EvalError> {
+    let arr = crate::grad_const::eval_const_arg(expr, env, params)?;
     if arr.rank() != 0 {
         return Err(EvalError::Unsupported(
             "grad: pow's exponent must be a scalar constant".into(),

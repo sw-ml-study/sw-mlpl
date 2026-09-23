@@ -665,14 +665,19 @@ builtin and differentiate directly. KL divergence is
 `reduce_add(P * (log(P) - log(Q)))` (the distillation loss);
 its gradient wrt the params behind `Q` is `-P / Q`.
 
-Index / mask builtins (`argmax`, `one_hot`, `eq`, `gt`, `lt`,
-`argtop_k`) may be used inside `grad`: they are non-differentiable
-by nature, so they act as stop-gradient constants -- computed from
-the current values of their arguments and held fixed on the tape.
-This lets a top-1 router mask be built inside the loss, e.g.
-`sum(one_hot(argmax(R, 1), E) * R)`, with the gradient flowing to
-the selected logits (`R`) through the surrounding ops, never
-through the mask. Constant constructors (`fill`, `zeros`, `ones`)
+Index / mask builtins (`argmax`, `one_hot`, `eq`, `ne`, `gt`,
+`ge`, `lt`, `le`, `argtop_k`) and the comparison operators (`<`,
+`>`, `<=`, `>=`, `==`, `!=`) may be used inside `grad`: they are
+non-differentiable by nature, so they act as stop-gradient
+constants -- computed from the current values of their arguments
+and held fixed on the tape. This lets a top-1 router mask be built
+inside the loss, e.g. `sum(one_hot(argmax(R, 1), E) * R)`, or a
+causal mask, e.g. `W * (c < r + 1)` with `r`/`c` row and column
+indices, with the gradient flowing through the surrounding ops,
+never through the mask. Non-differentiable arguments of
+differentiable builtins -- `cross_entropy` targets, `gather_rows`
+indices, `rotate`'s shift, `pow`'s exponent, a `transpose_axes`
+permutation -- may be a user function's parameter. Constant constructors (`fill`, `zeros`, `ones`)
 are likewise constant leaves inside `grad`, so a loss may scale by
 a constant mask or add a constant bias built inline. More
 generally, any subexpression that does not depend on a
@@ -712,8 +717,8 @@ initialized at construction). Apply a model to an array with
 | Function | Args | Description |
 |----------|------|-------------|
 | `apply(model, X)` | 2 | Forward pass. For `embed`, `X` is integer tokens; for everything else it is an `[..., d_in]` float array. Fully differentiable through the tape. |
-| `attention(d_model, heads, seed)` | 3 | Multi-head self-attention. Input `[T, d_model]` (or `[B, T, d_model]`), output same shape. Tape-lowered for `heads=1`, forward-only for `heads>1`. |
-| `causal_attention(d_model, heads, seed)` | 3 | Same as `attention` but applies a lower-triangular mask (upper-triangle scores become `-1e9` before softmax) so position `t` cannot attend to `t+k` for `k > 0`. Tape-lowered for `heads=1`. |
+| `attention(d_model, heads, seed)` | 3 | Multi-head self-attention. Input `[T, d_model]` (or `[B, T, d_model]`), output same shape. Differentiable for any `heads` dividing `d_model`. Parameters are the four projection matrices `W_q`, `W_k`, `W_v`, `W_o` (no biases). |
+| `causal_attention(d_model, heads, seed)` | 3 | Same as `attention` but applies a lower-triangular mask (upper-triangle scores become `-1e9` before softmax) so position `t` cannot attend to `t+k` for `k > 0`. Differentiable for any `heads` dividing `d_model`. |
 | `chain(a, b, ...)` | Nx | Sequential composition: `apply(chain(a, b, c), X) = apply(c, apply(b, apply(a, X)))`. Each argument is an independent block with its own parameters -- passing the same block twice COPIES it (`param_count` sums the arguments), so `chain` does NOT share weights. To share weights or express recurrence, reuse one block via nested `apply` (or a user function that applies it repeatedly): the tape accumulates the gradient across every use of the shared parameters. |
 | `embed(vocab_size, d_model, seed)` | 3 | Learned `[vocab, d_model]` lookup table. `apply(embed, tokens)` where `tokens` is a rank-1 `[T]` (or rank-2 `[B, T]`) integer array returns `[T, d_model]` (or `[B, T, d_model]`). Gradients accumulate on the embedding rows touched by `tokens`. |
 | `linear(in, out, seed)` | 3 | Seeded `W : [in, out]` + `b : [out]`, `apply(m, X)` computes `X W + b`. |

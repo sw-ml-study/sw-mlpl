@@ -7,8 +7,9 @@
 //! (demo-decision-model Q5 -- folding it returned a silently wrong gradient).
 
 use std::collections::{HashMap, HashSet};
+use std::rc::Rc;
 
-use mlpl_autograd::Tensor;
+use mlpl_autograd::{NodeKind, Tape, Tensor};
 use mlpl_parser::Expr;
 
 use crate::env::Environment;
@@ -18,26 +19,36 @@ use crate::env_api::*;
 /// A parameter that appears only inside shape-metadata builtins (`shape`,
 /// `rank`, `len`, `labels`) does not count -- those read structure, not values
 /// -- so a shape-derived size is value-independent and safe to constant-fold.
-/// A model identifier counts (its weights are params).
+/// A model identifier counts (its weights are params). A traced-scope binding
+/// counts unless it is a constant leaf on `tape` (e.g. a user function's
+/// parameter bound to a literal), so `pow(x, k)` with `k` a function argument
+/// stays a constant exponent.
 pub(crate) fn differentiably_uses_param(
     expr: &Expr,
     params: &HashMap<String, Tensor>,
     env: &Environment,
+    tape: &Rc<Tape>,
 ) -> bool {
-    uses(expr, &Scope { params, env }, &mut HashSet::new())
+    let sc = Scope { params, env, tape };
+    uses(expr, &sc, &mut HashSet::new())
 }
 
 struct Scope<'a> {
     params: &'a HashMap<String, Tensor>,
     env: &'a Environment,
+    tape: &'a Rc<Tape>,
 }
 
 /// Identifiers and calls carry the param semantics; every other form is
 /// scanned through its structural children. A form with no known children is
 /// conservatively param-using (never fold what we cannot prove constant).
 fn uses(expr: &Expr, sc: &Scope, seen: &mut HashSet<String>) -> bool {
+    let traced = |t: &Tensor| {
+        let node = &sc.tape.nodes()[t.node().0];
+        node.requires_grad || !matches!(node.kind, NodeKind::Leaf)
+    };
     match expr {
-        Expr::Ident(n, _) => sc.params.contains_key(n) || sc.env.get_model(n).is_some(),
+        Expr::Ident(n, _) => sc.params.get(n).is_some_and(traced) || sc.env.get_model(n).is_some(),
         Expr::FnCall { name, .. } if matches!(&**name, "shape" | "rank" | "len" | "labels") => {
             false
         }
@@ -78,8 +89,11 @@ pub(crate) fn is_constant_leaf_builtin(name: &str) -> bool {
         "argmax"
             | "one_hot"
             | "eq"
+            | "ne"
             | "gt"
+            | "ge"
             | "lt"
+            | "le"
             | "argtop_k"
             | "fill"
             | "zeros"

@@ -392,6 +392,14 @@ made trivial once annotations land.
    reset/clone/accounting, batched verification hooks, CPU +
    MLX, cache-equivalence tests. Exit: cached generation
    measurably faster, greedy outputs identical.
+   - **user-forward-kv-cache** (ask from microgpt-mlpl, 2026-09-22;
+     LOW -- recompute is cheap at their 16-token context):
+     `gen_state` only caches built-in `causal_attention` layers; a
+     hand-written `u:` forward (own Wq/Wk/Wv/Wo, no biases, 4
+     heads) gets no cache. Needs a user-visible K/V append hook
+     (e.g. a `kv_append(gs, layer, k, v)` + read contract the u:
+     forward calls) or a way to declare a u: function as a cached
+     attention layer. Design first; see docs/kv-cache-design.md.
 5. **mtp-training** -- multi_token_heads / multi_token_loss as
    Model DSL citizens + the experiment grid (NTP baseline, MTP
    from scratch, adaptation variants) -- trained on data-forge

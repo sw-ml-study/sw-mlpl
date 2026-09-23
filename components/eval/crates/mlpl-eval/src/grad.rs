@@ -50,7 +50,7 @@ pub(crate) fn eval_tensor_expr(
         Expr::BinOp { op, lhs, rhs, .. } => {
             let l = eval_tensor_expr(lhs, env, tape, params)?;
             let r = eval_tensor_expr(rhs, env, tape, params)?;
-            tensor_binop(op, &l, &r)
+            tensor_binop(op, &l, &r, tape)
         }
         Expr::FnCall { name, args, .. } => {
             crate::grad_const::fncall_or_fold(expr, name, args, env, tape, params)

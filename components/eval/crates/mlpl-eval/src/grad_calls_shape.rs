@@ -69,7 +69,7 @@ pub(crate) fn call_rotate(
 ) -> Result<Tensor, EvalError> {
     arity_check(args, 3, "rotate")?;
     let x = eval_tensor_expr(&args[0], env, tape, params)?;
-    let k_arr = crate::eval::eval_expr(&args[1], env, &mut None)?.into_array()?;
+    let k_arr = crate::grad_const::eval_const_arg(&args[1], env, params)?;
     if k_arr.rank() != 0 || k_arr.data()[0].fract() != 0.0 {
         return Err(EvalError::Unsupported(
             "rotate: k must be an integer scalar".into(),

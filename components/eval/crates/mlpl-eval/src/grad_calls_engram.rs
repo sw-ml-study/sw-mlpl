@@ -59,7 +59,7 @@ pub(crate) fn call_apply_engram(
     // Resolve ids through the traced scope so an index bound to a user-function
     // argument (not a literal or global) is seen and the gradient reaches the
     // memory table -- same scope-resolution fix as gather_rows / F23 (F24).
-    let ids = crate::grad_const::eval_index_expr(&args[2], env, params)?;
+    let ids = crate::grad_const::eval_const_arg(&args[2], env, params)?;
     let inputs = EngramInputs {
         memory: &memory,
         w_value: &w_value,
@@ -92,7 +92,7 @@ pub(crate) fn call_gather_rows(
 ) -> Result<Tensor, EvalError> {
     crate::grad::arity_check(args, 2, "gather_rows")?;
     let table = crate::grad::eval_tensor_expr(&args[0], env, tape, params)?;
-    let idx = crate::grad_const::eval_index_expr(&args[1], env, params)?;
+    let idx = crate::grad_const::eval_const_arg(&args[1], env, params)?;
     let dims = table.value().shape().dims().to_vec();
     if dims.len() != 2 {
         return Err(EvalError::Unsupported(format!(
