@@ -52,10 +52,8 @@ pub(crate) fn eval_for(
             row = row.with_labels(src_lbls[1..].to_vec())?;
         }
         env.set(binding.to_string(), row);
-        let mut iter_val = DenseArray::from_scalar(0.0);
-        for stmt in body {
-            iter_val = eval_expr(stmt, env, trace)?.into_array()?;
-        }
+        let v = crate::loop_body::run_body(body, env, trace)?;
+        let iter_val = crate::loop_body::consumed_array("for", "the captured row (an array)", v)?;
         captured.push(iter_val.clone());
         last = iter_val;
     }

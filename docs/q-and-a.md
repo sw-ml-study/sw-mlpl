@@ -5,6 +5,34 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-22 (microgpt-mlpl -- bug j + built-in alternatives)
+
+**Bug j (string-valued statements break `repeat` / `train` / `for`)
+-- FIXED.** The three loops coerced every body statement's value to
+an array; now non-final statements are evaluated and discarded
+whatever their kind, exactly like `while`. `repeat 1 { q = "abc"; 0 }`,
+`print("abc")` inside a `train` body, and the `u:f()` case all run.
+Only a CONSUMED value must be an array, and that error now names the
+construct ("train: the body's last statement must be the step loss
+(a number), got a string"). The sampling loop may go back to
+`repeat` / `for` if that reads better. The missing line number is a
+real gap: errors carry no source span, so script mode echoes the
+whole failing top-level statement. Queued as `error-spans` in
+docs/future-sagas-queue.md.
+
+**Hand-written vs built-in layers.** Findings for the switch
+checklist: built-in layers compute `x[T, d] @ W[in, out]`; multi-head
+attention puts head `h` in the contiguous columns `h*dk..(h+1)*dk`
+(PyTorch-style `[out, in]` weights need one transpose); the causal
+mask adds -1e9 (exactly 0 after softmax, same as -inf). Queued next
+(grad-soundness-records step 006): `params(model)` (documented but
+missing -- a real bug), `get_param` / `set_param` by role name,
+`rms_norm(dim, eps)`, and a bias-free `linear`. With those, default
+mode can use `causal_attention` / `rms_norm` / `linear` and parity
+mode can `set_param` microgpt-rs weights into the same layers. The
+RNG, sampling rule, vocabulary map and formatting stay yours by
+design.
+
 ## 2026-09-22 (reasoning-from-scratch R11 + demo-extensions R1/R2)
 
 **R11 (reasoning-from-scratch; demo-extensions E3 depends on it):

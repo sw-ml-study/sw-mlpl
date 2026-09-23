@@ -14,7 +14,7 @@ use mlpl_trace::{Trace, TraceValue};
 
 use crate::env::Environment;
 use crate::eval::eval_expr;
-use mlpl_eval_types::EvalError;
+use mlpl_eval_types::{EvalError, Value};
 
 pub(crate) fn eval_tensor_ctor(
     kind: TensorCtorKind,
@@ -73,8 +73,10 @@ pub(crate) fn eval_repeat(
                 partial_losses: Vec::new(),
             });
         }
-        for stmt in body {
-            r = eval_expr(stmt, env, trace)?.into_array()?;
+        // repeat's own value is the last array its body produced; a
+        // non-array final statement (e.g. `print("...")`) is fine.
+        if let Value::Array(a) = crate::loop_body::run_body(body, env, trace)? {
+            r = a;
         }
     }
     Ok(("repeat", vec![], r))
@@ -99,16 +101,13 @@ pub(crate) fn eval_train(
             return crate::interrupt::enrich_train_cancel(env, i, losses);
         }
         env.set("step".into(), DenseArray::from_scalar(i as f64));
-        let mut step_val = DenseArray::from_scalar(0.0);
-        for stmt in body {
-            step_val = match eval_expr(stmt, env, trace) {
-                Ok(v) => v.into_array()?,
-                Err(EvalError::Cancelled { .. }) => {
-                    return crate::interrupt::enrich_train_cancel(env, i, losses);
-                }
-                Err(e) => return Err(e),
-            };
-        }
+        let step_val = match crate::loop_body::run_body(body, env, trace) {
+            Ok(v) => crate::loop_body::consumed_array("train", "the step loss (a number)", v)?,
+            Err(EvalError::Cancelled { .. }) => {
+                return crate::interrupt::enrich_train_cancel(env, i, losses);
+            }
+            Err(e) => return Err(e),
+        };
         // Body's final value is the per-step loss; non-scalar
         // values reduce by mean so callers always get a scalar
         // history.

@@ -541,6 +541,16 @@ in data-forge come first).
 
 ## Maintenance items
 
+- **error-spans** (ask from microgpt-mlpl, 2026-09-22) --
+  `EvalError` carries no source span, so script mode reports a
+  failure by echoing the whole top-level statement: an error deep
+  inside a multi-line `repeat` / `train` / `for` / `u:` body gives
+  no line or inner statement (their bug j took a long bisection to
+  locate). Attach the failing statement's span (a context-wrapping
+  variant, filled at body/statement boundaries) and print
+  `line N` in script mode. Cross-cutting: every eval path returns
+  `EvalError`, so design the wrapper once.
+
 - **sw-checklist paydown spike** -- dedicated spike + crate
   partitions own the fn-count class (2026-08-02 ledger: 2
   documented FAILs, 337 warnings).

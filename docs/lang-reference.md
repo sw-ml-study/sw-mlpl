@@ -210,7 +210,12 @@ repeat N { body }
 Execute the body N times. N must evaluate to a non-negative integer.
 The body can contain multiple statements separated by semicolons or
 newlines. Returns the result of the last expression in the final
-iteration (or scalar 0 if N is 0).
+iteration (or scalar 0 if N is 0). Statements of any kind may appear
+in a loop body -- including string-valued ones such as `print("...")`
+or `name = "abc"`; only the value a loop consumes must be an array
+(`train`'s final per-step loss, `for`'s final per-row value), and a
+`repeat` whose final statement is not an array keeps its last array
+value.
 
 ```
 x = 0

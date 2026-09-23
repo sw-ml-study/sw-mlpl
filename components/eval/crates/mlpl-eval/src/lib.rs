@@ -195,6 +195,7 @@ mod interrupt;
 mod list_ops;
 mod llm_dispatch;
 mod loader;
+mod loop_body;
 mod result_ops;
 mod result_predicates;
 mod result_reconstruct;
