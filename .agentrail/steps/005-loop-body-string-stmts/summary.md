@@ -1,0 +1,1 @@
+Bug j: repeat/train/for coerced every body statement to an array; shared loop_body::run_body + consumed_array now only coerce the consumed final value, naming the construct in errors; repeat tolerates a non-array final. 4 TDD tests from microgpt's reproducer. error-spans queued. Pushed; release+debug rebuilt.
