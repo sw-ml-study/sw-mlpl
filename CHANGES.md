@@ -14,6 +14,11 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-22
 
+- feat(bytes,result): bulk unpack(bytes, dtype); is_result(); get_error message
+- chore(agentrail): insert 005-loop-body-string-stmts (microgpt-mlpl bug j)
+- chore(agentrail): insert 004-bulk-unpack-and-result-predicates (R11, R1, R2)
+- chore(agentrail): complete 003-traced-scope-args
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): function-parameter targets/args + comparison masks (microgpt-mlpl)
 - chore(agentrail): complete 002-shape-metadata
 - docs(changes): refresh CHANGES.md to HEAD
