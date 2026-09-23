@@ -1,0 +1,9 @@
+number = 5
+slug = "loop-body-string-stmts"
+status = "pending"
+description = "microgpt-mlpl bug (j): any string-valued statement inside a repeat / train / ..."
+role = "production"
+context_files = []
+created_at = "2026-09-22T21:47:38"
+task_type = "bugfix"
+commits = []
