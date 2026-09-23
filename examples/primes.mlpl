@@ -1,0 +1,64 @@
+# primes.mlpl -- the classic array-language prime sieve, in MLPL.
+#
+# Pseudocode (APL-style):
+#
+#   let n = 6
+#   let r = 2..n                                        # [2, 3, 4, 5]
+#   mask(not(contains(outerProduct(*, r, r), r)), r)    # [2, 3, 5]
+#
+# Idea: every composite in r is the product of two numbers from r, so
+# build the whole multiplication table of r with r, ask which elements
+# of r appear anywhere in it, and keep the ones that do NOT.
+#
+# How each piece maps to MLPL:
+#
+#   pseudocode            MLPL
+#   ----------            ----
+#   2..n                  range(n - 2) + 2   (range(k) is 0..k-1)
+#   outerProduct(*, r, r) reshape(r, [k, 1]) * reshape(r, [1, k])
+#                         -- broadcasting a column against a row gives
+#                         the [k, k] table -- or table(:u:times, r, r)
+#   contains(t, r)        reduce(:add, eq(r3, t3), [1, 2]) > 0
+#                         -- compare every r against every table cell
+#                         (a [k, k, k] broadcast), count hits per r
+#   not(...)              eq(hits, 0)  (no hits = not in the table)
+#   mask(m, r)            compress(m, r)
+#
+# Run: mlpl-repl examples/primes.mlpl
+
+def u:times(a, b) {
+  "Scalar product -- the function `table` applies to every (a, b) pair."
+  a * b
+}
+
+def u:primes_below(n) {
+  "Primes p with 2 <= p < n: keep the r values that never appear in r's multiplication table."
+  r = range(n - 2) + 2
+  k = len(r)
+  products = reshape(r, [k, 1]) * reshape(r, [1, k])
+  hits = reduce(:add, eq(reshape(r, [k, 1, 1]), reshape(products, [1, k, k])), [1, 2])
+  compress(eq(hits, 0), r)
+}
+
+# Step by step for n = 6.
+n = 6
+r = range(n - 2) + 2
+print("r =", r)
+k = len(r)
+
+# The outer product, two ways: broadcasting, and APL2's jot-dot `table`.
+products = reshape(r, [k, 1]) * reshape(r, [1, k])
+print("r outer-times r (broadcast):")
+print(products)
+print("same via table(:u:times, r, r):")
+print(table(:u:times, r, r))
+
+# contains: how many table cells equal each r?  4 = 2*2 appears once.
+hits = reduce(:add, eq(reshape(r, [k, 1, 1]), reshape(products, [1, k, k])), [1, 2])
+print("hits per r =", hits)
+
+# not + mask: keep the r values with zero hits.
+print("primes below 6 =", compress(eq(hits, 0), r))
+
+# The same pipeline as one reusable function.
+print("primes below 30 =", u:primes_below(30))
