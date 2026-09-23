@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-22
 
+- fix(grad): function-parameter targets/args + comparison masks (microgpt-mlpl)
+- chore(agentrail): complete 002-shape-metadata
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(grad): shape/rank/len of a u: function parameter inside grad
 - chore(agentrail): insert 003-traced-scope-args (microgpt-mlpl asks)
 - chore(agentrail): complete 001-fold-soundness
