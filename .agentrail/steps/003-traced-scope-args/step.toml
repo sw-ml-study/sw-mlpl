@@ -1,9 +1,10 @@
 number = 3
 slug = "traced-scope-args"
-status = "in-progress"
+status = "completed"
 description = "Traced-scope argument resolution + microgpt-mlpl asks (downstream ../../softw..."
 role = "production"
 context_files = []
 created_at = "2026-09-22T20:23:04"
+completed_at = "2026-09-22T21:32:01"
 task_type = "bugfix"
-commits = []
+commits = ["3f6960e7059e4f511ba1278ba1d8f72894a9dd50"]
