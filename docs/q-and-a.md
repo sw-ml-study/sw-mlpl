@@ -5,6 +5,43 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-23 (microgpt-mlpl -- sw-mlpl-requests.md triage + blockers)
+
+**Blockers.** Issue (j) is FIXED (e6ee2203): the `while` workarounds
+can go. Issue (e) is split: the "any `u:` call costs time
+proportional to ALL globals" half is caused by the call frame
+deep-cloning every scope table on entry; it is queued next-but-one
+as grad-soundness-records step 007 `frame-snapshot-cost` (the frame
+records only the names it writes), after which the `expunge` calls
+can go. The per-READ copy of a large global is the `cow-values`
+saga below.
+
+**The 13 requests** are planned as a six-saga program in
+docs/future-sagas-queue.md ("Python-ML-developer ergonomics
+program"): readable-scripts (#1 format/write/variadic str_concat,
+#6 and/or/not, #3 destructuring), diagnostics (error spans, #13
+tooling), tensor-indexing (#2), param-groups (#4), lists-and-text
+(#7, #9), cow-values (#5). #10's layer options (`{bias: 0}`,
+`rms_norm` eps, `set_param`, `params(model)`) are grad-soundness-
+records step 006, next. Pushback:
+
+- **#4 records of param values in `adam`: no.** Records hold
+  COPIES, so after `adam` updates `wte` the record would be stale;
+  param identity is by name. Instead `p = param_init({...}, seed,
+  std)` declares every param and returns a NAME group that `adam` /
+  `grad` / `params` accept like a model -- your one-line setup
+  without the stale-copy trap.
+- **#8 `where(x, cond)` meaning compress: no.** Python developers
+  read `where` as NumPy's `np.where(cond, a, b)`; if MLPL adds
+  `where` it will have that meaning. Filtering is `compress(mask,
+  x)`; `select(xs, :u:p)` is a one-line library function.
+- **#9 `char_class`: library.** `codepoints` / `from_codepoints`
+  are core (only the interpreter can split characters); classes over
+  code points belong in demo-mlpl-libraries (their S2).
+- **#11 macros: declined**, as you recommended.
+- **#1** will take a Python format-spec subset (`{:4d}`, `{:.4f}`,
+  `{:>8}`, `{:x}`).
+
 ## 2026-09-22 (microgpt-mlpl -- bug j + built-in alternatives)
 
 **Bug j (string-valued statements break `repeat` / `train` / `for`)

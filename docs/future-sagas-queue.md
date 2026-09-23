@@ -172,6 +172,53 @@ data-forge (Track 1).
   archived on 2026-09-10 (see `.agentrail-archive/`); its final unshipped
   item, `du-list-fs`, is deferred below.
 
+## Python-ML-developer ergonomics program (approved 2026-09-23)
+
+Source: microgpt-mlpl `docs/sw-mlpl-requests.md` (13 requests with
+counts over 1,658 downstream `.mlpl` files), triaged 2026-09-23;
+answer + pushback in docs/q-and-a.md. Ordered by what a developer
+coming from Python trips over first. Runs AFTER grad-soundness-records
+closes (its 006 layer-weights-api and 008 gather-node feed sagas 3-4;
+its 007 frame-snapshot-cost is the narrow half of request 5 / issue e).
+
+1. **readable-scripts** -- `format(template, args...)` with a Python
+   format-spec subset (`{}`, `{:4d}`, `{:.4f}`, `{:>8}`, `{:x}`;
+   lowers to Rust `format!`); `write(s)` (no
+   `unwrap(write_stdout(tokenize_bytes(s)))`); variadic `str_concat`;
+   `and` / `or` / `not` (short-circuit on scalars in `if` / `while`,
+   elementwise on masks); record destructuring `{a, b: x} = r` (also
+   `= expr?`), pure syntax lowering to field reads.
+2. **diagnostics** -- error spans (`file:line:col` of the failing
+   INNER statement; see `error-spans` under Maintenance), mlpl-mode
+   keywords (`def if else while for`), `include` in
+   `--babel-session`.
+3. **tensor-indexing** -- `gather(x, idx[, axis])`,
+   `slice(x, lo, hi[, axis])` (half-open), multi-axis
+   `at(x, i, j, ...)`; all differentiable (reuse the native gather
+   node). language-audit #12 (critical).
+4. **param-groups** -- `p = param_init({wte: [V, d], ...}, seed, std)`
+   declares + seeds each named param (per-leaf seeds derived from
+   `seed`) and returns a NAME group accepted by `adam` / `grad` /
+   `params` like a model. Records of VALUES stay non-trainable (value
+   semantics: a record would hold stale copies after an update).
+5. **lists-and-text** -- `list_at(xs, i)` (hard error out of range),
+   `for s in string_list`, `list_append` / `list_concat` (B4 below),
+   `codepoints(s)` / `from_codepoints(v)`.
+6. **cow-values** -- `Arc`-shared copy-on-write storage for array and
+   record values so reads (0.4-0.5 ms per read of a 228k global today)
+   and argument passing share instead of copy. Deep refactor across
+   the value/env crates: benchmark first (microgpt-mlpl
+   docs/benchmarks.md numbers), land behind the other sagas' tests.
+   May be promoted ahead of 3-5 if read cost becomes blocking.
+
+Declined or redirected: `where(x, cond)` as compress (collides with
+NumPy's `np.where(cond, a, b)`; if added, use NumPy semantics);
+`select(xs, :u:p)` and `char_class` (library: demo-mlpl-libraries);
+records of param values in `adam` (see 4); full macros (unrolling via
+`each` covers it). Already queued and kept in place: `|>` / compose
+(Track 8 #26), a position layer + user-forward KV cache (Track 2),
+`@formula` rendering (math-view).
+
 ## Track 0 -- substrate (COMPLETE)
 
 1. **E5 engram-mlx** (COMPLETE 2026-08-03) -- Engram trains fully
