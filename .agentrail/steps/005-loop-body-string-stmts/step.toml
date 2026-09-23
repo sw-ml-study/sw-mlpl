@@ -1,6 +1,6 @@
 number = 5
 slug = "loop-body-string-stmts"
-status = "pending"
+status = "in-progress"
 description = "microgpt-mlpl bug (j): any string-valued statement inside a repeat / train / ..."
 role = "production"
 context_files = []

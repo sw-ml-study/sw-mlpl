@@ -1,4 +1,4 @@
-number = 7
+number = 8
 slug = "record-fields"
 status = "pending"
 description = "Record field reads inside grad as constant leaves (plan.md step 4). Records a..."
