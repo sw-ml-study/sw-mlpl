@@ -1,0 +1,1 @@
+shape/rank/len inside grad are constant leaves from the traced argument value (join is_constant_leaf_builtin); fold_const_expr now evaluates over the traced-scope overlay so reduce_mul(shape(a)) on a u: param folds. 3 TDD tests. Gates green except 3 pre-existing failures. sw-checklist held 33/571 (exception). Pushed a6139122; release+debug mlpl-repl rebuilt.
