@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 4,
+    "step": "bulk-unpack-and-result-predicates"
+  },
+  "action": "TDD, native bulk decode, full release suites, clippy eval+eval-types",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-22T22:47:15"
+}
