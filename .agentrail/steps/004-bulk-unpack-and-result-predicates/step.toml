@@ -1,0 +1,9 @@
+number = 4
+slug = "bulk-unpack-and-result-predicates"
+status = "pending"
+description = "Downstream asks (user-approved 2026-09-22). (A) R11 from ../reasoning-from-sc..."
+role = "production"
+context_files = []
+created_at = "2026-09-22T21:39:05"
+task_type = "feature"
+commits = []
