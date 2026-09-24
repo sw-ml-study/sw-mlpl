@@ -176,7 +176,9 @@ data-forge (Track 1).
 
 Source: microgpt-mlpl `docs/sw-mlpl-requests.md` (13 requests with
 counts over 1,658 downstream `.mlpl` files), triaged 2026-09-23;
-answer + pushback in docs/q-and-a.md. Ordered by what a developer
+answer + pushback in docs/q-and-a.md. The downstream-facing view --
+which workaround each shipped and planned item retires, per repo, plus
+the idiomatic-MLPL guide -- is docs/downstream-updates.md. Ordered by what a developer
 coming from Python trips over first. Runs AFTER grad-soundness-records
 closes (its 006 layer-weights-api and 008 gather-node feed sagas 3-4;
 its 007 frame-snapshot-cost is the narrow half of request 5 / issue e).
