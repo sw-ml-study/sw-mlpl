@@ -1,9 +1,10 @@
 number = 6
 slug = "layer-weights-api"
-status = "in-progress"
+status = "completed"
 description = "Built-in layer weight access + bias-free/eps options (user-approved 2026-09-2..."
 role = "production"
 context_files = []
 created_at = "2026-09-22T22:51:50"
+completed_at = "2026-09-24T14:20:17"
 task_type = "feature"
-commits = []
+commits = ["89a78140a863b73d774351a31a225c5f29f86014"]

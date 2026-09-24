@@ -1,0 +1,1 @@
+params(model) (was documented but missing), get_param/set_param by role (model_roles, zipped with params()), rms_norm(d,{eps}) any rank>=2, bias-free linear(in,out,seed,{bias:0}) via Linear.b Option (serde back-compat). GPU recognizers match default eps only. 9 new tests. sw-checklist held 33/571 after retiring the FAILs this step introduced. Pushed 8d13e571; binaries rebuilt.
