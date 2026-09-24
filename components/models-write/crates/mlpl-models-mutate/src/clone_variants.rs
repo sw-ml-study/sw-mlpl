@@ -18,15 +18,25 @@ where
     Ok(ModelSpec::Chain(out))
 }
 
-pub(crate) fn clone_linear<E>(env: &mut E, w: &str, b: &str) -> Result<ModelSpec, MutateError>
+pub(crate) fn clone_linear<E>(
+    env: &mut E,
+    w: &str,
+    b: Option<&str>,
+) -> Result<ModelSpec, MutateError>
 where
     E: HasVars + HasParams + HasTensorDevices + HasModelIds,
 {
     let id = env.alloc_model_id();
     let new_w = format!("__linear_W_{id}");
-    let new_b = format!("__linear_b_{id}");
     copy_param(env, w, &new_w)?;
-    copy_param(env, b, &new_b)?;
+    let new_b = match b {
+        Some(b) => {
+            let new_b = format!("__linear_b_{id}");
+            copy_param(env, b, &new_b)?;
+            Some(new_b)
+        }
+        None => None,
+    };
     Ok(ModelSpec::Linear { w: new_w, b: new_b })
 }
 

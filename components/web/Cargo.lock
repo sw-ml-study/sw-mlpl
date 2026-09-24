@@ -1444,8 +1444,21 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
+ "mlpl-autograd-backward",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
+]
+
+[[package]]
+name = "mlpl-autograd-backward"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
+ "mlpl-autograd-tape",
  "mlpl-tensor-handle",
 ]
 
@@ -2078,6 +2091,7 @@ dependencies = [
  "mlpl-runtime",
  "mlpl-serve-core",
  "mlpl-serve-state",
+ "mlpl-source-loader",
  "mlpl-web-viz-ir",
  "rand 0.8.6",
  "rayon",

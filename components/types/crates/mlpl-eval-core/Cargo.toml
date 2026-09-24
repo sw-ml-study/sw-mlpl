@@ -19,3 +19,6 @@ mlpl-builtin-catalog = { path = "../mlpl-builtin-catalog" }
 # fine-tuned model can be persisted and reloaded (train once, compare
 # many times) instead of retrained every run.
 serde = { version = "1", features = ["derive"] }
+
+[dev-dependencies]
+serde_json = "1"

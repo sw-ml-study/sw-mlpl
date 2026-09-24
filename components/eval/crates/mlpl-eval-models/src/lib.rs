@@ -30,8 +30,11 @@ pub mod model_feasibility;
 pub mod model_freeze;
 pub mod model_inspect;
 pub mod model_io;
+pub mod model_layer_options;
 pub mod model_lora;
 pub mod model_mutate;
+pub mod model_params_api;
+pub mod model_roles;
 
 pub use model_apply_embed::tokens_to_onehot;
 

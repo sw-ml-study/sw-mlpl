@@ -24,25 +24,23 @@ pub(crate) fn try_dispatch(
     trace: &mut Option<&mut Trace>,
     _span: &mlpl_core::Span,
 ) -> Option<Result<Value, EvalError>> {
-    if let Some(r) = try_model_ctor(name, args, env) {
-        return Some(r.map(Value::Model));
-    }
-    if let Some(r) = try_activation(name, args) {
-        return Some(r);
-    }
-    if name == "apply_engram" {
-        return Some(crate::model_dispatch::eval_apply_engram(args, env, trace).map(Value::Array));
-    }
-    if name == "engram_stats" {
-        return Some(crate::model_dispatch::eval_engram_stats(args, env, trace));
-    }
-    if name == "to_device" {
-        return Some(crate::device::eval_to_device(args, env, trace));
-    }
-    if name == "param_count" {
-        return Some(crate::model_inspect::eval_param_count(args, env).map(Value::Array));
-    }
-    try_array_forward(name, args, env, trace).map(|r| r.map(Value::Array))
+    // The named forwarders first; every other name falls through the
+    // constructor / activation / array-forward / params families in turn.
+    Some(match name {
+        "apply_engram" => {
+            crate::model_dispatch::eval_apply_engram(args, env, trace).map(Value::Array)
+        }
+        "engram_stats" => crate::model_dispatch::eval_engram_stats(args, env, trace),
+        "to_device" => crate::device::eval_to_device(args, env, trace),
+        "param_count" => crate::model_inspect::eval_param_count(args, env).map(Value::Array),
+        _ => {
+            return try_model_ctor(name, args, env)
+                .map(|r| r.map(Value::Model))
+                .or_else(|| try_activation(name, args))
+                .or_else(|| try_array_forward(name, args, env, trace).map(|r| r.map(Value::Array)))
+                .or_else(|| mlpl_eval_models::model_params_api::try_dispatch(name, args, env));
+        }
+    })
 }
 
 fn try_model_ctor(

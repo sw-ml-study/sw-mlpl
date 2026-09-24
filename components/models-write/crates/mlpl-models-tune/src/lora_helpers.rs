@@ -53,12 +53,15 @@ where
 fn wrap_linear<E>(
     env: &mut E,
     w: String,
-    b: String,
+    b: Option<String>,
     ctx: &mut LoraCtx,
 ) -> Result<ModelSpec, TuneError>
 where
     E: HasVars + HasParams + HasTensorDevices + HasModelIds,
 {
+    let b = b.ok_or_else(|| {
+        TuneError::RuntimeMessage("lora: a bias-free linear cannot be wrapped".into())
+    })?;
     let w_arr = env
         .get(&w)
         .ok_or_else(|| TuneError::UndefinedVariable(w.clone()))?;

@@ -98,7 +98,7 @@ impl OptimizerState {
         // redo): drop this param's so a rebound model's bias correction
         // restarts at step 1.
         self.steps
-            .retain(|k, _| k.rsplit_once(':').map_or(true, |(_, p)| p != param));
+            .retain(|k, _| k.rsplit_once(':').is_none_or(|(_, p)| p != param));
     }
 }
 

@@ -23,7 +23,7 @@ pub(crate) fn head_param_names(spec: &ModelSpec) -> HashSet<String> {
         _ => None,
     };
     match head_linear {
-        Some(ModelSpec::Linear { w, b }) => [w.clone(), b.clone()].into_iter().collect(),
+        Some(ModelSpec::Linear { w, b }) => std::iter::once(w).chain(b).cloned().collect(),
         _ => HashSet::new(),
     }
 }

@@ -63,7 +63,7 @@ pub(crate) fn render_spec(spec: &ModelSpec) -> String {
             ActKind::Softmax => "softmax".into(),
         },
         ModelSpec::Residual(inner) => format!("residual({})", render_spec(inner)),
-        ModelSpec::RmsNorm { dim } => format!("rms_norm({dim})"),
+        ModelSpec::RmsNorm { dim, .. } => format!("rms_norm({dim})"),
         ModelSpec::Attention {
             d_model,
             heads,

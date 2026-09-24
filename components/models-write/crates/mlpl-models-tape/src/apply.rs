@@ -28,7 +28,7 @@ pub fn apply_model_tape(
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, TapeError> {
     match model {
-        ModelSpec::Linear { w, b } => linear_tape(&x, w, b, tape, params),
+        ModelSpec::Linear { w, b } => linear_tape(&x, w, b.as_deref(), tape, params),
         ModelSpec::Chain(children) => {
             // Saga E3 step 2: an Engram child receives the chain's
             // ORIGINAL input as its token ids (eager, undifferentiated),
@@ -52,7 +52,7 @@ pub fn apply_model_tape(
             let inner_out = apply_model_tape(inner, x.clone(), tape, params)?;
             Ok(x.add(&inner_out))
         }
-        ModelSpec::RmsNorm { .. } => rms_norm_tape(&x, tape),
+        ModelSpec::RmsNorm { eps, .. } => rms_norm_tape(&x, *eps, tape),
         ModelSpec::Embedding { table, vocab, .. } => {
             embedding_tape(&x, table, *vocab, tape, params)
         }

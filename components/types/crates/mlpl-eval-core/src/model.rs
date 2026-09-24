@@ -11,6 +11,14 @@
 //! which the parser does not know -- a free-standing `apply` built-in
 //! sidesteps the symbol-table problem and keeps the surface uniform.
 
+/// The `rms_norm` epsilon when none is given; the GPU fast paths
+/// assume it.
+pub const DEFAULT_RMS_EPS: f64 = 1e-8;
+
+fn default_rms_eps() -> f64 {
+    DEFAULT_RMS_EPS
+}
+
 /// Activation kind for the parameter-free activation layers.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum ActKind {
@@ -26,12 +34,16 @@ pub enum ActKind {
 /// `Residual`, `Norm`, and `Attention` variants.
 #[derive(Clone, Debug, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum ModelSpec {
-    /// `linear(in_dim, out_dim, seed)` -- y = X @ W + b.
+    /// `linear(in_dim, out_dim, seed)` -- y = X @ W + b;
+    /// `linear(in_dim, out_dim, seed, {bias: 0})` -- y = X @ W.
     Linear {
         /// Name of the weight parameter (`[in_dim, out_dim]`).
         w: String,
-        /// Name of the bias parameter (`[1, out_dim]`).
-        b: String,
+        /// Name of the bias parameter (`[1, out_dim]`); `None` for a
+        /// bias-free layer. A saved model's string bias reads back as
+        /// `Some`, so older files load unchanged.
+        #[serde(default)]
+        b: Option<String>,
     },
     /// `chain(layer_a, layer_b, ...)` -- sequential composition.
     /// Apply threads the input through each child in order.
@@ -42,13 +54,16 @@ pub enum ModelSpec {
     /// `residual(inner)` -- y = x + inner(x). The inner model's
     /// output shape must match its input shape.
     Residual(Box<ModelSpec>),
-    /// `rms_norm(dim)` -- per-row root-mean-square normalization
-    /// (no learnable scale or shift). `dim` records the expected
-    /// last-dim size for documentation only; the implementation
-    /// normalizes whatever rank-2 input it receives.
+    /// `rms_norm(dim[, {eps}])` -- root-mean-square normalization over
+    /// the last axis (no learnable scale or shift), for any input of
+    /// rank >= 2. `dim` records the expected last-dim size for
+    /// documentation only.
     RmsNorm {
         /// Expected last-dim size (informational).
         dim: usize,
+        /// Added to the mean square before the square root.
+        #[serde(default = "default_rms_eps")]
+        eps: f64,
     },
     /// `embed(vocab_size, d_model, seed)` -- token embedding layer.
     /// Owns a single `[vocab, d_model]` lookup table parameter. Apply
@@ -166,7 +181,7 @@ impl ModelSpec {
     #[must_use]
     pub fn params(&self) -> Vec<String> {
         match self {
-            Self::Linear { w, b } => vec![w.clone(), b.clone()],
+            Self::Linear { w, b } => std::iter::once(w).chain(b).cloned().collect(),
             Self::Chain(children) => {
                 let mut out = Vec::new();
                 for child in children {

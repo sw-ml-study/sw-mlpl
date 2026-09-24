@@ -1,6 +1,6 @@
 number = 6
 slug = "layer-weights-api"
-status = "pending"
+status = "in-progress"
 description = "Built-in layer weight access + bias-free/eps options (user-approved 2026-09-2..."
 role = "production"
 context_files = []

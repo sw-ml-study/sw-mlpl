@@ -23,7 +23,11 @@ fn path_arg(expr: &Expr, func: &str) -> Result<String, EvalError> {
     }
 }
 
-fn model_arg(expr: &Expr, env: &mut Environment, func: &str) -> Result<ModelSpec, EvalError> {
+pub(crate) fn model_arg(
+    expr: &Expr,
+    env: &mut Environment,
+    func: &str,
+) -> Result<ModelSpec, EvalError> {
     // A bare model identifier lives in `env.models` (not `vars`), so
     // resolve it by name first -- matching how the other model
     // builtins (apply, grad's collect_params) reach a model. Fall back

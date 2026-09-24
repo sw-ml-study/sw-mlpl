@@ -3,7 +3,7 @@
 //! and `Residual` recurse through `apply_model`; `RmsNorm` runs
 //! the parameter-free per-row RMS normalization in pure Rust.
 
-use mlpl_array::{DenseArray, Shape};
+use mlpl_array::DenseArray;
 
 use crate::model_apply::apply_model;
 use mlpl_eval_core::model::ModelSpec;
@@ -47,26 +47,24 @@ pub fn apply_residual(
     mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "add", vec![x.clone(), inner_out])
 }
 
-/// Per-row RMS normalization: `y[i, :] = x[i, :] / sqrt(mean(x[i, :]^2) + eps)`.
-pub fn apply_rms_norm(x: &DenseArray) -> Result<DenseArray, EvalError> {
+/// RMS normalization over the last axis, any rank >= 2 (`[rows, cols]`
+/// or `[B, T, d]`): `y[.., :] = x[.., :] / sqrt(mean(x[.., :]^2) + eps)`.
+pub fn apply_rms_norm(x: &DenseArray, eps: f64) -> Result<DenseArray, EvalError> {
     let dims = x.shape().dims();
-    if dims.len() != 2 {
+    if dims.len() < 2 {
         return Err(EvalError::Unsupported(
-            "rms_norm: input must be a rank-2 [rows, cols] matrix".into(),
+            "rms_norm: input must have rank >= 2 ([rows, cols] or [B, T, d])".into(),
         ));
     }
-    let rows = dims[0];
-    let cols = dims[1];
-    let eps = 1e-8;
-    let src = x.data();
-    let mut out = Vec::with_capacity(src.len());
-    for r in 0..rows {
-        let row = &src[r * cols..(r + 1) * cols];
-        let mean_sq: f64 = row.iter().map(|v| v * v).sum::<f64>() / cols.max(1) as f64;
-        let scale = 1.0 / (mean_sq + eps).sqrt();
-        for v in row {
-            out.push(v * scale);
-        }
-    }
-    Ok(DenseArray::new(Shape::new(vec![rows, cols]), out)?)
+    let cols = dims[dims.len() - 1].max(1);
+    let out: Vec<f64> = x
+        .data()
+        .chunks(cols)
+        .flat_map(|row| {
+            let mean_sq = row.iter().map(|v| v * v).sum::<f64>() / cols as f64;
+            let scale = 1.0 / (mean_sq + eps).sqrt();
+            row.iter().map(move |v| v * scale)
+        })
+        .collect();
+    Ok(DenseArray::new(x.shape().clone(), out)?)
 }

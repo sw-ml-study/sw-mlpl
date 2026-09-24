@@ -12,28 +12,29 @@ use mlpl_eval_core::model::ActKind;
 use mlpl_eval_env::Environment;
 use mlpl_eval_types::EvalError;
 
-/// `apply(Linear{w, b}, x)` = `x @ w + bias_broadcast(b)`.
+/// `apply(Linear{w, b}, x)` = `x @ w + bias_broadcast(b)`; `x @ w` for a
+/// bias-free layer.
 pub fn apply_linear(
     x: &DenseArray,
     w: &str,
-    b: &str,
+    b: Option<&str>,
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
-    let w_arr = env
-        .get(w)
-        .ok_or_else(|| EvalError::UndefinedVariable(w.into()))?;
-    let b_arr = env
-        .get(b)
-        .ok_or_else(|| EvalError::UndefinedVariable(b.into()))?;
-    let xw = mlpl_eval_env::dispatch_hook::dispatch_or_err(
-        env,
-        "matmul",
-        vec![x.clone(), w_arr.clone()],
-    )?;
+    let fetch = |n: &str| {
+        env.get(n)
+            .cloned()
+            .ok_or_else(|| EvalError::UndefinedVariable(n.into()))
+    };
+    let xw =
+        mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![x.clone(), fetch(w)?])?;
+    let Some(b) = b else {
+        return Ok(xw);
+    };
+    let b_arr = fetch(b)?;
     let n = xw.shape().dims()[0];
     let ones = DenseArray::new(Shape::new(vec![n, 1]), vec![1.0; n])?;
     let b_broadcast =
-        mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![ones, b_arr.clone()])?;
+        mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "matmul", vec![ones, b_arr])?;
     mlpl_eval_env::dispatch_hook::dispatch_or_err(env, "add", vec![xw, b_broadcast])
 }
 

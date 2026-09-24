@@ -60,11 +60,11 @@ where
     E: HasVars + HasParams + HasTensorDevices + HasModelIds,
 {
     match spec {
-        ModelSpec::Linear { w, b } => clone_linear(env, w, b),
+        ModelSpec::Linear { w, b } => clone_linear(env, w, b.as_deref()),
         ModelSpec::Chain(children) => clone_chain(children, env),
         ModelSpec::Activation(kind) => Ok(ModelSpec::Activation(*kind)),
         ModelSpec::Residual(inner) => Ok(ModelSpec::Residual(Box::new(clone_spec(inner, env)?))),
-        ModelSpec::RmsNorm { dim } => Ok(ModelSpec::RmsNorm { dim: *dim }),
+        ModelSpec::RmsNorm { .. } => Ok(spec.clone()),
         ModelSpec::Embedding {
             table,
             vocab,

@@ -127,7 +127,7 @@ fn leaf_meta(spec: &ModelSpec) -> (&'static str, String, f64) {
             };
             (n, n.to_string(), 48.0)
         }
-        ModelSpec::RmsNorm { dim } => ("rms_norm", format!("rms_norm ({dim})"), 16.0),
+        ModelSpec::RmsNorm { dim, .. } => ("rms_norm", format!("rms_norm ({dim})"), 16.0),
         ModelSpec::Activation(kind) => {
             let label = match kind {
                 ActKind::Tanh => "tanh",

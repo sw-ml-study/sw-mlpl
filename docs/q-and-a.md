@@ -5,6 +5,29 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-23 (microgpt-mlpl -- layer weights API shipped)
+
+**`params(model)`, `get_param` / `set_param`, `rms_norm(d, {eps})`,
+bias-free `linear` -- SHIPPED** (grad-soundness-records step 006).
+`params(model)` was documented but missing (a real bug); it now
+returns the names as a string list. The switch your table asked
+for:
+
+```
+q = linear(16, 16, 1, {bias: 0})            # bias-free projection
+n = rms_norm(16, {eps: 0.00001})             # microgpt's eps
+A = causal_attention(16, 4, 7)
+set_param(A, "Wq", transpose(wq_from_rs))    # parity mode: load weights
+```
+
+Roles: `linear` `W`/`b`; attention `Wq`/`Wk`/`Wv`/`Wo`; `embed`
+`table`; in a chain `get_param(m, "W", k)` addresses the k-th layer
+owning the role. Layout as in the previous entry (`x @ W[in, out]`,
+head `h` = columns `h*dk..(h+1)*dk`). `rms_norm` now also takes
+`[B, T, d]`. A custom eps runs on the exact CPU tape (the GPU fast
+paths assume the default). Measure the speed difference before
+switching, as you planned.
+
 ## 2026-09-23 (microgpt-mlpl -- sw-mlpl-requests.md triage + blockers)
 
 **Blockers.** Issue (j) is FIXED (e6ee2203): the `while` workarounds

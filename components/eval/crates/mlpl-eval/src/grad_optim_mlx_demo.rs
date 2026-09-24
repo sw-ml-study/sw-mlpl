@@ -8,6 +8,9 @@ use crate::env::Environment;
 use crate::env_api::*;
 use mlpl_array::DenseArray;
 use mlpl_eval_core::ModelSpec;
+// The GPU kernels hard-code the default rms_norm epsilon: a custom-eps norm
+// must not match (it runs on the exact CPU tape instead).
+use mlpl_eval_core::model::DEFAULT_RMS_EPS as EPS;
 use mlpl_parser::Expr;
 
 // The layout type moved to mlpl-eval-state (env-types-out step);
@@ -24,7 +27,7 @@ fn attn_names(layer: &ModelSpec) -> Option<(String, String, String, String)> {
     let ModelSpec::Chain(c) = inner.as_ref() else {
         return None;
     };
-    if c.len() != 2 || !matches!(c[0], ModelSpec::RmsNorm { .. }) {
+    if c.len() != 2 || !matches!(c[0], ModelSpec::RmsNorm { eps: EPS, .. }) {
         return None;
     }
     match &c[1] {
@@ -50,7 +53,7 @@ pub(crate) fn demo_layout(model_arg: &Expr, env: &Environment) -> Option<DemoLay
     let ModelSpec::Chain(ls) = env.get_model(name)? else {
         return None;
     };
-    if ls.len() != 4 || !matches!(ls[2], ModelSpec::RmsNorm { .. }) {
+    if ls.len() != 4 || !matches!(ls[2], ModelSpec::RmsNorm { eps: EPS, .. }) {
         return None;
     }
     let ModelSpec::Embedding { table, vocab, .. } = &ls[0] else {

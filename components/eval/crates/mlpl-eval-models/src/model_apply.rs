@@ -28,11 +28,11 @@ pub fn apply_model(
     env: &Environment,
 ) -> Result<DenseArray, EvalError> {
     match model {
-        ModelSpec::Linear { w, b } => apply_linear(x, w, b, env),
+        ModelSpec::Linear { w, b } => apply_linear(x, w, b.as_deref(), env),
         ModelSpec::Chain(children) => apply_chain(children, x, env),
         ModelSpec::Activation(kind) => apply_activation(*kind, x, env),
         ModelSpec::Residual(inner) => apply_residual(inner, x, env),
-        ModelSpec::RmsNorm { .. } => apply_rms_norm(x),
+        ModelSpec::RmsNorm { eps, .. } => apply_rms_norm(x, *eps),
         ModelSpec::Attention { .. } => apply_attention_spec(model, x, env),
         ModelSpec::Embedding { table, vocab, .. } => apply_embedding(x, table, *vocab, env),
         ModelSpec::LinearLora { .. } => apply_lora_spec(model, x, env),

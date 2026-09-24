@@ -17,22 +17,27 @@ use mlpl_engram_core::{HashSpec, head_offset, ngram_hashes};
 use crate::error::TapeError;
 use crate::linear::linear_tape;
 
-/// Per-row RMS normalization on the tape:
-/// `y[i, :] = x[i, :] / sqrt(mean(x[i, :]^2) + eps)`.
+/// RMS normalization over the last axis on the tape:
+/// `y[.., :] = x[.., :] / sqrt(mean(x[.., :]^2) + eps)`. A rank > 2
+/// input (e.g. `[B, T, d]`) is flattened to rows and reshaped back.
 ///
 /// `sqrt(v)` is encoded as `exp(-0.5 * log(v))` because the tape
 /// doesn't expose a direct sqrt op. Per-row mean is encoded as
 /// `matmul(x, ones([cols, 1])) / cols`, and the broadcast back
 /// to `[rows, cols]` as `rsqrt @ ones([1, cols])`.
-pub fn rms_norm_tape(x: &Tensor, tape: &Rc<Tape>) -> Result<Tensor, TapeError> {
+pub fn rms_norm_tape(x: &Tensor, eps: f64, tape: &Rc<Tape>) -> Result<Tensor, TapeError> {
     let dims = x.value().shape().dims().to_vec();
-    if dims.len() != 2 {
+    if dims.len() < 2 {
         return Err(TapeError::Unsupported(
-            "rms_norm: input must be a rank-2 [rows, cols] matrix".into(),
+            "rms_norm: input must have rank >= 2 ([rows, cols] or [B, T, d])".into(),
         ));
     }
-    let cols = dims[1];
-    let eps = 1e-8_f64;
+    let cols = dims[dims.len() - 1];
+    if dims.len() > 2 {
+        let rows = x.value().shape().elem_count() / cols.max(1);
+        let flat = rms_norm_tape(&x.reshape(Shape::new(vec![rows, cols])), eps, tape)?;
+        return Ok(flat.reshape(Shape::new(dims)));
+    }
     let leaf = |v: DenseArray| Tensor::leaf(Rc::clone(tape), v, false);
     let ones_col = leaf(DenseArray::new(Shape::new(vec![cols, 1]), vec![1.0; cols])?);
     let ones_row = leaf(DenseArray::new(Shape::new(vec![1, cols]), vec![1.0; cols])?);
@@ -147,9 +152,10 @@ pub fn engram_tape(
     let retrieved = sel
         .matmul(&memory_t)
         .reshape(Shape::new(vec![dims[0], width]));
-    let v = linear_tape(&retrieved, inputs.w_value, inputs.b_value, tape, params)?;
+    let bv = Some(inputs.b_value);
+    let v = linear_tape(&retrieved, inputs.w_value, bv, tape, params)?;
     let hv = h.concat(&v, 1);
-    let g = linear_tape(&hv, inputs.w_gate, inputs.b_gate, tape, params)?.sigmoid();
+    let g = linear_tape(&hv, inputs.w_gate, Some(inputs.b_gate), tape, params)?.sigmoid();
     Ok(h.add(&g.mul(&v)))
 }
 

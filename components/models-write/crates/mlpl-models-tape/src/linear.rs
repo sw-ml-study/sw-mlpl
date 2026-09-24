@@ -20,7 +20,7 @@ use crate::error::TapeError;
 pub fn linear_tape(
     x: &Tensor,
     w: &str,
-    b: &str,
+    b: Option<&str>,
     tape: &Rc<Tape>,
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, TapeError> {
@@ -31,12 +31,14 @@ pub fn linear_tape(
             .ok_or_else(|| TapeError::UndefinedVariable(name.into()))
     };
     let w_t = fetch(w)?;
-    let b_t = fetch(b)?;
     // Clean shape error instead of a tape panic when the activation's width
     // does not match the layer's input dimension (finding F19).
     mlpl_array_ops_matmul::check_matmul_compat(&x.value(), &w_t.value())?;
     let xw = x.matmul(&w_t);
-    let bias = bias_broadcast(&xw, &b_t, tape)?;
+    let Some(b) = b else {
+        return Ok(xw);
+    };
+    let bias = bias_broadcast(&xw, &fetch(b)?, tape)?;
     Ok(xw.add(&bias))
 }
 
