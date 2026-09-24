@@ -14,6 +14,13 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-24
 
+- feat(literate): syntax-colored MLPL source blocks via htmlize (microgpt-mlpl approach)
+- chore(agentrail): complete 007-downstream-updates-doc
+- docs: downstream-updates.md -- what downstream repos can adopt, delete, and how to write idiomatic MLPL
+- chore(agentrail): insert 007-downstream-updates-doc and 008-literate-htmlize
+- fix(serve): mlpl-mlx-serve eval-on-device handles every Value kind
+- chore(agentrail): complete 006-layer-weights-api
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(models): params(), get_param/set_param by role, rms_norm eps + rank-3, bias-free linear
 
 ## 2026-09-23
