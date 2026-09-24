@@ -12,7 +12,7 @@ use axum::extract::{Path, State};
 use axum::http::{HeaderMap, StatusCode};
 use axum::response::IntoResponse;
 use mlpl_eval::env_api::*;
-use mlpl_eval::{Environment, Value, eval_program_value};
+use mlpl_eval::{Environment, Value, eval_program_value, value_kind};
 use mlpl_parser::{lex, parse};
 use mlpl_serve::auth::{AuthMode, check_token, extract_bearer};
 use mlpl_serve::handlers::{CreateSessionResponse, ErrorResponse};
@@ -136,21 +136,13 @@ pub async fn eval_on_device_handler(
             }
         }
         Value::Str(s) => EvalResultPayload::String { value: s },
-        Value::Model(_)
-        | Value::Tokenizer(_)
-        | Value::DeviceTensor { .. }
-        | Value::BuiltinRef { .. }
-        | Value::UserFnRef { .. }
-        | Value::Record { .. }
-        | Value::StrList { .. }
-        | Value::Result { .. }
-        | Value::GenState(_)
-        | Value::Partial { .. } => {
-            return Err(bad(
-                "eval-on-device blocks must return a tensor or string in R1 \
-                 (got model / tokenizer / device-tensor / builtin-ref / record / string-list / result)"
-                    .into(),
-            ));
+        // Any other kind (model, record, result, bytes, ...) has no wire
+        // form here; naming it keeps new Value variants covered.
+        other => {
+            return Err(bad(format!(
+                "eval-on-device blocks must return a tensor or string (got {})",
+                value_kind(&other)
+            )));
         }
     };
     Ok(Json(EvalOnDeviceResponse { result: payload }))
