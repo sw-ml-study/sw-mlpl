@@ -1,0 +1,1 @@
+Wrote docs/downstream-updates.md (shipped fixes -> workarounds retired per repo, behavior changes, planned sagas, declined, untriaged, idiomatic-MLPL guide), verified claims against the release binary, linked from future-sagas-queue.
