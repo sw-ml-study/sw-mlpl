@@ -3,11 +3,11 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2026-06-01 Mon 08:44 -->
+<!-- 2026-09-24 Thu 16:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>MLX LoRA Fine-Tune &#x2013; a Literate, True-GPU Walkthrough</title>
-<meta name="author" content="Michael Wright" />
+<meta name="author" content="Michael A Wright" />
 <meta name="generator" content="Org Mode" />
 <style type="text/css">
   #content { max-width: 60em; margin: auto; }
@@ -193,6 +193,47 @@
     { background-color: #ffff00; color: #000000; font-weight: bold; }
   .org-svg { }
 </style>
+<style>
+/* Syntax colors for MLPL source blocks in published literate HTML.
+   publish.el exports blocks through htmlize with CSS output
+   (org-html-htmlize-output-type 'css, font prefix "org-"), so each
+   token carries a face class -- the mlpl-mode faces (org-mlpl-*) and
+   the font-lock faces they inherit or use (org-comment, org-string,
+   ...) -- and this sheet colors them. Inlined into every page by
+   publish.el; one source of truth for all the docs. */
+
+pre.src, pre.example {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+.org-mlpl-keyword, .org-keyword { color: #d73a49; font-weight: bold; }
+.org-mlpl-context-keyword, .org-type { color: #b31d28; font-weight: bold; }
+.org-mlpl-builtin, .org-builtin { color: #6f42c1; }
+.org-mlpl-number, .org-constant, .org-number { color: #005cc5; }
+.org-mlpl-operator, .org-operator { color: #8a8f98; }
+.org-string, .org-doc { color: #22863a; }
+.org-comment, .org-comment-delimiter { color: #6a737d; font-style: italic; }
+.org-preprocessor { color: #e36209; }
+.org-function-name { color: #e36209; }
+.org-variable-name { color: #b08800; }
+
+@media (prefers-color-scheme: dark) {
+  body { background: #16181c; color: #d8dade; }
+  a { color: #79b8ff; }
+  pre.src, pre.example { background: #1f2227; border-color: #33373e; color: #d8dade; }
+  .org-mlpl-keyword, .org-keyword { color: #f97583; }
+  .org-mlpl-context-keyword, .org-type { color: #fdaeb7; }
+  .org-mlpl-builtin, .org-builtin { color: #b392f0; }
+  .org-mlpl-number, .org-constant, .org-number { color: #79b8ff; }
+  .org-mlpl-operator, .org-operator { color: #7d8590; }
+  .org-string, .org-doc { color: #85e89d; }
+  .org-comment, .org-comment-delimiter { color: #8b949e; }
+  .org-preprocessor, .org-function-name { color: #ffab70; }
+  .org-variable-name { color: #ffdf5d; }
+  table, th, td { border-color: #33373e; }
+}
+</style>
 </head>
 <body>
 <div id="content" class="content">
@@ -204,12 +245,12 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org37120a2">Step 1 &#x2013; prepare the corpus</a></li>
-<li><a href="#org4a0d5cd">Step 2 &#x2013; define and pretrain a tiny language model</a></li>
-<li><a href="#orgd7cb24b">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</a></li>
-<li><a href="#orgd98eae4">Step 4 &#x2013; fine-tune the adapters on the GPU</a></li>
-<li><a href="#orgb6ca30b">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</a></li>
-<li><a href="#orgd94c650">Step 6 &#x2013; the fine-tune loss curve</a></li>
+<li><a href="#org4cca562">Step 1 &#x2013; prepare the corpus</a></li>
+<li><a href="#org77abcb2">Step 2 &#x2013; define and pretrain a tiny language model</a></li>
+<li><a href="#org4d8b864">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</a></li>
+<li><a href="#org8ae055c">Step 4 &#x2013; fine-tune the adapters on the GPU</a></li>
+<li><a href="#orgadb3f1a">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</a></li>
+<li><a href="#org5adf918">Step 6 &#x2013; the fine-tune loss curve</a></li>
 </ul>
 </div>
 </div>
@@ -230,9 +271,9 @@ again &#x2013; showing concrete <b>before vs after</b> learning, not just a loss
 curve. The blocks share one <code>:session mlx</code>, so state threads through
 exactly as if typed into the REPL.
 </p>
-<div id="outline-container-org37120a2" class="outline-2">
-<h2 id="org37120a2">Step 1 &#x2013; prepare the corpus</h2>
-<div class="outline-text-2" id="text-org37120a2">
+<div id="outline-container-org4cca562" class="outline-2">
+<h2 id="org4cca562">Step 1 &#x2013; prepare the corpus</h2>
+<div class="outline-text-2" id="text-org4cca562">
 <p>
 Load a snippet of tiny-Shakespeare, train a 280-token BPE tokenizer,
 encode to ids, and build next-token (X -&gt; Y) training pairs with a
@@ -240,12 +281,12 @@ context window of 32.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">corpus = load_preloaded("tiny_shakespeare_snippet")
-tok    = train_bpe(corpus, 280, 0)
-ids    = apply_tokenizer(tok, corpus)
-X = reshape(shift_pairs_x(ids, 32), [reduce_mul(shape(shift_pairs_x(ids, 32)))])
-Y = reshape(shift_pairs_y(ids, 32), [reduce_mul(shape(shift_pairs_y(ids, 32)))])
-shape(X)
+<pre class="src src-mlpl">corpus <span class="org-mlpl-operator">=</span> load_preloaded(<span class="org-string">"tiny_shakespeare_snippet"</span>)
+tok    <span class="org-mlpl-operator">=</span> train_bpe(corpus<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">280</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span>)
+ids    <span class="org-mlpl-operator">=</span> apply_tokenizer(tok<span class="org-mlpl-operator">,</span> corpus)
+X <span class="org-mlpl-operator">=</span> <span class="org-mlpl-builtin">reshape</span>(shift_pairs_x(ids<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">32</span>)<span class="org-mlpl-operator">,</span> [<span class="org-mlpl-builtin">reduce_mul</span>(<span class="org-mlpl-builtin">shape</span>(shift_pairs_x(ids<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">32</span>)))])
+Y <span class="org-mlpl-operator">=</span> <span class="org-mlpl-builtin">reshape</span>(shift_pairs_y(ids<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">32</span>)<span class="org-mlpl-operator">,</span> [<span class="org-mlpl-builtin">reduce_mul</span>(<span class="org-mlpl-builtin">shape</span>(shift_pairs_y(ids<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">32</span>)))])
+<span class="org-mlpl-builtin">shape</span>(X)
 </pre>
 </div>
 
@@ -254,9 +295,9 @@ shape(X)
 </pre>
 </div>
 </div>
-<div id="outline-container-org4a0d5cd" class="outline-2">
-<h2 id="org4a0d5cd">Step 2 &#x2013; define and pretrain a tiny language model</h2>
-<div class="outline-text-2" id="text-org4a0d5cd">
+<div id="outline-container-org77abcb2" class="outline-2">
+<h2 id="org77abcb2">Step 2 &#x2013; define and pretrain a tiny language model</h2>
+<div class="outline-text-2" id="text-org77abcb2">
 <p>
 A minimal decoder (embedding, one causal-attention block, a final norm,
 a linear head), pretrained for 20 Adam steps so it has some structure to
@@ -264,21 +305,21 @@ specialize from.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">V = 280 ; d = 32 ; h = 1
-base = chain(embed(V, d, 0), residual(chain(rms_norm(d), causal_attention(d, h, 1))), rms_norm(d), linear(d, V, 4))
-experiment "mlx_base" { train 20 { adam(cross_entropy(apply(base, X), Y), base, 0.001, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(base, X), Y) } }
+<pre class="src src-mlpl">V <span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">280</span> <span class="org-mlpl-operator">;</span> d <span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">32</span> <span class="org-mlpl-operator">;</span> h <span class="org-mlpl-operator">=</span> <span class="org-mlpl-number">1</span>
+base <span class="org-mlpl-operator">=</span> chain(embed(V<span class="org-mlpl-operator">,</span> d<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span>)<span class="org-mlpl-operator">,</span> residual(chain(rms_norm(d)<span class="org-mlpl-operator">,</span> causal_attention(d<span class="org-mlpl-operator">,</span> h<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">1</span>)))<span class="org-mlpl-operator">,</span> rms_norm(d)<span class="org-mlpl-operator">,</span> linear(d<span class="org-mlpl-operator">,</span> V<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">4</span>))
+experiment <span class="org-string">"mlx_base"</span> { <span class="org-mlpl-keyword">train</span> <span class="org-mlpl-number">20</span> { adam(cross_entropy(apply(base<span class="org-mlpl-operator">,</span> X)<span class="org-mlpl-operator">,</span> Y)<span class="org-mlpl-operator">,</span> base<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.001</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.9</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.999</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.00000001</span>)<span class="org-mlpl-operator">;</span> loss_metric <span class="org-mlpl-operator">=</span> cross_entropy(apply(base<span class="org-mlpl-operator">,</span> X)<span class="org-mlpl-operator">,</span> Y) } }
 last_losses
 </pre>
 </div>
 
 <pre class="example">
-8.748087078871551 8.556515224936415 8.374789080456026 8.229243094022198 8.088912927120974 7.950153720920675 7.822384960039977 7.702769117559669 7.589426658793878 7.4756597193971075 7.361660820476451 7.245777031342536 7.132938368249845 7.036058560056138 6.931899933236407 6.825627580515071 6.723534595757975 6.622502452566156 6.519077135403341 6.439220037847966
+8.68136971043806 8.479659270714212 8.331590410080342 8.21171550130538 8.100017723741562 7.993941863529588 7.899131414926591 7.80915004961342 7.723233447602549 7.642093413934386 7.563260901407564 7.485415227365 7.407264393415567 7.328405222459636 7.246101261046494 7.167768467081705 7.099577433663841 7.033722772291006 6.964698489447701 6.8934535871286355
 </pre>
 </div>
 </div>
-<div id="outline-container-orgd7cb24b" class="outline-2">
-<h2 id="orgd7cb24b">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</h2>
-<div class="outline-text-2" id="text-orgd7cb24b">
+<div id="outline-container-org4d8b864" class="outline-2">
+<h2 id="org4d8b864">Step 3 &#x2013; wrap with LoRA, then measure BEFORE fine-tuning</h2>
+<div class="outline-text-2" id="text-org4d8b864">
 <p>
 <code>lora(base, 8, 16.0, 0)</code> freezes every base weight and adds rank-8
 adapters to the head (the adapter <code>B</code> inits to zero, so the student
@@ -288,21 +329,21 @@ the prompt ="the "</code>.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">student = lora(base, 8, 16.0, 0)
-ppl_before = perplexity(apply(student, X), Y)
+<pre class="src src-mlpl">student <span class="org-mlpl-operator">=</span> lora(base<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">8</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">16.0</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0</span>)
+ppl_before <span class="org-mlpl-operator">=</span> perplexity(apply(student<span class="org-mlpl-operator">,</span> X)<span class="org-mlpl-operator">,</span> Y)
 ppl_before
 </pre>
 </div>
 
 <pre class="example">
-625.9184167007891
+985.8000915387879
 </pre>
 
 
 <div class="org-src-container">
-<pre class="src src-mlpl">seq = apply_tokenizer(tok, "the ")
-repeat 24 { logits = apply(student, seq); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); seq = concat(seq, nxt) }
-decode(tok, seq)
+<pre class="src src-mlpl">seq <span class="org-mlpl-operator">=</span> apply_tokenizer(tok<span class="org-mlpl-operator">,</span> <span class="org-string">"the "</span>)
+<span class="org-mlpl-keyword">repeat</span> <span class="org-mlpl-number">24</span> { logits <span class="org-mlpl-operator">=</span> apply(student<span class="org-mlpl-operator">,</span> seq)<span class="org-mlpl-operator">;</span> last <span class="org-mlpl-operator">=</span> last_row(logits)<span class="org-mlpl-operator">;</span> nxt <span class="org-mlpl-operator">=</span> sample(top_k(last<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">20</span>)<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.8</span><span class="org-mlpl-operator">,</span> step)<span class="org-mlpl-operator">;</span> seq <span class="org-mlpl-operator">=</span> concat(seq<span class="org-mlpl-operator">,</span> nxt) }
+decode(tok<span class="org-mlpl-operator">,</span> seq)
 </pre>
 </div>
 
@@ -311,9 +352,9 @@ the CCCCCCCCCCCC
 </pre>
 </div>
 </div>
-<div id="outline-container-orgd98eae4" class="outline-2">
-<h2 id="orgd98eae4">Step 4 &#x2013; fine-tune the adapters on the GPU</h2>
-<div class="outline-text-2" id="text-orgd98eae4">
+<div id="outline-container-org8ae055c" class="outline-2">
+<h2 id="org8ae055c">Step 4 &#x2013; fine-tune the adapters on the GPU</h2>
+<div class="outline-text-2" id="text-org8ae055c">
 <p>
 Inside <code>device("mlx")</code>, the fine-tune step's loss is built as a single
 MLX graph over the adapters, differentiated by <code>value_and_grad</code>, and the
@@ -323,19 +364,19 @@ frozen.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">device("mlx") { experiment "mlx_lora" { train 25 { adam(cross_entropy(apply(student, X), Y), student, 0.01, 0.9, 0.999, 0.00000001); loss_metric = cross_entropy(apply(student, X), Y) } } }
+<pre class="src src-mlpl">device(<span class="org-string">"mlx"</span>) { experiment <span class="org-string">"mlx_lora"</span> { <span class="org-mlpl-keyword">train</span> <span class="org-mlpl-number">25</span> { adam(cross_entropy(apply(student<span class="org-mlpl-operator">,</span> X)<span class="org-mlpl-operator">,</span> Y)<span class="org-mlpl-operator">,</span> student<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.01</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.9</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.999</span><span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.00000001</span>)<span class="org-mlpl-operator">;</span> loss_metric <span class="org-mlpl-operator">=</span> cross_entropy(apply(student<span class="org-mlpl-operator">,</span> X)<span class="org-mlpl-operator">,</span> Y) } } }
 last_losses
 </pre>
 </div>
 
 <pre class="example">
-6.349223988821594 6.213733652183676 6.0352822592153785 5.820442194388428 5.584296100499799 5.351590072096487 5.148978813365366 4.9845771578123115 4.845302307325645 4.723222394537387 4.620554635886209 4.539823568588221 4.474436269073964 4.4120594416185055 4.3460710722619345 4.279631724485524 4.217659592530554 4.1619466342323035 4.111412082819489 4.062401503603444 4.01329544939664 3.965955989651525 3.923028465811863 3.8854962998715563 3.8523739238166446
+6.83217651782934 6.74291122666956 6.628285598772657 6.490025032379681 6.331251335515088 6.157513425815848 5.977511291052338 5.801906353010584 5.640299835371345 5.495988610370392 5.36622914520038 5.2495815626717235 5.14656578830672 5.055138285529712 4.971804954912224 4.894986647359877 4.825626947191008 4.763785922469428 4.707254658526657 4.653446047397294 4.600424801125833 4.547765264379033 4.496109911894309 4.4461920328402105 4.398226003728822
 </pre>
 </div>
 </div>
-<div id="outline-container-orgb6ca30b" class="outline-2">
-<h2 id="orgb6ca30b">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</h2>
-<div class="outline-text-2" id="text-orgb6ca30b">
+<div id="outline-container-orgadb3f1a" class="outline-2">
+<h2 id="orgadb3f1a">Step 5 &#x2013; measure AFTER fine-tuning (the payoff)</h2>
+<div class="outline-text-2" id="text-orgadb3f1a">
 <p>
 Same model, same prompt, same sampling seeds &#x2013; only the adapters
 changed. Compare these two numbers and the two continuations to the
@@ -343,25 +384,25 @@ baselines in Step 3.
 </p>
 
 <div class="org-src-container">
-<pre class="src src-mlpl">ppl_after = perplexity(apply(student, X), Y)
+<pre class="src src-mlpl">ppl_after <span class="org-mlpl-operator">=</span> perplexity(apply(student<span class="org-mlpl-operator">,</span> X)<span class="org-mlpl-operator">,</span> Y)
 ppl_after
 </pre>
 </div>
 
 <pre class="example">
-47.104754879707265
+81.30647459034984
 </pre>
 
 
 <div class="org-src-container">
-<pre class="src src-mlpl">gen = apply_tokenizer(tok, "the ")
-repeat 24 { logits = apply(student, gen); last = last_row(logits); nxt = sample(top_k(last, 20), 0.8, step); gen = concat(gen, nxt) }
-decode(tok, gen)
+<pre class="src src-mlpl">gen <span class="org-mlpl-operator">=</span> apply_tokenizer(tok<span class="org-mlpl-operator">,</span> <span class="org-string">"the "</span>)
+<span class="org-mlpl-keyword">repeat</span> <span class="org-mlpl-number">24</span> { logits <span class="org-mlpl-operator">=</span> apply(student<span class="org-mlpl-operator">,</span> gen)<span class="org-mlpl-operator">;</span> last <span class="org-mlpl-operator">=</span> last_row(logits)<span class="org-mlpl-operator">;</span> nxt <span class="org-mlpl-operator">=</span> sample(top_k(last<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">20</span>)<span class="org-mlpl-operator">,</span> <span class="org-mlpl-number">0.8</span><span class="org-mlpl-operator">,</span> step)<span class="org-mlpl-operator">;</span> gen <span class="org-mlpl-operator">=</span> concat(gen<span class="org-mlpl-operator">,</span> nxt) }
+decode(tok<span class="org-mlpl-operator">,</span> gen)
 </pre>
 </div>
 
 <pre class="example">
-the �YYYYYYYYYYYHFiii
+the E g g g g g g g g g g g
 </pre>
 
 
@@ -376,27 +417,27 @@ perplexity, while the sampled distribution does visibly shift.)
 </p>
 </div>
 </div>
-<div id="outline-container-orgd94c650" class="outline-2">
-<h2 id="orgd94c650">Step 6 &#x2013; the fine-tune loss curve</h2>
-<div class="outline-text-2" id="text-orgd94c650">
+<div id="outline-container-org5adf918" class="outline-2">
+<h2 id="org5adf918">Step 6 &#x2013; the fine-tune loss curve</h2>
+<div class="outline-text-2" id="text-org5adf918">
 <div class="org-src-container">
-<pre class="src src-mlpl">loss_curve(last_losses)
+<pre class="src src-mlpl"><span class="org-mlpl-builtin">loss_curve</span>(last_losses)
 </pre>
 </div>
 
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"><rect width="100%" height="100%" fill="#1e1e2e"/><line x1="30" y1="270" x2="370" y2="270" stroke="#45475a" stroke-width="1"/><line x1="30" y1="30" x2="30" y2="270" stroke="#45475a" stroke-width="1"/><polyline points="30.0,30.0 44.2,43.0 58.3,60.2 72.5,80.8 86.7,103.5 100.8,125.9 115.0,145.4 129.2,161.2 143.3,174.6 157.5,186.3 171.7,196.2 185.8,203.9 200.0,210.2 214.2,216.2 228.3,222.5 242.5,228.9 256.7,234.9 270.8,240.2 285.0,245.1 299.2,249.8 313.3,254.5 327.5,259.1 341.7,263.2 355.8,266.8 370.0,270.0" fill="none" stroke="#a6e3a1" stroke-width="2"/><text x="30.0" y="18" fill="#cdd6f4" font-family="monospace" font-size="12">loss</text><text x="4" y="34.0" fill="#a6adc8" font-family="monospace" font-size="10">6.349</text><text x="4" y="270.0" fill="#a6adc8" font-family="monospace" font-size="10">3.852</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" width="400" height="300"><rect width="100%" height="100%" fill="#1e1e2e"/><line x1="30" y1="270" x2="370" y2="270" stroke="#45475a" stroke-width="1"/><line x1="30" y1="30" x2="30" y2="270" stroke="#45475a" stroke-width="1"/><polyline points="30.0,30.0 44.2,38.8 58.3,50.1 72.5,63.7 86.7,79.4 100.8,96.5 115.0,114.3 129.2,131.6 143.3,147.5 157.5,161.8 171.7,174.5 185.8,186.1 200.0,196.2 214.2,205.2 228.3,213.4 242.5,221.0 256.7,227.9 270.8,234.0 285.0,239.5 299.2,244.8 313.3,250.1 327.5,255.3 341.7,260.3 355.8,265.3 370.0,270.0" fill="none" stroke="#a6e3a1" stroke-width="2"/><text x="30.0" y="18" fill="#cdd6f4" font-family="monospace" font-size="12">loss</text><text x="4" y="34.0" fill="#a6adc8" font-family="monospace" font-size="10">6.832</text><text x="4" y="270.0" fill="#a6adc8" font-family="monospace" font-size="10">4.398</text></svg>
 </div>
 </div>
-<div id="outline-container-orgb780fe0" class="outline-2">
-<h2 id="orgb780fe0">How this was run</h2>
-<div class="outline-text-2" id="text-orgb780fe0">
+<div id="outline-container-orgc0a7373" class="outline-2">
+<h2 id="orgc0a7373">How this was run</h2>
+<div class="outline-text-2" id="text-orgc0a7373">
 <p>
 This page needs an MLX-enabled <code>mlpl-repl</code> (Apple Silicon). Build it once
 (this does NOT touch your installed binary):
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">cargo build -p mlpl-repl --features mlx --release   # -&gt; target/release/mlpl-repl
+<pre class="src src-sh">cargo build -p mlpl-repl --features mlx --release   <span class="org-comment-delimiter"># </span><span class="org-comment">-&gt; target/release/mlpl-repl</span>
 </pre>
 </div>
 
@@ -405,7 +446,7 @@ Then publish, pointing the Org-babel backend at that build:
 </p>
 
 <div class="org-src-container">
-<pre class="src src-sh">MLPL_REPL_CMD="$PWD/target/release/mlpl-repl" \
+<pre class="src src-sh"><span class="org-variable-name">MLPL_REPL_CMD</span>=<span class="org-string">"$PWD/target/release/mlpl-repl"</span> <span class="org-sh-escaped-newline">\</span>
   ./examples/literate/publish.sh examples/literate/mlx-lora-finetune.org
 </pre>
 </div>
@@ -419,8 +460,8 @@ it just won't be running on a GPU.
 </div>
 </div>
 <div id="postamble" class="status">
-<p class="author">Author: Michael Wright</p>
-<p class="date">Created: 2026-06-01 Mon 08:44</p>
+<p class="author">Author: Michael A Wright</p>
+<p class="date">Created: 2026-09-24 Thu 16:20</p>
 <p class="validation"><a href="https://validator.w3.org/check?uri=referer">Validate</a></p>
 </div>
 </body>
