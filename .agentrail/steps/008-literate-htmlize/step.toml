@@ -1,9 +1,10 @@
 number = 8
 slug = "literate-htmlize"
-status = "in-progress"
+status = "completed"
 description = "User request: look at ../../softwarewrighter/microgpt-mlpl to see how it uses..."
 role = "production"
 context_files = []
 created_at = "2026-09-24T15:07:21"
+completed_at = "2026-09-24T16:21:53"
 task_type = "docs"
-commits = []
+commits = ["44223c427efd15f6ae8b4279c43b921893e1b738"]

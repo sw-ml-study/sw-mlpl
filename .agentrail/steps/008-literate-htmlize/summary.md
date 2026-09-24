@@ -1,0 +1,1 @@
+Literate HTML syntax coloring via htmlize (microgpt-mlpl approach): publish.el loads htmlize from ELPA, CSS-class output, shared mlpl-code.css (light/dark) inlined; --export-only re-styles committed results with :eval never-export (CUDA/MLX docs without GPUs); all six pages/literate regenerated (text unchanged) and deployed to gh-pages 9600441b.
