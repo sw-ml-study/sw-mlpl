@@ -1,6 +1,6 @@
 number = 8
 slug = "literate-htmlize"
-status = "pending"
+status = "in-progress"
 description = "User request: look at ../../softwarewrighter/microgpt-mlpl to see how it uses..."
 role = "production"
 context_files = []

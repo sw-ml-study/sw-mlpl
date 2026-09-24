@@ -17,7 +17,17 @@
 ;;      session block appends to its session; a stale session would
 ;;      double-count).
 ;;   4. Execute the whole buffer, baking `#+RESULTS:' in.
-;;   5. Export to `<file>.html' beside the source.
+;;   5. Export to `<file>.html' beside the source, with source blocks
+;;      syntax-colored: htmlize (NonGNU ELPA, found in
+;;      ~/.emacs.d/elpa/htmlize-*) emits face CLASSES (batch Emacs has
+;;      no display, so faces carry no colors), and `mlpl-code.css'
+;;      beside this file -- inlined into every page -- colors them.
+;;      Without htmlize the blocks export plain.
+;;
+;; MLPL_PUBLISH_EXPORT_ONLY=1 skips steps 3-4 and re-exports the
+;; committed results as-is: for re-styling docs whose blocks need
+;; hardware this host lacks (the CUDA / MLX docs), with no content
+;; change.
 
 ;;; Code:
 
@@ -32,6 +42,20 @@
   (load loader nil t)
   (require 'ob)
   (require 'org)
+  (require 'ox-html)
+
+  ;; 1b. Syntax colors: htmlize from the user's ELPA (-Q skips package
+  ;; activation), CSS-class output, and the shared stylesheet inlined.
+  (dolist (dir (file-expand-wildcards (expand-file-name "~/.emacs.d/elpa/htmlize-*")))
+    (add-to-list 'load-path dir))
+  (if (require 'htmlize nil t)
+      (setq org-html-htmlize-output-type 'css
+            org-html-htmlize-font-prefix "org-")
+    (message "publish.el: htmlize not found; source blocks will be plain"))
+  (setq org-html-head-extra
+        (with-temp-buffer
+          (insert-file-contents (expand-file-name "mlpl-code.css" here))
+          (format "<style>\n%s</style>" (buffer-string))))
 
   ;; 2. No interactive "evaluate this block?" prompt in batch, and no
   ;; `file.org~` backups (save-buffer would otherwise leave a stray,
@@ -50,14 +74,21 @@
 
   ;; 3-5. Execute then export.
   (with-current-buffer (find-file-noselect org-file)
-    (when (fboundp 'org-babel-mlpl-reset-session)
-      (org-babel-mlpl-reset-session))
-    ;; Clear any baked-in results so a re-publish is reproducible --
-    ;; `:results raw'/`html' blocks are not always auto-replaced in
-    ;; place, which would leave stale lines next to the fresh ones.
-    (org-babel-remove-result-one-or-many t)
-    (org-babel-execute-buffer)
-    (save-buffer)
+    (if (equal (getenv "MLPL_PUBLISH_EXPORT_ONLY") "1")
+        ;; Export the committed results without evaluating anything.
+        ;; `never-export' keeps `:exports' honored (a `:exports code'
+        ;; block still hides its result) while no block runs.
+        (setq-local org-babel-default-header-args
+                    (cons '(:eval . "never-export")
+                          (assq-delete-all :eval (copy-alist org-babel-default-header-args))))
+      (when (fboundp 'org-babel-mlpl-reset-session)
+        (org-babel-mlpl-reset-session))
+      ;; Clear any baked-in results so a re-publish is reproducible --
+      ;; `:results raw'/`html' blocks are not always auto-replaced in
+      ;; place, which would leave stale lines next to the fresh ones.
+      (org-babel-remove-result-one-or-many t)
+      (org-babel-execute-buffer)
+      (save-buffer))
     (let ((html (org-html-export-to-html)))
       (princ (format "published: %s\n" (expand-file-name html))))))
 

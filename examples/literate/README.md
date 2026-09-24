@@ -28,7 +28,26 @@ location), resets the session, evaluates the buffer top to bottom, and
 writes `basics.html` beside the source.
 
 Requires a `mlpl-repl` binary on `PATH` or at
-`~/.local/softwarewrighter/bin` (build with `cargo build -p mlpl-repl`).
+`~/.local/softwarewrighter/bin` (build with `cargo build -p mlpl-repl`),
+and Emacs (`$EMACS`, then `PATH`, then the macOS `Emacs.app`).
+
+### Syntax colors
+
+Source blocks export syntax-colored with the `mlpl-mode` faces. The
+publisher loads `htmlize` (NonGNU ELPA; install once with
+`emacs --batch --eval "(progn (package-refresh-contents) (package-install 'htmlize))"`),
+which tags every token with a face class, and inlines `mlpl-code.css`
+-- one light/dark stylesheet shared by every page -- to color them.
+Without `htmlize` the blocks export plain.
+
+To re-style a doc without re-running it (for example the CUDA and MLX
+docs, whose blocks need hardware this host may lack), export the
+committed results as-is:
+
+```bash
+./examples/literate/publish.sh --export-only examples/literate/*.org
+cp examples/literate/*.html pages/literate/   # the deployed copies
+```
 
 ## How session state works
 

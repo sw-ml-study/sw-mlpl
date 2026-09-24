@@ -1,0 +1,39 @@
+/* Syntax colors for MLPL source blocks in published literate HTML.
+   publish.el exports blocks through htmlize with CSS output
+   (org-html-htmlize-output-type 'css, font prefix "org-"), so each
+   token carries a face class -- the mlpl-mode faces (org-mlpl-*) and
+   the font-lock faces they inherit or use (org-comment, org-string,
+   ...) -- and this sheet colors them. Inlined into every page by
+   publish.el; one source of truth for all the docs. */
+
+pre.src, pre.example {
+  background: #fafafa;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+}
+.org-mlpl-keyword, .org-keyword { color: #d73a49; font-weight: bold; }
+.org-mlpl-context-keyword, .org-type { color: #b31d28; font-weight: bold; }
+.org-mlpl-builtin, .org-builtin { color: #6f42c1; }
+.org-mlpl-number, .org-constant, .org-number { color: #005cc5; }
+.org-mlpl-operator, .org-operator { color: #8a8f98; }
+.org-string, .org-doc { color: #22863a; }
+.org-comment, .org-comment-delimiter { color: #6a737d; font-style: italic; }
+.org-preprocessor { color: #e36209; }
+.org-function-name { color: #e36209; }
+.org-variable-name { color: #b08800; }
+
+@media (prefers-color-scheme: dark) {
+  body { background: #16181c; color: #d8dade; }
+  a { color: #79b8ff; }
+  pre.src, pre.example { background: #1f2227; border-color: #33373e; color: #d8dade; }
+  .org-mlpl-keyword, .org-keyword { color: #f97583; }
+  .org-mlpl-context-keyword, .org-type { color: #fdaeb7; }
+  .org-mlpl-builtin, .org-builtin { color: #b392f0; }
+  .org-mlpl-number, .org-constant, .org-number { color: #79b8ff; }
+  .org-mlpl-operator, .org-operator { color: #7d8590; }
+  .org-string, .org-doc { color: #85e89d; }
+  .org-comment, .org-comment-delimiter { color: #8b949e; }
+  .org-preprocessor, .org-function-name { color: #ffab70; }
+  .org-variable-name { color: #ffdf5d; }
+  table, th, td { border-color: #33373e; }
+}
