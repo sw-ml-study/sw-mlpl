@@ -1,4 +1,4 @@
-number = 10
+number = 12
 slug = "relay-close"
 status = "pending"
 description = "Relay-close grad-soundness-records (plan.md step 5): lang-reference grad sect..."

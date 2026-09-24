@@ -1,4 +1,4 @@
-number = 7
+number = 9
 slug = "frame-snapshot-cost"
 status = "pending"
 description = "microgpt-mlpl issue (e), the blocking half: calling ANY u: function costs tim..."

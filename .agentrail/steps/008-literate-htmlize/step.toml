@@ -1,0 +1,9 @@
+number = 8
+slug = "literate-htmlize"
+status = "pending"
+description = "User request: look at ../../softwarewrighter/microgpt-mlpl to see how it uses..."
+role = "production"
+context_files = []
+created_at = "2026-09-24T15:07:21"
+task_type = "docs"
+commits = []
