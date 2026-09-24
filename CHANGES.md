@@ -12,8 +12,16 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-24
+
+- feat(models): params(), get_param/set_param by role, rms_norm eps + rank-3, bias-free linear
+
 ## 2026-09-23
 
+- examples: primes.mlpl -- the array-language prime sieve in MLPL
+- docs(plan): Python-ML-developer ergonomics program (6 sagas) + microgpt-mlpl triage; insert 007-frame-snapshot-cost
+- chore(agentrail): complete 005-loop-body-string-stmts
+- docs(changes): refresh CHANGES.md to HEAD
 - fix(eval): string-valued statements inside repeat/train/for bodies (microgpt-mlpl j)
 
 ## 2026-09-22
