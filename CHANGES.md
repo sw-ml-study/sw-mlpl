@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-25
 
+- perf(autograd): native GatherRows tape node -- O(n x d) gather_rows / embed gradients
+- chore(agentrail): complete 009-frame-snapshot-cost
+- docs(changes): refresh CHANGES.md to HEAD
 - perf(eval): u: calls cost O(names written), not a copy of every global (microgpt-mlpl e)
 
 ## 2026-09-24
