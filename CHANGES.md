@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-25
+
+- perf(eval): u: calls cost O(names written), not a copy of every global (microgpt-mlpl e)
+
 ## 2026-09-24
 
+- chore(agentrail): complete 008-literate-htmlize
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(literate): syntax-colored MLPL source blocks via htmlize (microgpt-mlpl approach)
 - chore(agentrail): complete 007-downstream-updates-doc
 - docs: downstream-updates.md -- what downstream repos can adopt, delete, and how to write idiomatic MLPL
