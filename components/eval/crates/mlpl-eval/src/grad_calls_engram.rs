@@ -8,7 +8,7 @@ use crate::env_api::*;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use mlpl_array::{DenseArray, Shape};
+use mlpl_array::Shape;
 use mlpl_autograd::{Tape, Tensor};
 use mlpl_engram_core::HashSpec;
 use mlpl_models_tape::EngramInputs;
@@ -78,11 +78,11 @@ pub(crate) fn call_apply_engram(
     mlpl_models_tape::engram_tape(&h, &ids, &inputs, tape, params).map_err(EvalError::from)
 }
 
-/// `gather_rows(table, indices)` on the tape (finding F4): the addressed rows
-/// are gathered by a one-hot selection matmul against the table, whose backward
-/// is an EXACT scatter-ADD into the addressed rows (duplicate indices
-/// accumulate), so a from-scratch embedding / addressing table trains -- the
-/// same seam as the engram memory lookup. `indices` are concrete integers (not
+/// `gather_rows(table, indices)` on the tape (finding F4): the native
+/// `GatherRows` node copies the addressed rows and its backward is an EXACT
+/// scatter-ADD into only those rows (duplicate indices accumulate) -- O(n x d),
+/// no one-hot selection matrix -- so a from-scratch embedding / addressing
+/// table trains at vocabulary scale. `indices` are concrete integers (not
 /// differentiable); the output shape is `indices.shape + [row_dim]`.
 pub(crate) fn call_gather_rows(
     args: &[Expr],
@@ -100,24 +100,14 @@ pub(crate) fn call_gather_rows(
             dims.len()
         )));
     }
-    let sel = Tensor::leaf(Rc::clone(tape), selection_onehot(&idx, dims[0])?, false);
+    let rows: Vec<usize> = idx
+        .data()
+        .iter()
+        .map(|&v| gather_index(v, dims[0]))
+        .collect::<Result<_, _>>()?;
     let mut out_dims = idx.shape().dims().to_vec();
     out_dims.push(dims[1]);
-    Ok(sel.matmul(&table).reshape(Shape::new(out_dims)))
-}
-
-/// Build a `[n, rows]` one-hot selection matrix from an integer index array
-/// (any shape, flattened to `n`). `sel @ table` gathers those rows; the matmul
-/// backward `sel^T @ upstream` is the scatter-ADD into the addressed rows.
-fn selection_onehot(idx: &DenseArray, rows: usize) -> Result<DenseArray, EvalError> {
-    let n = idx.shape().elem_count();
-    let mut data = vec![0.0_f64; n * rows];
-    for (r, &v) in idx.data().iter().enumerate() {
-        let c = gather_index(v, rows)?;
-        data[r * rows + c] = 1.0;
-    }
-    DenseArray::new(Shape::new(vec![n, rows]), data)
-        .map_err(|e| EvalError::Unsupported(format!("gather_rows: selection build failed: {e}")))
+    Ok(table.gather_rows(rows).reshape(Shape::new(out_dims)))
 }
 
 /// Validate one gather index: a non-negative integer strictly below `rows`.

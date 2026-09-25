@@ -5,6 +5,22 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-25 (demo-decision-model -- full-batch gather_rows gradient)
+
+**`gather_rows` was ~30 s per step at `n = 7595*24` -- FIXED**
+(grad-soundness-records step 010). Its tape rule built an `[n, V]`
+one-hot selection matrix and matmul'd it with the table: O(n x V x d)
+time and n x V x 8 bytes in both directions. It is now a native
+`GatherRows` node -- forward copies the addressed rows, backward
+scatter-ADDS into only those rows (duplicates accumulate) -- O(n x d),
+independent of the vocabulary. 20,000 ids into a 50,000 x 16 table
+differentiate in ~10 ms (the dense form needed an 8 GB matrix). The
+gradient equals the old one-hot form exactly
+(`gather_rows_node_tests`), and `embed` layers use the same node.
+Full-batch training of the scorer is back on the table. On a
+device-resident tape the gather runs on the host (counted as a CPU
+fallback); there is no device kernel for it yet.
+
 ## 2026-09-25 (microgpt-mlpl -- issue e call cost FIXED)
 
 **"Calling ANY `u:` function costs time proportional to all globals"

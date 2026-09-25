@@ -5,6 +5,7 @@ use mlpl_array::{DenseArray, Shape};
 use mlpl_array_ops_shape::prelude::*;
 
 use crate::grad_kernels::{reduce_sum_backward, windows_backward};
+use crate::grad_kernels_shape::gather_rows_backward;
 use mlpl_array_ops_compose::prelude::RotateExt;
 use mlpl_autograd_tape::{NodeId, NodeKind, Tape, accumulate, accumulate_pair, resident};
 use mlpl_tensor_handle::{SeamEvent, TensorHandle, bump_if};
@@ -90,29 +91,34 @@ fn propagate_dense(tape: &Tape, kind: NodeKind, upstream: &DenseArray) {
             axis,
             idx,
         } => prop_take(tape, parent, &orig_shape, axis, idx, upstream),
-        NodeKind::Rotate { parent, k, axis } => {
-            let g = upstream
-                .rotate(-k, axis)
-                .expect("rotate grad: axis in range");
+        single => {
+            let (parent, g) = single_parent_grad(single, upstream);
             accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
         }
+    }
+}
+
+/// The single-parent structural kinds: `(parent, gradient for parent)`
+/// from the exact CPU kernel.
+fn single_parent_grad(kind: NodeKind, upstream: &DenseArray) -> (NodeId, DenseArray) {
+    match kind {
+        NodeKind::Rotate { parent, k, axis } => (parent, upstream.rotate(-k, axis).expect("axis")),
         NodeKind::Windows {
             parent,
-            orig_shape,
-            sizes,
-            strides,
-        } => {
-            let g = windows_backward(upstream, &orig_shape, &sizes, &strides);
-            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
-        }
+            orig_shape: s,
+            sizes: z,
+            strides: t,
+        } => (parent, windows_backward(upstream, &s, &z, &t)),
         NodeKind::ReduceSum {
             parent,
             orig_shape,
             axes,
-        } => {
-            let g = reduce_sum_backward(upstream, &orig_shape, &axes);
-            accumulate(&mut tape.nodes_mut()[parent.0].grad, g);
-        }
+        } => (parent, reduce_sum_backward(upstream, &orig_shape, &axes)),
+        NodeKind::GatherRows {
+            parent,
+            indices,
+            rows,
+        } => (parent, gather_rows_backward(upstream, &indices, rows)),
         _ => unreachable!("non-structural kinds are handled in backward::propagate"),
     }
 }

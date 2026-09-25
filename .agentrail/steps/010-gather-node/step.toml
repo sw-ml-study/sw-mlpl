@@ -1,6 +1,6 @@
 number = 10
 slug = "gather-node"
-status = "pending"
+status = "in-progress"
 description = "Native GatherRows autograd node (plan.md step 3): forward copies rows, backwa..."
 role = "production"
 context_files = []

@@ -1,8 +1,22 @@
 //! Pure gradient kernels for the structural (rearrangement) ops:
-//! take / patchify / stack / concat. DenseArray in, DenseArray out, no tape
-//! access. Split from `grad_kernels` for the module function budget.
+//! take / patchify / stack / concat / row gather. DenseArray in, DenseArray
+//! out, no tape access. Split from `grad_kernels` for the module function
+//! budget.
 
 use mlpl_array::{DenseArray, Shape};
+
+/// Row-gather backward: a zero `[rows, d]` gradient with each upstream row
+/// `i` ADDED into row `indices[i]` (duplicates accumulate). O(n * d).
+pub fn gather_rows_backward(upstream: &DenseArray, indices: &[usize], rows: usize) -> DenseArray {
+    let d = upstream.shape().dims().get(1).copied().unwrap_or(0);
+    let mut out = vec![0.0; rows * d];
+    for (row, &target) in upstream.data().chunks(d.max(1)).zip(indices) {
+        for (o, g) in out[target * d..(target + 1) * d].iter_mut().zip(row) {
+            *o += g;
+        }
+    }
+    DenseArray::new(Shape::new(vec![rows, d]), out).expect("shape")
+}
 
 pub fn take_backward(
     upstream: &DenseArray,

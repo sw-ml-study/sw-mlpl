@@ -49,15 +49,14 @@ pub fn rms_norm_tape(x: &Tensor, eps: f64, tape: &Rc<Tape>) -> Result<Tensor, Ta
     Ok(x.mul(&rsqrt.matmul(&ones_row)))
 }
 
-/// Embedding lookup on the tape. The token id array enters as a
-/// non-trainable input leaf; its eager value builds a one-hot
-/// matrix which then matmuls against the trainable table tensor,
-/// routing backprop straight into the table's gradient buffer.
+/// Embedding lookup on the tape. The token ids (eager, not
+/// differentiable) drive a native row gather of the trainable table,
+/// whose backward scatter-adds straight into the looked-up rows'
+/// gradient -- O(tokens x d), no `[tokens, vocab]` one-hot matrix.
 pub fn embedding_tape(
     x: &Tensor,
     table: &str,
     vocab: usize,
-    tape: &Rc<Tape>,
     params: &HashMap<String, Tensor>,
 ) -> Result<Tensor, TapeError> {
     let table_t = params
@@ -65,30 +64,18 @@ pub fn embedding_tape(
         .cloned()
         .ok_or_else(|| TapeError::UndefinedVariable(table.into()))?;
     let tokens_arr = x.value().clone();
-    let onehot_arr = onehot_from_tokens(&tokens_arr, vocab)?;
-    let d = table_t.value().shape().dims()[1];
-    let onehot_t = Tensor::leaf(Rc::clone(tape), onehot_arr, false);
-    let flat = onehot_t.matmul(&table_t);
-    // Restore the token shape so a batched [B, T] lookup is [B, T, d] on the
-    // tape too (finding F9); rank-1 [T] stays [T, d] (a no-op reshape).
+    let ids: Vec<usize> = tokens_arr
+        .data()
+        .iter()
+        .enumerate()
+        .map(|(row, &id)| validate_token_id(row, id, vocab))
+        .collect::<Result<_, _>>()?;
+    // Native row gather (scatter-add backward into only the looked-up rows),
+    // then restore the token shape so a batched [B, T] lookup is [B, T, d]
+    // on the tape too (finding F9); rank-1 [T] stays [T, d].
     let mut out_dims = tokens_arr.shape().dims().to_vec();
-    out_dims.push(d);
-    Ok(flat.reshape(Shape::new(out_dims)))
-}
-
-/// One-hot encode a token id array of ANY rank into `[N, vocab]`, where `N` is
-/// the flattened element count (a batched `[B, T]` input gives `[B*T, vocab]`;
-/// the caller reshapes the lookup back to `tokens.shape + [d]`).
-fn onehot_from_tokens(tokens: &DenseArray, vocab: usize) -> Result<DenseArray, TapeError> {
-    let n = tokens.shape().elem_count();
-    let mut data = vec![0.0_f64; n * vocab];
-    for (row, &id_f) in tokens.data().iter().enumerate() {
-        let id = validate_token_id(row, id_f, vocab)?;
-        data[row * vocab + id] = 1.0;
-    }
-    DenseArray::new(Shape::new(vec![n, vocab]), data).map_err(|e| {
-        TapeError::Unsupported(format!("embed (tape): one-hot construction failed: {e}"))
-    })
+    out_dims.push(table_t.value().shape().dims()[1]);
+    Ok(table_t.gather_rows(ids).reshape(Shape::new(out_dims)))
 }
 
 /// Named-field inputs for [`engram_tape`]: the five parameter

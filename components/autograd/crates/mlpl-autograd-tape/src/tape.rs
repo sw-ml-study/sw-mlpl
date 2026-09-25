@@ -180,6 +180,18 @@ pub enum NodeKind {
         /// Strides, one per windowed axis.
         strides: Vec<usize>,
     },
+    /// Row gather `parent[indices[i], :]` from a rank-2 `[rows, d]` table
+    /// into `[indices.len(), d]`. Backward scatter-ADDS each upstream row
+    /// into the row it came from (duplicate indices accumulate): O(n * d),
+    /// with no `[n, rows]` one-hot selection matrix.
+    GatherRows {
+        /// The table's node id.
+        parent: NodeId,
+        /// Row index of each output row (validated `< rows`).
+        indices: Vec<usize>,
+        /// Number of rows in the table (the gradient's leading dim).
+        rows: usize,
+    },
     /// Sum over one or more axes (the differentiable `reduce(:add, x,
     /// axes)` / `reduce_add(x, axis)`). Backward BROADCASTS the upstream
     /// gradient back over the reduced axes into `orig_shape` -- every

@@ -37,6 +37,7 @@ All items below are on `main`; the adjacent checkout's
 | grad never silently constant-folds a `u:` call whose body reads a param; unsupported forms are named in the error (ab858695) | nothing to delete -- but see section 2 | demo-decision-model (Q5), moe-microscope (F17, F25 symptoms) |
 | layer weights API: `params(model)`, `get_param` / `set_param` by role, `rms_norm(d, {eps})` on `[rows, d]` or `[B, T, d]`, bias-free `linear(in, out, seed, {bias: 0})` (8d13e571) | hand-written `u:linear` / `u:rmsnorm` kept only to match an equation or a parameter count; weight loading through generated parameter names | microgpt-mlpl (requests #10), reasoning-from-scratch (`u:qwen_rms_norm`, bias-free Qwen projections) |
 | a `u:` call costs O(names it writes), not a copy of every global: 0.557 -> 0.0006 ms per call with a 2.28M-element global in scope, now independent of global size (grad-soundness-records step 009) | `expunge` of big globals before hot loops; restructuring to avoid `u:` calls in inner loops (the per-READ copy of a large global is the separate cow-values saga) | microgpt-mlpl (e, call-cost half) |
+| `gather_rows` and `embed` differentiate through a native row gather: O(n x d) forward and backward, independent of the table's row count (20,000 ids into a 50,000-row table: ~10 ms; the old one-hot form needed an 8 GB `[n, V]` matrix) (grad-soundness-records step 010) | mini-batching or vocabulary truncation adopted only because full-batch gathers took ~30 s per step | demo-decision-model (full-batch scorer training), microgpt-mlpl, reasoning-from-scratch embeddings |
 
 ## 2. Behavior changes to re-check
 
@@ -66,7 +67,6 @@ Current saga (grad-soundness-records), in order:
 
 | Step | Retires |
 |---|---|
-| gather-node -- native `GatherRows` backward, O(n x D) | dense one-hot gathers that are O(n x V x D) at large vocabularies |
 | record-fields -- record field reads inside `grad` as constant leaves | binding record fields to variables before a traced loss (moe-microscope F17, demo-decision-model Q5) |
 
 Then the Python-ML-developer ergonomics program

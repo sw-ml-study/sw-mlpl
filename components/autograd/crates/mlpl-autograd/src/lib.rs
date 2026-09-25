@@ -7,6 +7,7 @@
 //! `mlpl_autograd::` paths.
 
 mod tensor;
+mod tensor_gather;
 mod tensor_ops;
 mod tensor_reduce;
 mod tensor_shape;

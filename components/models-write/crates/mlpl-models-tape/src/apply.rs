@@ -53,9 +53,7 @@ pub fn apply_model_tape(
             Ok(x.add(&inner_out))
         }
         ModelSpec::RmsNorm { eps, .. } => rms_norm_tape(&x, *eps, tape),
-        ModelSpec::Embedding { table, vocab, .. } => {
-            embedding_tape(&x, table, *vocab, tape, params)
-        }
+        ModelSpec::Embedding { table, vocab, .. } => embedding_tape(&x, table, *vocab, params),
         ModelSpec::Attention { .. } => attention_arm(model, &x, tape, params),
         ModelSpec::LinearLora { .. } => lora_arm(model, &x, tape, params),
         ModelSpec::Engram { .. } => Err(TapeError::Unsupported(
