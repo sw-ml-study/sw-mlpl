@@ -1,0 +1,1 @@
+Native GatherRows tape node (forward row copy, scatter-add backward, O(n x d)); gather_rows + embed tape paths use it, one-hot builders deleted; propagate_dense split. 20k ids x 50k-row table grad in ~10 ms (was an 8 GB one-hot). 3 tests incl exact parity with dense form. Suites green. sw-checklist held 33/569.
