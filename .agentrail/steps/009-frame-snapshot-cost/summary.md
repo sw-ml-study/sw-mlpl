@@ -1,0 +1,1 @@
+u: call frames: undo-log journal (note_write on every scope-table write, frame_exit restores only written names) replaces the full deep-copy snapshot; eval_const_arg uses it too; single for_each_scope_table! macro; old snapshot API removed. 0.557 -> 0.00057 ms/call with a 2.28M global (release). 6 TDD tests; full suites green. sw-checklist 33/569 (-2 warn).

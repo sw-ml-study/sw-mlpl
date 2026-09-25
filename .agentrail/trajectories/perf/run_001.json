@@ -1,0 +1,11 @@
+{
+  "task_type": "perf",
+  "state": {
+    "number": 9,
+    "step": "frame-snapshot-cost"
+  },
+  "action": "TDD, write-site audit incl multi-line chains, undo log, release before/after benchmark, full release suites",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-25T10:35:26"
+}
