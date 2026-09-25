@@ -29,7 +29,7 @@ pub(crate) use mlpl_eval_models::{
 /// `crate::env_api::*`.
 pub mod env_api {
     pub use mlpl_eval_envc_bindings::{
-        EnvRecords, EnvResults, EnvScope, EnvStringLists, EnvStrings, EnvVars, ScopeSnapshot,
+        EnvRecords, EnvResults, EnvScope, EnvStringLists, EnvStrings, EnvVars,
     };
     pub use mlpl_eval_envc_exec::{
         EnvDevice, EnvDeviceNotices, EnvDeviceTensors, EnvInterrupt, EnvPeer, EnvTensorDevice,

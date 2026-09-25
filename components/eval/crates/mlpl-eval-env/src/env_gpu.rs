@@ -16,6 +16,7 @@ impl GpuEnv for Environment {
         self.vars.get(name)
     }
     fn set_binding(&mut self, name: String, value: DenseArray) {
+        self.note_write(&name);
         self.vars.insert(name, value);
     }
     fn optim_buffer(&self, opt: &str, param: &str, suffix: &str) -> Option<&DenseArray> {

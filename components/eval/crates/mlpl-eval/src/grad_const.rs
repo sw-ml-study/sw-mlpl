@@ -21,20 +21,21 @@ use mlpl_eval_types::EvalError;
 /// `transpose_axes` permutation, a constant fold -- in a scope overlaid with
 /// the current grad bindings, so a user function's parameters resolve
 /// (findings F11, microgpt-mlpl): `start + range(count)` or targets `y` living
-/// in the traced scope, not the global env. The overlay is snapshotted and
-/// restored so it does not leak.
+/// in the traced scope, not the global env. The overlay runs in an undo-log
+/// frame, so it does not leak and costs O(overlaid names), not a copy of
+/// every global.
 pub(crate) fn eval_const_arg(
     idx: &Expr,
     env: &mut Environment,
     params: &HashMap<String, Tensor>,
 ) -> Result<DenseArray, EvalError> {
-    let snap = env.snapshot_scope();
+    env.frame_journal.push(Default::default());
     for (name, t) in params {
         env.set(name.clone(), t.value());
     }
     let out =
         crate::eval::eval_expr(idx, env, &mut None).and_then(mlpl_eval_types::Value::into_array);
-    env.restore_scope(snap);
+    env.frame_exit();
     out
 }
 

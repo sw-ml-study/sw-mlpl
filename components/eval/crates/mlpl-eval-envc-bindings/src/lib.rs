@@ -14,7 +14,7 @@ pub mod env_vars;
 
 pub use env_records::EnvRecords;
 pub use env_results::EnvResults;
-pub use env_scope::{EnvScope, ScopeSnapshot};
+pub use env_scope::EnvScope;
 pub use env_string_lists::EnvStringLists;
 pub use env_strings::EnvStrings;
 pub use env_vars::EnvVars;

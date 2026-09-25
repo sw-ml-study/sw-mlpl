@@ -16,6 +16,7 @@ pub trait EnvStrings {
 
 impl EnvStrings for Environment {
     fn set_string(&mut self, name: String, value: String) {
+        self.note_write(&name);
         self.strings.insert(name, value);
     }
 

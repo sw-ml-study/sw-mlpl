@@ -72,19 +72,20 @@ pub(crate) fn invoke_user_fn_values(
     framed(env, |env| run_body(&f, name, values, env, trace))
 }
 
-/// One user-fn frame: snapshot, run, restore -- then REPLAY the
-/// global_set writes recorded during the call (they live outside
-/// the snapshot), and clear the log once the outermost frame
-/// returns so stale writes can never clobber later rebinds.
+/// One user-fn frame: open an undo-log frame, run, close it (restoring
+/// exactly the names the call wrote -- O(writes), not a copy of every
+/// global) -- then REPLAY the global_set writes recorded during the call,
+/// and clear the log once the outermost frame returns so stale writes
+/// can never clobber later rebinds.
 fn framed(
     env: &mut Environment,
     body: impl FnOnce(&mut Environment) -> Result<Value, EvalError>,
 ) -> Result<Value, EvalError> {
     let write_mark = env.global_writes.len();
     env.call_depth += 1;
-    let snapshot = env.snapshot_scope();
+    env.frame_journal.push(Default::default());
     let result = body(env);
-    env.restore_scope(snapshot);
+    env.frame_exit();
     env.call_depth -= 1;
     let replay: Vec<(String, Value)> = env.global_writes[write_mark..].to_vec();
     for (name, value) in replay {

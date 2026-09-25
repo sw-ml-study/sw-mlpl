@@ -22,6 +22,7 @@ pub trait EnvTokenizers {
 
 impl EnvTokenizers for Environment {
     fn set_tokenizer(&mut self, name: String, tok: TokenizerSpec) {
+        self.note_write(&name);
         self.tokenizers.insert(name, tok);
     }
 

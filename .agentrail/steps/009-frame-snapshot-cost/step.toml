@@ -1,6 +1,6 @@
 number = 9
 slug = "frame-snapshot-cost"
-status = "pending"
+status = "in-progress"
 description = "microgpt-mlpl issue (e), the blocking half: calling ANY u: function costs tim..."
 role = "production"
 context_files = []

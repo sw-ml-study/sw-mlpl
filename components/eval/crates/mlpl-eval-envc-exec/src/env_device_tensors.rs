@@ -8,6 +8,7 @@ use mlpl_eval_types::Value;
 
 impl EnvDeviceTensors for Environment {
     fn set_device_tensor(&mut self, name: String, value: Value) {
+        self.note_write(&name);
         self.device_tensors.insert(name, value);
     }
 
@@ -16,6 +17,7 @@ impl EnvDeviceTensors for Environment {
     }
 
     fn remove_device_tensor(&mut self, name: &str) {
+        self.note_write(name);
         self.device_tensors.remove(name);
     }
 }

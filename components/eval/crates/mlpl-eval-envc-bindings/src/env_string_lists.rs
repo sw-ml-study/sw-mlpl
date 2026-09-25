@@ -15,6 +15,7 @@ pub trait EnvStringLists {
 
 impl EnvStringLists for Environment {
     fn set_string_list(&mut self, name: String, items: Vec<String>) {
+        self.note_write(&name);
         self.string_lists.insert(name, items);
     }
 

@@ -94,6 +94,8 @@ pub struct Environment {
     pub global_writes: Vec<(String, Value)>,
     /// Current user-fn call depth (frame replay bookkeeping).
     pub call_depth: usize,
+    /// Undo-log frames of active `u:` calls, innermost last (`trait_impls_data`).
+    pub frame_journal: Vec<crate::trait_impls_data::FrameJournal>,
     /// Sandbox root for the filesystem builtins (`fs_walk` /
     /// `read_text` / `write_text` / `remove_path`). None on
     /// surfaces without filesystem access.

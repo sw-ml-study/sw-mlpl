@@ -21,6 +21,7 @@ pub trait EnvParams {
 
 impl EnvParams for Environment {
     fn set_param(&mut self, name: String, value: DenseArray) {
+        self.note_write(&name);
         self.params.insert(name.clone());
         self.vars.insert(name, value);
     }

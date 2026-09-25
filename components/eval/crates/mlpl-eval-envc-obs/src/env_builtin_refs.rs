@@ -8,6 +8,7 @@ use mlpl_eval_env::Environment;
 
 impl EnvBuiltinRefs for Environment {
     fn set_builtin_ref(&mut self, name: String, target: String) {
+        self.note_write(&name);
         self.builtin_refs.insert(name, target);
     }
 

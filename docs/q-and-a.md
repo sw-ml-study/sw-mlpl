@@ -5,6 +5,29 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-25 (microgpt-mlpl -- issue e call cost FIXED)
+
+**"Calling ANY `u:` function costs time proportional to all globals"
+-- FIXED** (grad-soundness-records step 009). The call frame used to
+deep-copy every scope table on entry; it now keeps an undo log of the
+names the call writes and restores only those. Your step-6
+measurement, on the release binary (1000 calls of
+`def u:ts() { to_string(6) }`):
+
+| globals in scope | before (ms/call) | after (ms/call) |
+|---|---|---|
+| small | 0.00087 | 0.00070 |
+| `zeros(228145)` | 0.054 | 0.00054 |
+| `zeros(2281450)` | 0.557 | 0.00057 |
+
+The `expunge` calls before hot loops can go. Scoping semantics are
+unchanged (locals and rebound params vanish on return, across every
+value kind, through errors and recursion; `global_set` and optimizer
+writes persist), pinned by `frame_cost_tests`. The other half of
+issue e -- READING a large global copies it (~0.4 ms per read of the
+228k corpus) -- is the `cow-values` saga; keep `u:doc_batch`'s
+pre-encoding until then.
+
 ## 2026-09-23 (microgpt-mlpl -- layer weights API shipped)
 
 **`params(model)`, `get_param` / `set_param`, `rms_norm(d, {eps})`,

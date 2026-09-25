@@ -19,6 +19,7 @@ pub trait EnvRecords {
 
 impl EnvRecords for Environment {
     fn set_record(&mut self, name: String, fields: BTreeMap<String, Value>) {
+        self.note_write(&name);
         self.records.insert(name, fields);
     }
 

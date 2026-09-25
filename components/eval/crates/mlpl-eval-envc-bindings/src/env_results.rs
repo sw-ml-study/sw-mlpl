@@ -17,6 +17,7 @@ pub trait EnvResults {
 
 impl EnvResults for Environment {
     fn set_result(&mut self, name: String, ok: bool, payload: Value) {
+        self.note_write(&name);
         self.results.insert(name, (ok, payload));
     }
     fn get_result(&self, name: &str) -> Option<&(bool, Value)> {

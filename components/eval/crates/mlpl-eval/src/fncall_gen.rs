@@ -110,6 +110,7 @@ fn eval_gen_append(
     let name = state_ident("gen_append", state_arg)?;
     // Take the state out of the table so the forward pass can
     // read the environment's weights immutably; reinsert after.
+    env.note_write(&name);
     let mut gs = env
         .gen_states
         .remove(&name)

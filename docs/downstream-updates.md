@@ -36,6 +36,7 @@ All items below are on `main`; the adjacent checkout's
 | `shape` / `rank` / `len` of a function's own argument inside `grad` (a6139122) | passing sizes in as extra arguments | re-probe moe-microscope F23 (reshape dims from `shape()`) |
 | grad never silently constant-folds a `u:` call whose body reads a param; unsupported forms are named in the error (ab858695) | nothing to delete -- but see section 2 | demo-decision-model (Q5), moe-microscope (F17, F25 symptoms) |
 | layer weights API: `params(model)`, `get_param` / `set_param` by role, `rms_norm(d, {eps})` on `[rows, d]` or `[B, T, d]`, bias-free `linear(in, out, seed, {bias: 0})` (8d13e571) | hand-written `u:linear` / `u:rmsnorm` kept only to match an equation or a parameter count; weight loading through generated parameter names | microgpt-mlpl (requests #10), reasoning-from-scratch (`u:qwen_rms_norm`, bias-free Qwen projections) |
+| a `u:` call costs O(names it writes), not a copy of every global: 0.557 -> 0.0006 ms per call with a 2.28M-element global in scope, now independent of global size (grad-soundness-records step 009) | `expunge` of big globals before hot loops; restructuring to avoid `u:` calls in inner loops (the per-READ copy of a large global is the separate cow-values saga) | microgpt-mlpl (e, call-cost half) |
 
 ## 2. Behavior changes to re-check
 
@@ -65,7 +66,6 @@ Current saga (grad-soundness-records), in order:
 
 | Step | Retires |
 |---|---|
-| frame-snapshot-cost -- a `u:` call costs O(names written), not O(all globals) | `expunge` of big globals before hot loops (microgpt-mlpl e, first half) |
 | gather-node -- native `GatherRows` backward, O(n x D) | dense one-hot gathers that are O(n x V x D) at large vocabularies |
 | record-fields -- record field reads inside `grad` as constant leaves | binding record fields to variables before a traced loss (moe-microscope F17, demo-decision-model Q5) |
 

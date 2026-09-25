@@ -26,6 +26,7 @@ impl EnvVars for Environment {
     }
 
     fn set(&mut self, name: String, value: DenseArray) {
+        self.note_write(&name);
         self.vars.insert(name, value);
     }
 

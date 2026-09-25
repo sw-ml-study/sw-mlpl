@@ -50,6 +50,7 @@ fn eval_gen_reset(
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
     let name = one_ident("gen_reset", args, env, trace)?;
+    env.note_write(&name);
     let mut gs = env
         .gen_states
         .remove(&name)
