@@ -1,0 +1,1 @@
+readable-scripts step 3: and / or / not keywords (lexer, parser precedence below comparisons: not > and > or), short-circuit on scalars in if/while conditions, elementwise 0/1 on arrays (nonzero = true), stop-gradient masks inside grad. TDD: short-circuit (right side not evaluated), precedence table, mask forms, grad.

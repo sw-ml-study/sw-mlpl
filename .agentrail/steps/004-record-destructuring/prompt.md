@@ -1,0 +1,1 @@
+readable-scripts step 4: {a, b} = expr, {a, b: x} = expr (rename), {a, b} = expr? as statements. Missing field -> error naming it + available fields; extras ignored; works in u: bodies (frame-scoped) and with ?. TDD.

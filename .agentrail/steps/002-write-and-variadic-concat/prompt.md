@@ -1,0 +1,1 @@
+readable-scripts step 2: write(s) -> stdout, no newline, returns 0 (script + connect mode); str_concat accepts 2+ args. TDD.
