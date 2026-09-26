@@ -1,0 +1,1 @@
+Relay-close: findings ledger (15 resolved items + open list), saga.md narrative, future-sagas-queue shipped entry + stale axis-naming paused entry fixed + remaining pre-existing grad-of-eager-loss tests queued, select_rows lang-reference row (fixes help_completeness_tests), q-and-a follow-up, wiki errata (6 rows). Binaries current.

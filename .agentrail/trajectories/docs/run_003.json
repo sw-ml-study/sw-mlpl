@@ -1,0 +1,11 @@
+{
+  "task_type": "docs",
+  "state": {
+    "number": 12,
+    "step": "relay-close"
+  },
+  "action": "docs sweep, help_completeness fix, wiki errata",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-26T12:29:30"
+}
