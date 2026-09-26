@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-26
+
+- feat(grad): record field reads and record arguments inside grad (demo-decision-model Q5)
+
 ## 2026-09-25
 
+- chore(agentrail): complete 010-gather-node
+- docs(changes): refresh CHANGES.md to HEAD
 - perf(autograd): native GatherRows tape node -- O(n x d) gather_rows / embed gradients
 - chore(agentrail): complete 009-frame-snapshot-cost
 - docs(changes): refresh CHANGES.md to HEAD
