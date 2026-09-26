@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-26
 
+- docs: grad-soundness-records relay-close -- findings ledger, saga narrative, queue, select_rows row
+- chore(agentrail): complete 011-record-fields
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(grad): record field reads and record arguments inside grad (demo-decision-model Q5)
 
 ## 2026-09-25
