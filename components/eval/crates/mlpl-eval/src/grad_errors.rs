@@ -12,19 +12,13 @@ use mlpl_eval_types::EvalError;
 /// The error for an expression form `eval_tensor_expr` cannot put on the tape.
 pub(crate) fn unsupported_form(expr: &Expr) -> EvalError {
     let form = match expr {
-        Expr::FieldAccess {
-            receiver, field, ..
-        } => match &**receiver {
-            Expr::Ident(r, _) => format!("record field access `{r}.{field}`"),
-            _ => format!("record field access `.{field}`"),
-        },
-        Expr::RecordLit { .. } => "a record literal".into(),
-        Expr::StrLit(..) => "a string literal".into(),
-        Expr::If { .. } => "an `if` expression".into(),
-        Expr::While { .. } => "a `while` loop".into(),
-        Expr::For { .. } => "a `for` loop".into(),
-        Expr::Assign { .. } => "an assignment".into(),
-        _ => "this expression form".into(),
+        Expr::RecordLit { .. } => "a record literal",
+        Expr::StrLit(..) => "a string literal",
+        Expr::If { .. } => "an `if` expression",
+        Expr::While { .. } => "a `while` loop",
+        Expr::For { .. } => "a `for` loop",
+        Expr::Assign { .. } => "an assignment",
+        _ => "this expression form",
     };
     EvalError::Unsupported(format!("grad: {form} is not supported inside grad()"))
 }

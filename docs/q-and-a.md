@@ -5,6 +5,29 @@ Newest first. (Started 2026-08-05 after several in-session
 answers failed to surface; if an answer here is stale, the git
 log of this file shows when it was written.)
 
+## 2026-09-26 (demo-decision-model -- Q5 record fields inside grad)
+
+**Q5 "a record field read inside grad is rejected" -- FIXED**
+(grad-soundness-records step 011). Records are data inside `grad`:
+`batch.ids` / `batch.wmask` read as constants and the gradient flows
+through the surrounding ops, and a record can be passed to a `u:`
+function called inside the loss. Your probe written with a record:
+
+```
+batch = {ids: q5_ids, wmask: q5_wm}
+def u:q5_pool_rec(b) { "pool" reduce_add(reduce_add(gather_rows(q5_E, b.ids) * b.wmask, 1)) }
+grad(u:q5_pool_rec(batch), q5_E)   // == grad(u:q5_pool(q5_ids, q5_wm), q5_E), exactly
+```
+
+(pinned by `grad_record_fields_tests`, including nesting and a record
+parameter that shadows a global of the same name). The 12-argument
+workaround in your differentiated `lib/` entry points can go: take
+one featurized-batch record. A record OF weights is still not
+trainable -- pass the params (or a model). Earlier in this saga the
+misleading "the loss does not depend on <param>" symptom was also
+fixed: an unsupported form inside a user function now names the
+form, never the param.
+
 ## 2026-09-25 (demo-decision-model -- full-batch gather_rows gradient)
 
 **`gather_rows` was ~30 s per step at `n = 7595*24` -- FIXED**

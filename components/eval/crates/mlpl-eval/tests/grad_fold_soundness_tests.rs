@@ -62,21 +62,28 @@ fn param_free_u_call_with_untraceable_body_still_folds() {
 }
 
 #[test]
-fn record_field_access_error_names_the_form() {
+fn record_field_access_is_a_constant_leaf() {
+    // Records are data: the field read is a constant, E gets the gradient.
     let mut env = setup("E = param[3]\nE = [1.0, 2.0, 3.0]\nr = {w: [1.0, 1.0, 1.0]}");
-    let msg = err_text(run(&mut env, "grad(reduce_add(E * r.w), E)"));
-    assert!(msg.contains("record field access `r.w`"), "{msg}");
+    let g = run(&mut env, "grad(reduce_add(E * r.w), E)").expect("field read");
+    assert_eq!(g, vec![1.0, 1.0, 1.0]);
 }
 
 #[test]
-fn record_argument_to_u_call_names_the_record_not_the_param() {
+fn record_argument_to_u_call_binds_for_field_reads() {
     let mut env = setup(
         "E = param[3]\nE = [1.0, 2.0, 3.0]\nr = {w: [1.0, 1.0, 1.0]}\n\
          def u:g(r) { reduce_add(E * r.w) }",
     );
-    let msg = err_text(run(&mut env, "grad(u:g(r), E)"));
-    assert!(!msg.contains("does not depend"), "not blamed on E: {msg}");
-    assert!(msg.contains("record"), "names the record: {msg}");
+    let g = run(&mut env, "grad(u:g(r), E)").expect("record argument");
+    assert_eq!(g, vec![1.0, 1.0, 1.0]);
+}
+
+#[test]
+fn an_unsupported_form_is_still_named() {
+    let mut env = setup("E = param[3]\nE = [1.0, 2.0, 3.0]");
+    let msg = err_text(run(&mut env, "grad(if 1 { reduce_add(E) } else { 0 }, E)"));
+    assert!(msg.contains("an `if` expression"), "{msg}");
 }
 
 #[test]

@@ -41,11 +41,32 @@ pub(crate) fn call_user_fn_grad(
     }
     // The body's scope: the outer grad params (so a global param the body
     // references stays differentiable) with the function's parameters bound to
-    // the traced arguments layered on top (shadowing).
+    // the traced arguments layered on top (shadowing). Record arguments bind
+    // as records (a frame, closed below on every path) for field reads.
     let mut local = params.clone();
+    let records = crate::grad_records::bind_record_args(&f.params, args, env, &mut local)?;
+    let out = bind_and_trace(&f, args, &records, env, tape, params, local);
+    if !records.is_empty() {
+        env.frame_exit();
+    }
+    out
+}
+
+/// Bind the non-record parameters to their traced arguments, then trace
+/// the body one call level deeper.
+fn bind_and_trace(
+    f: &mlpl_eval_state::UserFn,
+    args: &[Expr],
+    records: &[String],
+    env: &mut Environment,
+    tape: &Rc<Tape>,
+    params: &HashMap<String, Tensor>,
+    mut local: HashMap<String, Tensor>,
+) -> Result<Tensor, EvalError> {
     for (p, arg) in f.params.iter().zip(args) {
-        let t = eval_tensor_expr(arg, env, tape, params)?;
-        local.insert(p.clone(), t);
+        if !records.contains(p) {
+            local.insert(p.clone(), eval_tensor_expr(arg, env, tape, params)?);
+        }
     }
     env.call_depth += 1;
     let out = trace_body(&f.body, env, tape, &mut local);

@@ -38,6 +38,7 @@ All items below are on `main`; the adjacent checkout's
 | layer weights API: `params(model)`, `get_param` / `set_param` by role, `rms_norm(d, {eps})` on `[rows, d]` or `[B, T, d]`, bias-free `linear(in, out, seed, {bias: 0})` (8d13e571) | hand-written `u:linear` / `u:rmsnorm` kept only to match an equation or a parameter count; weight loading through generated parameter names | microgpt-mlpl (requests #10), reasoning-from-scratch (`u:qwen_rms_norm`, bias-free Qwen projections) |
 | a `u:` call costs O(names it writes), not a copy of every global: 0.557 -> 0.0006 ms per call with a 2.28M-element global in scope, now independent of global size (grad-soundness-records step 009) | `expunge` of big globals before hot loops; restructuring to avoid `u:` calls in inner loops (the per-READ copy of a large global is the separate cow-values saga) | microgpt-mlpl (e, call-cost half) |
 | `gather_rows` and `embed` differentiate through a native row gather: O(n x d) forward and backward, independent of the table's row count (20,000 ids into a 50,000-row table: ~10 ms; the old one-hot form needed an 8 GB `[n, V]` matrix) (grad-soundness-records step 010) | mini-batching or vocabulary truncation adopted only because full-batch gathers took ~30 s per step | demo-decision-model (full-batch scorer training), microgpt-mlpl, reasoning-from-scratch embeddings |
+| record field reads inside `grad` are constant leaves, and a record may be passed to a `u:` function called inside the loss (grad-soundness-records step 011) | differentiated entry points that take every field as a separate array argument; binding fields to variables before a traced loss | demo-decision-model (Q5: the 12-argument `lib/` entry points can take one `{ids, wmask, ...}` record), moe-microscope (F17) |
 
 ## 2. Behavior changes to re-check
 
@@ -63,13 +64,8 @@ changes result:
 
 ## 3. In flight and planned: workarounds these will retire
 
-Current saga (grad-soundness-records), in order:
-
-| Step | Retires |
-|---|---|
-| record-fields -- record field reads inside `grad` as constant leaves | binding record fields to variables before a traced loss (moe-microscope F17, demo-decision-model Q5) |
-
-Then the Python-ML-developer ergonomics program
+The grad-soundness-records saga's items are all in section 1. Next is
+the Python-ML-developer ergonomics program
 (docs/future-sagas-queue.md), each with the pattern it deletes and
 the heaviest users (line counts over downstream `.mlpl`):
 

@@ -701,9 +701,17 @@ a parameter when its arguments OR its body read one, so a helper
 that reads a global param is never folded away: if its body uses
 an unsupported builtin, `grad` reports that builtin rather than
 returning a gradient with the helper's term missing. Unsupported
-forms are named in the error (e.g. "record field access `r.ids`
-is not supported inside grad()"); records are data, not
-differentiable values, so pass their fields as plain arrays.
+forms are named in the error (e.g. "an `if` expression is not
+supported inside grad()").
+
+Records are data inside `grad`: a field read such as `batch.ids`
+or `batch.wmask` is a constant (a parameter is identified by its
+name, never by a record field), and a record may be passed to a
+user function called inside the loss --
+`grad(u:pool(batch), E)` with `def u:pool(b) { ... b.ids ... }`
+differentiates exactly like passing the fields as arrays. A record
+OF weights is therefore not trainable; pass the parameters
+themselves (or a model).
 
 ### Optimizers and Schedules
 

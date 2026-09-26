@@ -59,8 +59,10 @@ pub(crate) fn eval_tensor_expr(
             let dims = eval_shape_dims(shape, env, tape, params)?;
             Ok(leaf(DenseArray::zeros(Shape::new(dims))))
         }
-        // Scoped forms, records, and string literals never have a tensor
-        // analogue inside `grad(expr, wrt)` -- the differentiable
+        // A record field is data: a constant leaf (params are named, never fields).
+        Expr::FieldAccess { .. } => crate::grad_records::field_leaf(expr, env, tape, params),
+        // Scoped forms, record literals, and string literals never have a
+        // tensor analogue inside `grad(expr, wrt)` -- the differentiable
         // surface is array-valued ops only.
         _ => Err(crate::grad_errors::unsupported_form(expr)),
     }

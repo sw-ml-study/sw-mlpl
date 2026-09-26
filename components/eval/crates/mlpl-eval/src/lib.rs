@@ -145,6 +145,7 @@ mod grad_optim_resident_momentum;
 mod grad_optim_state;
 mod grad_params;
 mod grad_purity;
+mod grad_records;
 mod grad_scalars;
 mod grad_user;
 mod hof_compose;
