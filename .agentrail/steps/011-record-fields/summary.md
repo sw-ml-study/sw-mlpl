@@ -1,0 +1,1 @@
+Record field reads inside grad are constant leaves (field_leaf); record-valued u: args bind as records in an undo-log frame (two-phase: evaluate then bind; closed on every path). Q5 probe with {ids,wmask} record == plain-array grad exactly. 3 tests + updated interim pins. Suites green, 33/569 held.
