@@ -1127,3 +1127,40 @@ surfaces (trichotomy hints everywhere, --help on every command,
 multi-name :describe, expression guards, and registry-pinned
 usage docs). Next per the queue: generation-state-kv-cache --
 the MTP program begins.
+
+## Saga: grad-soundness-records -- trust the gradient, then remove the workarounds (COMPLETE, 2026-09-26)
+
+Opened on one downstream finding (demo-decision-model Q5: a record
+field read inside grad failed, and inside a user function the error
+blamed the parameter) and closed twelve steps later having absorbed
+four repos' worth of asks. The first step found the real bug under
+the symptom: grad's constant-fold fallback checked only a call's
+ARGUMENTS, so a `u:` function whose body read a global parameter was
+folded to a constant and `grad(u:f(b) + reduce_add(W), W)` silently
+returned all ones -- a wrong gradient, not an error. The analysis now
+walks function bodies, and optimizer steps refuse to zero-fill a
+listed parameter that received no gradient. From there the saga
+widened the set of values that are safe to treat as constants inside
+a traced loss -- shapes of function parameters, `cross_entropy`
+targets and other non-differentiable arguments bound to function
+parameters, comparison masks, and finally record fields and
+record-valued arguments -- each resolved through the traced scope
+rather than the global environment.
+
+The middle of the saga answered microgpt-mlpl, a Python port that
+surfaced real defects (string statements broke loop bodies; the
+documented `params(model)` did not exist) and design asks. It shipped
+the layer weights API (`get_param` / `set_param` by role, `rms_norm`
+epsilon, bias-free `linear`) so hand-written layers become optional,
+and it replaced the per-call deep copy of every global with undo-log
+frames: a `u:` call now costs O(names it writes), 0.557 -> 0.0006 ms
+with a 2.28M-element global in scope. A native `GatherRows` tape node
+made embedding gradients O(n x d) instead of materialising an
+`[n, vocab]` one-hot. Alongside: bulk `unpack` for model weights
+(reasoning-from-scratch R11), `is_result` and a clearer `get_error`
+boundary (demo-extensions), syntax-colored literate HTML, a repaired
+serve build, and `docs/downstream-updates.md` -- the per-repo map from
+each shipped change to the workaround it retires, plus the house
+style for idiomatic MLPL. The triage of microgpt-mlpl's thirteen
+design requests became the next program: six sagas of
+Python-developer ergonomics, starting with readable-scripts.

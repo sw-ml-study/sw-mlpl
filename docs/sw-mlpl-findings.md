@@ -459,3 +459,37 @@ consumer appears:
 
 RS10/RS11/RS12 are extensions (../demo-extensions); MLX-not-compiled is a
 distribution call.
+
+## grad-soundness-records (2026-09-22 .. 2026-09-26) -- RESOLVED
+
+Findings from ../demo-decision-model (Q5), ../../softwarewrighter/microgpt-mlpl
+(issues a-j, sw-mlpl-requests.md), ../reasoning-from-scratch (R11) and
+../demo-extensions (R1, R2), plus bugs found while fixing them. Downstream
+view (what to adopt / delete): `docs/downstream-updates.md`.
+
+| Finding | Resolution | Commit |
+|---|---|---|
+| grad constant-folded a `u:` call whose BODY read a param -- silently wrong gradient (`u:f(b) + reduce_add(W)` -> all 1s) | param-use analysis walks `u:` bodies; unsupported forms named in the error | `ab858695` |
+| optimizer steps zero-filled a listed param that got no gradient | `adam` / `momentum_sgd` error on a listed, non-frozen param with no gradient | `ab858695` |
+| `shape` / `rank` / `len` of a function parameter inside grad | constant leaves over the traced scope | `a6139122` |
+| `u:ce(x, y)`: cross_entropy targets (and rotate shift, pow exponent, transpose_axes perm) read from the global env | one traced-scope helper, `eval_const_arg` | `67c2ca86` |
+| comparison operators rejected inside grad while `lt()` worked | stop-gradient 0/1 masks, like the builtins | `67c2ca86` |
+| lang-reference said multi-head attention was tape-lowered for `heads=1` only | stale; multi-head trains (regression test) | `67c2ca86` |
+| no bulk `unpack(bytes, dtype)` (R11, blocking) | one native pass, every `reinterpret` dtype | `b3180d9a` |
+| extension success returns a bare value (R1) | total `is_result(x)` | `b3180d9a` |
+| `get_error` on a string payload cited a roadmap stage (R2) | error names `err_message(r)`; boundary documented | `b3180d9a` |
+| string-valued statements broke `repeat` / `train` / `for` bodies (j) | only the consumed value must be an array | `e6ee2203` |
+| `params(model)` documented but missing | shipped with `get_param` / `set_param` by role, `rms_norm(d, {eps})` (any rank >= 2), bias-free `linear` | `8d13e571` |
+| mlpl-mlx-serve did not compile (non-exhaustive Value match) | catch-all naming the kind | `01818632` |
+| every `u:` call deep-copied all globals (e, call half) | undo-log frames: O(names written); 0.557 -> 0.0006 ms/call with a 2.28M global | `55c65f2f` |
+| `gather_rows` / `embed` gradients built an `[n, V]` one-hot (~30 s/step) | native `GatherRows` node, O(n x d) | `02ecbb0b` |
+| record field reads / record arguments rejected inside grad (Q5) | constant leaves; record args bind for field reads | `7a115af7` |
+
+Still open from these repos (triage queue in `docs/downstream-updates.md`
+section 5): reasoning-from-scratch R3 (batched rank-3 matmul) and R10
+(element-access cost); the per-READ copy of large globals (cow-values
+saga); microgpt-mlpl g / i / k. Three mlpl-eval tests that fail on the
+unmodified tree (`auto_tag_tests::grad_tags_result_as_gradient_with_wrt_name`,
+`typed_values_lesson_smoke::lesson_step_4_grad_produces_gradient_with_wrt`,
+`help_completeness_tests::every_builtin_groups_name_is_in_lang_reference`)
+are queued as a maintenance item.

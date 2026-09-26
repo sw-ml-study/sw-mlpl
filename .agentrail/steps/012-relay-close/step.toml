@@ -1,6 +1,6 @@
 number = 12
 slug = "relay-close"
-status = "pending"
+status = "in-progress"
 description = "Relay-close grad-soundness-records (plan.md step 5): lang-reference grad sect..."
 role = "production"
 context_files = []

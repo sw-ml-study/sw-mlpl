@@ -22,8 +22,10 @@ grad(u:q5_pool_rec(batch), q5_E)   // == grad(u:q5_pool(q5_ids, q5_wm), q5_E), e
 (pinned by `grad_record_fields_tests`, including nesting and a record
 parameter that shadows a global of the same name). The 12-argument
 workaround in your differentiated `lib/` entry points can go: take
-one featurized-batch record. A record OF weights is still not
-trainable -- pass the params (or a model). Earlier in this saga the
+one featurized-batch record. `shape` / `rank` / `len` of a function
+parameter also work inside grad now (sizes need not be passed in),
+and `gather_rows` gradients are sparse (entry below). A record OF
+weights is still not trainable -- pass the params (or a model). Earlier in this saga the
 misleading "the loss does not depend on <param>" symptom was also
 fixed: an unsupported form inside a user function now names the
 form, never the param.

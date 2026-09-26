@@ -28,6 +28,19 @@ data-forge (Track 1).
 
 ## Recently shipped
 
+- **grad-soundness-records** -- SHIPPED 2026-09-26 (12 steps; started as
+  demo-decision-model Q5, absorbed microgpt-mlpl a-j + requests #10,
+  reasoning-from-scratch R11, demo-extensions R1/R2). grad no longer folds
+  a param-reading `u:` call (a silently wrong gradient); optimizer steps
+  error on a listed param with no gradient; function parameters work as
+  grad-time constants (`cross_entropy` targets, shapes, exponents);
+  comparison masks, record field reads and record arguments inside grad;
+  bulk `unpack`, `is_result`; string statements in loop bodies; layer
+  weights API (`params`, `get_param` / `set_param`, `rms_norm` eps,
+  bias-free `linear`); undo-log `u:` frames (call cost O(names written));
+  native `GatherRows` (O(n x d)); literate HTML syntax coloring;
+  docs/downstream-updates.md. Findings ledger: `docs/sw-mlpl-findings.md`.
+
 - **storage-layout-viz** -- SHIPPED 2026-09-11 (sw-mlpl's part). See
   `docs/storage-layout-viz.md`. sw-mlpl's array-programming middle of the
   multi-repo storage/memory 3D demo is complete: the COLUMNAR contract
@@ -155,18 +168,8 @@ data-forge (Track 1).
 
 ### Paused sagas
 
-- **axis-naming-unification** -- PAUSED 2026-09-11 at 4/7 steps (plan:
-  `docs/unifying-plan.md`). Steps 1-4 shipped and the core goal is DONE:
-  `label`, `reduce`, `reshape_labeled` now accept a bracketed name list, a
-  comma-string, or a computed value interchangeably via the shared
-  `mlpl_axes::AxisSpec`/`axis_names_of` -- the `label`-vs-`reduce`
-  inconsistency the CNN blog post surfaced is resolved in the interpreter.
-  Remaining (re-queue when resumed): (5) errors-and-docs -- one
-  AxisError-derived message + lang-reference/glossary/wiki; (6)
-  compiler-parity -- named `reduce_add` via static `known_labels` + label
-  lowering accepts a constant-fold StrList; (7) surface-sweep -- route
-  `compress`/`drop`/`reduce_add` through the shared path. The step-1
-  archive is under `.agentrail-archive/` after this pivot.
+- None. (**axis-naming-unification**, paused here on 2026-09-11 at 4/7
+  steps, resumed and SHIPPED 2026-09-12 -- see "Recently shipped".)
 
   Prior saga **compiler-file-processing-builtins** was completed and
   archived on 2026-09-10 (see `.agentrail-archive/`); its final unshipped
@@ -590,6 +593,15 @@ in data-forge come first).
 
 ## Maintenance items
 
+- **stale grad-of-eager-loss tests** (found 2026-09-22; fail on the
+  unmodified tree) -- `auto_tag_tests::grad_tags_result_as_gradient_with_wrt_name`
+  and `typed_values_lesson_smoke::lesson_step_4_grad_produces_gradient_with_wrt`
+  call `grad(loss, W)` on a loss computed BEFORE `grad`, which the D1 fix
+  deliberately turned into an error ("the loss does not depend on 'W'").
+  Rewrite them to trace the loss inside `grad` (and check the typed-values
+  lesson text the second one mirrors). The third pre-existing failure,
+  `help_completeness_tests` (select_rows missing from lang-reference), was
+  fixed in the grad-soundness-records relay-close.
 - **error-spans** (ask from microgpt-mlpl, 2026-09-22) --
   `EvalError` carries no source span, so script mode reports a
   failure by echoing the whole top-level statement: an error deep
