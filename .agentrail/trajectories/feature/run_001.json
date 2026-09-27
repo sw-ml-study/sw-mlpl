@@ -1,0 +1,11 @@
+{
+  "task_type": "feature",
+  "state": {
+    "number": 1,
+    "step": "format-builtin"
+  },
+  "action": "TDD against CPython outputs, pure crate, metric offsets",
+  "result": "success",
+  "reward": 1,
+  "timestamp": "2026-09-26T18:31:30"
+}

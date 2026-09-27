@@ -1,0 +1,1 @@
+format(template, args...) via new pure mlpl-format crate (Python spec subset, CPython-parity tests); builtin in mlpl-eval string_format (to_string moved there); lang-reference row; lockfiles refreshed. Pushed.
