@@ -203,6 +203,7 @@ mod result_reconstruct;
 mod result_str;
 mod stdin_chunk;
 mod string_convert;
+mod string_format;
 mod string_search;
 mod tag_arith;
 mod tag_propagate;

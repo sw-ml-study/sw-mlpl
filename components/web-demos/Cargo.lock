@@ -278,8 +278,21 @@ dependencies = [
  "mlpl-array-ops-matmul",
  "mlpl-array-ops-reduce",
  "mlpl-array-ops-shape",
+ "mlpl-autograd-backward",
  "mlpl-autograd-tape",
  "mlpl-core",
+ "mlpl-tensor-handle",
+]
+
+[[package]]
+name = "mlpl-autograd-backward"
+version = "0.22.0"
+dependencies = [
+ "mlpl-array",
+ "mlpl-array-ops-compose",
+ "mlpl-array-ops-matmul",
+ "mlpl-array-ops-shape",
+ "mlpl-autograd-tape",
  "mlpl-tensor-handle",
 ]
 
@@ -370,6 +383,7 @@ dependencies = [
  "mlpl-extension-loader",
  "mlpl-extension-registry",
  "mlpl-forge-kg",
+ "mlpl-format",
  "mlpl-loader-helpers",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
@@ -559,6 +573,10 @@ dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
 ]
+
+[[package]]
+name = "mlpl-format"
+version = "0.22.0"
 
 [[package]]
 name = "mlpl-lex-ident"

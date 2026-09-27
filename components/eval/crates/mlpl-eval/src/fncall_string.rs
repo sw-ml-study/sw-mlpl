@@ -1,5 +1,6 @@
 //! String-building builtins: `str_concat` (join two strings) and
-//! `str_join` (join a string list with a separator). Exact,
+//! `str_join` (join a string list with a separator); `to_string` and
+//! `format` dispatch here and live in `string_format`. Exact,
 //! byte-for-byte, Unicode-preserving; NO coercion -- a non-string
 //! argument is an error, never a silent `to_string`. `str_join` is
 //! the linear-time fold (`Vec::join`, O(total)), the answer to
@@ -21,38 +22,9 @@ pub(crate) fn try_dispatch(
     match name {
         "str_concat" => Some(eval_str_concat(args, env, trace)),
         "str_join" => Some(eval_str_join(args, env, trace)),
-        "to_string" => Some(eval_to_string(args, env, trace)),
+        "to_string" => Some(crate::string_format::eval_to_string(args, env, trace)),
+        "format" => Some(crate::string_format::eval_format(args, env, trace)),
         _ => None,
-    }
-}
-
-/// `to_string(x)` -> the shortest round-trip decimal of a scalar
-/// number, the honest inverse of `to_number`: integral values print
-/// bare (`to_string(8 / 2)` is `"4"`, not `"4.0"`) using the same
-/// formatting `to_json` gives a scalar, so `to_number(to_string(x))`
-/// recovers `x` for every finite `f64`. A non-scalar / non-number is
-/// an error (no format spec; rounding belongs in a library).
-fn eval_to_string(
-    args: &[Expr],
-    env: &mut Environment,
-    trace: &mut Option<&mut Trace>,
-) -> Result<Value, EvalError> {
-    let [x] = args else {
-        return Err(EvalError::BadArity {
-            func: "to_string".into(),
-            expected: 1,
-            got: args.len(),
-        });
-    };
-    match crate::eval::eval_expr(x, env, trace)? {
-        Value::Array(a) if a.rank() == 0 => {
-            let mut s = String::new();
-            crate::json_encode::push_number(&mut s, a.data()[0]);
-            Ok(Value::Str(s))
-        }
-        _ => Err(EvalError::Unsupported(
-            "to_string: expected a scalar number".into(),
-        )),
     }
 }
 

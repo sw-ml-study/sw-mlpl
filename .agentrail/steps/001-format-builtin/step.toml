@@ -1,6 +1,6 @@
 number = 1
 slug = "format-builtin"
-status = "pending"
+status = "in-progress"
 description = "readable-scripts step 1 (see plan.md): format(template, args...) -> string, P..."
 role = "production"
 context_files = []

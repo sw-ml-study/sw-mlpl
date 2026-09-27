@@ -436,6 +436,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "mlpl-format"
+version = "0.22.0"
+
+[[package]]
 name = "mlpl-lex-ident"
 version = "0.22.0"
 dependencies = [

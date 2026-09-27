@@ -4,6 +4,7 @@
 [workspace]
 members = [
     "crates/mlpl-bytes",
+    "crates/mlpl-format",
     "crates/mlpl-eval-types",
     "crates/mlpl-value-structural",
 ]

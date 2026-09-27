@@ -1,0 +1,11 @@
+[package]
+name = "mlpl-format"
+description = "Python-style format-spec string formatting for MLPL's format() builtin"
+edition.workspace = true
+license.workspace = true
+version.workspace = true
+
+[dependencies]
+
+[lints]
+workspace = true

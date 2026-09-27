@@ -1563,6 +1563,7 @@ dependencies = [
  "mlpl-extension-loader",
  "mlpl-extension-registry",
  "mlpl-forge-kg",
+ "mlpl-format",
  "mlpl-loader-helpers",
  "mlpl-models-feasibility",
  "mlpl-models-freeze",
@@ -1760,6 +1761,10 @@ dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
 ]
+
+[[package]]
+name = "mlpl-format"
+version = "0.22.0"
 
 [[package]]
 name = "mlpl-glossary-data"

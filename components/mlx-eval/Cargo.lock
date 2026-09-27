@@ -605,6 +605,7 @@ dependencies = [
  "mlpl-extension-loader",
  "mlpl-extension-registry",
  "mlpl-forge-kg",
+ "mlpl-format",
  "mlpl-loader-helpers",
  "mlpl-mlx-handle",
  "mlpl-mlx-rt",
@@ -796,6 +797,10 @@ dependencies = [
  "mlpl-array",
  "mlpl-runtime-core",
 ]
+
+[[package]]
+name = "mlpl-format"
+version = "0.22.0"
 
 [[package]]
 name = "mlpl-lex-ident"
