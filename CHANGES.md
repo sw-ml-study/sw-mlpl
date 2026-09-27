@@ -14,6 +14,10 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-09-26
 
+- feat(strings): format(template, args...) with Python format specs
+- chore(agentrail): archive grad-soundness-records; init readable-scripts (6 steps)
+- chore(agentrail): complete 012-relay-close; grad-soundness-records DONE
+- docs(changes): refresh CHANGES.md to HEAD
 - docs: grad-soundness-records relay-close -- findings ledger, saga narrative, queue, select_rows row
 - chore(agentrail): complete 011-record-fields
 - docs(changes): refresh CHANGES.md to HEAD
