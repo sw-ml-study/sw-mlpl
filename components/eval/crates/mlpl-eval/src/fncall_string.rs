@@ -40,23 +40,31 @@ fn two_args<'a>(name: &str, args: &'a [Expr]) -> Result<(&'a Expr, &'a Expr), Ev
     }
 }
 
-/// `str_concat(a, b)` -> the two strings joined. Both must be
-/// strings (no coercion).
+/// `str_concat(a, b, ...)` -> two or more strings joined in order. Every
+/// argument must be a string (no coercion; `format` converts numbers).
 fn eval_str_concat(
     args: &[Expr],
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
-    let (a, b) = two_args("str_concat", args)?;
-    match (
-        crate::eval::eval_expr(a, env, trace)?,
-        crate::eval::eval_expr(b, env, trace)?,
-    ) {
-        (Value::Str(x), Value::Str(y)) => Ok(Value::Str(format!("{x}{y}"))),
-        _ => Err(EvalError::Unsupported(
-            "str_concat: both arguments must be strings (no coercion)".into(),
-        )),
+    if args.len() < 2 {
+        return Err(EvalError::BadArity {
+            func: "str_concat".into(),
+            expected: 2,
+            got: args.len(),
+        });
     }
+    let parts =
+        args.iter()
+            .enumerate()
+            .map(|(i, a)| match crate::eval::eval_expr(a, env, trace)? {
+                Value::Str(s) => Ok(s),
+                other => Err(EvalError::Unsupported(format!(
+                    "str_concat: argument {i} must be a string, got {} (no coercion; use format)",
+                    mlpl_eval_types::value_kind(&other)
+                ))),
+            });
+    Ok(Value::Str(parts.collect::<Result<String, _>>()?))
 }
 
 /// `str_join(parts, separator)` -> the string list joined. `parts` is

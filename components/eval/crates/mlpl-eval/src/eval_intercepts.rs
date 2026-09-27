@@ -45,7 +45,7 @@ pub(crate) fn try_intercept(
         | "check" => Some(crate::result_ops::eval_result_accessor(
             name, args, env, trace,
         )),
-        "print" | "eprint" => Some(eval_print(name, args, env, trace)),
+        "print" | "eprint" | "write" => Some(eval_print(name, args, env, trace)),
         "to_number" | "to_int" | "env" => Some(crate::string_convert::eval_string_to_result(
             name, args, env, trace,
         )),
@@ -97,16 +97,17 @@ fn eval_print(
             "{name}: expects at least one argument"
         )));
     }
-    let mut vals = Vec::with_capacity(args.len());
-    for arg in args {
-        vals.push(eval_expr(arg, env, trace)?);
+    let mut vals = args
+        .iter()
+        .map(|a| eval_expr(a, env, trace))
+        .collect::<Result<Vec<_>, _>>()?;
+    let rendered: Vec<String> = vals.iter().map(ToString::to_string).collect();
+    if name == "write" {
+        return Ok(crate::string_format::emit_write(&rendered));
     }
-    let rendered: Vec<String> = vals.iter().map(|v| v.to_string()).collect();
-    let line = rendered.join(" ");
-    if name == "print" {
-        println!("{line}");
-    } else {
-        eprintln!("{line}");
+    match name {
+        "print" => println!("{}", rendered.join(" ")),
+        _ => eprintln!("{}", rendered.join(" ")),
     }
     Ok(vals.pop().unwrap())
 }

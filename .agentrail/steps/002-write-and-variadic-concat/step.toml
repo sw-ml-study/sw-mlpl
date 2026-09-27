@@ -1,6 +1,6 @@
 number = 2
 slug = "write-and-variadic-concat"
-status = "pending"
+status = "in-progress"
 description = "readable-scripts step 2: write(s) -> stdout, no newline, returns 0 (script + ..."
 role = "production"
 context_files = []

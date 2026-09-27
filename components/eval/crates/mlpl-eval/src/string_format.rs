@@ -70,6 +70,16 @@ pub(crate) fn eval_to_string(
     }
 }
 
+/// `write(...)`: `print` without the newline -- the rendered pieces
+/// concatenated, written to stdout and flushed (so `\r` lines update in
+/// place). The text written is the call's value.
+pub(crate) fn emit_write(rendered: &[String]) -> Value {
+    let text = rendered.concat();
+    print!("{text}");
+    std::io::Write::flush(&mut std::io::stdout()).ok();
+    Value::Str(text)
+}
+
 /// A scalar is a number; a string is itself; anything else is its display.
 fn format_arg(v: Value) -> FmtArg {
     match v {
