@@ -1,0 +1,1 @@
+write(...) (print without newline, flushed, returns text) + variadic str_concat (positional non-string errors). lang-reference rows. 2 TDD tests; suites green; 33/569 held.
