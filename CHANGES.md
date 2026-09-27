@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-27
+
+- feat(strings): write(...) and variadic str_concat
+
 ## 2026-09-26
 
+- chore(agentrail): complete 001-format-builtin
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(strings): format(template, args...) with Python format specs
 - chore(agentrail): archive grad-soundness-records; init readable-scripts (6 steps)
 - chore(agentrail): complete 012-relay-close; grad-soundness-records DONE
