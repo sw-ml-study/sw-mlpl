@@ -114,6 +114,12 @@ pub enum TokenKind {
     Def,
     /// `return` keyword (Saga 46). Early exit from a UDF body.
     Return,
+    /// `and` keyword: logical conjunction (short-circuit on scalars).
+    And,
+    /// `or` keyword: logical disjunction (short-circuit on scalars).
+    Or,
+    /// `not` keyword: logical negation (prefix).
+    Not,
     /// Newline (statement separator).
     Newline,
     /// End of input.
@@ -127,4 +133,34 @@ pub struct Token {
     pub kind: TokenKind,
     /// Where in the source.
     pub span: Span,
+}
+
+impl TokenKind {
+    /// The source spelling of a keyword token (`Some("repeat")`), or `None`
+    /// for every other token. The one table error messages and member-name
+    /// positions (`s.train`, `{if: 1}`) read keyword text from.
+    #[must_use]
+    pub fn keyword(&self) -> Option<&'static str> {
+        Some(match self {
+            Self::Repeat => "repeat",
+            Self::Train => "train",
+            Self::For => "for",
+            Self::In => "in",
+            Self::Experiment => "experiment",
+            Self::Device => "device",
+            Self::If => "if",
+            Self::Else => "else",
+            Self::While => "while",
+            Self::Break => "break",
+            Self::Continue => "continue",
+            Self::Try => "try",
+            Self::Catch => "catch",
+            Self::Def => "def",
+            Self::Return => "return",
+            Self::And => "and",
+            Self::Or => "or",
+            Self::Not => "not",
+            _ => return None,
+        })
+    }
 }

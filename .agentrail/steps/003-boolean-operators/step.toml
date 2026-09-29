@@ -1,6 +1,6 @@
 number = 3
 slug = "boolean-operators"
-status = "pending"
+status = "in-progress"
 description = "readable-scripts step 3: and / or / not keywords (lexer, parser precedence be..."
 role = "production"
 context_files = []

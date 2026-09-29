@@ -1,7 +1,8 @@
-//! Array-literal parsing (`[e, e, ...]`). Lives in a sibling module to
-//! keep `parser.rs` under the sw-checklist file-LOC budget (same
-//! pattern as `record_parser.rs` / `stmts.rs`). Both entry points hang
-//! off `Parser` and are called from `parse_atom` when it sees `[`.
+//! Array-literal parsing (`[e, e, ...]`) and prefix `not`. Lives in a
+//! sibling module to keep `parser.rs` under the sw-checklist file-LOC
+//! budget (same pattern as `record_parser.rs` / `stmts.rs`). The entry
+//! points hang off `Parser` and are called from `parse_atom` when it sees
+//! `[` or `not`.
 
 use mlpl_core::Span;
 use mlpl_lexer::{ParseError, TokenKind};
@@ -44,5 +45,22 @@ impl Parser<'_> {
             }
         }
         Ok(elems)
+    }
+
+    /// Prefix `not <operand>` (cursor on `not`). Desugars to `eq(x, 0)`: a
+    /// 0/1 result that works elementwise, as a stop-gradient mask inside
+    /// `grad`, and in compiled programs, with no new AST form. The operand
+    /// binds at the comparison level, so `not a < b` is `not (a < b)` and
+    /// `not a and b` is `(not a) and b` -- Python's precedence.
+    pub(crate) fn parse_not(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1;
+        let operand = self.parse_expr(crate::parser::COMPARISON_PREC)?;
+        let span = Span::new(start.start, operand.span().end);
+        Ok(Expr::FnCall {
+            name: "eq".into(),
+            args: vec![operand, Expr::IntLit(0, span)],
+            span,
+        })
     }
 }

@@ -20,6 +20,8 @@ impl fmt::Display for BinOpKind {
             Self::Ge => ">=",
             Self::Eq => "==",
             Self::Ne => "!=",
+            Self::And => "and",
+            Self::Or => "or",
         };
         write!(f, "{s}")
     }

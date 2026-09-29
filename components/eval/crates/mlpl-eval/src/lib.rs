@@ -66,6 +66,7 @@ mod eval_blocks;
 mod eval_fncalls;
 mod eval_for;
 mod eval_intercepts;
+mod eval_logic;
 mod eval_loop;
 mod eval_ops;
 mod eval_program;

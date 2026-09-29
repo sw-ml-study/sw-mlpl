@@ -25,6 +25,9 @@ pub(crate) fn eval_binop(
     env: &mut Environment,
     trace: &mut Option<&mut Trace>,
 ) -> Result<Value, EvalError> {
+    if matches!(op, BinOpKind::And | BinOpKind::Or) {
+        return crate::eval_logic::eval_logical(op, lhs, rhs, env, trace);
+    }
     let lv = eval_expr(lhs, env, trace)?;
     let rv = eval_expr(rhs, env, trace)?;
     if let (BinOpKind::Add, Value::Str(a), Value::Str(b)) = (op, &lv, &rv) {
@@ -69,6 +72,7 @@ fn binop_arrays(
         BinOpKind::Ge => "ge",
         BinOpKind::Eq => "eq",
         BinOpKind::Ne => "ne",
+        BinOpKind::And | BinOpKind::Or => unreachable!("and / or short-circuit in eval_logic"),
     };
     let inputs = vec![TraceValue::from_array(&l), TraceValue::from_array(&r)];
     let result = match crate::device::dispatched_call(env, name, vec![l.clone(), r.clone()]) {

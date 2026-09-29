@@ -38,22 +38,9 @@ pub fn describe_kind(kind: &TokenKind) -> String {
         TokenKind::Ge => "'>='".into(),
         TokenKind::EqEq => "'=='".into(),
         TokenKind::Ne => "'!='".into(),
-        TokenKind::Repeat => "'repeat'".into(),
-        TokenKind::Train => "'train'".into(),
-        TokenKind::For => "'for'".into(),
-        TokenKind::In => "'in'".into(),
-        TokenKind::Experiment => "'experiment'".into(),
-        TokenKind::Device => "'device'".into(),
-        TokenKind::If => "'if'".into(),
-        TokenKind::Else => "'else'".into(),
-        TokenKind::While => "'while'".into(),
-        TokenKind::Break => "'break'".into(),
-        TokenKind::Continue => "'continue'".into(),
-        TokenKind::Try => "'try'".into(),
-        TokenKind::Catch => "'catch'".into(),
         TokenKind::Question => "'?'".into(),
-        TokenKind::Def => "'def'".into(),
-        TokenKind::Return => "'return'".into(),
+        // Every remaining kind is a keyword; its spelling has one source.
+        keyword => format!("'{}'", keyword.keyword().unwrap_or("?")),
     }
 }
 

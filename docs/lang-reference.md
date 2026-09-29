@@ -137,12 +137,22 @@ Binary infix operators for element-wise arithmetic:
 | `-x` | Unary negation |
 | `<` `>` `<=` `>=` | Ordered comparison -- each yields a `1.0`/`0.0` mask elementwise |
 | `==` `!=` | Equality / inequality (epsilon-tolerant), also a `1.0`/`0.0` mask |
+| `not x` | Logical negation: `1` where `x` is zero, `0` elsewhere (the same as `eq(x, 0)`) |
+| `a and b` | Logical AND: `1` where both are nonzero |
+| `a or b` | Logical OR: `1` where either is nonzero |
 
 Comparisons are the infix spelling of the `gt` / `lt` / `ge` / `le` /
 `eq` / `ne` builtins, so `sums == 3` is `eq(sums, 3)` and `n > 3` is
 `gt(n, 3)`. Because they produce masks, they compose with `reduce_add`
-for counting (`reduce_add(v > 3, 0)`) and with `*` / `+` for AND / OR
-of conditions.
+for counting (`reduce_add(v > 3, 0)`) and with `and` / `or` / `not`
+for combining conditions: `compress(x > 2 and x < 8, x)`.
+
+`and` / `or` / `not` always yield `0` / `1` (not an operand, unlike
+Python). When the left side of `and` / `or` is a scalar that decides
+the result, the right side is not evaluated, so a guarded condition is
+safe: `while i < n and not done { ... }`. With an array on either side
+they work elementwise with the same broadcasting as the arithmetic
+operators. Inside `grad` they are constant masks, like the comparisons.
 
 Precedence (high to low):
 
@@ -151,7 +161,12 @@ Precedence (high to low):
 3. `+`, `-` (left-associative)
 4. `<` `>` `<=` `>=` `==` `!=` (comparisons -- looser than arithmetic,
    so `a + b > c` is `(a + b) > c`)
-5. `=` (assignment, right-associative)
+5. `not` (so `not a < b` is `not (a < b)`)
+6. `and`
+7. `or` (so `a or b and c` is `a or (b and c)`)
+8. `=` (assignment, right-associative)
+
+`and`, `or` and `not` are keywords, so they cannot be variable names.
 
 Parentheses override precedence: `(x + y) * z`
 

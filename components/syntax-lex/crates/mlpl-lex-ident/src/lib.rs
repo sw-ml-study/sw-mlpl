@@ -30,6 +30,9 @@ fn classify(name: &str) -> TokenKind {
         "catch" => TokenKind::Catch,
         "def" => TokenKind::Def,
         "return" => TokenKind::Return,
+        "and" => TokenKind::And,
+        "or" => TokenKind::Or,
+        "not" => TokenKind::Not,
         _ => TokenKind::Ident(name.to_owned()),
     }
 }

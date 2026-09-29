@@ -28,6 +28,12 @@ pub enum BinOpKind {
     Eq,
     /// `!=` -- elementwise inequality.
     Ne,
+    /// `and` -- logical conjunction: short-circuits on a scalar left
+    /// side, elementwise 0/1 on arrays.
+    And,
+    /// `or` -- logical disjunction: short-circuits on a scalar left
+    /// side, elementwise 0/1 on arrays.
+    Or,
 }
 
 /// Kind of tensor constructor: trainable parameter or non-trainable tensor.

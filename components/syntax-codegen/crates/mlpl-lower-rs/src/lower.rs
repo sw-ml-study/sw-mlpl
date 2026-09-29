@@ -169,6 +169,14 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
                 BinOpKind::Ne => quote! {
                     |__a: f64, __b: f64| if (__a - __b).abs() >= f64::EPSILON { 1.0 } else { 0.0 }
                 },
+                // Elementwise 0/1 (both sides evaluated; the interpreter's
+                // scalar short-circuit is not lowered here).
+                BinOpKind::And => quote! {
+                    |__a: f64, __b: f64| if __a != 0.0 && __b != 0.0 { 1.0 } else { 0.0 }
+                },
+                BinOpKind::Or => quote! {
+                    |__a: f64, __b: f64| if __a != 0.0 || __b != 0.0 { 1.0 } else { 0.0 }
+                },
             };
             let rt = &ctx.rt;
             // UFCS through the runtime facade's re-exported trait, so

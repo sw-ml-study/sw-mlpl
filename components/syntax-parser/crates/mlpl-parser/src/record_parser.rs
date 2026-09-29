@@ -36,25 +36,9 @@ use mlpl_lexer::TokenKind;
 /// names there -- `s.train` and `{eval: 1}` are legal -- while
 /// staying reserved everywhere else.
 fn member_name(kind: &TokenKind) -> Option<String> {
-    let kw = |s: &str| Some(s.to_string());
     match kind {
         TokenKind::Ident(name) => Some(name.clone()),
-        TokenKind::Repeat => kw("repeat"),
-        TokenKind::Train => kw("train"),
-        TokenKind::For => kw("for"),
-        TokenKind::In => kw("in"),
-        TokenKind::Experiment => kw("experiment"),
-        TokenKind::Device => kw("device"),
-        TokenKind::If => kw("if"),
-        TokenKind::Else => kw("else"),
-        TokenKind::While => kw("while"),
-        TokenKind::Break => kw("break"),
-        TokenKind::Continue => kw("continue"),
-        TokenKind::Try => kw("try"),
-        TokenKind::Catch => kw("catch"),
-        TokenKind::Def => kw("def"),
-        TokenKind::Return => kw("return"),
-        _ => None,
+        other => other.keyword().map(str::to_string),
     }
 }
 use mlpl_lexer::{ParseError, describe_kind};

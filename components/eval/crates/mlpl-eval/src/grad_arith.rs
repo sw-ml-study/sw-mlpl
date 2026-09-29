@@ -34,6 +34,10 @@ pub(crate) fn tensor_binop(
         BinOpKind::Ge => "ge",
         BinOpKind::Eq => "eq",
         BinOpKind::Ne => "ne",
+        BinOpKind::And | BinOpKind::Or => {
+            let out = crate::eval_logic::mask(op, l.value(), r.value())?;
+            return Ok(Tensor::leaf(Rc::clone(tape), out, false));
+        }
     };
     let out = mlpl_runtime::call_builtin(mask, vec![l.value(), r.value()])
         .map_err(|e| EvalError::Unsupported(format!("grad: comparison `{op}`: {e}")))?;

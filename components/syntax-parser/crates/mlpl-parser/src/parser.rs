@@ -49,27 +49,36 @@ pub(crate) fn can_start_expr(kind: Option<&TokenKind>) -> bool {
                 | TokenKind::RBracket
                 | TokenKind::Comma
                 | TokenKind::Else
+                | TokenKind::And
+                | TokenKind::Or
                 | TokenKind::Eof,
         )
     )
 }
 
+/// Binding power of the comparisons; prefix `not` takes its operand at
+/// this level, so `not a < b` is `not (a < b)` (Python's rule).
+pub(crate) const COMPARISON_PREC: u8 = 2;
+
 /// The binary operator (and its binding power) a token introduces, or
-/// `None` if the token is not an infix operator. Comparisons bind
-/// LOOSER than arithmetic (`a + b > c` is `(a + b) > c`), so they sit
-/// at precedence 0; `+ -` at 1; `* /` at 2.
+/// `None` if the token is not an infix operator. Loosest first: `or` 0,
+/// `and` 1, comparisons 2 (`a + b > c` is `(a + b) > c`), `+ -` 3,
+/// `* /` 4.
 fn binop_for_token(kind: &TokenKind) -> Option<(BinOpKind, u8)> {
+    let c = COMPARISON_PREC;
     match kind {
-        TokenKind::Lt => Some((BinOpKind::Lt, 0)),
-        TokenKind::Gt => Some((BinOpKind::Gt, 0)),
-        TokenKind::Le => Some((BinOpKind::Le, 0)),
-        TokenKind::Ge => Some((BinOpKind::Ge, 0)),
-        TokenKind::EqEq => Some((BinOpKind::Eq, 0)),
-        TokenKind::Ne => Some((BinOpKind::Ne, 0)),
-        TokenKind::Plus => Some((BinOpKind::Add, 1)),
-        TokenKind::Minus => Some((BinOpKind::Sub, 1)),
-        TokenKind::Star => Some((BinOpKind::Mul, 2)),
-        TokenKind::Slash => Some((BinOpKind::Div, 2)),
+        TokenKind::Or => Some((BinOpKind::Or, 0)),
+        TokenKind::And => Some((BinOpKind::And, 1)),
+        TokenKind::Lt => Some((BinOpKind::Lt, c)),
+        TokenKind::Gt => Some((BinOpKind::Gt, c)),
+        TokenKind::Le => Some((BinOpKind::Le, c)),
+        TokenKind::Ge => Some((BinOpKind::Ge, c)),
+        TokenKind::EqEq => Some((BinOpKind::Eq, c)),
+        TokenKind::Ne => Some((BinOpKind::Ne, c)),
+        TokenKind::Plus => Some((BinOpKind::Add, c + 1)),
+        TokenKind::Minus => Some((BinOpKind::Sub, c + 1)),
+        TokenKind::Star => Some((BinOpKind::Mul, c + 2)),
+        TokenKind::Slash => Some((BinOpKind::Div, c + 2)),
         _ => None,
     }
 }
@@ -184,6 +193,7 @@ impl<'a> Parser<'a> {
     pub(crate) fn parse_atom(&mut self) -> Result<Expr, ParseError> {
         let tok = &self.tokens[self.pos];
         match &tok.kind {
+            TokenKind::Not => self.parse_not(),
             TokenKind::Minus => {
                 let start = tok.span;
                 self.pos += 1;
