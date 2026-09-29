@@ -1,0 +1,1 @@
+and/or/not keywords: or<and<not<comparisons precedence; not desugars to eq(x,0); and/or short-circuit on scalars, elementwise 0/1 masks on arrays, grad masks; compiler lowers elementwise. TokenKind::keyword() single keyword table. 5 TDD tests; all touched workspaces green; 33/569 held.
