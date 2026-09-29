@@ -193,14 +193,36 @@ its 007 frame-snapshot-cost is the narrow half of request 5 / issue e).
    `and` / `or` / `not` (short-circuit on scalars in `if` / `while`,
    elementwise on masks); record destructuring `{a, b: x} = r` (also
    `= expr?`), pure syntax lowering to field reads.
-2. **diagnostics** -- error spans (`file:line:col` of the failing
-   INNER statement; see `error-spans` under Maintenance), mlpl-mode
-   keywords (`def if else while for`), `include` in
-   `--babel-session`.
-3. **tensor-indexing** -- `gather(x, idx[, axis])`,
-   `slice(x, lo, hi[, axis])` (half-open), multi-axis
-   `at(x, i, j, ...)`; all differentiable (reuse the native gather
-   node). language-audit #12 (critical).
+2. **diagnostics-and-repl** -- error spans (`file:line:col` of the
+   failing INNER statement; see `error-spans` under Maintenance),
+   mlpl-mode keywords (`def if else while for and or not`), `include`
+   in `--babel-session`. REPL (array-language-comparisons, 2026-09-29):
+   line editing + history in `mlpl-repl` (it reads plain `read_line`:
+   no arrows / HOME / END -- the comparison table marks MLPL's REPL
+   yellow for it), multi-line `def` / `{ ... }` blocks at the prompt,
+   `include` at the prompt, and a one-line `def` should not echo `0`.
+   Output polish: right-align matrix columns when printed (`11 10 9 8`
+   rows do not line up), print IEEE negative zero as `0`, and script
+   mode should not echo the final value when it is a `print(...)`
+   call (the output appears twice).
+3. **tensor-indexing** -- `gather(x, idx[, axis])` (incl. rank-1
+   vectors: `gather_rows` rejects them today and `at(v, [i, j])` rejects
+   vector indices), `slice(x, lo, hi[, axis])` (half-open) and
+   `drop(x, k[, axis])` for vectors (adjacent differences need
+   `rotate` + `compress` today; `windows(x, [2])` errors when n < 2),
+   multi-axis `at(x, i, j, ...)`, `reverse(x[, axis])`, and
+   `sort(x)` / `sort_by(x, keys)` (today reshape -> gather_rows ->
+   flatten over `grade_up`); all differentiable where it makes sense
+   (reuse the native gather node). language-audit #12 (critical);
+   gaps confirmed by the array-language-comparisons port.
+3b. **array-idioms** (from the array-language-comparisons port,
+   2026-09-29; after tensor-indexing, before param-groups) -- `sign(x)`;
+   the running-scan family beyond `running_sum` / `running_product`
+   (`running_max`, `running_min`) and `scan(:u:f, v)` over a user
+   function (APL `f\`; the LeetCode reduce-scan idioms need a loop
+   today); `partition(mask, v)` / cut (split a vector at a mask --
+   Max Consecutive Ones 1a is marked not-expressible without it).
+   Strings as character arrays are lists-and-text's `codepoints`.
 4. **param-groups** -- `p = param_init({wte: [V, d], ...}, seed, std)`
    declares + seeds each named param (per-leaf seeds derived from
    `seed`) and returns a NAME group accepted by `adam` / `grad` /
