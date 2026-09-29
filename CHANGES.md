@@ -12,8 +12,14 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-29
+
+- feat(lang): and / or / not keywords (Python precedence, short-circuit, masks)
+
 ## 2026-09-27
 
+- chore(agentrail): complete 002-write-and-variadic-concat
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(strings): write(...) and variadic str_concat
 
 ## 2026-09-26
