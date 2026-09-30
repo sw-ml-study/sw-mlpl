@@ -86,8 +86,21 @@ fn binop_for_token(kind: &TokenKind) -> Option<(BinOpKind, u8)> {
 impl<'a> Parser<'a> {
     /// Parse a single statement (assignment, repeat, or expression).
     pub(crate) fn parse_statement(&mut self) -> Result<Expr, ParseError> {
-        if self.tokens[self.pos].kind == TokenKind::At {
-            return self.parse_annotated_def();
+        match self.tokens[self.pos].kind {
+            TokenKind::At => return self.parse_annotated_def(),
+            TokenKind::Def => return self.parse_def(),
+            TokenKind::Return => return self.parse_return(),
+            TokenKind::Repeat => return self.parse_repeat(false),
+            TokenKind::Train => return self.parse_repeat(true),
+            TokenKind::For => return self.parse_for(),
+            TokenKind::Experiment => return self.parse_experiment(),
+            TokenKind::Device => return self.parse_device(),
+            TokenKind::LBrace => {
+                if let Some(d) = self.try_parse_destructure()? {
+                    return Ok(d);
+                }
+            }
+            _ => {}
         }
         if self.include_pattern() {
             return Err(ParseError::UnexpectedToken {
@@ -97,57 +110,24 @@ impl<'a> Parser<'a> {
                 span: self.tokens[self.pos].span,
             });
         }
-        if self.tokens[self.pos].kind == TokenKind::Def {
-            return self.parse_def();
+        let TokenKind::Ident(name) = &self.tokens[self.pos].kind else {
+            return self.parse_expr(0);
+        };
+        match self.tokens.get(self.pos + 1).map(|t| &t.kind) {
+            Some(TokenKind::Equals) => {
+                let (name, start) = (name.clone(), self.tokens[self.pos].span);
+                self.pos += 2;
+                let value = self.parse_expr(0)?;
+                let span = Span::new(start.start, value.span().end);
+                Ok(Expr::Assign {
+                    name,
+                    value: Box::new(value),
+                    span,
+                })
+            }
+            Some(TokenKind::Colon) => self.parse_annotated_assign(),
+            _ => self.parse_expr(0),
         }
-        if self.tokens[self.pos].kind == TokenKind::Return {
-            return self.parse_return();
-        }
-        if self.tokens[self.pos].kind == TokenKind::Repeat {
-            return self.parse_repeat(false);
-        }
-        if self.tokens[self.pos].kind == TokenKind::Train {
-            return self.parse_repeat(true);
-        }
-        if self.tokens[self.pos].kind == TokenKind::For {
-            return self.parse_for();
-        }
-        if self.tokens[self.pos].kind == TokenKind::Experiment {
-            return self.parse_experiment();
-        }
-        if self.tokens[self.pos].kind == TokenKind::Device {
-            return self.parse_device();
-        }
-        if matches!(self.tokens[self.pos].kind, TokenKind::Ident(_))
-            && self
-                .tokens
-                .get(self.pos + 1)
-                .is_some_and(|t| t.kind == TokenKind::Equals)
-        {
-            let name_tok = &self.tokens[self.pos];
-            let name = match &name_tok.kind {
-                TokenKind::Ident(n) => n.clone(),
-                _ => unreachable!(),
-            };
-            let start = name_tok.span;
-            self.pos += 2;
-            let value = self.parse_expr(0)?;
-            let span = Span::new(start.start, value.span().end);
-            return Ok(Expr::Assign {
-                name,
-                value: Box::new(value),
-                span,
-            });
-        }
-        if matches!(self.tokens[self.pos].kind, TokenKind::Ident(_))
-            && self
-                .tokens
-                .get(self.pos + 1)
-                .is_some_and(|t| t.kind == TokenKind::Colon)
-        {
-            return self.parse_annotated_assign();
-        }
-        self.parse_expr(0)
     }
 
     /// Consume a token of the given kind or return `UnexpectedToken`.

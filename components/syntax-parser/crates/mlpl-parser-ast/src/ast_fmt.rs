@@ -5,7 +5,7 @@
 use std::fmt;
 
 use crate::ast::{BinOpKind, Expr, TensorCtorKind};
-use crate::ast_fmt_compound::{fmt_fn_def, fmt_if_expr, fmt_quoted, fmt_record_lit, fmt_scope};
+use crate::ast_fmt_compound::{fmt_compound, fmt_record_lit, fmt_scope};
 
 impl fmt::Display for BinOpKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -59,7 +59,11 @@ impl fmt::Display for Expr {
             Self::IntLit(n, _) => write!(f, "{n}"),
             Self::FloatLit(x, _) if x.fract() == 0.0 && x.is_finite() => write!(f, "{x:.1}"),
             Self::FloatLit(x, _) => write!(f, "{x}"),
-            Self::StrLit(..) | Self::Include(..) => fmt_quoted(f, self),
+            Self::StrLit(..)
+            | Self::Include(..)
+            | Self::Destructure { .. }
+            | Self::If { .. }
+            | Self::FnDef { .. } => fmt_compound(f, self),
             Self::Ident(name, _) => write!(f, "{name}"),
             Self::BuiltinRef(name, _) => write!(f, ":{name}"),
             Self::BinOp { op, lhs, rhs, .. } => write!(f, "({lhs} {op} {rhs})"),
@@ -86,19 +90,10 @@ impl fmt::Display for Expr {
             Self::Device { target, body, .. } => {
                 fmt_scope(f, &format_args!("device(\"{target}\")"), body)
             }
-            Self::If {
-                cond,
-                then_body,
-                else_body,
-                ..
-            } => fmt_if_expr(f, cond, then_body, else_body),
             Self::While { cond, body, .. } => fmt_scope(f, &format_args!("while {cond}"), body),
             Self::Break { value: None, .. } => write!(f, "break"),
             Self::Break { value: Some(v), .. } => write!(f, "break {v}"),
             Self::Continue { .. } => write!(f, "continue"),
-            Self::FnDef {
-                name, params, body, ..
-            } => fmt_fn_def(f, name, params, body),
             Self::TryCatch { binding, .. } => write!(f, "try {{ ... }} catch {binding} {{ ... }}"),
             Self::Return { value: None, .. } => write!(f, "return"),
             Self::Return { value: Some(v), .. } => write!(f, "return {v}"),

@@ -1,6 +1,6 @@
 number = 4
 slug = "record-destructuring"
-status = "pending"
+status = "in-progress"
 description = "readable-scripts step 4: {a, b} = expr, {a, b: x} = expr (rename), {a, b} = e..."
 role = "production"
 context_files = []

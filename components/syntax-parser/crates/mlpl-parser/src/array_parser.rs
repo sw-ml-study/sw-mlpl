@@ -1,8 +1,9 @@
-//! Array-literal parsing (`[e, e, ...]`) and prefix `not`. Lives in a
+//! The bracket- and keyword-introduced atoms: array literals
+//! (`[e, e, ...]`), prefix `not`, and `try { } catch e { }`. Lives in a
 //! sibling module to keep `parser.rs` under the sw-checklist file-LOC
 //! budget (same pattern as `record_parser.rs` / `stmts.rs`). The entry
 //! points hang off `Parser` and are called from `parse_atom` when it sees
-//! `[` or `not`.
+//! `[`, `not`, or `try`.
 
 use mlpl_core::Span;
 use mlpl_lexer::{ParseError, TokenKind};
@@ -61,6 +62,31 @@ impl Parser<'_> {
             name: "eq".into(),
             args: vec![operand, Expr::IntLit(0, span)],
             span,
+        })
+    }
+
+    /// Parse `try { body } catch <ident> { handler }`. Both
+    /// braces are required; the binding is a plain ident.
+    pub(crate) fn parse_try(&mut self) -> Result<Expr, ParseError> {
+        let start = self.tokens[self.pos].span;
+        self.pos += 1; // skip 'try'
+        let (body, _) = self.parse_braced_body()?;
+        self.expect(&TokenKind::Catch)?;
+        let tok = &self.tokens[self.pos];
+        let TokenKind::Ident(binding) = &tok.kind else {
+            return Err(ParseError::UnexpectedToken {
+                found: mlpl_lexer::describe_kind(&tok.kind),
+                span: tok.span,
+            });
+        };
+        let binding = binding.clone();
+        self.pos += 1;
+        let (handler, end) = self.parse_braced_body()?;
+        Ok(Expr::TryCatch {
+            body,
+            binding,
+            handler,
+            span: Span::new(start.start, end.end),
         })
     }
 }

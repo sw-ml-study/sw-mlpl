@@ -111,26 +111,8 @@ pub(crate) fn eval_expr(
     if let Some(result) = crate::eval_intercepts::try_intercept(expr, env, trace) {
         return result;
     }
-    if let Expr::FieldAccess {
-        receiver, field, ..
-    } = expr
-    {
-        let recv = eval_expr(receiver, env, trace)?;
-        return match recv {
-            Value::Record { fields } => {
-                fields
-                    .get(field)
-                    .cloned()
-                    .ok_or_else(|| EvalError::FieldNotFound {
-                        requested: field.clone(),
-                        available: fields.keys().cloned().collect(),
-                    })
-            }
-            other => Err(EvalError::FieldOnNonRecord {
-                receiver_kind: value_kind(&other),
-                field: field.clone(),
-            }),
-        };
+    if let Some(result) = crate::eval_records::try_record_form(expr, env, trace) {
+        return result;
     }
     if let Expr::Ident(name, _) = expr
         && let Some(s) = env.get_string(name)
@@ -469,6 +451,7 @@ pub(crate) fn eval_expr(
         // by the early-return `if let` block at the head of
         // `eval_expr`. Saga 31 step 004: If is also early-return.
         Expr::RecordLit { .. }
+        | Expr::Destructure { .. }
         | Expr::FieldAccess { .. }
         | Expr::If { .. }
         | Expr::While { .. }

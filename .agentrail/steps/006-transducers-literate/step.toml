@@ -1,0 +1,8 @@
+number = 6
+slug = "transducers-literate"
+status = "pending"
+description = "New literate document examples/literate/transducers.org (+ its tangled .mlpl,..."
+role = "production"
+context_files = []
+created_at = "2026-09-29T10:31:14"
+commits = []

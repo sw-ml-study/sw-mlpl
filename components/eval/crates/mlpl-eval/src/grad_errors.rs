@@ -18,6 +18,7 @@ pub(crate) fn unsupported_form(expr: &Expr) -> EvalError {
         Expr::While { .. } => "a `while` loop",
         Expr::For { .. } => "a `for` loop",
         Expr::Assign { .. } => "an assignment",
+        Expr::Destructure { .. } => "a destructuring assignment (read `r.field` instead)",
         _ => "this expression form",
     };
     EvalError::Unsupported(format!("grad: {form} is not supported inside grad()"))

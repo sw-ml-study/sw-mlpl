@@ -11,10 +11,14 @@
 //!   error at parse time so the eval path never has to choose.
 //!
 //! - `parse_postfix_chain`: called from `parse_expr` after
-//!   `parse_atom` returns. Repeatedly consumes `.ident` and
+//!   `parse_atom` returns. Repeatedly consumes `?` and `.ident` and
 //!   wraps the running expression in `FieldAccess`. Binds
 //!   tighter than every infix binop (`f(x).y + z` parses as
 //!   `(f(x).y) + z`).
+//!
+//! - `try_parse_destructure`: called from `parse_statement` at a
+//!   statement-initial `{`; recognizes `{a, b: x} = value` and
+//!   otherwise backtracks so the `{` parses as a record literal.
 //!
 //! Grammar disambiguation: `{` in expression position ALWAYS
 //! opens a record literal because `{ stmt; ... }` blocks only
@@ -94,6 +98,56 @@ impl Parser<'_> {
         })
     }
 
+    /// At a statement-initial open brace: parse a destructuring
+    /// assignment (`a, b: x` between the braces, then `= value`). Anything
+    /// else -- a record literal, or a pattern with no `=` after it --
+    /// restores the cursor and returns `None`, so the caller parses an
+    /// expression as before.
+    pub(crate) fn try_parse_destructure(&mut self) -> Result<Option<Expr>, ParseError> {
+        let start = self.pos;
+        self.pos += 1;
+        let bindings: Vec<_> = std::iter::from_fn(|| self.pattern_binding()).collect();
+        let closes = self.is(TokenKind::RBrace)
+            && self.tokens.get(self.pos + 1).map(|t| &t.kind) == Some(&TokenKind::Equals);
+        if !closes || bindings.is_empty() {
+            self.pos = start;
+            return Ok(None);
+        }
+        self.pos += 2;
+        let value = self.parse_expr(0)?;
+        let span = Span::new(self.tokens[start].span.start, value.span().end);
+        Ok(Some(Expr::Destructure {
+            bindings,
+            value: Box::new(value),
+            span,
+        }))
+    }
+
+    /// One `field` or `field: var` pattern entry plus its separating comma
+    /// (none before the close brace); `None` (cursor possibly advanced -- the caller
+    /// restores it) when the tokens are not one.
+    fn pattern_binding(&mut self) -> Option<(String, String)> {
+        self.skip_newlines();
+        let field = member_name(&self.tokens[self.pos].kind)?;
+        self.pos += 1;
+        let var = if self.is(TokenKind::Colon) {
+            let TokenKind::Ident(var) = &self.tokens.get(self.pos + 1)?.kind else {
+                return None;
+            };
+            self.pos += 2;
+            var.clone()
+        } else {
+            field.clone()
+        };
+        self.skip_newlines();
+        match self.tokens[self.pos].kind {
+            TokenKind::Comma => self.pos += 1,
+            TokenKind::RBrace => {}
+            _ => return None,
+        }
+        Some((field, var))
+    }
+
     /// Consume zero or more `.ident` postfix chains, wrapping
     /// `atom` in nested `FieldAccess` nodes.
     pub(crate) fn parse_postfix_chain(&mut self, mut atom: Expr) -> Result<Expr, ParseError> {
@@ -128,30 +182,5 @@ impl Parser<'_> {
             };
         }
         Ok(atom)
-    }
-    /// Parse `try { body } catch <ident> { handler }`. Both
-    /// braces are required; the binding is a plain ident. Spike
-    /// step 011.
-    pub(crate) fn parse_try(&mut self) -> Result<Expr, ParseError> {
-        let start = self.tokens[self.pos].span;
-        self.pos += 1; // skip 'try'
-        let (body, _) = self.parse_braced_body()?;
-        self.expect(&TokenKind::Catch)?;
-        let tok = &self.tokens[self.pos];
-        let TokenKind::Ident(binding) = &tok.kind else {
-            return Err(ParseError::UnexpectedToken {
-                found: mlpl_lexer::describe_kind(&tok.kind),
-                span: tok.span,
-            });
-        };
-        let binding = binding.clone();
-        self.pos += 1;
-        let (handler, end) = self.parse_braced_body()?;
-        Ok(Expr::TryCatch {
-            body,
-            binding,
-            handler,
-            span: Span::new(start.start, end.end),
-        })
     }
 }

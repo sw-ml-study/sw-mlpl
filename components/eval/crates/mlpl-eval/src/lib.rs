@@ -70,6 +70,7 @@ mod eval_logic;
 mod eval_loop;
 mod eval_ops;
 mod eval_program;
+mod eval_records;
 mod eval_reduce;
 mod eval_script;
 mod eval_user_fn;

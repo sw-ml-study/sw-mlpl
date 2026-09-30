@@ -225,6 +225,7 @@ pub(crate) fn lower_expr(ctx: &Ctx, expr: &Expr) -> Result<TokenStream, LowerErr
         | Expr::Continue { .. }
         | Expr::FnDef { .. }
         | Expr::TryCatch { .. }
+        | Expr::Destructure { .. }
         | Expr::Return { .. } => Err(LowerError::Unsupported(format!("{expr:?}"))),
     }
 }

@@ -194,6 +194,17 @@ pub enum Expr {
         /// Span covering opening through closing brace.
         span: Span,
     },
+    /// Record destructuring: `{a, b: x} = value` binds field `a` to `a`
+    /// and field `b` to `x`. Only at statement position; extra fields
+    /// are ignored and a missing field is an error that binds nothing.
+    Destructure {
+        /// `(field, variable)` pairs in source order.
+        bindings: Vec<(String, String)>,
+        /// The record-valued expression.
+        value: Box<Expr>,
+        /// Span covering opening brace through value.
+        span: Span,
+    },
     /// Field access: `receiver.field`. Saga 29 step 001. Lower
     /// precedence than function call so `f(x).y` works.
     FieldAccess {
@@ -309,6 +320,7 @@ impl Expr {
             | Self::Experiment { span, .. }
             | Self::Device { span, .. }
             | Self::RecordLit { span, .. }
+            | Self::Destructure { span, .. }
             | Self::FieldAccess { span, .. }
             | Self::If { span, .. }
             | Self::While { span, .. }

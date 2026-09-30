@@ -205,6 +205,26 @@ z = x + 1
 Single `=` binds a name to a value. No `let` keyword. Reassignment
 is allowed. Scope is flat. Assignment returns the assigned value.
 
+### Record destructuring
+
+```
+{loss, grad} = step(x)          # binds loss = r.loss, grad = r.grad
+{loss, grad: g} = step(x)       # field grad bound to the name g
+{text, n} = read_config(p)?     # unwrap an ok(record) first
+```
+
+A `{...} = expr` statement binds record fields to variables. A bare
+name binds the field of that name; `field: var` binds the field to a
+different name. Fields not named in the pattern are ignored. The
+right side is evaluated once; if it is not a record, or any named
+field is missing, the statement errors (naming the missing field and
+the fields present) and binds nothing. Inside a `u:` body the names
+are local like any other assignment. The statement's value is the
+record. A `{` that starts a statement is a pattern only when every
+entry is `name` or `name: name` and `=` follows the closing brace;
+otherwise it is a record literal. Destructuring is not available
+inside the body a `grad` traces -- read `r.field` there.
+
 ## Function Calls
 
 ```
