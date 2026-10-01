@@ -12,8 +12,15 @@ counts, deferred follow-ups), see
 narratives, see [`docs/saga.md`](docs/saga.md).
 
 
+## 2026-09-30
+
+- feat(lang): record destructuring {a, b: x} = expr
+
 ## 2026-09-29
 
+- docs(plan): queue the MLPL gaps found by the array-language-comparisons port
+- chore(agentrail): complete 003-boolean-operators
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(lang): and / or / not keywords (Python precedence, short-circuit, masks)
 
 ## 2026-09-27
