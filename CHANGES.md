@@ -14,6 +14,9 @@ narratives, see [`docs/saga.md`](docs/saga.md).
 
 ## 2026-10-02
 
+- docs(literate): transducers -- one algorithm, any source, any sink
+- chore(agentrail): complete 005-compiler-parity
+- docs(changes): refresh CHANGES.md to HEAD
 - feat(compiler): lower format, write, variadic str_concat, and/or short-circuit, destructuring
 
 ## 2026-09-30
